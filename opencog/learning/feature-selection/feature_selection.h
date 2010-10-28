@@ -24,31 +24,43 @@
 #ifndef _OPENCOG_FEATURE_SELECTION_H
 #define _OPENCOG_FEATURE_SELECTION_H
 
+#include <functional>
+
 #include <opencog/util/foreach.h>
 
 namespace opencog {
 
 /**
- * Returns a set S of features such that if feature Fi is in S then
- * scorer(..., Fi, ...) > threshold. The algorithm goes as follows:
- * all features are tried seperatly first then all pairs, etc, up to
- * all set of size max_size.
+ * Returns a set S of features following the algo:
+ * 1) Select all features that score above 'threshold'
+ * 2) remove the selected features from the initial set 'features', called 'tf'
+ * 3) select all pairs of features from 'ft' that score above 'threshold'
+ * 4) follow the same pattern but with triplets, etc, until max_size.
  *
- * @param features    The initial set of features to select from
+ * @todo add some code to ignore redundant features, like before
+ * returning 'res', check all pairs of features of 'res' and remove
+ * the ones of each pair that does not improve the score enough.
+ *
+ * @param features    The initial set of features to be selected from
  * @param scorer      The function to score a set of features
- * @param threshold   The threshold to select a feature
- * @param max_size    The maximum size of feature set being tested in the scorer
+ * @param threshold   The threshold to select a set of feature
+ * @param max_size    The maximum size of each feature set tested in the scorer
  *
- * @return            The set of selected features, a subset of 'features'
+ * @return            The set of selected features
  */
-template<Scorer, FeatureSet>
+template<typename Scorer, typename FeatureSet>
 FeatureSet incremental_selection(const FeatureSet& features, const Scorer& scorer,
                                  double threshold, unsigned int max_size = 1) {
-    FeatureSet res;
-    std::set<FeatureSet> fss = powerset(features, max_size);
-    foreach(const FeatureSet& fs, fss)
-        if(scorer(fs) > threshold)
-            res.insert(fs.begin(), fs.end());
+    FeatureSet res; // the set of features to return
+    for(unsigned int i = 1; i <= max_size; i++) {
+        FeatureSet tf; // the set of features to test
+        std::set_difference(features.begin(), features.end(),
+                            res.begin(), res.end(), std::inserter(tf, tf.begin()));
+        std::set<FeatureSet> fss = powerset(tf, i, true);
+        foreach(const FeatureSet& fs, fss)
+            if(scorer(fs) > threshold)
+                res.insert(fs.begin(), fs.end());
+    }
     return res;
 }
 

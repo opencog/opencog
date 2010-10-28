@@ -23,8 +23,6 @@
 
 #include <opencog/util/numeric.h>
 
-using opencog::integer_log2;
-
 const unsigned int max_filename_size = 255;
 
 /**
@@ -253,6 +251,8 @@ int main(int argc,char** argv) {
     int reduct_knob_building_effort;
     unsigned long cache_size;
     vector<string> jobs_str;
+    double feature_selection_intensity;
+    unsigned int feature_selection_size;
     // metapop_param
     int max_candidates;
     bool reduce_all;
@@ -385,6 +385,12 @@ int main(int argc,char** argv) {
         (opt_desc_str(jobs_opt).c_str(),
          value<vector<string> >(&jobs_str),
          string("Number of jobs allocated for deme optimization. Jobs can be executed on a remote machine as well, in such case the notation -j N:REMOTE_HOST is used. For instance one can enter the options -j 4 -j 16").append(job_seperator).append("my_server.org (or -j 16").append(job_seperator).append("user@my_server.org if wishes to run the remote jobs under a different user name), meaning that 4 jobs are allocated on the local machine and 16 jobs are allocated on my_server.org. The assumption is that moses-exec must be on the remote machine and is located in a directory included in the PATH environment variable. Beware that a lot of log files are gonna be generated when using this option.\n").c_str())
+        (opt_desc_str(feature_selection_intensity_opt).c_str(),
+         value<double>(&feature_selection_intensity)->default_value(0),
+         "Value between 0 and 1. 0 means all features are selected, 1 corresponds to the stronger selection pressure, probably no features are selected at 1.\n")
+        (opt_desc_str(feature_selection_size_opt).c_str(),
+         value<unsigned int>(&feature_selection_size)->default_value(1),
+         "Maximum number of interactions considered during feature selection. Higher values make the feature selection computation longer.\n")
         (opt_desc_str(pop_size_ratio_opt).c_str(),
          value<double>(&pop_size_ratio)->default_value(200),
          "The higher the more effort is spent on a deme.\n")
@@ -434,9 +440,9 @@ int main(int argc,char** argv) {
     remove(log_file.c_str());
     logger().setFilename(log_file);
     logger().setLevel(logger().getLevelFromString(log_level));
-    logger().setBackTraceLevel(opencog::Logger::ERROR);
+    logger().setBackTraceLevel(Logger::ERROR);
     // init random generator
-    opencog::MT19937RandGen rng(rand_seed);
+    MT19937RandGen rng(rand_seed);
 
     // infer arity
     arity_t arity = infer_arity(problem, problem_size, input_table_file, combo_str);
@@ -538,7 +544,41 @@ int main(int argc,char** argv) {
             it.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(it, ot, nsamples, rng);
-        
+
+            // feature selection
+            if(feature_selection_intensity > 0) {
+                // Logger
+                logger().info("Computing feature selection");
+                // ~Logger
+
+                typedef ConditionalEntropy<truth_table_inputs, partial_truth_table>
+                    FeatureScorer;
+                FeatureScorer fs(it, ot);
+                std::set<arity_t> selected_features = 
+                    incremental_selection(it.get_considered_args_from_zero(), fs,
+                                          // translate feature_selection_intensity
+                                          // into threshold
+                                          feature_selection_intensity - 1,
+                                          feature_selection_size);
+
+                if(selected_features.empty()) {
+                    std::cerr << "No features have been selected. Please retry with a lower feature selection intensity" << std::endl;
+                    exit(1);
+                } else {
+                    it.set_consider_args_from_zero(selected_features);
+                    vertex_set ignore_args = it.get_ignore_args();
+                    moses_params.ignore_ops.insert(ignore_args.begin(),
+                                               ignore_args.end());
+                    
+                    // Logger
+                    logger().info("The following inputs have been selected");
+                    stringstream ss;
+                    ostreamContainer(ss, it.get_considered_args());
+                    logger().info(ss.str());
+                    // ~Logger
+                }
+            }
+
             type_tree tt = declare_function(output_type, arity);
 
             int as = alphabet_size(tt, ignore_ops);

@@ -53,7 +53,7 @@ public:
         } else {
             for(std::set<arity_t>::const_iterator cit = considered_args.begin();
                 cit != considered_args.end(); cit++)
-                binding(*cit) = args[*cit - 1];
+                binding(*cit + 1) = args[*cit];
         }
     }
     arity_t get_arity() const {
@@ -63,7 +63,8 @@ public:
     // raised. That method resets arguments.
     void set_ignore_args(const vertex_set& ignore_args) {
         considered_args.clear();
-        for(arity_t arg = 1; arg <= get_arity(); arg++) {
+        for(arity_t idx = 0; idx < get_arity(); idx++) {
+            arity_t arg = argument::idx_from_zero_to_idx(idx);
             if(ignore_args.find(argument(arg)) == ignore_args.end())
                 considered_args.insert(arg);
         }
@@ -74,13 +75,40 @@ public:
     void set_consider_args(const vertex_set& consider_args) {
         considered_args.clear();
         foreach(const vertex& arg, consider_args)
-            considered_args.insert(get_argument(arg).abs_idx());
+            considered_args.insert(get_argument(arg).abs_idx_from_zero());
+    }
+    // like above but take the indices of columns instead of arguments
+    void set_consider_args_from_zero(const std::set<arity_t>& consider_idx) {
+        considered_args = consider_idx;
+    }
+
+    vertex_set get_considered_args() {
+        vertex_set res;
+        foreach(arity_t idx, considered_args)
+            res.insert(argument(argument::idx_from_zero_to_idx(idx)));
+        return res;
+    }
+
+    // the reverse of get_considered_args
+    vertex_set get_ignore_args() {
+        vertex_set res;
+        for(arity_t idx = 0; idx < get_arity(); idx++)
+            if(considered_args.find(idx) == considered_args.end())
+                res.insert(argument(argument::idx_from_zero_to_idx(idx)));
+        return res;
+    }
+
+    // returns the set of column indices corresponding to the
+    // considered arguments
+    std::set<arity_t> get_considered_args_from_zero() {
+        return considered_args;
     }
 
     // STL
     typedef typename MT::iterator iterator;
     typedef typename MT::const_iterator const_iterator;
     typedef typename MT::size_type size_type;
+    typedef typename MT::value_type value_type;
     MT& get_matrix() { return matrix;}
     const MT& get_matrix() const {return matrix;}
     iterator begin() {return matrix.begin();}
@@ -92,9 +120,13 @@ public:
     iterator erase(iterator it) {return matrix.erase(it);}
 protected:
     MT matrix;
-    std::set<arity_t> considered_args; // the set of arguments to
-                                       // consider, if empty then all
-                                       // arguments are considered
+    // the set of arguments (represented directely as column indices)
+    // to consider, if empty then all arguments are considered
+    std::set<arity_t> considered_args; 
+                                       
+                                       
+                                       
+                                       
 };
 
 
@@ -213,7 +245,7 @@ public:
         } else {
             for(std::set<arity_t>::const_iterator cit = considered_args.begin();
                 cit != considered_args.end(); cit++)
-                binding(*cit) = bool_to_vertex(args[*cit - 1]);
+                binding(*cit + 1) = bool_to_vertex(args[*cit]);
         }
     }
 

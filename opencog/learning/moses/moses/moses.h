@@ -56,7 +56,7 @@ struct moses_parameters {
     // the max score
     score_t max_score;
     // the set of operators to ignore
-    const operator_set ignore_ops;
+    operator_set ignore_ops;
     // the set of perceptions of an optional interactive agent
     const combo_tree_ns_set* perceptions;
     // the set of actions of an optional interactive agent

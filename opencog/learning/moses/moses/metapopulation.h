@@ -133,8 +133,6 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
 template<typename Scoring, typename BScoring, typename Optimization>
 struct metapopulation : public set < bscored_combo_tree,
                                      bscored_combo_tree_greater > {
-//                                     std::greater<bscored_combo_tree> > {
-
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
 

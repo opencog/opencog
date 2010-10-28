@@ -35,12 +35,17 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/lru_cache.h>
+#include <opencog/util/algorithm.h>
+#include <opencog/util/iostreamContainer.h>
 
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
 
 // for operator>> to combo 
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h> 
+
+#include <opencog/learning/feature-selection/feature_selection.h>
+#include <opencog/learning/feature-selection/feature_scorer.h>
 
 #include "../moses/moses.h"
 #include "../moses/distributed_moses.h"
@@ -55,7 +60,7 @@ using boost::assign::list_of;
 using namespace std;
 using namespace moses;
 using namespace reduct;
-using opencog::logger;
+using namespace opencog;
 using namespace ant_combo;
 
 // default number of samples to describe a problem
@@ -78,6 +83,12 @@ static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 static const string un="un"; // univariate
 static const string sa="sa"; // simulation annealing
 static const string hc="hc"; // hillclimbing
+
+// feature selection algorithms
+static const string is="is"; // incremental selection
+
+// feature selection scorer
+static const string en="en"; // entropy
 
 struct metapop_moses_results_parameters {
     metapop_moses_results_parameters(long _result_count,
@@ -107,7 +118,7 @@ struct metapop_moses_results_parameters {
  * 3) print the results
  */
 template<typename Score, typename BScore, typename Optimization>
-void metapop_moses_results(opencog::RandGen& rng,
+void metapop_moses_results(RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
                            const reduct::rule& si_ca,
@@ -139,7 +150,7 @@ void metapop_moses_results(opencog::RandGen& rng,
  * like above but takes the algo type instead of the algo template
  */
 template<typename Score, typename BScore>
-void metapop_moses_results(opencog::RandGen& rng,
+void metapop_moses_results(RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
                            const reduct::rule& si_ca,
@@ -177,7 +188,7 @@ void metapop_moses_results(opencog::RandGen& rng,
  * like above but assumes that the score is bscore based
  */
 template<typename BScore>
-void metapop_moses_results(opencog::RandGen& rng,
+void metapop_moses_results(RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
                            const reduct::rule& si_ca,
@@ -191,11 +202,11 @@ void metapop_moses_results(opencog::RandGen& rng,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
     if(cache_size > 0) {
-        // typedef opencog::lru_cache<BScore> BScoreCache;
-        typedef opencog::prr_cache<BScore> BScoreCache;
+        // typedef lru_cache<BScore> BScoreCache;
+        typedef prr_cache<BScore> BScoreCache;
         typedef bscore_based_score<BScoreCache> Score;
-        // typedef opencog::lru_cache<Score> ScoreCache;
-        typedef opencog::prr_cache<Score> ScoreCache;
+        // typedef lru_cache<Score> ScoreCache;
+        typedef prr_cache<Score> ScoreCache;
         BScoreCache bscore_cache(cache_size, bsc);
         Score score(bscore_cache);
         ScoreCache score_cache(cache_size, score);

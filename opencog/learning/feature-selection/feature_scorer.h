@@ -24,6 +24,8 @@
 #ifndef _OPENCOG_FEATURE_SCORER_H
 #define _OPENCOG_FEATURE_SCORER_H
 
+#include <opencog/util/foreach.h>
+
 namespace opencog {
 
 /**
@@ -39,45 +41,46 @@ namespace opencog {
  *
  * because the feature_selection assumes a score to maximize
  */
-template<IT, OT>
+template<typename IT, typename OT>
 struct ConditionalEntropy {
     ConditionalEntropy(const IT& it, const OT& ot) 
         : _it(it), _ot(ot) {}
 
-    template<FeatureSet> double operator()(const FeatureSet& features) {
-        typedef IT::value_type::value_type EntryT;
+    template<typename FeatureSet>
+    double operator()(const FeatureSet& features) const {
+        typedef typename IT::value_type::value_type EntryT;
         // the following mapping is used to keep track of the number
         // of inputs a given setting. For instance X1=false, X2=true,
         // X3=true is one possible setting. It is then used to compute
         // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
-        typedef std::unordered_map<std::vector<EntryT>, unsigned int> TupleCount;
+        typedef std::map<std::vector<EntryT>, unsigned int> TupleCount;
         TupleCount ic, // for H(X1, ..., Xn)
             ioc; // for H(Y, X1, ..., Xn)
-        double total = ot.size();
-        IT::const_iterator i_it = it.begin();
-        OT::const_iterator o_it = ot.begin();
-        for(; i_it != it.end(); i_it++, o_it++) {
+        double total = _ot.size();
+        typename IT::const_iterator i_it = _it.begin();
+        typename OT::const_iterator o_it = _ot.begin();
+        for(; i_it != _it.end(); i_it++, o_it++) {
             std::vector<EntryT> ic_vec;
-            foreach(FeatureSet::value_type& idx, features)
-                ic_vec.push_back(iv[idx]);
+            foreach(const typename FeatureSet::value_type& idx, features)
+                ic_vec.push_back((*i_it)[idx]);
             ic[ic_vec]++;
-            std::vector<EntryT> ioc_vec(ic);
+            std::vector<EntryT> ioc_vec(ic_vec);
             ioc_vec.push_back(*o_it);
             ioc[ioc_vec]++;
         }
         // Compute conditional entropy
         std::vector<double> ip, iop;
-        foreach(const TupleCount::value_type& vic, ic)
+        foreach(const typename TupleCount::value_type& vic, ic)
             ip.push_back(vic.second/total);
-        foreach(const TupleCount::value_type& vioc, ioc)
+        foreach(const typename TupleCount::value_type& vioc, ioc)
             iop.push_back(vioc.second/total);
         // we return -H(Y|X1, ..., Xn)
         return entropy(ip.begin(), ip.end()) - entropy(iop.begin(), iop.end());
     }
 
 protected:
-    const InputTable& it;
-    const OutputTable& ot;
+    const IT& _it;
+    const OT& _ot;
 };
 
 } // ~namespace opencog

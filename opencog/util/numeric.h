@@ -275,7 +275,7 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
 template<typename It> double entropy(It from, It to)
 {
     double res = 0;
-    for(from; from != to; from++)
+    for(; from != to; from++)
         res += weightInformation(*from);
     return res;
 }

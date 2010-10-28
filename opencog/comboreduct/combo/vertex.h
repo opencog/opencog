@@ -129,9 +129,15 @@ public:
     arity_t abs_idx() const {
         return idx < 0 ? -idx : idx;
     }
-    //returns 0 for argument of idx 1, 1 for idx 2, and so on
+    const static arity_t idx_to_abs_idx_from_zero(arity_t other_idx) {
+        return (other_idx < 0 ? -other_idx : other_idx) - 1;
+    }
+    const static arity_t idx_from_zero_to_idx(arity_t idx_from_zero) {
+        return idx_from_zero + 1;;
+    }
+    //returns 0 for argument of idx 1 or -1, 1 for idx 2 or -2, and so on
     arity_t abs_idx_from_zero() const {
-        return (idx < 0 ? -idx : idx) - 1;
+        return idx_to_abs_idx_from_zero(idx);
     }
     //check if idx is in the possible range given arity a
     //formally idx is in the range of a:

@@ -157,6 +157,45 @@ Out n_way_partition(It begin, It end, const Pred p, int n, Out out)
     return out;
 }
 
+/**
+ * return the power set ps of s such that all elements of ps are
+ * subsets of size n or below.
+ *
+ * @param s       the input set
+ * @param n       the size of the largest subset of s
+ * @param exact   if true then do not include subsets of size below n
+ *
+ * @return        the power set of s with subsets up to size n
+ */
+template<typename Set> std::set<Set> powerset(const Set& s, size_t n, bool exact = false)
+{
+    typedef typename Set::const_iterator SetCIt;
+    typedef typename std::set<Set>::const_iterator PowerSetCIt;
+    std::set<Set> res;
+    if(n > 0) {
+        std::set<Set> ps = powerset(s, n-1, exact);
+        for(PowerSetCIt ss = ps.begin(); ss != ps.end(); ss++)
+            for(SetCIt el = s.begin(); el != s.end(); el++) {
+                Set subset(*ss);
+                if(subset.find(*el) == subset.end()) {
+                    subset.insert(*el);
+                    res.insert(subset);
+                }
+            }
+        if(!exact)
+            res.insert(ps.begin(), ps.end());
+    } else
+        res.insert(Set());
+    return res;
+}
+/**
+ * return the power set of s.
+ */
+template<typename Set> std::set<Set> powerset(const Set& s)
+{
+    return powerset(s, s.size());
+}
+
 } //~namespace opencog
 
 #endif
