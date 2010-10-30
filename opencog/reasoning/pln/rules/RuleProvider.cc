@@ -90,10 +90,10 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     AtomSpaceWrapper* asw = ASW();
     
     Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
-    
+
     foreach(pHandle fah, *ForAll_handles)
         AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
-    
+
     cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
     
     AddRule(new LookupRule(asw), 20.0f);
@@ -355,11 +355,6 @@ DeductionRuleProvider::DeductionRuleProvider(void) {
     //  AddRule(new ImplicationConstructionRule(asw), 10.0f);
 
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, IMPLICATION_LINK), 8.0f);
-    //AddRule(new InversionRule<INHERITANCE_LINK>(asw), 7.0f);
-    AddRule(new InversionRule(asw, INHERITANCE_LINK), 7.0f);
-    AddRule(new InversionRule(asw, ASSOCIATIVE_LINK), 7.0f);
-
-    AddRule(new InversionRule(asw, IMPLICATION_LINK), 7.0f);
 
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
     // This next one is just for the wordpairs demo.
@@ -413,6 +408,13 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
     AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, SUBSET_LINK), 10.0f);
     //AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
+
+    // JaredW: Inversion is basically a conversion Rule, so maybe it should be here.
+    // (i.e. it has exactly one way to produce each target, so not really combinatorial explosions.
+    //AddRule(new InversionRule<INHERITANCE_LINK>(asw), 7.0f);
+    AddRule(new InversionRule(asw, INHERITANCE_LINK), 7.0f);
+    AddRule(new InversionRule(asw, ASSOCIATIVE_LINK), 7.0f);
+    AddRule(new InversionRule(asw, IMPLICATION_LINK), 7.0f);
 
     AddRule(new LookupRule(asw), 20.0f);
     AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
