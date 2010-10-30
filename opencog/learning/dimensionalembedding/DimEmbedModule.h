@@ -35,12 +35,13 @@
 namespace opencog
 {
     /**
-     * The DimEmbedModule class  implements the dimensional embedding
+     * The DimEmbedModule class implements the dimensional embedding
      * technique as described on
      * http://www.opencog.org/wiki/OpenCogPrime:DimensionalEmbedding
      *
      * @todo Add support for non-symmetric links.
-     * @bug Can fail if a node is deleted after embedding (esp. a pivot node)
+     * @bug might fail if a node is deleted after embedding (esp. a pivot node)
+     * or added during embedding
      */
     class DimEmbedModule : public Module
     {
@@ -80,6 +81,7 @@ namespace opencog
          * defined as
          * (l1.tv.strength*l1.tv.confidence)*(l2.tv.strength*l2.tv.confidence)*
          * ...(ln.tv.strength*ln.tv.confidence).
+         * The greater the path weight, the closer the two nodes are.
          *
          * Path weight will always be between 0 and 1. Returns 0 if no path
          * exists and 1 if startHandle == targetHandle.
@@ -126,6 +128,8 @@ namespace opencog
          * sqrt((a1-a2)^2 + (b1-b2)^2 + ... + (n1-n2)^2)
          */
         double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
+
+        double sumOfSquares(std::vector<double> v);
     public:
         const char* id();
 
@@ -147,7 +151,7 @@ namespace opencog
          * should be incorporated to avoid picking pivots with no links
          */
         void embedAtomSpace(const Type& linkType);
-        
+
         /**
          * Logs a string representation of of the (Handle,vector<Double>)
          * pairs for linkType. This will have as many entries as there are nodes
@@ -176,7 +180,3 @@ namespace opencog
 } //namespace
 
 #endif // _OPENCOG_DIM_EMBED_MODULE_H
-        
-
-
-

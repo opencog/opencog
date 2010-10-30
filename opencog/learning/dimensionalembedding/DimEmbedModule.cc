@@ -29,6 +29,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/exceptions.h>
+#include <limits>
 
 using namespace opencog;
 
@@ -44,7 +45,7 @@ DimEmbedModule::~DimEmbedModule() {
 
 void DimEmbedModule::init() {    
     logger().info("[DimEmbedModule] init");
-	numDimensions=5;
+	numDimensions=50;
     CogServer& cogServer = static_cast<CogServer&>(server());
     this->as=cogServer.getAtomSpace();    
 #ifdef HAVE_GUILE
@@ -159,30 +160,77 @@ double DimEmbedModule::euclidDist(const Handle& h1,
     return distance;
 }
 
+double sumOfSquares(std::vector<double> v) {
+    double result=0;
+    for(std::vector<double>::iterator it=v.begin(); it<v.end(); it++) {
+        result+=(*it)*(*it);
+    }
+    return result;
+}
+
 void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){   
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
- 
-    pivotsMap[linkType].push_back(h);
 
-    //update atomEmbedding for this linkType to include this pivot in its
-    //embedding vector for each node.
-    HandleSeq nodes;
+    std::list<Handle> nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
-    for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-        atomMaps[linkType][*it].push_back
-            (findHighestWeightPath(*it, h, linkType));
+
+    pivotsMap[linkType].push_back(h);
+    std::map<Handle, double> nodeMap;
+    nodeMap[h]=1;
+
+    //find the highest weight path to each node from the pivot
+    //using dijkstra's algorithm
+    HandleSet visitedNodes;
+    while(!nodeMap.empty()) {
+        std::pair<Handle, double> bestNode = std::make_pair(h, -1);
+
+        //set bestNode to the node in nodeMap with the highest weight
+        for(std::map<Handle, double>::iterator it=nodeMap.begin();
+                it!=nodeMap.end(); ++it){
+            if(it->second > bestNode.second) bestNode=(*it);
+        }
+        visitedNodes.add(bestNode.first);
+        //Look at all of the links connected to the bestNode
+        HandleSeq newLinks = as->getIncoming(bestNode.first);
+        for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
+            //ignore links that aren't of type linkType
+            if(as->getType(*it)!=linkType) continue;
+            
+            HandleSeq newNodes = as->getOutgoing(*it);
+            //update all of the nodes' weights.
+            for(HandleSeq::iterator it2=newNodes.begin();
+                it2!=newNodes.end(); ++it2){
+                //if the node has been visited, don't do anything
+                if(visitedNodes.contains(*it2)) continue;
+
+                const TruthValue& linkTV = as->getTV(*it);
+                //If this path is better than the currently known one, save it
+                double pathWeight
+                    = bestNode.second*(linkTV.getMean()*linkTV.getConfidence());
+                if(nodeMap[*it2] < pathWeight) {
+                    nodeMap[*it2] = pathWeight;
+                }
+            }
+        }
+        atomMaps[linkType][bestNode.first].push_back(bestNode.second);
+        nodeMap.erase(bestNode.first);
+        nodes.remove(bestNode.first);
+    }
+    //everything still remaining in nodes is unreachable.
+    for(std::list<Handle>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
+        atomMaps[linkType][*it].push_back(0);
     }
 }
 
-void DimEmbedModule::embedAtomSpace(const Type& linkType){   
+void DimEmbedModule::embedAtomSpace(const Type& linkType){    
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
- 
+    
     clearEmbedding(linkType);
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
@@ -198,18 +246,12 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType){
 
         bestChoice = nodes[0];
         double bestChoiceWeight = 1;
+        //pick the next pivot to maximize its distance from its closest pivot
+        //(maximizing distance = minimizing path weight)
         for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-            //calculate the nearness to pivots by multiplying the highest
-            //weight paths from the node to each pivot.
-            std::vector<double>& embedVector=atomMaps[linkType][*it];
-            double testChoiceWeight =
-                std::accumulate(embedVector.begin(),
-                                embedVector.end(),
-                                double(1),
-                                std::multiplies<double>());
-            //pick the node with the lowest testChoiceWeight
-            //(farthest from the pivots)
-            if(testChoiceWeight < bestChoiceWeight){
+            std::vector<double> eV = atomMaps[linkType][*it];
+            double testChoiceWeight = *std::max_element(eV.begin(), eV.end());
+            if(testChoiceWeight < bestChoiceWeight) {
                 bestChoice = *it;
                 bestChoiceWeight = testChoiceWeight;
             }
