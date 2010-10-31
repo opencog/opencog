@@ -21,7 +21,7 @@
  */
 
 #include <boost/assign/list_of.hpp>
-#include <opencog/util/functional.h>
+#include <opencog/util/algorithm.h>
 
 using namespace boost::assign;
 using namespace opencog;

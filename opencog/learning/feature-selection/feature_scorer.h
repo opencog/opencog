@@ -24,6 +24,8 @@
 #ifndef _OPENCOG_FEATURE_SCORER_H
 #define _OPENCOG_FEATURE_SCORER_H
 
+#include <functional>
+
 #include <opencog/util/foreach.h>
 
 namespace opencog {
@@ -41,12 +43,12 @@ namespace opencog {
  *
  * because the feature_selection assumes a score to maximize
  */
-template<typename IT, typename OT>
-struct ConditionalEntropy {
+template<typename IT, typename OT, typename FeatureSet>
+struct ConditionalEntropy : public std::unary_function<FeatureSet, double> {
+
     ConditionalEntropy(const IT& it, const OT& ot) 
         : _it(it), _ot(ot) {}
 
-    template<typename FeatureSet>
     double operator()(const FeatureSet& features) const {
         typedef typename IT::value_type::value_type EntryT;
         // the following mapping is used to keep track of the number

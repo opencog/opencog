@@ -551,15 +551,17 @@ int main(int argc,char** argv) {
                 logger().info("Computing feature selection");
                 // ~Logger
 
-                typedef ConditionalEntropy<truth_table_inputs, partial_truth_table>
-                    FeatureScorer;
+                typedef ConditionalEntropy<truth_table_inputs,
+                                           partial_truth_table,
+                                           std::set<arity_t> > FeatureScorer;
                 FeatureScorer fs(it, ot);
                 std::set<arity_t> selected_features = 
                     incremental_selection(it.get_considered_args_from_zero(), fs,
                                           // translate feature_selection_intensity
                                           // into threshold
                                           feature_selection_intensity - 1,
-                                          feature_selection_size);
+                                          feature_selection_size,
+                                          true);
 
                 if(selected_features.empty()) {
                     std::cerr << "No features have been selected. Please retry with a lower feature selection intensity" << std::endl;

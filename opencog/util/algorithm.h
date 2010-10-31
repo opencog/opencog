@@ -146,6 +146,16 @@ bool has_empty_intersection(It1 from1, It1 to1,
     return true;
 }
 
+template<typename Set>
+bool has_empty_intersection(const Set& ls, const Set& rs) {
+    typedef typename Set::const_iterator const_iterator;
+    typedef typename Set::key_compare key_compare;
+    return has_empty_intersection(ls.begin(), ls.end(),
+                                  rs.begin(), rs.end(),
+                                  ls.key_comp());
+}
+
+
 //Predicate maps to the range [0,n)
 //n-1 values (the pivots) are copied to out
 template<typename It, typename Pred, typename Out>
