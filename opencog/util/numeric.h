@@ -272,8 +272,8 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
 }
 
 /**
- * Compute entropy of a probability distribution described by (from,
- * to[. Specifically it computes
+ * Compute entropy of a probability distribution described by (from, to[.
+ * Specifically it computes
  *
  * Sum p_i log2(p_i)
  * 
