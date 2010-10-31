@@ -271,7 +271,14 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
     return weightInformation(p) + weightInformation(1.0 - p);
 }
 
-// compute n-ary entropy, (from, to[ is a probability distribution
+/**
+ * Compute entropy of a probability distribution described by (from,
+ * to[. Specifically it computes
+ *
+ * Sum p_i log2(p_i)
+ * 
+ * where the p_i are values pointed by (from, to[
+ */
 template<typename It> double entropy(It from, It to)
 {
     double res = 0;
