@@ -474,7 +474,7 @@ pHandleSet constitutedSet(const pHandleSet& memberLinks,
 template<typename T>
 std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);
 
-bool MPunify(vtree lhs_t,
+bool MPunify(vtree& lhs_t,
              vtree::iterator lhs_ti,
              const pHandle rhs,
              bindingsT& bindings,

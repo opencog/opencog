@@ -1212,7 +1212,7 @@ bool equal_ignoreVarNameDifferences(pHandle l, pHandle r) {
     return equal_atom_ignoreVarNameDifferences(atom(l), atom(r));
 }
 
-bool MPunify(vtree lhs_t,
+bool MPunify(vtree& lhs_t,
              vtree::iterator lhs_ti,
              const pHandle rhs_h,
              bindingsT& bindings,
@@ -1262,7 +1262,7 @@ bool MPunify(vtree lhs_t,
         if ( // Check whether not the same type (todo: support subtypes also)
             rhs_T != lhs_T ||
             // If a node, then check if the names are different
-            (lhs_is_node && asw->getName(lhs_h) != asw->getName(rhs_h))) // Make sure to deal with two links, possibly one real and one virtual...
+            (lhs_is_node && lhs_name != asw->getName(rhs_h))) // Make sure to deal with two links, possibly one real and one virtual...
             {
             // difference found.
             // ...
