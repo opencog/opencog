@@ -1,0 +1,79 @@
+/** feature_selectionUTest.cxxtest --- 
+ *
+ * Copyright (C) 2010 Nil Geisweiller
+ *
+ * Author: Nil Geisweiller <nilg@nilg-desktop>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <boost/assign/list_of.hpp>
+
+#include <opencog/comboreduct/combo/table.h>
+
+#include <opencog/learning/feature-selection/feature_selection.h>
+#include <opencog/learning/feature-selection/feature_scorer.h>
+
+#define FEATURE_SELECTION_TEST_DIR PROJECT_SOURCE_DIR"/tests/learning/feature-selection/"
+
+using namespace opencog;
+using namespace combo;
+using namespace std;
+using namespace boost::assign;
+
+class feature_selectionUTest : public CxxTest::TestSuite {
+    truth_table_inputs input_table;
+    partial_truth_table output_table;
+
+public:
+    typedef ConditionalEntropy<truth_table_inputs, partial_truth_table, 
+                               set<arity_t> > FeatureScorer;
+
+
+    feature_selectionUTest() {
+        // load dataset
+        string filename(FEATURE_SELECTION_TEST_DIR"dataset");
+        istreamTable<truth_table_inputs, partial_truth_table, bool>(filename,
+                                                                    input_table,
+                                                                    output_table);
+    }
+
+    void test_incremental_selection() {
+        FeatureScorer fs(input_table, output_table);
+        set<arity_t> selected_features = 
+            incremental_selection(input_table.get_considered_args_from_zero(), fs,
+                                  0.1, 1, false);
+
+        ostreamContainer(cout, selected_features);
+        cout << endl;
+        
+        TS_ASSERT_EQUALS(selected_features.size(), 6);
+    }
+
+    void test_redundant_features() {
+        FeatureScorer fs(input_table, output_table);
+        set<arity_t> features = list_of(3)(4)(10)(17);
+        set<arity_t> redundant = redundant_features(features, fs, 0.001);
+
+        ostreamContainer(cout, redundant);
+        cout << endl;
+
+        TS_ASSERT_EQUALS(redundant.size(), 2);        
+    }
+};
+
