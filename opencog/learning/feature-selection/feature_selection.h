@@ -29,8 +29,10 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/lru_cache.h>
+#include <opencog/util/algorithm.h>
 
 namespace opencog {
+
 
 /**
  * Returns a set S of features following the algo:
@@ -44,7 +46,9 @@ namespace opencog {
  * 5) return 'res'
  *
  * @param features    The initial set of features to be selected from
- * @param scorer      The function to score a set of features
+ * @param scorer      The function to score a set of features, note that it
+ *                    is assumed that the codomain of the scorer is [0, 1],
+ *                    0 for the lowest score and 1 for the higest score.
  * @param threshold   The threshold to select a set of feature
  * @param max_size    The maximum size of each feature set tested in the scorer
  * @param remove_red  Flag indicating whether redundant features are discarded
@@ -63,9 +67,7 @@ FeatureSet incremental_selection(const FeatureSet& features, const Scorer& score
 
     for(unsigned int i = 1; i <= max_size; i++) {
         // define the set of set of features to test for relevancy
-        FeatureSet tf;
-        std::set_difference(features.begin(), features.end(),
-                            rel.begin(), rel.end(), std::inserter(tf, tf.begin()));
+        FeatureSet tf = set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);
         // add the set of relevant features for that iteration in rel
         rel.empty();
@@ -79,16 +81,9 @@ FeatureSet incremental_selection(const FeatureSet& features, const Scorer& score
             FeatureSet red;
             foreach(const FeatureSet& fs, nrfss) {
                 if(has_empty_intersection(fs, red)) {
-                    foreach(const typename FeatureSet::value_type& f, fs) {
-                        FeatureSet fs_without_f(fs);
-                        fs_without_f.erase(f);
-                        double score_diff = 
-                            scorer_cache(fs) - scorer_cache(fs_without_f);
-                        if(score_diff < threshold) {
-                            red.insert(f);
-                            break;
-                        }
-                    }
+                    FeatureSet rfs = redundant_features(fs, scorer_cache,
+                                                        threshold);
+                    red.insert(rfs.begin(), rfs.end());
                 }
             }
             // add in res the relevant non-redundant features
@@ -97,6 +92,24 @@ FeatureSet incremental_selection(const FeatureSet& features, const Scorer& score
         } else {
             res.insert(rel.begin(), rel.end());
         }
+    }
+    return res;
+}
+
+/**
+ * Return a set of redundant features of a given set of features. It
+ * look for a subset of features that do not manage to raise the score
+ * above a given threshold.
+ */
+template<typename Scorer, typename FeatureSet>
+FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
+                              double threshold) {
+    FeatureSet res;
+    foreach(const typename FeatureSet::value_type& f, features) {
+        FeatureSet sf = set_difference(features, res);
+        sf.erase(f);
+        if(!sf.empty() && (scorer(features) - scorer(sf) < threshold))
+            res.insert(f);
     }
     return res;
 }

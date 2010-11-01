@@ -557,9 +557,7 @@ int main(int argc,char** argv) {
                 FeatureScorer fs(it, ot);
                 std::set<arity_t> selected_features = 
                     incremental_selection(it.get_considered_args_from_zero(), fs,
-                                          // translate feature_selection_intensity
-                                          // into threshold
-                                          feature_selection_intensity - 1,
+                                          feature_selection_intensity,
                                           feature_selection_size,
                                           true);
 
@@ -570,7 +568,7 @@ int main(int argc,char** argv) {
                     it.set_consider_args_from_zero(selected_features);
                     vertex_set ignore_args = it.get_ignore_args();
                     moses_params.ignore_ops.insert(ignore_args.begin(),
-                                               ignore_args.end());
+                                                   ignore_args.end());
                     
                     // Logger
                     logger().info("The following inputs have been selected");

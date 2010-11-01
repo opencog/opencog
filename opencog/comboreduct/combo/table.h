@@ -26,6 +26,8 @@
 
 #include <fstream>
 
+#include <boost/iterator/counting_iterator.hpp>
+
 #include <opencog/util/RandGen.h>
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/dorepeat.h>
@@ -44,17 +46,13 @@ template<typename T>
 class input_table {
 public:
     typedef std::vector<std::vector<T> > MT;
+
     // set binding prior calling the combo evaluation, ignoring inputs
     // to be ignored
     void set_binding(const std::vector<T>& args) const {
-        if(considered_args.empty()) {
-            for(arity_t arg = 1; arg < (arity_t)args.size(); arg++)
-                binding(arg) = args[arg - 1];
-        } else {
-            for(std::set<arity_t>::const_iterator cit = considered_args.begin();
-                cit != considered_args.end(); cit++)
-                binding(*cit + 1) = args[*cit];
-        }
+        for(std::set<arity_t>::const_iterator cit = considered_args.begin();
+            cit != considered_args.end(); cit++)
+            binding(*cit + 1) = args[*cit];
     }
     arity_t get_arity() const {
         return matrix.front().size();
@@ -68,8 +66,7 @@ public:
             if(ignore_args.find(argument(arg)) == ignore_args.end())
                 considered_args.insert(arg);
         }
-        OC_ASSERT(!considered_args.empty(),
-                  "You cannot ignore all arguments");
+        OC_ASSERT(!considered_args.empty(), "You cannot ignore all arguments");
     }
     // set the inputs to consider. That method resets arguments.
     void set_consider_args(const vertex_set& consider_args) {
@@ -115,18 +112,22 @@ public:
     iterator end() {return matrix.end();}
     const_iterator begin() const {return matrix.begin();}
     const_iterator end() const {return matrix.end();}
-    void push_back(const std::vector<T>& t) {matrix.push_back(t);}
+    
+    // Warning: this method also update considered_args, by assuming
+    // all are considered
+    void push_back(const std::vector<T>& t) {
+        matrix.push_back(t);
+        if(considered_args.empty())
+            considered_args.insert(boost::counting_iterator<arity_t>(0),
+                                   boost::counting_iterator<arity_t>(get_arity()));
+    }
     size_type size() const {return matrix.size();}
     iterator erase(iterator it) {return matrix.erase(it);}
 protected:
     MT matrix;
     // the set of arguments (represented directely as column indices)
-    // to consider, if empty then all arguments are considered
+    // to consider
     std::set<arity_t> considered_args; 
-                                       
-                                       
-                                       
-                                       
 };
 
 
@@ -239,16 +240,10 @@ public:
     // set binding prior calling the combo evaluation, ignoring inputs
     // to be ignored
     void set_binding(const std::vector<bool>& args) const {
-        if(considered_args.empty()) {
-            for(arity_t arg = 1; arg < (arity_t)args.size(); arg++)
-                binding(arg) = bool_to_vertex(args[arg - 1]);
-        } else {
-            for(std::set<arity_t>::const_iterator cit = considered_args.begin();
-                cit != considered_args.end(); cit++)
-                binding(*cit + 1) = bool_to_vertex(args[*cit]);
-        }
+        for(std::set<arity_t>::const_iterator cit = considered_args.begin();
+            cit != considered_args.end(); cit++)
+            binding(*cit + 1) = bool_to_vertex(args[*cit]);
     }
-
 };
 
 /**

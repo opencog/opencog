@@ -155,6 +155,14 @@ bool has_empty_intersection(const Set& ls, const Set& rs) {
                                   ls.key_comp());
 }
 
+// returns s1 - s2
+template<typename Set>
+Set set_difference(const Set& s1, const Set& s2) {
+    Set res;
+    std::set_difference(s1.begin(), s1.end(), s2.begin(), s2.end(),
+                        std::inserter(res, res.begin()));
+    return res;
+}
 
 //Predicate maps to the range [0,n)
 //n-1 values (the pivots) are copied to out

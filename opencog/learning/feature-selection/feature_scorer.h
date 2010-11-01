@@ -35,13 +35,11 @@ namespace opencog {
  *
  * H(Y|X1, ..., Xn) = H(Y, X1, ..., Xn) - H(X1, ..., Xn)
  *
- * of the output Y given a set of features X1, ..., Xn. IT (a matrix) is
- * the type of the input table, OT (a vector) is the type of the
- * output table. We actually the inverse, that is
- *
- * -H(Y|X1, ..., Xn)
- *
- * because the feature_selection assumes a score to maximize
+ * of the output Y given a set of features X1, ..., Xn. IT (a matrix)
+ * is the type of the input table, OT (a vector) is the type of the
+ * output table. It returns 1 - H(Y|X1, ..., Xn) to meet the
+ * assumption that feature scorers return a value in [0, 1], where 0
+ * is the lower score and 1 is the higher score.
  */
 template<typename IT, typename OT, typename FeatureSet>
 struct ConditionalEntropy : public std::unary_function<FeatureSet, double> {
@@ -76,8 +74,10 @@ struct ConditionalEntropy : public std::unary_function<FeatureSet, double> {
             ip.push_back(vic.second/total);
         foreach(const typename TupleCount::value_type& vioc, ioc)
             iop.push_back(vioc.second/total);
-        // we return -H(Y|X1, ..., Xn)
-        return entropy(ip.begin(), ip.end()) - entropy(iop.begin(), iop.end());
+        // compute H(Y|X1, ..., Xn)
+        double cond_entropy =
+            entropy(iop.begin(), iop.end()) - entropy(ip.begin(), ip.end());
+        return 1 - cond_entropy;
     }
 
 protected:
