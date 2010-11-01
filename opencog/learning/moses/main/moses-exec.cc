@@ -252,6 +252,7 @@ int main(int argc,char** argv) {
     unsigned long cache_size;
     vector<string> jobs_str;
     double feature_selection_intensity;
+    double redundant_feature_intensity;
     unsigned int feature_selection_size;
     // metapop_param
     int max_candidates;
@@ -388,6 +389,9 @@ int main(int argc,char** argv) {
         (opt_desc_str(feature_selection_intensity_opt).c_str(),
          value<double>(&feature_selection_intensity)->default_value(0),
          "Value between 0 and 1. 0 means all features are selected, 1 corresponds to the stronger selection pressure, probably no features are selected at 1.\n")
+        (opt_desc_str(redundant_feature_intensity_opt).c_str(),
+         value<double>(&redundant_feature_intensity)->default_value(0),
+         "Value between 0 and 1. 0 means no redundant features are discarded, 1 means redudant features are maximally discarded. This option is only active when feature selection is active.\n")
         (opt_desc_str(feature_selection_size_opt).c_str(),
          value<unsigned int>(&feature_selection_size)->default_value(1),
          "Maximum number of interactions considered during feature selection. Higher values make the feature selection computation longer.\n")
@@ -559,7 +563,7 @@ int main(int argc,char** argv) {
                     incremental_selection(it.get_considered_args_from_zero(), fs,
                                           feature_selection_intensity,
                                           feature_selection_size,
-                                          true);
+                                          redundant_feature_intensity);
 
                 if(selected_features.empty()) {
                     std::cerr << "No features have been selected. Please retry with a lower feature selection intensity" << std::endl;
@@ -571,7 +575,8 @@ int main(int argc,char** argv) {
                                                    ignore_args.end());
                     
                     // Logger
-                    logger().info("The following inputs have been selected");
+                    vertex_set selected_args = it.get_considered_args();
+                    logger().info("%u inputs have been selected", selected_args.size());
                     stringstream ss;
                     ostreamContainer(ss, it.get_considered_args());
                     logger().info(ss.str());

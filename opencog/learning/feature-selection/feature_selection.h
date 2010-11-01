@@ -44,21 +44,24 @@ namespace opencog {
  * 3.b) select all redundant features among 'rel', called 'red'
  * 4) follow the same pattern with triplets, etc, until max_size.
  * 5) return 'res'
- *
- * @param features    The initial set of features to be selected from
- * @param scorer      The function to score a set of features, note that it
- *                    is assumed that the codomain of the scorer is [0, 1],
- *                    0 for the lowest score and 1 for the higest score.
- * @param threshold   The threshold to select a set of feature
- * @param max_size    The maximum size of each feature set tested in the scorer
- * @param remove_red  Flag indicating whether redundant features are discarded
+ * 
+ * @param features       The initial set of features to be selected from
+ * @param scorer         The function to score a set of features, it is
+ *                       assumed that the codomain of the scorer is [0, 1],
+ *                       0 for the lowest score and 1 for the higest score.
+ * @param threshold      The threshold to select a set of feature
+ * @param max_size       The maximum size of each feature set tested in the scorer
+ * @param red_threshold  If >0 it modulates the intensity of the
+ *                       threshold of redundant_features(), precisely
+ *                       red_threshold * threshold
+ *                       Otherwise redundant features are ignored.
  *
  * @return            The set of selected features
  */
 template<typename Scorer, typename FeatureSet>
 FeatureSet incremental_selection(const FeatureSet& features, const Scorer& scorer,
                                  double threshold, unsigned int max_size = 1,
-                                 bool remove_red = false) {
+                                 double red_threshold = 0) {
     lru_cache<Scorer> scorer_cache(std::pow((double)features.size(), (int)max_size),
                                    scorer);
 
@@ -74,7 +77,7 @@ FeatureSet incremental_selection(const FeatureSet& features, const Scorer& score
         foreach(const FeatureSet& fs, fss)
             if(scorer_cache(fs) > threshold)
                 rel.insert(fs.begin(), fs.end());
-        if(remove_red) {
+        if(red_threshold > 0) {
             // define the set of set of features to test redundancy
             std::set<FeatureSet> nrfss = powerset(rel, i+1, true);
             // determine the set of redundant features
@@ -82,7 +85,7 @@ FeatureSet incremental_selection(const FeatureSet& features, const Scorer& score
             foreach(const FeatureSet& fs, nrfss) {
                 if(has_empty_intersection(fs, red)) {
                     FeatureSet rfs = redundant_features(fs, scorer_cache,
-                                                        threshold);
+                                                        threshold * red_threshold);
                     red.insert(rfs.begin(), rfs.end());
                 }
             }
