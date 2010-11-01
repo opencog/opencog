@@ -55,7 +55,7 @@ template<typename Scorer, typename FeatureSet>
 FeatureSet incremental_selection(const FeatureSet& features, const Scorer& scorer,
                                  double threshold, unsigned int max_size = 1,
                                  bool remove_red = false) {
-    lru_cache<Scorer> scorer_cache(std::pow(features.size(), max_size),
+    lru_cache<Scorer> scorer_cache(std::pow((double)features.size(), (int)max_size),
                                    scorer);
 
     FeatureSet rel; // set of relevant features for a given iteration
