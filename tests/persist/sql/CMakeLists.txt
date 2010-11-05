@@ -1,14 +1,14 @@
 INCLUDE_DIRECTORIES (
-	${PROJECT_SOURCE_DIR}/src/atomspace
-	${PROJECT_SOURCE_DIR}/src/persist/file
-	${PROJECT_SOURCE_DIR}/src/persist/sql
-	${PROJECT_SOURCE_DIR}/src/util
+	${PROJECT_SOURCE_DIR}/opencog/atomspace
+	${PROJECT_SOURCE_DIR}/opencog/persist/file
+	${PROJECT_SOURCE_DIR}/opencog/persist/sql
+	${PROJECT_SOURCE_DIR}/opencog/util
 )
 
 LINK_DIRECTORIES(
-	${PROJECT_BINARY_DIR}/src/atomspace
-	${PROJECT_BINARY_DIR}/src/persist
-	${PROJECT_BINARY_DIR}/src/util
+	${PROJECT_BINARY_DIR}/opencog/atomspace
+	${PROJECT_BINARY_DIR}/opencog/persist
+	${PROJECT_BINARY_DIR}/opencog/util
 )
 
 LINK_LIBRARIES(

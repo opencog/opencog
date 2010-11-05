@@ -47,13 +47,16 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
     }
     return TRUE;
 }
-#elif __GNUC__
-static __attribute__ ((constructor)) void _init(void)
+#else //if __GNUC__
+__attribute__((constructor))
+static void init(void)
 {
     #include "atom_types.inheritance"
+    printf("Test");
 }
 
-static __attribute__ ((constructor)) void _fini(void)
+__attribute__((constructor))
+void fini(void)
 {
 }
 

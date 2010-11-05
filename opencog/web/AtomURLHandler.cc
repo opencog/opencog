@@ -48,7 +48,7 @@
 using namespace opencog;
 using namespace json_spirit;
 
-AtomURLHandler::AtomURLHandler() : isJSON(false),BaseURLHandler("text/plain"),
+AtomURLHandler::AtomURLHandler() : BaseURLHandler("text/plain"),isJSON(false),
     refreshPage(false), handleInQuery(false), handleInURL(false),
     h(Handle::UNDEFINED)
 {

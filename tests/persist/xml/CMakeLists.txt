@@ -1,7 +1,7 @@
 INCLUDE_DIRECTORIES(
-	${PROJECT_SOURCE_DIR}/src/util
-	${PROJECT_SOURCE_DIR}/src/atomspace
-	${PROJECT_SOURCE_DIR}/src/persist/xml
+	${PROJECT_SOURCE_DIR}/opencog/util
+	${PROJECT_SOURCE_DIR}/opencog/atomspace
+	${PROJECT_SOURCE_DIR}/opencog/persist/xml
 	${PROJECT_SOURCE_DIR}/test/xml
 )
 

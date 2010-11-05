@@ -114,7 +114,6 @@ public:
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
 
-
         CogServer& cogserver = static_cast<CogServer&>(server());
         cogserver.loadModule( "libquery.so" );
         cogserver.loadModule( "libscheme-shell.so" );
@@ -124,8 +123,8 @@ public:
         config(EmbodimentConfig::embodimentCreateInstance, true);
 
         // The PLN module sets various settings to defaults; if you loaded
-        // the EmbodimentConfig _after_ that, it would lose those settings
-        // altogether, causing errors when PLN code tries to look them up.
+        // the EmbodimentConfig _after_ that, it would lose the PLN module settings,
+        // causing errors when PLN code tries to look them up.
         try {
             config().load("pln-test.conf", false);
         } catch (RuntimeException &e) {

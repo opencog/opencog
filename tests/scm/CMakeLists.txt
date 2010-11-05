@@ -1,13 +1,13 @@
 INCLUDE_DIRECTORIES (
-	${PROJECT_SOURCE_DIR}/src/atomspace
-	${PROJECT_SOURCE_DIR}/src/guile
-	${PROJECT_SOURCE_DIR}/src/util
+	${PROJECT_SOURCE_DIR}/opencog/atomspace
+	${PROJECT_SOURCE_DIR}/opencog/guile
+	${PROJECT_SOURCE_DIR}/opencog/util
 )
 
 LINK_DIRECTORIES(
-	${PROJECT_BINARY_DIR}/src/atomspace
-	${PROJECT_BINARY_DIR}/src/guile
-	${PROJECT_BINARY_DIR}/src/util
+	${PROJECT_BINARY_DIR}/opencog/atomspace
+	${PROJECT_BINARY_DIR}/opencog/guile
+	${PROJECT_BINARY_DIR}/opencog/util
 )
 
 LINK_LIBRARIES(
