@@ -33,9 +33,11 @@
 #include "rules/Rules.h"
 //#include "spacetime.h"
 #include "AtomSpaceWrapper.h"
+#include "BackInferenceTreeNode.h"
+#include "InferenceCache.h"
+
 #include <opencog/server/CogServer.h>
 #include <opencog/util/copyif.h>
-#include "BackInferenceTreeNode.h"
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>
 
@@ -236,10 +238,17 @@ void BITNodeRoot::setRecordingTrails(bool x) { recordingTrails = x; }
 bool BITNodeRoot::getRecordingTrails() const { return recordingTrails; }
 
 BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
-        FitnessEvaluatorT _fe)
+        FitnessEvaluatorT _fe, InferenceCache* cache)
 : inferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0),
-  treeDepth(0), loosePoolPolicy(false)
+  treeDepth(0), loosePoolPolicy(false), BITcache(cache)
 {
+    if (cache != NULL) {
+        sharedBITCache = true;
+    } else {
+        sharedBITCache = false;
+        cache = new InferenceCache;
+    }
+
     haxx::registerBITNode(this);
 
     AtomSpaceWrapper *asw = GET_ASW;
@@ -372,7 +381,7 @@ BITNode* BITNodeRoot::createChild(int my_rule_arg_i, Rule* new_rule,
 }
 
 int BITNodeRoot::getExecPoolSize() const { return exec_pool.size(); }
-//BITNodeRoot& BITNode::getBITRoot() const { return *root; }
+BITNodeRoot& BITNode::getBITRoot() const { return *root; }
 
 Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
 {
@@ -424,6 +433,8 @@ int BITNode::totalChildren() const
 BITNodeRoot::~BITNodeRoot() {
     delete rp;
     foreach(BITNode* b, nodes) delete b;
+
+    if (!sharedBITCache) delete BITcache;
 
 #if 0
     // Attempt to use the varOwner map to delete FWVars

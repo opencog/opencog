@@ -284,8 +284,8 @@ public:
     /// which are not necessarily at the same depth,
     /// via for instance the ParametrizedBITNode class, which is a
     /// wrapper for BITNode, not sure how depth works then though.
-//    unsigned int depth;
-//    BITNodeRoot* root;
+    unsigned int depth;
+    BITNodeRoot* root;
 
     bool Expanded;
 
@@ -662,7 +662,7 @@ public:
 
     // The class assumes ownership of the RuleProvider
     BITNodeRoot(meta _target, RuleProvider* _rp,
-            bool _rTrails = true, FitnessEvaluatorT fe = BEST);
+            bool _rTrails = true, FitnessEvaluatorT fe = BEST, InferenceCache* cache = NULL);
     
     /**
      * Basic usage: 
@@ -733,6 +733,7 @@ public:
 protected:
 
     InferenceCache* BITcache;
+    bool sharedBITCache;
 
     typedef std::list<BITNode*> exec_poolT;
     exec_poolT exec_pool;

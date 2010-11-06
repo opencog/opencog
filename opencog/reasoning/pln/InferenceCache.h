@@ -73,14 +73,7 @@ protected:
     // Constructor?
 };
 
-InferenceCache& standardInferenceCache()
-{
-    static InferenceCache* standard;
-
-    if (standard == NULL) standard = new InferenceCache;
-
-    return *standard;
-}
+InferenceCache& standardInferenceCache();
 
 } } // opencog::pln
 
