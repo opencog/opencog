@@ -320,7 +320,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
                     bind(getTypeFun, bind(&_v2h, _1)),
                         (Type)FW_VARIABLE_NODE));
     foreach(Vertex v, vars)
-        varOwner[v].insert(root_variable_scoper);
+        BITcache->varOwner[v].insert(root_variable_scoper);
 
     eval_results.push_back(set<VtreeProvider*>());
     cprintf(3, "Root ok\n");
@@ -758,7 +758,7 @@ void BITNode::addDirectResult(Btr<set<BoundVertex> > directResult, spawn_mode sp
             bindingsT temp_binds(*bv.bindings);
             bv.bindings->clear();
             foreach(hpair hp, temp_binds)
-                if (STLhas(root->varOwner, hp.first))
+                if (STLhas(root->BITcache->varOwner, hp.first))
                     bv.bindings->insert(hp);
         }
         if (!bv.bindings || bv.bindings->empty())
@@ -1085,7 +1085,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
         foreach(Vertex v, vars)
             if (!STLhas2(*_target, v))
             {
-                root->varOwner[v].insert(new_node);
+                root->BITcache->varOwner[v].insert(new_node);
                 cprintf(0,"[%ld] owns %s\n", (long)new_node, asw->getName(_v2h(v)).c_str());
             }
 
@@ -1102,7 +1102,7 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
     /// Only retain the bindings relevant to the varOwner
     map<BITNode*, bindingsT> clone_binds;
     foreach(hpair raw_pair, *bindings) //for $x=>A
-        foreach(BITNode* bitn, varOwner[raw_pair.first])
+        foreach(BITNode* bitn, BITcache->varOwner[raw_pair.first])
             clone_binds[bitn].insert(raw_pair);
     /// clone_binds now has the BITNode which owns the variable as a key
     /// and a mapping from that variable to the binding.
@@ -1123,7 +1123,7 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
 bool BITNodeRoot::spawns(const bindingsT& bindings) const
 {
     foreach(hpair b, bindings)
-        if (STLhas(varOwner, b.first))
+        if (STLhas(BITcache->varOwner, b.first))
             return true;
 
     return false;
