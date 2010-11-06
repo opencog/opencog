@@ -61,7 +61,7 @@ namespace haxx {
 
 namespace opencog {
 
-//#define USE_BITUBIGRAPHER
+#define USE_BITUBIGRAPHER
 
 #ifdef USE_BITUBIGRAPHER
 class BITUbigrapher;
@@ -72,6 +72,7 @@ namespace pln {
 class BITNode;
 class BITNodeRoot;  //!< Root of a BIT, controls inference
 class RuleProvider; //!< Provide rules when expanding the tree
+class InferenceCache;
 
 /** A class for runtime errors during BIT expansion
   *
@@ -251,11 +252,13 @@ class BITNode
     // Let unit tests inspect BITNode state
     friend class ::BITNodeUTest;
     friend class ::PLNUTest;
+    friend class PLNModule;
 #ifdef USE_BITUBIGRAPHER
     friend class opencog::BITUbigrapher;
 #endif
 
-protected:
+//protected:
+public:
     /** Whether to allow sibling spawning */
     enum spawn_mode { NO_SIBLING_SPAWNING = 0, ALLOW_SIBLING_SPAWNING };
 
@@ -654,6 +657,7 @@ class BITNodeRoot : public BITNode
     // Let unit tests inspect BITNode state
     friend class ::PLNUTest;
     friend class ::BITNodeUTest;
+    friend class ::InferenceCache;
 public:
 
     ~BITNodeRoot();
@@ -719,12 +723,17 @@ public:
     // This seems to break some tests in BC, but makes FC support more cases of ForAll unification
     // for input into DeductionRule and ModusPonens.
     void setLoosePoolPolicy(bool x) { loosePoolPolicy = x; }
+    // Keep the RuleProvider rather than deleting it. Currently required for forward chaining + trails.
+    // Will be necessary when we reuse BITNodes between trees.
+    void setKeepRP(bool x) { keepRP = true; }
     void setRecordingTrails(bool x=true);
     bool getRecordingTrails() const;
 
     FitnessEvaluatorT fitnessEvaluator;
 
 protected:
+
+    InferenceCache* BITcache;
 
     typedef std::list<BITNode*> exec_poolT;
     exec_poolT exec_pool;
@@ -745,7 +754,7 @@ protected:
      * or indirectly use (ie. Have as a subtree, with possibly some
      * inheritance-bindings) BITNode b. This information is used (only) to
      * prevent circularity: a BITNode cannot indirectly or directly use itself.
-     * 
+     *
      * @note This should eventually be moved to a BITNodeCache (which doesn't
      * exist yet).
      */
@@ -781,6 +790,7 @@ protected:
     unsigned int treeDepth;
 
     bool loosePoolPolicy;
+    bool keepRP;
 
     friend class BITNode;
 };
