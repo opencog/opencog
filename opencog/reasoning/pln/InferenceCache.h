@@ -40,6 +40,7 @@ class InferenceCache
 {
 protected:
     friend class BITNodeRoot;
+    friend class BITNode;
 
     RuleProvider *referenceRP;
 
@@ -71,6 +72,9 @@ protected:
 
     // A whole bunch of methods to access them appropriately. For mining or BIT or statistical purposes.
     // Constructor?
+public:
+    ~InferenceCache();
+    InferenceCache() { }
 };
 
 InferenceCache& standardInferenceCache();

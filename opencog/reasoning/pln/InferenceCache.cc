@@ -49,3 +49,9 @@ InferenceCache& standardInferenceCache()
 
     return *standard;
 }
+
+InferenceCache::~InferenceCache()
+{
+//    delete referenceRP;
+    foreach(BITNode* b, nodes) delete b;
+}

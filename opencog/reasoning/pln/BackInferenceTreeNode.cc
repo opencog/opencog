@@ -238,15 +238,16 @@ void BITNodeRoot::setRecordingTrails(bool x) { recordingTrails = x; }
 bool BITNodeRoot::getRecordingTrails() const { return recordingTrails; }
 
 BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
-        FitnessEvaluatorT _fe, InferenceCache* cache)
+        FitnessEvaluatorT _fe, InferenceCache* _cache)
 : inferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0),
-  treeDepth(0), loosePoolPolicy(false), BITcache(cache)
+  treeDepth(0), loosePoolPolicy(false)
 {
-    if (cache != NULL) {
+    if (_cache != NULL) {
         sharedBITCache = true;
+        BITcache = _cache;
     } else {
         sharedBITCache = false;
-        cache = new InferenceCache;
+        BITcache = new InferenceCache;
     }
 
     haxx::registerBITNode(this);
@@ -431,8 +432,8 @@ int BITNode::totalChildren() const
 }
 
 BITNodeRoot::~BITNodeRoot() {
-    delete rp;
-    foreach(BITNode* b, nodes) delete b;
+//    delete rp;
+//    foreach(BITNode* b, nodes) delete b;
 
     if (!sharedBITCache) delete BITcache;
 
@@ -1052,7 +1053,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
                 root->BITNodeTemplates.insert(new_node);
         }
 
-        root->nodes.insert(new_node);
+        root->BITcache->nodes.insert(new_node);
 
         new_node->create();
 

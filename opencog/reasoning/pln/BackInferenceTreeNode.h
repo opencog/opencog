@@ -655,14 +655,14 @@ public:
 
     ~BITNodeRoot();
 
-    // The list of all BITNodes (except the root variable scoper I think).
-    // Updated in BITNode::createChild; used to delete all BITNodes in the
-    // BITNodeRoot destructor.
-    std::set<BITNode*> nodes;
+//    // The list of all BITNodes (except the root variable scoper I think).
+//    // Updated in BITNode::createChild; used to delete all BITNodes in the
+//    // BITNodeRoot destructor.
+//    std::set<BITNode*> nodes;
 
     // The class assumes ownership of the RuleProvider
     BITNodeRoot(meta _target, RuleProvider* _rp,
-            bool _rTrails = true, FitnessEvaluatorT fe = BEST, InferenceCache* cache = NULL);
+            bool _rTrails = true, FitnessEvaluatorT fe = BEST, InferenceCache* _cache = NULL);
     
     /**
      * Basic usage: 
