@@ -52,7 +52,6 @@ __attribute__((constructor))
 static void init(void)
 {
     #include "atom_types.inheritance"
-    printf("Test");
 }
 
 __attribute__((constructor))

@@ -3,12 +3,13 @@ ADD_CUSTOM_TARGET(embodiment_atom_types DEPENDS atom_types.h)
 
 ADD_LIBRARY (AtomSpaceExtensions SHARED
     atom_types_init
-    #    atom_types
+    #atom_types
     AtomSpaceUtil
     CompareAtomTreeTemplate
 )
 
 ADD_DEPENDENCIES(AtomSpaceExtensions opencog_atom_types)
+ADD_DEPENDENCIES(AtomSpaceExtensions embodiment_atom_types)
 
 TARGET_LINK_LIBRARIES (AtomSpaceExtensions
     util
