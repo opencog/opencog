@@ -762,12 +762,12 @@ protected:
      * @note This should eventually be moved to a BITNodeCache (which doesn't
      * exist yet).
      */
-    std::map<BITNode*, std::set<BITNode*> > users;
+//    std::map<BITNode*, std::set<BITNode*> > users;
 
     /// It's too slow to sort the pool after every insertion.
 
     bool exec_pool_sorted;
-    std::set<BITNode*> BITNodeTemplates;
+//    std::set<BITNode*> BITNodeTemplates;
 
     RuleProvider* rp;
 

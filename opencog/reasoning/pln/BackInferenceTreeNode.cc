@@ -215,7 +215,7 @@ direct_results(Btr<set<BoundVertex> >(new set<BoundVertex>))
 string BITNodeRoot::printUsers(BITNode* b)
 {
     stringstream ss;
-    foreach(BITNode* u, users[b])
+    foreach(BITNode* u, BITcache->users[b])
         ss << "[" << (long)u << "] ";
     ss << endl;
     cout << ss.str();
@@ -675,10 +675,10 @@ bool BITNode::addNewParent(BITNode* parent, int argumentSlot, Btr<bindingsT>
 
     // Let the BIT root know which nodes are dependent on this one now
     // (parent,
-    root->users[this].insert(parent);
+    root->BITcache->users[this].insert(parent);
     // ...and users of parent)
-    root->users[this].insert(root->users[parent].begin(),
-            root->users[parent].end());
+    root->BITcache->users[this].insert(root->BITcache->users[parent].begin(),
+            root->BITcache->users[parent].end());
     return true;
 }
 
@@ -943,7 +943,7 @@ void BITNode::findTemplateBIT(BITNode* new_node, BITNode*& template_node, bindin
     // Check whether they are both root variable scopers (or both normal BITNodes).
     bool isScoper = (new_node->rule == NULL);
 
-    foreach(BITNode* bit, root->BITNodeTemplates) {
+    foreach(BITNode* bit, root->BITcache->BITNodeTemplates) {
         bool bitIsScoper = (bit->rule == NULL);
 
         if (isScoper != bitIsScoper) continue;
@@ -1050,7 +1050,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
                 return template_node;
             }
             else
-                root->BITNodeTemplates.insert(new_node);
+                root->BITcache->BITNodeTemplates.insert(new_node);
         }
 
         root->BITcache->nodes.insert(new_node);
@@ -1277,7 +1277,7 @@ void BITNode::tryClone(hpair binding) const
 
 bool BITNode::hasAncestor(const BITNode* const _p) const
 {
-    return this != root && STLhas(root->users[(BITNode*)this], (BITNode*)_p);
+    return this != root && STLhas(root->BITcache->users[(BITNode*)this], (BITNode*)_p);
 }
 
 const set<VtreeProvider*>& BITNodeRoot::infer(int& resources,
