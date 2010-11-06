@@ -203,7 +203,7 @@ void copy_vars(V& vars, Vit varsbegin, Tit bbvt_begin, Tit bbvt_end)
 static int more_count=0;
 
 BITNode::BITNode()
-: depth(0), root(0), Expanded(false), rule(NULL), my_bdrum(0.0f),
+: depth(0), /*root(0),*/ Expanded(false), rule(NULL), my_bdrum(0.0f),
 direct_results(Btr<set<BoundVertex> >(new set<BoundVertex>))
 
 {
@@ -372,7 +372,7 @@ BITNode* BITNodeRoot::createChild(int my_rule_arg_i, Rule* new_rule,
 }
 
 int BITNodeRoot::getExecPoolSize() const { return exec_pool.size(); }
-BITNodeRoot& BITNode::getBITRoot() const { return *root; }
+//BITNodeRoot& BITNode::getBITRoot() const { return *root; }
 
 Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
 {
@@ -1762,12 +1762,12 @@ int missing_arity = (int)rule->getInputFilter().size();
 */      
 }
 
-void BITNode::findFittest(BITNode*& bisse, float& best_fitness)
+void BITNodeRoot::findFittest(BITNode*& bisse, float& best_fitness)
 {
-    bisse = (*root->exec_pool.begin());
+    bisse = (*exec_pool.begin());
     best_fitness = bisse->fitness();
     float next_fitness = 0.0f;
-    foreach(BITNode* bis, root->exec_pool)
+    foreach(BITNode* bis, exec_pool)
         if (best_fitness < (next_fitness=bis->fitness()))
         {
             best_fitness = next_fitness;
@@ -1777,9 +1777,9 @@ void BITNode::findFittest(BITNode*& bisse, float& best_fitness)
 
 float all_best_fitness = 0.0f;
 
-void BITNode::expandFittest()
+void BITNodeRoot::expandFittest()
 {
-    if (SOFTMAX == root->fitnessEvaluator)
+    if (SOFTMAX == fitnessEvaluator)
     {
         /*  tlog(2,"Fitness table: (%d)\n", root->exec_pool.size());
 
@@ -1795,7 +1795,7 @@ void BITNode::expandFittest()
 
         // Get the fitness of all nodes in the execution pool
         vector<double> fitnesses;
-        transform(root->exec_pool.begin(), root->exec_pool.end(), back_inserter(fitnesses), std::mem_fun(&BITNode::fitness));
+        transform(exec_pool.begin(), exec_pool.end(), back_inserter(fitnesses), std::mem_fun(&BITNode::fitness));
 
         //float partition = o;
         //const float temperature = 0.1f;
@@ -1828,7 +1828,7 @@ void BITNode::expandFittest()
 
         accumulated_weight = 0.0f; 
         int i=0;
-        BITNodeRoot::exec_poolT::iterator ei = root->exec_pool.begin();
+        BITNodeRoot::exec_poolT::iterator ei = exec_pool.begin();
 
         foreach(double Qb, fitnesses)
         {
@@ -1851,10 +1851,10 @@ void BITNode::expandFittest()
 
         return;
     }
-    else if (root->fitnessEvaluator == RANDOM)
+    else if (fitnessEvaluator == RANDOM)
     {
-        BITNodeRoot::exec_poolT::iterator ei = root->exec_pool.begin();
-        int e = rand() % root->exec_pool.size();
+        BITNodeRoot::exec_poolT::iterator ei = exec_pool.begin();
+        int e = rand() % exec_pool.size();
         for (int i=0; i < e; i++)
             ++ei;
 
@@ -1866,23 +1866,23 @@ void BITNode::expandFittest()
 
         BITNode* bisse = NULL;
     
-        if (!root->exec_pool.empty())
+        if (!exec_pool.empty())
         {
             if (currentDebugLevel>1) //Sort and print
             {
-                if (!root->exec_pool_sorted)
+                if (!exec_pool_sorted)
                 {
-                    root->exec_pool.sort(BITNodeFitnessCompare());
-                    root->exec_pool_sorted = true;
+                    exec_pool.sort(BITNodeFitnessCompare());
+                    exec_pool_sorted = true;
                 }
 
-                std::list<BITNode*>::iterator i = root->exec_pool.begin();
+                std::list<BITNode*>::iterator i = exec_pool.begin();
                 (*i)->tlog(3, ": %f / %d [%ld]\n", (*i)->fitness(), (*i)->children.size(), (long)(*i));
 
-                for (++i; i != root->exec_pool.end(); i++)      
+                for (++i; i != exec_pool.end(); i++)
                     (*i)->tlog(3, ": %f / %d [%ld]\n", (*i)->fitness(), (*i)->children.size(), (long)(*i));
 
-                bisse = (*root->exec_pool.begin());
+                bisse = (*exec_pool.begin());
             }
             else //Just find the best one
             {

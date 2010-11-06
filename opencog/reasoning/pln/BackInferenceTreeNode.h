@@ -284,8 +284,8 @@ public:
     /// which are not necessarily at the same depth,
     /// via for instance the ParametrizedBITNode class, which is a
     /// wrapper for BITNode, not sure how depth works then though.
-    unsigned int depth;
-    BITNodeRoot* root;
+//    unsigned int depth;
+//    BITNodeRoot* root;
 
     bool Expanded;
 
@@ -561,10 +561,6 @@ public:
     /// made rigorously here.
     void tryClone(hpair binding) const;
 
-    /// Find the fittest BITNode for expansion.
-    /// \todo This method should be moved to the root class.
-    void findFittest(BITNode*& bisse, float& best_fitness);
-
 public:
     /// Set of possible inputs for each index of the input vectors of the Rule
     /// associated with this node. Contains the BITNodes, as opposed to the
@@ -625,9 +621,6 @@ public:
     /// Expand whole tree level. Typically not called externally
     void expandNextLevel();
     
-    /// Typically not called externally
-    void expandFittest();
-
     // Printing utilities
     std::string tlog(int debugLevel, const char *format, ...) const;
     
@@ -708,6 +701,12 @@ public:
     std::string extract_plan(pHandle h, unsigned int level,
                              vtree& do_template, pHandleSeq& plan) const;
 
+    /// Find the fittest BITNode for expansion.
+    void findFittest(BITNode*& bisse, float& best_fitness);
+
+    /// Typically not called externally
+    void expandFittest();
+
     // Statistics
     
     std::map<pHandle,BITNode*> hsource;
@@ -744,6 +743,10 @@ protected:
     std::map<Vertex, std::set<BITNode*> > varOwner;
 
     std::map<Rule*, float> priority;
+
+    // Store the depths of each BITNode from this particular root (target).
+    // If it is even a descendant of this root.
+    std::map<BITNode*, int> BITNodeDepths;
 
     Rule::MPs dummy_args;
 
