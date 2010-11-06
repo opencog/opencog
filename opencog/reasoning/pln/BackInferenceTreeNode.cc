@@ -247,7 +247,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
         BITcache = _cache;
     } else {
         sharedBITCache = false;
-        BITcache = new InferenceCache;
+        BITcache = new InferenceCache(_rp);
     }
 
     haxx::registerBITNode(this);
