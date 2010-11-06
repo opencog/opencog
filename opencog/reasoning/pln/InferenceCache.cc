@@ -45,13 +45,13 @@ InferenceCache& standardInferenceCache()
 {
     static InferenceCache* standard;
 
-    if (standard == NULL) standard = new InferenceCache;
+    if (standard == NULL) standard = new InferenceCache(new DefaultVariableRuleProvider);
 
     return *standard;
 }
 
 InferenceCache::~InferenceCache()
 {
-//    delete referenceRP;
+    delete referenceRP;
     foreach(BITNode* b, nodes) delete b;
 }

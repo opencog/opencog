@@ -743,7 +743,7 @@ protected:
     // remaining FWVars being owned by both BITNodes.
 //    std::map<Vertex, std::set<BITNode*> > varOwner;
 
-    std::map<Rule*, float> priority;
+//    std::map<Rule*, float> priority;
 
     // Store the depths of each BITNode from this particular root (target).
     // If it is even a descendant of this root.

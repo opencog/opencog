@@ -42,6 +42,11 @@ protected:
     friend class BITNodeRoot;
     friend class BITNode;
 
+    /**
+     * A "reference" RuleProvider containing the official versions of all Rules. Particular FC or BC
+     * processes are allowed to use their own RuleProviders, which may have different combinations of
+     * Rules, but those RuleProviders must contain pointers to the same Rule objects as contained here.
+     */
     RuleProvider *referenceRP;
 
     typedef std::set<BITNode*> BITNodeCacheT;
@@ -58,6 +63,7 @@ protected:
     // remaining FWVars being owned by both BITNodes.
     std::map<Vertex, std::set<BITNode*> > varOwner;
 
+    // Not currently used.
     std::map<Rule*, float> priority;
 
     /** Records which BITNodes use one another.
@@ -74,7 +80,7 @@ protected:
     // Constructor?
 public:
     ~InferenceCache();
-    InferenceCache() { }
+    InferenceCache(RuleProvider* _rp) : referenceRP(_rp) { }
 };
 
 InferenceCache& standardInferenceCache();
