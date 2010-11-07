@@ -51,18 +51,24 @@ private:
 
     ComboProcedureRepository cpr;
     opencog::RandGen* rng;
+    bool combo_loaded;
 
 public :
 
     scriptsComboInterpreterUTest() {
         rng = new opencog::MT19937RandGen(0);
+        combo_loaded = false;
+    }
+
+    void load_combo_functions() {
+        if (combo_loaded) return;
         //load scripts
         string file_combo(PVP_XML_FILE_PATH "/scripts.combo");
         ifstream fin(file_combo.c_str());
         int n = cpr.loadFromStream(fin);
         cout << "loaded " << n << " combo functions from " << file_combo << std::endl;
-
         addFeelingsAndTraits();
+        combo_loaded = true;
     }
 
     ~scriptsComboInterpreterUTest() {
@@ -110,6 +116,9 @@ public :
         atomSpace->addLink(FREQUENCY_LINK, freqLink);
     }
 
+    void setUp() {
+        load_combo_functions();
+    }
 
     void testMath() {
 
