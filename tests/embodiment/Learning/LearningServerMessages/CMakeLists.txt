@@ -8,7 +8,6 @@ TARGET_LINK_LIBRARIES(LearnMessageUTest
     LearningServerMessages
     util
     Filter
-    AtomSpaceExtensions
     ${PROJECT_LIBRARIES}
 )
 
@@ -18,11 +17,10 @@ ENDIF(WIN32)
 
 ADD_CXXTEST(RewardMessageUTest)
 TARGET_LINK_LIBRARIES(RewardMessageUTest 
-	MessagingSystem
-	LearningServerMessages
-	AtomSpaceExtensions
-        SpaceMap
-	PetComboVocabulary
+    MessagingSystem
+    LearningServerMessages
+    SpaceMap
+    PetComboVocabulary
 )
 
 IF(WIN32)
@@ -31,13 +29,12 @@ ENDIF(WIN32)
 
 ADD_CXXTEST(SchemaMessageUTest)
 TARGET_LINK_LIBRARIES(SchemaMessageUTest 
-	MessagingSystem
-	LearningServerMessages
-	AtomSpaceExtensions
-        SpaceMap
-	PetComboVocabulary
-        util
-        comboreduct
+    MessagingSystem
+    LearningServerMessages
+    SpaceMap
+    PetComboVocabulary
+    util
+    comboreduct
 )
 
 IF(WIN32)
