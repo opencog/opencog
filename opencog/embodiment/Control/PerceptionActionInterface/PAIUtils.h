@@ -52,7 +52,7 @@ public:
      * Used in XML parsing. The max length of XML tags names which will be parsed.
      */
     static const int MAX_TAG_LENGTH;
-    static const boost::posix_time::ptime epoch;
+    //static const boost::posix_time::ptime epoch;
 
     /**
      * Initializes the xerces-c XML Platform
@@ -88,7 +88,7 @@ public:
     /**
      * Gets the current system epoch (start working date of the application)
      */
-    static const boost::posix_time::ptime getSystemEpoch( void );
+    static const boost::posix_time::ptime& getSystemEpoch( void );
 
     /**
      * Convert a given timestamp to a time structure

@@ -32,7 +32,6 @@
 using namespace PerceptionActionInterface;
 
 const int PAIUtils::MAX_TAG_LENGTH = 512;
-const boost::posix_time::ptime PAIUtils::epoch( boost::gregorian::date( 2008, boost::gregorian::Jan, 1 ) );
 
 void PAIUtils::initializeXMLPlatform() throw (opencog::XMLException, std::bad_exception)
 {
@@ -130,8 +129,9 @@ std::string PAIUtils::getExternalId(const char* internalId)
     return result;
 }
 
-const boost::posix_time::ptime PAIUtils::getSystemEpoch( void )
+const boost::posix_time::ptime& PAIUtils::getSystemEpoch( void )
 {
+    static const boost::posix_time::ptime epoch( boost::gregorian::date( 2008, boost::gregorian::Jan, 1 ) );
     return epoch;
 }
 

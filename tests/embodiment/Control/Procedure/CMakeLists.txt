@@ -29,7 +29,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 ADD_CXXTEST(ProcedureInterpreterUTest)
-target_link_libraries(ProcedureInterpreterUTest Procedure behavior)
+TARGET_LINK_LIBRARIES(ProcedureInterpreterUTest Procedure behavior)
 IF(WIN32)
 	TARGET_LINK_LIBRARIES(ProcedureInterpreterUTest winmm)
 ENDIF(WIN32)
