@@ -73,3 +73,6 @@ patches
 
 #Embodiment installation dir
 dist
+
+cscope.out
+lib/opencog-test.conf
