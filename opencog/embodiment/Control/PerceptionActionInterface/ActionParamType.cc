@@ -33,8 +33,15 @@ using namespace PerceptionActionInterface;
  * ===================================*/
 
 // Internal maps
-ActionParamType::Name2ActionParamTypeMap ActionParamType::nameMap;
-ActionParamType::Code2ActionParamTypeMap ActionParamType::codeMap;
+ActionParamType::Name2ActionParamTypeMap& ActionParamType::nameMap() {
+    static Name2ActionParamTypeMap nameMap;
+    return nameMap;
+}
+
+ActionParamType::Code2ActionParamTypeMap& ActionParamType::codeMap() {
+    static Code2ActionParamTypeMap codeMap;
+    return codeMap;
+}
 
 // Definition of all action type values
 const ActionParamType& ActionParamType::BOOLEAN()
@@ -86,8 +93,8 @@ ActionParamType::ActionParamType(ActionParamTypeCode _code, const std::string& _
     if (ActionParamType::existName(name)) {
         OC_ASSERT(false, "ActionParamType - Duplicate action parameter type name: %s", _name.c_str());
     }
-    nameMap[name] = this;
-    codeMap[code] = this;
+    nameMap()[name] = this;
+    codeMap()[code] = this;
 }
 
 // GETTERS
@@ -134,8 +141,8 @@ void ActionParamType::init()
 const ActionParamType& ActionParamType::getFromName(const std::string& name) throw (opencog::InvalidParamException, std::bad_exception)
 {
     init();
-    Name2ActionParamTypeMap::const_iterator itr = nameMap.find(name);
-    if (itr == nameMap.end()) {
+    Name2ActionParamTypeMap::const_iterator itr = nameMap().find(name);
+    if (itr == nameMap().end()) {
         throw opencog::InvalidParamException(TRACE_INFO,
                                              "ActionParamType - Invalid/unknown ActionParam name: %s\n", name.c_str());
     }
@@ -145,8 +152,8 @@ const ActionParamType& ActionParamType::getFromName(const std::string& name) thr
 const ActionParamType& ActionParamType::getFromCode(ActionParamTypeCode code) throw (opencog::InvalidParamException, std::bad_exception)
 {
     init();
-    Code2ActionParamTypeMap::const_iterator itr = codeMap.find(code);
-    if (itr == codeMap.end()) {
+    Code2ActionParamTypeMap::const_iterator itr = codeMap().find(code);
+    if (itr == codeMap().end()) {
         throw opencog::InvalidParamException(TRACE_INFO,
                                              "ActionParamType - Invalid/unknown ActionParam code: %d\n", code);
     }
@@ -155,14 +162,14 @@ const ActionParamType& ActionParamType::getFromCode(ActionParamTypeCode code) th
 
 bool ActionParamType::existName(const std::string& name)
 {
-    Name2ActionParamTypeMap::const_iterator itr = nameMap.find(name);
-    return (itr != nameMap.end());
+    Name2ActionParamTypeMap::const_iterator itr = nameMap().find(name);
+    return (itr != nameMap().end());
 }
 
 bool ActionParamType::existCode(ActionParamTypeCode code)
 {
-    Code2ActionParamTypeMap::const_iterator itr = codeMap.find(code);
-    return (itr != codeMap.end());
+    Code2ActionParamTypeMap::const_iterator itr = codeMap().find(code);
+    return (itr != codeMap().end());
 }
 std::ostream& operator<<(std::ostream& out, const ActionParamType& arg)
 {

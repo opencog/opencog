@@ -117,8 +117,8 @@ private:
     // Static data structure
     typedef std::map<std::string, ActionParamType*> Name2ActionParamTypeMap;
     typedef std::map<ActionParamTypeCode, ActionParamType*> Code2ActionParamTypeMap;
-    static Name2ActionParamTypeMap nameMap;
-    static Code2ActionParamTypeMap codeMap;
+    static Name2ActionParamTypeMap& nameMap();
+    static Code2ActionParamTypeMap& codeMap();
 
     // private static methods
     static bool existName(const std::string& name);

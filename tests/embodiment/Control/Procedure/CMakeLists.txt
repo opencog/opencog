@@ -56,4 +56,5 @@ ADD_CXXTEST(actionsComboInterpreterUTest)
 TARGET_LINK_LIBRARIES(actionsComboInterpreterUTest Procedure PredicateUpdaters behavior)
 
 ADD_CXXTEST(ProcedureRepositoryUTest)
-TARGET_LINK_LIBRARIES(ProcedureRepositoryUTest Procedure behavior)
+TARGET_LINK_LIBRARIES(ProcedureRepositoryUTest
+    Procedure behavior)

@@ -80,13 +80,11 @@ public:
 
         sender->setPai(ppai);
 
-        pr = new ProcedureRepository(*ppai);
 
     }
 
     ~ProcedureRepositoryUTest() {
 
-        delete pr;
         delete ppai;
         delete petInterface;
         delete sender;
@@ -94,9 +92,11 @@ public:
     }
 
     void setUp() {
+        pr = new ProcedureRepository(*ppai);
     }
 
     void tearDown() {
+        delete pr;
     }
 
     void testContains() {

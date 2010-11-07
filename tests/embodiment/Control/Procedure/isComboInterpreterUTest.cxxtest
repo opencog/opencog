@@ -42,11 +42,21 @@ class isComboInterpreterUTest :  public CxxTest::TestSuite , ComboInterpreterUTe
 
 private:
     opencog::RandGen* rng;
+    bool combo_loaded;
 
 public :
 
     isComboInterpreterUTest() {
         rng = new opencog::MT19937RandGen(0);
+        combo_loaded = false;
+    }
+
+    ~isComboInterpreterUTest() {
+        delete rng;
+    }
+
+    void load_combo_functions() {
+        if (combo_loaded) return;
         string file_combo(PVP_XML_FILE_PATH "/scripts.combo");
         ifstream fin(file_combo.c_str());
         int n = cpr.loadFromStream(fin);
@@ -54,10 +64,6 @@ public :
 
         addFeelingsAndTraits();
         addRelations();
-    }
-
-    ~isComboInterpreterUTest() {
-        delete rng;
     }
 
     void addRelations() {
@@ -121,6 +127,10 @@ public :
         freqLink.push_back(atomSpace->addNode(NUMBER_NODE, "4"));
 
         atomSpace->addLink(FREQUENCY_LINK, freqLink);
+    }
+
+    void setUp() {
+        load_combo_functions();
     }
 
     opencog::RandGen& getRandGen() {

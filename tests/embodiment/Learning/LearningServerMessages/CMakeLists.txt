@@ -33,8 +33,8 @@ TARGET_LINK_LIBRARIES(SchemaMessageUTest
     LearningServerMessages
     SpaceMap
     PetComboVocabulary
-    util
-    comboreduct
+    #util
+    #comboreduct
 )
 
 IF(WIN32)
