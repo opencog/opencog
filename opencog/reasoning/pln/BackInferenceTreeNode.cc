@@ -205,7 +205,7 @@ void copy_vars(V& vars, Vit varsbegin, Tit bbvt_begin, Tit bbvt_end)
 static int more_count=0;
 
 BITNode::BITNode()
-: depth(0), /*root(0),*/ Expanded(false), rule(NULL), my_bdrum(0.0f),
+: depth(0), root(0), Expanded(false), rule(NULL), my_bdrum(0.0f),
 direct_results(Btr<set<BoundVertex> >(new set<BoundVertex>))
 
 {

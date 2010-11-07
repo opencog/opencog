@@ -42,12 +42,14 @@ protected:
     friend class BITNodeRoot;
     friend class BITNode;
 
+public:
     /**
      * A "reference" RuleProvider containing the official versions of all Rules. Particular FC or BC
      * processes are allowed to use their own RuleProviders, which may have different combinations of
      * Rules, but those RuleProviders must contain pointers to the same Rule objects as contained here.
      */
     RuleProvider *referenceRP;
+protected:
 
     typedef std::set<BITNode*> BITNodeCacheT;
 
@@ -81,9 +83,9 @@ protected:
 public:
     ~InferenceCache();
     InferenceCache(RuleProvider* _rp) : referenceRP(_rp) { }
-};
 
-InferenceCache& standardInferenceCache();
+    static InferenceCache* standardInferenceCache();
+};
 
 } } // opencog::pln
 

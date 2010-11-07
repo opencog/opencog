@@ -41,13 +41,13 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>
 
-InferenceCache& standardInferenceCache()
+InferenceCache* InferenceCache::standardInferenceCache()
 {
-    static InferenceCache* standard;
+    static InferenceCache* standard = new InferenceCache(new DefaultVariableRuleProvider);;
 
-    if (standard == NULL) standard = new InferenceCache(new DefaultVariableRuleProvider);
+    //if (standard == NULL) standard = new InferenceCache(new DefaultVariableRuleProvider);
 
-    return *standard;
+    return standard;
 }
 
 InferenceCache::~InferenceCache()
