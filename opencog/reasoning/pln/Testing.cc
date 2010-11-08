@@ -267,9 +267,8 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     HybridForwardChainer fc;
 
     // Even with FC, we want to have a BIT available so that printTrail can be accessed
-//        if (test_bc) {
-        state.reset(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
-//        }
+    state.reset(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(),
+                config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
 
     uint s_i=0; // Expansion phase #
     pHandle eh=PHANDLE_UNDEFINED; // expected target handle
@@ -281,7 +280,8 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     if (test_bc)
         t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
     else
-        // 12 is the maximum depth the BIT reaches (for now), and each "step" of FC now does one level
+        // 12 is the maximum depth the BIT reaches (for now), and each "step"
+        // of FC now does one level
         t->minEvalsOfFittestBIT = 7;
 
     const int expansions_per_run = test_bc ? 1000 : 1;
@@ -296,12 +296,9 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 
             cprintf(-3, "\n    Evaluating...\n");
 
-            //if (foo42)
-                //currentDebugLevel=4;
-
             int expansions = expansions_per_run;
             if (test_bc) {
-                eres = state->infer(expansions, 0.000001f, 0.01f);
+                eres = state->infer(expansions, 0.000001f, 0.001f);
             } else {
                 eh = fc.fwdChainToTarget(expansions, (t->target));
                 //if (!results.empty()) eh = results[0];
@@ -318,23 +315,15 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                         "beginning of the cycle).\n", expansions,
                         expansions_per_run);
 
-            //currentDebugLevel=-4;
-
             if (test_bc)
                 eh = (eres.empty() ? PHANDLE_UNDEFINED :
                         _v2h(*(*eres.rbegin())->getVtree().begin()));
 
             if (eh != PHANDLE_UNDEFINED )
                 etv = asw->getTV(eh).clone();
-//                else
-//                    etv = new SimpleTruthValue(0.0f,0.0f);
-
-           /* float c1=t->minTV->getConfidence();
-            float c2=t->maxTV->getConfidence();
-            float m1=t->minTV->getMean();
-            float m2=t->maxTV->getMean(); */
 
             if (etv) {
+                /* Print resulting truth value compared to test requirements */
                 printf("c: %f min: %f\n", etv->getConfidence(),
                         t->minTV->getConfidence());
                 printf("s: %f min: %f\n", etv->getMean(),
@@ -350,6 +339,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                 state->printTrail(eh);
             }
 
+            /* Check whether resulting truth value meets test requirements */
             passed = (
                 eh != PHANDLE_UNDEFINED &&
                 etv &&
@@ -366,7 +356,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     }
     else if (t->minExhaustiveEvals > 0) {
         assert(0);
-        /// This should be updated to reflect the new BITNode interface
+        // This should be updated to reflect the new BITNode interface
         /*
         for (uint L=0;L<t->minExhaustiveEvals;L++)
             state->expandNextLevel();
@@ -442,10 +432,6 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 
 
     tests_total++;
-/*      if (etv) {
-        string stv(etv->toString());
-        puts(stv.c_str());
-    }*/
 
     //stats::Instance().print(stats::triviality_filterT());
 

@@ -22,8 +22,8 @@ LINK_DIRECTORIES (
 )
 
 LINK_LIBRARIES (
-    server
     pln
+    server
 )
 
 ADD_CXXTEST(AtomSpaceWrapperUTest)

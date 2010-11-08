@@ -33,9 +33,32 @@
 
 #include <stdlib.h>
 #include <time.h>
-#ifndef WIN32
-    #include <sys/time.h>
+#include <sys/time.h>
+
+#if defined(WIN32)
+#include <windows.h>
+#include <Mmsystem.h>
+
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#include <time.h>
+#ifndef _TIMEVAL_DEFINED /* also in winsock[2].h */
+#define _TIMEVAL_DEFINED
+struct timeval {
+    long tv_sec;
+    long tv_usec;
+};
+#endif /* _TIMEVAL_DEFINED */
+
+int gettimeofday(struct timeval* tp, void* tzp) {
+    unsigned long t;
+    t = timeGetTime();
+    tp->tv_sec = t / 1000;
+    tp->tv_usec = t % 1000;
+    /* 0 indicates that the call succeeded. */
+    return 0;
+}
 #endif
+#endif /* defined(WIN32) */
 
 #include "opencog/reasoning/pln/rules/RuleProvider.h"
 
@@ -61,35 +84,6 @@ using namespace boost::filesystem;
 // dir
 #define PLN_TEST_DIR PROJECT_SOURCE_DIR"/tests/reasoning/pln/"
 
-#if 0
-#include <windows.h>
-#include <Mmsystem.h>
-
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#  include <time.h>
-#ifndef _TIMEVAL_DEFINED /* also in winsock[2].h */
-#define _TIMEVAL_DEFINED
-struct timeval {
-    long tv_sec;
-    long tv_usec;
-};
-#endif /* _TIMEVAL_DEFINED */
-#else
-#  include <sys/time.h>
-#endif
-
-#if defined(_MSC_VER) || defined(__MINGW32__)
-int gettimeofday(struct timeval* tp, void* tzp) {
-    unsigned long t;
-    t = timeGetTime();
-    tp->tv_sec = t / 1000;
-    tp->tv_usec = t % 1000;
-    /* 0 indicates that the call succeeded. */
-    return 0;
-}
-#endif
-#endif
-
 const strength_t EPSILON_S = 0.001;
 const confidence_t EPSILON_C = 0.001;
 
@@ -99,9 +93,6 @@ namespace test
     extern double custom_duration;
     extern double custom_duration2;
 }
-
-//float getCount(float c)
-//{ return SimpleTruthValue::confidenceToCount(c); }
 
 namespace opencog {
 namespace pln {
@@ -204,16 +195,6 @@ private:
         test::logfile=fopen("pln.log","wt");
         cout << "LOGGING TO FILE pln.log!\n";
 #endif
-        //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
-
-        // Get config settings from config file.
-        // Don't tackily override them here.
-        // config().set("PLN_LOG_LEVEL","2");
-        // config().set("PLN_PRINT_REAL_ATOMS","true");
-        //config().set("PLN_RECORD_TRAILS","true");
-
-        //testFitnessEvaluator = BEST;
-        //currentDebugLevel = -4;
         currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
     }
 
@@ -236,8 +217,6 @@ public:
             logger().info("Initializing PLN test env...");
 
             f = fopen("results.txt","a");
-
-            //currentDebugLevel=100;
 
             asw = GET_ASW;                                  
         }
@@ -365,11 +344,6 @@ public:
     // argument but applies several different rules
     void DISABLEtestMacroRuleTest()
     {
-        AtomSpaceWrapper *asw = GET_ASW;
-        //typedef InversionRule RuleT1;
-        //typedef DeductionRule RuleT2;
-
-    //  DefaultVariableRuleProvider rp;
         InversionRule *invR = new InversionRule(asw, INHERITANCE_LINK);
         DeductionRule<DeductionSimpleFormula> *deduR = new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK);
 
