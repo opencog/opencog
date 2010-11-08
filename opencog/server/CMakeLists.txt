@@ -66,9 +66,7 @@ ADD_EXECUTABLE(cogserver
 
 TARGET_LINK_LIBRARIES(cogserver
 	server
-	${Boost_FILESYSTEM_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
-	#${Boost_SIGNALS_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
 	${GUILE_LIBRARIES}
 )
 
