@@ -9,11 +9,6 @@ INCLUDE_DIRECTORIES (
     ${PROJECT_SOURCE_DIR}/opencog/atomspace
     ${PROJECT_SOURCE_DIR}/opencog/xml
     ${PROJECT_SOURCE_DIR}/opencog/server
-#    ${PROJECT_SOURCE_DIR}/opencog/guile
-#    ${PROJECT_SOURCE_DIR}/opencog/adaptors/tulip
-#    ${PROJECT_SOURCE_DIR}/opencog/nlp/wsd
-#    ${PROJECT_SOURCE_DIR}/opencog/persist
-#    ${PROJECT_SOURCE_DIR}/opencog/query
     ${PROJECT_SOURCE_DIR}/opencog/reasoning
     ${IODBC_INCLUDE_DIRS}
     ${GSL_INCLUDE_DIR}
@@ -32,17 +27,7 @@ LINK_LIBRARIES (
     server
     #util
     pln
-    #${Boost_SIGNALS_LIBRARY}
-    #${GSL_LIBRARIES}
-    #${EXPAT_LIBRARIES}
-    #${GUILE_LIBRARIES}
 )
-
-
-# tests that require XML libraries.
-# IF (EXPAT_FOUND)
-#ADD_CXXTEST(XMLNodeLoaderUTest)
-# ENDIF (EXPAT_FOUND)
 
 ADD_CXXTEST(AtomSpaceWrapperUTest)
 ADD_CXXTEST(BITNodeUTest)
