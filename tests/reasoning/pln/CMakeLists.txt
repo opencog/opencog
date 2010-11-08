@@ -1,4 +1,3 @@
-#SET(CMAKE_BUILD_TYPE Debug)
 IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-deprecated -Wno-unused-variable")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
@@ -23,9 +22,7 @@ LINK_DIRECTORIES (
 )
 
 LINK_LIBRARIES (
-    #atomspace
     server
-    #util
     pln
 )
 
