@@ -286,7 +286,7 @@ int main(int argc,char** argv) {
          "If 1, outputs the complexity before each candidate (at the right of the score).\n")
         (opt_desc_str(output_score_complexity_old_moses_opt).c_str(),
          value<bool>(&output_score_complexity_old_moses)->default_value(false),
-         string("If 1, outputs the complexity and the score in the according to a previous version of MOSES (for compatibility issue). This option overwrites ").
+         string("If 1, outputs the complexity and the score according to a previous version of MOSES (for compatibility issue). This option overwrites ").
          append(output_score_opt.first).append(" and ").
          append(output_complexity_opt.first).append(".\n").c_str())
         (opt_desc_str(output_bscore_opt).c_str(),
@@ -390,7 +390,7 @@ int main(int argc,char** argv) {
          value<double>(&feature_selection_intensity)->default_value(0),
          "Value between 0 and 1. 0 means all features are selected, 1 corresponds to the stronger selection pressure, probably no features are selected at 1.\n")
         (opt_desc_str(redundant_feature_intensity_opt).c_str(),
-         value<double>(&redundant_feature_intensity)->default_value(0),
+         value<double>(&redundant_feature_intensity)->default_value(0.1),
          "Value between 0 and 1. 0 means no redundant features are discarded, 1 means redudant features are maximally discarded. This option is only active when feature selection is active.\n")
         (opt_desc_str(feature_selection_size_opt).c_str(),
          value<unsigned int>(&feature_selection_size)->default_value(1),
