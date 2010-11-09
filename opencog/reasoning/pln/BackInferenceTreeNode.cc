@@ -970,6 +970,28 @@ void BITNode::findTemplateBIT(BITNode* new_node, BITNode*& template_node, bindin
     template_node = NULL;
 }
 
+//!
+//!
+template <typename _exec_poolT>
+struct ExpansionPoolUpdater
+{
+    BITNodeRoot* root;
+    _exec_poolT* expansion_pool;
+    ExpansionPoolUpdater(_exec_poolT* _pool, BITNodeRoot*_root) : root(_root), expansion_pool(_pool) {}
+    bool operator()(BITNode* b)
+    {
+        b->root = root;
+        // check if that BITNode is not expanded
+        // check if it is not in our expansion pool
+        if (!b->Expanded && !STLhas2(*expansion_pool, b)) {
+            expansion_pool->push_back(b);
+            cout << "Adding BITNode from another BIT to expansion pool: " << b->id << endl;
+        }
+
+        return true;
+    }
+};
+
 BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
     const Rule::MPs& rule_args, BBvtree _target, const bindingsT& new_bindings,
     spawn_mode spawning)
@@ -1044,8 +1066,13 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
                 template_node->addNewParent(this, target_i, template_binds);
 
 #ifdef USE_BITUBIGRAPHER
-            haxx::BITUSingleton->markReuse((BITNode*)this, template_node, target_i);
+                haxx::BITUSingleton->markReuse((BITNode*)this, template_node, target_i);
 #endif // USE_BITUBIGRAPHER
+
+                /// Add any un-expanded descendents to the expansion pool, if they're not already there
+                /// (i.e. if the template was from a different BIT).
+                ApplyDown2(ExpansionPoolUpdater<BITNodeRoot::exec_poolT>(&root->exec_pool, haxx::bitnoderoot));
+                root->exec_pool_sorted = false;
 
                 return template_node;
             }
