@@ -49,6 +49,11 @@ public:
      * Rules, but those RuleProviders must contain pointers to the same Rule objects as contained here.
      */
     RuleProvider *referenceRP;
+
+    // temporary haxx
+
+    std::set<Btr<BITNodeRoot> > roots;
+
 protected:
 
     typedef std::set<BITNode*> BITNodeCacheT;

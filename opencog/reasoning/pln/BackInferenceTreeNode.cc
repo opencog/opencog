@@ -271,6 +271,11 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
     cprintf(3, "rp ok\n");
     haxx::bitnoderoot = this;
 
+    /// root haxx
+    foreach (BITNode* b, BITcache->nodes) {
+        b->root = this;
+    }
+
     vtree::iterator target_it = _target->begin();
     Type targetType = (Type) _v2h(*target_it);
     // Check whether the target inherits from either VARIABLE_SCOPE_LINK

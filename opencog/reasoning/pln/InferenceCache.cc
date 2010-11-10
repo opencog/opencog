@@ -44,6 +44,7 @@
 InferenceCache* InferenceCache::standardInferenceCache()
 {
     static InferenceCache* standard = new InferenceCache(new DefaultVariableRuleProvider);;
+    //static InferenceCache* standard = new InferenceCache(new EvaluationRuleProvider);
 
     //if (standard == NULL) standard = new InferenceCache(new DefaultVariableRuleProvider);
 
