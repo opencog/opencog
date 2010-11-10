@@ -7,12 +7,13 @@ ADD_LIBRARY (pln SHARED
 	PLNModule.cc
 	AtomSpaceWrapper.cc
 	BackInferenceTreeNode.cc
+	InferenceCache.cc
 	PLNatom.cc
 	PLNUtils.cc
 #	PLNShell.cc
 	PLNGlobals.cc
 #	Tester.cc
-        Testing.cc
+    Testing.cc
 	ForwardChainer.cc
 	BackChainingAgent
 	ForwardChainingAgent
@@ -103,6 +104,7 @@ INSTALL (FILES
 	PLNatom.h
 	PLN.h
 	BackInferenceTreeNode.h
+	InferenceCache.h
 	TestTargets.h
 	BackChainingAgent.h
 	ForwardChainingAgent.h
