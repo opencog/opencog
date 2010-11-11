@@ -32,6 +32,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/StringManipulator.h>
 
 extern "C"
 {
@@ -152,6 +153,8 @@ void BITUbigrapher::drawBITNodeLabel(BITNode * node, int node_id)
                 label.rfind("(=>)") != string::npos)
             label.erase(label.size() - 4 - 1);
         label = initials(label);
+
+        label += toString(node->id);
 
         ubigraph_set_vertex_attribute(node_id, "label", label.c_str());
     }
