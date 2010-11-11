@@ -61,7 +61,7 @@ public:
 
 	TruthValue** formatTVarray	(const vector<Vertex>& premiseArray, int* newN) const
 	{
-		TruthValue** tvs = new TruthValue*[1];
+		TruthValue** tvs = new TruthValue*[2];
 
 		const int N = (int)premiseArray.size();
 		assert(N==2);
