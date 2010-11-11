@@ -28,8 +28,6 @@ namespace test
     extern double custom_duration2;
 }
 
-//namespace opencog {
-//namespace pln {
 namespace test {
 
 FitnessEvaluatorT testFitnessEvaluator;
@@ -44,40 +42,35 @@ int allTestsExpansions=0;
 int tests_passed=0;
 int tests_total=0;
 
-float getCount(float c)
-{ return SimpleTruthValue::confidenceToCount(c); }
+float getCount(float c) { return SimpleTruthValue::confidenceToCount(c); }
 
-// Now uses SCM. Won't search any alternative locations for the file.
+/** Resets AtomSpaceWrapper (and indrectly the AtomSpace) and loads premiseFile
+ * in scm format.
+ *
+ * @param premiseFile exact relative or full path for file to load.
+ */
 void initAxiomSet(string premiseFile)
 {
-    AtomSpaceWrapper *atw = GET_ASW;
-    atw->reset();
-    atw->allowFWVarsInAtomSpace = true;
+    AtomSpaceWrapper *asw = GET_ASW;
+    asw->reset();
+    asw->allowFWVarsInAtomSpace = true;
 
-    //cprintf(-2,"loading...\n");
     std::cout << "loading " << premiseFile << std::endl;
 
-#if 0
-    atw->archiveTheorems = true;
-    bool axioms_ok = atw->loadAxioms(premiseFile);
-    if (!axioms_ok) throw std::string("failed to load file");
-    atw->archiveTheorems = false;
-
-#elif HAVE_GUILE
+#if HAVE_GUILE
     int rc = load_scm_file(premiseFile.c_str());
 
-    atw->archiveTheorems = true;
-    atw->makeCrispTheorems();
-    atw->archiveTheorems = false;
+    asw->archiveTheorems = true;
+    asw->makeCrispTheorems();
+    asw->archiveTheorems = false;
 
     // The error-checking is after the call to makeCrispTheorems, because
     // if there was an error, then the AS is now empty and makeCrispTheorems
-    // will (correctly) record that there are none.
+    // will (correctly) be updated to indicate that there are none.
     if (rc) throw std::string("failed to load file");
 #else
     throw std::string("Not allowed to use XML or SCM!");
 #endif
-
     cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
 }
 
@@ -465,4 +458,4 @@ bool maketest(meta target,
     return runPLNTest(t, test_bc);
 }
 
-}//}}
+}
