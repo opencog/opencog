@@ -163,7 +163,7 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
         delete tvs[i];
     }
 
-    delete tvs;
+    delete[] tvs;
 
     pHandle ret = _asw->addAtom(*i2oType(premiseArray), *retTV, fresh);
     return BoundVertex(ret);
