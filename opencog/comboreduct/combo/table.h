@@ -64,7 +64,7 @@ public:
         for(arity_t idx = 0; idx < get_arity(); idx++) {
             arity_t arg = argument::idx_from_zero_to_idx(idx);
             if(ignore_args.find(argument(arg)) == ignore_args.end())
-                considered_args.insert(arg);
+                considered_args.insert(idx);
         }
         OC_ASSERT(!considered_args.empty(), "You cannot ignore all arguments");
     }

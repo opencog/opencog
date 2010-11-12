@@ -712,7 +712,7 @@ inline bool vertex_to_bool(const vertex& v)
 inline vertex negate_vertex(const vertex& v)
 {
     OC_ASSERT(v == id::logical_true || v == id::logical_false,
-                     "vertex should be of logical types 'id::logical_true' or 'id::logical_false'.");
+              "vertex should be of logical types 'id::logical_true' or 'id::logical_false'.");
     return (v == id::logical_true ? id::logical_false : id::logical_true);
 }
 
