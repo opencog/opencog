@@ -1,3 +1,4 @@
+
 /*
  * opencog/learning/dimensionalembedding/DimEmbedModule.cc
  *
@@ -23,6 +24,7 @@
  */
 
 #include "DimEmbedModule.h"
+#include <algorithm>
 #include <opencog/util/Logger.h>
 #include <numeric>
 #include <cmath>
@@ -136,30 +138,6 @@ std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
     }
 }
 
-double DimEmbedModule::euclidDist(const Handle& h1,
-                                        const Handle& h2,
-                                        const Type& l) {
-    if(!classserver().isLink(l))
-        throw InvalidParamException(TRACE_INFO,
-            "DimensionalEmbedding requires link type, not %s",
-            classserver().getTypeName(l).c_str());
- 
-    double distance;
-    std::vector<double> v1=getEmbedVector(h1,l);
-    std::vector<double> v2=getEmbedVector(h2,l);
-    assert(v1.size()==v2.size());
-    std::vector<double>::iterator it1=v1.begin();
-    std::vector<double>::iterator it2=v2.begin();
-
-    //Calculate euclidean distance between v1 and v2
-    for(; it1 < v1.end(); it1++) {
-        distance+=std::pow((*it1 - *it2), 2);
-        it2++;
-    }
-    distance=sqrt(distance);
-    return distance;
-}
-
 double sumOfSquares(std::vector<double> v) {
     double result=0;
     for(std::vector<double>::iterator it=v.begin(); it<v.end(); it++) {
@@ -176,52 +154,52 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
 
     std::list<Handle> nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
-
-    pivotsMap[linkType].push_back(h);
-    std::map<Handle, double> nodeMap;
-    nodeMap[h]=1;
-
-    //find the highest weight path to each node from the pivot
-    //using dijkstra's algorithm
-    HandleSet visitedNodes;
-    while(!nodeMap.empty()) {
-        std::pair<Handle, double> bestNode = std::make_pair(h, -1);
-
-        //set bestNode to the node in nodeMap with the highest weight
-        for(std::map<Handle, double>::iterator it=nodeMap.begin();
-                it!=nodeMap.end(); ++it){
-            if(it->second > bestNode.second) bestNode=(*it);
+    std::map<Handle,double> distMap;
+    std::multimap<double,Handle> pQueue;
+    for(std::list<Handle>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
+        if(*it==h) {
+            pQueue.insert(std::pair<double, Handle>(1,*it));
+            distMap[*it]=1;
+        } else {
+            pQueue.insert(std::pair<double, Handle>(0,*it));
+            distMap[*it]=0;
         }
-        visitedNodes.add(bestNode.first);
-        //Look at all of the links connected to the bestNode
-        HandleSeq newLinks = as->getIncoming(bestNode.first);
+    }
+    
+    pivotsMap[linkType].push_back(h);
+    while(!pQueue.empty()) {
+        Handle& u = (*(pQueue.rbegin())).second;//extract min
+        pQueue.erase(--pQueue.end());
+        if (distMap[u]==0) {
+            logger().info("break"); break;}
+        HandleSeq newLinks = as->getIncoming(u);
         for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't of type linkType
             if(as->getType(*it)!=linkType) continue;
-            
+            const TruthValue& linkTV = as->getTV(*it);
             HandleSeq newNodes = as->getOutgoing(*it);
-            //update all of the nodes' weights.
             for(HandleSeq::iterator it2=newNodes.begin();
-                it2!=newNodes.end(); ++it2){
-                //if the node has been visited, don't do anything
-                if(visitedNodes.contains(*it2)) continue;
-
-                const TruthValue& linkTV = as->getTV(*it);
-                //If this path is better than the currently known one, save it
-                double pathWeight
-                    = bestNode.second*(linkTV.getMean()*linkTV.getConfidence());
-                if(nodeMap[*it2] < pathWeight) {
-                    nodeMap[*it2] = pathWeight;
+                it2!=newNodes.end(); it2++) {
+                double alt = distMap[u]*
+                    linkTV.getMean()*linkTV.getConfidence();
+                double oldDist=distMap[*it2];
+                if(alt>oldDist) {
+                    multimap<double,Handle>::iterator it3;
+                    std::pair<std::multimap<double,Handle>::iterator,
+                        std::multimap<double,Handle>::iterator> itPair
+                        = pQueue.equal_range(oldDist);
+                     for(it3=itPair.first;it3!=itPair.second;it3++) {
+                         if(it3->second==*it2) {pQueue.erase(it3); break;}
+                    }
+                    pQueue.insert(std::pair<double, Handle>(alt,*it2));
+                    distMap[*it2]=alt;
                 }
             }
         }
-        atomMaps[linkType][bestNode.first].push_back(bestNode.second);
-        nodeMap.erase(bestNode.first);
-        nodes.remove(bestNode.first);
     }
-    //everything still remaining in nodes is unreachable.
-    for(std::list<Handle>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-        atomMaps[linkType][*it].push_back(0);
+    for(std::map<Handle, double>::iterator it = distMap.begin();
+        it!=distMap.end();it++) {
+        atomMaps[linkType][(*it).first].push_back(distMap[(*it).first]);
     }
 }
 
@@ -230,11 +208,11 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType){
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-    
+
     clearEmbedding(linkType);
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
-
+    
     PivotSeq& pivots = pivotsMap[linkType];
     if(nodes.empty()) return;
     Handle bestChoice = nodes.back();
@@ -257,7 +235,24 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType){
             }
         }
     }
-    //logger().info("Embedding done");
+    
+    v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
+    //v_array<int> v = v_array<int>();
+    logger().info("%d %d", v.index, v.length);
+    AtomEmbedding aE = atomMaps[linkType];
+    AtomEmbedding::iterator it = aE.begin();
+    for(;it!=aE.end();it++) {
+        logger().info("pushing ");
+        logger().info(TLB::getAtom(it->first)->toString().c_str());
+        //it->second;
+        CoverTreeNode c = CoverTreeNode(it->first, it->second);
+        logger().info("about to push");
+        push(v,c);
+    }
+    logger().info("pushed");
+    embedTreeMap[linkType]=batch_create(v);
+    logger().info("batch created");
+    //print(2, embedTreeMap[linkType]);
 }
 
 std::vector<double> DimEmbedModule::addNode(const Handle& h,
@@ -335,4 +330,34 @@ bool DimEmbedModule::isEmbedded(const Type& linkType) {
         return false;
     }
     return true;
+}
+
+
+double DimEmbedModule::euclidDist(const Handle& h1,
+                                  const Handle& h2,
+                                  const Type& l) {
+    if(!classserver().isLink(l))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(l).c_str());
+ 
+    std::vector<double> v1=getEmbedVector(h1,l);
+    std::vector<double> v2=getEmbedVector(h2,l);
+    return euclidDist(v1, v2);
+}
+
+double DimEmbedModule::euclidDist(std::vector<double> v1,
+                                  std::vector<double> v2) {
+    assert(v1.size()==v2.size());
+    std::vector<double>::iterator it1=v1.begin();
+    std::vector<double>::iterator it2=v2.begin();
+
+    double distance=0;
+    //Calculate euclidean distance between v1 and v2
+    for(; it1 < v1.end(); it1++) {
+        distance+=std::pow((*it1 - *it2), 2);
+        if(it2!=v2.end()) it2++;
+    }
+    distance=sqrt(distance);
+    return distance;
 }

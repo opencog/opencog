@@ -23,6 +23,7 @@ ADD_LIBRARY(util
 	algorithm
 	based_variant
 	Config
+	cover_tree
 	digraph
 	dorepeat
 	exceptions
@@ -38,6 +39,7 @@ ADD_LIBRARY(util
 	mt19937ar
     random
 	platform
+	stack
 	StringManipulator
 	StringTokenizer
     iostreamContainer
@@ -57,6 +59,7 @@ INSTALL(FILES
 	algorithm.h
 	based_variant.h
 	Config.h
+	cover_tree.h
 	digraph.h
 	dorepeat.h
 	exceptions.h
@@ -77,6 +80,7 @@ INSTALL(FILES
 	RandGen.h
 	recent_val.h
 	selection.h
+	stack.h
 	StringManipulator.h
 	StringTokenizer.h
     iostreamContainer.h

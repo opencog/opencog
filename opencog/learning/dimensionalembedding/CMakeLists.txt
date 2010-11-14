@@ -1,5 +1,6 @@
 ADD_LIBRARY (dimensionalembedding SHARED
 	DimEmbedModule
+    CoverTreeNode
 )
 
 INCLUDE_DIRECTORIES (

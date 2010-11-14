@@ -31,6 +31,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/util/cover_tree.h>
+#include <opencog/learning/dimensionalembedding/CoverTreeNode.h>
 
 namespace opencog
 {
@@ -50,12 +52,13 @@ namespace opencog
         typedef std::vector<Handle> PivotSeq;
         typedef std::map<Type, PivotSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
+        typedef std::map<Type, node<CoverTreeNode> > EmbedTreeMap;
 
         AtomSpace* as;
         AtomEmbedMap atomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
         unsigned int numDimensions;//Number of pivot atoms
-        
+        EmbedTreeMap embedTreeMap;
         /**
          * Adds h as a pivot and adds the distances from each node to
          * the pivot to the appropriate atomEmbedding.
@@ -76,6 +79,7 @@ namespace opencog
         /**
          * Returns the highest weight path between the handles following
          * links of type linkType, where path weight is the product of
+
          * (tv.strength*tv.confidence) of the links in the path. ie if
          * (l1, l2,...ln) are the links in the path, then the path weight is
          * defined as
@@ -117,19 +121,9 @@ namespace opencog
          */
         std::vector<double> getEmbedVector(const Handle& h, const Type& l);
 
-        /**
-         * Returns the distance between handles h1 and h2 for the embedding of
-         * link type l.
-         *
-         * ie if the embedding vectors for h1 and h2 for type l is given by
-         * h1: (a1, b1, ..., n1) and
-         * h2: (a2, b2, ..., n2)
-         * Then their distance for link type l is
-         * sqrt((a1-a2)^2 + (b1-b2)^2 + ... + (n1-n2)^2)
-         */
-        double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
-
         double sumOfSquares(std::vector<double> v);
+
+        //void kNearestNeighbors(const Handle& h);
     public:
         const char* id();
 
@@ -173,7 +167,22 @@ namespace opencog
          * Returns true if a dimensional embedding exists for linkType l
          */
         bool isEmbedded(const Type& linkType);
+
         
+        /**
+         * Returns the distance between handles h1 and h2 for the embedding of
+         * link type l.
+         *
+         * ie if the embedding vectors for h1 and h2 for type l is given by
+         * h1: (a1, b1, ..., n1) and
+         * h2: (a2, b2, ..., n2)
+         * Then their distance for link type l is
+         * sqrt((a1-a2)^2 + (b1-b2)^2 + ... + (n1-n2)^2)
+         */
+        double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
+        static double euclidDist
+            (const std::vector<double> v1, const std::vector<double> v2);
+
         /** updates the given atom (recalculates its distance from pivots) */
         //void updateAtom(const Handle& h, const Type& linkType);
     }; // class
