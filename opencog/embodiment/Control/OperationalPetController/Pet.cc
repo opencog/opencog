@@ -929,14 +929,14 @@ void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exceptio
         Handle mapHandle = atomSpace->getAtTimeLink(pair);
         if (atomSpace->getSpaceServer().containsMap(mapHandle)) {
             logger().debug("Pet - Marking map (%s) as persistent.",
-                         TLB::getAtom(mapHandle)->toString().c_str());
+                         atomSpace->atomAsString(mapHandle).c_str());
             atomSpace->getSpaceServer().markMapAsPersistent(mapHandle);
         } else {
             // TODO: This should not be needed here. Remove it when a solution
             // for that is implemented.
             logger().debug("Pet - Removing map handle (%s) from AtomSpace. "
                     "Map already removed from SpaceServer.",
-                     TLB::getAtom(mapHandle)->toString().c_str());
+                     atomSpace->atomAsString(mapHandle).c_str());
             atomSpace->removeAtom(mapHandle, true);
         }
     }
@@ -995,7 +995,7 @@ void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
     HandleSeq::iterator it = highLTIObjects.begin();
     while (it != highLTIObjects.end()) {
         const AttentionValue& attentionValue =
-            TLB::getAtom(*it)->getAttentionValue();
+            atomSpace->getAV(*it);
         if (attentionValue.getLTI() < AtomSpaceUtil::highLongTermImportance)
             it = highLTIObjects.erase(it);
         else it++;

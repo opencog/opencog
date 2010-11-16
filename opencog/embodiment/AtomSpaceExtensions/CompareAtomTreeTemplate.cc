@@ -58,9 +58,9 @@ bool is_atom_tree_template_of::is_atom_tree_template_it(const atom_tree& tr1,
     OC_ASSERT((h2_ptr != NULL) ^ (t2_ptr != NULL), "atom_vertex v2 should be 'Handle' or 'Type' typed.");
 
     //debug print
-    //std::cout << "XEQUAL H1 : " << ((h1_ptr != NULL)?TLB::getAtom(*h1_ptr)->toString():"TYPE")
+    //std::cout << "XEQUAL H1 : " << ((h1_ptr != NULL)?as->atomToString(*h1_ptr):"TYPE")
     //  << " : " << ((h1_ptr != NULL)?as->getType(*h1_ptr):*t1_ptr) << std::endl;
-    //std::cout << "XEQUAL H2 : " << ((h2_ptr != NULL)?TLB::getAtom(*h2_ptr)->toString():"TYPE")
+    //std::cout << "XEQUAL H2 : " << ((h2_ptr != NULL)?as->atomToString(*h2_ptr):"TYPE")
     //  << " : " << ((h2_ptr != NULL)?as->getType(*h2_ptr):*t2_ptr) << std::endl;
     //~debug print
 

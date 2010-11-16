@@ -120,6 +120,13 @@ public:
         importanceSpreadingMultiplier = m;
     };
 
+    class IsHebbianLink {
+        public:
+        AtomSpace* a;
+        IsHebbianLink(AtomSpace* _a): a(_a) {};
+        
+        bool operator()(Handle h);
+    };
 }; // class
 
 } // namespace opencog

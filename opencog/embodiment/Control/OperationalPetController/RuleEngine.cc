@@ -1036,7 +1036,7 @@ void RuleEngine::updateCurrentActionRepetitions()
     } else if (!atomSpace.removeAtom(oldHandle)) {
         logger().error(
                      "RuleEngine - Unable to remove old FREQUECY_LINK: %s",
-                     TLB::getAtom(oldHandle)->toString().c_str());
+                     atomSpace.atomAsString(oldHandle).c_str());
     }
 
     // add new one

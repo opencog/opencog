@@ -161,6 +161,11 @@ float ImportanceSpreadingAgent::calcDifference(AttentionValue::sti_t s, Attentio
     return 0.0f;
 }
 
+bool ImportanceSpreadingAgent::IsHebbianLink::operator()(Handle h) {
+    if (classserver().isA(a->getType(h),HEBBIAN_LINK)) return true;
+    return false;
+}
+
 void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 {
     HandleEntry *links;
@@ -178,6 +183,8 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     logger().fine("+Spreading importance for atom %s", a->atomAsString(h).c_str());
 
     linksVector = a->getIncoming(h);
+    IsHebbianLink isHLPred(a);
+    std::remove_if(linksVector.begin(),linksVector.end(),isHLPred);
 
     logger().fine("  +Hebbian links found %d", links->getSize());
 
@@ -209,16 +216,12 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
         const TruthValue &linkTV = a->getTV(lh);
 
         // For the case of an asymmetric link without this atom as a source
-        if (!dynamic_cast<Link*>(TLB::getAtom(lh))->isSource(h)) {
-            //logger().fine("Link %s does not have this atom as a source.",
-            // TLB::getAtom(lh)->toString().c_str() );
-            continue;
-        }
+        if (!a->isSource(h,lh)) { continue; }
 
-        targets = dynamic_cast<Link*>(TLB::getAtom(lh))->getOutgoingSet();
+        targets = a->getOutgoing(lh);
         transferWeight = linkTV.toFloat();
 
-        logger().fine("  +Link %s", TLB::getAtom(lh)->toString().c_str() );
+        logger().fine("  +Link %s", a->atomAsString(lh).c_str() );
         logger().fine("    |weight %f, quanta %.2f, size %d", \
                 transferWeight, targets.size());
 
@@ -230,13 +233,12 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
             double transferAmount;
 
             // Then for each target of link except source...
-            if ( TLB::getAtom(target_h) == TLB::getAtom(h) )
-                continue;
+            if ( target_h == h ) continue;
 
             targetSTI = a->getSTI(target_h);
 
             // calculate amount to transfer, based on difference and scaling
-            if (TLB::getAtom(lh)->getType() == INVERSE_HEBBIAN_LINK) {
+            if (a->getType(lh) == INVERSE_HEBBIAN_LINK) {
                 // if the link is inverse, then scaling is unnecessary
                 // note the negative sign
                 transferAmount = -calcInverseDifference(sourceSTI,targetSTI, \
@@ -250,7 +252,8 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 
             a->setSTI( h, a->getSTI(h) - (AttentionValue::sti_t) transferAmount );
             a->setSTI( target_h, a->getSTI(target_h) + (AttentionValue::sti_t) transferAmount );
-            logger().fine("    |%d sti from %s to %s", (int) transferAmount, TLB::getAtom(h)->toString().c_str(), TLB::getAtom(target_h)->toString().c_str() );
+            logger().fine("    |%d sti from %s to %s", (int) transferAmount,
+                    a->atomAsString(h).c_str(), a->atomAsString(target_h).c_str() );
         }
     }
     delete links;

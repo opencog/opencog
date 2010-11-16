@@ -102,13 +102,13 @@ throw (opencog::InvalidParamException, std::bad_exception):
 #else
                     logger().debug(
                                  "LearnMessage - adding space map (%s) to the message.",
-                                 TLB::getAtom(sm_h)->toString().c_str());
+                                 atomSpace.atomAsString(sm_h).c_str());
                     spaceMaps.push_back(spaceServer.mapToString(sm_h));
 #endif
                 } else {
                     logger().error(
                                  "LearnMessage - SpaceServer has no space map (%s) to be added to the message!",
-                                 TLB::getAtom(sm_h)->toString().c_str());
+                                 atomSpace.atomAsString(sm_h).c_str());
                     // TODO: is this really needed? If not, we can get a const
                     // AtomSpace reference instead. Check if this atom will be
                     // removed by forgetting mechanism later anyway
@@ -117,7 +117,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
             } catch (opencog::AssertionException& e) {
                 logger().error(
                              "LearnMessage - Failed to add map (%s) into LearnMessage.",
-                             TLB::getAtom(sm_h)->toString().c_str());
+                             atomSpace.atomAsString(sm_h).c_str());
             }
         }
     }
@@ -126,7 +126,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
     foreach(Handle sm_h, mapsToSend) {
         logger().debug(
                      "LearnMessage - adding space map (%s) to the message.",
-                     TLB::getAtom(sm_h)->toString().c_str());
+                     atomSpace.atomAsString(sm_h).c_str());
         spaceMaps.push_back(spaceServer.MapToString(sm_h));
     }
 #endif

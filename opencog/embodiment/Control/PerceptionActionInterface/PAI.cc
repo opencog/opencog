@@ -2147,7 +2147,7 @@ Handle PAI::addActionToAtomSpace(ActionPlanID planId, const PetAction& action) t
 Handle PAI::addActionPredicate(const char* predicateName, const PetAction& action, unsigned long timestamp, ActionID actionId)
 {
     Handle execLink = actionId;
-    logger().debug("PAI - execLink = %s \n", TLB::getAtom(execLink)->toString().c_str());
+    logger().debug("PAI - execLink = %s \n", atomSpace.atomAsString(execLink).c_str());
 
     HandleSeq predicateListLinkOutgoing;
     predicateListLinkOutgoing.push_back(execLink);

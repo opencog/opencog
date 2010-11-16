@@ -71,7 +71,7 @@ void CustomAtomTypesTester::createAtoms()
 static void dumpHandleEntry(HandleEntry* he, const char *id)
 {
     for (HandleEntry* it = he; it != NULL; it = it->next) {
-        Atom* a = TLB::getAtom(it->handle);
+        boost::shared_ptr<Atom> a = server().getAtomSpace()->cloneAtom(it->handle);
         logger().info("[CustomAtomTypesTester] %s: %s", id, a->toShortString().c_str());
     }
     delete he;

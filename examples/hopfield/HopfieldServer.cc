@@ -460,7 +460,7 @@ void HopfieldServer::addRandomLinks()
 
         }
         if (he) {
-            //logger().fine("Trying to add %d -> %d, but already exists %s", source, target, TLB::getAtom(he->handle)->toString().c_str());
+            //logger().fine("Trying to add %d -> %d, but already exists %s", source, target, atomSpace->atomAsString(he->handle).c_str());
             delete he;
             attempts++;
         } else {
@@ -573,7 +573,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
             if (a->removeAtom(lh))
                 amountToRemove--;
             else
-                logger().error("Failed to remove link %s\n", TLB::getAtom(lh)->toString().c_str());
+                logger().error("Failed to remove link %s\n", atomSpace->atomAsString(lh).c_str());
         }
     }
 }
@@ -1030,7 +1030,7 @@ void HopfieldServer::printStatus()
 // for (current_l = links; current_l; current_l = current_l->next) {
 //     Handle h = current_l->handle;
 //
-//     cout << TLB::getAtom(h)->toString() << endl;
+//     cout << getAtomSpace()->atomAsString(h) << endl;
 //
 // }
 //  }
@@ -1071,7 +1071,7 @@ void HopfieldServer::printLinks()
     getAtomSpace()->getHandleSet(out_hi, LINK, true);
     // For each, get prop, scale... and 
 //    foreach (Handle h, hs) {
-//        cout << TLB::getAtom(h)->toString() << endl;
+//        cout << getAtomSpace->atomAsString(h) << endl;
 //    }
 
 }

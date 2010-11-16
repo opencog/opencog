@@ -125,7 +125,7 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
 
         activeEvalLinkFound = true;
         logger().debug( "LanguageComprehension::%s - Chosen link '%s'", 
-                        __FUNCTION__, TLB::getAtom( evalLinks[k] )->toString( ).c_str( ) );
+                        __FUNCTION__, as.atomAsString( evalLinks[k] ).c_str() );
         elements = as.getOutgoing(as.getOutgoing( evalLinks[k], 1 ));
     } // for
     return elements;
@@ -240,14 +240,12 @@ std::string LanguageComprehension::resolveFrames2Relex( )
             AtomSpaceUtil::getFrameInstanceElementsValues( as, predicateElement );
             
         logger().debug( "LanguageComprehension::%s - # of elements found: '%d' for predicate: '%s'", 
-                        __FUNCTION__, elements.size(), TLB::getAtom(predicateElement)->toString().c_str( ) );
-        
-        
+                        __FUNCTION__, elements.size(), as.atomAsString(predicateElement).c_str() );
         
         std::map<std::string, Handle>::iterator it;
         for(it = elements.begin(); it != elements.end(); ++it) {
             logger().debug( "LanguageComprehension::%s - Inspecting element: '%s' atom: '%s'", 
-                            __FUNCTION__, it->first.c_str(), TLB::getAtom(it->second)->toString( ).c_str()  );
+                            __FUNCTION__, it->first.c_str(), as.atomAsString(it->second).c_str() );
             std::string frameElementName = frameName+":"+it->first;
             handles.push_back( std::pair<std::string, Handle>(frameElementName, it->second ) );
             //count the number of times each element appears to be part of

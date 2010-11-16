@@ -66,9 +66,9 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
     
     {
         std::stringstream msg;
-        msg << "observer[" << TLB::getAtom( observer )->toString( ) << "] ";
-        msg << "objectA[" << TLB::getAtom( objectA )->toString( ) << "] ";
-        msg << "objectB[" << TLB::getAtom( objectB )->toString( ) << "] ";
+        msg << "observer[" << atomSpace.atomAsString( observer ) << "] ";
+        msg << "objectA[" << atomSpace.atomAsString( objectA ) << "] ";
+        msg << "objectB[" << atomSpace.atomAsString( objectB ) << "] ";
         if ( objectC != Handle::UNDEFINED ) {
             msg << "objectC[" << atomSpace.getName( objectC ) << "] ";
         } // if            
