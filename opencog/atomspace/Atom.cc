@@ -176,7 +176,7 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
            "Cannot change the OutgoingSet of an atom already "
            "inserted into an AtomTable\n");
     }
-#ifdef PEFORM_INVALID_HANDLE_CHECKS
+#ifdef PERFORM_INVALID_HANDLE_CHECKS
     // Make sure that garbage is not being passed in.
     // We'd like to perform a test for valid values here, but it seems
     // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
@@ -186,7 +186,7 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
             throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
         }
     }
-#endif
+#endif /* PERFORM_INVALID_HANDLE_CHECKS */
     outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
     if (classserver().isA(type, UNORDERED_LINK)) {
@@ -196,13 +196,13 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
 
 void Atom::addOutgoingAtom(Handle h)
 {
-#ifdef PEFORM_INVALID_HANDLE_CHECKS
+#ifdef PERFORM_INVALID_HANDLE_CHECKS
     // We'd like to perform a test for valid values here, but it seems
     // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
     // which it hopefully repairs later on ...
     if (TLB::isInvalidHandle(h))
         throw RuntimeException(TRACE_INFO, "addOutgoingAtom was passed invalid handles\n");
-#endif
+#endif /* PERFORM_INVALID_HANDLE_CHECKS */
     outgoing.push_back(h);
 }
 
