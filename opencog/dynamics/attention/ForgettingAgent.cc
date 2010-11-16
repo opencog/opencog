@@ -87,36 +87,30 @@ void ForgettingAgent::run(CogServer *c)
 
 void ForgettingAgent::forget(float proportion = 0.10f)
 {
-    HandleEntry *atoms;
     std::vector<Handle> atomsVector;
+    std::back_insert_iterator< std::vector<Handle> > output2(atomsVector);
     int count = 0;
     int removalAmount;
 
-    atoms = a->getAtomTable().getHandleSet(ATOM, true);
+    a->getHandleSet(output2, ATOM, true);
     // Sort atoms by lti, remove the lowest unless vlti is NONDISPOSABLE
-    atomsVector = atoms->toHandleVector();
-    std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort());
-    delete atoms;
+    std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort(a));
 
     removalAmount = (int) (atomsVector.size() * proportion);
     log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
 
-    for (unsigned int i = 0; i < atomsVector.size() ; i++) {
-        if (TLB::getAtom(atomsVector[i]) == NULL) {
-            // Atom must have already been removed through having 
-            // previously removed atoms in it's outgoing set.
-            count++;
-            continue;
-        }
+    for (unsigned int i = 0; i < atomsVector.size(); i++) {
         if (a->getLTI(atomsVector[i]) <= forgetThreshold
                 && count < removalAmount) {
             if (a->getVLTI(atomsVector[i]) != AttentionValue::NONDISPOSABLE ) {
-                //cout << "Removing atom " <<  TLB::getAtom(atomsVector[i])->toString().c_str() << endl;
-                log->fine("Removing atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
+                std::string atomName = a->atomAsString(atomsVector[i]);
+                log->fine("Removing atom %s", atomName.c_str());
+                // TODO: do recursive remove if neighbours are not very important
                 if (!a->removeAtom(atomsVector[i])) {
-                    log->error("Couldn't remove atom %s", TLB::getAtom(atomsVector[i])->toString().c_str());
-                    log->error("Aborting forget process");
-                    return;
+                    // Atom must have already been removed through having 
+                    // previously removed atoms in it's outgoing set.
+                    log->error("Couldn't remove atom %s", atomName.c_str());
+                    count++;
                 }
                 count++;
             }

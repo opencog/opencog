@@ -107,17 +107,14 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
     AttentionValue::sti_t targetSTI;
     
     // If this link doesn't have source as a source return 0
-    if (! ((Link*) TLB::getAtom(link))->isSource(source) ) {
-        return 0;
-    }
+    if (! a->isSource(source,link)) { return 0; }
 
     // Get outgoing set and sum difference for all non source atoms
     linkWeight = a->getTV(link).toFloat();
     sourceSTI = a->getSTI(source);
-    targets = dynamic_cast<Link*>(TLB::getAtom(link))->getOutgoingSet();
+    targets = a->getOutgoing(link);
 
-
-    if (TLB::getAtom(link)->getType() == INVERSE_HEBBIAN_LINK) {
+    if (a->getType(link) == INVERSE_HEBBIAN_LINK) {
         for (t = targets.begin(); t != targets.end(); t++) {
             Handle target_h = *t;
             if (target_h == source) continue;
@@ -140,7 +137,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
             linkDifference += calcDifference(sourceSTI,targetSTI,linkWeight);
         }
     }
-    if (TLB::getAtom(link)->getType() == INVERSE_HEBBIAN_LINK) {
+    if (a->getType(link) == INVERSE_HEBBIAN_LINK) {
         linkDifference *= -1.0f;
     }
     return (int) linkDifference;
@@ -178,10 +175,9 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     differenceScaling = 1.0f;
     totalTransferred = 0;
 
-    logger().fine("+Spreading importance for atom %s", TLB::getAtom(h)->toString().c_str());
+    logger().fine("+Spreading importance for atom %s", a->atomAsString(h).c_str());
 
-    links = TLB::getAtom(h)->getIncomingSet()->clone();
-    links = HandleEntry::filterSet(links, HEBBIAN_LINK, true);
+    linksVector = a->getIncoming(h);
 
     logger().fine("  +Hebbian links found %d", links->getSize());
 
@@ -203,8 +199,6 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     }
     logger().fine("  +totaldifference %.2f, scaling %.2f", totalDifference,
             differenceScaling);
-
-    linksVector = links->toHandleVector();
 
     for (linksVector_i = linksVector.begin();
             linksVector_i != linksVector.end(); linksVector_i++) {

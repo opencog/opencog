@@ -131,7 +131,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
             continue;
         }
 
-        targets = dynamic_cast<Link*>(TLB::getAtom(linkHandle))->getOutgoingSet();
+        targets = a->getOutgoing(linkHandle);
 
         for (targetItr = targets.begin(); targetItr != targets.end();
                 targetItr++) {
@@ -139,7 +139,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
                 diffusionAtomsMap[*targetItr] = totalDiffusionAtoms;
 #ifdef DEBUG
                 logger().fine("%s = %d",
-                        TLB::getAtom((*targetItr))->toString().c_str(),
+                        a->atomAsString(*targetItr).c_str(),
                         totalDiffusionAtoms);
 #endif
                 totalDiffusionAtoms++;
@@ -215,9 +215,9 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         val = a->getTV(*hi).toFloat();
         if (val == 0.0f) continue;
         //val *= diffuseTemperature;
-        type = TLB::getAtom(*hi)->getType(); 
+        type = a->getType(*hi); 
 
-        targets = dynamic_cast<Link*>(TLB::getAtom(*hi))->getOutgoingSet();
+        targets = a->getOutgoing(*hi);
         if (classserver().isA(type,ORDERED_LINK)) {
             Handle sourceHandle;
 

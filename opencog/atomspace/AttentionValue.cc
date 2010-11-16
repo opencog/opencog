@@ -26,7 +26,7 @@
 
 #include <math.h>
 
-#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/platform.h>
 
 using namespace opencog;
@@ -83,7 +83,7 @@ bool AttentionValue::operator==(const AttentionValue& av) const
 
 bool AttentionValue::STISort::operator()(const Handle& h1, const Handle& h2)
 {
-    return TLB::getAtom(h1)->getAttentionValue().getSTI() > TLB::getAtom(h2)->getAttentionValue().getSTI();
+    return a->getAV(h1).getSTI() > a->getAV(h2).getSTI();
 }
 
 bool AttentionValue::LTIAndTVAscendingSort::operator()(const Handle& h1, const Handle& h2)
@@ -91,11 +91,11 @@ bool AttentionValue::LTIAndTVAscendingSort::operator()(const Handle& h1, const H
     lti_t lti1, lti2;
     float tv1, tv2;
 
-    tv1 = fabs(TLB::getAtom(h1)->getTruthValue().getMean());
-    tv2 = fabs(TLB::getAtom(h2)->getTruthValue().getMean());
+    tv1 = fabs(a->getTV(h1).getMean());
+    tv2 = fabs(a->getTV(h2).getMean());
 
-    lti1 = TLB::getAtom(h1)->getAttentionValue().getLTI();
-    lti2 = TLB::getAtom(h2)->getAttentionValue().getLTI();
+    lti1 = a->getAV(h1).getLTI();
+    lti2 = a->getAV(h2).getLTI();
 
     if (lti1 < 0)
         tv1 = lti1 * (1.0f - tv1);
@@ -113,13 +113,13 @@ bool AttentionValue::LTIAndTVAscendingSort::operator()(const Handle& h1, const H
 bool AttentionValue::LTIThenTVAscendingSort::operator()(const Handle& h1, const Handle& h2)
 {
     lti_t lti1, lti2;
-    lti1 = TLB::getAtom(h1)->getAttentionValue().getLTI();
-    lti2 = TLB::getAtom(h2)->getAttentionValue().getLTI();
+    lti1 = a->getAV(h1).getLTI();
+    lti2 = a->getAV(h2).getLTI();
     if (lti1 != lti2) return lti1 < lti2;
 
     float tv1, tv2;
-    tv1 = TLB::getAtom(h1)->getTruthValue().getMean();
-    tv2 = TLB::getAtom(h2)->getTruthValue().getMean();
+    tv1 = a->getTV(h1).getMean();
+    tv2 = a->getTV(h2).getMean();
     return tv1 < tv2;
 }
 

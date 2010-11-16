@@ -266,7 +266,7 @@ public:
      * @param Handle to be checked for being a link source.
      * @return Whether a given handle is a source of this link.
      */
-    bool isSource(Handle) throw (InvalidParamException);
+    bool isSource(Handle) const throw (InvalidParamException);
 
     /**
      * Returns whether the element in a given position in the

@@ -150,6 +150,15 @@ public:
     }
 
     /**
+     * Returns the handle of the atom.
+     *
+     * @return The handle of the atom.
+     */
+    inline Handle getHandle() const {
+        return handle;
+    }
+
+    /**
      * Returns the arity of the atom.
      *
      * @return The arity of the atom.

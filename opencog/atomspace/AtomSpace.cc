@@ -738,6 +738,46 @@ const string& AtomSpace::getName(Handle h) const
         return emptyName;
 }
 
+boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle h) const
+{
+    // TODO: Add timestamp to atoms and add vector clock to AtomSpace
+    Atom * a = TLB::getAtom(h);
+    const Node *node = dynamic_cast<const Node *>(a);
+    if (NULL == node) {
+        const Link *l = dynamic_cast<const Link *>(a);
+        boost::shared_ptr<Atom> clone_link(new Link(*l));
+        return clone_link;
+    } else {
+        boost::shared_ptr<Atom> clone_node(new Node(*node));
+        return clone_node;
+    }
+}
+
+std::string AtomSpace::atomAsString(Handle h) const {
+    return TLB::getAtom(h)->toString();
+}
+
+bool AtomSpace::isSource(Handle source, Handle link) const {
+    Atom *a = TLB::getAtom(link);
+    const Link *l = dynamic_cast<const Link *>(a);
+    if (l != NULL) {
+        return l->isSource(source);
+    }
+    return false;
+}
+
+bool AtomSpace::commitAtom(const Atom& a)
+{
+    // TODO: Check for differences and abort if timestamp is out of date
+
+    // Get the version in the TLB
+    Atom* original = TLB::getAtom(a.getHandle());
+    // The only mutable properties of atoms are the TV and AttentionValue
+    original->setTruthValue(a.getTruthValue());
+    original->setAttentionValue(a.getAttentionValue());
+    return true;
+}
+
 Handle AtomSpace::getOutgoing(Handle h, int idx) const
 {
     Atom * a = TLB::getAtom(h);
@@ -769,7 +809,7 @@ void AtomSpace::setName(Handle h, const string& name)
 
 HandleSeq AtomSpace::getIncoming(Handle h)
 {
-    // Ugh. It is possible that the incoming set that we currently 
+    // It is possible that the incoming set that we currently 
     // hold is much smaller than what is in storage. In this case,
     // we would like to automatically pull all of those other atoms
     // into here (using fetchIncomingSet(h,true) to do so). However,
@@ -777,6 +817,8 @@ HandleSeq AtomSpace::getIncoming(Handle h)
     // storage over and over is a huge waste of time.  What to do? 
     //
     // h = fetchIncomingSet(h, true);
+    //
+    // TODO: solution where user can specify whether to poll storage/repository
 
     HandleEntry* he = TLB::getAtom(h)->getIncomingSet();
     return he->toHandleVector();

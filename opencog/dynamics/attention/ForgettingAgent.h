@@ -112,15 +112,20 @@ public:
  * then sorted ascending by TruthValue.
  */
 struct ForgettingLTIThenTVAscendingSort {
+
+    AtomSpace* a;
+
+    ForgettingLTIThenTVAscendingSort(AtomSpace* _a): a(_a) {};
+
     bool operator()(const Handle& h1, const Handle& h2) {
         AttentionValue::lti_t lti1, lti2;
         float tv1, tv2;
 
-        lti1 = TLB::getAtom(h1)->getAttentionValue().getLTI();
-        lti2 = TLB::getAtom(h2)->getAttentionValue().getLTI();
+        lti1 = a->getAV(h1).getLTI();
+        lti2 = a->getAV(h2).getLTI();
 
-        tv1 = fabs(TLB::getAtom(h1)->getTruthValue().getMean());
-        tv2 = fabs(TLB::getAtom(h2)->getTruthValue().getMean());
+        tv1 = fabs(a->getTV(h1).getMean());
+        tv2 = fabs(a->getTV(h2).getMean());
 
         if (lti1 != lti2) return lti1 < lti2;
 

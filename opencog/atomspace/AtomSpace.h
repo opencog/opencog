@@ -32,6 +32,8 @@
 #include <set>
 #include <vector>
 
+#include <boost/scoped_ptr.hpp>
+
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/BackingStore.h>
@@ -556,8 +558,7 @@ public:
      *
      * When the atom is removed from the atomspace, all memory associated
      * with it is also deleted; in particular, the atom is removed from
-     * the TLB as well, so that future TLB lookups will now return pointers
-     * to freed memory.
+     * the TLB as well, so that future TLB lookups will be invalid. 
      */
     bool removeAtom(Handle h, bool recursive = false);
 
@@ -580,6 +581,9 @@ public:
     Handle getHandle(Type t, const HandleSeq& outgoing) const {
         return atomTable.getHandle(t, outgoing);
     }
+
+    /** Get the atom referred to by Handle h represented as a string. */
+    std::string atomAsString(Handle h) const;
 
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle) const;
@@ -718,11 +722,31 @@ public:
         return getVLTI(TLB::getAtom(h));
     }
 
+    /** Clone an atom from the TLB, replaces the public access to TLB::getAtom
+     * that many modules were doing.
+     * @param h Handle of atom to clone
+     * @return A smart pointer to the atom
+     * @note Any changes to the atom object must be committed using
+     * AtomSpace::commitAtom for them to be merged with the AtomSpace.
+     * Otherwise changes are lost.
+     */
+    boost::shared_ptr<Atom> cloneAtom(const Handle h) const;
+
+    /** Commit an atom that has been cloned from the AtomSpace.
+     *
+     * @param a Atom to commit
+     * @return whether the commit was successful
+     */
+    bool commitAtom(const Atom& a);
+
     /** Retrieve a single Handle from the outgoing set of a given link */
     Handle getOutgoing(Handle, int idx) const;
 
     /** Retrieve the arity of a given link */
     int getArity(Handle) const;
+
+    /** Return whether s is the source handle in a link l */ 
+    bool isSource(Handle source, Handle link) const;
 
     /** Retrieve the outgoing set of a given link */
     const HandleSeq& getOutgoing(Handle h) const;

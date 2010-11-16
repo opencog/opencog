@@ -73,7 +73,9 @@ void HebbianUpdatingAgent::run(CogServer *server)
 
 void HebbianUpdatingAgent::hebbianUpdatingUpdate()
 {
-    HandleEntry *links, *current_l;
+    std::vector<Handle> links;
+    std::back_insert_iterator< std::vector<Handle> > link_output(links);
+    std::vector<Handle>::const_iterator current_l;
 
     // tc affects the truthvalue
     float tc, old_tc, new_tc;
@@ -83,19 +85,19 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                    "(convert links = %d)", convertLinks);
 
     // get links again to include the new ones
-    links = a->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
+    a->getHandleSet(link_output, HEBBIAN_LINK, true);
 
-    for (current_l = links; current_l; current_l = current_l->next) {
+    for (current_l = links.begin(); current_l != links.end(); current_l++) {
         // for each hebbian link, find targets, work out conjunction and convert
         // that into truthvalue change. the change should be based on existing TV.
         Handle h;
         std::vector<Handle> outgoing;
 		bool isDifferent = false;
 
-        h = current_l->handle;
+        h = *current_l;
 
         // get out going set
-        outgoing = dynamic_cast<Link *>(TLB::getAtom(h))->getOutgoingSet();
+        outgoing = a->getOutgoing(h);
         new_tc = targetConjunction(outgoing);
         // old link strength decays
         old_tc = a->getTV(h).getMean();
@@ -107,7 +109,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             // another when conjunction between sti values is correct
             // (initially for hopfield emulation, but could
             // be useful in other cases)
-            if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK) {
+            if (a->getType(h) == INVERSE_HEBBIAN_LINK) {
                 // if inverse normalised sti of source is negative
                 // (i.e. hebbian link is pointing in the wrong direction)
                 if (a->getNormalisedSTI(outgoing[0]) < 0.0f) {
@@ -115,7 +117,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                     if (tc < 0) {
                         // link no longer representative
                         // swap inverse hebbian link direction
-                        log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", TLB::getAtom(h)->toString().c_str());
+                        log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", a->atomAsString(h).c_str());
                         // save STI/LTI
                         AttentionValue backupAV = a->getAV(h);
                         a->removeAtom(h);
@@ -133,7 +135,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                     if (tc < 0) {
                         // Inverse link no longer representative
                         // change to symmetric hebbian link
-                        log->fine("HebbianUpdatingAgent: change old inverse %s to sym link", TLB::getAtom(h)->toString().c_str());
+                        log->fine("HebbianUpdatingAgent: change old inverse %s to sym link", a->atomAsString(h).c_str());
                         // save STI/LTI
                         AttentionValue backupAV = a->getAV(h);
                         a->removeAtom(h);
@@ -150,7 +152,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                 if (tc < 0) {
                     // link no longer representative
                     // change to inverse hebbian link
-                    log->fine("HebbianUpdatingAgent: change old sym %s to inverse link", TLB::getAtom(h)->toString().c_str());
+                    log->fine("HebbianUpdatingAgent: change old sym %s to inverse link", a->atomAsString(h).c_str());
                     // save STI/LTI
                     AttentionValue backupAV = a->getAV(h);
                     a->removeAtom(h);
@@ -168,7 +170,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             // otherwise just update link weights
             // if inverse normalised sti of source is positive
             // (i.e. hebbian link is pointing in the right direction)
-            if (TLB::getAtom(h)->getType() == INVERSE_HEBBIAN_LINK &&
+            if (a->getType(h) == INVERSE_HEBBIAN_LINK &&
                     a->getNormalisedSTI(outgoing[0]) < 0.0f) {
 				new_tc = -new_tc;
             }
@@ -177,14 +179,11 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             a->setMean(h, tc);
         }
 		if (isDifferent)
-			log->fine("HebbianUpdatingAgent: %s old tv %f", TLB::getAtom(h)->toString().c_str(), old_tc);
+			log->fine("HebbianUpdatingAgent: %s old tv %f", a->atomAsString(h).c_str(), old_tc);
 
     }
     // if not enough links, try and create some more either randomly
     // or by looking at what nodes are in attentional focus
-
-    delete links;
-
 }
 
 

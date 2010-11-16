@@ -1532,7 +1532,7 @@ public:
         
         logger().debug("LTIThenTVAscendingSort");
         
-        AttentionValue::LTIThenTVAscendingSort lttvSort;
+        AttentionValue::LTIThenTVAscendingSort lttvSort(atomSpace);
         vector<Handle> lttvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(lttvAtoms), ATOM, true, lttvSort);
         for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {

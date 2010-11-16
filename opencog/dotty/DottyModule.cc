@@ -26,12 +26,13 @@
 #include <sstream>
 #include <string>
 
+#include <boost/pointer_cast.hpp>
+
 #include "DottyModule.h"
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/server/CogServer.h>
 
 using namespace opencog;
@@ -52,12 +53,12 @@ public:
      */
     bool do_nodes(Handle h)
     {
-        Atom *a = TLB::getAtom(h);
+        boost::shared_ptr<Atom> a = space->cloneAtom(h);
 
         if (compact)
         {
             // don't make nodes for binary links with no incoming
-            Link *l = dynamic_cast<Link*>(a);
+            boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
             if (l && l->getOutgoingSet().size() == 2 &&
                      l->getIncomingSet() == NULL)
                 return false;
@@ -69,12 +70,13 @@ public:
             ost << "shape=\"diamond\" ";
         ost << "label=\"[" << classserver().getTypeName(a->getType()) << "]";
         if (space->isNode(a->getType())) {
-            Node *n = (Node*)a;
+            boost::shared_ptr<Node> n = boost::dynamic_pointer_cast<Node>(a);
+            //Node *n = (Node*)a;
             ost << " " << n->getName();
-        } else {
-            Link *l = (Link*)a;
-            l = l; // TODO: anything to output for links?
-        }
+        } //else {
+            // TODO: anything to output for links?
+            //boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+        //}
         ost << "\"];\n";
         answer += ost.str();
         return false;
@@ -85,10 +87,11 @@ public:
      */
     bool do_links(Handle h)
     {
-        Atom *a = TLB::getAtom(h);
+        boost::shared_ptr<Atom> a = space->cloneAtom(h);
         std::ostringstream ost;
 
-        const Link *l = dynamic_cast<const Link *>(a);
+        //const Link *l = dynamic_cast<const Link *>(a);
+        boost::shared_ptr<const Link> l = boost::dynamic_pointer_cast<const Link>(a);
         if (l)
         {
             const std::vector<Handle> &out = l->getOutgoingSet();

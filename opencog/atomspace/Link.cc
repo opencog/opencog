@@ -156,7 +156,7 @@ float Link::getWeight(void)
     return getTruthValue().toFloat();
 }
 
-bool Link::isSource(Handle handle) throw (InvalidParamException)
+bool Link::isSource(Handle handle) const throw (InvalidParamException)
 {
     // On ordered links, only the first position in the outgoing set is a source
     // of this link. So, if the handle given is equal to the first position,

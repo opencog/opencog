@@ -34,6 +34,8 @@
 namespace opencog
 {
 
+class AtomSpace;
+
 struct AttentionValue {
 
 public:
@@ -114,14 +116,20 @@ public:
          { return !(*this == rhs); }
 
     struct STISort {
+        AtomSpace *a;
+        STISort(AtomSpace *_a): a(_a) {};
         bool operator()(const Handle& h1, const Handle& h2);
     };
 
     struct LTIAndTVAscendingSort {
+        AtomSpace *a;
+        LTIAndTVAscendingSort(AtomSpace *_a): a(_a) {};
         bool operator()(const Handle& h1, const Handle& h2);
     };
 
     struct LTIThenTVAscendingSort {
+        AtomSpace *a;
+        LTIThenTVAscendingSort(AtomSpace *_a): a(_a) {};
         bool operator()(const Handle& h1, const Handle& h2);
     };
 

@@ -157,7 +157,7 @@ public:
         
         logger().debug("STISort");
 
-        AttentionValue::STISort sSort;
+        AttentionValue::STISort sSort(atomSpace);
         
         // an atom which has higher sti is strictly before one with lower sti
         TS_ASSERT_EQUALS(sSort(atoms[1], atoms[0]), true);
@@ -181,7 +181,7 @@ public:
 
         logger().debug("LTIThenTVAscendingSort");
         
-        AttentionValue::LTIThenTVAscendingSort lttvSort;
+        AttentionValue::LTIThenTVAscendingSort lttvSort(atomSpace);
 
         // an atom which has higher LTI is not strictly before one with lower LTI
         TS_ASSERT_EQUALS(lttvSort(atoms[1], atoms[0]), false);
