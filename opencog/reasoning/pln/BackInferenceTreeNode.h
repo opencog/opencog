@@ -45,6 +45,8 @@
 #include "rules/RuleApp.h"
 #include "utils/NMPrinter.h"
 
+#include <opencog/util/iostreamContainer.h>
+
 #include "FitnessEvaluator.h"
 
 class BITNodeUTest;
@@ -327,18 +329,33 @@ public:
         return true;
     }
 
-    /// Apply an operator to all nodes below this one (and to this one)
-    template<typename opT> void ApplyDown(opT op)
+    /// Apply an operator to all nodes below this one (and to this one, if inclusive is true)
+    template<typename opT> void ApplyDown(opT op, bool inclusive = true,
+            Btr<std::set<BITNode*> > usedBITNodes = Btr<std::set<BITNode*> >())
     {
         using namespace boost;
+        using namespace std;
         
+        // Initialise the set of BITNodes that it has already been applied to
+        if (usedBITNodes == NULL) {
+            usedBITNodes = Btr<set<BITNode*> >(new set<BITNode*>());
+        }
+
+        if (STLhas2(*usedBITNodes, this)) {
+            return;
+        }
+
+        usedBITNodes->insert(this);
+
         for (std::vector<std::set<ParametrizedBITNode> >::iterator i =  children.begin(); i!=children.end(); i++)
             foreach(const ParametrizedBITNode& pbit, *i)
-                pbit.prover->ApplyDown<opT>(op);
-        op(this);
+                pbit.prover->ApplyDown<opT>(op, usedBITNodes);
+        if (inclusive)
+            op(this);
     }
     
     /// Apply an operator to all nodes below this one (and to this one) in reverse
+    //! @todo Add an already-used list like ApplyDown() to deal with loops in the tree
     template<typename opT> bool ApplyDown2(opT op)
     {
         using namespace boost;
