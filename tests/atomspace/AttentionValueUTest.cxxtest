@@ -169,7 +169,7 @@ public:
         
         logger().debug("LTIAndTVAscendingSort");
 
-        AttentionValue::LTIAndTVAscendingSort latvSort;
+        AttentionValue::LTIAndTVAscendingSort latvSort(atomSpace);
         
         // an atom which has higher LTI*TV is not strictly before one with lower LTI*TV
         TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[0]), false);

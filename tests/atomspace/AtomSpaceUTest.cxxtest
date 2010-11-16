@@ -1514,7 +1514,7 @@ public:
         
         logger().debug("STISort");
 
-        AttentionValue::STISort sSort;
+        AttentionValue::STISort sSort(atomSpace);
         vector<Handle> sAtoms;
         atomSpace->getSortedHandleSet(back_inserter(sAtoms), ATOM, true, sSort);
         for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
@@ -1523,7 +1523,7 @@ public:
         
         logger().debug("LTIAndTVAscendingSort");
         
-        AttentionValue::LTIAndTVAscendingSort latvSort;
+        AttentionValue::LTIAndTVAscendingSort latvSort(atomSpace);
         vector<Handle> latvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(latvAtoms), ATOM, true, latvSort);
         for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
