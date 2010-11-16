@@ -113,3 +113,14 @@ size_t Node::hashCode() const
 {
     return getType() ^ boost::hash<std::string>()(name);
 }
+
+Atom* Node::clone() const
+{
+    Atom *a = new Node(*this);
+    for (HandleEntry *h = getIncomingSet(); h != NULL; h = h ->next) {
+        a->addIncomingHandle(h->handle);
+    }
+    return a;
+}
+
+

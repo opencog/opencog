@@ -335,6 +335,8 @@ public:
      * @return an unsigned integer value as the hashCode of the Atom.
      */
     virtual size_t hashCode(void) const = 0;
+
+    virtual Atom* clone() const = 0;
 };
 
 } // namespace opencog

@@ -316,3 +316,12 @@ void Link::addOutgoingAtom(Handle h)
 
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
+Atom* Link::clone() const
+{
+    Atom* a = new Link(*this);
+    for (HandleEntry *h = getIncomingSet(); h != NULL; h = h->next) {
+        a->addIncomingHandle(h->handle);
+    }
+    return a;
+}
+

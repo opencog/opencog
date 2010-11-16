@@ -583,7 +583,7 @@ public:
     }
 
     /** Get the atom referred to by Handle h represented as a string. */
-    std::string atomAsString(Handle h) const;
+    std::string atomAsString(Handle h, bool terse = true) const;
 
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle) const;

@@ -741,19 +741,22 @@ const string& AtomSpace::getName(Handle h) const
 boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle h) const
 {
     // TODO: Add timestamp to atoms and add vector clock to AtomSpace
+    // Need to use the newly added clone methods as the copy constructors for
+    // Node and Link don't copy incoming set.
     Atom * a = TLB::getAtom(h);
     const Node *node = dynamic_cast<const Node *>(a);
     if (NULL == node) {
         const Link *l = dynamic_cast<const Link *>(a);
-        boost::shared_ptr<Atom> clone_link(new Link(*l));
+        boost::shared_ptr<Atom> clone_link(l->clone());
         return clone_link;
     } else {
-        boost::shared_ptr<Atom> clone_node(new Node(*node));
+        boost::shared_ptr<Atom> clone_node(node->clone());
         return clone_node;
     }
 }
 
-std::string AtomSpace::atomAsString(Handle h) const {
+std::string AtomSpace::atomAsString(Handle h, bool terse) const {
+    if (terse) return TLB::getAtom(h)->toShortString();
     return TLB::getAtom(h)->toString();
 }
 

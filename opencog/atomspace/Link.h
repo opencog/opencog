@@ -142,11 +142,19 @@ public:
     }
 
     /** Copy constructor, does NOT copy atom table membership! */
+#ifdef PUT_OUTGOING_SET_IN_LINKS
     Link(const Link &l)
         : Atom(l.getType(), l.getTruthValue())
     {
         init(l.getOutgoingSet());
     }
+#else
+    Link(const Link &l)
+        : Atom(l.getType(), l.getOutgoingSet(), l.getTruthValue())
+    {
+        init();
+    }
+#endif
 
     /**
      * Destructor for this class.
@@ -315,6 +323,8 @@ public:
      * @return an unsigned integer value as the hashCode of the link.
      */
     virtual size_t hashCode(void) const;
+
+    virtual Atom* clone() const;
 };
 
 } // namespace opencog

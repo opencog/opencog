@@ -91,9 +91,13 @@ Atom::Atom(Type type, const TruthValue& tv )
 Atom::~Atom() throw (RuntimeException)
 {
     // checks if there is still an atom pointing to the one being removed
-    if (incoming != NULL) {
+    // WARNING: I (Joel) disabled this check as it makes it impossible to clone
+    // Atoms via the AtomSpace for code that wants an Atom object. *Most* code
+    // should only use the AtomSpace to view/alter the hypergraph though...so
+    // it should be the AtomTable/AtomSpace that does this check.
+    /*if (incoming != NULL) {
         throw RuntimeException(TRACE_INFO, "Attempting to remove atom with non-empty incoming set.");
-    }
+    }*/
 
 #ifdef USE_SHARED_DEFAULT_TV
     if (truthValue != &(TruthValue::DEFAULT_TV())) {

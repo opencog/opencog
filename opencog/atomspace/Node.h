@@ -119,6 +119,8 @@ public:
      * @return a integer value as the hashCode of the node.
      */
     virtual size_t hashCode(void) const;
+
+    virtual Atom* clone() const;
 };
 
 } // namespace opencog
