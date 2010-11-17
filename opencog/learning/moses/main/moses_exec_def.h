@@ -79,8 +79,9 @@ static const pair<string, string> max_score_opt("max-score", "A");
 static const pair<string, string> max_candidates_opt("max-candidates", "M");
 static const pair<string, string> ignore_bscore_opt("ignore-bscore", "I");
 static const pair<string, string> feature_selection_intensity_opt("feature-selection-intensity", "T");
+static const pair<string, string> feature_selection_target_size_opt("feature-selection-target-size", "C");
 static const pair<string, string> redundant_feature_intensity_opt("redundant-feature-intensity", "D");
-static const pair<string, string> feature_selection_size_opt("feature-selection-size", "U");
+static const pair<string, string> feature_selection_interaction_terms_opt("feature-selection-interaction-terms", "U");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);

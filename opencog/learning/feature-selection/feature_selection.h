@@ -33,7 +33,6 @@
 
 namespace opencog {
 
-
 /**
  * Returns a set S of features following the algo:
  * 1.a) Select all relevant features (that score above 'threshold'), called 'rel'
@@ -42,40 +41,43 @@ namespace opencog {
  * 2) remove 'rel' from the initial set 'features', called 'tf'
  * 3.a) select all pairs of relevant features from 'ft', called 'rel'
  * 3.b) select all redundant features among 'rel', called 'red'
- * 4) follow the same pattern with triplets, etc, until max_size.
+ * 4) follow the same pattern with triplets, etc, until max_interaction_terms.
  * 5) return 'res'
  * 
  * @param features       The initial set of features to be selected from
  * @param scorer         The function to score a set of features, it is
- *                       assumed that the codomain of the scorer is [0, 1],
+ *                       assumed that the codomain of the scorer is [0,1],
  *                       0 for the lowest score and 1 for the higest score.
- * @param threshold      The threshold to select a set of feature
- * @param max_size       The maximum size of each feature set tested in the scorer
+ * @param threshold      The threshold to select a set of feature, in [0,1]
+ * @param max_interaction_terms The maximum size of each feature set tested in the scorer
  * @param red_threshold  If >0 it modulates the intensity of the
  *                       threshold of redundant_features(), precisely
  *                       red_threshold * threshold
  *                       Otherwise redundant features are ignored.
  *
- * @return            The set of selected features
+ * @return               The set of selected features
+ *
+ * @note                 It is strongly suggested to wrap a cache around the
+ *                       Scorer because the algorithm may do redundant
+ *                       evaluations. Or you may use directly
+ *                       cached_incremental_selection defined below
  */
 template<typename Scorer, typename FeatureSet>
 FeatureSet incremental_selection(const FeatureSet& features, const Scorer& scorer,
-                                 double threshold, unsigned int max_size = 1,
+                                 double threshold,
+                                 unsigned int max_interaction_terms = 1,
                                  double red_threshold = 0) {
-    lru_cache<Scorer> scorer_cache(std::pow((double)features.size(), (int)max_size),
-                                   scorer);
-
     FeatureSet rel; // set of relevant features for a given iteration
     FeatureSet res; // set of relevant non-redundant features to return
 
-    for(unsigned int i = 1; i <= max_size; i++) {
+    for(unsigned int i = 1; i <= max_interaction_terms; i++) {
         // define the set of set of features to test for relevancy
         FeatureSet tf = set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);
         // add the set of relevant features for that iteration in rel
         rel.empty();
         foreach(const FeatureSet& fs, fss)
-            if(scorer_cache(fs) > threshold)
+            if(scorer(fs) > threshold)
                 rel.insert(fs.begin(), fs.end());
         if(red_threshold > 0) {
             // define the set of set of features to test redundancy
@@ -84,7 +86,7 @@ FeatureSet incremental_selection(const FeatureSet& features, const Scorer& score
             FeatureSet red;
             foreach(const FeatureSet& fs, nrfss) {
                 if(has_empty_intersection(fs, red)) {
-                    FeatureSet rfs = redundant_features(fs, scorer_cache,
+                    FeatureSet rfs = redundant_features(fs, scorer,
                                                         threshold * red_threshold);
                     red.insert(rfs.begin(), rfs.end());
                 }
@@ -97,6 +99,77 @@ FeatureSet incremental_selection(const FeatureSet& features, const Scorer& score
         }
     }
     return res;
+}
+
+/**
+ * like incremental_selection but automatically wrap a cache around the scorer
+ */
+template<typename Scorer, typename FeatureSet>
+FeatureSet cached_incremental_selection(const FeatureSet& features,
+                                        const Scorer& scorer,
+                                        double threshold,
+                                        unsigned int max_interaction_terms = 1,
+                                        double red_threshold = 0) {
+    lru_cache<Scorer> scorer_cache(std::pow((double)features.size(),
+                                            (int)max_interaction_terms),
+                                   scorer);
+    return incremental_selection(features, scorer_cache, threshold,
+                                 max_interaction_terms, red_threshold);
+}
+
+
+/**
+ * like incremental_selection but take the number of feature to select
+ * instead of a threshold. It searches it by bisection.
+ */
+template<typename Scorer, typename FeatureSet>
+FeatureSet adaptive_incremental_selection(const FeatureSet& features,
+                                          const Scorer& scorer,
+                                          unsigned int features_size_target,
+                                          unsigned int max_interaction_terms = 1,
+                                          double red_threshold = 0,
+                                          double min = 0, double max = 1,
+                                          double epsilon = 0.01) {
+    double mean = (min+max)/2;
+    std::cout << "min = " << min << " max = " << max << " mean = " << mean << std::endl;
+    FeatureSet res = incremental_selection(features, scorer, mean,
+                                           max_interaction_terms, red_threshold);
+    unsigned int rsize = res.size();
+    std::cout << "rsize = " << rsize << std::endl;
+    if(isWithin(min, max, epsilon) || rsize == features_size_target)
+        return res;
+    else {
+        double nmin = rsize < features_size_target? min : mean;
+        double nmax = rsize < features_size_target? mean : max;
+        return adaptive_incremental_selection(features, scorer,
+                                              features_size_target,
+                                              max_interaction_terms, red_threshold,
+                                              nmin, nmax, epsilon);
+    }
+}
+
+/**
+ * like adaptive_incremental_selection but wrapping the scorer with a cache
+ */
+template<typename Scorer, typename FeatureSet>
+FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
+                                                 const Scorer& scorer,
+                                                 unsigned int features_size_target,
+                                                 unsigned int max_interaction_terms = 1,
+                                                 double red_threshold = 0,
+                                                 double min = 0, double max = 1,
+                                                 double epsilon = 0.01) {
+    lru_cache<Scorer> scorer_cache(std::pow((double)features.size(),
+                                            (int)max_interaction_terms),
+                                   scorer);
+    FeatureSet f = adaptive_incremental_selection(features, scorer_cache,
+                                                  features_size_target,
+                                                  max_interaction_terms,
+                                                  red_threshold,
+                                                  min, max, epsilon);
+    std::cout << "scorer_cache.get_failures() = " << scorer_cache.get_failures()
+              << " scorer_cache.get_hits() = " << scorer_cache.get_hits() << std::endl;
+    return f;
 }
 
 /**

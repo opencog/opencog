@@ -53,8 +53,7 @@ struct lru_cache {
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
-    lru_cache(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f)
-                                          ,_cache_failures(0) {}
+    lru_cache(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f),_failures(0) {}
 
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
@@ -77,6 +76,7 @@ struct lru_cache {
         if (it!=_map.end()) {
             _lru.pop_front();
             _lru.splice(it->first,_lru,_lru.begin());
+            _hits++;
             return it->second;
         }
       
@@ -98,7 +98,8 @@ struct lru_cache {
         return it->second;
     }
     
-    unsigned get_cache_failures() const { return _cache_failures; }
+    unsigned get_failures() const { return _failures; }
+    unsigned get_hits() const { return _hits; }
 
     void clear() {
         _map.clear();
@@ -113,10 +114,11 @@ protected:
                        // is the last used element to remove it from
                        // the cache when it gets full
     
-    mutable unsigned _cache_failures;
+    mutable unsigned _failures; // number of cache failures
+    mutable unsigned _hits; // number of cache hits
 
     inline result_type call_f(const argument_type& x) const {
-        _cache_failures++;
+        _failures++;
         try {
             return _f(x);
         } catch(...) {
@@ -203,7 +205,7 @@ struct prr_cache {
     typedef typename map::size_type size_type;
   
     prr_cache(size_type n, const F& f=F()) 
-        : _n(n), _map(n+1), _f(f), _cache_failures(0) {}
+        : _n(n), _map(n+1), _f(f), _failures(0) {}
 
     bool full() const { return _map.size()==_n; }
     bool empty() const { return _map.empty(); }
@@ -229,16 +231,16 @@ struct prr_cache {
         _map.clear();
     }
     
-    unsigned get_cache_failures() const { return _cache_failures; }
+    unsigned get_failures() const { return _failures; }
 
 protected:
     size_type _n;
     mutable map _map;
     F _f;
-    mutable unsigned _cache_failures;
+    mutable unsigned _failures;
 
     inline result_type call_f(const argument_type& x) const {
-        _cache_failures++;
+        _failures++;
         return _f(x);
     }
 

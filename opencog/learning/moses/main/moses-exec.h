@@ -217,8 +217,7 @@ void metapop_moses_results(RandGen& rng,
         if(pa.jobs.empty()) { // do not print the cache if using distributed moses
             logger().info("Number of cache failures for score = %u"
                           " and bscore = %u",
-                          score_cache.get_cache_failures(),
-                          bscore_cache.get_cache_failures());
+                          score_cache.get_failures(), bscore_cache.get_failures());
         }
     } else {
         bscore_based_score<BScore> score(bsc);
