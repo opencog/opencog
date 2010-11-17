@@ -18,6 +18,7 @@ void init_Atom_py()
         .def(self == self)
         .def(self != self)
         .def("hashCode", pure_virtual(&Atom::hashCode))
+        .def("clone", pure_virtual(&Atom::clone),return_value_policy<manage_new_object>() )
     ;
 }
 
@@ -52,6 +53,10 @@ bool AtomWrap::operator!=(const Atom&) const
 size_t AtomWrap::hashCode(void) const
 {
     return this->get_override("hashCode")();
+}
+Atom* AtomWrap::clone(void) const
+{
+    return this->get_override("clone")();
 }
 
 // For the non-pure virtual functions.

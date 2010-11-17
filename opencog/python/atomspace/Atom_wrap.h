@@ -30,6 +30,7 @@ struct AtomWrap : Atom, wrapper<Atom>
     bool operator==(const Atom&) const;
     bool operator!=(const Atom&) const;
     size_t hashCode(void) const;
+    Atom* clone() const;
 
     // Non-pure virtual functions.
 };

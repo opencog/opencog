@@ -1,7 +1,7 @@
 #ifndef _OPENCOG_LINK_WRAP_H
 #define _OPENCOG_LINK_WRAP_H
 
-#include "Link.h"
+#include <opencog/atomspace/Link.h>
 #include <boost/python.hpp>
 using namespace opencog;
 using namespace boost::python;
@@ -31,6 +31,8 @@ struct LinkWrap : Link, wrapper<Link>
     bool default_operator_not_equal(const Atom&) const;
     size_t hashCode(void) const;
     size_t default_hashCode(void) const;
+    Atom* clone(void) const;
+    Atom* default_clone(void) const;
 };
 
 #endif

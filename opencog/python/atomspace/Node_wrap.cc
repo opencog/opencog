@@ -13,6 +13,7 @@ void init_Node_py()
         .def(self == self)
         .def(self != self)
         .def("hashCode", pure_virtual(&Atom::hashCode))
+        .def("clone", &Node::clone, return_value_policy<manage_new_object>() )
     ;
 }
 

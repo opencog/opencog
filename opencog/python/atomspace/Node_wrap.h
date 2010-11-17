@@ -1,7 +1,7 @@
 #ifndef _OPENCOG_NODE_WRAP_H
 #define _OPENCOG_NODE_WRAP_H
 
-#include "Node.h"
+#include <opencog/atomspace/Node.h>
 #include <boost/python/wrapper.hpp>
 using namespace opencog;
 using namespace boost::python;

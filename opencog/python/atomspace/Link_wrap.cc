@@ -20,6 +20,7 @@ void init_Link_py()
         .def(self == self)
         .def(self != self)
         .def("hashCode", pure_virtual(&Atom::hashCode))
+        .def("clone", &Link::clone, return_value_policy<manage_new_object>() )
     ;
 }
 
