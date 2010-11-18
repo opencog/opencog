@@ -75,6 +75,7 @@ class BITNode;
 class BITNodeRoot;  //!< Root of a BIT, controls inference
 class RuleProvider; //!< Provide rules when expanding the tree
 class InferenceCache;
+template <typename _exec_poolT> struct ExpansionPoolUpdater;
 
 /** A class for runtime errors during BIT expansion
   *
@@ -248,6 +249,7 @@ class BITNode
 {
     friend class BITNodeFitnessCompare;
     friend class BDRUMUpdater;
+    friend class ExpansionPoolUpdater<std::list<BITNode*> >;
     friend class BITNodeRoot;
     friend class ExplicitlyEvaluatedBITNode;
 
@@ -338,6 +340,7 @@ public:
         
         // Initialise the set of BITNodes that it has already been applied to
         if (usedBITNodes == NULL) {
+            cout << "INIT" << endl;
             usedBITNodes = Btr<set<BITNode*> >(new set<BITNode*>());
         }
 
@@ -564,6 +567,7 @@ public:
 
     /// If inserting the rule invocation node in the expansion pool obeys
     /// our policy
+    //! @todo Should still be static, but got difficulties.
     /*static */bool obeysPoolPolicy(Rule *new_rule, meta arg, bool loosePoolPolicy = false);
 
     /// Find if we already have a BITNode like this such that we can re-use it
@@ -668,6 +672,7 @@ class BITNodeRoot : public BITNode
     friend class ::PLNUTest;
     friend class ::BITNodeUTest;
     friend class ::InferenceCache;
+    friend class ExpansionPoolUpdater<std::list<BITNode*> >;
 public:
 
     ~BITNodeRoot();

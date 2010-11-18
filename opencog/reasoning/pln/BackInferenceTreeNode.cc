@@ -988,7 +988,8 @@ struct ExpansionPoolUpdater
         b->root = root;
         // check if that BITNode is not expanded
         // check if it is not in our expansion pool
-        if (!b->Expanded && !STLhas2(*expansion_pool, b)) {
+        if (!b->Expanded && !STLhas2(*expansion_pool, b)
+            && root->obeysPoolPolicy(b->rule, b->raw_target, root->loosePoolPolicy)) {
             expansion_pool->push_back(b);
             cout << "Adding BITNode from another BIT to expansion pool: " << b->id << endl;
         }
@@ -1076,7 +1077,8 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
 
                 /// Add any un-expanded descendents to the expansion pool, if they're not already there
                 /// (i.e. if the template was from a different BIT).
-                ApplyDown2(ExpansionPoolUpdater<BITNodeRoot::exec_poolT>(&root->exec_pool, haxx::bitnoderoot));
+                ApplyDown(ExpansionPoolUpdater<BITNodeRoot::exec_poolT>(&root->exec_pool, haxx::bitnoderoot),
+                        false);
                 root->exec_pool_sorted = false;
 
                 return template_node;
@@ -1312,13 +1314,23 @@ bool BITNode::hasAncestor(const BITNode* const _p) const
     return this != root && STLhas(root->BITcache->users[(BITNode*)this], (BITNode*)_p);
 }
 
+// You'd want to just use BITNode::print(), but this could be used as part of a test for BITNode::ApplyDown.
+struct BITNodePrinter
+{
+    BITNodePrinter(){}
+    void operator()(BITNode* b)
+    {
+        std::cout << b->id << " ";
+    }
+};
+
 const set<VtreeProvider*>& BITNodeRoot::infer(int& resources,
                                               float minConfidenceForStorage,
                                               float minConfidenceForAbort)
 {
     AtomSpaceWrapper *asw = GET_ASW;
     
-    if (raw_target == NULL) {
+    if (!raw_target) {
         puts("Target is null, aborting.\n");
         static set<VtreeProvider*> aborted;
         return aborted;
