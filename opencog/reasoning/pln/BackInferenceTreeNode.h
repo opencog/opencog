@@ -340,7 +340,6 @@ public:
         
         // Initialise the set of BITNodes that it has already been applied to
         if (usedBITNodes == NULL) {
-            cout << "INIT" << endl;
             usedBITNodes = Btr<set<BITNode*> >(new set<BITNode*>());
         }
 
