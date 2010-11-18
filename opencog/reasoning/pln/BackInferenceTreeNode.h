@@ -349,7 +349,7 @@ public:
 
         for (std::vector<std::set<ParametrizedBITNode> >::iterator i =  children.begin(); i!=children.end(); i++)
             foreach(const ParametrizedBITNode& pbit, *i)
-                pbit.prover->ApplyDown<opT>(op, usedBITNodes);
+                pbit.prover->ApplyDown<opT>(op, true, usedBITNodes);
         if (inclusive)
             op(this);
     }
