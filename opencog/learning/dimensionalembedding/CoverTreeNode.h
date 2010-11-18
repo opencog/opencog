@@ -35,118 +35,62 @@
  * The CoverTreeNode class and its methods are required by the cover tree
  * implementation
  */
-
 namespace opencog {
     class CoverTreeNode {
     public:
-        Handle handle;
-        //std::vector<double> embeddingVector;
-        double embeddingVector[50];
+        //Handle handle;
+        std::vector<double>* embeddingVector;
         CoverTreeNode() {}
-    CoverTreeNode(Handle h, std::vector<double> eV) :
-        handle(h) {
-            int i=0;
-            std::vector<double>::iterator it;
-            for(it=eV.begin(); it!=eV.end(); it++) {
-                embeddingVector[i]=*it;
-                i++;
-            }
+        //CoverTreeNode(Handle h, std::vector<double>* eV) :
+    CoverTreeNode(std::vector<double>* eV) : 
+        //handle(h), embeddingVector(eV) { }
+        embeddingVector(eV) { }
+        std::vector<double> getVector() {
+            return *embeddingVector;
         }
-        /*
-        float distance(CoverTreeNode n1, CoverTreeNode n2, float upper_bound) {
-            std::vector<double> v1=n1.getVector();
-            std::vector<double> v2=n2.getVector();
-            std::vector<double>::iterator it1=v1.begin();
-            std::vector<double>::iterator it2=v2.begin();
-            
-            double distance=0;
-            //Calculate euclidean distance between v1 and v2
-            for(; it1 < v1.end(); it1++) {
-                distance+=std::pow((*it1 - *it2), 2);
-                if(it2!=v2.end()) it2++;
-            }
-            distance=sqrt(distance);
-            return distance;
-            //return DimEmbedModule::euclidDistance(n1.getVector(),
-            //                                      n2.getVector());
-        }
-        v_array<CoverTreeNode> parse_points(char *filename) {
-            //@TODO: implement
-            return v_array<CoverTreeNode>();
-        }
-        void print(CoverTreeNode& p) {
-            std::ostringstream oss;
-            Atom* atom = TLB::getAtom(p.getHandle());
-            if(atom==NULL) {
-                oss << "[NODE'S BEEN DELETED]" << " : (";
-            } else {
-                oss << atom->toShortString() << " : (";
-            }
-            std::vector<double> embedVector = p.getVector();
+        //Handle& getHandle() {
+        //    return handle;
+        //}
+    };
+    
+    void print(CoverTreeNode& p) {
+        std::ostringstream oss;
+        //Atom* atom = TLB::getAtom(p.getHandle());
+        //if(atom==NULL) {
+        //   oss << "[NODE'S BEEN DELETED]" << " : (";
+        //} else {
+        //    oss << atom->toShortString() << " : (";
+        //}
+        std::vector<double> embedVector = p.getVector();
             for(std::vector<double>::const_iterator it2=embedVector.begin();
                 it2!=embedVector.end();
                 ++it2){
                 oss << *it2 << " ";
             }
             oss << ")" << std::endl;
-            logger().info(oss.str());
-            }*/
-        /*        
-        std::vector<double> getVector() {
-            return embeddingVector;
-        }
-        Handle& getHandle() {
-            return handle;
-        }
-    };
+            printf(oss.str().c_str());
+    }
     
-        float distance(CoverTreeNode n1, CoverTreeNode n2, float upper_bound) {
-            std::vector<double> v1=n1.getVector();
-            std::vector<double> v2=n2.getVector();
-            std::vector<double>::iterator it1=v1.begin();
-            std::vector<double>::iterator it2=v2.begin();
-            
-            double distance=0;
-            //Calculate euclidean distance between v1 and v2
-            for(; it1 < v1.end(); it1++) {
-                distance+=std::pow((*it1 - *it2), 2);
-                if(it2!=v2.end()) it2++;
-                }
-            distance=sqrt(distance);
-            return distance;
-            //return DimEmbedModule::euclidDistance(n1.getVector(),
-            //                                      n2.getVector());
-            }*/
-    };
-    float distance(CoverTreeNode n1, CoverTreeNode n2, float upper_bound) {
+    double distance(CoverTreeNode n1, CoverTreeNode n2, double upper_bound) {
+        std::vector<double> v1=n1.getVector();
+        std::vector<double> v2=n2.getVector();
+        std::vector<double>::iterator it1=v1.begin();
+        std::vector<double>::iterator it2=v2.begin();
+        
         double distance=0;
-        for(int i=0; i<50; i++){
-            distance+=std::pow(n1.embeddingVector[i]-n2.embeddingVector[i], 2);
+        //Calculate euclidean distance between v1 and v2
+        for(; it1 < v1.end(); it1++) {
+            distance+=(*it1 - *it2)*(*it1 - *it2);
+            if(it2!=v2.end()) it2++;
         }
         distance=sqrt(distance);
         return distance;
+        //return DimEmbedModule::euclidDistance(n1.getVector(),
+        //                                      n2.getVector());
     }
     v_array<CoverTreeNode> parse_points(char *filename) {
         //@TODO: implement
         return v_array<CoverTreeNode>();
-    }
-    void print(CoverTreeNode& p) {
-        std::ostringstream oss;
-        Atom* atom = TLB::getAtom(p.handle);
-        if(atom==NULL) {
-            oss << "[NODE'S BEEN DELETED]" << " : (";
-        } else {
-            oss << atom->toShortString() << " : (";
-        }
-        /*
-          std::vector<double> embedVector = p.getVector();
-          for(std::vector<double>::const_iterator it2=embedVector.begin();
-          it2!=embedVector.end();
-          ++it2){
-          oss << *it2 << " ";
-          }*/
-        oss << ")" << std::endl;
-        logger().info(oss.str());
     }
 }//namespace
 

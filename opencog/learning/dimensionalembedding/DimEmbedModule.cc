@@ -32,6 +32,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/exceptions.h>
 #include <limits>
+#include <opencog/learning/dimensionalembedding/vector.h>
 
 using namespace opencog;
 
@@ -47,7 +48,6 @@ DimEmbedModule::~DimEmbedModule() {
 
 void DimEmbedModule::init() {    
     logger().info("[DimEmbedModule] init");
-	numDimensions=50;
     CogServer& cogServer = static_cast<CogServer&>(server());
     this->as=cogServer.getAtomSpace();    
 #ifdef HAVE_GUILE
@@ -61,6 +61,10 @@ void DimEmbedModule::init() {
     define_scheme_primitive("euclidDist",
                             &DimEmbedModule::euclidDist,
                             this);
+    //not quite working yet. segfaults and stuff for some reason
+    //define_scheme_primitive("kNN",
+    //                        &DimEmbedModule::kNearestNeighbors,
+    //                        this);
 #endif
 }
 
@@ -138,12 +142,44 @@ std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
     }
 }
 
-double sumOfSquares(std::vector<double> v) {
-    double result=0;
-    for(std::vector<double>::iterator it=v.begin(); it<v.end(); it++) {
-        result+=(*it)*(*it);
+HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int k) {
+    if(!classserver().isLink(l))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(l).c_str());
+    logger().info("%d nearest neighbours start", k);
+    if(!isEmbedded(l)) {
+        const char* tName = classserver().getTypeName(l).c_str();
+        logger().error("No embedding exists for type %s", tName);
+        throw std::string("No embedding exists for type %s", tName);
     }
-    return result;
+
+    AtomEmbedding aE = (atomMaps.find(l))->second;
+    AtomEmbedding::iterator aEit = aE.find(h);
+    //an embedding exists, but h has not been added yet
+    if(aEit==aE.end()) {
+        logger().error("Embedding exists, but %s is not in it",
+                       TLB::getAtom(h)->toString().c_str());
+        throw std::string("Embedding exists, but %s is not in it",
+                          TLB::getAtom(h)->toString().c_str());
+    } else {
+        v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
+        //CoverTreeNode c = CoverTreeNode(aEit->first, &(aEit->second));
+        CoverTreeNode c = CoverTreeNode(&(aEit->second));
+        push(v,c);
+        v_array<v_array<CoverTreeNode> > res;
+        k_nearest_neighbor(embedTreeMap[l], batch_create(v), res, k);
+        HandleSeq results = HandleSeq();
+        for (int j = 1; j<res[0].index; j++) {
+            print(res[0][j]);
+            //results.push_back(*(distMap.find(res[0][j].getVector()));
+            //results.push_back(res[0][j].getHandle());
+        }
+        //printf("\n");
+        
+        logger().info("kNN done");
+        return results;
+    }
 }
 
 void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){   
@@ -170,8 +206,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
     while(!pQueue.empty()) {
         Handle& u = (*(pQueue.rbegin())).second;//extract min
         pQueue.erase(--pQueue.end());
-        if (distMap[u]==0) {
-            logger().info("break"); break;}
+        if (distMap[u]==0) { break;}
         HandleSeq newLinks = as->getIncoming(u);
         for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't of type linkType
@@ -235,24 +270,30 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType){
             }
         }
     }
-    
+
+    //Now that all the points are calculated, we have to construct a
+    //cover tree for them.
     v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
-    //v_array<int> v = v_array<int>();
-    logger().info("%d %d", v.index, v.length);
     AtomEmbedding aE = atomMaps[linkType];
     AtomEmbedding::iterator it = aE.begin();
     for(;it!=aE.end();it++) {
-        logger().info("pushing ");
-        logger().info(TLB::getAtom(it->first)->toString().c_str());
-        //it->second;
-        CoverTreeNode c = CoverTreeNode(it->first, it->second);
-        logger().info("about to push");
+        //CoverTreeNode c = CoverTreeNode(it->first, &(it->second));
+        CoverTreeNode c = CoverTreeNode(&(it->second));
         push(v,c);
     }
-    logger().info("pushed");
     embedTreeMap[linkType]=batch_create(v);
-    logger().info("batch created");
-    //print(2, embedTreeMap[linkType]);
+    v_array<v_array<CoverTreeNode> > res;
+    //kNearestNeighbors(aE.begin()->first,linkType,1);
+    //kNearestNeighbors(aE.begin()->first,linkType,2);
+    //kNearestNeighbors(aE.begin()->first,linkType,4);
+    //kNearestNeighbors(aE.begin()->first,linkType,6);
+    //kNearestNeighbors(aE.begin()->first,linkType,10);
+    kNearestNeighbors(aE.begin()->first,linkType,5);
+    kNearestNeighbors(aE.begin()->first,linkType,5);
+    kNearestNeighbors(aE.begin()->first,linkType,5);
+    kNearestNeighbors(aE.begin()->first,linkType,5);
+    kNearestNeighbors(aE.begin()->first,linkType,5);
+    kNearestNeighbors(aE.begin()->first,linkType,5);    
 }
 
 std::vector<double> DimEmbedModule::addNode(const Handle& h,
@@ -304,7 +345,8 @@ void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
         if(as->isValidHandle(it->first)) {
             oss << as->atomAsString(it->first,true) << " : (";
         } else {
-            oss << "[NODE'S BEEN DELETED]" << " : (";
+            //oss << "[NODE'S BEEN DELETED]" << " : (";
+            //oss << atom->toShortString() << " : (";
         }
         std::vector<double> embedVector = it->second;
         for(std::vector<double>::const_iterator it2=embedVector.begin();
@@ -312,7 +354,8 @@ void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
             ++it2){
             oss << *it2 << " ";
         }
-        oss << ")" << std::endl;
+        //oss << ")" << std::endl;
+        oss << std::endl;
     }
     logger().info(oss.str());
     return;

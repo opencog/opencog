@@ -57,7 +57,6 @@ namespace opencog
         AtomSpace* as;
         AtomEmbedMap atomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
-        unsigned int numDimensions;//Number of pivot atoms
         EmbedTreeMap embedTreeMap;
         /**
          * Adds h as a pivot and adds the distances from each node to
@@ -120,11 +119,8 @@ namespace opencog
          * from each of the pivots.
          */
         std::vector<double> getEmbedVector(const Handle& h, const Type& l);
-
-        double sumOfSquares(std::vector<double> v);
-
-        //void kNearestNeighbors(const Handle& h);
     public:
+        static const unsigned int numDimensions=5;//number of pivot atoms
         const char* id();
 
         DimEmbedModule();
@@ -167,7 +163,6 @@ namespace opencog
          * Returns true if a dimensional embedding exists for linkType l
          */
         bool isEmbedded(const Type& linkType);
-
         
         /**
          * Returns the distance between handles h1 and h2 for the embedding of
@@ -183,6 +178,12 @@ namespace opencog
         static double euclidDist
             (const std::vector<double> v1, const std::vector<double> v2);
 
+        /**
+         * Returns a vector of Handles of the k nearest nodes for the given 
+         * link type.
+         */
+        HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k);
+        
         /** updates the given atom (recalculates its distance from pivots) */
         //void updateAtom(const Handle& h, const Type& linkType);
     }; // class

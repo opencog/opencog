@@ -83,6 +83,9 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			Handle (T::*h_sqq)(const std::string&, const HandleSeq&, const HandleSeq&);
+            // Merged from dimembed source
+			HandleSeq (T::*q_hti)(const Handle&, const Type&, int);
+            //--
 			const std::string& (T::*s_s)(const std::string&);
 			void (T::*v_t)(const Type&);
 			void (T::*v_v)(void);
@@ -97,6 +100,9 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_H,   // return handle, take handle
 			H_SQ,  // return handle, take string and HandleSeq
             H_SQQ, // return handle, take string, HandleSeq and handleSeq
+            // Merged from dimembed source
+			Q_HTI, // return HandleSeq, take handle, type, and int
+            // --
 			S_S,   // return string, take string
             V_T,   // return void, take Type
 			V_V    // return void, take void
@@ -207,6 +213,35 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
+                // Merged from dimembed code
+				case Q_HTI:
+				{
+					//First arg is a handle
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					
+					//Second arg is a type
+					SCM inType = scm_cadr(args);
+					//Assuming that the type is input as a string or symbol, eg
+					//(f 'SimilarityLink) or (f "SimilarityLink")
+					if (scm_is_true(scm_symbol_p(inType)))
+						inType = scm_symbol_to_string(inType);
+					
+					char *lstr = scm_to_locale_string(inType);
+					Type t = classserver().getType(lstr);
+					free(lstr);
+					
+					//Third arg is an int
+					int i = scm_to_int(scm_caddr(args));
+					HandleSeq rHS = (that->*method.q_hti)(h,t,i);
+					rc = scm_list_1(SCM_UNDEFINED);
+					HandleSeq::iterator it = rHS.begin();
+					for(;it!=rHS.end();it++) {
+						rc = scm_cons(SchemeSmob::handle_to_scm(*it), rc);
+					}
+					//rc = SchemeSmob::handle_to_scm(h);
+					break;
+				}
+                // -- end from dimembed
 				case S_S:
 				{
 					char *lstr = scm_to_locale_string(scm_car(args));
@@ -283,6 +318,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(D_HHT, d_hht, double, const Handle&, const Handle&, const Type&)
 		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
+		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, const Handle&, const Type&, int)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
 		DECLARE_CONSTR_3(H_SQQ, h_sqq, Handle, const std::string&, const HandleSeq&, const HandleSeq&)
@@ -334,6 +370,8 @@ DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_3(double, const Handle&, const Handle&, const Type&)
 DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
+// from dimbed merge
+DECLARE_DECLARE_3(HandleSeq, const Handle&, const Type&, int)
 
 }
 
