@@ -1,30 +1,218 @@
-###############################################################################
-Instalation and dependency resolution for Ubuntu 8.04 (hardy) users
-###############################################################################
+OpenCog is very easy to build under Ubuntu. Just follow this page
 
-Opencog depends on the following packages:
+http://wiki.opencog.org/w/Building_OpenCog_on_Ubuntu
 
-   g++ make cmake libssl-dev libboost-dev libboost-filesystem-dev \
-       libboost-signals-dev libgsl0-dev 
+Below is a just copy/paste of it (Nov 18 2010)
 
-----------------------------------------------------------
+=========================================================
 
-Additionally, it depends on the following non-official packages:
+Building OpenCog on Ubuntu
+From OpenCog
 
-   cxxtest csockets csockets-dev 
+There are two options if you are on Ubuntu, you can either use the setup scripts from the Cogbuntu release, or you can manually download and install the various depedencies...
+Contents
+[hide]
 
-which are available at the folowing PPA:
+    * 1 Use Cogbuntu scripts
+          o 1.1 Ubuntu 10.10
+          o 1.2 Ubuntu 10.04
+          o 1.3 Ubuntu 9.10
+    * 2 Manually installing depedencies
+          o 2.1 Install version control & build systems
+          o 2.2 Install the core libraries
+          o 2.3 Get the source code
+    * 3 Build the core
+    * 4 Build & run tests
+    * 5 Build the documentation
+    * 6 Build the Scheme interpreter
+    * 7 Build the Embodiment base system
+    * 8 Build the Embodiment proxy to Metaverse
+    * 9 Build the Embodiment question-answering support
 
-   https://launchpad.net/~gama/+archive
+Use Cogbuntu scripts
 
-----------------------------------------------------------
+The Cogbuntu scripts are on launchpad at:
 
-Opencog also _optionally_ depends on the following packages:
+https://code.launchpad.net/~opencog-dev/opencog/cogbuntu
 
-   libunixodbc-dev  -- needed for SQL persistence
+You'll need bzr to download them:
 
-   guile-1.8-dev    -- needed for scheme bindings
+ sudo aptitude install bzr
 
-   libexpat-dev     -- needed for embodiment
+Ubuntu 10.10
 
-----------------------------------------------------------
+If you checkout revision 29, you get all you need to install all dependencies for OpenCog on Ubuntu 10.10 So:
+
+bzr branch -r29 lp:~opencog-dev/opencog/cogbuntu cogbuntu-10.10
+cd cogbuntu-10.10
+
+then run
+
+mkdir temp
+sudo ./add-apt-repo.sh && sudo ./install-packages-opencog-dep.sh temp
+
+to install all that opencog needs. Beware that: add-apt-repo.sh is gonna add some Karmic packages repo in /etc/apt/sources.list.
+Ubuntu 10.04
+
+If you checkout revision 26, you get all you need to install all dependencies for OpenCog on Ubuntu 10.04 So:
+
+bzr branch -r26 lp:~opencog-dev/opencog/cogbuntu cogbuntu-10.04
+cd cogbuntu-10.04
+
+then run
+
+mkdir temp
+sudo ./add-apt-repo.sh && sudo ./install-packages-opencog-dep.sh temp
+
+to install all that opencog needs. Beware that: add-apt-repo.sh is gonna add some Karmic packages repo in /etc/apt/sources.list.
+Ubuntu 9.10
+
+If you checkout revision 1, you get all you need to install all dependencies for OpenCog on Ubuntu 9.10. So:
+
+bzr branch -r1 lp:~opencog-dev/opencog/cogbuntu cogbuntu-9.10
+cd cogbuntu-9.10
+
+then run
+
+sudo ./install-packages.sh
+
+These are instructions for a progressive build of OpenCog on Ubuntu 9.10 (karmic) and Ubuntu 10.04 (lucid).
+
+Please report any build issues on the #opencog channel at irc.freenode.net.
+Manually installing depedencies
+
+First insure your repository sources are up to date.
+
+Open a command line, e.g. from Applications > Accessories > Terminal. The boxes below surrounded with dotted lines are commands to be pasted onto the command line.
+
+Update your package repositories
+
+sudo aptitude update
+
+Install version control & build systems
+
+The OpenCog project uses the Bazaar source code version control system (analogous to SVN or CVS), and the CMake build system (analogous to GNU autoconf).
+
+sudo aptitude install bzr cmake
+
+note: the command above will also install necessary dependencies, such as a C compiler and other libraries and tools. If your system hasn't been used before to build software, it may take many minutes to download and install all dependencies.
+Install the core libraries
+
+OpenCog uses the Boost C++ Libraries, the GNU Scientific Library and the Expat XML parsing library.
+
+sudo aptitude install libboost1.38-dev libgsl0-dev libexpat1-dev
+
+note: the command above will also install necessary dependencies, such as a C++ compiler and other libraries and tools. If your system hasn't been used before to build software, it may take many minutes to download and install all dependencies.
+Get the source code
+
+Do this in a convenient place, like your home directory or ~/src.
+
+bzr branch lp:opencog
+
+Make a local scratch copy
+
+bzr branch opencog ochack
+
+Build the core
+
+The core includes PLN and MOSES.
+
+Currently parts of OpenCog rely on a hard-coded relative build location, so create your build directory at ochack/bin.
+
+cd ochack; mkdir bin; cd bin
+
+Configure the build
+
+cmake ..
+
+Build OpenCog core
+
+make 
+
+Currently the OpenCog build system chooses which components to build based upon the existence of certain development packages installed (or not installed) on your system.
+Build & run tests
+
+OpenCog uses the CxxTest framework (analogous to JUnit).
+
+Only do the next two steps if you didn't install dependencies with the Cogbuntu scripts...
+
+Download the cxxtest package:
+
+wget https://launchpad.net/~dhart/+archive/ppa/+files/cxxtest_3.10.1-0ubuntu1~dhart1_all.deb
+
+Install the cxxtest package
+
+sudo dpkg -i cxxtest_3.10.1-0ubuntu1~dhart1_all.deb
+
+Re-configure the build
+
+cmake ..
+
+Setup OpenCog tests
+
+make
+
+Make & run OpenCog tests
+
+make test 
+
+note: tests can be run after building each following section.
+Build the documentation
+
+Also available online at http://buildbot.opencog.org/doxygen/
+
+Install the graphviz and doxygen packages.
+
+sudo aptitude install graphviz doxygen
+
+Configure the build
+
+cmake ..
+
+Build OpenCog documentation
+
+make doxygen
+
+Build the Scheme interpreter
+
+Install the development packages for Guile (the GNU scheme interpreter).
+
+sudo aptitude install guile-1.8-dev 
+
+Re-configure the build
+
+cmake ..
+
+Build OpenCog with Scheme interpreter
+
+make
+
+Build the Embodiment base system
+
+Enable the universe repository by editing /etc/apt/sources.list or ticking the list at System > Administration > Software Sources.
+
+Update your package repositories
+
+sudo aptitude update
+
+Install dependencies
+
+sudo aptitude install libxerces-c2-dev liblua5.1-0-dev libluabind-dev
+
+Configure the build
+
+cmake ..
+
+Build OpenCog Embodiment
+
+make 
+
+TBD
+Build the Embodiment proxy to Metaverse
+
+TBD
+Build the Embodiment question-answering support
+
+uses Relex/NLGen
+
+TBD 
