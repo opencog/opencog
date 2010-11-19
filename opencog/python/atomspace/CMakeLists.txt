@@ -24,7 +24,6 @@ add_library(atomspace_py SHARED
     SpaceServer_wrap.cc
     SpaceServerContainer_wrap.cc
     TruthValue_wrap.cc
-    TLB_wrap.cc
 )
 target_link_libraries(atomspace_py
     atomspace
