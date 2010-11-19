@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 #include <libguile.h>
 
 #include <opencog/atomspace/Atom.h>
@@ -18,7 +20,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/server/CogServer.h>
 
@@ -51,9 +52,9 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname)
 	return h;
 }
 
-Atom * SchemeSmob::verify_atom (SCM satom, const char * subrname)
+boost::shared_ptr<Atom> SchemeSmob::verify_atom (SCM satom, const char * subrname)
 {
-	return TLB::getAtom(verify_handle(satom, subrname));
+	return cogserver().getAtomSpace()->cloneAtom(verify_handle(satom, subrname));
 }
 
 /* ============================================================== */
@@ -62,9 +63,9 @@ Atom * SchemeSmob::verify_atom (SCM satom, const char * subrname)
  */
 SCM SchemeSmob::ss_name (SCM satom)
 {
-	const Atom *atom = verify_atom(satom, "cog-name");
-	const Node *node = dynamic_cast<const Node *>(atom);
-	if (NULL == node) return SCM_EOL;
+	boost::shared_ptr<const Atom> atom = verify_atom(satom, "cog-name");
+    boost::shared_ptr<const Node> node = boost::shared_dynamic_cast<const Node>(atom);
+	if (!node) return SCM_EOL;
 	std::string name = node->getName();
 	SCM str = scm_from_locale_string(name.c_str());
 	return str;
@@ -72,7 +73,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 
 SCM SchemeSmob::ss_type (SCM satom)
 {
-	const Atom *atom = verify_atom(satom, "cog-type");
+	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-type");
 	Type t = atom->getType();
 	const std::string &tname = classserver().getTypeName(t);
 	SCM str = scm_from_locale_string(tname.c_str());
@@ -83,9 +84,9 @@ SCM SchemeSmob::ss_type (SCM satom)
 
 SCM SchemeSmob::ss_arity (SCM satom)
 {
-	const Atom *atom = verify_atom(satom, "cog-arity");
+	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-arity");
 	Arity ari = 0;
-	const Link *l = dynamic_cast<const Link *>(atom);
+    boost::shared_ptr<const Link> l = boost::shared_dynamic_cast<const Link>(atom);
 	if (l) ari = l->getArity();
 
 	/* Arity is currently an unsigned short */
@@ -95,7 +96,7 @@ SCM SchemeSmob::ss_arity (SCM satom)
 
 SCM SchemeSmob::ss_tv (SCM satom)
 {
-	const Atom *atom = verify_atom(satom, "cog-tv");
+	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-tv");
 	const TruthValue &tv = atom->getTruthValue();
 	TruthValue *stv = tv.clone();
 	return take_tv(stv);
@@ -103,7 +104,7 @@ SCM SchemeSmob::ss_tv (SCM satom)
 
 SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 {
-	Atom *atom = verify_atom(satom, "cog-set-tv!");
+	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-set-tv!");
 	TruthValue *tv = verify_tv(stv, "cog-set-tv!");
 
 	atom->setTruthValue(*tv);
@@ -112,7 +113,7 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 
 SCM SchemeSmob::ss_av (SCM satom)
 {
-	const Atom *atom = verify_atom(satom, "cog-av");
+	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-av");
 	const AttentionValue &av = atom->getAttentionValue();
 	AttentionValue *sav = av.clone();
 	return take_av(sav);
@@ -120,7 +121,7 @@ SCM SchemeSmob::ss_av (SCM satom)
 
 SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 {
-	Atom *atom = verify_atom(satom, "cog-set-av!");
+	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-set-av!");
 	AttentionValue *av = verify_av(sav, "cog-set-av!");
 
 	atom->setAttentionValue(*av);
@@ -133,9 +134,9 @@ SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
  */
 SCM SchemeSmob::ss_outgoing_set (SCM satom)
 {
-	const Atom *atom = verify_atom(satom, "cog-outgoing-set");
-	const Link *l = dynamic_cast<const Link *>(atom);
-	if (l == NULL) return SCM_EOL;  // only links have outgoing sets.
+	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-outgoing-set");
+    boost::shared_ptr<const Link> l = boost::shared_dynamic_cast<const Link>(atom);
+	if (!l) return SCM_EOL;  // only links have outgoing sets.
 
 	const std::vector<Handle> &oset = l->getOutgoingSet();
 

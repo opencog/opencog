@@ -704,8 +704,7 @@ Then you can call it from C++ as follows:
   // Create a LIST_LINK on stack, holding the input arguments.
   Handle arg1 = ...;
   Handle arg2 = ...;
-  Link lnk(LIST_LINK, arg1, arg2;...);    // constructor runs on stack
-  Handle hlnk = TLB::getHandle(&lnk);     // handle of the list link
+  hlnk = getAtomSpace.addLink(LIST_LINK, arg1, arg2, ...);
   
   // Call the "do-stuff" function
   SchemeEval evaluator;

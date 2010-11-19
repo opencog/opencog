@@ -15,6 +15,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include <libguile.h>
 
@@ -139,7 +140,7 @@ class SchemeSmob
 		
 		static Type validate_atom(SCM, const char *);
 		static Type validate_node(SCM, const char *);
-		static Atom * verify_atom(SCM, const char *);
+		static boost::shared_ptr<Atom> verify_atom(SCM, const char *);
 		static Handle verify_handle(SCM, const char *);
 		static TruthValue * verify_tv(SCM, const char *);
 		static AttentionValue * verify_av(SCM, const char *);

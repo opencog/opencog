@@ -31,13 +31,10 @@ class MyTestClass
 		Handle my_func(Handle h)
 		{
 			Handle hlist = Handle::UNDEFINED;
-			Atom *a = TLB::getAtom(h);
-			Node *n = dynamic_cast<Node *>(a);
-			if (n)
+            AtomSpace *as = cogserver().getAtomSpace();
+			if (as->isNode(as->getType(h)))
 			{
-				printf("Info: my_func instance %d received the node: %s\n", id, n->getName().c_str());
-				CogServer& cogserver = static_cast<CogServer&>(server());
-				AtomSpace *as = cogserver.getAtomSpace();
+				printf("Info: my_func instance %d received the node: %s\n", id, as->getName(h).c_str());
 				hlist = as->addLink(LIST_LINK, h);
 			}
 			else
