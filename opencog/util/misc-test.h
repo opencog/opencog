@@ -50,14 +50,14 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
     HandleSeq handles;
 
     if (head_handle_ptr != NULL) {
-        return as.addRealAtom(*(TLB::getAtom(*head_handle_ptr)), tvn);
+        return as.addRealAtom(*as.cloneAtom(*head_handle_ptr), tvn);
     }
 
     for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
         Handle *h_ptr = boost::get<Handle>(&*i);
 
         if (h_ptr) {
-            handles.push_back(as.addRealAtom(*TLB::getAtom(*h_ptr), TruthValue::NULL_TV()));
+            handles.push_back(as.addRealAtom(*as.cloneAtom(*h_ptr), TruthValue::NULL_TV()));
         } else {
             handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
         }
