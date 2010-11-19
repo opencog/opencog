@@ -81,7 +81,7 @@ bool UpdateAtomRequest::execute()
     if (keyvalue[0] == "handle") { // get by handle
         UUID uuid = strtol(keyvalue[1].c_str(), NULL, 0);
         h = Handle(uuid);
-        if (TLB::isInvalidHandle(h)) {
+        if (!as->isValidHandle(h)) {
             _output << "{\"error\":\"invalid handle\"}" << std::endl;
             send(_output.str());
             return false;

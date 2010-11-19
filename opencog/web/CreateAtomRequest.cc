@@ -133,16 +133,16 @@ bool CreateAtomRequest::execute()
             return false;
         }
         h = as->getHandle(t, outgoing);
-        if (!TLB::isInvalidHandle(h)) exists = true;
+        if (as->isValidHandle(h)) exists = true;
         h = as->addLink(t, outgoing, *tv);
     } else {
         h = as->getHandle(t, atomName);
-        if (!TLB::isInvalidHandle(h)) exists = true;
+        if (as->isValidHandle(h)) exists = true;
         h = as->addNode(t,atomName, *tv);
     }
     delete tv;
 
-    if (TLB::isInvalidHandle(h)) {
+    if (!as->isValidHandle(h)) {
         _output << "{\"error\":\"invalid handle returned\"}" << std::endl;
         send(_output.str());
         return false;

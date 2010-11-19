@@ -54,6 +54,7 @@ GetAtomRequest::~GetAtomRequest()
 bool GetAtomRequest::execute()
 {
     Handle handle = Handle::UNDEFINED;
+    AtomSpace* as = server().getAtomSpace();
 
     std::list<std::string>::const_iterator it;
     for (it = _parameters.begin(); it != _parameters.end(); ++it) {
@@ -73,7 +74,7 @@ bool GetAtomRequest::execute()
             if (keyvalue[1] == "json") output_format = json_format;
         }
     }
-    if (TLB::isInvalidHandle(handle)) {
+    if (!as->isValidHandle(handle)) {
         _output << "Invalid handle: " << handle.value() << std::endl;
         send(_output.str());
         return false;

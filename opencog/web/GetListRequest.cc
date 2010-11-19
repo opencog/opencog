@@ -142,7 +142,7 @@ bool GetListRequest::execute()
         if (keyvalue[0] == "handle") { // get by handle
             UUID uuid = strtol(keyvalue[1].c_str(), NULL, 0);
             handle = Handle(uuid);
-            if (TLB::isInvalidHandle(handle)) {
+            if (!as->isValidHandle(handle)) {
                 errbuff << "Invalid handle: " << uuid;
                 sendError(errbuff.str());
                 return false;
