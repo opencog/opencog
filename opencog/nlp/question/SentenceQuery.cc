@@ -89,11 +89,10 @@ bool SentenceQuery::is_parse_a_query(Handle parse)
  */
 bool SentenceQuery::is_tq(Handle prop)
 {
-	Atom *atom = TLB::getAtom(prop);
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
+	AtomSpace *atomspace = cogserver().getAtomSpace();
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atomspace->getType(prop)) return false;
 
-	Node *n = static_cast<Node *>(atom);
-	const std::string& name = n->getName();
+	const std::string& name = atomspace->getName(prop);
 	const char * str = name.c_str();
 	if (0 == strcmp(str, "truth-query"))
 		return true;
@@ -219,7 +218,7 @@ bool SentenceQuery::discard_extra_markup(Atom *atom)
  */
 bool SentenceQuery::assemble_predicate(Atom *atom)
 {
-	Handle ah = TLB::getHandle(atom);
+	Handle ah = atom->handle;
 	Type atype = atom->getType();
 	if (EVALUATION_LINK == atype)
 	{
@@ -268,8 +267,8 @@ bool SentenceQuery::is_ling_rel(Atom *atom)
 
 bool SentenceQuery::rel_up(Handle hrelation)
 {
-	Atom *a = TLB::getAtom(hrelation);
-	if (EVALUATION_LINK != a->getType()) return false;
+	AtomSpace *atomspace = cogserver().getAtomSpace();
+	if (EVALUATION_LINK != atomspace->getType(hrelation)) return false;
 
 	bool keep = foreach_outgoing_atom(hrelation, &SentenceQuery::is_ling_rel, this);
 	if (!keep) return false;
@@ -282,8 +281,8 @@ bool SentenceQuery::rel_up(Handle hrelation)
 
 bool SentenceQuery::word_up(Handle ll)
 {
-	Atom *a = TLB::getAtom(ll);
-	if (LIST_LINK != a->getType()) return false;
+	AtomSpace *atomspace = cogserver().getAtomSpace();
+	if (LIST_LINK != atomspace->getType(ll)) return false;
 
 	return foreach_incoming_handle(ll,
 		&SentenceQuery::rel_up, this);

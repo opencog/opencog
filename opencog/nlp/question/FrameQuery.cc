@@ -98,7 +98,7 @@ bool FrameQuery::discard_eval_markup(Atom *atom)
 
 	if (LIST_LINK == atype)
 	{
-		Handle ah = TLB::getHandle(atom);
+		Handle ah = atom->handle;
 		foreach_outgoing_atom(ah, &FrameQuery::discard_question_markup, this);
 		return false;
 	}
@@ -179,7 +179,7 @@ bool FrameQuery::discard_heir_markup(Atom *atom)
  */
 bool FrameQuery::assemble_predicate(Atom *atom)
 {
-	Handle ah = TLB::getHandle(atom);
+	Handle ah = atom->handle;
 	Type atype = atom->getType();
 	if (EVALUATION_LINK == atype)
 	{

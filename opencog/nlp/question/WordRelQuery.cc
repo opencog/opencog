@@ -85,11 +85,11 @@ static inline void prt(Atom *atom) {}
  */
 bool WordRelQuery::is_qVar(Handle word_prop)
 {
-	Atom *atom = TLB::getAtom(word_prop);
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
+	AtomSpace *atomspace = cogserver().getAtomSpace();
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atomspace->getType(word_prop))
+        return false;
 
-	Node *n = static_cast<Node *>(atom);
-	const std::string& name = n->getName();
+	const std::string& name = atomspace->getName(word_prop);
 	const char * str = name.c_str();
 	if (0 == strcmp(str, "who"))
 		return true;
@@ -372,12 +372,10 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 		// FYI, we expect the grounding to be a SemeNode 
 		// at this point, and that's what we return as the
 		// answer.
-		Atom *wrd = TLB::getAtom(ha);
-		Node *n = dynamic_cast<Node *>(wrd);
-		if (!n) return false;
-		printf("duude answer=%s\n", n->getName().c_str());
+		if (!atom_space->isNode(atom_space->getType(ha))) return false;
+		printf("duude answer=%s\n", atom_space->getName(ha).c_str());
 
-		Handle hw = TLB::getHandle(wrd);
+		Handle hw = ha;
 		atom_space->addLink(LIST_LINK, hq, hw);
 	}
 	else
