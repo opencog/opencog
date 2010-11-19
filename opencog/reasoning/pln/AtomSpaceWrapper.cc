@@ -24,7 +24,6 @@
 #include "rules/Rules.h"
 
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/server/CogServer.h> // To get access to AtomSpace
 #include <opencog/persist/xml/FileXMLBufferReader.h>
 #include <opencog/persist/xml/XMLBufferReader.h>
 #include <opencog/persist/xml/NMXmlParser.h>
@@ -257,8 +256,7 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
 bool AtomSpaceWrapper::isValidPHandle(const pHandle h) const
 {
 #ifdef STREAMLINE_PHANDLES
-	Atom* result = TLB::getAtom(fakeToRealHandle(h).first);
-	return result;
+	return atomspace->isValidHandle(fakeToRealHandle(h).first);
 #else
     vhmap_t::const_iterator i = vhmap.find(h);
     if (i != vhmap.end()) {
@@ -293,7 +291,7 @@ vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
     vhmap_t::const_iterator i = vhmap.find(h);
     if (i != vhmap.end()) {
         // check that real Handle is still valid
-        if (TLB::isValidHandle(i->second.first)) {
+        if (atomspace->isValidHandle(i->second.first)) {
             // return existing fake handle
             return i->second;
         } else {
@@ -481,7 +479,7 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
         // The below removal should probably become a utility mindagent
         // that checks for invalid versioned TVs...
         // Remove any invalid version TVs
-        ctv.removeInvalidTVs();
+        ctv.removeInvalidTVs(*atomspace);
         // Update the atomspace TV
         atomspace->setTV(real,ctv);
 
@@ -837,7 +835,7 @@ pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs,
         hsReal.push_back(v.first);
 
         // isInvalidHandle makes sure the atom was not deleted.
-        if (TLB::isInvalidHandle(v.second.substantive)) {
+        if (!atomspace->isValidHandle(v.second.substantive)) {
             contexts.push_back(atomspace->getHandle(CONCEPT_NODE, rootContext));
         } else {
             contexts.push_back(v.second.substantive);
@@ -921,7 +919,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 		assert(noExistingTV);
 #endif
 
-//		if (TLB::isInvalidHandle(result)) {
+//		if (!atomspace->isValidHandle(result)) {
 			// if the atom doesn't exist already, then just add normally
 			return realToFakeHandle(as->addNode(node.getType(),
 												node.getName(),
@@ -931,7 +929,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 	} else {
 		const Link& link = (const Link&) atom;
 		//for (int i = 0; i < link.getArity(); i++) {
-		//    outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
+		//    outgoing.push_back(link.getOutgoingAtom(i).value());
 		//}
 		//outgoing = link.getOutgoingSet();
 #ifdef NEVER_ALLOW_SECOND_TVS
@@ -951,7 +949,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 		assert(noExistingTV);
 #endif
 
-//		if (TLB::isInvalidHandle(result)) {
+//		if (!as->isValidHandle(result)) {
 			result = as->addLink(link.getType(), link.getOutgoingSet(),
 								 link.getTruthValue());
 //		}
@@ -980,7 +978,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
         if (nnn) {
             const Node& node = (const Node&) atom;
             result = as->getHandle(node.getType(), node.getName());
-            if (TLB::isInvalidHandle(result)) {
+            if (!as->isValidHandle(result)) {
                 // if the atom doesn't exist already, then just add normally
                 return realToFakeHandle(as->addNode(node.getType(),
                                                     node.getName(),
@@ -990,7 +988,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
         } else {
             const Link& link = (const Link&) atom;
             result = as->getHandle(link.getType(), link.getOutgoingSet());
-            if (TLB::isInvalidHandle(result)) {
+            if (!as->isValidHandle(result)) {
                 // if the atom doesn't exist already, then add normally
                 bool allNull = true;
                 // if all null context
@@ -1053,7 +1051,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
                                 as->getHandle(CONCEPT_NODE, rootContext));
 
                 Handle existingContext = as->getHandle(ORDERED_LINK, contexts);
-                if (TLB::isInvalidHandle(existingContext)) {
+                if (!as->isValidHandle(existingContext)) {
                     existingContext = as->addLink(ORDERED_LINK,contexts);
                     vh = VersionHandle(CONTEXTUAL,existingContext);
                     dummyContexts.insert(vh);
@@ -1082,7 +1080,7 @@ Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
 
     // check if root context link exists
     Handle existingLink = atomspace->getHandle(ORDERED_LINK,contexts);
-    if(TLB::isInvalidHandle(existingLink)) {
+    if (!atomspace->isValidHandle(existingLink)) {
         return atomspace->addLink(ORDERED_LINK,contexts);
     } else {
         // if it does exist, check if it's in the contexts of the
@@ -1096,8 +1094,7 @@ Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
                     VersionHandle vh = ctv.getVersionHandle(i);
 
                     // atoms in version handles may have been deleted!
-                    if (TLB::isValidHandle(vh.substantive) &&
-                       
+                    if (atomspace->isValidHandle(vh.substantive) &&
                         atomspace->getOutgoing(vh.substantive,0) == existingLink) {
                         existingLink = vh.substantive;
                         found = true;
@@ -1146,7 +1143,7 @@ bool AtomSpaceWrapper::removeAtom(pHandle h)
     // an atom might remove links connecting to it, and removing a
     // NULL_VERSION_HANDLE atom will remove all the versions of an atom)
     for ( i = vhmap.begin(); i != vhmap.end(); i++ ) {
-        if (TLB::getAtom(i->second.first)) {
+        if (as->isValidHandle(i->second.first)) {
             j = i;
             i--;
             vhmap.erase(j);
@@ -1179,7 +1176,7 @@ pHandleSeq AtomSpaceWrapper::getImportantHandles(int number)
 
     a->getHandleSetInAttentionalFocus(back_inserter(hs), ATOM, true);
     int toRemove = hs.size() - number;
-    sort(hs.begin(), hs.end(), compareSTI());
+    sort(hs.begin(), hs.end(), compareSTI(a));
     if (toRemove > 0) {
         while (toRemove > 0) {
             hs.pop_back();
@@ -1429,10 +1426,9 @@ std::string AtomSpaceWrapper::vhmapToString() const {
 std::string AtomSpaceWrapper::pHandleToString(pHandle ph) const {
     vhpair hvh = fakeToRealHandle(ph);
     Handle h = hvh.first;
-    const Atom* a = TLB::getAtom(h);
     VersionHandle vh = hvh.second;
     std::stringstream ss;
-    ss << "(Handle = " << h << "; Atom = " << a->toString()
+    ss << "(Handle = " << h << "; Atom = " << atomspace->atomAsString(h)
        << "; VersionHandle = " << vh 
        << "; VersionedTV = " << getTV(ph).toString()
        << ")";

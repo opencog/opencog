@@ -88,7 +88,7 @@ void BackChainingAgent::chooseTarget()
 
     int chosen_int = getRandGen()->randint(hs.size());
     h = hs[chosen_int];
-//    std::cout << "Atom: " << TLB::getAtom(h);
+//    std::cout << "Atom: " << a.atomAsString(h);
     
     // Initially: Run one whole PLN inference
     // Later: Divide it into slices

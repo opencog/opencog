@@ -231,10 +231,14 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
 
     //! Used by getImportantHandles
     struct compareSTI {
-        // Warning, uses real atomspace handles in comparison
+        AtomSpace *atomspace;
+
+        compareSTI(AtomSpace* _a): atomspace(_a) {};
+
+        //! @warning uses real atomspace handles in comparison
         bool operator()(const Handle& a, const Handle& b) {
-            return TLB::getAtom(a)->getAttentionValue().getSTI() >
-                TLB::getAtom(b)->getAttentionValue().getSTI();
+            return atomspace->getAV(a).getSTI() >
+                atomspace->getAV(b).getSTI();
         }
     };
     
