@@ -27,7 +27,6 @@
 #include <opencog/util/platform.h>
 
 #include "CompositeTruthValue.h"
-#include "TLB.h"
 
 //#define USE_SHARED_DEFAULT_TV
 
@@ -500,7 +499,7 @@ void CompositeTruthValue::removeVersionedTVs(const Handle &substantive)
 /**
  * Nearly identical to above, except tht all invalid handles are removed 
  */
-void CompositeTruthValue::removeInvalidTVs(void)
+void CompositeTruthValue::removeInvalidTVs(AtomSpace& atomspace)
 {
     VersionedTruthValueMap toBeRemovedEntries;
 
@@ -509,7 +508,7 @@ void CompositeTruthValue::removeInvalidTVs(void)
          itr != versionedTVs.end(); itr++)
     {
         VersionHandle key = itr->first;
-        if (TLB::isInvalidHandle(key.substantive))
+        if (!atomspace.isValidHandle(key.substantive))
         {
             toBeRemovedEntries[key] = NULL;
 

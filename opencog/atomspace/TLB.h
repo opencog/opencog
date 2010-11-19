@@ -60,6 +60,15 @@ namespace opencog
  */
 class TLB
 {
+    friend class AtomSpace;
+    friend class AtomTable;
+    //! @todo remove these friend classes and remove TLB references from them. 
+    friend class Atom;
+    friend class Node;
+    friend class Link;
+    friend class HandleEntry;
+    friend class HandleSet;
+    friend class HandleTemporalPair;
 private:
 
 #ifdef USE_TLB_MAP
@@ -75,6 +84,7 @@ private:
     static UUID brk_uuid;
 #endif
 
+// TODO: return this to private and only accessible to friend classes
 public:
     /**
      * Maps a handle to its corresponding atom.

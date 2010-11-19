@@ -731,6 +731,8 @@ public:
      * Otherwise changes are lost.
      */
     boost::shared_ptr<Atom> cloneAtom(const Handle h) const;
+    boost::shared_ptr<Node> cloneNode(const Handle h) const;
+    boost::shared_ptr<Link> cloneLink(const Handle h) const;
 
     /** Commit an atom that has been cloned from the AtomSpace.
      *
@@ -738,6 +740,16 @@ public:
      * @return whether the commit was successful
      */
     bool commitAtom(const Atom& a);
+
+    /** Get hash for an atom
+     */
+    size_t getAtomHash(const Handle h) const;
+
+    bool isValidHandle(const Handle h) const;
+
+    /** Get neighbours for an atom
+     */
+    HandleSeq getNeighbors(const Handle h, bool fanin, bool fanout, Type desiredLinkType, bool subClasses=true) const;
 
     /** Retrieve a single Handle from the outgoing set of a given link */
     Handle getOutgoing(Handle, int idx) const;

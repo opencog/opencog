@@ -655,7 +655,7 @@ void AtomTable::decayShortTermImportance(void)
     if (oldAtoms) clearIndexesAndRemoveAtoms(oldAtoms);
 }
 
-static bool decayed(Handle h)
+bool AtomTable::decayed(Handle h)
 {
     Atom *a = TLB::getAtom(h);
     return a->getFlag(REMOVED_BY_DECAY);

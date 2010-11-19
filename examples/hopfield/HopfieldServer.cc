@@ -525,10 +525,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     HandleSeq tempGrid(hGrid);
 
     // get all links from key node
-    //std::map<Handle,Handle> mapDestToLink = getDestinationsFrom(keyHandle, HEBBIAN_LINK);
-    HandleEntry* heNeighbours = TLB::getAtom(keyHandle)->getNeighbors(true, true, HEBBIAN_LINK);
-    HandleSeq neighbours;
-    neighbours = heNeighbours->toHandleVector();
+    HandleSeq neighbours = a->getNeighbors(keyHandle,true,true,HEBBIAN_LINK);
     
     // for each entry in hGrid
     for (uint i = 0; i < hGrid.size(); i++) {
@@ -543,10 +540,9 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     
     }
     // randomly remove other links from other key nodes if # links > max
-    HandleEntry* heLinks = atomSpace->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
     HandleSeq links;
-    links = heLinks->toHandleVector();
-    delete heLinks;
+    std::back_insert_iterator< HandleSeq > lo(links);
+    atomSpace->getHandleSet(lo, HEBBIAN_LINK, true);
     int amountToRemove = links.size() - this->links;
     if (amountToRemove > 0 && keyNodes.size() == 1) {
         logger().info("Only one keyNode, so unable to remove any links to "

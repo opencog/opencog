@@ -255,21 +255,19 @@ void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
     
     oss << "PIVOTS:" << std::endl;
     for(PivotSeq::const_iterator it=pivots.begin(); it!=pivots.end(); ++it){
-        Atom* atom = TLB::getAtom(*it);
-        if(atom==NULL) {
-            oss << "[PIVOT'S BEEN DELETED]" << std::endl;
+        if(as->isValidHandle(*it)) {
+            oss << as->atomAsString(*it,true) << std::endl;
         } else {
-            oss << atom->toShortString() << std::endl;
+            oss << "[PIVOT'S BEEN DELETED]" << std::endl;
         }
     }
     oss << "Node Embeddings:" << std::endl;
     AtomEmbedding::const_iterator it;
     for(it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
-        Atom* atom = TLB::getAtom(it->first);
-        if(atom==NULL) {
-            oss << "[NODE'S BEEN DELETED]" << " : (";
+        if(as->isValidHandle(it->first)) {
+            oss << as->atomAsString(it->first,true) << " : (";
         } else {
-            oss << atom->toShortString() << " : (";
+            oss << "[NODE'S BEEN DELETED]" << " : (";
         }
         std::vector<double> embedVector = it->second;
         for(std::vector<double>::const_iterator it2=embedVector.begin();

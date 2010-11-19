@@ -26,7 +26,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/server/CogServer.h>
 
@@ -64,7 +63,7 @@ bool ListRequest::execute()
             if (it == _parameters.end()) return syntaxError();
             UUID uuid = strtol((*it).c_str(), NULL, 0);
             handle = Handle(uuid);
-            if (TLB::isInvalidHandle(handle)) {
+            if (!as->isValidHandle(handle)) {
                 _error << "invalid handle" << std::endl;
                 sendError();
                 return false;
@@ -114,12 +113,13 @@ void ListRequest::sendOutput()
     std::ostringstream oss;
 
     if (_mimeType == "text/plain") {
+        AtomSpace* as = server().getAtomSpace();
         std::vector<Handle>::const_iterator it; 
         for (it = _handles.begin(); it != _handles.end(); ++it) {
-            Atom* atom = TLB::getAtom(*it);
-            oss << atom->toString() << std::endl;
+            oss << as->atomAsString(*it) << std::endl;
         }
-    } else throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s", _mimeType.c_str());
+    } else throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
+            _mimeType.c_str());
 
     send(oss.str());
 }
@@ -127,6 +127,7 @@ void ListRequest::sendOutput()
 void ListRequest::sendError()
 {
     if (_mimeType != "text/plain")
-        throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s", _mimeType.c_str());
+        throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
+                _mimeType.c_str());
     send(_error.str());
 }

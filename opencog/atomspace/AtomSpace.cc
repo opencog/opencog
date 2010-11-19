@@ -744,9 +744,12 @@ boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle h) const
     // Need to use the newly added clone methods as the copy constructors for
     // Node and Link don't copy incoming set.
     Atom * a = TLB::getAtom(h);
+    boost::shared_ptr<Atom> dud;
+    if (!a) return dud;
     const Node *node = dynamic_cast<const Node *>(a);
-    if (NULL == node) {
+    if (!node) {
         const Link *l = dynamic_cast<const Link *>(a);
+        if (!l) return dud;
         boost::shared_ptr<Atom> clone_link(l->clone());
         return clone_link;
     } else {
@@ -755,18 +758,55 @@ boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle h) const
     }
 }
 
-std::string AtomSpace::atomAsString(Handle h, bool terse) const {
+boost::shared_ptr<Node> AtomSpace::cloneNode(const Handle h) const
+{
+    return boost::shared_dynamic_cast<Node>(this->cloneAtom(h));
+}
+
+boost::shared_ptr<Link> AtomSpace::cloneLink(const Handle h) const
+{
+    return boost::shared_dynamic_cast<Link>(this->cloneAtom(h));
+}
+
+std::string AtomSpace::atomAsString(Handle h, bool terse) const
+{
+    // TODO check that h is a valid atom handle
     if (terse) return TLB::getAtom(h)->toShortString();
     return TLB::getAtom(h)->toString();
 }
 
-bool AtomSpace::isSource(Handle source, Handle link) const {
+HandleSeq AtomSpace::getNeighbors(const Handle h, bool fanin,
+        bool fanout, Type desiredLinkType, bool subClasses) const 
+{
+    Atom* a = TLB::getAtom(h);
+    if (a == NULL) {
+        throw InvalidParamException(TRACE_INFO,
+            "Handle %d doesn't refer to a Atom", h.value());
+    }
+    HandleEntry* he = a->getNeighbors(fanin,fanout,desiredLinkType,subClasses);
+    HandleSeq result(he->toHandleVector());
+    delete he;
+    return result;
+}
+
+bool AtomSpace::isSource(Handle source, Handle link) const
+{
     Atom *a = TLB::getAtom(link);
     const Link *l = dynamic_cast<const Link *>(a);
     if (l != NULL) {
         return l->isSource(source);
     }
     return false;
+}
+
+size_t AtomSpace::getAtomHash(const Handle h) const 
+{
+    return TLB::getAtom(h)->hashCode();
+}
+
+bool AtomSpace::isValidHandle(const Handle h) const 
+{
+    return TLB::isValidHandle(h);
 }
 
 bool AtomSpace::commitAtom(const Atom& a)
@@ -1176,3 +1216,4 @@ void AtomSpace::clear()
     getHandleSet(output2, ATOM, true);
     assert(allAtoms.size() == 0);
 }
+

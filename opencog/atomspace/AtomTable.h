@@ -132,6 +132,7 @@ private:
      */
     void typeAdded(Type);
 
+    static bool decayed(Handle h);
     void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
 
     /**

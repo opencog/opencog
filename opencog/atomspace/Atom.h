@@ -304,6 +304,7 @@ public:
      * considered.
      * @param fanout Whether directional links point from this node to
      * another should be considered.
+     * @param linkType Whether the link
      */
     HandleEntry *getNeighbors(bool fanin = true,
                               bool fanout = true,

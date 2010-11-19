@@ -27,6 +27,8 @@
 
 #include <opencog/util/platform.h>
 
+#include <opencog/atomspace/AtomSpace.h>
+
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/VersionHandle.h>
@@ -163,8 +165,10 @@ public:
      * Removes all versioned TruthValue objects associated with any
      * VersionHandle whose substantive component is not a valid handle.
      * (i.e. whose corresponding atom has been deleted).
+     *
+     * @param atomspace The AtomSpace to check the handles against
      */
-    void removeInvalidTVs(void);
+    void removeInvalidTVs(AtomSpace& atomspace);
 
     /**
      * Gets the number of versioned TVs of this CTV.
