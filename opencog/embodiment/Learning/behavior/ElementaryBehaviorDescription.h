@@ -28,7 +28,7 @@
 #include <opencog/atomspace/Temporal.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/StringManipulator.h>
 
 using namespace opencog;
@@ -47,10 +47,10 @@ public:
     ElementaryBehaviorDescription() : temporal(0) {}
     ElementaryBehaviorDescription(Handle h, const Temporal& t): handle(h), temporal(t) {}
 
-    std::string toString() const {
+    std::string toString(AtomSpace& a) const {
         std::string str = std::string("{") +
                           (handle == Handle::UNDEFINED ? std::string("Handle::UNDEFINED") :
-                           TLB::getAtom(handle)->toString())
+                          a.atomAsString(handle))
                           + std::string(",") + temporal.toString() + std::string("}");
         return str;
     }

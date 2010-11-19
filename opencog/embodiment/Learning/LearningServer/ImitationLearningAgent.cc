@@ -41,6 +41,7 @@ using namespace opencog;
 
 //constructor destructor
 ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),
+        _BDCat(NULL),
         _entropyFilter(NULL),
         _fitnessEstimator(NULL),
         _PIL(NULL), _PVoc(NULL)
@@ -66,6 +67,7 @@ ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),
 
 ImitationLearningAgent::~ImitationLearningAgent()
 {
+    delete _BDCat;
     delete _entropyFilter;
     delete _PIL;
     delete _PVoc;
@@ -106,7 +108,9 @@ bool ImitationLearningAgent::initLearning(int nepc,
 {
     OC_ASSERT(wp, "The World Provider points to NULL");
     //retreive exemplars
-    _BDCat.clear();
+    if (_BDCat != NULL) delete _BDCat;
+    _BDCat = new BehaviorCategory(&wp->getAtomSpace());
+    _BDCat->clear();
     _exemplarTemporals.clear();
     _all.clear();
 
@@ -115,9 +119,9 @@ bool ImitationLearningAgent::initLearning(int nepc,
     //of the previous learning session are ignored
     //BDRetriever::retrieveAllExemplars(_BDCat, _exemplarTemporals,
     //*wp, trick_name);
-    BDRetriever::addLastExemplar(_BDCat, _exemplarTemporals, *wp, trick_name);
+    BDRetriever::addLastExemplar(*_BDCat, _exemplarTemporals, *wp, trick_name);
 
-    if (_BDCat.empty()) {
+    if (_BDCat->empty()) {
         logger().info("ImitationLearningAgent - All exemplars are empty, learning will not start.");
         return false; //indicates that initLEarning has failed
     } else {
@@ -127,7 +131,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         _trick_name = trick_name;
 
         //for now it is assumed that _BDCat constins only one BD
-        unsigned int bdcs = _BDCat.getSize();
+        unsigned int bdcs = _BDCat->getSize();
         OC_ASSERT(bdcs == 1,
                          "For now it is assumed that _BDCat contains only one BD");
 
@@ -243,7 +247,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         OC_ASSERT(_atomic_perceptions.empty(),
                          "_atomic_perceptions must be empty because stopLearning would have clear it");
 
-        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_double("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat, _exemplarTemporals, _all);
+        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_double("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), *_BDCat, _exemplarTemporals, _all);
 
         logger().debug("ImitationLearningAgent - EntropyFilter, stop processing.");
 
@@ -271,7 +275,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
 
         OC_ASSERT(_atomic_actions.empty(),
                          "_atomic_actions must be empty because stopLearning would have clear it");
-        af.insertActionSubseqs(_atomic_actions, _BDCat, _all,
+        af.insertActionSubseqs(_atomic_actions, *_BDCat, _all,
                                config().get_int("ACTION_FILTER_SEQ_MAX"),
                                config().get_bool("ACTION_FILTER_ONLY_MIN_MAX"));
 
@@ -305,7 +309,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                          "_fitnessEstimator must be NULL because it should have been deleted by stopLearning");
         _fitnessEstimator =
             new FE(wp, _pet_id, _owner_id, _avatar_id, _trick_name,
-                   _definite_objects, _BDCat, _exemplarTemporals, _all, io.size(),
+                   _definite_objects, *_BDCat, _exemplarTemporals, _all, io.size(),
                    eo.size(),
                    _atomic_perceptions.size(), _atomic_actions.size(), *_rng);
 
@@ -363,9 +367,9 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
 {
     OC_ASSERT(wp, "The World Provider points to NULL");
     //add new exemplar
-    int cat_count = _BDCat.getSize();
-    BDRetriever::addLastExemplar(_BDCat, _exemplarTemporals, *wp, _trick_name);
-    if (cat_count != _BDCat.getSize()) { //a new exemplar has been added
+    int cat_count = _BDCat->getSize();
+    BDRetriever::addLastExemplar(*_BDCat, _exemplarTemporals, *wp, _trick_name);
+    if (cat_count != _BDCat->getSize()) { //a new exemplar has been added
 
         OC_ASSERT((int)al.size() == _arity,
                          "For now the arity must be the same for all exemplars");
@@ -420,7 +424,7 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         logger().debug("ImitationLearningAgent - EntropyFilter, start update processing.");
 
         _atomic_perceptions.clear();
-        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_double("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat.getEntries().back(), _exemplarTemporals.back(), al);
+        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_double("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat->getEntries().back(), _exemplarTemporals.back(), al);
 
         logger().debug("ImitationLearningAgent - EntropyFilter, stop update processing.");
 
@@ -449,7 +453,7 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
                                 *_rng);
 
         _atomic_actions.clear();
-        af.insertActionSubseqs(_atomic_actions, _BDCat, _all,
+        af.insertActionSubseqs(_atomic_actions, *_BDCat, _all,
                                config().get_int("ACTION_FILTER_SEQ_MAX"),
                                config().get_bool("ACTION_FILTER_ONLY_MIN_MAX"));
 
@@ -512,7 +516,7 @@ void ImitationLearningAgent::stopLearning()
 
     _definite_objects.clear();
     _messages.clear();
-    _BDCat.clear();
+    _BDCat->clear();
     _atomic_perceptions.clear();
     _atomic_actions.clear();
 

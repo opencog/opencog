@@ -48,7 +48,8 @@ NoSpaceLife::NoSpaceLife(AtomSpace& atomSpace, const std::string& pet_id,
         _atomSpace(atomSpace), _pet_id(pet_id), _owner_id(owner_id),
         _avatar_id(avatar_id),
         _currentTime(0), _currentIndex(0), _currentMapHandle(Handle::UNDEFINED),
-        _hasTimeChanged(true), _imitatedBD(cbd), _exemplarTemporal(et), _rng(rng)
+        _hasTimeChanged(true), _imitatedBD(cbd), _exemplarTemporal(et),
+        _generatedBD(&atomSpace), _rng(rng)
 {
     _currentTime = _imitatedBD.getStartTime();
 }
@@ -239,7 +240,7 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
             if (arg_index < _atomSpace.getArity(list_h) - 2) {
                 Handle arg_h = _atomSpace.getOutgoing(list_h, arg_index + 2);
                 OC_ASSERT(arg_h != Handle::UNDEFINED);
-                OC_ASSERT(dynamic_cast<Node*>(TLB::getAtom(arg_h)),
+                OC_ASSERT(_atomSpace.getType(arg_h),
                                  "arg_h must be a Node");
                 //convert to self or owner if name is _avatar_id or _owner_id
                 //(avatarName corresponds to self because the puts itself under its

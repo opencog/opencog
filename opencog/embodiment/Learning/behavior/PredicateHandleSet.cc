@@ -23,7 +23,6 @@
 
 
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include "PredicateHandleSet.h"
 
 using namespace behavior;
@@ -60,7 +59,7 @@ bool PredicateHandleSet::equals(const PredicateHandleSet &other) const
 
     std::set<Handle>::iterator it1, it2;
     for (it1 = handles.begin(), it2 = other.handles.begin(); it1 != handles.end(); it1++, it2++ ) {
-        if (! (TLB::getAtom((*it1)) == TLB::getAtom(*it2))) {
+        if (*it1 != *it2) {
             return false;
         }
     }
@@ -68,7 +67,7 @@ bool PredicateHandleSet::equals(const PredicateHandleSet &other) const
     return true;
 }
 
-std::string PredicateHandleSet::toString() const
+std::string PredicateHandleSet::toString(AtomSpace &atomspace) const
 {
 
     std::string answer = "{";
@@ -79,11 +78,11 @@ std::string PredicateHandleSet::toString() const
         //printing the atom name instead of its string representation
         //is kept for compatibility reason
         std::string str;
-        if (dynamic_cast<Node*>(TLB::getAtom(*it))) {
-            const std::string an = ((Node *) TLB::getAtom(*it))->getName();
+        if (atomspace.isNode(atomspace.getType(*it))) {
+            const std::string an = atomspace.getName(*it);
             str = an;
         } else {
-            str = TLB::getAtom((*it))->toString();
+            str = atomspace.atomAsString((*it));
         }
         answer.append(str);
         it++;

@@ -225,12 +225,10 @@ float BehaviorDescriptionMatcher::computeHandleSetSimilarity(const PredicateHand
         //std::cout << "act2 : " << hact2->toString() << std::endl;
         //~print for debug
 
-        OC_ASSERT(
-                         dynamic_cast<Node*>(TLB::getAtom(hact1)),
-                         "Failed to dynamically cast hact1 to a 'Node'");
-        OC_ASSERT(
-                         dynamic_cast<Node*>(TLB::getAtom(hact2)),
-                         "Failed to dynamically cast hact2 to a 'Node'");
+        OC_ASSERT( atomSpace->isNode(atomSpace->getType(hact1)),
+                   "hact1 is not a 'Node'");
+        OC_ASSERT( atomSpace->isNode(atomSpace->getType(hact2)),
+                   "hact2 is not a 'Node'");
         if (atomSpace->getName(hact1) == atomSpace->getName(hact2)) {
             int a1 = atomSpace->getArity(hargs1);
             int a2 = atomSpace->getArity(hargs2);
@@ -305,7 +303,7 @@ std::string BehaviorDescriptionMatcher::toStringAllSets(BehaviorCategory &catego
     std::string answer = "{";
     std::set<PredicateHandleSet>::iterator it = allSets.begin();
     while (it != allSets.end()) {
-        answer.append((*it).toString());
+        answer.append((*it).toString(*atomSpace));
         it++;
         if (it != allSets.end()) {
             answer.append(",");
@@ -325,9 +323,9 @@ std::string BehaviorDescriptionMatcher::toStringMapping(BehaviorCategory &catego
     std::map<PredicateHandleSet, PredicateHandleSet>::iterator it = mapping.begin();
     while (true) {
         answer.append("(");
-        answer.append((*it).first.toString());
+        answer.append((*it).first.toString(*atomSpace));
         answer.append("->");
-        answer.append((*it).second.toString());
+        answer.append((*it).second.toString(*atomSpace));
         answer.append(")");
         it++;
         if (it != mapping.end()) {
@@ -350,7 +348,7 @@ std::string BehaviorDescriptionMatcher::toStringSetDistribution(BehaviorCategory
 
     std::map<PredicateHandleSet, std::vector<int> >::iterator it = setDistribution.begin();
     while (true) {
-        answer.append((*it).first.toString());
+        answer.append((*it).first.toString(*atomSpace));
         answer.append(": ");
         answer.append("{");
         for (unsigned int i = 0; i < (*it).second.size(); i++) {
@@ -469,7 +467,7 @@ std::string BehaviorDescriptionMatcher::toStringBounds(BehaviorCategory &categor
     std::string answer;
     std::set<PredicateHandleSet>::iterator it = allSets.begin();
     while (it != allSets.end()) {
-        answer.append((*it).toString());
+        answer.append((*it).toString(*atomSpace));
         char tmp[128];
         sprintf(tmp, ": (%ld, ", lowerBound[*it]);
         answer.append(tmp);
@@ -903,7 +901,7 @@ float BehaviorDescriptionMatcher::weightedIntersectionOverUnion(const PredicateH
     for (std::set<Handle>::iterator it1 = set1.getSet().begin(); it1 != set1.getSet().end(); it1++) {
         float bestSimilarity = 0;
         for (std::set<Handle>::iterator it2 = set2.getSet().begin(); it2 != set2.getSet().end(); it2++) {
-            float similarity = EvaluationLinkSimilarityEvaluator::similarity(atomSpace, *it1, *it2);
+            float similarity = EvaluationLinkSimilarityEvaluator::similarity(*atomSpace, *it1, *it2);
             if (similarity > bestSimilarity) {
                 bestSimilarity = similarity;
             }

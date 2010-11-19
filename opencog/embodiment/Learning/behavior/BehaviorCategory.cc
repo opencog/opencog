@@ -30,7 +30,7 @@ BehaviorCategory::~BehaviorCategory()
 {
 }
 
-BehaviorCategory::BehaviorCategory()
+BehaviorCategory::BehaviorCategory(AtomSpace* a) : atomspace(a)
 {
 }
 

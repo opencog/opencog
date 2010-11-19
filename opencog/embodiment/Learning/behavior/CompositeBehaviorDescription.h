@@ -42,16 +42,17 @@ public:
     // ***********************************************/
     // Constructors/destructors
 
-    ~CompositeBehaviorDescription();
-
     /**
-     * Build an empty CompositeBehaviorDescription. One must use the building API to actually build a non-empty
-     * CompositeBehaviorDescription.
+     * Build an empty CompositeBehaviorDescription. One must use the building
+     * API to actually build a non-empty CompositeBehaviorDescription.
      *
-     * Take a look at the document here: https://extranet.vettalabs.com:8443/bin/view/Petaverse/BehaviorSimilarityAlgorithm
+     * Take a look at the document here:
+     * http://wiki.opencog.org/w/BehaviorSimilarityAlgorithm_%28Embodiment%29
      * for a more precise definition of CompositeBehaviorDescription.
      */
-    CompositeBehaviorDescription();
+    CompositeBehaviorDescription(AtomSpace *_atomspace);
+
+    ~CompositeBehaviorDescription();
 
     // ***********************************************/
     // Building API
@@ -145,6 +146,8 @@ public:
 
 
 private:
+
+    AtomSpace* atomspace;
 
     mutable std::vector<ElementaryBehaviorDescription> entries;
     mutable std::vector<PredicateHandleSet> timelineSets;

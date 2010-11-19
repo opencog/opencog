@@ -197,8 +197,8 @@ const message_set EntityRelevanceFilter::getMessages(const AtomSpace& atomSpace,
             listLink_h = atomSpace.getOutgoing(executionLink_h, 1);
             Handle sentence_h = atomSpace.getOutgoing(listLink_h, 1);
 
-            OC_ASSERT(dynamic_cast<Node*>(TLB::getAtom(sentence_h)),
-                             "Failed to dynamically cast sentence_h to a 'Node'.");
+            OC_ASSERT(atomSpace.getType(sentence_h),
+                             "sentence_h is not a NODE.");
             std::string message_str = atomSpace.getName(sentence_h);
             if (exclude_prefix) {
                 std::string pref = string("to:") + toID + string(": ");

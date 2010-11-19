@@ -28,6 +28,7 @@
 #include <set>
 #include <string>
 #include <opencog/atomspace/types.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 
@@ -60,7 +61,7 @@ public:
     int getSize() const;
     bool empty() const;
     bool equals(const PredicateHandleSet &other) const;
-    std::string toString() const;
+    std::string toString(AtomSpace& atomspace) const;
     virtual PredicateHandleSet &operator=(const PredicateHandleSet& other);
     virtual bool operator==(const PredicateHandleSet& other) const;
     virtual bool operator<(const PredicateHandleSet& other) const;

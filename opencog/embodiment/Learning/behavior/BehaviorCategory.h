@@ -43,13 +43,14 @@ private:
     //std::vector<std::vector<Handle> > timelineSets;
     //std::vector<long> timelineIntervals;
 
+    AtomSpace* atomspace;
 public:
 
     // ***********************************************/
     // Constructors/destructors
 
     ~BehaviorCategory();
-    BehaviorCategory();
+    BehaviorCategory(AtomSpace* a);
 
     // ***********************************************/
     // Building API

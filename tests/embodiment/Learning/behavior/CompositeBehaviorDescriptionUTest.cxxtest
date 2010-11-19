@@ -55,14 +55,14 @@ public:
         Temporal t0(0, 6);
         Temporal t1(0, 4);
 
-        CompositeBehaviorDescription bd1;
-        CompositeBehaviorDescription bd2;
-        CompositeBehaviorDescription bd3;
-        CompositeBehaviorDescription bd4;
-        CompositeBehaviorDescription bd5;
-        CompositeBehaviorDescription bd6;
-        CompositeBehaviorDescription bd7;
-        CompositeBehaviorDescription bd8;
+        CompositeBehaviorDescription bd1(&atomSpace);
+        CompositeBehaviorDescription bd2(&atomSpace);
+        CompositeBehaviorDescription bd3(&atomSpace);
+        CompositeBehaviorDescription bd4(&atomSpace);
+        CompositeBehaviorDescription bd5(&atomSpace);
+        CompositeBehaviorDescription bd6(&atomSpace);
+        CompositeBehaviorDescription bd7(&atomSpace);
+        CompositeBehaviorDescription bd8(&atomSpace);
 
         bd1.addPredicate(h0, t0);
         bd2.addPredicate(h0, t1);
@@ -159,7 +159,7 @@ public:
     void test_buildTimelineRepresentation() {
 
         AtomSpace atomSpace;
-        CompositeBehaviorDescription behaviorDescription;
+        CompositeBehaviorDescription behaviorDescription(&atomSpace);
 
         Handle h0 = atomSpace.addNode(PREDICATE_NODE, "P0");
         Handle h1 = atomSpace.addNode(PREDICATE_NODE, "P1");
@@ -191,7 +191,7 @@ public:
     void test_addpredicate() {
 
         AtomSpace atomSpace;
-        CompositeBehaviorDescription behaviorDescription;
+        CompositeBehaviorDescription behaviorDescription(&atomSpace);
 
         Handle h1 = atomSpace.addNode(PREDICATE_NODE, "P1");
         Temporal t1(0, 1);
@@ -211,12 +211,12 @@ public:
         const char *name[10] = {"p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9"};
 
         for (int i = 0; i < 10; i++) {
-            CompositeBehaviorDescription bd1;
+            CompositeBehaviorDescription bd1(&atomSpace);
             Handle h1 = atomSpace.addNode(PREDICATE_NODE, name[i]);
             Temporal t1(0, i);
             bd1.addPredicate(h1, t1);
             for (int j = 0; j < 10; j++) {
-                CompositeBehaviorDescription bd2;
+                CompositeBehaviorDescription bd2(&atomSpace);
                 Handle h2 = atomSpace.addNode(PREDICATE_NODE, name[j]);
                 Temporal t2(0, j);
                 bd2.addPredicate(h2, t2);
@@ -245,12 +245,12 @@ public:
         }
 
         for (int i = 0; i < 10; i++) {
-            CompositeBehaviorDescription bd1;
+            CompositeBehaviorDescription bd1(&atomSpace);
             Handle h1 = atomSpace.addNode(PREDICATE_NODE, name[0]);
             Temporal t1(i, 20);
             bd1.addPredicate(h1, t1);
             for (int j = 0; j < 10; j++) {
-                CompositeBehaviorDescription bd2;
+                CompositeBehaviorDescription bd2(&atomSpace);
                 Handle h1 = atomSpace.addNode(PREDICATE_NODE, name[0]);
                 Temporal t1(j, 20);
                 bd2.addPredicate(h1, t1);
@@ -259,12 +259,12 @@ public:
         }
 
         for (int i = 0; i < 10; i++) {
-            CompositeBehaviorDescription bd1;
+            CompositeBehaviorDescription bd1(&atomSpace);
             Handle h1 = atomSpace.addNode(PREDICATE_NODE, name[0]);
             Temporal t1(0, i);
             bd1.addPredicate(h1, t1);
             for (int j = 0; j < 10; j++) {
-                CompositeBehaviorDescription bd2;
+                CompositeBehaviorDescription bd2(&atomSpace);
                 Handle h1 = atomSpace.addNode(PREDICATE_NODE, name[0]);
                 Temporal t1(0, j);
                 bd2.addPredicate(h1, t1);
@@ -273,12 +273,12 @@ public:
         }
 
         for (int i = 0; i < 10; i++) {
-            CompositeBehaviorDescription bd1;
+            CompositeBehaviorDescription bd1(&atomSpace);
             Handle h1 = atomSpace.addNode(PREDICATE_NODE, name[i]);
             Temporal t1(0, 1);
             bd1.addPredicate(h1, t1);
             for (int j = 0; j < 10; j++) {
-                CompositeBehaviorDescription bd2;
+                CompositeBehaviorDescription bd2(&atomSpace);
                 Handle h1 = atomSpace.addNode(PREDICATE_NODE, name[j]);
                 Temporal t1(0, 1);
                 bd2.addPredicate(h1, t1);

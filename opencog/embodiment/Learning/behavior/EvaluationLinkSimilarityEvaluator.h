@@ -45,8 +45,8 @@ public:
     ~EvaluationLinkSimilarityEvaluator();
     EvaluationLinkSimilarityEvaluator();
 
-    static float computeHandleSimilarity(Handle h1, Handle h2);
-    static float similarity(AtomSpace *atomSpace, Handle h1, Handle h2);
+    static float computeHandleSimilarity(AtomSpace &atomSpace, Handle h1, Handle h2);
+    static float similarity(AtomSpace &atomSpace, Handle h1, Handle h2);
 
 }; // class
 }  // namespace

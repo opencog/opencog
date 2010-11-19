@@ -195,7 +195,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
             does_fit_template does_match_template =
                 does_fit_template(vf.first, &as);
             if (does_match_template(h)) {
-                logger().debug("BE - The following atom structure has been selected to be an elementary behavior description or contributing to define one: %s", TLB::getAtom(h)->toString().c_str());
+                logger().debug("BE - The following atom structure has been selected to be an elementary behavior description or contributing to define one: %s", as.atomAsString(h).c_str());
 
                 //create BD
                 OC_ASSERT(as.getType(h) == EVALUATION_LINK,
@@ -216,7 +216,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 //to be checked if walk perceptions
                 //per_h is in fact the action of the subject observed
                 Handle per_h = as.getOutgoing(arg_list_h, 1);
-                OC_ASSERT(dynamic_cast<Node*>(TLB::getAtom(per_h)),
+                OC_ASSERT(as.isNode(as.getType(per_h)),
                                  "Handle per_h should be a 'Node'.");
 
                 bool is_walk = as.getName(per_h) == WALK_PERCEPT_NAME;
@@ -475,7 +475,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                 logger().debug(
                              "BE - New elementary behavior description created: %s",
-                             TLB::getAtom(bd_t_h)->toString().c_str());
+                             as.atomAsString(bd_t_h).c_str());
 
 
                 //this in order to tell the converter walk to goto that we are not in

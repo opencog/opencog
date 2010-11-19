@@ -135,8 +135,7 @@ std::string WorldWrapperUtil::lookupInheritanceLink(opencog::RandGen& rng,
         return id::null_obj;
 
     // return the first element of the outgoing set of the inheritance link
-    Atom * atom = TLB::getAtom(res[rng.randint(res.size())]);
-    return as.getName(static_cast<Link*>(atom)->getOutgoingSet()[0]);
+    return as.getName(as.getOutgoing(res[rng.randint(res.size())],0));
 }
 
 std::string WorldWrapperUtil::lookupExecLink(opencog::RandGen& rng,

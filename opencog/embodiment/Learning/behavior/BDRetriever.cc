@@ -115,7 +115,7 @@ void BDRetriever::addLastExemplar(BehaviorCategory& bc,
 {
     OC_ASSERT(bc.getSize() == (int)est.size(),
                      "bc and est should have the same size");
-    CompositeBehaviorDescription bd;
+    CompositeBehaviorDescription bd(&wp.getAtomSpace());
     Temporal et(0);
     retrieveLastExemplar(bd, et, wp, tn);
     if (bd.empty()) { //if the exemplar is empty it is simply ignored
@@ -139,7 +139,7 @@ void BDRetriever::retrieveAllExemplars(BehaviorCategory& bc,
                                       Temporal(wp.getLatestSimWorldTimestamp()),
                                       TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::iterator ip = retP.begin(); ip != retP.end(); ++ip) {
-            CompositeBehaviorDescription bd;
+            CompositeBehaviorDescription bd(&wp.getAtomSpace());
             Temporal temp = *(ip->getTemporal());
             retrieveExemplar(bd, wp, h, temp);
             if (bd.empty()) {

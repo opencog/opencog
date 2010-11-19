@@ -150,10 +150,7 @@ bool MovementBDTracker::BDUpToDate(Handle bd, Handle percept) const
     //printf("!!! %s / %s\n", x1->toString().c_str(),
     //      x2->toString().c_str());
 
-    if (!(TLB::getAtom(x1) == TLB::getAtom(x2))) {
-
-        return false;
-    }
+    if (x1 != x2) return false;
 
     Handle y1 = hs11[3];
     Handle y2 = hs21[2];
@@ -161,8 +158,7 @@ bool MovementBDTracker::BDUpToDate(Handle bd, Handle percept) const
     //printf("!!! %s / %s\n", y1->toString().c_str(),
     //      y2->toString().c_str());
 
-    if (!(TLB::getAtom(y1) == TLB::getAtom(y2)))
-        return false;
+    if (y1 != y2) return false;
 
     Handle z1 = hs11[4];
     Handle z2 = hs21[3];
@@ -170,10 +166,9 @@ bool MovementBDTracker::BDUpToDate(Handle bd, Handle percept) const
     //printf("!!! %s / %s\n", z1->toString().c_str(),
     //      z2->toString().c_str());
 
-    return TLB::getAtom(z1) == TLB::getAtom(z2);
+    return z1 == z2;
 
 //    printf("cmp: %s      %s\n", hs11[2]->toString().c_str(), hs2[1]->toString().c_str());
-
 // return hs11[2]->equals(hs2[1]);
 }
 

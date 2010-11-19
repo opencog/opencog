@@ -377,7 +377,7 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(const AtomSpace &atomSpace,
         //create the sentence atom
         string atom_message_name;
         if (include_to) {
-            OC_ASSERT(atomSpace.getType(to_h) == NODE,
+            OC_ASSERT(atomSpace.isNode(atomSpace.getType(to_h)),
                        "Handle to_h should be a 'Node'.");
             atom_message_name = string("to:") + atomSpace.getName(to_h)
                                 + string(": ") + message;

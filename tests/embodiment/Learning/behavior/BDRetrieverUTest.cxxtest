@@ -113,7 +113,7 @@ public:
         atomSpace.addLink(MEMBER_LINK, m2_seq);
 
         //Create the CompositeBehaviorDescription of it
-        CompositeBehaviorDescription BD;
+        CompositeBehaviorDescription BD(&atomSpace);
         BD.addPredicate(bd1_h, 0, TIME_INTERVAL);
         BD.addPredicate(bd2_h, TIME_INTERVAL, 2*TIME_INTERVAL);
 
@@ -126,7 +126,7 @@ public:
         //std::cout << BD.toString() << std::endl;
 
         //retrieve the BD
-        CompositeBehaviorDescription BDretrieved;
+        CompositeBehaviorDescription BDretrieved(&atomSpace);
         AtomSpaceWorldProvider wp(atomSpace);
         Temporal et(0);
         BDRetriever::retrieveLastExemplar(BDretrieved, et, wp, trick_str);
@@ -254,10 +254,10 @@ public:
         atomSpace.addLink(MEMBER_LINK, m4_seq);
 
         //Create the CompositeBehaviorDescription of it
-        CompositeBehaviorDescription BD1;
+        CompositeBehaviorDescription BD1(&atomSpace);
         BD1.addPredicate(bd1_h, 0, TIME_INTERVAL);
         BD1.addPredicate(bd2_h, TIME_INTERVAL, 2*TIME_INTERVAL);
-        CompositeBehaviorDescription BD2;
+        CompositeBehaviorDescription BD2(&atomSpace);
         BD2.addPredicate(bd3_h, 10*TIME_INTERVAL, 11*TIME_INTERVAL);
         BD2.addPredicate(bd4_h, 11*TIME_INTERVAL, 12*TIME_INTERVAL);
 
@@ -276,7 +276,7 @@ public:
         std::cout << BD2.toStringTimeline() << std::endl;*/
 
         //retrieve the BC
-        BehaviorCategory BCretrieved;
+        BehaviorCategory BCretrieved(&atomSpace);
         AtomSpaceWorldProvider wp(atomSpace);
         std::vector<Temporal> est;
         BDRetriever::retrieveAllExemplars(BCretrieved, est, wp, trick_str);

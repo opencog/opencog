@@ -68,9 +68,9 @@ public:
         Temporal t41(4, 7);
         Temporal t42(6, 8);
 
-        CompositeBehaviorDescription bd1;
-        CompositeBehaviorDescription bd2;
-        CompositeBehaviorDescription bd3;
+        CompositeBehaviorDescription bd1(&atomSpace);
+        CompositeBehaviorDescription bd2(&atomSpace);
+        CompositeBehaviorDescription bd3(&atomSpace);
 
         bd1.addPredicate(h1, t11);
         bd1.addPredicate(h2, t21);
@@ -84,7 +84,7 @@ public:
         bd3.addPredicate(h1, t33);
         bd3.addPredicate(h2, t34);
 
-        BehaviorCategory category;
+        BehaviorCategory category(&atomSpace);
         category.addCompositeBehaviorDescription(bd1);
         category.addCompositeBehaviorDescription(bd2);
         category.addCompositeBehaviorDescription(bd3);
@@ -120,9 +120,9 @@ public:
         Temporal t41(4, 7);
         Temporal t42(6, 8);
 
-        CompositeBehaviorDescription bd1;
-        CompositeBehaviorDescription bd2;
-        CompositeBehaviorDescription bd3;
+        CompositeBehaviorDescription bd1(&atomSpace);
+        CompositeBehaviorDescription bd2(&atomSpace);
+        CompositeBehaviorDescription bd3(&atomSpace);
 
         bd1.addPredicate(h1, t11);
         bd1.addPredicate(h2, t21);
@@ -136,7 +136,7 @@ public:
         bd3.addPredicate(h1, t33);
         bd3.addPredicate(h2, t34);
 
-        BehaviorCategory category;
+        BehaviorCategory category(&atomSpace);
         category.addCompositeBehaviorDescription(bd1);
         category.addCompositeBehaviorDescription(bd2);
         category.addCompositeBehaviorDescription(bd3);
@@ -149,7 +149,7 @@ public:
         Temporal t5(5, 6);
         Temporal t7(7, 8);
         Temporal t9(9, 10);
-        CompositeBehaviorDescription bdtest;
+        CompositeBehaviorDescription bdtest(&atomSpace);
         bdtest.addPredicate(h2, t1);
         bdtest.addPredicate(h3, t1);
         bdtest.addPredicate(h1, t3);
@@ -191,9 +191,9 @@ public:
         Temporal t41(4, 7);
         Temporal t42(6, 8);
 
-        CompositeBehaviorDescription bd1;
-        CompositeBehaviorDescription bd2;
-        CompositeBehaviorDescription bd3;
+        CompositeBehaviorDescription bd1(&atomSpace);
+        CompositeBehaviorDescription bd2(&atomSpace);
+        CompositeBehaviorDescription bd3(&atomSpace);
 
         bd1.addPredicate(h1, t11);
         bd1.addPredicate(h2, t21);
@@ -208,7 +208,7 @@ public:
         bd3.addPredicate(h2, t34);
         bd3.addPredicate(h1, t11);
 
-        BehaviorCategory category;
+        BehaviorCategory category(&atomSpace);
         category.addCompositeBehaviorDescription(bd1);
         category.addCompositeBehaviorDescription(bd2);
         category.addCompositeBehaviorDescription(bd3);
@@ -235,10 +235,10 @@ public:
         Temporal t3(3, 4);
         Temporal t4(4, 5);
 
-        CompositeBehaviorDescription bd1;
-        CompositeBehaviorDescription bd2;
-        CompositeBehaviorDescription bd3;
-        CompositeBehaviorDescription bd4;
+        CompositeBehaviorDescription bd1(&atomSpace);
+        CompositeBehaviorDescription bd2(&atomSpace);
+        CompositeBehaviorDescription bd3(&atomSpace);
+        CompositeBehaviorDescription bd4(&atomSpace);
 
         bd1.addPredicate(h1, t1);
         bd1.addPredicate(h1, t2);
@@ -260,32 +260,32 @@ public:
         bd4.addPredicate(h1, t3);
         bd4.addPredicate(h1, t4);
 
-        BehaviorCategory category;
+        BehaviorCategory category(&atomSpace);
         category.addCompositeBehaviorDescription(bd1);
         category.addCompositeBehaviorDescription(bd2);
         category.addCompositeBehaviorDescription(bd3);
         category.addCompositeBehaviorDescription(bd4);
 
-        CompositeBehaviorDescription bdtest1;
+        CompositeBehaviorDescription bdtest1(&atomSpace);
         bdtest1.addPredicate(h1, t1);
 
-        CompositeBehaviorDescription bdtest2;
+        CompositeBehaviorDescription bdtest2(&atomSpace);
         bdtest2.addPredicate(h2, t1);
 
-        CompositeBehaviorDescription bdtest3;
+        CompositeBehaviorDescription bdtest3(&atomSpace);
         bdtest3.addPredicate(h2, t4);
 
-        CompositeBehaviorDescription bdtest4;
+        CompositeBehaviorDescription bdtest4(&atomSpace);
         bdtest4.addPredicate(h1, t3);
         bdtest4.addPredicate(h1, t2);
         bdtest4.addPredicate(h2, t4);
         bdtest4.addPredicate(h3, t1);
 
-        CompositeBehaviorDescription bdtest5;
+        CompositeBehaviorDescription bdtest5(&atomSpace);
         bdtest5.addPredicate(h1, t1);
         bdtest5.addPredicate(h1, t4);
 
-        CompositeBehaviorDescription bdtest6;
+        CompositeBehaviorDescription bdtest6(&atomSpace);
         bdtest6.addPredicate(h1, t1);
         bdtest6.addPredicate(h1, t2);
         bdtest6.addPredicate(h1, t3);
@@ -334,10 +334,10 @@ public:
         Temporal t3(4, 7);
         Temporal t4(7, 11);
 
-        CompositeBehaviorDescription bd1;
-        CompositeBehaviorDescription bd2;
-        CompositeBehaviorDescription bd3;
-        CompositeBehaviorDescription bd4;
+        CompositeBehaviorDescription bd1(&atomSpace);
+        CompositeBehaviorDescription bd2(&atomSpace);
+        CompositeBehaviorDescription bd3(&atomSpace);
+        CompositeBehaviorDescription bd4(&atomSpace);
 
         bd1.addPredicate(h1, t1);
         bd1.addPredicate(h1, t4);
@@ -352,7 +352,7 @@ public:
 
         bd4.addPredicate(h4, t2);
 
-        BehaviorCategory category;
+        BehaviorCategory category(&atomSpace);
         category.addCompositeBehaviorDescription(bd1);
         category.addCompositeBehaviorDescription(bd2);
         category.addCompositeBehaviorDescription(bd3);
@@ -376,12 +376,12 @@ public:
         Temporal t1(1, 3);
         Temporal t2(2, 5);
         Temporal t3(5, 10);
-        CompositeBehaviorDescription bd1;
+        CompositeBehaviorDescription bd1(&atomSpace);
         bd1.addPredicate(h1, t1);
         bd1.addPredicate(h2, t2);
         bd1.addPredicate(h3, t3);
 
-        BehaviorCategory category;
+        BehaviorCategory category(&atomSpace);
         category.addCompositeBehaviorDescription(bd1);
         //printf("\n%s\n", category.toStringTimeline().c_str());
 
@@ -391,7 +391,7 @@ public:
         Temporal t12(2, 3);
         Temporal t13(3, 4);
         Temporal t14(4, 5);
-        CompositeBehaviorDescription bdTest1;
+        CompositeBehaviorDescription bdTest1(&atomSpace);
         bdTest1.addPredicate(h1, t11);
         bdTest1.addPredicate(h1, t12);
         bdTest1.addPredicate(h2, t12);
@@ -404,7 +404,7 @@ public:
         Temporal t21(1, 6);
         Temporal t22(6, 9);
         Temporal t23(8, 10);
-        CompositeBehaviorDescription bdTest2;
+        CompositeBehaviorDescription bdTest2(&atomSpace);
         bdTest2.addPredicate(h3, t21);
         bdTest2.addPredicate(h2, t22);
         bdTest2.addPredicate(h1, t23);
@@ -415,7 +415,7 @@ public:
         Temporal t31(1, 6);
         Temporal t32(4, 10);
         Temporal t33(10, 20);
-        CompositeBehaviorDescription bdTest3;
+        CompositeBehaviorDescription bdTest3(&atomSpace);
         bdTest3.addPredicate(h1, t31);
         bdTest3.addPredicate(h2, t32);
         bdTest3.addPredicate(h3, t33);
@@ -439,20 +439,20 @@ public:
         Temporal t3(3, 4);
         Temporal t4(4, 5);
 
-        CompositeBehaviorDescription bd1;
+        CompositeBehaviorDescription bd1(&atomSpace);
         bd1.addPredicate(h1, t1);
         bd1.addPredicate(h2, t2);
         bd1.addPredicate(h3, t3);
         bd1.addPredicate(h4, t4);
 
-        BehaviorCategory category;
+        BehaviorCategory category(&atomSpace);
         category.addCompositeBehaviorDescription(bd1);
         BehaviorDescriptionMatcher matcher;
 
         //printf("\n%s\n", category.toStringTimeline().c_str());
         //printf("\n%s\n", matcher.toStringMatrices(category).c_str());
 
-        CompositeBehaviorDescription bdTest1;
+        CompositeBehaviorDescription bdTest1(&atomSpace);
         bdTest1.addPredicate(h1, t1);
         bdTest1.addPredicate(h2, t2);
         bdTest1.addPredicate(h3, t3);
@@ -462,7 +462,7 @@ public:
         TS_ASSERT(matcher.toStringTestCase(category, bdTest1) == "w1 = 1.000000\nw2 = 1.000000\nw3 = 1.000000\nf1 = 1.000000\nf2 = 1.000000\nf3 = 1.000000\nfitness = 1.000000\n");
 
 
-        CompositeBehaviorDescription bdTest2;
+        CompositeBehaviorDescription bdTest2(&atomSpace);
         bdTest2.addPredicate(h1, t1);
         bdTest2.addPredicate(h2, t2);
         bdTest2.addPredicate(h4, t3);
@@ -472,7 +472,7 @@ public:
         TS_ASSERT(matcher.toStringTestCase(category, bdTest2) == "w1 = 1.000000\nw2 = 1.000000\nw3 = 1.000000\nf1 = 1.000000\nf2 = 0.833333\nf3 = 1.000000\nfitness = 0.944444\n");
 
 
-        CompositeBehaviorDescription bdTest3;
+        CompositeBehaviorDescription bdTest3(&atomSpace);
         bdTest3.addPredicate(h1, t1);
         bdTest3.addPredicate(h4, t2);
         bdTest3.addPredicate(h2, t3);
@@ -482,7 +482,7 @@ public:
         TS_ASSERT(matcher.toStringTestCase(category, bdTest3) == "w1 = 1.000000\nw2 = 1.000000\nw3 = 1.000000\nf1 = 1.000000\nf2 = 0.666667\nf3 = 1.000000\nfitness = 0.888889\n");
 
 
-        CompositeBehaviorDescription bdTest4;
+        CompositeBehaviorDescription bdTest4(&atomSpace);
         bdTest4.addPredicate(h4, t1);
         bdTest4.addPredicate(h1, t2);
         bdTest4.addPredicate(h2, t3);
@@ -492,7 +492,7 @@ public:
         TS_ASSERT(matcher.toStringTestCase(category, bdTest4) == "w1 = 1.000000\nw2 = 1.000000\nw3 = 1.000000\nf1 = 1.000000\nf2 = 0.500000\nf3 = 1.000000\nfitness = 0.833333\n");
 
 
-        CompositeBehaviorDescription bdTest5;
+        CompositeBehaviorDescription bdTest5(&atomSpace);
         bdTest5.addPredicate(h4, t1);
         bdTest5.addPredicate(h1, t2);
         bdTest5.addPredicate(h3, t3);
@@ -502,7 +502,7 @@ public:
         TS_ASSERT(matcher.toStringTestCase(category, bdTest5) == "w1 = 1.000000\nw2 = 1.000000\nw3 = 1.000000\nf1 = 1.000000\nf2 = 0.333333\nf3 = 1.000000\nfitness = 0.777778\n");
 
 
-        CompositeBehaviorDescription bdTest6;
+        CompositeBehaviorDescription bdTest6(&atomSpace);
         bdTest6.addPredicate(h4, t1);
         bdTest6.addPredicate(h3, t2);
         bdTest6.addPredicate(h1, t3);
@@ -512,7 +512,7 @@ public:
         TS_ASSERT(matcher.toStringTestCase(category, bdTest6) == "w1 = 1.000000\nw2 = 1.000000\nw3 = 1.000000\nf1 = 1.000000\nf2 = 0.166667\nf3 = 1.000000\nfitness = 0.722222\n");
 
 
-        CompositeBehaviorDescription bdTest7;
+        CompositeBehaviorDescription bdTest7(&atomSpace);
         bdTest7.addPredicate(h4, t1);
         bdTest7.addPredicate(h3, t2);
         bdTest7.addPredicate(h2, t3);

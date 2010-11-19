@@ -25,8 +25,8 @@
 #include <stdio.h>
 #include "ElementaryBehaviorDescription.h"
 #include "CompositeBehaviorDescription.h"
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
 #include <algorithm>
 
 #include <opencog/util/exceptions.h>
@@ -34,15 +34,15 @@
 
 using namespace behavior;
 
-CompositeBehaviorDescription::~CompositeBehaviorDescription()
-{
-}
-
-CompositeBehaviorDescription::CompositeBehaviorDescription()
+CompositeBehaviorDescription::CompositeBehaviorDescription(AtomSpace *_atomspace) : atomspace(_atomspace)
 {
     timelineRepresentationIsValid = false;
     hashCodeComputed = false;
     hashCodeWarning = false;
+}
+
+CompositeBehaviorDescription::~CompositeBehaviorDescription()
+{
 }
 
 bool CompositeBehaviorDescription::empty() const
@@ -198,7 +198,7 @@ size_t CompositeBehaviorDescription::hashCode()
 
     //printf("hashCode = 0");
     for (unsigned int i = 0; i < entries.size(); i++) {
-        answer += TLB::getAtom(entries[i].handle)->hashCode();
+        answer += atomspace->getAtomHash(entries[i].handle);
         //printf(" => %u", answer);
         // The line bellow was added to make hash code a bit stronger (CBDUTest
         // was failing because hash colisions happened without this line)
@@ -313,7 +313,7 @@ std::string CompositeBehaviorDescription::toString() const
     std::string answer = "{";
     for (unsigned int i = 0; i < entries.size(); i++) {
         answer.append("(");
-        answer.append(TLB::getAtom(entries[i].handle)->toString());
+        answer.append(atomspace->atomAsString(entries[i].handle));
         answer.append(",");
         answer.append(entries[i].temporal.toString());
         answer.append(")");
@@ -341,12 +341,10 @@ bool CompositeBehaviorDescription::equals(const CompositeBehaviorDescription &ot
     other.buildTimelineRepresentation();
 
     for (unsigned int i = 0; i < entries.size(); i++) {
-        if (! (TLB::getAtom(entries[i].handle) == TLB::getAtom(other.entries[i].handle))) {
+        if (entries[i].handle != other.entries[i].handle)
             return false;
-        }
-        if (entries[i].temporal != other.entries[i].temporal) {
+        else if (entries[i].temporal != other.entries[i].temporal)
             return false;
-        }
     }
 
     return true;
@@ -358,7 +356,7 @@ std::string CompositeBehaviorDescription::toStringHandles()
     std::string answer = "{";
     for (unsigned int i = 0; i < entries.size(); i++) {
         answer.append("(");
-        answer.append(((Node *) TLB::getAtom(entries[i].handle))->getName());
+        answer.append(atomspace->getName(entries[i].handle));
         answer.append(",");
         answer.append(entries[i].temporal.toString());
         answer.append(")");
@@ -381,7 +379,9 @@ std::string CompositeBehaviorDescription::toStringTimeline()
     return toStringTimeline(timelineSets, timelineIntervals);
 }
 
-std::string CompositeBehaviorDescription::toStringTimeline(std::vector<PredicateHandleSet> &timelineSets, std::vector<long> &timelineIntervals)
+std::string CompositeBehaviorDescription::toStringTimeline(
+        std::vector<PredicateHandleSet> &timelineSets,
+        std::vector<long> &timelineIntervals)
 {
 
     //TODO: contigous equals sets should be merged
@@ -392,8 +392,8 @@ std::string CompositeBehaviorDescription::toStringTimeline(std::vector<Predicate
         std::vector<std::string> names;
         for (std::set<Handle>::iterator it = timelineSets[i].getSet().begin(); it != timelineSets[i].getSet().end(); it++) {
             //the assert below is here to insure that the atom is a node
-            OC_ASSERT(dynamic_cast<Node*>(TLB::getAtom(*it)));
-            names.push_back(((Node *) TLB::getAtom(*it))->getName());
+            OC_ASSERT(atomspace->isNode(atomspace->getType(*it)));
+            names.push_back(atomspace->getName(*it));
         }
         std::sort(names.begin(), names.end());
         for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); it++) {

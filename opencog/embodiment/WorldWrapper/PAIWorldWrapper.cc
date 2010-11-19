@@ -1490,7 +1490,7 @@ string PAIWorldWrapper::resolveType(combo::vertex v)
 }
 string PAIWorldWrapper::resolveType(Handle h)
 {
-    Type objType = TLB::getAtom(h)->getType();
+    Type objType = _pai.getAtomSpace().getType(h);
     return (objType == AVATAR_NODE ? AVATAR_OBJECT_TYPE :
             objType == PET_NODE ? PET_OBJECT_TYPE :
             objType == HUMANOID_NODE ? HUMANOID_OBJECT_TYPE :
@@ -1530,7 +1530,6 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
     //get the time node of the latest map, via the link AtTimeLink(TimeNode,SpaceMap)
     Handle atTimeLink = spaceServer.getLatestMapHandle();
     OC_ASSERT(atTimeLink != Handle::UNDEFINED);
-#if 1
     const SpaceServer::SpaceMap& sm = spaceServer.getLatestMap();
     const string& slObjName = as.getName(slobj);
     if (sm.containsObject(slObjName)) {
@@ -1539,40 +1538,6 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
         logger().debug("getAngleFacing(%s) => %f", as.getName(slobj).c_str(), result);
         return result;
     }
-#else
-    OC_ASSERT(TLB::getAtom(atTimeLink)->getType() == AT_TIME_LINK);
-    OC_ASSERT(TLB::getAtom(atTimeLink)->getArity() == 2);
-
-    Handle timeNode = TLB::getAtom(atTimeLink)->getOutgoingSet()[0];
-    OC_ASSERT(TLB::getAtom(timeNode)->getType() == TIME_NODE);
-
-    //now use it to lookup the AtTimeLink to our obj
-    HandleSeq outgoing = boost::assign::list_of(timeNode)(Handle::UNDEFINED);
-    Type types[] = {TIME_NODE, EVALUATION_LINK};
-    std::vector<Handle> tmp;
-    as.getHandleSet(back_inserter(tmp),
-                    outgoing, types, Handle::UNDEFINED, 2, AT_TIME_LINK, true);
-
-    foreach(Handle h, tmp) {
-        //check for well-formedness
-        if (TLB::getAtom(TLB::getAtom(TLB::getAtom(h)))->getArity() == 2 &&
-                TLB::getAtom(TLB::getAtom(TLB::getAtom(h))->getOutgoingSet()[1])->getArity() == 2) {
-            Handle evalLink = TLB::getAtom(TLB::getAtom(h))->getOutgoingSet()[1];
-            if (as.getType(TLB::getAtom(evalLink)->getOutgoingSet()[0]) == PREDICATE_NODE &&
-                    as.getName(TLB::getAtom(evalLink)->getOutgoingSet()[0]) == AGISIM_ROTATION_PREDICATE_NAME &&
-                    TLB::getAtom(TLB::getAtom(evalLink)->getOutgoingSet()[1])->getArity() == 4) {
-                Handle ll = TLB::getAtom(TLB::getAtom(TLB::getAtom(h)->getOutgoingSet()[1]))->getOutgoingSet()[1];
-                if (TLB::getAtom(ll)->getOutgoingSet()[0] == slobj) {
-                    //return the yaw
-                    OC_ASSERT(TLB::getAtom(ll)->getOutgoingSet().size() == 4);
-                    double result = lexical_cast<double>(as.getName(as.getOutgoing(ll, 3)));
-                    logger().debug("getAngleFacing(%s) => %f", as.getName(slobj).c_str(), result);
-                    return result;
-                }
-            }
-        }
-    }
-#endif
     //_pai.getAtomSpace().print();
     std::stringstream stream (std::stringstream::out);
     stream << "Can't find angle that Object '" << as.getName(slobj)

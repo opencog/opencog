@@ -223,7 +223,7 @@ public:
 
         //retrieve BDs
         AtomSpaceWorldProvider wp(atomSpace);
-        BehaviorCategory BDCat;
+        BehaviorCategory BDCat(&atomSpace);
         std::vector<Temporal> est;
         BDRetriever::retrieveAllExemplars(BDCat, est, wp, trick_name);
 

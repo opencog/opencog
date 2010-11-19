@@ -48,8 +48,8 @@ public:
 
         AtomSpace atomSpace;
 
-        CompositeBehaviorDescription bd1;
-        CompositeBehaviorDescription bd2;
+        CompositeBehaviorDescription bd1(&atomSpace);
+        CompositeBehaviorDescription bd2(&atomSpace);
 
         {
             Handle h1 = atomSpace.addNode(PREDICATE_NODE, "P1");
@@ -69,7 +69,7 @@ public:
             bd2.addPredicate(h2, t2);
         }
 
-        BehaviorCategory category;
+        BehaviorCategory category(&atomSpace);
         category.addCompositeBehaviorDescription(bd1);
         category.addCompositeBehaviorDescription(bd2);
 

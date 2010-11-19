@@ -125,7 +125,7 @@ public:
         Handle bd3_h = atomSpace.addLink(EVALUATION_LINK, b3_seq);
 
         //fill CompositeBehaviorDescriptions to imitate
-        CompositeBehaviorDescription bd;
+        CompositeBehaviorDescription bd(&atomSpace);
         bd.addPredicate(bd1_h, 0, ACTION_DONE_TIME);
         bd.addPredicate(bd2_h,
                         ACTION_DONE_TIME + PAUSE_TIME,

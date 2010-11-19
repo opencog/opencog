@@ -126,14 +126,14 @@ public:
         //check the result from the Behavior Encoder
         be.tempUpdateRec(ex_temp);
 
-        CompositeBehaviorDescription bd;
+        CompositeBehaviorDescription bd(&as);
 
         BDRetriever::retrieveExemplar(bd, bwp, trick_str, ex_temp);
 
         std::cout << "RETRIEVED BD : " << bd.toString() << std::endl;
 
         //build the expected cbd
-        CompositeBehaviorDescription expected_bd;
+        CompositeBehaviorDescription expected_bd(&as);
         atom_tree* action1_beh_at =
             makeVirtualAtom(EVALUATION_LINK,
                             makeVirtualAtom(as.addNode(PREDICATE_NODE, BEHAVED_PREDICATE_NAME), NULL),

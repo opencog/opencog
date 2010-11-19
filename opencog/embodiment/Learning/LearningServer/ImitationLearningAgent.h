@@ -91,7 +91,7 @@ private:
 
     learningTaskState _lts;
 
-    BehaviorCategory _BDCat;
+    BehaviorCategory* _BDCat;
     std::vector<Temporal> _exemplarTemporals;
     arity_t _arity;
     argument_list_list _all;
