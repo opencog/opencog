@@ -50,7 +50,7 @@ struct node {
 template<class P>
 struct ds_node {
   v_array<double> dist;
-  P p;
+    P p;
 };
 
 double base = 2;

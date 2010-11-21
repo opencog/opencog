@@ -1,0 +1,30 @@
+= Dimensional Embedding
+
+This a method of dimensional embedding of the atomspace using the Harel-Koren algorithm as described on 
+
+http://wiki.opencog.org/w/OpenCogPrime:WikiBook#Dimensional_Embedding and
+http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.20.5390
+
+k-nearest neighbour queries are answered quickly using the following cover tree implementation: http://hunch.net/~jl/projects/cover_tree/cover_tree.html
+
+== Using DimEmbedModule in Scheme
+
+To embed an atomspace using a certain link type (eg similarity link)...
+
+	(embedSpace 'SimilarityLink)
+
+To find the k nearest neighbors of a node...
+
+	(kNN node linkType k)
+
+eg to find 10 similar things to the "dog" concept node...
+
+	(kNN (cog-node 'ConceptNode "dog") 'SimilarityLink 10)
+
+Note that the atomspace must already be embedded (via embedSpace) for the given link type before you can find the k nearest neighbours for any nodes. This method will return a list of what the k nearest neighbours were of the given node AT THE TIME THE ATOMSPACE WAS EMBEDDED. To take into account newly added nodes and updated link truth values, the atomspace must be re-embedded.
+
+If a node is removed after embedding, an invalid handle may be returned by a nearest neighbour search.
+
+The entire embedding (the list of pivots and each node's embedding vector) can be written to the cogserver log using.
+
+	(logEmbedding linkType).

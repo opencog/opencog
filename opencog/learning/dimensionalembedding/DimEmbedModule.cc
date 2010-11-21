@@ -32,7 +32,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/exceptions.h>
 #include <limits>
-#include <opencog/learning/dimensionalembedding/vector.h>
+//#include <opencog/learning/dimensionalembedding/vector.h>
 
 using namespace opencog;
 
@@ -61,10 +61,9 @@ void DimEmbedModule::init() {
     define_scheme_primitive("euclidDist",
                             &DimEmbedModule::euclidDist,
                             this);
-    //not quite working yet. segfaults and stuff for some reason
-    //define_scheme_primitive("kNN",
-    //                        &DimEmbedModule::kNearestNeighbors,
-    //                        this);
+    define_scheme_primitive("kNN",
+                            &DimEmbedModule::kNearestNeighbors,
+                            this);
 #endif
 }
 
@@ -120,7 +119,7 @@ double DimEmbedModule::findHighestWeightPath(const Handle& startHandle,
     return 0; //no path found, return 0
 }
 
-std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
+std::list<double> DimEmbedModule::getEmbedlist(const Handle& h,
                                                          const Type& l) {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
@@ -133,7 +132,7 @@ std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
         throw std::string("No embedding exists for type %s", tName);
     }
     AtomEmbedding aE = (atomMaps.find(l))->second;
-    AtomEmbedding::iterator aEit = aE.find(h);
+    AtomEmbedding::const_iterator aEit = aE.find(h);
     //an embedding exists, but h has not been added yet
     if(aEit==aE.end()) {
         return addNode(h,l);
@@ -147,7 +146,7 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
-    logger().info("%d nearest neighbours start", k);
+    //logger().info("%d nearest neighbours start", k);
     if(!isEmbedded(l)) {
         const char* tName = classserver().getTypeName(l).c_str();
         logger().error("No embedding exists for type %s", tName);
@@ -165,19 +164,16 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
     } else {
         v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
         //CoverTreeNode c = CoverTreeNode(aEit->first, &(aEit->second));
-        CoverTreeNode c = CoverTreeNode(&(aEit->second));
+        //CoverTreeNode c = CoverTreeNode(&(aEit->second));
+        CoverTreeNode c = CoverTreeNode(aEit);
         push(v,c);
         v_array<v_array<CoverTreeNode> > res;
         k_nearest_neighbor(embedTreeMap[l], batch_create(v), res, k);
         HandleSeq results = HandleSeq();
         for (int j = 1; j<res[0].index; j++) {
             print(res[0][j]);
-            //results.push_back(*(distMap.find(res[0][j].getVector()));
-            //results.push_back(res[0][j].getHandle());
+            results.push_back(res[0][j].getHandle());
         }
-        //printf("\n");
-        
-        logger().info("kNN done");
         return results;
     }
 }
@@ -243,7 +239,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType){
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-
+    //logger().info("starting embedding");
     clearEmbedding(linkType);
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
@@ -251,7 +247,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType){
     PivotSeq& pivots = pivotsMap[linkType];
     if(nodes.empty()) return;
     Handle bestChoice = nodes.back();
-    
+
     while((pivots.size() < numDimensions) && (!nodes.empty())){
         addPivot(bestChoice, linkType);
         //logger().info("Pivot %d picked", pivots.size());
@@ -262,7 +258,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType){
         //pick the next pivot to maximize its distance from its closest pivot
         //(maximizing distance = minimizing path weight)
         for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-            std::vector<double> eV = atomMaps[linkType][*it];
+            std::list<double>& eV = atomMaps[linkType][*it];
             double testChoiceWeight = *std::max_element(eV.begin(), eV.end());
             if(testChoiceWeight < bestChoiceWeight) {
                 bestChoice = *it;
@@ -270,33 +266,21 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType){
             }
         }
     }
-
-    //Now that all the points are calculated, we have to construct a
+    //Now that all the points are calculated, we construct a
     //cover tree for them.
     v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
-    AtomEmbedding aE = atomMaps[linkType];
-    AtomEmbedding::iterator it = aE.begin();
+    AtomEmbedding& aE = atomMaps[linkType];
+    
+    AtomEmbedding::const_iterator it = aE.begin();
     for(;it!=aE.end();it++) {
-        //CoverTreeNode c = CoverTreeNode(it->first, &(it->second));
-        CoverTreeNode c = CoverTreeNode(&(it->second));
+        CoverTreeNode c = CoverTreeNode(it);
         push(v,c);
     }
     embedTreeMap[linkType]=batch_create(v);
-    v_array<v_array<CoverTreeNode> > res;
-    //kNearestNeighbors(aE.begin()->first,linkType,1);
-    //kNearestNeighbors(aE.begin()->first,linkType,2);
-    //kNearestNeighbors(aE.begin()->first,linkType,4);
-    //kNearestNeighbors(aE.begin()->first,linkType,6);
-    //kNearestNeighbors(aE.begin()->first,linkType,10);
-    kNearestNeighbors(aE.begin()->first,linkType,5);
-    kNearestNeighbors(aE.begin()->first,linkType,5);
-    kNearestNeighbors(aE.begin()->first,linkType,5);
-    kNearestNeighbors(aE.begin()->first,linkType,5);
-    kNearestNeighbors(aE.begin()->first,linkType,5);
-    kNearestNeighbors(aE.begin()->first,linkType,5);    
+    //logger().info("done embedding");
 }
 
-std::vector<double> DimEmbedModule::addNode(const Handle& h,
+std::list<double> DimEmbedModule::addNode(const Handle& h,
                                                   const Type& linkType){
     
     if(!classserver().isLink(linkType))
@@ -305,14 +289,14 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
             classserver().getTypeName(linkType).c_str());
     
     PivotSeq& pivots=pivotsMap[linkType];
-    std::vector<double> embeddingVector;
-    //The i'th entry of the handle's embeddingVector is the value of the
+    std::list<double> embeddinglist;
+    //The i'th entry of the handle's embeddinglist is the value of the
     //highest weight path between the handle and the i'th pivot.
     for(PivotSeq::iterator it=pivots.begin(); it!=pivots.end(); ++it){
-        embeddingVector.push_back(findHighestWeightPath(h, *it, linkType));
+        embeddinglist.push_back(findHighestWeightPath(h, *it, linkType));
     }
-    atomMaps[linkType][h]=embeddingVector;
-    return embeddingVector;
+    atomMaps[linkType][h]=embeddinglist;
+    return embeddinglist;
 }
 
 void DimEmbedModule::clearEmbedding(const Type& linkType){
@@ -345,17 +329,16 @@ void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
         if(as->isValidHandle(it->first)) {
             oss << as->atomAsString(it->first,true) << " : (";
         } else {
-            //oss << "[NODE'S BEEN DELETED]" << " : (";
-            //oss << atom->toShortString() << " : (";
+            oss << "[NODE'S BEEN DELETED]" << " : (";
+            oss << atom->toShortString() << " : (";
         }
-        std::vector<double> embedVector = it->second;
-        for(std::vector<double>::const_iterator it2=embedVector.begin();
-            it2!=embedVector.end();
+        const std::list<double>& embedlist = it->second;
+        for(std::list<double>::const_iterator it2=embedlist.begin();
+            it2!=embedlist.end();
             ++it2){
             oss << *it2 << " ";
         }
-        //oss << ")" << std::endl;
-        oss << std::endl;
+        oss << ")" << std::endl;
     }
     logger().info(oss.str());
     return;
@@ -384,20 +367,20 @@ double DimEmbedModule::euclidDist(const Handle& h1,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
  
-    std::vector<double> v1=getEmbedVector(h1,l);
-    std::vector<double> v2=getEmbedVector(h2,l);
+    std::list<double> v1=getEmbedlist(h1,l);
+    std::list<double> v2=getEmbedlist(h2,l);
     return euclidDist(v1, v2);
 }
 
-double DimEmbedModule::euclidDist(std::vector<double> v1,
-                                  std::vector<double> v2) {
+double DimEmbedModule::euclidDist(std::list<double> v1,
+                                  std::list<double> v2) {
     assert(v1.size()==v2.size());
-    std::vector<double>::iterator it1=v1.begin();
-    std::vector<double>::iterator it2=v2.begin();
+    std::list<double>::iterator it1=v1.begin();
+    std::list<double>::iterator it2=v2.begin();
 
     double distance=0;
     //Calculate euclidean distance between v1 and v2
-    for(; it1 < v1.end(); it1++) {
+    for(; it1 != v1.end(); it1++) {
         distance+=std::pow((*it1 - *it2), 2);
         if(it2!=v2.end()) it2++;
     }

@@ -233,12 +233,12 @@ class SchemePrimitive : public PrimitiveEnviron
 					//Third arg is an int
 					int i = scm_to_int(scm_caddr(args));
 					HandleSeq rHS = (that->*method.q_hti)(h,t,i);
-					rc = scm_list_1(SCM_UNDEFINED);
 					HandleSeq::iterator it = rHS.begin();
+					if(it!=rHS.end()) rc = scm_list_1(SchemeSmob::handle_to_scm(*it));
+					it++;
 					for(;it!=rHS.end();it++) {
 						rc = scm_cons(SchemeSmob::handle_to_scm(*it), rc);
 					}
-					//rc = SchemeSmob::handle_to_scm(h);
 					break;
 				}
                 // -- end from dimembed

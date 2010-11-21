@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_COVER_TREE_NODE_H
 #define _OPENCOG_COVER_TREE_NODE_H
 
-#include <vector>
+#include <list>
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
@@ -38,59 +38,49 @@
 namespace opencog {
     class CoverTreeNode {
     public:
-        //Handle handle;
-        std::vector<double>* embeddingVector;
+        std::map<Handle, std::list<double> >::const_iterator iter;
         CoverTreeNode() {}
-        //CoverTreeNode(Handle h, std::vector<double>* eV) :
-    CoverTreeNode(std::vector<double>* eV) : 
-        //handle(h), embeddingVector(eV) { }
-        embeddingVector(eV) { }
-        std::vector<double> getVector() {
-            return *embeddingVector;
+        CoverTreeNode(std::map<Handle, std::list<double> >::const_iterator it) : iter(it) {} 
+        const std::list<double>& getList() {
+            return iter->second;
         }
-        //Handle& getHandle() {
-        //    return handle;
-        //}
+        const Handle& getHandle() {
+            return iter->first;
+        }
     };
     
     void print(CoverTreeNode& p) {
         std::ostringstream oss;
-        //Atom* atom = TLB::getAtom(p.getHandle());
-        //if(atom==NULL) {
-        //   oss << "[NODE'S BEEN DELETED]" << " : (";
-        //} else {
-        //    oss << atom->toShortString() << " : (";
-        //}
-        std::vector<double> embedVector = p.getVector();
-            for(std::vector<double>::const_iterator it2=embedVector.begin();
-                it2!=embedVector.end();
-                ++it2){
-                oss << *it2 << " ";
-            }
-            oss << ")" << std::endl;
-            printf(oss.str().c_str());
+        Atom* atom = TLB::getAtom(p.getHandle());
+        if(atom==NULL) {
+           oss << "[NODE'S BEEN DELETED]" << " : (";
+        } else {
+            oss << atom->toShortString() << " : (";
+        }
+        const std::list<double>& embedList = p.getList();
+        for(std::list<double>::const_iterator it=embedList.begin();
+            it!=embedList.end(); it++)
+            {
+                oss << *it << " ";
+            }       
+        oss << ")" << std::endl;
+        printf("%s", oss.str().c_str());
     }
     
     double distance(CoverTreeNode n1, CoverTreeNode n2, double upper_bound) {
-        std::vector<double> v1=n1.getVector();
-        std::vector<double> v2=n2.getVector();
-        std::vector<double>::iterator it1=v1.begin();
-        std::vector<double>::iterator it2=v2.begin();
+        const std::list<double>& v1=n1.getList();
+        const std::list<double>& v2=n2.getList();
+        std::list<double>::const_iterator it1=v1.begin();
+        std::list<double>::const_iterator it2=v2.begin();
         
         double distance=0;
         //Calculate euclidean distance between v1 and v2
-        for(; it1 < v1.end(); it1++) {
+        for(; it1!=v1.end(); it1++) {
             distance+=(*it1 - *it2)*(*it1 - *it2);
             if(it2!=v2.end()) it2++;
         }
         distance=sqrt(distance);
         return distance;
-        //return DimEmbedModule::euclidDistance(n1.getVector(),
-        //                                      n2.getVector());
-    }
-    v_array<CoverTreeNode> parse_points(char *filename) {
-        //@TODO: implement
-        return v_array<CoverTreeNode>();
     }
 }//namespace
 
