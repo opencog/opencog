@@ -26,6 +26,8 @@
 #include <stack>
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
 #include <math.h>
 #include <expat.h>
 
@@ -78,7 +80,7 @@ unsigned processNodes: 1;
 unsigned processRelationships: 1;
 } Status;
 
-typedef std::stack<void*> ParserStack;
+typedef std::stack< boost::shared_ptr<Atom> > ParserStack;
 // TODO: CREATE AN ABSTRACT CLASS "Stackable" for check for subclasses
 // when poping elements from stack.
 
@@ -91,21 +93,21 @@ typedef struct {
     XML_Parser parser;
 } UserData;
 
-static void push(ParserStack& ps, void* p)
+static void push(ParserStack& ps, boost::shared_ptr<Atom> p)
 {
     ps.push(p);
 }
 
-static void* top(ParserStack& ps)
+static boost::shared_ptr<Atom> top(ParserStack& ps)
 {
-    if (!ps.size()) return NULL;
+    if (!ps.size()) return boost::shared_ptr<Atom>();
     return ps.top();
 }
 
-static void* pop(ParserStack& ps)
+static boost::shared_ptr<Atom> pop(ParserStack& ps)
 {
-    if (!ps.size()) return NULL;
-    void* ret = ps.top();
+    if (!ps.size()) return boost::shared_ptr<Atom>();
+    boost::shared_ptr<Atom> ret = ps.top();
     ps.pop();
     return ret;
 }
@@ -131,7 +133,7 @@ static Type getTypeFromString(const char *name, bool onlyClassName)
 }
 
 #ifdef NOT_USED_RIGHT_NOW
-static char *nativeBuildLinkKey(Atom *link)
+static char *nativeBuildLinkKey(boost::shared_ptr<Atom> link)
 {
     char key[1<<16];
     char aux[1 << 16];
@@ -142,7 +144,7 @@ static char *nativeBuildLinkKey(Atom *link)
     strcat(key, aux);
 
     for (int i = 0; i < link->getArity(); i++) {
-        sprintf(aux, "%p ", TLB::getHandle(link->getOutgoingAtom(i)));
+        sprintf(aux, "%p ", link->getOutgoingAtom(i)->getHandle());
         strcat(key, aux);
     }
 
@@ -162,7 +164,7 @@ static char *nativeBuildLinkKey(Atom *link)
  * Handle attributes that are common to both Nodes and Links.
  * In other words, handle "confidence" and "strength" attributes.
  */
-static const char ** scan_common_attrs (Atom *r, const char **atts)
+static const char ** scan_common_attrs (boost::shared_ptr<Atom> r, const char **atts)
 {
     float buffer;
     if (strcmp(*atts, CONFIDENCE_TOKEN) == 0) {
@@ -184,7 +186,7 @@ static const char ** scan_common_attrs (Atom *r, const char **atts)
 static void nativeStartElement(void *userData, const char *name, const char **atts)
 throw (RuntimeException, InconsistenceException)
 {
-    Atom* r = NULL;
+    boost::shared_ptr<Atom> r;
     Type typeFound;
 
     UserData* ud = (UserData*) userData;
@@ -212,8 +214,8 @@ throw (RuntimeException, InconsistenceException)
 
         if (classserver().isA(typeFound, NODE)) {
             //cprintf(5,"Processing Node: %d (%s)\n",  typeFound, name);
-            r = (Atom*) new Node(typeFound, "", NMXmlParser::DEFAULT_TV());
-            logger().fine("Pushing r = %p", r);
+            r = boost::shared_ptr<Atom>(new Node(typeFound, "", NMXmlParser::DEFAULT_TV()));
+            logger().fine("Pushing r = %p", r.get());
             push(ud->stack, r);
 
             const TruthValue& t = r->getTruthValue();
@@ -224,7 +226,7 @@ throw (RuntimeException, InconsistenceException)
             while (*atts != NULL) {
                 if (strcmp(*atts, NAME_TOKEN) == 0) {
                     atts++;
-                    NMXmlParser::setNodeName((Node*) r, *atts);
+                    NMXmlParser::setNodeName(r, *atts);
                 } else {
                     const char **natts = scan_common_attrs(r, atts);
                     if (atts == natts) {
@@ -251,7 +253,7 @@ throw (RuntimeException, InconsistenceException)
 //            timeval s;
 //            gettimeofday(&s, NULL);
             logger().fine("Processing Link: %d (%s)\n", typeFound, name);
-            r = (Atom*) new Link(typeFound, std::vector<Handle>(), NMXmlParser::DEFAULT_TV());
+            r = boost::shared_ptr<Atom>(new Link(typeFound, std::vector<Handle>(), NMXmlParser::DEFAULT_TV()));
 
             const TruthValue& t = r->getTruthValue();
             if (typeid(t) != typeid(SimpleTruthValue)) {
@@ -268,20 +270,20 @@ throw (RuntimeException, InconsistenceException)
                 atts++;
             }
 
-            Atom* currentAtom = (Atom*) top(ud->stack);
-            if (currentAtom != NULL) {
-                logger().fine("Getting link element inside currentAtom = %p", currentAtom);
-                Link *link = dynamic_cast<Link *>(currentAtom);
+            boost::shared_ptr<Atom> currentAtom = top(ud->stack);
+            if (currentAtom) {
+                logger().fine("Getting link element inside currentAtom = %p", currentAtom.get());
+                boost::shared_ptr<Link> link = boost::shared_dynamic_cast<Link>(currentAtom);
                 if (link) {
-                    if (r != NULL) {
-                        NMXmlParser::addOutgoingAtom(link, Handle::UNDEFINED);
+                    if (r) {
+                        NMXmlParser::addOutgoingAtom(link,Handle::UNDEFINED);
                     } else {
                         throw RuntimeException(TRACE_INFO, "fatal error: NULL inner link");
                     }
                 }
             }
 
-            logger().fine("Pushing r = %p", r);
+            logger().fine("Pushing r = %p", r.get());
             push(ud->stack, r);
 //            timeval e;
 //            gettimeofday(&e, NULL);
@@ -291,12 +293,12 @@ throw (RuntimeException, InconsistenceException)
             // processes elements of other relationships, and inserts them in
             // the link previously defined;
 
-            Atom* currentAtom = (Atom*) top(ud->stack);
-            if (currentAtom == NULL) {
+            boost::shared_ptr<Atom> currentAtom = top(ud->stack);
+            if (!currentAtom) {
                 logger().error("error: this token (%s) is expected to be nested\n", name);
                 return;
             }
-            logger().fine("Getting node element inside currentAtom = %p", currentAtom);
+            logger().fine("Getting node element inside currentAtom = %p", currentAtom.get());
 
 
             const char *n = NULL, *t = NULL;
@@ -317,15 +319,14 @@ throw (RuntimeException, InconsistenceException)
             //r = getRelationshipByNameAndType(n, getTypeFromString(t, true));
 
             logger().fine("Getting existing node (%s,%s)", n, t);
-            //h = ud->atomTable->getHandle(n, getTypeFromString(t, true));
             h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
             logger().fine(" => h = %p", h.value());
-            if (TLB::isValidHandle(h)) {
-                logger().fine(TLB::getAtom(h)->toString().c_str());
-                Link *link = dynamic_cast<Link *>(currentAtom);
+            if (ud->atomSpace->isValidHandle(h)) {
+                logger().fine(ud->atomSpace->atomAsString(h).c_str());
+                boost::shared_ptr<Link> link = boost::shared_dynamic_cast<Link>(currentAtom);
                 if (link) {
-                    logger().fine("adding atom %s to link %s", TLB::getAtom(h)->toShortString().c_str(), link->toShortString().c_str());
-                    NMXmlParser::addOutgoingAtom(link, h);
+                    logger().fine("adding atom %s to link %s", ud->atomSpace->atomAsString(h,true).c_str(), link->toShortString().c_str());
+                    NMXmlParser::addOutgoingAtom(link,h);
                 }
             } else {
 #ifdef THROW_EXCEPTIONS
@@ -356,9 +357,8 @@ throw (InconsistenceException)
     } else if (strcmp(name, TAG_DESCRIPTION_TOKEN) == 0) {
         ud->status.ignoring = 0;
     } else {
-        void* object = top(ud->stack);
-        Atom* currentAtom = (Atom*) object;
-        if (currentAtom != NULL) {
+        boost::shared_ptr<Atom> currentAtom = top(ud->stack);
+        if (currentAtom) {
             //timeval s;
             //gettimeofday(&s, NULL);
             Type type = getTypeFromString(name, false);
@@ -367,13 +367,13 @@ throw (InconsistenceException)
                 if (currentAtom->getType() == type) {
                     if (classserver().isA(type, LINK)) {
                         pop(ud->stack);
-                        logger().fine("(1) Pushing currentAtom = %p", currentAtom);
+                        logger().fine("(1) Pushing currentAtom = %p", currentAtom.get());
                         push(ud->stack, currentAtom);
                     }
                     if (classserver().isA(type, UNORDERED_LINK)) {
                         // Forces the sorting of outgoing by calling setOutgoingSet
                         // TODO: implement a sortOutgoingSet for doing the same thing more efficiently...
-                        Link *link = dynamic_cast<Link *>(currentAtom);
+                        boost::shared_ptr<Link> link = boost::shared_dynamic_cast<Link>(currentAtom);
                         if (link) {
                             std::vector<Handle> outgoing = link->getOutgoingSet();
                             NMXmlParser::setOutgoingSet(link, outgoing);
@@ -383,7 +383,6 @@ throw (InconsistenceException)
                     //timeval s1;
                     //gettimeofday(&s1, NULL);
                     logger().fine("currentAtom => %s", currentAtom->toString().c_str());
-                    //Handle newHandle = ud->atomTable->add(currentAtom);
                     Handle newHandle = ud->atomSpace->addRealAtom(*currentAtom);
                     //timeval e1;
                     //gettimeofday(&e1, NULL);
@@ -394,31 +393,30 @@ throw (InconsistenceException)
                     ud->lastInsertedHandle = newHandle;
                     if (Handle::compare(oldHandle, newHandle)) {
                         // already existed
-                        delete currentAtom;
                         logger().fine("Already existed");
-                        currentAtom = TLB::getAtom(newHandle);
+                        currentAtom = ud->atomSpace->cloneAtom(newHandle);
                         pop(ud->stack);
-                        logger().fine("(2) Pushing currentAtom = %p", currentAtom);
+                        logger().fine("(2) Pushing currentAtom = %p", currentAtom.get());
                         push(ud->stack, currentAtom);
                     }
                     // XXX FIXME:
                     // would be better if this was replaced by
-                    // if (NULL != dynamic_cast<Link *>(currentAtom))
+                    // if (NULL != boost::shared_dynamic_cast<Link>(currentAtom))
                     // and also a few lines down.
                     if (classserver().isA(currentAtom->getType(), LINK)) {
                         //KMI -- find out if this is a nested link
                         pop(ud->stack);
-                        Atom* nextUd = (Atom*) top(ud->stack);
-                        logger().fine("Getting link element inside nextUd = %p", nextUd);
-                        logger().fine("(3) Pushing currentAtom = %p", currentAtom);
+                        boost::shared_ptr<Atom> nextUd = top(ud->stack);
+                        logger().fine("Getting link element inside nextUd = %p", nextUd.get());
+                        logger().fine("(3) Pushing currentAtom = %p", currentAtom.get());
                         push(ud->stack, currentAtom);
 
-                        Link *nextlink = dynamic_cast<Link *>(nextUd);
-                        if (nextlink != NULL) {
+                        boost::shared_ptr<Link> nextlink = boost::shared_dynamic_cast<Link>(nextUd);
+                        if (nextlink) {
                             int arity = nextlink->getArity();
                             std::vector<Handle> outgoingSet = nextlink->getOutgoingSet();
                             for (int i = 0; i < arity; i++) {
-                                if (TLB::isInvalidHandle(outgoingSet[i])) {
+                                if (!ud->atomSpace->isValidHandle(outgoingSet[i])) {
                                     outgoingSet[i] = newHandle;
                                     break;
                                 }
@@ -442,7 +440,7 @@ throw (InconsistenceException)
             //unsigned long spentTime = (e.tv_sec -  s.tv_sec)*1000000+(e.tv_usec -  s.tv_usec);
             //cumulativeParseEnd += spentTime;
             else {
-                logger().fine("WARNING: Got NULL Atom* from the parser stack!");
+                logger().fine("WARNING: Got NULL boost::shared_ptr<Atom> from the parser stack!");
             }
         }
     }
@@ -459,17 +457,18 @@ NMXmlParser::~NMXmlParser()
 {
 }
 
-void NMXmlParser::setNodeName(Node* node, const char* name)
+void NMXmlParser::setNodeName(boost::shared_ptr<Atom> node, const char* name)
 {
-    node->setName(name);
+    boost::shared_ptr<Node> n = boost::shared_dynamic_cast<Node>(node);
+    n->setName(name);
 }
 
-void NMXmlParser::addOutgoingAtom(Link * link, Handle h)
+void NMXmlParser::addOutgoingAtom(boost::shared_ptr<Link> link, Handle h)
 {
     link->addOutgoingAtom(h);
 }
 
-void NMXmlParser::setOutgoingSet(Link * link, const std::vector<Handle>& outgoing)
+void NMXmlParser::setOutgoingSet(boost::shared_ptr<Link> link, const std::vector<Handle>& outgoing)
 {
     link->setOutgoingSet(outgoing);
 }
@@ -525,16 +524,17 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
     }
 
     // finally, null names of unnamed nodes
-    for (HandleEntry *e = result; e; e = e->next)
+    // Do we need this? I would expect not because we shouldn't be able to
+    // change the node name.
+    /*for (HandleEntry *e = result; e; e = e->next)
     {
-        Atom *a = TLB::getAtom(e->handle);
-        if (classserver().isNode(a->getType()))
+        if (classserver().isNode(atomSpace->getType(e->handle)))
         {
-            Node *n = (Node*)a;
-            if (n->getName()[0] == '#')
+            if (atomSpace->getName(e->handle)[0] == '#') {
                 n->setName("");
+            }
         }
-    }
+    }*/
 
     //time_t duration = time(NULL) - start;
     //timeval e;

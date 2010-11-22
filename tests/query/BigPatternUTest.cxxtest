@@ -142,14 +142,12 @@ void BigPatternUTest::setUp(void)
  *          ConceptNode "pottery"
  *          ConceptNode "clay"
  */
-#define getlink(hand,pos) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
-
-#define getarity(hand) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
 
 void BigPatternUTest::test_prep(void)
 {
+	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink

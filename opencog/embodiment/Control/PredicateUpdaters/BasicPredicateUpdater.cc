@@ -27,7 +27,6 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace OperationalPetController;
 using namespace opencog;

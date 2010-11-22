@@ -32,7 +32,6 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
 
@@ -171,9 +170,9 @@ bool NMXmlParserExperiment::checkExp0()
     one = atomSpace->getHandle(NUMBER_NODE, "1");
     two = atomSpace->getHandle(NUMBER_NODE, "2");
 
-    TS_ASSERT(TLB::isValidHandle(one));
-    TS_ASSERT(TLB::isValidHandle(two));
-    if (TLB::isInvalidHandle(one) || TLB::isInvalidHandle(two)) {
+    TS_ASSERT(atomSpace->isValidHandle(one));
+    TS_ASSERT(atomSpace->isValidHandle(two));
+    if (!atomSpace->isValidHandle(one) || !atomSpace->isValidHandle(two)) {
         return(false);
     }
 
@@ -184,14 +183,12 @@ bool NMXmlParserExperiment::checkExp0()
     if (handles.size() != 1) {
         return(false);
     }
-    Atom *atom = TLB::getAtom(handles[0]);
     link_one_two = handles[0];
-    Link * link = dynamic_cast<Link*>(atom);
 
-    TS_ASSERT((link->getOutgoingSet()[0]) == two);
-    TS_ASSERT((link->getOutgoingSet()[1]) == one);
-    if ((link->getOutgoingSet()[0] != two) ||
-            (link->getOutgoingSet()[1] != one)) {
+    TS_ASSERT((atomSpace->getOutgoing(link_one_two)[0]) == two);
+    TS_ASSERT((atomSpace->getOutgoing(link_one_two)[1]) == one);
+    if ((atomSpace->getOutgoing(link_one_two)[0] != two) ||
+            (atomSpace->getOutgoing(link_one_two)[1] != one)) {
         return(false);
     }
 
@@ -204,13 +201,11 @@ bool NMXmlParserExperiment::checkExp1()
     one = atomSpace->getHandle(NUMBER_NODE, "1");
     two = atomSpace->getHandle(NUMBER_NODE, "2");
 
-    TS_ASSERT(TLB::isValidHandle(one));
-    TS_ASSERT(TLB::isValidHandle(two));
-    if (TLB::isInvalidHandle(one) || TLB::isInvalidHandle(two)) {
+    TS_ASSERT(atomSpace->isValidHandle(one));
+    TS_ASSERT(atomSpace->isValidHandle(two));
+    if (!atomSpace->isValidHandle(one) || !atomSpace->isValidHandle(two)) {
         return(false);
     }
-
-    HandleEntry* entry = atomSpace->getAtomTable().getHandleSet(INHERITANCE_LINK, true);
 
     std::vector<Handle> handles;
     atomSpace->getHandleSet(back_inserter(handles), INHERITANCE_LINK, true);
@@ -222,26 +217,21 @@ bool NMXmlParserExperiment::checkExp1()
         return(false);
     }
 
-    TS_ASSERT(entry == NULL);
-
     link_one_two = Handle::UNDEFINED;
-    Atom *atom = NULL;
     std::vector<Handle>::iterator it;
     for (it = handles.begin(); it != handles.end(); it++) {
-        atom = TLB::getAtom((Handle) * it);
-        if (atom->getIncomingSet()->getSize() == 1) {
-            TS_ASSERT(TLB::isInvalidHandle(link_one_two));
+        if (atomSpace->getIncoming(*it).size() == 1) {
+            TS_ASSERT(!atomSpace->isValidHandle(link_one_two));
             link_one_two = *it;
         }
     }
     handles.clear();
 
-    Link * link = dynamic_cast<Link *>(atom);
-    TS_ASSERT(TLB::isValidHandle(link_one_two));
-    TS_ASSERT((link->getOutgoingSet()[0]) == two);
-    TS_ASSERT((link->getOutgoingSet()[1]) == one);
-    if ((link->getOutgoingSet()[0] != two) ||
-            (link->getOutgoingSet()[1] != one)) {
+    TS_ASSERT(atomSpace->isValidHandle(link_one_two));
+    TS_ASSERT((atomSpace->getOutgoing(link_one_two)[0]) == two);
+    TS_ASSERT((atomSpace->getOutgoing(link_one_two)[1]) == one);
+    if ((atomSpace->getOutgoing(link_one_two)[0] != two) ||
+            (atomSpace->getOutgoing(link_one_two)[1] != one)) {
         return(false);
     }
 
@@ -252,17 +242,16 @@ bool NMXmlParserExperiment::checkExp1()
     if (handles.size() != 1) {
         return(false);
     }
-    atom = TLB::getAtom(handles[0]);
+    //atom = TLB::getAtom(handles[0]);
     hihger_order_link = handles[0];
 
-    link = dynamic_cast<Link *>(atom);
-    TS_ASSERT(link->getOutgoingSet()[0] == link_one_two);
-    TS_ASSERT(link->getOutgoingSet()[1] == two);
-    if ((link->getOutgoingSet()[0] != link_one_two) ||
-            (link->getOutgoingSet()[1] != two)) {
+    //link = dynamic_cast<Link *>(atom);
+    TS_ASSERT(atomSpace->getOutgoing(handles[0])[0] == link_one_two);
+    TS_ASSERT(atomSpace->getOutgoing(handles[0])[1] == two);
+    if ((atomSpace->getOutgoing(handles[0])[0] != link_one_two) ||
+            (atomSpace->getOutgoing(handles[0])[1] != two)) {
         return(false);
     }
-
 
     /*
      entry = atomSpace->getAtomTable()->getHandleSet(INHERITANCE_LINK, true);

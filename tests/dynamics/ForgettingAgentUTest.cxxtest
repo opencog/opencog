@@ -162,8 +162,8 @@ public:
         cogserver.runLoopStep();
         // First two handles should now be invalid...
 #ifdef USE_TLB_MAP 
-        TS_ASSERT(TLB::getAtom(atoms[0]) == NULL);
-        TS_ASSERT(TLB::getAtom(atoms[1]) == NULL);
+        TS_ASSERT(!cogserver.getAtomSpace()->isValidHandle(atoms[0]));
+        TS_ASSERT(!cogserver.getAtomSpace()->isValidHandle(atoms[1]));
 #else
         HandleSeq result;
         cogserver.getAtomSpace()->getHandleSet(back_inserter(result),ATOM,true);
@@ -208,7 +208,7 @@ public:
         TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
 #ifdef USE_TLB_MAP
         for (int i = 0; i < 10; i++) {
-            TS_ASSERT(TLB::getAtom(atoms[i]) == NULL);
+            TS_ASSERT(!cogserver.getAtomSpace()->isValidHandle(atoms[i]));
         }
 #else
         HandleSeq result;
@@ -249,7 +249,7 @@ public:
         TS_ASSERT_EQUALS(cogserver.getAtomSpace()->Nodes(), count);
 #ifdef USE_TLB_MAP
         for (int i = 0; i < 5; i++) {
-            TS_ASSERT(TLB::getAtom(atoms[i]) == NULL);
+            TS_ASSERT(!cogserver.getAtomSpace()->isValidHandle(atoms[i]));
         }
 #else
         HandleSeq result;
@@ -273,7 +273,7 @@ public:
         numRemoved = 0;
 #ifdef USE_TLB_MAP
         for (int i = 5; i < 20; i++) {
-            if (TLB::getAtom(atoms[i]) == NULL) {
+            if (!cogserver.getAtomSpace()->isValidHandle(atoms[i])) {
                 numRemoved++;
             }
         }

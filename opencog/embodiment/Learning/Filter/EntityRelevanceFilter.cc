@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 

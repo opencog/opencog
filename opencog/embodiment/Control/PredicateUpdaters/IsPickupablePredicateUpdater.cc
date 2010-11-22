@@ -23,7 +23,6 @@
 
 #include <opencog/util/oc_assert.h>
 
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/SimpleTruthValue.h>

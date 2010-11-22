@@ -41,7 +41,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/TLB.h>
 
 #include <opencog/server/load-file.h>
 

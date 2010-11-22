@@ -11,7 +11,6 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/TLB.h>
 
 namespace opencog
 {
@@ -25,10 +24,9 @@ template<class T>
 inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
                                        bool (T::*cb)(Atom *, Atom *), T *data)
 {
-    Atom *aa = TLB::getAtom(ha);
-    Atom *ab = TLB::getAtom(hb);
-    Link *la = dynamic_cast<Link*>(aa);
-    Link *lb = dynamic_cast<Link*>(ab);
+    AtomSpace *as = &atomspace();
+    boost::shared_ptr<Link> la(as->cloneLink(ha));
+    boost::shared_ptr<Link> lb(as->cloneLink(hb));
     if (!la || !lb) return false;
     const std::vector<Handle> &va = la->getOutgoingSet();
     const std::vector<Handle> &vb = lb->getOutgoingSet();
@@ -40,22 +38,22 @@ inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
     for (size_t i = 0; i < minsz; i++) {
         ha = va[i];
         hb = vb[i];
-        aa = TLB::getAtom(ha);
-        ab = TLB::getAtom(hb);
-        bool rc = (data->*cb)(aa, ab);
+        boost::shared_ptr<Atom> aa(as->cloneLink(ha));
+        boost::shared_ptr<Atom> ab(as->cloneLink(hb));
+        bool rc = (data->*cb)(aa.get(), ab.get());
         if (rc) return rc;
     }
 
     for (size_t i = vasz; i < vbsz; i++) {
         hb = vb[i];
-        ab = TLB::getAtom(hb);
-        bool rc = (data->*cb)(NULL, ab);
+        boost::shared_ptr<Atom> ab(as->cloneLink(hb));
+        bool rc = (data->*cb)(NULL, ab.get());
         if (rc) return rc;
     }
     for (size_t i = vbsz; i < vasz; i++) {
         ha = va[i];
-        aa = TLB::getAtom(ha);
-        bool rc = (data->*cb)(aa, NULL);
+        boost::shared_ptr<Atom> aa(as->cloneLink(ha));
+        bool rc = (data->*cb)(aa.get(), NULL);
         if (rc) return rc;
     }
     return false;

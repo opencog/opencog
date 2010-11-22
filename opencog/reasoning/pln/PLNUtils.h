@@ -49,7 +49,6 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 
 // This is a 3rd party tree template library
 #include <opencog/util/tree.h>

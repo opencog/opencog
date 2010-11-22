@@ -94,7 +94,8 @@ class PatternUTest :  public CxxTest::TestSuite
 class PMCB : public DefaultPatternMatchCB
 {
 	public:
-		PMCB(void);
+        AtomSpace *as;
+		PMCB(AtomSpace *_as);
 		virtual bool node_match(Node *, Node *);
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
                             std::map<Handle, Handle> &var_soln);
@@ -104,8 +105,9 @@ class PMCB : public DefaultPatternMatchCB
 		std::map<Handle, Handle> vars;
 };
 
-PMCB::PMCB(void)
+PMCB::PMCB(AtomSpace* _as)
 {
+    as = as;
 	found = 0;
 }
 
@@ -117,8 +119,8 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 	// Reject obvioius misatches
 	if (pattype != soltype) return true;
 
-	Handle ha = TLB::getHandle(npat);
-	Handle hb = TLB::getHandle(nsoln);
+	Handle ha = npat->getHandle();
+	Handle hb = nsoln->getHandle();
 	logger().debug("Compare (%lu) %s ==== (%lu) %s", 
 		ha.value(), npat->getName().c_str(),
 		hb.value(), nsoln->getName().c_str());
@@ -234,7 +236,7 @@ void PatternUTest::test_simple_link(void)
 
 	std::vector<Handle> negs;
 
-	PMCB pmcb;
+	PMCB pmcb(as);
 	pme.match(&pmcb, vars, preds, negs);
 
 	// Should find only one solution.
@@ -292,7 +294,7 @@ void PatternUTest::test_two_links(void)
 
 	std::vector<Handle> negs;
 
-	PMCB pmcb;
+	PMCB pmcb(as);
 	pme.match(&pmcb, vars, preds, negs);
 
 	// Should find four solutions:
@@ -354,7 +356,7 @@ void PatternUTest::test_eval(void)
 
 	std::vector<Handle> negs;
 
-	PMCB pmcb;
+	PMCB pmcb(as);
 	pme.match(&pmcb, vars, preds, negs);
 
 	// Should find one solution
@@ -452,11 +454,9 @@ void PatternUTest::test_implication(void)
 	TSM_ASSERT_EQUALS("incorrect implication", ret.size(), 1);
 	if (0 < ret.size())
 	{
-		Atom *apl = TLB::getAtom(ret[0]);
-		Link *lpl = dynamic_cast<Link *>(apl);
-		TSM_ASSERT("null pointer", NULL != lpl);
+		TSM_ASSERT("null pointer", as->isValidHandle(ret[0]));
 
-		Handle solution = lpl->getOutgoingSet()[0];
+		Handle solution = as->getOutgoing(ret[0],0);
 		TSM_ASSERT("incorrect solution", hitem_2 == solution);
 	}
 

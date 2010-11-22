@@ -28,7 +28,6 @@
 
 #include "CompositeRenumber.h"
 #include "CoreUtils.h"
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 

@@ -74,25 +74,20 @@ class MyExampleClass
 {
 	private:
 		int id;  // some value in the instance
+        AtomSpace *as;
 	public:
 
-		MyExampleClass(int _id) { id = _id; }
+		MyExampleClass(AtomSpace *_as, int _id) {as = _as; id = _id; }
 
 		// An example method -- accepts a handle, and wraps it 
 		// with a ListLink.
 		Handle my_func(Handle h)
 		{
 			Handle hlist = Handle::UNDEFINED;
-			Atom *a = TLB::getAtom(h);
-			Node *n = dynamic_cast<Node *>(a);
+			TSM_ASSERT("Failed to get a valid handle", as->isValidHandle(h))
 
-			TSM_ASSERT("Failed to get a valid handle", n != NULL)
-
-			logger().debug("Info: my_func instance %d received the node: %s\n", id, n->getName().c_str());
-			CogServer& cogserver = static_cast<CogServer&>(server());
-			AtomSpace *as = cogserver.getAtomSpace();
+			logger().debug("Info: my_func instance %d received the node: %s\n", id, as->getName(h).c_str());
 			hlist = as->addLink(LIST_LINK, h);
-
 			return hlist;
 		}
 
@@ -124,7 +119,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 
 	// Create the example class, and define a scheme function,
 	// named "bingo", that will call one of its methods
-	MyExampleClass *mtc = new MyExampleClass(42);
+	MyExampleClass *mtc = new MyExampleClass(as,42);
 	define_scheme_primitive("bingo", &MyExampleClass::my_func, mtc);
 
 	// Now, call bingo, with a reasonable argument. Since 
@@ -139,14 +134,13 @@ void SCMPrimitiveUTest::test_H_H(void)
 	// Now verify that the returned yyy is a ListLink which wraps the input node.
 	Handle nnn = eval->eval_h("nnn");
 	Handle yyy = eval->eval_h("yyy");
-	TSM_ASSERT ("undefined node handle ", TLB::isValidHandle(nnn));
-	TSM_ASSERT ("undefined list handle ", TLB::isValidHandle(yyy));
+	TSM_ASSERT ("undefined node handle ", as->isValidHandle(nnn));
+	TSM_ASSERT ("undefined list handle ", as->isValidHandle(yyy));
 
-	Atom * a = TLB::getAtom(yyy);
-	Link * l = dynamic_cast<Link *>(a);
-	TSM_ASSERT ("Null link ", NULL != l);
+	TSM_ASSERT ("Null handle for link ", as->isValidHandle(yyy));
+	TSM_ASSERT ("handle isn't a link ", !as->isNode(as->getType(yyy)));
 
-	const std::vector<Handle>& oset = l->getOutgoingSet();
+	const std::vector<Handle>& oset = as->getOutgoing(yyy);
 
 	TSM_ASSERT ("wrong outgoing set ", nnn == oset[0]);
 

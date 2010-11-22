@@ -28,8 +28,6 @@
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/Config.h>
 
-#include <opencog/atomspace/TLB.h>
-
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 

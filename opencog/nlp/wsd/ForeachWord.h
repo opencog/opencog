@@ -53,9 +53,11 @@ template <class T>
 inline bool foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
 {
 	FollowLink fl;
-	Atom *a = fl.follow_binary_link(TLB::getAtom(h), REFERENCE_LINK);
+    AtomSpace as = atomspace();
+    boost::shared_ptr<Atom> ha(as.cloneAtom(h));
+	Atom *a = fl.follow_binary_link(ha.get(), REFERENCE_LINK);
 	if (a == NULL) return false;  // this would be a weird, unexpected error ... 
-	return foreach_outgoing_handle (TLB::getHandle(a), cb, data);
+	return foreach_outgoing_handle (a->getHandle(), cb, data);
 }
 
 /**
@@ -83,10 +85,9 @@ class PrivateUseOnlyEachSense
 		T *user_data;
 		bool sense_filter(Handle h, Handle l)
 		{
+            AtomSpace& as = atomspace();
 			// Rule out relations that aren't actual word-senses.
-			Node *sense = dynamic_cast<Node *>(TLB::getAtom(h));
-			if (!sense || sense->getType() != WORD_SENSE_NODE) return false;
-
+			if (as.getType(h) != WORD_SENSE_NODE) return false;
 			return (user_data->*user_cb)(h, l);
 		}
 };
@@ -148,11 +149,12 @@ class PrivateUseOnlyPOSFilter
 		const std::string *desired_pos;
 		bool pos_filter(Handle h)
 		{
-			Atom *word_sense = TLB::getAtom(h);
+            AtomSpace *as = &atomspace();
+            boost::shared_ptr<Atom> word_sense(as->cloneAtom(h));
 
 			// Find the part-of-speech for this word-sense.
 			FollowLink fl;
-			Atom *a = fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK);
+			Atom *a = fl.follow_binary_link(word_sense.get(), PART_OF_SPEECH_LINK);
 			Node *n = dynamic_cast<Node *>(a);
 
 			// The 'no-sense' special-case sense will not have a pos.
@@ -203,11 +205,12 @@ inline bool foreach_dict_word_sense_pos(Handle h, const std::string &pos,
 inline const std::string& get_part_of_speech(Handle h)
 {
 	static std::string empty;
-	Atom * word_instance = TLB::getAtom(h);
+    AtomSpace *as = &atomspace();
+    boost::shared_ptr<Atom> word_instance(as->cloneLink(h));
 
 	// Find the part-of-speech for this word instance.
 	FollowLink fl;
-	Atom *inst_pos = fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK);
+	Atom *inst_pos = fl.follow_binary_link(word_instance.get(), PART_OF_SPEECH_LINK);
 	Node *n = dynamic_cast<Node *>(inst_pos);
 	if (n == NULL) return empty;
 	return n->getName();
@@ -225,10 +228,11 @@ inline const std::string& get_part_of_speech(Handle h)
  */
 inline Handle get_dict_word_of_word_instance(Handle h)
 {
-	Atom *word_instance = TLB::getAtom(h);
+    AtomSpace *as = &atomspace();
+    boost::shared_ptr<Atom> word_instance(as->cloneLink(h));
 	FollowLink fl;
-	Atom *dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
-	return TLB::getHandle(dict_word);
+	Atom *dict_word = fl.follow_binary_link(word_instance.get(), REFERENCE_LINK);
+	return dict_word->getHandle();
 }
 
 /**
@@ -243,10 +247,11 @@ inline Handle get_dict_word_of_word_instance(Handle h)
  */
 inline Handle get_lemma_of_word_instance(Handle h)
 {
-	Atom *word_instance = TLB::getAtom(h);
+    AtomSpace *as = &atomspace();
+    boost::shared_ptr<Atom> word_instance(as->cloneLink(h));
 	FollowLink fl;
-	Atom *dict_word = fl.follow_binary_link(word_instance, LEMMA_LINK);
-	return TLB::getHandle(dict_word);
+	Atom *dict_word = fl.follow_binary_link(word_instance.get(), LEMMA_LINK);
+	return dict_word->getHandle();
 }
 
 /**
@@ -290,27 +295,22 @@ template <typename T>
 class PrivateUseOnlyRelexRelationFinder
 {
 	private:
-		Atom *listlink;
+        Handle listlink;
 		bool look_for_eval_link(Handle h)
 		{
-			Atom *a = TLB::getAtom(h);
-			if (a->getType() != EVALUATION_LINK) return false;
+            AtomSpace& as = atomspace();
+            Type t = as.getType(h);
+			if (t != EVALUATION_LINK) return false;
 
 			// If we are here, lets see if the first node is a ling rel.
-			Link *l = dynamic_cast<Link *>(a);
-			if (l == NULL) return false;
-
-			a = l->getOutgoingAtom(0);
-			Node *n = dynamic_cast<Node *>(a);
-			if (n == NULL) return false;
-			if (n->getType() != DEFINED_LINGUISTIC_RELATIONSHIP_NODE) return false;
+			Handle a = as.getOutgoing(h,0);
+			if (as.getType(a) != DEFINED_LINGUISTIC_RELATIONSHIP_NODE) return false;
 
 			// OK, we've found a relationship. Get the second member of
 			// the list link, and call the user callback with it.
-			const std::string &relname = n->getName();
+			const std::string &relname = as.getName(a);
 
-			l = dynamic_cast<Link *>(listlink);
-			const std::vector<Handle> outset = l->getOutgoingSet();
+			const std::vector<Handle> outset = as.getOutgoing(listlink);
 
 			// First arg must be first (avoid reporting twice with swapped order).
 			if (first_arg != outset[0]) return false;
@@ -326,9 +326,9 @@ class PrivateUseOnlyRelexRelationFinder
 
 		bool look_for_list_link(Handle h)
 		{
-			Atom *a = TLB::getAtom(h);
-			if (a->getType() != LIST_LINK) return false;
-			listlink = a;
+            AtomSpace& as = atomspace();
+			if (as.getType(h) != LIST_LINK) return false;
+			listlink = h;
 
 			// If we are here, lets see if the list link is in eval link.
 			foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder::look_for_eval_link, this);
@@ -360,9 +360,8 @@ foreach_relex_relation(Handle h,
  */
 inline Handle get_word_instance_of_sense_link(Handle h)
 {
-	const Link * sense_link = dynamic_cast<const Link *>(TLB::getAtom(h));
-	std::vector<Handle> v = sense_link->getOutgoingSet();
-	return v[0];
+    AtomSpace& as = atomspace();
+	return as.getOutgoing(h,0);
 }
 
 /**
@@ -377,9 +376,8 @@ inline Handle get_word_instance_of_sense_link(Handle h)
  */
 inline Handle get_word_sense_of_sense_link(Handle h)
 {
-	const Link * sense_link = dynamic_cast<const Link *>(TLB::getAtom(h));
-	std::vector<Handle> v = sense_link->getOutgoingSet();
-	return v[1];
+    AtomSpace& as = atomspace();
+	return as.getOutgoing(h,1);
 }
 
 } // namespace opencog

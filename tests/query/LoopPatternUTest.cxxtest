@@ -124,8 +124,8 @@ void LoopPatternUTest::setUp(void)
  *       ConceptNode "two"
  *       ConceptNode "three"
  */
-#define getlink(hand,pos) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
 
 void LoopPatternUTest::cycle(Handle va, Handle vb, Handle vc)
 {
@@ -152,6 +152,7 @@ void LoopPatternUTest::cycle(Handle va, Handle vb, Handle vc)
 
 void LoopPatternUTest::verify(Handle soln)
 {
+    AtomSpace *as = cogserver().getAtomSpace();
 	Handle va = getlink(soln, 0);
 	Handle vb = getlink(soln, 1);
 	Handle vc = getlink(soln, 2);
@@ -167,9 +168,7 @@ void LoopPatternUTest::test_prep(void)
 	Handle result = pm.imply(imlink);
 
    // Expect three answers.
-   Link *rlist = dynamic_cast<Link *>(TLB::getAtom(result));
-   int arity = rlist->getArity();
-   TSM_ASSERT_EQUALS("incorrect arity", arity, 3);
+   TSM_ASSERT_EQUALS("incorrect arity", as->getArity(result), 3);
 
 	// Check that each answer gives the loop in cyclic order.
 	verify (getlink(result, 0));

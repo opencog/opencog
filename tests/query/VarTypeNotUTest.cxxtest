@@ -111,11 +111,8 @@ void VarTypeNot::setUp(void)
 /*
  * Basic implication link test.
  */
-#define getlink(hand,pos) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
-
-#define getarity(hand) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
 
 void VarTypeNot::test_exec(void)
 {

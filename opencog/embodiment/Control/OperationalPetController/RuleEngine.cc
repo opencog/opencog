@@ -42,7 +42,6 @@
 #include "SchemaRunner.h"
 
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 

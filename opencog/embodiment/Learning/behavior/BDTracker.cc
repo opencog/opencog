@@ -24,8 +24,6 @@
 #include "BDTracker.h"
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomspace/TLB.h>
-
 
 using std::vector;
 using std::map;

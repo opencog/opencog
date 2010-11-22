@@ -864,7 +864,8 @@ HandleSeq AtomSpace::getIncoming(Handle h)
     // TODO: solution where user can specify whether to poll storage/repository
 
     HandleEntry* he = TLB::getAtom(h)->getIncomingSet();
-    return he->toHandleVector();
+    if (he) return he->toHandleVector();
+    else return HandleSeq();
 }
 
 void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)

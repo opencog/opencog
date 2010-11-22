@@ -48,11 +48,23 @@
 
 #define OBFUSCATE (0x55555555UL)
 
+class AtomSpaceUTest;
+class AtomTableUTest;
+class LinkUTest;
+class NodeUTest;
+class CompositeTruthValueUTest;
+class HandleEntryUTest;
+class HandleSetUTest;
+class TemporalTableUTest;
+class TimeServerUTest;
+class BasicSaveUTest;
+class BasicSCMUTest;
+
 namespace opencog
 {
 
 /**
- * Each atom stored on OpenCog will have an immutable ID, which will be used
+ * Each atom stored on OpenCog will have an immutable UUID, which will be used
  * to refer to that atom when a reference to that atom needs to be kept.
  * Each proxy must have a look-up mechanism or table (TLB) to map from
  * this ID to the actual memory address for the atom in the local process
@@ -61,14 +73,62 @@ namespace opencog
 class TLB
 {
     friend class AtomSpace;
+    friend class ::AtomSpaceUTest;
     friend class AtomTable;
-    //! @todo remove these friend classes and remove TLB references from them. 
+    friend class ::AtomTableUTest;
+
+    // TODO review these AtomSpace friend classes to see whether they
+    // are allowed to access the TLB in the way that they do.
     friend class Atom;
     friend class Node;
+    friend class ::NodeUTest;
     friend class Link;
+    friend class ::LinkUTest;
     friend class HandleEntry;
+    friend class ::HandleEntryUTest;
     friend class HandleSet;
+    friend class ::HandleSetUTest;
     friend class HandleTemporalPair;
+    friend class HandleToTemporalEntryMap;
+    friend class ImportanceIndex;
+    friend class LinkIndex;
+    friend class NameIndex;
+    friend class NodeIndex;
+    friend class PredicateIndex;
+    friend class SpaceServer;
+    friend class TargetTypeIndex;
+    friend class Trail;
+    friend class TypeIndex;
+    friend class ::TemporalTableUTest;
+    friend class ::TimeServerUTest;
+    friend class ::CompositeTruthValueUTest;
+
+    // TODO remove these friend classes and remove TLB references from them. 
+    friend class NMXmlExporter;
+    friend class SchemeSmob;
+    friend class ::BasicSCMUTest;
+    friend class CoreUtils;
+    friend class SavingLoading;
+    friend class ::BasicSaveUTest;
+    friend class SpaceServerSavable;
+    friend class TemporalTableFile;
+
+    friend class OutgoingTree;
+    friend class DefaultPatternMatchCB;
+    friend class PatternMatch;
+    friend class PatternMatchEngine;
+    friend class Instantiator;
+    friend class Implicator;
+    friend class CrispImplicator;
+    friend class FindVariables;
+    
+    friend class MilhalceaLabel;
+    friend class NNAdjust;
+    friend class ParseRank;
+    friend class ReportRank;
+    friend class SenseRank;
+    friend class SenseSimilarityLCH;
+
 private:
 
 #ifdef USE_TLB_MAP
@@ -84,8 +144,6 @@ private:
     static UUID brk_uuid;
 #endif
 
-// TODO: return this to private and only accessible to friend classes
-public:
     /**
      * Maps a handle to its corresponding atom.
      *

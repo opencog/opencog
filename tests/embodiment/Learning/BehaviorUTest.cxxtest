@@ -52,7 +52,7 @@ int countEvLinks(AtomSpace* as, string s)
     foreach(Handle ha, es) {
         string name = as->getName(as->getOutgoing(ha, 0));
         if (name == s) {
-            printf("countEvLinks got a matching link:\n%s\n", TLB::getAtom(ha)->toString().c_str());
+            printf("countEvLinks got a matching link:\n%s\n", as->atomAsString(ha).c_str());
             ret++;
         }
     }

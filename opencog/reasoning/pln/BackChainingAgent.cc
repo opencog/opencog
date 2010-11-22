@@ -29,8 +29,6 @@
 #include <vector>
 
 #include <opencog/atomspace/AtomSpace.h>
-//#include <opencog/atomspace/TLB.h>
-//#include <opencog/util/Logger.h>
 #include <opencog/util/mt19937ar.h>
 
 #include "PLN.h"

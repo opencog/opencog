@@ -110,14 +110,12 @@ void BuggyStackUTest::setUp(void)
 /*
  * Basic implication link test.
  */
-#define getlink(hand,pos) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
-
-#define getarity(hand) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
 
 void BuggyStackUTest::test_exec(void)
 {
+    AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink w/ one solution

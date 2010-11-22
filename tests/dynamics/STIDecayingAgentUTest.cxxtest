@@ -61,29 +61,26 @@ public:
 
         AtomSpace *as = cogserver.getAtomSpace();
         Handle h = as->addNode(NUMBER_NODE, "1");
-        Node *node = dynamic_cast<Node*>(TLB::getAtom(h));
-        node->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
+        as->setSTI(h,min_sti+5);
 
         // first, ensure the node's sti is what it should
-        h = as->getHandle(node->getType(), node->getName());
-        TS_ASSERT(TLB::getAtom(h)->getAttentionValue().getSTI() == (min_sti + 5));
+        TS_ASSERT(as->getSTI(h) == (min_sti + 5));
 
         cogserver.createAgent(STIDecayingAgent::info().id, true);
         for(int i=0; i < 5; i++) cogserver.runLoopStep();
 
         // we're on the verge of removing the node; check if its sti equals
         // min_sti
-        h = as->getHandle(node->getType(), node->getName());
-        TS_ASSERT(TLB::getAtom(h)->getAttentionValue().getSTI() == min_sti);
+        TS_ASSERT(as->getSTI(h) == min_sti);
 
         // run another cycle and check whether the atom has been removed
-        // Joel: you can't get the type or name when it's been deleted!
-        // save name and type first...
-        std::string name = node->getName();
-        Type t = node->getType();
+        // NB: you can't get the type or name when it's been deleted obviously,
+        // so save name and type first...
+        std::string name = as->getName(h);
+        Type t = as->getType(h);
         cogserver.runLoopStep();
 
         h = as->getHandle(t, name);
-        TS_ASSERT(TLB::isInvalidHandle(h));
+        TS_ASSERT(!as->isValidHandle(h));
     }
 };

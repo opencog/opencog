@@ -12,7 +12,6 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/TLB.h>
 
 namespace opencog
 {
@@ -23,8 +22,8 @@ namespace opencog
 template<class T>
 inline bool foreach_outgoing_handle(Handle h, bool (T::*cb)(Handle), T *data)
 {
-    Atom *atom = TLB::getAtom(h);
-    Link *link = dynamic_cast<Link *>(atom);
+    AtomSpace *as = &atomspace();
+    boost::shared_ptr<Link> link(as->cloneLink(h));
     if (NULL == link) return false;
 
     const std::vector<Handle> &vh = link->getOutgoingSet();
@@ -44,8 +43,8 @@ inline bool foreach_outgoing_handle(Handle h, bool (T::*cb)(Handle), T *data)
 template<class T>
 inline bool foreach_outgoing_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 {
-    Atom *atom = TLB::getAtom(h);
-    Link *link = dynamic_cast<Link *>(atom);
+    AtomSpace *as = &atomspace();
+    boost::shared_ptr<Link> link(as->cloneLink(h));
     if (NULL == link) return false;
 
     const std::vector<Handle> &vh = link->getOutgoingSet();
@@ -53,8 +52,9 @@ inline bool foreach_outgoing_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 
     for (size_t i = 0; i < sz; i++) {
         Handle hout = vh[i];
-        Atom *aout = TLB::getAtom(hout);
-        bool rc = (data->*cb)(aout);
+        boost::shared_ptr<Atom> aout(as->cloneAtom(hout));
+        // XXX we shouldn't expose the raw pointer like this
+        bool rc = (data->*cb)(aout.get());
         if (rc) return rc;
     }
     return false;
@@ -75,8 +75,9 @@ inline bool foreach_incoming_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 
     for (size_t i = 0; i < sz; i++) {
         Handle hin = vh[i];
-        Atom *ain = TLB::getAtom(hin);
-        bool rc = (data->*cb)(ain);
+        boost::shared_ptr<Atom> ain(as->cloneAtom(hin));
+        // XXX we shouldn't expose the raw pointer like this
+        bool rc = (data->*cb)(ain.get());
         if (rc) return rc;
     }
     return false;

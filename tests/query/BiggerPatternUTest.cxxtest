@@ -215,15 +215,13 @@ void BiggerPatternUTest::setUp(void)
  *      $prep   = DefinedLinguisticRelationshipNode "of"
  *      $phrase = DefinedLinguisticRelationshipNode "capital_of"
  */
-#define getlink(hand,pos) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
-
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define prtnode(str,hand) \
-	printf("%s %s\n", str, \
-	dynamic_cast<Node *>(TLB::getAtom(hand))->getName().c_str());
+	printf("%s %s\n", str, as->getName(hand).c_str());
 
 void BiggerPatternUTest::test_prep(void)
 {
+	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
@@ -231,8 +229,7 @@ void BiggerPatternUTest::test_prep(void)
 
 	// Expect two answers: Berlin is the capital of Germany, 
 	// and of France. (just for this test case :-)
-	Link *rlist = dynamic_cast<Link *>(TLB::getAtom(imlist));
-	int arity = rlist->getArity();
+	int arity = as->getArity(imlist);
 	TSM_ASSERT_EQUALS("incorrect arity", arity, 2);
 
 	// 0 has France, 1 has Germany

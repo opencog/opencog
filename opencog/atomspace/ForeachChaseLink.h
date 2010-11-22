@@ -1,7 +1,7 @@
 /**
  * ForeachChaseLink.h
  *
- * This file implements a numbeer of link-chasing routines.
+ * This file implements a number of link-chasing routines.
  * By "link-chasing", it is meant: given an input atom, find
  * all links of some given link-type that contain it, and then,
  * call a callback on each of the other elements in that link.
@@ -40,7 +40,6 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Foreach.h>
-#include <opencog/atomspace/TLB.h>
 
 namespace opencog
 {
@@ -137,8 +136,8 @@ public:
 
 private:
     Type link_type;
-    Atom * from_atom;
-    Atom * to_atom;
+    boost::shared_ptr<Atom> from_atom;
+    boost::shared_ptr<Atom> to_atom;
     int position_from;
     int position_to;
     int cnt;
@@ -148,14 +147,15 @@ private:
     T *user_data;
 
     inline bool do_follow_link(Handle h, Type ltype, int from, int to, T *data) {
-        Atom *atom = TLB::getAtom(h);
-        if (NULL == atom) return false;
+        AtomSpace &as = atomspace();
+        boost::shared_ptr<Atom> atom = as.cloneAtom(h);
+        if (!atom) return false;
 
         // Look for incoming links that are of the given type.
         // Then grab the thing that they link to.
         link_type = ltype;
         from_atom = atom;
-        to_atom = NULL;
+        to_atom.reset();
         position_from = from;
         position_to = to;
         user_data = data;
@@ -165,14 +165,15 @@ private:
     }
 
     inline bool do_follow_unordered_binary_link(Handle h, Type ltype, T *data) {
-        Atom *atom = TLB::getAtom(h);
-        if (NULL == atom) return false;
+        AtomSpace &as = atomspace();
+        boost::shared_ptr<Atom> atom = as.cloneAtom(h);
+        if (!atom) return false;
 
         // Look for incoming links that are of the given type.
         // Then grab the thing that they link to.
         link_type = ltype;
         from_atom = atom;
-        to_atom = NULL;
+        to_atom.reset();
         user_data = data;
         endpoint_matcher = &PrivateUseOnlyChaseLink::pursue_unordered_link;
         bool rc = foreach_incoming_atom(h, &PrivateUseOnlyChaseLink::find_link_type, this);
@@ -187,17 +188,17 @@ private:
         if (link_type != link_atom->getType()) return false;
 
         cnt = -1;
-        to_atom = NULL;
-        Handle link_h = TLB::getHandle(link_atom);
+        to_atom.reset();
+        Handle link_h = link_atom->getHandle();
         // foreach_outgoing_atom(link_h, PrivateUseOnlyChaseLink::endpoint_matcher, this);
         foreach_outgoing_atom(link_h, endpoint_matcher, this);
 
         bool rc = false;
         if (to_atom) {
             if (user_callback)
-                rc = (user_data->*user_callback)(TLB::getHandle(to_atom));
+                rc = (user_data->*user_callback)(to_atom->getHandle());
             else
-                rc = (user_data->*user_callback_lh)(TLB::getHandle(to_atom), link_h);
+                rc = (user_data->*user_callback_lh)(to_atom->getHandle(), link_h);
         }
         return rc;
     }
@@ -207,8 +208,8 @@ private:
 
         // The from-slot should be occupied by the node itself.
         if (position_from == cnt) {
-            if (from_atom != atom) {
-                to_atom = NULL;
+            if (from_atom->getHandle() != atom->getHandle()) {
+                to_atom.reset();
                 return true; // bad match, stop now.
             }
             return false;
@@ -216,7 +217,7 @@ private:
 
         // The to-slot is the one we're looking for.
         if (position_to == cnt) {
-            to_atom = atom;
+            to_atom = boost::shared_ptr<Atom>(atom->clone());
         }
 
         return false;
@@ -225,8 +226,8 @@ private:
     inline bool pursue_unordered_link(Atom *atom) {
         // There are only two atoms in a binary link. The one that is
         // not the from_atom is the one we are looking for.
-        if (from_atom != atom) {
-            to_atom = atom; // found it!
+        if (from_atom->getHandle() != atom->getHandle()) {
+            to_atom = boost::shared_ptr<Atom>(atom->clone()); // found it!
             return true;
         }
         return false;

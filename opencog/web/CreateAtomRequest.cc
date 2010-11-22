@@ -30,7 +30,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>

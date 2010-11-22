@@ -31,7 +31,7 @@ class MihalceaLabel
 		bool pull_pos(Handle);
 		Handle no_sense;
 
-		Atom * word_instance;
+		Handle word_instance;
 		int total_words;
 		int total_labels;
 

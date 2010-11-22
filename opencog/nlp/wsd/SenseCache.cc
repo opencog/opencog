@@ -54,8 +54,7 @@ const TruthValue& SenseCache::similarity(Handle sense_a, Handle sense_b)
 
 	if (!found) return TruthValue::DEFAULT_TV();
 
-	Link *l = dynamic_cast<Link *>(TLB::getAtom(found_link));
-	return l->getTruthValue();
+	return atom_space->getTV(found_link);
 }
 
 bool SenseCache::find_sense(Handle sense, Handle link)

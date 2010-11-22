@@ -19,7 +19,6 @@
 #include "SpaceServer_wrap.h"
 #include "SpaceServerContainer_wrap.h"
 #include "TruthValue_wrap.h"
-#include "TLB_wrap.h"
 
 using namespace boost::python;
 
@@ -51,5 +50,4 @@ void init_atomspace_module_py()
     init_Link_py();
     init_ClassServer_py();
     init_atom_types_py();
-    init_TLB_py();
 }

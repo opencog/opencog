@@ -153,6 +153,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 /* ================================================================= */
 // Handy dandy utility class.
 //
+namespace opencog {
 class FindVariables
 {
 	public:
@@ -368,6 +369,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 	}
 	return false;
 }
+} // namespace opencog
 
 /* ================================================================= */
 /**
@@ -783,10 +785,14 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 
 /* ================================================================= */
 
+namespace opencog {
+
 class DefaultImplicator:
 	public virtual Implicator,
 	public virtual DefaultPatternMatchCB
 {};
+
+} // namespace opencog
 
 /**
  * DEPRECATED: USE VAR_SCOPE INSTEAD!
@@ -803,6 +809,8 @@ Handle PatternMatch::imply (Handle himplication)
 	impl.as = atom_space;
 	return do_imply(himplication, &impl, NULL);
 }
+
+namespace opencog {
 
 class CrispImplicator:
 	public virtual Implicator,
@@ -847,6 +855,7 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 	return false;
 }
 
+} // namespace opencog
 
 /**
  * DEPRECATED: USE VAR_SCOPE INSTEAD!

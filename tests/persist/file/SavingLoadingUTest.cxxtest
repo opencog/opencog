@@ -34,7 +34,6 @@
 #include <opencog/persist/file/SavingLoading.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 
 #include "atom_types.definitions"
@@ -174,12 +173,11 @@ public:
         // Check nodes
         Handle h1 = atomSpace.getHandle(CONCEPT_NODE, NODE1_NAME);
         TS_ASSERT(h1 != Handle::UNDEFINED);
-        Atom* a1 = TLB::getAtom(h1);
-        const AttentionValue& av1 = a1->getAttentionValue();
+        const AttentionValue& av1 = atomSpace.getAV(h1);
         TS_ASSERT(av1.getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av1.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av1.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
-        const TruthValue& tv1 = a1->getTruthValue();
+        const TruthValue& tv1 = atomSpace.getTV(h1);
         TS_ASSERT(tv1.getType() == tvs[0]->getType());
         TS_ASSERT(tv1.getMean() == tvs[0]->getMean());
         TS_ASSERT(tv1.getCount() == tvs[0]->getCount());
@@ -187,13 +185,12 @@ public:
 
         Handle h2 = atomSpace.getHandle(CONCEPT_NODE, NODE2_NAME);
         TS_ASSERT(h2 != Handle::UNDEFINED);
-        Atom* a2 = TLB::getAtom(h2);
-        const AttentionValue& av2 = a2->getAttentionValue();
+        const AttentionValue& av2 = atomSpace.getAV(h2);
         TS_ASSERT(av2.getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av2.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av2.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        const TruthValue& tv2 = a2->getTruthValue();
+        const TruthValue& tv2 = atomSpace.getTV(h2);
         TS_ASSERT(tv2.getType() == tvs[1]->getType());
         TS_ASSERT(tv2.getMean() == tvs[1]->getMean());
         TS_ASSERT(tv2.getCount() == tvs[1]->getCount());
@@ -201,13 +198,12 @@ public:
 
         Handle h3 = atomSpace.getHandle(CONCEPT_NODE, NODE3_NAME);
         TS_ASSERT(h3 != Handle::UNDEFINED);
-        Atom* a3 = TLB::getAtom(h3);
-        const AttentionValue& av3 = a3->getAttentionValue();
+        const AttentionValue& av3 = atomSpace.getAV(h3);
         TS_ASSERT(av3.getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av3.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av3.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        const TruthValue& tv3 = a3->getTruthValue();
+        const TruthValue& tv3 = atomSpace.getTV(h3);
         TS_ASSERT(tv3.getType() == tvs[2]->getType());
         TS_ASSERT(tv3.getMean() == tvs[2]->getMean());
         TS_ASSERT(tv3.getCount() == tvs[2]->getCount());
@@ -216,13 +212,12 @@ public:
 
         Handle h4 = atomSpace.getHandle(CONCEPT_NODE, NODE4_NAME);
         TS_ASSERT(h4 != Handle::UNDEFINED);
-        Atom* a4 = TLB::getAtom(h4);
-        const AttentionValue& av4 = a4->getAttentionValue();
+        const AttentionValue& av4 = atomSpace.getAV(h4);
         TS_ASSERT(av4.getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av4.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av4.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        const TruthValue& tv4 = a4->getTruthValue();
+        const TruthValue& tv4 = atomSpace.getTV(h4);
         TS_ASSERT(tv4.getType() == tvs[3]->getType());
         TS_ASSERT(tv4.getMean() == tvs[3]->getMean());
         TS_ASSERT(tv4.getCount() == tvs[3]->getCount());
@@ -238,13 +233,12 @@ public:
 
         Handle h5 = atomSpace.getHandle(CONCEPT_NODE, NODE5_NAME);
         TS_ASSERT(h5 != Handle::UNDEFINED);
-        Atom* a5 = TLB::getAtom(h5);
-        const AttentionValue& av5 = a5->getAttentionValue();
+        const AttentionValue& av5 = atomSpace.getAV(h5);
         TS_ASSERT(av5.getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av5.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av5.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        const TruthValue& tv5 = a5->getTruthValue();
+        const TruthValue& tv5 = atomSpace.getTV(h5);
         TS_ASSERT(tv5.getType() == tvs[4]->getType());
         TS_ASSERT(tv5.getMean() == tvs[4]->getMean());
         TS_ASSERT(tv5.getCount() == tvs[4]->getCount());

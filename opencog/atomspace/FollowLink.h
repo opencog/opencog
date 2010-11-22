@@ -19,7 +19,6 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Foreach.h>
-#include <opencog/atomspace/TLB.h>
 
 namespace opencog
 {
@@ -56,7 +55,7 @@ public:
         to_atom = NULL;
         position_from = from;
         position_to = to;
-        Handle h = TLB::getHandle(atom);
+        Handle h = atom->getHandle();
         foreach_incoming_atom(h, &FollowLink::find_link_type, this);
         return to_atom;
     }
@@ -78,7 +77,7 @@ private:
 
         cnt = -1;
         to_atom = NULL;
-        Handle h = TLB::getHandle(atom);
+        Handle h = atom->getHandle();
         foreach_outgoing_atom(h, &FollowLink::pursue_link, this);
         if (to_atom) return true;
         return false;

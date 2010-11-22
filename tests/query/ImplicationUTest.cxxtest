@@ -257,14 +257,12 @@ void ImplicationUTest::setUp(void)
  *       DefinedFrameNode #Ingestion
  *       PredicateNode grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation
  */
-#define getlink(hand,pos) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
-
-#define getarity(hand) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
 
 void ImplicationUTest::test_exec(void)
 {
+    AtomSpace *as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink

@@ -489,7 +489,7 @@ public:
 
     //! returns whether the type of h is T or inherits from T
     bool isSubType(pHandle h, Type T);
-    //! returns whether 
+    //! returns whether type subT has superT as a parent type
     bool inheritsType(Type subT, Type superT) const;
 
     void HandleEntry2HandleSet(HandleEntry& src, std::set<Handle>& dest) const;

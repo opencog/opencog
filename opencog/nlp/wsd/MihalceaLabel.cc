@@ -80,7 +80,8 @@ bool MihalceaLabel::annotate_parse_f(Handle h)
  */
 bool MihalceaLabel::annotate_word(Handle h)
 {
-	word_instance = TLB::getAtom(h);
+    
+	word_instance = h;
 
 	// Find the part-of-speech for this word instance.
 	std::string word_inst_pos = get_part_of_speech(h);
@@ -97,12 +98,10 @@ bool MihalceaLabel::annotate_word(Handle h)
 
 #ifdef DEBUG
 	total_words ++;
-	Node *n = dynamic_cast<Node *>(word_instance);
 	printf("; MihalceaLabel::annotate_word(%lx)\n", (unsigned long) h);
-	printf("; found word-inst %s\n",  n->toString().c_str());
-	printf(";\thas inst-POS %s\n",  word_inst_pos.c_str());
-	n = dynamic_cast<Node *>(TLB::getAtom(lemma_h));
-	printf(";\thas word-dict %s\n",  n->toString().c_str());
+	printf("; found word-inst %s\n", atom_space.atomAsString(word_instance).c_str());
+	printf(";\thas inst-POS %s\n", word_inst_pos.c_str());
+	printf(";\thas word-dict %s\n", atom_space.atomAsString(lemma_h).c_str());
 #endif
 
 	// Pull in word senses from the persistent store, if needed.
@@ -124,20 +123,17 @@ bool MihalceaLabel::annotate_word(Handle h)
  *      WordInstanceNode "bark_144"
  *      WordSenseNode "bark_sense_23"
  */
-bool MihalceaLabel::annotate_word_sense(Handle h)
+bool MihalceaLabel::annotate_word_sense(Handle word_sense)
 {
-	Atom *word_sense = TLB::getAtom(h);
-
 #ifdef DEBUG
-	Node *n = dynamic_cast<Node *>(word_sense);
-	printf(";\thas word-sense %s\n",  n->toString().c_str());
+	printf(";\thas word-sense %s\n", atom_space->atomAsString(word_sense).c_str());
 	total_labels++;
 #endif
 
 	// Create a link connecting this word-instance to this word-sense.
 	std::vector<Handle> out;
-	out.push_back(TLB::getHandle(word_instance));
-	out.push_back(TLB::getHandle(word_sense));
+	out.push_back(word_instance);
+	out.push_back(word_sense);
 
 	// Give it a true truth value; but no confidence.
 	CountTruthValue ctv(1.0f, 0.0f, 1.0f);

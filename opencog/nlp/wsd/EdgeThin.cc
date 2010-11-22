@@ -7,7 +7,6 @@
  */
 
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 
 #include "EdgeThin.h"
 #include "ForeachWord.h"
@@ -57,8 +56,7 @@ bool EdgeThin::count_sense(Handle sense_h, Handle sense_link_h)
 bool EdgeThin::prune_sense(Handle sense_h, Handle sense_link_h)
 {
 	// If incoming set of this sense link is empty, remove it entirely.
-	Atom *a = TLB::getAtom(sense_link_h);
-	if (NULL == a->getIncomingSet())
+	if (atom_space->getIncoming(sense_link_h).size() == 0)
 	{
 		atom_space->removeAtom(sense_link_h, false);
 		prune_count ++;
@@ -123,8 +121,7 @@ bool EdgeThin::dbg_word(Handle word_h)
 
 	if (0 < sense_count)
 	{
-		Node *w = dynamic_cast<Node *>(TLB::getAtom(word_h));
-		const std::string &wn = w->getName();
+		const std::string &wn = atom_space->getName(word_h);
 		printf ("; EdgeThin::dbg_word %s has %d senses left \n",
 			wn.c_str(), sense_count);
 	}
@@ -163,10 +160,9 @@ void EdgeThin::thin_parse(Handle h, int _keep)
  */
 static bool sense_compare(Handle ha, Handle hb)
 {
-	Link *la = dynamic_cast<Link *>(TLB::getAtom(ha));
-	Link *lb = dynamic_cast<Link *>(TLB::getAtom(hb));
-	double sa = la->getTruthValue().getCount();
-	double sb = lb->getTruthValue().getCount();
+    AtomSpace& as = atomspace();
+	double sa = as.getTV(ha).getCount();
+	double sb = as.getTV(hb).getCount();
 	if (sa > sb) return true;
 	return false;
 }
@@ -185,24 +181,19 @@ bool EdgeThin::make_sense_list(Handle sense_h, Handle sense_link_h)
 bool EdgeThin::delete_sim(Handle h)
 {
 #ifdef LINK_DEBUG
-	Link *l = dynamic_cast<Link *>(TLB::getAtom(h));
-	std::vector<Handle> oset = l->getOutgoingSet();
+	std::vector<Handle> oset = atom_space.getOutgoing(h);
 	Handle first_sense_link = oset[0];
 	Handle second_sense_link = oset[1];
 
 	Handle fw = get_word_instance_of_sense_link(first_sense_link);
 	Handle fs = get_word_sense_of_sense_link(first_sense_link);
-	Node *nfw = dynamic_cast<Node *>(TLB::getAtom(fw));
-	Node *nfs = dynamic_cast<Node *>(TLB::getAtom(fs));
-	const char *vfw = nfw->getName().c_str();
-	const char *vfs = nfs->getName().c_str();
+	const char *vfw = atom_space.getName(fw).c_str();
+	const char *vfs = atom_space.getName(fs).c_str();
 
 	Handle sw = get_word_instance_of_sense_link(second_sense_link);
 	Handle ss = get_word_sense_of_sense_link(second_sense_link);
-	Node *nsw = dynamic_cast<Node *>(TLB::getAtom(sw));
-	Node *nss = dynamic_cast<Node *>(TLB::getAtom(ss));
-	const char *vsw = nsw->getName().c_str();
-	const char *vss = nss->getName().c_str();
+	const char *vsw = atom_space.getName(sw).c_str();
+	const char *vss = atom_space.getName(ss).c_str();
 
 	printf("slink: %s ## %s <<-->> %s ## %s delete\n", vfw, vsw, vfs, vss); 
 	printf("slink: %s ## %s <<-->> %s ## %s delete\n", vsw, vfw, vss, vfs); 
@@ -227,8 +218,7 @@ bool EdgeThin::thin_word(Handle word_h)
 
 #ifdef THIN_DEBUG
 	Handle wh = get_dict_word_of_word_instance(word_h);
-	Node *w = dynamic_cast<Node *>(TLB::getAtom(wh));
-	const std::string &wn = w->getName();
+	const std::string &wn = atom_space->getName(wh);
 	printf ("; EdgeThin::thin_word %s to %d from %d\n",
 		wn.c_str(), keep, sense_list.size());
 #endif
@@ -254,12 +244,10 @@ bool EdgeThin::thin_word(Handle word_h)
 			deleted_links ++;
 		}
 #ifdef THIN_DEBUG
-		Link *la = dynamic_cast<Link *>(TLB::getAtom(sense_h));
-		double sa = la->getTruthValue().getCount();
+		double sa = atom_space->getTV(sense_h).getCount();
 		Handle hws = get_word_sense_of_sense_link(sense_h);
-		Node *ws = dynamic_cast<Node *>(TLB::getAtom(hws));
 		printf ("; delete %s with score %f (%d links)\n",
-			ws->getName().c_str(), sa, deleted_links);
+			atom_space->getName(hws).c_str(), sa, deleted_links);
 #endif
 	}
 
