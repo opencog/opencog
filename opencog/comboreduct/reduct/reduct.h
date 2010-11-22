@@ -34,6 +34,8 @@ namespace reduct {
 using namespace combo;
     
 struct rule {
+    typedef combo_tree argument_type; // useful for cache rule
+
     rule(std::string _name) : name(_name) {}
     virtual ~rule() {}
     virtual void operator()(combo_tree&,combo_tree::iterator) const=0;
@@ -62,7 +64,8 @@ const rule& ann_reduction();
 const rule& logical_reduction(int effort);
 
 // ignore_ops is the set of operator to ignore
-const rule& contin_reduction(const vertex_set& ignore_ops, opencog::RandGen& rng);
+const rule& contin_reduction(const vertex_set& ignore_ops, opencog::RandGen& rng,
+                             unsigned int cache_size = 0);
 
 const rule& mixed_reduction(opencog::RandGen& rng);
 const rule& full_reduction(opencog::RandGen& rng);
@@ -82,8 +85,10 @@ inline void logical_reduce(int effort, combo_tree& tr) {
 inline void contin_reduce(combo_tree& tr,combo_tree::iterator it, const vertex_set& ignore_ops, opencog::RandGen& rng) {
     contin_reduction(ignore_ops, rng)(tr,it);
 }
-inline void contin_reduce(combo_tree& tr, const vertex_set& ignore_ops, opencog::RandGen& rng) { contin_reduction(ignore_ops, rng)(tr); }
-
+inline void contin_reduce(combo_tree& tr, const vertex_set& ignore_ops,
+                          opencog::RandGen& rng, unsigned int cache_size = 0) {
+    contin_reduction(ignore_ops, rng, cache_size)(tr); 
+}
 inline void mixed_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     mixed_reduction(rng)(tr,it);
 }

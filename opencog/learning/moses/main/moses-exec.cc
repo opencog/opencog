@@ -627,8 +627,8 @@ int main(int argc,char** argv) {
 
             occam_contin_bscore bscore(ot, it, variance, as, rng);
             metapop_moses_results(rng, exemplars, tt,
-                                  contin_reduction(ignore_ops, rng),
-                                  contin_reduction(ignore_ops, rng),
+                                  contin_reduction(ignore_ops, rng, 1000000),
+                                  contin_reduction(ignore_ops, rng, 1000000),
                                   bscore, cache_size, opt_algo,
                                   opt_params, meta_params, moses_params,
                                   vm, mmr_pa);
@@ -670,8 +670,8 @@ int main(int argc,char** argv) {
             occam_contin_bscore bscore(table_outputs, it,
                                        variance, as, rng);
             metapop_moses_results(rng, exemplars, tt,
-                                  contin_reduction(ignore_ops, rng),
-                                  contin_reduction(ignore_ops, rng),
+                                  contin_reduction(ignore_ops, rng, 1000000),
+                                  contin_reduction(ignore_ops, rng, 1000000),
                                   bscore, cache_size, opt_algo,
                                   opt_params, meta_params, moses_params,
                                   vm, mmr_pa);
@@ -749,8 +749,8 @@ int main(int argc,char** argv) {
         occam_contin_bscore bscore(simple_symbolic_regression(problem_size),
                                    rands, variance, as, rng);
         metapop_moses_results(rng, exemplars, tt,
-                              contin_reduction(ignore_ops, rng),
-                              contin_reduction(ignore_ops, rng),
+                              contin_reduction(ignore_ops, rng, 1000000),
+                              contin_reduction(ignore_ops, rng, 1000000),
                               bscore, cache_size, opt_algo,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);
@@ -808,8 +808,8 @@ int main(int argc,char** argv) {
         occam_contin_bscore bscore(table_outputs, it,
                                    variance, as, rng);
         metapop_moses_results(rng, exemplars, tt,
-                              contin_reduction(ignore_ops, rng),
-                              contin_reduction(ignore_ops, rng),
+                              contin_reduction(ignore_ops, rng, 1000000),
+                              contin_reduction(ignore_ops, rng, 1000000),
                               bscore, cache_size, opt_algo,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);

@@ -25,6 +25,9 @@
 #ifndef _META_RULES_H
 #define _META_RULES_H
 
+#include <opencog/util/lru_cache.h>
+#include <opencog/util/functional.h>
+
 #include <opencog/comboreduct/combo/type_tree.h>
 #include "reduct.h"
 
@@ -60,6 +63,17 @@ struct ignore_size_increase : public crule<ignore_size_increase> {
 protected:
     shared_ptr<const rule> r;
 };      
+
+// the result of the reduction applied by r will be cached
+struct cache : public crule<cache> {
+    explicit cache(const rule& r_, unsigned int cache_size, string name = "cache")
+        : crule<cache>::crule(name), r(r_.clone()),
+          rule_cache(cache_size,opencog::toFunc<rule>(*r)) {}
+    void operator()(combo_tree&,combo_tree::iterator) const;
+protected:
+    shared_ptr<const rule> r;
+    opencog::lru_cache<opencog::toFunc<rule> > rule_cache;
+};
 
 //apply rule in pre-order (left-to-right, parents before children, leftward
 //subtrees before rightward subtrees) from a given node, to visit all
