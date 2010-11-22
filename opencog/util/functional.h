@@ -216,6 +216,26 @@ const_function<T> make_const_function(const T& t)
     return const_function<T>(t);
 }
 
+/**
+ * turn a modifer into a unary function. The modifier should be as follows
+ * struct M {
+ *     typedef X argument_type ;
+ *     void operator()(X& x);
+ * }
+ */
+template<typename M>
+struct toFunc {
+    typedef typename M::argument_type argument_type;
+    typedef typename M::argument_type result_type;
+    toFunc(const M& _m) : m(_m) {}
+    typename M::argument_type operator()(const argument_type& x) const {
+        result_type tmp(x);
+        m(tmp);
+        return tmp;
+    }
+    const M& m;
+};
+
 } //~namespace opencog;
 
 #endif
