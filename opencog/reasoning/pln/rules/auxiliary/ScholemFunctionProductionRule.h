@@ -49,7 +49,7 @@ public:
     }
 
     Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh,
-                                                         bool fresh = false);
+                                                         bool fresh = false) const;
 };
 
 }} // namespace opencog { namespace pln {

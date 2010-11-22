@@ -60,7 +60,7 @@ public:
     bool validate2(MPs& args) const { return true; }
 
     Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh,
-                                                         bool fresh = true);
+                                                         bool fresh = true) const;
 };
 
 }} // namespace opencog { namespace pln {

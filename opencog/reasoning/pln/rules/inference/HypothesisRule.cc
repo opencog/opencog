@@ -32,7 +32,7 @@
 
 namespace opencog { namespace pln {
 
-boost::shared_ptr<std::set<BoundVertex> > HypothesisRule::attemptDirectProduction(meta outh, bool fresh)
+boost::shared_ptr<std::set<BoundVertex> > HypothesisRule::attemptDirectProduction(meta outh, bool fresh) const
 {
     std::set<BoundVertex>* ret = new std::set<BoundVertex>;
     

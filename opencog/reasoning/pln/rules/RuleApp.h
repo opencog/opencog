@@ -163,7 +163,7 @@ public:
 
     //NO_DIRECT_PRODUCTION; 
     Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh,
-                                                         bool fresh = true)
+                                                         bool fresh = true) const
     { 
         return Btr<std::set<BoundVertex> >(); 
     }

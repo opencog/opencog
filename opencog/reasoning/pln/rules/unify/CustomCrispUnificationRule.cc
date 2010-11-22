@@ -39,7 +39,7 @@ namespace haxx
 namespace opencog { namespace pln {
 
 Btr<std::set<BoundVertex > >
-CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
+CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh) const
 {
     if (asw->isSubType(_v2h(*outh->begin()), FORALL_LINK) ||
         asw->isSubType(_v2h(*outh->begin()), FW_VARIABLE_NODE))

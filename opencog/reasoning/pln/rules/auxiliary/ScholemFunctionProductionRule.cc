@@ -50,7 +50,7 @@ Rule::setOfMPs ScholemFunctionProductionRule::o2iMetaExtra(meta outh, bool& over
 */
 
 boost::shared_ptr<std::set<BoundVertex > >
-ScholemFunctionProductionRule::attemptDirectProduction(meta outh, bool fresh)
+ScholemFunctionProductionRule::attemptDirectProduction(meta outh, bool fresh) const
 {
     boost::shared_ptr<std::set<BoundVertex > > ret;
 
