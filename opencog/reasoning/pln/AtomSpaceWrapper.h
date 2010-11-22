@@ -59,9 +59,6 @@ class AtomSpaceWrapperUTest;
 namespace opencog {
 namespace pln {
 
-//! Construct a vtree around Handle h
-vtree make_vtree(pHandle h);
-
 // there exists a method to print (overloading <<) it see at the end of the file
 typedef std::pair<Handle,VersionHandle> vhpair;
 

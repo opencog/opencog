@@ -574,6 +574,8 @@ std::string condensed_form(const atom& a);
 
 void bind(BoundVTree& bbvt, hpair new_bind);
 meta bind_vtree(vtree &targ, const std::map<pHandle, pHandle>& binds);
+//! Construct a vtree around Handle h
+vtree make_vtree(pHandle h);
 void bind_Bvtree(meta arg, const bindingsVTreeT& binds);
 void removeRecursionFromHandleHandleMap(bindingsT& ret_bindings);
 
