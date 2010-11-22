@@ -49,10 +49,10 @@ Rule::setOfMPs ScholemFunctionProductionRule::o2iMetaExtra(meta outh, bool& over
     Scholem links are not memory-managed.
 */
 
-boost::shared_ptr<std::set<BoundVertex > >
+Btr<std::set<BoundVertex > >
 ScholemFunctionProductionRule::attemptDirectProduction(meta outh, bool fresh) const
 {
-    boost::shared_ptr<std::set<BoundVertex > > ret;
+    Btr<std::set<BoundVertex > > ret;
 
     if (!asw->isSubType(_v2h(*outh->begin()), SCHOLEM_LINK))
         return ret;
@@ -89,7 +89,7 @@ ScholemFunctionProductionRule::attemptDirectProduction(meta outh, bool fresh) co
     TableGather s(old_subst, asw);
 
     if (s.empty()) {
-        ret = boost::shared_ptr<std::set<BoundVertex > >(new std::set<BoundVertex>);
+        ret = Btr<std::set<BoundVertex > >(new std::set<BoundVertex>);
         ret->insert(BoundVertex(Vertex(asw->addAtom(*atomWithNewType(*outh,
                                                                      SCHOLEM_LINK,
                                                                      asw),
