@@ -91,17 +91,15 @@ const rule& contin_reduction(const combo::vertex_set& ignore_ops,
 
     static iterative res =
         iterative(sequential(seq_without_factorize_distribute,
-                             complete_factorize,
-                             cache(ignore_size_increase(sequential(complete_distribute,
+                             cache(sequential(complete_factorize,
+                                              ignore_size_increase(sequential(complete_distribute,
                                                              // we factorize
                                                              // again to be sure
                                                              // not to enter in
                                                              // an infinite
                                                              // factorize/distribute
                                                              // loop
-                                                                   complete_factorize)),
-                             cache_size)
-                             ));
+                                                                              complete_factorize))),cache_size)));
 
     //    static cache res_cache(res, cache_size);
 
