@@ -272,16 +272,28 @@ Handle opencog::pln::applyRule(const string& ruleName,
 {
     static RuleProvider* rp = new DefaultVariableRuleProvider;
     const Rule* rule = rp->findRule(ruleName);
+    vhpair vhp(Handle::UNDEFINED, VersionHandle()); // result to be overwriten
     if(rule) {
-        pHandleSeq phs = ASW()->realToFakeHandles(premises);
-        vector<Vertex> vv;
-        copy(phs.begin(), phs.end(), back_inserter(vv));
-        //! @todo usually use the version of compute that takes BoundVertexes
-        BoundVertex bv = rule->compute(vv, PHANDLE_UNDEFINED, false);
-        vhpair vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));
-        return vhp.first;
+        if(rule->isComposer()) {
+            pHandleSeq phs = ASW()->realToFakeHandles(premises);
+            vector<Vertex> vv(phs.begin(),phs.end());
+            //! @todo usually use the version of compute that takes BoundVertexes
+            BoundVertex bv = rule->compute(vv, PHANDLE_UNDEFINED, false);
+            vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));
+        } else { // generator
+            // here it is assumed that there is only one premise and
+            // one corresponding pHandle (because context are ignored
+            // for now)
+            pHandleSeq targets = ASW()->realToFakeHandles(premises);
+            OC_ASSERT(targets.size() == 1);
+            // since the target vtree corresponds a specific pHandle,
+            // directResult must have only one element
+            Btr<set<BoundVertex> > directResult;// = 
+            //rule->attemptDirectProduction(meta(make_vtree(targets[0])), false);
+            vhp = ASW()->fakeToRealHandle(_v2h(directResult->begin()->GetValue()));
+        }
     }
-    else return Handle::UNDEFINED;
+    return vhp.first;
 }
 
 //! Used by forward chainer 

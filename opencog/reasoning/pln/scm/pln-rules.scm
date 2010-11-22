@@ -13,3 +13,8 @@
   (string-append "SimpleANDRule" (number->string (length premises))))
 (define (SimpleANDRule . premises)
   (pln-ar (SimpleANDRuleNameStr premises) premises))
+; CustomCrispUnificationRule
+; TODO
+;; (define (CustomCrispUnificationRuleStr))
+;; (define (CustomCrispUnificationRule . premises)
+;;   (pln-ar ()))
