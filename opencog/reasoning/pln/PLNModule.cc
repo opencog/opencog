@@ -270,8 +270,8 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
 Handle opencog::pln::applyRule(const string& ruleName,
                                const HandleSeq& premises)
 {
-    static RuleProvider* rp = new DefaultVariableRuleProvider;
-    const Rule* rule = rp->findRule(ruleName);
+    DefaultVariableRuleProvider rp;
+    const Rule* rule = rp.findRule(ruleName);
     vhpair vhp(Handle::UNDEFINED, VersionHandle()); // result to be overwriten
     if(rule) {
         if(rule->isComposer()) {
@@ -288,8 +288,9 @@ Handle opencog::pln::applyRule(const string& ruleName,
             OC_ASSERT(targets.size() == 1);
             // since the target vtree corresponds a specific pHandle,
             // directResult must have only one element
-            Btr<set<BoundVertex> > directResult;// = 
-            //rule->attemptDirectProduction(meta(make_vtree(targets[0])), false);
+            meta target = meta(new vtree(make_vtree(targets[0])));
+            Btr<set<BoundVertex> > directResult = 
+                rule->attemptDirectProduction(target, false);
             vhp = ASW()->fakeToRealHandle(_v2h(directResult->begin()->GetValue()));
         }
     }
