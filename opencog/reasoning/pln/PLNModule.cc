@@ -292,6 +292,8 @@ Handle opencog::pln::applyRule(const string& ruleName,
             Btr<set<BoundVertex> > directResult = 
                 rule->attemptDirectProduction(target, false);
             vhp = ASW()->fakeToRealHandle(_v2h(directResult->begin()->GetValue()));
+            // std::overloadmadness::operator<<(std::cout,vhp);
+            // std::cout << std::endl;
         }
     }
     return vhp.first;
