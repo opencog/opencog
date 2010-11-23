@@ -71,7 +71,7 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
  *
  * This search algo makes the following (important) assumptions:
  *
- * 1) If there are no variables in the clasues, then this will search
+ * 1) If there are no variables in the clauses, then this will search
  *    over all links which have the same type as the first clause. 
  *    Clearly, this kind of search can fail if link_match() callback
  *    was prepared to accept other link types as well.
@@ -120,10 +120,11 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 	Handle h = clauses[0];
 	root = h;
 	Handle start = find_starter(h);
+    AtomSpace *as = pme->get_atomspace();
 	if ((Handle::UNDEFINED != start) && (0 != vars.size()))
 	{
-		// printf("Search start node: %s\n", TLB::getAtom(start)->toString().c_str());
-		// printf("Start pred is: %s\n", TLB::getAtom(starter_pred)->toString().c_str());
+		// printf("Search start node: %s\n", as->atomAsString(start).c_str());
+		// printf("Start pred is: %s\n", as->atomAsString(starter_pred).c_str());
 		foreach_incoming_handle(start,
 		                  &DefaultPatternMatchCB::loop_candidate, this);
 	}
@@ -132,12 +133,11 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 		starter_pred = root;
 
 		// Get type of the first item in the predicate list.
-		Atom *a = TLB::getAtom(h);
-		Type ptype = a->getType();
+        Type ptype = as->getType(h);
 
 		// Plunge into the deep end - start looking at all viable
 		// candidates in the AtomSpace.
-		pme->get_atomspace()->foreach_handle_of_type(ptype,
+		as->foreach_handle_of_type(ptype,
 		      &DefaultPatternMatchCB::loop_candidate, this);
 	}
 }

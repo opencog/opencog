@@ -71,7 +71,10 @@ private:
      */
     void exportAtom(Handle, bool [], std::string&, bool = false);
 
+    AtomSpace* as;
 public:
+
+    NMXmlExporter(AtomSpace* _as);
 
     /**
      * Exports a subset of the AtomTable to XML.

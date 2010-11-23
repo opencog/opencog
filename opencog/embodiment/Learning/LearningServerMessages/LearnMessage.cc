@@ -65,7 +65,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
 {
 
 
-    NMXmlExporter exporter;
+    NMXmlExporter exporter(&atomSpace);
 
     schema.assign(schm);
     ownerId.assign(owId);

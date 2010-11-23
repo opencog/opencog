@@ -46,7 +46,6 @@
 
 using namespace PerceptionActionInterface;
 using namespace Control;
-using namespace Control;
 using namespace opencog;
 
 std::list<ActionPlan> sentActionPlans;
@@ -189,7 +188,7 @@ public:
         pai.addAction(plan2, walkAction);
         pai.addAction(plan2, PetAction(ActionType::BARK()));
         PetAction eatAction(ActionType::EAT());
-        eatAction.addParameter(ActionParameter("object", ActionParamType::ENTITY(), Entity(PAIUtils::getInternalId("10"), "pet")));
+        eatAction.addParameter(ActionParameter("object", ActionParamType::ENTITY(), PerceptionActionInterface::Entity(PAIUtils::getInternalId("10"), "pet")));
         pai.addAction(plan2, eatAction);
         PetAction flyAction(ActionType::FLY());
         flyAction.addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(1.2, 1.3, 1.4)));
@@ -236,7 +235,7 @@ public:
         TS_ASSERT(planId == "10");
 
         PetAction action1(ActionType::BARK());
-        action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
+        action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), PerceptionActionInterface::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
         action1.addParameter(ActionParameter("duration", ActionParamType::FLOAT(), "1.0"));
         ActionID actionId1 = pai.addAction(planId, action1);
 
@@ -260,7 +259,7 @@ public:
         TS_ASSERT(planId == "12");
 
         PetAction action4(ActionType::GRAB());
-        action4.addParameter(ActionParameter("target", ActionParamType::ENTITY(), Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
+        action4.addParameter(ActionParameter("target", ActionParamType::ENTITY(), PerceptionActionInterface::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
         ActionID actionId4 = pai.addAction(planId, action4);
 
         pai.sendActionPlan(planId);
@@ -526,7 +525,7 @@ public:
 
             //Action parameters:
             //action1.addParameter(ActionParameter("duration", ActionParamType::FLOAT(), "1.0"));
-            //action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
+            //action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), PerceptionActionInterface::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
             Handle avatarNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("Wynx").c_str());
             TS_ASSERT(Handle::compare(avatarNode, Handle::UNDEFINED));
             schemaListLinkOutgoing.push_back(avatarNode);

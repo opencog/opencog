@@ -24,7 +24,7 @@ template<class T>
 inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
                                        bool (T::*cb)(Atom *, Atom *), T *data)
 {
-    AtomSpace *as = &atomspace();
+    AtomSpace *as = data->get_atomspace();
     boost::shared_ptr<Link> la(as->cloneLink(ha));
     boost::shared_ptr<Link> lb(as->cloneLink(hb));
     if (!la || !lb) return false;
@@ -38,21 +38,21 @@ inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
     for (size_t i = 0; i < minsz; i++) {
         ha = va[i];
         hb = vb[i];
-        boost::shared_ptr<Atom> aa(as->cloneLink(ha));
-        boost::shared_ptr<Atom> ab(as->cloneLink(hb));
+        boost::shared_ptr<Atom> aa(as->cloneAtom(ha));
+        boost::shared_ptr<Atom> ab(as->cloneAtom(hb));
         bool rc = (data->*cb)(aa.get(), ab.get());
         if (rc) return rc;
     }
 
     for (size_t i = vasz; i < vbsz; i++) {
         hb = vb[i];
-        boost::shared_ptr<Atom> ab(as->cloneLink(hb));
+        boost::shared_ptr<Atom> ab(as->cloneAtom(hb));
         bool rc = (data->*cb)(NULL, ab.get());
         if (rc) return rc;
     }
     for (size_t i = vbsz; i < vasz; i++) {
         ha = va[i];
-        boost::shared_ptr<Atom> aa(as->cloneLink(ha));
+        boost::shared_ptr<Atom> aa(as->cloneAtom(ha));
         bool rc = (data->*cb)(aa.get(), NULL);
         if (rc) return rc;
     }

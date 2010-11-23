@@ -66,7 +66,7 @@ bool SaveRequest::execute()
     // probably be exporting to scheme, not XML, anyway ... since XML
     // is slow in general.
     HandleEntry *handles = atomSpace->getAtomTable().getHandleSet(ATOM, true);
-    NMXmlExporter exporter;
+    NMXmlExporter exporter(atomSpace);
     std::fstream file(filename.c_str(), std::fstream::out);
     bool rc = true;
     try {

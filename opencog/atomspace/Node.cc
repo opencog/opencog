@@ -120,6 +120,7 @@ Atom* Node::clone() const
     for (HandleEntry *h = getIncomingSet(); h != NULL; h = h ->next) {
         a->addIncomingHandle(h->handle);
     }
+    a->handle = handle;
     return a;
 }
 

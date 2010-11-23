@@ -23,6 +23,8 @@
 
 #include "rules/RuleProvider.h"
 
+class BITNodeUTest;
+
 namespace opencog {
 
 #define USE_BITUBIGRAPHER
@@ -41,6 +43,7 @@ class InferenceCache
 protected:
     friend class BITNodeRoot;
     friend class BITNode;
+    friend class ::BITNodeUTest;
 
 public:
     /**

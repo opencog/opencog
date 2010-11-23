@@ -51,7 +51,7 @@ public:
     }
 
     void testToXML() {
-        NMXmlExporter *exporter = new NMXmlExporter();
+        NMXmlExporter *exporter = new NMXmlExporter(atomSpace);
 
         printf("Number of experiments = %d\n", NMXmlParserExperiment::getNExperiments());
         for (int i = 0; i < NMXmlParserExperiment::getNExperiments(); i++) {

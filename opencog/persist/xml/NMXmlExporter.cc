@@ -31,6 +31,10 @@
 
 using namespace opencog;
 
+NMXmlExporter::NMXmlExporter(AtomSpace* _as) :
+    as(_as)
+{ }
+
 std::string NMXmlExporter::toXML(HandleEntry *subset)
 {
     HandleSet *exportable = findExportables(subset);

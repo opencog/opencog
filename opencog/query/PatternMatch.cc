@@ -561,7 +561,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 }
 
 /* ================================================================= */
-typedef std::pair<Atom *, const std::set<Type> > ATPair;
+typedef std::pair<Handle, const std::set<Type> > ATPair;
 
 /**
  * Extract the variable type(s) from a TypedVariableLink
@@ -623,7 +623,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 		std::set<Type> ts;
 		ts.insert(vt);
-		typemap.insert(ATPair(avar,ts));
+		typemap.insert(ATPair(avar->getHandle(),ts));
 		vset.push_back(varname);
 	}
 	else if (LIST_LINK == t)
@@ -657,7 +657,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 			ts.insert(vt);
 		}
 
-		typemap.insert(ATPair(avar,ts));
+		typemap.insert(ATPair(avar->getHandle(),ts));
 		vset.push_back(varname);
 	}
 	else

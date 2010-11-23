@@ -59,6 +59,8 @@ class Atom : public AttentionValueHolder
     friend class ImportanceIndex;
     friend class NMXmlParser;
     friend class TLB;
+    friend class Node;
+    friend class Link;
 
 private:
 

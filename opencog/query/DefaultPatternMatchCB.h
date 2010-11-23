@@ -29,11 +29,12 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
 
-typedef std::map<Atom *, const std::set<Type> > VariableTypeMap;
+typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
 /**
  * Callback mixin class, used to provide a default node and link
@@ -102,7 +103,7 @@ class DefaultPatternMatchCB :
 
 			// If we are here, there's a restriction on the grounding type.
 			// Validate the node type, if needed.
-			VariableTypeMap::const_iterator it = type_restrictions->find(npat);
+			VariableTypeMap::const_iterator it = type_restrictions->find(npat->getHandle());
 			if (it == type_restrictions->end()) return false;
 
 			// Is the ground-atom type in our list of allowed types?

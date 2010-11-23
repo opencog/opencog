@@ -222,11 +222,8 @@ void PatternUTest::test_simple_link(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define the pattern to match against.
-	Node nvar(VARIABLE_NODE, "variable node");
-	Handle hvar = as->addRealAtom(nvar);
-
-	Link le(INHERITANCE_LINK, hconst, hvar);
-	Handle he = as->addRealAtom(le);
+	Handle hvar = as->addNode(VARIABLE_NODE, "variable node");
+	Handle he = as->addLink(INHERITANCE_LINK, hconst, hvar);
 
 	std::vector<Handle> vars;
 	vars.push_back(hvar);
