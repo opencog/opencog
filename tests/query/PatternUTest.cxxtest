@@ -94,7 +94,7 @@ class PatternUTest :  public CxxTest::TestSuite
 class PMCB : public DefaultPatternMatchCB
 {
 	public:
-        AtomSpace *as;
+		AtomSpace *as;
 		PMCB(AtomSpace *_as);
 		virtual bool node_match(Node *, Node *);
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
@@ -107,7 +107,7 @@ class PMCB : public DefaultPatternMatchCB
 
 PMCB::PMCB(AtomSpace* _as)
 {
-    as = as;
+	as = _as;
 	found = 0;
 }
 
