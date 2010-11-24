@@ -28,6 +28,9 @@
 
 namespace opencog { namespace pln {
 
+static const string CustomCrispUnificationRulePrefixStr = 
+    "CustomCrispUnificationRule";
+
 class CustomCrispUnificationRule : public Rule
 {
 protected:
@@ -37,7 +40,7 @@ protected:
 
 public:
     CustomCrispUnificationRule(pHandle _hForAllLink, AtomSpaceWrapper *_asw)
-        : Rule(_asw,false,false,"CustomCrispUnificationRule"),
+        : Rule(_asw,false,false,CustomCrispUnificationRulePrefixStr),
         hForAllLink(_hForAllLink)
     {
         //append the pHandle of the FORALL_LINK so that the rule name is unique

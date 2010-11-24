@@ -126,6 +126,12 @@ namespace pln {
 Handle infer(Handle h, int &steps, bool setTarget);
 
 /**
+ * in case the ruleName contains some Handle, then the Handle is
+ * replaced by the pHandle. That's a hack.
+ */
+void correctRuleName(const string ruleName);
+
+/**
  * This function applies a PLN inference rule given its name and its premises
  * to produce the conclusion. The set of rules is taken from
  * DefaultVariableRuleProvider.

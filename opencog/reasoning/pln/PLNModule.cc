@@ -267,15 +267,25 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
     return ret;
 }
 
-Handle opencog::pln::applyRule(const string& ruleName,
+void correctRuleName(const string ruleName)
+{
+    if(ruleName.find(CustomCrispUnificationRulePrefixStr) == 0) { // found
+        pHandle ph = ASW()->realToFakeHandle(Handle(boost::lexical_cast<UUID>))[0];
+        ruleName.replace(CustomCrispUnificationRulePrefixStr.size(),
+                         ruleName.size(), static_cast<string>(ph));
+    }
+}
+
+Handle opencog::pln::applyRule(string ruleName,
                                const HandleSeq& premises)
 {
+    correctRuleName(ruleName);
     DefaultVariableRuleProvider rp;
     const Rule* rule = rp.findRule(ruleName);
     vhpair vhp(Handle::UNDEFINED, VersionHandle()); // result to be overwriten
     if(rule) {
+        pHandleSeq phs = ASW()->realToFakeHandles(premises);
         if(rule->isComposer()) {
-            pHandleSeq phs = ASW()->realToFakeHandles(premises);
             vector<Vertex> vv(phs.begin(),phs.end());
             //! @todo usually use the version of compute that takes BoundVertexes
             BoundVertex bv = rule->compute(vv, PHANDLE_UNDEFINED, false);
@@ -284,16 +294,13 @@ Handle opencog::pln::applyRule(const string& ruleName,
             // here it is assumed that there is only one premise and
             // one corresponding pHandle (because context are ignored
             // for now)
-            pHandleSeq targets = ASW()->realToFakeHandles(premises);
-            OC_ASSERT(targets.size() == 1);
+            OC_ASSERT(phs.size() == 1);
+            meta target = meta(new vtree(make_vtree(phs[0])));
             // since the target vtree corresponds a specific pHandle,
             // directResult must have only one element
-            meta target = meta(new vtree(make_vtree(targets[0])));
             Btr<set<BoundVertex> > directResult = 
                 rule->attemptDirectProduction(target, false);
             vhp = ASW()->fakeToRealHandle(_v2h(directResult->begin()->GetValue()));
-            // std::overloadmadness::operator<<(std::cout,vhp);
-            // std::cout << std::endl;
         }
     }
     return vhp.first;
