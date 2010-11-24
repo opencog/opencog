@@ -63,7 +63,8 @@ namespace haxx {
 
 namespace opencog {
 
-#define USE_BITUBIGRAPHER
+// XXX TODO: use CMake to figure out if ubigraph is installed ... 
+// #define USE_BITUBIGRAPHER
 
 #ifdef USE_BITUBIGRAPHER
 class BITUbigrapher;
