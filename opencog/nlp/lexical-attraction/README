@@ -1043,3 +1043,19 @@ and word statistics. AAAI 1997.
   Fragment Grammars: Exploring Computation and Reuse in Language
   http://dspace.mit.edu/handle/1721.1/44963
   http://hdl.handle.net/1721.1/44963
+
+* http://chasen.org/~taku/software/freqt/
+  FREQT: An implementation of FREQT (FREQuent Tree miner)
+  The algorithm FREQT (FREQuent Tree miner), independently introduced by
+  Asai[1] and Zaki[2], efficiently extracts frequent ordered-sub-trees
+  from a set of ordered-trees (forest database). Frequent means that a
+  sub-tree occurs in no less than N trees, where N is a user given
+  threshold usually called minimum support. FREQT efficiently enumerates
+  frequent sub-trees using right-most expansion.
+
+* http://penglab.janelia.org/proj/mRMR/
+  minimum redundancy/maximum relevance
+
+* http://kzi.polsl.pl/~jbiesiada/Infosel/index.html
+  Information Based Feature Selection C++ Library
+

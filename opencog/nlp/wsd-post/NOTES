@@ -273,6 +273,10 @@ also: 0.1884*29.329 = 5.5256 million != number returned by
 
 So what's up with that ??? Arghhhh!
 
+Bad parses ... i.e. parses with unused_words > 0
+num bad parses: 1523281 so 3336818-1523281 == 1813537 good parses
+
+
 
 
 ---------------------------------------------------------------------------------------------

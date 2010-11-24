@@ -11,7 +11,7 @@ OpenCog atoms and systems, in various general ways. These utilities include:
 -- file-utils.scm
    + list files in directory
    + load scheme code from file
-   + execute scheme code from string orm port.
+   + execute scheme code from a string or a port.
 
 -- persistence.scm
    + store, fetch groups of atoms from persistent store.
