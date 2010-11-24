@@ -1,4 +1,4 @@
-; example to proof a >~ c using than if x >~ y and y >~ z then x >~ z
+; example to proof a >~ c using than ForAll x,y if x >~ y and y >~ z then x >~ z
 (define agt (PredicateNode "AboutGreaterThan"))
 ; axiom
 (define x (VariableNode "x"))
@@ -20,6 +20,6 @@
 ; Inference
 ; csn stands from conclusion of step n
 ;
-(define cs1 (CustomCrispForAllRule axiom a b c)) ; universal instantiation
-(define cs2 (SimpleANDRule a_agt_b b_agt_c)) ; antecedant instance
+(define cs1 (UniversalInstantiationForAllRule axiom a b c))
+(define cs2 (SimpleANDRule a_agt_b b_agt_c))
 (define target (ModusPonensRule cs1 cs2))

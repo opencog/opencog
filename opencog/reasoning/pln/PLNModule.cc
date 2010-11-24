@@ -267,12 +267,13 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
     return ret;
 }
 
-void correctRuleName(const string ruleName)
+void opencog::pln::correctRuleName(string& ruleName)
 {
     if(ruleName.find(CustomCrispUnificationRulePrefixStr) == 0) { // found
-        pHandle ph = ASW()->realToFakeHandle(Handle(boost::lexical_cast<UUID>))[0];
-        ruleName.replace(CustomCrispUnificationRulePrefixStr.size(),
-                         ruleName.size(), static_cast<string>(ph));
+        const unsigned int hpos = CustomCrispUnificationRulePrefixStr.size();
+        Handle h(boost::lexical_cast<UUID>(ruleName.substr(hpos)));
+        pHandle ph = ASW()->realToFakeHandle(h)[0];
+        ruleName.replace(hpos, ruleName.size(), boost::lexical_cast<string>(ph));
     }
 }
 

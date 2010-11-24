@@ -105,8 +105,6 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh) const
     if (haxx::inferred_from[ret_h].empty()) //comes here often, we want the link only once
         haxx::inferred_from[ret_h].push_back(hForAllLink);
 
-    std::cout << name << " produced " << ret_h << std::endl;
-
     // Necessary since this is not the only way of producing the Atom.
     //reviseVersionedTVs(asw->fakeToRealHandle(_v2h(ret_h)).first);
 

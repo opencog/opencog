@@ -127,9 +127,11 @@ Handle infer(Handle h, int &steps, bool setTarget);
 
 /**
  * in case the ruleName contains some Handle, then the Handle is
- * replaced by the pHandle. That's a hack.
+ * replaced by the pHandle. Only used by applyRule. IMO, that's kinda
+ * hack, if the universal Instantiation function is recoded in C++
+ * this will become useless and can be removed.
  */
-void correctRuleName(const string ruleName);
+void correctRuleName(std::string& ruleName);
 
 /**
  * This function applies a PLN inference rule given its name and its premises
@@ -144,7 +146,7 @@ void correctRuleName(const string ruleName);
  * @return the Handle of the conclusion. Handle::UNDEFINED if no rule
  *         corresponds to ruleName
  */
-Handle applyRule(const std::string& ruleName, const HandleSeq& premises);
+Handle applyRule(std::string ruleName, const HandleSeq& premises);
 
 }} // ~namespace opencog::pln
 

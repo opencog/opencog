@@ -28,7 +28,7 @@
 
 namespace opencog { namespace pln {
 
-static const string CustomCrispUnificationRulePrefixStr = 
+static const std::string CustomCrispUnificationRulePrefixStr = 
     "CustomCrispUnificationRule";
 
 class CustomCrispUnificationRule : public Rule
@@ -44,7 +44,7 @@ public:
         hForAllLink(_hForAllLink)
     {
         //append the pHandle of the FORALL_LINK so that the rule name is unique
-        name += boost::lexical_cast<std::string>(hForAllLink); 
+        name += boost::lexical_cast<std::string>(hForAllLink);
         inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
     }
 
