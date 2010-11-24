@@ -3,7 +3,6 @@
 #include "opencog/atomspace/Link.h"
 #include "opencog/atomspace/Node.h"
 #include "opencog/atomspace/SimpleTruthValue.h"
-#include "opencog/atomspace/TLB.h"
 
 using namespace opencog;
 
@@ -69,8 +68,8 @@ int main (int argc, char **argv){
 	    a->setTruthValue(stv);
 	    const AttentionValue av(42, 64, 1);
 	    a->setAttentionValue(av);
-	    TLB::addAtom(a);
-	    Handle h = TLB::getHandle(a);
+	    // TLB::addAtom(a);
+	    Handle h; // = a->handle;
 	
 	    // Store it
 	    table.storeAtom(h);
@@ -100,18 +99,18 @@ int main (int argc, char **argv){
         // Create a second atom, connect it to the first
 	    // with a link. Save it, fetch it ... are they equal?
 	    Atom *a2 = new Node(SCHEMA_NODE, "otherNode");
-	    TLB::addAtom(a2);
-	    table.storeAtom(TLB::getHandle(a2));
+	    // TLB::addAtom(a2);
+	    // table.storeAtom(TLB::getHandle(a2));
 
 	    std::vector<Handle> hvec;
-	    hvec.push_back(TLB::getHandle(a));
-	    hvec.push_back(TLB::getHandle(a2));
+	    // hvec.push_back(TLB::getHandle(a));
+	    // hvec.push_back(TLB::getHandle(a2));
 
 	    Link *l = new Link(SET_LINK, hvec);
-	    TLB::addAtom(l);
-	    table.storeAtom(TLB::getHandle(l));
+	    // TLB::addAtom(l);
+	    // table.storeAtom(TLB::getHandle(l));
 
-	    Atom *lb = table.getAtom(TLB::getHandle(l));
+	    Atom *lb ; // a= table.getAtom(TLB::getHandle(l));
 	    rc = atomCompare(l,lb);
 	    if (!rc) {
             std::cout << "link compare success" << std::endl;

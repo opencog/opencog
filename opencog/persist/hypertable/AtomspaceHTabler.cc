@@ -35,14 +35,13 @@
 #include <opencog/persist/hypertable/AtomspaceHTabler.h>
 
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 
+#include <boost/shared_ptr.hpp>
 
 using namespace opencog;
 using namespace Hypertable;
@@ -226,11 +225,11 @@ Node * AtomspaceHTabler::getNode(Type t, const char * name) const
 void AtomspaceHTabler::storeAtom(Handle h)
 {
     std::cout << "storeAtom() called\n";
-    Atom *atom_ptr = TLB::getAtom(h);
+    AtomSpace *as = cogserver().getAtomSpace();
 
     // If TLB didn't give us an atom, it was a bad handle and there's nothing
     // else to do.
-    if (!atom_ptr) {
+    if (!as->isValidHandle(h)) {
         std::cerr << "storeAtom(): Bad handle\n";
         return;
     }
@@ -246,21 +245,20 @@ void AtomspaceHTabler::storeAtom(Handle h)
     key.row = row;
 
     // If it's a node...
-    Node *n = dynamic_cast<Node *>(atom_ptr);
-    if (n)
+    if (as->isNode(as->getType(h)))
     {
         // Store the name
         key.column_family = "name";
-        m_handle_mutator->set(key, n->getName().c_str(), n->getName().length());
+        m_handle_mutator->set(key, as->getName(h).c_str(), as->getName(h).length());
 
         // Store the handle in Nametable
         KeySpec name_key;
         memset(&name_key, 0, sizeof(name_key));
 
         char r[BUFF_SIZE];
-        int len = snprintf(r, BUFF_SIZE, "%hu", n->getType());
+        int len = snprintf(r, BUFF_SIZE, "%hu", as->getType(h));
 
-        std::string name_index = n->getName() + ',' + std::string(r,len);
+        std::string name_index = as->getName(h) + ',' + std::string(r,len);
         name_key.row = name_index.c_str();
         name_key.row_len = name_index.length();
         name_key.column_family = "handle";
@@ -272,9 +270,8 @@ void AtomspaceHTabler::storeAtom(Handle h)
     else
     {
         // Store the outgoing set
-        Link *l = dynamic_cast<Link *>(atom_ptr);
-        int arity = l->getArity();
-        std::vector<Handle> out = l->getOutgoingSet();
+        int arity = as->getArity(h);
+        const std::vector<Handle> &out = as->getOutgoing(h);
         std::stringstream ss;
         for (int i = 0; i < arity; ++i)
         {
@@ -293,11 +290,11 @@ void AtomspaceHTabler::storeAtom(Handle h)
         memset(&outset_key, 0, sizeof(outset_key));
 
         char r[BUFF_SIZE];
-        int len = snprintf(r, BUFF_SIZE, "%hu", l->getType());
+        int len = snprintf(r, BUFF_SIZE, "%hu", as->getType(h));
 
         std::vector<Handle>::const_iterator iter;
-        for (iter = l->getOutgoingSet().begin();
-             iter != l->getOutgoingSet().end(); ++iter)
+        for (iter = as->getOutgoing(h).begin();
+             iter != as->getOutgoing(h).end(); ++iter)
         {
             UUID uuid = (*iter).value();
             r[len++] = ',';
@@ -315,13 +312,13 @@ void AtomspaceHTabler::storeAtom(Handle h)
     int val_len;
 
     // Store type
-    Type t = atom_ptr->getType();
+    Type t = as->getType(h);
     val_len = snprintf(val, BUFF_SIZE, "%d", t);
     key.column_family = "type";
     m_handle_mutator->set(key, val, val_len);
 
     // Store the importance
-    const AttentionValue& av = atom_ptr->getAttentionValue();
+    const AttentionValue& av = as->getAV(h);
     short sti = av.getSTI();
     short lti = av.getLTI();
     unsigned short vlti = av.getVLTI();
@@ -339,7 +336,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
     m_handle_mutator->set(key, val, val_len);
 
     // Store the truth value
-    const TruthValue &tv = atom_ptr->getTruthValue();
+    const TruthValue &tv = as->getTV(h);
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
     if (NULL == stv)
     {
@@ -354,7 +351,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
 
 #ifdef THERE_IS_NO_NEED_TO_STORE_INCOMING_SET
     // Store incoming set
-    HandleEntry *he = atom_ptr->getIncomingSet();
+    HandleEntry *he = as->getIncomingSet(h);
     std::stringstream ss;
     while (he) {
         ss << ',';
