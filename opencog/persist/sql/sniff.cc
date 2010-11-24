@@ -69,6 +69,7 @@ int atomCompare(Atom *a, Atom *b)
  * A simple test cases that tests the save and restore of 
  * a couple of nodes and a link. Does not test atomspaces at all.
  */
+#if 0
 void single_atom_test(std::string id)
 {
 	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
@@ -143,6 +144,7 @@ void add_to_table(AtomTable *table, std::string id)
 	Link *l = new Link(SET_LINK, hvec);
 	table->add(l);
 }
+#endif
 
 
 int main ()

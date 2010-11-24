@@ -112,6 +112,8 @@ class TLB
     friend class ::BasicSaveUTest;
     friend class SpaceServerSavable;
     friend class TemporalTableFile;
+    friend class AtomStorage;
+    friend class SenseSimilaritySQL;
 
     friend class OutgoingTree;
     friend class DefaultPatternMatchCB;
