@@ -1,4 +1,4 @@
-; example to proof a >~ c using than ForAll x,y if x >~ y and y >~ z then x >~ z
+; example to proof a >~ c using that ForAll x,y if x >~ y and y >~ z then x >~ z
 (define agt (PredicateNode "AboutGreaterThan"))
 ; axiom
 (define x (VariableNode "x"))

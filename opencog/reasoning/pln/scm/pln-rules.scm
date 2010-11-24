@@ -10,8 +10,8 @@
 (define (IntInhRule sub super)
   (pln-ar "IntensionalInheritanceRule" (list sub super)))
 ; ModusPonensRule is the name for StrictImplicationBreakdownRule
-(define (ModusPonensRule implication antecedant)
-  (pln-ar "ModusPonensRule" (list implication antecedant)))
+(define (ModusPonensRule implication antecedent)
+  (pln-ar "ModusPonensRule" (list implication antecedent)))
 
 ; AND rules, must happend the arity to the rule name
 (define (SimpleANDRuleNameStr premises)
