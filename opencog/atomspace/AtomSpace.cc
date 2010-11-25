@@ -397,7 +397,9 @@ const TruthValue& AtomSpace::getDefaultTV()
 Type AtomSpace::getType(Handle h) const
 {
     DPRINTF("AtomSpace::getType Atom space address: %p\n", this);
-    return TLB::getAtom(h)->getType();
+    Atom* a = TLB::getAtom(h);
+    if (a) return a->getType();
+    else return NOTYPE;
 }
 
 Type AtomSpace::getAtomType(const string& str) const
@@ -420,6 +422,20 @@ bool AtomSpace::isNode(Type t) const
 {
     DPRINTF("AtomSpace::isNode Atom space address: %p\n", this);
     return inheritsType(t, NODE);
+}
+
+bool AtomSpace::isNode(const Handle& h) const
+{
+    DPRINTF("AtomSpace::isNode Atom space address: %p\n", this);
+    Type t = getType(h);
+    return classserver().isA(t, NODE);
+}
+
+bool AtomSpace::isLink(const Handle& h) const
+{
+    DPRINTF("AtomSpace::isNode Atom space address: %p\n", this);
+    Type t = getType(h);
+    return classserver().isA(t, LINK);
 }
 
 string AtomSpace::getName(Type t) const

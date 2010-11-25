@@ -772,9 +772,16 @@ public:
     /** Returns the default TruthValue */
     static const TruthValue& getDefaultTV();
 
-    //type properties
+    //----type properties - these first two should be abandoned
+    //and accesed through the classserver as they don't have anything
+    //to do with handles... or they should at least be static.
     Type getAtomType(const std::string& typeName) const;
-    bool isNode(Type t) const;
+    bool isNode(const Type t) const;
+
+    /** Convenience functions... */
+    bool isNode(const Handle& h) const;
+    bool isLink(const Handle& h) const;
+
     /** Does t1 inherit from t2 */
     bool inheritsType(Type t1, Type t2) const;
     std::string getName(Type t) const;
