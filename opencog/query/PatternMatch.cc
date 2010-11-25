@@ -27,7 +27,6 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
@@ -87,19 +86,12 @@ void PatternMatch::match(PatternMatchCallback *cb,
                          Handle hclauses,
                          Handle hnegates)
 {
-	Atom * avarbles = TLB::getAtom(hvarbles);
-	Atom * aclauses = TLB::getAtom(hclauses);
-	Atom * anegates = TLB::getAtom(hnegates);
-	Link * lvarbles = dynamic_cast<Link *>(avarbles);
-	Link * lclauses = dynamic_cast<Link *>(aclauses);
-	Link * lnegates = dynamic_cast<Link *>(anegates);
-
 	// Both must be non-empty.
-	if (!lclauses || !lvarbles) return;
+	if (!atom_space->isLink(hclauses) || !atom_space->isLink(hvarbles)) return;
 
 	// Types must be as expected
-	Type tvarbles = lvarbles->getType();
-	Type tclauses = lclauses->getType();
+	Type tvarbles = atom_space->getType(hvarbles);
+	Type tclauses = atom_space->getType(hclauses);
 	if (LIST_LINK != tvarbles)
 	{
 		logger().warn("%s: expected ListLink for bound variable list",
@@ -112,19 +104,19 @@ void PatternMatch::match(PatternMatchCallback *cb,
 		return;
 	}
 
-	const std::vector<Handle> &vars = lvarbles->getOutgoingSet();
+	const std::vector<Handle> &vars = atom_space->getOutgoing(hvarbles);
 
 	// negation clauses are optionally present
 	std::vector<Handle> negs;
-	if (NULL != lnegates)
+	if (atom_space->isLink(hnegates))
 	{
-		Type tnegates = lnegates->getType();
+		Type tnegates = atom_space->getType(hnegates);
 		if (AND_LINK != tnegates)
 		{
 			logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
 			return;
 		}
-		negs = lnegates->getOutgoingSet();
+		negs = atom_space->getOutgoing(hnegates);
 		bool bogus = pme.validate(vars, negs);
 		if (bogus)
 		{
@@ -135,8 +127,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 	// Make sure that the user did not pass in bogus clauses
 	std::vector<Handle> clauses;
-	clauses = lclauses->getOutgoingSet();
-
+	clauses = atom_space->getOutgoing(hclauses);
 
 	bool bogus = pme.validate(vars, clauses);
 	if (bogus)
@@ -147,7 +138,6 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 	pme.match(cb, vars, clauses, negs);
 
-
 }
 
 /* ================================================================= */
@@ -156,8 +146,10 @@ void PatternMatch::match(PatternMatchCallback *cb,
 namespace opencog {
 class FindVariables
 {
+        AtomSpace* as;
 	public:
 		std::vector<Handle> varlist;
+        FindVariables(AtomSpace *_as) : as(_as) { };
 
 		/**
 		 * Create a list of all of the VariableNodes that lie in the
@@ -165,11 +157,10 @@ class FindVariables
 		 */
 		inline bool find_vars(Handle h)
 		{
-			Atom *a = TLB::getAtom(h);
-			Node *n = dynamic_cast<Node *>(a);
-			if (n)
+            Type t = as->getType(h);
+			if (as->isNode(t))
 			{
-				if (n->getType() == VARIABLE_NODE)
+				if (t == VARIABLE_NODE)
 				{
 					varlist.push_back(h);
 				}
@@ -207,11 +198,11 @@ Handle Instantiator::execution_link()
 	// The oset contains the grounded schema.
 	if (2 != oset.size()) return Handle::UNDEFINED;
 	Handle gs = oset[0];
-	Node *gsn = dynamic_cast<Node *>(TLB::getAtom(gs));
-	if (NULL == gsn) return Handle::UNDEFINED;
+
+	if (!as->isNode(gs)) return Handle::UNDEFINED;
 
 	// Get the schema name.
-	const std::string& schema = gsn->getName();
+	const std::string& schema = as->getName(gs);
 	// printf ("Grounded schema name: %s\n", schema.c_str());
 
 	// At this point, we only run scheme schemas.
@@ -235,26 +226,20 @@ Handle Instantiator::execution_link()
 
 bool Instantiator::walk_tree(Handle expr)
 {
-	Atom *a = TLB::getAtom(expr);
-	Type t = a->getType();
-	Node *n = dynamic_cast<Node *>(a);
-	if (n)
+    Type t = as->getType(expr);
+	if (as->isNode(expr))
 	{
-		if (VARIABLE_NODE != t)
-		{
+		if (VARIABLE_NODE != t) {
 			oset.push_back(expr);
 			return false;
 		}
 
 		// If we are here, we found a variable. Look it up.
 		std::map<Handle,Handle>::const_iterator it = vmap->find(expr);
-		if (vmap->end() != it)
-		{
+		if (vmap->end() != it) {
 			Handle soln = it->second;
 			oset.push_back(soln);
-		}
-		else
-		{
+		} else {
 			oset.push_back(expr);
 		}
 		return false;
@@ -283,7 +268,7 @@ bool Instantiator::walk_tree(Handle expr)
 
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
-	const TruthValue& tv = a->getTruthValue();
+	const TruthValue& tv = as->getTV(expr);
 	Handle sh = as->addLink(t, oset, tv);
 
 	oset = save_oset;
@@ -320,7 +305,7 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 	{
 		logger().warn("%s: failure to ground expression (found %d groundings)\n"
 			"Ungrounded expr is %s\n",
-			__FUNCTION__, oset.size(), TLB::getAtom(expr)->toString().c_str());
+			__FUNCTION__, oset.size(), as->atomAsString(expr).c_str());
 	}
 	if (oset.size() >= 1)
 		return oset[0];
@@ -363,7 +348,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	inst.as = as;
 	Handle h = inst.instantiate(implicand, var_soln);
-	if (TLB::isValidHandle(h))
+	if (as->isValidHandle(h))
 	{
 		result_list.push_back(h);            
 	}
@@ -454,21 +439,19 @@ Handle PatternMatch::do_imply (Handle himplication,
                                PatternMatchCallback *pmc,
                                std::vector<Handle> *varlist)
 {
-	Atom * aimpl = TLB::getAtom(himplication);
-	Link * limpl = dynamic_cast<Link *>(aimpl);
-
+    AtomSpace *as = atom_space;
 	// Must be non-empty.
-	if (!limpl) return Handle::UNDEFINED;
+	if (!as->isLink(himplication)) return Handle::UNDEFINED;
 
 	// Type must be as expected
-	Type timpl = limpl->getType();
+	Type timpl = as->getType(himplication);
 	if (IMPLICATION_LINK != timpl)
 	{
 		logger().warn("%s: expected ImplicationLink", __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
 
-	const std::vector<Handle>& oset = limpl->getOutgoingSet();
+	const std::vector<Handle>& oset = as->getOutgoing(himplication);
 	if (2 != oset.size())
 	{
 		logger().warn("%s: ImplicationLink has wrong size", __FUNCTION__);
@@ -478,34 +461,29 @@ Handle PatternMatch::do_imply (Handle himplication,
 	Handle hclauses = oset[0];
 	Handle implicand = oset[1];
 
-	Atom * aclauses = TLB::getAtom(hclauses);
-	Link * lclauses = dynamic_cast<Link *>(aclauses);
-
 	// Must be non-empty.
-	if (!lclauses) return Handle::UNDEFINED;
+	if (!as->isLink(hclauses)) return Handle::UNDEFINED;
 
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
 	// XXX Should an OrList be supported ??
 	std::vector<Handle> affirm, negate;
-	Type tclauses = lclauses->getType();
+	Type tclauses = as->getType(hclauses);
 	if (AND_LINK == tclauses)
 	{
 		// Input is in conjunctive normal form, consisting of clauses,
 		// or their negations. Split these into two distinct lists.
 		// Any clause that is a NotLink is "negated"; strip off the
 		// negation and put it into its own list.
-		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
+		const std::vector<Handle>& cset = as->getOutgoing(hclauses);
 		size_t clen = cset.size();
 		for (size_t i=0; i<clen; i++)
 		{
 			Handle h = cset[i];
-			Atom *a = TLB::getAtom(h);
-			Type t = a->getType();
+			Type t = as->getType(h);
 			if (NOT_LINK == t)
 			{
-				Link *l = static_cast<Link *>(a);
-				h = l->getOutgoingHandle(0);
+				h = as->getOutgoing(h,0);
 				negate.push_back(h);
 			}
 			else
@@ -524,7 +502,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 	// Extract a list of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// VariableScopeLink will include a list of variables up-front.
-	FindVariables fv;
+	FindVariables fv(atom_space);
 	if (NULL == varlist)
 	{
 		fv.find_vars(hclauses);
@@ -587,12 +565,11 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  * via the map "typemap". 
  */
 int PatternMatch::get_vartype(Handle htypelink,
-                              Atom * atypelink,
                               std::vector<Handle> &vset,
                               VariableTypeMap &typemap)
 {
-	Link * ltvl = dynamic_cast<Link *>(atypelink);
-	const std::vector<Handle>& oset = ltvl->getOutgoingSet();
+    AtomSpace *as = atom_space;
+	const std::vector<Handle>& oset = as->getOutgoing(htypelink);
 	if (2 != oset.size())
 	{
 		logger().warn("%s: TypedVariableLink has wrong size",
@@ -603,15 +580,11 @@ int PatternMatch::get_vartype(Handle htypelink,
 	Handle varname = oset[0];
 	Handle vartype = oset[1];
 
-	Atom *avar = TLB::getAtom(varname);
-
 	// The vartype is either a single type name, or a list of typenames.
-	Atom *atype = TLB::getAtom(vartype);
-	Type t = atype->getType();
+	Type t = as->getType(vartype);
 	if (VARIABLE_TYPE_NODE == t)
 	{
-		const Node *n = dynamic_cast<const Node *>(atype);
-		const std::string &tn = n->getName();
+		const std::string &tn = as->getName(vartype);
 		Type vt = classserver().getType(tn);
 
 		if (NOTYPE == vt)
@@ -623,30 +596,27 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 		std::set<Type> ts;
 		ts.insert(vt);
-		typemap.insert(ATPair(avar->getHandle(),ts));
+		typemap.insert(ATPair(varname,ts));
 		vset.push_back(varname);
 	}
 	else if (LIST_LINK == t)
 	{
 		std::set<Type> ts;
 
-		const Link *l = dynamic_cast<const Link *>(atype);
-		const std::vector<Handle>& tset = l->getOutgoingSet();
+		const std::vector<Handle>& tset = as->getOutgoing(vartype);
 		size_t tss = tset.size();
 		for (size_t i=0; i<tss; i++)
 		{
 			Handle h = tset[i];
-			Atom *a = TLB::getAtom(h);
-			if (VARIABLE_TYPE_NODE != a->getType())
+			if (VARIABLE_TYPE_NODE != as->getType(h))
 			{
 				logger().warn("%s: TypedVariableLink has unexpected content:\n"
 				              "Expected VariableTypeNode, got %s",
 				              __FUNCTION__,
-				              classserver().getTypeName(a->getType()).c_str());
+				              classserver().getTypeName(as->getType(h)).c_str());
 				return 3;
 			}
-			const Node *n = dynamic_cast<const Node *>(a);
-			const std::string &tn = n->getName();
+			const std::string &tn = as->getName(h);
 			Type vt = classserver().getType(tn);
 			if (NOTYPE == vt)
 			{
@@ -657,7 +627,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 			ts.insert(vt);
 		}
 
-		typemap.insert(ATPair(avar->getHandle(),ts));
+		typemap.insert(ATPair(varname,ts));
 		vset.push_back(varname);
 	}
 	else
@@ -696,14 +666,14 @@ int PatternMatch::get_vartype(Handle htypelink,
 Handle PatternMatch::do_varscope (Handle hvarscope,
                                   DefaultPatternMatchCB *pmc)
 {
-	Atom * ascope = TLB::getAtom(hvarscope);
-	Link * lscope = dynamic_cast<Link *>(ascope);
+    AtomSpace *as = atom_space;
+    Handle h = hvarscope;
 
 	// Must be non-empty.
-	if (!lscope) return Handle::UNDEFINED;
+	if (!as->isLink(h)) return Handle::UNDEFINED;
 
 	// Type must be as expected
-	Type tscope = lscope->getType();
+	Type tscope = as->getType(h);
 	if (VARIABLE_SCOPE_LINK != tscope)
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
@@ -712,7 +682,7 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 		return Handle::UNDEFINED;
 	}
 
-	const std::vector<Handle>& oset = lscope->getOutgoingSet();
+	const std::vector<Handle>& oset = as->getOutgoing(h);
 	if (2 != oset.size())
 	{
 		logger().warn("%s: VariableScopeLink has wrong size", __FUNCTION__);
@@ -722,8 +692,6 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 	Handle hdecls = oset[0];  // VariableNode declarations
 	Handle himpl = oset[1];   // ImplicationLink
 
-	Atom * adecls = TLB::getAtom(hdecls);
-
 	// vset is the vector of variables.
 	// typemap is the (possibly empty) list of restrictions on atom types.
 	std::vector<Handle> vset;
@@ -731,35 +699,33 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 
 	// Expecting the declaration list to be either a single
 	// variable, or a list of variable declarations
-	Type tdecls = adecls->getType();
+	Type tdecls = as->getType(hdecls);
 	if ((VARIABLE_NODE == tdecls) ||
-	    (dynamic_cast<Node *>(adecls))) // allow *any* node as a variable
+	    as->isNode(hdecls)) // allow *any* node as a variable
 	{
 		vset.push_back(hdecls);
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
-		if (get_vartype(hdecls, adecls, vset, typemap)) return Handle::UNDEFINED;
+		if (get_vartype(hdecls, vset, typemap)) return Handle::UNDEFINED;
 	}
 	else if (LIST_LINK == tdecls)
 	{
 		// The list of variable declarations should be .. a list of
 		// variables! Make sure its as expected.
-		Link * ldecls = dynamic_cast<Link *>(adecls);
-		const std::vector<Handle>& dset = ldecls->getOutgoingSet();
+		const std::vector<Handle>& dset = as->getOutgoing(hdecls);
 		size_t dlen = dset.size();
 		for (size_t i=0; i<dlen; i++)
 		{
 			Handle h = dset[i];
-			Atom *a = TLB::getAtom(h);
-			Type t = a->getType();
+			Type t = as->getType(h);
 			if (VARIABLE_NODE == t)
 			{
 				vset.push_back(h);
 			}
 			else if (TYPED_VARIABLE_LINK == t)
 			{
-				if (get_vartype(h, a, vset, typemap)) return Handle::UNDEFINED;
+				if (get_vartype(h, vset, typemap)) return Handle::UNDEFINED;
 			}
 			else
 			{

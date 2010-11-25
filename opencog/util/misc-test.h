@@ -30,7 +30,6 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 

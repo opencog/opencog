@@ -27,11 +27,10 @@
 #include <opencog/atomspace/ForeachTwo.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 
-// #define DEBUG 1
+#define DEBUG 1
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -60,31 +59,22 @@ void PatternMatchEngine::set_atomspace(AtomSpace *as)
 	invalid_grounding = as->addLink(LINK, oset);
 }
 
-bool PatternMatchEngine::prt(Atom *atom)
+bool PatternMatchEngine::prt(Handle h)
 {
-	if (!atom) return false;
-	std::string str = atom->toString();
+	std::string str = atom_space->atomAsString(h);
 	printf ("%s\n", str.c_str());
 	return false;
-}
-
-inline void PatternMatchEngine::prtmsg(const char * msg, Atom *atom)
-{
-#ifdef DEBUG
-	if (!atom)
-	{
-		printf ("%s (null handle)\n", msg);
-		return;
-	}
-	std::string str = atom->toString();
-	printf ("%s %s\n", msg, str.c_str());
-#endif
 }
 
 inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
 {
 #ifdef DEBUG
-	prtmsg(msg, TLB::getAtom(h));
+	if (h == Handle::UNDEFINED) {
+		printf ("%s (invalid handle)\n", msg);
+		return;
+	}
+	std::string str = atom_space->atomAsString(h);
+	printf ("%s %s\n", msg, str.c_str());
 #endif
 }
 
@@ -117,13 +107,12 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
  */
 bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 {
-	Handle hp = TLB::getHandle(ap);
-	Handle hg = TLB::getHandle(ag);
+	Handle hp = ap->getHandle();
+	Handle hg = ag->getHandle();
 
 	// Atom ap is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (bound_vars.end() != bound_vars.find(hp))
-	{
+	if (bound_vars.end() != bound_vars.find(hp)) {
 		// But... if atom g happens to also be a bound var,
 		// then its a mismatch.
 		if (bound_vars.end() != bound_vars.find(hg)) return true;
@@ -132,8 +121,7 @@ bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 		// proposed grounding must match the existing one. Such multiple
 		// groundings can occur when traversing graphs with loops in them.
 		Handle gnd = var_grounding[hp];
-		if (TLB::isValidHandle(gnd))
-		{
+		if (atom_space->isValidHandle(gnd)) {
 			return (gnd != hg);
 		}
 
@@ -144,7 +132,7 @@ bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 		Node *ng = dynamic_cast<Node *>(ag);
 		if (!np || !ng) return true;
 
-		if (pmc->variable_match (np,ng)) return true;
+		if (pmc->variable_match (hp,hg)) return true;
 
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
@@ -168,12 +156,12 @@ bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 	if (lp && lg)
 	{
 		// Let the callback perform basic checking.
-		bool mismatch = pmc->link_match(lp, lg);
+		bool mismatch = pmc->link_match(hp, hg);
 		if (mismatch) return true;
 
 		dbgprt("depth=%d\n", depth);
-		prtmsg("> tree_compare", ap);
-		prtmsg(">           to", ag);
+		prtmsg("> tree_compare", hp);
+		prtmsg(">           to", hg);
 
 		// The recursion step: traverse down the tree.
 		// Only links can have non-empty outgoing sets.
@@ -200,7 +188,7 @@ bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 	if (np && ng)
 	{
 		// Call the callback to make the final determination.
-		bool mismatch = pmc->node_match(np, ng);
+		bool mismatch = pmc->node_match(hp, hg);
 		if (false == mismatch)
 		{
 			dbgprt("Found matching nodes\n");
@@ -238,8 +226,8 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 {
 	// Let's not look at our own navel
 	if (hsoln == curr_root) return false;
-	Atom *ap = TLB::getAtom(curr_pred_handle);
-	Atom *as = TLB::getAtom(hsoln);
+    Atom * ap = TLB::getAtom(curr_pred_handle);
+    Atom * as = TLB::getAtom(hsoln);
 	depth = 1;
 	bool no_match = tree_compare(ap, as);
 
@@ -252,25 +240,22 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 	// only if the callback allows it.
 	if (curr_pred_handle == curr_root)
 	{
-		Link *lp = dynamic_cast<Link *>(ap);
-		Link *ls = dynamic_cast<Link *>(as);
-
 		// Is this required to match? If so, then let the callback
 		// make the final decision; if callback rejects, then it's
 		// the same as a mismatch; try the next one.
 		if (optionals.count(curr_root))
 		{
 			clause_accepted = true;
-			no_match = pmc->optional_clause_match(lp, ls);
+			no_match = pmc->optional_clause_match(curr_pred_handle, hsoln);
 		}
 		else
 		{
-			no_match = pmc->clause_match(lp, ls);
+			no_match = pmc->clause_match(curr_pred_handle, hsoln);
 		}
 		dbgprt("clause match callback no_match=%d\n", no_match);
 		if (no_match) return false;
 
-		curr_soln_handle = TLB::getHandle(as);
+		curr_soln_handle = as->getHandle();
 		clause_grounding[curr_root] = curr_soln_handle;
 		prtmsg("---------------------\nclause:", curr_root);
 		prtmsg("ground:", curr_soln_handle);
@@ -331,9 +316,8 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 			       (false == clause_accepted) &&
 			       (optionals.count(curr_root)))
 			{
-				Atom *acl = TLB::getAtom(curr_pred_handle);
-				Link *lcl = dynamic_cast<Link *>(acl);
-				no_match = pmc->optional_clause_match(lcl, NULL);
+				no_match = pmc->optional_clause_match(curr_pred_handle,
+                        Handle::UNDEFINED);
 				dbgprt ("Exhausted search for optional clause, cb=%d\n", no_match);
 				if (no_match) return false;
 
@@ -458,7 +442,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		for (i = rl->begin(); i != rl->end(); i++)
 		{
 			Handle root = *i;
-			if(TLB::isValidHandle(clause_grounding[root]))
+			if(atom_space->isValidHandle(clause_grounding[root]))
 			{
 				solved = true;
 			}
@@ -507,7 +491,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		{
 			Handle root = *i;
 			Handle root_gnd = clause_grounding[root];
-			if(TLB::isValidHandle(root_gnd) && root_gnd != invalid_grounding)
+			if(atom_space->isValidHandle(root_gnd) && root_gnd != invalid_grounding)
 			{
 				solved = true;
 			}
@@ -678,7 +662,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	{
 		printf("Clause %d: ", cl);
 		Handle h = *i;
-		prt(TLB::getAtom(h));
+		prt(h);
 		cl++;
 	}
 
@@ -687,11 +671,9 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
 	{
 		Handle h = *j;
-		Atom *a = TLB::getAtom(h);
-		Node *n = dynamic_cast<Node *>(a);
-		if (n)
+		if (atom_space->isNode(h))
 		{
-			printf(" Bound var: "); prt(a);
+			printf(" Bound var: "); prt(h);
 		}
 	}
 
@@ -763,8 +745,8 @@ bool PatternMatchEngine::validate(
                          Handle clause)
 {
 	// If its a node, then it must be one of the vars.
-	Node *n = dynamic_cast<Node *>(TLB::getAtom(clause));
-	if (n)
+	Type clause_type = atom_space->getType(clause);
+	if (atom_space->isNode(clause_type))
 	{
 		std::vector<Handle>::const_iterator i;
 		for (i = vars.begin();
@@ -777,10 +759,9 @@ bool PatternMatchEngine::validate(
 	}
 
 	// If its a link, then recurse to subclauses.
-	Link *l = dynamic_cast<Link *>(TLB::getAtom(clause));
-	if (l)
+	if (atom_space->isLink(clause_type))
 	{
-		const std::vector<Handle> &oset = l->getOutgoingSet();
+		const std::vector<Handle> &oset = atom_space->getOutgoing(clause);
 		std::vector<Handle>::const_iterator i;
 		for (i = oset.begin();
 	     	i != oset.end(); i++)
@@ -807,14 +788,13 @@ void PatternMatchEngine::print_solution(
 		std::pair<Handle, Handle> pv = *j;
 		Handle var = pv.first;
 		Handle soln = pv.second;
-		Atom *av = TLB::getAtom(var);
-		Atom *as = TLB::getAtom(soln);
-		Node *nv = dynamic_cast<Node *>(av);
-		Node *ns = dynamic_cast<Node *>(as);
-		if (ns && nv)
+        Type tv = atom_space->getType(var);
+        Type ts = atom_space->getType(soln);
+		if (atom_space->isNode(ts) && atom_space->isNode(tv))
 		{
 			printf("\tNode %s maps to %s\n", 
-			       nv->getName().c_str(), ns->getName().c_str());
+			       atom_space->getName(var).c_str(),
+                   atom_space->getName(soln).c_str());
 		}
 	}
 
@@ -824,13 +804,12 @@ void PatternMatchEngine::print_solution(
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); m++, i++) 
 	{
-		Atom *ac = TLB::getAtom(m->second);
-		if (NULL == ac)
+		if (m->second == Handle::UNDEFINED)
 		{
 			prtmsg("ERROR: ungrounded clause: ", m->first);
 			continue;
 		}
-		std::string str = ac->toString();
+		std::string str = atom_space->atomAsString(m->second);
 		printf ("%d.   %s\n", i, str.c_str());
 	}
 	printf ("\n");
@@ -848,15 +827,13 @@ void PatternMatchEngine::print_predicate(
 	for (i = clauses.begin(); i != clauses.end(); i++)
 	{
 		Handle h = *i;
-		Atom *a = TLB::getAtom(h);
-		prt(a);
+		prt(h);
 	}
 	printf("\nVars:\n");
 	for (i = vars.begin(); i != vars.end(); i++)
 	{
 		Handle h = *i;
-		Atom *a = TLB::getAtom(h);
-		prt(a);
+		prt(h);
 	}
 }
 

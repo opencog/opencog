@@ -51,7 +51,7 @@ class PatternMatchCallback
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
 		 */
-		virtual bool node_match(Node *, Node *) = 0;
+		virtual bool node_match(Handle node1, Handle node2) = 0;
 
 		/**
 		 * Called when a variable in the template pattern
@@ -62,7 +62,7 @@ class PatternMatchCallback
 		 * Return false if the grouding is acceptable, else
 		 * return true. (i.e. return true if mis-match).
 		 */
-		virtual bool variable_match(Node *, Node *) = 0;
+		virtual bool variable_match(Handle node1, Handle node2) = 0;
 
 		/**
 		 * Called when a link in the template pattern
@@ -73,7 +73,7 @@ class PatternMatchCallback
 		 * Return false if the links match, else return
 		 * true. (i.e. return true if mis-match).
 		 */
-		virtual bool link_match(Link *, Link *) = 0;
+		virtual bool link_match(Handle link1, Handle link2) = 0;
 
 		/**
 		 * Called when a solution is found. Should 
@@ -95,7 +95,7 @@ class PatternMatchCallback
 		 * Return true to discard the use of this clause as a possible 
 		 * grounding, return false to use this grounding.
 		 */
-		virtual bool clause_match(Link *pattrn, Link *grnd)
+		virtual bool clause_match(Handle pattrn_link_h, Handle grnd_link_h)
 		{
 			return false;
 		}
@@ -114,7 +114,7 @@ class PatternMatchCallback
 		 * Note that all required clauses will have been grounded before
 		 * any optional clauses are examined.
 		 */
-		virtual bool optional_clause_match(Link *pattrn, Link *grnd)
+		virtual bool optional_clause_match(Handle pattrn, Handle grnd)
 		{
 			return false;
 		}

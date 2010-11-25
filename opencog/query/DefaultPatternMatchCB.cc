@@ -26,7 +26,6 @@
 
 #include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 
@@ -34,17 +33,15 @@ using namespace opencog;
 
 Handle DefaultPatternMatchCB::find_starter(Handle h)
 {
-	Atom *a = TLB::getAtom(h);
-	Link *l = dynamic_cast<Link *>(a);
-	if (NULL == l)
-	{
-		Type t = a->getType();
+    AtomSpace *as = pme->get_atomspace();
+    Type t = as->getType(h);
+	if (as->isNode(t)) {
 		if (t != VARIABLE_NODE) return h;
 		return Handle::UNDEFINED;
 	}
 
 	starter_pred = h;
-	const std::vector<Handle> &vh = l->getOutgoingSet();
+	const std::vector<Handle> &vh = as->getOutgoing(h);
 	for (size_t i = 0; i < vh.size(); i++) {
 		Handle hout = vh[i];
 		Handle s = find_starter(hout);
@@ -57,7 +54,7 @@ Handle DefaultPatternMatchCB::find_starter(Handle h)
 bool DefaultPatternMatchCB::loop_candidate(Handle h)
 {
 	// printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-	// printf("Loop candidate: %s\n", TLB::getAtom(h)->toString().c_str());
+	// printf("Loop candidate: %s\n", pme->get_atomspace()->atomAsString(h).c_str());
 	return pme->do_candidate(root, starter_pred, h);
 }
 

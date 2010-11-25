@@ -49,7 +49,7 @@ class OutgoingTree
 		Handle tgt;
 		inline bool in_tree(Handle tree)
 		{
-			if (TLB::isInvalidHandle(tree)) return false;
+			if (tree == Handle::UNDEFINED) return false;
 			if (tree == tgt) return true;
 			return opencog::foreach_outgoing_handle(tree, &OutgoingTree::in_tree, this);
 		}

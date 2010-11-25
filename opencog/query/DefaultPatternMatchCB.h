@@ -31,6 +31,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/query/PatternMatchCallback.h>
+#include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
 
@@ -65,10 +66,10 @@ class DefaultPatternMatchCB :
 		 *
 		 * By default, the nodes must be identical.
 		 */
-		virtual bool node_match(Node *npat, Node *nsoln)
+		virtual bool node_match(Handle npat_h, Handle nsoln_h)
 		{
 			// If equality, then a match.
-			if (npat == nsoln) return false;
+			if (npat_h == nsoln_h) return false;
 			return true;
 		}
 
@@ -81,9 +82,10 @@ class DefaultPatternMatchCB :
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
 		 */
-		virtual bool variable_match(Node *npat, Node *nsoln)
+		virtual bool variable_match(Handle npat_h, Handle nsoln_h)
 		{
-			Type pattype = npat->getType();
+            AtomSpace *as = pme->get_atomspace();
+			Type pattype = as->getType(npat_h);
 
 			// If the ungrounded term is not of type VariableNode, then just
 			// accept the match. This allows any kind of node types to be 
@@ -93,7 +95,7 @@ class DefaultPatternMatchCB :
 
 			// If the solution is variable too, reject it out-of-hand,
 			// even if its some variable in some utterly unrelated thing.
-			Type soltype = nsoln->getType();
+			Type soltype = as->getType(nsoln_h);
 			if (soltype == VARIABLE_NODE) return true;
 
 			// If the ungrounded term is a variable, then see if there
@@ -103,7 +105,7 @@ class DefaultPatternMatchCB :
 
 			// If we are here, there's a restriction on the grounding type.
 			// Validate the node type, if needed.
-			VariableTypeMap::const_iterator it = type_restrictions->find(npat->getHandle());
+			VariableTypeMap::const_iterator it = type_restrictions->find(npat_h);
 			if (it == type_restrictions->end()) return false;
 
 			// Is the ground-atom type in our list of allowed types?
@@ -125,13 +127,14 @@ class DefaultPatternMatchCB :
 		 * By default, the link arity and the 
 		 * link types must match.
 		 */
-		virtual bool link_match(Link *lpat, Link *lsoln)
+		virtual bool link_match(Handle lpat_h, Handle lsoln_h)
 		{
-			if (lpat == lsoln) return false;
+            AtomSpace *as = pme->get_atomspace();
+			if (lpat_h == lsoln_h) return false;
 
-			if (lpat->getArity() != lsoln->getArity()) return true;
-			Type pattype = lpat->getType();
-			Type soltype = lsoln->getType();
+			if (as->getArity(lpat_h) != as->getArity(lsoln_h)) return true;
+			Type pattype = as->getType(lpat_h);
+			Type soltype = as->getType(lsoln_h);
 
 			// If types differ, no match,
 			if (pattype != soltype) return true;

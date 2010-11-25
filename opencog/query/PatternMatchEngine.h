@@ -46,10 +46,8 @@ class PatternMatchEngine
 		AtomSpace *atom_space;
 
 	private:
-		static bool prt(Atom *);
-
-		static void prtmsg(const char *, Atom *);
-		static void prtmsg(const char *, Handle);
+		bool prt(Handle h);
+		void prtmsg(const char *msg, Handle h);
 
 		// -------------------------------------------
 		// predicate to be solved.
@@ -123,10 +121,10 @@ class PatternMatchEngine
 		           const std::vector<Handle> &clauses,
 		           const std::vector<Handle> &negations);
 
-		static void print_solution(const std::map<Handle, Handle> &vars,
+		void print_solution(const std::map<Handle, Handle> &vars,
 		                           const std::map<Handle, Handle> &clauses);
 
-		static void print_predicate(const std::vector<Handle> &vars,
+		void print_predicate(const std::vector<Handle> &vars,
 		                            const std::vector<Handle> &clauses);
 };
 

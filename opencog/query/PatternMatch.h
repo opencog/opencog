@@ -39,7 +39,7 @@ class PatternMatch
 	private:
 		AtomSpace *atom_space;
 		PatternMatchEngine pme;
-		int get_vartype(Handle, Atom *, 
+		int get_vartype(Handle,
 		                std::vector<Handle> &,
 		                VariableTypeMap &);
 		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
