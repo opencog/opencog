@@ -777,6 +777,7 @@ public:
     //to do with handles... or they should at least be static.
     Type getAtomType(const std::string& typeName) const;
     bool isNode(const Type t) const;
+    bool isLink(const Type t) const;
 
     /** Convenience functions... */
     bool isNode(const Handle& h) const;

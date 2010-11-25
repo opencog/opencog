@@ -424,6 +424,12 @@ bool AtomSpace::isNode(Type t) const
     return inheritsType(t, NODE);
 }
 
+bool AtomSpace::isLink(Type t) const
+{
+    DPRINTF("AtomSpace::isLink Atom space address: %p\n", this);
+    return inheritsType(t, LINK);
+}
+
 bool AtomSpace::isNode(const Handle& h) const
 {
     DPRINTF("AtomSpace::isNode Atom space address: %p\n", this);
@@ -433,7 +439,7 @@ bool AtomSpace::isNode(const Handle& h) const
 
 bool AtomSpace::isLink(const Handle& h) const
 {
-    DPRINTF("AtomSpace::isNode Atom space address: %p\n", this);
+    DPRINTF("AtomSpace::isLink Atom space address: %p\n", this);
     Type t = getType(h);
     return classserver().isA(t, LINK);
 }
