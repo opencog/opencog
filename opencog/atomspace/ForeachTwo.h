@@ -22,14 +22,12 @@ namespace opencog
  */
 template<class T>
 inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
-                                       bool (T::*cb)(Atom *, Atom *), T *data)
+                                       bool (T::*cb)(Handle, Handle), T *data)
 {
     AtomSpace *as = data->get_atomspace();
-    boost::shared_ptr<Link> la(as->cloneLink(ha));
-    boost::shared_ptr<Link> lb(as->cloneLink(hb));
-    if (!la || !lb) return false;
-    const std::vector<Handle> &va = la->getOutgoingSet();
-    const std::vector<Handle> &vb = lb->getOutgoingSet();
+    if (!as->isLink(ha) || !as->isLink(hb)) return false;
+    const std::vector<Handle> &va = as->getOutgoing(ha);
+    const std::vector<Handle> &vb = as->getOutgoing(hb);
 
     size_t vasz = va.size();
     size_t vbsz = vb.size();
@@ -38,22 +36,18 @@ inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
     for (size_t i = 0; i < minsz; i++) {
         ha = va[i];
         hb = vb[i];
-        boost::shared_ptr<Atom> aa(as->cloneAtom(ha));
-        boost::shared_ptr<Atom> ab(as->cloneAtom(hb));
-        bool rc = (data->*cb)(aa.get(), ab.get());
+        bool rc = (data->*cb)(ha, hb);
         if (rc) return rc;
     }
 
     for (size_t i = vasz; i < vbsz; i++) {
         hb = vb[i];
-        boost::shared_ptr<Atom> ab(as->cloneAtom(hb));
-        bool rc = (data->*cb)(NULL, ab.get());
+        bool rc = (data->*cb)(Handle::UNDEFINED, hb);
         if (rc) return rc;
     }
     for (size_t i = vbsz; i < vasz; i++) {
         ha = va[i];
-        boost::shared_ptr<Atom> aa(as->cloneAtom(ha));
-        bool rc = (data->*cb)(aa.get(), NULL);
+        bool rc = (data->*cb)(ha,Handle::UNDEFINED);
         if (rc) return rc;
     }
     return false;

@@ -813,10 +813,9 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 		result_list.push_back(h);
 
 		// Set truth value to true+confident
-		Atom *a = TLB::getAtom(h);
 		SimpleTruthValue stv(1,0);
 		stv.setConfidence(1);
-		a->setTruthValue(stv);
+		pme->get_atomspace()->setTV(h,stv);
 	}
 	return false;
 }

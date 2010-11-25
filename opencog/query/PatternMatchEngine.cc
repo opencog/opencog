@@ -105,12 +105,10 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
  * the entire tree, without mismatches.  Since a return value of true
  * stops the iteration, true is used to signal a mismatch.
  */
-bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
+bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
-	Handle hp = ap->getHandle();
-	Handle hg = ag->getHandle();
-
-	// Atom ap is from the pattern clause, and it might be one
+    AtomSpace *as = atom_space;
+	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (bound_vars.end() != bound_vars.find(hp)) {
 		// But... if atom g happens to also be a bound var,
@@ -128,9 +126,7 @@ bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
 		// e.g. making sure that grounding is of some certain type.
-		Node *np = dynamic_cast<Node *>(ap);
-		Node *ng = dynamic_cast<Node *>(ag);
-		if (!np || !ng) return true;
+		if (!as->isNode(hp) || !as->isNode(hg)) return true;
 
 		if (pmc->variable_match (hp,hg)) return true;
 
@@ -151,9 +147,7 @@ bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 	}
 
 	// If both are links, compare them as such.
-	Link *lp = dynamic_cast<Link *>(ap);
-	Link *lg = dynamic_cast<Link *>(ag);
-	if (lp && lg)
+	if (as->isLink(hp) && as->isLink(hg))
 	{
 		// Let the callback perform basic checking.
 		bool mismatch = pmc->link_match(hp, hg);
@@ -183,9 +177,7 @@ bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 	}
 
 	// If both are nodes, compare them as such.
-	Node *np = dynamic_cast<Node *>(ap);
-	Node *ng = dynamic_cast<Node *>(ag);
-	if (np && ng)
+	if (as->isNode(hp) && as->isNode(hg))
 	{
 		// Call the callback to make the final determination.
 		bool mismatch = pmc->node_match(hp, hg);
@@ -226,10 +218,8 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 {
 	// Let's not look at our own navel
 	if (hsoln == curr_root) return false;
-    Atom * ap = TLB::getAtom(curr_pred_handle);
-    Atom * as = TLB::getAtom(hsoln);
 	depth = 1;
-	bool no_match = tree_compare(ap, as);
+	bool no_match = tree_compare(curr_pred_handle, hsoln);
 
 	// If no match, then try the next one.
 	if (no_match) return false;
@@ -255,7 +245,7 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 		dbgprt("clause match callback no_match=%d\n", no_match);
 		if (no_match) return false;
 
-		curr_soln_handle = as->getHandle();
+		curr_soln_handle = hsoln;
 		clause_grounding[curr_root] = curr_soln_handle;
 		prtmsg("---------------------\nclause:", curr_root);
 		prtmsg("ground:", curr_soln_handle);

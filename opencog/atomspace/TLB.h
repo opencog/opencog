@@ -115,15 +115,6 @@ class TLB
     friend class AtomStorage;
     friend class SenseSimilaritySQL;
 
-    friend class OutgoingTree;
-    friend class DefaultPatternMatchCB;
-    friend class PatternMatch;
-    friend class PatternMatchEngine;
-    friend class Instantiator;
-    friend class Implicator;
-    friend class CrispImplicator;
-    friend class FindVariables;
-    
     friend class MilhalceaLabel;
     friend class NNAdjust;
     friend class ParseRank;

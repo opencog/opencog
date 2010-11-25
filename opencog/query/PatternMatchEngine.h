@@ -63,7 +63,7 @@ class PatternMatchEngine
 		
 		// -------------------------------------------
 		// Recurisve tree comparison algorithm.
-		bool tree_compare(Atom *, Atom *);
+		bool tree_compare(Handle, Handle);
 		int depth;  // recursion depth for tree_compare.
 
 		bool pred_up(Handle);
