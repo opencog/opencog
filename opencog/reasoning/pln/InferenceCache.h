@@ -27,10 +27,6 @@ class BITNodeUTest;
 
 namespace opencog {
 
-// XXX TODO use cmake to determine if ubigraph is installed;
-// if its not installed, ths define breaks the build.
-// #define USE_BITUBIGRAPHER
-
 #ifdef USE_BITUBIGRAPHER
 class BITUbigrapher;
 #endif

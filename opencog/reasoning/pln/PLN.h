@@ -54,6 +54,10 @@
 #define foreach BOOST_FOREACH
 #define Btr boost::shared_ptr
 
+#ifdef HAVE_UBIGRAPH
+ #define USE_BITUBIGRAPHER
+#endif
+
 using namespace opencog;
 
 namespace opencog {
