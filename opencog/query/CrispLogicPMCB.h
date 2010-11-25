@@ -57,9 +57,10 @@ class CrispLogicPMCB :
  		 * Note the inverted return value: return "false" to accept 
  		 * a clause, and return "true" to reject it. 
  		 */
-		virtual bool clause_match(Link *pattrn, Link *grnd)
+		virtual bool clause_match(Handle pattrn, Handle grnd)
 		{
-			const TruthValue &tv = grnd->getTruthValue();
+            AtomSpace *as = pme->get_atomspace();
+			const TruthValue &tv = as->getTV(grnd);
 			// printf (">>>>>>>> clause match tv=%f\n", tv.getMean());
 			if (tv.getMean() < 0.5) return true;
 			return false;
@@ -77,11 +78,12 @@ class CrispLogicPMCB :
  		 * As usual, return "false" to accept a clause, and return "true" to
  		 * reject it. 
  		 */
-		virtual bool optional_clause_match(Link *pattrn, Link *grnd)
+		virtual bool optional_clause_match(Handle pattrn, Handle grnd)
 		{
+            AtomSpace *as = pme->get_atomspace();
 			// printf (">>>>>>>>>> hello optional term!! %p\n", grnd);
-			if (NULL == grnd) return false;
-			const TruthValue &tv = grnd->getTruthValue();
+			if (!as->isValidHandle(grnd)) return false;
+			const TruthValue &tv = as->getTV(grnd);
 			// printf (">>>> optional tv=%f\n", tv.getMean());
 			if (tv.getMean() > 0.5) return true;
 			return false;

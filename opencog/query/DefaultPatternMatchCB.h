@@ -165,8 +165,9 @@ class DefaultPatternMatchCB :
 		Handle starter_pred;
 		Handle find_starter(Handle);
 		bool loop_candidate(Handle);
-		PatternMatchEngine *pme;
 		VariableTypeMap *type_restrictions;
+    protected:
+		PatternMatchEngine *pme;
 };
 
 } // namespace opencog

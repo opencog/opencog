@@ -271,10 +271,6 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 
 		get_next_untried_clause();
 
-		prtmsg("next clause is", curr_root);
-		dbgprt("This clause is %s\n", optionals.count(curr_root)? "optional" : "required");
-		prtmsg("joining handle is", curr_pred_handle);
-
 		// If there are no further predicates to solve,
 		// we are really done! Report the solution via callback.
 		bool found = false;
@@ -288,6 +284,10 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 		}
 		else
 		{
+            prtmsg("next clause is", curr_root);
+            dbgprt("This clause is %s\n", optionals.count(curr_root)? "optional" : "required");
+            prtmsg("joining handle is", curr_pred_handle);
+
 			// Else, start solving the next unsolved clause. Note: this is
 			// a recursive call, and not a loop. Recursion is halted when
 			// the next unsolved clause has no grounding.
