@@ -928,10 +928,6 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 //		}
 	} else {
 		const Link& link = (const Link&) atom;
-		//for (int i = 0; i < link.getArity(); i++) {
-		//    outgoing.push_back(link.getOutgoingAtom(i).value());
-		//}
-		//outgoing = link.getOutgoingSet();
 #ifdef NEVER_ALLOW_SECOND_TVS
 		result = as->getHandle(link.getType(), link.getOutgoingSet());
 
