@@ -481,7 +481,8 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
         for (int i = arity - 1; i >= 0; i--) {
             if (TLB::isInvalidHandle(ogs[i])) {
                 throw RuntimeException(TRACE_INFO,
-                                       "AtomTable - Attempting to insert link with invalid (null) outgoing members");
+                           "AtomTable - Attempting to insert link with "
+                           "invalid outgoing members");
             }
         }
     }

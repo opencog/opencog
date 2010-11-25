@@ -171,6 +171,14 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
 }
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
+class HandleComparison
+{
+    public:
+        bool operator()(const Handle& h1, const Handle& h2) const {
+            return (Handle::compare(h1, h2) < 0);
+        }
+};
+
 void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
    throw (RuntimeException)
 {
@@ -180,17 +188,6 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
            "Cannot change the OutgoingSet of an atom already "
            "inserted into an AtomTable\n");
     }
-#ifdef PERFORM_INVALID_HANDLE_CHECKS
-    // Make sure that garbage is not being passed in.
-    // We'd like to perform a test for valid values here, but it seems
-    // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
-    // which it hopefully repairs later on ...
-    for (int i = 0; i < outgoingVector.size(); i++) {
-        if (TLB::isInvalidHandle(outgoingVector[i])) {
-            throw RuntimeException(TRACE_INFO, "setOutgoingSet was passed invalid handles\n");
-        }
-    }
-#endif /* PERFORM_INVALID_HANDLE_CHECKS */
     outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
     if (classserver().isA(type, UNORDERED_LINK)) {
@@ -200,13 +197,6 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
 
 void Atom::addOutgoingAtom(Handle h)
 {
-#ifdef PERFORM_INVALID_HANDLE_CHECKS
-    // We'd like to perform a test for valid values here, but it seems
-    // the NMXmlParser code intentionally adds Handle::UNDEFINED to link nodes,
-    // which it hopefully repairs later on ...
-    if (TLB::isInvalidHandle(h))
-        throw RuntimeException(TRACE_INFO, "addOutgoingAtom was passed invalid handles\n");
-#endif /* PERFORM_INVALID_HANDLE_CHECKS */
     outgoing.push_back(h);
 }
 
@@ -223,7 +213,6 @@ Atom * Atom::getOutgoingAtom(int position) const throw (RuntimeException)
 
 void Atom::addIncomingHandle(Handle handle)
 {
-
     // creates a new entry with handle
     HandleEntry* entry = new HandleEntry(handle);
     // entry is placed in the first position of the incoming set

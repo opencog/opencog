@@ -67,15 +67,13 @@ private:
     // Called by constructors to init this object
 #ifndef PUT_OUTGOING_SET_IN_LINKS
     void init(Type, const std::vector<Handle>&, const TruthValue&);
-#else
-    void init(Type, const TruthValue&);
-#endif
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
     // Adds a new handle to the outgoing set. Note that this is
     // used only in the NativeParser friend class, and, due to
     // performance issues, it should not be used anywhere else...
     void addOutgoingAtom(Handle h);
+#else
+    void init(Type, const TruthValue&);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     /**
@@ -134,6 +132,13 @@ protected:
     virtual void setOutgoingSet(const std::vector<Handle>& o)
     throw (RuntimeException);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
+
+    /**
+     * Adds a new entry to this atom's incoming set.
+     *
+     * @param The handle of the atom to be included.
+     */
+    void addIncomingHandle(Handle);
 
 public:
 
@@ -237,13 +242,6 @@ public:
      */
     Atom * getOutgoingAtom(int) const throw (RuntimeException);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
-
-    /**
-     * Adds a new entry to this atom's incoming set.
-     *
-     * @param The handle of the atom to be included.
-     */
-    void addIncomingHandle(Handle);
 
     /**
      * Removes an entry from this atom's incoming set.
