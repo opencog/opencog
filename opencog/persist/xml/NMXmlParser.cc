@@ -132,34 +132,6 @@ static Type getTypeFromString(const char *name, bool onlyClassName)
     return 0;
 }
 
-#ifdef NOT_USED_RIGHT_NOW
-static char *nativeBuildLinkKey(boost::shared_ptr<Atom> link)
-{
-    char key[1<<16];
-    char aux[1 << 16];
-
-    key[0] = '\0';
-
-    sprintf(aux, "%d ", link->getType());
-    strcat(key, aux);
-
-    for (int i = 0; i < link->getArity(); i++) {
-        sprintf(aux, "%p ", link->getOutgoingAtom(i)->getHandle());
-        strcat(key, aux);
-    }
-
-    return strdup(key);
-}
-#endif /* NOT_USED_RIGHT_NOW */
-
-//#include <sys/time.h>
-//unsigned long int cumulativeParseNodesStart = 0;
-//unsigned long int cumulativeParseLinksStart = 0;
-//unsigned long int cumulativeParseEnd = 0;
-//unsigned long int cumulativeParseEnd1 = 0;
-//unsigned long int cumulativeParseEnd2 = 0;
-
-
 /**
  * Handle attributes that are common to both Nodes and Links.
  * In other words, handle "confidence" and "strength" attributes.
