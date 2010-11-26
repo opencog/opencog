@@ -34,7 +34,6 @@
   (string-append "CustomCrispUnificationRule"
                  (number->string (cog-handle forAll))))
 ; apply the inference rule
-(define (UniversalInstantiationForAllRule . premises)
-  (let ((forAll (car premises)) (arguments (cdr premises)))
-    (pln-ar (UniversalInstantiationForAllRuleNameStr forAll)
-            (list (universal-instantiate forAll arguments)))))
+(define (UniversalInstantiationForAllRule forAll . arguments)
+  (pln-ar (UniversalInstantiationForAllRuleNameStr forAll)
+          (list (universal-instantiate forAll arguments))))

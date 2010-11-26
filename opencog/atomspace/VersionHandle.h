@@ -45,7 +45,7 @@ struct VersionHandle
     VersionHandle();
 
     // subs represents the context or hypothesis,
-    // not the atom to make the  handle for
+    // not the atom to make the handle for
     VersionHandle(IndicatorType ind, Handle subs);
     VersionHandle( const VersionHandle& other );
 

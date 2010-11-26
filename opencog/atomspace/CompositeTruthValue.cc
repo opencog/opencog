@@ -112,23 +112,23 @@ CompositeTruthValue::~CompositeTruthValue()
     clear();
 }
 
-const TruthValue& CompositeTruthValue::getPrimaryTV()
+const TruthValue& CompositeTruthValue::getPrimaryTV() const
 {
     return *primaryTV;
 }
 
-strength_t CompositeTruthValue::getMean()  const
+strength_t CompositeTruthValue::getMean() const
 {
     return primaryTV->getMean();
 }
 
-count_t CompositeTruthValue::getCount()  const
+count_t CompositeTruthValue::getCount() const
 {
     return primaryTV->getCount();
 }
 
 
-confidence_t CompositeTruthValue::getConfidence()  const
+confidence_t CompositeTruthValue::getConfidence() const
 {
     return primaryTV->getConfidence();
 }

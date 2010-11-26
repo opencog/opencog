@@ -58,7 +58,6 @@ private:
     CompositeTruthValue();
 
 protected:
-    const TruthValue& getPrimaryTV();
     void init(const TruthValue&, VersionHandle);
     void clear();
     void copy(const CompositeTruthValue&);
@@ -147,6 +146,8 @@ public:
      * returns the primaryTV.
      */
     const TruthValue& getVersionedTV(VersionHandle) const;
+
+    const TruthValue& getPrimaryTV() const;
 
     /**
      * Removes the versioned TruthValue object associated with the

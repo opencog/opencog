@@ -146,7 +146,7 @@ std::string GetAtomRequest::tvToJSON(const TruthValue &tv)
         const CompositeTruthValue* ctv = dynamic_cast<const CompositeTruthValue*>(&tv);
         jtv << "{\"composite\":";
         jtv << "{\"primary\":" <<
-            tvToJSON(ctv->getVersionedTV(NULL_VERSION_HANDLE));
+            tvToJSON(ctv->getPrimaryTV());
         for (int i = 0; i < ctv->getNumberOfVersionedTVs(); i++) {
             VersionHandle vh = ctv->getVersionHandle(i);
             jtv << "\"" << VersionHandle::indicatorToStr(vh.indicator) << "\":" << std::endl;

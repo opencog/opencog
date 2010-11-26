@@ -955,7 +955,7 @@ void AtomSpace::setMean(Handle h, float mean) throw (InvalidParamException)
     if (newTv->getType() == COMPOSITE_TRUTH_VALUE) {
         // Since CompositeTV has no setMean() method, we must handle it differently
         CompositeTruthValue* ctv = (CompositeTruthValue*) newTv;
-        TruthValue* primaryTv = ctv->getVersionedTV(NULL_VERSION_HANDLE).clone();
+        TruthValue* primaryTv = ctv->getPrimaryTV().clone();
         if (primaryTv->getType() == SIMPLE_TRUTH_VALUE) {
             ((SimpleTruthValue*)primaryTv)->setMean(mean);
         } else if (primaryTv->getType() == INDEFINITE_TRUTH_VALUE) {
