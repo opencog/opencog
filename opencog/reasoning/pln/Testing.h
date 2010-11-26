@@ -1,6 +1,7 @@
 #include "PLN.h"
 #include "PLNUtils.h"
 #include <string>
+#include <sys/types.h>
 
 //namespace opencog {
 //namespace pln {

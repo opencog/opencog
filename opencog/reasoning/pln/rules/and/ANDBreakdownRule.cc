@@ -92,7 +92,7 @@ BoundVertex ANDBreakdownRule::compute(const std::vector<Vertex>& premiseArray,
 
             //! @todo More pHandles messiness.
             Handle realHandle = asw->fakeToRealHandle(a).first;
-            atomspace().setTV(realHandle, *resultTV);
+            asw->getAtomSpace()->setTV(realHandle, *resultTV);
             //asw->addAtom(mva(hs[i]), *tv, false);
 
             delete resultTV;

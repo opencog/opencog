@@ -47,7 +47,6 @@
 // down to save on compilation time, especially for all the Rule classes!
 // CogServer.h imports lots of networking and boost::asio files so is a good
 // start to improve compilation
-#include <opencog/server/CogServer.h>
 // AtomSpace
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>

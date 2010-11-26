@@ -26,6 +26,7 @@
 #ifndef ATW_H
 #define ATW_H
 
+#include <sys/types.h>
 #include <time.h>
 #include <queue>
 #include <vector>
@@ -40,6 +41,7 @@
 //#include <boost/bimap/bimap.hpp>
 
 #include <opencog/atomspace/TimeServer.h>
+#include <opencog/util/exceptions.h>
 
 #include "PLN.h"
 
@@ -588,12 +590,14 @@ class NormalizingATW : public FIMATW
 public:
     virtual ~NormalizingATW() {}
        
-    static NormalizingATW& getInstance(AtomSpace *a = NULL) {
+    static NormalizingATW& getInstance(AtomSpace *a = NULL)
+    {
         if (a == NULL)
-            a = server().getAtomSpace();
+            throw RuntimeException(TRACE_INFO,"Atomspace pointer was NULL"); 
         static NormalizingATW* instance = new NormalizingATW(a);
         return *instance;
     }
+
     
     pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
             bool fresh);

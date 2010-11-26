@@ -36,6 +36,7 @@
 #endif
 
 // C includes
+#include <sys/types.h>
 #include <types.h>
 #include <math.h>
 #include <stdio.h>

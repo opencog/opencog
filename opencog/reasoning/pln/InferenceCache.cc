@@ -35,7 +35,6 @@
 #include "rules/Rules.h"
 //#include "spacetime.h"
 #include "AtomSpaceWrapper.h"
-#include <opencog/server/CogServer.h>
 #include <opencog/util/copyif.h>
 #include "BackInferenceTreeNode.h"
 #include <boost/iterator/indirect_iterator.hpp>

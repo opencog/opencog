@@ -32,7 +32,6 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 

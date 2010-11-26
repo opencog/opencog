@@ -22,7 +22,6 @@
 #include "NMPrinter.h"
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/server/CogServer.h>
 
 #include "../AtomSpaceWrapper.h"
 
