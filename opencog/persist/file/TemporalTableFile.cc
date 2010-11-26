@@ -27,7 +27,6 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/TemporalTable.h>
-#include <opencog/atomspace/TLB.h>
 
 #include <set>
 
@@ -65,9 +64,11 @@ void TemporalTableFile::load(FILE *fp, TemporalTable *tbl, HandleMap<Atom *> *co
             fread(&oldHandle, sizeof(Handle), 1, fp);
             if ((!conv->contains(oldHandle))) {
                 throw InconsistenceException(TRACE_INFO,
-                                             "Temporal TableFile - Couldn't load TemporalRepository, address incosistency.");
+                     "Temporal TableFile - Couldn't load TemporalRepository, "
+                     "address incosistency.");
             }
-            tbl->add(TLB::getHandle((const Atom *) conv->get(oldHandle)), t);
+            const Atom* conv_atom = (const Atom *) conv->get(oldHandle);
+            tbl->add(conv_atom->getHandle(), t);
         }
     }
 }

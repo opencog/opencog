@@ -22,6 +22,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/VersionHandle.h>
@@ -146,8 +147,9 @@ class SchemeSmob
 		static AttentionValue * verify_av(SCM, const char *);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 	
-		static void init(void);
-		SchemeSmob(void);
+        static AtomSpace* atomspace;
+		static void init(AtomSpace *as);
+		SchemeSmob(AtomSpace *as);
 	public:
 		// Helper functions XXX why are these public ??
 		static SCM handle_to_scm(Handle);

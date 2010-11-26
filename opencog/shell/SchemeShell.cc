@@ -25,6 +25,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/server/CogServer.h>
 
 #include "SchemeShell.h"
 
@@ -85,7 +86,7 @@ void SchemeShell::set_socket(ConsoleSocket *s)
 	//	Someone did this singleton instance crapola because 
 	//	some scheme threading somehow doesn't work somewhere.
 	//	buncha crap. fix this shit.
-	if (!evaluator) evaluator = &SchemeEval::instance();
+	if (!evaluator) evaluator = &SchemeEval::instance(cogserver().getAtomSpace());
 }
 
 void SchemeShell::socketClosed(void)

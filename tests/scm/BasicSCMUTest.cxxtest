@@ -43,12 +43,11 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
-		SchemeEval &eval;
+		SchemeEval *eval;
 
 	public:
 
-	BasicSCMUTest(void) :
-		eval(SchemeEval::instance())
+	BasicSCMUTest(void)
 	{
 		try
 		{
@@ -103,15 +102,16 @@ void BasicSCMUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
+    eval = &SchemeEval::instance(as);
 
 	// Proper UTF-8 behaviour requires the right locale.
 	// Do not use LC_ALL, as otherwise the printing of the numeric
 	// quantities (immediately below) get commas, not decimal points,
 	// in the majority of European locales. Unfortunately, guile number
 	// parsing is not locale dependent...
-	// eval.eval("(setlocale LC_ALL \"\")");
-	eval.eval("(setlocale LC_CTYPE \"\")");
-	eval.clear_pending();
+	// eval->eval("(setlocale LC_ALL \"\")");
+	eval->eval("(setlocale LC_CTYPE \"\")");
+	eval->clear_pending();
 }
 
 // ============================================================
@@ -121,9 +121,9 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 	printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
 	char buff[500];
 	snprintf(buff, 500, "(%s \"%s\" (stv %f %f))", tipo, nodename, truth, conf);
-	eval.eval(buff);
-	bool eval_err = eval.eval_error();
-	eval.clear_pending();
+	eval->eval(buff);
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
 	TSM_ASSERT("Failed to create a node", !eval_err);
 
 	Type t = classserver().getType(tipo);
@@ -146,10 +146,10 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 
 	// Test the eval_h function also -- it returns a handle.
 	snprintf(buff, 500, "(cog-atom %lu)", h.value());
-	Handle h2 = eval.eval_h(buff);
+	Handle h2 = eval->eval_h(buff);
 
-	eval_err = eval.eval_error();
-	eval.clear_pending();
+	eval_err = eval->eval_error();
+	eval->clear_pending();
 	TSM_ASSERT("Failed to eval_h", !eval_err);
 	TSM_ASSERT("Failed to get the correct handle", h == h2);
 }
@@ -158,20 +158,20 @@ void BasicSCMUTest::test_single_atom(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval.eval("(+ 2 2)");
-	bool eval_err = eval.eval_error();
-	eval.clear_pending();
+	eval->eval("(+ 2 2)");
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
 	TSM_ASSERT("Failed to find functional scheme iterpreter", !eval_err);
 
-	eval.eval("Evaluating this will cause an error to be thrown!");
-	eval_err = eval.eval_error();
-	eval.clear_pending();
+	eval->eval("Evaluating this will cause an error to be thrown!");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
 	TSM_ASSERT("Scheme iterpreter fails to throw errors", eval_err);
 
 	// Check basic guile-atomspace integration.
-	eval.eval("(cog-new-node 'Node \"My First Node\")");
-	eval_err = eval.eval_error();
-	eval.clear_pending();
+	eval->eval("(cog-new-node 'Node \"My First Node\")");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
 	TSM_ASSERT("Failed to create the first atom!", !eval_err);
 
 	Type t = classserver().getType("Node");
@@ -179,7 +179,7 @@ void BasicSCMUTest::test_single_atom(void)
 	TSM_ASSERT("Failed to find handle for first atom", TLB::isValidHandle(h));
 
 	// Load the utility definitions
-	int rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
+	int rc = load_scm_file(*as,PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
 	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
 	printf("typedefs now loaded!\n");
 
@@ -206,9 +206,9 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	char buff[500];
 	snprintf(buff, 500, "(%s (stv %f %f) (%s \"%s\") (%s \"%s\") )",
 	         tipo, truth, conf, nodename1, value1, nodename2, value2);
-	eval.eval(buff);
-	bool eval_err = eval.eval_error();
-	eval.clear_pending();
+	eval->eval(buff);
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
 	HandleSeq links;
@@ -315,9 +315,9 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	char buff[500];
 	snprintf(buff, 500, "(%s  (%s \"%s\"(stv %f %f)) (%s \"%s\"))",
 	         tipo, nodename1, value1, truth, conf, nodename2, value2);
-	eval.eval(buff);
-	bool eval_err = eval.eval_error();
-	eval.clear_pending();
+	eval->eval(buff);
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
 	TSM_ASSERT("Failed to create parse link", !eval_err);
 
 	HandleSeq links;
@@ -385,9 +385,9 @@ void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
 	snprintf(buff, 500, "(%s (%s \"%s\") (%s \"%s\") )",
 	         tipo, nodename1, value1, nodename2, value2);
 
-	eval.eval(buff);
-	bool eval_err = eval.eval_error();
-	eval.clear_pending();
+	eval->eval(buff);
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
 	TSM_ASSERT("Failed to create a frame link", !eval_err);
 
 	HandleSeq links;

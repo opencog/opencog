@@ -34,7 +34,7 @@ SchemeEval* SchemeEval::singletonInstance = 0;
  */
 void SchemeEval::init(void)
 {
-	SchemeSmob::init();
+	SchemeSmob::init(atomspace);
 	PrimitiveEnviron::init();
 
 	saved_outport = scm_current_output_port();
@@ -160,13 +160,14 @@ void SchemeEval::thread_unlock(void)
 }
 #endif
 
-SchemeEval::SchemeEval(void)
+SchemeEval::SchemeEval(AtomSpace* as)
 {
 	pthread_once(&eval_init_once, first_time_only);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
+    atomspace = as;
 
 	scm_with_guile(c_wrap_init, this);
 

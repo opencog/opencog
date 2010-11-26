@@ -2,7 +2,7 @@
  * FUNCTION:
  * Persistent Atom storage, SQL-backed.
  *
- * Atoms are saved to, and restored from, and SQL DB.
+ * Atoms are saved to, and restored from, an SQL DB.
  * Atoms are identified by means of unique ID's, which are taken to
  * be the atom Handles, as maintained by the TLB. In particular, the
  * system here depends on the handles in the TLB and in the SQL DB

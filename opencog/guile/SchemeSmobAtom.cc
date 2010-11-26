@@ -21,7 +21,6 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/server/CogServer.h>
 
 using namespace opencog;
 
@@ -54,7 +53,7 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname)
 
 boost::shared_ptr<Atom> SchemeSmob::verify_atom (SCM satom, const char * subrname)
 {
-	return cogserver().getAtomSpace()->cloneAtom(verify_handle(satom, subrname));
+	return atomspace->cloneAtom(verify_handle(satom, subrname));
 }
 
 /* ============================================================== */
@@ -158,8 +157,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-incoming-set");
 
-	AtomSpace *as = CogServer::getAtomSpace();
-	std::vector<Handle> iset = as->getIncoming(h);
+	std::vector<Handle> iset = atomspace->getIncoming(h);
 	size_t isz = iset.size();
 	if (0 == isz) return SCM_EOL;
 
@@ -187,8 +185,7 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 
 	// Get all of the handles of the indicated type
 	std::list<Handle> handle_set;
-	AtomSpace *as = CogServer::getAtomSpace();
-	as->getHandleSet(back_inserter(handle_set), t, false);
+	atomspace->getHandleSet(back_inserter(handle_set), t, false);
 
 	// Loop over all handles in the handle set.
 	// Call proc on each handle, in turn.

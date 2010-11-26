@@ -29,8 +29,8 @@
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/atom_types.h>
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/SpaceServer.h>
-#include <opencog/atomspace/TLB.h>
 
 #include <string>
 #include <vector>
@@ -112,7 +112,7 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
 
         OC_ASSERT(conv->contains(mapHandle),
                 "SpaceServerSavable - HandleMap conv does not contain mapHandle.");
-        Handle newMapHandle = TLB::getHandle(conv->get(mapHandle));
+        Handle newMapHandle = conv->get(mapHandle)->getHandle();
         server->spaceMaps[newMapHandle] = map;
         server->sortedMapHandles.push_back(newMapHandle);
     }
@@ -123,7 +123,7 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
         fread(&mapHandle, sizeof(Handle), 1, fp);
         OC_ASSERT(conv->contains(mapHandle),
                 "SpaceServerSavable - HandleMap conv does not contain mapHandle.");
-        Handle newMapHandle = TLB::getHandle(conv->get(mapHandle));
+        Handle newMapHandle = conv->get(mapHandle)->getHandle();
         server->persistentMapHandles.insert(newMapHandle);
     }
 }

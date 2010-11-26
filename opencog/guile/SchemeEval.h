@@ -13,8 +13,11 @@
 #include <pthread.h>
 #include <libguile.h>
 #include <opencog/atomspace/Handle.h>
+#include <opencog/util/exceptions.h>
 
 namespace opencog {
+
+class AtomSpace;
 
 class SchemeEval
 {
@@ -70,9 +73,10 @@ class SchemeEval
 	
 		// Make constructor, destructor private; force
 		// everyone to use the singleton instance, for now.
-		SchemeEval(void);
+		SchemeEval(AtomSpace* a);
 		~SchemeEval();
 		static SchemeEval* singletonInstance;
+        AtomSpace *atomspace;
 		
 	public:
 					
@@ -87,10 +91,17 @@ class SchemeEval
 	
 		// Someone thinks that there some scheme threading bug somewhere,
 		// and the current hack around this is to use a singleton instance.
-		static SchemeEval& instance(void)
+		static SchemeEval& instance(AtomSpace* atomspace = NULL)
 		{
-			if (!singletonInstance) 
-				singletonInstance = new SchemeEval();
+			if (!singletonInstance) {
+				singletonInstance = new SchemeEval(atomspace);
+            } else if (atomspace && singletonInstance->atomspace != atomspace) {
+                // Someone is trying to initialise the Scheme interpretator
+                // on a different AtomSpace. because of the singleton design
+                // there is no easy way to support this...
+                throw (RuntimeException(TRACE_INFO, "Trying to re-initialise"
+                            "scm interpretor with different AtomSpace ptr!"));
+            }
 			return *singletonInstance;
 		}
 };
@@ -122,10 +133,12 @@ class SchemeEval
 		// must report that an error occurred! 
 		bool eval_error(void) { return true; }
 
-		static SchemeEval& instance(void)
+		static SchemeEval& instance(AtomSpace* atomspace = NULL)
 		{
-			if (!singletonInstance) 
+			if (!singletonInstance) {
 				singletonInstance = new SchemeEval();
+            }
+
 			return *singletonInstance;
 		}
 };

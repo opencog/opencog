@@ -558,7 +558,7 @@ void CogServer::loadSCMModules(const char* config_paths[])
                 modulePath /= *it;
                 if (boost::filesystem::exists(modulePath)) {
                     mod = modulePath.string().c_str();
-                    rc = load_scm_file(mod);
+                    rc = load_scm_file(*atomSpace,mod);
                     if (0 == rc) break;
                 }
             }

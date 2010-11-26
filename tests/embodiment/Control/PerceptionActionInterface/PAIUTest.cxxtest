@@ -1508,7 +1508,7 @@ public:
         //AtomSpace atomSpace;
         AtomSpace *atomSpace = cogserver.getAtomSpace();
 
-        int rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
+        int rc = load_scm_file(*(atomSpace),PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
         OKActionPlanSender sender(sentActionPlans);

@@ -17,9 +17,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/server/CogServer.h>
 
 using namespace opencog;
 
@@ -58,15 +56,12 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 {
     if (Handle::UNDEFINED == h) return "#<Undefined atom handle>";
 
-    Atom *atom = TLB::getAtom(h);
-    if (NULL == atom) return "#<Invalid handle>";
-    Node *node = dynamic_cast<Node *>(atom);
-    Link *link = dynamic_cast<Link *>(atom);
+    if (!atomspace->isValidHandle(h)) return "#<Invalid handle>";
 
 #ifdef CRYPTIC_STYLE
     // output the olde-style opencog notation
     std::string ret = "#<";
-    ret += atom->toString();
+    ret += atomspace->atomAsString(h);
     ret += ">\n";
 #endif
 
@@ -75,21 +70,21 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
     std::string ret = "";
     for (int i=0; i< indent; i++) ret += "   ";
     ret += "(";
-    ret += classserver().getTypeName(atom->getType());
-    if (node) {
+    ret += classserver().getTypeName(atomspace->getType(h));
+    if (atomspace->isNode(h)) {
         ret += " \"";
-        ret += node->getName();
+        ret += atomspace->getName(h);
         ret += "\"";
         
         // Print the truth value only after the node name
-        const TruthValue &tv = atom->getTruthValue();
+        const TruthValue &tv = atomspace->getTV(h);
         if (tv != TruthValue::DEFAULT_TV()) {
             ret += " ";
             ret += tv_to_string (&tv);
         }
 
         // Print the attention value after the truth value
-        const AttentionValue &av = atom->getAttentionValue();
+        const AttentionValue &av = atomspace->getAV(h);
         if (av != AttentionValue::DEFAULT_AV()) {
             ret += " ";
             ret += av_to_string (&av);
@@ -97,23 +92,23 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
         ret += ")";
         return ret;
     }
-    else if (link) {
+    else if (atomspace->isLink(h)) {
         // If there's a truth value, print it before the other atoms
-        const TruthValue &tv = atom->getTruthValue();
+        const TruthValue &tv = atomspace->getTV(h);
         if (tv != TruthValue::DEFAULT_TV()) {
             ret += " ";
             ret += tv_to_string (&tv);
         }
 
         // Print the attention value after the truth value
-        const AttentionValue &av = atom->getAttentionValue();
+        const AttentionValue &av = atomspace->getAV(h);
         if (av != AttentionValue::DEFAULT_AV()) {
             ret += " ";
             ret += av_to_string (&av);
         }
 
         // print the outgoing link set.
-        std::vector<Handle> oset = link->getOutgoingSet();
+        std::vector<Handle> oset = atomspace->getOutgoing(h);
         unsigned int arity = oset.size();
         for (unsigned int i=0; i<arity; i++) {
             ret += " ";
@@ -198,9 +193,8 @@ SCM SchemeSmob::ss_node_p (SCM s)
     SCM shandle = SCM_SMOB_OBJECT(s);
     UUID uuid = scm_to_ulong(shandle);
     Handle h(uuid);
-    Atom *a = TLB::getAtom(h);
 
-    if (dynamic_cast<Node *>(a)) return SCM_BOOL_T;
+    if (atomspace->isNode(h)) return SCM_BOOL_T;
 
     return SCM_BOOL_F;
 }
@@ -216,9 +210,8 @@ SCM SchemeSmob::ss_link_p (SCM s)
     SCM shandle = SCM_SMOB_OBJECT(s);
     UUID uuid = scm_to_ulong(shandle);
     Handle h(uuid);
-    Atom *a = TLB::getAtom(h);
 
-    if (dynamic_cast<Link *>(a)) return SCM_BOOL_T;
+    if (atomspace->isLink(h)) return SCM_BOOL_T;
 
     return SCM_BOOL_F;
 }
@@ -280,15 +273,13 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
     const TruthValue *tv = get_tv_from_list(kv_pairs);
     if (!tv) tv = &TruthValue::DEFAULT_TV();
     
-    AtomSpace *as = CogServer::getAtomSpace();
-    Handle h = as->addNode(t, name, *tv);
+    Handle h = atomspace->addNode(t, name, *tv);
 
     // Was an attention value explicitly specified?
     // If so, then we've got to set it.
     const AttentionValue *av = get_av_from_list(kv_pairs);
     if (av) {
-        Atom *a = TLB::getAtom(h);
-        a->setAttentionValue(*av);
+        atomspace->setAV(h,*av);
     }
 
     return handle_to_scm (h);
@@ -306,23 +297,19 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
     std::string name = decode_string (sname, "cog-node", "string name for the node");
 
     // Now, look for the actual node... in the actual atom space.
-    AtomSpace *as = CogServer::getAtomSpace();
-    Handle h = as->getHandle(t, name);
-    if (!TLB::isValidHandle(h)) return SCM_EOL; // NIL
+    Handle h = atomspace->getHandle(t, name);
+    if (!atomspace->isValidHandle(h)) return SCM_EOL; // NIL
 
-    Atom *atom = NULL;
     // If there was a truth value, change it.
     const TruthValue *tv = get_tv_from_list(kv_pairs);
     if (tv) {
-        if (NULL == atom) atom = TLB::getAtom(h);
-        atom->setTruthValue(*tv);
+        atomspace->setTV(h,*tv);
     }
 
     // If there was an attention value, change it.
     const AttentionValue *av = get_av_from_list(kv_pairs);
     if (av) {
-        if (NULL == atom) atom = TLB::getAtom(h);
-        atom->setAttentionValue(*av);
+        atomspace->setAV(h,*av);
     }
     return handle_to_scm (h);
 }
@@ -423,15 +410,13 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
     if (!tv) tv = &TruthValue::DEFAULT_TV();
 
     // Now, create the actual link... in the actual atom space.
-    AtomSpace *as = CogServer::getAtomSpace();
-    Handle h = as->addLink(t, outgoing_set, *tv);
+    Handle h = atomspace->addLink(t, outgoing_set, *tv);
 
     // Was an attention value explicitly specified?
     // If so, then we've got to set it.
     const AttentionValue *av = get_av_from_list(satom_list);
     if (av) {
-        Atom *a = TLB::getAtom(h);
-        a->setAttentionValue(*av);
+        atomspace->setAV(h,*av);
     }
     return handle_to_scm (h);
 }
@@ -449,25 +434,17 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
     outgoing_set = decode_handle_list (satom_list, "cog-link");
 
     // Now, look to find the actual link... in the actual atom space.
-    AtomSpace *as = CogServer::getAtomSpace();
-    Handle h = as->getHandle(t, outgoing_set);
-    if (!TLB::isValidHandle(h)) return SCM_EOL; // NIL
-
-    Atom *atom = NULL;
+    Handle h = atomspace->getHandle(t, outgoing_set);
+    if (!atomspace->isValidHandle(h)) return SCM_EOL; // NIL
 
     // If there was a truth value, change it.
     const TruthValue *tv = get_tv_from_list(satom_list);
-    if (tv) {
-        if (NULL == atom) atom = TLB::getAtom(h);
-        atom->setTruthValue(*tv);
-    }
+    if (tv) atomspace->setTV(h,*tv);
 
     // If there was an attention value, change it.
     const AttentionValue *av = get_av_from_list(satom_list);
-    if (av) {
-        if (NULL == atom) atom = TLB::getAtom(h);
-        atom->setAttentionValue(*av);
-    }
+    if (av) atomspace->setAV(h,*av);
+
     return handle_to_scm (h);
 }
 
@@ -481,13 +458,11 @@ SCM SchemeSmob::ss_delete (SCM satom)
     Handle h = verify_handle(satom, "cog-delete");
 
     // The remove will fail/log warning if the incoming set isn't null.
-    Atom *a = TLB::getAtom(h);
-    if (NULL != a->getIncomingSet()) return SCM_BOOL_F;
+    if (atomspace->getIncoming(h).size() > 0) return SCM_BOOL_F;
 
-    AtomSpace *as = CogServer::getAtomSpace();
     // AtomSpace::removeAtom() returns true if atom was deleted, 
     // else returns false
-    bool rc = as->removeAtom(h, false);
+    bool rc = atomspace->removeAtom(h, false);
 
     // rc should always be true at this point ...
     if (rc) return SCM_BOOL_T;
@@ -502,8 +477,7 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom)
 {
     Handle h = verify_handle(satom, "cog-delete-recursive");
 
-    AtomSpace *as = CogServer::getAtomSpace();
-    bool rc = as->removeAtom(h, true);
+    bool rc = atomspace->removeAtom(h, true);
 
     if (rc) return SCM_BOOL_T;
     return SCM_BOOL_F;

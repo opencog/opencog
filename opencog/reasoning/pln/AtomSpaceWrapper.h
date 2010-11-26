@@ -288,6 +288,8 @@ protected:
 
 public:
 
+    inline AtomSpace* getAtomSpace() const { return atomspace; };
+
     //! Change whether AtomSpaceWrapper is listening for AtomSpace signals.
     void setWatchingAtomSpace(bool watching);
     //! Whether AtomSpaceWrapper is listening for AtomSpace signals.

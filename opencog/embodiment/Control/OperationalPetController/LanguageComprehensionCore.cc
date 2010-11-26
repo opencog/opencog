@@ -46,6 +46,10 @@ void LanguageComprehension::init( void )
 {
     if ( !initialized ) {
         initialized = true;
+
+        // Ensure SchemeEval is initialised with AtomSpace.
+        opencog::AtomSpace& as = this->agent.getAtomSpace();
+        SchemeEval::instance(&as);
         
 #ifdef HAVE_GUILE
         std::stringstream script;
@@ -79,19 +83,19 @@ void LanguageComprehension::resolveLatestSentenceReference( void )
     init();
 
 #ifdef HAVE_GUILE
-    std::string answer = SchemeEval::instance().eval( "(resolve-reference)");    
+    std::string answer = SchemeEval::instance().eval( "(resolve-reference)");
     logger().info( "LanguageComprehension::%s - (resolve-reference) answer: %s", __FUNCTION__, answer.c_str() );
     if ( SchemeEval::instance().eval_error() ) {
         logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve reference: %s",
                         __FUNCTION__, answer.c_str( ) );
     } // if
-    SchemeEval::instance().clear_pending( );    
+    SchemeEval::instance().clear_pending();
 #endif
 }
 
 HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string& predicateName ) 
 {
-    opencog::AtomSpace& as = this->agent.getAtomSpace( );
+    opencog::AtomSpace& as = this->agent.getAtomSpace();
     HandleSeq commands(2);
     commands[0] = as.addNode( PREDICATE_NODE, predicateName );
     commands[1] = Handle::UNDEFINED;
@@ -101,7 +105,7 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
     as.getHandleSet( back_inserter(evalLinks),
                      commands, &types[0], NULL, 2, EVALUATION_LINK, false );
     logger().debug( "LanguageComprehension::%s - # of EvalLinks for '%s': %d",
-                    __FUNCTION__, predicateName.c_str( ), evalLinks.size( ) );
+                    __FUNCTION__, predicateName.c_str(), evalLinks.size() );
 
     HandleSeq elements;
     bool activeEvalLinkFound = false;

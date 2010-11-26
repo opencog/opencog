@@ -54,12 +54,10 @@ class MyTestClass
 int main ()
 {
 	// Need to access the atomspace to get it to initialize itself.
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	// AtomSpace *as = cogserver.getAtomSpace();
-	cogserver.getAtomSpace();
+    AtomSpace *as = cogserver().getAtomSpace();
 
 	// Do this early, so that the scheme system is initialized.
-	SchemeEval &eval = SchemeEval::instance();
+	SchemeEval &eval = SchemeEval::instance(as);
 
 	printf("\nInfo: Start creating a scheme call into C++\n");
 

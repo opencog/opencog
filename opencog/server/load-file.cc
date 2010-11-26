@@ -37,7 +37,7 @@ namespace opencog {
  *
  * Return errno if file cannot be opened.
  */
-int load_scm_file (const char * filename)
+int load_scm_file (AtomSpace& as, const char * filename)
 {
 #define BUFSZ 400
 	char buff[BUFSZ];
@@ -51,7 +51,7 @@ int load_scm_file (const char * filename)
 		return norr;
 	}
 
-	SchemeEval &evaluator = SchemeEval::instance();
+	SchemeEval &evaluator = SchemeEval::instance(&as);
 	int lineno = 0;
 
 	while(1)

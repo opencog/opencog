@@ -25,6 +25,7 @@
 #ifndef _OPENCOG_NMXML_EXPORTER_H
 #define _OPENCOG_NMXML_EXPORTER_H
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/HandleSet.h>
 #include <opencog/persist/xml/NMXmlParser.h>
@@ -53,7 +54,7 @@ private:
     /**
      * Used to explor a subgraph of the AtomTable.
      */
-    void findExportables(HandleSet *, HandleSet *, Atom *);
+    void findExportables(HandleSet *, HandleSet *, Handle);
 
 
     /**
@@ -75,6 +76,7 @@ private:
 public:
 
     NMXmlExporter(AtomSpace* _as);
+    ~NMXmlExporter();
 
     /**
      * Exports a subset of the AtomTable to XML.

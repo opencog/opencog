@@ -10,7 +10,6 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/Link.h>
-#include <opencog/server/CogServer.h>
 
 #include <boost/shared_ptr.hpp>
 
@@ -51,7 +50,7 @@ SCM SchemeEval::do_apply_scm( const std::string& func, Handle varargs )
 	SCM expr = SCM_EOL;
 	
 	// If there were args, pass the args to the function.
-    boost::shared_ptr<Link> largs = cogserver().getAtomSpace()->cloneLink(varargs);
+    boost::shared_ptr<Link> largs = atomspace->cloneLink(varargs);
 	if (largs)
 	{
 		const std::vector<Handle> &oset = largs->getOutgoingSet();

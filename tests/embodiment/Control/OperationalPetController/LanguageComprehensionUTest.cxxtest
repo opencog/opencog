@@ -143,22 +143,22 @@ public:
 
         this->sender = new LSMessageSenderMock();
 
-        int rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
+        int rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/opencog/scm/utilities.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/opencog/scm/utilities.scm");
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/opencog/embodiment/scm/predicates-frames.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/opencog/embodiment/scm/predicates-frames.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
 
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/opencog/embodiment/scm/language-comprehension.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/opencog/embodiment/scm/language-comprehension.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/opencog/embodiment/scm/reference-resolution-rules.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/opencog/embodiment/scm/reference-resolution-rules.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/opencog/embodiment/scm/command-resolution-rules.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/opencog/embodiment/scm/command-resolution-rules.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/opencog/embodiment/scm/question-answering.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/opencog/embodiment/scm/question-answering.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
 
         
@@ -460,7 +460,7 @@ public:
         // first call it without sentence to parse
         this->language->resolveLatestSentenceReference( );
         // testing: grab the red ball
-        int rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-sentence1.scm");
+        int rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-sentence1.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
 
         this->language->resolveLatestSentenceReference( );
@@ -492,7 +492,7 @@ public:
         }
 
         // testing: bring it to me
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-sentence2.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-sentence2.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
 
         this->language->resolveLatestSentenceReference( );
@@ -529,7 +529,7 @@ public:
         } // end block        
         
         // testing: drop it
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-sentence3.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-sentence3.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );        
         { // checking anaphora resolution
@@ -560,7 +560,7 @@ public:
         }
 
         // testing: go to the red ball
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-sentence4.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-sentence4.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
         { // checking anaphora resolution
@@ -592,7 +592,7 @@ public:
         }
         
         // testing: grab the white ball
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-sentence5.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-sentence5.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
         { // checking anaphora resolution
@@ -626,7 +626,7 @@ public:
 
 
 
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-sentence7.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-sentence7.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
         this->language->storeFact( );
@@ -638,7 +638,7 @@ public:
         TS_ASSERT( colorFrame != Handle::UNDEFINED )
         TS_ASSERT( attributesFrame != Handle::UNDEFINED )
 
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-sentence8.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-sentence8.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
         this->language->storeFact( );       
@@ -703,7 +703,7 @@ public:
 
         setHeardSentence( "are you angry?" );
 
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question6.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question6.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
 
@@ -719,7 +719,7 @@ public:
             agentHandle );
 
         setHeardSentence( "are you hungry?" );
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question7.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question7.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
 
@@ -733,7 +733,7 @@ public:
 
         
         setHeardSentence( "are you proud?" );
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question8.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question8.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
 
@@ -747,7 +747,7 @@ public:
         
 
         setHeardSentence( "what color is the ball?" );
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question9.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question9.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
 
@@ -761,7 +761,7 @@ public:
         logger().debug("Question 9 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());
     
         setHeardSentence( "what color is the stick?" );
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question10.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question10.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
 
@@ -775,7 +775,7 @@ public:
         logger().debug("Question 10 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());
 
         setHeardSentence( "what is behind the tree?" );
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question11.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question11.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
 
@@ -834,7 +834,7 @@ public:
     void testFrames2Relex()
     {  
         //color
-        int rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question1.scm");
+        int rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question1.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);     
 
         std::string output = this->language->resolveFrames2Relex( );
@@ -846,7 +846,7 @@ public:
         logger().debug("testFrames2Relex - Relex Output for relex-question3.scm input: %s",output.c_str() );
 
         //hungry
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question4.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question4.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
 
         output = this->language->resolveFrames2Relex( );
@@ -854,7 +854,7 @@ public:
         logger().debug("testFrames2Relex - Relex Output for relex-question4.scm input: %s",output.c_str() );
        
         //two colors
-        rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question5.scm");
+        rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question5.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
 
         output = this->language->resolveFrames2Relex( );

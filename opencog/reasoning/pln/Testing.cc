@@ -58,7 +58,7 @@ void initAxiomSet(string premiseFile)
     std::cout << "loading " << premiseFile << std::endl;
 
 #if HAVE_GUILE
-    int rc = load_scm_file(premiseFile.c_str());
+    int rc = load_scm_file(*(asw->getAtomSpace()), premiseFile.c_str());
 
     asw->archiveTheorems = true;
     asw->makeCrispTheorems();

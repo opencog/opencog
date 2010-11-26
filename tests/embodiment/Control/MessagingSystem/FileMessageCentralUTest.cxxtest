@@ -57,33 +57,23 @@ public:
     }
 
     void setUp() {
-
-
         fmc = new FileMessageCentral();
 
         id1 = ("id1");
         id2 = ("id2");
-
     }
 
     void tearDown() {
-
         delete fmc;
-
     }
 
     void testCreateQueue() {
-
-
-
         fmc->createQueue(id2);
 
         TS_ASSERT(fmc->existsQueue(id2));
-
     }
 
     void testQueueOperations() {
-
 
         fmc->createQueue(id1);
         fmc->createQueue(id2);
@@ -123,8 +113,6 @@ public:
 
         ret_message = fmc->pop(id1);
         TS_ASSERT(ret_message == NULL);
-
-
     }
 
     void testMultilinesMessages() {
@@ -152,10 +140,7 @@ public:
     void testConcurrentQueueAccess() {
 
         pthread_t tid1, tid2, tid3;
-
         pthread_attr_t atid1, atid2, atid3;
-
-
 
         fmc->createQueue(id1);
         TS_ASSERT(fmc->existsQueue(id1));

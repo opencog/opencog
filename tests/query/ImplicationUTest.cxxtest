@@ -101,6 +101,7 @@ void ImplicationUTest::setUp(void)
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
 	pm.set_atomspace(as);
+    SchemeEval::instance(as);
 
 	// Create initialzation
 	const char * setup = 

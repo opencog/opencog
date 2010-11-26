@@ -107,7 +107,7 @@ void SCMPrimitiveUTest::setUp(void)
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
 
-	eval = &SchemeEval::instance();
+	eval = &(SchemeEval::instance(as));
 
 }
 

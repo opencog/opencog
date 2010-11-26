@@ -82,8 +82,6 @@ public:
     /**
      * Constructor for this class.
      */
-    //NMXmlParser(Transaction *, bool = true, bool = false);
-    //NMXmlParser(AtomTable*, bool = true, bool = false);
     NMXmlParser(AtomSpace*, bool = true, bool = false);
 
     /**
@@ -115,7 +113,6 @@ public:
      *        new Nodes. Note: Hypothetical links are always fresh.
     * @return a HandleEntry with the last outter link inserted/merged in the atom table for each parsed NM-xml.
      */
-    //static HandleEntry* loadXML(const std::vector<XMLBufferReader*>&, AtomTable*,  bool = true, bool = false);
     static HandleEntry* loadXML(const std::vector<XMLBufferReader*>&, AtomSpace*,  bool = true, bool = false);
 
     /**

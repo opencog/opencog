@@ -43,8 +43,12 @@
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
-// AtomSpace
+// XXX PLNUtils.h gets included in many files, this should be trimmed right
+// down to save on compilation time, especially for all the Rule classes!
+// CogServer.h imports lots of networking and boost::asio files so is a good
+// start to improve compilation
 #include <opencog/server/CogServer.h>
+// AtomSpace
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>

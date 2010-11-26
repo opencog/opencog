@@ -35,8 +35,9 @@ using namespace opencog;
 scm_t_bits SchemeSmob::cog_handle_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
 bool SchemeSmob::is_inited = false;
+AtomSpace* SchemeSmob::atomspace = NULL;
 
-void SchemeSmob::init(void)
+void SchemeSmob::init(AtomSpace *as)
 {
 	// XXX It would be ever so slightly more correct to use
 	// pthread_once() here, but that currently seems like overkill.
@@ -45,12 +46,14 @@ void SchemeSmob::init(void)
 		is_inited = true;
 		init_smob_type();
 		register_procs();
+        SchemeSmob::atomspace = as;
 	}
 }
 
-SchemeSmob::SchemeSmob(void)
+SchemeSmob::SchemeSmob(AtomSpace *as)
 {
-	init();
+    printf("atomspace at schemesmob creation is %p", as);
+	init(as);
 }
 
 /* ============================================================== */

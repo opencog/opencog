@@ -636,7 +636,7 @@ void SavingLoading::readLink(FILE *f, Link *link, HandleMap<Atom *> *handles)
     for (int i = 0; i < arity; i++) {
         Handle h;
         fread(&h, sizeof(Handle), 1, f);
-        link->outgoing.push_back( TLB::getHandle( handles->get(h) ) );
+        link->outgoing.push_back( handles->get(h)->getHandle() );
     }
 
     // the trail

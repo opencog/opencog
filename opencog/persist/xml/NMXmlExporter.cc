@@ -33,7 +33,11 @@ using namespace opencog;
 
 NMXmlExporter::NMXmlExporter(AtomSpace* _as) :
     as(_as)
-{ }
+{
+}
+
+NMXmlExporter::~NMXmlExporter() {
+}
 
 std::string NMXmlExporter::toXML(HandleEntry *subset)
 {
@@ -50,8 +54,7 @@ HandleSet *NMXmlExporter::findExportables(HandleEntry *seed)
     HandleEntry *it = seed;
     while (it != NULL) {
         exportables->add(it->handle);
-        Atom *atom = TLB::getAtom(it->handle);
-        findExportables(exportables, internalLinks, atom);
+        findExportables(exportables, internalLinks, it->handle);
         it = it->next;
     }
     delete(seed);
@@ -66,23 +69,20 @@ HandleSet *NMXmlExporter::findExportables(HandleEntry *seed)
     return(exportables);
 }
 
-void NMXmlExporter::findExportables(HandleSet *exportables, HandleSet *internalLinks, Atom *atom)
+void NMXmlExporter::findExportables(HandleSet *exportables, HandleSet *internalLinks, Handle h)
 {
-    Link *link = dynamic_cast<Link *>(atom);
-    if (link == NULL) return;
+    if (!as->isLink(h)) return;
 
-    for (int i = 0; i < link->getArity(); i++) {
-        Handle h = link->getOutgoingSet()[i];
-        exportables->add(h);
+    for (int i = 0; i < as->getArity(h); i++) {
+        Handle j = as->getOutgoing(h,i);
+        exportables->add(j);
 
-        Atom *newAtom = TLB::getAtom(h);
-        if (classserver().isA(newAtom->getType(), LINK)) {
-            internalLinks->add(h);
+        if (classserver().isA(as->getType(j), LINK)) {
+            internalLinks->add(j);
+            findExportables(exportables, internalLinks, j);
         }
-        findExportables(exportables, internalLinks, newAtom);
     }
 }
-
 
 std::string NMXmlExporter::toXML(HandleSet *elements)
 {
@@ -120,36 +120,46 @@ std::string NMXmlExporter::toXML(HandleSet *elements)
 
 void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string& result, bool isInternal)
 {
-    //printf("Exporting %s\n", TLB::getAtom(atomHandle)->toString().c_str());
-    Atom *atom = TLB::getAtom(atomHandle);
+    //printf("Exporting %s\n", as->atomAsString(atomHandle).c_str());
     char aux[1<<16];
-    typesUsed[atom->getType()] = true;
-    if (classserver().isA(atom->getType(), NODE)) {
+    Type t = as->getType(atomHandle);
+    typesUsed[t] = true;
+    const TruthValue& tv=as->getTV(atomHandle);
+    if (classserver().isA(t, NODE)) {
         if (!isInternal) {
-            sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", classserver().getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
+            sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ",
+                    classserver().getTypeName(t).c_str(),
+                    STRENGTH_TOKEN,
+                    tv.getMean(),
+                    CONFIDENCE_TOKEN,
+                    tv.getConfidence());
             result += aux;
         } else {
-            sprintf(aux, "<%s %s=\"%s\" ", ELEMENT_TOKEN, CLASS_TOKEN, classserver().getTypeName(atom->getType()).c_str());
+            sprintf(aux, "<%s %s=\"%s\" ", ELEMENT_TOKEN, CLASS_TOKEN, classserver().getTypeName(t).c_str());
             result += aux;
         }
-        std::string name = ((Node*)atom)->getName();
+        std::string name = as->getName(atomHandle);
         if (name == "")
             name = "#" + atomHandle;
         sprintf(aux, "%s=\"%s\" />\n", NAME_TOKEN, name.c_str());
         result += aux;
     } else {
-        sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", classserver().getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
+        sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ",
+                classserver().getTypeName(t).c_str(),
+                STRENGTH_TOKEN,
+                tv.getMean(),
+                CONFIDENCE_TOKEN,
+                tv.getConfidence());
         result += aux;
         sprintf(aux, ">\n");
         result += aux;
 
-        Link *link = dynamic_cast<Link *>(atom);
-        if (link) {
-            for (int i = 0; i < link->getArity(); i++) {
-                exportAtom(link->getOutgoingSet()[i], typesUsed, result, true);
+        if (as->isLink(atomHandle)) {
+            for (int i = 0; i < as->getArity(atomHandle); i++) {
+                exportAtom(as->getOutgoing(atomHandle,i), typesUsed, result, true);
             }
         }
-        sprintf(aux, "</%s>\n", classserver().getTypeName(atom->getType()).c_str());
+        sprintf(aux, "</%s>\n", classserver().getTypeName(t).c_str());
         result += aux;
     }
 
