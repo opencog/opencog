@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/persist/sql/odbcxx.h>
@@ -126,15 +127,11 @@ SenseSimilaritySQL::~SenseSimilaritySQL()
 	delete db_conn;
 }
 
-SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
+SimpleTruthValue SenseSimilaritySQL::similarity(Handle first_sense,
+        Handle second_sense)
 {
-	Handle first_sense = fs;
-	Handle second_sense = ss;
-
-	Node *fn = dynamic_cast<Node *>(TLB::getAtom(first_sense));
-	Node *sn = dynamic_cast<Node *>(TLB::getAtom(second_sense));
-	std::string fk = fn->getName();
-	std::string sk = sn->getName();
+	std::string fk = as->getName(first_sense);
+	std::string sk = as->getName(second_sense);
 
 	escape_single_quotes(fk);
 	escape_single_quotes(sk);

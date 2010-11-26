@@ -50,8 +50,7 @@ Handle ParseRank::get_top_ranked_parse(Handle h)
  */
 bool ParseRank::lookat_parse(Handle h)
 {
-	Node *n = dynamic_cast<Node *>(TLB::getAtom(h));
-	double rank = n->getTruthValue().getConfidence();
+	double rank = as->getTV(h).getConfidence();
 #ifdef DEBUG
 	printf("; ParseRank::lookat_parse parse=%lx rank=%f\n", (unsigned long) h, rank);
 #endif

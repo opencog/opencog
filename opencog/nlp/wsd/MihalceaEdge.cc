@@ -36,29 +36,36 @@
 
 using namespace opencog;
 
-MihalceaEdge::MihalceaEdge(void)
+MihalceaEdge::MihalceaEdge()
 {
+    sen_sim = NULL;
 	atom_space = NULL;
+}
+
+void MihalceaEdge::init_sense_similarity()
+{
 #ifdef HAVE_SQL_STORAGE
-	sen_sim = new SenseSimilaritySQL();
+	sen_sim = new SenseSimilaritySQL(atom_space);
 #else
 	fprintf (stderr, 
 		"Warning/Error: MihalceaEdge: proper operation of word-sense \n"
 		"disambiguation requires precomputed sense similarities to be\n"
 		"pulled from SQL stoarage.\n");
-	sen_sim = new SenseSimilarityLCH();
+	sen_sim = new SenseSimilarityLCH(atom_space);
 #endif /* HAVE_SQL_STORAGE */
 }
 
 MihalceaEdge::~MihalceaEdge()
 {
+	if (sen_sim) delete sen_sim;
 	atom_space = NULL;
-	delete sen_sim;
 }
 
 void MihalceaEdge::set_atom_space(AtomSpace *as)
 {
 	atom_space = as;
+	if (sen_sim) delete sen_sim;
+    init_sense_similarity();
 	sense_cache.set_atom_space(as);
 }
 
@@ -173,10 +180,8 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 bool MihalceaEdge::annotate_word_pair(Handle first, Handle second)
 {
 #ifdef DETAIL_DEBUG
-	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
-	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
-	const std::string &fn = f->getName();
-	const std::string &sn = s->getName();
+	const std::string &fn = as->getName(first);
+	const std::string &sn = as->getName(second);
 	printf ("; WordPair %d: (%s, %s)\n", word_pair_count, fn.c_str(), sn.c_str());
 #endif
 
@@ -198,8 +203,7 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
 	first_word_sense = first_word_sense_h;
 
 #ifdef SENSE_DETAIL_DEBUG
-	Node *f = dynamic_cast<Node *>(TLB::getAtom(first_word_sense_h));
-	const std::string &fn = f->getName();
+	const std::string &fn = as->getName(first_word_sense_h);
 	printf ("; First word sense: %s\n", fn.c_str());
 #endif
 
@@ -238,8 +242,7 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)
 {
 #ifdef SENSE_DETAIL_DEBUG
-	Node *f = dynamic_cast<Node *>(TLB::getAtom(second_word_sense_h));
-	const std::string &fn = f->getName();
+	const std::string &fn = as->getName(second_word_sense_h);
 	printf ("; Second word sense: %s\n", fn.c_str());
 #endif
 
@@ -275,17 +278,13 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 #ifdef LINK_DEBUG
 	Handle fw = get_word_instance_of_sense_link(first_sense_link);
 	Handle fs = get_word_sense_of_sense_link(first_sense_link);
-	Node *nfw = dynamic_cast<Node *>(TLB::getAtom(fw));
-	Node *nfs = dynamic_cast<Node *>(TLB::getAtom(fs));
-	const char *vfw = nfw->getName().c_str();
-	const char *vfs = nfs->getName().c_str();
+	const char *vfw = as->getName(fw).c_str();
+	const char *vfs = as->getName(fs).c_str();
 
 	Handle sw = get_word_instance_of_sense_link(second_sense_link);
 	Handle ss = get_word_sense_of_sense_link(second_sense_link);
-	Node *nsw = dynamic_cast<Node *>(TLB::getAtom(sw));
-	Node *nss = dynamic_cast<Node *>(TLB::getAtom(ss));
-	const char *vsw = nsw->getName().c_str();
-	const char *vss = nss->getName().c_str();
+	const char *vsw = as->getName(sw).c_str();
+	const char *vss = as->getName(ss).c_str();
 
 	printf("slink: %s ## %s <<-->> %s ## %s add\n", vfw, vsw, vfs, vss); 
 	printf("slink: %s ## %s <<-->> %s ## %s add\n", vsw, vfw, vss, vfs); 

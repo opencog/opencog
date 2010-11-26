@@ -136,8 +136,7 @@ bool ReportRank::renorm_word(Handle h)
 
 #ifdef HISCORE_DEBUG
 	Handle wh = get_dict_word_of_word_instance(h);
-	Node *n = dynamic_cast<Node *>(TLB::getAtom(wh));
-	const char *wd = n->getName().c_str();
+	const char *wd = as->getName(wh).c_str();
 	printf("; hi score=%g word = %s sense=%s\n", hi_score, wd, hi_sense);
 	fflush (stdout);
 #endif
@@ -147,8 +146,7 @@ bool ReportRank::renorm_word(Handle h)
 bool ReportRank::count_sense(Handle word_sense_h,
                              Handle sense_link_h)
 {
-	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
-	normalization += l->getTruthValue().getCount();
+	normalization += as->getTV(sense_link_h).getCount();
 	sense_count += 1.0;
 	return false;
 }
@@ -156,8 +154,7 @@ bool ReportRank::count_sense(Handle word_sense_h,
 bool ReportRank::renorm_sense(Handle word_sense_h,
                               Handle sense_link_h)
 {
-	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
-	double score = l->getTruthValue().getCount();
+	double score = as->getTV(sense_link_h).getCount();
 
 	score *= normalization;
 	score -= 1.0;
@@ -172,20 +169,18 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
 	// distributions seem to go from -0.8 to +3.5 or there-abouts.
 	//
 	CountTruthValue stv(1.0f, 0.0f, (float) score);
-	l->setTruthValue(stv);
+	as->setTV(sense_link_h,stv);
 
 #ifdef DEBUG
 	if (hi_score < score) {
-		Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
-		hi_sense = n->getName().c_str();
+		hi_sense = as->getName(word_sense_h).c_str();
 		hi_score = score;
 	}
 	if (0.0 < score) {
 		choosen_sense_count += 1.0;
 	
 #if 0
-Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
-printf ("duu word sense=%s score=%f\n", n->getName().c_str(), score);
+printf ("duu word sense=%s score=%f\n", as->getName(word_sense_h).c_str(), score);
 fflush (stdout);
 #endif
 	}

@@ -21,16 +21,19 @@
 
 namespace opencog {
 
+class AtomSpace;
+
 class SenseSimilaritySQL :
 	public SenseSimilarity
 {
 	private:
+        AtomSpace *as;
 		ODBCConnection *db_conn;
 
 		class Response;
 
 	public:
-		SenseSimilaritySQL(void);
+		SenseSimilaritySQL(AtomSpace* _as) : as(_as);
 		virtual ~SenseSimilaritySQL();
 
 		virtual SimpleTruthValue similarity(Handle, Handle);

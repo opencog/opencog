@@ -41,8 +41,9 @@ class MihalceaEdge : private EdgeUtils
 		bool sense_of_second_inst(Handle, Handle);
 
 	public:
-		MihalceaEdge(void);
+		MihalceaEdge();
 		~MihalceaEdge();
+        void init_sense_similarity();
 		void set_atom_space(AtomSpace *);
 		void annotate_sentence(Handle);
 		void annotate_parse(Handle);

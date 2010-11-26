@@ -23,7 +23,7 @@ using namespace opencog;
 
 #define DEBUG
 
-SenseSimilarityLCH::SenseSimilarityLCH(void)
+SenseSimilarityLCH::SenseSimilarityLCH(AtomSpace *_as) : as(_as)
 {
 	// Set 'max_follow_holo' to a small number to limit the total number
 	// of holonym relations to be followed. Setting this to a large number
@@ -131,11 +131,9 @@ SimpleTruthValue SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 	if (sim < 0.0) sim = 0.0;
 
 #ifdef DEBUG
-	Node *sense_a = dynamic_cast<Node *>(TLB::getAtom(first_sense));
-	Node *sense_b = dynamic_cast<Node *>(TLB::getAtom(second_sense));
 	printf("(%s, %s) dist=%d sim=%g\n",
-	       sense_a->getName().c_str(),
-	       sense_b->getName().c_str(),
+	       as->getName(first_sense).c_str(),
+	       as->getName(second_sense).c_str(),
 	       min_cnt, sim);
 	// printf("----\n");
 #endif
@@ -146,8 +144,7 @@ SimpleTruthValue SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 
 bool SenseSimilarityLCH::up_first(Handle up)
 {
-	Node *n = dynamic_cast<Node *>(TLB::getAtom(up));
-	if (n == NULL || n->getType() != WORD_SENSE_NODE) return false;
+	if (as->getType(up) != WORD_SENSE_NODE) return false;
 
 	first_cnt ++;
 	if (up == second_sense)
@@ -194,8 +191,7 @@ bool SenseSimilarityLCH::up_first(Handle up)
 
 bool SenseSimilarityLCH::up_second(Handle up)
 {
-	Node *n = dynamic_cast<Node *>(TLB::getAtom(up));
-	if (n == NULL || n->getType() != WORD_SENSE_NODE) return false;
+	if (as->getType(up) != WORD_SENSE_NODE) return false;
 
 	// Don't explore paths that are longer than the current shortest path.
 	int dist = first_cnt + second_cnt + 1;

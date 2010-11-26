@@ -32,9 +32,10 @@ class SenseSimilarityLCH :
 		bool up_first(Handle);
 		bool up_second(Handle);
 
+        AtomSpace *as;
 
 	public:
-		SenseSimilarityLCH(void);
+		SenseSimilarityLCH(AtomSpace* _as);
 		virtual ~SenseSimilarityLCH();
 
 		virtual SimpleTruthValue similarity(Handle, Handle);

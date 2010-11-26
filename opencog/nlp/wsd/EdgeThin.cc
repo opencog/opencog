@@ -77,8 +77,7 @@ bool EdgeThin::prune_word(Handle h)
 	foreach_word_sense_of_inst(h, &EdgeThin::count_sense, this);
 
 	Handle wh = get_dict_word_of_word_instance(h);
-	Node *n = dynamic_cast<Node *>(TLB::getAtom(wh));
-	const char *wd = n->getName().c_str();
+	const char *wd = atom_space->getName(wh).c_str();
 	printf("; post-prune, word = %s has %d senses\n", wd, sense_count);
 	fflush (stdout);
 #endif
@@ -103,11 +102,9 @@ void EdgeThin::prune_parse(Handle h)
 #ifdef COUNT_DEBUG
 bool EdgeThin::dbg_senses(Handle sense_h, Handle sense_link_h)
 {
-	Atom *a = TLB::getAtom(sense_link_h);
-	if (NULL != a->getIncomingSet())
+	if (atom_space->getIncoming(sense_link_h).size() > 0)
 	{
-		Node *w = dynamic_cast<Node *>(TLB::getAtom(sense_h));
-		const char* s = w->getName().c_str();
+		const char* s = atom_space->getName(sense_h).c_str();
 		printf("non-null incoming set for %s\n", s);
 	}
 	sense_count ++;

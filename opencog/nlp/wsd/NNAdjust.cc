@@ -74,10 +74,8 @@ bool NNAdjust::adjust_relation(const std::string &relname, Handle first, Handle 
 {
 	if (relname.compare("_nn")) return false;
 #ifdef DEBUG
-	Node *f = dynamic_cast<Node *>(TLB::getAtom(first));
-	Node *s = dynamic_cast<Node *>(TLB::getAtom(second));
-	const std::string &fn = f->getName();
-	const std::string &sn = s->getName();
+	const std::string &fn = as->getName(first);
+	const std::string &sn = as->getName(second);
 	printf("_nn(%s, %s)\n", fn.c_str(), sn.c_str());
 #endif
 
@@ -135,21 +133,21 @@ bool NNAdjust::sense_of_second_inst(Handle second_word_sense_h,
 bool NNAdjust::sense_pair(Handle pair_link)
 {
 	// If this is not a cosense link, skip it.
-	Link *edge = dynamic_cast<Link *>(TLB::getAtom(pair_link));
-	if ((edge == NULL) || (edge->getType() != COSENSE_LINK)) return false;
+    Type t = as->getType(pair_link);
+	if (classserver().isA(t, COSENSE_LINK)) return false;
 
 	// If this link is not linking the first and second sense, skip it.
-	std::vector<Handle> outset = edge->getOutgoingSet();
+	std::vector<Handle> outset = as->getOutgoing(pair_link);
 	if ((first_sense_link != outset[0]) && 
 	    (first_sense_link != outset[1])) return false;
 
 	// If we are here, we've got the link that we want. 
 	// Increase its strength.
-	float strength = edge->getTruthValue().getMean() * (float) strength_adjust;
+	float strength = as->getTV(pair_link).getMean() * (float) strength_adjust;
 	SimpleTruthValue stv(strength, 1.0f);
 
-	stv.setConfidence(edge->getTruthValue().getConfidence());
-	edge->setTruthValue(stv);
+	stv.setConfidence(as->getTV(pair_link).getConfidence());
+	as->setTV(pair_link,stv);
 
 	return false;
 }
