@@ -273,24 +273,19 @@ public:
     }
     
     void testASW() {
-        //! @bug For some reason there is a segfault when we try to change the
-        //! AtomSpace. This isn't extremely important and so I've left it since
-        //! I couldn't trivially work it out. Anybody who can explain why this
-        //! happens please do.
-
-        //AtomSpace* test = new AtomSpace();
+        AtomSpace* test = new AtomSpace();
         CogServer& cogserver = static_cast<CogServer&>(server());
         // test that the atomspace currently matches that of
         // the cogserver
-        TS_ASSERT(asw->atomspace == cogserver.getAtomSpace());
+        TS_ASSERT(asw->getAtomSpace() == cogserver.getAtomSpace());
         // check that we can replace the AtomSpace ptr
-        //asw = (AtomSpaceWrapper*) ASW(test);
-        //TS_ASSERT(asw->atomspace == test);
-        //asw = (AtomSpaceWrapper*) ASW(cogserver.getAtomSpace());
-        //TS_ASSERT(asw->atomspace == cogserver.getAtomSpace());
+        asw = (AtomSpaceWrapper*) ASW(test);
+        TS_ASSERT(asw->atomspace == test);
+        asw = (AtomSpaceWrapper*) ASW(cogserver.getAtomSpace());
+        TS_ASSERT(asw->atomspace == cogserver.getAtomSpace());
         // check that we get a result with NULL
-        //TS_ASSERT(((AtomSpaceWrapper*)ASW())->atomspace == cogserver.getAtomSpace());
-        //delete test;
+        TS_ASSERT(((AtomSpaceWrapper*)ASW())->atomspace == cogserver.getAtomSpace());
+        delete test;
     }
 
     void testInheritsType() {
