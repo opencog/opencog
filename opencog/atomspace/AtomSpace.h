@@ -747,9 +747,19 @@ public:
 
     bool isValidHandle(const Handle h) const;
 
-    /** Get neighbours for an atom
+    /**
+     * Returns neighboring atoms, following links and returning their
+     * target sets.
+     * @param h Get neighbours for the atom this handle points to.
+     * @param fanin Whether directional links point to this node should be
+     * considered.
+     * @param fanout Whether directional links point from this node to
+     * another should be considered.
+     * @param linkType Follow only these types of links.
+     * @param subClasses Follow subtypes of linkType too.
      */
-    HandleSeq getNeighbors(const Handle h, bool fanin, bool fanout, Type desiredLinkType, bool subClasses=true) const;
+    HandleSeq getNeighbors(const Handle h, bool fanin, bool fanout,
+            Type linkType=LINK, bool subClasses=true) const;
 
     /** Retrieve a single Handle from the outgoing set of a given link */
     Handle getOutgoing(Handle, int idx) const;

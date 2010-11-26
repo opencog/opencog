@@ -213,7 +213,7 @@ bool AtomSpace::removeTimeInfo(Handle h, unsigned long timestamp, TemporalTable:
 
 bool AtomSpace::removeTimeInfo(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive)
 {
-    DPRINTF("AtomSpace::removeTimeInfo(%s, %s, %d, %s, %d, %d)\n", TLB::getHandle(h)->toString().c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
+    DPRINTF("AtomSpace::removeTimeInfo(%s, %s, %d, %s, %d, %d)\n", TLB::;getHandle(h)->toString().c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
 
     std::list<HandleTemporalPair> existingEntries;
     timeServer.get(back_inserter(existingEntries), h, t, criterion);
@@ -805,10 +805,24 @@ HandleSeq AtomSpace::getNeighbors(const Handle h, bool fanin,
         throw InvalidParamException(TRACE_INFO,
             "Handle %d doesn't refer to a Atom", h.value());
     }
-    HandleEntry* he = a->getNeighbors(fanin,fanout,desiredLinkType,subClasses);
-    HandleSeq result(he->toHandleVector());
-    delete he;
-    return result;
+    HandleSeq answer;
+
+    for (HandleEntry *he = a->getIncomingSet(); he != NULL; he = he ->next) {
+        Link *link = dynamic_cast<Link*>(TLB::getAtom(he->handle));
+        Type linkType = link->getType();
+        DPRINTF("Atom::getNeighbors(): linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
+        if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
+            int linkArity = link->getArity();
+            for (int i = 0; i < linkArity; i++) {
+                Handle handle = link->getOutgoingSet()[i];
+                if (handle == h) continue;
+                if (!fanout && link->isSource(h)) continue;
+                if (!fanin && link->isTarget(h)) continue;
+                answer.push_back(handle);
+            }
+        }
+    }
+    return answer;
 }
 
 bool AtomSpace::isSource(Handle source, Handle link) const

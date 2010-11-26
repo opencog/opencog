@@ -103,9 +103,9 @@ class TLB
     friend class ::TimeServerUTest;
     friend class ::CompositeTruthValueUTest;
 
-    // TODO remove these friend classes and remove TLB references from them. 
+    // TODO work out if TLB can be removed from these persistance
+    // related classes
     friend class NMXmlExporter;
-    friend class SchemeSmob;
     friend class ::BasicSCMUTest;
     friend class CoreUtils;
     friend class SavingLoading;
@@ -114,13 +114,6 @@ class TLB
     friend class TemporalTableFile;
     friend class AtomStorage;
     friend class SenseSimilaritySQL;
-
-    friend class MilhalceaLabel;
-    friend class NNAdjust;
-    friend class ParseRank;
-    friend class ReportRank;
-    friend class SenseRank;
-    friend class SenseSimilarityLCH;
 
 private:
 

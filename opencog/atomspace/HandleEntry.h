@@ -404,6 +404,11 @@ public:
      */
     static HandleEntry* filterSet(HandleEntry*, const char*, Type, VersionHandle);
 
+    static bool matchesFilterCriteria(Atom* atom, Type targetType,
+            bool targetSubclasses, VersionHandle vh);
+
+    static bool matchesFilterCriteria(Atom* atom, const char* targetName,
+            Type targetType, VersionHandle vh);
 };
 
 } // namespace opencog

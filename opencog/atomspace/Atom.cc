@@ -283,29 +283,3 @@ void Atom::setAtomTable(AtomTable *tb)
     atomTable = tb;
 }
 
-HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, bool subClasses) const
-{
-
-    HandleEntry *answer = NULL;
-    Handle me = TLB::getHandle(this);
-
-    for (HandleEntry *h = getIncomingSet(); h != NULL; h = h ->next) {
-        Link *link = dynamic_cast<Link*>(TLB::getAtom(h->handle));
-        Type linkType = link->getType();
-        DPRINTF("linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
-        if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
-            int linkArity = link->getArity();
-            for (int i = 0; i < linkArity; i++) {
-                Handle handle = link->getOutgoingSet()[i];
-                if (handle == me) continue;
-                if (!fanout && link->isSource(me)) continue;
-                if (!fanin && link->isTarget(me)) continue;
-                HandleEntry *n = new HandleEntry(handle);
-                n->next = answer;
-                answer = n;
-            }
-        }
-    }
-
-    return answer;
-}

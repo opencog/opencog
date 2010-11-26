@@ -56,6 +56,7 @@ class Atom : public AttentionValueHolder
 {
     friend class SavingLoading;
     friend class AtomTable;
+    friend class AtomSpace;
     friend class ImportanceIndex;
     friend class NMXmlParser;
     friend class TLB;
@@ -139,6 +140,13 @@ protected:
      * @param The handle of the atom to be included.
      */
     void addIncomingHandle(Handle);
+
+    /**
+     * Removes an entry from this atom's incoming set.
+     *
+     * @param The handle of the atom to be excluded.
+     */
+    void removeIncomingHandle(Handle) throw (RuntimeException);
 
 public:
 
@@ -244,13 +252,6 @@ public:
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     /**
-     * Removes an entry from this atom's incoming set.
-     *
-     * @param The handle of the atom to be excluded.
-     */
-    void removeIncomingHandle(Handle) throw (RuntimeException);
-
-    /**
      * Returns whether this atom is marked for removal.
      *
      * @return Whether this atom is marked for removal.
@@ -296,20 +297,6 @@ public:
         return ((attentionValue.getSTI() < threshold) &&
                 (attentionValue.getLTI() < 1));
     }
-
-    /**
-     * Returns neighboring atoms, following links and returning their
-     * target sets.
-     * @param fanin Whether directional links point to this node should be
-     * considered.
-     * @param fanout Whether directional links point from this node to
-     * another should be considered.
-     * @param linkType Whether the link
-     */
-    HandleEntry *getNeighbors(bool fanin = true,
-                              bool fanout = true,
-                              Type linkType = LINK,
-                              bool subClasses = true) const;
 
     /**
      * Returns a string representation of the node.

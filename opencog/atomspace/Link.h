@@ -50,6 +50,8 @@ class Link : public Atom
     friend class AtomTable;
     friend class NMXmlParser;
     friend class Atom;
+    // This is dodgy, but it needs access to getOutgoingAtom
+    friend class HandleEntry;
 
 private:
     Trail* trail;
@@ -81,6 +83,17 @@ protected:
     void setOutgoingSet(const std::vector<Handle>& o)
     throw (RuntimeException);
 #endif /* PUT_OUTGOING_SET_IN_LINKS */
+
+    /**
+     * Returns a specific atom in the outgoing set (using the TLB).
+     *
+     * @param The position of the atom in the array.
+     * @return A specific atom in the outgoing set (using the TLB).
+     */
+    inline Atom * getOutgoingAtom(int pos) const
+    {
+        return TLB::getAtom(getOutgoingHandle(pos));
+    }
 
 public:
 
@@ -189,16 +202,6 @@ public:
         } else {
             throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
         }
-    }
-    /**
-     * Returns a specific atom in the outgoing set (using the TLB).
-     *
-     * @param The position of the atom in the array.
-     * @return A specific atom in the outgoing set (using the TLB).
-     */
-    inline Atom * getOutgoingAtom(int pos) const
-    {
-        return TLB::getAtom(getOutgoingHandle(pos));
     }
 
     /**

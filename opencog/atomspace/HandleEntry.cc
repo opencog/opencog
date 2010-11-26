@@ -813,7 +813,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
     return head;
 }
 
-bool matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, VersionHandle vh)
+bool HandleEntry::matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, VersionHandle vh)
 {
     bool result = false;
     Link *link = dynamic_cast<Link *>(atom);
@@ -878,7 +878,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type targetType, bool targ
     return head;
 }
 
-bool matchesFilterCriteria(Atom* atom, const char* targetName, Type targetType, VersionHandle vh)
+bool HandleEntry::matchesFilterCriteria(Atom* atom, const char* targetName, Type targetType, VersionHandle vh)
 {
     bool result = false;
     Link *link = dynamic_cast<Link *>(atom);
