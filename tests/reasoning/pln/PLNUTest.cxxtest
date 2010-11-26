@@ -219,7 +219,7 @@ public:
 
             f = fopen("results.txt","a");
 
-            asw = GET_ASW;                                  
+            asw = ASW(cogserver().getAtomSpace());                                  
         }
         catch(std::string s) {
             logger().error("at root level while initializing.");
