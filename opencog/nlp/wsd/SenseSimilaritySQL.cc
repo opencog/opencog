@@ -106,14 +106,14 @@ class SenseSimilaritySQL::Response
 		}
 };
 
-SenseSimilaritySQL::SenseSimilaritySQL(void)
+SenseSimilaritySQL::SenseSimilaritySQL(AtomSpace* _as) : as(_as)
 {
 	// Config class reads valuesfrom opencog.conf
 	const char * dbname = config()["SENSE_SIMILARITY_DB_NAME"].c_str();
 	const char * username = config()["SENSE_SIMILARITY_DB_USERNAME"].c_str();
 	const char * authentication = config()["SENSE_SIMILARITY_DB_PASSWD"].c_str();
 
-   db_conn = new ODBCConnection(dbname, username, authentication);
+    db_conn = new ODBCConnection(dbname, username, authentication);
 
 	if (!db_conn->connected())
 	{

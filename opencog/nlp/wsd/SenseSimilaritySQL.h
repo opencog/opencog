@@ -26,17 +26,17 @@ class AtomSpace;
 class SenseSimilaritySQL :
 	public SenseSimilarity
 {
-	private:
-        AtomSpace *as;
-		ODBCConnection *db_conn;
+private:
+    AtomSpace *as;
+    ODBCConnection *db_conn;
 
-		class Response;
+    class Response;
 
-	public:
-		SenseSimilaritySQL(AtomSpace* _as) : as(_as);
-		virtual ~SenseSimilaritySQL();
-
-		virtual SimpleTruthValue similarity(Handle, Handle);
+public:
+    SenseSimilaritySQL(AtomSpace* _as);
+    virtual ~SenseSimilaritySQL();
+    
+    virtual SimpleTruthValue similarity(Handle, Handle);
 };
 
 } // namespace opencog
