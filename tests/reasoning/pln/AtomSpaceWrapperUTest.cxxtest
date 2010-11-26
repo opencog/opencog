@@ -29,9 +29,6 @@ using namespace opencog;
 using namespace opencog::pln;
 using namespace std;
 
-//already defined in AtomSpaceWrapper.h
-//#define GET_ASW ((AtomSpaceWrapper*) ASW())
-
 #define ONE_PHANDLE_PER_ATOM
 
 /// @todo Check truth values and other functions in the AtomSpaceWrapper
@@ -51,7 +48,7 @@ public:
 
         // This is also necessary to make sure that the ASW is initialized
         // at the right time.
-        asw = GET_ASW;
+        asw = ASW(cogserver.getAtomSpace());
     }
 
     void setUp()

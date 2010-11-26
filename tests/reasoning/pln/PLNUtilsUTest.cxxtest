@@ -23,7 +23,6 @@
 #include <boost/assign/list_of.hpp>
 
 #include <opencog/util/Config.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/reasoning/pln/PLNUtils.h>
 #include <opencog/reasoning/pln/PLN.h>
@@ -41,6 +40,7 @@ using namespace std;
 
 class PLNUtilsUTest : public CxxTest::TestSuite {
 private:
+    AtomSpace atomspace;
     AtomSpaceWrapper *asw;
 
     void displayTableAndBindings(TableGather& table) {
@@ -65,13 +65,10 @@ public:
 
         logger().info("Initializing PLN test env...");
 
-        // This access is required to initialise CogServer.
-        CogServer& cogserver = static_cast<CogServer&>(server());
-
         logger().info("Creating AtomSpaceWrappers...");
         // This is also necessary to make sure that the ASW is initialized
         // at the right time.
-        asw = GET_ASW;
+        asw = ASW(&atomspace);
     }
 
     void testUnifiesWithVariableChangeTo()

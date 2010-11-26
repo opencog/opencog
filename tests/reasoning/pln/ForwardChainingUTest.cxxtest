@@ -19,15 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "opencog/reasoning/pln/PLN.h"
-#include "opencog/reasoning/pln/Testing.h"
-#include "opencog/reasoning/pln/rules/Rules.h"
+#include <opencog/server/CogServer.h>
 
-#include "opencog/reasoning/pln/AtomSpaceWrapper.h"
-#include "opencog/reasoning/pln/BackInferenceTreeNode.h"
-#include "opencog/reasoning/pln/ForwardChainer.h"
+#include <opencog/reasoning/pln/PLN.h>
+#include <opencog/reasoning/pln/Testing.h>
+#include <opencog/reasoning/pln/rules/Rules.h>
 
-#include "opencog/reasoning/pln/rules/RuleApp.h"
+#include <opencog/reasoning/pln/AtomSpaceWrapper.h>
+#include <opencog/reasoning/pln/BackInferenceTreeNode.h>
+#include <opencog/reasoning/pln/ForwardChainer.h>
+
+#include <opencog/reasoning/pln/rules/RuleApp.h>
 
 #include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>

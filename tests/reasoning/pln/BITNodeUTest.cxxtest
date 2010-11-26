@@ -38,10 +38,11 @@ public:
     BITNodeRoot* root;
     AtomSpaceWrapper* atw;
     meta fakeTarget;
+    AtomSpace atomspace;
 
     BITNodeUTest()
     {
-        atw = (AtomSpaceWrapper*) ASW();
+        atw = (AtomSpaceWrapper*) ASW(&atomspace);
         config().set("PLN_LOG_LEVEL","20");
         currentDebugLevel = 20;
         config().set("PLN_PRINT_REAL_ATOMS","true");
