@@ -12,6 +12,7 @@
 #include <string>
 #include <pthread.h>
 #include <libguile.h>
+#include <opencog/server/CogServer.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/util/exceptions.h>
 
@@ -94,6 +95,8 @@ class SchemeEval
 		static SchemeEval& instance(AtomSpace* atomspace = NULL)
 		{
 			if (!singletonInstance) {
+                if (!atomspace)
+                    atomspace = cogserver().getAtomSpace();
 				singletonInstance = new SchemeEval(atomspace);
             } else if (atomspace && singletonInstance->atomspace != atomspace) {
                 // Someone is trying to initialise the Scheme interpretator
