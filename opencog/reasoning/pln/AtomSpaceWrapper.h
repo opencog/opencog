@@ -592,9 +592,11 @@ public:
        
     static NormalizingATW& getInstance(AtomSpace *a = NULL)
     {
+        static NormalizingATW* instance = NULL;
         if (a == NULL)
             throw RuntimeException(TRACE_INFO,"Atomspace pointer was NULL"); 
-        static NormalizingATW* instance = new NormalizingATW(a);
+        if (instance != NULL) delete instance;
+        instance = new NormalizingATW(a);
         return *instance;
     }
 

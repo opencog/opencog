@@ -57,10 +57,12 @@ namespace pln {
 // create and return the single instance
 AtomSpaceWrapper* ASW(AtomSpace* a)
 {
-    static AtomSpaceWrapper* instance;
+    static AtomSpaceWrapper* instance = NULL;
     if (instance == NULL || a != NULL) {    
         if (instance != NULL) {
-            delete instance;
+            // No need to delete as NormalizingATW does it
+            //delete instance;
+            instance = NULL;
         }
         LOG(2, "Creating AtomSpaceWrappers...");
 #if LOCAL_ATW
