@@ -79,6 +79,8 @@ AtomSpace::AtomSpace(void) :
     addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpace::atomAdded, this, _1));
     removedAtomConnection = removeAtomSignal().connect(boost::bind(&AtomSpace::atomRemoved, this, _1));
 
+    logger().fine("Max load factor for handle map is: %f", TLB::handle_map.max_load_factor());
+
 }
 
 AtomSpace::~AtomSpace()
