@@ -31,13 +31,6 @@
 
 using namespace opencog;
 
-// XXX As of March 2009, non-real atoms are now obsolete!
-// Remove this stuff after the dust clears.
-// Low-lying values are reserved for "non-real" atoms. Real atom start after the
-// last definable type (opencog::NOTYPE) opencog::NOTYPE is defined as
-// ((1 << (8 * sizeof(opencog::Type))) - 1), which is 65535 when Type is "unsigned
-// short int"
-// UUID TLB::brk_uuid = (1 << (8 * sizeof(opencog::Type)));
 UUID TLB::brk_uuid = 1;
 
 boost::unordered_map<Handle, const Atom*, boost::hash<opencog::Handle> > TLB::handle_map;
