@@ -55,8 +55,6 @@ const char* WebModule::DEFAULT_SERVER_ADDRESS = "http://localhost";
 
 WebModule::WebModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRESS)
 {
-    logger().debug("[WebModule] constructor");
-
     if (config().has("Web_PORT"))
         _port = config().get_int("Web_PORT");
     if (config().has("Web_SERVER"))
@@ -70,14 +68,12 @@ WebModule::WebModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRE
     cogserver.registerRequest(UpdateAtomRequest::info().id, &updateAtomFactory); 
 
     timeout = 100;
-
 }
 
 WebModule::~WebModule()
 {
     rest_mod = NULL;
-    logger().debug("[WebModule] destructor");
-    //CogServer& cogserver = static_cast<CogServer&>(server());
+    // Stop mongoose webserver
     mg_stop(ctx);
 }
 
@@ -108,12 +104,16 @@ void WebModule::init()
         boost::filesystem::path webPath(DEFAULT_WEB_PATH[i]);
         webPath /= "resources/processing.js";
         if (boost::filesystem::exists(webPath)) {
-            std::cout << webPath << std::endl;
+            //std::cout << webPath << std::endl;
             break;
         }
     }
-    std::cout << i << std::endl;
-    mg_set_option(ctx, "root", DEFAULT_WEB_PATH[i]);
+    if (DEFAULT_WEB_PATH[i] == NULL) {
+        logger().error("[WebModule] Can't find web resources dir.");
+    } else {
+        logger().fine("[WebModule] Using resources directory %s", DEFAULT_WEB_PATH[i]);
+        mg_set_option(ctx, "root", DEFAULT_WEB_PATH[i]);
+    }
     // Turn off directory listing
     mg_set_option(ctx, "dir_list", "no");
     // Set up the urls

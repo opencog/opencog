@@ -136,13 +136,12 @@ int main(int argc, char *argv[])
     }
 
     if (configFiles.size() == 0) {
-        cerr << "Searching for config in default locations..." << endl;
         // search for configuration file on default locations
         for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i) {
             boost::filesystem::path configPath(DEFAULT_CONFIG_PATHS[i]);
             configPath /= DEFAULT_CONFIG_FILENAME;
             if (boost::filesystem::exists(configPath)) {
-                cerr << "Found " << configPath.string() << endl;
+                cerr << "Using default config at " << configPath.string() << endl;
                 configFiles.push_back(configPath.string());
             }
         }
@@ -156,7 +155,6 @@ int main(int argc, char *argv[])
     BOOST_FOREACH (string configFile, configFiles) {
         try {
             config().load(configFile.c_str(), false);
-            fprintf(stderr, "loaded configuration from file \"%s\"\n", configFile.c_str());
             break;
         } catch (RuntimeException &e) {
             std::cerr << e.getMessage() << std::endl;
