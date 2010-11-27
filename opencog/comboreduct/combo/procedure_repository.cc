@@ -24,19 +24,10 @@
 #include "procedure_repository.h"
 #include "type_tree.h"
 
-#include <boost/version.hpp>
-
-#if BOOST_VERSION >= 104000
-#define IGNORE_BOOST_GRAPH
-#endif
-
-#ifndef IGNORE_BOOST_GRAPH
 #include <boost/graph/strong_components.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/topological_sort.hpp>
-#endif
-
 #include <cstdio>
 
 namespace combo {
@@ -116,7 +107,6 @@ namespace combo {
   }
 
   void procedure_repository::generate_and_order_strongly_connected_components() {
-#ifndef IGNORE_BOOST_GRAPH
     //pc_vec is a vector containing all procedure calls of the repository
     //pv_index_map map all procedure calls to that vector indices
     std::vector<procedure_call> pc_vec;
@@ -239,7 +229,6 @@ namespace combo {
     //std::cout << std::endl;
     //}
     //~debug print
-#endif
   }
 
   bool procedure_repository::infer_types_repo() {

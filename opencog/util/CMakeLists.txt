@@ -15,13 +15,14 @@ ENDIF (APPLE)
 # This is because misc.cc references Handles.  Similar problem with 
 # misc-test.cc,  Yucko.  Basically, we need to ditch the misc* files
 # somehow, banish them somewhere ... (no, they don't belong in
-# atomsapce...)
+# atomspace...)
 #
 # ADD_LIBRARY(util SHARED
 ADD_LIBRARY(util 
     ansi
 	algorithm
 	based_variant
+	cluster
 	Config
 	cover_tree
 	digraph
@@ -58,6 +59,7 @@ INSTALL(FILES
     ansi.h
 	algorithm.h
 	based_variant.h
+	cluster.h
 	Config.h
 	cover_tree.h
 	digraph.h

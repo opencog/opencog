@@ -32,7 +32,10 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/exceptions.h>
 #include <limits>
-//#include <opencog/learning/dimensionalembedding/vector.h>
+extern "C" {
+#include <opencog/util/cluster.h>
+}
+#include <opencog/atomspace/SimpleTruthValue.h>
 
 using namespace opencog;
 
@@ -49,7 +52,8 @@ DimEmbedModule::~DimEmbedModule() {
 void DimEmbedModule::init() {    
     logger().info("[DimEmbedModule] init");
     CogServer& cogServer = static_cast<CogServer&>(server());
-    this->as=cogServer.getAtomSpace();    
+    this->as=cogServer.getAtomSpace();
+    clusters=0;
 #ifdef HAVE_GUILE
     //Functions available to scheme shell
     define_scheme_primitive("embedSpace",
@@ -63,6 +67,9 @@ void DimEmbedModule::init() {
                             this);
     define_scheme_primitive("kNN",
                             &DimEmbedModule::kNearestNeighbors,
+                            this);
+    define_scheme_primitive("cluster",
+                            &DimEmbedModule::cluster,
                             this);
 #endif
 }
@@ -250,7 +257,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType){
 
     while((pivots.size() < numDimensions) && (!nodes.empty())){
         addPivot(bestChoice, linkType);
-        //logger().info("Pivot %d picked", pivots.size());
+        logger().info("Pivot %d picked", pivots.size());
         nodes.erase(std::find(nodes.begin(), nodes.end(), bestChoice));
 
         bestChoice = nodes[0];
@@ -358,6 +365,115 @@ bool DimEmbedModule::isEmbedded(const Type& linkType) {
     return true;
 }
 
+void DimEmbedModule::cluster(const Type& l) {
+    if(!isEmbedded(l)) {
+        const char* tName = classserver().getTypeName(l).c_str();
+        logger().error("No embedding exists for type %s", tName);
+        throw std::string("No embedding exists for type %s", tName);
+    }
+    int numClusters=10; //number of clusters
+    int npass=1;
+    AtomEmbedding& aE = atomMaps[l];
+    unsigned int numVectors=aE.size();
+    if(numVectors<numClusters) {
+        logger().error("Cannot make more clusters than there are nodes");
+        throw std::string("Cannot make more clusters than there are nodes");
+    }
+    //create the required matrices for the clustering function (which
+    //takes double** as an argument...)
+    double* embedding = new double[numDimensions*numVectors];
+    double** embedMatrix = new double*[numVectors];
+    int* maskArray = new int[numDimensions*numVectors];
+    int** mask = new int*[numVectors];
+    for(unsigned int i=0;i<numVectors;++i) {
+        embedMatrix[i] = embedding + numDimensions*i;
+        mask[i] = maskArray + numDimensions*i;
+    }
+    Handle* handleArray = new Handle[numVectors];
+    AtomEmbedding::iterator aEit=aE.begin();
+    unsigned int i=0;
+    unsigned int j;
+    //add the values to the embeddingmatrix...
+    for(;aEit!=aE.end();aEit++) {
+        handleArray[i]=aEit->first;
+        std::list<double> embedding = aEit->second;
+        std::list<double>::iterator vit=embedding.begin();
+        j=0;
+        for(;vit!=embedding.end();vit++) {
+            embedMatrix[i][j]=*vit;
+            mask[i][j]=1;
+            j++;
+        }
+        i++;
+    }
+    double* weight = new double[numDimensions];
+    for(unsigned int i=0;i<numDimensions;i++) {weight[i]=1;}
+
+    int* clusterid = new int[numVectors]; //stores the result of clustering
+    double error;
+    int ifound;
+    //clusterid[i]==j will indicate that handle i belongs in cluster j
+    ::kcluster(numClusters, numVectors, numDimensions, embedMatrix,
+               mask, weight, 0, npass, 'a', 'e', clusterid, &error, &ifound);
+
+    //Now that we have the clusters (stored in clusterid), we find the centroid
+    //of each cluster so we will know how to weight the inheritance links
+    double* centroidArray = new double[numClusters*numDimensions];
+    double** centroidMatrix = new double*[numClusters];
+    
+    int* cmaskArray = new int[numClusters*numDimensions];
+    int** cmask = new int*[numClusters];
+    for(unsigned int i=0;i<numClusters;++i) {
+        centroidMatrix[i] = centroidArray + numDimensions*i;
+        cmask[i] = cmaskArray + numDimensions*i;
+    }
+    for(int i=0;i<numClusters;i++){
+        for(int j=0;j<numDimensions;j++){
+            cmask[i][j]=1;
+        }
+    }
+    ::getclustercentroids(numClusters, numVectors, numDimensions, embedMatrix,
+                          mask, clusterid, centroidMatrix, mask, 0, 'a');
+    HandleSeq clusters (numClusters);
+    for(int i=0;i<numClusters;i++) {
+        std::stringstream out;
+        out << "cluster_" << this->clusters++;
+        clusters[i] = as->addNode(CONCEPT_NODE, out.str());
+    }
+    for(unsigned int i=0;i<numVectors;i++) {
+        //clusterid[i] indicates which cluster handleArray[i] is in.
+        //so for each cluster, we make a new ConceptNode and make
+        //inheritancelinks between it and all of its consituent nodes.
+        int clustInd=clusterid[i];
+        double dist = euclidDist(centroidMatrix[clustInd],embedMatrix[i],
+                                 numDimensions);
+        //TODO: How should we set the truth value for this link? (this is just
+        //a placeholder)
+        SimpleTruthValue tv(1-dist,1-dist);
+        as->addLink(INHERITANCE_LINK, handleArray[i], clusters[clustInd], tv);
+    }
+
+    delete[] embedding;
+    delete[] embedMatrix;
+    delete[] maskArray;
+    delete[] mask;
+    delete[] handleArray;
+    delete[] weight;
+    delete[] clusterid;
+    delete[] centroidArray;
+    delete[] centroidMatrix;
+    delete[] cmaskArray;
+    delete[] cmask;
+}
+
+double DimEmbedModule::euclidDist(double v1[], double v2[], int size) {
+    double dist=0;
+    for(int i=0; i<size;i++) {
+        dist+=std::pow((v1[i]-v2[i]), 2);
+    }
+    dist=sqrt(dist);
+    return dist;
+}
 
 double DimEmbedModule::euclidDist(const Handle& h1,
                                   const Handle& h2,

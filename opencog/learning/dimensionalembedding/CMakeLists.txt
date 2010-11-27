@@ -10,3 +10,7 @@ INCLUDE_DIRECTORIES (
 INSTALL (TARGETS dimensionalembedding
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
+
+TARGET_LINK_LIBRARIES (dimensionalembedding
+        util 
+)

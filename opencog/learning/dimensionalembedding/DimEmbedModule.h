@@ -58,6 +58,7 @@ namespace opencog
         AtomEmbedMap atomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
         EmbedTreeMap embedTreeMap;
+        int clusters;//to keep track of the number of clusters
         /**
          * Adds h as a pivot and adds the distances from each node to
          * the pivot to the appropriate atomEmbedding.
@@ -119,6 +120,8 @@ namespace opencog
          * from each of the pivots.
          */
         std::list<double> getEmbedlist(const Handle& h, const Type& l);
+
+        double euclidDist(double v1[], double v2[], int size);
     public:
         static const unsigned int numDimensions=5;//number of pivot atoms
         const char* id();
@@ -183,7 +186,13 @@ namespace opencog
          * link type.
          */
         HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k);
-        
+
+        /**
+         * Use hierarchical clustering to make new nodes using the
+         * dimensional embedding.
+         */
+        void cluster(const Type& l);
+
         /** updates the given atom (recalculates its distance from pivots) */
         //void updateAtom(const Handle& h, const Type& linkType);
     }; // class
