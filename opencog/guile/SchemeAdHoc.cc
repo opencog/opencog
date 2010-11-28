@@ -33,7 +33,7 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 	// squirmy. The code below can be deleted after its allowed to smolder
 	// for a while, say, sometime in 2010. We keep it just in case :-)
 	if (0 == cmdname.compare("question")) {
-		Handle h = verify_handle(optargs, "cog-ad-hoc question");
+		Handle h = verify_handle(optargs, "cog-ad-hoc question", 2);
 		AtomSpace *as = &atomspace();
 
 		SentenceQuery rlx;

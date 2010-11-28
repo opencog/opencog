@@ -239,12 +239,28 @@ SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
 	return take_tv(tv);
 }
 
-// SCM SchemeSmob::ss_new_mtv (SCM stv, SCM svh)
-// {
-//     TruthValue *tv = verify_tv(stv, "cog-new-mtv");
-//     //TODO
-// 	return take_tv(tv);
-// }
+SCM SchemeSmob::ss_new_mtv (SCM stv, SCM svh)
+{
+    TruthValue *tv = verify_tv(stv, "cog-new-mtv");
+    VersionHandle *vh = verify_vh(svh, "cog-new-mtv", 2);
+
+    CompositeTruthValue *mtv = new CompositeTruthValue(*tv, *vh);
+	return take_tv(mtv);
+}
+
+SCM SchemeSmob::ss_set_vtv (SCM smtv, SCM stv, SCM svh)
+{
+    CompositeTruthValue *mtv = 
+        dynamic_cast<CompositeTruthValue*>(verify_tv(smtv, "cog-set-vtv!"));
+    if(!mtv)
+        scm_wrong_type_arg_msg("cog-set-vtv!", 1, smtv, "opencog composite truth value");
+
+    TruthValue *tv = verify_tv(stv, "cog-set-vtv!", 2);
+    VersionHandle *vh = verify_vh(svh, "cog-set-vtv!", 3);
+
+    mtv->setVersionedTV(*tv, *vh);
+	return smtv;
+}
 
 /* ============================================================== */
 /**
@@ -295,21 +311,21 @@ SCM SchemeSmob::ss_itv_p (SCM s)
 	return tv_p(s, INDEFINITE_TRUTH_VALUE);
 }
 
-// SCM SchemeSmob::ss_mtv_p (SCM s)
-// {
-// 	return tv_p(s, COMPOSITE_TRUTH_VALUE);
-// }
+SCM SchemeSmob::ss_mtv_p (SCM s)
+{
+	return tv_p(s, COMPOSITE_TRUTH_VALUE);
+}
 
 /* ============================================================== */
 
-TruthValue * SchemeSmob::verify_tv(SCM stv, const char *subrname)
+TruthValue * SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
 {
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, stv))
-		scm_wrong_type_arg_msg(subrname, 2, stv, "opencog truth value");
+		scm_wrong_type_arg_msg(subrname, pos, stv, "opencog truth value");
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(stv);
 	if (COG_TV != misctype)
-		scm_wrong_type_arg_msg(subrname, 2, stv, "opencog truth value");
+		scm_wrong_type_arg_msg(subrname, pos, stv, "opencog truth value");
 
 	TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(stv);
 	return tv;

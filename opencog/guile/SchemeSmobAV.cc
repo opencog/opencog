@@ -87,7 +87,7 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 	AttentionValue::lti_t lti = scm_to_short(slti);
     AttentionValue::vlti_t vlti = false;
     if (!scm_is_bool(svlti)) {
-        scm_wrong_type_arg_msg("cog-new-av", 4, svlti, "boolean value");
+        scm_wrong_type_arg_msg("cog-new-av", 3, svlti, "boolean value");
     }
     if (scm_is_true(svlti)) {
         vlti = true;
@@ -120,14 +120,14 @@ SCM SchemeSmob::ss_av_p (SCM s)
 
 /* ============================================================== */
 
-AttentionValue * SchemeSmob::verify_av(SCM sav, const char *subrname)
+AttentionValue * SchemeSmob::verify_av(SCM sav, const char *subrname, int pos)
 {
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sav))
-		scm_wrong_type_arg_msg(subrname, 2, sav, "opencog attention value");
+		scm_wrong_type_arg_msg(subrname, pos, sav, "opencog attention value");
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(sav);
 	if (COG_AV != misctype)
-		scm_wrong_type_arg_msg(subrname, 2, sav, "opencog attention value");
+		scm_wrong_type_arg_msg(subrname, pos, sav, "opencog attention value");
 
 	AttentionValue *av = (AttentionValue *) SCM_SMOB_DATA(sav);
 	return av;

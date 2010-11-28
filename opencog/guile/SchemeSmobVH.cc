@@ -61,7 +61,7 @@ SCM SchemeSmob::take_vh (VersionHandle *vh)
  */
 SCM SchemeSmob::ss_new_vh (SCM sind, SCM shandle)
 {
-	Handle h = verify_handle(shandle, "cog-new-vh");
+	Handle h = verify_handle(shandle, "cog-new-vh", 2);
 	std::string ind_name = decode_string (sind, "cog-new-vh",
 		"indicator for the version handle");
 
@@ -99,6 +99,21 @@ SCM SchemeSmob::ss_vh_p (SCM s)
 		}
 	}
 	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+
+VersionHandle * SchemeSmob::verify_vh(SCM svh, const char *subrname, int pos)
+{
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, svh))
+		scm_wrong_type_arg_msg(subrname, pos, svh, "opencog version handle");
+
+	scm_t_bits misctype = SCM_SMOB_FLAGS(svh);
+	if (COG_VH != misctype)
+		scm_wrong_type_arg_msg(subrname, pos, svh, "opencog version handle");
+
+	VersionHandle *vh = (VersionHandle *) SCM_SMOB_DATA(svh);
+	return vh;
 }
 
 /* ============================================================== */

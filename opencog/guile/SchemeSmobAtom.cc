@@ -40,10 +40,10 @@ using namespace opencog;
  * is returned.
  */
 
-Handle SchemeSmob::verify_handle (SCM satom, const char * subrname)
+Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 {
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
-		scm_wrong_type_arg_msg(subrname, 1, satom, "opencog atom");
+		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
 	UUID uuid = scm_to_ulong(shandle);
@@ -51,9 +51,9 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname)
 	return h;
 }
 
-boost::shared_ptr<Atom> SchemeSmob::verify_atom (SCM satom, const char * subrname)
+boost::shared_ptr<Atom> SchemeSmob::verify_atom (SCM satom, const char * subrname, int pos)
 {
-	return atomspace->cloneAtom(verify_handle(satom, subrname));
+	return atomspace->cloneAtom(verify_handle(satom, subrname, pos));
 }
 
 /* ============================================================== */
@@ -104,7 +104,7 @@ SCM SchemeSmob::ss_tv (SCM satom)
 SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 {
 	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-set-tv!");
-	TruthValue *tv = verify_tv(stv, "cog-set-tv!");
+	TruthValue *tv = verify_tv(stv, "cog-set-tv!", 2);
 
 	atom->setTruthValue(*tv);
 	return satom;
@@ -121,7 +121,7 @@ SCM SchemeSmob::ss_av (SCM satom)
 SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 {
 	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-set-av!");
-	AttentionValue *av = verify_av(sav, "cog-set-av!");
+	AttentionValue *av = verify_av(sav, "cog-set-av!", 2);
 
 	atom->setAttentionValue(*av);
 	return satom;

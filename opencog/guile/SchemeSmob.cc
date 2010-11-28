@@ -129,13 +129,13 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-new-stv",           2, 0, 0, C(ss_new_stv));
 	scm_c_define_gsubr("cog-new-ctv",           3, 0, 0, C(ss_new_ctv));
 	scm_c_define_gsubr("cog-new-itv",           3, 0, 0, C(ss_new_itv));
-	//scm_c_define_gsubr("cog-new-mtv",           2, 0, 0, C(ss_new_mtv));
-	//scm_c_define_gsubr("cog-set-vtv!",          3, 0, 0, C(ss_set_vtv));
+	scm_c_define_gsubr("cog-new-mtv",           2, 0, 0, C(ss_new_mtv));
+	scm_c_define_gsubr("cog-set-vtv!",          3, 0, 0, C(ss_set_vtv));
 	scm_c_define_gsubr("cog-tv?",               1, 0, 0, C(ss_tv_p));
 	scm_c_define_gsubr("cog-stv?",              1, 0, 0, C(ss_stv_p));
 	scm_c_define_gsubr("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
 	scm_c_define_gsubr("cog-itv?",              1, 0, 0, C(ss_itv_p));
-	//scm_c_define_gsubr("cog-mtv?",              1, 0, 0, C(ss_mtv_p));
+	scm_c_define_gsubr("cog-mtv?",              1, 0, 0, C(ss_mtv_p));
 	scm_c_define_gsubr("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 
 	// Version handles

@@ -106,11 +106,14 @@ class SchemeSmob
 		static SCM ss_new_stv(SCM, SCM);
 		static SCM ss_new_ctv(SCM, SCM, SCM);
 		static SCM ss_new_itv(SCM, SCM, SCM);
+		static SCM ss_new_mtv(SCM, SCM);
+		static SCM ss_set_vtv(SCM, SCM, SCM);
 		static SCM ss_tv_p(SCM);
 		static SCM tv_p(SCM, TruthValueType);
 		static SCM ss_stv_p(SCM);
 		static SCM ss_ctv_p(SCM);
 		static SCM ss_itv_p(SCM);
+		static SCM ss_mtv_p(SCM);
 		static SCM take_tv(TruthValue *);
 		static SCM ss_tv_get_value(SCM);
 	
@@ -141,10 +144,11 @@ class SchemeSmob
 		
 		static Type validate_atom(SCM, const char *);
 		static Type validate_node(SCM, const char *);
-		static boost::shared_ptr<Atom> verify_atom(SCM, const char *);
-		static Handle verify_handle(SCM, const char *);
-		static TruthValue * verify_tv(SCM, const char *);
-		static AttentionValue * verify_av(SCM, const char *);
+    static boost::shared_ptr<Atom> verify_atom(SCM, const char *, int pos = 1);
+		static Handle verify_handle(SCM, const char *, int pos = 1);
+		static VersionHandle * verify_vh(SCM, const char *, int pos = 1);
+		static TruthValue * verify_tv(SCM, const char *, int pos = 1);
+		static AttentionValue * verify_av(SCM, const char *, int pos = 1);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 	
         static AtomSpace* atomspace;
