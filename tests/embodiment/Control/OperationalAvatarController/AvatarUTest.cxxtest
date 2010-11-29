@@ -1,5 +1,5 @@
 /*
- * tests/embodiment/Control/OperationalAvatarController/PetUTest.cxxtest
+ * tests/embodiment/Control/OperationalAvatarController/AvatarUTest.cxxtest
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -51,7 +51,7 @@ static const string file   = "pet.dump";
 static const vector<string> trick(1, "fetch");
 static const string triedSchema  = "fetch_01";
 
-class PetUTest :  public CxxTest::TestSuite
+class AvatarUTest :  public CxxTest::TestSuite
 {
 
 private:
@@ -65,18 +65,18 @@ private:
 
 public:
 
-    PetUTest() {
+    AvatarUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
 
         atomSpace = new AtomSpace();
         sender = new LSMessageSenderMock();
         timestamp2 = PerceptionActionInterface::PAITestUtil::getCurrentTimestamp();
         timestamp = timestamp2 - 30;
-        printf("PetUTest(): timestamp = %lu, timestamp2 = %lu\n", timestamp, timestamp2);
+        printf("AvatarUTest(): timestamp = %lu, timestamp2 = %lu\n", timestamp, timestamp2);
         atomSpace->addNode(PET_NODE, petId);
     }
 
-    ~PetUTest() {
+    ~AvatarUTest() {
         delete (pet);
     }
 

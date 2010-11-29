@@ -1,5 +1,5 @@
-ADD_CXXTEST(PetUTest)
-TARGET_LINK_LIBRARIES(PetUTest 
+ADD_CXXTEST(AvatarUTest)
+TARGET_LINK_LIBRARIES(AvatarUTest 
 	OpcLib 
 	Procedure 
 	behavior 
@@ -16,7 +16,7 @@ TARGET_LINK_LIBRARIES(PetUTest
 )
 
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(PetUTest winmm)
+    TARGET_LINK_LIBRARIES(AvatarUTest winmm)
 ENDIF(WIN32)
 
 IF (GUILE_FOUND)
