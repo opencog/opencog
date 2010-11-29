@@ -26,7 +26,7 @@
 #include <opencog/embodiment/Control/Procedure/RunningProcedureId.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
 #include <opencog/util/files.h>
-#include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/AvatarInterfaceMock.h>
 #include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <tests/embodiment/Control/OperationalAvatarController/LSMessageSenderMock.h>
@@ -55,7 +55,7 @@ protected:
     HandleSeq toUpdateHandles;
     std::list<ActionPlan> sentActionPlans;
     ResponsiveActionPlanSender *sender;
-    PetInterfaceMock *petInterface;
+    AvatarInterfaceMock *petInterface;
 
 
     PAI* ppai;
@@ -86,7 +86,7 @@ public:
         xmlFileName = _xmlFileName;
 
         sender = new ResponsiveActionPlanSender();
-        petInterface = new PetInterfaceMock(petName, PAIUtils::getInternalId("Wynx"), string(""));
+        petInterface = new AvatarInterfaceMock(petName, PAIUtils::getInternalId("Wynx"), string(""));
         ppai = new PAI(*atomSpace, *sender, *petInterface);
         petInterface->setPAI(ppai);
 

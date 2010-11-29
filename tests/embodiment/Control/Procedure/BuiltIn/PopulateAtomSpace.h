@@ -26,7 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include "PAI.h"
 #include "SystemParameters.h"
-#include "PetInterfaceMock.h"
+#include "AvatarInterfaceMock.h"
 #include "PredicatesUpdater.h"
 #include "ActionPlanSenderMock.h"
 
@@ -52,7 +52,7 @@ private:
     AtomSpace atomSpace;
     Control::SystemParameters parameters;
     PAI * pai;
-    PetInterfaceMock * pet;
+    AvatarInterfaceMock * pet;
     PredicatesUpdater * updater;
     FailureActionPlanSender *ap;
 

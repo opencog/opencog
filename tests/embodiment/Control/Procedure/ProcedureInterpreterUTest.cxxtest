@@ -23,7 +23,7 @@
 
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
-#include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/AvatarInterfaceMock.h>
 #include <opencog/embodiment/Control/Procedure/BuiltIn/PetActionSchema.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -55,7 +55,7 @@ public:
 
         std::list<ActionPlan> plans;
         OKActionPlanSender ap(plans);
-        PetInterfaceMock pi;
+        AvatarInterfaceMock pi;
         PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;
@@ -84,7 +84,7 @@ public:
         AtomSpace as;
 
         FailureActionPlanSender ap;
-        PetInterfaceMock pi;
+        AvatarInterfaceMock pi;
         PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;

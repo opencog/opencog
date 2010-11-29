@@ -1,4 +1,4 @@
-ADD_LIBRARY (OpcLib 
+ADD_LIBRARY (oac 
     Pet
     OAC
     PetMessageSender
@@ -32,7 +32,7 @@ INCLUDE_DIRECTORIES (
     ${LUABIND_INCLUDE_DIR}
 )
 
-TARGET_LINK_LIBRARIES (OpcLib
+TARGET_LINK_LIBRARIES (oac
     ${LUA_LIBRARIES}
     ${LUABIND_LIBRARIES}
     ${XERCESC_LIBRARIES}
@@ -49,7 +49,7 @@ ENDIF(COMMAND cmake_policy)
 
 ADD_EXECUTABLE (OACTester OACTester.cc)
 TARGET_LINK_LIBRARIES (OACTester
-    OpcLib
+    oac
     comboreduct
     PetComboVocabulary
     AtomSpaceExtensions
@@ -59,7 +59,7 @@ TARGET_LINK_LIBRARIES (OACTester
 
 ADD_EXECUTABLE (opc OACExecutable.cc)
 TARGET_LINK_LIBRARIES (opc
-    OpcLib
+    oac
     comboreduct
     PetComboVocabulary
     ImaginaryLife
@@ -68,7 +68,7 @@ TARGET_LINK_LIBRARIES (opc
 
 ADD_EXECUTABLE (opcHcTester MockOpcHCTestExec.cc)
 TARGET_LINK_LIBRARIES (opcHcTester
-    OpcLib
+    oac
     comboreduct
     PetComboVocabulary
     ImaginaryLife

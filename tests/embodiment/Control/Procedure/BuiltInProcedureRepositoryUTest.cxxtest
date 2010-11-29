@@ -24,7 +24,7 @@
 #include <opencog/util/misc.h>
 #include <opencog/embodiment/Control/Procedure/BuiltInProcedureRepository.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
-#include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/AvatarInterfaceMock.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace Procedure;
@@ -55,7 +55,7 @@ public:
         AtomSpace as;
 
         FailureActionPlanSender ap;
-        PetInterfaceMock pi;
+        AvatarInterfaceMock pi;
         PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         BuiltInProcedureRepository rep(pai);
@@ -67,7 +67,7 @@ public:
         AtomSpace as;
 
         FailureActionPlanSender ap;
-        PetInterfaceMock pi;
+        AvatarInterfaceMock pi;
         PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         BuiltInProcedureRepository rep(pai);

@@ -42,7 +42,7 @@ public:
     }
     bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan) {
         printf("Action plan sent/executed successfully: %s\n", actionPlan.getID().c_str());
-        printf("message:\n%s\n", actionPlan.getPVPmessage(pai->getPetInterface().getPetId()).c_str());
+        printf("message:\n%s\n", actionPlan.getPVPmessage(pai->getAvatarInterface().getPetId()).c_str());
         // Create a XML PVP message with the action plan status
         char msg[1024];
         sprintf(msg, "<pet:petaverse-msg\n"
@@ -51,7 +51,7 @@ public:
                 "xsi:schemaLocation=\"http://proxy.esheepco.com/brain BrainProxyAxon.xsd\">\n"
                 "<pet-signal pet-id=\"%s\" name=\"whatever\" status=\"done\" action-plan-id=\"%s\" timestamp=\"2007-06-18T20:15:00.000-07:00\" />\n"
                 "</pet:petaverse-msg>",
-                pai->getPetInterface().getPetId().c_str(), actionPlan.getID().c_str());
+                pai->getAvatarInterface().getPetId().c_str(), actionPlan.getID().c_str());
         pvpMsg.assign(msg);
         return true;
     }

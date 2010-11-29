@@ -1,6 +1,6 @@
 ADD_CXXTEST(AvatarUTest)
 TARGET_LINK_LIBRARIES(AvatarUTest 
-	OpcLib 
+	oac 
 	Procedure 
 	behavior 
 	PAI 
@@ -22,7 +22,7 @@ ENDIF(WIN32)
 IF (GUILE_FOUND)
 	ADD_CXXTEST(LanguageComprehensionUTest)
 	TARGET_LINK_LIBRARIES(LanguageComprehensionUTest 
-		OpcLib
+		oac
 		behavior
 		${XERCESC_LIBRARIES}
 		${Boost_THREAD_LIBRARY}

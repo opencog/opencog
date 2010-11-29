@@ -22,7 +22,7 @@
  */
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include "ActionPlanSenderMock.h"
-#include "PetInterfaceMock.h"
+#include "AvatarInterfaceMock.h"
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
 #include <opencog/atomspace/SpaceServer.h>
 
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     HandleSeq toUpdateHandles;
     std::list<ActionPlan> sentActionPlans;
     OKActionPlanSender sender(sentActionPlans);
-    PetInterfaceMock petInterface;
+    AvatarInterfaceMock petInterface;
     PAI pai(atomSpace, sender, petInterface);
     petInterface.setPAI(&pai);
     PredicatesUpdater predicatesUpdater(atomSpace, petInterface.getPetId());

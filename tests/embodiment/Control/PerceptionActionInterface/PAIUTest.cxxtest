@@ -24,7 +24,7 @@
 #include <opencog/server/CogServer.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
-#include "PetInterfaceMock.h"
+#include "AvatarInterfaceMock.h"
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "ActionPlanSenderMock.h"
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
@@ -79,7 +79,7 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        PetInterfaceMock petInterface;
+        AvatarInterfaceMock petInterface;
         PAI pai1(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai1);
         ActionPlanID planId = pai1.createActionPlan();
@@ -101,7 +101,7 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        PetInterfaceMock petInterface;
+        AvatarInterfaceMock petInterface;
         PAI pai(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai);
         ActionPlanID plans[NUM_PLANS];
@@ -127,7 +127,7 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        PetInterfaceMock petInterface;
+        AvatarInterfaceMock petInterface;
         PAI pai(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai);
 
@@ -171,7 +171,7 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        PetInterfaceMock petInterface;
+        AvatarInterfaceMock petInterface;
         PAI pai(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai);
         ActionPlanID plan1 = pai.createActionPlan();
@@ -218,7 +218,7 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        PetInterfaceMock petInterface;
+        AvatarInterfaceMock petInterface;
         PAI pai(atomSpace, sender, petInterface, 10);
         petInterface.setPAI(&pai);
 
@@ -584,15 +584,15 @@ public:
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
         }
 
-        // Check grab status in PetInterface
+        // Check grab status in AvatarInterface
         {
             TS_ASSERT(!pai.hasPlanFailed("12"));
             TS_ASSERT(!pai.hasPlanFailed("13"));
             TS_ASSERT(pai.isPlanFinished("12"));
             TS_ASSERT(!pai.isPlanFinished("13"));
 
-            TS_ASSERT(pai.getPetInterface().hasGrabbedObj());
-            TS_ASSERT(pai.getPetInterface().getGrabbedObj() == PAIUtils::getInternalId("Wynx"));
+            TS_ASSERT(pai.getAvatarInterface().hasGrabbedObj());
+            TS_ASSERT(pai.getAvatarInterface().getGrabbedObj() == PAIUtils::getInternalId("Wynx"));
         }
 
         // Check Avatar-signal atoms
@@ -1388,15 +1388,15 @@ public:
         // Check latest received/processed timestamp
         TS_ASSERT(pai.getLatestSimWorldTimestamp() == PAI::getTimestampFromXsdDateTimeStr("2007-06-18T20:15:04.000-07:00"));
 
-        // Check grab status in PetInterface
+        // Check grab status in AvatarInterface
         {
             TS_ASSERT(!pai.hasPlanFailed("12"));
             TS_ASSERT(!pai.hasPlanFailed("13"));
             TS_ASSERT(pai.isPlanFinished("12"));
             TS_ASSERT(pai.isPlanFinished("13"));
 
-            TS_ASSERT(!pai.getPetInterface().hasGrabbedObj());
-            TS_ASSERT(pai.getPetInterface().getGrabbedObj() == string(""));
+            TS_ASSERT(!pai.getAvatarInterface().hasGrabbedObj());
+            TS_ASSERT(pai.getAvatarInterface().getGrabbedObj() == string(""));
         }
 
         // process next message
@@ -1438,7 +1438,7 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        PetInterfaceMock petInterface;
+        AvatarInterfaceMock petInterface;
         PAI pai(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai);
 
@@ -1512,7 +1512,7 @@ public:
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
         OKActionPlanSender sender(sentActionPlans);
-        PetInterfaceMock petInterface;
+        AvatarInterfaceMock petInterface;
         PAI pai(*atomSpace, sender, petInterface);
         petInterface.setPAI(&pai);
 

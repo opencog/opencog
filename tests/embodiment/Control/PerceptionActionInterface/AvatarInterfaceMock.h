@@ -1,5 +1,5 @@
 /*
- * tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h
+ * tests/embodiment/Control/PerceptionActionInterface/AvatarInterfaceMock.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -23,13 +23,13 @@
 #ifndef PET_INTERFACE_MOCK_H_
 #define PET_INTERFACE_MOCK_H_
 
-#include "PetInterfaceMock.h"
+#include "AvatarInterfaceMock.h"
 #include <opencog/util/misc.h>
 #include <opencog/embodiment/Learning/behavior/BE.h>
 #include <opencog/embodiment/Learning/behavior/BDTracker.h>
 #include <opencog/embodiment/Learning/behavior/PAIWorldProvider.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
-#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/Control/AgentModeHandler.h>
 
@@ -57,7 +57,7 @@ using namespace opencog::spatial;
 using namespace std;
 
 
-class PetInterfaceMock: public Control::PetInterface
+class AvatarInterfaceMock: public Control::AvatarInterface
 {
 
     std::pair<std::string, spatial::Point> latestGotoTarget;
@@ -121,7 +121,7 @@ class PetInterfaceMock: public Control::PetInterface
     }
 
 public:
-    PetInterfaceMock() {
+    AvatarInterfaceMock() {
         pet = PAIUtils::getInternalId("1");
         petName = "no_name";
         //ownerId = "no_owner_id";
@@ -134,7 +134,7 @@ public:
         pai = NULL;
     }
 
-    PetInterfaceMock(string _pet, string _petName, string _ownerId) {
+    AvatarInterfaceMock(string _pet, string _petName, string _ownerId) {
 
         pet = _pet;
         petName = _petName;
@@ -157,19 +157,19 @@ public:
     }
 
     void stopExecuting(const vector<string> &commandStatement, unsigned long timestamp) {
-        cout << "PetInterfaceMock: stop executing '" << commandStatement.front() << "' at " << timestamp << endl;
+        cout << "AvatarInterfaceMock: stop executing '" << commandStatement.front() << "' at " << timestamp << endl;
     }
 
     bool isInLearningMode() const {
         return isLearning;
     }
     void startLearning(const vector<string> &commandStatement, unsigned long timestamp) {
-        cout << "PetInterfaceMock: start learning '" << commandStatement.front() << "' at " << timestamp << endl;
+        cout << "AvatarInterfaceMock: start learning '" << commandStatement.front() << "' at " << timestamp << endl;
         isLearning = true;
         learningWhat.insert(commandStatement.front());
     }
     void stopLearning(const vector<string> &commandStatement, unsigned long timestamp) {
-        cout << "PetInterfaceMock: stop learning '" << commandStatement.front() << "' at " << timestamp << endl;
+        cout << "AvatarInterfaceMock: stop learning '" << commandStatement.front() << "' at " << timestamp << endl;
         isLearning = false;
         learningWhat.erase(commandStatement.front());
     }
@@ -183,14 +183,14 @@ public:
         }
         exemplarInProgress = true;
         whatExemplar = commandStatement.front();
-        cout << "PetInterfaceMock: Exemplar of '" << whatExemplar << "' started at " << timestamp << " done by " << exemplarAvatarId << endl;
+        cout << "AvatarInterfaceMock: Exemplar of '" << whatExemplar << "' started at " << timestamp << " done by " << exemplarAvatarId << endl;
         exemplarStartTimestamp = timestamp;
     }
     void endExemplar(const vector<string> &commandStatement, unsigned long timestamp) {
         // an exemplar should be in progress
         assert(exemplarInProgress);
 
-        cout << "PetInterfaceMock: Exemplar of '" << whatExemplar << "' ended at " << timestamp << " done by " << exemplarAvatarId << endl;
+        cout << "AvatarInterfaceMock: Exemplar of '" << whatExemplar << "' ended at " << timestamp << " done by " << exemplarAvatarId << endl;
         exemplarEndTimestamp = timestamp;
         exemplarInProgress = false;
 
@@ -198,14 +198,14 @@ public:
     }
 
     void trySchema(const vector<string> &commandStatement, unsigned long timestamp) {
-        cout << "PetInterfaceMock: TrySchema!" << endl;
+        cout << "AvatarInterfaceMock: TrySchema!" << endl;
     }
 
     void reward(unsigned long timestamp) {
-        cout << "PetInterfaceMock: Rewarding pet!" << endl;
+        cout << "AvatarInterfaceMock: Rewarding pet!" << endl;
     }
     void punish(unsigned long timestamp) {
-        cout << "PetInterfaceMock: Punishing pet!" << endl;
+        cout << "AvatarInterfaceMock: Punishing pet!" << endl;
     }
 
     Control::AgentModeHandler& getCurrentModeHandler( void ) {
@@ -214,7 +214,7 @@ public:
 
 
     void boostSGILink(Handle sgiLink) {
-        cout << "PetInterfaceMock: boostSGILink(" << sgiLink << ") called!" << endl;
+        cout << "AvatarInterfaceMock: boostSGILink(" << sgiLink << ") called!" << endl;
     }
 
     void setOwnerId(const string& _ownerId) {
@@ -246,10 +246,10 @@ public:
     }
     void getHighLTIObjects(HandleSeq& highLTIObjects) {};
     void setLatestGotoTarget( const std::pair<std::string, spatial::Point>& target ) {
-        cout << "PetInterfaceMock: setLatestGotoTarget!" << endl;
+        cout << "AvatarInterfaceMock: setLatestGotoTarget!" << endl;
     }
     const std::pair<std::string, spatial::Point>& getLatestGotoTarget( void ) {
-        cout << "PetInterfaceMock: getLatestGotoTarget!" << endl;
+        cout << "AvatarInterfaceMock: getLatestGotoTarget!" << endl;
         return this->latestGotoTarget;
     }
     void setRequestedCommand(string command, vector<string> parameters) {}

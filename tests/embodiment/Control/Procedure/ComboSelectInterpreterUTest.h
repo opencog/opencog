@@ -29,7 +29,7 @@
 #include "RunningProcedureId.h"
 #include "ActionPlanSenderMock.h"
 #include "util/files.h"
-#include "PetInterfaceMock.h"
+#include "AvatarInterfaceMock.h"
 #include "ComboProcedureRepository.h"
 #include "SystemParameters.h"
 #include "LSMessageSenderMock.h"
@@ -54,7 +54,7 @@ protected:
     HandleSeq toUpdateHandles;
     std::list<ActionPlan> sentActionPlans;
     ResponsiveActionPlanSender *sender;
-    PetInterfaceMock *petInterface;
+    AvatarInterfaceMock *petInterface;
 
 
     PAI* ppai;
@@ -84,7 +84,7 @@ public:
 
         atomSpace = new AtomSpace();
         sender = new ResponsiveActionPlanSender();
-        petInterface = new PetInterfaceMock(petName,
+        petInterface = new AvatarInterfaceMock(petName,
                                             PAIUtils::getInternalId("Wynx"),
                                             string(""));
         ppai = new PAI(*atomSpace, *sender, *petInterface, parameters);

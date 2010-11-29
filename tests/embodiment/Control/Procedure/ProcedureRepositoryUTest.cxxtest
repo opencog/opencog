@@ -24,7 +24,7 @@
 #include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
 #include <opencog/util/files.h>
-#include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/AvatarInterfaceMock.h>
 #include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -57,7 +57,7 @@ private:
     HandleSeq toUpdateHandles;
     list<ActionPlan> sentActionPlans;
     ResponsiveActionPlanSender *sender;
-    PetInterfaceMock *petInterface;
+    AvatarInterfaceMock *petInterface;
 
     PAI* ppai;
 
@@ -74,7 +74,7 @@ public:
         logger().setPrintErrorLevelStdout();
 
         sender = new ResponsiveActionPlanSender();
-        petInterface = new PetInterfaceMock(PAIUtils::getInternalId("32f56136-7973-4703-915b-6ec1bf5c67fa"), PAIUtils::getInternalId("Wynx"), string(""));
+        petInterface = new AvatarInterfaceMock(PAIUtils::getInternalId("32f56136-7973-4703-915b-6ec1bf5c67fa"), PAIUtils::getInternalId("Wynx"), string(""));
         ppai = new PAI(*atomSpace, *sender, *petInterface);
         petInterface->setPAI(ppai);
 

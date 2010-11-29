@@ -26,7 +26,7 @@
 PopulateAtomSpace::PopulateAtomSpace()
 {
 
-    pet = new PetInterfaceMock(atomSpace);
+    pet = new AvatarInterfaceMock(atomSpace);
     pet->setOwnerId(owner);
 
     ap  = new FailureActionPlanSender();

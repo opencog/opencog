@@ -23,7 +23,7 @@
 
 
 #include "ActionPlanSenderMock.h"
-#include "PetInterfaceMock.h"
+#include "AvatarInterfaceMock.h"
 
 #include "BehaviorSchema.h"
 
@@ -57,7 +57,7 @@ public:
         void etName() {
             AtomSpace as;
             FailureActionPlanSender ap;
-            PetInterfaceMock pi(as);
+            AvatarInterfaceMock pi(as);
             PAI pai(as, ap, pi);
 
             PetBowlSchema  petBowl(pai);
@@ -72,7 +72,7 @@ public:
         AtomSpace as;
         std::list<ActionPlan> plans;
         OKActionPlanSender ap(plans);
-        PetInterfaceMock pi(as);
+        AvatarInterfaceMock pi(as);
         PAI pai(as, ap, pi);
 
         std::vector<combo::vertex> args(1, "Wynx");
