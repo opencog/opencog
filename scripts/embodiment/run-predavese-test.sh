@@ -9,8 +9,8 @@ sleep 5
 echo "Start LSMocky, please wait..."
 ../bin/src/Learning/LearningServer/LSMocky &
 sleep 5
-echo "Start PredaveseTest.rb, will start OPC..."
+echo "Start PredaveseTest.rb, will start OAC..."
 ./run-predavese-mocky-proxy.rb &
 sleep 2
-echo "Start OPC, will start OPC..."
+echo "Start OAC, will start OAC..."
 ../bin/src/Control/OperationalAvatarController/opc 1 16330 &

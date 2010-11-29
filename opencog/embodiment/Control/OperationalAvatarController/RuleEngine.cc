@@ -47,7 +47,7 @@
 
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
-#include "OPC.h"
+#include "OAC.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 
 #include <boost/regex.hpp>
@@ -65,7 +65,7 @@
 using namespace OperationalAvatarController;
 using namespace opencog;
 
-RuleEngine::RuleEngine( OPC* opc, const std::string& petName )
+RuleEngine::RuleEngine( OAC* opc, const std::string& petName )
 throw( RuntimeException ) :
         opc(opc), petName( petName ), cycle(0),
         lastPetActionDone("", std::vector<std::string>()),

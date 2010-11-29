@@ -239,7 +239,7 @@
     <xsd:annotation>
         <xsd:documentation>
 	This type of message is required to provide informations about the agents sensory.
-	Sensors like vision and hearing can exchange it's data to OPC via this message type
+	Sensors like vision and hearing can exchange it's data to OAC via this message type
         </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType name="AgentSensorInfoType">

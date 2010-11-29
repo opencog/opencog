@@ -56,8 +56,8 @@ void Spawner::init(const std::string &id,
 
     setNetworkElement(new NetworkElement(id, ip, port));
 
-    minOpcPort = opencog::config().get_int("MIN_OPC_PORT");
-    maxOpcPort = opencog::config().get_int("MAX_OPC_PORT");
+    minOpcPort = opencog::config().get_int("MIN_OAC_PORT");
+    maxOpcPort = opencog::config().get_int("MAX_OAC_PORT");
     int maxNumberOfPets = maxOpcPort - minOpcPort;
 
     if (minOpcPort <= 0 || maxOpcPort <= 0 || maxNumberOfPets < 0) {
@@ -119,11 +119,11 @@ bool Spawner::processNextMessage(Message *message)
                       agentID.c_str( ), ownerID.c_str( ), agentType.c_str( ),
                       agentTraits.c_str( ) );
 
-        // TODO: Find a way to figure out that OPC is already running.
+        // TODO: Find a way to figure out that OAC is already running.
         // The call to isElementAvailable method does not work because it only knows the unavailable elements, not the
         // available ones:
         //if (isElementAvailable(petID)) {
-        //logger().warn("Trying to load an OPC that is already available: %s\n", petID.c_str());
+        //logger().warn("Trying to load an OAC that is already available: %s\n", petID.c_str());
         // TODO: send the LOAD SUCCESS message back
         //}
         std::stringstream command_ss;
@@ -144,10 +144,10 @@ bool Spawner::processNextMessage(Message *message)
             + agentTraits + " " + boost::lexical_cast<std::string>(opcPort)
             + " " + boost::lexical_cast<std::string>(cogServerShellPort);
 
-        if (opencog::config().get_bool("RUN_OPC_DEBUGGER")) {
-            std::string debuggerPath = opencog::config().get("OPC_DEBUGGER_PATH");
+        if (opencog::config().get_bool("RUN_OAC_DEBUGGER")) {
+            std::string debuggerPath = opencog::config().get("OAC_DEBUGGER_PATH");
             cmdPrefix = debuggerPath + " ";
-            if(opencog::config().get_bool("PASS_OPC_ARG_DEBUGGER_COMMAND")) {
+            if(opencog::config().get_bool("PASS_OAC_ARG_DEBUGGER_COMMAND")) {
                 command_ss << cmdPrefix << " ./opc " << agentArgs << " &";
             }
             else {
@@ -159,11 +159,11 @@ bool Spawner::processNextMessage(Message *message)
                 std::cout << agentArgs << std::endl;
             }
         } else {
-            if (opencog::config().get_bool("CHECK_OPC_MEMORY_LEAKS")) {
+            if (opencog::config().get_bool("CHECK_OAC_MEMORY_LEAKS")) {
                 cmdPrefix = opencog::config().get("VALGRIND_PATH");
                 cmdPrefix += " --leak-check=full ";
                 cmdSuffix += " > opc.valgrind.memcheck 2>&1";
-            } else if (opencog::config().get_bool("CHECK_OPC_MEMORY_USAGE")) {
+            } else if (opencog::config().get_bool("CHECK_OAC_MEMORY_USAGE")) {
                 cmdPrefix = opencog::config().get("VALGRIND_PATH");
                 cmdPrefix += " --tool=massif --detailed-freq=";
                 cmdPrefix += opencog::config().get("MASSIF_DETAILED_FREQ");
@@ -175,11 +175,11 @@ bool Spawner::processNextMessage(Message *message)
             command_ss << cmdPrefix << "./opc " << agentArgs
                        << " " << cmdSuffix << " &";
         }
-        logger().info("Starting OPC for %s %s %s (%s) at NE port %d; Shell port %d (command: %s)", 
+        logger().info("Starting OAC for %s %s %s (%s) at NE port %d; Shell port %d (command: %s)", 
                 agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), 
                 opcPort, cogServerShellPort,  command_ss.str().c_str( ) );
 
-        if (!opencog::config().get_bool("MANUAL_OPC_LAUNCH")) {
+        if (!opencog::config().get_bool("MANUAL_OAC_LAUNCH")) {
             system(command_ss.str().c_str( ) );
         } else {
             printf("\nSpawner Command: %s\n", command_ss.str().c_str());

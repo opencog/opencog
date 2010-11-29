@@ -126,7 +126,7 @@ private:
     bool buildGotoPlan( const spatial::Point& position, float customSpeed = 0 );
 
     /**
-     * Create a walk planning action that will be sent to OPC
+     * Create a walk planning action that will be sent to OAC
      * @param actions Calculated path plan
      * @param useExistingID If this method get called two or more times
      * and this var is true, the new walks will be added to the same walk plan

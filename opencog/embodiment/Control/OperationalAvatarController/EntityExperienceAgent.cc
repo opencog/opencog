@@ -22,7 +22,7 @@
  */
 
 
-#include <opencog/embodiment/Control/OperationalAvatarController/OPC.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/EntityExperienceAgent.h>
 
 using namespace OperationalAvatarController;

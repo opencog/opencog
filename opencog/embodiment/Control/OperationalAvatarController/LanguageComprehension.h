@@ -37,7 +37,7 @@ namespace OperationalAvatarController
 {
 
     /**
-     * LanguageComprehension is an OPC module responsible
+     * LanguageComprehension is an OAC module responsible
      * for the management of dialogs between agents
      */
     class LanguageComprehension 

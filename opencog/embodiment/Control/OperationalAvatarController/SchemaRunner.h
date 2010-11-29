@@ -28,7 +28,7 @@
 #include <vector>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/atomspace/Node.h>
-#include "OPC.h"
+#include "OAC.h"
 
 namespace OperationalAvatarController
 {
@@ -41,7 +41,7 @@ class SchemaRunner
 {
 public:
 
-    SchemaRunner( OPC* opc );
+    SchemaRunner( OAC* opc );
 
     virtual ~SchemaRunner( );
 
@@ -113,7 +113,7 @@ public:
     }
 
 private:
-    OPC* opc;
+    OAC* opc;
 
     // Executing schema state variables
     bool executingSchema;

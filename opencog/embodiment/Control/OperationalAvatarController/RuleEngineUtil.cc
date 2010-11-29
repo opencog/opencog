@@ -24,7 +24,7 @@
 #include <lua.hpp>
 #include <luabind/luabind.hpp>
 
-#include "OPC.h"
+#include "OAC.h"
 #include "SchemaRunner.h"
 #include "RuleEngine.h"
 #include "RuleEngineUtil.h"

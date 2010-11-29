@@ -490,7 +490,7 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
         // have a chance to answer it and get removed from the unavailable_elements list.
         if ((isElementAvailable(toId) || (id == routerId) ) && controlSocketConnection(toId)) {
 
-            // Filtering element availability messages to Proxy. Only OPCs and
+            // Filtering element availability messages to Proxy. Only OACs and
             // Router notifications should be sent.
             if ( toId == opencog::config().get("PROXY_ID") &&
                     (id == opencog::config().get("SPAWNER_ID") ||

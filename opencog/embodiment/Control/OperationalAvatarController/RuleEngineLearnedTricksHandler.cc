@@ -33,7 +33,7 @@ const int RuleEngineLearnedTricksHandler::REWARD_VALUE = 80;
 const int RuleEngineLearnedTricksHandler::PUNISHMENT_VALUE = -50;
 const int RuleEngineLearnedTricksHandler::NOT_SELECTED_VALUE = 2;
 
-RuleEngineLearnedTricksHandler::RuleEngineLearnedTricksHandler( OPC* opc ) : opc( opc ),
+RuleEngineLearnedTricksHandler::RuleEngineLearnedTricksHandler( OAC* opc ) : opc( opc ),
         atomSpace( opc->getAtomSpace( ) ), latestSelectedTrick( "" ), numberOfLearnedTricks( 0 )
 {
 

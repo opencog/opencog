@@ -112,11 +112,11 @@ start:
         stringstream ss;
         ss << tr;
         StringMessage msg(opencog::config().get("COMBO_SHELL_ID"),
-                          "1", //to the OPC - this is a hack...
+                          "1", //to the OAC - this is a hack...
                           ss.str());
         cout << "sending schema " << ss.str() << "..." << endl;
         sendMessage(msg);
-        cout << "schema sent to OPC, waiting for result ..." << endl;
+        cout << "schema sent to OAC, waiting for result ..." << endl;
         _waiting = true;
     } catch (...) {
         cout << "execution failed (threw exception)" << endl;

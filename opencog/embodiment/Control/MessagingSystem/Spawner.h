@@ -59,7 +59,7 @@ public:
     bool processNextMessage(Message *message);
 
     /**
-     * Allocates an available port number, from the range of ports reserved for OPCs, to a given pet id.
+     * Allocates an available port number, from the range of ports reserved for OACs, to a given pet id.
      * If there is no available port, returns -1.
      */
     int allocateOpcPort(const std::string& petId);

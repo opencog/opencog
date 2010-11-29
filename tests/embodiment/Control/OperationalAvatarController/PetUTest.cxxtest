@@ -173,7 +173,7 @@ public:
         // the Procedure repository, the pet will not leave the LEARNING
         // mode and erase the schemas name (for recovery reasons).
         //TS_ASSERT(pet->getMode() == LEARNING);
-        // This is temporarly changed since LS may crash or be unavailable before sending the SCHEMA message back, leading OPC to be in learning mode forever...
+        // This is temporarly changed since LS may crash or be unavailable before sending the SCHEMA message back, leading OAC to be in learning mode forever...
         TS_ASSERT(pet->getMode() == PLAYING);
     }
 };

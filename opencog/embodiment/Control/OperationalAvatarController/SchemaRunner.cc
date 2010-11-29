@@ -27,7 +27,7 @@
 
 using namespace OperationalAvatarController;
 
-SchemaRunner::SchemaRunner( OPC* opc ) : opc( opc )
+SchemaRunner::SchemaRunner( OAC* opc ) : opc( opc )
 {
     this->defaultMean = config().get_double("RE_DEFAULT_MEAN");
     this->defaultCount = config().get_double("RE_DEFAULT_COUNT");

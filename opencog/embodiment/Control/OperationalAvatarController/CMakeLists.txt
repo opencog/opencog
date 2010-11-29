@@ -1,6 +1,6 @@
 ADD_LIBRARY (OpcLib 
     Pet
-    OPC
+    OAC
     PetMessageSender
     PVPActionPlanSender
     ProcedureInterpreterAgent
@@ -57,7 +57,7 @@ TARGET_LINK_LIBRARIES (OpcTester
     ${Boost_THREAD_LIBRARY}
 )
 
-ADD_EXECUTABLE (opc OPCExecutable.cc)
+ADD_EXECUTABLE (opc OACExecutable.cc)
 TARGET_LINK_LIBRARIES (opc
     OpcLib
     comboreduct

@@ -1,8 +1,8 @@
 #!/bin/sh
 if [ -z "$1" ]; then 
-    echo "This script prints the number of new messages in router for a given OPC"
+    echo "This script prints the number of new messages in router for a given OAC"
     echo "Requires DEBUG log level"
-    echo "usage: $0 OPC_LOG_FILE"
+    echo "usage: $0 OAC_LOG_FILE"
     exit
 fi
 

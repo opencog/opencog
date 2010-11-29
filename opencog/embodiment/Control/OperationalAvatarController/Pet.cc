@@ -22,7 +22,7 @@
  */
 
 #include "Pet.h"
-#include "OPC.h"
+#include "OAC.h"
 
 #include <opencog/util/files.h>
 #include <opencog/util/Logger.h>
@@ -566,7 +566,7 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement,
 
     // NOTE: Pet will return to playing mode only when the learned schema is
     // stored in ProcedureRepository
-    // FOR NOW, put it in playing mode, so that OPC does not stay in Learning
+    // FOR NOW, put it in playing mode, so that OAC does not stay in Learning
     // state forever if LS crashes or become unavailable for any reason ...
     // (later, we could create a intermediate state/mode that implements a
     // timeout waiting LS meSsage.

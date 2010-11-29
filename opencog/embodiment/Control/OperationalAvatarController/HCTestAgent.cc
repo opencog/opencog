@@ -23,7 +23,7 @@
 
 
 #include "HCTestAgent.h"
-#include "OPC.h"
+#include "OAC.h"
 
 #define IDLE_TIME 1
 //replaced by learning_time1
@@ -72,44 +72,44 @@ void HCTestAgent::run(CogServer* ne)
     // send the whole atomSpace to the LS
     switch (mode) {
     case HCT_IDLE:
-        std::cout << "OPC IDLE" << std::endl;
+        std::cout << "OAC IDLE" << std::endl;
         sleep(IDLE_TIME);
         break;
     case HCT_INIT:
-        std::cout << "OPC INIT" << std::endl;
+        std::cout << "OAC INIT" << std::endl;
         sender->sendExemplar(schemaName, schemaArguments, ownerId, avatarId, *atomSpace);
         mode = HCT_WAIT1;
         break;
     case HCT_WAIT1:
-        std::cout << "OPC WAIT1" << std::endl;
+        std::cout << "OAC WAIT1" << std::endl;
         sleep(learning_time1);
-        std::cout << "OPC WAIT1 DONE" << std::endl;
+        std::cout << "OAC WAIT1 DONE" << std::endl;
         sender->sendCommand(config().get("TRY_SCHEMA_CMD"),
                             schemaName);
         mode = HCT_IDLE;
         break;
 
     case HCT_WAIT2:
-        std::cout << "OPC WAIT2" << std::endl;
+        std::cout << "OAC WAIT2" << std::endl;
         sleep(WAIT2_TIME);
-        std::cout << "OPC WAIT2 DONE" << std::endl;
+        std::cout << "OAC WAIT2 DONE" << std::endl;
         sender->sendExemplar(schemaName, schemaArguments, ownerId, avatarId, *atomSpace);
         mode = HCT_WAIT3;
         break;
 
     case HCT_WAIT3:
-        std::cout << "OPC WAIT3" << std::endl;
+        std::cout << "OAC WAIT3" << std::endl;
         sleep(learning_time2);
-        std::cout << "OPC WAIT3 DONE" << std::endl;
+        std::cout << "OAC WAIT3 DONE" << std::endl;
         sender->sendCommand(config().get("TRY_SCHEMA_CMD"),
                             schemaName);
         mode = HCT_IDLE;
         break;
 
     case HCT_WAIT4:
-        std::cout << "OPC WAIT4" << std::endl;
+        std::cout << "OAC WAIT4" << std::endl;
         sleep(WAIT4_TIME);
-        std::cout << "OPC WAIT4 DONE" << std::endl;
+        std::cout << "OAC WAIT4 DONE" << std::endl;
         sender->sendCommand(config().get("STOP_LEARNING_CMD"),
                             schemaName);
         mode = HCT_IDLE;

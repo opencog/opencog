@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalAvatarController/OPC.cc
+ * opencog/embodiment/Control/OperationalAvatarController/OAC.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -33,10 +33,10 @@
 #include <fstream>
 #include <iostream>
 
-#include "OPC.h"
+#include "OAC.h"
 
 /**
- * Uncoment the following define in order to delete atomSpace content inside OPC
+ * Uncoment the following define in order to delete atomSpace content inside OAC
  * destructor
  */
 //#define DELETE_ATOMSPACE
@@ -46,14 +46,14 @@ using namespace Procedure;
 using namespace PetCombo;
 using namespace opencog;
 
-BaseServer* OPC::createInstance()
+BaseServer* OAC::createInstance()
 {
-    return new OPC;
+    return new OAC;
 }
 
-OPC::OPC() {}
+OAC::OAC() {}
 
-void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
+void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                const std::string& petId, const std::string& ownerId,
                const std::string& agentType, const std::string& agentTraits)
 {
@@ -91,7 +91,7 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     } else {
         pet->initTraitsAndFeelings();
 
-        logger().info("OPC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s' and ActionSchemataPreconditions '%s'.",
+        logger().info("OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s' and ActionSchemataPreconditions '%s'.",
                      config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
                      config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
                      config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
@@ -102,44 +102,44 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
             logger().error(
-                         "OPC - Unable to load Combo stdlib.");
+                         "OAC - Unable to load Combo stdlib.");
         }
         fin.close();
         logger().info(
-                     "OPC - %d Combo functions loaded.", cnt);
+                     "OAC - %d Combo functions loaded.", cnt);
 
         fin.open(config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
         if (fin.good()) {
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
             logger().error(
-                         "OPC - Unable to load RulePreconditions combo.");
+                         "OAC - Unable to load RulePreconditions combo.");
         }
         fin.close();
         logger().info(
-                     "OPC - RulesPreconditions combo functions loaded.");
+                     "OAC - RulesPreconditions combo functions loaded.");
 
         fin.open(config().get("COMBO_SELECT_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
         if (fin.good()) {
             cnt = procedureRepository->loadComboSelectFromStream(fin);
         } else {
             logger().error(
-                         "OPC - Unable to load RulePreconditions combo select.");
+                         "OAC - Unable to load RulePreconditions combo select.");
         }
         fin.close();
         logger().info(
-                     "OPC - RulesPreconditions combo select functions loaded.");
+                     "OAC - RulesPreconditions combo select functions loaded.");
 
         fin.open(config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
         if (fin.good()) {
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
             logger().error(
-                         "OPC - Unable to load RulesActionSchemata combo.");
+                         "OAC - Unable to load RulesActionSchemata combo.");
         }
         fin.close();
         logger().info(
-                     "OPC - RulesActionSchemata combo functions loaded.");
+                     "OAC - RulesActionSchemata combo functions loaded.");
     }
 
 
@@ -204,7 +204,7 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     char str[100];
     sprintf(str, "SUCCESS LOAD %s %s", myId.c_str(), PerceptionActionInterface::PAIUtils::getExternalId(petId.c_str()).c_str());
     StringMessage successLoad(myId, config().get("PROXY_ID"), str);
-    logger().info("OPC spawned. Acking requestor");
+    logger().info("OAC spawned. Acking requestor");
     if (!sendMessage(successLoad)) {
         logger().error("Could not send SUCCESS LOAD to PROXY!");
         exit(-1);
@@ -212,7 +212,7 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     if ( config().get("VISUAL_DEBUGGER_ACTIVE") == "true" ) {
         int minPort = boost::lexical_cast<unsigned int>
-            ( config().get("MIN_OPC_PORT") );
+            ( config().get("MIN_OAC_PORT") );
 
         std::string visualDebuggerHost = 
             config().get("VISUAL_DEBUGGER_HOST");
@@ -230,7 +230,7 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
 
 }
 
-OPC::~OPC()
+OAC::~OAC()
 {
 
     // WARNIG: free memory should be implemented if there are more than one opc
@@ -253,15 +253,15 @@ OPC::~OPC()
     // is currently disable. This is a hack to allow valgrind tests to work fine. 
     // When atomSpace removal is fast enough, remove this hack and enable delete
     // operation again.
-    if (config().get_bool("CHECK_OPC_MEMORY_LEAKS")) {
+    if (config().get_bool("CHECK_OAC_MEMORY_LEAKS")) {
 #endif
-    logger().debug("OPC - Starting AtomSpace removal.");
-    printf("OPC - Starting AtomSpace removal.\n");
+    logger().debug("OAC - Starting AtomSpace removal.");
+    printf("OAC - Starting AtomSpace removal.\n");
     int t1 = time(NULL);
     delete (atomSpace);
     int t2 = time(NULL);
-    logger().debug("OPC - Finished AtomSpace removal. t1 = %d, t2=%d, elapsed time =%d seconds", t1, t2, t2-t1);
-    printf("OPC - Finished AtomSpace removal. t1 = %d, t2=%d, diff=%d\n", t1, t2, t2-t1);
+    logger().debug("OAC - Finished AtomSpace removal. t1 = %d, t2=%d, elapsed time =%d seconds", t1, t2, t2-t1);
+    printf("OAC - Finished AtomSpace removal. t1 = %d, t2=%d, diff=%d\n", t1, t2, t2-t1);
 #ifndef DELETE_ATOMSPACE 
     }
 #endif
@@ -272,25 +272,25 @@ OPC::~OPC()
  * --------------------------------------
  */
 
-void OPC::loadPet(const std::string& petId)
+void OAC::loadPet(const std::string& petId)
 {
     // load pet metadata
     std::string file = getPath(petId, config().get("PET_DUMP"));
     this->pet = Pet::importFromFile(file, petId, atomSpace, petMessageSender);
 }
 
-void OPC::loadAtomSpace(const std::string& petId)
+void OAC::loadAtomSpace(const std::string& petId)
 {
     // load atom space and other repositories
     std::string file = getPath(petId, config().get("ATOM_SPACE_DUMP"));
     savingLoading.load(file.c_str(), *atomSpace);
 }
 
-void OPC::saveState()
+void OAC::saveState()
 {
 
     if (!createDirectory(getPath(pet->getPetId()).c_str())) {
-        logger().error("OPC - Cannot create directory '%s'.",
+        logger().error("OAC - Cannot create directory '%s'.",
                      getPath(pet->getPetId()).c_str());
         return;
     }
@@ -308,13 +308,13 @@ void OPC::saveState()
     char str[100];
     sprintf(str, "SUCCESS UNLOAD %s %s", getID().c_str(), PerceptionActionInterface::PAIUtils::getExternalId(pet->getPetId().c_str()).c_str());
     StringMessage successUnload(getID(), config().get("PROXY_ID"), str);
-    logger().info("OPC - OPC despawned (state saved). Acking requestor");
+    logger().info("OAC - OAC despawned (state saved). Acking requestor");
     if (!sendMessage(successUnload)) {
         logger().error("Could not send SUCCESS UNLOAD to PROXY!");
     }
 }
 
-void OPC::adjustPetToBePersisted()
+void OAC::adjustPetToBePersisted()
 {
 
     // drop grabbed object, if any
@@ -329,9 +329,9 @@ void OPC::adjustPetToBePersisted()
     }
 }
 
-bool OPC::processSpawnerMessage(const std::string & spawnerMessage)
+bool OAC::processSpawnerMessage(const std::string & spawnerMessage)
 {
-    logger().info("OPC::processSpawnerMessage: msg = %s", spawnerMessage.c_str());
+    logger().info("OAC::processSpawnerMessage: msg = %s", spawnerMessage.c_str());
     if (spawnerMessage == "SAVE_AND_EXIT") {
         adjustPetToBePersisted();
         saveState();
@@ -346,46 +346,46 @@ bool OPC::processSpawnerMessage(const std::string & spawnerMessage)
  * --------------------------------------
  */
 
-PerceptionActionInterface::PAI & OPC::getPAI()
+PerceptionActionInterface::PAI & OAC::getPAI()
 {
     return *pai;
 }
 
-Pet & OPC::getPet()
+Pet & OAC::getPet()
 {
     return *pet;
 }
 
-RuleEngine & OPC::getRuleEngine()
+RuleEngine & OAC::getRuleEngine()
 {
     return *ruleEngine;
 }
 
-ProcedureInterpreter & OPC::getProcedureInterpreter()
+ProcedureInterpreter & OAC::getProcedureInterpreter()
 {
     return *procedureInterpreter;
 }
 
-ProcedureRepository & OPC::getProcedureRepository()
+ProcedureRepository & OAC::getProcedureRepository()
 {
     return *procedureRepository;
 }
 
-PVPActionPlanSender & OPC::getPlanSender()
+PVPActionPlanSender & OAC::getPlanSender()
 {
     return *planSender;
 }
 
-bool OPC::processNextMessage(MessagingSystem::Message *msg)
+bool OAC::processNextMessage(MessagingSystem::Message *msg)
 {
     using namespace combo;
 
-    logger().fine("OPC - Processing next message.");
+    logger().fine("OAC - Processing next message.");
     bool result;
 
-    // message not for the OPC
+    // message not for the OAC
     if (msg->getTo() != getID()) {
-        logger().warn("OPC - Wrong destination. Message to: %s",
+        logger().warn("OAC - Wrong destination. Message to: %s",
                      msg->getTo().c_str());
         return false;
     }
@@ -396,13 +396,13 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
         result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
 
         if (!result) {
-            logger().error("OPC - Unable to process XML message.");
+            logger().error("OAC - Unable to process XML message.");
         } else {
 
             // PVP message processed, update predicates for the
             // added/updated atoms
             predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
-            logger().debug("OPC - Message successfully  processed.");
+            logger().debug("OAC - Message successfully  processed.");
         }
         return false;
     }
@@ -414,7 +414,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
         // Message correctly processed, just exit
         if (result) {
             // TODO: Save status...
-            logger().info("OPC - Exiting...");
+            logger().info("OAC - Exiting...");
             return true;
         }
     }
@@ -422,7 +422,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
     // message from the combo shell to execute a schema
     if (msg->getFrom() == config().get("COMBO_SHELL_ID")) {
         std::string str(msg->getPlainTextRepresentation());
-        logger().error("OPC - Got combo shell msg: '%s'", str.c_str());
+        logger().error("OAC - Got combo shell msg: '%s'", str.c_str());
 
         if (str.empty())
             return false; //a timing error, maybe?
@@ -434,20 +434,20 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
         std::vector<vertex> args; //an expression, not a function - no args
         procedureInterpreter->runProcedure(cp, args);
         logger().error(
-                     "OPC - Called runProcedure(" + ss.str() + ")");
+                     "OAC - Called runProcedure(" + ss.str() + ")");
     }
 
     // message from learning server
     if (msg->getFrom() == config().get("LS_ID")) {
         LearningServerMessages::SchemaMessage * sm = (LearningServerMessages::SchemaMessage *)msg;
-        logger().debug("OPC - Got msg from LS: '%s'", msg->getPlainTextRepresentation());
+        logger().debug("OAC - Got msg from LS: '%s'", msg->getPlainTextRepresentation());
 
         // sanity check to see if LS does not return an empty
         // ComboSchema
         if (sm->getComboSchema().empty()) {
 
             logger().warn(
-                         "OPC - Received an empty ComboSchema fom LS. Discarding it.");
+                         "OAC - Received an empty ComboSchema fom LS. Discarding it.");
             return false;
 
         } else {
@@ -478,7 +478,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
             // design ensure that the learning info will not be lost
             // until a learned schema is received
             // NOTE: transfered back to when "stop learning" instruction
-            // is processed so that OPC does not stay in Lerning mode
+            // is processed so that OAC does not stay in Lerning mode
             // forever if LS crashes...
             //pet->setMode(PLAYING);
 
@@ -508,9 +508,9 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
     return false;
 }
 
-void OPC::schemaSelection()
+void OAC::schemaSelection()
 {
-    logger().fine("OPC - Executing selectSchemaToExecute().");
+    logger().fine("OAC - Executing selectSchemaToExecute().");
 
     this->pet->getCurrentModeHandler( ).update( );
     this->ruleEngine->processNextAction( );
@@ -521,22 +521,22 @@ void OPC::schemaSelection()
 //  } // if
 }
 
-void OPC::decayShortTermImportance()
+void OAC::decayShortTermImportance()
 {
     atomSpace->decayShortTermImportance();
 }
 
 
-/* TODO: OPC does not extend NetworkElement anymore.
+/* TODO: OAC does not extend NetworkElement anymore.
  * So, a better design must be created to figure out LS has just recovered from a failure:
-void OPC::markAsAvailableElement(const std::string& id){
-    logger().debug("OPC - markAsAvailableElement(%s).", id.c_str());
+void OAC::markAsAvailableElement(const std::string& id){
+    logger().debug("OAC - markAsAvailableElement(%s).", id.c_str());
 
     // remove element from unavailable list and handshake if router
     NetworkElement::markAsAvailableElement(id);
 
     if (isInitialized()) {
-        // OPC-specific actions
+        // OAC-specific actions
         PetMode mode = pet->getMode();
         if(mode == OperationalAvatarController::LEARNING){
             // Pet still in learning mode and LS has recovered from a crash. Restart
@@ -550,14 +550,14 @@ void OPC::markAsAvailableElement(const std::string& id){
 }
 */
 
-const std::string OPC::getPath(const std::string& petId, const std::string& filename)
+const std::string OAC::getPath(const std::string& petId, const std::string& filename)
 {
     std::string path;
 
     std::string base = config().get("PET_DATABASE");
     expandPath(base);
 
-    logger().debug("OPC - Pet database directory: %s", base.c_str());
+    logger().debug("OAC - Pet database directory: %s", base.c_str());
     path.append(base);
     path.append("/pet_");
     path.append(petId);
@@ -568,7 +568,7 @@ const std::string OPC::getPath(const std::string& petId, const std::string& file
         path.append(filename);
     }
 
-    logger().debug("OPC - getPath: " + path);
+    logger().debug("OAC - getPath: " + path);
 
     return path;
 }

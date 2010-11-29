@@ -4,7 +4,7 @@ if [ -z "$1" ]; then
     echo "and the corresponding action plans attempted to be sent to PAI"
     echo "the log messages are printed from the start of the log file"
     echo "Requires DEBUG log level"
-    echo "usage: $0 OPC_LOG_FILE"
+    echo "usage: $0 OAC_LOG_FILE"
     exit
 fi
 

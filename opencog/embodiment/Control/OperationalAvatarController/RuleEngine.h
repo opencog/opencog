@@ -48,7 +48,7 @@ struct lua_State;
 namespace OperationalAvatarController
 {
 
-class OPC;
+class OAC;
 class SchemaRunner;
 class RuleEngineUtil;
 class RuleEngineLearnedTricksHandler;
@@ -215,7 +215,7 @@ public:
     typedef boost::variant<Action, Relation, Feeling> Effect;
 
     // methods
-    RuleEngine( OPC* opc, const std::string& petName )
+    RuleEngine( OAC* opc, const std::string& petName )
     throw(opencog::RuntimeException);
 
     virtual ~RuleEngine( void );
@@ -267,7 +267,7 @@ private:
 
     friend class RuleEngineUtil;
 
-    OPC * opc;
+    OAC * opc;
 
     // handle the context of the lua(script language)
     lua_State * luaState;

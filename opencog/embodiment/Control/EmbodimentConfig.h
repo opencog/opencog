@@ -69,8 +69,8 @@ protected:
             "LS_PORT",                      "16314",
 
             // These 2 parameters define the maximal number of pets monitored by a same spawner
-            "MIN_OPC_PORT",                 "16326",
-            "MAX_OPC_PORT",                 "16330",
+            "MIN_OAC_PORT",                 "16326",
+            "MAX_OAC_PORT",                 "16330",
             
             "COMBO_SHELL_ID",               "COMBO_SHELL",
             "COMBO_SHELL_IP",               "127.0.0.1",
@@ -80,7 +80,7 @@ protected:
             // Anyway, fyi, the mockyProxy uses port 16315 and the real Proxy 8211
             "PROXY_ID",                     "PROXY",
 
-            // OPC settings
+            // OAC settings
             "UNKNOWN_PET_OWNER",            "no_owner_id",
             "UNKNOWN_PET_NAME",             "no_name",
             "NAVIGATION_ALGORITHM",         "tangentbug", // options: tangentbug, astar or hpa
@@ -92,7 +92,7 @@ protected:
             // component log levels
             "PROXY_LOG_LEVEL",              "FINE",
             "LS_LOG_LEVEL",                 "FINE",
-            "OPC_LOG_LEVEL",                "FINE",
+            "OAC_LOG_LEVEL",                "FINE",
             "ROUTER_LOG_LEVEL",             "FINE",
             "SPAWNER_LOG_LEVEL",            "FINE",
             "OPENCOG_LOG_LEVEL",            "FINE",
@@ -202,26 +202,26 @@ protected:
             //true for disabled, false for enabled
             "DISABLE_LOG_OF_PVP_MESSAGES",  "true",
             
-            "CHECK_OPC_MEMORY_LEAKS",       "false",
-            "CHECK_OPC_MEMORY_USAGE",       "false",
+            "CHECK_OAC_MEMORY_LEAKS",       "false",
+            "CHECK_OAC_MEMORY_USAGE",       "false",
             "VALGRIND_PATH",                "/usr/local/bin/valgrind",
             "MASSIF_DEPTH",                 "30",
             "MASSIF_DETAILED_FREQ",         "10",
             
-	    // launching OPC with a debugger
-	    // please note that CHECK_OPC_MEMORY_LEAKS, CHECK_OPC_MEMORY_USAGE
-	    // and RUN_OPC_DEBUGGER
+	    // launching OAC with a debugger
+	    // please note that CHECK_OAC_MEMORY_LEAKS, CHECK_OAC_MEMORY_USAGE
+	    // and RUN_OAC_DEBUGGER
 	    // are all exclusif (only one can be activated at a time)
-            "RUN_OPC_DEBUGGER",             "false",
-            "OPC_DEBUGGER_PATH",            "/usr/bin/gdb",
+            "RUN_OAC_DEBUGGER",             "false",
+            "OAC_DEBUGGER_PATH",            "/usr/bin/gdb",
 
-	    // Call the debugger with the OPC arguments directly
+	    // Call the debugger with the OAC arguments directly
 	    // appended at the end of the command line of the debugger call,
 	    // some debuggers, like nemiver, accept
 	    // the program to debug's argument in their command line
 	    // If it is false then the arguments are printed on the standard
 	    // output instead
-	    "PASS_OPC_ARG_DEBUGGER_COMMAND","true",
+	    "PASS_OAC_ARG_DEBUGGER_COMMAND","true",
             
             // NetworkElement's message reading parameters
             "UNREAD_MESSAGES_CHECK_INTERVAL",
@@ -307,7 +307,7 @@ protected:
             "TYPE_CHECK_LOADING_PROCEDURES","true",
             "TYPE_CHECK_GENERATED_COMBO",   "true",
             
-            "MANUAL_OPC_LAUNCH",            "false",
+            "MANUAL_OAC_LAUNCH",            "false",
 
             "SCHEME_TYPEDEFS_PATH",         "type_constructors.scm",
 

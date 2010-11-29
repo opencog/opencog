@@ -80,7 +80,7 @@ class PerceptionSimulator
     #ts = Time.now.strftime("%Y-%m-%dT%H:%M:%S-%Z")
     ts = Time.now.strftime("%Y-%m-%dT%H:%M:%S")
    
-    # current actions sent by OPC for test purposes:
+    # current actions sent by OAC for test purposes:
     #insertAtoms(ActionType::DROP().getName());
     #insertAtoms(ActionType::SNIFF().getName());
     #insertAtoms(ActionType::BARK().getName());

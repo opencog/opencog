@@ -212,11 +212,11 @@ Pet & MockOpcHCTest::getPet()
 
 bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
 {
-    logger().debug("DEBUG - OPC - Received msg");
+    logger().debug("DEBUG - OAC - Received msg");
 
-    std::cout << "OPC RECEIVED MSG" << std::endl;
+    std::cout << "OAC RECEIVED MSG" << std::endl;
 
-    // message not for the OPC
+    // message not for the OAC
     if (msg->getTo() != getID()) {
         return false;
     }

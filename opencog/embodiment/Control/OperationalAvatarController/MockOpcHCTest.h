@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MOCKOPCHCTEST_H
-#define MOCKOPCHCTEST_H
+#ifndef MOCKOACHCTEST_H
+#define MOCKOACHCTEST_H
 
 #include <string>
 

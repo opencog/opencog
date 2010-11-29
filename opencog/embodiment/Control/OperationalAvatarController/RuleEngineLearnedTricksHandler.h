@@ -24,7 +24,7 @@
 #ifndef RULEENGINELEARNEDTRICKSHANDLER_H
 #define RULEENGINELEARNEDTRICKSHANDLER_H
 
-#include "OPC.h"
+#include "OAC.h"
 
 namespace OperationalAvatarController
 {
@@ -37,7 +37,7 @@ public:
     static const int PUNISHMENT_VALUE;
     static const int NOT_SELECTED_VALUE;
 
-    RuleEngineLearnedTricksHandler( OPC* opc );
+    RuleEngineLearnedTricksHandler( OAC* opc );
 
     ~RuleEngineLearnedTricksHandler( );
 
@@ -57,7 +57,7 @@ private:
 
     void addToSTIValue( Handle link, short value );
 
-    OPC* opc;
+    OAC* opc;
     AtomSpace* atomSpace;
     Handle learnedTrickNode;
     std::set<Handle> punishedTricks;

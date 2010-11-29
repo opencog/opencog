@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalAvatarController/OPC.h
+ * opencog/embodiment/Control/OperationalAvatarController/OAC.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OPC_H
-#define OPC_H
+#ifndef OAC_H
+#define OAC_H
 
 #include <string>
 #include <opencog/persist/file/SavingLoading.h>
@@ -61,7 +61,7 @@ public:
     }
 };
 
-class OPC : public EmbodimentCogServer
+class OAC : public EmbodimentCogServer
 {
 
 private:
@@ -84,13 +84,13 @@ private:
     PerceptionActionInterface::PAI * pai;
 
     /**
-     * Store metadata concerning a pet controled by the OPC. Also implements
+     * Store metadata concerning a pet controled by the OAC. Also implements
      * an interface to comunicate with the LS.
      */
     Pet * pet;
 
     /**
-     * Interpreter for the procedures to be executed by the OPC. Can
+     * Interpreter for the procedures to be executed by the OAC. Can
      * deal with combo and builtin procedures
      */
     Procedure::ProcedureInterpreter * procedureInterpreter;
@@ -121,7 +121,7 @@ private:
     /**
      * Load pet metadata for a given pet.
      *
-     * IMPORTANT: This method should be invoke only in OPC start up, i.e.
+     * IMPORTANT: This method should be invoke only in OAC start up, i.e.
      * in the constructor.
      */
     void loadPet(const std::string & petId);
@@ -132,7 +132,7 @@ private:
      * SavableRepository objects must be created and registered
      * (this may be done at the constructor).
      *
-     * IMPORTANT: This method should be invoke only in OPC start up, i.e.
+     * IMPORTANT: This method should be invoke only in OAC start up, i.e.
      * in the constructor.
      */
     void loadAtomSpace(const std::string & petId);
@@ -162,8 +162,8 @@ public:
     /**
      * Constructor and destructor
      */
-    OPC();
-    ~OPC();
+    OAC();
+    ~OAC();
 
     void init(const std::string &myId, const std::string &ip, int portNumber,
               const std::string& petId, const std::string& ownerId,
@@ -172,7 +172,7 @@ public:
     /**
      * Save the OCP state.
      *
-     * IMPORTANT: This method should be invoke only on OPC shutdown,
+     * IMPORTANT: This method should be invoke only on OAC shutdown,
      *            that is, when it receive a shutdown message from the
      *            spawner. Or when an exception has occured and the state
      *            should be persisted.
@@ -195,30 +195,30 @@ public:
     Pet & getPet();
 
     /**
-     * Get the RuleEngine associated with the OPC.
+     * Get the RuleEngine associated with the OAC.
      *
-     * @return The RuleEngine associated with the OPC.
+     * @return The RuleEngine associated with the OAC.
      */
     RuleEngine & getRuleEngine();
 
     /**
-     * Get the Procedure Interpreter associated with the OPC.
+     * Get the Procedure Interpreter associated with the OAC.
      *
-     * @return The ProcedureInterpreter associated with the OPC.
+     * @return The ProcedureInterpreter associated with the OAC.
      */
     Procedure::ProcedureInterpreter & getProcedureInterpreter();
 
 
     /**
-     * Get the Procedure Repository associated with the OPC.
+     * Get the Procedure Repository associated with the OAC.
      *
-     * @return The ProcedureRepository associated with the OPC.
+     * @return The ProcedureRepository associated with the OAC.
      */
     Procedure::ProcedureRepository & getProcedureRepository( );
 
 
     /**
-      * @return A reference to the PVPActionPlanSender of this OPC
+      * @return A reference to the PVPActionPlanSender of this OAC
       */
     PVPActionPlanSender & getPlanSender();
 

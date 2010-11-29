@@ -737,7 +737,7 @@ void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
     XERCES_CPP_NAMESPACE::XMLString::transcode(PET_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* petID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     string internalPetId = PAIUtils::getInternalId(petID);
-    // TODO: Do we need to check if pedID matches the id of the Pet being controlled by this OPC?
+    // TODO: Do we need to check if pedID matches the id of the Pet being controlled by this OAC?
 
     /// getting name atribute value
     XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -983,7 +983,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     XERCES_CPP_NAMESPACE::XMLString::transcode(PET_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* petID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     string internalPetId = PAIUtils::getInternalId(petID);
-    // TODO: Do we need to check if pedID matches the id of the Pet being controlled by this OPC?
+    // TODO: Do we need to check if pedID matches the id of the Pet being controlled by this OAC?
 
     /// getting avatar-id atribute value
     // TODO: Rename avatar-id to agent-id, since any agent (avatar, pet,

@@ -69,7 +69,7 @@ opencog::Logger LoggerFactory::getLogger(const std::string &id)
     } else if (id == config().get("PROXY_ID")) {
         level = Logger::getLevelFromString(config().get("PROXY_LOG_LEVEL"));
     } else {
-        level = Logger::getLevelFromString(config().get("OPC_LOG_LEVEL"));
+        level = Logger::getLevelFromString(config().get("OAC_LOG_LEVEL"));
     }
 
     timestampEnabled = config().get_bool("TIMESTAMP_ENABLED_IN_LOGS");

@@ -2,7 +2,7 @@
 if [ -z "$1" ]; then 
     echo "This script prints in real-time all relations created so far and their truth values"
     echo "Requires FINE log level"
-    echo "usage: $0 OPC_LOG_FILE"
+    echo "usage: $0 OAC_LOG_FILE"
     exit
 fi
 

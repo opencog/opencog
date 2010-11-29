@@ -388,7 +388,7 @@ void RouterServerSocket::OnLine(const std::string& line)
             addNetworkElement(id, ip, port);
 
         } else if (command == "LOGOUT") {
-            // logout an NetworkElement - must of the time an OPC
+            // logout an NetworkElement - must of the time an OAC
             std::string id = args.front();
             args.pop();
 

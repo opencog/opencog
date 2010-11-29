@@ -386,7 +386,7 @@ bool VisibilityMap::isInsideArea( const spatial::Entity& entity, unsigned int ar
 
     math::Rectangle boundings( center1, spatial::math::Vector3( center2.x, 0, center1.z ), center2 );
     const std::vector<math::LineSegment>& corners = entity.getBoundingBox( ).getAllEdges( );
-    // TODO: change default OPC coordinate systems to x, z, y instead of using just x and y
+    // TODO: change default OAC coordinate systems to x, z, y instead of using just x and y
     unsigned int i;
     for ( i = 0; i < 4; ++i ) {
         if ( boundings.isInside( math::Vector3( corners[i].pointA.x, 0, corners[i].pointA.y ) ) ) {

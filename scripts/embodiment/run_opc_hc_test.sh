@@ -9,7 +9,7 @@ sleep 5
 echo "Start LS, please wait..."
 ./learningServer &
 sleep 10
-echo "Start MockOPCHCTest"
+echo "Start MockOACHCTest"
 #comment the following command line
 #and uncomment the 3 after if you want to use a debugger
 ./opcHcTester Fido 16330

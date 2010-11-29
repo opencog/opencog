@@ -284,7 +284,7 @@ private:
      * messages again.
      *
      * IMPORTANT: Filters are applied to notifications sent to Proxy. Only
-     * the ones related to OPC are considered.
+     * the ones related to OAC are considered.
      *
      * @param id The id of element that is available again.
      * @param availabile True if the element is available and false

@@ -75,7 +75,7 @@ public:
 
     /**
      * Try a candidate schema of the schema being learned. This schema is
-     * send to OPC in order to be evaluated by the pet owner. In order to
+     * send to OAC in order to be evaluated by the pet owner. In order to
      * send a candidate schema, the learning algorithm is pause and waits
      * for a feedback from the user (a reward message)
      *
@@ -84,7 +84,7 @@ public:
     void sendCandidateSchema(const combo::combo_tree & schema);
 
     /**
-     * Send the best schema so far to be stored in the OPC procedure repository
+     * Send the best schema so far to be stored in the OAC procedure repository
      *
      * @param schema The combo combo_tree representation of the schema
      */
@@ -161,13 +161,13 @@ private:
 
     /**
      * Finishs the learning process, get the best schema so far and send it to
-     * the OPC to be added into pet's procedure repository.
+     * the OAC to be added into pet's procedure repository.
      */
     void stopLearn();
 
     /**
      * Get the best schema so far during learning process and send it to
-     * the OPC in order to be evaluated by the owner of the pet. Note: the
+     * the OAC in order to be evaluated by the owner of the pet. Note: the
      * learning process is paused when a candidate schema is sent to evaluation.
      */
     void trySchema();

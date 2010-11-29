@@ -22,7 +22,7 @@
  */
 
 
-#include "OPC.h"
+#include "OAC.h"
 #include "ImportanceDecayAgent.h"
 
 using namespace OperationalAvatarController;
@@ -47,7 +47,7 @@ void ImportanceDecayAgent::run(opencog::CogServer *server)
 
     logger().fine(
                  "ImportanceDecayTask - Executing decayShortTermImportance().");
-    ((OPC *) server)->decayShortTermImportance();
+    ((OAC *) server)->decayShortTermImportance();
 
 }
 

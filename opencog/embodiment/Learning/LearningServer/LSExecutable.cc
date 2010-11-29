@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
                      "LSExec - LS raised a bad_alloc exception.");
     } catch (StandardException se) {
         logger().error(
-                     "OPC executable - An exceptional situation occured"
+                     "OAC executable - An exceptional situation occured"
                      " with the following message '%s'"
                      ". Check log for more information.",
                      se.getMessage());

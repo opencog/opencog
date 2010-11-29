@@ -22,7 +22,7 @@
  */
 
 
-#include "OPC.h"
+#include "OAC.h"
 #include "ActionSelectionAgent.h"
 
 using namespace OperationalAvatarController;
@@ -39,5 +39,5 @@ ActionSelectionAgent::ActionSelectionAgent()
 void ActionSelectionAgent::run(opencog::CogServer *server)
 {
     logger().debug("ActionSelectionAgent - Executing schemaSelection().");
-    ((OPC *) server)->schemaSelection();
+    ((OAC *) server)->schemaSelection();
 }

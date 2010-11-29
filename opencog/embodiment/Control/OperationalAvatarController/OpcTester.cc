@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OPC.h"
+#include "OAC.h"
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <stdio.h>
@@ -63,8 +63,8 @@ int main()
     //char * file = "arquivo.xml";
     //string xml = "<?xml version=\"1.0\"?><instruction pet-id=\"1\" avatar-id=\"2\" timestamp=\"2007-06-20\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:SchemaLocation=\"http://www.electricsheepcompany.com/xml/ns/PetProxy /home/dlopes/projetos/petaverse/trunk/Petaverse/build/src/PetController/petBrain.xsd\">start learning!</instruction><instruction pet-id=\"1\" avatar-id=\"2\" timestamp=\"2007-06-20\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:SchemaLocation=\"http://www.electricsheepcompany.com/xml/ns/PetProxy /home/dlopes/projetos/petaverse/trunk/Petaverse/build/src/PetController/petBrain.xsd\">stop learning</instruction>";
 
-    server(OPC::createInstance);
-    OPC& opc = static_cast<OPC&>(server());
+    server(OAC::createInstance);
+    OAC& opc = static_cast<OAC&>(server());
     opc.init("teste-opc", "127.0.0.1", 4000, "1", "2", "pet", "neutral");
     msg->setMessage(xml);
     opc.processNextMessage(msg);

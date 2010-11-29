@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalAvatarController/OPCExecutable.cc
+ * opencog/embodiment/Control/OperationalAvatarController/OACExecutable.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -27,7 +27,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/files.h>
-#include "OPC.h"
+#include "OAC.h"
 
 using namespace OperationalAvatarController;
 using namespace opencog;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 {
 
     if (argc != 7) {
-        logger().error("OPCExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port>.");
+        logger().error("OACExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port>.");
         return (1);
     }
 
@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
         //int portNumber = 5100 + petID;
         int portNumber = atoi(argv[5]);
         
-        server(OPC::createInstance);
-        OPC& opc = static_cast<OPC&>(server());
+        server(OAC::createInstance);
+        OAC& opc = static_cast<OAC&>(server());
         // Open database *before* loading modules, since the modules
         // might create atoms, and we can't have that happen until 
         // storage is open, as otherwise, there will be handle conflicts.
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         // enable the network server and run the server's main loop
         opc.enableNetworkServer();
 
-        // TODO: After making OPC a CogServerMain-compatible server, create a
+        // TODO: After making OAC a CogServerMain-compatible server, create a
         // shell command to list all configuration parameters (like MIN_STI
         // bellow). An perhaps a command to set a config parameter at runtime,
         // which may be very useful.
@@ -99,20 +99,20 @@ int main(int argc, char *argv[])
 
     } catch (std::bad_alloc) {
         logger().error(
-                     "OPCExecutable - OPC raised a bad_alloc exception.");
-        static_cast<OPC&>(server()).saveState();
+                     "OACExecutable - OAC raised a bad_alloc exception.");
+        static_cast<OAC&>(server()).saveState();
     } catch (StandardException se) {
         logger().error(
-                     "OPCExecutable - An exceptional situation occured"
+                     "OACExecutable - An exceptional situation occured"
                      " with the following message '%s'"
                      ". Check log for more information.",
                      se.getMessage());
-        static_cast<OPC&>(server()).saveState();
+        static_cast<OAC&>(server()).saveState();
     } catch (...) {
         logger().error(
-                     "OPCExecutable - An exceptional situation occured"
+                     "OACExecutable - An exceptional situation occured"
                      ". Check log for more information.");
-        static_cast<OPC&>(server()).saveState();
+        static_cast<OAC&>(server()).saveState();
     }
 
     return (0);

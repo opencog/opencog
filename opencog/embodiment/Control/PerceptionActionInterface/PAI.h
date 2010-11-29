@@ -223,7 +223,7 @@ public:
      * send action plans to the Virtual World.
      * @param nextPlanID The next plan ID to be used as return of the next
      * call to startActionPlan() method.  This argument may be useful to
-     * continue a previous sequence of action plan IDs (when restarting OPC, for
+     * continue a previous sequence of action plan IDs (when restarting OAC, for
      * instance). If not provided, assumes 0 as default.
      */
     PAI(AtomSpace& _atomSpace, ActionPlanSender& actionSender,
@@ -317,7 +317,7 @@ public:
      * @param pvpMessage the PVP message in the XML format to be processed
      * @param toUpdateHandles a vector where the handles of all objects
      * added/update by the processing of a PVPMessage. This information is used
-     * to update is_X predicates in the OPC (by PredicatesUpdater class).
+     * to update is_X predicates in the OAC (by PredicatesUpdater class).
      *
      * @return A boolean value for indicating if the PVP message was processed
      * successfully or not.
@@ -328,7 +328,7 @@ public:
      * Mark all pending actions as failed. This method should be called when
      * PROXY is down and hence the pending action plans won't have feedback.
      *
-     * This method should be called only by the OPC
+     * This method should be called only by the OAC
      */
     void setPendingActionPlansFailed();
 
@@ -407,7 +407,7 @@ private:
      * @param doc The parsed XML file to be processed
      * @param toUpdateHandles a vector where the handles of all objects
      * added/update by the processing of a PVPMessage. This information is used
-     * to update is_X predicates in the OPC (by PredicatesUpdater class).
+     * to update is_X predicates in the OAC (by PredicatesUpdater class).
      */
     void processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq
             &toUpdateHandles);
@@ -452,7 +452,7 @@ private:
      * @param element The map-info element to be processed
      * @param toUpdateHandles a vector where the handles of all objects
      * added/update by the processing of a PVPMessage. This information is used
-     * to update is_X predicates in the OPC (by PredicatesUpdater class).
+     * to update is_X predicates in the OAC (by PredicatesUpdater class).
      */
     void processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq
             &toUpdateHandles);

@@ -22,7 +22,7 @@
  */
 
 
-#include "OPC.h"
+#include "OAC.h"
 #include "ProcedureInterpreterAgent.h"
 
 using namespace OperationalAvatarController;
@@ -43,5 +43,5 @@ void ProcedureInterpreterAgent::setInterpreter(Procedure::ProcedureInterpreter* 
 void ProcedureInterpreterAgent::run(opencog::CogServer *server)
 {
     logger().fine("ProcedureInterpreterAgent::run()");
-    interpreter->run(&(((OPC*)server)->getNetworkElement()));
+    interpreter->run(&(((OAC*)server)->getNetworkElement()));
 }
