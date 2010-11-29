@@ -26,7 +26,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
-#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/OutputRelex.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/FramesToRelexRuleEngine.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/NLGenClient.h>
@@ -99,11 +99,11 @@ namespace OperationalAvatarController
         protected:
             std::string name;
             LanguageComprehension* langComp;
-            Control::PetInterface* agent;
+            Control::AvatarInterface* agent;
             Handle agentHandle;
         };
 
-        LanguageComprehension( Control::PetInterface& agent );
+        LanguageComprehension( Control::AvatarInterface& agent );
         
         virtual ~LanguageComprehension( void );        
         
@@ -146,7 +146,7 @@ namespace OperationalAvatarController
         /**
          * Getter for the agent interface
          */
-        inline Control::PetInterface& getAgent( void )
+        inline Control::AvatarInterface& getAgent( void )
         {
             return this->agent;
         }
@@ -210,9 +210,9 @@ namespace OperationalAvatarController
         static void createFrameInstancesFromRelations( AtomSpace& atomSpace, HandleSeq& resultingFrames,
                                                        const std::list<spatial::Entity::SPATIAL_RELATION>& relations,
                                                        const std::string& objectA, const std::string& objectB, const std::string& objectC );
-        static Control::PetInterface* localAgent;
+        static Control::AvatarInterface* localAgent;
         
-        Control::PetInterface& agent;
+        Control::AvatarInterface& agent;
         std::string nlgen_server_host;
         int nlgen_server_port;
         FramesToRelexRuleEngine framesToRelexRuleEngine;

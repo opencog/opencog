@@ -34,7 +34,7 @@
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
-#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/AvatarInterface.h>
 
 #include <opencog/embodiment/Control/OperationalAvatarController/LanguageComprehension.h>
 #include <opencog/spatial/MapExplorerServer.h>
@@ -58,7 +58,7 @@ enum PetMode {
 /**
  *
  */
-class Pet : public Control::PetInterface
+class Pet : public Control::AvatarInterface
 {
 
 private:    
@@ -280,7 +280,7 @@ public:
     static void exportToFile(const std::string& filename, Pet & pet) throw
         (opencog::IOException, std::bad_exception);
 
-    // IMPLEMENTATION OF METHODS OF PetInterface (getPetId() is already defined
+    // IMPLEMENTATION OF METHODS OF AvatarInterface (getPetId() is already defined
     // above):
 
     AtomSpace& getAtomSpace();
@@ -323,7 +323,7 @@ public:
     void getHighLTIObjects(HandleSeq& highLTIObjects);
 
     /**
-     * @see PetInterface::setLatestGotoTarget
+     * @see AvatarInterface::setLatestGotoTarget
      */
     void setLatestGotoTarget(
             const std::pair<std::string, spatial::Point>& target ) {
@@ -331,7 +331,7 @@ public:
     };
 
     /**
-     * @see PetInterface::getLatestGotoTarget
+     * @see AvatarInterface::getLatestGotoTarget
      */
     const std::pair<std::string, spatial::Point>& getLatestGotoTarget( void ) {
         return this->targetObject;

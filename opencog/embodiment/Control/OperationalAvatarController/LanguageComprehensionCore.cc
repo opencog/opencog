@@ -29,7 +29,7 @@
 using namespace OperationalAvatarController;
 using namespace opencog;
 
-LanguageComprehension::LanguageComprehension( Control::PetInterface& agent ) : 
+LanguageComprehension::LanguageComprehension( Control::AvatarInterface& agent ) : 
     agent( agent ), nlgenClient( NULL ), initialized( false )
 {
 }

@@ -36,7 +36,7 @@
 #include "PetAction.h"
 #include "ActionPlan.h"
 #include "ActionPlanSender.h"
-#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 #include <map>
@@ -105,9 +105,9 @@ private:
     ActionPlanSender& actionSender;
 
     /**
-     * A reference to a PetInterface (actualy a pet)
+     * A reference to a AvatarInterface (actualy a pet)
      */
-    Control::PetInterface& petInterface;
+    Control::AvatarInterface& petInterface;
 
     /**
      * The ID for the next action plan to be created
@@ -227,7 +227,7 @@ public:
      * instance). If not provided, assumes 0 as default.
      */
     PAI(AtomSpace& _atomSpace, ActionPlanSender& actionSender,
-            Control::PetInterface& petInterface, unsigned long nextPlanID = 0);
+            Control::AvatarInterface& petInterface, unsigned long nextPlanID = 0);
 
     /**
      * Destructor
@@ -240,9 +240,9 @@ public:
     AtomSpace& getAtomSpace();
 
     /**
-     * Gets the reference to the PetInterface this PAI works with
+     * Gets the reference to the AvatarInterface this PAI works with
      */
-    Control::PetInterface& getPetInterface();
+    Control::AvatarInterface& getAvatarInterface();
 
 
     /**

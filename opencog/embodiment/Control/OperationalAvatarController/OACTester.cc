@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalAvatarController/OpcTester.cc
+ * opencog/embodiment/Control/OperationalAvatarController/OACTester.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved

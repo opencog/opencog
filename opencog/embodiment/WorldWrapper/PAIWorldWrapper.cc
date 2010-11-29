@@ -127,7 +127,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                          "PAIWorldWrapper - goto_obj(%s, %f)", target.c_str( ), walkSpeed );
             if ( target == "custom_path" ) {
                 std::string customWaypoints =
-                    _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customPath" );
+                    _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customPath" );
 
                 std::vector<spatial::Point> actionPlan;
 
@@ -156,7 +156,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 } // for
 
                 // register seeking object
-                _pai.getPetInterface( ).setLatestGotoTarget( std::pair<std::string, spatial::Point>( target, wayPoint ) );
+                _pai.getAvatarInterface( ).setLatestGotoTarget( std::pair<std::string, spatial::Point>( target, wayPoint ) );
 
                 if ( _hasPlanFailed || !createWalkPlanAction( actionPlan, false, Handle::UNDEFINED, walkSpeed ) ) {
                     if (_hasPlanFailed) {
@@ -168,11 +168,11 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 } // if
 
                 std::vector<std::string> arguments;
-                _pai.getPetInterface( ).getCurrentModeHandler( ).handleCommand( "followCustomPathDone", arguments );
+                _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "followCustomPathDone", arguments );
             } else {
 
                 if ( target == "custom_object" ) {
-                    target = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+                    target = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
                 } // if
                 Handle targetHandle = toHandle( target );
                 try {
@@ -184,7 +184,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                         } else {
                             logger().info("PAIWorldWrapper - No goto plan needed since the goal was already near enough.");
                             std::vector<std::string> arguments;
-                            _pai.getPetInterface( ).getCurrentModeHandler( ).handleCommand( "gotoDone", arguments );
+                            _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "gotoDone", arguments );
 
                         } // else
                         MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
@@ -199,7 +199,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 } // catch
 
                 std::vector<std::string> arguments;
-                _pai.getPetInterface( ).getCurrentModeHandler( ).handleCommand( "gotoDone", arguments );
+                _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "gotoDone", arguments );
             } // else
 
         }
@@ -215,7 +215,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 float walkSpeed = get_contin( *++it.begin() );
 
                 if ( target == "custom_object" ) {
-                    target = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+                    target = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
                 } // if
 
                 const spatial::EntityPtr& entity = sm.getEntity( target );
@@ -268,7 +268,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             float walkSpeed = get_contin( *++it.begin() );
 
             if ( target == "custom_object" ) {
-                target = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+                target = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
             } // if
 
             if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),  target ) ) { //can't find the target
@@ -298,7 +298,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             //spatial::Point startPoint( md.centerX, md.centerY );
 
             // register seeking object
-            _pai.getPetInterface( ).setLatestGotoTarget(
+            _pai.getAvatarInterface( ).setLatestGotoTarget(
                 std::pair<std::string, spatial::Point>( target, spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ) ) );
 
             if ( !buildGotoPlan( goalPoint, walkSpeed ) ) {
@@ -412,7 +412,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 float duration = get_contin( *++(++it.begin( ) ) );
 
                 if ( duration == 0 ) {
-                    duration = _pai.getPetInterface( ).computeFollowingDuration( );
+                    duration = _pai.getAvatarInterface( ).computeFollowingDuration( );
                 } // if
 
                 if (!build_goto_plan(obj, false, Handle::UNDEFINED, Handle::UNDEFINED, walkSpeed ) )
@@ -739,7 +739,7 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
                                                        it_action.second,
                                                        0.0)));
 
-            float speed = ( customSpeed != 0 ) ? customSpeed : _pai.getPetInterface().computeWalkingSpeed();
+            float speed = ( customSpeed != 0 ) ? customSpeed : _pai.getAvatarInterface().computeWalkingSpeed();
             logger().debug("PAIWorldWrapper::createWalkPlanAction customSpeed[%f] finalSpeed[%f]", customSpeed, speed );
             action.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), lexical_cast<string>( speed) ) );
 
@@ -791,7 +791,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
                  "PAIWorldWrapper - Pet position: (%.2f, %.2f). Goal position: (%.2f, %.2f) - %s.",
                  startPoint.first, startPoint.second,  endPoint.first, endPoint.second, goalName.c_str());
     // register seeking object
-    _pai.getPetInterface( ).setLatestGotoTarget(
+    _pai.getAvatarInterface( ).setLatestGotoTarget(
         std::pair<std::string, spatial::Point>( goalName, targetCenterPosition ) );
 
     return buildGotoPlan( endPoint, walkSpeed );
@@ -942,7 +942,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         } // else
 
         if ( targetName == "custom_object" ) {
-            targetName = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+            targetName = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
         } // else
 
         action.addParameter( ActionParameter( "target", ActionParamType::ENTITY( ),
@@ -965,13 +965,13 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         } // else
 
         if ( message == "custom_message" ) {
-            message = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customMessage" );
+            message = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customMessage" );
         } // if
 
         // once the say action was executed set the has_something_to_say predicate to false
         // to avoid repetitions
         AtomSpaceUtil::setPredicateValue( as, "has_something_to_say", TruthValue::FALSE_TV( ),
-                                          AtomSpaceUtil::getAgentHandle( as, _pai.getPetInterface( ).getPetId( ) ) );
+                                          AtomSpaceUtil::getAgentHandle( as, _pai.getAvatarInterface( ).getPetId( ) ) );
                         
         action.addParameter( ActionParameter( "message", ActionParamType::STRING( ), message ) );
 
@@ -986,7 +986,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         } // else
         
         if ( targetName == "custom_object" ) {
-            targetName = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+            targetName = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
         } // else
         
         action.addParameter( ActionParameter( "target", ActionParamType::STRING( ), targetName ) );
@@ -1057,7 +1057,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         action.addParameter( ActionParameter( "command", ActionParamType::STRING( ), commandName ) );
         action.addParameter( ActionParameter( "parameters", ActionParamType::STRING( ), parameters.str() ) );
 
-        _pai.getPetInterface( ).getCurrentModeHandler( ).handleCommand( "groupCommandDone", actionDoneParameters );
+        _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "groupCommandDone", actionDoneParameters );
 
     }
     break;
@@ -1068,7 +1068,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         logger().debug(
                      "PAIWorldWrapper - receiving latest_group_commands from all agents" );
 
-        //_pai.getPetInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
+        //_pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
 
         // retrieve all agents
         std::vector<Handle> agentsHandles;
@@ -1123,7 +1123,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                     commandArguments.push_back( commandParameters[j] );
                 } // for
 
-                _pai.getPetInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
+                _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
 
             } // if
         } // for
@@ -1247,13 +1247,13 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     case id::rotate_left:      // rotate_left
         action.addParameter(ActionParameter("rotation",
                                             ActionParamType::ROTATION(),
-                                            Rotation(0.0, 0.0, _pai.getPetInterface().computeRotationAngle())));
+                                            Rotation(0.0, 0.0, _pai.getAvatarInterface().computeRotationAngle())));
         break;
 
     case id::rotate_right:     // rotate_right
         action.addParameter(ActionParameter("rotation",
                                             ActionParamType::ROTATION(),
-                                            Rotation(0.0, 0.0, -_pai.getPetInterface().computeRotationAngle())));
+                                            Rotation(0.0, 0.0, -_pai.getAvatarInterface().computeRotationAngle())));
         break;
 
         //now stepping actions
@@ -1297,7 +1297,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             }
             action.addParameter(ActionParameter("speed",
                                                 ActionParamType::FLOAT(),
-                                                lexical_cast<string>(_pai.getPetInterface().computeWalkingSpeed())));
+                                                lexical_cast<string>(_pai.getAvatarInterface().computeWalkingSpeed())));
         }
         break;
     case id::step_towards:      // step_towards(obj,TOWARDS|AWAY)
@@ -1324,7 +1324,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                                                 Vector(p.first, p.second, 0.0)));
             action.addParameter(ActionParameter("speed",
                                                 ActionParamType::FLOAT(),
-                                                lexical_cast<string>(_pai.getPetInterface().computeWalkingSpeed())));
+                                                lexical_cast<string>(_pai.getAvatarInterface().computeWalkingSpeed())));
         }
         break;
 
@@ -1397,7 +1397,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             spatial::math::Vector3 targetPosition;
             if ( targetObjectName == "custom_position" ) {
                 std::stringstream parser(
-                    _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customPosition" )
+                    _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customPosition" )
                 );
                 parser >> targetPosition.x;
                 parser >> targetPosition.y;
@@ -1502,12 +1502,12 @@ string PAIWorldWrapper::resolveType(Handle h)
 
 string PAIWorldWrapper::selfName()
 {
-    return _pai.getPetInterface().getPetId();
+    return _pai.getAvatarInterface().getPetId();
 }
 
 string PAIWorldWrapper::ownerName()
 {
-    return _pai.getPetInterface().getOwnerId();
+    return _pai.getAvatarInterface().getOwnerId();
 }
 
 /**

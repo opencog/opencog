@@ -32,7 +32,7 @@ namespace OperationalAvatarController
 {
 class Pet;
 /**
- * If a given mode doesn't need a handler, use a base handler to be returned by PetInterface
+ * If a given mode doesn't need a handler, use a base handler to be returned by AvatarInterface
  */
 class BaseAgentModeHandler : public Control::AgentModeHandler
 {

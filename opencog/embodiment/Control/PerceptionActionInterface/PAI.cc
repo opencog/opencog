@@ -69,7 +69,7 @@ using namespace opencog;
 #define REGEX_OUTPUT_SIZE 8
 
 
-PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _petInterface, unsigned long nextPlanID) :
+PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, AvatarInterface& _petInterface, unsigned long nextPlanID) :
         atomSpace(_atomSpace), actionSender(_actionSender), petInterface(_petInterface), nextActionPlanId(nextPlanID)
 {
     PAIUtils::initializeXMLPlatform();
@@ -126,7 +126,7 @@ AtomSpace& PAI::getAtomSpace()
     return atomSpace;
 }
 
-PetInterface& PAI::getPetInterface()
+AvatarInterface& PAI::getAvatarInterface()
 {
     return petInterface;
 }
@@ -1823,7 +1823,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             atomSpace.removeSpaceInfo(keepPreviousMap, objectNode, tsValue);
 
             // check if the object to be removed is marked as grabbed in
-            // PetInterface. If so grabbed status should be unset.
+            // AvatarInterface. If so grabbed status should be unset.
             if (petInterface.hasGrabbedObj() &&
                     petInterface.getGrabbedObj() == atomSpace.getName(objectNode)) {
                 petInterface.setGrabbedObj(std::string(""));

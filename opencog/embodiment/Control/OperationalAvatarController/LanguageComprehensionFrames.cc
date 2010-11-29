@@ -31,7 +31,7 @@ using namespace OperationalAvatarController;
 using namespace opencog;
 using namespace opencog::spatial;
 
-Control::PetInterface* LanguageComprehension::localAgent = NULL;
+Control::AvatarInterface* LanguageComprehension::localAgent = NULL;
 
 #ifdef HAVE_GUILE
 SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM groundSemeNode, SCM ground2SemeNode ) {

@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/PetInterface.h
+ * opencog/embodiment/Control/AvatarInterface.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -24,7 +24,7 @@
 #ifndef PET_INTERFACE_H_
 #define PET_INTERFACE_H_
 /**
- * PetInterface.h
+ * AvatarInterface.h
  *
  * This is an abstract class to define the interface that the Pet class must
  * provide for usage by other classes (like PAI, Predavese parser and handlers, etc).
@@ -44,11 +44,11 @@ using namespace opencog;
 namespace Control
 {
 
-class PetInterface
+class AvatarInterface
 {
 
 public:
-    virtual ~PetInterface() {}
+    virtual ~AvatarInterface() {}
 
     virtual const std::string& getPetId() const = 0;
     virtual const std::string& getExemplarAvatarId() const = 0;
@@ -159,9 +159,9 @@ public:
      * Save a LocalSpaceMap2D copy on the current application directory
      */
     void saveSpaceMapFile() {
-        logger().debug("PetInterface - saveSpaceMapFile().");
+        logger().debug("AvatarInterface - saveSpaceMapFile().");
         if (!getAtomSpace().getSpaceServer().isLatestMapValid()) {
-            logger().warn("PetInterface - There is no space map yet.");
+            logger().warn("AvatarInterface - There is no space map yet.");
             return;
         }
         const SpaceServer::SpaceMap& sm = getAtomSpace().getSpaceServer().getLatestMap();

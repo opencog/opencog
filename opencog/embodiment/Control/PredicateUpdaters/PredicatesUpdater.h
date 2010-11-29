@@ -30,7 +30,7 @@
 #define PREDICATESUPDATER_H_
 
 #include "BasicPredicateUpdater.h"
-#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <vector>

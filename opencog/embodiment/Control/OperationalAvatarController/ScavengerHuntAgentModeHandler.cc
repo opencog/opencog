@@ -26,7 +26,7 @@
 #include "Pet.h"
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
-#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 #include <opencog/atomspace/SimpleTruthValue.h>

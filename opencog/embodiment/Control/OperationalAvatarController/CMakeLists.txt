@@ -47,8 +47,8 @@ IF(COMMAND cmake_policy)
       CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
 
-ADD_EXECUTABLE (OpcTester OpcTester.cc)
-TARGET_LINK_LIBRARIES (OpcTester
+ADD_EXECUTABLE (OACTester OACTester.cc)
+TARGET_LINK_LIBRARIES (OACTester
     OpcLib
     comboreduct
     PetComboVocabulary

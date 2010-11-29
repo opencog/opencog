@@ -465,7 +465,7 @@ void Pet::exportToFile(const std::string& filename, Pet & pet) throw
 }
 
 /* ---------------------------------------------------
- * IMPLEMENTATION OF METHODS OF PetInterface
+ * IMPLEMENTATION OF METHODS OF AvatarInterface
  * - getPetId() is already defined above
  * ---------------------------------------------------
  */
