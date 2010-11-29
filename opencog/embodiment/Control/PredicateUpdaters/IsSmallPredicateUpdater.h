@@ -26,10 +26,10 @@
 
 #include "BasicPredicateUpdater.h"
 
-namespace OperationalPetController
+namespace OperationalAvatarController
 {
 
-class IsSmallPredicateUpdater : public OperationalPetController::BasicPredicateUpdater
+class IsSmallPredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
 {
 
 protected:

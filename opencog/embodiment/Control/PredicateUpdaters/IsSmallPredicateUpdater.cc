@@ -28,7 +28,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "IsSmallPredicateUpdater.h"
 
-using namespace OperationalPetController;
+using namespace OperationalAvatarController;
 using namespace opencog;
 
 IsSmallPredicateUpdater::IsSmallPredicateUpdater(AtomSpace & atomSpace) :

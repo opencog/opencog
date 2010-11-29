@@ -1,6 +1,6 @@
 CMAKE_POLICY(SET CMP0005 OLD)
 #TODO next line
-ADD_DEFINITIONS(-D_REENTRANT -DACTION_PLAN_TEST_XML_FILE=\\"${PETAVERSE_SOURCE_DIR}/test/Control/OperationalPetController/ActionPlanExample.xml\\")
+ADD_DEFINITIONS(-D_REENTRANT -DACTION_PLAN_TEST_XML_FILE=\\"${PETAVERSE_SOURCE_DIR}/test/Control/OperationalAvatarController/ActionPlanExample.xml\\")
 
 ADD_LIBRARY (MessagingSystem
 	Message.cc

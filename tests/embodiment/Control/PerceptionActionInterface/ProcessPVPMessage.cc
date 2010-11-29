@@ -31,7 +31,7 @@
 
 
 using namespace PerceptionActionInterface;
-using namespace OperationalPetController;
+using namespace OperationalAvatarController;
 
 int main(int argc, char* argv[])
 {

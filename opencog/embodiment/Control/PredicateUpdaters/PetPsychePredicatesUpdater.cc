@@ -35,7 +35,7 @@
 #include <opencog/spatial/MovableEntity.h>
 
 
-using namespace OperationalPetController;
+using namespace OperationalAvatarController;
 using namespace opencog;
 
 PetPsychePredicatesUpdater::PetPsychePredicatesUpdater(AtomSpace &_atomSpace ) : BasicPredicateUpdater(_atomSpace)

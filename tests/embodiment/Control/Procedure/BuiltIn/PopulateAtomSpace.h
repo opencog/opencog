@@ -30,7 +30,7 @@
 #include "PredicatesUpdater.h"
 #include "ActionPlanSenderMock.h"
 
-using namespace OperationalPetController;
+using namespace OperationalAvatarController;
 using namespace PerceptionActionInterface;
 
 static const std::string petId  = "1";

@@ -29,9 +29,9 @@
 #include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
 #include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <tests/embodiment/Control/OperationalPetController/LSMessageSenderMock.h>
+#include <tests/embodiment/Control/OperationalAvatarController/LSMessageSenderMock.h>
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
-#include <opencog/embodiment/Control/OperationalPetController/Pet.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/Pet.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 #ifndef COMBOINTERPRETERUTEST_H

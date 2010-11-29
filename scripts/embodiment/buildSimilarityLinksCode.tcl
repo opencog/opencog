@@ -310,7 +310,7 @@ proc emitSchemaCPPCode {} {
 #include \"BasicSchemaFeeder.h\"
 #include <vector>
 
-using namespace OperationalPetController;
+using namespace OperationalAvatarController;
 
 BasicSchemaFeeder::~BasicSchemaFeeder() {
 }
@@ -372,7 +372,7 @@ proc emitPredicateCPPCode {} {
 #include <SimpleTruthValue.h>
 #include <vector>
 
-using namespace OperationalPetController;
+using namespace OperationalAvatarController;
 
 BasicPredicateFeeder::~BasicPredicateFeeder() {
 }

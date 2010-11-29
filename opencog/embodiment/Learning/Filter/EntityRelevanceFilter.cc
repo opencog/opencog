@@ -38,7 +38,7 @@
 using namespace PetCombo;
 using namespace WorldWrapper;
 
-//using namespace OperationalPetController;
+//using namespace OperationalAvatarController;
 const std::string emptyString = "";
 
 EntityRelevanceFilter::EntityRelevanceFilter() {}

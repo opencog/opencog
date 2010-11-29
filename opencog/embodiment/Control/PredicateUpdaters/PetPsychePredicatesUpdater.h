@@ -27,7 +27,7 @@
 #include <opencog/embodiment/Control/PredicateUpdaters/BasicPredicateUpdater.h>
 #include <opencog/spatial/math/Triangle.h>
 
-namespace OperationalPetController
+namespace OperationalAvatarController
 {
 
 /**
@@ -50,6 +50,6 @@ public:
 
 }; // class
 
-} // OperationalPetController
+} // OperationalAvatarController
 
 #endif // PETPSYCHEPREDICATESUPDATER_H

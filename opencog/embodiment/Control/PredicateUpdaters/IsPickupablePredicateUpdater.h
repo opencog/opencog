@@ -26,10 +26,10 @@
 
 #include "BasicPredicateUpdater.h"
 
-namespace OperationalPetController
+namespace OperationalAvatarController
 {
 
-class IsPickupablePredicateUpdater : public OperationalPetController::BasicPredicateUpdater
+class IsPickupablePredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
 {
 
 private:

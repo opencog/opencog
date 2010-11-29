@@ -31,10 +31,10 @@
 #include "BasicPredicateUpdater.h"
 #include <opencog/atomspace/AtomSpace.h>
 
-namespace OperationalPetController
+namespace OperationalAvatarController
 {
 
-class NearPredicateUpdater : public OperationalPetController::BasicPredicateUpdater
+class NearPredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
 {
 
 public:

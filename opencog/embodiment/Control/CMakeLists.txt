@@ -1,6 +1,6 @@
 ADD_SUBDIRECTORY (MessagingSystem)
 ADD_SUBDIRECTORY (PerceptionActionInterface)
-ADD_SUBDIRECTORY (OperationalPetController)
+ADD_SUBDIRECTORY (OperationalAvatarController)
 ADD_SUBDIRECTORY (Procedure)
 ADD_SUBDIRECTORY (PredicateUpdaters)
 

@@ -13,4 +13,4 @@ echo "Start PredaveseTest.rb, will start OPC..."
 ./run-predavese-mocky-proxy.rb &
 sleep 2
 echo "Start OPC, will start OPC..."
-../bin/src/Control/OperationalPetController/opc 1 16330 &
+../bin/src/Control/OperationalAvatarController/opc 1 16330 &

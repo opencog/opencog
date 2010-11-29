@@ -54,7 +54,7 @@ static const std::string drink = "water";
 static const std::string wall = "wall";
 
 
-using namespace OperationalPetController;
+using namespace OperationalAvatarController;
 
 class PredicatesUpdaterUTest :  public CxxTest::TestSuite
 {

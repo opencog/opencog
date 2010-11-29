@@ -27,7 +27,7 @@
 #include "NearPredicateUpdater.h"
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 
-using namespace OperationalPetController;
+using namespace OperationalAvatarController;
 using namespace opencog;
 
 NearPredicateUpdater::NearPredicateUpdater(AtomSpace &_atomSpace) :

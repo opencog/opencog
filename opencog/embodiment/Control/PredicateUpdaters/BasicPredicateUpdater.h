@@ -30,7 +30,7 @@
 
 using namespace opencog;
 
-namespace OperationalPetController
+namespace OperationalAvatarController
 {
 
 class BasicPredicateUpdater
