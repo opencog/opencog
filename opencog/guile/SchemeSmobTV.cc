@@ -239,24 +239,24 @@ SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
 	return take_tv(tv);
 }
 
-SCM SchemeSmob::ss_new_mtv (SCM stv, SCM svh)
+SCM SchemeSmob::ss_new_mtv (SCM svh, SCM stv)
 {
-    TruthValue *tv = verify_tv(stv, "cog-new-mtv");
-    VersionHandle *vh = verify_vh(svh, "cog-new-mtv", 2);
+    VersionHandle *vh = verify_vh(svh, "cog-new-mtv");
+    TruthValue *tv = verify_tv(stv, "cog-new-mtv", 2);
 
     CompositeTruthValue *mtv = new CompositeTruthValue(*tv, *vh);
 	return take_tv(mtv);
 }
 
-SCM SchemeSmob::ss_set_vtv (SCM smtv, SCM stv, SCM svh)
+SCM SchemeSmob::ss_set_vtv (SCM smtv, SCM svh, SCM stv)
 {
     CompositeTruthValue *mtv = 
         dynamic_cast<CompositeTruthValue*>(verify_tv(smtv, "cog-set-vtv!"));
     if(!mtv)
         scm_wrong_type_arg_msg("cog-set-vtv!", 1, smtv, "opencog composite truth value");
 
-    TruthValue *tv = verify_tv(stv, "cog-set-vtv!", 2);
-    VersionHandle *vh = verify_vh(svh, "cog-set-vtv!", 3);
+    VersionHandle *vh = verify_vh(svh, "cog-set-vtv!", 2);
+    TruthValue *tv = verify_tv(stv, "cog-set-vtv!", 3);
 
     mtv->setVersionedTV(*tv, *vh);
 	return smtv;

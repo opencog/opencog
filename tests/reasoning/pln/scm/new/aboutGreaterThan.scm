@@ -1,3 +1,4 @@
+; PLN Scheme wrapper, for building forward inference step-by-step 
 ; example to proof a >~ c using that ForAll x,y if x >~ y and y >~ z then x >~ z
 (define agt (PredicateNode "AboutGreaterThan"))
 ; axiom
