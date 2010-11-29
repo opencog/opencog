@@ -116,7 +116,8 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 void AtomSpace::atomAdded(Handle h)
 {
     DPRINTF("AtomSpace::atomAdded(%p): %s\n", h, TLB::getAtom(h)->toString().c_str());
-    if (getType(h) == AT_TIME_LINK) {
+    Type type = getType(h);
+    if (type == AT_TIME_LINK) {
         // Add corresponding TimeServer entry
         if (getArity(h) == 2) {
             Handle timeNode = getOutgoing(h, 0);
@@ -125,8 +126,17 @@ void AtomSpace::atomAdded(Handle h)
                 Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
                 Handle timed_h = getOutgoing(h, 1);
                 timeServer.add(timed_h, t);
-            } else logger().warn("AtomSpace::addLink: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n", classserver().getTypeName(getType(timeNode)).c_str());
-        } else logger().warn("AtomSpace::addLink: Invalid arity for an AtTimeLink: %d (expected: 2)\n", getArity(h));
+            } else logger().warn("AtomSpace::atomAdded: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n", classserver().getTypeName(getType(timeNode)).c_str());
+        } else logger().warn("AtomSpace::atomAdded: Invalid arity for an AtTimeLink: %d (expected: 2)\n", getArity(h));
+    } else if (type == CONTEXT_LINK) {
+        // Add corresponding VersionedTV to the contextualized atom
+        // Note that when a VersionedTV is added to a
+        // CompositeTruthValue it will not automatically add a
+        // corresponding ContextLink
+        if (getArity(h) == 2) {
+            Handle ca = getOutgoing(h, 1); // contextualized atom
+            setTV(ca, getTV(h), VersionHandle(CONTEXTUAL, h));
+        } else logger().warn("AtomSpace::atomAdded: Invalid arity for a ContextLink: %d (expected: 2)\n", getArity(h));
     }
 }
 
@@ -147,6 +157,20 @@ void AtomSpace::atomRemoved(Handle h)
         if( getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom ){
            spaceServer->removeMap(h);
         } // if
+    } else if (type == CONTEXT_LINK) {
+        // Remove corresponding VersionedTV to the contextualized atom
+        // Note that when a VersionedTV is removed from a
+        // CompositeTruthValue it will not automatically remove the
+        // corresponding ContextLink
+        OC_ASSERT(getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed ContextLink = %d\n", getArity(h));
+        OC_ASSERT(false);
+        Handle ca = getOutgoing(h, 1); // contextualized atom
+        const TruthValue& tv = getTV(ca);
+        OC_ASSERT(tv.getType() == COMPOSITE_TRUTH_VALUE);
+        // obviously using a const_cast is rather hacky and should
+        // probably be replaced by something better
+        CompositeTruthValue& ctv = const_cast<CompositeTruthValue&>(static_cast<const CompositeTruthValue&>(tv));
+        ctv.removeVersionedTV(VersionHandle(CONTEXTUAL, h));
     } else if ( inheritsType(type, OBJECT_NODE) ) {
         spaceServer->removeObject(getName(h));
     } // else if
