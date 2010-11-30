@@ -169,8 +169,8 @@ void AtomSpace::atomRemoved(Handle h)
         CompositeTruthValue new_ctv(static_cast<const CompositeTruthValue&>(tv));
         new_ctv.removeVersionedTV(VersionHandle(CONTEXTUAL, h));
         // @todo: one may improve that code by converting back the
-        // CompositeTV into a simple or indefinite TV when it has more
-        // VersionedTV
+        // CompositeTV into a simple or indefinite TV when it has no
+        // more VersionedTV
         setTV(ca, new_ctv);
     } else if ( inheritsType(type, OBJECT_NODE) ) {
         spaceServer->removeObject(getName(h));
