@@ -5,19 +5,19 @@
 ;
 
 ; rules that do not require preprocessing
-(define (SubsetEvalRule sub super)
-  (pln-ar "SubsetEvalRule" (list sub super)))
-(define (IntInhRule sub super)
-  (pln-ar "IntensionalInheritanceRule" (list sub super)))
+(define (SubsetEvalRule sub super . context)
+  (pln-ar "SubsetEvalRule" (list sub super) context))
+(define (IntInhRule sub super . context)
+  (pln-ar "IntensionalInheritanceRule" (list sub super) context))
 ; ModusPonensRule is the name for StrictImplicationBreakdownRule
-(define (ModusPonensRule implication antecedent)
-  (pln-ar "ModusPonensRule" (list implication antecedent)))
+(define (ModusPonensRule implication antecedent . context)
+  (pln-ar "ModusPonensRule" (list implication antecedent) context))
 
 ; AND rules, must happend the arity to the rule name
 (define (SimpleANDRuleNameStr premises)
   (string-append "SimpleANDRule" (number->string (length premises))))
 (define (SimpleANDRule . premises)
-  (pln-ar (SimpleANDRuleNameStr premises) premises))
+  (pln-ar (SimpleANDRuleNameStr premises) premises (list))) ;TODO
 
 ;
 ; UniversalInstantiationForAllRule
@@ -36,4 +36,5 @@
 ; apply the inference rule
 (define (UniversalInstantiationForAllRule forAll . arguments)
   (pln-ar (UniversalInstantiationForAllRuleNameStr forAll)
-          (list (universal-instantiate forAll arguments))))
+          (list (universal-instantiate forAll arguments))
+          (list))) ; TODO

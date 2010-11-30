@@ -82,6 +82,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
+			Handle (T::*h_sqq)(const std::string&, const HandleSeq&, const HandleSeq&);
 			const std::string& (T::*s_s)(const std::string&);
 			void (T::*v_t)(const Type&);
 			void (T::*v_v)(void);
@@ -95,6 +96,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_HI,  // return handle, take handle and int
 			H_H,   // return handle, take handle
 			H_SQ,  // return handle, take string and HandleSeq
+            H_SQQ, // return handle, take string, HandleSeq and handleSeq
 			S_S,   // return string, take string
             V_T,   // return void, take Type
 			V_V    // return void, take void
@@ -116,7 +118,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				case D_HHT:
 				{
 					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name);
+					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
 					SCM input = scm_caddr(args);
 					//Assuming that the type is input as a string or symbol, eg
 					//(f 'SimilarityLink) or (f "SimilarityLink")
@@ -161,12 +163,47 @@ class SchemePrimitive : public PrimitiveEnviron
 					HandleSeq seq;
 					while (scm_is_pair(list))
 					{
-						Handle h = SchemeSmob::verify_handle(scm_car(list), scheme_name);
+						Handle h = SchemeSmob::verify_handle(scm_car(list), scheme_name, 0);
 						seq.push_back(h);
 						list = SCM_CDR(list);
 					}
 
 					Handle rh = (that->*method.h_sq)(str, seq);
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
+				case H_SQQ:
+				{
+					// First argument is a string
+					char *lstr = scm_to_locale_string(scm_car(args));
+					std::string str = lstr;
+					free(lstr);
+
+					// Second arg is a list of Handles
+					SCM list1 = scm_cadr(args);
+					if (!scm_is_pair(list1))
+					{
+						scm_wrong_type_arg_msg(scheme_name, 2, list1, "list of atom handles");
+					}
+					HandleSeq seq1;
+					while (scm_is_pair(list1))
+					{
+						Handle h = SchemeSmob::verify_handle(scm_car(list1), scheme_name, 0);
+						seq1.push_back(h);
+						list1 = SCM_CDR(list1);
+					}
+
+                    // Third argument is a possibly empty list of Handles
+					SCM list2 = scm_caddr(args);
+					HandleSeq seq2;
+					while (scm_is_pair(list2))
+					{
+						Handle h = SchemeSmob::verify_handle(scm_car(list2), scheme_name, 0);
+						seq2.push_back(h);
+						list2 = SCM_CDR(list2);
+					}
+
+					Handle rh = (that->*method.h_sqq)(str, seq1, seq2);
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
@@ -248,6 +285,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
+		DECLARE_CONSTR_3(H_SQQ, h_sqq, Handle, const std::string&, const HandleSeq&, const HandleSeq&)
 		DECLARE_CONSTR_1(V_T, v_t, void, const Type&)
 
 		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
@@ -295,7 +333,7 @@ DECLARE_DECLARE_2(bool, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_3(double, const Handle&, const Handle&, const Type&)
-
+DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
 
 }
 

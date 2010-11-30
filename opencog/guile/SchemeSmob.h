@@ -81,6 +81,10 @@ class SchemeSmob
 		// Atoms to ints, and back.
 		static SCM ss_atom(SCM);
 		static SCM ss_handle(SCM);
+
+
+		// return the int of Handle::UNDEFINED
+		static SCM ss_undefined_handle(void);
 	
 		// Set properties of atoms
 		static SCM ss_set_av(SCM, SCM);

@@ -200,9 +200,10 @@ Handle PLNModule::pln_bc(Handle h, int steps)
     return infer(h, steps, true);
 }
 
-Handle PLNModule::pln_ar(const std::string& ruleName,
-                         const HandleSeq& premises) {
-    return applyRule(ruleName, premises);
+Handle PLNModule::pln_ar(const std::string& ruleName, const HandleSeq& premises,
+                         const HandleSeq& CX) {
+    OC_ASSERT(CX.empty() || CX.size() == 1);
+    return applyRule(ruleName, premises, (CX.empty()? Handle::UNDEFINED: CX[0]));
 }
 
 Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
@@ -267,23 +268,25 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
     return ret;
 }
 
-void opencog::pln::correctRuleName(string& ruleName)
+void opencog::pln::correctRuleName(string& ruleName, Handle CX)
 {
     if(ruleName.find(CustomCrispUnificationRulePrefixStr) == 0) { // found
         const unsigned int hpos = CustomCrispUnificationRulePrefixStr.size();
         Handle h(boost::lexical_cast<UUID>(ruleName.substr(hpos)));
-        pHandle ph = ASW()->realToFakeHandle(h)[0];
+        pHandle ph = ASW()->realToFakeHandle(h, (CX == Handle::UNDEFINED?
+                                                 NULL_VERSION_HANDLE
+                                                 :VersionHandle(CONTEXTUAL, CX)));
         ruleName.replace(hpos, ruleName.size(), boost::lexical_cast<string>(ph));
     }
 }
 
-Handle opencog::pln::applyRule(string ruleName,
-                               const HandleSeq& premises)
+Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
+                               Handle CX)
 {
-    correctRuleName(ruleName);
+    correctRuleName(ruleName, CX);
     DefaultVariableRuleProvider rp;
     const Rule* rule = rp.findRule(ruleName);
-    vhpair vhp(Handle::UNDEFINED, VersionHandle()); // result to be overwriten
+    vhpair vhp(Handle::UNDEFINED, NULL_VERSION_HANDLE); // result to be overwriten
     if(rule) {
         pHandleSeq phs = ASW()->realToFakeHandles(premises);
         if(rule->isComposer()) {

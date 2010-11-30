@@ -78,7 +78,8 @@ private:
      * This method is used to wrap in a scheme function.
      * It calls applyRule.
      */
-    Handle pln_ar(const std::string& ruleName, const HandleSeq& premises);
+    Handle pln_ar(const std::string& ruleName, const HandleSeq& premises,
+                  const HandleSeq& CX);
 
 public:
 
@@ -131,7 +132,7 @@ Handle infer(Handle h, int &steps, bool setTarget);
  * hack, if the universal Instantiation function is recoded in C++
  * this will become useless and can be removed.
  */
-void correctRuleName(std::string& ruleName);
+void correctRuleName(std::string& ruleName, Handle CX);
 
 /**
  * This function applies a PLN inference rule given its name and its premises
@@ -142,11 +143,13 @@ void correctRuleName(std::string& ruleName);
  *
  * @param rule_name   the name of PLN rule to apply
  * @param premises    the list of Handle premises
+ * @param CX          the handle of the context of the inference
  *
  * @return the Handle of the conclusion. Handle::UNDEFINED if no rule
  *         corresponds to ruleName
  */
-Handle applyRule(std::string ruleName, const HandleSeq& premises);
+Handle applyRule(std::string ruleName, const HandleSeq& premises,
+                 Handle CX = Handle::UNDEFINED);
 
 }} // ~namespace opencog::pln
 

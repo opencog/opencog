@@ -102,6 +102,7 @@ void SchemeSmob::register_procs(void)
 {
 	scm_c_define_gsubr("cog-atom",              1, 0, 0, C(ss_atom));
 	scm_c_define_gsubr("cog-handle",            1, 0, 0, C(ss_handle));
+	scm_c_define_gsubr("cog-undefined-handle",  0, 0, 0, C(ss_undefined_handle));
 	scm_c_define_gsubr("cog-new-node",          2, 0, 1, C(ss_new_node));
 	scm_c_define_gsubr("cog-new-link",          1, 0, 1, C(ss_new_link));
 	scm_c_define_gsubr("cog-node",              2, 0, 1, C(ss_node));

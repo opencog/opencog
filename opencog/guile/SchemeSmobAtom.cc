@@ -31,7 +31,7 @@ using namespace opencog;
  * This routine is meant for validating arguments passed into
  * guile-wrapped C++ code.
  *
- * This routine takes an SCM arg and a string subriutine name. It
+ * This routine takes an SCM arg and a string subroutine name. It
  * verifies that the arg is actually a handle (and not, for example,
  * an int, string, etc.)  If its not a handle, it throws an SCM error,
  * using the subroutine name in the error message.  (Such an error is

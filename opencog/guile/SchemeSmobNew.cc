@@ -173,6 +173,15 @@ SCM SchemeSmob::ss_handle (SCM satom)
 }
 
 /* ============================================================== */
+/**
+ * Return Handle::UNDEFINED
+ */
+SCM SchemeSmob::ss_undefined_handle (void)
+{
+    return scm_from_ulong(Handle::UNDEFINED.value());
+}
+
+/* ============================================================== */
 /** Return true if s is an atom */
 
 SCM SchemeSmob::ss_atom_p (SCM s)
