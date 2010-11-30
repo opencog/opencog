@@ -667,7 +667,7 @@ public:
      * Returns a pointer to the most recent evaluation link. Using an agent id
      * this method performs a search on AtomSpace to find the evaluation link
      * marked with the most recent timestamp. If the evaluation link does not exists,
-     * an UNDEFINED_HANDLE will be returned
+     * a Handle::UNDEFINED will be returned
      *
      * @param atomSpace The atom space
      * @param agentId The agent's id

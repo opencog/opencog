@@ -138,10 +138,10 @@ void correctRuleName(std::string& ruleName);
  * to produce the conclusion. The set of rules is taken from
  * DefaultVariableRuleProvider.
  * If the name rule does not correspond to any declared rules
- * then the Handle returned is UNDEFINED_HANDLE
+ * then the Handle returned is Hanlde::UNDEFINED
  *
- * @param rule_name the name of PLN rule to apply
- * @param premises the list of Handle premises
+ * @param rule_name   the name of PLN rule to apply
+ * @param premises    the list of Handle premises
  *
  * @return the Handle of the conclusion. Handle::UNDEFINED if no rule
  *         corresponds to ruleName

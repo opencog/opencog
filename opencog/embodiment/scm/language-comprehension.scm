@@ -1946,7 +1946,7 @@
 
                 (let* ( ( tmp (pln-bc (build-query predicate) 2000) )  ; An AndLink
                      )
-                  (if (not (equal? (cog-handle tmp) 18446744073709551615)) ; workaround for a bug in cog-atom (treating UNDEFINED_HANDLE as valid handle)
+                  (if (not (equal? (cog-handle tmp) 18446744073709551615)) ; workaround for a bug in cog-atom (treating Handle::UNDEFINED as valid handle)
                     (let* (
                           ( groundedFrameInstance (gar (car (gdr (gar tmp)))) ) ; This extracts the frame instance (*gasp*)
                          )
