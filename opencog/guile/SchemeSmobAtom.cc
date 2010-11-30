@@ -106,7 +106,7 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-set-tv!");
 	TruthValue *tv = verify_tv(stv, "cog-set-tv!", 2);
 
-	atom->setTruthValue(*tv);
+	atomspace->setTV(atom->getHandle(),*tv);
 	return satom;
 }
 
@@ -123,7 +123,7 @@ SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 	boost::shared_ptr<Atom> atom = verify_atom(satom, "cog-set-av!");
 	AttentionValue *av = verify_av(sav, "cog-set-av!", 2);
 
-	atom->setAttentionValue(*av);
+	atomspace->setAV(atom->getHandle(),*av);
 	return satom;
 }
 
