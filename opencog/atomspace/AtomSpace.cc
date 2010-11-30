@@ -163,14 +163,15 @@ void AtomSpace::atomRemoved(Handle h)
         // CompositeTruthValue it will not automatically remove the
         // corresponding ContextLink
         OC_ASSERT(getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed ContextLink = %d\n", getArity(h));
-        OC_ASSERT(false);
         Handle ca = getOutgoing(h, 1); // contextualized atom
         const TruthValue& tv = getTV(ca);
         OC_ASSERT(tv.getType() == COMPOSITE_TRUTH_VALUE);
-        // obviously using a const_cast is rather hacky and should
-        // probably be replaced by something better
-        CompositeTruthValue& ctv = const_cast<CompositeTruthValue&>(static_cast<const CompositeTruthValue&>(tv));
-        ctv.removeVersionedTV(VersionHandle(CONTEXTUAL, h));
+        CompositeTruthValue new_ctv(static_cast<const CompositeTruthValue&>(tv));
+        new_ctv.removeVersionedTV(VersionHandle(CONTEXTUAL, h));
+        // @todo: one may improve that code by converting back the
+        // CompositeTV into a simple or indefinite TV when it has more
+        // VersionedTV
+        setTV(ca, new_ctv);
     } else if ( inheritsType(type, OBJECT_NODE) ) {
         spaceServer->removeObject(getName(h));
     } // else if
