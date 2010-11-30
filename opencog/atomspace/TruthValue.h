@@ -202,4 +202,14 @@ protected:
 
 } // namespace opencog
 
+// overload of operator<< to print TruthValue
+namespace std {
+    template<typename Out>
+    Out& operator<<(Out& out, const opencog::TruthValue& tv) {
+        out << tv.toString();
+        return out;
+    }
+} // ~namespace std
+
+
 #endif // _OPENCOG_TRUTH_VALUE_H
