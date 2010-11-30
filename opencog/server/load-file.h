@@ -23,6 +23,7 @@
 #ifndef OPENCOG_SERVER_LOAD_FILE_H_
 #define OPENCOG_SERVER_LOAD_FILE_H_
 
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog {
 
