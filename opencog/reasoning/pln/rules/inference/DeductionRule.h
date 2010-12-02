@@ -22,33 +22,35 @@
 #ifndef DEDUCTIONRULE_H
 #define DEDUCTIONRULE_H
 
+#include <opencog/util/iostreamContainer.h>
+
 namespace opencog { namespace pln {
 
 #define CHECK_ARGUMENT_VALIDITY_FOR_DEDUCTION_RULE 0
+
+static const std::string DeductionRuleSuffixStr = "DeductionRule";
 
 //template<typename DeductionFormula, Type InclusionLink> //=IMPLICATION_LINK>
 template<typename DeductionFormula>
 class DeductionRule : public GenericRule<DeductionFormula>
 {
+    typedef GenericRule<DeductionFormula> super;
+
     //DeductionFormula f;
     Type InclusionLink;
-
-    //! @todo I don't understand why it is needed but without this it does not
-    //! compile
-    AtomSpaceWrapper* asw;
 
     meta i2oType(const std::vector<Vertex>& h) const
     {
         assert(h.size()==2);
 
-        assert(asw->getArity(boost::get<pHandle>(h[0]))==2);
-        assert(asw->getArity(boost::get<pHandle>(h[1]))==2);
-        assert(asw->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
-        assert(asw->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
+        assert(super::asw->getArity(boost::get<pHandle>(h[0]))==2);
+        assert(super::asw->getArity(boost::get<pHandle>(h[1]))==2);
+        assert(super::asw->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
+        assert(super::asw->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
 	
         return meta(new vtree(mva((pHandle)InclusionLink, 
-                                         vtree(Vertex(asw->getOutgoing(boost::get<pHandle>(h[0]),0))),
-                                         vtree(Vertex(asw->getOutgoing(boost::get<pHandle>(h[1]),1)))
+                                         vtree(Vertex(super::asw->getOutgoing(boost::get<pHandle>(h[0]),0))),
+                                         vtree(Vertex(super::asw->getOutgoing(boost::get<pHandle>(h[1]),1)))
                                          )));
     }
     
@@ -64,8 +66,8 @@ class DeductionRule : public GenericRule<DeductionFormula>
         
         assert(premiseArray.size()==2);
         
-        pHandleSeq nodesAB = GET_ASW->getOutgoing(boost::get<pHandle>(premiseArray[0]));
-        pHandleSeq nodesBC = GET_ASW->getOutgoing(boost::get<pHandle>(premiseArray[1]));
+        pHandleSeq nodesAB = super::asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));
+        pHandleSeq nodesBC = super::asw->getOutgoing(boost::get<pHandle>(premiseArray[1]));
         
         if (CHECK_ARGUMENT_VALIDITY_FOR_DEDUCTION_RULE && !equal(nodesAB[1], nodesBC[0]))
             {
@@ -76,24 +78,29 @@ class DeductionRule : public GenericRule<DeductionFormula>
                 assert(equal(nodesAB[1], nodesBC[0]));
             }
         
-        tvs[0] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[0])));
-        tvs[1] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[1])));
-        tvs[2] = (TruthValue*) &(asw->getTV(nodesAB[0]));
-        tvs[3] = (TruthValue*) &(asw->getTV(nodesAB[1])); //== nodesBC[0]);
-        tvs[4] = (TruthValue*) &(asw->getTV(nodesBC[1]));
+        tvs[0] = (TruthValue*) &(super::asw->getTV(boost::get<pHandle>(premiseArray[0])));
+        tvs[1] = (TruthValue*) &(super::asw->getTV(boost::get<pHandle>(premiseArray[1])));
+        tvs[2] = (TruthValue*) &(super::asw->getTV(nodesAB[0]));
+        tvs[3] = (TruthValue*) &(super::asw->getTV(nodesAB[1])); //== nodesBC[0]);
+        tvs[4] = (TruthValue*) &(super::asw->getTV(nodesBC[1]));
         
         return tvs;
     }
 
 public:
     
-    //DeductionRule(iAtomSpaceWrapper *_asw)
-    //: GenericRule<DeductionFormula>(_asw,false,"DeductionRule")
     DeductionRule(AtomSpaceWrapper *_asw, Type linkType)
-	: GenericRule<DeductionFormula>(_asw,false,"DeductionRule"),
-        InclusionLink(linkType),
-        asw(_asw) // @todo I don't understand why it is needed, asw is already defined in Rule...
+        : GenericRule<DeductionFormula>(_asw, false, DeductionRuleSuffixStr),
+          InclusionLink(linkType) 
     {
+
+        // Determine name, note that instead of that we should probably
+        // better have inherited DeductionRule with the right names
+        if(linkType == INHERITANCE_LINK)
+            super::name = std::string("Inheritance") + super::name;
+        else if(linkType == IMPLICATION_LINK)
+            super::name = std::string("Implication") + super::name;
+
         //! @todo should use real variable for the other input.
 	
         GenericRule<DeductionFormula>::inputFilter.push_back(meta(
@@ -112,14 +119,14 @@ public:
     
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
-        if ( !asw->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
+        if ( !super::asw->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
             return Rule::setOfMPs();
         
         Rule::MPs ret;
         
         tree<Vertex>::iterator top0 = outh->begin();
 	
-        Vertex var = CreateVar(asw);
+        Vertex var = CreateVar(super::asw);
 	
         ret.push_back(BBvtree(new BoundVTree(mva((pHandle)InclusionLink,
                                                  tree<Vertex>(outh->begin(top0)),
@@ -139,9 +146,8 @@ public:
         // Using FWVars rather than ATOM is potentially less efficient, but
         // required for ForAll unification to match it (CustomCrispUnificationRule)
         return(meta(new vtree(mva((pHandle)InclusionLink, 
-                                         vtree(CreateVar(asw)),
-                                         vtree(CreateVar(asw))
-                                         ))));
+                                  vtree(CreateVar(super::asw)),
+                                  vtree(CreateVar(super::asw))))));
     }
     
     NO_DIRECT_PRODUCTION;
