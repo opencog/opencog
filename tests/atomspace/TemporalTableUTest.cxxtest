@@ -92,20 +92,28 @@ public:
             HandleTemporalPairEntry* result = temporalTable->get(handles[i]);
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(TemporalEntry::compare(hte->handleTemporalPair.getTemporal(), times[firstHalf?i:(N_TIMES-i-1)]) == 0);
+            TS_ASSERT(TemporalEntry::compare(hte->handleTemporalPair.getTemporal(),
+                        times[firstHalf?i:(N_TIMES-i-1)]) == 0);
             TS_ASSERT(hte->next);
             hte = hte->next;
-            TS_ASSERT(TemporalEntry::compare(hte->handleTemporalPair.getTemporal(), times[firstHalf?(N_TIMES-i-1):i]) == 0);
+            TS_ASSERT(TemporalEntry::compare(hte->handleTemporalPair.getTemporal(),
+                        times[firstHalf?(N_TIMES-i-1):i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Check handles by time
             result = temporalTable->get(Handle::UNDEFINED, *(times[i]));
             hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0 || Handle::compare(hte->handleTemporalPair.getHandle(), handles[N_TIMES-i-1]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(),
+                        handles[i]) == 0 ||
+                    Handle::compare(hte->handleTemporalPair.getHandle(),
+                        handles[N_TIMES-i-1]) == 0);
             TS_ASSERT(hte->next);
             hte = hte->next;
-            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0 || Handle::compare(hte->handleTemporalPair.getHandle(), handles[N_TIMES-i-1]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(),
+                        handles[i]) == 0 ||
+                    Handle::compare(hte->handleTemporalPair.getHandle(),
+                        handles[N_TIMES-i-1]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
         }
@@ -125,7 +133,8 @@ public:
                     HandleTemporalPairEntry* hte = result;
                     for (int k = 0; k <= j; k++) {
                         TS_ASSERT(hte);
-                        TS_ASSERT(TemporalEntry::compare(hte->handleTemporalPair.getTemporal(), times[k]) == 0);
+                        TS_ASSERT(TemporalEntry::compare(hte->handleTemporalPair.getTemporal(),
+                                    times[k]) == 0);
                         hte = hte->next;
                     }
                     TS_ASSERT(!hte);
@@ -139,7 +148,8 @@ public:
                     HandleTemporalPairEntry* hte = result;
                     for (int k = j; k < N_TIMES; k++) {
                         TS_ASSERT(hte);
-                        TS_ASSERT(TemporalEntry::compare(hte->handleTemporalPair.getTemporal(), times[k]) == 0);
+                        TS_ASSERT(TemporalEntry::compare(hte->handleTemporalPair.getTemporal(),
+                                    times[k]) == 0);
                         hte = hte->next;
                     }
                     TS_ASSERT(!hte);

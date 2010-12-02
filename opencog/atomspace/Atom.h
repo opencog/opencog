@@ -38,8 +38,6 @@
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/util/exceptions.h>
 
-#define PUT_OUTGOING_SET_IN_LINKS
-
 namespace opencog
 {
 
@@ -66,16 +64,7 @@ class Atom : public AttentionValueHolder
 private:
 
     // Called by constructors to init this object
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    void init(Type, const std::vector<Handle>&, const TruthValue&);
-
-    // Adds a new handle to the outgoing set. Note that this is
-    // used only in the NativeParser friend class, and, due to
-    // performance issues, it should not be used anywhere else...
-    void addOutgoingAtom(Handle h);
-#else
     void init(Type, const TruthValue&);
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     /**
      * Sets the AtomTable in which this Atom is inserted.
@@ -99,11 +88,6 @@ protected:
     // point to this atom.
     HandleEntry *incoming;
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    // Array that does not change during atom lifespan.
-    std::vector<Handle> outgoing;
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
     char flags;
 
     TruthValue *truthValue;
@@ -116,23 +100,7 @@ protected:
      * @param The truthValue of the atom. note: This is not cloned as
      *        in setTruthValue.
      */
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    Atom(Type, const std::vector<Handle>&,
-         const TruthValue& = TruthValue::NULL_TV());
-#else
     Atom(Type, const TruthValue& = TruthValue::NULL_TV());
-#endif
-
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    /**
-      * Sets the outgoing set of the atom
-      * This method can be called only if the atom is not inserted
-      * in an AtomTable yet.
-      * Otherwise, it throws a RuntimeException.
-      */
-    virtual void setOutgoingSet(const std::vector<Handle>& o)
-    throw (RuntimeException);
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     /**
      * Adds a new entry to this atom's incoming set.
@@ -172,17 +140,6 @@ public:
     inline Handle getHandle() const {
         return handle;
     }
-
-    /**
-     * Returns the arity of the atom.
-     *
-     * @return The arity of the atom.
-     */
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    inline Arity getArity(void) const {
-        return outgoing.size();
-    }
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     /**
      * Returns the AttentionValue object of the atom.
@@ -231,25 +188,6 @@ public:
     inline HandleEntry* getIncomingSet() const {
         return incoming;
     }
-
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    /**
-     * Returns a const reference to the array containing this
-     * atom's outgoing set.
-     *
-     * @return A const reference to this atom's outgoing set.
-     */
-    inline const std::vector<Handle>& getOutgoingSet() const {
-        return outgoing;
-    }
-    /**
-     * Returns a specific atom in the outgoing set (using the TLB).
-     *
-     * @param The position of the atom in the array.
-     * @return A specific atom in the outgoing set (using the TLB).
-     */
-    Atom * getOutgoingAtom(int) const throw (RuntimeException);
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     /**
      * Returns whether this atom is marked for removal.

@@ -44,11 +44,7 @@
 
 using namespace opencog;
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-void Link::init(void)
-#else
 void Link::init(const std::vector<Handle>& outgoingVector)
-#endif
 	throw (InvalidParamException)
 {
     if (!classserver().isA(type, LINK)) {
@@ -56,9 +52,7 @@ void Link::init(const std::vector<Handle>& outgoingVector)
              "Link -  invalid link type: %d", type);
     }
     trail = new Trail();
-#ifdef PUT_OUTGOING_SET_IN_LINKS
     setOutgoingSet(outgoingVector);
-#endif
 }
 
 Link::~Link() throw ()
@@ -266,7 +260,6 @@ size_t Link::hashCode(void) const
     return result;
 }
 
-#ifdef PUT_OUTGOING_SET_IN_LINKS
 class HandleComparison
 {
     public:
@@ -295,8 +288,6 @@ void Link::addOutgoingAtom(Handle h)
 {
     outgoing.push_back(h);
 }
-
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
 Atom* Link::clone() const
 {

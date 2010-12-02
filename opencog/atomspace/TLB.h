@@ -27,20 +27,9 @@
 #ifndef _OPENCOG_TLB_H
 #define _OPENCOG_TLB_H
 
-// Use the TLB map only if SQL storage is being used.
-// (or if distributed processing is enabled)
-// Various tests fail if TLB is not enabled. Until these are fixed,
-// we will enable the TLB. Anyway, long-term, it is needed, so may
-// as well turn it on for good ... 
-// #ifdef HAVE_SQL_STORAGE
-#define USE_TLB_MAP 1
-// #endif
-
 #define CHECK_MAP_CONSISTENCY
 
-#ifdef USE_TLB_MAP
 #include <boost/unordered_map.hpp>
-#endif
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/types.h>
@@ -117,18 +106,14 @@ class TLB
 
 private:
 
-#ifdef USE_TLB_MAP
     static boost::unordered_map<Handle, const Atom*, boost::hash<opencog::Handle> > handle_map;
-#endif
 
     /**
      * Private default constructor for this class to make it abstract.
      */
     TLB() {}
 
-#ifdef USE_TLB_MAP
     static UUID brk_uuid;
-#endif
 
     /**
      * Maps a handle to its corresponding atom.
@@ -139,14 +124,9 @@ private:
      */
     static inline Atom* getAtom(const Handle& handle)
     {
-#ifdef USE_TLB_MAP
         boost::unordered_map<Handle, const Atom*>::iterator it = handle_map.find(handle);
         if (it == handle_map.end()) return NULL;
         else return const_cast<Atom*>(it->second);
-#else
-        if (Handle::UNDEFINED == handle) return NULL;
-        return reinterpret_cast<Atom*>(handle.value() ^ OBFUSCATE);
-#endif
     }
 
     /**
@@ -159,7 +139,6 @@ private:
      */
     static inline const Handle& getHandle(const Atom* atom)
     {
-#ifdef USE_TLB_MAP
         const Handle &h = atom->handle;
         if (h != Handle::UNDEFINED) return h;
 #ifdef CHECK_MAP_CONSISTENCY
@@ -168,9 +147,6 @@ private:
         return Handle::UNDEFINED;
 #else
         return addAtom(atom);
-#endif
-#else
-        return Handle(reinterpret_cast<UUID>(atom) ^ OBFUSCATE);
 #endif
     }
 
@@ -185,7 +161,6 @@ private:
     static inline const Handle& addAtom(Atom* atom,
                                  const Handle &handle = Handle::UNDEFINED)
     {
-#ifdef USE_TLB_MAP
         const Handle &h = atom->handle;
         if (h != Handle::UNDEFINED)
         {
@@ -210,9 +185,6 @@ private:
         handle_map[ha] = atom;
         atom->handle = ha;
         return atom->handle;
-#else /* USE_TLB_MAP */
-        return Handle(reinterpret_cast<UUID>(atom) ^ OBFUSCATE);
-#endif /* USE_TLB_MAP */
     }
 
     /**
@@ -225,8 +197,6 @@ private:
      * @return Removed atom.
      */
     static inline const Atom* removeAtom(Atom* atom) {
-#ifdef USE_TLB_MAP
-
         const Handle &h = atom->handle;
         if (h == Handle::UNDEFINED) {
 #ifdef CHECK_MAP_CONSISTENCY
@@ -237,31 +207,24 @@ private:
         }
         handle_map.erase(h);
         atom->handle = Handle::UNDEFINED;
-#endif
         return atom;
     }
 
     static inline bool isInvalidHandle(const Handle& h) {
-#ifdef USE_TLB_MAP
         return (h == Handle::UNDEFINED) ||
                (h.value() >= brk_uuid) || 
                (NULL == getAtom(h));
-#else
-        return (h == Handle::UNDEFINED);
-#endif
     }
 
     static inline bool isValidHandle(Handle h) {
         return !isInvalidHandle(h);
     }
 
-#ifdef USE_TLB_MAP
     static UUID getMaxUUID(void) { return brk_uuid; }
     static void reserve_range(UUID lo, UUID hi)
     {
         if (brk_uuid <= hi) brk_uuid = hi+1;
     }
-#endif
 };
 
 } // namespace opencog

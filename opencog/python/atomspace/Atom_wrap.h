@@ -17,14 +17,8 @@ void init_Atom_py();
  */
 struct AtomWrap : Atom, wrapper<Atom>
 {
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    AtomWrap(Type, const std::vector<Handle>&, const TruthValue&);
-#else
     AtomWrap(Type, const TruthValue&);
-#endif
-
     // Pure virtual functions.
-
     std::string toString(void) const;
     std::string toShortString(void) const;
     bool operator==(const Atom&) const;

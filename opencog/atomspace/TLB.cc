@@ -27,12 +27,9 @@
 
 #include <opencog/util/platform.h>
 
-#ifdef USE_TLB_MAP
-
 using namespace opencog;
 
 UUID TLB::brk_uuid = 1;
 
 boost::unordered_map<Handle, const Atom*, boost::hash<opencog::Handle> > TLB::handle_map;
 
-#endif

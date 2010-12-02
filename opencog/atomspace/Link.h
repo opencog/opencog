@@ -55,22 +55,15 @@ class Link : public Atom
 
 private:
     Trail* trail;
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    void init(void) throw (InvalidParamException);
-#else
     void init(const std::vector<Handle>&) throw (InvalidParamException);
-#endif
 
-#ifdef PUT_OUTGOING_SET_IN_LINKS
     // Adds a new handle to the outgoing set. Note that this is
     // used only in the NativeParser friend class, and, due to
     // performance issues, it should not be used anywhere else...
     void addOutgoingAtom(Handle h);
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
 protected:
 
-#ifdef PUT_OUTGOING_SET_IN_LINKS
     // Array that does not change during atom lifespan.
     std::vector<Handle> outgoing;
 
@@ -82,7 +75,6 @@ protected:
       */
     void setOutgoingSet(const std::vector<Handle>& o)
     throw (RuntimeException);
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     /**
      * Returns a specific atom in the outgoing set (using the TLB).
@@ -155,26 +147,17 @@ public:
     }
 
     /** Copy constructor, does NOT copy atom table membership! */
-#ifdef PUT_OUTGOING_SET_IN_LINKS
     Link(const Link &l)
         : Atom(l.getType(), l.getTruthValue())
     {
         init(l.getOutgoingSet());
     }
-#else
-    Link(const Link &l)
-        : Atom(l.getType(), l.getOutgoingSet(), l.getTruthValue())
-    {
-        init();
-    }
-#endif
 
     /**
      * Destructor for this class.
      */
     ~Link() throw ();
 
-#ifdef PUT_OUTGOING_SET_IN_LINKS
     inline Arity getArity() const {
         return outgoing.size();
     }
@@ -230,8 +213,6 @@ public:
      * @return The number of different target types of an atom.
      */
     int getTargetTypeIndexSize() const;
-
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
     /**
      * Returns the trail of the link.

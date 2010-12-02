@@ -43,7 +43,6 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
-//#define USE_SHARED_DEFAULT_TV
 //#define DPRINTF printf
 #define DPRINTF(...)
 
@@ -51,11 +50,7 @@
 
 using namespace opencog;
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv)
-#else
 void Atom::init(Type t, const TruthValue& tv)
-#endif
 {
     handle = Handle::UNDEFINED;
     flags = 0;
@@ -63,30 +58,14 @@ void Atom::init(Type t, const TruthValue& tv)
     incoming = NULL;
     type = t;
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-    // need to call the method to handle specific subclass case
-    setOutgoingSet(outg);
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
-
-#ifdef USE_SHARED_DEFAULT_TV
     truthValue = NULL;
     setTruthValue(tv);
-#else
-    truthValue = tv.isNullTv() ? TruthValue::DEFAULT_TV().clone() : tv.clone();
-#endif
 }
 
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-Atom::Atom(Type type, const std::vector<Handle>& outgoingVector, const TruthValue& tv )
-{
-    init(type, outgoingVector, tv);
-}
-#else
 Atom::Atom(Type type, const TruthValue& tv )
 {
     init(type, tv);
 }
-#endif
 
 Atom::~Atom() throw (RuntimeException)
 {
@@ -98,14 +77,13 @@ Atom::~Atom() throw (RuntimeException)
     /*if (incoming != NULL) {
         throw RuntimeException(TRACE_INFO, "Attempting to remove atom with non-empty incoming set.");
     }*/
+    if (incoming != NULL) {
+        delete incoming;
+    }
 
-#ifdef USE_SHARED_DEFAULT_TV
     if (truthValue != &(TruthValue::DEFAULT_TV())) {
         delete truthValue;
     }
-#else
-    delete truthValue;
-#endif
 }
 
 const AttentionValue& Atom::getAttentionValue() const
@@ -120,7 +98,6 @@ const TruthValue& Atom::getTruthValue() const
 
 void Atom::setTruthValue(const TruthValue& tv)
 {
-#ifdef USE_SHARED_DEFAULT_TV
     if (truthValue != NULL && &tv != truthValue && truthValue != &(TruthValue::DEFAULT_TV())) {
         delete truthValue;
     }
@@ -128,21 +105,6 @@ void Atom::setTruthValue(const TruthValue& tv)
     if (!tv.isNullTv() && (&tv != &(TruthValue::DEFAULT_TV()))) {
         truthValue = tv.clone();
     }
-#else
-    if (truthValue != NULL && &tv != truthValue) {
-        delete truthValue;
-    }
-#if 1
-    // just like it was before
-    truthValue = tv.clone();
-#else
-    if (!tv.isNullTv()) {
-        truthValue = tv.clone();
-    } else {
-        truthValue = TruthValue::DEFAULT_TV().clone();
-    }
-#endif
-#endif
 }
 
 void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeException)
@@ -169,47 +131,6 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
         }
     }
 }
-
-#ifndef PUT_OUTGOING_SET_IN_LINKS
-class HandleComparison
-{
-    public:
-        bool operator()(const Handle& h1, const Handle& h2) const {
-            return (Handle::compare(h1, h2) < 0);
-        }
-};
-
-void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
-   throw (RuntimeException)
-{
-    DPRINTF("Atom::setOutgoingSet\n");
-    if (atomTable != NULL) {
-        throw RuntimeException(TRACE_INFO, 
-           "Cannot change the OutgoingSet of an atom already "
-           "inserted into an AtomTable\n");
-    }
-    outgoing = outgoingVector;
-    // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
-    if (classserver().isA(type, UNORDERED_LINK)) {
-        std::sort(outgoing.begin(), outgoing.end(), HandleComparison());
-    }
-}
-
-void Atom::addOutgoingAtom(Handle h)
-{
-    outgoing.push_back(h);
-}
-
-Atom * Atom::getOutgoingAtom(int position) const throw (RuntimeException)
-{
-    // checks for a valid position
-    if ((position < getArity()) && (position >= 0)) {
-        return TLB::getAtom(outgoing[position]);
-    } else {
-        throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", position);
-    }
-}
-#endif /* PUT_OUTGOING_SET_IN_LINKS */
 
 void Atom::addIncomingHandle(Handle handle)
 {
