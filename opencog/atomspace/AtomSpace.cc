@@ -134,8 +134,9 @@ void AtomSpace::atomAdded(Handle h)
         // CompositeTruthValue it will not automatically add a
         // corresponding ContextLink
         if (getArity(h) == 2) {
+            Handle cx = getOutgoing(h, 0); // context
             Handle ca = getOutgoing(h, 1); // contextualized atom
-            setTV(ca, getTV(h), VersionHandle(CONTEXTUAL, h));
+            setTV(ca, getTV(h), VersionHandle(CONTEXTUAL, cx));
         } else logger().warn("AtomSpace::atomAdded: Invalid arity for a ContextLink: %d (expected: 2)\n", getArity(h));
     }
 }
@@ -163,14 +164,15 @@ void AtomSpace::atomRemoved(Handle h)
         // CompositeTruthValue it will not automatically remove the
         // corresponding ContextLink
         OC_ASSERT(getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed ContextLink = %d\n", getArity(h));
+        Handle cx = getOutgoing(h, 0); // context
         Handle ca = getOutgoing(h, 1); // contextualized atom
         const TruthValue& tv = getTV(ca);
         OC_ASSERT(tv.getType() == COMPOSITE_TRUTH_VALUE);
         CompositeTruthValue new_ctv(static_cast<const CompositeTruthValue&>(tv));
-        new_ctv.removeVersionedTV(VersionHandle(CONTEXTUAL, h));
-        // @todo: one may improve that code by converting back the
-        // CompositeTV into a simple or indefinite TV when it has no
-        // more VersionedTV
+        new_ctv.removeVersionedTV(VersionHandle(CONTEXTUAL, cx));
+        // @todo: one may want improve that code by converting back
+        // the CompositeTV into a simple or indefinite TV when it has
+        // no more VersionedTV
         setTV(ca, new_ctv);
     } else if ( inheritsType(type, OBJECT_NODE) ) {
         spaceServer->removeObject(getName(h));
@@ -967,8 +969,8 @@ const TruthValue& AtomSpace::getTV(Handle h, VersionHandle vh) const
      {
         return tv;
     }
-     else if (tv.getType() == COMPOSITE_TRUTH_VALUE)
-     {
+    else if (tv.getType() == COMPOSITE_TRUTH_VALUE)
+    {
         return ((const CompositeTruthValue&) tv).getVersionedTV(vh);
     }
     return TruthValue::NULL_TV();
