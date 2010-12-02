@@ -28,6 +28,9 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 
 #include <opencog/guile/SchemeEval.h>
@@ -38,6 +41,7 @@
 #include <opencog/util/Config.h>
 
 using namespace opencog;
+using namespace std;
 
 class BasicSCMUTest :  public CxxTest::TestSuite
 {
@@ -72,6 +76,10 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	void setUp(void);
 
 	void tearDown(void) { }
+
+    // TVs
+    void check_truth_value(const TruthValue& tv);
+    void test_truth_value(void);
 
 	// Nodes
 	void check_node(const char *, const char *, float, float);
@@ -116,6 +124,61 @@ void BasicSCMUTest::setUp(void)
 
 // ============================================================
 
+void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
+    std::cout << "check_truth_value(" << tv << ")" << std::endl;
+
+    // added check_truth_value_node in the atomspace
+    string node_str = "check_truth_value_node";
+    string add_node_str = string("(cog-new-node 'Node \"") + node_str + "\") ";
+
+    eval->eval(add_node_str);
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create the first atom!", !eval_err);
+
+    // set its truth value
+    stringstream ss;
+    ss << "(cog-set-tv! " << add_node_str << "(";
+    switch(TruthValueType tvt = tv.getType()) {
+    case SIMPLE_TRUTH_VALUE:
+        ss << "cog-new-stv " << tv.getMean() << " " << tv.getConfidence();
+        break;
+    case COUNT_TRUTH_VALUE:
+        ss << "cog-new-stv " << tv.getMean() << " " << tv.getConfidence()
+           << " " << tv.getCount();
+        break;
+    case INDEFINITE_TRUTH_VALUE: {
+        const IndefiniteTruthValue& itv =
+            static_cast<const IndefiniteTruthValue&>(tv);
+        ss << "cog-new-itv " << itv.getL() << " " << itv.getU()
+           << " " << itv.getConfidence();
+        break;
+    }
+    case COMPOSITE_TRUTH_VALUE:
+        // @todo
+    default: 
+        ss << "Wrong Truth Value Type (" << tvt << ")";
+        TSM_ASSERT(ss.str().c_str(), false);
+    }
+    ss << "))";
+
+    // eval
+    eval->eval(ss.str());
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to eval", !eval_err);
+
+    // check that the atom has the right TV
+    Handle h = as->getHandle(NODE, node_str);
+	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
+    // hack to avoid floating error
+    bool tv_eq = tv.toString() == as->getTV(h).toString();
+    TSM_ASSERT("TVs are different", tv_eq);
+
+    // remove Node so we can redo the test
+    as->removeAtom(h);
+}
+
 void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
 {
 	printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
@@ -152,6 +215,14 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 	eval->clear_pending();
 	TSM_ASSERT("Failed to eval_h", !eval_err);
 	TSM_ASSERT("Failed to get the correct handle", h == h2);
+}
+
+void BasicSCMUTest::test_truth_value(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    check_truth_value(SimpleTruthValue(0.5, 0.5));
+    check_truth_value(SimpleTruthValue(0.2, 0.7));
+    // @todo : add more
 }
 
 void BasicSCMUTest::test_single_atom(void)
