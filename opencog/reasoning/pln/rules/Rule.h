@@ -243,7 +243,7 @@ public:
     // Used for logging purposes and retrieving rule based on its name
     std::string name; 
 
-    const std::string& getName() { return name; }
+    const std::string& getName() const { return name; }
 };
 
 

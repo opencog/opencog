@@ -38,10 +38,11 @@ using std::set;
 using std::cout;
 using std::endl;
 using std::set_union;
+using std::string;
 
 namespace haxx
 {
-    extern std::map<pHandle,std::vector<pHandle> > inferred_from;
+    extern std::map<pHandle,vector<pHandle> > inferred_from;
     extern std::map<pHandle,opencog::pln::Rule*> inferred_with;
 }
 
@@ -95,7 +96,7 @@ RandGen* ForwardChainer::getRNG() {
     return rng;
 }
 
-void ForwardChainer::printVertexVectorHandles(std::vector< Vertex > hs)
+void ForwardChainer::printVertexVectorHandles(vector< Vertex > hs)
 {
     printContainer(hs, ", ", "< ", " >");
 }
@@ -128,10 +129,10 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
             cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
-            std::set<std::vector<BBvtree> > filters(r->fullInputFilter());
+            set<vector<BBvtree> > filters(r->fullInputFilter());
             
             // For each such vector:
-            foreach(std::vector<BBvtree> f, filters) {
+            foreach(vector<BBvtree> f, filters) {
                 // find a vector of Atoms that matches it
                 Btr<vector<BoundVertex> > args;
 
@@ -151,7 +152,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     
                     //! @todo Tacky check for Deduction. Equivalent to validate2, but that uses the other MP datatype,
                     //! which is why I didn't include it here.
-                    if (r->getName() == std::string("DeductionRule")) {
+                    if (r->getName().find(DeductionRuleSuffixStr) != string::npos) {
 //                        cout << "Deduction sanity check" << endl;
                         // A->B   B->C   check that those are not the same Link
                         bool valid = (args->size() == 2 && !((*args)[0].GetValue() == (*args)[1].GetValue()));
@@ -216,15 +217,15 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 }
 
 //!@todo Remove the ones using non-primary TVs (only necessary while there's still the pHandle Hack).
-Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
+Btr<set<BoundVertex> > ForwardChainer::getMatching(const meta target)
 {
-    Btr<std::set<BoundVertex> > matches(new std::set<BoundVertex>);
+    Btr<set<BoundVertex> > matches(new set<BoundVertex>);
     
     cprintf(5, "getMatching: target: ");
     rawPrint(target->begin(), 5);
 
     foreach(Rule* g, *generators) {
-    	Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
+    	Btr<set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
 
     	if (gMatches.get()) {
             //foreach(BoundVertex tmp, *gMatches) matches->insert(tmp);
@@ -252,7 +253,7 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     return matches;
 }
 
-Btr<set<Btr<vector<BoundVertex> > > > ForwardChainer::findAllArgs(std::vector<BBvtree> filter)
+Btr<set<Btr<vector<BoundVertex> > > > ForwardChainer::findAllArgs(vector<BBvtree> filter)
 {
     Btr<vector<BoundVertex> > args(new vector<BoundVertex>);
     Btr<set<Btr<vector<BoundVertex> > > > all_args(new set<Btr<vector<BoundVertex> > >);
@@ -264,7 +265,7 @@ Btr<set<Btr<vector<BoundVertex> > > > ForwardChainer::findAllArgs(std::vector<BB
     return all_args;
 }
 
-bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
+bool ForwardChainer::findAllArgs(vector<BBvtree> filter, Btr<vector<BoundVertex> > args,
                                  uint current_arg, Btr<set<Btr<vector<BoundVertex> > > > all_args, Btr<bindingsT> bindings)
 {
     bool exhaustive = false;
@@ -284,7 +285,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         return true;
     }
     
-//    std::cout << "arg #" << current_arg << std::endl;
+//    cout << "arg #" << current_arg << endl;
     
     BoundVertex bv;
     
@@ -299,7 +300,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     //meta virtualized_target(meta(new vtree(*f)));
     ForceAllLinksVirtual(virtualized_target);
     
-    Btr<std::set<BoundVertex> > choices;    
+    Btr<set<BoundVertex> > choices;    
     choices = getMatching(virtualized_target);
     
     // pick one of the candidates at random to be the bv
@@ -313,10 +314,10 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
 
     // Alternative: is there some OpenCog library function to randomly select an item from a set?
     // @todo: can probably be simplified by using util/lazy_random_selector
-    std::vector<BoundVertex> ordered_choices;
+    vector<BoundVertex> ordered_choices;
 //    std::copy(choices->begin(), choices->end(), ordered_choices.begin());
     foreach (BoundVertex tmp, *choices) {
-        //std::cout << _v2h(tmp.GetValue()) << std::endl;
+        //cout << _v2h(tmp.GetValue()) << endl;
         ordered_choices.push_back(tmp);
     }
 
@@ -377,7 +378,7 @@ HybridForwardChainer::~HybridForwardChainer()
 {
 }
 
-Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vector<BBvtree> filter)
+Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(vector<BBvtree> filter)
 {
     // Make an ANDLink containing the arguments, and give it to the BC. Then convert each result into an arg-vector.
     // Used to not be able to make an ANDLink with 1 argument, because SimpleANDRule-1 crashed.

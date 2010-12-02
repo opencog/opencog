@@ -175,8 +175,7 @@ atom::atom(Type _T, vector<Btr<atom> > _hs)
     atom_alloc_count++;
 }
 
-atom::atom(pHandle h)
-: bindings(0), forbiddenBindings(0)
+atom::atom(pHandle h) : bindings(0), forbiddenBindings(0)
 {
     setHandle(h);
     atom_alloc_count++;

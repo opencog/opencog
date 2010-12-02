@@ -841,9 +841,7 @@ bool weak_atom<Btr<tree<Vertex> > >::operator()(pHandle h)
     bool ok = false;
 
     //! @todo Figure out whether the restart parameter is necessary or not
-    ok = MPunify(*value, value->begin(),
-            h, *bindings,
-            &restart, FW_VARIABLE_NODE);
+    ok = MPunify(*value, value->begin(), h, *bindings, &restart, FW_VARIABLE_NODE);
 
     return ok;
 }
