@@ -308,8 +308,8 @@ public:
     //! Convert real handles to pln pHandleSeq , optionally expanding to
     //! include every VersionHandled TV in each real handle
     pHandleSeq realToFakeHandles(const HandleSeq& hs, bool expand=false);
-    //! Match each context in the outgoing set of "context" with the handles
-    pHandleSeq realToFakeHandles(Handle h, Handle context);
+    //! Convert real handles to pln pHandleSeq, all under a given context
+    pHandleSeq realToFakeHandles(const HandleSeq& hs, Handle context);
 
     vhpair fakeToRealHandle(const pHandle f) const;
 
@@ -446,6 +446,10 @@ public:
     //! @param fresh allows atoms to be added with the same name/outgoing set
     virtual pHandle addNode(Type T, const std::string& name,
                             const TruthValue& tvn, bool fresh=false)=0;
+
+
+    //! Remove fake handle from vhmap and vhmap_reverse
+    void removeFakeHandle(pHandle h);
 
     //! Remove Atom
     virtual bool removeAtom(pHandle h);
