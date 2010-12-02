@@ -28,8 +28,6 @@
 
 #include "CompositeTruthValue.h"
 
-//#define USE_SHARED_DEFAULT_TV
-
 //#define DPRINTF printf
 #define DPRINTF(...)
 
@@ -40,55 +38,37 @@ void CompositeTruthValue::init(const TruthValue& tv, VersionHandle vh)
     primaryTV = NULL;
     setVersionedTV(tv, vh);
     if (primaryTV == NULL) {
-#ifdef USE_SHARED_DEFAULT_TV
         primaryTV = (TruthValue*) & (TruthValue::DEFAULT_TV());
-#else
-        primaryTV = TruthValue::DEFAULT_TV().clone();
-#endif
     }
 }
 
 void CompositeTruthValue::clear()
 {
-#ifdef USE_SHARED_DEFAULT_TV
     if (primaryTV != &(TruthValue::DEFAULT_TV())) {
         delete primaryTV;
     }
-#else
-    delete primaryTV;
-#endif
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
             itr != versionedTVs.end(); itr++) {
         TruthValue* tv = itr->second;
-#ifdef USE_SHARED_DEFAULT_TV
         if (tv != &(TruthValue::DEFAULT_TV())) {
             delete tv;
         }
-#else
-        delete tv;
-#endif
     }
     versionedTVs.clear();
 }
 
 void CompositeTruthValue::copy(CompositeTruthValue const& source)
 {
-#ifdef USE_SHARED_DEFAULT_TV
-    primaryTV = (source.primaryTV == &(TruthValue::DEFAULT_TV())) ? (TruthValue*) & (TruthValue::DEFAULT_TV()) : source.primaryTV->clone();
-#else
-    primaryTV = source.primaryTV->clone();
-#endif
+    primaryTV = (source.primaryTV == &(TruthValue::DEFAULT_TV())) ?
+        (TruthValue*) & (TruthValue::DEFAULT_TV()) :
+        source.primaryTV->clone();
     for (VersionedTruthValueMap::const_iterator itr = source.versionedTVs.begin();
             itr != source.versionedTVs.end(); itr++) {
         VersionHandle vh = itr->first;
         TruthValue* tv = itr->second;
-#ifdef USE_SHARED_DEFAULT_TV
-        versionedTVs[vh] = (tv == &(TruthValue::DEFAULT_TV())) ? (TruthValue*) & (TruthValue::DEFAULT_TV()) : tv->clone();
-#else
-//        versionedTVs[vh] = tv->clone();
-        TruthValue* newTv = tv->clone();
-        versionedTVs[vh] = newTv;
-#endif
+        versionedTVs[vh] = (tv == &(TruthValue::DEFAULT_TV())) ?
+            (TruthValue*) & (TruthValue::DEFAULT_TV()) :
+            tv->clone();
     }
 }
 
@@ -212,9 +192,7 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
     char* primaryTvStr = __strtok_r(NULL, ";", &internalBuff);
     DPRINTF("primary tvTypeStr = %s, tvStr = %s\n", primaryTvTypeStr, primaryTvStr);
     result->primaryTV = TruthValue::factory(primaryTvType, primaryTvStr);
-#ifdef USE_SHARED_DEFAULT_TV
     DeleteAndSetDefaultTVIfPertinent(&(result->primaryTV));
-#endif
 
     // Get the versioned tvs
     while ((tvToken = __strtok_r(NULL, "{}", &buff)) != NULL) {
@@ -234,13 +212,9 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
         char* versionedTvStr = __strtok_r(NULL, ";", &internalBuff);
         DPRINTF("tvTypeStr = %s, tvStr = %s\n", versionedTvTypeStr, versionedTvStr);
         VersionHandle vh(indicator, substantive);
-#ifdef USE_SHARED_DEFAULT_TV
         TruthValue* tv = TruthValue::factory(versionedTvType, versionedTvStr);
         DeleteAndSetDefaultTVIfPertinent(&tv);
         result->versionedTVs[vh] = tv;
-#else
-        result->versionedTVs[vh] = TruthValue::factory(versionedTvType, versionedTvStr);
-#endif
     }
     free(s);
     return result;
@@ -335,12 +309,7 @@ TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
     if (otherCTv) {
 #endif
         if (otherCTv->getConfidence() > result->getConfidence()) {
-#ifdef USE_SHARED_DEFAULT_TV
             result->setVersionedTV(*(otherCTv->primaryTV), NULL_VERSION_HANDLE);
-#else
-            delete result->primaryTV;
-            result->primaryTV = otherCTv->primaryTV->clone();
-#endif
         }
         // merge the common versioned TVs
         for (VersionedTruthValueMap::const_iterator itr = result->versionedTVs.begin();
@@ -351,12 +320,7 @@ TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
             if (otherItr != otherCTv->versionedTVs.end()) {
                 TruthValue* otherTv = otherItr->second;
                 if (otherTv->getConfidence() > tv->getConfidence()) {
-#ifdef USE_SHARED_DEFAULT_TV
                     result->setVersionedTV(*otherTv, key);
-#else
-                    delete tv;
-                    result->versionedTVs[key] = otherTv->clone();
-#endif
                 }
             }
         }
@@ -367,21 +331,12 @@ TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
             TruthValue* otherTv = otherItr->second;
             VersionedTruthValueMap::const_iterator itr = result->versionedTVs.find(key);
             if (itr == result->versionedTVs.end()) {
-#ifdef USE_SHARED_DEFAULT_TV
                 result->setVersionedTV(*otherTv, key);
-#else
-                result->versionedTVs[key] = otherTv->clone();
-#endif
             }
         }
     } else {
         if (other.getConfidence() > result->getConfidence()) {
-#ifdef USE_SHARED_DEFAULT_TV
             result->setVersionedTV(other, NULL_VERSION_HANDLE);
-#else
-            delete result->primaryTV;
-            result->primaryTV = other.clone();
-#endif
         }
     }
     return result;
@@ -390,15 +345,8 @@ TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
 
 void CompositeTruthValue::setVersionedTV(const TruthValue& tv, VersionHandle vh) {
 
-#ifdef USE_SHARED_DEFAULT_TV
     TruthValue* newTv = (TruthValue*) & (TruthValue::DEFAULT_TV());
     if (!tv.isNullTv() && &tv != &(TruthValue::DEFAULT_TV())) {
-#else
-    TruthValue* newTv;
-    if (tv.isNullTv()) {
-        newTv = TruthValue::DEFAULT_TV().clone();
-    } else {
-#endif
         newTv = tv.clone();
     }
     VersionedTruthValueMap::const_iterator itr = versionedTVs.find(vh);
@@ -408,11 +356,7 @@ void CompositeTruthValue::setVersionedTV(const TruthValue& tv, VersionHandle vh)
             versionedTVs[vh] = newTv;
         } else {
             // null version handle. Set the primary TV
-#ifdef USE_SHARED_DEFAULT_TV
             if (primaryTV != NULL && primaryTV != &(TruthValue::DEFAULT_TV())) {
-#else
-            if (primaryTV != NULL) {
-#endif
                 delete primaryTV;
             }
             primaryTV = newTv;
@@ -420,15 +364,10 @@ void CompositeTruthValue::setVersionedTV(const TruthValue& tv, VersionHandle vh)
     }
     else {
         TruthValue* versionedTv = itr->second;
-#ifdef USE_SHARED_DEFAULT_TV
         if (versionedTv != &(TruthValue::DEFAULT_TV())) {
             delete versionedTv;
         }
         versionedTVs[vh] = newTv;
-#else
-        delete versionedTv;
-        versionedTVs[vh] = newTv;
-#endif
 
     }
 }
@@ -453,13 +392,9 @@ void CompositeTruthValue::removeVersionedTV(VersionHandle vh)
     if (itr != versionedTVs.end()) {
         TruthValue* versionedTv = itr->second;
         versionedTVs.erase(vh);
-#ifdef USE_SHARED_DEFAULT_TV
         if (versionedTv != &(TruthValue::DEFAULT_TV())) {
             delete versionedTv;
         }
-#else
-        delete versionedTv;
-#endif
     }
 }
 
@@ -478,14 +413,9 @@ void CompositeTruthValue::removeVersionedTVs(const Handle &substantive)
 
             // Free TruthValue object at once
             TruthValue* versionedTv = itr->second;
-#ifdef USE_SHARED_DEFAULT_TV
-            if (versionedTv != &(TruthValue::DEFAULT_TV()))
-            {
+            if (versionedTv != &(TruthValue::DEFAULT_TV())) {
                 delete versionedTv;
             }
-#else
-            delete versionedTv;
-#endif
         }
     }
     for (itr = toBeRemovedEntries.begin();
@@ -511,17 +441,11 @@ void CompositeTruthValue::removeInvalidTVs(AtomSpace& atomspace)
         if (!atomspace.isValidHandle(key.substantive))
         {
             toBeRemovedEntries[key] = NULL;
-
             // Free TruthValue object at once
             TruthValue* versionedTv = itr->second;
-#ifdef USE_SHARED_DEFAULT_TV
-            if (versionedTv != &(TruthValue::DEFAULT_TV()))
-            {
+            if (versionedTv != &(TruthValue::DEFAULT_TV())) {
                 delete versionedTv;
             }
-#else
-            delete versionedTv;
-#endif
         }
     }
     for (itr = toBeRemovedEntries.begin();
