@@ -195,7 +195,7 @@ std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
  */
 Handle PLNModule::pln_bc(Handle h, int steps)
 {
-    std::cout << "pln_bc" << h << endl;
+    cout << "pln_bc" << h << endl;
 
     return infer(h, steps, true);
 }
@@ -288,7 +288,7 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
     const Rule* rule = rp.findRule(ruleName);
     vhpair vhp(Handle::UNDEFINED, NULL_VERSION_HANDLE); // result to be overwriten
     if(rule) {
-        pHandleSeq phs = ASW()->realToFakeHandles(premises);
+        pHandleSeq phs = ASW()->realToFakeHandles(premises, CX);
         if(rule->isComposer()) {
             vector<Vertex> vv(phs.begin(),phs.end());
             //! @todo usually use the version of compute that takes BoundVertexes

@@ -9,6 +9,9 @@
   (pln-ar "SubsetEvalRule" (list sub super) context))
 (define (IntInhRule sub super . context)
   (pln-ar "IntensionalInheritanceRule" (list sub super) context))
+(define (InhDedRule AB BC . context)
+  (pln-ar "InheritanceDeductionRule" (list AB BC) context))
+
 ; ModusPonensRule is the name for StrictImplicationBreakdownRule
 (define (ModusPonensRule implication antecedent . context)
   (pln-ar "ModusPonensRule" (list implication antecedent) context))
@@ -30,11 +33,11 @@
 ; to compute its TV.
 
 ; define rule name 
-(define (UniversalInstantiationForAllRuleNameStr forAll)
+(define (UniInsForAllRuleNameStr forAll)
   (string-append "CustomCrispUnificationRule"
                  (number->string (cog-handle forAll))))
 ; apply the inference rule
-(define (UniversalInstantiationForAllRule forAll . arguments)
-  (pln-ar (UniversalInstantiationForAllRuleNameStr forAll)
+(define (UniInsForAllRule forAll . arguments)
+  (pln-ar (UniInsForAllRuleNameStr forAll)
           (list (universal-instantiate forAll arguments))
           (list))) ; TODO
