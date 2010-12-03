@@ -1,0 +1,19 @@
+#
+# Modulator updaters
+#
+# @author Zhenhua Cai czhedu@gmail.com
+# @date   2010-12-03
+#
+
+ActivationModulatorUpdater(0) :=
+    get_activation()
+
+ResolutionModulatorUpdater(0) :=
+    get_resolution()
+
+CertaintyModulatorUpdater(0) :=
+    get_certainty()
+
+SelectionThresholdModulatorUpdater(0) :=
+    get_selection_threshold()
+
