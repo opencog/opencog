@@ -50,6 +50,9 @@ $binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
 ./rules_preconditions.combo \
 ./rules_preconditions.combo-select \
 ./rules_action_schemata.combo \
+./modulator_updaters.combo \
+$pdh/opencog/embodiment/rules_core.scm \
+$pdh/opencog/embodiment/pet_rules.scm \
 $pdh/opencog/embodiment/rules_core.lua \
 $pdh/opencog/embodiment/humanoid_rules.lua \
 $pdh/opencog/embodiment/humanoid_traits_maria.lua \
