@@ -53,6 +53,16 @@
 // high level predicates
 #define NEAR_PREDICATE_NAME "near"
 
+// Modulator names
+// Used by WorldWrapperUtil::evalPerception method
+// They should be the schema names used in "xxx_rules.scm" 
+// without the suffix "ModulatorUpdater" and 
+// should be exactly the same as defined in "EmbodimentConfig.h"
+#define ACTIVATION_MODULATOR_NAME "Activation"
+#define RESOLUTION_MODULATOR_NAME "Resolution"
+#define CERTAINTY_MODULATOR_NAME "Certainty"
+#define SELECTION_THRESHOLD_MODULATOR_NAME "SelectionThreshold"
+
 // high leval predicates - traits
 #define CURIOSITY_PREDICATE_NAME     "curiosity"
 #define PLAYFULNESS_PREDICATE_NAME    "playfulness"

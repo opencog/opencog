@@ -78,6 +78,13 @@ enum pet_perception_enum {
     has_requested_schema,
     has_something_to_say,
 
+    // Modulators
+    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-11-24)
+    get_activation,
+    get_resolution,
+    get_certainty,
+    get_selection_threshold,
+
     // traits
     get_aggressiveness,
     get_curiosity,
@@ -197,6 +204,13 @@ static const perception_basic_description pbd[] = {
     { id::has_requested_schema, "has_requested_schema", "->(union(definite_object indefinite_object) boolean)" },
     { id::has_something_to_say,          "has_something_to_say",          "->(union(definite_object indefinite_object) boolean)" },
 
+    // Modulators
+    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-03)
+    { id::get_activation, "get_activation", "contin"},
+    { id::get_resolution, "get_resolution", "contin"},
+    { id::get_certainty,  "get_certainty",  "contin"},
+    { id::get_selection_threshold, "get_selection_threshold", "contin"},
+
     { id::get_aggressiveness,   "get_aggressiveness",   "->(union(definite_object indefinite_object) contin)"},
     { id::get_curiosity,        "get_curiosity",     "->(union(definite_object indefinite_object) contin)"},
     { id::get_playfulness,   "get_playfulness",    "->(union(definite_object indefinite_object) contin)"},
@@ -282,6 +296,13 @@ static const perception_property_description ppd[] = {
     { id::has_learned_tricks,   false,   false,     false,      false,    false,    false },
     { id::has_requested_schema, false,   false,     false,      false,    false,    false },
     { id::has_something_to_say, false,   false,     false,      false,    false,    false },
+
+    // Modulators
+    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-11-24)  
+    { id::get_activation,           false,    false,    false,    false,   false,   false },
+    { id::get_resolution,           false,    false,    false,    false,   false,   false },
+    { id::get_certainty,            false,    false,    false,    false,   false,   false },
+    { id::get_selection_threshold,  false,    false,    false,    false,   false,   false },
 
     { id::get_aggressiveness,   false,   false,     false,      false,    false,    false },
     { id::get_curiosity,        false,   false,     false,      false,    false,    false },

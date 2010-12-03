@@ -116,6 +116,21 @@ private:
                                          const std::string& name,
                                          const std::string& target,
                                          unsigned long time);
+    /**
+     * Return the value for the given Modulator within the AtomSpace.
+     * Modulator not presented in AtomSpace will return -1.
+     *
+     * @param atomSpace The AtomSpace where to look for the Modulator.
+     * @param modulator The Modulator name, which is defined in "PredefinedProcedureNames.h" 
+     *                  in AtomSpace folder.
+     * @param self_id   ID of the Pet itself.
+     * @param time      The current timestamp, which is used for cache searching. 
+     */
+    static float getModulator(const AtomSpace & atomSpace,
+                              const std::string & modulator,
+                              const std::string & self_id,
+                              unsigned long time
+                             );
 
     /**
      * Return the value for the a emotional feeling or trait stored within

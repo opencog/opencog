@@ -5,6 +5,8 @@
  * All Rights Reserved
  * Author(s): Nil Geisweiller, Moshe Looks, Carlos Lopes
  *
+ * Updated: by ZhenhuaCai, on 2010-11-25
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -2429,6 +2431,39 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         }
         break;
 
+    // Modulators        
+    case id::get_activation:
+        return WorldWrapperUtil::getModulator( atomSpace, 
+                                               std::string(ACTIVATION_MODULATOR_NAME),
+                                               self_id, 
+                                               time
+                                             );
+        break;
+
+    case id::get_resolution:
+        return WorldWrapperUtil::getModulator( atomSpace, 
+                                               std::string(RESOLUTION_MODULATOR_NAME),
+                                               self_id,
+                                               time
+                                             );
+        break;
+
+    case id::get_certainty:
+        return WorldWrapperUtil::getModulator( atomSpace, 
+                                               std::string(CERTAINTY_MODULATOR_NAME), 
+                                               self_id,
+                                               time
+                                             );
+        break;
+
+    case id::get_selection_threshold:
+        return WorldWrapperUtil::getModulator
+                                     ( atomSpace, 
+                                       std::string(SELECTION_THRESHOLD_MODULATOR_NAME),
+                                       self_id,
+                                       time
+                                     );
+
         // -------------- pet traits perceptions
         //case id::is_aggressive:
     case id::get_aggressiveness:
@@ -2941,6 +2976,36 @@ float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& atomSpace,
     logger().debug(
                  "WWUtil - '%s' with '%s' '%f'.",
                  target.c_str(), feeling.c_str(), value);
+    return value;
+}
+
+float WorldWrapperUtil::getModulator(const AtomSpace & atomSpace,
+                                     const std::string & modulator,
+                                     const std::string & self_id,
+                                     unsigned long time)
+{
+    // Cache predicate data variables
+    //
+    // Actually, Modulator is not a Predicate in AtomSpace 
+    // (see "rules_core.scm" for the detail),
+    // while we only want to use WorldWrapperUtil's cache mechanism.
+    std::string name(modulator);
+    std::vector<std::string> argument;
+
+    WorldWrapper::predicate pred(name, argument);
+    float value = WorldWrapperUtil::cache.find(time, pred);
+
+    if (value == CACHE_MISS) {
+        value = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace, modulator, self_id);
+        WorldWrapperUtil::cache.add(time, pred, value);
+    }
+
+    logger().debug( "WWUtil - getModulator - '%s' for the pet with id '%s' is '%f'.", 
+                    modulator.c_str(), 
+                    self_id.c_str(),
+                    value
+                  );
+
     return value;
 }
 
