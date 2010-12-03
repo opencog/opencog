@@ -146,7 +146,8 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         fin.close();
         logger().info(
                      "OAC - RulesActionSchemata combo functions loaded.");
-        
+
+/*        
         fin.open(config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str());
         if (fin.good()) {
             cnt = procedureRepository->loadComboFromStream(fin);
@@ -157,6 +158,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         fin.close();
         logger().info(
                      "OAC - ModulatorUpdaters combo functions loaded.");
+*/                     
     }
 
 

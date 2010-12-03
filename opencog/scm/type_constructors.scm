@@ -110,6 +110,8 @@
 	(apply cog-new-link (append (list 'ExtensionalImplicationLink) x)))
 (define (EquivalenceLink . x)
 	(apply cog-new-link (append (list 'EquivalenceLink) x)))
+(define (SimultaneousEquivalenceLink . x)
+	(apply cog-new-link (append (list 'SimultaneousEquivalenceLink) x)))
 (define (ExtensionalEquivalenceLink . x)
 	(apply cog-new-link (append (list 'ExtensionalEquivalenceLink) x)))
 (define (AnchorNode . x)

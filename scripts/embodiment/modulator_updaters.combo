@@ -2,18 +2,19 @@
 # Modulator updaters
 #
 # @author Zhenhua Cai czhedu@gmail.com
-# @date   2010-12-03
+# @date   2010-12-04
 #
 
 ActivationModulatorUpdater(0) :=
-    get_activation()
+    ( get_activation() )
 
 ResolutionModulatorUpdater(0) :=
-    get_resolution()
+     (+ 1 get_resolution() )
 
 CertaintyModulatorUpdater(0) :=
-    get_certainty()
+    ( get_certainty() )
 
 SelectionThresholdModulatorUpdater(0) :=
-    get_selection_threshold()
+    (- get_selection_threshold() 1)
+     
 
