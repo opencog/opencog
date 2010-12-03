@@ -125,7 +125,19 @@ protected:
                                             "rules_preconditions.combo-select",
             "COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE",
                                             "rules_action_schemata.combo",
-            
+
+            // OpenPsi parameters
+            // Added by Zhenhua Cai, on 2010-12-03                                
+            "PSI_MODULATOR_UPDATERS_REPOSITORY_FILE",
+                                            "modulator_updaters.combo", 
+            "PSI_MODULATORS",      "Activation, Resolution, Certainty, SelectionThreshold", 
+
+            "PSI_RULES_CORE_FILE",          "rules_core.scm", 
+            "PSI_RULES_FILENAME_MASK",      "%s_rules.scm",
+
+
+            // TODO: Remove Rule Engine configurations once OpenPsi works fine
+            //
             // Rule Engine parameters
             "RE_CYCLE_PERIOD",              "2", //counted in term multiple idle cycles
             "RE_DEFAULT_MEAN",              "0.5",
