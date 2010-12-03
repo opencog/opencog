@@ -5,6 +5,8 @@
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
+ * Updated: by Zhenhua Cai, on 2010-11-25
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -774,6 +776,39 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
     }
 
     return -1;
+}
+
+float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
+                                              const std::string & modulator,
+                                              const std::string & petId
+                                             )
+{
+    float errorValue = -1.0;   // If error happens, return this value anyway.
+
+    // Get the SimilarityLink of the Modulator with petId
+    Handle modulatorHandle =  AtomSpaceUtil::getModulatorSimilarityLink
+                                                 ( atomSpace,
+                                                   modulator, 
+                                                   petId); 
+
+    if ( modulatorHandle == Handle::UNDEFINED ) {
+        logger().error( 
+                   "AtomSpaceUtil::%s - Failed to get the Handle (SimilarityLink) to %s.",
+                    __FUNCTION__, 
+                    modulator.c_str()
+                    );
+ 
+        return errorValue;
+    }
+
+    // Get the Handle to NumberNode
+    //
+    // We don't check if the type of the Atom returned is exactly NumberNode.
+    // Because it has been done by AtomSpaceUtil::getModulatorSimilarityLink method.
+    Handle numberNode = atomSpace.getOutgoing(modulatorHandle, 0); 
+
+    // Return the Modulator value
+    return boost::lexical_cast<float> ( atomSpace.getName(numberNode) );
 }
 
 void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,
@@ -1732,6 +1767,125 @@ std::string AtomSpaceUtil::convertAgentActionParametersToString( const AtomSpace
         } // catch
     } // if
     return "";
+}
+
+Handle AtomSpaceUtil::getModulatorSimilarityLink(const AtomSpace & atomSpace,  
+                                  const std::string & modulator, 
+                                  const std::string & petId)
+{
+    // Format of Modulator
+    //
+    // SimilarityLink (stv 1.0 1.0)
+    //     NumberNode: "modulator_value"
+    //     ExecutionOutputLink
+    //         GroundedSchemaNode: "modulator_schema_name"
+    //         ListLink
+    //             PET_HANDLE
+    //
+
+    // Get the Handle to Pet
+    Handle petHandle = AtomSpaceUtil::getAgentHandle(atomSpace, petId);
+
+    if (petHandle == Handle::UNDEFINED) {
+        logger().error( "AtomSpaceUtil::%s - Found no Pet named '%s'.",
+                        __FUNCTION__, petId.c_str()
+                      );
+        return Handle::UNDEFINED;
+    }
+
+    // Get the Handle to GroundSchemaNode
+    std::string modulatorUpdater = modulator + "ModulatorUpdater";
+
+    Handle groundedSchemaNode = atomSpace.getHandle
+                                        ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
+                                          modulatorUpdater      // Name of the Atom wanted
+                                        );
+
+    if (groundedSchemaNode == Handle::UNDEFINED) {
+        logger().error( "AtomSpaceUtil::%s - Found no GroundSchemaNode named '%s'.",
+                         __FUNCTION__, modulatorUpdater.c_str()
+                      );
+        return Handle::UNDEFINED;
+    }
+
+    // Get the  HandleSet to ExecutionOutputLink
+    std::vector<Handle> executionOutputLinkSet;
+
+    atomSpace.getHandleSet
+                  ( back_inserter(executionOutputLinkSet), // return value
+                    groundedSchemaNode,       // returned link should contain this node
+                    EXECUTION_OUTPUT_LINK,    // type of the returned link 
+                    false                     // subclass is not acceptable, 
+                                              // i.e. returned link should be exactly of 
+                  );                          // type EXECUTION_OUTPUT_LINK
+
+
+    // Pick up the ExecutionOutputLink that contains a ListLink holding petHandle
+    std::vector<Handle>::iterator itrHandleSet;
+
+    for ( itrHandleSet = executionOutputLinkSet.begin(); 
+          itrHandleSet != executionOutputLinkSet.end(); 
+          itrHandleSet ++ ) {
+
+        // Get Handle to ListLink
+        Handle listLink = atomSpace.getOutgoing
+                                    ( *itrHandleSet, // Handle of the Link to be searched
+                                      1              // Index of the Handle in Outgoing set 
+                                    ); 
+
+        if ( atomSpace.getType(listLink) == LIST_LINK && 
+             atomSpace.getArity(listLink) == 1 &&
+             atomSpace.getOutgoing(listLink, 0) == petHandle ) {
+            break;
+        }// if
+    
+    }// for
+        
+    if ( itrHandleSet == executionOutputLinkSet.end() ) {
+         logger().error( 
+             "AtomSpaceUtil::%s - Found no ExecutionOutputLink for '%s' with petId '%s'.",
+              __FUNCTION__, modulatorUpdater.c_str(), petId.c_str()
+                       );
+        return Handle::UNDEFINED;
+    }
+
+    Handle executionOutputLink = *itrHandleSet;
+
+    // Get the Handle to SimilarityLink
+    std::vector<Handle> similarityLinkSet;
+
+    atomSpace.getHandleSet
+        ( back_inserter(similarityLinkSet), // return value
+          executionOutputLink,              // returned link should contain this link
+          SIMILARITY_LINK,                  // type of the returned link 
+          false                             // subclass is not acceptable, i.e. returned 
+        );                                  // link should be exactly of 
+                                            // type SIMILARITY_LINK
+
+    if (similarityLinkSet.size() != 1) {
+        logger().error( "AtomSpaceUtil::%s - There should be exactly one SimilarityLink to '%s' with petId '%s', found '%d'.",
+                        __FUNCTION__, 
+                        modulatorUpdater.c_str(),
+                        petId.c_str(),
+                        similarityLinkSet.size()
+                      );
+
+        return Handle::UNDEFINED;
+    }
+
+    // Get the Handle to NumberNode
+    Handle numberNode = atomSpace.getOutgoing(similarityLinkSet[0], 0); 
+
+    if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
+        logger().error( "AtomSpaceUtil::%s - Outgoing atom index [0] of SimilarityLink for '%s' should be a NumberNode. Got '%s'.",
+                        __FUNCTION__, 
+                        modulatorUpdater.c_str(),
+                        classserver().getTypeName(atomSpace.getType(numberNode)).c_str()
+                      );
+        return Handle::UNDEFINED;
+    }
+
+    return similarityLinkSet[0];
 }
 
 Handle AtomSpaceUtil::getRuleImplicationLink(const AtomSpace& atomSpace,

@@ -5,6 +5,8 @@
  * All Rights Reserved
  * Author(s): Welter Luigi
  *
+ * Updated: by ZhenhuaCai, on 2010-11-25
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -121,6 +123,22 @@ public:
     static float getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
                                             const std::string& petId,
                                             const std::string& feelingName );
+    /**
+     * Returns the current level of the given Modulator.
+     *
+     * If the Modulator does not exist on AtomSpace or some problem occurs when invoked,
+     * this method will return -1
+     *
+     * @param AtomSpace The AtomSpace
+     * @param modulator Name of the Modulator wanted
+     * @param petId     Pet's name(id)
+     *
+     * @return float    The current level of a given Modulator
+     */ 
+    static float getCurrentModulatorLevel(const AtomSpace & atomSpace, 
+                                          const std::string & modulator, 
+                                          const std::string & petId
+                                         );
 
     /**
      * Returns a pointer to the most recent evaluation link. With the given name of the
@@ -764,6 +782,22 @@ public:
      */
     static Handle getRuleImplicationLink(const AtomSpace& atomSpace,
                                          const std::string& rule);
+    
+    /**
+     * Return the Handle of SimilarityLink that holds ModulatorUpdater
+     *
+     * The format of a Modulator stored in AtomSpace is:
+     *
+     * SimilarityLink
+     *     NumberNode: "modulator_value"
+     *     ExecutionOutputLink
+     *         GroundSchemaNode: modulatorUpdater
+     *         ListLink 
+     *             PET_HANDLE
+     */
+    static Handle getModulatorSimilarityLink(const AtomSpace & atomSpace,
+                                             const std::string & modulator, 
+                                             const std::string & petId);
 
     /**
      * Return the schema strength for the given rule. This strength is stored as
