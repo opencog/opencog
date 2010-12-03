@@ -7,6 +7,7 @@ ADD_LIBRARY (oac
     ImportanceDecayAgent
     ActionSelectionAgent
     EntityExperienceAgent
+    PsiModulatorUpdaterAgent
     SleepAgent
     MockOpcHCTest
     HCTestAgent

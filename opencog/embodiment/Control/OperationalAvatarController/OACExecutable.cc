@@ -89,6 +89,12 @@ int main(int argc, char *argv[])
         const char* config_path[] = {"."};
         opc.loadSCMModules(config_path);
 
+        // Add Psi Rules to AtomSpace
+        //
+        // Make sure you've called OAC::loadSCMModules method before.
+        // Because Psi Rules are written in Scheme language and need SCM modules for loading 
+        opc.addRulesToAtomSpace();
+
         // enable the network server and run the server's main loop
         opc.enableNetworkServer();
 

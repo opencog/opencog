@@ -5,6 +5,8 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
+ *  Updated: by Zhenhua Cai, on 2010-12-03
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -27,8 +29,12 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
+#include <opencog/server/load-file.h> // Loading Scheme scripts by C++ code
+
 #include <opencog/util/files.h>
 #include <opencog/util/Config.h>
+
+#include <boost/format.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -140,6 +146,17 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         fin.close();
         logger().info(
                      "OAC - RulesActionSchemata combo functions loaded.");
+        
+        fin.open(config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str());
+        if (fin.good()) {
+            cnt = procedureRepository->loadComboFromStream(fin);
+        } else {
+            logger().error(
+                         "OAC - Unable to load ModulatorUpdaters combo.");
+        }
+        fin.close();
+        logger().info(
+                     "OAC - ModulatorUpdaters combo functions loaded.");
     }
 
 
@@ -172,6 +189,17 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     this->registerAgent(EntityExperienceAgent::info().id, &entityExperienceAgentFactory);
     entityExperienceAgent = static_cast<EntityExperienceAgent*>(
                                this->createAgent(EntityExperienceAgent::info().id, false));
+
+    /*
+    this->registerAgent( PsiModulatorUpdaterAgent::info().id, 
+                         &psiModulatorUpdaterAgentFactory
+                       );
+    psiModulatorUpdaterAgent = static_cast<PsiModulatorUpdaterAgent*>(
+                               this->createAgent( PsiModulatorUpdaterAgent::info().id,
+                                                  false
+                                                )
+                                                                     );
+    */
 
     if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         this->startAgent(procedureInterpreterAgent);
@@ -230,6 +258,83 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
 }
 
+int OAC::addRulesToAtomSpace()
+{
+    // Load core file
+    //
+    // There are two ways to load "rules_core.scm", 
+    // one is adding "rules_core.scm" to the end of SCM_PRELOAD in "embodiment.conf",
+    // the other is using the code commented below.
+    // 
+    // If we choose the latter solution, then we can not use the functions/variables 
+    // defined in "rules_core.scm" in OpenCog shell. So we adopt the first method.
+    //
+/*
+    std::string psi_rules_core_file_name = config().get("PSI_RULES_CORE_FILE");
+
+    if ( load_scm_file( *(this->atomSpace), re_core_file_name.c_str() ) == 0  ) 
+        logger().info( "OAC::%s - Loaded psi rules core file: '%s'", 
+                        __FUNCTION__, 
+                        psi_rules_core_file_name)c_str() 
+                     );
+    else 
+        logger().error( "OAC::%s - Failed to load psi rules core file: '%s'", 
+                         __FUNCTION__, 
+                        psi_rules_core_file_name.c_str() 
+                      );
+    
+*/
+    // Set PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP for the Scheme shell 
+    // before loading rules file
+    SchemeEval & evaluator = SchemeEval::instance(this->atomSpace);
+    std::string scheme_expression, scheme_return_value;
+
+    scheme_expression =  "(set! PET_HANDLE (get_agent_handle \"" + 
+                                            this->getPet().getPetId() + 
+                                            "\") )";
+
+    scheme_expression += "(set! OWNER_HANDLE (get_owner_handle \"" + 
+                                              this->getPet().getOwnerId() + 
+                                             "\") )";
+
+    scheme_expression += "(set! CURRENT_TIMESTAMP \"" +
+                                boost::lexical_cast<std::string>
+                                    ( this->getPAI().getLatestSimWorldTimestamp() ) +
+                         "\" )";
+
+    scheme_return_value = evaluator.eval(scheme_expression);
+
+    if ( evaluator.eval_error() ) 
+        logger().error(
+                "OAC::%s - Failed to set PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP", 
+                __FUNCTION__
+                      );
+    else 
+        logger().info(
+          "OAC::%s - Set PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP for Scheme shell", 
+          __FUNCTION__
+                     );
+            
+    // Load the rules file, including Modulators, DemandGoals and Rules 
+    std::string psi_rules_file_name = 
+                                ( boost::format(config().get("PSI_RULES_FILENAME_MASK")) %
+                                                                this->getPet().getType()
+                                ).str();
+
+    if ( load_scm_file( *(this->atomSpace), psi_rules_file_name.c_str() ) == 0  ) 
+        logger().info( "OAC::%s - Loaded psi rules file: '%s'", 
+                        __FUNCTION__, 
+                       psi_rules_file_name.c_str() 
+                     );
+    else
+        logger().error( "OAC::%s - Failed to load psi rules file: '%s'", 
+                         __FUNCTION__, 
+                        psi_rules_file_name.c_str() 
+                      );
+
+    return 0;
+}
+
 OAC::~OAC()
 {
 
@@ -247,6 +352,7 @@ OAC::~OAC()
     delete (procedureInterpreterAgent);
     delete (importanceDecayAgent);
     delete (actionSelectionAgent);
+    delete (psiModulatorUpdaterAgent);
 
 #ifndef DELETE_ATOMSPACE 
     // TODO: It takes too much time to delete atomspace. So, atomspace removal

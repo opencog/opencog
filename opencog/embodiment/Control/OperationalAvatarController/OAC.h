@@ -5,6 +5,8 @@
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
+ * Updated: By Zhenhua Cai, on 2010-12-03
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -116,6 +118,7 @@ private:
     ImportanceDecayAgent* importanceDecayAgent;
     ActionSelectionAgent* actionSelectionAgent;
     EntityExperienceAgent* entityExperienceAgent;
+    PsiModulatorUpdaterAgent* psiModulatorUpdaterAgent;
 
     RuleEngine* ruleEngine;
 
@@ -169,6 +172,15 @@ public:
     void init(const std::string &myId, const std::string &ip, int portNumber,
               const std::string& petId, const std::string& ownerId,
               const std::string& agentType, const std::string& agentTraits);
+
+    /**
+     * Add Rules, including Modulators, DemandGoals etc. into AtomSpace. 
+     *
+     * For details about formats of Modulators, DemandGoals and Rules,
+     * please refer to file "rules_core.scm", 
+     * and "pet_rules.scm" is a good example of using them.     
+     */ 
+    int addRulesToAtomSpace();
 
     /**
      * Save the OCP state.
@@ -257,6 +269,7 @@ public:
     SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
     SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
     SingletonFactory<EntityExperienceAgent, Agent> entityExperienceAgentFactory;
+    SingletonFactory<PsiModulatorUpdaterAgent, Agent> psiModulatorUpdaterAgentFactory;
 
 }; // class
 }  // namespace
