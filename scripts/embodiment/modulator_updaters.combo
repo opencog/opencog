@@ -5,16 +5,41 @@
 # @date   2010-12-04
 #
 
-ActivationModulatorUpdater(0) :=
-    ( get_activation() )
+# Examples from http://wiki.opencog.org/w/Combo_Programming_Language work fine
+#randomPlusOneFunc(0) := + 1 random
+#randomPlusOneConst := + 1 random
 
-ResolutionModulatorUpdater(0) :=
-     (+ 1 get_resolution() )
+# Only for test (work fine)
+#ActivationModulatorUpdater(0) := 0.1
+#ResolutionModulatorUpdater(0) := 0.2
+#CertaintyModulatorUpdater(0) := 0.3
+#SelectionThresholdModulatorUpdater(0) := 0.4
 
-CertaintyModulatorUpdater(0) :=
-    ( get_certainty() )
+# Crash
+# [ERROR] A SpaceMap must exists (/home/czhedu/OpenPsi/openpsi/opencog/embodiment/WorldWrapper/PAIWorldWrapper.cc:497)
+#ActivationModulatorUpdater(0) := get_activation
+#ResolutionModulatorUpdater(0) := get_resolution
+#CertaintyModulatorUpdater(0) := get_certainty
+#SelectionThresholdModulatorUpdater(0) := get_selection_threshold
 
-SelectionThresholdModulatorUpdater(0) :=
-    (- get_selection_threshold() 1)
-     
+ActivationModulatorUpdater(0) := get_energy(self)
+ResolutionModulatorUpdater(0) := get_energy(self)
+CertaintyModulatorUpdater(0) := get_energy(self)
+SelectionThresholdModulatorUpdater(0) := get_energy(self)
+                                       
+# Something like what we really want (crash!)  
+#ActivationModulatorUpdater(0) := 
+#    + get_activation random
+
+#ResolutionModulatorUpdater(0) := 
+#    + get_resolution get_activation
+
+#CertaintyModulatorUpdater(0) := 
+#    + (* get_certainty get_activation) 
+#      random 
+
+#SelectionThresholdModulatorUpdater(0) := 
+#    - (/ get_selection_threshold 0.3)
+#      get_selection_threshold   
+
 

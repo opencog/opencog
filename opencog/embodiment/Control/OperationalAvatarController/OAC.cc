@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
- *  Updated: by Zhenhua Cai, on 2010-12-03
+ * Updated: by Zhenhua Cai, on 2010-12-04
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -97,10 +97,12 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     } else {
         pet->initTraitsAndFeelings();
 
-        logger().info("OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s' and ActionSchemataPreconditions '%s'.",
-                     config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
-                     config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
-                     config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
+        logger().info( "OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s', ActionSchemataPreconditions '%s' and PsiModulatorUpdaters '%s'.",
+                       config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
+                       config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
+                       config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str(), 
+                       config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str()
+                     );
 
         int cnt = 0;
         ifstream fin(config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str());
@@ -147,9 +149,9 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         logger().info(
                      "OAC - RulesActionSchemata combo functions loaded.");
 
-/*        
         fin.open(config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str());
         if (fin.good()) {
+            logger().info("OAC - Loading ModulatorUpdaters combo.");
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
             logger().error(
@@ -158,7 +160,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         fin.close();
         logger().info(
                      "OAC - ModulatorUpdaters combo functions loaded.");
-*/                     
     }
 
 
@@ -167,6 +168,15 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     this->pet->setRuleEngine(ruleEngine);
 
     predicatesUpdater = new PredicatesUpdater(*atomSpace, pet->getPetId());
+
+    // Load Psi Rules ('xxx_rules.scm') to AtomSpace
+    //
+    // Psi Rules should be loaded before running PsixxxAgent.
+    // And before loading Psi Rules, make sure 'rules_core.scm ' has been loaded.
+    // Since 'rules_core.scm' is loaded as a SCM module, 
+    // the correct sequence of initialization is 
+    // OAC::loadSCMModules, OAC::addRulesToAtomSpace and PsiXxxAgent finally.
+    this->addRulesToAtomSpace();
 
     // TODO: remove component reference from component constructors
 
@@ -192,7 +202,8 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     entityExperienceAgent = static_cast<EntityExperienceAgent*>(
                                this->createAgent(EntityExperienceAgent::info().id, false));
 
-    /*
+    // Three steps to run a MindAgent
+    // registerAgent, createAgent and startAgent
     this->registerAgent( PsiModulatorUpdaterAgent::info().id, 
                          &psiModulatorUpdaterAgentFactory
                        );
@@ -201,7 +212,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                   false
                                                 )
                                                                      );
-    */
 
     if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         this->startAgent(procedureInterpreterAgent);
@@ -227,6 +237,12 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
            config().get_int( "ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD" ) );
         this->startAgent(entityExperienceAgent);
     }
+    if (config().get_bool("PSI_MODULATOR_UPDATER_ENABLED")) {
+        this->psiModulatorUpdaterAgent->setFrequency(
+           config().get_int( "PSI_MODULATOR_UPDATER_CYCLE_PERIOD" ) );
+        this->startAgent(psiModulatorUpdaterAgent);
+    }
+   
 
     // TODO: This should be done only after NetworkElement is initialized
     // (i.e., handshake with router is done)

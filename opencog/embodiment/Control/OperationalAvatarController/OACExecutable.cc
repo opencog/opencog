@@ -78,22 +78,21 @@ int main(int argc, char *argv[])
         // storage is open, as otherwise, there will be handle conflicts.
         opc.openDatabase();
 
-        opc.init(argv[1], "127.0.0.1", portNumber, 
-                PerceptionActionInterface::PAIUtils::getInternalId(argv[1]), 
-                PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), 
-                argv[3], argv[4]);
-        
-
         // Load modules specified in config
         opc.loadModules(); 
         const char* config_path[] = {"."};
         opc.loadSCMModules(config_path);
 
-        // Add Psi Rules to AtomSpace
+        // Initialize OAC
         //
-        // Make sure you've called OAC::loadSCMModules method before.
-        // Because Psi Rules are written in Scheme language and need SCM modules for loading 
-        opc.addRulesToAtomSpace();
+        // OAC::loadSCMModules should be called before calling OAC::init, 
+        // because OAC::loadSCMModules will load 'rules_core.scm',  which should be loaded 
+        // before loading Psi Rules ('xxx_rules.scm') and 
+        // OAC::init is responsible for loading Psi Rules via OAC::addRulesToAtomSpace
+        opc.init(argv[1], "127.0.0.1", portNumber, 
+                PerceptionActionInterface::PAIUtils::getInternalId(argv[1]), 
+                PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), 
+                argv[3], argv[4]);
 
         // enable the network server and run the server's main loop
         opc.enableNetworkServer();

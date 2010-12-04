@@ -46,7 +46,7 @@ PsiModulatorUpdaterAgent::PsiModulatorUpdaterAgent()
 
 void PsiModulatorUpdaterAgent::init(opencog::CogServer * server) 
 {
-    logger().debug("PsiModulatorUpdaterAgent::init - Initialize the Agent");
+    logger().debug("PsiModulatorUpdaterAgent::%s - Initialize the Agent", __FUNCTION__);
 
     // Get OPC
     OAC * oac = (OAC *) server;
@@ -55,7 +55,8 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
     const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get Procedure repository
-    const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
+    const Procedure::ProcedureRepository & procedureRepository = 
+                                               oac->getProcedureRepository();
 
     // Get petId
     const std::string & petId = oac->getPet().getPetId();
@@ -64,7 +65,7 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
     this->modulatorMetaMap.clear();
 
     // Get modulator names from the configuration file
-    std::string modulatorNames = config()["MODULATORS"];
+    std::string modulatorNames = config()["PSI_MODULATORS"];
 
     // Process Modulators one by one
     boost::tokenizer<> modulatorNamesTok (modulatorNames);
@@ -79,10 +80,17 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
         modulator = (*iModulatorName);
         modulatorUpdater = modulator + "ModulatorUpdater";
 
+        logger().debug(
+              "PsiModulatorUpdaterAgent::%s - Searching the meta data of modulator '%s'.", 
+                        __FUNCTION__, 
+                        modulator.c_str() 
+                      );
+
         // Search modulator updater
         if ( !procedureRepository.contains(modulatorUpdater) ) {
             logger().warn( 
-       "PsiModulatorUpdaterAgent::init - Failed to find '%s' in OPC's procedureRepository",
+       "PsiModulatorUpdaterAgent::%s - Failed to find '%s' in OPC's procedureRepository",
+                           __FUNCTION__, 
                            modulatorUpdater.c_str()
                          );
             continue;
@@ -98,8 +106,9 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
         if ( similarityLink == Handle::UNDEFINED )
         {
             logger().warn(
-    "PsiModulatorUpdaterAgent::init - Failed to get the SimilarityLink for modulator '%s'",
-                      modulator.c_str()
+    "PsiModulatorUpdaterAgent::%s - Failed to get the SimilarityLink for modulator '%s'",
+                           __FUNCTION__, 
+                           modulator.c_str()
                          );
 
             continue;
@@ -116,9 +125,10 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
         modulatorMetaMap[modulator] = modulatorMeta;
 
         logger().debug(
-    "PsiModulatorUpdaterAgent::init - Store the meta data of  modulator '%s' successfully.", 
-                modulator.c_str() 
-                );
+     "PsiModulatorUpdaterAgent::%s - Store the meta data of  modulator '%s' successfully.", 
+                        __FUNCTION__, 
+                        modulator.c_str() 
+                      );
     }// for
 
     // Avoid initialize during next cycle
@@ -127,7 +137,9 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
 
 void PsiModulatorUpdaterAgent::runUpdaters(opencog::CogServer * server)
 {
-    logger().debug("PsiModulatorUpdaterAgent::runUpdaters - Run updaters (combo scripts)");
+    logger().debug( "PsiModulatorUpdaterAgent::%s - Run updaters (combo scripts)", 
+                    __FUNCTION__ 
+                  );
 
     // Get OAC
     OAC * oac = (OAC *) server;
@@ -160,14 +172,15 @@ void PsiModulatorUpdaterAgent::runUpdaters(opencog::CogServer * server)
 
         executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
 
+        // TODO: What does this for?
         while ( !procedureInterpreter.isFinished(executingSchemaId) )
             procedureInterpreter.run(NULL);  
 
         // Check if the the updater run successfully
         if ( procedureInterpreter.isFailed(executingSchemaId) ) {
-            logger().error( 
-                    "PsiModulatorUpdaterAgent::runUpdaters - Failed to execute '%s'", 
-                     modulatorUpdater.c_str() 
+            logger().error( "PsiModulatorUpdaterAgent::%s - Failed to execute '%s'", 
+                             __FUNCTION__, 
+                             modulatorUpdater.c_str() 
                           );
 
             iModulator->second.bUpdated = false;
@@ -185,7 +198,8 @@ void PsiModulatorUpdaterAgent::runUpdaters(opencog::CogServer * server)
         iModulator->second.updatedValue = get_contin(result);
 
         // TODO: Change the log level to fine, after testing
-        logger().debug( "PsiModulatorUpdater::run - The new level of '%s' will be %f", 
+        logger().debug( "PsiModulatorUpdaterAgent::%s - The new level of '%s' will be %f", 
+                         __FUNCTION__, 
                          modulator.c_str(),
                          iModulator->second.updatedValue                      
                       );
@@ -195,7 +209,9 @@ void PsiModulatorUpdaterAgent::runUpdaters(opencog::CogServer * server)
 
 void PsiModulatorUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
 {
-    logger().debug("PsiModulatorUpdaterAgent::runUpdaters - Run updaters (combo scripts)");
+    logger().debug("PsiModulatorUpdaterAgent::%s - Set updated values to AtomSpace",
+                    __FUNCTION__ 
+                  );
 
     // Get OAC
     OAC * oac = (OAC *) server;
@@ -228,18 +244,18 @@ void PsiModulatorUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
 
         // TODO: Change the log level to fine, after testing
         logger().debug( 
-          "PsiModulatorUpdater::setUpdatedValues - Set the level of modulator '%s' to %f", 
-           modulator.c_str(),
-           updatedValue
+                    "PsiModulatorUpdaterAgent::%s - Set the level of modulator '%s' to %f", 
+                         __FUNCTION__, 
+                         modulator.c_str(),
+                         updatedValue
                       );
     }// for
 }
 
 void PsiModulatorUpdaterAgent::run(opencog::CogServer * server)
 {
-    logger().debug("PsiModulatorUpdaterAgent::run - Executing run");
+    logger().debug("PsiModulatorUpdaterAgent::%s - Executing run", __FUNCTION__);
 
-    /*
     // Initialize the Agent (modulatorMetaMap etc)
     if ( !this->bInitialized )
         this->init(server);
@@ -249,6 +265,5 @@ void PsiModulatorUpdaterAgent::run(opencog::CogServer * server)
 
     // Set updated values to AtomSpace (NumberNodes)
     this->setUpdatedValues(server);
-    */
 }
 

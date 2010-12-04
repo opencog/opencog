@@ -91,7 +91,7 @@ public:
     }
 
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalAvatarController::ModulatorUpdaterAgent");
+        static const ClassInfo _ci("OperationalAvatarController::PsiModulatorUpdaterAgent");
         return _ci;
     }
 
