@@ -30,6 +30,7 @@
 #include <iostream>
 #include <list>
 
+#include <pthread.h>
 #include <stdlib.h>
 
 #include <opencog/atomspace/ClassServer.h>
@@ -81,6 +82,7 @@ AtomSpace::AtomSpace(void) :
 
     logger().fine("Max load factor for handle map is: %f", TLB::handle_map.max_load_factor());
 
+    pthread_mutex_init(&atomSpaceLock, NULL);
 }
 
 AtomSpace::~AtomSpace()

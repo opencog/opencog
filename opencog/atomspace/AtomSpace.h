@@ -56,6 +56,7 @@ typedef std::vector<HandleSet*> HandleSetSeq;
 class AtomSpace : public SpaceServerContainer
 {
     friend class SavingLoading;
+    friend class SaveRequest;
 
     /**
      * Used to fetch atoms from disk.
@@ -1497,6 +1498,15 @@ private:
     AtomTable atomTable;
     std::string emptyName;
     SpaceServer* spaceServer;
+
+    /** The AtomSpace currently acts like event loop, but some legacy code (such as
+     * saving/loading) might not like the AtomSpace changing while acting upon
+     * it. Those that absolutely require it can get a lock to halt the event loop.
+     * @warn This should only be used as a last resort, you need to add your
+     * class as a friend class to the AtomSpace, and we make no
+     * guarantee this will be available in the future.
+     */
+    pthread_mutex_t atomSpaceLock;
 
     /**
      * signal connections used to keep track of atom removal in the AtomTable
