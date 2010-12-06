@@ -2433,6 +2433,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
     // Modulators        
     case id::get_activation:
+        logger().debug("WorldWrapperUtil::%s - id::get_activation", __FUNCTION__);
         return WorldWrapperUtil::getModulator( atomSpace, 
                                                std::string(ACTIVATION_MODULATOR_NAME),
                                                self_id, 
@@ -2441,7 +2442,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::get_resolution:
-        return WorldWrapperUtil::getModulator( atomSpace, 
+       logger().debug("WorldWrapperUtil::%s - id::get_resolution", __FUNCTION__);
+       return WorldWrapperUtil::getModulator( atomSpace, 
                                                std::string(RESOLUTION_MODULATOR_NAME),
                                                self_id,
                                                time
@@ -2449,7 +2451,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::get_certainty:
-        return WorldWrapperUtil::getModulator( atomSpace, 
+      logger().debug("WorldWrapperUtil::%s - id::get_certainty", __FUNCTION__);
+      return WorldWrapperUtil::getModulator( atomSpace, 
                                                std::string(CERTAINTY_MODULATOR_NAME), 
                                                self_id,
                                                time
@@ -2457,12 +2460,15 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::get_selection_threshold:
-        return WorldWrapperUtil::getModulator
+     logger().debug("WorldWrapperUtil::%s - id::get_selection_threshold", __FUNCTION__);
+     return WorldWrapperUtil::getModulator
                                      ( atomSpace, 
                                        std::string(SELECTION_THRESHOLD_MODULATOR_NAME),
                                        self_id,
                                        time
                                      );
+
+        break;
 
         // -------------- pet traits perceptions
         //case id::is_aggressive:

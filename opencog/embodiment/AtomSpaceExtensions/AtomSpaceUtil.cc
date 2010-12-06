@@ -5,7 +5,7 @@
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
- * Updated: by Zhenhua Cai, on 2010-11-25
+ * Updated: by Zhenhua Cai, on 2010-12-05
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -803,9 +803,29 @@ float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
 
     // Get the Handle to NumberNode
     //
-    // We don't check if the type of the Atom returned is exactly NumberNode.
-    // Because it has been done by AtomSpaceUtil::getModulatorSimilarityLink method.
+    // Since SimilarityLink inherits from UnorderedLink, you can NOT use the following 
+    // code to get the NumberNode. 
+    // Because when you creating an UnorderedLink, it will sort its Outgoing set
+    // automatically ("./atomspace/Link.cc", Link::setOutgoingSet method)
+    //
+    // Handle numberNode = atomSpace.getOutgoing(modulatorHandle, 0); // Wrong!
+    
     Handle numberNode = atomSpace.getOutgoing(modulatorHandle, 0); 
+    
+    if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
+        
+        numberNode = atomSpace.getOutgoing(modulatorHandle, 1);    
+
+        if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
+
+            logger().error( "AtomSpaceUtil::%s - Could not find any NumberNode in the outgoing set of SimilarityLink for '%s'",
+                        __FUNCTION__, 
+                        modulator.c_str()
+                          );
+
+            return errorValue;
+        }
+    }// if
 
     // Return the Modulator value
     return boost::lexical_cast<float> ( atomSpace.getName(numberNode) );
@@ -1873,19 +1893,46 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(const AtomSpace & atomSpace,
         return Handle::UNDEFINED;
     }
 
-    // Get the Handle to NumberNode
-    Handle numberNode = atomSpace.getOutgoing(similarityLinkSet[0], 0); 
+    Handle similarityLink = similarityLinkSet[0];
 
-    if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
-        logger().error( "AtomSpaceUtil::%s - Outgoing atom index [0] of SimilarityLink for '%s' should be a NumberNode. Got '%s'.",
+    if ( atomSpace.getArity(similarityLink) != 2 ) {
+        logger().error( "AtomSpaceUtil::%s - The size of Outgoing set for SimilarityLink to '%s' with petId '%s' should be exactly 2, get '%d'", 
                         __FUNCTION__, 
                         modulatorUpdater.c_str(),
-                        classserver().getTypeName(atomSpace.getType(numberNode)).c_str()
+                        petId.c_str(), 
+                        atomSpace.getArity(similarityLink)
                       );
+
         return Handle::UNDEFINED;
     }
 
-    return similarityLinkSet[0];
+    // Get the Handle to NumberNode
+    //
+    // Since SimilarityLink inherits from UnorderedLink, you can NOT use the following 
+    // code to get the NumberNode. 
+    // Because when you creating an UnorderedLink, it will sort its Outgoing set
+    // automatically ("./atomspace/Link.cc", Link::setOutgoingSet method)
+    //
+    // Handle numberNode = atomSpace.getOutgoing(similarityLink, 0); // Wrong!
+    
+    Handle numberNode = atomSpace.getOutgoing(similarityLink, 0); 
+    
+    if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
+        
+        numberNode = atomSpace.getOutgoing(similarityLink, 1);    
+
+        if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
+
+            logger().error( "AtomSpaceUtil::%s - Could not find any NumberNode in the outgoing set of SimilarityLink for '%s'",
+                        __FUNCTION__, 
+                        modulatorUpdater.c_str()
+                          );
+
+            return Handle::UNDEFINED;
+        }
+    }// if
+
+    return similarityLink;
 }
 
 Handle AtomSpaceUtil::getRuleImplicationLink(const AtomSpace& atomSpace,

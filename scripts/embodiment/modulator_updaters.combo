@@ -2,32 +2,145 @@
 # Modulator updaters
 #
 # @author Zhenhua Cai czhedu@gmail.com
-# @date   2010-12-04
+# @date   2010-12-06
 #
 
-# Examples from http://wiki.opencog.org/w/Combo_Programming_Language work fine
-#randomPlusOneFunc(0) := + 1 random
-#randomPlusOneConst := + 1 random
+#####################################################################
+# Work fine
 
-# Only for test (work fine)
 #ActivationModulatorUpdater(0) := 0.1
 #ResolutionModulatorUpdater(0) := 0.2
 #CertaintyModulatorUpdater(0) := 0.3
 #SelectionThresholdModulatorUpdater(0) := 0.4
 
+#####################################################################
 # Crash
-# [ERROR] A SpaceMap must exists (/home/czhedu/OpenPsi/openpsi/opencog/embodiment/WorldWrapper/PAIWorldWrapper.cc:497)
-#ActivationModulatorUpdater(0) := get_activation
-#ResolutionModulatorUpdater(0) := get_resolution
-#CertaintyModulatorUpdater(0) := get_certainty
-#SelectionThresholdModulatorUpdater(0) := get_selection_threshold
+#
+# [ERROR] procedure_call - Wrong procedure definition operator '0.1' in procedure definition '1 ' should be ':=' instead
 
-ActivationModulatorUpdater(0) := get_energy(self)
-ResolutionModulatorUpdater(0) := get_energy(self)
-CertaintyModulatorUpdater(0) := get_energy(self)
-SelectionThresholdModulatorUpdater(0) := get_energy(self)
-                                       
-# Something like what we really want (crash!)  
+#ActivationModulatorUpdater(0) := + 1 0.1
+#ResolutionModulatorUpdater(0) := + 2 0.2
+#CertaintyModulatorUpdater(0) := + 3 0.3
+#SelectionThresholdModulatorUpdater(0) := + 4 0.4
+
+#####################################################################
+# Crash
+#
+# [ERROR] procedure_call - Wrong procedure definition operator 'ResolutionModulatorUpdater(0)' in procedure definition '(1 0.1) ' should be ':=' instead
+ 
+#ActivationModulatorUpdater(0) := + (1 0.1)
+#ResolutionModulatorUpdater(0) := + (2 0.2)
+#CertaintyModulatorUpdater(0) := + (3 0.3)
+#SelectionThresholdModulatorUpdater(0) := + (4 0.4)
+
+
+
+
+
+#####################################################################
+# Work fine
+
+#ActivationModulatorUpdater(0) := rand
+#ResolutionModulatorUpdater(0) := rand
+#CertaintyModulatorUpdater(0) := rand
+#SelectionThresholdModulatorUpdater(0) := rand
+
+#####################################################################
+# Crash
+#
+# [ERROR] procedure_call - Wrong procedure definition operator 'rand' in procedure definition '1 ' should be ':=' instead
+
+#ActivationModulatorUpdater(0) := + 1 rand
+#ResolutionModulatorUpdater(0) := + 2 rand
+#CertaintyModulatorUpdater(0) := + 3 rand
+#SelectionThresholdModulatorUpdater(0) := + 4 rand
+
+
+
+
+
+#####################################################################
+# Work fine
+
+ActivationModulatorUpdater(0) := get_activation
+ResolutionModulatorUpdater(0) := get_resolution
+CertaintyModulatorUpdater(0) := get_certainty
+SelectionThresholdModulatorUpdater(0) := get_selection_threshold
+
+#####################################################################
+# Crash
+#
+# [ERROR] procedure_call - Wrong procedure definition operator '4.4' in procedure definition 'get_current_action_repetition ' should be ':=' instead
+
+#ActivationModulatorUpdater(0) := * 0.1 get_current_action_repetition
+#ResolutionModulatorUpdater(0) := + get_current_action_repetition 222.222
+#CertaintyModulatorUpdater(0) := - get_current_action_repetition 33.33
+#SelectionThresholdModulatorUpdater(0) := / get_current_action_repetition 4.4
+
+#####################################################################
+#
+# Crash
+#
+# [ERROR] procedure_call - Wrong procedure definition operator 'ResolutionModulatorUpdater(0)' in procedure definition '(0.1 get_current_action_repetition) ' should be ':=' instead
+
+#ActivationModulatorUpdater(0) := + (0.1 get_current_action_repetition)
+#ResolutionModulatorUpdater(0) := + (get_current_action_repetition 0.02)
+#CertaintyModulatorUpdater(0) := - (get_current_action_repetition 0.003)
+#SelectionThresholdModulatorUpdater(0) := - (0.004 get_current_action_repetition)
+
+#####################################################################
+#
+# Crash
+#
+# [ERROR] tt2 is supposed to contain a type (/home/czhedu/OpenPsi/openpsi/opencog/comboreduct/combo/type_tree.cc:1064)
+
+#ActivationModulatorUpdater(0) := (+ (0.1 get_current_action_repetition))
+#ResolutionModulatorUpdater(0) := (+ (get_current_action_repetition 0.02))
+#CertaintyModulatorUpdater(0) := (- (get_current_action_repetition 0.003))
+#SelectionThresholdModulatorUpdater(0) := (- (0.004 get_current_action_repetition))
+
+
+
+
+
+#####################################################################
+# Crash
+#
+# Examples from
+# http://wiki.opencog.org/w/Combo_Programming_Language 
+#
+# [ERROR] procedure_call - Wrong procedure definition operator 'random' in procedure definition '1 ' should be ':=' instead
+
+#randomPlusOneFunc(0) := + 1 random
+#randomPlusOneConst := + 1 random
+
+#####################################################################
+# Crash
+#
+# [ERROR] procedure_call - Wrong procedure definition operator 'rand' in procedure definition '1 ' should be ':=' instead
+
+#randomPlusOneFunc(0) := + 1 rand
+#randomPlusOneConst := + 1 rand
+
+#####################################################################
+# Crash
+#
+# [ERROR] OACExecutable - An exceptional situation occured. Check log for more information.
+
+#ActivationModulatorUpdater(0) := random
+#ResolutionModulatorUpdater(0) := random
+#CertaintyModulatorUpdater(0) := random
+#SelectionThresholdModulatorUpdater(0) := random
+
+
+
+
+
+#####################################################################
+# Crash
+#
+# Something like what we really want
+
 #ActivationModulatorUpdater(0) := 
 #    + get_activation random
 

@@ -136,7 +136,7 @@ protected:
             "PSI_RULES_FILENAME_MASK",      "%s_rules.scm",
 
             "PSI_MODULATOR_UPDATER_ENABLED",        "true",
-            "PSI_MODULATOR_UPDATER_CYCLE_PERIOD",   "5",
+            "PSI_MODULATOR_UPDATER_CYCLE_PERIOD",   "2",
 
             // TODO: Remove Rule Engine configurations once OpenPsi works fine
             //

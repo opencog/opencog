@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2010-12-04
+ * @date 2010-12-05
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -29,7 +29,6 @@
 
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <time.h>
 
 namespace OperationalAvatarController
 {
@@ -37,12 +36,21 @@ namespace OperationalAvatarController
 /**
  * @class
  *
- * @brief Agent for updating modulators
+ * @brief MindAgent for updating modulators
  *
  * Controls the dynamic of the emotion of the agent (Perhaps how angry an
  * agent is. Note that "angry" should either correspond to a modulator, or,
  * more likely a configuration of modulators, but this is just an example).
- */
+ * 
+ * The format of Modulator in AtomSpace is
+ *
+ * SimilarityLink (stv 1.0 1.0)
+ *     NumberNode: "modulator_value"
+ *     ExecutionOutputLink
+ *         GroundedSchemaNode: xxxModulatorUpdater
+ *         ListLink
+ *            PET_HANDLE
+*/
 class PsiModulatorUpdaterAgent : public opencog::Agent
 {
 private:
@@ -52,21 +60,20 @@ private:
     {
     public:
 
-        std::string updaterName;   // The schema name that updates the Modulator
-        Handle numberNode;         // Handle to NumberNode that stores the value of 
-                                   // the Modulator
-        double updatedValue;       // The updated value after calling the Modulator updater  
-        bool bUpdated;             // Indicate if it has been updated
+        std::string updaterName; // The schema name that updates the Modulator
+        Handle similarityLink;   // Handle to SimilarityLink that holds the Modulator 
+        double updatedValue;     // The updated value after calling the Modulator updater  
+        bool bUpdated;           // Indicate if the value of the Modulator has been updated
 
-        void init (const std::string & updaterName, Handle numberNode) {
+        void init (const std::string & updaterName, Handle similarityLink) {
             this->updaterName = updaterName;
-            this->numberNode = numberNode;
+            this->similarityLink = similarityLink;
             this->updatedValue = 0;
             this->bUpdated = false;
         }
     }; // class
 
-    time_t lastTickTime;
+    unsigned long cycleCount;
 
     std::map <std::string, ModulatorMeta> modulatorMetaMap;  // Modulator - Meta data map 
 

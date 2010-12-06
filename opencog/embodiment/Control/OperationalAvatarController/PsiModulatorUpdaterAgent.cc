@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2010-12-04
+ * @date 2010-12-06
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -38,7 +38,7 @@ PsiModulatorUpdaterAgent::~PsiModulatorUpdaterAgent()
 
 PsiModulatorUpdaterAgent::PsiModulatorUpdaterAgent()
 {
-    lastTickTime = 0;
+    this->cycleCount = 0;
 
     // Force the Agent initialize itself during its first cycle. 
     this->forceInitNextCycle();
@@ -46,7 +46,10 @@ PsiModulatorUpdaterAgent::PsiModulatorUpdaterAgent()
 
 void PsiModulatorUpdaterAgent::init(opencog::CogServer * server) 
 {
-    logger().debug("PsiModulatorUpdaterAgent::%s - Initialize the Agent", __FUNCTION__);
+    logger().debug( "PsiModulatorUpdaterAgent::%s - Initialize the Agent [ cycle = %d ]",
+                    __FUNCTION__, 
+                    this->cycleCount
+                  );
 
     // Get OPC
     OAC * oac = (OAC *) server;
@@ -70,7 +73,7 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
     // Process Modulators one by one
     boost::tokenizer<> modulatorNamesTok (modulatorNames);
     std::string modulator, modulatorUpdater;
-    Handle similarityLink, numberNode;
+    Handle similarityLink;
     ModulatorMeta modulatorMeta;
 
     for ( boost::tokenizer<>::iterator iModulatorName = modulatorNamesTok.begin();
@@ -97,11 +100,10 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
         }
     
         // Search the corresponding SimilarityLink
-        similarityLink =  AtomSpaceUtil::getModulatorSimilarityLink
-                                                  ( atomSpace, 
-                                                    modulator,
-                                                    petId
-                                                  );
+        similarityLink =  AtomSpaceUtil::getModulatorSimilarityLink( atomSpace, 
+                                                                     modulator,
+                                                                     petId
+                                                                   );
 
         if ( similarityLink == Handle::UNDEFINED )
         {
@@ -114,14 +116,8 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
             continue;
         }
 
-        // Get NumberNode that stores the value of the Modulator
-        //
-        // We don't check if the type of the Atom returned is exactly NumberNode.
-        // Because it has been done by AtomSpaceUtil::getModulatorSimilarityLink method.
-        numberNode = atomSpace.getOutgoing(similarityLink, 0);
-
         // Insert the meta data of the Modulator to modulatorMetaMap
-        modulatorMeta.init(modulatorUpdater, numberNode);
+        modulatorMeta.init(modulatorUpdater, similarityLink);
         modulatorMetaMap[modulator] = modulatorMeta;
 
         logger().debug(
@@ -137,8 +133,10 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
 
 void PsiModulatorUpdaterAgent::runUpdaters(opencog::CogServer * server)
 {
-    logger().debug( "PsiModulatorUpdaterAgent::%s - Run updaters (combo scripts)", 
-                    __FUNCTION__ 
+    logger().debug( 
+            "PsiModulatorUpdaterAgent::%s - Run updaters (combo scripts) [ cycle = %d ]", 
+                    __FUNCTION__ , 
+                    this->cycleCount
                   );
 
     // Get OAC
@@ -209,8 +207,10 @@ void PsiModulatorUpdaterAgent::runUpdaters(opencog::CogServer * server)
 
 void PsiModulatorUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
 {
-    logger().debug("PsiModulatorUpdaterAgent::%s - Set updated values to AtomSpace",
-                    __FUNCTION__ 
+    logger().debug(
+            "PsiModulatorUpdaterAgent::%s - Set updated values to AtomSpace [ cycle =%d ]",
+                    __FUNCTION__, 
+                    this->cycleCount
                   );
 
     // Get OAC
@@ -223,7 +223,8 @@ void PsiModulatorUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
     std::map <std::string, ModulatorMeta>::iterator iModulator;
 
     std::string modulator;
-    Handle numberNode;
+    Handle oldSimilarityLink, oldNumberNode, oldExecutionOutputLink;
+    Handle newNumberNode, newSimilarityLink;
     double updatedValue;
 
     for ( iModulator = modulatorMetaMap.begin();
@@ -234,12 +235,135 @@ void PsiModulatorUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
             continue;
 
         modulator = iModulator->first;
-        numberNode = iModulator->second.numberNode;
+        oldSimilarityLink = iModulator->second.similarityLink;
         updatedValue = iModulator->second.updatedValue;
+        
+        // Get the Handle to old NumberNode and ExecutionOutputLink
+        //
+        // Since SimilarityLink inherits from UnorderedLink, you should check each Atom in 
+        // the Outgoing set to see if it is of type NumberNode or ExecutionOutputLink
+        //
+        // Because when you creating an UnorderedLink, it will sort its Outgoing set
+        // automatically (more detail: "./atomspace/Link.cc", Link::setOutgoingSet method)
+        //
+        
+        oldNumberNode = atomSpace.getOutgoing(oldSimilarityLink, 0);
+        oldExecutionOutputLink = atomSpace.getOutgoing(oldSimilarityLink, 1); 
+        
+        if ( atomSpace.getType(oldNumberNode) != NUMBER_NODE ||
+             atomSpace.getType(oldExecutionOutputLink) != EXECUTION_OUTPUT_LINK
+           ) {
+            
+            oldNumberNode = atomSpace.getOutgoing(oldSimilarityLink, 1);   
+            oldExecutionOutputLink = atomSpace.getOutgoing(oldSimilarityLink, 0); 
 
-        // Set updated values to the corresponding NumberNode
-        atomSpace.setName( numberNode, boost::lexical_cast<std::string> (updatedValue) );
+            if ( atomSpace.getType(oldNumberNode) != NUMBER_NODE ||
+                 atomSpace.getType(oldExecutionOutputLink) != EXECUTION_OUTPUT_LINK
+               ) {
 
+                logger().error( "PsiModulatorUpdaterAgent::%s - The outgoing set of SimilarityLink for '%s' should contain a NumberNode and a ExecutionOutputLink, but got [0]:%s, [1]:%s",
+                                __FUNCTION__, 
+                                modulator.c_str(), 
+                                classserver().getTypeName(
+                                                  atomSpace.getType(oldSimilarityLink)
+                                                         ).c_str(),  
+                                classserver().getTypeName(
+                                                  atomSpace.getType(oldNumberNode)
+                                                         ).c_str()
+                              );
+
+                continue;
+            }
+        }// if
+
+logger().fine( "PsiModulatorUpdaterAgent::%s - Modulator: %s, oldSimilarityLink: %s, oldNumberNode: %s, updatedValue: %f", 
+               __FUNCTION__,
+               modulator.c_str(), 
+               atomSpace.atomAsString(oldSimilarityLink).c_str(),
+               atomSpace.atomAsString(oldNumberNode).c_str(), 
+               updatedValue
+             );        
+
+        // Create a new NumberNode that stores the updated value
+        //
+        // If the Modulator doesn't change at all, it actually returns the old one
+        //
+        newNumberNode = AtomSpaceUtil::addNode( atomSpace,
+                                                NUMBER_NODE,
+                                                boost::lexical_cast<std::string>
+                                                                   (updatedValue), 
+                                                true // the atom should be permanent (not
+                                                     // removed by decay importance task) 
+                                               );
+
+logger().fine( "PsiModulatorUpdaterAgent::%s - newNumberNode: %s", 
+               __FUNCTION__, 
+               atomSpace.atomAsString(newNumberNode).c_str()
+             );        
+
+        // Create a new SimilarityLink that holds the Modulator
+        //
+        // Since SimilarityLink inherits from UnorderedLink, which will sort its Outgoing 
+        // set automatically when being created, the sequence you adding Atoms to its 
+        // Outgoing set makes none sense! 
+        // (more detail: "./atomspace/Link.cc", Link::setOutgoingSet method)
+        //
+        // If the Modulator doesn't change at all, it actually returns the old one
+        //
+        HandleSeq similarityLinkHandleSeq;  // HandleSeq is of type std::vector<Handle>
+
+        similarityLinkHandleSeq.push_back(newNumberNode);
+        similarityLinkHandleSeq.push_back(oldExecutionOutputLink);
+
+        newSimilarityLink = AtomSpaceUtil::addLink( atomSpace,
+                                                    SIMILARITY_LINK, 
+                                                    similarityLinkHandleSeq,
+                                                    true
+                                                  );
+
+        iModulator->second.similarityLink = newSimilarityLink;
+
+logger().fine( "PsiModulatorUpdaterAgent::%s - newSimilarityLink: %s", 
+               __FUNCTION__, 
+               atomSpace.atomAsString(newSimilarityLink).c_str()
+             );        
+
+        // Remove the old SimilarityLink and NumberNode
+        //
+        // Make sure the old one is different from the new one before removing.
+        // Because if the Modulator does change at all, including its value True Value etc,
+        // creating new one is actually returning the old one, then we shall not remove it.
+        //
+
+logger().fine( "PsiModulatorUpdaterAgent::%s - Going to remove oldSimilarityLink", 
+                __FUNCTION__);
+
+        if ( oldSimilarityLink != newSimilarityLink && 
+             !atomSpace.removeAtom(oldSimilarityLink) 
+           ) {
+            logger().error(
+                "PsiModulatorUpdaterAgent::%s - Unable to remove old SIMILARITY_LINK: %s",
+                __FUNCTION__, 
+                atomSpace.atomAsString(oldSimilarityLink).c_str()
+                          );
+        }// if
+
+logger().fine("PsiModulatorUpdaterAgent::%s - Removed oldSimilarityLink", __FUNCTION__);
+
+logger().fine("PsiModulatorUpdaterAgent::%s - Going to remove oldNumberNode", __FUNCTION__);
+
+        if ( oldNumberNode != newNumberNode && 
+             !atomSpace.removeAtom(oldNumberNode) 
+           ) {
+            logger().error(
+                "PsiModulatorUpdaterAgent::%s - Unable to remove old NUMBER_NODE: %s",
+                __FUNCTION__, 
+                atomSpace.atomAsString(oldNumberNode).c_str()
+                          );
+        }// if
+
+logger().fine( "PsiModulatorUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__);              
+        // Reset bUpdated  
         iModulator->second.bUpdated = false;
 
         // TODO: Change the log level to fine, after testing
@@ -249,12 +373,48 @@ void PsiModulatorUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
                          modulator.c_str(),
                          updatedValue
                       );
+
     }// for
+
 }
 
 void PsiModulatorUpdaterAgent::run(opencog::CogServer * server)
 {
-    logger().debug("PsiModulatorUpdaterAgent::%s - Executing run", __FUNCTION__);
+    this->cycleCount ++;
+
+    logger().debug( "PsiModulatorUpdaterAgent::%s - Executing run %d times",
+                     __FUNCTION__, 
+                     this->cycleCount
+                  );
+
+    // Get OAC
+    OAC * oac = (OAC *) server;
+
+    // Get AtomSpace
+    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+
+    // Get petId
+    const std::string & petId = oac->getPet().getPetId();
+
+    // Check if map info data is available
+    if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
+        logger().warn( 
+      "PsiModulatorUpdaterAgent::%s - There is no map info available yet [ cycle = %d ]", 
+                        __FUNCTION__, 
+                        this->cycleCount
+                     );
+        return;
+    }
+
+    // Check if the pet spatial info is already received
+    if ( !atomSpace.getSpaceServer().getLatestMap().containsObject(petId) ) {
+        logger().warn(
+ "PsiModulatorUpdaterAgent::%s - Pet was not inserted in the space map yet [ cycle = %d ]", 
+                     __FUNCTION__, 
+                     this->cycleCount
+                     );
+        return;
+    }
 
     // Initialize the Agent (modulatorMetaMap etc)
     if ( !this->bInitialized )
