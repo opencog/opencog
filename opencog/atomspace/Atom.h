@@ -142,23 +142,22 @@ public:
     }
 
     /**
+     * Returns a pointer to a linked-list containing the atoms that are
+     * members of this one's incoming set.
+     *
+     * @return A pointer to a linked-list containing the atoms that are
+     * members of this one's incoming set.
+     */
+    inline HandleEntry* getIncomingSet() const {
+        return incoming;
+    }
+
+    /**
      * Returns the AttentionValue object of the atom.
      *
-     * IMPORTANT NOTE: This method returns a "const reference" to
-     * the AV object of the Atom because it must not be changed
-     * at all. Otherwise, it will break internal core structures
-     * (like search indices). Never cast the result of this
-     * method to non-const references or get the pointer to the
-     * AV object by using the address-of (&) operator.
-     *
-     * XXX Why do we need this "important note"? It should go
-     * without saying that no programmer should ever do anyting
-     * like this for any routine that ever returns a const ref!
-     *
-     * @return The const referent to the AttentionValue object
-     *       of the atom.
+     * @return The const reference to the AttentionValue object
+     * of the atom.
      */
-
     const AttentionValue& getAttentionValue() const;
 
     /**
@@ -177,17 +176,6 @@ public:
      * Sets the TruthValue object of the atom.
      */
     void setTruthValue(const TruthValue&);
-
-    /**
-     * Returns a pointer to a linked-list containing the atoms that are
-     * members of this one's incoming set.
-     *
-     * @return A pointer to a linked-list containing the atoms that are
-     * members of this one's incoming set.
-     */
-    inline HandleEntry* getIncomingSet() const {
-        return incoming;
-    }
 
     /**
      * Returns whether this atom is marked for removal.
