@@ -25,6 +25,8 @@
 #ifndef _OPENCOG__COMPOSITE_TRUTH_VALUE_H_
 #define _OPENCOG__COMPOSITE_TRUTH_VALUE_H_
 
+#include <functional>
+
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -39,16 +41,16 @@ namespace opencog
 {
 
 typedef boost::unordered_map<VersionHandle, 
-                                TruthValue*,
-                                hashVersionHandle,
-                                eqVersionHandle> VersionedTruthValueMap;
+                             TruthValue*,
+                             hashVersionHandle,
+                             eqVersionHandle> VersionedTruthValueMap;
 
 class Atom;
 class CompositeRenumber;
 
 class CompositeTruthValue: public TruthValue
 {
-   friend class CompositeRenumber; // XXX ugly hack
+    friend class CompositeRenumber; // XXX ugly hack
 
 private:
     TruthValue* primaryTV;
@@ -63,7 +65,6 @@ protected:
     void copy(const CompositeTruthValue&);
 
 public:
-
     /**
      * @param The initial primary or versioned TV of this composite TV.
      *        If it is NULL_TV(), a default tv will be created internally.
@@ -170,6 +171,24 @@ public:
      * @param atomspace The AtomSpace to check the handles against
      */
     void removeInvalidTVs(AtomSpace& atomspace);
+
+    // iterator over VersionHandles
+private:
+    typedef select1st<VersionedTruthValueMap::value_type> get_key;
+    typedef VersionedTruthValueMap::const_iterator vhm_const_iterator;
+public:
+    typedef boost::transform_iterator<get_key,
+                                      vhm_const_iterator> vh_const_iterator;
+    vh_const_iterator vh_begin() const {
+        return boost::make_transform_iterator(versionedTVs.begin(), get_key());
+    }
+    vh_const_iterator vh_end() const {
+        return boost::make_transform_iterator(versionedTVs.end(), get_key());
+    }
+    // helper for foreach
+    std::pair<vh_const_iterator, vh_const_iterator> vh_range() const {
+        return std::make_pair(vh_begin(), vh_end());
+    }
 
     /**
      * Gets the number of versioned TVs of this CTV.
