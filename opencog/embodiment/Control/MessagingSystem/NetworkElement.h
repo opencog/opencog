@@ -48,23 +48,25 @@ namespace MessagingSystem
     class ServerSocket;
 
 /**
- * The basic class of communications layer is a NetworkElement (NE). The idea here is that every entity
- * (namely, every process) in the PB network should have a NetworkElement member to enter PB network
- * and exchange information with other units.
+ * The basic class of communications layer is a NetworkElement (NE). The idea
+ * here is that every entity (namely, every process) in the embodiment network
+ * should have a NetworkElement member to participate and exchange information
+ * with other units.
  *
- * So a PB server should have a loop to check and process all incoming messages of the type it is supposed
- * to receive.
+ * So a embodiment server should have a loop to check and process all incoming
+ * messages of the type it is supposed to receive.
  */
 class NetworkElement
 {
 
 protected:
-    std::string myId; // identification of this NE in PB network (set in constructor)
+    //! Identification of this NE in embodiment network (set in constructor)
+    std::string myId;
 
     /**
-     * This method is used to mark the an element as an unavailable one. Default
+     * This method is used to mark an element unavailable. Default
      * implementation just add the element id to the unavailable list. If the
-     * element is the router, them all messages in router are lost, so set the
+     * element is the router, then all messages in router are lost, so set the
      * numberof unread messages to zero.
      *
      * Subclasses are supposed to override this method to take the corresponding
@@ -75,12 +77,12 @@ protected:
     void markAsUnavailableElement(const std::string &id);
 
     /**
-     * This method is used to mark the an element as an available one. Default
-     * implementation removes the element id from the list and if it is the router
-     * a hansdshake operation is executed.
+     * This method is used to mark an element as available. Default
+     * implementation removes the element id from the unavailable list and if
+     * it is the router a handshake operation is executed.
      *
-     * Subclasses may override this method to
-     * take the corresponding actions when necessary.
+     * Subclasses may override this method to take the corresponding actions
+     * when necessary.
      *
      * @param id The element that should be marked as available
      */
@@ -98,21 +100,30 @@ protected:
 
 private:
 
-    pthread_cond_t mainThreadBed; // main thread is put in this bed when waiting for messages retireving
-    pthread_mutex_t messageQueueLock; // lock used coordinate manipulation of the messageQueue (main thread and listener thread)
-    pthread_mutex_t tickLock; // lock used coordinate manipulation of the messageQueue (main thread and listener thread)
+    //! main thread is put in this bed when waiting for messages retrieving
+    pthread_cond_t mainThreadBed;
+    //! lock used to coordinate manipulation of the messageQueue (main thread and listener thread)
+    pthread_mutex_t messageQueueLock;
+    //! lock used to coordinate manipulation of the messageQueue (main thread and listener thread)
+    pthread_mutex_t tickLock;
     pthread_mutex_t socketAccessLock;
 
     pthread_t socketListenerThread; // thread which will listen to the port
     pthread_attr_t socketListenerAttr;
-    static bool stopListenerThreadFlag; // control flag used to make listener thread finish and return.
-    static bool socketListenerIsReady; // control flag used to indicate listener is ready.
+    //! control flag used to make listener thread finish and return.
+    static bool stopListenerThreadFlag;
+    //! control flag used to indicate listener is ready.
+    static bool socketListenerIsReady;
 
-    int numberOfUnreadMessages; // control the number of unread messages stored in router for this network element
-    int lastNumberOfUnreadMessages; // the last number of unread messages stored in router for this network element. Used for tick overflow (over process) ...
-    int tickNumber; // control the number of unread messages stored in router for this network element
+    //! control the number of unread messages stored in router for this network element
+    int numberOfUnreadMessages;
+    //! The last number of unread messages stored in router for this network
+    //! element. Used for tick overflow (over process) ...
+    int lastNumberOfUnreadMessages; 
+    //! control the number of unread messages stored in router for this network element
+    int tickNumber;
 
-    std::string ipAddress; // ip of the network card this server will listen to
+    std::string ipAddress; // ip of the network interface this server will listen to
     int portNumber; // port this NE will listen to (set in constructor)
 
     MemoryMessageCentral messageCentral;
@@ -129,8 +140,8 @@ private:
 
     /**
      * Used to hold the ids of the NetworkElements that are currently
-     * unavailable. To be removed from the list an IS_AVAILABLE_COMPONENT <id>
-     * message is sent to the router, and with an 'OK'answer the component
+     * unavailable. To be removed from the list, an IS_AVAILABLE_COMPONENT <id>
+     * message is sent to the router, and with an 'OK' answer the component
      * id is removed.
      *
      * IMPORTANT:
@@ -164,7 +175,8 @@ private:
     bool startListener();
 
     /**
-     * Convenience method used to simplify the flow of retrieveMessages(). It creates the proper message to be sent to router and send it away.
+     * Convenience method used to simplify the flow of retrieveMessages(). It
+     * creates the proper message to be sent to router and sends it away.
      */
     void requestUnreadMessages(int limit);
 
@@ -175,22 +187,25 @@ private:
 
 
 public:
-
-    bool noAckMessages; // flag to define if the protocol should use ACK messages (OK,FAILED) or not.
+    //! flag to define if the protocol should use ACK messages (OK,FAILED) or not.
+    bool noAckMessages;
 
     // ***********************************************/
     // Constructors/destructors
-
     virtual ~NetworkElement();
 
     /**
      * Builds thje object and perform the handshake with the Router:
-     *    (a) Request access passing an identification string and a port number (the port this NE will listen to)
-     *    (b) Receive an OK or a failure message indicating that this NE could not join PB network.
-     *    (c) Starts a secondary thread which will listen to the given port to process commands from the Router
-     *        (the main thread returns from constructor)
+     *  #- Request access passing an identification string and a port number
+     * (the port this NE will listen to) 
+     *  #- Receive an OK or a failure message indicating that this NE could
+     * not join the embodiment network
+     *  #- Starts a secondary thread which will listen to the given port to
+     * process commands from the Router (the main thread returns from
+     * constructor)
      *
-     * @param myId A string which will identify this NE. Other NEs may use to string to discover this NE's actual id.
+     * @param myId A string which will identify this NE. Other NEs may use to
+     * string to discover this NE's actual id.
      * @param portNumber The port number this NE will listen to
      */
     NetworkElement(const std::string &myId, const std::string &ip, int portNumber);
@@ -203,12 +218,15 @@ public:
 
     /**
      * Initializes the object and perform the handshake with the Router:
-     *    (a) Request access passing an identification string and a port number (the port this NE will listen to)
-     *    (b) Receive an OK or a failure message indicating that this NE could not join PB network.
-     *    (c) Starts a secondary thread which will listen to the given port to process commands from the Router
-     *        (the main thread returns from constructor)
+     *  #- Request access passing an identification string and a port number
+     *  (the port this NE will listen to)
+     *  #- Receive an OK or a failure message indicating that this NE could not
+     *  join the embodiment network
+     *  #- Starts a secondary thread which will listen to the given port to
+     *  process commands from the Router (the main thread returns from constructor)
      *
-     * @param myId A string which will identify this NE. Other NEs may use to string to discover this NE's actual id.
+     * @param myId A string which will identify this NE. Other NEs may use to
+     * string to discover this NE's actual id.
      * @param portNumber The port number this NE will listen to
      */
     void initialize(const std::string &myId, const std::string &ip, int portNumber);
@@ -230,12 +248,13 @@ public:
     bool isElementAvailable(const std::string& id);
 
     /**
-     * Return true if there are new unread messages waiting in the router.
+     * Return true if there are new unread messages waiting on the router.
      * It is a local check, no communication is actually performed.
      * This method just returns a local boolean state variable which is set
      * assynchronously by the router when a new message to this NE arrives.
      *
-     * @return true if there are new unread messages waiting in the router or false otherwise.
+     * @return true if there are new unread messages waiting on the router or
+     * false otherwise.
      */
     bool haveUnreadMessage();
 
@@ -254,7 +273,8 @@ public:
     virtual bool sendMessage(Message &msg);
 
     /**
-     * Convenience method to encapsulate the code which acts as client when sending requests to router
+     * Convenience method to encapsulate the code which acts as client when
+     * sending requests to router.
      * @return true if the command was sent successfully, and false otherwise
      */
     virtual bool sendCommandToRouter(const std::string &cmd);
@@ -276,27 +296,27 @@ public:
     /**
      * This method is supposed to be called by ServerSocket to notify NE that
      * a new message has arrived in the Router targeted to this NE (the message
-     * is still in the Router). It shaw not be called by anyone else.
+     * is still on the Router). It should not be called by anyone else.
      */
     void newMessageInRouter(int numMessages);
 
     /**
      * This method is supposed to be called by ServerSocket to notify NE that at
-     * least one new message has been actually delivered by the Router. It shaw
-     * not be called by anyone else.
+     * least one new message has been actually delivered by the Router. It
+     * should not be called by anyone else.
      */
     void newMessageRead(const std::string &from, const std::string &to, int type, const std::string &msg);
 
     /**
      * This method is supposed to be called by ServerSocket to notify NE that all
-     * unread messages have been received from the Router. It shaw not be called
+     * unread messages have been received from the Router. It should not be called
      * by anyone else.
      */
     void noMoreMessages();
 
     /**
      * This method is supposed to be called by ServerSocket to notify NE that the given
-     * element is unavailable to receive messages. It shaw not be called by anyone else.
+     * element is unavailable to receive messages. It should not be called by anyone else.
      */
     void unavailableElement(const std::string &id);
 
@@ -304,7 +324,7 @@ public:
      * This method is supposed to be called by ServerSocket to notify NE that the given
      * element is available to receive messages (after being unavailable for a while since
      * by default all components are assume to be available at start up).
-     * It shaw not be called by anyone else.
+     * It should not be called by anyone else.
      */
     void availableElement(const std::string &id);
 

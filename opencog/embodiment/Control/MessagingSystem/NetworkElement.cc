@@ -226,7 +226,7 @@ bool NetworkElement::sendMessage(Message &msg)
                      "NetworkElement - sendMessage - response = %s. Expected OK.",
                      response.c_str());
         return false;
-    }  // else
+    } 
 }
 
 int NetworkElement::getPortNumber()

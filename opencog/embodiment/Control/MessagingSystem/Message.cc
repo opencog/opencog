@@ -52,7 +52,9 @@ Message::Message(const std::string &from, const std::string &to, int type)
 
 // Factory method
 
-Message *Message::factory(const std::string &from, const std::string &to, int msgType, const std::string &msg) throw (opencog::InvalidParamException, std::bad_exception)
+Message *Message::factory(const std::string &from, const std::string &to, int
+        msgType, const std::string &msg)
+    throw (opencog::InvalidParamException, std::bad_exception)
 {
 
     switch (msgType) {
@@ -79,9 +81,9 @@ Message *Message::factory(const std::string &from, const std::string &to, int ms
     }
     case SCHEMA:
     case CANDIDATE_SCHEMA: {
-        // same message class, but with diferent types,
-        // CANDIDATE_SCHEMA besides the schema being learned
-        // have the name of the candidate to be tried out
+        // Same message class, but with different types.
+        // CANDIDATE_SCHEMA, besides the schema being learned,
+        // also has the name of the candidate to be tried out
         return new LearningServerMessages::SchemaMessage(from, to, msg, msgType);
         break;
     }
@@ -104,7 +106,7 @@ Message *Message::factory(const std::string &from, const std::string &to, int ms
     }
     }
 
-    // to remove a warning, execution should never reach here.
+    // to remove compilation warning, execution should never reach here.
     return NULL;
 }
 

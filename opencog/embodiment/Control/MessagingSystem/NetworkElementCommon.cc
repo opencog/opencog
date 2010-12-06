@@ -34,18 +34,19 @@ const std::string NetworkElementCommon::OK_MESSAGE = "OK";
 const std::string NetworkElementCommon::FAILED_MESSAGE = "FAILED";
 const std::string NetworkElementCommon::FAILED_TO_CONNECT_MESSAGE = "FAILED_TO_CONNECT";
 
-void NetworkElementCommon::parseCommandLine(const std::string &line, std::string &command, std::queue<std::string> &args)
+void NetworkElementCommon::parseCommandLine(const std::string &line,
+        std::string &command, std::queue<std::string> &args)
 {
     std::vector<std::string> parameters;
     boost::split( parameters, line, boost::is_any_of( " " ) );
     if ( parameters.size( ) > 0 ) {
         command = parameters[0];
-    } // if
+    }
 
     unsigned int j;
     for ( j = 1; j < parameters.size( ); ++j ) {
         args.push( parameters[j] );
-    } // for
+    }
 }
 
 void NetworkElementCommon::reportThreadError(const int &errorCode)

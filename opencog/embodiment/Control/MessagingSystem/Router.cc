@@ -60,17 +60,21 @@ Router::Router()
 {
 
     running = true;
-    lastNotifyTimestamp = 0; // this force router to send AVAILABLE_ELEMENT for all known NE as soon it starts up
+    // this will force ther router to send AVAILABLE_ELEMENT for all known NE
+    // as soon it starts up...
+    lastNotifyTimestamp = 0;
     messageCentral = new MemoryMessageCentral();
 
-    // NOTE: Uncomment the code to test a way to make router fail and raise
+    // This a way to make router fail and raise exception for testing
     //exception = false;
 
     RouterServerSocket::setMaster(this);
-    this->routerId = opencog::config().get("ROUTER_ID");
-    this->routerPort = opencog::config().get_int("ROUTER_PORT");
-    this->routerAvailableNotificationInterval = opencog::config().get_int("ROUTER_AVAILABLE_NOTIFICATION_INTERVAL");
-    this->noAckMessages = config().get_bool("NO_ACK_MESSAGES");
+
+    routerId = opencog::config().get("ROUTER_ID");
+    routerPort = opencog::config().get_int("ROUTER_PORT");
+    routerAvailableNotificationInterval = 
+        opencog::config().get_int("ROUTER_AVAILABLE_NOTIFICATION_INTERVAL");
+    noAckMessages = config().get_bool("NO_ACK_MESSAGES");
 
     opencog::logger() = Control::LoggerFactory::getLogger(routerId);
 
@@ -198,7 +202,8 @@ void Router::run()
         Router::toNotifyUnavailability.clear();
         pthread_mutex_unlock(&unavailableIdsLock);
 
-        //logger().debug("Router - Checked pending unavailability notifications: %d", localToNotifyUnavailability.size());
+        //logger().debug("Router - Checked pending unavailability notifications: %d",
+        //  localToNotifyUnavailability.size());
 
         // Now sends the unavailable element notifications
         if (!localToNotifyUnavailability.empty()) {
@@ -221,7 +226,7 @@ void Router::shutdown()
 {
     running = false;
 
-    // NOTE: Uncomment the code to test a way to make router fail and raise
+    // This a way to make router fail and raise a NetworkException for testing
     //exception = true;
 }
 
@@ -229,10 +234,8 @@ void Router::shutdown()
 
 bool Router::knownID(const std::string &id)
 {
-
     std::map<std::string, int>::iterator iter1 = portNumber.find(id);
     if (iter1 == portNumber.end()) {
-
         // component not registered in router yet ... create it's message queue since the component
         // may be starting up.
         if (!messageCentral->existsQueue(id)) {

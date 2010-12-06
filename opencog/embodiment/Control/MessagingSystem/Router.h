@@ -87,7 +87,7 @@ struct NotificationData {
  * There are five relevant use cases for the protocol:
  *
  * (1) YourEntity starts a handshake with router to enter PB network (no autentication
- * is required at this point. it is just to allow ohet entities to know about YourEntity)
+ * is required at this point. it is just to allow other entities to know about YourEntity)
  * (2) YourEntity wants to send a Message to some other entity (it will always contact
  * the router to do so, regardless who is the actual target for that message)
  * (3) YourEntity is asynchronously notified by router that there are unread messages to
@@ -165,7 +165,7 @@ struct NotificationData {
  *
  * than routers sends one or more lines of data (the message itself). note
  * that each data line is prefixed with 'd'.
- * Than router send either:
+ * Then the router sends either:
  *
  * cSTART_MESSAGE <from> <to> <type>
  *
@@ -175,7 +175,7 @@ struct NotificationData {
  *
  * to denote that all messages have been sent already.
  *
- * An important warning is that YourEntity shaw not request message retrieving if it
+ * An important warning is that YourEntity should not request message retrieving if it
  * was not notified first about new messages to it in router. The C++ interface provide
  * this automatically but you must take care of it as you are bypassing
  * the interface.
@@ -254,7 +254,7 @@ private:
      * available for TCP protocol.
      *
      * @param An argument array with the sender and receiver IDs.
-    * @return true if socket connection is still ok after trying to send the notification
+     * @return true if socket connection is still ok after trying to send the notification
      */
     bool sendNotification(const NotificationData& data);
 
