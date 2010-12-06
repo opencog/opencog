@@ -131,14 +131,12 @@ Logger* ImportanceUpdatingAgent::getLogger()
     return log;
 }
 
-HandleEntry* ImportanceUpdatingAgent::getHandlesToUpdate(AtomSpace *a)
+void ImportanceUpdatingAgent::getHandlesToUpdate(AtomSpace *a, HandleSeq &hs)
 {
-    HandleEntry *h;
     if (updateLinks)
-        h = a->getAtomTable().getHandleSet(ATOM, true);
+        a->getHandleSet(back_inserter(hs),ATOM,true);
     else
-        h = a->getAtomTable().getHandleSet(NODE, true);
-    return h;
+        a->getHandleSet(back_inserter(hs),NODE,true);
 }
 
 void ImportanceUpdatingAgent::calculateAtomWages(AtomSpace *a, const AgentSeq &agents)
@@ -172,7 +170,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
 {
     AgentSeq agents = server->runningAgents();
     AtomSpace* a = server->getAtomSpace();
-    HandleEntry *h, *q;
+    HandleSeq hs;
     AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
     AttentionValue::sti_t minSTISeen = AttentionValue::MAXSTI;
 
@@ -197,30 +195,26 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     /* Update atoms: Collect rent, pay wages */
     log->info("Collecting rent and paying wages");
 
-    h = getHandlesToUpdate(a);
+    getHandlesToUpdate(a,hs);
 
     /* Calculate STI/LTI atom wages for each agent */
     calculateAtomWages(a, agents);
 
-    q = h;
-    while (q) {
-        updateAtomSTI(a, agents, q->handle);
-        updateAtomLTI(a, agents, q->handle);
+    foreach(Handle handle, hs) {
+        updateAtomSTI(a, agents, handle);
+        updateAtomLTI(a, agents, handle);
 
         /* Enfore sti and lti caps */
-        enforceSTICap(a, q->handle);
-        enforceLTICap(a, q->handle);
+        enforceSTICap(a, handle);
+        enforceLTICap(a, handle);
 
         // Greater than max sti seen?
-        if (a->getSTI(q->handle) > maxSTISeen) {
-            maxSTISeen = a->getSTI(q->handle);
-		} else if (a->getSTI(q->handle) < minSTISeen) {
-            minSTISeen = a->getSTI(q->handle);
+        if (a->getSTI(handle) > maxSTISeen) {
+            maxSTISeen = a->getSTI(handle);
+		} else if (a->getSTI(handle) < minSTISeen) {
+            minSTISeen = a->getSTI(handle);
 		}
-
-        q = q->next;
     }
-    delete h;
 
     // Update AtomSpace recent maxSTI and recent minSTI 
 	if (minSTISeen > maxSTISeen) {
@@ -306,7 +300,7 @@ opencog::RandGen* ImportanceUpdatingAgent::getRandGen()
 void ImportanceUpdatingAgent::randomStimulation(AtomSpace *a, Agent *agent)
 {
     int expectedNum, actualNum;
-    HandleEntry *h, *q;
+    HandleSeq hs;
     opencog::RandGen *rng;
 
     rng = getRandGen();
@@ -315,24 +309,20 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace *a, Agent *agent)
     // to get actualNum
     actualNum = 0;
 
-    h = getHandlesToUpdate(a);
-    expectedNum = (int) (noiseOdds * h->getSize());
+    getHandlesToUpdate(a,hs);
+    expectedNum = (int) (noiseOdds * hs.size());
 
-    q = h;
-    while (q) {
+    foreach( Handle h, hs) {
         double r;
         r = rng->randdouble();
         if (r < noiseOdds) {
-            agent->stimulateAtom(q->handle, noiseUnit);
+            agent->stimulateAtom(h, noiseUnit);
             actualNum++;
         }
-        q = q->next;
     }
 
     log->info("Applied stimulation randomly to %d " \
               "atoms, expected about %d.", actualNum, expectedNum);
-
-    delete h;
 
 }
 
@@ -341,25 +331,21 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
     long diff, oldTotal;
     AttentionValue::sti_t afterTax, beforeTax;
     double taxAmount;
-    HandleEntry* h;
-    HandleEntry* q;
+    HandleSeq hs;
 
     oldTotal = a->getSTIFunds();
     diff = targetLobeSTI - oldTotal;
-    h = getHandlesToUpdate(a);
-    taxAmount = (double) diff / (double) h->getSize();
+    getHandlesToUpdate(a,hs);
+    taxAmount = (double) diff / (double) hs.size();
 
-    q = h;
-    while (q) {
+    foreach(Handle handle, hs) {
         int actualTax;
         actualTax = getTaxAmount(taxAmount);
-        beforeTax = a->getSTI(q->handle);
+        beforeTax = a->getSTI(handle);
         afterTax = beforeTax - actualTax;
-        a->setSTI(q->handle, afterTax);
+        a->setSTI(handle, afterTax);
         log->fine("sti %d. Actual tax %d. after tax %d.", beforeTax, actualTax, afterTax);
-        q = q->next;
     }
-    delete h;
 
     log->info("AtomSpace STI Funds were %d, now %d. All atoms taxed %f.", \
               oldTotal, a->getSTIFunds(), taxAmount);
@@ -371,22 +357,18 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
     long diff, oldTotal;
     AttentionValue::lti_t afterTax;
     double taxAmount;
-    HandleEntry* h;
-    HandleEntry* q;
+    HandleSeq hs;
 
     oldTotal = a->getLTIFunds();
     diff = targetLobeLTI - oldTotal;
-    h = getHandlesToUpdate(a);
+    getHandlesToUpdate(a,hs);
 
-    taxAmount = (double) diff / (double) h->getSize();
+    taxAmount = (double) diff / (double) hs.size();
 
-    q = h;
-    while (q) {
-        afterTax = a->getLTI(q->handle) - getTaxAmount(taxAmount);
-        a->setLTI(q->handle, afterTax);
-        q = q->next;
+    foreach(Handle handle, hs) {
+        afterTax = a->getLTI(handle) - getTaxAmount(taxAmount);
+        a->setLTI(handle, afterTax);
     }
-    delete h;
 
     log->info("AtomSpace LTI Funds were %d, now %d. All atoms taxed %.2f.", \
               oldTotal, a->getLTIFunds(), taxAmount);
@@ -491,30 +473,24 @@ void ImportanceUpdatingAgent::updateLTIRent(AtomSpace* a)
 void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 {
     int n = 0;
-    HandleEntry* inFocus;
-    HandleEntry* h;
+    HandleSeq inFocus;
 
-    const AtomTable& at = a->getAtomTable();
-    inFocus = at.getHandleSet(a->getAttentionalFocusBoundary() + amnesty, AttentionValue::MAXSTI);
+    AttentionValue::sti_t threshold = a->getAttentionalFocusBoundary() + amnesty;
+    a->getHandleSetFiltered(back_inserter(inFocus),ATOM,true,
+            AtomSpace::STIAboveThreshold(threshold));
 
-    attentionalFocusSize.update(inFocus->getSize());
+    attentionalFocusSize.update(inFocus.size());
 
     log->fine("attentionalFocusSize = %d, recent = %f",
               attentionalFocusSize.val, attentionalFocusSize.recent);
 
-    h = inFocus;
-    while (h) {
-        if (a->isNode(h->getAtom()->getType()))
-            n += 1;
-        h = h->next;
+    foreach(Handle h, inFocus) {
+        if (a->isNode(h)) n += 1;
     }
     attentionalFocusNodesSize.update(n);
 
     log->fine("attentionalFocusNodesSize = %d, recent = %f",
               attentionalFocusNodesSize.val, attentionalFocusNodesSize.recent);
-
-    delete inFocus;
-
 }
 
 void ImportanceUpdatingAgent::updateAgentSTI(AtomSpace* a, Agent *agent)

@@ -274,7 +274,6 @@ public:
      */
     void testStimulateList() {
         stim_t stimValue;
-        HandleEntry* list;
         vector<Handle> atoms;
         logger().debug("BEGIN TEST: stimulateList");
         CogServer& cogserver = static_cast<CogServer&>(server());
@@ -283,16 +282,14 @@ public:
         AtomSpace *atomSpace = cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_list");
         stimValue = 100;
-        list = HandleEntry::fromHandleVector(atoms);
 
-        agent->stimulateAtom(list, stimValue);
+        agent->stimulateAtom(atoms, stimValue);
         for (unsigned int i = 0; i < atoms.size(); i++) {
             TS_ASSERT(agent->getAtomStimulus(atoms[i]) == 20);
         }
 
         TS_ASSERT(agent->getTotalStimulus() == stimValue);
 
-        delete list;
         logger().debug("END TEST: stimulateList");
     }
 
@@ -306,7 +303,6 @@ public:
      */
     void testResetStimulus() {
         stim_t stimValue;
-        HandleEntry* list;
         vector<Handle> atoms;
         logger().debug("BEGIN TEST: resetStimulus");
         CogServer& cogserver = static_cast<CogServer&>(server());
@@ -315,16 +311,14 @@ public:
         AtomSpace *atomSpace = cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_reset");
 
-        list = HandleEntry::fromHandleVector(atoms);
         stimValue = 100;
 
-        agent->stimulateAtom(list, stimValue);
+        agent->stimulateAtom(atoms, stimValue);
         agent->resetStimulus();
         for (unsigned int i = 0; i < atoms.size(); i++) {
             TS_ASSERT(agent->getAtomStimulus(atoms[i]) == 0);
         }
 
-        delete list;
         logger().debug("END TEST: resetStimulus");
     }
 };

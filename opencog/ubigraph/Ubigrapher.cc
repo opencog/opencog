@@ -442,9 +442,9 @@ bool Ubigrapher::addEdges(Handle h)
     {
         const std::vector<Handle> &out = l->getOutgoingSet();
         
-//            int id = ;// make IDs based on the type and outgoing set, in case
-//            // it's later necessary to change this edge
-//            int status = ubigraph_new_edge_w_id(id,x,y);
+//      int id = ;// make IDs based on the type and outgoing set, in case
+//      // it's later necessary to change this edge
+//      int status = ubigraph_new_edge_w_id(id,x,y);
 
         if (compact && out.size() == 2 && l->getIncomingSet() == NULL)
         {
@@ -481,15 +481,6 @@ bool Ubigrapher::addEdges(Handle h)
         }
     }
 
-/*        if (withIncoming) {
-        HandleEntry *he = a->getIncomingSet();
-        int i = 0;
-        while (he) {
-//                ost << h << "->" << he->handle << " [style=\"dotted\" label=\"" << i << "\"];\n";
-            he = he->next;
-            i++;
-        }
-    }*/
     return false;
 }
 

@@ -329,12 +329,13 @@ private:
      */
     void updateTotalStimulus(const AgentSeq &agents);
 
-    /** Gets either all Atoms or all Nodes, depending on \a updateLinks.
+    /** Gets either handles of all Atoms or all Nodes, depending on
+     * \a updateLinks.
      *
      * @param a The AtomSpace to work on.
-     * @return The Handles to process/update.
+     * @param hs The HandleSeq to add handles to.
      */
-    HandleEntry* getHandlesToUpdate(AtomSpace* a);
+    void getHandlesToUpdate(AtomSpace* a, HandleSeq& hs);
 
     /** Set the agent's logger object
      *

@@ -175,13 +175,13 @@ public:
     stim_t stimulateAtom(Handle h, stim_t amount);
 
     /**
-     * Stimulate all atoms in HandleEntry list.
+     * Stimulate all atoms in HandleSeq evenly with a given amount of stimulus.
      *
-     * @param linked list of atoms to spread stimulus across.
-     * @param amount of stimulus to share.
+     * @param hs set of atoms to spread stimulus across.
+     * @param amount amount of stimulus to share.
      * @return remainder stimulus after equal spread between atoms.
      */
-    stim_t stimulateAtom(HandleEntry* h, stim_t amount);
+    stim_t stimulateAtom(HandleSeq hs, stim_t amount);
 
     /**
      * Remove stimulus from a Handle's atom.

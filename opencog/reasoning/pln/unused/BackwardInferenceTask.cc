@@ -28,11 +28,6 @@
   #include "PLNEvaluator.h"
 #endif
 
-#ifndef AUTO_H_HANDLEENTRY_H
-  #define AUTO_H_HANDLEENTRY_H
-  #include "HandleEntry.h"
-#endif
-
 // Welter's comment: This seem not used anymore
 //#ifndef AUTO_H_INFERENCEMINDAGENT_H
 //  #define AUTO_H_INFERENCEMINDAGENT_H

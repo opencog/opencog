@@ -27,6 +27,8 @@
 #include <vector>
 #include <fstream>
 
+#include <pthread.h>
+
 #include <opencog/server/CogServer.h>
 #include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/util/Logger.h>
@@ -65,6 +67,10 @@ bool SaveRequest::execute()
     // suggest redesign using appropriate iterators.  Anyway, should
     // probably be exporting to scheme, not XML, anyway ... since XML
     // is slow in general.
+    
+    // XXX/FIXME This blocks the (planned) atomspace event loop until
+    // save is completed.
+    pthread_mutex_lock(&atomSpace->atomSpaceLock);
     HandleEntry *handles = atomSpace->getAtomTable().getHandleSet(ATOM, true);
     NMXmlExporter exporter(atomSpace);
     std::fstream file(filename.c_str(), std::fstream::out);
@@ -81,6 +87,7 @@ bool SaveRequest::execute()
     file.flush();
     file.close();
     delete handles;
+    pthread_mutex_unlock(&atomSpace->atomSpaceLock);
     send(oss.str());
     return rc;
 }

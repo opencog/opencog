@@ -122,22 +122,18 @@ void Agent::removeAtomStimulus(Handle h)
     totalStimulus -= amount;
 }
 
-stim_t Agent::stimulateAtom(HandleEntry* h, stim_t amount)
+stim_t Agent::stimulateAtom(HandleSeq hs, stim_t amount)
 {
-    HandleEntry* p;
     stim_t split;
 
     // how much to give each atom
-    split = amount / h->getSize();
+    split = amount / hs.size();
 
-    p = h;
-    while (p) {
-        stimulateAtom(p->handle, split);
-        p = p->next;
+    foreach(Handle handle, hs) {
+        stimulateAtom(handle, split);
     }
-
     // return unused stimulus
-    return amount - (split * h->getSize());
+    return amount - (split * hs.size());
 }
 
 stim_t Agent::resetStimulus()

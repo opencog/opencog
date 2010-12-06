@@ -925,7 +925,6 @@ InitAxiomSet("smalldemo.xml");
 
 #include "Rules.h"
 #include "PLNEvaluator.h"
-#include "HandleEntry.h"
 #include "InferenceMindAgent.h"
 #include "Rules.h"
 #include "RouletteSelector.h"
@@ -1312,9 +1311,6 @@ getc(stdin);*/
 
 //    BOATest();
 //    ForwardOsamaProofTest();
-
-/*  HandleEntry* result = MindDBProxy::getInstance()->getHandleSet((Type)INHERITANCE_LINK, true);
-            printf("%d results direct\n", result->getSize());*/
 
     //FIMTest();
 
