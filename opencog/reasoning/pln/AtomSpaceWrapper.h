@@ -50,6 +50,9 @@
 #include "utils/fim.h"
 #include "utils/Singleton.h"
 
+// uncomment this out to experiment with contextual inference
+// #define CONTEXTUAL_INFERENCE
+
 //! The value at which PLN considers a TV a binary True.
 #define PLN_TRUE_MEAN 0.989
 
@@ -308,6 +311,8 @@ public:
     //! Convert real handles to pln pHandleSeq , optionally expanding to
     //! include every VersionHandled TV in each real handle
     pHandleSeq realToFakeHandles(const HandleSeq& hs, bool expand=false);
+    //! Match each dummy context in the outgoing set of dc with the handles
+    pHandleSeq realToFakeHandles(Handle h, Handle dc);
     //! Convert real handles to pln pHandleSeq, all under a given context
     pHandleSeq realToFakeHandles(const HandleSeq& hs, Handle context);
 
@@ -336,11 +341,12 @@ public:
         USize = _USize;
     }
 
-    //! Get handles with type t and name str optionally subtypes as well
+    //! Get pHandles with type t and name str optionally subtypes as well
     virtual Btr<std::set<pHandle> > getHandleSet(Type T,
                                                  const std::string& name,
                                                  bool subclass = false);
-    //! Get handle of node with type t and name str
+    //! Get pHandle corresponding to the context-free Handle of node
+    //! with type t and name str
     pHandle getHandle(Type t,const std::string& str);
     //! Get handle of link with type t and outgoing set 
     pHandle getHandle(Type t,const pHandleSeq& outgoing);
@@ -613,7 +619,7 @@ public:
 
 }} //~namespace opencog::pln
 
-namespace std { 
+namespace std {
 //Nil: I wrap it under that namespace to avoid a weird ambiguous overload...
 namespace overloadmadness {
 //overload of operator<< to print vhpair

@@ -24,3 +24,7 @@
 (define cs1 (UniInsForAllRule axiom a b c))
 (define cs2 (SimpleANDRule a_agt_b b_agt_c))
 (define target (ModusPonensRule cs1 cs2))
+
+; return the target, necessary so it can be automatically tested by
+; PLNSchemeWrapperUTest.cxxtest
+target

@@ -39,7 +39,9 @@ using namespace std;
 using namespace opencog;
 using boost::shared_ptr;
 
-// #define STREAMLINE_PHANDLES
+#ifndef CONTEXTUAL_INFERENCE
+#define STREAMLINE_PHANDLES
+#endif
 
 // Mind Shadow is an atom cache system but no longer used
 #define USE_MIND_SHADOW 0
@@ -183,6 +185,7 @@ pHandleSeq AtomSpaceWrapper::getOutgoing(const pHandle h)
     } else {
         vhpair v = fakeToRealHandle(h);
         if (v.second.substantive != Handle::UNDEFINED)
+            // TODO, should also considered dummy contexts
             return realToFakeHandles(atomspace->getOutgoing(v.first),
                                      v.second.substantive);
         else
@@ -337,16 +340,13 @@ pHandle AtomSpaceWrapper::realToFakeHandle(Handle h, VersionHandle vh)
 #endif
 }
 
-std::vector< pHandle > AtomSpaceWrapper::realToFakeHandle(const Handle h) {
+pHandleSeq AtomSpaceWrapper::realToFakeHandle(const Handle h) {
 #ifdef STREAMLINE_PHANDLES
-    std::vector< pHandle > result;
-    result.push_back(realToFakeHandle(h, NULL_VERSION_HANDLE));
-    return result;
+    return pHandleSeq(1, realToFakeHandle(h, NULL_VERSION_HANDLE));
 #else
-    std::vector< pHandle > result;
-    result.push_back(realToFakeHandle(h, NULL_VERSION_HANDLE));
+    pHandleSeq result(1, realToFakeHandle(h, NULL_VERSION_HANDLE));
     if (atomspace->getTV(h).getType() == COMPOSITE_TRUTH_VALUE) {
-        const CompositeTruthValue ctv =
+        const CompositeTruthValue& ctv =
             dynamic_cast<const CompositeTruthValue&> (atomspace->getTV(h));
         for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
             VersionHandle vh = ctv.getVersionHandle(i);
@@ -358,6 +358,38 @@ std::vector< pHandle > AtomSpaceWrapper::realToFakeHandle(const Handle h) {
     }
     return result;
 #endif
+}
+
+
+pHandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h, const Handle c)
+{
+	bool NotUsed = true;
+	assert(NotUsed);
+
+    // c is a context whose outgoing set of contexts matches contexts of each
+    // handle in outgoing of real handle h.
+    HandleSeq contexts = atomspace->getOutgoing(c);
+    HandleSeq outgoing = atomspace->getOutgoing(h);
+    pHandleSeq results;
+
+    // Check that all contexts match... they should
+    bool match = true;
+    for (unsigned int i=0; match && i < outgoing.size(); i++) {
+        // +1 because first context is for distinguishing dual links using the
+        // same destination contexts.
+        if (atomspace->getName(contexts[i+1]) == rootContext)
+            contexts[i+1] = Handle::UNDEFINED;
+        VersionHandle vh(CONTEXTUAL, contexts[i+1]);
+        if (atomspace->getTV(outgoing[i],vh).isNullTv()) {
+            match = false;
+        } else {
+            results.push_back(realToFakeHandle(outgoing[i], vh));
+        }
+    }
+    if (match)
+        return results;
+    else
+        throw RuntimeException(TRACE_INFO, "getOutgoing: link context is bad");
 }
 
 pHandleSeq AtomSpaceWrapper::realToFakeHandles(const HandleSeq& hs,
@@ -392,8 +424,9 @@ const TruthValue& AtomSpaceWrapper::getTV(pHandle h) const
     }
 }
 
-shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(
-        Type T, const string& name, bool subclass) 
+shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
+                                                         const string& name,
+                                                         bool subclass)
 {
     HandleEntry* result = 
         (name.empty()
@@ -415,21 +448,13 @@ shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(
 
 pHandle AtomSpaceWrapper::getHandle(Type t, const string& name) 
 {
-    return realToFakeHandle(
-            atomspace->getAtomTable().getHandle(name.c_str(), t),
-            NULL_VERSION_HANDLE);
+    return realToFakeHandle(atomspace->getAtomTable().getHandle(name.c_str(), t),
+                            NULL_VERSION_HANDLE);
 }
 
 bool AtomSpaceWrapper::equal(const HandleSeq& lhs, const HandleSeq& rhs)
 {
-    size_t lhs_arity = lhs.size();
-    if (lhs_arity != rhs.size())
-        return false;
-        
-    for (unsigned int i = 0; i < lhs_arity; i++)
-        if (lhs[i] != rhs[i])
-            return false;
-    return true;            
+    return lhs == rhs;
 }
 
 pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)

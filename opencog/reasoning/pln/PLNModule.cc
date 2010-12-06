@@ -283,6 +283,10 @@ void opencog::pln::correctRuleName(string& ruleName, Handle CX)
 Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
                                Handle CX)
 {
+#ifndef CONTEXTUAL_INFERENCE
+    OC_ASSERT(CX == Handle::UNDEFINED, "Contextual inference is not allowed");
+#endif
+
     correctRuleName(ruleName, CX);
     DefaultVariableRuleProvider rp;
     const Rule* rule = rp.findRule(ruleName);

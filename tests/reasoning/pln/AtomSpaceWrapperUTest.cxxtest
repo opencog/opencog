@@ -64,16 +64,16 @@ public:
     void testAtomIdentity() {
         // Test node identity works
         pHandle h1 = asw->addNode(CONCEPT_NODE, "x",
-                SimpleTruthValue(0.001f,1.0f), false);
+                                  SimpleTruthValue(0.001f,1.0f), false);
         pHandle h2 = asw->addNode(CONCEPT_NODE, "x",
-                SimpleTruthValue(0.001f,1.0f), false);
+                                  SimpleTruthValue(0.001f,1.0f), false);
         TS_ASSERT(h1 == h2);
         
         // Test FW node identity works
         pHandle h3 = asw->addNode(FW_VARIABLE_NODE, "filler",
-                SimpleTruthValue(0.001f,1.0f), false);
+                                  SimpleTruthValue(0.001f,1.0f), false);
         pHandle h4 = asw->addNode(FW_VARIABLE_NODE, "filler",
-                SimpleTruthValue(0.001f,1.0f), false);
+                                  SimpleTruthValue(0.001f,1.0f), false);
         TS_ASSERT(h3 == h4);
         
     }
@@ -175,7 +175,7 @@ public:
 
         pHandleSeq pOutgoing = asw->getOutgoing(l2);
         TS_ASSERT(outgoing.size() == pOutgoing.size());
-            
+
         // Check nodes
         int i = 0;
         vhpair vhFromLink = asw->fakeToRealHandle(pOutgoing[i]);

@@ -40,3 +40,7 @@
 (define target1 (InhDedRule NI IC mathematics))
 ; a nerd is not cool in the context of makingOut
 (define target2 (InhDedRule NA AC makingOut))
+
+; return the target, necessary so it can be automatically tested by
+; PLNSchemeWrapperUTest.cxxtest
+target1
