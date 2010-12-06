@@ -171,11 +171,9 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 			ret += "(mtv ";
 			ret += tv_to_string(&mtv->getPrimaryTV());
 
-			int nvh = mtv->getNumberOfVersionedTVs();
-			for (int i=0; i<nvh; i++)
+			foreach(VersionHandle vh, mtv->vh_range())
 			{
 				ret += "(";
-				VersionHandle vh = mtv->getVersionHandle(i);
 				ret += vh_to_string(&vh);
 				const TruthValue& vtv = mtv->getVersionedTV(vh);
 				ret += " ";
@@ -399,12 +397,10 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 
 			// Loop over all the version handles.
 			SCM vers = SCM_EOL;
-			int nvh = mtv->getNumberOfVersionedTVs();
-			for (int i=0; i<nvh; i++)
+			foreach(VersionHandle vh, mtv->vh_range())
 			{
 				SCM one = SCM_EOL;
 
-				VersionHandle vh = mtv->getVersionHandle(i);
 				VersionHandle *nvh = new VersionHandle(vh);
 				SCM svh = take_vh(nvh);
 				one = scm_acons(svhandle, svh, one);

@@ -348,11 +348,10 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandle(const Handle h) {
     if (atomspace->getTV(h).getType() == COMPOSITE_TRUTH_VALUE) {
         const CompositeTruthValue& ctv =
             dynamic_cast<const CompositeTruthValue&> (atomspace->getTV(h));
-        for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
-            VersionHandle vh = ctv.getVersionHandle(i);
+        foreach(VersionHandle vh, ctv.vh_range()) { 
             if (dummyContexts.find(vh) != dummyContexts.end()) {
                 // if dummyContext contains a VersionHandle for h
-                result.push_back( realToFakeHandle(h, vh));
+                result.push_back(realToFakeHandle(h, vh));
             }
         }
     }
@@ -439,9 +438,9 @@ shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
     delete result;
 
     shared_ptr<set<pHandle> > retFake(new set<pHandle>);
-    foreach (Handle h, *ret) {
-        foreach(pHandle h2, realToFakeHandle(h))
-            (*retFake).insert(h2);
+    foreach(Handle h, *ret) {
+        pHandleSeq phs = realToFakeHandle(h);
+        retFake->insert(phs.begin(), phs.end());
     } 
     return retFake;
 }
@@ -491,8 +490,7 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
         // Update the atomspace TV
         atomspace->setTV(real,ctv);
 
-        for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
-            VersionHandle vh = ctv.getVersionHandle(i);
+        foreach(VersionHandle vh, ctv.vh_range()) { 
             HandleSeq hs = atomspace->getOutgoing(vh.substantive);
             bool matches = true;
             assert(hs.size() == (vhs.size()+1));
@@ -1035,7 +1033,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
         as->setTV(result, atom.getTruthValue(), vh);
 
         // Link <handle,vh> to a long int
-        fakeHandle = realToFakeHandle(result,vh);
+        fakeHandle = realToFakeHandle(result, vh);
     } else {
         // no fresh:
         VersionHandle vh = NULL_VERSION_HANDLE;
@@ -1094,9 +1092,7 @@ Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
             bool found = false;
             do {
                 found = false;
-                for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
-                    VersionHandle vh = ctv.getVersionHandle(i);
-
+                foreach(VersionHandle vh, ctv.vh_range()) { 
                     // atoms in version handles may have been deleted!
                     if (atomspace->isValidHandle(vh.substantive) &&
                         atomspace->getOutgoing(vh.substantive,0) == existingLink) {

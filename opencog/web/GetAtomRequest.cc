@@ -147,11 +147,10 @@ std::string GetAtomRequest::tvToJSON(const TruthValue &tv)
         jtv << "{\"composite\":";
         jtv << "{\"primary\":" <<
             tvToJSON(ctv->getPrimaryTV());
-        for (int i = 0; i < ctv->getNumberOfVersionedTVs(); i++) {
-            VersionHandle vh = ctv->getVersionHandle(i);
+        foreach(VersionHandle vh, ctv->vh_range()) {
             jtv << "\"" << VersionHandle::indicatorToStr(vh.indicator) << "\":" << std::endl;
             jtv << "[" << vh.substantive << ",";
-            jtv << tvToJSON(ctv->getVersionedTV(ctv->getVersionHandle(i)));
+            jtv << tvToJSON(ctv->getVersionedTV(vh));
             jtv << "]";
         }
         jtv << "}}";

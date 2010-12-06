@@ -939,19 +939,12 @@ TruthValue* Formula<_TVN>::compute(TruthValue** TV, int N, long U) const
     // Check for existence of CompositeTruthValues and makes computation
     // for each VersionHandle
     bool hasCompositeTruthValue = false;
-    //std::set<VersionHandle> versionHandles
-    // NOTE: Using VersionedTruthValueMap because set<VersionHandle>
-    // caused a lot of weird compiler errors
-    VersionedTruthValueMap versionHandles;
+    std::set<VersionHandle> versionHandles;
     for (int i = 0; i < N; i++) {
         if (TV[i]->getType() == COMPOSITE_TRUTH_VALUE) {
             hasCompositeTruthValue = true;
             CompositeTruthValue* ctv = (CompositeTruthValue*) TV[i];
-            int numberOfVHs = ctv->getNumberOfVersionedTVs();
-            for (int j = 0; j < numberOfVHs; j++) {
-                //versionHandles.insert(ctv->getVersionHandle(j));
-                versionHandles[ctv->getVersionHandle(j)] = NULL;
-            }
+            versionHandles.insert(ctv->vh_begin(), ctv->vh_end());
         }
     }
     // Temporary ForwardChainer demo hack
@@ -959,8 +952,7 @@ TruthValue* Formula<_TVN>::compute(TruthValue** TV, int N, long U) const
         CompositeTruthValue* compositeResult =
             new CompositeTruthValue(*primaryResult, NULL_VERSION_HANDLE);
         delete primaryResult;
-        for (VersionedTruthValueMap::const_iterator itr = versionHandles.begin(); itr != versionHandles.end(); itr++) {
-            VersionHandle vh = itr->first;
+        foreach(VersionHandle vh, versionHandles) {
             std::auto_ptr<TruthValue*> versionedTVs(new TruthValue*[N]);
             int numberOfCompatibleTvs = 0;
             for (int i = 0; i < N; i++) {

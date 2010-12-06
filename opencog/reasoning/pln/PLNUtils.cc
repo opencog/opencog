@@ -219,11 +219,11 @@ void reviseVersionedTVs(Handle h) {
     // TV on the stack each time, which makes the following more complicated.
     SimpleTruthValue revisedTV(TruthValue::DEFAULT_TV());
     CompositeTruthValue& all = (CompositeTruthValue&) atomspace().getTV(h);
-    for (int i = 0; i < all.getNumberOfVersionedTVs(); i++) {
+    foreach(VersionHandle vh, all.vh_range()) {
         TruthValue* both[2];
         // Have to clone due to const issues. arrggh.
         both[0] = revisedTV.clone();
-        both[1] = all.getVersionedTV(all.getVersionHandle(i)).clone();
+        both[1] = all.getVersionedTV(vh).clone();
         TruthValue* tmp = rev.simpleCompute(both, 2);
 
         revisedTV = *tmp;
