@@ -197,6 +197,11 @@ public:
 
     /**
      * Gets the versioned TV given its index in the internal map.
+     *
+     * @note this method has complexity O(Index), if you want to do
+     * that repetitively for all VersionedTV you should use
+     * vh_begin(), vh_end() or vh_range().
+     *
      * @param Index of the versioned TV. It must be a number between
      *        0 and (getNumberOfVersionedTVs()-1). Otherwise, it
      *        returns a NULL_VERSION_HANDLE.
