@@ -54,7 +54,7 @@
 ; The implication to be run
 (define (impy)
 
-(VariableScopeLink (stv 1 1)
+(LambdaLink (stv 1 1)
    (ListLink
     (TypedVariableLink
      (VariableNode "$agent")

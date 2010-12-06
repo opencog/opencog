@@ -607,7 +607,7 @@ interface.
       Currently-implemented primtives are:
       do-wsd                -- run word-sense disambiguation
       do-varscope handle    -- run forward-chainer on handle.
-                               handle must be an VariableScopeLink.
+                               handle must be an LambdaLink.
       do-implication handle -- DEPRECATED! Use do-varscope above.
                                Run forward-chainer on handle.
                                handle must be an ImplicationLink.

@@ -3,7 +3,7 @@
 ; Copyright (c) 2009 Linas Vepstas
 ;
 ; A set of routines for constructing ImplicationLinks and 
-; VariableScopeLinks in a "simplified" manner. The goal here is
+; LambdaLinks in a "simplified" manner. The goal here is
 ; to make it easier to write, read and debug hand-written 
 ; Implication/VarScope links.
 ;
@@ -14,12 +14,12 @@
 ; "vardecls" and "freevars".  The "clauses" are just a list of clauses
 ; that will eventually be and'ed together to create an ImplicationLink.
 ; The "vardecls" is a list of variable declarations that will appear in
-; the final VariableScopeLink that is constructed.  The "freevars" is a 
+; the final LambdaLink that is constructed.  The "freevars" is a 
 ; list of variables that were found along the way; these will be promoted
 ; to bound variables in the final varscope.
 ;
 ; A "real-life" example is given below; it constructs the
-; VariableScopeLink needed to convert the parsed sentence 
+; LambdaLink needed to convert the parsed sentence 
 ; "Lisbon is the capital of Portugaul" into the semantic triple
 ; "capital_of(Porutgaul, Lisbon)".
 ;
@@ -433,10 +433,10 @@
 ; -----------------------------------------------------------------
 ; r-varscope -- create a varscope structure from r-expressions
 ;
-; A VariableScopeLink consists of an implication link P->Q, with the
+; A LambdaLink consists of an implication link P->Q, with the
 ; predicate P being a sequence of disjuncts (to be conjoined together)
 ; and Q the implicand.  Here, both P and Q are taken to be r-expressions,
-; constructed with the r-* routines.  A VariableScopeLink also contains
+; constructed with the r-* routines.  A LambdaLink also contains
 ; a list of the bound variables which will be grounded when the 
 ; implication is evaluated. The variables are taken from the predicate 
 ; P r-expression. Any variables appearing in Q must also appear in P.
@@ -446,7 +446,7 @@
 ; This is done "for convenience", so that the user does not have to 
 ; explicitly declare variables.
 ;
-; Returns the constructed VariableScopeLink.
+; Returns the constructed LambdaLink.
 ;
 (define (r-varscope predicates implicand)
 
@@ -489,7 +489,7 @@
 		)
 
 		; The Big Kahuna -- a list of variables, and the implication.
-		(VariableScopeLink
+		(LambdaLink
 			(ListLink pv ff)
 			(ImplicationLink 
 				(AndLink pc)

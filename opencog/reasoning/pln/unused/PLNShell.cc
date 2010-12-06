@@ -649,7 +649,7 @@ printf("Insert test %d\n", testi++);
             ))));
 
 printf("Insert test %d\n", testi++);
-            tests[30] = Btr<vtree > (new vtree(mva((Handle)VARIABLE_SCOPE_LINK,
+            tests[30] = Btr<vtree > (new vtree(mva((Handle)LAMBDA_LINK,
                 mva((Handle)LIST_LINK), //empty dummy
                 mva((Handle)INHERITANCE_LINK,
                     NewNode(FW_VARIABLE_NODE, "$i"),

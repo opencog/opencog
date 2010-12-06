@@ -653,7 +653,7 @@ public:
 /** The root of a Backward Inference proof Tree
  *
  * The BITNodeRoot class works in the following way:
- * -# if the target of the query / inference is either a VariableScopeLink or
+ * -# if the target of the query / inference is either a LambdaLink or
  * ForAllLink (they have slightly different math), then BITNodeRoot::infer will
  * carry out the unification steps and find all fitting results, but return the
  * Handle to the single atom such as ForAllLink [$x] (ImplicationLink (isBoy $x)
@@ -792,7 +792,7 @@ protected:
 
     /** Whether the root is a generalization.
      * 0 = no, other = the result link type
-     * e.g. ForallLink, VariableScopeLink, ThereExistsLink
+     * e.g. ForallLink, LambdaLink, ThereExistsLink
      */
     Type post_generalize_type;
     

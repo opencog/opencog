@@ -13,7 +13,7 @@ Wish to prove:
 
 (define q
 
-(VariableScopeLink
+(LambdaLink
 	(ListLink
 		(VariableNode "$var-isa-B")
 	)

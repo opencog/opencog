@@ -149,7 +149,7 @@ private:
 //        testInverseBinding();
         testBasicSpawning();
 /*        testMultipleRootsSpawning();
-        testGeneralizationForVariableScopeLink();
+        testGeneralizationForLambdaLink();
         testGeneralizationForForAllLink();
         testInheritanceOsamaAbu();
         testInheritanceMuhummadTerrorist();

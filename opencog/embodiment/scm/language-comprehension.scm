@@ -1465,7 +1465,7 @@
      (get-frame-instance-elements-predicates predicateNode)
      )
 
-    (VariableScopeLink
+    (LambdaLink
      (ListLink
       variablesDeclaration
       (TypedVariableLink
@@ -1502,7 +1502,7 @@
 ; Prototype. Converts all frame instances from the messy format into the elegant format. Seems to be essential for
 ; PLN to be able to handle it with reasonable efficiency.
 (define convert-frames
-    (VariableScopeLink
+    (LambdaLink
      (ListLink
       (TypedVariableLink
        (VariableNode "$frameInstance")
@@ -1560,7 +1560,7 @@
 )
 
 (define frames-to-inh
-    (VariableScopeLink
+    (LambdaLink
      (ListLink
       (TypedVariableLink
        (VariableNode "$frameInstance")
@@ -1630,7 +1630,7 @@
 ; Lookup the query atom (can contain variables).
 (define (lookup-atoms variables query)
     (let ((implication
-         (VariableScopeLink
+         (LambdaLink
             variables
             (ImplicationLink
                 query
@@ -1712,7 +1712,7 @@
 ; This format will only support one premise and conclusion. Though the Frames output simply has separate Frame instances
 ; when there are multiple conclusions, so this rule will simply be triggered multiple times.
 (define frames-to-implication
-    (VariableScopeLink
+    (LambdaLink
      (ListLink
       (TypedVariableLink
        (VariableNode "$frameInstance")
@@ -1810,7 +1810,7 @@
      (get-frame-instance-elements-predicates predicateNode)
      )
 
-;    (VariableScopeLink
+;    (LambdaLink
 ;     (ListLink
 ;      variablesDeclaration
 ;      (TypedVariableLink
@@ -1871,7 +1871,7 @@
      (get-frame-instance-elements-predicates predicateNode)
      )
 
-;    (VariableScopeLink
+;    (LambdaLink
 ;     (ListLink
 ;      variablesDeclaration
 ;      (TypedVariableLink

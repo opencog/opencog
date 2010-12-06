@@ -78,7 +78,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
  * This function sets up an implication link, and some data.
  *
  * Note: although raw ImplicationLinks occuring outside of a
- * VariableScopeLink are now deprecated, this test still tests that
+ * LambdaLink are now deprecated, this test still tests that
  * function, since there's a fair amount of existing code that
  * still uses it.  At any rate, under the covers, both share a
  * code path, so its a good test no matter what.
@@ -91,7 +91,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
  *    some constants)
  * 4) Crisp-logic implication.
  * 5) Single-clause implications.
- * 6) Use of VariableScopeLink
+ * 6) Use of LambdaLink
  * 7) Restrictions on matching variable types.
  */
 #define an as->addNode
@@ -126,8 +126,8 @@ void ImplicationUTest::setUp(void)
 	"   (apply cog-new-node (append (list 'VariableTypeNode) x)))\n"
 	"(define (TypedVariableLink . x)\n"
 	"   (apply cog-new-link (append (list 'TypedVariableLink) x)))\n"
-	"(define (VariableScopeLink . x)\n"
-	"   (apply cog-new-link (append (list 'VariableScopeLink) x)))\n";
+	"(define (LambdaLink . x)\n"
+	"   (apply cog-new-link (append (list 'LambdaLink) x)))\n";
 	SchemeEval::instance().eval(setup);
 
 	// Create an implication link that will be tested.
@@ -167,7 +167,7 @@ void ImplicationUTest::setUp(void)
 	// Create a varscope link with just one variable
 	const char * scope =
 	"(define (varscope)\n"
-	"(VariableScopeLink\n"
+	"(LambdaLink\n"
 	"   (VariableNode \"$predNode\")\n"
 	"   (ImplicationLink\n"
 	"      (InheritanceLink (stv 1 1)\n"
@@ -184,7 +184,7 @@ void ImplicationUTest::setUp(void)
 	// Create a varscope link with a type restriction
 	const char * strict =
 	"(define (restricto)\n"
-	"(VariableScopeLink\n"
+	"(LambdaLink\n"
 	"   (TypedVariableLink\n"
 	"      (VariableNode \"$predNode\")\n"
 	"      (VariableTypeNode \"PredicateNode\")\n"
@@ -204,7 +204,7 @@ void ImplicationUTest::setUp(void)
 	// Create a varscope link with a type restriction
 	const char * strict2 =
 	"(define (restrict2)\n"
-	"(VariableScopeLink\n"
+	"(LambdaLink\n"
 	"   (ListLink\n"
 	"      (TypedVariableLink\n"
 	"         (VariableNode \"$predNode\")\n"

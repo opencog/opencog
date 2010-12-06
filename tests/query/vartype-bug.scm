@@ -26,7 +26,7 @@
 ;
 
 (define (rule-good)
-   (VariableScopeLink
+   (LambdaLink
       (ListLink 
          (TypedVariableLink
             (VariableNode "$var2")
@@ -76,7 +76,7 @@
 ; PreposxitionalRelationshipNode is misspelled (on purpose,
 ; since we want to test for the mis-spelled case).
 (define (rule-bad)
-   (VariableScopeLink
+   (LambdaLink
       (ListLink 
          (TypedVariableLink
             (VariableNode "$var2")

@@ -311,7 +311,7 @@ and a consequent (the "then" clause).  The antecedent is a list of
 clauses that must be satisfied, the consequent is a set of nodes to
 be created/modified.
 
-   (VariableScopeLink
+   (LambdaLink
       ; A list of the variables in the "rule" or "axiom".
       ; This list essentially acts as a type declaration for
       ; the variables in this axiom.
@@ -591,7 +591,7 @@ To step around these problems, a variant of the above was written in
 pure scheme, and is encoded in the file "rules.scm".  RelEx expressions
 are converted into "r-expressions" which hold both clauses and lists of
 variables. As a final step, an r-expression is converted into a
-VariableScopeLink contiaing variable declarations and an ImplicationLink.
+LambdaLink contiaing variable declarations and an ImplicationLink.
 
 New code should use "rules.scm". The perl script "rules-to-implications.pl"
 should be avoided, except possibly during a port of RelEx to OpenCog.

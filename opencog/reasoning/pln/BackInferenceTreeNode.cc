@@ -278,17 +278,17 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 
     vtree::iterator target_it = _target->begin();
     Type targetType = (Type) _v2h(*target_it);
-    // Check whether the target inherits from either VARIABLE_SCOPE_LINK
+    // Check whether the target inherits from either LAMBDA_LINK
     // or FORALL_LINK
     //! @todo This should be done for all quantifiers
     //! (put into a isQuantifier() method)
-    post_generalize_type = asw->inheritsType((Type)(_v2h(*target_it)), VARIABLE_SCOPE_LINK)
-                                    ? VARIABLE_SCOPE_LINK
+    post_generalize_type = asw->inheritsType((Type)(_v2h(*target_it)), LAMBDA_LINK)
+                                    ? LAMBDA_LINK
                                     : asw->inheritsType((Type)(_v2h(*target_it)), FORALL_LINK)
                                         ? FORALL_LINK
                                         : 0;
     if (post_generalize_type) {
-        // VARIABLE_SCOPE_LINK( arg_list, actual_atom ) -> select actual_atom:
+        // LAMBDA_LINK( arg_list, actual_atom ) -> select actual_atom:
         target_it = _target->begin(target_it);
         ++target_it;
     }
@@ -1742,7 +1742,7 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
         } 
         else {
             //new_result = PLNPredicateRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
-            new_result = PLNPredicateRule(ASW(), PHANDLE_UNDEFINED, VARIABLE_SCOPE_LINK).compute(ForAllArgs);
+            new_result = PLNPredicateRule(ASW(), PHANDLE_UNDEFINED, LAMBDA_LINK).compute(ForAllArgs);
         }
 
         tlog(0,"\nCombining %d results for final unification. Result was:\n", ForAllArgs.size());

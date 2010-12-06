@@ -1,7 +1,7 @@
 ;
 ; varscope.scm
 ;
-; Wrapper to create proper VariableScopeLinks from the naked
+; Wrapper to create proper LambdaLinks from the naked
 ; ImplicationLinks that the perl files generate.
 ;
 ; XXX This is not used any more, because the perl script is not used any
@@ -15,9 +15,9 @@
 ; ---------------------------------------------------------------------
 ; varscope-wrap-inplication implication
 ;
-; Create a VariableScopeLink wrapping the ImplicationLink
+; Create a LambdaLink wrapping the ImplicationLink
 ; This just simply locates all of the VariableNodes in the
-; ImplicationLink, and declares them up-front in the VariableScopeLink.
+; ImplicationLink, and declares them up-front in the LambdaLink.
 ;
 (define (varscope-wrap-implication impl)
 
@@ -30,12 +30,12 @@
 		(filter-hypergraph is-var? atoms)
 	)
 
-	; Create a VariableScopeLink declaring all of the 
+	; Create a LambdaLink declaring all of the 
 	; VariableNodes that we found.
 	(let* ((all-vars (find-vars impl))
 			(vars (delete-duplicates! all-vars))
 		)
-		(VariableScopeLink
+		(LambdaLink
 			(ListLink
 				vars
 			)

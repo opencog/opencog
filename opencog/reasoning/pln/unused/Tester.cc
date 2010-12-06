@@ -478,10 +478,10 @@ InitAxiomSet("smalldemo.xml");
             new SimpleTruthValue(0.999f, getCount(0.999f)),
         10,0);
 
-    printf("\nTest Generalization for VARIABLE_SCOPE_LINK.\n");
-    /// Test Generalization for VARIABLE_SCOPE_LINK
+    printf("\nTest Generalization for LAMBDA_LINK.\n");
+    /// Test Generalization for LAMBDA_LINK
     InitAxiomSet("smalldemo.xml");
-    maketest(makemeta(mva((Handle)VARIABLE_SCOPE_LINK,
+    maketest(makemeta(mva((Handle)LAMBDA_LINK,
                 mva((Handle)LIST_LINK), //empty dummy
                 mva((Handle)INHERITANCE_LINK,
                     NewNode(FW_VARIABLE_NODE, "$i"),

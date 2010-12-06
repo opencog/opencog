@@ -6,7 +6,7 @@
 ;
 ;
 (define human-implies-animal
-	(VariableScopeLink
+	(LambdaLink
    	(VariableNode "$H")
    	(ImplicationLink
       	(InheritanceLink
@@ -45,7 +45,7 @@
 
 ;; Example of an implication with just one predicate
 (define v
-   (VariableScopeLink
+   (LambdaLink
       (VariableNode "$predicateNode")
       (ImplicationLink
          (InheritanceLink
@@ -60,7 +60,7 @@
 (do-varscope v)
 
 (define v2
-   (VariableScopeLink
+   (LambdaLink
       (TypedVariableLink
          (VariableNode "$prNode")
          (VariableTypeNode "PredicateNode")
