@@ -140,18 +140,6 @@ bool AtomSpaceWrapper::handleRemoveSignal(Handle h)
     return false;
 }
 
-void AtomSpaceWrapper::HandleEntry2HandleSet(
-        HandleEntry& src, set<Handle>& dest) const
-{   
-    std::vector<Handle> dest_array;
-
-    dest_array = src.toHandleVector();
-    for (unsigned int i =0;i<dest_array.size();i++)
-    {
-        dest.insert(dest_array[i]);
-    }
-}
-
 bool AtomSpaceWrapper::inheritsType(Type T1, Type T2) const
 {
     return classserver().isA(T1, T2);
@@ -427,18 +415,14 @@ shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
                                                          const string& name,
                                                          bool subclass)
 {
-    HandleEntry* result = 
-        (name.empty()
-            ? atomspace->getAtomTable().getHandleSet((Type) T, subclass)
-            : atomspace->getAtomTable().getHandleSet(
-                name.c_str(), (Type) T, subclass));
-    shared_ptr<set<Handle> > ret(new set<Handle>);
-
-    HandleEntry2HandleSet(*result, *ret);
-    delete result;
+    list<Handle> hret;
+    if(name.empty())
+        atomspace->getHandleSet(back_inserter(hret), T, subclass);
+    else
+        atomspace->getHandleSet(back_inserter(hret), name.c_str(), T, subclass);
 
     shared_ptr<set<pHandle> > retFake(new set<pHandle>);
-    foreach(Handle h, *ret) {
+    foreach(Handle h, hret) {
         pHandleSeq phs = realToFakeHandle(h);
         retFake->insert(phs.begin(), phs.end());
     } 

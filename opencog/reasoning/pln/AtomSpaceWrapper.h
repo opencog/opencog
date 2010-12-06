@@ -506,7 +506,6 @@ public:
     //! returns whether type subT has superT as a parent type
     bool inheritsType(Type subT, Type superT) const;
 
-    void HandleEntry2HandleSet(HandleEntry& src, std::set<Handle>& dest) const;
     const TruthValue& getTV(pHandle h) const;
 
     bool isType(const pHandle h) const;
