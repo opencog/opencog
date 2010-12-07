@@ -62,8 +62,9 @@ public:
             NMXmlParser::loadXML(readers, atomSpace);
             delete readers[0];
 
-            HandleEntry *handles = atomSpace->getAtomTable().getHandleSet(ATOM, true);
-            printf("Handles before concate %s\n", handles->toString().c_str());
+            HandleSeq handles;
+            atomSpace->getHandleSet(std::back_inserter(handles), ATOM, true);
+            //std::cout << "Handles before concat. " << handles << std::endl;
             //handles = HandleEntry::concatenation(handles, atomSpace->getAtomTable().getHandleSet(ATOM, true));
             //printf("Handles after concate %s\n", handles->toString().c_str());
 
@@ -81,17 +82,15 @@ public:
             NMXmlParser::loadXML(readers, atomSpace);
             delete readers[0];
 
-            HandleEntry *h = atomSpace->getAtomTable().getHandleSet(ATOM, true);
-            HandleEntry *it = h;
-            while (it != NULL) {
-                //if (classserver().isAssignableFrom(NODE, TLB::getAtom(it->handle)->getType())){
-                // printf("%p %s\n", it->handle, ((Node *)it->handle)->toString().c_str());
+            handles.clear();
+            atomSpace->getHandleSet(back_inserter(handles), ATOM, true);
+            //foreach (Handle handle, handles) {
+                //if (classserver().isAssignableFrom(NODE, TLB::getAtom(handle)->getType())){
+                // printf("%p %s\n", handle, ((Node *)handle)->toString().c_str());
                 //}else{
-                // printf("%p %s\n", it->handle, ((Link *)it->handle)->toShortString());
+                // printf("%p %s\n", handle, ((Link *)handle)->toShortString());
                 //}
-                it = it->next;
-            }
-            delete(h);
+            //}
 
             TS_ASSERT(NMXmlParserExperiment::checkExperiment());
             atomSpace = NMXmlParserExperiment::destroyExperiment();

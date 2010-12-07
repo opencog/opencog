@@ -38,6 +38,7 @@ namespace opencog
  */
 class NMXmlExporter
 {
+    friend class AtomSpace;
 
 private:
     /**
@@ -56,7 +57,6 @@ private:
      */
     void findExportables(HandleSet *, HandleSet *, Handle);
 
-
     /**
      * Exports a subset of the AtomSpace to XML.
      * @param hs The set of Handles to be exported.
@@ -68,30 +68,30 @@ private:
 
     /**
      * Exports a subset of the AtomSpace to XML.
-     * @param hs The HandleSeq of Handles to be exported.
-     * @return An string describing the subset of Atoms in XML.
+     * @param hs The set of Handles from where the subset
+     *        should be built. After the handles are exported
+     *        the HandleEntry is deleted.
+     * @return A string describing the subset of Atoms in XML.
      */
-    std::string toXML(HandleSeq& hs);
+    std::string toXML(HandleEntry* hs);
 
     /**
      * Exports an Atom and the Atoms in its outgoingset.
      */
     void exportAtom(Handle, bool [], std::string&, bool = false);
 
-    AtomSpace* as;
+    const AtomSpace* as;
 public:
 
-    NMXmlExporter(AtomSpace* _as);
+    NMXmlExporter(const AtomSpace* _as);
     ~NMXmlExporter();
 
     /**
-     * Exports a subset of the AtomTable to XML.
-     * @param The set of Handles from where the subset
-     *        should be built. After the handles are exported
-     *        the HandleEntry is deleted.
-     * @return A string describing the subset of Atoms in XML.
+     * Exports a subset of the AtomSpace to XML.
+     * @param hs The HandleSeq of Handles to be exported.
+     * @return An string describing the subset of Atoms in XML.
      */
-    std::string toXML(HandleEntry *);
+    std::string toXML(HandleSeq& hs);
 
 };
 

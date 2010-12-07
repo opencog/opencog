@@ -60,34 +60,11 @@ bool SaveRequest::execute()
 
     std::string& filename = _parameters.front();
 
-    // XXX/FIXME This is an insanely inefficient way to export the 
-    // atomspace! For anything containing a million or more handles,
-    // this is just mind-bogglingly bad, as it will results in a vast
-    // amount of mallocs & frees, and blow out RAM usage.  Strongly
-    // suggest redesign using appropriate iterators.  Anyway, should
-    // probably be exporting to scheme, not XML, anyway ... since XML
-    // is slow in general.
-    
-    // XXX/FIXME This blocks the (planned) atomspace event loop until
-    // save is completed.
-    pthread_mutex_lock(&atomSpace->atomSpaceLock);
-    HandleEntry *handles = atomSpace->getAtomTable().getHandleSet(ATOM, true);
-    NMXmlExporter exporter(atomSpace);
-    std::fstream file(filename.c_str(), std::fstream::out);
-    bool rc = true;
-    try {
-        file << exporter.toXML(handles);
+    bool result = atomSpace->saveToXML(filename);
+    if (result)
         oss << "Info: done" << std::endl;
-        rc = true;
-    } catch (StandardException &e) {
-        oss << "Error: unable to save to XML (" << e.getMessage() << ")" << std::endl;
-        rc = false;
-    }
+    else 
+        oss << "Error: unable to save to XML" << std::endl;
 
-    file.flush();
-    file.close();
-    delete handles;
-    pthread_mutex_unlock(&atomSpace->atomSpaceLock);
     send(oss.str());
-    return rc;
 }

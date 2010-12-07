@@ -1482,6 +1482,8 @@ public:
         AttentionValue::lti_t threshold;
     };
 
+    bool saveToXML(const std::string& filename) const;
+
 protected:
 
     HandleIterator* _handle_iterator;
@@ -1506,7 +1508,7 @@ private:
      * class as a friend class to the AtomSpace, and we make no
      * guarantee this will be available in the future.
      */
-    pthread_mutex_t atomSpaceLock;
+    mutable pthread_mutex_t atomSpaceLock;
 
     /**
      * signal connections used to keep track of atom removal in the AtomTable

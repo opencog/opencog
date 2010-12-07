@@ -31,7 +31,7 @@
 
 using namespace opencog;
 
-NMXmlExporter::NMXmlExporter(AtomSpace* _as) :
+NMXmlExporter::NMXmlExporter(const AtomSpace* _as) :
     as(_as)
 {
 }
