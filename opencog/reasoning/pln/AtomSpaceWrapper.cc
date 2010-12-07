@@ -402,7 +402,6 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandles(const HandleSeq& hs,
 
 const TruthValue& AtomSpaceWrapper::getTV(pHandle h) const
 {
-    using namespace std::overloadmadness;
     if (h != PHANDLE_UNDEFINED) {
         vhpair r = fakeToRealHandle(h);
         return atomspace->getTV(r.first,r.second);
@@ -816,7 +815,7 @@ pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs,
 {
     pHandle ret;
     HandleSeq hsReal;
-    HandleSeq contexts;
+    HandleSeq contexts; // contexts of each pHandle of hs
 
     // Convert outgoing links to real Handles
     foreach(pHandle h, hs) {
@@ -825,14 +824,16 @@ pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs,
 
         // isInvalidHandle makes sure the atom was not deleted.
         if (!atomspace->isValidHandle(v.second.substantive)) {
+#ifndef CONTEXTUAL_INFERENCE
             contexts.push_back(atomspace->getHandle(CONCEPT_NODE, rootContext));
+#endif
         } else {
             contexts.push_back(v.second.substantive);
         }
     }
  
     // Construct a Link then use addAtomDC
-    Link l(t,hsReal,tvn);
+    Link l(t, hsReal, tvn);
     ret = addAtomDC(l, fresh, contexts);
     return ret;
 }
@@ -1020,7 +1021,8 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
     } else {
         // no fresh:
         VersionHandle vh = NULL_VERSION_HANDLE;
-        if (contexts.size() != 0) {
+        if (!contexts.empty()) {
+#ifndef CONTEXTUAL_INFERENCE
             // if the atom doesn't exist already, then add normally
             bool allNull = true;
             // if all null context
@@ -1037,13 +1039,23 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 
                 Handle existingContext = as->getHandle(ORDERED_LINK, contexts);
                 if (!as->isValidHandle(existingContext)) {
-                    existingContext = as->addLink(ORDERED_LINK,contexts);
-                    vh = VersionHandle(CONTEXTUAL,existingContext);
+                    existingContext = as->addLink(ORDERED_LINK, contexts);
+                    vh = VersionHandle(CONTEXTUAL, existingContext);
                     dummyContexts.insert(vh);
                 } else {
-                    vh = VersionHandle(CONTEXTUAL,existingContext);
+                    vh = VersionHandle(CONTEXTUAL, existingContext);
                 }
             }
+#else
+            // for now dummy contexts are ignored, it is assumed the
+            // contexts in the HandleSeq contexts are just the real
+            // ones
+            Handle context = contexts[0];
+            OC_ASSERT(std::count(contexts.begin(), contexts.end(), context)
+                      == (int)contexts.size(),
+                      "It is assumed that all context are the same");
+            vh = VersionHandle(CONTEXTUAL, contexts[0]);
+#endif
         }
         // add it and let AtomSpace deal with merging it
         result = as->addRealAtom(atom);
