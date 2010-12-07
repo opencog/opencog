@@ -93,9 +93,8 @@ public:
 		transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(
 		const int n = (int)premiseArray.size();
 		pHandle first = hs[0];
-		pHandleSeq dummy_outgoing; dummy_outgoing.push_back(first);
-        const TruthValue& dummy_tv 
-            = asw->getTV(first);
+		pHandleSeq dummy_outgoing(1, first);
+        const TruthValue& dummy_tv = asw->getTV(first);
 
 		//printf("ANDRUle: [%d: %d] %s =>\n", N, v2h(premiseArray[0]), getTruthValue(v2h(premiseArray[0]))->toString().c_str());
 
@@ -104,12 +103,11 @@ public:
 			printTree(v2h(v),0,-3);
 	*/
 		//currentDebugLevel = 3;
-		pHandle ret = ((N>1)
-                               ? UnorderedCcompute(asw, AND_LINK, fN,
-                                                   hs, n, CX, fresh)
+		pHandle ret = ((N>1)? UnorderedCcompute(asw, AND_LINK, fN,
+                                                hs, n, CX, fresh)
                        : asw->addLink(AND_LINK, dummy_outgoing,
                                       dummy_tv, fresh));
-		    delete[] hs;
+        delete[] hs;
 
 		      //		printf("=> ANDRUle: %s:\n", ret, getTruthValue(ret)->toString().c_str());
 		      //		printTree(ret,0,-3);

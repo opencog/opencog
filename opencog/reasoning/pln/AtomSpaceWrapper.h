@@ -619,27 +619,26 @@ public:
 }} //~namespace opencog::pln
 
 namespace std {
-//Nil: I wrap it under that namespace to avoid a weird ambiguous overload...
-namespace overloadmadness {
-//overload of operator<< to print vhpair
-inline std::ostream& operator<<(std::ostream& out,
-                                const opencog::pln::vhpair& vhp) {
+
+// overload of operator<< to print vhpair
+template<typename Out>
+Out& operator<<(Out& out, const opencog::pln::vhpair& vhp) {
     out << "(Handle=" << vhp.first
-        << ",VersionHandle=" << vhp.second << ")";
+        << ", VersionHandle=" << vhp.second << ")";
     return out;
 }
-} // ~namespace overloadmadness
 
-//overload of operator<< to print std::pair<pHandle,vhpair>
+// overload of operator<< to print std::pair<pHandle,vhpair>
+//
+// Warning: if you templatize this function like above gcc will
+// complaim arguing that it is ambiguous with the one above
 inline std::ostream& operator<<(std::ostream& out,
                                 const std::pair<opencog::pln::pHandle,
                                                 opencog::pln::vhpair>& pvp) {
-    using namespace overloadmadness;
     out << "(pHandle=" << pvp.first
-        << ",vhpair=" << pvp.second << ")";
+        << ", vhpair=" << pvp.second << ")";
     return out;
 }
 } // ~namespace std
-
 
 #endif

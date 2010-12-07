@@ -89,9 +89,7 @@ public:
     atom(const tree<boost::shared_ptr<atom> >& a,
         tree<boost::shared_ptr<atom> >::iterator parent_node,
         bool root = true);
-    atom(const tree<Vertex>& a,
-        tree<Vertex>::iterator parent_node,
-        bool root = true);
+    atom(const vtree& a, vtree::iterator parent_node, bool root = true);
 
     /** Create from an integer pattern of a pre-defined length. Doesn't change the ownership
         of the array.
@@ -146,7 +144,7 @@ public:
     //! @todo Write proper visitor object!
     tree< boost::shared_ptr<atom> > maketree() const; //tree<atom>& dest);
     
-    tree<Vertex> makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual=false) const; //tree<atom>& dest);
+    vtree makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual=false) const; //tree<atom>& dest);
 
     /// Actualize the substitution from bindings, delete forbiddenBindings, on new instance..
     void getWithActualizedSubstitutions(atom& target) const;

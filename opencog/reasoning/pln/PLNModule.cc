@@ -310,6 +310,8 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
                 rule->attemptDirectProduction(target, false);
             vhp = ASW()->fakeToRealHandle(_v2h(directResult->begin()->GetValue()));
         }
+        // std::cout << "VHP = " << vhp << std::endl;
+        // std::cout << "VHP.Handle = " << ASW()->getAtomSpace()->atomAsString(vhp.first, false) << std::endl;
     }
     return vhp.first;
 }

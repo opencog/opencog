@@ -82,7 +82,7 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh) const
         printer.print((*pre_binds)[vp.first]);
     }
 
-    BBvtree rootAtom(new BoundVTree(*i, pre_binds));
+    BBvtree rootAtom(new BoundVTree(*i, pre_binds)); // root atom of the body
 //    bind_Bvtree(rootAtom, *i->bindings);
 //    pHandle topologicalStub = asw->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false);
 //

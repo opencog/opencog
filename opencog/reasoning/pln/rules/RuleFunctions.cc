@@ -265,7 +265,7 @@ pHandle UnorderedCcompute(AtomSpaceWrapper *asw, Type linkT,
     
     return ret;
 }
-    
+
 Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter,
                                           Type OutLinkType,
                                           AtomSpaceWrapper* asw)

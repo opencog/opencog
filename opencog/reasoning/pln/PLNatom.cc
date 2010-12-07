@@ -559,14 +559,14 @@ void prn(tree< Btr<atom> >& tr)
       }
 }
 
-void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top);
-void makeHandletree(pHandle h, bool fullVirtual, tree<Vertex>& ret)
+void expandHandletree(bool fullVirtual, vtree& ret, vtree::iterator ret_top);
+void makeHandletree(pHandle h, bool fullVirtual, vtree& ret)
 {
     ret.set_head(h);
     expandHandletree(fullVirtual, ret, ret.begin());
 }
 
-void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top)
+void expandHandletree(bool fullVirtual, vtree& ret, vtree::iterator ret_top)
 {
     pHandle h = boost::get<pHandle>(*ret_top);
     Type T=GET_ASW->getType(h);
@@ -579,15 +579,15 @@ void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_t
         pHandleSeq _hs = GET_ASW->getOutgoing(h);
         foreach(pHandle child_h, _hs)
         {
-            tree<Vertex>::iterator next_i = ret.append_child(ret_top, child_h);
+            vtree::iterator next_i = ret.append_child(ret_top, child_h);
             expandHandletree(fullVirtual, ret, next_i);
         }
     }
 }
 
-tree<Vertex> atom::makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual) const
+vtree atom::makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual) const
 {
-    tree<Vertex> ret;
+    vtree ret;
     pHandle top = PHANDLE_UNDEFINED;
     
     if (handle != PHANDLE_UNDEFINED && (!fullVirtual || GET_ASW->isSubType(handle, FW_VARIABLE_NODE)))
@@ -601,7 +601,7 @@ tree<Vertex> atom::makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual) co
     
     for (unsigned int i = 0; i < this->hs.size(); i++)
     {
-        tree<Vertex> children = this->hs[i]->makeHandletree(table, fullVirtual);
+        vtree children = this->hs[i]->makeHandletree(table, fullVirtual);
 
         ret.append_children(ret.begin(), children.begin(), children.end());
     }
@@ -656,7 +656,7 @@ atom::atom(const tree<Btr<atom> >& a, tree<Btr<atom> >::iterator parent_node, bo
 
 ///hacky
 
-atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
+atom::atom(const vtree& a, vtree::iterator parent_node, bool root)
 : bindings(0), forbiddenBindings(0)
 {
     if (root)
@@ -672,7 +672,7 @@ atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
 //cprintf(4,"REAL: %d\n", handle);
     
     if (!GET_ASW->inheritsType(T, NODE)) //nodes have no children...
-        for (tree<Vertex>::sibling_iterator s = a.begin(parent_node);  s != a.end(parent_node); ++s)
+        for (vtree::sibling_iterator s = a.begin(parent_node);  s != a.end(parent_node); ++s)
         {   
             Btr<atom> b(new atom);
             

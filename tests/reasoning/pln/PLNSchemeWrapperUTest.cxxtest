@@ -114,18 +114,19 @@ public:
         std::cout << std::endl;
         // hack to get around with floating errors
         bool tv_eq = as->getTV(h, vh).toString() == tv.toString();
-        std::cout << "GETTV = " << as->getTV(h, vh) << "TRUC" << std::endl;
-        std::cout << "TV    = " << tv << "TRUC" << std::endl;
+        std::cout << "GETTV = " << as->getTV(h, vh) << std::endl;
+        std::cout << "TV    = " << tv << std::endl;
         TS_ASSERT(tv_eq);
     }
 
     void test_inference() {
+        check_inference("aboutGreaterThan.scm",
+                        SimpleTruthValue(0.2, 1018.181824));
 #ifdef CONTEXTUAL_INFERENCE
         Handle cx = as->addNode(CONCEPT_NODE, "mathematics");
         std::cout << "cx = " << cx.value() << std::endl;
-        check_inference("nerd.scm", SimpleTruthValue(0.5, 0.5),
+        check_inference("nerd.scm", SimpleTruthValue(0.66, 3200.000244),
                         VersionHandle(CONTEXTUAL, cx));
 #endif
-        check_inference("aboutGreaterThan.scm", SimpleTruthValue(0.2, 1018.181824));
     }
 };
