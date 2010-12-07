@@ -51,6 +51,7 @@ ADD_LIBRARY (atomspace SHARED
 )
 
 TARGET_LINK_LIBRARIES(atomspace
+    xml
 	util
 	SpaceMap
 	${GSL_LIBRARIES}
