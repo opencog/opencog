@@ -110,11 +110,10 @@ public:
         }
 
         if (withIncoming) {
-            HandleEntry *he = a->getIncomingSet();
+            HandleSeq hs = space->getIncoming(h);
             int i = 0;
-            while (he) {
-                ost << h << "->" << he->handle << " [style=\"dotted\" label=\"" << i << "\"];\n";
-                he = he->next;
+            for (Handle h, hs) {
+                ost << h << "->" << h << " [style=\"dotted\" label=\"" << i << "\"];\n";
                 i++;
             }
         }
