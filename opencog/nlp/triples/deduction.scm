@@ -43,7 +43,7 @@
 ;
 (define (make-one-chain hypothesis evaluand-a evaluand-b pred-first pred-next)
 	(define var (VariableNode "$simple-chain-var"))
-	(LambdaLink
+	(BindLink
 		var
 		(ImplicationLink
 			(AndLink

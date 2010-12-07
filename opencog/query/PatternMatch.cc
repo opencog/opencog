@@ -501,7 +501,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 
 	// Extract a list of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
-	// LambdaLink will include a list of variables up-front.
+	// BindLink will include a list of variables up-front.
 	FindVariables fv(atom_space);
 	if (NULL == varlist)
 	{
@@ -644,14 +644,14 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 /* ================================================================= */
 /**
- * Evaluate an ImplicationLink embedded in a LambdaLink
+ * Evaluate an ImplicationLink embedded in a BindLink
  *
- * Given a LambdaLink containing variable declarations and an
+ * Given a BindLink containing variable declarations and an
  * ImplicationLink, this method will "evaluate" the implication, matching
  * the predicate, and creating a grounded implicand, assuming the
  * predicate can be satisfied. Thus, for example, given the structure
  *
- *    LambdaLink
+ *    BindLink
  *       ListLink
  *          VariableNode "$var0"
  *          VariableNode "$var1"
@@ -659,7 +659,7 @@ int PatternMatch::get_vartype(Handle htypelink,
  *          AndList
  *             etc ...
  * Evaluation proceeds as decribed in the "do_imply()" function above.
- * The whole point of the LambdaLink is to do nothing more than 
+ * The whole point of the BindLink is to do nothing more than 
  * to limit the range of the scope of the variables.
  */
 
@@ -674,10 +674,10 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 
 	// Type must be as expected
 	Type tscope = as->getType(h);
-	if (LAMBDA_LINK != tscope)
+	if (BIND_LINK != tscope)
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
-		logger().warn("%s: expected LambdaLink, got %s",
+		logger().warn("%s: expected BindLink, got %s",
 			 __FUNCTION__, tname.c_str());
 		return Handle::UNDEFINED;
 	}
@@ -685,7 +685,7 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 	const std::vector<Handle>& oset = as->getOutgoing(h);
 	if (2 != oset.size())
 	{
-		logger().warn("%s: LambdaLink has wrong size", __FUNCTION__);
+		logger().warn("%s: BindLink has wrong size", __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
 

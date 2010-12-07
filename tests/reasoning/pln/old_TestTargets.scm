@@ -91,7 +91,7 @@
 (ForallLink (ListLink (stv 1 0))
     (InheritanceLink (stv 1 0) (FWVariableNode "$i" (stv 1 0))
        (ConceptNode "terrorist" (stv 1 0))))
-(LambdaLink (ListLink (stv 1 0))
+(BindLink (ListLink (stv 1 0))
     (InheritanceLink (stv 1 0) (FWVariableNode "$i" (stv 1 0))
        (ConceptNode "terrorist" (stv 1 0))))
 (EvaluationLink (PredicateNode "Possible" (stv 1 0))

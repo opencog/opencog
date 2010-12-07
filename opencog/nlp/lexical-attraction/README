@@ -129,7 +129,7 @@ But we are interested in the lemma forms:
 The template pattern to recognize the above word-pair is shown below.
 The actual pattern recognition will be done by the query pattern matcher.
 To distinguish this from other uses, we invent a new TemplateLink, which
-derives from LambdaLink (http://opencog.org/wiki/LambdaLink)
+derives from BindLink (http://opencog.org/wiki/BindLink)
 
 Note the strong typing used here. The strong typing is probably not
 strictly necessary, but is useful for making sure the pattern template
@@ -505,7 +505,7 @@ Suppose, for example, word-pairs were linked as follows:
 Then for example, sum_w_in_S1 mi(w, w1) with w1='tire' could be computed
 by running the pattern matcher on the following:
 
-   LambdaLink
+   BindLink
        ListLink
            TypedVariableLink
                VariableNode "$left-word"
@@ -536,7 +536,7 @@ Computing the intersected sum is slightly harder. So, to obtain
 sum_w_in_I12 [ mi (w, w1) + mi(w, w2) ] for w1=tire, w2=wheel, one 
 should run the following pattern:
 
-   LambdaLink
+   BindLink
        ListLink
            TypedVariableLink
                VariableNode "$left-word"
@@ -975,7 +975,7 @@ Most likely parse according to the weighting.
 
 =======================================================================
 
-                   A LambdaLink Proposal
+                   A BindLink Proposal
                    ---------------------
                        November 2009
 
@@ -983,7 +983,7 @@ Various algorithms within OpenCog might be simplified if there was a
 lambda, in the sense of lambda calculus. Here's a proposal for what this
 might look like:
 
-      LambdaLink
+      BindLink
          ListLink
             VariableNode "$word-a"
             VariableNode "$word-b"
@@ -1000,9 +1000,9 @@ might look like:
                   VariableNode "$word-b"
 
 Syntactically, the above is nothing more nor less than an extension of
-the LambdaLink -- see http://opencog.org/wiki/LambdaLink
+the BindLink -- see http://opencog.org/wiki/BindLink
 
-Another way to think of a LambdaLink is as a generalization of
+Another way to think of a BindLink is as a generalization of
 EvaluationLink, but with the first and second args reversed -- i.e. the
 ListLink appearing first, not last.
 

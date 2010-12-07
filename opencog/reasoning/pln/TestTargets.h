@@ -331,7 +331,7 @@ printf("Insert test %d\n", testi++);
             ))));
 
 printf("Insert test %d\n", testi++);
-            tests[30] = Btr<vtree > (new vtree(mva((pHandle)LAMBDA_LINK,
+            tests[30] = Btr<vtree > (new vtree(mva((pHandle)BIND_LINK,
                 mva((pHandle)LIST_LINK), //empty dummy
                 mva((pHandle)INHERITANCE_LINK,
                     NewNode(FW_VARIABLE_NODE, "$i"),

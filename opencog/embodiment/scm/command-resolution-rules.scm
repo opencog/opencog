@@ -25,7 +25,7 @@
 ; variable: command-resolution-rules (at the end of this file)
 
 (define evaluate-grab-command
-  (LambdaLink (stv 1 1) (cog-new-av 0 1 #f)
+  (BindLink (stv 1 1) (cog-new-av 0 1 #f)
    (ListLink
     (TypedVariableLink
      (VariableNode "$agent")
@@ -138,11 +138,11 @@
 
            
     ) ; ImplicationLink
-   ) ; LambdaLink
+   ) ; BindLink
   )
 
 (define evaluate-drop-command
-  (LambdaLink (stv 1 1) (cog-new-av 0 1 #f)
+  (BindLink (stv 1 1) (cog-new-av 0 1 #f)
    (ListLink
     (TypedVariableLink
      (VariableNode "$source")
@@ -253,11 +253,11 @@
      )
            
     ) ; ImplicationLink
-   ) ; LambdaLink
+   ) ; BindLink
   )
 
 (define evaluate-goto-command
-  (LambdaLink (stv 1 1) (cog-new-av 0 1 #f)
+  (BindLink (stv 1 1) (cog-new-av 0 1 #f)
    (ListLink
     (TypedVariableLink
      (VariableNode "$agent")
