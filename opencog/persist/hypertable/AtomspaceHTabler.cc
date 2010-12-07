@@ -351,12 +351,11 @@ void AtomspaceHTabler::storeAtom(Handle h)
 
 #ifdef THERE_IS_NO_NEED_TO_STORE_INCOMING_SET
     // Store incoming set
-    HandleEntry *he = as->getIncomingSet(h);
+    HandleSeq hs = as->getIncoming(h);
     std::stringstream ss;
-    while (he) {
+    foreach (Handle handle, hs) {
         ss << ',';
-        ss << he->handle;
-        he = he->next;
+        ss << handle;
     }
     key.column_family = "incoming";
     m_handle_mutator->set(key, ss.str().c_str(), ss.str().length());

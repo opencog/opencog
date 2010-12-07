@@ -1978,15 +1978,12 @@ puts("Loading classed to LocalATW...");
     for (int i = 0; i < NUMBER_OF_CLASSES; i++)
     {
         mindShadowMap[i] = shared_ptr<set<Handle> >(new set<Handle>);
-        for (   HandleEntry* e = a->getHandleSet((Type)i, true);
-                e && e->handle;
-                e = e->next)
-        {
-        printf(".\n");
-            mindShadowMap[i]->insert(e->handle);
+        HandleSeq handles;
+        a->getHandleSet(back_inserter(handles), (Type) i, true);
+        foreach (Handle handle, handles) {
+            printf(".\n");
+            mindShadowMap[i]->insert(handle);
         }
-            
-//      delete e;
     }   
 }
 

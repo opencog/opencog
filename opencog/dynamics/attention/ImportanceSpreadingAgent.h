@@ -75,7 +75,7 @@ private:
     void spreadImportance();
 
     //! Sum total difference for an atom
-    int sumTotalDifference(Handle source, HandleEntry* links);
+    int sumTotalDifference(Handle source, HandleSeq& links);
 
     //! Sum difference for one link
     int sumDifference(Handle source, Handle link);

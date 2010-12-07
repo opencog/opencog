@@ -25,7 +25,6 @@
 #define MESSAGESSENDER_H_
 
 #include <string>
-#include <opencog/atomspace/HandleEntry.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 

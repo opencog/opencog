@@ -82,16 +82,13 @@ void ImportanceSpreadingAgent::spreadImportance()
 
 // for a bunch of links from the source, get links passed as pointer
 // to avoid retrieving them twice 
-int ImportanceSpreadingAgent::sumTotalDifference(Handle source, HandleEntry* links)
+int ImportanceSpreadingAgent::sumTotalDifference(Handle source, HandleSeq& links)
 {
-    HandleEntry *he;
     std::vector<Handle> targets;
     int totalDifference = 0;
     // sum total difference
-    he = links;
-    while (he) {
-        totalDifference += sumDifference(source,he->handle);
-        he = he->next;
+    foreach(Handle handle, links) {
+        totalDifference += sumDifference(source,handle);
     }
     return totalDifference;
 }
@@ -168,7 +165,7 @@ bool ImportanceSpreadingAgent::IsHebbianLink::operator()(Handle h) {
 
 void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 {
-    HandleEntry *links;
+    HandleSeq links;
     float totalDifference, differenceScaling;
     int totalTransferred;
     AttentionValue::sti_t sourceSTI;
@@ -186,16 +183,15 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     IsHebbianLink isHLPred(a);
     std::remove_if(linksVector.begin(),linksVector.end(),isHLPred);
 
-    logger().fine("  +Hebbian links found %d", links->getSize());
+    logger().fine("  +Hebbian links found %d", linksVector.size());
 
-    totalDifference = static_cast<float>(sumTotalDifference(h, links));
+    totalDifference = static_cast<float>(sumTotalDifference(h, linksVector));
     sourceSTI = a->getSTI(h);
 
     // if there is no hebbian links with > 0 weight
     // or no lower STI atoms to spread to.
     if (totalDifference == 0.0f) {
         logger().fine("  |totalDifference = 0, spreading nothing");
-        delete links;
         return;
     }
 
@@ -256,6 +252,5 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
                     a->atomAsString(h).c_str(), a->atomAsString(target_h).c_str() );
         }
     }
-    delete links;
 
 }
