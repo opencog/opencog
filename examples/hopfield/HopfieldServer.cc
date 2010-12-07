@@ -412,13 +412,13 @@ void HopfieldServer::chooseKeyNodes()
 void HopfieldServer::reset()
 {
     AtomSpace* atomSpace = getAtomSpace();
-    HandleEntry *links, *l;
+    HandleSeq toRemove;
 
     // Remove all links and replace
-    links = atomSpace->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
-    for (l = links; l->next; l = l->next)
-        atomSpace->removeAtom(l->handle);
-    delete links;
+    atomSpace->getHandleSet(back_inserter(toRemove), HEBBIAN_LINK, true);
+    foreach (Handle handle, toRemove) {
+        atomSpace->removeAtom(handle);
+    }
     resetNodes();
 
     addRandomLinks();
@@ -427,21 +427,20 @@ void HopfieldServer::reset()
 void HopfieldServer::addRandomLinks()
 {
     AtomSpace* atomSpace = getAtomSpace();
-    HandleEntry *links;
+    HandleSeq countLinks;
     int amount, attempts = 0;
     int maxAttempts = 10000;
 
     // Add links if less than desired number and to replace forgotten links
-    links = atomSpace->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
-    amount = this->links - links->getSize();
-    delete links;
+    atomSpace->getHandleSet(back_inserter(countLinks), HEBBIAN_LINK, true);
+    amount = this->links - countLinks.size();
 
     logger().fine("Adding %d random Hebbian Links.", amount);
     // Link nodes randomly with amount links
     while (amount > 0 && attempts < maxAttempts) {
         int source, target;
         HandleSeq outgoing;
-        HandleEntry* he;
+        HandleSeq selected;
 
         source = rng->randint(hGrid.size());
         target = rng->randint(hGrid.size() - 1);
@@ -449,19 +448,18 @@ void HopfieldServer::addRandomLinks()
 
         outgoing.push_back(hGrid[source]);
         outgoing.push_back(hGrid[target]);
-        he = atomSpace->getAtomTable().getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+        atomSpace->getHandleSet(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
         // try links going the other way (because some Hebbian links are
         // ordered)
-        if (!he) {
+        if (selected.size() == 0) {
             outgoing.clear();
             outgoing.push_back(hGrid[target]);
             outgoing.push_back(hGrid[source]);
-            he = atomSpace->getAtomTable().getHandleSet(outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
-
+            // try links going the other way (because some Hebbian links are
+            atomSpace->getHandleSet(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
         }
-        if (he) {
+        if (selected.size() > 0) {
             //logger().fine("Trying to add %d -> %d, but already exists %s", source, target, atomSpace->atomAsString(he->handle).c_str());
-            delete he;
             attempts++;
         } else {
             Handle rl = atomSpace->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing);
@@ -482,15 +480,15 @@ void HopfieldServer::addRandomLinks()
 void HopfieldServer::resetNodes(bool toDefault)
 {
     AtomSpace* a = getAtomSpace();
-    HandleEntry *nodes, *n;
+    HandleSeq nodes;
 
-    nodes = a->getAtomTable().getHandleSet(NODE, true);
+    a->getHandleSet(back_inserter(nodes), NODE, true);
 
 	if (toDefault) {
-		for (n = nodes; n; n = n->next) {
+        foreach (Handle handle, nodes) {
 			// Set all nodes to default STI and default LTI
-			a->setSTI(n->handle, AttentionValue::DEFAULTATOMSTI);
-			a->setLTI(n->handle, AttentionValue::DEFAULTATOMLTI);
+			a->setSTI(handle, AttentionValue::DEFAULTATOMSTI);
+			a->setLTI(handle, AttentionValue::DEFAULTATOMLTI);
 		}
 	} else {
 		// Set nodes to negative of AF boundary - patternStimulus*wages
@@ -500,9 +498,9 @@ void HopfieldServer::resetNodes(bool toDefault)
 			(patternStimulus * importUpdateAgent->getSTIAtomWage())/hGrid.size();
 		startLTI = getAtomSpace()->getAttentionalFocusBoundary() -
 			(patternStimulus * importUpdateAgent->getLTIAtomWage())/hGrid.size();
-		for (n = nodes; n; n = n->next) {
-			a->setSTI(n->handle, startSTI);
-			a->setLTI(n->handle, startLTI);
+        foreach (Handle handle, nodes) {
+			a->setSTI(handle, startSTI);
+			a->setLTI(handle, startLTI);
 		}
 	}
 #ifdef HAVE_UBIGRAPH
@@ -511,9 +509,6 @@ void HopfieldServer::resetNodes(bool toDefault)
         ubi->applyStyleToHandleSeq(keyNodes, ubi->keyNodeStyle);
     }
 #endif //HAVE_UBIGRAPH
-    
-    delete nodes;
-
     logger().debug("Nodes Reset");
 }
 
@@ -866,7 +861,7 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles,
         encodePattern(partialPattern, patternStimulus);
         printStatus();
 
-        updateAtomTableForRetrieval(spreadCycles, originalPattern);
+        updateAtomSpaceForRetrieval(spreadCycles, originalPattern);
         printStatus();
 
         i++;
@@ -916,7 +911,7 @@ std::vector<stim_t> HopfieldServer::getGridStimVector()
     return out;
 }
 
-void HopfieldServer::updateAtomTableForRetrieval(int spreadCycles = 1,
+void HopfieldServer::updateAtomSpaceForRetrieval(int spreadCycles = 1,
         Pattern originalPattern)
 {
 //   run ImportanceUpdatingAgent once without updating links
@@ -995,7 +990,6 @@ void HopfieldServer::printStatus()
     Pattern nodeSTI = getGridSTIAsPattern();
     Pattern pattern = nodeSTI.binarisePattern(options->vizThreshold);
     std::vector<stim_t> nodeStim = getGridStimVector();
-//    HandleEntry *links, *current_l;
 
     int i;
 	
@@ -1019,17 +1013,6 @@ void HopfieldServer::printStatus()
         cout << endl;
     }
 
-    // Print out links.
-//  if (options->verboseLevel > 1) {
-// links = getAtomSpace()->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
-//
-// for (current_l = links; current_l; current_l = current_l->next) {
-//     Handle h = current_l->handle;
-//
-//     cout << getAtomSpace()->atomAsString(h) << endl;
-//
-// }
-//  }
     cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
 }
 

@@ -172,12 +172,12 @@ public:
     std::vector<bool> checkNeighbourStability(Pattern p, float tolerance);
 
     /**
-     * Perform a single retrieval update on the AtomTable
+     * Perform a single retrieval update on the AtomSpace
      *
      * @param spreadCycles is the number of times to spread importance per
      * retrieval cycle.
      */
-    void updateAtomTableForRetrieval(int spreadCycles, Pattern originalPattern
+    void updateAtomSpaceForRetrieval(int spreadCycles, Pattern originalPattern
             = Pattern(0,0));
 
     /**

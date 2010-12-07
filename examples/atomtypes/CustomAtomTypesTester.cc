@@ -25,8 +25,6 @@
 #include "CustomAtomTypesTester.h"
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/types.h>
@@ -42,48 +40,58 @@ void CustomAtomTypesTester::createAtoms()
 {
     logger().info("[CustomAtomTypesTester.createAtoms]");
 
-    AtomTable& at = const_cast<AtomTable&>(server().getAtomSpace()->getAtomTable());
+    AtomSpace& as = *server().getAtomSpace();
 
-    Node* number_node = new Node(NUMBER_NODE, "1");
-    Handle number_handle = at.add(number_node);
-    logger().info("[CustomAtomTypesTester] new node: %s (%d)", number_node->toShortString().c_str(), number_handle.value());
+    Handle number_handle = as.addNode(NUMBER_NODE,"1");
+    logger().info("[CustomAtomTypesTester] new node: %s (%d)",
+            as.atomAsString(number_handle).c_str(), number_handle.value());
 
-    Node* foo_node = new Node(FOO_NODE, "foo");
-    Handle foo_handle = at.add(foo_node);
-    logger().info("[CustomAtomTypesTester] new node: %s (%d)", foo_node->toShortString().c_str(), foo_handle.value());
+    Handle foo_handle = as.addNode(FOO_NODE, "foo");
+    logger().info("[CustomAtomTypesTester] new node: %s (%d)",
+            as.atomAsString(foo_handle).c_str(), foo_handle.value());
 
-    Node* bar_node = new Node(BAR_NODE, "bar");
-    Handle bar_handle = at.add(bar_node);
-    logger().info("[CustomAtomTypesTester] new node: %s (%d)", bar_node->toShortString().c_str(), bar_handle.value());
+    Handle bar_handle = as.addNode(BAR_NODE, "bar");
+    logger().info("[CustomAtomTypesTester] new node: %s (%d)",
+            as.atomAsString(bar_handle).c_str(), bar_handle.value());
 
     std::vector<Handle> v;
     v.push_back(foo_handle);
     v.push_back(bar_handle);
-    Link* foobar_link = new Link(FOOBAR_LINK, v);
-    Handle foobar_handle = at.add(foobar_link);
-    logger().info("[CustomAtomTypesTester] new link: %s (%d)", foobar_link->toShortString().c_str(), foobar_handle.value());
+    Handle foobar_handle = as.addLink(FOOBAR_LINK, v);
+    logger().info("[CustomAtomTypesTester] new link: %s (%d)",
+            as.atomAsString(foobar_handle).c_str(), foobar_handle.value());
 
-    Link* list_link = new Link(LIST_LINK, v);
-    Handle list_handle = at.add(list_link);
-    logger().info("[CustomAtomTypesTester] new link: %s (%d)", list_link->toShortString().c_str(), list_handle.value());
+    Handle list_handle = as.addLink(LIST_LINK, v);
+    logger().info("[CustomAtomTypesTester] new link: %s (%d)",
+            as.atomAsString(list_handle).c_str(), list_handle.value());
 }
 
-static void dumpHandleEntry(HandleEntry* he, const char *id)
+static void dumpHandleSeq(HandleSeq& hs, const char *id)
 {
-    for (HandleEntry* it = he; it != NULL; it = it->next) {
-        boost::shared_ptr<Atom> a = server().getAtomSpace()->cloneAtom(it->handle);
-        logger().info("[CustomAtomTypesTester] %s: %s", id, a->toShortString().c_str());
+    foreach( Handle handle, hs) {
+        logger().info("[CustomAtomTypesTester] %s: %s",
+                id, server().getAtomSpace()->atomAsString(handle).c_str());
     }
-    delete he;
 }
 
 void CustomAtomTypesTester::dumpAtoms()
 {
     logger().info("[CustomAtomTypesTester.dumpAtoms]");
-    AtomTable& at = const_cast<AtomTable&>(server().getAtomSpace()->getAtomTable());
-    dumpHandleEntry(at.getHandleSet(BAR_NODE            ), "bar node");
-    dumpHandleEntry(at.getHandleSet(NODE,           true), "node");
-    dumpHandleEntry(at.getHandleSet(FOOBAR_LINK         ), "foobar link");
-    dumpHandleEntry(at.getHandleSet(UNORDERED_LINK, true), "unordered link");
-    dumpHandleEntry(at.getHandleSet(LINK,           true), "link");
+    AtomSpace* as = server().getAtomSpace();
+    HandleSeq hs;
+    as->getHandleSet(back_inserter(hs), BAR_NODE);
+    dumpHandleSeq(hs, "bar node");
+    hs.clear();
+    as->getHandleSet(back_inserter(hs), NODE, true);
+    dumpHandleSeq(hs, "node");
+    hs.clear();
+    as->getHandleSet(back_inserter(hs), FOOBAR_LINK);
+    dumpHandleSeq(hs, "foobar link");
+    hs.clear();
+    as->getHandleSet(back_inserter(hs), UNORDERED_LINK, true);
+    dumpHandleSeq(hs, "unordered link");
+    hs.clear();
+    as->getHandleSet(back_inserter(hs), LINK, true);
+    dumpHandleSeq(hs, "link");
+    hs.clear();
 }
