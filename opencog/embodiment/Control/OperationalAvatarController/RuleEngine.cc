@@ -83,7 +83,7 @@ throw( RuntimeException ) :
         throw RuntimeException( TRACE_INFO,
                                 ( "There is no pet named '"
                                   + petName
-                                  + "' inside AtomTable" ).c_str() );
+                                  + "' inside AtomSpace" ).c_str() );
     } // if
     
     this->util = new RuleEngineUtil( this );

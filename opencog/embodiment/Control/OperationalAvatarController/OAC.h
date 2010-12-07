@@ -127,7 +127,7 @@ private:
     void loadPet(const std::string & petId);
 
     /**
-     * Load the AtomTable and other repositories (TimeServer, SpaceServer,
+     * Load the AtomSpace and other repositories (TimeServer, SpaceServer,
      * ProcedureRepository, etc).  Before invoking this method the
      * SavableRepository objects must be created and registered
      * (this may be done at the constructor).
@@ -239,7 +239,7 @@ public:
     void schemaSelection();
 
     /**
-      * Decays short term importance of all atoms in local AtomTable
+      * Decays short term importance of all atoms in local AtomSpace
       */
     void decayShortTermImportance();
 

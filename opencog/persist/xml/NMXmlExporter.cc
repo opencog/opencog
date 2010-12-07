@@ -46,6 +46,13 @@ std::string NMXmlExporter::toXML(HandleEntry *subset)
     return(toXML(exportable));
 }
 
+std::string NMXmlExporter::toXML(HandleSeq& subset)
+{
+    HandleEntry* subset_he = HandleEntry::fromHandleVector(subset);
+    HandleSet *exportable = findExportables(subset_he);
+    return(toXML(exportable));
+}
+
 HandleSet *NMXmlExporter::findExportables(HandleEntry *seed)
 {
     //Finds the subset.

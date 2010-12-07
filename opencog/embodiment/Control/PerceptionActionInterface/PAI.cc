@@ -277,7 +277,7 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 
     logger().debug("PAI - processPVPMessage.");
 
-    logger().debug("PAI - processPVPMessage atomTable.size=%d", atomSpace.getAtomTable().getSize() );
+    logger().debug("PAI - processPVPMessage atomSpace.size=%d", atomSpace.getSize() );
 
     if (logPVPMessage) {
         logger().info(" PAI - Processing PVP message:\n%s\n", pvpMsg.c_str());

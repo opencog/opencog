@@ -431,8 +431,7 @@ shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
 
 pHandle AtomSpaceWrapper::getHandle(Type t, const string& name) 
 {
-    return realToFakeHandle(atomspace->getAtomTable().getHandle(name.c_str(), t),
-                            NULL_VERSION_HANDLE);
+    return realToFakeHandle(atomspace->getHandle(t,name), NULL_VERSION_HANDLE);
 }
 
 bool AtomSpaceWrapper::equal(const HandleSeq& lhs, const HandleSeq& rhs)

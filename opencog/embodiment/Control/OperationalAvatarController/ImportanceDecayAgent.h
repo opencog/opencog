@@ -62,7 +62,7 @@ public:
     void connectSignals(AtomSpace& as);
 
     /**
-     * Method to receive atom merge signals from AtomTable
+     * Method to receive atom merge signals from AtomSpace
      */
     void atomMerged(Handle h);
 

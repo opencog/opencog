@@ -159,7 +159,7 @@ public:
      * @param agentType The agent type (pet or humanoid)
      * @param agentTraits The agent traits type
      * @param ownerID The SL id of the owner of the pet.*
-     * @param atomSpace A atomSpace with the Pet short memory AtomTable.
+     * @param atomSpace A atomSpace with the Pet short memory.
      */
     Pet(const std::string& petId, const std::string& petName, const std::string&
             agentType, const std::string& agentTraits, const std::string&

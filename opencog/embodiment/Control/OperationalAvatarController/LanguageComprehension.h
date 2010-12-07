@@ -118,7 +118,7 @@ namespace OperationalAvatarController
         void storeFact( void );
 
         /**
-         * Given a list of Frames, stored as a Predicate into the AtomTable,
+         * Given a list of Frames, stored as a Predicate into the AtomSpace,
          * this method will try to convert them into RelEx format and then
          * will call relex2Sentence to try to retrieve an English sentence
          * 

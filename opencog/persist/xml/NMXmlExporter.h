@@ -58,14 +58,20 @@ private:
 
 
     /**
-     * Exports a subset of the AtomTable to XML.
-     * @param The set of Handles to be exported.
+     * Exports a subset of the AtomSpace to XML.
+     * @param hs The set of Handles to be exported.
      *        After the handles are exported
      *        the HandleSet is deleted.
      * @return An string describing the subset of Atoms in XML.
      */
-    std::string toXML(HandleSet  *);
+    std::string toXML(HandleSet* hs);
 
+    /**
+     * Exports a subset of the AtomSpace to XML.
+     * @param hs The HandleSeq of Handles to be exported.
+     * @return An string describing the subset of Atoms in XML.
+     */
+    std::string toXML(HandleSeq& hs);
 
     /**
      * Exports an Atom and the Atoms in its outgoingset.

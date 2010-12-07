@@ -131,7 +131,10 @@ throw (opencog::InvalidParamException, std::bad_exception):
     }
 #endif
 
-    behaviorDescriptions.assign(exporter.toXML(atomSpace.getAtomTable().getHandleSet(ATOM, true)));
+    // why are we assigning the entire atomspace?
+    HandleSeq hs;
+    atomSpace.getHandleSet(back_inserter(hs),ATOM, true);
+    behaviorDescriptions.assign(exporter.toXML(hs));
     logger().debug("LearnMessage - finished creating message (behavior descriptors just added.");
 }
 

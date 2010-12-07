@@ -934,7 +934,6 @@ InitAxiomSet("smalldemo.xml");
 #include <boost/variant/static_visitor.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/foreach.hpp>
-#include "AtomTable.h"
 #include "AtomSpaceWrapper.h"
 
 #include "../core/ClassServer.h"

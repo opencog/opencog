@@ -387,12 +387,12 @@ private:
     boost::asio::io_service service;    
     boost::asio::ip::tcp::resolver::iterator iterator;
 };
-        
 
 
 /**
- * A Network Question Answerer DC will look for unanswered questions into the AtomTable
- * and will use the host service to try to retrieve an answer for a given question.
+ * A Network Question Answerer DC will look for unanswered questions into the
+ * AtomSpace and will use the host service to try to retrieve an answer for
+ * a given question.
  */
 class NetworkQuestionAnswererDialogController : public NetworkDialogController
 {

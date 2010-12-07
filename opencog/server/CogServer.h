@@ -301,6 +301,7 @@ static inline AtomSpace& atomspace(void)
     return const_cast<AtomSpace&>(*cogserver().getAtomSpace());
 }
 
+// TODO/XXX this shouldn't exist
 class AtomTable;
 static inline AtomTable& atomtable(void)
 {

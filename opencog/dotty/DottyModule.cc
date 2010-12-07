@@ -112,7 +112,7 @@ public:
         if (withIncoming) {
             HandleSeq hs = space->getIncoming(h);
             int i = 0;
-            for (Handle h, hs) {
+            foreach (Handle h, hs) {
                 ost << h << "->" << h << " [style=\"dotted\" label=\"" << i << "\"];\n";
                 i++;
             }

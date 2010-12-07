@@ -20,7 +20,7 @@
 ; 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-; Embodiment make use of several AtomTable structures to represent
+; Embodiment make use of several AtomSpace structures to represent
 ; perception signals reveived by its sensors, via Proxy.
 ; Each perception is represented using an EvaluationLink
 ; and a PredicateNode.
