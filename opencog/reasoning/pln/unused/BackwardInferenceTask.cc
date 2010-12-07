@@ -51,7 +51,7 @@ namespace opencog { namespace pln
 BackwardInferenceTask::BackwardInferenceTask(const InferenceTaskParameters& _pars)
 : pars(_pars)
 {
-	puts("BackwardInferenceTask created.");
+    puts("BackwardInferenceTask created.");
 }
 
 BackwardInferenceTask::~BackwardInferenceTask()
@@ -60,19 +60,19 @@ BackwardInferenceTask::~BackwardInferenceTask()
 
 void BackwardInferenceTask::cycle()
 {
-	puts("BackwardInferenceTask cycle()");	
+    puts("BackwardInferenceTask cycle()");  
 
-/*HandleEntry* ret = PLNEvaluator::evaluate(pars);
-	
-	if (ret && ret->handle)
-		printTree( ret->handle );	
-	*/	
-	finished = true;
+/*
+    HandleSeq ret = PLNEvaluator::evaluate(pars);
+    
+    if (ret && ret)
+        printTree( ret );*/
+    finished = true;
 }
 
 void BackwardInferenceTask::finish()
 {
-	puts("BackwardInferenceTask finish()");
+    puts("BackwardInferenceTask finish()");
 }
 
 bool BackwardInferenceTask::ok() { return finished; }
