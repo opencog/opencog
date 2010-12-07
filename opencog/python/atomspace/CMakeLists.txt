@@ -9,13 +9,11 @@ add_library(atomspace_py SHARED
     atom_types_wrap.cc
     Atom_wrap.cc
     AtomSpace_wrap.cc
-    AtomTable_wrap.cc
     AttentionValue_wrap.cc
     ClassServer_wrap.cc
     CompositeTruthValue_wrap.cc
     CountTruthValue_wrap.cc
-	Handle_wrap.cc
-	HandleEntry_wrap.cc
+    Handle_wrap.cc
     IndefiniteTruthValue_wrap.cc
     Link_wrap.cc
     Node_wrap.cc
@@ -35,5 +33,5 @@ set_target_properties(atomspace_py PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )
 INSTALL (TARGETS atomspace_py
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+    LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
