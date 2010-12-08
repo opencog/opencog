@@ -165,9 +165,9 @@ const float IndependenceAssumptionGeometryDiscount = 1.0f;
 
 const float DefaultNodeProbability = 1 / DefaultU;
 
-
 /**
- * 
+ * Returns a clone of the input. Useful for inference rules that
+ * outputs a TV identical to one of its premises.
  */ 
 class TautologyFormula : public Formula<1>
 {

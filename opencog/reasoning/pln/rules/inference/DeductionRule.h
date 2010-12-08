@@ -23,6 +23,7 @@
 #define DEDUCTIONRULE_H
 
 #include <opencog/util/iostreamContainer.h>
+#include "../GenericRule.h"
 
 namespace opencog { namespace pln {
 
@@ -36,17 +37,16 @@ class DeductionRule : public GenericRule<DeductionFormula>
 {
     typedef GenericRule<DeductionFormula> super;
 
-    //DeductionFormula f;
     Type InclusionLink;
 
     meta i2oType(const std::vector<Vertex>& h) const
     {
-        assert(h.size()==2);
+        OC_ASSERT(h.size()==2);
 
-        assert(super::asw->getArity(boost::get<pHandle>(h[0]))==2);
-        assert(super::asw->getArity(boost::get<pHandle>(h[1]))==2);
-        assert(super::asw->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
-        assert(super::asw->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
+        OC_ASSERT(super::asw->getArity(boost::get<pHandle>(h[0]))==2);
+        OC_ASSERT(super::asw->getArity(boost::get<pHandle>(h[1]))==2);
+        OC_ASSERT(super::asw->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
+        OC_ASSERT(super::asw->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
 	
         return meta(new vtree(mva((pHandle)InclusionLink, 
                                          vtree(Vertex(super::asw->getOutgoing(boost::get<pHandle>(h[0]),0))),
@@ -64,7 +64,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
     {
         TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[5];
         
-        assert(premiseArray.size()==2);
+        OC_ASSERT(premiseArray.size()==2);
         
         pHandleSeq nodesAB = super::asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));
         pHandleSeq nodesBC = super::asw->getOutgoing(boost::get<pHandle>(premiseArray[1]));
@@ -75,7 +75,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
                 NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
                 printer.print(_v2h(premiseArray[0]));
                 printer.print(_v2h(premiseArray[1]));
-                assert(equal(nodesAB[1], nodesBC[0]));
+                OC_ASSERT(equal(nodesAB[1], nodesBC[0]));
             }
         
         tvs[0] = (TruthValue*) &(super::asw->getTV(boost::get<pHandle>(premiseArray[0])));
@@ -149,8 +149,6 @@ public:
                                   vtree(CreateVar(super::asw)),
                                   vtree(CreateVar(super::asw))))));
     }
-    
-    NO_DIRECT_PRODUCTION;
 };
         
 }} // namespace opencog { namespace pln {
