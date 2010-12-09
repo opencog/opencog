@@ -108,7 +108,7 @@ LOG(1, "Loading XML Input...");
     L("FreeVariableNode", FW_VARIABLE_NODE);
     L("FW_VariableNode", FW_VARIABLE_NODE);
     L("FWVariableNode", FW_VARIABLE_NODE);
-    L("ExtInhLink", EXTENSIONAL_INHERITANCE_LINK);
+    // L("ExtInhLink", EXTENSIONAL_INHERITANCE_LINK);
     L("And", AND_LINK);
     L("Or", OR_LINK);
     L("Not", NOT_LINK);
