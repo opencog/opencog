@@ -47,7 +47,7 @@ SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw, Type argType)
 
 Rule::setOfMPs SubsetEvalRule::o2iMetaExtra(meta outh,
                                             bool& overrideInputFilter) const {
-    if(!_asw->inheritsType((Type)_v2h(*outh->begin()), SUBSET_LINK))
+    if(!_asw->isSubType(_v2h(*outh->begin()), SUBSET_LINK))
         return setOfMPs();
 
     tree<Vertex>::iterator head_it = outh->begin();

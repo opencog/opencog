@@ -32,8 +32,8 @@ namespace opencog { namespace pln {
 
 Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    if (asw->inheritsType(asw->getType(_v2h(*outh->begin())), FORALL_LINK) ||
-        asw->inheritsType(asw->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (asw->isSubType(_v2h(*outh->begin()), FORALL_LINK) ||
+        asw->isSubType(_v2h(*outh->begin()), FW_VARIABLE_NODE))
         return Rule::setOfMPs();
 
 #if 0

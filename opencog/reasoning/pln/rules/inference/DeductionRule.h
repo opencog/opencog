@@ -42,16 +42,18 @@ class DeductionRule : public GenericRule<DeductionFormula>
     meta i2oType(const std::vector<Vertex>& h) const
     {
         OC_ASSERT(h.size()==2);
-
-        OC_ASSERT(super::asw->getArity(boost::get<pHandle>(h[0]))==2);
-        OC_ASSERT(super::asw->getArity(boost::get<pHandle>(h[1]))==2);
-        OC_ASSERT(super::asw->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
-        OC_ASSERT(super::asw->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
-	
-        return meta(new vtree(mva((pHandle)InclusionLink, 
-                                         vtree(Vertex(super::asw->getOutgoing(boost::get<pHandle>(h[0]),0))),
-                                         vtree(Vertex(super::asw->getOutgoing(boost::get<pHandle>(h[1]),1)))
-                                         )));
+        pHandle AB = _v2h(h[0]);
+        pHandle BC = _v2h(h[1]);
+        OC_ASSERT(super::asw->getArity(AB)==2);
+        OC_ASSERT(super::asw->getArity(BC)==2);
+        pHandle A = super::asw->getOutgoing(AB,0);
+        pHandle C = super::asw->getOutgoing(BC,1);
+        OC_ASSERT(A != PHANDLE_UNDEFINED);
+        OC_ASSERT(C != PHANDLE_UNDEFINED);
+        
+        return meta(new vtree(mva((pHandle)InclusionLink,
+                                  vtree(Vertex(A)),
+                                  vtree(Vertex(C)))));
     }
     
     bool validate2 (Rule::MPs& args) const
@@ -65,21 +67,24 @@ class DeductionRule : public GenericRule<DeductionFormula>
         TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[5];
         
         OC_ASSERT(premiseArray.size()==2);
-        
-        pHandleSeq nodesAB = super::asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));
-        pHandleSeq nodesBC = super::asw->getOutgoing(boost::get<pHandle>(premiseArray[1]));
+
+        pHandle AB = _v2h(premiseArray[0]);
+        pHandle BC = _v2h(premiseArray[1]);
+
+        pHandleSeq nodesAB = super::asw->getOutgoing(AB);
+        pHandleSeq nodesBC = super::asw->getOutgoing(BC);
         
         if (CHECK_ARGUMENT_VALIDITY_FOR_DEDUCTION_RULE && !equal(nodesAB[1], nodesBC[0]))
             {
                 cprintf(0, "Invalid deduction arguments:\n");
                 NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-                printer.print(_v2h(premiseArray[0]));
-                printer.print(_v2h(premiseArray[1]));
+                printer.print(AB);
+                printer.print(BC);
                 OC_ASSERT(equal(nodesAB[1], nodesBC[0]));
             }
         
-        tvs[0] = (TruthValue*) &(super::asw->getTV(boost::get<pHandle>(premiseArray[0])));
-        tvs[1] = (TruthValue*) &(super::asw->getTV(boost::get<pHandle>(premiseArray[1])));
+        tvs[0] = (TruthValue*) &(super::asw->getTV(AB));
+        tvs[1] = (TruthValue*) &(super::asw->getTV(BC));
         tvs[2] = (TruthValue*) &(super::asw->getTV(nodesAB[0]));
         tvs[3] = (TruthValue*) &(super::asw->getTV(nodesAB[1])); //== nodesBC[0]);
         tvs[4] = (TruthValue*) &(super::asw->getTV(nodesBC[1]));
@@ -103,23 +108,17 @@ public:
 
         //! @todo should use real variable for the other input.
 	
-        GenericRule<DeductionFormula>::inputFilter.push_back(meta(
-                                                                  new tree<Vertex>(
-                                                                                   mva((pHandle)InclusionLink,
-                                                                                       mva((pHandle)ATOM),
-                                                                                       mva((pHandle)ATOM)))
-                                                                  ));		
-        GenericRule<DeductionFormula>::inputFilter.push_back(meta(
-                                                                  new tree<Vertex>(
-                                                                                   mva((pHandle)InclusionLink,
-                                                                                       mva((pHandle)ATOM),
-                                                                                       mva((pHandle)ATOM)))
-                                                                  ));		
+        super::inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)InclusionLink,
+                                                               mva((pHandle)ATOM),
+                                                               mva((pHandle)ATOM)))));		
+        super::inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)InclusionLink,
+                                                               mva((pHandle)ATOM),
+                                                               mva((pHandle)ATOM)))));		
     }
     
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
-        if ( !super::asw->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
+        if (!super::asw->isSubType(_v2h(*outh->begin()), InclusionLink))
             return Rule::setOfMPs();
         
         Rule::MPs ret;
@@ -133,8 +132,7 @@ public:
                                                  mva(var)))));
         ret.push_back(BBvtree(new BoundVTree(mva((pHandle)InclusionLink,
                                                  mva(var),
-                                                 tree<Vertex>(outh->last_child(top0))		
-                                                 ))));
+                                                 tree<Vertex>(outh->last_child(top0))))));
         
         overrideInputFilter = true;
         
@@ -150,6 +148,6 @@ public:
                                   vtree(CreateVar(super::asw))))));
     }
 };
-        
+
 }} // namespace opencog { namespace pln {
 #endif // DEDUCTIONRULE_H

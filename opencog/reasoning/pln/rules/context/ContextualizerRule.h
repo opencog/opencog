@@ -24,6 +24,8 @@
 #ifndef _OPENCOG_CONTEXTUALIZERRULE_H
 #define _OPENCOG_CONTEXTUALIZERRULE_H
 
+#include "../GenericRule.h"
+
 namespace opencog { namespace pln {
 
 /**
@@ -39,6 +41,8 @@ namespace opencog { namespace pln {
  * ContextLink <TV>
  *     C
  *     R A B
+ *
+ * @todo this should be generalized for n-ari ANDExt
  *
  * b)
  *

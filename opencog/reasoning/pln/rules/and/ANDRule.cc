@@ -38,14 +38,13 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     
     tree<Vertex>::iterator top = outh->begin();
 
-    if (! (asw->inheritsType(asw->getType(_v2h(*top)), AND_LINK)) ||
-        top.number_of_children() <= 2)  
+    if (! (asw->isSubType(_v2h(*top), AND_LINK)) || top.number_of_children() <= 2)
         return Rule::setOfMPs();
 
     /// This Rule cannot produce nested ANDLinks. Try SimpleANDRule instead.
 
     for (tree<Vertex>::sibling_iterator j = outh->begin(top); j != outh->end(top); j++)
-        if (asw->inheritsType(asw->getType(_v2h(*j)), AND_LINK))
+        if (asw->isSubType(_v2h(*j), AND_LINK))
             return Rule::setOfMPs();
 
     MPs ret;

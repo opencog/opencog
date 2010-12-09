@@ -816,7 +816,7 @@ void weak_atom<Btr<tree<Vertex> > >::apply_bindings()
     AtomSpaceWrapper* asw = GET_ASW;
     for (tree<Vertex>::iterator v = value->begin(); v != value->end(); v++) {
         pHandle *ph = boost::get<pHandle>(&*v);
-        if (ph && (asw->inheritsType((Type)*ph, NODE))) {
+        if (ph && (asw->isSubType(*ph, NODE))) {
             bindingsT::iterator substed = bindings->find(*ph);
             if (substed != bindings->end())
                 *v = Vertex(substed->second);

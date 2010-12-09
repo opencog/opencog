@@ -47,7 +47,7 @@ protected:
     std::vector<BoundVertex> r;
 
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
-        if (!asw->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
+        if (!asw->isSubType(_v2h(*outh->begin()), InclusionLink))
             return Rule::setOfMPs();
 
         Rule::MPs ret;

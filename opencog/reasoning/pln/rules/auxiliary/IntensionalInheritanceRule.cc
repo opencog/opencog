@@ -38,8 +38,7 @@ IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* _asw, T
 }
 
 Rule::setOfMPs IntensionalInheritanceRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
-    if(!asw->inheritsType((Type)_v2h(*outh->begin()),
-                          INTENSIONAL_INHERITANCE_LINK))
+    if(!asw->isSubType(_v2h(*outh->begin()), INTENSIONAL_INHERITANCE_LINK))
         return setOfMPs();
 
     tree<Vertex>::iterator head_it = outh->begin();

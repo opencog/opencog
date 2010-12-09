@@ -282,9 +282,9 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
     // or FORALL_LINK
     //! @todo This should be done for all quantifiers
     //! (put into a isQuantifier() method)
-    post_generalize_type = asw->inheritsType((Type)(_v2h(*target_it)), BIND_LINK)
+    post_generalize_type = asw->isSubType(_v2h(*target_it), BIND_LINK)
                                     ? BIND_LINK
-                                    : asw->inheritsType((Type)(_v2h(*target_it)), FORALL_LINK)
+                                    : asw->isSubType(_v2h(*target_it), FORALL_LINK)
                                         ? FORALL_LINK
                                         : 0;
     if (post_generalize_type) {
