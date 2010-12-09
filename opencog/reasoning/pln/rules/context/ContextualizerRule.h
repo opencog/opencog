@@ -25,6 +25,7 @@
 #define _OPENCOG_CONTEXTUALIZERRULE_H
 
 #include "../GenericRule.h"
+#include "../../formulas/Formulas.h"
 
 namespace opencog { namespace pln {
 

@@ -43,7 +43,7 @@ Vertex CreateVar(iAtomSpaceWrapper* asw, const std::string& varname);
  */
 Vertex CreateVar(iAtomSpaceWrapper* asw);
 
-Rule::setOfMPs makeSingletonSet(Btr<Rule::MPs> mp);
+Rule::setOfMPs makeSingletonSet(const Rule::MPs& mp);
 
 BBvtree atomWithNewType(Handle h, Type T, AtomSpaceWrapper* asw);
 BBvtree atomWithNewType(const tree<Vertex>& v, Type T, AtomSpaceWrapper* asw);

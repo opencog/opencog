@@ -52,9 +52,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
         OC_ASSERT(A != PHANDLE_UNDEFINED);
         OC_ASSERT(C != PHANDLE_UNDEFINED);
         
-        return meta(new vtree(mva((pHandle)InclusionLink,
-                                  vtree(Vertex(A)),
-                                  vtree(Vertex(C)))));
+        return meta(new vtree(mva((pHandle)InclusionLink, mva(A), mva(C))));
     }
     
     bool validate2 (Rule::MPs& args) const
@@ -129,11 +127,11 @@ public:
         Vertex var = CreateVar(super::asw);
 	
         ret.push_back(BBvtree(new BoundVTree(mva((pHandle)InclusionLink,
-                                                 tree<Vertex>(outh->begin(top0)),
+                                                 vtree(outh->begin(top0)),
                                                  mva(var)))));
         ret.push_back(BBvtree(new BoundVTree(mva((pHandle)InclusionLink,
                                                  mva(var),
-                                                 tree<Vertex>(outh->last_child(top0))))));
+                                                 vtree(outh->last_child(top0))))));
         
         overrideInputFilter = true;
         

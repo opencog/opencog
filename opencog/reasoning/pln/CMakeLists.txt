@@ -52,6 +52,9 @@ ADD_LIBRARY (pln SHARED
 	rules/convert/Equi2ImpRule.cc
 	rules/simsubst/SimSubstRule2.cc
 	rules/simsubst/SimSubstRule1.cc
+	rules/simsubst/SimSubstRule1.cc
+#	rules/context/ContextualizerRule.cc
+#	rules/context/DecontextualizerRule.cc
 # Utils
 	utils/Grim.cc
 #	utils/XMLNode.cc
@@ -63,7 +66,7 @@ ADD_LIBRARY (pln SHARED
 	# convert to OpenCog specific class:
 	#TimeStamp.cc
 	#spacetime.cc
-		ASSOC
+	ASSOC
 )
 
 INCLUDE_DIRECTORIES (
@@ -159,6 +162,8 @@ INSTALL (FILES
 	rules/and/ANDRuleSimple.h
 	rules/and/ANDRule.h
 	rules/and/ANDPartitionRule.h
+#	rules/context/ContextualizerRule.h
+#	rules/context/DecontextualizerRule.h
 	AtomSpaceWrapper.h
 #	utils/XMLNodeLoader.h
 	utils/fim.h

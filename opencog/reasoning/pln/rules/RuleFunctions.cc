@@ -24,6 +24,7 @@
 
 #include "Rule.h"
 #include "Rules.h"
+#include "RuleFunctions.h"
 #include "../AtomSpaceWrapper.h"
 #include "../PLNatom.h"
 #include "../BackInferenceTreeNode.h"
@@ -77,7 +78,7 @@ Vertex CreateVar(iAtomSpaceWrapper* asw)
     return CreateVar(asw, "$"+GetRandomString(10));
 }
 
-Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
+Rule::setOfMPs makeSingletonSet(const Rule::MPs& mp)
 {
     return make_singleton_set<Rule::setOfMPs>(mp);
 }

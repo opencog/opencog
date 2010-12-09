@@ -29,8 +29,6 @@
 
 namespace opencog { namespace pln {
 
-Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
-
 template<typename FormulaType>
 class Link2LinkRule : public GenericRule<FormulaType>
 {

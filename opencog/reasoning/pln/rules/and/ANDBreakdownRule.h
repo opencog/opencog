@@ -27,8 +27,6 @@
 
 namespace opencog { namespace pln {
 
-Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
-
 /// Produces A given an ANDLink containing A (and N other Atoms)
 /// You want multiple copies of this Rule, for different N.
 class ANDBreakdownRule : public Rule

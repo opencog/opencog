@@ -23,6 +23,7 @@
 #define RULEAPP_H
 
 #include "Rule.h"
+#include "RuleFunctions.h"
 #include <opencog/atomspace/Atom.h>
 
 /**
@@ -72,12 +73,6 @@ one to $1). Etc.
 */
 
 namespace opencog { namespace pln {
-
-class RuleApp;
-
-Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
-
-//typedef boost::variant<vtree, RuleApp*> VtreeProvider;
 
 struct VtreeProvider
 {
