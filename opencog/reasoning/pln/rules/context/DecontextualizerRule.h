@@ -1,0 +1,81 @@
+/** DecontextualizerRule.h --- 
+ *
+ * Copyright (C) 2010 Nil Geisweiller
+ *
+ * Author: Nil Geisweiller <nilg@laptop>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+
+#ifndef _OPENCOG_DECONTEXTUALIZERRULE_H
+#define _OPENCOG_DECONTEXTUALIZERRULE_H
+
+#include "../GenericRule.h"
+#include "../../formulas/Formulas.h"
+
+namespace opencog { namespace pln {
+
+/**
+ * Rule to turn contextual knowledge into non contextual knowledge
+ *
+ * More specifically apply the following inference
+ * a)
+ *
+ * ContextLink <TV>
+ *     C
+ *     R A B
+ * |-
+ * R <TV>
+ *     C ANDLink A
+ *     C ANDLink B
+ *
+ * @todo this should be generalized for n-ari ANDLink. Also it is
+ * assumed that both C, B and A are Nodes, which might be too
+ * constraining in the future
+ *
+ * b)
+ *
+ * ContextLink <TV>
+ *     C
+ *     A
+ * |-
+ * SubsetLink <TV>
+ *     C
+ *     A
+ *
+ * where A is a Node. that is because
+ *
+ * A <TV> is equivalent to
+ *
+ * SubsetLink <TV> Universe A
+ *
+ * the rest follows from a).
+ */
+class DecontextualizerRule : public GenericRule<IdentityFormula>
+{
+    meta i2oType(const std::vector<Vertex>& h) const;
+    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
+                               int* newN) const;
+public:
+    DecontextualizerRule(AtomSpaceWrapper* _asw);
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    meta targetTemplate() const;
+};
+
+}} // namespace opencog { namespace pln {
+
+#endif // _OPENCOG_DECONTEXTUALIZERRULE_H

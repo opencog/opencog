@@ -53,8 +53,8 @@ ADD_LIBRARY (pln SHARED
 	rules/simsubst/SimSubstRule2.cc
 	rules/simsubst/SimSubstRule1.cc
 	rules/simsubst/SimSubstRule1.cc
-#	rules/context/ContextualizerRule.cc
-#	rules/context/DecontextualizerRule.cc
+	rules/context/ContextualizerRule.cc
+	rules/context/DecontextualizerRule.cc
 # Utils
 	utils/Grim.cc
 #	utils/XMLNode.cc
@@ -162,8 +162,8 @@ INSTALL (FILES
 	rules/and/ANDRuleSimple.h
 	rules/and/ANDRule.h
 	rules/and/ANDPartitionRule.h
-#	rules/context/ContextualizerRule.h
-#	rules/context/DecontextualizerRule.h
+	rules/context/ContextualizerRule.h
+	rules/context/DecontextualizerRule.h
 	AtomSpaceWrapper.h
 #	utils/XMLNodeLoader.h
 	utils/fim.h
