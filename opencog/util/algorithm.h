@@ -164,6 +164,15 @@ Set set_difference(const Set& s1, const Set& s2) {
     return res;
 }
 
+// return s1 inter s2
+template<typename Set>
+Set set_intersection(const Set& s1, const Set& s2) {
+    Set res;
+    std::set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(),
+                          std::inserter(res, res.begin()));
+    return res;
+}
+
 //Predicate maps to the range [0,n)
 //n-1 values (the pivots) are copied to out
 template<typename It, typename Pred, typename Out>
