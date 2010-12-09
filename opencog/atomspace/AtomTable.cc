@@ -55,6 +55,9 @@ AtomTable::AtomTable(bool dsa)
 {
     useDSA = dsa;
     size = 0;
+    std::cout<< atomSet.max_load_factor() << std::endl;
+    atomSet.max_load_factor(100.0f);
+    std::cout<< atomSet.max_load_factor() << std::endl;
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&iteratorsLock, NULL);
@@ -715,6 +718,24 @@ void AtomTable::unlockIterators()
 #endif
 }
 
+Handle AtomTable::getRandom(RandGen *rng) const
+{
+    size_t x = rng->randint(getSize());
+    size_t b;
+    for(b=0; b<atomSet.bucket_count(); b++) {
+      if(x < atomSet.bucket_size(b)) {
+        break;
+      } else
+        x -= atomSet.bucket_size(b);
+    }
+    boost::unordered_set<const Atom*>::const_local_iterator l = atomSet.begin(b);
+    while(x>0) {
+      l++;
+      assert(l!=atomSet.end(b));
+      x--;
+    }
+    return (*l)->handle;
+}
 
 HandleIterator* AtomTable::getHandleIterator()
 {

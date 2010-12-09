@@ -48,6 +48,7 @@
 #include <opencog/atomspace/TargetTypeIndex.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/RandGen.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
 
@@ -574,6 +575,13 @@ public:
      * @return True if the removal operation was successful. False, otherwise.
      */
     bool remove(Handle, bool recursive = false);
+
+
+    /**
+     * Return a random atom in the AtomTable.
+     * @note Uses the atomSet buckets to provide reasonbly quick look-up.
+     */
+    Handle getRandom(RandGen* rng) const;
 
     /**
      * Decays importance of all atoms in the table, reindexing

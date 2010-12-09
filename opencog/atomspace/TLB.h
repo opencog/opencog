@@ -48,6 +48,7 @@ class TemporalTableUTest;
 class TimeServerUTest;
 class BasicSaveUTest;
 class BasicSCMUTest;
+class AtomSpaceBenchmark;
 
 namespace opencog
 {
@@ -91,6 +92,7 @@ class TLB
     friend class ::TemporalTableUTest;
     friend class ::TimeServerUTest;
     friend class ::CompositeTruthValueUTest;
+    friend class AtomSpaceBenchmark;
 
     // TODO work out if TLB can be removed from these persistance
     // related classes
