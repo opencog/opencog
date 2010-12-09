@@ -170,8 +170,6 @@
 	(apply cog-new-node (append (list 'SemeNode) x)))
 (define (SemanticRelationNode . x)
 	(apply cog-new-node (append (list 'SemanticRelationNode) x)))
-(define (ContextNode . x)
-	(apply cog-new-node (append (list 'ContextNode) x)))
 (define (AGISIMSoundNode . x)
 	(apply cog-new-node (append (list 'AGISIMSoundNode) x)))
 (define (AGISIMTasteNode . x)
