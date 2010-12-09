@@ -79,9 +79,7 @@ Vertex CreateVar(iAtomSpaceWrapper* asw)
 
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
 {
-    Rule::setOfMPs ret;
-    ret.insert(mp);
-    return ret;
+    return make_singleton_set<Rule::setOfMPs>(mp);
 }
 
 // Redundant, hopefully:

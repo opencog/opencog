@@ -157,7 +157,7 @@ private:
 template<typename Container>
 push_output_iterator<Container> pusher(Container& c)
 {
-    return   push_output_iterator<Container>(c);
+    return push_output_iterator<Container>(c);
 }
 
 //an output iterator that inserts into a container (without a hint)

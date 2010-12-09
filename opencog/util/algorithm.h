@@ -155,6 +155,16 @@ bool has_empty_intersection(const Set& ls, const Set& rs) {
                                   ls.key_comp());
 }
 
+/**
+ * return a singleton set with the input given in it
+ */
+template<typename Set>
+Set make_singleton_set(const typename Set::value_type& v) {
+    Set ret;
+    ret.insert(v);
+    return ret;
+}
+
 // returns s1 - s2
 template<typename Set>
 Set set_difference(const Set& s1, const Set& s2) {

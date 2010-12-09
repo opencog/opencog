@@ -23,6 +23,7 @@
 #define DEDUCTIONRULE_H
 
 #include <opencog/util/iostreamContainer.h>
+#include <opencog/util/algorithm.h>
 #include "../GenericRule.h"
 
 namespace opencog { namespace pln {
@@ -138,7 +139,7 @@ public:
         
         return makeSingletonSet(ret);
     }
-   
+
     meta targetTemplate() const
     {
         // Using FWVars rather than ATOM is potentially less efficient, but
