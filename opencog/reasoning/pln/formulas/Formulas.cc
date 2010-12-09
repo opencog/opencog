@@ -141,8 +141,8 @@ namespace pln {
 
 
 //===========================================================================//
-TruthValue* TautologyFormula::simpleCompute(TruthValue** TV,
-                                            int N, long U) const
+TruthValue* IdentityFormula::simpleCompute(TruthValue** TV,
+                                           int N, long U) const
 {
     assert(N > 0);
     return TV[0]->clone();

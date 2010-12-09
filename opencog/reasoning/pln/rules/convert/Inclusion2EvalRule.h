@@ -25,11 +25,11 @@
 namespace opencog { namespace pln {
 
 template<Type LinkType>
-class Inclusion2EvalRule : public GenericRule<TautologyFormula>
+class Inclusion2EvalRule : public GenericRule<IdentityFormula>
 {
 public:
     Inclusion2EvalRule(AtomSpaceWrapper *_asw)
-	: GenericRule<TautologyFormula>(_asw,false)
+	: GenericRule<IdentityFormula>(_asw,false)
     {
         inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(LinkType))));
     }

@@ -24,7 +24,7 @@
 
 namespace opencog { namespace pln {
 
-class Inh2EvalRule : public GenericRule<TautologyFormula>
+class Inh2EvalRule : public GenericRule<IdentityFormula>
 {
 protected:
     mutable std::vector<Type> ti;
@@ -32,7 +32,7 @@ protected:
 public:
     bool validate2(Rule::MPs& args) const { return true; }
     Inh2EvalRule(AtomSpaceWrapper *_asw)
-	: GenericRule<TautologyFormula>(_asw,false,"")
+	: GenericRule<IdentityFormula>(_asw,false,"")
     {
         GenericRule<FormulaType>::name = "Inh2Eval";
         GenericRule<FormulaType>::inputFilter.push_back(meta(

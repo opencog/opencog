@@ -169,7 +169,7 @@ const float DefaultNodeProbability = 1 / DefaultU;
  * Returns a clone of the input. Useful for inference rules that
  * outputs a TV identical to one of its premises.
  */ 
-class TautologyFormula : public Formula<1>
+class IdentityFormula : public Formula<1>
 {
 public:
     TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;

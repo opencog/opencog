@@ -24,11 +24,11 @@
 
 namespace opencog { namespace pln {
 
-class Eval2MemRule : public GenericRule<TautologyFormula>
+class Eval2MemRule : public GenericRule<IdentityFormula>
 {
 public:
     Eval2MemRule(AtomSpaceWrapper *_asw)
-	: GenericRule<TautologyFormula>(_asw, false)
+	: GenericRule<IdentityFormula>(_asw, false)
     {
         inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EVALUATION_LINK))));
     }

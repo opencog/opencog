@@ -35,18 +35,18 @@ namespace opencog { namespace pln {
  * a)
  *
  * R <TV>
- *     C ANDExt A
- *     C ANDExt B
+ *     C ANDLink A
+ *     C ANDLink B
  * |-
  * ContextLink <TV>
  *     C
  *     R A B
  *
- * @todo this should be generalized for n-ari ANDExt
+ * @todo this should be generalized for n-ari ANDLink
  *
  * b)
  *
- * ExtensionalInheritanceLink <TV>
+ * SubsetLink <TV>
  *     C
  *     A
  * |-
@@ -58,11 +58,11 @@ namespace opencog { namespace pln {
  *
  * A <TV> is equivalent to
  *
- * ExtensionalInheritanceLink <TV> Universe A
+ * SubsetLink <TV> Universe A
  *
  * the rest follows from a).
  */
-class ContextualizerRule : public GenericRule<TautologyFormula>
+class ContextualizerRule : public GenericRule<IdentityFormula>
 {
     meta i2oType(const std::vector<Vertex>& h) const;
     TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,

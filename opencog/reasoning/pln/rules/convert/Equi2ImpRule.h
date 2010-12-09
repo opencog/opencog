@@ -24,12 +24,12 @@
 
 namespace opencog { namespace pln {
 
-class Equi2ImpRule : public GenericRule<TautologyFormula>
+class Equi2ImpRule : public GenericRule<IdentityFormula>
 {
 public:
     /// "A<=>B" => "AND(A=>B, B=>A)"
     Equi2ImpRule(AtomSpaceWrapper *_asw)
-        : GenericRule<TautologyFormula>(_asw, false, "Equi2ImpRule")
+        : GenericRule<IdentityFormula>(_asw, false, "Equi2ImpRule")
     {
         //inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EQUIVALENCE_LINK))));
         inputFilter.push_back(meta(new vtree(
