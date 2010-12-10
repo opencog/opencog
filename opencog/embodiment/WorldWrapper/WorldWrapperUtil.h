@@ -133,6 +133,22 @@ private:
                              );
 
     /**
+     * Return the value for the given Demand within the AtomSpace.
+     * Modulator not presented in AtomSpace will return -1.
+     *
+     * @param atomSpace The AtomSpace where to look for the Modulator.
+     * @param modulator The Demand name, which is defined in "PredefinedProcedureNames.h" 
+     *                  in AtomSpace folder.
+     * @param self_id   ID of the Pet itself.
+     * @param time      The current timestamp, which is used for cache searching. 
+     */
+    static float getDemand(const AtomSpace & atomSpace,
+                           const std::string & demand,
+                           const std::string & self_id,
+                           unsigned long time
+                          );
+
+    /**
      * Return the value for the a emotional feeling or trait stored within
      * the atomSpace. The feeling or trait whose value is to be retrieved is
      * presented in the combo tree representation.

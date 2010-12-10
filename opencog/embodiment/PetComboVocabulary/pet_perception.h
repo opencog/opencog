@@ -79,11 +79,20 @@ enum pet_perception_enum {
     has_something_to_say,
 
     // Modulators
-    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-11-24)
-    get_activation,
-    get_resolution,
-    get_certainty,
-    get_selection_threshold,
+    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)
+    get_activation_modulator,
+    get_resolution_modulator,
+    get_certainty_modulator,
+    get_selection_threshold_modulator,
+
+    // Demands
+    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)
+    get_energy_demand, 
+    get_water_demand, 
+    get_integrity_demand, 
+    get_affiliation_demand, 
+    get_certainty_demand, 
+    get_competence_demand, 
 
     // traits
     get_aggressiveness,
@@ -205,11 +214,20 @@ static const perception_basic_description pbd[] = {
     { id::has_something_to_say,          "has_something_to_say",          "->(union(definite_object indefinite_object) boolean)" },
 
     // Modulators
-    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-03)
-    { id::get_activation, "get_activation", "contin"},
-    { id::get_resolution, "get_resolution", "contin"},
-    { id::get_certainty,  "get_certainty",  "contin"},
-    { id::get_selection_threshold, "get_selection_threshold", "contin"},
+    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)
+    { id::get_activation_modulator, "get_activation_modulator", "contin"},
+    { id::get_resolution_modulator, "get_resolution_modulator", "contin"},
+    { id::get_certainty_modulator,  "get_certainty_modulator",  "contin"},
+    { id::get_selection_threshold_modulator, "get_selection_threshold_modulator", "contin"},
+
+    // Demands
+    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)
+    { id::get_energy_demand, "get_energy_demand", "contin"}, 
+    { id::get_water_demand, "get_water_demand", "contin"}, 
+    { id::get_integrity_demand, "get_integrity_demand", "contin"}, 
+    { id::get_affiliation_demand, "get_affiliation_demand", "contin"}, 
+    { id::get_certainty_demand, "get_certainty_demand", "contin"}, 
+    { id::get_competence_demand, "get_competence_demand", "contin"}, 
 
     { id::get_aggressiveness,   "get_aggressiveness",   "->(union(definite_object indefinite_object) contin)"},
     { id::get_curiosity,        "get_curiosity",     "->(union(definite_object indefinite_object) contin)"},
@@ -298,11 +316,20 @@ static const perception_property_description ppd[] = {
     { id::has_something_to_say, false,   false,     false,      false,    false,    false },
 
     // Modulators
-    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-11-24)  
-    { id::get_activation,           false,    false,    false,    false,   false,   false },
-    { id::get_resolution,           false,    false,    false,    false,   false,   false },
-    { id::get_certainty,            false,    false,    false,    false,   false,   false },
-    { id::get_selection_threshold,  false,    false,    false,    false,   false,   false },
+    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)  
+    { id::get_activation_modulator,          false,  false,  false,  false, false, false },
+    { id::get_resolution_modulator,          false,  false,  false,  false, false, false },
+    { id::get_certainty_modulator,           false,  false,  false,  false, false, false },
+    { id::get_selection_threshold_modulator, false,  false,  false,  false, false, false },
+
+    // Demands
+    // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)  
+    { id::get_energy_demand,       false,    false,    false,    false,   false,   false }, 
+    { id::get_water_demand,        false,    false,    false,    false,   false,   false }, 
+    { id::get_integrity_demand,    false,    false,    false,    false,   false,   false }, 
+    { id::get_affiliation_demand,  false,    false,    false,    false,   false,   false }, 
+    { id::get_certainty_demand,    false,    false,    false,    false,   false,   false }, 
+    { id::get_competence_demand,   false,    false,    false,    false,   false,   false }, 
 
     { id::get_aggressiveness,   false,   false,     false,      false,    false,    false },
     { id::get_curiosity,        false,   false,     false,      false,    false,    false },

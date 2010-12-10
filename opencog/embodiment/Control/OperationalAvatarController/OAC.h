@@ -5,7 +5,7 @@
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
- * Updated: By Zhenhua Cai, on 2010-12-03
+ * Updated: By Zhenhua Cai, on 2010-12-08
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -119,6 +119,7 @@ private:
     ActionSelectionAgent* actionSelectionAgent;
     EntityExperienceAgent* entityExperienceAgent;
     PsiModulatorUpdaterAgent* psiModulatorUpdaterAgent;
+    PsiDemandUpdaterAgent* psiDemandUpdaterAgent;
 
     RuleEngine* ruleEngine;
 
@@ -270,6 +271,7 @@ public:
     SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
     SingletonFactory<EntityExperienceAgent, Agent> entityExperienceAgentFactory;
     SingletonFactory<PsiModulatorUpdaterAgent, Agent> psiModulatorUpdaterAgentFactory;
+    SingletonFactory<PsiDemandUpdaterAgent, Agent> psiDemandUpdaterAgentFactory;
 
 }; // class
 }  // namespace

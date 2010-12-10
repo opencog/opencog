@@ -1,0 +1,55 @@
+#
+# Demand updaters
+#
+# @author Zhenhua Cai czhedu@gmail.com
+# @date   2010-12-10
+#
+# Note: Some tricks about combo scripts
+#     1. There cannot be any whitespaces between operator and (
+#     2. There is no '-' operator, it is the default type of an unrecognized string.
+#        So for -x you must write *(-1 x). 
+#        But if you want you could define a procedure neg(1) := *(-1 #1) under
+#        scripts/embodiment/stdlib.combo
+#     3. The best doc about Combo is doc/comboreduct/ComboReduct.pdf in the OpenCog project
+#     4. You should avoid infinitely great number in Combo
+
+
+# The script below is only for test. 
+#
+# For real OpenPsi, it would be much more complex. Such as the example provided by Nil:
+#
+#     EnergyDemandSchema = (FoodIntake - MovementAmount) + EnergyDemandValue * 0.9
+#
+# Where EnergyDemandValue is obviously the value of EnergyDemandSchema 
+# calculated at the previous cycle
+
+EnergyDemandUpdater(0) :=
+    +( *( get_energy_demand rand )
+       rand 
+     )
+
+WaterDemandUpdater(0) :=
+    +( *( get_water_demand rand )
+       rand
+     )
+
+IntegrityDemandUpdater(0) :=
+    +( *( get_integrity_demand rand )
+       rand
+     )
+
+AffiliationDemandUpdater(0) :=
+    +( *( get_affiliation_demand rand )
+       rand
+     )
+
+
+CertaintyDemandUpdater(0) :=
+    +( *( get_certainty_demand rand )
+       rand
+     )
+
+CompetenceDemandUpdater(0) :=
+    +( *( get_competence_demand rand )
+       rand
+     )

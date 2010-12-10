@@ -2,7 +2,7 @@
 ; @file embodiment/rules_core.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2010-11-25
+; @date   2010-12-09
 ;
 ; Scheme core functions for adding Modulators, Demands and Rules etc. into AtomSpace
 ;
@@ -55,7 +55,12 @@
 ;         ListLink
 ;             NumberNode: min_acceptable_value
 ;             NumberNode: max_acceptable_value
-;             NumberNode: demand_value
+;             SimilarityLink (stv 1.0 1.0)
+;                 NumberNode: "demand_value"
+;                 ExecutionOutputLink
+;                     GroundedSchemaNode: "demand_schema_name"
+;                     ListLink
+;                         PET_HANDLE
 ;
 ;==============================================================================
 ;
@@ -304,7 +309,7 @@
          ; save the Handle to list 
          (set! modulator_list
                (assoc-set! modulator_list modulator_name handle_created)  
-         )set!
+         );set!
 
          handle_created ; return the Handle
     );let
@@ -350,7 +355,7 @@
          ; save the Handle to list 
          (set! demand_schema_list         
                (assoc-set! demand_schema_list demand_name handle_created) 
-         )set!
+         );set!
 
          handle_created ; return the Handle
    );let
@@ -358,7 +363,7 @@
 
 ;==============================================================================
 ; 
-; Add DemandGoal given demand_name, min_value, max_value and default_value
+; Add DemandGoal given demand_name, min_value, max_value and DemandSchema
 ; The PredicateNode added is usually named after demand_name with "Goal" suffix
 ;
 ; DemandGoal is represented as:
@@ -377,9 +382,10 @@
 ;                 NumberNode: "demand_value"
 ;                 ExecutionOutputLink
 ;                     GroundedSchemaNode: "demand_schema_name"
-;
+;                     ListLink
+;                         PET_HANDLE
 
-(define (add_demand_goal demand_name min_acceptable_value max_acceptable_value default_value)
+(define (add_demand_goal demand_name min_acceptable_value max_acceptable_value)
     (let* (
             (handle_created (list) )    
             (demand_name (string-trim-both demand_name) )
@@ -417,7 +423,7 @@
                                               (DEFAULT_STV) (DEFAULT_AV) 
                                   )
                                   demand_schema_handle
-                              )
+                              );ListLink
                           );EvaluationLink
                       );EquivalenceLink
                   );set!
@@ -425,7 +431,7 @@
                   ; save the Handle
                   (set! demand_goal_list
                         (assoc-set! demand_goal_list demand_name handle_created) 
-                  )set!
+                  );set!
               );begin
           );if
 

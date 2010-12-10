@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Welter Luigi
  *
- * Updated: by ZhenhuaCai, on 2010-11-25
+ * Updated: by ZhenhuaCai, on 2010-12-09
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -139,6 +139,22 @@ public:
                                           const std::string & modulator, 
                                           const std::string & petId
                                          );
+    /**
+     * Returns the current level of the given Demand.
+     *
+     * If the Demand does not exist on AtomSpace or some problem occurs when invoked,
+     * this method will return -1
+     *
+     * @param AtomSpace The AtomSpace
+     * @param demand    Name of the Demand wanted
+     * @param petId     Pet's name(id)
+     *
+     * @return float    The current level of a given Demand
+     */ 
+    static float getCurrentDemandLevel(const AtomSpace & atomSpace, 
+                                       const std::string & demand, 
+                                       const std::string & petId
+                                      );
 
     /**
      * Returns a pointer to the most recent evaluation link. With the given name of the
@@ -798,7 +814,50 @@ public:
     static Handle getModulatorSimilarityLink(const AtomSpace & atomSpace,
                                              const std::string & modulator, 
                                              const std::string & petId);
+    /**
+     * Return the Handle of SimilarityLink that holds DemandUpdater
+     *
+     * The format of a DemandSchema stored in AtomSpace is:
+     *
+     * SimilarityLink
+     *     NumberNode: "demand_value"
+     *     ExecutionOutputLink
+     *         GroundSchemaNode: demandUpdater
+     *         ListLink 
+     *             PET_HANDLE
+     */
+    static Handle getDemandSimilarityLink(const AtomSpace & atomSpace,
+                                          const std::string & demand, 
+                                          const std::string & petId);
 
+    /**
+     * Return the Handle of SimilarityLink that holds DemandUpdater
+     *
+     * The format of a DemandGoal stored in AtomSpace is:
+     *
+     * SimultaneousEquivalenceLink
+     * EvaluationLink
+     *     PredicateNode: "demand_name_goal" 
+     *                    (SimpleTruthValue indicates how well the demand is satisfied)
+     *                    (ShortTermInportance indicates the urgency of the demand)
+     * EvaluationLink
+     *     GroundedPredicateNode: "FuzzyWithin"
+     *     ListLink
+     *         NumberNode: "min_acceptable_value"
+     *         NumberNode: "max_acceptable_value"
+     *         SimilarityLink (stv 1.0 1.0)
+     *             NumberNode: "demand_value"
+     *             ExecutionOutputLink
+     *                 GroundedSchemaNode: "demand_schema_name"
+     *                 ListLink
+     *                     PET_HANDLE
+     *
+     */
+    static Handle getDemandSimultaneousEquivalenceLink (const AtomSpace & atomSpace, 
+                                                        const std::string & demand, 
+                                                        const std::string & petId);
+
+            
     /**
      * Return the schema strength for the given rule. This strength is stored as
      * the truth value of the ImplicationLink between the rule precondition and

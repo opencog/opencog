@@ -5,7 +5,7 @@
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
- * Updated: by Zhenhua Cai, on 2010-12-05
+ * Updated: by Zhenhua Cai, on 2010-12-10
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -786,10 +786,9 @@ float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
     float errorValue = -1.0;   // If error happens, return this value anyway.
 
     // Get the SimilarityLink of the Modulator with petId
-    Handle modulatorHandle =  AtomSpaceUtil::getModulatorSimilarityLink
-                                                 ( atomSpace,
-                                                   modulator, 
-                                                   petId); 
+    Handle modulatorHandle =  AtomSpaceUtil::getModulatorSimilarityLink( atomSpace,
+                                                                         modulator, 
+                                                                         petId); 
 
     if ( modulatorHandle == Handle::UNDEFINED ) {
         logger().error( 
@@ -819,8 +818,8 @@ float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
         if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
 
             logger().error( "AtomSpaceUtil::%s - Could not find any NumberNode in the outgoing set of SimilarityLink for '%s'",
-                        __FUNCTION__, 
-                        modulator.c_str()
+                            __FUNCTION__, 
+                            modulator.c_str()
                           );
 
             return errorValue;
@@ -828,6 +827,58 @@ float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
     }// if
 
     // Return the Modulator value
+    return boost::lexical_cast<float> ( atomSpace.getName(numberNode) );
+}
+
+float AtomSpaceUtil::getCurrentDemandLevel(const AtomSpace & atomSpace,
+                                           const std::string & demand,
+                                           const std::string & petId
+                                          )
+{
+    float errorValue = -1.0;   // If error happens, return this value anyway.
+
+    // Get the SimilarityLink of the Demand with petId
+    Handle demandHandle =  AtomSpaceUtil::getDemandSimilarityLink( atomSpace,
+                                                                   demand, 
+                                                                   petId); 
+
+    if ( demandHandle == Handle::UNDEFINED ) {
+        logger().error( 
+                   "AtomSpaceUtil::%s - Failed to get the Handle (SimilarityLink) to %s.",
+                    __FUNCTION__, 
+                    demand.c_str()
+                      );
+ 
+        return errorValue;
+    }
+
+    // Get the Handle to NumberNode
+    //
+    // Since SimilarityLink inherits from UnorderedLink, you can NOT use the following 
+    // code to get the NumberNode. 
+    // Because when you creating an UnorderedLink, it will sort its Outgoing set
+    // automatically ("./atomspace/Link.cc", Link::setOutgoingSet method)
+    //
+    // Handle numberNode = atomSpace.getOutgoing(demandHandle, 0); // Wrong!
+    
+    Handle numberNode = atomSpace.getOutgoing(demandHandle, 0); 
+    
+    if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
+        
+        numberNode = atomSpace.getOutgoing(demandHandle, 1);    
+
+        if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
+
+            logger().error( "AtomSpaceUtil::%s - Could not find any NumberNode in the outgoing set of SimilarityLink for '%s'",
+                            __FUNCTION__, 
+                            demand.c_str()
+                          );
+
+            return errorValue;
+        }
+    }// if
+
+    // Return the Demand value
     return boost::lexical_cast<float> ( atomSpace.getName(numberNode) );
 }
 
@@ -1933,6 +1984,344 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(const AtomSpace & atomSpace,
     }// if
 
     return similarityLink;
+}
+
+Handle AtomSpaceUtil::getDemandSimilarityLink( const AtomSpace & atomSpace,  
+                                               const std::string & demand, 
+                                               const std::string & petId )
+{
+    // Format of DemandSchema
+    //
+    // SimilarityLink (stv 1.0 1.0)
+    //     NumberNode: "demand_value"
+    //     ExecutionOutputLink
+    //         GroundedSchemaNode: "demand_schema_name"
+    //         ListLink
+    //             PET_HANDLE
+    //
+
+    // Get the Handle to Pet
+    Handle petHandle = AtomSpaceUtil::getAgentHandle(atomSpace, petId);
+
+    if (petHandle == Handle::UNDEFINED) {
+        logger().error( "AtomSpaceUtil::%s - Found no Pet named '%s'.",
+                        __FUNCTION__, petId.c_str()
+                      );
+        return Handle::UNDEFINED;
+    }
+
+    // Get the Handle to GroundSchemaNode
+    std::string demandUpdater = demand + "DemandUpdater";
+
+    Handle groundedSchemaNode = atomSpace.getHandle
+                                        ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
+                                          demandUpdater         // Name of the Atom wanted
+                                        );
+
+    if (groundedSchemaNode == Handle::UNDEFINED) {
+        logger().error( "AtomSpaceUtil::%s - Found no GroundSchemaNode named '%s'.",
+                         __FUNCTION__, demandUpdater.c_str()
+                      );
+        return Handle::UNDEFINED;
+    }
+
+    // Get the  HandleSet to ExecutionOutputLink
+    std::vector<Handle> executionOutputLinkSet;
+
+    atomSpace.getHandleSet
+                  ( back_inserter(executionOutputLinkSet), // return value
+                    groundedSchemaNode,       // returned link should contain this node
+                    EXECUTION_OUTPUT_LINK,    // type of the returned link 
+                    false                     // subclass is not acceptable, 
+                                              // i.e. returned link should be exactly of 
+                  );                          // type EXECUTION_OUTPUT_LINK
+
+
+    // Pick up the ExecutionOutputLink that contains a ListLink holding petHandle
+    std::vector<Handle>::iterator itrHandleSet;
+
+    for ( itrHandleSet = executionOutputLinkSet.begin(); 
+          itrHandleSet != executionOutputLinkSet.end(); 
+          itrHandleSet ++ ) {
+
+        // Get Handle to ListLink
+        Handle listLink = atomSpace.getOutgoing
+                                    ( *itrHandleSet, // Handle of the Link to be searched
+                                      1              // Index of the Handle in Outgoing set 
+                                    ); 
+
+        if ( atomSpace.getType(listLink) == LIST_LINK && 
+             atomSpace.getArity(listLink) == 1 &&
+             atomSpace.getOutgoing(listLink, 0) == petHandle ) {
+            break;
+        }// if
+    
+    }// for
+        
+    if ( itrHandleSet == executionOutputLinkSet.end() ) {
+         logger().error( 
+             "AtomSpaceUtil::%s - Found no ExecutionOutputLink for '%s' with petId '%s'.",
+              __FUNCTION__, demandUpdater.c_str(), petId.c_str()
+                       );
+        return Handle::UNDEFINED;
+    }
+
+    Handle executionOutputLink = *itrHandleSet;
+
+    // Get the Handle to SimilarityLink
+    std::vector<Handle> similarityLinkSet;
+
+    atomSpace.getHandleSet
+        ( back_inserter(similarityLinkSet), // return value
+          executionOutputLink,              // returned link should contain this link
+          SIMILARITY_LINK,                  // type of the returned link 
+          false                             // subclass is not acceptable, i.e. returned 
+        );                                  // link should be exactly of 
+                                            // type SIMILARITY_LINK
+
+    if (similarityLinkSet.size() != 1) {
+        logger().error( "AtomSpaceUtil::%s - There should be exactly one SimilarityLink to '%s' with petId '%s', found '%d'.",
+                        __FUNCTION__, 
+                        demandUpdater.c_str(),
+                        petId.c_str(),
+                        similarityLinkSet.size()
+                      );
+
+        return Handle::UNDEFINED;
+    }
+
+    Handle similarityLink = similarityLinkSet[0];
+
+    if ( atomSpace.getArity(similarityLink) != 2 ) {
+        logger().error( "AtomSpaceUtil::%s - The size of Outgoing set for SimilarityLink to '%s' with petId '%s' should be exactly 2, get '%d'", 
+                        __FUNCTION__, 
+                        demandUpdater.c_str(),
+                        petId.c_str(), 
+                        atomSpace.getArity(similarityLink)
+                      );
+
+        return Handle::UNDEFINED;
+    }
+
+    // Get the Handle to NumberNode
+    //
+    // Since SimilarityLink inherits from UnorderedLink, you can NOT use the following 
+    // code to get the NumberNode. 
+    // Because when you creating an UnorderedLink, it will sort its Outgoing set
+    // automatically ("./atomspace/Link.cc", Link::setOutgoingSet method)
+    //
+    // Handle numberNode = atomSpace.getOutgoing(similarityLink, 0); // Wrong!
+    
+    Handle numberNode = atomSpace.getOutgoing(similarityLink, 0); 
+    
+    if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
+        
+        numberNode = atomSpace.getOutgoing(similarityLink, 1);    
+
+        if ( atomSpace.getType(numberNode) != NUMBER_NODE) {
+
+            logger().error( "AtomSpaceUtil::%s - Could not find any NumberNode in the outgoing set of SimilarityLink for '%s'",
+                        __FUNCTION__, 
+                        demandUpdater.c_str()
+                          );
+
+            return Handle::UNDEFINED;
+        }
+    }// if
+
+    return similarityLink;
+}
+
+Handle AtomSpaceUtil::getDemandSimultaneousEquivalenceLink( const AtomSpace & atomSpace,  
+                                                            const std::string & demand, 
+                                                            const std::string & petId )
+{
+    // Format of DemandGoal
+    //
+    // SimultaneousEquivalenceLink
+    // EvaluationLink
+    //     PredicateNode: "demand_name_goal" 
+    //                    (SimpleTruthValue indicates how well the demand is satisfied)
+    //                    (ShortTermInportance indicates the urgency of the demand)
+    // EvaluationLink
+    //     GroundedPredicateNode: "FuzzyWithin"
+    //     ListLink
+    //         NumberNode: "min_acceptable_value"
+    //         NumberNode: "max_acceptable_value"
+    //         SimilarityLink (stv 1.0 1.0)
+    //             NumberNode: "demand_value"
+    //             ExecutionOutputLink
+    //                 GroundedSchemaNode: "demand_schema_name"
+    //                 ListLink
+    //                     PET_HANDLE
+    //
+
+    // Get the Handle to DemandSchema (SimilarityLink)
+    Handle similarityLink = AtomSpaceUtil::getDemandSimilarityLink( atomSpace, 
+                                                                    demand, 
+                                                                    petId
+                                                                  );
+
+    if (similarityLink == Handle::UNDEFINED) {
+        logger().error( "AtomSpaceUtil::%s - Found no DemandSchema (SimilarityLink) for '%s' with petId '%s'.",
+                        __FUNCTION__,
+                        demand.c_str(), 
+                        petId.c_str()
+                      );
+        return Handle::UNDEFINED;
+    }
+
+    // Get the HandleSet to ListLink
+    std::vector<Handle> listLinkSet;
+
+    atomSpace.getHandleSet
+                  ( back_inserter(listLinkSet), // return value
+                    similarityLink,             // returned link should contain this link
+                    LIST_LINK,                  // type of the returned link 
+                    false                       // subclass is not acceptable, 
+                                                // i.e. returned link should be exactly of 
+                  );                            // type LIST_LINK
+
+
+    // Pick up the ListLink that contains two NumberNodes, holding min/max acceptable value
+    std::vector<Handle>::iterator itrHandleSet;
+
+    Handle listLink = Handle::UNDEFINED;
+
+    for ( itrHandleSet = listLinkSet.begin(); 
+          itrHandleSet != listLinkSet.end(); 
+          itrHandleSet ++ ) {
+
+        listLink = *itrHandleSet;
+
+        if ( atomSpace.getType(listLink) == LIST_LINK && 
+             atomSpace.getArity(listLink) == 3 &&
+             atomSpace.getType( atomSpace.getOutgoing(listLink, 0) ) == NUMBER_NODE &&
+             atomSpace.getType( atomSpace.getOutgoing(listLink, 1) ) == NUMBER_NODE) {  
+            break;
+        }// if
+    
+    }// for
+        
+    if ( itrHandleSet == listLinkSet.end() ) {
+         logger().error( 
+            "AtomSpaceUtil::%s - Found no ListLink for '%s' containing DemandSchema '%s'.",
+                         __FUNCTION__, 
+                         demand.c_str(), 
+                         atomSpace.atomAsString(similarityLink).c_str()                  
+                       );
+        return Handle::UNDEFINED;
+    }
+
+    // Get the HandleSet to EvaluationLink
+    std::vector<Handle> evaluationLinkSet;
+
+    atomSpace.getHandleSet
+                  ( back_inserter(evaluationLinkSet), // return value
+                    listLink,                   // returned link should contain this link
+                    EVALUATION_LINK,            // type of the returned link 
+                    false                       // subclass is not acceptable, 
+                                                // i.e. returned link should be exactly of 
+                  );                            // type EVALUATION_LINK
+
+
+    // Pick up the EvaluationLink that contains GroundedPredicateNode: FuzzyWithin
+    Handle evaluationLink = Handle::UNDEFINED;
+
+    for ( itrHandleSet = evaluationLinkSet.begin(); 
+          itrHandleSet != evaluationLinkSet.end(); 
+          itrHandleSet ++ ) {
+
+        evaluationLink = *itrHandleSet;
+
+        if ( atomSpace.getType(evaluationLink) == EVALUATION_LINK && 
+             atomSpace.getArity(evaluationLink) == 2 &&
+             atomSpace.getType( atomSpace.getOutgoing(evaluationLink, 0) ) ==
+                                                     GROUNDED_PREDICATE_NODE &&
+             atomSpace.getName( atomSpace.getOutgoing(evaluationLink, 0) ) ==
+                                                            "FuzzyWithin") {  
+            break;
+        }// if
+    
+    }// for
+        
+    if ( itrHandleSet == listLinkSet.end() ) {
+         logger().error( 
+         "AtomSpaceUtil::%s - Found no EvaluationLink for '%s' containing ListLink '%s'.",
+                         __FUNCTION__, 
+                         demand.c_str(), 
+                         atomSpace.atomAsString(listLink).c_str()                  
+                       );
+        return Handle::UNDEFINED;
+    }
+
+    // Get the HandleSet to SimultaneousEquivalenceLink
+    std::vector<Handle> simultaneousEquivalenceLinkSet;
+
+    atomSpace.getHandleSet
+                  ( back_inserter(simultaneousEquivalenceLinkSet), // return value
+                    evaluationLink,             // returned link should contain this link
+                    SIMULTANEOUS_EQUIVALENCE_LINK,  // type of the returned link 
+                    false                       // subclass is not acceptable, 
+                                                // i.e. returned link should be exactly of 
+                  );                            // type SIMULTANEOUS_EQUIVALENCE_LINK
+
+    // Pick up the SimultaneousEquivalenceLink that contains
+    // PredicateNode: "demand_name_goal"
+    Handle simultaneousEquivalenceLink = Handle::UNDEFINED;
+    Handle evaluationLinkDemandGoal = Handle::UNDEFINED;
+
+    for ( itrHandleSet = simultaneousEquivalenceLinkSet.begin(); 
+          itrHandleSet != simultaneousEquivalenceLinkSet.end(); 
+          itrHandleSet ++ ) {
+
+        simultaneousEquivalenceLink = *itrHandleSet;
+
+       if ( atomSpace.getType(simultaneousEquivalenceLink) == 
+                             SIMULTANEOUS_EQUIVALENCE_LINK && 
+            atomSpace.getArity(simultaneousEquivalenceLink) == 2) {
+           
+            // Get EvaluationLink that holds PredicateNode: "demand_name_goal"
+            //
+            // Since SimultaneousEquivalenceLink inherits from UnorderedLink, 
+            // we can not simply assume it is simultaneousEquivalenceLink[0] or
+            // simultaneousEquivalenceLink[1]
+
+            atomSpace.getOutgoing(simultaneousEquivalenceLink, 0) == evaluationLink ?
+
+                evaluationLinkDemandGoal = atomSpace.getOutgoing(
+                                                         simultaneousEquivalenceLink, 1
+                                                                ):
+
+                evaluationLinkDemandGoal = atomSpace.getOutgoing(
+                                                         simultaneousEquivalenceLink, 0
+                                                                );
+
+            // Check what we get is the correct PredicateNode: "demand_name_goal"
+            if ( atomSpace.getArity(evaluationLinkDemandGoal) == 1 ) {
+                Handle predicateNodeDemandGoal = atomSpace.getOutgoing(
+                                                           evaluationLinkDemandGoal, 0);
+
+               if ( atomSpace.getType(predicateNodeDemandGoal) == PREDICATE_NODE &&
+                    atomSpace.getName(predicateNodeDemandGoal) == demand + "DemandGoal"
+                  )
+                    break;    
+            }
+
+        }// if
+    
+    }// for
+        
+    if ( itrHandleSet == simultaneousEquivalenceLinkSet.end() ) {
+         logger().error( "AtomSpaceUtil::%s - Found no SimultaneousEquivalenceLink for '%s' containing '%s'.",
+                         __FUNCTION__, 
+                         demand.c_str(), 
+                         atomSpace.atomAsString(evaluationLink).c_str()
+                       );
+        return Handle::UNDEFINED;
+    }
+
+    return simultaneousEquivalenceLink;
 }
 
 Handle AtomSpaceUtil::getRuleImplicationLink(const AtomSpace& atomSpace,

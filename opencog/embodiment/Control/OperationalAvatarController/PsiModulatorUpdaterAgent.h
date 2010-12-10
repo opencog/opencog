@@ -24,8 +24,8 @@
  */
 
 
-#ifndef MODULATORUPDATERAGENT_H
-#define MODULATORUPDATERAGENT_H
+#ifndef PSIMODULATORUPDATERAGENT_H
+#define PSIMODULATORUPDATERAGENT_H
 
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>

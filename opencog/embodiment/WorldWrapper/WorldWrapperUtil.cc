@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Nil Geisweiller, Moshe Looks, Carlos Lopes
  *
- * Updated: by ZhenhuaCai, on 2010-11-25
+ * Updated: by ZhenhuaCai, on 2010-12-08
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -2432,8 +2432,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     // Modulators        
-    case id::get_activation:
-        logger().debug("WorldWrapperUtil::%s - id::get_activation", __FUNCTION__);
+    case id::get_activation_modulator:
+        logger().debug("WorldWrapperUtil::%s - id::get_activation_modulator", __FUNCTION__);
         return WorldWrapperUtil::getModulator( atomSpace, 
                                                std::string(ACTIVATION_MODULATOR_NAME),
                                                self_id, 
@@ -2441,8 +2441,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                              );
         break;
 
-    case id::get_resolution:
-       logger().debug("WorldWrapperUtil::%s - id::get_resolution", __FUNCTION__);
+    case id::get_resolution_modulator:
+       logger().debug("WorldWrapperUtil::%s - id::get_resolution_modulator", __FUNCTION__);
        return WorldWrapperUtil::getModulator( atomSpace, 
                                                std::string(RESOLUTION_MODULATOR_NAME),
                                                self_id,
@@ -2450,8 +2450,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                              );
         break;
 
-    case id::get_certainty:
-      logger().debug("WorldWrapperUtil::%s - id::get_certainty", __FUNCTION__);
+    case id::get_certainty_modulator:
+      logger().debug("WorldWrapperUtil::%s - id::get_certainty_modulator", __FUNCTION__);
       return WorldWrapperUtil::getModulator( atomSpace, 
                                                std::string(CERTAINTY_MODULATOR_NAME), 
                                                self_id,
@@ -2459,8 +2459,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                              );
         break;
 
-    case id::get_selection_threshold:
-     logger().debug("WorldWrapperUtil::%s - id::get_selection_threshold", __FUNCTION__);
+    case id::get_selection_threshold_modulator:
+     logger().debug( "WorldWrapperUtil::%s - id::get_selection_threshold_modulator",
+                     __FUNCTION__
+                   );
      return WorldWrapperUtil::getModulator
                                      ( atomSpace, 
                                        std::string(SELECTION_THRESHOLD_MODULATOR_NAME),
@@ -2470,6 +2472,61 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
         break;
 
+    // Demands    
+    case id::get_energy_demand:
+        logger().debug("WorldWrapperUtil::%s - id::get_energy_demand", __FUNCTION__);
+        return WorldWrapperUtil::getDemand( atomSpace, 
+                                            std::string(ENERGY_DEMAND_NAME),
+                                            self_id, 
+                                            time
+                                          );
+        break;
+
+    case id::get_water_demand:
+        logger().debug("WorldWrapperUtil::%s - id::get_water_demand", __FUNCTION__);
+        return WorldWrapperUtil::getDemand( atomSpace, 
+                                            std::string(WATER_DEMAND_NAME),
+                                            self_id, 
+                                            time
+                                          );
+        break;
+
+    case id::get_integrity_demand:
+        logger().debug("WorldWrapperUtil::%s - id::get_integrity_demand", __FUNCTION__);
+        return WorldWrapperUtil::getDemand( atomSpace, 
+                                            std::string(INTEGRITY_DEMAND_NAME),
+                                            self_id, 
+                                            time
+                                          );
+        break;
+
+    case id::get_affiliation_demand:
+        logger().debug("WorldWrapperUtil::%s - id::get_affiliation_demand", __FUNCTION__);
+        return WorldWrapperUtil::getDemand( atomSpace, 
+                                            std::string(AFFILIATION_DEMAND_NAME),
+                                            self_id, 
+                                            time
+                                          );
+        break;
+        
+    case id::get_certainty_demand:
+        logger().debug("WorldWrapperUtil::%s - id::get_certainty_demand", __FUNCTION__);
+        return WorldWrapperUtil::getDemand( atomSpace, 
+                                            std::string(CERTAINTY_DEMAND_NAME),
+                                            self_id, 
+                                            time
+                                          );
+        break;
+
+     case id::get_competence_demand:
+        logger().debug("WorldWrapperUtil::%s - id::get_competence_demand", __FUNCTION__);
+        return WorldWrapperUtil::getDemand( atomSpace, 
+                                            std::string(COMPETENCE_DEMAND_NAME),
+                                            self_id, 
+                                            time
+                                          );
+        break;
+    
         // -------------- pet traits perceptions
         //case id::is_aggressive:
     case id::get_aggressiveness:
@@ -3008,6 +3065,36 @@ float WorldWrapperUtil::getModulator(const AtomSpace & atomSpace,
 
     logger().debug( "WWUtil - getModulator - '%s' for the pet with id '%s' is '%f'.", 
                     modulator.c_str(), 
+                    self_id.c_str(),
+                    value
+                  );
+
+    return value;
+}
+
+float WorldWrapperUtil::getDemand(const AtomSpace & atomSpace,
+                                  const std::string & demand,
+                                  const std::string & self_id,
+                                  unsigned long time)
+{
+    // Cache predicate data variables
+    //
+    // Actually, Demand is not a Predicate in AtomSpace 
+    // (see "rules_core.scm" for the detail),
+    // while we only want to use WorldWrapperUtil's cache mechanism.
+    std::string name(demand);
+    std::vector<std::string> argument;
+
+    WorldWrapper::predicate pred(name, argument);
+    float value = WorldWrapperUtil::cache.find(time, pred);
+
+    if (value == CACHE_MISS) {
+        value = AtomSpaceUtil::getCurrentDemandLevel(atomSpace, demand, self_id);
+        WorldWrapperUtil::cache.add(time, pred, value);
+    }
+
+    logger().debug( "WWUtil - getDemand - '%s' for the pet with id '%s' is '%f'.", 
+                    demand.c_str(), 
                     self_id.c_str(),
                     value
                   );

@@ -127,16 +127,23 @@ protected:
                                             "rules_action_schemata.combo",
 
             // OpenPsi parameters
-            // Added by Zhenhua Cai, on 2010-12-03                                
+            // Added by Zhenhua Cai, on 2010-12-08                                
             "PSI_MODULATOR_UPDATERS_REPOSITORY_FILE",
                                             "modulator_updaters.combo", 
             "PSI_MODULATORS",      "Activation, Resolution, Certainty, SelectionThreshold", 
+
+            "PSI_DEMAND_UPDATERS_REPOSITORY_FILE", 
+                                            "demand_updaters.combo", 
+            "PSI_DEMANDS", "Energy, Water, Integrity, Affiliation, Certainty, Competence",  
 
             "PSI_RULES_CORE_FILE",          "rules_core.scm", 
             "PSI_RULES_FILENAME_MASK",      "%s_rules.scm",
 
             "PSI_MODULATOR_UPDATER_ENABLED",        "true",
-            "PSI_MODULATOR_UPDATER_CYCLE_PERIOD",   "2",
+            "PSI_MODULATOR_UPDATER_CYCLE_PERIOD",   "1",
+
+            "PSI_DEMAND_UPDATER_ENABLED",           "true", 
+            "PSI_DEMAND_UPDATER_CYCLE_PERIOD",      "1", 
 
             // TODO: Remove Rule Engine configurations once OpenPsi works fine
             //

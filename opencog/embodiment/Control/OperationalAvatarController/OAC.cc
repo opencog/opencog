@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
- * Updated: by Zhenhua Cai, on 2010-12-04
+ * Updated: by Zhenhua Cai, on 2010-12-08
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -97,11 +97,12 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     } else {
         pet->initTraitsAndFeelings();
 
-        logger().info( "OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s', ActionSchemataPreconditions '%s' and PsiModulatorUpdaters '%s'.",
+        logger().info( "OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s', ActionSchemataPreconditions '%s', PsiModulatorUpdaters '%s' and PsiDemandUpdaters '%s'.",
                        config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
                        config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
                        config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str(), 
-                       config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str()
+                       config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str(), 
+                       config().get("PSI_DEMAND_UPDATERS_REPOSITORY_FILE").c_str()
                      );
 
         int cnt = 0;
@@ -160,7 +161,20 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         fin.close();
         logger().info(
                      "OAC - ModulatorUpdaters combo functions loaded.");
-    }
+
+        fin.open(config().get("PSI_DEMAND_UPDATERS_REPOSITORY_FILE").c_str());
+        if (fin.good()) {
+            logger().info("OAC - Loading DemandUpdaters combo.");
+            cnt = procedureRepository->loadComboFromStream(fin);
+        } else {
+            logger().error(
+                         "OAC - Unable to load DemandUpdaters combo.");
+        }
+        fin.close();
+        logger().info(
+                     "OAC - DemandUpdaters combo functions loaded.");
+       
+    }// if
 
 
     // warning: it must be called after register the agent and it's owner nodes
@@ -172,7 +186,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     // Load Psi Rules ('xxx_rules.scm') to AtomSpace
     //
     // Psi Rules should be loaded before running PsixxxAgent.
-    // And before loading Psi Rules, make sure 'rules_core.scm ' has been loaded.
+    // And before loading Psi Rules, make sure 'rules_core.scm' has been loaded.
     // Since 'rules_core.scm' is loaded as a SCM module, 
     // the correct sequence of initialization is 
     // OAC::loadSCMModules, OAC::addRulesToAtomSpace and PsiXxxAgent finally.
@@ -213,6 +227,15 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                 )
                                                                      );
 
+    this->registerAgent( PsiDemandUpdaterAgent::info().id, 
+                         &psiDemandUpdaterAgentFactory
+                       );
+    psiDemandUpdaterAgent = static_cast<PsiDemandUpdaterAgent*>(
+                               this->createAgent( PsiDemandUpdaterAgent::info().id,
+                                                  false
+                                                )
+                                                                     );
+
     if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         this->startAgent(procedureInterpreterAgent);
     }
@@ -242,7 +265,12 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
            config().get_int( "PSI_MODULATOR_UPDATER_CYCLE_PERIOD" ) );
         this->startAgent(psiModulatorUpdaterAgent);
     }
-   
+    if (config().get_bool("PSI_DEMAND_UPDATER_ENABLED")) {
+        this->psiDemandUpdaterAgent->setFrequency(
+           config().get_int( "PSI_DEMAND_UPDATER_CYCLE_PERIOD" ) );
+        this->startAgent(psiDemandUpdaterAgent);
+    }
+  
 
     // TODO: This should be done only after NetworkElement is initialized
     // (i.e., handshake with router is done)

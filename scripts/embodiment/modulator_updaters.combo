@@ -2,157 +2,39 @@
 # Modulator updaters
 #
 # @author Zhenhua Cai czhedu@gmail.com
-# @date   2010-12-06
+# @date   2010-12-10
 #
+# Note: Some tricks about combo scripts
+#     1. There cannot be any whitespaces between operator and (
+#     2. There is no '-' operator, it is the default type of an unrecognized string.
+#        So for -x you must write *(-1 x). 
+#        But if you want you could define a procedure neg(1) := *(-1 #1) under
+#        scripts/embodiment/stdlib.combo
+#     3. The best doc about Combo is doc/comboreduct/ComboReduct.pdf in the OpenCog project
+#     4. You should avoid infinitely great number in Combo
 
-#####################################################################
-# Work fine
+# Makes none sense. Only for test.
+        
+ActivationModulatorUpdater(0) := 
+    +( *( get_activation_modulator rand )
+       rand
+     ) 
 
-#ActivationModulatorUpdater(0) := 0.1
-#ResolutionModulatorUpdater(0) := 0.2
-#CertaintyModulatorUpdater(0) := 0.3
-#SelectionThresholdModulatorUpdater(0) := 0.4
+ResolutionModulatorUpdater(0) := 
+    *( +( get_resolution_modulator get_activation_modulator )
+       rand
+     ) 
 
-#####################################################################
-# Crash
-#
-# [ERROR] procedure_call - Wrong procedure definition operator '0.1' in procedure definition '1 ' should be ':=' instead
+CertaintyModulatorUpdater(0) := 
+    *( +( *(-1 get_activation_modulator)
+           get_certainty_modulator
+        )
+       rand 
+     )
 
-#ActivationModulatorUpdater(0) := + 1 0.1
-#ResolutionModulatorUpdater(0) := + 2 0.2
-#CertaintyModulatorUpdater(0) := + 3 0.3
-#SelectionThresholdModulatorUpdater(0) := + 4 0.4
-
-#####################################################################
-# Crash
-#
-# [ERROR] procedure_call - Wrong procedure definition operator 'ResolutionModulatorUpdater(0)' in procedure definition '(1 0.1) ' should be ':=' instead
- 
-#ActivationModulatorUpdater(0) := + (1 0.1)
-#ResolutionModulatorUpdater(0) := + (2 0.2)
-#CertaintyModulatorUpdater(0) := + (3 0.3)
-#SelectionThresholdModulatorUpdater(0) := + (4 0.4)
-
-
-
-
-
-#####################################################################
-# Work fine
-
-#ActivationModulatorUpdater(0) := rand
-#ResolutionModulatorUpdater(0) := rand
-#CertaintyModulatorUpdater(0) := rand
-#SelectionThresholdModulatorUpdater(0) := rand
-
-#####################################################################
-# Crash
-#
-# [ERROR] procedure_call - Wrong procedure definition operator 'rand' in procedure definition '1 ' should be ':=' instead
-
-#ActivationModulatorUpdater(0) := + 1 rand
-#ResolutionModulatorUpdater(0) := + 2 rand
-#CertaintyModulatorUpdater(0) := + 3 rand
-#SelectionThresholdModulatorUpdater(0) := + 4 rand
-
-
-
-
-
-#####################################################################
-# Work fine
-
-ActivationModulatorUpdater(0) := get_activation
-ResolutionModulatorUpdater(0) := get_resolution
-CertaintyModulatorUpdater(0) := get_certainty
-SelectionThresholdModulatorUpdater(0) := get_selection_threshold
-
-#####################################################################
-# Crash
-#
-# [ERROR] procedure_call - Wrong procedure definition operator '4.4' in procedure definition 'get_current_action_repetition ' should be ':=' instead
-
-#ActivationModulatorUpdater(0) := * 0.1 get_current_action_repetition
-#ResolutionModulatorUpdater(0) := + get_current_action_repetition 222.222
-#CertaintyModulatorUpdater(0) := - get_current_action_repetition 33.33
-#SelectionThresholdModulatorUpdater(0) := / get_current_action_repetition 4.4
-
-#####################################################################
-#
-# Crash
-#
-# [ERROR] procedure_call - Wrong procedure definition operator 'ResolutionModulatorUpdater(0)' in procedure definition '(0.1 get_current_action_repetition) ' should be ':=' instead
-
-#ActivationModulatorUpdater(0) := + (0.1 get_current_action_repetition)
-#ResolutionModulatorUpdater(0) := + (get_current_action_repetition 0.02)
-#CertaintyModulatorUpdater(0) := - (get_current_action_repetition 0.003)
-#SelectionThresholdModulatorUpdater(0) := - (0.004 get_current_action_repetition)
-
-#####################################################################
-#
-# Crash
-#
-# [ERROR] tt2 is supposed to contain a type (/home/czhedu/OpenPsi/openpsi/opencog/comboreduct/combo/type_tree.cc:1064)
-
-#ActivationModulatorUpdater(0) := (+ (0.1 get_current_action_repetition))
-#ResolutionModulatorUpdater(0) := (+ (get_current_action_repetition 0.02))
-#CertaintyModulatorUpdater(0) := (- (get_current_action_repetition 0.003))
-#SelectionThresholdModulatorUpdater(0) := (- (0.004 get_current_action_repetition))
-
-
-
-
-
-#####################################################################
-# Crash
-#
-# Examples from
-# http://wiki.opencog.org/w/Combo_Programming_Language 
-#
-# [ERROR] procedure_call - Wrong procedure definition operator 'random' in procedure definition '1 ' should be ':=' instead
-
-#randomPlusOneFunc(0) := + 1 random
-#randomPlusOneConst := + 1 random
-
-#####################################################################
-# Crash
-#
-# [ERROR] procedure_call - Wrong procedure definition operator 'rand' in procedure definition '1 ' should be ':=' instead
-
-#randomPlusOneFunc(0) := + 1 rand
-#randomPlusOneConst := + 1 rand
-
-#####################################################################
-# Crash
-#
-# [ERROR] OACExecutable - An exceptional situation occured. Check log for more information.
-
-#ActivationModulatorUpdater(0) := random
-#ResolutionModulatorUpdater(0) := random
-#CertaintyModulatorUpdater(0) := random
-#SelectionThresholdModulatorUpdater(0) := random
-
-
-
-
-
-#####################################################################
-# Crash
-#
-# Something like what we really want
-
-#ActivationModulatorUpdater(0) := 
-#    + get_activation random
-
-#ResolutionModulatorUpdater(0) := 
-#    + get_resolution get_activation
-
-#CertaintyModulatorUpdater(0) := 
-#    + (* get_certainty get_activation) 
-#      random 
-
-#SelectionThresholdModulatorUpdater(0) := 
-#    - (/ get_selection_threshold 0.3)
-#      get_selection_threshold   
-
-
+SelectionThresholdModulatorUpdater(0) := 
+    *(  +( /( get_selection_threshold_modulator 3 )
+           get_activation_modulator
+         )
+        rand
+     )

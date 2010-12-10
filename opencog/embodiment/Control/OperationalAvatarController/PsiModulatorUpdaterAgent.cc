@@ -51,7 +51,7 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
                     this->cycleCount
                   );
 
-    // Get OPC
+    // Get OAC
     OAC * oac = (OAC *) server;
 
     // Get AtomSpace
@@ -92,7 +92,7 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
         // Search modulator updater
         if ( !procedureRepository.contains(modulatorUpdater) ) {
             logger().warn( 
-       "PsiModulatorUpdaterAgent::%s - Failed to find '%s' in OPC's procedureRepository",
+       "PsiModulatorUpdaterAgent::%s - Failed to find '%s' in OAC's procedureRepository",
                            __FUNCTION__, 
                            modulatorUpdater.c_str()
                          );

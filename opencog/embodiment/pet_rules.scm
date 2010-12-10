@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2010-11-25
+; @date   2010-12-09
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into AtomSpace
 ;
@@ -126,7 +126,7 @@
 ; Add DemandGoals
 ;
 ; Usage:
-;     (add_demand_goal demand_name min_acceptable_value max_acceptable_value default_value)
+;     (add_demand_goal demand_name min_acceptable_value max_acceptable_value)
 ;
 ; DemandGoal is represented as:
 ;
@@ -144,14 +144,16 @@
 ;                 NumberNode: "demand_value"
 ;                 ExecutionOutputLink
 ;                     GroundedSchemaNode: "demand_schema_name"
+;                     ListLink
+;                         PET_HANDLE
 ;
 
-(add_demand_goal "EnergyDemand" 0.1 1.0 0.85)
-(add_demand_goal "WaterDemand" 0.1 0.9 0.80)
-(add_demand_goal "IntegrityDemand" 0.3 1.0 0.90)
-(add_demand_goal "AffiliationDemand" 0.3 0.9 0.70)
-(add_demand_goal "CertaintyDemand" 0.2 1.0 0.65)
-(add_demand_goal "CompetenceDemand" 0.25 0.95 0.65)
+(add_demand_goal "EnergyDemand" 0.1 1.0)
+(add_demand_goal "WaterDemand" 0.1 0.9)
+(add_demand_goal "IntegrityDemand" 0.3 1.0)
+(add_demand_goal "AffiliationDemand" 0.3 0.9)
+(add_demand_goal "CertaintyDemand" 0.2 1.0)
+(add_demand_goal "CompetenceDemand" 0.25 0.95)
 
 ;******************************************************************************
 ;
