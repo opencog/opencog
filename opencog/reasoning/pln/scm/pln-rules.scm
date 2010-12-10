@@ -11,6 +11,10 @@
   (pln-ar "IntensionalInheritanceRule" (list sub super) context))
 (define (InhDedRule AB BC . context)
   (pln-ar "InheritanceDeductionRule" (list AB BC) context))
+(define (ContextualizerRule R . context)
+  (pln-ar "ContextualizerRule" (list R) context))
+(define (DecontextualizerRule CL . context)
+  (pln-ar "DecontextualizerRule" (list CL) context))
 
 ; ModusPonensRule is the name for StrictImplicationBreakdownRule
 (define (ModusPonensRule implication antecedent . context)

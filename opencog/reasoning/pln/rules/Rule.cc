@@ -103,7 +103,7 @@ bool Rule::validate(const vector<Vertex>& h) const
     
     if (n != inputFilter.size()) {
         cprintf(0,"Rule::validate FALSE. Input vector size: %d\n", n);
-#if 0        
+#if 0
         for (int i=0;i<n;i++)
             printTree(v2h(h[i]),0,0);
 #else 
@@ -116,7 +116,7 @@ bool Rule::validate(const vector<Vertex>& h) const
 #endif             
         return false;
     }
-    
+
     // A vertex wrapper contains a vtree in a weak_atom
     //typedef weak_atom<boost::shared_ptr<tree<Vertex> > > vertex_wrapper;
     typedef weak_atom< meta > vertex_wrapper;

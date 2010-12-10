@@ -65,13 +65,15 @@ namespace opencog { namespace pln {
  */
 class ContextualizerRule : public GenericRule<IdentityFormula>
 {
-    meta i2oType(const std::vector<Vertex>& h) const;
-    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
-                               int* newN) const;
-public:
-    ContextualizerRule(AtomSpaceWrapper* _asw);
+protected:
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
     meta targetTemplate() const;
+public:
+    ContextualizerRule(AtomSpaceWrapper* _asw);
+    meta i2oType(const std::vector<Vertex>& h) const;
+    bool validate2(MPs& args) const { return true; } // not sure it's enough
+    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
+                               int* newN) const;
 };
 
 }} // namespace opencog { namespace pln {

@@ -122,6 +122,10 @@ public:
     void test_inference() {
         check_inference("aboutGreaterThan.scm",
                         SimpleTruthValue(0.2, 1018.181824));
+        check_inference("marsMath.scm",
+                        SimpleTruthValue(0.91, 800));
+        check_inference("jumpingMoon.scm",
+                        SimpleTruthValue(0.3, 800));
 #ifdef CONTEXTUAL_INFERENCE
         Handle cx = as->addNode(CONCEPT_NODE, "mathematics");
         std::cout << "cx = " << cx.value() << std::endl;

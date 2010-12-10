@@ -81,9 +81,10 @@ TruthValue** ContextualizerRule::formatTVarray(const std::vector<Vertex>& premis
 
 ContextualizerRule::ContextualizerRule(AtomSpaceWrapper* _asw)
     : GenericRule<IdentityFormula>(_asw, false, "ContextualizerRule") {
-    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)LINK,
-                                                    mva((pHandle)ATOM),
-                                                    mva((pHandle)ATOM)))));
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
+    // inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)LINK,
+    //                                                 mva((pHandle)ATOM),
+    //                                                 mva((pHandle)ATOM)))));
 }
 
 Rule::setOfMPs ContextualizerRule::o2iMetaExtra(meta outh,

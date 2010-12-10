@@ -190,6 +190,10 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 	AddRule(new Exist2ForAllRule(asw);
 	AddRule(new ExistRule(asw);
 */
+
+    // Contextual rules
+    AddRule(new ContextualizerRule(asw), 5.0f);
+    AddRule(new DecontextualizerRule(asw), 4.0f);
 }
 
 DefaultVariableRuleProvider::~DefaultVariableRuleProvider(void)

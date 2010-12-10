@@ -101,6 +101,9 @@
 #include "inference/QuantifierRule.h"
 // #include "inference/RevisionRule.h"
 
+#include "context/ContextualizerRule.h"
+#include "context/DecontextualizerRule.h"
+
 #define USE_ALL_AVAILABLE_INFORMATION_FOR_AND_RULE_COMPUTATION 1
 #define MAX_ARITY_FOR_PERMUTATION 5
 
