@@ -131,11 +131,9 @@ FeatureSet adaptive_incremental_selection(const FeatureSet& features,
                                           double min = 0, double max = 1,
                                           double epsilon = 0.01) {
     double mean = (min+max)/2;
-    std::cout << "min = " << min << " max = " << max << " mean = " << mean << std::endl;
     FeatureSet res = incremental_selection(features, scorer, mean,
                                            max_interaction_terms, red_threshold);
     unsigned int rsize = res.size();
-    std::cout << "rsize = " << rsize << std::endl;
     if(isWithin(min, max, epsilon) || rsize == features_size_target)
         return res;
     else {
@@ -167,8 +165,6 @@ FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
                                                   max_interaction_terms,
                                                   red_threshold,
                                                   min, max, epsilon);
-    std::cout << "scorer_cache.get_failures() = " << scorer_cache.get_failures()
-              << " scorer_cache.get_hits() = " << scorer_cache.get_hits() << std::endl;
     return f;
 }
 
