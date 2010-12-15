@@ -55,9 +55,8 @@ AtomTable::AtomTable(bool dsa)
 {
     useDSA = dsa;
     size = 0;
-    std::cout<< atomSet.max_load_factor() << std::endl;
-    atomSet.max_load_factor(100.0f);
-    std::cout<< atomSet.max_load_factor() << std::endl;
+    // This allows one to tune how often the unordered map resizes itself.
+    //atomSet.max_load_factor(100.0f);
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&iteratorsLock, NULL);

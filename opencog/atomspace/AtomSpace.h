@@ -51,8 +51,6 @@ namespace opencog
 
 typedef std::vector<HandleSet*> HandleSetSeq;
 
-//XXX FIXME: do NOT inherit from SpaceServerContainer;
-//instead used atom table signals to accomplish work.
 class AtomSpace : public SpaceServerContainer
 {
     friend class SavingLoading;

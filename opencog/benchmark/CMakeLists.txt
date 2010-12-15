@@ -12,4 +12,5 @@ ADD_EXECUTABLE (AS_no_event_loop
 
 TARGET_LINK_LIBRARIES (AS_no_event_loop
     atomspace
+    util
 )

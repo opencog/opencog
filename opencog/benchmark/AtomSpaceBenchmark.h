@@ -4,24 +4,31 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/mt19937ar.h>
+#include <boost/tuple/tuple.hpp>
+
+using boost::tuple;
 
 namespace opencog
 {
 
 class AtomSpaceBenchmark
 {
-    typedef std::pair<size_t,clock_t> size_by_time;
+    // size of AtomSpace, time taken for operation, rss memory max
+    typedef tuple<size_t,clock_t,long> record_t;
 
     struct TimeStats {
+        clock_t t_total;
         clock_t t_max;
         clock_t t_min;
         clock_t t_mean;
         clock_t t_std;
         long t_N;
-        TimeStats(const std::vector<size_by_time> records);
+        TimeStats(const std::vector<record_t> records);
+        void print();
     };
 
-    void dumpToCSV(std::string filename, std::vector<size_by_time> records) const;
+
+    void dumpToCSV(std::string filename, std::vector<record_t> records) const;
 
     float linkSize_mean;
     float linkSize_std;
@@ -31,8 +38,6 @@ class AtomSpaceBenchmark
     Type defaultNodeType;
     float chanceOfNonDefaultNode;
 
-    float percentLinks;
-    float atomCount; //! number of nodes to build atomspace with before testing
     float maxSize; //! never make the atomspace bigger than this while building it
 
     AtomSpace a;
@@ -43,31 +48,50 @@ class AtomSpaceBenchmark
     clock_t makeRandomNode(const std::string& s);
     clock_t makeRandomLink();
 
+    long getMemUsage();
     int counter;
 
+    std::string methodName;
 public:
+    int N;
+    int sizeIncrease;
+    bool saveToFile;
+    int saveInterval;
+    bool buildTestData;
+    typedef clock_t (AtomSpaceBenchmark::*BMFn)();
+    BMFn methodToTest;
+
+    float percentLinks;
+    long atomCount; //! number of nodes to build atomspace with before testing
+
+    bool showTypeSizes;
+    void printTypeSizes();
+
     AtomSpaceBenchmark();
     ~AtomSpaceBenchmark();
 
+    void setMethod(std::string method);
+    void showMethods();
     void startBenchmark(int numThreads=1);
 
     void buildAtomSpace(long atomspaceSize=(1 << 16), float percentLinks = 0.1);
 
-    void bm_addNode(int N);
-    void bm_addLink(int N, int arity = 0);
-    void bm_getHandleSet(int N);
+    clock_t bm_addNode();
+    clock_t bm_addLink();
+    void bm_getHandleSet();
 
-
-    void bm_getType(int N);
-    void bm_getHandleNode(int N);
-    void bm_getHandleLink(int N);
-    void bm_getName(int N);
+    void bm_getType();
+    void bm_getHandleNode();
+    void bm_getHandleLink();
+    void bm_getName();
 
     // Get and set TV and AV
-    void bm_TruthValue(int N);
-    void bm_TV(int N);
+    void bm_TruthValue();
+    void bm_TV();
 
     void bm_erase();
+
+    size_t estimateOfAtomSize(Handle h);
 
 };
 
