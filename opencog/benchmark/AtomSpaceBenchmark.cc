@@ -128,6 +128,13 @@ void AtomSpaceBenchmark::printTypeSizes()
     cout << "------------------------------" << endl;
 }
 
+void AtomSpaceBenchmark::showMethods() {
+    /// @todo should really encapsulate each test method in a struct or class
+    cout << "Methods that can be tested:" << endl;
+    cout << "  addNode" << endl;
+    cout << "  addLink" << endl;
+}
+
 void AtomSpaceBenchmark::setMethod(std::string _methodName) {
     if (_methodName == "addNode") {
         methodToTest = &AtomSpaceBenchmark::bm_addNode;

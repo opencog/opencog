@@ -78,18 +78,18 @@ public:
 
     clock_t bm_addNode();
     clock_t bm_addLink();
-    void bm_getHandleSet();
 
-    void bm_getType();
-    void bm_getHandleNode();
-    void bm_getHandleLink();
-    void bm_getName();
+    void bm_getType() {};
+    void bm_getHandleSet() {};
+    void bm_getHandleNode() {};
+    void bm_getHandleLink() {};
+    void bm_getName() {};
 
     // Get and set TV and AV
-    void bm_TruthValue();
-    void bm_TV();
+    void bm_TruthValue() {};
+    void bm_TV() {};
 
-    void bm_erase();
+    void bm_erase() {};
 
     size_t estimateOfAtomSize(Handle h);
 
