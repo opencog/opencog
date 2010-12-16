@@ -18,9 +18,11 @@ int main(int argc, char** argv) {
      "-- Build test data --\n"
      "-b        \tBefore benchmark, build a graph of random nodes/links\n"
      "-p <float> \tSet the connection probability or coordination number\n"
+     "         \t(-p impact behaviour of -S too)\n"
      "-s <int> \tSet how many atoms are created\n"
-     "         \t(-p and -s impact behaviour of -S too)\n"
+     "-d <float> \tChance of using non-default truth value\n"
      "-- Saving data --\n"
+     "-k       \tCalculate stats (warning, this will affect rss memory reporting)\n"
      "-f       \tSave a csv file with records for every repeated event\n"
      "-i <int> \tSet interval of data to save\n";
 
@@ -33,7 +35,7 @@ int main(int argc, char** argv) {
     opencog::AtomSpaceBenchmark benchmarker;
 
     opterr = 0;
-    while ((c = getopt (argc, argv, "tm:ln:S:bp:s:fi:")) != -1) {
+    while ((c = getopt (argc, argv, "tm:ln:S:bp:s:d:mfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -60,6 +62,12 @@ int main(int argc, char** argv) {
              break;
            case 's':
              benchmarker.atomCount = (long) atof(optarg);
+             break;
+           case 'd':
+             benchmarker.chanceUseDefaultTV = atof(optarg);
+             break;
+           case 'k':
+             benchmarker.doStats = true;
              break;
            case 'f':
              benchmarker.saveToFile = true;

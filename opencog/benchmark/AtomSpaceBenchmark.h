@@ -28,7 +28,7 @@ class AtomSpaceBenchmark
     };
 
 
-    void dumpToCSV(std::string filename, std::vector<record_t> records) const;
+    void recordToFile(std::ofstream& file, const record_t record) const;
 
     float linkSize_mean;
     float linkSize_std;
@@ -40,7 +40,7 @@ class AtomSpaceBenchmark
 
     float maxSize; //! never make the atomspace bigger than this while building it
 
-    AtomSpace a;
+    AtomSpace* a;
     MT19937RandGen* rng;
 
     Type randomType(Type t);
@@ -51,15 +51,16 @@ class AtomSpaceBenchmark
     long getMemUsage();
     int counter;
 
-    std::string methodName;
+    std::vector<std::string>  methodNames;
 public:
     int N;
     int sizeIncrease;
     bool saveToFile;
     int saveInterval;
+    bool doStats;
     bool buildTestData;
     typedef clock_t (AtomSpaceBenchmark::*BMFn)();
-    BMFn methodToTest;
+    std::vector< BMFn > methodsToTest;
 
     float percentLinks;
     long atomCount; //! number of nodes to build atomspace with before testing
@@ -74,20 +75,24 @@ public:
     void showMethods();
     void startBenchmark(int numThreads=1);
 
-    void buildAtomSpace(long atomspaceSize=(1 << 16), float percentLinks = 0.1);
+    void buildAtomSpace(long atomspaceSize=(1 << 16), float percentLinks = 0.1, 
+            bool display = true);
 
     clock_t bm_addNode();
     clock_t bm_addLink();
 
-    void bm_getType() {};
+    clock_t bm_getType();
     void bm_getHandleSet() {};
     void bm_getHandleNode() {};
     void bm_getHandleLink() {};
     void bm_getName() {};
 
     // Get and set TV and AV
-    void bm_TruthValue() {};
-    void bm_TV() {};
+    float chanceUseDefaultTV; // if set, this will use default TV for new atoms and bm_setTruthValue
+    clock_t bm_getTruthValue();
+    clock_t bm_setTruthValue();
+    void bm_getAttentionValue() {};
+    void bm_setAttentionValue() {};
 
     void bm_erase() {};
 
