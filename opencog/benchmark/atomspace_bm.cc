@@ -11,6 +11,7 @@ int main(int argc, char** argv) {
     const char* benchmark_desc = "Benchmark tool OpenCog AtomSpace\n"
      "Usage: atomspace_bm [-m <method>] [options]\n"
      "-t        \tPrint information on type sizes\n"
+     "-A        \tBenchmark all methods\n"
      "-m <methodname>\tMethod to benchmark\n" 
      "-l        \tList valid method names to benchmark\n"
      "-n <int>  \tHow many times to repeat the method\n" 
@@ -35,11 +36,19 @@ int main(int argc, char** argv) {
     opencog::AtomSpaceBenchmark benchmarker;
 
     opterr = 0;
-    while ((c = getopt (argc, argv, "tm:ln:S:bp:s:d:mfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAm:ln:S:bp:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
              benchmarker.showTypeSizes = true;
+             break;
+           case 'A':
+             benchmarker.setMethod("addNode");
+             benchmarker.setMethod("addLink");
+             benchmarker.setMethod("getTV");
+             benchmarker.setMethod("setTV");
+             benchmarker.setMethod("getHandleSet");
+             benchmarker.setMethod("getNodeHandles");
              break;
            case 'm':
              benchmarker.setMethod(optarg);

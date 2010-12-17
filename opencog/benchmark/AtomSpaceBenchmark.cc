@@ -48,7 +48,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     chanceUseDefaultTV=1.0f;
     doStats = false;
 
-    a = new AtomSpace();
+    a = NULL;
 
     rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
 
@@ -148,6 +148,8 @@ void AtomSpaceBenchmark::showMethods() {
     cout << "  getType" << endl;
     cout << "  getTruthValue" << endl;
     cout << "  setTruthValue" << endl;
+    cout << "  getHandleSet" << endl;
+    cout << "  getNodeHandles" << endl;
 
 }
 
@@ -162,65 +164,80 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName) {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValue);
     } else if (_methodName == "setTV") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
+    } else if (_methodName == "getHandleSet") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandleSet);
+    } else if (_methodName == "getNodeHandles") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getNodeHandles);
     }
     methodNames.push_back( _methodName);
 }
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember)) 
+void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodToCall) {
+    clock_t sumTime=0;
+    long rssStart, rssEnd;
+    std::vector<record_t> records;
+    cout << "Benchmarking AtomSpace's " << methodName << " method " << N <<
+        " times ";
+    std::ofstream myfile;
+    if (saveToFile) {
+        myfile.open ((methodName + "_benchmark.csv").c_str());
+    }
+    int diff = (N / PROGRESS_BAR_LENGTH);
+    if (!diff) diff = 1;
+    int counter=0;
+    rssStart = getMemUsage();
+    long rssFromIncrease = 0;
+    for (int i=0; i < N; i++) {
+        if (sizeIncrease) {
+            long rssBeforeIncrease = getMemUsage();
+            buildAtomSpace(sizeIncrease,percentLinks,false);
+            // Try to negate the memory increase due to adding atoms
+            rssFromIncrease += (getMemUsage() - rssBeforeIncrease);
+        }
+        size_t atomspaceSize = a->getSize();
+        clock_t timeTaken = CALL_MEMBER_FN(*this,methodToCall)();
+        sumTime += timeTaken;
+        counter++;
+        if (saveInterval && counter % saveInterval == 0) {
+            // Only save datapoints every saveInterval calls
+            record_t dataPoint(atomspaceSize,timeTaken,getMemUsage()-rssStart-rssFromIncrease);
+            // Only save datapoints if we have to calculate the stats
+            // afterwards, otherwise it affects memory usage
+            if (doStats) records.push_back(dataPoint);
+            // otherwise, we might write directly to a file
+            if (saveToFile) recordToFile(myfile,dataPoint);
+        }
+        if (i % diff == 0) cerr << "." << flush;
+    }
+    rssEnd = getMemUsage();
+    cout << endl; // clear dotted progress bar line
+    cout << "Sum time for all requests: " << (float) sumTime / CLOCKS_PER_SEC
+        << " seconds" << endl;
+    cout << "Memory (max RSS) change after benchmark: " <<
+        (rssEnd - rssStart - rssFromIncrease) / 1024 << "kb" << endl;
+
+    if (saveInterval && doStats) {
+        // Only calculate stats if we've actually been saving datapoints
+        // the option to calculate them is enabled
+        AtomSpaceBenchmark::TimeStats t(records);
+        t.print();
+    }
+    cout << DIVIDER_LINE << endl;
+    if (saveToFile) { myfile.close(); }
+}
+
 void AtomSpaceBenchmark::startBenchmark(int numThreads)
 {
     // num threads does nothing at the moment;
-    long rssStart, rssEnd;
     if (showTypeSizes) printTypeSizes();
-    if (buildTestData) buildAtomSpace(atomCount,percentLinks);
 
     for (unsigned int i = 0; i < methodNames.size(); i++) {
-        clock_t sumTime=0;
-        std::vector<record_t> records;
-        BMFn methodToTest = methodsToTest[i];
-        std::string methodName = methodNames[i];
-        rssStart = getMemUsage();
-        cout << "Benchmarking AtomSpace's " << methodName << " method " << N <<
-            " times ";
-        std::ofstream myfile;
-        if (saveToFile) {
-            myfile.open ((methodName + "_benchmark.csv").c_str());
-        }
-        int diff = (N / PROGRESS_BAR_LENGTH);
-        if (!diff) diff = 1;
-        int counter=0;
-        for (int i=0; i < N; i++) {
-            if (sizeIncrease) { buildAtomSpace(sizeIncrease,percentLinks,false); }
-            size_t atomspaceSize = a->getSize();
-            clock_t timeTaken = CALL_MEMBER_FN(*this,methodToTest)();
-            sumTime += timeTaken;
-            counter++;
-            if (saveInterval && counter % saveInterval == 0) {
-                // Only save datapoints every saveInterval calls
-                record_t dataPoint(atomspaceSize,timeTaken,getMemUsage()-rssStart);
-                // Only save datapoints if we have to calculate the stats
-                // afterwards, otherwise it affects memory usage
-                if (doStats) records.push_back(dataPoint);
-                // otherwise, we might write directly to a file
-                if (saveToFile) recordToFile(myfile,dataPoint);
-            }
-            if (i % diff == 0) cerr << "." << flush;
-        }
-        cout << endl; // clear dotted progress bar line
-        cout << "Sum time for all requests: " << (float) sumTime / CLOCKS_PER_SEC
-            << " seconds" << endl;
-        rssEnd = getMemUsage();
-        cout << "Memory (max RSS) change after benchmark: " <<
-            (rssEnd - rssStart) / 1024 << "kb" << endl;
-
-        if (saveInterval && doStats) {
-            // Only calculate stats if we've actually been saving datapoints
-            // the option to calculate them is enabled
-            AtomSpaceBenchmark::TimeStats t(records);
-            t.print();
-        }
-        cout << DIVIDER_LINE << endl;
-        if (saveToFile) { myfile.close(); }
+        UUID_begin = TLB::getMaxUUID();
+        a = new AtomSpace();
+        if (buildTestData) buildAtomSpace(atomCount,percentLinks);
+        doBenchmark(methodNames[i],methodsToTest[i]);
+        delete a;
     }
 
     //cout << estimateOfAtomSize(Handle(2)) << endl;
@@ -268,13 +285,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink() {
     if (arity==0) { ++arity; };
 
     for (int j=0; j < arity; j++) {
-        //tRandomStart = clock();
-        // We need this TLB access as the only alternative to
-        // getting a random handle this way scales badly:
-        //Handle h = a->getAtomTable().getRandom(rng);
-        Handle h(rng->randint(TLB::getMaxUUID()-2)+1);
-        //tRandomEnd = clock();
-        outgoing.push_back(h);
+        outgoing.push_back(getRandomHandle());
     }
     tAddLinkStart = clock();
     a->addLink(t,outgoing);
@@ -330,9 +341,18 @@ clock_t AtomSpaceBenchmark::bm_addLink()
     return makeRandomLink();
 }
 
+Handle AtomSpaceBenchmark::getRandomHandle() {
+    //tRandomStart = clock();
+    // We need this TLB access as the only alternative to
+    // getting a random handle this way scales badly:
+    //Handle h = a->getAtomTable().getRandom(rng);
+    //tRandomEnd = clock();
+    return Handle(UUID_begin + rng->randint((TLB::getMaxUUID()-1)-UUID_begin));
+}
+
 clock_t AtomSpaceBenchmark::bm_getType()
 {
-    Handle h(rng->randint(TLB::getMaxUUID()-2)+1);
+    Handle h = getRandomHandle();
     clock_t t_begin = clock();
     a->getType(h); 
     return clock() - t_begin;
@@ -340,7 +360,7 @@ clock_t AtomSpaceBenchmark::bm_getType()
 
 clock_t AtomSpaceBenchmark::bm_getTruthValue()
 {
-    Handle h(rng->randint(TLB::getMaxUUID()-2)+1);
+    Handle h = getRandomHandle();
     clock_t t_begin = clock();
     a->getTV(h); 
     return clock() - t_begin;
@@ -348,7 +368,7 @@ clock_t AtomSpaceBenchmark::bm_getTruthValue()
 
 clock_t AtomSpaceBenchmark::bm_setTruthValue()
 {
-    Handle h(rng->randint(TLB::getMaxUUID()-2)+1);
+    Handle h = getRandomHandle();
     bool useDefaultTV = (rng->randfloat() < chanceUseDefaultTV);
     if (useDefaultTV) {
         SimpleTruthValue stv(TruthValue::DEFAULT_TV()); 
@@ -363,6 +383,31 @@ clock_t AtomSpaceBenchmark::bm_setTruthValue()
         a->setTV(h,stv);
         return clock() - t_begin;
     }
+}
+
+clock_t AtomSpaceBenchmark::bm_getNodeHandles()
+{
+    HandleSeq results;
+    std::ostringstream oss;
+    counter++;
+    oss << "node " << (rng->randint((atomCount-1) * percentLinks)+1);
+    clock_t t_begin = clock();
+    a->getHandleSet(back_inserter(results),NODE,oss.str().c_str(),true);
+    return clock() - t_begin;
+}
+
+clock_t AtomSpaceBenchmark::bm_getHandleSet()
+{
+    Type t = randomType(ATOM);
+    HandleSeq results;
+    clock_t t_begin = clock();
+    a->getHandleSet(back_inserter(results),t,true);
+    return clock() - t_begin;
+}
+
+clock_t AtomSpaceBenchmark::bm_getOutgoingSet()
+{
+    Handle h = getRandomHandle();
 }
 
 AtomSpaceBenchmark::TimeStats::TimeStats(

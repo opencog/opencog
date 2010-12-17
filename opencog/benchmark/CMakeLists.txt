@@ -5,9 +5,9 @@ LINK_DIRECTORIES (
 #INCLUDE_DIRECTORIES (
 #)
 
-ADD_EXECUTABLE (AS_no_event_loop
+ADD_EXECUTABLE (atomspace_bm
     AtomSpaceBenchmark
-    AS_no_event_loop
+    atomspace_bm
 )
 
 TARGET_LINK_LIBRARIES (AS_no_event_loop

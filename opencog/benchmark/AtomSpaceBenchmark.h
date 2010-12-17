@@ -59,6 +59,7 @@ public:
     int saveInterval;
     bool doStats;
     bool buildTestData;
+    UUID UUID_begin;
     typedef clock_t (AtomSpaceBenchmark::*BMFn)();
     std::vector< BMFn > methodsToTest;
 
@@ -74,15 +75,20 @@ public:
     void setMethod(std::string method);
     void showMethods();
     void startBenchmark(int numThreads=1);
+    void doBenchmark(const std::string& methodName, BMFn methodToCall);
 
     void buildAtomSpace(long atomspaceSize=(1 << 16), float percentLinks = 0.1, 
             bool display = true);
+    Handle getRandomHandle();
 
     clock_t bm_addNode();
     clock_t bm_addLink();
 
     clock_t bm_getType();
-    void bm_getHandleSet() {};
+    clock_t bm_getNodeHandles();
+    clock_t bm_getHandleSet();
+    clock_t bm_getOutgoingSet();
+
     void bm_getHandleNode() {};
     void bm_getHandleLink() {};
     void bm_getName() {};
