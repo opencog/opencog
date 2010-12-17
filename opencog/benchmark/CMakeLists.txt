@@ -10,7 +10,7 @@ ADD_EXECUTABLE (atomspace_bm
     atomspace_bm
 )
 
-TARGET_LINK_LIBRARIES (AS_no_event_loop
+TARGET_LINK_LIBRARIES (atomspace_bm
     atomspace
     util
 )
