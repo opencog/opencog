@@ -31,16 +31,15 @@ protected:
 // mutable std::vector<Type> ti;
     Type InclusionLink;
 
-    virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
-                                       int* newN) const {
-        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[3];
-
+    virtual TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const {
+        TVSeq tvs;
+        pHandle A = boost::get<pHandle>(premiseArray[0]);
         assert(premiseArray.size() == 1);
-        pHandleSeq nodes = asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));
+        pHandleSeq nodes = asw->getOutgoing(A);
 
-        tvs[0] = (TruthValue*) & (asw->getTV(boost::get<pHandle>(premiseArray[0])));
-        tvs[1] = (TruthValue*) & (asw->getTV(nodes[0]));
-        tvs[2] = (TruthValue*) & (asw->getTV(nodes[1]));
+        tvs.push_back(&(asw->getTV(A)));
+        tvs.push_back(&(asw->getTV(nodes[0])));
+        tvs.push_back(&(asw->getTV(nodes[1])));
 
         return tvs;
     }

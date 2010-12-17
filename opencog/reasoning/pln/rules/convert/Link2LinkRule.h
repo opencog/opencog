@@ -32,6 +32,8 @@ namespace opencog { namespace pln {
 template<typename FormulaType>
 class Link2LinkRule : public GenericRule<FormulaType>
 {
+    typedef GenericRule<FormulaType> super;
+
     Type SRC_LINK;
     Type DEST_LINK;
 
@@ -41,20 +43,17 @@ class Link2LinkRule : public GenericRule<FormulaType>
 public:
     bool validate2(Rule::MPs& args) const { return true; }
     Link2LinkRule(AtomSpaceWrapper *_asw, Type src, Type dest)
-        : GenericRule<FormulaType>(_asw, false,""),
-        SRC_LINK(src), DEST_LINK(dest),
-        asw(_asw) // @todo I don't understand why it is needed, asw is already defined in Rule...
+        : super(_asw, false,""),
+          SRC_LINK(src), DEST_LINK(dest),
+          asw(_asw) // @todo I don't understand why it is needed, asw is already defined in Rule...
 
     {
-        GenericRule<FormulaType>::name = "Link2Link(" +
-            std::string(Type2Name(SRC_LINK)) + "=>" +
+        super::name = "Link2Link(" + std::string(Type2Name(SRC_LINK)) + "=>" +
             std::string(Type2Name(DEST_LINK)) +")";
-        GenericRule<FormulaType>::inputFilter.push_back(meta(
-                                                             new tree<Vertex>(
-                                                                              mva((pHandle)SRC_LINK,
-                                                                                  mva((pHandle)ATOM),
-                                                                                  mva((pHandle)ATOM))
-                                                                              )));
+        super::inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)SRC_LINK,
+                                                               mva((pHandle)ATOM),
+                                                               mva((pHandle)ATOM))
+                                                           )));
     }
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
@@ -72,16 +71,10 @@ public:
         return makeSingletonSet(ret);
     }
     
-    virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
-                                       int* newN) const
+    virtual TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const
     {
-        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
-        
-        assert(premiseArray.size()==1);
-        
-        tvs[0] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[0])));
-        
-        return tvs;
+        OC_ASSERT(premiseArray.size()==1);
+        return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
     }
 
 

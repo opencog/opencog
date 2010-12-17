@@ -39,9 +39,9 @@ const bool PLNdebug = true;
 ///fabricio: method that checks if all TV are of indefinite type (return false otherwise)
 ///In order to avoid "multiple definition" error and to not create a definition file only to
 ///definine this function, I declared it as inline
-inline bool isAllIndefiniteTruthValueType(TruthValue** TV, int N)
+inline bool isAllIndefiniteTruthValueType(const TVSeq& TV)
 {
-    for (int i = 0; i < N; i++) {
+    for (unsigned int i = 0; i < TV.size(); i++) {
         if (!(TV[i]->getType() == INDEFINITE_TRUTH_VALUE))
             return false;
     }
@@ -56,14 +56,14 @@ namespace pln {
 =============================================================================*/
 
 #define PLNFormulaBodyFor_Link \
-    assert(N == 1); \
+    assert(TV.size() == 1);   \
     assert(TV[0]); \
-    TruthValue* linkAB = TV[0]; \
+    const TruthValue* linkAB = TV[0]; \
     strength_t sAB = linkAB->getMean(); \
     count_t nAB = linkAB->getCount(); \
      
 #define PLNFormulaBodyFor_Atom2 \
-    assert(N == 2); \
+    assert(TV.size() == 2); \
     assert(TV[0]); \
     assert(TV[1]); \
     strength_t sA = TV[0]->getMean(); \
@@ -72,13 +72,13 @@ namespace pln {
     count_t nB = TV[1]->getCount(); \
      
 #define PLNFormulaBodyFor_Link1Node2 \
-    assert(N == 3); \
+    assert(TV.size() == 3); \
     assert(TV[0]); \
     assert(TV[1]); \
     assert(TV[2]); \
-    TruthValue* linkAB = TV[0]; \
-    TruthValue* atomA = TV[1]; \
-    TruthValue* atomB = TV[2]; \
+    const TruthValue* linkAB = TV[0]; \
+    const TruthValue* atomA = TV[1]; \
+    const TruthValue* atomB = TV[2]; \
     strength_t sAB = linkAB->getMean(); \
     strength_t sA = atomA->getMean(); \
     strength_t sB = atomB->getMean(); \
@@ -87,15 +87,15 @@ namespace pln {
     count_t nB = atomB->getCount();
 
 #define PLNFormulaBodyFor_Link2Node2 \
-    assert(N == 4); \
+    assert(TV.size() == 4); \
     assert(TV[0]); \
     assert(TV[1]); \
     assert(TV[2]); \
     assert(TV[3]); \
-    TruthValue* linkAB = TV[0]; \
-    TruthValue* linkBA = TV[1]; \
-    TruthValue* atomA = TV[2]; \
-    TruthValue* atomB = TV[3]; \
+    const TruthValue* linkAB = TV[0]; \
+    const TruthValue* linkBA = TV[1]; \
+    const TruthValue* atomA = TV[2]; \
+    const TruthValue* atomB = TV[3]; \
     strength_t sAB = linkAB->getMean(); \
     strength_t sBA = linkBA->getMean(); \
     strength_t sA = atomA->getMean(); \
@@ -106,17 +106,17 @@ namespace pln {
     count_t nB = atomB->getCount();
 
 #define PLNFormulaBodyFor_Link2Node3 \
-    assert(N == 5); \
+    assert(TV.size() == 5); \
     assert(TV[0]); \
     assert(TV[1]); \
     assert(TV[2]); \
     assert(TV[3]); \
     assert(TV[4]); \
-    TruthValue* linkAB = TV[0]; \
-    TruthValue* linkBC = TV[1]; \
-    TruthValue* atomA = TV[2]; \
-    TruthValue* atomB = TV[3]; \
-    TruthValue* atomC = TV[4]; \
+    const TruthValue* linkAB = TV[0]; \
+    const TruthValue* linkBC = TV[1]; \
+    const TruthValue* atomA = TV[2]; \
+    const TruthValue* atomB = TV[3]; \
+    const TruthValue* atomC = TV[4]; \
     strength_t sA = atomA->getMean(); \
     strength_t sB = atomB->getMean(); \
     strength_t sC = atomC->getMean(); \
@@ -141,10 +141,9 @@ namespace pln {
 
 
 //===========================================================================//
-TruthValue* IdentityFormula::simpleCompute(TruthValue** TV,
-                                           int N, long U) const
+TruthValue* IdentityFormula::simpleCompute(const TVSeq& TV, long U) const
 {
-    assert(N > 0);
+    assert(TV.size() > 0);
     return TV[0]->clone();
 }
 
@@ -154,16 +153,16 @@ TruthValue* IdentityFormula::simpleCompute(TruthValue** TV,
 =============================================================================*/
 
 //===========================================================================//
-TruthValue* InversionFormula::simpleCompute(TruthValue** TV,
-                                            int N, long U) const
+TruthValue* InversionFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Invert...\n");
 
+    // @todo remove once Indefinitizer is well defined
     ///IndefiniteTV check
-    if (isAllIndefiniteTruthValueType(TV, N)) {
-        cprintf(-3, "IndefiniteSymmetricBayesFormula\n");
-        return IndefiniteSymmetricBayesFormula().simpleCompute(TV, N, U);
-    }
+    // if (isAllIndefiniteTruthValueType(TV)) {
+    //     cprintf(-3, "IndefiniteSymmetricBayesFormula\n");
+    //     return IndefiniteSymmetricBayesFormula().simpleCompute(TV, U);
+    // }
 
     PLNFormulaBodyFor_Link1Node2;
     DebugPLNBodyFor_Link1Node2;
@@ -175,16 +174,16 @@ TruthValue* InversionFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
-                                                       int N, long U) const
+TruthValue* ImplicationBreakdownFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "InferenceMindAgent::ImplicationBreakdown\n");
 
+    // @todo remove once Indefinitizer is defined
     ///IndefiniteTV check
-    if (isAllIndefiniteTruthValueType(TV, N)) {
-        cprintf(-3, "IndefiniteSymmetricImplicationBreakdown\n");
-        return IndefiniteSymmetricImplicationBreakdownFormula().simpleCompute(TV, N, U);
-    }
+    // if (isAllIndefiniteTruthValueType(TV)) {
+    //     cprintf(-3, "IndefiniteSymmetricImplicationBreakdown\n");
+    //     return IndefiniteSymmetricImplicationBreakdownFormula().simpleCompute(TV, U);
+    // }
 
     PLNFormulaBodyFor_Link1Node2;
     DebugPLNBodyFor_Link1Node2;
@@ -212,8 +211,7 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
 }
 
 //=======================================================================================//
-TruthValue* ImplicationConstructionFormula::simpleCompute(TruthValue** TV,
-                                                          int N, long U) const
+TruthValue* ImplicationConstructionFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "InferenceMindAgent::ImplicationConstruction\n");
 
@@ -227,7 +225,7 @@ TruthValue* ImplicationConstructionFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* NotFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* NotFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "InferenceMindAgent::NotEvaluation\n");
 
@@ -243,18 +241,18 @@ TruthValue* NotFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* DeductionSimpleFormula::simpleCompute(TruthValue** TV,
-                                                  int N, long U) const
+TruthValue* DeductionSimpleFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "InferenceMindAgent::deduct(handleA, linkType, nodeType)\n");
 
+    /// @todo remove once Indefinitizer is here
     ///IndefiniteTV check
-    if (isAllIndefiniteTruthValueType(TV, N)) {
-        cprintf(-3, "IndefiniteSymmetricDeductionFormula\n");
-        return IndefiniteSymmetricDeductionFormula().simpleCompute(TV, N, U);
-    }
+    // if (isAllIndefiniteTruthValueType(TV, N)) {
+    //     cprintf(-3, "IndefiniteSymmetricDeductionFormula\n");
+    //     return IndefiniteSymmetricDeductionFormula().simpleCompute(TV, U);
+    // }
 
-    TruthValue* linkTEMP = TV[0];
+    const TruthValue* linkTEMP = TV[0];
 
     PLNFormulaBodyFor_Link2Node3;
     DebugPLNBodyFor_Link2Node3;
@@ -297,15 +295,16 @@ strength_t DeductionGeometryFormula::g2(strength_t sA, strength_t sB,
 }
 
 //===========================================================================//
-TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,
-                                                    int N, long U) const
+TruthValue* DeductionGeometryFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Geom: deduct\n");
 
     PLNFormulaBodyFor_Link2Node3;
     DebugPLNBodyFor_Link2Node3;
 
-    TruthValue* baTV[] = { linkAB, atomA, atomB };
+    TVSeq baTV(1, linkAB);
+    baTV.push_back(atomA);
+    baTV.push_back(atomB);
     TruthValue* linkBA = InversionFormula::simpleCompute(baTV, 3);
 
     strength_t sBA = linkBA->getMean();
@@ -322,21 +321,21 @@ TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,
         IndependenceAssumptionGeometryDiscount * nA * nBC
         / std::max(nB, TV_MIN);
 
-    return NULL;
+    return NULL; // @todo ???
     //    return checkTruthValue(  new SimpleTruthValue(sAC,nAC) );
 }
 
 //===========================================================================//
-TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,
-                                           int N, long U) const
+TruthValue* RevisionFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Revision...\n");
-
+    
+    /// @todo remove once we have Indefinitizer
     ///IndefiniteTV check
-    if (isAllIndefiniteTruthValueType(TV, N)) {
-        cprintf(-3, "IndefiniteSymmetricRevisionFormula\n");
-        return IndefiniteSymmetricRevisionFormula().simpleCompute(TV, N, U);
-    }
+    // if (isAllIndefiniteTruthValueType(TV)) {
+    //     cprintf(-3, "IndefiniteSymmetricRevisionFormula\n");
+    //     return IndefiniteSymmetricRevisionFormula().simpleCompute(TV, U);
+    // }
 
     PLNFormulaBodyFor_Atom2;
     //    DebugPLNBodyFor_Atom2;
@@ -354,8 +353,7 @@ TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* Inh2SimFormula::simpleCompute(TruthValue** TV,
-                                          int N, long U) const
+TruthValue* Inh2SimFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Inh2Sim...\n");
 
@@ -371,7 +369,7 @@ TruthValue* Inh2SimFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* Sim2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* Sim2InhFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Sim2Inh...\n");
 
@@ -387,8 +385,7 @@ TruthValue* Sim2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* ANDBreakdownFormula::simpleCompute(TruthValue** TV,
-                                               int N, long U) const
+TruthValue* ANDBreakdownFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "ANDbreak...\n");
 
@@ -402,8 +399,7 @@ TruthValue* ANDBreakdownFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* ModusPonensFormula::simpleCompute(TruthValue** TV,
-                                              int N, long U) const
+TruthValue* ModusPonensFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Modus Ponens...\n");
 
@@ -419,7 +415,7 @@ TruthValue* ModusPonensFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* Inh2ImpFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* Inh2ImpFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Inh2Imp...\n");
 
@@ -430,7 +426,7 @@ TruthValue* Inh2ImpFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* Imp2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* Imp2InhFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Imp2Inh...\n");
 
@@ -444,15 +440,16 @@ TruthValue* Imp2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* Mem2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* Mem2InhFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Mem2Inh...\n");
 
+    /// @todo once we have Indefinitizer
     ///IndefiniteTV check
-    if (isAllIndefiniteTruthValueType(TV, N)) {
-        cprintf(-3, "IndefiniteMem2InhFormula\n");
-        return IndefiniteMem2InhFormula().simpleCompute(TV, N, U);
-    }
+    // if (isAllIndefiniteTruthValueType(TV)) {
+    //     cprintf(-3, "IndefiniteMem2InhFormula\n");
+    //     return IndefiniteMem2InhFormula().simpleCompute(TV, U);
+    // }
 
 
     PLNFormulaBodyFor_Link;
@@ -465,8 +462,7 @@ TruthValue* Mem2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* Mem2EvalFormula::simpleCompute(TruthValue** TV,
-                                           int N, long U) const
+TruthValue* Mem2EvalFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Mem2Eval...\n");
 
@@ -480,8 +476,7 @@ TruthValue* Mem2EvalFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* Eval2InhFormula::simpleCompute(TruthValue** TV,
-                                           int N, long U) const
+TruthValue* Eval2InhFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Eval2Inh...\n");
 
@@ -495,7 +490,7 @@ TruthValue* Eval2InhFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* Ext2IntFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* Ext2IntFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Ext2Int...\n");
 
@@ -509,7 +504,7 @@ TruthValue* Ext2IntFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* Int2ExtFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* Int2ExtFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Int2Ext...\n");
 
@@ -523,35 +518,36 @@ TruthValue* Int2ExtFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
-                                               int N, long U) const
+TruthValue* SymmetricANDFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical AND...\n");
     cprintf(-3, "SymmetricAND...\n");
 
     /* Indefinite Formula */
-    if (isAllIndefiniteTruthValueType(TV, N)) {
-        cprintf(-3, "IndefiniteSymmetricANDFormula\n");
-        if (N == 2) {
-            return IndefiniteSymmetricANDFormula().simpleCompute(TV, N, U);
-        }
+    // @todo indefinite formula should be handled using an Indefinitizer anyway
 
-        IndefiniteTruthValue* _TV[2];
-        IndefiniteTruthValue* result = (IndefiniteTruthValue*)TV[0];
-        for (int i = 1; i < N; i++) {
-            _TV[0] = result;
-            _TV[1] = (IndefiniteTruthValue*)TV[i];
-            result = (IndefiniteTruthValue*)IndefiniteSymmetricANDFormula().simpleCompute((TruthValue**)_TV, 2, U);
-        }
-        return result;
-    }
+    // if (isAllIndefiniteTruthValueType(TV, N)) {
+    //     cprintf(-3, "IndefiniteSymmetricANDFormula\n");
+    //     if (TV.size() == 2) {
+    //         return IndefiniteSymmetricANDFormula().simpleCompute(TV, U);
+    //     }
+
+    //     IndefiniteTruthValue* _TV[2];
+    //     IndefiniteTruthValue* result = (IndefiniteTruthValue*)TV[0];
+    //     for (int i = 1; i < N; i++) {
+    //         _TV[0] = result;
+    //         _TV[1] = (IndefiniteTruthValue*)TV[i];
+    //         result = (IndefiniteTruthValue*)IndefiniteSymmetricANDFormula().simpleCompute((TruthValue**)_TV, 2, U);
+    //     }
+    //     return result;
+    // }
     /* End of Indefinite Formulas */
 
 
     strength_t sTot = 1.0f;
     confidence_t conTot = 1.0f;
 
-    for (int i = 0; i < N; i++) {
+    for (unsigned int i = 0; i < TV.size(); i++) {
         cprintf(-3, "%f,%f & ", TV[i]->getMean(), TV[i]->getConfidence());
         sTot *= TV[i]->getMean();
         conTot *= TV[i]->getConfidence();
@@ -573,8 +569,7 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* AsymmetricANDFormula::simpleCompute(TruthValue** TV,
-                                                int N, long U) const
+TruthValue* AsymmetricANDFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical AND2...\n");
 
@@ -588,7 +583,7 @@ TruthValue* AsymmetricANDFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* OldANDFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* OldANDFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "OldAND...\n");
 
@@ -604,14 +599,18 @@ TruthValue* OldANDFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* ORFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* ORFormula::simpleCompute(const TVSeq& TV, long U) const
 {
+    int N = TV.size();
+
     cprintf(-3,  "Logical OR with : ");
     for (int k = 0;k < N;k++)
         cprintf(-3,  "#%d:%s ", k, TV[k]->toString().c_str());
     cprintf(-3, "\n");
 
-    auto_ptr<TruthValue> res1, res2;
+    const TruthValue* res1 = TV[0];
+    const TruthValue* res2 = TV[1];
+    auto_ptr<const TruthValue> ptr1, ptr2;
 
     if (N > 2) {
 //  TVType* next[2];
@@ -619,31 +618,29 @@ TruthValue* ORFormula::simpleCompute(TruthValue** TV, int N, long U) const
         int N1 = (int)(N / 2);
         int N2 = (int)(N / 2.0 + 0.501);
 
+        TVSeq TV1(TV.begin(), TV.begin()+N1);
+        TVSeq TV2(TV.begin()+N1, TV.begin()+N1+N2);
+
         cprintf(-3,  "Division: %d - %d\n", N1, N2);
 
         if (N1 == 1) { //Either (>1, >1) or (1, >1).
-            TV[1] = simpleCompute(&TV[N1], N2, U);
-
-            res1 = auto_ptr<TruthValue>(TV[1]);
+            res2 = simpleCompute(TV2, U);
+            ptr2 = auto_ptr<const TruthValue>(res2);
         } else {
-            TV[0] = simpleCompute(TV, N1, U);
-            TV[1] = simpleCompute(&TV[N1], N2, U);
-
-            res1 = auto_ptr<TruthValue>(TV[0]);
-            res2 = auto_ptr<TruthValue>(TV[1]);
+            res1 = simpleCompute(TV1, U);
+            res2 = simpleCompute(TV2, U);
+            ptr1 = auto_ptr<const TruthValue>(res1);
+            ptr2 = auto_ptr<const TruthValue>(res2);
         }
     }
 
-    strength_t sTot = 0.0f;
+    strength_t sTot = res1->getMean() + res2->getMean();
     count_t nTot = 0.0f;
 
-    for (int i = 0; i < 2; i++)
-        sTot += TV[i]->getMean();
-
-    strength_t sA = TV[0]->getMean();
-    strength_t sB = TV[1]->getMean();
-    count_t nA = TV[0]->getCount();
-    count_t nB = TV[1]->getCount();
+    strength_t sA = res1->getMean();
+    strength_t sB = res2->getMean();
+    count_t nA = res1->getCount();
+    count_t nB = res2->getCount();
 
     count_t A = sA * nB;
     count_t B = sB * nA;
@@ -656,13 +653,14 @@ TruthValue* ORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,
-                                              int N, long U) const
+TruthValue* ExcludingORFormula::simpleCompute(const TVSeq& TV, long U) const
 {
 //  LOG(3, "Logical OR...\n");
 //  int level1N = haxx::contractInclusionExclusionFactorial(N); //2*(int)(sqrt(N)); //inverse of N*(N-1)/2
 
     ///N must be a square of an integery, namely (I + I*(I-1)) = I*I
+
+    int N = TV.size();
 
     int level1N = 2;
     assert(N == 3);
@@ -715,7 +713,7 @@ TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* NOTFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* NOTFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical NOT...\n");
 
@@ -729,26 +727,25 @@ TruthValue* NOTFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* ORFormula2::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* ORFormula2::simpleCompute(const TVSeq& TV, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical OR...\n");
 
     NOTFormula notF;
-    TruthValue** NOT_TVs = notF.multiCompute(TV, N, U);
-    TruthValue* NOT_ANDTV = SymmetricANDFormula().simpleCompute(NOT_TVs, N, U);
-    TruthValue* ORTV = notF.simpleCompute( &NOT_ANDTV, 1, U );
+    TVSeq NOT_TVs = notF.multiCompute(TV, U);
+    TruthValue* NOT_ANDTV = SymmetricANDFormula().simpleCompute(NOT_TVs, U);
+    TruthValue* ORTV = notF.simpleCompute(TVSeq(1, NOT_ANDTV), U);
 
     delete NOT_ANDTV;
 
-    for (int i = 0; i < N; i++)
+    for (unsigned int i = 0; i < NOT_TVs.size(); i++)
         delete NOT_TVs[i];
-    delete[] NOT_TVs;
 
     return ORTV;
 }
 
 //===========================================================================//
-TruthValue* OldORFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* OldORFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "OldOR...\n");
 
@@ -767,8 +764,10 @@ TruthValue* OldORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 =============================================================================*/
 
 //===========================================================================//
-TruthValue* SubsetEvalFormula::compute(TruthValue** TVs, int N, long U) const
+TruthValue* SubsetEvalFormula::compute(const TVSeq& TVs, long U) const
 {
+    int N = TVs.size();
+
     OC_ASSERT((N % 2) == 0, "N = %d must be pair", N);
 
     if (N == 0) {
@@ -779,16 +778,13 @@ TruthValue* SubsetEvalFormula::compute(TruthValue** TVs, int N, long U) const
     int Nsub = N/2;
     int Nsuper = Nsub;
 
-    TruthValue** TVsub = TVs;
-    TruthValue** TVsuper = TVsub + Nsub;
-
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "SubSetEval...\n");
 
     strength_t fs = 0.0f, s = 0.0f;
 
     for (int i = 0; i < Nsuper; i++) {
-        fs += f(TVsub[i]->getMean(), TVsuper[i]->getMean());
-        s += TVsub[i]->getMean();
+        fs += f(TVs[i]->getMean(), TVs[Nsub + i]->getMean());
+        s += TVs[i]->getMean();
     }
 
     strength_t sSS = fs / std::max(s, TV_MIN);
@@ -816,8 +812,10 @@ strength_t SubsetEvalFormulaMin::f(strength_t a, strength_t b) const
 =============================================================================*/
 
 //===========================================================================//
-TruthValue* FORALLFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* FORALLFormula::simpleCompute(const TVSeq& TV, long U) const
 {
+    int N = TV.size();
+
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "For all...\n");
 
     strength_t sForAll = 1.0f;
@@ -836,13 +834,12 @@ TruthValue* FORALLFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* PredicateTVFormula::simpleCompute(TruthValue** TV,
-                                              int N, long U) const
+TruthValue* PredicateTVFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     strength_t sForAll = 0.0f;
     count_t nForAll = 0.0f;
 
-    for (int i = 0; i < N; i++) {
+    for (unsigned int i = 0; i < TV.size(); i++) {
         count_t n_i = TV[i]->getCount();
         nForAll += n_i;
         sForAll += (TV[i]->getMean() * n_i);
@@ -852,20 +849,19 @@ TruthValue* PredicateTVFormula::simpleCompute(TruthValue** TV,
 }
 
 //===========================================================================//
-TruthValue* EXISTFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* EXISTFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Exists...\n");
 
     NotFormula notF;
-    TruthValue** NOT_TVs = notF.multiCompute(TV, N, U);
-    TruthValue* NOT_EXTV = FORALLFormula().simpleCompute(NOT_TVs, N, U);
-    TruthValue* EXTV = notF.simpleCompute( &NOT_EXTV, 1, U );
+    TVSeq NOT_TVs = notF.multiCompute(TV, U);
+    TruthValue* NOT_EXTV = FORALLFormula().simpleCompute(NOT_TVs, U);
+    TruthValue* EXTV = notF.simpleCompute(TVSeq(1, NOT_EXTV), U );
 
     delete NOT_EXTV;
 
-    for (int i = 0; i < N; i++)
+    for (unsigned int i = 0; i < TV.size(); i++)
         delete NOT_TVs[i];
-    delete[] NOT_TVs;
 
     return EXTV;
 
@@ -880,8 +876,7 @@ TruthValue* EXISTFormula::simpleCompute(TruthValue** TV, int N, long U) const
 }
 
 //===========================================================================//
-TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,
-                                           int N, long U) const
+TruthValue* InhSubstFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "InferenceMindAgent::InhSubstFormula\n");
 
@@ -906,23 +901,26 @@ TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,
 
 //===========================================================================//
 template<int _TVN>
-TruthValue* Formula<_TVN>::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* Formula<_TVN>::simpleCompute(const TVSeq& TV, long U) const
 {
     //cprintf(-3, "Formula<_TVN>::simpleCompute(N = %d)\n", N);
-    return this->simpleCompute(TV, N, U);
+    return this->simpleCompute(TV, U);
 }
 
 //===========================================================================//
 template<int _TVN>
-TruthValue** Formula<_TVN>::multiCompute(TruthValue** TV, int N, long U) const
+TVSeq Formula<_TVN>::multiCompute(const TVSeq& TV, long U) const
 {
+    int N = TV.size();
     //cprintf(-3, "Formula<_TVN>::multiCompute(N = %d)\n", N);
     assert(!(TVN / N));
 
-    TruthValue** ret = new TruthValue*[N/TVN];
+    TVSeq ret(N/TVN);
 
     for (int group = 0; group < N / TVN; group++) {
-        ret[group] = simpleCompute(&TV[group*TVN], TVN, U);
+        /// @todo maybe can be optimized
+        TVSeq groupTV(TV.begin() + group*TVN, TV.begin() + group*TVN + TVN);
+        ret[group] = simpleCompute(groupTV, U);
     }
 
     return ret;
@@ -930,63 +928,38 @@ TruthValue** Formula<_TVN>::multiCompute(TruthValue** TV, int N, long U) const
 
 //===========================================================================//
 template<int _TVN>
-TruthValue* Formula<_TVN>::compute(TruthValue** TV, int N, long U) const
+TruthValue* Formula<_TVN>::compute(const TVSeq& TV, long U) const
 {
+    int N = TV.size();
+
     //cprintf(-3, "Formula<_TVN>::compute(N = %d)\n", N);
-    TruthValue* result;
-    // computation with primary TVS
-    TruthValue* primaryResult = this->simpleCompute(TV, N, U);
+
+    TruthValue* primaryResult = this->simpleCompute(TV, U);
     // Check for existence of CompositeTruthValues and makes computation
     // for each VersionHandle
-    bool hasCompositeTruthValue = false;
     std::set<VersionHandle> versionHandles;
     for (int i = 0; i < N; i++) {
         if (TV[i]->getType() == COMPOSITE_TRUTH_VALUE) {
-            hasCompositeTruthValue = true;
             CompositeTruthValue* ctv = (CompositeTruthValue*) TV[i];
             versionHandles.insert(ctv->vh_begin(), ctv->vh_end());
         }
     }
-    // Temporary ForwardChainer demo hack
-    if (0) { //hasCompositeTruthValue) {
-        CompositeTruthValue* compositeResult =
-            new CompositeTruthValue(*primaryResult, NULL_VERSION_HANDLE);
-        delete primaryResult;
-        foreach(VersionHandle vh, versionHandles) {
-            std::auto_ptr<TruthValue*> versionedTVs(new TruthValue*[N]);
-            int numberOfCompatibleTvs = 0;
-            for (int i = 0; i < N; i++) {
-                if (TV[i]->getType() == COMPOSITE_TRUTH_VALUE) {
-                    const TruthValue& versionedTV =
-                        ((CompositeTruthValue*) TV[i])->getVersionedTV(vh);
-                    if (!versionedTV.isNullTv()) {
-                        versionedTVs.get()[numberOfCompatibleTvs++]
-                            = (TruthValue*) & versionedTV;
-                    }
-                }
-            }
-            TruthValue* versionedResult = this->simpleCompute(versionedTVs.get(), numberOfCompatibleTvs, U);
-            compositeResult->setVersionedTV(*versionedResult, vh);
-            delete versionedResult;
-        }
-        result = compositeResult;
-    } else {
-        result = primaryResult;
-    }
-    return result;
+    OC_ASSERT(versionHandles.empty(),
+              "compute should not be called on CompositeTruthValue with VersionedTV");
+    return primaryResult;
 }
 
 // All instantiations of Formula<_TVN> so that link error
 // (undefined reference) does not happen
-template TruthValue* Formula<1>::compute(TruthValue** TV, int N, long U) const;
-template TruthValue* Formula<2>::compute(TruthValue** TV, int N, long U) const;
-template TruthValue* Formula<3>::compute(TruthValue** TV, int N, long U) const;
-template TruthValue* Formula<4>::compute(TruthValue** TV, int N, long U) const;
-template TruthValue* Formula<5>::compute(TruthValue** TV, int N, long U) const;
-template TruthValue* Formula<AND_MAX_ARITY>::compute(TruthValue** TV, int N, long U) const;
+template TruthValue* Formula<1>::compute(const TVSeq& TV, long U) const;
+template TruthValue* Formula<2>::compute(const TVSeq& TV, long U) const;
+template TruthValue* Formula<3>::compute(const TVSeq& TV, long U) const;
+template TruthValue* Formula<4>::compute(const TVSeq& TV, long U) const;
+template TruthValue* Formula<5>::compute(const TVSeq& TV, long U) const;
+template TruthValue* Formula<AND_MAX_ARITY>::compute(const TVSeq& TV, long U) const;
 // AND_MAX_ARITY == OR_MAX_ARITY == FORALL_MAX_ARITY
-//template TruthValue* Formula<OR_MAX_ARITY>::compute(TruthValue** TV, int N, long U) const;
-//template TruthValue* Formula<FORALL_MAX_ARITY>::compute(TruthValue** TV, int N, long U) const;
+//template TruthValue* Formula<OR_MAX_ARITY>::compute(const TVSeq& TV, int N, long U) const;
+//template TruthValue* Formula<FORALL_MAX_ARITY>::compute(const TVSeq& TV, int N, long U) const;
 
 
 }} //namespace opencog::pln

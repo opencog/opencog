@@ -78,8 +78,7 @@ meta SubsetEvalRule::i2oType(const vector<Vertex>& h_vec) const
                                      )));
 }
 
-TruthValue** SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises,
-                                           int* newN) const
+TVSeq SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises) const
 {
     OC_ASSERT(premises.size() == 2);
 
@@ -96,8 +95,7 @@ TruthValue** SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises,
     pHandleSet mlSetSuper = memberLinkSet(super_h, MIN_MEMBERS_STRENGTH,
                                           MIN_MEMBERS_COUNT, _asw);
 
-    vector<TruthValue*> tvsSub;
-    vector<TruthValue*> tvsSuper;
+    TVSeq tvsSub, tvsSuper;
 
     // We fill tvsSub and tvsSuper by padding the missing TVs with zeros
     // so that each element of tvsSub and tvsSuper are aligned
@@ -110,7 +108,7 @@ TruthValue** SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises,
         pHandleSetConstIt h_ml_super_cit =
             find_if(mlSetSuper.begin(), mlSetSuper.end(), eqMember);
         if (h_ml_super_cit == mlSetSuper.end())
-            tvsSuper.push_back(new SimpleTruthValue(0, 0));
+            tvsSuper.push_back(new SimpleTruthValue(0, 0)); /// @todo leaking?
         else {
             tvsSuper.push_back(_asw->getTV(*h_ml_super_cit).clone());
             used.insert(*h_ml_super_cit);
@@ -121,30 +119,14 @@ TruthValue** SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises,
         //std::cout << _asw->pHandleToString(h_ml_super) << std::endl;
         if (!STLhas(used, h_ml_super)) {
             tvsSuper.push_back(_asw->getTV(h_ml_super).clone());
-            tvsSub.push_back(new SimpleTruthValue(0, 0));
+            tvsSub.push_back(new SimpleTruthValue(0, 0)); /// @todo leaking?
         }
     }
 
     assert(tvsSub.size() == tvsSuper.size());
 
-    unsigned int N = tvsSub.size();
-
-//     std::cout << "SUB" << std::endl;
-//     for(unsigned int i = 0; i < N; i++) {
-//         std::cout << tvsSub[i]->toString() << std::endl;
-//     }
-//     std::cout << "SUPER" << std::endl;
-//     for(unsigned int i = 0; i < N; i++) {
-//         std::cout << tvsSuper[i]->toString() << std::endl;
-//     }
-
-    *newN = 2 * N;
-
-    TruthValue** tvs = new TruthValue*[*newN];
-
-    std::copy(tvsSub.begin(), tvsSub.end(), tvs);
-    std::copy(tvsSuper.begin(), tvsSuper.end(), tvs + N);
-
+    TVSeq tvs(tvsSub.begin(), tvsSub.end());
+    tvs.insert(tvs.end(), tvsSuper.begin(), tvsSuper.end());
     return tvs;
 }
 
@@ -153,17 +135,13 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
                                     pHandle CX,
                                     bool fresh) const
 {
-    int N;
+    TVSeq tvs = formatTVarray(premiseArray);
 
-    TruthValue** tvs = formatTVarray(premiseArray, &N);
+    TruthValue* retTV = formula.compute(tvs);
 
-    TruthValue* retTV = formula.compute(tvs, N);
-
-    for (unsigned int i = 0; i < (unsigned int)N; i++) {
+    for (unsigned int i = 0; i < tvs.size(); i++) {
         delete tvs[i];
     }
-
-    delete[] tvs;
 
     pHandle ret = _asw->addAtom(*i2oType(premiseArray), *retTV, fresh);
     return BoundVertex(ret);

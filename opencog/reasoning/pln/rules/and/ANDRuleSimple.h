@@ -44,8 +44,7 @@ namespace opencog { namespace pln {
  *         as outgoing atoms
  */
 pHandle UnorderedCcompute(AtomSpaceWrapper *asw,
-                          Type linkT, const ArityFreeFormula<TruthValue,
-                                                             TruthValue*>& fN,
+                          Type linkT, const ArityFreeFormula& fN,
                           pHandle* premiseArray,
                           const int n, pHandle CX=PHANDLE_UNDEFINED,
                           bool fresh = true);

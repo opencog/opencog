@@ -187,14 +187,12 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
         assert(false);
     }
     
-    TruthValue* tvs[] = {
-        (TruthValue*) &(asw->getTV(implication)),
-        (TruthValue*) &(asw->getTV(antecedant)),
-        (TruthValue*) &(asw->getTV(conclusion))
-        };
+    TVSeq tvs(1, &(asw->getTV(implication)));
+    tvs.push_back(&(asw->getTV(antecedant)));
+    tvs.push_back(&(asw->getTV(conclusion)));
     
     TruthValue* retTV =
-        ImplicationBreakdownFormula().compute(tvs, 3);
+        ImplicationBreakdownFormula().compute(tvs);
     
     // update the TV of the conclusion.
     // Note that ret is different than conclusion, that is because a dummy

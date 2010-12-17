@@ -72,15 +72,10 @@ public:
                                 )));
     }
     
-    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
+    TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const
     {
-        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
-
-        assert(premiseArray.size()==1);
-
-        tvs[0] = (TruthValue*) &(asw->getTV(_v2h(premiseArray[0])));
-
-        return tvs;
+        OC_ASSERT(premiseArray.size()==1);
+        return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
     }
 
     bool validate2(Rule::MPs& args) const { return true; }

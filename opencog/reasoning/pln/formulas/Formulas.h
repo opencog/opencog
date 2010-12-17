@@ -172,7 +172,7 @@ const float DefaultNodeProbability = 1 / DefaultU;
 class IdentityFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /*=============================================================================
@@ -186,7 +186,7 @@ public:
 class InversionFormula : public Formula<3>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -195,7 +195,7 @@ public:
 class ImplicationBreakdownFormula : public Formula<3>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -204,7 +204,7 @@ public:
 class ImplicationConstructionFormula : public Formula<3>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -215,7 +215,7 @@ public:
 class NotFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -224,7 +224,7 @@ public:
 class DeductionSimpleFormula : public Formula<5>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -239,7 +239,7 @@ private:
     strength_t g2(strength_t sA, strength_t sB,
                   strength_t sC, strength_t sAB) const;
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -248,7 +248,7 @@ public:
 class RevisionFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -257,7 +257,7 @@ public:
 class Inh2SimFormula : public Formula<4>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -266,7 +266,7 @@ public:
 class Sim2InhFormula : public Formula<3>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -275,7 +275,7 @@ public:
 class ANDBreakdownFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -284,7 +284,7 @@ public:
 class ModusPonensFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -293,7 +293,7 @@ public:
 class Inh2ImpFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -302,7 +302,7 @@ public:
 class Imp2InhFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -311,7 +311,7 @@ public:
 class Mem2InhFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -320,7 +320,7 @@ public:
 class Mem2EvalFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -329,7 +329,7 @@ public:
 class Eval2InhFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -338,7 +338,7 @@ public:
 class Ext2IntFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -347,7 +347,7 @@ public:
 class Int2ExtFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -357,7 +357,7 @@ public:
 class SymmetricANDFormula : public Formula<AND_MAX_ARITY>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -366,7 +366,7 @@ public:
 class AsymmetricANDFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -375,7 +375,7 @@ public:
 class OldANDFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -384,7 +384,7 @@ public:
 class ORFormula : public Formula<OR_MAX_ARITY>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -393,7 +393,7 @@ public:
 class ExcludingORFormula : public Formula<OR_MAX_ARITY>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -402,7 +402,7 @@ public:
 class NOTFormula : public Formula<1>
 {
 public:
-     TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -412,7 +412,7 @@ public:
 class ORFormula2 : public Formula<OR_MAX_ARITY>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -421,7 +421,7 @@ public:
 class OldORFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 
@@ -432,7 +432,7 @@ public:
 /**
  * 
  */
-class SubsetEvalFormula : public ArityFreeFormula<TruthValue, TruthValue*>
+class SubsetEvalFormula : public ArityFreeFormula
 {
 private:
     //by default compute uses min
@@ -442,8 +442,8 @@ private:
     }
 public:
 
-    /*virtual TruthValue * compute(TruthValue** tv1, int N1,
-                                 TruthValue** tv2, int N2) const
+    /*virtual TruthValue * compute(const TVSeq& tv1, int N1,
+                                 const TVSeq& tv2, int N2) const
     {
         return NULL;
         }*/
@@ -453,16 +453,14 @@ public:
      * it assumes that TVs = TVsub @ TVsuper and that
      * TVsub and TVsuper have same size
      *
-     * Note that it is still posible to use the method with the signature
+     * Note that it is still possible to use the method with the signature
      *
-     * TruthValue* compute(TruthValue** TVsub, int Nsub,
-     *                     TruthValue** TVsuper, int Nsuper,
+     * TruthValue* compute(const TVSeq& TVsub, const TVSeq& TVsuper,
      *                     long U = DefaultU) const {
      *
      * as it is defined in formula.h
      */
-    virtual TruthValue* compute(TruthValue** TVs, int N,
-                                long U = DefaultU) const;
+    virtual TruthValue* compute(const TVSeq& TVs, long U = DefaultU) const;
 
 };
 
@@ -499,7 +497,7 @@ protected:
 class FORALLFormula : public Formula<FORALL_MAX_ARITY>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -508,7 +506,7 @@ public:
 class PredicateTVFormula : public Formula<FORALL_MAX_ARITY>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -518,7 +516,7 @@ public:
 class EXISTFormula : public Formula<FORALL_MAX_ARITY>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 /**
@@ -527,7 +525,7 @@ public:
 class InhSubstFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 

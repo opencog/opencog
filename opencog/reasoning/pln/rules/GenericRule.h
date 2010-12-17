@@ -23,6 +23,7 @@
 #define GENERICRULE_H
 
 #include "Rule.h"
+#include "../formulas/Formula.h"
 
 namespace opencog { namespace pln {
 
@@ -49,8 +50,7 @@ public:
      *
      * @return the array of TVs to be used by formula.compute
      */
-    virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
-                                       int* newN) const = 0;
+    virtual TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const = 0;
 
     /// Always a composer
     GenericRule(AtomSpaceWrapper *_asw, bool _FreeInputArity,
@@ -75,24 +75,17 @@ public:
         cprintf(-3, "/ validate()");
 
         cprintf(-3, "formatTVarray...\n");
-        int TVN = formula.TVN;
-        TruthValue** tvs = formatTVarray(premiseArray, &TVN);
+
+        TVSeq tvs = formatTVarray(premiseArray);
+        OC_ASSERT((int)tvs.size() <= formula.TVN);
+
         cprintf(-3, "formatTVarray OK\n");
 
-        if (!tvs) {
-            cprintf(-3, "Warning only: GenericRule: TV array formatting failure.");
-            return Vertex(PHANDLE_UNDEFINED);
-        }
-
         cprintf(-3, "Computing TV... \n");
-
         //! @todo Maybe fill in the Universe size.
-        TruthValue* retTV = formula.compute(tvs, TVN);
+        TruthValue* retTV = formula.compute(tvs);
 
         cprintf(-3, "TV computation ok\n");
-
-        delete[] tvs;
-        cprintf(-3, "tvs[] freed.\n");
 
         /// i2otype gives the atom skeleton (tree) w/o TV. addAtom inserts into AtomSpace with TV
         pHandle ret = asw->addAtom(*i2oType(premiseArray), *retTV, fresh);

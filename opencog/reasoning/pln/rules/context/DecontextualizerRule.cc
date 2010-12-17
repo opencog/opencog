@@ -50,12 +50,9 @@ meta DecontextualizerRule::i2oType(const std::vector<Vertex>& h) const {
     }
 }
 
-TruthValue** DecontextualizerRule::formatTVarray(const std::vector<Vertex>& premiseArray,
-                                                 int* newN) const {
+TVSeq DecontextualizerRule::formatTVarray(const std::vector<Vertex>& premiseArray) const {
     OC_ASSERT(premiseArray.size()==1);
-    TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
-    tvs[0] = (TruthValue*) &(asw->getTV(_v2h(premiseArray[0])));
-    return tvs;
+    return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
 }
 
 DecontextualizerRule::DecontextualizerRule(AtomSpaceWrapper* _asw)

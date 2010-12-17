@@ -36,14 +36,14 @@ public:
 	}
 	setOfMPs o2iMetaExtra(meta, bool& overrideInputFilter) const;
 
-	TruthValue** formatTVarray	(const vector<Vertex>& premiseArray, int* newN) const
+    TVSeq formatTVarray(const vector<Vertex>& premiseArray) const
 	{
-		TruthValue** tvs = new SimpleTruthValue*[1];
+		TVSeq tvs;
 
-		assert(N==1);
+		assert(premiseArray.size() == 2);
 
-		tvs[0] = (TruthValue*) &(asw->getTV(v2h(premiseArray[0])));
-		tvs[1] = (TruthValue*) &(asw->getTV(v2h(premiseArray[1])));
+		tvs.push_back(&(asw->getTV(v2h(premiseArray[0]))));
+		tvs.push_back(&(asw->getTV(v2h(premiseArray[1]))));
 
 		return tvs;
 	}

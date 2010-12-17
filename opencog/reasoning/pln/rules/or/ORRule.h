@@ -39,8 +39,7 @@ public:
 	
 	NO_DIRECT_PRODUCTION;
 	
-	virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
-                                           int* newN) const;
+	virtual TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const;
 public:
 	bool validate2(MPs& args) const { return true; }
 

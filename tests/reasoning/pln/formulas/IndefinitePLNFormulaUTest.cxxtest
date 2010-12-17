@@ -94,9 +94,9 @@ public:
 		TruthValue* TVA = createTV(0.0, 0.168f,0.8f);
 		
 		IndefiniteTruthValue* TVin1A = createTV(0.95f,1.0f);
-		TruthValue* TV1[1] = {TVin1A};
+		TVSeq TV1(1, TVin1A);
         opencog::pln::IndefiniteMem2InhFormula fMem2Inh;
-		TVin1A=(IndefiniteTruthValue*)(fMem2Inh.compute(TV1,1));
+		TVin1A=(IndefiniteTruthValue*)(fMem2Inh.compute(TV1));
 		
 /*		RuleGenerator<Mem2InhRule, IndefiniteTruthValue> myCreator2;
 	    AbductionRule *m = myCreator2.CreateRule(TVin1A);
@@ -107,7 +107,7 @@ public:
 		
 		TruthValue* TV2[3] = {TVin1, TVin2, TVin12};
         opencog::pln::IndefiniteSymmetricBayesFormula fBayes;
-		IndefiniteTruthValue* TVin21=(IndefiniteTruthValue*)(fBayes.simpleCompute(TV2,3));//Inh inhib2 inhib1
+		IndefiniteTruthValue* TVin21=(IndefiniteTruthValue*)(fBayes.simpleCompute(TVSeq(TV2,TV2+3)));//Inh inhib2 inhib1
 		
 //		RuleGenerator<BayesRule, IndefiniteTruthValue> myCreator3;
 //	    BayesRule *b = myCreator3.CreateRule(TVin1, TVin2, TVin12);
@@ -118,8 +118,8 @@ public:
 
 
 		TruthValue* TV3[5] = {TVin2, TVin1, TVA, TVin21,TVin1A};
-        opencog::pln::IndefiniteSymmetricDeductionFormula fDeduction;
-		IndefiniteTruthValue* TVin2A=(IndefiniteTruthValue*)(fDeduction.compute(TV3,5));//Inh inhib2 A
+        IndefiniteSymmetricDeductionFormula fDeduction;
+		IndefiniteTruthValue* TVin2A=(IndefiniteTruthValue*)(fDeduction.compute(TVSeq(TV3,TV3+5)));//Inh inhib2 A
 					
 		printf("\nTVin2A:\nL: %.5f - U: %.5f\n",TVin2A->getL(),TVin2A->getU());
 					
@@ -129,9 +129,9 @@ public:
 //		TruthValue* TVCAmem2inh = createTV(0.313043f,0.513043f);
 //		TruthValue* TVBAmem2inh = createTV(0.46666f,0.6f);
 
-		TruthValue* TV4[1] = {TVin2A};
+		TVSeq TV4(1, TVin2A);
         opencog::pln::IndefiniteInh2MemFormula fInh2Mem;
-		TVin2A=(IndefiniteTruthValue*)(fInh2Mem.compute(TV4,1));
+		TVin2A=(IndefiniteTruthValue*)(fInh2Mem.compute(TV4));
 		
 		printf("\nTVin2A:\nL: %.5f - U: %.5f\n",TVin2A->getL(), TVin2A->getU());
 		
@@ -140,7 +140,7 @@ public:
 		
 		TruthValue* TV5[5] = {TVin2, TVin0, TVCausalEvent, TVin20,TVin0CausalEvent};
 //		opencog::pln::IndefiniteSymmetricDeductionFormula fDeduction;
-		IndefiniteTruthValue* TVin2CausalEvent=(IndefiniteTruthValue*)(fDeduction.compute(TV5,5));//Inh inhib2 causal_event
+		IndefiniteTruthValue* TVin2CausalEvent=(IndefiniteTruthValue*)(fDeduction.compute(TVSeq(TV5,TV5+5)));//Inh inhib2 causal_event
 					
 		printf("\nTVin2CausalEvent:\nL: %.5f - U: %.5f\n",TVin2CausalEvent->getL(),TVin2CausalEvent->getU());
 
@@ -151,7 +151,7 @@ public:
 		
 		TruthValue* TV6[5] = {TVPrev1, TVPrev, TVCausalEvent, TVPrev1Prev, TVPrevCausalEvent};
 //		opencog::pln::IndefiniteSymmetricDeductionFormula fDeduction;
-		IndefiniteTruthValue* TVPrev1CausalEvent=(IndefiniteTruthValue*)(fDeduction.compute(TV6,5));//Inh Prev1 causal_event
+		IndefiniteTruthValue* TVPrev1CausalEvent=(IndefiniteTruthValue*)(fDeduction.compute(TVSeq(TV6,TV6+5)));//Inh Prev1 causal_event
 					
 		printf("\nTVPrev1CausalEvent:\nL: %.5f - U: %.5f\n",TVPrev1CausalEvent->getL(),TVPrev1CausalEvent->getU());
   }
@@ -460,10 +460,10 @@ public:
 		
 		TruthValue* TVA = createTV(LA,UA);
 		
-		TruthValue* TV[1] = {TVA};
-        opencog::pln::IndefiniteMem2InhFormula fMem2Inh;
+		TVSeq TV(1, TVA);
+        IndefiniteMem2InhFormula fMem2Inh;
 
-		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fMem2Inh.compute(TV,1));
+		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fMem2Inh.compute(TV));
 		
 		printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
 		printf("Mean: %.3f\n\n",result->getMean());

@@ -80,43 +80,43 @@ static void setUseDeductionLookupTable(bool b)
 class IndefiniteSymmetricBayesFormula : public Formula<3>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 class IndefiniteSymmetricImplicationBreakdownFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 class IndefiniteSymmetricDeductionFormula : public Formula<5>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 class IndefiniteSymmetricRevisionFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 class IndefiniteSymmetricANDFormula : public Formula<2>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 class IndefiniteMem2InhFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 class IndefiniteInh2MemFormula : public Formula<1>
 {
 public:
-    TruthValue* simpleCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 // ***************************************************

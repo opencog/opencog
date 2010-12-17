@@ -59,14 +59,12 @@ public:
                         bool fresh = true) const
     {
         const int n = (int)premiseArray.size();
-        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[n];
+        TVSeq tvs(n);
         int i;
         for (i = 0; i < n; i++)
-            tvs[i] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[i])));
+            tvs[i] = &(asw->getTV(boost::get<pHandle>(premiseArray[i])));
         
-        TruthValue* retTV = formula.compute(tvs, n);	
-        
-        delete[] tvs;
+        TruthValue* retTV = formula.compute(tvs);
         
         //haxx::
         pHandle ret = asw->addLink(OUTPUT_LINK_TYPE, pHandleSeq(),

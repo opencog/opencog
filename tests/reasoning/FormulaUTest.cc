@@ -53,7 +53,7 @@ public:
 		TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
 		reasoning::IndefiniteSymmetricAbductionFormula fAbduction;
         IndefiniteTruthValue* TVin12=(IndefiniteTruthValue*)(fAbduction.simpleCompute(TV,5));//Inh inhib1 inhib2
-		//TruthValue* TVin12=fAbduction.compute(TV,5);//Inh inhib1 inhib2
+		//TruthValue* TVin12=fAbduction.compute(TV);//Inh inhib1 inhib2
 		
 		printf("\nTVin12:\nL: %.5f - U: %.5f\n",TVin12->getL(),TVin12->getU());
 		

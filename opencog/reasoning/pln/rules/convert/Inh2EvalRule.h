@@ -58,15 +58,10 @@ public:
         return makeSingletonSet(ret);
     }
     
-    virtual TruthValue** formatTVarray(const vector<Vertex>& premiseArray, int* newN) const
+    virtual TVSeq formatTVarray(const vector<Vertex>& premiseArray) const
     {
-        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
-        
         assert(premiseArray.size()==1);
-        
-        tvs[0] = (TruthValue*) &(asw->getTV(_v2h(premiseArray[0])));
-        
-        return tvs;
+        return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
     }
     
     virtual meta i2oType(const vector<Vertex>& h) const

@@ -42,32 +42,29 @@ using namespace opencog;
 namespace opencog {
 namespace pln {
 
-template<typename TVType, typename ResultType>
+typedef std::vector<const TruthValue*> TVSeq;
+
 class ArityFreeFormula
 {
 public:
-
-    /** You should always provide the N argument to prove the compiler
-        that you know how many args this method takes. */
 
     /***
      * One or more of the following member functions should be
      * overridden in deriving classes; the general form is:
      *
-     *   Result compute(TruthValue* tv1,...,TruthValue* tvN) const;
+     *   ResultType compute(const TruthValue* tv1,...,const TruthValue* tvN) const;
      *
      * for 1<=N<=4. For larger values, the general N-arry case is:
      *
-     *   Result compute(TruthValue** tvs,int N) const;
+     *   ResultType compute(TVSeqType tvs) const;
      ***/
 
-    virtual ResultType compute(TVType**, int N, long U = DefaultU) const = 0;
+    virtual TruthValue* compute(const TVSeq&, long U = DefaultU) const = 0;
 
     /**
      U is the universe size...
     */
 
-    
 
     /**
      * That method calls compute above but appends TVsuper to TVsub and sum
@@ -77,22 +74,16 @@ public:
      * between long U and TVType**, it should work fine once TVType** is replaced
      * by stl container
      */
-    virtual ResultType compute2(TVType** TVsub, int Nsub,
-                                TVType** TVsuper, int Nsuper,
-                                long U = DefaultU) const {
-        OC_ASSERT(Nsub == Nsuper,
+    virtual TruthValue* compute2(const TVSeq& TVsub, const TVSeq& TVsuper,
+                                 long U = DefaultU) const {
+        OC_ASSERT(TVsub.size() == TVsuper.size(),
                   "That is the current assumption otherwise it is hard to know"
                   " what is TVsub and what is TVsuper in TVs");
 
-        int N = Nsub + Nsuper;
+        TVSeq TVs(TVsub.begin(), TVsub.end());
+        TVs.insert(TVs.end(), TVsuper.begin(), TVsuper.end());
 
-        TVType** TVs = new TVType*[N];
-
-        //TVs = TVsub @ TVsuper
-        std::copy(TVsub, TVsub + Nsub, TVs);
-        std::copy(TVsuper, TVsuper + Nsuper, TVs + Nsub);
-
-        return compute(TVs, N, U);
+        return compute(TVs, U);
     }
 
 public:
@@ -105,7 +96,7 @@ public:
 
     virtual ~ArityFreeFormula() {};
 
-    ResultType checkTruthValue(ResultType tv) const {
+    TruthValue* checkTruthValue(TruthValue* tv) const {
         //if (Log::getDefaultLevel() >= 3) printf("\nRaw result: %f", tv->getMean());
 
         if (LIMIT_TRUTH_VALUES) {
@@ -156,7 +147,7 @@ public:
 */
 
 template<int _TVN>
-class Formula : public ArityFreeFormula<TruthValue, TruthValue*>
+class Formula : public ArityFreeFormula
 {
     friend class SubsetEvalFormula;
 public:
@@ -168,8 +159,7 @@ public:
      * It's called by compute() method,
      * which handles CTVs.
      */
-    virtual TruthValue* simpleCompute(TruthValue** TV,
-                                      int N, long U = DefaultU) const;
+    virtual TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 
     /**
      * Partition the TV input to N/TVN groups of TVN entries.
@@ -178,7 +168,7 @@ public:
      * The size of the array is N/TVN.
      * Like simpleCompute, this method does not handle CTVs.
      */
-    virtual TruthValue** multiCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    virtual TVSeq multiCompute(const TVSeq& TV, long U = DefaultU) const;
 
     /**
      * Check if there is any CompositeTruthValue object in the array
@@ -186,8 +176,7 @@ public:
      * if so, computes different results for primaryTVs
      * and for each handle-versioned TVS
      */
-    TruthValue* compute(TruthValue** TV, int N, long U = DefaultU) const;
-
+    TruthValue* compute(const TVSeq& TV, long U = DefaultU) const;
 };
 
 

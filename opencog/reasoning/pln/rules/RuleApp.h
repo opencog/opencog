@@ -262,10 +262,8 @@ public:
                 
             bound_args.push_back(bv);
         }
-        
-        //! @todo Handle the context appropriately. I just filled it in so that
-        //! fresh could be passed.
-        result = root_rule->compute(bound_args, PHANDLE_UNDEFINED, fresh);
+
+        result = root_rule->compute(bound_args, CX, fresh);
         
         /// This used to be below out, but when args are empty so is
         ///result.value and isReal is false

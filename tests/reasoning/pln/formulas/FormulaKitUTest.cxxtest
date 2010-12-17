@@ -23,6 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/reasoning/pln/formulas/Formula.h>
 #include <opencog/reasoning/pln/formulas/Formulas.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -35,6 +36,8 @@
 #define COUNT_EPSILON 5
 
 using namespace std;
+using namespace opencog;
+using namespace pln;
 
 class FormulasKitUTest : public CxxTest::TestSuite {
 private:
@@ -96,26 +99,25 @@ public:
 
     void testSimpleFormulas() {
         printf("testSimpleFormulas()\n");
-        TruthValue* resultTv = opencog::pln::OldANDFormula().compute(atoms, 2);
+        TruthValue* resultTv = OldANDFormula().compute(TVSeq(atoms, atoms+2));
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = opencog::pln::SymmetricANDFormula().compute(atoms, 4);
+        resultTv = SymmetricANDFormula().compute(TVSeq(atoms, atoms+4));
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = opencog::pln::AsymmetricANDFormula().compute(atoms, 2);
+        resultTv = AsymmetricANDFormula().compute(TVSeq(atoms, atoms+2));
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
     }
     
     void testMultiCompute() {
         printf("testMultiCompute()\n");
-        TruthValue** multiResult;
-        multiResult = opencog::pln::OldANDFormula().multiCompute(atoms, 4);
+        TVSeq multiResult = OldANDFormula().multiCompute(TVSeq(atoms, atoms+4));
         for (int i = 0; i < 2; i++) {
             TS_ASSERT(multiResult[i]);
             printf("multiResult[%d] = %s\n", i, multiResult[i]->toString().c_str());
         }
-        TruthValue* resultTv = opencog::pln::OldANDFormula().compute(multiResult, 2);
+        TruthValue* resultTv = OldANDFormula().compute(multiResult);
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
     }
@@ -130,26 +132,26 @@ public:
         for (int i = 0; i < NUM_ATOMS; i++) {
             defaultTVs[i] = (TruthValue*) &(TruthValue::DEFAULT_TV());
         }
-        resultTv = opencog::pln::OldANDFormula().compute(defaultTVs, 2);
+        resultTv = OldANDFormula().compute(TVSeq(defaultTVs, defaultTVs+2));
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = opencog::pln::SymmetricANDFormula().compute(defaultTVs, 4);
+        resultTv = SymmetricANDFormula().compute(TVSeq(defaultTVs, defaultTVs+4));
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = opencog::pln::AsymmetricANDFormula().compute(defaultTVs, 2);
+        resultTv = AsymmetricANDFormula().compute(TVSeq(defaultTVs, defaultTVs+2));
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
         
 
         // run simplecompute with the same SimpleTruthValues. Must get same results...
         printf("======== PHASE 1: SimpleTVs ==========\n");
-        resultTv = opencog::pln::OldANDFormula().simpleCompute(atoms, 2);
+        resultTv = OldANDFormula().simpleCompute(TVSeq(atoms, atoms+2));
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = opencog::pln::SymmetricANDFormula().simpleCompute(atoms, 4);
+        resultTv = SymmetricANDFormula().simpleCompute(TVSeq(atoms, atoms+4));
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = opencog::pln::AsymmetricANDFormula().simpleCompute(atoms, 2);
+        resultTv = AsymmetricANDFormula().simpleCompute(TVSeq(atoms, atoms+2));
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
         
@@ -158,15 +160,16 @@ public:
         TruthValue* compositeTVs[NUM_ATOMS];
         for (int i = 0; i < NUM_ATOMS; i++) {
             compositeTVs[i] = new CompositeTruthValue(*(atoms[i]), VersionHandle(HYPOTHETICAL, Handle::UNDEFINED));
+            std::cout << "compositeTVs[" << i << "] = " << *compositeTVs[i] << std::endl;
         }
         // run with the same SimpleTruthValues. Must get same results...
-        resultTv = opencog::pln::OldANDFormula().compute(compositeTVs, 2);
+        resultTv = OldANDFormula().compute(TVSeq(compositeTVs, compositeTVs+2));
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = opencog::pln::SymmetricANDFormula().compute(compositeTVs, 4);
+        resultTv = SymmetricANDFormula().compute(TVSeq(compositeTVs, compositeTVs+4));
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = opencog::pln::AsymmetricANDFormula().compute(compositeTVs, 2);
+        resultTv = AsymmetricANDFormula().compute(TVSeq(compositeTVs, compositeTVs+2));
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
     }

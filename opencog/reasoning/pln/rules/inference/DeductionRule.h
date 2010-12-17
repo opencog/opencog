@@ -60,10 +60,9 @@ class DeductionRule : public GenericRule<DeductionFormula>
         return (args.size() == 2 && !(*args[0] == *args[1]));
     }
     
-    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
-                               int* newN) const
+    TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const
     {
-        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[5];
+        TVSeq tvs(5);
         
         OC_ASSERT(premiseArray.size()==2);
 
@@ -82,11 +81,11 @@ class DeductionRule : public GenericRule<DeductionFormula>
                 OC_ASSERT(equal(nodesAB[1], nodesBC[0]));
             }
         
-        tvs[0] = (TruthValue*) &(super::asw->getTV(AB));
-        tvs[1] = (TruthValue*) &(super::asw->getTV(BC));
-        tvs[2] = (TruthValue*) &(super::asw->getTV(nodesAB[0]));
-        tvs[3] = (TruthValue*) &(super::asw->getTV(nodesAB[1])); //== nodesBC[0]);
-        tvs[4] = (TruthValue*) &(super::asw->getTV(nodesBC[1]));
+        tvs[0] = &(super::asw->getTV(AB));
+        tvs[1] = &(super::asw->getTV(BC));
+        tvs[2] = &(super::asw->getTV(nodesAB[0]));
+        tvs[3] = &(super::asw->getTV(nodesAB[1])); //== nodesBC[0]);
+        tvs[4] = &(super::asw->getTV(nodesBC[1]));
         
         return tvs;
     }

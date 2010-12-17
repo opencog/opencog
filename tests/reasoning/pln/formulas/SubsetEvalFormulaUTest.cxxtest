@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/reasoning/pln/formulas/Formula.h>
 #include <opencog/reasoning/pln/formulas/Formulas.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <algorithm>
@@ -45,10 +46,10 @@ using namespace pln;
 
 class SubsetEvalFormulaUTest : public CxxTest::TestSuite {
 private:
-    TruthValue* TVsub[TV_COUNT];
-    TruthValue* TVsuper[TV_COUNT];
+    TVSeq TVsub;
+    TVSeq TVsuper;
 public:
-    SubsetEvalFormulaUTest() {
+    SubsetEvalFormulaUTest() : TVsub(TV_COUNT), TVsuper(TV_COUNT) {
         TVsub[0] = new SimpleTruthValue(SUB_S1, 1);
         TVsub[1] = new SimpleTruthValue(SUB_S2, 1);
         TVsub[2] = new SimpleTruthValue(SUB_S3, 1);
@@ -80,10 +81,7 @@ public:
 
         //compute now the result using SubsetFormula
         SubsetEvalFormula subsetf;
-        TruthValue* tv = subsetf.compute2(static_cast<TruthValue**>(TVsub),
-                                          TV_COUNT,
-                                          static_cast<TruthValue**>(TVsuper),
-                                          TV_COUNT);
+        TruthValue* tv = subsetf.compute2(TVsub, TVsuper);
 
         //compare the 2 results
 

@@ -209,7 +209,7 @@ protected:
 
 public:
     virtual std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
-    //	virtual TruthValue** formatTVarray	(const vector<Vertex>& premiseArray, int* newN) const=0;
+    //	virtual TVSeq formatTVarray	(const vector<Vertex>& premiseArray) const=0;
     
     ~GenericRule2() {}
     /// Always a Composer
@@ -234,10 +234,9 @@ protected:
     std::vector<Type> ti;
     
     ~InversionRule2() {}
-    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
+    TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const
     {
-        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[3];
-        
+        TVSeq tvs(3);
         return tvs;
     }
     std::vector<BoundVertex> r;

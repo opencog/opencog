@@ -682,11 +682,11 @@ IndefiniteTruthValue* DeductionRule::solve()
     return IndefiniteRule::conclusion(distributionAC);
 }
 
-TruthValue* IndefiniteSymmetricBayesFormula::simpleCompute(TruthValue** TV,
-                                                           int N, long U) const
+TruthValue* IndefiniteSymmetricBayesFormula::simpleCompute(const TVSeq& TV, long U) const
 {
+    int N = TV.size();
     assert(N == 3);
-    assert(TV[0]); assert(TV[1]);assert(TV[2]);
+    assert(TV[0]); assert(TV[1]); assert(TV[2]);
     IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
     IndefiniteTruthValue* TVc = (IndefiniteTruthValue*)(TV[1]);
     IndefiniteTruthValue* TVac = (IndefiniteTruthValue*)(TV[2]);
@@ -698,8 +698,9 @@ TruthValue* IndefiniteSymmetricBayesFormula::simpleCompute(TruthValue** TV,
     return result;
 }
 
-TruthValue* IndefiniteSymmetricImplicationBreakdownFormula::simpleCompute(TruthValue** TV, int N, long U) const
+TruthValue* IndefiniteSymmetricImplicationBreakdownFormula::simpleCompute(const TVSeq& TV, long U) const
 {
+    int N = TV.size();
     assert(N == 2);
     assert(TV[0]); assert(TV[1]);
     IndefiniteTruthValue* linkAB = (IndefiniteTruthValue*)(TV[0]);
@@ -712,10 +713,10 @@ TruthValue* IndefiniteSymmetricImplicationBreakdownFormula::simpleCompute(TruthV
     return result;
 }
 
-TruthValue* IndefiniteSymmetricDeductionFormula::simpleCompute(TruthValue** TV,
-                                                               int N,
+TruthValue* IndefiniteSymmetricDeductionFormula::simpleCompute(const TVSeq& TV,
                                                                long U) const
 {
+    int N = TV.size();
     assert(N == 5);
     assert(TV[0]); assert(TV[1]);
     assert(TV[2]); assert(TV[3]);assert(TV[4]);
@@ -732,10 +733,10 @@ TruthValue* IndefiniteSymmetricDeductionFormula::simpleCompute(TruthValue** TV,
     return result;
 }
 
-TruthValue* IndefiniteSymmetricRevisionFormula::simpleCompute(TruthValue** TV,
-                                                              int N,
+TruthValue* IndefiniteSymmetricRevisionFormula::simpleCompute(const TVSeq& TV,
                                                               long U) const
 {
+    int N = TV.size();
     assert(N == 2);
     assert(TV[0]); assert(TV[1]);
     IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
@@ -748,9 +749,10 @@ TruthValue* IndefiniteSymmetricRevisionFormula::simpleCompute(TruthValue** TV,
     return result;
 }
 
-TruthValue* IndefiniteSymmetricANDFormula::simpleCompute(TruthValue** TV,
-                                                         int N, long U) const
+TruthValue* IndefiniteSymmetricANDFormula::simpleCompute(const TVSeq& TV,
+                                                         long U) const
 {
+    int N = TV.size();
     assert(N == 2);
     assert(TV[0]); assert(TV[1]);
     IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
@@ -762,9 +764,10 @@ TruthValue* IndefiniteSymmetricANDFormula::simpleCompute(TruthValue** TV,
     return result;
 }
 
-TruthValue* IndefiniteMem2InhFormula::simpleCompute(TruthValue** TV,
-                                                    int N, long U) const
+TruthValue* IndefiniteMem2InhFormula::simpleCompute(const TVSeq& TV,
+                                                    long U) const
 {
+    int N = TV.size();
     assert(N == 1);
     assert(TV[0]);
     IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[0]);
@@ -779,9 +782,10 @@ TruthValue* IndefiniteMem2InhFormula::simpleCompute(TruthValue** TV,
     return result;
 }
 
-TruthValue* IndefiniteInh2MemFormula::simpleCompute(TruthValue** TV,
-                                                    int N, long U) const
+TruthValue* IndefiniteInh2MemFormula::simpleCompute(const TVSeq& TV,
+                                                    long U) const
 {
+    int N = TV.size();
     assert(N == 1);
     assert(TV[0]);
     IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[0]);

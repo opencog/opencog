@@ -35,15 +35,13 @@ using std::set;
 namespace opencog { namespace pln {
 
 CrispTheoremRule::CrispTheoremRule(AtomSpaceWrapper *_asw)
-: Rule(_asw, true, true, "CrispTheoremRule")
+  : Rule(_asw, true, true, "CrispTheoremRule")
 {
     // SHOULD NOT BE USED FOR FORWARD INFERENCE!
     // ... but why not? (Joel)
     // Possibly it only works with an actual target, not a generic one --JaredW
     // Note that this input filter is completely wrong.
-    inputFilter.push_back(meta(
-        new tree<Vertex>(mva(
-            (pHandle)ATOM))));
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
 }
 
 map<vtree, vector<vtree> ,less_vtree> CrispTheoremRule::thms;
@@ -91,7 +89,7 @@ break_inner:
         cprintf(4,"1 change run ok");
     } while (changes);
 
-    return thm_substed;             
+    return thm_substed;
 }
 
 Rule::setOfMPs CrispTheoremRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
@@ -269,7 +267,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray,
         )
     ));*/
 
-    int real_args = premiseArray.size()-1;
+    int real_args = premiseArray.size() - 1; /// @todo why?
     
     //vtree res(mva(nm->getOutgoing(v2h(premiseArray[1]))[1]));
     
@@ -290,11 +288,11 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray,
     /*for (int i=0;i<premiseArray.size();i++)
         res.append_child(res.begin(), premiseArray[i]*/
     
-    TruthValue** tvs = new TruthValue*[premiseArray.size()];
-    int i=0;
-    foreach(const Vertex& v, premiseArray)
+    TVSeq tvs(real_args);
+
+    for(unsigned int i = 0; i < real_args; i++)
     {
-        tvs[i++] = (TruthValue*) &(asw->getTV(_v2h(v)));
+        tvs[i] = &(asw->getTV(_v2h(premiseArray[i])));
     }
     
     bool use_AND_rule = (real_args>1);
@@ -302,7 +300,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray,
 //  cprintf(0,"CrispTheoremRule::compute... TV ok\n");
     
     TruthValue* tv = (use_AND_rule?
-                      SymmetricANDFormula().compute(tvs, real_args, fresh)
+                      SymmetricANDFormula().compute(tvs)
                       : tvs[0]->clone());
     pHandle ret_h = asw->addAtom(res, *tv, fresh);
     delete tv;
@@ -311,8 +309,6 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray,
 
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
     printer.print(ret_h);
-    
-    delete[] tvs;
     
     return Vertex(ret_h);
 }

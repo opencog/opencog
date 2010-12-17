@@ -47,8 +47,7 @@ public:
 
     meta i2oType(const vector<Vertex>& h) const;
 
-    TruthValue** formatTVarray(const std::vector<Vertex>& premises,
-                               int* newN) const;
+    TVSeq formatTVarray(const std::vector<Vertex>& premises) const;
 
     BoundVertex compute(const vector<Vertex>& premiseArray,
                         pHandle CX = NULL,

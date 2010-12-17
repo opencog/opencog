@@ -243,7 +243,7 @@ Handle Ass(iAtomSpaceWrapper *destTable, Handle h, std::vector<Handle>& ret);
       Handle hs[] = {h1,h2};
 
       SubsetEvalRule ser(&TheNM);
-      Handle IntInhSet = ser.compute(hs,2);
+      Handle IntInhSet = ser.compute(hs);
 
       printTree(IntInhSet,0,1);*/
 }

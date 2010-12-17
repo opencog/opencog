@@ -29,9 +29,8 @@ namespace opencog { namespace pln {
 class NotEvaluatorRule : public GenericRule<NotFormula>
 {
 protected:
-    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
-                               int* newN) const {
-        TruthValue** tvs = new TruthValue*[2];
+    TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const {
+        TVSeq tvs;
 
         const int N = (int)premiseArray.size();
         assert(N == 1);
@@ -39,13 +38,12 @@ protected:
         //std::vector<Handle> real = premiseArray[0];
 #if 0
         // Welter's comment: this change is waiting for Ari's aproval
-        tvs[0] = (TruthValue*) & (TruthValue::TRIVIAL_TV());
+        tvs.push_back(&(TruthValue::TRIVIAL_TV()));
 #else
-        tvs[0] = new SimpleTruthValue(0, 0); //nm->getTV(premiseArray[0]);
+        tvs.push_back(new SimpleTruthValue(0, 0)); //nm->getTV(premiseArray[0]);
         //! @todo create the TrivialTV to use here
 #endif
-        tvs[1] = (TruthValue*) 
-            & (asw->getTV(boost::get<pHandle>(premiseArray[0])));
+        tvs.push_back(&(asw->getTV(boost::get<pHandle>(premiseArray[0]))));
         return tvs;
     }
 

@@ -72,8 +72,7 @@ public:
     ContextualizerRule(AtomSpaceWrapper* _asw);
     meta i2oType(const std::vector<Vertex>& h) const;
     bool validate2(MPs& args) const { return true; } // not sure it's enough
-    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
-                               int* newN) const;
+    TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const;
 };
 
 }} // namespace opencog { namespace pln {

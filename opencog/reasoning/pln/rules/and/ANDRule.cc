@@ -127,11 +127,11 @@ BoundVertex ANDRule::compute(const std::vector<Vertex>& premiseArray,
                     premises.insert(*j);
                 }
             LOG(4, "ANDRule::compute");
-            TruthValue **partialTVs = new TruthValue*[premises.size()];
+            TVSeq partialTVs(premises.size());
 
             std::set<pHandle>::const_iterator i;
             std::set<pHandle> conjunct;
-            std::set<TruthValue*> TVowner;
+            std::set<const TruthValue*> TVowner;
 
     /// Create the set of elements in the result conjunction
             LOG(4, "ANDRule::computeCC");
@@ -220,17 +220,17 @@ BoundVertex ANDRule::compute(const std::vector<Vertex>& premiseArray,
 #endif          
             DiSubsets.insert(largest_intersection); 
         }
-
-LOG(4, "ANDRule:: getLargestIntersection OK!");
-        TruthValue** tvs = new TruthValue*[1 + DiSubsets.size()];
+                    
+        LOG(4, "ANDRule:: getLargestIntersection OK!");
+        TVSeq tvs(1 + DiSubsets.size());
         
-        tvs[0] = (TruthValue*) &(asw->getTV(*i));
+        tvs[0] = &(asw->getTV(*i));
     
         int h=0;
         std::set<pHandle>::const_iterator ss;
         for (h = 0, ss = DiSubsets.begin(); ss != DiSubsets.end(); ss++, h++)
-            tvs[h+1] = (TruthValue*) &(asw->getTV(*ss));
-LOG(4, "R ANDRule::compute");
+            tvs[h+1] = &(asw->getTV(*ss));
+        LOG(4, "R ANDRule::compute");
 
 /*      if (DiSubsets.size()>0)
         {
@@ -249,20 +249,18 @@ LOG(4, "R ANDRule::compute");
 
         if (DiSubsets.size()>0)
         {
-            partialTVs[p] = fN.compute(tvs, 1+DiSubsets.size());
+            partialTVs[p] = fN.compute(tvs);
             TVowner.insert(partialTVs[p]); // TVs to be deleted later
         }
         else
             partialTVs[p] = tvs[0];
 
 //      printf("Part: %f\n", partialTVs[p]->getMean());
-        
-        delete[] tvs;
     }
     /// Combine the partialTVs
-LOG(4, "33 ANDRule::compute");
+    LOG(4, "33 ANDRule::compute");
 
-    TruthValue* retTV = fN.compute(partialTVs, premises.size());
+    TruthValue* retTV = fN.compute(partialTVs);
 
     pHandleSeq outgoing;
     for (std::set<pHandle>::const_iterator c = conjunct.begin(); c != conjunct.end(); c++)
@@ -271,15 +269,14 @@ LOG(4, "44 ANDRule::compute");
     pHandle ret = asw->addLink(AND_LINK, outgoing, *retTV, fresh);
     
 LOG(4, "55 ANDRule::compute");
-    delete[] partialTVs;
     delete retTV;
     
-    for (std::set<TruthValue*>::iterator t= TVowner.begin();
-            t != TVowner.end(); t++)
+    for (std::set<const TruthValue*>::iterator t= TVowner.begin();
+         t != TVowner.end(); t++)
         delete *t;
 LOG(3, "ANDRule::compute ok.");		
     
-        return Vertex(ret);
+    return Vertex(ret);
 
     } catch(...) {
         LOG(-10, "Exception in ANDRule::compute");

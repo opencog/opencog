@@ -85,10 +85,8 @@ BoundVertex ANDBreakdownRule::compute(const std::vector<Vertex>& premiseArray,
         if (atom(hs[i]) == topological_model) {
             pHandle a = hs[i];
             TruthValue* resultTV;
-            TruthValue* tvs[1];
-
-            tvs[0] = asw->getTV(_v2h(premiseArray[0])).clone();
-            resultTV = formula.compute(tvs, 1);
+            TVSeq tvs(1, &asw->getTV(_v2h(premiseArray[0]))); /// @todo why?
+            resultTV = formula.compute(tvs);
 
             //! @todo More pHandles messiness.
             Handle realHandle = asw->fakeToRealHandle(a).first;

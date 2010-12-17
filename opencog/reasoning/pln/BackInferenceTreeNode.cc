@@ -1658,10 +1658,10 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                     TruthValue* primaryTV = atomspace().getTV(real, NULL_VERSION_HANDLE).clone();
                     TruthValue* newlyFoundTV = asw->getTV(ph).clone();
 
-                    TruthValue* both[2];
+                    TVSeq both(2);
                     both[0] = primaryTV;
                     both[1] = newlyFoundTV;
-                    TruthValue* tmp = formula.simpleCompute(both, 2);
+                    TruthValue* tmp = formula.simpleCompute(both);
 
                     atomspace().setTV(real, *tmp, NULL_VERSION_HANDLE);
 

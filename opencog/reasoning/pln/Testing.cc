@@ -290,6 +290,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
             cprintf(-3, "\n    Evaluating...\n");
 
             int expansions = expansions_per_run;
+
             if (test_bc) {
                 eres = state->infer(expansions, 0.000001f, 0.001f);
             } else {
@@ -297,7 +298,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                 //if (!results.empty()) eh = results[0];
             }
 
-            total_expansions = expansions_per_run - expansions;
+            total_expansions += expansions_per_run - expansions;
 
             if (expansions > 0)
                 cprintf(-3, "Succeeded. Saved $%d / $%d (from the "

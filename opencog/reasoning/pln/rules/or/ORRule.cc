@@ -88,51 +88,42 @@ Rule::setOfMPs ORRule::fullInputFilter() const
 }
 
 #define USE_INCLUSION_EXCLUSION_IN_OR_RULE 0
-TruthValue** ORRule::formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
+TVSeq ORRule::formatTVarray(const std::vector<Vertex>& premiseArray) const
 {
-        const int N = (int)premiseArray.size();
+    const int N = (int)premiseArray.size();
         
-cprintf(3, "ORRule::formatTVarray...");
-#if USE_INCLUSION_EXCLUSION_IN_OR_RULE
-        *newN = N*(N+1)/2; // (N-1)+(N-2)+...+1 = N*(N-1)/2
-#else
-        *newN = N;
-#endif
-//printTree(premiseArray[0],0,3);
-        TruthValue** tvs = new TruthValue*[*newN];
+    cprintf(3, "ORRule::formatTVarray...");
 
-        int i = 0, ii=0;
-        for (i = 0; i < N; i++)
-        {
-            tvs[ii++] = (TruthValue*) &(asw->getTV(_v2h(premiseArray[i])));
-cprintf(4,"TV Arg: %s -\n", tvs[i]->toString().c_str());
-        }
+    //printTree(premiseArray[0],0,3);
+    TVSeq tvs;
+
+    for (int i = 0; i < N; i++) {
+        tvs.push_back(&(asw->getTV(_v2h(premiseArray[i]))));
+        cprintf(4,"TV Arg: %s -\n", tvs[i]->toString().c_str());
+    }
         
-        for (i = 0; i < N-1; i++)
-            for (int j = i+1; j < N; j++)
-            {
+    for (int i = 0; i < N-1; i++)
+        for (int j = i+1; j < N; j++) {
 #if USE_INCLUSION_EXCLUSION_IN_OR_RULE
 
-cprintf(4,"Look up ANDLINK for args #%d,%d\n", i,j);
-                TableGather comb(mva((pHandle)AND_LINK,
-                                    mva(premiseArray[i]),
-                                    mva(premiseArray[j])
-                                ), asw);
-cprintf(4,"Look up %s\n", (comb.empty() ? "success." : "fails."));
-                tvs[ii++] = 
-                                (!comb.empty()
-                                ? getTruthValue(_v2h(comb[0]))
+            cprintf(4,"Look up ANDLINK for args #%d,%d\n", i,j);
+            TableGather comb(mva((pHandle)AND_LINK,
+                                 mva(premiseArray[i]),
+                                 mva(premiseArray[j])
+                                 ), asw);
+            cprintf(4,"Look up %s\n", (comb.empty() ? "success." : "fails."));
+            tvs.push_back((!comb.empty()? getTruthValue(_v2h(comb[0]))
 #if 0
 // Welter's comment: this change is waiting for Ari's aproval 
-                                : TruthValue::TRIVIAL_TV());
+                           : TruthValue::TRIVIAL_TV()));
 #else
-                                : SimpleTruthValue(0.0,0.0)); //! @todo Use a static variable...
+                           : SimpleTruthValue(0.0,0.0))); //! @todo Use a static variable...
 #endif
 #else
 #endif
-            }
+}
 cprintf(4, "ORRule::formatTVarray OK.");
-        return tvs;
+return tvs;
 }
 
 meta ORRule::i2oType(const std::vector<Vertex>& h) const
