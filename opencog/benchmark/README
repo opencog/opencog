@@ -63,3 +63,11 @@ installed for this to work. If you run the script from a directory with
 files ending in "_benchmark.csv" in it, it will create a .png file for
 each.
 
+== TODO ==
+
+The memory estimation should be made more informative and reliable. One way to
+do this may be to use dmalloc or wrap the process in valgrind and create
+a script to process memory calls. Python also has the subprocess module which
+could spawn instances of the benchmarker for each method (since the current
+memory measurement via max RSS isn't useful when running multiple methods).
+
