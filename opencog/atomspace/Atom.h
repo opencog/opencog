@@ -80,14 +80,13 @@ private:
 
 protected:
     Handle handle;
-    Type type;
-
     AtomTable *atomTable;
 
     // Linked-list that dynamically changes when new links
     // point to this atom.
     HandleEntry *incoming;
 
+    Type type;
     char flags;
 
     TruthValue *truthValue;
