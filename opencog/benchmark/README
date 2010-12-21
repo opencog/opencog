@@ -43,7 +43,7 @@ Use the -l option to list methods that are implemented for testing, or -A to
 run ALL methods sequentially. You can also specify multiple methods by using -m
 repeatedly.
 
--? will get more detail.
+The option -? will get more detail.
 
 == A note about memory measurement ==
 
@@ -70,4 +70,7 @@ do this may be to use dmalloc or wrap the process in valgrind and create
 a script to process memory calls. Python also has the subprocess module which
 could spawn instances of the benchmarker for each method (since the current
 memory measurement via max RSS isn't useful when running multiple methods).
+
+A better way might be to record the number of mallocs:
+http://www.gnu.org/s/libc/manual/html_node/Hooks-for-Malloc.html
 
