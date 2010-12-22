@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2010-12-09
+ * @date 2010-12-16
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -108,6 +108,9 @@ private:
 
     // Set updated values to AtomSpace (NumberNodes)
     void setUpdatedValues(opencog::CogServer * server);
+
+    // Update PredicateNodes of corresponding DemandGoals
+    void updateDemandGoals(opencog::CogServer * server);
 
     bool bInitialized; 
 

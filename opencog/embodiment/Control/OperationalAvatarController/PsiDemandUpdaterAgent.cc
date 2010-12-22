@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2010-12-09
+ * @date 2010-12-16
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -28,6 +28,7 @@
 #include "PsiDemandUpdaterAgent.h"
 
 #include<boost/tokenizer.hpp>
+#include<boost/lexical_cast.hpp>
 
 using namespace OperationalAvatarController;
 
@@ -537,7 +538,7 @@ logger().fine("PsiDemandUpdaterAgent::%s - Going to remove oldNumberNode", __FUN
 logger().fine( "PsiDemandUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__); 
 
         // Reset bUpdated  
-        iDemand->second.bUpdated = false;
+//        iDemand->second.bUpdated = false;
 
         // TODO: Change the log level to fine, after testing
         logger().debug( 
@@ -547,6 +548,139 @@ logger().fine( "PsiDemandUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__
                          updatedValue
                       );
 
+    }// for
+
+}
+
+void PsiDemandUpdaterAgent::updateDemandGoals(opencog::CogServer * server)
+{
+    logger().debug( 
+        "PsiDemandUpdaterAgent::%s - Update PredicateNodes for DemandGoals [ cycle = %d ]", 
+                    __FUNCTION__ , 
+                    this->cycleCount
+                  );
+
+    // Get OAC
+    OAC * oac = (OAC *) server;
+
+    // Get AtomSpace
+    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+
+    // Get ProcedureInterpreter
+    Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
+
+    // Get Procedure repository
+    const Procedure::ProcedureRepository & procedureRepository =
+                                                              oac->getProcedureRepository();
+
+    // Process Demands one by one
+    std::map <std::string, DemandMeta>::iterator iDemand;
+
+    std::string demand, demandGoalEvaluator, minValueStr, maxValueStr;
+    Handle simultaneousEquivalenceLink, evaluationLinkDemandGoal, evaluationLinkFuzzyWithin, 
+           listLink, predicateNode;
+    std::vector <combo::vertex> schemaArguments;
+    Procedure::RunningProcedureID executingSchemaId;
+    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
+
+    for ( iDemand = demandMetaMap.begin();
+          iDemand != demandMetaMap.end();
+          iDemand ++ ) {
+
+        if ( !iDemand->second.bUpdated )
+            continue;
+
+        demand = iDemand->first;
+        simultaneousEquivalenceLink = iDemand->second.simultaneousEquivalenceLink;
+
+        // Get the Handle to EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
+        //
+        // Since SimultaneousEquivalenceLink inherits from UnorderedLink,
+        // we should make a choice
+        if ( atomSpace.getArity(
+                                   atomSpace.getOutgoing(simultaneousEquivalenceLink, 0)
+                               ) ==  1 ) {
+            evaluationLinkDemandGoal = atomSpace.getOutgoing(
+                                                        simultaneousEquivalenceLink, 0
+                                                            );
+
+            evaluationLinkFuzzyWithin = atomSpace.getOutgoing(
+                                                        simultaneousEquivalenceLink, 1
+                                                             ); 
+        }
+        else {
+
+            evaluationLinkDemandGoal = atomSpace.getOutgoing(
+                                                        simultaneousEquivalenceLink, 1
+                                                            );
+
+            evaluationLinkFuzzyWithin = atomSpace.getOutgoing(
+                                                        simultaneousEquivalenceLink, 0
+                                                             ); 
+        }// if
+
+        // Get Handle to PredicateNode
+        predicateNode = atomSpace.getOutgoing(evaluationLinkDemandGoal, 0);
+
+        // Get the combo procedure name that evaluates DemandGoal
+        demandGoalEvaluator = atomSpace.getName(
+                                      atomSpace.getOutgoing(evaluationLinkFuzzyWithin, 0)
+                                               );
+
+        // Get the Handle to ListLink
+        listLink = atomSpace.getOutgoing(evaluationLinkFuzzyWithin, 1);
+
+        // Get min/ max acceptable values
+        minValueStr = atomSpace.getName( atomSpace.getOutgoing(listLink, 0) );
+        maxValueStr = atomSpace.getName( atomSpace.getOutgoing(listLink, 1) );
+
+        // Prepare arguments
+        schemaArguments.clear(); 
+        schemaArguments.push_back( boost::lexical_cast<double> (minValueStr) );
+        schemaArguments.push_back( boost::lexical_cast<double> (maxValueStr) );
+        schemaArguments.push_back(iDemand->second.updatedValue);
+
+        // Run the Procedure that update the true value of the PredicateNodes 
+        const Procedure::GeneralProcedure & procedure =
+                                            procedureRepository.get(demandGoalEvaluator);
+
+        executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
+
+        // TODO: What does this for?
+        while ( !procedureInterpreter.isFinished(executingSchemaId) )
+            procedureInterpreter.run(NULL);  
+
+        // Check if the the updater run successfully
+        if ( procedureInterpreter.isFailed(executingSchemaId) ) {
+            logger().error( "PsiDemandUpdaterAgent::%s - Failed to execute '%s'", 
+                             __FUNCTION__, 
+                             demandGoalEvaluator.c_str() 
+                          );
+
+            iDemand->second.bUpdated = false;
+
+            continue;
+        }
+        else {
+            iDemand->second.bUpdated = true;
+        }
+
+        result = procedureInterpreter.getResult(executingSchemaId);
+
+        // Update truth value of PredicateNode
+        atomSpace.setTV( predicateNode,
+                         SimpleTruthValue(get_contin(result), 1.0f)
+                       );
+
+        // Reset bUpdated  
+        iDemand->second.bUpdated = false;
+
+        // TODO: Change the log level to fine, after testing
+        logger().debug( "PsiDemandUpdaterAgent::%s - The level of DemandGoal for '%s' has been set to %f", 
+                         __FUNCTION__, 
+                         demand.c_str(),
+                         get_contin(result)
+                      );
     }// for
 
 }
@@ -598,5 +732,8 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
 
     // Set updated values to AtomSpace (NumberNodes)
     this->setUpdatedValues(server);
+
+    // Update PredicateNodes of corresponding DemandGoals
+    this->updateDemandGoals(server);
 }
 

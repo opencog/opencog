@@ -2,7 +2,7 @@
 # Demand updaters
 #
 # @author Zhenhua Cai czhedu@gmail.com
-# @date   2010-12-10
+# @date   2010-12-22
 #
 # Note: Some tricks about combo scripts
 #     1. There cannot be any whitespaces between operator and (
@@ -12,8 +12,21 @@
 #        scripts/embodiment/stdlib.combo
 #     3. The best doc about Combo is doc/comboreduct/ComboReduct.pdf in the OpenCog project
 #     4. You should avoid infinitely great number in Combo
+#     5. Refer to the function builtin_str_to_vertex in file 
+#        'opencog/comboreduct/combo/vertex.h' you will get the lexicon of the 
+#        built-in combo operators.
+#
 
-
+# FuzzyWithin is used to evaluate the truth value of a PredicateNode for DemandGoal 
+# given min/max acceptable values and its current level 
+FuzzyWithin(3) := contin_if( less_than(#3 #1) 
+                             rand_within(0 0.2)
+                             contin_if( greater_than(#3 #2)
+                                        rand_within( +(1 neg(0.2)) 1 )
+                                        rand_within( 0.2 +(1 neg(0.2)) ) 
+                                      )
+                           )
+         
 # The script below is only for test. 
 #
 # For real OpenPsi, it would be much more complex. Such as the example provided by Nil:

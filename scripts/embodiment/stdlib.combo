@@ -13,6 +13,19 @@ greater_than(2) := 0<(+(#1 *(-1 #2)))
 # #1 == #2
 equal_to(2) := and(not(less_than(#1 #2)) not(greater_than(#1 #2)))
 
+# There is no '-' operator, it is the default type of an unrecognized string
+neg(1) := *(-1 #1)
+
+# Return absolute value
+abs(1) := contin_if( greater_than(#1 0)  #1 neg(#1) ) 
+
+# Return random number given min/max value
+rand_within(2) := +( #1 
+                     *( +( #2 neg(#1) )
+                        rand 
+                      ) 
+                   )          
+
 # ----------------------- Constants -----------------------
 pee_threshold(0) := 0.5
 
