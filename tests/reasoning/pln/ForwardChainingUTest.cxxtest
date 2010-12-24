@@ -58,7 +58,8 @@ private:
     AtomSpaceWrapper *asw;
     FILE *f;
 
-    static const int TestRepeats = 1;
+    // Number of times to repeat each test
+    static const int numTestRepeats = 1;
     // test repeat #
     int t;
 
@@ -80,14 +81,10 @@ private:
 #endif
         //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
 
-        // Get config settings from config file.
-        // Don't tackily override them here.
-        // config().set("PLN_LOG_LEVEL","2");
-        // config().set("PLN_PRINT_REAL_ATOMS","true");
-        //config().set("PLN_RECORD_TRAILS","true");
+        config().set("PLN_LOG_LEVEL","-10");
+        config().set("PLN_PRINT_REAL_ATOMS","false");
+        config().set("PLN_RECORD_TRAILS","false");
 
-        //testFitnessEvaluator = BEST;
-        //currentDebugLevel = -4;
         currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
 
         // Call to initialise rule provider
@@ -104,11 +101,9 @@ public:
         // Initialize PLN test environment
         try {        
             logger().info("Initializing PLN test env...");
-
+            
             f = fopen("results.txt","a");
-
-            //currentDebugLevel=100;
-
+            
             asw = ASW(cogserver().getAtomSpace());                                  
         }
         catch(std::string s) {
@@ -155,13 +150,6 @@ public:
     
     ~ForwardChainingUTest()
     {
-        // t = test repeat #
-        // f = results.txt
-        // TestRepeats
-        
-//        uint t = 0;
-//        uint TestRepeats = 1;
-    
         // some stats stuff
         INstatsV.push_back(INstats);
     
@@ -171,7 +159,7 @@ public:
         for (uint v=0; v < INstatsV[0].size(); v++)
         {
             fprintf(f, "\n");
-            for (int t=0; t < ( (testFitnessEvaluator!=BEST) ? TestRepeats : 1); t++)
+            for (int t=0; t < ( (testFitnessEvaluator!=BEST) ? numTestRepeats : 1); t++)
                 fprintf(f, "%d ", INstatsV[t][v]);
         }
 
