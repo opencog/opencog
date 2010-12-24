@@ -15,33 +15,45 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
 # that is tested next, etc.
 IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (util)
-	ADD_SUBDIRECTORY (atomspace)
-	ADD_SUBDIRECTORY (persist)
+    IF (HAVE_ATOMSPACE)
+   	    ADD_SUBDIRECTORY (atomspace)
+    ENDIF (HAVE_ATOMSPACE)
+    IF(HAVE_PERSIST)
+        ADD_SUBDIRECTORY (persist)
+    ENDIF(HAVE_PERSIST)
 
 	IF (GUILE_FOUND)
 		ADD_SUBDIRECTORY (scm)
 	ENDIF (GUILE_FOUND)
 
 	ADD_SUBDIRECTORY (query)
-	ADD_SUBDIRECTORY (server)
-ENDIF (CXXTEST_FOUND)
+    IF (HAVE_SERVER)
+    	ADD_SUBDIRECTORY (server)
+    ENDIF (HAVE_SERVER)
 
-# Rest interfaces assume that the cogserver is working;
-# so run after the cogserver tests.
-ADD_SUBDIRECTORY (web)
+    # Rest interfaces assume that the cogserver is working;
+    # so run after the cogserver tests.
+    IF(HAVE_WEB)
+        ADD_SUBDIRECTORY (web)
+    ENDIF(HAVE_WEB)
 
-IF (CXXTEST_FOUND)
-	ADD_SUBDIRECTORY (dynamics)
-	ADD_SUBDIRECTORY (reasoning)
+    IF(HAVE_ATTENTION)
+        ADD_SUBDIRECTORY (dynamics)
+    ENDIF(HAVE_ATTENTION)
+
+    IF(HAVE_PLN)
+        ADD_SUBDIRECTORY (reasoning)
+    ENDIF(HAVE_PLN)
+
 	ADD_SUBDIRECTORY (comboreduct)
-	ADD_SUBDIRECTORY (spatial)
+    IF(HAVE_SPATIAL)
+       	ADD_SUBDIRECTORY (spatial)
+    ENDIF(HAVE_SPATIAL)
 
-	IF (XERCESC_FOUND AND LUABIND_FOUND AND EXPAT_FOUND)
+	IF (HAVE_EMBODIMENT)
 		ADD_SUBDIRECTORY (embodiment)
-	ENDIF (XERCESC_FOUND AND LUABIND_FOUND AND EXPAT_FOUND)
+	ENDIF (HAVE_EMBODIMENT)
 
-	IF (EXPAT_FOUND)
-		ADD_SUBDIRECTORY (learning)
-	ENDIF (EXPAT_FOUND)
+	ADD_SUBDIRECTORY (learning)
 ENDIF (CXXTEST_FOUND)
 

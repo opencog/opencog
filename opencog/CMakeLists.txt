@@ -42,9 +42,10 @@ ADD_SUBDIRECTORY (comboreduct)
 ADD_SUBDIRECTORY (spatial)
 ADD_SUBDIRECTORY (web)
 
-IF (EXPAT_FOUND)
-	ADD_SUBDIRECTORY (learning)
-ENDIF (EXPAT_FOUND)
+# Joel: I have no idea why this was relying on the expat library...
+#IF (EXPAT_FOUND)
+ADD_SUBDIRECTORY (learning)
+#ENDIF (EXPAT_FOUND)
 
 IF (XERCESC_VERSION_OK AND LUABIND_FOUND AND EXPAT_FOUND)
 	ADD_SUBDIRECTORY (embodiment)

@@ -83,9 +83,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			Handle (T::*h_sqq)(const std::string&, const HandleSeq&, const HandleSeq&);
-            // Merged from dimembed source
 			HandleSeq (T::*q_hti)(const Handle&, const Type&, int);
-            //--
 			const std::string& (T::*s_s)(const std::string&);
 			void (T::*v_t)(const Type&);
 			void (T::*v_v)(void);
@@ -100,9 +98,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_H,   // return handle, take handle
 			H_SQ,  // return handle, take string and HandleSeq
             H_SQQ, // return handle, take string, HandleSeq and handleSeq
-            // Merged from dimembed source
 			Q_HTI, // return HandleSeq, take handle, type, and int
-            // --
 			S_S,   // return string, take string
             V_T,   // return void, take Type
 			V_V    // return void, take void
@@ -213,7 +209,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
-                // Merged from dimembed code
 				case Q_HTI:
 				{
 					//First arg is a handle
@@ -241,7 +236,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					}
 					break;
 				}
-                // -- end from dimembed
 				case S_S:
 				{
 					char *lstr = scm_to_locale_string(scm_car(args));
@@ -370,7 +364,6 @@ DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_3(double, const Handle&, const Handle&, const Type&)
 DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
-// from dimbed merge
 DECLARE_DECLARE_3(HandleSeq, const Handle&, const Type&, int)
 
 }
