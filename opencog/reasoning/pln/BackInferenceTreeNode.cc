@@ -524,7 +524,7 @@ void BITNode::create()
     assert(rule || children.size() == 1);
     
     if (depth > getBITRoot().getTreeDepth()) {
-        tlog(-5, "BIT has reached depth: %d", depth);
+        tlog(-1, "BIT has reached depth: %d", depth);
         getBITRoot().setTreeDepth(depth);
     }
 
@@ -997,7 +997,7 @@ struct ExpansionPoolUpdater
         if (!b->Expanded && !STLhas2(*expansion_pool, b)
             && root->obeysPoolPolicy(b->rule, b->raw_target, root->loosePoolPolicy)) {
             expansion_pool->push_back(b);
-            cout << "Adding BITNode from another BIT to expansion pool: " << b->id << endl;
+            b->tlog(5,"Adding BITNode from another BIT to expansion pool: %d", b->id);
         }
 
         return true;
@@ -1051,8 +1051,6 @@ BITNode* BITNode::createChild(unsigned int target_i, RulePtr new_rule,
         // Is a root variable scoper or a Composer.
         if (!new_rule || new_rule->isComposer())//&& new_rule->name != "CrispUnificationRule")
         {
-            if (test::bigcount >= 3175 && new_rule)
-                cout << new_rule->name << endl;
             findTemplateBIT(new_node, template_node, *template_binds);
 
             if (template_node)
@@ -1875,10 +1873,6 @@ void BITNodeRoot::expandFittest()
 
         srand((unsigned int) seconds);*/
 
-        /*cout<< rand() << endl;
-        cout<< rand() << endl;
-        cout<< rand() << endl;
-        */
         int r = rand();
         double selection = (1.0f/accuracy) * (r%accuracy) * total_weight;
 
@@ -2256,14 +2250,14 @@ string BITNode::printFitnessPool(int logLevel)
 
 static bool bigcounter = true;
 
-string BITNode::tlog(int debugLevel, const char *format, ...) const
+string BITNode::tlog(int msgLevel, const char *format, ...) const
 {
 #define MAX_TLOG_MESSAGE_SIZE 5000
     // Make buffer static to avoid allocating it on every log call
     static char buf[MAX_TLOG_MESSAGE_SIZE];
-    // currentDebugLevel prints everything underneath it, so
-    // messages with higher log levels are more verbose
-    if (debugLevel > currentDebugLevel) return "";
+    // messages with higher msgLevels are only printed when higher verbosity
+    // is requested, i.e. messages with higher log levels are more verbose
+    if (msgLevel > currentDebugLevel) return "";
     stringstream ss;
 
     string name;

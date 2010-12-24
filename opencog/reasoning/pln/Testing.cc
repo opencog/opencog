@@ -287,7 +287,6 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                 eres = t->state->infer(expansions, 0.000001f, 0.001f);
             } else {
                 eh = fc.fwdChainToTarget(expansions, (t->target));
-                //if (!results.empty()) eh = results[0];
             }
 
             total_expansions += expansions_per_run - expansions;
