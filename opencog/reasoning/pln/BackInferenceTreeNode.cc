@@ -1852,8 +1852,6 @@ void BITNodeRoot::expandFittest()
         vector<double> fitnesses;
         transform(exec_pool.begin(), exec_pool.end(), back_inserter(fitnesses), std::mem_fun(&BITNode::fitness));
 
-        //const float temperature = 0.1f;
-
         int accuracy = RAND_MAX-1; //1000*1000;
         //float selection_weight_coordinate = exp(selection / temperature);
 
@@ -1864,14 +1862,8 @@ void BITNodeRoot::expandFittest()
         {
             // NOTE! Too low temperature will kill!
             assert(temperature > 0.00001);
-//          double a1 = exp((-1.0/Qb) / 0.00001);
             total_weight += exp((-1.0/Qb) / temperature);
         }
-
-        /*time_t seconds;
-        time(&seconds);
-
-        srand((unsigned int) seconds);*/
 
         int r = rand();
         double selection = (1.0f/accuracy) * (r%accuracy) * total_weight;
