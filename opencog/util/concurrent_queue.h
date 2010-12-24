@@ -1,0 +1,108 @@
+/*
+ * opencog/util/concurrent_queue.h
+ *
+ * Based off of http://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html
+ * Original version by Anthony Williams
+ * Modifications by Michael Anderson
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include "boost/thread.hpp"
+#include <deque>
+
+template<typename Data>
+class concurrent_queue
+{
+private:
+    std::deque<Data> the_queue;
+    mutable boost::mutex the_mutex;
+    boost::condition_variable the_condition_variable;
+    bool is_canceled;
+
+public:
+    concurrent_queue() : the_queue(), the_mutex(), the_condition_variable(), is_canceled(false) {}
+    struct Canceled{};
+    void push(Data const& data)
+    {
+        boost::mutex::scoped_lock lock(the_mutex);
+        if (is_canceled) throw Canceled();
+        the_queue.push_back(data);
+        lock.unlock();
+        the_condition_variable.notify_one();
+    }
+
+    bool empty() const
+    {
+        boost::mutex::scoped_lock lock(the_mutex);
+        if (is_canceled) throw Canceled();
+        return the_queue.empty();
+    }
+
+    bool try_pop(Data& popped_value)
+    {
+        boost::mutex::scoped_lock lock(the_mutex);
+        if (is_canceled) throw Canceled();
+        if(the_queue.empty())
+        {
+            return false;
+        }
+
+        popped_value=the_queue.front();
+        the_queue.pop_front();
+        return true;
+    }
+
+    void wait_and_pop(Data& popped_value)
+    {
+        boost::mutex::scoped_lock lock(the_mutex);
+
+        while(the_queue.empty() && !is_canceled)
+        {
+            the_condition_variable.wait(lock);
+        }
+        if (is_canceled) throw Canceled();
+
+        popped_value=the_queue.front();
+        the_queue.pop_front();
+    }
+
+    std::deque<Data> wait_and_take_all()
+    {
+        boost::mutex::scoped_lock lock(the_mutex);
+
+        while(the_queue.empty() && !is_canceled)
+        {
+            the_condition_variable.wait(lock);
+        }
+        if (is_canceled) throw Canceled();
+
+        std::deque<Data> retval;
+        std::swap(retval, the_queue);
+        return retval;
+    }
+
+    void cancel()
+    {
+       boost::mutex::scoped_lock lock(the_mutex);
+       if (is_canceled) throw Canceled();
+       is_canceled = true;
+       lock.unlock();
+       the_condition_variable.notify_all();
+    }
+
+};
+
+

@@ -6,6 +6,7 @@ ADD_LIBRARY (atomspace SHARED
 	atom_types.h
 	Atom.cc
 	AtomSpace.cc
+    AtomSpaceImpl.cc
 	AtomSpaceInit.cc
 	AtomTable.cc
 	AttentionValue.cc
@@ -67,6 +68,7 @@ INSTALL (FILES
 	AtomIndex.h
 	AtomSpaceDefinitions.h
 	AtomSpace.h
+    AtomSpaceImpl.h
 	AtomTable.h
 	atom_types.h
 	AttentionValue.h
@@ -117,4 +119,15 @@ INSTALL (FILES
 	types.h
 	utils.h
 	DESTINATION "include/${PROJECT_NAME}/atomspace"
+)
+
+ADD_EXECUTABLE (atomspace_async
+    AtomSpaceAsync
+    atomspace_async_tester
+)
+
+TARGET_LINK_LIBRARIES (atomspace_async
+    atomspace
+    util
+	${Boost_THREAD_LIBRARY}
 )

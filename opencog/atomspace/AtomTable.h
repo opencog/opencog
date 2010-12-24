@@ -78,6 +78,7 @@ class AtomTable
     friend class ImportanceUpdatingAgent;
     friend class SavingLoading;
     friend class AtomSpace;
+    friend class AtomSpaceImpl;
     friend class HandleIterator;
 
 private:

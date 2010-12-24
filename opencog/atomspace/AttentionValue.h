@@ -150,6 +150,9 @@ public:
 
 class AttentionValueHolder
 {
+    friend class AtomSpace;
+    friend class AtomSpaceImpl;
+
 protected:
     AttentionValue attentionValue;
 
@@ -158,7 +161,6 @@ protected:
         attentionValue = a;
     }
 
-    friend class AtomSpace;
 
 public:
     /** Returns the AttentionValue object */
