@@ -165,9 +165,9 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
     //an embedding exists, but h has not been added yet
     if(aEit==aE.end()) {
         logger().error("Embedding exists, but %s is not in it",
-                       TLB::getAtom(h)->toString().c_str());
+                       this->as->atomAsString(h).c_str());
         throw std::string("Embedding exists, but %s is not in it",
-                          TLB::getAtom(h)->toString().c_str());
+                          this->as->atomAsString(h).c_str());
     } else {
         v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
         //CoverTreeNode c = CoverTreeNode(aEit->first, &(aEit->second));
@@ -178,7 +178,7 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
         k_nearest_neighbor(embedTreeMap[l], batch_create(v), res, k);
         HandleSeq results = HandleSeq();
         for (int j = 1; j<res[0].index; j++) {
-            print(res[0][j]);
+            print(*(this->as), res[0][j]);
             results.push_back(res[0][j].getHandle());
         }
         return results;
@@ -337,7 +337,7 @@ void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
             oss << as->atomAsString(it->first,true) << " : (";
         } else {
             oss << "[NODE'S BEEN DELETED]" << " : (";
-            oss << atom->toShortString() << " : (";
+            oss << as->atomAsString(it->first,true) << " : (";
         }
         const std::list<double>& embedlist = it->second;
         for(std::list<double>::const_iterator it2=embedlist.begin();
@@ -371,7 +371,7 @@ void DimEmbedModule::cluster(const Type& l) {
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-    int numClusters=10; //number of clusters
+    unsigned int numClusters=10; //number of clusters
     int npass=1;
     AtomEmbedding& aE = atomMaps[l];
     unsigned int numVectors=aE.size();
@@ -427,15 +427,15 @@ void DimEmbedModule::cluster(const Type& l) {
         centroidMatrix[i] = centroidArray + numDimensions*i;
         cmask[i] = cmaskArray + numDimensions*i;
     }
-    for(int i=0;i<numClusters;i++){
-        for(int j=0;j<numDimensions;j++){
+    for(unsigned int i=0;i<numClusters;i++){
+        for(unsigned int j=0;j<numDimensions;j++){
             cmask[i][j]=1;
         }
     }
     ::getclustercentroids(numClusters, numVectors, numDimensions, embedMatrix,
                           mask, clusterid, centroidMatrix, mask, 0, 'a');
     HandleSeq clusters (numClusters);
-    for(int i=0;i<numClusters;i++) {
+    for(unsigned int i=0;i<numClusters;i++) {
         std::stringstream out;
         out << "cluster_" << this->clusters++;
         clusters[i] = as->addNode(CONCEPT_NODE, out.str());

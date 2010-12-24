@@ -36,52 +36,54 @@
  * implementation
  */
 namespace opencog {
-    class CoverTreeNode {
-    public:
-        std::map<Handle, std::list<double> >::const_iterator iter;
-        CoverTreeNode() {}
-        CoverTreeNode(std::map<Handle, std::list<double> >::const_iterator it) : iter(it) {} 
-        const std::list<double>& getList() {
-            return iter->second;
-        }
-        const Handle& getHandle() {
-            return iter->first;
-        }
-    };
-    
-    void print(CoverTreeNode& p) {
-        std::ostringstream oss;
-        Atom* atom = TLB::getAtom(p.getHandle());
-        if(atom==NULL) {
-           oss << "[NODE'S BEEN DELETED]" << " : (";
-        } else {
-            oss << atom->toShortString() << " : (";
-        }
-        const std::list<double>& embedList = p.getList();
-        for(std::list<double>::const_iterator it=embedList.begin();
-            it!=embedList.end(); it++)
-            {
-                oss << *it << " ";
-            }       
-        oss << ")" << std::endl;
-        printf("%s", oss.str().c_str());
+
+class CoverTreeNode {
+public:
+    std::map<Handle, std::list<double> >::const_iterator iter;
+    CoverTreeNode() {}
+    CoverTreeNode(std::map<Handle, std::list<double> >::const_iterator it) : iter(it) {}
+    const std::list<double>& getList() {
+        return iter->second;
     }
-    
-    double distance(CoverTreeNode n1, CoverTreeNode n2, double upper_bound) {
-        const std::list<double>& v1=n1.getList();
-        const std::list<double>& v2=n2.getList();
-        std::list<double>::const_iterator it1=v1.begin();
-        std::list<double>::const_iterator it2=v2.begin();
-        
-        double distance=0;
-        //Calculate euclidean distance between v1 and v2
-        for(; it1!=v1.end(); it1++) {
-            distance+=(*it1 - *it2)*(*it1 - *it2);
-            if(it2!=v2.end()) it2++;
-        }
-        distance=sqrt(distance);
-        return distance;
+    const Handle& getHandle() {
+        return iter->first;
     }
+};
+
+void print(AtomSpace& atomspace, CoverTreeNode& p) {
+    std::ostringstream oss;
+    Handle h = p.getHandle();
+    if(!atomspace.isValidHandle(h)) {
+       oss << "[NODE'S BEEN DELETED]" << " : (";
+    } else {
+        oss << atomspace.atomAsString(h, true) << " : (";
+    }
+    const std::list<double>& embedList = p.getList();
+    for(std::list<double>::const_iterator it=embedList.begin();
+        it!=embedList.end(); it++)
+        {
+            oss << *it << " ";
+        }       
+    oss << ")" << std::endl;
+    printf("%s", oss.str().c_str());
+}
+
+double distance(CoverTreeNode n1, CoverTreeNode n2, double upper_bound) {
+    const std::list<double>& v1=n1.getList();
+    const std::list<double>& v2=n2.getList();
+    std::list<double>::const_iterator it1=v1.begin();
+    std::list<double>::const_iterator it2=v2.begin();
+    
+    double distance=0;
+    //Calculate euclidean distance between v1 and v2
+    for(; it1!=v1.end(); it1++) {
+        distance+=(*it1 - *it2)*(*it1 - *it2);
+        if(it2!=v2.end()) it2++;
+    }
+    distance=sqrt(distance);
+    return distance;
+}
+
 }//namespace
 
 #endif //_OPENCOG_DIM_EMBED_MODULE_H

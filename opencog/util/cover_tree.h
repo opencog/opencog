@@ -6,7 +6,10 @@
 #define NDEBUG
 #include<assert.h>
 #include "stack.h"
-#include <values.h>
+
+// Used to include values.h, but that's obsolete and not on OSX
+#include <float.h>
+#define MAXDOUBLE DBL_MAX
 
 /* First written by John Langford jl@hunch.net
    Templatization by Dinoj Surendran dinojs@gmail.com
