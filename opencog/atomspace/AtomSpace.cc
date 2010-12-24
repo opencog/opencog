@@ -558,12 +558,6 @@ bool AtomSpace::removeAtom(Handle h, bool recursive)
     return false;
 }
 
-bool TValued(Type t)
-{
-    return t != LIST_LINK;
-}
-
-
 const HandleSeq& AtomSpace::getOutgoing(Handle h) const
 {
     static HandleSeq hs;
