@@ -47,6 +47,7 @@ extern "C" {
 #include <opencog/util/Logger.h>
 
 //#define DPRINTF printf
+//#define tableId (0) // Hack around some DPRINTF statements that want an old tableID member variable
 #define DPRINTF(...)
 
 using namespace opencog;
@@ -78,7 +79,7 @@ AtomTable::~AtomTable()
     AtomHashSet::iterator it = atomSet.begin();
 
     while (it != atomSet.end()) {
-        DPRINTF("Removing atom %s (atomSet size = %u)\n", (*it)->toString().c_str(), atomSet->size());
+        DPRINTF("Removing atom %s (atomSet size = %zu)\n", (*it)->toString().c_str(), atomSet.size());
         remove(TLB::getHandle(*it), true);
         it = atomSet.begin();
     }
@@ -93,7 +94,7 @@ bool AtomTable::isCleared(void) const
     }
 
     if (atomSet.size() != 0) {
-        DPRINTF("AtomTable[%d]::atomSet is not empty. size =%d\n", tableId, atomSet->size());
+        DPRINTF("AtomTable[%d]::atomSet is not empty. size =%zu\n", tableId, atomSet.size());
         return false;
     }
 
@@ -221,7 +222,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
         }
         DPRINTF("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);
         if (hasAllHandles && !subclass) {
-            DPRINTF("building link for lookup: type = %d, handles.size() = %d\n", type, handles.size());
+            DPRINTF("building link for lookup: type = %d, handles.size() = %zu\n", type, handles.size());
             Link link(type, handles); // local var on stack, avoid malloc
             AtomHashSet::const_iterator it = atomSet.find(&link);
             Handle h = Handle::UNDEFINED;
@@ -474,7 +475,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // Adds to the hash_set
     DPRINTF("Inserting atom %p intoAtomTable (type=%d)\n", atom, atom->getType());
     atomSet.insert(atom);
-    DPRINTF("AtomTable::add atomSet->insert(%p) => size = %d\n", atom, atomSet->size());
+    DPRINTF("AtomTable::add atomSet->insert(%p) => size = %zu\n", atom, atomSet.size());
 
     // Checks for null outgoing set members.
     if (lll) {
@@ -517,7 +518,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 
     // emit add atom signal
     _addAtomSignal(handle);
-    DPRINTF("Atom added: %d => %s\n", handle.value(), atom->toString().c_str());
+    DPRINTF("Atom added: %ld => %s\n", handle.value(), atom->toString().c_str());
 
     return handle;
 }
