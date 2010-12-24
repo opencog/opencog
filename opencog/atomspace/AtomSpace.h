@@ -218,6 +218,12 @@ public:
     }
 
     /**
+     * Add a new node to the AtomTable. A random 10-character string
+     * will be appended to the provided name.
+     **/
+    Handle addPrefixedNode(Type t, const std::string& prefix = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());
+
+    /**
      * Add a new link to the Atom Table
      * If the atom already exists then the old and the new truth value
      * is merged

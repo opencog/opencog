@@ -170,8 +170,6 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
                           this->as->atomAsString(h).c_str());
     } else {
         v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
-        //CoverTreeNode c = CoverTreeNode(aEit->first, &(aEit->second));
-        //CoverTreeNode c = CoverTreeNode(&(aEit->second));
         CoverTreeNode c = CoverTreeNode(aEit);
         push(v,c);
         v_array<v_array<CoverTreeNode> > res;
@@ -402,16 +400,15 @@ bool DimEmbedModule::isEmbedded(const Type& linkType) {
     return true;
 }
 
-void DimEmbedModule::cluster(const Type& l) {
+void DimEmbedModule::cluster(const Type& l, int numClusters) {
     if(!isEmbedded(l)) {
         const char* tName = classserver().getTypeName(l).c_str();
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-    unsigned int numClusters=10; //number of clusters
     int npass=1;
     AtomEmbedding& aE = atomMaps[l];
-    unsigned int numVectors=aE.size();
+    int numVectors=aE.size();
     if(numVectors<numClusters) {
         logger().error("Cannot make more clusters than there are nodes");
         throw std::string("Cannot make more clusters than there are nodes");
@@ -422,14 +419,14 @@ void DimEmbedModule::cluster(const Type& l) {
     double** embedMatrix = new double*[numVectors];
     int* maskArray = new int[numDimensions*numVectors];
     int** mask = new int*[numVectors];
-    for(unsigned int i=0;i<numVectors;++i) {
+    for(int i=0;i<numVectors;++i) {
         embedMatrix[i] = embedding + numDimensions*i;
         mask[i] = maskArray + numDimensions*i;
     }
     Handle* handleArray = new Handle[numVectors];
     AtomEmbedding::iterator aEit=aE.begin();
-    unsigned int i=0;
-    unsigned int j;
+    int i=0;
+    int j;
     //add the values to the embeddingmatrix...
     for(;aEit!=aE.end();aEit++) {
         handleArray[i]=aEit->first;
@@ -444,7 +441,7 @@ void DimEmbedModule::cluster(const Type& l) {
         i++;
     }
     double* weight = new double[numDimensions];
-    for(unsigned int i=0;i<numDimensions;i++) {weight[i]=1;}
+    for(int i=0;i<numDimensions;i++) {weight[i]=1;}
 
     int* clusterid = new int[numVectors]; //stores the result of clustering
     double error;
@@ -460,24 +457,24 @@ void DimEmbedModule::cluster(const Type& l) {
     
     int* cmaskArray = new int[numClusters*numDimensions];
     int** cmask = new int*[numClusters];
-    for(unsigned int i=0;i<numClusters;++i) {
+    for(int i=0;i<numClusters;++i) {
         centroidMatrix[i] = centroidArray + numDimensions*i;
         cmask[i] = cmaskArray + numDimensions*i;
     }
-    for(unsigned int i=0;i<numClusters;i++){
-        for(unsigned int j=0;j<numDimensions;j++){
+    for(int i=0;i<numClusters;i++){
+        for(int j=0;j<numDimensions;j++){
             cmask[i][j]=1;
         }
     }
     ::getclustercentroids(numClusters, numVectors, numDimensions, embedMatrix,
                           mask, clusterid, centroidMatrix, mask, 0, 'a');
     HandleSeq clusters (numClusters);
-    for(unsigned int i=0;i<numClusters;i++) {
-        std::stringstream out;
-        out << "cluster_" << this->clusters++;
-        clusters[i] = as->addNode(CONCEPT_NODE, out.str());
+    for(int i=0;i<numClusters;i++) {
+        //std::stringstream out;
+        //out << "cluster_" << this->clusters++;
+        clusters[i] = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
     }
-    for(unsigned int i=0;i<numVectors;i++) {
+    for(int i=0;i<numVectors;i++) {
         //clusterid[i] indicates which cluster handleArray[i] is in.
         //so for each cluster, we make a new ConceptNode and make
         //inheritancelinks between it and all of its consituent nodes.

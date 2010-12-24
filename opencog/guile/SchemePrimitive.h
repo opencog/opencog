@@ -87,6 +87,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			const std::string& (T::*s_s)(const std::string&);
 			void (T::*v_h)(Handle);
 			void (T::*v_t)(const Type&);
+			void (T::*v_ti)(const Type&, int);
 			void (T::*v_v)(void);
 		} method;
 		T* that;
@@ -102,7 +103,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			S_S,   // return string, take string
 			V_H,   // return void, take Handle
-			V_T,   // return void, take Type
+            V_TI,  // return voide, take Type and int
 			V_V    // return void, take void
 		} signature;
 
@@ -217,6 +218,23 @@ class SchemePrimitive : public PrimitiveEnviron
 					(that->*method.v_t)(t);
 					break;
 				}
+				case V_TI:
+				{
+					SCM input = scm_car(args);
+					//Assuming that the type is input as a string or symbol, eg
+					//(f 'SimilarityLink) or (f "SimilarityLink")
+					if (scm_is_true(scm_symbol_p(input)))
+						input = scm_symbol_to_string(input);
+					
+					char *lstr = scm_to_locale_string(input);
+					Type t = classserver().getType(lstr);
+					free(lstr);
+					
+					int i = scm_to_int(scm_cadr(args));
+					
+					(that->*method.v_ti)(t, i);
+					break;
+				}
 				case V_V:
 				{
 					(that->*method.v_v)();
@@ -274,6 +292,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_H, v_h, void, Handle)
 		DECLARE_CONSTR_1(V_T, v_t, void, const Type&)
+		DECLARE_CONSTR_2(V_TI, v_ti, void, const Type&, int)
 
 		// Below is DECLARE_CONSTR_0(V_V, v_v, void*, void);
 		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
@@ -321,6 +340,7 @@ DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
+DECLARE_DECLARE_2(void, const Type&, int)
 DECLARE_DECLARE_3(double, const Handle&, const Handle&, const Type&)
 DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
 DECLARE_DECLARE_3(HandleSeq, const Handle&, const Type&, int)

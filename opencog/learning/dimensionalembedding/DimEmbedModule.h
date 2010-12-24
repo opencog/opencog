@@ -123,7 +123,7 @@ namespace opencog
 
         double euclidDist(double v1[], double v2[], int size);
     public:
-        static const unsigned int numDimensions=5;//number of pivot atoms
+        static const int numDimensions=5;//number of pivot atoms
         const char* id();
 
         DimEmbedModule();
@@ -191,7 +191,7 @@ namespace opencog
          * Use hierarchical clustering to make new nodes using the
          * dimensional embedding.
          */
-        void cluster(const Type& l);
+        void cluster(const Type& l, int numClusters);
 
         /** updates the given atom (recalculates its distance from pivots) */
         //void updateAtom(const Handle& h, const Type& linkType);

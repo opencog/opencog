@@ -7,6 +7,8 @@ http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.20.5390
 
 k-nearest neighbour queries are answered quickly using the following cover tree implementation: http://hunch.net/~jl/projects/cover_tree/cover_tree.html
 
+The code for cluster, with documentation, can be found here: http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm#source
+
 == Using DimEmbedModule in Scheme
 
 To embed an atomspace using a certain link type (eg similarity link)...
