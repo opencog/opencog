@@ -29,7 +29,10 @@
 #include "Logger.h"
 #include "Config.h"
 
+#ifndef WIN32
 #include <execinfo.h>
+#endif
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
@@ -147,6 +150,8 @@ void Logger::disable()
     logEnabled = false;
 }
 
+#ifndef WIN32 /// @todo backtrace and backtrace_symbols is UNIX, we
+              /// may need a WIN32 version
 static void prt_backtrace(FILE *fh)
 {
 #define BT_BUFSZ 50
@@ -165,6 +170,7 @@ static void prt_backtrace(FILE *fh)
 	fprintf(fh, "\n");
 	free(syms);
 }
+#endif
 
 void Logger::log(Logger::Level level, const std::string &txt)
 {
@@ -201,7 +207,9 @@ void Logger::log(Logger::Level level, const std::string &txt)
 
         if (level <= backTraceLevel)
         {
+#ifndef WIN32
             prt_backtrace(f);
+#endif
         }
         fflush(f);
         pthread_mutex_unlock(&lock);
