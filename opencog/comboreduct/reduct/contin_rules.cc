@@ -27,6 +27,8 @@
 
 namespace reduct {
 
+using namespace opencog;
+
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
 
@@ -83,7 +85,7 @@ void reduce_factorize_fraction::operator()(combo_tree& tr,combo_tree::iterator i
     //associated an examplar subtree to its size and
     //and all equal subtrees
     typedef std::map<pre_it, equiv_subtrees,
-                     opencog::lexicographic_subtree_order<vertex>
+                     lexicographic_subtree_order<vertex>
                      > subtree_partition;
     typedef subtree_partition::iterator subtree_partition_it;
     if(*it==id::plus) {
@@ -260,7 +262,7 @@ void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const 
     //associated an exemplar subtree to its size and
     //and all equal subtrees
     typedef std::map<pre_it, equiv_subtrees,
-                     opencog::lexicographic_subtree_order<vertex>
+                     lexicographic_subtree_order<vertex>
                      > subtree_partition;
     typedef subtree_partition::iterator subtree_partition_it;
     if(*it==id::plus) {
@@ -526,7 +528,7 @@ void reduce_invert_constant::operator()(combo_tree& tr,combo_tree::iterator it) 
 void reduce_fraction::operator()(combo_tree& tr,combo_tree::iterator it) const {
     //associate the number of instances of each subtree encountered
     //on the numerator of the fraction
-    typedef std::multiset<pre_it, opencog::lexicographic_subtree_order<vertex> >
+    typedef std::multiset<pre_it, lexicographic_subtree_order<vertex> >
         num_counts;
     typedef num_counts::iterator num_counts_it;
     if(*it==id::div) {

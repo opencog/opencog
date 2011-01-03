@@ -33,23 +33,13 @@
 #include <numeric>
 #include <set>
 
+#include <boost/math/special_functions.hpp>
+
 #include "exceptions.h"
 #include "oc_assert.h"
 
 #define PI 3.141592653589793
 #define EXPONENTIAL 2.71828182845905
-
-#ifndef isnan
-#define isnan(x) ((x) != (x))
-#endif
-
-#ifndef isfinite
-#define isfinite(x) (!isnan((x) - (x)))
-#endif
-
-#ifndef isinf
-#define isinf(x) (!isnan(x) & !isfinite(x))
-#endif
 
 #ifdef WIN32
 #include <numeric>
@@ -61,6 +51,9 @@ namespace opencog
 {
 
 using std::numeric_limits;
+using boost::math::isnan;
+using boost::math::isfinite;
+using boost::math::isinf;
 
 #ifndef WIN32
 // This needs to be changed for non-gcc. Note however that so far it
