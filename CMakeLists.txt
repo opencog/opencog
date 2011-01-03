@@ -167,18 +167,19 @@ MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 
 # This is required for Guile
 FIND_LIBRARY(GMP_LIBRARY gmp)
+FIND_PATH(GMP_INCLUDE_DIR gmp.h)
 
 # Gnu Guile scheme interpreter
 # Versions prior to 1.8.6 have assorted serious problems with
 # multi-threading.  If you need guile, you need this version.
 FIND_PACKAGE(Guile 1.8.6)
-IF (GUILE_FOUND AND GMP_LIBRARY)
+IF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
     SET(HAVE_GUILE 1)
 	SET(GUILE_DIR_MESSAGE "Guile was found.")
-ELSE (GUILE_FOUND AND GMP_LIBRARY)
+ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
-ENDIF (GUILE_FOUND AND GMP_LIBRARY)
+ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 
 
