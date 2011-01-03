@@ -21,11 +21,11 @@ ENDIF(HAVE_SERVER)
 #ENDIF (NOT WIN32)
 
 # Extension language support
-IF (GUILE_FOUND)
+IF (HAVE_GUILE)
 	ADD_SUBDIRECTORY (guile)
 	ADD_SUBDIRECTORY (scm)
 	ADD_SUBDIRECTORY (shell)
-ENDIF (GUILE_FOUND)
+ENDIF (HAVE_GUILE)
 
 # Python bindings currently don't compile because of clash with
 # Node class in python lib.
