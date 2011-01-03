@@ -63,7 +63,7 @@ namespace opencog
 using std::numeric_limits;
 
 #ifndef WIN32
-// this needs to be changed for non-gcc. Note however that so far it
+// This needs to be changed for non-gcc. Note however that so far it
 // has been useless as most of the time you just need pow2 or sq
 // defined below in that header
 using __gnu_cxx::power;
