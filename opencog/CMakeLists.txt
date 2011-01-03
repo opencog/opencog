@@ -29,9 +29,9 @@ ENDIF (HAVE_GUILE)
 
 # Python bindings currently don't compile because of clash with
 # Node class in python lib.
-IF (NOT APPLE AND Boost_PYTHON_FOUND AND PYTHONLIBS_FOUND)
+IF (HAVE_PYTHON_BINDING)
 	ADD_SUBDIRECTORY (python)
-ENDIF (NOT APPLE AND Boost_PYTHON_FOUND AND PYTHONLIBS_FOUND)
+ENDIF (HAVE_PYTHON_BINDING)
 
 ADD_SUBDIRECTORY (persist)
 ADD_SUBDIRECTORY (adaptors)
