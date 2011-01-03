@@ -34,6 +34,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
@@ -256,8 +257,8 @@ double Config::get_double(const string &name) const
 
 bool Config::get_bool(const string &name) const
 {
-    if (strcasecmp(get(name).c_str(), "true") == 0) return true;
-    else if (strcasecmp(get(name).c_str(), "false") == 0) return false;
+    if (boost::iequals(get(name), "true")) return true;
+    else if (boost::iequals(get(name), "false")) return false;
     else throw InvalidParamException(TRACE_INFO,
                                      "[ERROR] invalid bool parameter (%s: %s)",
                                      name.c_str(), get(name).c_str());

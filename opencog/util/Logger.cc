@@ -45,6 +45,8 @@
 #include <sys/time.h>
 #endif
 
+#include <boost/algorithm/string.hpp>
+
 #include <opencog/util/platform.h>
 
 using namespace opencog;
@@ -311,7 +313,7 @@ const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
 {
     unsigned int nLevels = sizeof(levelStrings) / sizeof(levelStrings[0]);
     for (unsigned int i = 0; i < nLevels; ++i) {
-        if (strcasecmp(levelStrings[i], levelStr.c_str()) == 0)
+        if (boost::iequals(levelStrings[i], levelStr))
             return ((Logger::Level) i);
     }
     return ((Logger::Level) - 1);
