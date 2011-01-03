@@ -63,7 +63,9 @@ namespace opencog
 using std::numeric_limits;
 
 #ifndef WIN32
-//this needs to be changed for non-gcc
+// this needs to be changed for non-gcc. Note however that so far it
+// has been useless as most of the time you just need pow2 or sq
+// defined below in that header
 using __gnu_cxx::power;
 using __gnu_cxx::iota;
 #endif
@@ -307,7 +309,7 @@ template<typename IntT> IntT smallest_divisor(IntT n) {
 // calculate the square of x
 template<typename T> T sq(T x) { return x*x; }
 
-// return x^2
+// return 2^x
 template<typename OutInt> OutInt pow2(unsigned int x) {
     OC_ASSERT(8*sizeof(OutInt) - numeric_limits<OutInt>::is_signed?1:0 > x);
     return static_cast<OutInt>(1) << x;

@@ -393,8 +393,8 @@ namespace opencog
             //Euclidean distance between points
             template<typename PointT>
                 static Distance eucDist(const PointT& p1, const PointT& p2) {
-                return std::sqrt(opencog::power(p1.first - p2.first, 2) +
-                                 opencog::power(p1.second - p2.second, 2));
+                return std::sqrt(opencog::sq(p1.first - p2.first) +
+                                 opencog::sq(p1.second - p2.second));
             }
 
             //are the given /grid coordinates/ within the dimensions of this grid?

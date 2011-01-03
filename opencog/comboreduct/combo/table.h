@@ -170,20 +170,20 @@ public:
     truth_table(It from, It to) : super(from, to), _rng(NULL) { }
     template<typename T>
     truth_table(const opencog::tree<T>& tr, arity_t arity)
-        : super(opencog::power(2, arity)), _arity(arity), _rng(NULL) {
+        : super(opencog::pow2(arity)), _arity(arity), _rng(NULL) {
         populate(tr);
     }
     template<typename T>
     truth_table(const opencog::tree<T>& tr) {
         _arity = arity(tr);
         _rng = NULL;
-        this->resize(opencog::power(2, _arity));
+        this->resize(opencog::pow2(_arity));
         populate(tr);
     }
 
     template<typename Func>
     truth_table(const Func& f, arity_t arity)
-        : super(opencog::power(2, arity)), _arity(arity), _rng(NULL) {
+        : super(opencog::pow2(arity)), _arity(arity), _rng(NULL) {
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             bool_vector v(_arity);
