@@ -4,15 +4,20 @@
 # someday depend on the earlier parts.
 #
 ADD_SUBDIRECTORY (util)
+
 IF (HAVE_ATOMSPACE)
     ADD_SUBDIRECTORY (atomspace)
     ADD_SUBDIRECTORY (benchmark)
+    ADD_SUBDIRECTORY (query)
 ENDIF (HAVE_ATOMSPACE)
+
 IF (HAVE_ATTENTION)
     ADD_SUBDIRECTORY (dynamics)
 ENDIF (HAVE_ATTENTION)
+
 IF (HAVE_SERVER)
     ADD_SUBDIRECTORY (server)
+    ADD_SUBDIRECTORY (adaptors) # adaptors depends on server
 ENDIF(HAVE_SERVER)
 
 # There is nothing in this directory?
@@ -37,12 +42,6 @@ IF (HAVE_PERSIST)
    ADD_SUBDIRECTORY (persist)
 ENDIF (HAVE_PERSIST)
 
-# adaptors depends on server
-IF (HAVE_SERVER)
-   ADD_SUBDIRECTORY (adaptors)
-ENDIF(HAVE_SERVER)
-
-ADD_SUBDIRECTORY (query)
 ADD_SUBDIRECTORY (nlp)
 ADD_SUBDIRECTORY (reasoning)
 ADD_SUBDIRECTORY (comboreduct)
