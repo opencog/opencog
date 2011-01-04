@@ -19,6 +19,8 @@ set_target_properties(attention_py PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )
 
-INSTALL (TARGETS attention_py
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-) 
+IF (WIN32)
+    INSTALL (TARGETS attention_py DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ELSE (WIN32)
+    INSTALL (TARGETS attention_py LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (WIN32)

@@ -32,7 +32,7 @@
 
 #include "files.h"
 
-#ifdef WIN32
+#ifdef WIN32_NOT_UNIX
 #include <direct.h>
 #define  mkdir _mkdir
 #endif
@@ -79,7 +79,7 @@ void opencog::expandPath(std::string& path)
 bool opencog::createDirectory(const char* directory)
 {
 
-#ifdef WIN32
+#ifdef WIN32_NOT_CYGWIN
     if (mkdir(directory) == 0 || errno == EEXIST) {
 #else
     if (mkdir(directory, S_IRWXU | S_IRWXG | S_IRWXO) == 0 || errno == EEXIST) {

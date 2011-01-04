@@ -24,6 +24,8 @@ set_target_properties(server_py PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )
 
-INSTALL (TARGETS server_py
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+IF (WIN32)
+    INSTALL (TARGETS server_py DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ELSE (WIN32)
+    INSTALL (TARGETS server_py LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (WIN32)

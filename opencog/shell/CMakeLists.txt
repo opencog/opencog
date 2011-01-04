@@ -12,9 +12,11 @@ TARGET_LINK_LIBRARIES(scheme-shell
     ${Boost_SYSTEM_LIBRARY}
 )
 
-INSTALL (TARGETS scheme-shell
-    LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+IF (WIN32)
+    INSTALL (TARGETS scheme-shell DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ELSE (WIN32)
+    INSTALL (TARGETS scheme-shell LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (WIN32)
 
 INSTALL (FILES
     GenericShell.h

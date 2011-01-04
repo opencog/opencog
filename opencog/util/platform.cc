@@ -58,7 +58,7 @@ char* __strtok_r(char *s1, const char *s2, char **lasts)
 } // namespace opencog
 #endif
 
-#ifdef WIN32
+#ifdef WIN32_NOT_UNIX
 
 #include <sys/timeb.h>
 #include <winsock2.h>
@@ -149,7 +149,7 @@ unsigned long long opencog::atoll(const char *str)
     return la;
 }
 
-#endif // WIN32
+#endif // WIN32_NOT_UNIX
 
 #include <stdlib.h>
 #include <unistd.h>

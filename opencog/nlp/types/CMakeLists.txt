@@ -12,9 +12,11 @@ ADD_LIBRARY (nlp-types SHARED
 	NLPTypes
 )
 
-INSTALL (TARGETS nlp-types
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+IF (WIN32)
+    INSTALL (TARGETS nlp-types DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ELSE (WIN32)
+    INSTALL (TARGETS nlp-types LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (WIN32)
 
 INSTALL (FILES
 	atom_types.h

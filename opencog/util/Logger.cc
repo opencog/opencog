@@ -37,7 +37,7 @@
 #include <stdarg.h>
 #include <time.h>
 
-#ifdef WIN32
+#ifdef WIN32_NOT_UNIX
 #include <winsock2.h>
 #undef ERROR
 #undef DEBUG

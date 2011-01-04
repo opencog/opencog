@@ -17,6 +17,9 @@ set_target_properties(dynamics_py PROPERTIES
     OUTPUT_NAME "libopencog-dynamics-python"
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )
-INSTALL (TARGETS dynamics_py
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+
+IF (WIN32)
+    INSTALL (TARGETS dynamics_py DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ELSE (WIN32)
+    INSTALL (TARGETS dynamics_py LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (WIN32)
