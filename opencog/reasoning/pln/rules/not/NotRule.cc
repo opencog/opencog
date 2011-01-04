@@ -33,7 +33,7 @@ namespace opencog { namespace pln {
 TVSeq NotRule::formatTVarray(const VertexSeq& premiseArray) const
 {
     OC_ASSERT(premiseArray.size() == 1);
-    return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
+    return TVSeq(1, asw->getTV(_v2h(premiseArray[0])));
 }
 
 NotRule::NotRule(AtomSpaceWrapper *_asw)

@@ -246,7 +246,7 @@ pHandle UnorderedCcompute(AtomSpaceWrapper *asw, Type linkT,
     // tvs is to contain the TVs of the premises from premiseArray
     TVSeq tvs(n);
     for (int i = 0; i < n; i++)
-        tvs[i] = &(asw->getTV(premiseArray[i]));
+        tvs[i] = asw->getTV(premiseArray[i]);
 
     // compute TV result
     TruthValue* retTV = fN.compute(tvs);
@@ -418,7 +418,7 @@ Handle Ass(AtomSpaceWrapper *asw, Handle h, vector<Handle>& ret)
 
     for (vector<Handle>::iterator k = ret.begin(); k != ret.end();k++)
     {
-        TruthValue* tv = getTruthValue(*k);
+        TruthValuePtr tv = destTable->getTV(*k);
 
         printTree(
             destTable->addAtom(
@@ -426,9 +426,9 @@ Handle Ass(AtomSpaceWrapper *asw, Handle h, vector<Handle>& ret)
                     new atom(nm->getOutgoing(*k)[0]),
                     new atom(ass)
                 ),
-                tv->clone(),
-                                true);  
-//                              false);
+                *tv,
+                true);  
+//              false);
             )
             ,0,0
         );

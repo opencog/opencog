@@ -67,4 +67,5 @@ bool SaveRequest::execute()
         oss << "Error: unable to save to XML" << std::endl;
 
     send(oss.str());
+    return true;
 }

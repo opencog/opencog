@@ -126,7 +126,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
         std::vector<Handle>::iterator targetItr;
         Handle linkHandle = *hi;
         float val;
-        val = a->getTV(*hi).toFloat();
+        val = a->getTV(*hi)->toFloat();
         if (val == 0.0f) {
             continue;
         }
@@ -212,7 +212,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         Type type;
         float val;
 
-        val = a->getTV(*hi).toFloat();
+        val = a->getTV(*hi)->toFloat();
         if (val == 0.0f) continue;
         //val *= diffuseTemperature;
         type = a->getType(*hi); 

@@ -102,6 +102,18 @@ bool TruthValue::isNullTv() const
     return false;
 }
 
+bool TruthValue::isDefaultTV() const
+{
+    const TruthValue& dtv = TruthValue::DEFAULT_TV();
+    if (this == &(dtv)) return true;
+    if (getType() == dtv.getType() &&
+        getMean() == dtv.getMean() &&
+        getCount() == dtv.getCount()) {
+        return true;
+    }
+    return false;
+}
+
 const char* TruthValue::typeToStr(TruthValueType t) throw (InvalidParamException)
 {
     switch (t) {

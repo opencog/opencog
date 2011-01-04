@@ -37,9 +37,9 @@ protected:
         assert(premiseArray.size() == 1);
         pHandleSeq nodes = asw->getOutgoing(A);
 
-        tvs.push_back(&(asw->getTV(A)));
-        tvs.push_back(&(asw->getTV(nodes[0])));
-        tvs.push_back(&(asw->getTV(nodes[1])));
+        tvs.push_back(asw->getTV(A));
+        tvs.push_back(asw->getTV(nodes[0]));
+        tvs.push_back(asw->getTV(nodes[1]));
 
         return tvs;
     }

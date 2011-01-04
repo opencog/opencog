@@ -49,12 +49,11 @@ BoundVertex BaseCrispUnificationRule::compute(const VertexSeq& premiseArray, pHa
 
     pHandle topologicalStub = asw->getOutgoing(_v2h(premiseArray[n-1]))[0];
 
-    const TruthValue& tv = asw->getTV(_v2h(premiseArray[0]));
+    TruthValuePtr tv = asw->getTV(_v2h(premiseArray[0]));
     
-    
-    pHandle ret= asw->addLink(asw->getType(topologicalStub),
+    pHandle ret = asw->addLink(asw->getType(topologicalStub),
                               asw->getOutgoing(topologicalStub),
-                              tv, fresh);   
+                              *tv, fresh);   
 
     return Vertex(ret);
 }

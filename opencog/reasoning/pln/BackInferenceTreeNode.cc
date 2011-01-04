@@ -415,7 +415,7 @@ Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
         Btr<set<BoundVertex> > nontrivial_results(new set<BoundVertex>);
 
         foreach(const BoundVertex& new_result, *results)
-            if (GET_ASW->getTV(_v2h(new_result.value)).getConfidence() > min_confidence)
+            if (GET_ASW->getTV(_v2h(new_result.value))->getConfidence() > min_confidence)
             {
                 printTree(_v2h(new_result.value),0,0);
 
@@ -784,7 +784,7 @@ void BITNode::addDirectResult(Btr<set<BoundVertex> > directResult, spawn_mode sp
     bool bdrum_changed = false;
     foreach(BoundVertex bv, *directResult)
     {
-        float confidence = asw->getTV(_v2h(bv.value)).getConfidence();
+        float confidence = asw->getTV(_v2h(bv.value))->getConfidence();
         if (confidence > my_bdrum)
         {
             my_bdrum = confidence;
@@ -1372,12 +1372,12 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources,
         {
             tlog(0, "get next TV");
             assert(!asw->isType(vt2h(*vtp)));
-            const TruthValue& etv = asw->getTV(vt2h(*vtp));
-            if (!etv.isNullTv()) {
-                if (etv.getConfidence() > minConfidenceForAbort)
+            TruthValuePtr etv = asw->getTV(vt2h(*vtp));
+            if (!etv->isNullTv()) {
+                if (etv->getConfidence() > minConfidenceForAbort)
                     return *eval_res_vector_set.begin();
                 else 
-                    tlog(0,"TV conf too low to stop now: %f", etv.getConfidence());
+                    tlog(0,"TV conf too low to stop now: %f", etv->getConfidence());
             }
         }
         // The extra blank line makes it easier to scroll through output.
@@ -1625,7 +1625,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 {
                     pHandle h = _v2h(*ra->getVtree().begin());
                     if (!asw->isSubType(h, HYPOTHETICAL_LINK) &&
-                        asw->getTV(h).getConfidence() < MIN_CONFIDENCE_FOR_RULE_APPLICATION)
+                        asw->getTV(h)->getConfidence() < MIN_CONFIDENCE_FOR_RULE_APPLICATION)
                         goto next_args;
                 }
 
@@ -1661,8 +1661,8 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                     Handle real = asw->fakeToRealHandle(ph).first;
 
                     // Revise existing primary TV and newly found TV
-                    TruthValue* primaryTV = atomspace().getTV(real, NULL_VERSION_HANDLE).clone();
-                    TruthValue* newlyFoundTV = asw->getTV(ph).clone();
+                    TruthValuePtr primaryTV = atomspace().getTV(real, NULL_VERSION_HANDLE);
+                    TruthValuePtr newlyFoundTV = asw->getTV(ph);
 
                     TVSeq both(2);
                     both[0] = primaryTV;
@@ -1736,7 +1736,7 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
         tlog(0,"Generalizing results:");
 
         foreach(const BoundVertex& b, *bvs)
-            if (GET_ASW->getTV(_v2h(b.value)).getConfidence() > min_confidence)
+            if (GET_ASW->getTV(_v2h(b.value))->getConfidence() > min_confidence)
             {
                 printTree(_v2h(b.value),0,0);
                 ForAllArgs.push_back(b.value);

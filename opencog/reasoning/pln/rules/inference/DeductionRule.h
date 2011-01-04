@@ -81,11 +81,11 @@ class DeductionRule : public GenericRule<DeductionFormula>
                 OC_ASSERT(equal(nodesAB[1], nodesBC[0]));
             }
         
-        tvs[0] = &(super::asw->getTV(AB));
-        tvs[1] = &(super::asw->getTV(BC));
-        tvs[2] = &(super::asw->getTV(nodesAB[0]));
-        tvs[3] = &(super::asw->getTV(nodesAB[1])); //== nodesBC[0]);
-        tvs[4] = &(super::asw->getTV(nodesBC[1]));
+        tvs[0] = super::asw->getTV(AB);
+        tvs[1] = super::asw->getTV(BC);
+        tvs[2] = super::asw->getTV(nodesAB[0]);
+        tvs[3] = super::asw->getTV(nodesAB[1]); //== nodesBC[0]);
+        tvs[4] = super::asw->getTV(nodesBC[1]);
         
         return tvs;
     }

@@ -354,12 +354,12 @@ public:
         result = NULL;
     };
     ~GetTruthValueASR() {
-        if (result) delete result;
+        if (result && *result != TruthValue::DEFAULT_TV()) delete result;
     }
     
     virtual void do_work() {
         const TruthValue& tv = atomspace->getTV(h,vh);
-        if (tv != TruthValue::DEFAULT_TV) {
+        if (tv != TruthValue::DEFAULT_TV()) {
             set_result(tv.clone());
         } else {
             set_result(&tv);
@@ -581,7 +581,7 @@ typedef boost::shared_ptr< GenericASR<AttentionValue> > AttentionValueRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::sti_t> > STIRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::lti_t> > LTIRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::vlti_t> > VLTIRequest;
-typedef boost::shared_ptr< GenericASR<TruthValue*> > TruthValueRequest;
+typedef boost::shared_ptr< GenericASR<const TruthValue*> > TruthValueRequest;
 typedef boost::shared_ptr< GenericASR<HandleSeq> > HandleSeqRequest;
 typedef boost::shared_ptr< GenericASR<Type> > TypeRequest;
 typedef boost::shared_ptr< GenericASR<int> > IntRequest;

@@ -30,7 +30,7 @@ class SenseCache
 		~SenseCache();
 
 		void set_atom_space(AtomSpace *);
-		const TruthValue& similarity(Handle, Handle);
+		TruthValuePtr similarity(Handle, Handle);
 		void set_similarity(Handle, Handle, const TruthValue&);
 };
 

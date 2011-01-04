@@ -504,7 +504,7 @@ public:
     //! returns whether type subT has superT as a parent type
     bool inheritsType(Type subT, Type superT) const;
 
-    const TruthValue& getTV(pHandle h) const;
+    TruthValuePtr getTV(pHandle h) const;
 
     bool isType(const pHandle h) const;
 

@@ -85,8 +85,8 @@ protected:
     {
         OC_ASSERT(premiseArray.size() == 2);
         TVSeq tvs;
-        tvs.push_back(&(super::asw->getTV(_v2h(premiseArray[0])))); // R <TV1>
-		tvs.push_back(&(super::asw->getTV(_v2h(premiseArray[1])))); // C <TV2>
+        tvs.push_back(super::asw->getTV(_v2h(premiseArray[0]))); // R <TV1>
+		tvs.push_back(super::asw->getTV(_v2h(premiseArray[1]))); // C <TV2>
         return tvs;
     }
 

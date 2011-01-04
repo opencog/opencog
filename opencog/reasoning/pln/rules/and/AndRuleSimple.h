@@ -93,9 +93,9 @@ public:
 		const int n = (int)premiseArray.size();
 		pHandle first = hs[0];
 		pHandleSeq dummy_outgoing(1, first);
-        const TruthValue& dummy_tv = asw->getTV(first);
+        TruthValuePtr dummy_tv = asw->getTV(first);
 
-		//printf("AndRUle: [%d: %d] %s =>\n", N, v2h(premiseArray[0]), getTruthValue(v2h(premiseArray[0]))->toString().c_str());
+		//printf("AndRule: [%d: %d] %s =>\n", N, v2h(premiseArray[0]), asw->getTV(v2h(premiseArray[0]))->toString().c_str());
 
 /*		puts("AndRule got args:");
 		foreach(const Vertex& v, premiseArray)
@@ -105,12 +105,12 @@ public:
 		pHandle ret = ((N>1)? UnorderedCcompute(asw, AND_LINK, fN,
                                                 hs, n, CX, fresh)
                        : asw->addLink(AND_LINK, dummy_outgoing,
-                                      dummy_tv, fresh));
+                                      *dummy_tv, fresh));
         delete[] hs;
 
-		      //		printf("=> AndRUle: %s:\n", ret, getTruthValue(ret)->toString().c_str());
-		      //		printTree(ret,0,-3);
-		      //currentDebugLevel = -3;
+      //printf("=> AndRUle: %s:\n", ret, asw->getTV(ret)->toString().c_str());
+      //printTree(ret,0,-3);
+      //currentDebugLevel = -3;
 
 		return Vertex(ret);
 	}

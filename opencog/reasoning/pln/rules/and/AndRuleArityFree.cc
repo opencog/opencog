@@ -36,7 +36,7 @@ bool ArityFreeAndRule::asymmetric(Handle* A, Handle* B) const
         bool provenAsymmetric = false;
         bool provenSymmetric = false;
         bool swapped = false;
-        TruthValue* tvs[2];
+        TruthValuePtr tvs[2];
         vector<Handle> ImpLinks, EvaLinks;
     
         do
@@ -44,8 +44,8 @@ bool ArityFreeAndRule::asymmetric(Handle* A, Handle* B) const
             EvaLinks = nm->getOutgoing(*A); //Eval: P,a
             ImpLinks = nm->getOutgoing(*B); //Impl: P->P2
 
-            tvs[0] = getTruthValue(*A);
-            tvs[1] = getTruthValue(*B);
+            tvs[0] = nm->getTV(*A);
+            tvs[1] = nm->getTV(*B);
         
             if (nm->getType(*B) == IMPLICATION_LINK
                 && nm->getType(*A) == EVALUATION_LINK
@@ -70,14 +70,14 @@ BoundVertex ArityFreeAndRule::compute(Handle A, Handle B, Handle CX)  const //ve
 
         TruthValue* t=NULL;
         
-        TruthValue* tvs[2];
+        TruthValuePtr tvs[2];
 
         bool is_asymmetric = asymmetric(&A, &B); //, ImpLinks, EvaLinks);
 
         EvaLinks = nm->getOutgoing(A); //Eval: P,a
         ImpLinks = nm->getOutgoing(B); //Impl: P->P2
-        tvs[0] = getTruthValue(A);
-        tvs[1] = getTruthValue(B);
+        tvs[0] = nm->getTV(A);
+        tvs[1] = nm->getTV(B);
         
         if (is_asymmetric) //if (isLink(nm->getType(B)))
         {
@@ -112,11 +112,11 @@ BoundVertex ArityFreeAndRule::computeSymmetric(vector<Handle> nodes, Handle CX)
 {
         const int n = nodes.size();
         TruthValue* t=NULL;
-        TruthValue** tvs = new SimpleTruthValue*[nodes.size()];
+        TruthValuePtr* tvs = new TruthValuePtr[nodes.size()];
         int ti=0;
         
         for (ti = 0; ti < nodes.size(); ti++)
-            tvs[ti] = getTruthValue(nodes[ti]);
+            tvs[ti] = nm->getTV(nodes[ti]);
 
         t = fN.compute(tvs, nodes.size());
         
@@ -127,7 +127,7 @@ BoundVertex ArityFreeAndRule::computeSymmetric(vector<Handle> nodes, Handle CX)
         for (ti = 0; ti < nodes.size(); ti++)
             delete tvs[ti];
         
-        //  delete[] tvs;
+        delete[] tvs;
         
         return h;
 }

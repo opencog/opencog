@@ -63,7 +63,7 @@ printAtomTree(outh,0,1);
         Handle h = pseudoAtom->attach(asw);
         ret->push_back(pseudoAtom);
 
-            TruthValue *tv = getTruthValue(h);
+        TruthValue *tv = getTruthValue(h);
 
 
         //printAtomTree(*(*ret)[1],0,4);

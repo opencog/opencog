@@ -29,10 +29,10 @@
 #include <vector>
 
 #include <opencog/atomspace/TruthValue.h>
+#include <boost/shared_ptr.hpp>
 
 namespace opencog
 {
-
 
 /*
  * Indefinite probabilities are in the form ([L,U],b,N). In practical work,
@@ -121,6 +121,8 @@ public:
         DEFAULT_K = k;
     }
 };
+
+typedef boost::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
 
 } // namespace opencog
 

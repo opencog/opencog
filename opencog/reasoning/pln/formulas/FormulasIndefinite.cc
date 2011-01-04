@@ -62,8 +62,8 @@ static void truncate(number_t &value)
     value = (value <= 0.0) ? 0.000001 : (value >= 1.0) ? 0.999999 : value;
 }
 
-void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
-                             IndefiniteTruthValue* const& TVb)
+void Sampler::generateSample(IndefiniteTruthValuePtr TVa,
+                             IndefiniteTruthValuePtr TVb)
 {
 
     number_t valuesA[100], valuesB[100];
@@ -133,9 +133,9 @@ void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
     TVb->setFirstOrderDistribution(distributionB);
 }
 
-void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
-                             IndefiniteTruthValue* const& TVb,
-                             IndefiniteTruthValue* const& TVc)
+void Sampler::generateSample(IndefiniteTruthValuePtr TVa,
+                             IndefiniteTruthValuePtr TVb,
+                             IndefiniteTruthValuePtr TVc)
 {
 
     number_t valuesA[100], valuesC[100], valuesAC[100];
@@ -219,11 +219,11 @@ void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
     TVc->setFirstOrderDistribution(distributionAC);
 }
 
-void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
-                             IndefiniteTruthValue* const& TVb,
-                             IndefiniteTruthValue* const& TVc,
-                             IndefiniteTruthValue* const& TVab,
-                             IndefiniteTruthValue* const& TVcb_bc)
+void Sampler::generateSample(IndefiniteTruthValuePtr TVa,
+                             IndefiniteTruthValuePtr TVb,
+                             IndefiniteTruthValuePtr TVc,
+                             IndefiniteTruthValuePtr TVab,
+                             IndefiniteTruthValuePtr TVcb_bc)
 {
 
     number_t valuesA[100], valuesB[100],
@@ -361,8 +361,8 @@ void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
     TVcb_bc->setFirstOrderDistribution(distributionCB_BC);
 }
 
-IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa,
-                                IndefiniteTruthValue* const& TVb)
+IndefiniteRule::IndefiniteRule (IndefiniteTruthValuePtr TVa,
+                                IndefiniteTruthValuePtr TVb)
 {
     tvset.push_back(TVa);
     tvset.push_back(TVb);
@@ -370,9 +370,9 @@ IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa,
     s->generateSample(TVa, TVb);
 }
 
-IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa,
-                                IndefiniteTruthValue* const& TVb,
-                                IndefiniteTruthValue* const& TVc)
+IndefiniteRule::IndefiniteRule (IndefiniteTruthValuePtr TVa,
+                                IndefiniteTruthValuePtr TVb,
+                                IndefiniteTruthValuePtr TVc)
 {
     tvset.push_back(TVa);
     tvset.push_back(TVb);
@@ -381,11 +381,11 @@ IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa,
     s->generateSample(TVa, TVb, TVc);
 }
 
-IndefiniteRule::IndefiniteRule (IndefiniteTruthValue* const& TVa,
-                                IndefiniteTruthValue* const& TVb,
-                                IndefiniteTruthValue* const& TVc,
-                                IndefiniteTruthValue* const& TVab,
-                                IndefiniteTruthValue* const& TVbc,
+IndefiniteRule::IndefiniteRule (IndefiniteTruthValuePtr TVa,
+                                IndefiniteTruthValuePtr TVb,
+                                IndefiniteTruthValuePtr TVc,
+                                IndefiniteTruthValuePtr TVab,
+                                IndefiniteTruthValuePtr TVbc,
                                 bool deduction)
 {
     tvset.push_back(TVa);
@@ -434,8 +434,8 @@ IndefiniteTruthValue* IndefiniteRule::conclusion(const pvector& distributions)
 }
 
 // Methods Implementations
-ConjunctionRule::ConjunctionRule(IndefiniteTruthValue* const& TVa,
-                                 IndefiniteTruthValue* const& TVb)
+ConjunctionRule::ConjunctionRule(IndefiniteTruthValuePtr TVa,
+                                 IndefiniteTruthValuePtr TVb)
     : IndefiniteRule::IndefiniteRule(TVa, TVb) {}
 
 IndefiniteTruthValue* ConjunctionRule::solve()
@@ -456,8 +456,8 @@ IndefiniteTruthValue* ConjunctionRule::solve()
     return IndefiniteRule::conclusion(distributionResult);
 }
 
-ImplicationRule::ImplicationRule(IndefiniteTruthValue* const& TVa,
-                                 IndefiniteTruthValue* const& TVab)
+ImplicationRule::ImplicationRule(IndefiniteTruthValuePtr TVa,
+                                 IndefiniteTruthValuePtr TVab)
     : IndefiniteRule::IndefiniteRule(TVa, TVab) {}
 
 IndefiniteTruthValue* ImplicationRule::solve()
@@ -546,8 +546,8 @@ IndefiniteTruthValue* ImplicationRule::q_r_conclusion(float l, float u,
     }
 }
 
-RevisionRule::RevisionRule(IndefiniteTruthValue* const& TVa,
-                           IndefiniteTruthValue* const& TVb)
+RevisionRule::RevisionRule(IndefiniteTruthValuePtr TVa,
+                           IndefiniteTruthValuePtr TVb)
     : IndefiniteRule::IndefiniteRule(TVa, TVb) {}
 
 IndefiniteTruthValue* RevisionRule::solve()
@@ -579,11 +579,11 @@ IndefiniteTruthValue* RevisionRule::solve()
     return result;
 }
 
-AbductionRule::AbductionRule(IndefiniteTruthValue* const& TVa,
-                             IndefiniteTruthValue* const& TVb,
-                             IndefiniteTruthValue* const& TVc,
-                             IndefiniteTruthValue* const& TVab,
-                             IndefiniteTruthValue* const& TVcb)
+AbductionRule::AbductionRule(IndefiniteTruthValuePtr TVa,
+                             IndefiniteTruthValuePtr TVb,
+                             IndefiniteTruthValuePtr TVc,
+                             IndefiniteTruthValuePtr TVab,
+                             IndefiniteTruthValuePtr TVcb)
     : IndefiniteRule::IndefiniteRule(TVa, TVb, TVc, TVab, TVcb, false) {}
 
 IndefiniteTruthValue* AbductionRule::solve()
@@ -618,9 +618,9 @@ IndefiniteTruthValue* AbductionRule::solve()
     return IndefiniteRule::conclusion(distributionAC);
 }
 
-BayesRule::BayesRule(IndefiniteTruthValue* const& TVa,
-                     IndefiniteTruthValue* const& TVc,
-                     IndefiniteTruthValue* const& TVac)
+BayesRule::BayesRule(IndefiniteTruthValuePtr TVa,
+                     IndefiniteTruthValuePtr TVc,
+                     IndefiniteTruthValuePtr TVac)
     : IndefiniteRule::IndefiniteRule(TVa, TVc, TVac) {}
 
 IndefiniteTruthValue* BayesRule::solve()
@@ -646,11 +646,11 @@ IndefiniteTruthValue* BayesRule::solve()
     return IndefiniteRule::conclusion(distributionCA);
 }
 
-DeductionRule::DeductionRule(IndefiniteTruthValue* const& TVa,
-                             IndefiniteTruthValue* const& TVb,
-                             IndefiniteTruthValue* const& TVc,
-                             IndefiniteTruthValue* const& TVab,
-                             IndefiniteTruthValue* const& TVbc)
+DeductionRule::DeductionRule(IndefiniteTruthValuePtr TVa,
+                             IndefiniteTruthValuePtr TVb,
+                             IndefiniteTruthValuePtr TVc,
+                             IndefiniteTruthValuePtr TVab,
+                             IndefiniteTruthValuePtr TVbc)
     : IndefiniteRule::IndefiniteRule(TVa, TVb, TVc, TVab, TVbc, true) {}
 
 IndefiniteTruthValue* DeductionRule::solve()
@@ -687,12 +687,12 @@ TruthValue* IndefiniteSymmetricBayesFormula::simpleCompute(const TVSeq& TV, long
     int N = TV.size();
     assert(N == 3);
     assert(TV[0]); assert(TV[1]); assert(TV[2]);
-    IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
-    IndefiniteTruthValue* TVc = (IndefiniteTruthValue*)(TV[1]);
-    IndefiniteTruthValue* TVac = (IndefiniteTruthValue*)(TV[2]);
+    IndefiniteTruthValuePtr TVa = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVc = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
+    IndefiniteTruthValuePtr TVac = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[2]);
     IndefiniteTruthValue* result;
 
-    RuleGenerator<BayesRule, IndefiniteTruthValue> myCreator;
+    RuleGenerator<BayesRule, IndefiniteTruthValuePtr> myCreator;
     BayesRule *a = myCreator.CreateRule(TVa, TVc, TVac);
     result = a->solve();
     return result;
@@ -703,11 +703,11 @@ TruthValue* IndefiniteSymmetricImplicationBreakdownFormula::simpleCompute(const 
     int N = TV.size();
     assert(N == 2);
     assert(TV[0]); assert(TV[1]);
-    IndefiniteTruthValue* linkAB = (IndefiniteTruthValue*)(TV[0]);
-    IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[1]);
+    IndefiniteTruthValuePtr linkAB = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVA = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
     IndefiniteTruthValue* result;
 
-    RuleGenerator<ImplicationRule, IndefiniteTruthValue> myCreator;
+    RuleGenerator<ImplicationRule, IndefiniteTruthValuePtr> myCreator;
     ImplicationRule *a = myCreator.CreateRule(TVA, linkAB);
     result = a->solve();
     return result;
@@ -720,14 +720,14 @@ TruthValue* IndefiniteSymmetricDeductionFormula::simpleCompute(const TVSeq& TV,
     assert(N == 5);
     assert(TV[0]); assert(TV[1]);
     assert(TV[2]); assert(TV[3]);assert(TV[4]);
-    IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
-    IndefiniteTruthValue* TVb = (IndefiniteTruthValue*)(TV[1]);
-    IndefiniteTruthValue* TVc = (IndefiniteTruthValue*)(TV[2]);
-    IndefiniteTruthValue* TVab = (IndefiniteTruthValue*)(TV[3]);
-    IndefiniteTruthValue* TVbc = (IndefiniteTruthValue*)(TV[4]);
+    IndefiniteTruthValuePtr TVa = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVb = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
+    IndefiniteTruthValuePtr TVc = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[2]);
+    IndefiniteTruthValuePtr TVab = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[3]);
+    IndefiniteTruthValuePtr TVbc = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[4]);
     IndefiniteTruthValue* result;
 
-    RuleGenerator<DeductionRule, IndefiniteTruthValue> myCreator;
+    RuleGenerator<DeductionRule, IndefiniteTruthValuePtr> myCreator;
     DeductionRule *a = myCreator.CreateRule(TVa, TVb, TVc, TVab, TVbc);
     result = a->solve();
     return result;
@@ -739,11 +739,11 @@ TruthValue* IndefiniteSymmetricRevisionFormula::simpleCompute(const TVSeq& TV,
     int N = TV.size();
     assert(N == 2);
     assert(TV[0]); assert(TV[1]);
-    IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
-    IndefiniteTruthValue* TVb = (IndefiniteTruthValue*)(TV[1]);
+    IndefiniteTruthValuePtr TVa = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVb = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
     IndefiniteTruthValue* result;
 
-    RuleGenerator<RevisionRule, IndefiniteTruthValue> myCreator;
+    RuleGenerator<RevisionRule, IndefiniteTruthValuePtr> myCreator;
     RevisionRule *a = myCreator.CreateRule(TVa, TVb);
     result = a->solve();
     return result;
@@ -755,10 +755,10 @@ TruthValue* IndefiniteSymmetricAndFormula::simpleCompute(const TVSeq& TV,
     int N = TV.size();
     assert(N == 2);
     assert(TV[0]); assert(TV[1]);
-    IndefiniteTruthValue* TVa = (IndefiniteTruthValue*)(TV[0]);
-    IndefiniteTruthValue* TVb = (IndefiniteTruthValue*)(TV[1]);
+    IndefiniteTruthValuePtr TVa = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVb = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
     IndefiniteTruthValue* result;
-    RuleGenerator<ConjunctionRule, IndefiniteTruthValue> myCreator;
+    RuleGenerator<ConjunctionRule, IndefiniteTruthValuePtr> myCreator;
     ConjunctionRule *a = myCreator.CreateRule(TVa, TVb);
     result = a->solve();
     return result;
@@ -770,7 +770,7 @@ TruthValue* IndefiniteMem2InhFormula::simpleCompute(const TVSeq& TV,
     int N = TV.size();
     assert(N == 1);
     assert(TV[0]);
-    IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[0]);
+    IndefiniteTruthValuePtr TVA = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
     float width = TVA->getU() - TVA->getL();
     float center = TVA->getL() + width / 2;
     float L_ = center - ((width * IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor) / 2);
@@ -788,7 +788,7 @@ TruthValue* IndefiniteInh2MemFormula::simpleCompute(const TVSeq& TV,
     int N = TV.size();
     assert(N == 1);
     assert(TV[0]);
-    IndefiniteTruthValue* TVA = (IndefiniteTruthValue*)(TV[0]);
+    IndefiniteTruthValuePtr TVA = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
     float width = TVA->getU() - TVA->getL();
     float center = TVA->getL() + width / 2;
     float L_ = center - ((width * 1.2f) / 2);

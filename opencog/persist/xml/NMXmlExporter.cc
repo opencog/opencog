@@ -131,15 +131,15 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
     char aux[1<<16];
     Type t = as->getType(atomHandle);
     typesUsed[t] = true;
-    const TruthValue& tv=as->getTV(atomHandle);
+    TruthValuePtr tv=as->getTV(atomHandle);
     if (classserver().isA(t, NODE)) {
         if (!isInternal) {
             sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ",
                     classserver().getTypeName(t).c_str(),
                     STRENGTH_TOKEN,
-                    tv.getMean(),
+                    tv->getMean(),
                     CONFIDENCE_TOKEN,
-                    tv.getConfidence());
+                    tv->getConfidence());
             result += aux;
         } else {
             sprintf(aux, "<%s %s=\"%s\" ", ELEMENT_TOKEN, CLASS_TOKEN, classserver().getTypeName(t).c_str());
@@ -154,9 +154,9 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
         sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ",
                 classserver().getTypeName(t).c_str(),
                 STRENGTH_TOKEN,
-                tv.getMean(),
+                tv->getMean(),
                 CONFIDENCE_TOKEN,
-                tv.getConfidence());
+                tv->getConfidence());
         result += aux;
         sprintf(aux, ">\n");
         result += aux;

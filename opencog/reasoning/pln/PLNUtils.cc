@@ -587,14 +587,14 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
 
     for (set<pHandle>::iterator i = lookupResults->begin();
             i != lookupResults->end(); i++) {
-        const TruthValue& tv = asw->getTV(*i);
+        TruthValuePtr tv = asw->getTV(*i);
 
-        if (tv.isNullTv()) {
+        if (tv->isNullTv()) {
             printf("NULL TV! %d\n", *i);
             continue;
         }
 
-        if (tv.getConfidence() < MIN_CONFIDENCE) {
+        if (tv->getConfidence() < MIN_CONFIDENCE) {
             //printf("TableGather::gather; not enough confidence. Continuing...\n");
             continue;
         }
@@ -922,11 +922,11 @@ string printNode1(pHandle h, int level, int LogLevel)
 
     std::stringstream ss;
     Type t = asw->getType(h);
-    const TruthValue& tv = asw->getTV(h);
+    TruthValuePtr tv = asw->getTV(h);
 
-    if (!tv.isNullTv())
+    if (!tv->isNullTv())
         ss << asw->getName(h) << ":" << opencog::pln::Type2Name(t) << 
-            " (" << t << ") " << tv.toString() << "\t[" << h << "]";
+            " (" << t << ") " << tv->toString() << "\t[" << h << "]";
     else
         ss << "NULL TV!";
 
@@ -966,11 +966,11 @@ std::string printTree(pHandle h, int level, int LogLevel)
     } else {
         vector<pHandle> hs = asw->getOutgoing(h);
         Type t = asw->getType(h);
-        const TruthValue& tv = asw->getTV(h);
+        TruthValuePtr tv = asw->getTV(h);
 
-        if (!tv.isNullTv())
+        if (!tv->isNullTv())
             ss << opencog::pln::Type2Name(t)
-              << "(" << t << ") " << tv.toString() << "\t[" << h <<"]";
+              << "(" << t << ") " << tv->toString() << "\t[" << h <<"]";
         else
             ss << "NULL TV!";
 
@@ -1154,10 +1154,10 @@ pHandleSet memberLinkSet(pHandle CP,
         OC_ASSERT(hs.size() == 2);
         
         if (equal(hs[1], CP)) {
-            const TruthValue& tv = asw->getTV(h);
+            TruthValuePtr tv = asw->getTV(h);
             
-            if (min_membershipStrength <= tv.getMean()
-                && min_membershipCount <= tv.getCount())
+            if (min_membershipStrength <= tv->getMean()
+                && min_membershipCount <= tv->getCount())
                 ret.insert(h);
         }
     }
@@ -1994,8 +1994,8 @@ bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set)
     pHandle *ph = boost::get<pHandle>(&(*_target->begin()));
     if (ph && !asw->isType(*ph)) {
         cprintf(2, "Arg [%d] exists.\n", *ph);
-        const TruthValue& tv = asw->getTV(*ph);
-        if (tv.isNullTv())
+        TruthValuePtr tv = asw->getTV(*ph);
+        if (tv->isNullTv())
             cprintf(2, "NO TV!\n");
         result_set->insert(*_target->begin());
 
@@ -2109,7 +2109,7 @@ bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b)
     vtree vb(opencog::pln::make_vtree(b));
 
     return va == vb &&
-           (asw->getTV(b).getConfidence() - asw->getTV(a).getConfidence())
+           (asw->getTV(b)->getConfidence() - asw->getTV(a)->getConfidence())
            < 0.00000001f;
 }
 

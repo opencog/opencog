@@ -27,7 +27,6 @@
 #include "../PLNUtils.h"
 #include "../AtomSpaceWrapper.h"
 
-const TruthValue& getTV(pHandle);
 #define NO_DIRECT_PRODUCTION Btr<std::set<BoundVertex > > \
     attemptDirectProduction(meta outh, bool fresh = false) const {  \
         return Btr<std::set<BoundVertex> >(); \

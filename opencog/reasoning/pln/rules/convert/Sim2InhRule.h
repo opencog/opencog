@@ -62,7 +62,7 @@ public:
         
         FirstPLNTruthValue* tvs[20];
         
-        tvs[0] = (TruthValue*) &(asw->getTV(premiseArray[0]));
+        tvs[0] = asw->getTV(premiseArray[0]);
         
         TruthValue* retTV = formula.compute(tvs, n);
         

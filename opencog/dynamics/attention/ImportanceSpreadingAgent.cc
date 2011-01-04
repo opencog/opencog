@@ -107,7 +107,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
     if (! a->isSource(source,link)) { return 0; }
 
     // Get outgoing set and sum difference for all non source atoms
-    linkWeight = a->getTV(link).toFloat();
+    linkWeight = a->getTV(link)->toFloat();
     sourceSTI = a->getSTI(source);
     targets = a->getOutgoing(link);
 
@@ -209,13 +209,13 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
         std::vector<Handle> targets;
         std::vector<Handle>::iterator t;
         Handle lh = *linksVector_i;
-        const TruthValue &linkTV = a->getTV(lh);
+        TruthValuePtr linkTV = a->getTV(lh);
 
         // For the case of an asymmetric link without this atom as a source
         if (!a->isSource(h,lh)) { continue; }
 
         targets = a->getOutgoing(lh);
-        transferWeight = linkTV.toFloat();
+        transferWeight = linkTV->toFloat();
 
         logger().fine("  +Link %s", a->atomAsString(lh).c_str() );
         logger().fine("    |weight %f, quanta %.2f, size %d", \
@@ -238,12 +238,12 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
                 // if the link is inverse, then scaling is unnecessary
                 // note the negative sign
                 transferAmount = -calcInverseDifference(sourceSTI,targetSTI, \
-                        linkTV.toFloat());
+                        linkTV->toFloat());
             } else {
                 // Check removing STI doesn't take node out of attentional
                 // focus...
                 transferAmount = calcInverseDifference(sourceSTI,targetSTI, \
-                        linkTV.toFloat()) * differenceScaling;
+                        linkTV->toFloat()) * differenceScaling;
             }
 
             a->setSTI( h, a->getSTI(h) - (AttentionValue::sti_t) transferAmount );

@@ -67,10 +67,10 @@ protected:
 	mutable std::vector<Type> ti;
 	mutable Type a1, a2;
 
-	void SortTVs(Handle* premiseArray, const int n, TruthValue*** retTVs, int* retn) const
+	void SortTVs(Handle* premiseArray, const int n, TruthValuePtr** retTVs, int* retn) const
 	{
 	    for (int i = 0; i < n; i++)
-			(*retTVs)[i] = (TruthValue*) asw->getTV(premiseArray[i]);
+			(*retTVs)[i] = asw->getTV(premiseArray[i]);
 
 		*retn = n;
 	}

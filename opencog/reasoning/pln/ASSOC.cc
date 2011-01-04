@@ -67,9 +67,9 @@ pHandle CreateConceptASSOC(AtomSpaceWrapper* asw, pHandle c_h) {
                             c_name.c_str(), asw->getName(super_h).c_str());
                 return PHANDLE_UNDEFINED;
             }
-            SimpleTruthValue subset_not_c_TV = asw->getTV(subset_not_c_h);
+            TruthValuePtr subset_not_c_TV(asw->getTV(subset_not_c_h));
             asw->addLink(MEMBER_LINK, super_h, c_ASSOC_h,
-                         ASSOC(asw->getTV(subset_h), subset_not_c_TV));
+                         ASSOC(*asw->getTV(subset_h), *subset_not_c_TV));
         }
     }
     return c_ASSOC_h;

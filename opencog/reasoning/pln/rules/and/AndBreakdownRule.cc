@@ -85,7 +85,7 @@ BoundVertex AndBreakdownRule::compute(const VertexSeq& premiseArray,
         if (atom(hs[i]) == topological_model) {
             pHandle a = hs[i];
             TruthValue* resultTV;
-            TVSeq tvs(1, &asw->getTV(_v2h(premiseArray[0]))); /// @todo why?
+            TVSeq tvs(1, asw->getTV(_v2h(premiseArray[0]))); /// @todo why?
             resultTV = formula.compute(tvs);
 
             //! @todo More pHandles messiness.

@@ -62,7 +62,7 @@ public:
         TVSeq tvs(n);
         int i;
         for (i = 0; i < n; i++)
-            tvs[i] = &(asw->getTV(boost::get<pHandle>(premiseArray[i])));
+            tvs[i] = asw->getTV(boost::get<pHandle>(premiseArray[i]));
         
         TruthValue* retTV = formula.compute(tvs);
         

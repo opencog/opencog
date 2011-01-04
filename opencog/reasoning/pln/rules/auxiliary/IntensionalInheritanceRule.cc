@@ -89,7 +89,7 @@ BoundVertex IntensionalInheritanceRule::compute(const VertexSeq& premiseArray,
         BoundVertex bv = sser.compute(ASSOC_vv, fresh);
         pHandle subset_ASSOC_h = _v2h(bv.GetValue());
 
-        tv = asw->getTV(subset_ASSOC_h);
+        tv = *(asw->getTV(subset_ASSOC_h));
     }
     pHandle ret = asw->addAtom(*i2oType(premiseArray), tv, fresh);
     return BoundVertex(ret);

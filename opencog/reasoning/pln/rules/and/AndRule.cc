@@ -131,7 +131,7 @@ BoundVertex AndRule::compute(const VertexSeq& premiseArray,
 
             std::set<pHandle>::const_iterator i;
             std::set<pHandle> conjunct;
-            std::set<const TruthValue*> TVowner;
+            //std::set<const TruthValue*> TVowner;
 
     /// Create the set of elements in the result conjunction
             LOG(4, "AndRule::computeCC");
@@ -224,12 +224,12 @@ BoundVertex AndRule::compute(const VertexSeq& premiseArray,
         LOG(4, "AndRule:: getLargestIntersection OK!");
         TVSeq tvs(1 + DiSubsets.size());
         
-        tvs[0] = &(asw->getTV(*i));
+        tvs[0] = asw->getTV(*i);
     
         int h=0;
         std::set<pHandle>::const_iterator ss;
         for (h = 0, ss = DiSubsets.begin(); ss != DiSubsets.end(); ss++, h++)
-            tvs[h+1] = &(asw->getTV(*ss));
+            tvs[h+1] = asw->getTV(*ss);
         LOG(4, "R AndRule::compute");
 
 /*      if (DiSubsets.size()>0)
@@ -249,8 +249,8 @@ BoundVertex AndRule::compute(const VertexSeq& premiseArray,
 
         if (DiSubsets.size()>0)
         {
-            partialTVs[p] = fN.compute(tvs);
-            TVowner.insert(partialTVs[p]); // TVs to be deleted later
+            partialTVs[p] = TruthValuePtr(fN.compute(tvs));
+            //TVowner.insert(partialTVs[p]); // TVs to be deleted later
         }
         else
             partialTVs[p] = tvs[0];
@@ -271,9 +271,9 @@ LOG(4, "44 AndRule::compute");
 LOG(4, "55 AndRule::compute");
     delete retTV;
     
-    for (std::set<const TruthValue*>::iterator t= TVowner.begin();
-         t != TVowner.end(); t++)
-        delete *t;
+    //for (std::set<const TruthValue*>::iterator t= TVowner.begin();
+    //     t != TVowner.end(); t++)
+    //    delete *t;
 LOG(3, "AndRule::compute ok.");		
     
     return Vertex(ret);

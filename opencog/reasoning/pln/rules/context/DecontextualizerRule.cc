@@ -60,7 +60,7 @@ meta DecontextualizerRule::i2oType(const VertexSeq& h) const {
 
 TVSeq DecontextualizerRule::formatTVarray(const VertexSeq& premiseArray) const {
     OC_ASSERT(premiseArray.size()==1);
-    return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
+    return TVSeq(1, asw->getTV(_v2h(premiseArray[0])));
 }
 
 DecontextualizerRule::DecontextualizerRule(AtomSpaceWrapper* _asw)

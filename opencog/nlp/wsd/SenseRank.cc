@@ -234,7 +234,7 @@ void SenseRank::rank_sense(Handle sense_link_h)
 	rank_sum *= damping_factor;
 	rank_sum += 1.0-damping_factor;
 
-	double old_rank = as->getTV(sense_link_h).getCount();
+	double old_rank = as->getTV(sense_link_h)->getCount();
 
 #ifdef DEBUG
 	std::vector<Handle> oset = as->getOutgoing(sense_link_h);
@@ -260,7 +260,7 @@ void SenseRank::rank_sense(Handle sense_link_h)
 bool SenseRank::outer_sum(Handle sense_b_h, Handle hedge)
 {
 	// Get the weight of the edge
-	double weight_ab = as->getTV(hedge).getMean();
+	double weight_ab = as->getTV(hedge)->getMean();
 
 	// Normalize the weight_ab summing over all c's weight_cb
 	// The sum over 'c' runs over all edges pointing to link "b"
@@ -269,7 +269,7 @@ bool SenseRank::outer_sum(Handle sense_b_h, Handle hedge)
 	double t_ab = weight_ab / edge_sum; 
 
 	// Get the word-sense probability
-	double p_b = as->getTV(sense_b_h).getCount();
+	double p_b = as->getTV(sense_b_h)->getCount();
 	double weight = t_ab * p_b;
 
 	rank_sum += weight;
@@ -285,7 +285,7 @@ bool SenseRank::outer_sum(Handle sense_b_h, Handle hedge)
 bool SenseRank::inner_sum(Handle sense_c_h, Handle hedge_bc)
 {
 	next_sense = sense_c_h;
-	double weight_to_b = as->getTV(hedge_bc).getMean();
+	double weight_to_b = as->getTV(hedge_bc)->getMean();
 	edge_sum += weight_to_b;
 	// printf("inner sum h=%ld, %g %g\n", h, weight_to_b, edge_sum);
 	return false;
@@ -299,7 +299,7 @@ bool SenseRank::random_sum(Handle h, Handle hedge)
 {
 	next_sense = h;
 
-	double weight_to_b = as->getTV(hedge).getMean();
+	double weight_to_b = as->getTV(hedge)->getMean();
 	edge_sum += weight_to_b;
 	if (randy < edge_sum) {
 		return true; // we are done, we found our edge.

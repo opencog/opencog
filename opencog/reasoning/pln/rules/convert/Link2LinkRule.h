@@ -74,7 +74,7 @@ public:
     virtual TVSeq formatTVarray(const VertexSeq& premiseArray) const
     {
         OC_ASSERT(premiseArray.size()==1);
-        return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
+        return TVSeq(1, asw->getTV(_v2h(premiseArray[0])));
     }
 
 

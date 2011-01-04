@@ -333,8 +333,8 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
 struct compareStrength {
     // Warning, uses fake atomspace handles in comparison
     bool operator()(const pHandle& a, const pHandle& b) {
-        return GET_ASW->getTV(a).getConfidence() >
-            GET_ASW->getTV(b).getConfidence();
+        return GET_ASW->getTV(a)->getConfidence() >
+            GET_ASW->getTV(b)->getConfidence();
     }
 };
 

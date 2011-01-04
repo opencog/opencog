@@ -292,7 +292,7 @@ BoundVertex CrispTheoremRule::compute(const VertexSeq& premiseArray,
 
     for(int i = 0; i < real_args; i++)
     {
-        tvs[i] = &(asw->getTV(_v2h(premiseArray[i])));
+        tvs[i] = asw->getTV(_v2h(premiseArray[i]));
     }
     
     bool use_And_rule = (real_args>1);

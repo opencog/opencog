@@ -176,6 +176,11 @@ public:
      */
     virtual bool isNullTv() const;
 
+    /**
+     * Check if this TV is equal to the default TV. operator!= only compares pointers
+     */
+    virtual bool isDefaultTV() const;
+
 // STATIC METHODS:
 
     static const char* typeToStr(TruthValueType t)

@@ -209,6 +209,8 @@ public:
     VersionHandle getVersionHandle(int) const;
 };
 
+typedef boost::shared_ptr<CompositeTruthValue> CompositeTruthValuePtr;
+
 } // namespace opencog
 
 #endif // _OPENCOG__COMPOSITE_TRUTH_VALUE_H_

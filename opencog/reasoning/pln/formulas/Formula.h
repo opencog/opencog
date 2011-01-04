@@ -42,7 +42,7 @@ using namespace opencog;
 namespace opencog {
 namespace pln {
 
-typedef std::vector<const TruthValue*> TVSeq;
+typedef std::vector<TruthValuePtr> TVSeq;
 
 class ArityFreeFormula
 {

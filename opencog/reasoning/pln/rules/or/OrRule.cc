@@ -98,7 +98,7 @@ TVSeq OrRule::formatTVarray(const VertexSeq& premiseArray) const
     TVSeq tvs;
 
     for (int i = 0; i < N; i++) {
-        tvs.push_back(&(asw->getTV(_v2h(premiseArray[i]))));
+        tvs.push_back(asw->getTV(_v2h(premiseArray[i])));
         cprintf(4,"TV Arg: %s -\n", tvs[i]->toString().c_str());
     }
         
@@ -112,13 +112,8 @@ TVSeq OrRule::formatTVarray(const VertexSeq& premiseArray) const
                                  mva(premiseArray[j])
                                  ), asw);
             cprintf(4,"Look up %s\n", (comb.empty() ? "success." : "fails."));
-            tvs.push_back((!comb.empty()? getTruthValue(_v2h(comb[0]))
-#if 0
-// Welter's comment: this change is waiting for Ari's aproval 
-                           : TruthValue::TRIVIAL_TV()));
-#else
-                           : SimpleTruthValue(0.0,0.0))); //! @todo Use a static variable...
-#endif
+            tvs.push_back(!comb.empty()? asw->getTV(_v2h(comb[0]))
+                           : TruthValuePtr(new SimpleTruthValue(0.0,0.0)));
 #else
 #endif
 }

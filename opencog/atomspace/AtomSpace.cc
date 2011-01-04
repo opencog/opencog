@@ -217,20 +217,20 @@ bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const
 
     bool result = isNullVersionHandle(vh);
     if (!result) {
-        const TruthValue& tv = this->getTV(h);
-        result = !tv.isNullTv() && tv.getType() == COMPOSITE_TRUTH_VALUE &&
-                 !(((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv());
+        TruthValuePtr tv(getTV(h));
+        result = !tv->isNullTv() && tv->getType() == COMPOSITE_TRUTH_VALUE &&
+                 !(boost::shared_dynamic_cast<CompositeTruthValue>(tv)->getVersionedTV(vh).isNullTv());
     }
     return result;
 }
 
 void AtomSpace::do_merge_tv(Handle h, const TruthValue& tvn)
 {
-    const TruthValue& currentTV = getTV(h);
-    if (currentTV.isNullTv()) {
+    TruthValuePtr currentTV(getTV(h));
+    if (currentTV->isNullTv()) {
         setTV(h, tvn);
     } else {
-        TruthValue* mergedTV = currentTV.merge(tvn);
+        TruthValue* mergedTV = currentTV->merge(tvn);
         setTV(h, *mergedTV);
         delete mergedTV;
     }
@@ -257,15 +257,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
             return addLink(link->getType(), link->getOutgoingSet(), newTV);
         }
     }
-    const TruthValue& currentTV = getTV(result);
-    if (currentTV.isNullTv()) {
-        setTV(result, newTV);
-    } else {
-        TruthValue* mergedTV = currentTV.merge(newTV);
-        setTV(result, *mergedTV);
-        delete mergedTV;
-    }
-
+    do_merge_tv(result,newTV);
     return result;
 }
 
@@ -319,6 +311,16 @@ bool AtomSpace::commitAtom(const Atom& a)
     original->setTruthValue(a.getTruthValue());
     original->setAttentionValue(a.getAttentionValue());
     return true;
+}
+
+AttentionValue AtomSpace::getAV(Handle h) const
+{
+    return atomSpaceAsync.getAV(h)->get_result();
+}
+
+void AtomSpace::setAV(Handle h, const AttentionValue &av)
+{
+    atomSpaceAsync.setAV(h,av)->get_result();
 }
 
 const AttentionValue& AtomSpace::getAV(AttentionValueHolder *avh) const

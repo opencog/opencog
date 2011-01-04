@@ -187,9 +187,9 @@ BoundVertex StrictImplicationBreakdownRule::compute(const VertexSeq& premiseArra
         assert(false);
     }
     
-    TVSeq tvs(1, &(asw->getTV(implication)));
-    tvs.push_back(&(asw->getTV(antecedant)));
-    tvs.push_back(&(asw->getTV(conclusion)));
+    TVSeq tvs(1, asw->getTV(implication));
+    tvs.push_back(asw->getTV(antecedant));
+    tvs.push_back(asw->getTV(conclusion));
     
     TruthValue* retTV =
         ImplicationBreakdownFormula().compute(tvs);

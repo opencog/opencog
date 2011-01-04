@@ -257,7 +257,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 
     uint s_i=0; // Expansion phase #
     pHandle eh=PHANDLE_UNDEFINED; // expected target handle
-    TruthValue* etv = NULL; // expect target handle TV
+    TruthValuePtr etv; // expect target handle TV
     bool passed=false;
 
     set<VtreeProvider*> eres;
@@ -305,7 +305,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                         _v2h(*(*eres.rbegin())->getVtree().begin()));
 
             if (eh != PHANDLE_UNDEFINED )
-                etv = asw->getTV(eh).clone();
+                etv = asw->getTV(eh);
 
             if (etv) {
                 /* Print resulting truth value compared to test requirements */
@@ -392,8 +392,8 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
         printf("Test results: [");
 
         foreach(VtreeProvider* bv, eres) {
-            const TruthValue& tv = asw->getTV(vt2h(*bv));
-            if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
+            TruthValuePtr tv = asw->getTV(vt2h(*bv));
+            if (!tv->isNullTv() && tv->getConfidence()>0.0001f)
                 printf("%d ", vt2h(*bv));
         }
         printf("]\n");
@@ -430,7 +430,12 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     if (!passed)
         getc(stdin);
 #endif
+<<<<<<< TREE
     if (etv != NULL) delete etv;
+=======
+    //asw->reset(NULL);
+//    sleep(10);
+>>>>>>> MERGE-SOURCE
     return passed;
 }
 

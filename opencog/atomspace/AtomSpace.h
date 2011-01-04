@@ -409,14 +409,10 @@ public:
     }
 
     /** Retrieve the AttentionValue of a given Handle */
-    AttentionValue getAV(Handle h) const {
-        return atomSpaceAsync.getAV(h)->get_result();
-    }
+    AttentionValue getAV(Handle h) const;
 
     /** Change the AttentionValue of a given Handle */
-    void setAV(Handle h, const AttentionValue &av) {
-        atomSpaceAsync.setAV(h,av)->get_result();
-    }
+    void setAV(Handle h, const AttentionValue &av);
 
     /** Retrieve the type of a given Handle */
     Type getType(Handle h) const {
@@ -433,7 +429,10 @@ public:
      * cloneAtom.
      */
     TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
-        const TruthValue& result = *atomSpaceAsync.getTV(h, vh)->get_result();
+        TruthValueRequest tvr = atomSpaceAsync.getTV(h, vh);
+        const TruthValue& result = *tvr->get_result();
+        // Need to clone the result's TV as it will be deleted when the request
+        // is.
         return TruthValuePtr(result.clone());
     }
 

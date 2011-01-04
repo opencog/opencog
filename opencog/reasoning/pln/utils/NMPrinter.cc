@@ -259,8 +259,8 @@ void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) 
             if (printToFile) fprintf(logFile, "[handle=%d]", h);
         }
         if (printOptions & NMP_TRUTH_VALUE) {
-            const TruthValue& tv = atw->getTV(h);
-            if (tv.isNullTv()) {
+            TruthValuePtr tv = atw->getTV(h);
+            if (tv->isNullTv()) {
                 if (!(printOptions & NMP_NO_TV_WITH_NO_CONFIDENCE)) {
                     out << " <NULL TV>";
                     if (printToFile) fprintf(logFile, " <NULL TV>");
@@ -268,11 +268,11 @@ void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) 
             } else {
                 //printf("tv->getConfidence() = %14.12f\n", tv->getConfidence());
 //                if (!(printOptions & NMP_NO_TV_WITH_NO_CONFIDENCE) || tv->getConfidence() > 0.0000001) {
-                if (!(printOptions & NMP_NO_TV_WITH_NO_CONFIDENCE) || tv.getConfidence() > 0) {
-                    std::string str = getFloatStrWithoutTrailingZeros(tv.getMean());
+                if (!(printOptions & NMP_NO_TV_WITH_NO_CONFIDENCE) || tv->getConfidence() > 0) {
+                    std::string str = getFloatStrWithoutTrailingZeros(tv->getMean());
                     out << " <" + str + ",";
                     if (printToFile) fprintf(logFile, " <%s,", str.c_str());
-                    str = getFloatStrWithoutTrailingZeros(tv.getConfidence());
+                    str = getFloatStrWithoutTrailingZeros(tv->getConfidence());
                     out << str + ">"; 
                     if (printToFile) fprintf(logFile, "%s>", str.c_str());
                 }
