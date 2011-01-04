@@ -38,6 +38,7 @@
 #define OBFUSCATE (0x55555555UL)
 
 class AtomSpaceUTest;
+class AtomSpaceImplUTest;
 class AtomTableUTest;
 class LinkUTest;
 class NodeUTest;
@@ -65,6 +66,7 @@ class TLB
     friend class AtomSpace;
     friend class AtomSpaceImpl;
     friend class ::AtomSpaceUTest;
+    friend class ::AtomSpaceImplUTest;
     friend class AtomTable;
     friend class ::AtomTableUTest;
 

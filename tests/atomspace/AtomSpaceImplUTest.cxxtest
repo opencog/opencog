@@ -1,11 +1,10 @@
 /*
- * tests/atomspace/AtomSpaceUTest.cxxtest
+ * tests/atomspace/AtomSpaceImplUTest.cxxtest
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2010 OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Welter Silva <welter@vettalabs.com>
- *            Ricardo Bittencourt <ricbit@700km.com.br>
+ * Written by Joel Pitt <joel@opencog.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,8 +31,9 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/util/misc.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/misc-test.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
 
@@ -61,7 +61,7 @@ void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
     dest = src.toHandleVector();
 }
 
-vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
+vector<Handle> createSimpleGraph(AtomSpaceImpl* atomSpace, const char* baseName)
 {
     char buf[256];
     vector<Handle> testAtoms;
@@ -105,16 +105,16 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     return testAtoms;
 }
 
-class AtomSpaceUTest :  public CxxTest::TestSuite
+class AtomSpaceImplUTest :  public CxxTest::TestSuite
 {
 private:
 
-    static AtomSpace *atomSpace;
+    static AtomSpaceImpl *atomSpace;
     VersionHandle VHs[NUM_VHS];
 
 
 public:
-    AtomSpaceUTest() {
+    AtomSpaceImplUTest() {
         logger().setLevel(Logger::INFO);
         logger().setPrintToStdoutFlag(true);
     }
@@ -122,7 +122,7 @@ public:
     void setUp() {
 // Number of nodes added for setting version handles
 #define NUM_VH_NODES 3 
-        atomSpace = new AtomSpace();
+        atomSpace = new AtomSpaceImpl();
         VHs[0] = NULL_VERSION_HANDLE;
         VHs[1] = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL1"));
         VHs[2] = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL2"));
@@ -146,7 +146,7 @@ public:
     };
 
     void testMiscellaneous() {
-        logger().debug("\ntestMiscellaneous()\n");
+        logger().debug("\ntestMiscelaneous()\n");
 
         const char* nodeNames[NUM_NODES] = {
             "Vader",
@@ -379,6 +379,36 @@ public:
 
     }
 
+    static inline Handle addAtomIter(AtomSpaceImpl& as, tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn)
+    {
+        Handle* head_handle_ptr = boost::get<Handle>(&(*it));
+        Type* head_type_ptr = boost::get<Type>(&(*it));
+        OC_ASSERT((head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "addAtom(): Vertex should be of 'Handle' or 'Type' type.");
+
+        HandleSeq handles;
+
+        if (head_handle_ptr != NULL) {
+            return as.addRealAtom(*as.cloneAtom(*head_handle_ptr), tvn);
+        }
+
+        for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
+            Handle *h_ptr = boost::get<Handle>(&*i);
+
+            if (h_ptr) {
+                handles.push_back(as.addRealAtom(*as.cloneAtom(*h_ptr), TruthValue::NULL_TV()));
+            } else {
+                handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
+            }
+        }
+
+        return as.addLink(*head_type_ptr, handles, tvn);
+    }
+
+    static inline Handle addAtom(AtomSpaceImpl& as, tree<Vertex>& a, const TruthValue& tvn)
+    {
+        return addAtomIter(as, a, a.begin(), tvn);
+    }
+
     /**
      * Method tested:
      *
@@ -551,8 +581,9 @@ public:
 
     }
 
+
     void testGetHandle_bugfix1() {
-        AtomSpace atomSpace;
+        AtomSpaceImpl atomSpace;
         HandleSeq emptyOutgoing;
         Handle result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(!Handle::compare(result, Handle::UNDEFINED));
@@ -560,6 +591,7 @@ public:
         result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(Handle::compare(result, Handle::UNDEFINED));
     }
+
 
     /**
      * Method tested:
@@ -590,38 +622,29 @@ public:
         
         logger().debug("STISort");
 
-        AttentionValue::STISort<AtomSpace> sSort(atomSpace);
+        AttentionValue::STISort<AtomSpaceImpl> sSort(atomSpace);
         vector<Handle> sAtoms;
         atomSpace->getSortedHandleSet(back_inserter(sAtoms), ATOM, true, sSort);
-        TS_ASSERT(sAtoms.size() > 0);
-        if (sAtoms.size() > 0) {
-            for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
-                TS_ASSERT(sSort(sAtoms[i + 1], sAtoms[i]) == false);
-            }
+        for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
+            TS_ASSERT(sSort(sAtoms[i + 1], sAtoms[i]) == false);
         }
-
+        
         logger().debug("LTIAndTVAscendingSort");
         
-        AttentionValue::LTIAndTVAscendingSort<AtomSpace> latvSort(atomSpace);
+        AttentionValue::LTIAndTVAscendingSort<AtomSpaceImpl> latvSort(atomSpace);
         vector<Handle> latvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(latvAtoms), ATOM, true, latvSort);
-        TS_ASSERT(latvAtoms.size() > 0);
-        if (latvAtoms.size() > 0) {
-            for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
-                TS_ASSERT(latvSort(latvAtoms[i + 1], latvAtoms[i]) == false);
-            }
+        for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
+            TS_ASSERT(latvSort(latvAtoms[i + 1], latvAtoms[i]) == false);
         }
         
         logger().debug("LTIThenTVAscendingSort");
         
-        AttentionValue::LTIThenTVAscendingSort<AtomSpace> lttvSort(atomSpace);
+        AttentionValue::LTIThenTVAscendingSort<AtomSpaceImpl> lttvSort(atomSpace);
         vector<Handle> lttvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(lttvAtoms), ATOM, true, lttvSort);
-        TS_ASSERT(lttvAtoms.size() > 0);
-        if (lttvAtoms.size() > 0) {
-            for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {
-                TS_ASSERT(lttvSort(lttvAtoms[i + 1], lttvAtoms[i]) == false);
-            }
+        for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {
+            TS_ASSERT(lttvSort(lttvAtoms[i + 1], lttvAtoms[i]) == false);
         }
 
         logger().debug("END TEST: getSortedHandleSet");
@@ -656,9 +679,9 @@ public:
         logger().debug("STIAboveThreshold");
 
         vector<Handle> highSTI;
-        atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, AtomSpace::STIAboveThreshold(1000));
+        atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, AtomSpaceImpl::STIAboveThreshold(1000));
         for (unsigned int i = 0; i < highSTI.size(); i++) {
-            TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (highSTI[i]) );
+            TS_ASSERT(AtomSpaceImpl::STIAboveThreshold(1000) (highSTI[i]) );
         }
         TS_ASSERT(highSTI.size() == 1U);
         TS_ASSERT(highSTI[0] == atoms[0]);
@@ -666,9 +689,9 @@ public:
         logger().debug("LTIAboveThreshold");
         
         vector<Handle> highLTI;
-        atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, AtomSpace::LTIAboveThreshold(800));
+        atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, AtomSpaceImpl::LTIAboveThreshold(800));
         for (unsigned int i = 0; i < highLTI.size(); i++) {
-            TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (highLTI[i]) );
+            TS_ASSERT(AtomSpaceImpl::LTIAboveThreshold(800) (highLTI[i]) );
         }
         TS_ASSERT(highLTI.size() == 1U);
         TS_ASSERT(highLTI[0] == atoms[1]);
@@ -689,28 +712,28 @@ public:
         vector<Handle> atoms;
         logger().debug("BEGIN TEST: filter");
         
-        //atomSpace->getAtomTable().log(logger(), NODE, true);
-        //atomSpace->getAtomTable().log(logger(), LINK, true);
+        atomSpace->getAtomTable().log(logger(), NODE, true);
+        atomSpace->getAtomTable().log(logger(), LINK, true);
         
         atoms = createSimpleGraph(atomSpace, "filt\0");
 
-        //atomSpace->getAtomTable().log(logger(), NODE, true);
-        //atomSpace->getAtomTable().log(logger(), LINK, true);
+        atomSpace->getAtomTable().log(logger(), NODE, true);
+        atomSpace->getAtomTable().log(logger(), LINK, true);
         
         logger().debug("STIAboveThreshold");
 
-        vector<Handle> highSTI = atomSpace->filter(atoms.begin(), atoms.end(), AtomSpace::STIAboveThreshold(1000));
+        vector<Handle> highSTI = atomSpace->filter(atoms.begin(), atoms.end(), AtomSpaceImpl::STIAboveThreshold(1000));
         for (unsigned int i = 0; i < highSTI.size(); i++) {
-            TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (highSTI[i]) );
+            TS_ASSERT(AtomSpaceImpl::STIAboveThreshold(1000) (highSTI[i]) );
         }
         TS_ASSERT(highSTI.size() == 1U);
         TS_ASSERT(highSTI[0] == atoms[0]);
                 
         logger().debug("LTIAboveThreshold");
         
-        vector<Handle> highLTI = atomSpace->filter(atoms.begin(), atoms.end(), AtomSpace::LTIAboveThreshold(800));
+        vector<Handle> highLTI = atomSpace->filter(atoms.begin(), atoms.end(), AtomSpaceImpl::LTIAboveThreshold(800));
         for (unsigned int i = 0; i < highLTI.size(); i++) {
-            TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (highLTI[i]) );
+            TS_ASSERT(AtomSpaceImpl::LTIAboveThreshold(800) (highLTI[i]) );
         }
         TS_ASSERT(highLTI.size() == 1U);
         TS_ASSERT(highLTI[0] == atoms[1]);
@@ -719,4 +742,4 @@ public:
 
 };
 
-AtomSpace *AtomSpaceUTest::atomSpace = NULL;
+AtomSpaceImpl *AtomSpaceImplUTest::atomSpace = NULL;

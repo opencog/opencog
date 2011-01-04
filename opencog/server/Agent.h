@@ -38,6 +38,7 @@ typedef short stim_t;
 typedef boost::unordered_map<Handle, stim_t> AtomStimHashMap;
 
 class CogServer;
+class AtomSpaceImpl;
 
 /** The MindAgent Class
  * This class defines the base abstract class that should be extended by all
@@ -128,7 +129,7 @@ protected:
     boost::signals::connection conn;
 
     /** called by AtomTable via a boost:signal when an atom is removed. */
-    void atomRemoved(Handle h);
+    void atomRemoved(AtomSpaceImpl* a, Handle h);
 
 public:
 

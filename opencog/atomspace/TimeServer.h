@@ -28,10 +28,13 @@
 #include <set>
 
 #include <opencog/atomspace/TemporalTable.h>
+#include <opencog/atomspace/AtomSpaceImpl.h>
+#include <opencog/atomspace/AtomSpaceAsync.h>
 
 namespace opencog
 {
 
+class AtomSpaceAsync;
 class TimeServerSavable;
 
 /**
@@ -52,6 +55,9 @@ class TimeServer
      */
     void init();
 
+    AtomSpaceAsync* atomspace;
+    SpaceServer* spaceServer;
+
 public:
 
     static int timeServerEntries;
@@ -59,7 +65,7 @@ public:
     // USED TO SEEK MEMORY LEAK
     //static std::set<Temporal> temporalSet;
 
-    TimeServer();
+    TimeServer(AtomSpaceAsync& a, SpaceServer* ss);
     virtual ~TimeServer();
 
     /**
@@ -116,6 +122,213 @@ public:
 
     void clear();
 
+    /**
+     * Adds both the AtTime(TimeNode <timestamp>, atom) atom
+     * representation into the AtomTable and the entry (atom,
+     * timestamp) into the TimeServer of the given AtomSpace.
+     *
+     * @param atom the Handle of the atom to be associated to the timestamp
+     * @param timestamp The timestamp to be associated to the atom.
+     * @param tv Truth value for the AtTimeLink created (optional)
+     * @return the Handle of the AtTimeLink added into AtomSpace.
+     */
+    Handle addTimeInfo(Handle atom, unsigned long timestamp,
+                       const TruthValue& tv = TruthValue::NULL_TV());
+
+    /**
+     * Adds both the AtTime(TimeNode <t>, atom) atom representation
+     * into the AtomTable and the entry (atom, t) into the TimeServer
+     * of the given AtomSpace.
+     *
+     * @param atom the Handle of the atom to be associated to the timestamp
+     * @param t The Temporal object to be associated to the atom.
+     * @param tv Truth value for the AtTimeLink created (optional)
+     * @return the Handle of the AtTimeLink added into AtomSpace.
+     */
+    Handle addTimeInfo(Handle atom, const Temporal& t,
+                       const TruthValue& tv = TruthValue::NULL_TV());
+
+    /**
+     * Adds both the AtTime(TimeNode <timeNodeName>, atom) atom representation into the AtomTable and the
+     * corresponding entry (atom, t) into the TimeServer of the given AtomSpace.
+     * @param atom the Handle of the atom to be associated to the timestamp
+     * @param timeNodeName the name of the TimeNode to be associated to the atom via an AtTimeLink.
+     * @param tv Truth value for the AtTimeLink created (optional)
+     * @return the Handle of the AtTimeLink added into the AtomSpace.
+     */
+    Handle addTimeInfo(Handle h, const std::string& timeNodeName,
+            const TruthValue& tv = TruthValue::NULL_TV());
+
+    /**
+     * Removes both the AtTime(TimeNode <timestamp>, atom) atom
+     * representation from the AtomTable and the entry (atom,
+     * timestamp) from the TimeServer of the given AtomSpace.
+     *
+     * NOTE1: All handles in the incoming set of the corresponding
+     * AtTimeLink Atom will also be removed recursively (unless the
+     * recursive argument is explicitely set to false).
+     *
+     * NOTE2: The TimeNode that corresponds to the given removed
+     * time info is also removed if its incoming set becomes empty
+     * after the removal of an AtTimeLink link (unless the
+     * removeDisconnectedTimeNodes argument is explicitly set to false).
+     *
+     * @param atom the Handle of the atom to be associated to
+     *        the timestamp. This argument cannot be an Handle::UNDEFINED.
+     *        If it is, a RuntimeException is thrown.
+     * @param timestamp The timestamp to be associated to the atom.
+     *        This argument cannot be an UNDEFINED_TEMPORAL. If
+     *        so, it throws a RuntimeException.
+     * @param the Temporal relationship criteria to be used for
+     *        this removal operation.
+     *
+     *        This method only removes the time info related to
+     *        the HandleTemporalPair objects whose Temporal matches with
+     *        this argument (search criteria) applied to the given
+     *        timestamp argument.
+     *
+     *        The default temporal relationship is "exact match".
+     *        See the definition of TemporalRelationship enumeration
+     *        to see other possible values for it.
+     * @param removeDisconnectedTimeNodes Flag to indicate if any
+     *        TimeNode whose incoming set becomes empty after the
+     *        removal of the AtTimeLink link must be removed.
+     * @param recursive Flag to indicate if all atoms in the
+     *        incoming set of the AtTimeLink link must be
+     *        removed recursively.
+     *
+     * @return True if the matching pairs (Handle, Temporal) were
+     *        successfully removed. False, otherwise (i.e., no
+     *        mathing pair or any of them were not removed)
+     */
+    bool removeTimeInfo(Handle atom,
+                        unsigned long timestamp,
+                        TemporalTable::TemporalRelationship = TemporalTable::EXACT,
+                        bool removeDisconnectedTimeNodes = true,
+                        bool recursive = true);
+
+    /**
+     * Removes both the AtTime(TimeNode <t>, atom) atom representation
+     * from the AtomTable and the entry (atom, t) from the TimeServer
+     * of the given AtomSpace.
+     *
+     * NOTE1: All handles in the incoming set of the corresponding
+     *        AtTimeLink Atom will also be removed recursively
+     *        (unless the recursive argument is explicitely set to false).
+     * NOTE2: The TimeNode that corresponds to the given removed
+     *        time info is also removed if its incoming set becomes
+     *        empty after the removal of an AtTimeLink link (unless the
+     *        removeDisconnectedTimeNodes argument is explicitly set to
+     *        false).
+     *
+     * @param atom the Handle of the atom to be associated to the
+     *        timestamp. This argument cannot be an Handle::UNDEFINED.
+     *        If so, it throws a RuntimeException.
+     * @param t The Temporal object to be associated to the atom. This
+     *        argument cannot be an UNDEFINED_TEMPORAL. If so, it throws
+     *        a RuntimeException.
+     * @param removeDisconnectedTimeNode Flag to indicate if the
+     *        TimeNode that corresponds to the given timestamp should
+     *        be removed, if its incoming set becomes empty after the
+     *        removal of the AtTimeLink link.
+     * @param the Temporal relationship criteria to be used for this
+     *        removal operation, if the given Temporal object argument
+     *        is not UNDEFINED_TEMPORAL. This method only removes the
+     *        time info related to the HandleTemporalPair objects whose
+     *        Temporal matches with this argument (search criteria)
+     *        applied to the given Temporal object argument. The default
+     *        temporal relationship is "exact match". See the definition
+     *        of TemporalRelationship enumeration to see other possible
+     *        values for it.
+     * @param removeDisconnectedTimeNodes Flag to indicate if any
+     *        TimeNode whose incoming set becomes empty after the removal
+     *        of the AtTimeLink link must be removed.
+     * @param recursive Flag to indicate if all atoms in the incoming set
+     *        of the AtTimeLink link must be removed recursively.
+     *
+     * @return True if the matching pairs (Handle, Temporal) were
+     *         successfully removed. False, otherwise (i.e., no mathing
+     *         pair or any of them were not removed)
+     */
+    bool removeTimeInfo(Handle atom,
+                        const Temporal& t = UNDEFINED_TEMPORAL,
+                        TemporalTable::TemporalRelationship = TemporalTable::EXACT,
+                        bool removeDisconnectedTimeNodes = true,
+                        bool recursive = true);
+
+    /**
+     * Gets the corresponding AtTimeLink for the given HandleTemporalPair value
+     * @param the pair (Handle, Temporal) that defines an AtTimeLink instance.
+     * @return the Handle of the corresponding AtTimeLink, if it exists.
+     */
+    Handle getAtTimeLink(const HandleTemporalPair& htp) const;
+
+    /**
+     * Gets a list of HandleTemporalPair objects given an Atom Handle.
+     *
+     * \param outIt The outputIterator to
+     * \param h The Atom Handle
+     * \param t The temporal object
+     * \param c The Temporal pair removal criterion
+     *
+     * \return An OutputIterator list
+     *
+     * @note The matched entries are appended to a container whose
+     *       OutputIterator is passed as the first argument. Example
+     *       of call to this method, which would return all entries
+     *       in TimeServer:
+     *           std::list<HandleTemporalPair> ret;
+     *           timeServer.get(back_inserter(ret), Handle::UNDEFINED);
+     :A
+     */
+    template<typename OutputIterator> OutputIterator
+    getTimeInfo(OutputIterator outIt,
+                Handle h,
+                const Temporal& t = UNDEFINED_TEMPORAL,
+                TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const
+    {
+        return get(outIt, h, t, criterion);
+    }
+
+     /**
+     * Gets all SpaceMap handles that would be needed inside the given interval.
+     * For getting the SpaceMap of each handle returned,
+     * use the spaceServer.getMap(Handle spaceMapHandle) method.
+     * @param out  the output iterator where the resulting handles will be added.
+     * @param startMoment the start of the time interval for searching the maps
+     * @param endMoment the end of the time interval for searching the maps
+     *
+     * Example of usage:
+     *     HandleSeq result;
+     *     spaceServer.getMapHandles(back_inserter(result),start,end);
+     *     foreach(Handle h, result) {
+     *         const SpaceMap& map = spaceServer().getMap(h);
+     *         ...
+     *     }
+     */
+    template<typename OutputIterator>
+    OutputIterator getMapHandles(   OutputIterator outIt,
+                                    unsigned long startMoment, unsigned long endMoment) const
+    {
+        Temporal t(startMoment, endMoment);
+        std::vector<HandleTemporalPair> pairs;
+        Handle spaceMapNode = atomspace->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME)->get_result();
+        if (spaceMapNode != Handle::UNDEFINED) {
+            // Gets the first map before the given interval, if any
+            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::PREVIOUS_BEFORE_START_OF);
+            // Gets all maps inside the given interval, if any
+            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::STARTS_WITHIN);
+            for(unsigned int i = 0; i < pairs.size(); i++) {
+                HandleTemporalPair pair = pairs[i];
+                *(outIt++) = getAtTimeLink(pair);
+            }
+        }
+        return outIt;
+    }
+
+    void atomAdded(AtomSpaceImpl* a, Handle h);
+
+    void atomRemoved(AtomSpaceImpl* a, Handle h);
 private:
 
     /**

@@ -38,6 +38,7 @@
 
 namespace opencog
 {
+class AtomSpaceImpl;
 
 /**
  * This class implements storage for activity data.
@@ -84,8 +85,8 @@ protected:
     CogServer *cogServer;
     boost::signals::connection conn;
 
-    /** called by AtomTable via a boost:signal when an atom is removed. */
-    void atomRemoved(Handle h);
+    /** called by AtomSpaceImpl via a boost:signal when an atom is removed. */
+    void atomRemoved(AtomSpaceImpl* as, Handle h);
 
     /** trim Activity sequence to a maximum size */
     void trimActivitySeq(ActivitySeq &seq, size_t max);

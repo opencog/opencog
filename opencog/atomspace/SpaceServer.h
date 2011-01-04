@@ -49,6 +49,8 @@
 namespace opencog
 {
 
+class AtomSpaceAsync;
+class TimeServer;
 class SpaceServerSavable;
 
 /**
@@ -68,9 +70,8 @@ public:
     typedef std::map<Handle, SpaceMap*> HandleToSpaceMap;
     typedef std::pair<unsigned long, SpaceMap*> TimestampMap;
 
-    explicit SpaceServer(SpaceServerContainer&);
+    explicit SpaceServer(AtomSpaceAsync&);
     virtual ~SpaceServer();
-
 
     /**
      * Gets a const reference to a specific SpaceMap for make queries
@@ -196,12 +197,58 @@ public:
      */
     static TimestampMap mapFromString(const std::string &stringMap);
 
+    /**
+     * Adds space information about an object represented by a Node.
+     * @param objectNode the Handle of the node that represents the object to be associated to the space info
+     * @param timestamp The timestamp to be associated to this operation.
+     * @param the remaining arguments are related to object's spatial information
+     * @return true if any property of the object has changed (or it's a new object). False, otherwise.
+     */
+    bool addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
+                              double objX, double objY, double objZ,
+                              double objLength, double objWidth, double objHeight,
+                              double objYaw, bool isObstacle = true);
+    /**
+     * Add a whole space map into the SpaceServer.
+     * NOTE: This is just used when a whole space map is received
+     * from a remote SpaceServer (in LearningServer, for instance).
+     */
+    Handle addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap);
+
+    Handle getSpaceMapNode();
+
+    /**
+     * Removes space information about an object from the latest map (object is
+     * no longer at map's range)
+     * @param objectNode the Handle of the node that represents the object to
+     * be removed from space map
+     * @param timestamp The timestamp to be associated to this operation.
+     * @return handle of the atom that represents the SpaceMap (at the given
+     * timestamp) where the object was removed
+     */
+    Handle removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp);
+
+    /**
+     * Remove old maps from SpaceServer in order to save memory. SpaceMaps
+     * associated with exemplar sections, i.e., marked as persistent and the
+     * latest (newest) space map are preserved.
+     *
+     * IMPORTANT: This function cannot be called while any trick exemplar is in progress.
+     */
+    void cleanupSpaceServer();
+
+    // SpaceServerContainer virtual methods:
+    void mapRemoved(Handle mapId);
+    void mapPersisted(Handle mapId);
+    std::string getMapIdString(Handle mapId) const;
+
 private:
 
     /**
      * Container where SpaceServer is inserted to (usualy an AtomSpace)
      */
-    SpaceServerContainer& container;
+    AtomSpaceAsync* atomspace;
+    TimeServer* timeServer;
 
     /**
      * space maps contained by this SpaceServer. Each space map is

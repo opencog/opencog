@@ -1,20 +1,20 @@
 FIND_PACKAGE(EXPAT REQUIRED)
 
 ADD_LIBRARY(xml SHARED
-        FileXMLBufferReader
-        NMXmlExporter
-        NMXmlParser
-        StringXMLBufferReader
+    FileXMLBufferReader
+    NMXmlExporter
+    NMXmlParser
+    StringXMLBufferReader
 )
 
 ADD_DEPENDENCIES(xml opencog_atom_types)
 
 INCLUDE_DIRECTORIES (
-	${EXPAT_INCLUDE_DIRS}
+    ${EXPAT_INCLUDE_DIRS}
 )
 
 TARGET_LINK_LIBRARIES(xml
-	${EXPAT_LIBRARIES}
+    ${EXPAT_LIBRARIES}
 )
 
 IF (WIN32)
@@ -24,15 +24,15 @@ ELSE (WIN32)
 ENDIF (WIN32)
 
 INSTALL (FILES
-	FileXMLBufferReader.h
-	NMXmlDefinitions.h
-	NMXmlExporter.h
-	NMXmlParser.h
-	StringXMLBufferReader.h
-	XMLBufferReader.h
-	DESTINATION "include/${PROJECT_NAME}/persist/xml"
+    FileXMLBufferReader.h
+    NMXmlDefinitions.h
+    NMXmlExporter.h
+    NMXmlParser.h
+    StringXMLBufferReader.h
+    XMLBufferReader.h
+    DESTINATION "include/${PROJECT_NAME}/persist/xml"
 )
 
 TARGET_LINK_LIBRARIES(xml
-  ${EXPAT_LIBRARIES}
+    ${EXPAT_LIBRARIES}
 )

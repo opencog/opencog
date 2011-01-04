@@ -95,10 +95,10 @@ void Ubigrapher::watchSignals()
 {
     if (isConnected()) {
         if (!listening) {
-            c_add = space->addAtomSignal().connect(
-                    boost::bind(&Ubigrapher::handleAddSignal, this, _1));
-            c_remove = space->removeAtomSignal().connect(
-                    boost::bind(&Ubigrapher::handleRemoveSignal, this, _1));
+            c_add = space->atomSpaceAsync.addAtomSignal(
+                    boost::bind(&Ubigrapher::handleAddSignal, this, _1, _2));
+            c_remove = space->atomSpaceAsync.removeAtomSignal(
+                    boost::bind(&Ubigrapher::handleRemoveSignal, this, _1, _2));
             assert(c_add.connected() && c_remove.connected());
             listening = true;
         } else {
@@ -152,12 +152,14 @@ void Ubigrapher::setStyles()
     
 }
 
-bool Ubigrapher::handleAddSignal(Handle h)
+bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
 {
+    // XXX This is an error waiting to happen. Signals handling adds must be
+    // thread safe as they are called from the AtomSpace event loop
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space->cloneAtom(h);
+    boost::shared_ptr<Atom> a = as->cloneAtom(h);
     usleep(pushDelay);
-    if (space->isNode(a->getType()))
+    if (as->isNode(a->getType()))
         return addVertex(h);
     else {
         if (compact) {
@@ -171,12 +173,14 @@ bool Ubigrapher::handleAddSignal(Handle h)
     }
 }
 
-bool Ubigrapher::handleRemoveSignal(Handle h)
+bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, Handle h)
 {
+    // XXX This is an error waiting to happen. Signals handling adds must be
+    // thread safe as they are called from the AtomSpace event loop
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space->cloneAtom(h);
+    boost::shared_ptr<Atom> a = as->cloneAtom(h);
     usleep(pushDelay);
-    if (space->isNode(a->getType()))
+    if (as->isNode(a->getType()))
         return removeVertex(h);
     else {
         if (compact) {

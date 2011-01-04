@@ -57,6 +57,8 @@ int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};
 int numberOfExpectedMatchesWithVH1[] = {15, 15, 15, 0, 0, 0};
 int numberOfExpectedMatchesWithVH2[] = {15, 15, 15, 1, 1, 1};
 
+class opencog::AtomSpaceImpl;
+
 class AtomTableUTest : public CxxTest::TestSuite
 {
 
@@ -66,32 +68,40 @@ private:
     AtomSpace* atomSpace;
     VersionHandle VH1;
     VersionHandle VH2;
-    int        __testSignalsCounter;
 
 public:
 
-    AtomTableUTest() {}
+    AtomTableUTest() {
+        // Uncomment to enable logging
+        //logger().setLevel(Logger::DEBUG);
+        //logger().setPrintToStdoutFlag(true);
+    }
     ~AtomTableUTest() {}
 
     void setUp() {
-        /* load xml files with all necessary nodes and links  */
-        std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(ATOM_TABLE_TEST_XML_FILE));
-
         // XXX FIXME: the FileXMLBufferReader class can throw a "file
         // not found" exception. Since this exception is not caught,
         // then we never reach this statement. Thus, table can end up
         // being a null pointer, and the rest of the test will crash
         // painfully.
+
+        /* load xml files with all necessary nodes and links  */
+        std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(ATOM_TABLE_TEST_XML_FILE));
+
         atomSpace = new AtomSpace();
-        table = (AtomTable*) & (atomSpace->getAtomTable());
+        table = (AtomTable*) & (atomSpace->atomSpaceAsync.getAtomTable());
 
-        // Check for existing links because there are 2 identical links in the test xml file
-        HandleEntry* result = NMXmlParser::loadXML(readers, atomSpace, false);
-        delete result;
+        try {
+            // Check for existing links because there are 2 identical links in the test xml file
+            HandleEntry* result = NMXmlParser::loadXML(readers, atomSpace, false);
+            delete result;
+
+            VH1 = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL"));
+            VH2 = VersionHandle(CONTEXTUAL, atomSpace->addNode(CONCEPT_NODE, "CONTEXTUAL"));
+        } catch (IOException& e) {
+            TS_FAIL("Missing file " ATOM_TABLE_TEST_XML_FILE);
+        }
         delete readers[0];
-
-	VH1 = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL"));
-	VH2 = VersionHandle(CONTEXTUAL, atomSpace->addNode(CONCEPT_NODE, "CONTEXTUAL"));
     }
 
     void tearDown() {
@@ -411,201 +421,6 @@ public:
         TS_ASSERT(TLB::getAtom(linkHandle)->getAttentionValue().getSTI() == 490);
     }
 
-    void atomAdded1(Handle h) {
-        TS_ASSERT(table->getSize() == 1);
-        logger().debug("atomAdded1: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter += 1;
-    }
-
-    void atomAdded2(Handle h) {
-        TS_ASSERT(table->getSize() == 1);
-        logger().debug("atomAdded2: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter += 10;
-    }
-
-    void atomMerged1(Handle h) {
-        TS_ASSERT(table->getSize() == 1);
-        logger().debug("atomMerged1: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter += 100;
-    }
-
-    void atomMerged2(Handle h) {
-        TS_ASSERT(table->getSize() == 1);
-        logger().debug("atomMerged2: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter += 1000;
-    }
-
-    void atomRemoved1(Handle h) {
-        TS_ASSERT(table->getSize() == 0);
-        logger().debug("atomRemoved1: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter += 10000;
-    }
-
-    void atomRemoved2(Handle h) {
-        TS_ASSERT(table->getSize() == 0);
-        logger().debug("atomRemoved2: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter += 100000;
-    }
-
-    void testSignals() {
-        AtomTable atomTable;
-        table = &atomTable; // save pointer in class member
-
-        // connect signals
-        boost::signals::connection add1 =
-            atomTable.addAtomSignal().connect(boost::bind(&AtomTableUTest::atomAdded1, this, _1));
-        boost::signals::connection add2 =
-            atomTable.addAtomSignal().connect(boost::bind(&AtomTableUTest::atomAdded2, this, _1));
-        boost::signals::connection merge1 =
-            atomTable.mergeAtomSignal().connect(boost::bind(&AtomTableUTest::atomMerged1, this, _1));
-        boost::signals::connection merge2 =
-            atomTable.mergeAtomSignal().connect(boost::bind(&AtomTableUTest::atomMerged2, this, _1));
-        boost::signals::connection remove1 =
-            atomTable.removeAtomSignal().connect(boost::bind(&AtomTableUTest::atomRemoved1, this, _1));
-        boost::signals::connection remove2 =
-            atomTable.removeAtomSignal().connect(boost::bind(&AtomTableUTest::atomRemoved2, this, _1));
-
-        /* add and remove a simple node */
-        __testSignalsCounter = 0;
-        logger().debug("before first atom add");
-        Handle wnHandle = atomTable.add(new Node(NUMBER_NODE, "1"));
-        TS_ASSERT(__testSignalsCounter == 11);
-        logger().debug("before second atom add");
-        atomTable.add(new Node(NUMBER_NODE, "1"));
-        TS_ASSERT(__testSignalsCounter == 1111);
-        logger().debug("before atom remove");
-        atomTable.remove(wnHandle);
-        TS_ASSERT(__testSignalsCounter == 111111);
-
-        /* add a simple node and let decayShortTermImportance remove it */
-        __testSignalsCounter = 0;
-        Node *node = new Node(NUMBER_NODE, "1");
-        wnHandle = atomTable.add(node);
-        TS_ASSERT(__testSignalsCounter == 11);
-        node->setAttentionValue(AttentionValue(config().get_int("MIN_STI") + 10,
-                                node->getAttentionValue().getLTI(),
-                                node->getAttentionValue().getVLTI()));
-        for (unsigned int i = 0; i <= 10; ++i)
-            atomTable.decayShortTermImportance();
-        TS_ASSERT(__testSignalsCounter == 110011);
-
-        /* add a node with LTI == 1 so that decayShortTermImportance cannot remove it */
-        __testSignalsCounter = 0;
-        Node *ltiNode = new Node(NUMBER_NODE, "1");
-        wnHandle = atomTable.add(ltiNode);
-        TS_ASSERT(__testSignalsCounter == 11);
-        ltiNode->setAttentionValue(AttentionValue(config().get_int("MIN_STI") + 10,
-                                1, 
-                                ltiNode->getAttentionValue().getVLTI()));
-        for (unsigned int i = 0; i <= 10; ++i) {
-            std::cout << ltiNode->getAttentionValue().toString() << std::endl;
-            atomTable.decayShortTermImportance();
-        }
-        TS_ASSERT(__testSignalsCounter == 11);
-	atomTable.remove(wnHandle);
-        TS_ASSERT(__testSignalsCounter == 110011);
-
-        // test disconnections
-        __testSignalsCounter = 0;
-        add1.disconnect();
-        merge1.disconnect();
-        remove1.disconnect();
-        wnHandle = atomTable.add(new Node(NUMBER_NODE, "1"));
-        atomTable.add(new Node(NUMBER_NODE, "1"));
-        TS_ASSERT(__testSignalsCounter == 1010);
-        atomTable.remove(wnHandle);
-        TS_ASSERT(__testSignalsCounter == 101010);
-
-        __testSignalsCounter = 0;
-        add2.disconnect();
-        merge2.disconnect();
-        remove2.disconnect();
-        wnHandle = atomTable.add(new Node(NUMBER_NODE, "1"));
-        atomTable.add(new Node(NUMBER_NODE, "1"));
-        TS_ASSERT(__testSignalsCounter == 0);
-        atomTable.remove(wnHandle);
-        TS_ASSERT(__testSignalsCounter == 0);
-    }
-
-    void atomAdded3(Handle h) {
-        logger().debug("atomAdded3: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter += 1;
-    }
-
-    void atomRemoved3(Handle h) {
-        logger().debug("atomRemoved3: %s", TLB::getAtom(h)->toShortString().c_str());
-        __testSignalsCounter -= 1;
-    }
-
-    void testRemovalByDecay() {
-        AtomTable atomTable;
-        AttentionValue::sti_t min_sti = opencog::config().get_int("MIN_STI");
-
-        // connect signals and reset counter
-        atomTable.addAtomSignal().connect(boost::bind(&AtomTableUTest::atomAdded3, this, _1));
-        atomTable.removeAtomSignal().connect(boost::bind(&AtomTableUTest::atomRemoved3, this, _1));
-        __testSignalsCounter = 0;
-
-        /* add a simple tree of links & nodes */
-        Node* wordNode = new Node(NUMBER_NODE, "1");
-        wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 7)));
-        Handle wnHandle = atomTable.add(wordNode);
-
-        Node* senseNode = new Node(CONCEPT_NODE, "28675194");
-        senseNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
-        Handle snHandle = atomTable.add(senseNode);
-
-        std::vector<Handle> os;
-        os.push_back(wnHandle);
-        os.push_back(snHandle);
-        Link* inheritanceLink = new Link(INHERITANCE_LINK, os);
-        inheritanceLink->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 6)));
-        atomTable.add(inheritanceLink);
-
-        Link* listLink = new Link(LIST_LINK, os);
-        listLink->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) (min_sti + 5)));
-        atomTable.add(listLink);
-
-        // test we added 4 atoms
-        TS_ASSERT(__testSignalsCounter == 4);
-
-        // decay sti up to the threshold where the least important atoms
-        // should be about to be removed
-        for (int i = 0; i < 5; i++) atomTable.decayShortTermImportance();
-        // and test the existance of each atom
-        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        != NULL);
-        TS_ASSERT(__testSignalsCounter == 4); // no atoms removed yet
-
-        // run another decaying cycle; the list link node should have been
-        // removed
-        atomTable.decayShortTermImportance();
-        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
-        TS_ASSERT(__testSignalsCounter == 3); // 1 atom removed
-
-        // an another one; the inheritance link and the sense node should have
-        // been removed
-        atomTable.decayShortTermImportance();
-        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
-        TS_ASSERT(__testSignalsCounter == 1); // 2 more atoms removed
-
-        // and another, final one; by now all nodes should have been removed
-        atomTable.decayShortTermImportance();
-        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
-        TS_ASSERT(__testSignalsCounter == 0); // last one removed
-    }
-
     /* test the fix for the bug triggered whenever we had a link pointing to the
      * same atom twice (or more) */
     void testDoubleLink() {
@@ -645,7 +460,7 @@ public:
         Type MY_NUMBER_NODE = classserver().addType(NUMBER_NODE, "MyNumberNode");
         Type MY_CONCEPT_NODE = classserver().addType(CONCEPT_NODE, "MyConceptNode");
         Type MY_INHERITANCE_LINK = classserver().addType(INHERITANCE_LINK, "MyInheritanceLink");
-        printf("MY_NUMBER_NODE = %u, MY_CONCEPT_NODE = %u, MY_INHERITANCE_LINK = %u\n", MY_NUMBER_NODE, MY_CONCEPT_NODE, MY_INHERITANCE_LINK);
+        logger().debug("MY_NUMBER_NODE = %u, MY_CONCEPT_NODE = %u, MY_INHERITANCE_LINK = %u\n", MY_NUMBER_NODE, MY_CONCEPT_NODE, MY_INHERITANCE_LINK);
         Handle word = atomTable.add(new Node(MY_NUMBER_NODE, "1"));
         Handle sense = atomTable.add(new Node(MY_CONCEPT_NODE, "28675194"));
         std::vector<Handle> os;

@@ -34,6 +34,7 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include <opencog/atomspace/AtomSpaceAsync.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/BackingStore.h>
@@ -50,38 +51,35 @@ namespace opencog
 {
 
 typedef std::vector<HandleSet*> HandleSetSeq;
+typedef boost::shared_ptr<TruthValue> TruthValuePtr;
 
-class AtomSpace : public SpaceServerContainer
+class AtomSpace
 {
     friend class SavingLoading;
+    friend class ::AtomTableUTest;
     friend class SaveRequest;
 
-    /**
-     * Used to fetch atoms from disk.
-     */
-    BackingStore *backing_store;
     void do_merge_tv(Handle, const TruthValue&);
 
 public:
-    // USED TO SEEK MEMORY LEAK
-    //std::set<std::string> uniqueTimestamp;
-
     AtomSpace(void);
     ~AtomSpace();
 
-    /**
-     * Register a provider of backing storage.
+    /** The container class will eventually just be a wrapper of the asynchronous
+     * AtomSpaceAsync which returns ASRequest "futures". Functions in this
+     * class will block until notified that they've been fulfilled by the
+     * AtomSpaceAsync event loop.
      */
-    void registerBackingStore(BackingStore *);
-    void unregisterBackingStore(BackingStore *);
+    mutable AtomSpaceAsync atomSpaceAsync;
 
     /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
+     * @deprecated Use AtomSpaceAsync::storeAtom in new code.
      */
-    void storeAtom(Handle h) {
-        if (backing_store) backing_store->storeAtom(h);
+    inline void storeAtom(Handle h) {
+        atomSpaceAsync.storeAtom(h)->get_result();
     }
 
     /**
@@ -91,41 +89,72 @@ public:
      * then an undefined handle is returned. If the atom is found, 
      * then the corresponding atom is guaranteed to have been
      * instantiated in the atomspace.
+     * @deprecated Use AtomSpaceAsync::fetchAtom in new code.
      */
-    Handle fetchAtom(Handle);
+    inline Handle fetchAtom(Handle h) {
+        return atomSpaceAsync.fetchAtom(h)->get_result();
+    }
 
     /**
      * Use the backing store to load the entire incoming set of the atom.
      * If the flag is true, then the load is done recursively. 
      * This method queries the backing store to obtain all atoms that 
      * contain this one in their outgoing sets. All of these atoms are
-     * then loaded into this atomtable/atomspace.
+     * then loaded into this AtomSpace's AtomTable.
+     * @deprecated Use AtomSpaceAsync::fetchIncomingSet in new code.
      */
-    Handle fetchIncomingSet(Handle, bool);
+    inline Handle fetchIncomingSet(Handle h, bool recursive) {
+        return atomSpaceAsync.fetchIncomingSet(h,recursive)->get_result();
+    };
 
     /**
-     * @return a const reference to the AtomTable object of this AtomSpace
-     */
-    const AtomTable& getAtomTable() const;
-
-    /**
+     * Get time server associated with the AtomSpace
+     * @deprecated Use AtomSpaceAsync::getTimeServer in new code.
      * @return a const reference to the TimeServer object of this AtomSpace
      */
-    const TimeServer& getTimeServer() const;
+    inline TimeServer& getTimeServer() const {
+        return atomSpaceAsync.getTimeServer();
+    }
 
     /**
-     * XXX TODO eliminate this function
+     * Get space server associated with the AtomSpace
+     * @deprecated Use AtomSpaceAsync::getSpaceServer in new code.
      * @return a reference to the SpaceServer object of this AtomSpace
      */
-    SpaceServer& getSpaceServer() const;
+    inline SpaceServer& getSpaceServer() const {
+        return atomSpaceAsync.getSpaceServer();
+    }
 
     /**
      * Return the number of atoms contained in the space.
      */
-    int getSize() const { return atomTable.getSize(); }
+    inline int getSize() const { return atomSpaceAsync.getSize()->get_result(); }
 
     /**
-     * Prints atoms of this AtomTable to the given output stream.
+     * DEPRECATED! Add an atom an optional TruthValue object to the Atom Table
+     * This is a deprecated function; do not use it in new code,
+     * if at all possible.
+     *
+     * @param atom the handle of the Atom to be added
+     * @param tvn the TruthValue object to be associated to the added
+     *        atom. NULL if the own atom's tv must be used.
+     * @return Handle referring to atom after it's been added.
+     * @deprecated This is a legacy code left-over from when one could
+     * have non-real atoms, i.e. those whose handles were
+     * less than 500, and indicated types, not atoms.
+     * Instead of using that method, one should use
+     * addNode or addLink (which is a bit faster too) which is actually called
+     * internally by this wrapper.
+     */
+    Handle addRealAtom(const Atom& atom,
+                       const TruthValue& tvn = TruthValue::NULL_TV());
+
+    inline bool saveToXML(const std::string& filename) const {
+        return atomSpaceAsync.saveToXML(filename)->get_result();
+    }
+
+    /**
+     * Prints atoms of this AtomSpace to the given output stream.
      * @param output  the output stream where the atoms will be printed.
      * @param type  the type of atoms that should be printed.
      * @param subclass  if true, matches all atoms whose type is
@@ -133,272 +162,21 @@ public:
      *              only atoms of the exact type.
      */
     void print(std::ostream& output = std::cout,
-               Type type = ATOM, bool subclass = true) const;
-
-    //helper for GDB, because print seems to mess things up
-    void printGDB() const {
-        print();
+               Type type = ATOM, bool subclass = true) const {
+        atomSpaceAsync.print(output, type, subclass)->get_result();
     }
-
-    /**
-     * Adds both the AtTime(TimeNode <timestamp>, atom) atom
-     * representation into the AtomTable and the entry (atom,
-     * timestamp) into the TimeServer of the given AtomSpace.
-     *
-     * @param atom the Handle of the atom to be associated to the timestamp
-     * @param timestamp The timestamp to be associated to the atom.
-     * @param tv Truth value for the AtTimeLink created (optional)
-     * @return the Handle of the AtTimeLink added into AtomSpace.
-     */
-    Handle addTimeInfo(Handle atom, unsigned long timestamp,
-                       const TruthValue& tv = TruthValue::NULL_TV());
-
-    /**
-     * Adds both the AtTime(TimeNode <t>, atom) atom representation
-     * into the AtomTable and the entry (atom, t) into the TimeServer
-     * of the given AtomSpace.
-     *
-     * @param atom the Handle of the atom to be associated to the timestamp
-     * @param t The Temporal object to be associated to the atom.
-     * @param tv Truth value for the AtTimeLink created (optional)
-     * @return the Handle of the AtTimeLink added into AtomSpace.
-     */
-    Handle addTimeInfo(Handle atom, const Temporal& t,
-                       const TruthValue& tv = TruthValue::NULL_TV());
-
-    /**
-     * Removes both the AtTime(TimeNode <timestamp>, atom) atom
-     * representation from the AtomTable and the entry (atom,
-     * timestamp) from the TimeServer of the given AtomSpace.
-     *
-     * NOTE1: All handles in the incoming set of the corresponding
-     * AtTimeLink Atom will also be removed recursively (unless the
-     * recursive argument is explicitely set to false).
-     *
-     * NOTE2: The TimeNode that corresponds to the given removed
-     * time info is also removed if its incoming set becomes empty
-     * after the removal of an AtTimeLink link (unless the
-     * removeDisconnectedTimeNodes argument is explicitly set to false).
-     *
-     * @param atom the Handle of the atom to be associated to
-     *        the timestamp. This argument cannot be an Handle::UNDEFINED.
-     *        If it is, a RuntimeException is thrown.
-     * @param timestamp The timestamp to be associated to the atom.
-     *        This argument cannot be an UNDEFINED_TEMPORAL. If
-     *        so, it throws a RuntimeException.
-     * @param the Temporal relationship criteria to be used for
-     *        this removal operation.
-     *
-     *        This method only removes the time info related to
-     *        the HandleTemporalPair objects whose Temporal matches with
-     *        this argument (search criteria) applied to the given
-     *        timestamp argument.
-     *
-     *        The default temporal relationship is "exact match".
-     *        See the definition of TemporalRelationship enumeration
-     *        to see other possible values for it.
-     * @param removeDisconnectedTimeNodes Flag to indicate if any
-     *        TimeNode whose incoming set becomes empty after the
-     *        removal of the AtTimeLink link must be removed.
-     * @param recursive Flag to indicate if all atoms in the
-     *        incoming set of the AtTimeLink link must be
-     *        removed recursively.
-     *
-     * @return True if the matching pairs (Handle, Temporal) were
-     *        successfully removed. False, otherwise (i.e., no
-     *        mathing pair or any of them were not removed)
-     */
-    bool removeTimeInfo(Handle atom,
-                        unsigned long timestamp,
-                        TemporalTable::TemporalRelationship = TemporalTable::EXACT,
-                        bool removeDisconnectedTimeNodes = true,
-                        bool recursive = true);
-
-    /**
-     * Removes both the AtTime(TimeNode <t>, atom) atom representation
-     * from the AtomTable and the entry (atom, t) from the TimeServer
-     * of the given AtomSpace.
-     *
-     * NOTE1: All handles in the incoming set of the corresponding
-     *        AtTimeLink Atom will also be removed recursively
-     *        (unless the recursive argument is explicitely set to false).
-     * NOTE2: The TimeNode that corresponds to the given removed
-     *        time info is also removed if its incoming set becomes
-     *        empty after the removal of an AtTimeLink link (unless the
-     *        removeDisconnectedTimeNodes argument is explicitly set to
-     *        false).
-     *
-     * @param atom the Handle of the atom to be associated to the
-     *        timestamp. This argument cannot be an Handle::UNDEFINED.
-     *        If so, it throws a RuntimeException.
-     * @param t The Temporal object to be associated to the atom. This
-     *        argument cannot be an UNDEFINED_TEMPORAL. If so, it throws
-     *        a RuntimeException.
-     * @param removeDisconnectedTimeNode Flag to indicate if the
-     *        TimeNode that corresponds to the given timestamp should
-     *        be removed, if its incoming set becomes empty after the
-     *        removal of the AtTimeLink link.
-     * @param the Temporal relationship criteria to be used for this
-     *        removal operation, if the given Temporal object argument
-     *        is not UNDEFINED_TEMPORAL. This method only removes the
-     *        time info related to the HandleTemporalPair objects whose
-     *        Temporal matches with this argument (search criteria)
-     *        applied to the given Temporal object argument. The default
-     *        temporal relationship is "exact match". See the definition
-     *        of TemporalRelationship enumeration to see other possible
-     *        values for it.
-     * @param removeDisconnectedTimeNodes Flag to indicate if any
-     *        TimeNode whose incoming set becomes empty after the removal
-     *        of the AtTimeLink link must be removed.
-     * @param recursive Flag to indicate if all atoms in the incoming set
-     *        of the AtTimeLink link must be removed recursively.
-     *
-     * @return True if the matching pairs (Handle, Temporal) were
-     *         successfully removed. False, otherwise (i.e., no mathing
-     *         pair or any of them were not removed)
-     */
-    bool removeTimeInfo(Handle atom,
-                        const Temporal& t = UNDEFINED_TEMPORAL,
-                        TemporalTable::TemporalRelationship = TemporalTable::EXACT,
-                        bool removeDisconnectedTimeNodes = true,
-                        bool recursive = true);
-
-    /**
-     * Gets the corresponding AtTimeLink for the given HandleTemporalPair value
-     * @param the pair (Handle, Temporal) that defines an AtTimeLink instance.
-     * @return the Handle of the corresponding AtTimeLink, if it exists.
-     */
-    Handle getAtTimeLink(const HandleTemporalPair& htp) const;
-
-    /**
-     * Gets a list of HandleTemporalPair objects given an Atom Handle.
-     *
-     * \param outIt The outputIterator to
-     * \param h The Atom Handle
-     * \param t The temporal object
-     * \param c The Temporal pair removal criterion
-     *
-     * \return An OutputIterator list
-     *
-     * @note The matched entries are appended to a container whose
-     *       OutputIterator is passed as the first argument. Example
-     *       of call to this method, which would return all entries
-     *       in TimeServer:
-     *           std::list<HandleTemporalPair> ret;
-     *           timeServer.get(back_inserter(ret), Handle::UNDEFINED);
-     */
-    template<typename OutputIterator> OutputIterator
-    getTimeInfo(OutputIterator outIt,
-                Handle h,
-                const Temporal& t = UNDEFINED_TEMPORAL,
-                TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const
-    {
-        return timeServer.get(outIt, h, t, criterion);
-    }
-
-    /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Adds space information about an object represented by a Node.
-     * @param objectNode the Handle of the node that represents the object to be associated to the space info
-     * @param timestamp The timestamp to be associated to this operation.
-     * @param the remaining arguments are related to object's spatial information
-     * @return true if any property of the object has changed (or it's a new object). False, otherwise.
-     */
-    bool addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                              double objX, double objY, double objZ,
-                              double objLength, double objWidth, double objHeight,
-                              double objYaw, bool isObstacle = true);
-    /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Add a whole space map into the SpaceServer.
-     * NOTE: This is just used when a whole space map is received
-     * from a remote SpaceServer (in LearningServer, for instance).
-     */
-    Handle addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap);
-
-    /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Removes space information about an object from the latest map (object is no longer at map's range)
-     * @param objectNode the Handle of the node that represents the object to be removed from space map
-     * @param timestamp The timestamp to be associated to this operation.
-     * @return handle of the atom that represents the SpaceMap (at the given timestamp) where the object was removed
-     */
-    Handle removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp);
-
-     /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Gets all SpaceMap handles that would be needed inside the given interval.
-     * For getting the SpaceMap of each handle returned,
-     * use the spaceServer.getMap(Handle spaceMapHandle) method.
-     * @param out  the output iterator where the resulting handles will be added.
-     * @param startMoment the start of the time interval for searching the maps
-     * @param endMoment the end of the time interval for searching the maps
-     *
-     * Example of usage:
-     *     HandleSeq result;
-     *     spaceServer.getMapHandles(back_inserter(result),start,end);
-     *     foreach(Handle h, result) {
-     *         const SpaceMap& map = spaceServer().getMap(h);
-     *         ...
-     *     }
-     */
-
-    template<typename OutputIterator>
-    OutputIterator getMapHandles(   OutputIterator outIt,
-                                    unsigned long startMoment, unsigned long endMoment) const {
-        Temporal t(startMoment, endMoment);
-        std::vector<HandleTemporalPair> pairs;
-        Handle spaceMapNode = getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-        if (spaceMapNode != Handle::UNDEFINED) {
-            // Gets the first map before the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::PREVIOUS_BEFORE_START_OF);
-            // Gets all maps inside the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::STARTS_WITHIN);
-            for(unsigned int i = 0; i < pairs.size(); i++) {
-                HandleTemporalPair pair = pairs[i];
-                *(outIt++) = getAtTimeLink(pair);
-            }
-        }
-        return outIt;
-    }
-
-    /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Remove old maps from SpaceServer in order to save memory. SpaceMaps
-     * associated with exemplar sections, i.e., marked as persistent and the
-     * latest (newest) space map are preserved.
-     *
-     * IMPORTANT: This function cannot be called while any trick exemplar is in progress.
-     */
-    void cleanupSpaceServer();
-
 
     /** Add a new node to the Atom Table,
-    if the atom already exists then the old and the new truth value is merged
-        \param t     Type of the node
-        \param name  Name of the node
-        \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) */
-    Handle addNode(Type t, const std::string& name = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());
+     * if the atom already exists then the old and the new truth value is merged
+     * \param t     Type of the node
+     * \param name  Name of the node
+     * \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) 
+     * @deprecated New code should directly use the AtomSpaceAsync::addNode method.
+     */
+    inline Handle addNode(Type t, const std::string& name = "", const TruthValue& tvn = TruthValue::DEFAULT_TV())
+    {
+        return atomSpaceAsync.addNode(t,name,tvn)->get_result();
+    }
 
     /**
      * Add a new link to the Atom Table
@@ -409,9 +187,14 @@ public:
      *                  the outgoing set of the link
      * @param tvn       Optional TruthValue of the node. If not
      *                  provided, uses the DEFAULT_TV (see TruthValue.h)
+     * @deprecated New code should directly use the AtomSpaceAsync::addLink method.
      */
-    Handle addLink(Type t, const HandleSeq& outgoing,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV());
+    inline Handle addLink(Type t, const HandleSeq& outgoing,
+                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+    { 
+        return atomSpaceAsync.addLink(t,outgoing,tvn)->get_result();
+    }
+
     inline Handle addLink(Type t, Handle h,
                    const TruthValue& tvn = TruthValue::DEFAULT_TV())
     {
@@ -527,26 +310,11 @@ public:
     }
 
     /**
-     * DEPRECATED!
-     *
-     * Add an atom an optional TruthValue object to the Atom Table
-     * This is a deprecated function; do not use it in new code,
-     * if at all possible.
-     *
-     * @param atom the handle of the Atom to be added
-     * @param tvn the TruthValue object to be associated to the added
-     *        atom. NULL if the own atom's tv must be used.
-     * @deprecated This is a legacy code left-over from when one could
-     * have non-real atoms, i.e. those whose handles were
-     * less than 500, and indicated types, not atoms.
-     * Instead of using that method, one should use
-     * addNode or addLink (which is a bit faster too).
-     */
-    Handle addRealAtom(const Atom& atom,
-                       const TruthValue& tvn = TruthValue::NULL_TV());
-
-    /**
      * Removes an atom from the atomspace
+     *
+     * When the atom is removed from the atomspace, all memory associated
+     * with it is also deleted; in particular, the atom is removed from
+     * the TLB as well, so that future TLB lookups will be invalid. 
      *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag; if set, the links in the
@@ -554,12 +322,10 @@ public:
      *        removed.
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
-     *
-     * When the atom is removed from the atomspace, all memory associated
-     * with it is also deleted; in particular, the atom is removed from
-     * the TLB as well, so that future TLB lookups will be invalid. 
      */
-    bool removeAtom(Handle h, bool recursive = false);
+    bool removeAtom(Handle h, bool recursive = false) {
+        return atomSpaceAsync.removeAtom(h,recursive)->get_result();
+    }
 
     /**
      * Retrieve from the Atom Table the Handle of a given node
@@ -568,7 +334,7 @@ public:
      * @param str   Name of the node
     */
     Handle getHandle(Type t, const std::string& str) const {
-        return atomTable.getHandle(str.c_str(), t);
+        return atomSpaceAsync.getHandle(t,str)->get_result();
     }
 
     /**
@@ -578,29 +344,112 @@ public:
      *        the outgoing set of the link.
     */
     Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return atomTable.getHandle(t, outgoing);
+        return atomSpaceAsync.getHandle(t,outgoing)->get_result();
     }
 
     /** Get the atom referred to by Handle h represented as a string. */
-    std::string atomAsString(Handle h, bool terse = true) const;
+    std::string atomAsString(Handle h, bool terse = true) const {
+        return atomSpaceAsync.atomAsString(h,terse)->get_result();
+    }
 
     /** Retrieve the name of a given Handle */
-    const std::string& getName(Handle) const;
+    std::string getName(Handle h) const {
+        return atomSpaceAsync.getName(h)->get_result();
+    }
 
-    /** Change the name of a given Handle */
-    void setName(Handle, const std::string& name);
+    /** Change the Short-Term Importance of a given Handle */
+    void setSTI(Handle h, AttentionValue::sti_t stiValue) {
+        atomSpaceAsync.setSTI(h, stiValue)->get_result();
+    }
+
+    /** Change the Long-term Importance of a given Handle */
+    void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
+        atomSpaceAsync.setLTI(h, ltiValue)->get_result();
+    }
+
+    /** Change the Very-Long-Term Importance of a given Handle */
+    void setVLTI(Handle h, AttentionValue::vlti_t vltiValue) {
+        atomSpaceAsync.setVLTI(h, vltiValue)->get_result();
+    }
+
+    /** Retrieve the Short-Term Importance of a given Handle */
+    AttentionValue::sti_t getSTI(Handle h) const {
+        return atomSpaceAsync.getSTI(h)->get_result();
+    }
+
+    /** Retrieve the Long-term Importance of a given AttentionValueHolder */
+    AttentionValue::lti_t getLTI(Handle h) const {
+        return atomSpaceAsync.getLTI(h)->get_result();
+    }
+
+    /** Retrieve the Very-Long-Term Importance of a given
+     * AttentionValueHolder */
+    AttentionValue::vlti_t getVLTI(Handle h) const {
+        return atomSpaceAsync.getVLTI(h)->get_result();
+    }
+
+    /** Retrieve the outgoing set of a given link */
+    HandleSeq getOutgoing(Handle h) const {
+        return atomSpaceAsync.getOutgoing(h)->get_result();
+    }
+
+    /** Retrieve a single Handle from the outgoing set of a given link */
+    Handle getOutgoing(Handle h, int idx) const {
+        return atomSpaceAsync.getOutgoing(h,idx)->get_result();
+    }
+
+    /** Retrieve the arity of a given link */
+    int getArity(Handle h) const {
+        return atomSpaceAsync.getArity(h)->get_result();
+    }
+
+    /** Return whether s is the source handle in a link l */ 
+    bool isSource(Handle source, Handle link) const {
+        return atomSpaceAsync.isSource(source, link)->get_result();
+    }
+
+    /** Retrieve the AttentionValue of a given Handle */
+    AttentionValue getAV(Handle h) const {
+        return atomSpaceAsync.getAV(h)->get_result();
+    }
+
+    /** Change the AttentionValue of a given Handle */
+    void setAV(Handle h, const AttentionValue &av) {
+        atomSpaceAsync.setAV(h,av)->get_result();
+    }
 
     /** Retrieve the type of a given Handle */
-    Type getType(Handle) const;
+    Type getType(Handle h) const {
+        return atomSpaceAsync.getType(h)->get_result();
+    }
 
-    /** Retrieve the TruthValue of a given Handle */
-    const TruthValue& getTV(Handle, VersionHandle = NULL_VERSION_HANDLE) const;
+    /** Retrieve the TruthValue of a given Handle
+     * @note This is an unpleasant hack due to the TruthValue class being abstract and
+     * traditionally callers expected to receive a const reference to an  Atom's TV
+     * object. To prevent threads from crashing into one another, we have to
+     * return a copy of the object... but the caller needs to clean it up. To
+     * avoid inspecting all the code for where to delete the copy, I (Joel)
+     * have opted for a smart pointer, in the same way that I did with
+     * cloneAtom.
+     */
+    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
+        const TruthValue& result = *atomSpaceAsync.getTV(h, vh)->get_result();
+        return TruthValuePtr(result.clone());
+    }
 
     /** Change the TruthValue of a given Handle */
-    void setTV(Handle, const TruthValue&, VersionHandle = NULL_VERSION_HANDLE);
+    void setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE) {
+        atomSpaceAsync.setTV(h, tv, vh)->get_result();
+    }
 
-    /** Change the primary TV's mean of a given Handle */
-    void setMean(Handle, float mean) throw (InvalidParamException);
+    /** Change the primary TV's mean of a given Handle
+     * @note By Joel: this makes no sense to me, how can you generally set a mean
+     * across all TV types. I think a better solution would be to remove this
+     * enforce the use of setTV.
+     */
+    void setMean(Handle h, float mean) {
+        atomSpaceAsync.setMean(h, mean)->get_result();
+    }
 
     /** Retrieve the AttentionValue of an attention value holder */
     const AttentionValue& getAV(AttentionValueHolder *avh) const;
@@ -619,6 +468,12 @@ public:
 
     /** Retrieve the Short-Term Importance of an attention value holder */
     AttentionValue::sti_t getSTI(AttentionValueHolder *avh) const;
+
+    /** Retrieve the Long-term Importance of a given Handle */
+    AttentionValue::lti_t getLTI(AttentionValueHolder *avh) const;
+
+    /** Retrieve the Very-Long-Term Importance of a given Handle */
+    AttentionValue::vlti_t getVLTI(AttentionValueHolder *avh) const;
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given AttentionValueHolder. STI above and below threshold
@@ -644,43 +499,6 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool average=true, bool clip=false) const;
-
-    /** Retrieve the Long-term Importance of a given AttentionValueHolder */
-    AttentionValue::lti_t getLTI(AttentionValueHolder *avh) const;
-
-    /** Retrieve the Very-Long-Term Importance of a given
-     * AttentionValueHolder */
-    AttentionValue::vlti_t getVLTI(AttentionValueHolder *avh) const;
-
-    /** Retrieve the AttentionValue of a given Handle */
-    const AttentionValue& getAV(Handle h) const {
-        return getAV(TLB::getAtom(h));
-    }
-
-    /** Change the AttentionValue of a given Handle */
-    void setAV(Handle h, const AttentionValue &av) {
-        setAV(TLB::getAtom(h), av);
-    }
-
-    /** Change the Short-Term Importance of a given Handle */
-    void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        setSTI(TLB::getAtom(h), stiValue);
-    }
-
-    /** Change the Long-term Importance of a given Handle */
-    void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        setLTI(TLB::getAtom(h), ltiValue);
-    }
-
-    /** Change the Very-Long-Term Importance of a given Handle */
-    void setVLTI(Handle h, AttentionValue::vlti_t vltiValue) {
-        setVLTI(TLB::getAtom(h), vltiValue);
-    }
-
-    /** Retrieve the Short-Term Importance of a given Handle */
-    AttentionValue::sti_t getSTI(Handle h) const {
-        return getSTI(TLB::getAtom(h));
-    }
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given Handle. STI above and below threshold normalised separately
@@ -709,16 +527,6 @@ public:
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
         return getNormalisedZeroToOneSTI(TLB::getAtom(h), average, clip);
-    }
-
-    /** Retrieve the Long-term Importance of a given Handle */
-    AttentionValue::lti_t getLTI(Handle h) const {
-        return getLTI(TLB::getAtom(h));
-    }
-
-    /** Retrieve the Very-Long-Term Importance of a given Handle */
-    AttentionValue::vlti_t getVLTI(Handle h) const {
-        return getVLTI(TLB::getAtom(h));
     }
 
     /** Clone an atom from the TLB, replaces the public access to TLB::getAtom
@@ -758,22 +566,14 @@ public:
      * @param subClasses Follow subtypes of linkType too.
      */
     HandleSeq getNeighbors(const Handle h, bool fanin, bool fanout,
-            Type linkType=LINK, bool subClasses=true) const;
-
-    /** Retrieve a single Handle from the outgoing set of a given link */
-    Handle getOutgoing(Handle, int idx) const;
-
-    /** Retrieve the arity of a given link */
-    int getArity(Handle) const;
-
-    /** Return whether s is the source handle in a link l */ 
-    bool isSource(Handle source, Handle link) const;
-
-    /** Retrieve the outgoing set of a given link */
-    const HandleSeq& getOutgoing(Handle h) const;
+            Type linkType=LINK, bool subClasses=true) const {
+        return atomSpaceAsync.getNeighbors(h,fanin,fanout,linkType,subClasses)->get_result();
+    }
 
     /** Retrieve the incoming set of a given atom */
-    HandleSeq getIncoming(Handle);
+    HandleSeq getIncoming(Handle h) {
+        return atomSpaceAsync.getIncoming(h)->get_result();
+    }
 
     /** Retrieve the Count of a given Handle */
     float getCount(Handle) const;
@@ -966,10 +766,9 @@ public:
                  Type type,
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(handles, types,
-                subclasses, arity, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+        HandleSeq result_set = atomSpaceAsync.getHandlesByOutgoingSet(
+                handles,types,subclasses,arity,type,subclass,vh)->get_result();
+        return toOutputIterator(result, result_set);
     }
 
     /**
@@ -1480,8 +1279,6 @@ public:
         AttentionValue::lti_t threshold;
     };
 
-    bool saveToXML(const std::string& filename) const;
-
 protected:
 
     HandleIterator* _handle_iterator;
@@ -1494,25 +1291,8 @@ protected:
 
 private:
 
-    TimeServer timeServer;
     AtomTable atomTable;
     std::string emptyName;
-    SpaceServer* spaceServer;
-
-    /** The AtomSpace currently acts like event loop, but some legacy code (such as
-     * saving/loading) might not like the AtomSpace changing while acting upon
-     * it. Those that absolutely require it can get a lock to halt the event loop.
-     * @warn This should only be used as a last resort, you need to add your
-     * class as a friend class to the AtomSpace, and we make no
-     * guarantee this will be available in the future.
-     */
-    mutable pthread_mutex_t atomSpaceLock;
-
-    /**
-     * signal connections used to keep track of atom removal in the AtomTable
-     */
-    boost::signals::connection removedAtomConnection; 
-    boost::signals::connection addedAtomConnection; 
 
     /* Boundary at which an atom is considered within the attentional
      * focus of opencog. Atom's with STI less than this value are
@@ -1532,6 +1312,16 @@ private:
      */
     void removeStimulus(Handle h);
 
+    /* copy HandleSeq to an output iterator */
+    template <typename OutputIterator> OutputIterator
+    toOutputIterator(OutputIterator result, HandleSeq handles) const {
+        foreach(Handle h, handles) {
+            *(result++) = h;
+        }
+        return result;
+    }
+
+    /* copy HandleEntry to an output iterator */
     template <typename OutputIterator> OutputIterator
     toOutputIterator(OutputIterator result, HandleEntry * handleEntry) const {
 
@@ -1545,41 +1335,13 @@ private:
         return result;
     }
 
-    /*
-     * Adds both the AtTime(TimeNode <timeNodeName>, atom) atom representation into the AtomTable and the
-     * corresponding entry (atom, t) into the TimeServer of the given AtomSpace.
-     * @param atom the Handle of the atom to be associated to the timestamp
-     * @param timeNodeName the name of the TimeNode to be associated to the atom via an AtTimeLink.
-     * @param tv Truth value for the AtTimeLink created (optional)
-     * @return the Handle of the AtTimeLink added into the AtomSpace.
-     */
-    Handle addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv = TruthValue::NULL_TV());
-
     /**
      * Creates the space map node, if not created yet.
      * returns the handle of the node.
      */
     Handle getSpaceMapNode(void);
 
-    /**
-     * Handler of the 'atom removed' signal from AtomTable
-     */
-    void atomRemoved(Handle h);
-
-    /**
-     * Handler of the 'atom added' signal from AtomTable
-     */
-    void atomAdded(Handle h);
-
 public:
-    // pass on the signals from the Atom Table
-    boost::signal<void (Handle)>& addAtomSignal()
-        { return atomTable.addAtomSignal(); }
-    boost::signal<void (Handle)>& removeAtomSignal()
-        { return atomTable.removeAtomSignal(); }
-    boost::signal<void (Handle)>& mergeAtomSignal()
-        { return atomTable.mergeAtomSignal(); }
-
     // SpaceServerContainer virtual methods:
     void mapRemoved(Handle mapId);
     void mapPersisted(Handle mapId);

@@ -1,0 +1,233 @@
+/*
+ * tests/atomspace/AtomSpaceAsyncUTest.cxxtest
+ *
+ * Copyright (C) 2010 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Joel Pitt <joel@opencog.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <algorithm>
+
+#include <math.h>
+#include <string.h>
+
+#include <opencog/atomspace/AtomSpaceAsync.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/misc-test.h>
+#include <opencog/util/platform.h>
+#include <opencog/util/Config.h>
+
+using namespace opencog;
+using namespace std;
+
+class AtomSpaceAsyncUTest :  public CxxTest::TestSuite
+{
+private:
+
+    AtomSpaceAsync *atomSpace;
+    int __testSignalsCounter;
+
+
+public:
+    AtomSpaceAsyncUTest() {
+        logger().setLevel(Logger::INFO);
+        logger().setPrintToStdoutFlag(true);
+    }
+
+    void setUp() {
+        atomSpace = new AtomSpaceAsync();
+    }
+
+    void tearDown() {
+        delete atomSpace;
+    }
+
+    void atomAdded1(opencog::AtomSpaceImpl* a, Handle h) {
+        TS_ASSERT(a->getSize() == 1);
+        logger().debug("atomAdded1: %s", a->atomAsString(h,true).c_str());
+        __testSignalsCounter += 1;
+    }
+
+    void atomAdded2(opencog::AtomSpaceImpl* a,Handle h) {
+        TS_ASSERT(a->getSize() == 1);
+        logger().debug("atomAdded2: %s", a->atomAsString(h,true).c_str());
+        __testSignalsCounter += 10;
+    }
+
+    void atomMerged1(opencog::AtomSpaceImpl* a,Handle h) {
+        TS_ASSERT(a->getSize() == 1);
+        logger().debug("atomMerged1: %s", a->atomAsString(h,true).c_str());
+        __testSignalsCounter += 100;
+    }
+
+    void atomMerged2(opencog::AtomSpaceImpl* a,Handle h) {
+        TS_ASSERT(a->getSize() == 1);
+        logger().debug("atomMerged2: %s", a->atomAsString(h,true).c_str());
+        __testSignalsCounter += 1000;
+    }
+
+    void atomRemoved1(opencog::AtomSpaceImpl* a, Handle h) {
+        // Atom is removed from table, but not from TLB until AFTER callbacks are completed
+        TS_ASSERT(a->getSize() == 0);
+        logger().debug("atomRemoved1: %s", a->atomAsString(h,true).c_str());
+        __testSignalsCounter += 10000;
+    }
+
+    void atomRemoved2(opencog::AtomSpaceImpl* a, Handle h) {
+        // Atom is removed from table, but not from TLB until AFTER callbacks are completed
+        TS_ASSERT(a->getSize() == 0);
+        logger().debug("atomRemoved2: %s", a->atomAsString(h,true).c_str());
+        __testSignalsCounter += 100000;
+    }
+
+    void testSignals() {
+        // connect signals
+        boost::signals::connection add1 =
+            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded1, this, _1, _2));
+        boost::signals::connection add2 =
+            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded2, this, _1, _2));
+        boost::signals::connection merge1 =
+            atomSpace->mergeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged1, this, _1, _2));
+        boost::signals::connection merge2 =
+            atomSpace->mergeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged2, this, _1, _2));
+        boost::signals::connection remove1 =
+            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved1, this, _1, _2));
+        boost::signals::connection remove2 =
+            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved2, this, _1, _2));
+
+        /* add and remove a simple node */
+        __testSignalsCounter = 0;
+        logger().debug("before first atom add");
+        Handle wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        TS_ASSERT(__testSignalsCounter == 11);
+        logger().debug("before second atom add");
+        atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        TS_ASSERT(__testSignalsCounter == 1111);
+        logger().debug("before atom remove, table size = %d", atomSpace->getSize()->get_result());
+        atomSpace->removeAtom(wnHandle)->get_result();
+        TS_ASSERT(__testSignalsCounter == 111111);
+
+        /* add a simple node and let decayShortTermImportance remove it */
+        __testSignalsCounter = 0;
+        wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        TS_ASSERT(__testSignalsCounter == 11);
+        const AttentionValue& av = atomSpace->getAV(wnHandle)->get_result();
+        AttentionValue newAV(config().get_int("MIN_STI") + 10, av.getLTI(), av.getVLTI());
+        atomSpace->setAV(wnHandle,newAV)->get_result();
+
+        for (unsigned int i = 0; i <= 10; ++i) {
+            logger().debug(atomSpace->getAV(wnHandle)->get_result().toString());
+            atomSpace->decayShortTermImportance()->get_result();
+        }
+        TS_ASSERT(__testSignalsCounter == 110011);
+
+        /* add a node with LTI == 1 so that decayShortTermImportance cannot remove it */
+        __testSignalsCounter = 0;
+        wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        TS_ASSERT(__testSignalsCounter == 11);
+        const AttentionValue& av2 = atomSpace->getAV(wnHandle)->get_result();
+        newAV = AttentionValue(config().get_int("MIN_STI") + 10, 1, av2.getVLTI());
+        atomSpace->setAV(wnHandle,newAV)->get_result();
+        for (unsigned int i = 0; i <= 10; ++i) {
+            logger().debug(atomSpace->getAV(wnHandle)->get_result().toString());
+            atomSpace->decayShortTermImportance();
+        }
+        TS_ASSERT(__testSignalsCounter == 11);
+        atomSpace->removeAtom(wnHandle)->get_result();
+        TS_ASSERT(__testSignalsCounter == 110011);
+
+        // test disconnections
+        __testSignalsCounter = 0;
+        add1.disconnect();
+        merge1.disconnect();
+        remove1.disconnect();
+        wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        TS_ASSERT(__testSignalsCounter == 1010);
+        atomSpace->removeAtom(wnHandle)->get_result();
+        TS_ASSERT(__testSignalsCounter == 101010);
+
+        __testSignalsCounter = 0;
+        add2.disconnect();
+        merge2.disconnect();
+        remove2.disconnect();
+        wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        TS_ASSERT(__testSignalsCounter == 0);
+        atomSpace->removeAtom(wnHandle)->get_result();
+        TS_ASSERT(__testSignalsCounter == 0);
+    }
+
+    void testRemovalByDecay() {
+        AttentionValue::sti_t min_sti = opencog::config().get_int("MIN_STI");
+
+        /* add a simple tree of links & nodes */
+        Handle wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        atomSpace->setSTI(wnHandle,(AttentionValue::sti_t) (min_sti + 7));
+
+        Handle snHandle = atomSpace->addNode(CONCEPT_NODE, "28675194")->get_result();
+        atomSpace->setSTI(snHandle,(AttentionValue::sti_t) (min_sti + 5));
+
+        std::vector<Handle> os;
+        os.push_back(wnHandle);
+        os.push_back(snHandle);
+        Handle ilHandle = atomSpace->addLink(INHERITANCE_LINK,os)->get_result();
+        atomSpace->setSTI(ilHandle,(AttentionValue::sti_t) (min_sti + 6));
+
+        Handle llHandle = atomSpace->addLink(LIST_LINK,os)->get_result();
+        atomSpace->setSTI(llHandle,(AttentionValue::sti_t) (min_sti + 5));
+
+        // decay sti up to the threshold where the least important atoms
+        // should be about to be removed
+        for (int i = 0; i < 5; i++)
+            atomSpace->decayShortTermImportance()->get_result();
+        // and test the existance of each atom
+        const AtomTable& atomTable = atomSpace->atomspace.getAtomTable();
+        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        != NULL);
+
+        // run another decaying cycle; the list link node should have been
+        // removed
+        atomSpace->decayShortTermImportance()->get_result();
+        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
+
+        // an another one; the inheritance link and the sense node should have
+        // been removed
+        atomSpace->decayShortTermImportance()->get_result();
+        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
+
+        // and another, final one; by now all nodes should have been removed
+        atomSpace->decayShortTermImportance()->get_result();
+        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
+        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
+    }
+};

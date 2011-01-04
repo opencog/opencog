@@ -94,10 +94,10 @@ void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
 {
     if (watch) {
         if (!watchingAtomSpace) {
-            c_add = atomspace->addAtomSignal().connect(
-                    boost::bind(&AtomSpaceWrapper::handleAddSignal, this, _1));
-            c_remove = atomspace->removeAtomSignal().connect(
-                    boost::bind(&AtomSpaceWrapper::handleRemoveSignal, this, _1));
+            c_add = atomspace->atomSpaceAsync.addAtomSignal(
+                    boost::bind(&AtomSpaceWrapper::handleAddSignal, this, _1, _2));
+            c_remove = atomspace->atomSpaceAsync.removeAtomSignal(
+                    boost::bind(&AtomSpaceWrapper::handleRemoveSignal, this, _1, _2));
             assert(c_add.connected() && c_remove.connected());
             watchingAtomSpace = true;
             logger().info("[ASW] Watching AtomSpace.");
@@ -117,8 +117,10 @@ void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
     }
 }
 
-bool AtomSpaceWrapper::handleAddSignal(Handle h)
+bool AtomSpaceWrapper::handleAddSignal(AtomSpaceImpl *as, Handle h)
 {
+    // XXX This is an error waiting to happen. Signals handling adds must be
+    // thread safe as they are called from the AtomSpace event loop
     if (!archiveTheorems) {
         // Will create a new entry in the vhmap. This must not involve
         // making new atoms...
@@ -130,7 +132,7 @@ bool AtomSpaceWrapper::handleAddSignal(Handle h)
     return false;
 }
 
-bool AtomSpaceWrapper::handleRemoveSignal(Handle h)
+bool AtomSpaceWrapper::handleRemoveSignal(AtomSpaceImpl *as, Handle h)
 {
     // If ImplicationLink then check whether there is a CrispTheorem 
 

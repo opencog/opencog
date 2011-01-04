@@ -23,6 +23,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -152,12 +153,12 @@ public:
     void testComparisons() {
         logger().debug("BEGIN TEST:");
         
-        AtomSpace* atomSpace = new AtomSpace();
+        AtomSpaceImpl* atomSpace = new AtomSpaceImpl();
         vector<Handle> atoms = createSimpleGraph(atomSpace, "comparisons");
         
         logger().debug("STISort");
 
-        AttentionValue::STISort sSort(atomSpace);
+        AttentionValue::STISort<AtomSpaceImpl> sSort(atomSpace);
         
         // an atom which has higher sti is strictly before one with lower sti
         TS_ASSERT_EQUALS(sSort(atoms[1], atoms[0]), true);
@@ -169,7 +170,7 @@ public:
         
         logger().debug("LTIAndTVAscendingSort");
 
-        AttentionValue::LTIAndTVAscendingSort latvSort(atomSpace);
+        AttentionValue::LTIAndTVAscendingSort<AtomSpaceImpl> latvSort(atomSpace);
         
         // an atom which has higher LTI*TV is not strictly before one with lower LTI*TV
         TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[0]), false);
@@ -181,7 +182,7 @@ public:
 
         logger().debug("LTIThenTVAscendingSort");
         
-        AttentionValue::LTIThenTVAscendingSort lttvSort(atomSpace);
+        AttentionValue::LTIThenTVAscendingSort<AtomSpaceImpl> lttvSort(atomSpace);
 
         // an atom which has higher LTI is not strictly before one with lower LTI
         TS_ASSERT_EQUALS(lttvSort(atoms[1], atoms[0]), false);
@@ -199,7 +200,7 @@ public:
     }
 
     // copied from AtomSpaceUTest.cxxtest, but modified for the test testComparisons 
-    vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName) {
+    vector<Handle> createSimpleGraph(AtomSpaceImpl* atomSpace, const char* baseName) {
         char buf[256];
         vector<Handle> testAtoms;
         int baseNameLength;

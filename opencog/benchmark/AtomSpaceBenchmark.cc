@@ -351,6 +351,7 @@ Handle AtomSpaceBenchmark::getRandomHandle() {
     //tRandomStart = clock();
     // We need this TLB access as the only alternative to
     // getting a random handle this way scales badly:
+    // (... plus we are not allowed access to the AtomTable either)
     //Handle h = a->getAtomTable().getRandom(rng);
     //tRandomEnd = clock();
     return Handle(UUID_begin + rng->randint((TLB::getMaxUUID()-1)-UUID_begin));

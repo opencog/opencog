@@ -74,7 +74,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
         ret += "\"";
         
         // Print the truth value only after the node name
-        const TruthValue &tv = atomspace->getTV(h);
+        const TruthValue& tv = atomspace->getTV(h);
         if (tv != TruthValue::DEFAULT_TV()) {
             ret += " ";
             ret += tv_to_string (&tv);

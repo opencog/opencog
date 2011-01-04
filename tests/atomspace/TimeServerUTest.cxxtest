@@ -23,8 +23,10 @@
  */
 
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/TimeServer.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/numeric.h>
 
@@ -53,28 +55,30 @@ private:
     Handle handles[N_TIMES];
 
     TimeServer *timeServer;
+    AtomSpace *atomspace;
 
 public:
 
     TimeServerUTest() {
-        timeServer = new TimeServer;
+        atomspace = new AtomSpace();
+        timeServer = &(atomspace->atomSpaceAsync.getTimeServer());
         for (int i = 0; i < N_TIMES; i++) {
             times[i] = new Temporal(i*2, i*2);
             char name[16];
             sprintf(name, "%d", i);
-            Node *n = new Node(NUMBER_NODE, name);
-            handles[i] = TLB::addAtom(n);
+            handles[i] = atomspace->addNode(NUMBER_NODE, name);
         }
     }
 
     ~TimeServerUTest() {
         for (int i = 0; i < N_TIMES; i++) {
             delete times[i];
-            delete TLB::removeAtom(TLB::getAtom(handles[i]));
+            atomspace->removeAtom(handles[i]);
         }
     }
 
     void setUp() {
+        atomspace->clear();
         timeServer->clear();
     }
 
@@ -1248,4 +1252,926 @@ public:
         }
     }
 
+    void testAddGetTimeInfo() {
+        AtomSpace atomSpace;
+        Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
+        Handle node2 = atomSpace.addNode(CONCEPT_NODE, "test2");
+
+        Handle atTimeLink = timeServer->addTimeInfo(node1, 1000);
+        TS_ASSERT(atTimeLink != Handle::UNDEFINED);
+        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 0) == timeNode);
+        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 1) == node1);
+        vector<HandleTemporalPair> res;
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        Temporal t1(1000);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        Temporal t2(2000, 3000);
+        atTimeLink = timeServer->addTimeInfo(node1, t2);
+        TS_ASSERT(atTimeLink != Handle::UNDEFINED);
+        timeNode = atomSpace.getHandle(TIME_NODE, t2.getTimeNodeName());
+        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 0) == timeNode);
+        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 1) == node1);
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        timeServer->addTimeInfo(node2, t2);
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node2);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        // Check getTimeInfo with other temporal relationship criteria
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::STARTS_BEFORE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(1500, 2500), TemporalTable::STARTS_WITHIN);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(1500, 2500), TemporalTable::STARTS_AFTER);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::STARTS_AFTER);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(1000), TemporalTable::ENDS_BEFORE);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::ENDS_BEFORE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(500, 1500), TemporalTable::ENDS_WITHIN);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(3000), TemporalTable::ENDS_AFTER);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(1500, 2500), TemporalTable::ENDS_AFTER);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::OVERLAPS);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::OVERLAPS);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(1500), TemporalTable::INCLUDES);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::INCLUDES);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(2500,3000), TemporalTable::INCLUDES);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, t1, TemporalTable::NEXT_AFTER_END_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_END_OF);
+        TS_ASSERT(res.empty());
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, t1, TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), node1, t2, TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(ULONG_MAX), TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, t1, TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), node1, t2, TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1, Temporal(ULONG_MAX), TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        // Check getTimeInfo with Handle::UNDEFINED
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, t1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, t2);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(1500), TemporalTable::STARTS_BEFORE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(1500, 2500), TemporalTable::STARTS_WITHIN);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(1500, 2500), TemporalTable::STARTS_AFTER);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(1500), TemporalTable::STARTS_AFTER);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(1000), TemporalTable::ENDS_BEFORE);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(1500), TemporalTable::ENDS_BEFORE);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(500, 1500), TemporalTable::ENDS_WITHIN);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(3000), TemporalTable::ENDS_AFTER);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(1500, 2500), TemporalTable::ENDS_AFTER);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(1500), TemporalTable::OVERLAPS);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(500, 2500), TemporalTable::OVERLAPS);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(2500), TemporalTable::INCLUDES);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT((res[0].getHandle() == node1 && res[1].getHandle() == node2)
+                  || (res[0].getHandle() == node2 && res[1].getHandle() == node1));
+        TS_ASSERT(*(res[0].getTemporal()) == t2);
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(500, 2500), TemporalTable::INCLUDES);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(500, 3000), TemporalTable::INCLUDES);
+        TS_ASSERT(res.empty());
+
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(500, 2500), TemporalTable::NEXT_AFTER_END_OF);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, t1, TemporalTable::NEXT_AFTER_END_OF);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, t1, TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, t2, TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(ULONG_MAX), TemporalTable::PREVIOUS_BEFORE_START_OF);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, t1, TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.empty());
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, t2, TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED, Temporal(ULONG_MAX), TemporalTable::PREVIOUS_BEFORE_END_OF);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+    }
+
+    void testGetAtTimeLink() {
+        AtomSpace atomSpace;
+        Handle h1 = atomSpace.addNode(CONCEPT_NODE, "test1");
+        Handle h2 = atomSpace.addNode(CONCEPT_NODE, "test2");
+        Temporal* t1 = new Temporal(1000);
+        Temporal* t2 = new Temporal(500, 1500);
+
+        Handle atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t1));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t2));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t1));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t2));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+
+        timeServer->addTimeInfo(h1, *t1);
+
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t1));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t2));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t1));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t2));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+
+        timeServer->addTimeInfo(h1, *t2);
+
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t1));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t2));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t1));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t2));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+
+        timeServer->addTimeInfo(h2, *t1);
+
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t1));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t2));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t1));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t2));
+        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+
+        timeServer->addTimeInfo(h2, *t2);
+
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t1));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t2));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t1));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t2));
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+
+        delete t1;
+        delete t2;
+    }
+
+    void testTimeAtomsRemovalByDecay() {
+        AtomSpace atomSpace;
+
+        Handle node = atomSpace.addNode(CONCEPT_NODE, "test");
+        Handle atTimeLink = timeServer->addTimeInfo(node, 1000);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+
+        vector<HandleTemporalPair> res;
+        timeServer->getTimeInfo(back_inserter(res), node);
+        TS_ASSERT(!res.empty());
+
+        // Change STI so that all atoms are removed quickly by decay method. 
+        unsigned int ncycles = 5;
+        AttentionValue::sti_t sti = config().get_int("MIN_STI") + ncycles;
+        atomSpace.setSTI(atTimeLink, sti);
+        atomSpace.setSTI(atomSpace.getOutgoing(atTimeLink, 0), sti);
+        atomSpace.setSTI(atomSpace.getOutgoing(atTimeLink, 1), sti);
+
+        for (unsigned int i = 0; i < (ncycles + 1); ++i) atomSpace.decayShortTermImportance();
+
+        // Check if related time info was removed from TimeServer properly
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.empty());
+    }
+
+    void testRemoveTimeInfo() {
+        AtomSpace atomSpace;
+        Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
+        TS_ASSERT(!timeServer->removeTimeInfo(node1, 1000));
+        TS_ASSERT(!timeServer->removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
+
+        Handle atTimeLink = timeServer->addTimeInfo(node1, 1000);
+        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT(timeServer->removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
+
+        // Check if the TimeNode was removed from AtomTable. I should not, since removeDisconnectedTimeNodes flag is false.
+        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        TS_ASSERT(TLB::isValidHandle(timeNode));
+        // Check if the AtTimeLink was removed from AtomTable
+        HandleSeq outgoing;
+        outgoing.push_back(timeNode);
+        outgoing.push_back(node1);
+        TS_ASSERT(atomSpace.getHandle(AT_TIME_LINK, outgoing) == Handle::UNDEFINED);
+        // Check if the pair(node1, T) was removed from TimeServer
+        vector<HandleTemporalPair> res;
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+        // Check if node1 was not affected
+        TS_ASSERT(atomSpace.getHandle(CONCEPT_NODE, "test1") != Handle::UNDEFINED);
+
+        timeServer->addTimeInfo(node1, 1000);
+        TS_ASSERT(timeServer->removeTimeInfo(node1, 1000));
+
+        // Since the removeDisconnectedTimeNodes flag is true, TimeNode should have been removed too
+        timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        TS_ASSERT(TLB::isInvalidHandle(timeNode));
+        // Check if the AtTimeLink was removed from AtomTable
+        HandleSeq atTimeLinks;
+        atomSpace.getHandleSet(back_inserter(atTimeLinks), AT_TIME_LINK, false);
+        TS_ASSERT(atTimeLinks.empty());
+        // Check if the pair(node1, T) was removed from TimeServer
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+        // Check if node1 was not affected
+        TS_ASSERT(atomSpace.getHandle(CONCEPT_NODE, "test1") != Handle::UNDEFINED);
+
+
+        timeServer->addTimeInfo(node1, 1000);
+        Handle node2 = atomSpace.addNode(CONCEPT_NODE, "test2");
+        timeServer->addTimeInfo(node2, 1000);
+        TS_ASSERT(timeServer->removeTimeInfo(node1, 1000));
+
+        // Even the removeDisconnectedTimeNodes flag being true, TimeNode should not have been removed, since there is another atom associated to it.
+        timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        TS_ASSERT(timeNode != Handle::UNDEFINED);
+        // Check if the AtTimeLink was removed from AtomTable
+        outgoing.clear();
+        outgoing.push_back(timeNode);
+        outgoing.push_back(node1);
+        TS_ASSERT(atomSpace.getHandle(AT_TIME_LINK, outgoing) == Handle::UNDEFINED);
+        // Check if the pair(node1, T) was removed from TimeServer
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+        // Check if node1 was not affected
+        TS_ASSERT(atomSpace.getHandle(CONCEPT_NODE, "test1") != Handle::UNDEFINED);
+        // Check if the Timeinfo related to node2 is still there
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == Temporal(1000));
+
+        // Remove all remaining entries and check.
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.empty());
+
+        // Check removeTimeInfo with other temporal relationship criteria
+
+        Temporal t1(1000);
+        Temporal t2(2000, 3000);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(1500), TemporalTable::STARTS_BEFORE));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(1500, 2500), TemporalTable::STARTS_WITHIN));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(node1, Temporal(1500, 2500), TemporalTable::STARTS_AFTER));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(1500), TemporalTable::STARTS_AFTER));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(node1, Temporal(1000), TemporalTable::ENDS_BEFORE));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(1500), TemporalTable::ENDS_BEFORE));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(500, 1500), TemporalTable::ENDS_WITHIN));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(node1, Temporal(3000), TemporalTable::ENDS_AFTER));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(1500, 2500), TemporalTable::ENDS_AFTER));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(node1, Temporal(1500), TemporalTable::OVERLAPS));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(500, 2500), TemporalTable::OVERLAPS));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(node1, Temporal(1500), TemporalTable::INCLUDES));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(1000), TemporalTable::INCLUDES));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(2500), TemporalTable::INCLUDES));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.empty());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+        
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(node1, Temporal(500, 2500), TemporalTable::NEXT_AFTER_END_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, t1, TemporalTable::NEXT_AFTER_END_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(1500, 2500), TemporalTable::PREVIOUS_BEFORE_START_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(node1, t1, TemporalTable::PREVIOUS_BEFORE_END_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+        TS_ASSERT(res.back().getHandle() == node1);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(node1, Temporal(1500, 2500), TemporalTable::PREVIOUS_BEFORE_END_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), node1);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        // Check getTimeInfo with Handle::UNDEFINED
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, t1));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, t2));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500), TemporalTable::STARTS_BEFORE));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500, 2500), TemporalTable::STARTS_WITHIN));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500, 2500), TemporalTable::STARTS_AFTER));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500), TemporalTable::STARTS_AFTER));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1000), TemporalTable::ENDS_BEFORE));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500), TemporalTable::ENDS_BEFORE));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(500, 1500), TemporalTable::ENDS_WITHIN));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(3000), TemporalTable::ENDS_AFTER));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500, 2500), TemporalTable::ENDS_AFTER));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500), TemporalTable::OVERLAPS));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(500, 2500), TemporalTable::OVERLAPS));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.empty());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500), TemporalTable::INCLUDES));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1000), TemporalTable::INCLUDES));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res[0].getHandle() == node1 || res[0].getHandle() == node2);
+        TS_ASSERT(*(res[0].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[0].getHandle() != res[1].getHandle());
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(2500), TemporalTable::INCLUDES));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.empty());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(500, 2500), TemporalTable::NEXT_AFTER_START_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(500, 2500), TemporalTable::NEXT_AFTER_END_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, t1, TemporalTable::NEXT_AFTER_END_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500, 2500), TemporalTable::PREVIOUS_BEFORE_START_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 2);
+        TS_ASSERT(res.front().getHandle() == node1 || res.front().getHandle() == node2);
+        TS_ASSERT(*(res.front().getTemporal()) == t2);
+        TS_ASSERT(res.back().getHandle() == node1 || res.back().getHandle() == node2);
+        TS_ASSERT(*(res.back().getTemporal()) == t2);
+        TS_ASSERT(res.front().getHandle() != res.back().getHandle());
+
+        timeServer->addTimeInfo(node1, t1);
+        timeServer->addTimeInfo(node1, t2);
+        timeServer->addTimeInfo(node2, t2);
+
+        TS_ASSERT(!timeServer->removeTimeInfo(Handle::UNDEFINED, t1, TemporalTable::PREVIOUS_BEFORE_END_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 3);
+        TS_ASSERT(res[0].getHandle() == node1);
+        TS_ASSERT(*(res[0].getTemporal()) == t1);
+        TS_ASSERT(res[1].getHandle() == node1 || res[1].getHandle() == node2);
+        TS_ASSERT(*(res[1].getTemporal()) == t2);
+        TS_ASSERT(res[2].getHandle() == node1 || res[2].getHandle() == node2);
+        TS_ASSERT(*(res[2].getTemporal()) == t2);
+        TS_ASSERT(res[1].getHandle() != res[2].getHandle());
+
+        TS_ASSERT(timeServer->removeTimeInfo(Handle::UNDEFINED, Temporal(1500, 2500), TemporalTable::PREVIOUS_BEFORE_END_OF));
+        res.clear();
+        timeServer->getTimeInfo(back_inserter(res), Handle::UNDEFINED);
+        TS_ASSERT(res.size() == 1);
+        TS_ASSERT(res.front().getHandle() == node1);
+        TS_ASSERT(*(res.front().getTemporal()) == t1);
+
+    }
 };

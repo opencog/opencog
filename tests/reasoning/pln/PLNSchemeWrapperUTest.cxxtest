@@ -42,19 +42,19 @@ private:
 
 public:
 
-	PLNSchemeWrapperUTest(void)
-	{
-		try
-		{
-			config().load("pln-test.conf");
-		}
-		catch (RuntimeException &e)
-		{
-			std::cerr << e.getMessage() << std::endl;
-		}
-		logger().setFilename(config()["LOG_FILE"]);
-		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-		// logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+    PLNSchemeWrapperUTest(void)
+    {
+        try
+        {
+            config().load("pln-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        // logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
         // Necessary if you use test data and/or targets in Scheme.
         logger().debug("Loading Scheme modules");
@@ -90,9 +90,9 @@ public:
 
         std::string PLN_TEST_DIR = PROJECT_SOURCE_DIR"/tests/reasoning/pln/";
         inferenceFilePrefix = PLN_TEST_DIR+"scm/new/";
-	}
+    }
 
-	~PLNSchemeWrapperUTest() {
+    ~PLNSchemeWrapperUTest() {
         // erase the log file if no assertions failed
         if (!CxxTest::TestTracker::tracker().suiteFailed())
             std::remove(logger().getFilename().c_str());
@@ -110,7 +110,7 @@ public:
         Handle h = eval->eval_h(read_file(schemeFile));
         std::cout << "H = " << as->atomAsString(h, false) << std::endl;
         std::cout << "ATOMSPACE:" << std::endl;
-        as->printGDB();
+        as->print();
         std::cout << std::endl;
         // hack to get around with floating errors
         bool tv_eq = as->getTV(h, vh).toString() == tv.toString();

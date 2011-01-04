@@ -6,6 +6,7 @@ ADD_LIBRARY (atomspace SHARED
     atom_types.h
     Atom.cc
     AtomSpace.cc
+    AtomSpaceAsync.cc
     AtomSpaceImpl.cc
     AtomSpaceInit.cc
     AtomTable.cc
@@ -57,6 +58,7 @@ TARGET_LINK_LIBRARIES(atomspace
     SpaceMap
     ${GSL_LIBRARIES}
     ${Boost_SIGNALS_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
 )
 
 INSTALL (TARGETS atomspace
@@ -68,6 +70,7 @@ INSTALL (FILES
     AtomIndex.h
     AtomSpaceDefinitions.h
     AtomSpace.h
+    AtomSpaceAsync.h
     AtomSpaceImpl.h
     AtomTable.h
     atom_types.h
@@ -122,12 +125,10 @@ INSTALL (FILES
 )
 
 ADD_EXECUTABLE (atomspace_async
-    AtomSpaceAsync
     atomspace_async_tester
 )
 
 TARGET_LINK_LIBRARIES (atomspace_async
     atomspace
     util
-    ${Boost_THREAD_LIBRARY}
 )

@@ -102,11 +102,11 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
     saveLinks(f, atomTable, atomCount);
 
     TimeServerSavable tss;
-    tss.setServer(&atomSpace.timeServer);
+    tss.setServer(&atomSpace.atomSpaceAsync.getTimeServer());
     tss.saveRepository(f);
 
     SpaceServerSavable sss;
-    sss.setServer(atomSpace.spaceServer);
+    sss.setServer(&atomSpace.atomSpaceAsync.getSpaceServer());
     sss.saveRepository(f);
 
     saveRepositories(f);
@@ -258,7 +258,7 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
                                "SavingLoading - Can only load binary image from disk into an empty atom table.");
     }
     // The above sanity check does not work if StatisticMonitor is disabled. So, makes a different check:
-    if (atomSpace.getAtomTable().getSize() > 0) {
+    if (atomSpace.getSize() > 0) {
         throw RuntimeException(TRACE_INFO,
                                "SavingLoading - Can only load binary image from disk in a empty atom table.");
     }
@@ -309,11 +309,11 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
 
 
     TimeServerSavable tss;
-    tss.setServer(&atomSpace.timeServer);
+    tss.setServer(&atomSpace.atomSpaceAsync.getTimeServer());
     tss.loadRepository(f, handles);
 
     SpaceServerSavable sss;
-    sss.setServer(atomSpace.spaceServer);
+    sss.setServer(&atomSpace.atomSpaceAsync.getSpaceServer());
     sss.loadRepository(f, handles);
 
     loadRepositories(f, handles);

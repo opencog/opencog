@@ -29,6 +29,8 @@
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/oc_assert.h>
 
+#include <opencog/atomspace/AtomSpaceAsync.h>
+#include <opencog/atomspace/TimeServer.h>
 #include <opencog/atomspace/atom_types.h>
 
 #include <string>
@@ -42,7 +44,7 @@ using namespace opencog;
 
 const char* SpaceServer::SPACE_MAP_NODE_NAME = "SpaceMap";
 
-SpaceServer::SpaceServer(SpaceServerContainer &_container): container(_container)
+SpaceServer::SpaceServer(AtomSpaceAsync &_atomspace): atomspace(&_atomspace)
 {
     // Default values (should only be used for test purposes)
     agentRadius = 0.25;
@@ -110,27 +112,27 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
                             logger().debug("SpaceServer - The 2 previous maps are equals. Previous map (%s) transfered to new map (%s).", TLB::getAtom(latestMapHandle)->toString().c_str(), TLB::getAtom(spaceMapHandle)->toString().c_str());
                             sortedMapHandles.erase(sortedMapHandles.end() - 1);
                             spaceMaps.erase(latestMapHandle);
-                            container.mapRemoved(latestMapHandle);
+                            mapRemoved(latestMapHandle);
                             map = latestMap; // reuse the spaceMap object
                             mapReused = true;
                             persistentMapHandles.insert(lastButOneMapHandle);
-                            container.mapPersisted(lastButOneMapHandle);
+                            mapPersisted(lastButOneMapHandle);
                             logger().debug("SpaceServer - Map (%s) marked as persistent.", TLB::getAtom(lastButOneMapHandle)->toString().c_str());
                         } else {
                             persistentMapHandles.insert(latestMapHandle);
-                            container.mapPersisted(latestMapHandle);
+                            mapPersisted(latestMapHandle);
                             logger().debug("SpaceServer - Map (%s) marked as persistent.", TLB::getAtom(latestMapHandle)->toString().c_str());
                         }
                     } else {
                         persistentMapHandles.insert(latestMapHandle);
-                        container.mapPersisted(latestMapHandle);
+                        mapPersisted(latestMapHandle);
                         logger().debug("SpaceServer - Map (%s) marked as persistent.", TLB::getAtom(latestMapHandle)->toString().c_str());
                     }
                 } else if (persistentMapHandles.find(latestMapHandle) == persistentMapHandles.end()) {
                     logger().debug("SpaceServer - Previous map (%s) transfered to new map (%s).", TLB::getAtom(latestMapHandle)->toString().c_str(), TLB::getAtom(spaceMapHandle)->toString().c_str());
                     sortedMapHandles.erase(sortedMapHandles.end() - 1);
                     spaceMaps.erase(latestMapHandle);
-                    container.mapRemoved(latestMapHandle);
+                    mapRemoved(latestMapHandle);
                     map = latestMap; // reuse the spaceMap object
                     mapReused = true;
                 }
@@ -151,7 +153,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
 
                     sortedMapHandles.erase(sortedMapHandles.end() - 1);
                     spaceMaps.erase(latestMapHandle);
-                    container.mapRemoved(latestMapHandle);
+                    mapRemoved(latestMapHandle);
                     delete latestMap;
                 }
             }
@@ -162,7 +164,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
         }
         spaceMaps[spaceMapHandle] = map;
         sortedMapHandles.push_back(spaceMapHandle);
-        container.mapPersisted(spaceMapHandle); // Ensure the latest map will not be removed by forgetting mechanism
+        mapPersisted(spaceMapHandle); // Ensure the latest map will not be removed by forgetting mechanism
         logger().debug("SpaceServer - spaceMaps size: %u, sortedMapHandles size: %u", spaceMaps.size(), sortedMapHandles.size());
 
     } else {
@@ -342,9 +344,8 @@ void SpaceServer::removeMap(Handle spaceMapHandle)
 {
     HandleToSpaceMap::iterator itr = spaceMaps.find(spaceMapHandle);
     if (itr != spaceMaps.end()) {
-
-        std::vector<Handle>::iterator itr_map = std::find(sortedMapHandles.begin()
-                                                , sortedMapHandles.end(), spaceMapHandle);
+        std::vector<Handle>::iterator itr_map =
+            std::find(sortedMapHandles.begin(), sortedMapHandles.end(), spaceMapHandle);
         if (*itr_map == spaceMapHandle) {
             sortedMapHandles.erase(itr_map);
         } else {
@@ -372,7 +373,7 @@ void SpaceServer::markMapAsPersistent(Handle spaceMapHandle)
                                         TLB::getAtom(spaceMapHandle)->toString().c_str());
     }
     persistentMapHandles.insert(spaceMapHandle);
-    container.mapPersisted(spaceMapHandle);
+    mapPersisted(spaceMapHandle);
 }
 
 bool SpaceServer::isMapPersistent(Handle spaceMapHandle) const
@@ -400,6 +401,109 @@ void SpaceServer::clear()
     spaceMaps.clear();
 }
 
+Handle SpaceServer::getSpaceMapNode() 
+{
+    Handle result = atomspace->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME)->get_result();
+    if (result == Handle::UNDEFINED) 
+    {
+        result = atomspace->addNode(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME)->get_result();
+        atomspace->setLTI(result, 1);
+    } 
+    else 
+    {
+        if (atomspace->getLTI(result)->get_result() < 1) 
+        {
+            atomspace->setLTI(result, 1)->get_result();
+        }
+    }
+    return result;
+}
+
+bool SpaceServer::addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
+                              double objX, double objY, double objZ,
+                              double objLength, double objWidth, double objHeight,
+                              double objYaw, bool isObstacle) {
+
+    Handle spaceMapNode = getSpaceMapNode();
+    Handle spaceMapAtTimeLink = timeServer->addTimeInfo(spaceMapNode, timestamp);
+    bool result =  add( keepPreviousMap, spaceMapAtTimeLink, atomspace->getName(objectNode)->get_result(),
+                        objX, objY, objZ, objLength, objWidth, objHeight, objYaw, isObstacle);
+
+    return result;
+}
+
+Handle SpaceServer::addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap){
+
+    Handle spaceMapNode = getSpaceMapNode();
+    Handle spaceMapAtTimeLink = timeServer->addTimeInfo(spaceMapNode, timestamp);
+    add(spaceMapAtTimeLink, spaceMap);
+
+    return spaceMapAtTimeLink;
+}
+
+Handle SpaceServer::removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp) {
+
+    logger().debug("%s(%s)\n", __FUNCTION__, atomspace->getName(objectNode)->get_result().c_str());
+
+    Handle spaceMapNode = getSpaceMapNode();
+    Handle spaceMapAtTimeLink = timeServer->addTimeInfo(spaceMapNode, timestamp);
+    remove(keepPreviousMap, spaceMapAtTimeLink, atomspace->getName(objectNode)->get_result());
+
+    return spaceMapAtTimeLink;
+}
+
+void SpaceServer::cleanupSpaceServer(){
+
+    // sanity checks
+    if (getSpaceMapsSize() < 1) {
+        logger().debug("SpaceServer - No need to clean SpaceServer. It has no space map yet.");
+        return;
+    }
+
+    // sanity tests passed, cleaning SpaceServer
+    Handle spaceMapNode = getSpaceMapNode();
+
+    // get all HandleTemporalPairs associated with the SpaceMap concept node.
+    std::vector<HandleTemporalPair> pairs;
+    timeServer->getTimeInfo(back_inserter(pairs), spaceMapNode);
+
+    int j = 0;
+    // remember to leave at least one map in SpaceServer, the newer one.
+    for(unsigned int i = 0; i < pairs.size() - 1; i++){
+
+        // get SpaceMap handles
+        Handle mapHandle = timeServer->getAtTimeLink(pairs[i]);
+
+        // mapHandle not among the ones that should be preserved
+        if (!containsMap(mapHandle) || !isMapPersistent(mapHandle)){
+            j++;
+            logger().debug("SpaceServer - Removing map (%s)", TLB::getAtom(mapHandle)->toString().c_str());
+            // remove map from SpaceServer, and timeInfo from TimeServer and AtomSpace
+            atomspace->removeAtom(mapHandle, true)->get_result();
+        }
+    }
+    logger().debug("SpaceServer - Number of deleted maps: %d.", j);
+}
+
+void SpaceServer::mapRemoved(Handle mapId)
+{
+    // Remove this atom from AtomSpace since its map does not exist anymore 
+    atomspace->removeAtom(mapId)->get_result();
+}
+
+void SpaceServer::mapPersisted(Handle mapId)
+{
+    // set LTI to a value that prevents the corresponding atom to be removed
+    // from AtomSpace
+    atomspace->setLTI(mapId, 1);
+}
+
+std::string SpaceServer::getMapIdString(Handle mapHandle) const
+{
+    // Currently the mapHandle is of AtTimeLink(TimeNode:"<timestamp>" , ConceptNode:"SpaceMap")
+    // So, just get the name of the TimeNode as its string representation
+    return atomspace->getName(atomspace->getOutgoing(mapHandle, 0)->get_result())->get_result();
+}    
 
 std::string SpaceServer::mapToString(Handle mapHandle) const
 {
@@ -408,7 +512,7 @@ std::string SpaceServer::mapToString(Handle mapHandle) const
     stringMap.precision(25);
     const SpaceMap& map = getMap(mapHandle);
 
-    stringMap << container.getMapIdString(mapHandle);
+    stringMap << getMapIdString(mapHandle);
     stringMap << " ";
 
     stringMap << SpaceMap::toString( map );
@@ -439,13 +543,14 @@ SpaceServer& SpaceServer::operator=(const SpaceServer& other)
             "SpaceServer - Cannot copy an object of this class");
 }
 
-class FakeContainer: public SpaceServerContainer {
+/*class Fakeatomspace: public SpaceServerContainer {
     void mapRemoved(Handle mapId) {}
     void mapPersisted(Handle mapId) {}
     std::string getMapIdString(Handle mapId) {return "";}
 
-};
-SpaceServer::SpaceServer(const SpaceServer& other): container(*(new FakeContainer())) 
+};*/
+
+SpaceServer::SpaceServer(const SpaceServer& other)
 {
     throw opencog::RuntimeException(TRACE_INFO, 
             "SpaceServer - Cannot copy an object of this class");

@@ -69,19 +69,15 @@ AtomSpaceImpl::AtomSpaceImpl(void) :
     _handle_iterator = NULL;
     emptyName = "";
     backing_store = NULL;
-
-    // XXX this is wrong, the space server should live in its own
-    // directory, and not here. It needs to use the addAtom, removeAtom
-    // signals to get its work done.
-    spaceServer = new SpaceServer(*this);
+    spaceServer = NULL;
 
     fundsSTI = config().get_int("STARTING_STI_FUNDS");
     fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     attentionalFocusBoundary = 1;
 
     //connect signals
-    addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1));
-    removedAtomConnection = removeAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomRemoved, this, _1));
+    addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1, _2));
+    removedAtomConnection = removeAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomRemoved, this, _1, _2));
 
     logger().fine("Max load factor for handle map is: %f", TLB::handle_map.max_load_factor());
 
@@ -94,14 +90,11 @@ AtomSpaceImpl::~AtomSpaceImpl()
     addedAtomConnection.disconnect();
     removedAtomConnection.disconnect();
 
-
     // Check if has already been deleted. See in code where it can be delete.
     if (_handle_iterator) {
         delete _handle_iterator;
          _handle_iterator = NULL;
     }
-    delete spaceServer;
-    spaceServer = NULL;
 }
 
 // ====================================================================
@@ -118,22 +111,11 @@ void AtomSpaceImpl::unregisterBackingStore(BackingStore *bs)
 
 // ====================================================================
 
-void AtomSpaceImpl::atomAdded(Handle h)
+void AtomSpaceImpl::atomAdded(AtomSpaceImpl *a, Handle h)
 {
     DPRINTF("AtomSpaceImpl::atomAdded(%p): %s\n", h, TLB::getAtom(h)->toString().c_str());
     Type type = getType(h);
-    if (type == AT_TIME_LINK) {
-        // Add corresponding TimeServer entry
-        if (getArity(h) == 2) {
-            Handle timeNode = getOutgoing(h, 0);
-            if (getType(timeNode) == TIME_NODE) {
-                const string& timeNodeName = getName(timeNode);
-                Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
-                Handle timed_h = getOutgoing(h, 1);
-                timeServer.add(timed_h, t);
-            } else logger().warn("AtomSpaceImpl::atomAdded: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n", classserver().getTypeName(getType(timeNode)).c_str());
-        } else logger().warn("AtomSpaceImpl::atomAdded: Invalid arity for an AtTimeLink: %d (expected: 2)\n", getArity(h));
-    } else if (type == CONTEXT_LINK) {
+    if (type == CONTEXT_LINK) {
         // Add corresponding VersionedTV to the contextualized atom
         // Note that when a VersionedTV is added to a
         // CompositeTruthValue it will not automatically add a
@@ -146,24 +128,10 @@ void AtomSpaceImpl::atomAdded(Handle h)
     }
 }
 
-void AtomSpaceImpl::atomRemoved(Handle h)
+void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, Handle h)
 {
     Type type = getType(h);
-    if (type == AT_TIME_LINK)
-    {
-        OC_ASSERT(getArity(h) == 2, "AtomSpaceImpl::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n", getArity(h));
-        Handle timeNode = getOutgoing(h, 0);
-        OC_ASSERT(getType(timeNode) == TIME_NODE, "AtomSpaceImpl::atomRemoved: Got no TimeNode node at the first position of the AtTimeLink\n");
-        Handle timedAtom = getOutgoing(h, 1);
-        timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
-
-        // XXX THIS IS WRONG --- instead, the space server
-        // should listen for the removeAtomSignal signal, and go with that.
-        // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
-        if( getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom ){
-           spaceServer->removeMap(h);
-        } // if
-    } else if (type == CONTEXT_LINK) {
+    if (type == CONTEXT_LINK) {
         // Remove corresponding VersionedTV to the contextualized atom
         // Note that when a VersionedTV is removed from a
         // CompositeTruthValue it will not automatically remove the
@@ -179,7 +147,10 @@ void AtomSpaceImpl::atomRemoved(Handle h)
         // the CompositeTV into a simple or indefinite TV when it has
         // no more VersionedTV
         setTV(ca, new_ctv);
-    } else if ( inheritsType(type, OBJECT_NODE) ) {
+    } 
+    else if ( inheritsType(type, OBJECT_NODE) ) {
+        // TODO remove this and we can remove spaceServer from the
+        // AtomSpaceImpl class
         spaceServer->removeObject(getName(h));
     } // else if
 }
@@ -192,223 +163,11 @@ const AtomTable& AtomSpaceImpl::getAtomTable() const
     return atomTable;
 }
 
-const TimeServer& AtomSpaceImpl::getTimeServer() const
-{
-    DPRINTF("AtomSpaceImpl::getTimeServer Atom space address: %p\n", this);
-
-    return timeServer;
-}
-
-SpaceServer& AtomSpaceImpl::getSpaceServer() const
-{
-    DPRINTF("AtomSpaceImpl::getSpaceServer Atom space address: %p\n", this);
-
-    return *spaceServer;
-}
-
-
 void AtomSpaceImpl::print(std::ostream& output, Type type, bool subclass) const
 {
     atomTable.print(output, type, subclass);
 }
 
-Handle AtomSpaceImpl::addTimeInfo(Handle h, unsigned long timestamp, const TruthValue& tv)
-{
-    OC_ASSERT(TLB::isValidHandle(h), "AtomSpaceImpl::addTimeInfo: Got an invalid handle as argument\n");
-    std::string nodeName = Temporal::getTimeNodeName(timestamp);
-    return addTimeInfo(h, nodeName, tv);
-}
-
-Handle AtomSpaceImpl::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv)
-{
-    OC_ASSERT(TLB::isValidHandle(h), "AtomSpaceImpl::addTimeInfo: Got an invalid handle as argument\n");
-    OC_ASSERT(t != UNDEFINED_TEMPORAL, "AtomSpaceImpl::addTimeInfo: Got an UNDEFINED_TEMPORAL as argument\n");
-    return addTimeInfo(h, t.getTimeNodeName(), tv);
-}
-
-Handle AtomSpaceImpl::addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv)
-{
-    DPRINTF("AtomSpaceImpl::addTimeInfo - temp init\n");
-    Handle timeNode = addNode(TIME_NODE, timeNodeName.c_str());
-    DPRINTF("AtomSpaceImpl::addTimeInfo - temp 1\n");
-    HandleSeq atTimeLinkOutgoing;
-    atTimeLinkOutgoing.push_back(timeNode);
-    atTimeLinkOutgoing.push_back(h);
-    Handle atTimeLink = addLink(AT_TIME_LINK, atTimeLinkOutgoing, tv);
-    DPRINTF("AtomSpaceImpl::addTimeInfo - temp end\n");
-    return atTimeLink;
-}
-
-bool AtomSpaceImpl::removeTimeInfo(Handle h, unsigned long timestamp, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive)
-{
-    Temporal t(timestamp);
-    return removeTimeInfo(h, t, criterion, removeDisconnectedTimeNodes, recursive);
-}
-
-bool AtomSpaceImpl::removeTimeInfo(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive)
-{
-    DPRINTF("AtomSpaceImpl::removeTimeInfo(%s, %s, %d, %s, %d, %d)\n", TLB::;getHandle(h)->toString().c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
-
-    std::list<HandleTemporalPair> existingEntries;
-    timeServer.get(back_inserter(existingEntries), h, t, criterion);
-    bool result = !existingEntries.empty();
-    for (std::list<HandleTemporalPair>::const_iterator itr = existingEntries.begin();
-            itr != existingEntries.end(); itr++) {
-        Handle atTimeLink = getAtTimeLink(*itr);
-        DPRINTF("Got atTimeLink = %p\n", atTimeLink);
-        if (TLB::isValidHandle(atTimeLink)) {
-            Handle timeNode = getOutgoing(atTimeLink, 0);
-            DPRINTF("Got timeNode = %p\n", timeNode);
-            OC_ASSERT(getArity(atTimeLink) == 2, "AtomSpaceImpl::removeTimeInfo: Got invalid arity for AtTimeLink = %d\n", getArity(atTimeLink));
-            OC_ASSERT(TLB::isValidHandle(timeNode) && getType(timeNode) == TIME_NODE, "AtomSpaceImpl::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
-            if (removeAtom(atTimeLink, recursive)) {
-                DPRINTF("atTimeLink removed from AT successfully\n");
-                if (removeDisconnectedTimeNodes && getIncoming(timeNode).empty()) {
-                    DPRINTF("Trying to remove timeNode as well\n");
-                    removeAtom(timeNode);
-                }
-            } else {
-                result = false;
-            }
-        } else {
-            result = false;
-        }
-    }
-    return result;
-}
-
-Handle AtomSpaceImpl::getAtTimeLink(const HandleTemporalPair& htp) const
-{
-    Handle result = Handle::UNDEFINED;
-
-    const Temporal& t = *(htp.getTemporal());
-    Handle h = htp.getHandle();
-    DPRINTF("AtomSpaceImpl::getAtTimeLink: t = %s, h = %s\n", t.toString().c_str(), TLB::getAtom(h)->toString().c_str());
-
-    Handle timeNode = getHandle(TIME_NODE, t.getTimeNodeName().c_str());
-    DPRINTF("timeNode = %p\n", timeNode);
-    if (TLB::isValidHandle(timeNode)) {
-        HandleSeq atTimeLinkOutgoing(2);
-        atTimeLinkOutgoing[0] = timeNode;
-        atTimeLinkOutgoing[1] = h;
-        HandleSeq atTimeLinks;
-        getHandleSet(back_inserter(atTimeLinks), atTimeLinkOutgoing, NULL, NULL, 2, AT_TIME_LINK, false);
-        if (!atTimeLinks.empty()) {
-            result = atTimeLinks[0];
-            if (atTimeLinks.size() > 1) {
-                logger().warn(
-                    "AtomSpaceImpl::getAtTimeLink: More than 1 AtTimeLink(TimeNode, TimedAtom) found for HandleTemporalPair = %s \n",
-                    htp.toString().c_str());
-            }
-        }
-    }
-    return result;
-}
-
-Handle AtomSpaceImpl::getSpaceMapNode() 
-{
-    Handle result = getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-    if (result == Handle::UNDEFINED) 
-    {
-        result = addNode(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-        setLTI(result, 1);
-    } 
-    else 
-    {
-        if (getLTI(result) < 1) 
-        {
-            setLTI(result, 1);
-        }
-    }
-    return result;
-}
-
-bool AtomSpaceImpl::addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                              double objX, double objY, double objZ,
-                              double objLength, double objWidth, double objHeight,
-                              double objYaw, bool isObstacle) {
-
-    Handle spaceMapNode = getSpaceMapNode();
-    Handle spaceMapAtTimeLink = addTimeInfo(spaceMapNode, timestamp);
-    bool result =  spaceServer->add( keepPreviousMap, spaceMapAtTimeLink, getName(objectNode),
-                        objX, objY, objZ, objLength, objWidth, objHeight, objYaw, isObstacle);
-
-    return result;
-}
-
-Handle AtomSpaceImpl::addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap){
-
-    Handle spaceMapNode = getSpaceMapNode();
-    Handle spaceMapAtTimeLink = addTimeInfo(spaceMapNode, timestamp);
-    spaceServer->add(spaceMapAtTimeLink, spaceMap);
-
-    return spaceMapAtTimeLink;
-}
-
-Handle AtomSpaceImpl::removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp) {
-
-    logger().debug("%s(%s)\n", __FUNCTION__, getName(objectNode).c_str());
-
-    Handle spaceMapNode = getSpaceMapNode();
-    Handle spaceMapAtTimeLink = addTimeInfo(spaceMapNode, timestamp);
-    spaceServer->remove(keepPreviousMap, spaceMapAtTimeLink, getName(objectNode));
-
-    return spaceMapAtTimeLink;
-}
-
-void AtomSpaceImpl::cleanupSpaceServer(){
-
-    // sanity checks
-    if (spaceServer->getSpaceMapsSize() < 1) {
-        logger().debug(
-                       "AtomSpaceImpl - No need to clean SpaceServer. It has no space map yet.");
-        return;
-    }
-
-    // sanity tests passed, cleaning SpaceServer
-    Handle spaceMapNode = getSpaceMapNode();
-
-    // get all HandleTemporalPairs associated with the SpaceMap concept node.
-    std::vector<HandleTemporalPair> pairs;
-    getTimeInfo(back_inserter(pairs), spaceMapNode);
-
-    int j = 0;
-    // remember to leave at least one map in SpaceServer, the newer one.
-    for(unsigned int i = 0; i < pairs.size() - 1; i++){
-
-        // get SpaceMap handles
-        Handle mapHandle = getAtTimeLink(pairs[i]);
-
-        // mapHandle not among the ones that should be preserved
-        if (!spaceServer->containsMap(mapHandle) || !spaceServer->isMapPersistent(mapHandle)){
-            j++;
-            logger().debug("AtomSpaceImpl - Removing map (%s)", TLB::getAtom(mapHandle)->toString().c_str());
-            // remove map from SpaceServer, and timeInfo from TimeServer and AtomSpace
-            removeAtom(mapHandle, true);
-        }
-    }
-    logger().debug("AtomSpaceImpl - Number of deleted maps: %d.", j);
-}
-
-void AtomSpaceImpl::mapRemoved(Handle mapId)
-{
-    // Remove this atom from AtomSpace since its map does not exist anymore 
-    removeAtom(mapId);
-}
-
-void AtomSpaceImpl::mapPersisted(Handle mapId)
-{
-    // set LTI to a value that prevents the corresponding atom to be removed
-    // from AtomSpace
-    setLTI(mapId, 1);
-}
-
-std::string AtomSpaceImpl::getMapIdString(Handle mapHandle)
-{
-    // Currently the mapHandle is of AtTimeLink(TimeNode:"<timestamp>" , ConceptNode:"SpaceMap")
-    // So, just get the name of the TimeNode as its string representation
-    return getName(getOutgoing(mapHandle, 0));
-}    
 
 AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
 {
@@ -551,9 +310,14 @@ bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
             fundsSTI += getSTI(h);
             fundsLTI += getLTI(h);
 
+            // emit remove atom signal
+            _removeAtomSignal(this,h);
+
             currentEntry = currentEntry->next;
         }
         atomTable.removeExtractedHandles(extractedHandles);
+        
+        delete extractedHandles;
         return true;
     }
     return false;
@@ -589,6 +353,8 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
         // Even if the node already exists, it must be merged properly 
         // for updating its truth and attention values. 
         atomTable.merge(result, tvn); 
+        // emit "merge atom" signal
+        _mergeAtomSignal(this,result);
         return result;
     }
 
@@ -610,7 +376,10 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
         }
     }
 
-    return atomTable.add(new Node(t, name, tvn));
+    Handle newNodeHandle = atomTable.add(new Node(t, name, tvn));
+    // emit add atom signal
+    _addAtomSignal(this,newNodeHandle);
+    return newNodeHandle;
 }
 
 Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
@@ -624,6 +393,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         // Even if the node already exists, it must be merged properly 
         // for updating its truth and attention values. 
         atomTable.merge(result, tvn); 
+        _mergeAtomSignal(this,result);
         return result;
     }
 
@@ -645,7 +415,10 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         }
     }
 
-    return atomTable.add(new Link(t, outgoing, tvn));
+    Handle newLinkHandle = atomTable.add(new Link(t, outgoing, tvn));
+    // emit add atom signal
+    _addAtomSignal(this,newLinkHandle);
+    return newLinkHandle;
 }
 
 Handle AtomSpaceImpl::fetchAtom(Handle h)
@@ -1125,7 +898,20 @@ int AtomSpaceImpl::Nodes(VersionHandle vh) const
 void AtomSpaceImpl::decayShortTermImportance()
 {
     DPRINTF("AtomSpaceImpl::decayShortTermImportance Atom space address: %p\n", this);
-    atomTable.decayShortTermImportance();
+    HandleEntry* oldAtoms = atomTable.decayShortTermImportance();
+    if (oldAtoms) {
+        // Remove from indexes
+        atomTable.clearIndexesAndRemoveAtoms(oldAtoms);
+        // Send signals
+        HandleEntry* current;
+        for (current = oldAtoms; current != NULL; current = current->next) {
+            // emit remove atom signal
+            _removeAtomSignal(this,current->handle);
+        }
+        // actually remove atoms from TLB
+        atomTable.removeExtractedHandles(oldAtoms);
+        delete oldAtoms;
+    }
 }
 
 long AtomSpaceImpl::getTotalSTI() const
@@ -1248,6 +1034,45 @@ AttentionValue::sti_t AtomSpaceImpl::getMinSTI(bool average) const
     } else {
         return minSTI.val;
     }
+}
+
+bool AtomSpaceImpl::saveToXML(const std::string& filename) const {
+    // Saving to XML is messed up so it always fails for now
+    return false;
+#if 0
+    // This should possible be moved out of the AtomSpace and made into
+    // generalised saving interface. This code was moved from
+    // SaveRequest because it uses the AtomTable and it'd be (even more)
+    // inefficient to make a HandleEntry *and* HandleSeq of all atom handles.
+
+    // This blocks the (planned) atomspace event loop until
+    // save is completed.
+    pthread_mutex_lock(&atomSpaceLock);
+
+    // XXX/FIXME This is an insanely inefficient way to export the 
+    // atomspace! For anything containing a million or more handles,
+    // this is just mind-bogglingly bad, as it will results in a vast
+    // amount of mallocs & frees, and blow out RAM usage.  Strongly
+    // suggest redesign using appropriate iterators.  Anyway, should
+    // probably be exporting to scheme, not XML, anyway ... since XML
+    // is slow in general.
+    HandleEntry *handles = getAtomTable().getHandleSet(ATOM, true);
+    NMXmlExporter exporter(this);
+    std::fstream file(filename.c_str(), std::fstream::out);
+    bool rc = true;
+    try {
+        file << exporter.toXML(handles);
+        rc = true;
+    } catch (StandardException &e) {
+        logger().error("AtomSpace::saveToXML exception (%s)", e.getMessage());
+        rc = false;
+    }
+    pthread_mutex_unlock(&atomSpaceLock);
+    file.flush();
+    file.close();
+    delete handles;
+    return rc;
+#endif
 }
 
 void AtomSpaceImpl::clear()

@@ -34,7 +34,7 @@
 namespace opencog
 {
 
-class AtomSpace;
+class AtomSpaceImpl;
 
 struct AttentionValue {
 
@@ -115,24 +115,63 @@ public:
     inline bool operator!=(const AttentionValue& rhs) const
          { return !(*this == rhs); }
 
+    template <typename T>
     struct STISort {
-        AtomSpace *a;
-        STISort(AtomSpace *_a): a(_a) {};
-        bool operator()(const Handle& h1, const Handle& h2);
+        T *a;
+        STISort(T *_a): a(_a) {};
+        bool operator()(const Handle& h1, const Handle& h2)
+        {
+            return a->getAV(h1).getSTI() > a->getAV(h2).getSTI();
+        }
+
     };
 
+    template <typename T>
     struct LTIAndTVAscendingSort {
-        AtomSpace *a;
-        LTIAndTVAscendingSort(AtomSpace *_a): a(_a) {};
-        bool operator()(const Handle& h1, const Handle& h2);
+        T *a;
+        LTIAndTVAscendingSort(T *_a): a(_a) {};
+        bool operator()(const Handle& h1, const Handle& h2)
+        {
+            lti_t lti1, lti2;
+            float tv1, tv2;
+
+            tv1 = fabs(a->getTV(h1).getMean());
+            tv2 = fabs(a->getTV(h2).getMean());
+
+            lti1 = a->getAV(h1).getLTI();
+            lti2 = a->getAV(h2).getLTI();
+
+            if (lti1 < 0)
+                tv1 = lti1 * (1.0f - tv1);
+            else
+                tv1 = lti1 * tv1;
+
+            if (lti2 < 0)
+                tv2 = lti2 * (1.0f - tv2);
+            else
+                tv2 = lti2 * tv2;
+
+            return tv1 < tv2;
+        }
     };
 
+    template <typename T>
     struct LTIThenTVAscendingSort {
-        AtomSpace *a;
-        LTIThenTVAscendingSort(AtomSpace *_a): a(_a) {};
-        bool operator()(const Handle& h1, const Handle& h2);
-    };
+        T *a;
+        LTIThenTVAscendingSort(T *_a): a(_a) {};
+        bool operator()(const Handle& h1, const Handle& h2)
+        {
+            lti_t lti1, lti2;
+            lti1 = a->getAV(h1).getLTI();
+            lti2 = a->getAV(h2).getLTI();
+            if (lti1 != lti2) return lti1 < lti2;
 
+            float tv1, tv2;
+            tv1 = a->getTV(h1).getMean();
+            tv2 = a->getTV(h2).getMean();
+            return tv1 < tv2;
+        }
+    };
 
     // STATIC METHODS
 

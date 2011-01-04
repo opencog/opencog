@@ -526,7 +526,6 @@ Handle NMXmlParser::parse_pass(XMLBufferReader* xmlReader, NMXmlParseType pass)
     UserData userData;
 
     userData.lastInsertedHandle = Handle::UNDEFINED;
-    //userData.atomTable = atomSpace->getAtomTable();
     userData.atomSpace = atomSpace;
 
     userData.status.enabled = 0;

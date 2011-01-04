@@ -81,47 +81,6 @@ bool AttentionValue::operator==(const AttentionValue& av) const
     return (m_STI == av.getSTI() && m_LTI == av.getLTI() && m_VLTI == av.getVLTI());
 }
 
-bool AttentionValue::STISort::operator()(const Handle& h1, const Handle& h2)
-{
-    return a->getAV(h1).getSTI() > a->getAV(h2).getSTI();
-}
-
-bool AttentionValue::LTIAndTVAscendingSort::operator()(const Handle& h1, const Handle& h2)
-{
-    lti_t lti1, lti2;
-    float tv1, tv2;
-
-    tv1 = fabs(a->getTV(h1).getMean());
-    tv2 = fabs(a->getTV(h2).getMean());
-
-    lti1 = a->getAV(h1).getLTI();
-    lti2 = a->getAV(h2).getLTI();
-
-    if (lti1 < 0)
-        tv1 = lti1 * (1.0f - tv1);
-    else
-        tv1 = lti1 * tv1;
-
-    if (lti2 < 0)
-        tv2 = lti2 * (1.0f - tv2);
-    else
-        tv2 = lti2 * tv2;
-
-    return tv1 < tv2;
-}
-
-bool AttentionValue::LTIThenTVAscendingSort::operator()(const Handle& h1, const Handle& h2)
-{
-    lti_t lti1, lti2;
-    lti1 = a->getAV(h1).getLTI();
-    lti2 = a->getAV(h2).getLTI();
-    if (lti1 != lti2) return lti1 < lti2;
-
-    float tv1, tv2;
-    tv1 = a->getTV(h1).getMean();
-    tv2 = a->getTV(h2).getMean();
-    return tv1 < tv2;
-}
 
 AttentionValue* AttentionValue::m_defaultAV = NULL;
 

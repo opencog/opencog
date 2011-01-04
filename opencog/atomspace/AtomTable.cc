@@ -438,8 +438,6 @@ void AtomTable::merge(Handle h, const TruthValue& tvn)
                 delete mergedTV;
             }
         }
-        // emit "merge atom" signal
-        _mergeAtomSignal(h);
         if (logger().isDebugEnabled()) 
             logger().debug("Atom merged: %d => %s", h.value(), atom->toString().c_str());
     } 
@@ -516,8 +514,6 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
         StatisticsMonitor::getInstance()->add(atom);
     }
 
-    // emit add atom signal
-    _addAtomSignal(handle);
     DPRINTF("Atom added: %ld => %s\n", handle.value(), atom->toString().c_str());
 
     return handle;
@@ -639,24 +635,22 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 
     // We must to iterate from the end to the begining of the list of atoms so that 
     // link's target atoms are not removed before the link   
+    // TODO: this is inefficient. if we alter extract to build the HandleEntry
+    // list in reverse, then we can avoid initialising a temporary vector.
     hs = extractedHandles->toHandleVector();
-    delete extractedHandles;
 
     for (HandleSeq::reverse_iterator it = hs.rbegin(); it < hs.rend(); ++it) {
-        // emit remove atom signal
-        _removeAtomSignal(*it);
-
         Atom* atom = TLB::getAtom(*it);
-        if (logger().isDebugEnabled()) logger().debug("Atom removed: %d => %s", it->value(), atom->toString().c_str());
+        if (logger().isDebugEnabled())
+            logger().debug("Atom removed: %d => %s", it->value(), atom->toString().c_str());
         TLB::removeAtom(atom);
         delete atom;
     }
 }
 
-void AtomTable::decayShortTermImportance(void)
+HandleEntry* AtomTable::decayShortTermImportance(void)
 {
-    HandleEntry* oldAtoms = importanceIndex.decayShortTermImportance();
-    if (oldAtoms) clearIndexesAndRemoveAtoms(oldAtoms);
+    return importanceIndex.decayShortTermImportance();
 }
 
 bool AtomTable::decayed(Handle h)
@@ -700,8 +694,6 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
             }
         }
     }
-
-    removeExtractedHandles(extractedHandles);
 }
 
 void AtomTable::lockIterators()
@@ -858,21 +850,6 @@ bool opencog::atom_ptr_equal_to::operator()(const Atom* const& x,
                                             const Atom* const& y) const
 {
     return *x == *y;
-}
-
-boost::signal<void (Handle)>& AtomTable::addAtomSignal()
-{
-    return _addAtomSignal;
-}
-
-boost::signal<void (Handle)>& AtomTable::removeAtomSignal()
-{
-    return _removeAtomSignal;
-}
-
-boost::signal<void (Handle)>& AtomTable::mergeAtomSignal()
-{
-    return _mergeAtomSignal;
 }
 
 void AtomTable::typeAdded(Type t)

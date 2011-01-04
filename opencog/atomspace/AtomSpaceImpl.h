@@ -34,14 +34,15 @@
 #include <vector>
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/signal.hpp>
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleSet.h>
-#include <opencog/atomspace/TimeServer.h>
 #include <opencog/atomspace/SpaceServer.h>
+#include <opencog/atomspace/TemporalTable.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/recent_val.h>
@@ -49,22 +50,31 @@
 namespace opencog
 {
 
+class AtomSpaceImpl;
+
 typedef std::vector<HandleSet*> HandleSetSeq;
+typedef boost::signal<void (AtomSpaceImpl*,Handle)> AtomSignal;
 
 /** 
  * WARNING: The AtomSpaceImpl class contains methods that are only to be called by
  * AtomSpace requests that are running within the AtomSpaceAsync event loop.
  */
-class AtomSpaceImpl : public SpaceServerContainer
+class AtomSpaceImpl
 {
     friend class SavingLoading;
     friend class SaveRequest;
 
+    SpaceServer* spaceServer;
     /**
      * Used to fetch atoms from disk.
      */
     BackingStore *backing_store;
     void do_merge_tv(Handle, const TruthValue&);
+
+    /** Provided signals */
+    AtomSignal _addAtomSignal;
+    AtomSignal _removeAtomSignal;
+    AtomSignal _mergeAtomSignal;
 
 public:
     // USED TO SEEK MEMORY LEAK
@@ -72,6 +82,8 @@ public:
 
     AtomSpaceImpl(void);
     ~AtomSpaceImpl();
+
+    void setSpaceServer(SpaceServer* ss) {spaceServer = ss;};
 
     /**
      * Register a provider of backing storage.
@@ -113,17 +125,6 @@ public:
     const AtomTable& getAtomTable() const;
 
     /**
-     * @return a const reference to the TimeServer
-     */
-    const TimeServer& getTimeServer() const;
-
-    /**
-     * XXX TODO eliminate this function
-     * @return a reference to the SpaceServer object
-     */
-    SpaceServer& getSpaceServer() const;
-
-    /**
      * Return the number of atoms contained in the space.
      */
     int getSize() const { return atomTable.getSize(); }
@@ -144,262 +145,13 @@ public:
         print();
     }
 
-    /**
-     * Adds both the AtTime(TimeNode <timestamp>, atom) atom
-     * representation into the AtomTable and the entry (atom,
-     * timestamp) into the TimeServer.
-     *
-     * @param atom the Handle of the atom to be associated to the timestamp
-     * @param timestamp The timestamp to be associated to the atom.
-     * @param tv Truth value for the AtTimeLink created (optional)
-     * @return the Handle of the AtTimeLink added into AtomSpace.
-     */
-    Handle addTimeInfo(Handle atom, unsigned long timestamp,
-                       const TruthValue& tv = TruthValue::NULL_TV());
-
-    /**
-     * Adds both the AtTime(TimeNode <t>, atom) atom representation
-     * into the AtomTable and the entry (atom, t) into the TimeServer.
-     *
-     * @param atom the Handle of the atom to be associated to the timestamp
-     * @param t The Temporal object to be associated to the atom.
-     * @param tv Truth value for the AtTimeLink created (optional)
-     * @return the Handle of the AtTimeLink added into AtomSpace.
-     */
-    Handle addTimeInfo(Handle atom, const Temporal& t,
-                       const TruthValue& tv = TruthValue::NULL_TV());
-
-    /**
-     * Removes both the AtTime(TimeNode <timestamp>, atom) atom
-     * representation from the AtomTable and the entry (atom,
-     * timestamp) from the TimeServer.
-     *
-     * NOTE1: All handles in the incoming set of the corresponding
-     * AtTimeLink Atom will also be removed recursively (unless the
-     * recursive argument is explicitely set to false).
-     *
-     * NOTE2: The TimeNode that corresponds to the given removed
-     * time info is also removed if its incoming set becomes empty
-     * after the removal of an AtTimeLink link (unless the
-     * removeDisconnectedTimeNodes argument is explicitly set to false).
-     *
-     * @param atom the Handle of the atom to be associated to
-     *        the timestamp. This argument cannot be an Handle::UNDEFINED.
-     *        If it is, a RuntimeException is thrown.
-     * @param timestamp The timestamp to be associated to the atom.
-     *        This argument cannot be an UNDEFINED_TEMPORAL. If
-     *        so, it throws a RuntimeException.
-     * @param the Temporal relationship criteria to be used for
-     *        this removal operation.
-     *
-     *        This method only removes the time info related to
-     *        the HandleTemporalPair objects whose Temporal matches with
-     *        this argument (search criteria) applied to the given
-     *        timestamp argument.
-     *
-     *        The default temporal relationship is "exact match".
-     *        See the definition of TemporalRelationship enumeration
-     *        to see other possible values for it.
-     * @param removeDisconnectedTimeNodes Flag to indicate if any
-     *        TimeNode whose incoming set becomes empty after the
-     *        removal of the AtTimeLink link must be removed.
-     * @param recursive Flag to indicate if all atoms in the
-     *        incoming set of the AtTimeLink link must be
-     *        removed recursively.
-     *
-     * @return True if the matching pairs (Handle, Temporal) were
-     *        successfully removed. False, otherwise (i.e., no
-     *        mathing pair or any of them were not removed)
-     */
-    bool removeTimeInfo(Handle atom,
-                        unsigned long timestamp,
-                        TemporalTable::TemporalRelationship = TemporalTable::EXACT,
-                        bool removeDisconnectedTimeNodes = true,
-                        bool recursive = true);
-
-    /**
-     * Removes both the AtTime(TimeNode <t>, atom) atom representation
-     * from the AtomTable and the entry (atom, t) from the TimeServer.
-     *
-     * NOTE1: All handles in the incoming set of the corresponding
-     *        AtTimeLink Atom will also be removed recursively
-     *        (unless the recursive argument is explicitely set to false).
-     * NOTE2: The TimeNode that corresponds to the given removed
-     *        time info is also removed if its incoming set becomes
-     *        empty after the removal of an AtTimeLink link (unless the
-     *        removeDisconnectedTimeNodes argument is explicitly set to
-     *        false).
-     *
-     * @param atom the Handle of the atom to be associated to the
-     *        timestamp. This argument cannot be an Handle::UNDEFINED.
-     *        If so, it throws a RuntimeException.
-     * @param t The Temporal object to be associated to the atom. This
-     *        argument cannot be an UNDEFINED_TEMPORAL. If so, it throws
-     *        a RuntimeException.
-     * @param removeDisconnectedTimeNode Flag to indicate if the
-     *        TimeNode that corresponds to the given timestamp should
-     *        be removed, if its incoming set becomes empty after the
-     *        removal of the AtTimeLink link.
-     * @param the Temporal relationship criteria to be used for this
-     *        removal operation, if the given Temporal object argument
-     *        is not UNDEFINED_TEMPORAL. This method only removes the
-     *        time info related to the HandleTemporalPair objects whose
-     *        Temporal matches with this argument (search criteria)
-     *        applied to the given Temporal object argument. The default
-     *        temporal relationship is "exact match". See the definition
-     *        of TemporalRelationship enumeration to see other possible
-     *        values for it.
-     * @param removeDisconnectedTimeNodes Flag to indicate if any
-     *        TimeNode whose incoming set becomes empty after the removal
-     *        of the AtTimeLink link must be removed.
-     * @param recursive Flag to indicate if all atoms in the incoming set
-     *        of the AtTimeLink link must be removed recursively.
-     *
-     * @return True if the matching pairs (Handle, Temporal) were
-     *         successfully removed. False, otherwise (i.e., no mathing
-     *         pair or any of them were not removed)
-     */
-    bool removeTimeInfo(Handle atom,
-                        const Temporal& t = UNDEFINED_TEMPORAL,
-                        TemporalTable::TemporalRelationship = TemporalTable::EXACT,
-                        bool removeDisconnectedTimeNodes = true,
-                        bool recursive = true);
-
-    /**
-     * Gets the corresponding AtTimeLink for the given HandleTemporalPair value
-     * @param the pair (Handle, Temporal) that defines an AtTimeLink instance.
-     * @return the Handle of the corresponding AtTimeLink, if it exists.
-     */
-    Handle getAtTimeLink(const HandleTemporalPair& htp) const;
-
-    /**
-     * Gets a list of HandleTemporalPair objects given an Atom Handle.
-     *
-     * \param outIt The outputIterator to
-     * \param h The Atom Handle
-     * \param t The temporal object
-     * \param c The Temporal pair removal criterion
-     *
-     * \return An OutputIterator list
-     *
-     * @note The matched entries are appended to a container whose
-     *       OutputIterator is passed as the first argument. Example
-     *       of call to this method, which would return all entries
-     *       in TimeServer:
-     *           std::list<HandleTemporalPair> ret;
-     *           timeServer.get(back_inserter(ret), Handle::UNDEFINED);
-     */
-    template<typename OutputIterator> OutputIterator
-    getTimeInfo(OutputIterator outIt,
-                Handle h,
-                const Temporal& t = UNDEFINED_TEMPORAL,
-                TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const
-    {
-        return timeServer.get(outIt, h, t, criterion);
-    }
-
-    /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Adds space information about an object represented by a Node.
-     * @param objectNode the Handle of the node that represents the object to be associated to the space info
-     * @param timestamp The timestamp to be associated to this operation.
-     * @param the remaining arguments are related to object's spatial information
-     * @return true if any property of the object has changed (or it's a new object). False, otherwise.
-     */
-    bool addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                              double objX, double objY, double objZ,
-                              double objLength, double objWidth, double objHeight,
-                              double objYaw, bool isObstacle = true);
-    /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Add a whole space map into the SpaceServer.
-     * NOTE: This is just used when a whole space map is received
-     * from a remote SpaceServer (in LearningServer, for instance).
-     */
-    Handle addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap);
-
-    /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Removes space information about an object from the latest map (object is no longer at map's range)
-     * @param objectNode the Handle of the node that represents the object to be removed from space map
-     * @param timestamp The timestamp to be associated to this operation.
-     * @return handle of the atom that represents the SpaceMap (at the given timestamp) where the object was removed
-     */
-    Handle removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp);
-
-     /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Gets all SpaceMap handles that would be needed inside the given interval.
-     * For getting the SpaceMap of each handle returned,
-     * use the spaceServer.getMap(Handle spaceMapHandle) method.
-     * @param out  the output iterator where the resulting handles will be added.
-     * @param startMoment the start of the time interval for searching the maps
-     * @param endMoment the end of the time interval for searching the maps
-     *
-     * Example of usage:
-     *     HandleSeq result;
-     *     spaceServer.getMapHandles(back_inserter(result),start,end);
-     *     foreach(Handle h, result) {
-     *         const SpaceMap& map = spaceServer().getMap(h);
-     *         ...
-     *     }
-     */
-
-    template<typename OutputIterator>
-    OutputIterator getMapHandles(   OutputIterator outIt,
-                                    unsigned long startMoment, unsigned long endMoment) const {
-        Temporal t(startMoment, endMoment);
-        std::vector<HandleTemporalPair> pairs;
-        Handle spaceMapNode = getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-        if (spaceMapNode != Handle::UNDEFINED) {
-            // Gets the first map before the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::PREVIOUS_BEFORE_START_OF);
-            // Gets all maps inside the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::STARTS_WITHIN);
-            for(unsigned int i = 0; i < pairs.size(); i++) {
-                HandleTemporalPair pair = pairs[i];
-                *(outIt++) = getAtTimeLink(pair);
-            }
-        }
-        return outIt;
-    }
-
-    /**
-     * XXX TODO: Move this function out of here, and into its own
-     * class, somewhere not in the atomspace dirctory. The SpaceServer
-     * should be using the AtomTable addAtom, RemoveAtom() signals 
-     * to acomplish its work.
-     *
-     * Remove old maps from SpaceServer in order to save memory. SpaceMaps
-     * associated with exemplar sections, i.e., marked as persistent and the
-     * latest (newest) space map are preserved.
-     *
-     * IMPORTANT: This function cannot be called while any trick exemplar is in progress.
-     */
-    void cleanupSpaceServer();
-
-
     /** Add a new node to the Atom Table,
-    if the atom already exists then the old and the new truth value is merged
-        \param t     Type of the node
-        \param name  Name of the node
-        \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) */
+     * if the atom already exists then the old and the new truth value is merged
+     *  @param t     Type of the node
+     *  @param name  Name of the node
+     *  @param tvn   Optional TruthValue of the node. If not provided, uses the
+     *  DEFAULT_TV (see TruthValue.h)
+     */
     Handle addNode(Type t, const std::string& name = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());
 
     /**
@@ -1494,10 +1246,8 @@ protected:
 
 private:
 
-    TimeServer timeServer;
     AtomTable atomTable;
     std::string emptyName;
-    SpaceServer* spaceServer;
 
     /** The AtomSpace currently acts like event loop, but some legacy code (such as
      * saving/loading) might not like the AtomSpace changing while acting upon
@@ -1545,16 +1295,6 @@ private:
         return result;
     }
 
-    /*
-     * Adds both the AtTime(TimeNode <timeNodeName>, atom) atom representation into the AtomTable and the
-     * corresponding entry (atom, t) into the TimeServer of the given AtomSpace.
-     * @param atom the Handle of the atom to be associated to the timestamp
-     * @param timeNodeName the name of the TimeNode to be associated to the atom via an AtTimeLink.
-     * @param tv Truth value for the AtTimeLink created (optional)
-     * @return the Handle of the AtTimeLink added into the AtomSpace.
-     */
-    Handle addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv = TruthValue::NULL_TV());
-
     /**
      * Creates the space map node, if not created yet.
      * returns the handle of the node.
@@ -1562,28 +1302,23 @@ private:
     Handle getSpaceMapNode(void);
 
     /**
-     * Handler of the 'atom removed' signal from AtomTable
+     * Handler of the 'atom removed' signal from self
      */
-    void atomRemoved(Handle h);
+    void atomRemoved(AtomSpaceImpl *a, Handle h);
 
     /**
-     * Handler of the 'atom added' signal from AtomTable
+     * Handler of the 'atom added' signal from self
      */
-    void atomAdded(Handle h);
+    void atomAdded(AtomSpaceImpl *a, Handle h);
 
 public:
     // pass on the signals from the Atom Table
-    boost::signal<void (Handle)>& addAtomSignal()
-        { return atomTable.addAtomSignal(); }
-    boost::signal<void (Handle)>& removeAtomSignal()
-        { return atomTable.removeAtomSignal(); }
-    boost::signal<void (Handle)>& mergeAtomSignal()
-        { return atomTable.mergeAtomSignal(); }
-
-    // SpaceServerContainer virtual methods:
-    void mapRemoved(Handle mapId);
-    void mapPersisted(Handle mapId);
-    std::string getMapIdString(Handle mapId);
+    AtomSignal& addAtomSignal()
+        { return _addAtomSignal; }
+    AtomSignal& removeAtomSignal()
+        { return _removeAtomSignal; }
+    AtomSignal& mergeAtomSignal()
+        { return _mergeAtomSignal; }
 
     /**
      * Overrides and declares copy constructor and equals operator as private 
@@ -1591,6 +1326,8 @@ public:
      */
     AtomSpaceImpl& operator=(const AtomSpaceImpl&);
     AtomSpaceImpl(const AtomSpaceImpl&);
+
+    bool saveToXML(const std::string& filename) const;
 
 };
 

@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
     cout << "Done getting results and checking requests" << endl;*/
 
     thread_pool.join_all();
-    while (!a.requestQueue.empty()) usleep(10);
+    while (!a.isQueueEmpty()) usleep(10);
     clock_t tEnd = clock();
     cout << "Counter is " << a.get_counter() << endl;
     cout << "Time taken is " << (double)(tEnd - tStart)/CLOCKS_PER_SEC;

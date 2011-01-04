@@ -42,8 +42,8 @@ Agent::Agent(const unsigned int f) : _frequency(f)
     stimulatedAtoms = new AtomStimHashMap();
     totalStimulus = 0;
 
-    conn = server().getAtomSpace()->removeAtomSignal().connect(
-            boost::bind(&Agent::atomRemoved, this, _1));
+    conn = server().getAtomSpace()->atomSpaceAsync.removeAtomSignal(
+            boost::bind(&Agent::atomRemoved, this, _1, _2));
 }
 
 Agent::~Agent()
@@ -80,7 +80,7 @@ std::string Agent::to_string() const
     return oss.str();
 }
 
-void Agent::atomRemoved(Handle h)
+void Agent::atomRemoved(AtomSpaceImpl* a, Handle h)
 {
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
         if (_utilizedHandleSets[i]->contains(h))

@@ -80,6 +80,7 @@ class AtomTable
     friend class AtomSpace;
     friend class AtomSpaceImpl;
     friend class HandleIterator;
+    friend class ::AtomTableUTest;
 
 private:
 
@@ -118,11 +119,6 @@ private:
     pthread_mutex_t iteratorsLock;
 #endif
 
-    /** Provided signals */
-    boost::signal<void (Handle)> _addAtomSignal;
-    boost::signal<void (Handle)> _removeAtomSignal;
-    boost::signal<void (Handle)> _mergeAtomSignal;
-
     /**
      * signal connection used to keep track of atom type addition in the
      * ClassServer 
@@ -135,6 +131,7 @@ private:
     void typeAdded(Type);
 
     static bool decayed(Handle h);
+    // Warning, this should only be called by decayShortTermImportance
     void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
 
     /**
@@ -588,10 +585,9 @@ public:
      * Decays importance of all atoms in the table, reindexing
      * importanceIndex accordingly and extracting the atoms that fall
      * below the "LOWER_STI_VALUE" threshold.
-     * @return the list of the handles of the extracted atoms.
+     * @return the list of the handles that should be removed.
      */
-    //void decayShortTermImportance() throw (RuntimeException) __attribute__ ((deprecated));
-    void decayShortTermImportance();
+    HandleEntry* decayShortTermImportance();
 
     /**
      * Returns whether DynamicsStatisticsAgent is to be used with
@@ -641,9 +637,6 @@ public:
      */
     void scrubIncoming(void);
 
-    boost::signal<void (Handle)>& addAtomSignal();
-    boost::signal<void (Handle)>& removeAtomSignal();
-    boost::signal<void (Handle)>& mergeAtomSignal();
 };
 
 } //namespace opencog
