@@ -328,9 +328,12 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                         t->maxTV->getMean());
 
                 // This uses the BIT, but the trails are stored using some
-                // global variables so work in FC.
-                std::cout << "Inference trail: " << std::endl;
-                state->printTrail(eh);
+                // global variables so work in FC. Disabled due to an infinite
+                // recursion issue in the trails (as of Nov2009) -- JaredW
+                if (test_bc) {
+	                std::cout << "Inference trail: " << std::endl;
+          	        state->printTrail(eh);
+      	        }
             }
 
             /* Check whether resulting truth value meets test requirements */
