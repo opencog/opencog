@@ -19,8 +19,11 @@ ENDIF (HAVE_ATTENTION)
 IF (HAVE_SERVER)
     ADD_SUBDIRECTORY (server)
     ADD_SUBDIRECTORY (adaptors) # adaptors depends on server
-    ADD_SUBDIRECTORY (web) # web depends on server
 ENDIF(HAVE_SERVER)
+
+IF (HAVE_WEB)
+    ADD_SUBDIRECTORY (web)
+ENDIF (HAVE_WEB)
 
 # There is nothing in this directory?
 #IF (NOT WIN32)
