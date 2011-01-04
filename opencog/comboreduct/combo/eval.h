@@ -343,7 +343,8 @@ vertex eval_throws(opencog::RandGen& rng,
                       "vertex should be a contin.");
             y = get_contin(vy);
             contin_t res = x / y;
-            if (isnan(res) || isinf(res)) throw EvalException(vertex(res));
+            if (opencog::isnan(res) || opencog::isinf(res))
+	      throw EvalException(vertex(res));
             return res;
         }
         case id::log : {
@@ -358,7 +359,8 @@ vertex eval_throws(opencog::RandGen& rng,
 #else
             contin_t res = log(get_contin(vx));
 #endif
-            if (isnan(res) || isinf(res)) throw EvalException(vertex(res));
+            if (opencog::isnan(res) || opencog::isinf(res))
+	      throw EvalException(vertex(res));
             return res;
         }
         case id::exp : {
@@ -370,7 +372,7 @@ vertex eval_throws(opencog::RandGen& rng,
                       "vertex should be an contin");
             contin_t res = exp(get_contin(vx));
             //this may happen in case the argument is too high, then exp will be infty
-            if (isinf(res)) throw EvalException(vertex(res));
+            if (opencog::isinf(res)) throw EvalException(vertex(res));
             return res;
         }
         case id::sin : {
@@ -417,8 +419,9 @@ vertex eval_throws(opencog::RandGen& rng,
     }
     // contin constant
     else if (const contin_t* c = boost::get<contin_t>(&v)) {
-        if (isnan(*c) || isinf(*c)) throw EvalException(vertex(*c));
-        return v;
+      if (opencog::isnan(*c) || opencog::isinf(*c))
+	throw EvalException(vertex(*c));
+      return v;
     }
     // action symbol
     else if (is_action_symbol(v)) {
