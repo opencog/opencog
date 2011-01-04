@@ -41,3 +41,6 @@ Here is an example file (tests/reasoning/pln/targets/InheritanceOsamaAbu_test.co
     MAX_STEPS = 4000
 
 The targets_disabled/ directory contains target files that have been temporarily disabled. The subdirectories within targets/ and targets_disabled/ are the same. Currently, files directly contained in the directory are ported from Ari's work in PLNUTest. The new/ directory contains recent ones. This structure may change at any time.
+
+The targets/both directory contains targets that can be achieved by the current forward chainer (the backward chainer can achieve any of the targets). The targets/future_fc directory contains targets that can't be achieved by the current forward chainer. This is because of either a) speed issues or b) FC being unable to use ForAlls as a premise for a chain of 2+ ModusPonens or Deduction steps. (This limitation is described in the FC doxygen documentation.)
+
