@@ -147,7 +147,7 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  * original \c TruthValues) then we get:
  * 
  * \code
- *  dc_x_y <- OrderedLink (dc_x dc_y)
+ *  dc_x_y <- OrderedLink ((ConceptNode "___PLN___") dc_x dc_y)
  *  InheritanceLink <0.8, 0.9> [ Context dc_x_y <0.3, 0.5> ]
  *      ConceptNode "x" <0.8, 0.9> [ Context dc_x <0.5, 0.5> ]
  *      ConceptNode "y" <0.8, 0.9> [ Context dc_y <0.1, 0.5> ]
