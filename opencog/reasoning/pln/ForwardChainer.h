@@ -25,6 +25,7 @@
 #include "rules/RuleProvider.h"
 
 #include <opencog/util/RandGen.h>
+#include <opencog/util/Config.h>
 
 namespace opencog {
 namespace pln {
@@ -120,6 +121,8 @@ public:
 // conclusions may be useful in future FC steps.
 class HybridForwardChainer : public ForwardChainer {
 private:
+
+    int bcSteps; //! The number of BC steps to do to find (all) required arguments for a Rule during an FC step
 
 public:
     AtomSpaceWrapper* asw;

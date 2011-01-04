@@ -369,6 +369,8 @@ HybridForwardChainer::HybridForwardChainer(AtomSpaceWrapper* _asw) :
     minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
     probStack = FWD_CHAIN_PROB_STACK;
     probGlobal = FWD_CHAIN_PROB_GLOBAL;
+    
+    bcSteps = config().get_int("PLN_FC_BC_STEPS");
 
     ForwardChainer::composers = new DeductionRuleProvider;
     ForwardChainer::generators = new EvaluationRuleProvider;
@@ -403,7 +405,7 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(vector<B
 //    // Enables trails with forward chaining.
 //    bit.setKeepRP(true);
 
-    int maxSteps = 1000*filter.size();
+    int maxSteps = bcSteps; //*filter.size();
     //const set<VtreeProvider*>& results =
     bit.infer(maxSteps);//, 0.000001f, 0.01f);
 

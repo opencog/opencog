@@ -60,6 +60,7 @@ private:
             "PLN_FW_VARS_IN_ATOMSPACE", "true",
             "PLN_PRINT_REAL_ATOMS",  "true",
             "PLN_FITNESS_EVALUATOR", "best",
+            "PLN_FC_BC_STEPS",       "10000",
             "",                      ""
         };
         return defaultConfig;
