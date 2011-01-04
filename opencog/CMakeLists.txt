@@ -19,6 +19,7 @@ ENDIF (HAVE_ATTENTION)
 IF (HAVE_SERVER)
     ADD_SUBDIRECTORY (server)
     ADD_SUBDIRECTORY (adaptors) # adaptors depends on server
+    ADD_SUBDIRECTORY (web) # web depends on server
 ENDIF(HAVE_SERVER)
 
 # There is nothing in this directory?
@@ -49,8 +50,6 @@ ADD_SUBDIRECTORY (comboreduct)
 IF (HAVE_SPATIAL)
    ADD_SUBDIRECTORY (spatial)
 ENDIF (HAVE_SPATIAL)
-
-ADD_SUBDIRECTORY (web)
 
 ADD_SUBDIRECTORY (learning)
 
