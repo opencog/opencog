@@ -228,12 +228,6 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     pHandle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn,
                     bool fresh);
 
-    //! used by filter_type to merge collections of handles.
-    template<class T>
-    void mergeCopy(T& a, const T& b) {
-        copy(b.begin(), b.end(), back_inserter(a));
-    }
-
     //! Used by getImportantHandles
     struct compareSTI {
         AtomSpace *atomspace;
@@ -311,7 +305,8 @@ public:
     //! Convert real handles to pln pHandleSeq , optionally expanding to
     //! include every VersionHandled TV in each real handle
     pHandleSeq realToFakeHandles(const HandleSeq& hs, bool expand=false);
-    //! Match each dummy context in the outgoing set of dc with the handles
+    //! Match each dummy context in the tail of the outgoing set of dc
+    //! with the handles in the outgoing set of h
     pHandleSeq realToFakeHandles(Handle h, Handle dc);
     //! Convert real handles to pln pHandleSeq, all under a given context
     pHandleSeq realToFakeHandles(const HandleSeq& hs, Handle context);

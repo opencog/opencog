@@ -31,6 +31,7 @@
 #include <opencog/util/files.h>
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/tree.h>
+#include <opencog/util/algorithm.h>
 
 #include  <boost/foreach.hpp>
 
@@ -202,11 +203,9 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
 
 #ifdef STREAMLINE_PHANDLES
     foreach (Handle l, inLinks) {
-        // each link incoming can consist of multiple fake handles (not really now)
-        pHandleSeq moreLinks = realToFakeHandle(l);
-        foreach (pHandle ml, moreLinks) {
-            results.push_back(ml);
-        }
+        // each link incoming can consist of multiple fake handles
+        // (not really now)
+        append(results, realToFakeHandle(l));
     }
     return results;
 #else
@@ -393,7 +392,7 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandles(const HandleSeq& hs,
     pHandleSeq result;
     foreach (Handle h, hs) {
         if (expand) 
-            mergeCopy(result,realToFakeHandle(h));
+            append(result, realToFakeHandle(h));
         else
             result.push_back(realToFakeHandle(h,NULL_VERSION_HANDLE));
     }
@@ -881,7 +880,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 	///
 	fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
 	return fakeHandle;
-#endif
+#endif // ~0
 #ifdef STREAMLINE_PHANDLES
     AtomSpace *as = atomspace;
     Handle result;
@@ -907,7 +906,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 			std::cout << atom.toString() << " " << atv.toString() << std::endl;
 		}
 		assert(noExistingTV);
-#endif
+#endif // ~NEVER_ALLOW_SECOND_TVS
 
 //		if (!atomspace->isValidHandle(result)) {
 			// if the atom doesn't exist already, then just add normally
@@ -933,7 +932,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 			std::cout << atom.toString() << " " << atv.toString() << std::endl;
 		}
 		assert(noExistingTV);
-#endif
+#endif // ~NEVER_ALLOW_SECOND_TVS
 
 //		if (!as->isValidHandle(result)) {
 			result = as->addLink(link.getType(), link.getOutgoingSet(),
@@ -952,7 +951,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 	///
 	fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
 	return fakeHandle;
-#else
+#else // not STREAMLINE_PHANDLES
     AtomSpace *as = atomspace;
     Handle result;
     pHandle fakeHandle;
@@ -1046,7 +1045,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
                     vh = VersionHandle(CONTEXTUAL, existingContext);
                 }
             }
-#else
+#else // CONTEXTUAL_INFERENCE
             // for now dummy contexts are ignored, it is assumed the
             // contexts in the HandleSeq contexts are just the real
             // ones
@@ -1055,9 +1054,10 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
                       == (int)contexts.size(),
                       "It is assumed that all context are the same");
             vh = VersionHandle(CONTEXTUAL, contexts[0]);
-#endif
+#endif // ~CONTEXTUAL_INFERENCE
         }
-        // add it and let AtomSpace deal with merging it
+        // If contexts is empty, add atom and let AtomSpace deal with
+        // merging it
         result = as->addRealAtom(atom);
         if (vh != NULL_VERSION_HANDLE) {
             // if it's not for the root context, we still have to
@@ -1067,7 +1067,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
         fakeHandle = realToFakeHandle(result, vh);
     }
     return fakeHandle;
-#endif
+#endif // ~not STREAMLINE_PHANDLES
 }
 
 Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
@@ -1159,7 +1159,7 @@ bool AtomSpaceWrapper::removeAtom(pHandle h)
 pHandle AtomSpaceWrapper::getRandomHandle(Type T)
 {
     AtomSpace *a = atomspace;
-    vector<Handle> handles=a->filter_type(T);
+    HandleSeq handles=a->filter_type(T);
 
     if (handles.size()==0)
         return PHANDLE_UNDEFINED;
