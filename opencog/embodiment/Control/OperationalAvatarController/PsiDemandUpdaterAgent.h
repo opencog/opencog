@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2010-12-16
+ * @date 2011-01-05
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -49,13 +49,13 @@ namespace OperationalAvatarController
  *         ListLink
  *            PET_HANDLE
  *
- * DemandGoal is represented as:
+ * The connection of Demand and Goal is represented as:
  *
  * SimultaneousEquivalenceLink
  *     EvaluationLink
+ *         (SimpleTruthValue indicates how well the demand is satisfied)
+ *         (ShortTermInportance indicates the urgency of the demand)
  *         PredicateNode: "demand_name_goal" 
- *                        (SimpleTruthValue indicates how well the demand is satisfied)
- *                        (ShortTermInportance indicates the urgency of the demand)
  *     EvaluationLink
  *         GroundedPredicateNode: "FuzzyWithin"
  *         ListLink

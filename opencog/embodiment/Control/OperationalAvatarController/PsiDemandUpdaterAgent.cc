@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2010-12-16
+ * @date 2011-01-05
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -308,9 +308,12 @@ void PsiDemandUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
         //
         // Since SimultaneousEquivalenceLink inherits from UnorderedLink,
         // we should make a choice
-        if ( atomSpace.getArity(
-                                   atomSpace.getOutgoing(oldSimultaneousEquivalenceLink, 0)
-                               ) ==  1 ) {
+
+        Handle firstEvaluationLink = atomSpace.getOutgoing(oldSimultaneousEquivalenceLink, 0);
+
+        if ( atomSpace.getType( 
+                                  atomSpace.getOutgoing(firstEvaluationLink, 0) 
+                              ) ==  PREDICATE_NODE ) {
             oldEvaluationLinkDemandGoal = atomSpace.getOutgoing(
                                                         oldSimultaneousEquivalenceLink, 0
                                                                );
@@ -555,7 +558,7 @@ logger().fine( "PsiDemandUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__
 void PsiDemandUpdaterAgent::updateDemandGoals(opencog::CogServer * server)
 {
     logger().debug( 
-        "PsiDemandUpdaterAgent::%s - Update PredicateNodes for DemandGoals [ cycle = %d ]", 
+        "PsiDemandUpdaterAgent::%s - Update the TruthValue for DemandGoals [ cycle = %d ]", 
                     __FUNCTION__ , 
                     this->cycleCount
                   );
@@ -597,9 +600,12 @@ void PsiDemandUpdaterAgent::updateDemandGoals(opencog::CogServer * server)
         //
         // Since SimultaneousEquivalenceLink inherits from UnorderedLink,
         // we should make a choice
-        if ( atomSpace.getArity(
-                                   atomSpace.getOutgoing(simultaneousEquivalenceLink, 0)
-                               ) ==  1 ) {
+
+        Handle firstEvaluationLink = atomSpace.getOutgoing(simultaneousEquivalenceLink, 0);
+
+        if ( atomSpace.getType(
+                                   atomSpace.getOutgoing(firstEvaluationLink, 0)
+                              ) ==  PREDICATE_NODE ) {
             evaluationLinkDemandGoal = atomSpace.getOutgoing(
                                                         simultaneousEquivalenceLink, 0
                                                             );
@@ -667,8 +673,13 @@ void PsiDemandUpdaterAgent::updateDemandGoals(opencog::CogServer * server)
 
         result = procedureInterpreter.getResult(executingSchemaId);
 
-        // Update truth value of PredicateNode
-        atomSpace.setTV( predicateNode,
+        // Update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
+        // TODO: Use PLN forward chainer to handle this?
+        atomSpace.setTV( evaluationLinkDemandGoal,
+                         SimpleTruthValue(get_contin(result), 1.0f)
+                       );
+
+        atomSpace.setTV( evaluationLinkFuzzyWithin,
                          SimpleTruthValue(get_contin(result), 1.0f)
                        );
 

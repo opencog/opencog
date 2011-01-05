@@ -1,11 +1,11 @@
 /*
- * @file opencog/embodiment/Control/OperationalPetController/RelationUpdaterAgent.h
+ * @file opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2010-10-25
+ * @date 2010-12-23
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -24,15 +24,25 @@
  */
 
 
-#ifndef RELATIONUPDATERAGENT_H
-#define RELATIONUPDATERAGENT_H
+#ifndef PSIRELATIONUPDATERAGENT_H
+#define PSIRELATIONUPDATERAGENT_H
 
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <time.h>
 
-namespace OperationalPetController
+namespace OperationalAvatarController
 {
+
+/**
+ * Original ideas from RuleEngine
+ *
+ * step1. Write Relation rules in pet_rules.lua
+ * step2. RuleEngine::processRules if the Precondition meets, add the corresponding 
+ *        Relation suggest Relations via suggestRelation method
+ * step3. Apply Relation in RuleEngine::processNextAction through addRelation, 
+ *        removeRelation removeOppositeRelation methods
+ *
+ */     
 
 /**
  * @class
@@ -41,42 +51,106 @@ namespace OperationalPetController
  *
  * For instance, if the pet licks X it becomes Familiar with X, Familiar(self, X) relation is
  * then created
- */
-class RelationUpdaterAgent : public opencog::Agent
+ * 
+ * The format of RelationSchema in AtomSpace is
+ *
+ * SimilarityLink (stv 1.0 1.0)
+ *     NumberNode: "demand_value"
+ *     ExecutionOutputLink
+ *         GroundedSchemaNode: xxxRelationUpdater
+ *         ListLink
+ *            PET_HANDLE
+ *
+ * RelationGoal is represented as:
+ *
+ * SimultaneousEquivalenceLink
+ *     EvaluationLink
+ *         PredicateNode: "demand_name_goal" 
+ *                        (SimpleTruthValue indicates how well the demand is satisfied)
+ *                        (ShortTermInportance indicates the urgency of the demand)
+ *     EvaluationLink
+ *         GroundedPredicateNode: "FuzzyWithin"
+ *         ListLink
+ *             NumberNode: "min_acceptable_value"
+ *             NumberNode: "max_acceptable_value"
+ *             SimilarityLink (stv 1.0 1.0)
+ *                 NumberNode: "demand_value"
+ *                 ExecutionOutputLink
+ *                     GroundedSchemaNode: "demand_schema_name"
+ *                     ListLink
+ *                         PET_HANDLE
+ *
+*/
+class PsiRelationUpdaterAgent : public opencog::Agent
 {
-
 private:
 
-    time_t lastTickTime;
-    /**
-     * signal connections used to keep track of atom merge in the AtomSpace
-     */
-    boost::signals::connection mergedAtomConnection;
+    // Helper class that stores meta data of a Relation 
+    class RelationMeta
+    {
+    public:
+
+        std::string updaterName; // The schema name that updates the Relation
+        Handle similarityLink;   // Handle to SimilarityLink that holds the RelationSchema
+        Handle simultaneousEquivalenceLink; // Handle to SimultaneousEquivalenceLink that
+                                            // holds RelationGoal
+        double updatedValue; // The updated value after calling the Relation updater  
+        bool bUpdated;       // Indicate if the value of the RelationSchema has been updated
+
+        void init ( const std::string & updaterName, 
+                    Handle similarityLink,
+                    Handle simultaneousEquivalenceLink) {
+            this->updaterName = updaterName;
+            this->similarityLink = similarityLink;
+            this->simultaneousEquivalenceLink = simultaneousEquivalenceLink;
+            this->updatedValue = 0;
+            this->bUpdated = false;
+        }
+    }; // class
+
+    unsigned long cycleCount;
+
+    std::map <std::string, RelationMeta> demandMetaMap;  // Relation - Meta data map 
+
+    // Initialize demandMetaMap etc.
+    void init(opencog::CogServer * server);
+
+    // Run updaters (combo scripts)
+    void runUpdaters(opencog::CogServer * server);
+
+    // Set updated values to AtomSpace (NumberNodes)
+    void setUpdatedValues(opencog::CogServer * server);
+
+    // Update PredicateNodes of corresponding RelationGoals
+    void updateRelationGoals(opencog::CogServer * server);
+
+    bool bInitialized; 
 
 public:
 
-    RelationUpdaterAgent();
-    virtual ~RelationUpdaterAgent();
+    PsiRelationUpdaterAgent();
+    virtual ~PsiRelationUpdaterAgent();
 
     virtual const ClassInfo& classinfo() const {
         return info();
     }
+
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalPetController::RelationUpdaterAgent");
+        static const ClassInfo _ci("OperationalAvatarController::PsiRelationUpdaterAgent");
         return _ci;
     }
 
-    void run(opencog::CogServer *server);
+    // Entry of the Agent, CogServer will invoke this function during its cycle
+    void run(opencog::CogServer * server);
 
-    // connects to the signals from AtomSpace it needs to know
-    void connectSignals(AtomSpace& as);
-
-    /**
-     * Method to receive atom merge signals from AtomTable
-     */
-    void atomMerged(Handle h);
+    // After calling this function, the Agent will invoke its "init" method firstly 
+    // in "run" function during its next cycle
+    void forceInitNextCycle() {
+        this->bInitialized = false;
+    }
 
 }; // class
+
 }  // namespace
 
 #endif

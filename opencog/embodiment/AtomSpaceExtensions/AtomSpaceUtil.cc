@@ -5,7 +5,7 @@
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
- * Updated: by Zhenhua Cai, on 2010-12-10
+ * Updated: by Zhenhua Cai, on 2011-01-05
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -2140,9 +2140,10 @@ Handle AtomSpaceUtil::getDemandSimultaneousEquivalenceLink( const AtomSpace & at
     //
     // SimultaneousEquivalenceLink
     // EvaluationLink
+    //     (SimpleTruthValue indicates how well the demand is satisfied)
+    //     (ShortTermInportance indicates the urgency of the demand)
     //     PredicateNode: "demand_name_goal" 
-    //                    (SimpleTruthValue indicates how well the demand is satisfied)
-    //                    (ShortTermInportance indicates the urgency of the demand)
+    //     ListLink (empty)
     // EvaluationLink
     //     GroundedPredicateNode: "FuzzyWithin"
     //     ListLink
@@ -2298,7 +2299,7 @@ Handle AtomSpaceUtil::getDemandSimultaneousEquivalenceLink( const AtomSpace & at
                                                                 );
 
             // Check what we get is the correct PredicateNode: "demand_name_goal"
-            if ( atomSpace.getArity(evaluationLinkDemandGoal) == 1 ) {
+            if ( atomSpace.getArity(evaluationLinkDemandGoal) == 2 ) {
                 Handle predicateNodeDemandGoal = atomSpace.getOutgoing(
                                                            evaluationLinkDemandGoal, 0);
 

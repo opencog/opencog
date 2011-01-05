@@ -2,12 +2,12 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2010-12-09
+; @date   2011-01-04
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into AtomSpace
 ;
 
-;******************************************************************************
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Check that the PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP are not null
 ;
@@ -67,7 +67,7 @@
     );begin
 );if
 
-;******************************************************************************
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Modulators
 ;
@@ -87,12 +87,23 @@
 ;             PET_HANDLE
 ;
 
-(add_modulator "ActivationModulator" 0.3)
-(add_modulator "ResolutionModulator" 0.3)
-(add_modulator "CertaintyModulator"  0.8)
-(add_modulator "SelectionThresholdModulator" 0.85)
+(define ActivationModulator 
+    (add_modulator "ActivationModulator" 0.3)
+)
 
-;******************************************************************************
+(define ResolutionModulator 
+    (add_modulator "ResolutionModulator" 0.3)
+)
+
+(define CertaintyModulator 
+    (add_modulator "CertaintyModulator"  0.8)
+)
+
+(define SelectionThresholdModulator 
+    (add_modulator "SelectionThresholdModulator" 0.85)
+)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add DemandSchemas
 ;
@@ -114,27 +125,95 @@
 ; DemandValue is the output of DemandSchema.
 ;
 
-(add_demand_schema "EnergyDemand" 0.85)
-(add_demand_schema "WaterDemand" 0.80)
-(add_demand_schema "IntegrityDemand" 0.90)
-(add_demand_schema "AffiliationDemand" 0.70)
-(add_demand_schema "CertaintyDemand" 0.65)
-(add_demand_schema "CompetenceDemand" 0.65)
+(define EnergyDemandSchema
+    (add_demand_schema "EnergyDemand" 0.85)
+)
 
-;******************************************************************************
+(define WaterDemandSchema
+    (add_demand_schema "WaterDemand" 0.80)
+)
+
+(define IntegrityDemandSchema
+    (add_demand_schema "IntegrityDemand" 0.90)
+)
+
+(define AffiliationDemandSchema
+    (add_demand_schema "AffiliationDemand" 0.70)
+)
+
+(define CertaintyDemandSchema
+    (add_demand_schema "CertaintyDemand" 0.65)
+)
+
+(define CompetenceDemandSchema
+    (add_demand_schema "CompetenceDemand" 0.65)
+)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Add DemandGoals
+; Add Goals
 ;
 ; Usage:
-;     (add_demand_goal demand_name min_acceptable_value max_acceptable_value)
+;     (add_goal goal_pred_name)
 ;
-; DemandGoal is represented as:
+; Goal is represented as:
+;
+; EvaluationLink
+;     (SimpleTruthValue indicates how well the demand is satisfied)
+;     (ShortTermInportance indicates the urgency of the demand)
+;     PredicateNode "goal_pred_name"
+;     ListLink (empty)
+;
+; There are two kinds of Goals, Final Goal and Intermediate Goal.
+;
+; A Final Goal, also known as Demand Goal, is to keep a specific Demand in a suitable range, 
+; Which is the starting point of backward chaining. 
+;
+; While an Intermediate Goal should be used as other Rule's Precondition. 
+;
+
+; Final Goals, also known as Demand Goals
+;
+
+(define EnergyDemandGoal 
+    (add_goal "EnergyDemandGoal")
+)
+
+(define WaterDemandGoal
+    (add_goal "WaterDemandGoal")
+)
+
+(define IntegrityDemandGoal
+    (add_goal "IntegrityDemandGoal")
+)
+
+(define AffiliationDemandGoal
+    (add_goal "AffiliationDemandGoal")
+)
+
+(define CertaintyDemandGoal
+    (add_goal "CertaintyDemandGoal")
+)
+
+(define CompetenceDemandGoal
+    (add_goal "CompetenceDemandGoal")
+)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Connect Demands with their corresponding Demand Goals. 
+;
+; Usage:
+;     (connect_demand_goal demand_schema_handle goal_handle min_acceptable_value max_acceptable_value)
+;
+; The connection is represented as:
 ;
 ; SimultaneousEquivalenceLink
 ;     EvaluationLink
+;         (SimpleTruthValue indicates how well the demand is satisfied)
+;         (ShortTermInportance indicates the urgency of the demand)
 ;         PredicateNode: "demand_name_goal" 
-;                        (SimpleTruthValue indicates how well the demand is satisfied)
-;                        (ShortTermInportance indicates the urgency of the demand)
+;         ListLink (empty)
 ;     EvaluationLink
 ;         GroundedPredicateNode: "FuzzyWithin"
 ;         ListLink
@@ -148,19 +227,36 @@
 ;                         PET_HANDLE
 ;
 
-(add_demand_goal "EnergyDemand" 0.1 1.0)
-(add_demand_goal "WaterDemand" 0.1 0.9)
-(add_demand_goal "IntegrityDemand" 0.3 1.0)
-(add_demand_goal "AffiliationDemand" 0.3 0.9)
-(add_demand_goal "CertaintyDemand" 0.2 1.0)
-(add_demand_goal "CompetenceDemand" 0.25 0.95)
+(define ConnectEnergyDemandGoal
+    (connent_demand_goal EnergyDemandSchema         EnergyDemandGoal 0.1 1.0)
+)
 
-;******************************************************************************
+(define ConnectWaterDemandGoal
+    (connect_demand_goal WaterDemandSchema          WaterDemandGoal 0.1 0.9)
+)
+
+(define ConnectIntegrityDemandGoal
+    (connect_demand_goal IntegrityDemandSchema      IntegrityDemandGoal 0.3 1.0)
+)
+
+(define ConnectAffiliationDemandGoal
+    (connect_demand_goal AffiliationDemandSchema    AffiliationDemandGoal 0.3 0.9)
+)
+
+(define ConnectCertaintyDemandGoal
+    (connect_demand_goal CertaintyDemandSchema      CertaintyDemandGoal 0.2 1.0)
+)
+
+(define ConnectCompetenceDemandGoal
+    (connect_demand_goal CompetenceDemandSchema     CompetenceDemandGoal 0.25 0.95)
+)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Rules
 ;
 ; Usage:
-;     (rule rule_name tv_handle precondition_name action demand_name)
+;     (add_rule tv_handle goal_handle action_handle precondition_handle_1 precondition_handle_2 ...)
 ;
 ; Note: 
 ;     Each Rule here means a cognitive schematic, that is 
@@ -168,27 +264,44 @@
 ;
 ;     Rules here has nothing to do with that in PLN, so don't confuse them!
 ;
-; Rule is represented as:
+; A Rule is represented as below (AtTimeLink is missing currently): 
 ;
-; PredictiveImplicationLink (CompositeTruthValue indicates the mode strengths)
+; PredictiveImplicationLink
 ;     AndLink
 ;         AtTimeLink
 ;             TimeNode CURRENT_TIMESTAMP
-;             EvaluationLink
-;                 GroundedPredicateNode "precondition_name"
-;                 ListLink (empty)
-;             ExecutionLink
-;                 GroundedSchemaNode "schema_name"
-;                 ListLink
-;                     Node:params ...
-;                     ...
+;             AndLink
+;                 EvaluationLink
+;                     GroundedPredicateNode "precondition_1_name"
+;                     ListLink
+;                         Node:arguments ...
+;                         ...
+;                 EvaluationLink
+;                     PredicateNode         "precondition_2_name"
+;                     ListLink (empty)
+;                 ...
+;                        
+;         ExecutionLink
+;             GroundedSchemaNode "schema_name"
+;             ListLink
+;                 Node:arguments ...
+;                 ...
+;
 ;     AtTimeLink
 ;         TimeNode CURRENT_TIMESTAMP
 ;         EvaluationLink
+;             (SimpleTruthValue indicates how well the demand is satisfied)
+;             (ShortTermInportance indicates the urgency of the demand)
 ;             PredicateNode: "demand_name_goal" 
-;                            (SimpleTruthValue indicates how well the demand is satisfied)
-;                            (ShortTermInportance indicates the urgency of the demand)
+;             ListLink (empty)
+;
+; For each Rule, there's only a Goal, an Action and a bunch of Preconditions. 
+; And all these Preconditions should be grouped in an AndLink.
+; If you want to use OrLink, then just split the Rule into several Rules.
+; For the efficiency and simplicity of the planer (backward chainging), NotLink is forbidden currently.  
 ;
 
 ; Example, only for test
-(rule (cog-new-stv 0.8 0.8) "EatRulePrecondition" "beg_to_owner()" "EnergyDemand")
+;
+
+;(rule (cog-new-stv 0.8 0.8) "EatRulePrecondition" "beg_to_owner()" "EnergyDemand")
