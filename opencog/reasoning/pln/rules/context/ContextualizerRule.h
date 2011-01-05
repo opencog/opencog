@@ -30,7 +30,7 @@
 namespace opencog { namespace pln {
 
 /**
- * Rule to turn non contextual knowledge into Contextual knowledge
+ * Rule to turn non contextual knowledge into Contextual knowledge.
  *
  * More specifically apply the following inference
  * a)

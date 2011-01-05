@@ -79,6 +79,7 @@ TVSeq ContextualizerRule::formatTVarray(const std::vector<Vertex>& premiseArray)
 ContextualizerRule::ContextualizerRule(AtomSpaceWrapper* _asw)
     : GenericRule<IdentityFormula>(_asw, false, "ContextualizerRule") {
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
+    /// @todo understand why the following does work
     // inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)LINK,
     //                                                 mva((pHandle)ATOM),
     //                                                 mva((pHandle)ATOM)))));
