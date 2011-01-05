@@ -1,0 +1,2 @@
+Only Util, ComboReduct and MOSES components have been tried to be
+compiled on Cygwin. The only requirement is the Cygwin devel package.
