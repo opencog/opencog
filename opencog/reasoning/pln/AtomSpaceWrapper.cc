@@ -224,7 +224,7 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
                 HandleSeq contexts = atomspace->getOutgoing(v2.second.substantive);
                 assert ((outgoing.size() + 1) == contexts.size());
                 bool match = true;
-                for (uint i = 0; i < match && outgoing.size(); i++) {
+                for (uint i = 0; match && i < outgoing.size(); i++) {
                     if (outgoing[i] == v.first) {
                         Handle c = contexts[i+1];
                         if (atomspace->getName(c) == rootContext)
