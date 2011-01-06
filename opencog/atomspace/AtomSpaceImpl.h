@@ -1001,11 +1001,11 @@ public:
 
     template <typename Compare>
     struct filterAtom{
-        Compare c;
-        filterAtom(Compare _c) : c(_c) {}
+        Compare *c;
+        filterAtom(Compare *_c) : c(_c) {}
 
         bool operator()(const Handle& h1) {
-            return c(*TLB::getAtom(h1));
+            return (*c)(*TLB::getAtom(h1));
         }
     };
 
@@ -1190,7 +1190,7 @@ public:
     HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const {
         HandleSeq result;
         for (; begin != end; begin++)
-            if (filterAtom<AtomPredicate>()(*begin))
+            if (filterAtom<AtomPredicate>(compare)(*begin))
                 result.push_back(*begin);
 
         return result;
@@ -1200,7 +1200,7 @@ public:
     OutputIterator filter(InputIterator begin, InputIterator end,
             OutputIterator it, AtomPredicate* compare) const {
         for (; begin != end; begin++)
-            if (filterAtom<AtomPredicate>()(*begin))
+            if (filterAtom<AtomPredicate>(compare)(*begin))
                 * it++ = *begin;
         return it;
     }

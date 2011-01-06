@@ -142,11 +142,11 @@ StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
             outgoing.push_back(jHandle);
             Handle heb = a->getHandle(SYMMETRIC_HEBBIAN_LINK,outgoing);
             if (heb != Handle::UNDEFINED) {
-                iRow[j] = a->getTV(heb).getMean();
+                iRow[j] = a->getTV(heb)->getMean();
             } else {
                 heb = a->getHandle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
                 if (heb != Handle::UNDEFINED)
-                    iRow[j] = -(a->getTV(heb).getMean());
+                    iRow[j] = -(a->getTV(heb)->getMean());
                 else {
                     iRow[j] = 0.0f;
                 }
