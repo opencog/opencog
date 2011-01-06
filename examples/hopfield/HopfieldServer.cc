@@ -101,17 +101,17 @@ float HopfieldServer::totalEnergy()
                 Type rType = a->getType(ret[0]);
                 if (rType == SYMMETRIC_HEBBIAN_LINK) {
                     if (iSTI > jSTI)
-                        E += a->getTV(ret[0]).getMean() * (iSTI - jSTI);
+                        E += a->getTV(ret[0])->getMean() * (iSTI - jSTI);
                     else
-                        E += a->getTV(ret[0]).getMean() * (jSTI - iSTI);
+                        E += a->getTV(ret[0])->getMean() * (jSTI - iSTI);
                 } else if (rType == INVERSE_HEBBIAN_LINK) {
                     if (iSTI > 0.0f && iSTI > jSTI)
-                        E += (a->getTV(ret[0]).getMean()) * (iSTI - jSTI);
+                        E += (a->getTV(ret[0])->getMean()) * (iSTI - jSTI);
                 } else if (rType == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
                     if (iSTI > jSTI)
-                        E += (a->getTV(ret[0]).getMean()) * fabs(iSTI - jSTI);
+                        E += (a->getTV(ret[0])->getMean()) * fabs(iSTI - jSTI);
                     else
-                        E += (a->getTV(ret[0]).getMean()) * fabs(jSTI - iSTI);
+                        E += (a->getTV(ret[0])->getMean()) * fabs(jSTI - iSTI);
                 } else {
                     logger().error("Unknown Hebbian link type between unit s_%d and j_%d."
                             " Ignoring.", i, j);
@@ -630,7 +630,7 @@ Handle HopfieldServer::findKeyNode() {
                 }
                 // check type of link 
                 if (lt == SYMMETRIC_HEBBIAN_LINK) {
-                    sim += a->getTV(lh).getMean() * a->getNormalisedSTI(patternH,false);
+                    sim += a->getTV(lh)->getMean() * a->getNormalisedSTI(patternH,false);
                     break;
                 } else if (lt == ASYMMETRIC_HEBBIAN_LINK) {
                     logger().error("Asymmetic links are not supported by the Hopfield "
@@ -638,7 +638,7 @@ Handle HopfieldServer::findKeyNode() {
                     break;
                 } else if (lt == INVERSE_HEBBIAN_LINK ||
                         lt == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
-                    sim += a->getTV(lh).getMean() * -a->getNormalisedSTI(patternH,false);
+                    sim += a->getTV(lh)->getMean() * -a->getNormalisedSTI(patternH,false);
                     break;
                 }
             }
