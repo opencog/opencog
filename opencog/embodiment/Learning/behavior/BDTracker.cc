@@ -40,7 +40,7 @@ int MIN_TIME_TO_DENOTE_MOVEMENT_STOPPING = 1;
 int getIntervalEnd(AtomSpace* atomspace, Handle h, const Temporal& now)
 {
     vector<HandleTemporalPair> hhh;
-    atomspace->getTimeInfo(back_inserter(hhh), h, now, TemporalTable::NEXT_AFTER_END_OF);
+    atomspace->getTimeServer().getTimeInfo(back_inserter(hhh), h, now, TemporalTable::NEXT_AFTER_END_OF);
 
 
     return (hhh.size() == 1 ? hhh.rbegin()->getTemporal()->getUpperBound()
@@ -55,7 +55,7 @@ int getIntervalEnd(AtomSpace* atomspace, Handle h, const Temporal& now)
 int getIntervalStart(AtomSpace* atomspace, Handle h, const Temporal& now)
 {
     vector<HandleTemporalPair> hhh;
-    atomspace->getTimeInfo(back_inserter(hhh), h, now, TemporalTable::PREVIOUS_BEFORE_START_OF);
+    atomspace->getTimeServer().getTimeInfo(back_inserter(hhh), h, now, TemporalTable::PREVIOUS_BEFORE_START_OF);
 
     return (hhh.size() == 1 ? hhh.rbegin()->getTemporal()->getLowerBound()
             : now.getLowerBound());
@@ -83,10 +83,10 @@ Handle BDTracker::updateEndOfInterval(Handle perception, Handle bd, const Tempor
     OC_ASSERT(new_end >= old_end, "new_end interval should be greater than old_end interval.");
 
     // Remove old interval
-    atomspace->removeTimeInfo(bd, old_interval);
+    atomspace->getTimeServer().removeTimeInfo(bd, old_interval);
 
     // Replace with a new, wider interval
-    Handle atTimeLink = atomspace->addTimeInfo(bd, new_interval);
+    Handle atTimeLink = atomspace->getTimeServer().addTimeInfo(bd, new_interval);
     // TODO: check if the updateLatest bellow is really needed
     //AtomSpaceUtil::updateLatestBDInterval(atomSpace, atTimeLink, perception);
 
@@ -104,7 +104,7 @@ Handle BDTracker::CreateBD(Handle perception, Handle obj, const Temporal& t_now,
     Temporal t(( old_interval_start ?  old_interval_start : getIntervalStart(atomspace, perception, t_now)),
                t_now.getUpperBound());
 
-    Handle atTimeLink = atomspace->addTimeInfo(ret, t);
+    Handle atTimeLink = atomspace->getTimeServer().addTimeInfo(ret, t);
     // TODO: check if the updateLatest bellow is really needed
     //AtomSpaceUtil::updateLatestBDInterval(atomSpace, atTimeLink, perception, obj?);
 

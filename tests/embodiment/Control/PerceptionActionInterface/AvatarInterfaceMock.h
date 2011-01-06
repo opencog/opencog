@@ -86,7 +86,8 @@ class AvatarInterfaceMock: public Control::AvatarInterface
         // Define the behavior interval
         Temporal exemplarTimeInterval(exemplarStartTimestamp, exemplarEndTimestamp);
         Handle trickConceptNode = atomSpace.addNode(CONCEPT_NODE, learningSchema);
-        Handle trickExemplarAtTimeLink = atomSpace.addTimeInfo(trickConceptNode, exemplarTimeInterval);
+        Handle trickExemplarAtTimeLink = atomSpace.getTimeServer().addTimeInfo(
+                trickConceptNode, exemplarTimeInterval);
         BehaviorEncoder encoder(new PAIWorldProvider(pai), pet_id, trickExemplarAtTimeLink, 1);
 
         // Adds the inheritance link as Ari asked

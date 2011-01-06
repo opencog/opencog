@@ -127,3 +127,47 @@ AttentionValue* AttentionValue::factory(AttentionValue::sti_t sti, AttentionValu
     return new AttentionValue(sti, lti, vlti);
 }
 
+
+bool AttentionValue::STISort::test(const Atom& h1, const Atom& h2)
+{
+    return h1.getAttentionValue().getSTI() > h2.getAttentionValue().getSTI();
+}
+
+bool AttentionValue::LTIAndTVAscendingSort::test(const Atom& h1, const Atom& h2)
+{
+    lti_t lti1, lti2;
+    float tv1, tv2;
+
+    tv1 = fabs(h1.getTruthValue().getMean());
+    tv2 = fabs(h2.getTruthValue().getMean());
+
+    lti1 = h1.getAttentionValue().getLTI();
+    lti2 = h2.getAttentionValue().getLTI();
+
+    if (lti1 < 0)
+        tv1 = lti1 * (1.0f - tv1);
+    else
+        tv1 = lti1 * tv1;
+
+    if (lti2 < 0)
+        tv2 = lti2 * (1.0f - tv2);
+    else
+        tv2 = lti2 * tv2;
+
+    return tv1 < tv2;
+}
+
+bool AttentionValue::LTIThenTVAscendingSort::test(const Atom& h1, const Atom& h2)
+{
+    lti_t lti1, lti2;
+    lti1 = h1.getAttentionValue().getLTI();
+    lti2 = h2.getAttentionValue().getLTI();
+
+    if (lti1 != lti2) return lti1 < lti2;
+
+    float tv1, tv2;
+    tv1 = h1.getTruthValue().getMean();
+    tv2 = h2.getTruthValue().getMean();
+    return tv1 < tv2;
+}
+

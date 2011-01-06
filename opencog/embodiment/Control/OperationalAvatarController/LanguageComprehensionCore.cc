@@ -112,7 +112,7 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
     unsigned int k;
     for( k = 0; k < evalLinks.size(); ++k ) {
         Handle latestEvalLink = evalLinks[k];
-        if ( as.getTV( latestEvalLink ).isNullTv( ) || as.getTV( latestEvalLink ).getMean( ) == 0 ) {
+        if ( as.getTV(latestEvalLink)->isNullTv() || as.getTV(latestEvalLink)->getMean() == 0 ) {
             continue;
         } // if
 
@@ -364,8 +364,8 @@ HandleSeq LanguageComprehension::getHeardSentencePredicates( void )
     unsigned int i;
     for( i = 0; i < incoming.size( ); ++i ) {
         if ( atomSpace.getType( incoming[i] ) != EVALUATION_LINK ||
-             atomSpace.getTV( incoming[i] ).isNullTv( ) || 
-             atomSpace.getTV( incoming[i] ).getMean( ) == 0 ||
+             atomSpace.getTV( incoming[i] )->isNullTv() || 
+             atomSpace.getTV( incoming[i] )->getMean() == 0 ||
              atomSpace.getArity( incoming[i] ) != 2 ||
              atomSpace.getOutgoing( incoming[i], 1 ) == node ) {
             continue;

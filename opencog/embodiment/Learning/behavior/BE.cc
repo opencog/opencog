@@ -182,7 +182,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
     foreach(const VFpair& vf, factories) {
         vector<HandleTemporalPair> temps;
-        as.getTimeInfo(inserter(temps, temps.begin()),
+        as.getTimeServer().getTimeInfo(inserter(temps, temps.begin()),
                        Handle::UNDEFINED,
                        exemplarInterval,
                        TemporalTable::STARTS_WITHIN);
@@ -467,7 +467,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 HandleSeq el_seq = list_of(behaved_h)(new_arg_list_h);
                 Handle bd_h = as.addLink(EVALUATION_LINK, el_seq);
                 Temporal t(tl, tu);
-                Handle bd_t_h = as.addTimeInfo(bd_h, t);
+                Handle bd_t_h = as.getTimeServer().addTimeInfo(bd_h, t);
 
                 //add member link
                 HandleSeq memberLinkHS = list_of(bd_t_h)(trickExemplarAtTime);
@@ -515,7 +515,7 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
         vector<HandleTemporalPair> new_temps;
         //insert into new_temps all pairs (handle,temporal)
         //that have their starting time within t_grab_range
-        wp->getAtomSpace().getTimeInfo(inserter(new_temps, new_temps.begin()),
+        wp->getAtomSpace().getTimeServer().getTimeInfo(inserter(new_temps, new_temps.begin()),
                                        Handle::UNDEFINED,
                                        *ti,
                                        TemporalTable::STARTS_WITHIN);
@@ -563,7 +563,7 @@ bool BehaviorEncoder::update(Temporal start_moment)
     vector<HandleTemporalPair> new_temps;
     //insert into new_temps all pairs (handle,temporal)
     //that have their starting time within t_grab_range
-    wp->getAtomSpace().getTimeInfo(inserter(new_temps, new_temps.begin()),
+    wp->getAtomSpace().getTimeServer().getTimeInfo(inserter(new_temps, new_temps.begin()),
                                    Handle::UNDEFINED,
                                    t_grab_range,
                                    TemporalTable::STARTS_WITHIN);

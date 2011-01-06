@@ -80,7 +80,9 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
                           "SavingLoading - Unable to open file '%s' for writing", fileName);
     }
 
-    AtomTable& atomTable = atomSpace.atomTable;
+    // TODO: bad bad - saving and loading should be integrated as a request or
+    // use the AtomSpace API.
+    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.atomSpaceAsync.getAtomTable());
 
     // stores the total number of atoms in the system
     int atomCount = atomTable.getSize();
@@ -290,7 +292,7 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     processed = 0;
     total = atomCount;
 
-    AtomTable& atomTable = atomSpace.atomTable;
+    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.atomSpaceAsync.getAtomTable());
 
     std::vector<Type> dumpToCore;
     loadClassServerInfo(f, dumpToCore);

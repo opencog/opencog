@@ -141,10 +141,10 @@ public:
         atomSpace.addNode(CONCEPT_NODE, trick_name);
 
         //fill the spacemap with the locations of stick and Paul
-        atomSpace.addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y, OBJ_Z, 1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, avatar_h, T1, AVATAR_X1, AVATAR_Y1, AVATAR_Z1, 1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, avatar_h, T2, AVATAR_X2, AVATAR_Y2, AVATAR_Z2,1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, avatar_h, T3, AVATAR_X3, AVATAR_Y3, AVATAR_Z3,1, 1, 1, 0);
+        atomSpace.getSpaceServer().addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y, OBJ_Z, 1, 1, 1, 0);
+        atomSpace.getSpaceServer().addSpaceInfo(true, avatar_h, T1, AVATAR_X1, AVATAR_Y1, AVATAR_Z1, 1, 1, 1, 0);
+        atomSpace.getSpaceServer().addSpaceInfo(true, avatar_h, T2, AVATAR_X2, AVATAR_Y2, AVATAR_Z2,1, 1, 1, 0);
+        atomSpace.getSpaceServer().addSpaceInfo(true, avatar_h, T3, AVATAR_X3, AVATAR_Y3, AVATAR_Z3,1, 1, 1, 0);
 
         //fill atomSpace with behaved concept node
         Handle behaved_h = atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);
@@ -186,7 +186,7 @@ public:
                            );
 
         Handle eval_h = addAtom(atomSpace, *at, TruthValue::DEFAULT_TV());
-        atomSpace.addTimeInfo(eval_h, T2);
+        atomSpace.getTimeServer().addTimeInfo(eval_h, T2);
         //add is_last_agent_action perceptions
         //for avatar (supposed to be considered by EntropyFilter)
         Handle dummy_action_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE,
@@ -203,7 +203,7 @@ public:
                            );
 
         Handle eval_da_h = addAtom(atomSpace, *dat, TruthValue::DEFAULT_TV());
-        atomSpace.addTimeInfo(eval_da_h, Temporal(T1, T2));
+        atomSpace.getTimeServer().addTimeInfo(eval_da_h, Temporal(T1, T2));
         //for pet (supposed not to be considered by EntropyFilter)
         atom_tree *dapt =
             makeVirtualAtom(EVALUATION_LINK,
@@ -220,7 +220,7 @@ public:
                            );
 
         Handle eval_dap_h = addAtom(atomSpace, *dapt, TruthValue::DEFAULT_TV());
-        atomSpace.addTimeInfo(eval_dap_h, Temporal(T1, T2));
+        atomSpace.getTimeServer().addTimeInfo(eval_dap_h, Temporal(T1, T2));
         //create the ListLink atoms for goto_obj(stick)
         HandleSeq a1_seq;
         a1_seq.push_back(pet_h);
@@ -258,22 +258,22 @@ public:
         Handle bd2bis_h = atomSpace.addLink(EVALUATION_LINK, b2bis_seq);
 
         //add AtTimeLink for goto_obj(dummy_object)
-        Handle t1_h = atomSpace.addTimeInfo(bd1_h, Temporal(10 * TIME_INTERVAL,
+        Handle t1_h = atomSpace.getTimeServer().addTimeInfo(bd1_h, Temporal(10 * TIME_INTERVAL,
                                             11 * TIME_INTERVAL));
         //for drop
-        Handle t2_h = atomSpace.addTimeInfo(bd2_h, Temporal(11 * TIME_INTERVAL,
+        Handle t2_h = atomSpace.getTimeServer().addTimeInfo(bd2_h, Temporal(11 * TIME_INTERVAL,
                                             12 * TIME_INTERVAL));
         //for goto_obj(dummy_object)
-        Handle t3_h = atomSpace.addTimeInfo(bd1_h, Temporal(20 * TIME_INTERVAL,
+        Handle t3_h = atomSpace.getTimeServer().addTimeInfo(bd1_h, Temporal(20 * TIME_INTERVAL,
                                             21 * TIME_INTERVAL));
         //for goto_obj(Paul)
-        Handle t4_h = atomSpace.addTimeInfo(bd2bis_h, Temporal(21 * TIME_INTERVAL,
+        Handle t4_h = atomSpace.getTimeServer().addTimeInfo(bd2bis_h, Temporal(21 * TIME_INTERVAL,
                                             22 * TIME_INTERVAL));
 
         //add trick concept
         Handle trick_h = atomSpace.addNode(CONCEPT_NODE, trick_name);
         //add AtTimeLink to it
-        Handle tt1_h = atomSpace.addTimeInfo(trick_h, Temporal(10 * TIME_INTERVAL,
+        Handle tt1_h = atomSpace.getTimeServer().addTimeInfo(trick_h, Temporal(10 * TIME_INTERVAL,
                                              12 * TIME_INTERVAL));
 
         //add memberLinks to the concept node
@@ -288,7 +288,7 @@ public:
         atomSpace.addLink(MEMBER_LINK, m2_seq);
 
         //add AtTimeLink to it
-        Handle tt2_h = atomSpace.addTimeInfo(trick_h, Temporal(20 * TIME_INTERVAL,
+        Handle tt2_h = atomSpace.getTimeServer().addTimeInfo(trick_h, Temporal(20 * TIME_INTERVAL,
                                              22 * TIME_INTERVAL));
         //add memberLinks to the concept node
         HandleSeq m3_seq;

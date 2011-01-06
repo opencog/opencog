@@ -81,7 +81,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
     }
 
     std::list<HandleTemporalPair> htp_seq;
-    atomSpace.getTimeInfo(back_inserter(htp_seq), trick_h);
+    atomSpace.getTimeServer().getTimeInfo(back_inserter(htp_seq), trick_h);
 
 #ifdef USE_MAP_HANDLE_SET
     // TODO: THIS DOES NOT WORK BECAUSE MAPS GETS WRONG ORDER (Suggestion: to use a set of timestamps instead)
@@ -92,7 +92,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
     foreach(HandleTemporalPair htp, htp_seq) {
         Temporal t = *htp.getTemporal();
         HandleSeq sm_seq;
-        atomSpace.getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
+        atomSpace.getTimeServer().getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
 
         foreach(Handle sm_h, sm_seq) {
             try {
@@ -263,7 +263,7 @@ bool LearnMessage::populateAtomSpace(AtomSpace &atomSpace)
         // load SpaceMap into AtomSpace
         foreach(std::string s, spaceMaps) {
             SpaceServer::TimestampMap timestampMap = SpaceServer::mapFromString(s);
-            atomSpace.addSpaceMap(timestampMap.first, timestampMap.second);
+            atomSpace.getSpaceServer().addSpaceMap(timestampMap.first, timestampMap.second);
         }
 
         // catch all RuntimeExceptions descendents, specially

@@ -450,6 +450,29 @@ public:
         atomSpaceAsync.setMean(h, mean)->get_result();
     }
 
+    /** Clone an atom from the TLB, replaces the public access to TLB::getAtom
+     * that many modules were doing.
+     * @param h Handle of atom to clone
+     * @return A smart pointer to the atom
+     * @note Any changes to the atom object must be committed using
+     * AtomSpace::commitAtom for them to be merged with the AtomSpace.
+     * Otherwise changes are lost.
+     */
+    boost::shared_ptr<Atom> cloneAtom(const Handle h) const;
+    boost::shared_ptr<Node> cloneNode(const Handle h) const;
+    boost::shared_ptr<Link> cloneLink(const Handle h) const;
+
+    /** Commit an atom that has been cloned from the AtomSpace.
+     *
+     * @param a Atom to commit
+     * @return whether the commit was successful
+     */
+    bool commitAtom(const Atom& a);
+
+    bool isValidHandle(const Handle h) const;
+
+    // TODO - convert to use async or remove, then move to near the rest of the
+    // AV functions
     /** Retrieve the AttentionValue of an attention value holder */
     const AttentionValue& getAV(AttentionValueHolder *avh) const;
 
@@ -527,31 +550,10 @@ public:
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
         return getNormalisedZeroToOneSTI(TLB::getAtom(h), average, clip);
     }
+    //---
 
-    /** Clone an atom from the TLB, replaces the public access to TLB::getAtom
-     * that many modules were doing.
-     * @param h Handle of atom to clone
-     * @return A smart pointer to the atom
-     * @note Any changes to the atom object must be committed using
-     * AtomSpace::commitAtom for them to be merged with the AtomSpace.
-     * Otherwise changes are lost.
-     */
-    boost::shared_ptr<Atom> cloneAtom(const Handle h) const;
-    boost::shared_ptr<Node> cloneNode(const Handle h) const;
-    boost::shared_ptr<Link> cloneLink(const Handle h) const;
-
-    /** Commit an atom that has been cloned from the AtomSpace.
-     *
-     * @param a Atom to commit
-     * @return whether the commit was successful
-     */
-    bool commitAtom(const Atom& a);
-
-    /** Get hash for an atom
-     */
+    /** Get hash for an atom */
     size_t getAtomHash(const Handle h) const;
-
-    bool isValidHandle(const Handle h) const;
 
     /**
      * Returns neighboring atoms, following links and returning their
@@ -575,25 +577,27 @@ public:
     }
 
     /** Retrieve the Count of a given Handle */
-    float getCount(Handle) const;
+    // this is excessive and not part of core API
+    //float getCount(Handle) const;
 
     /** Returns the default TruthValue */
-    static const TruthValue& getDefaultTV();
+    //static const TruthValue& getDefaultTV();
 
-    //----type properties - these first two should be abandoned
+    //----type properties - these should be abandoned
     //and accesed through the classserver as they don't have anything
-    //to do with handles... or they should at least be static.
+    //to do with handles... at the very least they should be static.
     Type getAtomType(const std::string& typeName) const;
     bool isNode(const Type t) const;
     bool isLink(const Type t) const;
+    /** Does t1 inherit from t2 */
+    bool inheritsType(Type t1, Type t2) const;
+    // Get type name 
+    std::string getName(Type t) const;
+    //-----
 
     /** Convenience functions... */
     bool isNode(const Handle& h) const;
     bool isLink(const Handle& h) const;
-
-    /** Does t1 inherit from t2 */
-    bool inheritsType(Type t1, Type t2) const;
-    std::string getName(Type t) const;
 
     /**
      * Gets a set of handles that matches with the given arguments.
@@ -623,8 +627,41 @@ public:
                  const std::string& name,
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleEntry * handleEntry = atomTable.getHandleSet(name.c_str(), type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+        HandleSeq result_set = atomSpaceAsync.getHandlesByName(
+                std::string(name), type, subclass, vh)->get_result();
+        return toOutputIterator(result, result_set);
+    }
+
+    /**
+     * Returns the set of atoms of a given name (atom type and subclasses
+     * optionally).
+     *
+     * @param result An output iterator.
+     * @param name The desired name of the atoms.
+     * @param type The type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @return The set of atoms of the given type and name.
+     *
+     * @note The matched entries are appended to a container whose
+     * OutputIterator is passed as the first argument.
+     *
+     * @note Example of call to this method, which would return all entries in AtomSpace:
+     * @code
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandleSet(OutputIterator result,
+                 const char* name,
+                 Type type,
+                 bool subclass = true,
+                 VersionHandle vh = NULL_VERSION_HANDLE) const {
+        HandleSeq result_set = atomSpaceAsync.getHandlesByName(
+                name, type, subclass, vh)->get_result();
+        return toOutputIterator(result, result_set);
     }
 
     /**
@@ -651,9 +688,8 @@ public:
                  Type type,
                  bool subclass = false,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+        HandleSeq result_set = atomSpaceAsync.getHandlesByType(type, subclass, vh)->get_result();
+        return toOutputIterator(result, result_set);
     }
 
     /**
@@ -687,9 +723,9 @@ public:
                  bool targetSubclass,
                  VersionHandle vh = NULL_VERSION_HANDLE,
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(type, targetType, subclass, targetSubclass, vh, targetVh);
-        return (toOutputIterator(result, handleEntry));
+        HandleSeq result_set = atomSpaceAsync.getHandlesByTarget(type, targetType,
+                subclass, targetSubclass, vh, targetVh)->get_result();
+        return toOutputIterator(result, result_set);
     }
 
     /**
@@ -718,9 +754,9 @@ public:
                  Type type,
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(handle, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+        HandleSeq result_set = atomSpaceAsync.getHandlesByTargetHandle(handle,
+                type, subclass, vh)->get_result();
+        return toOutputIterator(result, result_set);
     }
 
     /**
@@ -771,38 +807,6 @@ public:
     }
 
     /**
-     * Returns the set of atoms of a given name (atom type and subclasses
-     * optionally).
-     *
-     * @param result An output iterator.
-     * @param name The desired name of the atoms.
-     * @param type The type of the atom.
-     * @param subclass Whether atom type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
-     * @return The set of atoms of the given type and name.
-     *
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument.
-     *
-     * @note Example of call to this method, which would return all entries in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 const char* name,
-                 Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(name, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
-    }
-
-    /**
      * Returns the set of atoms whose outgoing set contains at least one
      * atom with the given name and type (atom type and subclasses
      * optionally).
@@ -834,9 +838,9 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE,
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(targetName, targetType, type, subclass, vh, targetVh);
-        return (toOutputIterator(result, handleEntry));
+        HandleSeq result_set = atomSpaceAsync.getHandlesByTargetName(
+               targetName, targetType, type, subclass, vh, targetVh)->get_result();
+        return toOutputIterator(result, result_set);
     }
 
     /**
@@ -883,8 +887,9 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
-        HandleEntry * handleEntry = atomTable.getHandleSet(names, types, subclasses, arity, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+        HandleSeq result_set = atomSpaceAsync.getHandlesByTargetNames(
+                names, types, subclasses, arity, type, subclass, vh)->get_result();
+        return toOutputIterator(result, result_set);
     }
 
     /**
@@ -925,8 +930,9 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
-        HandleEntry * handleEntry = atomTable.getHandleSet(types, subclasses, arity, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+        HandleSeq result_set = atomSpaceAsync.getHandlesByTargetTypes(
+                types, subclasses, arity, type, subclass, vh)->get_result();
+        return toOutputIterator(result, result_set);
     }
 
     /**
@@ -954,7 +960,6 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);
         return getHandleSetFiltered(result, type, subclass, STIAboveThreshold(getAttentionalFocusBoundary()), vh);
 
     }
@@ -979,19 +984,14 @@ public:
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
      * @endcode
      */
-    template <typename OutputIterator, typename Predicate> OutputIterator
+    template <typename OutputIterator> OutputIterator
     getHandleSetFiltered(OutputIterator result,
                  Type type,
                  bool subclass,
-                 Predicate compare,
+                 AtomPredicate* compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
-        std::vector<Handle> hs;
-        // these two lines could be replaced using a function that filters
-        // a handleEntry list into an arbitrary sequence
-        toOutputIterator(back_inserter(hs), handleEntry);
-        return filter(hs.begin(), hs.end(), result, compare);
+        HandleSeq hs = atomSpaceAsync.filter(compare, type, subclass, vh)->get_result();
+        return toOutputIterator(result, hs);
     }
 
     /**
@@ -1022,14 +1022,9 @@ public:
                  bool subclass,
                  Compare compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        // get the handle set as a vector and sort it.
-        std::vector<Handle> hs;
-
-        getHandleSet(back_inserter(hs), type, subclass, vh);
-        sort(hs.begin(), hs.end(), compare);
-
-        // copy the vector and return the iterator.
-        return copy(hs.begin(), hs.end(), result);
+        HandleSeq result_set = atomSpaceAsync.getSortedHandleSet(
+                type, subclass, compare, vh)->get_result();
+        return toOutputIterator(result, result_set);
     }
 
 
@@ -1182,24 +1177,15 @@ public:
 
 // ---- filter templates
 
-    template<typename Predicate>
-    HandleSeq filter(Predicate compare, VersionHandle vh = NULL_VERSION_HANDLE) {
-        HandleSeq result;
-        _getNextAtomPrepare();
-        Handle next;
-        while ((next = _getNextAtom()) != Handle::UNDEFINED)
-            if (compare(next) && containsVersionedTV(next, vh))
-                result.push_back(next);
-        return result;
+    HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
+        return atomSpaceAsync.filter(compare,ATOM,true,vh)->get_result();
     }
 
-    template<typename OutputIterator, typename Predicate>
-    OutputIterator filter(OutputIterator it, Predicate compare, VersionHandle vh = NULL_VERSION_HANDLE) {
-        _getNextAtomPrepare();
-        Handle next;
-        while ((next = _getNextAtom()) != Handle::UNDEFINED)
-            if (compare(next) && containsVersionedTV(next, vh))
-                * it++ = next;
+    template<typename OutputIterator>
+    OutputIterator filter(OutputIterator it, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
+        HandleSeq result = atomSpaceAsync.filter(compare,ATOM,true,vh)->get_result();
+        foreach(Handle h, result) 
+            * it++ = h;
         return it;
     }
 
@@ -1211,86 +1197,84 @@ public:
      * @param struct or function embodying the criterion
      * @return The handles in the sequence that match the criterion.
      */
-    template<typename Predicate, typename InputIterator>
-    HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare) const {
+    template<typename InputIterator>
+    HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const {
         HandleSeq result;
-        for (; begin != end; begin++)
-            if (compare(*begin))
+        for (; begin != end; begin++) {
+            //std::cout << "evaluating atom " << atomAsString(*begin) << std::endl;
+            if ((*compare)(*cloneAtom(*begin))) {
+                //std::cout << "passed! " <<  std::endl;
                 result.push_back(*begin);
-
+            }
+        }
         return result;
     }
 
-    template<typename InputIterator, typename OutputIterator, typename Predicate>
-    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, Predicate compare) const {
+    template<typename InputIterator, typename OutputIterator>
+    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, AtomPredicate* compare) const {
         for (; begin != end; begin++)
             if (compare(*begin))
                 * it++ = *begin;
-
         return it;
     }
-
 
 // ---- custom filter templates
 
-    HandleSeq filter_type(Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
-        HandleSeq result;
-        _getNextAtomPrepare_type(type);
-        Handle next;
-        while ((next = _getNextAtom_type(type)) != Handle::UNDEFINED)
-            if (containsVersionedTV(next, vh))
-                result.push_back(next);
+    struct TruePredicate : public AtomPredicate {
+        TruePredicate(){}
+        virtual bool test(const Atom& atom) { return true; }
+    };
 
-        return result;
-    }
+    // redundant with getHandlesByType...
+    //HandleSeq filter_type(Type t, VersionHandle vh = NULL_VERSION_HANDLE) {
+    //    return atomSpaceAsync.filter<TruePredicate>(TruePredicate(),t,true,vh)->get_result();
+    //}
 
-    template<typename OutputIterator>
-    OutputIterator filter_type(OutputIterator it, Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
-        _getNextAtomPrepare_type(type);
-        Handle next;
-        while ((next = _getNextAtom_type(type)) != Handle::UNDEFINED)
-            if (containsVersionedTV(next, vh))
-                * it++ = next;
-
-        return it;
-    }
+    // redundant with getHandlesByType...
+    //template<typename OutputIterator>
+    //OutputIterator filter_type(OutputIterator it, Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
+        //HandleSeq result = atomSpaceAsync.filter(TruePredicate(),type,true,vh);
+        //foreach(Handle h, result) 
+            //* it++ = h;
+        //return it;
+    //}
 
     template<typename InputIterator>
     HandleSeq filter_InAttentionalFocus(InputIterator begin, InputIterator end) const {
-        return filter(begin, end, STIAboveThreshold(getAttentionalFocusBoundary()));
+        STIAboveThreshold sti_above(getAttentionalFocusBoundary());
+        return filter(begin, end, &sti_above);
     }
 
-    struct STIAboveThreshold {
+    struct STIAboveThreshold : public AtomPredicate {
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
-        bool operator()(const Handle& h) {
-            return TLB::getAtom(h)->getAttentionValue().getSTI() > threshold;
+        virtual bool test(const Atom& atom) {
+            return atom.getAttentionValue().getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
 
-    struct LTIAboveThreshold {
+    struct LTIAboveThreshold : public AtomPredicate {
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
-        bool operator()(const Handle& h) {
-            return TLB::getAtom(h)->getAttentionValue().getLTI() > threshold;
+        virtual bool test(const Atom& atom) {
+            return atom.getAttentionValue().getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };
 
 protected:
 
-    HandleIterator* _handle_iterator;
+    /*HandleIterator* _handle_iterator;
     TypeIndex::iterator type_itr;
     // these methods are used by the filter_* templates
     void _getNextAtomPrepare();
     Handle _getNextAtom();
     void _getNextAtomPrepare_type(Type type);
-    Handle _getNextAtom_type(Type type);
+    Handle _getNextAtom_type(Type type);*/
 
 private:
 
-    AtomTable atomTable;
     std::string emptyName;
 
     /* Boundary at which an atom is considered within the attentional

@@ -37,6 +37,8 @@
 namespace opencog
 {
 
+class Atom;
+
 // type and arity of Atoms, represented as short integers (16 bits)
 typedef unsigned short Type;
 typedef unsigned short Arity;
@@ -47,6 +49,23 @@ typedef boost::variant<Handle, Type, int, unsigned int, float, bool,
                        unsigned char, char, short int> Vertex;
 
 typedef std::vector<Vertex> VertexSeq;
+
+class HandlePredicate {
+public:
+    inline bool operator()(const Handle h) { return this->test(h); }
+    virtual bool test(const Handle h) { return true; }
+};
+class AtomPredicate {
+public:
+    inline bool operator()(const Atom& a) { return this->test(a); }
+    virtual bool test(const Atom&) { return true; }
+};
+class AtomComparator {
+public:
+    inline bool operator()(const Atom& a,const Atom& b) { return this->test(a,b); }
+    virtual bool test(const Atom&,const Atom&) { return true; }
+};
+
 
 } // namespace opencog
 

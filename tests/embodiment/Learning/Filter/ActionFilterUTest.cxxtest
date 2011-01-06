@@ -114,15 +114,15 @@ public:
         atomSpace.addNode(CONCEPT_NODE, trick_name);
 
         //fill the spacemap with the locations of Fido, stick and Paul
-        atomSpace.addSpaceInfo(true, pet_h, T1,
+        atomSpace.getSpaceServer().addSpaceInfo(true, pet_h, T1,
                                PET_X, PET_Y, PET_Z, 1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, obj_h,
+        atomSpace.getSpaceServer().addSpaceInfo(true, obj_h,
                                T1, OBJ_X, OBJ_Y, OBJ_Z,1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, avatar_h, T1,
+        atomSpace.getSpaceServer().addSpaceInfo(true, avatar_h, T1,
                                AVATAR_X1, AVATAR_Y1, AVATAR_Z1, 1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, avatar_h, T2,
+        atomSpace.getSpaceServer().addSpaceInfo(true, avatar_h, T2,
                                AVATAR_X2, AVATAR_Y2, AVATAR_Z2, 1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, avatar_h, T3,
+        atomSpace.getSpaceServer().addSpaceInfo(true, avatar_h, T3,
                                AVATAR_X3, AVATAR_Y3, AVATAR_Z3, 1, 1, 1, 0);
 
         FILE* mapFile = fopen( "file.bin", "wb+" );
@@ -175,23 +175,23 @@ public:
 
         //add AtTimeLink
         //for goto_obj(stick)
-        Handle t1_h = atomSpace.addTimeInfo(bd1_h, Temporal(0,
+        Handle t1_h = atomSpace.getTimeServer().addTimeInfo(bd1_h, Temporal(0,
                                             TIME_INTERVAL));
         //for drop
-        Handle t2_h = atomSpace.addTimeInfo(bd2_h, Temporal(TIME_INTERVAL,
+        Handle t2_h = atomSpace.getTimeServer().addTimeInfo(bd2_h, Temporal(TIME_INTERVAL,
                                             2 * TIME_INTERVAL));
         //for goto_obj(stick)
-        Handle t3_h = atomSpace.addTimeInfo(bd1_h, Temporal(10 * TIME_INTERVAL,
+        Handle t3_h = atomSpace.getTimeServer().addTimeInfo(bd1_h, Temporal(10 * TIME_INTERVAL,
                                             11 * TIME_INTERVAL));
         //for goto_obj(Paul)
-        Handle t4_h = atomSpace.addTimeInfo(bd2bis_h, Temporal(11 * TIME_INTERVAL,
+        Handle t4_h = atomSpace.getTimeServer().addTimeInfo(bd2bis_h, Temporal(11 * TIME_INTERVAL,
                                             12 * TIME_INTERVAL));
 
         //add trick concept
         Handle trick_h = atomSpace.addNode(CONCEPT_NODE, trick_name);
 
         //add AtTimeLink to trick concept for the first composite BD
-        Handle tt1_h = atomSpace.addTimeInfo(trick_h,
+        Handle tt1_h = atomSpace.getTimeServer().addTimeInfo(trick_h,
                                              Temporal(0, 2 * TIME_INTERVAL));
         //add memberLinks to the concept node
         HandleSeq m1_seq = list_of(t1_h)(tt1_h);
@@ -200,7 +200,7 @@ public:
         atomSpace.addLink(MEMBER_LINK, m2_seq);
 
         //add AtTimeLink to trick concept for the second composite BD
-        Handle tt2_h = atomSpace.addTimeInfo(trick_h, Temporal(10 * TIME_INTERVAL,
+        Handle tt2_h = atomSpace.getTimeServer().addTimeInfo(trick_h, Temporal(10 * TIME_INTERVAL,
                                              12 * TIME_INTERVAL));
         //add memberLinks to the concept node
         HandleSeq m3_seq = list_of(t3_h)(tt2_h);

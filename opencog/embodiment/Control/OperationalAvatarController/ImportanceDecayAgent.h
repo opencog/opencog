@@ -64,7 +64,7 @@ public:
     /**
      * Method to receive atom merge signals from AtomSpace
      */
-    void atomMerged(Handle h);
+    void atomMerged(AtomSpaceImpl* as, Handle h);
 
 }; // class
 }  // namespace

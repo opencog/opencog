@@ -693,7 +693,7 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
     evalLinkOutgoing.push_back(predicateNode);
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-    Handle atTimeLink = atomSpace.addTimeInfo(evalLink, tsValue);
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
 
     //if the action is grab or drop created/update isHoldingSomething
@@ -1136,7 +1136,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     evalLinkOutgoing.push_back(predicateNode);
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-    Handle atTimeLink = atomSpace.addTimeInfo(evalLink, tsValue);
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue);
     AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, agentNode);
 
 
@@ -1408,7 +1408,7 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
     evalLinkOutgoing.push_back(predicateNode);
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-    Handle atTimeLink = atomSpace.addTimeInfo(evalLink, tsValue);
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue);
     AtomSpaceUtil::updateLatestAvatarActionDone(atomSpace, atTimeLink, avatarNode);
 
     //if the action is grab or drop created/update isHoldingSomething
@@ -1522,7 +1522,7 @@ void PAI::processObjectSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
                 evalLinkOutgoing.push_back(predicateNode);
                 evalLinkOutgoing.push_back(predicateListLink);
                 Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-                atomSpace.addTimeInfo(evalLink, tsValue); // NOTE: latest info not handled because this is not used at all.
+                atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue); // NOTE: latest info not handled because this is not used at all.
             } else {
                 logger().warn("PAI - The object-signal param '%s' has no value!\n", paramName);
             }
@@ -1820,7 +1820,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         toUpdateHandles.push_back(objectNode);
 
         if (objRemoval) {
-            atomSpace.removeSpaceInfo(keepPreviousMap, objectNode, tsValue);
+            atomSpace.getSpaceServer().removeSpaceInfo(keepPreviousMap, objectNode, tsValue);
 
             // check if the object to be removed is marked as grabbed in
             // AvatarInterface. If so grabbed status should be unset.
@@ -2035,13 +2035,12 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosOffsetStr);
 
 
-
     // TODO: Check if this is really needed. It seems ImportanceDecayAgent
     // will eventually remove the atoms that represents the space maps and, this
     // way, these maps will be removed from spaceServer as well throught the
     // AtomSpace::atomRemoved() method connected to removal signal of AtomSpace.
-    if (!keepPreviousMap) atomSpace.cleanupSpaceServer();
-
+    if (!keepPreviousMap) atomSpace.getSpaceServer().cleanupSpaceServer();
+    // --
 
     this->petInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
 
@@ -2160,7 +2159,7 @@ Handle PAI::addActionPredicate(const char* predicateName, const PetAction& actio
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = atomSpace.addTimeInfo(evalLink, timestamp);
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp);
     AtomSpaceUtil::updateLatestPetActionPredicate(atomSpace, atTimeLink, predicateNode);
 
     return atTimeLink;
@@ -2197,7 +2196,7 @@ Vector PAI::addVectorPredicate(Handle objectNode, const std::string& predicateNa
     evalLinkOutgoing.push_back(listLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = atomSpace.addTimeInfo( evalLink, timestamp);
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo( evalLink, timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 
     Vector result(atof(X), atof(Y), atof(Z));
@@ -2240,7 +2239,7 @@ Rotation PAI::addRotationPredicate(Handle objectNode, unsigned long timestamp,
     evalLinkOutgoing.push_back(listLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = atomSpace.addTimeInfo( evalLink, timestamp);
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo( evalLink, timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 
     Rotation result(atof(pitch), atof(roll), atof(yaw));
@@ -2383,7 +2382,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
 
     logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
 
-    return atomSpace.addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle);
+    return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle);
 }
 
 Handle PAI::addPhysiologicalFeelingParam(const char* paramName,
@@ -2410,7 +2409,7 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
     evalLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, feelingParams));
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = atomSpace.addTimeInfo( evalLink, timestamp);
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo( evalLink, timestamp);
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, predicateNode);
     
     // setup the frame for the given physiological feeling

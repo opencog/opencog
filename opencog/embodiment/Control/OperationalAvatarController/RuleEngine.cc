@@ -635,8 +635,8 @@ void RuleEngine::logRelations(Logger::Level l)
         //get predicate name
         const string& pred_name = as.getName(as.getOutgoing(*h_it, 0));
         std::set<string>::iterator r_it = relationNameSet.find(pred_name);
-        const TruthValue& tv = as.getTV(*h_it);
-        if (r_it != relationNameSet.end() && tv.getMean() != 0.0) {
+        TruthValuePtr tv = as.getTV(*h_it);
+        if (r_it != relationNameSet.end() && tv->getMean() != 0.0) {
 
             //get the predicate arguments
             Handle list_h = as.getOutgoing(*h_it, 1);
@@ -653,7 +653,7 @@ void RuleEngine::logRelations(Logger::Level l)
                     message_str += string(", ");
             }
             message_str += string(") ");
-            message_str += tv.toString();
+            message_str += tv->toString();
 
             // log the message
             logger().log(l, message_str);
@@ -1074,7 +1074,7 @@ void RuleEngine::addSchemaDoneOrFailurePred(const std::string& schema,
 
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK,
                       evalLinkOutgoing);
-    Handle atTimeLink = atomSpace.addTimeInfo(evalLink, this->opc->getPAI().getLatestSimWorldTimestamp());
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, this->opc->getPAI().getLatestSimWorldTimestamp());
     AtomSpaceUtil::updateLatestSchemaPredicate(atomSpace, atTimeLink,
             predicateNode);
 
@@ -1956,11 +1956,11 @@ void RuleEngine::applyReinforcement(ReinforcementType type,
     }
 
     float strength = 0.0f;
-    const TruthValue& tv = atomSpace.getTV(implicationLink);
+    TruthValuePtr tv = atomSpace.getTV(implicationLink);
     switch (type) {
     case REWARD: {
         float reinforce = factor * config().get_double("RL_REWARD");
-        strength = tv.getMean() + reinforce;
+        strength = tv->getMean() + reinforce;
 
         if (strength > config().get_double("MAX_RULE_STRENGTH")) {
             strength = config().get_double("MAX_RULE_STRENGTH");
@@ -1970,7 +1970,7 @@ void RuleEngine::applyReinforcement(ReinforcementType type,
 
     case PUNISH: {
         float reinforceFactor = factor * config().get_double("RL_PUNISH");
-        strength = tv.getMean() - reinforceFactor;
+        strength = tv->getMean() - reinforceFactor;
         break;
     }
 
@@ -1985,7 +1985,7 @@ void RuleEngine::applyReinforcement(ReinforcementType type,
     if (seq.size() == 1) {
         Handle phraseNode = atomSpace.getOutgoing(seq[0], 0);
         logger().debug("RuleEngine - Update ImplicationLink TV mean for rule '%s'. OldTV '%.3f', newTV '%.3f'.",
-                     atomSpace.getName(phraseNode).c_str(), tv.getMean(), strength);
+                     atomSpace.getName(phraseNode).c_str(), tv->getMean(), strength);
     }
 
 #else

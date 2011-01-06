@@ -61,7 +61,7 @@ public:
 
     TimeServerUTest() {
         atomspace = new AtomSpace();
-        timeServer = &(atomspace->atomSpaceAsync.getTimeServer());
+        timeServer = &(atomspace->getTimeServer());
         for (int i = 0; i < N_TIMES; i++) {
             times[i] = new Temporal(i*2, i*2);
             char name[16];
@@ -1253,13 +1253,14 @@ public:
     }
 
     void testAddGetTimeInfo() {
-        AtomSpace atomSpace;
+        AtomSpace& atomSpace = *atomspace;
+        atomSpace.clear();
         Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
         Handle node2 = atomSpace.addNode(CONCEPT_NODE, "test2");
 
         Handle atTimeLink = timeServer->addTimeInfo(node1, 1000);
         TS_ASSERT(atTimeLink != Handle::UNDEFINED);
-        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
         TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 0) == timeNode);
         TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 1) == node1);
         vector<HandleTemporalPair> res;
@@ -1541,11 +1542,16 @@ public:
     }
 
     void testGetAtTimeLink() {
-        AtomSpace atomSpace;
+        AtomSpace& atomSpace = *atomspace;
+        atomSpace.clear();
+        printf("Nodes=%d\n",atomSpace.Nodes());
+        atomSpace.print();
         Handle h1 = atomSpace.addNode(CONCEPT_NODE, "test1");
         Handle h2 = atomSpace.addNode(CONCEPT_NODE, "test2");
         Temporal* t1 = new Temporal(1000);
         Temporal* t2 = new Temporal(500, 1500);
+        printf("After add\n");
+        atomSpace.print();
 
         Handle atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t1));
         TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
@@ -1556,7 +1562,11 @@ public:
         atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h2, t2));
         TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
 
+        printf("After gets\n");
+        atomSpace.print();
         timeServer->addTimeInfo(h1, *t1);
+        printf("After addTimeINfo\n");
+        atomSpace.print();
 
         atTimeLink = timeServer->getAtTimeLink(HandleTemporalPair(h1, t1));
         TS_ASSERT(TLB::isValidHandle(atTimeLink));
@@ -1605,7 +1615,8 @@ public:
     }
 
     void testTimeAtomsRemovalByDecay() {
-        AtomSpace atomSpace;
+        AtomSpace& atomSpace = *atomspace;
+        atomSpace.clear();
 
         Handle node = atomSpace.addNode(CONCEPT_NODE, "test");
         Handle atTimeLink = timeServer->addTimeInfo(node, 1000);
@@ -1631,7 +1642,8 @@ public:
     }
 
     void testRemoveTimeInfo() {
-        AtomSpace atomSpace;
+        AtomSpace& atomSpace = *atomspace;
+        atomSpace.clear();
         Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
         TS_ASSERT(!timeServer->removeTimeInfo(node1, 1000));
         TS_ASSERT(!timeServer->removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));

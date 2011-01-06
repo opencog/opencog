@@ -157,7 +157,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
     std::vector<HandleTemporalPair> htps;
     //get the first map at tl or if not before tl
     Temporal temp_right_after(tl + 1, tu);
-    _atomSpace.getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
+    _atomSpace.getTimeServer().getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
                            TemporalTable::PREVIOUS_BEFORE_START_OF);
     OC_ASSERT(!htps.empty(),
                      "There must be a map that starts at %d or at least before %d",
@@ -165,7 +165,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
     //try to get the map
     // get temporal pairs that start within temp_right_after, to not get
     //twice the first map
-    _atomSpace.getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
+    _atomSpace.getTimeServer().getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
                            TemporalTable::STARTS_WITHIN);
 
     const SpaceServer::SpaceMap* pre_sm = NULL; //previous spaceMap
@@ -174,7 +174,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
     for (std::vector<HandleTemporalPair>::const_iterator htp_it = htps.begin();
             htp_it != htps.end(); ++htp_it) {
         //determine spaceMap
-        Handle smh = _atomSpace.getAtTimeLink(*htp_it);
+        Handle smh = _atomSpace.getTimeServer().getAtTimeLink(*htp_it);
         OC_ASSERT(smh != Handle::UNDEFINED,
                          "There must be a spaceMap for that handle");
         const SpaceServer::SpaceMap& sm = _atomSpace.getSpaceServer().getMap(smh);
@@ -294,7 +294,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                 //retreive all actions of the agent involved in the perception
                 //in time interval of the SpaceMap
                 std::list<HandleTemporalPair> htp;
-                _atomSpace.getTimeInfo(back_inserter(htp),
+                _atomSpace.getTimeServer().getTimeInfo(back_inserter(htp),
                                        Handle::UNDEFINED,
                                        Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
 

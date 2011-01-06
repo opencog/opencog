@@ -17,10 +17,15 @@ class AtomSpaceAsyncUTest;
 
 namespace opencog {
 
+class AtomSpace;
+class SavingLoading;
+
 class AtomSpaceAsync {
 
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceAsyncUTest;
+    friend class AtomSpace;
+    friend class SavingLoading;
 
     bool processingRequests;
     boost::thread m_Thread;
@@ -76,7 +81,11 @@ public:
             const TruthValue& tvn = TruthValue::DEFAULT_TV() ) {
         // We need to clone the TV as the caller's TV may go out of scope
         // before the request is processed.
-        TruthValue* tv = tvn.clone();
+        const TruthValue* tv;
+        if (!tvn.isNullTv()) tv = tvn.clone();
+        // Unless it is a NULL_TV as this can't be cloned
+        else tv = &TruthValue::NULL_TV();
+
         HandleRequest hr(new AddLinkASR(&atomspace,t,outgoing,tv));
         requestQueue.push(hr);
         return hr;
@@ -104,6 +113,18 @@ public:
         HandleRequest hr(new GetLinkHandleASR(&atomspace,t,outgoing));
         requestQueue.push(hr);
         return hr;
+    }
+
+    AtomRequest getAtom(const Handle h) {
+        AtomRequest r(new GetAtomASR(&atomspace,h));
+        requestQueue.push(r);
+        return r;
+    }
+
+    BoolRequest commitAtom(const Atom& a) {
+        BoolRequest r(new CommitAtomASR(&atomspace,a));
+        requestQueue.push(r);
+        return r;
     }
 
     /**
@@ -154,6 +175,24 @@ public:
     }
 
     /**
+     * Get the number of Nodes in the AtomSpace
+     */
+    IntRequest nodeCount(const VersionHandle& vh) {
+        IntRequest ir(new NodeCountASR(&atomspace,vh));
+        requestQueue.push(ir);
+        return ir;
+    }
+
+    /**
+     * Get the number of Nodes in the AtomSpace
+     */
+    IntRequest linkCount(const VersionHandle& vh) {
+        IntRequest ir(new LinkCountASR(&atomspace,vh));
+        requestQueue.push(ir);
+        return ir;
+    }
+
+    /**
      * Print out the AtomSpace to the referenced stream.
      * @param output  the output stream where the atoms will be printed.
      * @param type  the type of atoms that should be printed.
@@ -170,6 +209,13 @@ public:
         VoidRequest pr(new PrintASR(&atomspace,output,type,subclass));
         requestQueue.push(pr);
         return pr;
+    }
+
+    //! Clear the atomspace, remove all atoms
+    VoidRequest clear() {
+        VoidRequest r(new ClearASR(&atomspace));
+        requestQueue.push(r);
+        return r;
     }
 
     /**
@@ -355,6 +401,158 @@ public:
     }
 
     /**
+     * Returns the set of atoms of a given name (atom type and subclasses
+     * optionally).
+     *
+     * @param name The desired name of the atoms.
+     * @param type The type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @return The set of atoms of the given type and name.
+     */
+    HandleSeqRequest getHandlesByName(const std::string& name, Type type,
+                 bool subclass=true, VersionHandle vh = NULL_VERSION_HANDLE) {
+        HandleSeqRequest hr(new GetHandlesByNameASR(&atomspace,name,type,subclass,vh));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally).
+     *
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     */
+    HandleSeqRequest getHandlesByType(Type type,
+                 bool subclass = false,
+                 VersionHandle vh = NULL_VERSION_HANDLE) {
+        HandleSeqRequest hr(new GetHandlesByTypeASR(&atomspace,type,subclass,vh));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
+     * Returns the set of atoms of a given type which have atoms of a
+     * given target type in their outgoing set (subclasses optionally).
+     *
+     * @param type The desired type.
+     * @param targetType The desired target type.
+     * @param subclass Whether type subclasses should be considered.
+     * @param targetSubclass Whether target type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param targetVh only atoms whose target contains versioned TVs with the given VersionHandle are returned.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @return The set of atoms of a given type and target type (subclasses
+     * optionally).
+     */
+    HandleSeqRequest getHandlesByTarget(Type type,
+            Type targetType,
+                 bool subclass, bool targetSubclass,
+                 VersionHandle vh = NULL_VERSION_HANDLE,
+                 VersionHandle targetVh = NULL_VERSION_HANDLE) {
+        HandleSeqRequest hr(new GetHandlesByTargetASR(&atomspace,type,targetType,
+                    subclass,targetSubclass, vh, targetVh));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
+     * Returns the set of atoms with a given target handle in their
+     * outgoing set (atom type and its subclasses optionally).
+     *
+     * @param handle The handle that must be in the outgoing set of the atom.
+     * @param type The type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @return The set of atoms of the given type with the given handle in
+     * their outgoing set.
+     */
+    HandleSeqRequest getHandlesByTargetHandle( Handle handle, Type type,
+                 bool subclass, VersionHandle vh = NULL_VERSION_HANDLE) {
+        HandleSeqRequest hr(new GetHandlesByTargetHandleASR(&atomspace,handle,type,
+                    subclass, vh));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
+     * Returns the set of atoms whose outgoing set contains at least one
+     * atom with the given name and type (atom type and subclasses
+     * optionally).
+     *
+     * @param targetName The name of the atom in the outgoing set of the searched
+     * atoms.
+     * @param targetType The type of the atom in the outgoing set of the searched
+     * atoms.
+     * @param type type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh return only atoms that contains versioned TVs with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @return The set of atoms of the given type and name whose outgoing
+     * set contains at least one atom of the given type and name.
+     */
+    HandleSeqRequest getHandlesByTargetName(
+                 const char* targetName,
+                 Type targetType,
+                 Type type,
+                 bool subclass,
+                 VersionHandle vh = NULL_VERSION_HANDLE,
+                 VersionHandle targetVh = NULL_VERSION_HANDLE) {
+        HandleSeqRequest hr(new GetHandlesByTargetNameASR(&atomspace,
+                    targetName,targetType,type,subclass, vh, targetVh));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
+     * Returns the set of atoms with the given target names and/or types
+     * (order is considered) in their outgoing sets, where the type
+     * and subclasses arguments of the searched atoms are optional.
+     *
+     * @param names An array of names to match the outgoing sets of the searched
+     * atoms. This array (or each of its elements) can be null, if
+     * the names do not matter or if do not apply to the specific search.
+     * Note that if this array is not null, it must contain "arity" elements.
+     * @param types An array of target types to match the types of the atoms in
+     * the outgoing set of searched atoms. If array of names is not null,
+     * this parameter *cannot* be null as well. Besides, if an element in a
+     * specific position in the array of names is not null, the corresponding
+     * type element in this array *cannot* be NOTYPE as well.
+     * @param subclasses An array of boolean values indicating whether each of the
+     * above types must also consider subclasses. This array can be null,
+     * what means that subclasses will not be considered. Not that if this
+     * array is not null, it must contains "arity" elements.
+     * @param arity The length of the outgoing set of the atoms being searched.
+     * @param type The optional type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh return only atoms that contains versioned TVs with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @return The set of atoms of the given type with the matching
+     * criteria in their outgoing set.
+     */
+    HandleSeqRequest getHandlesByTargetNames(
+                 const char** names,
+                 Type* types,
+                 bool* subclasses,
+                 Arity arity,
+                 Type type,
+                 bool subclass,
+                 VersionHandle vh = NULL_VERSION_HANDLE) {
+        HandleSeqRequest hr(new GetHandlesByTargetNamesASR(&atomspace,names,
+                    types, subclasses, arity, type, subclass, vh));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
      * Returns the set of atoms with the given target handles and types
      * (order is considered) in their outgoing sets, where the type and
      * subclasses of the atoms are optional.
@@ -385,6 +583,70 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) {
         HandleSeqRequest hr(new GetHandlesByOutgoingSetASR(&atomspace,
                     handles,types,subclasses,arity,type,subclass,vh));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
+     * Returns the set of atoms with the given target names and/or types
+     * (order is considered) in their outgoing sets, where the type
+     * and subclasses arguments of the searched atoms are optional.
+     *
+     * @param types An array of target types to match the types of the atoms in
+     * the outgoing set of searched atoms. This parameter can be null (or any of
+     * its elements can be NOTYPE), what means that the type doesnt matter.
+     * Not that if this array is not null, it must contains "arity" elements.
+     * @param subclasses An array of boolean values indicating whether each of the
+     * above types must also consider subclasses. This array can be null,
+     * what means that subclasses will not be considered. Not that if this
+     * array is not null, it must contains "arity" elements.
+     * @param arity The length of the outgoing set of the atoms being searched.
+     * @param type The optional type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @return The set of atoms of the given type with the matching
+     * criteria in their outgoing set.
+     */
+    HandleSeqRequest getHandlesByTargetTypes(
+                 Type* types,
+                 bool* subclasses,
+                 Arity arity,
+                 Type type,
+                 bool subclass,
+                 VersionHandle vh = NULL_VERSION_HANDLE) {
+        HandleSeqRequest hr(new GetHandlesByTargetTypesASR(&atomspace,
+                    types,subclasses,arity,type,subclass,vh));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally), sorted according to the given comparison
+     * structure.
+     *
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     * @param compare The comparison struct to use in the sort.
+     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     *
+     * @return The sorted set of atoms of a given type (subclasses optionally).
+     */
+    HandleSeqRequest getSortedHandleSet(
+                 Type type,
+                 bool subclass,
+                 AtomComparator* compare,
+                 VersionHandle vh = NULL_VERSION_HANDLE) {
+        HandleSeqRequest hr(new GetSortedHandleSetASR(&atomspace, type, subclass, compare, vh));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    HandleSeqRequest filter(AtomPredicate* p, Type t, bool subclass = true,
+            VersionHandle vh = NULL_VERSION_HANDLE) {
+        HandleSeqRequest hr(new FilterASR(&atomspace, p,t,subclass,vh));
         requestQueue.push(hr);
         return hr;
     }

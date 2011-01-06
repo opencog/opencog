@@ -178,11 +178,11 @@ public:
         TS_ASSERT(av1.getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av1.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av1.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
-        const TruthValue& tv1 = atomSpace.getTV(h1);
-        TS_ASSERT(tv1.getType() == tvs[0]->getType());
-        TS_ASSERT(tv1.getMean() == tvs[0]->getMean());
-        TS_ASSERT(tv1.getCount() == tvs[0]->getCount());
-        TS_ASSERT(fabs(tv1.getConfidence() - tvs[0]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        TruthValuePtr tv1 = atomSpace.getTV(h1);
+        TS_ASSERT(tv1->getType() == tvs[0]->getType());
+        TS_ASSERT(tv1->getMean() == tvs[0]->getMean());
+        TS_ASSERT(tv1->getCount() == tvs[0]->getCount());
+        TS_ASSERT(fabs(tv1->getConfidence() - tvs[0]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
         Handle h2 = atomSpace.getHandle(CONCEPT_NODE, NODE2_NAME);
         TS_ASSERT(h2 != Handle::UNDEFINED);
@@ -191,11 +191,11 @@ public:
         TS_ASSERT(av2.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av2.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        const TruthValue& tv2 = atomSpace.getTV(h2);
-        TS_ASSERT(tv2.getType() == tvs[1]->getType());
-        TS_ASSERT(tv2.getMean() == tvs[1]->getMean());
-        TS_ASSERT(tv2.getCount() == tvs[1]->getCount());
-        TS_ASSERT(fabs(tv2.getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        TruthValuePtr tv2 = atomSpace.getTV(h2);
+        TS_ASSERT(tv2->getType() == tvs[1]->getType());
+        TS_ASSERT(tv2->getMean() == tvs[1]->getMean());
+        TS_ASSERT(tv2->getCount() == tvs[1]->getCount());
+        TS_ASSERT(fabs(tv2->getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
         Handle h3 = atomSpace.getHandle(CONCEPT_NODE, NODE3_NAME);
         TS_ASSERT(h3 != Handle::UNDEFINED);
@@ -204,12 +204,12 @@ public:
         TS_ASSERT(av3.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av3.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        const TruthValue& tv3 = atomSpace.getTV(h3);
-        TS_ASSERT(tv3.getType() == tvs[2]->getType());
-        TS_ASSERT(tv3.getMean() == tvs[2]->getMean());
-        TS_ASSERT(tv3.getCount() == tvs[2]->getCount());
-        TS_ASSERT(fabs(tv3.getConfidence() - tvs[2]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(((const CompositeTruthValue&)tv3).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[2])->getNumberOfVersionedTVs());
+        TruthValuePtr tv3 = atomSpace.getTV(h3);
+        TS_ASSERT(tv3->getType() == tvs[2]->getType());
+        TS_ASSERT(tv3->getMean() == tvs[2]->getMean());
+        TS_ASSERT(tv3->getCount() == tvs[2]->getCount());
+        TS_ASSERT(fabs(tv3->getConfidence() - tvs[2]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(((const CompositeTruthValue&)*(tv3.get())).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[2])->getNumberOfVersionedTVs());
 
         Handle h4 = atomSpace.getHandle(CONCEPT_NODE, NODE4_NAME);
         TS_ASSERT(h4 != Handle::UNDEFINED);
@@ -218,14 +218,14 @@ public:
         TS_ASSERT(av4.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av4.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        const TruthValue& tv4 = atomSpace.getTV(h4);
-        TS_ASSERT(tv4.getType() == tvs[3]->getType());
-        TS_ASSERT(tv4.getMean() == tvs[3]->getMean());
-        TS_ASSERT(tv4.getCount() == tvs[3]->getCount());
-        TS_ASSERT(fabs(tv4.getConfidence() - tvs[3]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(((const CompositeTruthValue&)tv4).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[3])->getNumberOfVersionedTVs());
+        TruthValuePtr tv4 = atomSpace.getTV(h4);
+        TS_ASSERT(tv4->getType() == tvs[3]->getType());
+        TS_ASSERT(tv4->getMean() == tvs[3]->getMean());
+        TS_ASSERT(tv4->getCount() == tvs[3]->getCount());
+        TS_ASSERT(fabs(tv4->getConfidence() - tvs[3]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(((const CompositeTruthValue&)*(tv4.get())).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[3])->getNumberOfVersionedTVs());
 
-        const TruthValue& versionedTv = ((const CompositeTruthValue&)tv4).getVersionedTV(VersionHandle(HYPOTHETICAL, h1));
+        const TruthValue& versionedTv = ((const CompositeTruthValue&)*(tv4.get())).getVersionedTV(VersionHandle(HYPOTHETICAL, h1));
         TS_ASSERT(!versionedTv.isNullTv());
         TS_ASSERT(versionedTv.getType() == tvs[0]->getType());
         TS_ASSERT(versionedTv.getMean() == tvs[0]->getMean());
@@ -239,20 +239,20 @@ public:
         TS_ASSERT(av5.getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av5.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        const TruthValue& tv5 = atomSpace.getTV(h5);
-        TS_ASSERT(tv5.getType() == tvs[4]->getType());
-        TS_ASSERT(tv5.getMean() == tvs[4]->getMean());
-        TS_ASSERT(tv5.getCount() == tvs[4]->getCount());
-        TS_ASSERT(fabs(tv5.getConfidence() - tvs[4]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(((const CompositeTruthValue&)tv5).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[4])->getNumberOfVersionedTVs());
+        TruthValuePtr tv5 = atomSpace.getTV(h5);
+        TS_ASSERT(tv5->getType() == tvs[4]->getType());
+        TS_ASSERT(tv5->getMean() == tvs[4]->getMean());
+        TS_ASSERT(tv5->getCount() == tvs[4]->getCount());
+        TS_ASSERT(fabs(tv5->getConfidence() - tvs[4]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(((const CompositeTruthValue&)*tv5.get()).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[4])->getNumberOfVersionedTVs());
 
-        const TruthValue& versionedTv1 = ((const CompositeTruthValue&)tv5).getVersionedTV(VersionHandle(CONTEXTUAL, h2));
+        const TruthValue& versionedTv1 = ((const CompositeTruthValue&)*tv5.get()).getVersionedTV(VersionHandle(CONTEXTUAL, h2));
         TS_ASSERT(!versionedTv1.isNullTv());
         TS_ASSERT(versionedTv1.getType() == tvs[1]->getType());
         TS_ASSERT(versionedTv1.getMean() == tvs[1]->getMean());
         TS_ASSERT(versionedTv1.getCount() == tvs[1]->getCount());
         TS_ASSERT(fabs(versionedTv1.getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-        const TruthValue& versionedTv2 = ((const CompositeTruthValue&)tv5).getVersionedTV(VersionHandle(HYPOTHETICAL, h2));
+        const TruthValue& versionedTv2 = ((const CompositeTruthValue&)*tv5.get()).getVersionedTV(VersionHandle(HYPOTHETICAL, h2));
         TS_ASSERT(!versionedTv2.isNullTv());
         TS_ASSERT(versionedTv2.getType() == tvs[1]->getType());
         TS_ASSERT(versionedTv2.getMean() == tvs[1]->getMean());

@@ -458,8 +458,8 @@ public:
     //! Remove Atom
     virtual bool removeAtom(pHandle h);
 
-    //! return a random handle of type T
-    pHandle getRandomHandle(Type T);
+    // return a random handle of type T
+    //pHandle getRandomHandle(Type T);
 
     //! get a number of high STI handles
     pHandleSeq getImportantHandles(int number);

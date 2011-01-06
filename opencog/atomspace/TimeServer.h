@@ -58,11 +58,14 @@ class TimeServer
     AtomSpaceAsync* atomspace;
     SpaceServer* spaceServer;
 
+    // TS-wide mutex, since add/remove atom signals are called from AtomSpace event-loop
+    mutable boost::mutex ts_mutex;
+
 public:
 
-    static int timeServerEntries;
 
     // USED TO SEEK MEMORY LEAK
+    //static int timeServerEntries;
     //static std::set<Temporal> temporalSet;
 
     TimeServer(AtomSpaceAsync& a, SpaceServer* ss);
@@ -91,6 +94,7 @@ public:
     get(OutputIterator outIt, Handle h, const Temporal& t = UNDEFINED_TEMPORAL,
         TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
 
+        boost::mutex::scoped_lock lock(ts_mutex);
         HandleTemporalPairEntry* hte = table->get(h, t, criterion);
         HandleTemporalPairEntry* toRemove = hte;
 
@@ -279,7 +283,6 @@ public:
      *       in TimeServer:
      *           std::list<HandleTemporalPair> ret;
      *           timeServer.get(back_inserter(ret), Handle::UNDEFINED);
-     :A
      */
     template<typename OutputIterator> OutputIterator
     getTimeInfo(OutputIterator outIt,

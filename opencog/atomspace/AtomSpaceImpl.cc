@@ -653,6 +653,8 @@ bool AtomSpaceImpl::commitAtom(const Atom& a)
     // Get the version in the TLB
     Atom* original = TLB::getAtom(a.getHandle());
     // The only mutable properties of atoms are the TV and AttentionValue
+    // TODO: this isn't correct, trails, flags and other things might change
+    // too...
     original->setTruthValue(a.getTruthValue());
     original->setAttentionValue(a.getAttentionValue());
     return true;

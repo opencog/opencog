@@ -1193,17 +1193,17 @@ bool AtomSpaceWrapper::removeAtom(pHandle h)
 #endif
 }
 
-
-pHandle AtomSpaceWrapper::getRandomHandle(Type T)
+/*pHandle AtomSpaceWrapper::getRandomHandle(Type t)
 {
     AtomSpace *a = atomspace;
-    HandleSeq handles=a->filter_type(T);
+    HandleSeq handles;
+    a->getHandleSet(back_inserter(handles),t);
 
     if (handles.size()==0)
         return PHANDLE_UNDEFINED;
 
     return realToFakeHandle(handles[rand()%handles.size()], NULL_VERSION_HANDLE);
-}
+}*/
 
 pHandleSeq AtomSpaceWrapper::getImportantHandles(int number)
 {
@@ -1429,9 +1429,8 @@ int AtomSpaceWrapper::getArity(pHandle h) const
 pHandleSeq AtomSpaceWrapper::filter_type(Type t) 
 {
     HandleSeq s;
-    s = atomspace->filter_type(t);
+    atomspace->getHandleSet(back_inserter(s),t);
     return realToFakeHandles(s, true);
-
 }
 
 Type AtomSpaceWrapper::getType(const pHandle h) const

@@ -26,13 +26,13 @@
 
 #include <opencog/util/Logger.h>
 
-//#define DPRINTF printf
-#define DPRINTF(...)
+#define DPRINTF printf
+//#define DPRINTF(...)
 
 using namespace opencog;
 
-int TimeServer::timeServerEntries = 0;
 // USED TO SEEK MEMORY LEAK
+//int TimeServer::timeServerEntries = 0;
 //std::set<Temporal> TimeServer::temporalSet;
 
 void TimeServer::init()
@@ -44,6 +44,9 @@ void TimeServer::init()
 TimeServer::TimeServer(AtomSpaceAsync& a, SpaceServer *_ss) : atomspace(&a), spaceServer(_ss)
 {
     init();
+    // Connect signals
+    a.addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1, _2));
+    a.removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1, _2));
 }
 
 TimeServer::~TimeServer()
@@ -61,7 +64,7 @@ void TimeServer::add(Handle h, const Temporal& t)
     //   temporalSet.insert(t);
     //   cout << "Total unique entrys: " << temporalSet.size() << endl;
     //}
-
+    boost::mutex::scoped_lock lock(ts_mutex);
     table->add(h, t);
     if (t.getUpperBound() > latestTimestamp) {
         latestTimestamp = t.getUpperBound();
@@ -70,11 +73,13 @@ void TimeServer::add(Handle h, const Temporal& t)
 
 bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion)
 {
+    boost::mutex::scoped_lock lock(ts_mutex);
     return table->remove(h, t, criterion);
 }
 
 unsigned long TimeServer::getLatestTimestamp() const
 {
+    boost::mutex::scoped_lock lock(ts_mutex);
     return latestTimestamp;
 }
 
@@ -92,6 +97,7 @@ TimeServer::TimeServer(const TimeServer& other)
 
 void TimeServer::clear()
 {
+    boost::mutex::scoped_lock lock(ts_mutex);
     delete table;
     init();
 }
@@ -115,7 +121,7 @@ Handle TimeServer::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv
 Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv)
 {
     DPRINTF("TimeServer::addTimeInfo - temp init\n");
-    Handle timeNode = atomspace->addNode(TIME_NODE, timeNodeName.c_str())->get_result();
+    Handle timeNode = atomspace->addNode(TIME_NODE, timeNodeName)->get_result();
     DPRINTF("TimeServer::addTimeInfo - temp 1\n");
     HandleSeq atTimeLinkOutgoing;
     atTimeLinkOutgoing.push_back(timeNode);
@@ -135,7 +141,7 @@ bool TimeServer::removeTimeInfo(Handle h, const Temporal& t,
         TemporalTable::TemporalRelationship criterion,
         bool removeDisconnectedTimeNodes, bool recursive)
 {
-    DPRINTF("TimeServer::removeTimeInfo(%s, %s, %d, %s, %d, %d)\n", atomspace->atomAsString(h)->get_result().c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
+    DPRINTF("TimeServer::removeTimeInfo(%s, %s, %s, %d, %d)\n", atomspace->atomAsString(h)->get_result().c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
 
     std::list<HandleTemporalPair> existingEntries;
     get(back_inserter(existingEntries), h, t, criterion);
@@ -143,10 +149,10 @@ bool TimeServer::removeTimeInfo(Handle h, const Temporal& t,
     for (std::list<HandleTemporalPair>::const_iterator itr = existingEntries.begin();
             itr != existingEntries.end(); itr++) {
         Handle atTimeLink = getAtTimeLink(*itr);
-        DPRINTF("Got atTimeLink = %p\n", atTimeLink);
+        DPRINTF("Got atTimeLink = %u\n", atTimeLink.value());
         if (atomspace->isValidHandle(atTimeLink)->get_result()) {
             Handle timeNode = atomspace->getOutgoing(atTimeLink, 0)->get_result();
-            DPRINTF("Got timeNode = %p\n", timeNode);
+            DPRINTF("Got timeNode = %u\n", timeNode.value());
             int arityOfTimeLink = atomspace->getArity(atTimeLink)->get_result();
             OC_ASSERT(arityOfTimeLink == 2,
                     "TimeServer::removeTimeInfo: Got invalid arity for AtTimeLink = %d\n",
@@ -180,7 +186,7 @@ Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp) const
     DPRINTF("TimeServer::getAtTimeLink: t = %s, h = %s\n", t.toString().c_str(), atomspace->atomAsString(h)->get_result().c_str());
 
     Handle timeNode = atomspace->getHandle(TIME_NODE, t.getTimeNodeName())->get_result();
-    DPRINTF("timeNode = %p\n", timeNode);
+    DPRINTF("timeNode = %u\n", timeNode.value());
     if (atomspace->isValidHandle(timeNode)->get_result()) {
         HandleSeq atTimeLinkOutgoing(2);
         atTimeLinkOutgoing[0] = timeNode;
@@ -211,10 +217,10 @@ void TimeServer::atomAdded(AtomSpaceImpl* a, Handle h)
                 Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
                 Handle timed_h = a->getOutgoing(h, 1);
                 add(timed_h, t);
-            } else logger().warn("AtomSpace::atomAdded: Invalid atom type "
+            } else logger().warn("TimeServer::atomAdded: Invalid atom type "
                     "at the first element in an AtTimeLink's outgoing: "
                     "%s\n", classserver().getTypeName(a->getType(timeNode)).c_str());
-        } else logger().warn("AtomSpace::atomAdded: Invalid arity for an "
+        } else logger().warn("TimeServer::atomAdded: Invalid arity for an "
                 "AtTimeLink: %d (expected: 2)\n", a->getArity(h));
     }
 }

@@ -50,7 +50,7 @@
 
 using namespace opencog;
 
-void Atom::init(Type t, const TruthValue& tv)
+void Atom::init(Type t, const TruthValue& tv, const AttentionValue& av)
 {
     handle = Handle::UNDEFINED;
     flags = 0;
@@ -60,11 +60,12 @@ void Atom::init(Type t, const TruthValue& tv)
 
     truthValue = NULL;
     setTruthValue(tv);
+    setAttentionValue(av);
 }
 
-Atom::Atom(Type type, const TruthValue& tv )
+Atom::Atom(Type type, const TruthValue& tv, const AttentionValue& av)
 {
-    init(type, tv);
+    init(type, tv, av);
 }
 
 Atom::~Atom() throw (RuntimeException)

@@ -149,15 +149,15 @@ public:
 
         // get the resulting strengths
         strength_t res_mammal_lion_s =
-            _asw->getTV(mem_mammal_lion).getMean();
+            _asw->getTV(mem_mammal_lion)->getMean();
         strength_t res_carnivor_lion_s =
-            _asw->getTV(mem_carnivor_lion).getMean();
+            _asw->getTV(mem_carnivor_lion)->getMean();
         strength_t res_striped_lion_s =
-            _asw->getTV(mem_striped_lion).getMean();
+            _asw->getTV(mem_striped_lion)->getMean();
         strength_t res_predator_lion_s =
-            _asw->getTV(mem_predator_lion).getMean();
+            _asw->getTV(mem_predator_lion)->getMean();
         strength_t res_facingExtincion_lion_s =
-            _asw->getTV(mem_facingExtincion_lion).getMean();
+            _asw->getTV(mem_facingExtincion_lion)->getMean();
 
         // calculate their expected results
         strength_t expect_mammal_lion_s =

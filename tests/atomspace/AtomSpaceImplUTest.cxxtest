@@ -622,7 +622,7 @@ public:
         
         logger().debug("STISort");
 
-        AttentionValue::STISort<AtomSpaceImpl> sSort(atomSpace);
+        AttentionValue::STISort sSort();
         vector<Handle> sAtoms;
         atomSpace->getSortedHandleSet(back_inserter(sAtoms), ATOM, true, sSort);
         for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
@@ -631,7 +631,7 @@ public:
         
         logger().debug("LTIAndTVAscendingSort");
         
-        AttentionValue::LTIAndTVAscendingSort<AtomSpaceImpl> latvSort(atomSpace);
+        AttentionValue::LTIAndTVAscendingSort latvSort();
         vector<Handle> latvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(latvAtoms), ATOM, true, latvSort);
         for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
@@ -640,7 +640,7 @@ public:
         
         logger().debug("LTIThenTVAscendingSort");
         
-        AttentionValue::LTIThenTVAscendingSort<AtomSpaceImpl> lttvSort(atomSpace);
+        AttentionValue::LTIThenTVAscendingSort lttvSort();
         vector<Handle> lttvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(lttvAtoms), ATOM, true, lttvSort);
         for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {

@@ -148,7 +148,7 @@ public:
 
     /** Copy constructor, does NOT copy atom table membership! */
     Link(const Link &l)
-        : Atom(l.getType(), l.getTruthValue())
+        : Atom(l.getType(), l.getTruthValue(), l.getAttentionValue())
     {
         init(l.getOutgoingSet());
     }

@@ -93,14 +93,14 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
         
 
         const std::string& name = atomSpace->getName( semeNodes[i] );
-        const TruthValue& tv = atomSpace->getTV( semeNodes[i]);
+        TruthValuePtr tv = atomSpace->getTV( semeNodes[i]);
 
         strength_t mean = 1.0;
         count_t count = 1.0;
-        if ( tv.getType( ) == SIMPLE_TRUTH_VALUE ) {
-            const SimpleTruthValue& stv = *dynamic_cast<const SimpleTruthValue*>( &tv );
-            mean = stv.getMean( );
-            count = stv.getCount( );
+        if ( tv->getType() == SIMPLE_TRUTH_VALUE ) {
+            const SimpleTruthValue& stv = *dynamic_cast<const SimpleTruthValue*>( tv.get() );
+            mean = stv.getMean();
+            count = stv.getCount();
         } // if 
 
         mean = static_cast<strength_t>( count ) / 
@@ -142,14 +142,14 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
     // enhance the class count
     std::map<Handle, bool >::const_iterator it;
     for( it = nodeStatus.begin( ); it != nodeStatus.end( ); ++it ) {
-        const TruthValue& tv = atomSpace->getTV( it->first );
+        TruthValuePtr tv = atomSpace->getTV( it->first );
 
         strength_t mean = 1;
         count_t count = 1;
-        if ( tv.getType( ) == SIMPLE_TRUTH_VALUE ) {
-            const SimpleTruthValue& stv = *dynamic_cast<const SimpleTruthValue*>( &tv );
-            mean = stv.getMean( );
-            count = stv.getCount( );
+        if ( tv->getType() == SIMPLE_TRUTH_VALUE ) {
+            const SimpleTruthValue& stv = *dynamic_cast<const SimpleTruthValue*>( tv.get() );
+            mean = stv.getMean();
+            count = stv.getCount();
         } // if
 
         mean = static_cast<strength_t>( count ) / 

@@ -939,7 +939,7 @@ public:
     getHandleSetFiltered(OutputIterator result,
                  Type type,
                  bool subclass,
-                 Predicate compare,
+                 AtomPredicate* compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
         HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
@@ -972,22 +972,42 @@ public:
      *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
      * @endcode
      */
-    template <typename OutputIterator, typename Compare> OutputIterator
+    template <typename OutputIterator> OutputIterator
     getSortedHandleSet(OutputIterator result,
                  Type type,
                  bool subclass,
-                 Compare compare,
+                 AtomComparator* compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         // get the handle set as a vector and sort it.
         std::vector<Handle> hs;
 
         getHandleSet(back_inserter(hs), type, subclass, vh);
-        sort(hs.begin(), hs.end(), compare);
+        sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
 
         // copy the vector and return the iterator.
         return copy(hs.begin(), hs.end(), result);
     }
 
+    // Wrapper for comparing atoms from a HandleSeq
+    template <typename Compare>
+    struct compareAtom{
+        Compare* c;
+        compareAtom(Compare* _c) : c(_c) {}
+
+        bool operator()(const Handle& h1,const Handle& h2) {
+            return (*c)(*TLB::getAtom(h1),*TLB::getAtom(h2));
+        }
+    };
+
+    template <typename Compare>
+    struct filterAtom{
+        Compare c;
+        filterAtom(Compare _c) : c(_c) {}
+
+        bool operator()(const Handle& h1) {
+            return c(*TLB::getAtom(h1));
+        }
+    };
 
     /* ----------------------------------------------------------- */
     /* The foreach routines offer an alternative interface
@@ -1138,23 +1158,22 @@ public:
 
 // ---- filter templates
 
-    template<typename Predicate>
-    HandleSeq filter(Predicate compare, VersionHandle vh = NULL_VERSION_HANDLE) {
+    HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
         HandleSeq result;
         _getNextAtomPrepare();
         Handle next;
         while ((next = _getNextAtom()) != Handle::UNDEFINED)
-            if (compare(next) && containsVersionedTV(next, vh))
+            if ((*compare)(*TLB::getAtom(next)) && containsVersionedTV(next, vh))
                 result.push_back(next);
         return result;
     }
 
-    template<typename OutputIterator, typename Predicate>
-    OutputIterator filter(OutputIterator it, Predicate compare, VersionHandle vh = NULL_VERSION_HANDLE) {
+    template<typename OutputIterator>
+    OutputIterator filter(OutputIterator it, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
         _getNextAtomPrepare();
         Handle next;
         while ((next = _getNextAtom()) != Handle::UNDEFINED)
-            if (compare(next) && containsVersionedTV(next, vh))
+            if ((*compare)(*TLB::getAtom(next)) && containsVersionedTV(next, vh))
                 * it++ = next;
         return it;
     }
@@ -1167,28 +1186,26 @@ public:
      * @param struct or function embodying the criterion
      * @return The handles in the sequence that match the criterion.
      */
-    template<typename Predicate, typename InputIterator>
-    HandleSeq filter(InputIterator begin, InputIterator end, Predicate compare) const {
+    template<typename InputIterator>
+    HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const {
         HandleSeq result;
         for (; begin != end; begin++)
-            if (compare(*begin))
+            if (filterAtom<AtomPredicate>()(*begin))
                 result.push_back(*begin);
 
         return result;
     }
 
-    template<typename InputIterator, typename OutputIterator, typename Predicate>
-    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, Predicate compare) const {
+    template<typename InputIterator, typename OutputIterator>
+    OutputIterator filter(InputIterator begin, InputIterator end,
+            OutputIterator it, AtomPredicate* compare) const {
         for (; begin != end; begin++)
-            if (compare(*begin))
+            if (filterAtom<AtomPredicate>()(*begin))
                 * it++ = *begin;
-
         return it;
     }
 
-
 // ---- custom filter templates
-
     HandleSeq filter_type(Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
         HandleSeq result;
         _getNextAtomPrepare_type(type);
@@ -1196,7 +1213,6 @@ public:
         while ((next = _getNextAtom_type(type)) != Handle::UNDEFINED)
             if (containsVersionedTV(next, vh))
                 result.push_back(next);
-
         return result;
     }
 
@@ -1216,23 +1232,29 @@ public:
         return filter(begin, end, STIAboveThreshold(getAttentionalFocusBoundary()));
     }
 
-    struct STIAboveThreshold {
+    struct STIAboveThreshold : public AtomPredicate {
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
-        bool operator()(const Handle& h) {
-            return TLB::getAtom(h)->getAttentionValue().getSTI() > threshold;
+        virtual bool test(const Atom& a) {
+            return a.getAttentionValue().getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
 
-    struct LTIAboveThreshold {
+    struct LTIAboveThreshold : public AtomPredicate {
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
-        bool operator()(const Handle& h) {
-            return TLB::getAtom(h)->getAttentionValue().getLTI() > threshold;
+        virtual bool test(const Atom& a) {
+            return a.getAttentionValue().getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };
+
+    // AtomSpaceRequests are not allowed to access the TLB, but they may get
+    // references to specific atoms.
+    inline const Atom& getAtom(Handle h) {
+        return *TLB::getAtom(h);
+    }
 
 protected:
 

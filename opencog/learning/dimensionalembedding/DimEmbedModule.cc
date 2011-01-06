@@ -112,10 +112,10 @@ double DimEmbedModule::findHighestWeightPath(const Handle& startHandle,
                 //if the node has been visited, don't do anything
                 if(visitedNodes.contains(*it2)) continue;
 
-                const TruthValue& linkTV = as->getTV(*it);
+                TruthValuePtr linkTV = as->getTV(*it);
                 //If this path is better than the currently known one, save it
                 double pathWeight
-                    = bestNode.second*(linkTV.getMean()*linkTV.getConfidence());
+                    = bestNode.second*(linkTV->getMean()*linkTV->getConfidence());
                 if(nodeMap[*it2] < pathWeight) {
                     nodeMap[*it2] = pathWeight;
                 }
@@ -214,12 +214,12 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
         for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't of type linkType
             if(as->getType(*it)!=linkType) continue;
-            const TruthValue& linkTV = as->getTV(*it);
+            TruthValuePtr linkTV = as->getTV(*it);
             HandleSeq newNodes = as->getOutgoing(*it);
             for(HandleSeq::iterator it2=newNodes.begin();
                 it2!=newNodes.end(); it2++) {
                 double alt = distMap[u]*
-                    linkTV.getMean()*linkTV.getConfidence();
+                    linkTV->getMean()*linkTV->getConfidence();
                 double oldDist=distMap[*it2];
                 if(alt>oldDist) {
                     multimap<double,Handle>::iterator it3;

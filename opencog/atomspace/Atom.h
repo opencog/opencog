@@ -64,7 +64,7 @@ class Atom : public AttentionValueHolder
 private:
 
     // Called by constructors to init this object
-    void init(Type, const TruthValue&);
+    void init(Type, const TruthValue&, const AttentionValue& av = AttentionValue::DEFAULT_AV());
 
     /**
      * Sets the AtomTable in which this Atom is inserted.
@@ -99,7 +99,7 @@ protected:
      * @param The truthValue of the atom. note: This is not cloned as
      *        in setTruthValue.
      */
-    Atom(Type, const TruthValue& = TruthValue::NULL_TV());
+    Atom(Type, const TruthValue& = TruthValue::NULL_TV(), const AttentionValue& = AttentionValue::DEFAULT_AV());
 
     /**
      * Adds a new entry to this atom's incoming set.

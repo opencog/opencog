@@ -39,7 +39,7 @@ ImportanceDecayAgent::ImportanceDecayAgent()
 
 void ImportanceDecayAgent::connectSignals(AtomSpace& as)
 {
-    mergedAtomConnection = as.mergeAtomSignal().connect(boost::bind(&ImportanceDecayAgent::atomMerged, this, _1));
+    mergedAtomConnection = as.atomSpaceAsync.mergeAtomSignal(boost::bind(&ImportanceDecayAgent::atomMerged, this, _1, _2));
 }
 
 void ImportanceDecayAgent::run(opencog::CogServer *server)
@@ -51,13 +51,12 @@ void ImportanceDecayAgent::run(opencog::CogServer *server)
 
 }
 
-void ImportanceDecayAgent::atomMerged(Handle h)
+void ImportanceDecayAgent::atomMerged(AtomSpaceImpl* as, Handle h)
 {
     logger().debug("ImportanceDecayAgent::atomMerged(%lu)", h.value());
-    AtomSpace* atomSpace = server().getAtomSpace();
     // Restore the default STI value if it has decayed
     // TODO: Remove this code when the merge of atoms consider the STI values this way as well.
-    if (atomSpace->getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
-        atomSpace->setSTI(h, AttentionValue::DEFAULTATOMSTI);
+    if (as->getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
+        as->setSTI(h, AttentionValue::DEFAULTATOMSTI);
     }
 }

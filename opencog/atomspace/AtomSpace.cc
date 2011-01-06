@@ -62,10 +62,8 @@ using namespace opencog;
 
 // ====================================================================
 
-AtomSpace::AtomSpace(void) : 
-    type_itr(0,false)
+AtomSpace::AtomSpace(void)
 {
-    _handle_iterator = NULL;
     emptyName = "";
 
     fundsSTI = config().get_int("STARTING_STI_FUNDS");
@@ -78,11 +76,6 @@ AtomSpace::AtomSpace(void) :
 
 AtomSpace::~AtomSpace()
 {
-    // Check if has already been deleted. See in code where it can be delete.
-    if (_handle_iterator) {
-        delete _handle_iterator;
-         _handle_iterator = NULL;
-    }
 }
 
 Handle AtomSpace::getSpaceMapNode() 
@@ -109,17 +102,16 @@ AtomSpace& AtomSpace::operator=(const AtomSpace& other)
             "AtomSpace - Cannot copy an object of this class");
 }
 
-AtomSpace::AtomSpace(const AtomSpace& other):
-    type_itr(0,false)
+AtomSpace::AtomSpace(const AtomSpace& other)
 {
     throw opencog::RuntimeException(TRACE_INFO, 
             "AtomSpace - Cannot copy an object of this class");
 }
 
-const TruthValue& AtomSpace::getDefaultTV()
+/*const TruthValue& AtomSpace::getDefaultTV()
 {
     return TruthValue::DEFAULT_TV();
-}
+}*/
 
 Type AtomSpace::getAtomType(const string& str) const
 {
@@ -263,22 +255,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
 
 boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle h) const
 {
-    // TODO: Add timestamp to atoms and add vector clock to AtomSpace
-    // Need to use the newly added clone methods as the copy constructors for
-    // Node and Link don't copy incoming set.
-    Atom * a = TLB::getAtom(h);
-    boost::shared_ptr<Atom> dud;
-    if (!a) return dud;
-    const Node *node = dynamic_cast<const Node *>(a);
-    if (!node) {
-        const Link *l = dynamic_cast<const Link *>(a);
-        if (!l) return dud;
-        boost::shared_ptr<Atom> clone_link(l->clone());
-        return clone_link;
-    } else {
-        boost::shared_ptr<Atom> clone_node(node->clone());
-        return clone_node;
-    }
+    return atomSpaceAsync.getAtom(h)->get_result();
 }
 
 boost::shared_ptr<Node> AtomSpace::cloneNode(const Handle h) const
@@ -298,19 +275,12 @@ size_t AtomSpace::getAtomHash(const Handle h) const
 
 bool AtomSpace::isValidHandle(const Handle h) const 
 {
-    return TLB::isValidHandle(h);
+    return atomSpaceAsync.isValidHandle(h)->get_result();
 }
 
 bool AtomSpace::commitAtom(const Atom& a)
 {
-    // TODO: Check for differences and abort if timestamp is out of date
-
-    // Get the version in the TLB
-    Atom* original = TLB::getAtom(a.getHandle());
-    // The only mutable properties of atoms are the TV and AttentionValue
-    original->setTruthValue(a.getTruthValue());
-    original->setAttentionValue(a.getAttentionValue());
-    return true;
+    return atomSpaceAsync.commitAtom(a)->get_result();
 }
 
 AttentionValue AtomSpace::getAV(Handle h) const
@@ -415,27 +385,20 @@ AttentionValue::vlti_t AtomSpace::getVLTI(AttentionValueHolder *avh) const
     return avh->getAttentionValue().getVLTI();
 }
 
-float AtomSpace::getCount(Handle h) const
+/*float AtomSpace::getCount(Handle h) const
 {
     DPRINTF("AtomSpace::getCount Atom space address: %p\n", this);
     return TLB::getAtom(h)->getTruthValue().getCount();
-}
+}*/
 
 int AtomSpace::Nodes(VersionHandle vh) const
 {
-    DPRINTF("AtomSpace::Nodes Atom space address: %p\n", this);
+    return atomSpaceAsync.nodeCount(vh)->get_result();
+}
 
-    /* This is too expensive and depending on an Agent that may be disabled.
-     * Besides it does not have statistics by VersionHandles
-     DynamicsStatisticsAgent *agent=DynamicsStatisticsAgent::getInstance();
-     agent->reevaluateAllStatistics();
-     return agent->getNodeCount();
-     */
-    // The following implementation is still expensive, but already deals with VersionHandles:
-    HandleEntry* he = atomTable.getHandleSet(NODE, true, vh);
-    int result = he->getSize();
-    delete he;
-    return result;
+int AtomSpace::Links(VersionHandle vh) const
+{
+    return atomSpaceAsync.linkCount(vh)->get_result();
 }
 
 void AtomSpace::decayShortTermImportance()
@@ -472,45 +435,6 @@ long AtomSpace::getSTIFunds() const
 long AtomSpace::getLTIFunds() const
 {
     return fundsLTI;
-}
-
-int AtomSpace::Links(VersionHandle vh) const
-{
-    DPRINTF("AtomSpace::Links Atom space address: %p\n", this);
-
-    // The following implementation is still expensive, but already deals with VersionHandles:
-    HandleEntry* he = atomTable.getHandleSet(LINK, true, vh);
-    int result = he->getSize();
-    delete he;
-    return result;
-}
-
-void AtomSpace::_getNextAtomPrepare()
-{
-    _handle_iterator = atomTable.getHandleIterator(ATOM, true);
-}
-
-Handle AtomSpace::_getNextAtom()
-{
-    if (_handle_iterator->hasNext())
-        return _handle_iterator->next();
-    else {
-        delete _handle_iterator;
-        _handle_iterator = NULL;
-        return Handle::UNDEFINED;
-    }
-}
-
-void AtomSpace::_getNextAtomPrepare_type(Type type)
-{
-    type_itr = atomTable.typeIndex.begin(type, true);
-}
-
-Handle AtomSpace::_getNextAtom_type(Type type)
-{
-    Handle h = *type_itr;
-    type_itr ++;
-    return h;
 }
 
 AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
@@ -550,33 +474,6 @@ AttentionValue::sti_t AtomSpace::getMinSTI(bool average) const
 
 void AtomSpace::clear()
 {
-    std::vector<Handle> allAtoms;
-    std::vector<Handle>::iterator i;
-    std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
-    bool result;
-
-    getHandleSet(outputI, ATOM, true);
-
-    int j = 0;
-    DPRINTF("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
-            Links(NULL_VERSION_HANDLE));
-    DPRINTF("atoms in allAtoms: %d\n",allAtoms.size());
-
-    logger().enable();
-    logger().setLevel(Logger::DEBUG);
-
-    for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
-        result = removeAtom(*i,true);
-        if (result) {
-            DPRINTF("%d: Atom %u removed, %d nodes %d links left to delete\n",
-                j,*i,Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
-            j++;
-        }
-    }
-
-    allAtoms.clear();
-    std::back_insert_iterator< std::vector<Handle> > output2(allAtoms);
-    getHandleSet(output2, ATOM, true);
-    assert(allAtoms.size() == 0);
+    atomSpaceAsync.clear()->get_result();
 }
 

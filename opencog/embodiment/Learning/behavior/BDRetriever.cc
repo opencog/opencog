@@ -51,13 +51,13 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
                                    const Temporal& temp)
 {
     std::list<HandleTemporalPair> retP;
-    wp.getAtomSpace().getTimeInfo(std::back_inserter(retP),
+    wp.getAtomSpace().getTimeServer().getTimeInfo(std::back_inserter(retP),
                                   trickConceptNode, temp,
                                   TemporalTable::EXACT);
     if (!retP.empty()) {
         OC_ASSERT(retP.size() == 1,
                          "retP std::list should have exactly one 'HandleTemporal Pair'.");
-        Handle h = wp.getAtomSpace().getAtTimeLink(*(retP.begin()));
+        Handle h = wp.getAtomSpace().getTimeServer().getAtTimeLink(*(retP.begin()));
         OC_ASSERT(h != Handle::UNDEFINED,
                          "Handle h should not be an 'Handle::UNDEFINED'.");
         std::list<Handle> result;
@@ -96,7 +96,7 @@ void BDRetriever::retrieveLastExemplar(CompositeBehaviorDescription& bd,
     Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, tn);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
-        wp.getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
+        wp.getAtomSpace().getTimeServer().getTimeInfo(std::back_inserter(retP), h,
                                       Temporal(wp.getLatestSimWorldTimestamp()),
                                       TemporalTable::PREVIOUS_BEFORE_START_OF);
         if (!retP.empty()) {
@@ -135,7 +135,7 @@ void BDRetriever::retrieveAllExemplars(BehaviorCategory& bc,
     Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, tn);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
-        wp.getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
+        wp.getAtomSpace().getTimeServer().getTimeInfo(std::back_inserter(retP), h,
                                       Temporal(wp.getLatestSimWorldTimestamp()),
                                       TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::iterator ip = retP.begin(); ip != retP.end(); ++ip) {

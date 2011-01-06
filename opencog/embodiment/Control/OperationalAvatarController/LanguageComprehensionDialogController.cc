@@ -254,7 +254,7 @@ public:
                     bool unknownTermFound = false;
                     unsigned int i;
                     for (i = 0; i < evalLinks.size( ); ++i ) {
-                        if ( as.getTV( evalLinks[i] ).isNullTv( ) || as.getTV( evalLinks[i] ).getMean( ) == 0 ) {
+                        if ( as.getTV( evalLinks[i] )->isNullTv() || as.getTV( evalLinks[i] )->getMean() == 0 ) {
                             continue;                    
                         } // if
                         as.setTV( evalLinks[i], TruthValue::FALSE_TV() );

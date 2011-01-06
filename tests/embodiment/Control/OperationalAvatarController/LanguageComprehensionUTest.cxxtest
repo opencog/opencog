@@ -167,7 +167,7 @@ public:
         // setup agent
         Handle petNode = this->atomSpace->addNode( PET_NODE, petId );
         Handle petSemeNode = this->atomSpace->addNode( SEME_NODE, petId );
-        this->atomSpace->addSpaceInfo(true, petNode, 1, 
+        this->atomSpace->getSpaceServer().addSpaceInfo(true, petNode, 1, 
                                       35, 60, 0, 
                                       10, 10, 10, 0, false );
 
@@ -177,7 +177,7 @@ public:
 
         Handle avatarNode = this->atomSpace->addNode( AVATAR_NODE, petOwnerId );
         Handle avatarSemeNode = this->atomSpace->addNode( SEME_NODE, petOwnerId );
-        this->atomSpace->addSpaceInfo(true, avatarNode, 1, 
+        this->atomSpace->getSpaceServer().addSpaceInfo(true, avatarNode, 1, 
                                       200, 101, 0, 
                                       20, 20, 20, 0, true );
 
@@ -236,7 +236,7 @@ public:
             wordNodeReference[0] = semeNode;
             this->atomSpace->addLink( REFERENCE_LINK, wordNodeReference,TruthValue::TRUE_TV( ) );
             
-            this->atomSpace->addSpaceInfo(true, semeNode, 1, 
+            this->atomSpace->getSpaceServer().addSpaceInfo(true, semeNode, 1, 
                                           50, 60, 0, 
                                           2, 2, 30, 0, false );            
         }
@@ -251,7 +251,7 @@ public:
             wordNodeReference[0] = semeNode;
             this->atomSpace->addLink( REFERENCE_LINK, wordNodeReference,TruthValue::TRUE_TV( ) );
             
-            this->atomSpace->addSpaceInfo(true, semeNode, 1, 
+            this->atomSpace->getSpaceServer().addSpaceInfo(true, semeNode, 1, 
                                           50, 150, 0, 
                                           2, 2, 30, 0, false );            
         }
@@ -266,7 +266,7 @@ public:
             wordNodeReference[0] = semeNode;
             this->atomSpace->addLink( REFERENCE_LINK, wordNodeReference,TruthValue::TRUE_TV( ) );
             
-            this->atomSpace->addSpaceInfo(true, semeNode, 1, 
+            this->atomSpace->getSpaceServer().addSpaceInfo(true, semeNode, 1, 
                                           50, 200, 0, 
                                           2, 2, 30, 0, false );            
         }
@@ -298,7 +298,7 @@ public:
                                                         SimpleTruthValue(1.0, 1.0) );
         }
 
-        this->atomSpace->addSpaceInfo(true, semeNode1, 1, 
+        this->atomSpace->getSpaceServer().addSpaceInfo(true, semeNode1, 1, 
                                       10, 10, 0, 
                                       2, 2, 2, 0, false );
 
@@ -328,7 +328,7 @@ public:
                                                         SimpleTruthValue(1.0, 1.0) );
         }
 
-        this->atomSpace->addSpaceInfo(true, semeNode2, 1, 
+        this->atomSpace->getSpaceServer().addSpaceInfo(true, semeNode2, 1, 
                                       50, 50, 0, 
                                       2, 2, 2, 0, false );
 
@@ -363,7 +363,7 @@ public:
                                                         elements, 
                                                         SimpleTruthValue(1.0, 1.0) );
         }
-        this->atomSpace->addSpaceInfo(true, semeNode3, 1, 
+        this->atomSpace->getSpaceServer().addSpaceInfo(true, semeNode3, 1, 
                                       45, 100, 0, 
                                       2, 2, 2, 0, false );
         
@@ -421,7 +421,7 @@ public:
                                                         
         }
 
-        this->atomSpace->addSpaceInfo(true, semeNode4, 1, 
+        this->atomSpace->getSpaceServer().addSpaceInfo(true, semeNode4, 1, 
                                       40, 105, 0, 
                                       2, 2, 2, 0, false );
         
@@ -487,7 +487,7 @@ public:
             command[1] = this->atomSpace->getHandle( LIST_LINK, arguments );
             
             Handle execLink = this->atomSpace->getHandle( EXECUTION_LINK, command );
-            TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
+            TS_ASSERT( this->atomSpace->getTV( execLink )->getMean( ) > 0 );
             TS_ASSERT( execLink != Handle::UNDEFINED );
         }
 
@@ -555,7 +555,7 @@ public:
             command[1] = this->atomSpace->getHandle( LIST_LINK, arguments );
             
             Handle execLink = this->atomSpace->getHandle( EXECUTION_LINK, command );
-            TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
+            TS_ASSERT( this->atomSpace->getTV( execLink )->getMean( ) > 0 );
             TS_ASSERT( execLink != Handle::UNDEFINED );
         }
 
@@ -587,7 +587,7 @@ public:
             command[1] = this->atomSpace->getHandle( LIST_LINK, arguments );
             
             Handle execLink = this->atomSpace->getHandle( EXECUTION_LINK, command );
-            TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
+            TS_ASSERT( this->atomSpace->getTV( execLink )->getMean( ) > 0 );
             TS_ASSERT( execLink != Handle::UNDEFINED );
         }
         
@@ -620,7 +620,7 @@ public:
             command[1] = this->atomSpace->getHandle( LIST_LINK, arguments );
             
             Handle execLink = this->atomSpace->getHandle( EXECUTION_LINK, command );
-            TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
+            TS_ASSERT( this->atomSpace->getTV( execLink )->getMean( ) > 0 );
             TS_ASSERT( execLink != Handle::UNDEFINED );
         }
 

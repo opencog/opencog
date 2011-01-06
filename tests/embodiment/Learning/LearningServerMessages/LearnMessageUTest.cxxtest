@@ -90,16 +90,16 @@ public:
         Handle n4 = atomSpace->addNode(AVATAR_NODE, avatar);
         Handle n5 = atomSpace->addNode(AVATAR_NODE, owner);
 
-        atomSpace->addSpaceInfo(true, n1, 1, 100, 100, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, n2, 1, 100, 100, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, n3, 1, 102, 102, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, n4, 1, 104, 104, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, n5, 1, 106, 106, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, n1, 1, 100, 100, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, n2, 1, 100, 100, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, n3, 1, 102, 102, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, n4, 1, 104, 104, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, n5, 1, 106, 106, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
 
         //to satisfy an assert of LearnMessage
         Handle trick_h = atomSpace->addNode(CONCEPT_NODE, trick);
         Temporal t(1, 100);
-        atomSpace->addTimeInfo(trick_h, t);
+        atomSpace->getTimeServer().addTimeInfo(trick_h, t);
 
         learnMessage = new LearnMessage(from, to, trick, trickArgs, owner, avatar, *atomSpace);
         TS_ASSERT(learnMessage);

@@ -172,7 +172,7 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
     Handle h = as->getHandle(NODE, node_str);
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
     // hack to avoid floating error
-    bool tv_eq = tv.toString() == as->getTV(h).toString();
+    bool tv_eq = tv.toString() == as->getTV(h)->toString();
     TSM_ASSERT("TVs are different", tv_eq);
 
     // remove Node so we can redo the test
@@ -288,9 +288,9 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		const TruthValue &tv = as->getTV(*i);
-		float m = tv.getMean();
-		float c = tv.getConfidence();
+		TruthValuePtr tv = as->getTV(*i);
+		float m = tv->getMean();
+		float c = tv->getConfidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
 		//printf("Link TruthValue: %f -- %f\n", m, c);
@@ -397,9 +397,9 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		const TruthValue &tv = as->getTV(*i);
-		float m = tv.getMean();
-		float c = tv.getConfidence();
+		TruthValuePtr tv = as->getTV(*i);
+		float m = tv->getMean();
+		float c = tv->getConfidence();
 		//the link has TV 0.0
 		TS_ASSERT_EQUALS(m,0.0);
 		TS_ASSERT_EQUALS(c,0.0);
@@ -468,9 +468,9 @@ void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		const TruthValue &tv = as->getTV(*i);
-		float m = tv.getMean();
-		float c = tv.getConfidence();
+		TruthValuePtr tv = as->getTV(*i);
+		float m = tv->getMean();
+		float c = tv->getConfidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
 		//printf("Link TruthValue: %f -- %f\n", m, c);

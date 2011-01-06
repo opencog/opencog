@@ -18,7 +18,7 @@ void init_AtomSpace_py()
 {
     class_<std::vector<Handle> >("std_vector_Handle");
 
-    class_<AtomSpaceWrap, bases<SpaceServerContainer>, boost::noncopyable >("AtomSpace", no_init)
+    class_<AtomSpaceWrap, boost::noncopyable >("AtomSpace", no_init)
         .def(init<>())
         .def("storeAtom", &AtomSpace::storeAtom)
         .def("addNode", &AtomSpace::addNode, addNode_overloads())
@@ -49,16 +49,15 @@ void init_AtomSpace_py()
             (void (AtomSpace::*)(Handle, AttentionValue::sti_t))
             &AtomSpace::setSTI)
         .def("getTV", &AtomSpace::getTV,
-            return_value_policy<copy_const_reference>())
+            return_value_policy<return_by_value>())
         .def("setTV", &AtomSpace::setTV)
         .def("getAV",
             (const AttentionValue& (AtomSpace::*)(AttentionValueHolder*) const)
             &AtomSpace::getAV,
             return_value_policy<copy_const_reference>())
         .def("getAV",
-            (const AttentionValue& (AtomSpace::*)(Handle) const)
-            &AtomSpace::getAV,
-            return_value_policy<copy_const_reference>())
+            (AttentionValue (AtomSpace::*)(Handle) const)
+            &AtomSpace::getAV)
         .def("setAV",
             (void (AtomSpace::*)(AttentionValueHolder*, const AttentionValue&))
             &AtomSpace::setAV)
@@ -85,14 +84,12 @@ void init_AtomSpace_py()
             &AtomSpace::getVLTI)
         .def("getName", (std::string (AtomSpace::*)(Type) const)
             &AtomSpace::getName)
-        .def("getName", (const std::string& (AtomSpace::*)(Handle) const)
-            &AtomSpace::getName,
-            return_value_policy<copy_const_reference>())
+        .def("getName", (std::string (AtomSpace::*)(Handle) const)
+            &AtomSpace::getName)
         .def("getOutgoing", (Handle (AtomSpace::*)(Handle, int) const)
             &AtomSpace::getOutgoing)
-        .def("getOutgoing", (const HandleSeq& (AtomSpace::*)(Handle) const)
-            &AtomSpace::getOutgoing,
-            return_value_policy<copy_const_reference>())
+        .def("getOutgoing", (HandleSeq (AtomSpace::*)(Handle) const)
+            &AtomSpace::getOutgoing)
         .def("getHandle",
             (Handle (AtomSpace::*)(Type, const std::string&) const)
             &AtomSpace::getHandle)

@@ -82,8 +82,8 @@ bool getListSortByTVStrengthPredicate (bool descending,
     float tv1, tv2;
     AtomSpace* as = server().getAtomSpace();
 
-    tv1 = as->getTV(h1).getMean();
-    tv2 = as->getTV(h2).getMean();
+    tv1 = as->getTV(h1)->getMean();
+    tv2 = as->getTV(h2)->getMean();
 
     if (descending)
         return tv1 > tv2;
@@ -100,8 +100,8 @@ bool getListSortByTVConfidencePredicate (bool descending,
     float tv1, tv2;
     AtomSpace* as = server().getAtomSpace();
 
-    tv1 = as->getTV(h1).getConfidence();
-    tv2 = as->getTV(h2).getConfidence();
+    tv1 = as->getTV(h1)->getConfidence();
+    tv2 = as->getTV(h2)->getConfidence();
 
     if (descending)
         return tv1 > tv2;
@@ -400,7 +400,7 @@ void GetListRequest::html_makeOutput(HandleSeq &hs)
             _output << "<td style=\"background-color:#99FF66\">" << the_lti << "</td> ";
         else
             _output << "<td style=\"background-color:#99FFFF\">" << the_lti << "</td> ";
-        _output << "<td>" << as->getTV(h).toString() << "</td> ";
+        _output << "<td>" << as->getTV(h)->toString() << "</td> ";
 
         // Here the outgoing targets string is made
         HandleSeq outgoing = as->getOutgoing(h);

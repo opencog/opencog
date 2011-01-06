@@ -124,7 +124,7 @@ public:
 
         // adding pet
         Handle objs = atomSpace->addNode(PET_NODE, petId);
-        atomSpace->addSpaceInfo(true, objs, timestamp, 
+        atomSpace->getSpaceServer().addSpaceInfo(true, objs, timestamp, 
                                 baseX, baseY, 0, // position
                                 0.5, 0.5, 0.5, 0, false);
         addSizeInfo(objs, 0.5, 0.5, 0.5);
@@ -132,7 +132,7 @@ public:
 
         // adding avatar
         objs = atomSpace->addNode(AVATAR_NODE, owner);
-        atomSpace->addSpaceInfo(true, objs, timestamp, 
+        atomSpace->getSpaceServer().addSpaceInfo(true, objs, timestamp, 
                                 baseX + 1.5, baseY + 1.5, 0, // position
                                 0.5, 0.5, 0.5, 0, false);
         addSizeInfo(objs, 0.5, 0.5, 0.5);
@@ -140,7 +140,7 @@ public:
 
         // adding stick
         objs = atomSpace->addNode(ACCESSORY_NODE, stick);
-        atomSpace->addSpaceInfo(true, objs, timestamp, 
+        atomSpace->getSpaceServer().addSpaceInfo(true, objs, timestamp, 
                                 baseX + 10.2, baseY + 10.2, 0,  // position
                                 0.2, 0.2, 0.2, 0, false);
         addSizeInfo(objs, 0.2, 0.2, 0.2);
@@ -148,7 +148,7 @@ public:
 
         // adding food
         objs = atomSpace->addNode(OBJECT_NODE, food);
-        atomSpace->addSpaceInfo(true, objs, timestamp, 
+        atomSpace->getSpaceServer().addSpaceInfo(true, objs, timestamp, 
                                 baseX, baseY + 0.4, 0,  // position
                                 0.1, 0.1, 0.1, 0, false);
         addSizeInfo(objs, 0.1, 0.1, 0.1);
@@ -157,7 +157,7 @@ public:
 
         // adding drink
         objs = atomSpace->addNode(OBJECT_NODE, drink);
-        atomSpace->addSpaceInfo(true, objs, timestamp, 
+        atomSpace->getSpaceServer().addSpaceInfo(true, objs, timestamp, 
                                 baseX, baseY + 0.4, 0,  // position
                                 0.1, 0.1, 0.1, 0, false);
         addSizeInfo(objs, 0.1, 0.1, 0.1);
@@ -166,7 +166,7 @@ public:
 
         // adding wall
         objs = atomSpace->addNode(STRUCTURE_NODE, wall);
-        atomSpace->addSpaceInfo(true, objs, timestamp, 
+        atomSpace->getSpaceServer().addSpaceInfo(true, objs, timestamp, 
                                 3, 3, 0,  // position
                                 2, 0.2, 1, 0, true);
         addSizeInfo(objs, 2, 0.2, 1);

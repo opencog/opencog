@@ -105,7 +105,7 @@ float EvaluationLinkSimilarityEvaluator::computeHandleSimilarity(AtomSpace& a, H
     if (link_handle != Handle::UNDEFINED) {
         //printf("link = %s\n", link->toString().c_str());
         //printf("sim = %f\n", link->getTruthValue().getMean());
-        return a.getTV(link_handle).getMean();
+        return a.getTV(link_handle)->getMean();
     } else {
         //printf("link = NULL\n");
         return 0;

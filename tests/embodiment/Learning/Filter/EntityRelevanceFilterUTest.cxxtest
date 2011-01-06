@@ -127,10 +127,10 @@ public:
     }
 
     void setUp() {
-        atomSpace->addSpaceInfo(true, pet_h, 0, 100, 100, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, avatar_h, 0, 100, 80, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, ball_h, 0, 92, 88, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, meat_h, 0, 100, 90, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, pet_h, 0, 100, 100, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, avatar_h, 0, 100, 80, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, ball_h, 0, 92, 88, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, meat_h, 0, 100, 90, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
 
         //add say sentence1 and say sentence 2 perception
         Handle sentence1_h = atomSpace->addNode(SENTENCE_NODE, str1);
@@ -160,7 +160,7 @@ public:
 
         Handle eval1_h = addAtom(*atomSpace, *at1, TruthValue::DEFAULT_TV());
         TS_ASSERT( eval1_h != Handle::UNDEFINED );
-        atomSpace->addTimeInfo(eval1_h, T1);
+        atomSpace->getTimeServer().addTimeInfo(eval1_h, T1);
 
         Handle sentence2_h = atomSpace->addNode(SENTENCE_NODE, str2);
         //add say sentence2
@@ -183,7 +183,7 @@ public:
                            );
 
         Handle eval2_h = addAtom(*atomSpace, *at2, TruthValue::DEFAULT_TV());
-        atomSpace->addTimeInfo(eval2_h, T2);
+        atomSpace->getTimeServer().addTimeInfo(eval2_h, T2);
 
 
         //add action done dummy_action
@@ -200,7 +200,7 @@ public:
                            );
 
         Handle eval3_h = addAtom(*atomSpace, *at3, TruthValue::DEFAULT_TV());
-        atomSpace->addTimeInfo(eval3_h, T1);
+        atomSpace->getTimeServer().addTimeInfo(eval3_h, T1);
     }
 
     void tearDown() {
@@ -225,10 +225,10 @@ public:
 
     void testSecondMap() {
 
-        atomSpace->addSpaceInfo(true, pet_h, T2, 100, 80, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, avatar_h, T2, 80,  90, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, bone_h, T2, 85, 85, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, stick_h, T2, 95, 95, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, pet_h, T2, 100, 80, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, avatar_h, T2, 80,  90, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, bone_h, T2, 85, 85, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->getSpaceServer().addSpaceInfo(true, stick_h, T2, 95, 95, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
 
         filter = new EntityRelevanceFilter(atomSpace->getSpaceServer().getLatestMap(), "pet", "avatar");
         std::set<std::string> ent = filter->getEntities();

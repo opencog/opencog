@@ -113,14 +113,15 @@ public:
     }
 };
 
-class AddNodeASR : public ThreeParamASR <Handle,Type,std::string,TruthValue*> {
+class AddNodeASR : public ThreeParamASR <Handle,Type,std::string,const TruthValue*> {
 public:
-    AddNodeASR(AtomSpaceImpl *a, Type type, const std::string& name, TruthValue* tvn) :
-        ThreeParamASR<Handle,Type,std::string,TruthValue*>(a,type,name,tvn)
+    AddNodeASR(AtomSpaceImpl *a, Type type, const std::string& name, const TruthValue* tvn) :
+        ThreeParamASR<Handle,Type,std::string,const TruthValue*>(a,type,name,tvn)
         { };
     ~AddNodeASR() {
         // clean up TruthValue as we are responsible for any passed parameters.
-        delete p3;
+        if (!p3->isNullTv())
+            delete p3;
     }
     
     virtual void do_work() {
@@ -129,14 +130,15 @@ public:
     
 };
 
-class AddLinkASR : public ThreeParamASR <Handle,Type,HandleSeq,TruthValue*> {
+class AddLinkASR : public ThreeParamASR <Handle,Type,HandleSeq,const TruthValue*> {
 public:
-    AddLinkASR(AtomSpaceImpl *a, Type type, const HandleSeq& outgoing, TruthValue* tvn) :
-        ThreeParamASR<Handle,Type,HandleSeq,TruthValue*>(a,type,outgoing,tvn)
+    AddLinkASR(AtomSpaceImpl *a, Type type, const HandleSeq& outgoing, const TruthValue* tvn) :
+        ThreeParamASR<Handle,Type,HandleSeq,const TruthValue*>(a,type,outgoing,tvn)
         {};
     ~AddLinkASR() {
         // clean up TruthValue as we are responsible for any passed parameters.
-        delete p3;
+        if (!p3->isNullTv())
+            delete p3;
     }
     
     virtual void do_work() {
@@ -216,6 +218,39 @@ public:
     
 };
 
+class NodeCountASR : public OneParamASR<int,VersionHandle> {
+public:
+    NodeCountASR(AtomSpaceImpl *a,const VersionHandle &vh) :
+        OneParamASR<int,VersionHandle>(a, vh) {};
+    
+    virtual void do_work() {
+        set_result(atomspace->Nodes(p1));
+    };
+    
+};
+
+class LinkCountASR : public OneParamASR<int,VersionHandle> {
+public:
+    LinkCountASR(AtomSpaceImpl *a,const VersionHandle &vh) :
+        OneParamASR<int,VersionHandle>(a,vh) {};
+    
+    virtual void do_work() {
+        set_result(atomspace->Links(p1));
+    };
+    
+};
+
+class ClearASR : public GenericASR<bool> {
+public:
+    ClearASR(AtomSpaceImpl *a) : GenericASR<bool>(a) {};
+    
+    virtual void do_work() {
+        atomspace->clear();
+        set_result(true);
+    };
+    
+};
+
 class PrintASR : public TwoParamASR<bool,Type,bool> {
     std::ostream* _output;
 public:
@@ -263,6 +298,31 @@ public:
     
     virtual void do_work() {
         set_result(atomspace->getName(p1));
+    };
+    
+};
+
+class GetAtomASR : public OneParamASR <boost::shared_ptr<Atom>, Handle> {
+public:
+    GetAtomASR(AtomSpaceImpl *a, Handle h) :
+        OneParamASR<boost::shared_ptr<Atom>, Handle>(a,h) {};
+    
+    virtual void do_work() {
+        set_result(atomspace->cloneAtom(p1));
+    };
+    
+};
+
+class CommitAtomASR : public GenericASR <bool> {
+    boost::shared_ptr<Atom> atom;
+public:
+    CommitAtomASR(AtomSpaceImpl *a, const Atom& _atom) :
+       GenericASR<bool>(a) {
+           atom = boost::shared_ptr<Atom>((&_atom)->clone());
+       };
+    
+    virtual void do_work() {
+        set_result(atomspace->commitAtom(*atom));
     };
     
 };
@@ -486,28 +546,51 @@ public:
 class SetAttentionValueVLTIASR : public TwoParamASR <bool, Handle, AttentionValue::vlti_t> {
 public:
     SetAttentionValueVLTIASR(AtomSpaceImpl *a, Handle h, AttentionValue::vlti_t vlti) :
-        TwoParamASR<bool,Handle,AttentionValue::vlti_t>(a,h,vlti) {};
+        TwoParamASR<bool,Handle,AttentionValue::vlti_t>(a,h,vlti) {}
     
     virtual void do_work() {
         atomspace->setVLTI(p1,p2);
         set_result(true);
-    };
+    }
     
 };
 
 class SaveToXMLASR : public OneParamASR<bool,std::string> {
 public:
     SaveToXMLASR(AtomSpaceImpl *a, const std::string filename) :
-        OneParamASR<bool,std::string>(a,filename) {};
+        OneParamASR<bool,std::string>(a,filename) {}
     
     virtual void do_work() {
         set_result(atomspace->saveToXML(p1));
-    };
+    }
     
 };
 
 // -----------------
 // Search requests
+
+class FilterASR : public GenericASR<HandleSeq> {
+    AtomPredicate* p;
+    Type t;
+    bool subclass;
+    VersionHandle vh;
+public:
+    FilterASR(AtomSpaceImpl *a, AtomPredicate *_p, Type _t = ATOM, bool _subclass=true,
+            VersionHandle _vh = NULL_VERSION_HANDLE) :
+            GenericASR<HandleSeq>(a), p(_p), t(_t), subclass(_subclass), vh(_vh) { }
+    
+    virtual void do_work() {
+        HandleSeq _result;
+        HandleSeq hs;
+        atomspace->getHandleSet(back_inserter(hs), t, subclass, vh);
+        foreach (Handle h, hs) {
+            if ((*p)(atomspace->getAtom(h)) && atomspace->containsVersionedTV(h, vh))
+                _result.push_back(h);
+        }
+        set_result(_result);
+    }
+    
+};
 
 class GetNeighborsASR : public GenericASR<HandleSeq> {
     Handle h;
@@ -575,8 +658,255 @@ public:
     }
 };
 
+class GetHandlesByNameASR: public GenericASR<HandleSeq> {
+    std::string name;
+    Type type;
+    bool subclass;
+    VersionHandle vh;
+
+public:
+    GetHandlesByNameASR(AtomSpaceImpl* a,
+            const std::string& _name, Type _type, bool _subclass,
+             VersionHandle _vh = NULL_VERSION_HANDLE) :
+            GenericASR<HandleSeq>(a) {
+        name = _name;
+        type = _type;
+        subclass = _subclass;
+        vh = _vh;
+    }
+
+    virtual void do_work() {
+        atomspace->getHandleSet(back_inserter(result),type,name,subclass,vh);
+    }
+};
+
+class GetHandlesByTypeASR: public GenericASR<HandleSeq> {
+    Type type;
+    bool subclass;
+    VersionHandle vh;
+
+public:
+    GetHandlesByTypeASR(AtomSpaceImpl* a,
+            Type _type, bool _subclass,
+            VersionHandle _vh = NULL_VERSION_HANDLE) :
+            GenericASR<HandleSeq>(a) {
+        type = _type;
+        subclass = _subclass;
+        vh = _vh;
+    }
+
+    virtual void do_work() {
+        atomspace->getHandleSet(back_inserter(result),type,subclass,vh);
+    }
+};
+
+class GetHandlesByTargetASR: public GenericASR<HandleSeq> {
+    Type type, targetType;
+    bool subclass, targetSubclass;
+    VersionHandle vh, targetVh;
+
+public:
+    GetHandlesByTargetASR(AtomSpaceImpl* a,
+            Type _type, Type _targetType,
+            bool _subclass, bool _targetSubclass,
+            VersionHandle _vh = NULL_VERSION_HANDLE,
+            VersionHandle _targetVh = NULL_VERSION_HANDLE) :
+            GenericASR<HandleSeq>(a) {
+        type = _type;
+        subclass = _subclass;
+        vh = _vh;
+        targetType = _targetType;
+        targetSubclass = _targetSubclass;
+        targetVh = _targetVh;
+    }
+
+    virtual void do_work() {
+        atomspace->getHandleSet(back_inserter(result),type,targetType,
+                subclass,targetSubclass,vh,targetVh);
+    }
+};
+
+class GetHandlesByTargetHandleASR: public GenericASR<HandleSeq> {
+    Handle h;
+    Type type;
+    bool subclass;
+    VersionHandle vh;
+
+public:
+    GetHandlesByTargetHandleASR(AtomSpaceImpl* a,
+            Handle _h,
+            Type _type,
+            bool _subclass,
+            VersionHandle _vh = NULL_VERSION_HANDLE) :
+            GenericASR<HandleSeq>(a) {
+        h = _h;
+        type = _type;
+        subclass = _subclass;
+        vh = _vh;
+    }
+
+    virtual void do_work() {
+        atomspace->getHandleSet(back_inserter(result),h,type,
+                subclass,vh);
+    }
+};
+
+class GetHandlesByTargetTypesASR: public GenericASR<HandleSeq> {
+    Type* types;
+    bool* subclasses;
+    Arity arity;
+    Type type;
+    bool subclass;
+    VersionHandle vh;
+
+public:
+    GetHandlesByTargetTypesASR(AtomSpaceImpl* a,
+             Type* _types, bool* _subclasses,
+             Arity _arity, Type _type, bool _subclass,
+             VersionHandle _vh = NULL_VERSION_HANDLE) :
+            GenericASR<HandleSeq>(a) {
+        // This is nasty - having to malloc...
+        // but we can't rely on the parameters being around when the
+        // request is actioned.
+        arity = _arity;
+        types = NULL; subclasses = NULL;
+        if (_types) {
+            types = (Type*) malloc(sizeof(Type) * arity);
+            memcpy(types, _types, sizeof(Type) * arity);
+        }
+        if (_subclasses) {
+            subclasses = (bool*) malloc(sizeof(bool) * arity);
+            memcpy(subclasses, _subclasses,sizeof(bool) * arity);
+        }
+        type = _type;
+        subclass = _subclass;
+        vh = _vh;
+    }
+    ~GetHandlesByTargetTypesASR() {
+        if (types) delete types;
+        if (subclasses) delete subclasses;
+    }
+
+    virtual void do_work() {
+        atomspace->getHandleSet(back_inserter(result),types,subclasses,
+               arity,type,subclass,vh);
+    }
+};
+
+class GetHandlesByTargetNamesASR: public GenericASR<HandleSeq> {
+    char** names;
+    Type* types;
+    bool* subclasses;
+    Arity arity;
+    Type type;
+    bool subclass;
+    VersionHandle vh;
+
+public:
+    GetHandlesByTargetNamesASR(AtomSpaceImpl* a,
+            const char** _names, Type* _types, bool* _subclasses,
+             Arity _arity, Type _type, bool _subclass,
+             VersionHandle _vh = NULL_VERSION_HANDLE) :
+            GenericASR<HandleSeq>(a) {
+        // This is nasty - having to malloc...
+        // but we can't rely on the parameters being around when the
+        // request is actioned.
+        arity = _arity;
+        names = NULL; types = NULL; subclasses = NULL;
+        if (_names) {
+            names = (char**) malloc(sizeof(char*) * arity);
+            for (int i=0; i < arity; i++) {
+                names[i] = NULL;
+                if (_names[i]) names[i] = (char*) malloc(sizeof(char) * strlen(_names[i]));
+            }
+        }
+        if (_types) {
+            types = (Type*) malloc(sizeof(Type) * arity);
+            memcpy(types, _types, sizeof(Type) * arity);
+        }
+        if (_subclasses) {
+            subclasses = (bool*) malloc(sizeof(bool) * arity);
+            memcpy(subclasses, _subclasses,sizeof(bool) * arity);
+        }
+        type = _type;
+        subclass = _subclass;
+        vh = _vh;
+    }
+    ~GetHandlesByTargetNamesASR() {
+        if (types) delete types;
+        if (subclasses) delete subclasses;
+        if (names) {
+            for (int i=0; i < arity; i++) {
+                if (names[i]) delete names[i];
+            }
+            delete names;
+        }
+    }
+
+    virtual void do_work() {
+        atomspace->getHandleSet(back_inserter(result),
+               (const char**)names,types,subclasses,
+               arity,type,subclass,vh);
+    }
+};
+
+class GetHandlesByTargetNameASR: public GenericASR<HandleSeq> {
+    std::string targetName;
+    Type targetType;
+    Type type;
+    bool subclass;
+    VersionHandle vh;
+    VersionHandle targetVh;
+
+public:
+    GetHandlesByTargetNameASR(AtomSpaceImpl* a,
+            const char* _targetName,
+            Type _targetType,
+            Type _type,
+            bool _subclass,
+            VersionHandle _vh = NULL_VERSION_HANDLE,
+            VersionHandle _targetVh = NULL_VERSION_HANDLE) :
+            GenericASR<HandleSeq>(a) {
+        targetName = _targetName;
+        targetType = _targetType;
+        type = _type;
+        subclass = _subclass;
+        vh = _vh;
+        targetVh = _targetVh;
+    }
+
+    virtual void do_work() {
+        atomspace->getHandleSet(back_inserter(result),targetName.c_str(),
+                targetType,type,subclass,vh,targetVh);
+    }
+};
+
+class GetSortedHandleSetASR: public GenericASR<HandleSeq> {
+    Type type;
+    bool subclass;
+    VersionHandle vh;
+    AtomComparator* compare;
+
+public:
+    GetSortedHandleSetASR(AtomSpaceImpl* a,
+            Type _type, bool _subclass,
+            AtomComparator* _compare,
+            VersionHandle _vh = NULL_VERSION_HANDLE) :
+            GenericASR<HandleSeq>(a) {
+        type = _type;
+        subclass = _subclass;
+        vh = _vh;
+        compare = _compare;
+    }
+
+    virtual void do_work() {
+        atomspace->getSortedHandleSet(back_inserter(result),type,subclass,compare,vh);
+    }
+};
+
 // Requests are based on their parent class that defines the return type
 typedef boost::shared_ptr< GenericASR<Handle> > HandleRequest;
+typedef boost::shared_ptr< GenericASR<boost::shared_ptr<Atom> > > AtomRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue> > AttentionValueRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::sti_t> > STIRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::lti_t> > LTIRequest;

@@ -99,15 +99,15 @@ void MockOpcHCTest::init(const std::string & myId,
     speed_h = atomSpace->addNode(NUMBER_NODE,
                                  boost::lexical_cast<string>(2));
 
-    atomSpace->addSpaceInfo(true, pet_h, T1, PET_X, PET_Y, PET_Z,
+    atomSpace->getSpaceServer().addSpaceInfo(true, pet_h, T1, PET_X, PET_Y, PET_Z,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    atomSpace->addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y, OBJ_Z,
+    atomSpace->getSpaceServer().addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y, OBJ_Z,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    atomSpace->addSpaceInfo(true, owner_h, T1, OWNER_X1, OWNER_Y1, OWNER_Z1,
+    atomSpace->getSpaceServer().addSpaceInfo(true, owner_h, T1, OWNER_X1, OWNER_Y1, OWNER_Z1,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    atomSpace->addSpaceInfo(true, owner_h, T2, OWNER_X2, OWNER_Y2, OWNER_Z2,
+    atomSpace->getSpaceServer().addSpaceInfo(true, owner_h, T2, OWNER_X2, OWNER_Y2, OWNER_Z2,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    atomSpace->addSpaceInfo(true, owner_h, T3, OWNER_X3, OWNER_Y3, OWNER_Z3,
+    atomSpace->getSpaceServer().addSpaceInfo(true, owner_h, T3, OWNER_X3, OWNER_Y3, OWNER_Z3,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
     //add necessary nodes to represent BDs
     behaved_h = atomSpace->addNode(PREDICATE_NODE, BEHAVED_STR);
@@ -124,7 +124,7 @@ void MockOpcHCTest::init(const std::string & myId,
     //add the concept of the trick
     trick_h = atomSpace->addNode(CONCEPT_NODE, TRICK_NAME);
     //add AtTimeLink to it
-    tt1_h = atomSpace->addTimeInfo(trick_h, Temporal(0,
+    tt1_h = atomSpace->getTimeServer().addTimeInfo(trick_h, Temporal(0,
                                    3 * TIME_INTERVAL));
     //add first behavior, goto to stick and wag the taile (subject : owner)
     //(yes the owner wag its taile)
@@ -140,7 +140,7 @@ void MockOpcHCTest::init(const std::string & myId,
     ev_goto_seq.push_back(argl_h);
     eval_goto_obj_h = atomSpace->addLink(EVALUATION_LINK, ev_goto_seq);
     //add atTimeLink to it
-    ebd1_h = atomSpace->addTimeInfo(eval_goto_obj_h,
+    ebd1_h = atomSpace->getTimeServer().addTimeInfo(eval_goto_obj_h,
                                     Temporal(0, TIME_INTERVAL));
     //for grab
     HandleSeq grab_seq;
@@ -162,7 +162,7 @@ void MockOpcHCTest::init(const std::string & myId,
     ev_wag_seq.push_back(arglw_h);
     eval_wag_h = atomSpace->addLink(EVALUATION_LINK, ev_wag_seq);
     //add atTimeLink to it
-    ebdg_h = atomSpace->addTimeInfo(eval_grab_obj_h,
+    ebdg_h = atomSpace->getTimeServer().addTimeInfo(eval_grab_obj_h,
                                     Temporal(2 * TIME_INTERVAL,
                                              3 * TIME_INTERVAL));
     //add member link to trick concept
@@ -250,17 +250,17 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
                 //set up second exemplar to be sent later
                 //add the concept of the trick
                 //add AtTimeLink to it
-                Handle tt2_h = atomSpace->addTimeInfo(trick_h,
+                Handle tt2_h = atomSpace->getTimeServer().addTimeInfo(trick_h,
                                                       Temporal(10 * TIME_INTERVAL,
                                                                13 * TIME_INTERVAL));
                 //for goto_obj
                 //add atTimeLink to it
-                Handle ebd2_h = atomSpace->addTimeInfo(eval_goto_obj_h,
+                Handle ebd2_h = atomSpace->getTimeServer().addTimeInfo(eval_goto_obj_h,
                                                        Temporal(10 * TIME_INTERVAL,
                                                                 11 * TIME_INTERVAL));
                 //for grab
                 //add atTimeLink to it
-                Handle ebdw_h = atomSpace->addTimeInfo(eval_wag_h,
+                Handle ebdw_h = atomSpace->getTimeServer().addTimeInfo(eval_wag_h,
                                                        Temporal(12 * TIME_INTERVAL,
                                                                 13 * TIME_INTERVAL));
                 //add member link to trick concept

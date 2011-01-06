@@ -27,12 +27,11 @@
 #define _OPENCOG_CORE_UTILS_H_
 
 #include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/HandleMap.h>
 
 namespace opencog
 {
-
-class Atom;
 
 /** Module for including any core-specific common utilities */
 class CoreUtils

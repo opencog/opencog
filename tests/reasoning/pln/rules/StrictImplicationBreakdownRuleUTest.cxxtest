@@ -92,7 +92,7 @@ public:
         BoundVertex bv = sibr.compute(list_of(_AB_h)(_A_h));
         pHandle res_h = _v2h(bv.GetValue());
 
-        const TruthValue& res_tv = _asw->getTV(res_h);
+        TruthValuePtr res_tv = _asw->getTV(res_h);
         cout << "res = " << _asw->pHandleToString(res_h) << endl;
 
         // build the TV result manually
@@ -106,8 +106,8 @@ public:
         cout << "expected_n: " << expected_n << endl;
 
         // check strength
-        TS_ASSERT(isApproxEq(res_tv.getMean(), expected_s));
+        TS_ASSERT(isApproxEq(res_tv->getMean(), expected_s));
         // check count
-        TS_ASSERT(isApproxEq(res_tv.getCount(), expected_n));
+        TS_ASSERT(isApproxEq(res_tv->getCount(), expected_n));
     }
 };

@@ -113,7 +113,7 @@ public:
         as->print();
         std::cout << std::endl;
         // hack to get around with floating errors
-        bool tv_eq = as->getTV(h, vh).toString() == tv.toString();
+        bool tv_eq = as->getTV(h, vh)->toString() == tv.toString();
         std::cout << "GETTV = " << as->getTV(h, vh) << std::endl;
         std::cout << "TV    = " << tv << std::endl;
         TS_ASSERT(tv_eq);

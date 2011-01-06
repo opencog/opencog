@@ -38,9 +38,7 @@
 
 using namespace opencog;
 
-void Node::init(Type type,
-           const std::string& cname,
-           const TruthValue& tv)
+void Node::init( const std::string& cname)
 throw (InvalidParamException, AssertionException)
 {
     if (!classserver().isA(type, NODE)) {

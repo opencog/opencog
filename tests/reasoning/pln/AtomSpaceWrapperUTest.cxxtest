@@ -374,10 +374,10 @@ public:
         SimpleTruthValue tv3(0.4, 0.2);
         pHandleSeq outgoing;
         pHandle h1 = asw->addNode(CONCEPT_NODE, "magneto", tv1);
-        TS_ASSERT(asw->getTV(h1) == tv1);
+        TS_ASSERT(*asw->getTV(h1) == tv1);
         outgoing.push_back(h1);
         pHandle l1 = asw->addLink(LIST_LINK, outgoing, tv2);
-        TS_ASSERT(asw->getTV(l1) == tv2);
+        TS_ASSERT(*asw->getTV(l1) == tv2);
 
         // FWVar can't store a TV, it always returns a TRIVIAL_TV
         // ^only without FWVar in AS
@@ -386,7 +386,7 @@ public:
         //TS_ASSERT(asw->getTV(fw1) == TruthValue::TRIVIAL_TV());
 
         // ... so does an undefined pHandle
-        TS_ASSERT(asw->getTV(PHANDLE_UNDEFINED) == TruthValue::TRIVIAL_TV());
+        TS_ASSERT(*asw->getTV(PHANDLE_UNDEFINED) == TruthValue::TRIVIAL_TV());
     }
 
 };

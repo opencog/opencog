@@ -101,7 +101,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
             Handle evalLink = addLink(EVALUATION_LINK, evalLinkOutgoing);
 
             // adding atTimeLink
-            this->opc->getAtomSpace()->addTimeInfo(evalLink, this->opc->getPAI( ).getLatestSimWorldTimestamp( ) );
+            this->opc->getAtomSpace()->getTimeServer().addTimeInfo(evalLink, this->opc->getPAI( ).getLatestSimWorldTimestamp( ) );
 
             // clear executingSchema variables
             this->petIsMoving = false;
