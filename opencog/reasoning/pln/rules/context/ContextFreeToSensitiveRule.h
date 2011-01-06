@@ -1,8 +1,8 @@
-/** ContextualizerRule.h --- 
+/** ContextFreeToSensitiveRule.h --- 
  *
- * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2011 Nil Geisweiller
  *
- * Author: Nil Geisweiller <nilg@laptop>
+ * Author: Nil Geisweiller <nilg@desktop>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,8 +21,8 @@
  */
 
 
-#ifndef _OPENCOG_CONTEXTUALIZERRULE_H
-#define _OPENCOG_CONTEXTUALIZERRULE_H
+#ifndef _OPENCOG_CONTEXTFREETOSENSITIVERULE_H
+#define _OPENCOG_CONTEXTFREETOSENSITIVERULE_H
 
 #include "../GenericRule.h"
 #include "../../formulas/Formulas.h"
@@ -30,47 +30,32 @@
 namespace opencog { namespace pln {
 
 /**
- * Rule to turn non contextual knowledge into Contextual knowledge.
+ * Rule to contextualize an atom A given no prior assumption aboput A and C.
  *
- * More specifically apply the following inference
- * a)
+ * Speficically apply the inference
  *
- * R <TV>
- *     C ANDLink A
- *     C ANDLink B
+ * A <TV1>
+ * C <TV2>
  * |-
- * ContextLink <TV>
- *     C
- *     R A B
- *
- * @todo this should be generalized for n-ari ANDLink
- *
- * b)
- *
- * SubsetLink <TV>
- *     C
- *     A
- * |-
- * ContextLink <TV>
+ * ContextLink <TV3>
  *     C
  *     A
  *
- * where A is a Node. that is because
+ * where TV3 is determined by ContextFreeToSensitiveFormula
  *
- * A <TV> is equivalent to
+ * Such a rule since it makes no assumption should be called in last
+ * resort (after ContextualizerRule for instance) and therefore have a
+ * low priority.
  *
- * SubsetLink <TV> Universe A
- *
- * the rest follows from a).
  */
-class ContextualizerRule : public GenericRule<IdentityFormula>
+class ContextFreeToSensitiveRule : public GenericRule<ContextFreeToSensitiveFormula>
 {
-    typedef GenericRule<IdentityFormula> super;
+    typedef GenericRule<ContextFreeToSensitiveFormula> super;
 protected:
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
     meta targetTemplate() const;
 public:
-    ContextualizerRule(AtomSpaceWrapper* _asw);
+    ContextFreeToSensitiveRule(AtomSpaceWrapper* _asw);
     meta i2oType(const std::vector<Vertex>& h) const;
     bool validate2(MPs& args) const { return true; } // not sure it's enough
     TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const;
@@ -78,4 +63,4 @@ public:
 
 }} // namespace opencog { namespace pln {
 
-#endif // _OPENCOG_CONTEXTUALIZERRULE_H
+#endif // _OPENCOG_CONTEXTFREETOSENSITIVENODERULE_H

@@ -290,7 +290,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray,
     
     TVSeq tvs(real_args);
 
-    for(unsigned int i = 0; i < real_args; i++)
+    for(int i = 0; i < real_args; i++)
     {
         tvs[i] = &(asw->getTV(_v2h(premiseArray[i])));
     }

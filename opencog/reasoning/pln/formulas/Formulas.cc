@@ -892,7 +892,19 @@ TruthValue* InhSubstFormula::simpleCompute(const TVSeq& TV, long U) const
     count_t n3 = c_PAT * nB * d1 * sA;
     strength_t s3 = sB;
 
-    return checkTruthValue(  new SimpleTruthValue(s3, n3) );
+    return checkTruthValue( new SimpleTruthValue(s3, n3) );
+}
+
+TruthValue* ContextFreeToSensitiveFormula::simpleCompute(const TVSeq& TV, long U) const {
+    OC_ASSERT(TV.size() == 2);
+    strength_t A_s = TV[0]->getMean();
+    confidence_t A_c = TV[0]->getConfidence();
+    strength_t CX_s = TV[1]->getMean();
+    confidence_t CX_c = TV[1]->getConfidence();
+    
+    strength_t c = A_c*CX_c*(1 - binaryEntropy(A_s)*binaryEntropy(CX_s));
+    
+    return checkTruthValue(new SimpleTruthValue(A_s, c));
 }
 
 /*=============================================================================

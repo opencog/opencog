@@ -528,6 +528,30 @@ public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
+/**
+ * Formula used in ContextFreeToSensitiveRule to determine the TV of a
+ * contextual knowledge given its context free equivalent.
+ *
+ * Used for the inference
+ *
+ * A <TV1>
+ * C <TV2>
+ * |-
+ * ContextLink <TV3>
+ *     C
+ *     A
+ *
+ * TV3.s = TV1.s
+ * TV3.c = TV1.c*TV2.c*(1-H(TV1.s)*H(TV2.s))
+ * 
+ * That formula is a heuristic with not much justification, for an
+ * accurate computation see @todo add link to a future wikipage.
+ */
+class ContextFreeToSensitiveFormula : public Formula<2>
+{
+public:
+    TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
+};
 
 }} // namespace opencog::pln
 
