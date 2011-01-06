@@ -911,7 +911,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);
-        return getHandleSetFiltered(result, type, subclass, STIAboveThreshold(getAttentionalFocusBoundary()), vh);
+        return getHandleSetFiltered(result, type, subclass, &STIAboveThreshold(getAttentionalFocusBoundary()), vh);
 
     }
 
@@ -935,7 +935,7 @@ public:
      *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
      * @endcode
      */
-    template <typename OutputIterator, typename Predicate> OutputIterator
+    template <typename OutputIterator> OutputIterator
     getHandleSetFiltered(OutputIterator result,
                  Type type,
                  bool subclass,
@@ -1206,7 +1206,7 @@ public:
     }
 
 // ---- custom filter templates
-    HandleSeq filter_type(Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
+    /*HandleSeq filter_type(Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
         HandleSeq result;
         _getNextAtomPrepare_type(type);
         Handle next;
@@ -1225,11 +1225,11 @@ public:
                 * it++ = next;
 
         return it;
-    }
+    }*/
 
     template<typename InputIterator>
     HandleSeq filter_InAttentionalFocus(InputIterator begin, InputIterator end) const {
-        return filter(begin, end, STIAboveThreshold(getAttentionalFocusBoundary()));
+        return filter(begin, end, &STIAboveThreshold(getAttentionalFocusBoundary()));
     }
 
     struct STIAboveThreshold : public AtomPredicate {

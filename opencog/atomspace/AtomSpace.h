@@ -960,7 +960,7 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return getHandleSetFiltered(result, type, subclass, STIAboveThreshold(getAttentionalFocusBoundary()), vh);
+        return getHandleSetFiltered(result, type, subclass, &STIAboveThreshold(getAttentionalFocusBoundary()), vh);
 
     }
 

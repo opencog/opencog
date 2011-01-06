@@ -249,7 +249,6 @@ public:
         //logger().debug("Primary and versioned TVS checked\n");
 
         TS_ASSERT(atomSpace->Nodes() == (NUM_NODES + NUM_VH_NODES));
-        atomSpace->print();
         TS_ASSERT(atomSpace->Links() == 8);
 
         // Test filters

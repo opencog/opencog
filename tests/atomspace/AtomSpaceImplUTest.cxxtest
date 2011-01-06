@@ -133,16 +133,14 @@ public:
         delete atomSpace;
     }
 
-    struct mean {
-        bool operator()(Handle h) {
+    struct mean : public AtomPredicate {
+        bool test(Handle h) {
             return atomSpace->getTV(h).getMean() > 0.8;
         }
     };
 
-    struct everything {
-        bool operator()(Handle h) {
-            return true;
-        }
+    struct everything : public AtomPredicate {
+        bool test(Handle h) { return true; }
     };
 
     void testMiscellaneous() {
@@ -255,7 +253,7 @@ public:
         // Test filters
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
             //logger().debug("Checking against VersionHandle %d\n", vhIdx);
-            vector<Handle> high_mean = atomSpace->filter(mean(), VHs[vhIdx]);
+            vector<Handle> high_mean = atomSpace->filter(&mean(), VHs[vhIdx]);
 
             vector<Handle> nodes = atomSpace->filter_type(NODE, VHs[vhIdx]);
 
@@ -263,7 +261,7 @@ public:
             atomSpace->filter_type(back_inserter(links), LINK, VHs[vhIdx]);
 
             vector<Handle> all;
-            atomSpace->filter(back_inserter(all), everything(), VHs[vhIdx]);
+            atomSpace->filter(back_inserter(all), &everything(), VHs[vhIdx]);
             
             vector<Handle> AF_nodes = atomSpace->filter_InAttentionalFocus(nodes.begin(), nodes.end());
             vector<Handle> AF_links = atomSpace->filter_InAttentionalFocus(links.begin(), links.end());
@@ -622,29 +620,29 @@ public:
         
         logger().debug("STISort");
 
-        AttentionValue::STISort sSort();
+        AttentionValue::STISort sSort;
         vector<Handle> sAtoms;
-        atomSpace->getSortedHandleSet(back_inserter(sAtoms), ATOM, true, sSort);
+        atomSpace->getSortedHandleSet(back_inserter(sAtoms), ATOM, true, &sSort);
         for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
-            TS_ASSERT(sSort(sAtoms[i + 1], sAtoms[i]) == false);
+            TS_ASSERT(sSort(*atomSpace->cloneAtom(sAtoms[i + 1]), *atomSpace->cloneAtom(sAtoms[i])) == false);
         }
         
         logger().debug("LTIAndTVAscendingSort");
         
-        AttentionValue::LTIAndTVAscendingSort latvSort();
+        AttentionValue::LTIAndTVAscendingSort latvSort;
         vector<Handle> latvAtoms;
-        atomSpace->getSortedHandleSet(back_inserter(latvAtoms), ATOM, true, latvSort);
+        atomSpace->getSortedHandleSet(back_inserter(latvAtoms), ATOM, true, &latvSort);
         for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
-            TS_ASSERT(latvSort(latvAtoms[i + 1], latvAtoms[i]) == false);
+            TS_ASSERT(latvSort(*atomSpace->cloneAtom(latvAtoms[i + 1]), *atomSpace->cloneAtom(latvAtoms[i])) == false);
         }
         
         logger().debug("LTIThenTVAscendingSort");
         
-        AttentionValue::LTIThenTVAscendingSort lttvSort();
+        AttentionValue::LTIThenTVAscendingSort lttvSort;
         vector<Handle> lttvAtoms;
-        atomSpace->getSortedHandleSet(back_inserter(lttvAtoms), ATOM, true, lttvSort);
+        atomSpace->getSortedHandleSet(back_inserter(lttvAtoms), ATOM, true, &lttvSort);
         for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {
-            TS_ASSERT(lttvSort(lttvAtoms[i + 1], lttvAtoms[i]) == false);
+            TS_ASSERT(lttvSort(*atomSpace->cloneAtom(lttvAtoms[i + 1]), *atomSpace->cloneAtom(lttvAtoms[i])) == false);
         }
 
         logger().debug("END TEST: getSortedHandleSet");
@@ -679,7 +677,7 @@ public:
         logger().debug("STIAboveThreshold");
 
         vector<Handle> highSTI;
-        atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, AtomSpaceImpl::STIAboveThreshold(1000));
+        atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, &AtomSpaceImpl::STIAboveThreshold(1000));
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             TS_ASSERT(AtomSpaceImpl::STIAboveThreshold(1000) (highSTI[i]) );
         }
@@ -689,7 +687,7 @@ public:
         logger().debug("LTIAboveThreshold");
         
         vector<Handle> highLTI;
-        atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, AtomSpaceImpl::LTIAboveThreshold(800));
+        atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, &AtomSpaceImpl::LTIAboveThreshold(800));
         for (unsigned int i = 0; i < highLTI.size(); i++) {
             TS_ASSERT(AtomSpaceImpl::LTIAboveThreshold(800) (highLTI[i]) );
         }
@@ -722,7 +720,7 @@ public:
         
         logger().debug("STIAboveThreshold");
 
-        vector<Handle> highSTI = atomSpace->filter(atoms.begin(), atoms.end(), AtomSpaceImpl::STIAboveThreshold(1000));
+        vector<Handle> highSTI = atomSpace->filter(atoms.begin(), atoms.end(), &AtomSpaceImpl::STIAboveThreshold(1000));
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             TS_ASSERT(AtomSpaceImpl::STIAboveThreshold(1000) (highSTI[i]) );
         }
@@ -731,7 +729,7 @@ public:
                 
         logger().debug("LTIAboveThreshold");
         
-        vector<Handle> highLTI = atomSpace->filter(atoms.begin(), atoms.end(), AtomSpaceImpl::LTIAboveThreshold(800));
+        vector<Handle> highLTI = atomSpace->filter(atoms.begin(), atoms.end(), &AtomSpaceImpl::LTIAboveThreshold(800));
         for (unsigned int i = 0; i < highLTI.size(); i++) {
             TS_ASSERT(AtomSpaceImpl::LTIAboveThreshold(800) (highLTI[i]) );
         }
