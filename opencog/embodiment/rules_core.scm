@@ -2,7 +2,7 @@
 ; @file embodiment/rules_core.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-01-04
+; @date   2011-01-07
 ;
 ; Scheme core functions for adding Modulators, Demands and Rules etc. into AtomSpace
 ;
@@ -37,7 +37,7 @@
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; DemandGoal is represented as:
+; The connection of Demand and Goal is represented as:
 ;
 ; SimultaneousEquivalenceLink
 ;     EvaluationLink
@@ -64,33 +64,32 @@
 ;
 ; PredictiveImplicationLink
 ;     AndLink
-;         AtTimeLink
-;             TimeNode CURRENT_TIMESTAMP
-;             AndLink
-;                 EvaluationLink
-;                     GroundedPredicateNode "precondition_1_name"
-;                     ListLink
-;                         Node:arguments ...
-;                         ...
-;                 EvaluationLink
-;                     PredicateNode         "precondition_2_name"
-;                     ListLink (empty)
-;                 ...
+;         AndLink
+;             EvaluationLink
+;                 GroundedPredicateNode "precondition_1_name"
+;                 ListLink
+;                     Node:arguments
+;                     ...
+;             EvaluationLink
+;                 PredicateNode         "precondition_2_name"
+;                 ListLink 
+;                     Node:arguments
+;                     ...
+;             ...
 ;                        
 ;         ExecutionLink
 ;             GroundedSchemaNode "schema_name"
 ;             ListLink
-;                 Node:arguments ...
+;                 Node:arguments
 ;                 ...
 ;
-;     AtTimeLink
-;         TimeNode CURRENT_TIMESTAMP
-;         EvaluationLink
-;             (SimpleTruthValue indicates how well the demand is satisfied)
-;             (ShortTermInportance indicates the urgency of the demand)
-;             PredicateNode: "demand_name_goal" 
-;             ListLink (empty)
-;
+;     EvaluationLink
+;         (SimpleTruthValue indicates how well the demand is satisfied)
+;         (ShortTermInportance indicates the urgency of the demand)
+;         PredicateNode: "goal_name" 
+;         ListLink
+;             Node:arguments
+;             ...
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -385,7 +384,7 @@
 ;         )
 ;
 
-(define (parse_combo_arguments . arguments)
+(define (parse_arguments . arguments)
     (map-in-order
         (lambda (argument)
 
@@ -452,7 +451,9 @@
 ;
 ; EvaluationLink
 ;     PredicateNode "precondition_name"
-;     ListLink (empty)
+;     ListLink
+;         Node:arguments
+;         ...
 ;
 ; 2. Another is an EvaluationLink with a GroundedPredicateNode, say GPN Precondition,  
 ; which's Truth Value can only be evaluated by corresponding combo script.
@@ -463,7 +464,7 @@
 ; EvaluationLink
 ;     GroundedPredicateNode "schema_name"
 ;     ListLink 
-;         Node:arguments ...
+;         Node:arguments
 ;         ...
 ;
 
@@ -473,11 +474,27 @@
        (GroundedSchemaNode (string-trim-both schema_name) (DEFAULT_STV) (DEFAULT_AV) )
 
        (ListLink (DEFAULT_STV) (DEFAULT_AV)
-                 (apply parse_combo_arguments arguments)
+                 (apply parse_arguments arguments)
        )
 
     );EvaluationLink
 );define
+
+; NULL_PRECONDITION is a dummy Goal that is always satisfied!
+; 
+; It is used when the Precondition (in another word Contex) is not necessary in a Rule.
+;
+; Then the cognitive schematic 
+;     Contex & Procedure ==> Goal
+; is reduced to 
+;     Procedure ===> Goal
+;
+; Do we really need this NULL_PRECONDITION? Who knowns!
+;
+
+(define (NULL_PRECONDITION) 
+    (add_goal "NoPrecondition")
+)
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -491,7 +508,7 @@
 ; ExecutionLink
 ;     GroundedSchemaNode "schema_name"
 ;     ListLink
-;         Node:arguments ...
+;         Node:arguments
 ;         ...
 ;
 
@@ -500,12 +517,32 @@
 
         (GroundedSchemaNode (string-trim-both schema_name) (DEFAULT_STV) (DEFAULT_AV) )
 
-        (ListLink
-            (apply parse_combo_arguments arguments)
+        (ListLink (DEFAULT_STV) (DEFAULT_AV)
+            (apply parse_arguments arguments)
         )
 
     );ExecutionLink
 );define
+
+; NULL_ACTION is a dummy Action that actually does nothing!
+; 
+; It is used when the Action (in another word Procedure) is not necessary in a Rule.
+;
+; Then the cognitive schematic 
+;     Contex & Procedure ==> Goal
+; is reduced to 
+;     Context ===> Goal
+;
+; For instance, in a Relation Rule, Action may be missing. 
+; When someone attacks you, the Relation between you and the unfriendly guy would probably be Enemy, 
+; without any Action you take. 
+;
+; Moreover, to some extend, do nothing is actualy do something :)
+;
+
+(define (NULL_ACTION) 
+    (add_action "DoNothing")
+)
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -515,7 +552,9 @@
 ;
 ; EvaluationLink
 ;     PredicateNode "goal_pred_name"
-;     ListLink (empty)
+;     ListLink
+;         Node:arguments
+;         ...
 ;
 ; There are two kinds of Goals, Final Goal and Intermediate Goal.
 ;
@@ -525,11 +564,15 @@
 ; While an Intermediate Goal should be used as other Rule's Precondition. 
 ;
 
-(define (add_goal goal_pred_name)
+(define (add_goal goal_pred_name . arguments)
     (EvaluationLink (DEFAULT_STV) (DEFAULT_AV) 
         (PredicateNode (string-trim-both goal_pred_name) (DEFAULT_STV) (DEFAULT_AV) )
-        (ListLink (DEFAULT_STV) (DEFAULT_AV) )
-    )
+
+        (ListLink (DEFAULT_STV) (DEFAULT_AV)
+
+            (apply parse_arguments arguments)
+        )
+    );EvaluationLink
 );define
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -540,32 +583,30 @@
 ;
 ; PredictiveImplicationLink
 ;     AndLink
-;         AtTimeLink
-;             TimeNode CURRENT_TIMESTAMP
-;             AndLink
-;                 EvaluationLink
-;                     GroundedPredicateNode "precondition_1_name"
-;                     ListLink
-;                         Node:arguments ...
-;                         ...
-;                 EvaluationLink
-;                     PredicateNode         "precondition_2_name"
-;                     ListLink (empty)
-;                 ...
+;         AndLink
+;             EvaluationLink
+;                 GroundedPredicateNode "precondition_1_name"
+;                 ListLink
+;                     Node:arguments
+;                     ...
+;             EvaluationLink
+;                 PredicateNode         "precondition_2_name"
+;                 ListLink
+;                     Node:arguments
+;                     ...
+;             ...
 ;                        
 ;         ExecutionLink
 ;             GroundedSchemaNode "schema_name"
 ;             ListLink
-;                 Node:arguments ...
+;                 Node:arguments
 ;                 ...
 ;
-;     AtTimeLink
-;         TimeNode CURRENT_TIMESTAMP
-;         EvaluationLink
-;             (SimpleTruthValue indicates how well the demand is satisfied)
-;             (ShortTermInportance indicates the urgency of the demand)
-;             PredicateNode: "demand_name_goal" 
-;             ListLink (empty)
+;     EvaluationLink
+;         (SimpleTruthValue indicates how well the demand is satisfied)
+;         (ShortTermInportance indicates the urgency of the demand)
+;         PredicateNode: "demand_name_goal" 
+;         ListLink (empty)
 ;
 ; For each Rule, there's only a Goal, an Action and a bunch of Preconditions. 
 ; And all these Preconditions should be grouped in an AndLink.
@@ -576,7 +617,9 @@
 ;
 ; EvaluationLink
 ;     PredicateNode "goal_name"
-;     ListLink (empty)
+;     ListLink
+;         Node:arguments
+;         ...
 ;
 ; There are two kinds of Goals, Final Goal and Intermediate Goal.
 ;
@@ -592,7 +635,7 @@
 ; ExecutionLink
 ;     GroundedSchemaNode "schema_name"
 ;     ListLink
-;         Node:arguments ...
+;         Node:arguments
 ;         ...
 ;
 ; 3. There are two kinds of Preconditions. 
@@ -602,7 +645,9 @@
 ;
 ; EvaluationLink
 ;     PredicateNode "precondition_name"
-;     ListLink (empty)
+;     ListLink
+;         Node:arguments
+;         ...
 ;
 ; Another is an EvaluationLink with a GroundedPredicateNode, say GPN Precondition, 
 ; which's Truth Value can only be evaluated by corresponding combo script, 
@@ -610,7 +655,7 @@
 ; EvaluationLink
 ;     GroundedPredicateNode "schema_name"
 ;     ListLink 
-;         Node:arguments ...
+;         Node:arguments
 ;         ...
 ;
 

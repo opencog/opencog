@@ -9,6 +9,7 @@ ADD_LIBRARY (oac
     EntityExperienceAgent
     PsiModulatorUpdaterAgent
     PsiDemandUpdaterAgent
+    PsiActionSelectionAgent
     SleepAgent
     MockOpcHCTest
     HCTestAgent

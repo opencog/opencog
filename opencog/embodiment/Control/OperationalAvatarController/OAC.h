@@ -120,6 +120,7 @@ private:
     EntityExperienceAgent* entityExperienceAgent;
     PsiModulatorUpdaterAgent* psiModulatorUpdaterAgent;
     PsiDemandUpdaterAgent* psiDemandUpdaterAgent;
+    PsiActionSelectionAgent* psiActionSelectionAgent;
 
     RuleEngine* ruleEngine;
 
@@ -272,6 +273,7 @@ public:
     SingletonFactory<EntityExperienceAgent, Agent> entityExperienceAgentFactory;
     SingletonFactory<PsiModulatorUpdaterAgent, Agent> psiModulatorUpdaterAgentFactory;
     SingletonFactory<PsiDemandUpdaterAgent, Agent> psiDemandUpdaterAgentFactory;
+    SingletonFactory<PsiActionSelectionAgent, Agent> psiActionSelectionAgentFactory;
 
 }; // class
 }  // namespace
