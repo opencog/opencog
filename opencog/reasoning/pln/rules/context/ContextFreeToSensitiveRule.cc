@@ -43,8 +43,8 @@ TVSeq ContextFreeToSensitiveRule::formatTVarray(const std::vector<Vertex>& premi
 
 ContextFreeToSensitiveRule::ContextFreeToSensitiveRule(AtomSpaceWrapper* _asw)
     : super(_asw, false, "ContextFreeToSensitiveRule") {
-    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)CONCEPT_NODE))));
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
 }
 
 Rule::setOfMPs ContextFreeToSensitiveRule::o2iMetaExtra(meta outh,

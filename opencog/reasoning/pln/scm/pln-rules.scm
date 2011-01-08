@@ -5,20 +5,23 @@
 ;
 
 ; rules that do not require preprocessing
-(define (SubsetEvalRule sub super . context)
-  (pln-ar "SubsetEvalRule" (list sub super) context))
-(define (IntInhRule sub super . context)
-  (pln-ar "IntensionalInheritanceRule" (list sub super) context))
-(define (InhDedRule AB BC . context)
-  (pln-ar "InheritanceDeductionRule" (list AB BC) context))
-(define (ContextualizerRule R . context)
-  (pln-ar "ContextualizerRule" (list R) context))
-(define (DecontextualizerRule CL . context)
-  (pln-ar "DecontextualizerRule" (list CL) context))
+(define (SubsetEvalRule sub super . contexts)
+  (pln-ar "SubsetEvalRule" (list sub super) contexts))
+(define (IntInhRule sub super . contexts)
+  (pln-ar "IntensionalInheritanceRule" (list sub super) contexts))
+(define (InhDedRule AB BC . contexts)
+  (pln-ar "InheritanceDeductionRule" (list AB BC) contexts))
+; context rules, not sure if the last argument 'contexts' would be useful
+(define (ContextualizerRule R . contexts)
+  (pln-ar "ContextualizerRule" (list R) contexts))
+(define (DecontextualizerRule CL . contexts)
+  (pln-ar "DecontextualizerRule" (list CL) contexts))
+(define (ContextFreeToSensitiveRule CX A . contexts)
+  (pln-ar "ContextFreeToSensitiveRule" (list CX A) contexts))
 
 ; ModusPonensRule is the name for StrictImplicationBreakdownRule
-(define (ModusPonensRule implication antecedent . context)
-  (pln-ar "ModusPonensRule" (list implication antecedent) context))
+(define (ModusPonensRule implication antecedent . contexts)
+  (pln-ar "ModusPonensRule" (list implication antecedent) contexts))
 
 ; AND rules, must happend the arity to the rule name
 (define (SimpleANDRuleNameStr premises)

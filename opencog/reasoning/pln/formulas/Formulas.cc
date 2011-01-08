@@ -903,8 +903,8 @@ TruthValue* ContextFreeToSensitiveFormula::simpleCompute(const TVSeq& TV, long U
     confidence_t A_c = TV[1]->getConfidence();
     
     strength_t c = CX_c*A_c*(1 - binaryEntropy(CX_s)*binaryEntropy(A_s));
-    
-    return checkTruthValue(new SimpleTruthValue(A_s, c));
+    count_t count = SimpleTruthValue::confidenceToCount(c);
+    return checkTruthValue(new SimpleTruthValue(A_s, count));
 }
 
 /*=============================================================================
