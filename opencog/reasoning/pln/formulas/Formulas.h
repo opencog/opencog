@@ -534,14 +534,14 @@ public:
  *
  * Used for the inference
  *
- * A <TV1>
- * C <TV2>
+ * C <TV1>
+ * A <TV2>
  * |-
  * ContextLink <TV3>
  *     C
  *     A
  *
- * TV3.s = TV1.s
+ * TV3.s = TV2.s
  * TV3.c = TV1.c*TV2.c*(1-H(TV1.s)*H(TV2.s))
  * 
  * That formula is a heuristic with not much justification, for an

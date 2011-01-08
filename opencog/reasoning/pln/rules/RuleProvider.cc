@@ -194,6 +194,7 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     // Contextual rules
     AddRule(new ContextualizerRule(asw), 5.0f);
     AddRule(new DecontextualizerRule(asw), 4.0f);
+    AddRule(new ContextFreeToSensitiveRule(asw), 1.0f);
 }
 
 DefaultVariableRuleProvider::~DefaultVariableRuleProvider(void)

@@ -34,8 +34,8 @@ namespace opencog { namespace pln {
  *
  * Speficically apply the inference
  *
- * A <TV1>
- * C <TV2>
+ * C <TV1>
+ * A <TV2>
  * |-
  * ContextLink <TV3>
  *     C

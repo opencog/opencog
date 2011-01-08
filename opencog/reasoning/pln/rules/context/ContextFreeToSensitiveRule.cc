@@ -28,8 +28,8 @@ namespace opencog { namespace pln {
 
 meta ContextFreeToSensitiveRule::i2oType(const std::vector<Vertex>& h) const {
     OC_ASSERT(h.size() == 2);
-    pHandle A = _v2h(h[0]);
-    pHandle CX = _v2h(h[1]);
+    pHandle CX = _v2h(h[0]);
+    pHandle A = _v2h(h[1]);
     return meta(new vtree(mva((pHandle)CONTEXT_LINK, mva(CX), mva(A))));
 }
 
@@ -60,14 +60,14 @@ Rule::setOfMPs ContextFreeToSensitiveRule::o2iMetaExtra(meta outh,
     pHandle CX = _v2h(*root.begin());
     pHandle A = _v2h(*root.last_child());
 
-    BoundVTree* A_bv = new BoundVTree(mva(A));
     BoundVTree* CX_bv = new BoundVTree(mva(CX));
+    BoundVTree* A_bv = new BoundVTree(mva(A));
 
     overrideInputFilter = true;
 
     Rule::MPs res;
-    res.push_back(BBvtree(A_bv));
     res.push_back(BBvtree(CX_bv));
+    res.push_back(BBvtree(A_bv));
 
     return makeSingletonSet(res);
 }

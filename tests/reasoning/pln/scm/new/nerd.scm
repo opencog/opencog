@@ -11,7 +11,8 @@
 (define mathematics (ConceptNode "mathematics" (stv 0.5 0.5)))
 (define makingOut (ConceptNode "makingOut" (stv 0.5 0.5)))
 
-; contextualized concepts
+; contextualized concepts. Note that this can be infered using
+; ContextFreeToSensitiveRule but that is not the purpose of that test
 (define mathematicsCool (ContextLink (stv 0.5 0.5) mathematics cool))
 (define mathematicsNerd (ContextLink (stv 0.5 0.5) mathematics nerd))
 (define mathematicsInteresting (ContextLink (stv 0.5 0.5) mathematics interesting))
