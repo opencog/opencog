@@ -52,6 +52,7 @@
 class BITNodeUTest;
 class PLNUTest;
 
+#define USE_BITUBIGRAPHER
 
 typedef unsigned int BITNodeID;
 

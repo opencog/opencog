@@ -414,7 +414,7 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
     AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
 
     // JaredW: Inversion is basically a conversion Rule, so maybe it should be here.
-    // (i.e. it has exactly one way to produce each target, so not really combinatorial explosions.
+    // (i.e. it has exactly one way to produce each target, so not really combinatorial explosions).
     //AddRule(new InversionRule<INHERITANCE_LINK>(asw), 7.0f);
     AddRule(new InversionRule(asw, INHERITANCE_LINK), 7.0f);
     AddRule(new InversionRule(asw, ASSOCIATIVE_LINK), 7.0f);
