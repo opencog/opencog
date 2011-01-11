@@ -43,6 +43,8 @@ float EvaluationLinkSimilarityEvaluator::similarity(AtomSpace& atomSpace, Handle
 
     //printf("arity1 = %d\n", evalLink1->getArity());
     //printf("arity2 = %d\n", evalLink1->getArity());
+    //printf("type1 = %s\n", atomSpace.getName(atomSpace.getType(evalLinkHandle1)).c_str());
+    //printf("type2 = %s\n", atomSpace.getName(atomSpace.getType(evalLinkHandle2)).c_str());
     if ((atomSpace.getArity(evalLinkHandle1) < 2) || (atomSpace.getArity(evalLinkHandle2) < 2)) {
         return 0;
     }

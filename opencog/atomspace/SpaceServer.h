@@ -73,6 +73,9 @@ public:
     explicit SpaceServer(AtomSpaceAsync&);
     virtual ~SpaceServer();
 
+    //! Set the timeServer
+    void setTimeServer(TimeServer *ts);
+
     /**
      * Gets a const reference to a specific SpaceMap for make queries
      * @throws RuntimeException if the given Handle is not a valid 

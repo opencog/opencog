@@ -57,8 +57,6 @@ int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};
 int numberOfExpectedMatchesWithVH1[] = {15, 15, 15, 0, 0, 0};
 int numberOfExpectedMatchesWithVH2[] = {15, 15, 15, 1, 1, 1};
 
-class opencog::AtomSpaceImpl;
-
 class AtomTableUTest : public CxxTest::TestSuite
 {
 

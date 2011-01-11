@@ -26,6 +26,7 @@ class AtomSpaceAsync {
     friend class ::AtomSpaceAsyncUTest;
     friend class AtomSpace;
     friend class SavingLoading;
+    friend class PersistModule;
 
     bool processingRequests;
     boost::thread m_Thread;

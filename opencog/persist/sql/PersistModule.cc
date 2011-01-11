@@ -39,7 +39,7 @@ class SQLBackingStore : public BackingStore
 	private:
 		AtomStorage *store;
 	public:
-		SQLBackingStore(void);
+		SQLBackingStore();
 		void set_store(AtomStorage *);
 
 		virtual Node * getNode(Type, const char *) const;
@@ -50,7 +50,7 @@ class SQLBackingStore : public BackingStore
 };
 };
 
-SQLBackingStore::SQLBackingStore(void)
+SQLBackingStore::SQLBackingStore()
 {
 	store = NULL;
 }
@@ -142,7 +142,7 @@ std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-load: database not open";
 
-	store->load(atomtable());
+	store->load(const_cast<AtomTable&>(atomspace().atomSpaceAsync.getAtomTable()));
 
 	return "database load started";
 }
@@ -184,7 +184,7 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-store: database not open";
 
-	store->store(atomtable());
+	store->store(const_cast<AtomTable&>(atomspace().atomSpaceAsync.getAtomTable()));
 
 	return "database store started";
 }

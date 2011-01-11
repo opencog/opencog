@@ -10,6 +10,7 @@ AtomSpaceAsync::AtomSpaceAsync()
     counter = 0;
     spaceServer = new SpaceServer(*this);
     timeServer = new TimeServer(*this,spaceServer);
+    spaceServer->setTimeServer(timeServer);
     atomspace.setSpaceServer(spaceServer);
     // Start event loop
     startEventLoop();
@@ -18,6 +19,7 @@ AtomSpaceAsync::AtomSpaceAsync()
 AtomSpaceAsync::~AtomSpaceAsync()
 {
     stopEventLoop();
+    spaceServer->setTimeServer(NULL);
     delete timeServer;
     delete spaceServer;
 };

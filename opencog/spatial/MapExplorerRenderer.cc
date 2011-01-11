@@ -92,7 +92,7 @@ void MapExplorer::selectEntity( void )
         unsigned int name;
         unsigned int nearestToCamera = 0xffffffff;
         unsigned int *cursor = buffer;
-        unsigned int *chosenEntity;
+        unsigned int *chosenEntity = NULL;
         
         for (i = 0; i < (unsigned int)hits; ++i) {
             name = *cursor;

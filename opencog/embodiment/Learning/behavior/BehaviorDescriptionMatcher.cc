@@ -864,21 +864,32 @@ float BehaviorDescriptionMatcher::computeSetSimilarity(const PredicateHandleSet 
 
     if (set1.getSize() == 0) {
         if (set2.getSize() == 0) {
+            printf("both sets are 0 size\n");
             return 1.0;
         } else {
+            printf("only set1 is 0 size\n");
             return 0.0;
         }
     } else {
         if (set2.getSize() == 0) {
+            printf("only set2 is 0 size\n");
             return 0.0;
         }
     }
 
-    if (atomSpace == NULL) {
+    /* can no longer use the presence of atomspace pointer to determine
+     * similarity measure to use..
+     if (atomSpace == NULL) {
+        printf("atomspace null\n");
         return intersectionOverUnion(set1, set2);
     } else {
+        printf("not null\n");
         return weightedIntersectionOverUnion(set1, set2);
-    }
+    }*/
+    float returnValue = weightedIntersectionOverUnion(set1,set2);
+    if (returnValue == 0) returnValue = intersectionOverUnion(set1,set2);
+    return returnValue;
+
 }
 
 float BehaviorDescriptionMatcher::intersectionOverUnion(const PredicateHandleSet &set1, const PredicateHandleSet &set2) const
@@ -927,10 +938,10 @@ void BehaviorDescriptionMatcher::buildMapping(BehaviorCategory &category, Compos
     mappingSimilarity.clear();
 
     for (unsigned int i = 0; i < bdSets.size(); i++) {
-        //printf("mapping %s\n", bdSets[i].toString().c_str());
+        //printf("mapping %s\n", bdSets[i].toString(*atomSpace).c_str());
         float betterSimilarity = -1;
         for (std::set<PredicateHandleSet>::iterator it = allSets.begin(); it != allSets.end(); it++) {
-            //printf("comparing against %s\n", (*it).toString().c_str());
+            //printf("comparing against %s\n", (*it).toString(*atomSpace).c_str());
             float similarity = computeSetSimilarity(bdSets[i], *it);
             //printf("similarity = %f\n", similarity);
             if (similarity > betterSimilarity) {

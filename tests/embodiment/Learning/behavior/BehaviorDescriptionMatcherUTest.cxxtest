@@ -93,6 +93,7 @@ public:
         //printf("\n%s\n", category.toStringTimeline().c_str());
 
         BehaviorDescriptionMatcher matcher;
+        matcher.setAtomSpace(&atomSpace);
         //printf("\n%s\n", matcher.toStringAllSets(category).c_str());
         TS_ASSERT(matcher.toStringAllSets(category) == "{{},{P1},{P1,P2},{P1,P2,P3},{P2},{P3},{P4}}");
     }
@@ -164,8 +165,9 @@ public:
         //printf("\n%s\n", bdtest.toStringTimeline().c_str());
 
         BehaviorDescriptionMatcher matcher;
+        matcher.setAtomSpace(&atomSpace);
 
-        //printf("\n%s\n", matcher.toStringMapping(category, bdtest).c_str());
+        printf("\n%s\n", matcher.toStringMapping(category, bdtest).c_str());
         TS_ASSERT(matcher.toStringMapping(category, bdtest) == "{({}->{}),({P1,P2}->{P1,P2}),({P1,P2,P4}->{P1,P2}),({P2}->{P2}),({P2,P3}->{P1,P2,P3}),({P5}->{})}");
     }
 
@@ -217,8 +219,9 @@ public:
         //printf("\n%s\n", category.toStringTimeline().c_str());
 
         BehaviorDescriptionMatcher matcher;
+        matcher.setAtomSpace(&atomSpace);
 
-        //printf("\n<%s>\n", matcher.toStringSetDistribution(category).c_str());
+        printf("\n<%s>\n", matcher.toStringSetDistribution(category).c_str());
         TS_ASSERT(matcher.toStringSetDistribution(category) == "{}: {1,0,2}\n{P1}: {1,1,2}\n{P1,P2}: {1,0,0}\n{P1,P2,P3}: {0,0,1}\n{P2}: {1,0,0}\n{P3}: {1,0,0}\n{P4}: {0,1,1}\n");
     }
 
@@ -307,6 +310,7 @@ public:
         v.push_back(bdtest6);
 
         BehaviorDescriptionMatcher matcher;
+        matcher.setAtomSpace(&atomSpace);
 
         //printf("\n%s\n", category.toStringTimeline().c_str());
 
@@ -361,6 +365,7 @@ public:
         //printf("\n%s\n", category.toStringTimeline().c_str());
 
         BehaviorDescriptionMatcher matcher;
+        matcher.setAtomSpace(&atomSpace);
         //printf("\n%s\n", matcher.toStringBounds(category).c_str());
         TS_ASSERT(matcher.toStringBounds(category) == "{}: (5, 5)\n{P1}: (1, 4)\n{P2}: (1, 3)\n{P3}: (2, 3)\n{P4}: (2, 2)\n");
     }
@@ -386,6 +391,7 @@ public:
         //printf("\n%s\n", category.toStringTimeline().c_str());
 
         BehaviorDescriptionMatcher matcher;
+        matcher.setAtomSpace(&atomSpace);
 
         Temporal t11(1, 2);
         Temporal t12(2, 3);
@@ -448,6 +454,7 @@ public:
         BehaviorCategory category(&atomSpace);
         category.addCompositeBehaviorDescription(bd1);
         BehaviorDescriptionMatcher matcher;
+        matcher.setAtomSpace(&atomSpace);
 
         //printf("\n%s\n", category.toStringTimeline().c_str());
         //printf("\n%s\n", matcher.toStringMatrices(category).c_str());

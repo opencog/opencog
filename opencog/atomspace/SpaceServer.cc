@@ -54,6 +54,7 @@ SpaceServer::SpaceServer(AtomSpaceAsync &_atomspace): atomspace(&_atomspace)
     yMax = 256;
     xDim = 1024;
     yDim = 1024;
+    timeServer = NULL;
 }
 
 SpaceServer::~SpaceServer()
@@ -61,6 +62,11 @@ SpaceServer::~SpaceServer()
     for (HandleToSpaceMap::iterator itr = spaceMaps.begin(); itr != spaceMaps.end(); itr++) {
         delete itr->second;
     }
+}
+
+void SpaceServer::setTimeServer(TimeServer *ts)
+{
+    timeServer = ts;
 }
 
 void SpaceServer::setAgentRadius(double _radius)

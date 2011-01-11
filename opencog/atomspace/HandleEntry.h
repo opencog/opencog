@@ -36,6 +36,8 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/VersionHandle.h>
 
+using std::string;
+
 namespace opencog
 {
 
