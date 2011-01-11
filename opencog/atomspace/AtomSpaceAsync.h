@@ -328,8 +328,8 @@ public:
 
     /** Change the primary TV's mean of a given Handle */
     VoidRequest setMean(Handle h, float mean) {
-        VoidRequest r; //(new SetTruthValueMeanASR(&atomspace,h,tv,vh));
-        //requestQueue.push(r);
+        VoidRequest r(new SetTruthValueMeanASR(&atomspace,h,mean));
+        requestQueue.push(r);
         return r;
     }
 

@@ -1229,7 +1229,8 @@ public:
 
     template<typename InputIterator>
     HandleSeq filter_InAttentionalFocus(InputIterator begin, InputIterator end) const {
-        return filter(begin, end, &STIAboveThreshold(getAttentionalFocusBoundary()));
+        STIAboveThreshold stiAbove(getAttentionalFocusBoundary());
+        return filter(begin, end, &stiAbove);
     }
 
     struct STIAboveThreshold : public AtomPredicate {

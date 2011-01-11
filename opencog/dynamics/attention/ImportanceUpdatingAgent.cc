@@ -476,8 +476,8 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
     HandleSeq inFocus;
 
     AttentionValue::sti_t threshold = a->getAttentionalFocusBoundary() + amnesty;
-    a->getHandleSetFiltered(back_inserter(inFocus),ATOM,true,
-            &AtomSpace::STIAboveThreshold(threshold));
+    AtomSpace::STIAboveThreshold stiAbove(threshold);
+    a->getHandleSetFiltered(back_inserter(inFocus),ATOM,true,&stiAbove);
 
     attentionalFocusSize.update(inFocus.size());
 

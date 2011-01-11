@@ -451,6 +451,20 @@ public:
     
 };
 
+class SetTruthValueMeanASR : public TwoParamASR <bool,Handle,float> {
+    Handle h;
+public:
+    SetTruthValueMeanASR(AtomSpaceImpl *a, Handle _h, float mean) :
+            TwoParamASR<bool,Handle,float>(a,_h,mean) {
+    }
+    
+    virtual void do_work() {
+        atomspace->setMean(p1,p2);
+        set_result(true);
+    };
+    
+};
+
 class DecaySTIASR : public GenericASR<bool> {
 public:
     DecaySTIASR(AtomSpaceImpl *a) :
@@ -630,7 +644,7 @@ public:
              VersionHandle _vh = NULL_VERSION_HANDLE) :
             GenericASR<HandleSeq>(a) {
         types = NULL; subclasses = NULL;
-        handles = handles;
+        handles = _handles;
         // This is nasty - having to malloc...
         // but we can't rely on the parameters being around when the
         // request is actioned.

@@ -120,13 +120,14 @@ Handle TimeServer::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv
 
 Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv)
 {
-    DPRINTF("TimeServer::addTimeInfo - temp init\n");
+    DPRINTF("TimeServer::addTimeInfo - start\n");
     Handle timeNode = atomspace->addNode(TIME_NODE, timeNodeName)->get_result();
-    DPRINTF("TimeServer::addTimeInfo - temp 1\n");
+    DPRINTF("TimeServer::addTimeInfo - timeNode was %lu\n", timeNode.value());
     HandleSeq atTimeLinkOutgoing;
     atTimeLinkOutgoing.push_back(timeNode);
     atTimeLinkOutgoing.push_back(h);
     Handle atTimeLink = atomspace->addLink(AT_TIME_LINK, atTimeLinkOutgoing, tv)->get_result();
+    DPRINTF("TimeServer::addTimeInfo - atTimeLink was %lu\n", atTimeLink.value());
     DPRINTF("TimeServer::addTimeInfo - temp end\n");
     return atTimeLink;
 }
@@ -149,10 +150,10 @@ bool TimeServer::removeTimeInfo(Handle h, const Temporal& t,
     for (std::list<HandleTemporalPair>::const_iterator itr = existingEntries.begin();
             itr != existingEntries.end(); itr++) {
         Handle atTimeLink = getAtTimeLink(*itr);
-        DPRINTF("Got atTimeLink = %u\n", atTimeLink.value());
+        DPRINTF("Got atTimeLink = %lu\n", atTimeLink.value());
         if (atomspace->isValidHandle(atTimeLink)->get_result()) {
             Handle timeNode = atomspace->getOutgoing(atTimeLink, 0)->get_result();
-            DPRINTF("Got timeNode = %u\n", timeNode.value());
+            DPRINTF("Got timeNode = %lu\n", timeNode.value());
             int arityOfTimeLink = atomspace->getArity(atTimeLink)->get_result();
             OC_ASSERT(arityOfTimeLink == 2,
                     "TimeServer::removeTimeInfo: Got invalid arity for AtTimeLink = %d\n",
@@ -186,7 +187,7 @@ Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp) const
     DPRINTF("TimeServer::getAtTimeLink: t = %s, h = %s\n", t.toString().c_str(), atomspace->atomAsString(h)->get_result().c_str());
 
     Handle timeNode = atomspace->getHandle(TIME_NODE, t.getTimeNodeName())->get_result();
-    DPRINTF("timeNode = %u\n", timeNode.value());
+    DPRINTF("timeNode = %lu\n", timeNode.value());
     if (atomspace->isValidHandle(timeNode)->get_result()) {
         HandleSeq atTimeLinkOutgoing(2);
         atTimeLinkOutgoing[0] = timeNode;

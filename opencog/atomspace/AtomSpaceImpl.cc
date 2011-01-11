@@ -593,9 +593,12 @@ boost::shared_ptr<Link> AtomSpaceImpl::cloneLink(const Handle h) const
 
 std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
 {
-    // TODO check that h is a valid atom handle
-    if (terse) return TLB::getAtom(h)->toShortString();
-    return TLB::getAtom(h)->toString();
+    Atom* a = TLB::getAtom(h);
+    if (a) {
+        if (terse) return a->toShortString();
+        else return a->toString();
+    }
+    return std::string("ERROR: Bad handle");
 }
 
 HandleSeq AtomSpaceImpl::getNeighbors(const Handle h, bool fanin,

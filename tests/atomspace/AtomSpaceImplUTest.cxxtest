@@ -253,7 +253,8 @@ public:
         // Test filters
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
             //logger().debug("Checking against VersionHandle %d\n", vhIdx);
-            HandleSeq high_mean = atomSpace->filter(&mean(), VHs[vhIdx]);
+            mean m;
+            HandleSeq high_mean = atomSpace->filter(&m, VHs[vhIdx]);
 
             HandleSeq nodes;
             atomSpace->getHandleSet(back_inserter(nodes), NODE, true, VHs[vhIdx]);
@@ -262,7 +263,8 @@ public:
             atomSpace->getHandleSet(back_inserter(links), LINK, true, VHs[vhIdx]);
 
             HandleSeq all;
-            atomSpace->filter(back_inserter(all), &everything(), VHs[vhIdx]);
+            everything e;
+            atomSpace->filter(back_inserter(all), &e, VHs[vhIdx]);
             
             HandleSeq AF_nodes = atomSpace->filter_InAttentionalFocus(nodes.begin(), nodes.end());
             HandleSeq AF_links = atomSpace->filter_InAttentionalFocus(links.begin(), links.end());
@@ -678,9 +680,10 @@ public:
         logger().debug("STIAboveThreshold");
 
         HandleSeq highSTI;
-        atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, &AtomSpaceImpl::STIAboveThreshold(1000));
+        AtomSpaceImpl::STIAboveThreshold stiAbove(1000);
+        atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, &stiAbove);
         for (unsigned int i = 0; i < highSTI.size(); i++) {
-            TS_ASSERT(AtomSpaceImpl::STIAboveThreshold(1000) (*atomSpace->cloneAtom(highSTI[i])) );
+            TS_ASSERT(stiAbove (*atomSpace->cloneAtom(highSTI[i])) );
         }
         TS_ASSERT(highSTI.size() == 1U);
         TS_ASSERT(highSTI[0] == atoms[0]);
@@ -688,9 +691,10 @@ public:
         logger().debug("LTIAboveThreshold");
         
         HandleSeq highLTI;
-        atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, &AtomSpaceImpl::LTIAboveThreshold(800));
+        AtomSpaceImpl::LTIAboveThreshold ltiAbove(800);
+        atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, &ltiAbove);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
-            TS_ASSERT(AtomSpaceImpl::LTIAboveThreshold(800) (*atomSpace->cloneAtom(highLTI[i])) );
+            TS_ASSERT(ltiAbove (*atomSpace->cloneAtom(highLTI[i])) );
         }
         TS_ASSERT(highLTI.size() == 1U);
         TS_ASSERT(highLTI[0] == atoms[1]);
@@ -721,18 +725,20 @@ public:
         
         logger().debug("STIAboveThreshold");
 
-        HandleSeq highSTI = atomSpace->filter(atoms.begin(), atoms.end(), &AtomSpaceImpl::STIAboveThreshold(1000));
+        AtomSpaceImpl::STIAboveThreshold stiAbove(1000);
+        HandleSeq highSTI = atomSpace->filter(atoms.begin(), atoms.end(), &stiAbove);
         for (unsigned int i = 0; i < highSTI.size(); i++) {
-            TS_ASSERT(AtomSpaceImpl::STIAboveThreshold(1000) (*atomSpace->cloneAtom(highSTI[i])) );
+            TS_ASSERT(stiAbove (*atomSpace->cloneAtom(highSTI[i])) );
         }
         TS_ASSERT(highSTI.size() == 1U);
         TS_ASSERT(highSTI[0] == atoms[0]);
                 
         logger().debug("LTIAboveThreshold");
         
-        HandleSeq highLTI = atomSpace->filter(atoms.begin(), atoms.end(), &AtomSpaceImpl::LTIAboveThreshold(800));
+        AtomSpaceImpl::LTIAboveThreshold ltiAbove(800);
+        HandleSeq highLTI = atomSpace->filter(atoms.begin(), atoms.end(), &ltiAbove);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
-            TS_ASSERT(AtomSpaceImpl::LTIAboveThreshold(800) (*atomSpace->cloneAtom(highLTI[i])) );
+            TS_ASSERT(ltiAbove (*atomSpace->cloneAtom(highLTI[i])) );
         }
         TS_ASSERT(highLTI.size() == 1U);
         TS_ASSERT(highLTI[0] == atoms[1]);
