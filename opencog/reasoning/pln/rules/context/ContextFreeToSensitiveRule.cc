@@ -36,8 +36,8 @@ meta ContextFreeToSensitiveRule::i2oType(const VertexSeq& h) const {
 TVSeq ContextFreeToSensitiveRule::formatTVarray(const VertexSeq& premiseArray) const {
     OC_ASSERT(premiseArray.size()==2);
     TVSeq res;
-    res.push_back(&asw->getTV(_v2h(premiseArray[0])));
-    res.push_back(&asw->getTV(_v2h(premiseArray[1])));
+    res.push_back(asw->getTV(_v2h(premiseArray[0])));
+    res.push_back(asw->getTV(_v2h(premiseArray[1])));
     return res;
 }
 
