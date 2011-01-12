@@ -1276,7 +1276,7 @@ private:
      * saving/loading) might not like the AtomSpace changing while acting upon
      * it. Those that absolutely require it can get a lock to halt the event loop.
      * @warn This should only be used as a last resort, you need to add your
-     * class as a friend class to the AtomSpace, and we make no
+     * class as a friend class to the AtomSpace, and there is no
      * guarantee this will be available in the future.
      */
     mutable pthread_mutex_t atomSpaceLock;

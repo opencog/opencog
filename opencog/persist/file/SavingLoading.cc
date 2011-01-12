@@ -325,7 +325,7 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     fclose(f);
 
     // update all statistics
-    StatisticsMonitor::getInstance()->reevaluateAllStatistics(atomTable);
+    StatisticsMonitor::getInstance()->reevaluateAllStatistics(atomSpace);
 
     // calculates the total time that the process of loading has spent
     time_t duration = time(NULL) - start;

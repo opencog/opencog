@@ -29,7 +29,7 @@
 #include <time.h>
 #include <vector>
 
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
 
 namespace opencog
@@ -145,7 +145,7 @@ public:
      * Updates all statistics from scratch. This is expensive since all
      * atoms in the system must be traversed.
      */
-    void reevaluateAllStatistics(const AtomTable&);
+    void reevaluateAllStatistics(const AtomSpace&);
 
     /**
      * Returns the total number of atoms in the system.

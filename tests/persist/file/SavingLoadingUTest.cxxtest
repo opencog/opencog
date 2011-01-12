@@ -153,14 +153,14 @@ public:
         logger().debug("runLoading()");
         SavingLoading savingLoading;
 
-#if 0 // TODO: SM code has been disabled. So this test fails. We can get back with this when it is enabled again.
         // Check statistics:
         StatisticsMonitor* sm = StatisticsMonitor::getInstance();
-        sm->reevaluateAllStatistics(atomSpace.getAtomTable());
+        sm->reevaluateAllStatistics(atomSpace);
 
         savingLoading.load(DUMP_FILENAME, atomSpace);
         logger().debug("loaded %s", DUMP_FILENAME);
 
+#if 0 // TODO: SM code has been disabled. So this test fails. We can get back with this when it is enabled again.
         logger().debug("atomCount=%d", sm->getAtomCount());
         logger().debug("nodeCount=%d", sm->getNodeCount());
         logger().debug("LinkCount=%d", sm->getLinkCount());

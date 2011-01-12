@@ -26,8 +26,8 @@
 
 #include <opencog/util/Logger.h>
 
-#define DPRINTF printf
-//#define DPRINTF(...)
+//#define DPRINTF printf
+#define DPRINTF(...)
 
 using namespace opencog;
 

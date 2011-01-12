@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/Link.h>
@@ -123,7 +123,7 @@ int StatisticsMonitor::getNodeImportanceBinCount(int i)
     return 0;
 }
 
-void StatisticsMonitor::reevaluateAllStatistics(const AtomTable& atomTable)
+void StatisticsMonitor::reevaluateAllStatistics(const AtomSpace& atomTable)
 {
 }
 
