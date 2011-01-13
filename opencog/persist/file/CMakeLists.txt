@@ -8,6 +8,8 @@ ADD_LIBRARY (savable SHARED
 	TemporalTableFile.cc
 )
 
+ADD_DEPENDENCIES(savable opencog_atom_types)
+
 INSTALL (FILES
 	SavableRepository.h
 	SavingLoading.h

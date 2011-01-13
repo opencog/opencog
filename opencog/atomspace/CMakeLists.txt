@@ -52,6 +52,8 @@ ADD_LIBRARY (atomspace SHARED
     md5.c
 )
 
+ADD_DEPENDENCIES(atomspace opencog_atom_types)
+
 TARGET_LINK_LIBRARIES(atomspace
     xml
     util
