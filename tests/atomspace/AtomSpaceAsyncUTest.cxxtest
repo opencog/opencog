@@ -32,6 +32,8 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
 #include <opencog/util/misc-test.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
@@ -45,20 +47,27 @@ private:
 
     AtomSpaceAsync *atomSpace;
     int __testSignalsCounter;
+    RandGen *rng;
 
+    int n_threads;
+    int num_atoms;
 
 public:
     AtomSpaceAsyncUTest() {
+        n_threads = 10;
+        num_atoms = 100;
         logger().setLevel(Logger::INFO);
         logger().setPrintToStdoutFlag(true);
     }
 
     void setUp() {
         atomSpace = new AtomSpaceAsync();
+        rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     }
 
     void tearDown() {
         delete atomSpace;
+        delete rng;
     }
 
     void atomAdded1(opencog::AtomSpaceImpl* a, Handle h) {
@@ -230,4 +239,70 @@ public:
         TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
         TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
     }
+
+    Type randomType(Type t) {
+        int numberOfTypes = classserver().getNumberOfClasses();
+        OC_ASSERT(t < numberOfTypes);
+        Type randomType = NOTYPE;
+        while (!classserver().isA(randomType, t))
+            randomType = ATOM + rng->randint(numberOfTypes-1);
+        return randomType;
+    }
+
+    void threadedAdd(int N) {
+        int counter=0;
+        double chanceOfNonDefaultNode = 0.0;
+        for (int i =0; i < N; i++) {
+            double p = rng->randdouble();
+            Type t = CONCEPT_NODE;
+            if (p < chanceOfNonDefaultNode)
+                t=randomType(NODE);
+            std::ostringstream oss;
+            oss << "node " << counter;
+            counter++;
+            atomSpace->addNode(t,oss.str())->get_result(); 
+        }
+    }
+
+    void testThreadedAdd() {
+        boost::thread_group thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            boost::thread *t = new boost::thread(boost::bind(&AtomSpaceAsyncUTest::threadedAdd, this, _1), num_atoms);
+            thread_pool.add_thread(t);
+        }
+        thread_pool.join_all();
+        int size = atomSpace->getSize()->get_result();
+        //std::cout<<"size:"<<size<<std::endl;
+        TS_ASSERT_EQUALS(size, num_atoms);
+    }
+
+    void threadedRemove(int start,int interval) {
+        for (int i =start; i < start+interval; i++) {
+            std::ostringstream oss;
+            oss << "node " << i;
+            //std::cout << "removing " << oss.str() << std::endl;
+            HandleSeq hs = atomSpace->getHandlesByName(oss.str(),NODE)->get_result();
+            TS_ASSERT_EQUALS(hs.size(), 1); 
+            if (hs.size() != 0) {
+                //std::cout << " handle " << hs[0] << std::endl;
+                atomSpace->removeAtom(hs[0])->get_result();
+            }
+        }
+    }
+
+    void testThreadedRemove() {
+        testThreadedAdd();
+        int interval = num_atoms/n_threads;
+        boost::thread_group thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            boost::thread *t = new boost::thread(boost::bind(&AtomSpaceAsyncUTest::threadedRemove, this, i*interval, interval));
+            thread_pool.add_thread(t);
+        }
+        thread_pool.join_all();
+        int size = atomSpace->getSize()->get_result();
+        TS_ASSERT_EQUALS(size, 0);
+        size = atomSpace->getSize()->get_result();
+    }
+    
+
 };
