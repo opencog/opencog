@@ -32,7 +32,7 @@ namespace opencog { namespace pln {
 /**
  * Rule to contextualize an atom A given no prior assumption aboput A and C.
  *
- * Speficically apply the inference
+ * Specifically apply the inference
  *
  * C <TV1>
  * A <TV2>
