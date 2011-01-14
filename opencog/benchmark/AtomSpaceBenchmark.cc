@@ -26,7 +26,7 @@ using std::clock;
 using std::time;
 
 #define DIVIDER_LINE "------------------------------"
-#define PROGRESS_BAR_LENGTH 50
+#define PROGRESS_BAR_LENGTH 10
 
 AtomSpaceBenchmark::AtomSpaceBenchmark()
 {
@@ -213,9 +213,9 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodT
     rssEnd = getMemUsage();
     cout << endl; // clear dotted progress bar line
     cout << "Sum time for all requests: " << (float) sumTime / CLOCKS_PER_SEC
-        << " seconds" << endl;
-    cout << "Memory (max RSS) change after benchmark: " <<
-        (rssEnd - rssStart - rssFromIncrease) / 1024 << "kb" << endl;
+        << " seconds ("<< 1.0f/(((float)sumTime/CLOCKS_PER_SEC) / N) << " requests per second)" << endl;
+    //cout << "Memory (max RSS) change after benchmark: " <<
+    //    (rssEnd - rssStart - rssFromIncrease) / 1024 << "kb" << endl;
 
     if (saveInterval && doStats) {
         // Only calculate stats if we've actually been saving datapoints
@@ -235,7 +235,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
     for (unsigned int i = 0; i < methodNames.size(); i++) {
         UUID_begin = TLB::getMaxUUID();
         a = new AtomSpace();
-        if (buildTestData) buildAtomSpace(atomCount,percentLinks);
+        if (buildTestData) buildAtomSpace(atomCount,percentLinks,false);
         doBenchmark(methodNames[i],methodsToTest[i]);
         delete a;
     }
@@ -408,6 +408,9 @@ clock_t AtomSpaceBenchmark::bm_getHandleSet()
 clock_t AtomSpaceBenchmark::bm_getOutgoingSet()
 {
     Handle h = getRandomHandle();
+    clock_t t_begin = clock();
+    a->getOutgoing(h);
+    return clock() - t_begin;
 }
 
 AtomSpaceBenchmark::TimeStats::TimeStats(
