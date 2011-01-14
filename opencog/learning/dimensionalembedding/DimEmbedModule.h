@@ -53,12 +53,14 @@ namespace opencog
         typedef std::map<Type, PivotSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
         typedef std::map<Type, node<CoverTreeNode> > EmbedTreeMap;
-
+        
         AtomSpace* as;
         AtomEmbedMap atomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
         EmbedTreeMap embedTreeMap;
-        int clusters;//to keep track of the number of clusters
+        std::map<Type,int> dimensionMap;//Stores the number of dimensions that
+                                        //each link type is embedded under
+
         /**
          * Adds h as a pivot and adds the distances from each node to
          * the pivot to the appropriate atomEmbedding.
@@ -107,6 +109,15 @@ namespace opencog
                                      const Handle& targetHandle,
                                      const Type& linkType);
 
+        double euclidDist(double v1[], double v2[], int size);
+    public:
+        const char* id();
+
+        DimEmbedModule(AtomSpace* atomSpace);
+        DimEmbedModule();
+        virtual ~DimEmbedModule();
+        virtual void init();
+
         /**
          * Returns a list of doubles corresponding to the handle h's
          * embedding of link type l. Throws an exception if no embedding
@@ -119,17 +130,8 @@ namespace opencog
          * @return A list of doubles corresponding to handle h's distance
          * from each of the pivots.
          */
-        std::list<double> getEmbedlist(const Handle& h, const Type& l);
+        std::list<double> getEmbedList(const Handle& h, const Type& l);
 
-        double euclidDist(double v1[], double v2[], int size);
-    public:
-        static const int numDimensions=5;//number of pivot atoms
-        const char* id();
-
-        DimEmbedModule();
-        virtual ~DimEmbedModule();
-        virtual void init();
-        
         /**
          * Creates an AtomEmbedding of the atomspace using linkType
          * and registers it with the AtomEmbedMap. If an AtomEmbedding
@@ -143,7 +145,7 @@ namespace opencog
          * picked as the farthest from the current pivots, but connectedness
          * should be incorporated to avoid picking pivots with no links
          */
-        void embedAtomSpace(const Type& linkType);
+        void embedAtomSpace(const Type& linkType, const int numDimensions=5);
 
         /**
          * Logs a string representation of of the (Handle,list<Double>)

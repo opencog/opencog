@@ -22,14 +22,95 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//#include "opencog/learning/dimensionalembedding/DimEmbedModule.h"
 #include <cxxtest/TestSuite.h>
+
+#include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+
+using namespace opencog;
 
 class DimEmbedTestSuite : public CxxTest::TestSuite
 {
-public:
-    void testEuclidDist() {
-        //int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/dimembeddata.scm");
-        //TSM_ASSERT_EQUALS("Failed to load type scheme file", 0, rc);
+public:        
+    void testMisc() {
+        AtomSpace *atomSpace = new AtomSpace();
+        DimEmbedModule dimEmbed=DimEmbedModule(atomSpace);
+        
+        Handle h1 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog2", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "dog3", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h4 = atomSpace->addNode(CONCEPT_NODE, "dog4", SimpleTruthValue(0.001f, 0.00001f));
+
+        atomSpace->addLink(SIMILARITY_LINK, h1, h2,
+                           SimpleTruthValue(0.5, SimpleTruthValue::confidenceToCount(1.0)));
+        atomSpace->addLink(SIMILARITY_LINK, h1, h3,
+                           SimpleTruthValue(0.7, SimpleTruthValue::confidenceToCount(1.0)));
+        atomSpace->addLink(SIMILARITY_LINK, h1, h4,
+                           SimpleTruthValue(1.0, SimpleTruthValue::confidenceToCount(0.9)));
+        atomSpace->addLink(SIMILARITY_LINK, h3, h4,
+                           SimpleTruthValue(0.2, SimpleTruthValue::confidenceToCount(1.0)));
+        /*
+        //dimEmbed.addPivot(h1,SIMILARITY_LINK);
+        //dimEmbed.addPivot(h2,SIMILARITY_LINK);
+        dimEmbed.embedAtomSpace(SIMILARITY_LINK, 2);
+        //The embedding vectors should be as follows:
+        //h1: (1, .5)
+        //h2: (.5, 1)
+        //h3: (.7, .35)
+        //h4: (.9, .45)
+        std::list<double> l1 = dimEmbed.getEmbedList(h1,SIMILARITY_LINK);
+        std::list<double> l2 = dimEmbed.getEmbedList(h2,SIMILARITY_LINK);
+        std::list<double> l3 = dimEmbed.getEmbedList(h3,SIMILARITY_LINK);
+        std::list<double> l4 = dimEmbed.getEmbedList(h4,SIMILARITY_LINK);
+        TS_ASSERT_EQUALS(2, l1.size());
+        TS_ASSERT_EQUALS(l1.size(), l2.size());
+        TS_ASSERT_EQUALS(l2.size(), l3.size());
+        TS_ASSERT_EQUALS(l3.size(), l4.size());
+        std::list<double>::iterator it = l1.begin();
+        TS_ASSERT_DELTA(*it, 1.0, .00001); it++;
+        TS_ASSERT_DELTA(*it, 0.5, .00001);
+        it=l2.begin();
+        TS_ASSERT_DELTA(*it, 0.5, .00001); it++;
+        TS_ASSERT_DELTA(*it, 1.0, .00001);
+        it=l3.begin();
+        TS_ASSERT_DELTA(*it, 0.7, .00001); it++;
+        TS_ASSERT_DELTA(*it, 0.35, .00001);
+        it=l4.begin();
+        TS_ASSERT_DELTA(*it, 0.9, .00001); it++;
+        TS_ASSERT_DELTA(*it, 0.45, .00001);
+        */
+        //dimEmbed.clearEmbedding(SIMILARITY_LINK);
+        dimEmbed.embedAtomSpace(SIMILARITY_LINK, 4);
+        //We have no guarantee on the order that the pivots
+        //were picked in, but since numDimensions=numNodes,
+        //the euclidean distances between any 2 nodes
+        //will not be affected by this.
+        //So the embedding vectors should be some permutation of...
+        //h1:(1, .5, .7, .9)
+        //h2:(.5, 1, .35, .45)
+        //h3:(.7, .35, 1, .63)
+        //h4:(.9, .45, .63, 1)
+        Handle handles[4] = {h1, h2, h3, h4};
+        //Pre-calculated distances based on what the embedding should be...
+        double dists [4][4] = //dists[i][j] denotes distance between hi and hj
+            {{0.0, 0.908295106229, 0.524785670536, 0.165529453572},
+             {0.90829510622924747, 0.0, 0.95781000203589439, 0.9183681179135087},
+             {0.52478567053607716, 0.95781000203589439, 0.0, 0.5690342696182717},
+             {0.16552945357246843, 0.9183681179135087, 0.56903426961827175, 0.0}
+            };
+        double dist;
+        for(int i=0;i<4;i++){
+            for(int j=0;j<4;j++){
+                dist = dimEmbed.euclidDist(handles[i],
+                                                  handles[j]
+                                                  ,SIMILARITY_LINK);
+                TS_ASSERT_DELTA(dist,dists[i][j],.000001);
+            }
+        }
+        
+        delete atomSpace;
     }
+    //TODO: Write tests for k nearest neighbor and clustering
 };

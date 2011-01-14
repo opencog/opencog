@@ -256,20 +256,14 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, const TruthValue
     //Keep trying new random suffixes until you generate a new name
     do {
         name=prefix;
-        //std::stringstream out;
-        //out << prefix;
         for (int i = 0; i < len; ++i) {
             name+=alphanum[rand() % (sizeof(alphanum) - 1)];
-            //out << alphanum[rand() % (sizeof(alphanum) - 1)];
         }
-        //name = out.str();
         result = getHandle(t, name);
     } while(TLB::isValidHandle(result));
 
     return addNode(t, name, tvn);
 }
-  
-
 
 Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
                           const TruthValue& tvn)

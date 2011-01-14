@@ -41,6 +41,9 @@ using namespace opencog;
 
 DECLARE_MODULE(DimEmbedModule)
 
+DimEmbedModule::DimEmbedModule(AtomSpace* atomSpace) {
+    this->as=atomSpace;
+}
 DimEmbedModule::DimEmbedModule() {
 	logger().info("[DimEmbedModule] constructor");
 }
@@ -53,7 +56,6 @@ void DimEmbedModule::init() {
     logger().info("[DimEmbedModule] init");
     CogServer& cogServer = static_cast<CogServer&>(server());
     this->as=cogServer.getAtomSpace();
-    clusters=0;
 #ifdef HAVE_GUILE
     //Functions available to scheme shell
     define_scheme_primitive("embedSpace",
@@ -126,7 +128,7 @@ double DimEmbedModule::findHighestWeightPath(const Handle& startHandle,
     return 0; //no path found, return 0
 }
 
-std::list<double> DimEmbedModule::getEmbedlist(const Handle& h,
+std::list<double> DimEmbedModule::getEmbedList(const Handle& h,
                                                          const Type& l) {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
@@ -251,13 +253,15 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
     }
 }
 
-void DimEmbedModule::embedAtomSpace(const Type& linkType){    
+void DimEmbedModule::embedAtomSpace(const Type& linkType,
+                                    const int numDimensions){    
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
     //logger().info("starting embedding");
     clearEmbedding(linkType);
+    dimensionMap[linkType]=numDimensions;
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
     
@@ -324,6 +328,7 @@ void DimEmbedModule::clearEmbedding(const Type& linkType){
 
     atomMaps.erase(linkType);
     pivotsMap.erase(linkType);
+    dimensionMap.erase(linkType);
 }
 
 void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
@@ -406,6 +411,7 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
+    int numDimensions=dimensionMap[l];
     int npass=1;
     AtomEmbedding& aE = atomMaps[l];
     int numVectors=aE.size();
@@ -517,8 +523,8 @@ double DimEmbedModule::euclidDist(const Handle& h1,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
  
-    std::list<double> v1=getEmbedlist(h1,l);
-    std::list<double> v2=getEmbedlist(h2,l);
+    std::list<double> v1=getEmbedList(h1,l);
+    std::list<double> v2=getEmbedList(h2,l);
     return euclidDist(v1, v2);
 }
 
