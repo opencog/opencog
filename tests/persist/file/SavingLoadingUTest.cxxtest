@@ -157,6 +157,7 @@ public:
         sm->reevaluateAllStatistics(atomSpace.getAtomTable());
 
         savingLoading.load(DUMP_FILENAME, atomSpace);
+        logger().debug("loaded %s", DUMP_FILENAME);
 
 #if 0 // TODO: SM code has been disabled. So this test fails. We can get back with this when it is enabled again.
         // Check statistics:
