@@ -52,7 +52,11 @@
 class BITNodeUTest;
 class PLNUTest;
 
+/* Don't define USE_BITUBIGRAPHER unless cmake actually found Ubigraph
+ * installed */
+#ifdef HAVE_UBIGRAPH
 #define USE_BITUBIGRAPHER
+#endif
 
 typedef unsigned int BITNodeID;
 
