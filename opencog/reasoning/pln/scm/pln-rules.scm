@@ -40,11 +40,11 @@
 ; to compute its TV.
 
 ; define rule name 
-(define (UniInsForAllRuleNameStr forAll)
-  (string-append "CustomCrispUnificationRule"
+(define (ForAllInstantiationRuleNameStr forAll)
+  (string-append "ForAllInstantiationRule"
                  (number->string (cog-handle forAll))))
 ; apply the inference rule
-(define (UniInsForAllRule forAll . arguments)
-  (pln-ar (UniInsForAllRuleNameStr forAll)
+(define (ForAllInstantiationRule forAll . arguments)
+  (pln-ar (ForAllInstantiationRuleNameStr forAll)
           (list (universal-instantiate forAll arguments))
           (list))) ; TODO

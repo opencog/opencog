@@ -89,12 +89,12 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     
     AtomSpaceWrapper* asw = ASW();
     
+    // Instantiation Rules
     Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
-
     foreach(pHandle fah, *ForAll_handles)
-        AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
+        AddRule(new ForAllInstantiationRule(fah, asw), 7.5f);
 
-    cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
+    cprintf(-1, "Added %u InstantiationRules.\n", (unsigned int) size());
     
     AddRule(new LookupRule(asw), 20.0f);
 
@@ -338,9 +338,9 @@ ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
     Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
 
     foreach(pHandle fah, *ForAll_handles)
-        AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
+        AddRule(new ForAllInstantiationRule(fah, asw), 7.5f);
 
-    cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
+    cprintf(-1, "Added %u InstantiationRules.\n", (unsigned int) size());
 }
 
 ForwardGeneratorRuleProvider::~ForwardGeneratorRuleProvider(void)
@@ -377,9 +377,9 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
     Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
 
     foreach(pHandle fah, *ForAll_handles)
-        AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
+        AddRule(new ForAllInstantiationRule(fah, asw), 7.5f);
 
-    cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
+    cprintf(-1, "Added %u InstantiationRules.\n", (unsigned int) size());
 
     AddRule(new ORRule(asw), 10.0f);
 

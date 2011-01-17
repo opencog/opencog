@@ -270,8 +270,8 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
 
 void opencog::pln::correctRuleName(string& ruleName, Handle CX)
 {
-    if(ruleName.find(CustomCrispUnificationRulePrefixStr) == 0) { // found
-        const unsigned int hpos = CustomCrispUnificationRulePrefixStr.size();
+    if(ruleName.find(ForAllInstantiationRulePrefixStr) == 0) { // found
+        const unsigned int hpos = ForAllInstantiationRulePrefixStr.size();
         Handle h(boost::lexical_cast<UUID>(ruleName.substr(hpos)));
         pHandle ph = ASW()->realToFakeHandle(h, (CX == Handle::UNDEFINED?
                                                  NULL_VERSION_HANDLE

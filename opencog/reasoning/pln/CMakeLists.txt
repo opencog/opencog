@@ -35,7 +35,6 @@ ADD_LIBRARY (pln SHARED
 	rules/auxiliary/LookupRule.cc
 	rules/auxiliary/ScholemFunctionProductionRule.cc
 	rules/auxiliary/UnorderedLinkPermutationRule.cc
-	rules/instantiation/CustomCrispUnificationRule.cc
 	rules/and/ANDRuleArityFree.cc
 	rules/and/ANDRule.cc
 	rules/and/ANDPartitionRule.cc
@@ -147,7 +146,8 @@ INSTALL (FILES
 	rules/RuleProvider.h
 	rules/RuleFunctions.h
 	rules/GenericRule.h
-	rules/instantiation/CustomCrispUnificationRule.h
+	rules/instantiation/BaseInstantiationRule.h
+	rules/instantiation/ForAllInstantiationRule.h
 	rules/Rules.h
 	rules/and/AND2ORRule.h
 	rules/and/ANDBreakdownRule.h
