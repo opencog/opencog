@@ -36,7 +36,7 @@ public:
 	}
 	setOfMPs o2iMetaExtra(meta, bool& overrideInputFilter) const;
 
-    TVSeq formatTVarray(const vector<Vertex>& premiseArray) const
+    TVSeq formatTVarray(const VertexSeq& premiseArray) const
 	{
 		TVSeq tvs;
 
@@ -48,7 +48,7 @@ public:
 		return tvs;
 	}
 
-	meta i2oType(const vector<Vertex>& h) const
+	meta i2oType(const VertexSeq& h) const
 	{
 		const int n = h.size();
 		Handle h0 = v2h(h[0]);

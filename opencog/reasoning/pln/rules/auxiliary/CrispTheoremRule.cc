@@ -255,7 +255,7 @@ Rule::setOfMPs CrispTheoremRule::o2iMetaExtra(meta outh, bool& overrideInputFilt
 }
 
 
-BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray,
+BoundVertex CrispTheoremRule::compute(const VertexSeq& premiseArray,
                                       pHandle CX,
                                       bool fresh) const
 {

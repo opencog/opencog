@@ -84,7 +84,7 @@ public:
 		return makeSingletonSet(ret);
 	}
 
-	BoundVertex compute(const std::vector<Vertex>& premiseArray,
+	BoundVertex compute(const VertexSeq& premiseArray,
                             pHandle CX=PHANDLE_UNDEFINED,
                             bool fresh = true) const
 	{

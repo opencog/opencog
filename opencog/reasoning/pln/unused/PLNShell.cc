@@ -823,7 +823,7 @@ void PLNShell::Launch(vtree *target)
 {
     AtomSpaceWrapper* atw = GET_ASW;
 
-/*  vector<Vertex> targs, targs2;
+/*  VertexSeq targs, targs2;
     targs.push_back(mva((Handle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "A"),
                     NewNode(CONCEPT_NODE, "B")

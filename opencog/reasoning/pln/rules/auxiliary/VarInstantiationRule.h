@@ -57,7 +57,7 @@ public:
                         return ret;*/
     }
 
-    BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL,
+    BoundVertex compute(const VertexSeq& premiseArray, Handle CX = NULL,
                         bool fresh = true) const
     {
 	assert(n == 5);

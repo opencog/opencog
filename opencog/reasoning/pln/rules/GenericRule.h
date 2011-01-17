@@ -39,7 +39,7 @@ public:
      * up the BIT (i.e. once it has reached existing atoms,
      * and is evaluating Rules on the path back up to the target).
      */
-    virtual meta i2oType(const std::vector<Vertex>& h) const = 0;
+    virtual meta i2oType(const VertexSeq& h) const = 0;
 
     /**
      * formatTVarray generates the array of TVs to be passed to formula.compute
@@ -50,14 +50,14 @@ public:
      *
      * @return the array of TVs to be used by formula.compute
      */
-    virtual TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const = 0;
+    virtual TVSeq formatTVarray(const VertexSeq& premiseArray) const = 0;
 
     /// Always a composer
     GenericRule(AtomSpaceWrapper *_asw, bool _FreeInputArity,
                 std::string _name = "")
         : Rule(_asw, _FreeInputArity, true, _name) { }
 
-    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+    BoundVertex compute(const VertexSeq& premiseArray,
                         pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const {
         const int n = (const int) premiseArray.size();

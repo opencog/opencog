@@ -31,7 +31,7 @@ protected:
 // mutable std::vector<Type> ti;
     Type InclusionLink;
 
-    virtual TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const {
+    virtual TVSeq formatTVarray(const VertexSeq& premiseArray) const {
         TVSeq tvs;
         pHandle A = boost::get<pHandle>(premiseArray[0]);
         assert(premiseArray.size() == 1);
@@ -78,7 +78,7 @@ public:
         return true;
     }
 
-    virtual meta i2oType(const std::vector<Vertex>& h) const {
+    virtual meta i2oType(const VertexSeq& h) const {
         assert(1 == h.size());
         pHandle h0 = boost::get<pHandle>(h[0]);
         /*cprintf(1,"INV OLD ATOM:\n");

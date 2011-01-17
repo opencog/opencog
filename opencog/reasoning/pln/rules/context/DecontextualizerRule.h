@@ -72,9 +72,9 @@ protected:
     meta targetTemplate() const;
 public:
     DecontextualizerRule(AtomSpaceWrapper* _asw);
-    meta i2oType(const std::vector<Vertex>& h) const;
+    meta i2oType(const VertexSeq& h) const;
     bool validate2(MPs& args) const { return true; } // not sure it's enough
-    TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const;
+    TVSeq formatTVarray(const VertexSeq& premiseArray) const;
 };
 
 }} // namespace opencog { namespace pln {

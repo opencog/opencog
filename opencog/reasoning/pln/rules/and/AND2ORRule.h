@@ -50,7 +50,7 @@ class AND2ORRule : public Rule
         return isSubType(h[0], AND_LINK);
     }
 
-    BoundVertex compute(const vector<Vertex>& premiseArray,
+    BoundVertex compute(const VertexSeq& premiseArray,
                         Handle CX = NULL,
                         bool fresh = true) const
     {

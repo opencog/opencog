@@ -34,7 +34,7 @@ namespace opencog { namespace pln {
 Rule::setOfMPs ImplicationRedundantExpansionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
 }
-BoundVertex ImplicationRedundantExpansionRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
+BoundVertex ImplicationRedundantExpansionRule::compute(const VertexSeq& premiseArray, Handle CX) const
 {
 }
 */

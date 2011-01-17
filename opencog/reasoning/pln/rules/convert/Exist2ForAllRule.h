@@ -50,7 +50,7 @@ class Exist2ForAllRule : public Rule
         return isSubType(h[0], EXIST_LINK);
     }
     
-    BoundVertex compute(const vector<Vertex>& premiseArray,
+    BoundVertex compute(const VertexSeq& premiseArray,
                         Handle CX = NULL, bool fresh = true) const
     {
         assert(n==1);

@@ -34,7 +34,7 @@ public:
 	{ }
 
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
-	virtual meta i2oType(const vector<Vertex>& h) const;
+	virtual meta i2oType(const VertexSeq& h) const;
 	bool validate2(MPs& args) const { return true; }
 };
 #endif

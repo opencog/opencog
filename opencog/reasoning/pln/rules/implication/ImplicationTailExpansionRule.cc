@@ -83,7 +83,7 @@ cprintf(0,"T:%d\n", (Type)_v2h(*hs1));
     return makeSingletonSet(ret);
 }
 
-BoundVertex ImplicationTailExpansionRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex ImplicationTailExpansionRule::compute(const VertexSeq& premiseArray, pHandle CX) const
 {
 /*  for (int i=0;i<premiseArray.size();i++)
         printTree(v2h(premiseArray[i]),0,0);

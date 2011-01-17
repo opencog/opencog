@@ -39,11 +39,11 @@ public:
 	
 	NO_DIRECT_PRODUCTION;
 	
-	virtual TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const;
+	virtual TVSeq formatTVarray(const VertexSeq& premiseArray) const;
 public:
 	bool validate2(MPs& args) const { return true; }
 
-	virtual meta i2oType(const std::vector<Vertex>& h) const;
+	virtual meta i2oType(const VertexSeq& h) const;
 };
 
 }} // namespace opencog { namespace pln {

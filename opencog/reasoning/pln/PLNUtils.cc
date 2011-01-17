@@ -336,7 +336,7 @@ void convertTo(const VertexVector& args, auto_ptr<Handle>& ret)
         ret.get()[i] = boost::get<Handle>((*args)[i]);
 }
 
-void convertTo(const vector<Vertex>& args, auto_ptr<Handle>& ret)
+void convertTo(const VertexSeq& args, auto_ptr<Handle>& ret)
 {
     const int N = (int)args.size();
     ret = auto_ptr<Handle>(new Handle[N]);
@@ -389,7 +389,7 @@ void convertTo(const VertexVector& args, Handle*& ret)
         ret[i] = boost::get<Handle>((*args)[i]);
 }
 
-void convertTo(const vector<Vertex>& args, Handle*& ret)
+void convertTo(const VertexSeq& args, Handle*& ret)
 {
     const int N = (int)args.size();
     ret = (new Handle[N]);
@@ -2081,7 +2081,7 @@ Vertex transitive_produce( const containerT& chain,
                            const_iteratorT next_it,
                            Vertex last_result = (Handle)NULL)
 {
-    vector<Vertex> rule_args;
+    VertexSeq rule_args;
     rule_args.push_back(_v2h(last_result) ? last_result : (*next_it++));
     rule_args.push_back(*next_it++);
 
@@ -2094,8 +2094,8 @@ Vertex transitive_produce( const containerT& chain,
 
 /*void testt()
 {
- vector<Vertex> foo;
- transitive_produce<IMPLICATION_LINK, vector<Vertex>, vector<Vertex>::const_iterator>(foo,foo.begin());
+ VertexSeq foo;
+ transitive_produce<IMPLICATION_LINK, VertexSeq, VertexSeq::const_iterator>(foo,foo.begin());
 }*/
 
 

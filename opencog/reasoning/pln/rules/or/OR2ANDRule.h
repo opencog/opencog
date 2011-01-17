@@ -48,7 +48,7 @@ class OR2ANDRule : public Rule
 		return isSubType( h[0], OR_LINK);
 	}
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
+	BoundVertex compute(const VertexSeq& premiseArray, Handle CX = NULL) const
 	{
 		assert(n==1);
 

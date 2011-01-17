@@ -43,7 +43,7 @@ public:
     
     NO_DIRECT_PRODUCTION;
 
-    BoundVertex compute(const vector<Vertex>& premiseArray,
+    BoundVertex compute(const VertexSeq& premiseArray,
                         Handle CX = NULL,
                         bool fresh = true) const
     {

@@ -69,7 +69,7 @@ Rule::setOfMPs SubsetEvalRule::o2iMetaExtra(meta outh,
     return makeSingletonSet(ret);
 }
 
-meta SubsetEvalRule::i2oType(const vector<Vertex>& h_vec) const
+meta SubsetEvalRule::i2oType(const VertexSeq& h_vec) const
 {
     OC_ASSERT(h_vec.size()==2);
     return meta(new tree<Vertex>(mva((pHandle)SUBSET_LINK,
@@ -78,7 +78,7 @@ meta SubsetEvalRule::i2oType(const vector<Vertex>& h_vec) const
                                      )));
 }
 
-TVSeq SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises) const
+TVSeq SubsetEvalRule::formatTVarray(const VertexSeq& premises) const
 {
     OC_ASSERT(premises.size() == 2);
 
@@ -131,7 +131,7 @@ TVSeq SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises) const
 }
 
 
-BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
+BoundVertex SubsetEvalRule::compute(const VertexSeq& premiseArray,
                                     pHandle CX,
                                     bool fresh) const
 {

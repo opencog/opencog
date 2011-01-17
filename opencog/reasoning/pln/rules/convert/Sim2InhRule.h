@@ -53,7 +53,7 @@ public:
         return makeSingletonSet(ret);
     }
     
-    BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
+    BoundVertex compute(const VertexSeq& premiseArray, Handle CX = NULL) const
     {
         assert(n == 1);
         LINKTYPE_ASSERT(premiseArray[0], SIMILARITY_LINK);

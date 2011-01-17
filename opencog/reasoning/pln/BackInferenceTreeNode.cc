@@ -1718,7 +1718,7 @@ next_args:; //! @todo replace goto!
 
 BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) const
 {
-    vector<Vertex> ForAllArgs;
+    VertexSeq ForAllArgs;
     Vertex v = ATOM;
     BoundVertex new_result(v);
 

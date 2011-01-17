@@ -210,7 +210,7 @@ protected:
 
 public:
     virtual std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
-    //	virtual TVSeq formatTVarray	(const vector<Vertex>& premiseArray) const=0;
+    //	virtual TVSeq formatTVarray	(const VertexSeq& premiseArray) const=0;
     
     ~GenericRule2() {}
     /// Always a Composer
@@ -218,7 +218,7 @@ public:
                  bool _FreeInputArity, string _name = "")
         : Rule(_asw, _FreeInputArity, true, _name) {}
     
-    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+    BoundVertex compute(const VertexSeq& premiseArray,
                         Handle CX = Handle::UNDEFINED) const
     {
         return Vertex();
@@ -235,7 +235,7 @@ protected:
     std::vector<Type> ti;
     
     ~InversionRule2() {}
-    TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const
+    TVSeq formatTVarray(const VertexSeq& premiseArray) const
     {
         TVSeq tvs(3);
         return tvs;
@@ -256,7 +256,7 @@ public:
     }
     bool validate2(MPs& args) const { return true; }
     
-    virtual meta i2oType(const std::vector<Vertex>& h) const
+    virtual meta i2oType(const VertexSeq& h) const
     {
         return	meta(new tree<Vertex>());
     }

@@ -108,7 +108,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
     return makeSingletonSet(ret);
 }
 
-BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX, bool fresh) const
+BoundVertex StrictImplicationBreakdownRule::compute(const VertexSeq& premiseArray, pHandle CX, bool fresh) const
 {
     cprintf(3,"StrictImplicationBreakdownRule::compute:\n");
 

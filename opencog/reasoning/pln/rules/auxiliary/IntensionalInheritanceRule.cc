@@ -52,7 +52,7 @@ Rule::setOfMPs IntensionalInheritanceRule::o2iMetaExtra(meta outh, bool& overrid
     return makeSingletonSet(ret);
 }
 
-meta IntensionalInheritanceRule::i2oType(const vector<Vertex>& h_vec) const
+meta IntensionalInheritanceRule::i2oType(const VertexSeq& h_vec) const
 {
     OC_ASSERT(h_vec.size()==2);
     return meta(new tree<Vertex>(mva((pHandle)INTENSIONAL_INHERITANCE_LINK, 
@@ -61,7 +61,7 @@ meta IntensionalInheritanceRule::i2oType(const vector<Vertex>& h_vec) const
                                      )));
 }
 
-BoundVertex IntensionalInheritanceRule::compute(const vector<Vertex>& premiseArray,
+BoundVertex IntensionalInheritanceRule::compute(const VertexSeq& premiseArray,
                                                 pHandle CX, bool fresh) const
 {
     OC_ASSERT(premiseArray.size() == 2);
@@ -81,7 +81,7 @@ BoundVertex IntensionalInheritanceRule::compute(const vector<Vertex>& premiseArr
     if (sub_ASSOC_h != PHANDLE_UNDEFINED
         && super_ASSOC_h != PHANDLE_UNDEFINED) {
 
-        const vector<Vertex> ASSOC_vv = list_of(sub_ASSOC_h)(super_ASSOC_h);
+        const VertexSeq ASSOC_vv = list_of(sub_ASSOC_h)(super_ASSOC_h);
         BoundVertex bv = sser.compute(ASSOC_vv, fresh);
         pHandle subset_ASSOC_h = _v2h(bv.GetValue());
 

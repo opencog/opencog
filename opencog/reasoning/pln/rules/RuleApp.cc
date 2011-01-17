@@ -42,7 +42,7 @@ const vtree& RuleApp::getVtree() const
 	return vt_result;
 }*/
 
-BoundVertex RuleApp::compute(const vector<Vertex>& h, pHandle CX,
+BoundVertex RuleApp::compute(const VertexSeq& h, pHandle CX,
                              bool fresh) const
 {
     vector<VtreeProvider*>::iterator next_unused_arg;

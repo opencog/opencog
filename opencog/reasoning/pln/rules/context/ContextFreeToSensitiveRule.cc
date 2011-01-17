@@ -26,14 +26,14 @@
 
 namespace opencog { namespace pln {
 
-meta ContextFreeToSensitiveRule::i2oType(const std::vector<Vertex>& h) const {
+meta ContextFreeToSensitiveRule::i2oType(const VertexSeq& h) const {
     OC_ASSERT(h.size() == 2);
     pHandle CX = _v2h(h[0]);
     pHandle A = _v2h(h[1]);
     return meta(new vtree(mva((pHandle)CONTEXT_LINK, mva(CX), mva(A))));
 }
 
-TVSeq ContextFreeToSensitiveRule::formatTVarray(const std::vector<Vertex>& premiseArray) const {
+TVSeq ContextFreeToSensitiveRule::formatTVarray(const VertexSeq& premiseArray) const {
     OC_ASSERT(premiseArray.size()==2);
     TVSeq res;
     res.push_back(&asw->getTV(_v2h(premiseArray[0])));

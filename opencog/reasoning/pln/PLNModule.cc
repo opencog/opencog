@@ -294,7 +294,7 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
     if(rule) {
         pHandleSeq phs = ASW()->realToFakeHandles(premises, CX);
         if(rule->isComposer()) {
-            vector<Vertex> vv(phs.begin(),phs.end());
+            VertexSeq vv(phs.begin(),phs.end());
             //! @todo usually use the version of compute that takes BoundVertexes
             BoundVertex bv = rule->compute(vv, PHANDLE_UNDEFINED, false);
             vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));

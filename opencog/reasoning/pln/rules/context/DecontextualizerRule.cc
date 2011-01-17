@@ -26,7 +26,7 @@
 
 namespace opencog { namespace pln {
 
-meta DecontextualizerRule::i2oType(const std::vector<Vertex>& h) const {
+meta DecontextualizerRule::i2oType(const VertexSeq& h) const {
     OC_ASSERT(h.size() == 1);
     pHandle ph = _v2h(h[0]);
     OC_ASSERT(asw->isSubType(ph, CONTEXT_LINK));
@@ -50,7 +50,7 @@ meta DecontextualizerRule::i2oType(const std::vector<Vertex>& h) const {
     }
 }
 
-TVSeq DecontextualizerRule::formatTVarray(const std::vector<Vertex>& premiseArray) const {
+TVSeq DecontextualizerRule::formatTVarray(const VertexSeq& premiseArray) const {
     OC_ASSERT(premiseArray.size()==1);
     return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
 }

@@ -47,7 +47,7 @@ namespace opencog { namespace pln {
     
 }
 
-BoundVertex ANDSubstRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
+BoundVertex ANDSubstRule::compute(const VertexSeq& premiseArray, Handle CX) const
 {
 } */
 

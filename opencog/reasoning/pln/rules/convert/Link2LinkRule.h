@@ -71,14 +71,14 @@ public:
         return makeSingletonSet(ret);
     }
     
-    virtual TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const
+    virtual TVSeq formatTVarray(const VertexSeq& premiseArray) const
     {
         OC_ASSERT(premiseArray.size()==1);
         return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
     }
 
 
-    virtual meta i2oType(const std::vector<Vertex>& h) const
+    virtual meta i2oType(const VertexSeq& h) const
     {
         assert(1==h.size());
         

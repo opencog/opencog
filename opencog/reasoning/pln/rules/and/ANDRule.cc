@@ -96,7 +96,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     return attemptDirectANDProduction(asw, outh, this);
 }*/
 
-BoundVertex ANDRule::compute(const std::vector<Vertex>& premiseArray,
+BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
                              pHandle CX,
                              bool fresh) const
 {

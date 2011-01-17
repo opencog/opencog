@@ -59,7 +59,7 @@ public:
 	}
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-	TVSeq formatTVarray(const vector<Vertex>& premiseArray) const
+	TVSeq formatTVarray(const VertexSeq& premiseArray) const
 	{
 		TVSeq tvs;
 
@@ -74,7 +74,7 @@ public:
 
 	bool validate2(MPs& args) const { return true; }
 
-	virtual meta i2oType(const vector<Vertex>& h) const;
+	virtual meta i2oType(const VertexSeq& h) const;
 };
 
 }} // namespace opencog { namespace pln {

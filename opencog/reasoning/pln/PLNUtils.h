@@ -147,7 +147,7 @@ bool unifiesWithVariableChangeTo(AtomSpaceWrapper* asw,
                                  const vtree & lhs_t, const vtree & rhs_t,
                                  std::map<pHandle, pHandle>& bindings);
 
-typedef Btr< std::vector<Vertex> > VertexVector;
+typedef Btr< VertexSeq > VertexVector;
 typedef Btr< std::set<Vertex> > VertexSet;
 
 // What are PostConditions used for ???
@@ -540,14 +540,14 @@ public:
     }
 };
 
-void convertTo(const std::vector<Vertex>& args, std::auto_ptr<Handle>& ret);
+void convertTo(const VertexSeq& args, std::auto_ptr<Handle>& ret);
 void convertTo(const VertexVector& args, std::auto_ptr<Handle>& ret);
 void convertTo(const std::vector<BoundVertex>& args, std::auto_ptr<Handle>& ret);
 void convertTo(const std::set<BoundVertex>& args, std::auto_ptr<Handle>& ret);
 void convertTo(const VertexSet& args, std::auto_ptr<Handle>& ret);
 void convertTo(const std::vector<Handle>& args, std::auto_ptr<Handle>& ret);
 void convertTo(const VertexVector& args, Handle*& ret);
-void convertTo(const std::vector<Vertex>& args, Handle*& ret);
+void convertTo(const VertexSeq& args, Handle*& ret);
 void convertTo(const std::vector<BoundVertex>& args, Handle*& ret);
 void convertTo(const std::vector<BoundVertex>& args, HandleSeq& ret);
 void convertTo(const std::set<BoundVertex>& args, Handle*& ret);

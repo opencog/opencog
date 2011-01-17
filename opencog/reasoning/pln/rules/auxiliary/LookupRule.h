@@ -34,7 +34,7 @@ class LookupRule : public Rule
 protected:
     setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+    BoundVertex compute(const VertexSeq& premiseArray,
                         pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const
     {

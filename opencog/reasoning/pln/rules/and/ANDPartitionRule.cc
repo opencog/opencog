@@ -35,7 +35,7 @@ Rule::setOfMPs ANDPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilt
     return PartitionRule_o2iMetaExtra(outh, overrideInputFilter, AND_LINK, asw);
 }
 
-BoundVertex ANDPartitionRule::compute(const std::vector<Vertex>& premiseArray,
+BoundVertex ANDPartitionRule::compute(const VertexSeq& premiseArray,
                                       pHandle CX,
                                       bool fresh) const
 {

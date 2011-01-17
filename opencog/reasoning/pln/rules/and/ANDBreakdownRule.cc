@@ -70,7 +70,7 @@ Rule::setOfMPs ANDBreakdownRule::o2iMetaExtra(meta outh, bool& overrideInputFilt
     return makeSingletonSet(ret);
 }
 
-BoundVertex ANDBreakdownRule::compute(const std::vector<Vertex>& premiseArray,
+BoundVertex ANDBreakdownRule::compute(const VertexSeq& premiseArray,
                     pHandle CX, bool fresh) const
 {
     std::vector<pHandle> hs = asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));

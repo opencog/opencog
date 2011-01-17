@@ -48,7 +48,7 @@ public:
      *
      * @return the BoundVertex of the conclusion, A
      */
-    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+    BoundVertex compute(const VertexSeq& premiseArray,
                         pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const;
     bool validate2(MPs& args) const { return true; }

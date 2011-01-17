@@ -130,7 +130,7 @@ Links are assumed not inheritable either.
     return ret;
 }
 
-meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
+meta SimSubstRule1::i2oType(const VertexSeq& h) const
 {
     pHandle h0 = boost::get<pHandle>(h[0]);
     pHandle h1 = boost::get<pHandle>(h[1]);

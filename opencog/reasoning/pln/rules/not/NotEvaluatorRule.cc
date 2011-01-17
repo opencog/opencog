@@ -38,7 +38,7 @@ NotEvaluatorRule::NotEvaluatorRule( opencog::pln::AtomSpaceWrapper *_asw )
                                ));
 }
 
-meta NotEvaluatorRule::i2oType(const std::vector<Vertex>& h) const
+meta NotEvaluatorRule::i2oType(const VertexSeq& h) const
 {
     assert(1 == h.size());
     return meta(new tree<Vertex>(mva((pHandle)NOT_LINK,

@@ -166,7 +166,7 @@ public:
     /// For Rule interface.
     /// This method aborts with assert failure if the RuleApp is called
     /// with a wrong nr of args.
-    BoundVertex compute(const std::vector<Vertex>& h,
+    BoundVertex compute(const VertexSeq& h,
                         pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const;
     

@@ -45,11 +45,11 @@ public:
 
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-    meta i2oType(const vector<Vertex>& h) const;
+    meta i2oType(const VertexSeq& h) const;
 
-    TVSeq formatTVarray(const std::vector<Vertex>& premises) const;
+    TVSeq formatTVarray(const VertexSeq& premises) const;
 
-    BoundVertex compute(const vector<Vertex>& premiseArray,
+    BoundVertex compute(const VertexSeq& premiseArray,
                         pHandle CX = NULL,
                         bool fresh = true) const;
 

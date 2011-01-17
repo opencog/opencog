@@ -29,7 +29,7 @@ namespace opencog { namespace pln {
 class NotEvaluatorRule : public GenericRule<NotFormula>
 {
 protected:
-    TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const {
+    TVSeq formatTVarray(const VertexSeq& premiseArray) const {
         TVSeq tvs;
 
         const int N = (int)premiseArray.size();
@@ -51,7 +51,7 @@ protected:
 
 public:
     NotEvaluatorRule(AtomSpaceWrapper *_asw);
-    meta i2oType(const std::vector<Vertex>& h) const;
+    meta i2oType(const VertexSeq& h) const;
 
     bool validate2(MPs& args) const {
         return true;

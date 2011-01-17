@@ -26,7 +26,7 @@
 
 namespace opencog { namespace pln {
 
-meta ContextualizerRule::i2oType(const std::vector<Vertex>& h) const {
+meta ContextualizerRule::i2oType(const VertexSeq& h) const {
     OC_ASSERT(h.size() == 1);
     pHandle ph = _v2h(h[0]);
 
@@ -71,7 +71,7 @@ meta ContextualizerRule::i2oType(const std::vector<Vertex>& h) const {
     }
 }
 
-TVSeq ContextualizerRule::formatTVarray(const std::vector<Vertex>& premiseArray) const {
+TVSeq ContextualizerRule::formatTVarray(const VertexSeq& premiseArray) const {
     OC_ASSERT(premiseArray.size()==1);
     return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
 }

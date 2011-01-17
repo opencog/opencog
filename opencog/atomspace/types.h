@@ -46,6 +46,8 @@ typedef short stim_t;
 typedef boost::variant<Handle, Type, int, unsigned int, float, bool,
                        unsigned char, char, short int> Vertex;
 
+typedef std::vector<Vertex> VertexSeq;
+
 } // namespace opencog
 
 #endif // _OPENCOG_TYPES_H

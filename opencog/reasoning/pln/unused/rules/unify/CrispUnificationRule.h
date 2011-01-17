@@ -41,7 +41,7 @@ public:
 		which affect the Arg #2!
 	*/
 
-//	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const;
+//	BoundVertex compute(const VertexSeq& premiseArray, Handle CX = NULL) const;
 	bool validate2(MPs& args) const { return true; }
 
 	NO_DIRECT_PRODUCTION;

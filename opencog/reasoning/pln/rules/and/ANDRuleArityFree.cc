@@ -133,7 +133,7 @@ BoundVertex ArityFreeANDRule::computeSymmetric(vector<Handle> nodes, Handle CX)
 }
 */
 
-void ArityFreeANDRule::DistinguishNodes(const std::vector<Vertex>& premiseArray,
+void ArityFreeANDRule::DistinguishNodes(const VertexSeq& premiseArray,
                                         std::set<pHandle>& ANDlinks,
                                         std::set<pHandle>& nodes) const
 {

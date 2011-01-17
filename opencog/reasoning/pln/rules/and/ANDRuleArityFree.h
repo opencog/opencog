@@ -46,7 +46,7 @@ public:
     bool asymmetric(Handle* A, Handle* B) const;
     //Handle compute(Handle A, Handle B, Handle CX = NULL)  const; //std::vector<Handle> vh)
     
-    BoundVertex computeSymmetric(const std::vector<Vertex>& premiseArray,
+    BoundVertex computeSymmetric(const VertexSeq& premiseArray,
                                  pHandle CX = PHANDLE_UNDEFINED,
                                  bool fresh = true) const;
 
@@ -59,11 +59,11 @@ public:
      * @param ANDLinks will contain the set of premises of type AND_LINK
      * @param nodes will contain the set of premises of any type but AND_LINK
      */
-    void DistinguishNodes(const std::vector<Vertex>& premiseArray,
+    void DistinguishNodes(const VertexSeq& premiseArray,
                           std::set<pHandle>& ANDlinks,
                           std::set<pHandle>& nodes) const;
     
-    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+    BoundVertex compute(const VertexSeq& premiseArray,
                         pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const=0;
 };

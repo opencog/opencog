@@ -67,7 +67,7 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX,
         assert(asw->getType(_v2h(bv.value)) != FW_VARIABLE_NODE);
     }
     
-    vector<Vertex> rule_args(h.size());
+    VertexSeq rule_args(h.size());
     transform(h.begin(), h.end(), rule_args.begin(), DropVertexBindings());
 
     Btr<bindingsT> bindings_of_all_args(new bindingsT);
@@ -92,14 +92,14 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX,
     return BoundVertex(compute(rule_args, CX, fresh), bindings_of_all_args);
 }
 
-bool Rule::validate(const vector<Vertex>& h) const
+bool Rule::validate(const VertexSeq& h) const
 {
     if (freeInputArity)
         return true;
 
     const uint n = h.size();
     
-    vector<Vertex> myh(h);
+    VertexSeq myh(h);
     
     if (n != inputFilter.size()) {
         cprintf(0,"Rule::validate FALSE. Input vector size: %d\n", n);
@@ -145,7 +145,7 @@ bool Rule::validate(const vector<Vertex>& h) const
     return true;
 }
 
-BoundVertex Rule::computeIfValid(const vector<Vertex>& h, pHandle CX,
+BoundVertex Rule::computeIfValid(const VertexSeq& h, pHandle CX,
                                  bool fresh) const
 {
     if (validate(h))

@@ -40,7 +40,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 
     Type InclusionLink;
 
-    meta i2oType(const std::vector<Vertex>& h) const
+    meta i2oType(const VertexSeq& h) const
     {
         OC_ASSERT(h.size()==2);
         pHandle AB = _v2h(h[0]);
@@ -60,7 +60,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
         return (args.size() == 2 && !(*args[0] == *args[1]));
     }
     
-    TVSeq formatTVarray(const std::vector<Vertex>& premiseArray) const
+    TVSeq formatTVarray(const VertexSeq& premiseArray) const
     {
         TVSeq tvs(5);
         

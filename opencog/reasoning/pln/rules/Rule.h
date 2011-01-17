@@ -27,7 +27,7 @@
 #include "../PLNUtils.h"
 #include "../AtomSpaceWrapper.h"
 
-const TruthValue& getTV(pHandle); 
+const TruthValue& getTV(pHandle);
 #define NO_DIRECT_PRODUCTION Btr<std::set<BoundVertex > > \
     attemptDirectProduction(meta outh, bool fresh = false) const {  \
         return Btr<std::set<BoundVertex> >(); \
@@ -152,14 +152,14 @@ public:
      * @todo A future implementation may include 'bool ordered_already'
      * parameter to speed up.
      */
-    virtual BoundVertex compute(const std::vector<Vertex>& h,
+    virtual BoundVertex compute(const VertexSeq& h,
                                 pHandle CX = PHANDLE_UNDEFINED,
                                 bool fresh = true) const=0;
 
     /** Perform some checks then run the other version of compute. Note that
      * this is the method that is actually called by the back and forward
      * chainers.
-     * @see Rule::compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED)
+     * @see Rule::compute(const VertexSeq& h, pHandle CX = PHANDLE_UNDEFINED)
      */
     BoundVertex compute(const std::vector<BoundVertex>& h,
                         pHandle CX = PHANDLE_UNDEFINED,
@@ -170,7 +170,7 @@ public:
                                                                 bool fresh = true) const=0;
 
     //! Just calls compute()
-    BoundVertex operator() (const std::vector<Vertex> h,
+    BoundVertex operator() (const VertexSeq h,
                             pHandle CX = PHANDLE_UNDEFINED,
                             bool fresh = true) const
         { return compute(h,CX); }
@@ -182,7 +182,7 @@ public:
      * @param h The vertices to check validity for.
      * @return Whether the provided vertices fit the rule requirements or not.
      */
-    bool validate(const std::vector<Vertex>& h) const;
+    bool validate(const VertexSeq& h) const;
 
     /** ARI: Another alternative for checking validity. Only used by deduction,
      * to avoid things like "Imp A A" where an atom implies itself. This method
@@ -199,7 +199,7 @@ public:
      * @param CX Context to use for rule computation. Currently unused.
      * @return The result of the rule being computed.
      */
-    BoundVertex computeIfValid (const std::vector<Vertex>& h,
+    BoundVertex computeIfValid (const VertexSeq& h,
                                 pHandle CX = PHANDLE_UNDEFINED,
                                 bool fresh = true) const;
 
