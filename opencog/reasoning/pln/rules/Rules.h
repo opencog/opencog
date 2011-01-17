@@ -89,11 +89,7 @@
 #include "simsubst/SimSubstRule1.h"
 //#include "simsubst/SimSubstRule2.h"
 
-#include "unify/BaseCrispUnificationRule.h"
-#include "unify/CrispUnificationRule.h"
-#include "unify/CustomCrispUnificationRule.h"
-#include "unify/CustomCrispUnificationRuleComposer.h"
-#include "unify/StrictCrispUnificationRule.h"
+#include "instantiation/CustomCrispUnificationRule.h"
 
 #include "inference/DeductionRule.h"
 #include "inference/HypothesisRule.h"
