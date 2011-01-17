@@ -48,6 +48,8 @@
 	(apply cog-new-link (append (list 'ForAllLink) x)))
 (define (ExistLink . x)
 	(apply cog-new-link (append (list 'ExistLink) x)))
+(define (AverageLink . x)
+	(apply cog-new-link (append (list 'AverageLink) x)))
 (define (ScholemLink . x)
 	(apply cog-new-link (append (list 'ScholemLink) x)))
 (define (ImplicationLink . x)
