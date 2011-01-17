@@ -93,8 +93,11 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
     foreach(pHandle fah, *ForAll_handles)
         AddRule(new ForAllInstantiationRule(fah, asw), 7.5f);
+    Btr<std::set<pHandle> > Average_handles = asw->getHandleSet(AVERAGE_LINK, "");
+    foreach(pHandle ah, *Average_handles)
+        AddRule(new AverageInstantiationRule(ah, asw), 7.5f);
 
-    cprintf(-1, "Added %u InstantiationRules.\n", (unsigned int) size());
+    cprintf(-1, "Added %u Instantiation Rules.\n", (unsigned int) size());
     
     AddRule(new LookupRule(asw), 20.0f);
 
@@ -335,12 +338,15 @@ ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
     AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
     AddRule(new HypothesisRule(asw), 30.0f);
 
+    // Instantiation Rules
     Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
-
     foreach(pHandle fah, *ForAll_handles)
         AddRule(new ForAllInstantiationRule(fah, asw), 7.5f);
+    Btr<std::set<pHandle> > Average_handles = asw->getHandleSet(AVERAGE_LINK, "");
+    foreach(pHandle ah, *Average_handles)
+        AddRule(new AverageInstantiationRule(ah, asw), 7.5f);
 
-    cprintf(-1, "Added %u InstantiationRules.\n", (unsigned int) size());
+    cprintf(-1, "Added %u Instantiation Rules.\n", (unsigned int) size());
 }
 
 ForwardGeneratorRuleProvider::~ForwardGeneratorRuleProvider(void)
@@ -374,12 +380,15 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
 
     float ANDEvaluatorPriority = 10.0f;
 
+    // Instantiation Rules
     Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
-
     foreach(pHandle fah, *ForAll_handles)
         AddRule(new ForAllInstantiationRule(fah, asw), 7.5f);
+    Btr<std::set<pHandle> > Average_handles = asw->getHandleSet(AVERAGE_LINK, "");
+    foreach(pHandle ah, *Average_handles)
+        AddRule(new AverageInstantiationRule(ah, asw), 7.5f);
 
-    cprintf(-1, "Added %u InstantiationRules.\n", (unsigned int) size());
+    cprintf(-1, "Added %u Instantiation Rules.\n", (unsigned int) size());
 
     AddRule(new ORRule(asw), 10.0f);
 

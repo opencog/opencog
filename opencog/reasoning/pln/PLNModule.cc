@@ -268,16 +268,23 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
     return ret;
 }
 
+// Assuming s == prefix.append(string(Handle)), replace string(Handle)
+// by string(pHandle)
+inline void replaceHandleBypHandle(const string& prefix, string& s, Handle CX) {
+    const unsigned int hpos = prefix.size();
+    Handle h(boost::lexical_cast<UUID>(s.substr(hpos)));
+    pHandle ph = ASW()->realToFakeHandle(h, (CX == Handle::UNDEFINED?
+                                             NULL_VERSION_HANDLE
+                                             :VersionHandle(CONTEXTUAL, CX)));
+    s.replace(hpos, s.size(), boost::lexical_cast<string>(ph));
+}
+
 void opencog::pln::correctRuleName(string& ruleName, Handle CX)
 {
-    if(ruleName.find(ForAllInstantiationRulePrefixStr) == 0) { // found
-        const unsigned int hpos = ForAllInstantiationRulePrefixStr.size();
-        Handle h(boost::lexical_cast<UUID>(ruleName.substr(hpos)));
-        pHandle ph = ASW()->realToFakeHandle(h, (CX == Handle::UNDEFINED?
-                                                 NULL_VERSION_HANDLE
-                                                 :VersionHandle(CONTEXTUAL, CX)));
-        ruleName.replace(hpos, ruleName.size(), boost::lexical_cast<string>(ph));
-    }
+    if(ruleName.find(ForAllInstantiationRulePrefixStr) == 0)
+        replaceHandleBypHandle(ForAllInstantiationRulePrefixStr, ruleName, CX);
+    else if (ruleName.find(AverageInstantiationRulePrefixStr) == 0)
+        replaceHandleBypHandle(AverageInstantiationRulePrefixStr, ruleName, CX);
 }
 
 Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,

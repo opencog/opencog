@@ -90,6 +90,7 @@
 //#include "simsubst/SimSubstRule2.h"
 
 #include "instantiation/ForAllInstantiationRule.h"
+#include "instantiation/AverageInstantiationRule.h"
 
 #include "inference/DeductionRule.h"
 #include "inference/HypothesisRule.h"

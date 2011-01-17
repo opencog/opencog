@@ -148,6 +148,7 @@ INSTALL (FILES
 	rules/GenericRule.h
 	rules/instantiation/BaseInstantiationRule.h
 	rules/instantiation/ForAllInstantiationRule.h
+	rules/instantiation/AverageInstantiationRule.h
 	rules/Rules.h
 	rules/and/AND2ORRule.h
 	rules/and/ANDBreakdownRule.h

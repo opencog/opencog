@@ -30,21 +30,28 @@
   (pln-ar (SimpleANDRuleNameStr premises) premises (list))) ;TODO
 
 ;
-; UniversalInstantiationForAllRule
+; Instantiation Rules
 ;
 ; premises are as follows
-; premises[0] is the forall atom = (ForAllLink (ListLink X1,...,Xn) Body)
+; premises[0] is the forall atom = (Quantifier (ListLink X1,...,Xn) Body)
 ; premises[1:n] are the arguments to substitute to X1,...,Xn
 ;
-; It generates the instance and then uses CustomCrispUnificationRule
+; It generates the instance and then uses an Instantiation rule
 ; to compute its TV.
 
-; define rule name 
+; define rule name
+(define (append-handle s a)
+  (string-append s (number->string (cog-handle a))))
 (define (ForAllInstantiationRuleNameStr forAll)
-  (string-append "ForAllInstantiationRule"
-                 (number->string (cog-handle forAll))))
+  (append-handle "ForAllInstantiationRule" forAll))
+(define (AverageInstantiationRuleNameStr average)
+  (append-handle "AverageInstantiationRule" average))
 ; apply the inference rule
 (define (ForAllInstantiationRule forAll . arguments)
   (pln-ar (ForAllInstantiationRuleNameStr forAll)
           (list (universal-instantiate forAll arguments))
-          (list))) ; TODO
+          (list))) ; TODO context list
+(define (AverageInstantiationRule average . arguments)
+  (pln-ar (AverageInstantiationRuleNameStr average)
+          (list (universal-instantiate average arguments))
+          (list))) ; TODO context list
