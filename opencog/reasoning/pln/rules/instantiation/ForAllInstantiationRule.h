@@ -33,7 +33,7 @@ static const std::string ForAllInstantiationRulePrefixStr =
     "ForAllInstantiationRule";
 
 /**
- * See BaseInstantiationRule.h for comments
+ * @todo the formula is not right
  */
 class ForAllInstantiationRule : public BaseInstantiationRule<IdentityFormula> {
 private:
