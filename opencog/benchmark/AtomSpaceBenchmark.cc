@@ -188,6 +188,9 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodT
     int counter=0;
     rssStart = getMemUsage();
     long rssFromIncrease = 0;
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
     for (int i=0; i < N; i++) {
         if (sizeIncrease) {
             long rssBeforeIncrease = getMemUsage();
@@ -210,10 +213,13 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodT
         }
         if (i % diff == 0) cerr << "." << flush;
     }
+    gettimeofday(&tim, NULL);
+    double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
+    printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/N));
     rssEnd = getMemUsage();
-    cout << endl; // clear dotted progress bar line
-    cout << "Sum time for all requests: " << (float) sumTime / CLOCKS_PER_SEC
-        << " seconds ("<< 1.0f/(((float)sumTime/CLOCKS_PER_SEC) / N) << " requests per second)" << endl;
+    cout << "Sum clock() time for all requests: " << sumTime << " (" <<
+        (float) sumTime / CLOCKS_PER_SEC << " seconds, "<<
+        1.0f/(((float)sumTime/CLOCKS_PER_SEC) / N) << " requests per second)" << endl;
     //cout << "Memory (max RSS) change after benchmark: " <<
     //    (rssEnd - rssStart - rssFromIncrease) / 1024 << "kb" << endl;
 
