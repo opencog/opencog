@@ -122,7 +122,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name);
 					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
 					SCM input = scm_caddr(args);
-					//Assuming that the type is input as a string or symbol, eg
+					// Assuming that the type is input as a string or symbol, eg
 					//(f 'SimilarityLink) or (f "SimilarityLink")
 					if (scm_is_true(scm_symbol_p(input)))
 						input = scm_symbol_to_string(input);
@@ -158,18 +158,7 @@ class SchemePrimitive : public PrimitiveEnviron
 
 					// Second arg is a list of Handles
 					SCM list = scm_cadr(args);
-					if (!scm_is_pair(list))
-					{
-						scm_wrong_type_arg_msg(scheme_name, 2, list, "list of atom handles");
-					}
-					HandleSeq seq;
-					while (scm_is_pair(list))
-					{
-						Handle h = SchemeSmob::verify_handle(scm_car(list), scheme_name, 0);
-						seq.push_back(h);
-						list = SCM_CDR(list);
-					}
-
+					HandleSeq seq = SchemeSmob::verify_handle_list(list, scheme_name, 2);
 					Handle rh = (that->*method.h_sq)(str, seq);
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
@@ -183,27 +172,11 @@ class SchemePrimitive : public PrimitiveEnviron
 
 					// Second arg is a list of Handles
 					SCM list1 = scm_cadr(args);
-					if (!scm_is_pair(list1))
-					{
-						scm_wrong_type_arg_msg(scheme_name, 2, list1, "list of atom handles");
-					}
-					HandleSeq seq1;
-					while (scm_is_pair(list1))
-					{
-						Handle h = SchemeSmob::verify_handle(scm_car(list1), scheme_name, 0);
-						seq1.push_back(h);
-						list1 = SCM_CDR(list1);
-					}
+					HandleSeq seq1 = SchemeSmob::verify_handle_list(list1, scheme_name, 2);
 
-                    // Third argument is a possibly empty list of Handles
+					// Third argument is a possibly empty list of Handles
 					SCM list2 = scm_caddr(args);
-					HandleSeq seq2;
-					while (scm_is_pair(list2))
-					{
-						Handle h = SchemeSmob::verify_handle(scm_car(list2), scheme_name, 0);
-						seq2.push_back(h);
-						list2 = SCM_CDR(list2);
-					}
+					HandleSeq seq2 = SchemeSmob::verify_handle_list(list2, scheme_name, 3);
 
 					Handle rh = (that->*method.h_sqq)(str, seq1, seq2);
 					rc = SchemeSmob::handle_to_scm(rh);

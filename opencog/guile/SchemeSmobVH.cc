@@ -62,7 +62,7 @@ SCM SchemeSmob::take_vh (VersionHandle *vh)
 SCM SchemeSmob::ss_new_vh (SCM sind, SCM shandle)
 {
 	Handle h = verify_handle(shandle, "cog-new-vh", 2);
-	std::string ind_name = decode_string (sind, "cog-new-vh",
+	std::string ind_name = verify_string (sind, "cog-new-vh", 3,
 		"indicator for the version handle");
 
 	IndicatorType ind;

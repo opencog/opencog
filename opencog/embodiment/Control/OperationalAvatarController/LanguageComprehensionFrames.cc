@@ -34,6 +34,9 @@ using namespace opencog::spatial;
 Control::AvatarInterface* LanguageComprehension::localAgent = NULL;
 
 #ifdef HAVE_GUILE
+// XXX TODO This code should not be using SCM directly, it should
+// do all of its work with the existing interfaces into guile.
+// At some point, it should be re-written to do so ...
 SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM groundSemeNode, SCM ground2SemeNode ) {
     opencog::AtomSpace& atomSpace = localAgent->getAtomSpace( );
     HandleSeq resultingFrames;

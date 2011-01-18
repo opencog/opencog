@@ -24,7 +24,7 @@ using namespace opencog;
  */
 SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 {
-	std::string cmdname = decode_string (command, "cog-ad-hoc", "string command name");
+	std::string cmdname = verify_string (command, "cog-ad-hoc", 2, "string command name");
 
 #if REVIVE_OLD_C_CODE_FOR_SENTENCE_PATTERN_MATCH
 	// As of September 2009, this code is "obsolete", in that all sentence

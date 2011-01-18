@@ -138,7 +138,6 @@ class SchemeSmob
 		static SCM pln_bc(SCM, SCM);
 	
 		// Misc utilities
-		static std::string decode_string (SCM, const char *, const char *);
 		static std::string to_string(SCM);
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);
@@ -148,18 +147,21 @@ class SchemeSmob
 		
 		static Type validate_atom(SCM, const char *);
 		static Type validate_node(SCM, const char *);
-    static boost::shared_ptr<Atom> verify_atom(SCM, const char *, int pos = 1);
+		static boost::shared_ptr<Atom> verify_atom(SCM, const char *, int pos = 1);
 		static Handle verify_handle(SCM, const char *, int pos = 1);
 		static VersionHandle * verify_vh(SCM, const char *, int pos = 1);
 		static TruthValue * verify_tv(SCM, const char *, int pos = 1);
 		static AttentionValue * verify_av(SCM, const char *, int pos = 1);
-		static std::vector<Handle> decode_handle_list (SCM, const char *);
+		static std::vector<Handle> verify_handle_list (SCM, const char *, int pos = 1);
+		static std::string verify_string (SCM, const char *, int pos = 1, const char *="");
 	
-        static AtomSpace* atomspace;
+		static AtomSpace* atomspace;
 		static void init(AtomSpace *as);
 		SchemeSmob(AtomSpace *as);
 	public:
 		// Helper functions XXX why are these public ??
+		// XXX Becuase the embodiment code uses them :-(
+		// The embodiment code should be refactored to no use these.
 		static SCM handle_to_scm(Handle);
 		static Handle scm_to_handle(SCM);
 	

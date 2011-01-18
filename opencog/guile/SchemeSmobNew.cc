@@ -259,10 +259,10 @@ Type SchemeSmob::validate_node (SCM stype, const char *subrname)
     return t;
 }
 
-std::string SchemeSmob::decode_string (SCM sname, const char *subrname, const char * msg)
+std::string SchemeSmob::verify_string (SCM sname, const char *subrname, int pos, const char * msg)
 {
     if (scm_is_false(scm_string_p(sname)))
-        scm_wrong_type_arg_msg(subrname, 2, sname, msg);
+        scm_wrong_type_arg_msg(subrname, pos, sname, msg);
 
     char * cname = scm_to_locale_string(sname);
     std::string name = cname;
@@ -276,7 +276,7 @@ std::string SchemeSmob::decode_string (SCM sname, const char *subrname, const ch
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
     Type t = validate_node(stype, "cog-new-node");
-    std::string name = decode_string (sname, "cog-new-node", "string name for the node");
+    std::string name = verify_string (sname, "cog-new-node", 2, "string name for the node");
 
     // Now, create the actual node... in the actual atom space.
     const TruthValue *tv = get_tv_from_list(kv_pairs);
@@ -303,7 +303,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 {
     Type t = validate_node(stype, "cog-node");
-    std::string name = decode_string (sname, "cog-node", "string name for the node");
+    std::string name = verify_string (sname, "cog-node", 2, "string name for the node");
 
     // Now, look for the actual node... in the actual atom space.
     Handle h = atomspace->getHandle(t, name);
@@ -350,17 +350,17 @@ static Type verify_link (SCM stype, const char * subrname)
  * Convert argument into a list of handles.
  */
 std::vector<Handle>
-SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
+SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 {
     // Verify that second arg is an actual list. Allow null list
     // (which is rather unusal, but legit.  Allow embedded nulls
     // as this can be convenient for writing scheme code.
     if (!scm_is_pair(satom_list) && !scm_is_null(satom_list))
-        scm_wrong_type_arg_msg(subrname, 2, satom_list, "a list of atoms");
+        scm_wrong_type_arg_msg(subrname, pos, satom_list, "a list of atoms");
 
     std::vector<Handle> outgoing_set;
     SCM sl = satom_list;
-    int pos = 2;
+    pos = 2;
     while (scm_is_pair(sl)) {
         SCM satom = SCM_CAR(sl);
 
@@ -378,7 +378,7 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
             // Do this via a recursive call, flattening nested lists
             // as we go along.
             const std::vector<Handle> &oset =
-                decode_handle_list(satom, subrname);
+                verify_handle_list(satom, subrname, pos);
             std::vector<Handle>::const_iterator it;
             for (it = oset.begin(); it != oset.end(); it++) {
                 outgoing_set.push_back(*it);
@@ -412,7 +412,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
     Type t = verify_link (stype, "cog-new-link");
 
     std::vector<Handle> outgoing_set;
-    outgoing_set = decode_handle_list (satom_list, "cog-new-link");
+    outgoing_set = verify_handle_list (satom_list, "cog-new-link", 2);
 
     // Fish out a truth value, if its there.
     const TruthValue *tv = get_tv_from_list(satom_list);
@@ -440,7 +440,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
     Type t = verify_link (stype, "cog-link");
 
     std::vector<Handle> outgoing_set;
-    outgoing_set = decode_handle_list (satom_list, "cog-link");
+    outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
     // Now, look to find the actual link... in the actual atom space.
     Handle h = atomspace->getHandle(t, outgoing_set);
