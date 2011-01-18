@@ -97,10 +97,10 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_HI,  // return handle, take handle and int
 			H_H,   // return handle, take handle
 			H_SQ,  // return handle, take string and HandleSeq
-            H_SQQ, // return handle, take string, HandleSeq and handleSeq
+			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			S_S,   // return string, take string
-            V_T,   // return void, take Type
+			V_T,   // return void, take Type
 			V_V    // return void, take void
 		} signature;
 
@@ -211,27 +211,32 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case Q_HTI:
 				{
-					//First arg is a handle
+					// First arg is a handle
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
 					
-					//Second arg is a type
+					// Second arg is a type
 					SCM inType = scm_cadr(args);
-					//Assuming that the type is input as a string or symbol, eg
-					//(f 'SimilarityLink) or (f "SimilarityLink")
+					// The type may be a string or symbol,
+					// i.e. 'SimilarityLink or "SimilarityLink"
 					if (scm_is_true(scm_symbol_p(inType)))
 						inType = scm_symbol_to_string(inType);
 					
 					char *lstr = scm_to_locale_string(inType);
 					Type t = classserver().getType(lstr);
 					free(lstr);
+
+					// if (NOTYPE == t)
+					//	scm_wrong_type_arg_msg(scheme_name, 2, inType, "opencog type");
 					
-					//Third arg is an int
+					// Third arg is an int
 					int i = scm_to_int(scm_caddr(args));
 					HandleSeq rHS = (that->*method.q_hti)(h,t,i);
 					HandleSeq::iterator it = rHS.begin();
-					if(it!=rHS.end()) rc = scm_list_1(SchemeSmob::handle_to_scm(*it));
+					if (it != rHS.end())
+						rc = scm_list_1(SchemeSmob::handle_to_scm(*it));
 					it++;
-					for(;it!=rHS.end();it++) {
+					for ( ; it != rHS.end(); it++)
+					{
 						rc = scm_cons(SchemeSmob::handle_to_scm(*it), rc);
 					}
 					break;
