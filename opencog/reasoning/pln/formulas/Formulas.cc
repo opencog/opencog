@@ -58,6 +58,7 @@ namespace pln {
 #define PLNFormulaBodyFor_Link \
     assert(TV.size() == 1);   \
     assert(TV[0]); \
+    OC_ASSERT(!TV[0]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     const TruthValue* linkAB = TV[0]; \
     strength_t sAB = linkAB->getMean(); \
     count_t nAB = linkAB->getCount(); \
@@ -66,6 +67,8 @@ namespace pln {
     assert(TV.size() == 2); \
     assert(TV[0]); \
     assert(TV[1]); \
+    OC_ASSERT(!TV[0]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[1]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     strength_t sA = TV[0]->getMean(); \
     count_t nA = TV[0]->getCount(); \
     strength_t sB = TV[1]->getMean(); \
@@ -76,6 +79,9 @@ namespace pln {
     assert(TV[0]); \
     assert(TV[1]); \
     assert(TV[2]); \
+    OC_ASSERT(!TV[0]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[1]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[2]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     const TruthValue* linkAB = TV[0]; \
     const TruthValue* atomA = TV[1]; \
     const TruthValue* atomB = TV[2]; \
@@ -92,6 +98,10 @@ namespace pln {
     assert(TV[1]); \
     assert(TV[2]); \
     assert(TV[3]); \
+    OC_ASSERT(!TV[0]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[1]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[2]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[3]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     const TruthValue* linkAB = TV[0]; \
     const TruthValue* linkBA = TV[1]; \
     const TruthValue* atomA = TV[2]; \
@@ -112,6 +122,11 @@ namespace pln {
     assert(TV[2]); \
     assert(TV[3]); \
     assert(TV[4]); \
+    OC_ASSERT(!TV[0]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[1]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[2]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[3]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    OC_ASSERT(!TV[4]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     const TruthValue* linkAB = TV[0]; \
     const TruthValue* linkBC = TV[1]; \
     const TruthValue* atomA = TV[2]; \
@@ -946,19 +961,7 @@ TruthValue* Formula<_TVN>::compute(const TVSeq& TV, long U) const
 
     //cprintf(-3, "Formula<_TVN>::compute(N = %d)\n", N);
 
-    TruthValue* primaryResult = this->simpleCompute(TV, U);
-    // Check for existence of CompositeTruthValues and makes computation
-    // for each VersionHandle
-    std::set<VersionHandle> versionHandles;
-    for (int i = 0; i < N; i++) {
-        if (TV[i]->getType() == COMPOSITE_TRUTH_VALUE) {
-            CompositeTruthValue* ctv = (CompositeTruthValue*) TV[i];
-            versionHandles.insert(ctv->vh_begin(), ctv->vh_end());
-        }
-    }
-    OC_ASSERT(versionHandles.empty(),
-              "compute should not be called on CompositeTruthValue with VersionedTV");
-    return primaryResult;
+    return this->simpleCompute(TV, U);
 }
 
 // All instantiations of Formula<_TVN> so that link error
