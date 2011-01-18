@@ -181,7 +181,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
  */
 SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 {
-	Type t = validate_atom (stype, "cog-map-type");
+	Type t = verify_atom_type (stype, "cog-map-type");
 
 	// Get all of the handles of the indicated type
 	std::list<Handle> handle_set;
@@ -230,7 +230,7 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 {
 	SCM list = SCM_EOL;
 
-	Type t = validate_atom(stype, "cog-get-subtypes");
+	Type t = verify_atom_type(stype, "cog-get-subtypes");
 	std::vector<Type> subl;
 	unsigned int ns = classserver().getChildren(t, std::back_inserter(subl));
 

@@ -227,16 +227,17 @@ SCM SchemeSmob::ss_link_p (SCM s)
 
 /* ============================================================== */
 /**
- * Check that the arguments represent a value node, else throw errors.
- * Return the node type.
+ * Check that the argument is the string or symbol name of an atom,
+ * else throw errors.
+ * Return the atom type.
  */
-Type SchemeSmob::validate_atom (SCM stype, const char *subrname)
+Type SchemeSmob::verify_atom_type (SCM stype, const char *subrname, int pos)
 {
     if (scm_is_true(scm_symbol_p(stype)))
         stype = scm_symbol_to_string(stype);
 
     if (scm_is_false(scm_string_p(stype)))
-        scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog atom type");
+        scm_wrong_type_arg_msg(subrname, pos, stype, "name of opencog atom type");
 
     char * ct = scm_to_locale_string(stype);
     Type t = classserver().getType(ct);
@@ -244,21 +245,30 @@ Type SchemeSmob::validate_atom (SCM stype, const char *subrname)
 
     // Make sure that the type is good
     if (NOTYPE == t)
-        scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog atom type");
+        scm_wrong_type_arg_msg(subrname, pos, stype, "name of opencog atom type");
 
     return t;
 }
 
-Type SchemeSmob::validate_node (SCM stype, const char *subrname)
+/**
+ * Check that the argument is the string or symbol name of a node,
+ * else throw errors.
+ * Return the node type.
+ */
+Type SchemeSmob::verify_node_type (SCM stype, const char *subrname, int pos)
 {
-    Type t = validate_atom(stype, subrname);
+    Type t = verify_atom_type(stype, subrname, pos);
 
     if (false == classserver().isA(t, NODE))
-        scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog node type");
+        scm_wrong_type_arg_msg(subrname, pos, stype, "name of opencog node type");
 
     return t;
 }
 
+/**
+ * Check that the argument is a string, else throw errors.
+ * Return the string, in C.
+ */
 std::string SchemeSmob::verify_string (SCM sname, const char *subrname, int pos, const char * msg)
 {
     if (scm_is_false(scm_string_p(sname)))
@@ -275,7 +285,7 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname, int pos,
  */
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
-    Type t = validate_node(stype, "cog-new-node");
+    Type t = verify_node_type(stype, "cog-new-node", 1);
     std::string name = verify_string (sname, "cog-new-node", 2, "string name for the node");
 
     // Now, create the actual node... in the actual atom space.
@@ -302,7 +312,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 {
-    Type t = validate_node(stype, "cog-node");
+    Type t = verify_node_type(stype, "cog-node", 1);
     std::string name = verify_string (sname, "cog-node", 2, "string name for the node");
 
     // Now, look for the actual node... in the actual atom space.

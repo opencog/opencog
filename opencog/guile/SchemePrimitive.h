@@ -79,8 +79,8 @@ class SchemePrimitive : public PrimitiveEnviron
 			// Extend as needed.
 			bool (T::*b_hi)(Handle, int);
 			double (T::*d_hht)(const Handle&, const Handle&, const Type&);
-			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_h)(Handle);
+			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			Handle (T::*h_sqq)(const std::string&, const HandleSeq&, const HandleSeq&);
 			HandleSeq (T::*q_hti)(const Handle&, const Type&, int);
@@ -94,8 +94,8 @@ class SchemePrimitive : public PrimitiveEnviron
 		{
 			B_HI,  // return boolean, take handle and int
 			D_HHT, // return double, take handle, handle, and int
-			H_HI,  // return handle, take handle and int
 			H_H,   // return handle, take handle
+			H_HI,  // return handle, take handle and int
 			H_SQ,  // return handle, take string and HandleSeq
 			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
 			Q_HTI, // return HandleSeq, take handle, type, and int
@@ -119,19 +119,19 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case D_HHT:
 				{
-					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
 					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
-					SCM input = scm_caddr(args);
-					// Assuming that the type is input as a string or symbol, eg
-					//(f 'SimilarityLink) or (f "SimilarityLink")
-					if (scm_is_true(scm_symbol_p(input)))
-						input = scm_symbol_to_string(input);
-					char *lstr = scm_to_locale_string(input);
-					Type t = classserver().getType(lstr);
-					free(lstr);
+					Type t = SchemeSmob::verify_atom_type(scm_caddr(args), scheme_name, 3);
 					
 					double d = (that->*method.d_hht)(h1,h2,t);
 					rc = scm_from_double(d);
+					break;
+				}
+				case H_H:
+				{
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					Handle rh = (that->*method.h_h)(h);
+					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
 				case H_HI:
@@ -142,23 +142,15 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
-				case H_H:
-				{
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					Handle rh = (that->*method.h_h)(h);
-					rc = SchemeSmob::handle_to_scm(rh);
-					break;
-				}
 				case H_SQ:
 				{
 					// First argument is a string
-					char *lstr = scm_to_locale_string(scm_car(args));
-					std::string str = lstr;
-					free(lstr);
+					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
 
 					// Second arg is a list of Handles
 					SCM list = scm_cadr(args);
 					HandleSeq seq = SchemeSmob::verify_handle_list(list, scheme_name, 2);
+
 					Handle rh = (that->*method.h_sq)(str, seq);
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
@@ -166,9 +158,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				case H_SQQ:
 				{
 					// First argument is a string
-					char *lstr = scm_to_locale_string(scm_car(args));
-					std::string str = lstr;
-					free(lstr);
+					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
 
 					// Second arg is a list of Handles
 					SCM list1 = scm_cadr(args);
@@ -185,24 +175,14 @@ class SchemePrimitive : public PrimitiveEnviron
 				case Q_HTI:
 				{
 					// First arg is a handle
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
 					
 					// Second arg is a type
-					SCM inType = scm_cadr(args);
-					// The type may be a string or symbol,
-					// i.e. 'SimilarityLink or "SimilarityLink"
-					if (scm_is_true(scm_symbol_p(inType)))
-						inType = scm_symbol_to_string(inType);
-					
-					char *lstr = scm_to_locale_string(inType);
-					Type t = classserver().getType(lstr);
-					free(lstr);
+					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
 
-					// if (NOTYPE == t)
-					//	scm_wrong_type_arg_msg(scheme_name, 2, inType, "opencog type");
-					
 					// Third arg is an int
 					int i = scm_to_int(scm_caddr(args));
+
 					HandleSeq rHS = (that->*method.q_hti)(h,t,i);
 					HandleSeq::iterator it = rHS.begin();
 					if (it != rHS.end())
@@ -216,9 +196,8 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case S_S:
 				{
-					char *lstr = scm_to_locale_string(scm_car(args));
-					std::string str = lstr;
-					free(lstr);
+					// First argument is a string
+					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
 
 					const std::string &rs = (that->*method.s_s)(str);
 					rc = scm_from_locale_string(rs.c_str());
@@ -226,16 +205,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case V_T:
 				{
-					SCM input = scm_car(args);
-					//Assuming that the type is input as a string or symbol, eg
-					//(f 'SimilarityLink) or (f "SimilarityLink")
-					if (scm_is_true(scm_symbol_p(input)))
-						input = scm_symbol_to_string(input);
-					
-					char *lstr = scm_to_locale_string(input);
-					Type t = classserver().getType(lstr);
-					free(lstr);
-					
+					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
 					(that->*method.v_t)(t);
 					break;
 				}
@@ -288,14 +258,15 @@ class SchemePrimitive : public PrimitiveEnviron
 		// the same basic form, except for the types.
 		DECLARE_CONSTR_2(B_HI, b_hi, bool, Handle, int)
 		DECLARE_CONSTR_3(D_HHT, d_hht, double, const Handle&, const Handle&, const Type&)
-		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
-		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, const Handle&, const Type&, int)
-		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
+		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
 		DECLARE_CONSTR_3(H_SQQ, h_sqq, Handle, const std::string&, const HandleSeq&, const HandleSeq&)
+		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, const Handle&, const Type&, int)
+		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_T, v_t, void, const Type&)
 
+		// Below is DECLARE_CONSTR_0(V_V, v_v, void*, void);
 		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
 		{
 			that = data;

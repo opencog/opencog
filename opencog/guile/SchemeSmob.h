@@ -145,15 +145,17 @@ class SchemeSmob
 		static TruthValue *get_tv_from_list(SCM);
 		static AttentionValue *get_av_from_list(SCM);
 		
-		static Type validate_atom(SCM, const char *);
-		static Type validate_node(SCM, const char *);
+		static Type verify_atom_type(SCM, const char *, int pos = 1);
+		static Type verify_node_type(SCM, const char *, int pos = 1);
 		static boost::shared_ptr<Atom> verify_atom(SCM, const char *, int pos = 1);
 		static Handle verify_handle(SCM, const char *, int pos = 1);
 		static VersionHandle * verify_vh(SCM, const char *, int pos = 1);
 		static TruthValue * verify_tv(SCM, const char *, int pos = 1);
 		static AttentionValue * verify_av(SCM, const char *, int pos = 1);
-		static std::vector<Handle> verify_handle_list (SCM, const char *, int pos = 1);
-		static std::string verify_string (SCM, const char *, int pos = 1, const char *="");
+		static std::vector<Handle> verify_handle_list (SCM, const char *,
+		                                  int pos = 1);
+		static std::string verify_string (SCM, const char *, int pos = 1,
+		                                  const char *msg = "expecting string");
 	
 		static AtomSpace* atomspace;
 		static void init(AtomSpace *as);
