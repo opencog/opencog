@@ -36,11 +36,9 @@ ADD_CXXTEST(PLNSchemeWrapperUTest)
 # are loaded from files.
 IF (EXPAT_FOUND OR GUILE_FOUND)
 	ADD_CXXTEST(PLNUTest)
-    IF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
-        # ForwardChaining takes forever with coverage reporting
-        # It should really be split into smaller quicker tests
-        ADD_CXXTEST(ForwardChainingUTest)
-    ENDIF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    #IF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    ADD_CXXTEST(ForwardChainingUTest)
+    #ENDIF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (EXPAT_FOUND OR GUILE_FOUND)
 
 ADD_SUBDIRECTORY(formulas)
