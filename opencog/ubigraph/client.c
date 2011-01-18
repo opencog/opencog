@@ -14,8 +14,8 @@ int print_err_if_fault_occurred (xmlrpc_env *env)
     int return_value;
     return_value = env->fault_occurred;
     if (env->fault_occurred) {
-        fprintf(stderr, "XML-RPC Fault: %s (%d)\n",
-                env->fault_string, env->fault_code);
+        //fprintf(stderr, "XML-RPC Fault: %s (%d)\n",
+        //        env->fault_string, env->fault_code);
         /* Clean up our error-handling environment. */
         xmlrpc_env_clean(env);
     }

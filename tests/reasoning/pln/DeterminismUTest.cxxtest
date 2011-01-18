@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2008-2009 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,14 +51,12 @@ namespace test {
     extern FitnessEvaluatorT testFitnessEvaluator;
 }
 
-class ForwardChainingUTest :  public CxxTest::TestSuite {
+class DeterminismUTest :  public CxxTest::TestSuite {
 
 private:
     AtomSpaceWrapper *asw;
-    FILE *f;
 
-    static const int TestRepeats = 1;
-    // test repeat #
+    static const int testRepeats = 2;
     int t;
 
 
@@ -79,34 +76,15 @@ private:
         test::logfile=fopen("pln.log","wt");
         cout << "LOGGING TO FILE pln.log!\n";
 #endif
-        //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
-
-        // Get config settings from config file.
-        // Don't tackily override them here.
-        // config().set("PLN_LOG_LEVEL","2");
-        // config().set("PLN_PRINT_REAL_ATOMS","true");
-        //config().set("PLN_RECORD_TRAILS","true");
-
-        //testFitnessEvaluator = BEST;
-        //currentDebugLevel = -4;
         currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
     }
 
 public:
-
-    static ForwardChainingUTest* createSuite() { return new ForwardChainingUTest(); }
-    static void destroySuite(ForwardChainingUTest* suite) { delete suite; }
-
-    ForwardChainingUTest()
+    DeterminismUTest()
     {
         // Initialize PLN test environment
         try {        
             logger().info("Initializing PLN test env...");
-
-            f = fopen("results.txt","a");
-
-            //currentDebugLevel=100;
-
             asw = ASW(cogserver().getAtomSpace());                                  
         }
         catch(std::string s) {
@@ -146,39 +124,36 @@ public:
 
         allTestsInferenceNodes = 0;
 
-        INstats.clear();
-
-        t = 0;
     }
     
-    ~ForwardChainingUTest()
+    ~DeterminismUTest()
     {
-        // t = test repeat #
-        // f = results.txt
-        // TestRepeats
-        
-//        uint t = 0;
-//        uint TestRepeats = 1;
-    
-        // some stats stuff
-        INstatsV.push_back(INstats);
-    
-        INstatsV[t].push_back(allTestsInferenceNodes);
-        INstatsVT.push_back(INstatsV);
-
-        for (uint v=0; v < INstatsV[0].size(); v++)
-        {
-            fprintf(f, "\n");
-            for (int t=0; t < ( (testFitnessEvaluator!=BEST) ? TestRepeats : 1); t++)
-                fprintf(f, "%d ", INstatsV[t][v]);
-        }
-
-        fclose(f);
     }
     
     // test forward chainer on all targets defined as conf file
-    void testSCMTargetsFC() {
-        TS_ASSERT(runSCMTargets(PLN_TEST_DIR, false));
+    void testForwardChainingDeterminism() {
+        AtomSpaceWrapper *asw = GET_ASW;
+        asw->allowFWVarsInAtomSpace = true;
+
+        HybridForwardChainer fc1;
+        Btr<PLNTest> test1 = findSCMTarget("AnotBdemo", false);
+        HybridForwardChainer fc2;
+        Btr<PLNTest> test2 = findSCMTarget("AnotBdemo", false);
+
+        for (int i=0; i < 2; i++) {
+            pHandle eh1=PHANDLE_UNDEFINED; // expected target handle
+            pHandle eh2=PHANDLE_UNDEFINED; // expected target handle
+            std::cout << "== DOING REPEAT 1 ==" << endl;
+            eh1 = fc1.fwdChainToTarget(1, test1->target);
+            std::cout << "== DOING REPEAT 2 ==" << endl;
+            eh2 = fc2.fwdChainToTarget(1, test2->target);
+            TS_ASSERT(eh1 == eh2);
+            TS_ASSERT_EQUALS(fc1.level, fc2.level);
+            TS_ASSERT_EQUALS(*fc1.thisLevelResults, *fc2.thisLevelResults);
+        }
+
+
+
     }
 
 };

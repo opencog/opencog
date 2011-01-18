@@ -10,8 +10,6 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
-#define BackInferenceTreeRootT BITNodeRoot
-
 using namespace std;
 using namespace opencog;
 using namespace opencog::pln;
@@ -91,14 +89,12 @@ Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc)
     Config test;
     std::cout << conf_file << std::endl;
     test.load(conf_file.c_str());
-    //std::cout << test.to_string() << std::endl;
 
     std::cout << test["COMMENT"] << std::endl;
 
     //! @todo define this somewhere else.
     std::string PLN_TEST_DIR = PROJECT_SOURCE_DIR"/tests/reasoning/pln/";
-    // scm is now used instead of xml
-    // std::string axiomsFile = PLN_TEST_DIR+"xml/"+test["LOAD"]+".xml";
+    // Load axioms from scm file
     std::string axiomsFile = PLN_TEST_DIR+"scm/"+test["LOAD"]+".scm";
 
     initAxiomSet(axiomsFile);
@@ -106,52 +102,40 @@ Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc)
     std::string targetScheme = test["TARGET"];
     std::cout << "Target: " << targetScheme << std::endl;
 
-    // get target atom
+    // Get target atom
     SchemeEval& eval = SchemeEval::instance();
     Handle h = eval.eval_h(targetScheme);
 
+    // Get the fake handle for the primary TV of the target
     pHandleSeq fakeHandles =
             ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
+    // Index 0 is the primary
     pHandle fakeHandle = fakeHandles[0];
-    //meta target(new vtree(fakeHandle));
 
     meta target_(new vtree(fakeHandle));
-
     meta target = ForceAllLinksVirtual(target_);
 
     // Set parameters
     uint maxSteps = test.get_int("MAX_STEPS");
-    /*
-    // Make sure FC doesn't take too long / only test it on simpler tests.
-    // It takes disproportionately long once the AtomSpace gets large, due
-    // to the indexes probably.
-    if (!TESTING_BACKWARD_CHAINING && maxSteps > 201) {
-        std::cout << "Skipping test due to time constraints" << std::endl;
-        return; //minEvalsOfFittestBIT = 500;
-    }
-     */
     uint minEvalsOfFittestBIT = maxSteps/100;
 
-    // Changed because we don't want to have to specify the count
-    // as well, in the test's .conf file
-    //TruthValue* minTV = SimpleTruthValue::fromString(test["MIN_TV"].c_str());
-    //TruthValue* maxTV = SimpleTruthValue::fromString(test["MAX_TV"].c_str());
     TruthValue* minTV = parseSTV(test["MIN_TV"].c_str());
     TruthValue* maxTV = parseSTV(test["MAX_TV"].c_str());
 
     std::cout << "Loaded parameters of test OK" << std::endl;
 
-
-
     state = new BITNodeRoot(target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator);
     Bstate.reset(state);
 
-    return Btr<PLNTest>(
-            new PLNTest(target,
-                       minTV,
-                       maxTV,
-                       minEvalsOfFittestBIT,
-                       0)); // Alternative for using exhaustive evaluation (obsolete).
+    Btr<PLNTest> the_test(new PLNTest(
+               target,
+               minTV, maxTV,
+               minEvalsOfFittestBIT,
+               0)); // Alternative for using exhaustive evaluation (obsolete).
+    // Even with FC, we want to have a BIT available so that printTrail can be accessed
+    the_test->state = Bstate;
+    return the_test;
+
 #endif // HAVE_GUILE
 }
 
@@ -241,7 +225,6 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     AtomSpaceWrapper *asw = GET_ASW;
     stats::Instance().ITN2atom.clear();
 
-    //currentDebugLevel=0;
     rawPrint(*t->target, t->target->begin(), -2);
 
     clock_t start, finish;
@@ -253,15 +236,8 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     asw->allowFWVarsInAtomSpace = true;
 
     fflush(stdout);
-    //currentDebugLevel=-4;
 
-    Btr<BackInferenceTreeRootT> state;
-    //ForwardChainer fc;
     HybridForwardChainer fc;
-
-    // Even with FC, we want to have a BIT available so that printTrail can be accessed
-    state.reset(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(),
-                config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
 
     uint s_i=0; // Expansion phase #
     pHandle eh=PHANDLE_UNDEFINED; // expected target handle
@@ -283,16 +259,16 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     if (t->minEvalsOfFittestBIT > 0) {
         do {
 /*              for (int k=0;k<expansions_per_run;k++)
-                state->expandFittest();
+                t->state->expandFittest();
 
-            eres = state->evaluate();*/
+            eres = t->state->evaluate();*/
 
             cprintf(-3, "\n    Evaluating...\n");
 
             int expansions = expansions_per_run;
 
             if (test_bc) {
-                eres = state->infer(expansions, 0.000001f, 0.001f);
+                eres = t->state->infer(expansions, 0.000001f, 0.001f);
             } else {
                 eh = fc.fwdChainToTarget(expansions, (t->target));
                 //if (!results.empty()) eh = results[0];
@@ -332,7 +308,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                 // recursion issue in the trails (as of Nov2009) -- JaredW
                 if (test_bc) {
 	                std::cout << "Inference trail: " << std::endl;
-          	        state->printTrail(eh);
+          	        t->state->printTrail(eh);
       	        }
             }
 
@@ -356,9 +332,9 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
         // This should be updated to reflect the new BITNode interface
         /*
         for (uint L=0;L<t->minExhaustiveEvals;L++)
-            state->expandNextLevel();
+            t->state->expandNextLevel();
 
-        eres = state->evaluate();
+        eres = t->state->evaluate();
         eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
         if (eh) {
             if (etv != NULL) delete etv;
@@ -416,15 +392,15 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
         INstats.push_back(0);
 
     //! @todo Decide whether this stuff should only be done if it passes (like before)
-    allTestsInferenceNodes += state->inferenceNodes;
+    allTestsInferenceNodes += t->state->inferenceNodes;
     allTestsExpansions += total_expansions;
 
-    INstats.push_back(state->inferenceNodes);
+    INstats.push_back(t->state->inferenceNodes);
 
     cout << "Total expansion steps: " << total_expansions <<
             "(" << allTestsExpansions << " in all tests)";
-    cout << endl << "Exec pool size: " << state->getExecPoolSize();
-    cout << endl << "InferenceNodes: " << state->inferenceNodes <<
+    cout << endl << "Exec pool size: " << t->state->getExecPoolSize();
+    cout << endl << "InferenceNodes: " << t->state->inferenceNodes <<
             " (" << allTestsInferenceNodes << " in all tests)" << endl;
 
 
@@ -459,6 +435,8 @@ bool maketest(meta target,
                                         minEvalsOfFittestBIT,
                                         minExhaustiveEvals)
                                         );
+    t->state = Btr<BITNodeRoot>(new BITNodeRoot(target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
+    Bstate.reset(state);
     return runPLNTest(t, test_bc);
 }
 

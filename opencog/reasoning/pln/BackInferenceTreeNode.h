@@ -82,7 +82,7 @@ template <typename _exec_poolT> struct ExpansionPoolUpdater;
 
 /** A class for runtime errors during BIT expansion
   *
-  * Currently not used, but may be useful as Joel and other's refactor the code.
+  * Currently not used, but should be used as code is refactored.
   */
 class BITException : public std::runtime_error
 {

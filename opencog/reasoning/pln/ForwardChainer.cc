@@ -144,24 +144,26 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                         continue;
                     }
                     // Check that they include at least 1 result from the previous level (except on the first level).
-                    if   (lastLevelResults &&
+                    if (lastLevelResults &&
                           !containsAtLeastOneOf(lastLevelResults, args)) {
                         continue;
                     }
                     // do the rule computation etc
                     
-                    //! @todo Tacky check for Deduction. Equivalent to validate2, but that uses the other MP datatype,
+                    //! @todo Tacky check for Deduction. Equivalent to
+                    //! validate2, but that uses the other MP datatype,
                     //! which is why I didn't include it here.
                     if (r->getName().find(DeductionRuleSuffixStr) != string::npos) {
-//                        cout << "Deduction sanity check" << endl;
-                        // A->B   B->C   check that those are not the same Link
-                        bool valid = (args->size() == 2 && !((*args)[0].GetValue() == (*args)[1].GetValue()));
+                        // cout << "Deduction sanity check" << endl;
+                        // A->B ; B->C  <- check that those are not the same Link
+                        bool valid = ( args->size() == 2 &&
+                                !((*args)[0].GetValue() == (*args)[1].GetValue()));
                         if (!valid) continue;
                     }
 
                     Vertex V=((r->compute(*args, PHANDLE_UNDEFINED, false)).GetValue());
                     pHandle out=boost::get<pHandle>(V);
-                    const TruthValue& tv=GET_ASW->getTV(out);
+                    const TruthValue& tv(GET_ASW->getTV(out));
                     NMPrinter().print(out,-5);
 
                     if (!tv.isNullTv() && tv.getCount() > minConfidence) {

@@ -1,10 +1,10 @@
 #include "PLN.h"
 #include "PLNUtils.h"
+#include "BackInferenceTreeNode.h"
 #include <string>
 #include <sys/types.h>
 
-//namespace opencog {
-//namespace pln {
+
 namespace test {
 
 /**
@@ -28,6 +28,7 @@ struct PLNTest
           minEvalsOfFittestBIT(_minEvalsOfFittestBIT),
           minExhaustiveEvals(_minExhaustiveEvals)
     {}
+    Btr<opencog::pln::BITNodeRoot> state;
 };
 
 float getCount(float c);
