@@ -18,8 +18,13 @@ DECLARE_MODULE(QueryModule);
 QueryModule::QueryModule(void)
 {
 #ifdef HAVE_GUILE
+	/* do-implication is deprecated, and is here for backward-compat */
 	define_scheme_primitive("do-implication", &QueryModule::do_implication, this);
 	define_scheme_primitive("do-varscope", &QueryModule::do_varscope, this);
+
+	/* XXX TODO -- provide a do-bind that simply returns the grounding,
+	 * but does no other evaluation!
+	 */
 #endif
 }
 QueryModule::~QueryModule()
@@ -45,7 +50,7 @@ Handle QueryModule::do_implication(Handle h)
 
 /**
  * Run implication, assuming that the argument is a handle to
- * an VarScopeLink containing variables and an ImplicationLink
+ * an BindLink containing variables and an ImplicationLink
  */
 Handle QueryModule::do_varscope(Handle h)
 {
