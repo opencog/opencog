@@ -234,7 +234,7 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
         Btr<vtree> target = ForceAllLinksVirtual(target_);
 
         bool recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
-        Bstate_.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider,
+        Bstate_.reset(new BITNodeRoot(target, &referenceRuleProvider(),
                     recordingTrails, getFitnessEvaluator(PLN_FITNESS_BEST)));
 
         printf("BITNodeRoot init ok\n");
@@ -295,7 +295,7 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
 #endif
 
     correctRuleName(ruleName, CX);
-    DefaultVariableRuleProvider rp;
+    RuleProvider& rp = referenceRuleProvider();
     const Rule* rule = rp.findRule(ruleName);
 
     // result to be overwriten

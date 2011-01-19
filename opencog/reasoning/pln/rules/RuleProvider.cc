@@ -31,6 +31,15 @@ namespace opencog { namespace pln {
 
 using std::string;
 
+RuleProvider& referenceRuleProvider()
+{
+    static ReferenceRuleProvider* rrp = NULL;
+    if (!rrp)
+        rrp = new ReferenceRuleProvider();
+    // need to add any other rules?
+    return *rrp;
+}
+
 RuleProvider::RuleProvider(void)
 {
 }
@@ -77,14 +86,8 @@ VariableRuleProvider::VariableRuleProvider(void)
 VariableRuleProvider::~VariableRuleProvider(void)
 {
 }
-/*
-void VariableRuleProvider::CreateCustomCrispUnificationRules()
-{
-iAtomSpaceWrapper* asw = ASW();
-	
-}
-*/
-DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
+
+ReferenceRuleProvider::ReferenceRuleProvider(void)
 {
     
     AtomSpaceWrapper* asw = ASW();
@@ -201,7 +204,7 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     AddRule(new ContextFreeToSensitiveRule(asw), 1.0f);
 }
 
-DefaultVariableRuleProvider::~DefaultVariableRuleProvider(void)
+ReferenceRuleProvider::~ReferenceRuleProvider(void)
 {
 }
 

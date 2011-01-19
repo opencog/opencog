@@ -685,7 +685,7 @@ public:
 //    std::set<BITNode*> nodes;
 
     // The class assumes ownership of the RuleProvider
-    BITNodeRoot(meta _target, RuleProvider* _rp,
+    BITNodeRoot(meta _target, RuleProvider* _rp = NULL,
             bool _rTrails = true, FitnessEvaluatorT fe = BEST, InferenceCache* _cache = NULL);
     
     /**

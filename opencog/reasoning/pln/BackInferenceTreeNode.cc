@@ -249,7 +249,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
         BITcache = _cache;
     } else {
         sharedBITCache = false;
-        BITcache = new InferenceCache(_rp);
+        BITcache = new InferenceCache();
     }
 
     haxx::registerBITNode(this);
@@ -267,8 +267,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
     rule = NULL;
     root = this;
     bound_target = meta(new vtree);
-    if (!rp) // changed to NOT rp... otherwise we are overwriting the passed rp
-      rp = new DefaultVariableRuleProvider;
+    if (!rp) rp = &referenceRuleProvider();
     assert(!rp->empty());
     cprintf(3, "rp ok\n");
     haxx::bitnoderoot = this;
@@ -439,8 +438,6 @@ int BITNode::totalChildren() const
 }
 
 BITNodeRoot::~BITNodeRoot() {
-//    delete rp;
-//    foreach(BITNode* b, nodes) delete b;
 
     if (!sharedBITCache) delete BITcache;
 
@@ -577,8 +574,8 @@ rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
 
         if (!root->rp)
         {
-            root->rp = new DefaultVariableRuleProvider();
-            tlog(3, "Default RuleProvider created.");
+            root->rp = &referenceRuleProvider();
+            tlog(3, "Using ReferenceRuleProvider.");
         }
         else tlog(3, "Parent passed on my RuleProvider.");
 
@@ -1264,7 +1261,7 @@ void BITNode::tryClone(hpair binding) const
 {
     foreach(const parent_link<BITNode>& p, parents)
     {
-        tlog(-2, "TryClone next...");
+        tlog(2, "TryClone next...");
 
         // when 'binding' is from ($A to $B), try to find parent with bindings ($C to $A)
         map<pHandle, pHandle>::const_iterator it =

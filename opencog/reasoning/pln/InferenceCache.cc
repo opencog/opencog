@@ -33,7 +33,6 @@
 
 #include "rules/RuleProvider.h"
 #include "rules/Rules.h"
-//#include "spacetime.h"
 #include "AtomSpaceWrapper.h"
 #include <opencog/util/copyif.h>
 #include "BackInferenceTreeNode.h"
@@ -42,16 +41,12 @@
 
 InferenceCache* InferenceCache::standardInferenceCache()
 {
-    static InferenceCache* standard = new InferenceCache(new DefaultVariableRuleProvider);;
-    //static InferenceCache* standard = new InferenceCache(new EvaluationRuleProvider);
-
-    //if (standard == NULL) standard = new InferenceCache(new DefaultVariableRuleProvider);
+    static InferenceCache* standard = new InferenceCache();;
 
     return standard;
 }
 
 InferenceCache::~InferenceCache()
 {
-    delete referenceRP;
     foreach(BITNode* b, nodes) delete b;
 }

@@ -44,12 +44,6 @@ protected:
     friend class ::BITNodeUTest;
 
 public:
-    /**
-     * A "reference" RuleProvider containing the official versions of all Rules. Particular FC or BC
-     * processes are allowed to use their own RuleProviders, which may have different combinations of
-     * Rules, but those RuleProviders must contain pointers to the same Rule objects as contained here.
-     */
-    RuleProvider *referenceRP;
 
     // temporary haxx
 
@@ -88,7 +82,7 @@ protected:
     // Constructor?
 public:
     ~InferenceCache();
-    InferenceCache(RuleProvider* _rp) : referenceRP(_rp) { }
+    InferenceCache() { }
 
     static InferenceCache* standardInferenceCache();
 };

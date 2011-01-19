@@ -271,7 +271,6 @@ void MacroRuleTest()
     //typedef DeductionRule RuleT2;
     iAtomSpaceWrapper* parent = ::haxx::defaultAtomSpaceWrapper;
 
-//  DefaultVariableRuleProvider rp;
     InversionRule<INHERITANCE_LINK> *invR = new InversionRule<INHERITANCE_LINK>(parent);
     DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK> *deduR = new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent);
 
@@ -774,7 +773,7 @@ InitAxiomSet("smalldemo.xml");
         fflush(stdout);
         currentDebugLevel=-4;
 
-        Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
+        Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target));
 
         uint s_i=0;
         Handle eh=Handle::UNDEFINED;

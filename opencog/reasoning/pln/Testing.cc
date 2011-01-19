@@ -124,7 +124,7 @@ Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc)
 
     std::cout << "Loaded parameters of test OK" << std::endl;
 
-    state = new BITNodeRoot(target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator);
+    state = new BITNodeRoot(target, NULL, config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator);
     Bstate.reset(state);
 
     Btr<PLNTest> the_test(new PLNTest(
@@ -435,7 +435,7 @@ bool maketest(meta target,
                                         minEvalsOfFittestBIT,
                                         minExhaustiveEvals)
                                         );
-    t->state = Btr<BITNodeRoot>(new BITNodeRoot(target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
+    t->state = Btr<BITNodeRoot>(new BITNodeRoot(target, NULL, config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
     Bstate.reset(state);
     return runPLNTest(t, test_bc);
 }

@@ -23,7 +23,6 @@
 #define RULEPROVIDER_H_
 
 #include "Rule.h"
-//#pragma once
 
 namespace opencog { namespace pln {
 
@@ -46,20 +45,27 @@ public:
     const Rule* findRule(const std::string& ruleName) const;
 };
 
+class ReferenceRuleProvider : public RuleProvider
+{
+public:
+    ReferenceRuleProvider(void);
+    virtual ~ReferenceRuleProvider(void);
+};
+
+/**
+ * A "reference" RuleProvider containing the official versions of all Rules.
+ * Particular FC or BC processes are allowed to use their own RuleProviders,
+ * which may have different combinations of Rules, but those RuleProviders must
+ * contain pointers to the same Rule objects as contained here.
+ */
+RuleProvider& referenceRuleProvider();
+
+
 class VariableRuleProvider : public RuleProvider {
 public:
     VariableRuleProvider(void);
     virtual ~VariableRuleProvider(void);
 
-//  void CreateCustomCrispUnificationRules(); //Re-create these rules every time a new axiom set is loaded in!
-//  const set<uint>& GetCustomCrispUnificationRules() const { return CustomCrispUnificationRules; }
-};
-
-class DefaultVariableRuleProvider : public VariableRuleProvider
-{
-public:
-    DefaultVariableRuleProvider(void);
-    virtual ~DefaultVariableRuleProvider(void);
 };
 
 class ForwardComposerRuleProvider : public VariableRuleProvider
