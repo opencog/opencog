@@ -7,10 +7,12 @@
 ; rules that do not require preprocessing
 (define (SubsetEvalRule sub super . contexts)
   (pln-ar "SubsetEvalRule" (list sub super) contexts))
-(define (IntInhRule sub super . contexts)
+(define (IntensionalInheritanceRule sub super . contexts)
   (pln-ar "IntensionalInheritanceRule" (list sub super) contexts))
-(define (InhDedRule AB BC . contexts)
-  (pln-ar "InheritanceDeductionRule" (list AB BC) contexts))
+(define (InhDeductionRule AB BC . contexts)
+  (pln-ar "InheritanceLinkDeductionRule" (list AB BC) contexts))
+(define (ExtInhDeductionRule AB BC . contexts)
+  (pln-ar "ExtensionalInheritanceLinkDeductionRule" (list AB BC) contexts))
 ; context rules, not sure if the last argument 'contexts' would be useful
 (define (ContextualizerRule R . contexts)
   (pln-ar "ContextualizerRule" (list R) contexts))

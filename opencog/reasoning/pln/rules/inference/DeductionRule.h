@@ -97,12 +97,9 @@ public:
           InclusionLink(linkType) 
     {
 
-        // Determine name, note that instead of that we should probably
-        // better have inherited DeductionRule with the right names
-        if(linkType == INHERITANCE_LINK)
-            super::name = std::string("Inheritance") + super::name;
-        else if(linkType == IMPLICATION_LINK)
-            super::name = std::string("Implication") + super::name;
+        // Determine name, note that we may preferably inherit
+        // DeductionRule with the right names
+        super::name = _asw->getAtomSpace()->getName(linkType) + super::name;
 
         //! @todo should use real variable for the other input.
 	
