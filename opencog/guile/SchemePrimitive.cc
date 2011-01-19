@@ -117,11 +117,23 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	catch (std::exception &ex)
 	{
 		const char *msg = ex.what();
-		scm_misc_error(fe->get_name(), msg, SCM_EOL);
+		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
+		scm_error_scm(
+			scm_from_locale_symbol("C++ exception"),
+			scm_from_locale_string(fe->get_name()),
+			scm_from_locale_string(msg),
+			SCM_EOL,
+			SCM_EOL);
 	}
 	catch (...)
 	{
-		scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
+		// scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
+		scm_error_scm(
+			scm_from_locale_symbol("C++ exception"),
+			scm_from_locale_string(fe->get_name()),
+			scm_from_locale_string("unknown C++ exception"),
+			SCM_EOL,
+			SCM_EOL);
 	}
 	return rc;
 }
