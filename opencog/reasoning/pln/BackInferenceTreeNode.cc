@@ -2315,13 +2315,10 @@ string BITNode::tlog(int debugLevel, const char *format, ...) const
 string BITNode::printChildrenSizes() const
 {
     stringstream ss;
-    //if (currentDebugLevel>=3)
-    //    ss << "next chi...0";
-    ss << tlog(3,"next chi...0");
-    for(uint c=0; c< children.size(); c++)
+    ss << tlog(3,"Children sizes:");
+    for(uint c=0; c < children.size(); c++)
     {
-        ss << tlog(3,"(%d:%d), ", c, children[c].size());
-        ss << tlog(3,"\n");
+        ss << tlog(3,"(%d:%d),", c, children[c].size());
     }
     return ss.str();
 }

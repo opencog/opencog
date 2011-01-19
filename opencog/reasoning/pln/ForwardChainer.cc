@@ -49,6 +49,8 @@ namespace haxx
 namespace opencog {
 namespace pln {
 
+extern int currentDebugLevel;
+
 //! @todo refactor into PLNUtils or maybe somewhere else.
 void updateTrail(pHandle out, Rule* r, Btr<vector<BoundVertex> > args) {
     // Update the tacky trail mechanism (similar code to in the BIT)
