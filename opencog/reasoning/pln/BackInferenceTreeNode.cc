@@ -216,7 +216,7 @@ string BITNodeRoot::printUsers(BITNode* b)
 {
     stringstream ss;
     foreach(BITNode* u, BITcache->users[b])
-        ss << "[" << (long)u << "] ";
+        ss << "[" << u->id << "] ";
     ss << endl;
     cout << ss.str();
     return ss.str();
@@ -226,7 +226,7 @@ string BITNodeRoot::printParents(BITNode* b) const
 {
     stringstream ss;
     foreach(const parent_link<BITNode>& p, b->parents)
-        ss << "[" << (long)p.link << "] ";
+        ss << "[" << p.link->id << "] ";
     ss << endl;
     cout << ss.str();
     return ss.str();
@@ -1051,7 +1051,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
 
             if (template_node)
             {
-                tlog(-1, "Found a template [%ld]\n", (long)template_node);
+                tlog(-1, "Found a template [%ld]\n", template_node->id);
 
                 delete new_node;
 
@@ -1064,7 +1064,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
                     {
                         tlog(-1, "I already have this node as a child\n");
                         foreach(const parent_link<BITNode>& myp, parents)
-                            tlog(-2, "Parent: %ld\n", (long)myp.link);
+                            tlog(-2, "Parent: %ld\n", myp.link->id);
                         return template_node;
                     }
 
@@ -1120,7 +1120,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
             if (!STLhas2(*_target, v))
             {
                 root->BITcache->varOwner[v].insert(new_node);
-                cprintf(0,"[%ld] owns %s\n", (long)new_node, asw->getName(_v2h(v)).c_str());
+                cprintf(0,"[%ld] owns %s\n", new_node->id, asw->getName(_v2h(v)).c_str());
             }
 
         return new_node;
@@ -1144,7 +1144,7 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
     typedef pair<BITNode*, bindingsT> o2bT;
     foreach(const o2bT& owner2binds, clone_binds)
     {
-        cprintf(-1,"spawn next[%ld]:\n", (long)owner2binds.first);
+        cprintf(-1,"spawn next[%ld]:\n", owner2binds.first->id);
 
         foreach(hpair b, owner2binds.second)
             owner2binds.first->tryClone(b);
@@ -1933,10 +1933,10 @@ void BITNodeRoot::expandFittest()
                 }
 
                 std::list<BITNode*>::iterator i = exec_pool.begin();
-                (*i)->tlog(3, ": %f / %d [%ld]\n", (*i)->fitness(), (*i)->children.size(), (long)(*i));
+                (*i)->tlog(3, ": %f / %d [%ld]\n", (*i)->fitness(), (*i)->children.size(), (*i)->id);
 
                 for (++i; i != exec_pool.end(); i++)
-                    (*i)->tlog(3, ": %f / %d [%ld]\n", (*i)->fitness(), (*i)->children.size(), (long)(*i));
+                    (*i)->tlog(3, ": %f / %d [%ld]\n", (*i)->fitness(), (*i)->children.size(), (*i)->id);
 
                 bisse = (*exec_pool.begin());
             }
@@ -2025,7 +2025,7 @@ string BITNodeRoot::extract_plan(pHandle h) const
 string BITNode::loopCheck() const
 {
     stringstream ss;
-    ss << "-" << depth << " " << (long) this << ":" << totalChildren() << endl;
+    ss << "-" << depth << " " << id << ":" << totalChildren() << endl;
     for (vector<set<ParametrizedBITNode> >::const_iterator i = children.begin();
             i!=children.end(); i++) {
         foreach(const ParametrizedBITNode& pbit, *i) {
@@ -2113,7 +2113,7 @@ string BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > usedBITNod
             ss << repeatc(' ', depth*3) << rule->name << endl;
             //prlog(loglevel, ss.str().c_str());
         } else {
-            ss << repeatc(' ', depth*3) << rule->name << " ([" << id //(long)this
+            ss << repeatc(' ', depth*3) << rule->name << " ([" << id 
                 << "])" << endl;
             ss << repeatc(' ', (depth+1)*3) << "[ ";
             if (direct_results) {
@@ -2246,10 +2246,10 @@ string BITNode::printArgs() const
 {
     stringstream ss;
     if (args.size() == 0) {
-        ss << "No arguments to BITNode [" << (long)this << endl;
+        ss << "No arguments to BITNode [" << id << endl;
         return ss.str();
     }
-    ss << "BITNode [" << (long)this << "] has " << args.size() << " args:" <<endl;
+    ss << "BITNode [" << id << "] has " << args.size() << " args:" <<endl;
     foreach(meta _arg, args)
         ss << NMPrinter(NMP_ALL).toString(*_arg, -2);
     cprintf(-2,ss.str().c_str());
@@ -2278,36 +2278,37 @@ string BITNode::printFitnessPool()
 
 static bool bigcounter = true;
 
-// haxxUsedProofResources wasn't being printed, even before I commented out???
-// -- JaredW
 string BITNode::tlog(int debugLevel, const char *format, ...) const
 {
-    stringstream ss;
+#define MAX_TLOG_MESSAGE_SIZE 5000
+    // Make buffer static to avoid allocating it on every log call
+    static char buf[MAX_TLOG_MESSAGE_SIZE];
+    // currentDebugLevel prints everything underneath it, so
+    // messages with higher log levels are more verbose
     if (debugLevel > currentDebugLevel) return "";
-
-    //if (test::bigcount == 601) {
-    //    ss << "Debug feature." << endl;
-    //}
+    stringstream ss;
 
     string name;
     if (rule) name = rule->name;
     else if (root != this) name = string("SCOPER");
     else name = string("ROOT");
 
+    // format is:
+    // depth/msgcount Pool=toExpand/totalNodes [BITNode id-name] message
+    // e.g.
+    // 3234 Pool=1123/4124 [232-DeductionRule] This is a test
     ss << (bigcounter? (++test::bigcount) : depth) << " Pool="
         << (unsigned int) root->exec_pool.size() << "/" << root->inferenceNodes
-        /*<< haxxUsedProofResources*/ << " [" << id << "-"
+        << " [" << id << "-"
         << name << "] ";
 
-    char buf[5000];
     va_list ap;
     va_start(ap, format);
-    int answer = vsprintf(buf, format, ap);
+    int answer = vsnprintf(buf, MAX_TLOG_MESSAGE_SIZE, format, ap);
+    va_end(ap);
     ss << buf;
 
-    cout << ss.str().c_str();
-    fflush(stdout);
-    va_end(ap);
+    cout << ss.str().c_str() << std::flush;
     return ss.str();
 }
 
