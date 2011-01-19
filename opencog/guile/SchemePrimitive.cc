@@ -8,7 +8,6 @@
  */
 
 #include <exception>
-#include <opencog/util/exceptions.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -115,15 +114,14 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	{
 		rc = fe->invoke(arglist);
 	}
-	catch (const StandardException &ex)
-	{
-		const char *msg = ex.getMessage();
-		scm_misc_error(fe->get_name(), msg, SCM_EOL);
-	}
 	catch (std::exception &ex)
 	{
 		const char *msg = ex.what();
 		scm_misc_error(fe->get_name(), msg, SCM_EOL);
+	}
+	catch (...)
+	{
+		scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
 	}
 	return rc;
 }

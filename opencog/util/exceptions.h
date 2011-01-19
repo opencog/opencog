@@ -41,7 +41,7 @@ namespace opencog
 /**
  * Base exception class from which all other exceptions should inheritates.
  */
-class StandardException
+class StandardException : public std::exception
 {
 
 private:
@@ -64,10 +64,13 @@ public:
     /**
      * Construtor and destructor.
      */
-    StandardException();
-    StandardException(const StandardException&);
-    StandardException& operator=(const StandardException&);
-    ~StandardException();
+    StandardException() throw();
+    StandardException(const StandardException&) throw();
+    StandardException& operator=(const StandardException&) throw();
+    virtual ~StandardException() throw();
+    virtual const char* what() const throw() {
+        return getMessage();
+    }
 
     /**
      * Get error message.
@@ -100,17 +103,12 @@ public:
      *
      * @param Exception message in printf standard format.
      */
-    RuntimeException(const char*, const char*, ...);
+    RuntimeException(const char*, const char*, ...) throw(); 
 
     /**
      * Default constructor used for inheritance
      */
-    RuntimeException();
-
-    /**
-     * Destructor
-     */
-    ~RuntimeException();
+    RuntimeException() throw();
 
 }; // RuntimException
 
@@ -129,7 +127,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    XMLException(const char*, const char*, ...);
+    XMLException(const char*, const char*, ...) throw(); 
 
 }; // XMLException
 
@@ -148,7 +146,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    IOException(const char*, const char*, ...);
+    IOException(const char*, const char*, ...) throw();
 
 }; // IOException
 
@@ -167,7 +165,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    ComboException(const char*, const char*, ...);
+    ComboException(const char*, const char*, ...) throw();
 
 }; // ComboException
 
@@ -186,7 +184,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    IndexErrorException(const char*, const char*, ...);
+    IndexErrorException(const char*, const char*, ...) throw();
 
 }; // IndexErrorException
 
@@ -209,7 +207,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    InvalidParamException(const char*, const char*, ...);
+    InvalidParamException(const char*, const char*, ...) throw();
 
 }; // InvalidParamException
 
@@ -229,7 +227,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    InconsistenceException(const char*, const char*, ...);
+    InconsistenceException(const char*, const char*, ...) throw();
 
 }; // InconsistenceException
 
@@ -249,7 +247,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    FatalErrorException(const char*, const char*, ...);
+    FatalErrorException(const char*, const char*, ...) throw();
 
 }; // FatalErrorException
 
@@ -269,7 +267,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    NotFoundException(const char*, const char*, ...);
+    NotFoundException(const char*, const char*, ...) throw();
     
 }; // NotFoundException
 
@@ -289,7 +287,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    NetworkException(const char*, const char*, ...);
+    NetworkException(const char*, const char*, ...) throw();
 
 }; // NetworkException
 
@@ -302,8 +300,8 @@ class AssertionException : public StandardException
 
 public:
 
-    AssertionException(const char*, ...);
-    AssertionException(const char* fmt, va_list ap);
+    AssertionException(const char*, ...) throw();
+    AssertionException(const char* fmt, va_list ap) throw();
 };
 
 } // namespace opencog

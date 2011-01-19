@@ -68,14 +68,14 @@ void StandardException::parseErrorMessage(const char *trace, const char * msg, v
     delete [] concatMsg;
 }
 
-StandardException::StandardException()
+StandardException::StandardException() throw()
 {
     message = NULL;
 }
 
 // Exceptions must have a copy constructor, as otherwise the
 // catcher will not be able to see the message! Ouch!
-StandardException::StandardException(const StandardException& ex)
+StandardException::StandardException(const StandardException& ex) throw()
 {
     message = NULL;
     if (ex.message)
@@ -85,7 +85,7 @@ StandardException::StandardException(const StandardException& ex)
     }
 }
 
-StandardException& StandardException::operator=(const StandardException& ex)
+StandardException& StandardException::operator=(const StandardException& ex) throw()
 {
     message = NULL;
     if (ex.message)
@@ -96,7 +96,7 @@ StandardException& StandardException::operator=(const StandardException& ex)
     return *this;
 }
 
-StandardException::~StandardException()
+StandardException::~StandardException() throw()
 {
     // clear memory
     if (message != NULL) {
@@ -128,7 +128,7 @@ void StandardException::setMessage(const char * msg)
  * RuntimeException class
  * ----------------------------------------------------------------------------
  */
-RuntimeException::RuntimeException(const char *trace, const char* fmt, ...)
+RuntimeException::RuntimeException(const char *trace, const char* fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -136,11 +136,7 @@ RuntimeException::RuntimeException(const char *trace, const char* fmt, ...)
     va_end(ap);
 }
 
-RuntimeException::RuntimeException()
-{
-}
-
-RuntimeException::~RuntimeException()
+RuntimeException::RuntimeException() throw()
 {
 }
 
@@ -149,7 +145,7 @@ RuntimeException::~RuntimeException()
  * XMLException class
  * ----------------------------------------------------------------------------
  */
-XMLException::XMLException(const char * trace, const char * fmt, ...)
+XMLException::XMLException(const char * trace, const char * fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -162,7 +158,7 @@ XMLException::XMLException(const char * trace, const char * fmt, ...)
  * IOException class
  * ----------------------------------------------------------------------------
  */
-IOException::IOException(const char * trace, const char * fmt, ...)
+IOException::IOException(const char * trace, const char * fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -175,7 +171,7 @@ IOException::IOException(const char * trace, const char * fmt, ...)
  * ComboException class
  * ----------------------------------------------------------------------------
  */
-ComboException::ComboException(const char * trace, const char * fmt, ...)
+ComboException::ComboException(const char * trace, const char * fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -188,7 +184,7 @@ ComboException::ComboException(const char * trace, const char * fmt, ...)
  * IndexErrorException class
  * ----------------------------------------------------------------------------
  */
-IndexErrorException::IndexErrorException(const char * trace, const char * fmt, ...)
+IndexErrorException::IndexErrorException(const char * trace, const char * fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -201,7 +197,7 @@ IndexErrorException::IndexErrorException(const char * trace, const char * fmt, .
  * InvalidException class
  * ----------------------------------------------------------------------------
  */
-InvalidParamException::InvalidParamException(const char * trace, const char * fmt, ...)
+InvalidParamException::InvalidParamException(const char * trace, const char * fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -214,7 +210,7 @@ InvalidParamException::InvalidParamException(const char * trace, const char * fm
  * InconsistenceException class
  * ----------------------------------------------------------------------------
  */
-InconsistenceException::InconsistenceException(const char * trace, const char * fmt, ...)
+InconsistenceException::InconsistenceException(const char * trace, const char * fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -227,7 +223,7 @@ InconsistenceException::InconsistenceException(const char * trace, const char * 
  * FatalErrorException class
  * ----------------------------------------------------------------------------
  */
-FatalErrorException::FatalErrorException(const char * trace, const char * fmt, ...)
+FatalErrorException::FatalErrorException(const char * trace, const char * fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -240,7 +236,7 @@ FatalErrorException::FatalErrorException(const char * trace, const char * fmt, .
  * NetworkException class
  * ----------------------------------------------------------------------------
  */
-NetworkException::NetworkException(const char * trace, const char * fmt, ...)
+NetworkException::NetworkException(const char * trace, const char * fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -253,7 +249,7 @@ NetworkException::NetworkException(const char * trace, const char * fmt, ...)
  * NotFoundException class
  * ----------------------------------------------------------------------------
  */
-NotFoundException::NotFoundException(const char * trace, const char * fmt, ...)
+NotFoundException::NotFoundException(const char * trace, const char * fmt, ...) throw()
 {
     va_list  ap;
     va_start(ap, fmt);
@@ -278,7 +274,7 @@ NotFoundException::NotFoundException(const char * trace, const char * fmt, ...)
  * AssertionException class
  * ----------------------------------------------------------------------------
  */
-AssertionException::AssertionException(const char* fmt, ...)
+AssertionException::AssertionException(const char* fmt, ...) throw()
 {
     char    buf[MAX_MSG_LENGTH];
 
@@ -291,7 +287,7 @@ AssertionException::AssertionException(const char* fmt, ...)
     opencog::logger().error(buf);
 }
 
-AssertionException::AssertionException(const char* fmt, va_list ap)
+AssertionException::AssertionException(const char* fmt, va_list ap) throw()
 {
     char    buf[MAX_MSG_LENGTH];
 
