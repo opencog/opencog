@@ -73,6 +73,29 @@ StandardException::StandardException()
     message = NULL;
 }
 
+// Exceptions must have a copy constructor, as otherwise the
+// catcher will not be able to see the message! Ouch!
+StandardException::StandardException(const StandardException& ex)
+{
+    message = NULL;
+    if (ex.message)
+    {
+        message = new char[strlen(ex.message) + 1];
+        strcpy(message, ex.message);
+    }
+}
+
+StandardException& StandardException::operator=(const StandardException& ex)
+{
+    message = NULL;
+    if (ex.message)
+    {
+        message = new char[strlen(ex.message) + 1];
+        strcpy(message, ex.message);
+    }
+    return *this;
+}
+
 StandardException::~StandardException()
 {
     // clear memory
@@ -259,12 +282,13 @@ AssertionException::AssertionException(const char* fmt, ...)
 {
     char    buf[MAX_MSG_LENGTH];
 
-    va_list        ap;
+    va_list ap;
     va_start(ap, fmt);
-
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    opencog::logger().error(buf);
     va_end(ap);
+
+    setMessage(buf);
+    opencog::logger().error(buf);
 }
 
 AssertionException::AssertionException(const char* fmt, va_list ap)
@@ -272,6 +296,7 @@ AssertionException::AssertionException(const char* fmt, va_list ap)
     char    buf[MAX_MSG_LENGTH];
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
+    setMessage(buf);
     opencog::logger().error(buf);
 }
 

@@ -65,6 +65,8 @@ public:
      * Construtor and destructor.
      */
     StandardException();
+    StandardException(const StandardException&);
+    StandardException& operator=(const StandardException&);
     ~StandardException();
 
     /**
@@ -295,7 +297,7 @@ public:
 /**
  * Exception to be called when an assertion fails to pass a cassert function.
  */
-class AssertionException
+class AssertionException : public StandardException
 {
 
 public:

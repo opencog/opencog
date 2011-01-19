@@ -14,9 +14,6 @@
 #include <pthread.h>
 
 #include <opencog/util/Logger.h>
-#include <boost/function.hpp>
-//#include <functional>
-#include <boost/bind.hpp>
 
 
 #include "SchemeEval.h"
@@ -420,7 +417,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	}
 	else
 	{
-		scm_puts ("ERROR: thow args are unexpectedly short!\n", port);
+		scm_puts ("ERROR: throw args are unexpectedly short!\n", port);
 	}
 	scm_puts("ABORT: ", port);
 	scm_puts(restr, port);
