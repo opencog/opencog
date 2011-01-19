@@ -53,6 +53,15 @@ void RuleProvider::AddRule(Rule* r, float priority)
     r->setPriority(priority);
 }
 
+void RuleProvider::AddRule(string& ruleName, float priority)
+{
+    Rule* r = referenceRuleProvider().findRule(ruleName);
+    //! @todo move rule priority out of rule and into RuleProvider so
+    //! that rule providers can specify their own rule order.
+    OC_ASSERT(r->getPriority() == priority);
+    push_back(r);
+}
+
 RuleProvider::~RuleProvider(void)
 {
     for_each(begin(), end(), &delete_op<Rule>);
@@ -70,7 +79,7 @@ public:
     }
 };
 
-const Rule* RuleProvider::findRule(const string& ruleName) const
+Rule* RuleProvider::findRule(const string& ruleName) const
 {
     EqRuleName eq(ruleName);
     RuleProvider::const_iterator cit = find_if(begin(), end(), eq);
@@ -206,6 +215,7 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
 
 ReferenceRuleProvider::~ReferenceRuleProvider(void)
 {
+
 }
 
 //template<typename FormulaType>
@@ -274,6 +284,7 @@ public:
 ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 {
     AtomSpaceWrapper* asw = GET_ASW;
+    RuleProvider* ref = &referenceRuleProvider();
 
     float ANDEvaluatorPriority = 10.0f;
 

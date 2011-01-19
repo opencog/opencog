@@ -35,6 +35,7 @@ protected:
 public:
     RuleProvider(void);
     virtual ~RuleProvider(void);
+    void AddRule(std::string& ruleName, float priority);
 
     /**
      * @param ruleName the name of the rule we are looking for
@@ -42,7 +43,7 @@ public:
      * @return a pointer to the rule with name ruleName.
      *         If no such rule exists then it return NULL
      */
-    const Rule* findRule(const std::string& ruleName) const;
+    Rule* findRule(const std::string& ruleName) const;
 };
 
 class ReferenceRuleProvider : public RuleProvider
