@@ -649,7 +649,7 @@ public:
     
     std::string printChildrenSizes() const;
     std::string print(int loglevel=0, bool compact=false, Btr<std::set<BITNode*> > UsedBITNodes = Btr<std::set<BITNode*> >()) const;
-    std::string printFitnessPool();
+    std::string printFitnessPool(int logLevel = 0);
     std::string printTarget() const;
     std::string printArgs() const;
     std::string printResults() const; 

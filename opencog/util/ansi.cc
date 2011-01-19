@@ -25,21 +25,5 @@
 
 #include <string>
 
-
 namespace opencog {
-/*
-inline void ansi_code(std::string &s,const std::string &code) {
-    if (config().get_bool("ANSI_ENABLED")) s.append(code);
 }
-
-inline void ansi_off(std::string &s) { ansi_code(s,COLOR_OFF); }
-inline void ansi_bright(std::string &s) { ansi_code(s,BRIGHT); }
-inline void ansi_red(std::string &s) { ansi_code(s,RED); }
-inline void ansi_green(std::string &s) { ansi_code(s,GREEN); }
-inline void ansi_yellow(std::string &s) { ansi_code(s,YELLOW); }
-inline void ansi_blue(std::string &s) { ansi_code(s,BLUE); }
-inline void ansi_magenta(std::string &s) { ansi_code(s,MAGENTA); }
-inline void ansi_cyan(std::string &s) { ansi_code(s,CYAN); }
-inline void ansi_white(std::string &s) { ansi_code(s,WHITE); }
-*/
-};

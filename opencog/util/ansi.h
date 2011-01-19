@@ -26,27 +26,15 @@
 #include <opencog/util/Config.h>
 namespace opencog {
 
-/*void ansi_code(std::string &s,const std::string &code);
-
-void ansi_off(std::string &s);
-void ansi_bright(std::string &s);
-void ansi_red(std::string &s);
-void ansi_green(std::string &s);
-void ansi_yellow(std::string &s);
-void ansi_blue(std::string &s);
-void ansi_magenta(std::string &s);
-void ansi_cyan(std::string &s);
-void ansi_white(std::string &s);*/
-
-static const char* const COLOR_OFF = "\e[0m";
-static const char* const BRIGHT = "\e[1m";
-static const char* const RED = "\e[31m";
-static const char* const GREEN = "\e[32m";
-static const char* const YELLOW = "\e[33m";
-static const char* const BLUE = "\e[34m";
-static const char* const MAGENTA = "\e[35m";
-static const char* const CYAN = "\e[36m";
-static const char* const WHITE = "\e[37m";
+static const char* const COLOR_OFF = "\033[0m";
+static const char* const BRIGHT = "\033[1m";
+static const char* const RED = "\033[31m";
+static const char* const GREEN = "\033[32m";
+static const char* const YELLOW = "\033[33m";
+static const char* const BLUE = "\033[34m";
+static const char* const MAGENTA = "\033[35m";
+static const char* const CYAN = "\033[36m";
+static const char* const WHITE = "\033[37m";
   
 inline void ansi_code(std::string &s,const std::string &code) {
     if (config().get_bool("ANSI_ENABLED")) s.append(code);
@@ -62,4 +50,4 @@ inline void ansi_magenta(std::string &s) { ansi_code(s,MAGENTA); }
 inline void ansi_cyan(std::string &s) { ansi_code(s,CYAN); }
 inline void ansi_white(std::string &s) { ansi_code(s,WHITE); }
 
-};
+}
