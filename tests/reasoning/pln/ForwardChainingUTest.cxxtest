@@ -62,7 +62,6 @@ private:
     // test repeat #
     int t;
 
-
     //! @todo have a setup method in PLNModule that is also used in PLNUTest
     void initPLNTests()
     {
