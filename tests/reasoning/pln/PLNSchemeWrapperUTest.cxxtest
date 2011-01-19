@@ -120,14 +120,14 @@ public:
     }
 
     void test_inference() {
-        // check_inference("aboutGreaterThan.scm",
-        //                 SimpleTruthValue(0.2, SimpleTruthValue::confidenceToCount(0.56)));
-        // check_inference("marsMath.scm",
-        //                 SimpleTruthValue(0.91, SimpleTruthValue::confidenceToCount(0.5)));
-        // check_inference("jumpingMoon.scm",
-        //                 SimpleTruthValue(0.3, SimpleTruthValue::confidenceToCount(0.5)));
-        // check_inference("cheeseMaking.scm",
-        //                 SimpleTruthValue(0.95, 959.707703));
+        check_inference("aboutGreaterThan.scm",
+                        SimpleTruthValue(0.2, SimpleTruthValue::confidenceToCount(0.56)));
+        check_inference("marsMath.scm",
+                        SimpleTruthValue(0.91, SimpleTruthValue::confidenceToCount(0.5)));
+        check_inference("jumpingMoon.scm",
+                        SimpleTruthValue(0.3, SimpleTruthValue::confidenceToCount(0.5)));
+        check_inference("cheeseMaking.scm",
+                        SimpleTruthValue(0.95, 959.707703));
         check_inference("niceWeather.scm",
                         SimpleTruthValue(0.5, SimpleTruthValue::confidenceToCount(0.5)));
 #ifdef CONTEXTUAL_INFERENCE
@@ -135,6 +135,7 @@ public:
         std::cout << "cx = " << cx.value() << std::endl;
         check_inference("nerd.scm", SimpleTruthValue(0.66, 3200.000244),
                         VersionHandle(CONTEXTUAL, cx));
+        // check_inference("ClarkLogTrafficking.scm", SimpleTruthValue(0.66, 3200.000244));
 #endif
     }
 };
