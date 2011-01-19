@@ -112,7 +112,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				case B_HI:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					int i = scm_to_int(scm_cadr(args));
+					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
 					bool b = (that->*method.b_hi)(h, i);
 					if (b) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
 					break;
@@ -137,7 +137,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				case H_HI:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					int i = scm_to_int(scm_cadr(args));
+					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
 					Handle rh = (that->*method.h_hi)(h,i);
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
@@ -181,7 +181,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
 
 					// Third arg is an int
-					int i = scm_to_int(scm_caddr(args));
+					int i = SchemeSmob::verify_int(scm_caddr(args), scheme_name, 3);
 
 					HandleSeq rHS = (that->*method.q_hti)(h,t,i);
 					HandleSeq::iterator it = rHS.begin();

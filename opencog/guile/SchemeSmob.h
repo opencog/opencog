@@ -156,6 +156,8 @@ class SchemeSmob
 		                                  int pos = 1);
 		static std::string verify_string (SCM, const char *, int pos = 1,
 		                                  const char *msg = "expecting string");
+		static int verify_int (SCM, const char *, int pos = 1,
+		                       const char *msg = "expecting integer");
 	
 		static AtomSpace* atomspace;
 		static void init(AtomSpace *as);

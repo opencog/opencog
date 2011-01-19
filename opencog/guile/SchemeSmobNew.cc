@@ -281,6 +281,18 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname, int pos,
 }
 
 /**
+ * Check that the argument is an int, else throw errors.
+ * Return the int.
+ */
+int SchemeSmob::verify_int (SCM sint, const char *subrname, int pos, const char * msg)
+{
+    if (scm_is_false(scm_integer_p(sint)))
+        scm_wrong_type_arg_msg(subrname, pos, sint, msg);
+
+    return scm_to_int(sint);
+}
+
+/**
  * Create a new node, of named type stype, and string name sname
  */
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
