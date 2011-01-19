@@ -129,6 +129,9 @@ public:
     ~DeterminismUTest()
     {
     }
+
+    void testDummy() {
+    }
     
     // test forward chainer on all targets defined as conf file
     void DISABLEtestForwardChainingDeterminism() {

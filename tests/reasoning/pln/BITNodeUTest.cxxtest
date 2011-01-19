@@ -60,11 +60,9 @@ public:
                     NewNode(FW_VARIABLE_NODE, "$X"),
                     NewNode(FW_VARIABLE_NODE, "$Y")
                 )));
-        cout << "BITNodeUTest: Making RuleProvider" << endl;
-        RuleProvider *rp = new DefaultVariableRuleProvider();
         cout << "BITNodeUTest: Making BITNodeRoot" << endl;
         try {
-        root = new BITNodeRoot(fakeTarget, rp);
+            root = new BITNodeRoot(fakeTarget);
         } catch (exception &e) {
             cout << e.what();
 
