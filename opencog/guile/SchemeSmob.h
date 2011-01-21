@@ -15,8 +15,6 @@
 
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
-
 #include <libguile.h>
 
 #include <opencog/atomspace/Handle.h>
@@ -144,10 +142,10 @@ class SchemeSmob
 		static std::string misc_to_string(SCM);
 		static TruthValue *get_tv_from_list(SCM);
 		static AttentionValue *get_av_from_list(SCM);
-		
+
+		// validate arguments coming from scheme passing into C++
 		static Type verify_atom_type(SCM, const char *, int pos = 1);
 		static Type verify_node_type(SCM, const char *, int pos = 1);
-		static boost::shared_ptr<Atom> verify_atom(SCM, const char *, int pos = 1);
 		static Handle verify_handle(SCM, const char *, int pos = 1);
 		static VersionHandle * verify_vh(SCM, const char *, int pos = 1);
 		static TruthValue * verify_tv(SCM, const char *, int pos = 1);
@@ -158,7 +156,7 @@ class SchemeSmob
 		                                  const char *msg = "expecting string");
 		static int verify_int (SCM, const char *, int pos = 1,
 		                       const char *msg = "expecting integer");
-	
+
 		static AtomSpace* atomspace;
 		static void init(AtomSpace *as);
 		SchemeSmob(AtomSpace *as);
