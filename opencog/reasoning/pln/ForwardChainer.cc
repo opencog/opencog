@@ -43,7 +43,7 @@ using std::string;
 namespace haxx
 {
     extern std::map<pHandle,pHandleSeq> inferred_from;
-    extern std::map<pHandle,opencog::pln::Rule*> inferred_with;
+    extern std::map<pHandle,opencog::pln::RulePtr> inferred_with;
 }
 
 namespace opencog {
@@ -52,7 +52,7 @@ namespace pln {
 extern int currentDebugLevel;
 
 //! @todo refactor into PLNUtils or maybe somewhere else.
-void updateTrail(pHandle out, Rule* r, Btr<vector<BoundVertex> > args) {
+void updateTrail(pHandle out, RulePtr r, Btr<vector<BoundVertex> > args) {
     // Update the tacky trail mechanism (similar code to in the BIT)
     foreach(BoundVertex v, *args) {
         haxx::inferred_from[out].push_back(_v2h(v.value));
@@ -127,7 +127,8 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
         thisLevelResults.reset(new pHandleSet);
 
         // Get the next Rule (no restrictions)
-        foreach(Rule *r, *composers) { // to avoid needing a nextRule method.
+        foreach(std::string ruleName, composers->getRuleNames()) {
+            RulePtr r = generators->findRule(ruleName);
             cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
@@ -228,7 +229,8 @@ Btr<set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     cprintf(5, "getMatching: target: ");
     rawPrint(target->begin(), 5);
 
-    foreach(Rule* g, *generators) {
+    foreach(std::string ruleName, generators->getRuleNames()) {
+        RulePtr g = generators->findRule(ruleName);
     	Btr<set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
 
     	if (gMatches.get()) {

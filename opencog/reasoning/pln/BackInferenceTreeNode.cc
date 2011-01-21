@@ -39,6 +39,7 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/copyif.h>
 #include <opencog/util/ansi.h>
+#include <opencog/util/exceptions.h>
 
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>
@@ -74,7 +75,7 @@ namespace haxx
 
     //! @todo This data must persist even if the BITNodeRoot is deleted.
     std::map<pHandle,pHandleSeq> inferred_from;
-    std::map<pHandle,Rule*> inferred_with;
+    std::map<pHandle,RulePtr> inferred_with;
 
     //! @todo Should be in a BITNode repository class. Not stored in a specific
     //! BIT so you can use multiple BITs.
@@ -145,7 +146,7 @@ using std::stringstream;
 using std::endl;
 using std::cout;
 
-typedef pair<Rule*, vtree> directProductionArgs;
+typedef pair<RulePtr, vtree> directProductionArgs;
 
 struct less_dpargs : public std::binary_function<directProductionArgs, directProductionArgs, bool>
 {
@@ -153,7 +154,7 @@ struct less_dpargs : public std::binary_function<directProductionArgs, directPro
     {
         if (lhs.first < rhs.first)
             return true;
-        if (lhs.first > rhs.first)
+        if (rhs.first < lhs.first )
             return false;
         if (less_vtree()(lhs.second, rhs.second))
             return true;
@@ -207,7 +208,7 @@ void copy_vars(V& vars, Vit varsbegin, Tit bbvt_begin, Tit bbvt_end)
 static int more_count=0;
 
 BITNode::BITNode()
-: depth(0), root(0), Expanded(false), rule(NULL), my_bdrum(0.0f),
+: depth(0), root(0), Expanded(false), my_bdrum(0.0f),
 direct_results(Btr<set<BoundVertex> >(new set<BoundVertex>))
 
 {
@@ -264,7 +265,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
     recordingTrails = _rTrails;
     fitnessEvaluator = _fe;
     
-    rule = NULL;
+    //rule = NULL;
     root = this;
     bound_target = meta(new vtree);
     if (!rp) rp = &referenceRuleProvider();
@@ -314,7 +315,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 #endif
 
     cprintf(3, "scoper...\n");
-    BITNode* root_variable_scoper = createChild(0, NULL, dummy_args,
+    BITNode* root_variable_scoper = createChild(0, RulePtr(), dummy_args,
             Btr<BoundVTree>(new BoundVTree(make_vtree(NODE))),
             bindingsT(), NO_SIBLING_SPAWNING);
     cprintf(3, "scoper ok\n");
@@ -364,7 +365,7 @@ void BITNode::ForceTargetVirtual(spawn_mode spawning)
 }
 
 
-BITNode* BITNodeRoot::createChild(int my_rule_arg_i, Rule* new_rule,
+BITNode* BITNodeRoot::createChild(int my_rule_arg_i, RulePtr new_rule,
         const Rule::MPs& rule_args, BBvtree _target,
         const bindingsT& bindings, spawn_mode spawning)
 {
@@ -374,7 +375,7 @@ BITNode* BITNodeRoot::createChild(int my_rule_arg_i, Rule* new_rule,
                                 1,
                                 0,
                                 _target,
-                                (Rule*)NULL,
+                                RulePtr(),
                                 rule_args,
                                 target_chain);
 
@@ -528,9 +529,13 @@ void BITNode::create()
     }
 
 #ifdef USE_BITUBIGRAPHER
-    RuleProvider * rp = this->root->rp;
+    RuleProvider& rp = referenceRuleProvider();
+    std::vector<std::string> rulenames = rp.getRuleNames();
+    // TODO This should use a different method to index the rules... they may change
+    // as rules are added and removed in response to generalisation links being
+    // added/removed from the AtomSpace.
     int ruleNumber = (!rule) ? 1 : // (one of the) root variable scopers
-            (2 + std::find(rp->begin(), rp->end(), rule) - rp->begin());
+            (2 + std::find(rulenames.begin(), rulenames.end(), rule->getName()) - rulenames.begin());
     haxx::BITUSingleton->drawBITNode(this, ruleNumber);
 #endif
 }
@@ -540,7 +545,7 @@ BITNode::BITNode( BITNodeRoot* _root,
     unsigned int _depth,
     unsigned int _parent_arg_i,
     meta _target,
-    Rule *_rule,
+    RulePtr _rule,
     const Rule::MPs& _args,
     const vtreeset& _target_chain,
     Btr<bindingsT> _pre_bindings,
@@ -607,7 +612,7 @@ bool BITNode::eq(BITNode* rhs) const
 template<typename T>
 bool equal_indirect(const T& a, const T& b) { return *a == *b; }
 
-bool BITNode::eq(Rule* r,  const Rule::MPs& _args, meta _target, const bindingsT& _pre_bindings) const
+bool BITNode::eq(RulePtr r,  const Rule::MPs& _args, meta _target, const bindingsT& _pre_bindings) const
 {
     try
     {
@@ -654,7 +659,7 @@ BITNode* BITNode::HasChild(BITNode* new_child, int arg_i) const
     return NULL;
 }
 
-BITNode* BITNode::HasChild(int arg_i, Rule* r, 
+BITNode* BITNode::HasChild(int arg_i, RulePtr r, 
     const Rule::MPs& _args, meta _target, const bindingsT& _pre_bindings) const
 {
     foreach(const ParametrizedBITNode& c, children[arg_i])
@@ -706,7 +711,7 @@ BITNode* BITNode::findNode(BITNode* new_child) const
 }
 
 
-BITNode* BITNode::findNode(Rule* new_rule, meta _target,
+BITNode* BITNode::findNode(RulePtr new_rule, meta _target,
     const Rule::MPs& rule_args, const bindingsT& _pre_bindings) const
 {
     /// _target has to be ForceAllLinksVirtual()ized beforehand!
@@ -848,7 +853,7 @@ bool BITNode::inferenceLoop(Rule::MPs reqs)
 
 // Filter
 
-bool BITNode::obeysSubtreePolicy(Rule *new_rule, meta _target)
+bool BITNode::obeysSubtreePolicy(RulePtr new_rule, meta _target)
 {
 //  return !(asw->inheritsType(asw->getTypeV(*_target), NODE)
 //      && new_rule->isComposer());
@@ -858,7 +863,7 @@ bool BITNode::obeysSubtreePolicy(Rule *new_rule, meta _target)
 
 // Filter
 
-bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target, bool loosePoolPolicy)
+bool BITNode::obeysPoolPolicy(RulePtr new_rule, meta _target, bool loosePoolPolicy)
 {
     // For ModusPonens. It requires ($1 -> B), ($1). With this restriction, it will always
     // find the ImplicationLinks first, and then search for suitable precedents.
@@ -947,10 +952,10 @@ bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target, bool loosePoolPolicy
 void BITNode::findTemplateBIT(BITNode* new_node, BITNode*& template_node, bindingsT& template_binds) const
 {
     // Check whether they are both root variable scopers (or both normal BITNodes).
-    bool isScoper = (new_node->rule == NULL);
+    bool isScoper = (!new_node->rule);
 
     foreach(BITNode* bit, root->BITcache->BITNodeTemplates) {
-        bool bitIsScoper = (bit->rule == NULL);
+        bool bitIsScoper = (!bit->rule);
 
         if (isScoper != bitIsScoper) continue;
 
@@ -999,7 +1004,7 @@ struct ExpansionPoolUpdater
     }
 };
 
-BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
+BITNode* BITNode::createChild(unsigned int target_i, RulePtr new_rule,
     const Rule::MPs& rule_args, BBvtree _target, const bindingsT& new_bindings,
     spawn_mode spawning)
 {
@@ -1164,7 +1169,7 @@ bool BITNodeRoot::spawns(const bindingsT& bindings) const
     return false;
 }
 
-bool BITNode::expandRule(Rule *new_rule, int target_i, BBvtree _target, Btr<bindingsT> bindings, spawn_mode spawning)
+bool BITNode::expandRule(RulePtr new_rule, int target_i, BBvtree _target, Btr<bindingsT> bindings, spawn_mode spawning)
 {   
     bool ret = true;
     try
@@ -1401,15 +1406,17 @@ bool BITNode::createChildren(int i, BBvtree arg,
 
     if (PREVENT_LOOPS && inferenceLoopWith(arg))
     {
-        HypothesisRule hr(ASW());
-        expandRule(&hr, i, arg, bindings, spawning);
+        RulePtr hr = referenceRuleProvider().findRule("HypothesisRule");
+        expandRule(hr, i, arg, bindings, spawning);
         tlog(-2,"LOOP! Assumed Hypothetically:");
         rawPrint(*arg, arg->begin(), 2);
     }
     else
     {
-        foreach(Rule *r, *root->rp)
-            expandRule(r, i, arg, bindings, spawning);
+        foreach(std::string r, root->rp->getRuleNames()) {
+            RulePtr rp = root->rp->findRule(r);
+            expandRule(rp, i, arg, bindings, spawning);
+        }
     }
     tlog(1,"Rule expansion ok!");
 
@@ -1789,7 +1796,9 @@ float BITNode::fitness() const
     const float SOLUTION_SPACE_WEIGHT = 0.01f;
     const float RULE_PRIORITY_WEIGHT = 0.0001f;
 
-    tlog(10," fitness: %f %f %f %f", -my_bdrum, -(float)depth, my_solution_space(), (rule ? rule->getPriority() : 0));
+    RuleProvider * rp = this->root->rp;
+    float priority = (rule ? rp->getPriority(rule->getName()) : 0.0f);
+    tlog(10," fitness: %f %f %f %f", -my_bdrum, -(float)depth, my_solution_space(), priority );
     
     // At the top is an optional change to always run Generators first
     // (more like traditional logic, and necessary if you use softmax)
@@ -1797,10 +1806,10 @@ float BITNode::fitness() const
             -1.0f*CONFIDENCE_WEIGHT     * my_bdrum
             -1.0f*DEPTH_WEIGHT          * depth
             -1.0f*SOLUTION_SPACE_WEIGHT * my_solution_space()
-            +1.0f*RULE_PRIORITY_WEIGHT  * (rule ? rule->getPriority() : 0);
+            +1.0f*RULE_PRIORITY_WEIGHT  * priority;
 
 //    if (!rule) return 1000000;
-//    return rule->getPriority() / (missing_arity+1) /  depth
+//    return rp->getPriority(rule) / (missing_arity+1) /  depth
 //            - my_bdrum;
     
 /*  \todo Use arity in the spirit of the following:
@@ -1967,7 +1976,7 @@ string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
         ss << "Can't make plan for a NULL/virtual target" << endl;
     }
     
-    map<pHandle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
+    map<pHandle,RulePtr> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end()) {
         foreach(pHandle arg_h, haxx::inferred_from[h]) {
             if (unifiesTo(GET_ASW, do_template, make_vtree(arg_h),
@@ -2022,10 +2031,10 @@ newDepth; }
 #if 0
 void test_pool_policy()
 {
-/*  Rule* deductionR1 = RuleRepository::Instance().rule[Deduction_Implication];
-    Rule* deductionR2 = RuleRepository::Instance().rule[Deduction_Inheritance];
+/*  RulePtr deductionR1 = RuleRepository::Instance().rule[Deduction_Implication];
+    RulePtr deductionR2 = RuleRepository::Instance().rule[Deduction_Inheritance];
 */
-    Rule* deductionR2 = NULL; //Should have no effect
+    RulePtr deductionR2 = NULL; //Should have no effect
 
     assert(obeysPoolPolicy(deductionR2,
         Btr<tree<Vertex> > (new tree<Vertex>(mva((pHandle)EVALUATION_LINK,
@@ -2158,17 +2167,18 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
     	return ss.str();
     }
 
-    map<pHandle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
+    map<pHandle,RulePtr> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end())
     {
         string name;
         
         // Working around a trail _recording_ glitch
         // (which only happened while there was a pHandle->Handle map)
-        if (find(rp->begin(), rp->end(), rule->second) == rp->end()) {
-            name = "<!!! INVALID RULE !!!>";
-        } else {
+        try {
+            rp->findRule(rule->second->getName());
             name = rule->second->getName();
+        } catch (InvalidParamException& e) {
+            name = "<!!! INVALID RULE !!!>";
         }
     
         ss << repeatc(' ', level*3) << "[" << h << "] was produced by applying ";
@@ -2485,16 +2495,16 @@ void combine_maps(const map<T1, T2>& m12, const map<T2, T3>& m23, map<T1, T2>& m
 #endif
 
     /*
-class priorityComp :  public std::binary_function<Rule*,Rule*,bool>
+class priorityComp :  public std::binary_function<RulePtr,RulePtr,bool>
 {
-    const std::map<Rule*, float>& priority;
+    const std::map<RulePtr, float>& priority;
 public:
-    priorityComp(const std::map<Rule*, float>& _priority) : priority(_priority)
+    priorityComp(const std::map<RulePtr, float>& _priority) : priority(_priority)
     {}
 
-    bool operator()(Rule* x, Rule* y) //true if x has higher priority
+    bool operator()(RulePtr x, RulePtr y) //true if x has higher priority
     {
-        std::map<Rule*, float>::const_iterator xi, yi;
+        std::map<RulePtr, float>::const_iterator xi, yi;
 
         if ((yi=priority.find(y)) == priority.end())
             return true;

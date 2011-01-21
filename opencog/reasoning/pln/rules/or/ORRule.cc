@@ -31,7 +31,7 @@
 namespace opencog { namespace pln {
 
 ORRule::ORRule(AtomSpaceWrapper *_asw)
-: GenericRule<ORFormula>(_asw, true, "OR Rule")
+: GenericRule<ORFormula>(_asw, true, "OrRule")
 {
 }
 

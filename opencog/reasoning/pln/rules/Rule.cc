@@ -59,9 +59,6 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX,
         if (asw->isType(_v2h(bv.value)))
         {
             puts("!isReal");
-
-            void testDummy() {
-            }
             printf("%u\n", _v2h(bv.value)); 
             NMPrinter(NMP_ALL)(_v2h(bv.value), -10);
         }

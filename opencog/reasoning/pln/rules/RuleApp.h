@@ -137,10 +137,10 @@ class RuleApp : public VtreeProvider, public Rule
     mutable vtree vt_result;
     mutable bool arg_changes_since_last_compute;
     mutable std::vector<VtreeProvider*> args;
-    Rule* root_rule;
+    RulePtr root_rule;
 public:
     virtual ~RuleApp();
-    RuleApp(Rule *_root_rule);
+    RuleApp(RulePtr _root_rule);
     
     /// Takes ownership of the "arg"
     /// false if arg was already bound. (And assert failure.)

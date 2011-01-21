@@ -254,7 +254,7 @@ public:
 /**
  * Exception to be called when the searched item was not found
  *
- * This exception will not log an error when throwed, because the error must be
+ * This exception will not log an error when thrown, because the error must be
  * handled inside the code
  */
 class NotFoundException : public StandardException {

@@ -24,31 +24,76 @@
 
 #include "Rule.h"
 
+//#include <boost/mutex.hpp>
+
 namespace opencog { namespace pln {
 
-/**
- * Takes ownership of the Rule objects given to it
- */
-class RuleProvider : public std::vector<Rule*> {
+class RuleProvider  {
 protected:
-    void AddRule(Rule* r, float priority);
 public:
+    // This map is used to record both the rules in this
+    // provider and the priorities
+    std::map<const std::string, float> rulePriorities; 
+
     RuleProvider(void);
     virtual ~RuleProvider(void);
-    void AddRule(std::string& ruleName, float priority);
+
+    void addRule(const std::string& ruleName, float priority);
+    virtual void removeRule(const std::string& name);
+
+    /** Set the Rule's priority that is used by inference heuristics.
+     *
+     * @param r The Rule
+     * @param priority The Rule's priority.
+     */
+    void setPriority(const std::string& ruleName, float priority);
+
+    /** Get the priority of the rule for use by inference heuristics.
+     *
+     * @param r The Rule
+     * @return The Rule's priority.
+     */
+    float getPriority(const std::string& ruleName);
 
     /**
      * @param ruleName the name of the rule we are looking for
      *
-     * @return a pointer to the rule with name ruleName.
+     * @return a smart pointer to the rule with name ruleName.
      *         If no such rule exists then it return NULL
      */
-    Rule* findRule(const std::string& ruleName) const;
+    virtual RulePtr findRule(const std::string& ruleName) const;
+
+    std::vector<std::string> getRuleNames() const;
+
+    bool empty() const {return rulePriorities.size() == 0 ? false : true; }
 };
 
 class ReferenceRuleProvider : public RuleProvider
 {
+    // For monitoring additions to the AtomSpace from outside of PLN
+    bool handleAddSignal(Handle h); //!< Signal handler for atom adds.
+    bool handleRemoveSignal(Handle h); //!< Signal handler for atom removals.
+
+    boost::signals::connection c_add; //! Connection to add atom signals
+    boost::signals::connection c_remove; //! Connection to remove atom signals
+
+    std::map<std::string,RulePtr> rules; //! name to rule mapping
+
+    /**
+     * Takes ownership of the Rule objects given to it
+     */
+    void addRule(Rule* r, float priority);
 public:
+    /**
+     * @param ruleName the name of the rule we are looking for
+     *
+     * @return a smart pointer to the rule with name ruleName.
+     *         If no such rule exists then it return NULL
+     */
+    virtual RulePtr findRule(const std::string& ruleName) const;
+
+    virtual void removeRule(const std::string& name);
+
     ReferenceRuleProvider(void);
     virtual ~ReferenceRuleProvider(void);
 };

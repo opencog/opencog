@@ -40,6 +40,10 @@ const strength_t MIN_MEMBERS_COUNT = 1;
 SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw, Type argType)
     : Rule(asw, false, true, "SubsetEvalRule"), ArgType(argType), _asw(asw)
 {
+    if (argType != CONCEPT_NODE) {
+        // If we are not using ATOM type, then we need to insure a unique name
+        name += classserver().getTypeName(argType);
+    }
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ArgType))));
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ArgType))));
 }

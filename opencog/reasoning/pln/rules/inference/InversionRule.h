@@ -67,6 +67,10 @@ public:
     InversionRule(AtomSpaceWrapper *_asw, Type linkType)
         : GenericRule<InversionFormula> (_asw, false, "InversionRule"),
           InclusionLink(linkType) {
+        OC_ASSERT(classserver().isA(linkType,LINK));
+        std::string linkName = classserver().getTypeName(linkType);
+        if (linkType != INHERITANCE_LINK) 
+            name = linkName.substr(0,linkName.find("Link")) + name;
         inputFilter.push_back(meta(
                                    new tree<Vertex>(
                                                     mva((pHandle)InclusionLink,

@@ -296,7 +296,7 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
 
     correctRuleName(ruleName, CX);
     RuleProvider& rp = referenceRuleProvider();
-    const Rule* rule = rp.findRule(ruleName);
+    RulePtr rule = rp.findRule(ruleName);
 
     // result to be overwriten
     vhpair vhp(Handle::UNDEFINED, NULL_VERSION_HANDLE);
@@ -395,7 +395,6 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         int a1T, a2T, bT, tempi=0;
         string a10, a11, a20, a21, b1, b2;
         vtree avt1, avt2, bvt;
-        int qrule=0;
         Rule::MPs rule_args;
         bindingsT new_bindings;
 
@@ -599,6 +598,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             input(a1T, args); input(a10, args); input(a11, args);
             input(a2T, args); input(a20, args); input(a21, args);
 //          puts("Enter Rule #: ");
+            string qrule;
             input(qrule, args);
 
             bvt = (mva((pHandle)bT, NewNode(CONCEPT_NODE, b1), NewNode(CONCEPT_NODE, b2)));
@@ -618,7 +618,8 @@ std::string PLNModule::runCommand(std::list<std::string> args)
                 rule_args.push_back(BBvtree(new BoundVTree(avt2)));
             else
                 ss << "Passing 1 arg.\n";
-            ss << "BITNode " << (long) state->findNode((Rule*)qrule,
+            RulePtr rp = referenceRuleProvider().findRule(qrule);
+            ss << "BITNode " << (long) state->findNode(rp,
                     meta(new vtree(bvt)), rule_args, new_bindings) << ".\n" ;
 
         }

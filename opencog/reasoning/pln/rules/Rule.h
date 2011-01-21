@@ -126,18 +126,6 @@ public:
 
     virtual ~Rule();
 
-    /** Get the priority of the rule for use by inference heuristics.
-     *
-     * @return The Rule's priority.
-     */
-    float getPriority() const { return priority; }
-
-    /** Set the Rule's priority that is used by inference heuristics.
-     *
-     * @param _priority The Rule's priority.
-     */
-    void setPriority(float _priority) { priority = _priority; }
-
     /** The generic rule computation method.  This method must be implemented in
      * subclasses.  If the rule can take the args in any order, the \c Rule
      * object must take care of ordering them.
@@ -331,6 +319,8 @@ enum RULE
     Exist2ForAll,
     Exist
 };
+
+typedef boost::shared_ptr<Rule> RulePtr;
 
 //! Total number of rules in PLN (Not necessarily the number that are active
 //! though).

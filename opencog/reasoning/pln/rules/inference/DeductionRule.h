@@ -96,13 +96,11 @@ public:
         : GenericRule<DeductionFormula>(_asw, false, DeductionRuleSuffixStr),
           InclusionLink(linkType) 
     {
-
-        // Determine name, note that we may preferably inherit
-        // DeductionRule with the right names
-        super::name = _asw->getAtomSpace()->getName(linkType) + super::name;
+        OC_ASSERT(classserver().isA(linkType,LINK));
+        std::string linkName = classserver().getTypeName(linkType);
+        super::name = linkName.substr(0,linkName.find("Link")) + super::name;
 
         //! @todo should use real variable for the other input.
-	
         super::inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)InclusionLink,
                                                                mva((pHandle)ATOM),
                                                                mva((pHandle)ATOM)))));		

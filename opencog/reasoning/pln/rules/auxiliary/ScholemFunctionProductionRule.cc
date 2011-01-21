@@ -32,10 +32,6 @@ namespace haxx
 {
 std::map<std::string, std::map<Handle, Handle> > scholemFunctions;
 opencog::pln::BITNodeRoot* bitnoderoot;
-
-/// \todo This data must persist even if the BITNodeRoot is deleted.
-//extern map<Handle,vector<Handle> > inferred_from;
-//extern map<Handle,opencog::pln::Rule*> inferred_with;
 }
 
 namespace opencog { namespace pln {

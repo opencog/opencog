@@ -33,6 +33,10 @@ using boost::assign::list_of;
 IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* _asw, Type argType)
     : Rule(_asw, false, true, "IntensionalInheritanceRule"), sser(_asw, argType), ArgType(argType)
 {
+    if (argType != CONCEPT_NODE) {
+        // If we are not using ATOM type, then we need to insure a unique name
+        name += classserver().getTypeName(argType);
+    }
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ArgType))));
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ArgType))));
 }

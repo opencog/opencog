@@ -27,20 +27,22 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "../RuleProvider.h"
 #include "../Rule.h"
 
 
 namespace haxx
 {
     /// \todo This data must persist even if the BITNodeRoot is deleted.
-    ///
+    
+    /// \todo move this info to the definition...
     /// Given an inference step, the key pHandle corresponds to the
     /// conclusion of the step, the value pHandleSeq corresponds to
     /// the premises.
     extern std::map<pHandle,pHandleSeq> inferred_from;
     /// the key pHandle is the conclusion (just as above) and Rule* is
     /// the rule that has been applied to create it
-    extern std::map<pHandle,opencog::pln::Rule*> inferred_with;
+    extern std::map<pHandle,opencog::pln::RulePtr> inferred_with;
 }
 
 namespace opencog { namespace pln {
@@ -66,12 +68,17 @@ class BaseInstantiationRule : public Rule
 protected:
     mutable FormulaType formula;
 
-    /** The ForAllLink that this rule has been instantiated for.
+    /** The link that this rule has been instantiated for.
      */
     pHandle quantifierLink;
     Type quantifierType;
 
 public:
+
+    //! Obsolete is set to true if the Handle this rule is based off of is
+    //! removed from the AtomSpace.
+    bool obsolete;
+
     BaseInstantiationRule(pHandle _quantifierLink,
                           AtomSpaceWrapper *_asw, const std::string& _name)
         : Rule(_asw, false, false, _name), quantifierLink(_quantifierLink)
@@ -80,6 +87,7 @@ public:
         //append the pHandle quantifierLink so that the rule name is unique
         name += boost::lexical_cast<std::string>(quantifierLink);
         inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM)))); //???
+        obsolete = false;
     }
 
     BoundVertex compute(const VertexSeq& premiseArray,
@@ -165,7 +173,7 @@ public:
             if (haxx::bitnoderoot->inferred_from[ret_h].empty()) //comes here often, we want the link only once
             haxx::bitnoderoot->inferred_from[ret_h].push_back(hForAllLink);
         */
-        haxx::inferred_with[ret_h] = (Rule*)this;
+        haxx::inferred_with[ret_h] = referenceRuleProvider().findRule(name);
         if (haxx::inferred_from[ret_h].empty()) //comes here often, we want the link only once
             haxx::inferred_from[ret_h].push_back(quantifierLink);
         

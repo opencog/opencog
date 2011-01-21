@@ -67,7 +67,7 @@ RuleApp::~RuleApp() {
         delete vtp;
 }
 RuleApp::RuleApp(//AtomSpaceWrapper *_asw,
-                 Rule *_root_rule)
+                 RulePtr _root_rule)
     :	Rule(_root_rule->asw, false, true, "Inference Pathway"),
         result(PHANDLE_UNDEFINED), arg_changes_since_last_compute(true), root_rule(_root_rule)
 { 

@@ -299,7 +299,7 @@ public:
     /// The Rule that the child_results of this state object's child_results will be
     /// associated with. This BITNode can be thought of as an implementation of
     /// this Rule
-    Rule *rule;
+    RulePtr rule;
     
     /// bdrum = the Best (confidence of) Direct Result Under Me
     float my_bdrum;
@@ -389,7 +389,7 @@ public:
     /// Normally arg = args[rule_arg_i], but children with differently-bound
     /// targets may also be created.
     /// == expansion of the BIT.
-    BITNode* createChild(unsigned int my_rule_arg_i, Rule* new_rule,
+    BITNode* createChild(unsigned int my_rule_arg_i, RulePtr new_rule,
                          const Rule::MPs& rule_args, BBvtree arg,
                          const bindingsT& bindings, spawn_mode spawning);
     bool createChildren(int rule_arg_i, BBvtree arg,
@@ -401,7 +401,7 @@ public:
     /// Note: Rules come in 2 flavours: Composers and Generators.
     /// See PLN implementation docs.
     bool CheckForDirectResults();
-    BITNode* HasChild(int arg_i, Rule* r, const Rule::MPs& rule_args,
+    BITNode* HasChild(int arg_i, RulePtr r, const Rule::MPs& rule_args,
                       meta target, const bindingsT& _pre_bindings) const;
     BITNode* HasChild(BITNode* new_child, int arg_i) const;
 
@@ -534,7 +534,7 @@ public:
                          spawn_mode spawning);
 
     /// Create children and do some (probably obsolete) pre-binding checks.
-    bool expandRule(Rule *rule, int target_i, BBvtree arg,
+    bool expandRule(RulePtr rule, int target_i, BBvtree arg,
                     Btr<bindingsT> bindings, spawn_mode spawning);
     
     void clearResults();
@@ -565,12 +565,12 @@ public:
     float fitness() const;
     
     /// If inserting the rule invocation node in the subtree obeys our policy
-    static bool obeysSubtreePolicy(Rule *new_rule, meta arg);
+    static bool obeysSubtreePolicy(RulePtr new_rule, meta arg);
 
     /// If inserting the rule invocation node in the expansion pool obeys
     /// our policy
     //! @todo Should still be static, but got difficulties.
-    /*static */bool obeysPoolPolicy(Rule *new_rule, meta arg, bool loosePoolPolicy = false);
+    /*static */bool obeysPoolPolicy(RulePtr new_rule, meta arg, bool loosePoolPolicy = false);
 
     /// Find if we already have a BITNode like this such that we can re-use it
     /// by some template_bindings which are returned to the caller.
@@ -599,7 +599,7 @@ public:
             unsigned int _depth,
             unsigned int _parent_arg_i,
             meta _target,
-            Rule *_rule,
+            RulePtr _rule,
             const Rule::MPs& _args,
             const vtreeset& _target_chain,
             Btr<bindingsT> _pre_bindings = Btr<bindingsT>(new bindingsT),
@@ -633,12 +633,12 @@ public:
     BITNode* findNode(BITNode* new_child) const;
 
     /// Look for a node based on certain defining characteristics
-    BITNode* findNode(Rule* new_rule, meta _target, const Rule::MPs& rule_args,
+    BITNode* findNode(RulePtr new_rule, meta _target, const Rule::MPs& rule_args,
                       const bindingsT& new_bindings) const;
 
     /// helpers
     bool eq(BITNode* rhs) const;
-    bool eq(Rule* r,  const Rule::MPs& _args, meta _target,
+    bool eq(RulePtr r,  const Rule::MPs& _args, meta _target,
             const bindingsT& _pre_bindings) const;
 
     /// Expand whole tree level. Typically not called externally
@@ -767,7 +767,7 @@ protected:
     // remaining FWVars being owned by both BITNodes.
 //    std::map<Vertex, std::set<BITNode*> > varOwner;
 
-//    std::map<Rule*, float> priority;
+//    std::map<RulePtr, float> priority;
 
     // Store the depths of each BITNode from this particular root (target).
     // If it is even a descendant of this root.
@@ -805,7 +805,7 @@ protected:
     bool spawns(const bindingsT& bindings) const;
     void spawn(Btr<bindingsT> bindings);
 
-    BITNode* createChild(int my_rule_arg_i, Rule* new_rule,
+    BITNode* createChild(int my_rule_arg_i, RulePtr new_rule,
                          const Rule::MPs& rule_args, 
                          BBvtree arg, const bindingsT& bindings,
                          spawn_mode spawning);

@@ -72,11 +72,6 @@
             (EvaluationLink do
                             (ListLink V10000)))
 
-(ImplicationLink (EvaluationLink near
-                                 L_Vobj)
-                 (EvaluationLink can_do
-                                 (ListLink lift_Vobj)))
-
 (ImplicationLink (stv 1 0.99000001) (AndLink (EvaluationLink just_done
                                                              (ListLink hold_ball))
                                              (EvaluationLink near
