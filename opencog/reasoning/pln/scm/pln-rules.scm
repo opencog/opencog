@@ -11,8 +11,8 @@
   (pln-ar "IntensionalInheritanceRule" (list sub super) contexts))
 (define (InhDeductionRule AB BC . contexts)
   (pln-ar "InheritanceLinkDeductionRule" (list AB BC) contexts))
-(define (ExtInhDeductionRule AB BC . contexts)
-  (pln-ar "ExtensionalInheritanceLinkDeductionRule" (list AB BC) contexts))
+(define (SubsetDeductionRule AB BC . contexts)
+  (pln-ar "SubsetLinkDeductionRule" (list AB BC) contexts))
 ; context rules, not sure if the last argument 'contexts' would be useful
 (define (ContextualizerRule R . contexts)
   (pln-ar "ContextualizerRule" (list R) contexts))

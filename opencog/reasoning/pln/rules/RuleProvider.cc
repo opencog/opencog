@@ -148,6 +148,7 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     //AddRule(new InversionRule<INHERITANCE_LINK>(asw), 7.0f);
     AddRule(new InversionRule(asw, INHERITANCE_LINK), 7.0f);
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, SUBSET_LINK), 8.0f);
     
     //	AddRule(new ORPartitionRule(asw), 10.0f);
     AddRule(new CrispTheoremRule(asw), 10.0f);
