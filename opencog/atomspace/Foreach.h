@@ -20,7 +20,7 @@ namespace opencog
 template<class T>
 inline bool foreach_outgoing_handle(Handle h, bool (T::*cb)(Handle), T *data)
 {
-    AtomSpace &as = atomspace();
+    const AtomSpace &as = atomspace();
     const std::vector<Handle> &vh = as.getOutgoing(h);
     size_t sz = vh.size();
 

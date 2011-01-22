@@ -23,7 +23,7 @@ template<class T>
 inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
                                        bool (T::*cb)(Handle, Handle), T *data)
 {
-    AtomSpace *as = data->get_atomspace();
+    const AtomSpace *as = data->get_atomspace();
     if (!as->isLink(ha) || !as->isLink(hb)) return false;
     const std::vector<Handle> &va = as->getOutgoing(ha);
     const std::vector<Handle> &vb = as->getOutgoing(hb);

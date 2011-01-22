@@ -181,7 +181,7 @@ private:
 	 */
 	inline bool find_link_type(Handle link_h)
 	{
-		AtomSpace &as = atomspace();
+		const AtomSpace &as = atomspace();
 
 		// Make sure the link is of the specified link type
 		if (link_type != as.getType(link_h)) return false;
