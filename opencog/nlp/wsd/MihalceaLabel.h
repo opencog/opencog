@@ -27,7 +27,7 @@ class MihalceaLabel
 		bool annotate_word_sense(Handle);
 
 		void fetch_senses(Handle);
-		bool have_sense(Atom *);
+		bool have_sense(Handle);
 		bool pull_pos(Handle);
 		Handle no_sense;
 

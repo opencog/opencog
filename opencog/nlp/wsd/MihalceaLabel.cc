@@ -144,9 +144,9 @@ bool MihalceaLabel::annotate_word_sense(Handle word_sense)
 
 // ==================================================================
 
-bool MihalceaLabel::have_sense(Atom *a)
+bool MihalceaLabel::have_sense(Handle h)
 {
-	if (a->getType() == WORD_SENSE_LINK) return true;
+	if (atom_space->getType(h) == WORD_SENSE_LINK) return true;
 	return false;
 }
 
@@ -171,7 +171,7 @@ bool MihalceaLabel::pull_pos(Handle sense_h)
  */
 void MihalceaLabel::fetch_senses(Handle lemma_h)
 {
-	bool rc = foreach_incoming_atom (lemma_h, &MihalceaLabel::have_sense, this);
+	bool rc = foreach_incoming_handle(lemma_h, &MihalceaLabel::have_sense, this);
    if (rc) return;
 
 	// If we are here, we need to pull senses from the database.
@@ -181,7 +181,7 @@ void MihalceaLabel::fetch_senses(Handle lemma_h)
 	foreach_binary_link(lemma_h, WORD_SENSE_LINK, &MihalceaLabel::pull_pos, this);
 
 	// If we now have senses, we are done.
-	rc = foreach_incoming_atom (lemma_h, &MihalceaLabel::have_sense, this);
+	rc = foreach_incoming_handle(lemma_h, &MihalceaLabel::have_sense, this);
 	if (rc) return;
 
 	// Add a bogus sense.

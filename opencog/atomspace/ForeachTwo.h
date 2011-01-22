@@ -9,7 +9,6 @@
 #ifndef _OPENCOG_FOREACH_TWO_H
 #define _OPENCOG_FOREACH_TWO_H
 
-#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
