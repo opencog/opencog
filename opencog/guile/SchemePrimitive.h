@@ -85,6 +85,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_sqq)(const std::string&, const HandleSeq&, const HandleSeq&);
 			HandleSeq (T::*q_hti)(const Handle&, const Type&, int);
 			const std::string& (T::*s_s)(const std::string&);
+			void (T::*v_h)(Handle);
 			void (T::*v_t)(const Type&);
 			void (T::*v_v)(void);
 		} method;
@@ -100,6 +101,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			S_S,   // return string, take string
+			V_H,   // return void, take Handle
 			V_T,   // return void, take Type
 			V_V    // return void, take void
 		} signature;
@@ -203,6 +205,12 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = scm_from_locale_string(rs.c_str());
 					break;
 				}
+				case V_H:
+				{
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					(that->*method.h_h)(h);
+					break;
+				}
 				case V_T:
 				{
 					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
@@ -264,6 +272,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(H_SQQ, h_sqq, Handle, const std::string&, const HandleSeq&, const HandleSeq&)
 		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, const Handle&, const Type&, int)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
+		DECLARE_CONSTR_1(V_H, v_h, void, Handle)
 		DECLARE_CONSTR_1(V_T, v_t, void, const Type&)
 
 		// Below is DECLARE_CONSTR_0(V_V, v_v, void*, void);
@@ -306,6 +315,7 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG
 
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
+DECLARE_DECLARE_1(void, Handle)
 DECLARE_DECLARE_1(void, const Type&)
 DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, int)
