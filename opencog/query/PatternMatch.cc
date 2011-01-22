@@ -30,10 +30,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/format.hpp>
-
-
 using namespace opencog;
 
 PatternMatch::PatternMatch(void)
