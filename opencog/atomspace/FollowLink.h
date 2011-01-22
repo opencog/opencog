@@ -27,81 +27,84 @@ class FollowLink
 {
 public:
 
-    /**
-     * follow_binary_link -- follow an ordered, binary link.
-     *
-     * Look at the incoming set of this atom.
-     * Find the first link of type link_type,
-     * then follow this link to see where its going.
-     * Its asssumed that there is only one such link,
-     * and that its binary.
-     * Return a pointer to where the link is going.
-     */
-    inline Atom * follow_binary_link(Atom *atom, Type ltype) {
-        return follow_link(atom, ltype, 0, 1);
-    }
+	/**
+	 * follow_binary_link -- follow an ordered, binary link.
+	 *
+	 * Look at the incoming set of this atom.
+	 * Find the first link of type link_type,
+	 * then follow this link to see where its going.
+	 * Its asssumed that there is only one such link,
+	 * and that its binary.
+	 * Return a pointer to where the link is going.
+	 */
+	inline Handle follow_binary_link(Handle h, Type ltype)
+	{
+		return follow_link(h, ltype, 0, 1);
+	}
 
-    inline Atom * backtrack_binary_link(Atom *atom, Type ltype) {
-        return follow_link(atom, ltype, 1, 0);
-    }
+	inline Handle backtrack_binary_link(Handle h, Type ltype)
+	{
+		return follow_link(h, ltype, 1, 0);
+	}
 
-    inline Atom * follow_link(Atom *atom, Type ltype, int from, int to) {
-        if (NULL == atom) return NULL;
-
-        // Look for incoming links that are of the given type.
-        // Then grab the thing that they link to.
-        link_type = ltype;
-        from_atom = atom;
-        to_atom = NULL;
-        position_from = from;
-        position_to = to;
-        Handle h = atom->getHandle();
-        foreach_incoming_atom(h, &FollowLink::find_link_type, this);
-        return to_atom;
-    }
+	inline Handle follow_link(Handle h, Type ltype, int from, int to)
+	{
+		// Look for incoming links that are of the given type.
+		// Then grab the thing that they link to.
+		link_type = ltype;
+		from_atom = h;
+		to_atom = Handle::UNDEFINED;
+		position_from = from;
+		position_to = to;
+		foreach_incoming_handle(h, &FollowLink::find_link_type, this);
+		return to_atom;
+	}
 
 private:
-    Type link_type;
-    Atom * from_atom;
-    Atom * to_atom;
-    int position_from;
-    int position_to;
-    int cnt;
+	Type link_type;
+	Handle from_atom;
+	Handle to_atom;
+	int position_from;
+	int position_to;
+	int cnt;
 
-    /**
-     * Find the (first!, assumed only!?) link of desired type.
-     */
-    inline bool find_link_type(Atom *atom) {
-        // Make sure that the link is of the desired type.
-        if (link_type != atom->getType()) return false;
+	/**
+	 * Find the (first!, assumed only!?) link of desired type.
+	 */
+	inline bool find_link_type(Handle h)
+	{
+		AtomSpace &as = atomspace();
 
-        cnt = -1;
-        to_atom = NULL;
-        Handle h = atom->getHandle();
-        foreach_outgoing_atom(h, &FollowLink::pursue_link, this);
-        if (to_atom) return true;
-        return false;
-    }
+		// Make sure that the link is of the desired type.
+		if (link_type != as.getType(h)) return false;
 
-    inline bool pursue_link(Atom *atom) {
-        cnt ++;
+		cnt = -1;
+		to_atom = Handle::UNDEFINED;
+		foreach_outgoing_handle(h, &FollowLink::pursue_link, this);
+		if (to_atom != Handle::UNDEFINED) return true;
+		return false;
+	}
 
-        // The from-slot should be occupied by the node itself.
-        if (position_from == cnt) {
-            if (from_atom != atom) {
-                to_atom = NULL;
-                return true; // Bad match, stop now.
-            }
-            return false;
-        }
+	inline bool pursue_link(Handle h)
+	{
+		cnt ++;
 
-        // The to-slot is the one we're looking for.
-        if (position_to == cnt) {
-            to_atom = atom;
-        }
+		// The from-slot should be occupied by the node itself.
+		if (position_from == cnt) {
+			if (from_atom != h) {
+				to_atom = Handle::UNDEFINED;
+				return true; // Bad match, stop now.
+			}
+			return false;
+		}
 
-        return false;
-    }
+		// The to-slot is the one we're looking for.
+		if (position_to == cnt) {
+			to_atom = h;
+		}
+
+		return false;
+	}
 };
 
 } // namespace opencog

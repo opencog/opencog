@@ -50,14 +50,11 @@ inline bool foreach_parse(Handle h, bool (T::*cb)(Handle), T *data)
  *          WordInstanceNode "stopped@456"
  */
 template <class T>
-inline bool foreach_word_instance(Handle h, bool (T::*cb)(Handle), T *data)
+inline bool foreach_word_instance(Handle ha, bool (T::*cb)(Handle), T *data)
 {
 	FollowLink fl;
-    AtomSpace as = atomspace();
-    boost::shared_ptr<Atom> ha(as.cloneAtom(h));
-	Atom *a = fl.follow_binary_link(ha.get(), REFERENCE_LINK);
-	if (a == NULL) return false;  // this would be a weird, unexpected error ... 
-	return foreach_outgoing_handle (a->getHandle(), cb, data);
+	Handle h = fl.follow_binary_link(ha, REFERENCE_LINK);
+	return foreach_outgoing_handle (h, cb, data);
 }
 
 /**
@@ -147,19 +144,16 @@ class PrivateUseOnlyPOSFilter
 		bool (T::*user_cb)(Handle);
 		T *user_data;
 		const std::string *desired_pos;
-		bool pos_filter(Handle h)
+		bool pos_filter(Handle word_sense)
 		{
-            AtomSpace *as = &atomspace();
-            boost::shared_ptr<Atom> word_sense(as->cloneAtom(h));
+			AtomSpace &as = atomspace();
 
 			// Find the part-of-speech for this word-sense.
 			FollowLink fl;
-			Atom *a = fl.follow_binary_link(word_sense.get(), PART_OF_SPEECH_LINK);
-			Node *n = dynamic_cast<Node *>(a);
+			Handle h = fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK);
 
 			// The 'no-sense' special-case sense will not have a pos.
-			if (NULL == n) return false;
-			std::string sense_pos = n->getName();
+			const std::string &sense_pos = as.getName(h);
 
 			// If there's no POS match, skip this sense.
 			if (desired_pos->compare(sense_pos)) return false;
@@ -202,18 +196,15 @@ inline bool foreach_dict_word_sense_pos(Handle h, const std::string &pos,
  *       WordSenseNode "bark%1:20:00::"
  *       DefinedLinguisticConceptNode "noun"
  */
-inline const std::string& get_part_of_speech(Handle h)
+inline const std::string& get_part_of_speech(Handle word_instance)
 {
 	static std::string empty;
-    AtomSpace *as = &atomspace();
-    boost::shared_ptr<Atom> word_instance(as->cloneLink(h));
+	AtomSpace &as = atomspace();
 
 	// Find the part-of-speech for this word instance.
 	FollowLink fl;
-	Atom *inst_pos = fl.follow_binary_link(word_instance.get(), PART_OF_SPEECH_LINK);
-	Node *n = dynamic_cast<Node *>(inst_pos);
-	if (n == NULL) return empty;
-	return n->getName();
+	Handle inst_pos = fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK);
+	return as.getName(inst_pos);
 }
 
 /**
@@ -226,13 +217,11 @@ inline const std::string& get_part_of_speech(Handle h)
  *      WordInstanceNode "bark@169"
  *      WordNode "bark"
  */
-inline Handle get_dict_word_of_word_instance(Handle h)
+inline Handle get_dict_word_of_word_instance(Handle word_instance)
 {
-    AtomSpace *as = &atomspace();
-    boost::shared_ptr<Atom> word_instance(as->cloneLink(h));
 	FollowLink fl;
-	Atom *dict_word = fl.follow_binary_link(word_instance.get(), REFERENCE_LINK);
-	return dict_word->getHandle();
+	Handle dict_word = fl.follow_binary_link(word_instance, REFERENCE_LINK);
+	return dict_word;
 }
 
 /**
@@ -245,13 +234,11 @@ inline Handle get_dict_word_of_word_instance(Handle h)
  *      WordInstanceNode "was@169"
  *      WordNode "is"
  */
-inline Handle get_lemma_of_word_instance(Handle h)
+inline Handle get_lemma_of_word_instance(Handle word_instance)
 {
-    AtomSpace *as = &atomspace();
-    boost::shared_ptr<Atom> word_instance(as->cloneLink(h));
 	FollowLink fl;
-	Atom *dict_word = fl.follow_binary_link(word_instance.get(), LEMMA_LINK);
-	return dict_word->getHandle();
+	Handle dict_word = fl.follow_binary_link(word_instance, LEMMA_LINK);
+	return dict_word;
 }
 
 /**
@@ -295,11 +282,11 @@ template <typename T>
 class PrivateUseOnlyRelexRelationFinder
 {
 	private:
-        Handle listlink;
+		Handle listlink;
 		bool look_for_eval_link(Handle h)
 		{
-            AtomSpace& as = atomspace();
-            Type t = as.getType(h);
+			AtomSpace& as = atomspace();
+			Type t = as.getType(h);
 			if (t != EVALUATION_LINK) return false;
 
 			// If we are here, lets see if the first node is a ling rel.
@@ -326,7 +313,7 @@ class PrivateUseOnlyRelexRelationFinder
 
 		bool look_for_list_link(Handle h)
 		{
-            AtomSpace& as = atomspace();
+			AtomSpace& as = atomspace();
 			if (as.getType(h) != LIST_LINK) return false;
 			listlink = h;
 
@@ -360,7 +347,7 @@ foreach_relex_relation(Handle h,
  */
 inline Handle get_word_instance_of_sense_link(Handle h)
 {
-    AtomSpace& as = atomspace();
+	AtomSpace& as = atomspace();
 	return as.getOutgoing(h,0);
 }
 
@@ -376,7 +363,7 @@ inline Handle get_word_instance_of_sense_link(Handle h)
  */
 inline Handle get_word_sense_of_sense_link(Handle h)
 {
-    AtomSpace& as = atomspace();
+	AtomSpace& as = atomspace();
 	return as.getOutgoing(h,1);
 }
 
