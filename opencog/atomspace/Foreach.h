@@ -23,10 +23,7 @@ template<class T>
 inline bool foreach_outgoing_handle(Handle h, bool (T::*cb)(Handle), T *data)
 {
     AtomSpace *as = &atomspace();
-    boost::shared_ptr<Link> link(as->cloneLink(h));
-    if (NULL == link) return false;
-
-    const std::vector<Handle> &vh = link->getOutgoingSet();
+    const std::vector<Handle> &vh = as->getOutgoing(h);
     size_t sz = vh.size();
 
     for (size_t i = 0; i < sz; i++) {
@@ -44,10 +41,7 @@ template<class T>
 inline bool foreach_outgoing_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 {
     AtomSpace *as = &atomspace();
-    boost::shared_ptr<Link> link(as->cloneLink(h));
-    if (NULL == link) return false;
-
-    const std::vector<Handle> &vh = link->getOutgoingSet();
+    const std::vector<Handle> &vh = as->getOutgoing(h);
     size_t sz = vh.size();
 
     for (size_t i = 0; i < sz; i++) {
