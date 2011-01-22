@@ -105,7 +105,8 @@ public:
 	 * The callback should return false to search for
 	 * more matches, or return true to halt the search.
 	 */
-	inline bool follow_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Handle), T *data) {
+	inline bool follow_link(Handle h, Type ltype, int from, int to, bool (T::*cb)(Handle), T *data)
+	{
 		user_callback = cb;
 		user_callback_lh = NULL;
 		return do_follow_link (h, ltype, from, to, data);
@@ -116,19 +117,22 @@ public:
 	 * the link itself in the second arg.
 	 */
 	inline bool follow_link_lh(Handle h, Type ltype, int from, int to,
-							   bool (T::*cb)(Handle, Handle), T *data) {
+							   bool (T::*cb)(Handle, Handle), T *data)
+	{
 		user_callback = NULL;
 		user_callback_lh = cb;
 		return do_follow_link (h, ltype, from, to, data);
 	}
 
-	inline bool follow_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data) {
+	inline bool follow_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle), T *data)
+	{
 		user_callback = cb;
 		user_callback_lh = NULL;
 		return do_follow_unordered_binary_link(h, ltype, data);
 	}
 
-	inline bool follow_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data) {
+	inline bool follow_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Handle, Handle), T *data)
+	{
 		user_callback = NULL;
 		user_callback_lh = cb;
 		return do_follow_unordered_binary_link(h, ltype, data);
@@ -136,98 +140,101 @@ public:
 
 private:
 	Type link_type;
-	boost::shared_ptr<Atom> from_atom;
-	boost::shared_ptr<Atom> to_atom;
+	Handle from_atom;
+	Handle to_atom;
 	int position_from;
 	int position_to;
 	int cnt;
-	bool (PrivateUseOnlyChaseLink::*endpoint_matcher)(Atom *);
+	bool (PrivateUseOnlyChaseLink::*endpoint_matcher)(Handle);
 	bool (T::*user_callback)(Handle);
 	bool (T::*user_callback_lh)(Handle, Handle);
 	T *user_data;
 
-	inline bool do_follow_link(Handle h, Type ltype, int from, int to, T *data) {
-		AtomSpace &as = atomspace();
-		boost::shared_ptr<Atom> atom = as.cloneAtom(h);
-		if (!atom) return false;
-
+	inline bool do_follow_link(Handle h, Type ltype, int from, int to, T *data)
+	{
 		// Look for incoming links that are of the given type.
 		// Then grab the thing that they link to.
 		link_type = ltype;
-		from_atom = atom;
-		to_atom.reset();
+		from_atom = h;
+		to_atom = Handle::UNDEFINED;
 		position_from = from;
 		position_to = to;
 		user_data = data;
 		endpoint_matcher = &PrivateUseOnlyChaseLink::pursue_link;
-		bool rc = foreach_incoming_atom(h, &PrivateUseOnlyChaseLink::find_link_type, this);
+		bool rc = foreach_incoming_handle(h, &PrivateUseOnlyChaseLink::find_link_type, this);
 		return rc;
 	}
 
-	inline bool do_follow_unordered_binary_link(Handle h, Type ltype, T *data) {
-		AtomSpace &as = atomspace();
-		boost::shared_ptr<Atom> atom = as.cloneAtom(h);
-		if (!atom) return false;
-
+	inline bool do_follow_unordered_binary_link(Handle h, Type ltype, T *data)
+	{
 		// Look for incoming links that are of the given type.
 		// Then grab the thing that they link to.
 		link_type = ltype;
-		from_atom = atom;
-		to_atom.reset();
+		from_atom = h;
+		to_atom = Handle::UNDEFINED;
 		user_data = data;
 		endpoint_matcher = &PrivateUseOnlyChaseLink::pursue_unordered_link;
-		bool rc = foreach_incoming_atom(h, &PrivateUseOnlyChaseLink::find_link_type, this);
+		bool rc = foreach_incoming_handle(h, &PrivateUseOnlyChaseLink::find_link_type, this);
 		return rc;
 	}
 
 	/**
 	 * Check for link of the desired type, then loop over its outgoing set.
 	 */
-	inline bool find_link_type(Atom *link_atom) {
+	inline bool find_link_type(Handle link_h)
+	{
+		AtomSpace &as = atomspace();
+
 		// Make sure the link is of the specified link type
-		if (link_type != link_atom->getType()) return false;
+		if (link_type != as.getType(link_h)) return false;
 
 		cnt = -1;
-		to_atom.reset();
-		Handle link_h = link_atom->getHandle();
-		// foreach_outgoing_atom(link_h, PrivateUseOnlyChaseLink::endpoint_matcher, this);
-		foreach_outgoing_atom(link_h, endpoint_matcher, this);
+		to_atom = Handle::UNDEFINED;
+		// foreach_outgoing_handle(link_h, PrivateUseOnlyChaseLink::endpoint_matcher, this);
+		foreach_outgoing_handle(link_h, endpoint_matcher, this);
 
 		bool rc = false;
-		if (to_atom) {
+		if (Handle::UNDEFINED != to_atom)
+		{
 			if (user_callback)
-				rc = (user_data->*user_callback)(to_atom->getHandle());
+				rc = (user_data->*user_callback)(to_atom);
 			else
-				rc = (user_data->*user_callback_lh)(to_atom->getHandle(), link_h);
+				rc = (user_data->*user_callback_lh)(to_atom, link_h);
 		}
 		return rc;
 	}
 
-	inline bool pursue_link(Atom *atom) {
+	inline bool pursue_link(Handle h)
+	{
 		cnt ++;
 
 		// The from-slot should be occupied by the node itself.
-		if (position_from == cnt) {
-			if (from_atom->getHandle() != atom->getHandle()) {
-				to_atom.reset();
+		if (position_from == cnt)
+		{
+			if (from_atom != h)
+			{
+				to_atom = Handle::UNDEFINED;
 				return true; // bad match, stop now.
 			}
 			return false;
 		}
 
 		// The to-slot is the one we're looking for.
-		if (position_to == cnt) {
-			to_atom = boost::shared_ptr<Atom>(atom->clone());
+		if (position_to == cnt)
+		{
+			to_atom = h;
 		}
 
 		return false;
 	}
 
-	inline bool pursue_unordered_link(Atom *atom) {
+	inline bool pursue_unordered_link(Handle h)
+	{
 		// There are only two atoms in a binary link. The one that is
 		// not the from_atom is the one we are looking for.
-		if (from_atom->getHandle() != atom->getHandle()) {
-			to_atom = boost::shared_ptr<Atom>(atom->clone()); // found it!
+		if (from_atom != h)
+		{
+			to_atom = h; // found it!
 			return true;
 		}
 		return false;
