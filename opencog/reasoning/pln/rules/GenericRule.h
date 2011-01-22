@@ -71,7 +71,7 @@ public:
         cprintf(-3, " </Generic rule args>\n");
 
         cprintf(-3, "validate()");
-        assert(validate(premiseArray));
+        OC_ASSERT(validate(premiseArray));
         cprintf(-3, "/ validate()");
 
         cprintf(-3, "formatTVarray...\n");
