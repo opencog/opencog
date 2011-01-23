@@ -7,15 +7,15 @@
 ;
 (define human-implies-animal
 	(BindLink
-   	(VariableNode "$H")
-   	(ImplicationLink
-      	(InheritanceLink
-         	(VariableNode "$H")
-         	(ConceptNode "human")
+		(VariableNode "$H")
+		(ImplicationLink
+			(InheritanceLink
+				(VariableNode "$H")
+				(ConceptNode "human")
 			)
-    		(InheritanceLink
-     	 		(VariableNode "$H")
-         	(ConceptNode "animal")
+			(InheritanceLink
+				(VariableNode "$H")
+				(ConceptNode "animal")
 			)
 		)
 	)
@@ -27,108 +27,110 @@
 )
 
 
-(do-varscope human-implies-animal)
+(cog-bind human-implies-animal)
 
 (InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
-    (DefinedFrameNode "#Ingestion")
-    (DefinedFrameNode "#Manipulation")
+	(DefinedFrameNode "#Ingestion")
+	(DefinedFrameNode "#Manipulation")
 )
 (InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
-    (PredicateNode "grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation")
-    (DefinedFrameNode "#Manipulation")
+	(PredicateNode "grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation")
+	(DefinedFrameNode "#Manipulation")
 )
 (FrameElementLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
-   (DefinedFrameNode "#Manipulation")
-   (DefinedFrameElementNode "#Manipulation:Agent")
+	(DefinedFrameNode "#Manipulation")
+	(DefinedFrameElementNode "#Manipulation:Agent")
 )
 
 
 ;; Example of an implication with just one predicate
 (define v
-   (BindLink
-      (VariableNode "$predicateNode")
-      (ImplicationLink
-         (InheritanceLink
-            (VariableNode "$predicateNode")
-            (DefinedFrameNode "#Manipulation")
-         )
-         (VariableNode "$predicateNode")
-      )
-   )
+	(BindLink
+	(VariableNode "$predicateNode")
+	(ImplicationLink
+		(InheritanceLink
+			(VariableNode "$predicateNode")
+			(DefinedFrameNode "#Manipulation")
+		)
+		(VariableNode "$predicateNode")
+		)
+	)
 )
 
-(do-varscope v)
+(cog-bind v)
 
 (define v2
-   (BindLink
-      (TypedVariableLink
-         (VariableNode "$prNode")
-         (VariableTypeNode "PredicateNode")
-      )
-      (ImplicationLink
-         (InheritanceLink
-            (VariableNode "$prNode")
-            (DefinedFrameNode "#Manipulation")
-         )
-         (VariableNode "$prNode")
-      )
-   )
+	(BindLink
+		(TypedVariableLink
+			(VariableNode "$prNode")
+			(VariableTypeNode "PredicateNode")
+		)
+		(ImplicationLink
+			(InheritanceLink
+				(VariableNode "$prNode")
+				(DefinedFrameNode "#Manipulation")
+			)
+			(VariableNode "$prNode")
+		)
+	)
 )
 
-(do-varscope v2)
+(cog-bind v2)
 
 (define x
-  (ImplicationLink
-    (InheritanceLink
-      (VariableNode "$predicateNode")
-      (DefinedFrameNode "#Manipulation")
-    )
-    (VariableNode "$predicateNode")
-  )
+	(BindLink
+		(VariableNode "$H")
+		(ImplicationLink
+			(InheritanceLink
+				(VariableNode "$predicateNode")
+				(DefinedFrameNode "#Manipulation")
+			)
+			(VariableNode "$predicateNode")
+		)
+	)
 )
 
-(do-implication x)
-
+(cog-bind x)
 
 ;; Example of implication with a constant term in it.
 (define y
-  (ImplicationLink
-     (AndLink
-       (InheritanceLink
-         (PredicateNode "grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation")
-         (DefinedFrameNode "#Manipulation")
-       )
-       (InheritanceLink
-         (VariableNode "$predicateNode")
-         (DefinedFrameNode "#Manipulation")
-       )
-     )
-     (VariableNode "$predicateNode")
-  )
+	(ImplicationLink
+		(AndLink
+			(InheritanceLink
+				(PredicateNode "grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation")
+				(DefinedFrameNode "#Manipulation")
+			)
+			(InheritanceLink
+				(VariableNode "$predicateNode")
+				(DefinedFrameNode "#Manipulation")
+			)
+		)
+		(VariableNode "$predicateNode")
+	)
 )
 
 
 (define w
-   (ImplicationLink
-      (AndLink
-         (InheritanceLink
-            (VariableNode "$framePredicateNode")
-            (DefinedFrameNode "#Manipulation")
-         )
-         (InheritanceLink
-            (VariableNode "$frameAgentPredicateNode")
-            (DefinedFrameElementNode "#Manipulation:Agent")
-         )
-        
-         (FrameElementLink
-            (VariableNode "$framePredicateNode")
-            (VariableNode "$frameAgentPredicateNode")
-         )
-         (FrameElementLink
-            (PredicateNode "grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation")
-            (VariableNode "$frameAgentPredicateNode")
-         )
-      )
-      (VariableNode "$frameAgentPredicateNode")
-   )
+	(ImplicationLink
+		(AndLink
+			(InheritanceLink
+				(VariableNode "$framePredicateNode")
+				(DefinedFrameNode "#Manipulation")
+			)
+			(InheritanceLink
+				(VariableNode "$frameAgentPredicateNode")
+				(DefinedFrameElementNode "#Manipulation:Agent")
+			)
+
+			(FrameElementLink
+				(VariableNode "$framePredicateNode")
+				(VariableNode "$frameAgentPredicateNode")
+			)
+			(FrameElementLink
+				(PredicateNode "grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation")
+				(VariableNode "$frameAgentPredicateNode")
+			)
+		)
+		(VariableNode "$frameAgentPredicateNode")
+	)
 )
