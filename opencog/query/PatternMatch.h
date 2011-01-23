@@ -28,7 +28,6 @@
 #include <vector>
 
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/Atom.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatchEngine.h>
 

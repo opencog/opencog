@@ -26,8 +26,6 @@
 #define _OPENCOG_CRISP_LOGIC_PATTERN_MATCH_H
 
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 

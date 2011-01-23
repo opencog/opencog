@@ -27,8 +27,6 @@
 
 #include <set>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>

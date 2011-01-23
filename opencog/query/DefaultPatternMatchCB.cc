@@ -25,7 +25,6 @@
 #include "PatternMatchEngine.h"
 
 #include <opencog/atomspace/Foreach.h>
-#include <opencog/atomspace/Link.h>
 
 using namespace opencog;
 

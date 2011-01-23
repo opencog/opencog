@@ -25,8 +25,6 @@
 
 #include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/ForeachTwo.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
 
 using namespace opencog;
 

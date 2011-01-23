@@ -24,10 +24,6 @@
 #ifndef _OPENCOG_PATTERN_MATCH_CALLBACK_H
 #define _OPENCOG_PATTERN_MATCH_CALLBACK_H
 
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
-
 #include <map>
 
 namespace opencog {
