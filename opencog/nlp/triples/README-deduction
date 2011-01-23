@@ -62,4 +62,4 @@ Wish to prove:
 )
 
 
-(do-varscope q)
+(cog-bind q)

@@ -18,13 +18,7 @@ DECLARE_MODULE(QueryModule);
 QueryModule::QueryModule(void)
 {
 #ifdef HAVE_GUILE
-	/* do-implication is deprecated, and is here for backward-compat */
-	define_scheme_primitive("do-implication", &QueryModule::do_implication, this);
-	define_scheme_primitive("do-varscope", &QueryModule::do_varscope, this);
-
-	/* XXX TODO -- provide a do-bind that simply returns the grounding,
-	 * but does no other evaluation!
-	 */
+	define_scheme_primitive("cog-bind", &QueryModule::do_varscope, this);
 #endif
 }
 QueryModule::~QueryModule()
@@ -32,20 +26,6 @@ QueryModule::~QueryModule()
 }
 void QueryModule::init(void)
 {
-}
-
-/**
- * Run implication, assuming that the argument is a handle to
- * an ImplicationLink. XXX DEPRECATED: Use varscope below!
- */
-Handle QueryModule::do_implication(Handle h)
-{
-	// XXX we should also allow opt-args to be a list of handles
-	AtomSpace *as = &atomspace();
-	PatternMatch pm;
-	pm.set_atomspace(as);
-	Handle grounded_expressions = pm.varscope(h);
-	return grounded_expressions;
 }
 
 /**

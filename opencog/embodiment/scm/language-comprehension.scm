@@ -1639,8 +1639,8 @@
          )
          ))
          
-         ; do-varscope returns a ListLink of results, so get the list not the ListLink
-         (cog-outgoing-set (do-varscope implication))
+         ; cog-bind returns a ListLink of results, so get the list not the ListLink
+         (cog-outgoing-set (cog-bind implication))
      )
 )
 
@@ -1939,10 +1939,10 @@
       (lambda (predicate)
         (frame-preprocessor predicate)
         (begin
-                (do-varscope convert-frames)
-                (do-varscope frames-to-inh)
+                (cog-bind convert-frames)
+                (cog-bind frames-to-inh)
                 ; Convert any Contingency frames into ImplicationLinks.
-                (do-varscope frames-to-implication)
+                (cog-bind frames-to-implication)
 
                 (let* ( ( tmp (pln-bc (build-query predicate) 2000) )  ; An AndLink
                      )
@@ -2106,7 +2106,7 @@
                         ) ; let*
                  )) ; cond
           )
-        (cog-outgoing-set (do-varscope rule ) )
+        (cog-outgoing-set (cog-bind rule ) )
         )
 
        )
@@ -2162,7 +2162,7 @@
               (set! commands (append commands (list candidateCommand )) )
               )
           )
-        (cog-outgoing-set (do-varscope rule ) )
+        (cog-outgoing-set (cog-bind rule ) )
         )
               
        )

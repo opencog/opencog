@@ -54,7 +54,7 @@
 ; The implication to be run
 (define (impy)
 
-(BindLink (stv 1 1)
+  (BindLink (stv 1 1)
    (ListLink
     (TypedVariableLink
      (VariableNode "$agent")
@@ -144,5 +144,5 @@
 )
 
 ; Running the implication should return only one answer!
-; (do-varscope (impy))
+; (cog-bind (impy))
 

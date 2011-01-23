@@ -17,7 +17,6 @@ class QueryModule : public Module
 {
 	private:
 		Handle do_varscope(Handle);
-		Handle do_implication(Handle);
    public:
       QueryModule(void);
       virtual ~QueryModule();

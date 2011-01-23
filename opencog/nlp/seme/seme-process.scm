@@ -642,6 +642,7 @@
 ; This may generate a list of atoms. Take that list, and manually
 ; store it in the database.
 ;
+(define (do-implication x) #t)  ; XXX use cog-bind instead ... 
 (define (xxxprocess-rule rule)
 	(define triple-list (cog-outgoing-set (do-implication rule)))
 

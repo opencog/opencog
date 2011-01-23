@@ -212,13 +212,13 @@
 )
 
 ; -----------------------------------------------------------------------
-; Run all rules in a list of rules -- i.e. apply do-varscope to each.
+; Run all rules in a list of rules -- i.e. apply cog-bind to each.
 ;
 (define (apply-all-rules rule-list)
 	(for-each
 		(lambda (rule) 
 			(cog-delete ; need to delete the returned ListLink
-				(do-varscope rule)
+				(cog-bind rule)
 			)
 		)
 		rule-list
@@ -386,9 +386,9 @@
 (define (loop-over-questions q-list)
 	(define (do-one-question quest)
 
-		; The do-varscope returns a ListLink. We need to nuke
+		; The cog-bind returns a ListLink. We need to nuke
 		; that, as otherwise it will only cause trouble later.
-		(let ((rslt (do-varscope quest)))
+		(let ((rslt (cog-bind quest)))
 (dbg-display "q-apply result is\n")
 (display rslt)
 (end-dbg-display)
@@ -585,7 +585,7 @@
 		)
 		(if (not (null? trip-semes))
 			(let* ((ftrip (car trip-semes))
-					(ans (do-varscope (make-simple-chain ftrip)))
+					(ans (cog-bind (make-simple-chain ftrip)))
 				)
 (dbg-display "duude question-deduct trip-semes are:\n")
 (display trip-semes)
