@@ -33,7 +33,39 @@ namespace opencog { namespace pln {
  * Rule to turn contextual knowledge into non contextual knowledge
  *
  * More specifically apply the following inference
+ *
  * a)
+ *
+ * ContextLink <TV>
+ *     C
+ *     A
+ * |-
+ * SubsetLink <TV>
+ *     C
+ *     A
+ *
+ * where A is a ConceptNode. that is because
+ *
+ * A <TV> is equivalent to
+ *
+ * SubsetLink <TV> Universe A
+ *
+ * the rest follows from c) (see below).
+ *
+ * b)
+ *
+ * ContextLink <TV>
+ *     C
+ *     R
+ * |-
+ * SubsetLink <TV>
+ *     C
+ *     SatisfyingSetLink
+ *         R
+ *
+ * where R is an EvaluationLink or a PredicateNode
+ *
+ * c)
  *
  * ContextLink <TV>
  *     C
@@ -46,24 +78,6 @@ namespace opencog { namespace pln {
  * @todo this should be generalized for n-ari ANDLink. Also it is
  * assumed that both C, B and A are Nodes, which might be too
  * constraining in the future
- *
- * b)
- *
- * ContextLink <TV>
- *     C
- *     A
- * |-
- * SubsetLink <TV>
- *     C
- *     A
- *
- * where A is a Node. that is because
- *
- * A <TV> is equivalent to
- *
- * SubsetLink <TV> Universe A
- *
- * the rest follows from a).
  */
 class DecontextualizerRule : public GenericRule<IdentityFormula>
 {
