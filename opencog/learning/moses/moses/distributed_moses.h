@@ -415,7 +415,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         }
 
         // Logger
-        logger().debug("Running processes: %u", running_proc_count(hpm));
+        logger().fine("Number of running processes: %u", running_proc_count(hpm));
         // ~Logger
 
         // wait for a second to not take all resources
