@@ -12,11 +12,7 @@
 
 #include <libguile.h>
 
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 

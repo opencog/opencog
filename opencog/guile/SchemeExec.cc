@@ -9,7 +9,6 @@
 
 #include <libguile.h>
 
-#include <opencog/atomspace/Link.h>
 #include "SchemeEval.h"
 #include "SchemeSmob.h"
 
