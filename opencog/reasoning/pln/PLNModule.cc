@@ -297,29 +297,32 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
     correctRuleName(ruleName, CX);
     DefaultVariableRuleProvider rp;
     const Rule* rule = rp.findRule(ruleName);
-    vhpair vhp(Handle::UNDEFINED, NULL_VERSION_HANDLE); // result to be overwriten
-    if(rule) {
-        pHandleSeq phs = ASW()->realToFakeHandles(premises, CX);
-        if(rule->isComposer()) {
-            VertexSeq vv(phs.begin(),phs.end());
-            //! @todo usually use the version of compute that takes BoundVertexes
-            BoundVertex bv = rule->compute(vv, PHANDLE_UNDEFINED, false);
-            vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));
-        } else { // generator
-            // here it is assumed that there is only one premise and
-            // one corresponding pHandle (because context are ignored
-            // for now)
-            OC_ASSERT(phs.size() == 1);
-            meta target = meta(new vtree(make_vtree(phs[0])));
-            // since the target vtree corresponds a specific pHandle,
-            // directResult must have only one element
-            Btr<set<BoundVertex> > directResult = 
-                rule->attemptDirectProduction(target, false);
-            vhp = ASW()->fakeToRealHandle(_v2h(directResult->begin()->GetValue()));
-        }
-        // std::cout << "VHP = " << vhp << std::endl;
-        // std::cout << "VHP.Handle = " << ASW()->getAtomSpace()->atomAsString(vhp.first, false) << std::endl;
+
+    // result to be overwriten
+    vhpair vhp(Handle::UNDEFINED, NULL_VERSION_HANDLE);
+
+    OC_ASSERT(rule, "Apparently the rule %s is undefined", ruleName.c_str());
+
+    pHandleSeq phs = ASW()->realToFakeHandles(premises, CX);
+    if(rule->isComposer()) {
+        VertexSeq vv(phs.begin(),phs.end());
+        //! @todo usually use the version of compute that takes BoundVertexes
+        BoundVertex bv = rule->compute(vv, PHANDLE_UNDEFINED, false);
+        vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));
+    } else { // generator
+        // here it is assumed that there is only one premise and
+        // one corresponding pHandle (because context are ignored
+        // for now)
+        OC_ASSERT(phs.size() == 1);
+        meta target = meta(new vtree(make_vtree(phs[0])));
+        // since the target vtree corresponds a specific pHandle,
+        // directResult must have only one element
+        Btr<set<BoundVertex> > directResult = 
+            rule->attemptDirectProduction(target, false);
+        vhp = ASW()->fakeToRealHandle(_v2h(directResult->begin()->GetValue()));
     }
+    // std::cout << "VHP = " << vhp << std::endl;
+    // std::cout << "VHP.Handle = " << ASW()->getAtomSpace()->atomAsString(vhp.first, false) << std::endl;
     return vhp.first;
 }
 
