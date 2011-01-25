@@ -197,6 +197,9 @@ private:
         cout << "LOGGING TO FILE pln.log!\n";
 #endif
         currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
+
+        // Call to initialise rule provider
+        referenceRuleProvider();
     }
 
 public:

@@ -89,6 +89,9 @@ private:
         //testFitnessEvaluator = BEST;
         //currentDebugLevel = -4;
         currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
+
+        // Call to initialise rule provider
+        referenceRuleProvider();
     }
 
 public:
