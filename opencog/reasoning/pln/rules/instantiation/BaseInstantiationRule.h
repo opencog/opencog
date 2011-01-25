@@ -33,7 +33,13 @@
 namespace haxx
 {
     /// \todo This data must persist even if the BITNodeRoot is deleted.
-    extern std::map<pHandle,std::vector<pHandle> > inferred_from;
+    ///
+    /// Given an inference step, the key pHandle corresponds to the
+    /// conclusion of the step, the value pHandleSeq corresponds to
+    /// the premises.
+    extern std::map<pHandle,pHandleSeq> inferred_from;
+    /// the key pHandle is the conclusion (just as above) and Rule* is
+    /// the rule that has been applied to create it
     extern std::map<pHandle,opencog::pln::Rule*> inferred_with;
 }
 

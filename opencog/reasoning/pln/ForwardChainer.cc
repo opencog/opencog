@@ -42,7 +42,7 @@ using std::string;
 
 namespace haxx
 {
-    extern std::map<pHandle,vector<pHandle> > inferred_from;
+    extern std::map<pHandle,pHandleSeq> inferred_from;
     extern std::map<pHandle,opencog::pln::Rule*> inferred_with;
 }
 

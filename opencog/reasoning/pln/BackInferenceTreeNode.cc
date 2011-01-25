@@ -71,7 +71,7 @@ namespace haxx
     extern opencog::pln::BITNodeRoot* bitnoderoot;
 
     //! @todo This data must persist even if the BITNodeRoot is deleted.
-    std::map<pHandle,std::vector<pHandle> > inferred_from;
+    std::map<pHandle,pHandleSeq> inferred_from;
     std::map<pHandle,Rule*> inferred_with;
 
     //! @todo Should be in a BITNode repository class. Not stored in a specific
