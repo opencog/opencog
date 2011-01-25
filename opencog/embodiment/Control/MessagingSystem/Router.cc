@@ -694,10 +694,7 @@ bool Router::sendNotification(const NotificationData& data)
         }
 
     } catch (std::exception &e) {
-        
-        logger().error("Router::sendNotification - std::exception: %s", e.what());
-    } catch (StandardException &e) {
-        logger().error("Router::sendNotification - StandardException: %s", e.getMessage());
+        logger().error("Router::sendNotification - Exception: %s", e.what());
     } catch (...) {
         logger().error("Router::sendNotification - unknown exception!");
     }
