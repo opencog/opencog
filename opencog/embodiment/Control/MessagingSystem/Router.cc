@@ -70,13 +70,13 @@ Router::Router()
 
     RouterServerSocket::setMaster(this);
 
-    routerId = opencog::config().get("ROUTER_ID");
-    routerPort = opencog::config().get_int("ROUTER_PORT");
+    routerId = config().get("ROUTER_ID");
+    routerPort = config().get_int("ROUTER_PORT");
     routerAvailableNotificationInterval = 
-        opencog::config().get_int("ROUTER_AVAILABLE_NOTIFICATION_INTERVAL");
+        config().get_int("ROUTER_AVAILABLE_NOTIFICATION_INTERVAL");
     noAckMessages = config().get_bool("NO_ACK_MESSAGES");
 
-    opencog::logger() = Control::LoggerFactory::getLogger(routerId);
+    logger() = Control::LoggerFactory::getLogger(routerId);
 
     pthread_mutex_init(&unavailableIdsLock, NULL);
     stopListenerThreadFlag = false;
@@ -143,10 +143,10 @@ void Router::run()
      * than check if such file exists in filesystem. If so, start recovery
      * process.
      */
-    std::string recoveryFile = opencog::config().get("ROUTER_DATABASE_DIR");
+    std::string recoveryFile = config().get("ROUTER_DATABASE_DIR");
     expandPath(recoveryFile);
     recoveryFile.append("/");
-    recoveryFile.append(opencog::config().get("ROUTER_DATA_FILE"));
+    recoveryFile.append(config().get("ROUTER_DATA_FILE"));
 
     if (fileExists(recoveryFile.c_str())) {
         recoveryFromPersistedData(recoveryFile);
@@ -330,11 +330,11 @@ int Router::addNetworkElement(const std::string &strId, const std::string &strIp
     // new data inserted, updates persisted router table
     try {
         persistState();
-    } catch (opencog::IOException& e) { }
+    } catch (IOException& e) { }
 
     // erease all messages from queue if have any
-    if (id == opencog::config().get("LS_ID") ||
-        id == opencog::config().get("SPAWNER_ID")) {
+    if (id == config().get("LS_ID") ||
+        id == config().get("SPAWNER_ID")) {
 
         messageCentral->createQueue(id, true);
         errorCode = NO_ERROR;
@@ -379,7 +379,7 @@ void Router::removeNetworkElement(const std::string &id)
     // save modifications into persisted data file
     try {
         persistState();
-    } catch (opencog::IOException& e) { }
+    } catch (IOException& e) { }
 }
 
 void Router::clearNetworkElementMessageQueue(const std::string &id)
@@ -391,7 +391,7 @@ void Router::persistState()
 {
 
     // TODO: add some timestamp info to filename
-    std::string path = opencog::config().get("ROUTER_DATABASE_DIR");
+    std::string path = config().get("ROUTER_DATABASE_DIR");
     expandPath(path);
 
     if (!createDirectory(path.c_str())) {
@@ -401,7 +401,7 @@ void Router::persistState()
     }
 
     // TODO: Insert timestamp information into routerInfo file
-    std::string filename = path + "/" + opencog::config().get("ROUTER_DATA_FILE");
+    std::string filename = path + "/" + config().get("ROUTER_DATA_FILE");
     remove(filename.c_str());
 
     std::ofstream routerFile(filename.c_str());
@@ -414,14 +414,14 @@ void Router::persistState()
 
             std::string id = (*it).first;
             std::string ip = (*it).second;
-            std::string port = opencog::toString(getPortNumber(id));
+            std::string port = toString(getPortNumber(id));
 
             // save data
             routerFile << id << " " << ip << " " << port  << std::endl;
         }
     } catch (std::ofstream::failure e) {
         routerFile.close();
-        throw opencog::IOException(TRACE_INFO, "Router - Unable to save Router information.");
+        throw IOException(TRACE_INFO, "Router - Unable to save Router information.");
     }
 
     routerFile.close();
@@ -495,10 +495,10 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
 
             // Filtering element availability messages to Proxy. Only OACs and
             // Router notifications should be sent.
-            if ( toId == opencog::config().get("PROXY_ID") &&
-                    (id == opencog::config().get("SPAWNER_ID") ||
-                     id == opencog::config().get("LS_ID") ||
-                     id == opencog::config().get("COMBO_SHELL_ID"))
+            if ( toId == config().get("PROXY_ID") &&
+                    (id == config().get("SPAWNER_ID") ||
+                     id == config().get("LS_ID") ||
+                     id == config().get("COMBO_SHELL_ID"))
                ) {
                 logger().debug("Router - Discarding notification from internal network elements to Proxy");
                 continue;
@@ -639,7 +639,7 @@ bool Router::sendNotification(const NotificationData& data)
 
         case MESSAGE:
             cmd.append("cNOTIFY_NEW_MESSAGE ");
-            cmd.append(opencog::toString(data.numMessages));
+            cmd.append(toString(data.numMessages));
             cmd.append("\n");
             break;
 
@@ -694,8 +694,9 @@ bool Router::sendNotification(const NotificationData& data)
         }
 
     } catch (std::exception &e) {
+        
         logger().error("Router::sendNotification - std::exception: %s", e.what());
-    } catch (opencog::StandardException &e) {
+    } catch (StandardException &e) {
         logger().error("Router::sendNotification - StandardException: %s", e.getMessage());
     } catch (...) {
         logger().error("Router::sendNotification - unknown exception!");
