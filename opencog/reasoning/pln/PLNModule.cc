@@ -630,16 +630,9 @@ std::string PLNModule::runCommand(std::list<std::string> args)
                 "Use 'help pln' or 'pln help' for a list of valid commands." << endl;
 
         }
-    } catch( std::exception& e )
+    } catch(std::exception& e)
     {
-        ss << endl << "Exception: "
-             << e.what() << endl;
-        cout << ss.str();
-    }
-    catch( StandardException& e )
-    {
-        ss << endl << "Exception: "
-             << e.getMessage() << endl;
+        ss << endl << "Exception: " << e.what() << endl;
         cout << ss.str();
     }
     return ss.str();
