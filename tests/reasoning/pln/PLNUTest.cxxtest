@@ -345,8 +345,9 @@ public:
     // argument but applies several different rules
     void DISABLEtestMacroRuleTest()
     {
-        InversionRule *invR = new InversionRule(asw, INHERITANCE_LINK);
-        DeductionRule<DeductionSimpleFormula> *deduR = new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK);
+        RulePtr invR(new InversionRule(asw, INHERITANCE_LINK));
+        //DeductionRule<DeductionSimpleFormula> *deduR = new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK);
+        RulePtr deduR(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK));
 
         printf("v0\n");
         vtree v0(mva((pHandle)INHERITANCE_LINK,
