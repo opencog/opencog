@@ -75,13 +75,11 @@ Rule::setOfMPs DecontextualizerRule::o2iMetaExtra(meta outh,
     vtree::iterator root = outh->begin();
     pHandle ph = _v2h(*root);
 
-    if(asw->isSubType(ph, NODE))
+    if(asw->isSubType(ph, NODE) ||
+       root.number_of_children() != 2) // maybe this should be relaxed
         return Rule::setOfMPs();
 
     BoundVTree* res;
-
-    OC_ASSERT(root.number_of_children() == 2); // maybe this should be
-                                               // relaxed
 
     vtree::iterator A1_it = root.begin();
     pHandle A1 = _v2h(*A1_it);
@@ -106,14 +104,16 @@ Rule::setOfMPs DecontextualizerRule::o2iMetaExtra(meta outh,
         pHandleSeq inter = set_intersection(out1, out2);
 
         if(inter.size() > 0) {
-            OC_ASSERT(inter.size() == 1); // @todo generilize for n-ary
+            if(inter.size() != 1) /// @todo generalize for n-ary
+                return Rule::setOfMPs();
             pHandle CX = *inter.begin();
             // can be optimized
             pHandleSeq new_out1 = set_difference(out1, inter);
             pHandleSeq new_out2 = set_difference(out2, inter);
-            OC_ASSERT(new_out1.size() == 1); // @todo generilize for n-ary
+            /// @todo generalize for n-ary
+            if(new_out1.size() != 1 || new_out2.size())
+                return Rule::setOfMPs();
             pHandle A = new_out1[0];
-            OC_ASSERT(new_out2.size() == 1); // @todo generilize for n-ary
             pHandle B = new_out2[0];
             res = new BoundVTree(mva((pHandle)CONTEXT_LINK, mva(CX),
                                      mva((pHandle)asw->getType(ph),
