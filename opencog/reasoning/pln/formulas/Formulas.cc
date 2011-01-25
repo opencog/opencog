@@ -55,6 +55,13 @@ namespace pln {
   Macros of common body parts 
 =============================================================================*/
 
+#define PLNFormulaBodyFor_Atom \
+    assert(TV.size() == 1);   \
+    assert(TV[0]); \
+    OC_ASSERT(!TV[0]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
+    strength_t sA = TV[0]->getMean(); \
+    count_t nA = TV[0]->getCount(); \
+
 #define PLNFormulaBodyFor_Link \
     assert(TV.size() == 1);   \
     assert(TV[0]); \
@@ -242,17 +249,11 @@ TruthValue* ImplicationConstructionFormula::simpleCompute(const TVSeq& TV, long 
 //===========================================================================//
 TruthValue* NotFormula::simpleCompute(const TVSeq& TV, long U) const
 {
-    cprintf(-3, "InferenceMindAgent::NotEvaluation\n");
+    cprintf(-3, "InferenceMindAgent::NotRule\n");
 
-    PLNFormulaBodyFor_Atom2;
-    DebugPLNBodyFor_Link2;
+    PLNFormulaBodyFor_Atom;
 
-    /*    float s2 = (nA*sA + 1 - nB*sB) / (nA + nB); // s(LINK) - s(NOT)
-        if (s2 < 0.0f) s2 = 0.0f;
-        float n2 = (nA - nB);
-        if (n2 < 0.0f) n2 = 0.0f;*/
-
-    return checkTruthValue(  new SimpleTruthValue(1.0f - sB, nB) );
+    return checkTruthValue(  new SimpleTruthValue(1.0f - sA, nA) );
 }
 
 //===========================================================================//

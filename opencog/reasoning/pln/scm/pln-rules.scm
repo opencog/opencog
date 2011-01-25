@@ -13,6 +13,8 @@
   (pln-ar "InheritanceLinkDeductionRule" (list AB BC) contexts))
 (define (SubsetDeductionRule AB BC . contexts)
   (pln-ar "SubsetLinkDeductionRule" (list AB BC) contexts))
+(define (NotRule A . contexts)
+  (pln-ar "NotRule" (list A) contexts))
 ; context rules, not sure if the last argument 'contexts' would be useful
 (define (ContextualizerRule R . contexts)
   (pln-ar "ContextualizerRule" (list R) contexts))

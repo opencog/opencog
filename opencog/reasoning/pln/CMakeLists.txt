@@ -26,7 +26,7 @@ ADD_LIBRARY (pln SHARED
 	rules/RuleApp.cc
 	rules/RuleProvider.cc
 	rules/RuleFunctions.cc
-	rules/not/NotEvaluatorRule.cc
+	rules/not/NotRule.cc
 	rules/or/ORPartitionRule.cc
 	rules/or/ORRule.cc
 	rules/auxiliary/SubsetEvalRule.cc
@@ -125,7 +125,7 @@ INSTALL (FILES
 	rules/inference/InversionRule.h
 	rules/inference/RevisionRule.h
 	rules/inference/QuantifierRule.h
-	rules/not/NotEvaluatorRule.h
+	rules/not/NotRule.h
 	rules/not/NotEliminationRule.h
 	rules/auxiliary/LookupRule.h
 	rules/auxiliary/VarInstantiationRule.h

@@ -19,38 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef NOTEVALUATORRULE_H
-#define NOTEVALUATORRULE_H
+#ifndef NOTRULE_H
+#define NOTRULE_H
 
 #include "../GenericRule.h"
 
 namespace opencog { namespace pln {
 
-class NotEvaluatorRule : public GenericRule<NotFormula>
+/**
+ * NotRule
+ *
+ * A <s, c>
+ *|-
+ * NotLink <1-s, c>
+ *     A
+ */
+class NotRule : public GenericRule<NotFormula>
 {
 protected:
-    TVSeq formatTVarray(const VertexSeq& premiseArray) const {
-        TVSeq tvs;
-
-        const int N = (int)premiseArray.size();
-        assert(N == 1);
-
-        //std::vector<Handle> real = premiseArray[0];
-#if 0
-        // Welter's comment: this change is waiting for Ari's aproval
-        tvs.push_back(&(TruthValue::TRIVIAL_TV()));
-#else
-        tvs.push_back(new SimpleTruthValue(0, 0)); //nm->getTV(premiseArray[0]);
-        //! @todo create the TrivialTV to use here
-#endif
-        tvs.push_back(&(asw->getTV(boost::get<pHandle>(premiseArray[0]))));
-        return tvs;
-    }
-
+    TVSeq formatTVarray(const VertexSeq& premiseArray) const;
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
 public:
-    NotEvaluatorRule(AtomSpaceWrapper *_asw);
+    NotRule(AtomSpaceWrapper *_asw);
     meta i2oType(const VertexSeq& h) const;
 
     bool validate2(MPs& args) const {

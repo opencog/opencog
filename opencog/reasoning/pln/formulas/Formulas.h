@@ -208,11 +208,11 @@ public:
 };
 
 /**
- * NotFormula takes 2 TVs and returns the negation of the second TV, I don't know why...
- * TV->mean = 1 - TV[1]->mean
- * TV->count = TV[1]->count
+ * NotFormula takes 1 TV and returns the its negation.
+ * TV->mean = 1 - TV[0]->mean
+ * TV->count = TV[0]->count
  */ 
-class NotFormula : public Formula<2>
+class NotFormula : public Formula<1>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;

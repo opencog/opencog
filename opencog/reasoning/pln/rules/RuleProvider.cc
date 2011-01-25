@@ -126,7 +126,7 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 //    AddRule(new ANDBreakdownRule(asw, 2), 10.0f);
 //    AddRule(new ANDBreakdownRule(asw, 3), 10.0f);
 
-    AddRule(new NotEvaluatorRule(asw), 10.0f);
+    AddRule(new NotRule(asw), 10.0f);
     
     AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
     
@@ -286,7 +286,7 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 //// Needs a fullInputFilter method to deal with the variable arity.
     // Also not actually used in any of the demos.
     AddRule(new ANDPartitionRule(asw), 10.0f);
-    AddRule(new NotEvaluatorRule(asw), 10.0f);
+    AddRule(new NotRule(asw), 10.0f);
 
     // FC: Have to use ATOM due to TableGather not handling Node Type vertexes
     AddRule(new SubsetEvalRule(asw, ATOM), 10.0f);
@@ -402,7 +402,7 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
 //// Needs a fullInputFilter method to deal with the variable arity.
     // Also not actually used in any of the demos.
 //    AddRule(new ANDPartitionRule(asw), 10.0f);
-    AddRule(new NotEvaluatorRule(asw), 10.0f);
+    AddRule(new NotRule(asw), 10.0f);
 
     AddRule(new SubsetEvalRule(asw, CONCEPT_NODE), 10.0f);
 

@@ -30,35 +30,37 @@
 
 namespace opencog { namespace pln {
 
-NotEvaluatorRule::NotEvaluatorRule( opencog::pln::AtomSpaceWrapper *_asw )
-: GenericRule<opencog::pln::NotFormula>(_asw, true, "NotEvaluatorRule")
+TVSeq NotRule::formatTVarray(const VertexSeq& premiseArray) const
 {
-    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)NOT_LINK,
-                                                    mva((pHandle)ATOM)))
-                               ));
+    OC_ASSERT(premiseArray.size() == 1);
+    return TVSeq(1, &(asw->getTV(_v2h(premiseArray[0]))));
 }
 
-meta NotEvaluatorRule::i2oType(const VertexSeq& h) const
+NotRule::NotRule(AtomSpaceWrapper *_asw)
+  : GenericRule<NotFormula>(_asw, true, "NotRule")
 {
-    assert(1 == h.size());
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)NOT_LINK,
+                                                    mva((pHandle)ATOM)))));
+}
+
+meta NotRule::i2oType(const VertexSeq& h) const
+{
+    OC_ASSERT(h.size() == 1);
     return meta(new tree<Vertex>(mva((pHandle)NOT_LINK,
-                                     tree<Vertex>(h[0])
-                                     )));
+                                     tree<Vertex>(h[0]))));
 }
 
 // Private method
-Rule::setOfMPs NotEvaluatorRule::o2iMetaExtra(meta outh,
-                                              bool& overrideInputFilter) const
+Rule::setOfMPs NotRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     if (!asw->isSubType(_v2h(*outh->begin()), NOT_LINK))
         return Rule::setOfMPs();
 
     //! @todo why not?
-//    LOG(-10, "SHOULD NOT BE HERE!"); assert(0);
-    MPs ret;
+    //    LOG(-10, "SHOULD NOT BE HERE!"); assert(0);
+    OC_ASSERT(outh->begin().number_of_children() == 1);
 
-    assert(outh->begin().number_of_children() == 1);
-    ret.push_back(BBvtree(new BoundVTree(outh->begin(outh->begin())))); //1st child
+    MPs ret(1, BBvtree(new BoundVTree(outh->begin(outh->begin())))); //1st child
 
 //  printAtomTree(*(*ret)[0],0,4);
 

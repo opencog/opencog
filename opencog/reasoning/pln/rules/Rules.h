@@ -59,7 +59,7 @@
 #include "or/ORPartitionRule.h"
 //#include "or/OR2ANDRule.h"
 
-#include "not/NotEvaluatorRule.h"
+#include "not/NotRule.h"
 //#include "not/NotEliminationRule.h"
 
 #include "convert/Link2LinkRule.h"
