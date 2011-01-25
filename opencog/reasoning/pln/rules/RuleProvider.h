@@ -24,21 +24,31 @@
 
 #include "Rule.h"
 
-//#include <boost/mutex.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace opencog { namespace pln {
 
 class RuleProvider  {
 protected:
+    //! Watching for instantiation atoms
+    bool watchingForInstantiationAtoms;
+
+    //! Guard is used when add/remove signals are sent from AtomSpace via the
+    //! ReferenceRuleProvider.
+    mutable boost::mutex guard;
 public:
-    // This map is used to record both the rules in this
-    // provider and the priorities
+    /** This map is used to record both the rules in this
+     * provider and the priorities.
+     */
     std::map<const std::string, float> rulePriorities; 
 
     RuleProvider(void);
     virtual ~RuleProvider(void);
 
+    //! Add rule given by rule name with priority
     void addRule(const std::string& ruleName, float priority);
+
+    //! Remove rule with given name
     virtual void removeRule(const std::string& name);
 
     /** Set the Rule's priority that is used by inference heuristics.
@@ -63,9 +73,19 @@ public:
      */
     virtual RulePtr findRule(const std::string& ruleName) const;
 
+    //! Get a list of names for rules in this provider.
     std::vector<std::string> getRuleNames() const;
 
-    bool empty() const {return rulePriorities.size() == 0 ? false : true; }
+    //! Does this rule provider contain any rules?
+    bool empty() const;
+
+    /** Tell the reference rule provider that it should update this rule
+     * provider when atoms matching FORALL_LINK or AVERAGE_LINK are
+     * added/removed.
+     */
+    void watchInstantiationAtoms();
+
+    void printPriorities();
 };
 
 class ReferenceRuleProvider : public RuleProvider
@@ -79,10 +99,19 @@ class ReferenceRuleProvider : public RuleProvider
 
     std::map<std::string,RulePtr> rules; //! name to rule mapping
 
+    //! notify these rule providers when instantiation atoms are added/removed.
+    std::vector<RuleProvider*> watchers;
+    //! lock for watchers
+    mutable boost::mutex watchersLock;
+
+    std::vector<RulePtr> instantiationRules;
+
+    static const float instantiationRulePriority;
+
     /**
      * Takes ownership of the Rule objects given to it
      */
-    void addRule(Rule* r, float priority);
+    RulePtr addRule(Rule* r, float priority);
 public:
     /**
      * @param ruleName the name of the rule we are looking for
@@ -96,7 +125,13 @@ public:
 
     ReferenceRuleProvider(void);
     virtual ~ReferenceRuleProvider(void);
+
+    void registerWatcher(RuleProvider* rp);
+    void unregisterWatcher(RuleProvider* rp);
+
+    void printRules();
 };
+
 
 /**
  * A "reference" RuleProvider containing the official versions of all Rules.
@@ -104,7 +139,7 @@ public:
  * which may have different combinations of Rules, but those RuleProviders must
  * contain pointers to the same Rule objects as contained here.
  */
-RuleProvider& referenceRuleProvider();
+ReferenceRuleProvider& referenceRuleProvider();
 
 
 class VariableRuleProvider : public RuleProvider {

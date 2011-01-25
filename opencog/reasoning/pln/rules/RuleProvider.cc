@@ -27,28 +27,69 @@
 #include <opencog/util/exceptions.h>
 
 #include <boost/foreach.hpp>
+#include <boost/thread/thread.hpp>
+
+#define DPRINTF printf
+//#define DPRINTF(...)
 
 namespace opencog { namespace pln {
 
 using std::string;
 
-RuleProvider& referenceRuleProvider()
+ReferenceRuleProvider& referenceRuleProvider()
 {
     static ReferenceRuleProvider* rrp = NULL;
     if (rrp == NULL) {
+        DPRINTF("Creating new reference rule provider\n");
         rrp = new ReferenceRuleProvider();
-        std::vector<std::string> rulenames(rrp->getRuleNames());
-        for (unsigned int i=0; i < rulenames.size(); i++){ 
-            std::cout << rulenames[i] << std::endl;
-        }
     }
-
     // need to add any other rules?
     return *rrp;
 }
 
+const float ReferenceRuleProvider::instantiationRulePriority(7.5f);
+
+ReferenceRuleProvider::~ReferenceRuleProvider(void)
+{
+}
+
+void ReferenceRuleProvider::registerWatcher(RuleProvider* rp)
+{
+    boost::mutex::scoped_lock lock(watchersLock);
+    watchers.push_back(rp);
+    foreach(RulePtr r, instantiationRules) {
+        rp->addRule(r->getName(),instantiationRulePriority);
+    }
+    
+}
+
+void ReferenceRuleProvider::unregisterWatcher(RuleProvider* rp)
+{
+    boost::mutex::scoped_lock lock(guard);
+    std::vector<RuleProvider*>::iterator ri;
+    for (ri = watchers.begin(); ri != watchers.end(); ri++ ) {
+        if (*ri == rp) break;
+    }
+    if (ri != watchers.end()) watchers.erase(ri);
+}
+
 RuleProvider::RuleProvider(void)
 {
+}
+
+RuleProvider::~RuleProvider(void)
+{
+    boost::mutex::scoped_lock lock(guard);
+    // Unregister from the referenceRuleProvider list
+    referenceRuleProvider().unregisterWatcher(this);
+}
+
+void RuleProvider::watchInstantiationAtoms() {
+    // separate guard for this bool?
+    if (!watchingForInstantiationAtoms) {
+        referenceRuleProvider().registerWatcher(this);
+        watchingForInstantiationAtoms = true;
+    }
 }
 
 void RuleProvider::addRule(const string& ruleName, float priority)
@@ -57,11 +98,23 @@ void RuleProvider::addRule(const string& ruleName, float priority)
         throw opencog::RuntimeException(TRACE_INFO, "Can't add rule to reference ruleprovider.");
     // Check it exists in the reference repository
     RulePtr r = referenceRuleProvider().findRule(ruleName);
+    boost::mutex::scoped_lock lock(guard);
     // If so, give it a priority
-    setPriority(ruleName, priority);
+    rulePriorities[ruleName] = priority;
+}
+
+void RuleProvider::removeRule(const string& ruleName)
+{
+    boost::mutex::scoped_lock lock(guard);
+    // Check it exists in the reference repository
+    std::map<const std::string, float>::iterator i = rulePriorities.find(ruleName);
+    if (i == rulePriorities.end())
+        throw opencog::InvalidParamException(TRACE_INFO, ("No rule with name " + ruleName).c_str());
+    rulePriorities.erase(i);
 }
 
 void RuleProvider::setPriority(const std::string& ruleName, float priority) {
+    boost::mutex::scoped_lock lock(guard);
     std::map<const std::string, float>::const_iterator i = rulePriorities.find(ruleName);
     if (i == rulePriorities.end());
         throw opencog::InvalidParamException(TRACE_INFO, ("No rule with name " + ruleName).c_str());
@@ -69,26 +122,28 @@ void RuleProvider::setPriority(const std::string& ruleName, float priority) {
 }
 
 float RuleProvider::getPriority(const std::string& ruleName) {
+    boost::mutex::scoped_lock lock(guard);
     std::map<const std::string, float>::const_iterator i = rulePriorities.find(ruleName);
     if (i == rulePriorities.end())
         throw opencog::InvalidParamException(TRACE_INFO, ("No rule with name " + ruleName).c_str());
     else return i->second;
 }
 
-RuleProvider::~RuleProvider(void)
+RulePtr ReferenceRuleProvider::addRule(Rule* r, float priority)
 {
-}
-
-ReferenceRuleProvider::~ReferenceRuleProvider(void)
-{
-}
-
-void ReferenceRuleProvider::addRule(Rule* r, float priority)
-{
+    boost::mutex::scoped_lock lock(guard);
     RulePtr rp(r);
     std::map<std::string, RulePtr>::const_iterator i = rules.find(rp->getName());
+    // TODO prevent double addition of existing rule!!
+    DPRINTF("Rule added %s\n",rp->getName().c_str());
     rules[rp->getName()] = rp;
-    setPriority(rp->getName(),priority);
+    rulePriorities[rp->getName()] = priority;
+    lock.unlock();
+    return rp;
+}
+
+bool RuleProvider::empty() const {
+    return rulePriorities.size() == 0 ? true : false;
 }
 
 struct EqRuleName
@@ -100,14 +155,11 @@ public:
     bool operator()(const std::pair<std::string,RulePtr>& other) {
         return other.first == _name;
     }
-    /*bool operator()(RulePtr r) {
-        OC_ASSERT(r != NULL);
-        return r->getName() == _name;
-    }*/
 };
 
 RulePtr RuleProvider::findRule(const string& ruleName) const
 {
+    boost::mutex::scoped_lock lock(guard);
     // Check rule is in our rulePriorities
     std::map<const std::string, float>::const_iterator i = rulePriorities.find(ruleName);
     if (i == rulePriorities.end())
@@ -120,7 +172,8 @@ RulePtr RuleProvider::findRule(const string& ruleName) const
 RulePtr ReferenceRuleProvider::findRule(const string& ruleName) const
 {
     EqRuleName eq(ruleName);
-    std::map<std::string,RulePtr>::const_iterator cit = find_if(rules.begin(), rules.end(), eq);
+    boost::mutex::scoped_lock lock(guard);
+    std::map<const std::string,RulePtr>::const_iterator cit = find_if(rules.begin(), rules.end(), eq);
     if(cit == rules.end())
         throw opencog::InvalidParamException(TRACE_INFO, ("No rule with name " + ruleName).c_str());
     else return cit->second;
@@ -128,6 +181,7 @@ RulePtr ReferenceRuleProvider::findRule(const string& ruleName) const
 
 std::vector<std::string> RuleProvider::getRuleNames() const
 {
+    boost::mutex::scoped_lock lock(guard);
     std::vector<std::string> result;
     std::map<const std::string, float>::const_iterator cit = rulePriorities.begin();
     while (cit != rulePriorities.end()) {
@@ -145,18 +199,49 @@ VariableRuleProvider::~VariableRuleProvider(void)
 {
 }
 
+void RuleProvider::printPriorities()
+{
+    printf("Priorities of rules\n");
+    std::map<const std::string, float>::const_iterator cit = rulePriorities.begin();
+    while (cit != rulePriorities.end()) {
+        printf(" %s - %.3f\n", cit->first.c_str(), cit->second);
+        cit++;
+    }
+}
+
+void ReferenceRuleProvider::printRules()
+{
+    printf("Instantiation Rules\n");
+    foreach(RulePtr r, instantiationRules) {
+        printf(" %s\n", r->getName().c_str());
+    }
+    printf("All Rules\n");
+    std::map<const std::string, float>::const_iterator cit = rulePriorities.begin();
+    while (cit != rulePriorities.end()) {
+        printf(" %s\n", cit->first.c_str());
+        cit++;
+    }
+}
+
 bool ReferenceRuleProvider::handleAddSignal(Handle h)
 {
     AtomSpaceWrapper* asw = ASW();
     pHandle ph = asw->realToFakeHandle(h, NULL_VERSION_HANDLE);
     
     Type t = asw->getType(ph);
+    RulePtr rulePtr;
     if (t == FORALL_LINK) {
-        addRule(new ForAllInstantiationRule(ph, asw), 7.5f);
+        rulePtr = addRule(new ForAllInstantiationRule(ph, asw),
+                instantiationRulePriority);
     } else if (t == AVERAGE_LINK) {
-        addRule(new AverageInstantiationRule(ph, asw), 7.5f);
+        rulePtr = addRule(new AverageInstantiationRule(ph, asw),
+                instantiationRulePriority);
     }
-
+    if (rulePtr) {
+        instantiationRules.push_back(rulePtr);
+        foreach(RuleProvider* rp, watchers)
+            rp->addRule(rulePtr->getName(), instantiationRulePriority);
+    }
     return false;
 }
 
@@ -166,26 +251,49 @@ bool ReferenceRuleProvider::handleRemoveSignal(Handle h)
     pHandle ph = asw->realToFakeHandle(h, NULL_VERSION_HANDLE);
     
     Type t = asw->getType(ph);
+    std::string name;
     if (t == FORALL_LINK) {
-        std::string name = ForAllInstantiationRulePrefixStr;
-        name += boost::lexical_cast<std::string>(h);
-        removeRule(name);
+        name = ForAllInstantiationRulePrefixStr;
     } else if (t == AVERAGE_LINK) {
-        std::string name = AverageInstantiationRulePrefixStr;
-        name += boost::lexical_cast<std::string>(h);
+        name = AverageInstantiationRulePrefixStr;
+    }
+    if (name.length() > 0) {
+        name += boost::lexical_cast<std::string>(ph);
+        // Remove from watching RuleProviders first
+        //foreach(RuleProvider* rp, watchers)
+        //    rp->removeRule(name);
+        // Then remove from ReferenceRuleProvider
         removeRule(name);
     }
-
     return false;
 }
 
 void ReferenceRuleProvider::removeRule(const std::string& ruleName)
 {
+    boost::mutex::scoped_lock lock(guard);
     EqRuleName eq(ruleName);
     std::map<std::string,RulePtr>::iterator cit = find_if(rules.begin(), rules.end(), eq);
     if(cit == rules.end())
         throw opencog::InvalidParamException(TRACE_INFO, ("No rule with name " + ruleName).c_str());
+
+    // Remove from instantiation rules if it exists within the list
+    std::vector<RulePtr>::iterator ri;
+    for (ri = instantiationRules.begin(); ri != instantiationRules.end(); ri++ ) {
+        if ((*ri)->getName() == ruleName) break;
+    }
+    if (ri != instantiationRules.end()) {
+        foreach(RuleProvider* rp, watchers) {
+            rp->removeRule((*ri)->getName());
+        }
+        instantiationRules.erase(ri);
+    }
+    // Remove from referenceRuleProvider priorities
+    std::map<const std::string, float>::iterator i = rulePriorities.find(ruleName);
+    rulePriorities.erase(i);
+
+    // Remove from master rule map
     rules.erase(cit);
+    DPRINTF("Rule removed %s\n",cit->second->getName().c_str());
 }
 
 ReferenceRuleProvider::ReferenceRuleProvider(void)
@@ -200,16 +308,6 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
             boost::bind(&ReferenceRuleProvider::handleRemoveSignal, this, _1));
     assert(c_add.connected() && c_remove.connected());
 
-    // Instantiation Rules
-    //Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
-    //foreach(pHandle fah, *ForAll_handles)
-    //    addRule(new ForAllInstantiationRule(fah, asw), 7.5f);
-    //Btr<std::set<pHandle> > Average_handles = asw->getHandleSet(AVERAGE_LINK, "");
-    //foreach(pHandle ah, *Average_handles)
-    //    addRule(new AverageInstantiationRule(ah, asw), 7.5f);
-    //
-    //cprintf(-1, "Added %u Instantiation Rules.\n", (unsigned int) size());
-    
     addRule(new LookupRule(asw), 20.0f);
 
 /// StrictCrispUnification always requires Hypothesis, too!	
@@ -447,18 +545,7 @@ ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
     addRule("ScholemFunctionProductionRule", 20.0f);
     addRule("Hypothesis", 30.0f);
 
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    // TODO Automatically add these - register with reference rule provider
-    // Instantiation Rules
-    //Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
-    //foreach(pHandle fah, *ForAll_handles)
-    //    addRule(new ForAllInstantiationRule(fah, asw), 7.5f);
-    //Btr<std::set<pHandle> > Average_handles = asw->getHandleSet(AVERAGE_LINK, "");
-    //foreach(pHandle ah, *Average_handles)
-    //    addRule(new AverageInstantiationRule(ah, asw), 7.5f);
-
-    // TODO enable after above is fixed
-    //cprintf(-1, "Added %u Instantiation Rules.\n", (unsigned int) rulePriorities.size());
+    watchInstantiationAtoms();
 }
 
 ForwardGeneratorRuleProvider::~ForwardGeneratorRuleProvider(void)
@@ -492,16 +579,7 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
 
     float ANDEvaluatorPriority = 10.0f;
 
-    // Instantiation Rules
-    /*Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
-    foreach(pHandle fah, *ForAll_handles)
-        addRule(new ForAllInstantiationRule(fah, asw), 7.5f);
-    Btr<std::set<pHandle> > Average_handles = asw->getHandleSet(AVERAGE_LINK, "");
-    foreach(pHandle ah, *Average_handles)
-        addRule(new AverageInstantiationRule(ah, asw), 7.5f);
-
-    cprintf(-1, "Added %u Instantiation Rules.\n", (unsigned int) size());
-    */
+    watchInstantiationAtoms();
 
     addRule("OrRule", 10.0f);
 

@@ -128,7 +128,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 
         // Get the next Rule (no restrictions)
         foreach(std::string ruleName, composers->getRuleNames()) {
-            RulePtr r = generators->findRule(ruleName);
+            RulePtr r = composers->findRule(ruleName);
             cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it

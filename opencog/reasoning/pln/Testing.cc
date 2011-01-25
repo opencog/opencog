@@ -10,6 +10,8 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
+#define DPRINTF(...)
+
 using namespace std;
 using namespace opencog;
 using namespace opencog::pln;
@@ -50,10 +52,12 @@ float getCount(float c) { return SimpleTruthValue::confidenceToCount(c); }
 void initAxiomSet(string premiseFile)
 {
     AtomSpaceWrapper *asw = GET_ASW;
+    DPRINTF("initAxiomSet: Before reset");
     asw->reset();
+    DPRINTF("initAxiomSet: After reset");
     asw->allowFWVarsInAtomSpace = true;
 
-    std::cout << "loading " << premiseFile << std::endl;
+    DPRINTF("Loading %s", premiseFile.c_str());
 
 #if HAVE_GUILE
     int rc = load_scm_file(*(asw->getAtomSpace()), premiseFile.c_str());
@@ -67,7 +71,7 @@ void initAxiomSet(string premiseFile)
     // will (correctly) be updated to indicate that there are none.
     if (rc) throw std::string("failed to load file");
 #else
-    throw std::string("Not allowed to use XML or SCM!");
+    throw std::string("Need Scheme bindings to run PLN tests!");
 #endif
     cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
 }
@@ -154,7 +158,8 @@ bool runSCMTargets(string testDir, bool test_bc) {
     // So, it has/needs somewhat elaborate exception-handling.
     // This is partly because CXXTest doesn't give you any info
     // about an exception, just telling you it happened.
-    try {
+    try
+    {
 
         // TODO apparently there is a way to make iterators only cover
         // either files or directories. The boost::filesystem
@@ -167,7 +172,7 @@ bool runSCMTargets(string testDir, bool test_bc) {
             }
         }
     }
-    catch(std::string s) {
+    /*catch(std::string s) {
         std::cerr << "testSCMTargets:" << s;
         throw s;
     }
@@ -179,8 +184,8 @@ bool runSCMTargets(string testDir, bool test_bc) {
     {
         std::cerr << "testSCMTargets:" << e.what();
         throw e;
-    }
-    catch(...)
+    }*/
+    catch(std::exception& e) 
     {
         std::cerr << "Unknown exception during SCM targets" << std::endl;
         throw;
@@ -437,6 +442,7 @@ bool maketest(meta target,
                                         );
     t->state = Btr<BITNodeRoot>(new BITNodeRoot(target, NULL, config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
     Bstate.reset(state);
+    state = Bstate.get();
     return runPLNTest(t, test_bc);
 }
 

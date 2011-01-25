@@ -212,6 +212,7 @@ public:
         // test repeat #
         t = 0;
         temperature = 0.1f;
+        testFitnessEvaluator = BEST;
     
         // Initialize PLN test environment
         try {        
@@ -535,7 +536,7 @@ public:
                                       ))),
                      new SimpleTruthValue(0.78f, getCount(0.39f)),
                      new SimpleTruthValue(1.001f, getCount(0.999f)),
-                     100,0));
+                     200,0));
         }
     }
 

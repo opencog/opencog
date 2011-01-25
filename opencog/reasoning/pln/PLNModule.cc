@@ -169,6 +169,9 @@ void PLNModule::init()
     asw->allowFWVarsInAtomSpace = 
         config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
 
+    // Initialise ruleprovider (because it needs to monitor atom add/remove)
+    RuleProvider& rp = referenceRuleProvider();
+
 #ifdef HAVE_GUILE
     // Define a scheme wrapper -- the scheme function pln-bc will
     // call the pln_bc method.
