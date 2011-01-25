@@ -62,6 +62,19 @@ namespace opencog { namespace pln {
  * SubsetLink <TV> Universe A
  *
  * the rest follows from a).
+ *
+ * c)
+ *
+ * SubsetLink <TV>
+ *     C
+ *     SatisfyingSetLink
+ *         R
+ * |-
+ * ContextLink <TV>
+ *     C
+ *     R
+ *
+ * where R is an EvaluationLink or a PredicateNode
  */
 class ContextualizerRule : public GenericRule<IdentityFormula>
 {

@@ -95,9 +95,9 @@
 
 ; 7) Accounting is associated with Money
 
-(define axiom7 (InheritanceLink (stv .7 .9)
-                                Accounting
-                                Money))
+(define axiom7 (SubsetLink (stv .7 .9)
+                           Money
+                           Accounting))
 
 ; 8) CanadianPlaces is associated with Canada
 
@@ -120,8 +120,9 @@
                                  CanadianPeople
                                  Canada))
 
-; 12) Non Canadian People involved with Canadian people and money are
-; associated with log trafficking
+; 12) Non Canadian People involved with Canadian people in the context
+; of Money (only) have a chance of being associated with log
+; trafficking activities
 
 (define axiom11
   (AverageLink (stv .6 .7)
@@ -129,25 +130,30 @@
                (ImplicationLink (AndLink (InheritanceLink
                                           X
                                           (NotLink CanadianPeople))
-                                         (InheritanceLink
-                                          X
-                                          Money)
-                                         (EvaluationLink
-                                          Involved
-                                          (ListLink X CanadianPeople)))
+                                         (ContextLink
+                                          Money
+                                          (EvaluationLink
+                                           Involved
+                                           (ListLink X CanadianPeople)))
+                                         (NotLink
+                                          (ContextLink
+                                           (NotLink Money)
+                                           (EvaluationLink
+                                            Involved
+                                            (ListLink X CanadianPeople)))))
                                 (InheritanceLink
                                  X
                                  LogTrafficking))))
 
 ; 13) Clark is not Canadian
 
-(define axiom12 (InheritanceLink (stv .99 .9)
+(define axiom12 (InheritanceLink (stv .9 .9)
                                  Clark
                                  (NotLink CanadianPeople)))
 ;
 ; Inference, target theorem
 ;
-; Inheritance <?>
+; InheritanceLink <?>
 ;     Clark
 ;     LogTrafficking
 
@@ -207,7 +213,7 @@
 ; as the antecedent. (gadr axiom6) is used to take the contextualized
 ; axiom directly rather than the contextLink.
 ; 
-; Context <0.45, 0.48>
+; ContextLink <0.45, 0.48>
 ;     Accounting
 ;     EvaluationLink
 ;         Involved
@@ -217,4 +223,42 @@
 
 (define step3 (ModusPonensRule step1 (gadr axiom6) Accounting))
 
-step1
+; 4) Decontextualize the result of step3
+;
+; SubsetLink <0.45, 0.48>
+;     Accounting
+;     EvaluationLink
+;         Involved
+;         ListLink
+;             Clark
+;             CanadianPlaceNames
+;
+; Note that the ExtensionalInheritance of Accounting and
+; EvaluationLink is implicitely defined by considering the
+; satisfyingSet of EvaluationLink.
+
+(define step4 (DecontextualizerRule (ContextLink Accounting step3)))
+
+; 5) Apply SubsetDeductionRule on axiom7 and the result of step4
+;
+; SubsetLink <?>
+;     Money
+;     EvaluationLink
+;         Involved
+;         ListLink
+;             Clark
+;             CanadianPlaceNames
+
+(define step5 (SubsetDeductionRule axiom7 step4))
+
+; 6) Contextualize step5 using ContextualizerRule
+;
+; ContextLink <?>
+;     Money
+;     EvaluationLink
+;         Involved
+;         ListLink
+;             Clark
+;             CanadianPlaceNames
+
+(define step6 (ContextualizerRule step5))

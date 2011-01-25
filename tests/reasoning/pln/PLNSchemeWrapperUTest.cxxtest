@@ -130,6 +130,10 @@ public:
                         SimpleTruthValue(0.95, 959.707703));
         check_inference("niceWeather.scm",
                         SimpleTruthValue(0.5, SimpleTruthValue::confidenceToCount(0.5)));
+        check_inference("DecontextualizePredicate.scm",
+                        SimpleTruthValue(0.7, SimpleTruthValue::confidenceToCount(0.8)));
+        check_inference("ContextualizePredicate.scm",
+                        SimpleTruthValue(0.7, SimpleTruthValue::confidenceToCount(0.8)));
 #ifdef CONTEXTUAL_INFERENCE
         Handle cx = as->addNode(CONCEPT_NODE, "mathematics");
         std::cout << "cx = " << cx.value() << std::endl;

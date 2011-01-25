@@ -30,45 +30,44 @@ meta ContextualizerRule::i2oType(const VertexSeq& h) const {
     OC_ASSERT(h.size() == 1);
     pHandle ph = _v2h(h[0]);
 
-    // @todo it should probably be better to first try to
-    // contextualize a relation and then only if it's not possible try
-    // the Node contextualization
+    OC_ASSERT(asw->getArity(ph) == 2); // maybe this should be relaxed
+    pHandle A1 = asw->getOutgoing(ph,0);
+    pHandle A2 = asw->getOutgoing(ph,1);
 
-    // case b) contextualizing a Node
-    if(asw->getType(ph) == SUBSET_LINK) {
-        OC_ASSERT(asw->getArity(ph)==2);
-        pHandle CX = asw->getOutgoing(ph,0);
-        pHandle A = asw->getOutgoing(ph,1);
-        OC_ASSERT(A != PHANDLE_UNDEFINED);
-        OC_ASSERT(CX != PHANDLE_UNDEFINED);
-        return meta(new vtree(mva((pHandle)CONTEXT_LINK, mva(CX), mva(A))));
-    }
     // case a) contextualizing a relation
-    else {
-        OC_ASSERT(asw->getArity(ph)==2); // @todo generilize for n-ary
-        pHandle And1 = asw->getOutgoing(ph,0);
-        pHandle And2 = asw->getOutgoing(ph,1);
-        OC_ASSERT(asw->getType(And1) == AND_LINK);
-        OC_ASSERT(asw->getType(And2) == AND_LINK);
-        OC_ASSERT(asw->getArity(And1)==2); // @todo generilize for n-ary
-        OC_ASSERT(asw->getArity(And2)==2); // @todo generilize for n-ary
-        pHandleSeq out1 = asw->getOutgoing(And1);
-        pHandleSeq out2 = asw->getOutgoing(And2);
+    if(asw->getType(A1) == AND_LINK && asw->getType(A2) == AND_LINK) {
+        // @todo generilize for n-ary
+        OC_ASSERT(asw->getArity(A1) == 2);
+        OC_ASSERT(asw->getArity(A2) == 2);
+        pHandleSeq out1 = asw->getOutgoing(A1);
+        pHandleSeq out2 = asw->getOutgoing(A2);
 
         // the intersection btw out1 and out2 will be the new context
         pHandleSeq inter = set_intersection(out1, out2);
-        OC_ASSERT(inter.size() == 1); // @todo generilize for n-ary
-        pHandle CX = inter[0];
-        pHandleSeq new_out1 = set_difference(out1, inter); // can be optimized
-        pHandleSeq new_out2 = set_difference(out2, inter); // can be optimized
-        OC_ASSERT(new_out1.size() == 1); // @todo generilize for n-ary
-        pHandle A = new_out1[0];
-        OC_ASSERT(new_out2.size() == 1); // @todo generilize for n-ary
-        pHandle B = new_out2[0];
-        return meta(new vtree(mva((pHandle)CONTEXT_LINK, mva(CX),
-                                  mva((pHandle)asw->getType(ph),
-                                      mva(A), mva(B)))));
+        if(inter.size() > 0) {
+            pHandle CX = inter[0];
+            // can be optimized
+            pHandleSeq new_out1 = set_difference(out1, inter);
+            pHandleSeq new_out2 = set_difference(out2, inter);
+            OC_ASSERT(new_out1.size() == 1); // @todo generilize for n-ary
+            pHandle A = new_out1[0];
+            OC_ASSERT(new_out2.size() == 1); // @todo generilize for n-ary
+            pHandle B = new_out2[0];
+            return meta(new vtree(mva((pHandle)CONTEXT_LINK, mva(CX),
+                                      mva((pHandle)asw->getType(ph),
+                                          mva(A), mva(B)))));
+        }
     }
+
+    // case b) and c)
+    if(asw->getType(ph) == SUBSET_LINK) {
+        if(asw->isSubType(A2, SATISFYING_SET_LINK)) // case c)
+            A2 = asw->getOutgoing(A2, 0);
+        return meta(new vtree(mva((pHandle)CONTEXT_LINK, mva(A1), mva(A2))));
+    }
+
+    OC_ASSERT(false); // unhandle case
+    return meta();
 }
 
 TVSeq ContextualizerRule::formatTVarray(const VertexSeq& premiseArray) const {
@@ -105,18 +104,19 @@ Rule::setOfMPs ContextualizerRule::o2iMetaExtra(meta outh,
 
     BoundVTree* res;
     // case a) contextualizing a relation
-    if(asw->isSubType(A, LINK)) {
+    if(asw->isSubType(A, LINK) || !asw->isSubType(A, SATISFYING_SET_LINK)) {
         OC_ASSERT(A_it.number_of_children() == 2); // @todo generalize for n-ary
-        
         res = new BoundVTree(mva((pHandle)asw->getType(A),
                                  mva((pHandle)AND_LINK, mva(CX),
                                      vtree(A_it.begin())),
                                  mva((pHandle)AND_LINK, mva(CX),
                                      vtree(A_it.last_child()))));
     }
-    // case b) contextualizing a Node
+    // case b) and c)
     // @note it is missing the cases where concepts are AND_LINK and such
     else {
+        if(asw->isSubType(A, SATISFYING_SET_LINK)) // case c)
+            A = _v2h(*A_it.begin());
         res = new BoundVTree(mva((pHandle)SUBSET_LINK, mva(CX), mva(A)));
     }
 
