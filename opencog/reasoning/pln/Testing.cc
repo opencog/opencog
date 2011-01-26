@@ -36,6 +36,8 @@ FitnessEvaluatorT testFitnessEvaluator;
 vector< vector<vector<int> > >  INstatsVT;
 vector<vector<int> > INstatsV;
 vector<int> INstats;
+//! A list of test names that fail, to be printed out at the end of testing
+vector<string> failedSCMTargets;
 int allTestsInferenceNodes=0;
 int allTestsExpansions=0;
 
@@ -167,8 +169,12 @@ bool runSCMTargets(string testDir, bool test_bc) {
         for (recursive_directory_iterator end, dir(testDir);
               dir != end; ++dir) {
             if (!is_directory(dir->status())) {
-                Btr<PLNTest> _test = setupSCMTarget(dir->path().string().c_str(), test_bc);
-                if (_test) runPLNTest(_test, test_bc);
+                string filename(dir->path().string());
+                Btr<PLNTest> _test = setupSCMTarget(filename.c_str(), test_bc);
+                if (_test) {
+                    if (!runPLNTest(_test, test_bc))
+                        failedSCMTargets.push_back(filename);
+                }
             }
         }
     }
@@ -198,6 +204,11 @@ bool runSCMTargets(string testDir, bool test_bc) {
     } else {
         cout << "Failed " << (tests_total - tests_passed) << " out of "
              << tests_total << " tests." << endl;
+        vector<string>::const_iterator cit = failedSCMTargets.begin();
+        cout << "Tests failed:" << endl;
+        for (; cit != failedSCMTargets.end(); cit++) {
+            cout << "  " << *cit << endl;
+        }
         return false;
     }
 }
@@ -416,14 +427,11 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     cout << "So far, failed " << (tests_total - tests_passed) << " out of "
          << tests_total << " tests." << endl;
 
-//    TS_ASSERT(passed);
 #if WAIT_KEY_ON_FAILURE
     if (!passed)
         getc(stdin);
 #endif
     if (etv != NULL) delete etv;
-    //asw->reset(NULL);
-//    sleep(10);
     return passed;
 }
 
