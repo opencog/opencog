@@ -29,8 +29,8 @@
 #include <boost/foreach.hpp>
 #include <boost/thread/thread.hpp>
 
-#define DPRINTF printf
-//#define DPRINTF(...)
+//#define DPRINTF printf
+#define DPRINTF(...)
 
 namespace opencog { namespace pln {
 
@@ -335,7 +335,7 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
     //addRule(new ANDBreakdownRule(asw, 2), 10.0f);
     //addRule(new ANDBreakdownRule(asw, 3), 10.0f);
 
-    addRule(new NotNotRule(asw), 10.0f);
+    addRule(new NotRule(asw), 10.0f);
     
     addRule(new ScholemFunctionProductionRule(asw), 20.0f);
     
@@ -360,6 +360,7 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
     addRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
     addRule(new DeductionRule<DeductionSimpleFormula>(asw, ASSOCIATIVE_LINK), 8.0f);
     addRule(new DeductionRule<DeductionSimpleFormula>(asw, SIMILARITY_LINK), 8.0f);
+    addRule(new DeductionRule<DeductionSimpleFormula>(asw, SUBSET_LINK), 8.0f);
     
     //addRule(new ORPartitionRule(asw), 10.0f);
     addRule(new CrispTheoremRule(asw), 10.0f);
@@ -372,7 +373,6 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
     addRule(new Equi2ImpRule(asw), 10.0f);
 
     addRule(new HypothesisRule(asw), 30.0f);
->>>>>>> MERGE-SOURCE
     // general -> specific
     //addRule(new SimSubstRule1(asw, false), -10000000.0f);
     addRule(new SimSubstRule1(asw, false), 5.0f);
