@@ -112,7 +112,7 @@ BoundVertex StrictImplicationBreakdownRule::compute(const VertexSeq& premiseArra
 {
     cprintf(3,"StrictImplicationBreakdownRule::compute:\n");
 
-    // In FC, the input sometimes comes in in the wrong order (shit, ANDLinks are now asymmetric)
+    // In FC, the input sometimes comes in in the wrong order (shit, AndLinks are now asymmetric)
     // validate didn't seem to mind...
     assert(validate(premiseArray));
 //    const uint n = premiseArray.size();

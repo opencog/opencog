@@ -19,33 +19,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ANDPARTITIONRULE_H
-#define ANDPARTITIONRULE_H
+#ifndef ANDSUBSTRULE_H
+#define ANDSUBSTRULE_H
 
 namespace opencog { namespace pln {
 
-/** @class ANDPartitionRule
-	Partitions argument into smaller ANDLinks
-*/
-
-class ANDPartitionRule : public Rule
+class AndSubstRule : public Rule
 {
-	SymmetricANDFormula fN;
-
+protected:
+    AndSubstRule(AtomSpaceWrapper *_asw)
+        : Rule(_asw,true,true,"AndSubstRule")
+    {}
 public:
-	ANDPartitionRule(AtomSpaceWrapper *_asw)
-	: Rule(_asw,true,true,"ANDPartitionRule")
-	{ }
-	
-	bool validate2(MPs& args) const { return true; }
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    bool validate2(MPs& args) const { return true; }
 
-	BoundVertex compute(const VertexSeq& premiseArray,
-                            pHandle CX = PHANDLE_UNDEFINED,
-                            bool fresh = true) const;
-	
-	NO_DIRECT_PRODUCTION;
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    BoundVertex compute(const VertexSeq& premiseArray,
+                        Handle CX = Handle::UNDEFINED,
+                        bool fresh = true) const;
+    NO_DIRECT_PRODUCTION;
 };
 
 }} // namespace opencog { namespace pln {
-#endif // ANDPARTITIONRULE_H
+#endif // ANDSUBSTRULE_H
+

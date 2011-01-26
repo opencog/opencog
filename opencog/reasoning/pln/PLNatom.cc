@@ -125,7 +125,7 @@ bool echo=false;
     }
     
     if (T == AND_LINK) {
-        p("AND");
+        p("And");
         for (s = 0; s < hs.size(); s++)
             if (!(*((MetaPredicate*)(hs[s].get())))(h))
             {
@@ -145,7 +145,7 @@ bool echo=false;
             p("no");
             return false;
     } else if (T == NOT_LINK) { 
-        for (s = 0; s < hs.size(); s++) //Actually this is "NOT AND"
+        for (s = 0; s < hs.size(); s++) //Actually this is "Not And"
                         if (!(*((MetaPredicate*)(hs[s].get())))(h))
                         {
                             p("yes");

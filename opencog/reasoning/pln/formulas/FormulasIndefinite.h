@@ -101,7 +101,7 @@ public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
 };
 
-class IndefiniteSymmetricANDFormula : public Formula<2>
+class IndefiniteSymmetricAndFormula : public Formula<2>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;

@@ -30,7 +30,7 @@
 
 namespace opencog { namespace pln {
 
-Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+Rule::setOfMPs AndRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     //return Rule::setOfMPs();
     
@@ -41,7 +41,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     if (! (asw->isSubType(_v2h(*top), AND_LINK)) || top.number_of_children() <= 2)
         return Rule::setOfMPs();
 
-    /// This Rule cannot produce nested ANDLinks. Try SimpleANDRule instead.
+    /// This Rule cannot produce nested AndLinks. Try SimpleAndRule instead.
 
     for (tree<Vertex>::sibling_iterator j = outh->begin(top); j != outh->end(top); j++)
         if (asw->isSubType(_v2h(*j), AND_LINK))
@@ -58,15 +58,15 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 
     /// Smart lookup begins
 
-    Btr<std::set<pHandle> > sANDLink_set = asw->getHandleSet(AND_LINK,"");
-    std::vector<pHandle> ANDLink_set(sANDLink_set->size());
-    std::copy(sANDLink_set->begin(), sANDLink_set->end(), ANDLink_set.begin());
+    Btr<std::set<pHandle> > sAndLink_set = asw->getHandleSet(AND_LINK,"");
+    std::vector<pHandle> AndLink_set(sAndLink_set->size());
+    std::copy(sAndLink_set->begin(), sAndLink_set->end(), AndLink_set.begin());
 
     while (1)
         {
             std::vector<Btr<atom> > max_subset;
             
-            getLargestIntersection2(query_set, ANDLink_set, max_subset);
+            getLargestIntersection2(query_set, AndLink_set, max_subset);
             
             if (max_subset.size() > 1)
             {
@@ -91,12 +91,12 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     return makeSingletonSet(ret);
 }
 
-/*boost::shared_ptr<set<BoundVertex > > ANDRule::attemptDirectProduction(meta outh);
+/*boost::shared_ptr<set<BoundVertex > > AndRule::attemptDirectProduction(meta outh);
 {
-    return attemptDirectANDProduction(asw, outh, this);
+    return attemptDirectAndProduction(asw, outh, this);
 }*/
 
-BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
+BoundVertex AndRule::compute(const VertexSeq& premiseArray,
                              pHandle CX,
                              bool fresh) const
 {
@@ -107,18 +107,18 @@ BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
                 if (!_v2h(&premiseArray[i]))
                     return Vertex(PHANDLE_UNDEFINED);
 
-    // The items in the the premiseArray are divided into ANDLinks and nodes.
-    // Then, the nodes are combined into a single ANDlink by symmetric AND formula,
-    // and added to the list of ANDlinks.
+    // The items in the the premiseArray are divided into AndLinks and nodes.
+    // Then, the nodes are combined into a single Andlink by symmetric And formula,
+    // and added to the list of Andlinks.
     
             int p=0;
     
     
-            LOG(3, "ANDRule::compute");
+            LOG(3, "AndRule::compute");
 
             std::set<pHandle> premises, nodes;
             DistinguishNodes(premiseArray, premises, nodes);
-            LOG(4, "ANDRule::compute");
+            LOG(4, "AndRule::compute");
 //  if (!nodes.empty())
 //      premises.push_back( computeSymmetric(nodes) );
 
@@ -126,7 +126,7 @@ BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
                 {
                     premises.insert(*j);
                 }
-            LOG(4, "ANDRule::compute");
+            LOG(4, "AndRule::compute");
             TVSeq partialTVs(premises.size());
 
             std::set<pHandle>::const_iterator i;
@@ -134,7 +134,7 @@ BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
             std::set<const TruthValue*> TVowner;
 
     /// Create the set of elements in the result conjunction
-            LOG(4, "ANDRule::computeCC");
+            LOG(4, "AndRule::computeCC");
             for (i = premises.begin(); i != premises.end(); i++)
                 {
                     std::vector<pHandle> inc2;
@@ -150,12 +150,12 @@ BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
                         if (conjunct.find(*j) == conjunct.end())
                             conjunct.insert(*j);
                 }
-            LOG(4, "22 ANDRule::compute");
+            LOG(4, "22 AndRule::compute");
             /// Loop thru the premises, creating the partialTVs.
             
             for (p=0, i = premises.begin(); i != premises.end(); i++, p++)
                 {
-                    LOG(4, "Q ANDRule::compute");
+                    LOG(4, "Q AndRule::compute");
                     /// Put into Di all the elements of the result conjunct not present in the premise #i
                     std::set<pHandle> Di;
                     for (std::set<pHandle>::const_iterator j = conjunct.begin(); j != conjunct.end(); j++)
@@ -171,22 +171,22 @@ BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
                             if (!STLhas2(*inc, *j))
                                 Di.insert(*j);
                         }
-                    LOG(4, "W ANDRule::compute");
+                    LOG(4, "W AndRule::compute");
                     int Dis = Di.size();
                     
                     std::set<pHandle> DiSubsets;
                     pHandle largest_intersection;
                     
-                    LOG(4,"ANDRule::compute:");
+                    LOG(4,"AndRule::compute:");
                     
                     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
                     for (std::set<pHandle>::const_iterator di = Di.begin(); di != Di.end(); di++)
                         printer.print(*di, 4);
                     
-                    LOG(4, "ANDRule:: getLargestIntersection");
+                    LOG(4, "AndRule:: getLargestIntersection");
                     while (getLargestIntersection(Di, premises, largest_intersection))
                         {
-                            cprintf(4,"Y ANDRule::compute Di size = %u\n", (uint) Di.size());          
+                            cprintf(4,"Y AndRule::compute Di size = %u\n", (uint) Di.size());          
                             const std::vector<pHandle> new_elem2 = asw->getOutgoing(largest_intersection);
 
 #ifdef WIN32            
@@ -221,7 +221,7 @@ BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
             DiSubsets.insert(largest_intersection); 
         }
                     
-        LOG(4, "ANDRule:: getLargestIntersection OK!");
+        LOG(4, "AndRule:: getLargestIntersection OK!");
         TVSeq tvs(1 + DiSubsets.size());
         
         tvs[0] = &(asw->getTV(*i));
@@ -230,11 +230,11 @@ BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
         std::set<pHandle>::const_iterator ss;
         for (h = 0, ss = DiSubsets.begin(); ss != DiSubsets.end(); ss++, h++)
             tvs[h+1] = &(asw->getTV(*ss));
-        LOG(4, "R ANDRule::compute");
+        LOG(4, "R AndRule::compute");
 
 /*      if (DiSubsets.size()>0)
         {
-            printf("AND ");
+            printf("And ");
             for (set<Handle>::const_iterator z=DiSubsets.begin();z != DiSubsets.end(); z++)
             {
                 printf("(");
@@ -245,7 +245,7 @@ BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
             printf("\n");
         }       
 */
-        // Calculate either the ANDNode evaluation or just use the premise strength:
+        // Calculate either the AndNode evaluation or just use the premise strength:
 
         if (DiSubsets.size()>0)
         {
@@ -258,28 +258,28 @@ BoundVertex ANDRule::compute(const VertexSeq& premiseArray,
 //      printf("Part: %f\n", partialTVs[p]->getMean());
     }
     /// Combine the partialTVs
-    LOG(4, "33 ANDRule::compute");
+    LOG(4, "33 AndRule::compute");
 
     TruthValue* retTV = fN.compute(partialTVs);
 
     pHandleSeq outgoing;
     for (std::set<pHandle>::const_iterator c = conjunct.begin(); c != conjunct.end(); c++)
         outgoing.push_back(*c);
-LOG(4, "44 ANDRule::compute");
+LOG(4, "44 AndRule::compute");
     pHandle ret = asw->addLink(AND_LINK, outgoing, *retTV, fresh);
     
-LOG(4, "55 ANDRule::compute");
+LOG(4, "55 AndRule::compute");
     delete retTV;
     
     for (std::set<const TruthValue*>::iterator t= TVowner.begin();
          t != TVowner.end(); t++)
         delete *t;
-LOG(3, "ANDRule::compute ok.");		
+LOG(3, "AndRule::compute ok.");		
     
     return Vertex(ret);
 
     } catch(...) {
-        LOG(-10, "Exception in ANDRule::compute");
+        LOG(-10, "Exception in AndRule::compute");
         return Vertex(PHANDLE_UNDEFINED);
     }
 }

@@ -295,12 +295,12 @@ BoundVertex CrispTheoremRule::compute(const VertexSeq& premiseArray,
         tvs[i] = &(asw->getTV(_v2h(premiseArray[i])));
     }
     
-    bool use_AND_rule = (real_args>1);
+    bool use_And_rule = (real_args>1);
     
 //  cprintf(0,"CrispTheoremRule::compute... TV ok\n");
     
-    TruthValue* tv = (use_AND_rule?
-                      SymmetricANDFormula().compute(tvs)
+    TruthValue* tv = (use_And_rule?
+                      SymmetricAndFormula().compute(tvs)
                       : tvs[0]->clone());
     pHandle ret_h = asw->addAtom(res, *tv, fresh);
     delete tv;

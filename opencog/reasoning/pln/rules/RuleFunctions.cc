@@ -170,7 +170,7 @@ pHandle Join(pHandle h1, pHandle h2, ASW& asw)
     return Join<T>(h, 2, asw);
 }
 
-void insertAllANDCombinations(set<atom, lessatom_ignoreVarNameDifferences> head, vector<atom> tail, set<atom, lessatom_ignoreVarNameDifferences>& AND_combinations)
+void insertAllAndCombinations(set<atom, lessatom_ignoreVarNameDifferences> head, vector<atom> tail, set<atom, lessatom_ignoreVarNameDifferences>& And_combinations)
 {
     int totalSize = tail.size() + head.size();
 
@@ -188,7 +188,7 @@ void insertAllANDCombinations(set<atom, lessatom_ignoreVarNameDifferences> head,
 //          copy(head.begin(), head.end(), neBoundVertex.hs.begin());
         }
 
-        AND_combinations.insert(neBoundVertex);
+        And_combinations.insert(neBoundVertex);
     }
     else
     {
@@ -197,14 +197,14 @@ void insertAllANDCombinations(set<atom, lessatom_ignoreVarNameDifferences> head,
         
         /// Combinations without natom
 
-        if (totalSize >= 3) //If ANDLink producible even if 1 element was removed.
-            insertAllANDCombinations(head, tail, AND_combinations);
+        if (totalSize >= 3) //If AndLink producible even if 1 element was removed.
+            insertAllAndCombinations(head, tail, And_combinations);
         
         head.insert(natom);
 
         /// Combinations with natom
 
-        insertAllANDCombinations(head, tail, AND_combinations);
+        insertAllAndCombinations(head, tail, And_combinations);
     }
 }
 
@@ -310,9 +310,9 @@ Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter,
 
 #if DISABLE_FOR_NOW
 //! @todo Update to BoundVTree
-boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapper *destTable,
+boost::shared_ptr<set<BoundVertex > > attemptDirectAndProduction(iAtomSpaceWrapper *destTable,
                                         const meta& outh,
-                                        ArityFreeANDRule* rule)
+                                        ArityFreeAndRule* rule)
     {
         if (!isSubType(v2h(*outh->begin()), AND_LINK))
             return Rule::setOfMPs();
@@ -320,7 +320,7 @@ boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapp
         tree<Vertex>::iterator top = outh->begin();
         const int N = outh->begin(top);
 
-        set<atom, lessatom_ignoreVarNameDifferences> qnodes, AND_combinations;
+        set<atom, lessatom_ignoreVarNameDifferences> qnodes, And_combinations;
         vector<atom> units;
 
         /// Add Individual nodes
@@ -330,26 +330,26 @@ boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapp
                                             i++)
             qnodes.insert(v2h(*i));
 
-        AND_combinations = qnodes;
+        And_combinations = qnodes;
 
-        /// Add ANDLinks
+        /// Add AndLinks
 
-        insertAllANDCombinations(set<atom, lessatom_ignoreVarNameDifferences>(), outh.hs, AND_combinations);
+        insertAllAndCombinations(set<atom, lessatom_ignoreVarNameDifferences>(), outh.hs, And_combinations);
 
         /// Create ring MP
 
         meta gatherMP(new BoundVTree((Handle)OR_LINK));
 
-        if (!AND_combinations.empty())
+        if (!And_combinations.empty())
         {
-            //gatherMP.hs = vector<atom>(AND_combinations.size());
+            //gatherMP.hs = vector<atom>(And_combinations.size());
             for (set<atom, lessatom_ignoreVarNameDifferences>::iterator a =
-                AND_combinations.begin(); a != AND_combinations.end(); a++)
+                And_combinations.begin(); a != And_combinations.end(); a++)
             {
                 gatherMP.append_child(  gatherMP.begin(),
                                         a->maketree().begin());
             }
-            //copy(AND_combinations.begin(), AND_combinations.end(), gatherMP.hs.begin());
+            //copy(And_combinations.begin(), And_combinations.end(), gatherMP.hs.begin());
         }
 
         /// Gather

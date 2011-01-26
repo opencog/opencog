@@ -39,17 +39,17 @@ decided (=policy), and only [TV.strength > 1.0-L] should be considered TRUE, etc
 - No Nested ForAlls => "defined($X) @ node" currently fails.
 - ForAllRule's TV determines the TV of the outest link within the ForAll, not affecting
 the internal ones. All atoms within ForAll should originally have confidence = 0.
-- ORRule is only evaluated to the binary pair exclusion precision (A+B+C-AB-AC-BC).
+- OrRule is only evaluated to the binary pair exclusion precision (A+B+C-AB-AC-BC).
 - Policy: Rule.o2i methods must make sure they don't waste time. ResMan only guards the
 blocking Rule method calls on a serial manner - it cannot survive a slow o2i implementation
-- Always puts ANDRules before SimpleANDRules, since the latter accept more general output type,
+- Always puts AndRules before SimpleAndRules, since the latter accept more general output type,
 but don't do the flattening magic.
-- BW chaining UnorderedLinkPermutationRule only works for ANDLinks. Try it with ORLinks and die.
+- BW chaining UnorderedLinkPermutationRule only works for AndLinks. Try it with OrLinks and die.
 FW chaining should be ok. The reason is logical...
 - CrispUnificationRule & UnorderedLinkPermutationRule use HYPOTHETICAL_LINKs - pseudo atoms that,
 given as a parameter to the rule, make the rule output the desired kind of outcome
 - Often you can choose to either increase the complexity of a Rule, or make multiple
-versions of the rule (eg. ANDRule<N>).
+versions of the rule (eg. AndRule<N>).
 - MP that only tests __INSTANCE_OF property is equivalent to a MP construct that uses
 FW_VARIABLE_NODEs, but faster to use (no substitutions needed).
 - ATOM-type MP will always be true for any parameter atom.
@@ -299,8 +299,8 @@ WHen using exhaustive inference tree expansion, there may arise pathological
 Rule combinations. Known examples are:
 
 - CrispTheorem (with theorems in fetchdemo.xml) with ImplicationBreakdown
-- AND Rules with ANDBreakdown
-- UnorderedLinkPermutation often, esp. with ANDBreakdown / ORBreakdown
+- And Rules with AndBreakdown
+- UnorderedLinkPermutation often, esp. with AndBreakdown / OrBreakdown
 - ChildSubstitution almost always
 
 
@@ -1123,7 +1123,7 @@ q - quit\n\
 2 - recommended maximally informative log level\n\
 r #n - Load in a new pre-defined target #n (from PLNShell.cc)\n\
 x [path] - Load XML axiom file in 'path'\n\
-s #s - Infer until result found with conf>0.01 OR 's' inference steps have been taken \n\
+s #s - Infer until result found with conf>0.01 Or 's' inference steps have been taken \n\
 S #n - Execute the #n of the fittest BIT nodes\n\
 i #n - Expand BITNode with id #n\n\
 E #n - Print out the results of the BITnode #n  (0 = root)\n\

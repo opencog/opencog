@@ -27,19 +27,19 @@ ADD_LIBRARY (pln SHARED
 	rules/RuleProvider.cc
 	rules/RuleFunctions.cc
 	rules/not/NotRule.cc
-	rules/or/ORPartitionRule.cc
-	rules/or/ORRule.cc
+	rules/or/OrPartitionRule.cc
+	rules/or/OrRule.cc
 	rules/auxiliary/SubsetEvalRule.cc
 	rules/auxiliary/IntensionalInheritanceRule
 	rules/auxiliary/CrispTheoremRule.cc
 	rules/auxiliary/LookupRule.cc
 	rules/auxiliary/ScholemFunctionProductionRule.cc
 	rules/auxiliary/UnorderedLinkPermutationRule.cc
-	rules/and/ANDRuleArityFree.cc
-	rules/and/ANDRule.cc
-	rules/and/ANDPartitionRule.cc
-	rules/and/ANDSubstRule.cc
-	rules/and/ANDBreakdownRule.cc
+	rules/and/AndRuleArityFree.cc
+	rules/and/AndRule.cc
+	rules/and/AndPartitionRule.cc
+	rules/and/AndSubstRule.cc
+	rules/and/AndBreakdownRule.cc
 	rules/implication/ImplicationTailExpansionRule.cc
 	rules/implication/ImplicationBreakdownRule.cc
 	rules/implication/StrictImplicationBreakdownRule.cc
@@ -116,9 +116,9 @@ INSTALL (FILES
 	rules/implication/ImplicationTailExpansionRule.h
 	rules/simsubst/SimSubstRule2.h
 	rules/simsubst/SimSubstRule1.h
-	rules/or/ORRule.h
-	rules/or/OR2ANDRule.h
-	rules/or/ORPartitionRule.h
+	rules/or/OrRule.h
+	rules/or/Or2AndRule.h
+	rules/or/OrPartitionRule.h
 	rules/RuleApp.h
 	rules/inference/DeductionRule.h
 	rules/inference/HypothesisRule.h
@@ -150,13 +150,13 @@ INSTALL (FILES
 	rules/instantiation/ForAllInstantiationRule.h
 	rules/instantiation/AverageInstantiationRule.h
 	rules/Rules.h
-	rules/and/AND2ORRule.h
-	rules/and/ANDBreakdownRule.h
-	rules/and/ANDSubstRule.h
-	rules/and/ANDRuleArityFree.h
-	rules/and/ANDRuleSimple.h
-	rules/and/ANDRule.h
-	rules/and/ANDPartitionRule.h
+	rules/and/And2OrRule.h
+	rules/and/AndBreakdownRule.h
+	rules/and/AndSubstRule.h
+	rules/and/AndRuleArityFree.h
+	rules/and/AndRuleSimple.h
+	rules/and/AndRule.h
+	rules/and/AndPartitionRule.h
 	rules/context/ContextualizerRule.h
 	rules/context/DecontextualizerRule.h
 	rules/context/ContextFreeToSensitiveRule.h

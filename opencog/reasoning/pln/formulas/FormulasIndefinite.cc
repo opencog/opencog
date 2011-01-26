@@ -749,7 +749,7 @@ TruthValue* IndefiniteSymmetricRevisionFormula::simpleCompute(const TVSeq& TV,
     return result;
 }
 
-TruthValue* IndefiniteSymmetricANDFormula::simpleCompute(const TVSeq& TV,
+TruthValue* IndefiniteSymmetricAndFormula::simpleCompute(const TVSeq& TV,
                                                          long U) const
 {
     int N = TV.size();

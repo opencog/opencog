@@ -824,7 +824,7 @@ void weak_atom<Btr<tree<Vertex> > >::apply_bindings()
     }
 }
 
-/// Slow, and doesn't handle the meta-level AND,OR,NOT operations.
+/// Slow, and doesn't handle the meta-level And,Or,Not operations.
 
 template<>
 bool weak_atom<Btr<tree<Vertex> > >::operator()(pHandle h)
@@ -1057,7 +1057,7 @@ string make_subst_buf(const atom& a)
     if (a.forbiddenBindings)
         for ( set<subst>::const_iterator fi = a.forbiddenBindings->begin();
                 fi != a.forbiddenBindings->end(); fi++) {
-            subst_buf += "NOT( " + fi->first + "=>" + condensed_form(fi->second) + " ) ";
+            subst_buf += "Not( " + fi->first + "=>" + condensed_form(fi->second) + " ) ";
         }
 
     return subst_buf;

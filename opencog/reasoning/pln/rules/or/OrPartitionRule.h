@@ -19,32 +19,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ORRULE_H
-#define ORRULE_H
+#ifndef ORPARTITIONRULE_H
+#define ORPARTITIONRULE_H
 
-#include "../GenericRule.h"
+#include "OrRule.h"
 
 namespace opencog { namespace pln {
 
-class ORRule : public GenericRule<ORFormula>
+/** @class OrPartitionRule
+	Partitions argument into, like, Or(A, Or(B, Or(C, D)))
+*/
+
+class OrPartitionRule : public Rule
 {
+    OrRule* regularOr;
 public:
-	ORRule(AtomSpaceWrapper *_asw);
-    
-//    virtual meta targetTemplate() const;
 
-    virtual setOfMPs fullInputFilter() const;
-    
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    OrPartitionRule(AtomSpaceWrapper *_asw)
+        : Rule(_asw, true, true, "OrPartitionRule") 
+    {
+        regularOr = new OrRule(_asw);
+    }
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    bool validate2(MPs& args) const { return true; }
 	
-	NO_DIRECT_PRODUCTION;
+    BoundVertex compute(const VertexSeq& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const;
 	
-	virtual TVSeq formatTVarray(const VertexSeq& premiseArray) const;
-public:
-	bool validate2(MPs& args) const { return true; }
-
-	virtual meta i2oType(const VertexSeq& h) const;
+    NO_DIRECT_PRODUCTION;
 };
 
 }} // namespace opencog { namespace pln {
-#endif // ORRULE_H
+#endif // ORPARTITIONRULE_H

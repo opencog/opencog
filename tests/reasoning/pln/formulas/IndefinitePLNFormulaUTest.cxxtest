@@ -158,7 +158,7 @@ public:
   
   	void testSymmetricAndFormula() {
 		
-		printf("** AND Formula **\n");
+		printf("** And Formula **\n");
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(10);
     	float LA=0.99f; float LB=0.99f;
@@ -182,7 +182,7 @@ public:
 		TS_ASSERT(result->getU() >= expectedU-error && result->getU() <= expectedU+error);
 		TS_ASSERT(result->getMean() >= expectedMean-error && result->getMean() <= expectedMean+error);
 
-	    printf("\n** AND Formula **");
+	    printf("\n** And Formula **");
 	
 	    float L2A=0.051668044685163f; float L2B=0.731203298626716f;
 	    float U2A=0.264185905611042f; float U2B=0.997599605415954f;

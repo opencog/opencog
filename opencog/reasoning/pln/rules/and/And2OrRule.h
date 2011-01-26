@@ -23,10 +23,10 @@
 #define AND2ORRULE_H
 
 namespace opencog { namespace pln {
-class AND2ORRule : public Rule
+class And2OrRule : public Rule
 {
-    AND2ORRule(iAtomSpaceWrapper *_asw)
-	: Rule(_asw, false, true, "AND2ORRule")
+    And2OrRule(iAtomSpaceWrapper *_asw)
+	: Rule(_asw, false, true, "And2OrRule")
     {
         inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N,
                                                  1, new atom(AndLink))));
@@ -55,7 +55,7 @@ class AND2ORRule : public Rule
                         bool fresh = true) const
     {
         assert(n==1);
-        return AND2ORLink(premiseArray[0]);
+        return And2OrLink(premiseArray[0]);
     }
 };
 

@@ -25,7 +25,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../../PLNUtils.h"
-#include "ANDRuleArityFree.h"
+#include "AndRuleArityFree.h"
 
 namespace opencog { namespace pln {
 
@@ -50,13 +50,13 @@ pHandle UnorderedCcompute(AtomSpaceWrapper *asw,
                           bool fresh = true);
 
 template<int N>
-class SimpleANDRule : public ArityFreeANDRule
+class SimpleAndRule : public ArityFreeAndRule
 {
 public:
-	SimpleANDRule(AtomSpaceWrapper *_asw)
-	: ArityFreeANDRule(_asw)
+	SimpleAndRule(AtomSpaceWrapper *_asw)
+	: ArityFreeAndRule(_asw)
 	{
-		name = "SimpleANDRule" + boost::lexical_cast<std::string>(N);
+		name = "SimpleAndRule" + boost::lexical_cast<std::string>(N);
 		for (int i = 0; i < N; i++)
 			inputFilter.push_back(meta(
 				new tree<Vertex>(mva((pHandle)ATOM))
@@ -95,9 +95,9 @@ public:
 		pHandleSeq dummy_outgoing(1, first);
         const TruthValue& dummy_tv = asw->getTV(first);
 
-		//printf("ANDRUle: [%d: %d] %s =>\n", N, v2h(premiseArray[0]), getTruthValue(v2h(premiseArray[0]))->toString().c_str());
+		//printf("AndRUle: [%d: %d] %s =>\n", N, v2h(premiseArray[0]), getTruthValue(v2h(premiseArray[0]))->toString().c_str());
 
-/*		puts("ANDRule got args:");
+/*		puts("AndRule got args:");
 		foreach(const Vertex& v, premiseArray)
 			printTree(v2h(v),0,-3);
 	*/
@@ -108,7 +108,7 @@ public:
                                       dummy_tv, fresh));
         delete[] hs;
 
-		      //		printf("=> ANDRUle: %s:\n", ret, getTruthValue(ret)->toString().c_str());
+		      //		printf("=> AndRUle: %s:\n", ret, getTruthValue(ret)->toString().c_str());
 		      //		printTree(ret,0,-3);
 		      //currentDebugLevel = -3;
 

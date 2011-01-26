@@ -27,19 +27,19 @@
 
 namespace opencog { namespace pln {
 
-/// Produces A given an ANDLink containing A (and N other Atoms)
+/// Produces A given an AndLink containing A (and N other Atoms)
 /// You want multiple copies of this Rule, for different N.
-class ANDBreakdownRule : public Rule
+class AndBreakdownRule : public Rule
 {
 protected:
-    ANDBreakdownFormula formula;
+    AndBreakdownFormula formula;
     const uint N;
     
 public:
-    ANDBreakdownRule(AtomSpaceWrapper *_asw, int _N)
+    AndBreakdownRule(AtomSpaceWrapper *_asw, int _N)
 	: Rule(_asw,true,true,""), N(_N)
     {
-        name = "ANDBreakdownRule/" + i2str(N);
+        name = "AndBreakdownRule/" + i2str(N);
 	
         inputFilter.push_back(meta(
                                    new tree<Vertex>(mva((pHandle)AND_LINK,

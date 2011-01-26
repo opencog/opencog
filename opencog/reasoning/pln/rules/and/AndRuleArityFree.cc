@@ -31,7 +31,7 @@
 namespace opencog { namespace pln {
 
 /** ToDo: Update
-bool ArityFreeANDRule::asymmetric(Handle* A, Handle* B) const
+bool ArityFreeAndRule::asymmetric(Handle* A, Handle* B) const
 {
         bool provenAsymmetric = false;
         bool provenSymmetric = false;
@@ -63,7 +63,7 @@ bool ArityFreeANDRule::asymmetric(Handle* A, Handle* B) const
         return provenAsymmetric;
 }
 
-BoundVertex ArityFreeANDRule::compute(Handle A, Handle B, Handle CX)  const //vector<Handle> vh)
+BoundVertex ArityFreeAndRule::compute(Handle A, Handle B, Handle CX)  const //vector<Handle> vh)
 {
         HandleSeq SAB;
         vector<Handle> ImpLinks, EvaLinks;
@@ -108,7 +108,7 @@ BoundVertex ArityFreeANDRule::compute(Handle A, Handle B, Handle CX)  const //ve
         return Vertex((Handle)NULL);
 }
 
-BoundVertex ArityFreeANDRule::computeSymmetric(vector<Handle> nodes, Handle CX)
+BoundVertex ArityFreeAndRule::computeSymmetric(vector<Handle> nodes, Handle CX)
 {
         const int n = nodes.size();
         TruthValue* t=NULL;
@@ -133,15 +133,15 @@ BoundVertex ArityFreeANDRule::computeSymmetric(vector<Handle> nodes, Handle CX)
 }
 */
 
-void ArityFreeANDRule::DistinguishNodes(const VertexSeq& premiseArray,
-                                        std::set<pHandle>& ANDlinks,
+void ArityFreeAndRule::DistinguishNodes(const VertexSeq& premiseArray,
+                                        std::set<pHandle>& Andlinks,
                                         std::set<pHandle>& nodes) const
 {
     const int n = premiseArray.size();
       
     for (int pi = 0; pi < n; pi++)
         ((((Type)_v2h(premiseArray[pi])) == AND_LINK)
-         ? ANDlinks
+         ? Andlinks
          : nodes
          ).insert(_v2h(premiseArray[pi]));
 }

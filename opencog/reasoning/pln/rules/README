@@ -14,19 +14,19 @@ The rules have been divided up into different groupings
 
 -- and Rules --
 
-AND2ORRule
-ANDBreakdownRule
-ANDPartitionRule
-ANDRuleArityFree
-ANDRule
-ANDRuleSimple
-ANDSubstRule
+And2OrRule
+AndBreakdownRule
+AndPartitionRule
+AndRuleArityFree
+AndRule
+AndRuleSimple
+AndSubstRule
 
 -- or Rules --
 
-OR2ANDRule
-ORPartitionRule
-ORRule
+Or2AndRule
+OrPartitionRule
+OrRule
 
 -- not Rules --
 

@@ -30,7 +30,7 @@
 
 namespace opencog { namespace pln {
 
-Rule::setOfMPs ORPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+Rule::setOfMPs OrPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     return PartitionRule_o2iMetaExtra(outh, overrideInputFilter, OR_LINK, asw);
         
@@ -56,14 +56,14 @@ Rule::setOfMPs ORPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilte
         return makeSingletonSet(ret);*/
 }
 
-BoundVertex ORPartitionRule::compute(const VertexSeq& premiseArray,
+BoundVertex OrPartitionRule::compute(const VertexSeq& premiseArray,
                                      pHandle CX, bool fresh) const
 {
 /*  Handle *hs = new Handle[premiseArray.size()];
     transform(premiseArray.begin(), premiseArray.end(), hs[0], DropVertexBindings()); //mem_fun(
     const int n = premiseArray.size();*/
 
-    BoundVertex ret = regularOR->compute(premiseArray, CX, fresh);
+    BoundVertex ret = regularOr->compute(premiseArray, CX, fresh);
 //  delete[] hs;
     return ret;
 }

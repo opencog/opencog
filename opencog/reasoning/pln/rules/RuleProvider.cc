@@ -314,26 +314,26 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
 //	addRule(new StrictCrispUnificationRule(asw), 7.5f);
 //	addRule(new CrispUnificationRule(asw), 7.5f); ///Alternative implementation
 
-    float ANDEvaluatorPriority = 10.0f;
-/// haxx:: \todo ANDRule sometimes confuses the order of atoms in the 
-/// outgoing vector of the resulting ANDLink. Ie. the order is not the same
+    float AndEvaluatorPriority = 10.0f;
+/// haxx:: \todo AndRule sometimes confuses the order of atoms in the 
+/// outgoing vector of the resulting AndLink. Ie. the order is not the same
 /// as the order in which the arguments were inputted. Eg. compute(a, b) may give
-/// AND(b,a). This is not acceptable because all PLN code assumes that the ANDLinks
-/// are ordered properly. This is especially necessary when ANDLinks are used
-/// as SequentialANDLinks, but there is another basic cause for it, too.
-//	addRule(new ANDRule(asw), ANDEvaluatorPriority);
+/// And(b,a). This is not acceptable because all PLN code assumes that the AndLinks
+/// are ordered properly. This is especially necessary when AndLinks are used
+/// as SequentialAndLinks, but there is another basic cause for it, too.
+//	addRule(new AndRule(asw), AndEvaluatorPriority);
 
-    addRule(new ORRule(asw), 10.0f);
+    addRule(new OrRule(asw), 10.0f);
     
-    addRule(new SimpleANDRule<1>(asw), ANDEvaluatorPriority - 1.0f);
-    addRule(new SimpleANDRule<2>(asw), ANDEvaluatorPriority - 1.1f);
-    addRule(new SimpleANDRule<3>(asw), ANDEvaluatorPriority - 1.2f);
-    //addRule(new SimpleANDRule<4>(asw), ANDEvaluatorPriority - 1.3f);
-    //addRule(new SimpleANDRule<5>(asw), ANDEvaluatorPriority - 1.4f);
+    addRule(new SimpleAndRule<1>(asw), AndEvaluatorPriority - 1.0f);
+    addRule(new SimpleAndRule<2>(asw), AndEvaluatorPriority - 1.1f);
+    addRule(new SimpleAndRule<3>(asw), AndEvaluatorPriority - 1.2f);
+    //addRule(new SimpleAndRule<4>(asw), AndEvaluatorPriority - 1.3f);
+    //addRule(new SimpleAndRule<5>(asw), AndEvaluatorPriority - 1.4f);
     
-    addRule(new ANDPartitionRule(asw), -100.0f);
-    //addRule(new ANDBreakdownRule(asw, 2), 10.0f);
-    //addRule(new ANDBreakdownRule(asw, 3), 10.0f);
+    addRule(new AndPartitionRule(asw), -100.0f);
+    //addRule(new AndBreakdownRule(asw, 2), 10.0f);
+    //addRule(new AndBreakdownRule(asw, 3), 10.0f);
 
     addRule(new NotRule(asw), 10.0f);
     
@@ -345,7 +345,7 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
     addRule(new SubsetEvalRule(asw, ATOM), 1.0f);
     addRule(new IntensionalInheritanceRule(asw, ATOM), 1.0f);
 
-    //addRule(new FORALLRule(asw,NULL), 5.0f);
+    //addRule(new ForAllRule(asw,NULL), 5.0f);
     //addRule( new PLNPredicateRule(asw,NULL), 5.0f);
     
     //addRule(new ImplicationBreakdownRule(asw), 9.0f);
@@ -364,7 +364,7 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
     // mechanism enter an infinite loop
     //addRule(new DeductionRule<DeductionSimpleFormula>(asw, SUBSET_LINK), 8.0f);
     
-    //addRule(new ORPartitionRule(asw), 10.0f);
+    //addRule(new OrPartitionRule(asw), 10.0f);
     addRule(new CrispTheoremRule(asw), 10.0f);
     
     addRule(new Int2ExtRule(asw, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
@@ -385,7 +385,7 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
     
     /*	addRule(new UnorderedLinkPermutationRule(asw), 10.0f);
 	addRule(new VariableInstantiationRule(asw), 10.0f);
-	addRule(new NOTEliminationRule(asw), 10.0f
+	addRule(new NotEliminationRule(asw), 10.0f
 	addRule(new Equi2ImplRule(asw), 10.0f
 	addRule(new Equi2Sim(asw), 10.0f;
 	addRule(new Inh2SimRule(asw), 10.0f;
@@ -404,7 +404,7 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
 	addRule(new ExtImpl2SubsetRule(asw);
 	addRule(new ExtEqui2ExtSimRule(asw);
 	addRule(new TautologyRule(asw);
-	addRule(new OR2ANDRule(asw);
+	addRule(new Or2AndRule(asw);
 	addRule(new Exist2ForAllRule(asw);
 	addRule(new ExistRule(asw);
 */
@@ -482,18 +482,18 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 {
     AtomSpaceWrapper* asw = GET_ASW;
 
-    float ANDEvaluatorPriority = 10.0f;
+    float AndEvaluatorPriority = 10.0f;
 
 #ifdef USE_RULES_BESIDES_DEDUCTION
-////addRule(new SimpleANDRule<1>(asw), ANDEvaluatorPriority - 1.0f);
-    addRule("SimpleANDRule2", ANDEvaluatorPriority - 1.1f);
-    addRule("SimpleANDRule3", ANDEvaluatorPriority - 1.2f);
-    //  addRule(new SimpleANDRule<4>(asw), ANDEvaluatorPriority - 1.3f);
-    //  addRule(new SimpleANDRule<5>(asw), ANDEvaluatorPriority - 1.4f);
+////addRule(new SimpleAndRule<1>(asw), AndEvaluatorPriority - 1.0f);
+    addRule("SimpleAndRule2", AndEvaluatorPriority - 1.1f);
+    addRule("SimpleAndRule3", AndEvaluatorPriority - 1.2f);
+    //  addRule(new SimpleAndRule<4>(asw), AndEvaluatorPriority - 1.3f);
+    //  addRule(new SimpleAndRule<5>(asw), AndEvaluatorPriority - 1.4f);
 
 //// Needs a fullInputFilter method to deal with the variable arity.
     // Also not actually used in any of the demos.
-    addRule("ANDPartitionRule", 10.0f);
+    addRule("AndPartitionRule", 10.0f);
     addRule("NotRule", 10.0f);
 
     // FC: Have to use ATOM due to TableGather not handling Node Type vertexes
@@ -501,7 +501,7 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 
     addRule("IntensionalInheritanceRuleAtom", 10.f);
 
-    //  addRule(new FORALLRule(asw,NULL), 5.0f);
+    //  addRule(new ForAllRule(asw,NULL), 5.0f);
     //  addRule( new PLNPredicateRule(asw,NULL), 5.0f);
 
     //  addRule(new ImplicationBreakdownRule(asw), 9.0f);
@@ -522,7 +522,7 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
     addRule("AssociativeDeductionRule", 8.0f);
     addRule("SimilarityDeductionRule", 8.0f);
 
-    //  addRule(new ORPartitionRule(asw), 10.0f);
+    //  addRule(new OrPartitionRule(asw), 10.0f);
 
 ////addRule(new CrispTheoremRule(asw), 10.0f);
 
@@ -579,21 +579,21 @@ DeductionRuleProvider::~DeductionRuleProvider(void) {
 EvaluationRuleProvider::EvaluationRuleProvider(void) {
     AtomSpaceWrapper* asw = GET_ASW;
 
-    float ANDEvaluatorPriority = 10.0f;
+    float AndEvaluatorPriority = 10.0f;
 
     watchInstantiationAtoms();
 
     addRule("OrRule", 10.0f);
 
-    addRule("SimpleANDRule1", ANDEvaluatorPriority - 1.0f);
-    addRule("SimpleANDRule2", ANDEvaluatorPriority - 1.1f);
-    addRule("SimpleANDRule3", ANDEvaluatorPriority - 1.2f);
-    //addRule("SimpleANDRule4", ANDEvaluatorPriority - 1.2f);
-    //addRule("SimpleANDRule5", ANDEvaluatorPriority - 1.2f);
+    addRule("SimpleAndRule1", AndEvaluatorPriority - 1.0f);
+    addRule("SimpleAndRule2", AndEvaluatorPriority - 1.1f);
+    addRule("SimpleAndRule3", AndEvaluatorPriority - 1.2f);
+    //addRule("SimpleAndRule4", AndEvaluatorPriority - 1.2f);
+    //addRule("SimpleAndRule5", AndEvaluatorPriority - 1.2f);
 
     // Needs a fullInputFilter method to deal with the variable arity.
     // Also not actually used in any of the demos.
-    //addRule(new ANDPartitionRule(asw), 10.0f);
+    //addRule(new AndPartitionRule(asw), 10.0f);
     
     addRule("NotRule", 10.0f);
 
@@ -601,10 +601,10 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
 
     addRule("IntensionalInheritanceRule", 10.f);
 
-    //addRule(new FORALLRule(asw,NULL), 5.0f);
+    //addRule(new ForAllRule(asw,NULL), 5.0f);
     //addRule( new PLNPredicateRule(asw,NULL), 5.0f);
 
-    //addRule(new ORPartitionRule(asw), 10.0f);
+    //addRule(new OrPartitionRule(asw), 10.0f);
 
     //addRule(new CrispTheoremRule(asw), 10.0f);
 

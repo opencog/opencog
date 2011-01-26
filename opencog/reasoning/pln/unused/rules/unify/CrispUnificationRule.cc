@@ -224,10 +224,10 @@ printf("VariableMPforms was non-empty.");
 	{
 		MPs ret1;
 	
-		boost::shared_ptr<atom> ANDform(new atom(i->real));
+		boost::shared_ptr<atom> Andform(new atom(i->real));
 printf("And formm:\n");		
-		printAtomTree(*ANDform,0,3);
-		ret1.push_back(BBvtree(new BoundVTree(ANDform->makeHandletree(destTable))));
+		printAtomTree(*Andform,0,3);
+		ret1.push_back(BBvtree(new BoundVTree(Andform->makeHandletree(destTable))));
 		
 //		ret1.push_back(BBvtree(new tree<Vertex>(mva(i->real))));
 		printTree(i->real,0,3);
@@ -285,9 +285,9 @@ printf("Partial CrispU args:\n");
 		ret.insert(ret1);
 	}
 	
-	/*		atom* ANDform = new atom(AND_LINK, 2,
+	/*		atom* Andform = new atom(AND_LINK, 2,
 	new atom(__INSTANCEOF_N, 1, new atom(FORALL_LINK,0)),
-	new atom(__INDEX2, 1, ORform)
+	new atom(__INDEX2, 1, Orform)
 	);*/
 
 	overrideInputFilter = true;

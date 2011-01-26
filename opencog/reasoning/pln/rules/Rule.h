@@ -40,8 +40,8 @@ namespace opencog { namespace pln {
  * In determining the proper input on the basis of getting a specific output:
  *
  * For some rules, the exact input atom can be determined.  For other rules,
- * only constraints on the atom properties can be determined.  Eg. AND(A, B, C)
- * can be derived from AND(A,B) & AND(B,C) etc. ie. from any collection of
+ * only constraints on the atom properties can be determined.  Eg. And(A, B, C)
+ * can be derived from And(A,B) & And(B,C) etc. ie. from any collection of
  * AndLinks with A, B, and C occurring somewhere. This can only be expressed as
  * a MP (metapredicate).
  */
@@ -241,28 +241,28 @@ public:
 enum RULE
 {
     PLN_AND,
-    SimpleAND,
-    SimpleAND2,
-    SimpleAND3,
-    SimpleAND4,
-    SimpleAND5,
+    SimpleAnd,
+    SimpleAnd2,
+    SimpleAnd3,
+    SimpleAnd4,
+    SimpleAnd5,
     ForAll,
     PLNPredicate,
 
-    ORPartition,
-    OR,
+    OrPartition,
+    Or,
 
-    ANDPartition,
+    AndPartition,
 
     NotEvaluation,
     UnorderedLinkPermutation,
 
-    ANDBreakdown1,
-    ANDBreakdown2,
-    ANDBreakdown3,
-    ANDBreakdown4,
-    ANDBreakdown5,
-    ORBreakdown,
+    AndBreakdown1,
+    AndBreakdown2,
+    AndBreakdown3,
+    AndBreakdown4,
+    AndBreakdown5,
+    OrBreakdown,
 
     StrictImplicationBreakdown,
     ImplicationBreakdown,
@@ -275,7 +275,7 @@ enum RULE
     
     ChildSubstitution,
 
-    NOTElimination,
+    NotElimination,
 
     Deduction_Implication,
     Deduction_Inheritance,
@@ -315,7 +315,7 @@ enum RULE
 // Irrelevant Rules (the ones only used at startup, plus tautology)
     Tautology,
 
-    OR2AND,
+    Or2And,
     Exist2ForAll,
     Exist
 };

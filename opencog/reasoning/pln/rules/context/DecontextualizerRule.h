@@ -72,10 +72,10 @@ namespace opencog { namespace pln {
  *     R A B
  * |-
  * R <TV>
- *     C ANDLink A
- *     C ANDLink B
+ *     C AndLink A
+ *     C AndLink B
  *
- * @todo this should be generalized for n-ari ANDLink. Also it is
+ * @todo this should be generalized for n-ari AndLink. Also it is
  * assumed that both C, B and A are Nodes, which might be too
  * constraining in the future
  */

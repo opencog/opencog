@@ -30,22 +30,22 @@
 
 namespace opencog { namespace pln {
 
-/*setOfMPs ANDBreakdownRule::o2iMetaExtra(const atom& outh, bool& overrideInputFilter) const
+/*setOfMPs AndBreakdownRule::o2iMetaExtra(const atom& outh, bool& overrideInputFilter) const
 {
     boost::shared_ptr<MPs> ret(new MPs);
 
     MPs->push_back(
 }*/
 
-Rule::setOfMPs ANDBreakdownRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+Rule::setOfMPs AndBreakdownRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     /// And parameters aren't ordered. Therefore, the order in which we feed them
     /// here is irrelavent. But we need a hypothetical parameter that will later remind
     /// which kind of atom we need to produce.
 
-    ///haxx:: (would also ignore nested ANDLinks)
+    ///haxx:: (would also ignore nested AndLinks)
     // Mainly to decrease the combinatorial explosion by not producing infinite
-    // series of ANDBDRules within the BIT.
+    // series of AndBDRules within the BIT.
     if (asw->isSubType(_v2h(*outh->begin()), AND_LINK) ||
         // this one should probably be done more generally (for most rules)
         asw->isSubType(_v2h(*outh->begin()), HYPOTHETICAL_LINK))
@@ -70,7 +70,7 @@ Rule::setOfMPs ANDBreakdownRule::o2iMetaExtra(meta outh, bool& overrideInputFilt
     return makeSingletonSet(ret);
 }
 
-BoundVertex ANDBreakdownRule::compute(const VertexSeq& premiseArray,
+BoundVertex AndBreakdownRule::compute(const VertexSeq& premiseArray,
                     pHandle CX, bool fresh) const
 {
     std::vector<pHandle> hs = asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));
@@ -104,7 +104,7 @@ BoundVertex ANDBreakdownRule::compute(const VertexSeq& premiseArray,
       for (uint i = 0; i < hs.size(); i++)
       printTree(hs[i],0,0);*/
 
-//LOG(0, "ANDBREAKDOWN: NO TOPOLOGICAL MODEL FOUND!");
+//LOG(0, "AndBREAKDOWN: NO TOPOLOGICAL MODEL FOUND!");
     assert(0);
 
     return Vertex((pHandle)PHANDLE_UNDEFINED);

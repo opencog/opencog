@@ -19,27 +19,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ANDSUBSTRULE_H
-#define ANDSUBSTRULE_H
+#ifndef OR2ANDRULE_H
+#define OR2ANDRULE_H
 
 namespace opencog { namespace pln {
 
-class ANDSubstRule : public Rule
+class Or2AndRule : public Rule
 {
-protected:
-    ANDSubstRule(AtomSpaceWrapper *_asw)
-        : Rule(_asw,true,true,"ANDSubstRule")
-    {}
-public:
-    bool validate2(MPs& args) const { return true; }
+	Or2AndRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw)
+	{
+		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(OrLink))));
+	}
+	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+	{
+		Btr<MPs> ret(new MPs);
+		ret->push_back(Btr<atom>(neBoundVertexWithNewType(outh, OrLink)));
+		return makeSingletonSet(ret);
+	}
+	virtual atom i2oType(Handle* h, const int n) const
+	{
+		assert(1==n);
 
-    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
-    BoundVertex compute(const VertexSeq& premiseArray,
-                        Handle CX = Handle::UNDEFINED,
-                        bool fresh = true) const;
-    NO_DIRECT_PRODUCTION;
+		return atomWithNewType(h[0], AND_LINK, asw);
+	}
+	virtual bool valid(Handle* h, const int n) const
+	{
+		return isSubType( h[0], OR_LINK);
+	}
+
+	BoundVertex compute(const VertexSeq& premiseArray, Handle CX = NULL) const
+	{
+		assert(n==1);
+
+		return Or2AndLink(premiseArray[0]);
+	}
 };
 
 }} // namespace opencog { namespace pln {
-#endif // ANDSUBSTRULE_H
-
+#endif // OR2ANDRULE_H

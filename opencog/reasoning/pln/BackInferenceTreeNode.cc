@@ -1745,8 +1745,8 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
             }
 
         if (_resultT == FORALL_LINK) {
-            //new_result = FORALLRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
-            new_result = FORALLRule(ASW(), PHANDLE_UNDEFINED, FORALL_LINK).compute(ForAllArgs);
+            //new_result = ForAllRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);
+            new_result = ForAllRule(ASW(), PHANDLE_UNDEFINED, FORALL_LINK).compute(ForAllArgs);
         } 
         else {
             //new_result = PLNPredicateRule(ASW(), Handle::UNDEFINED).compute(ForAllArgs);

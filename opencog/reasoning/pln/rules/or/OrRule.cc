@@ -30,12 +30,12 @@
 
 namespace opencog { namespace pln {
 
-ORRule::ORRule(AtomSpaceWrapper *_asw)
-: GenericRule<ORFormula>(_asw, true, "OrRule")
+OrRule::OrRule(AtomSpaceWrapper *_asw)
+: GenericRule<OrFormula>(_asw, true, "OrRule")
 {
 }
 
-Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+Rule::setOfMPs OrRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
         tree<Vertex>::iterator top = outh->begin();
         
@@ -57,7 +57,7 @@ Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 }
 
 //// Can't support more than 2 inputs.
-//meta ORRule::targetTemplate() const
+//meta OrRule::targetTemplate() const
 //{
 //    return(meta(new vtree(mva((pHandle)OR_LINK,
 //                                     mva((pHandle)ATOM),
@@ -65,10 +65,10 @@ Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 //                                     ))));
 //}
 
-//! @todo uses a somewhat tacky approach to support other numbers of OR
-//! arguments besides 2. NOTE: ORRule currently gets an error with >2
+//! @todo uses a somewhat tacky approach to support other numbers of Or
+//! arguments besides 2. NOTE: OrRule currently gets an error with >2
 //! arguments anyway.
-Rule::setOfMPs ORRule::fullInputFilter() const
+Rule::setOfMPs OrRule::fullInputFilter() const
 {
     // The possible inputs are {any 2 Atoms}, {any 3 Atoms}, ...
     int max_arity = 2;
@@ -88,11 +88,11 @@ Rule::setOfMPs ORRule::fullInputFilter() const
 }
 
 #define USE_INCLUSION_EXCLUSION_IN_OR_RULE 0
-TVSeq ORRule::formatTVarray(const VertexSeq& premiseArray) const
+TVSeq OrRule::formatTVarray(const VertexSeq& premiseArray) const
 {
     const int N = (int)premiseArray.size();
         
-    cprintf(3, "ORRule::formatTVarray...");
+    cprintf(3, "OrRule::formatTVarray...");
 
     //printTree(premiseArray[0],0,3);
     TVSeq tvs;
@@ -106,7 +106,7 @@ TVSeq ORRule::formatTVarray(const VertexSeq& premiseArray) const
         for (int j = i+1; j < N; j++) {
 #if USE_INCLUSION_EXCLUSION_IN_OR_RULE
 
-            cprintf(4,"Look up ANDLINK for args #%d,%d\n", i,j);
+            cprintf(4,"Look up AndLINK for args #%d,%d\n", i,j);
             TableGather comb(mva((pHandle)AND_LINK,
                                  mva(premiseArray[i]),
                                  mva(premiseArray[j])
@@ -122,11 +122,11 @@ TVSeq ORRule::formatTVarray(const VertexSeq& premiseArray) const
 #else
 #endif
 }
-cprintf(4, "ORRule::formatTVarray OK.");
+cprintf(4, "OrRule::formatTVarray OK.");
 return tvs;
 }
 
-meta ORRule::i2oType(const VertexSeq& h) const
+meta OrRule::i2oType(const VertexSeq& h) const
 {
         meta ret(new tree<Vertex>(mva((pHandle)OR_LINK)));
 

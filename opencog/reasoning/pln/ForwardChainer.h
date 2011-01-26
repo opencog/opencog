@@ -113,7 +113,7 @@ public:
 };
 
 // ForwardChainer subclass that uses similar inference control to a classical logic FC,
-// i.e. it uses a deduction-ish Rule each step, and evaluates any AND/OR/etc expressions
+// i.e. it uses a deduction-ish Rule each step, and evaluates any And/Or/etc expressions
 // in the ImplicationLink/etc. It uses the backward chainer to evaluate the expressions.
 // Example step: applying ModusPonens on an ImplicationLink (produces B given A and {A implies B}).
 // It would call the BC to find all ImplicationLinks, and also the antecedent (A here).

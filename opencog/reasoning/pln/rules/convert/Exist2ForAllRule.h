@@ -34,7 +34,7 @@ class Exist2ForAllRule : public Rule
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
         MPs ret;
-        ret.insert(new atom(NOTLink,
+        ret.insert(new atom(NotLink,
                             neBoundVertexWithNewType(outh, AndLink)));
         return ret;
     }

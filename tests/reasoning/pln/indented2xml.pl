@@ -10,7 +10,7 @@ close STUFF;
 $previous_ntabs = 0;
 $current_ntabs = 0;
 #TODO translate from inh to InheritanceLink etc
-$link_types = "_ForAll_AND_And_InheritanceLink_inh_SimultaneousAND_SimAND_EvaluationLink_eval_ImplicationLink_imp_ListLink_list_SatisfyingSet_SatSet_PredImp_PredictiveImplication_SeqAND_SimulAND_";
+$link_types = "_ForAll_And_And_InheritanceLink_inh_SimultaneousAnd_SimAnd_EvaluationLink_eval_ImplicationLink_imp_ListLink_list_SatisfyingSet_SatSet_PredImp_PredictiveImplication_SeqAnd_SimulAnd_";
 $node_types = "_ConceptNode_conc_PredicateNode_pred_VariableNode_var_WordNode_word_FreeVariableNode_";
 
 @pile;

@@ -100,7 +100,7 @@ BoundVertex ImplicationTailExpansionRule::compute(const VertexSeq& premiseArray,
     /*for (int i=0;i<premiseArray.size();i++)
         res.append_child(res.begin(), premiseArray[i]*/
     
-    return Vertex(asw->addAtom(res, asw->getTV(_v2h(SimpleANDRule<2>(asw).compute(premiseArray,CX).value)),true));
+    return Vertex(asw->addAtom(res, asw->getTV(_v2h(SimpleAndRule<2>(asw).compute(premiseArray,CX).value)),true));
 }
 
 }} // namespace opencog { namespace pln {

@@ -154,9 +154,9 @@ for(; m != ret1.end(); m++)
         ret.insert(ret1);
     }
 
-///     atom* ANDform = new atom(AND_LINK, 2,
+///     atom* Andform = new atom(AND_LINK, 2,
 /// new atom(__INSTANCEOF_N, 1, new atom(FORALL_LINK,0)),
-/// new atom(__INDEX2, 1, ORform)
+/// new atom(__INDEX2, 1, Orform)
 
     overrideInputFilter = true;
     

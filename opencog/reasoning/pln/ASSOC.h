@@ -36,7 +36,7 @@ const std::string ASSOC_suffix = "__ASSOC__";
  * CreateConceptASSOC is in charge of creating the concept AC such
  * that AC(x) = ASSOC(x, C).
  *
- * where ASSOC(F, G) = max(P(F|G) − P(F|NOT G), 0)
+ * where ASSOC(F, G) = max(P(F|G) − P(F|Not G), 0)
  *
  * Here P(F|G) will be measured by SubSet G F
  *
@@ -58,7 +58,7 @@ pHandle CreateConceptASSOC(AtomSpaceWrapper* asw, pHandle c_h);
 
 /**
  * @param tv1 TruthValue representing P(F|G)
- * @param tv2 TruthValue representing P(F|NOT G)
+ * @param tv2 TruthValue representing P(F|Not G)
  *
  * @return SimpleTruthValue such that strength = max(tv1.s - tv2.s, 0)
  */

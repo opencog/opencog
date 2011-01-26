@@ -123,7 +123,7 @@ powerful.
 - ExistsN x P(x) <tv>
 <=> ImplicationLink P (EquivalenceLink x1) <tv / N>
 
-! SatisfyingSets vs. concept applicability? (X might not satisfy P nor -P.) Ie. excluded middle rule doesn't work. Avoiding the mutual existence of P and NOT(P) should be a heuristic only, or handled via revision.
+! SatisfyingSets vs. concept applicability? (X might not satisfy P nor -P.) Ie. excluded middle rule doesn't work. Avoiding the mutual existence of P and Not(P) should be a heuristic only, or handled via revision.
 ! Multi-deduction?
 */
 
@@ -272,7 +272,7 @@ public:
 /**
  * 
  */ 
-class ANDBreakdownFormula : public Formula<1>
+class AndBreakdownFormula : public Formula<1>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
@@ -354,7 +354,7 @@ public:
  * TV.strength = Prod_i TV[i].strength
  * TV.confidence = Prod_i TV[i].confidence
  */ 
-class SymmetricANDFormula : public Formula<AND_MAX_ARITY>
+class SymmetricAndFormula : public Formula<AND_MAX_ARITY>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
@@ -363,7 +363,7 @@ public:
 /**
  * p(A),P(B|A)
  */ 
-class AsymmetricANDFormula : public Formula<2>
+class AsymmetricAndFormula : public Formula<2>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
@@ -372,7 +372,7 @@ public:
 /**
  * Formula that behaves like old TruthValue::andOperation() method.
  */
-class OldANDFormula : public Formula<2>
+class OldAndFormula : public Formula<2>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
@@ -381,7 +381,7 @@ public:
 /**
  * 
  */ 
-class ORFormula : public Formula<OR_MAX_ARITY>
+class OrFormula : public Formula<OR_MAX_ARITY>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
@@ -390,7 +390,7 @@ public:
 /**
  * 
  */ 
-class ExcludingORFormula : public Formula<OR_MAX_ARITY>
+class ExcludingOrFormula : public Formula<OR_MAX_ARITY>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
@@ -399,17 +399,8 @@ public:
 /**
  * 
  */ 
-class NOTFormula : public Formula<1>
-{
-public:
-     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
-};
-
-/**
- * 
- */ 
-//class ORFormula2 : public SymmetricANDFormula, public NOTFormula
-class ORFormula2 : public Formula<OR_MAX_ARITY>
+//class OrFormula2 : public SymmetricAndFormula, public NotFormula
+class OrFormula2 : public Formula<OR_MAX_ARITY>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
@@ -418,7 +409,7 @@ public:
 /**
  * Formula that behaves like old TruthValue::orOperation() method.
  */
-class OldORFormula : public Formula<2>
+class OldOrFormula : public Formula<2>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
@@ -488,13 +479,13 @@ protected:
 =============================================================================*/ 
 
 /**
- * Compute the FORALL formula as follows (it is a heuristic and seems not
+ * Compute the ForAll formula as follows (it is a heuristic and seems not
  * mathematically justified, and therefore could probably be improved)
  * TV->count = Sum_i TV[i]->count
  * TV->mean = Sum_i (TV[i]->mean * sqrt(TV[i]->count)) / total_weight
  * where total_weight = Sum_i sqrt(TV[i]->count)
  */
-class FORALLFormula : public Formula<FORALL_MAX_ARITY>
+class ForAllFormula : public Formula<FORALL_MAX_ARITY>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;
@@ -512,8 +503,8 @@ public:
 /**
  *
  */
-//class EXISTFormula : public FORALLFormula, public NOTFormula
-class EXISTFormula : public Formula<FORALL_MAX_ARITY>
+//class ExistFormula : public FORALLFormula, public NotFormula
+class ExistFormula : public Formula<FORALL_MAX_ARITY>
 {
 public:
     TruthValue* simpleCompute(const TVSeq& TV, long U = DefaultU) const;

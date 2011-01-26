@@ -42,7 +42,7 @@ ForAll(List, Implication(And(A1,A2,...,An)), Pat1)<tv1>
 
 will be converted to RewritingRules* of the form "if you need to produce Pat1,
 then it's sufficient to produce A1,A2,...,An. The conversion is only made
-if tv1.confidence>=0.99 (ANDFormula will eventually be applied to produced
+if tv1.confidence>=0.99 (AndFormula will eventually be applied to produced
 atoms to forward-compute the TV). This approach should only be used for
 purely Boolean rewriting, i.e. Boolean theorems.
 
@@ -71,17 +71,17 @@ decided (=policy), and only [TV.strength > 1.0-L] should be considered TRUE, etc
 - No Nested ForAlls => "defined($X) @ node" currently fails.
 - ForAllRule's TV determines the TV of the outest link within the ForAll, not affecting
 the internal ones. All atoms within ForAll should originally have confidence = 0.
-- ORRule is only evaluated to the binary pair exclusion precision (A+B+C-AB-AC-BC).
+- OrRule is only evaluated to the binary pair exclusion precision (A+B+C-AB-AC-BC).
 - Policy: Rule.o2i methods must make sure they don't waste time. ResMan only guards the
 blocking Rule method calls on a serial manner - it cannot survive a slow o2i implementation
-- Always puts ANDRules before SimpleANDRules, since the latter accept more general output type,
+- Always puts AndRules before SimpleAndRules, since the latter accept more general output type,
 but don't do the flattening magic.
-- BW chaining UnorderedLinkPermutationRule only works for ANDLinks. Try it with ORLinks and die.
+- BW chaining UnorderedLinkPermutationRule only works for AndLinks. Try it with OrLinks and die.
 FW chaining should be ok. The reason is logical...
 - CrispUnificationRule & UnorderedLinkPermutationRule use HYPOTHETICAL_LINKs - pseudo atoms that,
 given as a parameter to the rule, make the rule output the desired kind of outcome
 - Often you can choose to either increase the complexity of a Rule, or make multiple
-versions of the rule (eg. ANDRule<N>).
+versions of the rule (eg. AndRule<N>).
 - MP that only tests __INSTANCE_OF property is equivalent to a MP construct that uses
 FW_VARIABLE_NODEs, but faster to use (no substitutions needed).
 - ATOM-type MP will always be true for any parameter atom.
@@ -159,8 +159,8 @@ WHen using exhaustive inference tree expansion, there may arise pathological
 Rule combinations. Known examples are:
 
 - CrispTheorem (with theorems in fetchdemo.xml) with ImplicationBreakdown
-- AND Rules with ANDBreakdown
-- UnorderedLinkPermutation often, esp. with ANDBreakdown / ORBreakdown
+- And Rules with AndBreakdown
+- UnorderedLinkPermutation often, esp. with AndBreakdown / OrBreakdown
 - ChildSubstitution almost always
 
 == Screencasts explaining code details

@@ -15,6 +15,7 @@
   (pln-ar "SubsetDeductionRule" (list AB BC) contexts))
 (define (NotRule A . contexts)
   (pln-ar "NotRule" (list A) contexts))
+
 ; context rules, not sure if the last argument 'contexts' would be useful
 (define (ContextualizerRule R . contexts)
   (pln-ar "ContextualizerRule" (list R) contexts))
@@ -27,11 +28,11 @@
 (define (ModusPonensRule implication antecedent . contexts)
   (pln-ar "ModusPonensRule" (list implication antecedent) contexts))
 
-; AND rules, must happend the arity to the rule name
-(define (SimpleANDRuleNameStr premises)
-  (string-append "SimpleANDRule" (number->string (length premises))))
-(define (SimpleANDRule . premises)
-  (pln-ar (SimpleANDRuleNameStr premises) premises (list))) ;TODO
+; And rules, must happend the arity to the rule name
+(define (SimpleAndRuleNameStr premises)
+  (string-append "SimpleAndRule" (number->string (length premises))))
+(define (SimpleAndRule . premises)
+  (pln-ar (SimpleAndRuleNameStr premises) premises (list))) ;TODO
 
 ;
 ; Instantiation Rules

@@ -19,36 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ORPARTITIONRULE_H
-#define ORPARTITIONRULE_H
-
-#include "ORRule.h"
+#ifndef ANDRULE_H
+#define ANDRULE_H
 
 namespace opencog { namespace pln {
 
-/** @class ORPartitionRule
-	Partitions argument into, like, OR(A, OR(B, OR(C, D)))
-*/
-
-class ORPartitionRule : public Rule
+class AndRule : public ArityFreeAndRule
 {
-    ORRule* regularOR;
 public:
+	AndRule(AtomSpaceWrapper *_asw)
+        : ArityFreeAndRule(_asw)
+	{
+		name = "And Evaluator Rule";
+	}
+	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+	//Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
 
-    ORPartitionRule(AtomSpaceWrapper *_asw)
-        : Rule(_asw, true, true, "ORPartitionRule") 
-    {
-        regularOR = new ORRule(_asw);
-    }
-    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
-    bool validate2(MPs& args) const { return true; }
+	BoundVertex compute(const VertexSeq& premiseArray,
+                            pHandle CX = PHANDLE_UNDEFINED,
+                            bool fresh = true) const;
 	
-    BoundVertex compute(const VertexSeq& premiseArray,
-                        pHandle CX = PHANDLE_UNDEFINED,
-                        bool fresh = true) const;
-	
-    NO_DIRECT_PRODUCTION;
+	///! Direct production was used here before. @todo Check whether this should be resumed!
+	NO_DIRECT_PRODUCTION;
 };
 
 }} // namespace opencog { namespace pln {
-#endif // ORPARTITIONRULE_H
+#endif // ANDRULE_H

@@ -22,7 +22,7 @@
 ; csn stands from conclusion of step n
 ;
 (define cs1 (ForAllInstantiationRule axiom a b c))
-(define cs2 (SimpleANDRule a_agt_b b_agt_c))
+(define cs2 (SimpleAndRule a_agt_b b_agt_c))
 (define target (ModusPonensRule cs1 cs2))
 
 ; return the target, necessary so it can be automatically tested by

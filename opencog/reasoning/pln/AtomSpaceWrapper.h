@@ -469,16 +469,16 @@ public:
     
     //! Wrap h in a NOT_LINK and return that 
     pHandle invert(pHandle h);
-    //! Convert from AND to OR link
-    pHandle AND2ORLink(pHandle& andL, Type _ANDLinkType, Type _ORLinkType);
+    //! Convert from And to Or link
+    pHandle And2OrLink(pHandle& andL, Type _AndLinkType, Type _OrLinkType);
     //! Convert from Equivalence to Implication link
     hpair Equi2ImpLink(pHandle& exL);
     //! Convert from Existance to For All link
     pHandle Exist2ForAllLink(pHandle& exL);
-    //! Convert from OR to AND link
-    pHandle OR2ANDLink(pHandle& andL);
-    //! Convert from AND to OR link
-    pHandle AND2ORLink(pHandle& andL);
+    //! Convert from Or to And link
+    pHandle Or2AndLink(pHandle& andL);
+    //! Convert from And to Or link
+    pHandle And2OrLink(pHandle& andL);
     
     Handle getNewContextLink(Handle h, HandleSeq destContexts);
 
@@ -493,7 +493,7 @@ public:
     //! Generate a CrispTheoremRule for crisp theorem pointed to by
     //! p then and add to CrispTheoremRule::thms.
     //! A crisp theorem has the format:
-    //! ImplicationLink ( AND < tv 1.0 > (...), result )
+    //! ImplicationLink ( And < tv 1.0 > (...), result )
     void makeCrispTheorem(pHandle p);
 
     //! returns whether the type of h is T or inherits from T
@@ -519,7 +519,7 @@ public:
     bool symmetricLink(Type T);
     bool isEmptyLink(pHandle h);
     bool hasFalsum(pHandleSeq hs);
-    bool containsNegation(pHandle ANDlink, pHandle h);
+    bool containsNegation(pHandle Andlink, pHandle h);
 
     //! return the type of the root of _target
     Type getTypeV(const tree<Vertex>& _target) const;

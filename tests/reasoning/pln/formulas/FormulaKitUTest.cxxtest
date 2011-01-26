@@ -99,25 +99,25 @@ public:
 
     void testSimpleFormulas() {
         printf("testSimpleFormulas()\n");
-        TruthValue* resultTv = OldANDFormula().compute(TVSeq(atoms, atoms+2));
+        TruthValue* resultTv = OldAndFormula().compute(TVSeq(atoms, atoms+2));
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = SymmetricANDFormula().compute(TVSeq(atoms, atoms+4));
+        resultTv = SymmetricAndFormula().compute(TVSeq(atoms, atoms+4));
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = AsymmetricANDFormula().compute(TVSeq(atoms, atoms+2));
+        resultTv = AsymmetricAndFormula().compute(TVSeq(atoms, atoms+2));
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
     }
     
     void testMultiCompute() {
         printf("testMultiCompute()\n");
-        TVSeq multiResult = OldANDFormula().multiCompute(TVSeq(atoms, atoms+4));
+        TVSeq multiResult = OldAndFormula().multiCompute(TVSeq(atoms, atoms+4));
         for (int i = 0; i < 2; i++) {
             TS_ASSERT(multiResult[i]);
             printf("multiResult[%d] = %s\n", i, multiResult[i]->toString().c_str());
         }
-        TruthValue* resultTv = OldANDFormula().compute(multiResult);
+        TruthValue* resultTv = OldAndFormula().compute(multiResult);
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
     }
@@ -132,26 +132,26 @@ public:
         for (int i = 0; i < NUM_ATOMS; i++) {
             defaultTVs[i] = (TruthValue*) &(TruthValue::DEFAULT_TV());
         }
-        resultTv = OldANDFormula().compute(TVSeq(defaultTVs, defaultTVs+2));
+        resultTv = OldAndFormula().compute(TVSeq(defaultTVs, defaultTVs+2));
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = SymmetricANDFormula().compute(TVSeq(defaultTVs, defaultTVs+4));
+        resultTv = SymmetricAndFormula().compute(TVSeq(defaultTVs, defaultTVs+4));
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = AsymmetricANDFormula().compute(TVSeq(defaultTVs, defaultTVs+2));
+        resultTv = AsymmetricAndFormula().compute(TVSeq(defaultTVs, defaultTVs+2));
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
         
 
         // run simplecompute with the same SimpleTruthValues. Must get same results...
         printf("======== PHASE 1: SimpleTVs ==========\n");
-        resultTv = OldANDFormula().simpleCompute(TVSeq(atoms, atoms+2));
+        resultTv = OldAndFormula().simpleCompute(TVSeq(atoms, atoms+2));
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = SymmetricANDFormula().simpleCompute(TVSeq(atoms, atoms+4));
+        resultTv = SymmetricAndFormula().simpleCompute(TVSeq(atoms, atoms+4));
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = AsymmetricANDFormula().simpleCompute(TVSeq(atoms, atoms+2));
+        resultTv = AsymmetricAndFormula().simpleCompute(TVSeq(atoms, atoms+2));
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
         
@@ -163,13 +163,13 @@ public:
             std::cout << "compositeTVs[" << i << "] = " << *compositeTVs[i] << std::endl;
         }
         // run with the same SimpleTruthValues. Must get same results...
-        resultTv = OldANDFormula().compute(TVSeq(compositeTVs, compositeTVs+2));
+        resultTv = OldAndFormula().compute(TVSeq(compositeTVs, compositeTVs+2));
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = SymmetricANDFormula().compute(TVSeq(compositeTVs, compositeTVs+4));
+        resultTv = SymmetricAndFormula().compute(TVSeq(compositeTVs, compositeTVs+4));
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = AsymmetricANDFormula().compute(TVSeq(compositeTVs, compositeTVs+2));
+        resultTv = AsymmetricAndFormula().compute(TVSeq(compositeTVs, compositeTVs+2));
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
     }

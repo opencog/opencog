@@ -66,9 +66,9 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
                                               pHandle ForAllLink,
                                               AtomSpaceWrapper* asw);
 	
-Handle AND2ORLink(Handle& andL, Type _ANDLinkType, Type _OR_LINK);
-Handle OR2ANDLink(Handle& andL);
-Handle AND2ORLink(Handle& andL);
+Handle And2OrLink(Handle& andL, Type _AndLinkType, Type _OR_LINK);
+Handle Or2AndLink(Handle& andL);
+Handle And2OrLink(Handle& andL);
 Handle Exist2ForAllLink(Handle& exL);
 std::pair<Handle,Handle> Equi2ImpLink(Handle&);
 #define LINKTYPE_ASSERT(__cLink, __cLinkType) assert(inheritsType(GET_ASW->getType(__cLink), __cLinkType))

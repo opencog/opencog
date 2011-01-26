@@ -212,10 +212,10 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(const TVSeq& TV, long U) 
 
     count_t n2 = std::min(nAB, nA);
 
-    // sB is used for P(B|NOT A)
-    // so it must assume that B and NOT A are independent
+    // sB is used for P(B|Not A)
+    // so it must assume that B and Not A are independent
     // @todo, we should make the formula look more general with sB
-    // being possibly P(B|NOT A), and the caller of that formula
+    // being possibly P(B|Not A), and the caller of that formula
     // would the one deciding what is the assumption
     strength_t s2 = ((n2 + nB) > 0)
         ? ( (sAB * sA * n2 + sB * (1 - sA) * nB)
@@ -401,9 +401,9 @@ TruthValue* Sim2InhFormula::simpleCompute(const TVSeq& TV, long U) const
 }
 
 //===========================================================================//
-TruthValue* ANDBreakdownFormula::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* AndBreakdownFormula::simpleCompute(const TVSeq& TV, long U) const
 {
-    cprintf(-3, "ANDbreak...\n");
+    cprintf(-3, "Andbreak...\n");
 
     PLNFormulaBodyFor_Link;
     DebugPLNBodyFor_Link;
@@ -423,7 +423,7 @@ TruthValue* ModusPonensFormula::simpleCompute(const TVSeq& TV, long U) const
     //    DebugPLNBodyFor_atom2;
 
     // Note that sB corresponds to sAB
-    // DefaultNodeProbability is supposed to replace the unknown P(B|NOT A)
+    // DefaultNodeProbability is supposed to replace the unknown P(B|Not A)
     strength_t sC = sA * sB + DefaultNodeProbability * (1 - sA);
     count_t nC = nA;
 
@@ -534,18 +534,18 @@ TruthValue* Int2ExtFormula::simpleCompute(const TVSeq& TV, long U) const
 }
 
 //===========================================================================//
-TruthValue* SymmetricANDFormula::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* SymmetricAndFormula::simpleCompute(const TVSeq& TV, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical AND...\n");
-    cprintf(-3, "SymmetricAND...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical And...\n");
+    cprintf(-3, "SymmetricAnd...\n");
 
     /* Indefinite Formula */
     // @todo indefinite formula should be handled using an Indefinitizer anyway
 
     // if (isAllIndefiniteTruthValueType(TV, N)) {
-    //     cprintf(-3, "IndefiniteSymmetricANDFormula\n");
+    //     cprintf(-3, "IndefiniteSymmetricAndFormula\n");
     //     if (TV.size() == 2) {
-    //         return IndefiniteSymmetricANDFormula().simpleCompute(TV, U);
+    //         return IndefiniteSymmetricAndFormula().simpleCompute(TV, U);
     //     }
 
     //     IndefiniteTruthValue* _TV[2];
@@ -553,7 +553,7 @@ TruthValue* SymmetricANDFormula::simpleCompute(const TVSeq& TV, long U) const
     //     for (int i = 1; i < N; i++) {
     //         _TV[0] = result;
     //         _TV[1] = (IndefiniteTruthValue*)TV[i];
-    //         result = (IndefiniteTruthValue*)IndefiniteSymmetricANDFormula().simpleCompute((TruthValue**)_TV, 2, U);
+    //         result = (IndefiniteTruthValue*)IndefiniteSymmetricAndFormula().simpleCompute((TruthValue**)_TV, 2, U);
     //     }
     //     return result;
     // }
@@ -569,39 +569,39 @@ TruthValue* SymmetricANDFormula::simpleCompute(const TVSeq& TV, long U) const
         conTot *= TV[i]->getConfidence();
     }
 
-    strength_t sAND = sTot;
-    count_t nAND = SimpleTruthValue::confidenceToCount(conTot);
+    strength_t sAnd = sTot;
+    count_t nAnd = SimpleTruthValue::confidenceToCount(conTot);
     //float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
     //KKK * conTot / (1 - conTot); /// The standard count=>confidence formula!
 
-//  cprintf(-3, " = %f\n", sAND);
+//  cprintf(-3, " = %f\n", sAnd);
 
 //    assert(nTot <= 1.0f);
 
-    TruthValue* retTV = new SimpleTruthValue(sAND, nAND);
+    TruthValue* retTV = new SimpleTruthValue(sAnd, nAnd);
 
 
     return checkTruthValue(retTV);
 }
 
 //===========================================================================//
-TruthValue* AsymmetricANDFormula::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* AsymmetricAndFormula::simpleCompute(const TVSeq& TV, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical AND2...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical And2...\n");
 
     PLNFormulaBodyFor_Atom2;
     //    DebugPLNBodyFor_Atom2;
 
-    strength_t sAND = sA * sB;
-    count_t nAND = nB;
+    strength_t sAnd = sA * sB;
+    count_t nAnd = nB;
 
-    return checkTruthValue( new SimpleTruthValue(sAND, nAND) );
+    return checkTruthValue( new SimpleTruthValue(sAnd, nAnd) );
 }
 
 //===========================================================================//
-TruthValue* OldANDFormula::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* OldAndFormula::simpleCompute(const TVSeq& TV, long U) const
 {
-    cprintf(-3, "OldAND...\n");
+    cprintf(-3, "OldAnd...\n");
 
 
     strength_t mean = TV[0]->getMean() * TV[1]->getMean();
@@ -615,11 +615,11 @@ TruthValue* OldANDFormula::simpleCompute(const TVSeq& TV, long U) const
 }
 
 //===========================================================================//
-TruthValue* ORFormula::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* OrFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     int N = TV.size();
 
-    cprintf(-3,  "Logical OR with : ");
+    cprintf(-3,  "Logical Or with : ");
     for (int k = 0;k < N;k++)
         cprintf(-3,  "#%d:%s ", k, TV[k]->toString().c_str());
     cprintf(-3, "\n");
@@ -669,9 +669,9 @@ TruthValue* ORFormula::simpleCompute(const TVSeq& TV, long U) const
 }
 
 //===========================================================================//
-TruthValue* ExcludingORFormula::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* ExcludingOrFormula::simpleCompute(const TVSeq& TV, long U) const
 {
-//  LOG(3, "Logical OR...\n");
+//  LOG(3, "Logical Or...\n");
 //  int level1N = haxx::contractInclusionExclusionFactorial(N); //2*(int)(sqrt(N)); //inverse of N*(N-1)/2
 
     ///N must be a square of an integery, namely (I + I*(I-1)) = I*I
@@ -719,51 +719,37 @@ TruthValue* ExcludingORFormula::simpleCompute(const TVSeq& TV, long U) const
         nTot = nA + nB - (A + B) / 2;
     }
 
-    strength_t sOR = sTot;
+    strength_t sOr = sTot;
     confidence_t KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
-    count_t nOR = nTot  * KKK;
+    count_t nOr = nTot  * KKK;
 
-//  cprintf(-3, " = %f\n", sAND);
+//  cprintf(-3, " = %f\n", sAnd);
 
-    return checkTruthValue( new SimpleTruthValue(sOR, nOR) );
+    return checkTruthValue( new SimpleTruthValue(sOr, nOr) );
 }
 
 //===========================================================================//
-TruthValue* NOTFormula::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* OrFormula2::simpleCompute(const TVSeq& TV, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical NOT...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical Or...\n");
 
-    PLNFormulaBodyFor_Link;
-    DebugPLNBodyFor_Link;
+    NotFormula notF;
+    TVSeq Not_TVs = notF.multiCompute(TV, U);
+    TruthValue* Not_AndTV = SymmetricAndFormula().simpleCompute(Not_TVs, U);
+    TruthValue* OrTV = notF.simpleCompute(TVSeq(1, Not_AndTV), U);
 
-    strength_t sNOT = 1 - sAB;
-    count_t nNOT = nAB;
+    delete Not_AndTV;
 
-    return checkTruthValue( new SimpleTruthValue(sNOT, nNOT) );
+    for (unsigned int i = 0; i < Not_TVs.size(); i++)
+        delete Not_TVs[i];
+
+    return OrTV;
 }
 
 //===========================================================================//
-TruthValue* ORFormula2::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* OldOrFormula::simpleCompute(const TVSeq& TV, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical OR...\n");
-
-    NOTFormula notF;
-    TVSeq NOT_TVs = notF.multiCompute(TV, U);
-    TruthValue* NOT_ANDTV = SymmetricANDFormula().simpleCompute(NOT_TVs, U);
-    TruthValue* ORTV = notF.simpleCompute(TVSeq(1, NOT_ANDTV), U);
-
-    delete NOT_ANDTV;
-
-    for (unsigned int i = 0; i < NOT_TVs.size(); i++)
-        delete NOT_TVs[i];
-
-    return ORTV;
-}
-
-//===========================================================================//
-TruthValue* OldORFormula::simpleCompute(const TVSeq& TV, long U) const
-{
-    cprintf(-3, "OldOR...\n");
+    cprintf(-3, "OldOr...\n");
 
     strength_t mean = 1 - ((1 - TV[0]->getMean()) * (1 - TV[1]->getMean()));
     count_t count1 = TV[0]->getCount();
@@ -828,7 +814,7 @@ strength_t SubsetEvalFormulaMin::f(strength_t a, strength_t b) const
 =============================================================================*/
 
 //===========================================================================//
-TruthValue* FORALLFormula::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* ForAllFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     int N = TV.size();
 
@@ -865,19 +851,19 @@ TruthValue* PredicateTVFormula::simpleCompute(const TVSeq& TV, long U) const
 }
 
 //===========================================================================//
-TruthValue* EXISTFormula::simpleCompute(const TVSeq& TV, long U) const
+TruthValue* ExistFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Exists...\n");
 
     NotFormula notF;
-    TVSeq NOT_TVs = notF.multiCompute(TV, U);
-    TruthValue* NOT_EXTV = FORALLFormula().simpleCompute(NOT_TVs, U);
-    TruthValue* EXTV = notF.simpleCompute(TVSeq(1, NOT_EXTV), U );
+    TVSeq Not_TVs = notF.multiCompute(TV, U);
+    TruthValue* Not_EXTV = ForAllFormula().simpleCompute(Not_TVs, U);
+    TruthValue* EXTV = notF.simpleCompute(TVSeq(1, Not_EXTV), U );
 
-    delete NOT_EXTV;
+    delete Not_EXTV;
 
     for (unsigned int i = 0; i < TV.size(); i++)
-        delete NOT_TVs[i];
+        delete Not_TVs[i];
 
     return EXTV;
 

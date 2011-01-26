@@ -27,7 +27,7 @@ namespace opencog { namespace pln {
 class Equi2ImpRule : public GenericRule<IdentityFormula>
 {
 public:
-    /// "A<=>B" => "AND(A=>B, B=>A)"
+    /// "A<=>B" => "And(A=>B, B=>A)"
     Equi2ImpRule(AtomSpaceWrapper *_asw)
         : GenericRule<IdentityFormula>(_asw, false, "Equi2ImpRule")
     {

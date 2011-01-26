@@ -39,7 +39,7 @@ Rule::setOfMPs ImplicationConstructionRule::o2iMetaExtra(const atom& outh, bool&
         boost::shared_ptr<MPs> ret(new MPs);
 
         ret->push_back(boost::shared_ptr<atom>(new atom(outh)));
-        (*ret)[0]->T = AND_LINK;
+        (*ret)[0]->T = And_LINK;
 
         overrideInputFilter = true;
         

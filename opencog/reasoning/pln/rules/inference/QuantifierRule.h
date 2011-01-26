@@ -78,8 +78,8 @@ public:
     NO_DIRECT_PRODUCTION;
 };
 
-typedef QuantifierRule<FORALLFormula> FORALLRule;
-typedef QuantifierRule<EXISTFormula> ExistRule;
+typedef QuantifierRule<ForAllFormula> ForAllRule;
+typedef QuantifierRule<ExistFormula> ExistRule;
 typedef QuantifierRule<PredicateTVFormula> PLNPredicateRule;
 
 }} // namespace opencog { namespace pln {

@@ -544,8 +544,8 @@ public:
     }
 
     // Test that targets with childless links or ATOM still match.
-    void DISABLEtestFORALL() {
-        initAxiomSet(PLN_TEST_DIR"scm/new/BasicForAllDemo_AND.scm");
+    void DISABLEtestForAll() {
+        initAxiomSet(PLN_TEST_DIR"scm/new/BasicForAllDemo_And.scm");
 
         TS_ASSERT(
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,

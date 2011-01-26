@@ -643,9 +643,9 @@ bool AtomSpaceWrapper::hasFalsum(pHandleSeq hs)
     return false;
 }
 
-bool AtomSpaceWrapper::containsNegation(pHandle ANDlink, pHandle h)
+bool AtomSpaceWrapper::containsNegation(pHandle Andlink, pHandle h)
 {
-    pHandleSeq hs = getOutgoing(ANDlink);
+    pHandleSeq hs = getOutgoing(Andlink);
     hs.push_back(h);
     return hasFalsum(hs);
 }
@@ -777,7 +777,7 @@ void AtomSpaceWrapper::makeCrispTheorems() {
 
 void AtomSpaceWrapper::makeCrispTheorem(pHandle h)
 {
-    // if implication link and composed of AND as a source, and whose
+    // if implication link and composed of And as a source, and whose
     // TruthValue is essentially true
     if (getType(h) != IMPLICATION_LINK)
         return;
@@ -1285,14 +1285,14 @@ bool AtomSpaceWrapper::equal(Handle A, Handle B)
     return true;
 }
 
-pHandle AtomSpaceWrapper::OR2ANDLink(pHandle& andL)
+pHandle AtomSpaceWrapper::Or2AndLink(pHandle& andL)
 {
-    return AND2ORLink(andL, OR_LINK, AND_LINK);
+    return And2OrLink(andL, OR_LINK, AND_LINK);
 }
 
-pHandle AtomSpaceWrapper::AND2ORLink(pHandle& andL)
+pHandle AtomSpaceWrapper::And2OrLink(pHandle& andL)
 {
-    return AND2ORLink(andL, AND_LINK, OR_LINK);
+    return And2OrLink(andL, AND_LINK, OR_LINK);
 }
 
 pHandle AtomSpaceWrapper::invert(pHandle h)
@@ -1302,31 +1302,31 @@ pHandle AtomSpaceWrapper::invert(pHandle h)
     return addLink(NOT_LINK, hs, TruthValue::TRUE_TV(), true);
 }
 
-pHandle AtomSpaceWrapper::AND2ORLink(pHandle& andL, Type _ANDLinkType, Type _ORLinkType)
+pHandle AtomSpaceWrapper::And2OrLink(pHandle& andL, Type _AndLinkType, Type _OrLinkType)
 {
-    assert(getType(andL) == _ANDLinkType);
+    assert(getType(andL) == _AndLinkType);
 
-    pHandleSeq ORtarget;
-    const pHandleSeq _ANDtargets = getOutgoing(andL);
+    pHandleSeq Ortarget;
+    const pHandleSeq _Andtargets = getOutgoing(andL);
 
-    for (pHandleSeq::const_iterator i = _ANDtargets.begin();
-            i != _ANDtargets.end(); i++) {
-        ORtarget.push_back(invert(*i));
+    for (pHandleSeq::const_iterator i = _Andtargets.begin();
+            i != _Andtargets.end(); i++) {
+        Ortarget.push_back(invert(*i));
     }
 
     const TruthValue& outerTV = getTV(andL);
 
-    pHandleSeq NOTarg;
-    pHandle newORAND = addLink(_ORLinkType, ORtarget,
+    pHandleSeq Notarg;
+    pHandle newOrAnd = addLink(_OrLinkType, Ortarget,
                 outerTV,
                 true);
 
-    NOTarg.push_back(newORAND);
+    Notarg.push_back(newOrAnd);
 
 puts("---------");
-printTree(newORAND,0,0);
+printTree(newOrAnd,0,0);
 
-    return addLink(NOT_LINK, NOTarg,
+    return addLink(NOT_LINK, Notarg,
                 TruthValue::TRUE_TV(),
                 true);
 }
@@ -1479,20 +1479,20 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
     {
         assert(hs.size()==2 || hs.empty());
 
-        HandleSeq NOTarg;
-        NOTarg.push_back(hs[0]);
+        HandleSeq Notarg;
+        Notarg.push_back(hs[0]);
         
-        ret = addLink(NOT_LINK, NOTarg, TruthValue::TRUE_TV(), fresh);
+        ret = addLink(NOT_LINK, Notarg, TruthValue::TRUE_TV(), fresh);
     }
     else if (T == IMPLICATION_LINK          //Accidentally similar to da above
             && hs.size()==2
             && isSubType(hs[0], AND_LINK)
             && containsNegation(hs[0], hs[1]))
     {
-        HandleSeq NOTarg;
-        NOTarg.push_back(hs[0]);
+        HandleSeq Notarg;
+        Notarg.push_back(hs[0]);
 
-        ret = addLink(NOT_LINK, NOTarg, TruthValue::TRUE_TV(), fresh);
+        ret = addLink(NOT_LINK, Notarg, TruthValue::TRUE_TV(), fresh);
     }
     else if (T == IMPLICATION_LINK
         && !hs.empty()
@@ -1500,7 +1500,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
     {
         assert(hs.size()==2 || hs.empty());
 
-        LOG(BL, "Cut A=>AND(B,C,...) into AND(A=>B, A=>C, ...)");
+        LOG(BL, "Cut A=>And(B,C,...) into And(A=>B, A=>C, ...)");
         
         HandleSeq imps;
         
@@ -1534,21 +1534,21 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
 //      LOG(BL, "=>( =>(A,B), C) ) into =>( |(B,~A),C ) into  =>( ~&(~B,A),C ) ");
         LOG(BL, "=>( =>(A,B), C) ) into &( =>( A&B, C), =>(~A, C) )");
 
-        HandleSeq NOTa_args;
-        NOTa_args.push_back(a);
+        HandleSeq Nota_args;
+        Nota_args.push_back(a);
         
-        HandleSeq AND_args;
-        AND_args.push_back(a);
-        AND_args.push_back(b);
+        HandleSeq And_args;
+        And_args.push_back(a);
+        And_args.push_back(b);
 
-//      HandleSeq NOTAND_args;
+//      HandleSeq NotAnd_args;
 
         HandleSeq imps1, imps2;
-        imps1.push_back(addLink(AND_LINK, AND_args, TruthValue::TRUE_TV(),
+        imps1.push_back(addLink(AND_LINK, And_args, TruthValue::TRUE_TV(),
                     fresh));
         imps1.push_back(c);
 
-        imps2.push_back(addLink(NOT_LINK, NOTa_args, TruthValue::TRUE_TV(),
+        imps2.push_back(addLink(NOT_LINK, Nota_args, TruthValue::TRUE_TV(),
                     fresh));
         imps2.push_back(c);
         
@@ -1565,7 +1565,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
             && hs.size()==2
             && a->getType(hs[1]) != IMPLICATION_LINK)
     {
-        LOG(0, "AND => Implication");
+        LOG(0, "And => Implication");
         cprintf(0,"%d\n",nm->getType(hs[1]));
         getc(stdin);
         
@@ -1863,19 +1863,19 @@ printTree(ret,0,1);
         
 //      const TruthValue& outerTV = getTV(exL);
         
-        pHandleSeq ANDargs;
+        pHandleSeq Andargs;
 
-        ANDargs.push_back( addLink(IMPLICATION_LINK, ImpTarget1,
+        Andargs.push_back( addLink(IMPLICATION_LINK, ImpTarget1,
             tvn,
             true));
 
-        ANDargs.push_back( addLink(IMPLICATION_LINK, ImpTarget2,
+        Andargs.push_back( addLink(IMPLICATION_LINK, ImpTarget2,
             tvn,
             true));
 
-//      reverse(ANDargs.begin(), ANDargs.end());
+//      reverse(Andargs.begin(), Andargs.end());
 
-        ret = addLink(AND_LINK, ANDargs, TruthValue::TRUE_TV(), fresh);
+        ret = addLink(AND_LINK, Andargs, TruthValue::TRUE_TV(), fresh);
     }
     else if (T == FORALL_LINK
             && hs.size() == 2
@@ -1884,12 +1884,12 @@ printTree(ret,0,1);
             && getArity(hs[1]) > 1)
     {
         // FORALL quantifier with AND_LINK is expanded into a LIST of FORALL
-        // for each component within the AND.
-        unsigned int AND_arity = getArity(hs[1]);
+        // for each component within the And.
+        unsigned int And_arity = getArity(hs[1]);
 
         pHandleSeq fa_list;
 
-        for (unsigned int i = 0; i < AND_arity; i++)
+        for (unsigned int i = 0; i < And_arity; i++)
         {
             pHandleSeq fora_hs;
             // How come for all links need the source to be freshened?
@@ -1904,7 +1904,7 @@ printTree(ret,0,1);
             fa_list.push_back( addLink(FORALL_LINK, fora_hs, tvn, fresh) );
         }
 
-        assert(fa_list.size() == AND_arity);
+        assert(fa_list.size() == And_arity);
 
         ret = addLink(LIST_LINK, fa_list, TruthValue::TRUE_TV(), fresh);
 

@@ -36,14 +36,14 @@ namespace opencog { namespace pln {
  * a)
  *
  * R <TV>
- *     C ANDLink A
- *     C ANDLink B
+ *     C AndLink A
+ *     C AndLink B
  * |-
  * ContextLink <TV>
  *     C
  *     R A B
  *
- * @todo this should be generalized for n-ari ANDLink
+ * @todo this should be generalized for n-ari AndLink
  *
  * b)
  *

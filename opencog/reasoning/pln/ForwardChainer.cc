@@ -388,10 +388,10 @@ HybridForwardChainer::~HybridForwardChainer()
 
 Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(vector<BBvtree> filter)
 {
-    // Make an ANDLink containing the arguments, and give it to the BC. Then convert each result into an arg-vector.
-    // Used to not be able to make an ANDLink with 1 argument, because SimpleANDRule-1 crashed.
+    // Make an AndLink containing the arguments, and give it to the BC. Then convert each result into an arg-vector.
+    // Used to not be able to make an AndLink with 1 argument, because SimpleAndRule-1 crashed.
 
-    meta AND(
+    meta And(
         new vtree(
              mva((pHandle)AND_LINK)
              )
@@ -400,12 +400,12 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(vector<B
     for (unsigned int i = 0; i < filter.size(); i++)
     {
         //vtree arg(*filter[i]);
-        AND->append_child(AND->begin(), filter[i]->begin());
+        And->append_child(And->begin(), filter[i]->begin());
     }
 
     // filter[0] is technically also a meta, i.e. Boost shared pointer to vtree.
     // Since BoundVTree is a subclass of vtree.
-    BITNodeRoot bit(AND, new EvaluationRuleProvider);
+    BITNodeRoot bit(And, new EvaluationRuleProvider);
     // Enables it to handle Deduction/MP combined with ForAll unification.
     bit.setLoosePoolPolicy(true);
 //    // Enables trails with forward chaining.

@@ -19,36 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/platform.h>
-#include "../../PLN.h"
-
-#include "../Rule.h"
-#include "../Rules.h"
-#include "../../AtomSpaceWrapper.h"
-#include "../../PLNatom.h"
-#include "../../BackInferenceTreeNode.h"
+#ifndef ANDPARTITIONRULE_H
+#define ANDPARTITIONRULE_H
 
 namespace opencog { namespace pln {
 
-/*Rule::setOfMPs ANDSubstRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
-{
-    if (!inheritsType(nm->getType(v2h(*outh->begin())), IMPLICATION_LINK)
-        || outh->number_of_children() != 2)
-        return Rule::setOfMPs();        
+/** @class AndPartitionRule
+	Partitions argument into smaller AndLinks
+*/
 
-    tree<Vertex>::sibling_iterator hs1 = outh->begin(outh->begin());
-    tree<Vertex>::sibling_iterator hs0 = hs1++;
-    
-    if (!inheritsType(nm->getType(v2h(*hs0)), AND_LINK)
-        || (   !inheritsType(nm->getType(v2h(*hs0)), AND_LINK)
-            && !inheritsType(nm->getType(v2h(*hs0)), FW_VARIABLE_NODE)
-    )
-        return Rule::setOfMPs();
-    
-}
-
-BoundVertex ANDSubstRule::compute(const VertexSeq& premiseArray, Handle CX) const
+class AndPartitionRule : public Rule
 {
-} */
+	SymmetricAndFormula fN;
+
+public:
+	AndPartitionRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw,true,true,"AndPartitionRule")
+	{ }
+	
+	bool validate2(MPs& args) const { return true; }
+	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+
+	BoundVertex compute(const VertexSeq& premiseArray,
+                            pHandle CX = PHANDLE_UNDEFINED,
+                            bool fresh = true) const;
+	
+	NO_DIRECT_PRODUCTION;
+};
 
 }} // namespace opencog { namespace pln {
+#endif // ANDPARTITIONRULE_H

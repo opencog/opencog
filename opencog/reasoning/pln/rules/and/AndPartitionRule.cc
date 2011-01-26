@@ -30,12 +30,12 @@
 
 namespace opencog { namespace pln {
 
-Rule::setOfMPs ANDPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+Rule::setOfMPs AndPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     return PartitionRule_o2iMetaExtra(outh, overrideInputFilter, AND_LINK, asw);
 }
 
-BoundVertex ANDPartitionRule::compute(const VertexSeq& premiseArray,
+BoundVertex AndPartitionRule::compute(const VertexSeq& premiseArray,
                                       pHandle CX,
                                       bool fresh) const
 {

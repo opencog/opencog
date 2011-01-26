@@ -47,17 +47,17 @@
 	And inputFilter must be initialized in the constructor!
 */
 
-#include "and/ANDBreakdownRule.h"
-#include "and/ANDPartitionRule.h"
-#include "and/ANDSubstRule.h"
-#include "and/ANDRuleArityFree.h"
-#include "and/ANDRule.h"
-#include "and/ANDRuleSimple.h"
-//#include "and/AND2ORRule.h"
+#include "and/AndBreakdownRule.h"
+#include "and/AndPartitionRule.h"
+#include "and/AndSubstRule.h"
+#include "and/AndRuleArityFree.h"
+#include "and/AndRule.h"
+#include "and/AndRuleSimple.h"
+//#include "and/And2OrRule.h"
 
-#include "or/ORRule.h"
-#include "or/ORPartitionRule.h"
-//#include "or/OR2ANDRule.h"
+#include "or/OrRule.h"
+#include "or/OrPartitionRule.h"
+//#include "or/Or2AndRule.h"
 
 #include "not/NotRule.h"
 //#include "not/NotEliminationRule.h"
