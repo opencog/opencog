@@ -46,9 +46,8 @@ ADD_LIBRARY (pln SHARED
 	rules/implication/ImplicationConstructionRule.cc
 	rules/inference/HypothesisRule.cc
 	rules/convert/Equi2ImpRule.cc
-	rules/simsubst/SimSubstRule2.cc
-	rules/simsubst/SimSubstRule1.cc
-	rules/simsubst/SimSubstRule1.cc
+	rules/substitution/SimSubstRule1.cc
+	rules/substitution/SimSubstRule2.cc
 	rules/context/ContextualizerRule.cc
 	rules/context/DecontextualizerRule.cc
 	rules/context/ContextFreeToSensitiveRule.cc
@@ -114,8 +113,8 @@ INSTALL (FILES
 	rules/implication/ImplicationConstructionRule.h
 	rules/implication/StrictImplicationBreakdownRule.h
 	rules/implication/ImplicationTailExpansionRule.h
-	rules/simsubst/SimSubstRule2.h
-	rules/simsubst/SimSubstRule1.h
+	rules/substitution/SimSubstRule1.h
+	rules/substitution/SimSubstRule2.h
 	rules/or/OrRule.h
 	rules/or/Or2AndRule.h
 	rules/or/OrPartitionRule.h
