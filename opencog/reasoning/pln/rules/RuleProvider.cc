@@ -360,7 +360,9 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
     addRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
     addRule(new DeductionRule<DeductionSimpleFormula>(asw, ASSOCIATIVE_LINK), 8.0f);
     addRule(new DeductionRule<DeductionSimpleFormula>(asw, SIMILARITY_LINK), 8.0f);
-    addRule(new DeductionRule<DeductionSimpleFormula>(asw, SUBSET_LINK), 8.0f);
+    // Enabling SubsetDeductionRule seems to make the inference trail printing
+    // mechanism enter an infinite loop
+    //addRule(new DeductionRule<DeductionSimpleFormula>(asw, SUBSET_LINK), 8.0f);
     
     //addRule(new ORPartitionRule(asw), 10.0f);
     addRule(new CrispTheoremRule(asw), 10.0f);
