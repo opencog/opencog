@@ -93,8 +93,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 public:
     
     DeductionRule(AtomSpaceWrapper *_asw, Type linkType)
-        : GenericRule<DeductionFormula>(_asw, false, DeductionRuleSuffixStr),
-          InclusionLink(linkType) 
+        : super(_asw, false, DeductionRuleSuffixStr), InclusionLink(linkType) 
     {
         OC_ASSERT(classserver().isA(linkType,LINK));
         std::string linkName = classserver().getTypeName(linkType);
