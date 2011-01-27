@@ -11,7 +11,7 @@
   (pln-ar "IntensionalInheritanceRule" (list sub super) contexts))
 
 ; Deduction rules
-(define (InhDeductionRule AB BC . contexts)
+(define (InheritanceDeductionRule AB BC . contexts)
   (pln-ar "InheritanceDeductionRule" (list AB BC) contexts))
 (define (SubsetDeductionRule AB BC . contexts)
   (pln-ar "SubsetDeductionRule" (list AB BC) contexts))

@@ -38,9 +38,9 @@
 ; Inference
 ;
 ; a nerd is cool in the context of mathematics
-(define target1 (InhDeductionRule NI IC mathematics))
+(define target1 (InheritanceDeductionRule NI IC mathematics))
 ; a nerd is not cool in the context of makingOut
-(define target2 (InhDeductionRule NA AC makingOut))
+(define target2 (InheritanceDeductionRule NA AC makingOut))
 
 ; return the target, necessary so it can be automatically tested by
 ; PLNSchemeWrapperUTest.cxxtest
