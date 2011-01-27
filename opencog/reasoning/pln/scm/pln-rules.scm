@@ -9,30 +9,38 @@
   (pln-ar "SubsetEvalRule" (list sub super) contexts))
 (define (IntensionalInheritanceRule sub super . contexts)
   (pln-ar "IntensionalInheritanceRule" (list sub super) contexts))
+
+; Deduction rules
 (define (InhDeductionRule AB BC . contexts)
   (pln-ar "InheritanceDeductionRule" (list AB BC) contexts))
 (define (SubsetDeductionRule AB BC . contexts)
   (pln-ar "SubsetDeductionRule" (list AB BC) contexts))
+
+; Logical rules
 (define (NotRule A . contexts)
   (pln-ar "NotRule" (list A) contexts))
+; And rules, must happend the arity to the rule name
+(define (SimpleAndRuleNameStr premises)
+  (string-append "SimpleAndRule" (number->string (length premises))))
+(define (SimpleAndRule . premises)
+  (pln-ar (SimpleAndRuleNameStr premises) premises (list))) ;TODO add
+                                                            ;context
+; ModusPonensRule is the name for StrictImplicationBreakdownRule
+(define (ModusPonensRule implication antecedent . contexts)
+  (pln-ar "ModusPonensRule" (list implication antecedent) contexts))
 
-; context rules, not sure if the last argument 'contexts' would be useful
+; Substitution rules
+; that one substitute the right operand or R by the left one in C
+(define (InheritanceSubstRule R C . contexts)
+  (pln-ar "InheritanceSubstRByLRule" (list R C) contexts))
+
+; Context rules, not sure if the last argument 'contexts' would be useful
 (define (ContextualizerRule R . contexts)
   (pln-ar "ContextualizerRule" (list R) contexts))
 (define (DecontextualizerRule CL . contexts)
   (pln-ar "DecontextualizerRule" (list CL) contexts))
 (define (ContextFreeToSensitiveRule CX A . contexts)
   (pln-ar "ContextFreeToSensitiveRule" (list CX A) contexts))
-
-; ModusPonensRule is the name for StrictImplicationBreakdownRule
-(define (ModusPonensRule implication antecedent . contexts)
-  (pln-ar "ModusPonensRule" (list implication antecedent) contexts))
-
-; And rules, must happend the arity to the rule name
-(define (SimpleAndRuleNameStr premises)
-  (string-append "SimpleAndRule" (number->string (length premises))))
-(define (SimpleAndRule . premises)
-  (pln-ar (SimpleAndRuleNameStr premises) premises (list))) ;TODO
 
 ;
 ; Instantiation Rules

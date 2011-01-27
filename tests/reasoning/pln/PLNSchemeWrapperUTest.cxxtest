@@ -136,6 +136,8 @@ public:
                         SimpleTruthValue(0.7, SimpleTruthValue::confidenceToCount(0.8)));
         check_inference("Not.scm",
                         SimpleTruthValue(0.9, SimpleTruthValue::confidenceToCount(0.3)));
+        check_inference("InheritanceSubst.scm",
+                        SimpleTruthValue(0.6, 324.000031));
 #ifdef CONTEXTUAL_INFERENCE
         Handle cx = as->addNode(CONCEPT_NODE, "mathematics");
         std::cout << "cx = " << cx.value() << std::endl;

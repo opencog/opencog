@@ -26,7 +26,7 @@
 
 namespace opencog { namespace pln {
 
-static const std::string SubstRuleSuffixStr = "SubstRule";
+static const std::string SubstStr = "Subst";
 
 /**
  * Rule for substituting an atom A by an atom B inside an
@@ -91,13 +91,13 @@ protected:
     }
 
 public:
-    BaseSubstRule(AtomSpaceWrapper* _asw, Type _relationType, bool LByR = true) 
-        : super(_asw, false, SubstRuleSuffixStr), relationType(_relationType)
+    BaseSubstRule(AtomSpaceWrapper* _asw, Type _relationType, bool _LByR = true) 
+        : super(_asw, false, SubstStr), relationType(_relationType), LByR(_LByR)
     {
         OC_ASSERT(classserver().isA(relationType, LINK));
         std::string relationName = classserver().getTypeName(relationType);
         super::name = relationName.substr(0, relationName.find("Link")) 
-            + super::name;
+            + super::name + (LByR? "LByR" : "RByL") + "Rule";
 
         super::inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)relationType,
                                                                mva((pHandle)ATOM),
