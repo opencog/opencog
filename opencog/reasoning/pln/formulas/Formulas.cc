@@ -735,13 +735,11 @@ TruthValue* OrFormula2::simpleCompute(const TVSeq& TV, long U) const
 
     NotFormula notF;
     TVSeq Not_TVs = notF.multiCompute(TV, U);
-    TruthValue* Not_AndTV = SymmetricAndFormula().simpleCompute(Not_TVs, U);
+    TruthValuePtr Not_AndTV(SymmetricAndFormula().simpleCompute(Not_TVs, U));
     TruthValue* OrTV = notF.simpleCompute(TVSeq(1, Not_AndTV), U);
 
-    delete Not_AndTV;
-
-    for (unsigned int i = 0; i < Not_TVs.size(); i++)
-        delete Not_TVs[i];
+    //for (unsigned int i = 0; i < Not_TVs.size(); i++)
+    //    delete Not_TVs[i];
 
     return OrTV;
 }
@@ -750,7 +748,6 @@ TruthValue* OrFormula2::simpleCompute(const TVSeq& TV, long U) const
 TruthValue* OldOrFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "OldOr...\n");
-    TruthValuePtr NOT_ANDTV(SymmetricANDFormula().simpleCompute(NOT_TVs, U));
     // No longer needed as NOT_TV entries are smart pointers
     //for (unsigned int i = 0; i < NOT_TVs.size(); i++)
     //    delete NOT_TVs[i];
@@ -861,7 +858,7 @@ TruthValue* ExistFormula::simpleCompute(const TVSeq& TV, long U) const
 
     NotFormula notF;
     TVSeq Not_TVs = notF.multiCompute(TV, U);
-    TruthValue* Not_EXTV = ForAllFormula().simpleCompute(Not_TVs, U);
+    TruthValuePtr Not_EXTV(ForAllFormula().simpleCompute(Not_TVs, U));
     TruthValue* EXTV = notF.simpleCompute(TVSeq(1, Not_EXTV), U );
 
     return EXTV;

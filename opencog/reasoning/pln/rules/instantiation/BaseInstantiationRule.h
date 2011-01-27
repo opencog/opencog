@@ -73,11 +73,28 @@ protected:
     pHandle quantifierLink;
     Type quantifierType;
 
+    inline void makeName(pHandle h) {
+        //append the pHandle quantifierLink so that the rule name is unique
+        name += boost::lexical_cast<std::string>(quantifierLink);
+    }
 public:
 
     //! Obsolete is set to true if the Handle this rule is based off of is
     //! removed from the AtomSpace.
     bool obsolete;
+
+    //! This version is needed for adding via add/remove signals, because
+    //! ASW access from add/remove handlers is not allowed.
+    BaseInstantiationRule(Type _quantifierType,
+                          pHandle _quantifierLink,
+                          AtomSpaceWrapper *_asw, const std::string& _name)
+        : Rule(_asw, false, false, _name), quantifierLink(_quantifierLink)
+    {
+        quantifierType = _quantifierType;
+        makeName(quantifierLink);
+        inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
+        obsolete = false;
+    }
 
     BaseInstantiationRule(pHandle _quantifierLink,
                           AtomSpaceWrapper *_asw, const std::string& _name)
@@ -85,8 +102,8 @@ public:
     {
         quantifierType = asw->getType(quantifierLink);
         //append the pHandle quantifierLink so that the rule name is unique
-        name += boost::lexical_cast<std::string>(quantifierLink);
-        inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM)))); //???
+        makeName(quantifierLink);
+        inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
         obsolete = false;
     }
 
@@ -160,7 +177,7 @@ public:
         
         bind_Bvtree(rootAtom, *i->bindings);
 
-        TruthValue* retTV = formula.compute(TVSeq(1, &asw->getTV(i->original_handle)));
+        TruthValue* retTV = formula.compute(TVSeq(1, asw->getTV(i->original_handle)));
 
         pHandle ret_h = asw->addAtom(*rootAtom, *retTV, false);
 

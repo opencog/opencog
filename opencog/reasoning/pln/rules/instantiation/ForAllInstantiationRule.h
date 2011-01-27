@@ -40,6 +40,10 @@ private:
     typedef BaseInstantiationRule<IdentityFormula> super;
 
 public:
+    //! Constructor for calling from add/remove signal handler
+    ForAllInstantiationRule(Type t, pHandle _forAllLink, AtomSpaceWrapper *_asw) :
+        super(t, _forAllLink, _asw, ForAllInstantiationRulePrefixStr) { }
+
     ForAllInstantiationRule(pHandle _forAllLink, AtomSpaceWrapper *_asw) :
         super(_forAllLink, _asw, ForAllInstantiationRulePrefixStr) { }
 };

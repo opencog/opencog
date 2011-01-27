@@ -39,7 +39,7 @@ meta DecontextualizerRule::i2oType(const VertexSeq& h) const {
        asw->isSubType(A, EVALUATION_LINK)) {
         /// @todo this might be decomposed into subrule
         A = asw->addLink(SATISFYING_SET_LINK, pHandleSeq(1, A),
-                         asw->getTV(A), false);
+                         *asw->getTV(A), false);
     }
     // case a)
     // @note it is missing the cases where concepts are AND_LINK and such

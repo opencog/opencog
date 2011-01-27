@@ -884,8 +884,10 @@ pHandle AtomSpaceWrapper::addNodeDC(Type t, const string& name,
 
 pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 {
+    // This is a sort of "nexus" function, which every Atom-add bottoms out in
+    
 #if 0 // This implementation still gets different behaviour in some cases...
-//#ifdef STREAMLINE_PHANDLES // This is a sort of "nexus" function, which every Atom-add bottoms out in
+//#ifdef STREAMLINE_PHANDLES 
 	// DESIGN DECISIONS:
 	// Ignore fresh; also let the AS take care of TVs for now.
 	// This should make sure that when the first TV is added, it will be primary

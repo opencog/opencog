@@ -166,11 +166,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 
                     Vertex V=((r->compute(*args, PHANDLE_UNDEFINED, false)).GetValue());
                     pHandle out=boost::get<pHandle>(V);
-<<<<<<< TREE
-                    const TruthValue& tv(GET_ASW->getTV(out));
-=======
                     TruthValuePtr tv = GET_ASW->getTV(out);
->>>>>>> MERGE-SOURCE
                     NMPrinter().print(out,-5);
 
                     if (!tv->isNullTv() && tv->getCount() > minConfidence) {

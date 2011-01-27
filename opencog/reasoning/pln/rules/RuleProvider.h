@@ -26,7 +26,11 @@
 
 #include <boost/thread/mutex.hpp>
 
-namespace opencog { namespace pln {
+namespace opencog {
+
+class AtomSpaceImpl;
+    
+namespace pln {
 
 class RuleProvider  {
 protected:
@@ -91,8 +95,8 @@ public:
 class ReferenceRuleProvider : public RuleProvider
 {
     // For monitoring additions to the AtomSpace from outside of PLN
-    bool handleAddSignal(Handle h); //!< Signal handler for atom adds.
-    bool handleRemoveSignal(Handle h); //!< Signal handler for atom removals.
+    bool handleAddSignal(AtomSpaceImpl *a, Handle h); //!< Signal handler for atom adds.
+    bool handleRemoveSignal(AtomSpaceImpl *a, Handle h); //!< Signal handler for atom removals.
 
     boost::signals::connection c_add; //! Connection to add atom signals
     boost::signals::connection c_remove; //! Connection to remove atom signals

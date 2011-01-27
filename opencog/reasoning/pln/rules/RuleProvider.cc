@@ -23,6 +23,8 @@
 #include "Rules.h"
 #include "RuleProvider.h"
 
+#include <opencog/atomspace/AtomSpaceImpl.h>
+
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 
@@ -223,34 +225,35 @@ void ReferenceRuleProvider::printRules()
     }
 }
 
-bool ReferenceRuleProvider::handleAddSignal(Handle h)
+bool ReferenceRuleProvider::handleAddSignal(AtomSpaceImpl* a, Handle h)
 {
     AtomSpaceWrapper* asw = ASW();
     pHandle ph = asw->realToFakeHandle(h, NULL_VERSION_HANDLE);
     
-    Type t = asw->getType(ph);
+    Type t = a->getType(h);
     RulePtr rulePtr;
     if (t == FORALL_LINK) {
-        rulePtr = addRule(new ForAllInstantiationRule(ph, asw),
+        rulePtr = addRule(new ForAllInstantiationRule(t, ph, asw),
                 instantiationRulePriority);
     } else if (t == AVERAGE_LINK) {
-        rulePtr = addRule(new AverageInstantiationRule(ph, asw),
+        rulePtr = addRule(new AverageInstantiationRule(t, ph, asw),
                 instantiationRulePriority);
     }
     if (rulePtr) {
         instantiationRules.push_back(rulePtr);
+        boost::mutex::scoped_lock lock(watchersLock);
         foreach(RuleProvider* rp, watchers)
             rp->addRule(rulePtr->getName(), instantiationRulePriority);
     }
     return false;
 }
 
-bool ReferenceRuleProvider::handleRemoveSignal(Handle h)
+bool ReferenceRuleProvider::handleRemoveSignal(AtomSpaceImpl* a, Handle h)
 {
     AtomSpaceWrapper* asw = ASW();
     pHandle ph = asw->realToFakeHandle(h, NULL_VERSION_HANDLE);
     
-    Type t = asw->getType(ph);
+    Type t = a->getType(h);
     std::string name;
     if (t == FORALL_LINK) {
         name = ForAllInstantiationRulePrefixStr;
@@ -259,10 +262,7 @@ bool ReferenceRuleProvider::handleRemoveSignal(Handle h)
     }
     if (name.length() > 0) {
         name += boost::lexical_cast<std::string>(ph);
-        // Remove from watching RuleProviders first
-        //foreach(RuleProvider* rp, watchers)
-        //    rp->removeRule(name);
-        // Then remove from ReferenceRuleProvider
+        // remove from ReferenceRuleProvider
         removeRule(name);
     }
     return false;
@@ -282,6 +282,7 @@ void ReferenceRuleProvider::removeRule(const std::string& ruleName)
         if ((*ri)->getName() == ruleName) break;
     }
     if (ri != instantiationRules.end()) {
+        boost::mutex::scoped_lock lock(watchersLock);
         foreach(RuleProvider* rp, watchers) {
             rp->removeRule((*ri)->getName());
         }
@@ -302,10 +303,10 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
     AtomSpaceWrapper* asw = ASW();
     AtomSpace* atomspace = asw->getAtomSpace();
     
-    c_add = atomspace->addAtomSignal().connect(
-            boost::bind(&ReferenceRuleProvider::handleAddSignal, this, _1));
-    c_remove = atomspace->removeAtomSignal().connect(
-            boost::bind(&ReferenceRuleProvider::handleRemoveSignal, this, _1));
+    c_add = atomspace->atomSpaceAsync.addAtomSignal(
+            boost::bind(&ReferenceRuleProvider::handleAddSignal, this, _1, _2));
+    c_remove = atomspace->atomSpaceAsync.removeAtomSignal(
+            boost::bind(&ReferenceRuleProvider::handleRemoveSignal, this, _1, _2));
     assert(c_add.connected() && c_remove.connected());
 
     addRule(new LookupRule(asw), 20.0f);

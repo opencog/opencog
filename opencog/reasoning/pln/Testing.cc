@@ -430,12 +430,6 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     if (!passed)
         getc(stdin);
 #endif
-<<<<<<< TREE
-    if (etv != NULL) delete etv;
-=======
-    //asw->reset(NULL);
-//    sleep(10);
->>>>>>> MERGE-SOURCE
     return passed;
 }
 

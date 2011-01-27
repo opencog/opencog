@@ -55,6 +55,10 @@ private:
     typedef BaseInstantiationRule<IdentityFormula> super;
 
 public:
+    //! Constructor for calling from add/remove signal handler
+    AverageInstantiationRule(Type t, pHandle _averageLink, AtomSpaceWrapper *_asw) :
+        super(t, _averageLink, _asw, AverageInstantiationRulePrefixStr) { }
+
     AverageInstantiationRule(pHandle _averageLink, AtomSpaceWrapper *_asw) :
         super(_averageLink, _asw, AverageInstantiationRulePrefixStr) { }
 };

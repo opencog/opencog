@@ -196,9 +196,9 @@ inline bool foreach_dict_word_sense_pos(Handle h, const std::string &pos,
  *       WordSenseNode "bark%1:20:00::"
  *       DefinedLinguisticConceptNode "noun"
  */
-inline const std::string& get_part_of_speech(Handle word_instance)
+inline const std::string get_part_of_speech(Handle word_instance)
 {
-	static std::string empty;
+	//static std::string empty;
 	AtomSpace &as = atomspace();
 
 	// Find the part-of-speech for this word instance.
