@@ -86,8 +86,7 @@
 
 //#include "auxiliary/VarInstantiationRule.h"
 
-#include "substitution/SimSubstRule1.h"
-//#include "substitution/SimSubstRule2.h"
+#include "substitution/InheritanceSubstRule.h"
 
 #include "instantiation/ForAllInstantiationRule.h"
 #include "instantiation/AverageInstantiationRule.h"

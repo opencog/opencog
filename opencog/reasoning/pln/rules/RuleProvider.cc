@@ -376,10 +376,10 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
 
     addRule(new HypothesisRule(asw), 30.0f);
     // general -> specific
-    //addRule(new SimSubstRule1(asw, false), -10000000.0f);
-    addRule(new SimSubstRule1(asw, false), 5.0f);
-    // specific -> general; can be handled by general->specific, plus InversionRule.
-//    addRule(new SimSubstRule1(asw, true), 5.0f);
+    addRule(new InheritanceSubstRule(asw, false), 5.0f);
+    // specific -> general; can be handled by general->specific, plus
+    // InversionRule.
+    //    addRule(new InheritanceSubstRule(asw, true), 5.0f);
     
     /* The rest of the Rules have rarely or never been used. Some of them just won't work. */
     
