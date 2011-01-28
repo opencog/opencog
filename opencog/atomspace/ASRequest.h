@@ -149,7 +149,7 @@ public:
 
 class GetNodeHandleASR : public TwoParamASR <Handle,Type,std::string> {
 public:
-    GetNodeHandleASR(AtomSpaceImpl *a, Type type, std::string name) :
+    GetNodeHandleASR(AtomSpaceImpl *a, Type type, const std::string& name) :
         TwoParamASR<Handle,Type,std::string>(a,type,name)
         {};
     
@@ -161,7 +161,7 @@ public:
 
 class GetLinkHandleASR : public TwoParamASR <Handle,Type,HandleSeq> {
 public:
-    GetLinkHandleASR(AtomSpaceImpl *a, Type type, HandleSeq outgoing) :
+    GetLinkHandleASR(AtomSpaceImpl *a, Type type, const HandleSeq& outgoing) :
         TwoParamASR<Handle,Type,HandleSeq>(a,type,outgoing)
         {};
     
