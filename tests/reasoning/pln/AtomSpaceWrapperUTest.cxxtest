@@ -387,6 +387,19 @@ public:
 
         // ... so does an undefined pHandle
         TS_ASSERT(*asw->getTV(PHANDLE_UNDEFINED) == TruthValue::TRIVIAL_TV());
+
+        asw->setTV(h1,tv2);
+        TS_ASSERT(*asw->getTV(h1) == tv2);
+
+        asw->setTV(h1,tv2);
+        pHandle h1_1 = asw->addNode(CONCEPT_NODE, "magneto", tv3);
+
+        TS_ASSERT_EQUALS(h1, asw->getPrimaryFakeHandle(h1_1));
+        // TVs get merged in current incarnation of AtomSpaceWrapper and
+        // merge method keeps highest confidence... i.e. tv2
+        TS_ASSERT(*asw->getTV(h1_1) != tv3);
+        TS_ASSERT(*asw->getTV(h1) == tv2);
+
     }
 
 };
