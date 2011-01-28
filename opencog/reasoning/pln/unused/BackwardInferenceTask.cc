@@ -21,8 +21,6 @@
 
 #include "PLN.h"
 
-#ifndef USE_PSEUDOCORE
-
 #ifndef AUTO_H_PLNEVALUATOR_H
   #define AUTO_H_PLNEVALUATOR_H
   #include "PLNEvaluator.h"
@@ -79,4 +77,3 @@ bool BackwardInferenceTask::ok() { return finished; }
 
 }} //opencog::pln
 
-#endif //#ifndef USE_PSEUDOCORE

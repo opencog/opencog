@@ -22,8 +22,6 @@
 #ifndef _BACKWARDINFERENCETASK_H_
 #define _BACKWARDINFERENCETASK_H_
 
-#ifndef USE_PSEUDOCORE
-
 namespace opencog { namespace pln
 {
 	
@@ -55,7 +53,5 @@ public:
 };
 
 }}
-
-#endif //#ifndef USE_PSEUDOCORE
 
 #endif //_BACKWARDINFERENCETASK_H_

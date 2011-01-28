@@ -58,11 +58,7 @@ struct Vector3D { float x1; float x2; float x3; };
 //! @todo Standardize this
 //const int MAX_COUNT = 100000;
 
-#ifdef USE_PSEUDOCORE
-	#define USE_TIME_SERVER 0
-#else
-	#define USE_TIME_SERVER 1
-#endif
+#define USE_TIME_SERVER 1
 
 typedef unsigned long timeUnit;
 
