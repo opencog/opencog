@@ -42,6 +42,7 @@
 
 #include <opencog/atomspace/TimeServer.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/lru_cache.h>
 
 #include "PLN.h"
 
@@ -197,6 +198,8 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     
     //! This string is the prefix of PLN dummy context root Node
     const std::string rootContext;
+    //! The handle of the root context
+    Handle rootContextHandle;
 
     // typedef bimap< unordered_set_of< vhpair >, set_of<Handle> > vhmap_t;
     // typedef vhmap_t::value_type vhmap_pair_t;
@@ -254,6 +257,35 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     boost::signals::connection c_add; //! Connection to add atom signals
     boost::signals::connection c_remove; //! Connection to remove atom signals
 
+    class _getType : public std::unary_function<pHandle, Type> {
+        AtomSpaceWrapper* asw;
+        public:
+        _getType(AtomSpaceWrapper* _asw) : asw(_asw) { };
+        Type operator()(const pHandle& ph) const {
+            Handle h = asw->fakeToRealHandle(ph).first;
+            return asw->atomspace->getType(h);
+        }
+    };
+    _getType* __getType;
+    // dummy get type version which is cached using lru_cache
+    lru_cache<AtomSpaceWrapper::_getType> *getTypeCached;
+
+    class _getTV : public std::unary_function<pHandle, TruthValuePtr> {
+        AtomSpaceWrapper* asw;
+        public:
+        _getTV(AtomSpaceWrapper* _asw) : asw(_asw) { };
+        TruthValuePtr operator()(const pHandle& ph) const {
+            if (ph != PHANDLE_UNDEFINED) {
+                vhpair r = asw->fakeToRealHandle(ph);
+                return asw->atomspace->getTV(r.first,r.second);
+            } else {
+                return TruthValuePtr(TruthValue::TRIVIAL_TV().clone());
+            }
+        }
+    };
+    _getTV* __getTV;
+    // dummy get type version which is cached using lru_cache
+    lru_cache<AtomSpaceWrapper::_getTV> *getTVCached;
 protected:
     AtomSpace *atomspace;
 
@@ -313,6 +345,11 @@ public:
     pHandleSeq realToFakeHandles(Handle h, Handle dc);
     //! Convert real handles to pln pHandleSeq, all under a given context
     pHandleSeq realToFakeHandles(const HandleSeq& hs, Handle context);
+
+    /** Get the pHandle that represents the non-contextual/primary TV the real handle
+     * behind ph.
+     */
+    pHandle getPrimaryFakeHandle(pHandle ph);
 
     vhpair fakeToRealHandle(const pHandle f) const;
 
@@ -376,7 +413,7 @@ public:
 
     //! Initialize new AtomSpaceWrapper with const universe size
     AtomSpaceWrapper(AtomSpace* as);
-    virtual ~AtomSpaceWrapper() {}
+    virtual ~AtomSpaceWrapper();
 
     //! Load axioms from given xml filename
     bool loadAxioms(const std::string& path);
@@ -505,6 +542,7 @@ public:
     bool inheritsType(Type subT, Type superT) const;
 
     TruthValuePtr getTV(pHandle h) const;
+    void setTV(pHandle h, const TruthValue& tv);
 
     bool isType(const pHandle h) const;
 

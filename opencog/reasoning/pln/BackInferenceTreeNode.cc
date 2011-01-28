@@ -1658,10 +1658,10 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                     //SimpleTruthValue* revisedTV = new SimpleTruthValue(TruthValue::DEFAULT_TV());
                     //CompositeTruthValue& all;
                     pHandle ph = _v2h(next_result.value);
-                    Handle real = asw->fakeToRealHandle(ph).first;
+                    pHandle primary_ph = asw->getPrimaryFakeHandle(ph);
 
                     // Revise existing primary TV and newly found TV
-                    TruthValuePtr primaryTV = atomspace().getTV(real, NULL_VERSION_HANDLE);
+                    TruthValuePtr primaryTV = asw->getTV(primary_ph);
                     TruthValuePtr newlyFoundTV = asw->getTV(ph);
 
                     TVSeq both(2);
@@ -1669,7 +1669,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                     both[1] = newlyFoundTV;
                     TruthValue* tmp = formula.simpleCompute(both);
 
-                    atomspace().setTV(real, *tmp, NULL_VERSION_HANDLE);
+                    asw->setTV(primary_ph, *tmp);
 
 
                     //! @todo use the primary TV higher up

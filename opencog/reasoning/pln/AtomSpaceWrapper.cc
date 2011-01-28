@@ -81,13 +81,26 @@ AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
     USize(800), USizeMode(CONST_SIZE), rootContext("___PLN___"), atomspace(a)
 {
     // Add dummy root NULL context node
-    atomspace->addNode(CONCEPT_NODE, rootContext);
+    rootContextHandle = atomspace->addNode(CONCEPT_NODE, rootContext);
+    atomspace->setVLTI(rootContextHandle, AttentionValue::NONDISPOSABLE);
+    
+    // Initialise lru cache for getType and getTV
+    __getType = new _getType(this);
+    getTypeCached = new lru_cache<AtomSpaceWrapper::_getType>(1000,*__getType);
+    __getTV = new _getTV(this);
+    getTVCached = new lru_cache<AtomSpaceWrapper::_getTV>(1000,*__getTV);
 
     //! @todo Replace srand with opencog::RandGen
     srand(12345678);
     allowFWVarsInAtomSpace = true;
     archiveTheorems = false;
     setWatchingAtomSpace(true);
+}
+
+AtomSpaceWrapper::~AtomSpaceWrapper()
+{
+    delete __getType;
+    delete getTypeCached;
 }
 
 void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
@@ -265,7 +278,7 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
                 for (uint i = 0; match && i < outgoing.size(); i++) {
                     if (outgoing[i] == v.first) {
                         Handle c = contexts[i+1];
-                        if (atomspace->getName(c) == rootContext)
+                        if (c == rootContextHandle))
                             c = Handle::UNDEFINED;
                         if (sourceContext != c) {
                             match = false;
@@ -401,7 +414,7 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h, const Handle c)
     for (unsigned int i=0; match && i < outgoing.size(); i++) {
         // +1 because first context is for distinguishing dual links using the
         // same destination contexts.
-        if (atomspace->getName(contexts[i+1]) == rootContext)
+        if (contexts[i+1] == rootContextHandle)
             contexts[i+1] = Handle::UNDEFINED;
         VersionHandle vh(CONTEXTUAL, contexts[i+1]);
         if (atomspace->getTV(outgoing[i],vh)->isNullTv()) {
@@ -437,14 +450,38 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandles(const HandleSeq& hs,
     return result;
 }
 
-TruthValuePtr AtomSpaceWrapper::getTV(pHandle h) const
+pHandle AtomSpaceWrapper::getPrimaryFakeHandle(pHandle ph)
 {
-    if (h != PHANDLE_UNDEFINED) {
-        vhpair r = fakeToRealHandle(h);
-        return atomspace->getTV(r.first,r.second);
+    vhpair real = fakeToRealHandle(ph);
+    return realToFakeHandle(real.first, NULL_VERSION_HANDLE);
+}
+
+TruthValuePtr AtomSpaceWrapper::getTV(pHandle ph) const
+{
+    return (*getTVCached)(ph);
+    /*TruthValuePtr testtv = (*getTVCached)(ph);
+    if (ph != PHANDLE_UNDEFINED) {
+        vhpair r = fakeToRealHandle(ph);
+
+        TruthValuePtr ret(atomspace->getTV(r.first,r.second));
+        if (ret->toString() != testtv->toString()) {
+            OC_ASSERT(false);
+        }
+        return ret;
     } else {
-        return TruthValuePtr(TruthValue::TRIVIAL_TV().clone());
-    }
+        TruthValuePtr trivial = TruthValuePtr(TruthValue::TRIVIAL_TV().clone());
+        if (trivial->toString() != testtv->toString()) {
+            OC_ASSERT(false);
+        }
+        return trivial;
+    }*/
+}
+
+void AtomSpaceWrapper::setTV(pHandle h, const TruthValue& tv)
+{
+    vhpair real = fakeToRealHandle(h);
+    atomspace->setTV(real.first, tv, real.second);
+    getTVCached->make_dirty(h);
 }
 
 shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
@@ -520,7 +557,11 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
                 }
             }
             if (matches) {
-                return realToFakeHandle(real,vh);
+                pHandle result = realToFakeHandle(real,vh);
+                // We need to mark the TV cache entry dirty in case of the setTV
+                // above changing things
+                getTVCached->make_dirty(result);
+                return result;
             }
         }
     }
@@ -535,7 +576,10 @@ void AtomSpaceWrapper::reset()
     vhmap_reverse.clear();
     variableShadowMap.clear();
     atomspace->clear();
-    atomspace->addNode(CONCEPT_NODE, rootContext);
+    getTypeCached->clear();
+    getTVCached->clear();
+    rootContextHandle = atomspace->addNode(CONCEPT_NODE, rootContext);
+    atomspace->setVLTI(rootContextHandle, AttentionValue::NONDISPOSABLE);
 }
 
 bool AtomSpaceWrapper::loadAxioms(const string& path)
@@ -861,7 +905,7 @@ pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs,
         // isInvalidHandle makes sure the atom was not deleted.
         if (!atomspace->isValidHandle(v.second.substantive)) {
 #ifndef CONTEXTUAL_INFERENCE
-            contexts.push_back(atomspace->getHandle(CONCEPT_NODE, rootContext));
+            contexts.push_back(rootContextHandle);
 #endif
         } else {
             contexts.push_back(v.second.substantive);
@@ -949,10 +993,12 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 
 //		if (!atomspace->isValidHandle(result)) {
 			// if the atom doesn't exist already, then just add normally
-			return realToFakeHandle(as->addNode(node.getType(),
+			pHandle ph = realToFakeHandle(as->addNode(node.getType(),
 												node.getName(),
 												node.getTruthValue()),
 									NULL_VERSION_HANDLE);
+            getTVCached->make_dirty(ph);
+            return ph;
 //		}
 	} else {
 		const Link& link = (const Link&) atom;
@@ -964,7 +1010,6 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 		bool noExistingTV = (tv == TruthValue::TRIVIAL_TV() || tv == TruthValue::DEFAULT_TV() || tv == TruthValue::NULL_TV()
 							 || tv.getCount() >= atv.getCount());
 		bool sameTV = (tv != TruthValue::NULL_TV() && tv.getMean() == atv.getMean() && tv.getCount() == atv.getCount());
-		//if (tv != TruthValue::NULL_TV()) std::cout << tv.getMean() << " " << atv.getMean() << " " << tv.getCount() << " " << atv.getCount() << std::endl;
 		if (tv != TruthValue::NULL_TV()) std::cout << tv.toString() << " new: " << atv.toString() << std::endl;
 		if (!noExistingTV && !sameTV) {
 			std::cout << "Existing TV!" << std::endl;
@@ -979,16 +1024,15 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 //		}
 	}
 
-	// Link <handle,vh> to a long int
-	///
 	// Get any existing TVs
 //	const TruthValue& tv = as->getTV(result);
 //	if (atom.getTruthValue() != TruthValue::TRIVIAL_TV()) {
 //		std::cout << atom.toString() /*<< " " << tv.toString()*/ << std::endl;
 //		assert(atom.getTruthValue() == atom.getTruthValue()); // Check that it never is required to make a new TV (or that they're always higher-conf...)
 //	}
-	///
 	fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
+    // invalidate cache entry
+    getTVCached->make_dirty(fakeHandle);
 	return fakeHandle;
 #else // not STREAMLINE_PHANDLES
     AtomSpace *as = atomspace;
@@ -1002,23 +1046,25 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
         if (nnn) {
             const Node& node = (const Node&) atom;
             result = as->getHandle(node.getType(), node.getName());
-            if (!as->isValidHandle(result)) {
+            if (result == Handle::UNDEFINED) {
                 // if the atom doesn't exist already, then just add normally
-                return realToFakeHandle(as->addNode(node.getType(),
-                                                    node.getName(),
-                                                    node.getTruthValue()),
-                                        NULL_VERSION_HANDLE);
+                pHandle ph = realToFakeHandle(as->addNode(node.getType(),
+                                                node.getName(),
+                                                node.getTruthValue()),
+                                                NULL_VERSION_HANDLE);
+                getTVCached->make_dirty(ph);
+                return ph;
             }
         } else {
             const Link& link = (const Link&) atom;
             result = as->getHandle(link.getType(), link.getOutgoingSet());
-            if (!as->isValidHandle(result)) {
+            if (result == Handle::UNDEFINED) {
                 // if the atom doesn't exist already, then add normally
                 bool allNull = true;
                 // if all null context
                 for (HandleSeq::iterator i = contexts.begin();
                      i != contexts.end(); i++) {
-                    if (as->getName(*i) != rootContext) {
+                    if (*i != rootContextHandle) {
                         allNull = false;
                     }
                 }
@@ -1026,8 +1072,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
                                      TruthValue::TRIVIAL_TV());
                 fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
                 if (allNull) {
-                    as->setTV(result, atom.getTruthValue(),
-                              NULL_VERSION_HANDLE);
+                    setTV(fakeHandle, atom.getTruthValue());
                     return fakeHandle;
                 } else {
                     printf("Not all contexts of new link are null! Needs to be "
@@ -1047,15 +1092,16 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
         VersionHandle vh;
 
         Handle contextLink = getNewContextLink(result,contexts);
+        // vh is now a version handle for a free context
+        // for which we can set a truth value
         vh = VersionHandle(CONTEXTUAL,contextLink);
         // add version handle to dummyContexts
         dummyContexts.insert(vh);
-        // vh is now a version handle for a free context
-        // for which we can set a truth value
-        as->setTV(result, atom.getTruthValue(), vh);
-
         // Link <handle,vh> to a long int
         fakeHandle = realToFakeHandle(result, vh);
+
+        setTV(fakeHandle, atom.getTruthValue());
+
     } else {
         // no fresh:
         VersionHandle vh = NULL_VERSION_HANDLE;
@@ -1066,17 +1112,16 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
             // if all null context
             for (HandleSeq::iterator i = contexts.begin(); i != contexts.end();
                  i++) {
-                if (as->getName(*i) != rootContext) {
+                if (*i != rootContextHandle) {
                     allNull = false;
                 }
             }
             // Get the existing context link if not all contexts are NULL 
             if (!allNull) {
-                contexts.insert(contexts.begin(),
-                                as->getHandle(CONCEPT_NODE, rootContext));
+                contexts.insert(contexts.begin(), rootContextHandle);
 
                 Handle existingContext = as->getHandle(ORDERED_LINK, contexts);
-                if (!as->isValidHandle(existingContext)) {
+                if (existingContext == Handle::UNDEFINED) {
                     existingContext = as->addLink(ORDERED_LINK, contexts);
                     vh = VersionHandle(CONTEXTUAL, existingContext);
                     dummyContexts.insert(vh);
@@ -1098,12 +1143,12 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
         // If contexts is empty, add atom and let AtomSpace deal with
         // merging it
         result = as->addRealAtom(atom);
+        fakeHandle = realToFakeHandle(result, vh);
         if (vh != NULL_VERSION_HANDLE) {
             // if it's not for the root context, we still have to
             // specify the truth value for that VersionHandle
-            as->setTV(result, atom.getTruthValue(), vh);
+            setTV(fakeHandle, atom.getTruthValue());
         }
-        fakeHandle = realToFakeHandle(result, vh);
     }
     return fakeHandle;
 #endif // ~not STREAMLINE_PHANDLES
@@ -1112,11 +1157,11 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
     // All handles in this method are REAL AtomSpace handles.
     // insert root as beginning
-    contexts.insert(contexts.begin(),atomspace->getHandle(CONCEPT_NODE, rootContext));
+    contexts.insert(contexts.begin(),rootContextHandle);
 
     // check if root context link exists
     Handle existingLink = atomspace->getHandle(ORDERED_LINK,contexts);
-    if (!atomspace->isValidHandle(existingLink)) {
+    if (existingLink == Handle::UNDEFINED) {
         return atomspace->addLink(ORDERED_LINK,contexts);
     } else {
         // if it does exist, check if it's in the contexts of the
@@ -1135,7 +1180,7 @@ Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
                         found = true;
                     }
                 }
-            } while (found);
+            } while (found); // shouldn't this be !found??
             // existingLink is now the furthest from rootContext
             contexts[0] = existingLink;
         }
@@ -1437,9 +1482,8 @@ pHandleSeq AtomSpaceWrapper::filter_type(Type t)
 
 Type AtomSpaceWrapper::getType(const pHandle h) const
 {
-    if (isType(h))
-        return (Type) h;
-    return atomspace->getType(fakeToRealHandle(h).first);
+    if (isType(h)) return (Type) h;
+    return (*getTypeCached)(h);
 }
 
 std::string AtomSpaceWrapper::getName(const pHandle h) const
@@ -2215,13 +2259,6 @@ pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool 
 
     // Disable confidence for variables:
 
-#ifdef USE_PSEUDOCORE
-    const TruthValue& tv = SimpleTruthValue(tvn.getMean(), 0.0f);
-    const TruthValue& mod_tvn = (!inheritsType(T, VARIABLE_NODE))? tvn : tv; 
-
-    pHandle ret = addNode( T, name, mod_tvn, fresh);
-#else
-    
     LOG(3,"FIMATW::addNode");
 
     if (inheritsType(T, FW_VARIABLE_NODE)) {
@@ -2244,7 +2281,6 @@ pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool 
 #endif
     
     LOG(3, "Add ok.");
-#endif
 
     if (inheritsType(T, FW_VARIABLE_NODE))
         variableShadowMap[name] = ret;
