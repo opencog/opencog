@@ -40,9 +40,7 @@
 
 #include "PLNUtils.h"
 
-#ifndef USE_PSEUDOCORE
 #include "opencog/atomspace/TimeServer.h"
-#endif
 
 using std::string;
 using std::map;
@@ -203,7 +201,7 @@ string repeatc(const char c, const int count)
 namespace opencog {
 namespace pln {
 
-void reviseVersionedTVs(Handle h) {
+void reviseVersionedTVs(AtomSpaceWrapper *asw, Handle h) {
 #if MULTIPLE_TVS_WITHOUT_PHANDLE_MAP_WORKS
     // Revise TVs.
     // NOTE: When a BITNode's result changes, it is necessary
@@ -218,7 +216,7 @@ void reviseVersionedTVs(Handle h) {
     // Note that a formula's simpleCompute method allocates a new
     // TV on the stack each time, which makes the following more complicated.
     SimpleTruthValue revisedTV(TruthValue::DEFAULT_TV());
-    CompositeTruthValue& all = (CompositeTruthValue&) atomspace().getTV(h);
+    CompositeTruthValue& all = (CompositeTruthValue&) asw->atomspace->getTV(h);
     foreach(VersionHandle vh, all.vh_range()) {
         TruthValue* both[2];
         // Have to clone due to const issues. arrggh.
@@ -229,7 +227,10 @@ void reviseVersionedTVs(Handle h) {
         revisedTV = *tmp;
         delete tmp;
     }
-    atomspace().setTV(h, revisedTV, NULL_VERSION_HANDLE);
+    asw->atomspace->setTV(h, revisedTV);
+    // flush getTV cache
+    foreach (pHandle p, realToFakeHandles(h)) 
+        asw->getTVCached->make_dirty(p);
 #endif
 }
 
@@ -639,8 +640,6 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
     // IF NO RESULT WAS FOUND, CHECK FOR SPECIAL CASES
     //cprintf(0, "TABLEGATHER END: SIZE = %d\n", size());
 
-#ifndef USE_PSEUDOCORE
-
     if (size() <= 0) {
         // Case 1:
         //     Evaluation
@@ -791,7 +790,6 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
             }
         }
     }
-#endif
     test::custom_finish = clock();
     test::custom_duration = (double)(test::custom_finish - test::custom_start) / CLOCKS_PER_SEC;
 }
