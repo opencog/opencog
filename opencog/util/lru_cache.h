@@ -54,7 +54,7 @@ struct lru_cache {
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
-    lru_cache(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f),_failures(0) {}
+    lru_cache(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f),_failures(0),_hits(0) {}
 
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
