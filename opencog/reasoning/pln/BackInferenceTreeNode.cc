@@ -77,6 +77,10 @@ namespace haxx
     std::map<pHandle,pHandleSeq> inferred_from;
     std::map<pHandle,RulePtr> inferred_with;
 
+    const std::map<pHandle,std::vector<pHandle> > & get_inferred_from() {
+        return inferred_from;
+    }
+
     //! @todo Should be in a BITNode repository class. Not stored in a specific
     //! BIT so you can use multiple BITs.
     std::map<BITNodeID, BITNode*> BITNodeIDMap;

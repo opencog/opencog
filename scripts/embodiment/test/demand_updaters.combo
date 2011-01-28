@@ -15,7 +15,6 @@
 #     5. Refer to the function builtin_str_to_vertex in file 
 #        'opencog/comboreduct/combo/vertex.h' you will get the lexicon of the 
 #        built-in combo operators.
-#     6. Never use '_' as the start of function name. 
 #
 
 # FuzzyWithin is used to evaluate the truth value of a PredicateNode for DemandGoal 
@@ -67,10 +66,3 @@ CompetenceDemandUpdater(0) :=
     +( *( get_competence_demand rand )
        rand
      )
-
-# TODO: TestEnergy is only used for debugging. Remove it once finished. 
-TestEnergyDemandUpdater(0) :=
-    +( *( get_energy_demand rand )
-       rand 
-     )
-

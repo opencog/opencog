@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-01-07
+ * @date 2011-01-25
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -29,6 +29,15 @@
 
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/reasoning/pln/PLN.h>
+#include <opencog/reasoning/pln/PLNUtils.h>
+#include <opencog/reasoning/pln/rules/Rules.h>
+#include <opencog/reasoning/pln/rules/RuleProvider.h>
+#include <opencog/reasoning/pln/AtomSpaceWrapper.h>
+#include <opencog/reasoning/pln/BackInferenceTreeNode.h>
+
+class PsiActionSelectionAgentUTest; 
 
 namespace OperationalAvatarController
 {
@@ -86,31 +95,13 @@ namespace OperationalAvatarController
 
 class PsiActionSelectionAgent : public opencog::Agent
 {
+    friend class::PsiActionSelectionAgentUTest;
+
 private:
-
-    // Helper class that stores meta data of a Modulator 
-    class ModulatorMeta
-    {
-    public:
-
-        std::string updaterName; // The schema name that updates the Modulator
-        Handle similarityLink;   // Handle to SimilarityLink that holds the Modulator 
-        double updatedValue;     // The updated value after calling the Modulator updater  
-        bool bUpdated;           // Indicate if the value of the Modulator has been updated
-
-        void init (const std::string & updaterName, Handle similarityLink) {
-            this->updaterName = updaterName;
-            this->similarityLink = similarityLink;
-            this->updatedValue = 0;
-            this->bUpdated = false;
-        }
-    }; // class
 
     unsigned long cycleCount;
 
-    std::map <std::string, ModulatorMeta> modulatorMetaMap;  // Modulator - Meta data map 
-
-    // Initialize modulatorMetaMap etc.
+    // Initialize demandGoalList etc.
     void init(opencog::CogServer * server);
 
     // Run updaters (combo scripts)
@@ -120,6 +111,51 @@ private:
     void setUpdatedValues(opencog::CogServer * server);
 
     bool bInitialized; 
+
+    AtomSpace * atomSpace;
+
+    const AtomSpace & getAtomSpace() {
+        return * atomSpace; 
+    }
+
+    // A list of Demand Goals, also known as Final Goals
+    std::vector<Handle> demandGoalList;
+
+    // Initialize the list of Demand Goals
+    void initDemandGoalList(opencog::CogServer * server);
+ 
+    // Return a Demand Goal randomly
+    Handle chooseRandomDemandGoal();
+ 
+    // Return the Demand Goal with minimum truth value
+    Handle chooseMostCriticalDemandGoal(const AtomSpace & atomSpace); 
+
+    /**
+     * PLNModule.cc
+     *
+     * line 209: Scheme wrapper for PLN, can set Target, but can not return the Tree
+     * line 427: CogServer shell for PLN, can not set Target
+     * line 463: CogServer shell for PLN, can return the Tree
+     *
+     */   
+    Btr<BITNodeRoot> Bstate;
+
+    // Do backward inference given the Goal Handle and maximum steps. 
+    //
+    // Return the tree that would be used to extract Psi rules which lead to the Goal.
+    // Note the returned set of trees may be empty.
+    const std::set<VtreeProvider *> & searchBackward(Handle goalHandle, int & steps);
+
+    // Extract Psi rules from the searching tree returned by searchBackward method
+    bool extractPsiRules(const std::set<VtreeProvider *> & inferResult,
+                         std::vector< std::vector<Handle> > & psiRulesList);
+
+    // Helper function used by extractPsiRules method above
+    void extractPsiRules(pHandle ph, std::vector<Handle> & psiRules, unsigned int level);
+
+    // Return true if the given Handle indicating a Psi Rule
+    // For the format of Psi Rules, please refer to "./opencog/embodiment/rules_core.scm"
+    bool isHandleToPsiRule(Handle h);
 
 public:
 

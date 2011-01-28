@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-01-28
+; @date   2011-01-07
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into AtomSpace
 ;
@@ -154,11 +154,6 @@
     (add_demand_schema "CompetenceDemand" 0.65)
 )
 
-; TODO: TestEnergy is only used for debugging. Remove it once finished. 
-(define TestEnergyDemandSchema
-    (add_demand_schema "TestEnergyDemand" 0.85)
-)
-
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Goals
@@ -213,27 +208,15 @@
     (add_goal "CompetenceDemandGoal")
 )
 
-; TODO: TestEnergy is only used for debugging. Remove it once finished. 
-(define TestEnergyDemandGoal
-    (add_goal "TestEnergyDemandGoal")
-)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; Relation Goals, which are usually served as other Rule's Precondition  
-;
-; Note: There's no need to set truth value and attention value for Nodes. 
-;       If you insist in doing this, be carefule about the sequence of node name and truth value. 
-;
-;       For instance, 
-;           (VariableNode (DEFAULT_STV) "$VarName") 
-;       is fault. 
-;       The correct version is
-;           (VariableNode "$VarName" (DEFAULT_STV))
+; Relation Goals, which are usually served as other Rule's Precondition 
 ;
 
 (define EntityVar
-    (VariableNode "$EntityVar")
+    (VariableNode (DEFAULT_STV) (DEFAULT_AV) 
+                  "$EntityVar" 
+    )
 )
 
 (define FriendRelationGoal
@@ -301,7 +284,7 @@
 ;
 
 (define ConnectEnergyDemandGoal
-    (connect_demand_goal EnergyDemandSchema         EnergyDemandGoal 0.1 1.0)
+    (connent_demand_goal EnergyDemandSchema         EnergyDemandGoal 0.1 1.0)
 )
 
 (define ConnectWaterDemandGoal
@@ -322,11 +305,6 @@
 
 (define ConnectCompetenceDemandGoal
     (connect_demand_goal CompetenceDemandSchema     CompetenceDemandGoal 0.25 0.95)
-)
-
-; TestEnergy is only used for debugging. Remove it once finished. 
-(define ConnectTestEnergyDemandGoal
-    (connect_demand_goal TestEnergyDemandSchema     TestEnergyDemandGoal 0.1 0.95)
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -554,7 +532,9 @@
 ;
 
 (define FoodVar
-    (VariableNode "$FoodVar")
+    (VariableNode (DEFAULT_STV) (DEFAULT_AV) 
+                  "$FoodVar" 
+    )
 )
 
 
@@ -567,7 +547,7 @@
     (ListLink FoodVar)
 
     (add_rule (cog-new-stv 1.0 1.0) GetFoodGoal (NULL_ACTION)
-              (add_gpn_precondition "getFoodPrecondition" FoodVar)
+              (add_gpn_precondition) "getFoodPrecondition" FoodVar)
     )
 )
 
@@ -674,7 +654,9 @@
 ;
 
 (define WaterVar
-    (VariableNode "$WaterVar")
+    (VariableNode (DEFAULT_STV) (DEFAULT_AV) 
+                  "$WaterVar" 
+    )
 )
 
 (define GetWaterGoal
@@ -910,7 +892,7 @@
 (ForAllLink
     (ListLink EntityVar)
 
-    (add_rule (cog-new-stv 0.6 1.0) CompetenceDemandGoal walkto_obj
+    (add_rule (cog-new-stv 0.6 1.0) CompetenceDemanGoal walkto_obj
               (add_gpn_precondition "approachToAttackPrecondition" EntityVar)
     )
 )
@@ -918,7 +900,7 @@
 (ForAllLink
     (ListLink EntityVar)
 
-    (add_rule (cog-new-stv 0.75 1.0) CompetenceDemandGoal play
+    (add_rule (cog-new-stv 0.75 1.0) CompetenceDemanGoal play
               (add_gpn_precondition "playPrecondition" EntityVar)
     )
 )
@@ -930,7 +912,7 @@
 (ForAllLink
     (ListLink EntityVar)
 
-    (add_rule (cog-new-stv 0.85 1.0) CompetenceDemandGoal goto_random_pickupable
+    (add_rule (cog-new-stv 0.85 1.0) CompetenceDemand goto_random_pickupable
               (add_gpn_precondition "lookForThingsToDestroy")
     )
 )
@@ -1019,34 +1001,6 @@
 (add_rule (cog-new-stv 0.8 1.0) SatisfyOwnerGoal say_n_bark
           (add_gpn_precondition "saySomethingPrecondition")
 )
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-; Rules connect with TestEnergy
-;
-; TODO: TestEnergy is only used for debugging. Remove it once finished.
-;
-
-(define TestGetFoodGoal 
-    (add_goal "TestGetFoodGoal")
-)
-
-(define test_eat_food
-    (add_action "test_eat_food")
-)
-
-(add_rule (cog-new-stv 0.8 1.0) TestEnergyGoal test_eat_food
-          TestGetFoodGoal 
-)
-
-(define test_search_food
-    (add_action "test_search_food") 
-)
-
-(add_rule (cog-new-stv 0.8 1.0) TestGetFoodGoal test_search_food
-          (add_gpn_precondition "testSearchFoodPrecondition") 
-)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;

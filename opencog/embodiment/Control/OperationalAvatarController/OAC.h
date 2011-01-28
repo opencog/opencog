@@ -46,6 +46,8 @@
 
 #include "RuleEngine.h"
 
+class PsiActionSelectionAgentUTest;
+
 namespace OperationalAvatarController
 {
 
@@ -66,6 +68,7 @@ public:
 
 class OAC : public EmbodimentCogServer
 {
+    friend class::PsiActionSelectionAgentUTest;
 
 private:
 

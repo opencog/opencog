@@ -133,8 +133,9 @@ protected:
             "PSI_MODULATORS",      "Activation, Resolution, Certainty, SelectionThreshold", 
 
             "PSI_DEMAND_UPDATERS_REPOSITORY_FILE", 
-                                            "demand_updaters.combo", 
-            "PSI_DEMANDS", "Energy, Water, Integrity, Affiliation, Certainty, Competence",  
+                                            "demand_updaters.combo",    
+            // TODO: TestEnergy is only used for debugging, remove it once finished
+            "PSI_DEMANDS", "Energy, Water, Integrity, Affiliation, Certainty, Competence, TestEnergy",  
 
             "PSI_RULES_CORE_FILE",          "rules_core.scm", 
             "PSI_RULES_FILENAME_MASK",      "%s_rules.scm",

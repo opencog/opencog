@@ -1,0 +1,164 @@
+/*
+ * tests/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgentUTest.cxxtest
+ *
+ * Written by Zhenhua Cai <czhedu@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
+#include <opencog/server/Agent.h>
+#include <opencog/server/load-file.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/util/files.h>
+
+#include <opencog/reasoning/pln/PLN.h>
+#include <opencog/reasoning/pln/PLNUtils.h>
+#include <opencog/reasoning/pln/rules/Rules.h>
+#include <opencog/reasoning/pln/rules/RuleProvider.h>
+#include <opencog/reasoning/pln/AtomSpaceWrapper.h>
+#include <opencog/reasoning/pln/BackInferenceTreeNode.h>
+
+#include <opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.h>
+
+using namespace std;
+using namespace opencog;
+using namespace OperationalAvatarController;
+
+class PsiActionSelectionAgentUTest :  public CxxTest::TestSuite {
+
+private:
+
+    std::string agentId;
+    std::string ip;
+    std::string ownerId;
+    std::string agentType;
+    std::string agentTraits;
+    std::string networkElementPort;
+    std::string cogserverShellPort;
+
+    OAC * oac; 
+    PsiActionSelectionAgent * actionSelectionAgent;  
+
+public:
+    
+
+
+
+public:
+
+    static PsiActionSelectionAgentUTest* createSuite() { return new PsiActionSelectionAgentUTest(); }
+    static void destroySuite(PsiActionSelectionAgentUTest* suite) { delete suite; }
+
+    PsiActionSelectionAgentUTest() :
+        agentId("1"), 
+        ip("127.0.0.1"), 
+        ownerId("2"), 
+        agentType("pet"), 
+        agentTraits("maxie"), 
+        networkElementPort("8001"), 
+        cogserverShellPort("17001")
+
+    {
+        this->setUp(); 
+    }
+
+    ~PsiActionSelectionAgentUTest() {
+        this->tearDown();
+    }
+
+    void setUp() {
+
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        
+        // if exists load file with configuration parameters
+        // IMPORTANT: this file should be the same for all executables that create
+        // a systemParameter object.
+        if (fileExists(config().get("CONFIG_FILE").c_str())) {
+            config().load(config().get("CONFIG_FILE").c_str());
+        }
+        
+        config().set("EXTERNAL_TICK_MODE", "true");
+        config().set("SERVER_PORT", cogserverShellPort); 
+
+        // setting unexpected handler in case a different exception from the
+        // especified ones is throw in the code
+//        std::set_unexpected(opc_unexpected_handler);
+//         int portNumber = atoi(networkElementPort.c_str());
+       
+        server(OAC::createInstance);
+        oac = & (static_cast<OAC &> (server()));
+        // Open database *before* loading modules, since the modules
+        // might create atoms, and we can't have that happen until 
+        // storage is open, as otherwise, there will be handle conflicts.
+        oac->openDatabase();
+
+        // Load modules specified in config
+        oac->loadModules(); 
+        const char* config_path[] = {"."};
+        oac->loadSCMModules(config_path);
+
+        // Initialize OAC
+        //
+        // It seems quite impossible to test all the functionality of oac->within unit test 
+        // unless you really run the whole embodiment system
+        //
+        // For unit test of a single mind agent, just initialize things needed
+        //
+        // oac->:loadSCMModules should be called before calling oac->:init, 
+        // because oac->:loadSCMModules will load 'rules_core.scm',  which should be loaded 
+        // before loading Psi Rules ('xxx_rules.scm') and 
+        // oac->:init is responsible for loading Psi Rules via oac->:addRulesToAtomSpace
+        //
+
+ //       oac->init( agentId, ip, portNumber, 
+ //                 PerceptionActionInterface::PAIUtils::getInternalId(agentId.c_str()), 
+ //                 PerceptionActionInterface::PAIUtils::getInternalId(ownerId.c_str()), 
+ //                 agentType, agentTraits
+ //               );
+
+        // enable the network server and run the server's main loop
+//        oac->enableNetworkServer();
+
+        // TODO: After making oac->a CogServerMain-compatible server, create a
+        // shell command to list all configuration parameters (like MIN_STI
+        // bellow). An perhaps a command to set a config parameter at runtime,
+        // which may be very useful.
+        logger().debug("MIN_STI = %s\n", config().get("MIN_STI").c_str());
+
+        //main loop
+//        oac->serverLoop();
+    }
+
+    void tearDown(){
+	    // erase the log file if no assertions failed
+//	    if (!CxxTest::TestTracker::tracker().suiteFailed())
+//            std::remove(agent->getLogger()->getFilename().c_str());
+
+	    oac->stopAgent(actionSelectionAgent);
+        oac->unregisterAgent(PsiActionSelectionAgent::info().id);
+	    delete actionSelectionAgent;
+    }
+
+    void testInit(){
+        
+    }
+
+    void testRun() {
+
+    }
+};

@@ -44,6 +44,7 @@ TARGET_LINK_LIBRARIES (oac
     MessagingSystem
     Procedure
     savable
+    pln
 )
 
 IF(COMMAND cmake_policy)

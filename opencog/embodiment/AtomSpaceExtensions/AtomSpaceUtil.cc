@@ -2189,11 +2189,29 @@ Handle AtomSpaceUtil::getDemandSimultaneousEquivalenceLink( const AtomSpace & at
 
     Handle listLink = Handle::UNDEFINED;
 
+/*    
+logger().debug(
+        "AtomSpaceUtil::%s - Found %d ListLink may related with Demand '%s'", 
+                  __FUNCTION__, 
+                 listLinkSet.size(), 
+                 demand.c_str()
+              );
+*/
+
     for ( itrHandleSet = listLinkSet.begin(); 
           itrHandleSet != listLinkSet.end(); 
           itrHandleSet ++ ) {
 
         listLink = *itrHandleSet;
+
+/*        
+logger().debug(
+                  "AtomSpaceUtil::%s - ListLink may related with Demand '%s' is '%s'",
+                  __FUNCTION__, 
+                  demand.c_str(), 
+                  atomSpace.atomAsString(listLink).c_str() 
+              );        
+*/
 
         if ( atomSpace.getType(listLink) == LIST_LINK && 
              atomSpace.getArity(listLink) == 3 &&

@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-01-07
+ * @date 2011-01-25
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -26,6 +26,7 @@
 
 #include "OAC.h"
 #include "PsiActionSelectionAgent.h"
+
 
 #include<boost/tokenizer.hpp>
 
@@ -55,160 +56,38 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
     OAC * oac = (OAC *) server;
 
     // Get AtomSpace
-    const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    this->atomSpace = oac->getAtomSpace();
 
     // Get Procedure repository
-    const Procedure::ProcedureRepository & procedureRepository = 
-                                               oac->getProcedureRepository();
+//    const Procedure::ProcedureRepository & procedureRepository = 
+//                                               oac->getProcedureRepository();
 
     // Get petId
-    const std::string & petId = oac->getPet().getPetId();
+//    const std::string & petId = oac->getPet().getPetId();
 
-    // Clear old modulatorMetaMap; 
-    this->modulatorMetaMap.clear();
+    // Initialize the list of Demand Goals
+    this->initDemandGoalList(server);
 
-    // Get modulator names from the configuration file
-    std::string modulatorNames = config()["PSI_MODULATORS"];
+    // Reset the seed for pseudo-random numbers
+    srand(time(0));
 
-    // Process Modulators one by one
-    boost::tokenizer<> modulatorNamesTok (modulatorNames);
-    std::string modulator, modulatorUpdater;
-    Handle similarityLink;
-    ModulatorMeta modulatorMeta;
-
-    for ( boost::tokenizer<>::iterator iModulatorName = modulatorNamesTok.begin();
-          iModulatorName != modulatorNamesTok.end();
-          iModulatorName ++ ) {
-
-        modulator = (*iModulatorName);
-        modulatorUpdater = modulator + "ModulatorUpdater";
-
-        logger().debug(
-              "PsiActionSelectionAgent::%s - Searching the meta data of modulator '%s'.", 
-                        __FUNCTION__, 
-                        modulator.c_str() 
-                      );
-
-        // Search modulator updater
-        if ( !procedureRepository.contains(modulatorUpdater) ) {
-            logger().warn( 
-       "PsiActionSelectionAgent::%s - Failed to find '%s' in OAC's procedureRepository",
-                           __FUNCTION__, 
-                           modulatorUpdater.c_str()
-                         );
-            continue;
-        }
-    
-        // Search the corresponding SimilarityLink
-        similarityLink =  AtomSpaceUtil::getModulatorSimilarityLink( atomSpace, 
-                                                                     modulator,
-                                                                     petId
-                                                                   );
-
-        if ( similarityLink == Handle::UNDEFINED )
-        {
-            logger().warn(
-    "PsiActionSelectionAgent::%s - Failed to get the SimilarityLink for modulator '%s'",
-                           __FUNCTION__, 
-                           modulator.c_str()
-                         );
-
-            continue;
-        }
-
-        // Insert the meta data of the Modulator to modulatorMetaMap
-        modulatorMeta.init(modulatorUpdater, similarityLink);
-        modulatorMetaMap[modulator] = modulatorMeta;
-
-        logger().debug(
-     "PsiActionSelectionAgent::%s - Store the meta data of  modulator '%s' successfully.", 
-                        __FUNCTION__, 
-                        modulator.c_str() 
-                      );
-    }// for
+    // Initialize ASW
+//    AtomSpaceWrapper* asw = ASW(server().getAtomSpace());
+//#if LOCAL_ATW
+//    ((LocalATW*)asw)->SetCapacity(10000);
+//#endif  
+//    asw->archiveTheorems = false;
+//    asw->allowFWVarsInAtomSpace = 
+//        config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
 }
 
-void PsiActionSelectionAgent::runUpdaters(opencog::CogServer * server)
-{
-    logger().debug( 
-            "PsiActionSelectionAgent::%s - Run updaters (combo scripts) [ cycle = %d ]", 
-                    __FUNCTION__ , 
-                    this->cycleCount
-                  );
-
-    // Get OAC
-    OAC * oac = (OAC *) server;
-
-    // Get ProcedureInterpreter
-    Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
-
-    // Get Procedure repository
-    const Procedure::ProcedureRepository & procedureRepository =
-                                                              oac->getProcedureRepository();
-
-    // Process Modulators one by one
-    std::map <std::string, ModulatorMeta>::iterator iModulator;
-
-    std::string modulator, modulatorUpdater;
-    std::vector <combo::vertex> schemaArguments;
-    Procedure::RunningProcedureID executingSchemaId;
-    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
-
-    for ( iModulator = modulatorMetaMap.begin();
-          iModulator != modulatorMetaMap.end();
-          iModulator ++ ) {
-
-        modulator = iModulator->first;
-        modulatorUpdater = iModulator->second.updaterName;
-
-        // Run the Procedure that update Modulator and get the updated value
-        const Procedure::GeneralProcedure & procedure =
-                                            procedureRepository.get(modulatorUpdater);
-
-        executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
-
-        // TODO: What does this for?
-        while ( !procedureInterpreter.isFinished(executingSchemaId) )
-            procedureInterpreter.run(NULL);  
-
-        // Check if the the updater run successfully
-        if ( procedureInterpreter.isFailed(executingSchemaId) ) {
-            logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
-                             __FUNCTION__, 
-                             modulatorUpdater.c_str() 
-                          );
-
-            iModulator->second.bUpdated = false;
-
-            continue;
-        }
-        else {
-            iModulator->second.bUpdated = true;
-        }
-
-        result = procedureInterpreter.getResult(executingSchemaId);
-
-        // Store updated value to ModulatorMeta.updatedValue
-        // contin_t is actually of type double (see "comboreduct/combo/vertex.h") 
-        iModulator->second.updatedValue = get_contin(result);
-
-        // TODO: Change the log level to fine, after testing
-        logger().debug( "PsiActionSelectionAgent::%s - The new level of '%s' will be %f", 
-                         __FUNCTION__, 
-                         modulator.c_str(),
-                         iModulator->second.updatedValue                      
-                      );
-    }// for
-
-}    
-
-void PsiActionSelectionAgent::setUpdatedValues(opencog::CogServer * server)
+void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
 {
     logger().debug(
-            "PsiActionSelectionAgent::%s - Set updated values to AtomSpace [ cycle =%d ]",
+            "PsiActionSelectionAgent::%s - Initialize the list of Demand Goals (Final Goals) [ cycle =%d ]",
                     __FUNCTION__, 
                     this->cycleCount
                   );
@@ -217,165 +96,284 @@ void PsiActionSelectionAgent::setUpdatedValues(opencog::CogServer * server)
     OAC * oac = (OAC *) server;
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
-    // Process Modulators one by one
-    std::map <std::string, ModulatorMeta>::iterator iModulator;
+    // Get petId
+    const std::string & petId = oac->getPet().getPetId();
 
-    std::string modulator;
-    Handle oldSimilarityLink, oldNumberNode, oldExecutionOutputLink;
-    Handle newNumberNode, newSimilarityLink;
-    double updatedValue;
+    // Clear old demandGoalList;
+    this->demandGoalList.clear();
 
-    for ( iModulator = modulatorMetaMap.begin();
-          iModulator != modulatorMetaMap.end();
-          iModulator ++ ) {
+    // Get demand names from the configuration file
+    std::string demandNames = config()["PSI_DEMANDS"];
 
-        if ( !iModulator->second.bUpdated )
+    // Process Demands one by one
+    boost::tokenizer<> demandNamesTok (demandNames);
+    std::string demand;
+    Handle simultaneousEquivalenceLink, evaluationLinkDemandGoal;
+
+    for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
+          iDemandName != demandNamesTok.end();
+          iDemandName ++ ) {
+
+        demand = (*iDemandName);
+
+        // Search the corresponding SimultaneousEquivalenceLink
+        simultaneousEquivalenceLink =  AtomSpaceUtil::getDemandSimultaneousEquivalenceLink
+                                           ( atomSpace, 
+                                             demand,
+                                             petId
+                                           );
+
+        if ( simultaneousEquivalenceLink == Handle::UNDEFINED )
+        {
+            logger().warn( "PsiActionSelectionAgent::%s - Failed to get the SimultaneousEquivalenceLink for demand '%s'",
+                           __FUNCTION__, 
+                           demand.c_str()
+                         );
+
             continue;
+        }
 
-        modulator = iModulator->first;
-        oldSimilarityLink = iModulator->second.similarityLink;
-        updatedValue = iModulator->second.updatedValue;
-        
-        // Get the Handle to old NumberNode and ExecutionOutputLink
+        // Get the Handle to EvaluationLinkDemandGoal
         //
-        // Since SimilarityLink inherits from UnorderedLink, you should check each Atom in 
-        // the Outgoing set to see if it is of type NumberNode or ExecutionOutputLink
-        //
-        // Because when you creating an UnorderedLink, it will sort its Outgoing set
-        // automatically (more detail: "./atomspace/Link.cc", Link::setOutgoingSet method)
-        //
-        
-        oldNumberNode = atomSpace.getOutgoing(oldSimilarityLink, 0);
-        oldExecutionOutputLink = atomSpace.getOutgoing(oldSimilarityLink, 1); 
-        
-        if ( atomSpace.getType(oldNumberNode) != NUMBER_NODE ||
-             atomSpace.getType(oldExecutionOutputLink) != EXECUTION_OUTPUT_LINK
-           ) {
-            
-            oldNumberNode = atomSpace.getOutgoing(oldSimilarityLink, 1);   
-            oldExecutionOutputLink = atomSpace.getOutgoing(oldSimilarityLink, 0); 
+        // Since SimultaneousEquivalenceLink inherits from UnorderedLink,
+        // we should make a choice
 
-            if ( atomSpace.getType(oldNumberNode) != NUMBER_NODE ||
-                 atomSpace.getType(oldExecutionOutputLink) != EXECUTION_OUTPUT_LINK
-               ) {
+        Handle firstEvaluationLink = atomSpace.getOutgoing(simultaneousEquivalenceLink, 0);
 
-                logger().error( "PsiActionSelectionAgent::%s - The outgoing set of SimilarityLink for '%s' should contain a NumberNode and a ExecutionOutputLink, but got [0]:%s, [1]:%s",
-                                __FUNCTION__, 
-                                modulator.c_str(), 
-                                classserver().getTypeName(
-                                                  atomSpace.getType(oldSimilarityLink)
-                                                         ).c_str(),  
-                                classserver().getTypeName(
-                                                  atomSpace.getType(oldNumberNode)
-                                                         ).c_str()
-                              );
-
-                continue;
-            }
+        if ( atomSpace.getType( 
+                                  atomSpace.getOutgoing(firstEvaluationLink, 0) 
+                              ) ==  PREDICATE_NODE ) {
+            evaluationLinkDemandGoal = atomSpace.getOutgoing(simultaneousEquivalenceLink, 0);
+        }
+        else {
+            evaluationLinkDemandGoal = atomSpace.getOutgoing(simultaneousEquivalenceLink, 1);
         }// if
 
-logger().fine( "PsiActionSelectionAgent::%s - Modulator: %s, oldSimilarityLink: %s, oldNumberNode: %s, updatedValue: %f", 
-               __FUNCTION__,
-               modulator.c_str(), 
-               atomSpace.atomAsString(oldSimilarityLink).c_str(),
-               atomSpace.atomAsString(oldNumberNode).c_str(), 
-               updatedValue
-             );        
+        // Append the Demand Goal to demandGoalList
+        this->demandGoalList.push_back(evaluationLinkDemandGoal);
 
-        // Create a new NumberNode that stores the updated value
-        //
-        // If the Modulator doesn't change at all, it actually returns the old one
-        //
-        newNumberNode = AtomSpaceUtil::addNode( atomSpace,
-                                                NUMBER_NODE,
-                                                boost::lexical_cast<std::string>
-                                                                   (updatedValue), 
-                                                true // the atom should be permanent (not
-                                                     // removed by decay importance task) 
-                                               );
-
-logger().fine( "PsiActionSelectionAgent::%s - newNumberNode: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(newNumberNode).c_str()
-             );        
-
-        // Create a new SimilarityLink that holds the Modulator
-        //
-        // Since SimilarityLink inherits from UnorderedLink, which will sort its Outgoing 
-        // set automatically when being created, the sequence you adding Atoms to its 
-        // Outgoing set makes none sense! 
-        // (more detail: "./atomspace/Link.cc", Link::setOutgoingSet method)
-        //
-        // If the Modulator doesn't change at all, it actually returns the old one
-        //
-        HandleSeq similarityLinkHandleSeq;  // HandleSeq is of type std::vector<Handle>
-
-        similarityLinkHandleSeq.push_back(newNumberNode);
-        similarityLinkHandleSeq.push_back(oldExecutionOutputLink);
-
-        newSimilarityLink = AtomSpaceUtil::addLink( atomSpace,
-                                                    SIMILARITY_LINK, 
-                                                    similarityLinkHandleSeq,
-                                                    true
-                                                  );
-
-        iModulator->second.similarityLink = newSimilarityLink;
-
-logger().fine( "PsiActionSelectionAgent::%s - newSimilarityLink: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(newSimilarityLink).c_str()
-             );        
-
-        // Remove the old SimilarityLink and NumberNode
-        //
-        // Make sure the old one is different from the new one before removing.
-        // Because if the Modulator does change at all, including its value True Value etc,
-        // creating new one is actually returning the old one, then we shall not remove it.
-        //
-
-logger().fine( "PsiActionSelectionAgent::%s - Going to remove oldSimilarityLink", 
-                __FUNCTION__);
-
-        if ( oldSimilarityLink != newSimilarityLink && 
-             !atomSpace.removeAtom(oldSimilarityLink) 
-           ) {
-            logger().error(
-                "PsiActionSelectionAgent::%s - Unable to remove old SIMILARITY_LINK: %s",
-                __FUNCTION__, 
-                atomSpace.atomAsString(oldSimilarityLink).c_str()
-                          );
-        }// if
-
-logger().fine("PsiActionSelectionAgent::%s - Removed oldSimilarityLink", __FUNCTION__);
-
-logger().fine("PsiActionSelectionAgent::%s - Going to remove oldNumberNode", __FUNCTION__);
-
-        if ( oldNumberNode != newNumberNode && 
-             !atomSpace.removeAtom(oldNumberNode) 
-           ) {
-            logger().error(
-                "PsiActionSelectionAgent::%s - Unable to remove old NUMBER_NODE: %s",
-                __FUNCTION__, 
-                atomSpace.atomAsString(oldNumberNode).c_str()
-                          );
-        }// if
-
-logger().fine( "PsiActionSelectionAgent::%s - Removed oldNumberNode", __FUNCTION__);              
-        // Reset bUpdated  
-        iModulator->second.bUpdated = false;
-
-        // TODO: Change the log level to fine, after testing
-        logger().debug( 
-                    "PsiActionSelectionAgent::%s - Set the level of modulator '%s' to %f", 
-                         __FUNCTION__, 
-                         modulator.c_str(),
-                         updatedValue
+        logger().debug(
+                        "PsiActionSelectionAgent::%s - Add demand '%s' to demandGoalList successfully.", 
+                        __FUNCTION__, 
+                        demand.c_str() 
                       );
+    }// for
+}
 
+Handle PsiActionSelectionAgent::chooseRandomDemandGoal() 
+{
+    std::vector<Handle>::iterator iDemandGoalList = this->demandGoalList.begin();
+    iDemandGoalList += rand()%this->demandGoalList.size();
+    return (*iDemandGoalList);
+}
+ 
+Handle PsiActionSelectionAgent::chooseMostCriticalDemandGoal(const AtomSpace & atomSpace)
+{
+    std::vector<Handle>::iterator iDemandGoalList, iCritialDemandGoal;
+   
+    // Pick up the Demand Goal with minimum truth value
+    for( iDemandGoalList = this->demandGoalList.begin(), iCritialDemandGoal = this->demandGoalList.begin(); 
+         iDemandGoalList != this->demandGoalList.end();
+         iDemandGoalList ++ ) {
+
+        if ( atomSpace.getTV(*iDemandGoalList).getMean() < atomSpace.getTV(*iCritialDemandGoal).getMean() ) {
+            iCritialDemandGoal = iDemandGoalList;
+        }
     }// for
 
+    return (*iCritialDemandGoal);
+}
+
+const std::set<VtreeProvider*> & PsiActionSelectionAgent::searchBackward(Handle goalHandle, int & steps) 
+{
+    AtomSpace & atomSpace = * ( server().getAtomSpace() ); 
+   
+    // Create BITNodeRoot for the Goal (Target)
+    pHandleSeq fakeHandles = ASW(&atomSpace)->realToFakeHandle(goalHandle);
+    pHandle fakeHandle = fakeHandles[0];
+   
+std::cout<<"Initialize ASW OK"<<std::endl;
+
+    Btr<vtree> target_(new vtree(fakeHandle));
+    
+    // The BIT uses real Links as a cue that it has already found the link,
+    // so it is necessary to make them virtual
+    Btr<vtree> target = ForceAllLinksVirtual(target_);
+
+    // TODO: Do we have to use PLN_RECORD_TRAILS?
+    bool recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
+    
+    Bstate.reset(new BITNodeRoot(target, 
+                                 new DefaultVariableRuleProvider,
+                                 recordingTrails, 
+                                 getFitnessEvaluator(PLN_FITNESS_BEST)
+                                )
+                );
+
+    logger().debug("PsiActionSelectionAgent::%s - BITNodeRoot init ok.",  __FUNCTION__);
+
+    // TODO: What if something bad happen while initialize BITNodeRoot?
+
+    // Do inference backward
+    BITNodeRoot * state = Bstate.get();
+    state->setLoosePoolPolicy(true);
+
+    const std::set<VtreeProvider *> & result = state->infer(steps,     // proof resources
+                                                            0.000001f, // minimum confidence for storage
+                                                            0.01f      // minimum confidence for abort
+                                                           ); 
+
+    logger().debug(
+        "PsiActionSelectionAgent::%s - Got %d results (trees) after doing backward inference starting from demand %s", 
+                    __FUNCTION__, 
+                    result.size(), 
+                    atomSpace.getName( atomSpace.getOutgoing(goalHandle, 0)
+                                     ).c_str() 
+                  );
+
+    return result;
+}
+
+bool PsiActionSelectionAgent::extractPsiRules(const std::set<VtreeProvider *> & inferResult, 
+                                              std::vector< std::vector<Handle> > & psiRulesList)
+{
+    // Make sure the result is not empty
+    if ( inferResult.empty() ) {
+        logger().warn("PsiActionSelectionAgent::%s - The result of backward searching is empty.",
+                       __FUNCTION__
+                     );
+
+        return false; 
+    }
+
+    // Clear old Psi rules
+    psiRulesList.clear();
+    psiRulesList.resize(inferResult.size());
+
+    // Process the tree one by one
+    std::vector< std::vector<Handle> >::iterator iPsiRules = psiRulesList.begin();
+
+    foreach(VtreeProvider * vtp, inferResult) {
+
+        // Get the pHandle to Goal (i.e. the root node of the tree)
+        pHandle goalpHandle = _v2h( *(vtp->getVtree().begin()) );
+
+        this->extractPsiRules(goalpHandle, *iPsiRules, 0);        
+       
+        iPsiRules++;
+    }// foreach
+
+    return true;
+}
+
+void PsiActionSelectionAgent::extractPsiRules(pHandle ph, std::vector<Handle> & psiRules, unsigned int level)
+{
+    AtomSpaceWrapper *asw = GET_ASW;
+
+    if ( ph == PHANDLE_UNDEFINED || asw->isType(ph) ) {
+        logger().warn("PsiActionSelectionAgent::%s - Trying to extract Psi rules from NULL/ Virtual atom.",
+                       __FUNCTION__
+                     );
+        return;
+    }
+
+    if (level > 20) {
+        logger().warn("PsiActionSelectionAgent::%s - Maximum recursion depth exceeded.",
+                       __FUNCTION__
+                     );
+    	return; 
+    }
+
+    // TODO: add h psiRulesList if h is a Psi Rule
+    vhpair vhp = asw->fakeToRealHandle(ph);
+    Handle realHandle = vhp.first; 
+
+    if ( this->isHandleToPsiRule(realHandle) ) 
+        psiRules.push_back(realHandle);
+
+    // Extract Psi rules from its children nodes
+    std::map<pHandle,vector<pHandle> >::const_iterator ph_it = haxx::get_inferred_from().find(ph);
+
+    if( ph_it == haxx::get_inferred_from().end() ) 
+        return; 
+
+    foreach(pHandle arg_ph, ph_it->second)
+        this->extractPsiRules(arg_ph, psiRules, level+1);
+}
+
+bool PsiActionSelectionAgent::isHandleToPsiRule(Handle h)
+{
+// Format of Psi rule    
+//
+// PredictiveImplicationLink
+//     AndLink
+//         AndLink
+//             EvaluationLink
+//                 GroundedPredicateNode "precondition_1_name"
+//                 ListLink
+//                     Node:arguments
+//                     ...
+//             EvaluationLink
+//                 PredicateNode         "precondition_2_name"
+//                 ListLink 
+//                     Node:arguments
+//                     ...
+//             ...
+//                        
+//         ExecutionLink
+//             GroundedSchemaNode "schema_name"
+//             ListLink
+//                 Node:arguments
+//                 ...
+//
+//     EvaluationLink
+//         (SimpleTruthValue indicates how well the demand is satisfied)
+//         (ShortTermInportance indicates the urgency of the demand)
+//         PredicateNode: "goal_name" 
+//         ListLink
+//             Node:arguments
+//             ...
+//
+
+    const AtomSpace & atomSpace = this->getAtomSpace();
+
+    // Check h
+    if ( atomSpace.getType(h) != PREDICTIVE_IMPLICATION_LINK || atomSpace.getArity(h) != 2 )
+        return false; 
+
+    // Get handles to premise and goal
+    Handle andLinkPreconditionAction = atomSpace.getOutgoing(h, 0);
+    Handle evaluationLinkGoal = atomSpace.getOutgoing(h, 1);
+
+    // Check premise
+    if ( atomSpace.getType(andLinkPreconditionAction) != AND_LINK || atomSpace.getArity(h) != 2 )
+        return false;
+
+    // Get handle to action
+    Handle executionLinkAction = atomSpace.getType( 
+                                                      atomSpace.getOutgoing(andLinkPreconditionAction, 0) 
+                                                  ) == EXECUTION_LINK ? 
+                                 atomSpace.getOutgoing(andLinkPreconditionAction, 0) :
+                                 atomSpace.getOutgoing(andLinkPreconditionAction, 1);
+
+    // Check action
+    if ( atomSpace.getType(executionLinkAction) != EXECUTION_LINK ||
+         atomSpace.getArity(executionLinkAction) != 2 ||
+         atomSpace.getType( atomSpace.getOutgoing(executionLinkAction, 0) ) != GROUNDED_PREDICATE_NODE
+       )
+        return false; 
+
+    // Check goal
+    if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
+         atomSpace.getArity(evaluationLinkGoal) != 2 ||
+         atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0) ) != PREDICATE_NODE 
+       )
+        return false; 
+
+    // Now we are pretty sure it(h) is a Psi rule
+    return true;
 }
 
 void PsiActionSelectionAgent::run(opencog::CogServer * server)
@@ -416,14 +414,45 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
         return;
     }
 
-    // Initialize the Agent (modulatorMetaMap etc)
-//    if ( !this->bInitialized )
-//        this->init(server);
+    // Initialize the Agent (demandGoalList etc)
+    if ( !this->bInitialized )
+        this->init(server);
 
-    // Run updaters (combo scripts)
-//    this->runUpdaters(server);
+    // Choose a Demand Goal 
+    Handle currentDemandGoal;
 
-    // Set updated values to AtomSpace (NumberNodes)
-//    this->setUpdatedValues(server);
+    // Set current Demand Goal to TestEnergyDemand for debugging
+    std::vector<Handle>::iterator iDemandGoal; 
+    Handle goalPredicateNode; 
+    for (iDemandGoal=this->demandGoalList.begin(); iDemandGoal!=this->demandGoalList.end(); iDemandGoal++) {
+        goalPredicateNode = atomSpace.getOutgoing(*iDemandGoal, 0);
+
+        logger().debug(
+                "PsiActionSelectionAgent::%s - Name of current searching PredicateNode for Demand is '%s'", 
+                __FUNCTION__, 
+                atomSpace.getName(goalPredicateNode).c_str()
+                      );        
+
+        if ( atomSpace.getName(goalPredicateNode) == "TestEnergyDemandGoal" )
+            break;
+    }
+
+    if ( iDemandGoal == this->demandGoalList.end() ) {
+        logger().error(
+                "PsiActionSelectionAgent::%s - Can not find TestEnergyDemandGoal for debugging [ cycle = %d ]", 
+                __FUNCTION__, 
+                this->cycleCount
+                      );
+        return; 
+    }
+    else {
+        currentDemandGoal = *iDemandGoal; 
+    }
+
+    // Do backward inference starting from the selected Demand Goal using PLN
+    int steps = 2000;
+    const std::set<VtreeProvider *> & inferResult = this->searchBackward(currentDemandGoal, steps);
+
+
 }
 

@@ -37,6 +37,11 @@
 #define  mkdir _mkdir
 #endif
 
+#include <unistd.h>
+#ifndef PATH_MAX
+#define PATH_MAX 1024
+#endif
+
 #define USER_FLAG "$USER"
 
 bool opencog::fileExists(const char* filename)
@@ -134,4 +139,20 @@ bool opencog::LoadTextFile(const std::string fname, std::string& dest)
     return true;
 }
 
+std::string getExeName() {
+    static char buf[PATH_MAX];
+    int rslt = readlink("/proc/self/exe", buf, PATH_MAX);
+
+    if ( rslt < 0 || rslt >= PATH_MAX ) {
+        return NULL;
+    }
+
+    buf[rslt] = '\0';
+        return std::string(buf);
+}
+
+std::string getExeDir() {
+    std::string exeName = getExeName();
+    return exeName.substr(0, exeName.rfind("/")+1);
+}
 

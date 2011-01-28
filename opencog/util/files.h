@@ -75,6 +75,15 @@ bool appendFileContent(const char* filename, std::string &s);
 /** Load the contents of a textfile \param fname to \param dest. */
 bool LoadTextFile(const std::string fname, std::string& dest);
 
+/**
+ * Get the file name (including absolute path) of current executing file 
+ */
+std::string getExeName();
+
+/**
+ * Get the absolute path (including "/" at the end) where the current executing file runs
+ */
+std::string getExeDir(); 
 
 } // namespace opencog
 

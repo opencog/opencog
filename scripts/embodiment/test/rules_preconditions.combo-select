@@ -1,0 +1,21 @@
+#
+# Rules preconditions scriptst using combo select procedures
+#
+# Copyright(c) 2002-2008 VettaLabs Ltda
+#
+
+#
+# IMPORTANT: ComboProcedureRepository MUST be previouslly loaded before loading
+# these combo select preconditions
+
+# ---------------------- Approach --------------------------------
+approachCuriousPetPrecondition(0) |=
+    approachCuriousPetPreconditionSelect(0) :=
+	    and(inside_pet_fov(self _*_)
+	        is_pet(_*_)
+	        is_there_relation(curious_about self _*_))
+
+    approachCuriousPetPreconditionEvalSelect(1) :=
+	    and(not(is_angry(#1))
+	        not(is_fearful(#1)))
+

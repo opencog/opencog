@@ -63,6 +63,7 @@ typedef unsigned int BITNodeID;
 namespace opencog{namespace pln{ class BITNode;}}
 namespace haxx {
     BITNode* getBITNode(BITNodeID id);
+    const std::map<pHandle,std::vector<pHandle> > & get_inferred_from();
 }
 
 
