@@ -148,12 +148,12 @@ void metapop_moses_results(RandGen& rng,
                     pa.output_score_complexity_old_moses,
                     pa.output_bscore);
     if(pa.output_eval_number)
-        ss << number_of_evals_str << ": " << metapop.n_evals();
+        ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
     if(pa.output_file.empty())
-        std::cout << ss.str() << std::endl;
+        std::cout << ss.str();
     else {
         ofstream of(pa.output_file.c_str());
-        of << ss.str() << std::endl;
+        of << ss.str();
         of.close();
     }
 }
