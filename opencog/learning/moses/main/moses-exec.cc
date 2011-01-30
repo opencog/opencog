@@ -237,6 +237,7 @@ int main(int argc,char** argv) {
     bool output_score_complexity_old_moses;
     bool output_bscore;
     bool output_eval_number;
+    string output_file;
     int max_gens;
     string log_level;
     string log_file;
@@ -296,6 +297,9 @@ int main(int argc,char** argv) {
         (opt_desc_str(output_eval_number_opt).c_str(),
          value<bool>(&output_eval_number)->default_value(false),
          "If 1, outputs the actual number of evaluations.\n")
+        (opt_desc_str(output_file_opt).c_str(),
+         value<string>(&output_file)->default_value(""),
+         "File where to save the results. If empty then it outputs on the stdout.")
         (opt_desc_str(max_gens_opt).c_str(),
          value<int>(&max_gens)->default_value(-1),
          "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
@@ -523,7 +527,7 @@ int main(int argc,char** argv) {
                                             output_score, output_complexity,
                                             output_score_complexity_old_moses,
                                             output_bscore, output_eval_number,
-                                            jobs);
+                                            output_file, jobs);
 
     if(problem == it) { // regression based on input table
         

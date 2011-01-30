@@ -97,11 +97,13 @@ struct metapop_moses_results_parameters {
                                      bool _output_score_complexity_old_moses,
                                      bool _output_bscore,
                                      bool _output_eval_number,
+                                     std::string _output_file,
                                      const jobs_t& _jobs) : 
         result_count(_result_count), output_score(_output_score), 
         output_complexity(_output_complexity),
         output_score_complexity_old_moses(_output_score_complexity_old_moses),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
+        output_file(_output_file),
         jobs(_jobs) {}
     long result_count;
     bool output_score;
@@ -109,6 +111,7 @@ struct metapop_moses_results_parameters {
     bool output_score_complexity_old_moses;
     bool output_bscore;
     bool output_eval_number;
+    std::string output_file;
     const jobs_t& jobs;
 };
 
@@ -137,13 +140,22 @@ void metapop_moses_results(RandGen& rng,
     if(pa.jobs.empty()) {
         moses::moses(metapop, moses_params);
     } else moses::distributed_moses(metapop, vm, pa.jobs, moses_params);
-    // print result
-    metapop.print(pa.result_count, pa.output_score,
-                  pa.output_complexity,
-                  pa.output_score_complexity_old_moses,
-                  pa.output_bscore);
+    // output result
+    stringstream ss;
+    metapop.ostream(ss,
+                    pa.result_count, pa.output_score,
+                    pa.output_complexity,
+                    pa.output_score_complexity_old_moses,
+                    pa.output_bscore);
     if(pa.output_eval_number)
-        std::cout << number_of_evals_str << ": " << metapop.n_evals() << std::endl;
+        ss << number_of_evals_str << ": " << metapop.n_evals();
+    if(pa.output_file.empty())
+        std::cout << ss.str() << std::endl;
+    else {
+        ofstream of(pa.output_file.c_str());
+        of << ss.str() << std::endl;
+        of.close();
+    }
 }
 
 /**
