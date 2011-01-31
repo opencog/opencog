@@ -284,7 +284,7 @@ std::string LanguageComprehension::resolveFrames2Relex( )
     OutputRelex* output_relex = framesToRelexRuleEngine.resolve( pre_conditions );
     if( output_relex == NULL ){
         logger().debug("LanguageComprehension::%s - Output Relex is NULL for the pre-conditions. No rules were found.",__FUNCTION__);
-        return "I know it, but I don't know how to say it.";//TODO return empty or relex string
+        return "I know the answer, but I don't know how to say it. [Frames2Relex did not have a suitable rule]";
     }
     
     std::string text = output_relex->getOutput( as, handles );
@@ -318,9 +318,9 @@ std::string LanguageComprehension::resolveRelex2Sentence( const std::string& rel
             std::string msg = matches[2];
             logger().debug("LanguageComprehension::%s - NLGen Sentence returned an ERROR message with code %s and message %s",__FUNCTION__, code.c_str(), msg.c_str());
             if( code == "1"){
-                return ""; // I don't know
+                return "I know the answer, but I don't know how to say it. [NLGen could not match the Relex output to a sentence]";
             }else if( code == "2" ){
-                return "I know the answer, but I don't know how to say it.";
+                return "I know the answer, but I don't know how to say it. [Frames2Relex generated malformed output]";
             }
         }else{
             logger().debug("LanguageComprehension::%s - NLGen Sentence returned an ERROR but it was not possible to get the code. Error: %s",__FUNCTION__, nlgen_sentence.c_str());
