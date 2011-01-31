@@ -143,7 +143,7 @@ public:
         std::cout << "cx = " << cx.value() << std::endl;
         check_inference("nerd.scm", SimpleTruthValue(0.66, 3200.000244),
                         VersionHandle(CONTEXTUAL, cx));
-        // check_inference("ClarkLogTrafficking.scm", SimpleTruthValue(0.66, 3200.000244));
+        check_inference("ClarkLogTrafficking.scm", SimpleTruthValue(0.243, 300.906616));
 #endif
     }
 };
