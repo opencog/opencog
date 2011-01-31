@@ -16,6 +16,8 @@ PROJECT(opencog)
 # uncomment to be in coverage testing mode
 #SET(CMAKE_BUILD_TYPE Coverage)
 #
+# uncomment to build in profile mode
+#SET(CMAKE_BUILD_TYPE Profile)
 
 IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Debug)
@@ -58,6 +60,9 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
   IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
   LINK_LIBRARIES(gcov)
   ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+
+  SET(CMAKE_C_FLAGS_PROFILE "-O0 -pg")
+  SET(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_C_FLAGS_PROFILE}")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 IF (WIN32)
