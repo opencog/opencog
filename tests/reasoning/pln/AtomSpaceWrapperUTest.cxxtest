@@ -403,12 +403,22 @@ public:
     }
 
     void testGetTVCache() {
+        
         SimpleTruthValue tv1(0.8, 0.9);
         SimpleTruthValue tv2(0.2, 0.3);
         SimpleTruthValue tv3(0.4, 0.2);
+        int hits=0, failures=0;
         pHandle h1 = asw->addNode(CONCEPT_NODE, "magneto", tv1);
+        hits = asw->getTVCached->get_hits();
+        failures = asw->getTVCached->get_failures();
+        cout << "hits " << hits << endl;
+        cout << "failures " << failures << endl;
+
         pHandleSeq outgoing;
         TS_ASSERT(*(*asw->getTVCached)(h1) == tv1);
+        TS_ASSERT_EQUALS(0, asw->getTVCached->get_hits());
+        TS_ASSERT_EQUALS(1, asw->getTVCached->get_failures());
+
         outgoing.push_back(h1);
         pHandle l1 = asw->addLink(LIST_LINK, outgoing, tv2);
         TS_ASSERT(*(*asw->getTVCached)(l1) == tv2);
