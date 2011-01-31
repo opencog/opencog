@@ -57,11 +57,6 @@
 (AndLink (EvaluationLink just_done
                          (ListLink walktowards_V2)))
 
-(AndLink (EvaluationLink do
-                         L_V1)
-         (EvaluationLink can_do
-                         L_V1))
-
 (ForAllLink (stv 1 0.80000001) L_Vobj
             (ImplicationLink (EvaluationLink near
                                              L_Vobj)
@@ -148,21 +143,6 @@ hold_ball
                 L_Vobj)
 
 lift_Vobj
-
-(EvaluationLink can_do
-                (ListLink lift_Vobj))
-
-(EvaluationLink do
-                (ListLink V10000))
-
-(EvaluationLink do
-                L_V1)
-
-(EvaluationLink can_do
-                L_V1)
-
-(EvaluationLink just_done
-                L_V1)
 
 (EvaluationLink (stv 0.99000001 0.99000001) teacher_say
                 (ListLink fetch))

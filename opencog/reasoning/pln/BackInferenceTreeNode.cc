@@ -143,6 +143,7 @@ using std::vector;
 using std::string;
 using std::map;
 using std::stringstream;
+using std::ostringstream;
 using std::endl;
 using std::cout;
 
@@ -1956,7 +1957,7 @@ string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
 {
     AtomSpaceWrapper *asw = GET_ASW;
     map<pHandle, vtree> bindings;
-    stringstream ss;
+    ostringstream ss;
     
     if (asw->isType(h)) {
         ss << "Can't make plan for a NULL/virtual target" << endl;
@@ -1980,7 +1981,7 @@ string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
 string BITNodeRoot::extract_plan(pHandle h) const
 {
     AtomSpaceWrapper *asw = GET_ASW;
-    stringstream ss;
+    ostringstream ss;
     vtree do_template = mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "do"),
                             mva((pHandle)LIST_LINK,
@@ -1989,7 +1990,8 @@ string BITNodeRoot::extract_plan(pHandle h) const
     ss << extract_plan(h,0,do_template,plan);
     ss << "PLAN BEGIN" << endl;
     for (pHandleSeq::reverse_iterator i = plan.rbegin(); i!=plan.rend(); i++)
-        printTree(*i,0,-10);
+        //printTree(*i,0,-10);
+        ss << NMPrinter().toString(*i);
     ss << "PLAN END" << endl;
     if (plan.size()>0) {
         ss << "[plan found, exiting]" << endl;
