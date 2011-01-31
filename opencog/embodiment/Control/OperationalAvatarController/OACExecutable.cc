@@ -55,6 +55,9 @@ int main(int argc, char *argv[])
             config().load(config().get("CONFIG_FILE").c_str());
         }
         
+        // Jared - Added this for now so that error messages will always be easy to see.
+        logger().setPrintErrorLevelStdout();
+
         config().set("EXTERNAL_TICK_MODE", "true");
         config().set("SERVER_PORT", argv[6]);
 
