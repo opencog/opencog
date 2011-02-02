@@ -89,7 +89,6 @@ struct lru_cache {
         //if we've found it, update lru and return
         if (it!=_map.end()) {
             _lru.pop_front();
-            //_lru.splice(it->first,_lru,_lru.begin());
             _lru.splice(_lru.begin(),_lru,it->first);
             _hits++;
             return it->second;
@@ -175,7 +174,7 @@ struct lru_cache_arg_result {
 
         //if we've found it, update lru
         if (it!=_map.end())
-            _lru.splice(it->first,_lru,_lru.begin());
+            _lru.splice(_lru.begin(),_lru,it->first);
 
         return it;
     }
