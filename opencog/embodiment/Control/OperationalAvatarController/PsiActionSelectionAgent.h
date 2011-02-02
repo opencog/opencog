@@ -121,6 +121,13 @@ private:
     // A list of Demand Goals, also known as Final Goals
     std::vector<Handle> demandGoalList;
 
+    // Each list contains a bunch of Psi Rules that would lead to the selected Demand Goal
+    std::vector< std::vector<Handle> > psiRulesLists;
+
+    // Handles to current and previous Psi Rule
+    Handle currentPsiRule;
+    Handle previousPsiRule;
+
     // Initialize the list of Demand Goals
     void initDemandGoalList(opencog::CogServer * server);
  
@@ -156,6 +163,23 @@ private:
     // Return true if the given Handle indicating a Psi Rule
     // For the format of Psi Rules, please refer to "./opencog/embodiment/rules_core.scm"
     bool isHandleToPsiRule(Handle h);
+
+    // Print Actions for each Plan, only used for debugging
+    void printPlans(const std::vector< std::vector<Handle> > & psiRulesLists);
+
+    // Get the arguments from the given ListLink, returns the number of arguments got
+    int getSchemaArguments(opencog::CogServer * server, Handle hListLink, 
+                           std::vector <combo::vertex> & schemaArguments);
+
+    // Returns true if the given Precondition is satisfied, otherwise returns false
+    bool isSatisfied(opencog::CogServer * server, Handle hPrecondition);
+
+    // Pick up a Psi Rule, returns the current selected Rule
+    Handle pickUpPsiRule(opencog::CogServer * server, const std::vector<Handle> & psiRules);
+
+    // Apply the given Psi Rule
+    bool applyPsiRule(opencog::CogServer * server, Handle hPsiRule);
+
 
 public:
 

@@ -140,7 +140,7 @@
 
 ; Default Simple Truth Value
 (define (DEFAULT_STV) 
-    (cog-new-stv 0 0) 
+    (cog-new-stv 0.01 0.01) 
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -659,10 +659,12 @@
 ;         ...
 ;
 
+; TODO: Use PredictiveImplicationLink instead of ImplicationLink
+
 (define (add_rule tv_handle goal_handle action_handle . precondition_handles)
-    (PredictiveImplicationLink (DEFAULT_AV) tv_handle 
-        (AndLink (DEFAULT_STV) (DEFAULT_AV)
-             (AndLink (DEFAULT_STV) (DEFAULT_AV)
+    (ImplicationLink (DEFAULT_AV) tv_handle 
+        (AndLink (cog-new-stv 1.0 1.0)
+             (AndLink (cog-new-stv 1.0 1.0)
                  precondition_handles
              )
             action_handle
