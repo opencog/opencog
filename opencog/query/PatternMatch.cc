@@ -264,7 +264,7 @@ bool Instantiator::walk_tree(Handle expr)
 
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
-	TruthValuePtr tv = as->getTV(expr);
+	const TruthValue* tv = as->getTV(expr);
 	Handle sh = as->addLink(t, oset, *tv);
 
 	oset = save_oset;

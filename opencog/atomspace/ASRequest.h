@@ -414,16 +414,17 @@ public:
         result = NULL;
     };
     ~GetTruthValueASR() {
-        if (result && *result != TruthValue::DEFAULT_TV()) delete result;
+        //if (result && *result != TruthValue::DEFAULT_TV()) delete result;
     }
     
     virtual void do_work() {
         const TruthValue& tv = atomspace->getTV(h,vh);
-        if (tv != TruthValue::DEFAULT_TV()) {
+        set_result(&tv);
+        /*if (tv != TruthValue::DEFAULT_TV()) {
             set_result(tv.clone());
         } else {
             set_result(&tv);
-        }
+        }*/
     };
     
 };

@@ -51,7 +51,6 @@ namespace opencog
 {
 
 typedef std::vector<HandleSet*> HandleSetSeq;
-typedef boost::shared_ptr<TruthValue> TruthValuePtr;
 
 class AtomSpace
 {
@@ -428,12 +427,13 @@ public:
      * have opted for a smart pointer, in the same way that I did with
      * cloneAtom.
      */
-    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
+    const TruthValue* getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
         TruthValueRequest tvr = atomSpaceAsync.getTV(h, vh);
-        const TruthValue& result = *tvr->get_result();
+        return tvr->get_result();
+        //const TruthValue& result = *tvr->get_result();
         // Need to clone the result's TV as it will be deleted when the request
         // is.
-        return TruthValuePtr(result.clone());
+        //return TruthValue*(result.clone());
     }
 
     /** Change the TruthValue of a given Handle */

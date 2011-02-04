@@ -394,7 +394,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
     // For result...
     std::stringstream ss;
 
-    try {
+    //try {
         int a1T, a2T, bT, tempi=0;
         string a10, a11, a20, a21, b1, b2;
         vtree avt1, avt2, bvt;
@@ -635,11 +635,11 @@ std::string PLNModule::runCommand(std::list<std::string> args)
                 "Use 'help pln' or 'pln help' for a list of valid commands." << endl;
 
         }
-    } catch(std::exception& e)
+    /*} catch(std::exception& e)
     {
         ss << endl << "Exception: " << e.what() << endl;
         cout << ss.str();
-    }
+    }*/
     return ss.str();
 }
 

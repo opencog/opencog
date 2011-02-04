@@ -45,14 +45,14 @@ void SenseCache::set_atom_space(AtomSpace *as)
  *       WordSenseNode "bark_sense_23"
  *       WordSenseNode "covering_sense_42"
  */
-TruthValuePtr SenseCache::similarity(Handle sense_a, Handle sense_b)
+TruthValue* SenseCache::similarity(Handle sense_a, Handle sense_b)
 {
 	match_sense = sense_b;
 
 	bool found = foreach_unordered_binary_link(sense_a, SIMILARITY_LINK,
 	                         &SenseCache::find_sense, this);
 
-	if (!found) return TruthValuePtr(TruthValue::DEFAULT_TV().clone());
+	if (!found) return TruthValue::DEFAULT_TV().clone();
 
 	return atom_space->getTV(found_link);
 }

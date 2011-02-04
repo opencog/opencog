@@ -147,7 +147,7 @@ bool AtomSpaceWrapper::handleAddSignal(AtomSpaceImpl *as, Handle h)
             if (getType(h) != IMPLICATION_LINK)
                 return;
             const pHandleSeq hs = getOutgoing(h);
-            TruthValuePtr tvn = getTV(h);
+            const TruthValue* tvn = getTV(h);
 
             //! @todo this could use the index that involves complex atom structure predicates
             if(getType(hs[0]) == AND_LINK &&
@@ -383,9 +383,9 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandle(const Handle h) {
     return pHandleSeq(1, realToFakeHandle(h, NULL_VERSION_HANDLE));
 #else
     pHandleSeq result(1, realToFakeHandle(h, NULL_VERSION_HANDLE));
-    TruthValuePtr tv(atomspace->getTV(h));
+    const TruthValue* tv(atomspace->getTV(h));
     if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-        CompositeTruthValuePtr ctv = boost::shared_dynamic_cast<CompositeTruthValue>(tv);
+        const CompositeTruthValue* ctv = dynamic_cast(const CompositeTruthValue*)(tv);
         foreach(VersionHandle vh, ctv->vh_range()) { 
             if (dummyContexts.find(vh) != dummyContexts.end()) {
                 // if dummyContext contains a VersionHandle for h
@@ -456,32 +456,28 @@ pHandle AtomSpaceWrapper::getPrimaryFakeHandle(pHandle ph)
     return realToFakeHandle(real.first, NULL_VERSION_HANDLE);
 }
 
-TruthValuePtr AtomSpaceWrapper::getTV(pHandle ph) const
+const TruthValue* AtomSpaceWrapper::getTV(pHandle ph) const
 {
-    return (*getTVCached)(ph);
-    /*TruthValuePtr testtv = (*getTVCached)(ph);
+    //return (*getTVCached)(ph);
+    //const TruthValue* testtv = (*getTVCached)(ph);
     if (ph != PHANDLE_UNDEFINED) {
         vhpair r = fakeToRealHandle(ph);
 
-        TruthValuePtr ret(atomspace->getTV(r.first,r.second));
-        if (ret->toString() != testtv->toString()) {
-            OC_ASSERT(false);
-        }
+        const TruthValue* ret(atomspace->getTV(r.first,r.second));
+        //std::cout << "ASW::getTV " << ph << " tv: " << ret->toString() << std::endl;
         return ret;
     } else {
-        TruthValuePtr trivial = TruthValuePtr(TruthValue::TRIVIAL_TV().clone());
-        if (trivial->toString() != testtv->toString()) {
-            OC_ASSERT(false);
-        }
+        const TruthValue* trivial = &TruthValue::TRIVIAL_TV();
         return trivial;
-    }*/
+    }
 }
 
 void AtomSpaceWrapper::setTV(pHandle h, const TruthValue& tv)
 {
     vhpair real = fakeToRealHandle(h);
+    //std::cout << "ASW::setTV " << h << " tv: " << tv.toString() << std::endl;
     atomspace->setTV(real.first, tv, real.second);
-    getTVCached->make_dirty(h);
+    //getTVCached->make_dirty(h);
 }
 
 shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
@@ -536,9 +532,9 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
     // Find a a VersionHandle with a context that has the same order of contexts
     // as vhs, otherwise return default
     // (need to clone, because we want to remove any invalid TVs before using)
-    TruthValuePtr tv(atomspace->getTV(h));
+    const TruthValue* tv = atomspace->getTV(h);
     if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-        CompositeTruthValuePtr ctv = boost::shared_dynamic_cast<CompositeTruthValue>(tv);
+        const CompositeTruthValue* ctv = dynamic_cast(const CompositeTruthValue*)(tv);
         // The below removal should probably become a utility mindagent
         // that checks for invalid versioned TVs...
         // Remove any invalid version TVs
@@ -560,7 +556,7 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
                 pHandle result = realToFakeHandle(real,vh);
                 // We need to mark the TV cache entry dirty in case of the setTV
                 // above changing things
-                getTVCached->make_dirty(result);
+                //getTVCached->make_dirty(result);
                 return result;
             }
         }
@@ -682,7 +678,7 @@ int AtomSpaceWrapper::getFirstIndexOfType(const pHandleSeq hs, const Type T) con
 
 bool AtomSpaceWrapper::binaryTrue(pHandle h)
 {
-    TruthValuePtr tv(getTV(h));//fakeToRealHandle(h).first);
+    const TruthValue* tv(getTV(h));//fakeToRealHandle(h).first);
     return (tv->getMean() > PLN_TRUE_MEAN);
 }
 
@@ -863,7 +859,7 @@ void AtomSpaceWrapper::makeCrispTheorem(pHandle h)
     if (getType(h) != IMPLICATION_LINK)
         return;
     const pHandleSeq hs = getOutgoing(h);
-    TruthValuePtr tvn = getTV(h);
+    const TruthValue* tvn = getTV(h);
 
     //! @todo this could use the index that involves complex atom structure predicates
     if(getType(hs[0]) == AND_LINK &&
@@ -955,7 +951,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
     }
 	///
 	// Get any existing TVs
-	TruthValuePtr tv = as->getTV(result);
+	const TruthValue* tv = as->getTV(result);
 	if (*tv != TruthValue::TRIVIAL_TV()) {
 		std::cout << atom.toString() /*<< " " << tv->toString()*/ << std::endl;
 	}
@@ -976,7 +972,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 #ifdef NEVER_ALLOW_SECOND_TVS
 		result = as->getHandle(node.getType(), node.getName());
 
-		TruthValuePtr tv = as->getTV(result);
+		const TruthValue* tv = as->getTV(result);
 		const TruthValue& atv = atom.getTruthValue();
         bool noExistingTV = (*tv == TruthValue::TRIVIAL_TV() ||
                 tv->isDefaultTV() || *tv == TruthValue::NULL_TV() ||
@@ -997,7 +993,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 												node.getName(),
 												node.getTruthValue()),
 									NULL_VERSION_HANDLE);
-            getTVCached->make_dirty(ph);
+            //getTVCached->make_dirty(ph);
             return ph;
 //		}
 	} else {
@@ -1005,7 +1001,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 #ifdef NEVER_ALLOW_SECOND_TVS
 		result = as->getHandle(link.getType(), link.getOutgoingSet());
 
-		TruthValuePtr tv = as->getTV(result);
+		const TruthValue* tv = as->getTV(result);
 		const TruthValue& atv = atom.getTruthValue();
 		bool noExistingTV = (tv == TruthValue::TRIVIAL_TV() || tv == TruthValue::DEFAULT_TV() || tv == TruthValue::NULL_TV()
 							 || tv.getCount() >= atv.getCount());
@@ -1032,7 +1028,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 //	}
 	fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
     // invalidate cache entry
-    getTVCached->make_dirty(fakeHandle);
+    //getTVCached->make_dirty(fakeHandle);
 	return fakeHandle;
 #else // not STREAMLINE_PHANDLES
     AtomSpace *as = atomspace;
@@ -1052,7 +1048,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
                                                 node.getName(),
                                                 node.getTruthValue()),
                                                 NULL_VERSION_HANDLE);
-                getTVCached->make_dirty(ph);
+                //getTVCached->make_dirty(ph);
                 return ph;
             }
         } else {
@@ -1166,9 +1162,9 @@ Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
     } else {
         // if it does exist, check if it's in the contexts of the
         // given atom
-        TruthValuePtr tv = atomspace->getTV(h);
+        const TruthValue* tv = atomspace->getTV(h);
         if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-            CompositeTruthValuePtr ctv = boost::shared_dynamic_cast<CompositeTruthValue>(tv);
+            const CompositeTruthValue* ctv = dynamic_cast<const CompositeTruthValue*>(tv);
             bool found = false;
             do {
                 found = false;
@@ -1399,7 +1395,7 @@ pHandle AtomSpaceWrapper::And2OrLink(pHandle& andL, Type _AndLinkType, Type _OrL
         Ortarget.push_back(invert(*i));
     }
 
-    TruthValuePtr outerTV = getTV(andL);
+    const TruthValue* outerTV = getTV(andL);
 
     pHandleSeq Notarg;
     pHandle newOrAnd = addLink(_OrLinkType, Ortarget,
@@ -1437,7 +1433,7 @@ pair<pHandle, pHandle> AtomSpaceWrapper::Equi2ImpLink(pHandle& exL)
 
     assert(ImpTarget2.size()==2);
 
-    TruthValuePtr outerTV = getTV(exL);
+    const TruthValue* outerTV = getTV(exL);
 
     pair<pHandle, pHandle> ret;
 
@@ -1944,7 +1940,7 @@ printTree(ret,0,1);
         
         assert(ImpTarget2.size()==2);
         
-//      TruthValuePtr outerTV = getTV(exL);
+//      const TruthValue* outerTV = getTV(exL);
         
         pHandleSeq Andargs;
 

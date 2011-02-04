@@ -209,16 +209,16 @@ bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const
 
     bool result = isNullVersionHandle(vh);
     if (!result) {
-        TruthValuePtr tv(getTV(h));
+        const TruthValue* tv(getTV(h));
         result = !tv->isNullTv() && tv->getType() == COMPOSITE_TRUTH_VALUE &&
-                 !(boost::shared_dynamic_cast<CompositeTruthValue>(tv)->getVersionedTV(vh).isNullTv());
+                 !(dynamic_cast<const CompositeTruthValue*>(tv)->getVersionedTV(vh).isNullTv());
     }
     return result;
 }
 
 void AtomSpace::do_merge_tv(Handle h, const TruthValue& tvn)
 {
-    TruthValuePtr currentTV(getTV(h));
+    const TruthValue* currentTV(getTV(h));
     if (currentTV->isNullTv()) {
         setTV(h, tvn);
     } else {

@@ -74,10 +74,10 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
         ret += "\"";
         
         // Print the truth value only after the node name
-        TruthValuePtr tv(atomspace->getTV(h));
+        const TruthValue* tv(atomspace->getTV(h));
         if (!tv->isDefaultTV()) {
             ret += " ";
-            ret += tv_to_string (tv.get());
+            ret += tv_to_string (tv);
         }
 
         // Print the attention value after the truth value
@@ -91,10 +91,10 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
     }
     else if (atomspace->isLink(h)) {
         // If there's a truth value, print it before the other atoms
-        TruthValuePtr tv(atomspace->getTV(h));
+        const TruthValue* tv(atomspace->getTV(h));
         if (!tv->isDefaultTV()) {
             ret += " ";
-            ret += tv_to_string (tv.get());
+            ret += tv_to_string (tv);
         }
 
         // Print the attention value after the truth value

@@ -93,7 +93,7 @@ public:
 	retlist.push_back(premiseArray[0]); //P
 	retlist.push_back(hA);
 
-	TruthValuePtr retTV(asw->getTV(eval1));
+	const TruthValue* retTV(asw->getTV(eval1));
 
 	Handle ret = asw->addLink(EVALUATION_LINK, retlist, retTV, fresh);	
 

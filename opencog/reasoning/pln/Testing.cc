@@ -257,7 +257,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 
     uint s_i=0; // Expansion phase #
     pHandle eh=PHANDLE_UNDEFINED; // expected target handle
-    TruthValuePtr etv; // expect target handle TV
+    const TruthValue* etv = NULL; // expect target handle TV
     bool passed=false;
 
     set<VtreeProvider*> eres;
@@ -305,7 +305,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                         _v2h(*(*eres.rbegin())->getVtree().begin()));
 
             if (eh != PHANDLE_UNDEFINED )
-                etv = asw->getTV(eh);
+                etv = asw->getTV(eh)->clone();
 
             if (etv) {
                 /* Print resulting truth value compared to test requirements */
@@ -392,7 +392,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
         printf("Test results: [");
 
         foreach(VtreeProvider* bv, eres) {
-            TruthValuePtr tv = asw->getTV(vt2h(*bv));
+            const TruthValue* tv = asw->getTV(vt2h(*bv));
             if (!tv->isNullTv() && tv->getConfidence()>0.0001f)
                 printf("%d ", vt2h(*bv));
         }
@@ -430,6 +430,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     if (!passed)
         getc(stdin);
 #endif
+    if (etv != NULL) delete etv;
     return passed;
 }
 

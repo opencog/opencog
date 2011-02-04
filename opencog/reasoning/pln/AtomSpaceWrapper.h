@@ -270,16 +270,16 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     // dummy get type version which is cached using lru_cache
     lru_cache<AtomSpaceWrapper::_getType> *getTypeCached;
 
-    class _getTV : public std::unary_function<pHandle, TruthValuePtr> {
+    class _getTV : public std::unary_function<pHandle, const TruthValue*> {
         AtomSpaceWrapper* asw;
         public:
         _getTV(AtomSpaceWrapper* _asw) : asw(_asw) { };
-        TruthValuePtr operator()(const pHandle& ph) const {
+        const TruthValue* operator()(const pHandle& ph) const {
             if (ph != PHANDLE_UNDEFINED) {
                 vhpair r = asw->fakeToRealHandle(ph);
                 return asw->atomspace->getTV(r.first,r.second);
             } else {
-                return TruthValuePtr(TruthValue::TRIVIAL_TV().clone());
+                return &TruthValue::TRIVIAL_TV();
             }
         }
     };
@@ -541,7 +541,7 @@ public:
     //! returns whether type subT has superT as a parent type
     bool inheritsType(Type subT, Type superT) const;
 
-    TruthValuePtr getTV(pHandle h) const;
+    const TruthValue* getTV(pHandle h) const;
     void setTV(pHandle h, const TruthValue& tv);
 
     bool isType(const pHandle h) const;

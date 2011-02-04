@@ -122,8 +122,6 @@ public:
     }
 };
 
-typedef boost::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
-
 } // namespace opencog
 
 #endif // _OPENCOG_INDEFINITE_TRUTH_VALUE_H

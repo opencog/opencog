@@ -209,7 +209,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
         std::vector<Handle> targets;
         std::vector<Handle>::iterator t;
         Handle lh = *linksVector_i;
-        TruthValuePtr linkTV = a->getTV(lh);
+        const TruthValue* linkTV = a->getTV(lh);
 
         // For the case of an asymmetric link without this atom as a source
         if (!a->isSource(h,lh)) { continue; }

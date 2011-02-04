@@ -31,6 +31,8 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/util/exceptions.h>
 
+//#include <boost/shared_ptr.h>
+
 class TruthValueUTest;
 
 namespace opencog
