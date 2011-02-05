@@ -114,9 +114,7 @@ public:
 //	    BayesRule *b = myCreator3.CreateRule(TVin1, TVin2, TVin12);
 //   	IndefiniteTruthValue* TVin21 = a->solve();//Inh inhib2 inhib1
 
-		
 		printf("\nTVin21:\nL: %.5f - U: %.5f\n",TVin21->getL(),TVin21->getU());		
-
 
 		const TruthValue* TV3[5] = {TVin2, TVin1, TVA, TVin21,TVin1A};
         IndefiniteSymmetricDeductionFormula fDeduction;
