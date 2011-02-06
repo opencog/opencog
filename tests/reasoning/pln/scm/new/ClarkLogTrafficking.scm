@@ -1,5 +1,5 @@
 ; Example to proove that Clark is involved in suspicious log
-; tracfficking activities
+; tracfficking activities.
 
 ; Alison is an accountant who is also a musician.  Alison is emotional
 ; in the context of music, but not in the context of accounting.  She

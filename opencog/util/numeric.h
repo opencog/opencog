@@ -242,7 +242,7 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y, FloatT epsilon) {
     FloatT amp = std::abs(x + y);
     if (amp*amp > epsilon)
         return diff <= epsilon * amp;
-    else return diff <= epsilon;    
+    else return diff <= epsilon;
 }
 
 // compare 2 FloatT with precision EPSILON

@@ -454,7 +454,8 @@ bool inherit_type_tree(const type_tree& ty1, type_tree_pre_it it1,
         return true;
     } else if (*it2 == id::union_type) {
         OC_ASSERT(*it1 != id::union_type,
-                          "Due to the recursive structure of that function it is impossible that *it1 is id::union_type");
+                  "Due to the recursive structure of that function"
+                  " it is impossible that *it1 is id::union_type");
         //the type of it1 must inherit at least one type of the union of it2
         for (type_tree_sib_it sib = it2.begin(); sib != it2.end(); ++sib) {
             if (inherit_type_tree(ty1, it1, ty2, type_tree_pre_it(sib)))
