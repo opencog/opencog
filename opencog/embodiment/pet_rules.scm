@@ -419,6 +419,76 @@
           (add_gpn_precondition "testSearchFoodPrecondition") 
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; 
+; Rules for Relations (Only used for debugging)
+;
+
+(define ObjBall
+    (ObjectNode "Ball") 
+)
+
+(define ObjChicken
+    (ObjectNode "Chicken")
+)
+
+(define ObjToy
+    (ObjectNode "Toy") 
+)
+
+(define EvaNoveltyBall
+    (EvaluationLink (stv 1.0 1.0)
+        (PredicateNode "RelationNovelty")
+        (ListLink
+            PET_HANDLE
+            ObjBall
+        )
+    )
+)
+
+(define EvaKnowBall
+    (EvaluationLink 
+        (PredicateNode "RelationKnow")
+        (ListLink
+            PET_HANDLE 
+            ObjBall
+        )
+    )
+)
+
+;(ImplicationLink (stv 1.0 1.0)
+;    EvaNoveltyBall
+;    EvaKnowBall
+;)
+
+(define EvaNovelty
+    (EvaluationLink 
+        (PredicateNode "RelationNovelty")
+        (ListLink
+            PET_HANDLE
+            EntityVar
+        )
+    ) 
+)
+
+(define EvaKnow
+    (EvaluationLink
+        (PredicateNode "RelationKnow")
+        (ListLink
+            PET_HANDLE
+            EntityVar
+        )
+    )
+)
+
+(ForAllLink (stv 1.0 1.0)
+    (ListLink EntityVar)
+
+    (ImplicationLink 
+        EvaNovelty
+        EvaKnow
+    )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;

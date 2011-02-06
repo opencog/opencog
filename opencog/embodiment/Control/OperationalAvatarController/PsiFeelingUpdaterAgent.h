@@ -1,11 +1,8 @@
 /*
- * @file opencog/embodiment/Control/OperationalPetController/FeelingUpdaterAgent.h
- *
- * Copyright (C) 2002-2009 Novamente LLC
- * All Rights Reserved
+ * @file opencog/embodiment/Control/OperationalAvatarController/PsiFeelingUpdaterAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2010-10-25
+ * @date 2011-02-06
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -24,60 +21,107 @@
  */
 
 
-#ifndef FEELINGUPDATERAGENT_H
-#define FEELINGUPDATERAGENT_H
+#ifndef PSIFEELINGUPDATERAGENT_H
+#define PSIFEELINGUPDATERAGENT_H
 
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <time.h>
 
-namespace OperationalPetController
+namespace OperationalAvatarController
 {
 
 /**
  * @class
  *
- * @brief Agent for updating modulators
+ * @brief MindAgent for updating feelings
  *
- * Controls the dynamic of the emotion of the agent (Perhaps how angry an
- * agent is. Note that "angry" should either correspond to a modulator, or,
- * more likely a configuration of modulators, but this is just an example).
+ * @note Each feeling in AtomSpace is represented as below:
+ *
+ *       EvaluationLink
+ *           PredicateNode "feelingName"
+ *           ListLink
+ *               petHandle
  */
-class FeelingUpdaterAgent : public opencog::Agent
+class PsiFeelingUpdaterAgent : public opencog::Agent
 {
-
 private:
 
-    time_t lastTickTime;
     /**
-     * signal connections used to keep track of atom merge in the AtomSpace
+     *  Helper class that stores meta data of a feeling 
      */
-    boost::signals::connection mergedAtomConnection;
+    class FeelingMeta
+    {
+    public:
+
+        std::string updaterName; // The schema name that updates the feeling
+        Handle evaluationLink;   // Handle to EvaluationLink that holds the feeling 
+        double updatedValue;     // The updated value after calling the feeling updater  
+        bool bUpdated;           // Indicate if the value of the Feeling has been updated
+
+        void init (const std::string & updaterName, Handle evaluationLink) {
+            this->updaterName = updaterName;
+            this->evaluationLink = evaluationLink; 
+            this->updatedValue = 0;
+            this->bUpdated = false;
+        }
+    }; // class
+
+    unsigned long cycleCount;  // Indicates this mind agent has been executed how many times
+
+    bool bInitialized;         // Indicate whether this mind agent has been Initialized
+
+    std::map <std::string, FeelingMeta> feelingMetaMap;  // Feeling - Meta data map 
+
+    /**
+     * Initialize feelingMetaMap etc.
+     */
+    void init(opencog::CogServer * server);
+
+    /**
+     * Get corresponding EvaluationLink of the feeling 
+     */
+    Handle getFeelingEvaluationLink(opencog::CogServer * server, const std::string feelingName, Handle petHandle); 
+
+    /**
+     * Run updaters (combo scripts)
+     */
+    void runUpdaters(opencog::CogServer * server);
+
+    /**
+     * Set updated values to AtomSpace
+     */
+    void setUpdatedValues(opencog::CogServer * server);
+
+    /**
+     * Send updated values to the virtual world where the pet lives
+     */
+    void sendUpdatedValues(opencog::CogServer * server); 
 
 public:
 
-    FeelingUpdaterAgent();
-    virtual ~FeelingUpdaterAgent();
+    PsiFeelingUpdaterAgent();
+    virtual ~PsiFeelingUpdaterAgent();
 
     virtual const ClassInfo& classinfo() const {
         return info();
     }
+
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalPetController::FeelingUpdaterAgent");
+        static const ClassInfo _ci("OperationalAvatarController::PsiFeelingUpdaterAgent");
         return _ci;
     }
 
-    void run(opencog::CogServer *server);
+    // Entry of the Agent, CogServer will invoke this function during its cycle
+    void run(opencog::CogServer * server);
 
-    // connects to the signals from AtomSpace it needs to know
-    void connectSignals(AtomSpace& as);
-
-    /**
-     * Method to receive atom merge signals from AtomTable
-     */
-    void atomMerged(Handle h);
+    // After calling this function, the Agent will invoke its "init" method firstly 
+    // in "run" function during its next cycle
+    void forceInitNextCycle() {
+        this->bInitialized = false;
+    }
 
 }; // class
+
 }  // namespace
 
 #endif

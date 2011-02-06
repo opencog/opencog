@@ -10,6 +10,8 @@ ADD_LIBRARY (oac
     PsiModulatorUpdaterAgent
     PsiDemandUpdaterAgent
     PsiActionSelectionAgent
+    PsiRelationUpdaterAgent
+    PsiFeelingUpdaterAgent
     SleepAgent
     MockOpcHCTest
     HCTestAgent
