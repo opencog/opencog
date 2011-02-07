@@ -178,7 +178,7 @@ bool runSCMTargets(string testDir, bool test_bc) {
             }
         }
     }
-    /*catch(std::string s) {
+    catch(std::string s) {
         std::cerr << "testSCMTargets:" << s;
         throw s;
     }
@@ -190,7 +190,7 @@ bool runSCMTargets(string testDir, bool test_bc) {
     {
         std::cerr << "testSCMTargets:" << e.what();
         throw e;
-    }*/
+    }
     catch(std::exception& e) 
     {
         std::cerr << "Unknown exception during SCM targets" << std::endl;

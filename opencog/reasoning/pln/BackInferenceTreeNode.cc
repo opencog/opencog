@@ -597,9 +597,9 @@ rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
     } catch(string s) {
       printf("Exception in BITNode::BITNode = %s\n",s.c_str());
       throw;
-    /*} catch(...)  {
+    } catch(...)  {
       printf("Unknown Exception in BITNode::BITNode!\n");
-      throw;*/
+      throw;
     }
     root->inferenceNodes++;
 }
