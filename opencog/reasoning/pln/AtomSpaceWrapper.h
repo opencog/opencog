@@ -257,35 +257,6 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     boost::signals::connection c_add; //! Connection to add atom signals
     boost::signals::connection c_remove; //! Connection to remove atom signals
 
-    class _getType : public std::unary_function<pHandle, Type> {
-        AtomSpaceWrapper* asw;
-        public:
-        _getType(AtomSpaceWrapper* _asw) : asw(_asw) { };
-        Type operator()(const pHandle& ph) const {
-            Handle h = asw->fakeToRealHandle(ph).first;
-            return asw->atomspace->getType(h);
-        }
-    };
-    _getType* __getType;
-    // dummy get type version which is cached using lru_cache
-    lru_cache<AtomSpaceWrapper::_getType> *getTypeCached;
-
-    class _getTV : public std::unary_function<pHandle, const TruthValue*> {
-        AtomSpaceWrapper* asw;
-        public:
-        _getTV(AtomSpaceWrapper* _asw) : asw(_asw) { };
-        const TruthValue* operator()(const pHandle& ph) const {
-            if (ph != PHANDLE_UNDEFINED) {
-                vhpair r = asw->fakeToRealHandle(ph);
-                return asw->atomspace->getTV(r.first,r.second);
-            } else {
-                return &TruthValue::TRIVIAL_TV();
-            }
-        }
-    };
-    _getTV* __getTV;
-    // dummy get type version which is cached using lru_cache
-    lru_cache<AtomSpaceWrapper::_getTV> *getTVCached;
 protected:
     AtomSpace *atomspace;
 

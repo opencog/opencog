@@ -581,6 +581,27 @@ public:
     
 };
 
+class CheckIfContainsVarASR : public OneParamASR<bool,Handle> {
+public:
+    CheckIfContainsVarASR(AtomSpaceImpl *a, const Handle h) :
+        OneParamASR<bool,Handle>(a,h) {}
+    
+    virtual void do_work() {
+        set_result(atomspace->containsVar(p1));
+    }
+};
+
+class GetAtomHashASR : public OneParamASR<size_t,Handle> {
+public:
+    GetAtomHashASR (AtomSpaceImpl *a, const Handle h) :
+        OneParamASR<size_t,Handle>(a,h) {}
+    
+    virtual void do_work() {
+        set_result(atomspace->getAtomHash(p1));
+    }
+};
+
+
 // -----------------
 // Search requests
 
@@ -931,6 +952,7 @@ typedef boost::shared_ptr< GenericASR<HandleSeq> > HandleSeqRequest;
 typedef boost::shared_ptr< GenericASR<Type> > TypeRequest;
 typedef boost::shared_ptr< GenericASR<int> > IntRequest;
 typedef boost::shared_ptr< GenericASR<bool> > BoolRequest;
+typedef boost::shared_ptr< GenericASR<size_t> > HashRequest;
 typedef boost::shared_ptr< GenericASR<std::string> > StringRequest;
 // Can't actually init template with void, so use bool as stand-in.
 typedef boost::shared_ptr< GenericASR<bool> > VoidRequest;

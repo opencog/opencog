@@ -42,7 +42,6 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/util/Config.h>
@@ -70,12 +69,74 @@ AtomSpace::AtomSpace(void)
     fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     attentionalFocusBoundary = 1;
 
-    logger().fine("Max load factor for handle map is: %f", TLB::handle_map.max_load_factor());
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    // Initialise lru cache for getType
+    __getType = new _getType(this);
+    getTypeCached = new lru_cache<AtomSpace::_getType>(1000,*__getType);
 
+    // Initialise lru cache for getTV
+    //__getTV = new _getTV(this);
+    //getTVCached = new lru_cache<AtomSpace::_getTV>(1000,*__getTV);
+
+    c_remove = atomSpaceAsync.removeAtomSignal(
+            boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
+
+#endif
 }
 
 AtomSpace::~AtomSpace()
 {
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    c_remove.disconnect();
+    boost::mutex::scoped_lock(cache_lock);
+    delete __getType;
+    delete getTypeCached;
+#endif
+}
+
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+bool AtomSpace::handleRemoveSignal(AtomSpaceImpl *as, Handle h)
+{
+    boost::mutex::scoped_lock(cache_lock);
+    getTypeCached->make_dirty(h);
+    return false;
+}
+
+#endif
+
+Type AtomSpace::getType(Handle h) const
+{
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    boost::mutex::scoped_lock(cache_lock);
+    return (*getTypeCached)(h);
+#else
+    return atomSpaceAsync.getType(h)->get_result();
+#endif
+}
+
+const TruthValue* AtomSpace::getTV(Handle h, VersionHandle vh) const
+{
+/*#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    boost::mutex::scoped_lock(cache_lock);
+    vhpair hvh(h,vh);
+    return (*getTVCached)(hvh);
+#else*/
+    TruthValueRequest tvr = atomSpaceAsync.getTV(h, vh);
+    return tvr->get_result();
+    //const TruthValue& result = *tvr->get_result();
+    // Need to clone the result's TV as it will be deleted when the request
+    // is.
+    //return TruthValue*(result.clone());
+//#endif
+}
+
+void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
+{
+/*#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    boost::mutex::scoped_lock(cache_lock);
+    getTVCached->make_dirty(h);
+#endif*/
+    atomSpaceAsync.setTV(h, tv, vh)->get_result();
 }
 
 Handle AtomSpace::getSpaceMapNode() 
@@ -176,15 +237,7 @@ bool AtomSpace::isList(Handle h) const
 bool AtomSpace::containsVar(Handle h) const
 {
     DPRINTF("AtomSpace::containsVar Atom space address: %p\n", this);
-
-    Node *nnn = dynamic_cast<Node *>(TLB::getAtom(h));
-    if (!nnn) {
-        for (int i = 0;i < getArity(h);++i)
-            if (containsVar(getOutgoing(h, i)))
-                return true;
-        return false;
-    }
-    return isVar(h);
+    return atomSpaceAsync.containsVar(h)->get_result();
 }
 
 Handle AtomSpace::createHandle(Type t, const string& str, bool managed)
@@ -192,7 +245,7 @@ Handle AtomSpace::createHandle(Type t, const string& str, bool managed)
     DPRINTF("AtomSpace::createHandle Atom space address: %p\n", this);
 
     Handle h = getHandle(t, str);
-    return TLB::isValidHandle(h) ? h : addNode(t, str, TruthValue::NULL_TV());
+    return h != Handle::UNDEFINED ? h : addNode(t, str, TruthValue::NULL_TV());
 }
 
 Handle AtomSpace::createHandle(Type t, const HandleSeq& outgoing, bool managed)
@@ -200,7 +253,7 @@ Handle AtomSpace::createHandle(Type t, const HandleSeq& outgoing, bool managed)
     DPRINTF("AtomSpace::createHandle Atom space address: %p\n", this);
 
     Handle h = getHandle(t, outgoing);
-    return TLB::isValidHandle(h) ? h : addLink(t, outgoing, TruthValue::NULL_TV());
+    return h != Handle::UNDEFINED ? h : addLink(t, outgoing, TruthValue::NULL_TV());
 }
 
 bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const
@@ -239,13 +292,13 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
     const Node *node = dynamic_cast<const Node *>(&atom);
     if (node) {
         result = getHandle(node->getType(), node->getName());
-        if (TLB::isInvalidHandle(result)) {
+        if (result == Handle::UNDEFINED) {
             return addNode(node->getType(), node->getName(), newTV);
         }
     } else {
         const Link *link = dynamic_cast<const Link *>(&atom);
         result = getHandle(link->getType(), link->getOutgoingSet());
-        if (TLB::isInvalidHandle(result)) {
+        if (result == Handle::UNDEFINED) {
             return addLink(link->getType(), link->getOutgoingSet(), newTV);
         }
     }
@@ -270,7 +323,7 @@ boost::shared_ptr<Link> AtomSpace::cloneLink(const Handle h) const
 
 size_t AtomSpace::getAtomHash(const Handle h) const 
 {
-    return TLB::getAtom(h)->hashCode();
+    return atomSpaceAsync.getAtomHash(h)->get_result();
 }
 
 bool AtomSpace::isValidHandle(const Handle h) const 
@@ -385,12 +438,6 @@ AttentionValue::vlti_t AtomSpace::getVLTI(AttentionValueHolder *avh) const
     return avh->getAttentionValue().getVLTI();
 }
 
-/*float AtomSpace::getCount(Handle h) const
-{
-    DPRINTF("AtomSpace::getCount Atom space address: %p\n", this);
-    return TLB::getAtom(h)->getTruthValue().getCount();
-}*/
-
 int AtomSpace::Nodes(VersionHandle vh) const
 {
     return atomSpaceAsync.nodeCount(vh)->get_result();
@@ -474,6 +521,13 @@ AttentionValue::sti_t AtomSpace::getMinSTI(bool average) const
 
 void AtomSpace::clear()
 {
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    {
+        boost::mutex::scoped_lock(cache_lock);
+        getTypeCached->clear();
+        //getTVCached->clear();
+    }
+#endif
     atomSpaceAsync.clear()->get_result();
 }
 

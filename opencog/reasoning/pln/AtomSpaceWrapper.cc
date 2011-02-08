@@ -84,12 +84,6 @@ AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
     rootContextHandle = atomspace->addNode(CONCEPT_NODE, rootContext);
     atomspace->setVLTI(rootContextHandle, AttentionValue::NONDISPOSABLE);
     
-    // Initialise lru cache for getType and getTV
-    __getType = new _getType(this);
-    getTypeCached = new lru_cache<AtomSpaceWrapper::_getType>(1000,*__getType);
-    __getTV = new _getTV(this);
-    getTVCached = new lru_cache<AtomSpaceWrapper::_getTV>(1000,*__getTV);
-
     //! @todo Replace srand with opencog::RandGen
     srand(12345678);
     allowFWVarsInAtomSpace = true;
@@ -99,8 +93,7 @@ AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
 
 AtomSpaceWrapper::~AtomSpaceWrapper()
 {
-    delete __getType;
-    delete getTypeCached;
+    setWatchingAtomSpace(false);
 }
 
 void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
@@ -458,13 +451,9 @@ pHandle AtomSpaceWrapper::getPrimaryFakeHandle(pHandle ph)
 
 const TruthValue* AtomSpaceWrapper::getTV(pHandle ph) const
 {
-    //return (*getTVCached)(ph);
-    //const TruthValue* testtv = (*getTVCached)(ph);
     if (ph != PHANDLE_UNDEFINED) {
         vhpair r = fakeToRealHandle(ph);
-
         const TruthValue* ret(atomspace->getTV(r.first,r.second));
-        //std::cout << "ASW::getTV " << ph << " tv: " << ret->toString() << std::endl;
         return ret;
     } else {
         const TruthValue* trivial = &TruthValue::TRIVIAL_TV();
@@ -475,9 +464,7 @@ const TruthValue* AtomSpaceWrapper::getTV(pHandle ph) const
 void AtomSpaceWrapper::setTV(pHandle h, const TruthValue& tv)
 {
     vhpair real = fakeToRealHandle(h);
-    //std::cout << "ASW::setTV " << h << " tv: " << tv.toString() << std::endl;
     atomspace->setTV(real.first, tv, real.second);
-    //getTVCached->make_dirty(h);
 }
 
 shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
@@ -556,7 +543,6 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
                 pHandle result = realToFakeHandle(real,vh);
                 // We need to mark the TV cache entry dirty in case of the setTV
                 // above changing things
-                //getTVCached->make_dirty(result);
                 return result;
             }
         }
@@ -572,8 +558,6 @@ void AtomSpaceWrapper::reset()
     vhmap_reverse.clear();
     variableShadowMap.clear();
     atomspace->clear();
-    getTypeCached->clear();
-    getTVCached->clear();
     rootContextHandle = atomspace->addNode(CONCEPT_NODE, rootContext);
     atomspace->setVLTI(rootContextHandle, AttentionValue::NONDISPOSABLE);
 }
@@ -993,7 +977,6 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 												node.getName(),
 												node.getTruthValue()),
 									NULL_VERSION_HANDLE);
-            //getTVCached->make_dirty(ph);
             return ph;
 //		}
 	} else {
@@ -1028,7 +1011,6 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 //	}
 	fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
     // invalidate cache entry
-    //getTVCached->make_dirty(fakeHandle);
 	return fakeHandle;
 #else // not STREAMLINE_PHANDLES
     AtomSpace *as = atomspace;
@@ -1048,7 +1030,6 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
                                                 node.getName(),
                                                 node.getTruthValue()),
                                                 NULL_VERSION_HANDLE);
-                //getTVCached->make_dirty(ph);
                 return ph;
             }
         } else {
@@ -1479,7 +1460,7 @@ pHandleSeq AtomSpaceWrapper::filter_type(Type t)
 Type AtomSpaceWrapper::getType(const pHandle h) const
 {
     if (isType(h)) return (Type) h;
-    return (*getTypeCached)(h);
+    return atomspace->getType(fakeToRealHandle(h).first);
 }
 
 std::string AtomSpaceWrapper::getName(const pHandle h) const

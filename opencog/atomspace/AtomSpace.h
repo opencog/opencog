@@ -46,6 +46,13 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/recent_val.h>
 
+// Whether to wrap certain functions in lru_cache<>
+#define USE_ATOMSPACE_LOCAL_THREAD_CACHE 1
+
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+#include <opencog/util/lru_cache.h>
+#endif
+
 
 namespace opencog
 {
@@ -414,9 +421,41 @@ public:
     void setAV(Handle h, const AttentionValue &av);
 
     /** Retrieve the type of a given Handle */
-    Type getType(Handle h) const {
-        return atomSpaceAsync.getType(h)->get_result();
-    }
+    Type getType(Handle h) const;
+
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    // Experimental code for speeding up TV retrieval...
+    /** Cached get type function */
+    class _getType : public std::unary_function<Handle, Type> {
+        AtomSpace* a;
+        public:
+        _getType(AtomSpace* _a) : a(_a) { };
+        Type operator()(const Handle& h) const {
+            return a->atomSpaceAsync.getType(h)->get_result();
+        }
+    };
+    _getType* __getType;
+    // dummy get type version which is cached using lru_cache
+    lru_cache<AtomSpace::_getType> *getTypeCached;
+
+    typedef std::pair<Handle,VersionHandle> vhpair;
+    class _getTV : public std::unary_function<vhpair, const TruthValue*> {
+        AtomSpace* a;
+        public:
+        _getTV(AtomSpace* _a) : a(_a) { };
+        const TruthValue* operator()(const vhpair& hvh) const {
+            if (hvh.first != Handle::UNDEFINED) {
+                return a->atomSpaceAsync.getTV(hvh.first, hvh.second)->get_result();
+            } else {
+                return &TruthValue::NULL_TV();
+            }
+        }
+    };
+    _getTV* __getTV;
+    // dummy get TV version which is cached using lru_cache
+    lru_cache<AtomSpace::_getTV> *getTVCached;
+#endif // USE_ATOMSPACE_LOCAL_THREAD_CACHE
+
 
     /** Retrieve the TruthValue of a given Handle
      * @note This is an unpleasant hack due to the TruthValue class being abstract and
@@ -427,19 +466,10 @@ public:
      * have opted for a smart pointer, in the same way that I did with
      * cloneAtom.
      */
-    const TruthValue* getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
-        TruthValueRequest tvr = atomSpaceAsync.getTV(h, vh);
-        return tvr->get_result();
-        //const TruthValue& result = *tvr->get_result();
-        // Need to clone the result's TV as it will be deleted when the request
-        // is.
-        //return TruthValue*(result.clone());
-    }
+    const TruthValue* getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
 
     /** Change the TruthValue of a given Handle */
-    void setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE) {
-        atomSpaceAsync.setTV(h, tv, vh)->get_result();
-    }
+    void setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE);
 
     /** Change the primary TV's mean of a given Handle
      * @note By Joel: this makes no sense to me, how can you generally set a mean
@@ -1324,6 +1354,20 @@ private:
      * returns the handle of the node.
      */
     Handle getSpaceMapNode(void);
+
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    // For monitoring removals to the AtomSpace so that cache entries can be
+    // invalidated as necessary
+    bool handleRemoveSignal(AtomSpaceImpl *as, Handle h); //!< Signal handler for atom removals.
+
+    //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
+    bool watchingAtomSpace;
+
+    boost::signals::connection c_add; //! Connection to add atom signals
+    boost::signals::connection c_remove; //! Connection to remove atom signals
+
+    mutable boost::mutex cache_lock;
+#endif
 
 public:
     // SpaceServerContainer virtual methods:
