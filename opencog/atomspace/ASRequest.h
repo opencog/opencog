@@ -512,6 +512,23 @@ public:
     
 };
 
+class GetNormalisedAttentionValueSTIASR : public GenericASR<float> {
+    Handle h;
+    bool average, clip, positive;
+public:
+    GetNormalisedAttentionValueSTIASR(AtomSpaceImpl *a, Handle _h, bool _average=true,
+            bool _clip=false, bool _positive=false) :
+        GenericASR<float>(a), h(_h), average(_average), clip(_clip), positive(_positive) {};
+    
+    virtual void do_work() {
+        if (positive)
+            set_result(atomspace->getNormalisedSTI(h,average,clip));
+        else
+            set_result(atomspace->getNormalisedZeroToOneSTI(h,average,clip));
+    };
+    
+};
+
 class SetAttentionValueSTIASR : public TwoParamASR <bool, Handle, AttentionValue::sti_t> {
 public:
     SetAttentionValueSTIASR(AtomSpaceImpl *a, Handle h, AttentionValue::sti_t sti) :
@@ -951,6 +968,7 @@ typedef boost::shared_ptr< GenericASR<const TruthValue*> > TruthValueRequest;
 typedef boost::shared_ptr< GenericASR<HandleSeq> > HandleSeqRequest;
 typedef boost::shared_ptr< GenericASR<Type> > TypeRequest;
 typedef boost::shared_ptr< GenericASR<int> > IntRequest;
+typedef boost::shared_ptr< GenericASR<float> > FloatRequest;
 typedef boost::shared_ptr< GenericASR<bool> > BoolRequest;
 typedef boost::shared_ptr< GenericASR<size_t> > HashRequest;
 typedef boost::shared_ptr< GenericASR<std::string> > StringRequest;

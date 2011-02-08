@@ -347,6 +347,26 @@ public:
         return r;
     }
 
+    /** Retrieve the normalised Short-Term Importance for a given Handle.
+     * Unless positive parameter is true, STI above and below the attentional
+     * focus threshold is normalised separately and linearly.
+     *
+     * @param h The atom handle to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to -1..1, or 0..1 with
+     * positive==true? Outside these ranges can be returned if average=true
+     * @param positive Linearly normalise the STI from 0..1 instead of from
+     * -1..1.
+     * @return normalised STI
+     */
+    FloatRequest getNormalisedSTI(Handle h, bool average=true, bool clip=false, bool positive=false) {
+        FloatRequest r(new GetNormalisedAttentionValueSTIASR(
+                    &atomspace,h,average,clip,positive));
+        requestQueue.push(r);
+        return r;
+    }
+
     /** Change the Long-Term Importance of an Atom */
     VoidRequest setLTI(Handle h, AttentionValue::lti_t lti) {
         VoidRequest r(new SetAttentionValueLTIASR(&atomspace,h,lti));

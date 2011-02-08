@@ -318,10 +318,6 @@ public:
     /**
      * Removes an atom from the atomspace
      *
-     * When the atom is removed from the atomspace, all memory associated
-     * with it is also deleted; in particular, the atom is removed from
-     * the TLB as well, so that future TLB lookups will be invalid. 
-     *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag; if set, the links in the
      *        incoming set of the atom to be removed will also be
@@ -480,7 +476,7 @@ public:
         atomSpaceAsync.setMean(h, mean)->get_result();
     }
 
-    /** Clone an atom from the TLB, replaces the public access to TLB::getAtom
+    /** Clone an atom from the AtomSpace, replaces the public access to TLB::getAtom
      * that many modules were doing.
      * @param h Handle of atom to clone
      * @return A smart pointer to the atom
@@ -528,31 +524,6 @@ public:
     AttentionValue::vlti_t getVLTI(AttentionValueHolder *avh) const;
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given AttentionValueHolder. STI above and below threshold
-     * normalised separately and linearly.
-     *
-     * @param h The attention value holder to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to -1..1? Outside this
-     * range can be return if average=true
-     * @return normalised STI between -1..1
-     */
-    float getNormalisedSTI(AttentionValueHolder *avh, bool average=true, bool clip=false) const;
-
-    /** Retrieve the linearly normalised Short-Term Importance between 0..1
-     * for a given AttentionValueHolder.
-     *
-     * @param h The attention value holder to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to 0..1? Outside this
-     * range can be return if average=true
-     * @return normalised STI between 0..1
-     */
-    float getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool average=true, bool clip=false) const;
-
-    /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given Handle. STI above and below threshold normalised separately
      * and linearly.
      *
@@ -560,11 +531,11 @@ public:
      * @param average Should the recent average max/min STI be used, or the
      * exact min/max?
      * @param clip Should the returned value be clipped to -1..1? Outside this
-     * range can be return if average=true
+     * range can be returned if average=true
      * @return normalised STI between -1..1
      */
     float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return getNormalisedSTI(TLB::getAtom(h), average, clip);
+        return atomSpaceAsync.getNormalisedSTI(h, average, clip, false)->get_result();
     }
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
@@ -574,11 +545,11 @@ public:
      * @param average Should the recent average max/min STI be used, or the
      * exact min/max?
      * @param clip Should the returned value be clipped to 0..1? Outside this
-     * range can be return if average=true
+     * range can be returned if average=true
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return getNormalisedZeroToOneSTI(TLB::getAtom(h), average, clip);
+        return atomSpaceAsync.getNormalisedSTI(h, average, clip, true)->get_result();
     }
     //---
 
