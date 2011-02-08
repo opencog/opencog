@@ -63,7 +63,6 @@ namespace opencog
  */
 class TLB
 {
-    friend class AtomSpace;
     friend class AtomSpaceImpl;
     friend class ::AtomSpaceUTest;
     friend class ::AtomSpaceImplUTest;
