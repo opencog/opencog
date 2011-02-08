@@ -522,9 +522,9 @@ public:
     
     virtual void do_work() {
         if (positive)
-            set_result(atomspace->getNormalisedSTI(h,average,clip));
-        else
             set_result(atomspace->getNormalisedZeroToOneSTI(h,average,clip));
+        else
+            set_result(atomspace->getNormalisedSTI(h,average,clip));
     };
     
 };
