@@ -5,7 +5,6 @@ using namespace opencog;
 
 AtomSpaceAsync::AtomSpaceAsync()
 {
-    pthread_mutex_init(&atomSpaceLock, NULL); 
     processingRequests = false;
     counter = 0;
     spaceServer = new SpaceServer(*this);

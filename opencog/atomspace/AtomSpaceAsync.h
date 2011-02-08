@@ -30,7 +30,6 @@ class AtomSpaceAsync {
 
     bool processingRequests;
     boost::thread m_Thread;
-    mutable pthread_mutex_t atomSpaceLock;
     int counter;
 
     AtomSpaceImpl atomspace;
