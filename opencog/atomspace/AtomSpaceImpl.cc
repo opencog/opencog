@@ -71,10 +71,6 @@ AtomSpaceImpl::AtomSpaceImpl(void) :
     backing_store = NULL;
     spaceServer = NULL;
 
-    fundsSTI = config().get_int("STARTING_STI_FUNDS");
-    fundsLTI = config().get_int("STARTING_LTI_FUNDS");
-    attentionalFocusBoundary = 1;
-
     //connect signals
     addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1, _2));
     removedAtomConnection = removeAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomRemoved, this, _1, _2));
@@ -298,6 +294,8 @@ bool AtomSpaceImpl::containsVersionedTV(Handle h, VersionHandle vh) const
     return result;
 }
 
+AttentionBank& AtomSpaceImpl::getAttentionBank() { return bank; }
+
 bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
     HandleEntry* extractedHandles = atomTable.extract(h, recursive);
@@ -307,8 +305,8 @@ bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
             Handle h = currentEntry->handle;
 
             // Also refund sti/lti to AtomSpace funds pool
-            fundsSTI += getSTI(h);
-            fundsLTI += getLTI(h);
+            bank.updateSTIFunds(getSTI(h));
+            bank.updateLTIFunds(getLTI(h));
 
             // emit remove atom signal
             _removeAtomSignal(this,h);
@@ -784,64 +782,24 @@ void AtomSpaceImpl::setMean(Handle h, float mean) throw (InvalidParamException)
     delete newTv;
 }
 
-
-const AttentionValue& AtomSpaceImpl::getAV(AttentionValueHolder *avh) const
-{
-    return avh->getAttentionValue();
-}
-
-void AtomSpaceImpl::setAV(AttentionValueHolder *avh, const AttentionValue& av)
-{
-    const AttentionValue& oldAV = avh->getAttentionValue();
-    // Add the old attention values to the AtomSpace funds and
-    // subtract the new attention values from the AtomSpace funds
-    fundsSTI += (oldAV.getSTI() - av.getSTI());
-    fundsLTI += (oldAV.getLTI() - av.getLTI());
-
-    avh->setAttentionValue(av); // setAttentionValue takes care of updating indices
-}
-
-void AtomSpaceImpl::setSTI(AttentionValueHolder *avh, AttentionValue::sti_t stiValue)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(stiValue, currentAv.getLTI(), currentAv.getVLTI()));
-}
-
-void AtomSpaceImpl::setLTI(AttentionValueHolder *avh, AttentionValue::lti_t ltiValue)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(currentAv.getSTI(), ltiValue, currentAv.getVLTI()));
-}
-
-void AtomSpaceImpl::setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t vltiValue)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(currentAv.getSTI(), currentAv.getLTI(), vltiValue));
-}
-
-AttentionValue::sti_t AtomSpaceImpl::getSTI(AttentionValueHolder *avh) const
-{
-    return avh->getAttentionValue().getSTI();
-}
-
 float AtomSpaceImpl::getNormalisedSTI(AttentionValueHolder *avh, bool average, bool clip) const
 {
     // get normalizer (maxSTI - attention boundary)
     int normaliser;
     float val;
-    AttentionValue::sti_t s = getSTI(avh);
-    if (s > getAttentionalFocusBoundary()) {
-        normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
+    AttentionValue::sti_t s = bank.getSTI(avh);
+    if (s > bank.getAttentionalFocusBoundary()) {
+        normaliser = (int) bank.getMaxSTI(average) - bank.getAttentionalFocusBoundary();
         if (normaliser == 0) {
             return 0.0f;
         }
-        val = (s - getAttentionalFocusBoundary()) / (float) normaliser;
+        val = (s - bank.getAttentionalFocusBoundary()) / (float) normaliser;
     } else {
-        normaliser = -((int) getMinSTI(average) + getAttentionalFocusBoundary());
+        normaliser = -((int) bank.getMinSTI(average) + bank.getAttentionalFocusBoundary());
         if (normaliser == 0) {
             return 0.0f;
         }
-        val = (s + getAttentionalFocusBoundary()) / (float) normaliser;
+        val = (s + bank.getAttentionalFocusBoundary()) / (float) normaliser;
     }
     if (clip) {
         return max(-1.0f,min(val,1.0f));
@@ -854,33 +812,17 @@ float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool a
 {
     int normaliser;
     float val;
-    AttentionValue::sti_t s = getSTI(avh);
-    normaliser = getMaxSTI(average) - getMinSTI(average);
+    AttentionValue::sti_t s = bank.getSTI(avh);
+    normaliser = bank.getMaxSTI(average) - bank.getMinSTI(average);
     if (normaliser == 0) {
         return 0.0f;
     }
-    val = (s - getMinSTI(average)) / (float) normaliser;
+    val = (s - bank.getMinSTI(average)) / (float) normaliser;
     if (clip) {
         return max(0.0f,min(val,1.0f));
     } else {
         return val;
     }
-}
-
-AttentionValue::lti_t AtomSpaceImpl::getLTI(AttentionValueHolder *avh) const
-{
-    return avh->getAttentionValue().getLTI();
-}
-
-AttentionValue::vlti_t AtomSpaceImpl::getVLTI(AttentionValueHolder *avh) const
-{
-    return avh->getAttentionValue().getVLTI();
-}
-
-float AtomSpaceImpl::getCount(Handle h) const
-{
-    DPRINTF("AtomSpaceImpl::getCount Atom space address: %p\n", this);
-    return TLB::getAtom(h)->getTruthValue().getCount();
 }
 
 int AtomSpaceImpl::Nodes(VersionHandle vh) const
@@ -957,16 +899,6 @@ long AtomSpaceImpl::getTotalLTI() const
 
 }
 
-long AtomSpaceImpl::getSTIFunds() const
-{
-    return fundsSTI;
-}
-
-long AtomSpaceImpl::getLTIFunds() const
-{
-    return fundsLTI;
-}
-
 int AtomSpaceImpl::Links(VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::Links Atom space address: %p\n", this);
@@ -1004,41 +936,6 @@ Handle AtomSpaceImpl::_getNextAtom_type(Type type)
     Handle h = *type_itr;
     type_itr ++;
     return h;
-}
-
-AttentionValue::sti_t AtomSpaceImpl::getAttentionalFocusBoundary() const
-{
-    return attentionalFocusBoundary;
-}
-
-AttentionValue::sti_t AtomSpaceImpl::setAttentionalFocusBoundary(AttentionValue::sti_t s)
-{
-    attentionalFocusBoundary = s;
-    return s;
-}
-
-void AtomSpaceImpl::updateMaxSTI(AttentionValue::sti_t m)
-{ maxSTI.update(m); }
-
-AttentionValue::sti_t AtomSpaceImpl::getMaxSTI(bool average) const
-{
-    if (average) {
-        return (AttentionValue::sti_t) maxSTI.recent;
-    } else {
-        return maxSTI.val;
-    }
-}
-
-void AtomSpaceImpl::updateMinSTI(AttentionValue::sti_t m)
-{ minSTI.update(m); }
-
-AttentionValue::sti_t AtomSpaceImpl::getMinSTI(bool average) const
-{
-    if (average) {
-        return (AttentionValue::sti_t) minSTI.recent;
-    } else {
-        return minSTI.val;
-    }
 }
 
 bool AtomSpaceImpl::saveToXML(const std::string& filename) const {

@@ -49,8 +49,8 @@ Agent::Agent(const unsigned int f) : _frequency(f)
 Agent::~Agent()
 {
     // give back funds
-    server().getAtomSpace()->setSTI(this, 0);
-    server().getAtomSpace()->setLTI(this, 0);
+    server().getAtomSpace()->getAttentionBank().setSTI(this, 0);
+    server().getAtomSpace()->getAttentionBank().setLTI(this, 0);
 
     resetUtilizedHandleSets();
     delete stimulatedAtoms;

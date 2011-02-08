@@ -60,15 +60,10 @@ using std::max;
 using namespace opencog;
 
 // ====================================================================
+//
 
 AtomSpace::AtomSpace(void)
 {
-    emptyName = "";
-
-    fundsSTI = config().get_int("STARTING_STI_FUNDS");
-    fundsLTI = config().get_int("STARTING_LTI_FUNDS");
-    attentionalFocusBoundary = 1;
-
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     // Initialise lru cache for getType
     __getType = new _getType(this);
@@ -101,7 +96,6 @@ bool AtomSpace::handleRemoveSignal(AtomSpaceImpl *as, Handle h)
     getTypeCached->make_dirty(h);
     return false;
 }
-
 #endif
 
 Type AtomSpace::getType(Handle h) const
@@ -168,11 +162,6 @@ AtomSpace::AtomSpace(const AtomSpace& other)
     throw opencog::RuntimeException(TRACE_INFO, 
             "AtomSpace - Cannot copy an object of this class");
 }
-
-/*const TruthValue& AtomSpace::getDefaultTV()
-{
-    return TruthValue::DEFAULT_TV();
-}*/
 
 Type AtomSpace::getAtomType(const string& str) const
 {
@@ -346,55 +335,6 @@ void AtomSpace::setAV(Handle h, const AttentionValue &av)
     atomSpaceAsync.setAV(h,av)->get_result();
 }
 
-const AttentionValue& AtomSpace::getAV(AttentionValueHolder *avh) const
-{
-    return avh->getAttentionValue();
-}
-
-void AtomSpace::setAV(AttentionValueHolder *avh, const AttentionValue& av)
-{
-    const AttentionValue& oldAV = avh->getAttentionValue();
-    // Add the old attention values to the AtomSpace funds and
-    // subtract the new attention values from the AtomSpace funds
-    fundsSTI += (oldAV.getSTI() - av.getSTI());
-    fundsLTI += (oldAV.getLTI() - av.getLTI());
-
-    avh->setAttentionValue(av); // setAttentionValue takes care of updating indices
-}
-
-void AtomSpace::setSTI(AttentionValueHolder *avh, AttentionValue::sti_t stiValue)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(stiValue, currentAv.getLTI(), currentAv.getVLTI()));
-}
-
-void AtomSpace::setLTI(AttentionValueHolder *avh, AttentionValue::lti_t ltiValue)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(currentAv.getSTI(), ltiValue, currentAv.getVLTI()));
-}
-
-void AtomSpace::setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t vltiValue)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(currentAv.getSTI(), currentAv.getLTI(), vltiValue));
-}
-
-AttentionValue::sti_t AtomSpace::getSTI(AttentionValueHolder *avh) const
-{
-    return avh->getAttentionValue().getSTI();
-}
-
-AttentionValue::lti_t AtomSpace::getLTI(AttentionValueHolder *avh) const
-{
-    return avh->getAttentionValue().getLTI();
-}
-
-AttentionValue::vlti_t AtomSpace::getVLTI(AttentionValueHolder *avh) const
-{
-    return avh->getAttentionValue().getVLTI();
-}
-
 int AtomSpace::Nodes(VersionHandle vh) const
 {
     return atomSpaceAsync.nodeCount(vh)->get_result();
@@ -431,49 +371,14 @@ long AtomSpace::getTotalLTI() const
     return totalLTI;
 }
 
-long AtomSpace::getSTIFunds() const
-{
-    return fundsSTI;
-}
-
-long AtomSpace::getLTIFunds() const
-{
-    return fundsLTI;
-}
-
 AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
 {
-    return attentionalFocusBoundary;
+    return atomSpaceAsync.atomspace.getAttentionBank().getAttentionalFocusBoundary();
 }
 
 AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti_t s)
 {
-    attentionalFocusBoundary = s;
-    return s;
-}
-
-void AtomSpace::updateMaxSTI(AttentionValue::sti_t m)
-{ maxSTI.update(m); }
-
-AttentionValue::sti_t AtomSpace::getMaxSTI(bool average) const
-{
-    if (average) {
-        return (AttentionValue::sti_t) maxSTI.recent;
-    } else {
-        return maxSTI.val;
-    }
-}
-
-void AtomSpace::updateMinSTI(AttentionValue::sti_t m)
-{ minSTI.update(m); }
-
-AttentionValue::sti_t AtomSpace::getMinSTI(bool average) const
-{
-    if (average) {
-        return (AttentionValue::sti_t) minSTI.recent;
-    } else {
-        return minSTI.val;
-    }
+    return atomSpaceAsync.atomspace.getAttentionBank().setAttentionalFocusBoundary(s);
 }
 
 void AtomSpace::clear()

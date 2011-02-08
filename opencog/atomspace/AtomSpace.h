@@ -44,7 +44,6 @@
 #include <opencog/atomspace/SpaceServer.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/recent_val.h>
 
 // Whether to wrap certain functions in lru_cache<>
 #define USE_ATOMSPACE_LOCAL_THREAD_CACHE 1
@@ -130,6 +129,9 @@ public:
     inline SpaceServer& getSpaceServer() const {
         return atomSpaceAsync.getSpaceServer();
     }
+
+    inline AttentionBank& getAttentionBank()
+    { return atomSpaceAsync.getAttentionBank(); }
 
     /**
      * Return the number of atoms contained in the space.
@@ -497,32 +499,6 @@ public:
 
     bool isValidHandle(const Handle h) const;
 
-    // TODO - convert to use async or remove, then move to near the rest of the
-    // AV functions
-    /** Retrieve the AttentionValue of an attention value holder */
-    const AttentionValue& getAV(AttentionValueHolder *avh) const;
-
-    /** Change the AttentionValue of an attention value holder */
-    void setAV(AttentionValueHolder *avh, const AttentionValue &av);
-
-    /** Change the Short-Term Importance of an attention value holder */
-    void setSTI(AttentionValueHolder *avh, AttentionValue::sti_t);
-
-    /** Change the Long-term Importance of an attention value holder */
-    void setLTI(AttentionValueHolder *avh, AttentionValue::lti_t);
-
-    /** Change the Very-Long-Term Importance of an attention value holder */
-    void setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t);
-
-    /** Retrieve the Short-Term Importance of an attention value holder */
-    AttentionValue::sti_t getSTI(AttentionValueHolder *avh) const;
-
-    /** Retrieve the Long-term Importance of a given Handle */
-    AttentionValue::lti_t getLTI(AttentionValueHolder *avh) const;
-
-    /** Retrieve the Very-Long-Term Importance of a given Handle */
-    AttentionValue::vlti_t getVLTI(AttentionValueHolder *avh) const;
-
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given Handle. STI above and below threshold normalised separately
      * and linearly.
@@ -551,7 +527,6 @@ public:
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
         return atomSpaceAsync.getNormalisedSTI(h, average, clip, true)->get_result();
     }
-    //---
 
     /** Get hash for an atom */
     size_t getAtomHash(const Handle h) const;
@@ -1090,20 +1065,6 @@ public:
     long getTotalLTI() const;
 
     /**
-     * Get the STI funds available in the AtomSpace pool.
-     *
-     * @return STI funds available
-     */
-    long getSTIFunds() const;
-
-    /**
-     * Get the LTI funds available in the AtomSpace pool.
-     *
-     * @return LTI funds available
-     */
-    long getLTIFunds() const;
-
-    /**
      * Get attentional focus boundary, generally atoms below
      * this threshold won't be accessed unless search methods
      * are unsuccessful on those that are above this value.
@@ -1129,7 +1090,8 @@ public:
      * maximum STI, otherwise return the actual maximum.
      * @return Maximum STI
      */
-    AttentionValue::sti_t getMaxSTI(bool average=true) const;
+    AttentionValue::sti_t getMaxSTI(bool average=true)
+    { return getAttentionBank().getMaxSTI(average); } 
 
     /**
      * Get the minimum STI observed in the AtomSpace.
@@ -1138,7 +1100,8 @@ public:
      * minimum STI, otherwise return the actual maximum.
      * @return Minimum STI
      */
-    AttentionValue::sti_t getMinSTI(bool average=true) const;
+    AttentionValue::sti_t getMinSTI(bool average=true)
+    { return getAttentionBank().getMinSTI(average); } 
 
     /**
      * Update the minimum STI observed in the AtomSpace. Min/max are not updated
@@ -1148,7 +1111,7 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New minimum STI
      */
-    void updateMinSTI(AttentionValue::sti_t m);
+    void updateMinSTI(AttentionValue::sti_t m) { getAttentionBank().updateMinSTI(m); }
 
     /**
      * Update the maximum STI observed in the AtomSpace. Min/max are not updated
@@ -1158,7 +1121,7 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New maximum STI
      */
-    void updateMaxSTI(AttentionValue::sti_t m);
+    void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
     // For convenience
     // bool isNode(Handle) const;
@@ -1264,16 +1227,6 @@ public:
         }
         AttentionValue::lti_t threshold;
     };
-
-protected:
-
-    /*HandleIterator* _handle_iterator;
-    TypeIndex::iterator type_itr;
-    // these methods are used by the filter_* templates
-    void _getNextAtomPrepare();
-    Handle _getNextAtom();
-    void _getNextAtomPrepare_type(Type type);
-    Handle _getNextAtom_type(Type type);*/
 
 private:
 

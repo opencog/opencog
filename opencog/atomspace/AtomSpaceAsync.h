@@ -715,6 +715,9 @@ public:
     inline SpaceServer& getSpaceServer() const
     { return *spaceServer; }
 
+    inline AttentionBank& getAttentionBank()
+    { return atomspace.getAttentionBank(); }
+
     inline BoolRequest saveToXML(const std::string& filename) {
         BoolRequest r(new SaveToXMLASR(&atomspace,filename));
         requestQueue.push(r);

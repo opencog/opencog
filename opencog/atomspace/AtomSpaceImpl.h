@@ -1,13 +1,10 @@
 /*
  * opencog/atomspace/AtomSpaceImpl.h
  *
- * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2010-2011 OpenCog Foundation
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
- *            Welter Silva <welter@vettalabs.com>
- *            Andre Senna <senna@vettalabs.com>
- *            Carlos Lopes <dlopes@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -38,6 +35,7 @@
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/AttentionBank.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleSet.h>
@@ -76,14 +74,14 @@ class AtomSpaceImpl
     AtomSignal _removeAtomSignal;
     AtomSignal _mergeAtomSignal;
 
-public:
-    // USED TO SEEK MEMORY LEAK
-    //std::set<std::string> uniqueTimestamp;
+    AttentionBank bank;
 
+public:
     AtomSpaceImpl(void);
     ~AtomSpaceImpl();
 
     void setSpaceServer(SpaceServer* ss) {spaceServer = ss;};
+    AttentionBank& getAttentionBank();
 
     /**
      * Register a provider of backing storage.
@@ -357,22 +355,22 @@ public:
     void setMean(Handle, float mean) throw (InvalidParamException);
 
     /** Retrieve the AttentionValue of an attention value holder */
-    const AttentionValue& getAV(AttentionValueHolder *avh) const;
+    //const AttentionValue& getAV(AttentionValueHolder *avh) const;
 
     /** Change the AttentionValue of an attention value holder */
-    void setAV(AttentionValueHolder *avh, const AttentionValue &av);
+    //void setAV(AttentionValueHolder *avh, const AttentionValue &av);
 
     /** Change the Short-Term Importance of an attention value holder */
-    void setSTI(AttentionValueHolder *avh, AttentionValue::sti_t);
+    //void setSTI(AttentionValueHolder *avh, AttentionValue::sti_t);
 
     /** Change the Long-term Importance of an attention value holder */
-    void setLTI(AttentionValueHolder *avh, AttentionValue::lti_t);
+    //void setLTI(AttentionValueHolder *avh, AttentionValue::lti_t);
 
     /** Change the Very-Long-Term Importance of an attention value holder */
-    void setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t);
+    //void setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t);
 
     /** Retrieve the Short-Term Importance of an attention value holder */
-    AttentionValue::sti_t getSTI(AttentionValueHolder *avh) const;
+    //AttentionValue::sti_t getSTI(AttentionValueHolder *avh) const;
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given AttentionValueHolder. STI above and below threshold
@@ -408,32 +406,32 @@ public:
 
     /** Retrieve the AttentionValue of a given Handle */
     const AttentionValue& getAV(Handle h) const {
-        return getAV(TLB::getAtom(h));
+        return bank.getAV(TLB::getAtom(h));
     }
 
     /** Change the AttentionValue of a given Handle */
     void setAV(Handle h, const AttentionValue &av) {
-        setAV(TLB::getAtom(h), av);
+        bank.setAV(TLB::getAtom(h), av);
     }
 
     /** Change the Short-Term Importance of a given Handle */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        setSTI(TLB::getAtom(h), stiValue);
+        bank.setSTI(TLB::getAtom(h), stiValue);
     }
 
     /** Change the Long-term Importance of a given Handle */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        setLTI(TLB::getAtom(h), ltiValue);
+        bank.setLTI(TLB::getAtom(h), ltiValue);
     }
 
     /** Change the Very-Long-Term Importance of a given Handle */
     void setVLTI(Handle h, AttentionValue::vlti_t vltiValue) {
-        setVLTI(TLB::getAtom(h), vltiValue);
+        bank.setVLTI(TLB::getAtom(h), vltiValue);
     }
 
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
-        return getSTI(TLB::getAtom(h));
+        return bank.getSTI(TLB::getAtom(h));
     }
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
@@ -467,12 +465,12 @@ public:
 
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle h) const {
-        return getLTI(TLB::getAtom(h));
+        return bank.getLTI(TLB::getAtom(h));
     }
 
     /** Retrieve the Very-Long-Term Importance of a given Handle */
     AttentionValue::vlti_t getVLTI(Handle h) const {
-        return getVLTI(TLB::getAtom(h));
+        return bank.getVLTI(TLB::getAtom(h));
     }
 
     /** Clone an atom from the TLB, replaces the public access to TLB::getAtom
@@ -528,9 +526,6 @@ public:
 
     /** Retrieve the incoming set of a given atom */
     HandleSeq getIncoming(Handle);
-
-    /** Retrieve the Count of a given Handle */
-    float getCount(Handle) const;
 
     /** Returns the default TruthValue */
     static const TruthValue& getDefaultTV();
@@ -911,7 +906,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);
-        return getHandleSetFiltered(result, type, subclass, &STIAboveThreshold(getAttentionalFocusBoundary()), vh);
+        return getHandleSetFiltered(result, type, subclass, &STIAboveThreshold(bank.getAttentionalFocusBoundary()), vh);
 
     }
 
@@ -1068,77 +1063,6 @@ public:
      */
     long getTotalLTI() const;
 
-    /**
-     * Get the STI funds available in the AtomSpace pool.
-     *
-     * @return STI funds available
-     */
-    long getSTIFunds() const;
-
-    /**
-     * Get the LTI funds available in the AtomSpace pool.
-     *
-     * @return LTI funds available
-     */
-    long getLTIFunds() const;
-
-    /**
-     * Get attentional focus boundary, generally atoms below
-     * this threshold won't be accessed unless search methods
-     * are unsuccessful on those that are above this value.
-     *
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t getAttentionalFocusBoundary() const;
-
-    /**
-     * Change the attentional focus boundary. Some situations
-     * may benefit from less focussed searches.
-     *
-     * @param s New threshold
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t setAttentionalFocusBoundary(
-        AttentionValue::sti_t s);
-
-    /**
-     * Get the maximum STI observed in the AtomSpace.
-     *
-     * @param average If true, return an exponentially decaying average of
-     * maximum STI, otherwise return the actual maximum.
-     * @return Maximum STI
-     */
-    AttentionValue::sti_t getMaxSTI(bool average=true) const;
-
-    /**
-     * Get the minimum STI observed in the AtomSpace.
-     *
-     * @param average If true, return an exponentially decaying average of
-     * minimum STI, otherwise return the actual maximum.
-     * @return Minimum STI
-     */
-    AttentionValue::sti_t getMinSTI(bool average=true) const;
-
-    /**
-     * Update the minimum STI observed in the AtomSpace. Min/max are not updated
-     * on setSTI because average is calculate by lobe cycle, although this could
-     * potentially also be handled by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New minimum STI
-     */
-    void updateMinSTI(AttentionValue::sti_t m);
-
-    /**
-     * Update the maximum STI observed in the AtomSpace. Min/max are not updated
-     * on setSTI because average is calculate by lobe cycle, although this could
-     * potentially also be handled by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New maximum STI
-     */
-    void updateMaxSTI(AttentionValue::sti_t m);
-
     // For convenience
     // bool isNode(Handle) const;
     bool isVar(Handle) const;
@@ -1229,7 +1153,7 @@ public:
 
     template<typename InputIterator>
     HandleSeq filter_InAttentionalFocus(InputIterator begin, InputIterator end) const {
-        STIAboveThreshold stiAbove(getAttentionalFocusBoundary());
+        STIAboveThreshold stiAbove(bank.getAttentionalFocusBoundary());
         return filter(begin, end, &stiAbove);
     }
 

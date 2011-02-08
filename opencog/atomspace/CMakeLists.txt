@@ -11,6 +11,7 @@ ADD_LIBRARY (atomspace SHARED
     AtomSpaceInit.cc
     AtomTable.cc
     AttentionValue.cc
+    AttentionBank.cc
     ClassServer.cc
     CompositeTruthValue.cc
     CountTruthValue.cc
@@ -77,6 +78,7 @@ INSTALL (FILES
     AtomTable.h
     atom_types.h
     AttentionValue.h
+    AttentionBank.h
     BackingStore.h
     ClassServer.h
     CompositeTruthValue.h

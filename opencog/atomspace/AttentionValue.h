@@ -36,6 +36,7 @@ namespace opencog
 
 class Atom;
 class AtomSpaceImpl;
+class AttentionBank;
 
 struct AttentionValue {
 
@@ -147,8 +148,8 @@ public:
 
 class AttentionValueHolder
 {
-    friend class AtomSpace;
     friend class AtomSpaceImpl;
+    friend class AttentionBank;
 
 protected:
     AttentionValue attentionValue;
