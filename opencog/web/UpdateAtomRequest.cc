@@ -98,11 +98,9 @@ bool UpdateAtomRequest::execute()
     Value json_top;
     // Instead of applying changes while parsing, we store them
     // in case later changes parsed are invalid.
-    AttentionValue::sti_t sti_x;
-    AttentionValue::lti_t lti_x;
+    AttentionValue::sti_t sti_x=0;
+    AttentionValue::lti_t lti_x=0;
     try {
- 
-      
         read( json_data, json_top);
         const Object &json_obj = json_top.get_obj();
         for( Object::size_type i = 0; i != json_obj.size(); ++i ) {

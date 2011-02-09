@@ -88,7 +88,7 @@ TruthValue* JSONToTV(const Value& v, std::ostringstream& _output )
     std::string tv_type_str = pair.name_;
     if (tv_type_str == "simple") {
         const Object& stv_obj = pair.value_.get_obj();
-        float str, count;
+        float str=0.0f, count=0.0f;
         std::vector<std::string> key_list;
         key_list.push_back("str");
         key_list.push_back("count");
@@ -102,7 +102,7 @@ TruthValue* JSONToTV(const Value& v, std::ostringstream& _output )
         tv = new SimpleTruthValue(str,count);
     } else if (tv_type_str == "count") {
         const Object& stv_obj = pair.value_.get_obj();
-        float str, conf, count;
+        float str=0.0f, conf=0.0f, count=0.0f;
         std::vector<std::string> key_list;
         key_list.push_back("str");
         key_list.push_back("conf");
@@ -120,7 +120,7 @@ TruthValue* JSONToTV(const Value& v, std::ostringstream& _output )
     } else if (tv_type_str == "indefinite") {
         //! @todo Allow asymmetric Indefinite TVs
         const Object& stv_obj = pair.value_.get_obj();
-        float conf, l, u;
+        float conf=0.0f, l=0.0f, u=0.0f;
         std::vector<std::string> key_list;
         key_list.push_back("l");
         key_list.push_back("u");
