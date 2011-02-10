@@ -112,11 +112,14 @@ public:
         std::cout << "ATOMSPACE:" << std::endl;
         as->print();
         std::cout << std::endl;
-        // hack to get around with floating errors
-        bool tv_eq = as->getTV(h, vh)->toString() == tv.toString();
         std::cout << "GETTV = " << (*as->getTV(h, vh)) << std::endl;
         std::cout << "TV    = " << tv << std::endl;
-        TS_ASSERT(tv_eq);
+        areEqualTV(*as->getTV(h, vh), tv, 0.0001);
+    }
+
+    void areEqualTV(const TruthValue& tv1, const TruthValue& tv2, float delta) {
+        TS_ASSERT_DELTA(tv1.getMean(),tv2.getMean(),delta);
+        TS_ASSERT_DELTA(tv1.getCount(),tv2.getCount(),delta);
     }
 
     void test_inference() {
