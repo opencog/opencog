@@ -18,10 +18,12 @@
   
   \section{Introduction}
   
+  NOTE: This document is from before ComboReduct was integrated with OpenCog.
+
   ComboReduct is a library providing C++ data structures and algorithms 
-  to manipulate a programatic language used in program evolution 
-  like MOSES. That code was initialy integrated in MOSES but has
-  been split to be reused in other program evolution project.
+  to manipulate a programatic language which is used in program evolution 
+  systems like MOSES. The code was initially part of MOSES but has
+  been split from it so that it can be reused in other program evolution projects.
   
   \section{Installation}
   
@@ -34,8 +36,7 @@
   \end{itemize}
   
   For compiling Comboreduct, create a directory \verb|bin|
-  (from the root folder
-  of the ComboReduct distribution), go under it
+  (from the root folder of the ComboReduct distribution), go under it
   and run \verb|"cmake .."|. This will create 
   the needed build files. Then, make the project using "\verb|make|" (again 
   from the directory \verb|bin|). Then \verb|make install| (you may need the
@@ -70,24 +71,20 @@
     functionalities
   \item \verb|reduct| containing the code of the Reduct engine
   \end{itemize}
-    
-  
 
-  Now we will go through each component of ComboReduct, that is Combo a programatic language, its type checker and the Reduct engine.
+  Now we will go through each component of ComboReduct. The programatic language Combo, its type checker and the Reduct engine.
     
   \section{Combo language}
   
   Combo is a programatic language dedicated to program evolution.
-  It contains primitives to handle boolean operators, arithmetics and
-  action/perception of an iteractive agent.
+  It contains primitives to handle boolean operators, arithmetic and
+  action/perception of an interactive agent.
   
   A Combo program is represented by a tree where each node is either an
-  operator,
-  a constant or a procedure call and where operands of operators are
+  operator, a constant or a procedure call and where operands of operators are
   its children.
 
-  The C++ structure for it (the C++ code in under
-  src/ComboReduct/combo/vertex.h)
+  The C++ structure for it (the C++ code in under src/ComboReduct/combo/vertex.h)
   is:
 
   \begin{verbatim}
@@ -171,7 +168,7 @@ typedef boost::variant<builtin,
     $$\verb|procedure_name(arity) := procedure_body|$$
   \item \verb|action_symbol| is a pointer to an abstract
     class to be implemented
-    representing symbols used to caracterize actions, for instance
+    representing symbols used to characterize actions, for instance
     in the context of a virtual pet with the action \verb|scratch|
     the action symbol \verb|neck| can be used to form \verb|scratch(neck)|
   \end{itemize}
@@ -181,7 +178,7 @@ typedef boost::variant<builtin,
   \subsection{Type representation}
 
   ComboReduct contains a type checker engine, to check and infer types.
-  A type is also a tree just like a program but the nodes referes to type
+  A type is also a tree just like a program but the nodes refer to type
   operators and type constants instead of actual operators and constants.
   So type\_tree is defined as follow (the code can be found at 
   \verb|src/ComboReduct/combo/type_tree_def.h|):
@@ -236,10 +233,10 @@ enum type_node {
   therefore
   $$\verb|lambda(boolean boolean boolean boolean)|$$
   We say that
-  just combo program has implicit inputs. As such any operator alone
+  such a combo program has implicit inputs. As such any operator alone
   is a combo program with implicit inputs. Some operators uses
   an indefinite number of the inputs of the same type
-  (like \verb|+|), there input types are described
+  (like \verb|+|), their input types are described
   by using the type operator
   \verb|arg_list|, for instance the type tree of \verb|+| is 
   $$\verb|lambda(arg_list(contin) contin)|$$
@@ -266,8 +263,8 @@ enum type_node {
   \subsection{Type inference}
 
   Type inference is performed by converting a Combo tree into a
-  correspondant type tree representing the abstractions and
-  applications of the operators with there operands, then
+  corresponding type tree representing the abstractions and
+  applications of the operators with their operands, then
   that tree is reduced into a normal form to look more like what we can
   call a procedure type signature.
 
