@@ -17,7 +17,7 @@
 (define V2 (FWVariableNode "$2"))
 
 ; predicates
-(define PPP (PredicateNode "+++"))
+(define Reward (PredicateNode "+++"))
 (define teacher_say (PredicateNode "teacher_say"))
 (define just_done (PredicateNode "just_done"))
 (define near (PredicateNode "near"))
@@ -43,19 +43,6 @@
 (define hold_ball (EvaluationLink hold L_ball))
 (define lift_Vobj (EvaluationLink lift L_Vobj))
 (define lift_ball (EvaluationLink lift L_ball))
-
-(AndLink (EvaluationLink just_done
-                         (ListLink hold_ball))
-         (EvaluationLink near
-                         L_teacher))
-
-(AndLink (EvaluationLink (stv 0.99000001 0.99000001) teacher_say
-                         (ListLink fetch))
-         (EvaluationLink just_done
-                         (ListLink give_ball_teacher)))
-
-(AndLink (EvaluationLink just_done
-                         (ListLink walktowards_V2)))
 
 (ForAllLink (stv 1 0.80000001) L_Vobj
             (ImplicationLink (EvaluationLink near
@@ -83,7 +70,7 @@
                                                              (ListLink fetch))
                                              (EvaluationLink just_done
                                                              (ListLink give_ball_teacher)))
-                 (EvaluationLink PPP))
+                 (EvaluationLink Reward))
 
 (ImplicationLink (stv 1 0.99900001) (AndLink (EvaluationLink just_done
                                                              (ListLink walktowards_V2)))
@@ -96,67 +83,12 @@
                                                              L_V1))
                  (EvaluationLink just_done
                                  L_V1))
-
-(EvaluationLink just_done
-                (ListLink give_ball_teacher))
-
-(EvaluationLink PPP)
-
-(EvaluationLink just_done
-                (ListLink hold_ball))
-
-(EvaluationLink near
-                L_teacher)
-
-(EvaluationLink can_do
-                (ListLink give_ball_teacher))
-
-walktowards_V2
-
-(EvaluationLink just_done
-                (ListLink walktowards_V2))
-
-(EvaluationLink near
-                L_V2)
-
-walktowards_teacher
-
 (EvaluationLink (stv 1 0.99000001) can_do
                 (ListLink walktowards_teacher))
-
-lift_ball
-
-walktowards_ball
-
-(EvaluationLink just_done
-                (ListLink lift_ball))
 
 (EvaluationLink (stv 1 0.99000001) can_do
                 (ListLink walktowards_ball))
 
-hold_ball
-
-(EvaluationLink can_do
-                (ListLink hold_ball))
-
-(EvaluationLink near
-                L_Vobj)
-
-lift_Vobj
-
 (EvaluationLink (stv 0.99000001 0.99000001) teacher_say
                 (ListLink fetch))
 
-give
-hold
-walktowards
-lift
-PPP
-just_done
-near
-do
-can_do
-teacher_say
-fetch
-V2
-V1
