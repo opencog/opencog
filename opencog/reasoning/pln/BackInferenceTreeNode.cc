@@ -2141,10 +2141,17 @@ string BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > usedBITNod
 
 static int _trail_print_more_count = 0;
 
-string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
+string BITNodeRoot::printTrail(pHandle h, unsigned int level, Btr<set<pHandle> > usedPHandles) const
 {
     AtomSpaceWrapper *asw = GET_ASW;
     stringstream ss;
+
+    // Initialise the set of BITNodes that have already been printed
+    if (usedPHandles == NULL) {
+        //usedPHandles = Btr<set<pHandle> >(new set<pHandle>());
+        usedPHandles.reset(new set<pHandle>());
+    }
+
     if (h == PHANDLE_UNDEFINED || asw->isType(h))
         ss << "Error, trying to print trail for NULL / Virtual atom." << endl;
 
@@ -2154,6 +2161,13 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
         ss << repeatc(' ', level*3) << "(maximum recursion depth exceeded)\n";
     	return ss.str();
     }
+
+    if (STLhas2(*usedPHandles,h)) {
+        ss << "(which has already been proven)" << endl;
+        return ss.str();
+    }
+
+    usedPHandles->insert(h);
 
     map<pHandle,RulePtr> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end())
@@ -2168,7 +2182,7 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
         } catch (InvalidParamException& e) {
             name = "<!!! INVALID RULE !!!>";
         }
-    
+
         ss << repeatc(' ', level*3) << "[" << h << "] was produced by applying ";
         ss << name << " to:\n";
 

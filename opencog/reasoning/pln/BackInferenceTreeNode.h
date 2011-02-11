@@ -811,7 +811,8 @@ protected:
                          spawn_mode spawning);
                         
     /// Basically a helper function for the public printTrail(pHandle)
-    std::string printTrail(pHandle h, unsigned int level) const;
+    //! @todo Support multiple paths better, and adjust the code that detects loops
+    std::string printTrail(pHandle h, unsigned int level, Btr<std::set<pHandle> > usedPHandles = Btr<std::set<pHandle> >()) const;
 
     void setTreeDepth(const unsigned int newDepth);
     // The current depth of the tree (i.e. the depth of the lowest BITNode)
