@@ -723,7 +723,8 @@ public:
     /// pHandle h.
     std::string extract_plan(pHandle h) const;
     std::string extract_plan(pHandle h, unsigned int level,
-                             vtree& do_template, pHandleSeq& plan) const;
+                             vtree& do_template, pHandleSeq& plan,
+                             Btr<std::set<pHandle> > usedPHandles = Btr<std::set<pHandle> >() ) const;
 
     /// Find the fittest BITNode for expansion.
     void findFittest(BITNode*& bisse, float& best_fitness);

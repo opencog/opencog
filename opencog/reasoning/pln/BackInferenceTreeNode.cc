@@ -1953,7 +1953,7 @@ bool BITNodeFitnessCompare::operator()(BITNode* lhs, BITNode* rhs) const
 
 /* Action */
 string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
-                                 vtree& do_template, pHandleSeq& plan) const
+                                 vtree& do_template, pHandleSeq& plan, Btr<std::set<pHandle> > usedPHandles) const
 {
     AtomSpaceWrapper *asw = GET_ASW;
     map<pHandle, vtree> bindings;
@@ -1963,6 +1963,19 @@ string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
         ss << "Can't make plan for a NULL/virtual target" << endl;
     }
     
+    // Initialise the set of handles that have already been printed
+    if (usedPHandles == NULL) {
+        //usedPHandles = Btr<set<pHandle> >(new set<pHandle>());
+        usedPHandles.reset(new std::set<pHandle>());
+    }
+
+    if (STLhas2(*usedPHandles,h)) {
+        ss << "(which has already been proven/done)" << endl;
+        return ss.str();
+    }
+
+    usedPHandles->insert(h);
+
     map<pHandle,RulePtr> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end()) {
         foreach(pHandle arg_h, haxx::inferred_from[h]) {
@@ -2146,7 +2159,7 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level, Btr<set<pHandle> >
     AtomSpaceWrapper *asw = GET_ASW;
     stringstream ss;
 
-    // Initialise the set of BITNodes that have already been printed
+    // Initialise the set of handles that have already been printed
     if (usedPHandles == NULL) {
         //usedPHandles = Btr<set<pHandle> >(new set<pHandle>());
         usedPHandles.reset(new set<pHandle>());
