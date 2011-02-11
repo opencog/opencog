@@ -1080,10 +1080,12 @@ BITNode* BITNode::createChild(unsigned int target_i, RulePtr new_rule,
                 haxx::BITUSingleton->markReuse((BITNode*)this, template_node, target_i);
 #endif // USE_BITUBIGRAPHER
 
-                /// Add any un-expanded descendents to the expansion pool, if they're not already there
-                /// (i.e. if the template was from a different BIT).
-                ApplyDown(ExpansionPoolUpdater<BITNodeRoot::exec_poolT>(&root->exec_pool, haxx::bitnoderoot),
-                        false);
+                if (root->sharedBITCache) {
+                    /// Add any un-expanded descendents to the expansion pool, if they're not already there
+                    /// (i.e. if the template was from a different BIT).
+                    ApplyDown(ExpansionPoolUpdater<BITNodeRoot::exec_poolT>(&root->exec_pool, haxx::bitnoderoot),
+                            false);
+                }
                 root->exec_pool_sorted = false;
 
                 return template_node;
