@@ -5,7 +5,7 @@
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
- * Updated: by Zhenhua Cai, on 2011-01-05
+ * Updated: by Zhenhua Cai, on 2011-02-09
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -778,12 +778,13 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
     return -1;
 }
 
-float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
+float AtomSpaceUtil::getCurrentModulatorLevel(opencog::RandGen & rng, 
+                                              const AtomSpace & atomSpace,
                                               const std::string & modulator,
                                               const std::string & petId
                                              )
 {
-    float errorValue = -1.0;   // If error happens, return this value anyway.
+    float errorValue = rng.randfloat();   // If error happens, return this value anyway.
 
     // Get the SimilarityLink of the Modulator with petId
     Handle modulatorHandle =  AtomSpaceUtil::getModulatorSimilarityLink( atomSpace,
@@ -880,6 +881,200 @@ float AtomSpaceUtil::getCurrentDemandLevel(const AtomSpace & atomSpace,
 
     // Return the Demand value
     return boost::lexical_cast<float> ( atomSpace.getName(numberNode) );
+}
+
+Handle AtomSpaceUtil::getDemandGoalEvaluationLink(const AtomSpace & atomSpace, 
+                                                  const std::string & demand 
+                                                 )
+{
+    // Get the PredicateNode
+    Handle predicateNode = atomSpace.getHandle(PREDICATE_NODE, demand+"DemandGoal");
+
+    if ( predicateNode == opencog::Handle::UNDEFINED ) {
+        logger().error("AtomSpaceUtil::%s - Failed to get the PredicateNode for demand goal '%s'", 
+                       __FUNCTION__, 
+                       demand.c_str()
+                      );
+        return opencog::Handle::UNDEFINED;  
+    }
+
+    // Get the ListLink
+    // Note: The ListLink of Demand Goal is empty currently, but this may changes in future. 
+    std::vector<Handle> listLinkOutgoing; 
+
+    Handle listLink = atomSpace.getHandle(LIST_LINK, listLinkOutgoing); 
+
+    if ( listLink == opencog::Handle::UNDEFINED ) {
+        logger().error("AtomSpaceUtil::%s - Failed to get the ListLink for demand goal '%s'", 
+                        __FUNCTION__, 
+                        demand.c_str()
+                      );
+        return opencog::Handle::UNDEFINED; 
+    }
+
+    // Get the EvaluationLink
+    std::vector<Handle> evaluationLinkOutgoing;
+
+    evaluationLinkOutgoing.push_back(predicateNode); 
+    evaluationLinkOutgoing.push_back(listLink); 
+
+    Handle evaluationLink = atomSpace.getHandle(EVALUATION_LINK, evaluationLinkOutgoing);
+
+    if ( evaluationLink == opencog::Handle::UNDEFINED ) {
+        logger().error("AtomSpaceUtil::%s - Failed to get the EvaluationLink for demand goal '%s'", 
+                       __FUNCTION__, 
+                       demand.c_str()
+                      ); 
+        return opencog::Handle::UNDEFINED;  
+    }
+
+    // Return the Handle to the demand goal (EvaluationLink)
+    return evaluationLink; 
+}
+
+bool AtomSpaceUtil::splitPsiRule(const AtomSpace & atomSpace,
+                                 const Handle hPsiRule, 
+                                 Handle & hGoalEvaluationLink,
+                                 Handle & hActionExecutionLink, 
+                                 Handle & hPreconditionAndLink
+                                )
+{
+    // Check hPsiRule
+    // TODO: Use PredictiveImplicationLink instead of ImplicationLink
+    //       if ( atomSpace.getType(hPsiRule) != PREDICTIVE_IMPLICATION_LINK ||
+    //            atomSpace.getArity(hPsiRule) != 2 )
+    if ( atomSpace.getType(hPsiRule) != IMPLICATION_LINK ||
+         atomSpace.getArity(hPsiRule) != 2 ){
+
+        logger().error( "AtomSpaceUtil::%s - %s is not a valid Psi Rule. The correct Psi Rule should be of type ImplicationLink and with two arity.", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(hPsiRule).c_str()
+                      );
+
+        return false; 
+    }
+ 
+    // Get handles to premise and goal
+    Handle andLinkPreconditionAction = atomSpace.getOutgoing(hPsiRule, 0);
+    Handle evaluationLinkGoal = atomSpace.getOutgoing(hPsiRule, 1);
+
+    // Check goal
+    if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
+         atomSpace.getArity(evaluationLinkGoal) != 2 ||
+         atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0) ) != PREDICATE_NODE ) {
+
+        logger().error( "AtomSpaceUtil::%s - %s is not a valid Psi Goal. The correct Psi Goal should be of type EvaluationLink, with two arity and its first outgoing should be of type PredicateNode.", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(evaluationLinkGoal).c_str()
+                      ); 
+
+        return false; 
+    }
+
+    // Check premise
+    if ( atomSpace.getType(andLinkPreconditionAction) != AND_LINK || 
+         atomSpace.getArity(andLinkPreconditionAction) != 2 ) {
+
+        logger().error( 
+                "AtomSpaceUtil::%s - Failed to find an AndLink holding the Action and all the Preconditions in %s",
+                       __FUNCTION__, 
+                       atomSpace.atomAsString(hPsiRule).c_str()
+                      );
+
+        return false;
+    }
+
+    // Get handle to action and preconditions
+    Handle executionLinkAction;
+    Handle andLinkPreconditions;
+
+    if ( atomSpace.getType( atomSpace.getOutgoing(andLinkPreconditionAction, 0) 
+                          ) == EXECUTION_LINK ) {
+        executionLinkAction = atomSpace.getOutgoing(andLinkPreconditionAction, 0);
+        andLinkPreconditions = atomSpace.getOutgoing(andLinkPreconditionAction, 1);
+    }
+    else {
+        executionLinkAction = atomSpace.getOutgoing(andLinkPreconditionAction, 1);
+        andLinkPreconditions = atomSpace.getOutgoing(andLinkPreconditionAction, 0);
+    }
+           
+    // Check action
+    if ( atomSpace.getType(executionLinkAction) != EXECUTION_LINK ||
+         atomSpace.getArity(executionLinkAction) != 2 ||
+         atomSpace.getType( atomSpace.getOutgoing(executionLinkAction, 0) ) != GROUNDED_SCHEMA_NODE ) {
+
+        logger().error( "AtomSpaceUtil::%s - %s is not a valid Psi Action. The correct Psi Action should be of type ExecutionLink, with two arity and its first outgoing should be of type GroundedSchemaNode.", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(executionLinkAction).c_str()
+                      ); 
+
+        return false; 
+    }
+
+    // Check preconditions
+    if ( atomSpace.getType(andLinkPreconditions) != AND_LINK ) {
+
+        logger().error( "AtomSpaceUtil::%s - %s is not a valid AndLink containing all the Psi preconditions.", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(andLinkPreconditions).c_str()
+                      );
+
+        return false; 
+    }
+
+    // Return the Goal, Action and Preconditions 
+    hGoalEvaluationLink = evaluationLinkGoal; 
+    hActionExecutionLink = executionLinkAction; 
+    hPreconditionAndLink = andLinkPreconditions; 
+
+    return true; 
+}
+
+bool AtomSpaceUtil::isHandleToPsiRule(const AtomSpace & atomSpace, Handle h)
+{
+    logger().debug("AtomSpaceUtil::%s - Going to check Atom: '%s'.",
+                   __FUNCTION__, 
+                   atomSpace.atomAsString(h).c_str()
+                  );
+
+    // Check h
+    // TODO: Use PredictiveImplicationLink instead of ImplicationLink
+    //       if ( atomSpace.getType(h) != PREDICTIVE_IMPLICATION_LINK || atomSpace.getArity(h) != 2 )
+    if ( atomSpace.getType(h) != IMPLICATION_LINK || atomSpace.getArity(h) != 2 )
+        return false; 
+ 
+    // Get handles to premise and goal
+    Handle andLinkPreconditionAction = atomSpace.getOutgoing(h, 0);
+    Handle evaluationLinkGoal = atomSpace.getOutgoing(h, 1);
+
+    // Check premise
+    if ( atomSpace.getType(andLinkPreconditionAction) != AND_LINK ||
+         atomSpace.getArity(andLinkPreconditionAction) != 2 )
+        return false;
+
+    // Get handle to action
+    Handle executionLinkAction = atomSpace.getType( 
+                                                      atomSpace.getOutgoing(andLinkPreconditionAction, 0) 
+                                                  ) == EXECUTION_LINK ? 
+                                 atomSpace.getOutgoing(andLinkPreconditionAction, 0) :
+                                 atomSpace.getOutgoing(andLinkPreconditionAction, 1);
+
+    // Check action
+    if ( atomSpace.getType(executionLinkAction) != EXECUTION_LINK ||
+         atomSpace.getArity(executionLinkAction) != 2 ||
+         atomSpace.getType( atomSpace.getOutgoing(executionLinkAction, 0) ) != GROUNDED_SCHEMA_NODE
+       )
+        return false; 
+
+    // Check goal
+    if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
+         atomSpace.getArity(evaluationLinkGoal) != 2 ||
+         atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0) ) != PREDICATE_NODE 
+       )
+        return false; 
+
+    // Now we are pretty sure it(h) is a Psi rule
+    return true;
 }
 
 void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,

@@ -82,7 +82,7 @@ enum pet_perception_enum {
     // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)
     get_activation_modulator,
     get_resolution_modulator,
-    get_certainty_modulator,
+    get_securing_threshold_modulator,
     get_selection_threshold_modulator,
 
     // Demands
@@ -93,6 +93,15 @@ enum pet_perception_enum {
     get_affiliation_demand, 
     get_certainty_demand, 
     get_competence_demand, 
+
+    // TODO: There should be a more generic way to do this. 
+    // Such as define a 'get_deman_goal_truth_value', which takes a parameter indicating different demand goals
+    // [ by Zhenhua Cai, on 2011-02-08 ]
+    get_current_demand_goal_truth_value, 
+    get_integrity_demand_goal_truth_value, 
+    get_affiliation_demand_goal_truth_value, 
+    get_certainty_demand_goal_truth_value,
+    get_competence_demand_goal_truth_value,
 
     // traits
     get_aggressiveness,
@@ -215,19 +224,25 @@ static const perception_basic_description pbd[] = {
 
     // Modulators
     // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)
-    { id::get_activation_modulator, "get_activation_modulator", "contin"},
-    { id::get_resolution_modulator, "get_resolution_modulator", "contin"},
-    { id::get_certainty_modulator,  "get_certainty_modulator",  "contin"},
+    { id::get_activation_modulator,          "get_activation_modulator",          "contin"},
+    { id::get_resolution_modulator,          "get_resolution_modulator",          "contin"},
+    { id::get_securing_threshold_modulator,  "get_securing_threshold_modulator",  "contin"},
     { id::get_selection_threshold_modulator, "get_selection_threshold_modulator", "contin"},
 
     // Demands
     // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)
-    { id::get_energy_demand, "get_energy_demand", "contin"}, 
-    { id::get_water_demand, "get_water_demand", "contin"}, 
-    { id::get_integrity_demand, "get_integrity_demand", "contin"}, 
+    { id::get_energy_demand,      "get_energy_demand",      "contin"}, 
+    { id::get_water_demand,       "get_water_demand",       "contin"}, 
+    { id::get_integrity_demand,   "get_integrity_demand",   "contin"}, 
     { id::get_affiliation_demand, "get_affiliation_demand", "contin"}, 
-    { id::get_certainty_demand, "get_certainty_demand", "contin"}, 
-    { id::get_competence_demand, "get_competence_demand", "contin"}, 
+    { id::get_certainty_demand,   "get_certainty_demand",   "contin"}, 
+    { id::get_competence_demand,  "get_competence_demand",  "contin"}, 
+
+    { id::get_current_demand_goal_truth_value,     "get_current_demand_goal_truth_value",     "contin"}, 
+    { id::get_integrity_demand_goal_truth_value,   "get_integrity_demand_goal_truth_value",   "contin"}, 
+    { id::get_affiliation_demand_goal_truth_value, "get_affiliation_demand_goal_truth_value", "contin"}, 
+    { id::get_certainty_demand_goal_truth_value,   "get_certainty_demand_goal_truth_value",   "contin"},
+    { id::get_competence_demand_goal_truth_value,  "get_competence_demand_goal_truth_value",  "contin"},
 
     { id::get_aggressiveness,   "get_aggressiveness",   "->(union(definite_object indefinite_object) contin)"},
     { id::get_curiosity,        "get_curiosity",     "->(union(definite_object indefinite_object) contin)"},
@@ -319,7 +334,7 @@ static const perception_property_description ppd[] = {
     // They should be the same as "xxx_rules.scm" (added by Zhenhua Cai, on 2010-12-08)  
     { id::get_activation_modulator,          false,  false,  false,  false, false, false },
     { id::get_resolution_modulator,          false,  false,  false,  false, false, false },
-    { id::get_certainty_modulator,           false,  false,  false,  false, false, false },
+    { id::get_securing_threshold_modulator,  false,  false,  false,  false, false, false },
     { id::get_selection_threshold_modulator, false,  false,  false,  false, false, false },
 
     // Demands
@@ -330,6 +345,12 @@ static const perception_property_description ppd[] = {
     { id::get_affiliation_demand,  false,    false,    false,    false,   false,   false }, 
     { id::get_certainty_demand,    false,    false,    false,    false,   false,   false }, 
     { id::get_competence_demand,   false,    false,    false,    false,   false,   false }, 
+
+    { id::get_current_demand_goal_truth_value,     false,    false,    false,    false,   false,   false }, 
+    { id::get_integrity_demand_goal_truth_value,   false,    false,    false,    false,   false,   false }, 
+    { id::get_affiliation_demand_goal_truth_value, false,    false,    false,    false,   false,   false }, 
+    { id::get_certainty_demand_goal_truth_value,   false,    false,    false,    false,   false,   false },
+    { id::get_competence_demand_goal_truth_value,  false,    false,    false,    false,   false,   false },
 
     { id::get_aggressiveness,   false,   false,     false,      false,    false,    false },
     { id::get_curiosity,        false,   false,     false,      false,    false,    false },

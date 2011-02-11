@@ -1,7 +1,5 @@
 /**
  * TODO: 1. Deal with the truth value of Action, i.e. ExecutionLink 
- *       2. Store the information of currentDemandGoal, previousDemandGoal etc. to AtomSpace, 
- *          which would be used by PsiFeelingUpdaterAgent
  */
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.cc
@@ -87,8 +85,6 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
     currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
 
     // Initialize other members
-    this->currentDemandGoal = opencog::Handle::UNDEFINED; 
-    this->previousDemandGoal = opencog::Handle::UNDEFINED; 
     this->currentPsiRule = opencog::Handle::UNDEFINED; 
     this->previousPsiRule = opencog::Handle::UNDEFINED;
     this->currentSchemaId = 0;
@@ -212,7 +208,7 @@ Handle PsiActionSelectionAgent::chooseMostCriticalDemandGoal(opencog::CogServer 
          iDemandGoalList != this->demandGoalList.end();
          iDemandGoalList ++ ) {
 
-        if ( atomSpace.getTV(*iDemandGoalList).getMean() < atomSpace.getTV(*iCritialDemandGoal).getMean() ) {
+        if ( atomSpace.getTV(*iDemandGoalList)->getMean() < atomSpace.getTV(*iCritialDemandGoal)->getMean() ) {
             iCritialDemandGoal = iDemandGoalList;
         }
     }// for
@@ -366,11 +362,11 @@ void PsiActionSelectionAgent::extractPsiRules(opencog::CogServer * server, pHand
     	return; 
     }
 
-    // TODO: add h psiRulesList if h is a Psi Rule
+    // Append the given handle (its corresponding real handle) to psiRulesList if it is a Psi Rule
     vhpair vhp = asw->fakeToRealHandle(ph);
     Handle realHandle = vhp.first; 
 
-    if ( this->isHandleToPsiRule(server, realHandle) ) { 
+    if ( AtomSpaceUtil::isHandleToPsiRule(atomSpace, realHandle) ) { 
 
         logger().debug("PsiActionSelectionAgent::%s - Found a Psi Rule: '%s' [ level = %d, cycle = %d ].",
                        __FUNCTION__, 
@@ -419,87 +415,6 @@ void PsiActionSelectionAgent::extractPsiRules(opencog::CogServer * server, pHand
         this->extractPsiRules(server, arg_ph, psiRules, level+1);
 
     }// foreach 
-}
-
-bool PsiActionSelectionAgent::isHandleToPsiRule(opencog::CogServer * server, Handle h)
-{
-// Format of Psi rule    
-//
-// PredictiveImplicationLink
-//     AndLink
-//         AndLink
-//             EvaluationLink
-//                 GroundedPredicateNode "precondition_1_name"
-//                 ListLink
-//                     Node:arguments
-//                     ...
-//             EvaluationLink
-//                 PredicateNode         "precondition_2_name"
-//                 ListLink 
-//                     Node:arguments
-//                     ...
-//             ...
-//                        
-//         ExecutionLink
-//             GroundedSchemaNode "schema_name"
-//             ListLink
-//                 Node:arguments
-//                 ...
-//
-//     EvaluationLink
-//         (SimpleTruthValue indicates how well the demand is satisfied)
-//         (ShortTermInportance indicates the urgency of the demand)
-//         PredicateNode: "goal_name" 
-//         ListLink
-//             Node:arguments
-//             ...
-//
-
-    const AtomSpace & atomSpace = * ( server->getAtomSpace() );
-
-    logger().debug("PsiActionSelectionAgent::%s - Going to check Atom: '%s' [ cycle = %d ].",
-                   __FUNCTION__, 
-                   atomSpace.atomAsString(h).c_str(),
-                   this->cycleCount
-                  );
-
-    // Check h
-    // TODO: Use PredictiveImplicationLink instead of ImplicationLink
-    //       if ( atomSpace.getType(h) != PREDICTIVE_IMPLICATION_LINK || atomSpace.getArity(h) != 2 )
-    if ( atomSpace.getType(h) != IMPLICATION_LINK || atomSpace.getArity(h) != 2 )
-        return false; 
- 
-    // Get handles to premise and goal
-    Handle andLinkPreconditionAction = atomSpace.getOutgoing(h, 0);
-    Handle evaluationLinkGoal = atomSpace.getOutgoing(h, 1);
-
-    // Check premise
-    if ( atomSpace.getType(andLinkPreconditionAction) != AND_LINK || atomSpace.getArity(h) != 2 )
-        return false;
-
-    // Get handle to action
-    Handle executionLinkAction = atomSpace.getType( 
-                                                      atomSpace.getOutgoing(andLinkPreconditionAction, 0) 
-                                                  ) == EXECUTION_LINK ? 
-                                 atomSpace.getOutgoing(andLinkPreconditionAction, 0) :
-                                 atomSpace.getOutgoing(andLinkPreconditionAction, 1);
-
-    // Check action
-    if ( atomSpace.getType(executionLinkAction) != EXECUTION_LINK ||
-         atomSpace.getArity(executionLinkAction) != 2 ||
-         atomSpace.getType( atomSpace.getOutgoing(executionLinkAction, 0) ) != GROUNDED_SCHEMA_NODE
-       )
-        return false; 
-
-    // Check goal
-    if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
-         atomSpace.getArity(evaluationLinkGoal) != 2 ||
-         atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0) ) != PREDICATE_NODE 
-       )
-        return false; 
-
-    // Now we are pretty sure it(h) is a Psi rule
-    return true;
 }
 
 void PsiActionSelectionAgent::printPlans(opencog::CogServer * server, Handle hDemandGoal, 
@@ -582,16 +497,65 @@ int PsiActionSelectionAgent::getSchemaArguments(opencog::CogServer * server, Han
     return schemaArguments.size();
 }
 
-bool PsiActionSelectionAgent::isSatisfied(opencog::CogServer * server, Handle hPrecondition) 
+void PsiActionSelectionAgent::initVarBindCandidates(opencog::CogServer * server, 
+                                                    std::vector<std::string> & varBindCandidates)
+{
+    varBindCandidates.clear(); 
+
+    const AtomSpace & atomSpace = * ( server->getAtomSpace() );
+    const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap(); 
+
+    spaceMap.findAllEntities( back_inserter(varBindCandidates) );
+}
+
+void PsiActionSelectionAgent::initUnifier(combo::variable_unifier & unifier,
+                                          const std::vector<std::string> & varBindCandidates)
+{
+    unifier.clear(); 
+
+    foreach(std::string varBind, varBindCandidates) {
+        unifier.insert(varBind, 
+                       true  // Each variable binding is considered as valid initially. 
+                             // Then the combo procedure would update its state (valid/invalid)
+                             // after running the procedure. 
+                      );
+    }
+} 
+
+void PsiActionSelectionAgent::updateVarBindCandidates(const combo::variable_unifier & unifier, 
+                                                      std::vector<std::string> & varBindCandidates)
+{
+    varBindCandidates.clear();
+
+    if ( !unifier.isUpdated() ) {
+        return;
+    }
+
+    std::map<std::string, bool>::const_iterator iVarBind;
+
+    for ( iVarBind = unifier.begin(); iVarBind != unifier.end(); iVarBind ++ ) {
+        if ( iVarBind->second ) {
+            varBindCandidates.push_back( iVarBind->first );
+
+            logger().debug("PsiActionSelectionAgent::%s - Found a valid variable binding '%s' [ cycle = %d ].", 
+                           __FUNCTION__, 
+                           iVarBind->first.c_str(),
+                           this->cycleCount
+                          );
+        }
+    }
+}
+
+bool PsiActionSelectionAgent::isSatisfied(opencog::CogServer * server, 
+                                          Handle hPrecondition, 
+                                          combo::variable_unifier & unifier
+                                         ) 
 {
     // Get OAC
     OAC * oac = (OAC *) server;
 
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get Precondition name
-    std::string preconditionName = atomSpace.getName(hPrecondition);
 
     // Get ProcedureInterpreter
     Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
@@ -604,27 +568,72 @@ bool PsiActionSelectionAgent::isSatisfied(opencog::CogServer * server, Handle hP
     Procedure::RunningProcedureID executingSchemaId;
     combo::vertex result; // combo::vertex is actually of type boost::variant <...>
 
+    // Check the input (hPrecondition)
+    if ( atomSpace.getType(hPrecondition) != EVALUATION_LINK ||
+         atomSpace.getArity(hPrecondition) != 2 ) {
+        logger().warn( "PsiActionSelectionAgent::%s - Precondition should be of type EvaluationLink and with two arity. But got %s [ cycle = %d ]", 
+                        __FUNCTION__,
+                        atomSpace.atomAsString(hPrecondition).c_str(),
+                        this->cycleCount
+                     );
+
+        return false;    
+    }
+       
+    // Get the PredicateNode or GroundedPredicateNode inside hPrecondition
+    Handle hNode = atomSpace.getOutgoing(hPrecondition, 0); 
+
+    // Get Precondition name
+    std::string preconditionName = atomSpace.getName(hNode);
+
     // For PredicateNode, simply check its truth value
-    if ( atomSpace.getType(hPrecondition) == PREDICATE_NODE ) {
-        if ( atomSpace.getTV(hPrecondition).getMean() >= 0.99 ) 
+    if ( atomSpace.getType(hNode) == PREDICATE_NODE ) {
+
+        logger().debug("PsiActionSelectionAgent::%s - Got a PredicateNode: %s [ cycle = %d ]", 
+                       __FUNCTION__, 
+                       atomSpace.atomAsString(hNode).c_str(), 
+                       this->cycleCount
+                      );
+
+        if ( atomSpace.getTV(hPrecondition)->getMean() >= 0.99 ) 
             return true; 
     }
     // For GroundedPredicateNode, run the corresponding combo script, and then analyze the result
-    else if ( atomSpace.getType(hPrecondition) == GROUNDED_PREDICATE_NODE ) {
+    else if ( atomSpace.getType(hNode) == GROUNDED_PREDICATE_NODE ) {
+
+        logger().debug("PsiActionSelectionAgent::%s - Got a GroundedPredicateNode: %s [ cycle = %d ]", 
+                       __FUNCTION__, 
+                       atomSpace.atomAsString(hNode).c_str(), 
+                       this->cycleCount
+                      );
+
         // Get schemaArguments
         this->getSchemaArguments( server,
                                   atomSpace.getOutgoing(hPrecondition, 1), // Handle to ListLink containing arguments
                                   schemaArguments
                                 );
 
+        logger().debug("PsiActionSelectionAgent::%s - Got %d arguments [ cycle = %d ]", 
+                       __FUNCTION__, 
+                       schemaArguments.size(),
+                       this->cycleCount
+                      );
+
         // Run the Procedure of the Precondition
+        // TODO: If the get method fails, what happens?
         const Procedure::GeneralProcedure & procedure = procedureRepository.get(preconditionName);
 
-        executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
+        executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments, unifier);
 
-        // TODO: What does this for?
+        // Wait until the combo script has been done
         while ( !procedureInterpreter.isFinished(executingSchemaId) )
             procedureInterpreter.run(NULL);  
+
+        logger().debug("PsiActionSelectionAgent::%s - Finish executing combo procedure %s [ cycle = %d ]", 
+                       __FUNCTION__, 
+                       preconditionName.c_str(), 
+                       this->cycleCount
+                      );
 
         // Check if the the Procedure run successfully
         if ( procedureInterpreter.isFailed(executingSchemaId) ) {
@@ -638,6 +647,13 @@ bool PsiActionSelectionAgent::isSatisfied(opencog::CogServer * server, Handle hP
 
         result = procedureInterpreter.getResult(executingSchemaId);
 
+        logger().debug(
+                "PsiActionSelectionAgent::%s - Got the result after executing combo procedure %s [ cycle = %d ]", 
+                       __FUNCTION__, 
+                       preconditionName.c_str(), 
+                       this->cycleCount
+                      );
+
         if ( result == combo::id::logical_true )
             return true; 
         else 
@@ -645,19 +661,21 @@ bool PsiActionSelectionAgent::isSatisfied(opencog::CogServer * server, Handle hP
     }
     // For other types of Atom, return false
     else {
-        logger().warn( "PsiActionSelectionAgent::%s - Precondition should be of type PredicateNode or GroundedPredicateNode. But got type '%s' for '%s' precondition", 
+        logger().warn( "PsiActionSelectionAgent::%s - First outgoing of Precondition should be of type PredicateNode or GroundedPredicateNode. But got type '%s' in '%s'. [ cycle = %d ]", 
                          __FUNCTION__,
-                         classserver().getTypeName( atomSpace.getType(hPrecondition)
+                         classserver().getTypeName( atomSpace.getType(hNode)
                                                   ).c_str(), 
-                         atomSpace.getName(hPrecondition).c_str(),  
-                         preconditionName.c_str()
+                         atomSpace.atomAsString(hPrecondition).c_str(),  
+                         this->cycleCount
                      );
 
         return false;    
     }// if
 }
 
-Handle PsiActionSelectionAgent::pickUpPsiRule(opencog::CogServer * server, const std::vector<Handle> & psiRules) 
+Handle PsiActionSelectionAgent::pickUpPsiRule(opencog::CogServer * server,
+                                              const std::vector<Handle> & psiRules,
+                                              std::vector<std::string> & varBindCandidates) 
 {
     // Get OAC
     OAC * oac = (OAC *) server;
@@ -667,28 +685,77 @@ Handle PsiActionSelectionAgent::pickUpPsiRule(opencog::CogServer * server, const
 
     bool bAllPreconditionsSatisfied = true;
     Handle hSelectedPsiRule = opencog::Handle::UNDEFINED; 
+    Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink;
+    std::vector<Handle> hPreconditionEvalutaionLinks;  
 
     foreach(Handle hPsiRule, psiRules) {
-        // Get the handle to Preconditions and Action
-        Handle andLinkPreconditionAction = atomSpace.getOutgoing(hPsiRule, 0);
+        logger().debug( "PsiActionSelectionAgent::%s Going to check the Psi Rule: %s [ cycle = %d ]", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(hPsiRule).c_str(), 
+                        this->cycleCount 
+                      ); 
 
-        // Get handle to Preconditions
-        Handle andLinkPreconditions = atomSpace.getType( 
-                                                           atomSpace.getOutgoing(andLinkPreconditionAction, 0) 
-                                                       ) == AND_LINK ? 
-                                          atomSpace.getOutgoing(andLinkPreconditionAction, 0) :
-                                          atomSpace.getOutgoing(andLinkPreconditionAction, 1);
+        // Get the Handles to Preconditions
+        if ( !AtomSpaceUtil::splitPsiRule(atomSpace, 
+                                          hPsiRule, 
+                                          hGoalEvaluationLink, 
+                                          hActionExecutionLink,
+                                          hPreconditionAndLink
+                                         ) ) 
+            continue; 
+
+        hPreconditionEvalutaionLinks = atomSpace.getOutgoing(hPreconditionAndLink);
+
+        // Initialize the variable bindings with all the entities the pet encounters 
+        this->initVarBindCandidates(server, varBindCandidates); 
+
+        logger().debug( "PsiActionSelectionAgent::%s Initialize the variable bindings ( size = %d ) with all the entities the pet encounters [ cycle = %d ]", 
+                        __FUNCTION__, 
+                        varBindCandidates.size(), 
+                        this->cycleCount 
+                      ); 
+
+        // Initialize the unifier used by combo interpreter
+        //
+        // Initially all the entities the pet encounters are considered as valid variable bindings. 
+        // Then the combo interpreter would update the states (valid/ invalid) of each binding.
+        combo::variable_unifier unifier; 
+        this->initUnifier(unifier, varBindCandidates);
+
+        logger().debug( "PsiActionSelectionAgent::%s Initialize the unifier ( size = %d ) [ cycle = %d ]", 
+                        __FUNCTION__, 
+                        unifier.size(), 
+                        this->cycleCount 
+                      ); 
 
         // Check Preconditions one by one
-        foreach( Handle hPrecondition, atomSpace.getOutgoing(andLinkPreconditions) ) {
-            if ( !isSatisfied(server, hPrecondition) ) {
+        foreach( Handle hPrecondition, hPreconditionEvalutaionLinks ) {
+            logger().debug( "PsiActionSelectionAgent::%s - Going to check the Precondition: %s [ cycle = %d ]", 
+                            __FUNCTION__, 
+                            atomSpace.atomAsString(hPrecondition).c_str(), 
+                            this->cycleCount
+                          );
+
+            if ( !isSatisfied(server, hPrecondition, unifier) ) {
                 bAllPreconditionsSatisfied = false;
                 break; 
             }
         }// foreach
        
         if (bAllPreconditionsSatisfied) {
-            hSelectedPsiRule = hPsiRule;  // Record the Psi Rule that all its Preconditions are satisfied
+
+            // Record the Psi Rule that all its Preconditions are satisfied
+            hSelectedPsiRule = hPsiRule;  
+
+            // Get all the valid variable bindings based on the unifier 
+            // updated by the combo interpreter after running the combo procedure.
+            this->updateVarBindCandidates(unifier, varBindCandidates);  
+
+            logger().debug( "PsiActionSelectionAgent::%s Update the variable bindings [ cycle = %d ]", 
+                            __FUNCTION__, 
+                            this->cycleCount 
+                          ); 
+
             break; 
         }
 
@@ -715,14 +782,23 @@ Handle PsiActionSelectionAgent::pickUpPsiRule(opencog::CogServer * server, const
 
 bool PsiActionSelectionAgent::applyPsiRule(opencog::CogServer * server, Handle hPsiRule)
 {
-    if ( hPsiRule == opencog::Handle::UNDEFINED )
-        return false;
-
     // Get OAC
     OAC * oac = (OAC *) server;
 
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+
+    // Get Goal, Action and Preconditions from Psi Rule  
+    Handle evaluationLinkGoal, executionLinkAction, andLinkPrecondition;
+
+    if ( !AtomSpaceUtil::splitPsiRule( atomSpace, 
+                                       hPsiRule, 
+                                       evaluationLinkGoal, 
+                                       executionLinkAction, 
+                                       andLinkPrecondition
+                                     ) 
+       ) 
+        return false; 
 
     // Get ProcedureInterpreter
     Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
@@ -734,17 +810,6 @@ bool PsiActionSelectionAgent::applyPsiRule(opencog::CogServer * server, Handle h
     std::vector <combo::vertex> schemaArguments;
     Procedure::RunningProcedureID executingSchemaId;
     combo::vertex result; // combo::vertex is actually of type boost::variant <...>
-
-    // Get handles to premise and goal
-    Handle andLinkPreconditionAction = atomSpace.getOutgoing(hPsiRule, 0);
-    Handle evaluationLinkGoal = atomSpace.getOutgoing(hPsiRule, 1);
-
-    // Get handle to action
-    Handle executionLinkAction = atomSpace.getType( 
-                                                      atomSpace.getOutgoing(andLinkPreconditionAction, 0) 
-                                                  ) == EXECUTION_LINK ? 
-                                 atomSpace.getOutgoing(andLinkPreconditionAction, 0) :
-                                 atomSpace.getOutgoing(andLinkPreconditionAction, 1);
 
     // Get Action name
     std::string actionName = atomSpace.getName( atomSpace.getOutgoing(executionLinkAction, 0)
@@ -794,22 +859,24 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     // Get OAC
     OAC * oac = (OAC *) server;
 
+    // Get rand generator
+    RandGen & randGen = oac->getRandGen();
+
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get ProcedureInterpreter
     Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
 
-    // Get Procedure repository
-//    const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
-
     // Variables used by combo interpreter
     std::vector <combo::vertex> schemaArguments;
-//    Procedure::RunningProcedureID executingSchemaId;
     combo::vertex result; // combo::vertex is actually of type boost::variant <...>
 
+    // Get pet
+    Pet & pet = oac->getPet();
+
     // Get petId
-    const std::string & petId = oac->getPet().getPetId();
+    const std::string & petId = pet.getPetId();
 
     // Check if map info data is available
     if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
@@ -940,43 +1007,86 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     }// if (this->currentPsiRule != opencog::Handle::UNDEFINED)
 
     // Select a Demand Goal
+    Handle selectedDemandGoal;
+
     if ( this->psiRulesLists.empty() || this->psiRulesLists[0].empty() ) {
 
         // Select the Demand Goal with lowest truth value
-        this->previousDemandGoal = this->currentDemandGoal; 
-        this->currentDemandGoal = this->chooseMostCriticalDemandGoal(server);
+        selectedDemandGoal = this->chooseMostCriticalDemandGoal(server);
+
+        // Update the pet's previously/ currently Demand Goal
+        pet.setCurrentDemandGoal( selectedDemandGoal );
 
         logger().debug( "PsiActionSelectionAgent::%s - Select the Demand Goal: %s [ cycle = %d ].", 
                         __FUNCTION__, 
-                        atomSpace.getName( atomSpace.getOutgoing(this->currentDemandGoal, 0)
+                        atomSpace.getName( atomSpace.getOutgoing(selectedDemandGoal, 0)
                                          ).c_str(), 
                         this->cycleCount
                       );
 
         // Do backward inference starting from the selected Demand Goal using PLN
         int steps = 5000;   // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
-        const std::set<VtreeProvider *> & inferResult = this->searchBackward(this->currentDemandGoal, steps);
+        const std::set<VtreeProvider *> & inferResult = this->searchBackward(selectedDemandGoal, steps);
 
         // Extract Psi Rules from trees returned by PLN
         this->extractPsiRules(server, inferResult, this->psiRulesLists);
 
         // TODO: only for debugging, comment it later 
         // Print plans
-        this->printPlans(server, this->currentDemandGoal, this->psiRulesLists);
+        this->printPlans(server, selectedDemandGoal, this->psiRulesLists);
     }// if
-   
-    // TODO: Change the current Demand Goal randomly, and then call PLN and extract Psi Rules again
-    //
-    //       Incorporate Modulator, say SelectionThreshold 
-    //       this->previousDemandGoal = this->currentDemandGoal; 
-    //       this->currentDemandGoal = this->chooseRandomDemandGoal();
-    //
+
+    // Change the current Demand Goal randomly (controlled by the modulator 'SelectionThreshold')
+    float selectionThreshold = AtomSpaceUtil::getCurrentModulatorLevel(randGen,
+                                                                       atomSpace,
+                                                                       SELECTION_THRESHOLD_MODULATOR_NAME,
+                                                                       petId
+                                                                      );
+// TODO: uncomment the line below once finish testing
+//    if ( randGen.randfloat() > selectionThreshold )
+    if ( false )  // skip this for debugging
+    {
+
+        selectedDemandGoal = this->chooseRandomDemandGoal(); 
+
+        if ( selectedDemandGoal != pet.getCurrentDemandGoal() ) {
+
+            // Update the pet's previously/ currently Demand Goal
+            pet.setCurrentDemandGoal( selectedDemandGoal );
+           
+            logger().debug( "PsiActionSelectionAgent::%s - Switch the Demand Goal to: %s [ cycle = %d ].", 
+                            __FUNCTION__, 
+                            atomSpace.getName( atomSpace.getOutgoing(selectedDemandGoal, 0)
+                                             ).c_str(), 
+                            this->cycleCount
+                          );
+
+            // Do backward inference starting from the selected Demand Goal using PLN
+            int steps = 5000; // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
+            const std::set<VtreeProvider *> & inferResult = this->searchBackward(selectedDemandGoal, steps);
+
+            // Extract Psi Rules from trees returned by PLN
+            this->extractPsiRules(server, inferResult, this->psiRulesLists);
+
+            // TODO: only for debugging, comment it later 
+            // Print plans
+            this->printPlans(server, selectedDemandGoal, this->psiRulesLists);
+
+        }// if
+
+    }// if
 
     // Choose a Psi Rule to be applied
     Handle hSelectedPsiRule = opencog::Handle::UNDEFINED;
 
+    // This vector has all possible objects/avatars ids to replace wildcard in Psi Rules
+    //
+    // TODO: We would not use wildcard later, 
+    //       and the vector here should be used to replace VariableNode in Psi Rules with ForAllLink
+    std::vector<std::string> varBindCandidates;
+
     if ( !this->psiRulesLists.empty() ) {
-        hSelectedPsiRule = this->pickUpPsiRule(server, this->psiRulesLists[0]);
+        hSelectedPsiRule = this->pickUpPsiRule(server, this->psiRulesLists[0], varBindCandidates);
     }
     else {
         logger().warn( "PsiActionSelectionAgent::%s - Failed to select a Psi Rule to apply because Psi Rule Lists is empty [ cycle = %d].", 
@@ -987,6 +1097,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     }
 
     // Apply the selected Psi Rule
+    // TODO:: use variable bindings later 
     if ( hSelectedPsiRule != opencog::Handle::UNDEFINED ) {
 
         logger().debug( "PsiActionSelectionAgent::%s - Applying the selected Psi Rule: %s [ cycle = %d ].", 

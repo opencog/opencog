@@ -237,6 +237,9 @@ void PsiDemandUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
+    // Get Pet
+    Pet & pet = oac->getPet();  
+
     // Process Demands one by one
     //
     // Don't be scared by the bulgy 'for' loop below, what it does is quite simple,
@@ -361,8 +364,8 @@ logger().fine( "PsiDemandUpdaterAgent::%s - DemandGoal: %s, oldSimultaneousEquiv
                                                 NUMBER_NODE,
                                                 boost::lexical_cast<std::string>
                                                                    (updatedValue), 
-                                                true // the atom should be permanent (not
-                                                     // removed by decay importance task) 
+                                                false // the atom should not be permanent (can be
+                                                      // removed by decay importance task) 
                                                );
 
 logger().fine( "PsiDemandUpdaterAgent::%s - newNumberNode: %s", 
@@ -526,19 +529,19 @@ logger().fine( "PsiDemandUpdaterAgent::%s - Going to remove oldSimilarityLink",
 
 logger().fine("PsiDemandUpdaterAgent::%s - Removed oldSimilarityLink", __FUNCTION__);
 
-logger().fine("PsiDemandUpdaterAgent::%s - Going to remove oldNumberNode", __FUNCTION__);
-
-        if ( oldNumberNode != newNumberNode && 
-             !atomSpace.removeAtom(oldNumberNode) 
-           ) {
-            logger().error(
-                "PsiDemandUpdaterAgent::%s - Unable to remove old NUMBER_NODE: %s",
-                __FUNCTION__, 
-                atomSpace.atomAsString(oldNumberNode).c_str()
-                          );
-        }// if
-
-logger().fine( "PsiDemandUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__); 
+//logger().fine("PsiDemandUpdaterAgent::%s - Going to remove oldNumberNode", __FUNCTION__);
+//
+//        if ( oldNumberNode != newNumberNode && 
+//             !atomSpace.removeAtom(oldNumberNode) 
+//           ) {
+//            logger().error(
+//                "PsiDemandUpdaterAgent::%s - Unable to remove old NUMBER_NODE: %s",
+//                __FUNCTION__, 
+//                atomSpace.atomAsString(oldNumberNode).c_str()
+//                          );
+//        }// if
+//
+//logger().fine( "PsiDemandUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__); 
 
         // Reset bUpdated  
 //        iDemand->second.bUpdated = false;
@@ -553,6 +556,22 @@ logger().fine( "PsiDemandUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__
 
     }// for
 
+    // Update the truth value of previous/ current demand goal
+    logger().debug(
+            "PsiDemandUpdaterAgent::%s - Updating the truth value of previous/ current demand goal. [ cycle = %d]",
+                   __FUNCTION__, 
+                   this->cycleCount
+                  );
+
+    if ( pet.getPreviousDemandGoal() != opencog::Handle::UNDEFINED )
+        atomSpace.setTV( AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, PREVIOUS_DEMAND_NAME), 
+                         * atomSpace.getTV( pet.getPreviousDemandGoal() )
+                       );
+
+    if ( pet.getCurrentDemandGoal() != opencog::Handle::UNDEFINED )
+        atomSpace.setTV( AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, CURRENT_DEMAND_NAME), 
+                         * atomSpace.getTV( pet.getCurrentDemandGoal() )
+                       );
 }
 
 void PsiDemandUpdaterAgent::updateDemandGoals(opencog::CogServer * server)

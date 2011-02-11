@@ -61,7 +61,7 @@
 // should be exactly the same as defined in "EmbodimentConfig.h"
 #define ACTIVATION_MODULATOR_NAME "Activation"
 #define RESOLUTION_MODULATOR_NAME "Resolution"
-#define CERTAINTY_MODULATOR_NAME "Certainty"
+#define SECURING_THRESHOLD_MODULATOR_NAME "SecuringThreshold"
 #define SELECTION_THRESHOLD_MODULATOR_NAME "SelectionThreshold"
 
 // Demand names
@@ -70,6 +70,8 @@
 // They should be the schema names used in "xxx_rules.scm" 
 // without the suffix "DemandUpdater" and 
 // should be exactly the same as defined in "EmbodimentConfig.h"
+#define CURRENT_DEMAND_NAME      "Current"  // Dummy demand goal, indicating currently selected demand goals below
+#define PREVIOUS_DEMAND_NAME     "Previous" // Dummy demand goal, indicating previously selected demand goals below
 #define ENERGY_DEMAND_NAME       "Energy" 
 #define WATER_DEMAND_NAME        "Water"
 #define INTEGRITY_DEMAND_NAME    "Integrity"
@@ -77,7 +79,7 @@
 #define CERTAINTY_DEMAND_NAME    "Certainty"
 #define COMPETENCE_DEMAND_NAME   "Competence"
 
-// high leval predicates - traits
+// high level predicates - traits
 #define CURIOSITY_PREDICATE_NAME     "curiosity"
 #define PLAYFULNESS_PREDICATE_NAME    "playfulness"
 #define FEARFULNESS_PREDICATE_NAME    "fearfulness"

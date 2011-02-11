@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
- * Updated: by Zhenhua Cai, on 2010-12-08
+ * Updated: by Zhenhua Cai, on 2011-02-07
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -33,6 +33,7 @@
 
 #include <opencog/util/files.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/mt19937ar.h>
 
 #include <boost/format.hpp>
 
@@ -63,7 +64,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                const std::string& petId, const std::string& ownerId,
                const std::string& agentType, const std::string& agentTraits)
 {
-
     setNetworkElement(new NetworkElement(myId, ip, portNumber));
 
     std::string aType = (agentType == "pet" || agentType == "humanoid") ?
@@ -97,12 +97,13 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     } else {
         pet->initTraitsAndFeelings();
 
-        logger().info( "OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s', ActionSchemataPreconditions '%s', PsiModulatorUpdaters '%s' and PsiDemandUpdaters '%s'.",
+        logger().info( "OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s', ActionSchemataPreconditions '%s', PsiModulatorUpdaters '%s', PsiDemandUpdaters '%s' and PsiFeelingUpdaterAgent '%s'.",
                        config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
                        config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
                        config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str(), 
                        config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str(), 
-                       config().get("PSI_DEMAND_UPDATERS_REPOSITORY_FILE").c_str()
+                       config().get("PSI_DEMAND_UPDATERS_REPOSITORY_FILE").c_str(), 
+                       config().get("PSI_FEELING_UPDATERS_REPOSITORY_FILE").c_str()
                      );
 
         int cnt = 0;
@@ -173,13 +174,25 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         fin.close();
         logger().info(
                      "OAC - DemandUpdaters combo functions loaded.");
-       
+
+        fin.open(config().get("PSI_FEELING_UPDATERS_REPOSITORY_FILE").c_str());
+        if (fin.good()) {
+            logger().info("OAC - Loading FeelingUpdaters combo.");
+            cnt = procedureRepository->loadComboFromStream(fin);
+        } else {
+            logger().error(
+                         "OAC - Unable to load FeelingUpdaters combo.");
+        }
+        fin.close();
+        logger().info(
+                     "OAC - FeelingUpdaters combo functions loaded.");
+      
     }// if
 
 
     // warning: it must be called after register the agent and it's owner nodes
-    this->ruleEngine = new RuleEngine( this, petId );
-    this->pet->setRuleEngine(ruleEngine);
+//    this->ruleEngine = new RuleEngine( this, petId );
+//    this->pet->setRuleEngine(ruleEngine);
 
     predicatesUpdater = new PredicatesUpdater(*atomSpace, pet->getPetId());
 
@@ -222,20 +235,47 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                          &psiModulatorUpdaterAgentFactory
                        );
     psiModulatorUpdaterAgent = static_cast<PsiModulatorUpdaterAgent*>(
-                               this->createAgent( PsiModulatorUpdaterAgent::info().id,
-                                                  false
-                                                )
+                                   this->createAgent( PsiModulatorUpdaterAgent::info().id,
+                                                      false
+                                                    )
                                                                      );
 
     this->registerAgent( PsiDemandUpdaterAgent::info().id, 
                          &psiDemandUpdaterAgentFactory
                        );
     psiDemandUpdaterAgent = static_cast<PsiDemandUpdaterAgent*>(
-                               this->createAgent( PsiDemandUpdaterAgent::info().id,
-                                                  false
-                                                )
-                                                                     );
+                                this->createAgent( PsiDemandUpdaterAgent::info().id,
+                                                   false
+                                                 )
+                                                               );
 
+    this->registerAgent( PsiActionSelectionAgent::info().id, 
+                         &psiActionSelectionAgentFactory
+                       );
+    psiActionSelectionAgent = static_cast<PsiActionSelectionAgent*>(
+                                  this->createAgent( PsiActionSelectionAgent::info().id,
+                                                     false
+                                                   )
+                                                                   );
+
+    this->registerAgent( PsiRelationUpdaterAgent::info().id, 
+                         &psiRelationUpdaterAgentFactory
+                       );
+    psiRelationUpdaterAgent = static_cast<PsiRelationUpdaterAgent*>(
+                                  this->createAgent( PsiRelationUpdaterAgent::info().id,
+                                                     false
+                                                   )
+                                                                   );
+
+    this->registerAgent( PsiFeelingUpdaterAgent::info().id, 
+                         &psiFeelingUpdaterAgentFactory
+                       );
+    psiFeelingUpdaterAgent = static_cast<PsiFeelingUpdaterAgent*>(
+                                 this->createAgent( PsiFeelingUpdaterAgent::info().id,
+                                                    false
+                                                  )
+                                                                 );
+                    
     if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         this->startAgent(procedureInterpreterAgent);
     }
@@ -255,22 +295,43 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
             config().get_int("IMPORTANCE_DECAY_CYCLE_PERIOD"));
         this->startAgent(importanceDecayAgent);
     }
+
     if (config().get_bool("ENTITY_EXPERIENCE_ENABLED")) {
         this->entityExperienceAgent->setFrequency(
            config().get_int( "ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD" ) );
         this->startAgent(entityExperienceAgent);
     }
+
     if (config().get_bool("PSI_MODULATOR_UPDATER_ENABLED")) {
         this->psiModulatorUpdaterAgent->setFrequency(
            config().get_int( "PSI_MODULATOR_UPDATER_CYCLE_PERIOD" ) );
         this->startAgent(psiModulatorUpdaterAgent);
     }
+
     if (config().get_bool("PSI_DEMAND_UPDATER_ENABLED")) {
         this->psiDemandUpdaterAgent->setFrequency(
            config().get_int( "PSI_DEMAND_UPDATER_CYCLE_PERIOD" ) );
         this->startAgent(psiDemandUpdaterAgent);
     }
   
+    if (config().get_bool("PSI_ACTION_SELECTION_ENABLED")) {
+        this->psiActionSelectionAgent->setFrequency(
+           config().get_int( "PSI_ACTION_SELECTION_CYCLE_PERIOD" ) );
+        this->startAgent(psiActionSelectionAgent);
+    }
+
+    if (config().get_bool("PSI_RELATION_UPDATER_ENABLED")) {
+        this->psiRelationUpdaterAgent->setFrequency(
+           config().get_int( "PSI_RELATION_UPDATER_CYCLE_PERIOD" ) );
+        this->startAgent(psiRelationUpdaterAgent);
+    }
+
+    if (config().get_bool("PSI_FEELING_UPDATER_ENABLED")) {
+        this->psiFeelingUpdaterAgent->setFrequency(
+           config().get_int( "PSI_FEELING_UPDATER_CYCLE_PERIOD" ) );
+        this->startAgent(psiFeelingUpdaterAgent);
+    }
+   
 
     // TODO: This should be done only after NetworkElement is initialized
     // (i.e., handshake with router is done)
@@ -399,6 +460,9 @@ OAC::~OAC()
     delete (importanceDecayAgent);
     delete (actionSelectionAgent);
     delete (psiModulatorUpdaterAgent);
+    delete (psiActionSelectionAgent);
+    delete (psiRelationUpdaterAgent); 
+    delete (psiFeelingUpdaterAgent); 
 
 #ifndef DELETE_ATOMSPACE 
     // TODO: It takes too much time to delete atomspace. So, atomspace removal
@@ -508,6 +572,14 @@ Pet & OAC::getPet()
     return *pet;
 }
 
+// Static/Shared random number generator
+boost::shared_ptr<RandGen> OAC::rngPtr( new opencog::MT19937RandGen((unsigned long) time(NULL)) );
+
+RandGen & OAC::getRandGen()
+{
+    return *( this->rngPtr.get() );
+}
+
 RuleEngine & OAC::getRuleEngine()
 {
     return *ruleEngine;
@@ -542,9 +614,8 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
         return false;
     }
 
-
-    // message that has been parsed by RelEx server
-    if(msg->getFrom() == config().get("RELEX_SERVER_ID")) {
+    // message from petaverse proxy - send to PAI
+    if (msg->getFrom() == config().get("PROXY_ID")) {
         HandleSeq toUpdateHandles;
         result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
 
@@ -556,34 +627,6 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
             // added/updated atoms
             predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
             logger().debug("OAC - Message successfully  processed.");
-        }
-        return false;
-    }
-
-    if (msg->getFrom() == config().get("PROXY_ID")) {
-		// The message type RAW is used for HK unity project.
-		// If you use multiverse, just ignore this.
-        if(msg->getType() == MessagingSystem::Message::RAW) {
-			// message from OCAvatar, forward it to RelEx server.
-            StringMessage rawMessage(getID(), config().get("RELEX_SERVER_ID"), msg->getPlainTextRepresentation());
-
-            logger().info("Forward raw message to RelEx server.");
-            if (!sendMessage(rawMessage)) {
-                logger().error("Could not send raw message to RelEx server!");
-            }
-        } else {
-            HandleSeq toUpdateHandles;
-            result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
-
-            if (!result) {
-                logger().error("OAC - Unable to process XML message.");
-            } else {
-
-                // PVP message processed, update predicates for the
-                // added/updated atoms
-                predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
-                logger().debug("OAC - Message successfully  processed.");
-            }
         }
         return false;
     }
@@ -664,17 +707,17 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
             //pet->setMode(PLAYING);
 
             // Add schema to RuleEngine learned schemata
-            ruleEngine->addLearnedSchema( sm->getSchemaName() );
+//            ruleEngine->addLearnedSchema( sm->getSchemaName( ) );
         }
         break;
 
         case MessagingSystem::Message::CANDIDATE_SCHEMA: {
             // Add schema to RuleEngine learned schemata ...
-            ruleEngine->addLearnedSchema( sm->getSchemaName() );
+//            ruleEngine->addLearnedSchema( sm->getSchemaName( ) );
 
             // .. and execute it
             pet->setTriedSchema(sm->getSchemaName());
-            ruleEngine->tryExecuteSchema( sm->getSchemaName() );
+//            ruleEngine->tryExecuteSchema( sm->getSchemaName( ) );
 
         }
         break;
@@ -693,10 +736,13 @@ void OAC::schemaSelection()
 {
     logger().fine("OAC - Executing selectSchemaToExecute().");
 
-    this->pet->getCurrentModeHandler().update();
-    this->ruleEngine->processNextAction();
-    this->ruleEngine->runSchemaForCurrentAction();
+    this->pet->getCurrentModeHandler( ).update( );
+//    this->ruleEngine->processNextAction( );
+//    this->ruleEngine->runSchemaForCurrentAction( );
 
+//  if ( pet->getMode( ) != PLAYING && pet->getMode( ) != LEARNING ) {
+//    pet->setMode( PLAYING );
+//  } // if
 }
 
 void OAC::decayShortTermImportance()

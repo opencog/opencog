@@ -118,15 +118,17 @@ private:
                                          unsigned long time);
     /**
      * Return the value for the given Modulator within the AtomSpace.
-     * Modulator not presented in AtomSpace will return -1.
+     * Modulator not presented in AtomSpace will return a random value in [0, 1].
      *
+     * @param rng       Random generator
      * @param atomSpace The AtomSpace where to look for the Modulator.
      * @param modulator The Modulator name, which is defined in "PredefinedProcedureNames.h" 
      *                  in AtomSpace folder.
      * @param self_id   ID of the Pet itself.
      * @param time      The current timestamp, which is used for cache searching. 
      */
-    static float getModulator(const AtomSpace & atomSpace,
+    static float getModulator(opencog::RandGen & rng, 
+                              const AtomSpace & atomSpace,
                               const std::string & modulator,
                               const std::string & self_id,
                               unsigned long time
@@ -134,9 +136,9 @@ private:
 
     /**
      * Return the value for the given Demand within the AtomSpace.
-     * Modulator not presented in AtomSpace will return -1.
+     * Demand not presented in AtomSpace will return -1.
      *
-     * @param atomSpace The AtomSpace where to look for the Modulator.
+     * @param atomSpace The AtomSpace where to look for the Demand.
      * @param modulator The Demand name, which is defined in "PredefinedProcedureNames.h" 
      *                  in AtomSpace folder.
      * @param self_id   ID of the Pet itself.
@@ -147,6 +149,24 @@ private:
                            const std::string & self_id,
                            unsigned long time
                           );
+
+    /**
+     * Return the truth value for the given Demand Goal.
+     * Demand not presented in AtomSpace will return a random value in [0, 1].
+     *
+     * @param rng       Random generator
+     * @param atomSpace The AtomSpace where to look for the Demand.
+     * @param modulator The Demand name, which is defined in "PredefinedProcedureNames.h" 
+     *                  in AtomSpace folder.
+     * @param self_id   ID of the Pet itself.
+     * @param time      The current timestamp, which is used for cache searching. 
+     */
+    static float getDemandGoalTruthValue(opencog::RandGen & rng,  
+                                         const AtomSpace & atomSpace,
+                                         const std::string & demand,
+                                         const std::string & self_id,
+                                         unsigned long time
+                                        );
 
     /**
      * Return the value for the a emotional feeling or trait stored within

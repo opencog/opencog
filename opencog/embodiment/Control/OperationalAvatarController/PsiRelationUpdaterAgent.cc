@@ -325,6 +325,9 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     // Get OAC
     OAC * oac = (OAC *) server;
 
+    // Get random generator
+    RandGen & randGen = oac->getRandGen(); 
+
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
@@ -360,6 +363,23 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
                       this->cycleCount
                      );
         return;
+    }
+
+    // Decide whether to update relations during this cognitive cycle (controlled by the modulator 'SecuringThreshold')
+    float securingThreshold = AtomSpaceUtil::getCurrentModulatorLevel(randGen,
+                                                                      atomSpace,
+                                                                      SECURING_THRESHOLD_MODULATOR_NAME, 
+                                                                      petId
+                                                                     );
+// TODO: Uncomment the line below once finish testing
+//    if ( randGen.randfloat() < securingThreshold ) 
+    {
+        logger().debug(
+                "PsiRelationUpdaterAgent::%s - Skip updating the relations for this cognitive cycle [ cycle = %d ] ", 
+                       __FUNCTION__, 
+                       this->cycleCount
+                      );
+        return; 
     }
 
     // Initialize entity, relation lists etc.

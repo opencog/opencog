@@ -292,8 +292,8 @@ logger().fine( "PsiModulatorUpdaterAgent::%s - Modulator: %s, oldSimilarityLink:
                                                 NUMBER_NODE,
                                                 boost::lexical_cast<std::string>
                                                                    (updatedValue), 
-                                                true // the atom should be permanent (not
-                                                     // removed by decay importance task) 
+                                                false // the atom should not be permanent (can be
+                                                      // removed by decay importance task) 
                                                );
 
 logger().fine( "PsiModulatorUpdaterAgent::%s - newNumberNode: %s", 
@@ -350,19 +350,19 @@ logger().fine( "PsiModulatorUpdaterAgent::%s - Going to remove oldSimilarityLink
 
 logger().fine("PsiModulatorUpdaterAgent::%s - Removed oldSimilarityLink", __FUNCTION__);
 
-logger().fine("PsiModulatorUpdaterAgent::%s - Going to remove oldNumberNode", __FUNCTION__);
-
-        if ( oldNumberNode != newNumberNode && 
-             !atomSpace.removeAtom(oldNumberNode) 
-           ) {
-            logger().error(
-                "PsiModulatorUpdaterAgent::%s - Unable to remove old NUMBER_NODE: %s",
-                __FUNCTION__, 
-                atomSpace.atomAsString(oldNumberNode).c_str()
-                          );
-        }// if
-
-logger().fine( "PsiModulatorUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__);              
+//logger().fine("PsiModulatorUpdaterAgent::%s - Going to remove oldNumberNode", __FUNCTION__);
+//
+//        if ( oldNumberNode != newNumberNode && 
+//             !atomSpace.removeAtom(oldNumberNode) 
+//           ) {
+//            logger().error(
+//                "PsiModulatorUpdaterAgent::%s - Unable to remove old NUMBER_NODE: %s",
+//                __FUNCTION__, 
+//                atomSpace.atomAsString(oldNumberNode).c_str()
+//                          );
+//        }// if
+//
+//logger().fine( "PsiModulatorUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__);              
         // Reset bUpdated  
         iModulator->second.bUpdated = false;
 

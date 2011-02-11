@@ -273,12 +273,10 @@
 
 (define (add_modulator modulator_name default_value)
     (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
-       (NumberNode (number->string default_value) (DEFAULT_STV) (DEFAULT_AV) )
+       (NumberNode (number->string default_value) )
        (ExecutionOutputLink (DEFAULT_STV) (DEFAULT_AV) 
-            (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") 
-                                (DEFAULT_STV) (DEFAULT_AV)
-            )
-            (ListLink (DEFAULT_STV) (DEFAULT_AV) 
+            (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") ) 
+            (ListLink  
                 PET_HANDLE          
             )
        )
@@ -305,12 +303,10 @@
 
 (define (add_demand_schema demand_name default_value)
     (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
-       (NumberNode (number->string default_value) (DEFAULT_STV) (DEFAULT_AV) )
+       (NumberNode (number->string default_value) )
        (ExecutionOutputLink (DEFAULT_STV) (DEFAULT_AV)
-            (GroundedSchemaNode (string-append (string-trim-both demand_name) "Updater") 
-                                (DEFAULT_STV) (DEFAULT_AV) 
-            )
-            (ListLink (DEFAULT_STV) (DEFAULT_AV)
+            (GroundedSchemaNode (string-append (string-trim-both demand_name) "Updater") )
+            (ListLink 
                 PET_HANDLE 
             )
        )
@@ -346,18 +342,14 @@
 ;
 
 (define (connect_demand_goal demand_schema_handle goal_handle min_acceptable_value max_acceptable_value)
-    (SimultaneousEquivalenceLink (DEFAULT_STV) (DEFAULT_AV)
+    (SimultaneousEquivalenceLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
         goal_handle
 
         (EvaluationLink (DEFAULT_STV) (DEFAULT_AV)
             (GroundedPredicateNode "FuzzyWithin")  
-            (ListLink (DEFAULT_STV) (DEFAULT_AV)
-                (NumberNode (number->string min_acceptable_value) 
-                            (DEFAULT_STV) (DEFAULT_AV) 
-                )
-                (NumberNode (number->string max_acceptable_value) 
-                            (DEFAULT_STV) (DEFAULT_AV) 
-                )
+            (ListLink 
+                (NumberNode (number->string min_acceptable_value) )
+                (NumberNode (number->string max_acceptable_value) )
                 demand_schema_handle
             );ListLink
         );EvaluationLink
@@ -398,12 +390,12 @@
 
                   ( (number? argument)
 
-                    (NumberNode (number->string argument) (DEFAULT_STV) (DEFAULT_AV) )
+                    (NumberNode (number->string argument) )
                   )   
 
                   ( (equal? (string-contains argument "'") #f)
                   
-                    (VariableNode (string-trim-both argument) (DEFAULT_STV) (DEFAULT_AV) )
+                    (VariableNode (string-trim-both argument) )
                   )
 
                   ( (string=? (string-trim-both argument) "'self'")
@@ -426,7 +418,7 @@
                               ); Strip ' at both ends of argument
                             )
 
-                           (WordNode  argument (DEFAULT_STV) (DEFAULT_AV) )
+                           (WordNode  argument)
                       );let*
                   );else
 
@@ -471,10 +463,10 @@
 (define (add_gpn_precondition schema_name . arguments)
     (EvaluationLink (DEFAULT_STV) (DEFAULT_AV)
 
-       (GroundedSchemaNode (string-trim-both schema_name) (DEFAULT_STV) (DEFAULT_AV) )
+       (GroundedPredicateNode (string-trim-both schema_name) )
 
-       (ListLink (DEFAULT_STV) (DEFAULT_AV)
-                 (apply parse_arguments arguments)
+       (ListLink 
+           (apply parse_arguments arguments)
        )
 
     );EvaluationLink
@@ -515,9 +507,9 @@
 (define (add_action schema_name . arguments)
     (ExecutionLink (DEFAULT_STV) (DEFAULT_AV)
 
-        (GroundedSchemaNode (string-trim-both schema_name) (DEFAULT_STV) (DEFAULT_AV) )
+        (GroundedSchemaNode (string-trim-both schema_name) )
 
-        (ListLink (DEFAULT_STV) (DEFAULT_AV)
+        (ListLink 
             (apply parse_arguments arguments)
         )
 
@@ -566,10 +558,9 @@
 
 (define (add_goal goal_pred_name . arguments)
     (EvaluationLink (DEFAULT_STV) (DEFAULT_AV) 
-        (PredicateNode (string-trim-both goal_pred_name) (DEFAULT_STV) (DEFAULT_AV) )
+        (PredicateNode (string-trim-both goal_pred_name) )
 
-        (ListLink (DEFAULT_STV) (DEFAULT_AV)
-
+        (ListLink 
             (apply parse_arguments arguments)
         )
     );EvaluationLink

@@ -113,8 +113,6 @@ private:
     void init(opencog::CogServer * server);
 
     std::vector<Handle> demandGoalList;  // A list of Demand Goals, also known as Final Goals
-    Handle currentDemandGoal;            // Current selected Demand Goal  
-    Handle previousDemandGoal;           // Previous selected Demand Goal 
 
     // Each list is considered as a plan, which contains a bunch of Psi Rules 
     // leading to the currently selected Demand Goal. 
@@ -191,14 +189,6 @@ private:
     void extractPsiRules(opencog::CogServer * server, pHandle ph, std::vector<Handle> & psiRules, unsigned int level);
 
     /**
-     * Check if the given Handle is a Psi Rule. It is used by extractPsiRules. 
-     *
-     * @return  true if the given Handle indicating a Psi Rule
-     * @note  For the format of Psi Rules, please refer to "./opencog/embodiment/rules_core.scm"
-     */
-    bool isHandleToPsiRule(opencog::CogServer * server, Handle h);
-
-    /**
      * Print Actions for each Plan, only used for debugging
      */
     void printPlans(opencog::CogServer * server, Handle hDemandGoal,
@@ -216,10 +206,51 @@ private:
                            std::vector <combo::vertex> & schemaArguments);
 
     /**
+     * Initialize all the possible variable bindings in Psi Rule with all the entities the pet encounters
+     *
+     * @param server             The pointer to CogServer
+     * @param varBindCandidates  All the possible variable bindings   
+     */
+    void initVarBindCandidates(opencog::CogServer * server, std::vector<std::string> & varBindCandidates);
+
+    /**
+     * Initialize the unifier with the given all the possible variable bindings
+     *
+     * @param unifier            
+     * @param varBindCandidates  All the possible variable bindings
+     *
+     * @note  The combo::variable_unifier inherits from the type 'std::map<std::string, bool>', 
+     *        recording each variable binding and the corresponding state (valid/invalid). 
+     *        (see also './opencog/comboreduct/combo/variable_unifier.h')
+     *
+     *        We usually call this function before running a combo procedure that needs a unifier. 
+     */
+    void initUnifier(combo::variable_unifier & unifier, const std::vector<std::string> & varBindCandidates);
+
+    /**
+     * Updating the possible variable bindings in Psi Rule, based on the result return by combo interpreter 
+     *
+     * @param unifier            The unifier after executing a combo function
+     * @param varBindCandidates  All the possible variable bindings
+     *
+     * @note  We usually call this function after running a combo procedure that needs a unifier. 
+     *
+     *        When you call a combo procedure with a unifier, the combo procedure interpreter would update 
+     *        the state of each possible variable binding automatically.
+     *
+     *        So after running the combo procedure, you can usually call this function,
+     *        which would find variable bindings that are actually valid by simply checking their states. 
+     */
+    void updateVarBindCandidates(const combo::variable_unifier & unifier, std::vector<std::string> & varBindCandidates);
+
+    /**
      * Check if the given Precondition is satisfied. It is used by 'pickUpPsiRule' method.
      *
      * @param  server
      * @param  hPrecondition  Handle to the Precondition, i.e. an EvaluationLink
+     * @param  unifier        The combo interpreter would update the states of all the possible variable bindings 
+     *                        within the unifier
+     *
      * @return  true if the given Precondition is satisfied, otherwise returns false
      *
      * @note  If the EvaluationLink(hPrecondition)) contains a PredicateNode, 
@@ -227,16 +258,20 @@ private:
      *        If the EvaluationLink holds a GroundedPredicateNode, 
      *        we would run the corresponding combo procedure firstly, and then judge based on the execution result. 
      */
-    bool isSatisfied(opencog::CogServer * server, Handle hPrecondition);
+    bool isSatisfied(opencog::CogServer * server, Handle hPrecondition, combo::variable_unifier & unifier);
 
     /**
      * Pick up a Psi Rule that all its Preconditions are satisfied. 
      *
      * @param  server
      * @param  psiRules
+     * @param  varBindCandidates  All the possible variable bindings for the selected Psi Rule
+     *
      * @returns The handle to current selected Rule. Or opencog::Handle::UNDEFINED if Failed. 
      */
-    Handle pickUpPsiRule(opencog::CogServer * server, const std::vector<Handle> & psiRules);
+    Handle pickUpPsiRule(opencog::CogServer * server, 
+                         const std::vector<Handle> & psiRules, 
+                         std::vector<std::string> & varBindCandidates);
 
     /**
      * Apply the given Psi Rule. 
