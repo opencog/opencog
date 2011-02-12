@@ -745,6 +745,23 @@ public:
         logger().debug("END TEST: filter");
     }
 
+    void testHandleRemove() {
+        // Ensure that context link removal removes the TV from the associated
+        // CompositeTV
+        Handle h = atomSpace->addNode(CONCEPT_NODE,"blah");
+        atomSpace->setTV(h,SimpleTruthValue(0.5,0.5));
+        Handle ch = atomSpace->addNode(CONCEPT_NODE,"context");
+        HandleSeq oset;
+        oset.push_back(ch);
+        oset.push_back(h);
+        Handle contextLink = atomSpace->addLink(CONTEXT_LINK,oset,SimpleTruthValue(0.8,0.1));
+        VersionHandle vh(CONTEXTUAL, ch); 
+        TS_ASSERT_DELTA(atomSpace->getTV(h,vh).getMean(),0.8,0.001);
+        atomSpace->removeAtom(contextLink);
+        TS_ASSERT(atomSpace->getTV(h,vh) == TruthValue::NULL_TV());
+
+    }
+
 };
 
 AtomSpaceImpl *AtomSpaceImplUTest::atomSpace = NULL;
