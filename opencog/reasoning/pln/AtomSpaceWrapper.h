@@ -311,9 +311,6 @@ public:
     //! Convert real handles to pln pHandleSeq , optionally expanding to
     //! include every VersionHandled TV in each real handle
     pHandleSeq realToFakeHandles(const HandleSeq& hs, bool expand=false);
-    //! Match each dummy context in the tail of the outgoing set of dc
-    //! with the handles in the outgoing set of h
-    pHandleSeq realToFakeHandles(Handle h, Handle dc);
     //! Convert real handles to pln pHandleSeq, all under a given context
     pHandleSeq realToFakeHandles(const HandleSeq& hs, Handle context);
 

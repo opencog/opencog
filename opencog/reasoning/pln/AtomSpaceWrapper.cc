@@ -302,26 +302,18 @@ bool AtomSpaceWrapper::isValidPHandle(const pHandle h) const
 
 vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
 {
-#ifdef	STREAMLINE_PHANDLES
     // Don't map Handles that are Types
     if (isType(h)) {
-        printf("Cannot convert an atom type (%u) to a real Handle", h);
         throw RuntimeException(TRACE_INFO, "Cannot convert an atom type (%u) "
                 "to a real Handle", h);
     }
-
+#ifdef	STREAMLINE_PHANDLES
     Handle realHandle(h - mapOffset);
     vhpair vh;
     vh.first = realHandle;
     vh.second = NULL_VERSION_HANDLE;
     return vh;
 #else
-    // Don't map Handles that are Types
-    if (isType(h)) {
-        printf("Cannot convert an atom type (%u) to a real Handle", h);
-        throw RuntimeException(TRACE_INFO, "Cannot convert an atom type (%u) "
-                "to a real Handle", h);
-    }
     vhmap_t::const_iterator i = vhmap.find(h);
     if (i != vhmap.end()) {
         // check that real Handle is still valid
@@ -384,38 +376,6 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandle(const Handle h) {
     }
     return result;
 #endif
-}
-
-
-pHandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h, const Handle c)
-{
-	bool NotUsed = true;
-	assert(NotUsed);
-
-    // c is a context whose outgoing set of contexts matches contexts of each
-    // handle in outgoing of real handle h.
-    HandleSeq contexts = atomspace->getOutgoing(c);
-    HandleSeq outgoing = atomspace->getOutgoing(h);
-    pHandleSeq results;
-
-    // Check that all contexts match... they should
-    bool match = true;
-    for (unsigned int i=0; match && i < outgoing.size(); i++) {
-        // +1 because first context is for distinguishing dual links using the
-        // same destination contexts.
-        if (contexts[i+1] == rootContextHandle)
-            contexts[i+1] = Handle::UNDEFINED;
-        VersionHandle vh(CONTEXTUAL, contexts[i+1]);
-        if (atomspace->getTV(outgoing[i],vh)->isNullTv()) {
-            match = false;
-        } else {
-            results.push_back(realToFakeHandle(outgoing[i], vh));
-        }
-    }
-    if (match)
-        return results;
-    else
-        throw RuntimeException(TRACE_INFO, "getOutgoing: link context is bad");
 }
 
 pHandleSeq AtomSpaceWrapper::realToFakeHandles(const HandleSeq& hs,
@@ -1497,7 +1457,6 @@ NormalizingATW::NormalizingATW(AtomSpace *a): FIMATW(a)
 {
 }
 
-//#define BL 2
 pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
                                 const TruthValue& tvn, bool fresh)
 {
@@ -1521,6 +1480,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
     }
 
 #if 0
+//#define BL 2
     if (T == IMPLICATION_LINK
         && hs.size()==2
         && isSubType(hs[0], FALSE_LINK))

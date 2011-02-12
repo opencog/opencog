@@ -60,6 +60,12 @@ public:
         asw->reset();
     }
 
+    void testFakeToRealHandle() {
+        pHandle h1 = asw->addNode(CONCEPT_NODE, "x",
+                                  SimpleTruthValue(0.001f,1.0f), false);
+        TS_ASSERT_THROWS(asw->fakeToRealHandle(CONCEPT_NODE), RuntimeException);
+
+    }
 
     void testAtomIdentity() {
         // Test node identity works

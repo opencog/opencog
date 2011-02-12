@@ -51,8 +51,6 @@ ADD_LIBRARY (pln SHARED
 	rules/context/ContextFreeToSensitiveRule.cc
 # Utils
 	utils/Grim.cc
-#	utils/XMLNode.cc
-#	utils/XMLNodeLoader.cc
 	utils/NMPrinter.cc
 	utils/mva.cc
 	# for later:
