@@ -239,48 +239,6 @@ string AtomSpaceImpl::getName(Type t) const
     return classserver().getTypeName(t);
 }
 
-bool AtomSpaceImpl::isVar(Handle h) const
-{
-    DPRINTF("AtomSpaceImpl::isVar Atom space address: %p\n", this);
-    return inheritsType(getType(h), VARIABLE_NODE);
-}
-
-bool AtomSpaceImpl::isList(Handle h) const
-{
-    DPRINTF("AtomSpaceImpl::isList Atom space address: %p\n", this);
-    return inheritsType(getType(h), LIST_LINK);
-}
-
-bool AtomSpaceImpl::containsVar(Handle h) const
-{
-    DPRINTF("AtomSpaceImpl::containsVar Atom space address: %p\n", this);
-
-    Node *nnn = dynamic_cast<Node *>(TLB::getAtom(h));
-    if (!nnn) {
-        for (int i = 0;i < getArity(h);++i)
-            if (containsVar(getOutgoing(h, i)))
-                return true;
-        return false;
-    }
-    return isVar(h);
-}
-
-Handle AtomSpaceImpl::createHandle(Type t, const string& str, bool managed)
-{
-    DPRINTF("AtomSpaceImpl::createHandle Atom space address: %p\n", this);
-
-    Handle h = getHandle(t, str);
-    return TLB::isValidHandle(h) ? h : addNode(t, str, TruthValue::NULL_TV());
-}
-
-Handle AtomSpaceImpl::createHandle(Type t, const HandleSeq& outgoing, bool managed)
-{
-    DPRINTF("AtomSpaceImpl::createHandle Atom space address: %p\n", this);
-
-    Handle h = getHandle(t, outgoing);
-    return TLB::isValidHandle(h) ? h : addLink(t, outgoing, TruthValue::NULL_TV());
-}
-
 bool AtomSpaceImpl::containsVersionedTV(Handle h, VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::containsVersionedTV Atom space address: %p\n", this);
@@ -386,10 +344,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
     Handle result = getHandle(t, outgoing);
     if (TLB::isValidHandle(result))
     {
-        // Just merges the TV
-        //if (!tvn.isNullTv()) do_merge_tv(result, tvn);
-        // Even if the node already exists, it must be merged properly 
-        // for updating its truth and attention values. 
+        // If the node already exists, it must be merged properly 
         atomTable.merge(result, tvn); 
         _mergeAtomSignal(this,result);
         return result;
@@ -403,13 +358,18 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
     if (backing_store)
     {
         Link *l = backing_store->getLink(t, outgoing);
-        if (l)
-        {
+        if (l) {
+            // ask for a Handle from the TLB
             result = TLB::getHandle(l);
-            // TODO: Check if merge signal must be emitted here (AtomTable::merge
-            // does that, but what to do with atoms that are not there?)
+            // merge the tvn argument with that of the atom just loaded from
+            // the backing store
             if (!tvn.isNullTv()) do_merge_tv(result, tvn);
-            return atomTable.add(l);
+            // register the atom with the atomtable (so it gets placed in
+            // indices)
+            Handle r2 = atomTable.add(l);
+            // Send a merge signal
+            _mergeAtomSignal(this,r2);
+            return r2;
         }
     }
 
@@ -528,13 +488,13 @@ Handle AtomSpaceImpl::addRealAtom(const Atom& atom, const TruthValue& tvn)
     const Node *node = dynamic_cast<const Node *>(&atom);
     if (node) {
         result = getHandle(node->getType(), node->getName());
-        if (TLB::isInvalidHandle(result)) {
+        if (result == Handle::UNDEFINED) {
             return addNode(node->getType(), node->getName(), newTV);
         }
     } else {
         const Link *link = dynamic_cast<const Link *>(&atom);
         result = getHandle(link->getType(), link->getOutgoingSet());
-        if (TLB::isInvalidHandle(result)) {
+        if (result == Handle::UNDEFINED) {
             return addLink(link->getType(), link->getOutgoingSet(), newTV);
         }
     }
@@ -577,16 +537,6 @@ boost::shared_ptr<Atom> AtomSpaceImpl::cloneAtom(const Handle h) const
         boost::shared_ptr<Atom> clone_node(node->clone());
         return clone_node;
     }
-}
-
-boost::shared_ptr<Node> AtomSpaceImpl::cloneNode(const Handle h) const
-{
-    return boost::shared_dynamic_cast<Node>(this->cloneAtom(h));
-}
-
-boost::shared_ptr<Link> AtomSpaceImpl::cloneLink(const Handle h) const
-{
-    return boost::shared_dynamic_cast<Link>(this->cloneAtom(h));
 }
 
 std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const

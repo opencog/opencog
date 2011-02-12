@@ -1,11 +1,8 @@
 /*
- * src/AtomSpace/utils.cc
+ * opencog/atomspace/time.cc
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2011 OpenCog Foundation
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,7 +29,7 @@
 #include <sys/time.h>
 #endif
 
-#include "utils.h"
+#include <opencog/util/octime.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 

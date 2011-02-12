@@ -60,6 +60,7 @@ class SpaceServer
 {
     friend class SpaceServerSavable;
 
+    Handle spaceMapNodeHandle;
 public:
 
     static const char* SPACE_MAP_NODE_NAME;

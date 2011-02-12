@@ -48,7 +48,6 @@ ADD_LIBRARY (atomspace SHARED
     Trail.cc
     TruthValue.cc
     TypeIndex.cc
-    utils.cc
     VersionHandle.cc
     md5.c
 )
@@ -124,7 +123,6 @@ INSTALL (FILES
     VersionHandle.h
     md5.h
     types.h
-    utils.h
     DESTINATION "include/${PROJECT_NAME}/atomspace"
 )
 

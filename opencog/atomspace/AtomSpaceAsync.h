@@ -395,12 +395,6 @@ public:
         return r;
     }
 
-    BoolRequest containsVar(const Handle& h) {
-        BoolRequest r(new CheckIfContainsVarASR(&atomspace,h));
-        requestQueue.push(r);
-        return r;
-    }
-
     HashRequest getAtomHash(const Handle& h) {
         HashRequest r(new GetAtomHashASR(&atomspace,h));
         requestQueue.push(r);

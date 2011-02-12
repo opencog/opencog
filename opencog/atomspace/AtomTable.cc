@@ -447,13 +447,13 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 {
     if (atom->getAtomTable() != NULL) {
         // Atom is already inserted
-        return  TLB::getHandle(atom);
+        return TLB::getHandle(atom);
     }
     Handle existingHandle = Handle::UNDEFINED;
     Node * nnn = dynamic_cast<Node *>(atom);
     Link * lll = dynamic_cast<Link *>(atom);
+    // Check if the node or link handle already exists in the indexers
     if (nnn) {
-        // checks if the node handle already exists.
         existingHandle = getHandle(nnn);
     } else if (lll) {
         existingHandle = getHandle(lll);

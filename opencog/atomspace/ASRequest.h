@@ -598,16 +598,6 @@ public:
     
 };
 
-class CheckIfContainsVarASR : public OneParamASR<bool,Handle> {
-public:
-    CheckIfContainsVarASR(AtomSpaceImpl *a, const Handle h) :
-        OneParamASR<bool,Handle>(a,h) {}
-    
-    virtual void do_work() {
-        set_result(atomspace->containsVar(p1));
-    }
-};
-
 class GetAtomHashASR : public OneParamASR<size_t,Handle> {
 public:
     GetAtomHashASR (AtomSpaceImpl *a, const Handle h) :

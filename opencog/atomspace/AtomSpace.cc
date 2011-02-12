@@ -133,24 +133,6 @@ void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
     atomSpaceAsync.setTV(h, tv, vh)->get_result();
 }
 
-Handle AtomSpace::getSpaceMapNode() 
-{
-    Handle result = getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-    if (result == Handle::UNDEFINED) 
-    {
-        result = addNode(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-        setLTI(result, 1);
-    } 
-    else 
-    {
-        if (getLTI(result) < 1) 
-        {
-            setLTI(result, 1);
-        }
-    }
-    return result;
-}
-
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)
 {
     throw opencog::RuntimeException(TRACE_INFO, 
@@ -211,53 +193,6 @@ string AtomSpace::getName(Type t) const
     return classserver().getTypeName(t);
 }
 
-bool AtomSpace::isVar(Handle h) const
-{
-    DPRINTF("AtomSpace::isVar Atom space address: %p\n", this);
-    return inheritsType(getType(h), VARIABLE_NODE);
-}
-
-bool AtomSpace::isList(Handle h) const
-{
-    DPRINTF("AtomSpace::isList Atom space address: %p\n", this);
-    return inheritsType(getType(h), LIST_LINK);
-}
-
-bool AtomSpace::containsVar(Handle h) const
-{
-    DPRINTF("AtomSpace::containsVar Atom space address: %p\n", this);
-    return atomSpaceAsync.containsVar(h)->get_result();
-}
-
-Handle AtomSpace::createHandle(Type t, const string& str, bool managed)
-{
-    DPRINTF("AtomSpace::createHandle Atom space address: %p\n", this);
-
-    Handle h = getHandle(t, str);
-    return h != Handle::UNDEFINED ? h : addNode(t, str, TruthValue::NULL_TV());
-}
-
-Handle AtomSpace::createHandle(Type t, const HandleSeq& outgoing, bool managed)
-{
-    DPRINTF("AtomSpace::createHandle Atom space address: %p\n", this);
-
-    Handle h = getHandle(t, outgoing);
-    return h != Handle::UNDEFINED ? h : addLink(t, outgoing, TruthValue::NULL_TV());
-}
-
-bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const
-{
-    DPRINTF("AtomSpace::containsVersionedTV Atom space address: %p\n", this);
-
-    bool result = isNullVersionHandle(vh);
-    if (!result) {
-        const TruthValue* tv(getTV(h));
-        result = !tv->isNullTv() && tv->getType() == COMPOSITE_TRUTH_VALUE &&
-                 !(dynamic_cast<const CompositeTruthValue*>(tv)->getVersionedTV(vh).isNullTv());
-    }
-    return result;
-}
-
 void AtomSpace::do_merge_tv(Handle h, const TruthValue& tvn)
 {
     const TruthValue* currentTV(getTV(h));
@@ -298,16 +233,6 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
 boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle h) const
 {
     return atomSpaceAsync.getAtom(h)->get_result();
-}
-
-boost::shared_ptr<Node> AtomSpace::cloneNode(const Handle h) const
-{
-    return boost::shared_dynamic_cast<Node>(this->cloneAtom(h));
-}
-
-boost::shared_ptr<Link> AtomSpace::cloneLink(const Handle h) const
-{
-    return boost::shared_dynamic_cast<Link>(this->cloneAtom(h));
 }
 
 size_t AtomSpace::getAtomHash(const Handle h) const 

@@ -409,17 +409,13 @@ void SpaceServer::clear()
 
 Handle SpaceServer::getSpaceMapNode() 
 {
-    Handle result = atomspace->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME)->get_result();
-    if (result == Handle::UNDEFINED) 
-    {
+    Handle result = spaceMapNodeHandle;
+    if (result == Handle::UNDEFINED) {
         result = atomspace->addNode(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME)->get_result();
         atomspace->setLTI(result, 1);
-    } 
-    else 
-    {
-        if (atomspace->getLTI(result)->get_result() < 1) 
-        {
-            atomspace->setLTI(result, 1)->get_result();
+    } else {
+        if (atomspace->getLTI(result)->get_result() < 1) {
+            atomspace->setLTI(result, 1);
         }
     }
     return result;

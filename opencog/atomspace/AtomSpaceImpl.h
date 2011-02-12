@@ -482,8 +482,6 @@ public:
      * Otherwise changes are lost.
      */
     boost::shared_ptr<Atom> cloneAtom(const Handle h) const;
-    boost::shared_ptr<Node> cloneNode(const Handle h) const;
-    boost::shared_ptr<Link> cloneLink(const Handle h) const;
 
     /** Commit an atom that has been cloned from the AtomSpace.
      *
@@ -1063,15 +1061,6 @@ public:
      */
     long getTotalLTI() const;
 
-    // For convenience
-    // bool isNode(Handle) const;
-    bool isVar(Handle) const;
-    bool isList(Handle) const;
-    bool containsVar(Handle) const;
-
-    Handle createHandle(Type t, const std::string& str, bool managed = false);
-    Handle createHandle(Type t, const HandleSeq& outgoing, bool managed = false);
-
     int Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
     int Links(VersionHandle = NULL_VERSION_HANDLE) const;
 
@@ -1128,28 +1117,6 @@ public:
                 * it++ = *begin;
         return it;
     }
-
-// ---- custom filter templates
-    /*HandleSeq filter_type(Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
-        HandleSeq result;
-        _getNextAtomPrepare_type(type);
-        Handle next;
-        while ((next = _getNextAtom_type(type)) != Handle::UNDEFINED)
-            if (containsVersionedTV(next, vh))
-                result.push_back(next);
-        return result;
-    }
-
-    template<typename OutputIterator>
-    OutputIterator filter_type(OutputIterator it, Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
-        _getNextAtomPrepare_type(type);
-        Handle next;
-        while ((next = _getNextAtom_type(type)) != Handle::UNDEFINED)
-            if (containsVersionedTV(next, vh))
-                * it++ = next;
-
-        return it;
-    }*/
 
     template<typename InputIterator>
     HandleSeq filter_InAttentionalFocus(InputIterator begin, InputIterator end) const {

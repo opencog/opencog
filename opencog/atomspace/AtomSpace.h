@@ -157,10 +157,6 @@ public:
     Handle addRealAtom(const Atom& atom,
                        const TruthValue& tvn = TruthValue::NULL_TV());
 
-    inline bool saveToXML(const std::string& filename) const {
-        return atomSpaceAsync.saveToXML(filename)->get_result();
-    }
-
     /**
      * Prints atoms of this AtomSpace to the given output stream.
      * @param output  the output stream where the atoms will be printed.
@@ -487,8 +483,6 @@ public:
      * Otherwise changes are lost.
      */
     boost::shared_ptr<Atom> cloneAtom(const Handle h) const;
-    boost::shared_ptr<Node> cloneNode(const Handle h) const;
-    boost::shared_ptr<Link> cloneLink(const Handle h) const;
 
     /** Commit an atom that has been cloned from the AtomSpace.
      *
@@ -1123,19 +1117,8 @@ public:
      */
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
-    // For convenience
-    // bool isNode(Handle) const;
-    bool isVar(Handle) const;
-    bool isList(Handle) const;
-    bool containsVar(Handle) const;
-
-    Handle createHandle(Type t, const std::string& str, bool managed = false);
-    Handle createHandle(Type t, const HandleSeq& outgoing, bool managed = false);
-
     int Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
     int Links(VersionHandle = NULL_VERSION_HANDLE) const;
-
-    bool containsVersionedTV(Handle h, VersionHandle vh) const;
 
     //! Clear the atomspace, remove all atoms
     void clear();
@@ -1272,12 +1255,6 @@ private:
         if (toRemove) delete toRemove;
         return result;
     }
-
-    /**
-     * Creates the space map node, if not created yet.
-     * returns the handle of the node.
-     */
-    Handle getSpaceMapNode(void);
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     // For monitoring removals to the AtomSpace so that cache entries can be

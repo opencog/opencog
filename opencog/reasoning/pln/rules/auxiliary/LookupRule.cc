@@ -59,13 +59,13 @@ bool ExpandEvaluationLinks(vtree& target, AtomSpaceWrapper* asw)
                                                           begin_stamp_s,
                                                           TruthValue::TRUE_TV(),
                                                           false)));
-                //              target.replace(i, Vertex(NewNode(NUMBER_NODE, begin_stamp_s)));
+                //  target.replace(i, Vertex(NewNode(NUMBER_NODE, begin_stamp_s)));
                 if (name == "!now")
                     target.replace(i, Vertex(asw->addNode(NUMBER_NODE,
                                                           end_stamp_s,
                                                           TruthValue::TRUE_TV(),
                                                           false)));
-//              target.replace(i, Vertex(NewNode(NUMBER_NODE, end_stamp_s)));
+                //  target.replace(i, Vertex(NewNode(NUMBER_NODE, end_stamp_s)));
 
                 is_changed = true;
             }

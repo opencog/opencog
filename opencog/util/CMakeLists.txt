@@ -30,6 +30,7 @@ ADD_LIBRARY(util
 	exceptions
 	files
 	functional.h
+    iostreamContainer
 	lazy_normal_selector
 	lazy_random_selector
 	lazy_selector
@@ -43,7 +44,7 @@ ADD_LIBRARY(util
 	stack
 	StringManipulator
 	StringTokenizer
-    iostreamContainer
+    octime
 	tree
 	${WIN32_GETOPT_FILES}
     ${APPLE_STRNDUP_FILES}
@@ -69,6 +70,7 @@ INSTALL(FILES
 	functional.h
 	oc_assert.h
 	hashing.h
+    iostreamContainer.h
 	lazy_normal_selector.h
 	lazy_random_selector.h
 	lazy_selector.h
@@ -85,8 +87,8 @@ INSTALL(FILES
 	stack.h
 	StringManipulator.h
 	StringTokenizer.h
-    iostreamContainer.h
 	tree.h
+    octime.h
 	DESTINATION "include/${PROJECT_NAME}/util"
 )
 

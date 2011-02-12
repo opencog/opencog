@@ -64,7 +64,7 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
 {
     size_t total = 0;
     if (a->isNode(h)) {
-        boost::shared_ptr<Node> n(a->cloneNode(h));
+        Node* n = dynamic_cast<Node*>(TLB::getAtom(h));
         total = sizeof(Node);
         total += sizeof(HandleEntry) * n->getIncomingSet()->getSize();
         if (&(n->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
@@ -86,7 +86,7 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
             }
         }
     } else {
-        boost::shared_ptr<Link> l(a->cloneLink(h));
+        Link* l = dynamic_cast<Link*>(TLB::getAtom(h));
         total = sizeof(Link);
         total += sizeof(HandleEntry) * l->getIncomingSet()->getSize();
         if (&(l->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {

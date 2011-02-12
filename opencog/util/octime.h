@@ -1,11 +1,8 @@
 /*
- * src/AtomSpace/utils.h
+ * opencog/util/time.h
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2011 OpenCog Foundation
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OPENCOG_UTILS_H
-#define OPENCOG_UTILS_H
+#ifndef OPENCOG_UTILS_TIME_H
+#define OPENCOG_UTILS_TIME_H
 
 namespace opencog
 {
@@ -43,4 +40,4 @@ unsigned long getElapsedMillis();
 
 } // namespace opencog
 
-#endif /* OPENCOG_UTILS_H */
+#endif //  OPENCOG_UTILS_TIME_H
