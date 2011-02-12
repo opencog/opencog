@@ -229,12 +229,8 @@ pHandleSeq AtomSpaceWrapper::getOutgoing(const pHandle h)
 
 pHandle AtomSpaceWrapper::getOutgoing(const pHandle h, const int i)
 {
-    if (i < getArity(h))
-        return getOutgoing(h)[i];
-    else
-        cout << "no outgoing set!" << endl;
-        printTree(h,0,0);
-        return PHANDLE_UNDEFINED;
+    OC_ASSERT(i < getArity(h));
+    return getOutgoing(h)[i];
 }
 
 pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h) 
