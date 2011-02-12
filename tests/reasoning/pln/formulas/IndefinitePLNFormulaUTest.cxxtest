@@ -1,6 +1,7 @@
 /*
  * tests/reasoning/IndefinitePLNFormulaUTest.cxxtest
  *
+ * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
  *
@@ -27,7 +28,6 @@
 #include <opencog/reasoning/pln/formulas/Formulas.h>
 #include <opencog/reasoning/pln/formulas/FormulasIndefinite.h>
 #include <opencog/reasoning/pln/formulas/DeductionLookupTable.h>
-#include <opencog/atomspace/utils.h>
 
 #include <math.h>
 #include <vector>
@@ -568,12 +568,10 @@ public:
 		
         opencog::pln::setSaveDeductionLookupTable(true);
         opencog::pln::setUseDeductionLookupTable(false);
-//		unsigned long time_start=getElapsedMillis();
 		//DeductionLookupTable::getInstance()->readTable();
 // Removed because that formula was removed (a new version of it is needed).
 /*		opencog::pln::BuildLookuptTableIndefiniteSymmetricDeductionFormula fBuildLookupDeduction;
 		fBuildLookupDeduction.compute();*/
-//        unsigned long time_end=getElapsedMillis();
 	}
 
     void testEvaluateDeductionLookupTable(){

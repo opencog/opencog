@@ -1,11 +1,9 @@
 /*
  * tests/reasoning/FormulaKitUTest.cxxtest
  *
+ * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
- *
- * Original written by Ari A. Heljakka
- * Modified by Jared Wigmore <jared.wigmore@gmail.com> 2008
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -28,7 +26,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/utils.h> //#include <utils2.h>
 
 #include <math.h>
 #define NUM_ATOMS 5
