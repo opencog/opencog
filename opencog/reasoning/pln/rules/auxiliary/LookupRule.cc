@@ -20,7 +20,8 @@
  */
 
 #include <opencog/util/platform.h>
-#include <opencog/atomspace/utils.h>
+#include <opencog/util/octime.h>
+
 #include "../../PLN.h"
 
 #include "../Rule.h"
