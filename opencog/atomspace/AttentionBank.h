@@ -52,6 +52,9 @@ class AttentionBank
     long fundsSTI;
     long fundsLTI;
 
+    long startingFundsSTI;
+    long startingFundsLTI;
+
     mutable boost::mutex lock_funds;
 
     /*

@@ -5,16 +5,23 @@
 using namespace opencog;
 
 AttentionBank::AttentionBank()
-    //AtomSpaceImpl *a) :
-    //atomspace(as)
 {
-    fundsSTI = config().get_int("STARTING_STI_FUNDS");
-    fundsLTI = config().get_int("STARTING_LTI_FUNDS");
+    startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS");
+    startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     attentionalFocusBoundary = 1;
 }
 
 AttentionBank::~AttentionBank()
 {
+    fundsSTI = config().get_int("STARTING_STI_FUNDS");
+}
+
+long AttentionBank::getTotalSTI() const {
+    return startingFundsSTI - fundsSTI;
+}
+
+long AttentionBank::getTotalLTI() const {
+    return startingFundsLTI - fundsLTI;
 }
 
 void AttentionBank::setAV(AttentionValueHolder *avh, const AttentionValue& av)

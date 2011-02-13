@@ -78,6 +78,7 @@ AtomSpaceImpl::AtomSpaceImpl(void) :
     logger().fine("Max load factor for handle map is: %f", TLB::handle_map.max_load_factor());
 
     pthread_mutex_init(&atomSpaceLock, NULL);
+    DPRINTF("AtomSpaceImpl::Constructor AtomTable address: %p\n", &atomTable);
 }
 
 AtomSpaceImpl::~AtomSpaceImpl()
@@ -109,7 +110,7 @@ void AtomSpaceImpl::unregisterBackingStore(BackingStore *bs)
 
 void AtomSpaceImpl::atomAdded(AtomSpaceImpl *a, Handle h)
 {
-    DPRINTF("AtomSpaceImpl::atomAdded(%p): %s\n", h, TLB::getAtom(h)->toString().c_str());
+    DPRINTF("AtomSpaceImpl::atomAdded(%lu): %s\n", h.value(), TLB::getAtom(h)->toString().c_str());
     Type type = getType(h);
     if (type == CONTEXT_LINK) {
         // Add corresponding VersionedTV to the contextualized atom
@@ -155,7 +156,7 @@ void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, Handle h)
 
 const AtomTable& AtomSpaceImpl::getAtomTable() const
 {
-    DPRINTF("AtomSpaceImpl::getAtomTable Atom space address: %p\n", this);
+    DPRINTF("AtomSpaceImpl::getAtomTable this(%p), atomTable address = %p\n", this, &atomTable);
     return atomTable;
 }
 
@@ -164,6 +165,13 @@ void AtomSpaceImpl::print(std::ostream& output, Type type, bool subclass) const
     atomTable.print(output, type, subclass);
 }
 
+Handle AtomSpaceImpl::getHandle(Type t, const std::string& str) const {
+    return atomTable.getHandle(str.c_str(), t);
+}
+
+Handle AtomSpaceImpl::getHandle(Type t, const HandleSeq& outgoing) const {
+    return atomTable.getHandle(t, outgoing);
+}
 
 AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
 {
@@ -301,6 +309,8 @@ void AtomSpaceImpl::do_merge_tv(Handle h, const TruthValue& tvn)
 
 Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
 {
+    DPRINTF("AtomSpaceImpl::addNode AtomTable address: %p\n", &atomTable);
+    DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
     Handle result = getHandle(t, name);
     if (TLB::isValidHandle(result))
     {
@@ -341,6 +351,8 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
 Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
                           const TruthValue& tvn)
 {
+    DPRINTF("AtomSpaceImpl::addLink AtomTable address: %p\n", &atomTable);
+    DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
     Handle result = getHandle(t, outgoing);
     if (TLB::isValidHandle(result))
     {
@@ -811,44 +823,6 @@ void AtomSpaceImpl::decayShortTermImportance()
     }
 }
 
-long AtomSpaceImpl::getTotalSTI() const
-{
-    long totalSTI = 0;
-    HandleEntry* q;
-
-    /* get atom iterator, go through each atom and calculate add
-     * sti to total */
-
-    HandleEntry* h = getAtomTable().getHandleSet(ATOM, true);
-    q = h;
-    while (q) {
-        totalSTI += getSTI(q->handle);
-        q = q->next;
-    }
-    delete h;
-    return totalSTI;
-
-}
-
-long AtomSpaceImpl::getTotalLTI() const
-{
-    long totalLTI = 0;
-    HandleEntry* q;
-
-    /* get atom iterator, go through each atom and calculate add
-     * lti to total */
-
-    HandleEntry* h = getAtomTable().getHandleSet(ATOM, true);
-    q = h;
-    while (q) {
-        totalLTI += getLTI(q->handle);
-        q = q->next;
-    }
-    delete h;
-    return totalLTI;
-
-}
-
 int AtomSpaceImpl::Links(VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::Links Atom space address: %p\n", this);
@@ -939,7 +913,7 @@ void AtomSpaceImpl::clear()
     int j = 0;
     DPRINTF("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
             Links(NULL_VERSION_HANDLE));
-    DPRINTF("atoms in allAtoms: %d\n",allAtoms.size());
+    DPRINTF("atoms in allAtoms: %lu\n",allAtoms.size());
 
     logger().enable();
     logger().setLevel(Logger::DEBUG);
@@ -947,8 +921,8 @@ void AtomSpaceImpl::clear()
     for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
         result = removeAtom(*i,true);
         if (result) {
-            DPRINTF("%d: Atom %u removed, %d nodes %d links left to delete\n",
-                j,*i,Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
+            DPRINTF("%d: Atom %lu removed, %d nodes %d links left to delete\n",
+                j,i->value(),Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
             j++;
         }
     }

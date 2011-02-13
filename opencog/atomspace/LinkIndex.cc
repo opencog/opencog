@@ -26,6 +26,9 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 LinkIndex::LinkIndex(void)
@@ -35,6 +38,7 @@ LinkIndex::LinkIndex(void)
 
 void LinkIndex::resize()
 {
+    DPRINTF("Resizing link index (%p) to size %d\n", this, classserver().getNumberOfClasses());
 	idx.resize(classserver().getNumberOfClasses());
 }
 

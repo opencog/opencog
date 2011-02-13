@@ -326,19 +326,11 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(const char* name, Type t) const {
-        return nodeIndex.getHandle(t, name);
-    }
-    Handle getHandle(const Node* n) const {
-        return getHandle(n->getName().c_str(), n->getType());
-    }
+    Handle getHandle(const char* name, Type t) const;
+    Handle getHandle(const Node* n) const;
 
-    Handle getHandle(Type t, const HandleSeq &seq) const {
-        return linkIndex.getHandle(t, seq);
-    }
-    Handle getHandle(const Link* l) const {
-        return getHandle(l->getType(), l->getOutgoingSet());
-    }
+    Handle getHandle(Type t, const HandleSeq &seq) const;
+    Handle getHandle(const Link* l) const;
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).

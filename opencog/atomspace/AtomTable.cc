@@ -185,6 +185,20 @@ inline unsigned int AtomTable::getNameHash(Atom* atom) const
     return strHash(nnn->getName().c_str());
 }
 
+Handle AtomTable::getHandle(const char* name, Type t) const {
+    return nodeIndex.getHandle(t, name);
+}
+Handle AtomTable::getHandle(const Node* n) const {
+    return getHandle(n->getName().c_str(), n->getType());
+}
+
+Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const {
+    return linkIndex.getHandle(t, seq);
+}
+Handle AtomTable::getHandle(const Link* l) const {
+    return getHandle(l->getType(), l->getOutgoingSet());
+}
+
 HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle vh) const
 {
     DPRINTF("AtomTable::findHandlesByGPN(%s)\n", gpnNodeName);

@@ -319,9 +319,7 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getHandle(Type t, const std::string& str) const {
-        return atomTable.getHandle(str.c_str(), t);
-    }
+    Handle getHandle(Type t, const std::string& str) const;
 
     /**
      * Retrieve from the Atom Table the Handle of a given link
@@ -329,9 +327,7 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return atomTable.getHandle(t, outgoing);
-    }
+    Handle getHandle(Type t, const HandleSeq& outgoing) const;
 
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const;
@@ -353,24 +349,6 @@ public:
 
     /** Change the primary TV's mean of a given Handle */
     void setMean(Handle, float mean) throw (InvalidParamException);
-
-    /** Retrieve the AttentionValue of an attention value holder */
-    //const AttentionValue& getAV(AttentionValueHolder *avh) const;
-
-    /** Change the AttentionValue of an attention value holder */
-    //void setAV(AttentionValueHolder *avh, const AttentionValue &av);
-
-    /** Change the Short-Term Importance of an attention value holder */
-    //void setSTI(AttentionValueHolder *avh, AttentionValue::sti_t);
-
-    /** Change the Long-term Importance of an attention value holder */
-    //void setLTI(AttentionValueHolder *avh, AttentionValue::lti_t);
-
-    /** Change the Very-Long-Term Importance of an attention value holder */
-    //void setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t);
-
-    /** Retrieve the Short-Term Importance of an attention value holder */
-    //AttentionValue::sti_t getSTI(AttentionValueHolder *avh) const;
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given AttentionValueHolder. STI above and below threshold
@@ -1044,22 +1022,6 @@ public:
      * Agent. Still used by Embodiment.
      */
     void decayShortTermImportance();
-
-    /**
-     * Get the total amount of STI in the AtomSpace, sum of
-     * STI across all atoms.
-     *
-     * @return total STI in AtomSpace
-     */
-    long getTotalSTI() const;
-
-    /**
-     * Get the total amount of LTI in the AtomSpace, sum of
-     * all LTI across atoms.
-     *
-     * @return total LTI in AtomSpace
-     */
-    long getTotalLTI() const;
 
     int Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
     int Links(VersionHandle = NULL_VERSION_HANDLE) const;
