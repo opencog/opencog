@@ -8,11 +8,16 @@ ifiles=""
 for f in ${BASEDIR}/coverage/*.info; do
     ifiles="$ifiles -a $f"
 done
-echo "Combining all lcov .info files into single file"
+echo "*** Combining all lcov .info files into single file"
+echo Command is: lcov --directory ${BASEDIR} $ifiles --output-file ${BASEDIR}/coverage/alltemp.info
 lcov --directory ${BASEDIR} $ifiles --output-file ${BASEDIR}/coverage/alltemp.info
-echo "Removing coverage info for non-OpenCog files"
+echo "*** Removing coverage info for non-OpenCog files"
 # Get the name of the current dir
 BIN_DIR=${PWD##*/}
+echo Command is: lcov --directory ${BASEDIR} --output-file ${BASEDIR}/coverage/all.info \
+    --remove ${BASEDIR}/coverage/alltemp.info \
+        /usr/include/\* \
+        ${BIN_DIR}/tests/\*
 lcov --directory ${BASEDIR} --output-file ${BASEDIR}/coverage/all.info \
     --remove ${BASEDIR}/coverage/alltemp.info \
         /usr/include/\* \
@@ -20,6 +25,7 @@ lcov --directory ${BASEDIR} --output-file ${BASEDIR}/coverage/all.info \
 rm ${BASEDIR}/coverage/alltemp.info
 
 echo "Creating lcov html summary"
+echo Command is: genhtml -s -o ${BASEDIR}/lcov --demangle-cpp --num-spaces 4 --title "OpenCog Coverage Analysis" ${BASEDIR}/coverage/all.info
 genhtml -s -o ${BASEDIR}/lcov --demangle-cpp --num-spaces 4 --title "OpenCog Coverage Analysis" ${BASEDIR}/coverage/all.info
 echo "Moving coverage files to ${BASEDIR}/coverage/old"
 mkdir -p ${BASEDIR}/coverage/old
