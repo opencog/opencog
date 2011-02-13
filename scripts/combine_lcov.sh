@@ -22,7 +22,7 @@ lcov --directory ${BASEDIR} --output-file ${BASEDIR}/coverage/all.info \
     --remove ${BASEDIR}/coverage/alltemp.info \
         /usr/include/\* \
         ${BIN_DIR}/tests/\*
-rm ${BASEDIR}/coverage/alltemp.info
+#rm ${BASEDIR}/coverage/alltemp.info
 
 echo "Creating lcov html summary"
 echo Command is: genhtml -s -o ${BASEDIR}/lcov --demangle-cpp --num-spaces 4 --title "OpenCog Coverage Analysis" ${BASEDIR}/coverage/all.info
