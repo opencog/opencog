@@ -566,11 +566,12 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
         if (atomSpace.getType(listLink) == LIST_LINK
                 && atomSpace.getArity(listLink) == 4) {
             // ensure that the size predicate relats to the object
-            if (atomSpace.getOutgoing(listLink, 0) == object) {
+            HandleSeq outgoing = atomSpace.getOutgoing(listLink);
+            if (outgoing[0] == object) {
 //TODO: elvys remove logs comment
-                length = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 1)).c_str());
-                width = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 2)).c_str());
-                height = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 3)).c_str());
+                length = atof(atomSpace.getName(outgoing[1]).c_str());
+                width = atof(atomSpace.getName(outgoing[2]).c_str());
+                height = atof(atomSpace.getName(outgoing[3]).c_str());
 //                logger().info("AtomSpaceUtil - Obj %s (width: %.2lf length: %.2lf height: %.2lf)",
 //                            atomSpace.getName(object).c_str(), width, length, height);
                 return true;
