@@ -37,20 +37,18 @@ class PAIWorldWrapper : public WorldWrapperBase
 {
 public:
 
-    //ctor, dtor
-    PAIWorldWrapper(PerceptionActionInterface::PAI& pai, opencog::RandGen& _rng);
+    PAIWorldWrapper(PerceptionActionInterface::PAI& _pai, opencog::RandGen& _rng);
     ~PAIWorldWrapper();
 
     /**
-     * return true is the current action plan is finished
+     * @returns true is the current action plan is finished
      * false otherwise or if there is no action plan
      */
     bool isPlanFinished() const;
 
     /**
-     * return true if the plan has failed
-     * false otherwise
-     * pre-condition : the plan is finished
+     * @pre the plan is finished
+     * @returns true if the plan has failed false otherwise
      */
     bool isPlanFailed() const;
 
@@ -66,27 +64,23 @@ public:
      * evaluate a perception
      */
     combo::vertex evalPerception(pre_it per,
-                                 combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+           combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
     /**
      * evaluate an indefinite object
      */
     combo::vertex evalIndefiniteObject(combo::indefinite_object io,
-                                       combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+           combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
 private:
-    //attributes
-    PerceptionActionInterface::PAI& _pai;
+    PerceptionActionInterface::PAI& pai;
+    PerceptionActionInterface::ActionPlanID planID;
     opencog::RandGen& rng;
-    PerceptionActionInterface::ActionPlanID _planID;
 
-    bool _hasPlanFailed; //sometimes it is possible to know in advance
-    //whether the plan has failed without sending it
-    //if _planHasFailed is true then we know for sure
-    //that the plan has already failed
-    //otherwise we don't know
-
-    //methods
+    // sometimes it is possible to know in advance whether the plan has failed
+    // without sending it if _planHasFailed is true then we know for sure that
+    // the plan has already failed otherwise we don't know
+    bool _hasPlanFailed; 
 
     /**
      * If pet is located at an invalid position, this method will return
@@ -97,8 +91,8 @@ private:
     spatial::Point getValidPosition( const spatial::Point& location );
 
     /**
-     * This method will try to makes path even smoother,
-     * reducing the number of walks
+     * This method will try to make path even smoother, reducing the number of
+     * walks
      * @param actions walks processed by pathplanner
      * @param startPoint Current pet position
      * @param endPoint Goal position
@@ -117,9 +111,8 @@ private:
     void getWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point>& actions );
 
     /**
-     * Uses the current PathPlanner (HPA, Astar, TangentBUG, etc. )
-     * to build the path plan
-     * to achieve a given position
+     * Uses the current PathPlanner (HPA, Astar, TangentBUG, etc.) to build
+     * a path to achieve a given position
      * @param position Goal position
      * @return false if path planning has failed and true if successfull
      */
@@ -139,32 +132,34 @@ private:
                                float customSpeed = 0);
 
 
-    //builds plans for actions relying on goto (goto_obj, follow, etc)
+    //! Builds plans for actions relying on goto (goto_obj, follow, etc)
     bool build_goto_plan(Handle, bool useExistingID = false,
-                         Handle nudgeHandle = Handle::UNDEFINED, Handle goBehind = Handle::UNDEFINED, float walkSpeed = 0);
+                         Handle nudgeHandle = Handle::UNDEFINED,
+                         Handle goBehind = Handle::UNDEFINED,
+                         float walkSpeed = 0);
 
-    //synthesize a PetAction obj from a subtree
+    //! synthesize a PetAction obj from a subtree
     PerceptionActionInterface::PetAction buildPetAction(sib_it from);
 
-    //???
-    std::string toCamelCase(std::string str);
+    //! convert string to camelCase
+    std::string toCamelCase(const std::string& str);
 
-    //type of a handle -> string
+    //! type of a handle -> string
     std::string resolveType(combo::vertex);
     std::string resolveType(Handle);
 
-    //convenience reference to string representing our pet ("self" in combo)
+    //! Convenience reference to string representing our avatar ("self" in combo)
     std::string selfName();
 
-    //convenience reference to string representing the owner ("owner" in combo)
+    //! Convenience reference to string representing the owner ("owner" in combo)
     std::string ownerName();
 
-    //determing angle an slobject is facing based on atomtable lookup
+    //! Determine the angle an slobject is facing based on atomspace lookup
     double getAngleFacing(Handle) throw (opencog::ComboException,
                                          opencog::AssertionException,
                                          std::bad_exception);
 
-    //convenience conversion function
+    //! Convenience conversion function
     Handle toHandle(combo::definite_object);
 
     bool eval_percept_with_pai(pre_it it);

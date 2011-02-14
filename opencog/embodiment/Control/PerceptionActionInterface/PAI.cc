@@ -1,9 +1,9 @@
 /*
  * opencog/embodiment/Control/PerceptionActionInterface/PAI.cc
  *
+ * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Welter Luigi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,7 +20,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/framework/MemBufInputSource.hpp>
@@ -68,6 +67,9 @@ using namespace opencog;
 // expression is altered.
 #define REGEX_OUTPUT_SIZE 8
 
+using XERCES_CPP_NAMESPACE::XMLString;
+using XERCES_CPP_NAMESPACE::DOMDocument;
+using XERCES_CPP_NAMESPACE::DOMElement;
 
 PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, AvatarInterface& _avatarInterface, unsigned long nextPlanID) :
         atomSpace(_atomSpace), actionSender(_actionSender), avatarInterface(_avatarInterface), nextActionPlanId(nextPlanID)
@@ -84,13 +86,15 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, AvatarInterface
 #endif
     latestSimWorldTimestamp = 0;
 
+    // Set up the xml parser
     parser = new PetaverseDOMParser();
     parser->setErrorHandler(&errorHandler);
 
     // The following lines enable validation
     //parser->setValidationScheme(XERCES_CPP_NAMESPACE::XercesDOMParser::Val_Always);
     parser->cacheGrammarFromParse(true);
-    parser->setValidationScheme(XERCES_CPP_NAMESPACE::XercesDOMParser::Val_Auto); // only when setDoSchema(true) is called.
+    // only validate when setDoSchema(true) is called.
+    parser->setValidationScheme(XERCES_CPP_NAMESPACE::XercesDOMParser::Val_Auto);
     parser->setDoNamespaces(true);
 //    parser->setDoNamespaces(false);
     parser->setDoSchema(true);
@@ -137,7 +141,6 @@ ActionPlanID PAI::createActionPlan()
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_lock(&plock);
 #endif
-    //planId = nextActionPlanId++;
     planId = opencog::toString(nextActionPlanId);
     nextActionPlanId++;
 #ifdef HAVE_LIBPTHREAD
@@ -157,17 +160,20 @@ void PAI::sendActionPlan(ActionPlanID planId) throw (opencog::RuntimeException, 
         const ActionPlan& plan = it->second;
         if (actionSender.sendActionPlan(plan)) {
             // mark action plan as sent by moving it from inProgress to pending map
-            pendingActionPlans[planId] = plan; // must be added first. Otherwise the reference to the plan becomes invalid
+            
+            // must be added first. Otherwise the reference to the plan becomes invalid
+            pendingActionPlans[planId] = plan;
             inProgressActionPlans.erase(it->first);
+
             // TODO: Add a "ActionTried" predicate for each action in the sent action plan
             // (i.e., each ExecLink Handle in planToActionIdsMaps[planId])
         } else {
             throw opencog::RuntimeException(TRACE_INFO,
-                                            "PAI - ActionPlanSender could not send the ActionPlan '%s'.", planId.c_str());
+                "PAI - ActionPlanSender could not send the ActionPlan '%s'.", planId.c_str());
         }
     } else {
         throw opencog::RuntimeException(TRACE_INFO,
-                                        "PAI - No ActionPlan with the id '%s'.", planId.c_str());
+            "PAI - No ActionPlan with the id '%s'.", planId.c_str());
     }
 }
 
@@ -179,9 +185,9 @@ void PAI::sendEmotionalFeelings(const std::string& petId, const std::map<std::st
     // creating XML DOC
     XMLCh namespaceURI[PAIUtils::MAX_TAG_LENGTH+1];
     XMLCh qualifiedName[PAIUtils::MAX_TAG_LENGTH+1];
-    XERCES_CPP_NAMESPACE::XMLString::transcode("http://proxy.esheepco.com/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
-    XERCES_CPP_NAMESPACE::XMLString::transcode(EMOTIONAL_FEELING_ELEMENT, qualifiedName, PAIUtils::MAX_TAG_LENGTH);
-    XERCES_CPP_NAMESPACE::DOMDocument* doc = PAIUtils::getDOMImplementation()->createDocument(
+    XMLString::transcode("http://proxy.esheepco.com/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(EMOTIONAL_FEELING_ELEMENT, qualifiedName, PAIUtils::MAX_TAG_LENGTH);
+    DOMDocument* doc = PAIUtils::getDOMImplementation()->createDocument(
                 namespaceURI,
                 qualifiedName,
                 NULL
@@ -192,37 +198,39 @@ void PAI::sendEmotionalFeelings(const std::string& petId, const std::map<std::st
     }
 
     XMLCh tmpStr[PAIUtils::MAX_TAG_LENGTH+1];
-    XERCES_CPP_NAMESPACE::XMLString::transcode("UTF-8", tmpStr, PAIUtils::MAX_TAG_LENGTH);
+    // Set encoding
+    XMLString::transcode("UTF-8", tmpStr, PAIUtils::MAX_TAG_LENGTH);
     doc->setEncoding(tmpStr);
-    XERCES_CPP_NAMESPACE::XMLString::transcode("1.0", tmpStr, PAIUtils::MAX_TAG_LENGTH);
+    // Set version
+    XMLString::transcode("1.0", tmpStr, PAIUtils::MAX_TAG_LENGTH);
     doc->setVersion(tmpStr);
 
     // filling emotional feeling element with pet id
-    XERCES_CPP_NAMESPACE::DOMElement *emotionalFeeling = doc->getDocumentElement();
+    DOMElement *emotionalFeeling = doc->getDocumentElement();
 
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    XERCES_CPP_NAMESPACE::XMLString::transcode(ENTITY_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    XMLCh* entityIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(PAIUtils::getExternalId(petId.c_str()).c_str());
+    XMLString::transcode(ENTITY_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLCh* entityIdStr = XMLString::transcode(PAIUtils::getExternalId(petId.c_str()).c_str());
     emotionalFeeling->setAttribute(tag, entityIdStr);
-    XERCES_CPP_NAMESPACE::XMLString::release(&entityIdStr);
+    XMLString::release(&entityIdStr);
 
     // adding all feelings
     std::map<std::string, float>::const_iterator it;
     for (it = feelingsValueMap.begin(); it != feelingsValueMap.end(); it++) {
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(FEELING_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-        XERCES_CPP_NAMESPACE::DOMElement *feelingElement = doc->createElement(tag);
+        XMLString::transcode(FEELING_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+        DOMElement *feelingElement = doc->createElement(tag);
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        XMLCh* nameStr = XERCES_CPP_NAMESPACE::XMLString::transcode(it->first.c_str());
+        XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        XMLCh* nameStr = XMLString::transcode(it->first.c_str());
         feelingElement->setAttribute(tag, nameStr);
-        XERCES_CPP_NAMESPACE::XMLString::release(&nameStr);
+        XMLString::release(&nameStr);
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        XMLCh* valueStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(it->second).c_str());
+        XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        XMLCh* valueStr = XMLString::transcode(opencog::toString(it->second).c_str());
         feelingElement->setAttribute(tag, valueStr);
-        XERCES_CPP_NAMESPACE::XMLString::release(&valueStr);
+        XMLString::release(&valueStr);
 
         emotionalFeeling->appendChild(feelingElement);
     }
@@ -270,13 +278,8 @@ bool PAI::isActionPlanEmpty(const ActionPlanID& planId)
     }
 }
 
-#include <opencog/util/files.h>
-
 bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 {
-
-    logger().debug("PAI - processPVPMessage.");
-
     logger().debug("PAI - processPVPMessage atomSpace.size=%d", atomSpace.getSize() );
 
     if (logPVPMessage) {
@@ -285,39 +288,32 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 
     static const char* bufID = "pvp message";
     const XMLByte* xmlBuf = reinterpret_cast<const XMLByte*>(pvpMsg.c_str());
-    //const XMLByte* xmlBuf = reinterpret_cast<const XMLByte*>("<petaverse-msg> <globs/> </petaverse-msg>");
-    //printf("strlen(pvpMsg.c_str()) = %d, pvpMsg.length() = %d\n", strlen(pvpMsg.c_str()), pvpMsg.length());
-    XERCES_CPP_NAMESPACE::MemBufInputSource * memBufIS = new XERCES_CPP_NAMESPACE::MemBufInputSource(
-        (const XMLByte *) xmlBuf, pvpMsg.size(), bufID);
-
+    XERCES_CPP_NAMESPACE::MemBufInputSource * memBufIS =
+        new XERCES_CPP_NAMESPACE::MemBufInputSource((const XMLByte *) xmlBuf, pvpMsg.size(), bufID);
 
     parser->resetDocumentPool();
 
     try {
         parser->parse(*memBufIS);
     } catch (const XERCES_CPP_NAMESPACE::XMLException& toCatch) {
-        char* message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.getMessage());
+        char* message = XMLString::transcode(toCatch.getMessage());
         logger().error("PAI - XML Exception: %s\n", message);
-        XERCES_CPP_NAMESPACE::XMLString::release(&message);
+        XMLString::release(&message);
         delete memBufIS;
-        //delete parser;
         return false;
     } catch (const XERCES_CPP_NAMESPACE::DOMException& toCatch) {
-        char* message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.msg);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&heightStr);
+        char* message = XMLString::transcode(toCatch.msg);
         logger().error("PAI - DOM Exception: %s\n", message);
-        XERCES_CPP_NAMESPACE::XMLString::release(&message);
+        XMLString::release(&message);
         delete memBufIS;
-        //delete parser;
         return false;
     } catch (...) {
         logger().error("PAI - Unexpected XML Parse Exception\n");
         delete memBufIS;
-        //delete parser;
         return false;
     }
 
-    XERCES_CPP_NAMESPACE::DOMDocument * document = NULL;
+    DOMDocument * document = NULL;
     if (parser->getErrorCount() == 0) {
         document = parser->adoptDocument();
         logger().debug("PAI - DOMDocument retrieved");
@@ -333,31 +329,27 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
             return false;
 
         } catch (const std::exception& e) {
-            logger().error(
-                         "PAI - Got an std::exception while processing from PVP XML message: %s", e.what( ) );
+            logger().error("PAI - Got an std::exception while processing from "
+                    "PVP XML message: %s", e.what( ) );
 
             delete memBufIS;
             delete document;
             return false;
 
         } catch (...) {
-            logger().error(
-                         "PAI - Got an unknown exception while processing from PVP XML message.");
+            logger().error("PAI - Got an unknown exception while processing from "
+                    "PVP XML message.");
             delete memBufIS;
             delete document;
             return false;
         }
     } else {
-        // TODO: Are any of these errors really relevant/important enough
-        // to make the DOM document invalid?
-
-        logger().error(
-                     "PAI - Got %d errors parsing the xml data.", parser->getErrorCount());
+        logger().error("PAI - Got %d errors while parsing xml message data.",
+                parser->getErrorCount());
         delete memBufIS;
         delete document;
         return false;
     }
-
 
     delete memBufIS;
     //delete parser;
@@ -367,20 +359,22 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 }
 
 // TODO: TEMPORARY PUBLIC METHODS: They should become built-in predicates later.
-
 bool PAI::isActionDone(ActionID actionId, unsigned long sinceTimestamp) const
 {
-    return AtomSpaceUtil::isActionPredicatePresent(atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, sinceTimestamp);
+    return AtomSpaceUtil::isActionPredicatePresent(
+            atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, sinceTimestamp);
 }
 
 bool PAI::isActionFailed(ActionID actionId, unsigned long sinceTimestamp) const
 {
-    return AtomSpaceUtil::isActionPredicatePresent(atomSpace, ACTION_FAILED_PREDICATE_NAME, actionId, sinceTimestamp);
+    return AtomSpaceUtil::isActionPredicatePresent(
+            atomSpace, ACTION_FAILED_PREDICATE_NAME, actionId, sinceTimestamp);
 }
 
 bool PAI::isActionTried(ActionID actionId, unsigned long sinceTimestamp) const
 {
-    return AtomSpaceUtil::isActionPredicatePresent(atomSpace, ACTION_TRIED_PREDICATE_NAME, actionId, sinceTimestamp);
+    return AtomSpaceUtil::isActionPredicatePresent(
+            atomSpace, ACTION_TRIED_PREDICATE_NAME, actionId, sinceTimestamp);
 }
 
 bool PAI::isPlanFinished(ActionPlanID planId) const
@@ -400,8 +394,7 @@ bool PAI::hasPlanFailed(ActionPlanID planId) const
  * Private methods used to parse XML msg from PVP
  * ----------------------------------------------
  */
-
-void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq &toUpdateHandles)
+void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
 {
     logger().debug("PAI - processPVPDocument");
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
@@ -413,69 +406,69 @@ void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq 
     // when the owner asks for anything...
 
     // getting <map-info> elements from the XML message
-    XERCES_CPP_NAMESPACE::XMLString::transcode(MAP_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(MAP_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processMapInfo((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i), toUpdateHandles);
+        processMapInfo((DOMElement *)list->item(i), toUpdateHandles);
     }
     logger().debug("PAI - Processing map-info done");
 
     // getting <pet-signal> elements from the XML message
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PET_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(PET_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processPetSignal((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
+        processPetSignal((DOMElement *)list->item(i));
     }
     logger().debug("PAI - Processing pet-signal done");
 
     // getting <avatar-signal> elements from the XML message
-    XERCES_CPP_NAMESPACE::XMLString::transcode(AVATAR_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(AVATAR_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processAvatarSignal((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
+        processAvatarSignal((DOMElement *)list->item(i));
     }
     logger().debug("PAI - Processing avatar-signal done");
 
 
 
     // getting <agent-signal> elements from the XML message
-    XERCES_CPP_NAMESPACE::XMLString::transcode(AGENT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(AGENT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processAgentSignal((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
+        processAgentSignal((DOMElement *)list->item(i));
     }
     logger().debug("PAI - Processing agent-signal done");
 
 
     // getting <object-signal> elements from the XML message
-    XERCES_CPP_NAMESPACE::XMLString::transcode(OBJECT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(OBJECT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processObjectSignal((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
+        processObjectSignal((DOMElement *)list->item(i));
     }
     logger().debug("PAI - Processing object-signal done");
 
 
     // getting <instructions> elements from the XML message
-    XERCES_CPP_NAMESPACE::XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processInstruction((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
+        processInstruction((DOMElement *)list->item(i));
     }
     logger().debug("PAI - Processing instructions done");
 
     // getting <agent-sensor-info> elements from the XML message
-    XERCES_CPP_NAMESPACE::XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processAgentSensorInfo((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
+        processAgentSensorInfo((DOMElement *)list->item(i));
     } // for
     logger().debug("PAI - Processing agent-sensor-info done");
 
@@ -483,33 +476,33 @@ void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq 
 
 }
 
-void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     /// getting timestamp atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* timestamp = XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
         logger().error("PAI - Received old timestamp in agent-signal => Message discarded!");
-        XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+        XMLString::release(&timestamp);
         return;
     }
 
     /// getting agent-id atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(AGENT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* agentID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(AGENT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* agentID = XMLString::transcode(element->getAttribute(tag));
     string internalAgentId = PAIUtils::getInternalId(agentID);
 
     /// getting agent type
-    XERCES_CPP_NAMESPACE::XMLString::transcode(AGENT_TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* agentType = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(AGENT_TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* agentType = XMLString::transcode(element->getAttribute(tag));
     string agentTypeStr( agentType );
 
     /// getting agent name atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* name = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* name = XMLString::transcode(element->getAttribute(tag));
     string nameStr(camelCaseToUnderscore(name)); //that's for the atomSpace name storage
 
     logger().debug("PAI - Got agent-signal: agentId = %s (%s), name = %s, timestamp = %s\n", agentID, internalAgentId.c_str(), name, timestamp);
@@ -539,23 +532,23 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
     predicateListLinkOutgoing.push_back(agentNode);
     predicateListLinkOutgoing.push_back(actionNode);
 
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList * list = element->getElementsByTagName(tag);
 
     //used only in case the name of the action is 'grab'
     string grabObjectId;
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        XERCES_CPP_NAMESPACE::DOMElement* paramElement = (XERCES_CPP_NAMESPACE::DOMElement*) list->item(i);
+        DOMElement* paramElement = (DOMElement*) list->item(i);
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* paramName = XERCES_CPP_NAMESPACE::XMLString::transcode(paramElement->getAttribute(tag));
+        XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* paramName = XMLString::transcode(paramElement->getAttribute(tag));
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* paramType = XERCES_CPP_NAMESPACE::XMLString::transcode(paramElement->getAttribute(tag));
+        XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* paramType = XMLString::transcode(paramElement->getAttribute(tag));
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* paramValue = XERCES_CPP_NAMESPACE::XMLString::transcode(paramElement->getAttribute(tag));
+        XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* paramValue = XMLString::transcode(paramElement->getAttribute(tag));
 
         logger().debug("PAI - Got param: name = %s, type = %s, value = %s", paramName, paramType, paramValue);
 
@@ -583,19 +576,19 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
             break;
         }
         case VECTOR_CODE: {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(VECTOR_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(VECTOR_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             XERCES_CPP_NAMESPACE::DOMNodeList * vectorList = paramElement->getElementsByTagName(tag);
             if (vectorList->getLength() <= 0) {
                 throw opencog::InvalidParamException(TRACE_INFO,
                                                      "PAI - Got a parameter element with vector type without a vector child element.");
             }
-            XERCES_CPP_NAMESPACE::DOMElement* vectorElement = (XERCES_CPP_NAMESPACE::DOMElement*) vectorList->item(0);
-            XERCES_CPP_NAMESPACE::XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* xStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* yStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* zStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
+            DOMElement* vectorElement = (DOMElement*) vectorList->item(0);
+            XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* xStr = XMLString::transcode(vectorElement->getAttribute(tag));
+            XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* yStr = XMLString::transcode(vectorElement->getAttribute(tag));
+            XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* zStr = XMLString::transcode(vectorElement->getAttribute(tag));
             logger().debug("PAI - Got vector: x = %s, y = %s, z = %s\n", xStr, yStr, zStr);
             HandleSeq rotationListLink;
 
@@ -604,25 +597,25 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
             rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, zStr));
             parametersListLink.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, rotationListLink));
 
-            XERCES_CPP_NAMESPACE::XMLString::release(&xStr);
-            XERCES_CPP_NAMESPACE::XMLString::release(&yStr);
-            XERCES_CPP_NAMESPACE::XMLString::release(&zStr);
+            XMLString::release(&xStr);
+            XMLString::release(&yStr);
+            XMLString::release(&zStr);
             break;
         }
         case ROTATION_CODE: {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             XERCES_CPP_NAMESPACE::DOMNodeList * rotationList = paramElement->getElementsByTagName(tag);
             if (rotationList->getLength() <= 0) {
                 throw opencog::InvalidParamException(TRACE_INFO,
                                                      "PAI - Got a parameter element with Rotation type without a rotation child element.");
             }
-            XERCES_CPP_NAMESPACE::DOMElement* rotationElement = (XERCES_CPP_NAMESPACE::DOMElement*) rotationList->item(0);
-            XERCES_CPP_NAMESPACE::XMLString::transcode(PITCH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* pitchStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ROLL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* rollStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* yawStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
+            DOMElement* rotationElement = (DOMElement*) rotationList->item(0);
+            XMLString::transcode(PITCH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* pitchStr = XMLString::transcode(rotationElement->getAttribute(tag));
+            XMLString::transcode(ROLL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* rollStr = XMLString::transcode(rotationElement->getAttribute(tag));
+            XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* yawStr = XMLString::transcode(rotationElement->getAttribute(tag));
             logger().debug("PAI - Got rotaion: pitch = %s, roll = %s, yaw = %s\n", pitchStr, rollStr, yawStr);
 
             HandleSeq rotationListLink;
@@ -632,30 +625,30 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
             rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, yawStr));
             parametersListLink.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, rotationListLink));
 
-            XERCES_CPP_NAMESPACE::XMLString::release(&pitchStr);
-            XERCES_CPP_NAMESPACE::XMLString::release(&rollStr);
-            XERCES_CPP_NAMESPACE::XMLString::release(&yawStr);
+            XMLString::release(&pitchStr);
+            XMLString::release(&rollStr);
+            XMLString::release(&yawStr);
             break;
         }
         case ENTITY_CODE: {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             XERCES_CPP_NAMESPACE::DOMNodeList * entityList = paramElement->getElementsByTagName(tag);
             if (entityList->getLength() <= 0) {
                 throw opencog::InvalidParamException(TRACE_INFO,
                                                      "PAI - Got a parameter element with Entity type without an entity child element.");
             }
-            XERCES_CPP_NAMESPACE::DOMElement* entityElement = (XERCES_CPP_NAMESPACE::DOMElement*) entityList->item(0);
+            DOMElement* entityElement = (DOMElement*) entityList->item(0);
 
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* entityId = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+            XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* entityId = XMLString::transcode(entityElement->getAttribute(tag));
             string internalEntityId = PAIUtils::getInternalId(entityId);
-            XERCES_CPP_NAMESPACE::XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* entityType = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* entityOwnerId = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+            XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* entityType = XMLString::transcode(entityElement->getAttribute(tag));
+            XMLString::transcode(OWNER_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* entityOwnerId = XMLString::transcode(entityElement->getAttribute(tag));
             string internalEntityOwnerId = PAIUtils::getInternalId(entityOwnerId);
-            XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* entityOwnerName = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+            XMLString::transcode(OWNER_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* entityOwnerName = XMLString::transcode(entityElement->getAttribute(tag));
             logger().debug("PAI - Got Entity: id = %s (%s), type = %s, ownerId = %s (%s), ownerName = %s\n", entityId, internalEntityId.c_str(), entityType, entityOwnerId, internalEntityOwnerId.c_str(), entityOwnerName);
             //if action name is 'grab' then temporarly store
             //the argument to create isHolding predicate (see below)
@@ -665,10 +658,10 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
 
             parametersListLink.push_back(AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType), internalEntityId.c_str()));
 
-            XERCES_CPP_NAMESPACE::XMLString::release(&entityId);
-            XERCES_CPP_NAMESPACE::XMLString::release(&entityType);
-            XERCES_CPP_NAMESPACE::XMLString::release(&entityOwnerId);
-            XERCES_CPP_NAMESPACE::XMLString::release(&entityOwnerName);
+            XMLString::release(&entityId);
+            XMLString::release(&entityType);
+            XMLString::release(&entityOwnerId);
+            XMLString::release(&entityOwnerName);
             break;
         }
         default: {
@@ -678,9 +671,9 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
         }
         }
 
-        XERCES_CPP_NAMESPACE::XMLString::release(&paramName);
-        XERCES_CPP_NAMESPACE::XMLString::release(&paramType);
-        XERCES_CPP_NAMESPACE::XMLString::release(&paramValue);
+        XMLString::release(&paramName);
+        XMLString::release(&paramType);
+        XMLString::release(&paramValue);
     } // for each parameter
 
     if ( parametersListLink.size( ) > 0 ) {
@@ -710,47 +703,47 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
                                           getLatestSimWorldTimestamp());
     }
 
-    XERCES_CPP_NAMESPACE::XMLString::release(&agentID);
-    XERCES_CPP_NAMESPACE::XMLString::release(&agentType);
-    XERCES_CPP_NAMESPACE::XMLString::release(&name);
-    XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+    XMLString::release(&agentID);
+    XMLString::release(&agentType);
+    XMLString::release(&name);
+    XMLString::release(&timestamp);
 
 }
 
-void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
+void PAI::processPetSignal(DOMElement * element)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
 
     /// getting timestamp atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* timestamp = XMLString::transcode(element->getAttribute(tag));
     logger().fine("PAI:processPetSignal - timestamp: %s", timestamp);
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
         logger().error("PAI - Received old timestamp in pet-signal => Message discarded!");
-        XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+        XMLString::release(&timestamp);
         return;
     }
 
     /// getting pet-id atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PET_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* petID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(PET_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* petID = XMLString::transcode(element->getAttribute(tag));
     string internalPetId = PAIUtils::getInternalId(petID);
     // TODO: Do we need to check if pedID matches the id of the Pet being controlled by this OAC?
 
     /// getting name atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* name = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* name = XMLString::transcode(element->getAttribute(tag));
     string nameStr = camelCaseToUnderscore(name);
 
     /// getting the plan-id, if any
-    XERCES_CPP_NAMESPACE::XMLString::transcode(ACTION_PLAN_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* planIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(ACTION_PLAN_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* planIdStr = XMLString::transcode(element->getAttribute(tag));
 
     /// getting status atribute value (NOTE: it's always present since it has a default value = "done")
-    XERCES_CPP_NAMESPACE::XMLString::transcode(STATUS_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* status = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(STATUS_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* status = XMLString::transcode(element->getAttribute(tag));
 
     ActionStatus statusCode = PerceptionActionInterface::NONE;
     if (planIdStr && strlen(planIdStr)) {
@@ -766,18 +759,18 @@ void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
     if (statusCode == PerceptionActionInterface::NONE) {
         // This is just a common pet physiological feeling (not a status for a previously sent action)
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+        XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         XERCES_CPP_NAMESPACE::DOMNodeList * list = element->getElementsByTagName(tag);
 
         // For feeling signals
         HandleSeq feelingParams;
 
         for (unsigned int i = 0; i < list->getLength(); i++) {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* paramName = XERCES_CPP_NAMESPACE::XMLString::transcode(((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i))->getAttribute(tag));
+            XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* paramName = XMLString::transcode(((DOMElement *)list->item(i))->getAttribute(tag));
 
-            XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* paramValue = XERCES_CPP_NAMESPACE::XMLString::transcode(((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i))->getAttribute(tag));
+            XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* paramValue = XMLString::transcode(((DOMElement *)list->item(i))->getAttribute(tag));
 
             // TODO: Technically, the param type may be composed like vector, rotation or entity. If so, it would need to parse an additional element for getting the value.
             //        Should they be considered in this case?
@@ -786,8 +779,8 @@ void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
             Handle paramListLink = addPhysiologicalFeelingParam(paramName, paramValue);
             feelingParams.push_back(paramListLink);
 
-            XERCES_CPP_NAMESPACE::XMLString::release(&paramName);
-            XERCES_CPP_NAMESPACE::XMLString::release(&paramValue);
+            XMLString::release(&paramName);
+            XMLString::release(&paramValue);
 //            logger().debug("PAI - processPetSignal - after addPhysiologicalFeelingParam.");
         }
 
@@ -800,8 +793,8 @@ void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
 //     logger().debug("PAI - processPetSignal - before send action plan.");
 
         // This is a feedback for a sent action plan
-        XERCES_CPP_NAMESPACE::XMLString::transcode(SEQUENCE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* sequenceStr = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+        XMLString::transcode(SEQUENCE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* sequenceStr = XMLString::transcode(element->getAttribute(tag));
 
         if (planIdStr && strlen(planIdStr) > 0) {
             ActionPlanID planId = planIdStr;
@@ -821,15 +814,15 @@ void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
                          "PAI - Got a pet-signal with action status (name = '%s'), but no action-plan-id attribute!", status);
         }
 
-        XERCES_CPP_NAMESPACE::XMLString::release(&sequenceStr);
+        XMLString::release(&sequenceStr);
 //      logger().debug("PAI - processPetSignal - after send action plan.");
     }
 
-    XERCES_CPP_NAMESPACE::XMLString::release(&petID);
-    XERCES_CPP_NAMESPACE::XMLString::release(&name);
-    XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
-    XERCES_CPP_NAMESPACE::XMLString::release(&status);
-    XERCES_CPP_NAMESPACE::XMLString::release(&planIdStr);
+    XMLString::release(&petID);
+    XMLString::release(&name);
+    XMLString::release(&timestamp);
+    XMLString::release(&status);
+    XMLString::release(&planIdStr);
 }
 
 unsigned long PAI::getLatestSimWorldTimestamp()
@@ -964,78 +957,78 @@ unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) th
     return result;
 }
 
-void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
+void PAI::processInstruction(DOMElement * element)
 {
 
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     /// getting timestamp atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* timestamp = XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
         logger().error("PAI - Received old timestamp in instruction => Message discarded!");
-        XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+        XMLString::release(&timestamp);
         return;
     }
 
     /// getting pet-id atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PET_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* petID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(PET_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* petID = XMLString::transcode(element->getAttribute(tag));
     string internalPetId = PAIUtils::getInternalId(petID);
     // TODO: Do we need to check if pedID matches the id of the Pet being controlled by this OAC?
 
     /// getting avatar-id atribute value
     // TODO: Rename avatar-id to agent-id, since any agent (avatar, pet,
     // humanoid) may say something.
-    XERCES_CPP_NAMESPACE::XMLString::transcode(AVATAR_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* avatarID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(AVATAR_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* avatarID = XMLString::transcode(element->getAttribute(tag));
     string internalAvatarId = PAIUtils::getInternalId(avatarID);
 
     /// getting content-type atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(CONTENT_TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* contentType = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(CONTENT_TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* contentType = XMLString::transcode(element->getAttribute(tag));
 
     /// getting target-mode atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(TARGET_MODE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* targetMode = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(TARGET_MODE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* targetMode = XMLString::transcode(element->getAttribute(tag));
 
     
     OC_ASSERT(strlen(contentType) > 0 );
     OC_ASSERT(strlen(targetMode) > 0 );
 
     /// getting the value of the sentence
-    XERCES_CPP_NAMESPACE::XMLString::transcode(SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList *list = element->getElementsByTagName(tag);
     OC_ASSERT(list->getLength() == 1);
-    XERCES_CPP_NAMESPACE::DOMElement* sentenceElement = (XERCES_CPP_NAMESPACE::DOMElement*) list->item(0);
-    char* sentenceText = XERCES_CPP_NAMESPACE::XMLString::transcode(sentenceElement->getTextContent());
+    DOMElement* sentenceElement = (DOMElement*) list->item(0);
+    char* sentenceText = XMLString::transcode(sentenceElement->getTextContent());
     /// getting the sentence length
-    XERCES_CPP_NAMESPACE::XMLString::transcode(LENGTH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* length = XERCES_CPP_NAMESPACE::XMLString::transcode(sentenceElement->getAttribute(tag));    
+    XMLString::transcode(LENGTH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* length = XMLString::transcode(sentenceElement->getAttribute(tag));    
     int sentenceLength = atoi( length );
-    XERCES_CPP_NAMESPACE::XMLString::release(&length);
+    XMLString::release(&length);
     OC_ASSERT(static_cast<int>( strlen( sentenceText) ) == sentenceLength );
-    XERCES_CPP_NAMESPACE::XMLString::trim(sentenceText);
+    XMLString::trim(sentenceText);
 
     /// getting the value of the parsed-sentence
-    //XERCES_CPP_NAMESPACE::XMLString::transcode(PARSED_SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PARSED_SENTENCE_TYPE, tag, 56000);
+    //XMLString::transcode(PARSED_SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(PARSED_SENTENCE_TYPE, tag, 56000);
     list = element->getElementsByTagName(tag);
     OC_ASSERT(list->getLength( ) == 0 || list->getLength( ) == 1 );
 
     char* parsedSentenceText = NULL;
     int parsedSentenceLength = 0;
     if ( list->getLength() == 1 ) {
-        XERCES_CPP_NAMESPACE::DOMElement* parsedSentenceElement = (XERCES_CPP_NAMESPACE::DOMElement*) list->item(0);
-        parsedSentenceText = XERCES_CPP_NAMESPACE::XMLString::transcode(parsedSentenceElement->getTextContent());
+        DOMElement* parsedSentenceElement = (DOMElement*) list->item(0);
+        parsedSentenceText = XMLString::transcode(parsedSentenceElement->getTextContent());
         /// getting the sentence length
-        XERCES_CPP_NAMESPACE::XMLString::transcode(LENGTH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        length = XERCES_CPP_NAMESPACE::XMLString::transcode(parsedSentenceElement->getAttribute(tag));
+        XMLString::transcode(LENGTH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        length = XMLString::transcode(parsedSentenceElement->getAttribute(tag));
         parsedSentenceLength = atoi( length );
-        XERCES_CPP_NAMESPACE::XMLString::release(&length);
+        XMLString::release(&length);
         OC_ASSERT(static_cast<int>( strlen( parsedSentenceText ) ) == parsedSentenceLength );
-        XERCES_CPP_NAMESPACE::XMLString::trim(parsedSentenceText);
+        XMLString::trim(parsedSentenceText);
     } // if
 
 #ifdef HAVE_GUILE
@@ -1173,36 +1166,36 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     } // if
 
 
-    XERCES_CPP_NAMESPACE::XMLString::release(&petID);
-    XERCES_CPP_NAMESPACE::XMLString::release(&avatarID);
-    XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
-    XERCES_CPP_NAMESPACE::XMLString::release(&contentType);
-    XERCES_CPP_NAMESPACE::XMLString::release(&targetMode);
-    XERCES_CPP_NAMESPACE::XMLString::release(&sentenceText);
-    XERCES_CPP_NAMESPACE::XMLString::release(&parsedSentenceText);
+    XMLString::release(&petID);
+    XMLString::release(&avatarID);
+    XMLString::release(&timestamp);
+    XMLString::release(&contentType);
+    XMLString::release(&targetMode);
+    XMLString::release(&sentenceText);
+    XMLString::release(&parsedSentenceText);
 }
 
-void PAI::processAgentSensorInfo(XERCES_CPP_NAMESPACE::DOMElement * element)
+void PAI::processAgentSensorInfo(DOMElement * element)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     // Gets each blip element
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PERCEPTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(PERCEPTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList *perceptionList = element->getElementsByTagName(tag);
 
     logger().debug("PAI - Received an agent-sensor-info. %d perceptions", perceptionList->getLength() );
 
     for (unsigned int i = 0; i < perceptionList->getLength(); i++) {
-        XERCES_CPP_NAMESPACE::DOMElement* perceptionElement = (XERCES_CPP_NAMESPACE::DOMElement*) perceptionList->item(i);
+        DOMElement* perceptionElement = (DOMElement*) perceptionList->item(i);
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(SENSOR_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* sensor = XERCES_CPP_NAMESPACE::XMLString::transcode(perceptionElement->getAttribute(tag));
+        XMLString::transcode(SENSOR_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* sensor = XMLString::transcode(perceptionElement->getAttribute(tag));
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(SUBJECT_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* subject = XERCES_CPP_NAMESPACE::XMLString::transcode(perceptionElement->getAttribute(tag));
+        XMLString::transcode(SUBJECT_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* subject = XMLString::transcode(perceptionElement->getAttribute(tag));
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(SIGNAL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* signal = XERCES_CPP_NAMESPACE::XMLString::transcode(perceptionElement->getAttribute(tag));
+        XMLString::transcode(SIGNAL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* signal = XMLString::transcode(perceptionElement->getAttribute(tag));
 
         logger().debug("PAI - Received a perception: %s, %s, %s", sensor, subject, signal );
 
@@ -1213,37 +1206,37 @@ void PAI::processAgentSensorInfo(XERCES_CPP_NAMESPACE::DOMElement * element)
             avatarInterface.getCurrentModeHandler( ).handleCommand( "visibilityMap", arguments );
         } // if
 
-        XERCES_CPP_NAMESPACE::XMLString::release(&sensor);
-        XERCES_CPP_NAMESPACE::XMLString::release(&subject);
-        XERCES_CPP_NAMESPACE::XMLString::release(&signal);
+        XMLString::release(&sensor);
+        XMLString::release(&subject);
+        XMLString::release(&signal);
 
     } // for
 }
 
 
 
-void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+void PAI::processAvatarSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     /// getting timestamp atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* timestamp = XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
         logger().error("PAI - Received old timestamp in avatar-signal => Message discarded!");
-        XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+        XMLString::release(&timestamp);
         return;
     }
 
     /// getting pet-id atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(AVATAR_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* avatarID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(AVATAR_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* avatarID = XMLString::transcode(element->getAttribute(tag));
     string internalAvatarId = PAIUtils::getInternalId(avatarID);
 
     /// getting avatar-id atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* name = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* name = XMLString::transcode(element->getAttribute(tag));
     string nameStr(camelCaseToUnderscore(name));
 
     logger().debug("PAI - Got avatar-signal: avatarId = %s (%s), name = %s, timestamp = %s\n", avatarID, internalAvatarId.c_str(), name, timestamp);
@@ -1258,23 +1251,23 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
     predicateListLinkOutgoing.push_back(avatarNode);
     predicateListLinkOutgoing.push_back(actionNode);
 
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList * list = element->getElementsByTagName(tag);
 
     //used only in case the name of the action is 'grab'
     string grabObjectId;
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        XERCES_CPP_NAMESPACE::DOMElement* paramElement = (XERCES_CPP_NAMESPACE::DOMElement*) list->item(i);
+        DOMElement* paramElement = (DOMElement*) list->item(i);
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* paramName = XERCES_CPP_NAMESPACE::XMLString::transcode(paramElement->getAttribute(tag));
+        XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* paramName = XMLString::transcode(paramElement->getAttribute(tag));
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* paramType = XERCES_CPP_NAMESPACE::XMLString::transcode(paramElement->getAttribute(tag));
+        XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* paramType = XMLString::transcode(paramElement->getAttribute(tag));
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* paramValue = XERCES_CPP_NAMESPACE::XMLString::transcode(paramElement->getAttribute(tag));
+        XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* paramValue = XMLString::transcode(paramElement->getAttribute(tag));
 
         logger().debug("PAI - Got param: name = %s, type = %s, value = %s", paramName, paramType, paramValue);
 
@@ -1302,19 +1295,19 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
             break;
         }
         case VECTOR_CODE: {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(VECTOR_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(VECTOR_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             XERCES_CPP_NAMESPACE::DOMNodeList * vectorList = paramElement->getElementsByTagName(tag);
             if (vectorList->getLength() <= 0) {
                 throw opencog::InvalidParamException(TRACE_INFO,
                                                      "PAI - Got a parameter element with vector type without a vector child element.");
             }
-            XERCES_CPP_NAMESPACE::DOMElement* vectorElement = (XERCES_CPP_NAMESPACE::DOMElement*) vectorList->item(0);
-            XERCES_CPP_NAMESPACE::XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* xStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* yStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* zStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
+            DOMElement* vectorElement = (DOMElement*) vectorList->item(0);
+            XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* xStr = XMLString::transcode(vectorElement->getAttribute(tag));
+            XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* yStr = XMLString::transcode(vectorElement->getAttribute(tag));
+            XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* zStr = XMLString::transcode(vectorElement->getAttribute(tag));
             logger().debug("PAI - Got vector: x = %s, y = %s, z = %s\n", xStr, yStr, zStr);
             HandleSeq rotationListLink;
             // TODO: check if string is a valid number?
@@ -1323,25 +1316,25 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
             rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, zStr));
             predicateListLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, rotationListLink));
 
-            XERCES_CPP_NAMESPACE::XMLString::release(&xStr);
-            XERCES_CPP_NAMESPACE::XMLString::release(&yStr);
-            XERCES_CPP_NAMESPACE::XMLString::release(&zStr);
+            XMLString::release(&xStr);
+            XMLString::release(&yStr);
+            XMLString::release(&zStr);
             break;
         }
         case ROTATION_CODE: {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             XERCES_CPP_NAMESPACE::DOMNodeList * rotationList = paramElement->getElementsByTagName(tag);
             if (rotationList->getLength() <= 0) {
                 throw opencog::InvalidParamException(TRACE_INFO,
                                                      "PAI - Got a parameter element with Rotation type without a rotation child element.");
             }
-            XERCES_CPP_NAMESPACE::DOMElement* rotationElement = (XERCES_CPP_NAMESPACE::DOMElement*) rotationList->item(0);
-            XERCES_CPP_NAMESPACE::XMLString::transcode(PITCH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* pitchStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ROLL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* rollStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* yawStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
+            DOMElement* rotationElement = (DOMElement*) rotationList->item(0);
+            XMLString::transcode(PITCH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* pitchStr = XMLString::transcode(rotationElement->getAttribute(tag));
+            XMLString::transcode(ROLL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* rollStr = XMLString::transcode(rotationElement->getAttribute(tag));
+            XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* yawStr = XMLString::transcode(rotationElement->getAttribute(tag));
             logger().debug("PAI - Got rotaion: pitch = %s, roll = %s, yaw = %s\n", pitchStr, rollStr, yawStr);
 
             HandleSeq rotationListLink;
@@ -1351,30 +1344,30 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
             rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, yawStr));
             predicateListLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, rotationListLink));
 
-            XERCES_CPP_NAMESPACE::XMLString::release(&pitchStr);
-            XERCES_CPP_NAMESPACE::XMLString::release(&rollStr);
-            XERCES_CPP_NAMESPACE::XMLString::release(&yawStr);
+            XMLString::release(&pitchStr);
+            XMLString::release(&rollStr);
+            XMLString::release(&yawStr);
             break;
         }
         case ENTITY_CODE: {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             XERCES_CPP_NAMESPACE::DOMNodeList * entityList = paramElement->getElementsByTagName(tag);
             if (entityList->getLength() <= 0) {
                 throw opencog::InvalidParamException(TRACE_INFO,
                                                      "PAI - Got a parameter element with Entity type without an entity child element.");
             }
-            XERCES_CPP_NAMESPACE::DOMElement* entityElement = (XERCES_CPP_NAMESPACE::DOMElement*) entityList->item(0);
+            DOMElement* entityElement = (DOMElement*) entityList->item(0);
 
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* entityId = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+            XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* entityId = XMLString::transcode(entityElement->getAttribute(tag));
             string internalEntityId = PAIUtils::getInternalId(entityId);
-            XERCES_CPP_NAMESPACE::XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* entityType = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
-            XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* entityOwnerId = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+            XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* entityType = XMLString::transcode(entityElement->getAttribute(tag));
+            XMLString::transcode(OWNER_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* entityOwnerId = XMLString::transcode(entityElement->getAttribute(tag));
             string internalEntityOwnerId = PAIUtils::getInternalId(entityOwnerId);
-            XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* entityOwnerName = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+            XMLString::transcode(OWNER_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* entityOwnerName = XMLString::transcode(entityElement->getAttribute(tag));
             logger().debug("PAI - Got Entity: id = %s (%s), type = %s, ownerId = %s (%s), ownerName = %s\n", entityId, internalEntityId.c_str(), entityType, entityOwnerId, internalEntityOwnerId.c_str(), entityOwnerName);
             //if action name is 'grab' then temporarly store
             //the argument to create isHolding predicate (see below)
@@ -1384,10 +1377,10 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
 
             predicateListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType), internalEntityId.c_str()));
 
-            XERCES_CPP_NAMESPACE::XMLString::release(&entityId);
-            XERCES_CPP_NAMESPACE::XMLString::release(&entityType);
-            XERCES_CPP_NAMESPACE::XMLString::release(&entityOwnerId);
-            XERCES_CPP_NAMESPACE::XMLString::release(&entityOwnerName);
+            XMLString::release(&entityId);
+            XMLString::release(&entityType);
+            XMLString::release(&entityOwnerId);
+            XMLString::release(&entityOwnerName);
             break;
         }
         default: {
@@ -1397,9 +1390,9 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
         }
         }
 
-        XERCES_CPP_NAMESPACE::XMLString::release(&paramName);
-        XERCES_CPP_NAMESPACE::XMLString::release(&paramType);
-        XERCES_CPP_NAMESPACE::XMLString::release(&paramValue);
+        XMLString::release(&paramName);
+        XMLString::release(&paramType);
+        XMLString::release(&paramValue);
     } // for each parameter
 
     Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
@@ -1425,9 +1418,9 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
                                           getLatestSimWorldTimestamp());
     }
 
-    XERCES_CPP_NAMESPACE::XMLString::release(&avatarID);
-    XERCES_CPP_NAMESPACE::XMLString::release(&name);
-    XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+    XMLString::release(&avatarID);
+    XMLString::release(&name);
+    XMLString::release(&timestamp);
 }
 
 Type PAI::getSLObjectNodeType(const char* objectType)
@@ -1450,58 +1443,58 @@ Type PAI::getSLObjectNodeType(const char* objectType)
 }
 
 // TODO: DEPRECATED => actually, never used. Remove this later if it's not going to be used at all.
-void PAI::processObjectSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
+void PAI::processObjectSignal(DOMElement * element)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     /// getting timestamp atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* timestamp = XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
         logger().error("PAI - Received old timestamp in object-signal => Message discarded!");
-        XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+        XMLString::release(&timestamp);
         return;
     }
 
     /// getting object id atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(OBJECT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* objectID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(OBJECT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* objectID = XMLString::transcode(element->getAttribute(tag));
     string internalObjectId = PAIUtils::getInternalId(objectID);
 
     /// getting object name atribute value
-    XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* name = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* name = XMLString::transcode(element->getAttribute(tag));
 
     Handle objectNode = AtomSpaceUtil::addNode(atomSpace, OBJECT_NODE, internalObjectId.c_str());
 
     // Get param lists
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList * list = element->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        XERCES_CPP_NAMESPACE::DOMElement* paramElement = (XERCES_CPP_NAMESPACE::DOMElement*) list->item(i);
+        DOMElement* paramElement = (DOMElement*) list->item(i);
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* paramName = XERCES_CPP_NAMESPACE::XMLString::transcode(paramElement->getAttribute(tag));
+        XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* paramName = XMLString::transcode(paramElement->getAttribute(tag));
 
         if (!strcmp(paramName, POSITION_PARAMETER_NAME)) {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(VECTOR_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(VECTOR_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             XERCES_CPP_NAMESPACE::DOMNodeList* vectorList = paramElement->getElementsByTagName(tag);
             if (vectorList->getLength()) {
-                XERCES_CPP_NAMESPACE::DOMElement* vectorElement = (XERCES_CPP_NAMESPACE::DOMElement*) vectorList->item(0);
+                DOMElement* vectorElement = (DOMElement*) vectorList->item(0);
                 addVectorPredicate(objectNode, AGISIM_POSITION_PREDICATE_NAME, tsValue, vectorElement);
             }
         } else if (!strcmp(paramName, ROTATE_PARAMETER_NAME)) {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             XERCES_CPP_NAMESPACE::DOMNodeList* rotationList = paramElement->getElementsByTagName(tag);
             if (rotationList->getLength()) {
-                XERCES_CPP_NAMESPACE::DOMElement* rotationElement = (XERCES_CPP_NAMESPACE::DOMElement*) rotationList->item(0);
+                DOMElement* rotationElement = (DOMElement*) rotationList->item(0);
                 addRotationPredicate(objectNode, tsValue, rotationElement);
             }
         } else {
-            XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* paramValue = XERCES_CPP_NAMESPACE::XMLString::transcode(((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i))->getAttribute(tag));
+            XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            char* paramValue = XMLString::transcode(((DOMElement *)list->item(i))->getAttribute(tag));
 
             if (paramValue && strlen(paramValue) > 0) {
                 Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, OBJECT_STATE_PREDICATE_NAME, true);
@@ -1527,27 +1520,27 @@ void PAI::processObjectSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
                 logger().warn("PAI - The object-signal param '%s' has no value!\n", paramName);
             }
 
-            XERCES_CPP_NAMESPACE::XMLString::release(&paramValue);
+            XMLString::release(&paramValue);
 
         }
-        XERCES_CPP_NAMESPACE::XMLString::release(&paramName);
+        XMLString::release(&paramName);
     }
 
-    XERCES_CPP_NAMESPACE::XMLString::release(&objectID);
-    XERCES_CPP_NAMESPACE::XMLString::release(&name);
-    XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+    XMLString::release(&objectID);
+    XMLString::release(&name);
+    XMLString::release(&timestamp);
 
 }
 
-void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &toUpdateHandles)
+void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     logger().debug("PAI - processMapInfo(): init.");
 
     // gets global position offset (to be added to global x and y positions to get map dimensions)
-    XERCES_CPP_NAMESPACE::XMLString::transcode(GLOBAL_POS_OFFSET_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* globalPosOffsetStr = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(GLOBAL_POS_OFFSET_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* globalPosOffsetStr = XMLString::transcode(element->getAttribute(tag));
     if (!strlen(globalPosOffsetStr)) {
         logger().error("PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_Y_ATTRIBUTE);
     }
@@ -1556,8 +1549,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 
 
     // gets global position x
-    XERCES_CPP_NAMESPACE::XMLString::transcode(GLOBAL_POS_X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* globalPosXStr = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(GLOBAL_POS_X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* globalPosXStr = XMLString::transcode(element->getAttribute(tag));
     if (!strlen(globalPosXStr)) {
         logger().error("PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_X_ATTRIBUTE);
     }
@@ -1566,8 +1559,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     logger().fine("PAI - processMapInfo(): global position x = %s => xMin = %lf, xMax = %lf", globalPosXStr, xMin, xMax);
 
     // gets global position y
-    XERCES_CPP_NAMESPACE::XMLString::transcode(GLOBAL_POS_Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* globalPosYStr = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+    XMLString::transcode(GLOBAL_POS_Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* globalPosYStr = XMLString::transcode(element->getAttribute(tag));
     if (!strlen(globalPosYStr)) {
         logger().error("PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_Y_ATTRIBUTE);
     }
@@ -1584,7 +1577,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 
     bool keepPreviousMap = avatarInterface.isExemplarInProgress();
     // Gets each blip element
-    XERCES_CPP_NAMESPACE::XMLString::transcode(BLIP_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(BLIP_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList * blipList = element->getElementsByTagName(tag);
 
     //printf("Blip List: %d\n",blipList->getLength());
@@ -1592,19 +1585,19 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     for (unsigned int i = 0; i < blipList->getLength(); i++) {
     
 
-        XERCES_CPP_NAMESPACE::DOMElement* blipElement = (XERCES_CPP_NAMESPACE::DOMElement*) blipList->item(i);
+        DOMElement* blipElement = (DOMElement*) blipList->item(i);
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
+        XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* timestamp = XMLString::transcode(blipElement->getAttribute(tag));
         unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
         if (!setLatestSimWorldTimestamp(tsValue)) {
             logger().error("PAI - Received old timestamp in blip => Message discarded!");
-            XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+            XMLString::release(&timestamp);
             continue;
         }
 
         // Gets each properties element
-        XERCES_CPP_NAMESPACE::XMLString::transcode(PROPERTIES_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+        XMLString::transcode(PROPERTIES_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         XERCES_CPP_NAMESPACE::DOMNodeList * propertiesList = blipElement->getElementsByTagName(tag);
 
         // printf("Properties List: %d\n",propertiesList->getLength());
@@ -1629,25 +1622,25 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 
         for (unsigned int j = 0; j < propertiesList->getLength(); j++) {
 
-            XERCES_CPP_NAMESPACE::DOMElement* propertiesElement = 
-                     (XERCES_CPP_NAMESPACE::DOMElement*) propertiesList->item(j);
+            DOMElement* propertiesElement = 
+                     (DOMElement*) propertiesList->item(j);
 
-            XERCES_CPP_NAMESPACE::XMLString::transcode(PROPERTY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLString::transcode(PROPERTY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
             XERCES_CPP_NAMESPACE::DOMNodeList * propertyList = propertiesElement->getElementsByTagName(tag);
 
             //printf("Property List: %d\n",propertyList->getLength());
             
             for (unsigned int p = 0; p < propertyList->getLength(); p++) {
 
-                XERCES_CPP_NAMESPACE::DOMElement* propertyElement = 
-                         (XERCES_CPP_NAMESPACE::DOMElement*) propertyList->item(p);
+                DOMElement* propertyElement = 
+                         (DOMElement*) propertyList->item(p);
 
 
-                XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* name =  XERCES_CPP_NAMESPACE::XMLString::transcode(propertyElement->getAttribute(tag));
+                XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+                char* name =  XMLString::transcode(propertyElement->getAttribute(tag));
 
-                XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* value =  XERCES_CPP_NAMESPACE::XMLString::transcode(propertyElement->getAttribute(tag));
+                XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+                char* value =  XMLString::transcode(propertyElement->getAttribute(tag));
 
         
                 // Note from Tristan: All objects (toys, pets, and pet-owners) report map updates, usually on themselves,
@@ -1742,19 +1735,19 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 }
 
 
-                XERCES_CPP_NAMESPACE::XMLString::release(&value);
-                XERCES_CPP_NAMESPACE::XMLString::release(&name);
+                XMLString::release(&value);
+                XMLString::release(&name);
 
           }// for property
         } // for properties
         
         // processing entity element of blip
-        XERCES_CPP_NAMESPACE::XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-        XERCES_CPP_NAMESPACE::DOMElement* entityElement =
-            (XERCES_CPP_NAMESPACE::DOMElement*) blipElement->getElementsByTagName(tag)->item(0);
+        XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+        DOMElement* entityElement =
+            (DOMElement*) blipElement->getElementsByTagName(tag)->item(0);
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* entityId = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+        XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* entityId = XMLString::transcode(entityElement->getAttribute(tag));
         string internalEntityId = PAIUtils::getInternalId(entityId);
 
         bool isPetObject = (internalEntityId == avatarInterface.getPetId());
@@ -1763,8 +1756,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         // at avatarInterface when blip for the onwer comes.
 
         Handle objectNode;
-        XERCES_CPP_NAMESPACE::XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* entityType = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+        XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* entityType = XMLString::transcode(entityElement->getAttribute(tag));
 
         Handle typeNode = Handle::UNDEFINED;
 
@@ -1781,8 +1774,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         } else {
             objectNode = AtomSpaceUtil::addNode(atomSpace, OBJECT_NODE, internalEntityId.c_str());
         }
-        XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* objName = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+        XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* objName = XMLString::transcode(entityElement->getAttribute(tag));
 
 //     logger().info("PAI - processMapInfo(): objName=%s", objName);
 
@@ -1798,8 +1791,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             AtomSpaceUtil::addLink(atomSpace, WR_LINK, outgoing, true);
         }
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* ownerId = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
+        XMLString::transcode(OWNER_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* ownerId = XMLString::transcode(entityElement->getAttribute(tag));
 
         if (ownerId && strlen(ownerId)) {
             string internalOwnerId = PAIUtils::getInternalId(ownerId);
@@ -1830,19 +1823,19 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
         } else {
             // position
-            XERCES_CPP_NAMESPACE::XMLString::transcode(POSITION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-            XERCES_CPP_NAMESPACE::DOMElement* positionElement =
-                (XERCES_CPP_NAMESPACE::DOMElement*) blipElement->getElementsByTagName(tag)->item(0);
+            XMLString::transcode(POSITION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            DOMElement* positionElement =
+                (DOMElement*) blipElement->getElementsByTagName(tag)->item(0);
 
             // rotation
-            XERCES_CPP_NAMESPACE::XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-            XERCES_CPP_NAMESPACE::DOMElement* rotationElement =
-                (XERCES_CPP_NAMESPACE::DOMElement*) blipElement->getElementsByTagName(tag)->item(0);
+            XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            DOMElement* rotationElement =
+                (DOMElement*) blipElement->getElementsByTagName(tag)->item(0);
 
             // velocity
-            XERCES_CPP_NAMESPACE::XMLString::transcode(VELOCITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-            XERCES_CPP_NAMESPACE::DOMElement* velocityElement =
-                (XERCES_CPP_NAMESPACE::DOMElement*) blipElement->getElementsByTagName(tag)->item(0);
+            XMLString::transcode(VELOCITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            DOMElement* velocityElement =
+                (DOMElement*) blipElement->getElementsByTagName(tag)->item(0);
             Vector velocityVector = getVelocityData(velocityElement);
 
             // check the velocity vector in order to see if the pet is moving,
@@ -2008,12 +2001,12 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
         }
 
-        XERCES_CPP_NAMESPACE::XMLString::release(&entityId);
-        XERCES_CPP_NAMESPACE::XMLString::release(&entityType);
-        XERCES_CPP_NAMESPACE::XMLString::release(&objName);
-        XERCES_CPP_NAMESPACE::XMLString::release(&ownerId);
+        XMLString::release(&entityId);
+        XMLString::release(&entityType);
+        XMLString::release(&objName);
+        XMLString::release(&ownerId);
 
-        XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+        XMLString::release(&timestamp);
 
         /*
         delete detector;
@@ -2030,9 +2023,9 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         */
 
     }
-    XERCES_CPP_NAMESPACE::XMLString::release(&globalPosXStr);
-    XERCES_CPP_NAMESPACE::XMLString::release(&globalPosYStr);
-    XERCES_CPP_NAMESPACE::XMLString::release(&globalPosOffsetStr);
+    XMLString::release(&globalPosXStr);
+    XMLString::release(&globalPosYStr);
+    XMLString::release(&globalPosOffsetStr);
 
 
     // TODO: Check if this is really needed. It seems ImportanceDecayAgent
@@ -2046,23 +2039,23 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 
 }
 
-Vector PAI::getVelocityData(XERCES_CPP_NAMESPACE::DOMElement* velocityElement)
+Vector PAI::getVelocityData(DOMElement* velocityElement)
 {
 
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    XERCES_CPP_NAMESPACE::XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* X = XERCES_CPP_NAMESPACE::XMLString::transcode(velocityElement->getAttribute(tag));
-    XERCES_CPP_NAMESPACE::XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* Y = XERCES_CPP_NAMESPACE::XMLString::transcode(velocityElement->getAttribute(tag));
-    XERCES_CPP_NAMESPACE::XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* Z = XERCES_CPP_NAMESPACE::XMLString::transcode(velocityElement->getAttribute(tag));
+    XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* X = XMLString::transcode(velocityElement->getAttribute(tag));
+    XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* Y = XMLString::transcode(velocityElement->getAttribute(tag));
+    XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* Z = XMLString::transcode(velocityElement->getAttribute(tag));
 
     Vector result(atof(X), atof(Y), atof(Z));
 
-    XERCES_CPP_NAMESPACE::XMLString::release(&X);
-    XERCES_CPP_NAMESPACE::XMLString::release(&Y);
-    XERCES_CPP_NAMESPACE::XMLString::release(&Z);
+    XMLString::release(&X);
+    XMLString::release(&Y);
+    XMLString::release(&Z);
 
     return result;
 }
@@ -2166,16 +2159,16 @@ Handle PAI::addActionPredicate(const char* predicateName, const PetAction& actio
 }
 
 Vector PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName, unsigned long timestamp,
-                               XERCES_CPP_NAMESPACE::DOMElement* vectorElement)
+                               DOMElement* vectorElement)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    XERCES_CPP_NAMESPACE::XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* X = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
-    XERCES_CPP_NAMESPACE::XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* Y = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
-    XERCES_CPP_NAMESPACE::XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* Z = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
+    XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* X = XMLString::transcode(vectorElement->getAttribute(tag));
+    XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* Y = XMLString::transcode(vectorElement->getAttribute(tag));
+    XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* Z = XMLString::transcode(vectorElement->getAttribute(tag));
 
     Handle predNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName, true);
 
@@ -2201,24 +2194,24 @@ Vector PAI::addVectorPredicate(Handle objectNode, const std::string& predicateNa
 
     Vector result(atof(X), atof(Y), atof(Z));
 
-    XERCES_CPP_NAMESPACE::XMLString::release(&X);
-    XERCES_CPP_NAMESPACE::XMLString::release(&Y);
-    XERCES_CPP_NAMESPACE::XMLString::release(&Z);
+    XMLString::release(&X);
+    XMLString::release(&Y);
+    XMLString::release(&Z);
 
     return result;
 }
 
 Rotation PAI::addRotationPredicate(Handle objectNode, unsigned long timestamp,
-                                   XERCES_CPP_NAMESPACE::DOMElement* rotationElement)
+                                   DOMElement* rotationElement)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PITCH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* pitch = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
-    XERCES_CPP_NAMESPACE::XMLString::transcode(ROLL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* roll = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
-    XERCES_CPP_NAMESPACE::XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* yaw = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
+    XMLString::transcode(PITCH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* pitch = XMLString::transcode(rotationElement->getAttribute(tag));
+    XMLString::transcode(ROLL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* roll = XMLString::transcode(rotationElement->getAttribute(tag));
+    XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* yaw = XMLString::transcode(rotationElement->getAttribute(tag));
 
     Handle predNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, AGISIM_ROTATION_PREDICATE_NAME, true);
 
@@ -2244,9 +2237,9 @@ Rotation PAI::addRotationPredicate(Handle objectNode, unsigned long timestamp,
 
     Rotation result(atof(pitch), atof(roll), atof(yaw));
 
-    XERCES_CPP_NAMESPACE::XMLString::release(&pitch);
-    XERCES_CPP_NAMESPACE::XMLString::release(&roll);
-    XERCES_CPP_NAMESPACE::XMLString::release(&yaw);
+    XMLString::release(&pitch);
+    XMLString::release(&roll);
+    XMLString::release(&yaw);
 
     return result;
 }
@@ -2289,8 +2282,8 @@ void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, 
 }
 
 bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                             XERCES_CPP_NAMESPACE::DOMElement* positionElement,
-                             XERCES_CPP_NAMESPACE::DOMElement* rotationElement,
+                             DOMElement* positionElement,
+                             DOMElement* rotationElement,
                              double length, double width, double height,
                              bool isEdible, bool isDrinkable)
 {
@@ -2321,11 +2314,11 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
         HandleSeq evalLinkOutgoing;
         evalLinkOutgoing.push_back(predNode);
         evalLinkOutgoing.push_back(listLink);
-        AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-        //Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
         // For now, assume any object's size does not change in time.
-        // TODO: uncomment this for sizable SL objects, if any, in the future
+        // TODO: uncomment this for variable size objects, if any, in the future
+        AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+        //Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
         //atomSpace.addTimeInfo( evalLink, timestamp);
 
         // If the object is the Pet, save its radius for new space maps

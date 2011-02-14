@@ -43,29 +43,30 @@
 namespace WorldWrapper
 {
 
-/**
- * Class containing a set of methods to access perceptions or objects
- * into the atomSpace or spaceMap according to vertex representation
- */
-
 using namespace opencog;
 
+/**
+ * Class containing a set of methods to access perceptions or objects
+ * in the atomSpace or spaceMap according to vertex representation
+ */
 class WorldWrapperUtil
 {
 
 private:
 
-    // inform if cache data should be used when evaluationg predicates
+    // inform if cache data should be used when evaluating predicates
     static bool useCache;
 
     // cache predicates information between timestamps.
     static WorldWrapperUtilCache cache;
 
-    // return a list of definite objects for the given vertex. In general,
-    // this vertex would be a definite_object, an indefinite_object or a
-    // wild_card (_*_). Definite_object and indefinite_objects will produce
-    // a one-element vector while wild_card will result in a multi-valued
-    // vector.
+    /**
+     * @return a list of definite objects for the given vertex. In general,
+     * this vertex would be a definite_object, an indefinite_object or a
+     * wild_card (_*_). definite_object and indefinite_objects will produce
+     * a one-element vector whereas wild_card will result in a multi-valued
+     * vector.
+     */
     static std::vector<combo::definite_object>
     getDefiniteObjects(opencog::RandGen& rng,
                        Handle smh,
@@ -160,18 +161,18 @@ public:
     static combo::definite_object atom_name_to_definite_object(const std::string& atom_name, const std::string& self_id, const std::string& owner_id);
 
     /**
-     * returns the atom name corresponding to a definite object
-     * in case of ambiguities between self_id and owner_id,
-     * self_id is considered first
+     * Get the atom name corresponding to a definite object. In case of
+     * ambiguities between self_id and owner_id, self_id is considered first.
+     *
+     * @return the atom name corresponding to a definite object
      */
     static std::string definite_object_to_atom_name(const std::string& atom_name,
             const std::string& self_id,
             const std::string& owner_id);
 
     /**
-     * test whether 2 definite objects are equal
-     * id corresponding to owner and self
-     * are compare to their keyword as well
+     * test whether 2 definite objects are equal id corresponding to owner and
+     * self are compare to their keyword as well
      */
     static bool definite_object_equal(const combo::definite_object& d1,
                                       const combo::definite_object& d2,
@@ -185,14 +186,14 @@ public:
                            const std::string& self_id, const std::string& owner_id);
 
     /**
-     * atom-table querying for inheritance links of nullary predicates
+     * AtomSpace querying for inheritance links of nullary predicates
      * (e.g. food_bowl)
      */
     static std::string lookupInheritanceLink(opencog::RandGen& rng,
             const AtomSpace& as, Handle);
 
     /**
-     * atom-table querying for execution links of nullary predicates
+     * AtomSpace querying for execution links of nullary predicates
      * (e.g. pet_bowl)
      */
     static std::string lookupExecLink(opencog::RandGen& rng,
@@ -218,15 +219,15 @@ public:
             std::string h);
 
     /**
-     * atom table lookup of a nested link-and-node struct represented
+     * AtomSpace lookup of a nested link-and-node struct represented
      * as a subtree
      */
     static Handle rec_lookup(const AtomSpace& as, combo::combo_tree::iterator it,
                              const std::string& self_id, const std::string& owner_id);
 
     /**
-     * returns the handle representing pet or avatar of self_id
-     * WARNING : if there exists a pet and an avatar with the same id
+     * @return the handle representing pet or avatar of self_id
+     * @warning if there exists a pet and an avatar with the same id
      * then the handle of the pet is returned
      */
     static Handle selfHandle(const AtomSpace& as, const std::string& self_id);

@@ -53,7 +53,6 @@ namespace WorldWrapper
 typedef combo_tree::iterator pre_it;
 typedef combo_tree::sibling_iterator sib_it;
 
-bool WorldWrapperUtil::useCache = false;
 WorldWrapperUtilCache WorldWrapperUtil::cache;
 
 definite_object WorldWrapperUtil::atom_name_to_definite_object(const string& atom_name, const string& self_id, const string& owner_id)
@@ -3017,16 +3016,6 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
                      ss.str().c_str(), data);
         return data;
     }
-}
-
-bool WorldWrapperUtil::cacheEnabled()
-{
-    return WorldWrapperUtil::useCache;
-}
-
-void WorldWrapperUtil::setCacheUse(bool state)
-{
-    WorldWrapperUtil::useCache = state;
 }
 
 } // namespace

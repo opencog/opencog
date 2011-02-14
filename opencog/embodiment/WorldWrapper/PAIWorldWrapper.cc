@@ -54,7 +54,6 @@ namespace WorldWrapper
 {
 
 using namespace PetCombo;
-//  using namespace Spatial;
 using namespace opencog;
 using namespace PerceptionActionInterface;
 
@@ -63,27 +62,27 @@ using namespace PerceptionActionInterface;
  */
 
 //ctor, stor
-PAIWorldWrapper::PAIWorldWrapper(PAI& pai, opencog::RandGen& _rng)
-        : _pai(pai), rng(_rng), _hasPlanFailed(false) { }
+PAIWorldWrapper::PAIWorldWrapper(PAI& _pai, opencog::RandGen& _rng)
+        : pai(_pai), rng(_rng), _hasPlanFailed(false) { }
 
 PAIWorldWrapper::~PAIWorldWrapper() { }
 
 
 bool PAIWorldWrapper::isPlanFinished() const
 {
-    return _pai.isPlanFinished(_planID);
+    return pai.isPlanFinished(planID);
 }
 
 bool PAIWorldWrapper::isPlanFailed() const
 {
-    return _hasPlanFailed || _pai.hasPlanFailed(_planID);
+    return _hasPlanFailed || pai.hasPlanFailed(planID);
 }
 
 bool PAIWorldWrapper::sendSequential_and(sib_it from, sib_it to)
 throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 {
 
-    //DEBUG log
+    // DEBUG log
     if (logger().isDebugEnabled()) {
         string actionPlanStr = "{";
         for (sib_it sib = from; sib != to;) {
@@ -99,38 +98,36 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                      "PAIWorldWrapper - Attempt to send the following sequence of actions: %s",
                      actionPlanStr.c_str());
     }
-    //~DEBUG log
+    // ~DEBUG log
 
     _hasPlanFailed = false;
-    _planID = _pai.createActionPlan();
+    planID = pai.createActionPlan();
 
-    const AtomSpace& as = _pai.getAtomSpace();
+    const AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
-    //treat the case when the action is a compound
+    // treat the case when the action is a compound
     if (WorldWrapperUtil::is_builtin_compound_action(*from)) {
-        OC_ASSERT(++sib_it(from) == to); //there is only one compound action
+        OC_ASSERT(++sib_it(from) == to); // there is only one compound action
         pre_it it = from;
         builtin_action ba = get_builtin_action(*it);
         pet_builtin_action_enum bae = get_enum(ba);
         switch (bae) {
         case id::goto_obj: {
-            logger().debug(
-                         "PAIWorldWrapper - Handling goto_obj. # of parameters = %d", it.number_of_children() );
+            logger().debug("PAIWorldWrapper - Handling goto_obj. # of parameters = %d",
+                         it.number_of_children() );
             OC_ASSERT(it.number_of_children() == 2);
             OC_ASSERT(is_definite_object(*it.begin()));
             OC_ASSERT(is_contin(*++it.begin()));
 
-
             std::string target = get_definite_object( *it.begin() );
             float walkSpeed = get_contin( *++it.begin() );
-            logger().debug(
-                         "PAIWorldWrapper - goto_obj(%s, %f)", target.c_str( ), walkSpeed );
+            logger().debug("PAIWorldWrapper - goto_obj(%s, %f)",
+                    target.c_str(), walkSpeed );
             if ( target == "custom_path" ) {
-                std::string customWaypoints =
-                    _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customPath" );
+                std::string customWaypoints = pai.getAvatarInterface().
+                    getCurrentModeHandler().getPropertyValue( "customPath" );
 
                 std::vector<spatial::Point> actionPlan;
-
                 std::vector<std::string> strWayPoints;
                 boost::algorithm::split( strWayPoints, customWaypoints, boost::algorithm::is_any_of(";") );
 
@@ -156,7 +153,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 } // for
 
                 // register seeking object
-                _pai.getAvatarInterface( ).setLatestGotoTarget( std::pair<std::string, spatial::Point>( target, wayPoint ) );
+                pai.getAvatarInterface().setLatestGotoTarget( std::pair<std::string, spatial::Point>( target, wayPoint ) );
 
                 if ( _hasPlanFailed || !createWalkPlanAction( actionPlan, false, Handle::UNDEFINED, walkSpeed ) ) {
                     if (_hasPlanFailed) {
@@ -168,11 +165,11 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 } // if
 
                 std::vector<std::string> arguments;
-                _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "followCustomPathDone", arguments );
+                pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "followCustomPathDone", arguments );
             } else {
 
                 if ( target == "custom_object" ) {
-                    target = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+                    target = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
                 } // if
                 Handle targetHandle = toHandle( target );
                 try {
@@ -184,22 +181,22 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                         } else {
                             logger().info("PAIWorldWrapper - No goto plan needed since the goal was already near enough.");
                             std::vector<std::string> arguments;
-                            _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "gotoDone", arguments );
+                            pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "gotoDone", arguments );
 
                         } // else
-                        MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                        MAIN_LOGGER_ACTION_PLAN_FAILED;
                         return false;
                     } // if
 
                 } catch ( NotFoundException& ex ) {
                     logger().error("PAIWorldWrapper - Goto: target not found.");
                     _hasPlanFailed = true;
-                    MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                    MAIN_LOGGER_ACTION_PLAN_FAILED;
                     return false;
-                } // catch
+                } // try
 
                 std::vector<std::string> arguments;
-                _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "gotoDone", arguments );
+                pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "gotoDone", arguments );
             } // else
 
         }
@@ -215,7 +212,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 float walkSpeed = get_contin( *++it.begin() );
 
                 if ( target == "custom_object" ) {
-                    target = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+                    target = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
                 } // if
 
                 const spatial::EntityPtr& entity = sm.getEntity( target );
@@ -227,31 +224,33 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 spatial::math::Vector3 direction( entity->getDirection( ) );
 
                 spatial::Point position = sm.getNearFreePointAtDistance(
-                                              spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ),
-                                              distanceFromGoal,
-                                              spatial::Point( direction.x, direction.y )
-                                          );
+                          spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ),
+                          distanceFromGoal,
+                          spatial::Point( direction.x, direction.y ));
 
-                logger().debug("PAIWorldWrapper - gonear_obj(%s) calculated position(%f, %f) target orientation(%s) target location(%s) distance from target(%f)", target.c_str( ), position.first, position.second, entity->getOrientation( ).toString( ).c_str( ), entity->getPosition( ).toString( ).c_str( ), distanceFromGoal );
+                logger().debug("PAIWorldWrapper - gonear_obj(%s) calculated position(%f, %f)"
+                        " target orientation(%s) target location(%s) distance from target(%f)",
+                        target.c_str( ), position.first, position.second,
+                        entity->getOrientation( ).toString( ).c_str( ),
+                        entity->getPosition( ).toString( ).c_str( ), distanceFromGoal );
 
                 if ( !buildGotoPlan( position, walkSpeed ) ) {
                     if ( _hasPlanFailed ) {
-                        logger().error(
-                                     "PAIWorldWrapper - Failed to create a goto plan to the goal.");
+                        logger().error("PAIWorldWrapper - Failed to create a goto plan to the goal.");
                     } else {
-                        logger().info(
-                                     "PAIWorldWrapper - No goto plan needed since the goal was already near enough.");
+                        logger().info("PAIWorldWrapper - No goto plan needed "
+                                "since the goal was already near enough.");
 
                     } // else
-                    MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                    MAIN_LOGGER_ACTION_PLAN_FAILED;
                     return false;
                 } // if
             } catch ( NotFoundException& ex ) {
-                // Pet will stay at it's current position until it's owner isn't at a valid position
-                logger().error(
-                             "PAIWorldWrapper - Goto: target not found.");
+                // Pet will stay at it's current position until it's owner
+                // isn't at a valid position
+                logger().error( "PAIWorldWrapper - Goto: target not found.");
                 _hasPlanFailed = true;
-                MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                MAIN_LOGGER_ACTION_PLAN_FAILED;
                 return false;
             } // catch
 
@@ -268,15 +267,15 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             float walkSpeed = get_contin( *++it.begin() );
 
             if ( target == "custom_object" ) {
-                target = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+                target = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
             } // if
 
-            if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),  target ) ) { //can't find the target
-                logger().error(
-                             "PAIWorldWrapper - gobehind_obj: target[%s] not found.",
-                             target.c_str( ) );
+            if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(), target)) {
+                //can't find the target
+                logger().error("PAIWorldWrapper - gobehind_obj: target[%s] not found.",
+                             target.c_str() );
                 _hasPlanFailed = true;
-                MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                MAIN_LOGGER_ACTION_PLAN_FAILED;
                 return false;
             } // if
 
@@ -298,7 +297,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             //spatial::Point startPoint( md.centerX, md.centerY );
 
             // register seeking object
-            _pai.getAvatarInterface( ).setLatestGotoTarget(
+            pai.getAvatarInterface( ).setLatestGotoTarget(
                 std::pair<std::string, spatial::Point>( target, spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ) ) );
 
             if ( !buildGotoPlan( goalPoint, walkSpeed ) ) {
@@ -309,7 +308,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                     logger().info(
                                  "PAIWorldWrapper - No gobehind_obj plan needed since the goal was already near enough.");
                 } // if
-                MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                MAIN_LOGGER_ACTION_PLAN_FAILED;
                 return false;
             } // if
 
@@ -318,47 +317,43 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 
         case id::heel:
             OC_ASSERT(it.number_of_children() == 0);
-            //first goto the owner, if we can find it
-            if (!WorldWrapperUtil::inSpaceMap(sm, as,
-                                              selfName(), ownerName(),
+            // first goto the owner, if we can find it
+            if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
                                               combo::vertex("owner"))) {
-                logger().error(
-                             "PAIWorldWrapper - Heel: owner not found.");
-
+                logger().error("PAIWorldWrapper - Heel: owner not found.");
                 _hasPlanFailed = true;
-                MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                MAIN_LOGGER_ACTION_PLAN_FAILED;
                 return false;
             }
             if (!build_goto_plan(WorldWrapperUtil::ownerHandle(as, ownerName())))
-                _planID = _pai.createActionPlan();
-            //then add a heel action at the end
-            _pai.addAction(_planID, PetAction(ActionType::HEEL()));
+                planID = pai.createActionPlan();
+            // then add a heel action at the end
+            pai.addAction(planID, PetAction(ActionType::HEEL()));
             break;
         case id::nudge_to:
             OC_ASSERT(it.number_of_children() == 2);
             OC_ASSERT(is_definite_object(*it.begin()));
             OC_ASSERT(is_definite_object(*++it.begin()));
-            //make sure we can find the obj to nudge and its destination
+            // make sure we can find the obj to nudge and its destination
             if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
                                               *it.begin()) ||
                     !WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
                                                   *++it.begin())) {
-                logger().error(
-                             "PAIWorldWrapper - Nudge: obj or destination not found.");
-
+                logger().error("PAIWorldWrapper - Nudge: obj or destination not found.");
                 _hasPlanFailed = true;
-                MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                MAIN_LOGGER_ACTION_PLAN_FAILED;
                 return false;
             }
-            //first goto the obj that we want to nudge
+            // first goto the obj that we want to nudge
             {
-                bool useExistingPlan = build_goto_plan(toHandle(get_definite_object(*it.begin())));
+                bool useExistingPlan = build_goto_plan(
+                        toHandle(get_definite_object(*it.begin())));
                 //now build a nudging plan adding to it
                 if (!build_goto_plan(toHandle(get_definite_object(*++it.begin())),
                                      useExistingPlan,
                                      toHandle(get_definite_object(*it.begin())))
                         && !useExistingPlan) {
-                    MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                    MAIN_LOGGER_ACTION_PLAN_FAILED;
                     return false;
                 }
             }
@@ -378,14 +373,14 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                              "PAIWorldWrapper - Go behind: args not found.");
 
                 _hasPlanFailed = true;
-                MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                MAIN_LOGGER_ACTION_PLAN_FAILED;
                 return false;
             }
             float walkSpeed = get_contin( *++(++it.begin()) );
 
             if (!build_goto_plan(toHandle(get_definite_object(*it.begin())),
                                  false, Handle::UNDEFINED, toHandle(get_definite_object(*++it.begin()))), walkSpeed ) {
-                MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                MAIN_LOGGER_ACTION_PLAN_FAILED;
                 return false;
             }
         }
@@ -405,18 +400,18 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                                  "PAIWorldWrapper - Follow: obj not found.");
 
                     _hasPlanFailed = true;
-                    MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+                    MAIN_LOGGER_ACTION_PLAN_FAILED;
                     return false;
                 }
                 float walkSpeed = get_contin( *++it.begin() );
                 float duration = get_contin( *++(++it.begin( ) ) );
 
                 if ( duration == 0 ) {
-                    duration = _pai.getAvatarInterface( ).computeFollowingDuration( );
+                    duration = pai.getAvatarInterface( ).computeFollowingDuration( );
                 } // if
 
                 if (!build_goto_plan(obj, false, Handle::UNDEFINED, Handle::UNDEFINED, walkSpeed ) )
-                    _planID = _pai.createActionPlan();
+                    planID = pai.createActionPlan();
                 //then add a follow action at the end
                 PetAction action(ActionType::FOLLOW());
                 action.addParameter(ActionParameter("id",
@@ -424,7 +419,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                                                     Entity(get_definite_object(*it.begin()),
                                                            resolveType(*it.begin()))));
                 action.addParameter(ActionParameter("duration", ActionParamType::FLOAT(), lexical_cast<string>(duration)) );
-                _pai.addAction(_planID, action);
+                pai.addAction(planID, action);
             }
         }
         break;
@@ -434,24 +429,24 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             throw opencog::ComboException(TRACE_INFO, "PAIWorldWrapper - %s.", stream.str().c_str());
         }
         //try { //TODO
-        if (_pai.isActionPlanEmpty(_planID)) {
+        if (pai.isActionPlanEmpty(planID)) {
             _hasPlanFailed = true;
-            MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+            MAIN_LOGGER_ACTION_PLAN_FAILED;
             return false;
         } else {
-            _pai.sendActionPlan(_planID);
-            MAIN_LOGGER_ACTION_PLAN_SUCCEEDED; //macro see top of the file
+            pai.sendActionPlan(planID);
+            MAIN_LOGGER_ACTION_PLAN_SUCCEEDED;
             return true;
         }
         //} catch (...) {
-        //throw ActionPlanSendingFailure(_planID);
+        //throw ActionPlanSendingFailure(planID);
         //}
 
     } else { //non-compound action sequence
         while (from != to) {
             try {
                 PetAction action = buildPetAction(from);
-                _pai.addAction(_planID, action);
+                pai.addAction(planID, action);
                 ++from;
             } catch( const opencog::StandardException& ex ) {
                 std::stringstream ss (stringstream::out);
@@ -461,42 +456,35 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                                 __FUNCTION__, ss.str().c_str( )  );
                 from = to;
             } catch (...) {
-                //log error
                 std::stringstream ss (stringstream::out);
                 ss << combo_tree(from);
-                logger().error(
-                             "PAIWorldWrapper - Failed to build PetAction '%s'.",
+                logger().error("PAIWorldWrapper - Failed to build PetAction '%s'.",
                              ss.str().c_str());
-                //~log error
 
-                from = to; //so no more actions are built for that action plan, as according to and_seq semantics
+                // so no more actions are built for that action plan, as
+                // according to and_seq semantics
+                from = to;
             }
         }
-        //TODO : add expection
-        //try {
-        if (_pai.isActionPlanEmpty(_planID)) {
+        if (pai.isActionPlanEmpty(planID)) {
             _hasPlanFailed = true;
-            MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
+            MAIN_LOGGER_ACTION_PLAN_FAILED;
             return false;
         } else {
-            _pai.sendActionPlan(_planID);
-            MAIN_LOGGER_ACTION_PLAN_SUCCEEDED; //macro see top of the file
+            pai.sendActionPlan(planID);
+            MAIN_LOGGER_ACTION_PLAN_SUCCEEDED;
             return true;
         }
-        //} catch (...) {
-        //throw ActionPlanSendingFailure(_planID);
-        //}
     }
 }
 
 combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier& vu)
 {
-    Handle smh = _pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
-    unsigned int current_time = _pai.getLatestSimWorldTimestamp();
-    OC_ASSERT(smh != Handle::UNDEFINED,
-                     "A SpaceMap must exists");
+    Handle smh = pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
+    unsigned int current_time = pai.getLatestSimWorldTimestamp();
+    OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exists");
     combo::vertex v = WorldWrapperUtil::evalPerception(rng, smh, current_time,
-                      _pai.getAtomSpace(),
+                      pai.getAtomSpace(),
                       selfName(), ownerName(),
                       it, false, vu);
 
@@ -505,8 +493,7 @@ combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier
         stringstream p_ss, r_ss;
         p_ss << combo_tree(it);
         r_ss << v;
-        logger().debug(
-                     "PAIWorldWrapper - Perception %s has been evaluation to %s",
+        logger().debug("PAIWorldWrapper - Perception %s has been evaluation to %s",
                      p_ss.str().c_str(), r_ss.str().c_str());
     }
     //~DEBUG log
@@ -517,13 +504,12 @@ combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier
 combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
         combo::variable_unifier& vu)
 {
-    Handle smh = _pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
-    unsigned int current_time = _pai.getLatestSimWorldTimestamp();
-    OC_ASSERT(smh != Handle::UNDEFINED,
-                     "A SpaceMap must exists");
+    Handle smh = pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
+    unsigned int current_time = pai.getLatestSimWorldTimestamp();
+    OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exists");
 
     combo::vertex v = WorldWrapperUtil::evalIndefiniteObject(rng, smh, current_time,
-                      _pai.getAtomSpace(),
+                      pai.getAtomSpace(),
                       selfName(), ownerName(),
                       io, false, vu);
 
@@ -532,8 +518,7 @@ combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
         stringstream io_ss, r_ss;
         io_ss << io;
         r_ss << v;
-        logger().debug(
-                     "PAIWorldWrapper - Indefinition object %s has been evaluation to %s",
+        logger().debug("PAIWorldWrapper - Indefinition object %s has been evaluation to %s",
                      io_ss.str().c_str(), r_ss.str().c_str());
     }
     //~DEBUG log
@@ -549,7 +534,7 @@ void PAIWorldWrapper::clearPlan( std::vector<spatial::Point>& actions,
                                  const spatial::Point& startPoint,
                                  const spatial::Point& endPoint )
 {
-    const SpaceServer::SpaceMap& sm = _pai.getAtomSpace().getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& sm = pai.getAtomSpace().getSpaceServer().getLatestMap();
 
     double closestDist = SpaceServer::SpaceMap::eucDist( startPoint,
                          endPoint );
@@ -561,15 +546,13 @@ void PAIWorldWrapper::clearPlan( std::vector<spatial::Point>& actions,
         if (d < closestDist) {
             eraseFrom = next(it);
 
-            // at some point the following "take the nearest point"
-            // heuristic can be
-            // made more subtle by adding a weight to the length of the path -
-            // e.g. if the path generated by tb is (x1,x2,...,xN) and N is large,
-            // and the point xN is only slightly closer to the goal than x2, then
-            // maybe we want to just go to x2 and not all the way to xN
-            if (d <= sm.radius() * 1.1) {
-                break;
-            } // if
+            // at some point the following "take the nearest point" heuristic
+            // can be made more subtle by adding a weight to the length of the
+            // path - e.g. if the path generated by tb is (x1,x2,...,xN) and
+            // N is large, and the point xN is only slightly closer to the goal
+            // than x2, then maybe we want to just go to x2 and not all the way
+            // to xN
+            if (d <= sm.radius() * 1.1) break;
             closestDist = d;
         } // if
     } // for
@@ -578,31 +561,32 @@ void PAIWorldWrapper::clearPlan( std::vector<spatial::Point>& actions,
 
 spatial::Point PAIWorldWrapper::getValidPosition( const spatial::Point& location )
 {
-    const SpaceServer::SpaceMap& spaceMap = _pai.getAtomSpace().getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& spaceMap = pai.getAtomSpace().getSpaceServer().getLatestMap();
 
     //make sure that the object location is valid
     spatial::Point correctedLocation = location;
     if ( spaceMap.illegal( location ) ) {
-        logger().warn(
-                     "PAIWorldWrapper - Position (%.2f, %.2f) is invalid (off the grid, near/inside an obstacle).",
-                     location.first, location.second);
+        logger().warn("PAIWorldWrapper - Position (%.2f, %.2f) is invalid "
+                "(off the grid, near/inside an obstacle).",
+                location.first, location.second);
 
         correctedLocation = spaceMap.getNearestFreePoint( location );
 
-        logger().warn(
-                     "PAIWorldWrapper - Changed position to the nearest valid point (%.2f, %.2f).",
-                     correctedLocation.first, correctedLocation.second);
-    } // if
+        logger().warn("PAIWorldWrapper - Changed position to the nearest : "
+                "valid point (%.2f, %.2f).",
+                correctedLocation.first, correctedLocation.second);
+    }
 
     return correctedLocation;
 }
 
-void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point>& actions )
+void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
+        const spatial::Point& endPoint, std::vector<spatial::Point>& actions )
 {
     const std::string pathFindingAlgorithm =
         opencog::config().get("NAVIGATION_ALGORITHM");
 
-    const SpaceServer::SpaceMap& sm = _pai.getAtomSpace().getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& sm = pai.getAtomSpace().getSpaceServer().getLatestMap();
 
     try {
         spatial::Point begin = startPoint;
@@ -614,11 +598,11 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint, const spat
         if ( correctedAgentLocation != begin ) {
             begin = correctedAgentLocation;
             actions.push_back( begin );
-        } // if
+        }
 
         if ( correctedEndLocation != end ) {
             end = correctedEndLocation;
-        } // if
+        }
 
         if ( pathFindingAlgorithm == "astar") {
             spatial::LSMap2DSearchNode petNode = sm.snap(spatial::Point(begin.first, begin.second));
@@ -633,8 +617,8 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint, const spat
             _hasPlanFailed = (AStar.findPath() != spatial::AStarSearch<spatial::LSMap2DSearchNode>::SEARCH_STATE_SUCCEEDED);
             actions = AStar.getShortestCalculatedPath( );
 
-            logger().debug(
-                         "PAIWorldWrapper - AStar result %s.", !_hasPlanFailed ? "true" : "false");
+            logger().debug("PAIWorldWrapper - AStar result %s.",
+                    !_hasPlanFailed ? "true" : "false");
         } else if ( pathFindingAlgorithm == "hpa" ) {
 
             SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
@@ -646,11 +630,11 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint, const spat
             if ( !_hasPlanFailed ) {
                 foreach( spatial::math::Vector2 pathPoint, pathPoints ) {
                     actions.push_back( spatial::Point( pathPoint.x, pathPoint.y ) );
-                } // foreach
-            } // if
+                }
+            }
 
-            logger().debug(
-                         "PAIWorldWrapper - HPASearch result %s.", !_hasPlanFailed ? "true" : "false");
+            logger().debug("PAIWorldWrapper - HPASearch result %s.",
+                    !_hasPlanFailed ? "true" : "false");
 
         } else {
             spatial::TangentBug::CalculatedPath calculatedPath;
@@ -666,8 +650,8 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint, const spat
                 spatial::TangentBug::CalculatedPath::iterator it;
                 for ( it = calculatedPath.begin( ); it != calculatedPath.end( ); ++it ) {
                     actions.push_back( boost::get<0>( *it ) );
-                } // for
-            } // if
+                }
+            }
             logger().debug("PAIWorldWrapper - TangetBug result %s.",
                          !_hasPlanFailed ? "true" : "false");
         } // else
@@ -675,13 +659,13 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint, const spat
         _hasPlanFailed = true;
     } catch ( opencog::AssertionException& e) {
         _hasPlanFailed = true;
-    } // catch
+    }
 }
 
 bool PAIWorldWrapper::buildGotoPlan( const spatial::Point& position, float customSpeed )
 {
 
-    const AtomSpace& as = _pai.getAtomSpace();
+    const AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
     std::vector<spatial::Point> actions;
 
@@ -714,7 +698,7 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
     // --------------------------------------------------------------------
 
     if (!useExistingId ) {
-        _planID = _pai.createActionPlan( );
+        planID = pai.createActionPlan( );
     } // if
 
     foreach(const spatial::Point& it_action, actions ) {
@@ -724,7 +708,7 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
             action = PetAction(ActionType::NUDGE_TO());
             action.addParameter(ActionParameter("moveableObj",
                                                 ActionParamType::ENTITY(),
-                                                Entity(_pai.getAtomSpace().getName(toNudge),
+                                                Entity(pai.getAtomSpace().getName(toNudge),
                                                        resolveType(toNudge))));
             action.addParameter(ActionParameter("target",
                                                 ActionParamType::VECTOR(),
@@ -739,12 +723,15 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
                                                        it_action.second,
                                                        0.0)));
 
-            float speed = ( customSpeed != 0 ) ? customSpeed : _pai.getAvatarInterface().computeWalkingSpeed();
-            logger().debug("PAIWorldWrapper::createWalkPlanAction customSpeed[%f] finalSpeed[%f]", customSpeed, speed );
-            action.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), lexical_cast<string>( speed) ) );
+            float speed = ( customSpeed != 0 ) ?
+                    customSpeed : pai.getAvatarInterface().computeWalkingSpeed();
+            logger().debug("PAIWorldWrapper::createWalkPlanAction customSpeed[%f] finalSpeed[%f]",
+                    customSpeed, speed );
+            action.addParameter(ActionParameter("speed", ActionParamType::FLOAT(),
+                    lexical_cast<string>( speed) ) );
 
         } // else
-        _pai.addAction( _planID, action );
+        pai.addAction( planID, action );
     } // foreach
 
     return true;
@@ -756,7 +743,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
                                       Handle goBehind, float walkSpeed )
 {
 
-    const AtomSpace& atomSpace = _pai.getAtomSpace();
+    const AtomSpace& atomSpace = pai.getAtomSpace();
     const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
     std::string goalName = atomSpace.getName(goalHandle);
 
@@ -776,22 +763,21 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
         } else {
             endPoint = spaceMap.nearbyPoint(startPoint, goalName);
             if (spaceMap.gridIllegal(spaceMap.snap(endPoint))) {
-                logger().error(
-                             "PAIWorldWrapper - nearby point selected and invalid point.");
+                logger().error("PAIWorldWrapper - nearby point selected and invalid point.");
             }
         } // else
     } catch ( opencog::AssertionException& e ) {
-        logger().error(
-                     "PAIWorldWrapper - Unable to get pet or goal location.");
+        logger().error("PAIWorldWrapper - Unable to get pet or goal location.");
         _hasPlanFailed = true;
         return false;
     } // catch
 
-    logger().fine(
-                 "PAIWorldWrapper - Pet position: (%.2f, %.2f). Goal position: (%.2f, %.2f) - %s.",
-                 startPoint.first, startPoint.second,  endPoint.first, endPoint.second, goalName.c_str());
+    logger().fine("PAIWorldWrapper - Pet position: (%.2f, %.2f). "
+            "Goal position: (%.2f, %.2f) - %s.",
+            startPoint.first, startPoint.second,  endPoint.first,
+            endPoint.second, goalName.c_str());
     // register seeking object
-    _pai.getAvatarInterface( ).setLatestGotoTarget(
+    pai.getAvatarInterface( ).setLatestGotoTarget(
         std::pair<std::string, spatial::Point>( goalName, targetCenterPosition ) );
 
     return buildGotoPlan( endPoint, walkSpeed );
@@ -799,8 +785,8 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
 
 PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 {
-    unsigned int current_time = _pai.getLatestSimWorldTimestamp();
-    AtomSpace& as = _pai.getAtomSpace();
+    unsigned int current_time = pai.getLatestSimWorldTimestamp();
+    AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
     static const std::map<pet_builtin_action_enum, ActionType> actions2types =
         boost::assign::map_list_of
@@ -942,7 +928,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         } // else
 
         if ( targetName == "custom_object" ) {
-            targetName = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+            targetName = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
         } // else
 
         action.addParameter( ActionParameter( "target", ActionParamType::ENTITY( ),
@@ -965,13 +951,13 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         } // else
 
         if ( message == "custom_message" ) {
-            message = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customMessage" );
+            message = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customMessage" );
         } // if
 
         // once the say action was executed set the has_something_to_say predicate to false
         // to avoid repetitions
         AtomSpaceUtil::setPredicateValue( as, "has_something_to_say", TruthValue::FALSE_TV( ),
-                                          AtomSpaceUtil::getAgentHandle( as, _pai.getAvatarInterface( ).getPetId( ) ) );
+                                          AtomSpaceUtil::getAgentHandle( as, pai.getAvatarInterface( ).getPetId( ) ) );
                         
         action.addParameter( ActionParameter( "message", ActionParamType::STRING( ), message ) );
 
@@ -986,7 +972,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         } // else
         
         if ( targetName == "custom_object" ) {
-            targetName = _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+            targetName = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
         } // else
         
         action.addParameter( ActionParameter( "target", ActionParamType::STRING( ), targetName ) );
@@ -1057,7 +1043,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         action.addParameter( ActionParameter( "command", ActionParamType::STRING( ), commandName ) );
         action.addParameter( ActionParameter( "parameters", ActionParamType::STRING( ), parameters.str() ) );
 
-        _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "groupCommandDone", actionDoneParameters );
+        pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "groupCommandDone", actionDoneParameters );
 
     }
     break;
@@ -1068,7 +1054,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         logger().debug(
                      "PAIWorldWrapper - receiving latest_group_commands from all agents" );
 
-        //_pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
+        //pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
 
         // retrieve all agents
         std::vector<Handle> agentsHandles;
@@ -1123,7 +1109,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                     commandArguments.push_back( commandParameters[j] );
                 } // for
 
-                _pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
+                pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
 
             } // if
         } // for
@@ -1247,13 +1233,13 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     case id::rotate_left:      // rotate_left
         action.addParameter(ActionParameter("rotation",
                                             ActionParamType::ROTATION(),
-                                            Rotation(0.0, 0.0, _pai.getAvatarInterface().computeRotationAngle())));
+                                            Rotation(0.0, 0.0, pai.getAvatarInterface().computeRotationAngle())));
         break;
 
     case id::rotate_right:     // rotate_right
         action.addParameter(ActionParameter("rotation",
                                             ActionParamType::ROTATION(),
-                                            Rotation(0.0, 0.0, -_pai.getAvatarInterface().computeRotationAngle())));
+                                            Rotation(0.0, 0.0, -pai.getAvatarInterface().computeRotationAngle())));
         break;
 
         //now stepping actions
@@ -1297,7 +1283,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             }
             action.addParameter(ActionParameter("speed",
                                                 ActionParamType::FLOAT(),
-                                                lexical_cast<string>(_pai.getAvatarInterface().computeWalkingSpeed())));
+                                                lexical_cast<string>(pai.getAvatarInterface().computeWalkingSpeed())));
         }
         break;
     case id::step_towards:      // step_towards(obj,TOWARDS|AWAY)
@@ -1324,7 +1310,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                                                 Vector(p.first, p.second, 0.0)));
             action.addParameter(ActionParameter("speed",
                                                 ActionParamType::FLOAT(),
-                                                lexical_cast<string>(_pai.getAvatarInterface().computeWalkingSpeed())));
+                                                lexical_cast<string>(pai.getAvatarInterface().computeWalkingSpeed())));
         }
         break;
 
@@ -1397,7 +1383,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             spatial::math::Vector3 targetPosition;
             if ( targetObjectName == "custom_position" ) {
                 std::stringstream parser(
-                    _pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customPosition" )
+                    pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customPosition" )
                 );
                 parser >> targetPosition.x;
                 parser >> targetPosition.y;
@@ -1472,14 +1458,15 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     return action;
 }
 
-string PAIWorldWrapper::toCamelCase(string str)
+string PAIWorldWrapper::toCamelCase(const string& str)
 {
-    for (string::iterator it = str.begin();it != str.end() - 1;++it)
+    string result = str;
+    for (string::iterator it = result.begin();it != result.end() - 1;++it)
         if (*it == '_') {
-            it = str.erase(it);
+            it = result.erase(it);
             *it = toupper(*it);
         }
-    return str;
+    return result;
 }
 
 string PAIWorldWrapper::resolveType(combo::vertex v)
@@ -1490,7 +1477,7 @@ string PAIWorldWrapper::resolveType(combo::vertex v)
 }
 string PAIWorldWrapper::resolveType(Handle h)
 {
-    Type objType = _pai.getAtomSpace().getType(h);
+    Type objType = pai.getAtomSpace().getType(h);
     return (objType == AVATAR_NODE ? AVATAR_OBJECT_TYPE :
             objType == PET_NODE ? PET_OBJECT_TYPE :
             objType == HUMANOID_NODE ? HUMANOID_OBJECT_TYPE :
@@ -1502,30 +1489,30 @@ string PAIWorldWrapper::resolveType(Handle h)
 
 string PAIWorldWrapper::selfName()
 {
-    return _pai.getAvatarInterface().getPetId();
+    return pai.getAvatarInterface().getPetId();
 }
 
 string PAIWorldWrapper::ownerName()
 {
-    return _pai.getAvatarInterface().getOwnerId();
+    return pai.getAvatarInterface().getOwnerId();
 }
 
 /**
    do a lookup in:
 
    AtTimeLink
-   TimeNode "$timestamp"
-   EvalLink
-   PredicateNode "AGISIM_position"
-   ListLink
-   ObjectNode "$obj_id"
-   NumberNode "$pitch"
-   NumberNode "$roll"
-   NumberNode "$yaw"
+       TimeNode "$timestamp"
+       EvalLink
+           PredicateNode "AGISIM_position"
+           ListLink
+               ObjectNode "$obj_id"
+               NumberNode "$pitch"
+               NumberNode "$roll"
+               NumberNode "$yaw"
 **/
 double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 {
-    const AtomSpace& as = _pai.getAtomSpace();
+    const AtomSpace& as = pai.getAtomSpace();
     const SpaceServer& spaceServer = as.getSpaceServer();
     //get the time node of the latest map, via the link AtTimeLink(TimeNode,SpaceMap)
     Handle atTimeLink = spaceServer.getLatestMapHandle();
@@ -1534,21 +1521,20 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
     const string& slObjName = as.getName(slobj);
     if (sm.containsObject(slObjName)) {
         //return the yaw
-        double result = sm.getEntity(slObjName)->getOrientation( ).getRoll( );//sm.getMetaData(slObjName).yaw;
+        double result = sm.getEntity(slObjName)->getOrientation().getRoll();
         logger().debug("getAngleFacing(%s) => %f", as.getName(slobj).c_str(), result);
         return result;
     }
-    //_pai.getAtomSpace().print();
     std::stringstream stream (std::stringstream::out);
     stream << "Can't find angle that Object '" << as.getName(slobj)
-    << "' is facing at" << std::endl;
+        << "' is facing at" << std::endl;
     throw opencog::ComboException(TRACE_INFO, "PAIWorldWrapper - %s.",
                                   stream.str().c_str());
 }
 
 Handle PAIWorldWrapper::toHandle(combo::definite_object obj)
 {
-    return WorldWrapperUtil::toHandle(_pai.getAtomSpace(), obj,
+    return WorldWrapperUtil::toHandle(pai.getAtomSpace(), obj,
                                       selfName(), ownerName());
 }
 

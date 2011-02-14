@@ -1,9 +1,9 @@
 /*
  * opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.cc
  *
+ * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Welter Luigi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,14 +19,6 @@
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
-
-
-/**
- * Class with util methods for related to AtomSpace manipulation
- *
- * Author: Welter Luigi
- * Copyright(c), 2007
  */
 
 #include <opencog/atomspace/HandleTemporalPairEntry.h>
@@ -633,9 +625,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
                      predicateName.c_str());
         return Handle::UNDEFINED;
     } else {
-        ph = AtomSpaceUtil::addNode(atomSpace,
-                                    PREDICATE_NODE,
-                                    predicateName, true);
+        ph = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName, true);
     }
 
     Handle ll = atomSpace.getHandle(LIST_LINK, ll_out);
@@ -2637,12 +2627,11 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
         Handle link = atomSpace.getHandle( EVALUATION_LINK, elementPair );
         atomSpace.removeAtom( link );
 
-        // second, remove the frame element link       
+        // second, remove the frame element link
         elementPair[0] = frameInstance;
         elementPair[1] = elementPredicate;
         link = atomSpace.getHandle( FRAME_ELEMENT_LINK, elementPair );
         atomSpace.removeAtom( link );
-
 
         // then, remove the inheritance link
 #ifdef USE_GET_HANDLE_SET

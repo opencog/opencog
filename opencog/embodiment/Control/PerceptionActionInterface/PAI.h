@@ -1,9 +1,9 @@
 /*
  * opencog/embodiment/Control/PerceptionActionInterface/PAI.h
  *
+ * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Welter Luigi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -72,9 +72,7 @@ typedef map<ActionPlanID, ActionIdMap> PlanToActionIdsMap;
 /** Perception and Actions Interface.
  *
  * This class provides the interface for receiving perceptions and send actions
- * from/to Petaverse Proxy (PVP)
- *
- * @author Welter Luigi
+ * from/to Embodiment Proxy
  */
 class PAI
 {
@@ -164,10 +162,6 @@ private:
      * Current agent radius
      */
     double agentRadius;
-
-    /**
-     * Object that updates the "near" predicates between the objects in the field of view of the agent.
-     */
 
 #ifdef HAVE_LIBPTHREAD
     /**
