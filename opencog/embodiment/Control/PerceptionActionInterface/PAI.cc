@@ -69,8 +69,8 @@ using namespace opencog;
 #define REGEX_OUTPUT_SIZE 8
 
 
-PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, AvatarInterface& _petInterface, unsigned long nextPlanID) :
-        atomSpace(_atomSpace), actionSender(_actionSender), petInterface(_petInterface), nextActionPlanId(nextPlanID)
+PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, AvatarInterface& _avatarInterface, unsigned long nextPlanID) :
+        atomSpace(_atomSpace), actionSender(_actionSender), avatarInterface(_avatarInterface), nextActionPlanId(nextPlanID)
 {
     PAIUtils::initializeXMLPlatform();
     xMin = -1;
@@ -128,7 +128,7 @@ AtomSpace& PAI::getAtomSpace()
 
 AvatarInterface& PAI::getAvatarInterface()
 {
-    return petInterface;
+    return avatarInterface;
 }
 
 ActionPlanID PAI::createActionPlan()
@@ -1068,7 +1068,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
 
     Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE, sentence.c_str());
 
-    if ( petInterface.getPetId( ) == internalPetId ) {
+    if ( avatarInterface.getPetId( ) == internalPetId ) {
         AtomSpaceUtil::setPredicateValue( atomSpace, "heard_sentence",
             TruthValue::TRUE_TV( ), sentenceNode );
     } // if
@@ -1145,10 +1145,10 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
 
     if ( std::string( contentType ) == "FACT" ) {
 
-        petInterface.getCurrentModeHandler( ).handleCommand( "storeFact", arguments );
+        avatarInterface.getCurrentModeHandler( ).handleCommand( "storeFact", arguments );
 
     } else if ( std::string( contentType ) == "COMMAND" ) {
-        petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", arguments );
+        avatarInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", arguments );
 
     } else if ( std::string( contentType ) == "QUESTION" ) {
         AtomSpaceUtil::setPredicateValue( atomSpace,
@@ -1156,19 +1156,19 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
         AtomSpaceUtil::setPredicateValue( atomSpace,
             "was_answered", TruthValue::FALSE_TV( ), sentenceNode );
         
-        petInterface.getCurrentModeHandler( ).handleCommand( "answerQuestion", arguments );
+        avatarInterface.getCurrentModeHandler( ).handleCommand( "answerQuestion", arguments );
 
     } else if ( std::string( contentType ) == "SPECIFIC_COMMAND" ) {
-        if ( std::string( targetMode ) == petInterface.getCurrentModeHandler( ).getModeName( ) ) {
+        if ( std::string( targetMode ) == avatarInterface.getCurrentModeHandler( ).getModeName( ) ) {
 
             // ATTENTION: a sentence must be upper case to be handled by the agent mode handlers
             boost::to_upper(arguments[0]);            
             arguments.push_back( boost::lexical_cast<std::string>( tsValue ) );
             arguments.push_back( internalAvatarId );
-            petInterface.getCurrentModeHandler( ).handleCommand( "instruction", arguments );
+            avatarInterface.getCurrentModeHandler( ).handleCommand( "instruction", arguments );
         } else {
             logger().debug( "PAI::%s - A specific command of another mode was sent. Ignoring it. Current Mode: %s, Target Mode: %s, Command: %s", 
-                            __FUNCTION__, petInterface.getCurrentModeHandler( ).getModeName( ).c_str( ), targetMode, sentenceText );
+                            __FUNCTION__, avatarInterface.getCurrentModeHandler( ).getModeName( ).c_str( ), targetMode, sentenceText );
         } // else
     } // if
 
@@ -1210,7 +1210,7 @@ void PAI::processAgentSensorInfo(XERCES_CPP_NAMESPACE::DOMElement * element)
         if ( !strcmp( sensor, "visibility" ) && !strcmp( subject, "map" ) ) {
             std::vector<std::string> arguments;
             arguments.push_back( signal );
-            petInterface.getCurrentModeHandler( ).handleCommand( "visibilityMap", arguments );
+            avatarInterface.getCurrentModeHandler( ).handleCommand( "visibilityMap", arguments );
         } // if
 
         XERCES_CPP_NAMESPACE::XMLString::release(&sensor);
@@ -1582,7 +1582,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     SpaceServer& spaceServer = atomSpace.getSpaceServer();
     spaceServer.setMapBoundaries(xMin, xMax, yMin, yMax, xDim, yDim);
 
-    bool keepPreviousMap = petInterface.isExemplarInProgress();
+    bool keepPreviousMap = avatarInterface.isExemplarInProgress();
     // Gets each blip element
     XERCES_CPP_NAMESPACE::XMLString::transcode(BLIP_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList * blipList = element->getElementsByTagName(tag);
@@ -1757,10 +1757,10 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         char* entityId = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
         string internalEntityId = PAIUtils::getInternalId(entityId);
 
-        bool isPetObject = (internalEntityId == petInterface.getPetId());
-        bool isPetOwner = (internalEntityId == petInterface.getOwnerId());
+        bool isPetObject = (internalEntityId == avatarInterface.getPetId());
+        bool isPetOwner = (internalEntityId == avatarInterface.getOwnerId());
         // NOTE: blip for the pet itself should be the first one. This way, owner's id will be already known
-        // at petInterface when blip for the onwer comes.
+        // at avatarInterface when blip for the onwer comes.
 
         Handle objectNode;
         XERCES_CPP_NAMESPACE::XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -1788,7 +1788,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 
         if (objName && strlen(objName)) {
             if (isPetObject)  {
-                petInterface.setName(objName);
+                avatarInterface.setName(objName);
             }
 
             Handle objNameNode = AtomSpaceUtil::addNode(atomSpace, WORD_NODE, objName, isPetObject || isPetOwner);
@@ -1805,7 +1805,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             string internalOwnerId = PAIUtils::getInternalId(ownerId);
 //            logger().log(Util::Logger::INFO, "PAI - processMapInfo(): ownerId=%s (%s)", ownerId, internalOwnerId.c_str());
             if (isPetObject) {
-                petInterface.setOwnerId(internalOwnerId);
+                avatarInterface.setOwnerId(internalOwnerId);
             }
 
             // TODO: we will assume that only Avatars can own something or someone
@@ -1824,9 +1824,9 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 
             // check if the object to be removed is marked as grabbed in
             // AvatarInterface. If so grabbed status should be unset.
-            if (petInterface.hasGrabbedObj() &&
-                    petInterface.getGrabbedObj() == atomSpace.getName(objectNode)) {
-                petInterface.setGrabbedObj(std::string(""));
+            if (avatarInterface.hasGrabbedObj() &&
+                    avatarInterface.getGrabbedObj() == atomSpace.getName(objectNode)) {
+                avatarInterface.setGrabbedObj(std::string(""));
             }
         } else {
             // position
@@ -1864,7 +1864,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 addVectorPredicate( objectNode, AGISIM_VELOCITY_PREDICATE_NAME, tsValue, velocityElement );
             } // if
 
-            Handle agent = AtomSpaceUtil::getAgentHandle( atomSpace, petInterface.getPetId( ) );
+            Handle agent = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId( ) );
             if ( agent != objectNode ) { // an agent cannot see himself
                 AtomSpaceUtil::setPredicateValue( atomSpace, "inside_pet_fov",
                                                   SimpleTruthValue( (isObjectInsidePetFov ? 1.0f : 0.0f), 1.0f ), agent, objectNode );
@@ -2042,7 +2042,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     if (!keepPreviousMap) atomSpace.getSpaceServer().cleanupSpaceServer();
     // --
 
-    this->petInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
+    this->avatarInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
 
 }
 
@@ -2295,7 +2295,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
                              bool isEdible, bool isDrinkable)
 {
 
-    bool isSelfObject = (petInterface.getPetId() == atomSpace.getName(objectNode));
+    bool isSelfObject = (avatarInterface.getPetId() == atomSpace.getName(objectNode));
 
     // Position predicate
     Vector position = addVectorPredicate(objectNode, AGISIM_POSITION_PREDICATE_NAME, timestamp, positionElement);
@@ -2370,7 +2370,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
 
     // SPACE SERVER INSERTION:
 
-    Handle petHandle = AtomSpaceUtil::getAgentHandle( atomSpace, petInterface.getPetId());
+    Handle petHandle = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId());
     std::string objectName = atomSpace.getName( objectNode );
     bool isAgent = AtomSpaceUtil::getAgentHandle( atomSpace, objectName ) != Handle::UNDEFINED;
     double pet_length, pet_width, pet_height;
@@ -2424,12 +2424,12 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
     std::string feeling = name;
     boost::replace_first( feeling, "_urgency", "");
 
-    std::string frameInstanceName = petInterface.getPetId() + "_" + feeling + "_biological_urge";
+    std::string frameInstanceName = avatarInterface.getPetId() + "_" + feeling + "_biological_urge";
 
     if ( value > 0 ) {
         std::string degree = value >= 0.7 ? "High" : value >= 0.3 ? "Medium" : "Low";
         std::map<std::string, Handle> elements;
-        elements["Experiencer"] = atomSpace.addNode( SEME_NODE, petInterface.getPetId() );
+        elements["Experiencer"] = atomSpace.addNode( SEME_NODE, avatarInterface.getPetId() );
         elements["State"] = atomSpace.addNode( CONCEPT_NODE, feeling );
         elements["Degree"] = atomSpace.addNode( CONCEPT_NODE, degree );
         elements["Value"] = atomSpace.addNode( NUMBER_NODE, boost::lexical_cast<std::string>( value ) );
@@ -2524,10 +2524,10 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                         if (param.getName() == "target") {
                             const Entity& entity = param.getEntityValue();
                             AtomSpaceUtil::setupHoldingObject(  atomSpace,
-                                                                petInterface.getPetId( ),
+                                                                avatarInterface.getPetId( ),
                                                                 entity.id,
                                                                 getLatestSimWorldTimestamp() );
-                            petInterface.setGrabbedObj(entity.id);
+                            avatarInterface.setGrabbedObj(entity.id);
                         }
                     }
                 }
@@ -2536,9 +2536,9 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                 else if (action.getType() == ActionType::DROP() ||
                          action.getType() == ActionType::NUDGE_TO()) {
                     AtomSpaceUtil::setupHoldingObject(  atomSpace,
-                                                        petInterface.getPetId( ), "",
+                                                        avatarInterface.getPetId( ), "",
                                                         getLatestSimWorldTimestamp() );
-                    petInterface.setGrabbedObj(std::string(""));
+                    avatarInterface.setGrabbedObj(std::string(""));
                 }
 
                 plan.markAsDone(seqNumber);

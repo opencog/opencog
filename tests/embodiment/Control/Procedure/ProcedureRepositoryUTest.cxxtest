@@ -57,7 +57,7 @@ private:
     HandleSeq toUpdateHandles;
     list<ActionPlan> sentActionPlans;
     ResponsiveActionPlanSender *sender;
-    AvatarInterfaceMock *petInterface;
+    AvatarInterfaceMock *avatarInterface;
 
     PAI* ppai;
 
@@ -74,9 +74,9 @@ public:
         logger().setPrintErrorLevelStdout();
 
         sender = new ResponsiveActionPlanSender();
-        petInterface = new AvatarInterfaceMock(PAIUtils::getInternalId("32f56136-7973-4703-915b-6ec1bf5c67fa"), PAIUtils::getInternalId("Wynx"), string(""));
-        ppai = new PAI(*atomSpace, *sender, *petInterface);
-        petInterface->setPAI(ppai);
+        avatarInterface = new AvatarInterfaceMock(PAIUtils::getInternalId("32f56136-7973-4703-915b-6ec1bf5c67fa"), PAIUtils::getInternalId("Wynx"), string(""));
+        ppai = new PAI(*atomSpace, *sender, *avatarInterface);
+        avatarInterface->setPAI(ppai);
 
         sender->setPai(ppai);
 
@@ -86,7 +86,7 @@ public:
     ~ProcedureRepositoryUTest() {
 
         delete ppai;
-        delete petInterface;
+        delete avatarInterface;
         delete sender;
 
     }

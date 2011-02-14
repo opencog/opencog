@@ -55,7 +55,7 @@ protected:
     HandleSeq toUpdateHandles;
     std::list<ActionPlan> sentActionPlans;
     ResponsiveActionPlanSender *sender;
-    AvatarInterfaceMock *petInterface;
+    AvatarInterfaceMock *avatarInterface;
 
 
     PAI* ppai;
@@ -86,9 +86,9 @@ public:
         xmlFileName = _xmlFileName;
 
         sender = new ResponsiveActionPlanSender();
-        petInterface = new AvatarInterfaceMock(petName, PAIUtils::getInternalId("Wynx"), string(""));
-        ppai = new PAI(*atomSpace, *sender, *petInterface);
-        petInterface->setPAI(ppai);
+        avatarInterface = new AvatarInterfaceMock(petName, PAIUtils::getInternalId("Wynx"), string(""));
+        ppai = new PAI(*atomSpace, *sender, *avatarInterface);
+        avatarInterface->setPAI(ppai);
 
         sender->setPai(ppai);
 
@@ -103,7 +103,7 @@ public:
 
         PredicatesUpdater * updater;
 
-        updater = new PredicatesUpdater(*atomSpace, petInterface->getPetId());
+        updater = new PredicatesUpdater(*atomSpace, avatarInterface->getPetId());
 
         updater->update(toUpdateHandles, ppai->getLatestSimWorldTimestamp());
 

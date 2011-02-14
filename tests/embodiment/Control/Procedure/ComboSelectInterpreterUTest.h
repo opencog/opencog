@@ -54,7 +54,7 @@ protected:
     HandleSeq toUpdateHandles;
     std::list<ActionPlan> sentActionPlans;
     ResponsiveActionPlanSender *sender;
-    AvatarInterfaceMock *petInterface;
+    AvatarInterfaceMock *avatarInterface;
 
 
     PAI* ppai;
@@ -84,12 +84,12 @@ public:
 
         atomSpace = new AtomSpace();
         sender = new ResponsiveActionPlanSender();
-        petInterface = new AvatarInterfaceMock(petName,
+        avatarInterface = new AvatarInterfaceMock(petName,
                                             PAIUtils::getInternalId("Wynx"),
                                             string(""));
-        ppai = new PAI(*atomSpace, *sender, *petInterface, parameters);
+        ppai = new PAI(*atomSpace, *sender, *avatarInterface, parameters);
 
-        petInterface->setPAI(ppai);
+        avatarInterface->setPAI(ppai);
         sender->setPai(ppai);
 
         string pvpMsg;
@@ -102,7 +102,7 @@ public:
         ppai->processPVPMessage(pvpMsg, toUpdateHandles);
 
         PredicatesUpdater * updater;
-        updater = new PredicatesUpdater(*atomSpace, petInterface->getPetId());
+        updater = new PredicatesUpdater(*atomSpace, avatarInterface->getPetId());
         updater->update(toUpdateHandles, ppai->getLatestSimWorldTimestamp());
     }
 

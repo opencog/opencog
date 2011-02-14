@@ -49,10 +49,10 @@ int main(int argc, char* argv[])
     HandleSeq toUpdateHandles;
     std::list<ActionPlan> sentActionPlans;
     OKActionPlanSender sender(sentActionPlans);
-    AvatarInterfaceMock petInterface;
-    PAI pai(atomSpace, sender, petInterface);
-    petInterface.setPAI(&pai);
-    PredicatesUpdater predicatesUpdater(atomSpace, petInterface.getPetId());
+    AvatarInterfaceMock avatarInterface;
+    PAI pai(atomSpace, sender, avatarInterface);
+    avatarInterface.setPAI(&pai);
+    PredicatesUpdater predicatesUpdater(atomSpace, avatarInterface.getPetId());
     for (int i = 1; i < argc; i++) {
         const char* xmlFileName = argv[1];
         string pvpMsg;

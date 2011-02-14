@@ -107,7 +107,7 @@ private:
     /**
      * A reference to a AvatarInterface (actualy a pet)
      */
-    Control::AvatarInterface& petInterface;
+    Control::AvatarInterface& avatarInterface;
 
     /**
      * The ID for the next action plan to be created
@@ -227,7 +227,7 @@ public:
      * instance). If not provided, assumes 0 as default.
      */
     PAI(AtomSpace& _atomSpace, ActionPlanSender& actionSender,
-            Control::AvatarInterface& petInterface, unsigned long nextPlanID = 0);
+            Control::AvatarInterface& avatarInterface, unsigned long nextPlanID = 0);
 
     /**
      * Destructor

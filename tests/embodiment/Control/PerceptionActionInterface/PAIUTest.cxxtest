@@ -79,13 +79,13 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        AvatarInterfaceMock petInterface;
-        PAI pai1(atomSpace, sender, petInterface);
-        petInterface.setPAI(&pai1);
+        AvatarInterfaceMock avatarInterface;
+        PAI pai1(atomSpace, sender, avatarInterface);
+        avatarInterface.setPAI(&pai1);
         ActionPlanID planId = pai1.createActionPlan();
         TS_ASSERT(planId == "0");
-        PAI pai2(atomSpace, sender, petInterface, 10);
-        petInterface.setPAI(&pai2);
+        PAI pai2(atomSpace, sender, avatarInterface, 10);
+        avatarInterface.setPAI(&pai2);
         planId = pai2.createActionPlan();
         TS_ASSERT(planId == "10");
     }
@@ -101,9 +101,9 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        AvatarInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface);
-        petInterface.setPAI(&pai);
+        AvatarInterfaceMock avatarInterface;
+        PAI pai(atomSpace, sender, avatarInterface);
+        avatarInterface.setPAI(&pai);
         ActionPlanID plans[NUM_PLANS];
         for (int i = 0; i < NUM_PLANS; i++) {
             plans[i] = pai.createActionPlan();
@@ -127,9 +127,9 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        AvatarInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface);
-        petInterface.setPAI(&pai);
+        AvatarInterfaceMock avatarInterface;
+        PAI pai(atomSpace, sender, avatarInterface);
+        avatarInterface.setPAI(&pai);
 
         TS_ASSERT_THROWS(pai.sendActionPlan("0"), RuntimeException&);
         TS_ASSERT_THROWS(pai.sendActionPlan("1"), RuntimeException&);
@@ -146,7 +146,7 @@ public:
         }
 
         FailureActionPlanSender sender2;
-        PAI pai2(atomSpace, sender2, petInterface);
+        PAI pai2(atomSpace, sender2, avatarInterface);
 
         TS_ASSERT_THROWS(pai2.sendActionPlan("0"), RuntimeException&);
         TS_ASSERT_THROWS(pai2.sendActionPlan("1"), RuntimeException&);
@@ -171,9 +171,9 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        AvatarInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface);
-        petInterface.setPAI(&pai);
+        AvatarInterfaceMock avatarInterface;
+        PAI pai(atomSpace, sender, avatarInterface);
+        avatarInterface.setPAI(&pai);
         ActionPlanID plan1 = pai.createActionPlan();
         ActionPlanID plan2 = pai.createActionPlan();
         pai.addAction(plan1, PetAction(ActionType::TRICK_FOR_FOOD()));
@@ -218,9 +218,9 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        AvatarInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface, 10);
-        petInterface.setPAI(&pai);
+        AvatarInterfaceMock avatarInterface;
+        PAI pai(atomSpace, sender, avatarInterface, 10);
+        avatarInterface.setPAI(&pai);
 
         // Check Action Plan status before creating them, according with the passed "nextActionPlanId" argument to the constructor
         TS_ASSERT(!pai.hasPlanFailed("0"));
@@ -1438,9 +1438,9 @@ public:
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
-        AvatarInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface);
-        petInterface.setPAI(&pai);
+        AvatarInterfaceMock avatarInterface;
+        PAI pai(atomSpace, sender, avatarInterface);
+        avatarInterface.setPAI(&pai);
 
         /*
                 TS_ASSERT(pai.getLatestSimWorldTimestamp() == 0);
@@ -1512,9 +1512,9 @@ public:
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
         OKActionPlanSender sender(sentActionPlans);
-        AvatarInterfaceMock petInterface;
-        PAI pai(*atomSpace, sender, petInterface);
-        petInterface.setPAI(&pai);
+        AvatarInterfaceMock avatarInterface;
+        PAI pai(*atomSpace, sender, avatarInterface);
+        avatarInterface.setPAI(&pai);
 
         TS_ASSERT_THROWS(pai.sendActionPlan("0"), RuntimeException&);
         TS_ASSERT_THROWS(pai.sendActionPlan("1"), RuntimeException&);
