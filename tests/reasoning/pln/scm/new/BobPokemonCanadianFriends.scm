@@ -20,6 +20,31 @@
 (define TerminatedAt (PredicateNode "TerminatedAt"))
 (define TerminatedThroughout (PredicateNode "TerminatedThroughout"))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Temporal reasoning axioms ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; PredictiveImplicationInitiatedLink
+;;    T
+;;    A
+;;    B
+;;
+;; is equivalent to
+;;
+;; PredictiveImplicationLink
+;;    T
+;;    A_initiated
+;;    B_initiated
+;;
+;; where A_initiated is equivalent to
+;;
+;; AverageLink
+;;     t
+;;     initiatedAt
+;;         t
+;;         A
+
 ;;;;;;;;;;;
 ;; times ;;
 ;;;;;;;;;;;
@@ -96,10 +121,10 @@
 
 ;; Canadian friends of Bob who are not friends of his wife are
 ;; associated with Pokemon cards.
-(define CFBNWPokemonCards (AverageAll (ListLink X)
-                                      (ImplicationLink CanadianFriendBobNotWife
-                                                       (InheritanceLink X
-                                                                        PokemonCards))))
+(define CFBNWPokemonCards (AverageLink (ListLink X)
+                                       (ImplicationLink CanadianFriendBobNotWife
+                                                        (InheritanceLink X
+                                                                         PokemonCards))))
 
 ;; BobLearningFrench
 (define BobLearningFrench (EvaluationLink Learning
@@ -108,7 +133,7 @@
 
 ;; Canadian friends of Bob who are not friends of his wife are
 ;; Quebecois.
-(define CFBNWQuebecois (AverageAll (ListLink X)
+(define CFBNWQuebecois (AverageLink (ListLink X)
                                    (ImplicationLink CanadianFriendBobNotWife
                                                     (SubsetLink X
                                                                 Quebecois))))
@@ -140,14 +165,14 @@
                                          BobCollectingPokemonCards)))
 
 ;; If X collects Y then X shares associations with Y
-(define axiom4 (AverageAll (stv 0.7 0.7)
-                           (ImplicationLink (EvaluationLink Collecting
-                                                            (ListLink X Y))
-                                            (InheritanceLink X Y))))
+(define axiom4 (AverageLink (stv 0.7 0.7)
+                            (ImplicationLink (EvaluationLink Collecting
+                                                             (ListLink X Y))
+                                             (InheritanceLink X Y))))
 
 ;; Most of the new Canadian friends Bob made after March 2007 who are
 ;; not friends of his wife are associated with Pokemon cards.
-(define axiom5 (EvaluationLink (stv 0.9 0.8)
+(define axiom5 (EvaluationLink (stv 0.6 0.8)
                                HoldTrhoughout
                                (ListLink March2007
                                          End2007
@@ -160,10 +185,10 @@
                                          BobLearningFrench)))
 
 ;; If X learns Y then X shares associations with Y
-(define axiom7 (AverageAll (stv 0.7 0.7)
-                           (ImplicationLink (EvaluationLink Learning
-                                                            (ListLink X Y))
-                                            (InheritanceLink X Y))))
+(define axiom7 (AverageLink (stv 0.7 0.7)
+                            (ImplicationLink (EvaluationLink Learning
+                                                             (ListLink X Y))
+                                             (InheritanceLink X Y))))
 
 ;; Most of the new Canadian friends Bob made after March 2007 who are
 ;; not friends of his wife are Quebecois.
@@ -179,52 +204,105 @@
 ;; Bob's Pokemon cards interest is the cause of Bob's new Canadian
 ;; friendships
 ;;
-;; PredictiveInitiatedImplicationLink <?>
+;; PredictiveImplicationInitiatedLink <?>
 ;;     3Months
 ;;     Year
 ;;     BobCollectingPokemonCards
 ;;     AverageCFBNW
 
-;; SubTarget, using the definition of PredictiveInitiatedImplicationLink
-;;
-;; AverageLink <?>
-;;     ListLink
-;;         t
-;;     ImplicationLink
-;;         InitiatedAt
-;;             t
-;;             BobCollectingPokemonCards
-;;         InitiatedThroughout
-;;             t+3Months
-;;             t+Year
-;;             AverageCFBNW
+;; Let's go backward...
 
-;; SubSubTarget, using the definition of ImplicationLink as the
-;; disjunction of Extensional and Intentional implicationLink
+;; Using the definition of PredictiveInitiatedImplicationLink
 ;;
-;; AverageLink <?>
-;;     ListLink
-;;         t
-;;     OrLink
-;;         ExtensionalImplicationLink
-;;             InitiatedAt
-;;                 t
-;;                 BobCollectingPokemonCards
-;;             InitiatedThroughout
-;;                 t+3Months
-;;                 t+Year
-;;                 AverageCFBNW
-;;         IntensionalImplicationLink
-;;             InitiatedAt
-;;                 t
-;;                 BobCollectingPokemonCards
-;;             InitiatedThroughout
-;;                 t+3Months
-;;                 t+Year
-;;                 AverageCFBNW
+;; ImplicationLink
+;;     BobCollectingPokemonCards_initiated
+;;     SequentialAnd
+;;         3Months
+;;         Year
+;;         BobCollectingPokemonCards_initiated
+;;         AverageCFBNW_initiated
 
-;; The extensional part could have a high strength due to axiom3 and
-;; axiom2, and high confidence because such an implication is observed
-;; at every instant.
+;; Due to definition of mixed implication
 ;;
-;; Therefore the IntensionalImplication is here to weaken the TV of it.
+;; OrLink
+;;     ExtensionalImplicationLink
+;;         BobCollectingPokemonCards_initiated
+;;         SequentialAndLink
+;;             3Months
+;;             Year
+;;             BobCollectingPokemonCards_initiated
+;;             AverageCFBNW_initiated
+;;     IntensionalImplicationLink
+;;         BobCollectingPokemonCards__initiated
+;;         SequentialAndLink
+;;             3Months
+;;             Year
+;;             BobCollectingPokemonCards_initiated
+;;             AverageCFBNW_initiated
+
+;; Using axiom3 and axiom2 and the definition of SequentialAndLink, one
+;; can conclude
+;;
+;; ExtensionalImplicationLink
+;;     BobCollectingPokemonCards_initiated
+;;     SequentialAndLink
+;;         t+3Months
+;;         t+Year
+;;         BobCollectingPokemonCards_initiated
+;;         AverageCFBNW_initiated
+
+;; The confidence of the TV of such implication will not be very high,
+;; because such even has occured only once.
+
+;; Done for extensional implication!
+
+;; Now let's take care of intensional implication
+
+;; Using axiom4 and universal intanstiation with X=Bob and Y=Pokemon
+;;
+;; InheritanceLink
+;;     Bob
+;;     PokemonCards
+
+;; Using some assumption
+;;
+;; InheritanceLink
+;;     NotLink
+;;         Bob
+;;     PokemonCards
+
+;; Given that above one can calculate that PokemonCards is a pattern of Bob
+;;
+;; MemberLink
+;;     PokemonCards
+;;     PAT(BobCollectingPokemonCards__initiated)
+
+;; Then using axiom5 one infer that
+;;
+;; MemberLink
+;;     PokemonCards
+;;     PAT(SequentialAndLink
+;;             3Months
+;;             Year
+;;             BobCollectingPokemonCards_initiated
+;;             AverageCFBNW_initiated)
+
+;; which leads to
+;;
+;; ExtensionalImplication
+;;     PAT(BobCollectingPokemonCards__initiated)
+;;     PAT(SequentialAndLink
+;;             3Months
+;;             Year
+;;             BobCollectingPokemonCards_initiated
+;;             AverageCFBNW_initiated)
+
+;; and therefore
+
+;; IntensionalImplicationLink
+;;     BobCollectingPokemonCards__initiated
+;;     SequentialAndLink
+;;         3Months
+;;         Year
+;;         BobCollectingPokemonCards_initiated
+;;         AverageCFBNW_initiated

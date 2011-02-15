@@ -162,7 +162,7 @@
                                 CanadianPeople
                                 CanadianPlaceNames))
 
-; 9) If someone X frequently mentions Y then he/she is highly involved with Y
+; 9) If X frequently mentions Y then he/she is highly involved with Y
 ;
 ; AverageLink <.9, .8>
 ;     ListLink
@@ -330,8 +330,6 @@
 
 (define step4 (DecontextualizerRule (ContextLink Accounting step3)))
 
-; 4.1) 
-
 ; 5) Apply SubsetDeductionRule on axiom7 and the result of step4
 ;
 ; SubsetLink <0.45, 0.48>
@@ -370,7 +368,7 @@
 
 (define step7 (InheritanceSubstRule axiom8 step6))
 
-; 8) Infer the conjuction of axiom11 and the last step
+; 8) Infer the conjunction of axiom11 and the last step
 ;
 ; AndLink <0.4, 0.27>
 ;     InheritanceLink
