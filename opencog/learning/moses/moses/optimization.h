@@ -512,25 +512,38 @@ struct sliced_iterative_hillclimbing {
     int _evals_per_slice;
 };
 
+
+/////////////////////////
+// Simulated Annealing //
+/////////////////////////
+
+// Parameters specific for Simulated Annealing
+struct sa_parameters {
+    sa_parameters() :
+        init_temp(30),
+        min_temp(0),
+        temp_step_size(0.5),
+        accept_prob_temp_intensity(0.5),
+        dist_temp_intensity(0.5) {}
+
+    double init_temp;
+    double min_temp;
+    double temp_step_size;
+    double accept_prob_temp_intensity;
+    double dist_temp_intensity;
+};
+
 struct simulated_annealing {
      
     typedef score_t energy_t;
  
     simulated_annealing(opencog::RandGen& _rng,
                         const optim_parameters& op = optim_parameters(),
-                        double _init_temp = 30,
-                        double _min_temp = 0, double _temp_step_size = 0.5,
-                        double _accept_prob_temp_intensity = 0.5,
-                        double _dist_temp_intensity = 0.5,
+                        const sa_parameters& sa = sa_parameters(),
                         double _fraction_of_remaining = 10.0)
         : rng(_rng), 
-          init_temp(_init_temp),
-          min_temp(_min_temp),
-          temp_step_size(_temp_step_size),
-          accept_prob_temp_intensity(_accept_prob_temp_intensity),
-          dist_temp_intensity(_dist_temp_intensity),
           fraction_of_remaining(_fraction_of_remaining),
-          opt_params(op) {}
+          opt_params(op), sa_params(sa) {}
       
     double accept_probability(energy_t energy_new, energy_t energy_old,
                               double temperature)
@@ -545,7 +558,7 @@ struct simulated_annealing {
     { 
         OC_ASSERT(t > 0, "t should greater than 0");
         //return (double) init_temp / std::log(1.0 + t); 
-        return (double) init_temp / (1.0 + t);
+        return (double) sa_params.init_temp / (1.0 + t);
     }
     
     energy_t energy(score_t sc)
@@ -571,7 +584,8 @@ struct simulated_annealing {
      */
     unsigned int dist_temp(double current_temp)
     {
-        return (unsigned int)( ((current_temp - min_temp)/(init_temp - min_temp))
+        return (unsigned int)( ((current_temp - sa_params.min_temp)
+                                /(sa_params.init_temp - sa_params.min_temp))
                                *
                                (max_distance - 1) + 1 );
     }
@@ -606,10 +620,11 @@ struct simulated_annealing {
         eda::scored_instance<composite_score> scored_exemplar = 
             eda::score_instance(center_instance, score);
         energy_t center_instance_energy = energy(scored_exemplar);
-        double current_temp = init_temp;
+        double current_temp = sa_params.init_temp;
         do {
             unsigned int current_distance = 
-                max(1, (int)(dist_temp_intensity * dist_temp(current_temp)));
+                max(1, (int)(sa_params.dist_temp_intensity
+                             * dist_temp(current_temp)));
 
             // score all new instances in the deme
             long long number_of_new_instances = 1; //@todo: possibly change that
@@ -637,7 +652,7 @@ struct simulated_annealing {
                                           
             // check if the current instance in the deme is better than
             // the center_instance                                        
-            double actual_accept_prob = accept_prob_temp_intensity *
+            double actual_accept_prob = sa_params.accept_prob_temp_intensity *
                 accept_probability(current_instance_energy,
                                    center_instance_energy, current_temp);
                       
@@ -654,24 +669,22 @@ struct simulated_annealing {
             // cout <<"-----------------------------------------------" <<endl;
             // ~DEBUG
 
-            current_temp = cooling_schedule((double)step * temp_step_size);
+            current_temp = cooling_schedule((double)step
+                                            * sa_params.temp_step_size);
             step++;
         } while(current_number_of_instances < max_number_of_instances &&
-                current_temp >= min_temp &&
+                current_temp >= sa_params.min_temp &&
                 center_instance_energy > energy(opt_params.terminate_if_gte));
         
         return current_number_of_instances;
     }
       
     opencog::RandGen& rng;
-    double init_temp;
-    double min_temp;
-    unsigned int max_distance;
-    double temp_step_size;
-    double accept_prob_temp_intensity;
-    double dist_temp_intensity;
-    double fraction_of_remaining;
+    double fraction_of_remaining; /// @todo clean that, as well as FRACTION_OF_REMAINING
     optim_parameters opt_params;
+    sa_parameters sa_params;
+protected:
+    unsigned int max_distance;
 };
 
 } //~namespace moses
