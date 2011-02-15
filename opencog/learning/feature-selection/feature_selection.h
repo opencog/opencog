@@ -35,14 +35,14 @@ namespace opencog {
 
 /**
  * Returns a set S of features following the algo:
- * 1.a) Select all relevant features (that score above 'threshold'), called 'rel'
- * 1.b) Select all redundant features among 'rel', called 'red'
+ * 1.a) Select all relevant features (that score above threshold), called rel
+ * 1.b) Select all redundant features among rel, called red
  * 1.c) res += res - red
- * 2) remove 'rel' from the initial set 'features', called 'tf'
- * 3.a) select all pairs of relevant features from 'ft', called 'rel'
- * 3.b) select all redundant features among 'rel', called 'red'
+ * 2) remove rel from the initial set features, called tf
+ * 3.a) select all pairs of relevant features from ft, called rel
+ * 3.b) select all redundant features among rel, called red
  * 4) follow the same pattern with triplets, etc, until max_interaction_terms.
- * 5) return 'res'
+ * 5) return res
  * 
  * @param features       The initial set of features to be selected from
  * @param scorer         The function to score a set of features, it is
