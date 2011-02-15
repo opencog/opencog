@@ -21,11 +21,14 @@ ADD_LIBRARY (moses SHARED
     eda/field_set
     eda/initialization
     eda/local_structure
+    main/moses_exec
+    main/moses_exec_def
 )
 
 TARGET_LINK_LIBRARIES (moses
         comboreduct
         util 
+        ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 
 

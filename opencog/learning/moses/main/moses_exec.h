@@ -90,6 +90,13 @@ static const string is="is"; // incremental selection
 // feature selection scorer
 static const string en="en"; // entropy
 
+// used by the main function, it is included in the library for its
+// convenience
+int moses_exec(int argc, char** argv);
+// helper for the function above, note that the first still represents
+// the name of the supposed executable
+int moses_exec(const vector<string>& argv);
+
 struct metapop_moses_results_parameters {
     metapop_moses_results_parameters(long _result_count,
                                      bool _output_score,

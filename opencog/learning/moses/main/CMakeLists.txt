@@ -109,13 +109,23 @@ TARGET_LINK_LIBRARIES (gen-truth-table
         util
 )
 
-ADD_EXECUTABLE (moses-exec moses-exec)
-TARGET_LINK_LIBRARIES (moses-exec
-        moses
-        comboreduct
-        util
-        ${Boost_PROGRAM_OPTIONS_LIBRARY} 
-)
+# ADD_EXECUTABLE (moses-exec moses-exec)
+# TARGET_LINK_LIBRARIES (moses-exec
+#        moses
+#        comboreduct
+#        util
+#        ${Boost_PROGRAM_OPTIONS_LIBRARY} 
+# )
 
 # install moses-exec, eval-contin-table
-INSTALL(TARGETS moses-exec eval-contin-table RUNTIME DESTINATION bin)
+# INSTALL(TARGETS moses-exec eval-contin-table RUNTIME DESTINATION bin)
+
+#install header files
+INSTALL(FILES
+    moses_exec.h
+    moses_exec_def.h
+
+	DESTINATION
+
+	"include/${PROJECT_NAME}/learning/moses/main" 
+)

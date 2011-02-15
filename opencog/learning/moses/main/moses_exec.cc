@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "moses-exec.h"
+#include "moses_exec.h"
 
 #include <opencog/util/numeric.h>
 
@@ -219,7 +219,9 @@ arity_t multiplex_arity(arity_t a) {
     return -1;
 }
 
-int main(int argc,char** argv) { 
+int moses_exec(int argc, char** argv) { 
+    for(int i = 0; i < argc; i++)
+        std::cout << "arg = " << argv[i] << std::endl;
 
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
@@ -819,4 +821,15 @@ int main(int argc,char** argv) {
                               vm, mmr_pa);
     }
     else unsupported_problem_exit(problem);
+    return 0;
+}
+
+int moses_exec(const vector<string>& argvs) {
+    char** argv = new char*[argvs.size()];
+    for(size_t i = 0; i < argvs.size(); i++) {
+        argv[i] = const_cast<char*>(argvs[i].c_str());
+    }
+    int res = moses_exec(argvs.size(), argv);
+    delete argv;
+    return res;
 }

@@ -29,3 +29,10 @@ TARGET_LINK_LIBRARIES(representationUTest
     comboreduct
     util
 )
+
+ADD_CXXTEST(MOSESUTest)
+TARGET_LINK_LIBRARIES(MOSESUTest
+    moses
+    comboreduct
+    util        
+)
