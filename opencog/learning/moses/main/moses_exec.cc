@@ -220,8 +220,8 @@ arity_t multiplex_arity(arity_t a) {
 }
 
 int moses_exec(int argc, char** argv) { 
-    for(int i = 0; i < argc; i++)
-        std::cout << "arg = " << argv[i] << std::endl;
+    // for(int i = 0; i < argc; i++)
+    //     std::cout << "arg = " << argv[i] << std::endl;
 
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
