@@ -337,6 +337,123 @@ bool PsiActionSelectionAgent::extractPsiRules(opencog::CogServer * server,
     return true;
 }
 
+bool PsiActionSelectionAgent::planByPLN( opencog::CogServer * server,
+                                         Handle goalHandle,
+                                         std::vector< std::vector<Handle> > & psiPlanList,
+                                         int & steps )
+{
+    // Get OAC
+    OAC * oac = (OAC *) server;
+
+    // Get AtomSpace
+    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+
+    // Get the name of the goal
+    std::string goalName = atomSpace.getName( atomSpace.getOutgoing(goalHandle, 0) );
+
+    logger().debug(
+            "PsiActionSelectionAgent::%s - Do action planning starting from the Demand Goal '%s' [ cycle = %d ].", 
+                    __FUNCTION__, 
+                    goalName.c_str(), 
+                    this->cycleCount
+                  );
+
+    // Do backward inference starting from the selected Demand Goal using PLN
+    const std::set<VtreeProvider *> & inferResult = this->searchBackward(goalHandle, steps);
+
+    if ( inferResult.empty() ) {
+        logger().warn( 
+                "PsiActionSelectionAgent::%s - Got empty result while searching backward via PLN [ cycle = %d ]", 
+                     __FUNCTION__, 
+                     this->cycleCount
+                    );
+        return false; 
+    }
+
+    // Extract Psi Rules from trees returned by PLN
+    if ( !this->extractPsiRules(server, inferResult, psiPlanList) ) {
+        logger().warn(
+              "PsiActionSelectionAgent::%s - Failed to extract Psi rules from the tree returned by PLN [ cycle = %d ]", 
+                    __FUNCTION__, 
+                    this->cycleCount
+                   );
+        return false; 
+    }
+
+    // Reset all the truth value of subgoals to false
+    this->resetPlans(server, goalHandle, psiPlanList);
+
+    // TODO: only for debugging, comment it later 
+    // Print plans
+    this->printPlans(server, goalHandle, psiPlanList);
+
+    logger().debug( "PsiActionSelectionAgent::%s - Figure out %d plans for the goal '%s' successfully [ cycle = %d ]", 
+                    __FUNCTION__, 
+                    psiPlanList.size(), 
+                    goalName.c_str(), 
+                    this->cycleCount
+                  );
+
+    return true; 
+}
+
+bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * server, 
+                                                       Handle goalHandle, 
+                                                       std::vector< std::vector<Handle> > & psiPlanList,
+                                                       int & steps )
+{
+    // Get OAC
+    OAC * oac = (OAC *) server;
+
+    // Get rand generator
+    RandGen & randGen = oac->getRandGen();
+
+    // Get AtomSpace
+    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+
+    // Get the name of the goal
+    std::string goalName = atomSpace.getName( atomSpace.getOutgoing(goalHandle, 0) );
+
+    logger().debug(
+            "PsiActionSelectionAgent::%s - Do action planning starting from the Demand Goal '%s' [ cycle = %d ].", 
+                    __FUNCTION__, 
+                    goalName.c_str(), 
+                    this->cycleCount
+                  );
+
+    // Clear old Plans
+    psiPlanList.clear();
+
+    std::queue<Handle> openList; 
+
+    openList.push(goalHandle);
+
+    while ( !openList.empty() ) {
+
+    }// while
+
+
+
+
+
+
+    // Reset all the truth value of subgoals to false
+    this->resetPlans(server, goalHandle, psiPlanList);
+
+    // TODO: only for debugging, comment it later 
+    // Print plans
+    this->printPlans(server, goalHandle, psiPlanList);
+
+    logger().debug( "PsiActionSelectionAgent::%s - Figure out %d plans for the goal '%s' successfully [ cycle = %d ]", 
+                    __FUNCTION__, 
+                    psiPlanList.size(), 
+                    goalName.c_str(), 
+                    this->cycleCount
+                  );
+
+    return true; 
+}
+
 void PsiActionSelectionAgent::extractPsiRules(opencog::CogServer * server, pHandle ph,
                                               std::vector<Handle> & psiRules, unsigned int level)
 {
@@ -462,9 +579,70 @@ void PsiActionSelectionAgent::printPlans(opencog::CogServer * server, Handle hDe
     }// foreach
 }
 
-int PsiActionSelectionAgent::getSchemaArguments(opencog::CogServer * server, Handle hListLink, 
-                                                std::vector <combo::vertex> & schemaArguments) 
+void PsiActionSelectionAgent::resetPlans( opencog::CogServer * server,
+                                          Handle hDemandGoal, 
+                                          std::vector< std::vector<Handle> > & psiPlanList)
 {
+    // Get AtomSpace
+    AtomSpace & atomSpace = * ( server->getAtomSpace() ); 
+
+    Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink; 
+
+    // Process each Plan
+    foreach(std::vector<Handle> psiPlan, psiPlanList) {
+
+        // Process each Psi Rule within a specific Plan
+        foreach(Handle hPsiRule, psiPlan) {
+
+            // Split the Psi Rule into Goal, Action and Preconditions
+            if ( !AtomSpaceUtil::splitPsiRule(atomSpace, 
+                                              hPsiRule, 
+                                              hGoalEvaluationLink, 
+                                              hActionExecutionLink,
+                                              hPreconditionAndLink
+                                             ) ) {
+                logger().warn( "PsiActionSelectionAgent::%s - Failed to split the Psi Rule, %s [ cycle = %d ]", 
+                               __FUNCTION__, 
+                               atomSpace.atomAsString(hPsiRule), 
+                               this->cycleCount
+                              );
+
+                continue; 
+            }// if 
+
+            // Set the truth value of the subgoal to false 
+            //
+            // Note: we'll skip GroundedPredicateNode and Demald Goal.
+            //       Because the TruthValue of a subgoal with GroundedPredicateNode 
+            //       is achieved by running combo script, and 
+            //       the TruthValue of a DemandGoal is handled by 'PsiDemandUpdaterAgent'
+            //
+            Type goalType = atomSpace.getType( atomSpace.getOutgoing(hGoalEvaluationLink, 0) );
+
+            SimpleTruthValue stvFalse(0.000001, 1.0);
+
+            if ( goalType != GROUNDED_PREDICATE_NODE &&
+                 hGoalEvaluationLink != hDemandGoal ) {
+                atomSpace.setTV(hGoalEvaluationLink, stvFalse);
+            }
+
+        }// foreach
+
+    }// foreach
+}
+
+bool PsiActionSelectionAgent::getSchemaArguments(opencog::CogServer * server,
+                                                 Handle hListLink, 
+                                                 const std::vector<std::string> & varBindCandidates, 
+                                                 std::vector <combo::vertex> & schemaArguments) 
+{
+    // Get OAC
+    OAC * oac = (OAC *) server;
+
+    // Get rand generator
+    RandGen & randGen = oac->getRandGen();
+
+    // Get AtomSpace
     AtomSpace & atomSpace = * ( server->getAtomSpace() );
 
     // Check hListLink is of type ListLink
@@ -478,23 +656,62 @@ int PsiActionSelectionAgent::getSchemaArguments(opencog::CogServer * server, Han
         return 0;
     }
 
+    // Randomly choose a variable binding from varBindCandidates for all the VariableNodes within hListLink
+    //
+    // TODO: Strictly speaking, the implementation below is not so correct, 
+    //       because it will replace all the VarialbeNode within hListLink with the same variable binding 
+    //       [By Zhennua Cai, on 2011-02-14]
+    //
+    bool bChooseVariableBind = false; 
+    std::string variableBind;
+    int indexVariableBind; 
+
+    if ( !varBindCandidates.empty() ) {
+        indexVariableBind = randGen.randint( varBindCandidates.size() ); 
+        variableBind = varBindCandidates[indexVariableBind];
+        bChooseVariableBind = true; 
+    }
+
+    // Clear old schema arguments
     schemaArguments.clear(); 
 
     // Process the arguments according to its type
     foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
-        if (atomSpace.getType(hArgument) == NUMBER_NODE) {
+
+        Type argumentType = atomSpace.getType(hArgument);
+
+        if (argumentType == NUMBER_NODE) {
             schemaArguments.push_back(combo::contin_t(
                                           boost::lexical_cast<combo::contin_t>(atomSpace.getName(hArgument)
                                                                               )
                                                      ) 
                                      );
         }
+        else if (argumentType == VARIABLE_NODE) {
+            schemaArguments.push_back(combo::contin_t(
+                                          boost::lexical_cast<combo::contin_t>(atomSpace.getName(hArgument)
+                                                                              )
+                                                     ) 
+                                     );
+
+            if ( bChooseVariableBind ) {
+                schemaArguments.push_back(variableBind);  
+            }
+            else {
+                logger().error( "PsiActionSelectionAgent::%s - Failed to find any valid variable binding for VarialbeNode '%s' [ cycle = %d ]", 
+                                __FUNCTION__, 
+                                atomSpace.getName(hArgument).c_str(), 
+                                this->cycleCount
+                              );
+                return false; 
+            }
+        }
         else {
             schemaArguments.push_back( atomSpace.getName(hArgument) );
         }
     }// foreach
 
-    return schemaArguments.size();
+    return true; 
 }
 
 void PsiActionSelectionAgent::initVarBindCandidates(opencog::CogServer * server, 
@@ -608,10 +825,11 @@ bool PsiActionSelectionAgent::isSatisfied(opencog::CogServer * server,
                       );
 
         // Get schemaArguments
-        this->getSchemaArguments( server,
-                                  atomSpace.getOutgoing(hPrecondition, 1), // Handle to ListLink containing arguments
-                                  schemaArguments
-                                );
+        Handle hListLink = atomSpace.getOutgoing(hPrecondition, 1); // Handle to ListLink containing arguments
+        std::vector<std::string> emptyVarBindCandidates; 
+
+        if ( !this->getSchemaArguments( server, hListLink, emptyVarBindCandidates, schemaArguments) )
+            return false; 
 
         logger().debug("PsiActionSelectionAgent::%s - Got %d arguments [ cycle = %d ]", 
                        __FUNCTION__, 
@@ -780,7 +998,9 @@ Handle PsiActionSelectionAgent::pickUpPsiRule(opencog::CogServer * server,
     return hSelectedPsiRule; 
 }
 
-bool PsiActionSelectionAgent::applyPsiRule(opencog::CogServer * server, Handle hPsiRule)
+bool PsiActionSelectionAgent::applyPsiRule(opencog::CogServer * server, 
+                                           Handle hPsiRule,
+                                           const std::vector<std::string> & varBindCandidates)
 {
     // Get OAC
     OAC * oac = (OAC *) server;
@@ -815,10 +1035,10 @@ bool PsiActionSelectionAgent::applyPsiRule(opencog::CogServer * server, Handle h
     std::string actionName = atomSpace.getName( atomSpace.getOutgoing(executionLinkAction, 0)
                                               );
     // Get combo arguments for Action
-    this->getSchemaArguments( server,
-                              atomSpace.getOutgoing(executionLinkAction, 1), // Handle to ListLink containing arguments
-                              schemaArguments
-                            );
+    Handle hListLink = atomSpace.getOutgoing(executionLinkAction, 1); // Handle to ListLink containing arguments
+
+    if ( !this->getSchemaArguments(server, hListLink, varBindCandidates, schemaArguments) )
+        return false; 
 
     // Run the Procedure of the Action
     //
@@ -896,7 +1116,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
         return;
     }
 
-    // Initialize the Agent (demandGoalList etc)
+    // Initialize the Mind Agent (demandGoalList etc)
     if ( !this->bInitialized )
         this->init(server);
 
@@ -917,17 +1137,31 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                  ( is_builtin(result) && get_builtin(result) == combo::id::logical_true )
                ) {   
 
-                this->previousPsiRule = this->currentPsiRule; 
-                this->currentPsiRule = opencog::Handle::UNDEFINED; 
-                this->currentSchemaId = 0;
-
                 // Update the truth value of the Goal related to the Action
                 Handle evaluationLinkGoal = atomSpace.getOutgoing(this->currentPsiRule, 1);
                 SimpleTruthValue stvTrue(1.0, 1.0); 
-                atomSpace.setTV(evaluationLinkGoal, stvTrue); 
+                atomSpace.setTV(evaluationLinkGoal, stvTrue);
 
                 // Remove the corresponding Psi Rule from the rule list
-                std::remove(this->psiRulesLists[0].begin(), this->psiRulesLists[0].end(), this->currentPsiRule);      
+                //
+                // Note: std::remove itself actually removes NOTHING! 
+                //       It only move all the elements to be removed to the end of the vector, 
+                //       and the returns the iterator pointing to the first element to be removed.
+                //       So you call 'erase' method to really REMOVE. 
+                //
+                //       An exception is std::list, its remove method really remove element. 
+                //       The behavior of 'remove_if' and 'unique' is similar to 'remove'
+                this->psiRulesLists[0].erase( std::remove( this->psiRulesLists[0].begin(), 
+                                                           this->psiRulesLists[0].end(),
+                                                           this->currentPsiRule
+                                                         ), 
+                                              this->psiRulesLists[0].end()
+                                            );      
+
+               // Update current/ previous Psi Rule 
+                this->previousPsiRule = this->currentPsiRule; 
+                this->currentPsiRule = opencog::Handle::UNDEFINED; 
+                this->currentSchemaId = 0;
             }
             // If check result: fail
             else if ( is_action_result(result) || is_builtin(result) ) {
@@ -954,7 +1188,6 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                                unexpected_result.str().c_str(), 
                                this->cycleCount
                              );
-                return;
             }
         } 
         // If the Action fails
@@ -1024,16 +1257,10 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                         this->cycleCount
                       );
 
-        // Do backward inference starting from the selected Demand Goal using PLN
+        // Figure out a plan for the selected Demand Goal
         int steps = 5000;   // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
-        const std::set<VtreeProvider *> & inferResult = this->searchBackward(selectedDemandGoal, steps);
 
-        // Extract Psi Rules from trees returned by PLN
-        this->extractPsiRules(server, inferResult, this->psiRulesLists);
-
-        // TODO: only for debugging, comment it later 
-        // Print plans
-        this->printPlans(server, selectedDemandGoal, this->psiRulesLists);
+        this->planByPLN(server, selectedDemandGoal, this->psiRulesLists, steps);
     }// if
 
     // Change the current Demand Goal randomly (controlled by the modulator 'SelectionThreshold')
@@ -1061,17 +1288,10 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                             this->cycleCount
                           );
 
-            // Do backward inference starting from the selected Demand Goal using PLN
-            int steps = 5000; // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
-            const std::set<VtreeProvider *> & inferResult = this->searchBackward(selectedDemandGoal, steps);
+            // Figure out a plan for the selected Demand Goal
+            int steps = 5000; // TODO: Emotional states shall have impact on steps, i.e. resource of cognitive process
 
-            // Extract Psi Rules from trees returned by PLN
-            this->extractPsiRules(server, inferResult, this->psiRulesLists);
-
-            // TODO: only for debugging, comment it later 
-            // Print plans
-            this->printPlans(server, selectedDemandGoal, this->psiRulesLists);
-
+            this->planByPLN(server, selectedDemandGoal, this->psiRulesLists, steps);
         }// if
 
     }// if
@@ -1097,7 +1317,6 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     }
 
     // Apply the selected Psi Rule
-    // TODO:: use variable bindings later 
     if ( hSelectedPsiRule != opencog::Handle::UNDEFINED ) {
 
         logger().debug( "PsiActionSelectionAgent::%s - Applying the selected Psi Rule: %s [ cycle = %d ].", 
@@ -1106,7 +1325,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                         this->cycleCount
                       );
        
-        this->applyPsiRule(server, hSelectedPsiRule);
+        this->applyPsiRule(server, hSelectedPsiRule, varBindCandidates);
     }
     else {
         logger().warn( "PsiActionSelectionAgent::%s - Failed to select a Psi Rule to apply because none of them meets their Precondition [ cycle = %d ] .", 

@@ -34,11 +34,14 @@ eatAlonePrecondition(0) :=
 		not(near(self nearest_avatar))
 		is_edible(_*_)
 		near(self _*_))
-		
+
 searchForFoodPrecondition(0) :=
-	and(is_hungry(self)
-		not(near(self nearest_edible))
-		has_energy(self))
+    not(near(self nearest_edible))
+
+#searchForFoodPrecondition(0) :=
+#	and(is_hungry(self)
+#		not(near(self nearest_edible))
+#		has_energy(self))
 		
 eatToKillHungryPrecondition(0) :=
 	and(greater_than(get_hunger(self) 0.7)

@@ -111,7 +111,7 @@
 )
 
 (define SecuringThreshold 
-    (add_modulator "SecuringThreshold"  0.8)
+    (add_modulator "SecuringThresholdModulator"  0.8)
 )
 
 (define SelectionThresholdModulator 

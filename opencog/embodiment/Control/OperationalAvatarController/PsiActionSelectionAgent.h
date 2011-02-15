@@ -184,6 +184,38 @@ private:
                          std::vector< std::vector<Handle> > & psiRulesList);
 
     /**
+     * Do action planning via PLN
+     *
+     * @param server
+     * @param goalHandle  Handle to the selected Goal
+     * @param psiPlanList Storing the action plan (handles to a bunch of Psi Rules) that would lead to the Goal
+     * @param steps       Maximum steps used by the planner, return the steps remains after planning
+     *
+     * @return true if success, false while fails
+     */
+    bool planByPLN( opencog::CogServer * server,
+                    Handle goalHandle,
+                    std::vector< std::vector<Handle> > & psiPlanList,
+                    int & steps
+                  );
+
+    /**
+     * Do action planning via very simple breadth-first search
+     *
+     * @param server
+     * @param goalHandle  Handle to the selected Goal
+     * @param psiPlanList Storing the action plan (handles to a bunch of Psi Rules) that would lead to the Goal
+     * @param steps       Maximum steps used by the planner, return the steps remains after planning
+     *
+     * @return true if success, false while fails
+     */
+    bool planByNaiveBreadthFirst( opencog::CogServer * server, 
+                                  Handle goalHandle, 
+                                  std::vector< std::vector<Handle> > & psiPlanList,
+                                  int & steps  
+                                ); 
+
+    /**
      * Helper function used by extractPsiRules method above. You should never call this method directly. 
      */
     void extractPsiRules(opencog::CogServer * server, pHandle ph, std::vector<Handle> & psiRules, unsigned int level);
@@ -195,15 +227,31 @@ private:
                     const std::vector< std::vector<Handle> > & psiRulesLists);
 
     /**
+     * Reset all the truth values of intermediate goals to false
+     *
+     * @note We need this, because we should offer pet the ability of
+     *       distinguishing whether a specific subgoal has been achieved during fulfillment of the plan. 
+     *
+     * @todo This implementation is no so correct. I will figure out how to do this elegantly.  
+     */
+    void resetPlans( opencog::CogServer * server,
+                     Handle hDemandGoal, 
+                     std::vector< std::vector<Handle> > & psiPlanList);
+
+    /**
      * Transfer the format of arguments within given ListLink to combo. 
      * 
      * @param  server
-     * @parem  hListLink  Handle to ListLink that contains arguments
-     * @param  schemaArguments  Return the arguments that would be used while executing the combo procedure
+     * @parem  hListLink          Handle to ListLink that contains arguments
+     * @param  varBindCandidates  All the possible variable bindings for the selected Psi Rule
+     * @param  schemaArguments    Return the arguments that would be used while executing the combo procedure
+     *
      * @return  The number of arguments got
      */
-    int getSchemaArguments(opencog::CogServer * server, Handle hListLink, 
-                           std::vector <combo::vertex> & schemaArguments);
+    bool getSchemaArguments(opencog::CogServer * server,
+                            Handle hListLink, 
+                            const std::vector<std::string> & varBindCandidates, 
+                            std::vector <combo::vertex> & schemaArguments);
 
     /**
      * Initialize all the possible variable bindings in Psi Rule with all the entities the pet encounters
@@ -276,6 +324,10 @@ private:
     /**
      * Apply the given Psi Rule. 
      *
+     * @param  server
+     * @param  psiRules
+     * @param  varBindCandidates  All the possible variable bindings for the selected Psi Rule
+     *
      * @return  true if success. 
      *
      * @note  Since each Psi Rule associates with a single Action, 
@@ -287,7 +339,7 @@ private:
      *        'run' method is responsible for dealing with the result of execution during next "cognitive cycle" 
      *        after calling the 'applyPsiRule' method. 
      */
-    bool applyPsiRule(opencog::CogServer * server, Handle hPsiRule);
+    bool applyPsiRule(opencog::CogServer * server, Handle hPsiRule, const std::vector<std::string> & varBindCandidates);
 
 
 public:

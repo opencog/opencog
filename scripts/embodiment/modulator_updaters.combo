@@ -49,7 +49,7 @@ ResolutionModulatorUpdater(0) :=
 # i.e. in the face of urgency, there will be less orientation. 
 # It also depends on the uncertainty in the current context.
 # An undetermined environment requires more orientation, i.e. lower securing threshold. 
-SecuringThreshold(0) :=
+SecuringThresholdModulatorUpdater(0) :=
     normalize( /( +(get_certainty_demand_goal_truth_value 1)
 
                   +(get_current_demand_goal_truth_value 1)
