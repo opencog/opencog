@@ -27,6 +27,7 @@
 #include <fstream>
 
 #include <boost/iterator/counting_iterator.hpp>
+#include <boost/tokenizer.hpp>
 
 #include <opencog/util/RandGen.h>
 #include <opencog/util/iostreamContainer.h>
@@ -42,10 +43,33 @@ using opencog::RandGen;
 // Generic table //
 ///////////////////
 
+
+/**
+ * Matrix of type T.
+ * Rows represent samples.
+ * Columns represent input variables
+ *
+ * It contains additional methods to ignore some variables, this is
+ * done only for speeding up evaluation of data fitting objective
+ * functions when variables in the function to evaluate are
+ * scarce. The gain is noticable but not tremendous (if I remember no
+ * more 10% depending on the case). If it's too ugly and constraining
+ * to maintain I don't think it would be a big loss to remove that
+ * optimization. Of course in the case where there are millions of
+ * columns and only a few variables to evaluate the gain could be
+ * tremendous.
+ */
 template<typename T>
 class input_table {
 public:
     typedef std::vector<std::vector<T> > MT;
+
+    input_table() {}
+
+    input_table(const MT& mt) {
+        foreach(std::vector<T>& row, mt)
+            push_back(row); // using push_back to update considered_args
+    }
 
     // set binding prior calling the combo evaluation, ignoring inputs
     // to be ignored
@@ -112,6 +136,9 @@ public:
     iterator end() {return matrix.end();}
     const_iterator begin() const {return matrix.begin();}
     const_iterator end() const {return matrix.end();}
+    bool operator==(const input_table<T>& rhs) const {
+        return get_matrix() == rhs.get_matrix();
+    }
     
     // Warning: this method also update considered_args, by assuming
     // all are considered
@@ -251,6 +278,7 @@ public:
  */
 struct partial_truth_table : public bool_vector {
     partial_truth_table() {}
+    partial_truth_table(const bool_vector& bv) : bool_vector(bv) {}
     partial_truth_table(const combo_tree& tr, const truth_table_inputs& tti,
                         opencog::RandGen& rng);
     
@@ -587,6 +615,16 @@ public:
 //////////////////
 
 /**
+ * remove the carriage return (for DOS format)
+ */
+void removeCarriageReturn(std::string& str);
+
+/**
+ * remove non ASCII char at the begining of the string
+ */
+void removeNonASCII(std::string& str);
+
+/**
  * Return true if the next chars in 'in' correspond to carriage return
  * (support UNIX and DOS format) and advance in of the checked chars.
  */
@@ -600,48 +638,51 @@ arity_t istreamArity(std::istream& in);
 
 /**
  * template to fill an input table (IT) and output table (OT) of type
- * T. Note that a '\n' (or '\r' '\n' for DOS format) must be placed
- * right after the last number, including for the last line.  It is
- * assumed that each row have the same number of columns, if not the
- * case an assert is raised.
+ * T, given a SSV (space-seperated values) file format.
+ * 
+ * Note that a '\n' (or '\r\n' for DOS format) must be placed right
+ * after the last number, including for the last line.  It is assumed
+ * that each row have the same number of columns, if not an assert is
+ * raised.
  */
 template<typename IT, typename OT, typename T>
 std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
-    std::vector<T> input_vec;
-    T input;
-    bool arity_det = false; // flag to indicate that th arity has been
-                            // determined
-    arity_t arity = -1; // arity according to the first row, used for check
-    while (!in.eof()) {
-        std::string str;
-        in >> str;
+    arity_t arity = -1; // arity of the first row, used for check
 
-        // remove non ASCII char
-        while(str.size() && (unsigned char)str[0] > 127) {
-            str = str.substr(1);
+    typedef boost::tokenizer<> tokenizer; // parse cells
+    typedef tokenizer::const_iterator tokenizer_cit;
+
+    std::string line;
+    while (getline(in, line)) {
+        // remove weird symbols and carriage return symbol (for DOS files)
+        removeNonASCII(line);
+        removeCarriageReturn(line);
+        if(line.empty())
+            continue;
+
+        // tokenize line
+        tokenizer tok(line);
+        std::vector<T> input_vec;
+        T output;
+        for(tokenizer_cit it = tok.begin(); it != tok.end(); it++) {
+            tokenizer_cit it_next = it;
+            if(++it_next != tok.end())
+                input_vec.push_back(boost::lexical_cast<T>(*it));
+            else output = boost::lexical_cast<T>(*it);
         }
 
-        if(str.size()) {
-            input = boost::lexical_cast<T>(str);
-            if(checkCarriageReturn(in)) {
-                output_table.push_back(input);
-                table_inputs.push_back(input_vec);
-                if(arity_det) {
-                    OC_ASSERT(arity == (arity_t)input_vec.size(),
-                              "The row %u has %u columns while the first row"
-                              " has %d columns, all rows should have the same"
-                              " number of columns",
-                              output_table.size(), input_vec.size(), arity);
-                } else {
-                    arity = input_vec.size();
-                    arity_det = true;
-                }
-                input_vec.clear();
-            }
-            else {
-                input_vec.push_back(input);
-            }
-        }
+        // check arity
+        if(arity > 0)
+            OC_ASSERT(arity == (arity_t)input_vec.size(),
+                      "The row %u has %u columns while the first row"
+                      " has %d columns, all rows should have the same"
+                      " number of columns",
+                      output_table.size(), input_vec.size(), arity);
+        else arity = input_vec.size();
+
+        // fill table
+        table_inputs.push_back(input_vec);
+        output_table.push_back(output);
     }
     return in;
 }

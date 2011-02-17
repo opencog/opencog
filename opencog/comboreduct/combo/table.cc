@@ -160,7 +160,7 @@ contin_t contin_table::root_mean_square_error(const contin_table& other) const
     return sqrt(mean_squared_error(other));
 }
 
-bool checkCarriageReturn(std::istream& in) {
+bool checkCarriageReturn(istream& in) {
     char next_c = in.get();
     if(next_c == '\r') // DOS format
         next_c = in.get();
@@ -169,11 +169,21 @@ bool checkCarriageReturn(std::istream& in) {
     return false;
 }
 
-arity_t istreamArity(std::istream& in) {
+void removeCarriageReturn(string& str) {
+    if ((str.size() > 0) && (*str.end()-- == '\r'))
+        str.resize(str.size() - 1);
+}
+
+void removeNonASCII(string& str) {
+    while(str.size() && (unsigned char)str[0] > 127)
+        str = str.substr(1);
+}
+
+arity_t istreamArity(istream& in) {
     arity_t arity = -1;
     while(!in.eof()) {
         arity++;
-        std::string str;
+        string str;
         in >> str;
         if(checkCarriageReturn(in))
             return arity;
