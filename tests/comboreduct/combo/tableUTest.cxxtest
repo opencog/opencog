@@ -29,26 +29,32 @@ using namespace boost::assign;
 
 class tableUTest : public CxxTest::TestSuite {
 private:
-    void testIStreamBooleanTable(const string& ts,
-                                 const truth_table_inputs& it,
-                                 const partial_truth_table& ot) {
+    template<typename IT, typename OT, typename T>
+    void testIStreamTable(const string& ts, const IT& it, const OT& ot) {
         stringstream ss(ts);
-        truth_table_inputs it_test;
-        partial_truth_table ot_test;
-        istreamTable<truth_table_inputs,
-                     partial_truth_table, bool>(ss, it_test, ot_test);
+        IT it_test;
+        OT ot_test;
+        istreamTable<IT, OT, T>(ss, it_test, ot_test);
         TS_ASSERT_EQUALS(it, it_test);
         TS_ASSERT_EQUALS(ot, ot_test);
     }
 public:
-    void test_SSVTruthTable() {
+    void test_TruthTable() {
         truth_table_inputs it;
-        bool_vector r1 = list_of(true)(false);
-        bool_vector r2 = list_of(false)(true);
-        it.push_back(r1);
-        it.push_back(r2);
+        it.push_back(list_of(true)(false));
+        it.push_back(list_of(false)(true));
         bool_vector o = list_of(true)(false);
         partial_truth_table ot(o);
-        testIStreamBooleanTable("1 0 1\n0 1 0\n", it, ot);
+        testIStreamTable<truth_table_inputs, partial_truth_table,
+                         bool>("1 0 1\n0 1 0\n", it, ot);
+    }
+    void test_ContinTable() {
+        contin_input_table it;
+        it.push_back(list_of(0.4)(244.2));
+        it.push_back(list_of(9.5)(4.2));
+        contin_vector o = list_of(10.1)(6.5);
+        contin_table ot(o);
+        testIStreamTable<contin_input_table, contin_table,
+                         contin_t>("0.4,244.2,10.1\n9.5,4.2,6.5\n", it, ot);
     }
 };

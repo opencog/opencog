@@ -323,6 +323,7 @@ public:
 
     //constructors
     contin_table() {}
+    contin_table(const contin_vector& cv) : contin_vector(cv) {}
     contin_table(const combo_tree& tr, const contin_input_table& cti,
                  opencog::RandGen& rng);
     template<typename Func>
@@ -637,52 +638,62 @@ bool checkCarriageReturn(std::istream& in);
 arity_t istreamArity(std::istream& in);
 
 /**
+ * take a line and return the input vector and output.
+ * Used by istreamTable.
+ * Please note that it may modify line to be Unix compatible
+ */
+template<typename T>
+std::pair<std::vector<T>, T> tokenizeRow(std::string& line) {
+    typedef boost::escaped_list_separator<char> seperator;
+    typedef boost::tokenizer<seperator> tokenizer;
+    typedef tokenizer::const_iterator tokenizer_cit;
+
+    // remove weird symbols and carriage return symbol (for DOS files)
+    removeNonASCII(line);
+    removeCarriageReturn(line);
+
+    // tokenize line
+    seperator sep("\\", ", \t", "\"");
+    tokenizer tok(line, sep);
+    std::vector<T> input_vec;
+    T output;
+    for(tokenizer_cit it = tok.begin(); it != tok.end(); it++) {
+        //std::cout << "Token = " << *it << std::endl;
+        if(++tokenizer_cit(it) != tok.end())
+            input_vec.push_back(boost::lexical_cast<T>(*it));
+        else output = boost::lexical_cast<T>(*it);
+    }
+    return std::make_pair(input_vec, output);
+}
+
+/**
  * template to fill an input table (IT) and output table (OT) of type
- * T, given a SSV (space-seperated values) file format.
+ * T, given a DSV (delimiter-seperated values) file format, where
+ * delimiters are ',', ' ' or '\t'.
  * 
- * Note that a '\n' (or '\r\n' for DOS format) must be placed right
- * after the last number, including for the last line.  It is assumed
- * that each row have the same number of columns, if not an assert is
- * raised.
+ * It is assumed that each row have the same number of columns, if not
+ * an assert is raised.
  */
 template<typename IT, typename OT, typename T>
 std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
     arity_t arity = -1; // arity of the first row, used for check
-
-    typedef boost::tokenizer<> tokenizer; // parse cells
-    typedef tokenizer::const_iterator tokenizer_cit;
-
     std::string line;
     while (getline(in, line)) {
-        // remove weird symbols and carriage return symbol (for DOS files)
-        removeNonASCII(line);
-        removeCarriageReturn(line);
-        if(line.empty())
-            continue;
-
-        // tokenize line
-        tokenizer tok(line);
-        std::vector<T> input_vec;
-        T output;
-        for(tokenizer_cit it = tok.begin(); it != tok.end(); it++) {
-            tokenizer_cit it_next = it;
-            if(++it_next != tok.end())
-                input_vec.push_back(boost::lexical_cast<T>(*it));
-            else output = boost::lexical_cast<T>(*it);
-        }
+        // tonkenize the line and fill the input vector and output
+        std::pair<std::vector<T>, T> iop = tokenizeRow<T>(line);
 
         // check arity
+        arity_t row_arity = iop.first.size();
         if(arity > 0)
-            OC_ASSERT(arity == (arity_t)input_vec.size(),
-                      "The row %u has %u columns while the first row"
-                      " has %d columns, all rows should have the same"
-                      " number of columns",
-                      output_table.size(), input_vec.size(), arity);
-        else arity = input_vec.size();
+            OC_ASSERT(arity == row_arity,
+                      "The row %u has %u columns while the first row has %d"
+                      " columns, all rows should have the same number of"
+                      " columns", output_table.size(), row_arity, arity);
+        else arity = row_arity;
 
         // fill table
-        table_inputs.push_back(input_vec);
-        output_table.push_back(output);
+        table_inputs.push_back(iop.first);
+        output_table.push_back(iop.second);
     }
     return in;
 }
@@ -743,6 +754,7 @@ inline std::ostream& operator<<(std::ostream& out,
 {
     for(combo::const_cm_it i = cm.begin(); i != cm.end(); ++i) {
         opencog::ostreamContainer(out, *i, "\t");
+        out << std::endl;
     }
     return out;
 }
