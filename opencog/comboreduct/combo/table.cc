@@ -114,6 +114,8 @@ contin_table::contin_table(const combo_tree& tr, const contin_input_table& cti,
 
 bool contin_table::operator==(const contin_table& ct) const
 {
+    if (get_label() != ct.get_label())
+        return false;
     if (ct.size() == size()) {
         const_cv_it ct_i = ct.begin();
         for (const_cv_it i = begin(); i != end(); ++i, ++ct_i) {

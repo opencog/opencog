@@ -43,11 +43,11 @@ using opencog::RandGen;
 // Generic table //
 ///////////////////
 
-
 /**
  * Matrix of type T.
  * Rows represent samples.
  * Columns represent input variables
+ * Optionally a list of labels (input variable names)
  *
  * It contains additional methods to ignore some variables, this is
  * done only for speeding up evaluation of data fitting objective
@@ -66,9 +66,16 @@ public:
 
     input_table() {}
 
-    input_table(const MT& mt) {
+    input_table(const MT& mt,
+                std::vector<std::string>& il = std::vector<std::string>())
+        : labels(il) {
         foreach(std::vector<T>& row, mt)
             push_back(row); // using push_back to update considered_args
+    }
+
+    // set input labels
+    void set_labels(std::vector<std::string>& il) {
+        labels = il;
     }
 
     // set binding prior calling the combo evaluation, ignoring inputs
@@ -132,12 +139,15 @@ public:
     typedef typename MT::value_type value_type;
     MT& get_matrix() { return matrix;}
     const MT& get_matrix() const {return matrix;}
+    std::vector<std::string>& get_labels() { return labels; }
+    const std::vector<std::string>& get_labels() const { return labels; }
     iterator begin() {return matrix.begin();}
     iterator end() {return matrix.end();}
     const_iterator begin() const {return matrix.begin();}
     const_iterator end() const {return matrix.end();}
     bool operator==(const input_table<T>& rhs) const {
-        return get_matrix() == rhs.get_matrix();
+        return get_matrix() == rhs.get_matrix()
+            && get_labels() == rhs.get_labels();
     }
     
     // Warning: this method also update considered_args, by assuming
@@ -152,11 +162,33 @@ public:
     iterator erase(iterator it) {return matrix.erase(it);}
 protected:
     MT matrix;
-    // the set of arguments (represented directely as column indices)
+    std::vector<std::string> labels; // list of input labels
+    // the set of arguments (represented directly as column indices)
     // to consider
     std::set<arity_t> considered_args; 
 };
 
+template<typename T>
+class output_table : public std::vector<T> {
+    typedef std::vector<T> super;
+public:
+    output_table() {}
+    output_table(const super& ot, std::string& ol = "") 
+        : super(ot), label(ol) {}
+
+    void set_label(std::string& ol) { label = ol; }
+    std::string& get_label() { return label; }
+    const std::string& get_label() const { return label; }
+
+    // STL
+    bool operator==(const output_table<T>& rhs) const {
+        return 
+            static_cast<const super&>(*this) == static_cast<const super&>(rhs)
+            && rhs.get_label() == label;
+    }
+private:
+    std::string label; // output label
+};
 
 /////////////////
 // Truth table //
@@ -276,9 +308,10 @@ public:
 /**
  * partial_truth_table, column of result of a corresponding truth_table_inputs
  */
-struct partial_truth_table : public bool_vector {
+struct partial_truth_table : public output_table<bool> {
     partial_truth_table() {}
-    partial_truth_table(const bool_vector& bv) : bool_vector(bv) {}
+    partial_truth_table(const bool_vector& bv, std::string ol = "")
+        : output_table<bool>(bv, ol) {}
     partial_truth_table(const combo_tree& tr, const truth_table_inputs& tti,
                         opencog::RandGen& rng);
     
@@ -316,14 +349,15 @@ public:
     a RndNumTable cti.
     assumption : t has only contin inputs and output
 */
-class contin_table : public contin_vector   //a column of results
+class contin_table : public output_table<contin_t>   //a column of results
 {
 public:
     //typedef contin_vector super;
 
     //constructors
     contin_table() {}
-    contin_table(const contin_vector& cv) : contin_vector(cv) {}
+    contin_table(const contin_vector& cv, std::string ol = "") 
+        : output_table<contin_t>(cv, ol) {}
     contin_table(const combo_tree& tr, const contin_input_table& cti,
                  opencog::RandGen& rng);
     template<typename Func>
@@ -643,7 +677,7 @@ arity_t istreamArity(std::istream& in);
  * Please note that it may modify line to be Unix compatible
  */
 template<typename T>
-std::pair<std::vector<T>, T> tokenizeRow(std::string& line) {
+void tokenizeRow(std::string& line, std::vector<T>& input_vec, T& output) {
     typedef boost::escaped_list_separator<char> seperator;
     typedef boost::tokenizer<seperator> tokenizer;
     typedef tokenizer::const_iterator tokenizer_cit;
@@ -655,14 +689,19 @@ std::pair<std::vector<T>, T> tokenizeRow(std::string& line) {
     // tokenize line
     seperator sep("\\", ", \t", "\"");
     tokenizer tok(line, sep);
-    std::vector<T> input_vec;
-    T output;
     for(tokenizer_cit it = tok.begin(); it != tok.end(); it++) {
         //std::cout << "Token = " << *it << std::endl;
         if(++tokenizer_cit(it) != tok.end())
             input_vec.push_back(boost::lexical_cast<T>(*it));
         else output = boost::lexical_cast<T>(*it);
     }
+}
+// helper
+template<typename T>
+std::pair<std::vector<T>, T> tokenizeRow(std::string& line) {
+    std::vector<T> input_vec;
+    T output;
+    tokenizeRow(line, input_vec, output);
     return std::make_pair(input_vec, output);
 }
 
@@ -676,21 +715,44 @@ std::pair<std::vector<T>, T> tokenizeRow(std::string& line) {
  */
 template<typename IT, typename OT, typename T>
 std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
-    arity_t arity = -1; // arity of the first row, used for check
     std::string line;
+
+    ///////////////////////////////////////////////////
+    // first row, check if they are labels or values //
+    ///////////////////////////////////////////////////
+    getline(in, line);    
+    std::vector<std::string> input_labels; // possibly labels
+    std::string output_label; // possibly label
+    tokenizeRow<std::string>(line, input_labels, output_label);
+    try { // try to interpret then as values
+        std::vector<T> input_vec;
+        T output;
+        foreach(std::string& s, input_labels)
+            input_vec.push_back(boost::lexical_cast<T>(s));
+        output = boost::lexical_cast<T>(output_label);
+        // they are values so we add them
+        table_inputs.push_back(input_vec);
+        output_table.push_back(output);        
+    } catch (boost::bad_lexical_cast &) { // not interpretable, they
+                                          // must be labels
+        table_inputs.set_labels(input_labels);
+        output_table.set_label(output_label);
+    }
+    arity_t arity = input_labels.size();
+    
+    //////////////////////////////////////////
+    // next rows, we assume they are values //
+    //////////////////////////////////////////
     while (getline(in, line)) {
-        // tonkenize the line and fill the input vector and output
+        // tokenize the line and fill the input vector and output
         std::pair<std::vector<T>, T> iop = tokenizeRow<T>(line);
-
+        
         // check arity
-        arity_t row_arity = iop.first.size();
-        if(arity > 0)
-            OC_ASSERT(arity == row_arity,
-                      "The row %u has %u columns while the first row has %d"
-                      " columns, all rows should have the same number of"
-                      " columns", output_table.size(), row_arity, arity);
-        else arity = row_arity;
-
+        OC_ASSERT(arity == (arity_t)iop.first.size(),
+                  "The row %u has %u columns while the first row has %d"
+                  " columns, all rows should have the same number of"
+                  " columns", output_table.size(), iop.first.size(), arity);
+        
         // fill table
         table_inputs.push_back(iop.first);
         output_table.push_back(iop.second);
