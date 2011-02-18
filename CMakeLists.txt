@@ -150,9 +150,6 @@ ELSE(SDLGFX_FOUND)
   MESSAGE(STATUS "SDL_gfx missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
 ENDIF(SDLGFX_FOUND)
 
-IF(OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
-    SET(HAVE_SPATIAL 1)
-ENDIF(OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 
 # At this time, there is no reason to build with memcached for 
 # FIND_PACKAGE(LibMemCached)
@@ -209,16 +206,23 @@ IF (GSL_FOUND)
     SET(HAVE_GSL 1)
 ENDIF (GSL_FOUND)
 
-# atomspace depends on spatial because of SpaceMap but it does require
-# all dependencies of HAVE_SPATIAL, only MapTools reuiqres it so it
-# would be better to fiddle with spatial/CMakeLists.txt to have only
-# MapTools not compile rather the entire spatial directory
-IF(GSL_FOUND AND HAVE_SPATIAL)
+IF(GSL_FOUND)
     SET(HAVE_ATOMSPACE 1)
     SET(HAVE_ATTENTION 1)
     SET(HAVE_PLN 1)
     SET(HAVE_DIMEMBED 1)
-ENDIF(GSL_FOUND AND HAVE_SPATIAL)
+ENDIF(GSL_FOUND)
+
+# Always want to build spatial dir for the AtomSpace 
+# as it depends on libSpaceMap and guards against compiling
+# stuff requiring opengl and sdl in it's own CMakeLists.txt
+IF(HAVE_ATOMSPACE)
+    SET(HAVE_SPATIAL 1)
+ELSE(HAVE_ATOMSPACE)
+    IF(OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
+        SET(HAVE_SPATIAL 1)
+    ENDIF(OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
+ENDIF(HAVE_ATOMSPACE)
 
 # XML parsing library
 FIND_PACKAGE(EXPAT)
