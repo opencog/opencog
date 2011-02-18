@@ -78,8 +78,8 @@ void DimEmbedModule::init() {
 
 // Uses a slightly modified version of Dijkstra's algorithm
 double DimEmbedModule::findHighestWeightPath(const Handle& startHandle,
-                                                   const Handle& targetHandle,
-                                                   const Type& linkType)
+                                             const Handle& targetHandle,
+                                             const Type& linkType)
 {
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
@@ -128,7 +128,7 @@ double DimEmbedModule::findHighestWeightPath(const Handle& startHandle,
     return 0; //no path found, return 0
 }
 
-std::list<double> DimEmbedModule::getEmbedList(const Handle& h,
+std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
                                                          const Type& l) {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
@@ -191,13 +191,14 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
 
-    std::list<Handle> nodes;
+    HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
 
     std::map<Handle,double> distMap;
+
     typedef std::multimap<double,Handle> pQueue_t;
     pQueue_t pQueue;
-    for(std::list<Handle>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
+    for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
         if(*it==h) {
             pQueue.insert(std::pair<double, Handle>(1,*it));
             distMap[*it]=1;
@@ -232,6 +233,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
                 double alt = distMap[u] *
                     linkTV->getMean() * linkTV->getConfidence();
                 double oldDist=distMap[*it2];
+                //If we've found a better (higher weight) path, update distMap
                 if(alt>oldDist) {
                     pQueue_t::iterator it3;
 
@@ -279,7 +281,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
         //pick the next pivot to maximize its distance from its closest pivot
         //(maximizing distance = minimizing path weight)
         for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-            std::list<double>& eV = atomMaps[linkType][*it];
+            std::vector<double>& eV = atomMaps[linkType][*it];
             double testChoiceWeight = *std::max_element(eV.begin(), eV.end());
             if(testChoiceWeight < bestChoiceWeight) {
                 bestChoice = *it;
@@ -301,23 +303,39 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     //logger().info("done embedding");
 }
 
-std::list<double> DimEmbedModule::addNode(const Handle& h,
-                                                  const Type& linkType){
-    
+std::vector<double> DimEmbedModule::addNode(const Handle& h,
+                                                  const Type& linkType){    
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-    
-    PivotSeq& pivots=pivotsMap[linkType];
-    std::list<double> embeddinglist;
-    //The i'th entry of the handle's embeddinglist is the value of the
-    //highest weight path between the handle and the i'th pivot.
-    for(PivotSeq::iterator it=pivots.begin(); it!=pivots.end(); ++it){
-        embeddinglist.push_back(findHighestWeightPath(h, *it, linkType));
+
+    HandleSeq links = as->getIncoming(h);
+    std::vector<double> newEmbedding (dimensionMap[linkType], 0.0);
+    //The embedding for each coordinate is the max of
+    //tv.strength*tv.confidence*embedding of every directly connected
+    //node.
+    //eg if our new node is connected to node A with embedding (.1,.2)
+    //with link weight .3, and to node B with embedding (.4,.5)
+    //with link weight .6, then the new node's embedding is...
+    //(max(.3*.1,.8*.4),max(.3*.2,.6*.5))    
+    for(HandleSeq::iterator it=links.begin(); it<links.end(); it++) {
+        HandleSeq nodes = as->getOutgoing(*it);
+        const TruthValue& linkTV = as->getTV(*it);        
+        double weight = linkTV.getConfidence()*linkTV.getMean();
+        for(HandleSeq::iterator it2=nodes.begin();it2<nodes.end(); it2++) {
+            if(*it2==h) continue;
+            std::vector<double> embedding =
+                getEmbedVector(*it2,linkType);
+            //Alter our embedding whenever we find a higher weight path
+            for(int i=0; i<embedding.size(); i++) {
+                if(weight*embedding[i]>newEmbedding[i]) {
+                    newEmbedding[i]=weight*embedding[i];
+                }
+            }
+        }
     }
-    atomMaps[linkType][h]=embeddinglist;
-    return embeddinglist;
+    return newEmbedding;
 }
 
 void DimEmbedModule::clearEmbedding(const Type& linkType){
@@ -353,9 +371,9 @@ void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
         } else {
             oss << "[NODE'S BEEN DELETED H=" << it->first << "] : (";
         }
-        const std::list<double>& embedlist = it->second;
-        for(std::list<double>::const_iterator it2=embedlist.begin();
-            it2!=embedlist.end();
+        const std::vector<double>& embedvector = it->second;
+        for(std::vector<double>::const_iterator it2=embedvector.begin();
+            it2!=embedvector.end();
             ++it2){
             oss << *it2 << " ";
         }
@@ -436,8 +454,8 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
     //add the values to the embeddingmatrix...
     for(;aEit!=aE.end();aEit++) {
         handleArray[i]=aEit->first;
-        std::list<double> embedding = aEit->second;
-        std::list<double>::iterator vit=embedding.begin();
+        std::vector<double> embedding = aEit->second;
+        std::vector<double>::iterator vit=embedding.begin();
         j=0;
         for(;vit!=embedding.end();vit++) {
             embedMatrix[i][j]=*vit;
@@ -476,8 +494,6 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
                           mask, clusterid, centroidMatrix, mask, 0, 'a');
     HandleSeq clusters (numClusters);
     for(int i=0;i<numClusters;i++) {
-        //std::stringstream out;
-        //out << "cluster_" << this->clusters++;
         clusters[i] = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
     }
     for(int i=0;i<numVectors;i++) {
@@ -489,7 +505,8 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
                                  numDimensions);
         //TODO: How should we set the truth value for this link? (this is just
         //a placeholder)
-        SimpleTruthValue tv(1-dist,1-dist);
+        SimpleTruthValue tv(1-dist,
+                            SimpleTruthValue::confidenceToCount(1-dist));
         as->addLink(INHERITANCE_LINK, handleArray[i], clusters[clustInd], tv);
     }
 
@@ -523,16 +540,16 @@ double DimEmbedModule::euclidDist(const Handle& h1,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
  
-    std::list<double> v1=getEmbedList(h1,l);
-    std::list<double> v2=getEmbedList(h2,l);
+    std::vector<double> v1=getEmbedVector(h1,l);
+    std::vector<double> v2=getEmbedVector(h2,l);
     return euclidDist(v1, v2);
 }
 
-double DimEmbedModule::euclidDist(std::list<double> v1,
-                                  std::list<double> v2) {
+double DimEmbedModule::euclidDist(std::vector<double> v1,
+                                  std::vector<double> v2) {
     assert(v1.size()==v2.size());
-    std::list<double>::iterator it1=v1.begin();
-    std::list<double>::iterator it2=v2.begin();
+    std::vector<double>::iterator it1=v1.begin();
+    std::vector<double>::iterator it2=v2.begin();
 
     double distance=0;
     //Calculate euclidean distance between v1 and v2

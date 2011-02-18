@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_COVER_TREE_NODE_H
 #define _OPENCOG_COVER_TREE_NODE_H
 
-#include <list>
+#include <vector>
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
@@ -39,10 +39,10 @@ namespace opencog {
 
 class CoverTreeNode {
 public:
-    std::map<Handle, std::list<double> >::const_iterator iter;
+    std::map<Handle, std::vector<double> >::const_iterator iter;
     CoverTreeNode() {}
-    CoverTreeNode(std::map<Handle, std::list<double> >::const_iterator it) : iter(it) {}
-    const std::list<double>& getList() {
+    CoverTreeNode(std::map<Handle, std::vector<double> >::const_iterator it) : iter(it) {}
+    const std::vector<double>& getVector() {
         return iter->second;
     }
     const Handle& getHandle() {
@@ -58,9 +58,9 @@ void print(AtomSpace& atomspace, CoverTreeNode& p) {
     } else {
         oss << atomspace.atomAsString(h, true) << " : (";
     }
-    const std::list<double>& embedList = p.getList();
-    for(std::list<double>::const_iterator it=embedList.begin();
-        it!=embedList.end(); it++)
+    const std::vector<double>& embedVector = p.getVector();
+    for(std::vector<double>::const_iterator it=embedVector.begin();
+        it!=embedVector.end(); it++)
         {
             oss << *it << " ";
         }       
@@ -69,10 +69,10 @@ void print(AtomSpace& atomspace, CoverTreeNode& p) {
 }
 
 double distance(CoverTreeNode n1, CoverTreeNode n2, double upper_bound) {
-    const std::list<double>& v1=n1.getList();
-    const std::list<double>& v2=n2.getList();
-    std::list<double>::const_iterator it1=v1.begin();
-    std::list<double>::const_iterator it2=v2.begin();
+    const std::vector<double>& v1=n1.getVector();
+    const std::vector<double>& v2=n2.getVector();
+    std::vector<double>::const_iterator it1=v1.begin();
+    std::vector<double>::const_iterator it2=v2.begin();
     
     double distance=0;
     //Calculate euclidean distance between v1 and v2

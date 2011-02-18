@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_DIM_EMBED_MODULE_H
 #define _OPENCOG_DIM_EMBED_MODULE_H
 
-#include <list>
+#include <vector>
 #include <map>
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
@@ -48,8 +48,8 @@ namespace opencog
     class DimEmbedModule : public Module
     {
     private:
-        typedef std::map<Handle, std::list<double> > AtomEmbedding;
-        typedef std::list<Handle> PivotSeq;
+        typedef std::map<Handle, std::vector<double> > AtomEmbedding;
+        typedef std::vector<Handle> PivotSeq;
         typedef std::map<Type, PivotSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
         typedef std::map<Type, node<CoverTreeNode> > EmbedTreeMap;
@@ -119,18 +119,18 @@ namespace opencog
         virtual void init();
 
         /**
-         * Returns a list of doubles corresponding to the handle h's
+         * Returns a vector of doubles corresponding to the handle h's
          * embedding of link type l. Throws an exception if no embedding
-         * exists yet for type l. Calculates the list if an embedding exists
+         * exists yet for type l. Calculates the vector if an embedding exists
          * (ie pivots are picked) but handle h has not been calculated yet.
          *
-         * @param h The handle whose embedding list is returned
-         * @param l The link type for which h's embedding list is wanted
+         * @param h The handle whose embedding vector is returned
+         * @param l The link type for which h's embedding vector is wanted
          *
-         * @return A list of doubles corresponding to handle h's distance
+         * @return A vector of doubles corresponding to handle h's distance
          * from each of the pivots.
          */
-        std::list<double> getEmbedList(const Handle& h, const Type& l);
+        std::vector<double> getEmbedVector(const Handle& h, const Type& l);
 
         /**
          * Creates an AtomEmbedding of the atomspace using linkType
@@ -148,7 +148,7 @@ namespace opencog
         void embedAtomSpace(const Type& linkType, const int numDimensions=5);
 
         /**
-         * Logs a string representation of of the (Handle,list<Double>)
+         * Logs a string representation of of the (Handle,vector<Double>)
          * pairs for linkType. This will have as many entries as there are nodes
          * in the atomspace (unless nodes have been added since the embedding.
          * Just used for testing/debugging.
@@ -158,11 +158,19 @@ namespace opencog
         /**
          * Adds node to the appropriate AtomEmbedding in the AtomEmbedMap.
          *
+         * We assume that the atomspace has already been embedded, so we can
+         * quickly calculate the new embedding for this node. If every other
+         * node is already embedded exactly, then this new embedding will be
+         * exact, except that the embeddings of other nodes may now be off
+         * (eg if we add node A, which is connect to a pivot and node B,
+         * node B will have a new, shorter path to the pivot, but its
+         * embedding will not be updated to reflect this).
+         *
          * @param h Handle of node to be embedded.
          * @param linkType Type of link to use to embed h
-         * @return The embedding list (a list of doubles between 0 and 1)
+         * @return The embedding vector (a vector of doubles between 0 and 1)
          */
-        std::list<double> addNode(const Handle& h, const Type& linkType);
+        std::vector<double> addNode(const Handle& h, const Type& linkType);
 
         /**
          * Returns true if a dimensional embedding exists for linkType l
@@ -173,7 +181,7 @@ namespace opencog
          * Returns the distance between handles h1 and h2 for the embedding of
          * link type l.
          *
-         * ie if the embedding lists for h1 and h2 for type l is given by
+         * ie if the embedding vectors for h1 and h2 for type l is given by
          * h1: (a1, b1, ..., n1) and
          * h2: (a2, b2, ..., n2)
          * Then their distance for link type l is
@@ -181,10 +189,10 @@ namespace opencog
          */
         double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
         static double euclidDist
-            (const std::list<double> v1, const std::list<double> v2);
+            (const std::vector<double> v1, const std::vector<double> v2);
 
         /**
-         * Returns a list of Handles of the k nearest nodes for the given 
+         * Returns a vector of Handles of the k nearest nodes for the given 
          * link type.
          */
         HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k);
