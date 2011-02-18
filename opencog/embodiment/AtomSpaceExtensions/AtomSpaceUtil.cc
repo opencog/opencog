@@ -622,8 +622,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     Handle ph = atomSpace.getHandle(PREDICATE_NODE, predicateName);
     // if predicate handle not defined and TV equals < 0.5 just return
     if (ph == Handle::UNDEFINED && predBool) {
-        logger().fine(
-                     "AtomSpaceUtil - %s not added (no pred handle and TV less than 0.5).",
+        logger().fine("AtomSpaceUtil - %s not added (no pred handle and TV less than 0.5).",
                      predicateName.c_str());
         return Handle::UNDEFINED;
     } else {
@@ -633,8 +632,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     Handle ll = atomSpace.getHandle(LIST_LINK, ll_out);
     // if list link handle not defined and TV equals < 0.5 just return
     if (ll == Handle::UNDEFINED && predBool) {
-        logger().fine(
-                     "AtomSpaceUtil - %s not added (no ListLink and TV less than 0.5)",
+        logger().fine("AtomSpaceUtil - %s not added (no ListLink and TV less than 0.5)",
                      predicateName.c_str());
         return Handle::UNDEFINED;
     } else {
@@ -648,17 +646,14 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
 
     // if evaluation link handle not defined and TV equals < 0.5 just return
     if (el == Handle::UNDEFINED && predBool) {
-        logger().fine(
-                     "AtomSpaceUtil - %s not added (no EvalLink and TV less than 0.5).",
+        logger().fine("AtomSpaceUtil - %s not added (no EvalLink and TV less than 0.5).",
                      predicateName.c_str());
         return Handle::UNDEFINED;
     } else {
         el = atomSpace.addLink(EVALUATION_LINK, hs2);
-        logger().fine(
-                     "AtomSpaceUtil - %s added with TV %f.",
+        logger().fine("AtomSpaceUtil - %s added with TV %f.",
                      predicateName.c_str(), tv.getMean());
     }
-
     atomSpace.setTV(el, tv);
 
     Handle result;
@@ -669,9 +664,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     } else {
         result = el;
     }
-    if (permanent) {
-        atomSpace.setLTI(result, 1);
-    }
+    if (permanent) { atomSpace.setLTI(result, 1); }
     return result;
 }
 
@@ -687,7 +680,7 @@ Handle AtomSpaceUtil::getMostRecentEvaluationLink(const AtomSpace& atomSpace,
                      "AtomSpaceUtil - Found no entries for PredicateNode '%s' in TimeServer.",
                      predicateNodeName.c_str());
         return Handle::UNDEFINED;
-    } // if
+    }
 
     int mostRecentIndex = 0;
     Temporal *mostRecent = timestamps[mostRecentIndex].getTemporal();
@@ -700,11 +693,10 @@ Handle AtomSpaceUtil::getMostRecentEvaluationLink(const AtomSpace& atomSpace,
 
     Handle selectedHandle = timestamps[mostRecentIndex].getHandle();
     if ( selectedHandle == Handle::UNDEFINED) {
-        logger().debug(
-                     "AtomSpaceUtil - Timeserver returned NULL handle for PredicateNode '%s'",
-                     predicateNodeName.c_str());
+        logger().debug("AtomSpaceUtil - Timeserver returned NULL handle "
+                "for PredicateNode '%s'", predicateNodeName.c_str());
         return Handle::UNDEFINED;
-    } // if
+    }
 
     return selectedHandle;
 }
@@ -727,51 +719,48 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
 
     Handle primaryListLink = atomSpace.getOutgoing(selectedEvalLink, 1);
     if (primaryListLink == Handle::UNDEFINED) {
-        logger().warn(
-                     "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Null primary listLink.",
-                     predicateName.c_str());
+        logger().warn("AtomSpaceUtil - Found no signals for "
+                "PredicateNode '%s'. Null primary listLink.",
+                predicateName.c_str());
         return -1;
-    } // if
+    }
 
     int i = 0;
-    do {
+    while (true) {
         Handle secondaryListLink = atomSpace.getOutgoing(primaryListLink, i);
         if (secondaryListLink == Handle::UNDEFINED) {
-            logger().warn(
-                         "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Null secondary listLink.",
-                         predicateName.c_str());
+            logger().warn("AtomSpaceUtil - Found no signals for "
+                    "PredicateNode '%s'. Null secondary listLink.",
+                     predicateName.c_str());
             return -1;
         }
         Handle paramName = atomSpace.getOutgoing(secondaryListLink, 0);
         if (paramName == Handle::UNDEFINED) {
-            logger().warn(
-                         "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Null paramName.",
-                         predicateName.c_str());
+            logger().warn("AtomSpaceUtil - Found no signals for "
+                    "PredicateNode '%s'. Null paramName.",
+                     predicateName.c_str());
             return -1;
-        } // if
+        }
 
         if (atomSpace.getName(paramName) == "level") {
             Handle paramValue = atomSpace.getOutgoing(secondaryListLink, 1);
             if (paramValue == Handle::UNDEFINED) {
-                logger().warn(
-                             "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Null paramValue.",
-                             predicateName.c_str());
+                logger().warn("AtomSpaceUtil - Found no signals for "
+                        "PredicateNode '%s'. Null paramValue.",
+                         predicateName.c_str());
                 return -1;
-            } // if
-
+            }
             return atof( atomSpace.getName(paramValue).c_str( ) );
-        } // if
+        }
 
         i++;
-
         if (i >= atomSpace.getArity(primaryListLink)) {
-            logger().warn(
-                         "AtomSpaceUtil - Found no signals for PredicateNode '%s'. Invalid listLink.",
-                         predicateName.c_str());
+            logger().warn("AtomSpaceUtil - Found no signals for "
+                    "PredicateNode '%s'. Invalid listLink.",
+                     predicateName.c_str());
             return -1;
-        } // if
-
-    } while (true);
+        }
+    }
 
     return -1;
 }
@@ -784,9 +773,9 @@ void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,
         bool needSort)
 {
 
-    logger().fine(
-                 "AtomSpaceUtil - getAllEvaluationLinks - Searching for PredicateNode '%s'.",
-                 predicateNodeName.c_str());
+    logger().fine("AtomSpaceUtil - getAllEvaluationLinks - "
+            "Searching for PredicateNode '%s'.",
+            predicateNodeName.c_str());
 
     std::vector<Handle> handles;
     atomSpace.getHandleSet(back_inserter(handles),
@@ -795,16 +784,16 @@ void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,
                            EVALUATION_LINK, true);
 
     if (handles.empty()) {
-        logger().debug(
-                     "AtomSpaceUtil - getAllEvaluationLinks - Found no EvaluationLink for PredicateNode '%s'",
-                     predicateNodeName.c_str());
+        logger().debug("AtomSpaceUtil - getAllEvaluationLinks - "
+                "Found no EvaluationLink for PredicateNode '%s'",
+                predicateNodeName.c_str());
         return;
-    } // if
+    }
 
     for ( unsigned int i = 0; i < handles.size(); ++i ) {
         atomSpace.getTimeServer().getTimeInfo(back_inserter(timestamps),
                               handles[i], temporal, criterion);
-    } // for
+    }
 
     if (needSort) {
         std::sort(timestamps.begin(),
@@ -812,8 +801,7 @@ void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,
                   HandleTemporalPairEntry::SortComparison());
     }
 
-    logger().fine(
-                 "AtomSpaceUtil - getAllEvaluationLinks - end.");
+    logger().fine("AtomSpaceUtil - getAllEvaluationLinks - end.");
 }
 
 Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
@@ -880,33 +868,28 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
 {
 
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
-    if ( holderHandle == Handle::UNDEFINED ) {
-        return;
-    } // if
+    if ( holderHandle == Handle::UNDEFINED ) return;
 
     Handle objectHandle = Handle::UNDEFINED;
     if ( objectId != "" ) {
         objectHandle = atomSpace.getHandle( OBJECT_NODE, objectId );
         if ( objectHandle != Handle::UNDEFINED ) {
-            logger().debug(
-                          "AtomSpaceUtil - Object is a OBJECT_NODE" );
+            logger().debug("AtomSpaceUtil - Object is a OBJECT_NODE");
         } else {
             objectHandle = atomSpace.getHandle( ACCESSORY_NODE, objectId );
             if ( objectHandle != Handle::UNDEFINED ) {
-                logger().debug(
-                              "AtomSpaceUtil - Object is a ACCESSORY_NODE" );
+                logger().debug("AtomSpaceUtil - Object is a ACCESSORY_NODE");
             } else {
-                logger().error(
-                              "AtomSpaceUtil - Object cannot be identified" );
+                logger().error("AtomSpaceUtil - Object cannot be identified");
                 return;
-            } // if
-        } // if
-    } // if
+            }
+        }
+    }
 
     if (objectHandle == Handle::UNDEFINED) {
         // drop operation
-        logger().debug(
-                     "AtomSpaceUtil - The object's handle is undefined. Holder dropped the object");
+        logger().debug("AtomSpaceUtil - The object's handle is undefined. "
+                "Holder dropped the object");
         Handle isHoldingOldAtTimeLink = getMostRecentIsHoldingAtTimeLink(atomSpace, holderId);
         if (isHoldingOldAtTimeLink != Handle::UNDEFINED) {
             // Reconfigure the timestamp of the last grabbed object
@@ -914,28 +897,30 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
                                        isHoldingOldAtTimeLink);
             if ( isHoldingEvalLink != Handle::UNDEFINED ) {
                 Temporal t = getTemporal(atomSpace, isHoldingOldAtTimeLink);
-                // TODO: What if it was not holding anything anymore (this happens if it gets 2 or more consecutive drop operations)
+                // TODO: What if it was not holding anything anymore (this
+                // happens if it gets 2 or more consecutive drop operations)
                 // Shouldn't the old isHoldingatTimeLink be updated?
-                //remove the old atTimeLink
+
+                // Remove the old AtTimeLink
                 atomSpace.removeAtom(isHoldingOldAtTimeLink);
-                //add the new one
+                // Add the new one
                 long unsigned tl = t.getLowerBound();
                 Temporal new_temp(tl, std::max(currentTimestamp - 20, tl));
-                logger().debug(
-                             "AtomSpaceUtil - setupHoldingObject: new time = '%s'",
-                             new_temp.toString().c_str());
-                atomSpace.getTimeServer().addTimeInfo(isHoldingEvalLink, new_temp); // Now, it can be forgotten.
-            } // if
-        } // if
+                logger().debug("AtomSpaceUtil - setupHoldingObject: "
+                        "new time = '%s'", new_temp.toString().c_str());
+                 // Now, it can be forgotten.
+                atomSpace.getTimeServer().addTimeInfo(isHoldingEvalLink, new_temp);
+            }
+        }
         AtomSpaceUtil::setPredicateValue( atomSpace,
                                           IS_HOLDING_SOMETHING_PREDICATE_NAME,
                                           SimpleTruthValue( 0.0, 1.0 ),
                                           holderHandle );
     } else {
         // grab: it is now holding an object
-        // TODO: What if it is already holding another thing? Shouldn't the old isHoldingatTimeLink be updated?
-        logger().debug(
-                     "AtomSpaceUtil - Now '%s' is holding '%s' at '%ul'",
+        // TODO: What if it is already holding another thing? Shouldn't the old
+        // isHoldingatTimeLink be updated?
+        logger().debug("AtomSpaceUtil - Now '%s' is holding '%s' at '%ul'",
                      atomSpace.getName(holderHandle).c_str(),
                      atomSpace.getName(objectHandle).c_str(),
                      currentTimestamp);
@@ -950,8 +935,10 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
                                                  objectHandle,
                                                  SimpleTruthValue( 1.0, 1.0 ),
                                                  Temporal(currentTimestamp) );
-        atomSpace.setLTI(isHoldingAtTimeLink, 1); // Now, it cannot be forgotten (until the agent drop the object)
-    } // else
+        // Now, it cannot be forgotten (until the agent drop the object)
+        // TODO: this is untrue, it should use VLTI
+        atomSpace.setLTI(isHoldingAtTimeLink, 1);
+    }
 }
 
 Handle AtomSpaceUtil::getLatestHoldingObjectHandle(const AtomSpace& atomSpace,
@@ -961,26 +948,22 @@ Handle AtomSpaceUtil::getLatestHoldingObjectHandle(const AtomSpace& atomSpace,
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
     if ( holderHandle == Handle::UNDEFINED ) {
         return Handle::UNDEFINED;
-    } // if
+    }
 
     Handle isHoldingLink = getMostRecentIsHoldingLink( atomSpace, holderId );
     if ( isHoldingLink != Handle::UNDEFINED ) {
         Handle listLink = atomSpace.getOutgoing(isHoldingLink, 1);
         if ( listLink != Handle::UNDEFINED ) {
             Handle objectHandle = atomSpace.getOutgoing(listLink, 1);
-            if ( objectHandle != Handle::UNDEFINED ) {
-                return objectHandle;
-            } // if
-            logger().error(
-                          "AtomSpaceUtil - There is no object on list link" );
-        } // if
-        logger().error(
-                      "AtomSpaceUtil - There is no listlink on isHoldingLink" );
-    } // if
+            if ( objectHandle != Handle::UNDEFINED ) return objectHandle;
 
-    logger().debug(
-                  "AtomSpaceUtil - There is no isHoldingLink for %s",
-                  holderId.c_str( ) );
+            logger().error("AtomSpaceUtil - There is no object on list link");
+        }
+        logger().error("AtomSpaceUtil - There is no listlink on isHoldingLink");
+    }
+
+    logger().debug("AtomSpaceUtil - There is no isHoldingLink for %s",
+                  holderId.c_str() );
     return Handle::UNDEFINED;
 }
 
@@ -993,19 +976,18 @@ bool AtomSpaceUtil::isObjectBeingHolded( const AtomSpace& atomSpace,
 Handle AtomSpaceUtil::getObjectHolderHandle( const AtomSpace& atomSpace,
         const std::string& objectId )
 {
-    // TODO: try to optimize this method. it is using twice the getHandleSet for
+    // TODO: try to optimize this method. It is using getHandleSet twice for
     // isHolding (below and through getLatestHoldingObjectHandle)
     std::vector<Handle> handles;
     atomSpace.getHandleSet( back_inserter(handles),
                             OBJECT_NODE,
                             objectId, true );
 
-    if ( handles.size( ) != 1 ) {
-        logger().debug(
-                     "AtomSpaceUtil - No agent is holding object[%s]",
-                     objectId.c_str( ) );
+    if (handles.size() != 1) {
+        logger().debug("AtomSpaceUtil - No agent is holding object[%s]",
+                     objectId.c_str() );
         return Handle::UNDEFINED;
-    } // if
+    }
     Handle holdedObjectHandle = handles[0];
 
     handles.clear( );
@@ -1095,9 +1077,9 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(const AtomSpace& atomSpac
             if ( atomSpace.getOutgoing(listLink, 0) == holderHandle ) {
                 atomSpace.getTimeServer().getTimeInfo( back_inserter( timestamps ),
                                        handles[i]);
-            } // if
-        } // if
-    } // for
+            }
+        }
+    }
 
     // get the most recent eval link
     if ( timestamps.size( ) > 0 ) {
@@ -1107,15 +1089,14 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(const AtomSpace& atomSpac
             if (*(timestamps[i].getTemporal()) > *mostRecent) {
                 mostRecent = timestamps[i].getTemporal();
                 mostRecentIndex = i;
-            } // if
-        } // for
+            }
+        }
 
-        logger().debug(
-                      "AtomSpaceUtil - The most recent holded object %ul",
-                      timestamps[mostRecentIndex].getTemporal( )->getUpperBound( ) );
+        logger().debug("AtomSpaceUtil - The most recent holded object %ul",
+                      timestamps[mostRecentIndex].getTemporal()->getUpperBound() );
 
         return atomSpace.getTimeServer().getAtTimeLink(timestamps[mostRecentIndex]);
-    } // if
+    }
     return Handle::UNDEFINED;
 }
 
@@ -1132,20 +1113,16 @@ std::string AtomSpaceUtil::getHoldingObjectId(const AtomSpace& atomSpace,
         const std::string& holderId )
 {
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
-    if ( holderHandle == Handle::UNDEFINED ) {
-        return "";
-    } // if
+    if ( holderHandle == Handle::UNDEFINED ) return "";
 
     if ( !AtomSpaceUtil::isPredicateTrue( atomSpace,
                                           IS_HOLDING_SOMETHING_PREDICATE_NAME,
                                           holderHandle ) ) {
         return "";
-    } // if
+    }
 
     Handle objectHandle = getLatestHoldingObjectHandle( atomSpace, holderId );
-    if ( objectHandle == Handle::UNDEFINED ) {
-        return "";
-    } // if
+    if ( objectHandle == Handle::UNDEFINED ) return "";
 
     return atomSpace.getName(objectHandle);
 }
@@ -1154,9 +1131,7 @@ bool AtomSpaceUtil::isHoldingSomething(const AtomSpace& atomSpace,
                                        const std::string& holderId)
 {
     Handle holderHandle = getAgentHandle(atomSpace, holderId);
-    if (holderHandle == Handle::UNDEFINED) {
-        return false;
-    }
+    if (holderHandle == Handle::UNDEFINED) return false;
 
     return AtomSpaceUtil::isPredicateTrue(atomSpace,
                                           IS_HOLDING_SOMETHING_PREDICATE_NAME,
@@ -1176,17 +1151,14 @@ Handle AtomSpaceUtil::getHoldingObjectHandleAtTime(const AtomSpace& atomSpace,
             Handle objectHandle = atomSpace.getOutgoing(listLink, 1);
             if ( objectHandle != Handle::UNDEFINED ) {
                 return objectHandle;
-            } // if
-            logger().error(
-                          "AtomSpaceUtil - There is no object on list link" );
-        } // if
-        logger().error(
-                      "AtomSpaceUtil - There is no listlink on isHoldingLink" );
-    } // if
+            }
+            logger().error("AtomSpaceUtil - There is no object on list link");
+        }
+        logger().error("AtomSpaceUtil - There is no listlink on isHoldingLink");
+    }
 
-    logger().debug(
-                  "AtomSpaceUtil - There is no isHoldingLink for %s",
-                  holderId.c_str( ) );
+    logger().debug("AtomSpaceUtil - There is no isHoldingLink for %s",
+                  holderId.c_str() );
     return Handle::UNDEFINED;
 }
 
@@ -1195,10 +1167,7 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(const AtomSpace& atomSpace,
         unsigned long time)
 {
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
-    if ( holderHandle == Handle::UNDEFINED ) {
-        return Handle::UNDEFINED;
-    } // if
-
+    if ( holderHandle == Handle::UNDEFINED ) return Handle::UNDEFINED;
 
     std::vector<Handle> handles;
     atomSpace.getHandleSet(back_inserter(handles), IS_HOLDING_PREDICATE_NAME,
@@ -1255,14 +1224,10 @@ std::string AtomSpaceUtil::getHoldingObjectIdAtTime(const AtomSpace& as,
         unsigned long time)
 {
     Handle holderHandle = getAgentHandle( as, holderId );
-    if ( holderHandle == Handle::UNDEFINED ) {
-        return "";
-    } // if
+    if ( holderHandle == Handle::UNDEFINED ) return "";
 
     Handle objectHandle = getHoldingObjectHandleAtTime(as, holderId, time);
-    if ( objectHandle == Handle::UNDEFINED ) {
-        return "";
-    } // if
+    if ( objectHandle == Handle::UNDEFINED ) return "";
 
     return as.getName(objectHandle);
 }
@@ -1305,14 +1270,13 @@ std::string AtomSpaceUtil::getObjIdFromName( const AtomSpace& atomSpace,
             objIdHandle = atomSpace.getOutgoing(wrLinks[0], 1);
             // TODO: check for multiple answers...
         } else {
-            logger().debug(
-                          "AtomSpaceUtil::getObjIdFromName: Found avatar name '%s' but no avatar id associated to this name.",
-                          objName.c_str());
+            logger().debug("AtomSpaceUtil::getObjIdFromName: "
+                    "Found avatar name '%s' but no avatar id associated to this name.",
+                    objName.c_str());
         }
     } else {
-        logger().debug(
-                      "AtomSpaceUtil::getObjIdFromName: didn't find avatar name '%s'",
-                      objName.c_str());
+        logger().debug("AtomSpaceUtil::getObjIdFromName: "
+                "didn't find avatar name '%s'", objName.c_str());
     }
     if (objIdHandle == Handle::UNDEFINED) {
         // try all letters in lowercase
@@ -1331,14 +1295,13 @@ std::string AtomSpaceUtil::getObjIdFromName( const AtomSpace& atomSpace,
                 objIdHandle = atomSpace.getOutgoing(wrLinks[0], 1);
                 // TODO: check for multiple answers...
             } else {
-                logger().debug(
-                              "AtomSpaceUtil::getObjIdFromName: Found avatar name '%s' but no avatar id associated to this name.",
-                              lcObjName.c_str());
+                logger().debug("AtomSpaceUtil::getObjIdFromName: "
+                        "Found avatar name '%s' but no avatar id associated "
+                        "with this name.", lcObjName.c_str());
             }
         } else {
-            logger().debug(
-                          "AtomSpaceUtil::getObjIdFromName: didn't find avatar name '%s'",
-                          lcObjName.c_str());
+            logger().debug("AtomSpaceUtil::getObjIdFromName: "
+                    "didn't find avatar name '%s'", lcObjName.c_str());
         }
     }
     if (objIdHandle == Handle::UNDEFINED) {
@@ -1359,21 +1322,20 @@ std::string AtomSpaceUtil::getObjIdFromName( const AtomSpace& atomSpace,
                 objIdHandle = atomSpace.getOutgoing(wrLinks[0], 1);
                 // TODO: check for multiple answers...
             } else {
-                logger().debug(
-                              "AtomSpaceUtil::getObjIdFromName: Found avatar name '%s' but no avatar id associated to this name.",
-                              firstCapObjName.c_str());
+                logger().debug("AtomSpaceUtil::getObjIdFromName: "
+                        "Found avatar name '%s' but no avatar id associated to this name.",
+                        firstCapObjName.c_str());
             }
         } else {
-            logger().debug(
-                          "AtomSpaceUtil::getObjIdFromName: didn't find avatar name '%s'",
-                          firstCapObjName.c_str());
+            logger().debug("AtomSpaceUtil::getObjIdFromName: "
+                    "didn't find avatar name '%s'",
+                    firstCapObjName.c_str());
         }
     }
     if (objIdHandle != Handle::UNDEFINED) {
         result = atomSpace.getName(objIdHandle);
     }
-    logger().debug(
-                  "AtomSpaceUtil::getObjIdFromName: returning '%s'",
+    logger().debug("AtomSpaceUtil::getObjIdFromName: returning '%s'",
                   result.c_str());
     return result;
 }
@@ -1382,9 +1344,7 @@ Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(const AtomSpace& atomSpace,
         unsigned long timestamp,
         bool schemaSuccessful)
 {
-
-    logger().debug(
-                 "AtomSpaceUtil - getMostRecentPetSchemaExecLink");
+    logger().debug("AtomSpaceUtil - getMostRecentPetSchemaExecLink");
     std::vector<HandleTemporalPair> timestamps;
     Temporal t(timestamp);
 
@@ -1401,13 +1361,9 @@ Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(const AtomSpace& atomSpace,
                                              t, TemporalTable::STARTS_AFTER,
                                              true);
     }
-
-    if (timestamps.empty()) {
-        return Handle::UNDEFINED;
-    }
+    if (timestamps.empty()) return Handle::UNDEFINED;
 
     for (int i = timestamps.size() - 1; i > 0; --i) {
-
         Handle evalLink = timestamps[i].getHandle();
         if (evalLink != Handle::UNDEFINED) {
             Handle listLink = atomSpace.getOutgoing(evalLink, 1);
@@ -1429,9 +1385,7 @@ std::string AtomSpaceUtil::convertPetExecLinkParametersToString(const AtomSpace&
 
     if (execLink != Handle::UNDEFINED) {
         Handle listLink = atomSpace.getOutgoing(execLink, 1);
-        if (listLink == Handle::UNDEFINED) {
-            return "";
-        } // if
+        if (listLink == Handle::UNDEFINED) return "";
 
         std::stringstream parameters;
         for (int i = 0; i < atomSpace.getArity(listLink); i++ ) {

@@ -87,7 +87,7 @@ private:
      * Static variables for storing the handles for the LatestLink(AtTimeLink(...))
      * that represents the latest data for each type of information
      */
-    typedef std::map<Handle, Handle> HandleToHandleMap
+    typedef std::map<Handle, Handle> HandleToHandleMap;
     static HandleToHandleMap latestAgentActionDone;
     static HandleToHandleMap latestPhysiologicalFeeling;
     static HandleToHandleMap latestAvatarSayActionDone;
