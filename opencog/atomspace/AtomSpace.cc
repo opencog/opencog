@@ -1,12 +1,9 @@
 /*
  * opencog/atomspace/AtomSpace.cc
  *
+ * Copyright (C) 2008-2011 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
- *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -64,7 +61,17 @@ using namespace opencog;
 
 AtomSpace::AtomSpace(void)
 {
+    atomSpaceAsync = new AtomSpaceAsync();
+    ownsAtomSpaceAsync = true;
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    setUpCaching();
+#endif
+}
+
+
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+void AtomSpace::setUpCaching() 
+{
     // Initialise lru cache for getType
     __getType = new _getType(this);
     getTypeCached = new lru_cache<AtomSpace::_getType>(1000,*__getType);
@@ -73,10 +80,20 @@ AtomSpace::AtomSpace(void)
     //__getTV = new _getTV(this);
     //getTVCached = new lru_cache<AtomSpace::_getTV>(1000,*__getTV);
 
-    c_remove = atomSpaceAsync.removeAtomSignal(
+    c_remove = atomSpaceAsync->removeAtomSignal(
             boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
 
+}
 #endif
+
+AtomSpace::AtomSpace(AtomSpaceAsync& a)
+{
+    atomSpaceAsync = &a;
+    ownsAtomSpaceAsync = false;
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    setUpCaching();
+#endif
+
 }
 
 AtomSpace::~AtomSpace()
@@ -87,6 +104,9 @@ AtomSpace::~AtomSpace()
     delete __getType;
     delete getTypeCached;
 #endif
+    // Will be unnecessary once GC is implemented
+    if (ownsAtomSpaceAsync)
+        delete atomSpaceAsync;
 }
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
@@ -104,33 +124,23 @@ Type AtomSpace::getType(Handle h) const
     boost::mutex::scoped_lock(cache_lock);
     return (*getTypeCached)(h);
 #else
-    return atomSpaceAsync.getType(h)->get_result();
+    return atomSpaceAsync->getType(h)->get_result();
 #endif
 }
 
 const TruthValue* AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
-/*#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    boost::mutex::scoped_lock(cache_lock);
-    vhpair hvh(h,vh);
-    return (*getTVCached)(hvh);
-#else*/
-    TruthValueRequest tvr = atomSpaceAsync.getTV(h, vh);
+    TruthValueRequest tvr = atomSpaceAsync->getTV(h, vh);
     return tvr->get_result();
     //const TruthValue& result = *tvr->get_result();
     // Need to clone the result's TV as it will be deleted when the request
     // is.
     //return TruthValue*(result.clone());
-//#endif
 }
 
 void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 {
-/*#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    boost::mutex::scoped_lock(cache_lock);
-    getTVCached->make_dirty(h);
-#endif*/
-    atomSpaceAsync.setTV(h, tv, vh)->get_result();
+    atomSpaceAsync->setTV(h, tv, vh)->get_result();
 }
 
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)
@@ -143,13 +153,6 @@ AtomSpace::AtomSpace(const AtomSpace& other)
 {
     throw opencog::RuntimeException(TRACE_INFO, 
             "AtomSpace - Cannot copy an object of this class");
-}
-
-Type AtomSpace::getAtomType(const string& str) const
-{
-    DPRINTF("AtomSpace::getAtomType Atom space address: %p\n", this);
-
-    return classserver().getType(const_cast<char*>(str.c_str()));
 }
 
 bool AtomSpace::inheritsType(Type t1, Type t2) const
@@ -232,47 +235,47 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
 
 boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle h) const
 {
-    return atomSpaceAsync.getAtom(h)->get_result();
+    return atomSpaceAsync->getAtom(h)->get_result();
 }
 
 size_t AtomSpace::getAtomHash(const Handle h) const 
 {
-    return atomSpaceAsync.getAtomHash(h)->get_result();
+    return atomSpaceAsync->getAtomHash(h)->get_result();
 }
 
 bool AtomSpace::isValidHandle(const Handle h) const 
 {
-    return atomSpaceAsync.isValidHandle(h)->get_result();
+    return atomSpaceAsync->isValidHandle(h)->get_result();
 }
 
 bool AtomSpace::commitAtom(const Atom& a)
 {
-    return atomSpaceAsync.commitAtom(a)->get_result();
+    return atomSpaceAsync->commitAtom(a)->get_result();
 }
 
 AttentionValue AtomSpace::getAV(Handle h) const
 {
-    return atomSpaceAsync.getAV(h)->get_result();
+    return atomSpaceAsync->getAV(h)->get_result();
 }
 
 void AtomSpace::setAV(Handle h, const AttentionValue &av)
 {
-    atomSpaceAsync.setAV(h,av)->get_result();
+    atomSpaceAsync->setAV(h,av)->get_result();
 }
 
 int AtomSpace::Nodes(VersionHandle vh) const
 {
-    return atomSpaceAsync.nodeCount(vh)->get_result();
+    return atomSpaceAsync->nodeCount(vh)->get_result();
 }
 
 int AtomSpace::Links(VersionHandle vh) const
 {
-    return atomSpaceAsync.linkCount(vh)->get_result();
+    return atomSpaceAsync->linkCount(vh)->get_result();
 }
 
 void AtomSpace::decayShortTermImportance()
 {
-    atomSpaceAsync.decayShortTermImportance()->get_result();
+    atomSpaceAsync->decayShortTermImportance()->get_result();
 }
 
 long AtomSpace::getTotalSTI() const
@@ -298,12 +301,12 @@ long AtomSpace::getTotalLTI() const
 
 AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
 {
-    return atomSpaceAsync.atomspace.getAttentionBank().getAttentionalFocusBoundary();
+    return atomSpaceAsync->atomspace.getAttentionBank().getAttentionalFocusBoundary();
 }
 
 AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti_t s)
 {
-    return atomSpaceAsync.atomspace.getAttentionBank().setAttentionalFocusBoundary(s);
+    return atomSpaceAsync->atomspace.getAttentionBank().setAttentionalFocusBoundary(s);
 }
 
 void AtomSpace::clear()
@@ -315,6 +318,6 @@ void AtomSpace::clear()
         //getTVCached->clear();
     }
 #endif
-    atomSpaceAsync.clear()->get_result();
+    atomSpaceAsync->clear()->get_result();
 }
 

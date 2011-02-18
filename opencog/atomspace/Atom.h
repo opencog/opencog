@@ -63,33 +63,28 @@ class Atom : public AttentionValueHolder
 
 private:
 
-    // Called by constructors to init this object
-    void init(Type, const TruthValue&, const AttentionValue& av = AttentionValue::DEFAULT_AV());
+    //! Called by constructors to init this object
+    void init(Type, const TruthValue&,
+            const AttentionValue& av = AttentionValue::DEFAULT_AV());
 
-    /**
-     * Sets the AtomTable in which this Atom is inserted.
-     */
+    //! Sets the AtomTable in which this Atom is inserted.
     void setAtomTable(AtomTable *);
 
-    /**
-     * Returns the AtomTable in which this Atom is inserted.
-     */
-    AtomTable *getAtomTable() const {
-        return atomTable;
-    }
+    //! Returns the AtomTable in which this Atom is inserted.
+    AtomTable *getAtomTable() const { return atomTable; }
 
 protected:
     Handle handle;
     AtomTable *atomTable;
 
-    // Linked-list that dynamically changes when new links
-    // point to this atom.
+    //! Linked-list that dynamically changes when new links point to this atom.
     HandleEntry *incoming;
 
     Type type;
     char flags;
 
     TruthValue *truthValue;
+
     /**
      * Constructor for this class.
      *
@@ -99,17 +94,16 @@ protected:
      * @param The truthValue of the atom. note: This is not cloned as
      *        in setTruthValue.
      */
-    Atom(Type, const TruthValue& = TruthValue::NULL_TV(), const AttentionValue& = AttentionValue::DEFAULT_AV());
+    Atom(Type, const TruthValue& = TruthValue::NULL_TV(),
+            const AttentionValue& = AttentionValue::DEFAULT_AV());
 
-    /**
-     * Adds a new entry to this atom's incoming set.
+    /** Adds a new entry to this atom's incoming set.
      *
      * @param The handle of the atom to be included.
      */
     void addIncomingHandle(Handle);
 
-    /**
-     * Removes an entry from this atom's incoming set.
+    /** Removes an entry from this atom's incoming set.
      *
      * @param The handle of the atom to be excluded.
      */
@@ -117,67 +111,48 @@ protected:
 
 public:
 
-    /**
-     * Destructor for this class.
-     */
     virtual ~Atom() throw (RuntimeException);
 
-    /**
-     * Returns the type of the atom.
+    /** Returns the type of the atom.
      *
      * @return The type of the atom.
      */
-    inline Type getType() const {
-        return type;
-    }
+    inline Type getType() const { return type; }
 
-    /**
-     * Returns the handle of the atom.
+    /** Returns the handle of the atom.
      *
      * @return The handle of the atom.
      */
-    inline Handle getHandle() const {
-        return handle;
-    }
+    inline Handle getHandle() const { return handle; }
 
-    /**
-     * Returns a pointer to a linked-list containing the atoms that are
+    /** Returns a pointer to a linked-list containing the atoms that are
      * members of this one's incoming set.
      *
      * @return A pointer to a linked-list containing the atoms that are
      * members of this one's incoming set.
      */
-    inline HandleEntry* getIncomingSet() const {
-        return incoming;
-    }
+    inline HandleEntry* getIncomingSet() const { return incoming; }
 
-    /**
-     * Returns the AttentionValue object of the atom.
+    /** Returns the AttentionValue object of the atom.
      *
      * @return The const reference to the AttentionValue object
      * of the atom.
      */
     const AttentionValue& getAttentionValue() const;
 
-    /**
-     * Sets the AttentionValue object of the atom.
-     */
+    //! Sets the AttentionValue object of the atom.
     void setAttentionValue(const AttentionValue&) throw (RuntimeException);
 
-    /**
-     * Returns the TruthValue object of the atom.
+    /** Returns the TruthValue object of the atom.
      *
      * @return The const referent to the TruthValue object of the atom.
      */
     const TruthValue& getTruthValue() const;
 
-    /**
-     * Sets the TruthValue object of the atom.
-     */
+    //! Sets the TruthValue object of the atom.
     void setTruthValue(const TruthValue&);
 
-    /**
-     * Returns whether this atom is marked for removal.
+    /** Returns whether this atom is marked for removal.
      *
      * @return Whether this atom is marked for removal.
      */
@@ -186,65 +161,48 @@ public:
         return (flags & MARKED_FOR_REMOVAL) != 0;
     }
 
-    /**
-     * Returns a desired atom flag. A byte represents all flags. Each bit
-     * is one of them.
+    /** Returns an atom flag.
+     * A byte represents all flags. Each bit is one of them.
      *
      * @param An int indicating which of the flags will be returned.
      * @return A boolean indicating if that flag is set or not.
      */
     bool getFlag(int) const;
 
-    /**
-     * Changes the value of the given flag.
+    /** Changes the value of the given flag.
      *
      * @param An int indicating which of the flags will be set.
      * @param A boolean indicating the new value of the flag.
      */
     void setFlag(int, bool);
 
-    /**
-     * Marks the atom for removal.
-     */
+    //! Marks the atom for removal.
     void markForRemoval();
 
-    /**
-     * Unsets removal flag.
-     */
+    //! Unsets removal flag.
     void unsetRemovalFlag();
 
-    /** tests the atom's sti 
-     * Joel: What is this used for and why is the LTI threshold
-     * hardcoded at 1??
-     */
-    bool isOld(const AttentionValue::sti_t threshold) const
-    {
-        return ((attentionValue.getSTI() < threshold) &&
-                (attentionValue.getLTI() < 1));
-    }
-
-    /**
-     * Returns a string representation of the node.
+    /** Returns a string representation of the node.
      *
      * @return A string representation of the node.
      */
     virtual std::string toString(void) const = 0;
     virtual std::string toShortString(void) const = 0;
 
-    /**
-     * Returns whether two atoms are equal.
+    /** Returns whether two atoms are equal.
+     *
      * @return true if the atoms are equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const = 0;
 
-    /**
-     * Returns whether two atoms are different.
+    /** Returns whether two atoms are different.
+     *
      * @return true if the atoms are different, false otherwise.
      */
     virtual bool operator!=(const Atom&) const = 0;
 
-    /**
-     * Returns the hashCode of the Atom.
+    /** Returns the hashCode of the Atom.
+     *
      * @return an unsigned integer value as the hashCode of the Atom.
      */
     virtual size_t hashCode(void) const = 0;

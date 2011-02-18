@@ -87,7 +87,7 @@ public:
         std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(ATOM_TABLE_TEST_XML_FILE));
 
         atomSpace = new AtomSpace();
-        table = (AtomTable*) & (atomSpace->atomSpaceAsync.getAtomTable());
+        table = (AtomTable*) & (atomSpace->atomSpaceAsync->getAtomTable());
 
         try {
             // Check for existing links because there are 2 identical links in the test xml file

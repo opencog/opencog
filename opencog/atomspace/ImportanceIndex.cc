@@ -1,14 +1,8 @@
 /*
  * opencog/atomspace/ImportanceIndex.cc
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2008-2011 OpenCog Foundation
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
- *            Welter Silva <welter@vettalabs.com>
- *
- * Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -39,14 +33,6 @@ ImportanceIndex::ImportanceIndex(void)
 	resize(IMPORTANCE_INDEX_SIZE+1);
 }
 
-/**
- * This method returns which importance bin an atom with the given
- * importance should be placed.
- *
- * @param Importance value to be mapped.
- * @return The importance bin which an atom of the given importance
- * should be placed.
- */
 unsigned int ImportanceIndex::importanceBin(short importance)
 {
 	// STI is in range of [-32768, 32767] so adding 32768 puts it in
@@ -54,13 +40,6 @@ unsigned int ImportanceIndex::importanceBin(short importance)
 	return importance + 32768;
 }
 
-/**
- * Updates the importance index for the given atom. According to the
- * new importance of the atom, it may change importance bins.
- *
- * @param The atom whose importance index will be updated.
- * @param The old importance bin where the atom originally was.
- */
 void ImportanceIndex::updateImportance(Atom* atom, int bin)
 {
 	Handle h = TLB::getHandle(atom);
@@ -86,8 +65,6 @@ void ImportanceIndex::removeHandle(Handle h)
 	int bin = importanceBin(sti);
 	remove(bin, h);
 }
-
-// ================================================================
 
 HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 {
@@ -156,13 +133,20 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 			Atom *atom = TLB::getAtom(*hit);
 
 			// Remove it if too old.
-			if (atom->isOld(minSTI))
+			if (isOld(atom,minSTI))
 				oldAtoms = HandleEntry::concatenation(
 					extractOld(minSTI, *hit, true), oldAtoms);
 		}
 	}
 
 	return oldAtoms;
+}
+
+bool ImportanceIndex::isOld(const Atom* atom,
+        const AttentionValue::sti_t threshold) const
+{
+    return ((atom->getAttentionValue().getSTI() < threshold) &&
+            (atom->getAttentionValue().getLTI() < 1));
 }
 
 HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
@@ -176,13 +160,11 @@ HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
 
 	// If recursive-flag is set, also extract all the links in the
 	// atom's incoming set.
-	if (recursive)
-	{
-		for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next)
-		{
+	if (recursive) {
+		for (HandleEntry* in = atom->getIncomingSet();
+                in != NULL; in = in->next) {
 			Atom *a = TLB::getAtom(in->handle);
-			if (a->isOld(minSTI))
-			{
+			if (isOld(a,minSTI)) {
 				result = HandleEntry::concatenation(
 					extractOld(minSTI, in->handle, true), result);
 			}
@@ -191,10 +173,8 @@ HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
 
 	// Only return if there is at least one incoming atom that is
 	// not marked for removal by decay.
-	for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next)
-	{
-		if (TLB::getAtom(in->handle)->getFlag(REMOVED_BY_DECAY) == false)
-		{
+	for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next) {
+		if (TLB::getAtom(in->handle)->getFlag(REMOVED_BY_DECAY) == false) {
 			atom->setFlag(REMOVED_BY_DECAY, false);
 			return result;
 		}
@@ -203,9 +183,9 @@ HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
 	return result;
 }
 
-HandleEntry* 
-ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
-                              AttentionValue::sti_t upperBound) const
+HandleEntry* ImportanceIndex::getHandleSet(
+        AttentionValue::sti_t lowerBound,
+        AttentionValue::sti_t upperBound) const
 {
 	HandleEntry *set = NULL;
 
@@ -216,8 +196,7 @@ ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
 	// Build a list of atoms whose importance is equal to the lower bound.
 	UnorderedHandleSet::const_iterator hit;
 	const UnorderedHandleSet &sl = idx[lowerBin];
-	for (hit = sl.begin(); hit != sl.end(); hit++)
-	{
+	for (hit = sl.begin(); hit != sl.end(); hit++) {
 		HandleEntry *he = new HandleEntry(*hit);
 		he->next = set;
 		set = he;
@@ -226,12 +205,12 @@ ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
 	// For the lower bound and upper bound index, the list is filtered,
 	// because there may be atoms that have the same importanceIndex
 	// and whose importance is lower than lowerBound or bigger than
-	// upperBound.  XXX This doesn't sound right. Maybe after being 
+	// upperBound.
+    // XXX This doesn't sound right. Maybe after being 
 	// decayed ... but this should not be generally true.
 	set = HandleEntry::filterSet(set, lowerBound, upperBound);
 
-	if (lowerBin == upperBin)
-	{
+	if (lowerBin == upperBin) {
 		// If both lower and upper bounds are in the same bin,
 		// Then we are done.
 		return set;
@@ -239,11 +218,9 @@ ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
 
 	// For every index within lowerBound and upperBound,
 	// add to the list.
-	while (++lowerBin < upperBin)
-	{
+	while (++lowerBin < upperBin) {
 		const UnorderedHandleSet &ss = idx[lowerBin];
-		for (hit = ss.begin(); hit != ss.end(); hit++)
-		{
+		for (hit = ss.begin(); hit != ss.end(); hit++) {
 			HandleEntry *he = new HandleEntry(*hit);
 			he->next = set;
 			set = he;
@@ -252,8 +229,7 @@ ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
 
 	HandleEntry *uset = NULL;
 	const UnorderedHandleSet &su = idx[upperBin];
-	for (hit = su.begin(); hit != su.end(); hit++)
-	{
+	for (hit = su.begin(); hit != su.end(); hit++) {
 		HandleEntry *he = new HandleEntry(*hit);
 		he->next = uset;
 		uset = he;
@@ -264,4 +240,3 @@ ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
 	return HandleEntry::concatenation(uset, set);
 }
 
-// ================================================================

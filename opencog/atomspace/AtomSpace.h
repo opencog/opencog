@@ -58,6 +58,35 @@ namespace opencog
 
 typedef std::vector<HandleSet*> HandleSetSeq;
 
+/**
+ * The AtomSpace class is a legacy interface to OpenCog's AtomSpace and
+ * provides a standard functions that return results immediately. It is
+ * a wrapper around opencog::AtomSpaceAsync which submits requests to queue.
+ * These requests (defined in ASRequest.h) access the core
+ * opencog::AtomSpaceImpl class. For an asynchronous interface that allows
+ * AtomSpace requests to be fired and forgot (mostly useful for setting TVs,
+ * queuing handleset queries or creating Atoms), see AtomSpaceAsync.
+ *
+ * The default constructor will create a new AtomSpaceAsync. To connect to
+ * an existing AtomSpaceAsync and send requests to it, pass a reference.
+ *
+ * @code
+ *  // Create an atomspace with it's own internal AtomSpace event-loop.
+ *  AtomSpace atomspace;
+ *
+ *  // create AtomSpaceAsync and start event loop
+ *  AtomSpaceAsync& atomSpaceAsync;
+ *  // wrap it in this legacy AtomSpace API
+ *  AtomSpace atomspace2(atomSpaceAsync);
+ *
+ *  // Share the event-loop of atomspace
+ *  AtomSpace atomspace3(*atomspace.atomSpaceAsync);
+ * @endcode
+ *
+ * If one were to add atoms to via atomspace3 or atomspace, they would both be
+ * in the same "AtomSpace". Adding atoms via atomSpaceAsync or atomspace2 would
+ * place atoms in another separate "AtomSpace".
+ */
 class AtomSpace
 {
     friend class SavingLoading;
@@ -66,16 +95,24 @@ class AtomSpace
 
     void do_merge_tv(Handle, const TruthValue&);
 
+    bool ownsAtomSpaceAsync;
 public:
-    AtomSpace(void);
-    ~AtomSpace();
-
-    /** The container class will eventually just be a wrapper of the asynchronous
-     * AtomSpaceAsync which returns ASRequest "futures". Functions in this
+    /** 
+     * The AtomSpace class is essentially just be a wrapper of the asynchronous
+     * AtomSpaceAsync which returns ASRequest "futures" as well as allowing
+     * thread-local caching of some requests. Functions in this
      * class will block until notified that they've been fulfilled by the
      * AtomSpaceAsync event loop.
      */
-    mutable AtomSpaceAsync atomSpaceAsync;
+    mutable AtomSpaceAsync* atomSpaceAsync;
+
+    AtomSpace(void);
+    /**
+     * Create an atomspace that will send requests to an existing AtomSpace
+     * event-loop.
+     */
+    AtomSpace(AtomSpaceAsync& a);
+    ~AtomSpace();
 
     /**
      * Recursively store the atom to the backing store.
@@ -84,7 +121,7 @@ public:
      * @deprecated Use AtomSpaceAsync::storeAtom in new code.
      */
     inline void storeAtom(Handle h) {
-        atomSpaceAsync.storeAtom(h)->get_result();
+        atomSpaceAsync->storeAtom(h)->get_result();
     }
 
     /**
@@ -97,7 +134,7 @@ public:
      * @deprecated Use AtomSpaceAsync::fetchAtom in new code.
      */
     inline Handle fetchAtom(Handle h) {
-        return atomSpaceAsync.fetchAtom(h)->get_result();
+        return atomSpaceAsync->fetchAtom(h)->get_result();
     }
 
     /**
@@ -109,7 +146,7 @@ public:
      * @deprecated Use AtomSpaceAsync::fetchIncomingSet in new code.
      */
     inline Handle fetchIncomingSet(Handle h, bool recursive) {
-        return atomSpaceAsync.fetchIncomingSet(h,recursive)->get_result();
+        return atomSpaceAsync->fetchIncomingSet(h,recursive)->get_result();
     };
 
     /**
@@ -118,7 +155,7 @@ public:
      * @return a const reference to the TimeServer object of this AtomSpace
      */
     inline TimeServer& getTimeServer() const {
-        return atomSpaceAsync.getTimeServer();
+        return atomSpaceAsync->getTimeServer();
     }
 
     /**
@@ -127,16 +164,16 @@ public:
      * @return a reference to the SpaceServer object of this AtomSpace
      */
     inline SpaceServer& getSpaceServer() const {
-        return atomSpaceAsync.getSpaceServer();
+        return atomSpaceAsync->getSpaceServer();
     }
 
     inline AttentionBank& getAttentionBank()
-    { return atomSpaceAsync.getAttentionBank(); }
+    { return atomSpaceAsync->getAttentionBank(); }
 
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int getSize() const { return atomSpaceAsync.getSize()->get_result(); }
+    inline int getSize() const { return atomSpaceAsync->getSize()->get_result(); }
 
     /**
      * DEPRECATED! Add an atom an optional TruthValue object to the Atom Table
@@ -167,7 +204,7 @@ public:
      */
     void print(std::ostream& output = std::cout,
                Type type = ATOM, bool subclass = true) const {
-        atomSpaceAsync.print(output, type, subclass)->get_result();
+        atomSpaceAsync->print(output, type, subclass)->get_result();
     }
 
     /** Add a new node to the Atom Table,
@@ -179,7 +216,7 @@ public:
      */
     inline Handle addNode(Type t, const std::string& name = "", const TruthValue& tvn = TruthValue::DEFAULT_TV())
     {
-        return atomSpaceAsync.addNode(t,name,tvn)->get_result();
+        return atomSpaceAsync->addNode(t,name,tvn)->get_result();
     }
 
     /**
@@ -196,7 +233,7 @@ public:
     inline Handle addLink(Type t, const HandleSeq& outgoing,
                    const TruthValue& tvn = TruthValue::DEFAULT_TV())
     { 
-        return atomSpaceAsync.addLink(t,outgoing,tvn)->get_result();
+        return atomSpaceAsync->addLink(t,outgoing,tvn)->get_result();
     }
 
     inline Handle addLink(Type t, Handle h,
@@ -324,7 +361,7 @@ public:
      *         removed. False, otherwise.
      */
     bool removeAtom(Handle h, bool recursive = false) {
-        return atomSpaceAsync.removeAtom(h,recursive)->get_result();
+        return atomSpaceAsync->removeAtom(h,recursive)->get_result();
     }
 
     /**
@@ -334,7 +371,7 @@ public:
      * @param str   Name of the node
     */
     Handle getHandle(Type t, const std::string& str) const {
-        return atomSpaceAsync.getHandle(t,str)->get_result();
+        return atomSpaceAsync->getHandle(t,str)->get_result();
     }
 
     /**
@@ -344,68 +381,68 @@ public:
      *        the outgoing set of the link.
     */
     Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return atomSpaceAsync.getHandle(t,outgoing)->get_result();
+        return atomSpaceAsync->getHandle(t,outgoing)->get_result();
     }
 
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const {
-        return atomSpaceAsync.atomAsString(h,terse)->get_result();
+        return atomSpaceAsync->atomAsString(h,terse)->get_result();
     }
 
     /** Retrieve the name of a given Handle */
     std::string getName(Handle h) const {
-        return atomSpaceAsync.getName(h)->get_result();
+        return atomSpaceAsync->getName(h)->get_result();
     }
 
     /** Change the Short-Term Importance of a given Handle */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        atomSpaceAsync.setSTI(h, stiValue)->get_result();
+        atomSpaceAsync->setSTI(h, stiValue)->get_result();
     }
 
     /** Change the Long-term Importance of a given Handle */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        atomSpaceAsync.setLTI(h, ltiValue)->get_result();
+        atomSpaceAsync->setLTI(h, ltiValue)->get_result();
     }
 
     /** Change the Very-Long-Term Importance of a given Handle */
     void setVLTI(Handle h, AttentionValue::vlti_t vltiValue) {
-        atomSpaceAsync.setVLTI(h, vltiValue)->get_result();
+        atomSpaceAsync->setVLTI(h, vltiValue)->get_result();
     }
 
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
-        return atomSpaceAsync.getSTI(h)->get_result();
+        return atomSpaceAsync->getSTI(h)->get_result();
     }
 
     /** Retrieve the Long-term Importance of a given AttentionValueHolder */
     AttentionValue::lti_t getLTI(Handle h) const {
-        return atomSpaceAsync.getLTI(h)->get_result();
+        return atomSpaceAsync->getLTI(h)->get_result();
     }
 
     /** Retrieve the Very-Long-Term Importance of a given
      * AttentionValueHolder */
     AttentionValue::vlti_t getVLTI(Handle h) const {
-        return atomSpaceAsync.getVLTI(h)->get_result();
+        return atomSpaceAsync->getVLTI(h)->get_result();
     }
 
     /** Retrieve the outgoing set of a given link */
     HandleSeq getOutgoing(Handle h) const {
-        return atomSpaceAsync.getOutgoing(h)->get_result();
+        return atomSpaceAsync->getOutgoing(h)->get_result();
     }
 
     /** Retrieve a single Handle from the outgoing set of a given link */
     Handle getOutgoing(Handle h, int idx) const {
-        return atomSpaceAsync.getOutgoing(h,idx)->get_result();
+        return atomSpaceAsync->getOutgoing(h,idx)->get_result();
     }
 
     /** Retrieve the arity of a given link */
     int getArity(Handle h) const {
-        return atomSpaceAsync.getArity(h)->get_result();
+        return atomSpaceAsync->getArity(h)->get_result();
     }
 
     /** Return whether s is the source handle in a link l */ 
     bool isSource(Handle source, Handle link) const {
-        return atomSpaceAsync.isSource(source, link)->get_result();
+        return atomSpaceAsync->isSource(source, link)->get_result();
     }
 
     /** Retrieve the AttentionValue of a given Handle */
@@ -425,7 +462,7 @@ public:
         public:
         _getType(AtomSpace* _a) : a(_a) { };
         Type operator()(const Handle& h) const {
-            return a->atomSpaceAsync.getType(h)->get_result();
+            return a->atomSpaceAsync->getType(h)->get_result();
         }
     };
     _getType* __getType;
@@ -439,7 +476,7 @@ public:
         _getTV(AtomSpace* _a) : a(_a) { };
         const TruthValue* operator()(const vhpair& hvh) const {
             if (hvh.first != Handle::UNDEFINED) {
-                return a->atomSpaceAsync.getTV(hvh.first, hvh.second)->get_result();
+                return a->atomSpaceAsync->getTV(hvh.first, hvh.second)->get_result();
             } else {
                 return &TruthValue::NULL_TV();
             }
@@ -452,13 +489,10 @@ public:
 
 
     /** Retrieve the TruthValue of a given Handle
-     * @note This is an unpleasant hack due to the TruthValue class being abstract and
-     * traditionally callers expected to receive a const reference to an  Atom's TV
-     * object. To prevent threads from crashing into one another, we have to
-     * return a copy of the object... but the caller needs to clean it up. To
-     * avoid inspecting all the code for where to delete the copy, I (Joel)
-     * have opted for a smart pointer, in the same way that I did with
-     * cloneAtom.
+     * @note This is an unpleasant hack which is unsafe as it returns a pointer
+     * to the AtomSpace TV which may be lost if the Atom the TV belongs to is
+     * removed. It's much faster than having to copy the value and use smart
+     * pointers though. Garbage collection should solve this.
      */
     const TruthValue* getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
 
@@ -471,7 +505,7 @@ public:
      * enforce the use of setTV.
      */
     void setMean(Handle h, float mean) {
-        atomSpaceAsync.setMean(h, mean)->get_result();
+        atomSpaceAsync->setMean(h, mean)->get_result();
     }
 
     /** Clone an atom from the AtomSpace, replaces the public access to TLB::getAtom
@@ -505,7 +539,7 @@ public:
      * @return normalised STI between -1..1
      */
     float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return atomSpaceAsync.getNormalisedSTI(h, average, clip, false)->get_result();
+        return atomSpaceAsync->getNormalisedSTI(h, average, clip, false)->get_result();
     }
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
@@ -519,7 +553,7 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return atomSpaceAsync.getNormalisedSTI(h, average, clip, true)->get_result();
+        return atomSpaceAsync->getNormalisedSTI(h, average, clip, true)->get_result();
     }
 
     /** Get hash for an atom */
@@ -538,25 +572,17 @@ public:
      */
     HandleSeq getNeighbors(const Handle h, bool fanin, bool fanout,
             Type linkType=LINK, bool subClasses=true) const {
-        return atomSpaceAsync.getNeighbors(h,fanin,fanout,linkType,subClasses)->get_result();
+        return atomSpaceAsync->getNeighbors(h,fanin,fanout,linkType,subClasses)->get_result();
     }
 
     /** Retrieve the incoming set of a given atom */
     HandleSeq getIncoming(Handle h) {
-        return atomSpaceAsync.getIncoming(h)->get_result();
+        return atomSpaceAsync->getIncoming(h)->get_result();
     }
-
-    /** Retrieve the Count of a given Handle */
-    // this is excessive and not part of core API
-    //float getCount(Handle) const;
-
-    /** Returns the default TruthValue */
-    //static const TruthValue& getDefaultTV();
 
     //----type properties - these should be abandoned
     //and accesed through the classserver as they don't have anything
     //to do with handles... at the very least they should be static.
-    Type getAtomType(const std::string& typeName) const;
     bool isNode(const Type t) const;
     bool isLink(const Type t) const;
     /** Does t1 inherit from t2 */
@@ -597,7 +623,7 @@ public:
                  const std::string& name,
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync.getHandlesByName(
+        HandleSeq result_set = atomSpaceAsync->getHandlesByName(
                 std::string(name), type, subclass, vh)->get_result();
         return toOutputIterator(result, result_set);
     }
@@ -629,7 +655,7 @@ public:
                  Type type,
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync.getHandlesByName(
+        HandleSeq result_set = atomSpaceAsync->getHandlesByName(
                 name, type, subclass, vh)->get_result();
         return toOutputIterator(result, result_set);
     }
@@ -658,7 +684,7 @@ public:
                  Type type,
                  bool subclass = false,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync.getHandlesByType(type, subclass, vh)->get_result();
+        HandleSeq result_set = atomSpaceAsync->getHandlesByType(type, subclass, vh)->get_result();
         return toOutputIterator(result, result_set);
     }
 
@@ -693,7 +719,7 @@ public:
                  bool targetSubclass,
                  VersionHandle vh = NULL_VERSION_HANDLE,
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync.getHandlesByTarget(type, targetType,
+        HandleSeq result_set = atomSpaceAsync->getHandlesByTarget(type, targetType,
                 subclass, targetSubclass, vh, targetVh)->get_result();
         return toOutputIterator(result, result_set);
     }
@@ -724,7 +750,7 @@ public:
                  Type type,
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync.getHandlesByTargetHandle(handle,
+        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetHandle(handle,
                 type, subclass, vh)->get_result();
         return toOutputIterator(result, result_set);
     }
@@ -749,8 +775,9 @@ public:
      * @param arity The length of the outgoing set of the atoms being searched.
      * @param type The type of the atom.
      * @param subclass Whether atom type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param vh only atoms that contains versioned TVs with the given
+     * VersionHandle are returned. If NULL_VERSION_HANDLE is given, it does not
+     * restrict the result.
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
@@ -771,7 +798,7 @@ public:
                  Type type,
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync.getHandlesByOutgoingSet(
+        HandleSeq result_set = atomSpaceAsync->getHandlesByOutgoingSet(
                 handles,types,subclasses,arity,type,subclass,vh)->get_result();
         return toOutputIterator(result, result_set);
     }
@@ -788,16 +815,19 @@ public:
      * atoms.
      * @param type type of the atom.
      * @param subclass Whether atom type subclasses should be considered.
-     * @param vh return only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param vh return only atoms that contains versioned TVs with the given
+     * VersionHandle.  If NULL_VERSION_HANDLE is given, it does not restrict
+     * the result.
      * @return The set of atoms of the given type and name whose outgoing
      * set contains at least one atom of the given type and name.
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @note The matched entries are appended to a container whose
+     * OutputIterator is passed as the first argument.  Example of call to this
+     * method, which would return all entries in AtomSpace:
+     *
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * std::list<Handle> ret;
+     * atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -808,7 +838,7 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE,
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync.getHandlesByTargetName(
+        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetName(
                targetName, targetType, type, subclass, vh, targetVh)->get_result();
         return toOutputIterator(result, result_set);
     }
@@ -857,7 +887,7 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
-        HandleSeq result_set = atomSpaceAsync.getHandlesByTargetNames(
+        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetNames(
                 names, types, subclasses, arity, type, subclass, vh)->get_result();
         return toOutputIterator(result, result_set);
     }
@@ -879,16 +909,19 @@ public:
      * @param arity The length of the outgoing set of the atoms being searched.
      * @param type The optional type of the atom.
      * @param subclass Whether atom type subclasses should be considered.
-     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param vh returns only atoms that contains versioned TVs with the given
+     * VersionHandle.  If NULL_VERSION_HANDLE is given, it does not restrict
+     * the result.
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @note The matched entries are appended to a container whose
+     * OutputIterator is passed as the first argument.  Example of call to this
+     * method, which would return all entries in AtomSpace:
+     *
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * std::list<Handle> ret;
+     * atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -900,7 +933,7 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
-        HandleSeq result_set = atomSpaceAsync.getHandlesByTargetTypes(
+        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetTypes(
                 types, subclasses, arity, type, subclass, vh)->get_result();
         return toOutputIterator(result, result_set);
     }
@@ -917,8 +950,10 @@ public:
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace in the AttentionalFocus:
+     * @note The matched entries are appended to a container whose
+     * OutputIterator is passed as the first argument.  Example of call to this
+     * method, which would return all entries in AtomSpace in the
+     * AttentionalFocus:
      * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
@@ -942,14 +977,17 @@ public:
      * @param result An output iterator.
      * @param type The desired type.
      * @param subclass Whether type subclasses should be considered.
-     * @param compare A criterion for including atoms. It must be something that returns a bool when called.
-     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param compare A criterion for including atoms. It must be something
+     * that returns a bool when called.
+     * @param vh returns only atoms that contains versioned TVs with the given
+     * VersionHandle.  If NULL_VERSION_HANDLE is given, it does not restrict
+     * the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace beyond 500 LTI:
+     * @note The matched entries are appended to a container whose
+     * OutputIterator is passed as the first argument.  Example of call to this
+     * method, which would return all entries in AtomSpace beyond 500 LTI:
      * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
@@ -961,7 +999,7 @@ public:
                  bool subclass,
                  AtomPredicate* compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq hs = atomSpaceAsync.filter(compare, type, subclass, vh)->get_result();
+        HandleSeq hs = atomSpaceAsync->filter(compare, type, subclass, vh)->get_result();
         return toOutputIterator(result, hs);
     }
 
@@ -974,13 +1012,15 @@ public:
      * @param type The desired type.
      * @param subclass Whether type subclasses should be considered.
      * @param compare The comparison struct to use in the sort.
-     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param vh returns only atoms that contains versioned TVs with the given
+     * VersionHandle.  If NULL_VERSION_HANDLE is given, it does not restrict
+     * the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace, sorted by STI:
+     * @note The matched entries are appended to a container whose
+     * OutputIterator is passed as the first argument.  Example of call to this
+     * method, which would return all entries in AtomSpace, sorted by STI:
      * @code
      *         std::list<Handle> ret;
      *         AttentionValue::STISort stiSort;
@@ -993,7 +1033,7 @@ public:
                  bool subclass,
                  Compare compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync.getSortedHandleSet(
+        HandleSeq result_set = atomSpaceAsync->getSortedHandleSet(
                 type, subclass, compare, vh)->get_result();
         return toOutputIterator(result, result_set);
     }
@@ -1036,40 +1076,37 @@ public:
     /* ----------------------------------------------------------- */
 
     /**
-     * Decays STI of all atoms (one cycle of importance decay).
-     * Deprecated, importance updating should be done by ImportanceUpdating
-     * Agent. Still used by Embodiment.
+     * Decays STI of all atoms (one cycle of importance decay).  Deprecated,
+     * importance updating should be done by ImportanceUpdating Agent.
+     * @deprecated ECAN should be used, but this method is still used by
+     * embodiment.
      */
     void decayShortTermImportance();
 
-    /**
-     * Get the total amount of STI in the AtomSpace, sum of
-     * STI across all atoms.
+    /** Get the total amount of STI in the AtomSpace
+     * The sum of STI across all atoms.
      *
      * @return total STI in AtomSpace
      */
     long getTotalSTI() const;
 
-    /**
-     * Get the total amount of LTI in the AtomSpace, sum of
-     * all LTI across atoms.
+    /** Get the total amount of LTI in the AtomSpace.
+     * The sum of LTI across all atoms.
      *
      * @return total LTI in AtomSpace
      */
     long getTotalLTI() const;
 
-    /**
-     * Get attentional focus boundary, generally atoms below
-     * this threshold won't be accessed unless search methods
-     * are unsuccessful on those that are above this value.
+    /** Get attentional focus boundary
+     * Generally atoms below this threshold shouldn't be accessed unless search
+     * methods are unsuccessful on those that are above this value.
      *
      * @return Short Term Importance threshold value
      */
     AttentionValue::sti_t getAttentionalFocusBoundary() const;
 
-    /**
-     * Change the attentional focus boundary. Some situations
-     * may benefit from less focussed searches.
+    /** Change the attentional focus boundary.
+     * Some situations may benefit from less focussed searches.
      *
      * @param s New threshold
      * @return Short Term Importance threshold value
@@ -1077,9 +1114,7 @@ public:
     AttentionValue::sti_t setAttentionalFocusBoundary(
         AttentionValue::sti_t s);
 
-    /**
-     * Get the maximum STI observed in the AtomSpace.
-     *
+    /** Get the maximum STI observed in the AtomSpace.
      * @param average If true, return an exponentially decaying average of
      * maximum STI, otherwise return the actual maximum.
      * @return Maximum STI
@@ -1087,8 +1122,7 @@ public:
     AttentionValue::sti_t getMaxSTI(bool average=true)
     { return getAttentionBank().getMaxSTI(average); } 
 
-    /**
-     * Get the minimum STI observed in the AtomSpace.
+    /** Get the minimum STI observed in the AtomSpace.
      *
      * @param average If true, return an exponentially decaying average of
      * minimum STI, otherwise return the actual maximum.
@@ -1097,10 +1131,9 @@ public:
     AttentionValue::sti_t getMinSTI(bool average=true)
     { return getAttentionBank().getMinSTI(average); } 
 
-    /**
-     * Update the minimum STI observed in the AtomSpace. Min/max are not updated
-     * on setSTI because average is calculate by lobe cycle, although this could
-     * potentially also be handled by the cogServer.
+    /** Update the minimum STI observed in the AtomSpace.
+     * Min/max are not updated on setSTI because average is calculate by lobe
+     * cycle, although this could potentially also be handled by the cogServer.
      *
      * @warning Should only be used by attention allocation system.
      * @param m New minimum STI
@@ -1126,12 +1159,12 @@ public:
 // ---- filter templates
 
     HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
-        return atomSpaceAsync.filter(compare,ATOM,true,vh)->get_result();
+        return atomSpaceAsync->filter(compare,ATOM,true,vh)->get_result();
     }
 
     template<typename OutputIterator>
     OutputIterator filter(OutputIterator it, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
-        HandleSeq result = atomSpaceAsync.filter(compare,ATOM,true,vh)->get_result();
+        HandleSeq result = atomSpaceAsync->filter(compare,ATOM,true,vh)->get_result();
         foreach(Handle h, result) 
             * it++ = h;
         return it;
@@ -1173,20 +1206,6 @@ public:
         virtual bool test(const Atom& atom) { return true; }
     };
 
-    // redundant with getHandlesByType...
-    //HandleSeq filter_type(Type t, VersionHandle vh = NULL_VERSION_HANDLE) {
-    //    return atomSpaceAsync.filter<TruePredicate>(TruePredicate(),t,true,vh)->get_result();
-    //}
-
-    // redundant with getHandlesByType...
-    //template<typename OutputIterator>
-    //OutputIterator filter_type(OutputIterator it, Type type, VersionHandle vh = NULL_VERSION_HANDLE) {
-        //HandleSeq result = atomSpaceAsync.filter(TruePredicate(),type,true,vh);
-        //foreach(Handle h, result) 
-            //* it++ = h;
-        //return it;
-    //}
-
     template<typename InputIterator>
     HandleSeq filter_InAttentionalFocus(InputIterator begin, InputIterator end) const {
         STIAboveThreshold sti_above(getAttentionalFocusBoundary());
@@ -1212,28 +1231,12 @@ public:
     };
 
 private:
-
-    std::string emptyName;
-
-    /* Boundary at which an atom is considered within the attentional
-     * focus of opencog. Atom's with STI less than this value are
-     * not charged STI rent */
-    AttentionValue::sti_t attentionalFocusBoundary;
-
-    opencog::recent_val<AttentionValue::sti_t> maxSTI;
-    opencog::recent_val<AttentionValue::sti_t> minSTI;
-
-    /* These indicate the amount importance funds available in the
-     * AtomSpace */
-    long fundsSTI;
-    long fundsLTI;
-
-    /*
+    /**
      * Remove stimulus from atom, only should be used when Atom is deleted.
      */
     void removeStimulus(Handle h);
 
-    /* copy HandleSeq to an output iterator */
+    /** copy HandleSeq to an output iterator */
     template <typename OutputIterator> OutputIterator
     toOutputIterator(OutputIterator result, HandleSeq handles) const {
         foreach(Handle h, handles) {
@@ -1242,7 +1245,7 @@ private:
         return result;
     }
 
-    /* copy HandleEntry to an output iterator */
+    /** copy HandleEntry to an output iterator */
     template <typename OutputIterator> OutputIterator
     toOutputIterator(OutputIterator result, HandleEntry * handleEntry) const {
 
@@ -1257,9 +1260,10 @@ private:
     }
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    // For monitoring removals to the AtomSpace so that cache entries can be
-    // invalidated as necessary
-    bool handleRemoveSignal(AtomSpaceImpl *as, Handle h); //!< Signal handler for atom removals.
+    /** For monitoring removals to the AtomSpace so that cache entries can be
+     * invalidated as necessary
+     */
+    bool handleRemoveSignal(AtomSpaceImpl *as, Handle h);
 
     //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
     bool watchingAtomSpace;
@@ -1268,13 +1272,11 @@ private:
     boost::signals::connection c_remove; //! Connection to remove atom signals
 
     mutable boost::mutex cache_lock;
+
+    void setUpCaching();
 #endif
 
 public:
-    // SpaceServerContainer virtual methods:
-    void mapRemoved(Handle mapId);
-    void mapPersisted(Handle mapId);
-    std::string getMapIdString(Handle mapId);
 
     /**
      * Overrides and declares copy constructor and equals operator as private 
