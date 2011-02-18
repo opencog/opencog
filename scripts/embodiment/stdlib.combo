@@ -54,6 +54,49 @@ rand_within(2) := +( #1
                       ) 
                    )          
 
+# Return the probability of #1 (x) equals to #2 (t, the target number)
+# fuzzy_equal(x,t,a) = 1/(1+a(x-b)^2)
+# a is the parameter, the bigger a, the closer to crisp set
+# After plotting via gnuplot for a while, it seems for t falls in [0,1], a=100 is a good choice 
+fuzzy_equal(3) := /( 1
+                     +( 1
+                        *( #3
+                           *( +( #1 neg(#2) )
+                              +( #1 neg(#2) )
+                            )  
+                         ) 
+                      )
+                   )        
+
+# Ruturn the probability x (#1) falls in [min, max] ( i.e. [#2, #3] )
+# #4 is the parameter, the bigger a, the closer to crisp set
+# For x falls in [0,1], a=100 ( i.e. #4=100 ) seems a good choice
+fuzzy_within(4) := contin_if( less_than(#1 #2)
+                              fuzzy_equal(#1 #2 #4)
+                              contin_if( greater_than(#1 #3)
+                                         fuzzy_equal(#1 #3 #4)
+                                         1
+                                       )
+                            )
+
+# Ruturn the probability x (#1) is smaller than t (#2), 
+# a (#4) is the parameter, the bigger a, the closer to crisp set
+fuzzy_less_than(3) := contin_if( greater_than(#1 #2)
+                                 fuzzy_equal(#1 #2 #3)
+                                 1 
+                               )                   
+
+fuzzy_low(3) := fuzzy_less_than(#1 #2 #3)                      
+
+# Ruturn the probability x (#1) is greater than t (#2), 
+# a (#4) is the parameter, the bigger a, the closer to crisp set
+fuzzy_greater_than(3) := contin_if( less_than(#1 #2)
+                                    fuzzy_equal(#1 #2 #3)
+                                    1
+                                  )
+
+fuzzy_high(3) := fuzzy_greater_than(#1 #2 #3)                         
+
 # ----------------------- Constants -----------------------
 pee_threshold(0) := 0.5
 

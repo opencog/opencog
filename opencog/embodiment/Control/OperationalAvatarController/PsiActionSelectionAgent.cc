@@ -424,18 +424,84 @@ bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * serv
     // Clear old Plans
     psiPlanList.clear();
 
-    std::queue<Handle> openList; 
+    // Push the ultimate Goal to the Open List
+    std::list<Handle> openList; 
+    std::vector<Handle> closeList; 
 
-    openList.push(goalHandle);
+    openList.push_back(goalHandle);
 
-    while ( !openList.empty() ) {
+    while ( !openList.empty() && steps>0 ) {
 
+        // Pop up a Goal from Open List, push it to Close List, and set it as the current goal
+        Handle hCurrentGoal = openList.front();
+        openList.pop_front();    
+        closeList.push_back(hCurrentGoal);
+
+        Handle hCurrentGoalNode = atomSpace.getOutgoing(hCurrentGoal, 0);
+        std::string currentGoalName = atomSpace.getName(hCurrentGoalNode);
+
+        logger().debug( "PsiActionSelectionAgent::%s - Going to figure out how to reach the goal '%s'. [ cycle = %d ]", 
+                        __FUNCTION__, 
+                        currentGoalName.c_str(), 
+                        this->cycleCount
+                      );
+
+        // Get all the Psi Rules that would lead to the current goal 
+        std::vector<Handle> implicationLinkSet;
+        std::vector<Handle> psiRuleCandidates;
+        atomSpace.getHandleSet( back_inserter(implicationLinkSet), hCurrentGoal, IMPLICATION_LINK, false );
+
+        foreach(Handle hImplicationLink, implicationLinkSet) {
+            if ( AtomSpaceUtil::isHandleToPsiRule(atomSpace, hImplicationLink) )
+                psiRuleCandidates.push_back(hImplicationLink);
+        }
+
+        if ( psiRuleCandidates.empty() ) {
+            logger().warn( "PsiActionSelectionAgent::%s - There's no Psi Rule that would lead to the goal '%s' [ cycle = %d]", 
+                           __FUNCTION__, 
+                           currentGoalName.c_str(), 
+                           this->cycleCount
+                         );
+            continue; 
+        }
+
+        // Randomly select one Psi Rule for current goal
+        int selectedIndex = randGen.randint( psiRuleCandidates.size() );
+        Handle hSelectedPsiRule = psiRuleCandidates[selectedIndex];
+
+        logger().debug( "PsiActionSelectionAgent::%s - Randomly select a Psi Rule: %s [ cycle = %d ]", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(hSelectedPsiRule).c_str()
+                      );
+
+        // Split the Psi Rule into Goal, Action and Preconditions
+        Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink; 
+        AtomSpaceUtil::splitPsiRule( atomSpace,
+                                     hSelectedPsiRule, 
+                                     hGoalEvaluationLink, 
+                                     hActionExecutionLink,
+                                     hPreconditionAndLink
+                                   );
+
+        // Store those Preconditions, i.e. subgoals, to Open List if they are not GroundedPredicateNode and 
+        // do no exist in both Open and Close List
+        foreach( Handle hPrecondition, atomSpace.getOutgoing(hPreconditionAndLink) ) {
+            steps --; 
+            Handle hPreconditionNode = atomSpace.getOutgoing(hPrecondition, 0);
+            Type preconditionType = atomSpace.getType(hPreconditionNode);
+
+            if ( preconditionType != GROUNDED_PREDICATE_NODE &&
+                 std::find(openList.begin(), openList.end(), hPrecondition) == openList.end() &&
+                 std::find(closeList.begin(), closeList.end(), hPrecondition) == closeList.end()
+               ) {
+                openList.push_back(hPrecondition); 
+            }// if
+
+        }// foreach
+
+        // Store the Psi Rule
+        psiPlanList[0].push_back(hSelectedPsiRule);
     }// while
-
-
-
-
-
 
     // Reset all the truth value of subgoals to false
     this->resetPlans(server, goalHandle, psiPlanList);
@@ -603,7 +669,7 @@ void PsiActionSelectionAgent::resetPlans( opencog::CogServer * server,
                                              ) ) {
                 logger().warn( "PsiActionSelectionAgent::%s - Failed to split the Psi Rule, %s [ cycle = %d ]", 
                                __FUNCTION__, 
-                               atomSpace.atomAsString(hPsiRule), 
+                               atomSpace.atomAsString(hPsiRule).c_str(), 
                                this->cycleCount
                               );
 
@@ -1151,12 +1217,12 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                 //
                 //       An exception is std::list, its remove method really remove element. 
                 //       The behavior of 'remove_if' and 'unique' is similar to 'remove'
-                this->psiRulesLists[0].erase( std::remove( this->psiRulesLists[0].begin(), 
-                                                           this->psiRulesLists[0].end(),
-                                                           this->currentPsiRule
-                                                         ), 
-                                              this->psiRulesLists[0].end()
-                                            );      
+                this->psiPlanList[0].erase( std::remove( this->psiPlanList[0].begin(), 
+                                                         this->psiPlanList[0].end(),
+                                                         this->currentPsiRule
+                                                       ), 
+                                            this->psiPlanList[0].end()
+                                          );      
 
                // Update current/ previous Psi Rule 
                 this->previousPsiRule = this->currentPsiRule; 
@@ -1242,7 +1308,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     // Select a Demand Goal
     Handle selectedDemandGoal;
 
-    if ( this->psiRulesLists.empty() || this->psiRulesLists[0].empty() ) {
+    if ( this->psiPlanList.empty() || this->psiPlanList[0].empty() ) {
 
         // Select the Demand Goal with lowest truth value
         selectedDemandGoal = this->chooseMostCriticalDemandGoal(server);
@@ -1260,7 +1326,8 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
         // Figure out a plan for the selected Demand Goal
         int steps = 5000;   // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
 
-        this->planByPLN(server, selectedDemandGoal, this->psiRulesLists, steps);
+//        this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
+        this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
     }// if
 
     // Change the current Demand Goal randomly (controlled by the modulator 'SelectionThreshold')
@@ -1291,7 +1358,8 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
             // Figure out a plan for the selected Demand Goal
             int steps = 5000; // TODO: Emotional states shall have impact on steps, i.e. resource of cognitive process
 
-            this->planByPLN(server, selectedDemandGoal, this->psiRulesLists, steps);
+//            this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
+            this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
         }// if
 
     }// if
@@ -1305,8 +1373,8 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     //       and the vector here should be used to replace VariableNode in Psi Rules with ForAllLink
     std::vector<std::string> varBindCandidates;
 
-    if ( !this->psiRulesLists.empty() ) {
-        hSelectedPsiRule = this->pickUpPsiRule(server, this->psiRulesLists[0], varBindCandidates);
+    if ( !this->psiPlanList.empty() ) {
+        hSelectedPsiRule = this->pickUpPsiRule(server, this->psiPlanList[0], varBindCandidates);
     }
     else {
         logger().warn( "PsiActionSelectionAgent::%s - Failed to select a Psi Rule to apply because Psi Rule Lists is empty [ cycle = %d].", 

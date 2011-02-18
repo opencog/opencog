@@ -2540,6 +2540,16 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                                         );
         break;
 
+    case id::get_previous_demand_goal_truth_value:
+        logger().debug("WorldWrapperUtil::%s - id::get_previous_demand_goal_truth_value", __FUNCTION__);
+        return WorldWrapperUtil::getDemandGoalTruthValue( rng, 
+                                                          atomSpace, 
+                                                          std::string(PREVIOUS_DEMAND_NAME), 
+                                                          self_id, 
+                                                          time
+                                                        );
+        break;
+
     case id::get_integrity_demand_goal_truth_value:
         logger().debug("WorldWrapperUtil::%s - id::get_integrity_demand_goal_truth_value", __FUNCTION__); 
         return WorldWrapperUtil::getDemandGoalTruthValue( rng, 

@@ -126,7 +126,7 @@ private:
     //       stick to a Demand Goal, but jump among different plans. 
     //
     //       Anyway have a plan B is not so bad. 
-    std::vector< std::vector<Handle> > psiRulesLists;
+    std::vector< std::vector<Handle> > psiPlanList;
 
     Handle currentPsiRule;   // Handle to current applied Psi Rule
     Handle previousPsiRule;  // Handle to previous applied Psi Rule

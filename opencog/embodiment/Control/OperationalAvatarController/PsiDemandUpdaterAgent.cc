@@ -661,9 +661,9 @@ void PsiDemandUpdaterAgent::updateDemandGoals(opencog::CogServer * server)
 
         // Prepare arguments
         schemaArguments.clear(); 
+        schemaArguments.push_back(iDemand->second.updatedValue);
         schemaArguments.push_back( boost::lexical_cast<double> (minValueStr) );
         schemaArguments.push_back( boost::lexical_cast<double> (maxValueStr) );
-        schemaArguments.push_back(iDemand->second.updatedValue);
 
         // Run the Procedure that update the true value of the PredicateNodes 
         const Procedure::GeneralProcedure & procedure =

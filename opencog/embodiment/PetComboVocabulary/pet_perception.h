@@ -98,6 +98,7 @@ enum pet_perception_enum {
     // Such as define a 'get_deman_goal_truth_value', which takes a parameter indicating different demand goals
     // [ by Zhenhua Cai, on 2011-02-08 ]
     get_current_demand_goal_truth_value, 
+    get_previous_demand_goal_truth_value, 
     get_integrity_demand_goal_truth_value, 
     get_affiliation_demand_goal_truth_value, 
     get_certainty_demand_goal_truth_value,
@@ -239,6 +240,7 @@ static const perception_basic_description pbd[] = {
     { id::get_competence_demand,  "get_competence_demand",  "contin"}, 
 
     { id::get_current_demand_goal_truth_value,     "get_current_demand_goal_truth_value",     "contin"}, 
+    { id::get_previous_demand_goal_truth_value,    "get_previous_demand_goal_truth_value",    "contin"}, 
     { id::get_integrity_demand_goal_truth_value,   "get_integrity_demand_goal_truth_value",   "contin"}, 
     { id::get_affiliation_demand_goal_truth_value, "get_affiliation_demand_goal_truth_value", "contin"}, 
     { id::get_certainty_demand_goal_truth_value,   "get_certainty_demand_goal_truth_value",   "contin"},
@@ -347,6 +349,7 @@ static const perception_property_description ppd[] = {
     { id::get_competence_demand,   false,    false,    false,    false,   false,   false }, 
 
     { id::get_current_demand_goal_truth_value,     false,    false,    false,    false,   false,   false }, 
+    { id::get_previous_demand_goal_truth_value,    false,    false,    false,    false,   false,   false }, 
     { id::get_integrity_demand_goal_truth_value,   false,    false,    false,    false,   false,   false }, 
     { id::get_affiliation_demand_goal_truth_value, false,    false,    false,    false,   false,   false }, 
     { id::get_certainty_demand_goal_truth_value,   false,    false,    false,    false,   false,   false },
