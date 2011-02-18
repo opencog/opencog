@@ -143,10 +143,12 @@ void metapop_moses_results(RandGen& rng,
     // instantiate metapop
     metapopulation<Score, BScore, Optimization> 
         metapop(rng, bases, tt, si_ca, si_kb, sc, bsc, opt, meta_params);
+
     // run moses
     if(pa.jobs.empty()) {
         moses::moses(metapop, moses_params);
     } else moses::distributed_moses(metapop, vm, pa.jobs, moses_params);
+
     // output result
     stringstream ss;
     metapop.ostream(ss,

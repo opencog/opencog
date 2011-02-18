@@ -239,6 +239,7 @@ int moses_exec(int argc, char** argv) {
     bool output_score_complexity_old_moses;
     bool output_bscore;
     bool output_eval_number;
+    bool output_with_labels;
     string output_file;
     int max_gens;
     string log_level;
@@ -299,6 +300,9 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(output_eval_number_opt).c_str(),
          value<bool>(&output_eval_number)->default_value(false),
          "If 1, outputs the actual number of evaluations.\n")
+        (opt_desc_str(output_with_labels_opt).c_str(),
+         value<bool>(&output_with_labels)->default_value(false),
+         "If 1, outputs the candidates with their labels instead of place holders. for instance *(\"price\" \"temprature\") instead of *(#1 #2). This only works for data fitting problems where the data file contains labels in its header\n")
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&output_file)->default_value(""),
          "File where to save the results. If empty then it outputs on the stdout.")
