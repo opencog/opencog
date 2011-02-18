@@ -50,15 +50,12 @@ Message::Message(const std::string &from, const std::string &to, int type)
     this->type = type;
 }
 
-// Factory method
-
 Message *Message::factory(const std::string &from, const std::string &to, int
         msgType, const std::string &msg)
     throw (opencog::InvalidParamException, std::bad_exception)
 {
 
     switch (msgType) {
-
     case STRING: {
         return new StringMessage(from, to, msg);
         break;
@@ -102,14 +99,13 @@ Message *Message::factory(const std::string &from, const std::string &to, int
     }
     default: {
         throw opencog::InvalidParamException(TRACE_INFO,
-                                             "Message - Unknown message type id: '%d'.", msgType);
+                     "Message - Unknown message type id: '%d'.", msgType);
     }
     }
 
     // to remove compilation warning, execution should never reach here.
     return NULL;
 }
-
 
 Message *Message::routerMessageFactory(const std::string &from, const std::string &to, int encapsulateMsgType, const std::string &msg)
 {

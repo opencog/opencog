@@ -47,7 +47,7 @@ using boost::asio::ip::tcp;
 namespace MessagingSystem
 {
 
-    class RouterServerSocket;
+class RouterServerSocket;
 
 enum NotificationType {
     MESSAGE,
@@ -66,37 +66,42 @@ struct NotificationData {
     std::string element;
     unsigned int numMessages;
 
-    /**
-     * Constructor
-     */
-    NotificationData(const std::string& _toId, tcp::socket* _sock, NotificationType _type, const std::string& _element, unsigned int _numMessages) :
-            toId(_toId), sock(_sock), type(_type), element(_element), numMessages(_numMessages) {}
+    NotificationData(const std::string& _toId,
+                    tcp::socket* _sock,
+                    NotificationType _type,
+                    const std::string& _element,
+                    unsigned int _numMessages)
+    : toId(_toId), sock(_sock), type(_type), element(_element), numMessages(_numMessages) {}
 
 }; // struct NotificationData
 
 
-    typedef std::map<std::string, tcp::socket*> Id2SocketMap;
-
+typedef std::map<std::string, tcp::socket*> Id2SocketMap;
 
 /**
- * Router is not supposed to be used directly by PB entities. All communication with it is
- * supposed to be performed by NetworkElement's internals. NE encapsulates the protocol
- * used to communicate with Router but in the case you want/need to simulate a NE communicating
- * directly with the router, you may find useful the protocol description provided below.
+ * Router is not supposed to be used directly by PB entities. All communication
+ * with it should be performed by NetworkElement's (NE) internals. NE
+ * encapsulates the protocol used to communicate with Router but in the case
+ * you want/need to simulate a NE communicating directly with the router, you
+ * may find useful the protocol description provided below.
  *
  * There are five relevant use cases for the protocol:
  *
- * (1) YourEntity starts a handshake with router to enter PB network (no autentication
- * is required at this point. it is just to allow other entities to know about YourEntity)
- * (2) YourEntity wants to send a Message to some other entity (it will always contact
- * the router to do so, regardless who is the actual target for that message)
- * (3) YourEntity is asynchronously notified by router that there are unread messages to
- * it waiting in router's queue. YourEntity will need to be listening to a given port
- * to receive such a message.
- * (4) YourEntity decides it wants to retrieve unread messages from router so it sends
- * a proper request (this request will be answered assynchronously by router)
- * (5) YourEntity is assynchronously contaced by router to receive requested unread messages.
- * YourEntity will need to be listening to a given port to receive the messages.
+ * (1) YourEntity starts a handshake with router to enter PB network (no
+ * autentication is required at this point. it is just to allow other entities
+ * to know about YourEntity)
+ * (2) YourEntity wants to send a Message to some other entity (it will always
+ * contact the router to do so, regardless who is the actual target for that
+ * message)
+ * (3) YourEntity is asynchronously notified by router that there are unread
+ * messages to it waiting in router's queue. YourEntity will need to be
+ * listening to a given port to receive such a message.
+ * (4) YourEntity decides it wants to retrieve unread messages from router so
+ * it sends a proper request (this request will be answered assynchronously by
+ * router)
+ * (5) YourEntity is assynchronously contaced by router to receive requested
+ * unread messages.  YourEntity will need to be listening to a given port to
+ * receive the messages.
  *
  * (1)
  *
@@ -106,7 +111,7 @@ struct NotificationData {
  * LOGIN <YOUR_ENTITY> <ip> <port>
  *
  * All communication is performed in line-based protocol. So everything
- * should go with an explicit '\n'. (this is true from every command or
+ * should go with an explicit '\\n'. (this is true from every command or
  * data line). YOUR_ENTITY is a literal string used to identify YourEntity in
  * PB network. <ip> and <port> will be used to connect to your entity.
  * Please use ports > 5100 (obviously 5005 is already taken).

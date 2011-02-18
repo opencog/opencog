@@ -48,6 +48,17 @@ using std::list;
 #define IS_HOLDING_PREDICATE_NAME "isHolding"
 #define IS_HOLDING_SOMETHING_PREDICATE_NAME "isHoldingSomething"
 
+// Initialize static variables that stores the LatestLinks for each type of information
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAgentActionDone;
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPhysiologicalFeeling;
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarSayActionDone;
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarActionDone;
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPetActionPredicate;
+std::map<Handle, AtomSpaceUtil::HandleToHandleMap > AtomSpaceUtil::latestSpatialPredicate;
+std::map<Handle, Handle> AtomSpaceUtil::latestSchemaPredicate;
+boost::unordered_map<std::string, HandleSeq> AtomSpaceUtil::frameElementsCache;
+Handle AtomSpaceUtil::latestIsExemplarAvatar = Handle::UNDEFINED;
+
 Handle AtomSpaceUtil::addNode(AtomSpace& atomSpace,
                               Type nodeType,
                               const std::string& nodeName,
@@ -1392,14 +1403,11 @@ std::string AtomSpaceUtil::convertPetExecLinkParametersToString(const AtomSpace&
             Handle schemaParam = atomSpace.getOutgoing(listLink, i);
 
             if (schemaParam == Handle::UNDEFINED) {
-                logger().error(
-                             "AtomSpaceUtil - Found no param for schema");
+                logger().error("AtomSpaceUtil - Found no param for schema");
                 return "";
-            } // if
+            }
 
-            if (i > 0) {
-                parameters << ", ";
-            } // if
+            if (i > 0) parameters << ", ";
 
             if (atomSpace.getType(schemaParam) == LIST_LINK) {
                 // rotation or vector
@@ -1423,13 +1431,10 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(const AtomSpace& atomSpace,
         const Temporal& temporal,
         TemporalTable::TemporalRelationship criterion)
 {
-
-
+    // reference: http://wiki.opencog.org/w/PerceptionActionInterface
+    
     Handle latestActionDoneLink = Handle::UNDEFINED;
     std::string agentType = "unknown";
-
-    // reference:
-    // https://extranet.vettalabs.com:8443/bin/view/Petaverse/PerceptionActionInterface
 
     // get eval links for all agents actions done
     std::vector<HandleTemporalPair> timestamps;
@@ -1440,68 +1445,66 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(const AtomSpace& atomSpace,
     Temporal previousTemporal(0);
 
     // filter eval links by agent name and most recent temporal
-    unsigned int i;
-    for ( i = 0; i < timestamps.size( ); ++i ) {
+    unsigned int i = 0;
+    for (; i < timestamps.size( ); ++i ) {
         Temporal& temporal = *( timestamps[i].getTemporal( ) );
 
         Handle evalLink = timestamps[i].getHandle( );
 
         if ( evalLink == Handle::UNDEFINED) {
-            logger().error(
-                         "AtomSpaceUtil - AtomSpace returned undefined handle for evaluation link (agent action done predicate)" );
+            logger().error("AtomSpaceUtil - AtomSpace returned undefined "
+                    "handle for evaluation link (agent action done predicate)" );
             continue;
-        } // if
+        }
 
         Handle agentActionLink = atomSpace.getOutgoing(evalLink, 1);
 
         if ( agentActionLink == Handle::UNDEFINED) {
-            logger().error(
-                         "AtomSpaceUtil - Found no agent action for actionDone predicate." );
+            logger().error("AtomSpaceUtil - Found no agent action for "
+                    "actionDone predicate.");
             continue;
-        } // if
+        }
 
         Handle agentIdNode = atomSpace.getOutgoing(agentActionLink, 0);
         if (agentIdNode == Handle::UNDEFINED ) {
-            logger().error(
-                         "AtomSpaceUtil - Found no agent name for actionDone predicate" );
+            logger().error("AtomSpaceUtil - Found no agent name for "
+                    "actionDone predicate" );
             continue;
-        } // if
+        }
 
         int inspectedAgentTypeCode = atomSpace.getType(agentIdNode);
         if ( !atomSpace.isNode( inspectedAgentTypeCode ) ) {
-            logger().fine(
-                         "AtomSpaceUtil - Skipping handles that isn't nodes. Inspected handle type: %d",
-                         inspectedAgentTypeCode );
+            logger().fine("AtomSpaceUtil - Skipping non-node handle type: %d",
+                    inspectedAgentTypeCode );
             continue;
-        } // if
+        }
 
-        const std::string& inspectedAgentId = atomSpace.getName( agentIdNode );
+        const std::string& inspectedAgentId = atomSpace.getName(agentIdNode);
 
         if ( inspectedAgentId != agentId ) {
-            logger().fine(
-                         "AtomSpaceUtil - Inspected agent id is [%s; type=%d], but required is %s",
-                         inspectedAgentId.c_str( ),
-                         inspectedAgentTypeCode,
-                         agentId.c_str( ) );
+            logger().fine("AtomSpaceUtil - "
+                    "Inspected agent id is [%s; type=%d], but required is %s",
+                     inspectedAgentId.c_str(),
+                     inspectedAgentTypeCode,
+                     agentId.c_str() );
             // it is the wrong agent, then skip it
             continue;
-        } // if
+        }
 
         Handle agentActionNode = atomSpace.getOutgoing(agentActionLink, 1);
         if (agentActionNode == Handle::UNDEFINED) {
-            logger().error(
-                         "AtomSpaceUtil - Found no agent action name for actionDone predicate" );
+            logger().error("AtomSpaceUtil - "
+                    "Found no agent action name for actionDone predicate");
             continue;
-        } // if
+        }
 
-        logger().fine(
-                     "AtomSpaceUtil - Previous temporal[%lu %lu], Inspected temporal[%lu %lu]",
-                     previousTemporal.getA(),
-                     previousTemporal.getB(),
-                     temporal.getA(),
-                     temporal.getB() );
+        logger().fine("AtomSpaceUtil - "
+                "Previous temporal[%lu %lu], Inspected temporal[%lu %lu]",
+                 previousTemporal.getA(),
+                 previousTemporal.getB(),
+                 temporal.getA(),
+                 temporal.getB() );
         if ( temporal > previousTemporal ) {
-
             latestActionDoneLink = agentActionLink;
             previousTemporal = temporal;
 
@@ -1516,16 +1519,12 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(const AtomSpace& atomSpace,
                              "AtomSpaceUtil - Invalid agentIdNode type: %i",
                              inspectedAgentTypeCode );
                 continue;
-            } // else
+            }
+        }
+    }
 
-        } // if
-
-    } // for
-
-    logger().debug(
-                 "AtomSpaceUtil::getMostRecentAgentActionLink - Agent %s is %s",
-                 agentId.c_str( ),
-                 agentType.c_str( ) );
+    logger().debug("AtomSpaceUtil::getMostRecentAgentActionLink - "
+            "Agent %s is %s", agentId.c_str(), agentType.c_str() );
 
     return latestActionDoneLink;
 }
@@ -1904,17 +1903,6 @@ Handle AtomSpaceUtil::getTimedHandle(AtomSpace& as, Handle atTimeLink)
 
     return as.getOutgoing(atTimeLink, 1);
 }
-
-// Initialize static variables that stores the LatestLinks for each type of information
-std::map<Handle, Handle> AtomSpaceUtil::latestAgentActionDone;
-std::map<Handle, Handle> AtomSpaceUtil::latestPhysiologicalFeeling;
-std::map<Handle, Handle> AtomSpaceUtil::latestAvatarSayActionDone;
-std::map<Handle, Handle> AtomSpaceUtil::latestAvatarActionDone;
-std::map<Handle, Handle> AtomSpaceUtil::latestPetActionPredicate;
-std::map<Handle, std::map<Handle, Handle> > AtomSpaceUtil::latestSpatialPredicate;
-std::map<Handle, Handle> AtomSpaceUtil::latestSchemaPredicate;
-boost::unordered_map<std::string, HandleSeq> AtomSpaceUtil::frameElementsCache;
-Handle AtomSpaceUtil::latestIsExemplarAvatar = Handle::UNDEFINED;
 
 void AtomSpaceUtil::updateGenericLatestInfoMap(std::map<Handle, Handle>& infoMap,
         AtomSpace& as,
@@ -2534,7 +2522,9 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
             }
         }
         if (inheritanceLink == Handle::UNDEFINED) {
-            logger().error( "AtomSpaceUtil::%s - Invalid frame instance. It has a predicate node linked by a InheritanceLink that isn't a DefinedFrameElementNode", __FUNCTION__ );
+            logger().error( "AtomSpaceUtil::%s - Invalid frame instance. "
+                    "It has a predicate node linked by a InheritanceLink "
+                    "that isn't a DefinedFrameElementNode", __FUNCTION__ );
             return;
         }
 #endif
@@ -2549,10 +2539,10 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
         atomSpace.getHandleSet( back_inserter( values ),
                                 evaluation, NULL, NULL, 2, EVALUATION_LINK, false );
         if ( values.size( ) != 1 ) {
-            logger().error( "AtomSpaceUtil::%s - Invalid number of element value. It should be just one but was %d.", 
-                            __FUNCTION__, values.size( ) );
+            logger().error( "AtomSpaceUtil::%s - Invalid number of element value. "
+                    "It should be just one but was %d.", __FUNCTION__, values.size() );
             return;
-        } // if
+        }
 #else
         Handle valueHandle = Handle::UNDEFINED;
         foreach (Handle elemIncomingHandle, elemIncomingSet) {

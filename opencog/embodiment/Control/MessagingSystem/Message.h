@@ -44,9 +44,9 @@ class Message
 
 private:
 
-    std::string from; // ID of source NetworkElement
-    std::string to;   // ID of target NetworkElement
-    int type; // Message type (used in factory method to build messages of given types)
+    std::string from; //! ID of source NetworkElement
+    std::string to;   //! ID of target NetworkElement
+    int type; //! Message type (used in factory method to build messages of given types)
 
 public:
 
