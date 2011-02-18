@@ -209,7 +209,11 @@ IF (GSL_FOUND)
     SET(HAVE_GSL 1)
 ENDIF (GSL_FOUND)
 
-IF(GSL_FOUND)
+# atomspace depends on spatial because of SpaceMap but it does require
+# all dependencies of HAVE_SPATIAL, only MapTools reuiqres it so it
+# would be better to fiddle with spatial/CMakeLists.txt to have only
+# MapTools not compile rather the entire spatial directory
+IF(GSL_FOUND AND HAVE_SPATIAL)
     SET(HAVE_ATOMSPACE 1)
     SET(HAVE_ATTENTION 1)
     SET(HAVE_PLN 1)
