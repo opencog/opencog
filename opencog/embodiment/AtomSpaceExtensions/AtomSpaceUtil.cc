@@ -466,14 +466,17 @@ throw(opencog::NotFoundException)
                              predicateName);
     if (predicateHandle == Handle::UNDEFINED) {
         throw opencog::NotFoundException( TRACE_INFO,
-                                          ( std::string( "AtomSpaceUtil - Predicate not found: " ) + predicateName ).c_str( ) );
-    } // if
+                  (std::string("AtomSpaceUtil - Predicate not found: ")
+                   + predicateName ).c_str( ) );
+    }
 
     // testing if there is a list link already
     Handle listLinkHandle = atomSpace.getHandle(LIST_LINK, seq0);
     if (listLinkHandle == Handle::UNDEFINED) {
-        throw opencog::NotFoundException( TRACE_INFO, ( "AtomSpaceUtil - List link not found. predicateName[" + predicateName + "]" ).c_str( ) );
-    } // if
+        throw opencog::NotFoundException( TRACE_INFO,
+                ( "AtomSpaceUtil - List link not found. "
+                  "predicateName[" + predicateName + "]").c_str( ) );
+    }
 
     HandleSeq seq;
     seq.push_back(predicateHandle);
@@ -481,8 +484,10 @@ throw(opencog::NotFoundException)
 
     Handle evalLinkHandle = atomSpace.getHandle(EVALUATION_LINK, seq);
     if (evalLinkHandle == Handle::UNDEFINED) {
-        throw opencog::NotFoundException( TRACE_INFO, ( "AtomSpaceUtil - There is no evaluation link for predicate: " + predicateName ).c_str( ) );
-    } // if
+        throw opencog::NotFoundException(TRACE_INFO,
+               ("AtomSpaceUtil - There is no evaluation link for predicate: "
+                 + predicateName).c_str() );
+    }
     return atomSpace.getTV(evalLinkHandle)->getMean();
 }
 
@@ -495,7 +500,7 @@ bool AtomSpaceUtil::isPredicateTrue(const AtomSpace &atomSpace,
         return ( getPredicateValue( atomSpace, predicateName, a, b ) > 0.5 );
     } catch ( opencog::NotFoundException& ex ) {
         return false;
-    } // catch
+    }
 }
 
 bool AtomSpaceUtil::isPetOwner( const AtomSpace& atomSpace,
@@ -509,16 +514,14 @@ bool AtomSpaceUtil::isPetOwner( const AtomSpace& atomSpace,
     Handle predicateHandle = atomSpace.getHandle(PREDICATE_NODE,
                              OWNERSHIP_PREDICATE_NAME );
     if (predicateHandle == Handle::UNDEFINED) {
-        logger().fine(
-                     "IsFriendly - Found no \"owns\" predicate.");
+        logger().fine("IsFriendly - Found no \"owns\" predicate.");
         return false;
     } // if
 
     // testing if there is a list link already
     Handle listLinkHandle = atomSpace.getHandle(LIST_LINK, seq0);
     if (listLinkHandle == Handle::UNDEFINED) {
-        logger().fine(
-                     "IsFriendly - Obj %s and %s have no ListLink.",
+        logger().fine("IsFriendly - Obj %s and %s have no ListLink.",
                      atomSpace.getName(avatar).c_str(),
                      atomSpace.getName(pet).c_str());
         return false;
@@ -535,7 +538,6 @@ bool AtomSpaceUtil::isPetOwner( const AtomSpace& atomSpace,
     }
 
     return true;
-
 }
 
 bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
@@ -546,8 +548,7 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
     Handle sizePredicate = atomSpace.getHandle(PREDICATE_NODE,
                            SIZE_PREDICATE_NAME);
     if (sizePredicate == Handle::UNDEFINED) {
-        logger().fine(
-                     "AtomSpaceUtil - No size predicate found.");
+        logger().fine("AtomSpaceUtil - No size predicate found.");
         return false;
     }
 

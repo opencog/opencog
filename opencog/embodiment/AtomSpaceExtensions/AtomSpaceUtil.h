@@ -46,17 +46,19 @@ class AtomSpaceUtil
 
 private:
 
-    /*
+    /**
      * Add a property predicate into the AtomSpace for the given arguments.
      * The predicate has the following basic template:
      *
-     *     EvaluationLink
-     *       pred:PredicateNode
-     *       ListLink
-     *    arg1
-     *    arg2
-     *    ...
-     *    argN
+     * <code>
+     * EvaluationLink
+     *    pred:PredicateNode
+     *    ListLink
+     *       arg1
+     *       arg2
+     *       ...
+     *       argN
+     * </code>
      *
      * @param atomSpace The AtomSpace where the predicate will be added.
      * @param predicateName The name of the predicate. This name should be exactly
@@ -70,7 +72,8 @@ private:
      * @param t  An optional temporal (should not be used arbitrarily).
      * @return On success, the handle of the predicate's AtTimeLink (if timestamped);
      *                     or of the predicate's EvalLink (if not timestamped);
-     *                     or Handle::UNDEFINED, if predicate is false but it is not represented in AtomSpace.
+     *                     or Handle::UNDEFINED, if predicate is false but it
+     *                     is not represented in AtomSpace.
      *         On failure, return Handle::UNDEFINED
      */
     static Handle addGenericPropertyPred(AtomSpace& atomSpace,
@@ -80,48 +83,50 @@ private:
                                          bool permanent = false,
                                          const Temporal& t = UNDEFINED_TEMPORAL);
 
-    /*
+    /**
      * Static variables for storing the handles for the LatestLink(AtTimeLink(...))
      * that represents the latest data for each type of information
      */
-    static std::map<Handle, Handle> latestAgentActionDone;
-    static std::map<Handle, Handle> latestPhysiologicalFeeling;
-    static std::map<Handle, Handle> latestAvatarSayActionDone;
-    static std::map<Handle, Handle> latestAvatarActionDone;
-    static std::map<Handle, Handle> latestPetActionPredicate;
-    static std::map<Handle, std::map<Handle, Handle> > latestSpatialPredicate;
-    static std::map<Handle, Handle> latestSchemaPredicate;
+    typedef std::map<Handle, Handle> HandleToHandleMap
+    static HandleToHandleMap latestAgentActionDone;
+    static HandleToHandleMap latestPhysiologicalFeeling;
+    static HandleToHandleMap latestAvatarSayActionDone;
+    static HandleToHandleMap latestAvatarActionDone;
+    static HandleToHandleMap latestPetActionPredicate;
+    static std::map<Handle, HandleToHandleMap > latestSpatialPredicate;
+    static HandleToHandleMap latestSchemaPredicate;
     static boost::unordered_map<std::string, HandleSeq> frameElementsCache;
     static Handle latestIsExemplarAvatar;
 
-    static void updateGenericLatestInfoMap(std::map<Handle, Handle>& infoMap,
+    static void updateGenericLatestInfoMap(HandleToHandleMap& infoMap,
                                            AtomSpace& as,
                                            Handle atTimeLink,
                                            Handle key);
+
     static void updateGenericLatestSingleInfo(Handle& latestSingleInfoHandle,
             AtomSpace& as,
             Handle atTimeLink);
 
 public:
-    /*
+    /**
      * Returns the current level of the given feeling name.
      * If the feeling does not exists on AtomSpace or some problem occurs when invoked,
-     * this method will return -1
+     * this method will return -1.
      *
      * @param atomSpace The atom space
      * @param petId Pet's name(id)
      * @param feelingName name of the feeling wanted
-     * @return float The current level of a given feeling
+     * @return The current level of a given feeling
      */
     static float getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
                                             const std::string& petId,
                                             const std::string& feelingName );
 
-    /*
+    /**
      * Returns a pointer to the most recent evaluation link. With the given name of the
      * predicateNode link, this method performs a search on AtomSpace to find the link
      * marked with the most recent timestamp. If the evaluation link does not exists,
-     * an Handle::UNDEFINED will be returned
+     * an Handle::UNDEFINED will be returned.
      *
      * @param atomSpace The atom space
      * @param predicateNodeName The name of the predicate node of the Evaluation link
@@ -132,7 +137,7 @@ public:
 
     /**
      * Returns witin timestamps vector all EvaluationLinks for a given predicate
-     * node. Optionaly its possible to specify temporal and search criterion on
+     * node. Optionally it's possible to specify temporal and search criterion on
      * the time search.
      *
      * Default temporal and search criterion returns all EvaluationLinks
@@ -154,25 +159,28 @@ public:
                                       TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT,
                                       bool needSort = false);
 
-    /*
+    /**
      * Add a generic predicate into the AtomSpace or update it's value if it was already defined
      * The predicate has the following basic template:
      *
-     *     EvaluationLink
-     *       pred:PredicateNode
-     *       ListLink
-     *    object1
-     *           object2 (optional)
+     * <code>
+     * EvaluationLink
+     *    pred:PredicateNode
+     *    ListLink
+     *       object1
+     *       object2 (optional)
+     * </code>
      *
      * @param atomSpace The AtomSpace.
      * @param predicateName The name of the predicate. This name should be exactly
      * the same names of combo predicates.
-     * @param tv Truth value for the evaluation link. if the mean of TV is less than 0.5 it will be added anyway
+     * @param tv Truth value for the evaluation link. if the mean of TV is less
+     * than 0.5 it will be added anyway
      * @param object1 The handle of the object1
      * @param object1 The handle of the object2
-     * @return On success, the handle of the predicate's EvalLink (if not timestamped);
-     *                     or Handle::UNDEFINED, if predicate is false but it is not represented in AtomSpace.
-     *         On failure, return Handle::UNDEFINED
+     * @return On success, the handle of the predicate's EvalLink (if not
+     * timestamped) or Handle::UNDEFINED, if predicate is false but it is not
+     * represented in AtomSpace. On failure, return Handle::UNDEFINED.
      */
     static Handle setPredicateValue( AtomSpace& atomSpace,
                                      std::string predicateName,
@@ -238,12 +246,15 @@ public:
     /**
      * Check if the action with the given id was done since the given timestamp.
      * @param atomSpace the AtomSpace where the condition will be checked
-     * @param actionpredicateName the predicate name which the existence for the given action will be checked for
+     * @param actionpredicateName the predicate name which the existence for
+     * the given action will be checked for
      * @param actionExecLink the Handle of the ExecLink that represents the action
-     * @param sinceTimestamp the timestamp since which the ActionDone mark of the action will be checked for
-     * @return true if the action was marked as done after the given timestamp, false otherwise
+     * @param sinceTimestamp the timestamp since which the ActionDone mark of
+     * the action will be checked for
+     * @return true if the action was marked as done after the given timestamp,
+     * false otherwise
      *
-     * NOTE: you can use the PAI::getCurrentTimestamp() method just before calling the addAction() method to get
+     * @note You can use PAI::getCurrentTimestamp() just before calling addAction() to get
      * the timestamp argument for this method.
      */
     static bool isActionPredicatePresent(const AtomSpace& atomSpace,
@@ -253,14 +264,16 @@ public:
 
 
     /**
-     * Gets the position coordinates and object handle from an EvalLink for a "position" predicate
+     * Gets the position coordinates and object handle from an EvalLink for
+     * a "position" predicate
      * @param the AtomSpace where the data will be extracted from
      * @param The handle of the EvaluationLink
      * @param x coordinate to be get
      * @param y coordinate to be get
      * @param z coordinate to be get
      * @param handle of the node that represents the object the predicate refers to
-     * @param true if got the coordinates and object's node handle successfully. False otherwise
+     * @return if got the coordinates and object's node handle
+     * successfully. False otherwise
      */
     static bool getXYZOFromPositionEvalLink(const AtomSpace& atomSpace,
                                             Handle evalLink,
@@ -276,7 +289,7 @@ public:
      *
      * @param atomSpace The AtomSpace with the spaceServer where the spaceMap is
      * @param t  The timestamp to look at
-     * @return   The spaceMapHandle at time t or if none the first one before t
+     * @return The spaceMapHandle at time t or if none the first one before t
      */
     static Handle getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
             unsigned long t);
@@ -292,7 +305,7 @@ public:
      * @param objectB   The handle of the second object to be used in the
      *                  predicate.
      *
-     * NOTE: the above, inside and below predicates depends on 3D information
+     * @note the above, inside and below predicates depend on 3D information
      * currently not available (26/09/2007).
      */
     static bool getPredicateValueAtSpaceMap(const AtomSpace& atomSpace,
@@ -310,7 +323,7 @@ public:
      * @param objectB   The handle of the second object to be used in the
      * predicate.
      *
-     * NOTE: the above, inside and below predicates depends on 3D information
+     * @note the above, inside and below predicates depends on 3D information
      * currently not available (26/09/2007).
      */
     static bool getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
@@ -355,7 +368,7 @@ public:
                                    std::string predicateName,
                                    Handle a,
                                    Handle b = Handle::UNDEFINED)
-    throw(opencog::NotFoundException);
+        throw(opencog::NotFoundException);
 
     /**
      * Return true if the given predicate, with its objects, has the truth value
@@ -395,7 +408,12 @@ public:
                                     Handle obj);
 
     /**
-     * like the previous one but retrieve the previous spaceMap
+     * Return true iff obj has changed its location between sm 
+     * and the previous spaceMap
+     *
+     * @param atomSpace The atomSpace to look at
+     * @param sm the spaceMap after
+     * @param the object to look at
      */
     static bool isMovingBtwSpaceMap(const AtomSpace& atomSpace,
                                     const SpaceServer::SpaceMap& sm,
@@ -423,10 +441,12 @@ public:
      * Add a property predicate into the AtomSpace for the given node.
      * The predicate has the following basic template:
      *
-     *     EvaluationLink
-     *       pred:PredicateNode
-     *       ListLink
-     *    obj:ObjectNode (or its descendents)
+     * <code>
+     * EvaluationLink
+     *    pred:PredicateNode
+     *    ListLink
+     *       obj:ObjectNode (or its descendents)
+     * </code>
      *
      * @param atomSpace The AtomSpace.
      * @param predicateName The name of the predicate. This name should be exactly
@@ -440,7 +460,8 @@ public:
      * @param t  An optional temporal (should not be used arbitrarily).
      * @return On success, the handle of the predicate's AtTimeLink (if timestamped);
      *                     or of the predicate's EvalLink (if not timestamped);
-     *                     or Handle::UNDEFINED, if predicate is false but it is not represented in AtomSpace.
+     *                     or Handle::UNDEFINED, if predicate is false but it
+     *                     is not represented in AtomSpace.
      *         On failure, return Handle::UNDEFINED
      */
     static Handle addPropertyPredicate(AtomSpace& atomSpace,
@@ -455,11 +476,13 @@ public:
      * inside, below, above) into the AtomSpace for the given nodes.
      * The predicate has the following basic template:
      *
-     *     EvaluationLink
-     *       pred:PredicateNode
-     *       ListLink
-     *    A:ObjectNode (or its descendents)
-     *    B:ObjectNode (or its descendents)
+     * <code>
+     * EvaluationLink
+     *     pred:PredicateNode
+     *     ListLink
+     *        A:ObjectNode (or its descendents)
+     *        B:ObjectNode (or its descendents)
+     * </code>
      *
      * The first object is the reference one, i.e. A is near B (in this case
      * the relation is commutative), A is inside B, A is above B, and A is
@@ -476,7 +499,8 @@ public:
      * @param t  An optional temporal (should not be used arbitrarily).
      * @return On success, the handle of the predicate's AtTimeLink (if timestamped);
      *                     or of the predicate's EvalLink (if not timestamped);
-     *                     or Handle::UNDEFINED, if predicate is false but it is not represented in AtomSpace.
+     *                     or Handle::UNDEFINED, if predicate is false but it
+     *                     is not represented in AtomSpace.
      *         On failure, return Handle::UNDEFINED
      */
     static Handle addPropertyPredicate(AtomSpace& atomSpace,
@@ -494,20 +518,25 @@ public:
      * inside, below, above) into the AtomSpace for the given nodes.
      * The predicate has the following basic template:
      *
+     * <code>
      * AtTimeLink
      *   TimeNode "$timestamp"
      *   EvaluationLink
-     *      PredicateNode:"isHolding"
-     *      ListLink
-     *        AvatarNode|PetNode:"$avatar-id" or "$pet-id"
-     *        ObjectNode|AccessoryNode:"$object-id"
+     *     PredicateNode:"isHolding"
+     *     ListLink
+     *       AvatarNode|PetNode:"$avatar-id" or "$pet-id"
+     *       ObjectNode|AccessoryNode:"$object-id"
+     * </code>
      *
-     * Besides, add/update the isHoldingSomething predicate (which is not timestamped), as follows:
+     * Besides, add/update the isHoldingSomething predicate (which is not
+     * timestamped), as follows:
      *
-     *   EvaluationLink
-     *      PredicateNode:"isHoldingSomething"
-     *      ListLink
-     *        AvatarNode|PetNode:"$avatar-id" or "$pet-id"
+     * <code>
+     * EvaluationLink
+     *   PredicateNode:"isHoldingSomething"
+     *   ListLink
+     *     AvatarNode|PetNode:"$avatar-id" or "$pet-id"
+     * </code>
      *
      * @param atomSpace AtomSpace pointer
      * @param holderId Id of an avatar or a pet that is holding or dropping something
@@ -538,12 +567,13 @@ public:
                                           const std::string& objectId );
 
     /**
-     * Retrieve the most recent atTimeLink that points to a 'isHolding' Eval Link, used by a given holder
+     * Retrieve the most recent atTimeLink that points to a 'isHolding'
+     * EvaluationLink, used by a given holder
      *
      * @param atomSpace AtomSpace pointer
      * @param holderId Id of an avatar or a pet that is holding or dropping something
-     * @return The Handle of the latest atTimeLink that points to isHolding Link. It can be Handle::UNDEFINED
-     *         if there is no isHolding eval link
+     * @return The Handle of the latest atTimeLink that points to isHolding
+     * Link. It can be Handle::UNDEFINED if there is no isHolding EvaluationLink
      */
     static Handle getMostRecentIsHoldingAtTimeLink(const AtomSpace& atomSpace,
             const std::string& holderId);
@@ -591,7 +621,8 @@ public:
 
 
     /**
-     * Helper function that retrieves the id of the object held by the pet or avatar at time 'time'
+     * Helper function that retrieves the id of the object held by the pet or
+     * avatar at time 'time'
      *
      * @param atomSpace AtomSpace pointer
      * @param holderId Id of an avatar or a pet that is holding or dropping something
@@ -655,15 +686,15 @@ public:
      * @param criterion the search criterion (see TemporalTable.h for possible
      *        values)
      *
-     * @return a handle that points to the latest agent action link or Handle::UNDEFINED if
-     *                            there is no action link for the given agentid
+     * @return a handle that points to the latest agent action link or
+     * Handle::UNDEFINED if there is no action link for the given agentid
      */
     static Handle getMostRecentAgentActionLink( const AtomSpace& atomSpace,
             const std::string& agentId,
             const Temporal& temporal = UNDEFINED_TEMPORAL,
             TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT);
 
-    /*
+    /**
      * Returns a pointer to the most recent evaluation link. Using an agent id
      * this method performs a search on AtomSpace to find the evaluation link
      * marked with the most recent timestamp. If the evaluation link does not exists,
@@ -786,28 +817,24 @@ public:
 
     /**
      * Return the object (structure or accessory) handle using its id.
-     * Note that includes the concept nodes food_bowl, water_bowl and pet_home.
-     * If no such object the returns Handle::UNDEFINED
+     *
+     * @note includes the concept nodes food_bowl, water_bowl and pet_home.
      *
      * @param atomSpace The AtomSpace
      * @param objectID The object's ID
      * @return The object's handle. UNDEFINE_HANDLE if the agent's doesn't exists
      */
-
-    static Handle getObjectHandle ( const AtomSpace& atomSpace,
-                                    const std::string& objectID );
+    static Handle getObjectHandle ( const AtomSpace& atomSpace, const std::string& objectID );
 
 
     /**
-     * Return the agent handle using its id.
-     * If there is no agent on atomSpace return Handle::UNDEFINED
+     * Return the agent handle using its agentID
      *
      * @param atomSpace The AtomSpace
      * @param agentID The agent's ID
-     * @return The agent's handle. UNDEFINE_HANDLE if the agent's doesn't exists
+     * @return The agent's handle. Handle::UNDEFINED if the agent doesn't exist.
      */
-    static Handle getAgentHandle( const AtomSpace& atomSpace,
-                                  const std::string& agentID );
+    static Handle getAgentHandle( const AtomSpace& atomSpace, const std::string& agentID );
 
     /**
      * Return the Temporal pointed by a given AtTimeLink
@@ -817,8 +844,7 @@ public:
      * @param atTimeLink the Handle of the given AtTimeLink
      * @return a new Temporal object pointed by atTimeLink
      */
-    static Temporal getTemporal(AtomSpace& as,
-                                Handle atTimeLink);
+    static Temporal getTemporal(AtomSpace& as, Handle atTimeLink);
 
     /**
      * Return the Handle pointed by a given AtTimeLink
@@ -882,6 +908,7 @@ public:
      *
      * Then, a Frame will be created as follows:
      *
+     * <code>
      * InheritanceLink
      *    DefinedFrameNode "#Locative_relation"
      *    PredicateNode "is_near"
@@ -898,7 +925,6 @@ public:
      *    DefinedFrameElementNode "#Locative_relation:Relation_type"
      *    PredicateNode "is_near_Relation_type"
      *  
-     *  
      * FrameElementLink
      *    PredicateNode "is_near"
      *    PredicateNode "is_near_Figure"
@@ -910,7 +936,6 @@ public:
      * FrameElementLink
      *    PredicateNode "is_near"
      *    PredicateNode "is_near_Relation_type"
-     *  
      *  
      * EvaluationLink
      *    PredicateNode "is_near_Figure"
@@ -923,7 +948,7 @@ public:
      * EvaluationLink
      *    PredicateNode "is_near_Relation_type"
      *    ConceptNode "is_near"
-     *      
+     * </code>
      *
      * @param atomSpace The AtomSpace reference where the Frame will be create into
      * @param frameName The name of the Frame that will be instantiated
@@ -932,25 +957,29 @@ public:
      *                                   used to set the frame instance elements     
      * @param truthValue The truthValue that will be set as the frame instance TV
      * @param permanent If true set the LTI of the frame atoms to 1, 0 otherwise
+     *
      * @return The Frame instance handle
      */
-    static Handle setPredicateFrameFromHandles( AtomSpace& atomSpace, 
-                                                const std::string& frameName, 
-                                                const std::string& frameInstanceName, 
-                                                const std::map<std::string, Handle>& frameElementsValuesHandles, 
-                                                const TruthValue& truthValue,
-                                                bool permanent = true );
+    static Handle setPredicateFrameFromHandles(
+            AtomSpace& atomSpace, 
+            const std::string& frameName, 
+            const std::string& frameInstanceName, 
+            const std::map<std::string, Handle>& frameElementsValuesHandles, 
+            const TruthValue& truthValue,
+            bool permanent = true );
 
     /**
      * Given a predicate Node handle this method returns all the elements
      * and their values of the Frame instance represented by the PredicateNode
      *
      * @param atomSpace The AtomSpace reference
-     * @param frameInstancePredicateNode The handle of the PredicateNode which represents the frame instance
+     * @param frameInstancePredicateNode The handle of the PredicateNode which
+     * represents the frame instance
+     *
      * @return A Map containing the names and values of all the Frame instance elements
      */
-    static std::map<std::string, Handle> getFrameInstanceElementsValues
-        ( AtomSpace& atomSpace, Handle frameInstancePredicateNode );
+    static std::map<std::string, Handle> getFrameInstanceElementsValues (
+            AtomSpace& atomSpace, Handle frameInstancePredicateNode );
 
     /**
      * Given a value of a Frame instance element and the name of the frame.
@@ -961,11 +990,11 @@ public:
      * @param atomSpace The AtomSpace reference
      * @param frameName The name of the frame
      * @param aElementValue the element value
+     *
      * @return A handleSeq containing all the matched predicateNodes
      */
-    static HandleSeq retrieveFrameInstancesUsingAnElementValue
-        ( AtomSpace& atomSpace, const std::string& frameName, Handle aElementValue );
-
+    static HandleSeq retrieveFrameInstancesUsingAnElementValue (
+            AtomSpace& atomSpace, const std::string& frameName, Handle aElementValue );
 
     /**
      * Excludes from the given AtomSpace an instance of a Frame represented
