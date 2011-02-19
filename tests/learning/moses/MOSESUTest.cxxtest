@@ -27,6 +27,8 @@
 using boost::assign::list_of;
 using namespace moses;
 
+const string MOSESUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
+
 /**
  * MOSES test on toy problems
  */
@@ -65,5 +67,9 @@ public:
     }
     void test_sa_3_mux() {
         moses_test(list_of("-Hmux")("-k3")("-asa"));
+    }
+    void test_hc_it() {
+        string data_file_path = MOSESUTest_dir + "dataset.csv";
+        moses_test(list_of(string("-i").append(data_file_path)));
     }
 };
