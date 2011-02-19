@@ -36,8 +36,8 @@ ImportanceIndex::ImportanceIndex(void)
 unsigned int ImportanceIndex::importanceBin(short importance)
 {
 	// STI is in range of [-32768, 32767] so adding 32768 puts it in
-	// [0, 65535] which is the size of the index
-	return importance + 32768;
+	// [0, 65535]
+	return (importance + 32768) / IMPORTANCE_INDEX_SIZE;
 }
 
 void ImportanceIndex::updateImportance(Atom* atom, int bin)
