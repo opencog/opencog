@@ -549,11 +549,25 @@ public:
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(Handle h) {
-        Atom *a = TLB::getAtom(h);
+    bool holds(const Handle& h) {
+        Atom *a = getAtom(h);
         if (NULL == a) return false;
-        if (this == a->getAtomTable()) return true;
-        return false;
+        return true;
+    }
+
+    /** Get Atom object already in the AtomTable.
+     *
+     * @param h Handle of the atom to retrieve.
+     * @return pointer to Atom object, NULL if no atom within this AtomTable is
+     * associated with handle.
+     */
+    inline Atom* getAtom(const Handle& h) {
+        Atom *atom = TLB::getAtom(h);
+        if (atom)
+            // if the atom isn't linked to this AtomTable
+            // then blank pointer
+            if (this != atom->getAtomTable()) atom = NULL;
+        return atom;
     }
 
     /**
