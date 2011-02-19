@@ -203,9 +203,7 @@ public:
      *              only atoms of the exact type.
      */
     void print(std::ostream& output = std::cout,
-               Type type = ATOM, bool subclass = true) const {
-        atomSpaceAsync->print(output, type, subclass)->get_result();
-    }
+               Type type = ATOM, bool subclass = true) const;
 
     /** Add a new node to the Atom Table,
      * if the atom already exists then the old and the new truth value is merged

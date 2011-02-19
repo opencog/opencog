@@ -321,3 +321,8 @@ void AtomSpace::clear()
     atomSpaceAsync->clear()->get_result();
 }
 
+void AtomSpace::print(std::ostream& output,
+           Type type, bool subclass) const
+{
+    atomSpaceAsync->print(output, type, subclass)->get_result();
+}
