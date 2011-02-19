@@ -60,7 +60,7 @@ bool SaveRequest::execute()
 
     std::string& filename = _parameters.front();
 
-    bool result = atomSpace->atomSpaceAsync.saveToXML(filename);
+    bool result = atomSpace->atomSpaceAsync->saveToXML(filename);
     if (result)
         oss << "Info: done" << std::endl;
     else 

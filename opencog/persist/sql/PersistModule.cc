@@ -126,7 +126,7 @@ std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-close: database not open";
 
-	atomspace().atomSpaceAsync.unregisterBackingStore(backing);
+	atomspace().atomSpaceAsync->unregisterBackingStore(backing);
 
 	backing->set_store(NULL);
 	delete store;
@@ -142,7 +142,7 @@ std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-load: database not open";
 
-	store->load(const_cast<AtomTable&>(atomspace().atomSpaceAsync.getAtomTable()));
+	store->load(const_cast<AtomTable&>(atomspace().atomSpaceAsync->getAtomTable()));
 
 	return "database load started";
 }
@@ -171,7 +171,7 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 	// reserve() is critical here, to reserve UUID range.
 	store->reserve();
 	backing->set_store(store);
-	atomspace().atomSpaceAsync.registerBackingStore(backing);
+	atomspace().atomSpaceAsync->registerBackingStore(backing);
 
 	return "database opened";
 }
@@ -184,7 +184,7 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-store: database not open";
 
-	store->store(const_cast<AtomTable&>(atomspace().atomSpaceAsync.getAtomTable()));
+	store->store(const_cast<AtomTable&>(atomspace().atomSpaceAsync->getAtomTable()));
 
 	return "database store started";
 }
