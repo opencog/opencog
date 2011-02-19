@@ -526,6 +526,7 @@ TruthValue* AtomStorage::getTV(int tvid)
  * nodes in their outgoing set have a height of 1, by definition. 
  * The height of a link is, by definition, one more than the height
  * of the tallest atom in its outgoing set.
+ * @note This can conversely be viewed as the depth of a tree.
  */
 int AtomStorage::get_height(const Atom *atom)
 {
