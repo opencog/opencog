@@ -28,8 +28,18 @@
 #include <opencog/util/platform.h>
 
 using namespace opencog;
+using std::cout;
+using std::endl;
 
 UUID TLB::brk_uuid = 1;
 
-boost::unordered_map<Handle, const Atom*, boost::hash<opencog::Handle> > TLB::handle_map;
+TLB::map_t TLB::handle_map;
+
+void TLB::print()
+{
+    map_t::iterator it = handle_map.begin();
+    for (; it != handle_map.end(); it++) {
+        cout << it->first << ": " << it->second->toString() << endl;
+    }
+}
 

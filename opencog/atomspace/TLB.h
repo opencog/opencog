@@ -27,8 +27,6 @@
 #ifndef _OPENCOG_TLB_H
 #define _OPENCOG_TLB_H
 
-#define CHECK_MAP_CONSISTENCY
-
 #include <boost/unordered_map.hpp>
 
 #include <opencog/atomspace/Atom.h>
@@ -98,21 +96,17 @@ class TLB
 
     // TODO work out if TLB can be removed from these persistance
     // related classes
-    friend class NMXmlExporter;
     friend class ::BasicSCMUTest;
     friend class CoreUtils;
-    friend class SavingLoading;
     friend class ::BasicSaveUTest;
-    friend class SpaceServerSavable;
-    friend class TemporalTableFile;
     friend class AtomStorage;
     friend class SenseSimilaritySQL;
 
+    typedef boost::unordered_map< Handle, Atom*,
+            boost::hash<opencog::Handle> > map_t;
 private:
 
-    static boost::unordered_map<
-        Handle, const Atom*,
-        boost::hash<opencog::Handle> > handle_map;
+    static map_t handle_map;
 
     /**
      * Private default constructor for this class to make it abstract.
@@ -128,12 +122,7 @@ private:
      * @return Corresponding atom for the given handle. Returns NULL if handle
      * isn't found.
      */
-    static inline Atom* getAtom(const Handle& handle)
-    {
-        boost::unordered_map<Handle, const Atom*>::iterator it = handle_map.find(handle);
-        if (it == handle_map.end()) return NULL;
-        else return const_cast<Atom*>(it->second);
-    }
+    static inline Atom* getAtom(const Handle& handle);
 
     /** Adds a new atom to the TLB.
      * If the atom has already be added then an exception is thrown.
@@ -142,25 +131,7 @@ private:
      * @return Handle of the newly added atom.
      */
     static inline const Handle& addAtom(Atom* atom,
-                                 const Handle &handle = Handle::UNDEFINED)
-    {
-        const Handle &h = atom->handle;
-        if (h != Handle::UNDEFINED) {
-#ifdef CHECK_MAP_CONSISTENCY
-            throw InvalidParamException(TRACE_INFO,
-            "Atom is already in the TLB!");
-#endif /* CHECK_MAP_CONSISTENCY */
-        }
-
-        Handle ha = handle;
-        if (ha == Handle::UNDEFINED) {
-            ha = Handle(brk_uuid);
-            brk_uuid++;
-        }
-        handle_map[ha] = atom;
-        atom->handle = ha;
-        return atom->handle;
-    }
+                                 const Handle &handle = Handle::UNDEFINED);
 
     /**
      * Removes an atom from the TLB.
@@ -171,32 +142,72 @@ private:
      * @param handle of atom to be removed.
      * @return Removed atom.
      */
-    static inline const Atom* removeAtom(Handle h) {
-        if (h == Handle::UNDEFINED) {
-            throw InvalidParamException(TRACE_INFO,
-                "Cannot remove invalid Handle from TLB");
-        }
-        handle_map.erase(h);
-        atom->handle = Handle::UNDEFINED;
-        return atom;
-    }
+    static inline Atom* removeAtom(const Handle& h);
 
-    static inline bool isInvalidHandle(const Handle& h) {
-        return (h == Handle::UNDEFINED) ||
-               (h.value() >= brk_uuid) || 
-               (NULL == getAtom(h));
-    }
+    static inline bool isInvalidHandle(const Handle& h);
 
-    static inline bool isValidHandle(Handle h) {
-        return !isInvalidHandle(h);
-    }
+    static inline bool isValidHandle(const Handle& h);
 
     static UUID getMaxUUID(void) { return brk_uuid; }
-    static void reserve_range(UUID lo, UUID hi)
+    static inline void reserve_range(UUID lo, UUID hi)
     {
         if (brk_uuid <= hi) brk_uuid = hi+1;
     }
+
+    static void print();
 };
+
+inline bool TLB::isInvalidHandle(const Handle& h)
+{
+    return (h == Handle::UNDEFINED) ||
+           (h.value() >= brk_uuid) || 
+           (NULL == getAtom(h));
+}
+
+inline bool TLB::isValidHandle(const Handle& h)
+{
+    return !isInvalidHandle(h);
+}
+
+inline const Handle& TLB::addAtom(Atom* atom, const Handle &handle)
+{
+    const Handle &h = atom->handle;
+    if (h != Handle::UNDEFINED) {
+        throw InvalidParamException(TRACE_INFO,
+        "Atom is already in the TLB!");
+    }
+
+    Handle ha = handle;
+    if (ha == Handle::UNDEFINED) {
+        ha = Handle(brk_uuid);
+        brk_uuid++;
+    }
+    handle_map[ha] = atom;
+    atom->handle = ha;
+    return atom->handle;
+}
+
+inline Atom* TLB::getAtom(const Handle& handle)
+{
+    map_t::iterator it = handle_map.find(handle);
+    if (it == handle_map.end()) return NULL;
+    else return it->second;
+}
+
+inline Atom* TLB::removeAtom(const Handle& h)
+{
+    if (h == Handle::UNDEFINED) {
+        throw InvalidParamException(TRACE_INFO,
+            "Cannot remove invalid Handle from TLB");
+    }
+    Atom* atom = TLB::getAtom(h);
+    // Remove from the map
+    handle_map.erase(h);
+    // blank the old handle so it is clear this Atom is no longer
+    // in the TLB
+    atom->handle = Handle::UNDEFINED;
+    return atom;
+}
 
 } // namespace opencog
 
