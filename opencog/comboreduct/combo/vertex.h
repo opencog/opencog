@@ -36,6 +36,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/foreach.h>
 
 #include "action.h"
 #include "builtin_action.h"
@@ -986,6 +987,16 @@ std::istream& stream_to_combo_tree(std::istream& in, combo_tree& tr)
     strtree_to_combo_tree<BUILTIN_ACTION, PERCEPTION, ACTION_SYMBOL, INDEFINITE_OBJECT>(tmp, tr);
     return  in;
 }
+
+/**
+ * This method allows to replace place holders by labels in a string
+ * containing a combo expression.
+ *
+ * For instance "and(#1 #2)" would be replaced by "and(#fat #pretty)"
+ * provided with the vector of labels {"fat", "pretty"}
+ */
+std::string ph2l(const std::string& ce,
+                 const std::vector<std::string>& labels);
 
 } //~namespace combo
 

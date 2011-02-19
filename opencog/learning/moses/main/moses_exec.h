@@ -104,12 +104,15 @@ struct metapop_moses_results_parameters {
                                      bool _output_score_complexity_old_moses,
                                      bool _output_bscore,
                                      bool _output_eval_number,
-                                     std::string _output_file,
+                                     bool _output_with_labels,
+                                     const vector<string>& _labels,
+                                     string _output_file,
                                      const jobs_t& _jobs) : 
         result_count(_result_count), output_score(_output_score), 
         output_complexity(_output_complexity),
         output_score_complexity_old_moses(_output_score_complexity_old_moses),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
+        output_with_labels(_output_with_labels), labels(_labels),
         output_file(_output_file),
         jobs(_jobs) {}
     long result_count;
@@ -118,7 +121,9 @@ struct metapop_moses_results_parameters {
     bool output_score_complexity_old_moses;
     bool output_bscore;
     bool output_eval_number;
-    std::string output_file;
+    bool output_with_labels;
+    const vector<string>& labels;
+    string output_file;
     const jobs_t& jobs;
 };
 
@@ -158,11 +163,13 @@ void metapop_moses_results(RandGen& rng,
                     pa.output_bscore);
     if(pa.output_eval_number)
         ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
+    string res = (pa.output_with_labels && !pa.labels.empty()?
+                  ph2l(ss.str(), pa.labels) : ss.str());
     if(pa.output_file.empty())
-        std::cout << ss.str();
+        std::cout << res;
     else {
         ofstream of(pa.output_file.c_str());
-        of << ss.str();
+        of << res;
         of.close();
     }
 }

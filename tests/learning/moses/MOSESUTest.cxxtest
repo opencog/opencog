@@ -54,6 +54,9 @@ public:
     void test_hc_2_parity() {
         moses_test(list_of("-Hpa")("-k2"));
     }
+    void test_hc_2_parity_with_labels() {
+        moses_test(list_of("-Hpa")("-k2")("-W1"));
+    }
     void test_hc_3_mux() {
         moses_test(list_of("-Hmux")("-k3"));
     }

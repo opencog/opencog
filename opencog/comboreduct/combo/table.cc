@@ -182,15 +182,9 @@ void removeNonASCII(string& str) {
 }
 
 arity_t istreamArity(istream& in) {
-    arity_t arity = -1;
-    while(!in.eof()) {
-        arity++;
-        string str;
-        in >> str;
-        if(checkCarriageReturn(in))
-            return arity;
-    }
-    return arity;
+    std::string line;
+    getline(in, line);    
+    return tokenizeRow<string>(line).first.size();
 }
 
 } // ~namespace combo

@@ -73,7 +73,7 @@ void not_recognized_combo_operator(const string& ops_str) {
 }
 
 
-ifstream* open_table_file(const string& file) {
+ifstream* open_data_file(const string& file) {
     ifstream* in = new ifstream(file.c_str());
     if(!in->is_open()) {
         if(file.empty()) {
@@ -89,29 +89,50 @@ ifstream* open_table_file(const string& file) {
 }
 
 /**
- * check the first element of the data file, if it is "0" or "1" then
- * it is boolean, otherwise it is contin. It is not 100% reliable of
- * course and should be improved.
+ * if the data file has a first row with labels
  */
-type_node infer_type_from_data_file(string file) {
-    auto_ptr<ifstream> in(open_table_file(file));
-    string str;
-    *in >> str;
-    // remove non ASCII char
-    while(str.size() && (unsigned char)str[0] > 127) {
-        str = str.substr(1);
-    }
-    if(str == "0" || str == "1")
+vector<string> read_data_file_labels(const string& file) {
+    auto_ptr<ifstream> in(open_data_file(file));
+    std::string line;
+    getline(*in, line);    
+    return tokenizeRow<std::string>(line).first;
+}
+
+/**
+ * check the token, if it is "0" or "1" then it is boolean, otherwise
+ * it is contin. It is not 100% reliable of course and should be
+ * improved.
+ */
+type_node infer_type_from_token(const string& token) {
+    if(token == "0" || token == "1")
         return id::boolean_type;
     else {
         try {
-            lexical_cast<contin_t>(str);
+            lexical_cast<contin_t>(token);
             return id::contin_type;
         }
         catch(...) {
             return id::ill_formed_type;
         }
+    }    
+}
+
+/**
+ * check the last element of the first or second row of a data file
+ * according to infer_type_from_token.
+ */
+type_node infer_type_from_data_file(const string& file) {
+    type_node res;
+    auto_ptr<ifstream> in(open_data_file(file));
+    string line;
+    // check the last token of the first row
+    getline(*in, line);
+    res = infer_type_from_token(tokenizeRow<string>(line).second);
+    if(res == id::ill_formed_type) { // check the last token if the second row
+        getline(*in, line);
+        res = infer_type_from_token(tokenizeRow<string>(line).second);
     }
+    return res;
 }
 
 /**
@@ -183,7 +204,7 @@ arity_t infer_arity(const string& problem,
                     const string& input_table_file,
                     const string& combo_str) {
     if(problem == it || problem == ann_it) {
-        auto_ptr<ifstream> in(open_table_file(input_table_file));
+        auto_ptr<ifstream> in(open_data_file(input_table_file));
         return istreamArity(*in);
     } else if(problem == cp || problem == ann_cp) {
         if(combo_str.empty())
@@ -225,7 +246,7 @@ int moses_exec(int argc, char** argv) {
 
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
-    string input_table_file;
+    string input_data_file;
     string problem;
     string combo_str;
     unsigned int problem_size;
@@ -309,8 +330,8 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(max_gens_opt).c_str(),
          value<int>(&max_gens)->default_value(-1),
          "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
-        (opt_desc_str(input_table_file_opt).c_str(),
-         value<string>(&input_table_file),
+        (opt_desc_str(input_data_file_opt).c_str(),
+         value<string>(&input_data_file),
          "Input table file, the maximum number of samples is the number of rows in the file.\n")
         (opt_desc_str(problem_opt).c_str(),
          value<string>(&problem)->default_value("it"),
@@ -463,7 +484,7 @@ int moses_exec(int argc, char** argv) {
     MT19937RandGen rng(rand_seed);
 
     // infer arity
-    arity_t arity = infer_arity(problem, problem_size, input_table_file, combo_str);
+    arity_t arity = infer_arity(problem, problem_size, input_data_file, combo_str);
 
     // convert include_only_ops_str to the set of actual operators to
     // ignore
@@ -528,17 +549,23 @@ int moses_exec(int argc, char** argv) {
     // set moses_parameters
     moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);
 
+    // read labels on data file
+    vector<string> labels;
+    if(output_with_labels && !input_data_file.empty())
+        labels = read_data_file_labels(input_data_file);
+
     // set metapop_moses_results_parameters
     metapop_moses_results_parameters mmr_pa(result_count,
                                             output_score, output_complexity,
                                             output_score_complexity_old_moses,
                                             output_bscore, output_eval_number,
+                                            output_with_labels, labels,
                                             output_file, jobs);
 
     if(problem == it) { // regression based on input table
         
         // try to infer the type of the input table
-        type_node inferred_type = infer_type_from_data_file(input_table_file);
+        type_node inferred_type = infer_type_from_data_file(input_data_file);
         if(exemplars.empty()) {            
             exemplars.push_back(type_to_exemplar(inferred_type));
         }
@@ -551,10 +578,10 @@ int moses_exec(int argc, char** argv) {
 
         OC_ASSERT(output_type == inferred_type);
 
-        auto_ptr<ifstream> in(open_table_file(input_table_file));
+        auto_ptr<ifstream> in(open_data_file(input_data_file));
 
         if(output_type == id::boolean_type) {
-            // read input_table_file file
+            // read input_data_file file
             truth_table_inputs it;
             partial_truth_table ot;
             istreamTable<truth_table_inputs,
@@ -617,7 +644,7 @@ int moses_exec(int argc, char** argv) {
                                   vm, mmr_pa);
         }
         else if(output_type == id::contin_type) {
-            // read input_table_file file
+            // read input_data_file file
             contin_input_table it;
             contin_table ot;
             istreamTable<contin_input_table,
@@ -768,10 +795,10 @@ int moses_exec(int argc, char** argv) {
     // ANN problems //
     //////////////////
     } else if(problem == ann_it) { // regression based on input table using ann
-        auto_ptr<ifstream> in(open_table_file(input_table_file));
+        auto_ptr<ifstream> in(open_data_file(input_data_file));
         contin_input_table it;
         contin_table ot;
-        // read input_table_file file
+        // read input_data_file file
         istreamTable<contin_input_table,
                      contin_table, contin_t>(*in, it, ot);
         // if no exemplar has been provided in option insert the default one
@@ -808,7 +835,7 @@ int moses_exec(int argc, char** argv) {
             nsamples = default_nsamples;
         
         contin_input_table it(nsamples, arity, rng,
-                                       max_rand_input, min_rand_input);
+                              max_rand_input, min_rand_input);
         contin_table table_outputs(tr, it, rng);
         
         type_tree tt = declare_function(id::ann_type, 0);

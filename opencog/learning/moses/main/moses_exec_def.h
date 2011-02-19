@@ -38,7 +38,7 @@ static const string number_of_evals_str = "#evals";
 // program option names and abbreviations
 // for their meanings see options_description in moses-exec.cc
 static const pair<string, string> rand_seed_opt("random-seed", "r");
-static const pair<string, string> input_table_file_opt("input-file", "i");
+static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> problem_opt("problem", "H");
 static const pair<string, string> combo_str_opt("combo-program", "y");
 static const pair<string, string> problem_size_opt("problem-size", "k");

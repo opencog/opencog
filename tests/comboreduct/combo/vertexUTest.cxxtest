@@ -1,6 +1,9 @@
 #include <opencog/comboreduct/combo/vertex.h>
+#include <boost/assign/list_of.hpp>
 
 using namespace combo;
+using namespace std;
+using namespace boost::assign;
 
 class vertexUTest :  public CxxTest::TestSuite {
 public:
@@ -25,5 +28,10 @@ public:
             arity_t arity = -4;
             TS_ASSERT(arg.is_idx_valid(arity));
         }
+    }
+
+    void test_ph2l() {
+        vector<string> labels = list_of("fat")("pretty");
+        TS_ASSERT_EQUALS(ph2l("and(#1 #2)", labels), "and(#fat #pretty)");
     }
 };

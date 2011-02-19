@@ -805,33 +805,42 @@ void subsampleTable(IT& table_inputs, unsigned int nsamples, RandGen& rng) {
 
 } // ~namespace combo
 
+template<typename T>
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::truth_table& tt)
+                                const std::vector<std::vector<T> >& mt)
 {
-    return opencog::ostreamContainer(out, tt);
-}
-
-inline std::ostream& operator<<(std::ostream& out,
-                                const combo::contin_matrix& cm)
-{
-    for(combo::const_cm_it i = cm.begin(); i != cm.end(); ++i) {
-        opencog::ostreamContainer(out, *i, "\t");
+    foreach(const std::vector<T>& row, mt) {
+        opencog::ostreamContainer(out, row, ",");
         out << std::endl;
     }
     return out;
 }
 
+template<typename T>
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::contin_input_table& cti)
+                                const combo::input_table<T>& it)
 {
-    out << static_cast<combo::contin_matrix>(cti.get_matrix());
+    if(!it.get_labels().empty()) {
+        opencog::ostreamContainer(out, it.get_labels(), ",");
+        out << std::endl;
+    }
+    out << it.get_matrix();
     return out;
 }
 
+template<typename T>
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::contin_table& ct)
+                                const combo::output_table<T>& ot)
 {
-    return opencog::ostreamContainer(out, ct);
+    if(!ot.get_label().empty())
+        out << ot.get_label() << std::endl;
+    return opencog::ostreamContainer(out, ot, "\n");
+}
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const combo::truth_table& tt)
+{
+    return opencog::ostreamContainer(out, tt);
 }
 
 inline std::ostream& operator<<(std::ostream& out,

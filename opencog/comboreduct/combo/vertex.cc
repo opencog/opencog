@@ -26,12 +26,15 @@
 #include <boost/lexical_cast.hpp>
 #include "procedure_call.h"
 
+using namespace std;
+using namespace boost;
+using namespace combo;
+
 // uncomment this to output a negative literal !#n instead of not(#n)
 #define ABBREVIATE_NEGATIVE_LITERAL
 
-std::ostream& operator<<(std::ostream& out, const combo::ann_type& h)
+ostream& operator<<(ostream& out, const ann_type& h)
 {
-    using namespace combo;
     switch (h.id) {
     case id::ann:
         return out << "ann";
@@ -44,7 +47,7 @@ std::ostream& operator<<(std::ostream& out, const combo::ann_type& h)
    }
 }
 
-std::ostream& operator<<(std::ostream& out, const combo::builtin& h)
+ostream& operator<<(ostream& out, const builtin& h)
 {
     using namespace combo;
     switch (h) {
@@ -87,7 +90,7 @@ std::ostream& operator<<(std::ostream& out, const combo::builtin& h)
     }
 }
 
-std::ostream& operator<<(std::ostream& out, const combo::wild_card& w)
+ostream& operator<<(ostream& out, const wild_card& w)
 {
     using namespace combo;
     switch (w) {
@@ -98,15 +101,14 @@ std::ostream& operator<<(std::ostream& out, const combo::wild_card& w)
     }
 }
 
-std::ostream& ostream_abbreviate_literal(std::ostream& out,
-                                         const combo::argument& a) {
+ostream& ostream_abbreviate_literal(ostream& out, const argument& a) {
     if(a.is_negated()) {
         return out << "!#" << -a.idx;
     }
     return out << "#" << a.idx;
 }
 
-std::ostream& operator<<(std::ostream& out, const combo::argument& a)
+ostream& operator<<(ostream& out, const argument& a)
 {
 #ifdef ABBREVIATE_NEGATIVE_LITERAL
     return ostream_abbreviate_literal(out, a);
@@ -117,35 +119,35 @@ std::ostream& operator<<(std::ostream& out, const combo::argument& a)
 #endif
 }
 
-std::ostream& operator<<(std::ostream& out, const combo::vertex& v)
+ostream& operator<<(ostream& out, const vertex& v)
 {
-    if (const combo::ann_type* z = boost::get<combo::ann_type>(&v))
+    if (const ann_type* z = get<ann_type>(&v))
         return out << (*z);
-    if (const combo::argument* a = boost::get<combo::argument>(&v))
+    if (const argument* a = get<argument>(&v))
         return out << (*a);
-    if (const combo::builtin* h = boost::get<combo::builtin>(&v))
+    if (const builtin* h = get<builtin>(&v))
         return out << (*h);
-    if (const combo::wild_card* w = boost::get<combo::wild_card>(&v))
+    if (const wild_card* w = get<wild_card>(&v))
         return out << (*w);
-    if (const combo::action* act = boost::get<combo::action>(&v))
+    if (const action* act = get<action>(&v))
         return out << (*act);
-    if (const combo::builtin_action* aact = boost::get<combo::builtin_action>(&v))
+    if (const builtin_action* aact = get<builtin_action>(&v))
         return out << (*aact);
-    if (const combo::perception* per = boost::get<combo::perception>(&v))
+    if (const perception* per = get<perception>(&v))
         return out << (*per);
-    if (const combo::indefinite_object*
-            iot = boost::get<combo::indefinite_object>(&v))
+    if (const indefinite_object*
+            iot = get<indefinite_object>(&v))
         return out << (*iot);
-    if (const combo::message* m = boost::get<combo::message>(&v))
+    if (const message* m = get<message>(&v))
         return out << (*m);
-    if (const combo::definite_object* dot = boost::get<combo::definite_object>(&v))
+    if (const definite_object* dot = get<definite_object>(&v))
         return out << (*dot);
-    if (const combo::action_symbol* as = boost::get<combo::action_symbol>(&v))
+    if (const action_symbol* as = get<action_symbol>(&v))
         return out << (*as);
-    if (const combo::procedure_call* cp = boost::get<combo::procedure_call>(&v)) {
+    if (const procedure_call* cp = get<procedure_call>(&v)) {
         return out << (*cp);
     }
-    return out << boost::get<combo::contin_t>(v);
+    return out << get<contin_t>(v);
 }
 
 
@@ -159,6 +161,35 @@ void copy_without_null_vertices(combo_tree::iterator src,
     for (combo_tree::sibling_iterator sib = src.begin();sib != src.end();++sib)
         if (*sib != id::null_vertex)
             copy_without_null_vertices(sib, dst_tr, dst_tr.append_child(dst));
+}
+
+string ph2l(const string& ce, const vector<string>& labels)
+{
+    /// @todo the implementation could be done in 2 lines with
+    /// boost.regex with boost version 1.42 or above because then we
+    /// can use Formatter as callback, but we're stuck with boost 1.38
+    /// :-(
+    string res;
+    string match;
+    bool matching = false;
+    foreach(char c, ce) {
+        if(!matching) {
+            res += c;
+            if(c == '#') // matching starts
+                matching = true;
+        } else {
+            if(c == ' ' || c == ')' || c == '\n') { //matching ends
+                res += labels[lexical_cast<arity_t>(match) - 1] + c;
+                match.clear();
+                matching = false;
+            } else // matching goes
+                match += c;
+        }
+    }
+    // if a matching is going on flush to the result
+    if(matching)
+        res += labels[lexical_cast<arity_t>(match) - 1];
+    return res;
 }
 
 } //~namespace combo
