@@ -52,11 +52,11 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         MindDBProxy::getInstance()->add(atomB2);
         MindDBProxy::getInstance()->add(atomB3);
         MindDBProxy::getInstance()->add(atomC);
-        hA = TLB::getHandle(atomA);
-        hB1 = TLB::getHandle(atomB1);
-        hB2 = TLB::getHandle(atomB2);
-        hB3 = TLB::getHandle(atomB3);
-        hC = TLB::getHandle(atomC);
+        hA = atomA->getHandle();
+        hB1 = atomB1->getHandle();
+        hB2 = atomB2->getHandle();
+        hB3 = atomB3->getHandle();
+        hC = atomC->getHandle();
         linkAB1 = (Link*) TLB::getAtom(createLink(INHERITANCE_LINK, hA, hB1, 0.5277778,36));
         linkAB2 = (Link*) TLB::getAtom(createLink(INHERITANCE_LINK, hA, hB2, 0.44444445,36));
         linkAB3 = (Link*) TLB::getAtom(createLink(INHERITANCE_LINK, hA, hB3, 0.5277778,36));
@@ -124,7 +124,7 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
     void testCreateLink(){
         FirstPLNTruthValue* tv = new FirstPLNTruthValue (0.3888889,36);
         Link* link = InferenceMindAgent::createLink(SUBSET_LINK, hA,hC, tv);
-        Handle h = TLB::getHandle(link);
+        Handle h = link->getHandle();
         link = (Link*) TLB::getAtom(h);
         TS_ASSERT_EQUALS(link->getType(), SUBSET_LINK);
         TS_ASSERT(link->isSource(hA));
@@ -158,7 +158,7 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
     void testFindInferenceLinkBasic(){
 
         Link* link = InferenceMindAgent::findInferenceLink(atomA, atomB1, INHERITANCE_LINK, false);
-        Handle h = TLB::getHandle(link);
+        Handle h = link->getHandle();
         link = (Link*) TLB::getAtom(h);
         TS_ASSERT(link != NULL);
         TS_ASSERT_EQUALS(link->getType(), INHERITANCE_LINK);
@@ -185,7 +185,7 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
 
     void testFindInferenceLinkInversionOn(){
         Link* link = InferenceMindAgent::findInferenceLink(atomA, atomB1, INHERITANCE_LINK, true);
-        Handle h = TLB::getHandle(link);
+        Handle h = link->getHandle();
         link = (Link*) TLB::getAtom(h);
         TS_ASSERT(link != NULL);
         TS_ASSERT_EQUALS(link->getType(), INHERITANCE_LINK);
@@ -201,7 +201,7 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
 
     void testFindInferenceLinkWithInversion(){
         Link* link = InferenceMindAgent::findInferenceLink(atomB1, atomA, INHERITANCE_LINK, true);
-        Handle h = TLB::getHandle(link);
+        Handle h = link->getHandle();
         link = (Link*) TLB::getAtom(h);
         TS_ASSERT(link != NULL);
         TS_ASSERT_EQUALS(link->getType(), INHERITANCE_LINK);
@@ -306,8 +306,8 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
     }
 
     void testInversionFailType(){
-        TS_ASSERT_EQUALS(hC, TLB::getHandle(atomC));
-        TS_ASSERT_EQUALS(hB3, TLB::getHandle(atomB3));
+        TS_ASSERT_EQUALS(hC, atomC->getHandle());
+        TS_ASSERT_EQUALS(hB3, atomB3->getHandle());
         Link* link = InferenceMindAgent::invert(hC, hB3, SUBSET_LINK);
         TS_ASSERT(link == NULL);
     }

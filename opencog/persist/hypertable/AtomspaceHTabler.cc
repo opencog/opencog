@@ -191,7 +191,7 @@ Link * AtomspaceHTabler::getLink(Type t, const std::vector<Handle>& handles) con
  * This is a two-pass lookup: we get the handle from Nametable
  * and use it to index into the main Atomtable.
  */
-Node * AtomspaceHTabler::getNode(Type t, const char * name) const
+Node* AtomspaceHTabler::getNode(Type t, const char * name) const
 {
     TableScannerPtr scanner_ptr;
     ScanSpecBuilder ssb;
@@ -548,6 +548,8 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     SimpleTruthValue nstv(mean, count);
     atom_ptr->setTruthValue(nstv);
     std::cout << "getAtom(): truth value restored" <<std::endl;
+
+    // XXX we should explicitly add the atom to the TLB
 
     return atom_ptr;
 }

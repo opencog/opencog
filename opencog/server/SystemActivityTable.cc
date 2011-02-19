@@ -2,9 +2,8 @@
  * opencog/server/SystemActivityTable.cc
  *
  * Copyright (C) 2009 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010-2011 OpenCog Foundation
  * All Rights Reserved
- *
- * Written by Trent Waddington <trent.waddington@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -49,7 +48,7 @@ void SystemActivityTable::init(CogServer *cogServer)
 {
     logger().debug("[SystemActivityTable] init");
     this->cogServer = cogServer;
-    conn = cogServer->getAtomSpace()->atomSpaceAsync.removeAtomSignal(
+    conn = cogServer->getAtomSpace()->atomSpaceAsync->removeAtomSignal(
             boost::bind(&SystemActivityTable::atomRemoved, this, _1, _2));
 }
 

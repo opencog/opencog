@@ -42,7 +42,7 @@ Agent::Agent(const unsigned int f) : _frequency(f)
     stimulatedAtoms = new AtomStimHashMap();
     totalStimulus = 0;
 
-    conn = server().getAtomSpace()->atomSpaceAsync.removeAtomSignal(
+    conn = server().getAtomSpace()->atomSpaceAsync->removeAtomSignal(
             boost::bind(&Agent::atomRemoved, this, _1, _2));
 }
 

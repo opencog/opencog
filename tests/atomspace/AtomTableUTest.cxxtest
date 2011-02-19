@@ -360,7 +360,7 @@ public:
         TS_ASSERT(!result);
         Link* link = new Link(LIST_LINK, emptyOutgoing);
         Handle h = table->add(link);
-        if (TLB::getHandle(link) != h) delete link;
+        if (link->getHandle() != h) delete link;
         result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false);
         TS_ASSERT(result);
         delete result;

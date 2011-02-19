@@ -483,17 +483,17 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
             //pet->setMode(PLAYING);
 
             // Add schema to RuleEngine learned schemata
-            ruleEngine->addLearnedSchema( sm->getSchemaName( ) );
+            ruleEngine->addLearnedSchema( sm->getSchemaName() );
         }
         break;
 
         case MessagingSystem::Message::CANDIDATE_SCHEMA: {
             // Add schema to RuleEngine learned schemata ...
-            ruleEngine->addLearnedSchema( sm->getSchemaName( ) );
+            ruleEngine->addLearnedSchema( sm->getSchemaName() );
 
             // .. and execute it
             pet->setTriedSchema(sm->getSchemaName());
-            ruleEngine->tryExecuteSchema( sm->getSchemaName( ) );
+            ruleEngine->tryExecuteSchema( sm->getSchemaName() );
 
         }
         break;
@@ -512,13 +512,10 @@ void OAC::schemaSelection()
 {
     logger().fine("OAC - Executing selectSchemaToExecute().");
 
-    this->pet->getCurrentModeHandler( ).update( );
-    this->ruleEngine->processNextAction( );
-    this->ruleEngine->runSchemaForCurrentAction( );
+    this->pet->getCurrentModeHandler().update();
+    this->ruleEngine->processNextAction();
+    this->ruleEngine->runSchemaForCurrentAction();
 
-//  if ( pet->getMode( ) != PLAYING && pet->getMode( ) != LEARNING ) {
-//    pet->setMode( PLAYING );
-//  } // if
 }
 
 void OAC::decayShortTermImportance()

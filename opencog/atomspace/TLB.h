@@ -134,27 +134,6 @@ private:
     }
 
     /**
-     * Maps an atom to its corresponding handle.
-     *
-     * If the atom is not in the TLB an exception is thrown.
-     *
-     * @param Atom to be mapped.
-     * @return Corresponding handle for the given atom.
-     */
-    static inline const Handle& getHandle(const Atom* atom)
-    {
-        const Handle &h = atom->handle;
-        if (h != Handle::UNDEFINED) return h;
-#ifdef CHECK_MAP_CONSISTENCY
-        throw InvalidParamException(TRACE_INFO,
-                                    "Atom is not in the TLB!");
-        return Handle::UNDEFINED;
-#else
-        return addAtom(atom);
-#endif
-    }
-
-    /**
      * Adds a new atom to the TLB.
      *
      * If the atom has already be added then an exception is thrown.

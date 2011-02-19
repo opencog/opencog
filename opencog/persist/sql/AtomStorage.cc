@@ -576,8 +576,7 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 void AtomStorage::storeAtom(const Atom *atom)
 {
 	get_ids();
-	Handle h = TLB::getHandle(atom);
-	do_store_atom(atom, h);
+	do_store_atom(atom, atom->getHandle());
 }
 
 void AtomStorage::storeAtom(Handle h)
@@ -627,7 +626,7 @@ int AtomStorage::do_store_atom(const Atom *atom, Handle h)
 void AtomStorage::storeSingleAtom(const Atom *atom)
 {
 	get_ids();
-	Handle h = TLB::getHandle(atom);
+	Handle h = atom->getHandle();
 	int height = get_height(atom);
 	do_store_single_atom(atom, h, height);
 }

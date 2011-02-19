@@ -3,7 +3,6 @@
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Andre Senna
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,7 +19,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #include "ServerSocket.h"
 #include <string.h>
@@ -69,7 +67,8 @@ void ServerSocket::handle_connection(ServerSocket* ss)
     {
         try {
         //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
-        boost::asio::read_until(ss->getSocket(), b, boost::regex("\n"));
+        boost::regex nl("\n");
+        boost::asio::read_until(ss->getSocket(), b, nl);
         //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
         std::istream is(&b);
         std::string line;

@@ -79,8 +79,9 @@ AtomTable::~AtomTable()
     AtomHashSet::iterator it = atomSet.begin();
 
     while (it != atomSet.end()) {
-        DPRINTF("Removing atom %s (atomSet size = %zu)\n", (*it)->toString().c_str(), atomSet.size());
-        remove(TLB::getHandle(*it), true);
+        DPRINTF("Removing atom %s (atomSet size = %zu)\n",
+                (*it)->toString().c_str(), atomSet.size());
+        remove((*it)->getHandle(), true);
         it = atomSet.begin();
     }
     atomSet.clear();
@@ -241,7 +242,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             AtomHashSet::const_iterator it = atomSet.find(&link);
             Handle h = Handle::UNDEFINED;
             if (it != atomSet.end()) {
-                h = TLB::getHandle(*it);
+                h = (*it)->getHandle();
             }
             HandleEntry* result = NULL;
             if (TLB::isValidHandle(h)) {
@@ -461,7 +462,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 {
     if (atom->getAtomTable() != NULL) {
         // Atom is already inserted
-        return TLB::getHandle(atom);
+        return atom->getHandle();
     }
     Handle existingHandle = Handle::UNDEFINED;
     Node * nnn = dynamic_cast<Node *>(atom);
@@ -544,7 +545,9 @@ void AtomTable::log(Logger& logger, Type type, bool subclass) const
     for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
         bool matched = (subclass && classserver().isA(atom->getType(), type)) || type == atom->getType();
-        if (matched) logger.debug("%d: %s", TLB::getHandle(atom).value(), atom->toString().c_str());
+        if (matched)
+            logger.debug("%d: %s", atom->getHandle().value(),
+                    atom->toString().c_str());
     }
 }
 
@@ -554,7 +557,7 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
     for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
         bool matched = (subclass && classserver().isA(atom->getType(), type)) || type == atom->getType();
-        if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << std::endl;
+        if (matched) output << atom->getHandle() << ": " << atom->toString() << std::endl;
     }
 }
 
@@ -839,7 +842,7 @@ void AtomTable::scrubIncoming(void)
     AtomHashSet::const_iterator it;
     for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
-        Handle handle = TLB::getHandle(atom);
+        Handle handle = atom->getHandle();
 
         // Updates incoming set of all targets.
         const Link * link = dynamic_cast<const Link *>(atom);

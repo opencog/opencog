@@ -42,7 +42,7 @@ unsigned int ImportanceIndex::importanceBin(short importance)
 
 void ImportanceIndex::updateImportance(Atom* atom, int bin)
 {
-	Handle h = TLB::getHandle(atom);
+	Handle h = atom->getHandle();
 	int newbin = importanceBin(atom->getAttentionValue().getSTI());
 	if (bin == newbin) return;
 
@@ -143,7 +143,7 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 }
 
 bool ImportanceIndex::isOld(const Atom* atom,
-        const AttentionValue::sti_t threshold) const
+        const AttentionValue::sti_t threshold)
 {
     return ((atom->getAttentionValue().getSTI() < threshold) &&
             (atom->getAttentionValue().getLTI() < 1));
@@ -206,8 +206,6 @@ HandleEntry* ImportanceIndex::getHandleSet(
 	// because there may be atoms that have the same importanceIndex
 	// and whose importance is lower than lowerBound or bigger than
 	// upperBound.
-    // XXX This doesn't sound right. Maybe after being 
-	// decayed ... but this should not be generally true.
 	set = HandleEntry::filterSet(set, lowerBound, upperBound);
 
 	if (lowerBin == upperBin) {

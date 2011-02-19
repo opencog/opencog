@@ -69,7 +69,7 @@ public:
     static unsigned int importanceBin(short);
 
     //! Tests whether an atom should be considered "old"
-    bool isOld(const Atom* a, const AttentionValue::sti_t threshold) const;
+    static bool isOld(const Atom* a, const AttentionValue::sti_t threshold);
 
 };
 

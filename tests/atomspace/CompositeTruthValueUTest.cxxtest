@@ -523,11 +523,16 @@ public:
             const TruthValue& versionedTv1 = tv->getVersionedTV(versionHandles[i]);
             TS_ASSERT(versionedTv1.isNullTv());
             //logger().debug("%d => %p", i+1, handles->get(i+1));
-            const TruthValue& versionedTv2 = tv->getVersionedTV(VersionHandle(versionHandles[i].indicator, TLB::getHandle(handles->get(atomhand[i]))));
+            const TruthValue& versionedTv2 =
+                tv->getVersionedTV(VersionHandle(versionHandles[i].indicator,
+                            handles->get(atomhand[i])->getHandle() ));
             TS_ASSERT(!versionedTv2.isNullTv());
-            TS_ASSERT(fabs(versionedTv2.getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(versionedTv2.getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(versionedTv2.getConfidence() - confidences[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(versionedTv2.getMean() - means[i]) <=
+                    FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(versionedTv2.getCount() - counts[i]) <=
+                    FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(versionedTv2.getConfidence() - confidences[i]) <=
+                    FLOAT_ACCEPTABLE_ERROR);
         }
     }
 };

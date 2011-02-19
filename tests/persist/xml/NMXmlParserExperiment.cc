@@ -278,8 +278,8 @@ bool NMXmlParserExperiment::checkExp1()
 
      TS_ASSERT(link_one_two != NULL);
 
-     TS_ASSERT(TLB::getHandle(atom->getOutgoingSet()[0]) == two);
-     TS_ASSERT(TLB::getHandle(atom->getOutgoingSet()[1]) == one);
+     TS_ASSERT(atom->getOutgoingSet()[0]->getHandleSet() == two);
+     TS_ASSERT(atom->getOutgoingSet()[1]->getHandleSet() == one);
      if ((atom->getOutgoingSet()[0] != two) ||
       (atom->getOutgoingSet()[1] != one)){
       return(false);

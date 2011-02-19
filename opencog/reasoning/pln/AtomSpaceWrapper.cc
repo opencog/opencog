@@ -100,9 +100,9 @@ void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
 {
     if (watch) {
         if (!watchingAtomSpace) {
-            c_add = atomspace->atomSpaceAsync.addAtomSignal(
+            c_add = atomspace->atomSpaceAsync->addAtomSignal(
                     boost::bind(&AtomSpaceWrapper::handleAddSignal, this, _1, _2));
-            c_remove = atomspace->atomSpaceAsync.removeAtomSignal(
+            c_remove = atomspace->atomSpaceAsync->removeAtomSignal(
                     boost::bind(&AtomSpaceWrapper::handleRemoveSignal, this, _1, _2));
             assert(c_add.connected() && c_remove.connected());
             watchingAtomSpace = true;

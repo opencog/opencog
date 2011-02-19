@@ -455,7 +455,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 
 void SavingLoading::writeAtom(FILE *f, Atom *atom)
 {
-    logger().info("SavingLoading::writeAtom: %p (type = %d) (handle = %d)", atom, atom->getType(), TLB::getHandle(atom).value( ));
+    logger().info("SavingLoading::writeAtom: %p (type = %d) (handle = %d)", atom, atom->getType(), atom->getHandle().value());
 
     // writes the atom type
     fwrite(&atom->type, sizeof(Type), 1, f);
@@ -463,7 +463,7 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom)
     fwrite(&atom->flags, sizeof(char), 1, f);
 
     // writes the atom handle
-    Handle handle = TLB::getHandle(atom);
+    Handle handle = atom->getHandle();
     fwrite(&handle, sizeof(Handle), 1, f);
 
     // incoming references will be re-created during the loading process

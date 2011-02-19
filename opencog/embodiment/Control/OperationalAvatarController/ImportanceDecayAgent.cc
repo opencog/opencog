@@ -1,9 +1,9 @@
 /*
  * opencog/embodiment/Control/OperationalAvatarController/ImportanceDecayAgent.cc
  *
+ * Copyright (C) 2009-2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Andre Senna
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -39,23 +39,23 @@ ImportanceDecayAgent::ImportanceDecayAgent()
 
 void ImportanceDecayAgent::connectSignals(AtomSpace& as)
 {
-    mergedAtomConnection = as.atomSpaceAsync.mergeAtomSignal(boost::bind(&ImportanceDecayAgent::atomMerged, this, _1, _2));
+    mergedAtomConnection = as.atomSpaceAsync->mergeAtomSignal(
+            boost::bind(&ImportanceDecayAgent::atomMerged,
+            this, _1, _2));
 }
 
 void ImportanceDecayAgent::run(opencog::CogServer *server)
 {
-
-    logger().fine(
-                 "ImportanceDecayTask - Executing decayShortTermImportance().");
+    logger().fine("ImportanceDecayTask - Executing decayShortTermImportance().");
     ((OAC *) server)->decayShortTermImportance();
-
 }
 
 void ImportanceDecayAgent::atomMerged(AtomSpaceImpl* as, Handle h)
 {
     logger().debug("ImportanceDecayAgent::atomMerged(%lu)", h.value());
     // Restore the default STI value if it has decayed
-    // TODO: Remove this code when the merge of atoms consider the STI values this way as well.
+    // TODO: Remove this code when the merge of atoms consider the STI values
+    // this way as well.
     if (as->getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
         as->setSTI(h, AttentionValue::DEFAULTATOMSTI);
     }

@@ -53,7 +53,7 @@ public:
         TS_ASSERT(l2->getArity() == 0);
 
         std::vector<Handle> out2;
-        out2.push_back(TLB::getHandle(n1));
+        out2.push_back(n1->getHandle());
         Link* l3 = new Link(LIST_LINK, out2);
         Link* l4 = new Link(LIST_LINK, out2);
         Link* l5 = new Link(INHERITANCE_LINK, out2);
@@ -64,8 +64,8 @@ public:
         TS_ASSERT(l6->getArity() == 1);
 
         std::vector<Handle> out3;
-        out3.push_back(TLB::getHandle(n1));
-        out3.push_back(TLB::getHandle(n2));
+        out3.push_back(n1->getHandle());
+        out3.push_back(n2->getHandle());
         Link* l7 = new Link(INHERITANCE_LINK, out3);
         Link* l8 = new Link(INHERITANCE_LINK, out3);
         TS_ASSERT(l7->getArity() == 2);

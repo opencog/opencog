@@ -1,9 +1,9 @@
 /*
  * opencog/embodiment/Control/OperationalAvatarController/OAC.h
  *
+ * Copyright (C) 2009-2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Carlos Lopes
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -37,18 +37,19 @@
 #include "PetMessageSender.h"
 #include "PVPActionPlanSender.h"
 
-#include <opencog/embodiment/Control/OperationalAvatarController/ProcedureInterpreterAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/ActionSelectionAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/ImportanceDecayAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/EntityExperienceAgent.h>
+#include "ProcedureInterpreterAgent.h"
+#include "ActionSelectionAgent.h"
+#include "ImportanceDecayAgent.h"
+#include "EntityExperienceAgent.h"
 
 #include "RuleEngine.h"
 
 namespace OperationalAvatarController
 {
 
-/* Defines a single factory template to allow insert a same agent
- * multiple times in the Cogserver schedule */
+/** Defines a single factory template to allow the same agent
+ * to be inserted multiple times in the Cogserver schedule
+ */
 template< typename _Type, typename _BaseType >
 class SingletonFactory : public Factory<_Type, _BaseType>
 {
@@ -121,7 +122,7 @@ private:
     /**
      * Load pet metadata for a given pet.
      *
-     * IMPORTANT: This method should be invoke only in OAC start up, i.e.
+     * @warning This method should be invoke only in OAC start up, i.e.
      * in the constructor.
      */
     void loadPet(const std::string & petId);
@@ -132,7 +133,7 @@ private:
      * SavableRepository objects must be created and registered
      * (this may be done at the constructor).
      *
-     * IMPORTANT: This method should be invoke only in OAC start up, i.e.
+     * @warning This method should be invoke only in OAC start up, i.e.
      * in the constructor.
      */
     void loadAtomSpace(const std::string & petId);
@@ -142,7 +143,7 @@ private:
      * one.
      *
      * @param spawnerMessage The spawner message plain text format to be
-     *                          processed
+     * processed
      *
      * @return True if the message was correctly processed
      */
@@ -172,16 +173,15 @@ public:
     /**
      * Save the OCP state.
      *
-     * IMPORTANT: This method should be invoke only on OAC shutdown,
-     *            that is, when it receive a shutdown message from the
-     *            spawner. Or when an exception has occured and the state
-     *            should be persisted.
+     * @warning This method should be invoke only on OAC shutdown, that is,
+     * when it receive a shutdown message from the spawner. Or when an
+     * exception has occured and the state should be persisted.
      */
     void saveState();
 
     /**
-     * @return The Percpetion/Action Interface object used to exchange
-     *            (send and receive) data with virtual world.
+     * @return The Percpetion/Action Interface object used to exchange (send
+     * and receive) data with virtual world.
      */
     PerceptionActionInterface::PAI & getPAI();
 

@@ -121,13 +121,13 @@ public:
         outgoing[1] = TLB::addAtom(n3); // predicate (with VH1)
         Link* l1 = new Link(LIST_LINK, outgoing);
         outgoing.resize(3);
-        outgoing[0] = TLB::getHandle(n3); // predicate (with VH1)
+        outgoing[0] = n3->getHandle(); // predicate (with VH1)
         outgoing[1] = TLB::addAtom(n4); // predicate (with VH1 and VH2)
         outgoing[2] = TLB::addAtom(n5); // concept (with VH2)
         Link* l2 = new Link(LIST_LINK, outgoing);
         outgoing.resize(2);
-        outgoing[0] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
-        outgoing[1] = TLB::getHandle(n5); // concept (with VH2)
+        outgoing[0] = n4->getHandle(); // predicate (with VH1 and VH2)
+        outgoing[1] = n5->getHandle(); // concept (with VH2)
         Link* l3 = new Link(LIST_LINK, outgoing);
 
 
@@ -179,12 +179,12 @@ public:
         Link* l1 = new Link(LIST_LINK, outgoing);
         outgoing.resize(3);
         outgoing[0] = TLB::addAtom(n3); // predicate (with VH1)
-        outgoing[1] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
+        outgoing[1] = n4->getHandle(); // predicate (with VH1 and VH2)
         outgoing[2] = TLB::addAtom(n5); // concept (with VH2)
         Link* l2 = new Link(LIST_LINK, outgoing);
         outgoing.resize(2);
-        outgoing[0] = TLB::getHandle(n4); // predicate (with VH1 and VH2)
-        outgoing[1] = TLB::getHandle(n5); // concept (with VH2)
+        outgoing[0] = n4->getHandle(); // predicate (with VH1 and VH2)
+        outgoing[1] = n5->getHandle(); // concept (with VH2)
         Link* l3 = new Link(LIST_LINK, outgoing);
 
 

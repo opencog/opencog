@@ -329,12 +329,10 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
     fundsLTI -= AttentionValue::DEFAULTATOMLTI;
 
     // Maybe the backing store knows about this atom.
-    if (backing_store)
-    {
+    if (backing_store) {
         Node *n = backing_store->getNode(t, name.c_str());
-        if (n)
-        {
-            result = TLB::getHandle(n);
+        if (n) {
+            result = TLB::addAtom(n);
             // TODO: Check if merge signal must be emitted here (AtomTable::merge
             // does that, but what to do with atoms that are not there?)
             if (!tvn.isNullTv()) do_merge_tv(result, tvn);
@@ -372,7 +370,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         Link *l = backing_store->getLink(t, outgoing);
         if (l) {
             // ask for a Handle from the TLB
-            result = TLB::getHandle(l);
+            result = TLB::addAtom(l);
             // merge the tvn argument with that of the atom just loaded from
             // the backing store
             if (!tvn.isNullTv()) do_merge_tv(result, tvn);

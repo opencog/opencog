@@ -203,7 +203,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	store->storeAtom(a);
 
 	// Fetch it back ...
-	Handle h = TLB::getHandle(a);
+	Handle h = a->getHandle();
 	Atom *b = store->getAtom(h);
 
 	// Are they equal ??
@@ -216,15 +216,15 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	store->storeAtom(a2);
 
 	std::vector<Handle> hvec;
-	hvec.push_back(TLB::getHandle(a));
-	hvec.push_back(TLB::getHandle(a2));
+	hvec.push_back(a->getHandle());
+	hvec.push_back(a2->getHandle());
 
 
 	Link *l = new Link(SET_LINK, hvec);
 	TLB::addAtom(l);
 	store->storeAtom(l);
 
-	Atom *lb = store->getAtom(TLB::getHandle(l));
+	Atom *lb = store->getAtom(l->getHandle());
 	atomCompare(l,lb);
 
 	store->kill_data();
@@ -262,9 +262,9 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 	table->add(a3[idx]);
 
 	std::vector<Handle> hvec;
-	hvec.push_back(TLB::getHandle(a1[idx]));
-	hvec.push_back(TLB::getHandle(a2[idx]));
-	hvec.push_back(TLB::getHandle(a3[idx]));
+	hvec.push_back(a1[idx]->getHandle());
+	hvec.push_back(a2[idx]->getHandle());
+	hvec.push_back(a3[idx]->getHandle());
 
 	l[idx] = new Link(PARSE_LINK, hvec);
 	al[idx] = l[idx];
