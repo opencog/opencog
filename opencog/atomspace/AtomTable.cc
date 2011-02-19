@@ -571,11 +571,13 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     if (!atom || atom->isMarkedForRemoval()) return result;
     atom->markForRemoval();
 
-    // if recursive-flag is set, also extract all the links in the atom's incoming set
+    // if recursive-flag is set, also extract all the links in the atom's
+    // incoming set
     if (recursive) {
-        /* we need to make a copy of the incoming set because the 'incoming set'
-         * container is actually a list, so the same link may appear twice in an
-         * incoming set. Hopefully we'll eventually use the right container */
+        // we need to make a copy of the incoming set because the 'incoming
+        // set' container is actually a list, so the same link may appear twice
+        // in an incoming set. Hopefully we'll eventually use the right
+        // container
         std::set<Handle> is;
         for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next)
             is.insert(in->handle);
@@ -657,10 +659,9 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
     hs = extractedHandles->toHandleVector();
 
     for (HandleSeq::reverse_iterator it = hs.rbegin(); it < hs.rend(); ++it) {
-        Atom* atom = TLB::getAtom(*it);
+        Atom* atom = TLB::removeAtom(*it);
         if (logger().isDebugEnabled())
             logger().debug("Atom removed: %d => %s", it->value(), atom->toString().c_str());
-        TLB::removeAtom(atom);
         delete atom;
     }
 }

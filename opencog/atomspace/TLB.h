@@ -110,7 +110,9 @@ class TLB
 
 private:
 
-    static boost::unordered_map<Handle, const Atom*, boost::hash<opencog::Handle> > handle_map;
+    static boost::unordered_map<
+        Handle, const Atom*,
+        boost::hash<opencog::Handle> > handle_map;
 
     /**
      * Private default constructor for this class to make it abstract.
@@ -133,9 +135,7 @@ private:
         else return const_cast<Atom*>(it->second);
     }
 
-    /**
-     * Adds a new atom to the TLB.
-     *
+    /** Adds a new atom to the TLB.
      * If the atom has already be added then an exception is thrown.
      *
      * @param Atom to be added.
@@ -145,23 +145,15 @@ private:
                                  const Handle &handle = Handle::UNDEFINED)
     {
         const Handle &h = atom->handle;
-        if (h != Handle::UNDEFINED)
-        {
+        if (h != Handle::UNDEFINED) {
 #ifdef CHECK_MAP_CONSISTENCY
             throw InvalidParamException(TRACE_INFO,
             "Atom is already in the TLB!");
 #endif /* CHECK_MAP_CONSISTENCY */
-            /* Hmm, I guess its okay to add an atom twice, assuming
-             * that it is being added with the same handle. */
-            if (handle != h)
-                throw InvalidParamException(TRACE_INFO,
-                "Atom is already in the TLB with a different handle!");
-            return h;
         }
 
         Handle ha = handle;
-        if (ha == Handle::UNDEFINED)
-        {
+        if (ha == Handle::UNDEFINED) {
             ha = Handle(brk_uuid);
             brk_uuid++;
         }
@@ -176,17 +168,13 @@ private:
      * If the atom has already been removed from or never been in the TLB
      * then an exception is thrown.
      *
-     * @param Atom to be removed.
+     * @param handle of atom to be removed.
      * @return Removed atom.
      */
-    static inline const Atom* removeAtom(Atom* atom) {
-        const Handle &h = atom->handle;
+    static inline const Atom* removeAtom(Handle h) {
         if (h == Handle::UNDEFINED) {
-#ifdef CHECK_MAP_CONSISTENCY
             throw InvalidParamException(TRACE_INFO,
-                "Cannot remove: Atom is not in the TLB");
-#endif
-            return atom;
+                "Cannot remove invalid Handle from TLB");
         }
         handle_map.erase(h);
         atom->handle = Handle::UNDEFINED;
