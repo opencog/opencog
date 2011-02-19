@@ -33,9 +33,6 @@ using namespace opencog;
 /* Module for including any core-specific common utilities */
 void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (RuntimeException)
 {
-    //printf("CoreUtils::updateHandle(%p)\n", *handle);
-    //if (TLB::isInvalidHandle(*handle)) return;
-
     Atom *a  = handles->get(*handle);
     // Assume that the HandleMap stores <Handle, Atom *> pairs ....
     Handle newH = a->getHandle();
@@ -46,7 +43,8 @@ void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (
         if (TLB::isValidHandle(newH)) {
             *handle = newH;
         } else {
-            throw RuntimeException(TRACE_INFO, "CoreUtils::updateHandle: unknown handle %p", handle->value());
+            throw RuntimeException(TRACE_INFO, "CoreUtils::updateHandle: "
+                    "unknown handle %p", handle->value());
         }
     }
 }

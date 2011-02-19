@@ -47,7 +47,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 
@@ -82,7 +81,8 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
 
     // TODO: bad bad - saving and loading should be integrated as a request or
     // use the AtomSpace API.
-    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.atomSpaceAsync->getAtomTable());
+    AtomTable& atomTable = const_cast<AtomTable&> (
+            atomSpace.atomSpaceAsync->getAtomTable() );
 
     // stores the total number of atoms in the system
     int atomCount = atomTable.getSize();
@@ -157,15 +157,18 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     // writes nodes to file and increments node counter
     while (iter->hasNext()) {
         Handle atomHandle = iter->next();
-        Node* node = dynamic_cast<Node*>(TLB::getAtom(atomHandle));
+        Node* node = dynamic_cast<Node*>(atomTable.getAtom(atomHandle));
         if ( node == NULL ) {
-            logger().error( "Trying to save a node which isn't registered at TLB. Handle %d", atomHandle.value() );
+            logger().error( "Trying to save a node which isn't in atomTable "
+                    "(%p). Handle %d", &atomTable, atomHandle.value() );
             continue;
-        } // if
-        logger().info( "Saving Node handle %d name %s", atomHandle.value(), node->toString().c_str() );
+        }
+        logger().info( "Saving Node handle %d name %s", atomHandle.value(),
+                node->toString().c_str() );
         writeNode(f, node);
         numNodes++;
-        int percentage = (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR)));
+        int percentage = (int) (100 * ((float) ++processed /
+                    (total * INDEX_REPORT_FACTOR)));
         if ((percentage % 10) == 0) {
             printf( "Memory dump: %d%% done.\r", percentage);
             fflush(stdout);
@@ -221,14 +224,15 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
      */
     std::set<Handle> linkHandles;
     while (iter->hasNext()) {
-        linkHandles.insert( iter->next( ) );
+        linkHandles.insert( iter->next() );
     } // while
     delete iter;
 
     // writes links to file and increments link counter
     std::set<Handle>::iterator itLinks;
-    for( itLinks = linkHandles.begin( ); itLinks != linkHandles.end( ); ++itLinks ) {
-        Link* link = dynamic_cast<Link*>(TLB::getAtom(*itLinks));
+    for( itLinks = linkHandles.begin( ); itLinks != linkHandles.end( );
+            ++itLinks ) {
+        Link* link = dynamic_cast<Link*>(atomTable.getAtom(*itLinks));
         logger().fine( "Saving Link handle %d name %s", itLinks->value(), link->toString().c_str() );
         writeLink(f, link);
         numLinks++;
@@ -390,7 +394,8 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
 
 }
 
-void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable, const std::vector<Type>& dumpToCore)
+void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles,
+        AtomTable& atomTable, const std::vector<Type>& dumpToCore)
 {
     logger().fine("SavingLoading::loadLinks");
 
@@ -398,12 +403,11 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
     // reads the total number of links
     fread(&numLinks, sizeof(int), 1, f);
 
-    /**
-     * Before registering indexes for a loaded link, all it's outgoing handles must be
-     * already loaded in order to avoid INVALID_HANDLE issues. So, a handle list
-     * will be used to store all the link handles registered at TLB. Then, all indexes 
-     * related to each link will be created.
-     */
+    // Before registering indexes for a loaded link, all of its outgoing handles
+    // must be already loaded in order to avoid INVALID_HANDLE issues. So,
+    // a handle list will be used to store all the link handles registered
+    // with the AtomTable. Then, all indexes related to each link will be created.
+    //
     // first reads each link from the file
     for (int i = 0; i < numLinks; i++) {
         // a new link is created
@@ -413,18 +417,19 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         fread(&oldType, sizeof(Type), 1, f);        
         if (dumpToCore[oldType] > classserver().getNumberOfClasses()) {
             throw InconsistenceException(TRACE_INFO,
-                                         "SavingLoading - Type inconsistence clash '%d'.", oldType );
+                 "SavingLoading - Type inconsistence clash '%d'.", oldType );
         }
         link->type = dumpToCore[oldType];
         readLink( f, link, handles );
 
         atomTable.add(link);
-    } // for
+    }
 }
 
 void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 {
-    logger().fine("SavingLoading::updateHandles: atom = %p, type = %d", atom, atom->getType());
+    logger().fine("SavingLoading::updateHandles: atom = %p, type = %d",
+            atom, atom->getType());
 
     // if atom uses a CompositeTruthValue, updates the version handles inside it
     if (atom->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE) {
@@ -432,7 +437,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
         CompositeTruthValue ctv((const CompositeTruthValue&) atom->getTruthValue());
         CompositeRenumber::updateVersionHandles(ctv, handles);
         atom->setTruthValue(ctv);        
-    } // if
+    }
     
     // updates handles for trail
     if (classserver().isA(atom->type, LINK)) {
