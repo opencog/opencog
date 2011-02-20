@@ -228,6 +228,7 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, const TruthValue
         result = getHandle(t, name);
     } while(result!=Handle::UNDEFINED);//while(TLB::isValidHandle(result));
 
+    std::cout << "adding node" << std::endl;
     return addNode(t, name, tvn);
 }
 

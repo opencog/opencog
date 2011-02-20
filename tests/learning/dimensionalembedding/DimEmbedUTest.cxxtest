@@ -51,37 +51,9 @@ public:
                            SimpleTruthValue(1.0, SimpleTruthValue::confidenceToCount(0.9)));
         atomSpace->addLink(SIMILARITY_LINK, h3, h4,
                            SimpleTruthValue(0.2, SimpleTruthValue::confidenceToCount(1.0)));
-        /*
-        //dimEmbed.addPivot(h1,SIMILARITY_LINK);
-        //dimEmbed.addPivot(h2,SIMILARITY_LINK);
-        dimEmbed.embedAtomSpace(SIMILARITY_LINK, 2);
-        //The embedding vectors should be as follows:
-        //h1: (1, .5)
-        //h2: (.5, 1)
-        //h3: (.7, .35)
-        //h4: (.9, .45)
-        std::list<double> l1 = dimEmbed.getEmbedList(h1,SIMILARITY_LINK);
-        std::list<double> l2 = dimEmbed.getEmbedList(h2,SIMILARITY_LINK);
-        std::list<double> l3 = dimEmbed.getEmbedList(h3,SIMILARITY_LINK);
-        std::list<double> l4 = dimEmbed.getEmbedList(h4,SIMILARITY_LINK);
-        TS_ASSERT_EQUALS(2, l1.size());
-        TS_ASSERT_EQUALS(l1.size(), l2.size());
-        TS_ASSERT_EQUALS(l2.size(), l3.size());
-        TS_ASSERT_EQUALS(l3.size(), l4.size());
-        std::list<double>::iterator it = l1.begin();
-        TS_ASSERT_DELTA(*it, 1.0, .00001); it++;
-        TS_ASSERT_DELTA(*it, 0.5, .00001);
-        it=l2.begin();
-        TS_ASSERT_DELTA(*it, 0.5, .00001); it++;
-        TS_ASSERT_DELTA(*it, 1.0, .00001);
-        it=l3.begin();
-        TS_ASSERT_DELTA(*it, 0.7, .00001); it++;
-        TS_ASSERT_DELTA(*it, 0.35, .00001);
-        it=l4.begin();
-        TS_ASSERT_DELTA(*it, 0.9, .00001); it++;
-        TS_ASSERT_DELTA(*it, 0.45, .00001);
-        */
+        
         dimEmbed.embedAtomSpace(SIMILARITY_LINK, 4);
+        dimEmbed.logAtomEmbedding(SIMILARITY_LINK);
         //We have no guarantee on the order that the pivots
         //were picked in, but since numDimensions=numNodes,
         //the euclidean distances between any 2 nodes

@@ -110,6 +110,21 @@ namespace opencog
                                      const Type& linkType);
 
         double euclidDist(double v1[], double v2[], int size);
+
+        /**
+         * Calculate the homogeneity of a cluster of handles for given linkType
+         * Homogeneity is calculated as 1/(1+A) where A is the mean of
+         * the distances of all members of the cluster to their nearest
+         * clustermates.
+         */
+        double homogeneity(const HandleSeq& cluster, const Type& linkType);
+
+        /**
+         * Calculate the separation of a cluster of handles for given linkType.
+         * Separation is the minimum distance from any given member of the
+         * cluster to elements outside the cluster.
+         */
+        double separation(const HandleSeq cluster, const Type& linkType);
     public:
         const char* id();
 

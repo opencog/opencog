@@ -230,8 +230,8 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
             HandleSeq newNodes = as->getOutgoing(*it);
             for(HandleSeq::iterator it2=newNodes.begin();
                 it2!=newNodes.end(); it2++) {
-                double alt = distMap[u] *
-                    linkTV->getMean() * linkTV->getConfidence();
+                double alt =
+                    distMap[u] * linkTV->getMean() * linkTV->getConfidence();
                 double oldDist=distMap[*it2];
                 //If we've found a better (higher weight) path, update distMap
                 if(alt>oldDist) {
@@ -251,7 +251,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
     }
     for(std::map<Handle, double>::iterator it = distMap.begin();
             it != distMap.end(); it++) {
-        atomMaps[linkType][it->first].push_back(it->second); //(distMap[(*it).first]);
+        atomMaps[linkType][it->first].push_back(it->second);
     }
 }
 
@@ -266,7 +266,10 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     dimensionMap[linkType]=numDimensions;
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
-    
+
+    //for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
+    //    std::cout << as->atomAsString(*it,true) << std::endl;
+    //}
     PivotSeq& pivots = pivotsMap[linkType];
     if(nodes.empty()) return;
     Handle bestChoice = nodes.back();
@@ -321,7 +324,7 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
     //(max(.3*.1,.8*.4),max(.3*.2,.6*.5))    
     for(HandleSeq::iterator it=links.begin(); it<links.end(); it++) {
         HandleSeq nodes = as->getOutgoing(*it);
-        const TruthValue& linkTV = as->getTV(*it);        
+        const TruthValue& linkTV = *(as->getTV(*it));        
         double weight = linkTV.getConfidence()*linkTV.getMean();
         for(HandleSeq::iterator it2=nodes.begin();it2<nodes.end(); it2++) {
             if(*it2==h) continue;
@@ -492,10 +495,12 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
     }
     ::getclustercentroids(numClusters, numVectors, numDimensions, embedMatrix,
                           mask, clusterid, centroidMatrix, mask, 0, 'a');
-    HandleSeq clusters (numClusters);
+    HandleSeq clusterNodes (numClusters);
     for(int i=0;i<numClusters;i++) {
-        clusters[i] = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
+        clusterNodes[i] = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
     }
+
+    std::vector<HandleSeq> clusters(numClusters);
     for(int i=0;i<numVectors;i++) {
         //clusterid[i] indicates which cluster handleArray[i] is in.
         //so for each cluster, we make a new ConceptNode and make
@@ -507,7 +512,15 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
         //a placeholder)
         SimpleTruthValue tv(1-dist,
                             SimpleTruthValue::confidenceToCount(1-dist));
-        as->addLink(INHERITANCE_LINK, handleArray[i], clusters[clustInd], tv);
+        //    as->addLink(INHERITANCE_LINK, handleArray[i],
+        //            clusterNodes[clustInd], tv);
+        clusters[clustInd].push_back(handleArray[i]);
+    }
+    
+    for(std::vector<HandleSeq>::const_iterator it=clusters.begin();
+        it!=clusters.end(); it++) {
+        std::cout << "Homogeneity: " << homogeneity(*it,l) << std::endl;
+        std::cout << "Separation: " << separation(*it,l) << std::endl;
     }
 
     delete[] embedding;
@@ -521,6 +534,65 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
     delete[] centroidMatrix;
     delete[] cmaskArray;
     delete[] cmask;
+}
+
+double DimEmbedModule::homogeneity(const HandleSeq& cluster,
+                                   const Type& linkType) {
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+    assert(cluster.size()>1);
+    
+    double average=0;
+    for(HandleSeq::const_iterator it=cluster.begin();it!=cluster.end();it++) {
+        double minDist=DBL_MAX;
+        //find the distance to nearest clustermate
+        for(HandleSeq::const_iterator it2=cluster.begin();
+                                      it2!=cluster.end();it2++) {
+            if(*it==*it2) continue;
+            double dist=euclidDist(*it,*it2,linkType);
+            if(dist<minDist) minDist=dist;
+        }
+        average+=minDist;
+    }
+    average = average/cluster.size();
+    return 1.0/(1.0 + average);  //h=1/(1+A)
+}
+
+double DimEmbedModule::separation(const HandleSeq cluster,
+                                  const Type& linkType) {
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+
+    HandleSeq nodes;
+    as->getHandleSet(std::back_inserter(nodes), NODE, true);
+
+    double minDist=DBL_MAX;
+    for(HandleSeq::iterator it=nodes.begin();it!=nodes.end();it++) {
+        bool inCluster=false; //whether *it is in cluster
+        bool better=false; //whether *it is closer to some element of cluster
+                           //than minDist
+        double dist;
+        for(HandleSeq::const_iterator it2=cluster.begin();
+                                      it2!=cluster.end();it2++) {
+            if(*it==*it2) {
+                inCluster=true;
+                break;
+            }
+            dist = euclidDist(*it,*it2,linkType);
+            if(dist<minDist) better=true;
+        }
+        //If the node is closer and it is not in the cluster, update minDist
+        if(better && !inCluster) {
+            minDist=dist;
+        }
+        better=false;
+        inCluster=false;
+    }
+    return minDist;
 }
 
 double DimEmbedModule::euclidDist(double v1[], double v2[], int size) {
