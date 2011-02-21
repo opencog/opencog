@@ -1922,7 +1922,10 @@
             ) ; let
           ) ; if
       ) ; lambda
-    (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
+;    (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates)
+    (if (and (pair? framesPredicates) (list? (car framesPredicates)))
+       (car framesPredicates) framesPredicates)
+;    framesPredicates
     ) ; map
     finalFrames
   ) ; let
@@ -2196,7 +2199,7 @@
         (question? #f)
         (questionType '())
         
-        (use-pln #t)
+        (use-pln #f)
         )
         
     (map

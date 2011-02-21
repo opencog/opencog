@@ -22,7 +22,7 @@
 ; JaredW: TODO This seems to be a weird temporary hack. I've re-enabled the Attributes Frame so it can handle "is" sentences. 
 (define invalid-question-frames
   (list
-;   "#Attributes"
+   "#Attributes"
    "#Possibilities"
    "#Temporal_colocation"
    "#Entity"
@@ -66,7 +66,7 @@
    (list "fitness" "fittingness")
    (list "energy" "vigor" "power" "vitality" "vigour" "powered" "energized")
    
-   ; TODO the code doesn't handle stemming for nouns so you have to do this.
+   ; TODO Fabricio's Relex2Frame modifications break stemming for nouns so you have to do this.
    (list "kicking" "kick" "kicked")
    (list "human" "humans" "man" "men")
    (list "cat" "cats" "Cats")
