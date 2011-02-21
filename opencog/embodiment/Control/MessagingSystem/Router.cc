@@ -236,8 +236,8 @@ bool Router::knownID(const std::string &id)
 {
     std::map<std::string, int>::iterator iter1 = portNumber.find(id);
     if (iter1 == portNumber.end()) {
-        // component not registered in router yet ... create it's message queue since the component
-        // may be starting up.
+        // component not registered in router yet ... create it's message queue
+        // since the component may be starting up.
         if (!messageCentral->existsQueue(id)) {
             messageCentral->createQueue(id);
         }
@@ -365,7 +365,6 @@ int Router::addNetworkElement(const std::string &strId, const std::string &strIp
 
 void Router::removeNetworkElement(const std::string &id)
 {
-
     std::string networkId;
     networkId.assign(id);
 
@@ -389,7 +388,6 @@ void Router::clearNetworkElementMessageQueue(const std::string &id)
 
 void Router::persistState()
 {
-
     // TODO: add some timestamp info to filename
     std::string path = config().get("ROUTER_DATABASE_DIR");
     expandPath(path);
@@ -575,18 +573,20 @@ bool Router::controlSocketConnection(const std::string& ne_id)
 bool Router::dataSocketConnection(const std::string& ne_id)
 {
     if ( dataSockets.find(ne_id) != dataSockets.end() ) {
-        // Check if socket connection is still ok. If not so, remove the corresponding entry from dataSockets map and tries to re-connect.
+        // Check if socket connection is still ok. If not so, remove the
+        // corresponding entry from dataSockets map and tries to re-connect.
         if (!isElementAvailable(ne_id)) {
-            logger().info(
-                         "Router - dataSocketConnection(%s): Element marked as unavailable. Trying to re-connect...", ne_id.c_str() );
+            logger().info("Router - dataSocketConnection(%s): "
+                    "Element marked as unavailable. Trying to re-connect...",
+                    ne_id.c_str() );
             closeDataSocket(ne_id);
             closeControlSocket(ne_id);
         } else {
-            logger().debug(
-                         "Router - dataSocketConnection(%s): Connection already established", ne_id.c_str() );
+            logger().debug("Router - dataSocketConnection(%s): "
+                    "Connection already established", ne_id.c_str() );
             return true;
         }
-    } // if
+    }
 
     tcp::socket* sock = NULL;
     std::string ipAddr = getIPAddress(ne_id);
@@ -596,17 +596,18 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         tcp::resolver::query query(tcp::v4(), ipAddr, boost::lexical_cast<std::string>(port));
         tcp::resolver::iterator iterator = resolver.resolve(query);
         sock = new tcp::socket(io_service);
-        logger().debug("Router - dataSocketConnection(%s): created new socket: %p.", ne_id.c_str(), sock);
+        logger().debug("Router - dataSocketConnection(%s): "
+                "created new socket: %p.", ne_id.c_str(), sock);
         sock->connect(*iterator);
-        logger().debug(
-                     "Router - dataSocketConnection(%s). Connection established. ip=%s, port=%d",
-                     ne_id.c_str(), ipAddr.c_str(), port);
+        logger().debug("Router - dataSocketConnection(%s). "
+                "Connection established. ip=%s, port=%d",
+                 ne_id.c_str(), ipAddr.c_str(), port);
         dataSockets[ne_id] = sock;
         return true;
-    }catch(std::exception& e){
-        logger().error(
-                 "Router - dataSocketConnection. Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
-                 ne_id.c_str(), ipAddr.c_str(), port, e.what());
+    } catch(std::exception& e) {
+        logger().error("Router - dataSocketConnection. "
+                "Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
+                ne_id.c_str(), ipAddr.c_str(), port, e.what());
         if (sock != NULL) delete sock;
         sock = NULL;
     }
@@ -651,10 +652,12 @@ bool Router::sendNotification(const NotificationData& data)
             break;
         }
 
-        logger().debug("Router - Sending notification (socket = %p) '%s'.", data.sock, cmd.c_str());
+        logger().debug("Router - Sending notification (socket = %p) '%s'.",
+                data.sock, cmd.c_str());
  
         boost::system::error_code error;
-        boost::asio::write(*data.sock, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+        boost::asio::write(*data.sock, boost::asio::buffer(cmd),
+                boost::asio::transfer_all(), error);
         if (error) {
             logger().error("Router - sendNotification. Error transfering data");
             return false;
@@ -666,9 +669,10 @@ bool Router::sendNotification(const NotificationData& data)
 
 #define BUFFER_SIZE 256
         char response[BUFFER_SIZE];
-        size_t receivedBytes = data.sock->read_some(boost::asio::buffer(response), error);
+        size_t receivedBytes = data.sock->read_some( boost::asio::buffer(response), error );
         if (error && error != boost::asio::error::eof) {
-            logger().error("Router - sendNotification. Invalid response. recv returned %d ", receivedBytes );
+            logger().error("Router - sendNotification. Invalid response. "
+                    "recv returned %d ", receivedBytes );
             return false;
         }
 
@@ -676,11 +680,14 @@ bool Router::sendNotification(const NotificationData& data)
 
         // chomp all trailing slashes from string
         int i;
-        for ( i = receivedBytes - 1; i >= 0 && (response[i] == '\n' || response[i] == '\r')  ; --i ) {
+        for ( i = receivedBytes - 1;
+                i >= 0 && (response[i] == '\n' || response[i] == '\r'); --i ) {
             response[i] = '\0';
         }
 
-        logger().debug("Router - sendNotification. Received response (after chomp): '%s' bytes: %d", response, receivedBytes );
+        logger().debug("Router - sendNotification. "
+                "Received response (after chomp): '%s' bytes: %d",
+                response, receivedBytes );
 
         std::string answer = response;
 

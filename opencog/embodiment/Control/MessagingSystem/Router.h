@@ -99,8 +99,8 @@ typedef std::map<std::string, tcp::socket*> Id2SocketMap;
  * (4) YourEntity decides it wants to retrieve unread messages from router so
  * it sends a proper request (this request will be answered assynchronously by
  * router)
- * (5) YourEntity is assynchronously contaced by router to receive requested
- * unread messages.  YourEntity will need to be listening to a given port to
+ * (5) YourEntity is asynchronously contacted by the router to receive requested
+ * unread messages. YourEntity will need to be listening to a given port to
  * receive the messages.
  *
  * (1)
@@ -307,32 +307,57 @@ public:
     static const int PORT_EXISTS = 2;
     static const int HAS_PENDING_MSGS = 3;
 
-    bool noAckMessages; // flag to define if the protocol should use ACK messages (OK,FAILED) or not.
+    //! Flag to define if the protocol should use ACK messages (OK,FAILED) or not.
+    bool noAckMessages;
 
     // ***********************************************/
     // Constructors/destructors
-
+    
     ~Router();
     Router();
 
     // ***********************************************/
     // public interface
 
+    /** Check if the id is known.
+     * @warning side effect: creates a message queue for the ID if it is unknown.
+     * @return whether the id of element is known
+     */
     bool knownID(const std::string &id);
+
+    //! Get the port number that a NetworkElement is listening on.
     int getPortNumber(const std::string &id);
+
+    //! Get the IP address that a connected NetworkElement is located at.
     const std::string &getIPAddress(const std::string &id);
+
+    //! Retrieve network socket for sending control messages to network element?
     tcp::socket* getControlSocket(const std::string &id);
+
+    //! Retrieve network socket for sending data messages to network element?
     tcp::socket* getDataSocket(const std::string &id);
+
+    //! Close network socket for sending control messages to network element?
     void closeControlSocket(const std::string &id);
+
+    //! Close network socket for sending data messages to network element?
     void closeDataSocket(const std::string &id);
+
+    /** Remove network element from the embodiment system and clean up sockets
+     * and queues associated with it.
+     */
     void removeNetworkElement(const std::string &strId);
+
+    //! Clear all pending messages for NetworkElement strId
     void clearNetworkElementMessageQueue(const std::string &strId);
-    int  addNetworkElement(const std::string &strId, const std::string &strIp, int port);
+
+    //! Add new network element to the embodiment system
+    int addNetworkElement(const std::string &strId, const std::string &strIp, int port);
 
     MessageCentral* getMessageCentral();
 
     /**
-     * Main loop. Infinit loop listening to a port.
+     * Main loop. Infinite loop listening to a port.
      */
     void run();
 
@@ -359,44 +384,48 @@ public:
 
     /**
      * Return true if the component is available or false otherwise
+     * NetworkElements are unavailable when notification messages fail or the
+     * when restarting the router using a saved set of connections.
      *
      * @param id The id of the element to be checked
      */
     bool isElementAvailable(const std::string &id);
 
-    /**
-     * Mark the network element with given id as unavailable. This will cause
-     * Router to send UNAVAILABLE_ELEMENT to all other network elements.
+    /** Mark the network element with given id as unavailable.
+     * This will cause Router to send UNAVAILABLE_ELEMENT to all other network
+     * elements.
      **/
     void markElementUnavailable(const std::string& ne_id);
 
-    /**
-     * Mark the network element with given id as available. This will cause
-     * Router to send AVAILABLE_ELEMENT to all other network elements.
+    /** Mark the network element with given id as available.
+     * This will cause Router to send AVAILABLE_ELEMENT to all other network
+     * elements.
      **/
     void markElementAvailable(const std::string& ne_id);
 
     /**
-     * Set stopListenerThread tag to true and stop listerning the messages
+     * Set stopListenerThread tag to true and stop listening for messages
      */
     void stopListenerThread();
 
     /**
-    * Estabish control connection to the network element with the given id, if not yet connected.
-    * (it also updates internal map from network element ids to control sockets)
-    * Returns true if the connection is established. False, otherwise.
+    * Estabish control connection to the network element with the given id, if
+    * not yet connected.
+    * Also updates internal map from network element ids to control sockets.
+    * @return true if the connection is established.
     */
     bool controlSocketConnection(const std::string& ne_id);
 
     /**
-    * Estabish data connection to the network element with the given id, if not yet connected.
-    * (it also updates internal map from network element ids to data sockets)
-    * Returns true if the connection is established. False, otherwise.
+    * Estabish data connection to the network element with the given id, if not
+    * yet connected.
+    * Also updates internal map from network element ids to data sockets.
+    * @return true if the connection is established.
     */
     bool dataSocketConnection(const std::string& ne_id);
 
     /**
-     * Method to check if NetworkElment is still listenning to its tcp port
+     * Check if NetworkElment is still listenning to its tcp port.
      */
     static bool isListenerThreadStopped() {
         return !stopListenerThreadFlag;
