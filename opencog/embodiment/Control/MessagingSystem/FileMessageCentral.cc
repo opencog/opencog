@@ -1,9 +1,9 @@
 /*
  * opencog/embodiment/Control/MessagingSystem/FileMessageCentral.cc
  *
+ * Copyright (C) 2010-2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Elvys Borges
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -35,7 +35,6 @@ using namespace opencog;
 
 FileMessageCentral::~FileMessageCentral()
 {
-    //TODO: need I clear the queue ??
 }
 
 FileMessageCentral::FileMessageCentral() : MessageCentral()
@@ -43,18 +42,6 @@ FileMessageCentral::FileMessageCentral() : MessageCentral()
     std::string dir = opencog::config().get("MESSAGE_DIR");
     expandPath(dir);
 
-    /**
-     * This code was put in expandPath func in Util/files.h
-     *
-    size_t user_index = dir.find(USER_FLAG, 0);
-    if (user_index != std::string::npos) {
-     //const char* username = getlogin();
-     const char* username = getenv("LOGNAME");
-     logger().log(Util::Logger::WARN, "FileMessageCentral - processing $USER flag => username = %s\n", username);
-     if (username == NULL) username = "unknown_user";
-        dir.replace(user_index, strlen(USER_FLAG), username);
-    }
-    */
     logger().warn("FileMessageCentral - creating message dir: %s\n", dir.c_str());
     this->directory = dir;
 
@@ -197,8 +184,8 @@ const bool FileMessageCentral::existsQueue(const std::string id)
 
 void FileMessageCentral::push(const std::string id, Message *message)
 {
-
     if (!this->existsQueue(id)) {
+        delete message;
         return;
     }
 
@@ -215,9 +202,7 @@ void FileMessageCentral::push(const std::string id, Message *message)
 
     file.close();
 
-// std::cout << "write :" << message->getPlainTextRepresentation();
     this->unlockQueue();
-
     delete message;
 
 }
@@ -230,14 +215,11 @@ Message* FileMessageCentral::pop(const std::string id)
     if ((!this->existsQueue(id)) || this->isQueueEmpty(id)) {
         return value;
     } else {
-
         boost::filesystem::path m_path = this->directory / id;
         std::string from("");
         std::string to("");
         std::string msg("");
 
-
-        //I need delete all objects in the queue that already exists
         this->lockQueue();
         directory_iterator end_itr;
         directory_iterator itr( m_path );
@@ -251,14 +233,13 @@ Message* FileMessageCentral::pop(const std::string id)
             while ( !file.eof()) {
                 std::getline(file, line);
                 msg.append(line.append("\n"));
-
-//    std::cout << "read line :" << line.c_str() << " size: " << line.size() << "\n";
+// std::cout << "read line :" << line.c_str() << " size: " << line.size() << "\n";
             }
 
-            //erase the last \n put when reached at EOF.
+            // Erase the last \n put when reached at EOF.
             msg.erase(msg.length() - 1, 1);
 
-//   std::cout << "read :" << msg.c_str();
+// std::cout << "read :" << msg.c_str();
             file.close();
 
             value = new StringMessage(from, to, msg);
