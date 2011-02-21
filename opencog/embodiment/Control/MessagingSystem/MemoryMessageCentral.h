@@ -1,9 +1,9 @@
 /*
  * opencog/embodiment/Control/MessagingSystem/MemoryMessageCentral.h
  *
+ * Copyright (C) 2010-2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Carlos Lopes
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -34,6 +34,8 @@ namespace MessagingSystem
 
 /**
  * Implements MessageCentral using a map of queue, in memory.
+ *
+ * @see MessageCentral parent class for class documentation.
  *
  */
 class MemoryMessageCentral : public MessageCentral

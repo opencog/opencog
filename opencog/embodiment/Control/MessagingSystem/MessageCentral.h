@@ -1,9 +1,9 @@
 /*
  * opencog/embodiment/Control/MessagingSystem/MessageCentral.h
  *
+ * Copyright (C) 2010-2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Elvys Borges
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,7 +20,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #ifndef MESSAGECENTRAL_H
 #define MESSAGECENTRAL_H
@@ -46,18 +45,18 @@ protected:
 
 private:
 
-    pthread_mutex_t messageQueueLock; // lock used coordinate manipulation of the messageQueue (main thread and listener thread)
+    //! lock used coordinate manipulation of the messageQueue (main thread and listener thread)
+    pthread_mutex_t messageQueueLock;
 
 public:
 
     virtual ~MessageCentral();
     MessageCentral();
 
-    /**
-     * Create a internal queue. if reset == true and the queue already exists,
-     * it will be cleaned.
+    /** Create a internal queue.
+     * if reset == true and the queue already exists, it will be cleaned.
      * @param id representation of queue name
-     * @param reset flag to clear queue if it alreaady exists
+     * @param reset flag to clear queue if it already exists
      */
     virtual void createQueue(const std::string id, const bool reset = false) = 0;
 
@@ -72,7 +71,6 @@ public:
      * @param id representation of queue name
      */
     virtual void removeQueue(const std::string id) = 0;
-
 
     /**
      * Check if the queue is empty

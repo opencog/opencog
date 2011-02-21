@@ -1,9 +1,9 @@
 /*
  * opencog/embodiment/Control/MessagingSystem/MemoryMessageCentral.cc
  *
+ * Copyright (C) 2010-2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Elvys Borges
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -25,12 +25,11 @@
 
 using namespace MessagingSystem;
 
-
 MemoryMessageCentral::~MemoryMessageCentral()
 {
-    //TODO: need I clear the queue ??
     std::map<std::string, std::queue<Message *> *>::iterator map_itr = messageQueue.begin();
     while (map_itr != messageQueue.end()) {
+        // TODO: surely we can just removeQueue(strId) here?
         std::string str_id = map_itr->first;
         while (!this->isQueueEmpty(str_id)) {
             Message *msg = this->pop(str_id);

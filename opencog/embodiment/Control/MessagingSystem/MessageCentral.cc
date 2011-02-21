@@ -38,13 +38,9 @@ MessageCentral::~MessageCentral()
     pthread_mutex_destroy(&messageQueueLock);
 }
 
-//MessageCentral::MessageCentral(const Control::SystemParameters &params) : parameters(params) {
 MessageCentral::MessageCentral()
 {
-
     pthread_mutex_init(&messageQueueLock, NULL);
-
-//    Util::Logger::initMainLogger(Control::LoggerFactory::getLogger(this->parameters, this->parameters.get("ROUTER_ID")));
 }
 
 void MessageCentral::lockQueue()
