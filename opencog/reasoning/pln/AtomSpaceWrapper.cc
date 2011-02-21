@@ -78,7 +78,7 @@ AtomSpaceWrapper* ASW(AtomSpace* a)
 }
 
 AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
-    USize(800), USizeMode(CONST_SIZE), rootContext("___PLN___"), atomspace(a)
+    USize(800), USizeMode(CONST_SIZE), rootContext("___PLN___"), watchingAtomSpace(false), atomspace(a)
 {
     // Add dummy root NULL context node
     rootContextHandle = atomspace->addNode(CONCEPT_NODE, rootContext);
