@@ -19,17 +19,17 @@ and run the ./make_distribution script, as follows:
 
  ./make_distribution <compile_dir> <dist_subdirectory>
 
-where <compile_dir> is the folder that opencog was built in 
-and <dist_subdirectory> is any arbitrary name you want to give for the
-distribution directory. For example, the following command: 
+where <compile_dir> is the folder that opencog was built in and
+<dist_subdirectory> is any arbitrary name you want to give for the distribution
+directory. For example, the following command: 
 
  ./make_distribution compile test
 
-will create the directory "<opencog's root dir>/dist/test" and copy all
-files required to configure and run the Embodiment servers. Then:
+will create the directory "<opencog's root dir>/dist/test" and copy all files
+required to configure and run the Embodiment servers. Then:
 
 * For configuring Embodiment, edit the "embodiment.conf" file in the created
 distribution folder.
-* For running Embodiment servers, run the "pb.csh" script file.
-* For killing Embodiment servers, run the "kill.csh" script file.
+* For running Embodiment servers, run the "start_embodiment.sh" script file.
+* For killing Embodiment servers, run the "stop_embodiment.sh" script file.
 
