@@ -67,8 +67,7 @@ void ServerSocket::handle_connection(ServerSocket* ss)
     {
         try {
         //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
-        boost::regex nl("\n");
-        boost::asio::read_until(ss->getSocket(), b, nl);
+        boost::asio::read_until(ss->getSocket(), b, '\n');
         //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
         std::istream is(&b);
         std::string line;
