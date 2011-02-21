@@ -41,9 +41,8 @@ namespace opencog {
  * assumption that feature scorers return a value in [0, 1], where 0
  * is the lower score and 1 is the higher score.
  *
- * Note that in the literature most use mutual information instead of
- * conditional entropy but it actually amounts to the same, as
- * explained:
+ * In the context of one single problem maximizing mutual information
+ * amounts to minimizing conditional entropy, as explained below:
  *
  * H(X;Y) = H(X,Y)-H(X|Y) - H(Y|X)
  *        = H(X,Y)-H(X,Y) + H(Y) - H(X,Y) + H(X)
@@ -51,8 +50,12 @@ namespace opencog {
  *
  * H(Y|X) = H(Y,X) - H(X)
  *
- * But H(Y) is constant, so maximizing H(X;Y) is equivalent to
+ * But since H(Y) is constant maximizing H(X;Y) is equivalent to
  * minimizing H(Y|X).
+ *
+ * However in the context of measuring the usefulness of X across
+ * several problems mutual information migh be better that conditional
+ * entropy.
  */
 template<typename IT, typename OT, typename FeatureSet>
 struct ConditionalEntropy : public std::unary_function<FeatureSet, double> {
