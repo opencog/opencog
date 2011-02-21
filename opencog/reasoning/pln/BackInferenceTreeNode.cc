@@ -1987,7 +1987,7 @@ string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
                 ss << printTree(arg_h,level+1,0);
                 plan.push_back(arg_h);
             }
-            ss << extract_plan(arg_h, level+1, do_template, plan);
+            ss << extract_plan(arg_h, level+1, do_template, plan, usedPHandles);
         }
     }
     return ss.str();
@@ -2177,13 +2177,6 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level, Btr<set<pHandle> >
     	return ss.str();
     }
 
-    if (STLhas2(*usedPHandles,h)) {
-        ss << "(which has already been proven)" << endl;
-        return ss.str();
-    }
-
-    usedPHandles->insert(h);
-
     map<pHandle,RulePtr> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end())
     {
@@ -2207,13 +2200,20 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level, Btr<set<pHandle> >
         NMPrinter nmp(NMP_BRACKETED | NMP_TYPE_NAME | NMP_NODE_NAME |
                 NMP_HANDLE | NMP_NO_TV_WITH_NO_CONFIDENCE, 0,
                 NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0,
-                level+1);
+                0); //level+1);
 
         foreach(pHandle arg_h, h_it->second)
         {
-            ss << nmp.toString(arg_h, -10);
-            ss << printTrail(arg_h, level+1);
+            if (STLhas2(*usedPHandles,h)) {
+                ss << repeatc(' ', (level+1)*3 ) << "***";
+                ss << nmp.toString(arg_h, -10);
+            } else {
+                ss << repeatc(' ', (level+1)*3 ) << nmp.toString(arg_h, -10);
+                ss << printTrail(arg_h, level+1, usedPHandles);
+            }
         }
+
+        usedPHandles->insert(h);
     }
     else
         ss << repeatc(' ', level*3) << "which is trivial (or axiom).\n";
