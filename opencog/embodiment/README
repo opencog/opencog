@@ -19,14 +19,14 @@ and run the ./makeDistribution script, as follows:
 
  ./makeDistribution <compile_dir> <dist_subdirectory>
 
-where <compile_dir> is the folder where the opencog was built on
+where <compile_dir> is the folder that opencog was built in 
 and <dist_subdirectory> is any arbitrary name you want to give for the
-distribution directory For example, the following command: 
+distribution directory. For example, the following command: 
 
  ./makeDistribution compile test
 
-will create the directory "<opencog's root dir>/dist/test" and put there all
-files needed to configure and run the Embodiment servers. Then:
+will create the directory "<opencog's root dir>/dist/test" and copy all
+files required to configure and run the Embodiment servers. Then:
 
 * For configuring Embodiment, edit the "embodiment.conf" file in the created
 distribution folder.

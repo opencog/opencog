@@ -41,9 +41,9 @@ $binDirH/opencog/embodiment/Control/Procedure/combo_shell \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
 $binDirH/opencog/embodiment/Learning/LearningServer/learningServer \
 $binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
-./killpb.csh \
-./cleanup.csh \
-./pb.csh \
+./cleanup.sh \
+./stop_embodiment.sh \
+./start_embodiment.sh \
 ./pvpInterface.csh \
 ./run_opc_hc_test.sh \
 ./stdlib.combo \
