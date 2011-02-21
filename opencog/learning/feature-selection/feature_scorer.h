@@ -40,6 +40,19 @@ namespace opencog {
  * output table. It returns 1 - H(Y|X1, ..., Xn) to meet the
  * assumption that feature scorers return a value in [0, 1], where 0
  * is the lower score and 1 is the higher score.
+ *
+ * Note that in the literature most use mutual information instead of
+ * conditional entropy but it actually amounts to the same, as
+ * explained:
+ *
+ * H(X;Y) = H(X,Y)-H(X|Y) - H(Y|X)
+ *        = H(X,Y)-H(X,Y) + H(Y) - H(X,Y) + H(X)
+ *        = H(Y) + H(X) - H(X,Y)
+ *
+ * H(Y|X) = H(Y,X) - H(X)
+ *
+ * But H(Y) is constant, so maximizing H(X;Y) is equivalent to
+ * minimizing H(Y|X).
  */
 template<typename IT, typename OT, typename FeatureSet>
 struct ConditionalEntropy : public std::unary_function<FeatureSet, double> {
