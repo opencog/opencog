@@ -172,8 +172,7 @@ bool Spawner::processNextMessage(Message *message)
                 cmdPrefix += " ";
                 cmdSuffix += " > opc.valgrind.massif 2>&1 &";
             }
-            command_ss << cmdPrefix << "./opc " << agentArgs
-                       << " ";
+            command_ss << cmdPrefix << "./opc " << agentArgs << " ";
 
             // This is a hack. To redirect "PROXY_ID" setting to agent id.
             // There are also some tweaks in OAC code.
