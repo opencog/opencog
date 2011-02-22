@@ -408,12 +408,28 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
         return false;
     }
 
-    // message from OCAvatar, forward it to RelEx server.
     if (msg->getFrom() == config().get("PROXY_ID")) {
-        StringMessage rawMessage(getID(), config().get("RELEX_SERVER_ID"), msg->getPlainTextRepresentation());
-        logger().info("Forward raw message to RelEx server.");
-        if (!sendMessage(rawMessage)) {
-            logger().error("Could not send raw message to RelEx server!");
+        if(msg->getType() == MessagingSystem::Message::RAW) {
+        // message from OCAvatar, forward it to RelEx server.
+            StringMessage rawMessage(getID(), config().get("RELEX_SERVER_ID"), msg->getPlainTextRepresentation());
+
+            logger().info("Forward raw message to RelEx server.");
+            if (!sendMessage(rawMessage)) {
+                logger().error("Could not send raw message to RelEx server!");
+            }
+        } else {
+            HandleSeq toUpdateHandles;
+            result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
+
+            if (!result) {
+                logger().error("OAC - Unable to process XML message.");
+            } else {
+
+                // PVP message processed, update predicates for the
+                // added/updated atoms
+                predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
+                logger().debug("OAC - Message successfully  processed.");
+            }
         }
         return false;
     }

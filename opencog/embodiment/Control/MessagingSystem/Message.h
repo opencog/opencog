@@ -62,6 +62,7 @@ public:
     static const int FEEDBACK = 9;
     static const int TRY = 10;
     static const int STOP_LEARNING = 11;
+    static const int RAW = 12;
 
     virtual ~Message();
 

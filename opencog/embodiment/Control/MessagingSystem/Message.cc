@@ -30,6 +30,7 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/TickMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/RawMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
@@ -97,6 +98,10 @@ Message *Message::factory(const std::string &from, const std::string &to, int
         return new FeedbackMessage(from, to, msg);
         break;
     }
+	case RAW: {
+		return new RawMessage(from, to, msg);
+		break;
+	}
     default: {
         throw opencog::InvalidParamException(TRACE_INFO,
                      "Message - Unknown message type id: '%d'.", msgType);

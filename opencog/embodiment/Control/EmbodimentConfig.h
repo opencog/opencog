@@ -64,6 +64,8 @@ protected:
             "SPAWNER_IP",                   "127.0.0.1",
             "SPAWNER_PORT",                 "16313",
 
+			"RELEX_SERVER_ID",				"RELEX_SERVER",
+
             "LS_ID",                        "LS",
             "LS_IP",                        "127.0.0.1",
             "LS_PORT",                      "16314",

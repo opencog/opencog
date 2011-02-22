@@ -9,7 +9,8 @@ ADD_LIBRARY (MessagingSystem
 	FileMessageCentral.cc
 	StringMessage.cc
 	TickMessage.cc
-	FeedbackMessage.cc
+    FeedbackMessage.cc
+    RawMessage.cc
 	RouterMessage.cc
 	NetworkElement.cc
 	NetworkElementCommon.cc

@@ -177,7 +177,7 @@ bool Spawner::processNextMessage(Message *message)
 
             // This is a hack. To redirect "PROXY_ID" setting to agent id.
             // There are also some tweaks in OAC code.
-            command_ss << message->getFrom() << " " << cmdSuffix;
+            command_ss << message->getFrom() << " " << cmdSuffix << " &";
         }
         logger().info("Starting OAC for %s %s %s (%s) at NE port %d; Shell port %d (command: %s)", 
                 agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), 
