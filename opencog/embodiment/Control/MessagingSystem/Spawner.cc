@@ -170,10 +170,14 @@ bool Spawner::processNextMessage(Message *message)
                 cmdPrefix += " --depth=";
                 cmdPrefix += opencog::config().get("MASSIF_DEPTH");
                 cmdPrefix += " ";
-                cmdSuffix += " > opc.valgrind.massif 2>&1";
+                cmdSuffix += " > opc.valgrind.massif 2>&1 &";
             }
             command_ss << cmdPrefix << "./opc " << agentArgs
-                       << " " << cmdSuffix << " &";
+                       << " ";
+
+            // This is a hack. To redirect "PROXY_ID" setting to agent id.
+            // There are also some tweaks in OAC code.
+            command_ss << message->getFrom() << " " << cmdSuffix;
         }
         logger().info("Starting OAC for %s %s %s (%s) at NE port %d; Shell port %d (command: %s)", 
                 agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), 

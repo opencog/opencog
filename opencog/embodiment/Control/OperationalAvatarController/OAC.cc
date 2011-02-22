@@ -390,8 +390,9 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
         return false;
     }
 
-    // message from petaverse proxy - send to PAI
-    if (msg->getFrom() == config().get("PROXY_ID")) {
+
+    // message that has been parsed by RelEx server
+    if(msg->getFrom() == config().get("RELEX_SERVER_ID")) {
         HandleSeq toUpdateHandles;
         result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
 
@@ -403,6 +404,16 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
             // added/updated atoms
             predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
             logger().debug("OAC - Message successfully  processed.");
+        }
+        return false;
+    }
+
+    // message from OCAvatar, forward it to RelEx server.
+    if (msg->getFrom() == config().get("PROXY_ID")) {
+        StringMessage rawMessage(getID(), config().get("RELEX_SERVER_ID"), msg->getPlainTextRepresentation());
+        logger().info("Forward raw message to RelEx server.");
+        if (!sendMessage(rawMessage)) {
+            logger().error("Could not send raw message to RelEx server!");
         }
         return false;
     }

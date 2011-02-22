@@ -39,9 +39,9 @@ void opc_unexpected_handler()
 
 int main(int argc, char *argv[])
 {
-
-    if (argc != 7) {
-        logger().error("OACExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port>.");
+    // take care of the args number.
+    if (argc != 8) {
+        logger().error("OACExec - Usage: \n\topc <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> <agent-id>.");
         return (1);
     }
 
@@ -55,11 +55,11 @@ int main(int argc, char *argv[])
             config().load(config().get("CONFIG_FILE").c_str());
         }
         
-        // Jared - Added this for now so that error messages will always be easy to see.
-        logger().setPrintErrorLevelStdout();
-
         config().set("EXTERNAL_TICK_MODE", "true");
         config().set("SERVER_PORT", argv[6]);
+
+        // This is a hack!!! To redirect message to OCAvatar in unity game.
+        config().set("PROXY_ID", argv[7]);
 
         // setting unexpected handler in case a different exception from the
         // especified ones is throw in the code
