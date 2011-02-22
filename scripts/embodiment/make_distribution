@@ -11,7 +11,7 @@
 # This script will copy all the relevant files into {petaverse base dir}/dist/<tag name>
 
 #pdh stands for "Project Directory from Here"
-set pdh "../../"
+set pdh "../.."
 
 set binDir "bin" 
 set tag ""
@@ -30,7 +30,7 @@ if {[llength $argv] > 0} {
     }
 } 
 
-set binDirH $pdh$binDir
+set binDirH $pdh/$binDir
 
 set flist [list  \
 $binDirH/opencog/embodiment/Control/MessagingSystem/router \
