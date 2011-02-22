@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby 
 
-require File.join(File.dirname(__FILE__), "predavese-mocky-proxy")
+require File.join(File.dirname(__FILE__), "predavese_mocky_proxy")
 require 'optparse'
 
 mock_port = 16315

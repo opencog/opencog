@@ -15,15 +15,15 @@ For distributing the files of Embodiment system, just go to:
 
  <opencog's root dir>/scripts/embodiment
 
-and run the ./makeDistribution script, as follows:
+and run the ./make_distribution script, as follows:
 
- ./makeDistribution <compile_dir> <dist_subdirectory>
+ ./make_distribution <compile_dir> <dist_subdirectory>
 
 where <compile_dir> is the folder that opencog was built in 
 and <dist_subdirectory> is any arbitrary name you want to give for the
 distribution directory. For example, the following command: 
 
- ./makeDistribution compile test
+ ./make_distribution compile test
 
 will create the directory "<opencog's root dir>/dist/test" and copy all
 files required to configure and run the Embodiment servers. Then:

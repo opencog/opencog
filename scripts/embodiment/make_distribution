@@ -1,17 +1,16 @@
 #!/usr/bin/tclsh
 
 # Usage:
-# makeDistribution.tcl [<bin dir> [<tag name>] [<type of distribution = "dev" or "user">]]
+# make_distribution [<bin dir> [<tag name>] [<type of distribution = "dev" or "user">]]
 # <bin dir> is the directory where the script will try to find the compiled executables, 
 #           relative to petaverse base dir. Default is "bin", Ie, it will try to find binaries
 #           under {petaverse base dir}/bin
-# 
 # <tag name> is a tag it will use to name the distribution. Default is <svn revision number>.
-# <type of distribution> select the type of config file will be copy. .
+# <type of distribution> select the type of config file that will be copied.
 # 
 # This script will copy all the relevant files into {petaverse base dir}/dist/<tag name>
 
-#pdh stands for Project Directory From Here
+#pdh stands for "Project Directory from Here"
 set pdh "../../"
 
 set binDir "bin" 
@@ -20,6 +19,7 @@ set tag ""
 # typedist = dev | user
 set type_dist "dev"
 
+# get command line arguments
 if {[llength $argv] > 0} {
     set binDir [lindex $argv 0] 
     if {[llength $argv] > 1} {
@@ -44,7 +44,7 @@ $binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
 ./cleanup.sh \
 ./stop_embodiment.sh \
 ./start_embodiment.sh \
-./pvpInterface.csh \
+./pvp_interface.sh \
 ./run_opc_hc_test.sh \
 ./stdlib.combo \
 ./rules_preconditions.combo \

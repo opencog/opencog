@@ -9,8 +9,8 @@ rm -rf $SYSTEM_TEST_DIR
 for gsfile in `find . -name "gsfile_*" ` ; do
 	if [ -x $gsfile ]; then 
 
-        ./killpb.csh
-        ./pb.csh > /dev/null
+        ./stop_embodiment.sh
+        ./start_embodiment.sh > /dev/null
 
         currfile=`echo $gsfile | awk -F/ '{print $2}'`
 		printf "Running ./pbTester $currfile ... "
@@ -36,7 +36,7 @@ for gsfile in `find . -name "gsfile_*" ` ; do
 	fi
 done
 
-./killpb.csh
+./stop_embodiment.csh
 
 if [ $failed ]; then
 	echo "SOME TESTS FAILED";
