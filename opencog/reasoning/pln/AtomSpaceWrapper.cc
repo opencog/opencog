@@ -331,8 +331,6 @@ vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
 #endif
 }
 
-
-
 pHandle AtomSpaceWrapper::realToFakeHandle(Handle h, VersionHandle vh)
 {
 #ifdef STREAMLINE_PHANDLES
