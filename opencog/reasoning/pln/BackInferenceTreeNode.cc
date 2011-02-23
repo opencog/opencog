@@ -2198,7 +2198,7 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level, Btr<set<pHandle> >
         assert (h_it != haxx::inferred_from.end());
 
         NMPrinter nmp(NMP_BRACKETED | NMP_TYPE_NAME | NMP_NODE_NAME |
-                NMP_HANDLE | NMP_NO_TV_WITH_NO_CONFIDENCE, 0,
+                NMP_HANDLE | NMP_TRUTH_VALUE | NMP_NO_TV_WITH_NO_CONFIDENCE, 0,
                 NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0,
                 0); //level+1);
 
