@@ -89,8 +89,10 @@ Rule::setOfMPs DecontextualizerRule::o2iMetaExtra(meta outh,
     // case c)
     if(asw->getType(A1) == AND_LINK && asw->getType(A2) == AND_LINK) {
         // @todo generilize for n-ary
-        OC_ASSERT(A1_it.number_of_children() == 2);
-        OC_ASSERT(A2_it.number_of_children() == 2);
+        if (A1_it.number_of_children() != 2 ||
+                A2_it.number_of_children() != 2)
+            return Rule::setOfMPs();
+
         pHandleSeq out1, out2; // set of potential contexts
         for(vtree::sibling_iterator sib = A1_it.begin();
             sib != A1_it.end(); sib++) {
