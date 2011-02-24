@@ -239,6 +239,20 @@ template<typename Set> std::set<Set> powerset(const Set& s)
     return powerset(s, s.size());
 }
 
+/**
+ * overloading of find to work with container
+ */
+template<typename C>
+typename C::const_iterator find(const C& c, const typename C::value_type& e)
+{
+    return std::find(c.begin(), c.end(), e);
+}
+template<typename C>
+typename C::iterator find(C& c, const typename C::value_type& e)
+{
+    return std::find(c.begin(), c.end(), e);
+}
+
 } //~namespace opencog
 
 #endif
