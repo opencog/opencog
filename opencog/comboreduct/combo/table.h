@@ -32,7 +32,9 @@
 #include <opencog/util/RandGen.h>
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/dorepeat.h>
+
 #include "eval.h"
+#include "vertex.h"
 
 namespace combo
 {
@@ -670,6 +672,15 @@ bool checkCarriageReturn(std::istream& in);
  * number of elements of the first line).
  */
 arity_t istreamArity(std::istream& in);
+/**
+ * Helper, like above but given the file name instead of istream
+ */
+arity_t fileNameArity(const std::string& dataFileName);
+
+/**
+ * Infer the type of elements of the data file
+ */
+type_node inferDataType(const std::string& dataFileName);
 
 /**
  * take a line and return the input vector and output.

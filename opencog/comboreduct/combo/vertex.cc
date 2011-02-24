@@ -25,10 +25,12 @@
 #include "vertex.h"
 #include <boost/lexical_cast.hpp>
 #include "procedure_call.h"
+#include <opencog/util/algorithm.h>
 
 using namespace std;
 using namespace boost;
 using namespace combo;
+using namespace opencog;
 
 // uncomment this to output a negative literal !#n instead of not(#n)
 #define ABBREVIATE_NEGATIVE_LITERAL
@@ -189,6 +191,38 @@ string ph2l(const string& ce, const vector<string>& labels)
     // if a matching is going on flush to the result
     if(matching)
         res += labels[lexical_cast<arity_t>(match) - 1];
+    return res;
+}
+
+string l2ph(const string& ce, const vector<string>& labels)
+{
+    /// @todo the implementation could be done in 2 lines with
+    /// boost.regex with boost version 1.42 or above because then we
+    /// can use Formatter as callback, but we're stuck with boost 1.38
+    /// :-(
+    string res;
+    string match;
+    bool matching = false;
+    foreach(char c, ce) {
+        if(!matching) {
+            res += c;
+            if(c == '#') // matching starts
+                matching = true;
+        } else {
+            if(c == ' ' || c == ')' || c == '\n') { //matching ends
+                arity_t idx = distance(labels.begin(), find(labels, match)) + 1;
+                res += lexical_cast<string>(idx) + c;
+                match.clear();
+                matching = false;
+            } else // matching goes
+                match += c;
+        }
+    }
+    // if a matching is going on flush to the result
+    if(matching) {
+        arity_t idx = distance(labels.begin(), find(labels, match)) + 1;
+        res += lexical_cast<string>(idx);
+    }
     return res;
 }
 

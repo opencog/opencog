@@ -29,9 +29,12 @@ public:
             TS_ASSERT(arg.is_idx_valid(arity));
         }
     }
-
     void test_ph2l() {
         vector<string> labels = list_of("fat")("pretty");
         TS_ASSERT_EQUALS(ph2l("and(#1 #2)", labels), "and(#fat #pretty)");
+    }
+    void test_l2ph() {
+        vector<string> labels = list_of("fat")("pretty");
+        TS_ASSERT_EQUALS(l2ph("and(#fat #pretty)", labels), "and(#1 #2)");
     }
 };

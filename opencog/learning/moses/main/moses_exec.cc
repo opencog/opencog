@@ -72,22 +72,6 @@ void not_recognized_combo_operator(const string& ops_str) {
     exit(1);
 }
 
-
-ifstream* open_data_file(const string& file) {
-    ifstream* in = new ifstream(file.c_str());
-    if(!in->is_open()) {
-        if(file.empty()) {
-            std::cerr << "the input file is empty" << std::endl;
-            std::cerr << "To indicate the file to open use the option"
-                      << " -i or --input-file" << std::endl;
-        } else {
-            std::cerr << "Could not open " << file << std::endl;
-        }
-        exit(1);
-    }
-    return in;
-}
-
 /**
  * if the data file has a first row with labels
  */
@@ -96,43 +80,6 @@ vector<string> read_data_file_labels(const string& file) {
     std::string line;
     getline(*in, line);    
     return tokenizeRow<std::string>(line).first;
-}
-
-/**
- * check the token, if it is "0" or "1" then it is boolean, otherwise
- * it is contin. It is not 100% reliable of course and should be
- * improved.
- */
-type_node infer_type_from_token(const string& token) {
-    if(token == "0" || token == "1")
-        return id::boolean_type;
-    else {
-        try {
-            lexical_cast<contin_t>(token);
-            return id::contin_type;
-        }
-        catch(...) {
-            return id::ill_formed_type;
-        }
-    }    
-}
-
-/**
- * check the last element of the first or second row of a data file
- * according to infer_type_from_token.
- */
-type_node infer_type_from_data_file(const string& file) {
-    type_node res;
-    auto_ptr<ifstream> in(open_data_file(file));
-    string line;
-    // check the last token of the first row
-    getline(*in, line);
-    res = infer_type_from_token(tokenizeRow<string>(line).second);
-    if(res == id::ill_formed_type) { // check the last token if the second row
-        getline(*in, line);
-        res = infer_type_from_token(tokenizeRow<string>(line).second);
-    }
-    return res;
 }
 
 /**
@@ -203,10 +150,9 @@ arity_t infer_arity(const string& problem,
                     unsigned int problem_size,
                     const string& input_table_file,
                     const string& combo_str) {
-    if(problem == it || problem == ann_it) {
-        auto_ptr<ifstream> in(open_data_file(input_table_file));
-        return istreamArity(*in);
-    } else if(problem == cp || problem == ann_cp) {
+    if(problem == it || problem == ann_it)
+        return dataFileArity(input_table_file);
+    else if(problem == cp || problem == ann_cp) {
         if(combo_str.empty())
             unspecified_combo_exit();
         // get the combo_tree and infer its type
@@ -565,7 +511,7 @@ int moses_exec(int argc, char** argv) {
     if(problem == it) { // regression based on input table
         
         // try to infer the type of the input table
-        type_node inferred_type = infer_type_from_data_file(input_data_file);
+        type_node inferred_type = inferDataType(input_data_file);
         if(exemplars.empty()) {            
             exemplars.push_back(type_to_exemplar(inferred_type));
         }

@@ -998,6 +998,13 @@ std::istream& stream_to_combo_tree(std::istream& in, combo_tree& tr)
 std::string ph2l(const std::string& ce,
                  const std::vector<std::string>& labels);
 
+/**
+ * This is the converse of ph2l, that is given for instance
+ * "and(#fat #pretty)" it returns "and(#1 #2)"
+ */
+std::string l2ph(const std::string& ce,
+                 const std::vector<std::string>& labels);
+
 } //~namespace combo
 
 namespace boost

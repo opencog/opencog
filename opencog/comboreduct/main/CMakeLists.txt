@@ -45,3 +45,10 @@ TARGET_LINK_LIBRARIES(tree_gen
 	comboreduct
         util
 )
+
+ADD_EXECUTABLE (eval-table eval-table.cc)
+TARGET_LINK_LIBRARIES(eval-table
+    comboreduct
+    util
+    ${Boost_PROGRAM_OPTIONS_LIBRARY} 
+)

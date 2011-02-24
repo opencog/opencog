@@ -22,6 +22,7 @@
 #include "table.h"
 
 #include <opencog/util/numeric.h>
+#include <boost/lexical_cast.hpp>
 
 #include "ann.h"
 #include "simple_nn.h"
@@ -30,6 +31,7 @@
 namespace combo {
 
 using opencog::sq;
+using namespace boost;
 
 truth_table::size_type
 truth_table::hamming_distance(const truth_table& other) const
@@ -185,6 +187,54 @@ arity_t istreamArity(istream& in) {
     std::string line;
     getline(in, line);    
     return tokenizeRow<string>(line).first.size();
+}
+
+ifstream* open_data_file(const string& fileName) {
+    ifstream* in = new ifstream(fileName.c_str());
+    if(!in->is_open()) {
+        stringstream ss;
+        ss << "Could not open " << fileName << std::endl;
+        OC_ASSERT(false, ss.str());
+    }
+    return in;
+}
+
+arity_t dataFileArity(const string& fileName) {
+    auto_ptr<ifstream> in(open_data_file(fileName));
+    return istreamArity(*in);
+}
+
+/**
+ * Check the token, if it is "0" or "1" then it is boolean, otherwise
+ * it is contin. It is not 100% reliable of course and should be
+ * improved.
+ */
+type_node infer_type_from_token(const string& token) {
+    if(token == "0" || token == "1")
+        return id::boolean_type;
+    else {
+        try {
+            lexical_cast<contin_t>(token);
+            return id::contin_type;
+        }
+        catch(...) {
+            return id::ill_formed_type;
+        }
+    }
+}
+
+type_node inferDataType(const string& fileName) {
+    type_node res;
+    auto_ptr<ifstream> in(open_data_file(fileName));
+    string line;
+    // check the last token of the first row
+    getline(*in, line);
+    res = infer_type_from_token(tokenizeRow<string>(line).second);
+    if(res == id::ill_formed_type) { // check the last token if the second row
+        getline(*in, line);
+        res = infer_type_from_token(tokenizeRow<string>(line).second);
+    }
+    return res;
 }
 
 } // ~namespace combo
