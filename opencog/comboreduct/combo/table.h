@@ -675,7 +675,7 @@ arity_t istreamArity(std::istream& in);
 /**
  * Helper, like above but given the file name instead of istream
  */
-arity_t fileNameArity(const std::string& dataFileName);
+arity_t dataFileArity(const std::string& dataFileName);
 
 /**
  * Infer the type of elements of the data file
@@ -818,6 +818,8 @@ void subsampleTable(IT& table_inputs, unsigned int nsamples, RandGen& rng) {
  * if the data file has a first row with labels
  */
 std::vector<std::string> read_data_file_labels(const std::string& file);
+
+std::ifstream* open_data_file(const std::string& fileName);
 
 } // ~namespace combo
 
