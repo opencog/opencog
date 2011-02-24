@@ -193,8 +193,15 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
 
     std::list<Handle> nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
+    /*std::cout << "got all nodes = ";
+    for(std::list<Handle>::iterator it = nodes.begin(); it != nodes.end(); it++) {
+        std::cout << *it << ",";
+    }
+    std::cout << "}" << std::endl;*/
+
     std::map<Handle,double> distMap;
-    std::multimap<double,Handle> pQueue;
+    typedef std::multimap<double,Handle> pQueue_t;
+    pQueue_t pQueue;
     for(std::list<Handle>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
         if(*it==h) {
             pQueue.insert(std::pair<double, Handle>(1,*it));
@@ -207,37 +214,54 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
     
     pivotsMap[linkType].push_back(h);
     while(!pQueue.empty()) {
-        Handle& u = (*(pQueue.rbegin())).second;//extract min
-        pQueue.erase(--pQueue.end());
+        pQueue_t::reverse_iterator p_it = pQueue.rbegin();
+        Handle u = p_it->second;//extract min
+
+        /*std::cout << "U=" << u << " distmap={";
+        for(std::map<Handle, double>::iterator it = distMap.begin();
+                it != distMap.end(); it++) {
+            std::cout << it->second << ":h=" << it->first << ",";
+        }
+        std::cout << "}" << std::endl;*/
+
+        //Handle& u = (*(pQueue.rbegin())).second;//extract min
+        pQueue.erase(p_it->first);
         if (distMap[u]==0) { break;}
         HandleSeq newLinks = as->getIncoming(u);
         for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't of type linkType
             if(as->getType(*it)!=linkType) continue;
             const TruthValue* linkTV = as->getTV(*it);
+            //std::cout << "investigating link " << as->atomAsString(*it,false) << std::endl;
             HandleSeq newNodes = as->getOutgoing(*it);
             for(HandleSeq::iterator it2=newNodes.begin();
                 it2!=newNodes.end(); it2++) {
-                double alt = distMap[u]*
-                    linkTV->getMean()*linkTV->getConfidence();
+                //std::cout << "checking distance to " << as->atomAsString(*it2,false) << std::endl;
+                double alt = distMap[u] *
+                    linkTV->getMean() * linkTV->getConfidence();
                 double oldDist=distMap[*it2];
                 if(alt>oldDist) {
-                    multimap<double,Handle>::iterator it3;
-                    std::pair<std::multimap<double,Handle>::iterator,
-                        std::multimap<double,Handle>::iterator> itPair
-                        = pQueue.equal_range(oldDist);
-                     for(it3=itPair.first;it3!=itPair.second;it3++) {
+                    pQueue_t::iterator it3;
+
+                    std::pair<pQueue_t::iterator, pQueue_t::iterator>
+                        itPair = pQueue.equal_range(oldDist);
+
+                    for(it3=itPair.first;it3!=itPair.second;it3++) {
                          if(it3->second==*it2) {pQueue.erase(it3); break;}
                     }
                     pQueue.insert(std::pair<double, Handle>(alt,*it2));
                     distMap[*it2]=alt;
+                    //std::cout << "set distance for h=" << *it2;
+                    //std::cout << "to " << alt << std::endl;
+
                 }
             }
         }
     }
     for(std::map<Handle, double>::iterator it = distMap.begin();
-        it!=distMap.end();it++) {
-        atomMaps[linkType][(*it).first].push_back(distMap[(*it).first]);
+            it != distMap.end(); it++) {
+        //std::cout << "pushing distance " << it->second << " to h=" << it->first << std::endl;
+        atomMaps[linkType][it->first].push_back(it->second); //(distMap[(*it).first]);
     }
 }
 
@@ -336,8 +360,7 @@ void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
         if(as->isValidHandle(it->first)) {
             oss << as->atomAsString(it->first,true) << " : (";
         } else {
-            oss << "[NODE'S BEEN DELETED]" << " : (";
-            oss << as->atomAsString(it->first,true) << " : (";
+            oss << "[NODE'S BEEN DELETED H=" << it->first << "] : (";
         }
         const std::list<double>& embedlist = it->second;
         for(std::list<double>::const_iterator it2=embedlist.begin();
@@ -351,6 +374,32 @@ void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
     return;
 }
 
+void DimEmbedModule::printEmbedding() {
+    std::ostringstream oss;
+    AtomEmbedMap::const_iterator mit = atomMaps.begin();
+    oss << "Node Embeddings" << std::endl;
+    for (; mit != atomMaps.end(); mit++) {
+        oss << "=== for type" << classserver().getTypeName(mit->first).c_str() << std::endl;
+        AtomEmbedding atomEmbedding=mit->second;
+        AtomEmbedding::const_iterator it;
+        for(it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
+            if(as->isValidHandle(it->first)) {
+                oss << as->atomAsString(it->first,true) << " : (";
+            } else {
+                oss << "[NODE'S BEEN DELETED. handle=";
+                oss << it->first << "] : (";
+            }
+            const std::list<double>& embedlist = it->second;
+            for(std::list<double>::const_iterator it2=embedlist.begin();
+                it2!=embedlist.end();
+                ++it2){
+                oss << *it2 << " ";
+            }
+            oss << ")" << std::endl;
+        }
+    }
+    std::cout << oss.str();
+}
 bool DimEmbedModule::isEmbedded(const Type& linkType) {
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,

@@ -195,6 +195,8 @@ namespace opencog
 
         /** updates the given atom (recalculates its distance from pivots) */
         //void updateAtom(const Handle& h, const Type& linkType);
+
+        void printEmbedding();
     }; // class
 } //namespace
 
