@@ -73,16 +73,6 @@ void not_recognized_combo_operator(const string& ops_str) {
 }
 
 /**
- * if the data file has a first row with labels
- */
-vector<string> read_data_file_labels(const string& file) {
-    auto_ptr<ifstream> in(open_data_file(file));
-    std::string line;
-    getline(*in, line);    
-    return tokenizeRow<std::string>(line).first;
-}
-
-/**
  * determine the initial exemplar of a given type
  */
 combo_tree type_to_exemplar(type_node type) {

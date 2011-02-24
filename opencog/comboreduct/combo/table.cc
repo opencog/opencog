@@ -199,6 +199,13 @@ ifstream* open_data_file(const string& fileName) {
     return in;
 }
 
+vector<string> read_data_file_labels(const string& file) {
+    auto_ptr<ifstream> in(open_data_file(file));
+    std::string line;
+    getline(*in, line);    
+    return tokenizeRow<std::string>(line).first;
+}
+
 arity_t dataFileArity(const string& fileName) {
     auto_ptr<ifstream> in(open_data_file(fileName));
     return istreamArity(*in);

@@ -814,6 +814,11 @@ void subsampleTable(IT& table_inputs, unsigned int nsamples, RandGen& rng) {
     }
 }
 
+/**
+ * if the data file has a first row with labels
+ */
+std::vector<std::string> read_data_file_labels(const std::string& file);
+
 } // ~namespace combo
 
 template<typename T>
