@@ -103,8 +103,8 @@ class SchemePrimitive : public PrimitiveEnviron
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			S_S,   // return string, take string
 			V_H,   // return void, take Handle
-            V_T,   // return void, take Type
-            V_TI,  // return voide, take Type and int
+			V_T,   // return void, take Type
+			V_TI,  // return voide, take Type and int
 			V_V    // return void, take void
 		} signature;
 

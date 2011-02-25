@@ -223,12 +223,12 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, const TruthValue
     do {
         name=prefix;
         for (int i = 0; i < len; ++i) {
-            name+=alphanum[rand() % (sizeof(alphanum) - 1)];
+            name+=alphanum[rand() % (sizeof(alphanum)/sizeof(char))];
         }
         result = getHandle(t, name);
-    } while(result!=Handle::UNDEFINED);//while(TLB::isValidHandle(result));
+    } while(isValidHandle(result));//If the name already exists, try again
 
-    std::cout << "adding node" << std::endl;
+    //std::cout << "adding node" << std::endl;
     return addNode(t, name, tvn);
 }
 

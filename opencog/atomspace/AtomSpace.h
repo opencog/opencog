@@ -220,7 +220,7 @@ public:
     /**
      * Add a new node to the AtomTable. A random 16-character string
      * will be appended to the provided name.
-     * TODO: Later on, the names can include server/time info to decrease
+     * @TODO: Later on, the names can include server/time info to decrease
      * the probability of collisions and be more informative.
      **/
     Handle addPrefixedNode(Type t, const std::string& prefix = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());

@@ -1,13 +1,13 @@
 = Dimensional Embedding
 
-This a method of dimensional embedding of the atomspace using the Harel-Koren algorithm as described on 
+This implements a method of dimensional embedding of the atomspace using the Harel-Koren algorithm as described on 
 
 http://wiki.opencog.org/w/OpenCogPrime:WikiBook#Dimensional_Embedding and
 http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.20.5390
 
 k-nearest neighbour queries are answered quickly using the following cover tree implementation: http://hunch.net/~jl/projects/cover_tree/cover_tree.html
 
-The code for cluster, with documentation, can be found here: http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm#source
+The clustering code, with documentation, can be found here: http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm#source
 
 == Using DimEmbedModule in Scheme
 
@@ -27,6 +27,6 @@ Note that the atomspace must already be embedded (via embedSpace) for the given 
 
 If a node is removed after embedding, an invalid handle may be returned by a nearest neighbour search.
 
-The entire embedding (the list of pivots and each node's embedding vector) can be written to the cogserver log using.
+The entire embedding (the list of pivots and each node's embedding vector) can be written to the cogserver log using
 
-	(logEmbedding linkType).
+	(logEmbedding LinkType)

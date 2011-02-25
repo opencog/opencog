@@ -178,7 +178,7 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
         k_nearest_neighbor(embedTreeMap[l], batch_create(v), res, k);
         HandleSeq results = HandleSeq();
         for (int j = 1; j<res[0].index; j++) {
-            print(*(this->as), res[0][j]);
+            //print(*(this->as), res[0][j]);
             results.push_back(res[0][j].getHandle());
         }
         return results;
@@ -401,9 +401,9 @@ void DimEmbedModule::printEmbedding() {
                 oss << "[NODE'S BEEN DELETED. handle=";
                 oss << it->first << "] : (";
             }
-            const std::list<double>& embedlist = it->second;
-            for(std::list<double>::const_iterator it2=embedlist.begin();
-                it2!=embedlist.end();
+            const std::vector<double>& embedVector = it->second;
+            for(std::vector<double>::const_iterator it2=embedVector.begin();
+                it2!=embedVector.end();
                 ++it2){
                 oss << *it2 << " ";
             }
@@ -560,29 +560,27 @@ double DimEmbedModule::homogeneity(const HandleSeq& cluster,
     return 1.0/(1.0 + average);  //h=1/(1+A)
 }
 
-double DimEmbedModule::separation(const HandleSeq cluster,
+double DimEmbedModule::separation(const HandleSeq& cluster,
                                   const Type& linkType) {
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
 
-    HandleSeq nodes;
-    as->getHandleSet(std::back_inserter(nodes), NODE, true);
-
+    AtomEmbedding aE = (atomMaps.find(linkType))->second;
     double minDist=DBL_MAX;
-    for(HandleSeq::iterator it=nodes.begin();it!=nodes.end();it++) {
+    for(AtomEmbedding::iterator it=aE.begin();it!=aE.end();it++) {
         bool inCluster=false; //whether *it is in cluster
         bool better=false; //whether *it is closer to some element of cluster
                            //than minDist
         double dist;
         for(HandleSeq::const_iterator it2=cluster.begin();
                                       it2!=cluster.end();it2++) {
-            if(*it==*it2) {
+            if(it->first==*it2) {
                 inCluster=true;
                 break;
             }
-            dist = euclidDist(*it,*it2,linkType);
+            dist = euclidDist(it->second,aE[*it2]);
             if(dist<minDist) better=true;
         }
         //If the node is closer and it is not in the cluster, update minDist

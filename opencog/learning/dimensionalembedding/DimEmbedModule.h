@@ -110,21 +110,6 @@ namespace opencog
                                      const Type& linkType);
 
         double euclidDist(double v1[], double v2[], int size);
-
-        /**
-         * Calculate the homogeneity of a cluster of handles for given linkType
-         * Homogeneity is calculated as 1/(1+A) where A is the mean of
-         * the distances of all members of the cluster to their nearest
-         * clustermates.
-         */
-        double homogeneity(const HandleSeq& cluster, const Type& linkType);
-
-        /**
-         * Calculate the separation of a cluster of handles for given linkType.
-         * Separation is the minimum distance from any given member of the
-         * cluster to elements outside the cluster.
-         */
-        double separation(const HandleSeq cluster, const Type& linkType);
     public:
         const char* id();
 
@@ -155,6 +140,8 @@ namespace opencog
          *
          * @param linkType The type of link for which a dimensional embedding
          * is wanted.
+         * @param numDimensions The number of dimensions to embed the atomspace
+         * in.
          *
          * @todo improve pivot-picking technique: currently pivots are just
          * picked as the farthest from the current pivots, but connectedness
@@ -165,7 +152,7 @@ namespace opencog
         /**
          * Logs a string representation of of the (Handle,vector<Double>)
          * pairs for linkType. This will have as many entries as there are nodes
-         * in the atomspace (unless nodes have been added since the embedding.
+         * in the atomspace (unless nodes have been added since the embedding).
          * Just used for testing/debugging.
          */
         void logAtomEmbedding(const Type& linkType);
@@ -193,8 +180,8 @@ namespace opencog
         bool isEmbedded(const Type& linkType);
         
         /**
-         * Returns the distance between handles h1 and h2 for the embedding of
-         * link type l.
+         * Returns the euclidean distance between handles h1 and h2 for the
+         * embedding of link type l.
          *
          * ie if the embedding vectors for h1 and h2 for type l is given by
          * h1: (a1, b1, ..., n1) and
@@ -213,10 +200,27 @@ namespace opencog
         HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k);
 
         /**
-         * Use hierarchical clustering to make new nodes using the
+         * Use k-means clustering to make new nodes using the
          * dimensional embedding.
          */
         void cluster(const Type& l, int numClusters);
+
+        /**
+         * Calculate the homogeneity of a cluster of handles for given linkType.
+         *
+         * Homogeneity is calculated as 1/(1+A) where A is the mean of
+         * the distances of all members of the cluster to their nearest
+         * clustermates.
+         */
+        double homogeneity(const HandleSeq& cluster, const Type& linkType);
+
+        /**
+         * Calculate the separation of a cluster of handles for given linkType.
+         *
+         * Separation is the minimum distance from any given member of the
+         * cluster to elements outside the cluster.
+         */
+        double separation(const HandleSeq& cluster, const Type& linkType);
 
         /** updates the given atom (recalculates its distance from pivots) */
         //void updateAtom(const Handle& h, const Type& linkType);
