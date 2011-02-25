@@ -193,11 +193,6 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
 
     std::list<Handle> nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
-    /*std::cout << "got all nodes = ";
-    for(std::list<Handle>::iterator it = nodes.begin(); it != nodes.end(); it++) {
-        std::cout << *it << ",";
-    }
-    std::cout << "}" << std::endl;*/
 
     std::map<Handle,double> distMap;
     typedef std::multimap<double,Handle> pQueue_t;
@@ -224,7 +219,6 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
         }
         std::cout << "}" << std::endl;*/
 
-        //Handle& u = (*(pQueue.rbegin())).second;//extract min
         pQueue.erase(p_it->first);
         if (distMap[u]==0) { break;}
         HandleSeq newLinks = as->getIncoming(u);
@@ -232,11 +226,9 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
             //ignore links that aren't of type linkType
             if(as->getType(*it)!=linkType) continue;
             const TruthValue* linkTV = as->getTV(*it);
-            //std::cout << "investigating link " << as->atomAsString(*it,false) << std::endl;
             HandleSeq newNodes = as->getOutgoing(*it);
             for(HandleSeq::iterator it2=newNodes.begin();
                 it2!=newNodes.end(); it2++) {
-                //std::cout << "checking distance to " << as->atomAsString(*it2,false) << std::endl;
                 double alt = distMap[u] *
                     linkTV->getMean() * linkTV->getConfidence();
                 double oldDist=distMap[*it2];
@@ -251,16 +243,12 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
                     }
                     pQueue.insert(std::pair<double, Handle>(alt,*it2));
                     distMap[*it2]=alt;
-                    //std::cout << "set distance for h=" << *it2;
-                    //std::cout << "to " << alt << std::endl;
-
                 }
             }
         }
     }
     for(std::map<Handle, double>::iterator it = distMap.begin();
             it != distMap.end(); it++) {
-        //std::cout << "pushing distance " << it->second << " to h=" << it->first << std::endl;
         atomMaps[linkType][it->first].push_back(it->second); //(distMap[(*it).first]);
     }
 }
