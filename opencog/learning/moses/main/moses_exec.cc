@@ -262,7 +262,7 @@ int moses_exec(int argc, char** argv) {
          "If 1, outputs the candidates with their labels instead of place holders. for instance *(\"price\" \"temprature\") instead of *(#1 #2). This only works for data fitting problems where the data file contains labels in its header\n")
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&output_file)->default_value(""),
-         "File where to save the results. If empty then it outputs on the stdout.")
+         "File where to save the results. If empty then it outputs on the stdout.\n")
         (opt_desc_str(max_gens_opt).c_str(),
          value<int>(&max_gens)->default_value(-1),
          "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
