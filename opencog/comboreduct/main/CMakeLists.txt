@@ -52,3 +52,7 @@ TARGET_LINK_LIBRARIES(eval-table
     util
     ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
+
+# install eval-table
+INSTALL(TARGETS eval-table RUNTIME DESTINATION bin)
+
