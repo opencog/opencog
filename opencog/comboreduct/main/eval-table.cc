@@ -27,14 +27,10 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
 
-#include <opencog/comboreduct/combo/table.h>
-
-//ant_combo_vocabulary is used only for the boolean core vocabulary
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include "eval-table.h"
 
 using namespace boost::program_options;
 using boost::lexical_cast;
-using namespace ant_combo;
 using namespace opencog;
 
 /**
@@ -67,6 +63,7 @@ int main(int argc,char** argv) {
     unsigned long rand_seed;
     string input_table_file;
     string combo_program_str;
+    string output_file;
     bool labels;
     // bool residual_error;
 
@@ -80,6 +77,8 @@ int main(int argc,char** argv) {
         ("combo-program,c", value<string>(&combo_program_str),
          "Combo program to evaluate against the input table.\n")
         ("labels,l", "If enabled then the combo program is expected to contain variables labels #labels1, etc, instead of place holders. For instance one provide the combo program \"and(#large #tall)\" instead of \"and(#24 #124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
+        ("output-file,o", value<string>(&output_file),
+         "File where to save the results. If empty then it outputs on the stdout.\n")
         // ("residual-error,e", "If enabled then residual error of the combo program against the output of the data set is printed.\n")
         ;
 
@@ -102,48 +101,19 @@ int main(int argc,char** argv) {
     // read input_table_file file
     type_node data_type = inferDataType(input_table_file);
 
+    evalTableParameters evalParam(input_table_file,
+                                  combo_program_str,
+                                  labels,
+                                  output_file);
+
     if(data_type == id::boolean_type) {
-        truth_table_inputs it;
-        partial_truth_table ct;
-        istreamTable<truth_table_inputs,
-                     partial_truth_table, bool>(input_table_file, it, ct);
-
-        // read combo program
-        combo_tree tr = str2combo_tree_label(combo_program_str,
-                                             labels, it.get_labels());
-
-        // evaluated tr over input table
-        partial_truth_table ct_tr = partial_truth_table(tr, it, rng);
-        ct_tr.set_label(ct.get_label());
-
-        // print target variable result
-        std::cout << ct_tr << std::endl;;
-
-        // print residual error
-        // if(residual_error)
-        //     cout << "Residual error = " <<
-        //         ct.root_mean_square_error(ct_tr) << endl;
+        typedef truth_table_inputs IT;
+        typedef partial_truth_table OT;
+        read_eval_output_results<IT, OT, bool>(evalParam, rng);
     } else if(data_type == id::contin_type) {
-        contin_input_table it;
-        contin_table ct;
-        istreamTable<contin_input_table,
-                     contin_table, contin_t>(input_table_file, it, ct);
-
-        // read combo program
-        combo_tree tr = str2combo_tree_label(combo_program_str,
-                                             labels, it.get_labels());
-
-        // evaluated tr over input table
-        contin_table ct_tr = contin_table(tr, it, rng);
-        ct_tr.set_label(ct.get_label());
-
-        // print target variable result
-        std::cout << ct_tr << std::endl;;
-
-        // print residual error
-        // if(residual_error)
-        //     cout << "Residual error = " <<
-        //         ct.root_mean_square_error(ct_tr) << endl;
+        typedef contin_input_table IT;
+        typedef contin_table OT;
+        read_eval_output_results<IT, OT, contin_t>(evalParam, rng);
     }
 
 }
