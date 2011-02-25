@@ -39,7 +39,7 @@
 namespace combo
 {
 
-using opencog::RandGen;
+using namespace opencog;
 
 ///////////////////
 // Generic table //
@@ -178,7 +178,7 @@ public:
     output_table(const super& ot, std::string& ol = "") 
         : super(ot), label(ol) {}
 
-    void set_label(std::string& ol) { label = ol; }
+    void set_label(const std::string& ol) { label = ol; }
     std::string& get_label() { return label; }
     const std::string& get_label() const { return label; }
 
@@ -230,21 +230,21 @@ public:
     template<typename It>
     truth_table(It from, It to) : super(from, to), _rng(NULL) { }
     template<typename T>
-    truth_table(const opencog::tree<T>& tr, arity_t arity)
-        : super(opencog::pow2(arity)), _arity(arity), _rng(NULL) {
+    truth_table(const tree<T>& tr, arity_t arity)
+        : super(pow2(arity)), _arity(arity), _rng(NULL) {
         populate(tr);
     }
     template<typename T>
-    truth_table(const opencog::tree<T>& tr) {
+    truth_table(const tree<T>& tr) {
         _arity = arity(tr);
         _rng = NULL;
-        this->resize(opencog::pow2(_arity));
+        this->resize(pow2(_arity));
         populate(tr);
     }
 
     template<typename Func>
     truth_table(const Func& f, arity_t arity)
-        : super(opencog::pow2(arity)), _arity(arity), _rng(NULL) {
+        : super(pow2(arity)), _arity(arity), _rng(NULL) {
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             bool_vector v(_arity);
@@ -279,7 +279,7 @@ public:
     bool same_truth_table(const combo_tree& tr) const;
 protected:
     template<typename T>
-    void populate(const opencog::tree<T>& tr) {
+    void populate(const tree<T>& tr) {
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             for (int j = 0; j < _arity; ++j)
@@ -315,7 +315,7 @@ struct partial_truth_table : public output_table<bool> {
     partial_truth_table(const bool_vector& bv, std::string ol = "")
         : output_table<bool>(bv, ol) {}
     partial_truth_table(const combo_tree& tr, const truth_table_inputs& tti,
-                        opencog::RandGen& rng);
+                        RandGen& rng);
     
 };
 
@@ -341,7 +341,7 @@ class contin_input_table : public input_table<contin_t>
 public:
     // constructors
     contin_input_table() {}
-    contin_input_table(int sample_count, int arity, opencog::RandGen& rng,
+    contin_input_table(int sample_count, int arity, RandGen& rng,
                        double max_randvalue = 1.0, double min_randvalue = -1.0);
 };
 
@@ -361,7 +361,7 @@ public:
     contin_table(const contin_vector& cv, std::string ol = "") 
         : output_table<contin_t>(cv, ol) {}
     contin_table(const combo_tree& tr, const contin_input_table& cti,
-                 opencog::RandGen& rng);
+                 RandGen& rng);
     template<typename Func>
     contin_table(const Func& f, const contin_input_table& cti) {
         foreach(const contin_vector& v, cti.get_matrix())
@@ -452,7 +452,7 @@ public:
     //constructors
     mixed_table() {}
     mixed_table(const combo_tree& tr, const contin_input_table& cti,
-                const type_tree& prototype, opencog::RandGen& rng) {
+                const type_tree& prototype, RandGen& rng) {
         _cti = cti;
         if (prototype.empty()) {
             type_tree inferred_proto = infer_type_tree(tr);
@@ -585,7 +585,7 @@ public:
     //constructors
     mixed_action_table() {}
     mixed_action_table(const combo_tree& tr, const contin_input_table& cti,
-                       const type_tree& prototype, opencog::RandGen& rng) {
+                       const type_tree& prototype, RandGen& rng) {
         _cti = cti;
         if (prototype.empty()) {
             type_tree inferred_proto = infer_type_tree(tr);
