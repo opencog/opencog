@@ -62,6 +62,16 @@ static void truncate(number_t &value)
     value = (value <= 0.0) ? 0.000001 : (value >= 1.0) ? 0.999999 : value;
 }
 
+void setSaveDeductionLookupTable(bool b)
+{
+    SAVE_DEDUCTION_LOOKUP_TABLE = b;
+}
+
+void setUseDeductionLookupTable(bool b)
+{
+    USE_DEDUCTION_LOOKUP_TABLE = b;
+}
+
 void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
                              IndefiniteTruthValue* const& TVb)
 {
