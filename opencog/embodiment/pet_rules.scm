@@ -254,40 +254,40 @@
     (VariableNode "$EntityVar")
 )
 
-(define FriendRelationGoal
-    (add_goal "FriendRelationGoal" "'self'" EntityVar) 
+(define FriendRelation
+    (add_goal "friend" "'self'" EntityVar) 
 )
 
-(define EnemyRelationGoal
-    (add_goal "EnemyRelationGoal" "'self'" EntityVar)
+(define EnemyRelation
+    (add_goal "enemey" "'self'" EntityVar)
 )
 
-(define GratitudeRelationGoal
-    (add_goal "GratitudeRelationGoal" "'self'" EntityVar)
+(define GratitudeRelation
+    (add_goal "gratitude" "'self'" EntityVar)
 )
 
-(define LoveRelationGoal
-    (add_goal "LoveRelationGoal" "'self'" EntityVar)
+(define LoveRelation
+    (add_goal "love" "'self'" EntityVar)
 )
 
-(define FearRelationGoal
-    (add_goal "FearRelationGoal" "'self'" EntityVar)
+(define FearRelation
+    (add_goal "fear" "'self'" EntityVar)
 )
 
-(define AngerRelationGoal
-    (add_goal "AngerRelationGoal" "'self'" EntityVar) 
+(define AngerRelation
+    (add_goal "anger" "'self'" EntityVar) 
 )
 
-(define KnowRelationGoal
-    (add_goal "KnowRelationGoal" "'self'" EntityVar)
+(define KnowRelation
+    (add_goal "know" "'self'" EntityVar)
 )
 
-(define CuriousAboutRelationGoal
-    (add_goal "CuriousAboutRelationGoal" "'self'" EntityVar)
+(define CuriousAboutRelation
+    (add_goal "curious_about" "'self'" EntityVar)
 )
 
-(define FamiliarWithRelationGoal
-    (add_goal "FamiliarWithRelationGoal" "'self'" EntityVar)
+(define FamiliarWithRelation
+    (add_goal "familiar_with" "'self'" EntityVar)
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -404,9 +404,6 @@
 ; TODO: TestEnergy is only used for debugging. Remove it once finished.
 ;
 
-
-
-
 (define TestGetFoodGoal 
     (add_goal "TestGetFoodGoal")
 )
@@ -503,11 +500,226 @@
 ; Rules to test the whole OpenPsi, can be used as a very simple demo
 ;
 
-(define wander_searching_food
-    (add_action "wander_searching_food")
+;(define wander_searching_food
+;    (add_action "wander_searching_food")
+;)
+;
+;(define goto_owner
+;    (add_action "goto_owner")
+;)
+;
+;(define random_step_searching
+;    (add_action "random_step_searching")
+;)
+;
+;(add_rule (cog-new-stv 0.8 1.0)  EnergyDemandGoal random_step_searching
+;    (add_gpn_precondition "searchForFoodPrecondition")
+;)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Rules related to EnergyDemandGoal
+;
+
+(define truePrecondition
+    (add_gpn_precondition "truePrecondition")  
 )
 
-(add_rule (cog-new-stv 0.8 1.0)  EnergyDemandGoal wander_searching_food
-          (add_gpn_precondition "searchForFoodPrecondition")
+(define eat_food
+    (add_action "eat_food")  
+)
+
+(define GetFoodGoal
+    (add_goal "GetFoodGoal") 
+)
+
+(add_rule (cog-new-stv 1.0 1.0) EnergyDemandGoal eat_food
+    GetFoodGoal   	  
+)
+
+(define search_for_food 
+    (add_action "search_for_food")  
+)
+
+(add_rule (cog-new-stv 1.0 1.0) GetFoodGoal search_for_food
+    truePrecondition	  
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Rules related to WaterDemandGoal
+;
+
+(define drink_water
+    (add_action "drink_water")  
+)
+
+(define GetWaterGoal 
+    (add_goal "GetWaterGoal")  
+)
+
+(add_rule (cog-new-stv 1.0 1.0) WaterDemandGoal drink_water
+    GetWaterGoal	  
+)
+
+(define search_for_water
+    (add_action "search_for_water")  
+)
+
+(add_rule (cog-new-stv 1.0 1.0) GetWaterGoal search_for_water
+    truePrecondition	  
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Rules related to IntegrityDemandGoal
+;
+
+(define flee
+    (add_action "flee")
+)
+
+(add_rule (cog-new-stv 1.0 1.0) IntegrityDemandGoal flee
+    (add_gpn_precondition "fleePrecondition")
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Rules related to AffiliationDemandGoal
+;
+
+(define goto_owner
+    (add_action "goto_owner")  
+)
+
+(add_rule (cog-new-stv 1.0 1.0) AffiliationDemandGoal goto_owner
+    truePrecondition
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Rules related to CertaintyDemandGoal
+;
+
+(define play
+    (add_action "play")  
+)
+
+(add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal play
+    truePrecondition	  
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Rules related to CompetenceDemandGoal
+;
+
+(add_rule (cog-new-stv 1.0 1.0) CompetenceDemandGoal play
+    truePrecondition	  
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Rules related to Relations 
+;
+; Note: 1. Some Relation Rules hold NULL_ACTION, some are not. 
+;       2. NULL_ACTION which means "Do nothing". 'PsiRelationUpdaterAgent' would retrieve all the 
+;          Relation Rules with NULL_ACTION during its Initialization. It will inspect their preconditions 
+;          within each 'Cognitive Cycle', and then update the truth value of corresponding Relations
+;          (EvaluationLinks actually), if all the preconditions are satisfied. 
+;       3. For those Relation Rules with none NULL_ACTION, it menas the pet should be active to take 
+;          actions to reach the Relations it desires. 
+;
+; Why there are Relation rules with normal/ NULL_ACTION?
+;
+; Example 1: Some one attacks you, then the relation between you and the guy would probably be Enemy. 
+; Example 2: When you want to borrow something from a stranger, the first step may be approach him/ her 
+;            and say hello to him/her. So what? You are tring to reach 'familiar_with' relation between 
+;            you both!
+;  
+; In example 1, you did nothing, then the relation happens. These relation rules taking NULL_ACTION
+; would be handled by 'PsiRelationUpdaterAgent'
+;
+; In example 2, the relation is considered as a Goal, or a Precondition before you borrowing stuff
+; from the guy. In order to reach the Goal, you should take some actions. 'PsiActionSelectionAgent' is 
+; in charege of these relation rules. 
+;
+; [ By Zhenhua Cai, on 2011-02-23 ]
+;
+
+; curious_about
+; It is the very basic relation before others, such as know, familiar_with etc.
+; 'PsiRelationUpdaterAgent' will handle this directly 
+
+; familiar_with
+; familiar_with is the first step before knowing
+; for instance sniffing something makes the pet familiar with it
+
+(ForAllLink (stv 1.0 1.0)
+    (ListLink EntityVar)	    
+
+    (add_rule (cog-new-stv 1.0 1.0) FamiliarWithRelation NULL_ACTION
+        CuriousAboutRelation
+	(add_gpn_precondition "familiarWithPrecondition")
+    )
+)
+
+; know
+; know it one step above familiar with, for instance if the pet is familiar
+; with something and then lick it is considered to be known 
+
+(ForAllLink (stv 1.0 1.0)
+    (ListLink EntityVar)	    
+
+    (add_rule (cog-new-stv 1.0 1.0) KnowRelation NULL_ACTION
+	FamiliarWithRelation 
+        (add_gpn_precondition "knowPrecondition")	      
+    )
+)
+
+; enemy
+
+(ForAllLink (stv 1.0 1.0)
+    (ListLink EntityVar) 
+
+    (add_rule (cog-new-stv 1.0 1.0) EnemyRelation NULL_ACTION
+        (add_gpn_precondition "enemyPrecondition")	      
+    )
+)
+
+; friend
+
+(ForAllLink (stv 1.0 1.0)
+    (ListLink EntityVar)	    
+
+    (add_rule (cog-new-stv 1.0 1.0) FriendRelation NULL_ACTION
+	FamiliarWithRelation
+        (add_gpn_precondition "friendPrecondition")	      
+    )
+)
+
+; anger
+
+(ForAllLink (stv 1.0 1.0)
+    (ListLink EntityVar)	    
+
+    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
+	(add_gpn_precondition "angerForFoodThreatenPrecondition")      
+    )
+)
+
+(ForAllLink (stv 1.0 1.0)
+    (ListLink EntityVar)
+
+    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
+        (add_gpn_precondition "angerForEnemyPrecondition")     
+    )
+)
+
+(ForAllLink (stv 1.0 1.0)
+    (ListLink EntityVar)	    
+
+    (add_rule (cog-new-stv 1.0 1.0) AnagerRelation NULL_ACTION
+        (add_gpn_precondition "angerWhenAttackedPrecondition")	      
+    )
 )
 

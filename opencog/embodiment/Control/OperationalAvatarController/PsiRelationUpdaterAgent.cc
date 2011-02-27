@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-02-06
+ * @date 2011-02-23
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,7 +19,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #include "OAC.h"
 #include "PsiRelationUpdaterAgent.h"
@@ -87,9 +86,6 @@ void PsiRelationUpdaterAgent::init(opencog::CogServer * server)
                     this->cycleCount
                   );
 
-    // Reset iterator to current processing relation
-    this->iCurrentRelation = this->relationList.begin(); 
-
     // Clear old entity list
     this->entityList.clear(); 
 
@@ -103,9 +99,6 @@ void PsiRelationUpdaterAgent::init(opencog::CogServer * server)
                     this->cycleCount
                   );
   
-    // Reset iterator to current processing entity
-    this->iCurrentEntity = this->entityList.begin();
-
     // Initialize ASW
     // TODO: Shall we have to to do so? 
     AtomSpaceWrapper* asw = ASW(opencog::server().getAtomSpace());
@@ -148,6 +141,12 @@ void PsiRelationUpdaterAgent::updateEntityRelation(opencog::CogServer * server, 
 
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+
+    // Set the truth value of relationEvaluationLink to stv(0 0), which would force PLN refresh anyway
+    // TODO: Really? Shall we have to do this?
+    SimpleTruthValue stvFalse(0, 0);
+
+    atomSpace.setTV(relationEvaluationLink, stvFalse);
 
     // Create BITNodeRoot for the Goal (Target)
     pHandleSeq fakeHandles = ASW()->realToFakeHandle(relationEvaluationLink);
@@ -218,15 +217,10 @@ void PsiRelationUpdaterAgent::updateEntityRelation(opencog::CogServer * server, 
 
 Handle PsiRelationUpdaterAgent::getRelationEvaluationLink(opencog::CogServer * server, 
                                                           const std::string & relationName,
-                                                          Handle entityHandle, 
-                                                          Handle petHandle)
+							  Handle petHandle, 
+                                                          Handle entityHandle
+                                                         )
 {
-    // TODO: Shall we create these Nodes and Links if we failed to find them in the AtomSpace?
-    //       Or maybe we should create them in init method of the mind agent, 
-    //       or in scheme scripts ('pet_rules.scm') 
-    //       [By Zhenhua Cai, on 2011-02-06]
-    //      
-
     // Get the AtomSpace
     AtomSpace & atomSpace = * ( server->getAtomSpace() ); 
 
@@ -234,33 +228,32 @@ Handle PsiRelationUpdaterAgent::getRelationEvaluationLink(opencog::CogServer * s
     Handle relationPredicateHandle = atomSpace.getHandle(PREDICATE_NODE, relationName);
 
     if (relationPredicateHandle == Handle::UNDEFINED) {
-        logger().warn(
-            "PsiRelationUpdaterAgent::%s - Failed to find the PredicateNode for relation '%s' [ cycle = %d ].", 
+        logger().warn( "PsiRelationUpdaterAgent::%s - Failed to find the PredicateNode for relation '%s'. Don't worry it will be created automatically. [ cycle = %d ]", 
                         __FUNCTION__, 
                         relationName.c_str(), 
                         this->cycleCount
                       );
 
-        return opencog::Handle::UNDEFINED; 
+        relationPredicateHandle = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, relationName, false); 
     }
 
-    // Get the Handle to ListLink that contains both entity and pet
+    // Get the Handle to ListLink that contains both pet and entity
     std::vector<Handle> listLinkOutgoing;
 
-    listLinkOutgoing.push_back(entityHandle);
     listLinkOutgoing.push_back(petHandle);
+    listLinkOutgoing.push_back(entityHandle);
 
     Handle listLinkHandle = atomSpace.getHandle(LIST_LINK, listLinkOutgoing);
 
     if (listLinkHandle == Handle::UNDEFINED) {
-        logger().warn( "PsiRelationUpdaterAgent::%s - Failed to find the ListLink containing both entity ( id = '%s' ) and pet ( id = '%s' ) [ cycle = %d ].", 
+        logger().debug( "PsiRelationUpdaterAgent::%s - Failed to find the ListLink containing both entity ( id = '%s' ) and pet ( id = '%s' ). Don't worry, it will be created automatically [ cycle = %d ].", 
                         __FUNCTION__, 
                         atomSpace.getName(entityHandle).c_str(),
                         atomSpace.getName(petHandle).c_str(),
                         this->cycleCount
                       );
 
-        return opencog::Handle::UNDEFINED; 
+        AtomSpaceUtil::addLink(atomSpace, LIST_LINK, listLinkOutgoing, false);
     } 
 
     // Get the Handle to EvaluationLink holding the relation between the pet and the entity
@@ -272,7 +265,7 @@ Handle PsiRelationUpdaterAgent::getRelationEvaluationLink(opencog::CogServer * s
     Handle evaluationLinkHandle = atomSpace.getHandle(EVALUATION_LINK, evaluationLinkOutgoing);
 
     if (evaluationLinkHandle == Handle::UNDEFINED) {
-        logger().warn( "PsiRelationUpdaterAgent::%s - Failed to find the EvaluationLink holding the '%s' relation between the pet ( id = '%s' ) and the entity ( id = '%s' ) [ cycle = %d ].", 
+        logger().debug( "PsiRelationUpdaterAgent::%s - Failed to find the EvaluationLink holding the '%s' relation between the pet ( id = '%s' ) and the entity ( id = '%s' ). Don't worry it would be created automatically [ cycle = %d ].", 
                         __FUNCTION__, 
                         relationName.c_str(), 
                         atomSpace.getName(petHandle).c_str(),
@@ -280,8 +273,9 @@ Handle PsiRelationUpdaterAgent::getRelationEvaluationLink(opencog::CogServer * s
                         this->cycleCount
                      );
 
-        return opencog::Handle::UNDEFINED; 
+        AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evaluationLinkOutgoing, false);
     } 
+
 
     return evaluationLinkHandle;
 }
@@ -336,12 +330,12 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     const std::string & petId = oac->getPet().getPetId(); 
 
     // Get Handle to the pet
-    Handle petHandle = AtomSpaceUtil::getAgentHandle( atomSpace, petName); 
+    Handle petHandle = AtomSpaceUtil::getAgentHandle( atomSpace, petId); 
 
     if ( petHandle == Handle::UNDEFINED ) {
-        logger().warn("PsiRelationUpdaterAgent::%s - Failed to get the handle to the pet ( name = '%s' ) [ cycle = %d ]",
+        logger().warn("PsiRelationUpdaterAgent::%s - Failed to get the handle to the pet ( id = '%s' ) [ cycle = %d ]",
                         __FUNCTION__, 
-                        petName.c_str(), 
+                        petId.c_str(), 
                         this->cycleCount
                      );
         return;
@@ -389,57 +383,58 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     // Allocate inference steps (totalRemainSteps and singleEntityRelationMaxSteps)
     this->allocInferSteps(); 
 
-    // Process each (relation, entity, pet) triple, which represented in AtomSpace as follows:
+    // Process (relation, pet, entity) triples, which are represented in AtomSpace as follows:
     //
     // EvaluationLink (truth value indicates the intensity of the relation between the entity and the pet)
     //     PredicateNode "relationName"
     //         ListLink
-    //             entityHandle
     //             petHandle
+    //             entityHandle
     //
-    while ( this->iCurrentEntity != this->entityList.end() && 
-            this->totalRemainSteps > 0 ) {
+    
+    std::vector<std::string>::iterator iEntity;
+    std::vector<std::string>::iterator iRelation; 
+
+    while ( this->totalRemainSteps > 0 ) {
+
+        totalRemainSteps --; 	    
+       
+        // Randomly select an entity
+	iEntity = this->entityList.begin() + randGen.randint( this->entityList.size() ); 
 
         // If the entity is the pet itself, skip it
-        if ( *iCurrentEntity == petId ) 
+        if ( *iEntity == petId ) 
             continue; 
 
         // Get the Handle to the entity
-        Handle entityHandle = this->getEntityHandle(server, *iCurrentEntity); 
+        Handle entityHandle = this->getEntityHandle(server, *iEntity); 
 
         if ( entityHandle == opencog::Handle::UNDEFINED )
             continue; 
 
-        // Process all the relations to the entity
-        while ( this->iCurrentRelation != this->relationList.end() ) {
-            // Get the Handle to the EvaluationLink holding the relation between the entity and the pet
-            Handle relationEvaluationLink = this->getRelationEvaluationLink( server,
-                                                                             *iCurrentRelation,
-                                                                             entityHandle,
-                                                                             petHandle
-                                                                           ); 
+	// Randomly select a relation
+        iRelation = this->relationList.begin() + randGen.randint( this->relationList.size() );	
 
-            if ( relationEvaluationLink == opencog::Handle::UNDEFINED )
-                continue; 
+        // Get the Handle to the EvaluationLink holding the relation between the entity and the pet
+	// If it doesn't exist, the function below would create one and return it. 
+        Handle relationEvaluationLink = this->getRelationEvaluationLink( server,
+                                                                         *iRelation,
+								         petHandle, 
+								         entityHandle
+								       ); 
 
-            // Update the truth value of the relation through PLN (backward chainer)
-            int singleEntityRelationRemainSteps = this->singleEntityRelationMaxSteps;  
+        // Update the truth value of the relation through PLN (backward chainer)
+        int singleEntityRelationRemainSteps = this->singleEntityRelationMaxSteps;  
 
-            this->updateEntityRelation(server, relationEvaluationLink, singleEntityRelationRemainSteps); 
+        this->updateEntityRelation(server, relationEvaluationLink, singleEntityRelationRemainSteps); 
 
-            // Decrease total step remain
-            this->totalRemainSteps -= (this->singleEntityRelationMaxSteps - singleEntityRelationRemainSteps);
-
-            this->iCurrentRelation ++; 
-        }// while
-
-        this->iCurrentEntity ++;
-        this->iCurrentRelation = this->relationList.begin();
+        // Decrease total step remain
+        this->totalRemainSteps -= (this->singleEntityRelationMaxSteps - singleEntityRelationRemainSteps);
 
     }// while
 
-    // If all the entities have been processed, force the mind agent to reinitialize during next cognitive cycle
-    if ( this->iCurrentEntity == this->entityList.end() )
-        this->forceInitNextCycle();
+    // Since the perception would changes next cycle, the function below would inforce the mind agent 
+    // reinitialize itself during next cycle
+    this->forceInitNextCycle();
 }
 

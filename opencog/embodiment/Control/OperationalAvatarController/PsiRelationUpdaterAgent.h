@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-02-06
+ * @date 2011-02-23
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,7 +19,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #ifndef PSIRELATIONUPDATERAGENT_H
 #define PSIRELATIONUPDATERAGENT_H
@@ -54,11 +53,9 @@ private:
     std::vector<std::string> entityList;  // The names of entities within SpaceMap
     std::vector<std::string> relationList; // The names of relations
 
-    std::vector<std::string>::iterator iCurrentEntity;    // Interator points to the current entity being processed
-    std::vector<std::string>::iterator iCurrentRelation;  // Interator points to the current relation being processed
-
-    int totalRemainSteps;               // Total steps (inference resource) remain for all the (entity, relation) pair
-    int singleEntityRelationMaxSteps;   // Maximum Steps (inference resource) for a single (entity, relation) pair
+    int totalRemainSteps;   // Total steps (inference resource) remain for all the (entity, relation) pair
+    int singleEntityRelationMaxSteps; // Maximum Steps (inference resource) for
+                                      // a single (entity, relation) pair
 
     Btr<BITNodeRoot> Bstate;  // Root node of back inference tree, used by PLN backward chainer
 
@@ -82,18 +79,21 @@ private:
     void updateEntityRelation(opencog::CogServer * server, Handle relationEvaluationLink, int & steps); 
 
     /**
-     * Get the EvaluationLink holding the relation between the entity and the pet
+     * Get the EvaluationLink holding the relation between the pet and the entity.
+     * If failed to find the EvaluationLink, it will create one automatically and return the EvaluationLink.
      *
      * @note  
      *     EvaluationLink
      *         PredicateNode "relationName"
      *         ListLink
-     *             entityHandle
      *             petHandle
+     *             entityHandle
      */
-    Handle getRelationEvaluationLink(opencog::CogServer * server, const std::string & relationName, 
-                                     Handle entityHandle, Handle petHandle); 
-
+    Handle getRelationEvaluationLink(opencog::CogServer * server, 
+		                     const std::string & relationName, 
+				     Handle petHandle, 
+                                     Handle entityHandle
+				    ); 
     /**
      * Get the Handle to entity given its name (id)
      */

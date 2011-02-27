@@ -39,46 +39,6 @@ rule( "begMercy", SCHEMA_RULE, { PLAYING_MODE=0.4, SCAVENGER_HUNT_MODE=0, LEARNI
       "begMercyPrecondition",
       "beg_to_target('_*_')" );
 
---- EAT ---
-
-rule( "eatBreakfast", SCHEMA_RULE, { PLAYING_MODE=0.7, SCAVENGER_HUNT_MODE=0.7, LEARNING_MODE=0.7 },
-      "eatBreakfastPrecondition",
-      "drop_n_eat('_*_')" );
-
-rule( "eatAlone", SCHEMA_RULE, { PLAYING_MODE=0.5, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
-      "eatAlonePrecondition",
-      "drop_n_eat('_*_')" );
-
-rule( "searchForFood", SCHEMA_RULE, { PLAYING_MODE=0.8, SCAVENGER_HUNT_MODE=0.8, LEARNING_MODE=0.8 },
-      "searchForFoodPrecondition",
-      "wander_searching_food()" );
-
-rule( "eatToKillHungry", SCHEMA_RULE, { PLAYING_MODE=0.9, SCAVENGER_HUNT_MODE=0.9, LEARNING_MODE=0.9 },
-      "eatToKillHungryPrecondition",
-      "drop_n_eat('_*_')" );
-
-rule( "eatToRestoreEnergy", SCHEMA_RULE, { PLAYING_MODE=0.88, SCAVENGER_HUNT_MODE=0.88, LEARNING_MODE=0.88 },
-      "eatToRestoreEnergyPrecondition",  
-      "wander_searching_food()" );
-
---- DRINK ---
-
-rule( "drinkToRefresh", SCHEMA_RULE, { PLAYING_MODE=0.7, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
-      "drinkToRefreshPrecondition",
-      "drop_n_drink('_*_')" );
-
-rule( "drinkAlone", SCHEMA_RULE, { PLAYING_MODE=0.5, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
-      "drinkAlonePrecondition",
-      "drop_n_drink('_*_')" );
-
-rule( "searchForWater", SCHEMA_RULE, { PLAYING_MODE=0.88, SCAVENGER_HUNT_MODE=0.88, LEARNING_MODE=0.88 },
-      "searchForWaterPrecondition",
-      "wander_searching_water()" );
-
-rule( "drinkToKillThirst", SCHEMA_RULE, { PLAYING_MODE=0.9, SCAVENGER_HUNT_MODE=0.9, LEARNING_MODE=0.9 },
-      "drinkToKillThirstPrecondition",
-      "drop_n_drink('_*_')" );
-
 --- POO ---
 
 rule( "wanderToFindPooPlace", SCHEMA_RULE, { PLAYING_MODE=0.88, SCAVENGER_HUNT_MODE=0.88, LEARNING_MODE=0.88 },
@@ -202,16 +162,6 @@ rule( "biteEnemyWhenAngry", SCHEMA_RULE, { PLAYING_MODE=0.6, SCAVENGER_HUNT_MODE
       "biteEnemyWhenAngryPrecondition",
       "drop_n_bite( '_*_' )" );
 
---- FLEE ---
-
-rule( "fleeWhenAttacked", SCHEMA_RULE, { PLAYING_MODE=0.7, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
-      "fleeWhenAttackedPrecondition",
-      "goto_owner()" );
-
-rule( "fleeWhenChasedByAMovingObject", SCHEMA_RULE, { PLAYING_MODE=0.71, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
-      "fleeWhenChasedByAMovingObjectPrecondition",
-      "wander( )" );
-
 --- LICK ---
 
 rule( "lickForGratitude", SCHEMA_RULE, { PLAYING_MODE=0.1, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
@@ -257,10 +207,6 @@ rule( "jumpPlay", SCHEMA_RULE, { PLAYING_MODE=0.2, SCAVENGER_HUNT_MODE=0, LEARNI
 
 
 --- PLAY ---
-
-rule( "play", SCHEMA_RULE, { PLAYING_MODE=0.15, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
-      "playPrecondition",
-      "play()" )
 
 rule( "playWithOwner", SCHEMA_RULE, { PLAYING_MODE=0.15, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
       "playWithOwnerPrecondition",
@@ -413,66 +359,6 @@ rule( "feelGratitude", FEELING_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, 
 rule( "feelFear", FEELING_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 }, 
       "feelFearPrecondition",
       "feel('fear', 0.7)" );
-
-
----------------------- RELATIONS ----------------------
-
--- FAMILIAR_WITH --
--- familiar_with is the first step before knowing --
--- for instance sniffing something makes the pet familiar with it --
-
-rule( "relateFamiliarWith", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
-      "relateFamiliarWithPrecondition",
-      "relate('familiar_with', '_*_', 0.9 )" );
-
--- KNOW --
--- know it one step above familiar with, for instance if the pet is familiar --
--- with something and then lick it is consireded to be known --
-
-rule( "relateKnow", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },  
-      "relateKnowPrecondition",
-      "relate('know', '_*_', 0.9 )" );
-
--- ENEMY --
-
-rule( "relateEnemyWhenSeeked", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
-      "relateEnemyWhenSeekedPrecondition",
-      "relate( 'enemy', '_*_', 0.1 )" );
-
-rule( "relateAngerWhenAttacked", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },  
-      "relateAngerWhenAttackedPrecondition",
-      "relate('enemy', '_*_', 0.8 )" );
-
--- CURIOUS_ABOUT --
-
-rule( "relateCuriousAbout", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },  
-      "relateCuriousAboutPrecondition",
-      "relate('curious_about', '_*_' , 0.7 )" );
-
--- FRIEND --
-
-rule( "relateFriend", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },  
-      "relateFriendPrecondition",
-      "relate('friend', '_*_', 0.7 )" );
-
-rule( "relateFriendWhenReceiveFood", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },  
-      "relateFriendWhenReceiveFoodPrecondition",
-      "relate('friend', '_*_', 0.96)" );
-
--- ANGER --
-
-rule( "relateAnger", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },  
-      "relateAngerPrecondition",
-      "relate('anger', '_*_', 0.7 )" );
-
-rule( "relateAngerEnemy", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },  
-      "relateAngerEnemyPrecondition",
-      "relate('anger', '_*_', 0.95 )" );
-
-rule( "relateAngerFoodThreaten", RELATION_RULE, { PLAYING_MODE=1.0, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },  
-      "relateAngerFoodThreatenPrecondition",
-      "relate('anger', '_*_', 0.55)" );
-
 
 ------ LEARNING MODE ACTIONS ------
 

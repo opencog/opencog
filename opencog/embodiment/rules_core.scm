@@ -516,7 +516,7 @@
     );ExecutionLink
 );define
 
-; NULL_ACTION is a dummy Action that actually does nothing!
+; NULL_ACTION is a dummy Action that actually does nothing and its truth value is always ture!
 ; 
 ; It is used when the Action (in another word Procedure) is not necessary in a Rule.
 ;
@@ -533,7 +533,10 @@
 ;
 
 (define (NULL_ACTION) 
-    (add_action "DoNothing")
+    (ExecutionLink (stv 1.0 1.0) (DEFAULT_AV)
+        (GroundedSchemaNode "DoNothing")
+        (ListLink)
+    );ExecutionLink
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -557,7 +560,7 @@
 ;
 
 (define (add_goal goal_pred_name . arguments)
-    (EvaluationLink (DEFAULT_STV) (DEFAULT_AV) 
+    (EvaluationLink (DEFAULT_AV) 
         (PredicateNode (string-trim-both goal_pred_name) )
 
         (ListLink 
@@ -654,8 +657,8 @@
 
 (define (add_rule tv_handle goal_handle action_handle . precondition_handles)
     (ImplicationLink (DEFAULT_AV) tv_handle 
-        (AndLink (cog-new-stv 1.0 1.0)
-             (AndLink (cog-new-stv 1.0 1.0)
+        (AndLink 
+             (AndLink
                  precondition_handles
              )
             action_handle

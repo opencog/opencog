@@ -513,7 +513,7 @@ bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * serv
 			  );
 
             if ( preconditionType != GROUNDED_PREDICATE_NODE &&
-//                 std::find(openList.begin(), openList.end(), hPrecondition) == openList.end() &&
+                 std::find(openList.begin(), openList.end(), hPrecondition) == openList.end() &&
                  std::find(closeList.begin(), closeList.end(), hPrecondition) == closeList.end()
                ) {
                 openList.push_back(hPrecondition); 
@@ -980,10 +980,22 @@ bool PsiActionSelectionAgent::isSatisfied(opencog::CogServer * server,
                        this->cycleCount
                       );
 
-        if ( result == combo::id::logical_true )
+        if ( result == combo::id::logical_true ) {
+            logger().debug( "PsiActionSelectionAgent::%s - This Precondition '%s' is true. [ cycle = %d ]", 
+			    __FUNCTION__, 
+			    preconditionName.c_str(), 
+			    this->cycleCount
+			  );   		
             return true; 
-        else 
+	} 
+        else {
+            logger().debug( "PsiActionSelectionAgent::%s - This Precondition '%s' is false. [ cycle = %d ]", 
+			    __FUNCTION__, 
+			    preconditionName.c_str(), 
+			    this->cycleCount
+			  );   		
             return false; 
+	}
     }
     // For other types of Atom, return false
     else {

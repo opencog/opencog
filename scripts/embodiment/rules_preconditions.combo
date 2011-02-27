@@ -4,6 +4,8 @@
 # Copyright(c) 2002-2008 VettaLabs Ltda
 #
 
+# debug preconditions
+truePrecondition(0) := true
 
 # ----------------------- Beg Preconditions ----------------------
 begCompanyPrecondition(0) := 
@@ -21,59 +23,18 @@ begMercyPrecondition(0) :=
 		is_last_agent_action(_*_ kick_action self))
 
 # ----------------------- Eat Preconditions ----------------------
-#eatBreakfastPrecondition(0) :=
-#	and(is_hungry(self)
-#		less_than(get_energy(self) 0.4)
-#		is_edible(_*_)
-#		near(self _*_))
-eatBreakfastPrecondition(0) :=
-		greater_than(0.2 0.4)
-
-eatAlonePrecondition(0) :=
-	and(is_hungry(self)
-		not(near(self nearest_avatar))
-		is_edible(_*_)
-		near(self _*_))
-
-searchForFoodPrecondition(0) :=
-    not(near(self nearest_edible))
 
 #searchForFoodPrecondition(0) :=
 #	and(is_hungry(self)
 #		not(near(self nearest_edible))
 #		has_energy(self))
-		
-eatToKillHungryPrecondition(0) :=
-	and(greater_than(get_hunger(self) 0.7)
-		is_edible(_*_)
-		near(self _*_))
-
-eatToRestoreEnergyPrecondition(0) :=
-	less_than(get_energy(self) 0.4)
 
 # ----------------------- Drink Preconditions ----------------------
-drinkToRefreshPrecondition(0) :=
-	and(is_thirsty(self)
-		less_than(get_energy(self) 0.4)
-		is_drinkable(_*_)
-		near(self _*_))
 
-drinkAlonePrecondition(0) :=
-	and(is_thirsty(self)
-		less_than(get_energy(self) 0.3)
-		not(near(self nearest_avatar))
-		is_drinkable(_*_)
-		near(self _*_))
-
-searchForWaterPrecondition(0) :=
-	and(is_thirsty(self)
-		not(near(self nearest_drinkable))
-		greater_than(get_energy(self) 0.3))
-
-drinkToKillThirstPrecondition(0) :=
-	and(greater_than(get_thirst(self) 0.8)
-		is_drinkable(_*_)
-		near(self _*_))
+#searchForWaterPrecondition(0) :=
+#	and(is_thirsty(self)
+#		not(near(self nearest_drinkable))
+#		greater_than(get_energy(self) 0.3))
 
 # ----------------------- Poo Preconditions ----------------------
 wanderToFindPooPlacePrecondition(0) :=
@@ -266,24 +227,37 @@ biteEnemyWhenAngryPrecondition(0) :=
 		is_there_relation(enemy self _*_))
 
 # ----------------------- Flee Preconditions ----------------------
-fleeWhenAttackedPrecondition(0) :=
-	and( or(is_fear(self)
-			and(not(is_angry(self))
-				less_than(get_energy(self) 0.25)
-			   )
-		    )
-		 next(self _*_)
-		 is_last_agent_action(_*_ kick_action self)
-		 not(near(self owner))
-	   ) 
+#fleeWhenAttackedPrecondition(0) :=
+#	and( or(is_fear(self)
+#			and(not(is_angry(self))
+#				less_than(get_energy(self) 0.25)
+#			   )
+#		    )
+#		 next(self _*_)
+#		 is_last_agent_action(_*_ kick_action self)
+#		 not(near(self owner))
+#	   ) 
+#
+#fleeWhenChasedByAMovingObjectPrecondition(0) :=
+#	and(is_fear(self)
+#		not(is_pet(_*_))
+#		not(is_avatar(_*_))
+#		is_moving(_*_)
+#		is_moving_toward(self _*_)
+#		is_proportional_next(self _*_ 4 0.6))
 
-fleeWhenChasedByAMovingObjectPrecondition(0) :=
-	and(is_fear(self)
-		not(is_pet(_*_))
-		not(is_avatar(_*_))
-		is_moving(_*_)
-		is_moving_toward(self _*_)
-		is_proportional_next(self _*_ 4 0.6))
+fleePrecondition(0) :=
+    or( and( next(self _*_)
+             is_last_agent_action(_*_ kick_action self)
+             not(near(self owner))
+           )
+
+         and( not(is_pet(_*_))
+              not(is_avatar(_*_))
+              is_moving_toward(self _*_)
+              is_proportional_next(self _*_ 4 0.6)
+            )
+      )
 
 # ----------------------- Lick Preconditions ----------------------
 lickForGratitudePrecondition(0) :=
@@ -343,15 +317,15 @@ jumpPlayPrecondition(0) :=
 
 		
 # ----------------------- Play Preconditions ----------------------
-playPrecondition(0) :=
-	and(is_happy(self)
-		is_playful(self)
-		not(is_angry(self))
-		is_excited(self)
-		has_energy(self)
-		not(is_hungry(self))
-		near(self _*_)
-		is_there_relation(friend self _*_))
+#playPrecondition(0) :=
+#	and(is_happy(self)
+#		is_playful(self)
+#		not(is_angry(self))
+#		is_excited(self)
+#		has_energy(self)
+#		not(is_hungry(self))
+#		near(self _*_)
+#		is_there_relation(friend self _*_))
 
 playWithOwnerPrecondition(0) :=
 	and(is_playful(self)
@@ -541,13 +515,6 @@ feelFearPrecondition(0) :=
 	is_there_relation(fear self _*_)
 
 # ----------------------- Relations Preconditions ----------------------
-relateEnemyWhenSeekedPrecondition(0) := 
-	and(is_fear(self)
-		not(is_pet(_*_))
-		not(is_avatar(_*_))
-		is_moving(_*_)
-		is_moving_toward(self _*_)
-		is_proportional_next(self _*_ 4 0.6))
 
 does_last_pet_schema_contain_sniff_at(1) :=
         or(is_last_pet_schema(drop_n_sniff_action action_success #1)
@@ -555,54 +522,97 @@ does_last_pet_schema_contain_sniff_at(1) :=
            is_last_pet_schema(goto_sniff_action action_success #1)
         )
 
-relateFamiliarWithPrecondition(0) :=
-        and(not(is_there_relation(know self _*_))
-            is_there_relation(curious_about self _*_)
-            does_last_pet_schema_contain_sniff_at(_*_))
+#relateCuriousAboutPrecondition(0) :=
+#	and(has_novelty(self)
+#            is_curious(self)
+#            not(is_there_relation(know self _*_))
+#	    not(is_there_relation(curious_about self _*_))) 
 
-relateCuriousAboutPrecondition(0) :=
-	and(has_novelty(self)
-            is_curious(self)
-            not(is_there_relation(know self _*_))
-	    not(is_there_relation(curious_about self _*_))) 
+#relateFamiliarWithPrecondition(0) :=
+#        and(not(is_there_relation(know self _*_))
+#            is_there_relation(curious_about self _*_)
+#            does_last_pet_schema_contain_sniff_at(_*_))
+
+familiarWithPrecondition(0) :=
+    does_last_pet_schema_contain_sniff_at(_*_))
+
+#relateKnowPrecondition(0) :=
+#        and(not(is_there_relation(know self _*_))
+#	    or(is_last_pet_schema(drop_n_lick_action action_success _*_)
+#	       is_last_agent_action(_*_ give_food_action)
+#               is_last_agent_action(_*_ kick_action self)
+#              )
+#           )
+
+knowPrecondition(0) :=
+    or( is_last_pet_schema(drop_n_lick_action action_success _*_)
+ 	is_last_agent_action(_*_ give_food_action)
+        is_last_agent_action(_*_ kick_action self)
+      )
+
+#relateEnemyWhenSeekedPrecondition(0) := 
+#	and(is_fear(self)
+#		not(is_pet(_*_))
+#		not(is_avatar(_*_))
+#		is_moving(_*_)
+#		is_moving_toward(self _*_)
+#		is_proportional_next(self _*_ 4 0.6))
+
+enemyPrecondition(0) := 
+    and( not(is_pet(_*_))
+         not(is_avatar(_*_))
+	 is_moving(_*_)
+	 is_moving_toward(self _*_)
+	 is_proportional_next(self _*_ 4 0.6)
+       )
 
 #only avatar of pet can become friend
-relateFriendPrecondition(0) :=
-	and(is_last_pet_schema(drop_n_lick_action action_success _*_)
-            or(is_pet(_*_) is_avatar(_*_))
-	    is_there_relation(curious_about self _*_))
 
-relateKnowPrecondition(0) :=
-        and(not(is_there_relation(know self _*_))
-	    or(is_last_pet_schema(drop_n_lick_action action_success _*_)
-	       is_last_agent_action(_*_ give_food_action)
-               is_last_agent_action(_*_ kick_action self)
-              )
-           )
+#relateFriendPrecondition(0) :=
+#	and(is_last_pet_schema(drop_n_lick_action action_success _*_)
+#            or(is_pet(_*_) is_avatar(_*_))
+#	    is_there_relation(curious_about self _*_))
 
+#relateFriendWhenReceiveFoodPrecondition(0) :=
+#	is_last_agent_action(_*_ give_food_action)   
 
-relateAngerPrecondition(0) :=
-	and(is_angry(self)
-		and(or(next(self _*_)
-			   near(self _*_))
-			near(self nearest_edible)))
+friendPrecondition(0) :=
+    and( or(is_pet(_*_) is_avatar(_*_))
+         is_last_agent_action(_*_ give_food_action) 
+       )
 
-relateAngerEnemyPrecondition(0) :=
-	and(is_aggressive(self)
-		next(self _*_)
-		is_there_relation(enemy self _*_))
+#relateAngerPrecondition(0) :=
+#	and(is_angry(self)
+#		and(or(next(self _*_)
+#			   near(self _*_))
+#			near(self nearest_edible)))
+#
+#relateAngerFoodThreatenPrecondition(0) :=
+#	and(is_aggressive(self)
+#		near(self nearest_edible)
+#		next(self _*_))   
 
-relateAngerFoodThreatenPrecondition(0) :=
-	and(is_aggressive(self)
-		near(self nearest_edible)
-		next(self _*_))   
+angerForFoodThreatenPrecondition(0) :=
+    and( near(self nearest_edible)
+         next(self _*_)
+         is_pet(_*_)
+       )   
 
-relateAngerWhenAttackedPrecondition(0) :=
-	is_last_agent_action(_*_ kick_action self)   
+#relateAngerEnemyPrecondition(0) :=
+#	and(is_aggressive(self)
+#		next(self _*_)
+#		is_there_relation(enemy self _*_))
 
+angerForEnemyPrecondition(0) :=
+    and( is_there_relation(enemy self _*_)
+         next(self _*_)
+       )
 
-relateFriendWhenReceiveFoodPrecondition(0) :=
-	is_last_agent_action(_*_ give_food_action)   
+#relateAngerWhenAttackedPrecondition(0) :=
+#	is_last_agent_action(_*_ kick_action self)   
+
+angerWhenAttackedPrecondition(0) :=
+    is_last_agent_action(_*_ kick_action self)   
 
 # ----------------------- Learning Mode Preconditions ----------------------
 approachToLearnPrecondition(0) :=
@@ -804,6 +814,4 @@ lookForTargetPrecondition(0) :=
 
 # 1317 is being used to main game control
 
-# debug preconditions
 
-truePrecondition(0) := true

@@ -75,16 +75,21 @@ random_step_lib(0) :=
 
 #walk random, but more forward and more right and does not rotate every time
 random_step_searching(0) := 
-	and_seq(
-    	        action_boolean_if(greater_than(rand 0.5) 
-        	                  action_boolean_if(greater_than(rand 0.6)
-          		                            rotate_left rotate_right)
-        	                  step_forward)
-      	        action_boolean_if(greater_than(rand 0.3)
-        	                  step_forward
-	                          step_backward)
-	       )
+    and_seq( action_boolean_if(greater_than(rand 0.5) 
+                               action_boolean_if(greater_than(rand 0.6)
+          	                                 rotate_left
+                                                 rotate_right
+                                                )
+        	               step_forward
+                              )
 
+             action_boolean_if(greater_than(rand 0.3)
+                               step_forward
+	                       step_backward
+                              )
+           )
+
+wander(0) := random_step_searching
 
 #############################################
 ########### RULE ENGINE FUNCTIONS ###########
@@ -95,19 +100,44 @@ random_step_searching(0) :=
 ######################
 
 #Looking for food. If does not exist, random_step_searching until find food
-wander_searching_food(0) :=
-	and_seq(
-    	boolean_while(not(exists_edible) random_step_searching)
-        goto_obj(nearest_edible 3) drop wag eat(nearest_edible)
-    )
+#wander_searching_food(0) :=
+#	and_seq(
+#    	boolean_while(not(exists_edible) random_step_searching)
+#        goto_obj(nearest_edible 3) drop wag eat(nearest_edible)
+#    )
+    
+eat_food(0) :=
+    and_seq( goto_obj(nearest_edible 3)
+             drop
+             wag
+             eat(nearest_edible)
+             wander
+           )
 
+search_for_food(0) :=
+    and_seq( boolean_while(not(exists_edible) random_step_searching)
+             goto_obj(nearest_edible 3) 
+           )
 
 #Looking for water. If does not exist, random_step_searching until find water
-wander_searching_water(0) :=
-    and_seq(
-    	boolean_while(not(exists_drinkable) random_step_searching)
-        and_seq(goto_obj(nearest_drinkable 3) drop wag drink(nearest_drinkable))
-    )
+#wander_searching_water(0) :=
+#    and_seq(
+#    	boolean_while(not(exists_drinkable) random_step_searching)
+#        and_seq(goto_obj(nearest_drinkable 3) drop wag drink(nearest_drinkable))
+#    )
+
+drink_water(0) :=  
+    and_seq( goto_obj(nearest_drinkable 3)
+             drop 
+             wag 
+             drink(nearest_drinkable)
+             wander
+           )
+
+search_for_water(0) := 
+    and_seq( boolean_while(not(exists_drinkable) random_step_searching)
+             goto_obj(nearest_drinkable 3)
+           )
 
 #Looking for pee place. If does not exist, random_step_searching until find one
 wander_searching_pee_place(0) :=
@@ -123,7 +153,6 @@ wander_searching_poo_place(0) :=
         and_seq(goto_obj(nearest_poo_place 3) wag poo)
     )
 
-wander(0) := random_step_searching
 
 # Behavior functions
 #################
