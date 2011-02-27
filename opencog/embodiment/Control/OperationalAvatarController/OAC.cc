@@ -409,8 +409,10 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
     }
 
     if (msg->getFrom() == config().get("PROXY_ID")) {
+		// The message type RAW is used for HK unity project.
+		// If you use multiverse, just ignore this.
         if(msg->getType() == MessagingSystem::Message::RAW) {
-        // message from OCAvatar, forward it to RelEx server.
+			// message from OCAvatar, forward it to RelEx server.
             StringMessage rawMessage(getID(), config().get("RELEX_SERVER_ID"), msg->getPlainTextRepresentation());
 
             logger().info("Forward raw message to RelEx server.");

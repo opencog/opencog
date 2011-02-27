@@ -64,6 +64,7 @@ protected:
             "SPAWNER_IP",                   "127.0.0.1",
             "SPAWNER_PORT",                 "16313",
 
+			// item for the standalone RelEx server.
 			"RELEX_SERVER_ID",				"RELEX_SERVER",
 
             "LS_ID",                        "LS",
@@ -340,6 +341,9 @@ protected:
             "RAMONA_SERVER_HOST",           "localhost",
             "RAMONA_SERVER_PORT",           "6003",
 
+			// For HK unity project
+			// If following option is set to 'true', multiverse would not work. 
+			"ENABLE_UNITY_CONNECTOR",		"false",
             //used as halting condition by reset
             "",                             ""
         };

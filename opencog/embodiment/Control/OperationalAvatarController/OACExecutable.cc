@@ -40,8 +40,8 @@ void opc_unexpected_handler()
 int main(int argc, char *argv[])
 {
     // take care of the args number.
-    if (argc != 8) {
-        logger().error("OACExec - Usage: \n\topc <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> <agent-id>.");
+    if (argc < 7 || argc > 8) {
+        logger().error("OACExec - Usage: \n\topc <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> [<agent-id>].");
         return (1);
     }
 
@@ -59,8 +59,9 @@ int main(int argc, char *argv[])
         config().set("SERVER_PORT", argv[6]);
 
         // This is a hack!!! To redirect message to OCAvatar in unity game.
-        config().set("PROXY_ID", argv[7]);
-
+		if(argc == 8) {
+			config().set("PROXY_ID", argv[7]);
+		}
         // setting unexpected handler in case a different exception from the
         // especified ones is throw in the code
         std::set_unexpected(opc_unexpected_handler);
