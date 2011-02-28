@@ -1,11 +1,11 @@
 /*
  * opencog/embodiment/Control/OperationalAvatarController/OAC.h
  *
- * Copyright (C) 2009-2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
+ * Author(s): Carlos Lopes
  *
- * Updated: By Zhenhua Cai, on 2010-12-08
+ * Updated: By Zhenhua Cai, on 2011-02-07
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -28,6 +28,7 @@
 
 #include <string>
 #include <opencog/persist/file/SavingLoading.h>
+#include <opencog/util/RandGen.h>
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
@@ -39,10 +40,16 @@
 #include "PetMessageSender.h"
 #include "PVPActionPlanSender.h"
 
-#include "ProcedureInterpreterAgent.h"
-#include "ActionSelectionAgent.h"
-#include "ImportanceDecayAgent.h"
-#include "EntityExperienceAgent.h"
+#include <opencog/embodiment/Control/OperationalAvatarController/ProcedureInterpreterAgent.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/ActionSelectionAgent.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/ImportanceDecayAgent.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/EntityExperienceAgent.h>
+
+#include <opencog/embodiment/Control/OperationalAvatarController/PsiModulatorUpdaterAgent.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/PsiFeelingUpdaterAgent.h>
 
 #include "RuleEngine.h"
 
@@ -51,9 +58,8 @@ class PsiActionSelectionAgentUTest;
 namespace OperationalAvatarController
 {
 
-/** Defines a single factory template to allow the same agent
- * to be inserted multiple times in the Cogserver schedule
- */
+/* Defines a single factory template to allow insert a same agent
+ * multiple times in the Cogserver schedule */
 template< typename _Type, typename _BaseType >
 class SingletonFactory : public Factory<_Type, _BaseType>
 {
@@ -95,6 +101,11 @@ private:
      */
     Pet * pet;
 
+    /*
+     * Random generator
+     */
+    static boost::shared_ptr<RandGen> rngPtr; 
+
     /**
      * Interpreter for the procedures to be executed by the OAC. Can
      * deal with combo and builtin procedures
@@ -121,16 +132,19 @@ private:
     ImportanceDecayAgent* importanceDecayAgent;
     ActionSelectionAgent* actionSelectionAgent;
     EntityExperienceAgent* entityExperienceAgent;
-    PsiModulatorUpdaterAgent* psiModulatorUpdaterAgent;
-    PsiDemandUpdaterAgent* psiDemandUpdaterAgent;
-    PsiActionSelectionAgent* psiActionSelectionAgent;
+
+    PsiModulatorUpdaterAgent * psiModulatorUpdaterAgent;
+    PsiDemandUpdaterAgent * psiDemandUpdaterAgent;
+    PsiActionSelectionAgent * psiActionSelectionAgent;
+    PsiRelationUpdaterAgent * psiRelationUpdaterAgent; 
+    PsiFeelingUpdaterAgent * psiFeelingUpdaterAgent; 
 
     RuleEngine* ruleEngine;
 
     /**
      * Load pet metadata for a given pet.
      *
-     * @warning This method should be invoke only in OAC start up, i.e.
+     * IMPORTANT: This method should be invoke only in OAC start up, i.e.
      * in the constructor.
      */
     void loadPet(const std::string & petId);
@@ -141,7 +155,7 @@ private:
      * SavableRepository objects must be created and registered
      * (this may be done at the constructor).
      *
-     * @warning This method should be invoke only in OAC start up, i.e.
+     * IMPORTANT: This method should be invoke only in OAC start up, i.e.
      * in the constructor.
      */
     void loadAtomSpace(const std::string & petId);
@@ -151,7 +165,7 @@ private:
      * one.
      *
      * @param spawnerMessage The spawner message plain text format to be
-     * processed
+     *                          processed
      *
      * @return True if the message was correctly processed
      */
@@ -190,15 +204,16 @@ public:
     /**
      * Save the OCP state.
      *
-     * @warning This method should be invoke only on OAC shutdown, that is,
-     * when it receive a shutdown message from the spawner. Or when an
-     * exception has occured and the state should be persisted.
+     * IMPORTANT: This method should be invoke only on OAC shutdown,
+     *            that is, when it receive a shutdown message from the
+     *            spawner. Or when an exception has occured and the state
+     *            should be persisted.
      */
     void saveState();
 
     /**
-     * @return The Percpetion/Action Interface object used to exchange (send
-     * and receive) data with virtual world.
+     * @return The Percpetion/Action Interface object used to exchange
+     *            (send and receive) data with virtual world.
      */
     PerceptionActionInterface::PAI & getPAI();
 
@@ -210,6 +225,11 @@ public:
      * @return The pet's cognitive component.
      */
     Pet & getPet();
+
+    /**
+     * Return the reference to rand generator
+     */ 
+    RandGen & getRandGen();
 
     /**
      * Get the RuleEngine associated with the OAC.
@@ -274,10 +294,12 @@ public:
     SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
     SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
     SingletonFactory<EntityExperienceAgent, Agent> entityExperienceAgentFactory;
-    SingletonFactory<PsiModulatorUpdaterAgent, Agent> psiModulatorUpdaterAgentFactory;
-    SingletonFactory<PsiDemandUpdaterAgent, Agent> psiDemandUpdaterAgentFactory;
-    SingletonFactory<PsiActionSelectionAgent, Agent> psiActionSelectionAgentFactory;
 
+    SingletonFactory <PsiModulatorUpdaterAgent, Agent> psiModulatorUpdaterAgentFactory;
+    SingletonFactory <PsiDemandUpdaterAgent, Agent> psiDemandUpdaterAgentFactory;
+    SingletonFactory <PsiActionSelectionAgent, Agent> psiActionSelectionAgentFactory;
+    SingletonFactory <PsiRelationUpdaterAgent, Agent> psiRelationUpdaterAgentFactory; 
+    SingletonFactory <PsiFeelingUpdaterAgent, Agent> psiFeelingUpdaterAgentFactory; 
 }; // class
 }  // namespace
 
