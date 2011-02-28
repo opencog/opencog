@@ -2,7 +2,7 @@
 # Feeling updaters
 #
 # @author Zhenhua Cai czhedu@gmail.com
-# @date   2011-02-18
+# @date   2011-02-21
 #
 # Note: Some tricks about combo scripts
 #     1. There cannot be any whitespaces between operator and (
@@ -76,19 +76,19 @@
 #
 
 # Thresholds for fuzzy high, low, medium etc.
-modulator_high_threshold := 0.7
-modulator_extremely_high_threshold := 0.85
-modulator_low_threshold := 0.3
-modulator_extremely_low_threshold := 0.15
-modulator_medium_threshold := 0.5
+modulator_high_threshold(0) := 0.7
+modulator_extremely_high_threshold(0) := 0.85
+modulator_low_threshold(0) := 0.3
+modulator_extremely_low_threshold(0) := 0.15
+modulator_medium_threshold(0) := 0.5
 
 # Used by 'modulator_to_feeling_dimension' below
-modulator_extremely_low_indicator := -2
-modulator_low_indicator := -1
-modulator_medium_indicator := 0
-modulator_high_indicator := 1
-modulator_extremely_high_indicator := 2
-modulator_undefined_indicator := 3
+modulator_extremely_low_indicator(0) := -2
+modulator_low_indicator(0) := -1
+modulator_medium_indicator(0) := 0
+modulator_high_indicator(0) := 1
+modulator_extremely_high_indicator(0) := 2
+modulator_undefined_indicator(0) := 3
 
 # Get pleasure based on previously/ currently selected demand goal
 get_pleasure(0) := +( *(0.35 get_current_demand_goal_truth_value)
@@ -101,22 +101,22 @@ get_pleasure(0) := +( *(0.35 get_current_demand_goal_truth_value)
 modulator_to_feeling_dimension(2) := 
      contin_if( equal_to(#2 modulator_extremely_low_indicator) 
                 fuzzy_low(#1 modulator_extremely_low_threshold 100)
-                (contin_if( equal_to(#2 modulator_low_indicator)
-                            fuzzy_low(#1 modulator_low_threshold 100)
-                            (contin_if( equal_to(#2 modulator_medium_indicator)
-                                        fuzzy_equal(#1 modulator_medium_threshold 100)
-                                        (contin_if( equal_to(#2 modulator_high_indicator)
-                                                    fuzzy_high(#1 modulator_high_threshold 100)
-                                                    contin_if( equal_to(#2 modulator_extremely_high_indicator)
-                                                               fuzzy_high(#1 modulator_extremely_high_threshold 100)
-                                                               0
-                                                             )
-                                                  )
-                                        )
-                                      )
-                            )
-                          )
-                )
+                contin_if( equal_to(#2 modulator_low_indicator)
+                           fuzzy_low(#1 modulator_low_threshold 100)
+                           contin_if( equal_to(#2 modulator_medium_indicator)
+                                      fuzzy_equal(#1 modulator_medium_threshold 100)
+                                      contin_if( equal_to(#2 modulator_high_indicator)
+                                                 fuzzy_high(#1 modulator_high_threshold 100)
+                                                 contin_if( equal_to(#2 modulator_extremely_high_indicator)
+                                                            fuzzy_high(#1 modulator_extremely_high_threshold 100)
+                                                            0
+                                                          )
+                                               )
+                                        
+                                    )
+                            
+                         )
+                
               )
 
 # Calculate the feeling based on modulator indicators (low, high, medium etc.)
@@ -126,17 +126,16 @@ modulator_to_feeling_dimension(2) :=
 # #4 indicator for SelectionThreshold
 # #5 indicator for Pleasure
 # #6 the number of modulators used during calculation 
-feeling_calculator(6) := 
-    /( +( modulator_to_feeling_dimension(get_activation_modulator #1)
-          +( modulator_to_feeling_dimension(get_resolution_modulator #2)
-             +( modulator_to_feeling_dimension(get_securing_threshold #3)
-                +( modulator_to_feeling_dimension(get_selection_threshold #4)
-                   modulator_to_feeling_dimension(get_pleasure #5)
+feeling_calculator(6) :=
+    /( +( modulator_to_feeling_dimension( get_activation_modulator #1 )
+          +( modulator_to_feeling_dimension( get_resolution_modulator #2 )
+             +( modulator_to_feeling_dimension( get_securing_threshold_modulator #3 )
+                +( modulator_to_feeling_dimension( get_selection_threshold_modulator #4 )
+                   modulator_to_feeling_dimension( get_pleasure #5 )
                  )
               )
            )
         )
-          
        #6
      )                     
 
@@ -155,7 +154,7 @@ prideFeelingUpdater(0) := feeling_calculator( modulator_undefined_indicator
                                               modulator_high_indicator
                                               modulator_high_indicator
                                               4
-                                           )
+                                            )
 
 loveFeelingUpdater(0) := feeling_calculator( modulator_undefined_indicator
                                              modulator_extremely_low_indicator
@@ -179,7 +178,7 @@ angerFeelingUpdater(0) := feeling_calculator( modulator_high_indicator
                                               modulator_low_indicator
                                               modulator_low_indicator
                                               5
-                                           )
+                                            )
 
 gratitudeFeelingUpdater(0) := feeling_calculator( modulator_undefined_indicator
                                                   modulator_undefined_indicator
@@ -210,6 +209,7 @@ excitementFeelingUpdater(0) := max( feeling_calculator( modulator_high_indicator
                                                         modulator_undefined_indicator
                                                         modulator_low_indicator
                                                         modulator_extremely_low_indicator
+                                                        4
                                                       )
                                   )
 

@@ -423,6 +423,7 @@ bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * serv
 
     // Clear old Plans
     psiPlanList.clear();
+    psiPlanList.resize(1);
 
     // Push the ultimate Goal to the Open List
     std::list<Handle> openList; 
@@ -431,6 +432,8 @@ bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * serv
     openList.push_back(goalHandle);
 
     while ( !openList.empty() && steps>0 ) {
+
+	steps --;
 
         // Pop up a Goal from Open List, push it to Close List, and set it as the current goal
         Handle hCurrentGoal = openList.front();
@@ -486,29 +489,56 @@ bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * serv
         // Store those Preconditions, i.e. subgoals, to Open List if they are not GroundedPredicateNode and 
         // do no exist in both Open and Close List
         foreach( Handle hPrecondition, atomSpace.getOutgoing(hPreconditionAndLink) ) {
-            steps --; 
+
+           logger().debug("PsiActionSelectionAgent::%s - Going to check the precondition: %s [ cycle = %d ]", 
+			   __FUNCTION__, 
+			   atomSpace.atomAsString(hPrecondition).c_str(), 
+			   this->cycleCount
+			 );
+         		
             Handle hPreconditionNode = atomSpace.getOutgoing(hPrecondition, 0);
+
+ 	    logger().debug("PsiActionSelectionAgent::%s - Get hPreconditionNode: %s [ cycle = %d ]", 
+			    __FUNCTION__, 
+			    atomSpace.atomAsString(hPreconditionNode).c_str(), 
+			    this->cycleCount
+                          );
+
             Type preconditionType = atomSpace.getType(hPreconditionNode);
 
+	    logger().debug("PsiActionSelectionAgent::%s - Get hPreconditionNode type : %s [ cycle = %d ]", 
+			    __FUNCTION__, 
+			    classserver().getTypeName(preconditionType).c_str(), 
+			    this->cycleCount
+			  );
+
             if ( preconditionType != GROUNDED_PREDICATE_NODE &&
-                 std::find(openList.begin(), openList.end(), hPrecondition) == openList.end() &&
+//                 std::find(openList.begin(), openList.end(), hPrecondition) == openList.end() &&
                  std::find(closeList.begin(), closeList.end(), hPrecondition) == closeList.end()
                ) {
                 openList.push_back(hPrecondition); 
+		logger().debug("PsiActionSelectionAgent::%s - Append %s to Open List [ cycle = %d ]", 
+				__FUNCTION__, 
+				atomSpace.atomAsString(hPrecondition).c_str(), 
+				this->cycleCount
+			      );
             }// if
+
+	    logger().debug("PsiActionSelectionAgent::%s - It has not been added to Open List [ cycle = %d ]", 
+			    __FUNCTION__, 
+			    this->cycleCount
+			  );
 
         }// foreach
 
         // Store the Psi Rule
+ 	logger().debug("PsiActionSelectionAgent::%s - Stored an Psi Rule: %s [ cycle = %d ]", 
+			__FUNCTION__, 
+			atomSpace.atomAsString(hSelectedPsiRule).c_str(), 
+			this->cycleCount
+		      );
         psiPlanList[0].push_back(hSelectedPsiRule);
     }// while
-
-    // Reset all the truth value of subgoals to false
-    this->resetPlans(server, goalHandle, psiPlanList);
-
-    // TODO: only for debugging, comment it later 
-    // Print plans
-    this->printPlans(server, goalHandle, psiPlanList);
 
     logger().debug( "PsiActionSelectionAgent::%s - Figure out %d plans for the goal '%s' successfully [ cycle = %d ]", 
                     __FUNCTION__, 
@@ -516,6 +546,18 @@ bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * serv
                     goalName.c_str(), 
                     this->cycleCount
                   );
+
+    // Reset all the truth value of subgoals to false
+    this->resetPlans(server, goalHandle, psiPlanList);
+
+    logger().debug( "PsiActionSelectionAgent::%s - Reset plans successfully [ cycle = %d]", 
+		    __FUNCTION__, 
+		    this->cycleCount
+		  );
+
+    // TODO: only for debugging, comment it later 
+    // Print plans
+    this->printPlans(server, goalHandle, psiPlanList);
 
     return true; 
 }
@@ -1130,6 +1172,13 @@ bool PsiActionSelectionAgent::applyPsiRule(opencog::CogServer * server,
     this->currentPsiRule = hPsiRule; 
     this->timeStartCurrentPsiRule = time(NULL);
 
+    logger().debug( "PsiActionSelectionAgent::%s - Applying Psi rule: %s successfully ( currentSchemaId = %d ) [ cycle = %d ]", 
+		    __FUNCTION__, 
+		    atomSpace.atomAsString(hPsiRule).c_str(), 
+		    this->currentSchemaId, 
+		    this->cycleCount
+		  );
+
     return true; 
 }
 
@@ -1193,8 +1242,21 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     //
     if (this->currentPsiRule != opencog::Handle::UNDEFINED) {
 
+        logger().debug( "PsiActionSelectionAgent::%s currentSchemaId = %d [ cycle = %d] ", 
+			__FUNCTION__, 
+			this->currentSchemaId,
+                        this->cycleCount	
+		      );
+
         // If the Action has been done, check the result
         if ( procedureInterpreter.isFinished(this->currentSchemaId) ) {
+
+            logger().debug( "PsiActionSelectionAgent::%s - The Action [ id = %d ] is finished for the Psi Rule: %s [ cycle = %d ].", 
+                            __FUNCTION__,
+                            this->currentSchemaId,
+                            atomSpace.atomAsString(this->currentPsiRule).c_str(), 
+                            this->cycleCount
+                          );
 
             combo::vertex result = procedureInterpreter.getResult(this->currentSchemaId);
 
@@ -1212,8 +1274,8 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                 //
                 // Note: std::remove itself actually removes NOTHING! 
                 //       It only move all the elements to be removed to the end of the vector, 
-                //       and the returns the iterator pointing to the first element to be removed.
-                //       So you call 'erase' method to really REMOVE. 
+                //       and then returns the iterator pointing to the first element to be removed.
+                //       So you should call 'erase' method to really REMOVE. 
                 //
                 //       An exception is std::list, its remove method really remove element. 
                 //       The behavior of 'remove_if' and 'unique' is similar to 'remove'
@@ -1281,9 +1343,6 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
         // If the Action is time out
         else if ( time(NULL) - this->timeStartCurrentPsiRule >  this->procedureExecutionTimeout ) { 
 
-            this->currentPsiRule = opencog::Handle::UNDEFINED;
-            this->currentSchemaId = 0;
-
             // Stop the time out Action
             procedureInterpreter.stopProcedure(this->currentSchemaId);
 
@@ -1292,6 +1351,9 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                            atomSpace.atomAsString(this->currentPsiRule).c_str(), 
                            this->cycleCount
                          );
+
+            this->currentPsiRule = opencog::Handle::UNDEFINED;
+            this->currentSchemaId = 0;
         }
         // If the Action is still running, simply returns
         else {  

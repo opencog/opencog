@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiFeelingUpdaterAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-02-06
+ * @date 2011-02-21
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -55,15 +55,15 @@ void PsiFeelingUpdaterAgent::init(opencog::CogServer * server)
     const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get petName
-    const std::string & petName = oac->getPet().getName(); 
+    const std::string & petId = oac->getPet().getPetId(); 
 
     // Get petHandle
-    Handle petHandle = AtomSpaceUtil::getAgentHandle(atomSpace, petName); 
+    Handle petHandle = AtomSpaceUtil::getAgentHandle(atomSpace, petId); 
 
     if ( petHandle == Handle::UNDEFINED ) {
-        logger().warn("PsiFeelingUpdaterAgent::%s - Failed to get the handle to the pet ( name = '%s' ) [ cycle = %d ]", 
+        logger().warn("PsiFeelingUpdaterAgent::%s - Failed to get the handle to the pet ( id = '%s' ) [ cycle = %d ]", 
                         __FUNCTION__, 
-                        petName.c_str(), 
+                        petId.c_str(), 
                         this->cycleCount
                      );
         return;
