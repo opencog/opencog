@@ -1411,8 +1411,8 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                                                                        petId
                                                                       );
 // TODO: uncomment the line below once finish testing
-//    if ( randGen.randfloat() > selectionThreshold )
-    if ( false )  // skip this for debugging
+    if ( randGen.randfloat() > selectionThreshold )
+//    if ( false )  // skip this for debugging
     {
 
         selectedDemandGoal = this->chooseRandomDemandGoal(); 

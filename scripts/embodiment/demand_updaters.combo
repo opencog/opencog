@@ -39,41 +39,47 @@ FuzzyWithin(3) := contin_if( less_than(#1 #2)
 # calculated at the previous cycle
 
 EnergyDemandUpdater(0) :=
-    exp( +( *( log(get_energy_demand) 0.999)
-            neg(0.001)
-          )  
-       )
+    rand_within(0 1)
+#    exp( +( *( log(get_energy_demand) 0.999)
+#            neg(0.001)
+#          )  
+#       )
 
 WaterDemandUpdater(0) :=
-    exp( +( *( log(get_water_demand) 0.999)
-            neg(0.001)
-          )  
-       )
+    rand_within(0 1)
+#    exp( +( *( log(get_water_demand) 0.999)
+#            neg(0.001)
+#          )  
+#       )
 
 IntegrityDemandUpdater(0) :=
-    exp( +( *( log(get_integrity_demand) 0.999)
-            neg(0.001)
-          )  
-       )
+    rand_within(0 1)
+#    exp( +( *( log(get_integrity_demand) 0.999)
+#            neg(0.001)
+#          )  
+#       )
 
 AffiliationDemandUpdater(0) :=
-    exp( +( *( log(get_affiliation_demand) 0.999)
-            neg(0.001)
-          )  
-       )
+    rand_within(0 1)
+#    exp( +( *( log(get_affiliation_demand) 0.999)
+#            neg(0.001)
+#          )  
+#       )
 
 
 CertaintyDemandUpdater(0) :=
-    exp( +( *( log(get_certainty_demand) 0.999)
-            neg(0.001)
-          )  
-       )
+    rand_within(0 1)
+#    exp( +( *( log(get_certainty_demand) 0.999)
+#            neg(0.001)
+#          )  
+#       )
 
 CompetenceDemandUpdater(0) :=
-    exp( +( *( log(get_competence_demand) 0.999)
-            neg(0.001)
-          )  
-       )
+    rand_within(0 1)
+#    exp( +( *( log(get_competence_demand) 0.999)
+#            neg(0.001)
+#          )  
+#       )
 
 # TODO: TestEnergy is only used for debugging. Remove it once finished. 
 TestEnergyDemandUpdater(0) :=

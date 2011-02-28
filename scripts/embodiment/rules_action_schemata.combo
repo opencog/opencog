@@ -43,11 +43,10 @@ drop_n_play(0) := and_seq( drop play )
 drop_n_celebrate(0) := and_seq( drop back_flip run_in_circle bark )
 
 grab_nearest_pickupable(0) :=
-        action_boolean_if(
-	                  near(self nearest_pickupable)
-	                  and_seq( drop grab(nearest_pickupable) )
-	                  action_failure
-)
+    action_boolean_if( near(self nearest_pickupable)
+                       and_seq( drop grab(nearest_pickupable) )
+	                   action_failure
+                     )
 
 walkto_obj(1) := goto_obj(#1 2.5)
 trotto_obj(1) := goto_obj(#1 4)
@@ -170,8 +169,14 @@ follow_owner(0) := goto_obj(owner 4)
 flee(0) := and_seq( beg random_step_lib random_step_lib )
 
 play(0) := and_seq( bark wag wag wag wag bark
-       		    grab_nearest_pickupable
-		    random_step_searching drop bark )
+                    random_step_searching
+        		  )
+
+#action_boolean_if( near(self nearest_pickupable)
+#                   and_seq( drop grab(nearest_pickupable) )
+#                   and_seq( random_step_searching drop bark )
+#                 )
+
 
 # schema used by SchemaRunner when the pet does'n know(not found) to perform the requested trick
 full_of_doubts(0) := and_seq( sit bark bark );

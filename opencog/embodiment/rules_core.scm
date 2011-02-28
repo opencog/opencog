@@ -432,6 +432,36 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
+; Add Goal to AtomSpace. 
+;
+; A Goal is an EvaluationLink with a PredicateNode, which can be represented as below:
+;
+; EvaluationLink
+;     PredicateNode "goal_pred_name"
+;     ListLink
+;         Node:arguments
+;         ...
+;
+; There are two kinds of Goals, Final Goal and Intermediate Goal.
+;
+; A Final Goal, also known as Demand Goal, is to keep a specific Demand in a suitable range, 
+; Which is the starting point of backward chaining. 
+;
+; While an Intermediate Goal should be used as other Rule's Precondition. 
+;
+
+(define (add_goal goal_pred_name . arguments)
+    (EvaluationLink (DEFAULT_AV) 
+        (PredicateNode (string-trim-both goal_pred_name) )
+
+        (ListLink 
+            (apply parse_arguments arguments)
+        )
+    );EvaluationLink
+);define
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
 ; Add GPN (GroundedPredicateNode) Precondition to AtomSpace.
 ;
 ; There are two kinds of Preconditions: 
@@ -484,7 +514,7 @@
 ; Do we really need this NULL_PRECONDITION? Who knowns!
 ;
 
-(define (NULL_PRECONDITION) 
+(define NULL_PRECONDITION 
     (add_goal "NoPrecondition")
 )
 
@@ -532,42 +562,12 @@
 ; Moreover, to some extend, do nothing is actualy do something :)
 ;
 
-(define (NULL_ACTION) 
+(define NULL_ACTION 
     (ExecutionLink (stv 1.0 1.0) (DEFAULT_AV)
         (GroundedSchemaNode "DoNothing")
         (ListLink)
     );ExecutionLink
 )
-
-;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-;
-; Add Goal to AtomSpace. 
-;
-; A Goal is an EvaluationLink with a PredicateNode, which can be represented as below:
-;
-; EvaluationLink
-;     PredicateNode "goal_pred_name"
-;     ListLink
-;         Node:arguments
-;         ...
-;
-; There are two kinds of Goals, Final Goal and Intermediate Goal.
-;
-; A Final Goal, also known as Demand Goal, is to keep a specific Demand in a suitable range, 
-; Which is the starting point of backward chaining. 
-;
-; While an Intermediate Goal should be used as other Rule's Precondition. 
-;
-
-(define (add_goal goal_pred_name . arguments)
-    (EvaluationLink (DEFAULT_AV) 
-        (PredicateNode (string-trim-both goal_pred_name) )
-
-        (ListLink 
-            (apply parse_arguments arguments)
-        )
-    );EvaluationLink
-);define
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;

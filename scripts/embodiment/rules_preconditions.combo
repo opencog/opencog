@@ -534,7 +534,7 @@ does_last_pet_schema_contain_sniff_at(1) :=
 #            does_last_pet_schema_contain_sniff_at(_*_))
 
 familiarWithPrecondition(0) :=
-    does_last_pet_schema_contain_sniff_at(_*_))
+    does_last_pet_schema_contain_sniff_at(_*_)
 
 #relateKnowPrecondition(0) :=
 #        and(not(is_there_relation(know self _*_))
