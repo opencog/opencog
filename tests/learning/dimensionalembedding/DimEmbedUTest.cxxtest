@@ -144,6 +144,7 @@ public:
         link(atomSpace, h6, h7, 0.4, 1.0);
         
         dimEmbed.embedAtomSpace(SIMILARITY_LINK, 7);
+        TS_ASSERT(dimEmbed.isEmbedded(SIMILARITY_LINK));
 
         //Throw in a few nodes and links after embedding to make sure the
         //functions we're testing are robust against nodes added after

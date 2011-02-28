@@ -39,6 +39,9 @@ extern "C" {
 
 using namespace opencog;
 
+typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
+    ClusterSeq; //the vector of doubles is the centroid of the cluster
+
 DECLARE_MODULE(DimEmbedModule)
 
 DimEmbedModule::DimEmbedModule(AtomSpace* atomSpace) {
@@ -70,8 +73,8 @@ void DimEmbedModule::init() {
     define_scheme_primitive("kNN",
                             &DimEmbedModule::kNearestNeighbors,
                             this);
-    define_scheme_primitive("cluster",
-                            &DimEmbedModule::cluster,
+    define_scheme_primitive("kMeansCluster",
+                            &DimEmbedModule::addKMeansClusters,
                             this);
 #endif
 }
@@ -266,10 +269,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     dimensionMap[linkType]=numDimensions;
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
-
-    //for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-    //    std::cout << as->atomAsString(*it,true) << std::endl;
-    //}
+    
     PivotSeq& pivots = pivotsMap[linkType];
     if(nodes.empty()) return;
     Handle bestChoice = nodes.back();
@@ -426,7 +426,7 @@ bool DimEmbedModule::isEmbedded(const Type& linkType) {
     return true;
 }
 
-void DimEmbedModule::cluster(const Type& l, int numClusters) {
+ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters) {
     if(!isEmbedded(l)) {
         const char* tName = classserver().getTypeName(l).c_str();
         logger().error("No embedding exists for type %s", tName);
@@ -473,6 +473,12 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
     int* clusterid = new int[numVectors]; //stores the result of clustering
     double error;
     int ifound;
+    for(int i=0;i<numVectors;i++) {
+        for(int j=0;j<numDimensions;j++) {
+            mask[i][j]=1;
+        }
+    }
+
     //clusterid[i]==j will indicate that handle i belongs in cluster j
     ::kcluster(numClusters, numVectors, numDimensions, embedMatrix,
                mask, weight, 0, npass, 'a', 'e', clusterid, &error, &ifound);
@@ -488,40 +494,29 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
         centroidMatrix[i] = centroidArray + numDimensions*i;
         cmask[i] = cmaskArray + numDimensions*i;
     }
-    for(int i=0;i<numClusters;i++){
-        for(int j=0;j<numDimensions;j++){
-            cmask[i][j]=1;
-        }
-    }
-    ::getclustercentroids(numClusters, numVectors, numDimensions, embedMatrix,
-                          mask, clusterid, centroidMatrix, mask, 0, 'a');
-    HandleSeq clusterNodes (numClusters);
-    for(int i=0;i<numClusters;i++) {
-        clusterNodes[i] = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
-    }
-
-    std::vector<HandleSeq> clusters(numClusters);
+    
+    //Stores the centroid of each cluster in centroidMatrix
+    ::getclustercentroids(numClusters, numVectors,
+                          numDimensions, embedMatrix,
+                          mask, clusterid, centroidMatrix,
+                          cmask, 0, 'a');
+    ClusterSeq clusters(numClusters);
     for(int i=0;i<numVectors;i++) {
         //clusterid[i] indicates which cluster handleArray[i] is in.
-        //so for each cluster, we make a new ConceptNode and make
-        //inheritancelinks between it and all of its consituent nodes.
         int clustInd=clusterid[i];
-        double dist = euclidDist(centroidMatrix[clustInd],embedMatrix[i],
-                                 numDimensions);
-        //TODO: How should we set the truth value for this link? (this is just
-        //a placeholder)
-        SimpleTruthValue tv(1-dist,
-                            SimpleTruthValue::confidenceToCount(1-dist));
-        //    as->addLink(INHERITANCE_LINK, handleArray[i],
-        //            clusterNodes[clustInd], tv);
-        clusters[clustInd].push_back(handleArray[i]);
+        clusters[clustInd].first.push_back(handleArray[i]);
+    }
+    for(int i=0;i<numClusters;i++) {
+        std::vector<double> centroid(centroidMatrix[i],
+                                     centroidMatrix[i]+numDimensions);
+        clusters[i].second=centroid;
     }
     
-    for(std::vector<HandleSeq>::const_iterator it=clusters.begin();
-        it!=clusters.end(); it++) {
-        std::cout << "Homogeneity: " << homogeneity(*it,l) << std::endl;
-        std::cout << "Separation: " << separation(*it,l) << std::endl;
-    }
+    //for(std::vector<HandleSeq>::const_iterator it=clusters.begin();
+    //    it!=clusters.end(); it++) {
+    //    std::cout << "Homogeneity: " << homogeneity(*it,l) << std::endl;
+    //    std::cout << "Separation: " << separation(*it,l) << std::endl;
+    //}
 
     delete[] embedding;
     delete[] embedMatrix;
@@ -534,6 +529,57 @@ void DimEmbedModule::cluster(const Type& l, int numClusters) {
     delete[] centroidMatrix;
     delete[] cmaskArray;
     delete[] cmask;
+
+    return clusters;
+}
+
+void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
+                                       double threshold, int kPasses) {
+    AtomEmbedding aE = atomMaps[l];
+
+    typedef std::pair<double,std::pair<HandleSeq,vector<double> > > cPair;
+    typedef std::multimap<double,std::pair<HandleSeq,vector<double> > >
+        pQueue_t;
+    pQueue_t clusters;
+    //make a Priority Queue of (HandleSeq,vector<double>) pairs, where
+    //we can easily extract those with the lowest value to discard if we
+    //exceed maxClusters.
+    for(int i=1;i<kPasses+1;i++) {
+        int k = std::pow(2,std::log(aE.size()/std::log(2)));
+        ClusterSeq newClusts = kMeansCluster(l,k);
+        for(ClusterSeq::iterator it = newClusts.begin();
+            it!=newClusts.end();it++) {
+            //if we still have room for more clusters and the cluster quality
+            //is high enough, insert the cluster into the pQueue
+            double quality = separation(it->first,l)*homogeneity(it->first,l);
+            if(quality>threshold) {
+                if(clusters.size()<maxClusters) {
+                    clusters.insert(cPair(quality,*it));
+                } else {
+                    //if there is no room, but our new cluster is better
+                    //than the worst current cluster, remove it and add new one
+                    pQueue_t::iterator p_it = clusters.begin();
+                    if(quality>p_it->first) {
+                        clusters.erase(p_it);
+                        clusters.insert(cPair(quality,*it));
+                    }
+                }
+            }
+        }
+    }
+    //Make a new node for each cluster and connect it with InheritanceLinks.
+    for(pQueue_t::iterator it = clusters.begin();it!=clusters.end();it++) {
+        HandleSeq cluster = it->second.first;
+        std::vector<double> centroid = it->second.second;
+        Handle newNode = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
+        for(HandleSeq::iterator it2=cluster.begin();it2!=cluster.end();it2++) {
+            //Connect newNode to each handle in its cluster.
+            //@TODO: Decide how to set this truth value.
+            SimpleTruthValue tv(.99,
+                                SimpleTruthValue::confidenceToCount(.99));
+            as->addLink(INHERITANCE_LINK, *it2, newNode, tv);
+        }
+    }
 }
 
 double DimEmbedModule::homogeneity(const HandleSeq& cluster,

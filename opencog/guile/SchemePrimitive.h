@@ -88,6 +88,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			void (T::*v_h)(Handle);
 			void (T::*v_t)(const Type&);
 			void (T::*v_ti)(const Type&, int);
+			void (T::*v_tidi)(const Type&, int, double, int);
 			void (T::*v_v)(void);
 		} method;
 		T* that;
@@ -104,7 +105,8 @@ class SchemePrimitive : public PrimitiveEnviron
 			S_S,   // return string, take string
 			V_H,   // return void, take Handle
 			V_T,   // return void, take Type
-			V_TI,  // return voide, take Type and int
+			V_TI,  // return void, take Type and int
+			V_TIDI,// return void, take Type, int, double, and int
 			V_V    // return void, take void
 		} signature;
 
@@ -236,6 +238,25 @@ class SchemePrimitive : public PrimitiveEnviron
 					(that->*method.v_ti)(t, i);
 					break;
 				}
+				case V_TIDI:
+				{
+					SCM input = scm_car(args);
+					//Assuming that the type is input as a string or symbol, eg
+					//(f 'SimilarityLink) or (f "SimilarityLink")
+					if (scm_is_true(scm_symbol_p(input)))
+						input = scm_symbol_to_string(input);
+					
+					char *lstr = scm_to_locale_string(input);
+					Type t = classserver().getType(lstr);
+					free(lstr);
+					
+					int i = scm_to_int(scm_cadr(args));
+					double d = scm_to_double(scm_caddr(args));
+					int i2 = scm_to_int(scm_cadddr(args));
+					
+					(that->*method.v_tidi)(t, i, d, i2);
+					break;
+				}
 				case V_V:
 				{
 					(that->*method.v_v)();
@@ -280,6 +301,15 @@ class SchemePrimitive : public PrimitiveEnviron
 		signature = SIG; \
 		do_register(name, 3); /* cb has 3 args */ \
 	}
+#define DECLARE_CONSTR_4(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE) \
+	SchemePrimitive(const char *name, RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE), T *data) \
+	{ \
+		that = data; \
+		method.LSIG = cb; \
+		scheme_name = name; \
+		signature = SIG; \
+		do_register(name, 4); /* cb has 4 args */ \
+	}
 
 		// Declare and define the constructors for this class. They all have
 		// the same basic form, except for the types.
@@ -294,6 +324,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(V_H, v_h, void, Handle)
 		DECLARE_CONSTR_1(V_T, v_t, void, const Type&)
 		DECLARE_CONSTR_2(V_TI, v_ti, void, const Type&, int)
+		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, const Type&, int, double, int)
 
 		// Below is DECLARE_CONSTR_0(V_V, v_v, void*, void);
 		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
@@ -332,6 +363,14 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG
 	/* when it is no longer needed. */ \
 	new SchemePrimitive<T>(name, cb, data); \
 }
+#define DECLARE_DECLARE_4(RET,ARG1,ARG2,ARG3,ARG4) \
+template<class T> \
+inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3,ARG4), T *data) \
+{ \
+	/* Note: this is freed automatically by scheme garbage collection */ \
+	/* when it is no longer needed. */ \
+	new SchemePrimitive<T>(name, cb, data); \
+}
 
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
@@ -345,6 +384,7 @@ DECLARE_DECLARE_2(void, const Type&, int)
 DECLARE_DECLARE_3(double, const Handle&, const Handle&, const Type&)
 DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
 DECLARE_DECLARE_3(HandleSeq, const Handle&, const Type&, int)
+DECLARE_DECLARE_4(void, const Type&, int, double, int)
 
 }
 

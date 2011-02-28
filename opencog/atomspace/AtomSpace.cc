@@ -198,12 +198,10 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, const TruthValue
     do {
         name=prefix;
         for (int i = 0; i < len; ++i) {
-            name+=alphanum[rand() % (sizeof(alphanum)/sizeof(char))];
+            name+=alphanum[rand() % (sizeof(alphanum) - 1)];
         }
         result = getHandle(t, name);
     } while(isValidHandle(result));//If the name already exists, try again
-
-    //std::cout << "adding node" << std::endl;
     return addNode(t, name, tvn);
 }
 

@@ -53,7 +53,8 @@ namespace opencog
         typedef std::map<Type, PivotSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
         typedef std::map<Type, node<CoverTreeNode> > EmbedTreeMap;
-        
+        //typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
+        //ClusterSeq; //the vector of doubles is the centroid of the cluster
         AtomSpace* as;
         AtomEmbedMap atomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
@@ -111,6 +112,8 @@ namespace opencog
 
         double euclidDist(double v1[], double v2[], int size);
     public:
+        typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
+            ClusterSeq; //the vector of doubles is the centroid of the cluster
         const char* id();
 
         DimEmbedModule(AtomSpace* atomSpace);
@@ -200,11 +203,42 @@ namespace opencog
         HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k);
 
         /**
-         * Use k-means clustering to make new nodes using the
-         * dimensional embedding.
+         * Use k-means clustering to find clusters using the
+         * dimensional embedding. This function won't actually add
+         * anything to the atomspace, it just returns k vectors
+         * of handles which might make good clusters.
+         *
+         * @param l type of link for which to find clusters.
+         * @param numClusters The number of clusters to return.
+         * @return A vector of (HandleSeq,vector<double>) pairs, where
+         * each HandleSeq represents a cluster and the vector of doubles its
+         * centroid.
          */
-        void cluster(const Type& l, int numClusters);
+        //std::vector<std::pair<HandleSeq,vector<double> > >
+        ClusterSeq kMeansCluster(const Type& l, int numClusters);
 
+        /**
+         * Use k-means clustering to add new nodes to the atomspace (one
+         * new node for each good cluster found, plus inheritance links
+         * between each new node and its corresponding cluster members).
+         *
+         * @param l Type of link for which to find clusters.
+         * @param maxClusters The maximum number of nodes to add to the
+         * atomspace.
+         * @param threshold The threshold for accepting a cluster; clusters
+         * not meeting this threshold will not be added to the atomspace.
+         * Cluster quality is measured as homogeneity*separation (see the
+         * homogeneity and separation functions for further explanation).
+         * @param kPasses The number of different k values to try for
+         * k-means clustering. K values are chosen exponentially across half
+         * of the number of nodes. eg let n:=log(numNodes/2).
+         * Then for kPasses=1, the k value is 2^(n/2). For
+         * kPasses=2, the k values are 2^(n/3) and 2^(2n/3). For
+         * kPasses=3, the k values are 2^(n/4), 2^(2n/4), and 2^(3n/4).
+         */
+        void addKMeansClusters(const Type& l, int maxClusters,
+                                               double threshold=0.,
+                                               int kPasses=1);
         /**
          * Calculate the homogeneity of a cluster of handles for given linkType.
          *

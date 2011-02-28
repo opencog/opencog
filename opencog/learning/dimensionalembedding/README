@@ -30,3 +30,34 @@ If a node is removed after embedding, an invalid handle may be returned by a nea
 The entire embedding (the list of pivots and each node's embedding vector) can be written to the cogserver log using
 
 	(logEmbedding LinkType)
+	
+== About Complexity
+> It uses dijkstra's algorithm on the whole atomspace once for each
+> pivot, so it should run in O(D*(|E| + |V|log|V|)) time, where E is the
+> number of links, V is the number of nodes, and D is the number of
+> dimensions (pivots). Based on experiments with random datasets, this
+> seems accurate (specific times from my 2008 laptop):
+>
+> For embedding in 50 dimensions:
+>
+> 1,000 nodes 4000  links - 21 seconds
+> 1,000 nodes 8000  links - 41 seconds
+> 1,000 nodes 12000 links - 63 seconds
+>
+> 3,000 nodes 9000 links - 54 seconds
+> 3,000 nodes 18000 links - 114 seconds
+> 3,000 nodes 24000 links - 155 seconds
+>
+> 10,000 nodes 30,000 links - 246 seconds
+> 10,000 nodes 60,000 links - 415 seconds
+> 10,000 nodes 90,000 links - 585 seconds
+>
+> The amount of time for each pivot was consistent for any given
+> embedding (ie the first 10 pivots took the same amount of time to pick
+> as the last 10).
+> The thesaurus data had 6k nodes and 500k links and that took about
+> 3000 seconds (50 minutes, 1 minute per pivot), which seems pretty
+> consistent with the random datasets/big-O-predicted complexity.
+
+See the citeseer paper linked above for more
+detail on the embedding algorithm.
