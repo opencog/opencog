@@ -26,8 +26,11 @@
 
 #include <boost/version.hpp>
 
+// this is to avoid a boost bug
 #if BOOST_VERSION >= 104000
+#if BOOST_VERSION <= 104400
 #define IGNORE_BOOST_GRAPH
+#endif
 #endif
 
 #ifndef IGNORE_BOOST_GRAPH
