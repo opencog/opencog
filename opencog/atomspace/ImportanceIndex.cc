@@ -71,55 +71,58 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 	HandleEntry* oldAtoms = NULL;
 
 	unsigned int bin;
-#if 0
-	for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++)
-	{
-		UnorderedHandleSet move_it;
-		UnorderedHandleSet & band = idx[bin];
-		UnorderedHandleSet::iterator hit;
-		for (hit = band.begin(); hit != band.end(); hit++)
-		{
-			Handle h = *hit;
-			Atom *atom = TLB::getAtom(h);
+    if (IMPORTANCE_INDEX_SIZE != (1 << 16) ) {
+        for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++)
+        {
+            UnorderedHandleSet move_it;
+            UnorderedHandleSet & band = idx[bin];
+            UnorderedHandleSet::iterator hit;
+            for (hit = band.begin(); hit != band.end(); hit++)
+            {
+                Handle h = *hit;
+                Atom *atom = TLB::getAtom(h);
 
-			atom->attentionValue.decaySTI();
-			unsigned int newbin = importanceBin(atom->attentionValue.getSTI());
-			if (newbin != bin)
-			{
-				insert(newbin, h);
-				move_it.insert(h);
-			}
-		}
-		for (hit = move_it.begin(); hit != move_it.end(); hit++)
-		{
-			remove(bin, *hit);
-		}
-	}
-#else
-    // Update STI
-    // Optimization: Assuming that all atoms decrease the sti by one unit 
-    // (i.e. --sti), we could update the indexes with:
-    // "importanceIndex[band - 1] = importanceIndex[band];"
+                atom->attentionValue.decaySTI();
+                unsigned int newbin = importanceBin(atom->attentionValue.getSTI());
+                if (newbin != bin)
+                {
+                    insert(newbin, h);
+                    move_it.insert(h);
+                }
+            }
+            for (hit = move_it.begin(); hit != move_it.end(); hit++)
+            {
+                remove(bin, *hit);
+            }
+        }
+    } else {
+        // Update STI
+        // Optimization for the case where there is a bin for EVERY possible
+        // importance value
+        //
+        // Assumes that all atoms decrease the sti by one unit 
+        // (i.e. --sti), we could update the indexes with:
+        // "importanceIndex[band - 1] = importanceIndex[band];"
 
-    UnorderedHandleSet & band = idx[1];
-    for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
-        Handle h = *hit;
-        Atom *atom = TLB::getAtom(h);
-        atom->attentionValue.decaySTI();
-    }
-    idx[0].insert(idx[1].begin(), idx[1].end());
-	for (bin = 1; bin < IMPORTANCE_INDEX_SIZE-1; bin++)
-    {
-        idx[bin] = idx[bin+1];
-        UnorderedHandleSet & band = idx[bin];
+        UnorderedHandleSet & band = idx[1];
         for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
             Handle h = *hit;
             Atom *atom = TLB::getAtom(h);
             atom->attentionValue.decaySTI();
         }
+        idx[0].insert(idx[1].begin(), idx[1].end());
+        for (bin = 1; bin < IMPORTANCE_INDEX_SIZE-1; bin++)
+        {
+            idx[bin] = idx[bin+1];
+            UnorderedHandleSet & band = idx[bin];
+            for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
+                Handle h = *hit;
+                Atom *atom = TLB::getAtom(h);
+                atom->attentionValue.decaySTI();
+            }
+        }
+        idx[bin].clear();
     }
-    idx[bin].clear();
-#endif
 
 	AttentionValue::sti_t minSTI = config().get_int("MIN_STI");
 	unsigned int lowerStiBand = importanceBin(minSTI);

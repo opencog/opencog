@@ -60,8 +60,9 @@ AttentionValue::vlti_t AttentionValue::getVLTI() const
 
 void AttentionValue::decaySTI()
 {
-    if (m_STI != -32768)
-        m_STI--;
+    // Prevent m_STI from wrapping around... should really compare to system
+    // constant though.
+    if (m_STI != -32768) m_STI--;
 }
 
 std::string AttentionValue::toString() const
