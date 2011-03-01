@@ -27,6 +27,7 @@
 #include <functional>
 
 #include <opencog/util/foreach.h>
+#include <opencog/util/numeric.h>
 
 namespace opencog {
 
