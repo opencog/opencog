@@ -67,7 +67,7 @@ struct ConditionalEntropy : public std::unary_function<FeatureSet, double> {
         // compute H(X1, ..., Xn) an H(X1, ..., Xn, Y) at once
         std::pair<double, double> jioh = jointIOTEntropies(_it, _ot, features);
         // return 1 - H(Y|X1, ..., Xn)
-        double ce = jioh.first - jioh.second;
+        double ce = jioh.second - jioh.first;
         return 1 - ce;
     }
 
