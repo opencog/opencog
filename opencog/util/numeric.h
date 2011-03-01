@@ -32,11 +32,13 @@
 #include <limits>
 #include <numeric>
 #include <set>
+#include <map>
 
 #include <boost/math/special_functions.hpp>
 
 #include "exceptions.h"
 #include "oc_assert.h"
+#include "foreach.h"
 
 #define PI 3.141592653589793
 #define EXPONENTIAL 2.71828182845905
@@ -274,12 +276,86 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
  * 
  * where the p_i are values pointed by (from, to[, and Sum_i p_i == 1.0
  */
-template<typename It> double entropy(It from, It to)
-{
+template<typename It> double entropy(It from, It to) {
     double res = 0;
     for(; from != to; from++)
         res += weightInformation(*from);
     return res;
+}
+// helper
+template<typename C>
+double entropy(const C& c) {
+    return entropy(c.begin(), c.end());
+}
+
+/**
+ * Compute the entropy H(Y) of an output table of type OT
+ */
+template<typename OT>
+double OTEntropy(const OT& ot) {
+    typedef typename OT::value_type::value_type EntryT;
+    typedef std::map<EntryT, unsigned int> entryCount;
+    entryCount oc;
+    foreach(const EntryT& y, ot)
+        oc[y]++;
+    // Compute the probability distributions
+    double total = ot.size();
+    std::vector<double> py;
+    foreach(const typename entryCount::value_type& eoc, oc)
+        py.push_back(eoc.second/total);
+    // Compute the entropies
+    return entropy(py);    
+}
+
+/**
+ * Given a feature set X1, ..., Xn provided a set of indices of the
+ * column of an input table of type IT, and an output feature Y
+ * provided by the output table of type OT, return a pair
+ *
+ * <H(X1, ..., Xn), H(X1, ..., Xn, Y)>
+ *
+ * where H(X1, ..., Xn) is the joint entropy of the feature set and
+ * H(X1, ..., Xn, Y) is the joint entropy of the feature set and the
+ * output.
+ *
+ * IT is typically an input_table and OT an output_table as defined in
+ * opencog/comboreduct/combo/table.h.
+ *
+ * @note only works for discrete data set. Also, the reason this
+ * function is done in one pass rather than computing H(X1, ..., Xn)
+ * and H(X1, ..., Xn, Y) seperatly is to go faster.
+ */
+template<typename IT, typename OT, typename FeatureSet>
+std::pair<double, double>
+jointIOTEntropies(const IT& it, const OT& ot, const FeatureSet& fs) {
+    typedef typename IT::value_type::value_type EntryT;
+    // the following mapping is used to keep track of the number
+    // of inputs a given setting. For instance X1=false, X2=true,
+    // X3=true is one possible setting. It is then used to compute
+    // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
+    typedef std::map<std::vector<EntryT>, unsigned int> TupleCount;
+    TupleCount ic, // for H(X1, ..., Xn)
+        ioc; // for H(Y, X1, ..., Xn)
+    double total = ot.size();
+    typename IT::const_iterator i_it = it.begin();
+    typename OT::const_iterator o_it = ot.begin();
+    for(; i_it != it.end(); i_it++, o_it++) {
+        std::vector<EntryT> ic_vec;
+        foreach(const typename FeatureSet::value_type& idx, fs)
+            ic_vec.push_back((*i_it)[idx]);
+        ic[ic_vec]++;
+        std::vector<EntryT> ioc_vec(ic_vec);
+        ioc_vec.push_back(*o_it);
+        ioc[ioc_vec]++;
+    }
+    // Compute the probability distributions
+    std::vector<double> ip, iop;
+    foreach(const typename TupleCount::value_type& vic, ic)
+        ip.push_back(vic.second/total);
+    foreach(const typename TupleCount::value_type& vioc, ioc)
+        iop.push_back(vioc.second/total);
+    // Compute the entropies
+    return std::make_pair(entropy(ip), entropy(iop));
 }
 
 // compute the smallest divisor of n
