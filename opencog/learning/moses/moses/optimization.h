@@ -37,11 +37,8 @@
 #include "moses.h"
 #include "neighborhood_sampling.h"
 
-#define MAX_DISTANCE_FROM_EXEMPLAR 5
-#define FRACTION_OF_REMAINING     10
 #define MINIMUM_DEME_SIZE         50
 #define MAX_EVALS_PER_SLICE       10
-#define TEMP_STEPSIZE             0.5
 
 namespace moses
 {
@@ -65,7 +62,7 @@ inline double information_theoretic_bits(const eda::field_set& fs)
 // Parameters used mostly for EDA algorithms but also possibly by
 // other algo
 struct optim_parameters {
-    optim_parameters(double _pop_size_ratio = 200 /*was 20*/,
+    optim_parameters(double _pop_size_ratio = 20,
                      double _terminate_if_gte = 0) :
         term_total(1),
         term_improv(1),
@@ -74,6 +71,9 @@ struct optim_parameters {
         window_size_len(1),    //min(windowsize_pop*N,windowsize_len*n)
         
         pop_size_ratio(_pop_size_ratio),
+
+        max_dist_ratio(0.75),
+
         terminate_if_gte(_terminate_if_gte) {}
 
     //N=p.popsize_ratio*n^1.05
@@ -111,6 +111,10 @@ struct optim_parameters {
     // populations are sized at N = popsize_ratio*n^1.05 where n is
     // problem size in info-t bits
     double pop_size_ratio;
+    // defines the max distance to search (either overall or during
+    // one iteration depending on the optimization algo) as
+    // max_dist_ratio * fields.dim_size()
+    double max_dist_ratio;
     // optimization is terminated if best score is >= terminate_if_gte
     double terminate_if_gte;
 };
@@ -208,10 +212,17 @@ struct univariate_optimization {
     eda_parameters eda_params;
 };
 
+struct hc_parameters {
+    hc_parameters(unsigned int _fraction_of_remaining = 10)
+        : fraction_of_remaining(_fraction_of_remaining) {}
+    unsigned int fraction_of_remaining;
+};
+
 struct iterative_hillclimbing {
     iterative_hillclimbing(opencog::RandGen& _rng,
-                           const optim_parameters& op = optim_parameters())
-        : rng(_rng), opt_params(op) {}
+                           const optim_parameters& op = optim_parameters(),
+                           const hc_parameters& hc = hc_parameters())
+        : rng(_rng), opt_params(op), hc_params(hc) {}
 
     //return # of evaluations actually performed
     template<typename Scoring>
@@ -229,7 +240,8 @@ struct iterative_hillclimbing {
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
-        int number_of_fields = fields.dim_size();
+        unsigned int max_overall_distance =
+            opt_params.max_dist_ratio * fields.dim_size();
 
         // it is assumed that the exemplar instance is null
         eda::instance exemplar(fields.packed_width());
@@ -243,7 +255,7 @@ struct iterative_hillclimbing {
             eda::score_instance(exemplar, score);
         score_t exemplar_score = score(scored_exemplar).first;
 
-        int distance = 1;
+        unsigned int distance = 1;
         bool bImprovement_made = false;
         score_t best_score;
         do {
@@ -251,7 +263,7 @@ struct iterative_hillclimbing {
 
             number_of_new_instances = 
                 (max_number_of_instances - current_number_of_instances)
-                / FRACTION_OF_REMAINING;
+                / hc_params.fraction_of_remaining;
 
             if (number_of_new_instances  < MINIMUM_DEME_SIZE)
                 number_of_new_instances =
@@ -312,8 +324,7 @@ struct iterative_hillclimbing {
             distance++;
 
         } while (!bImprovement_made &&
-                 distance <= number_of_fields &&
-                 distance <= MAX_DISTANCE_FROM_EXEMPLAR &&
+                 distance <= max_overall_distance &&
                  current_number_of_instances < max_number_of_instances &&
                  best_score < opt_params.terminate_if_gte);
         
@@ -322,6 +333,7 @@ struct iterative_hillclimbing {
 
     opencog::RandGen& rng;
     optim_parameters opt_params;
+    hc_parameters hc_params;
 };
 
 // @todo: redo the code entriely from iterative_hillclimbing to take
@@ -400,6 +412,8 @@ struct sliced_iterative_hillclimbing {
                 return EVALUATED_ALL_AVAILABLE; // This is ugly, see the note in moses.h
             }
 
+#define MAX_DISTANCE_FROM_EXEMPLAR 5
+
             if (distance > MAX_DISTANCE_FROM_EXEMPLAR || distance > number_of_fields) {
                 m_state = M_INIT;
                 return EVALUATED_ALL_AVAILABLE; // This is ugly, see the note in moses.h
@@ -415,6 +429,8 @@ struct sliced_iterative_hillclimbing {
                 m_state = M_INIT;
                 return EVALUATED_ALL_AVAILABLE; // This is ugly, see the note in moses.h
             }
+
+#define FRACTION_OF_REMAINING 10 
 
             number_of_new_instances = (max_number_of_instances - current_number_of_instances) / FRACTION_OF_REMAINING;
             if (number_of_new_instances  < MINIMUM_DEME_SIZE)
@@ -497,9 +513,9 @@ struct sliced_iterative_hillclimbing {
         return 0;
     }
 
-    int distance;
+    unsigned int distance;
     long long number_of_new_instances;
-    int number_of_fields;
+    unsigned int number_of_fields;
     eda::instance exemplar;
     int max_number_of_instances;
     score_t exemplar_score;
@@ -523,14 +539,12 @@ struct sa_parameters {
         init_temp(30),
         min_temp(0),
         temp_step_size(0.5),
-        accept_prob_temp_intensity(0.5),
-        dist_temp_intensity(0.5) {}
+        accept_prob_temp_intensity(0.5) {}
 
     double init_temp;
     double min_temp;
     double temp_step_size;
     double accept_prob_temp_intensity;
-    double dist_temp_intensity;
 };
 
 struct simulated_annealing {
@@ -539,10 +553,8 @@ struct simulated_annealing {
  
     simulated_annealing(opencog::RandGen& _rng,
                         const optim_parameters& op = optim_parameters(),
-                        const sa_parameters& sa = sa_parameters(),
-                        double _fraction_of_remaining = 10.0)
+                        const sa_parameters& sa = sa_parameters())
         : rng(_rng), 
-          fraction_of_remaining(_fraction_of_remaining),
           opt_params(op), sa_params(sa) {}
       
     double accept_probability(energy_t energy_new, energy_t energy_old,
@@ -623,7 +635,7 @@ struct simulated_annealing {
         double current_temp = sa_params.init_temp;
         do {
             unsigned int current_distance = 
-                max(1, (int)(sa_params.dist_temp_intensity
+                max(1, (int)(opt_params.max_dist_ratio
                              * dist_temp(current_temp)));
 
             // score all new instances in the deme
@@ -680,7 +692,6 @@ struct simulated_annealing {
     }
       
     opencog::RandGen& rng;
-    double fraction_of_remaining; /// @todo clean that, as well as FRACTION_OF_REMAINING
     optim_parameters opt_params;
     sa_parameters sa_params;
 protected:

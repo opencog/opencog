@@ -367,7 +367,7 @@ int moses_exec(int argc, char** argv) {
          value<unsigned int>(&fs_interaction_terms)->default_value(1),
          "Maximum number of interaction terms considered during feature selection. Higher values make the feature selection more accurate but is computationally expensive.\n")
         (opt_desc_str(pop_size_ratio_opt).c_str(),
-         value<double>(&pop_size_ratio)->default_value(200),
+         value<double>(&pop_size_ratio)->default_value(20),
          "The higher the more effort is spent on a deme.\n")
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&max_score)->default_value(0),
