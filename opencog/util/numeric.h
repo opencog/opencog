@@ -293,7 +293,7 @@ double entropy(const C& c) {
  */
 template<typename OT>
 double OTEntropy(const OT& ot) {
-    typedef typename OT::value_type::value_type EntryT;
+    typedef typename OT::value_type EntryT;
     typedef std::map<EntryT, unsigned int> entryCount;
     entryCount oc;
     foreach(const EntryT& y, ot)
