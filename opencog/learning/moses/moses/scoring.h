@@ -321,14 +321,31 @@ struct occam_truth_table_bscore_opt_binding : public occam_truth_table_bscore {
     }
 };
 
+/**
+ * Mostly for testing the optimization algos, returns minus the
+ * hamming distance of the candidate to a given target instance and
+ * constant null complexity.
+ */
+struct distance_based_scorer : public unary_function<eda::instance,
+                                                     composite_score> {
+    distance_based_scorer(const eda::field_set& _fs,
+                          const eda::instance& _target_inst)
+        : fs(_fs), target_inst(_target_inst) {}
+
+    composite_score operator()(const eda::instance& inst) const {
+        return composite_score(-fs.hamming_distance(target_inst, inst), 0);
+    }
+
+protected:
+    const eda::field_set& fs;
+    const eda::instance& target_inst;
+};
+
 template<typename Scoring>
 struct complexity_based_scorer : public unary_function<eda::instance,
                                                        composite_score> {
-    complexity_based_scorer(const Scoring& s,
-                            representation& rep,
-                            bool reduce,
-                            opencog::RandGen& _rng)
-        : score(s), _rep(rep), _reduce(reduce), rng(_rng) { }
+    complexity_based_scorer(const Scoring& s, representation& rep, bool reduce)
+        : score(s), _rep(rep), _reduce(reduce) {}
 
     composite_score operator()(const eda::instance& inst) const {
         using namespace reduct;
@@ -362,19 +379,14 @@ protected:
     bool _reduce; // whether the exemplar is reduced before being
                   // evaluated, this may be advantagous if Scoring is
                   // also a cache
-    opencog::RandGen& rng;
 };
 
 template<typename Scoring>
 struct count_based_scorer : public unary_function<eda::instance, 
                                                   composite_score> {
-    count_based_scorer(const Scoring& s,
-                       representation& rep,
-                       int base_count,
-                       bool reduce,
-                       opencog::RandGen& _rng)
-        : score(s), _base_count(base_count), _rep(rep), _reduce(reduce),
-          rng(_rng) {}
+    count_based_scorer(const Scoring& s, representation& rep,
+                       int base_count, bool reduce)
+        : score(s), _base_count(base_count), _rep(rep), _reduce(reduce) {}
 
     composite_score operator()(const eda::instance& inst) const {
         // Logger
@@ -408,7 +420,6 @@ protected:
     bool _reduce; // whether the exemplar is reduced before being
                   // evaluated, this may be advantagous if Scoring is
                   // also a cache
-    opencog::RandGen& rng;
 };
 
 

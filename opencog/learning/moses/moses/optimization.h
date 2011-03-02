@@ -5,6 +5,9 @@
  * All Rights Reserved
  *
  * Written by Moshe Looks
+ *            Predrag Janicic
+ *            Nil Geisweiller
+ *            Xiaohui Liu
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -213,8 +216,11 @@ struct univariate_optimization {
 };
 
 struct hc_parameters {
-    hc_parameters(unsigned int _fraction_of_remaining = 10)
-        : fraction_of_remaining(_fraction_of_remaining) {}
+    hc_parameters(bool _terminate_if_improvement = true,
+                  unsigned int _fraction_of_remaining = 10)
+        : terminate_if_improvement(_terminate_if_improvement),
+          fraction_of_remaining(_fraction_of_remaining) {}
+    bool terminate_if_improvement;
     unsigned int fraction_of_remaining;
 };
 
@@ -224,7 +230,14 @@ struct iterative_hillclimbing {
                            const hc_parameters& hc = hc_parameters())
         : rng(_rng), opt_params(op), hc_params(hc) {}
 
-    //return # of evaluations actually performed
+    /**
+     * @param deme were to store the candidates searched. Typically
+     *             the deme is empty, if it is not empty it will be
+     *             overwritten
+     * @param score the scoring function
+     * @param max_evals the maximum number of evaluations
+     * @return number of evaluations actually performed
+     */
     template<typename Scoring>
     int operator()(eda::instance_set<composite_score>& deme,
                    const Scoring& score, int max_evals) {
@@ -323,7 +336,7 @@ struct iterative_hillclimbing {
             current_number_of_instances += number_of_new_instances;
             distance++;
 
-        } while (!bImprovement_made &&
+        } while ((!hc_params.terminate_if_improvement || !bImprovement_made) &&
                  distance <= max_overall_distance &&
                  current_number_of_instances < max_number_of_instances &&
                  best_score < opt_params.terminate_if_gte);

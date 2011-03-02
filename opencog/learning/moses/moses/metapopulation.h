@@ -472,11 +472,11 @@ struct metapopulation : public set < bscored_combo_tree,
         if(params.count_base) { // count_based_scorer
             complexity_t cex = get_complexity(*_exemplar);
             count_based_scorer<Scoring> scorer = 
-                count_based_scorer<Scoring>(score, *_rep, cex, params.reduce_all, rng);
+                count_based_scorer<Scoring>(score, *_rep, cex, params.reduce_all);
             n = optimize(*_deme, scorer, max_evals);
         } else { // complexity_based_scorer
             complexity_based_scorer<Scoring> scorer =
-                complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all, rng);
+                complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
             n = optimize(*_deme, scorer, max_evals);                
         }
 
@@ -522,11 +522,11 @@ struct metapopulation : public set < bscored_combo_tree,
         if(params.count_base) { // count_based_scorer
             complexity_t cex = get_complexity(*_exemplar);
             count_based_scorer<Scoring> scorer = 
-                count_based_scorer<Scoring>(score, *_rep, cex, params.reduce_all, rng);
+                count_based_scorer<Scoring>(score, *_rep, cex, params.reduce_all);
             return optimize(*_deme, scorer, max_evals);
         } else { // complexity_based_scorer
             complexity_based_scorer<Scoring> scorer =
-                complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all, rng);
+                complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
             return optimize(*_deme, scorer, max_evals);
         }
     }

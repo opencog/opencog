@@ -56,6 +56,7 @@ struct instance_set : public vector<scored_instance<ScoreT> > {
     // create a deme initialized with n instances of inst
     instance_set(int n, const instance& inst, const field_set& fs)
         : super(n, inst), _fields(fs) { }
+    // create an empty deme
     instance_set(const field_set& fs) : _fields(fs) { }
 
     // insert or erase instances so that the size becomes n

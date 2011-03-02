@@ -42,7 +42,7 @@ using boost::math::binomial_coefficient;
 using std::numeric_limits;
 
 /**
- * This procedure generat the initial deme randomly
+ * This procedure generate the initial deme randomly
  *
  * @param fs  the deme
  * @param n   the size of deme

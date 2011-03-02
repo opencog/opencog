@@ -1,0 +1,61 @@
+/** optimizationUTest.cxxtest --- 
+ *
+ * Copyright (C) 2011 Nil Geisweiller
+ *
+ * Author: Nil Geisweiller <nilg@desktop>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+#include <opencog/learning/moses/eda/field_set.h>
+#include <opencog/learning/moses/moses/types.h>
+#include <opencog/learning/moses/moses/optimization.h>
+
+using namespace moses;
+using namespace eda;
+
+class optimizationUTest : public CxxTest::TestSuite {
+    MT19937RandGen rng;
+
+public:
+    optimizationUTest() : rng(1) {
+        logger().setPrintToStdoutFlag(true);
+        logger().setLevel(Logger::DEBUG);
+    }
+    /**
+     * test iterative_hillclimbing optimization in standalone. The
+     * field set is a bit string and the scoring function returns
+     * minus the number of bits that differs from some target.
+     */
+    void test_hc() {
+        // field of 8 booleans
+        const unsigned int fs_size = 8;
+        const unsigned int eval_n = pow2(fs_size);
+        field_set fs(field_set::disc_spec(2), fs_size);
+        eda::instance target_inst(fs.packed_width());
+        randomize(fs, target_inst, rng);
+        distance_based_scorer scorer(fs, target_inst);
+        hc_parameters hc_param(false); // do not terminate if improvement
+        iterative_hillclimbing hc(rng, optim_parameters(), hc_param);
+        instance_set<composite_score> deme(fs);
+        int actual_evals = hc(deme, scorer, eval_n);
+        std::cout << "actual_evals = " << actual_evals << std::endl;
+        std::sort(deme.begin(), deme.end(),
+                  std::greater<scored_instance<composite_score> >());
+        TS_ASSERT_EQUALS(get_score(*deme.begin_scores()), 0);
+    }    
+};
