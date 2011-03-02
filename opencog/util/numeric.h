@@ -378,9 +378,9 @@ template<typename IntT> IntT smallest_divisor(IntT n) {
 // calculate the square of x
 template<typename T> T sq(T x) { return x*x; }
 
-// return 2^x
+// check if x isn't too high and return 2^x
 template<typename OutInt> OutInt pow2(unsigned int x) {
-    OC_ASSERT(8*sizeof(OutInt) - numeric_limits<OutInt>::is_signed?1:0 > x);
+    OC_ASSERT(8*sizeof(OutInt) - (numeric_limits<OutInt>::is_signed?1:0) > x);
     return static_cast<OutInt>(1) << x;
 }
 inline unsigned int pow2(unsigned int x) { return pow2<unsigned int>(x); }
