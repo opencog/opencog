@@ -333,7 +333,16 @@ struct distance_based_scorer : public unary_function<eda::instance,
         : fs(_fs), target_inst(_target_inst) {}
 
     composite_score operator()(const eda::instance& inst) const {
-        return composite_score(-fs.hamming_distance(target_inst, inst), 0);
+        score_t sc = -fs.hamming_distance(target_inst, inst);
+        // Logger
+        if(logger().getLevel() >= opencog::Logger::FINE) {
+            stringstream ss;
+            ss << "distance_based_scorer - Evaluate instance: " 
+               << fs.stream(inst) << std::endl << "Score = " << sc << std::endl;
+            logger().fine(ss.str());
+        }
+        // ~Logger
+        return composite_score(sc, 0);
     }
 
 protected:
@@ -380,48 +389,6 @@ protected:
                   // evaluated, this may be advantagous if Scoring is
                   // also a cache
 };
-
-template<typename Scoring>
-struct count_based_scorer : public unary_function<eda::instance, 
-                                                  composite_score> {
-    count_based_scorer(const Scoring& s, representation& rep,
-                       int base_count, bool reduce)
-        : score(s), _base_count(base_count), _rep(rep), _reduce(reduce) {}
-
-    composite_score operator()(const eda::instance& inst) const {
-        // Logger
-        if(logger().getLevel() >= opencog::Logger::FINE) {
-            stringstream ss;
-            ss << "count_based_scorer - Evaluate instance: " 
-               << _rep.fields().stream(inst);
-            logger().fine(ss.str());
-        }
-        // ~Logger
-
-        _rep.transform(inst);
-
-        try {
-            return composite_score(score(_rep.get_clean_exemplar(_reduce)), 
-                                   - int(_rep.fields().count(inst))
-                                   + _base_count);
-        } catch(...) {
-             stringstream ss;
-             ss << "The following instance has failed to be evaluated: " 
-                << _rep.fields().stream(inst);
-             logger().warn(ss.str());
-             return worst_possible_score;
-         }
-    }
-    
-protected:
-    const Scoring& score;
-    int _base_count;
-    representation& _rep;
-    bool _reduce; // whether the exemplar is reduced before being
-                  // evaluated, this may be advantagous if Scoring is
-                  // also a cache
-};
-
 
 } //~namespace moses
 

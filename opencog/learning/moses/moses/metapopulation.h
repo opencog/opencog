@@ -56,13 +56,11 @@ typedef std::set<combo::combo_tree,
 struct metapop_parameters {
     metapop_parameters(int _max_candidates = -1,
                        bool _reduce_all = true,
-                       bool _countbs = true,
                        bool _revisit = false,
                        bool _ignore_bscore = false) :
         selection_max_range(28),
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
-        count_base(_countbs),
         revisit(_revisit),
         ignore_bscore(_ignore_bscore)
     { }
@@ -76,9 +74,6 @@ struct metapop_parameters {
     int max_candidates;
     // if true then all candidates are reduced before evaluation
     bool reduce_all;
-    // if true the scorer is count based, otherwise it is complexity
-    // based
-    bool count_base;
     // when true then visited exemplars can be revisited
     bool revisit;
     // ignore the behavioral score when merging candidates in the population
@@ -469,16 +464,9 @@ struct metapopulation : public set < bscored_combo_tree,
         //do some optimization according to the scoring function
         optimize.set_evals_per_slice(max_for_slice);
         int n;
-        if(params.count_base) { // count_based_scorer
-            complexity_t cex = get_complexity(*_exemplar);
-            count_based_scorer<Scoring> scorer = 
-                count_based_scorer<Scoring>(score, *_rep, cex, params.reduce_all);
-            n = optimize(*_deme, scorer, max_evals);
-        } else { // complexity_based_scorer
-            complexity_based_scorer<Scoring> scorer =
-                complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
-            n = optimize(*_deme, scorer, max_evals);                
-        }
+        complexity_based_scorer<Scoring> scorer =
+            complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
+        n = optimize(*_deme, scorer, max_evals);                
 
         // This is very ugly, but saves the old MOSES' architecture
         // The only return value of the operator is used for two
@@ -519,16 +507,9 @@ struct metapopulation : public set < bscored_combo_tree,
         }
         // ~Logger
 
-        if(params.count_base) { // count_based_scorer
-            complexity_t cex = get_complexity(*_exemplar);
-            count_based_scorer<Scoring> scorer = 
-                count_based_scorer<Scoring>(score, *_rep, cex, params.reduce_all);
-            return optimize(*_deme, scorer, max_evals);
-        } else { // complexity_based_scorer
-            complexity_based_scorer<Scoring> scorer =
-                complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
-            return optimize(*_deme, scorer, max_evals);
-        }
+        complexity_based_scorer<Scoring> scorer =
+            complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
+        return optimize(*_deme, scorer, max_evals);
     }
 
     /**
@@ -600,8 +581,8 @@ struct metapopulation : public set < bscored_combo_tree,
                 if(params.max_candidates < 0
                    || (int)candidates.size() < params.max_candidates) {
                     // recompute the complexity if the candidate has
-                    // not been previously reduced or is count_based
-                    composite_score csc = params.reduce_all && !params.count_base?
+                    // not been previously reduced
+                    composite_score csc = params.reduce_all?
                         inst.second : make_pair(get_score(inst.second),
                                                 complexity(tr));
                     bscored_combo_tree candidate = 

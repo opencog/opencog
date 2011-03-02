@@ -219,8 +219,6 @@ int moses_exec(int argc, char** argv) {
     // metapop_param
     int max_candidates;
     bool reduce_all;
-    bool count_base; // true if the scorer is count based, otherwise
-                     // complexity based
     bool revisit;
     bool ignore_bscore;
     // optim_param
@@ -343,9 +341,6 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
          value<int>(&reduct_knob_building_effort)->default_value(2),
          "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
-        (opt_desc_str(count_base_opt).c_str(),
-         value<bool>(&count_base)->default_value(false),
-         "If 1 then a count based scorer is used, otherwise, if 0, a complexity based scorer is used.\n")
         (opt_desc_str(cache_size_opt).c_str(),
          value<unsigned long>(&cache_size)->default_value(1000000),
          "Cache size, so that identical candidates are not re-evaluated, 0 means no cache.\n")
@@ -477,7 +472,7 @@ int moses_exec(int argc, char** argv) {
 
     // set metapopulation parameters
     metapop_parameters meta_params(max_candidates, reduce_all,
-                                   count_base, revisit, ignore_bscore);
+                                   revisit, ignore_bscore);
 
     // set optim_parameters
     optim_parameters opt_params(pop_size_ratio, max_score);
