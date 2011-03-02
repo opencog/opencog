@@ -24,16 +24,16 @@
 #ifndef NEARPREDICATEUPDATER_H_
 #define NEARPREDICATEUPDATER_H_
 
-/**
- * This class is used to update the near predicates whenever an object
- * changes its position in the latest SpaceMap.
- */
 #include "BasicPredicateUpdater.h"
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace OperationalAvatarController
 {
 
+/**
+ * This class is used to update the near predicates whenever an object
+ * changes its position in the latest SpaceMap.
+ */
 class NearPredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
 {
 

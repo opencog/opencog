@@ -282,7 +282,7 @@
         </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType name="MapInfoType">
-        <xsd:sequence>            
+        <xsd:sequence>
             <xsd:annotation>
                 <xsd:documentation>
                 The map data behaves much like a radar screen, a grid with a
