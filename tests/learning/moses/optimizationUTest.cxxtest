@@ -24,6 +24,9 @@
 #include <opencog/learning/moses/eda/field_set.h>
 #include <opencog/learning/moses/moses/types.h>
 #include <opencog/learning/moses/moses/optimization.h>
+#include <opencog/util/iostreamContainer.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/numeric.h>
 
 using namespace moses;
 using namespace eda;
@@ -32,9 +35,9 @@ class optimizationUTest : public CxxTest::TestSuite {
     MT19937RandGen rng;
 
 public:
-    optimizationUTest() : rng(1) {
+    optimizationUTest() : rng(1000) {
         logger().setPrintToStdoutFlag(true);
-        logger().setLevel(Logger::DEBUG);
+        logger().setLevel(Logger::FINE);
     }
     /**
      * test iterative_hillclimbing optimization in standalone. The
@@ -43,19 +46,31 @@ public:
      */
     void test_hc() {
         // field of 8 booleans
-        const unsigned int fs_size = 8;
+        const unsigned int fs_size = 30;
         const unsigned int eval_n = pow2(fs_size);
+        std::cout << "eval_n = " << eval_n << std::endl;
         field_set fs(field_set::disc_spec(2), fs_size);
+        // initial instance
+        eda::instance init_inst(fs.packed_width());
+        randomize(fs, init_inst, rng);
+        // target instance
         eda::instance target_inst(fs.packed_width());
         randomize(fs, target_inst, rng);
+        std::cout << "target_inst =" << fs.stream(target_inst) << std::endl;
+        // scorer
         distance_based_scorer scorer(fs, target_inst);
+        // HC optimization
+        optim_parameters op_param(20, 1);
         hc_parameters hc_param(false); // do not terminate if improvement
-        iterative_hillclimbing hc(rng, optim_parameters(), hc_param);
+        iterative_hillclimbing hc(rng, op_param, hc_param);
+        // empty deme
         instance_set<composite_score> deme(fs);
-        int actual_evals = hc(deme, scorer, eval_n);
+        // perform the search
+        unsigned int actual_evals = hc(deme, /*init_inst,*/ scorer, eval_n);
         std::cout << "actual_evals = " << actual_evals << std::endl;
         std::sort(deme.begin(), deme.end(),
                   std::greater<scored_instance<composite_score> >());
+        // check if it has found the solution
         TS_ASSERT_EQUALS(get_score(*deme.begin_scores()), 0);
     }    
 };

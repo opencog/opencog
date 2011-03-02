@@ -516,12 +516,12 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
 }
 
 /**
- * Counts instances at distance n from the exemplar
- * (i.e., with n elements changed from the exemplar)
+ * Counts instances at distance n from the initial instance
+ * (i.e., with n elements changed from the initial instance)
  * It calls a recursive function count_n_changed_knobs_from_index
  * 
  * @param fs              deme
- * @param inst            exemplar
+ * @param inst            initial instance
  * @param n               distance
  * @param max_count       stop counting when above this value, that is
  *                        because this function can be computationally expensive.
