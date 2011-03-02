@@ -1,11 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.h
  *
- * Copyright (C) 2002-2009 Novamente LLC
- * All Rights Reserved
- *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-02-04
+ * @date 2011-03-02
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,7 +19,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #ifndef PSIACTIONSELECTIONAGENT_H
 #define PSIACTIONSELECTIONAGENT_H
@@ -239,76 +235,6 @@ private:
                      std::vector< std::vector<Handle> > & psiPlanList);
 
     /**
-     * Transfer the format of arguments within given ListLink to combo. 
-     * 
-     * @param  server
-     * @parem  hListLink          Handle to ListLink that contains arguments
-     * @param  varBindCandidates  All the possible variable bindings for the selected Psi Rule
-     * @param  schemaArguments    Return the arguments that would be used while executing the combo procedure
-     *
-     * @return  The number of arguments got
-     */
-    bool getSchemaArguments(opencog::CogServer * server,
-                            Handle hListLink, 
-                            const std::vector<std::string> & varBindCandidates, 
-                            std::vector <combo::vertex> & schemaArguments);
-
-    /**
-     * Initialize all the possible variable bindings in Psi Rule with all the entities the pet encounters
-     *
-     * @param server             The pointer to CogServer
-     * @param varBindCandidates  All the possible variable bindings   
-     */
-    void initVarBindCandidates(opencog::CogServer * server, std::vector<std::string> & varBindCandidates);
-
-    /**
-     * Initialize the unifier with the given all the possible variable bindings
-     *
-     * @param unifier            
-     * @param varBindCandidates  All the possible variable bindings
-     *
-     * @note  The combo::variable_unifier inherits from the type 'std::map<std::string, bool>', 
-     *        recording each variable binding and the corresponding state (valid/invalid). 
-     *        (see also './opencog/comboreduct/combo/variable_unifier.h')
-     *
-     *        We usually call this function before running a combo procedure that needs a unifier. 
-     */
-    void initUnifier(combo::variable_unifier & unifier, const std::vector<std::string> & varBindCandidates);
-
-    /**
-     * Updating the possible variable bindings in Psi Rule, based on the result return by combo interpreter 
-     *
-     * @param unifier            The unifier after executing a combo function
-     * @param varBindCandidates  All the possible variable bindings
-     *
-     * @note  We usually call this function after running a combo procedure that needs a unifier. 
-     *
-     *        When you call a combo procedure with a unifier, the combo procedure interpreter would update 
-     *        the state of each possible variable binding automatically.
-     *
-     *        So after running the combo procedure, you can usually call this function,
-     *        which would find variable bindings that are actually valid by simply checking their states. 
-     */
-    void updateVarBindCandidates(const combo::variable_unifier & unifier, std::vector<std::string> & varBindCandidates);
-
-    /**
-     * Check if the given Precondition is satisfied. It is used by 'pickUpPsiRule' method.
-     *
-     * @param  server
-     * @param  hPrecondition  Handle to the Precondition, i.e. an EvaluationLink
-     * @param  unifier        The combo interpreter would update the states of all the possible variable bindings 
-     *                        within the unifier
-     *
-     * @return  true if the given Precondition is satisfied, otherwise returns false
-     *
-     * @note  If the EvaluationLink(hPrecondition)) contains a PredicateNode, 
-     *        then we simply check the truth value of the EvaluationLink. 
-     *        If the EvaluationLink holds a GroundedPredicateNode, 
-     *        we would run the corresponding combo procedure firstly, and then judge based on the execution result. 
-     */
-    bool isSatisfied(opencog::CogServer * server, Handle hPrecondition, combo::variable_unifier & unifier);
-
-    /**
      * Pick up a Psi Rule that all its Preconditions are satisfied. 
      *
      * @param  server
@@ -320,27 +246,6 @@ private:
     Handle pickUpPsiRule(opencog::CogServer * server, 
                          const std::vector<Handle> & psiRules, 
                          std::vector<std::string> & varBindCandidates);
-
-    /**
-     * Apply the given Psi Rule. 
-     *
-     * @param  server
-     * @param  psiRules
-     * @param  varBindCandidates  All the possible variable bindings for the selected Psi Rule
-     *
-     * @return  true if success. 
-     *
-     * @note  Since each Psi Rule associates with a single Action, 
-     *        applying a Psi Rule equals executing the corresponding Action.
-     *
-     *        While this method simply runs the Action, it will not get and analyze the result of the execution, 
-     *        because it may take some time to finish the execution. 
-     *
-     *        'run' method is responsible for dealing with the result of execution during next "cognitive cycle" 
-     *        after calling the 'applyPsiRule' method. 
-     */
-    bool applyPsiRule(opencog::CogServer * server, Handle hPsiRule, const std::vector<std::string> & varBindCandidates);
-
 
 public:
 

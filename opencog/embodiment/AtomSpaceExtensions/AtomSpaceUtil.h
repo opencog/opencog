@@ -157,7 +157,6 @@ public:
                                        const std::string & petId
                                       );
 
-
     /**
      * Get the handle to Demand Goal (EvaluationLink)
      *
@@ -170,79 +169,6 @@ public:
     static Handle getDemandGoalEvaluationLink(const AtomSpace & atomSpace, 
                                               const std::string & demand 
                                              );
-
-    /**
-     * Split the Psi Rule into three components: Goal, Action and Preconditions
-     *
-     * @param atomSpace                   The AtomSpace
-     * @param hPsiRule                    The Handle to the Psi Rule 
-     * @param hGoalEvaluationLink         The Handle to the Goal (EvaluationLink) 
-     * @param hActionExecutionLink        The Handle to the Action (ExecutionLink)
-     * @param hPreconditionEvaluatioLinks Handles to the Preconditions (EvaluationLinks)
-     *
-     * @return bool True if split the Psi Rule successfully, false if fails
-     *
-     * @note
-     *
-     * Each Rule here means a cognitive schematic, that is 
-     *     Contex & Procedure ==> Goal
-     *
-     * Rules here has nothing to do with that in PLN, so don't confuse them!
-     *
-     * An OpenPsi Rule is represented in AtomSpace as below: 
-     *
-     * Note: AtTimeLink is missing currently
-     *       ImplicationLink is used instead of PredictiveImplicationLink, 
-     *       since PLN doesn't support it while implementation
-     *
-     *     PredictiveImplicationLink
-     *         AndLink
-     *             AndLink
-     *                 EvaluationLink
-     *                     GroundedPredicateNode "precondition_1_name"
-     *                     ListLink
-     *                         Node:arguments
-     *                         ...
-     *                 EvaluationLink
-     *                     PredicateNode         "precondition_2_name"
-     *                     ListLink
-     *                         Node:arguments
-     *                         ...
-     *                 ...
-     *                            
-     *             ExecutionLink
-     *                 GroundedSchemaNode "schema_name"
-     *                 ListLink
-     *                     Node:arguments
-     *                     ...
-     *    
-     *         EvaluationLink
-     *             (SimpleTruthValue indicates how well the demand is satisfied)
-     *             (ShortTermInportance indicates the urgency of the demand)
-     *             PredicateNode: "goal_name" 
-     *             ListLink
-     *                 Node:arguments
-     *                 ...
-     *
-     * For each Rule, there's only a Goal, an Action and a bunch of Preconditions. 
-     * And all these Preconditions should be grouped in an AndLink.
-     * If you want to use OrLink, then just split the Rule into several Rules.
-     * For the efficiency and simplicity of the planer (backward chainging), NotLink is forbidden currently.  
-     */
-    static bool splitPsiRule(const AtomSpace & atomSpace,
-                             const Handle hPsiRule, 
-                             Handle & hGoalEvaluationLink,
-                             Handle & hActionExecutionLink, 
-                             Handle & hPreconditionAndLink
-                            );
-    /**
-     * Check if the given Handle is a Psi Rule.
-     *
-     * @return  true if the given Handle indicating a Psi Rule
-     *
-     * @note  For the format of Psi Rules, please refer to "./opencog/embodiment/rules_core.scm"
-     */
-    static bool isHandleToPsiRule(const AtomSpace & atomSpace, Handle h);
 
     /**
      * Returns a pointer to the most recent evaluation link. With the given name of the
@@ -917,6 +843,7 @@ public:
     static Handle getDemandSimilarityLink(const AtomSpace & atomSpace,
                                           const std::string & demand, 
                                           const std::string & petId);
+
     /**
      * Return the Handle of SimilarityLink that holds DemandUpdater
      *
@@ -944,6 +871,7 @@ public:
                                                         const std::string & demand, 
                                                         const std::string & petId);
 
+            
     /**
      * Return the schema strength for the given rule. This strength is stored as
      * the truth value of the ImplicationLink between the rule precondition and

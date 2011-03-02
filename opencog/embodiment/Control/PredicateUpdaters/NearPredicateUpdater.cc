@@ -42,7 +42,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
     // there is no map, no update is possible
     Handle spaceMapHandle = atomSpace.getSpaceServer().getLatestMapHandle();
     if (spaceMapHandle == Handle::UNDEFINED) {
-        logger().warning( "NearPredicateUpdater::%s - No space map handle found!", __FUNCTION__);
+        logger().warn( "NearPredicateUpdater::%s - No space map handle found!", __FUNCTION__);
         return;
     }
     const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
