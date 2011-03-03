@@ -151,6 +151,7 @@ public:
             TS_ASSERT(atomSpace->getVLTI(handles[i])
                       ==AttentionValue::NONDISPOSABLE);
         }
+        
         //Throw in a few nodes and links after embedding to make sure the
         //functions we're testing are robust against nodes added after
         //embedding. These atoms should't affect the embedding at all

@@ -52,8 +52,9 @@ namespace opencog
         typedef std::map<Type, PivotSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
         typedef std::map<Type, node<CoverTreeNode> > EmbedTreeMap;
-        //typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
-        //ClusterSeq; //the vector of doubles is the centroid of the cluster
+        typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
+            ClusterSeq; //the vector of doubles is the centroid of the cluster
+        
         AtomSpace* as;
         AtomEmbedMap atomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
@@ -105,8 +106,6 @@ namespace opencog
                                      const Type& linkType);
 
     public:
-        typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
-            ClusterSeq; //the vector of doubles is the centroid of the cluster
         const char* id();
 
         DimEmbedModule(AtomSpace* atomSpace);
@@ -241,8 +240,7 @@ namespace opencog
          * kPasses=3, the k values are 2^(n/4), 2^(2n/4), and 2^(3n/4).
          */
         void addKMeansClusters(const Type& l, int maxClusters,
-                                               double threshold=0.,
-                                               int kPasses=1);
+                               double threshold=0., int kPasses=1);
         /**
          * Calculate the homogeneity of a cluster of handles for given linkType.
          *
