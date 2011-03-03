@@ -244,6 +244,11 @@ struct iterative_hillclimbing {
     unsigned int operator()(eda::instance_set<composite_score>& deme,
                             const eda::instance& init_inst,
                             const Scoring& score, unsigned int max_evals) {
+
+        // Logger
+        logger(). debug("Iterative HillClimbing Optimization");
+        // ~Logger
+
         const eda::field_set& fields = deme.fields();
         unsigned int pop_size = opt_params.pop_size(fields);
         unsigned int max_gens_total = opt_params.max_gens_total(fields);
@@ -257,7 +262,8 @@ struct iterative_hillclimbing {
             max_number_of_instances = max_evals;
 
         unsigned int max_distance =
-            opt_params.max_dist_ratio * fields.dim_size();
+            max(1U, (unsigned int)(opt_params.max_dist_ratio 
+                                   * (double)fields.dim_size()));
 
         // score the initial instance
         eda::instance center_inst(init_inst);
@@ -266,8 +272,28 @@ struct iterative_hillclimbing {
         score_t best_score = score(scored_center_inst).first;
 
         unsigned int distance = 1;
-        bool has_improved = false; // whether the score has improved
+        bool has_improved; // whether the score has improved
+
+        unsigned int iteration = 0;
+
+        // Logger
+        {
+            std::stringstream ss;
+            ss << "Initial center instance: [score=" << best_score << "] "
+               << fields.stream(center_inst);
+            logger().debug(ss.str());
+        }
+        // ~Logger
+
         do {
+            has_improved = false;
+
+            // Logger
+            {
+                logger().debug("Interation: %u", iteration++);
+            }
+            // ~Logger
+
             long long number_of_new_instances;
 
             number_of_new_instances = 
@@ -304,6 +330,11 @@ struct iterative_hillclimbing {
                                              deme.begin() + current_number_of_instances, deme.end(),
                                              center_inst);
             }
+
+            // Logger
+            logger().debug("Evaluate %u neighbors at distance %u",
+                           number_of_new_instances, distance);
+            // ~Logger
             
             // score all new instances in the deme
             transform(deme.begin() + current_number_of_instances, deme.end(),
@@ -322,11 +353,20 @@ struct iterative_hillclimbing {
             }
 
             current_number_of_instances += number_of_new_instances;
-            if(has_improved)
+            if(has_improved) {
                 distance = 1;
+                // Logger
+                {
+                    std::stringstream ss;
+                    ss << "New center instance: [score=" << best_score << "] "
+                       << fields.stream(center_inst);
+                    logger().debug(ss.str());
+                }
+                // ~Logger
+            }
             else
                 distance++;
-
+            
         } while ((!hc_params.terminate_if_improvement || !has_improved) &&
                  distance <= max_distance &&
                  current_number_of_instances < max_number_of_instances &&
@@ -642,7 +682,7 @@ struct simulated_annealing {
         do {
             unsigned int current_distance = 
                 max(1U, (unsigned int)(opt_params.max_dist_ratio
-                             * dist_temp(current_temp)));
+                                       * (double)dist_temp(current_temp)));
 
             // score all new instances in the deme
             long long number_of_new_instances = 1; //@todo: possibly change that
