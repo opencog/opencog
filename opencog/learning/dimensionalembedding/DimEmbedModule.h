@@ -42,8 +42,6 @@ namespace opencog
      * http://www.opencog.org/wiki/OpenCogPrime:DimensionalEmbedding
      *
      * @todo Add support for non-symmetric links.
-     * @bug might fail if a node is deleted after embedding (esp. a pivot node)
-     * or added during embedding
      */
     class DimEmbedModule : public Module
     {
@@ -53,15 +51,19 @@ namespace opencog
         typedef std::map<Type, PivotSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
         typedef std::map<Type, node<CoverTreeNode> > EmbedTreeMap;
-        //typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
-        //ClusterSeq; //the vector of doubles is the centroid of the cluster
+        typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
+            ClusterSeq; //the vector of doubles is the centroid of the cluster
+        
         AtomSpace* as;
         AtomEmbedMap atomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
         EmbedTreeMap embedTreeMap;
         std::map<Type,int> dimensionMap;//Stores the number of dimensions that
                                         //each link type is embedded under
-
+        std::map<Handle,int> vLTIMap; //Stores what the VLTI for pivots
+        //was before we added them, setting them to nondisposable. This way
+        //we know what to revert VLTI to when we re-embed.
+        
         /**
          * Adds h as a pivot and adds the distances from each node to
          * the pivot to the appropriate atomEmbedding.
@@ -70,14 +72,6 @@ namespace opencog
          * @param linkType Type of link for which h should be added as a pivot
          */
         void addPivot(const Handle& h, const Type& linkType);
-
-        /**
-         * Clears the AtomEmbedMap and PivotMap for linkType
-         *
-         * @param linkType Type of link for which the embedding should be
-         * cleared.
-         */
-        void clearEmbedding(const Type& linkType);
 
         /**
          * Returns the highest weight path between the handles following
@@ -110,10 +104,7 @@ namespace opencog
                                      const Handle& targetHandle,
                                      const Type& linkType);
 
-        double euclidDist(double v1[], double v2[], int size);
     public:
-        typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
-            ClusterSeq; //the vector of doubles is the centroid of the cluster
         const char* id();
 
         DimEmbedModule(AtomSpace* atomSpace);
@@ -152,6 +143,17 @@ namespace opencog
          */
         void embedAtomSpace(const Type& linkType, const int numDimensions=5);
 
+        
+        /**
+         * Clears the AtomEmbedMap and PivotMap for linkType, also
+         * reverting the VLTI of any pivots to what they were before
+         * embedding.
+         *
+         * @param linkType Type of link for which the embedding should be
+         * cleared.
+         */
+        void clearEmbedding(const Type& linkType);
+        
         /**
          * Logs a string representation of of the (Handle,vector<Double>)
          * pairs for linkType. This will have as many entries as there are nodes
@@ -195,7 +197,8 @@ namespace opencog
         double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
         static double euclidDist
             (const std::vector<double> v1, const std::vector<double> v2);
-
+        static double euclidDist(double v1[], double v2[], int size);
+        
         /**
          * Returns a vector of Handles of the k nearest nodes for the given 
          * link type.
@@ -214,7 +217,6 @@ namespace opencog
          * each HandleSeq represents a cluster and the vector of doubles its
          * centroid.
          */
-        //std::vector<std::pair<HandleSeq,vector<double> > >
         ClusterSeq kMeansCluster(const Type& l, int numClusters);
 
         /**
@@ -237,8 +239,7 @@ namespace opencog
          * kPasses=3, the k values are 2^(n/4), 2^(2n/4), and 2^(3n/4).
          */
         void addKMeansClusters(const Type& l, int maxClusters,
-                                               double threshold=0.,
-                                               int kPasses=1);
+                               double threshold=0., int kPasses=1);
         /**
          * Calculate the homogeneity of a cluster of handles for given linkType.
          *

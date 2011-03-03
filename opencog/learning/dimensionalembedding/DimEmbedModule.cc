@@ -194,6 +194,14 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
 
+    //If we haven't already from another embedding, we must record the very
+    //long term importance (VLTI) before we set it to nondisposable. This way
+    //we know what to revert it to when we reembed and find different pivots.
+    std::map<Handle,int>::iterator p = vLTIMap.find(h);
+    if(p==vLTIMap.end()) {
+        vLTIMap[h]=as->getVLTI(h);
+        as->setVLTI(h,AttentionValue::NONDISPOSABLE);
+    }
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
 
@@ -222,8 +230,14 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
             std::cout << it->second << ":h=" << it->first << ",";
         }
         std::cout << "}" << std::endl;*/
-
-        pQueue.erase(p_it->first);
+        
+        //we can't simply erase p_it->first because there could be multiple
+        //nodes that are the same distance from our pivot, and we can't
+        //pass erase p_it because it's a reverseiterator, thus this awkwardness
+        pQueue_t::iterator erase_it = pQueue.end();
+        erase_it--;
+        pQueue.erase(erase_it);
+        
         if (distMap[u]==0) { break;}
         HandleSeq newLinks = as->getIncoming(u);
         for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
@@ -307,7 +321,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
 }
 
 std::vector<double> DimEmbedModule::addNode(const Handle& h,
-                                                  const Type& linkType){    
+                                            const Type& linkType){    
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -346,12 +360,30 @@ void DimEmbedModule::clearEmbedding(const Type& linkType){
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-
+    
     atomMaps.erase(linkType);
     pivotsMap.erase(linkType);
     dimensionMap.erase(linkType);
-}
 
+    std::map<Handle,int>::iterator vIt = vLTIMap.begin();
+    for(;vIt!=vLTIMap.end();vIt++) {
+        bool revert=true;
+        //In case multiple embeddings (ie for different link types) use the
+        //same pivot, check before reverting the VLTI.
+        for(PivotMap::iterator it = pivotsMap.begin();
+            it!=pivotsMap.end(); it++) {
+            PivotSeq pivots = it->second;
+            PivotSeq::iterator it2=pivots.begin();
+            for(; it2!=pivots.end(); it2++) {
+                if(vIt->first==*it2) revert=false;
+            }
+        }
+        //If we weren't able to find the pivot being used in another
+        //embedding, we can reset the VLTI to what it was before we
+        //did any embedding.
+        if(revert) as->setVLTI(vIt->first,vIt->second);
+    }
+}
 void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
     AtomEmbedding atomEmbedding=atomMaps[linkType];
     PivotSeq pivots = pivotsMap[linkType];
