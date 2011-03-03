@@ -1,8 +1,8 @@
 /*
- * @file opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.cc
+ * @file opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterByPLNAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-03
+ * @date 2011-02-23
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,7 +21,7 @@
  */
 
 #include "OAC.h"
-#include "PsiRelationUpdaterAgent.h"
+#include "PsiRelationUpdaterByPLNAgent.h"
 #include "PsiRuleUtil.h"
 
 #include<boost/tokenizer.hpp>
@@ -59,97 +59,161 @@ void PsiRelationUpdaterAgent::init(opencog::CogServer * server)
     // Get petId
 //    const std::string & petId = oac->getPet().getPetId();
 
+    // Clear old relation list
+    this->relationList.clear(); 
+
     // Get relation names from the configuration file
     std::string relationNames = config()["PSI_RELATIONS"];
 
     boost::tokenizer<> relationNamesTok (relationNames);
 
-    // Process Relations one by one 
     for ( boost::tokenizer<>::iterator iRelationName = relationNamesTok.begin();
           iRelationName != relationNamesTok.end();
           iRelationName ++ ) {
 
-        // Get corresponding PredicateNode 
-        Handle hRelationPredicateNode = atomSpace.getHandle(PREDICATE_NODE, *iRelationName);
+        this->relationList.push_back(*iRelationName);
 
-        if ( hRelationPredicateNode==opencog::Handle::UNDEFINED ) {
-            logger().warn("PsiRelationUpdaterAgent::%s - Failed to find PredicateNode for relation '%s' [ cycle = %d]", 
-                          __FUNCTION__, 
-                          (*iRelationName).c_str(), 
-                          this->cycleCount
-                         );
-            continue; 
-        }
+        logger().debug("PsiRelationUpdaterAgent::%s - Found relation '%s' from configuration file [ cycle = %d ].", 
+                        __FUNCTION__, 
+                        (*iRelationName).c_str(), 
+                        this->cycleCount
+                      );
 
-        // Get all the EvaluationLink containing hRelationPredicateNode
-        std::vector<Handle> relationEvaluationLinkSet;
-        
-        atomSpace.getHandleSet( back_inserter(relationEvaluationLinkSet), 
-                                hRelationPredicateNode,
-                                EVALUATION_LINK, 
-                                false
-                              );  
+    }
 
-        if ( relationEvaluationLinkSet.empty() ) {
-            logger().warn("PsiRelationUpdaterAgent::%s - Failed to find EvaluationLink for relation '%s' [ cycle = %d]", 
-                          __FUNCTION__, 
-                          (*iRelationName).c_str(), 
-                          this->cycleCount
-                         );
-            continue; 
+    logger().debug("PsiRelationUpdaterAgent::%s - Got %d relations from configuration file [ cycle = %d ].", 
+                    __FUNCTION__, 
+                    this->relationList.size(), 
+                    this->cycleCount
+                  );
 
-        }
+    // Clear old entity list
+    this->entityList.clear(); 
 
-        // Process EvaluationLinks one by one
-        foreach(Handle hRelationEvaluationLink, relationEvaluationLinkSet) {
+    // Update entity list
+    const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap(); 
+    spaceMap.findAllEntities(back_inserter(this->entityList));
 
-            // Get all the ImplicatonLinks containing hRelationEvaluationLink
-            std::vector<Handle> relationImplicationLinkSet; 
-           
-            atomSpace.getHandleSet( back_inserter(relationImplicationLinkSet), 
-                                    hRelationEvaluationLink, 
-                                    IMPLICATION_LINK, 
-                                    false 
-                                  );
+    logger().debug("PsiRelationUpdaterAgent::%s - Got %d entities from space map [ cycle = %d ].", 
+                    __FUNCTION__, 
+                    this->entityList.size(), 
+                    this->cycleCount
+                  );
+  
+    // Initialize ASW
+    // TODO: Shall we have to to do so? 
+    AtomSpaceWrapper* asw = ASW(opencog::server().getAtomSpace());
+#if LOCAL_ATW
+    ((LocalATW*)asw)->SetCapacity(10000);
+#endif  
+    asw->archiveTheorems = false;
+    asw->allowFWVarsInAtomSpace = 
+    config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
 
-            // Process ImplicatonLinks one by one
-            // If it is a Psi Rule with NULL_ACTION, append it to instantRelationRules
-            foreach(Handle hImplicationLink, relationImplicationLinkSet) {
-
-                // Split the Psi Rule into Goal, Action and Preconditions
-                Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink; 
-
-                if (PsiRuleUtil::splitPsiRule( atomSpace,
-                                               hImplicationLink, 
-                                               hGoalEvaluationLink, 
-                                               hActionExecutionLink,
-                                               hPreconditionAndLink
-                                             ) ) {
-
-                    // Check if this Psi Rule contains a NULL_ACTION
-                    // About NULL_ACTION, please refer to './opencog/embodiment/rules_core.scm'
-                    Handle hActionGroundedSchemaNode = atomSpace.getOutgoing(hActionExecutionLink, 0);
-
-                    if ( atomSpace.getName(hActionGroundedSchemaNode) == "DoNothing" ) {
-
-                        this->instantRelationRules.push_back(hImplicationLink);
-
-                        logger().debug("PsiRelationUpdaterAgent::%s - Found an instant (with NULL_ACTION) Psi Rule '%s' for relatin '%s' [ cycle = %d ]", 
-                                       __FUNCTION__, 
-                                       atomSpace.atomAsString(hImplicationLink).c_str(), 
-                                       (*iRelationName).c_str(), 
-                                       this->cycleCount
-                                      );
-                    }// if
-                }// if
-            }// foreach
-
-        }// foreach
-
-    }// for
+    currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
+}
+
+void PsiRelationUpdaterAgent::allocInferSteps()
+{
+    // Reset steps (inference resource) 
+    // TODO: Modulators shall have impact on these values (By Zhenhua Cai, on 2011-02-05)
+    //
+    this->totalRemainSteps = 2000; 
+    this->singleEntityRelationMaxSteps = 150;    
+
+    logger().debug("PsiRelationUpdaterAgent::%s - Total inference steps remain = %d, Single entity relation maximum steps = %d [ cycle = %d ].", 
+                    __FUNCTION__, 
+                    this->totalRemainSteps, 
+                    this->singleEntityRelationMaxSteps, 
+                    this->cycleCount
+                  );
+}
+
+void PsiRelationUpdaterAgent::updateEntityRelation(opencog::CogServer * server, Handle relationEvaluationLink,
+                                                   int & steps)
+{
+    // The implementation below borrowed many source code from the function opencog::pln::infer ("PLNModule.cc")
+    
+    // Get OAC
+    OAC * oac = (OAC *) server;
+
+    // Get AtomSpace
+    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+
+    // Set the truth value of relationEvaluationLink to stv(0 0), which would force PLN refresh anyway
+    // TODO: Really? Shall we have to do this?
+    SimpleTruthValue stvFalse(0, 0);
+
+    atomSpace.setTV(relationEvaluationLink, stvFalse);
+
+    // Create BITNodeRoot for the Goal (Target)
+    pHandleSeq fakeHandles = ASW()->realToFakeHandle(relationEvaluationLink);
+
+    pHandle fakeHandle = fakeHandles[0];
+
+    logger().debug("PsiRelationUpdaterAgent::%s - Initialize ASW OK [ cycle = %d ]", 
+                   __FUNCTION__, 
+                   this->cycleCount
+                  );
+
+    Btr<vtree> target_(new vtree(fakeHandle));
+    
+    // The BIT uses real Links as a cue that it has already found the link,
+    // so it is necessary to make them virtual
+    Btr<vtree> target = ForceAllLinksVirtual(target_);
+
+    // TODO: Do we have to use PLN_RECORD_TRAILS?
+    //       Actually, we should always set it true currently,
+    //       because 'extractPsiRules' relies on the trails information. 
+    bool recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
+
+    Bstate.reset(new BITNodeRoot(target, 
+                                 &referenceRuleProvider(),
+                                 recordingTrails, 
+                                 getFitnessEvaluator(PLN_FITNESS_BEST)
+                                )
+                );
+
+    logger().debug("PsiRelationUpdaterAgent::%s - BITNodeRoot init ok [ cycle = %d ].", 
+                   __FUNCTION__,           
+                   this->cycleCount
+                  );
+
+    // TODO: What if something bad happen while initialize BITNodeRoot?
+
+    // Do inference backward
+    BITNodeRoot * state = Bstate.get();
+    state->setLoosePoolPolicy(true);
+
+    // TODO: How to forbid the output to the screen during inference?
+    //       We don't want to mess up the screen with too much details of PLN inference. 
+    const std::set<VtreeProvider *> & result = state->infer(steps,     // proof resources
+                                                            0.000001f, // minimum confidence for storage
+                                                            0.01f      // minimum confidence for abort
+                                                           ); 
+
+    // Print the result to the screen for debugging
+    state->printResults();
+
+    // Log information
+    if ( result.empty() ) {
+        logger().warn( "PsiRelationUpdaterAgent::%s - Failed to update the truth value of %s by PLN [ cycle = %d ].", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(relationEvaluationLink).c_str(), 
+                        this->cycleCount
+                      );
+    }
+    else {
+        logger().debug("PsiRelationUpdaterAgent::%s - Update the truth value of %s successfully by PLN [ cycle = %d ].", 
+                       __FUNCTION__, 
+                       atomSpace.atomAsString(relationEvaluationLink).c_str(), 
+                       this->cycleCount
+                      );
+
+    }// if
 }
 
 Handle PsiRelationUpdaterAgent::getRelationEvaluationLink(opencog::CogServer * server, 
@@ -256,17 +320,11 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     // Get OAC
     OAC * oac = (OAC *) server;
 
-    // Get rand generator
-    RandGen & randGen = oac->getRandGen();
+    // Get random generator
+    RandGen & randGen = oac->getRandGen(); 
 
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get ProcedureInterpreter
-    Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
-
-    // Get Procedure repository
-    const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
 
     // Get petId and petName
     const std::string & petName = oac->getPet().getName();
@@ -323,82 +381,61 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     if ( !this->bInitialized )
         this->init(server);
 
-    // TODO: Deal with 'curious_about' relation
+    // Allocate inference steps (totalRemainSteps and singleEntityRelationMaxSteps)
+    this->allocInferSteps(); 
 
-    // Shuffle all the instant Psi Rules about Relation 
+    // Process (relation, pet, entity) triples, which are represented in AtomSpace as follows:
     //
-    // Note: Why? Because some Relations rely on other Relations, like multi-steps planning.  
-    //       For example, 'familiar_with' is the former step before 'know' and 
-    //       'curious_about' is the very basic step for other relations.
+    // EvaluationLink (truth value indicates the intensity of the relation between the entity and the pet)
+    //     PredicateNode "relationName"
+    //         ListLink
+    //             petHandle
+    //             entityHandle
     //
-    //       Randomly shuffle these instant relation rules before processing would give the pet 
-    //       the chance to consider multi-step relations in different combinations.  
-    std::random_shuffle( this->instantRelationRules.begin(), this->instantRelationRules.end() );
+    
+    std::vector<std::string>::iterator iEntity;
+    std::vector<std::string>::iterator iRelation; 
 
-    // This vector has all possible objects/avatars ids to replace wildcard in Psi Rules
-    //
-    // TODO: We would not use wildcard later, 
-    //       and the vector here should be used to replace VariableNode in Psi Rules with ForAllLink
-    std::vector<std::string> varBindCandidates;
+    while ( this->totalRemainSteps > 0 ) {
 
-    // Process instant relation rules one by one 
-    foreach(Handle hInstantRelationRule, this->instantRelationRules) {
+        totalRemainSteps --; 	    
+       
+        // Randomly select an entity
+        iEntity = this->entityList.begin() + randGen.randint( this->entityList.size() ); 
 
-        // If all the instant relation rules are satisfied, 
-        // set the truth value of corresponding EvaluationLinks to true
-        if ( PsiRuleUtil::allPreconditionsSatisfied( atomSpace, 
-                                                     procedureInterpreter, 
-                                                     procedureRepository, 
-                                                     hInstantRelationRule, 
-                                                     varBindCandidates, 
-                                                     randGen
-                                                   ) ) {
-            
-            // Split the Psi Rule into Goal, Action and Preconditions
-            Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink; 
+        // If the entity is the pet itself, skip it
+        if ( *iEntity == petId ) 
+            continue; 
 
-            PsiRuleUtil::splitPsiRule( atomSpace,
-                                       hInstantRelationRule, 
-                                       hGoalEvaluationLink, 
-                                       hActionExecutionLink,
-                                       hPreconditionAndLink
-                                     );
+        // Get the Handle to the entity
+        Handle entityHandle = this->getEntityHandle(server, *iEntity); 
 
-            // Get relation name
-            Handle hRelationPredicateNode = atomSpace.getOutgoing(hInstantRelationRule, 0);
-            std::string relationName = atomSpace.getName(hRelationPredicateNode);
+        if ( entityHandle == opencog::Handle::UNDEFINED )
+            continue; 
 
-            // Set all the truth value of all the EvaluationLinks containing this relation to true
-            foreach(std::string entityId, varBindCandidates) {
-                // Get handle to entity
-                Handle entityHandle = this->getEntityHandle(server, entityId);
+        // Randomly select a relation
+        iRelation = this->relationList.begin() + randGen.randint( this->relationList.size() );	
 
-                if ( entityHandle == opencog::Handle::UNDEFINED )
-                    continue; 
+        // Get the Handle to the EvaluationLink holding the relation between the entity and the pet
+        // If it doesn't exist, the function below would create one and return it. 
+        Handle relationEvaluationLink = this->getRelationEvaluationLink( server,
+                                                                         *iRelation,
+								                                         petHandle, 
+                                                                         entityHandle
+                                                                       ); 
 
-                Handle hRelationEvaluationLink = this->getRelationEvaluationLink( server, 
-                                                                                  relationName,
-                                                                                  petHandle, 
-                                                                                  entityHandle            
-                                                                                );
-                // Set the truth value to true
-                // TODO: Actually, this not so correct, the truth value should not be a constant (1, 1)
-                //       We should give the pet the ability to distinguish the intensity of relation,
-                //       such as friend, good friend and best friend
-                SimpleTruthValue stvTrue(1, 1);
-                atomSpace.setTV(hRelationEvaluationLink, stvTrue); 
-                
-                logger().debug("PsiRelationUpdaterAgent::%s Updated the trutu value of '%s' [ cycle = %d ]", 
-                               __FUNCTION__, 
-                               atomSpace.atomAsString(hRelationEvaluationLink).c_str(), 
-                               this->cycleCount
-                              );
+        // Update the truth value of the relation through PLN (backward chainer)
+        int singleEntityRelationRemainSteps = this->singleEntityRelationMaxSteps;  
 
-            }// foreach
+        this->updateEntityRelation(server, relationEvaluationLink, singleEntityRelationRemainSteps);        
 
-        }// if 
+        // Decrease total step remain
+        this->totalRemainSteps -= (this->singleEntityRelationMaxSteps - singleEntityRelationRemainSteps);
 
-    }// foreach
+    }// while
 
+    // Since the perception would changes next cycle, the function below would inforce the mind agent 
+    // reinitialize itself during next cycle
+    this->forceInitNextCycle();
 }
 

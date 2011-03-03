@@ -755,7 +755,6 @@ Handle PsiActionSelectionAgent::pickUpPsiRule(opencog::CogServer * server,
     // Get Procedure repository
     const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
 
-    bool bAllPreconditionsSatisfied = true;
     Handle hSelectedPsiRule = opencog::Handle::UNDEFINED; 
     Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink;
     std::vector<Handle> hPreconditionEvalutaionLinks;  
@@ -767,75 +766,19 @@ Handle PsiActionSelectionAgent::pickUpPsiRule(opencog::CogServer * server,
                         this->cycleCount 
                       ); 
 
-        // Get the Handles to Preconditions
-        if ( !PsiRuleUtil::splitPsiRule( atomSpace, 
-                                         hPsiRule, 
-                                         hGoalEvaluationLink, 
-                                         hActionExecutionLink,
-                                         hPreconditionAndLink
-                                       ) ) 
-            continue; 
+        if ( PsiRuleUtil::allPreconditionsSatisfied( atomSpace, 
+                                                     procedureInterpreter, 
+                                                     procedureRepository, 
+                                                     hPsiRule, 
+                                                     varBindCandidates, 
+                                                     randGen
+                                                   ) ) {
 
-        hPreconditionEvalutaionLinks = atomSpace.getOutgoing(hPreconditionAndLink);
+                    // Record the Psi Rule that all its Preconditions are satisfied
+                    hSelectedPsiRule = hPsiRule;  
 
-        // Initialize the variable bindings with all the entities the pet encounters 
-        PsiRuleUtil::initVarBindCandidates(atomSpace, varBindCandidates); 
-
-        logger().debug( "PsiActionSelectionAgent::%s Initialize the variable bindings ( size = %d ) with all the entities the pet encounters [ cycle = %d ]", 
-                        __FUNCTION__, 
-                        varBindCandidates.size(), 
-                        this->cycleCount 
-                      ); 
-
-        // Initialize the unifier used by combo interpreter
-        //
-        // Initially all the entities the pet encounters are considered as valid variable bindings. 
-        // Then the combo interpreter would update the states (valid/ invalid) of each binding.
-        combo::variable_unifier unifier; 
-        PsiRuleUtil::initUnifier(unifier, varBindCandidates);
-
-        logger().debug( "PsiActionSelectionAgent::%s Initialize the unifier ( size = %d ) [ cycle = %d ]", 
-                        __FUNCTION__, 
-                        unifier.size(), 
-                        this->cycleCount 
-                      ); 
-
-        // Check Preconditions one by one
-        foreach( Handle hPrecondition, hPreconditionEvalutaionLinks ) {
-            logger().debug( "PsiActionSelectionAgent::%s - Going to check the Precondition: %s [ cycle = %d ]", 
-                            __FUNCTION__, 
-                            atomSpace.atomAsString(hPrecondition).c_str(), 
-                            this->cycleCount
-                          );
-
-            if ( !PsiRuleUtil::isSatisfied( atomSpace,
-                                            procedureInterpreter,
-                                            procedureRepository, 
-                                            hPrecondition,
-                                            unifier,
-                                            randGen
-                                           ) ) {
-                bAllPreconditionsSatisfied = false;
-                break; 
-            }
-        }// foreach
-       
-        if (bAllPreconditionsSatisfied) {
-
-            // Record the Psi Rule that all its Preconditions are satisfied
-            hSelectedPsiRule = hPsiRule;  
-
-            // Get all the valid variable bindings based on the unifier 
-            // updated by the combo interpreter after running the combo procedure.
-            PsiRuleUtil::updateVarBindCandidates(unifier, varBindCandidates);  
-
-            logger().debug( "PsiActionSelectionAgent::%s Update the variable bindings [ cycle = %d ]", 
-                            __FUNCTION__, 
-                            this->cycleCount 
-                          ); 
-
-            break; 
-        }
+                    break; 
+        }// if 
 
     }// foreach 
 

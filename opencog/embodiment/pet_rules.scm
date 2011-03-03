@@ -659,7 +659,7 @@
 
     (add_rule (cog-new-stv 1.0 1.0) FamiliarWithRelation NULL_ACTION
         CuriousAboutRelation
-	(add_gpn_precondition "familiarWithPrecondition")
+        (add_gpn_precondition "familiarWithPrecondition")
     )
 )
 
@@ -671,7 +671,7 @@
     (ListLink EntityVar)	    
 
     (add_rule (cog-new-stv 1.0 1.0) KnowRelation NULL_ACTION
-	FamiliarWithRelation 
+        FamiliarWithRelation 
         (add_gpn_precondition "knowPrecondition")	      
     )
 )
@@ -692,7 +692,7 @@
     (ListLink EntityVar)	    
 
     (add_rule (cog-new-stv 1.0 1.0) FriendRelation NULL_ACTION
-	FamiliarWithRelation
+        FamiliarWithRelation
         (add_gpn_precondition "friendPrecondition")	      
     )
 )
@@ -703,7 +703,7 @@
     (ListLink EntityVar)	    
 
     (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
-	(add_gpn_precondition "angerForFoodThreatenPrecondition")      
+        (add_gpn_precondition "angerForFoodThreatenPrecondition")      
     )
 )
 

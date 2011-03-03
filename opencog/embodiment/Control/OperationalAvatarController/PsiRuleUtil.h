@@ -176,7 +176,7 @@ public:
     static void updateVarBindCandidates(const combo::variable_unifier & unifier, std::vector<std::string> & varBindCandidates);
 
     /**
-     * Check if the given Precondition is satisfied. It is used by 'PsiActionSelectionAgent::pickUpPsiRule' method.
+     * Check if the given Precondition is satisfied. 
      *
      * @param  atomSpace             The AtomSpace
      * @param  procedureInterpreter  It is responsible for executing a given procedure, such as combo procedure
@@ -199,6 +199,26 @@ public:
                             Handle hPrecondition, 
                             combo::variable_unifier & unifier, 
                             RandGen & randGen);
+
+    /**
+     * Check if all the Preconditions of a given Psi Rule are satisfied. 
+     * It is used by 'PsiActionSelectionAgent::pickUpPsiRule' method.
+     *
+     * @param  atomSpace             The AtomSpace
+     * @param  procedureInterpreter  It is responsible for executing a given procedure, such as combo procedure
+     * @param  procedureRepository   Where to search the procedure given its name
+     * @param  hPsiRule              Handle to the a Psi Rule, i.e. an ImplicationLink
+     * @param  varBindCandidates     All the possible variable bindings for the selected Psi Rule
+     * @param  randGen               Random number generator
+     *
+     * @return true if all the preconditions of the given Psi Rule are satisfied, otherwise return false                              
+     */
+    static bool allPreconditionsSatisfied(const AtomSpace & atomSpace, 
+                                          Procedure::ProcedureInterpreter & procedureInterpreter, 
+                                          const Procedure::ProcedureRepository & procedureRepository, 
+                                          Handle hPsiRule, 
+                                          std::vector<std::string> & varBindCandidates, 
+                                          RandGen & randGen);
 
     /**
      * Apply the given Psi Rule. 

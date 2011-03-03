@@ -409,6 +409,83 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
     }// if
 }
 
+bool PsiRuleUtil::allPreconditionsSatisfied(const AtomSpace & atomSpace, 
+                                            Procedure::ProcedureInterpreter & procedureInterpreter, 
+                                            const Procedure::ProcedureRepository & procedureRepository, 
+                                            Handle hPsiRule, 
+                                            std::vector<std::string> & varBindCandidates, 
+                                            RandGen & randGen) 
+{
+    Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink;
+    std::vector<Handle> hPreconditionEvalutaionLinks;  
+
+    // get the handles to preconditions
+    if ( !PsiRuleUtil::splitPsiRule( atomSpace, 
+                                     hPsiRule, 
+                                     hGoalEvaluationLink, 
+                                     hActionExecutionLink,
+                                     hPreconditionAndLink
+                                   ) ) 
+        return false; 
+
+    hPreconditionEvalutaionLinks = atomSpace.getOutgoing(hPreconditionAndLink);
+
+    // Initialize the variable bindings with all the entities the pet encounters 
+    PsiRuleUtil::initVarBindCandidates(atomSpace, varBindCandidates); 
+
+    logger().debug( "PsiRuleUtil::%s Initialize the variable bindings ( size = %d ) with all the entities that the pet encounters.", 
+                    __FUNCTION__, 
+                    varBindCandidates.size()
+                  ); 
+
+    // Initialize the unifier used by combo interpreter
+    //
+    // Initially all the entities the pet encounters are considered as valid variable bindings. 
+    // Then the combo interpreter would update the states (valid/ invalid) of each binding.
+    combo::variable_unifier unifier; 
+    PsiRuleUtil::initUnifier(unifier, varBindCandidates);
+
+    logger().debug( "PsiRuleUtil::%s Initialize the unifier ( size = %d )", 
+                    __FUNCTION__, 
+                    unifier.size()
+                  ); 
+
+    // Check all the  Preconditions one by one
+    bool bAllPreconditionsSatisfied = true;
+
+    foreach( Handle hPrecondition, hPreconditionEvalutaionLinks ) {
+        logger().debug( "PsiRuleUtil::%s - Going to check the Precondition: %s", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(hPrecondition).c_str()
+                      );
+
+        if ( !PsiRuleUtil::isSatisfied( atomSpace,
+                                        procedureInterpreter,
+                                        procedureRepository, 
+                                        hPrecondition,
+                                        unifier,
+                                        randGen
+                                       ) ) {
+            bAllPreconditionsSatisfied = false;
+            break; 
+        }
+    }// foreach
+   
+    if (bAllPreconditionsSatisfied) {
+
+        // Get all the valid variable bindings based on the unifier 
+        // updated by the combo interpreter after running the combo procedure.
+        PsiRuleUtil::updateVarBindCandidates(unifier, varBindCandidates);  
+
+        logger().debug( "PsiRuleUtil::%s Update the variable bindings", 
+                        __FUNCTION__
+                      ); 
+
+    }
+
+    return bAllPreconditionsSatisfied; 
+}
+
 Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSpace, 
                                                         Procedure::ProcedureInterpreter & procedureInterpreter, 
                                                         const Procedure::ProcedureRepository & procedureRepository, 
@@ -423,11 +500,11 @@ Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSp
     Handle evaluationLinkGoal, executionLinkAction, andLinkPrecondition;
 
     if ( !PsiRuleUtil::splitPsiRule( atomSpace, 
-                                       hPsiRule, 
-                                       evaluationLinkGoal, 
-                                       executionLinkAction, 
-                                       andLinkPrecondition
-                                     ) 
+                                     hPsiRule, 
+                                     evaluationLinkGoal, 
+                                     executionLinkAction, 
+                                     andLinkPrecondition
+                                   ) 
        ) 
         return errorExecutingSchemaId; 
 

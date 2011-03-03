@@ -1,11 +1,14 @@
 /*
- * TODO: Once PLN is ready and can process GroundedPredicateNode automatically, we should then use 
- *       'PsiRelationUpdaterByPLNAgent.h|cc' instead. Of course, some modification are needed :-)
+ * TODO: These 'PsiRelationUpdaterByPLNAgent.h|cc' are not compiled and used currently, because 
+ *       PLN could not handle GroundedPredicateNode directly when I wrote them. 
  *
- * @file opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.h
+ *       Once PLN is ready and can process GroundedPredicateNode automatically, we should then use 
+ *       'PsiRelationUpdaterByPLNAgent.h|cc'. Of course, some modification are needed :-)
+ *
+ * @file opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterByPLNAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-03
+ * @date 2011-02-23
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,8 +26,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PSIRELATIONUPDATERAGENT_H
-#define PSIRELATIONUPDATERAGENT_H
+#ifndef PSIRELATIONUPDATERBYPLNAGENT_H
+#define PSIRELATIONUPDATERBYPLNAGENT_H
 
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -53,13 +56,34 @@ private:
 
     bool bInitialized;  // Indicate whether the Agent has been Initialized
 
-    std::vector<Handle> instantRelationRules; // Psi Rules (ImplicatonLinks) about Relations, 
-                                              // 'instant' here means they have NULL_ACTION   
+    std::vector<std::string> entityList;  // The names of entities within SpaceMap
+    std::vector<std::string> relationList; // The names of relations
+
+    int totalRemainSteps;   // Total steps (inference resource) remain for all the (entity, relation) pair
+    int singleEntityRelationMaxSteps; // Maximum Steps (inference resource) for
+                                      // a single (entity, relation) pair
+
+    Btr<BITNodeRoot> Bstate;  // Root node of back inference tree, used by PLN backward chainer
 
     /**
-     * Initialize instantRelationRules etc.
+     * Initialize entity, relation lists etc.
      */
     void init(opencog::CogServer * server);
+
+    /**
+     * Set inference steps (totalRemainSteps and singleEntityRelationMaxSteps)
+     */
+    void allocInferSteps();
+
+    /**
+     * Update the truth value of EvaluationLink holding the relation between the entity and the pet via PLN
+     *
+     * @param  server
+     * @param  relationEvaluationLink  EvaluationLink holding the relation between the entity and the pet
+     * @param  steps  Inference resource
+     *
+     */
+    void updateEntityRelation(opencog::CogServer * server, Handle relationEvaluationLink, int & steps); 
 
     /**
      * Get the EvaluationLink holding the relation between the pet and the entity.
