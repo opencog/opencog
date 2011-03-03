@@ -22,6 +22,7 @@
 
 #include "OAC.h"
 #include "PsiRelationUpdaterAgent.h"
+#include "PsiRuleUtil.h"
 
 #include<boost/tokenizer.hpp>
 
@@ -400,7 +401,7 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
         totalRemainSteps --; 	    
        
         // Randomly select an entity
-	iEntity = this->entityList.begin() + randGen.randint( this->entityList.size() ); 
+        iEntity = this->entityList.begin() + randGen.randint( this->entityList.size() ); 
 
         // If the entity is the pet itself, skip it
         if ( *iEntity == petId ) 
@@ -412,11 +413,11 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
         if ( entityHandle == opencog::Handle::UNDEFINED )
             continue; 
 
-	// Randomly select a relation
+        // Randomly select a relation
         iRelation = this->relationList.begin() + randGen.randint( this->relationList.size() );	
 
         // Get the Handle to the EvaluationLink holding the relation between the entity and the pet
-	// If it doesn't exist, the function below would create one and return it. 
+        // If it doesn't exist, the function below would create one and return it. 
         Handle relationEvaluationLink = this->getRelationEvaluationLink( server,
                                                                          *iRelation,
 								         petHandle, 

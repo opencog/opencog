@@ -25,7 +25,6 @@
 
 #include "OAC.h"
 #include "PsiActionSelectionAgent.h"
-
 #include "PsiRuleUtil.h"
 
 #include <boost/tokenizer.hpp>
