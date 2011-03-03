@@ -114,7 +114,7 @@ exec mkdir -p $distDir
 exec mkdir -p $distDir/data
 
 foreach file $flist {
-    exec cp -r $file $distDir
+    exec cp -rf $file $distDir
 }
 
 foreach file $flistconfig {
