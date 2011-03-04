@@ -260,7 +260,7 @@ struct field_set {
         return _fields.size();
     }
     // dimension size, number of actual knobs to consider, as onto and
-    // contin may take severak raw knobs
+    // contin may take several raw knobs
     size_t dim_size() const {
         return n_bits() + n_disc() + contin().size() + onto().size();
     }
