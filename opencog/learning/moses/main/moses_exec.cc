@@ -22,8 +22,9 @@
 #include "moses_exec.h"
 
 #include <opencog/util/numeric.h>
+#include <opencog/util/log_prog_name.h>
 
-const unsigned int max_filename_size = 255;
+static const unsigned int max_filename_size = 255;
 
 /**
  * Display error message about unspecified combo tree and exit
@@ -387,24 +388,10 @@ int moses_exec(int argc, char** argv) {
 
     // set log
     if(log_file_dep_opt) {
-        // determine the name of the log depending on the program options
-        log_file = default_log_file_prefix;
-        for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++)
-            // we ignore the option log_file_dep_opt and any default one
-            if(it->first != log_file_dep_opt_opt.first && !it->second.defaulted()) {
-                string str = string("_") + it->first + "_" + to_string(it->second);
-                // this is because OSs usually do not handle file name
-                // above 255 chars
-                unsigned int expected_max_size =
-                    log_file.size()+str.size()+default_log_file_suffix.size()+1;
-                if(expected_max_size < max_filename_size) {
-                    log_file += str;
-                }
-            }
-        log_file += string(".") + default_log_file_suffix;
-        // replace / by d because unix file name cannot have / in it
-        replace(log_file.begin(), log_file.end(), '/', 'd');
-        OC_ASSERT(log_file.size() <= max_filename_size);
+        std::set<std::string> ignore_opt = list_of(log_file_dep_opt_opt.first);
+        log_file = determine_log_name(default_log_file_prefix,
+                                      vm, ignore_opt,
+                                      std::string(".").append(default_log_file_suffix));
     }
     // remove log_file
     remove(log_file.c_str());

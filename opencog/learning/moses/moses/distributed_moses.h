@@ -34,6 +34,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <opencog/util/iostreamContainer.h>
+#include <opencog/util/log_prog_name.h>
 
 #include "../main/moses_exec_def.h"
 #include "metapopulation.h"
