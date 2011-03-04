@@ -80,4 +80,19 @@ public:
                                    "0.4,244.2,10.1\n"
                                    "9.5,4.2,6.5\n", it, ot);
     }
+    void test_ostreamTrueTable() {
+        truth_table_inputs it;
+        it.push_back(list_of(true)(false));
+        it.push_back(list_of(false)(true));
+        vector<string> lbs = list_of("truc")("trac");
+        it.set_labels(lbs);
+        bool_vector o = list_of(true)(false);
+        // ignore second argument trac
+        it.set_ignore_args_from_zero(list_of(1));
+        partial_truth_table ot(o);
+        ot.set_label("troc");
+        stringstream ss;
+        ostreamTable(ss, it, ot);
+        TS_ASSERT_EQUALS(ss.str(), "truc,troc\n1,1\n0,0\n");
+    }
 };

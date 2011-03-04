@@ -64,7 +64,8 @@ using namespace opencog;
 template<typename T>
 class input_table {
 public:
-    typedef std::vector<std::vector<T> > MT;
+    typedef std::vector<T> VT;
+    typedef std::vector<VT> MT;
 
     input_table() {}
 
@@ -93,12 +94,18 @@ public:
     // set the inputs to ignore, if all are ignored an assert is
     // raised. That method resets arguments.
     void set_ignore_args(const vertex_set& ignore_args) {
+        std::set<arity_t> ii;
+        foreach(const vertex& ia, ignore_args)
+            if(is_argument(ia))
+                ii.insert(get_argument(ia).abs_idx_from_zero());
+        set_ignore_args_from_zero(ii);
+    }
+    // like above but takes a set of indices instead of vertex
+    void set_ignore_args_from_zero(const std::set<arity_t>& ignore_idxs) {
         considered_args.clear();
-        for(arity_t idx = 0; idx < get_arity(); idx++) {
-            arity_t arg = argument::idx_from_zero_to_idx(idx);
-            if(ignore_args.find(argument(arg)) == ignore_args.end())
+        for(arity_t idx = 0; idx < get_arity(); idx++)
+            if(ignore_idxs.find(idx) == ignore_idxs.end())
                 considered_args.insert(idx);
-        }
         OC_ASSERT(!considered_args.empty(), "You cannot ignore all arguments");
     }
     // set the inputs to consider. That method resets arguments.
@@ -130,7 +137,7 @@ public:
 
     // returns the set of column indices corresponding to the
     // considered arguments
-    std::set<arity_t> get_considered_args_from_zero() {
+    const std::set<arity_t>& get_considered_args_from_zero() const {
         return considered_args;
     }
 
@@ -143,6 +150,8 @@ public:
     const MT& get_matrix() const {return matrix;}
     std::vector<std::string>& get_labels() { return labels; }
     const std::vector<std::string>& get_labels() const { return labels; }
+    VT& operator[](size_t i) { return get_matrix()[i]; }
+    const VT& operator[](size_t i) const { return get_matrix()[i]; }
     iterator begin() {return matrix.begin();}
     iterator end() {return matrix.end();}
     const_iterator begin() const {return matrix.begin();}
@@ -781,6 +790,31 @@ void istreamTable(const std::string& file_name,
     std::ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
     istreamTable<IT, OT, T>(in, table_inputs, output_table);
+}
+
+//////////////////
+// ostreamTable //
+//////////////////
+
+// output a data table in CSV format, not that ignored arguments are
+// not printed
+template<typename Out, typename IT, typename OT>
+Out& ostreamTable(Out& out, const IT& it, const OT& ot) {
+    OC_ASSERT(it.size() == ot.size());
+    const std::set<arity_t>& ca = it.get_considered_args_from_zero();
+    // print labels
+    if(!it.get_labels().empty() && !ot.get_label().empty()) {
+        foreach(size_t col, ca)
+            out << it.get_labels()[col] << ",";
+        out << ot.get_label() << std::endl;
+    }
+    // print data
+    for(size_t row = 0; row < it.size(); row++) {
+        foreach(size_t col, ca)
+            out << it[row][col] << ",";
+        out << ot[row] << std::endl;
+    }
+    return out;
 }
 
 /**
