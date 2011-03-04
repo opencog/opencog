@@ -26,7 +26,7 @@
 
 #include <opencog/comboreduct/combo/table.h>
 
-#include <opencog/learning/feature-selection/feature_selection.h>
+#include <opencog/learning/feature-selection/feature_optimization.h>
 #include <opencog/learning/feature-selection/feature_scorer.h>
 
 #define FEATURE_SELECTION_TEST_DIR PROJECT_SOURCE_DIR"/tests/learning/feature-selection/"

@@ -1,4 +1,4 @@
-/** feature_selection.h --- 
+/** feature_optimization.h --- 
  *
  * Copyright (C) 2010 Nil Geisweiller
  *
@@ -21,8 +21,8 @@
  */
 
 
-#ifndef _OPENCOG_FEATURE_SELECTION_H
-#define _OPENCOG_FEATURE_SELECTION_H
+#ifndef _OPENCOG_FEATURE_SELECTION_ALGO_H
+#define _OPENCOG_FEATURE_SELECTION_ALGO_H
 
 #include <functional>
 
@@ -188,4 +188,4 @@ FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
 
 } // ~namespace opencog
 
-#endif // _OPENCOG_FEATURE_SELECTION_H
+#endif // _OPENCOG_FEATURE_SELECTION_ALGO_H

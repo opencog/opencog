@@ -44,7 +44,7 @@
 // for operator>> to combo 
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h> 
 
-#include <opencog/learning/feature-selection/feature_selection.h>
+#include <opencog/learning/feature-selection/feature_optimization.h>
 #include <opencog/learning/feature-selection/feature_scorer.h>
 
 #include "../moses/moses.h"
