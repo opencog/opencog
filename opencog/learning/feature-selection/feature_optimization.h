@@ -186,6 +186,8 @@ FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
     return res;
 }
 
+
+
 } // ~namespace opencog
 
 #endif // _OPENCOG_FEATURE_SELECTION_ALGO_H

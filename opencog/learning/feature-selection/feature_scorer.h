@@ -106,6 +106,7 @@ protected:
 };
 
 
+
 } // ~namespace opencog
 
 #endif // _OPENCOG_FEATURE_SCORER_H

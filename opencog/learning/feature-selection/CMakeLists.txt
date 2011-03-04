@@ -7,3 +7,4 @@
 # TARGET_LINK_LIBRARIES(feature_selection
 # 	util
 # )
+ADD_SUBDIRECTORY(main)
