@@ -798,8 +798,8 @@ void istreamTable(const std::string& file_name,
 
 // output a data table in CSV format, not that ignored arguments are
 // not printed
-template<typename Out, typename IT, typename OT>
-Out& ostreamTable(Out& out, const IT& it, const OT& ot) {
+template<typename IT, typename OT>
+std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
     OC_ASSERT(it.size() == ot.size());
     const std::set<arity_t>& ca = it.get_considered_args_from_zero();
     // print labels
@@ -815,6 +815,14 @@ Out& ostreamTable(Out& out, const IT& it, const OT& ot) {
         out << ot[row] << std::endl;
     }
     return out;
+}
+// like above but takes the file name where to write the table
+template<typename IT, typename OT>
+void ostreamTable(const std::string& file_name, const IT& it, const OT& ot) {
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    std::ofstream out(file_name.c_str());
+    OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
+    ostreamTable(out, it, ot);
 }
 
 /**
