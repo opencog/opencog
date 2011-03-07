@@ -253,11 +253,11 @@ struct iterative_hillclimbing {
         unsigned int pop_size = opt_params.pop_size(fields);
         unsigned int max_gens_total = opt_params.max_gens_total(fields);
 
-        long long current_number_of_instances = 0;
+        unsigned long long current_number_of_instances = 0;
 
         //adjust parameters based on the maximal # of evaluations allowed
-        long long max_number_of_instances =
-            (long long)max_gens_total * (long long)pop_size;
+        unsigned long long max_number_of_instances =
+            (unsigned long long)max_gens_total * (unsigned long long)pop_size;
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
@@ -269,7 +269,7 @@ struct iterative_hillclimbing {
         eda::instance center_inst(init_inst);
         eda::scored_instance<composite_score> scored_center_inst = 
             eda::score_instance(center_inst, score);
-        score_t best_score = score(scored_center_inst).first;
+        composite_score best_score = score(scored_center_inst);
 
         unsigned int distance = 1;
         bool has_improved; // whether the score has improved
@@ -279,8 +279,8 @@ struct iterative_hillclimbing {
         // Logger
         {
             std::stringstream ss;
-            ss << "Initial center instance: [score=" << best_score << "] "
-               << fields.stream(center_inst);
+            ss << "Initial center instance: " << fields.stream(center_inst)
+               << best_score;
             logger().debug(ss.str());
         }
         // ~Logger
@@ -294,7 +294,7 @@ struct iterative_hillclimbing {
             }
             // ~Logger
 
-            long long number_of_new_instances;
+            unsigned long long number_of_new_instances;
 
             number_of_new_instances = 
                 (max_number_of_instances - current_number_of_instances)
@@ -307,7 +307,7 @@ struct iterative_hillclimbing {
 
             // the number of all neighbours at the distance d (stops
             // counting when above number_of_new_instances)
-            long long total_number_of_neighbours =
+            unsigned long long total_number_of_neighbours =
                 count_n_changed_knobs(deme.fields(), center_inst, distance,
                                       number_of_new_instances);
 
@@ -344,8 +344,8 @@ struct iterative_hillclimbing {
             // the exemplar
             for (unsigned int i = current_number_of_instances;
                  deme.begin() + i != deme.end(); i++) {
-                score_t inst_score = get_score(deme[i].second);
-                if (inst_score > best_score) {
+                composite_score inst_score = deme[i].second;
+                if (get_score(inst_score) > get_score(best_score)) {
                     best_score = inst_score;
                     center_inst = deme[i].first;
                     has_improved = true;
@@ -370,7 +370,7 @@ struct iterative_hillclimbing {
         } while ((!hc_params.terminate_if_improvement || !has_improved) &&
                  distance <= max_distance &&
                  current_number_of_instances < max_number_of_instances &&
-                 best_score < opt_params.terminate_if_gte);
+                 get_score(best_score) < opt_params.terminate_if_gte);
         
         return current_number_of_instances;
     }
@@ -473,7 +473,7 @@ struct sliced_iterative_hillclimbing {
             cout << "Distance in this iteration:" << distance << endl;
 
             // the number of all neighbours at the distance d
-            long long total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
+            unsigned long long total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
             cout << "Number of possible instances:" << total_number_of_neighbours << endl;
 
             if (total_number_of_neighbours == 0) {
@@ -565,7 +565,7 @@ struct sliced_iterative_hillclimbing {
     }
 
     unsigned int distance;
-    long long number_of_new_instances;
+    unsigned long long number_of_new_instances;
     unsigned int number_of_fields;
     eda::instance exemplar;
     int max_number_of_instances;
@@ -669,7 +669,7 @@ struct simulated_annealing {
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
-        long long current_number_of_instances = 0;
+        unsigned long long current_number_of_instances = 0;
 
         unsigned int step = 1;
 
@@ -685,7 +685,7 @@ struct simulated_annealing {
                                        * (double)dist_temp(current_temp)));
 
             // score all new instances in the deme
-            long long number_of_new_instances = 1; //@todo: possibly change that
+            unsigned long long number_of_new_instances = 1; //@todo: possibly change that
 
             // sample one neighbour (for now) of the center_instance
             // from distance.

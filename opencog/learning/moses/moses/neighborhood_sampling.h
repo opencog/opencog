@@ -425,17 +425,17 @@ Out vary_n_knobs(const eda::field_set& fs,
  * @param max_count       stop counting when above this value, that is
  *                        because this function can be computationally expensive.
  */
-inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
-                                                  const eda::instance& inst,
-                                                  unsigned int n,
-                                                  unsigned int starting_index,
-                                                  long long max_count
-                                                  = numeric_limits<long long>::max())
+inline unsigned long long count_n_changed_knobs_from_index(const eda::field_set& fs,
+                                                           const eda::instance& inst,
+                                                           unsigned int n,
+                                                           unsigned int starting_index,
+                                                           unsigned long long max_count
+                                                           = numeric_limits<unsigned long long>::max())
 {
     if(n == 0)
         return 1;
 
-    long long number_of_instances = 0;
+    unsigned long long number_of_instances = 0;
 
     unsigned int begin_contin_idx = fs.n_onto();
     unsigned int begin_disc_idx = begin_contin_idx + fs.n_contin();
@@ -509,8 +509,14 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
         // since bits have the same arity (2) and are the last there
         // is no need for recursive call
         unsigned int rb = end_bit_idx - starting_index;
-        if(n <= rb)
-            number_of_instances = (long long)binomial_coefficient<double>(rb , n);
+        if(n <= rb) {
+            double noi_double = binomial_coefficient<double>(rb , n);
+            // the following is in case the actual number of instances
+            // is greater than what can be represented by an unsigned
+            // long long
+            double noi_max = numeric_limits<unsigned long long>::max();
+            number_of_instances = std::min(noi_max, noi_double);
+        }
     }
     return number_of_instances;
 }
@@ -526,19 +532,19 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
  * @param max_count       stop counting when above this value, that is
  *                        because this function can be computationally expensive.
  */
-inline long long count_n_changed_knobs(const eda::field_set& fs,
-                                       const eda::instance& inst,
-                                       unsigned int n,
-                                       long long max_count 
-                                       = numeric_limits<long long>::max())
+inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
+                                                const eda::instance& inst,
+                                                unsigned int n,
+                                                unsigned long long max_count 
+                                                = numeric_limits<unsigned long long>::max())
 {
     return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
 }
 // for backward compatibility, like above but with null instance
-inline long long count_n_changed_knobs(const eda::field_set& fs,
-                                       unsigned int n,
-                                       long long max_count
-                                       = numeric_limits<long long>::max())
+inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
+                                                unsigned int n,
+                                                unsigned long long max_count
+                                                = numeric_limits<unsigned long long>::max())
 {
     eda::instance inst(fs.packed_width());
     return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
