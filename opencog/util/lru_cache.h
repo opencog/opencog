@@ -54,7 +54,7 @@ struct lru_cache {
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
-    lru_cache(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f),_failures(0),_hits(0) {}
+    lru_cache(size_type n,const F& f=F()) : _n(n), _map(n+1), _f(f) {}
 
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
@@ -111,9 +111,6 @@ struct lru_cache {
         //return the result
         return it->second;
     }
-    
-    unsigned get_failures() const { return _failures; }
-    unsigned get_hits() const { return _hits; }
 
     void clear() {
         _map.clear();
@@ -141,7 +138,67 @@ protected:
         }
     }
 };
- 
+
+// Pseudo Random Replacement Cache, very fast but very dumb, it just
+// removes the first element of the hash table when the cache is full.
+template<typename F,
+         typename Hash=boost::hash<typename F::argument_type>,
+         typename Equals=std::equal_to<typename F::argument_type> >
+struct prr_cache {
+    typedef typename F::argument_type argument_type;
+    typedef typename F::result_type result_type;
+    typedef boost::unordered_map<argument_type, result_type, Hash, Equals> map;
+    typedef typename map::iterator map_iter;
+    typedef typename map::size_type size_type;
+  
+    prr_cache(size_type n, const F& f=F()) 
+        : _n(n), _map(n+1), _f(f), _failures(0) {}
+
+    bool full() const { return _map.size()==_n; }
+    bool empty() const { return _map.empty(); }
+
+    result_type operator()(const argument_type& x) const
+    {
+        // search for x
+        map_iter it=_map.find(x);
+
+        if(it != _map.end()) {// if we've found return 
+            _hits++;
+            return it->second;
+        }
+        else { // otherwise evaluate, insert in _map then return
+            result_type res = call_f(x);
+            if(full()) { // if the cache is full randomly remove an element
+                _map.erase(_map.begin());
+            }
+            _map.insert(make_pair(x, res)).first;
+            return res;
+        }
+    }
+    
+    void clear() {
+        _map.clear();
+    }
+    
+    unsigned get_failures() const { return _failures; }
+    unsigned get_hits() const { return _hits; }
+
+protected:
+    size_type _n;
+    mutable map _map;
+    F _f;
+    mutable unsigned _failures;
+    mutable unsigned _hits; // number of cache hits
+
+    inline result_type call_f(const argument_type& x) const {
+        _failures++;
+        return _f(x);
+    }
+
+};
+  
+/// @todo this stuff sucks an should be removed. It is kept before
+/// some code in embodiment uses it
 // like above but hacked to handle a function that changes, it is
 // embodiment, but all this is ugly and should be replaced by an
 // elegent use of lru_cache
@@ -204,62 +261,6 @@ protected:
     mutable list _lru;
 };
 
-
-
-// Pseudo Random Replacement Cache, very fast but very dumb, it just
-// removes the first element of the hash table when the cache is full.
-template<typename F,
-         typename Hash=boost::hash<typename F::argument_type>,
-         typename Equals=std::equal_to<typename F::argument_type> >
-struct prr_cache {
-    typedef typename F::argument_type argument_type;
-    typedef typename F::result_type result_type;
-    typedef boost::unordered_map<argument_type, result_type, Hash, Equals> map;
-    typedef typename map::iterator map_iter;
-    typedef typename map::size_type size_type;
-  
-    prr_cache(size_type n, const F& f=F()) 
-        : _n(n), _map(n+1), _f(f), _failures(0) {}
-
-    bool full() const { return _map.size()==_n; }
-    bool empty() const { return _map.empty(); }
-
-    result_type operator()(const argument_type& x) const
-    {
-        // search for x
-        map_iter it=_map.find(x);
-
-        if(it != _map.end()) // if we've found return
-            return it->second;
-        else { // otherwise evaluate, insert in _map then return
-            result_type res = call_f(x);
-            if(full()) { // if the cache is full randomly remove an element
-                _map.erase(_map.begin());
-            }
-            _map.insert(make_pair(x, res)).first;
-            return res;
-        }
-    }
-    
-    void clear() {
-        _map.clear();
-    }
-    
-    unsigned get_failures() const { return _failures; }
-
-protected:
-    size_type _n;
-    mutable map _map;
-    F _f;
-    mutable unsigned _failures;
-
-    inline result_type call_f(const argument_type& x) const {
-        _failures++;
-        return _f(x);
-    }
-
-};
-  
 } //~namespace opencog
 
 #endif
