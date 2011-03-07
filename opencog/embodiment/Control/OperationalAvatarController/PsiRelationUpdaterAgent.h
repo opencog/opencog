@@ -5,7 +5,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-03
+ * @date 2011-03-07
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -49,12 +49,76 @@ class PsiRelationUpdaterAgent : public opencog::Agent
 {
 private:
 
+    /**
+     * @class Novelty
+     *
+     * @brief Inner class that stores the information of an entity's novelty
+     */
+    class Novelty
+    {
+    public:
+
+        Novelty(float initLevel) : noveltyLevel(initLevel), resetTime(time(NULL)) {
+        }
+
+        inline float getNoveltyLevel() const {
+            return this->noveltyLevel;
+        }
+
+        /**
+         * Check if the entity is novel
+         *
+         * @param noveltyThreshold
+         */
+        inline bool isNovel(float noveltyThreshold) const {
+            return (this->noveltyLevel >= noveltyThreshold);
+        }
+
+        /**
+         * Check if the novelty level can be reset to initial value
+         *
+         * @param resetThreshold 
+         */
+        inline bool canBeReset (float resetThreshold) const {
+            return (this->noveltyLevel <= resetThreshold);
+        }
+
+        inline void resetNoveltyLevel(float initLevel) {
+            this->noveltyLevel = initLevel; 
+            this->resetTime = time(NULL);
+        }
+
+        /**
+         * Update the novelty level of the entity
+         *
+         * @param initLevel    Initial novelty level
+         * @param decayFactor  The larger, the novelty level decrease more quickly by time
+         */
+        inline void updateNoveltyLevel(float initLevel, float decayFactor) {
+            long timeElapse = time(NULL) - this->resetTime;
+            this->noveltyLevel = initLevel*exp(-decayFactor*timeElapse);
+        }
+
+    private:
+        float noveltyLevel;  
+        long resetTime;      // When the novelty level is reset to initial level
+
+    }; // class Novelty
+
     unsigned long cycleCount;
 
     bool bInitialized;  // Indicate whether the Agent has been Initialized
 
     std::vector<Handle> instantRelationRules; // Psi Rules (ImplicatonLinks) about Relations, 
                                               // 'instant' here means they have NULL_ACTION   
+
+    std::map<std::string, Novelty> entityNovelty; // Contains (entityId, novelty level) pairs
+
+    float noveltyInitLevel;      // Initial value of novelty level
+    float noveltyThreshold;      // Entity with novelty level greater than the threshold is novel
+    float noveltyResetThreshold; // Entity with novelty level less than the threshold should be 
+                                 // reset or removed
+    float noveltyDecayFactor;    // Larger the value, the novelty level decays more quickly
 
     /**
      * Initialize instantRelationRules etc.
@@ -72,7 +136,7 @@ private:
      *             petHandle
      *             entityHandle
      */
-    Handle getRelationEvaluationLink(opencog::CogServer * server, 
+    Handle getRelationEvaluationLink(AtomSpace & atomSpace, 
                                      const std::string & relationName, 
                                      Handle petHandle, 
                                      Handle entityHandle
@@ -80,7 +144,27 @@ private:
     /**
      * Get the Handle to entity given its id
      */
-    Handle getEntityHandle(opencog::CogServer * server, const std::string & entityName);
+    Handle getEntityHandle(const AtomSpace & atomSpace, const std::string & entityName);
+
+    /**
+     * Update novel levels of all the entities.  
+     *
+     * @param server
+     *
+     * @note Each entity associates with a novelty level decreasing by time
+     *       If the novelty level is higher than PSI_NOVELTY_THRESHOLD, 
+     *       the entity would be considered as novel.
+     *       If the novelty level is below or equals to PSI_NOVELTY_RESET_THRESHOLD, 
+     *       it would be reset to PSI_NOVELTY_INIT_VALUE next time
+     *       the pet encounters the corresponding entity. 
+     */
+    void updateEntityNovelty(opencog::CogServer * server);
+
+    void updateEntityRelation(AtomSpace & atomSpace, 
+                              Handle petHandle, 
+                              Procedure::ProcedureInterpreter & procedureInterpreter, 
+                              const Procedure::ProcedureRepository & procedureRepository, 
+                              RandGen & randGen);
 
 public:
 

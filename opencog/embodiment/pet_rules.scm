@@ -259,7 +259,7 @@
 )
 
 (define EnemyRelation
-    (add_goal "enemey" "'self'" EntityVar)
+    (add_goal "enemy" "'self'" EntityVar)
 )
 
 (define GratitudeRelation
