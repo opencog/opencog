@@ -62,7 +62,9 @@ namespace eda {
         //compute scores of the initial instance set
         logger().debug("Evaluate the initial population (%u individuals)",
                        current.size());
-        transform(current.begin(),current.end(),current.begin_scores(),score);
+        transform(current.begin(),current.end(),current.begin_scores(),
+                  // using bind and cref to be passed by ref instead of copy
+                  boost::bind(boost::cref(score), _1));
         
         //main loop
         int gen=0;

@@ -244,7 +244,6 @@ struct iterative_hillclimbing {
     unsigned int operator()(eda::instance_set<composite_score>& deme,
                             const eda::instance& init_inst,
                             const Scoring& score, unsigned int max_evals) {
-
         // Logger
         logger(). debug("Iterative HillClimbing Optimization");
         // ~Logger
@@ -338,8 +337,10 @@ struct iterative_hillclimbing {
             
             // score all new instances in the deme
             transform(deme.begin() + current_number_of_instances, deme.end(),
-                      deme.begin_scores() + current_number_of_instances, score);
-
+                      deme.begin_scores() + current_number_of_instances, 
+                      // using bind cref so that score is passed by
+                      // ref instead of by copy
+                      boost::bind(boost::cref(score), _1)); 
             // check if there is an instance in the deme better than
             // the exemplar
             for (unsigned int i = current_number_of_instances;
@@ -359,7 +360,7 @@ struct iterative_hillclimbing {
                 {
                     std::stringstream ss;
                     ss << "New center instance: " << fields.stream(center_inst)
-                       << best_score;
+                       << " " << best_score;
                     logger().debug(ss.str());
                 }
                 // ~Logger
@@ -429,7 +430,8 @@ struct sliced_iterative_hillclimbing {
             number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
             exemplar = eda::instance(deme.fields().packed_width());
 
-            // set to 0 all fields (contin and onto fields are ignored) to represent the exemplar
+            // set to 0 all fields (contin and onto fields are
+            // ignored) to represent the exemplar
             for (eda::field_set::bit_iterator it = deme.fields().begin_bits(exemplar);
                     it != deme.fields().end_bits(exemplar); ++it)
                 *it = false;
@@ -701,7 +703,7 @@ struct simulated_annealing {
             // score all new instances in the deme (1 for now)
             transform(deme.begin() + current_number_of_instances, deme.end(),
                       deme.begin_scores() + current_number_of_instances,
-                      score);
+                      boost::bind(boost::cref(score), _1));
                       
             eda::scored_instance<composite_score>& current_scored_instance =
                 deme[current_number_of_instances];
