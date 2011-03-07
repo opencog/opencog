@@ -59,8 +59,8 @@ struct lru_cache {
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
 
-    //! Remove x from cache because entry invalid
-    void make_dirty(const argument_type& x) {
+    //! Remove (aka make dirty) x from cache because entry invalid
+    void remove(const argument_type& x) {
         _lru.push_front(x); // temporary so we can get an iterator for searching map
         map_iter it=_map.find(_lru.begin());
         if (it != _map.end()) {

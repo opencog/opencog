@@ -230,7 +230,7 @@ void reviseVersionedTVs(AtomSpaceWrapper *asw, Handle h) {
     asw->atomspace->setTV(h, revisedTV);
     // flush getTV cache
     foreach (pHandle p, realToFakeHandles(h)) 
-        asw->getTVCached->make_dirty(p);
+        asw->getTVCached->remove(p);
 #endif
 }
 

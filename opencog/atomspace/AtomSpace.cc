@@ -115,7 +115,7 @@ AtomSpace::~AtomSpace()
 bool AtomSpace::handleRemoveSignal(AtomSpaceImpl *as, Handle h)
 {
     boost::mutex::scoped_lock(cache_lock);
-    getTypeCached->make_dirty(h);
+    getTypeCached->remove(h);
     return false;
 }
 #endif
