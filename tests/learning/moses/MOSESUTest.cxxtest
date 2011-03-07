@@ -36,7 +36,8 @@ class MOSESUTest : public CxxTest::TestSuite {
     void moses_test(vector<string> arguments) {
         // build arguments
         char tempfile[] = "/tmp/MOSESUTestXXXXXX";
-        mkstemp(tempfile);
+        int tmp = mkstemp(tempfile);
+        std::cout << tmp << std::endl;
         arguments.insert(arguments.begin(), "moses-exec");
         arguments.push_back(string("-o").append(tempfile).c_str());
         // run moses
