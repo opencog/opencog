@@ -100,7 +100,7 @@ public:
         TS_ASSERT_EQUALS(cache.get_hits(), 1502);
         
         // Ensure that after throwing the exception the cache doesn't
-        // get altered (which would throw an exception)
+        // get inconsistent (which would throw an exception)
         TS_ASSERT_THROWS_NOTHING(cache(500));        
     }
 
