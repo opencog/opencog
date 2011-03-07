@@ -23,6 +23,7 @@
  */
 
 #include <stdio.h>
+#include <exception>
 
 #include <opencog/util/lru_cache.h>
 
@@ -42,6 +43,8 @@ class lru_cacheUTest : public CxxTest::TestSuite
         // ~_function() { delete rnd; }
 
         float operator()(const int& x) const {
+            if(x == 2000)
+                throw std::exception();
             return x + rnd->randfloat();
         }
     };
@@ -89,6 +92,16 @@ public:
         answer = cache(500);
         TS_ASSERT_EQUALS(cache.get_failures(), 1501);
         TS_ASSERT_EQUALS(cache.get_hits(), 1502);
+
+        // Ensure that if the function throws an exception the cache
+        // transmit it
+        TS_ASSERT_THROWS(cache(2000), std::exception);
+        TS_ASSERT_EQUALS(cache.get_failures(), 1502);
+        TS_ASSERT_EQUALS(cache.get_hits(), 1502);
+        
+        // Ensure that after throwing the exception the cache doesn't
+        // get altered (which would throw an exception)
+        TS_ASSERT_THROWS_NOTHING(cache(500));        
     }
 
 };
