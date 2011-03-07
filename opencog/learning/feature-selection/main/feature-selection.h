@@ -150,10 +150,14 @@ void feature_selection(IT& it, const OT& ot,
         typedef MIORScorer<IT, OT> Scorer;
         Scorer sc(it, ot, fields, fs_params.cpi);
         if(fs_params.cache_size > 0) {
-            typedef lru_cache<Scorer> ScorerCache;
+            typedef prr_cache<Scorer> ScorerCache;
             ScorerCache sc_cache(fs_params.cache_size, sc);
             feature_selection(it, ot, fields, deme, init_inst, hc, sc_cache,
                               fs_params);
+            // Logger
+            logger().info("Number of cache failures = %u",
+                          sc_cache.get_failures());
+            // ~Logger
         } else {
             feature_selection(it, ot, fields, deme, init_inst, hc, sc,
                               fs_params);            

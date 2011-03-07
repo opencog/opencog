@@ -230,9 +230,9 @@ void metapop_moses_results(RandGen& rng,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
     if(cache_size > 0) {
-        typedef lru_cache<BScore> BScoreCache;
+        typedef prr_cache<BScore> BScoreCache;
         typedef bscore_based_score<BScoreCache> Score;
-        typedef lru_cache<Score> ScoreCache;
+        typedef prr_cache<Score> ScoreCache;
         BScoreCache bscore_cache(cache_size, bsc);
         Score score(bscore_cache);
         ScoreCache score_cache(cache_size, score);
