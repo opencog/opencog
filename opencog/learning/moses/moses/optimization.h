@@ -279,7 +279,7 @@ struct iterative_hillclimbing {
         {
             std::stringstream ss;
             ss << "Initial center instance: " << fields.stream(center_inst)
-               << best_score;
+               << " " << best_score;
             logger().debug(ss.str());
         }
         // ~Logger
