@@ -54,7 +54,7 @@ inline double information_theoretic_bits(const eda::field_set& fs)
     foreach(const eda::field_set::contin_spec& c, fs.contin()) {
         // number of possible contins with depth d is 2^(d+1)-1 because
         // after a Stop only Stop is allowed which is why it is not 3^d
-        unsigned int contin_count = pow2(c.depth + 1) - 1;
+        unsigned contin_count = pow2(c.depth + 1) - 1;
         res += log2(double(contin_count));
     }
     foreach(const eda::field_set::onto_spec& o, fs.onto())
@@ -81,24 +81,24 @@ struct optim_parameters {
         terminate_if_gte(_terminate_if_gte) {}
 
     //N=p.popsize_ratio*n^1.05
-    inline unsigned int pop_size(const eda::field_set& fs) {
+    inline unsigned pop_size(const eda::field_set& fs) {
         return ceil((double(pop_size_ratio)*
                      pow(information_theoretic_bits(fs), 1.05)));
     }
 
     //term_total*n
-    inline unsigned int max_gens_total(const eda::field_set& fs) {
+    inline unsigned max_gens_total(const eda::field_set& fs) {
         return ceil(term_total*information_theoretic_bits(fs));
     }
 
     //term_improv*sqrt(n/w)
-    inline unsigned int max_gens_improv(const eda::field_set& fs) {
+    inline unsigned max_gens_improv(const eda::field_set& fs) {
         return ceil(term_improv*
                     sqrt(information_theoretic_bits(fs) /
                          rtr_window_size(fs)));
     }
     //min(windowsize_pop*N,windowsize_len*n)
-    inline unsigned int rtr_window_size(const eda::field_set& fs) {
+    inline unsigned rtr_window_size(const eda::field_set& fs) {
         return ceil(min(window_size_pop*pop_size(fs),
                         window_size_len*information_theoretic_bits(fs)));
     }
@@ -158,13 +158,13 @@ struct univariate_optimization {
 
     //return # of evaluations actually performed
     template<typename Scoring>
-    unsigned int operator()(eda::instance_set<composite_score>& deme,
-                            const Scoring& score, unsigned int max_evals) {
-        unsigned int pop_size = opt_params.pop_size(deme.fields());
-        unsigned int max_gens_total = opt_params.max_gens_total(deme.fields());
-        unsigned int max_gens_improv = opt_params.max_gens_improv(deme.fields());
-        unsigned int n_select = double(pop_size) * eda_params.selection_ratio;
-        unsigned int n_generate = double(pop_size) * eda_params.replacement_ratio;
+    unsigned operator()(eda::instance_set<composite_score>& deme,
+                        const Scoring& score, unsigned max_evals) {
+        unsigned pop_size = opt_params.pop_size(deme.fields());
+        unsigned max_gens_total = opt_params.max_gens_total(deme.fields());
+        unsigned max_gens_improv = opt_params.max_gens_improv(deme.fields());
+        unsigned n_select = double(pop_size) * eda_params.selection_ratio;
+        unsigned n_generate = double(pop_size) * eda_params.replacement_ratio;
 
         //adjust parameters based on the maximal # of evaluations allowed
         if (max_evals < pop_size) {
@@ -189,7 +189,7 @@ struct univariate_optimization {
                     (composite_score(opt_params.terminate_if_gte,
                                       worst_possible_score.second),
                      max_gens_improv),
-                    opencog::tournament_selection((unsigned int)eda_params.selection, rng),
+                    opencog::tournament_selection((unsigned)eda_params.selection, rng),
                     eda::univariate(), eda::local_structure_probs_learning(),
                     eda::rtr_replacement(deme.fields(),
                                          opt_params.rtr_window_size(deme.fields()),
@@ -218,11 +218,11 @@ struct univariate_optimization {
 
 struct hc_parameters {
     hc_parameters(bool _terminate_if_improvement = true,
-                  unsigned int _fraction_of_remaining = 10)
+                  unsigned _fraction_of_remaining = 10)
         : terminate_if_improvement(_terminate_if_improvement),
           fraction_of_remaining(_fraction_of_remaining) {}
     bool terminate_if_improvement;
-    unsigned int fraction_of_remaining;
+    unsigned fraction_of_remaining;
 };
 
 struct iterative_hillclimbing {
@@ -241,16 +241,16 @@ struct iterative_hillclimbing {
      * @return number of evaluations actually performed
      */
     template<typename Scoring>
-    unsigned int operator()(eda::instance_set<composite_score>& deme,
-                            const eda::instance& init_inst,
-                            const Scoring& score, unsigned int max_evals) {
+    unsigned operator()(eda::instance_set<composite_score>& deme,
+                        const eda::instance& init_inst,
+                        const Scoring& score, unsigned max_evals) {
         // Logger
         logger(). debug("Iterative HillClimbing Optimization");
         // ~Logger
 
         const eda::field_set& fields = deme.fields();
-        unsigned int pop_size = opt_params.pop_size(fields);
-        unsigned int max_gens_total = opt_params.max_gens_total(fields);
+        unsigned pop_size = opt_params.pop_size(fields);
+        unsigned max_gens_total = opt_params.max_gens_total(fields);
 
         unsigned long long current_number_of_instances = 0;
 
@@ -260,9 +260,9 @@ struct iterative_hillclimbing {
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
-        unsigned int max_distance =
-            max(1U, (unsigned int)(opt_params.max_dist_ratio 
-                                   * (double)fields.dim_size()));
+        unsigned max_distance =
+            max(1U, (unsigned)(opt_params.max_dist_ratio 
+                               * (double)fields.dim_size()));
 
         // score the initial instance
         eda::instance center_inst(init_inst);
@@ -270,10 +270,10 @@ struct iterative_hillclimbing {
             eda::score_instance(center_inst, score);
         composite_score best_score = score(scored_center_inst);
 
-        unsigned int distance = 1;
+        unsigned distance = 1;
         bool has_improved; // whether the score has improved
 
-        unsigned int iteration = 0;
+        unsigned iteration = 0;
 
         // Logger
         {
@@ -343,7 +343,7 @@ struct iterative_hillclimbing {
                       boost::bind(boost::cref(score), _1)); 
             // check if there is an instance in the deme better than
             // the exemplar
-            for (unsigned int i = current_number_of_instances;
+            for (unsigned i = current_number_of_instances;
                  deme.begin() + i != deme.end(); i++) {
                 composite_score inst_score = deme[i].second;
                 if (get_score(inst_score) > get_score(best_score)) {
@@ -377,8 +377,8 @@ struct iterative_hillclimbing {
     }
     // like above but assumes that init_inst is null (backward compatibility)
     template<typename Scoring>
-    unsigned int operator()(eda::instance_set<composite_score>& deme,
-                            const Scoring& score, unsigned int max_evals) {
+    unsigned operator()(eda::instance_set<composite_score>& deme,
+                            const Scoring& score, unsigned max_evals) {
         eda::instance init_inst(deme.fields().packed_width());
         return operator()(deme, init_inst, score, max_evals);
     }
@@ -566,9 +566,9 @@ struct sliced_iterative_hillclimbing {
         return 0;
     }
 
-    unsigned int distance;
+    unsigned distance;
     unsigned long long number_of_new_instances;
-    unsigned int number_of_fields;
+    unsigned number_of_fields;
     eda::instance exemplar;
     int max_number_of_instances;
     score_t exemplar_score;
@@ -647,33 +647,33 @@ struct simulated_annealing {
      * distance.  @todo: it may be better to have the distance
      * decreasing exponentially instead of linearly
      */
-    unsigned int dist_temp(double current_temp)
+    unsigned dist_temp(double current_temp)
     {
-        return (unsigned int)( ((current_temp - sa_params.min_temp)
+        return (unsigned)( ((current_temp - sa_params.min_temp)
                                 /(sa_params.init_temp - sa_params.min_temp))
                                *
                                (max_distance - 1) + 1 );
     }
 
     template<typename Scoring>
-    unsigned int operator()(eda::instance_set<composite_score>& deme,
+    unsigned operator()(eda::instance_set<composite_score>& deme,
                             const eda::instance& init_inst,
-                            const Scoring& score, unsigned int max_evals) {
+                            const Scoring& score, unsigned max_evals) {
 
         const eda::field_set& fields = deme.fields();
         max_distance = fields.dim_size();
 
         // @todo this should be adapted for SA
-        unsigned int pop_size = opt_params.pop_size(fields);
+        unsigned pop_size = opt_params.pop_size(fields);
         // int max_gens_total = opt_params.max_gens_total(deme.fields());
         // int max_number_of_instances = max_gens_total * pop_size;
-        unsigned int max_number_of_instances = pop_size;
+        unsigned max_number_of_instances = pop_size;
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
         unsigned long long current_number_of_instances = 0;
 
-        unsigned int step = 1;
+        unsigned step = 1;
 
         // score the initial instance
         eda::instance center_instance(init_inst);
@@ -682,8 +682,8 @@ struct simulated_annealing {
         energy_t center_instance_energy = energy(scored_center_inst);
         double current_temp = sa_params.init_temp;
         do {
-            unsigned int current_distance = 
-                max(1U, (unsigned int)(opt_params.max_dist_ratio
+            unsigned current_distance = 
+                max(1U, (unsigned)(opt_params.max_dist_ratio
                                        * (double)dist_temp(current_temp)));
 
             // score all new instances in the deme
@@ -740,8 +740,8 @@ struct simulated_annealing {
     }
     // like above but assumes that the initial instance is null
     template<typename Scoring>
-    unsigned int operator()(eda::instance_set<composite_score>& deme,
-                            const Scoring& score, unsigned int max_evals) {
+    unsigned operator()(eda::instance_set<composite_score>& deme,
+                            const Scoring& score, unsigned max_evals) {
         const eda::instance init_inst(deme.fields().packed_width());
         return operator()(deme, init_inst, score, max_evals);
     }
@@ -750,7 +750,7 @@ struct simulated_annealing {
     optim_parameters opt_params;
     sa_parameters sa_params;
 protected:
-    unsigned int max_distance;
+    unsigned max_distance;
 };
 
 } //~namespace moses

@@ -99,7 +99,7 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out, Out end,
 inline void generate_contin_neighbor(const eda::field_set& fs,
                                      eda::instance& inst, 
                                      eda::field_set::contin_iterator it, 
-                                     unsigned int n, opencog::RandGen& rng)
+                                     unsigned n, opencog::RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
     size_t num = fs.count_n_before_stop(inst, it.idx());
@@ -109,7 +109,7 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
     // there is no Stop, the last disc (i.e. either Left or Right)
     opencog::lazy_random_selector select(std::min(num + 1, depth), rng);
 
-    for(unsigned int i = n; i > 0; i--) {
+    for(unsigned i = n; i > 0; i--) {
         size_t r = select();
         eda::field_set::disc_iterator itr = fs.begin_raw(inst);        
         itr += begin + r;
@@ -153,8 +153,8 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
  * @param center_inst   the center instance
  */
 template<typename Out>
-void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
-                              unsigned int sample_size, Out out, Out end,
+void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
+                              unsigned sample_size, Out out, Out end,
                               opencog::RandGen& rng,
                               const eda::instance & center_inst )
 {
@@ -162,7 +162,7 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
               "Please make sure that the center_inst"
               " have the same size with the field_set");
 
-    unsigned int dim = fs.dim_size();
+    unsigned dim = fs.dim_size();
 
     OC_ASSERT(n <= dim,
               "the sampling distance %u"
@@ -173,7 +173,7 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
         eda::instance new_inst(center_inst);
         opencog::lazy_random_selector select(dim, rng);
 
-        for (unsigned int i = 1;i <= n;) {
+        for (unsigned i = 1;i <= n;) {
             size_t r = select();
             eda::field_set::bit_iterator itb = fs.begin_bits(new_inst);
             eda::field_set::disc_iterator itd = fs.begin_disc(new_inst);
@@ -222,8 +222,8 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
  *                      of the deme if it does so then an assert is raised
  */
 template<typename Out>
-void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
-                              unsigned int sample_size, Out out, Out end,
+void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
+                              unsigned sample_size, Out out, Out end,
                               opencog::RandGen& rng)
 {
     eda::instance inst(fs.packed_width());
@@ -256,7 +256,7 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
  * @param center_inst   the center instance 
  */
 template<typename Out>
-void generate_all_in_neighborhood(const eda::field_set& fs, unsigned int n,
+void generate_all_in_neighborhood(const eda::field_set& fs, unsigned n,
                                   Out out, Out end,
                                   const eda::instance& center_inst )
 {
@@ -281,7 +281,7 @@ void generate_all_in_neighborhood(const eda::field_set& fs, unsigned int n,
  */
 template<typename Out>
 void generate_all_in_neighborhood(const eda::field_set& fs,
-                                  unsigned int n, Out out, Out end)
+                                  unsigned n, Out out, Out end)
 {
     eda::instance inst(fs.packed_width());
     generate_all_in_neighborhood(fs, n, out, end, inst);
@@ -309,8 +309,8 @@ void generate_all_in_neighborhood(const eda::field_set& fs,
 template<typename Out>
 Out vary_n_knobs(const eda::field_set& fs,
                  const eda::instance& inst,
-                 unsigned int n,
-                 unsigned int starting_index,
+                 unsigned n,
+                 unsigned starting_index,
                  Out out, Out end)
 {
     if(n == 0) {
@@ -320,7 +320,7 @@ Out vary_n_knobs(const eda::field_set& fs,
     }
 
     eda::instance tmp_inst = inst;
-    unsigned int begin_contin_idx, begin_disc_idx, begin_bit_idx;
+    unsigned begin_contin_idx, begin_disc_idx, begin_bit_idx;
 
     // ontos
     if(starting_index < (begin_contin_idx = fs.n_onto())) {
@@ -362,9 +362,9 @@ Out vary_n_knobs(const eda::field_set& fs,
             out = vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out, end);
             // if the next Stop is not further from itr than the distance n
             // then turn the remaining discs to Stop
-            unsigned int remRLs = num - relative_raw_idx; // remaining non-Stop
-                                                          // discs including
-                                                          // the current one
+            unsigned remRLs = num - relative_raw_idx; // remaining non-Stop
+                                                      // discs including
+                                                      // the current one
             if(remRLs <= n) {
                 for(; relative_raw_idx < num; num--, itr++) {
                     // Stop
@@ -385,10 +385,10 @@ Out vary_n_knobs(const eda::field_set& fs,
         // recursive call, moved for one position
         out = vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out, end);
         // modify the disc and recursive call, moved for one position
-        for(unsigned int i = 1; i <= itd.arity() - 1; i++) {
+        for(unsigned i = 1; i <= itd.arity() - 1; i++) {
             // vary all legal values, the neighborhood should 
             // not equals to itself, so if it is same, set it to 0.
-            if(static_cast<unsigned int>(tmp_val) == i)
+            if(static_cast<unsigned>(tmp_val) == i)
                 *itd = 0;
             else
                 *itd = i;
@@ -427,8 +427,8 @@ Out vary_n_knobs(const eda::field_set& fs,
  */
 inline unsigned long long count_n_changed_knobs_from_index(const eda::field_set& fs,
                                                            const eda::instance& inst,
-                                                           unsigned int n,
-                                                           unsigned int starting_index,
+                                                           unsigned n,
+                                                           unsigned starting_index,
                                                            unsigned long long max_count
                                                            = numeric_limits<unsigned long long>::max())
 {
@@ -437,10 +437,10 @@ inline unsigned long long count_n_changed_knobs_from_index(const eda::field_set&
 
     unsigned long long number_of_instances = 0;
 
-    unsigned int begin_contin_idx = fs.n_onto();
-    unsigned int begin_disc_idx = begin_contin_idx + fs.n_contin();
-    unsigned int begin_bit_idx = begin_disc_idx + fs.n_disc();
-    unsigned int end_bit_idx = begin_bit_idx + fs.n_bits();
+    unsigned begin_contin_idx = fs.n_onto();
+    unsigned begin_disc_idx = begin_contin_idx + fs.n_contin();
+    unsigned begin_bit_idx = begin_disc_idx + fs.n_disc();
+    unsigned end_bit_idx = begin_bit_idx + fs.n_bits();
 
     // ontos
     if(starting_index < begin_contin_idx) {
@@ -464,19 +464,19 @@ inline unsigned long long count_n_changed_knobs_from_index(const eda::field_set&
         // of the current contin
         for(int i = 0; i <= min((int)n, depth); i++) {
             // number of instances for that contin, at distance i
-            unsigned int cni = 0;
+            unsigned cni = 0;
             // count combinations when Left or Right are switched and
             // added after Stop, where j represents the number of
             // Left or Right added after Stop
             for(int j = max(0, i-num); j <= min(i, depth-num); j++)
-                cni += (unsigned int)binomial_coefficient<double>(num, i-j)
+                cni += (unsigned)binomial_coefficient<double>(num, i-j)
                     * pow2(j);
             // count combinations when Left or Right are switched and
             // removed before Stop, where j represents the number of
             // removed Left or Right before Stop
             if(i <= num)
                 for(int j = 1; j <= min(i, num); j++)
-                    cni += (unsigned int)binomial_coefficient<double>(num-j, i-j);
+                    cni += (unsigned)binomial_coefficient<double>(num-j, i-j);
             // recursive call
             number_of_instances +=
                 cni * count_n_changed_knobs_from_index(fs, inst, n-i,
@@ -508,7 +508,7 @@ inline unsigned long long count_n_changed_knobs_from_index(const eda::field_set&
     else if(starting_index < end_bit_idx) {
         // since bits have the same arity (2) and are the last there
         // is no need for recursive call
-        unsigned int rb = end_bit_idx - starting_index;
+        unsigned rb = end_bit_idx - starting_index;
         if(n <= rb) {
             double noi_double = binomial_coefficient<double>(rb , n);
             // the following is in case the actual number of instances
@@ -534,7 +534,7 @@ inline unsigned long long count_n_changed_knobs_from_index(const eda::field_set&
  */
 inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
                                                 const eda::instance& inst,
-                                                unsigned int n,
+                                                unsigned n,
                                                 unsigned long long max_count 
                                                 = numeric_limits<unsigned long long>::max())
 {
@@ -542,7 +542,7 @@ inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
 }
 // for backward compatibility, like above but with null instance
 inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
-                                                unsigned int n,
+                                                unsigned n,
                                                 unsigned long long max_count
                                                 = numeric_limits<unsigned long long>::max())
 {
