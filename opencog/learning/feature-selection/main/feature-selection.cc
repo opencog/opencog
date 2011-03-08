@@ -51,7 +51,7 @@ using namespace std;
 using namespace opencog;
 using namespace combo;
 
-const static unsigned int max_filename_size = 255;
+const static unsigned max_filename_size = 255;
 
 /**
  * Display error message about unsupported type and exit
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
         ("initial-feature,f", value<vector<string> >(&fs_params.initial_features),
          "Initial feature to search from. This option can be used as many times as features to include in the initial feature set. An initial feature set close to the one maximizing the feature quality measure can greatly increase feature selection speed.\n")
         (opt_desc_str(max_evals_opt).c_str(),
-         value<unsigned int>(&fs_params.max_evals)->default_value(10000),
+         value<unsigned>(&fs_params.max_evals)->default_value(10000),
          "Maximum number of fitness function evaluations.\n")
         // ("result-count,c",
         //  value<long>(&fs_params.result_count)->default_value(10),

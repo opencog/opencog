@@ -128,8 +128,22 @@ struct MIORScorer : public unary_function<eda::instance, composite_score> {
     const IT& it;
     const OT& ot;
     const field_set& fields;
-    double cpi; // compexity penalty intensity
+    double cpi; // complexity penalty intensity
 };
+
+eda::instance initial_instance(const feature_selection_parameters& fs_params,
+                               const field_set& fields) {
+    eda::instance res(fields.packed_width());
+    vector<std::string> labels = read_data_file_labels(fs_params.input_file);
+    foreach(const std::string& f, fs_params.initial_features) {
+        arity_t idx = std::distance(labels.begin(), find(labels, f));
+        OC_ASSERT((size_t)idx != labels.size(),
+                  "No such a feature %s in file %s",
+                  f.c_str(), fs_params.input_file.c_str());
+        *(fields.begin_bits(res) + idx) = true;
+    }
+    return res;
+}
 
 template<typename IT, typename OT>
 void feature_selection(IT& it, const OT& ot,
@@ -146,7 +160,8 @@ void feature_selection(IT& it, const OT& ot,
         hc_parameters hc_param(false); // do not terminate if improvement
         iterative_hillclimbing hc(rng, op_param, hc_param);
         instance_set<composite_score> deme(fields);
-        eda::instance init_inst(fields.packed_width());
+        // determine the initial instance given the initial feature set
+        eda::instance init_inst = initial_instance(fs_params, fields);
         typedef MIORScorer<IT, OT> Scorer;
         Scorer sc(it, ot, fields, fs_params.cpi);
         if(fs_params.cache_size > 0) {
