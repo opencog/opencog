@@ -65,12 +65,12 @@ namespace opencog {
 template<typename Scorer, typename FeatureSet>
 FeatureSet incremental_selection(const FeatureSet& features, const Scorer& scorer,
                                  double threshold,
-                                 unsigned int max_interaction_terms = 1,
+                                 unsigned max_interaction_terms = 1,
                                  double red_threshold = 0) {
     FeatureSet rel; // set of relevant features for a given iteration
     FeatureSet res; // set of relevant non-redundant features to return
 
-    for(unsigned int i = 1; i <= max_interaction_terms; i++) {
+    for(unsigned i = 1; i <= max_interaction_terms; i++) {
         // define the set of set of features to test for relevancy
         FeatureSet tf = set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);
@@ -108,7 +108,7 @@ template<typename Scorer, typename FeatureSet>
 FeatureSet cached_incremental_selection(const FeatureSet& features,
                                         const Scorer& scorer,
                                         double threshold,
-                                        unsigned int max_interaction_terms = 1,
+                                        unsigned max_interaction_terms = 1,
                                         double red_threshold = 0) {
     lru_cache<Scorer> scorer_cache(std::pow((double)features.size(),
                                             (int)max_interaction_terms),
@@ -125,15 +125,15 @@ FeatureSet cached_incremental_selection(const FeatureSet& features,
 template<typename Scorer, typename FeatureSet>
 FeatureSet adaptive_incremental_selection(const FeatureSet& features,
                                           const Scorer& scorer,
-                                          unsigned int features_size_target,
-                                          unsigned int max_interaction_terms = 1,
+                                          unsigned features_size_target,
+                                          unsigned max_interaction_terms = 1,
                                           double red_threshold = 0,
                                           double min = 0, double max = 1,
                                           double epsilon = 0.01) {
     double mean = (min+max)/2;
     FeatureSet res = incremental_selection(features, scorer, mean,
                                            max_interaction_terms, red_threshold);
-    unsigned int rsize = res.size();
+    unsigned rsize = res.size();
     if(isWithin(min, max, epsilon) || rsize == features_size_target)
         return res;
     else {
@@ -152,8 +152,8 @@ FeatureSet adaptive_incremental_selection(const FeatureSet& features,
 template<typename Scorer, typename FeatureSet>
 FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
                                                  const Scorer& scorer,
-                                                 unsigned int features_size_target,
-                                                 unsigned int max_interaction_terms = 1,
+                                                 unsigned features_size_target,
+                                                 unsigned max_interaction_terms = 1,
                                                  double red_threshold = 0,
                                                  double min = 0, double max = 1,
                                                  double epsilon = 0.01) {
