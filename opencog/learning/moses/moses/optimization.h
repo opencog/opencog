@@ -40,7 +40,7 @@
 #include "moses.h"
 #include "neighborhood_sampling.h"
 
-#define MINIMUM_DEME_SIZE         50
+#define MINIMUM_DEME_SIZE         2
 #define MAX_EVALS_PER_SLICE       10
 
 namespace moses
@@ -293,9 +293,7 @@ struct iterative_hillclimbing {
             }
             // ~Logger
 
-            unsigned long long number_of_new_instances;
-
-            number_of_new_instances = 
+            unsigned long long number_of_new_instances =
                 (max_number_of_instances - current_number_of_instances)
                 / hc_params.fraction_of_remaining;
 

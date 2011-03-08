@@ -63,7 +63,8 @@ namespace opencog {
  *                       cached_incremental_selection defined below
  */
 template<typename Scorer, typename FeatureSet>
-FeatureSet incremental_selection(const FeatureSet& features, const Scorer& scorer,
+FeatureSet incremental_selection(const FeatureSet& features,
+                                 const Scorer& scorer,
                                  double threshold,
                                  unsigned max_interaction_terms = 1,
                                  double red_threshold = 0) {
