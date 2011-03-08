@@ -116,6 +116,9 @@ struct lru_cache {
         _map.clear();
         _lru.clear();
     }
+
+    unsigned get_failures() const { return _failures; }
+    unsigned get_hits() const { return _hits; }
     
 protected:
     size_type _n;
