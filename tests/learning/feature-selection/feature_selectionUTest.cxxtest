@@ -41,8 +41,8 @@ class feature_selectionUTest : public CxxTest::TestSuite {
     partial_truth_table output_table;
 
 public:
-    typedef ConditionalEntropy<truth_table_inputs, partial_truth_table, 
-                               set<arity_t> > FeatureScorer;
+    typedef MutualInformation<truth_table_inputs, partial_truth_table, 
+                              set<arity_t> > FeatureScorer;
 
 
     feature_selectionUTest() {

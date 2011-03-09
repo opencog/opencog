@@ -515,9 +515,9 @@ int moses_exec(int argc, char** argv) {
                 logger().info("Computing feature selection");
                 // ~Logger
 
-                typedef ConditionalEntropy<truth_table_inputs,
-                                           partial_truth_table,
-                                           std::set<arity_t> > FeatureScorer;
+                typedef MutualInformation<truth_table_inputs,
+                                          partial_truth_table,
+                                          std::set<arity_t> > FeatureScorer;
                 FeatureScorer fs(it, ot);
                 std::set<arity_t> features = it.get_considered_args_from_zero();
                 std::set<arity_t> selected_features = 

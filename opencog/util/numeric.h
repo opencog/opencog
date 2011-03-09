@@ -310,24 +310,18 @@ double OTEntropy(const OT& ot) {
 /**
  * Given a feature set X1, ..., Xn provided a set of indices of the
  * column of an input table of type IT, and an output feature Y
- * provided by the output table of type OT, return a pair
+ * provided by the output table of type OT, compute the mutual
+ * information
  *
- * <H(X1, ..., Xn), H(X1, ..., Xn, Y)>
- *
- * where H(X1, ..., Xn) is the joint entropy of the feature set and
- * H(X1, ..., Xn, Y) is the joint entropy of the feature set and the
- * output.
+ * MI(X1, ..., Xn; Y)
  *
  * IT is typically an input_table and OT an output_table as defined in
  * opencog/comboreduct/combo/table.h.
  *
- * @note only works for discrete data set. Also, the reason this
- * function is done in one pass rather than computing H(X1, ..., Xn)
- * and H(X1, ..., Xn, Y) seperatly is to go faster.
+ * @note only works for discrete data set.
  */
 template<typename IT, typename OT, typename FeatureSet>
-std::pair<double, double>
-jointIOTEntropies(const IT& it, const OT& ot, const FeatureSet& fs) {
+double mutualInformation(const IT& it, const OT& ot, const FeatureSet& fs) {
     typedef typename IT::value_type::value_type EntryT;
     // the following mapping is used to keep track of the number
     // of inputs a given setting. For instance X1=false, X2=true,
@@ -355,7 +349,7 @@ jointIOTEntropies(const IT& it, const OT& ot, const FeatureSet& fs) {
     foreach(const typename TupleCount::value_type& vioc, ioc)
         iop.push_back(vioc.second/total);
     // Compute the entropies
-    return std::make_pair(entropy(ip), entropy(iop));
+    return entropy(ip) + OTEntropy(ot) - entropy(iop);
 }
 
 // compute the smallest divisor of n
