@@ -26,6 +26,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/platform.h>
+#include <opencog/util/exceptions.h>
 
 using namespace opencog;
 
@@ -80,12 +81,48 @@ public:
         TS_ASSERT(link->getOutgoingSet()[0] == sortedHandles[2]);
         TS_ASSERT(link->getOutgoingSet()[1] == sortedHandles[0]);
         TS_ASSERT(link->getOutgoingSet()[2] == sortedHandles[1]);
+        // Unordered lists sort their outgoing sets
         atom = new ConcreteAtom(UNORDERED_LINK, outgoing);
         link = dynamic_cast<Link *>(atom);
         TS_ASSERT(link != NULL);
         TS_ASSERT(link->getOutgoingSet()[0] == sortedHandles[0]);
         TS_ASSERT(link->getOutgoingSet()[1] == sortedHandles[1]);
         TS_ASSERT(link->getOutgoingSet()[2] == sortedHandles[2]);
+        delete atom;
+    }
+
+    void testRemoveIncoming() {
+        // Test to ensure removing incoming handle when it doesn't exist is ok
+        std::vector<Handle> outgoing;
+        outgoing.push_back(sortedHandles[2]);
+        outgoing.push_back(sortedHandles[0]);
+        outgoing.push_back(sortedHandles[1]);
+
+        Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing);
+        Link *link = dynamic_cast<Link *>(atom);
+        TS_ASSERT(link != NULL);
+
+        TS_ASSERT_THROWS(atom->removeIncomingHandle(sortedHandles[0]), opencog::RuntimeException);
+
+        Handle h(2220);
+        atom->addIncomingHandle(h);
+        TS_ASSERT_THROWS(atom->removeIncomingHandle(sortedHandles[0]), opencog::RuntimeException);
+        delete atom;
+
+    }
+
+    void testFlags() {
+        // Test to ensure removing incoming handle when it doesn't exist is ok
+        std::vector<Handle> outgoing;
+        outgoing.push_back(sortedHandles[2]);
+        outgoing.push_back(sortedHandles[0]);
+        outgoing.push_back(sortedHandles[1]);
+
+        Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing);
+        atom->markForRemoval();
+        TS_ASSERT_EQUALS(atom->flags & MARKED_FOR_REMOVAL, MARKED_FOR_REMOVAL);
+        delete atom;
+
     }
 
 };

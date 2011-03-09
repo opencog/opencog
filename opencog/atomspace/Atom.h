@@ -38,6 +38,8 @@
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/util/exceptions.h>
 
+class AtomUTest;
+
 namespace opencog
 {
 
@@ -60,6 +62,8 @@ class Atom : public AttentionValueHolder
     friend class TLB;
     friend class Node;
     friend class Link;
+
+    friend class ::AtomUTest;
 
 private:
 
