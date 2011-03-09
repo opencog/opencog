@@ -34,6 +34,12 @@ using boost::lexical_cast;
 using namespace opencog;
 
 /**
+ * Program to output the result of a combo program given input data
+ * described in CSV format. It has a few additional options to
+ * compute the mutual information, and more to add.
+ */
+
+/**
  * Convert a string representing a combo program in a combo_tree.
  *
  * @param combo_prog_str   the string containing the combo program
@@ -60,12 +66,8 @@ combo_tree str2combo_tree_label(const std::string& combo_prog_str,
 int main(int argc,char** argv) { 
 
     // program options, see options_description below for their meaning
+    evalTableParameters pa;
     unsigned long rand_seed;
-    string input_table_file;
-    string combo_program_str;
-    string output_file;
-    bool labels;
-    // bool residual_error;
 
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -73,12 +75,19 @@ int main(int argc,char** argv) {
         ("help,h", "Produce help message.\n")
         ("rand-seed,r", value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
-        ("input-table,i", value<string>(&input_table_file), "Input table file.\n")
-        ("combo-program,c", value<string>(&combo_program_str),
+        ("input-table,i", value<string>(&pa.input_table_file),
+         "Input table file.\n")
+        ("combo-program,c", value<string>(&pa.combo_prog_str),
          "Combo program to evaluate against the input table.\n")
         ("labels,l", "If enabled then the combo program is expected to contain variables labels #labels1, etc, instead of place holders. For instance one provide the combo program \"and(#large #tall)\" instead of \"and(#24 #124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
-        ("output-file,o", value<string>(&output_file),
+        ("output-file,o", value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
+        ("feature,f", value<vector<string> >(&pa.features),
+         "Feature to consider. Can be used several time for several features. Useful to output the mutual information between a set of features and the output of the combo program (option -c).\n")
+        ("compute-MI,m", value<bool>(&pa.compute_MI)->default_value(false),
+         "Compute the mutual information between a given set of features (see option -f) and a given combo program (see option -c)")
+        ("display-output-table,d", value<bool>(&pa.display_output_table),
+         "Display the output table resulting from applying the combo program on the input table.\n")
         // ("residual-error,e", "If enabled then residual error of the combo program against the output of the data set is printed.\n")
         ;
 
@@ -92,28 +101,23 @@ int main(int argc,char** argv) {
     }
 
     // set variables
-    labels = vm.count("labels");
+    pa.has_labels = vm.count("labels");
     // residual_error = vm.count("residual-error");
 
     // init random generator
     opencog::MT19937RandGen rng(rand_seed);
 
     // read input_table_file file
-    type_node data_type = inferDataType(input_table_file);
-
-    evalTableParameters evalParam(input_table_file,
-                                  combo_program_str,
-                                  labels,
-                                  output_file);
+    type_node data_type = inferDataType(pa.input_table_file);
 
     if(data_type == id::boolean_type) {
         typedef truth_table_inputs IT;
         typedef partial_truth_table OT;
-        read_eval_output_results<IT, OT, bool>(evalParam, rng);
+        read_eval_output_results<IT, OT, bool>(pa, rng);
     } else if(data_type == id::contin_type) {
         typedef contin_input_table IT;
         typedef contin_table OT;
-        read_eval_output_results<IT, OT, contin_t>(evalParam, rng);
+        read_eval_output_results<IT, OT, contin_t>(pa, rng);
     }
 
 }
