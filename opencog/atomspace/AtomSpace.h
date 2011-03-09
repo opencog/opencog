@@ -45,7 +45,7 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
 
-// Whether to wrap certain functions in lru_cache<>
+// Whether to wrap certain functions in lru_cache_threaded<>
 #define USE_ATOMSPACE_LOCAL_THREAD_CACHE 1
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
@@ -95,7 +95,14 @@ class AtomSpace
 
     void do_merge_tv(Handle, const TruthValue&);
 
+    //! Indicates whether the AtomSpace should delete AtomSpaceAsync on destruction
     bool ownsAtomSpaceAsync;
+
+    /**
+     * Overrides and declares equals operator as private 
+     * for avoiding large object copying by mistake.
+     */
+    AtomSpace& operator=(const AtomSpace&);
 public:
     /** 
      * The AtomSpace class is essentially just be a wrapper of the asynchronous
@@ -112,6 +119,8 @@ public:
      * event-loop.
      */
     AtomSpace(AtomSpaceAsync& a);
+
+    AtomSpace(const AtomSpace&);
     ~AtomSpace();
 
     /**
@@ -473,7 +482,7 @@ public:
     };
     _getType* __getType;
     // dummy get type version which is cached using lru_cache
-    lru_cache<AtomSpace::_getType> *getTypeCached;
+    lru_cache_threaded<AtomSpace::_getType> *getTypeCached;
 
     typedef std::pair<Handle,VersionHandle> vhpair;
     class _getTV : public std::unary_function<vhpair, const TruthValue*> {
@@ -490,7 +499,7 @@ public:
     };
     _getTV* __getTV;
     // dummy get TV version which is cached using lru_cache
-    lru_cache<AtomSpace::_getTV> *getTVCached;
+    lru_cache_threaded<AtomSpace::_getTV> *getTVCached;
 #endif // USE_ATOMSPACE_LOCAL_THREAD_CACHE
 
 
@@ -1282,14 +1291,6 @@ private:
     void setUpCaching();
 #endif
 
-public:
-
-    /**
-     * Overrides and declares copy constructor and equals operator as private 
-     * for avoiding large object copying by mistake.
-     */
-    AtomSpace& operator=(const AtomSpace&);
-    AtomSpace(const AtomSpace&);
 
 };
 

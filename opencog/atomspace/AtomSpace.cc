@@ -70,15 +70,25 @@ AtomSpace::AtomSpace(void)
 #endif
 }
 
+AtomSpace::AtomSpace(const AtomSpace& other)
+{
+    this->atomSpaceAsync = other.atomSpaceAsync;
+    ownsAtomSpaceAsync = false;
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    setUpCaching();
+#endif
+}
+
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
 void AtomSpace::setUpCaching() 
 {
     // Initialise lru cache for getType
     __getType = new _getType(this);
-    getTypeCached = new lru_cache<AtomSpace::_getType>(1000,*__getType);
+    getTypeCached = new lru_cache_threaded<AtomSpace::_getType>(1000,*__getType);
 
-    // Initialise lru cache for getTV
+    // Initialise lru cache for getTV (disabled because we can't get TV
+    // changes from other threads)
     //__getTV = new _getTV(this);
     //getTVCached = new lru_cache<AtomSpace::_getTV>(1000,*__getTV);
 
@@ -102,7 +112,6 @@ AtomSpace::~AtomSpace()
 {
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     c_remove.disconnect();
-    boost::mutex::scoped_lock(cache_lock);
     delete __getType;
     delete getTypeCached;
 #endif
@@ -114,7 +123,6 @@ AtomSpace::~AtomSpace()
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
 bool AtomSpace::handleRemoveSignal(AtomSpaceImpl *as, Handle h)
 {
-    boost::mutex::scoped_lock(cache_lock);
     getTypeCached->remove(h);
     return false;
 }
@@ -123,8 +131,8 @@ bool AtomSpace::handleRemoveSignal(AtomSpaceImpl *as, Handle h)
 Type AtomSpace::getType(Handle h) const
 {
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    boost::mutex::scoped_lock(cache_lock);
-    return (*getTypeCached)(h);
+    Type t = (*getTypeCached)(h);
+    return t;
 #else
     return atomSpaceAsync->getType(h)->get_result();
 #endif
@@ -146,12 +154,6 @@ void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 }
 
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)
-{
-    throw opencog::RuntimeException(TRACE_INFO, 
-            "AtomSpace - Cannot copy an object of this class");
-}
-
-AtomSpace::AtomSpace(const AtomSpace& other)
 {
     throw opencog::RuntimeException(TRACE_INFO, 
             "AtomSpace - Cannot copy an object of this class");
@@ -337,7 +339,6 @@ void AtomSpace::clear()
 {
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     {
-        boost::mutex::scoped_lock(cache_lock);
         getTypeCached->clear();
         //getTVCached->clear();
     }
