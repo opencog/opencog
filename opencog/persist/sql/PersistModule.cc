@@ -199,7 +199,7 @@ Handle PersistModule::fetch_atom(Handle h)
 Handle PersistModule::fetch_incoming_set(Handle h)
 {
 	AtomSpace *as = &atomspace();
-	// The "true" flag here means "fetch resursive".
+	// The "true" flag here means "fetch recursive".
 	h = as->fetchIncomingSet(h, true);
 	return h;
 }
