@@ -95,16 +95,22 @@ class SchemeEval
 		static SchemeEval& instance(AtomSpace* atomspace = NULL)
 		{
 			if (!singletonInstance) {
-                if (!atomspace)
-                    atomspace = cogserver().getAtomSpace();
+                if (!atomspace) {
+                    // We create our own local AtomSpace to send calls to the
+                    // event loop (otherwise the getType cache breaks)
+                    atomspace = new AtomSpace(*cogserver().getAtomSpace());
+                }
 				singletonInstance = new SchemeEval(atomspace);
-            } else if (atomspace && singletonInstance->atomspace != atomspace) {
+            }
+            // Disable this check, because scheme module creates its own
+            // AtomSpace instance for connecting to the shared AtomSpaceAsync
+            /*else if (atomspace && singletonInstance->atomspace != atomspace) {
                 // Someone is trying to initialise the Scheme interpretator
                 // on a different AtomSpace. because of the singleton design
                 // there is no easy way to support this...
                 throw (RuntimeException(TRACE_INFO, "Trying to re-initialise"
                             "scm interpretor with different AtomSpace ptr!"));
-            }
+            }*/
 			return *singletonInstance;
 		}
 };
