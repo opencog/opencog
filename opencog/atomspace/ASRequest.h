@@ -171,6 +171,8 @@ public:
     
 };
 
+// store and fetching atoms is low level stuff that should be handled by the
+// AtomSpace internally
 class StoreAtomASR : public OneParamASR <Handle, Handle> {
 public:
     StoreAtomASR(AtomSpaceImpl *a, Handle h) :

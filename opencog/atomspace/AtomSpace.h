@@ -602,8 +602,6 @@ public:
     bool isLink(const Type t) const;
     /** Does t1 inherit from t2 */
     bool inheritsType(Type t1, Type t2) const;
-    // Get type name 
-    std::string getName(Type t) const;
     //-----
 
     /** Convenience functions... */
@@ -1097,20 +1095,6 @@ public:
      * embodiment.
      */
     void decayShortTermImportance();
-
-    /** Get the total amount of STI in the AtomSpace
-     * The sum of STI across all atoms.
-     *
-     * @return total STI in AtomSpace
-     */
-    long getTotalSTI() const;
-
-    /** Get the total amount of LTI in the AtomSpace.
-     * The sum of LTI across all atoms.
-     *
-     * @return total LTI in AtomSpace
-     */
-    long getTotalLTI() const;
 
     /** Get attentional focus boundary
      * Generally atoms below this threshold shouldn't be accessed unless search

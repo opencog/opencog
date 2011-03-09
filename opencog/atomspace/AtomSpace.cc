@@ -194,12 +194,6 @@ bool AtomSpace::isLink(const Handle& h) const
     return classserver().isA(t, LINK);
 }
 
-string AtomSpace::getName(Type t) const
-{
-    DPRINTF("AtomSpace::getName Atom space address: %p\n", this);
-    return classserver().getTypeName(t);
-}
-
 void AtomSpace::do_merge_tv(Handle h, const TruthValue& tvn)
 {
     const TruthValue* currentTV(getTV(h));
@@ -304,7 +298,7 @@ void AtomSpace::decayShortTermImportance()
     atomSpaceAsync->decayShortTermImportance()->get_result();
 }
 
-long AtomSpace::getTotalSTI() const
+/*long AtomSpace::getTotalSTI() const
 {
     long totalSTI = 0;
     HandleSeq hs;
@@ -323,7 +317,7 @@ long AtomSpace::getTotalLTI() const
     getHandleSet(back_inserter(hs), ATOM, true);
     foreach (Handle h, hs) totalLTI += getLTI(h);
     return totalLTI;
-}
+}*/
 
 AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
 {
