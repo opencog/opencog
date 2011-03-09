@@ -186,24 +186,12 @@ AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other):
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
-const TruthValue& AtomSpaceImpl::getDefaultTV()
-{
-    return TruthValue::DEFAULT_TV();
-}
-
 Type AtomSpaceImpl::getType(Handle h) const
 {
     DPRINTF("AtomSpaceImpl::getType Atom space address: %p\n", this);
     Atom* a = TLB::getAtom(h);
     if (a) return a->getType();
     else return NOTYPE;
-}
-
-Type AtomSpaceImpl::getAtomType(const string& str) const
-{
-    DPRINTF("AtomSpaceImpl::getAtomType Atom space address: %p\n", this);
-
-    return classserver().getType(const_cast<char*>(str.c_str()));
 }
 
 bool AtomSpaceImpl::inheritsType(Type t1, Type t2) const
@@ -213,18 +201,6 @@ bool AtomSpaceImpl::inheritsType(Type t1, Type t2) const
     bool result = classserver().isA(t1, t2);
     DPRINTF("AtomSpaceImpl::inheritsType result = %d\n", result);
     return result;
-}
-
-bool AtomSpaceImpl::isNode(Type t) const
-{
-    DPRINTF("AtomSpaceImpl::isNode Atom space address: %p\n", this);
-    return inheritsType(t, NODE);
-}
-
-bool AtomSpaceImpl::isLink(Type t) const
-{
-    DPRINTF("AtomSpaceImpl::isLink Atom space address: %p\n", this);
-    return inheritsType(t, LINK);
 }
 
 bool AtomSpaceImpl::isNode(const Handle& h) const
@@ -239,12 +215,6 @@ bool AtomSpaceImpl::isLink(const Handle& h) const
     DPRINTF("AtomSpaceImpl::isLink Atom space address: %p\n", this);
     Type t = getType(h);
     return classserver().isA(t, LINK);
-}
-
-string AtomSpaceImpl::getName(Type t) const
-{
-    DPRINTF("AtomSpaceImpl::getName Atom space address: %p\n", this);
-    return classserver().getTypeName(t);
 }
 
 bool AtomSpaceImpl::containsVersionedTV(Handle h, VersionHandle vh) const
@@ -295,18 +265,6 @@ const HandleSeq& AtomSpaceImpl::getOutgoing(Handle h) const
     return link->getOutgoingSet();
 }
 
-void AtomSpaceImpl::do_merge_tv(Handle h, const TruthValue& tvn)
-{
-    const TruthValue& currentTV = getTV(h);
-    if (currentTV.isNullTv()) {
-        setTV(h, tvn);
-    } else {
-        TruthValue* mergedTV = currentTV.merge(tvn);
-        setTV(h, *mergedTV);
-        delete mergedTV;
-    }
-}
-
 Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
 {
     DPRINTF("AtomSpaceImpl::addNode AtomTable address: %p\n", &atomTable);
@@ -314,10 +272,6 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
     Handle result = getHandle(t, name);
     if (TLB::isValidHandle(result))
     {
-        // Just merges the TV
-        // if (!tvn.isNullTv()) do_merge_tv(result, tvn);
-        // Even if the node already exists, it must be merged properly 
-        // for updating its truth and attention values. 
         atomTable.merge(result, tvn); 
         // emit "merge atom" signal
         _mergeAtomSignal(this,result);
@@ -333,10 +287,11 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
         Node *n = backing_store->getNode(t, name.c_str());
         if (n) {
             result = TLB::addAtom(n);
-            // TODO: Check if merge signal must be emitted here (AtomTable::merge
-            // does that, but what to do with atoms that are not there?)
-            if (!tvn.isNullTv()) do_merge_tv(result, tvn);
-            return atomTable.add(n);
+            Handle hh = atomTable.add(n);
+            atomTable.merge(hh,tvn);
+            // emit "merge atom" signal
+            _mergeAtomSignal(this,result);
+            return hh;
         }
     }
 
@@ -371,12 +326,10 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         if (l) {
             // ask for a Handle from the TLB
             result = TLB::addAtom(l);
-            // merge the tvn argument with that of the atom just loaded from
-            // the backing store
-            if (!tvn.isNullTv()) do_merge_tv(result, tvn);
             // register the atom with the atomtable (so it gets placed in
             // indices)
             Handle r2 = atomTable.add(l);
+            atomTable.merge(r2,tvn);
             // Send a merge signal
             _mergeAtomSignal(this,r2);
             return r2;

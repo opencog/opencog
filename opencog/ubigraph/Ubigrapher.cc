@@ -159,7 +159,7 @@ bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
     if (!isConnected()) return false;
     boost::shared_ptr<Atom> a = as->cloneAtom(h);
     usleep(pushDelay);
-    if (as->isNode(a->getType()))
+    if (classserver().isA(a->getType(),NODE))
         return addVertex(h);
     else {
         if (compact) {
@@ -180,7 +180,7 @@ bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, Handle h)
     if (!isConnected()) return false;
     boost::shared_ptr<Atom> a = as->cloneAtom(h);
     usleep(pushDelay);
-    if (as->isNode(a->getType()))
+    if (classserver().isA(a->getType(),NODE))
         return removeVertex(h);
     else {
         if (compact) {
@@ -391,7 +391,7 @@ bool Ubigrapher::addVertex(Handle h)
 
     if (!isConnected()) return false;
     boost::shared_ptr<Atom> a = space->cloneAtom(h);
-    bool isNode = space->isNode(a->getType());
+    bool isNode = classserver().isA(a->getType(),NODE);
 
     int id = (int)h.value();
 

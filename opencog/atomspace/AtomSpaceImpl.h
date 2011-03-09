@@ -67,7 +67,6 @@ class AtomSpaceImpl
      * Used to fetch atoms from disk.
      */
     BackingStore *backing_store;
-    void do_merge_tv(Handle, const TruthValue&);
 
     /** Provided signals */
     AtomSignal _addAtomSignal;
@@ -503,23 +502,12 @@ public:
     /** Retrieve the incoming set of a given atom */
     HandleSeq getIncoming(Handle);
 
-    /** Returns the default TruthValue */
-    static const TruthValue& getDefaultTV();
-
-    //----type properties - these first two should be abandoned
-    //and accesed through the classserver as they don't have anything
-    //to do with handles... or they should at least be static.
-    Type getAtomType(const std::string& typeName) const;
-    bool isNode(const Type t) const;
-    bool isLink(const Type t) const;
-
     /** Convenience functions... */
     bool isNode(const Handle& h) const;
     bool isLink(const Handle& h) const;
 
     /** Does t1 inherit from t2 */
     bool inheritsType(Type t1, Type t2) const;
-    std::string getName(Type t) const;
 
     /**
      * Gets a set of handles that matches with the given arguments.
