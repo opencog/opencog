@@ -30,45 +30,55 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/util/numeric.h>
 
+#include <boost/assign/std/vector.hpp>
+
+using namespace std;
+using namespace boost::assign;
 using namespace ant_combo;
 
 // structure containing the options for the eval-table program
 struct evalTableParameters {
-    std::string input_table_file;
-    std::string combo_prog_str;
+    string input_table_file;
+    vector<string> combo_programs;
+    string combo_programs_file;
     bool has_labels;
-    std::vector<std::string> features;
+    vector<string> features;
+    string features_file;
     bool compute_MI;
     bool display_output_table;
-    std::string output_file;
+    string output_file;
 };
 
 template<typename Out, typename OT>
 Out& output_results(Out& out, const evalTableParameters& pa, const OT& ot,
                     double mi) {
     if(pa.compute_MI)
-        out << mi << std::endl; // print mutual information
+        out << mi << endl; // print mutual information
     if(pa.display_output_table)
-        out << ot << std::endl; // print output table
+        out << ot << endl; // print output table
     return out;
 }
 
 template<typename OT>
-void output_results(const evalTableParameters& pa, const OT& ot, double mi) {
-    if(pa.output_file.empty())
-        output_results(std::cout, pa, ot, mi);
-    else {
-        std::ofstream of(pa.output_file.c_str());
-        output_results(of, pa, ot, mi);
-        of.close();        
+void output_results(const evalTableParameters& pa, const OT& ot,
+                    const vector<double>& mis) {
+    foreach(double mi, mis) {
+        if(pa.output_file.empty())
+            output_results(cout, pa, ot, mi);
+        else {
+            ofstream of(pa.output_file.c_str());
+            output_results(of, pa, ot, mi);
+            of.close();        
+        }
     }
 }
 
-std::set<arity_t> get_features_idx(const evalTableParameters& pa) {
-    std::set<arity_t> res;
-    vector<std::string> labels = read_data_file_labels(pa.input_table_file);
-    foreach(const std::string& f, pa.features) {
-        arity_t idx = std::distance(labels.begin(), find(labels, f));
+set<arity_t> get_features_idx(const vector<string>& features,
+                              const vector<string>& labels,
+                              const evalTableParameters& pa) {
+    set<arity_t> res;
+    foreach(const string& f, features) {
+        arity_t idx = distance(labels.begin(), find(labels, f));
         OC_ASSERT((size_t)idx != labels.size(),
                   "No such a feature %s in file %s",
                   f.c_str(), pa.input_table_file.c_str());
@@ -78,17 +88,41 @@ std::set<arity_t> get_features_idx(const evalTableParameters& pa) {
 }
 
 template<typename IT, typename OT>
-void eval_output_results(const evalTableParameters& pa, const combo_tree& tr,
-                         const IT& it, const OT& ot, opencog::RandGen& rng) {
-    // evaluated tr over input table
-    OT ot_tr(tr, it, rng);
-    ot_tr.set_label(ot.get_label());
-
-    // compute MI
-    double mi = pa.compute_MI?
-        mutualInformation(it, ot_tr, get_features_idx(pa)) : 0;
-    // print results
-    output_results(pa, ot_tr, mi);
+void eval_output_results(const evalTableParameters& pa,
+                         const vector<combo_tree>& trs,
+                         IT& it, const OT& ot, opencog::RandGen& rng) {
+    foreach(const combo_tree& tr, trs) {
+        // evaluated tr over input table
+        it.set_consider_args(argument_set(tr)); // to speed up ot_tr computation
+        OT ot_tr(tr, it, rng);
+        
+        ot_tr.set_label(ot.get_label());
+        
+        // compute MI for each feature set
+        vector<double> mis;
+        if(pa.compute_MI) {
+            vector<string> labels = read_data_file_labels(pa.input_table_file);
+            if(!pa.features.empty()) {
+                set<arity_t> fs = get_features_idx(pa.features, labels, pa);
+                mis += mutualInformation(it, ot_tr, fs);
+            }
+            if(!pa.features_file.empty()) {
+                ifstream in(pa.features_file.c_str());
+                while(in.good()) {
+                    string line;
+                    getline(in, line);
+                    if(line.empty())
+                        continue;
+                    set<arity_t> fs =
+                        get_features_idx(tokenizeRowVec<string>(line),
+                                         labels, pa);
+                    mis += mutualInformation(it, ot_tr, fs);
+                }
+            }
+        }
+        // print results
+        output_results(pa, ot_tr, mis);
+    }
 }
 
 template<typename IT, typename OT, typename Type>
@@ -99,13 +133,23 @@ void read_eval_output_results(const evalTableParameters& pa,
 
     // read data table
     istreamTable<IT, OT, Type>(pa.input_table_file, it, ot);
-    
-    // read combo program
-    combo_tree tr = str2combo_tree_label(pa.combo_prog_str,
-                                         pa.has_labels, it.get_labels());
 
+    // read combo programs
+    vector<combo_tree> trs;
+    foreach(const string& tr_str, pa.combo_programs)
+        trs += str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
+    if(!pa.combo_programs_file.empty()) {
+        ifstream in(pa.combo_programs_file.c_str());
+        while(in.good()) {
+            string line;
+            getline(in, line);
+            if(line.empty())
+                continue;
+            trs += str2combo_tree_label(line, pa.has_labels, it.get_labels());
+        }
+    }
     // eval and output the results
-    eval_output_results(pa, tr, it, ot, rng);
+    eval_output_results(pa, trs, it, ot, rng);
 }
 
 #endif // _OPENCOG_EVAL_TABLE_H

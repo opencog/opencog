@@ -77,13 +77,17 @@ int main(int argc,char** argv) {
          "Random seed.\n")
         ("input-table,i", value<string>(&pa.input_table_file),
          "Input table file.\n")
-        ("combo-program,c", value<string>(&pa.combo_prog_str),
-         "Combo program to evaluate against the input table.\n")
+        ("combo-program,c", value<vector<string> >(&pa.combo_programs),
+         "Combo program to evaluate against the input table. It can be used several time so that several programs are evaluated at once.\n")
+        ("combo-programs-file,C", value<string>(&pa.combo_programs_file),
+         "File containing combo programs to evaluate against the input table. Each combo program in the file is seperated by a new line and each results are displaied in the same order, seperated by a new line.\n")
         ("labels,l", "If enabled then the combo program is expected to contain variables labels #labels1, etc, instead of place holders. For instance one provide the combo program \"and(#large #tall)\" instead of \"and(#24 #124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
         ("output-file,o", value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
         ("feature,f", value<vector<string> >(&pa.features),
          "Feature to consider. Can be used several time for several features. Useful to output the mutual information between a set of features and the output of the combo program (option -c).\n")
+        ("features-file,F", value<string>(&pa.features_file),
+         "File containing features to consider, TODO.\n")
         ("compute-MI,m", value<bool>(&pa.compute_MI)->default_value(false),
          "Compute the mutual information between a given set of features (see option -f) and a given combo program (see option -c)")
         ("display-output-table,d", value<bool>(&pa.display_output_table),
