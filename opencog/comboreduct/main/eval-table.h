@@ -62,14 +62,15 @@ Out& output_results(Out& out, const evalTableParameters& pa, const OT& ot,
 template<typename OT>
 void output_results(const evalTableParameters& pa, const OT& ot,
                     const vector<double>& mis) {
-    foreach(double mi, mis) {
-        if(pa.output_file.empty())
+    
+    if(pa.output_file.empty())
+        foreach(double mi, mis)
             output_results(cout, pa, ot, mi);
-        else {
-            ofstream of(pa.output_file.c_str());
+    else {
+        ofstream of(pa.output_file.c_str(), ios_base::app);
+        foreach(double mi, mis)
             output_results(of, pa, ot, mi);
-            of.close();        
-        }
+        of.close();        
     }
 }
 
