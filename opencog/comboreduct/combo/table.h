@@ -724,6 +724,12 @@ std::pair<std::vector<T>, T> tokenizeRow(std::string& line) {
     tokenizeRow(line, input_vec, output);
     return std::make_pair(input_vec, output);
 }
+template<typename T>
+std::vector<T> tokenizeRowVec(std::string& line) {
+    std::pair<std::vector<T>, T> p = tokenizeRow<T>(line);
+    p.first.push_back(p.second);
+    return p.first;
+}
 
 /**
  * template to fill an input table (IT) and output table (OT) of type
