@@ -35,6 +35,7 @@
 
 #define OBFUSCATE (0x55555555UL)
 
+class TLBUTest;
 class AtomSpaceUTest;
 class AtomSpaceImplUTest;
 class AtomTableUTest;
@@ -66,6 +67,7 @@ class TLB
     friend class ::AtomSpaceImplUTest;
     friend class AtomTable;
     friend class ::AtomTableUTest;
+    friend class ::TLBUTest;
 
     // TODO review these AtomSpace friend classes to see whether they
     // are allowed to access the TLB in the way that they do.
@@ -201,11 +203,13 @@ inline Atom* TLB::removeAtom(const Handle& h)
             "Cannot remove invalid Handle from TLB");
     }
     Atom* atom = TLB::getAtom(h);
-    // Remove from the map
-    handle_map.erase(h);
-    // blank the old handle so it is clear this Atom is no longer
-    // in the TLB
-    atom->handle = Handle::UNDEFINED;
+    if (atom) {
+        // Remove from the map
+        handle_map.erase(h);
+        // blank the old handle so it is clear this Atom is no longer
+        // in the TLB
+        atom->handle = Handle::UNDEFINED;
+    }
     return atom;
 }
 

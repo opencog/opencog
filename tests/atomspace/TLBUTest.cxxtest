@@ -1,0 +1,73 @@
+/*
+ * tests/atomspace/TLBUTest.cxxtest
+ *
+ * Copyright (C) 2011 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <iostream>
+#include <fstream>
+#include <streambuf>
+#include <stdio.h>
+
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+using namespace std;
+
+class TLBUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+    TLBUTest() {
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+    void testPrint() {
+        std::streambuf* cout_sbuf = std::cout.rdbuf(); // save original sbuf
+        std::ofstream   fout("TLB_cout.txt");
+        std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'
+        TLB::print();
+        std::cout.rdbuf(cout_sbuf); // restore the original stream buffer
+        remove("TLB_cout.txt");
+    }
+
+    void testAdd() {
+        Node* n = new Node(CONCEPT_NODE, "test");
+        TLB::addAtom(n);
+        TS_ASSERT_THROWS(TLB::addAtom(n),InvalidParamException);
+    }
+
+    void testRemove() {
+        Node* n = new Node(CONCEPT_NODE, "test");
+        Handle h = TLB::addAtom(n);
+        TS_ASSERT_EQUALS(TLB::removeAtom(h),n);
+        TS_ASSERT(TLB::removeAtom(h) == NULL);
+        TS_ASSERT_THROWS(TLB::removeAtom(Handle::UNDEFINED),InvalidParamException);
+
+    }
+
+};
