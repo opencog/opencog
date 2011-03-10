@@ -28,6 +28,7 @@
 #include <opencog/atomspace/ClassServer.h>
 
 using namespace opencog;
+using namespace std;
 
 class ClassServerUTest :  public CxxTest::TestSuite
 {
@@ -122,5 +123,23 @@ public:
         TS_ASSERT( classserver().isA(CS_UTEST_LINK,   UNORDERED_LINK));
         TS_ASSERT(!classserver().isA(CS_UTEST_LINK,   NODE));
         TS_ASSERT(!classserver().isA(CS_UTEST_LINK,   NUMBER_NODE));
+    }
+
+    void testIteratorMethods() {
+        vector<Type> types;
+        back_insert_iterator< vector<Type> > back_it (types);
+        classserver().getChildren(NODE, back_it);
+        for (vector<Type>::iterator it = types.begin();
+                it != types.end(); it++) {
+            TS_ASSERT(classserver().isNode(*it));
+        }
+        vector<Type> types2;
+        back_insert_iterator< vector<Type> > back_it2 (types2);
+        classserver().getChildrenRecursive(NODE, back_it2);
+        for (vector<Type>::iterator it = types2.begin();
+                it != types2.end(); it++) {
+            TS_ASSERT(classserver().isNode(*it));
+        }
+        TS_ASSERT(types2.size() >= types.size());
     }
 };
