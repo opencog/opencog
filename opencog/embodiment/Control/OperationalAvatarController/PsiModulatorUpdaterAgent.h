@@ -1,11 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiModulatorUpdaterAgent.h
  *
- * Copyright (C) 2002-2009 Novamente LLC
- * All Rights Reserved
- *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2010-12-05
+ * @date 2011-03-11
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,7 +19,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #ifndef PSIMODULATORUPDATERAGENT_H
 #define PSIMODULATORUPDATERAGENT_H
@@ -44,47 +40,88 @@ namespace OperationalAvatarController
  * 
  * The format of Modulator in AtomSpace is
  *
- * SimilarityLink (stv 1.0 1.0)
- *     NumberNode: "modulator_value"
- *     ExecutionOutputLink
- *         GroundedSchemaNode: xxxModulatorUpdater
- *         ListLink
- *            PET_HANDLE
+ * AtTimeLink
+ *     TimeNode "timestamp"
+ *     SimilarityLink (stv 1.0 1.0)
+ *         NumberNode: "modulator_value"
+ *         ExecutionOutputLink
+ *             GroundedSchemaNode: xxxModulatorUpdater
+ *             ListLink (empty)
 */
 class PsiModulatorUpdaterAgent : public opencog::Agent
 {
 private:
 
-    // Helper class that stores meta data of a Modulator 
-    class ModulatorMeta
+    /**
+     * Inner class for Modulator
+     */
+    class Modulator
     {
     public:
 
-        std::string updaterName; // The schema name that updates the Modulator
-        Handle similarityLink;   // Handle to SimilarityLink that holds the Modulator 
-        double updatedValue;     // The updated value after calling the Modulator updater  
-        bool bUpdated;           // Indicate if the value of the Modulator has been updated
+        Modulator(const std::string & modulatorName, Handle hUpdater) :
+            modulatorName(modulatorName), hUpdater(hUpdater)
+        {};
 
-        void init (const std::string & updaterName, Handle similarityLink) {
-            this->updaterName = updaterName;
-            this->similarityLink = similarityLink;
-            this->updatedValue = 0;
-            this->bUpdated = false;
+        inline const std::string & getModulatorName() 
+        {
+            return this->modulatorName;
         }
-    }; // class
+
+        inline Handle getHandleUpdater()
+        {
+            return this->hUpdater;
+        }
+  
+        /**
+         * Update the Modulator Value
+         *
+         * @return return true if update successfully, otherwise false
+         */
+        bool runUpdater(const AtomSpace & atomSpace, 
+                        Procedure::ProcedureInterpreter & procedureInterpreter, 
+                        const Procedure::ProcedureRepository & procedureRepository);
+
+        /**
+         * Set the new modulator value to the AtomSpace
+         *
+         * @return return true if update successfully, otherwise false
+         *
+         * TODO: Only current (latest) modulator value is considered, also take previous modulator values in future
+         *
+         * @note This function woule create a new NumberNode and SimilarityLink to store the result, 
+         *       and then time stamp the SimilarityLink.
+         *
+         *       Since OpenCog would forget (remove) those Nodes and Links gradually, 
+         *       unless you create them to be permanent, don't worry about the overflow of memory. 
+         *
+         *       AtTimeLink
+         *           TimeNode "timestamp"
+         *           SimilarityLink (stv 1.0 1.0)
+         *               NumberNode: "modulator_value"
+         *                   ExecutionOutputLink
+         *                       GroundedSchemaNode: xxxModulatorUpdater
+         *                       ListLink (empty)
+         */
+        bool updateModulator(AtomSpace & atomSpace, 
+                             Procedure::ProcedureInterpreter & procedureInterpreter,
+                             const Procedure::ProcedureRepository & procedureRepository, 
+                             const unsigned long timeStamp);
+
+    private:        
+
+        std::string modulatorName;    // The name of the Modulator
+        Handle hUpdater;              // Handle to Modulator updater (ExecutionOutputLink)
+        double currentModulatorValue; // Store current (latest) value of Modulator
+
+    };// class Modulator
 
     unsigned long cycleCount;
 
-    std::map <std::string, ModulatorMeta> modulatorMetaMap;  // Modulator - Meta data map 
+    std::vector<Modulator> modulatorList;  // List of Modulators
 
-    // Initialize modulatorMetaMap etc.
+    // Initialize modulatorList etc.
     void init(opencog::CogServer * server);
-
-    // Run updaters (combo scripts)
-    void runUpdaters(opencog::CogServer * server);
-
-    // Set updated values to AtomSpace (NumberNodes)
-    void setUpdatedValues(opencog::CogServer * server);
 
     bool bInitialized; 
 

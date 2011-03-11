@@ -2434,30 +2434,27 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     // Modulators        
     case id::get_activation_modulator:
         logger().debug("WorldWrapperUtil::%s - id::get_activation_modulator", __FUNCTION__);
-        return WorldWrapperUtil::getModulator( rng, 
-                                               atomSpace, 
+        return WorldWrapperUtil::getModulator( atomSpace, 
                                                std::string(ACTIVATION_MODULATOR_NAME),
-                                               self_id, 
+                                               rng, 
                                                time
                                              );
         break;
 
     case id::get_resolution_modulator:
        logger().debug("WorldWrapperUtil::%s - id::get_resolution_modulator", __FUNCTION__);
-       return WorldWrapperUtil::getModulator( rng, 
-                                              atomSpace, 
+       return WorldWrapperUtil::getModulator( atomSpace, 
                                               std::string(RESOLUTION_MODULATOR_NAME),
-                                              self_id,
+                                              rng,
                                               time
                                              );
         break;
 
     case id::get_securing_threshold_modulator:
       logger().debug("WorldWrapperUtil::%s - id::get_securing_threshold_modulator", __FUNCTION__);
-      return WorldWrapperUtil::getModulator( rng, 
-                                             atomSpace, 
+      return WorldWrapperUtil::getModulator( atomSpace, 
                                              std::string(SECURING_THRESHOLD_MODULATOR_NAME), 
-                                             self_id,
+                                             rng,
                                              time
                                            );
         break;
@@ -2466,10 +2463,9 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
      logger().debug( "WorldWrapperUtil::%s - id::get_selection_threshold_modulator",
                      __FUNCTION__
                    );
-     return WorldWrapperUtil::getModulator( rng, 
-                                            atomSpace, 
+     return WorldWrapperUtil::getModulator( atomSpace, 
                                             std::string(SELECTION_THRESHOLD_MODULATOR_NAME),
-                                            self_id,
+                                            rng,
                                             time
                                           );
 
@@ -2480,7 +2476,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         logger().debug("WorldWrapperUtil::%s - id::get_energy_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
                                             std::string(ENERGY_DEMAND_NAME),
-                                            self_id, 
+                                            rng, 
                                             time
                                           );
         break;
@@ -2489,7 +2485,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         logger().debug("WorldWrapperUtil::%s - id::get_water_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
                                             std::string(WATER_DEMAND_NAME),
-                                            self_id, 
+                                            rng, 
                                             time
                                           );
         break;
@@ -2498,7 +2494,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         logger().debug("WorldWrapperUtil::%s - id::get_integrity_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
                                             std::string(INTEGRITY_DEMAND_NAME),
-                                            self_id, 
+                                            rng, 
                                             time
                                           );
         break;
@@ -2507,7 +2503,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         logger().debug("WorldWrapperUtil::%s - id::get_affiliation_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
                                             std::string(AFFILIATION_DEMAND_NAME),
-                                            self_id, 
+                                            rng, 
                                             time
                                           );
         break;
@@ -2516,7 +2512,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         logger().debug("WorldWrapperUtil::%s - id::get_certainty_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
                                             std::string(CERTAINTY_DEMAND_NAME),
-                                            self_id, 
+                                            rng, 
                                             time
                                           );
         break;
@@ -2525,7 +2521,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         logger().debug("WorldWrapperUtil::%s - id::get_competence_demand", __FUNCTION__);
         return WorldWrapperUtil::getDemand( atomSpace, 
                                             std::string(COMPETENCE_DEMAND_NAME),
-                                            self_id, 
+                                            rng, 
                                             time
                                           );
         break;
@@ -3105,10 +3101,9 @@ float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& atomSpace,
     return value;
 }
 
-float WorldWrapperUtil::getModulator(opencog::RandGen & rng, 
-                                     const AtomSpace & atomSpace,
-                                     const std::string & modulator,
-                                     const std::string & self_id,
+float WorldWrapperUtil::getModulator(const AtomSpace & atomSpace,
+                                     const std::string & modulatorName,
+                                     opencog::RandGen & randGen,
                                      unsigned long time)
 {
     // Cache predicate data variables
@@ -3116,21 +3111,20 @@ float WorldWrapperUtil::getModulator(opencog::RandGen & rng,
     // Actually, Modulator is not a Predicate in AtomSpace 
     // (see "rules_core.scm" for the detail),
     // while we only want to use WorldWrapperUtil's cache mechanism.
-    std::string name(modulator);
+    std::string name(modulatorName);
     std::vector<std::string> argument;
 
     WorldWrapper::predicate pred(name, argument);
     float value = WorldWrapperUtil::cache.find(time, pred);
 
     if (value == CACHE_MISS) {
-        value = AtomSpaceUtil::getCurrentModulatorLevel(rng, atomSpace, modulator, self_id);
+        value = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace, modulatorName, randGen);
         WorldWrapperUtil::cache.add(time, pred, value);
     }
 
-    logger().debug( "WorldWrapperUtil::%s - '%s' for the pet with id '%s' is '%f'.", 
+    logger().debug( "WorldWrapperUtil::%s - '%s' for the pet is '%f'", 
                     __FUNCTION__, 
-                    modulator.c_str(), 
-                    self_id.c_str(),
+                    modulatorName.c_str(), 
                     value
                   );
 
@@ -3138,8 +3132,8 @@ float WorldWrapperUtil::getModulator(opencog::RandGen & rng,
 }
 
 float WorldWrapperUtil::getDemand(const AtomSpace & atomSpace,
-                                  const std::string & demand,
-                                  const std::string & self_id,
+                                  const std::string & demandName,
+                                  opencog::RandGen & randGen, 
                                   unsigned long time)
 {
     // Cache predicate data variables
@@ -3147,21 +3141,20 @@ float WorldWrapperUtil::getDemand(const AtomSpace & atomSpace,
     // Actually, Demand is not a Predicate in AtomSpace 
     // (see "rules_core.scm" for the detail),
     // while we only want to use WorldWrapperUtil's cache mechanism.
-    std::string name(demand);
+    std::string name(demandName);
     std::vector<std::string> argument;
 
     WorldWrapper::predicate pred(name, argument);
     float value = WorldWrapperUtil::cache.find(time, pred);
 
     if (value == CACHE_MISS) {
-        value = AtomSpaceUtil::getCurrentDemandLevel(atomSpace, demand, self_id);
+        value = AtomSpaceUtil::getCurrentDemandLevel(atomSpace, demandName, randGen);
         WorldWrapperUtil::cache.add(time, pred, value);
     }
 
-    logger().debug( "WorldWrapperUtil::%s - '%s' for the pet with id '%s' is '%f'.", 
+    logger().debug( "WorldWrapperUtil::%s - current '%s' level is '%f'.", 
                     __FUNCTION__, 
-                    demand.c_str(), 
-                    self_id.c_str(),
+                    demandName.c_str(), 
                     value
                   );
 

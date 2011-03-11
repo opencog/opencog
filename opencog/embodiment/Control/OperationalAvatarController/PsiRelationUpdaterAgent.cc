@@ -584,10 +584,9 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     }
 
     // Decide whether to update relations during this cognitive cycle (controlled by the modulator 'SecuringThreshold')
-    float securingThreshold = AtomSpaceUtil::getCurrentModulatorLevel(randGen,
-                                                                      atomSpace,
+    float securingThreshold = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
                                                                       SECURING_THRESHOLD_MODULATOR_NAME, 
-                                                                      petId
+                                                                      randGen
                                                                      );
 // TODO: Uncomment the lines below once finish testing
 //    if ( randGen.randfloat() < securingThreshold ) 

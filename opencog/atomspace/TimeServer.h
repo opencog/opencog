@@ -127,13 +127,13 @@ public:
     void clear();
 
     /**
-     * Adds both the AtTime(TimeNode <timestamp>, atom) atom
-     * representation into the AtomTable and the entry (atom,
-     * timestamp) into the TimeServer of the given AtomSpace.
+     * Adds both the AtTime(TimeNode <timestamp>, atom) atom representation into the AtomTable 
+     * and the entry (atom, * timestamp) into the TimeServer of the given AtomSpace.
      *
-     * @param atom the Handle of the atom to be associated to the timestamp
-     * @param timestamp The timestamp to be associated to the atom.
-     * @param tv Truth value for the AtTimeLink created (optional)
+     * @param atom       the Handle of the atom to be associated to the timestamp
+     * @param timestamp  The timestamp to be associated to the atom.
+     * @param tv         Truth value for the AtTimeLink created (optional)
+     *
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
     Handle addTimeInfo(Handle atom, unsigned long timestamp,

@@ -432,8 +432,6 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     }
     logger().debug("PAI - Processing avatar-signal done");
 
-
-
     // getting <agent-signal> elements from the XML message
     XMLString::transcode(AGENT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
@@ -443,7 +441,6 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     }
     logger().debug("PAI - Processing agent-signal done");
 
-
     // getting <object-signal> elements from the XML message
     XMLString::transcode(OBJECT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
@@ -452,7 +449,6 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processObjectSignal((DOMElement *)list->item(i));
     }
     logger().debug("PAI - Processing object-signal done");
-
 
     // getting <instructions> elements from the XML message
     XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -471,9 +467,6 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processAgentSensorInfo((DOMElement *)list->item(i));
     } // for
     logger().debug("PAI - Processing agent-sensor-info done");
-
-
-
 }
 
 void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
@@ -714,7 +707,6 @@ void PAI::processPetSignal(DOMElement * element)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-
     /// getting timestamp atribute value
     XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* timestamp = XMLString::transcode(element->getAttribute(tag));
@@ -772,7 +764,8 @@ void PAI::processPetSignal(DOMElement * element)
             XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
             char* paramValue = XMLString::transcode(((DOMElement *)list->item(i))->getAttribute(tag));
 
-            // TODO: Technically, the param type may be composed like vector, rotation or entity. If so, it would need to parse an additional element for getting the value.
+            // TODO: Technically, the param type may be composed like vector, rotation or entity. 
+            //       If so, it would need to parse an additional element for getting the value.
             //        Should they be considered in this case?
 
 //            logger().debug("PAI - processPetSignal - before addPhysiologicalFeelingParam.");
@@ -2378,8 +2371,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
     return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle);
 }
 
-Handle PAI::addPhysiologicalFeelingParam(const char* paramName,
-        const char* paramValue)
+Handle PAI::addPhysiologicalFeelingParam(const char* paramName, const char* paramValue)
 {
     HandleSeq outgoing;
     outgoing.push_back(AtomSpaceUtil::addNode(atomSpace, NODE, paramName));
@@ -2394,46 +2386,71 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
                                     const HandleSeq& feelingParams)
 {
     HandleSeq evalLinkOutgoing;
+
+    // Add PredicateNode
     string predicateName = petID;
     predicateName += ".";
     predicateName += name;
     Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName.c_str());
+
+    // Add EvaluationLink
     evalLinkOutgoing.push_back(predicateNode);
     evalLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, feelingParams));
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo( evalLink, timestamp);
+    // Time stamp the EvaluationLink
+    //
+    // AtTimeLink
+    //     TimeNode "timestamp"
+    //     EvaluationLink
+    //
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp);
+
+    // TODO: what does this for? [by Zhenhua Cai, on 2011-03-08]
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, predicateNode);
     
     // setup the frame for the given physiological feeling
+    //
+    // Note: What does this for?
     float value = 0.0f;
     if (feelingParams.size() > 1) {
         try {
+            // Note: Since feelingParams is a vector of handles to ListLinks without names,
+            //       it seems impossible to get the value! [By ZhenhuaCai, on 2011-03-08]
             value = boost::lexical_cast<float>( atomSpace.getName( feelingParams[1] ) );
         } catch ( boost::bad_lexical_cast &ex ) { } // ignore
     } // if
 
-
+    // Create the name for the frame
     std::string feeling = name;
-    boost::replace_first( feeling, "_urgency", "");
-
+    boost::replace_first(feeling, "_urgency", "");
     std::string frameInstanceName = avatarInterface.getPetId() + "_" + feeling + "_biological_urge";
 
-    if ( value > 0 ) {
-        std::string degree = value >= 0.7 ? "High" : value >= 0.3 ? "Medium" : "Low";
+    // TODO: The if block below may cause problems because the value of the 'value' variable is undetermined. 
+    //       [By ZhenhuaCai, on 2011-03-08]
+    if (value > 0) {
+        std::string degree = (value >= 0.7) ? 
+                                 "High" :
+                                 (value >= 0.3) ?
+                                     "Medium" : 
+                                     "Low";
+
         std::map<std::string, Handle> elements;
         elements["Experiencer"] = atomSpace.addNode( SEME_NODE, avatarInterface.getPetId() );
         elements["State"] = atomSpace.addNode( CONCEPT_NODE, feeling );
         elements["Degree"] = atomSpace.addNode( CONCEPT_NODE, degree );
         elements["Value"] = atomSpace.addNode( NUMBER_NODE, boost::lexical_cast<std::string>( value ) );
 
-        AtomSpaceUtil::setPredicateFrameFromHandles( 
-            atomSpace, "#Biological_urge", frameInstanceName,
-                 elements, SimpleTruthValue( (value < 0.5) ? 0.0 : value, 1.0 ) );        
+        AtomSpaceUtil::setPredicateFrameFromHandles( atomSpace,
+                                                     "#Biological_urge", 
+                                                     frameInstanceName,
+                                                     elements, 
+                                                     SimpleTruthValue( (value < 0.5) ? 0.0 : value, 1.0 ) 
+                                                    );
     } else {
-        Handle predicateNode = atomSpace.getHandle( PREDICATE_NODE, frameInstanceName );
+        Handle predicateNode = atomSpace.getHandle(PREDICATE_NODE, frameInstanceName);
         if ( predicateNode != Handle::UNDEFINED ) {
-            AtomSpaceUtil::deleteFrameInstance( atomSpace, predicateNode );
+            AtomSpaceUtil::deleteFrameInstance(atomSpace, predicateNode);
         } // if
     } // else
     

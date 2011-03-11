@@ -1,11 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.cc
  *
- * Copyright (C) 2002-2009 Novamente LLC
- * All Rights Reserved
- *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-01-05
+ * @date 2011-03-09
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,7 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include "OAC.h"
 #include "PsiDemandUpdaterAgent.h"
 
@@ -31,6 +27,261 @@
 #include<boost/lexical_cast.hpp>
 
 using namespace OperationalAvatarController;
+
+bool PsiDemandUpdaterAgent::Demand::runUpdater
+    (const AtomSpace & atomSpace, 
+     Procedure::ProcedureInterpreter & procedureInterpreter, 
+     const Procedure::ProcedureRepository & procedureRepository
+    )
+{
+    // Get ListLink that holding the updater
+    Handle hListLink = atomSpace.getOutgoing(this->hFuzzyWithin, 1);
+
+    if ( hListLink == opencog::Handle::UNDEFINED ||
+         atomSpace.getType(hListLink) != LIST_LINK || 
+         atomSpace.getArity(hListLink) != 3 ) {
+
+        logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a ListLink for demand '%s' with three arity that contains an updater (ExecutionOutputLink). But got '%s'", 
+                       __FUNCTION__, 
+                       this->demandName.c_str(), 
+                       atomSpace.atomAsString(hListLink).c_str()
+                      );
+        return false; 
+    }
+
+logger().debug("PsiDemandUpdaterAgent::Demand::%s - ListLink: %s", 
+               __FUNCTION__, 
+               atomSpace.atomAsString(hListLink).c_str()
+              );
+
+    // Get the ExecutionOutputLink
+    Handle hExecutionOutputLink = atomSpace.getOutgoing(hListLink, 2);
+
+    if ( hExecutionOutputLink == opencog::Handle::UNDEFINED ||
+         atomSpace.getType(hExecutionOutputLink) != EXECUTION_OUTPUT_LINK ||
+         atomSpace.getArity(hExecutionOutputLink) != 2 ) {
+
+        logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a ExecutionOutputLink for demand '%s' with two arity that contains an updater. But got '%s'", 
+                       __FUNCTION__, 
+                       this->demandName.c_str(), 
+                       atomSpace.atomAsString(hExecutionOutputLink).c_str()
+                      );
+        return false; 
+    }
+
+logger().debug("PsiDemandUpdaterAgent::Demand::%s - ExecutionOutputLink: %s", 
+               __FUNCTION__, 
+               atomSpace.atomAsString(hExecutionOutputLink).c_str()
+              );
+
+    // Get the GroundedSchemaNode
+    Handle hGroundedSchemaNode = atomSpace.getOutgoing(hExecutionOutputLink, 0);
+
+    if ( hGroundedSchemaNode == opencog::Handle::UNDEFINED ||
+         atomSpace.getType(hGroundedSchemaNode) != GROUNDED_SCHEMA_NODE ) {
+
+        logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a GroundedSchemaNode for demand '%s'. But got '%s'", 
+                       __FUNCTION__, 
+                       this->demandName.c_str(), 
+                       atomSpace.atomAsString(hGroundedSchemaNode).c_str()
+                      );
+        return false; 
+
+    }
+
+logger().debug("PsiDemandUpdaterAgent::Demand::%s - GroundedSchemaNode: %s", 
+               __FUNCTION__, 
+               atomSpace.atomAsString(hGroundedSchemaNode).c_str()
+              );
+
+    // Run the Procedure that update Demand and get the updated value
+    const std::string & updaterName = atomSpace.getName(hGroundedSchemaNode);
+    std::vector <combo::vertex> schemaArguments;
+    Procedure::RunningProcedureID executingSchemaId;
+    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
+
+    const Procedure::GeneralProcedure & procedure =
+                                        procedureRepository.get(updaterName);
+
+    executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
+
+    // Wait until the procedure is done
+    while ( !procedureInterpreter.isFinished(executingSchemaId) )
+        procedureInterpreter.run(NULL);  
+
+    // Check if the the updater run successfully
+    if ( procedureInterpreter.isFailed(executingSchemaId) ) {
+        logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute '%s' for updating demand '%s'", 
+                         __FUNCTION__, 
+                         updaterName.c_str(), 
+                         this->demandName.c_str()
+                      );
+
+        return false;
+    }
+
+    // Store the updated demand value (result)
+    result = procedureInterpreter.getResult(executingSchemaId);
+    this->currentDemandValue = get_contin(result);
+
+    logger().debug("PsiDemandUpdaterAgent::Demand::%s - The level of demand '%s' will be set to '%f'", 
+                   __FUNCTION__, 
+                   this->demandName.c_str(), 
+                   this->currentDemandValue
+                  );
+
+    return true; 
+}    
+
+bool PsiDemandUpdaterAgent::Demand::updateDemandGoal
+    (AtomSpace & atomSpace, 
+     Procedure::ProcedureInterpreter & procedureInterpreter,
+     const Procedure::ProcedureRepository & procedureRepository, 
+     const unsigned long timeStamp
+    )
+{
+    // Get the GroundedPredicateNode "FuzzyWithin"
+    Handle hGroundedPredicateNode = atomSpace.getOutgoing(hFuzzyWithin, 0);
+
+    if ( hGroundedPredicateNode == opencog::Handle::UNDEFINED ||
+         atomSpace.getType(hGroundedPredicateNode) != GROUNDED_PREDICATE_NODE ) {
+
+        logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a GroundedPredicateNode for demand '%s'. But got '%s'", 
+                       __FUNCTION__, 
+                       this->demandName.c_str(), 
+                       atomSpace.atomAsString(hGroundedPredicateNode).c_str()
+                      );
+        return false; 
+    }
+
+    // Get ListLink containing ExecutionOutputLink and parameters of FuzzyWithin
+    Handle hListLink = atomSpace.getOutgoing(hFuzzyWithin, 1);
+
+    if ( hListLink == opencog::Handle::UNDEFINED ||
+         atomSpace.getType(hListLink) != LIST_LINK || 
+         atomSpace.getArity(hListLink) != 3 ) {
+
+        logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a ListLink for demand '%s' with three arity (parameters of FuzzyWithin). But got '%s'", 
+                       __FUNCTION__, 
+                       this->demandName.c_str(), 
+                       atomSpace.atomAsString(hListLink).c_str()
+                      );
+        return false; 
+    }
+
+    // Get the ExecutionOutputLink
+    Handle hExecutionOutputLink = atomSpace.getOutgoing(hListLink, 2);
+
+    if ( hExecutionOutputLink == opencog::Handle::UNDEFINED ||
+         atomSpace.getType(hExecutionOutputLink) != EXECUTION_OUTPUT_LINK ||
+         atomSpace.getArity(hExecutionOutputLink) != 2 ) {
+
+        logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a ExecutionOutputLink for demand '%s' with two arity that contains an updater. But got '%s'", 
+                       __FUNCTION__, 
+                       this->demandName.c_str(), 
+                       atomSpace.atomAsString(hExecutionOutputLink).c_str()
+                      );
+        return false; 
+    }
+
+    // Create a new NumberNode and SilarityLink to store the result
+    //
+    // Note: Since OpenCog would forget (remove) those Nodes and Links gradually, 
+    //       unless you create them to be permanent, don't worry about the overflow of memory. 
+
+    // Create a new NumberNode that stores the updated value
+    // If the Demand doesn't change at all, it actually returns the old one
+    Handle hNewNumberNode = AtomSpaceUtil::addNode( atomSpace,
+                                                    NUMBER_NODE,
+                                                    boost::lexical_cast<std::string>
+                                                           (this->currentDemandValue),
+                                                    false // the atom should not be permanent (can be
+                                                          // removed by decay importance task) 
+                                                  );
+
+    // Create a new SimilarityLink that holds the DemandSchema
+    // If the Demand doesn't change at all, it actually returns the old one
+    std::vector<Handle> similarityLinkOutgoing;
+
+    similarityLinkOutgoing.push_back(hNewNumberNode);
+    similarityLinkOutgoing.push_back(hExecutionOutputLink);
+
+    Handle hNewSimilarityLink = AtomSpaceUtil::addLink( atomSpace,
+                                                        SIMILARITY_LINK, 
+                                                        similarityLinkOutgoing,
+                                                        false // the atom should not be permanent (can be
+                                                              // removed by decay importance task)
+                                                      );
+  
+    // Time stamp the SimilarityLink.
+    Handle hAtTimeLink = atomSpace.getTimeServer().addTimeInfo(hNewSimilarityLink, timeStamp);
+
+    logger().debug("PsiDemandUpdaterAgent::Demand::%s - Updated the value of '%s' demand to %f and store it to AtomSpace as '%s'", 
+                   __FUNCTION__, 
+                   demandName.c_str(), 
+                   this->currentDemandValue, 
+                   atomSpace.atomAsString(hNewSimilarityLink).c_str()
+                  );
+
+    // Run the FuzzyWithin procedure
+    std::string demandGoalEvaluator = atomSpace.getName(hGroundedPredicateNode);
+    std::vector <combo::vertex> schemaArguments;
+    Procedure::RunningProcedureID executingSchemaId;
+    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
+
+    // Get min/ max acceptable values
+    std::string minValueStr = atomSpace.getName( atomSpace.getOutgoing(hListLink, 0) );
+    std::string maxValueStr = atomSpace.getName( atomSpace.getOutgoing(hListLink, 1) );
+
+    // Prepare arguments
+    schemaArguments.clear(); 
+
+    // TODO: we would also use previous demand values in future
+    schemaArguments.push_back( this->currentDemandValue);  
+    schemaArguments.push_back( boost::lexical_cast<double> (minValueStr) );
+    schemaArguments.push_back( boost::lexical_cast<double> (maxValueStr) );
+
+    // Run the procedure
+    const Procedure::GeneralProcedure & procedure =
+                                        procedureRepository.get(demandGoalEvaluator);
+
+    executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
+
+    // Wait until the procedure done
+    while ( !procedureInterpreter.isFinished(executingSchemaId) )
+        procedureInterpreter.run(NULL);  
+
+    // Check if the the FuzzyWithin procedure run successfully
+    if ( procedureInterpreter.isFailed(executingSchemaId) ) {
+        logger().error( "PsiDemandUpdaterAgent::Demand::%s - Failed to execute FuzzyWithin procedure '%s' for demand '%s'", 
+                         __FUNCTION__, 
+                         demandGoalEvaluator.c_str(), 
+                         this->demandName.c_str()
+                      );
+
+        return false;
+    }
+
+    result = procedureInterpreter.getResult(executingSchemaId);
+
+    // Update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
+    // TODO: Use PLN forward chainer to handle this?
+    atomSpace.setTV( this->hDemandGoal,
+                     SimpleTruthValue(get_contin(result), 1.0f)
+                   );
+
+    atomSpace.setTV( this->hFuzzyWithin,
+                     SimpleTruthValue(get_contin(result), 1.0f)
+                   );
+
+    logger().debug( "PsiDemandUpdaterAgent::Demand::%s - The level  (truth value) of DemandGoal '%s' has been set to %f", 
+                     __FUNCTION__, 
+                     this->demandName.c_str(),
+                     get_contin(result)
+                  );
+
+    return true; 
+}    
 
 PsiDemandUpdaterAgent::~PsiDemandUpdaterAgent()
 {
@@ -47,7 +298,7 @@ PsiDemandUpdaterAgent::PsiDemandUpdaterAgent()
 
 void PsiDemandUpdaterAgent::init(opencog::CogServer * server) 
 {
-    logger().debug( "PsiDemandUpdaterAgent::%s - Initialize the Agent [ cycle = %d ]",
+    logger().debug( "PsiDemandUpdaterAgent::%s - Initialize the Agent [cycle = %d]",
                     __FUNCTION__, 
                     this->cycleCount
                   );
@@ -63,656 +314,62 @@ void PsiDemandUpdaterAgent::init(opencog::CogServer * server)
                                                oac->getProcedureRepository();
 
     // Get petId
-    const std::string & petId = oac->getPet().getPetId();
+//    const std::string & petId = oac->getPet().getPetId();
 
-    // Clear old demandMetaMap; 
-    this->demandMetaMap.clear();
+    // Clear old demandList 
+    this->demandList.clear();
 
     // Get demand names from the configuration file
     std::string demandNames = config()["PSI_DEMANDS"];
 
     // Process Demands one by one
-    boost::tokenizer<> demandNamesTok (demandNames);
-    std::string demand, demandUpdater;
-    Handle similarityLink, simultaneousEquivalenceLink;
-    DemandMeta demandMeta;
+    boost::char_separator<char> sep(", ");
+    boost::tokenizer< boost::char_separator<char> > demandNamesTok (demandNames, sep);
 
-    for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
+    std::string demandName, demandUpdater;
+    Handle hDemandGoal, hFuzzyWithin;
+
+    // Process Relations one by one 
+    for ( boost::tokenizer< boost::char_separator<char> >::iterator iDemandName = demandNamesTok.begin();
           iDemandName != demandNamesTok.end();
           iDemandName ++ ) {
 
-        demand = (*iDemandName);
-        demandUpdater = demand + "DemandUpdater";
-
-        logger().debug(
-              "PsiDemandUpdaterAgent::%s - Searching the meta data of demand '%s'.", 
-                        __FUNCTION__, 
-                        demand.c_str() 
-                      );
+        demandName = (*iDemandName);
+        demandUpdater = demandName + "DemandUpdater";
 
         // Search demand updater
         if ( !procedureRepository.contains(demandUpdater) ) {
-            logger().warn( 
-       "PsiDemandUpdaterAgent::%s - Failed to find '%s' in OAC's procedureRepository",
+            logger().warn( "PsiDemandUpdaterAgent::%s - Failed to find '%s' in OAC's procedureRepository [cycle = %d]",
                            __FUNCTION__, 
-                           demandUpdater.c_str()
+                           demandUpdater.c_str(), 
+                           this->cycleCount
                          );
             continue;
         }
     
-        // Search the corresponding SimilarityLink
-        similarityLink =  AtomSpaceUtil::getDemandSimilarityLink( atomSpace, 
-                                                                  demand,
-                                                                  petId
-                                                                );
-
-        if ( similarityLink == Handle::UNDEFINED )
-        {
-            logger().warn(
-    "PsiDemandUpdaterAgent::%s - Failed to get the SimilarityLink for demand '%s'",
-                           __FUNCTION__, 
-                           demand.c_str()
-                         );
-
-            continue;
-        }
-
         // Search the corresponding SimultaneousEquivalenceLink
-        simultaneousEquivalenceLink =  AtomSpaceUtil::getDemandSimultaneousEquivalenceLink
-                                           ( atomSpace, 
-                                             demand,
-                                             petId
-                                           );
-
-        if ( simultaneousEquivalenceLink == Handle::UNDEFINED )
+        if ( !AtomSpaceUtil::getDemandEvaluationLinks(atomSpace, demandName, hDemandGoal, hFuzzyWithin) )
         {
-            logger().warn( "PsiDemandUpdaterAgent::%s - Failed to get the SimultaneousEquivalenceLink for demand '%s'",
+            logger().warn( "PsiDemandUpdaterAgent::%s - Failed to get EvaluationLinks for demand '%s' [cycle = %d]",
                            __FUNCTION__, 
-                           demand.c_str()
+                           demandName.c_str(), 
+                           this->cycleCount
                          );
 
             continue;
         }
 
-        // Insert the meta data of the Demand to demandMetaMap
-        demandMeta.init(demandUpdater, similarityLink, simultaneousEquivalenceLink);
-        demandMetaMap[demand] = demandMeta;
+        this->demandList.push_back(Demand(demandName, hDemandGoal, hFuzzyWithin));
 
-        logger().debug(
-     "PsiDemandUpdaterAgent::%s - Store the meta data of  demand '%s' successfully.", 
+        logger().debug("PsiDemandUpdaterAgent::%s - Store the meta data of demand '%s' successfully [cycle = %d]", 
                         __FUNCTION__, 
-                        demand.c_str() 
+                        demandName.c_str(), 
+                        this->cycleCount
                       );
     }// for
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
-}
-
-void PsiDemandUpdaterAgent::runUpdaters(opencog::CogServer * server)
-{
-    logger().debug( 
-            "PsiDemandUpdaterAgent::%s - Run updaters (combo scripts) [ cycle = %d ]", 
-                    __FUNCTION__ , 
-                    this->cycleCount
-                  );
-
-    // Get OAC
-    OAC * oac = (OAC *) server;
-
-    // Get ProcedureInterpreter
-    Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
-
-    // Get Procedure repository
-    const Procedure::ProcedureRepository & procedureRepository =
-                                                              oac->getProcedureRepository();
-
-    // Process Demands one by one
-    std::map <std::string, DemandMeta>::iterator iDemand;
-
-    std::string demand, demandUpdater;
-    std::vector <combo::vertex> schemaArguments;
-    Procedure::RunningProcedureID executingSchemaId;
-    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
-
-    for ( iDemand = demandMetaMap.begin();
-          iDemand != demandMetaMap.end();
-          iDemand ++ ) {
-
-        demand = iDemand->first;
-        demandUpdater = iDemand->second.updaterName;
-
-        // Run the Procedure that update Demand and get the updated value
-        const Procedure::GeneralProcedure & procedure =
-                                            procedureRepository.get(demandUpdater);
-
-        executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
-
-        // TODO: What does this for?
-        while ( !procedureInterpreter.isFinished(executingSchemaId) )
-            procedureInterpreter.run(NULL);  
-
-        // Check if the the updater run successfully
-        if ( procedureInterpreter.isFailed(executingSchemaId) ) {
-            logger().error( "PsiDemandUpdaterAgent::%s - Failed to execute '%s'", 
-                             __FUNCTION__, 
-                             demandUpdater.c_str() 
-                          );
-
-            iDemand->second.bUpdated = false;
-
-            continue;
-        }
-        else {
-            iDemand->second.bUpdated = true;
-        }
-
-        result = procedureInterpreter.getResult(executingSchemaId);
-
-        // Store updated value to DemandMeta.updatedValue
-        // contin_t is actually of type double (see "comboreduct/combo/vertex.h") 
-        iDemand->second.updatedValue = get_contin(result);
-
-        // TODO: Change the log level to fine, after testing
-        logger().debug( "PsiDemandUpdaterAgent::%s - The new level of '%s' will be %f", 
-                         __FUNCTION__, 
-                         demand.c_str(),
-                         iDemand->second.updatedValue                      
-                      );
-    }// for
-
-}    
-
-void PsiDemandUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
-{
-    logger().debug(
-            "PsiDemandUpdaterAgent::%s - Set updated values to AtomSpace [ cycle =%d ]",
-                    __FUNCTION__, 
-                    this->cycleCount
-                  );
-
-    // Get OAC
-    OAC * oac = (OAC *) server;
-
-    // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get Pet
-    Pet & pet = oac->getPet();  
-
-    // Process Demands one by one
-    //
-    // Don't be scared by the bulgy 'for' loop below, what it does is quite simple,
-    // get old Handles, create new Handles and remove old Handles 
-    std::map <std::string, DemandMeta>::iterator iDemand;
-
-    std::string demand;
-
-    Handle oldSimilarityLink, oldNumberNode, oldExecutionOutputLink;
-    Handle newNumberNode, newSimilarityLink;
-
-    Handle oldSimultaneousEquivalenceLink, oldEvaluationLinkDemandGoal,
-           oldEvaluationLinkFuzzyWithin, oldListLink;
-    Handle newSimultaneousEquivalenceLink, newEvaluationLinkFuzzyWithin, newListLink;
-
-    double updatedValue;
-
-    for ( iDemand = demandMetaMap.begin();
-          iDemand != demandMetaMap.end();
-          iDemand ++ ) {
-
-        if ( !iDemand->second.bUpdated )
-            continue;
-
-        demand = iDemand->first;
-        oldSimilarityLink = iDemand->second.similarityLink;
-        oldSimultaneousEquivalenceLink = iDemand->second.simultaneousEquivalenceLink;
-        updatedValue = iDemand->second.updatedValue;
-        
-        // Get the Handle to old NumberNode and ExecutionOutputLink
-        //
-        // Since SimilarityLink inherits from UnorderedLink, you should check each Atom in 
-        // the Outgoing set to see if it is of type NumberNode or ExecutionOutputLink.
-        //
-        // Because when you creating an UnorderedLink, it will sort its Outgoing set
-        // automatically (more detail: "./atomspace/Link.cc", Link::setOutgoingSet method)
-        //
-        
-        oldNumberNode = atomSpace.getOutgoing(oldSimilarityLink, 0);
-        oldExecutionOutputLink = atomSpace.getOutgoing(oldSimilarityLink, 1); 
-        
-        if ( atomSpace.getType(oldNumberNode) != NUMBER_NODE ||
-             atomSpace.getType(oldExecutionOutputLink) != EXECUTION_OUTPUT_LINK
-           ) {
-            
-            oldNumberNode = atomSpace.getOutgoing(oldSimilarityLink, 1);   
-            oldExecutionOutputLink = atomSpace.getOutgoing(oldSimilarityLink, 0); 
-
-            if ( atomSpace.getType(oldNumberNode) != NUMBER_NODE ||
-                 atomSpace.getType(oldExecutionOutputLink) != EXECUTION_OUTPUT_LINK
-               ) {
-
-                logger().error( "PsiDemandUpdaterAgent::%s - The outgoing set of SimilarityLink for '%s' should contain a NumberNode and a ExecutionOutputLink, but got [0]:%s, [1]:%s",
-                                __FUNCTION__, 
-                                demand.c_str(), 
-                                classserver().getTypeName(
-                                                  atomSpace.getType(oldSimilarityLink)
-                                                         ).c_str(),  
-                                classserver().getTypeName(
-                                                  atomSpace.getType(oldNumberNode)
-                                                         ).c_str()
-                              );
-
-                continue;
-            }
-        }// if
-
-        // Get the Handle to old EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
-        //
-        // Since SimultaneousEquivalenceLink inherits from UnorderedLink,
-        // we should make a choice
-
-        Handle firstEvaluationLink = atomSpace.getOutgoing(oldSimultaneousEquivalenceLink, 0);
-
-        if ( atomSpace.getType( 
-                                  atomSpace.getOutgoing(firstEvaluationLink, 0) 
-                              ) ==  PREDICATE_NODE ) {
-            oldEvaluationLinkDemandGoal = atomSpace.getOutgoing(
-                                                        oldSimultaneousEquivalenceLink, 0
-                                                               );
-
-            oldEvaluationLinkFuzzyWithin = atomSpace.getOutgoing(
-                                                        oldSimultaneousEquivalenceLink, 1
-                                                                ); 
-        }
-        else {
-
-            oldEvaluationLinkDemandGoal = atomSpace.getOutgoing(
-                                                        oldSimultaneousEquivalenceLink, 1
-                                                               );
-
-            oldEvaluationLinkFuzzyWithin = atomSpace.getOutgoing(
-                                                        oldSimultaneousEquivalenceLink, 0
-                                                                ); 
-        }// if
-
-        // Get the Handle to old ListLink
-        oldListLink = atomSpace.getOutgoing(oldEvaluationLinkFuzzyWithin, 1);
-
-logger().fine( "PsiDemandUpdaterAgent::%s - DemandSchema: %s, oldSimilarityLink: %s, oldNumberNode: %s, updatedValue: %f", 
-               __FUNCTION__,
-               demand.c_str(), 
-               atomSpace.atomAsString(oldSimilarityLink).c_str(),
-               atomSpace.atomAsString(oldNumberNode).c_str(), 
-               updatedValue
-             );        
-
-logger().fine( "PsiDemandUpdaterAgent::%s - DemandGoal: %s, oldSimultaneousEquivalenceLink: %s, oldEvaluationLinkDemandGoal: %s, oldEvaluationLinkFuzzyWithin: %s, oldListLink: %s", 
-               __FUNCTION__,
-               demand.c_str(), 
-               atomSpace.atomAsString(oldSimultaneousEquivalenceLink).c_str(),
-               atomSpace.atomAsString(oldEvaluationLinkDemandGoal).c_str(), 
-               atomSpace.atomAsString(oldEvaluationLinkFuzzyWithin).c_str(),
-               atomSpace.atomAsString(oldListLink).c_str() 
-             );        
-
-        // Create a new NumberNode that stores the updated value
-        //
-        // If the Demand doesn't change at all, it actually returns the old one
-        //
-        newNumberNode = AtomSpaceUtil::addNode( atomSpace,
-                                                NUMBER_NODE,
-                                                boost::lexical_cast<std::string>
-                                                                   (updatedValue), 
-                                                false // the atom should not be permanent (can be
-                                                      // removed by decay importance task) 
-                                               );
-
-logger().fine( "PsiDemandUpdaterAgent::%s - newNumberNode: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(newNumberNode).c_str()
-             );        
-
-        // Create a new SimilarityLink that holds the DemandSchema
-        //
-        // Since SimilarityLink inherits from UnorderedLink, which will sort its Outgoing 
-        // set automatically when being created, the sequence you adding Atoms to its 
-        // Outgoing set makes none sense! 
-        // (more detail: "./atomspace/Link.cc", Link::setOutgoingSet method)
-        //
-        // If the Demand doesn't change at all, it actually returns the old one
-        //
-        HandleSeq similarityLinkHandleSeq;  // HandleSeq is of type std::vector<Handle>
-
-        similarityLinkHandleSeq.push_back(newNumberNode);
-        similarityLinkHandleSeq.push_back(oldExecutionOutputLink);
-
-        newSimilarityLink = AtomSpaceUtil::addLink( atomSpace,
-                                                    SIMILARITY_LINK, 
-                                                    similarityLinkHandleSeq,
-                                                    true
-                                                  );
-
-        iDemand->second.similarityLink = newSimilarityLink;
-
-logger().fine( "PsiDemandUpdaterAgent::%s - newSimilarityLink: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(newSimilarityLink).c_str()
-             );        
-
-        // Create a new ListLink that holds the SimilarityLink
-        HandleSeq listLinkHandleSeq = atomSpace.getOutgoing(oldListLink);
-
-        listLinkHandleSeq[2] = newSimilarityLink;
-        
-        newListLink = AtomSpaceUtil::addLink( atomSpace,
-                                              LIST_LINK, 
-                                              listLinkHandleSeq,
-                                              true
-                                            );
-
-logger().fine( "PsiDemandUpdaterAgent::%s - newListLink: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(newListLink).c_str()
-             );        
-
-        // Create a new EvaluationLinkFuzzyWithin that holds the ListLink
-        HandleSeq evaluationLinkFuzzyWithinHandleSeq = 
-                                       atomSpace.getOutgoing(oldEvaluationLinkFuzzyWithin);
-
-        evaluationLinkFuzzyWithinHandleSeq[1] = newListLink;
-        
-        newEvaluationLinkFuzzyWithin = AtomSpaceUtil::addLink
-                                           ( atomSpace,
-                                             EVALUATION_LINK, 
-                                             evaluationLinkFuzzyWithinHandleSeq,
-                                             true
-                                            );
-
-logger().fine( "PsiDemandUpdaterAgent::%s - newEvaluationLinkFuzzyWithin: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(newEvaluationLinkFuzzyWithin).c_str()
-             );        
-
-        // Create a new SimultaneousEquivalenceLink that holds the DemandGoal
-        HandleSeq simultaneousEquivalenceLinkHandleSeq;
-
-        simultaneousEquivalenceLinkHandleSeq.push_back(oldEvaluationLinkDemandGoal);
-        simultaneousEquivalenceLinkHandleSeq.push_back(newEvaluationLinkFuzzyWithin);
-
-        newSimultaneousEquivalenceLink = AtomSpaceUtil::addLink
-                                           ( atomSpace,
-                                             SIMULTANEOUS_EQUIVALENCE_LINK, 
-                                             simultaneousEquivalenceLinkHandleSeq,
-                                             true
-                                            );
-
-        iDemand->second.simultaneousEquivalenceLink = newSimultaneousEquivalenceLink;
-
-logger().fine( "PsiDemandUpdaterAgent::%s - newSimultaneousEquivalenceLink: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(newSimultaneousEquivalenceLink).c_str()
-             );        
-
-        // Remove the old SimultaneousEquivalenceLink, EvaluationLinkFuzzyWithin, ListLink,
-        // SimilarityLink and NumberNode
-        //
-        // Note:
-        //     1. Make sure the old one is different from the new one before removing.
-        //        Because if the Demand does not change at all, including its value, 
-        //        True Value etc, creating new one is actually returning the old one,
-        //        then we shall not remove it.
-        //     2. The sequence of removing Atoms is contrary to that of creating. 
-        //        That is you should remove the out layer Link firstly, and then its
-        //        Outgoing set.  
-        //
-
-logger().fine( "PsiDemandUpdaterAgent::%s - Going to remove oldSimultaneousEquivalenceLink", 
-                __FUNCTION__);
-
-        if ( oldSimultaneousEquivalenceLink != newSimultaneousEquivalenceLink && 
-             !atomSpace.removeAtom(oldSimultaneousEquivalenceLink) 
-           ) {
-            logger().error( "PsiDemandUpdaterAgent::%s - Unable to remove old SIMULTANEOUS_EQUIVALENCE_LINK: %s",
-                            __FUNCTION__, 
-                            atomSpace.atomAsString(oldSimultaneousEquivalenceLink).c_str()
-                          );
-        }// if
-
-logger().fine( "PsiDemandUpdaterAgent::%s - Removed oldSimultaneousEquivalenceLink",
-               __FUNCTION__
-             );
-
-logger().fine( "PsiDemandUpdaterAgent::%s - Going to remove oldEvaluationLinkFuzzyWithin", 
-                __FUNCTION__);
-
-        if ( oldEvaluationLinkFuzzyWithin != newEvaluationLinkFuzzyWithin && 
-             !atomSpace.removeAtom(oldEvaluationLinkFuzzyWithin) 
-           ) {
-            logger().error( "PsiDemandUpdaterAgent::%s - Unable to remove old EvaluationLinkFuzzyWithin: %s",
-                            __FUNCTION__, 
-                            atomSpace.atomAsString(oldEvaluationLinkFuzzyWithin).c_str()
-                          );
-        }// if
-
-logger().fine( "PsiDemandUpdaterAgent::%s - Removed oldEvaluationLinkFuzzyWithin",
-               __FUNCTION__
-             );
-
-logger().fine( "PsiDemandUpdaterAgent::%s - Going to remove oldListLink", 
-                __FUNCTION__);
-
-        if ( oldListLink != newListLink && 
-             !atomSpace.removeAtom(oldListLink) 
-           ) {
-            logger().error(
-                "PsiDemandUpdaterAgent::%s - Unable to remove old LIST_LINK: %s",
-                __FUNCTION__, 
-                atomSpace.atomAsString(oldListLink).c_str()
-                          );
-        }// if
-
-logger().fine("PsiDemandUpdaterAgent::%s - Removed oldListLink", __FUNCTION__);
-
-logger().fine( "PsiDemandUpdaterAgent::%s - Going to remove oldSimilarityLink", 
-                __FUNCTION__);
-
-        if ( oldSimilarityLink != newSimilarityLink && 
-             !atomSpace.removeAtom(oldSimilarityLink) 
-           ) {
-            logger().error(
-                "PsiDemandUpdaterAgent::%s - Unable to remove old SIMILARITY_LINK: %s",
-                __FUNCTION__, 
-                atomSpace.atomAsString(oldSimilarityLink).c_str()
-                          );
-        }// if
-
-logger().fine("PsiDemandUpdaterAgent::%s - Removed oldSimilarityLink", __FUNCTION__);
-
-//logger().fine("PsiDemandUpdaterAgent::%s - Going to remove oldNumberNode", __FUNCTION__);
-//
-//        if ( oldNumberNode != newNumberNode && 
-//             !atomSpace.removeAtom(oldNumberNode) 
-//           ) {
-//            logger().error(
-//                "PsiDemandUpdaterAgent::%s - Unable to remove old NUMBER_NODE: %s",
-//                __FUNCTION__, 
-//                atomSpace.atomAsString(oldNumberNode).c_str()
-//                          );
-//        }// if
-//
-//logger().fine( "PsiDemandUpdaterAgent::%s - Removed oldNumberNode", __FUNCTION__); 
-
-        // Reset bUpdated  
-//        iDemand->second.bUpdated = false;
-
-        // TODO: Change the log level to fine, after testing
-        logger().debug( 
-                    "PsiDemandUpdaterAgent::%s - Set the level of demand '%s' to %f", 
-                         __FUNCTION__, 
-                         demand.c_str(),
-                         updatedValue
-                      );
-
-    }// for
-
-    // Update the truth value of previous/ current demand goal
-    logger().debug(
-            "PsiDemandUpdaterAgent::%s - Updating the truth value of previous/ current demand goal. [ cycle = %d]",
-                   __FUNCTION__, 
-                   this->cycleCount
-                  );
-
-    if ( pet.getPreviousDemandGoal() != opencog::Handle::UNDEFINED )
-        atomSpace.setTV( AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, PREVIOUS_DEMAND_NAME), 
-                         * atomSpace.getTV( pet.getPreviousDemandGoal() )
-                       );
-
-    if ( pet.getCurrentDemandGoal() != opencog::Handle::UNDEFINED )
-        atomSpace.setTV( AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, CURRENT_DEMAND_NAME), 
-                         * atomSpace.getTV( pet.getCurrentDemandGoal() )
-                       );
-}
-
-void PsiDemandUpdaterAgent::updateDemandGoals(opencog::CogServer * server)
-{
-    logger().debug( 
-        "PsiDemandUpdaterAgent::%s - Update the TruthValue for DemandGoals [ cycle = %d ]", 
-                    __FUNCTION__ , 
-                    this->cycleCount
-                  );
-
-    // Get OAC
-    OAC * oac = (OAC *) server;
-
-    // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get ProcedureInterpreter
-    Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
-
-    // Get Procedure repository
-    const Procedure::ProcedureRepository & procedureRepository =
-                                                              oac->getProcedureRepository();
-
-    // Process Demands one by one
-    std::map <std::string, DemandMeta>::iterator iDemand;
-
-    std::string demand, demandGoalEvaluator, minValueStr, maxValueStr;
-    Handle simultaneousEquivalenceLink, evaluationLinkDemandGoal, evaluationLinkFuzzyWithin, 
-           listLink, predicateNode;
-    std::vector <combo::vertex> schemaArguments;
-    Procedure::RunningProcedureID executingSchemaId;
-    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
-
-    for ( iDemand = demandMetaMap.begin();
-          iDemand != demandMetaMap.end();
-          iDemand ++ ) {
-
-        if ( !iDemand->second.bUpdated )
-            continue;
-
-        demand = iDemand->first;
-        simultaneousEquivalenceLink = iDemand->second.simultaneousEquivalenceLink;
-
-        // Get the Handle to EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
-        //
-        // Since SimultaneousEquivalenceLink inherits from UnorderedLink,
-        // we should make a choice
-
-        Handle firstEvaluationLink = atomSpace.getOutgoing(simultaneousEquivalenceLink, 0);
-
-        if ( atomSpace.getType(
-                                   atomSpace.getOutgoing(firstEvaluationLink, 0)
-                              ) ==  PREDICATE_NODE ) {
-            evaluationLinkDemandGoal = atomSpace.getOutgoing(
-                                                        simultaneousEquivalenceLink, 0
-                                                            );
-
-            evaluationLinkFuzzyWithin = atomSpace.getOutgoing(
-                                                        simultaneousEquivalenceLink, 1
-                                                             ); 
-        }
-        else {
-
-            evaluationLinkDemandGoal = atomSpace.getOutgoing(
-                                                        simultaneousEquivalenceLink, 1
-                                                            );
-
-            evaluationLinkFuzzyWithin = atomSpace.getOutgoing(
-                                                        simultaneousEquivalenceLink, 0
-                                                             ); 
-        }// if
-
-        // Get Handle to PredicateNode
-        predicateNode = atomSpace.getOutgoing(evaluationLinkDemandGoal, 0);
-
-        // Get the combo procedure name that evaluates DemandGoal
-        demandGoalEvaluator = atomSpace.getName(
-                                      atomSpace.getOutgoing(evaluationLinkFuzzyWithin, 0)
-                                               );
-
-        // Get the Handle to ListLink
-        listLink = atomSpace.getOutgoing(evaluationLinkFuzzyWithin, 1);
-
-        // Get min/ max acceptable values
-        minValueStr = atomSpace.getName( atomSpace.getOutgoing(listLink, 0) );
-        maxValueStr = atomSpace.getName( atomSpace.getOutgoing(listLink, 1) );
-
-        // Prepare arguments
-        schemaArguments.clear(); 
-        schemaArguments.push_back(iDemand->second.updatedValue);
-        schemaArguments.push_back( boost::lexical_cast<double> (minValueStr) );
-        schemaArguments.push_back( boost::lexical_cast<double> (maxValueStr) );
-
-        // Run the Procedure that update the true value of the PredicateNodes 
-        const Procedure::GeneralProcedure & procedure =
-                                            procedureRepository.get(demandGoalEvaluator);
-
-        executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
-
-        // TODO: What does this for?
-        while ( !procedureInterpreter.isFinished(executingSchemaId) )
-            procedureInterpreter.run(NULL);  
-
-        // Check if the the updater run successfully
-        if ( procedureInterpreter.isFailed(executingSchemaId) ) {
-            logger().error( "PsiDemandUpdaterAgent::%s - Failed to execute '%s'", 
-                             __FUNCTION__, 
-                             demandGoalEvaluator.c_str() 
-                          );
-
-            iDemand->second.bUpdated = false;
-
-            continue;
-        }
-        else {
-            iDemand->second.bUpdated = true;
-        }
-
-        result = procedureInterpreter.getResult(executingSchemaId);
-
-        // Update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
-        // TODO: Use PLN forward chainer to handle this?
-        atomSpace.setTV( evaluationLinkDemandGoal,
-                         SimpleTruthValue(get_contin(result), 1.0f)
-                       );
-
-        atomSpace.setTV( evaluationLinkFuzzyWithin,
-                         SimpleTruthValue(get_contin(result), 1.0f)
-                       );
-
-        // Reset bUpdated  
-        iDemand->second.bUpdated = false;
-
-        // TODO: Change the log level to fine, after testing
-        logger().debug( "PsiDemandUpdaterAgent::%s - The level of DemandGoal for '%s' has been set to %f", 
-                         __FUNCTION__, 
-                         demand.c_str(),
-                         get_contin(result)
-                      );
-    }// for
-
 }
 
 void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
@@ -730,13 +387,25 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
+    // Get Pet
+    Pet & pet = oac->getPet();
+
     // Get petId
-    const std::string & petId = oac->getPet().getPetId();
+    const std::string & petId = pet.getPetId();
+
+    // Get ProcedureInterpreter
+    Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
+
+    // Get Procedure repository
+    const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
+
+    // Get current time stamp
+    unsigned long timeStamp = atomSpace.getTimeServer().getLatestTimestamp();
 
     // Check if map info data is available
     if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
         logger().warn( 
-      "PsiDemandUpdaterAgent::%s - There is no map info available yet [ cycle = %d ]", 
+      "PsiDemandUpdaterAgent::%s - There is no map info available yet [cycle = %d]", 
                         __FUNCTION__, 
                         this->cycleCount
                      );
@@ -746,24 +415,43 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
     // Check if the pet spatial info is already received
     if ( !atomSpace.getSpaceServer().getLatestMap().containsObject(petId) ) {
         logger().warn(
- "PsiDemandUpdaterAgent::%s - Pet was not inserted in the space map yet [ cycle = %d ]", 
+ "PsiDemandUpdaterAgent::%s - Pet was not inserted in the space map yet [cycle = %d]", 
                      __FUNCTION__, 
                      this->cycleCount
                      );
         return;
     }
 
-    // Initialize the Agent (demandMetaMap etc)
+    // Initialize the Agent (demandList etc)
     if ( !this->bInitialized )
         this->init(server);
 
-    // Run updaters (combo scripts)
-    this->runUpdaters(server);
+    // Update demand values
+    foreach (Demand demand, this->demandList) {
+        demand.runUpdater(atomSpace, procedureInterpreter, procedureRepository);
+    }
 
-    // Set updated values to AtomSpace (NumberNodes)
-    this->setUpdatedValues(server);
+    // Update Demand Goals
+    foreach (Demand demand, this->demandList) {
+        demand.updateDemandGoal(atomSpace, procedureInterpreter, procedureRepository, timeStamp);
+    }
 
-    // Update PredicateNodes of corresponding DemandGoals
-    this->updateDemandGoals(server);
+    // Update the truth value of previous/ current demand goal
+    if ( pet.getPreviousDemandGoal() != opencog::Handle::UNDEFINED )
+        atomSpace.setTV( AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, PREVIOUS_DEMAND_NAME), 
+                         * atomSpace.getTV( pet.getPreviousDemandGoal() )
+                       );
+
+    if ( pet.getCurrentDemandGoal() != opencog::Handle::UNDEFINED )
+        atomSpace.setTV( AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, CURRENT_DEMAND_NAME), 
+                         * atomSpace.getTV( pet.getCurrentDemandGoal() )
+                       );
+
+    logger().debug(
+            "PsiDemandUpdaterAgent::%s - Updated the truth value of previous/ current demand goal. [cycle = %d]",
+                   __FUNCTION__, 
+                   this->cycleCount
+                  );
+
 }
 

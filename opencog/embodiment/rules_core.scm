@@ -2,7 +2,7 @@
 ; @file embodiment/rules_core.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-01-07
+; @date   2011-03-11
 ;
 ; Scheme core functions for adding Modulators, Demands and Rules etc. into AtomSpace
 ;
@@ -15,23 +15,25 @@
 ;
 ; Modulator is represented as:
 ;
-; SimilarityLink (stv 1.0 1.0)
-;     NumberNode: "modulator_value"
-;     ExecutionOutputLink
-;         GroundedSchemaNode: "modulator_schema_name"
-;         ListLink 
-;             PET_HANDLE
+; AtTimeLink
+;     TimeNode "timestamp"
+;     SimilarityLink (stv 1.0 1.0)
+;         NumberNode: "modulator_value"
+;         ExecutionOutputLink
+;             GroundedSchemaNode: "modulator_schema_name"
+;             ListLink (empty)
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; DemandSchema/DemandValue is represented as:
-;
-; SimilarityLink (stv 1.0 1.0)
-;     NumberNode: "demand_value"
-;     ExecutionOutputLink
-;         GroundedSchemaNode: "demand_schema_name"
-;         ListLink
-;             PET_HANDLE
+; 
+; AtTimeLink
+;     TimeNode "timestamp"
+;     SimilarityLink (stv 1.0 1.0)
+;         NumberNode: "demand_value"
+;         ExecutionOutputLink
+;             GroundedSchemaNode: "demand_schema_name"
+;             ListLink (empty)
 ;
 ; DemandValue is the output of DemandSchema.
 ;
@@ -51,12 +53,9 @@
 ;         ListLink
 ;             NumberNode: min_acceptable_value
 ;             NumberNode: max_acceptable_value
-;             SimilarityLink (stv 1.0 1.0)
-;                 NumberNode: "demand_value"
-;                 ExecutionOutputLink
-;                     GroundedSchemaNode: "demand_schema_name"
-;                     ListLink
-;                         PET_HANDLE
+;             ExecutionOutputLink
+;                 GroundedSchemaNode: "demand_schema_name"
+;                 ListLink (empty)
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -178,7 +177,7 @@
 ;     http://wiki.opencog.org/w/TimeServer
 ;
 
-(define CURRENT_TIMESTAMP 0)
+(define CURRENT_TIMESTAMP "0")
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -263,54 +262,77 @@
 ;
 ; Modulator is represented as:
 ;
-; SimilarityLink (stv 1.0 1.0)
-;     NumberNode: "modulator_value"
-;     ExecutionOutputLink
-;         GroundedSchemaNode: "modulator_schema_name"
-;         ListLink 
-;             PET_HANDLE
+; AtTimeLink
+;     TimeNode "timestamp"
+;     SimilarityLink (stv 1.0 1.0)
+;         NumberNode: "modulator_value"
+;         ExecutionOutputLink
+;             GroundedSchemaNode: "modulator_schema_name"
+;             ListLink (empty)
 ;
 
 (define (add_modulator modulator_name default_value)
-    (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
-       (NumberNode (number->string default_value) )
-       (ExecutionOutputLink (DEFAULT_STV) (DEFAULT_AV) 
-            (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") ) 
-            (ListLink  
-                PET_HANDLE          
-            )
-       )
-    );SimilarityLink
+    (let ( (schema_handle (ExecutionOutputLink (DEFAULT_STV) (DEFAULT_AV) 
+                              (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") ) 
+                              (ListLink)
+                          );ExecutionOutputLink
+           );schema_handle
+         )
+
+         (AtTimeLink
+             (TimeNode CURRENT_TIMESTAMP)
+
+             (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
+                 (NumberNode (number->string default_value) )
+                 schema_handle
+             );SimilarityLink
+         );AtTimeLink
+
+         schema_handle
+
+    );let
 );define
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Add a DemandSchema/DemandValue given demand_name and default_value
+; Add a DemandSchema/DemandValue given demand_name and default_value, 
+; return the handle to ExecutionOutputLink, which would be used by 'connect_demand_goal' function
 ;
 ; The updater of the demand value is a combo script, named after demand_name with suffix "Updater"
 ;
 ; DemandSchema/DemandValue is represented as:
 ;
-; SimilarityLink (stv 1.0 1.0)
-;     NumberNode: "demand_value"
-;     ExecutionOutputLink
-;         GroundedSchemaNode: "demand_schema_name"
-;         ListLink
-;             PET_HANDLE
+; AtTimeLink
+;     TimeNode "timestamp"
+;     SimilarityLink (stv 1.0 1.0)
+;         NumberNode: "demand_value"
+;         ExecutionOutputLink
+;             GroundedSchemaNode: "demand_schema_name"
+;             ListLink (empty)
 ;
 ; DemandValue is the output of DemandSchema.
 ;
 
 (define (add_demand_schema demand_name default_value)
-    (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
-       (NumberNode (number->string default_value) )
-       (ExecutionOutputLink (DEFAULT_STV) (DEFAULT_AV)
-            (GroundedSchemaNode (string-append (string-trim-both demand_name) "Updater") )
-            (ListLink 
-                PET_HANDLE 
-            )
-       )
-    );SimilarityLink
+    (let ( (schema_handle (ExecutionOutputLink (DEFAULT_STV) (DEFAULT_AV)
+                              (GroundedSchemaNode (string-append (string-trim-both demand_name) "Updater") )
+                              (ListLink)
+                          );ExecutionOutputLink
+           );schema_handle    
+         )    
+
+        (AtTimeLink
+            (TimeNode CURRENT_TIMESTAMP)
+
+            (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
+                (NumberNode (number->string default_value) )
+                schema_handle
+            );SimilarityLink
+        );AtTimeLink
+
+        schema_handle
+
+    );let
 );define
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -333,12 +355,9 @@
 ;         ListLink
 ;             NumberNode: "min_acceptable_value"
 ;             NumberNode: "max_acceptable_value"
-;             SimilarityLink (stv 1.0 1.0)
-;                 NumberNode: "demand_value"
-;                 ExecutionOutputLink
-;                     GroundedSchemaNode: "demand_schema_name"
-;                     ListLink
-;                         PET_HANDLE
+;             ExecutionOutputLink
+;                 GroundedSchemaNode: "demand_schema_name"
+;                 ListLink (empty)
 ;
 
 (define (connect_demand_goal demand_schema_handle goal_handle min_acceptable_value max_acceptable_value)

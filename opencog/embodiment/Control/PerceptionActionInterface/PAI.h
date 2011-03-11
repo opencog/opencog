@@ -562,21 +562,44 @@ private:
 
     /**
      * Adds a physiological feeling into the AtomSpace
-     * @param the name of the feeling parameter
-     * @param the value of the feeling parameter
+     *
+     * @param paramName   the name of the feeling parameter
+     * @param paramValue  the value of the feeling parameter
+     *
      * @return the Handle of the ListLink that contains the name and value nodes.
+     * 
+     * @note 
+     *
+     *     ListLink
+     *         Node "paramName"
+     *         Node "paramValue"
      */
-    Handle addPhysiologicalFeelingParam(const char* paramName,
-                                        const char* paramValue);
+    Handle addPhysiologicalFeelingParam(const char* paramName, const char* paramValue);
 
     /**
      * Adds a physiological feeling into the AtomSpace
-     * @param the id of the pet
-     * @param the name of the feeling
-     * @param timestamp a string in the xsd:datetime format representing the
-     * timestamp of this feeling.
-     * @param the sequence of Handles for each one of the feeling parameters.
+     *
+     * @param petID          the id of the pet
+     * @param name           the name of the feeling
+     * @param timestamp      a string in the xsd:datetime format representing the timestamp of this feeling
+     * @param feelingParams  the sequence of Handles for each one of the feeling parameters.
+     *
      * @return the Handle of the EvalLink that represents the feeling
+     *
+     * @note
+     *
+     *     AtTimeLink
+     *         TimeNode "timestamp"
+     *         EvaluationLink
+     *             PredicateNode "petId.name"
+     *             ListLink
+     *                 ListLink 
+     *                     Node "paramName1"
+     *                     Node "paramValue1"
+     *                 ListLink
+     *                     Node "paramName2"
+     *                     Node "paramValue2"
+     *                 ...    
      */
     Handle addPhysiologicalFeeling(const char* petID,
                                    const char* name,

@@ -117,7 +117,7 @@ void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
     // Process Demands one by one
     boost::tokenizer<> demandNamesTok (demandNames);
     std::string demand;
-    Handle simultaneousEquivalenceLink, evaluationLinkDemandGoal;
+    Handle hDemandGoal, hFuzzyWithin;
 
     for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
           iDemandName != demandNamesTok.end();
@@ -125,16 +125,14 @@ void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
 
         demand = (*iDemandName);
 
-        // Search the corresponding SimultaneousEquivalenceLink
-        simultaneousEquivalenceLink =  AtomSpaceUtil::getDemandSimultaneousEquivalenceLink
-                                           ( atomSpace, 
-                                             demand,
-                                             petId
-                                           );
-
-        if ( simultaneousEquivalenceLink == Handle::UNDEFINED )
-        {
-            logger().warn( "PsiActionSelectionAgent::%s - Failed to get the SimultaneousEquivalenceLink for demand '%s'",
+        // Get the Handle to EvaluationLinks given demad name 
+        if ( !AtomSpaceUtil::getDemandEvaluationLinks(atomSpace, 
+                                                       demand, 
+                                                       hDemandGoal, 
+                                                       hFuzzyWithin
+                                                     ) ) {
+      
+            logger().warn( "PsiActionSelectionAgent::%s - Failed to get EvaluationLinks for demand '%s'",
                            __FUNCTION__, 
                            demand.c_str()
                          );
@@ -142,24 +140,8 @@ void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
             continue;
         }
 
-        // Get the Handle to EvaluationLinkDemandGoal
-        //
-        // Since SimultaneousEquivalenceLink inherits from UnorderedLink,
-        // we should make a choice
-
-        Handle firstEvaluationLink = atomSpace.getOutgoing(simultaneousEquivalenceLink, 0);
-
-        if ( atomSpace.getType( 
-                                  atomSpace.getOutgoing(firstEvaluationLink, 0) 
-                              ) ==  PREDICATE_NODE ) {
-            evaluationLinkDemandGoal = atomSpace.getOutgoing(simultaneousEquivalenceLink, 0);
-        }
-        else {
-            evaluationLinkDemandGoal = atomSpace.getOutgoing(simultaneousEquivalenceLink, 1);
-        }// if
-
         // Append the Demand Goal to demandGoalList
-        this->demandGoalList.push_back(evaluationLinkDemandGoal);
+        this->demandGoalList.push_back(hDemandGoal);
 
         logger().debug(
                         "PsiActionSelectionAgent::%s - Add demand '%s' to demandGoalList successfully.", 
@@ -1015,10 +997,9 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     }// if
 
     // Change the current Demand Goal randomly (controlled by the modulator 'SelectionThreshold')
-    float selectionThreshold = AtomSpaceUtil::getCurrentModulatorLevel(randGen,
-                                                                       atomSpace,
+    float selectionThreshold = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
                                                                        SELECTION_THRESHOLD_MODULATOR_NAME,
-                                                                       petId
+                                                                       randGen
                                                                       );
 // TODO: uncomment the line below once finish testing
     if ( randGen.randfloat() > selectionThreshold )

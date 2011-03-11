@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-01-28
+; @date   2011-03-11
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into AtomSpace
 ;
@@ -98,8 +98,7 @@
 ;     NumberNode: "modulator_value"
 ;     ExecutionOutputLink
 ;         GroundedSchemaNode: xxxModulatorUpdater
-;         ListLink
-;             PET_HANDLE
+;         ListLink (empty)
 ;
 
 (define ActivationModulator 
@@ -134,8 +133,7 @@
 ;     NumberNode: "demand_value"
 ;     ExecutionOutputLink
 ;         GroundedSchemaNode: "demand_schema_name"
-;         ListLink
-;             PET_HANDLE
+;         ListLink (empty)
 ;
 ; DemandValue is the output of DemandSchema.
 ;
@@ -314,8 +312,7 @@
 ;                 NumberNode: "demand_value"
 ;                 ExecutionOutputLink
 ;                     GroundedSchemaNode: "demand_schema_name"
-;                     ListLink
-;                         PET_HANDLE
+;                     ListLink (empty)
 ;
 
 (define ConnectEnergyDemandGoal

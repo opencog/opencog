@@ -120,17 +120,15 @@ private:
      * Return the value for the given Modulator within the AtomSpace.
      * Modulator not presented in AtomSpace will return a random value in [0, 1].
      *
-     * @param rng       Random generator
-     * @param atomSpace The AtomSpace where to look for the Modulator.
-     * @param modulator The Modulator name, which is defined in "PredefinedProcedureNames.h" 
-     *                  in AtomSpace folder.
-     * @param self_id   ID of the Pet itself.
+     * @param atomSpace     The AtomSpace where to look for the Modulator.
+     * @param modulatorName The Modulator name, which is defined in "PredefinedProcedureNames.h" 
+     *                      in AtomSpace folder.
+     * @param randGen       Random number generator                     
      * @param time      The current timestamp, which is used for cache searching. 
      */
-    static float getModulator(opencog::RandGen & rng, 
-                              const AtomSpace & atomSpace,
-                              const std::string & modulator,
-                              const std::string & self_id,
+    static float getModulator(const AtomSpace & atomSpace,
+                              const std::string & modulatorName,
+                              opencog::RandGen & randGen,
                               unsigned long time
                              );
 
@@ -138,15 +136,15 @@ private:
      * Return the value for the given Demand within the AtomSpace.
      * Demand not presented in AtomSpace will return -1.
      *
-     * @param atomSpace The AtomSpace where to look for the Demand.
-     * @param modulator The Demand name, which is defined in "PredefinedProcedureNames.h" 
-     *                  in AtomSpace folder.
-     * @param self_id   ID of the Pet itself.
-     * @param time      The current timestamp, which is used for cache searching. 
+     * @param atomSpace  The AtomSpace where to look for the Demand.
+     * @param demandName The Demand name, which is defined in "PredefinedProcedureNames.h" 
+     *                   in AtomSpace folder.
+     * @param randGen    Random number generator
+     * @param time       The current timestamp, which is used for cache searching. 
      */
     static float getDemand(const AtomSpace & atomSpace,
-                           const std::string & demand,
-                           const std::string & self_id,
+                           const std::string & demandName,
+                           opencog::RandGen & randGen,
                            unsigned long time
                           );
 

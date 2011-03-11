@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Welter Luigi
  *
- * Updated: by ZhenhuaCai, on 2011-02-09
+ * Updated: by ZhenhuaCai, on 2011-03-10
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -100,6 +100,21 @@ private:
     static boost::unordered_map<std::string, HandleSeq> frameElementsCache;
     static Handle latestIsExemplarAvatar;
 
+    /**
+     * Create a LatestLink holding an AtTimeLink and update infoMap
+     *
+     * @param infoMap     pairs of (PredicateNode, LatestLink)
+     * @param as
+     * @param atTimeLink
+     * @param key         key (a handle to PredicateNode) of infoMap
+     *
+     * @note
+     *  
+     *     LatestLink
+     *         EvaluationLink
+     *
+     *  TODO: who would use this infoMap and LatestLink?
+     */
     static void updateGenericLatestInfoMap(HandleToHandleMap& infoMap,
                                            AtomSpace& as,
                                            Handle atTimeLink,
@@ -129,32 +144,40 @@ public:
      * If the Modulator does not exist on AtomSpace or some problem occurs when invoked,
      * this method will return a random value in [0, 1]
      *
-     * @param atomSpace The AtomSpace
-     * @param modulator Name of the Modulator wanted
-     * @param petId     Pet's name(id)
+     * @param atomSpace      The AtomSpace
+     * @param modulatorName  Name of the Modulator wanted
+     * @param rangGen        Random number generator
      *
      * @return float    The current level of a given Modulator
+     *
+     * @note The format of a Modulator stored in AtomSpace is:
+     *
+     * AtTimeLink
+     *     TimeNode "timestamp"
+     *     SimilarityLink
+     *         NumberNode: "modulator_value"
+     *         ExecutionOutputLink
+     *             GroundSchemaNode: modulatorUpdater
+     *             ListLink (empty)
      */ 
-    static float getCurrentModulatorLevel(opencog::RandGen & rng, 
-                                          const AtomSpace & atomSpace, 
-                                          const std::string & modulator, 
-                                          const std::string & petId
+    static float getCurrentModulatorLevel(const AtomSpace & atomSpace, 
+                                          const std::string & modulatorName, 
+                                          opencog::RandGen & randGen
                                          );
     /**
      * Returns the current level of the given Demand.
      *
      * If the Demand does not exist on AtomSpace or some problem occurs when invoked,
-     * this method will return -1
+     * this method will return a random value in [0, 1]
      *
      * @param atomSpace The AtomSpace
      * @param demand    Name of the Demand wanted
-     * @param petId     Pet's name(id)
      *
      * @return float    The current level of a given Demand
      */ 
     static float getCurrentDemandLevel(const AtomSpace & atomSpace, 
-                                       const std::string & demand, 
-                                       const std::string & petId
+                                       const std::string & demandName, 
+                                       opencog::RandGen & randGen
                                       );
 
     /**
@@ -162,7 +185,6 @@ public:
      *
      * @param atomSpace The AtomSpace
      * @param demand    Name of the Demand 
-     * @param petId     Pet's id
      *
      * @return Handle   The Handle to Demand Goal (EvaluationLink), or Handle::UNDEFINED if fails
      */
@@ -828,21 +850,6 @@ public:
     static Handle getModulatorSimilarityLink(const AtomSpace & atomSpace,
                                              const std::string & modulator, 
                                              const std::string & petId);
-    /**
-     * Return the Handle of SimilarityLink that holds DemandUpdater
-     *
-     * The format of a DemandSchema stored in AtomSpace is:
-     *
-     * SimilarityLink
-     *     NumberNode: "demand_value"
-     *     ExecutionOutputLink
-     *         GroundSchemaNode: demandUpdater
-     *         ListLink 
-     *             PET_HANDLE
-     */
-    static Handle getDemandSimilarityLink(const AtomSpace & atomSpace,
-                                          const std::string & demand, 
-                                          const std::string & petId);
 
     /**
      * Return the Handle of SimilarityLink that holds DemandUpdater
@@ -871,7 +878,33 @@ public:
                                                         const std::string & demand, 
                                                         const std::string & petId);
 
-            
+     /**
+     * Return the EvaluationLinks (both DemandGoal and FUzzyWithin) of specific demand
+     *
+     * The format of a DemandGoal stored in AtomSpace is:
+     *
+     * SimultaneousEquivalenceLink
+     * EvaluationLink
+     *     PredicateNode: "demand_name_goal" 
+     *                    (SimpleTruthValue indicates how well the demand is satisfied)
+     *                    (ShortTermInportance indicates the urgency of the demand)
+     *     ListLink (empty)               
+     * EvaluationLink
+     *     GroundedPredicateNode: "FuzzyWithin"
+     *     ListLink
+     *         NumberNode: "min_acceptable_value"
+     *         NumberNode: "max_acceptable_value"
+     *         ExecutionOutputLink
+     *             GroundedSchemaNode: "demand_schema_name"
+     *             ListLink (empty)
+     *
+     */
+    static bool getDemandEvaluationLinks (const AtomSpace & atomSpace, 
+                                          const std::string & demandName, 
+                                          Handle & hDemandGoal, 
+                                          Handle & hFuzzyWithin);
+
+           
     /**
      * Return the schema strength for the given rule. This strength is stored as
      * the truth value of the ImplicationLink between the rule precondition and
@@ -966,27 +999,34 @@ public:
     static void updateLatestAgentActionDone(AtomSpace& as,
                                             Handle atTimeLink,
                                             Handle agentNode);
+
     static void updateLatestPhysiologicalFeeling(AtomSpace& as,
-            Handle atTimeLink,
-            Handle predicateNode);
+                                                 Handle atTimeLink,
+                                                 Handle predicateNode);
+
     static void updateLatestAvatarSayActionDone(AtomSpace& as,
-            Handle atTimeLink,
-            Handle avatarNode);
+                                                Handle atTimeLink,
+                                                Handle avatarNode);
+
     static void updateLatestAvatarActionDone(AtomSpace& as,
-            Handle atTimeLink,
-            Handle avatarNode);
+                                             Handle atTimeLink,
+                                             Handle avatarNode);
+
     static void updateLatestPetActionPredicate(AtomSpace& as,
-            Handle atTimeLink,
-            Handle predicateNode);
+                                               Handle atTimeLink,
+                                               Handle predicateNode);
+
     static void updateLatestSpatialPredicate(AtomSpace& as,
-            Handle atTimeLink,
-            Handle predicateNode,
-            Handle objectNode);
+                                             Handle atTimeLink,
+                                             Handle predicateNode,
+                                             Handle objectNode);
+
     static void updateLatestSchemaPredicate(AtomSpace& as,
                                             Handle atTimeLink,
                                             Handle predicateNode);
+
     static void updateLatestIsExemplarAvatar(AtomSpace& as,
-            Handle atTimeLink);
+                                             Handle atTimeLink);
 
 
     /**

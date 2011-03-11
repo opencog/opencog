@@ -1,11 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.h
  *
- * Copyright (C) 2002-2009 Novamente LLC
- * All Rights Reserved
- *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-01-05
+ * @date 2011-03-09
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,7 +19,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #ifndef PSIDEMANDUPDATERAGENT_H
 #define PSIDEMANDUPDATERAGENT_H
@@ -42,12 +38,13 @@ namespace OperationalAvatarController
  * 
  * The format of DemandSchema in AtomSpace is
  *
- * SimilarityLink (stv 1.0 1.0)
- *     NumberNode: "demand_value"
- *     ExecutionOutputLink
- *         GroundedSchemaNode: xxxDemandUpdater
- *         ListLink
- *            PET_HANDLE
+ * AtTimeLink
+ *     TimeNode "timestamp"
+ *     SimilarityLink (stv 1.0 1.0)
+ *         NumberNode: "demand_value"
+ *         ExecutionOutputLink
+ *             GroundedSchemaNode: xxxDemandUpdater
+ *             ListLink (empty)
  *
  * The connection of Demand and Goal is represented as:
  *
@@ -56,61 +53,104 @@ namespace OperationalAvatarController
  *         (SimpleTruthValue indicates how well the demand is satisfied)
  *         (ShortTermInportance indicates the urgency of the demand)
  *         PredicateNode: "demand_name_goal" 
+ *         ListLink (empty)
  *     EvaluationLink
  *         GroundedPredicateNode: "FuzzyWithin"
  *         ListLink
  *             NumberNode: "min_acceptable_value"
  *             NumberNode: "max_acceptable_value"
- *             SimilarityLink (stv 1.0 1.0)
- *                 NumberNode: "demand_value"
- *                 ExecutionOutputLink
- *                     GroundedSchemaNode: "demand_schema_name"
- *                     ListLink
- *                         PET_HANDLE
+ *             ExecutionOutputLink
+ *                 GroundedSchemaNode: "demand_schema_name"
+ *                 ListLink (empty)
  *
 */
 class PsiDemandUpdaterAgent : public opencog::Agent
 {
 private:
 
-    // Helper class that stores meta data of a Demand 
-    class DemandMeta
+    /**
+     * Inner class for Demand
+     */
+    class Demand
     {
     public:
 
-        std::string updaterName; // The schema name that updates the Demand
-        Handle similarityLink;   // Handle to SimilarityLink that holds the DemandSchema
-        Handle simultaneousEquivalenceLink; // Handle to SimultaneousEquivalenceLink that
-                                            // holds DemandGoal
-        double updatedValue; // The updated value after calling the Demand updater  
-        bool bUpdated;       // Indicate if the value of the DemandSchema has been updated
+        Demand(const std::string & demandName, Handle hDemandGoal, Handle hFuzzyWithin) :
+            demandName(demandName), hDemandGoal(hDemandGoal), hFuzzyWithin(hFuzzyWithin)
+        {};
 
-        void init ( const std::string & updaterName, 
-                    Handle similarityLink,
-                    Handle simultaneousEquivalenceLink) {
-            this->updaterName = updaterName;
-            this->similarityLink = similarityLink;
-            this->simultaneousEquivalenceLink = simultaneousEquivalenceLink;
-            this->updatedValue = 0;
-            this->bUpdated = false;
+        inline const std::string & getDemandName() 
+        {
+            return this->demandName;
         }
-    }; // class
+
+        inline Handle getHandleDemandGoal()
+        {
+            return this->hDemandGoal;
+        }
+   
+        inline Handle getHandleFuzzyWithin()
+        {
+            return this->hFuzzyWithin;
+        }
+
+        /**
+         * Update the Demand Value
+         *
+         * @return return true if update successfully, otherwise false
+         */
+        bool runUpdater(const AtomSpace & atomSpace, 
+                        Procedure::ProcedureInterpreter & procedureInterpreter, 
+                        const Procedure::ProcedureRepository & procedureRepository);
+
+        /**
+         * Update the truth value of Demand Goal
+         *
+         * @return return true if update successfully, otherwise false
+         *
+         * TODO: Only current (latest) demand value is considered, also take previous demand values in future
+         *
+         * @note This function does two jobs as follows:
+         *
+         *       1. Create a new NumberNode and SimilarityLink to store the result, 
+         *          and then time stamp the SimilarityLink.
+         *
+         *          Since OpenCog would forget (remove) those Nodes and Links gradually, 
+         *          unless you create them to be permanent, don't worry about the overflow of memory. 
+         *
+         *          AtTimeLink
+         *              TimeNode "timestamp"
+         *              SimilarityLink (stv 1.0 1.0)
+         *                  NumberNode: "demand_value"
+         *                  ExecutionOutputLink
+         *                      GroundedSchemaNode: xxxDemandUpdater
+         *                      ListLink (empty)
+         *
+         *       2. Run the procedure named "FuzzyWithin", and then set the result to the truth value of 
+         *         both EvaluationLink of Demand Goal and FuzzyWithin
+         */
+        bool updateDemandGoal(AtomSpace & atomSpace, 
+                              Procedure::ProcedureInterpreter & procedureInterpreter,
+                              const Procedure::ProcedureRepository & procedureRepository, 
+                              const unsigned long timeStamp);
+
+    private:        
+
+        std::string demandName; // The name of the Demand
+
+        Handle hDemandGoal;   // Handle to Demand Goal (EvaluationLink)
+        Handle hFuzzyWithin;  // Handle to FuzzyWithin (EvaluationLink)
+
+        double currentDemandValue; // Store current (latest) value of Demand, 
+
+    };// class Demand
 
     unsigned long cycleCount;
 
-    std::map <std::string, DemandMeta> demandMetaMap;  // Demand - Meta data map 
+    std::vector<Demand> demandList; // List of Demands
 
-    // Initialize demandMetaMap etc.
+    // Initialize demandList etc.
     void init(opencog::CogServer * server);
-
-    // Run updaters (combo scripts)
-    void runUpdaters(opencog::CogServer * server);
-
-    // Set updated values to AtomSpace (NumberNodes)
-    void setUpdatedValues(opencog::CogServer * server);
-
-    // Update PredicateNodes of corresponding DemandGoals
-    void updateDemandGoals(opencog::CogServer * server);
 
     bool bInitialized; 
 
