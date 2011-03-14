@@ -738,6 +738,9 @@ std::vector<T> tokenizeRowVec(std::string& line) {
  * 
  * It is assumed that each row have the same number of columns, if not
  * an assert is raised.
+ *
+ * @todo this function can probably be optimized in speed by using
+ * boost.tokenizer on istream instead of string.
  */
 template<typename IT, typename OT, typename T>
 std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
