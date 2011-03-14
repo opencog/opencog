@@ -47,10 +47,8 @@ throw (InvalidParamException, AssertionException)
     name = cname;
 }
 
-Node::~Node() throw ()
+Node::~Node()
 {
-//    fprintf(stdout, "Deleting Node:\n%s\n", toString().c_str());
-//    fflush(stdout);
 }
 
 const std::string& Node::getName() const

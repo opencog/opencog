@@ -156,7 +156,7 @@ public:
     /**
      * Destructor for this class.
      */
-    ~Link() throw ();
+    ~Link();
 
     inline Arity getArity() const {
         return outgoing.size();

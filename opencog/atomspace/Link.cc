@@ -55,12 +55,10 @@ void Link::init(const std::vector<Handle>& outgoingVector)
     setOutgoingSet(outgoingVector);
 }
 
-Link::~Link() throw ()
+Link::~Link()
 {
-    DPRINTF("Link::~Link() begin\n");
     DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
     delete trail;
-    DPRINTF("Link::~Link() end\n");
 }
 
 void Link::setTrail(Trail* t)

@@ -115,7 +115,7 @@ protected:
 
 public:
 
-    virtual ~Atom() throw (RuntimeException);
+    virtual ~Atom();
 
     /** Returns the type of the atom.
      *

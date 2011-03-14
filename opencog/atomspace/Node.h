@@ -72,7 +72,7 @@ public:
     /**
      * Destructor for this class.
      */
-    virtual ~Node() throw ();
+    virtual ~Node();
 
     /**
      * Gets the name of the node.
