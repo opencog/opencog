@@ -976,6 +976,14 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
         // Select the Demand Goal with lowest truth value
         selectedDemandGoal = this->chooseMostCriticalDemandGoal(server);
 
+        if ( selectedDemandGoal == opencog::Handle::UNDEFINED ) {
+            logger().warn("PsiActionSelectionAgent::%s - Failed to select the most critical Demand Goal [cycle = %d]", 
+                          __FUNCTION__, 
+                          this->cycleCount
+                         );
+            return; 
+        }
+
         // Update the pet's previously/ currently Demand Goal
         pet.setCurrentDemandGoal( selectedDemandGoal );
 
@@ -1004,6 +1012,14 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     {
 
         selectedDemandGoal = this->chooseRandomDemandGoal(); 
+
+        if ( selectedDemandGoal == opencog::Handle::UNDEFINED ) {
+            logger().warn("PsiActionSelectionAgent::%s - Failed to randomly select a Demand Goal [cycle = %d]", 
+                          __FUNCTION__, 
+                          this->cycleCount
+                         );
+            return; 
+        }
 
         if ( selectedDemandGoal != pet.getCurrentDemandGoal() ) {
 
