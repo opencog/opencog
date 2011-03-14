@@ -225,10 +225,9 @@ float BehaviorDescriptionMatcher::computeHandleSetSimilarity(const PredicateHand
         //std::cout << "act2 : " << hact2->toString() << std::endl;
         //~print for debug
 
-        OC_ASSERT( atomSpace->isNode(atomSpace->getType(hact1)),
-                   "hact1 is not a 'Node'");
-        OC_ASSERT( atomSpace->isNode(atomSpace->getType(hact2)),
-                   "hact2 is not a 'Node'");
+        OC_ASSERT( atomSpace->isNode(hact1), "hact1 is not a 'Node'");
+        OC_ASSERT( atomSpace->isNode(hact2), "hact2 is not a 'Node'");
+
         if (atomSpace->getName(hact1) == atomSpace->getName(hact2)) {
             int a1 = atomSpace->getArity(hargs1);
             int a2 = atomSpace->getArity(hargs2);

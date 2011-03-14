@@ -987,11 +987,11 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 result = (data > meanTruthThreshold);
 
             } else {
-                result = atomSpace.inheritsType(atomSpace.getType(toHandle(atomSpace,
+                result = classserver().isA(atomSpace.getType(toHandle(atomSpace,
                                                 def_obj,
                                                 self_id,
                                                 owner_id)),
-                                                PET_NODE);
+                                            PET_NODE);
 
                 // cache miss, compute value and cache it
                 if (result) {
@@ -1045,11 +1045,11 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     result = (data > meanTruthThreshold);
 
                 } else {
-                    result =  atomSpace.inheritsType(atomSpace.getType(toHandle(atomSpace,
-                                                     def_obj,
-                                                     self_id,
-                                                     owner_id)),
-                                                     AVATAR_NODE);
+                    result = classserver().isA(atomSpace.getType(toHandle(atomSpace,
+                                                         def_obj,
+                                                         self_id,
+                                                         owner_id)),
+                                                        AVATAR_NODE);
 
                     // cache miss, compute value and cache it
                     if (result) {
@@ -1109,10 +1109,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     // for the time being all nodes that are no avatar or structure
                     // are considered objects
                     result =
-                        !atomSpace.inheritsType(atomSpace.getType(obj_handle),
+                        !classserver().isA(atomSpace.getType(obj_handle),
                                                 AVATAR_NODE)
                         &&
-                        !atomSpace.inheritsType(atomSpace.getType(obj_handle),
+                        !classserver().isA(atomSpace.getType(obj_handle),
                                                 STRUCTURE_NODE);
 
                     // cache miss, compute value and cache it

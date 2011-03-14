@@ -159,27 +159,6 @@ AtomSpace& AtomSpace::operator=(const AtomSpace& other)
             "AtomSpace - Cannot copy an object of this class");
 }
 
-bool AtomSpace::inheritsType(Type t1, Type t2) const
-{
-    DPRINTF("AtomSpace::inheritsType Atom space address: %p\n", this);
-    DPRINTF("AtomSpace::inheritsType(t1=%d,t2=%d)\n", t1, t2);
-    bool result = classserver().isA(t1, t2);
-    DPRINTF("AtomSpace::inheritsType result = %d\n", result);
-    return result;
-}
-
-bool AtomSpace::isNode(Type t) const
-{
-    DPRINTF("AtomSpace::isNode Atom space address: %p\n", this);
-    return inheritsType(t, NODE);
-}
-
-bool AtomSpace::isLink(Type t) const
-{
-    DPRINTF("AtomSpace::isLink Atom space address: %p\n", this);
-    return inheritsType(t, LINK);
-}
-
 bool AtomSpace::isNode(const Handle& h) const
 {
     DPRINTF("AtomSpace::isNode Atom space address: %p\n", this);
@@ -297,27 +276,6 @@ void AtomSpace::decayShortTermImportance()
 {
     atomSpaceAsync->decayShortTermImportance()->get_result();
 }
-
-/*long AtomSpace::getTotalSTI() const
-{
-    long totalSTI = 0;
-    HandleSeq hs;
-
-    getHandleSet(back_inserter(hs), ATOM, true);
-    foreach (Handle h, hs) totalSTI += getSTI(h);
-    return totalSTI;
-
-}
-
-long AtomSpace::getTotalLTI() const
-{
-    long totalLTI = 0;
-    HandleSeq hs;
-
-    getHandleSet(back_inserter(hs), ATOM, true);
-    foreach (Handle h, hs) totalLTI += getLTI(h);
-    return totalLTI;
-}*/
 
 AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
 {

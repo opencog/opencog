@@ -91,7 +91,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
         unsigned int i;
         for( i = 0; i < incoming.size( ); ++i ) {
             Handle firstElement = atomSpace.getOutgoing(incoming[i], 0 );
-            if ( atomSpace.inheritsType( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
+            if ( classserver().isA( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
                 entitiesA.push_back( atomSpace.getName( firstElement ) );
             } // if
         } // for            
@@ -104,7 +104,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
         unsigned int i;
         for( i = 0; i < incoming.size( ); ++i ) {
             Handle firstElement = atomSpace.getOutgoing(incoming[i], 0 );
-            if ( atomSpace.inheritsType( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
+            if ( classserver().isA( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
                 entitiesB.push_back( atomSpace.getName( firstElement ) );
             } // if
         } // for
@@ -118,7 +118,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
             unsigned int i;
             for( i = 0; i < incoming.size( ); ++i ) {
                 Handle firstElement = atomSpace.getOutgoing(incoming[i], 0 );
-                if ( atomSpace.inheritsType( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
+                if ( classserver().isA( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
                     entitiesC.push_back( atomSpace.getName( firstElement ) );
                 } // if
             } // for

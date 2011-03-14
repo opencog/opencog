@@ -34,7 +34,7 @@ Handle DefaultPatternMatchCB::find_starter(Handle h)
 {
     AtomSpace *as = pme->get_atomspace();
     Type t = as->getType(h);
-	if (as->isNode(t)) {
+	if (classserver().isNode(t)) {
 		if (t != VARIABLE_NODE) return h;
 		return Handle::UNDEFINED;
 	}

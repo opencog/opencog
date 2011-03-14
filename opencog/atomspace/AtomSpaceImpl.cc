@@ -145,7 +145,7 @@ void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, Handle h)
         // no more VersionedTV
         setTV(ca, new_ctv);
     } 
-    else if ( inheritsType(type, OBJECT_NODE) ) {
+    else if ( classserver().isA(type, OBJECT_NODE) ) {
         // TODO remove this and we can remove spaceServer from the
         // AtomSpaceImpl class
         spaceServer->removeObject(getName(h));
@@ -192,15 +192,6 @@ Type AtomSpaceImpl::getType(Handle h) const
     Atom* a = TLB::getAtom(h);
     if (a) return a->getType();
     else return NOTYPE;
-}
-
-bool AtomSpaceImpl::inheritsType(Type t1, Type t2) const
-{
-    DPRINTF("AtomSpaceImpl::inheritsType Atom space address: %p\n", this);
-    DPRINTF("AtomSpaceImpl::inheritsType(t1=%d,t2=%d)\n", t1, t2);
-    bool result = classserver().isA(t1, t2);
-    DPRINTF("AtomSpaceImpl::inheritsType result = %d\n", result);
-    return result;
 }
 
 bool AtomSpaceImpl::isNode(const Handle& h) const

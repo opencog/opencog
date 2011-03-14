@@ -734,7 +734,7 @@ bool PatternMatchEngine::validate(
 {
 	// If its a node, then it must be one of the vars.
 	Type clause_type = atom_space->getType(clause);
-	if (atom_space->isNode(clause_type))
+	if (classserver().isNode(clause_type))
 	{
 		std::vector<Handle>::const_iterator i;
 		for (i = vars.begin();
@@ -747,7 +747,7 @@ bool PatternMatchEngine::validate(
 	}
 
 	// If its a link, then recurse to subclauses.
-	if (atom_space->isLink(clause_type))
+	if (classserver().isLink(clause_type))
 	{
 		const std::vector<Handle> &oset = atom_space->getOutgoing(clause);
 		std::vector<Handle>::const_iterator i;
@@ -778,7 +778,7 @@ void PatternMatchEngine::print_solution(
 		Handle soln = pv.second;
         Type tv = atom_space->getType(var);
         Type ts = atom_space->getType(soln);
-		if (atom_space->isNode(ts) && atom_space->isNode(tv))
+		if (classserver().isNode(ts) && classserver().isNode(tv))
 		{
 			printf("\tNode %s maps to %s\n", 
 			       atom_space->getName(var).c_str(),

@@ -224,23 +224,25 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
 {
     const AtomSpace& as = _wp.getAtomSpace();
 
-    OC_ASSERT(h != Handle::UNDEFINED,
-                     "h must conrrespond to a defined handle");
-    OC_ASSERT(
-                     as.getType(h) == EVALUATION_LINK,
-                     "ActionFilter - h should be of type EVALUATION_LINK.");
+    OC_ASSERT( h != Handle::UNDEFINED,
+                 "h must conrrespond to a defined handle");
+    OC_ASSERT( as.getType(h) == EVALUATION_LINK,
+                 "ActionFilter - h should be of type EVALUATION_LINK.");
+
     //get the list of args
     Handle list_arg_h = as.getOutgoing(h, 1);
+
     OC_ASSERT(list_arg_h != Handle::UNDEFINED,
-                     "list_arg_h must correspond to a defined handle");
-    OC_ASSERT(
-                     as.getType(list_arg_h) == LIST_LINK,
-                     "ActionFilter - h outgoing atom 1 should be of type LIST_LINK. ");
+                 "list_arg_h must correspond to a defined handle");
+    OC_ASSERT( as.getType(list_arg_h) == LIST_LINK,
+                 "ActionFilter - h outgoing atom 1 should be of type LIST_LINK. ");
+
     //get finally action name
     Handle action_h = as.getOutgoing(list_arg_h, 1);
-    OC_ASSERT(
-                     as.inheritsType(as.getType(action_h), NODE),
-                     "ActionFilter - action handle should inherits from NODE");
+
+    OC_ASSERT( as.isNode(action_h),
+                 "ActionFilter - action handle should inherits from NODE");
+
     //get the action name
     std::string action_name = (as.getName(action_h));
 
@@ -265,7 +267,7 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
                 Type arg_type = as.getType(arg_h);
                 const string& arg_name = as.getName(arg_h);
                 //check if the argument is an identifier
-                if (as.inheritsType(arg_type, OBJECT_NODE)) {
+                if (classserver().isA(arg_type, OBJECT_NODE)) {
                     vertex arg_v =
                         WorldWrapperUtil::atom_name_to_definite_object(arg_name,
                                 _self_id,
@@ -273,7 +275,7 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
                     operand_list.push_back(arg_v);
                 }
                 //check if the argument is a number
-                else if (as.inheritsType(arg_type, NUMBER_NODE)) {
+                else if (classserver().isA(arg_type, NUMBER_NODE)) {
                     vertex arg_v = boost::lexical_cast<contin_t>(arg_name);
                     operand_list.push_back(arg_v);
                 }

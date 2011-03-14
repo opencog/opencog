@@ -2,7 +2,6 @@
 #define _OPENCOG_ATOMSPACE_ASYNC_H
 
 #include <iostream>
-#include <pthread.h>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
 

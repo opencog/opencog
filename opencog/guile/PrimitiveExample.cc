@@ -30,7 +30,7 @@ class MyTestClass
 		{
 			Handle hlist = Handle::UNDEFINED;
             AtomSpace *as = cogserver().getAtomSpace();
-			if (as->isNode(as->getType(h)))
+			if (as->isNode(h))
 			{
 				printf("Info: my_func instance %d received the node: %s\n", id, as->getName(h).c_str());
 				hlist = as->addLink(LIST_LINK, h);

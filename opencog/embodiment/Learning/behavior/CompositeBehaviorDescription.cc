@@ -392,7 +392,7 @@ std::string CompositeBehaviorDescription::toStringTimeline(
         std::vector<std::string> names;
         for (std::set<Handle>::iterator it = timelineSets[i].getSet().begin(); it != timelineSets[i].getSet().end(); it++) {
             //the assert below is here to insure that the atom is a node
-            OC_ASSERT(atomspace->isNode(atomspace->getType(*it)));
+            OC_ASSERT(atomspace->isNode(*it));
             names.push_back(atomspace->getName(*it));
         }
         std::sort(names.begin(), names.end());

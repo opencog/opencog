@@ -506,9 +506,6 @@ public:
     bool isNode(const Handle& h) const;
     bool isLink(const Handle& h) const;
 
-    /** Does t1 inherit from t2 */
-    bool inheritsType(Type t1, Type t2) const;
-
     /**
      * Gets a set of handles that matches with the given arguments.
      *

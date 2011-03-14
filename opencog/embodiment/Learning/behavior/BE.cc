@@ -216,8 +216,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 //to be checked if walk perceptions
                 //per_h is in fact the action of the subject observed
                 Handle per_h = as.getOutgoing(arg_list_h, 1);
-                OC_ASSERT(as.isNode(as.getType(per_h)),
-                                 "Handle per_h should be a 'Node'.");
+                OC_ASSERT(as.isNode(per_h), "Handle per_h should be a 'Node'.");
 
                 bool is_walk = as.getName(per_h) == WALK_PERCEPT_NAME;
 
@@ -609,7 +608,7 @@ bool BehaviorEncoder::isUpdated() const
 Handle extractObjectID::operator()(Handle h) const
 {
     Handle out1 = atomspace->getOutgoing(h, 0);
-    if (atomspace->inheritsType(atomspace->getType(out1), NODE)) {
+    if (atomspace->isNode(out1)) {
         Handle out21 = atomspace->getOutgoing(h, 1);
         if (atomspace->getArity(out21) > 0)
             return atomspace->getOutgoing(out21, 0);

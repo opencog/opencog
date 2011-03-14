@@ -595,15 +595,6 @@ public:
         return atomSpaceAsync->getIncoming(h)->get_result();
     }
 
-    //----type properties - these should be abandoned
-    //and accesed through the classserver as they don't have anything
-    //to do with handles... at the very least they should be static.
-    bool isNode(const Type t) const;
-    bool isLink(const Type t) const;
-    /** Does t1 inherit from t2 */
-    bool inheritsType(Type t1, Type t2) const;
-    //-----
-
     /** Convenience functions... */
     bool isNode(const Handle& h) const;
     bool isLink(const Handle& h) const;

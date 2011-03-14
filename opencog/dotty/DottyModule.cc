@@ -66,10 +66,10 @@ public:
 
         std::ostringstream ost;
         ost << h.value() << " [";
-        if (!space->isNode(a->getType()))
+        if (!classserver().isNode(a->getType()))
             ost << "shape=\"diamond\" ";
         ost << "label=\"[" << classserver().getTypeName(a->getType()) << "]";
-        if (space->isNode(a->getType())) {
+        if (classserver().isNode(a->getType())) {
             boost::shared_ptr<Node> n = boost::dynamic_pointer_cast<Node>(a);
             //Node *n = (Node*)a;
             ost << " " << n->getName();

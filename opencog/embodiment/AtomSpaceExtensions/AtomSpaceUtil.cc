@@ -383,7 +383,7 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(const AtomSpace &atomSpace,
         //create the sentence atom
         string atom_message_name;
         if (include_to) {
-            OC_ASSERT(atomSpace.isNode(atomSpace.getType(to_h)),
+            OC_ASSERT(atomSpace.isNode(to_h),
                        "Handle to_h should be a 'Node'.");
             atom_message_name = string("to:") + atomSpace.getName(to_h)
                                 + string(": ") + message;
@@ -1818,8 +1818,8 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(const AtomSpace& atomSpace,
             continue;
         }
 
-        int inspectedAgentTypeCode = atomSpace.getType(agentIdNode);
-        if ( !atomSpace.isNode( inspectedAgentTypeCode ) ) {
+        Type inspectedAgentTypeCode = atomSpace.getType(agentIdNode);
+        if ( !classserver().isNode( inspectedAgentTypeCode ) ) {
             logger().fine("AtomSpaceUtil - Skipping non-node handle type: %d",
                     inspectedAgentTypeCode );
             continue;

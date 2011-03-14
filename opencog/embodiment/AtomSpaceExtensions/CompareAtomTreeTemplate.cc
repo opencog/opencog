@@ -73,7 +73,12 @@ bool is_atom_tree_template_of::is_atom_tree_template_it(const atom_tree& tr1,
             h1_TempOf_h2 = *h1_ptr == *h2_ptr;
         //h2 is a type
         else h1_TempOf_h2 = false; //because tr1 is the template and tr2 a instance
-    } else h1_TempOf_h2 = as->inheritsType((h2_ptr != NULL) ? as->getType(*h2_ptr) : *t2_ptr, *t1_ptr);
+    } else {
+        h1_TempOf_h2 = classserver().isA(
+                (h2_ptr != NULL) ?
+                    as->getType(*h2_ptr) : *t2_ptr,
+                *t1_ptr);
+    }
 
     //debug print
     //std::cout << "XEQUAL H1_TEMPOF_H2 : " << h1_TempOf_h2 << std::endl;
@@ -137,7 +142,7 @@ void does_fit_template::expandHandletree(bool fullVirtual, atom_tree& ret,
     Type T = (h_ptr != NULL) ? as->getType(*h_ptr) : boost::get<Type>(*ret_top);
 
     /// If link then we keep expanding
-    if (as->inheritsType(T, LINK)) {
+    if (classserver().isA(T, LINK)) {
         if (fullVirtual)
             *ret_top = Vertex(T);
 

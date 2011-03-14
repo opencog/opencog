@@ -154,7 +154,7 @@ class FindVariables
 		inline bool find_vars(Handle h)
 		{
             Type t = as->getType(h);
-			if (as->isNode(t))
+			if (classserver().isNode(t))
 			{
 				if (t == VARIABLE_NODE)
 				{

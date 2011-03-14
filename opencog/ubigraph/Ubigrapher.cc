@@ -212,8 +212,8 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
     }
     ost << baseline + scaler;
     boost::shared_ptr<Atom> a = space->cloneAtom(h);
-    if (space->inheritsType(a->getType(), LINK)) {
-        boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
+    boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
+    if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
         if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
             ubigraph_set_edge_attribute(h.value(), "width", ost.str().c_str());
@@ -285,8 +285,8 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
     }
 
     boost::shared_ptr<Atom> a = space->cloneAtom(h);
-    if (space->inheritsType(a->getType(), LINK)) {
-        boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
+    boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
+    if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
         if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
             //ubigraph_set_edge_attribute(h.value(), "color", "#ffffff");
@@ -353,8 +353,8 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
         }
         if (okToApply) {
             boost::shared_ptr<Atom> a = space->cloneAtom(h);
-            if (space->inheritsType(t, LINK)) {
-                boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
+            boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
+            if (l) {
                 const std::vector<Handle> &out = l->getOutgoingSet();
                 if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
                     ubigraph_change_edge_style(h.value(), style);
@@ -373,8 +373,8 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
     foreach (Handle h, hs) {
         boost::shared_ptr<Atom> a = space->cloneAtom(h);
         if (!a) continue;
-        if (space->inheritsType(a->getType(), LINK)) {
-            boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
+        boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
+        if (l) {
             const std::vector<Handle> &out = l->getOutgoingSet();
             if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
                 ubigraph_change_edge_style(h.value(), style);
@@ -387,7 +387,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
 bool Ubigrapher::addVertex(Handle h)
 {
 	// Policy: don't display PLN's FWVariableNodes, because it's annoying
-	if (space->inheritsType(space->getType(h), FW_VARIABLE_NODE)) return false;
+	if (classserver().isA(space->getType(h), FW_VARIABLE_NODE)) return false;
 
     if (!isConnected()) return false;
     boost::shared_ptr<Atom> a = space->cloneAtom(h);

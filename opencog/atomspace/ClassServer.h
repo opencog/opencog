@@ -28,6 +28,7 @@
 #include <stdlib.h>
 
 #include <boost/signal.hpp>
+#include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
 
 #include <opencog/atomspace/types.h>
@@ -53,6 +54,9 @@ private:
     /** Private default constructor for this class to make it a singleton. */
     ClassServer();
 
+    mutable boost::mutex type_mutex;
+    mutable boost::mutex signal_mutex;
+
     Type nTypes;
 
     std::vector< std::vector<bool> > inheritanceMap;
@@ -70,7 +74,10 @@ public:
     /** Adds a new atom type with the given name and parent type */
     Type addType(Type parent, const std::string& name);
 
-    /** Gets the boost::signal for connecting to add type signals */
+    /** Gets the boost::signal for connecting to add type signals
+     * @warning methods connected to this signal must not call ClassServer::addType or
+     * things will deadlock.
+     */
     boost::signal<void (Type)>& addTypeSignal();
 
     /**
