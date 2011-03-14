@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-09
+ * @date 2011-03-14
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -49,11 +49,6 @@ bool PsiDemandUpdaterAgent::Demand::runUpdater
         return false; 
     }
 
-logger().debug("PsiDemandUpdaterAgent::Demand::%s - ListLink: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(hListLink).c_str()
-              );
-
     // Get the ExecutionOutputLink
     Handle hExecutionOutputLink = atomSpace.getOutgoing(hListLink, 2);
 
@@ -69,11 +64,6 @@ logger().debug("PsiDemandUpdaterAgent::Demand::%s - ListLink: %s",
         return false; 
     }
 
-logger().debug("PsiDemandUpdaterAgent::Demand::%s - ExecutionOutputLink: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(hExecutionOutputLink).c_str()
-              );
-
     // Get the GroundedSchemaNode
     Handle hGroundedSchemaNode = atomSpace.getOutgoing(hExecutionOutputLink, 0);
 
@@ -88,11 +78,6 @@ logger().debug("PsiDemandUpdaterAgent::Demand::%s - ExecutionOutputLink: %s",
         return false; 
 
     }
-
-logger().debug("PsiDemandUpdaterAgent::Demand::%s - GroundedSchemaNode: %s", 
-               __FUNCTION__, 
-               atomSpace.atomAsString(hGroundedSchemaNode).c_str()
-              );
 
     // Run the Procedure that update Demand and get the updated value
     const std::string & updaterName = atomSpace.getName(hGroundedSchemaNode);
@@ -427,12 +412,24 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
         this->init(server);
 
     // Update demand values
-    foreach (Demand demand, this->demandList) {
+    foreach (Demand & demand, this->demandList) {
+        logger().debug("PsiDemandUpdaterAgent::%s - Going to run updaters for demand '%s' [cycle = %d]", 
+                       __FUNCTION__, 
+                       demand.getDemandName().c_str(), 
+                       this->cycleCount
+                      );
+
         demand.runUpdater(atomSpace, procedureInterpreter, procedureRepository);
     }
 
     // Update Demand Goals
-    foreach (Demand demand, this->demandList) {
+    foreach (Demand & demand, this->demandList) {
+        logger().debug("PsiDemandUpdaterAgent::%s - Going to set the updated value to AtomSpace for demand '%s' [cycle = %d]", 
+                       __FUNCTION__, 
+                       demand.getDemandName().c_str(), 
+                       this->cycleCount
+                      );
+
         demand.updateDemandGoal(atomSpace, procedureInterpreter, procedureRepository, timeStamp);
     }
 

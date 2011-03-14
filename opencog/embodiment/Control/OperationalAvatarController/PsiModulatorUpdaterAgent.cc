@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-11
+ * @date 2011-03-14
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -300,12 +300,12 @@ void PsiModulatorUpdaterAgent::run(opencog::CogServer * server)
         this->init(server);
 
     // Run modulator updaters
-    foreach (Modulator modulator, this->modulatorList) {
+    foreach (Modulator & modulator, this->modulatorList) {
         modulator.runUpdater(atomSpace, procedureInterpreter, procedureRepository);
     }
 
     // Set the updated value to AtomSpace
-    foreach (Modulator modulator, this->modulatorList) {
+    foreach (Modulator & modulator, this->modulatorList) {
         modulator.updateModulator(atomSpace, procedureInterpreter, procedureRepository, timeStamp);
     }
 }

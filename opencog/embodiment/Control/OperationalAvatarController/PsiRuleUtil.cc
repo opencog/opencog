@@ -256,7 +256,7 @@ void PsiRuleUtil::initUnifier(combo::variable_unifier & unifier,
 {
     unifier.clear(); 
 
-    foreach(std::string varBind, varBindCandidates) {
+    foreach(const std::string & varBind, varBindCandidates) {
         unifier.insert(varBind, 
                        true  // Each variable binding is considered as valid initially. 
                              // Then the combo procedure would update its state (valid/invalid)

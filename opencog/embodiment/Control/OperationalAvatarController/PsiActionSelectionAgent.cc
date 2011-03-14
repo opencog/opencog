@@ -1,11 +1,8 @@
-/**
- * TODO: 1. Deal with the truth value of Action, i.e. ExecutionLink 
- */
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-02
+ * @date 2011-03-14
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -634,7 +631,7 @@ void PsiActionSelectionAgent::printPlans(opencog::CogServer * server, Handle hDe
 
     int planNo=1;
 
-    foreach(std::vector<Handle> psiRules, psiRulesLists) {
+    foreach(const std::vector<Handle> & psiRules, psiRulesLists) {
 
         std::cout<<std::endl<<"Plan No."<<planNo<<" contains "<<psiRules.size()<<" Actions:"
                 <<std::endl
@@ -676,7 +673,7 @@ void PsiActionSelectionAgent::resetPlans( opencog::CogServer * server,
     Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink; 
 
     // Process each Plan
-    foreach(std::vector<Handle> psiPlan, psiPlanList) {
+    foreach(std::vector<Handle> & psiPlan, psiPlanList) {
 
         // Process each Psi Rule within a specific Plan
         foreach(Handle hPsiRule, psiPlan) {
