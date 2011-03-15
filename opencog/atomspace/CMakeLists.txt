@@ -49,7 +49,6 @@ ADD_LIBRARY (atomspace SHARED
     TruthValue.cc
     TypeIndex.cc
     VersionHandle.cc
-    md5.c
 )
 
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
