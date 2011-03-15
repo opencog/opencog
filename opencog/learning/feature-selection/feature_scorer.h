@@ -24,9 +24,6 @@
 #ifndef _OPENCOG_FEATURE_SCORER_H
 #define _OPENCOG_FEATURE_SCORER_H
 
-#include <functional>
-
-#include <opencog/util/foreach.h>
 #include <opencog/util/numeric.h>
 
 namespace opencog {
@@ -53,8 +50,6 @@ protected:
     const IT& _it;
     const OT& _ot;
 };
-
-
 
 } // ~namespace opencog
 
