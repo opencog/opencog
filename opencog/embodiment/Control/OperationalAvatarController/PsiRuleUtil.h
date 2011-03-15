@@ -201,6 +201,15 @@ public:
                             RandGen & randGen);
 
     /**
+     * Slightly easier-to-use version of the above, which creates unifier itself.
+     */
+    static bool isSatisfied(const AtomSpace & atomSpace,
+                            Procedure::ProcedureInterpreter & procedureInterpreter,
+                            const Procedure::ProcedureRepository & procedureRepository,
+                            Handle hPrecondition,
+                            RandGen & randGen);
+
+    /**
      * Check if all the Preconditions of a given Psi Rule are satisfied. 
      * It is used by 'PsiActionSelectionAgent::pickUpPsiRule' method.
      *

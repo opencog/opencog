@@ -53,7 +53,9 @@ bool PsiRuleUtil::splitPsiRule(const AtomSpace & atomSpace,
     // Check goal
     if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
          atomSpace.getArity(evaluationLinkGoal) != 2 ||
-         atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0) ) != PREDICATE_NODE ) {
+         ! atomSpace.inheritsType(
+         atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0) ),
+                            PREDICATE_NODE) ) {
 
         logger().error( "PsiRuleUtil::%s - %s is not a valid Psi Goal. The correct Psi Goal should be of type EvaluationLink, with two arity and its first outgoing should be of type PredicateNode.", 
                         __FUNCTION__, 
@@ -161,7 +163,7 @@ bool PsiRuleUtil::isHandleToPsiRule(const AtomSpace & atomSpace, Handle h)
     // Check goal
     if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
          atomSpace.getArity(evaluationLinkGoal) != 2 ||
-         atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0) ) != PREDICATE_NODE 
+         ! atomSpace.inheritsType(atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0)), PREDICATE_NODE)
        )
         return false; 
 
@@ -288,6 +290,42 @@ void PsiRuleUtil::updateVarBindCandidates(const combo::variable_unifier & unifie
     }
 }
 
+bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
+                              Procedure::ProcedureInterpreter & procedureInterpreter,
+                              const Procedure::ProcedureRepository & procedureRepository,
+                              Handle hPrecondition,
+                              RandGen & randGen)
+{
+    std::vector<std::string> varBindCandidates;
+
+    // Initialize the variable bindings with all the entities the pet encounters
+    PsiRuleUtil::initVarBindCandidates(atomSpace, varBindCandidates);
+
+    logger().debug( "PsiRuleUtil::%s Initialize the variable bindings ( size = %d ) with all the entities that the pet encounters.",
+                    __FUNCTION__,
+                    varBindCandidates.size()
+                  );
+
+    // Initialize the unifier used by combo interpreter
+    //
+    // Initially all the entities the pet encounters are considered as valid variable bindings.
+    // Then the combo interpreter would update the states (valid/ invalid) of each binding.
+    combo::variable_unifier unifier;
+    PsiRuleUtil::initUnifier(unifier, varBindCandidates);
+
+    logger().debug( "PsiRuleUtil::%s Initialize the unifier ( size = %d )",
+                    __FUNCTION__,
+                    unifier.size()
+                  );
+
+    return isSatisfied(atomSpace,
+            procedureInterpreter,
+            procedureRepository,
+            hPrecondition,
+            unifier,
+            randGen);
+}
+
 bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace, 
                               Procedure::ProcedureInterpreter & procedureInterpreter, 
                               const Procedure::ProcedureRepository & procedureRepository, 
@@ -325,7 +363,7 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                        atomSpace.atomAsString(hNode).c_str()
                       );
 
-        if ( atomSpace.getTV(hPrecondition)->getMean() >= 0.99 ) 
+        if ( atomSpace.getTV(hPrecondition)->getMean() >= 0.001 )
             return true; 
     }
     // For GroundedPredicateNode, run the corresponding combo script, and then analyze the result
@@ -538,9 +576,13 @@ Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSp
     executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
 
     logger().debug( "PsiRuleUtil::%s - Applying Psi rule: %s successfully ( currentSchemaId = %d )", 
-		            __FUNCTION__, 
+		            __FUNCTION__,
                     atomSpace.atomAsString(hPsiRule).c_str(), 
                     executingSchemaId 
+                  );
+    logger().debug( "PsiRuleUtil::%s - New action: %s",
+                    __FUNCTION__,
+                    procedure.getName().c_str()
                   );
 
     return executingSchemaId; 

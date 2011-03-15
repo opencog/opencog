@@ -69,9 +69,6 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
     // Initialize ASW etc.
     // TODO: Shall we have to to do so? 
     AtomSpaceWrapper* asw = ASW(opencog::server().getAtomSpace());
-#if LOCAL_ATW
-    ((LocalATW*)asw)->SetCapacity(10000);
-#endif  
     asw->archiveTheorems = false;
     asw->allowFWVarsInAtomSpace = 
     config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
@@ -194,10 +191,14 @@ Handle PsiActionSelectionAgent::chooseMostCriticalDemandGoal(opencog::CogServer 
 
 const std::set<VtreeProvider*> & PsiActionSelectionAgent::searchBackward(Handle goalHandle, int & steps) 
 {
+    AtomSpace & atomSpace = * ( server().getAtomSpace() );
+
+    //! @todo temporary hack because only one TV is recorded. We really want the current TV for the Goal
+    //! to be separate from the planned one (at a later time and/or conditional on executing the plan).
+    atomSpace.setTV(goalHandle,SimpleTruthValue::DEFAULT_TV());
+
     // The implementation below borrowed many source code from the function opencog::pln::infer ("PLNModule.cc")
 
-    AtomSpace & atomSpace = * ( server().getAtomSpace() ); 
-   
     // Create BITNodeRoot for the Goal (Target)
     pHandleSeq fakeHandles = ASW()->realToFakeHandle(goalHandle);
 
@@ -235,7 +236,8 @@ const std::set<VtreeProvider*> & PsiActionSelectionAgent::searchBackward(Handle 
 
     // Do inference backward
     BITNodeRoot * state = Bstate.get();
-    state->setLoosePoolPolicy(true);
+    // Attack of the evil slows!
+    //state->setLoosePoolPolicy(true);
 
     // TODO: How to forbid the output to the screen during inference?
     //       We don't want to mess up the screen with too much details of PLN inference. 
@@ -462,8 +464,11 @@ bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * serv
                                    hPreconditionAndLink
                                  );
 
-        // Store those Preconditions, i.e. subgoals, to Open List if they are not GroundedPredicateNode and 
-        // do no exist in both Open and Close List
+        // Store those Preconditions, i.e. subgoals, to Open List if they
+        // do not exist in both Open and Close List.
+        // They should still be included if they are GroundedPredicateNodes or PredicateNodes, as long as they
+        // are not achieved right now. Other parts of the code will determine whether either type of PredicateNode
+        // is satisfied (each cycle).
         foreach( Handle hPrecondition, atomSpace.getOutgoing(hPreconditionAndLink) ) {
 
            logger().debug("PsiActionSelectionAgent::%s - Going to check the precondition: %s [ cycle = %d ]", 
@@ -488,7 +493,20 @@ bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * serv
 			    this->cycleCount
 			  );
 
-            if ( preconditionType != GROUNDED_PREDICATE_NODE &&
+	    // Verbosely set up too many variables
+
+	    // Get ProcedureInterpreter
+	    Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
+
+	    // Get Procedure repository
+	    const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
+
+            if ( !PsiRuleUtil::isSatisfied(
+                     atomSpace,
+                     procedureInterpreter,
+                     procedureRepository,
+                     hPrecondition,
+                     randGen) &&
                  std::find(openList.begin(), openList.end(), hPrecondition) == openList.end() &&
                  std::find(closeList.begin(), closeList.end(), hPrecondition) == closeList.end()
                ) {
@@ -523,13 +541,13 @@ bool PsiActionSelectionAgent::planByNaiveBreadthFirst( opencog::CogServer * serv
                     this->cycleCount
                   );
 
-    // Reset all the truth value of subgoals to false
-    this->resetPlans(server, goalHandle, psiPlanList);
-
-    logger().debug( "PsiActionSelectionAgent::%s - Reset plans successfully [ cycle = %d]", 
-		    __FUNCTION__, 
-		    this->cycleCount
-		  );
+//    // Reset all the truth value of subgoals to false
+//    this->resetPlans(server, goalHandle, psiPlanList);
+//
+//    logger().debug( "PsiActionSelectionAgent::%s - Reset plans successfully [ cycle = %d]",
+//		    __FUNCTION__,
+//		    this->cycleCount
+//		  );
 
     // TODO: only for debugging, comment it later 
     // Print plans
@@ -554,13 +572,13 @@ void PsiActionSelectionAgent::extractPsiRules(opencog::CogServer * server, pHand
         return;
     }
 
-    if (level > 20) {
+    if (level > 3) { // 20
         logger().warn("PsiActionSelectionAgent::%s - Maximum recursion depth exceeded [ level = %d, cycle = %d ].",
                        __FUNCTION__, 
                        level, 
                        this->cycleCount
                      );
-    	return; 
+    	return;
     }
 
     // Append the given handle (its corresponding real handle) to psiRulesList if it is a Psi Rule
@@ -622,12 +640,11 @@ void PsiActionSelectionAgent::printPlans(opencog::CogServer * server, Handle hDe
                                          const std::vector< std::vector<Handle> > & psiRulesLists)
 {
     const AtomSpace & atomSpace = * ( server->getAtomSpace() ); 
+    std::string sDemandGoalName(atomSpace.getName( atomSpace.getOutgoing(hDemandGoal, 0)));
 
     std::cout<<"Found "<<psiRulesLists.size()<<" plans for Demand Goal: "
-             <<atomSpace.getName( atomSpace.getOutgoing(hDemandGoal, 0)
-                                ).c_str()
-             <<" [ cycle = "<<this->cycleCount<< " ]"
-             <<std::endl;
+             <<sDemandGoalName
+             <<" [ cycle = "<<this->cycleCount<< " ]";
 
     int planNo=1;
 
@@ -635,7 +652,7 @@ void PsiActionSelectionAgent::printPlans(opencog::CogServer * server, Handle hDe
 
         std::cout<<std::endl<<"Plan No."<<planNo<<" contains "<<psiRules.size()<<" Actions:"
                 <<std::endl
-                <<"DemandGoal ";
+                << sDemandGoalName << " ";
 
         foreach(Handle h, psiRules) {
             // Get handles to premise and goal
@@ -661,6 +678,8 @@ void PsiActionSelectionAgent::printPlans(opencog::CogServer * server, Handle hDe
         planNo++;   
 
     }// foreach
+
+    std::cout << std::endl;
 }
 
 void PsiActionSelectionAgent::resetPlans( opencog::CogServer * server,
@@ -696,7 +715,7 @@ void PsiActionSelectionAgent::resetPlans( opencog::CogServer * server,
 
             // Set the truth value of the subgoal to false 
             //
-            // Note: we'll skip GroundedPredicateNode and Demald Goal.
+            // Note: we'll skip GroundedPredicateNode and Demand Goal.
             //       Because the TruthValue of a subgoal with GroundedPredicateNode 
             //       is achieved by running combo script, and 
             //       the TruthValue of a DemandGoal is handled by 'PsiDemandUpdaterAgent'
@@ -995,10 +1014,10 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                       );
 
         // Figure out a plan for the selected Demand Goal
-        int steps = 5000;   // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
+        int steps = 2000000;   // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
 
-//        this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
-        this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
+        this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
+        //this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
     }// if
 
     // Change the current Demand Goal randomly (controlled by the modulator 'SelectionThreshold')
@@ -1034,10 +1053,10 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                           );
 
             // Figure out a plan for the selected Demand Goal
-            int steps = 5000; // TODO: Emotional states shall have impact on steps, i.e. resource of cognitive process
+            int steps = 2000000; // TODO: Emotional states shall have impact on steps, i.e. resource of cognitive process
 
-//            this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
-            this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
+            this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
+            //this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
         }// if
 
     }// if
