@@ -53,7 +53,7 @@ bool PsiRuleUtil::splitPsiRule(const AtomSpace & atomSpace,
     // Check goal
     if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
          atomSpace.getArity(evaluationLinkGoal) != 2 ||
-         ! atomSpace.inheritsType(
+         ! classserver().isA(
          atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0) ),
                             PREDICATE_NODE) ) {
 
@@ -163,7 +163,7 @@ bool PsiRuleUtil::isHandleToPsiRule(const AtomSpace & atomSpace, Handle h)
     // Check goal
     if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
          atomSpace.getArity(evaluationLinkGoal) != 2 ||
-         ! atomSpace.inheritsType(atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0)), PREDICATE_NODE)
+         ! classserver().isA(atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0)), PREDICATE_NODE)
        )
         return false; 
 
