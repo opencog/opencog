@@ -33,7 +33,7 @@
 typedef std::map<string, unsigned int> jobs_t;
 
 // number of evals string
-static const string number_of_evals_str = "#evals";
+static const string number_of_evals_str = "n_evals";
 
 // program option names and abbreviations
 // for their meanings see options_description in moses-exec.cc
