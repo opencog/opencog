@@ -139,7 +139,7 @@ namespace moses {
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::composite_score& ts) {
-    return (out << "[score=" << ts.first << ", complexity=" << -ts.second << "]");
+    return out << "[score=" << ts.first << ", complexity=" << ts.second << "]";
 }
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::composite_behavioral_score& s) {

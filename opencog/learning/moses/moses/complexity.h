@@ -31,13 +31,10 @@
 #include <limits>
 
 namespace moses {
-    typedef int complexity_t ;  //note: complexity is negative with zero being
-                                //the best - this allows for simple ordering
+    typedef int complexity_t ;
   
-    // the max_complexity corresponds to the min value of complexity_t
-    // since complexity is negative
     static const complexity_t max_complexity =
-        std::numeric_limits<complexity_t>::min();
+        std::numeric_limits<complexity_t>::max();
 
     complexity_t complexity(combo::combo_tree::iterator);
     

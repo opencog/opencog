@@ -100,9 +100,9 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
             return false;
         complexity_t c1 = get_complexity(bs_tr1);
         complexity_t c2 = get_complexity(bs_tr2);
-        if(c1 > c2)
-            return true;
         if(c1 < c2)
+            return true;
+        if(c1 > c2)
             return false;
         return opencog::size_tree_order<combo::vertex>()(get_tree(bs_tr1),
                                                          get_tree(bs_tr2));
@@ -280,7 +280,7 @@ struct metapopulation : public set < bscored_combo_tree,
             complexity_t c = get_complexity(*it);
 
             // this to not consider too complex exemplar
-            if (cmin - c > params.selection_max_range) 
+            if (c - cmin > params.selection_max_range) 
                 break;
             const combo_tree& tr = get_tree(*it);
             if(_visited_exemplars.find(tr) == _visited_exemplars.end()) {
@@ -288,7 +288,7 @@ struct metapopulation : public set < bscored_combo_tree,
                 exist_exemplar = true;
             } else // hack: if the tree is visited then put a complexity positive
                    // so we know it must be ignored
-                probs.push_back(1);
+                probs.push_back(-1);
         }
         
         if(!exist_exemplar) {
@@ -296,12 +296,12 @@ struct metapopulation : public set < bscored_combo_tree,
         }
 
         complexity_t sum = 0;
-        complexity_t max_comp = *min_element(probs.begin(), probs.end());
+        complexity_t max_comp = *max_element(probs.begin(), probs.end());
         // convert complexities into (non-normalized) probabilities
         foreach(complexity_t& p, probs) {
             // in case p has the max complexity (already visited) then
             // the probability is set to null
-            p = (p > 0? 0 : pow2(p - max_comp));
+            p = (p < 0? 0 : pow2(max_comp - p));
             sum += p;
         }
 

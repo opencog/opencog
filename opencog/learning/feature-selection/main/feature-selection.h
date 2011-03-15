@@ -140,7 +140,7 @@ struct MIORScorer : public unary_function<eda::instance, composite_score> {
         complexity_t c = fields.count(inst);
         double confidence = it.size()/(it.size() + confi*c);
         double speedPrior = std::min(1.0, resources/exp(cpi*c));
-        composite_score csc(MI(fs) * confidence * speedPrior, -c);
+        composite_score csc(MI(fs) * confidence * speedPrior, c);
         // Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
             stringstream ss;

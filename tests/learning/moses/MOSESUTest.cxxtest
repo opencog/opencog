@@ -54,6 +54,11 @@ class MOSESUTest : public CxxTest::TestSuite {
         TS_ASSERT(lexical_cast<int>(s) == 0);
     }
 public:
+    MOSESUTest() {
+        // logger().setPrintToStdoutFlag(true);
+        // to control the log level use option -l
+    }
+
     void test_hc_2_parity() {
         moses_test(list_of("-Hpa")("-k2"));
     }

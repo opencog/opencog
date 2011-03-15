@@ -37,16 +37,16 @@ complexity_t complexity(combo_tree::iterator it) {
         return 0;
 
     if (is_argument(*it))
-        return -1;
+        return 1;
 
     if (is_builtin_action(*it))
-        return -1;
+        return 1;
 
     if (*it==id::logical_not)
         return complexity(it.begin());
 
     if (is_ann_type(*it))
-        return -1;
+        return 1;
 
     int c=0;
     for (combo_tree::sibling_iterator sib = it.begin(); sib != it.end(); ++sib)
