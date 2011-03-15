@@ -39,9 +39,6 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/TLB.h>
-extern "C" {
-#include <opencog/atomspace/md5.h>
-}
 #include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -150,40 +147,6 @@ void AtomTable::unregisterIterator(HandleIterator* iterator) throw (RuntimeExcep
 
     unlockIterators();
     throw RuntimeException(TRACE_INFO, "could not unregister iterator");
-}
-
-unsigned int AtomTable::strHash(const char* name) const
-{
-
-    // this is a traditional hash algorithm that implements the MD5
-    // XXX Why? Isn't MD5 a bit of overkill for this?
-    // It'll just be slow, without adding much value.
-
-    // special hash value for NULL names
-    if (name == NULL) return 0;
-
-    unsigned int hash = 0;
-    MD5_CTX context;
-    unsigned char digest[16];
-
-    MD5Init(&context);
-    MD5Update(&context, (const unsigned char*) name, strlen(name));
-    MD5Final(digest, &context);
-
-    hash = *((int*) digest);
-    hash ^= *(((int*) digest) + 1);
-    hash ^= *(((int*) digest) + 2);
-    hash ^= *(((int*) digest) + 3);
-
-#define NAME_HASH_SZ (1<<16)
-    return (hash % (NAME_HASH_SZ - 1)) + 1;
-}
-
-inline unsigned int AtomTable::getNameHash(Atom* atom) const
-{
-    Node *nnn = dynamic_cast<Node *>(atom);
-    if (NULL == nnn) return strHash(NULL);
-    return strHash(nnn->getName().c_str());
 }
 
 Handle AtomTable::getHandle(const char* name, Type t) const {

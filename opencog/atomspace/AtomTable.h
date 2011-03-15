@@ -92,8 +92,6 @@ private:
      * if possible.
      */
     AtomHashSet atomSet;
-    unsigned int strHash(const char*) const;
-    inline unsigned int getNameHash(Atom* atom) const;
 
     /**
      * Indicates whether DynamicStatisticsAgent should be used
