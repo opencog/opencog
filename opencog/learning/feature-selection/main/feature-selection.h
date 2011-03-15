@@ -28,6 +28,7 @@
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/comboreduct/combo/table.h>
 
+#include "../feature_scorer.h"
 #include "../moses_based_scorer.h"
 
 using namespace eda;
@@ -113,39 +114,50 @@ eda::instance initial_instance(const feature_selection_parameters& fs_params,
     return res;
 }
 
+template<typename IT, typename OT, typename Optimize>
+void feature_selection(IT& it, const OT& ot,
+                       Optimize& optimize,
+                       const feature_selection_parameters& fs_params) {
+    arity_t arity = it.get_arity();
+    field_set fields(field_set::disc_spec(2), arity);
+    instance_set<composite_score> deme(fields);
+    // determine the initial instance given the initial feature set
+    eda::instance init_inst = initial_instance(fs_params, fields);
+    // define feature set quality scorer
+    typedef MICSScorer<IT, OT, set<arity_t> > FSScorer;
+    FSScorer fs_sc(it, ot,
+                   fs_params.cpi, fs_params.confi, fs_params.resources);
+    typedef moses_based_scorer<FSScorer> MBScorer;
+    MBScorer mb_sc(fs_sc, fields);
+    // possibly wrap in a cache
+    if(fs_params.cache_size > 0) {
+        typedef prr_cache<MBScorer> ScorerCache;
+        ScorerCache sc_cache(fs_params.cache_size, mb_sc);
+        feature_selection(it, ot, fields, deme, init_inst, optimize,
+                          sc_cache, fs_params);
+        // Logger
+        logger().info("Number of cache failures = %u",
+                      sc_cache.get_failures());
+        // ~Logger
+    } else {
+        feature_selection(it, ot, fields, deme, init_inst, optimize,
+                          mb_sc, fs_params);
+    }
+}
+
 template<typename IT, typename OT>
 void feature_selection(IT& it, const OT& ot,
                        const feature_selection_parameters& fs_params,
                        RandGen& rng) {
-    arity_t arity = it.get_arity();
+    optim_parameters op_param(20, 1, 2);
     if(fs_params.algorithm == un) {
         OC_ASSERT(false, "TODO");
     } else if(fs_params.algorithm == sa) {
         OC_ASSERT(false, "TODO");        
     } else if(fs_params.algorithm == hc) {
-        field_set fields(field_set::disc_spec(2), arity);
-        optim_parameters op_param(20, 1, 2);
         hc_parameters hc_param(false); // do not terminate if improvement
         iterative_hillclimbing hc(rng, op_param, hc_param);
-        instance_set<composite_score> deme(fields);
-        // determine the initial instance given the initial feature set
-        eda::instance init_inst = initial_instance(fs_params, fields);
-        typedef MIORScorer<IT, OT> Scorer;
-        Scorer sc(it, ot, fields,
-                  fs_params.cpi, fs_params.confi, fs_params.resources);
-        if(fs_params.cache_size > 0) {
-            typedef prr_cache<Scorer> ScorerCache;
-            ScorerCache sc_cache(fs_params.cache_size, sc);
-            feature_selection(it, ot, fields, deme, init_inst, hc, sc_cache,
-                              fs_params);
-            // Logger
-            logger().info("Number of cache failures = %u",
-                          sc_cache.get_failures());
-            // ~Logger
-        } else {
-            feature_selection(it, ot, fields, deme, init_inst, hc, sc,
-                              fs_params);            
-        }
+        feature_selection(it, ot, hc, fs_params);            
     }
 }
 

@@ -51,6 +51,50 @@ protected:
     const OT& _ot;
 };
 
+/**
+ * Feature set scorer; Mutual Information, Confidence and Speed
+ * prior. The formula is as follows
+ *
+ * MI(fs) * confidence * speedPrior
+ *
+ * where confidence = N/(N+confi*|fs|), the confidence of MI (this is
+ * a heuristic, in order to measure the true confidence one could
+ * compute several MI based on a subsample the dataset and estimate
+ * the confidence based on the distribution of MI obtained)
+ *
+ * speedPrior = max(1, R/exp(cpi*|fs|)), a larger feature means more
+ * computational power for the learning algo. So even if the
+ * confidence is quite high (because the number of samples in the data
+ * set is high) we still don't want to bias the search toward small
+ * feature sets.
+ */
+template<typename IT, typename OT, typename FeatureSet>
+struct MICSScorer : public std::unary_function<FeatureSet, double> {
+
+    MICSScorer(const IT& it, const OT& ot,
+               double cpi = 1, double confi = 0, double resources = 10000)
+        : _it(it), _ot(ot), _cpi(cpi), _confi(confi), _resources(resources) {}
+
+    /**
+     * The feature set is represented by an eda::instance encoding a
+     * field of booleans. Each boolean represents whether its
+     * corresponding feature is in the feature set of not.
+     */
+    double operator()(const FeatureSet& fs) const {
+        double MI = mutualInformation(_it, _ot, fs);
+        double confidence = _it.size()/(_it.size() + _confi*fs.size());
+        double speedPrior = std::min(1.0, _resources/exp(_cpi*fs.size()));
+        return MI * confidence * speedPrior;
+    }
+
+    const IT& _it;
+    const OT& _ot;
+    double _cpi; // complexity penalty intensity
+    double _confi; //  confidence intensity
+    double _resources; // resources of the learning algo that will take
+                       // in input the feature set
+};
+
 } // ~namespace opencog
 
 #endif // _OPENCOG_FEATURE_SCORER_H

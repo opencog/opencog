@@ -48,30 +48,14 @@ std::set<arity_t> get_feature_set(const eda::field_set& fields,
 }
 
 /**
- * Scorer to be used with MOSES' optimizers for feature set combining
- * Mutual Information, Confidence and Speed prior. The formula is as
- * follows
- *
- * MI(fs) * confidence * speedPrior
- *
- * where confidence = N/(N+confi*|fs|), the confidence of MI (this is
- * a heuristic, in order to measure the true confidence one could
- * compute several MI based on a subsample the dataset and estimate
- * the confidence based on the distribution of MI obtained)
- *
- * speedPrior = max(1, R/exp(cpi*|fs|)), a larger feature means more
- * computational power for the learning algo. So even if the
- * confidence is quite high (because the number of samples in the data
- * set is high) we still don't want to bias the search toward small
- * feature sets.
+ * Wrapper to use a feature set scorer with MOSES's optimization
+ * algorithms.
  */
-template<typename IT, typename OT>
-struct MIORScorer : public unary_function<eda::instance, composite_score> {
+template<typename FSScorer>
+struct moses_based_scorer : public unary_function<eda::instance, composite_score> {
 
-    MIORScorer(const IT& _it, const OT& _ot, const eda::field_set& _fields,
-               double _cpi = 1, double _confi = 0, double _resources = 10000)
-        : it(_it), ot(_ot), fields(_fields), cpi(_cpi),
-          confi(_confi), resources(_resources) {}
+    moses_based_scorer(const FSScorer& fs_scorer, const eda::field_set& fields)
+        : _fs_scorer(fs_scorer), _fields(fields) {}
 
     /**
      * The feature set is represented by an eda::instance encoding a
@@ -79,32 +63,21 @@ struct MIORScorer : public unary_function<eda::instance, composite_score> {
      * corresponding feature is in the feature set of not.
      */
     composite_score operator()(const eda::instance& inst) const {
-        std::set<arity_t> fs = get_feature_set(fields, inst);
-        complexity_t c = fields.count(inst);
-        double MI = mutualInformation(it, ot, fs);
-        double confidence = it.size()/(it.size() + confi*c);
-        double speedPrior = std::min(1.0, resources/exp(cpi*c));
-        composite_score csc(MI * confidence * speedPrior, c);
+        std::set<arity_t> fs = get_feature_set(_fields, inst);
+        composite_score csc(_fs_scorer(fs), fs.size());
         // Logger
         if(logger().getLevel() >= Logger::FINE) {
             stringstream ss;
-            ss << "MIORScorer - Evaluate instance: " 
-               << fields.stream(inst) << " " << csc
-               << ", confidence = " << confidence
-               << ", speedPrior = " << speedPrior << std::endl;
+            ss << "moses_based_scorer - Evaluate instance: " 
+               << _fields.stream(inst) << " " << csc << std::endl;
             logger().fine(ss.str());
         }
         // ~Logger
         return csc;
     }
 
-    const IT& it;
-    const OT& ot;
-    const eda::field_set& fields;
-    double cpi; // complexity penalty intensity
-    double confi; //  confidence intensity
-    double resources; // resources of the learning algo that will take
-                      // in input the feature set
+    const FSScorer& _fs_scorer;
+    const eda::field_set& _fields;
 };
 
 } // ~namespace opencog
