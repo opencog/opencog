@@ -116,6 +116,24 @@ public:
         atomTable.add(new Link(INHERITANCE_LINK, os));
     }
 
+    void testHolds() {
+        Handle h(100101);
+        AtomTable atomTable(false);
+        Handle word = atomTable.add(new Node(NUMBER_NODE, "1"));
+        TS_ASSERT(atomTable.holds(word));
+        TS_ASSERT(!atomTable.holds(h));
+    }
+
+    void testIsCleared() {
+
+        AtomTable atomTable(false);
+        TS_ASSERT(atomTable.isCleared());
+        Handle word = atomTable.add(new Node(NUMBER_NODE, "1"));
+        TS_ASSERT(!atomTable.isCleared());
+
+        
+    }
+
     void REMOVEDtestPredicateIndices() {
         /* TODO: REVIEW ALL THIS STUFF */
         HandleEntry* expectedEntries[6];

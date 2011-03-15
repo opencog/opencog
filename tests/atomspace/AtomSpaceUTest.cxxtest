@@ -734,6 +734,38 @@ public:
         logger().debug("END TEST: filter");
     }
 
+    void testCopyConstructor() {
+        AtomSpace* asCopy = new AtomSpace(*atomSpace);
+        // Check they access the same AtomSpaceImpl
+        Handle h1 = asCopy->addNode(NODE, "test1");
+        Handle h2 = atomSpace->getHandle(NODE, "test1");
+        TS_ASSERT_EQUALS(h1, h2);
+
+        delete asCopy;
+        // Ensure AtomSpace still exists via original AtomSpace.
+        h2 = atomSpace->getHandle(NODE, "test1");
+        TS_ASSERT_EQUALS(h1, h2);
+    }
+
+    void testCloneAndCommit() {
+        Handle h1 = atomSpace->addNode(NODE, "test1");
+        boost::shared_ptr<Atom> a = atomSpace->cloneAtom(h1);
+        a->setTruthValue(SimpleTruthValue(0.001f, 0.00001f));
+        atomSpace->commitAtom(*a);
+        TS_ASSERT(atomSpace->getTV(h1)->getMean() == 0.001f);
+
+    }
+
+
+    void testGetHandleSetByName() {
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(NODE, "dog1", SimpleTruthValue(0.5f, 0.99f));
+
+        HandleSeq namedAtoms;
+        atomSpace->getHandleSet(back_inserter(namedAtoms), NODE, true);
+        TS_ASSERT_EQUALS(namedAtoms.size(), 3 + NUM_VH_NODES);
+    }
 };
 
 AtomSpace *AtomSpaceUTest::atomSpace = NULL;
