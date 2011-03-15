@@ -59,14 +59,14 @@ protected:
  *
  * where confidence = N/(N+confi*|fs|), the confidence of MI (this is
  * a heuristic, in order to measure the true confidence one could
- * compute several MI based on a subsample the dataset and estimate
- * the confidence based on the distribution of MI obtained)
+ * compute several MI based on subsamples the dataset and estimate the
+ * confidence based on the distribution of MI obtained)
  *
  * speedPrior = max(1, R/exp(cpi*|fs|)), a larger feature means more
  * computational power for the learning algo. So even if the
  * confidence is quite high (because the number of samples in the data
- * set is high) we still don't want to bias the search toward small
- * feature sets.
+ * set is high) we still want to bias the search toward small feature
+ * sets.
  */
 template<typename IT, typename OT, typename FeatureSet>
 struct MICSScorer : public std::unary_function<FeatureSet, double> {
