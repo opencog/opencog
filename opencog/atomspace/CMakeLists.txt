@@ -120,7 +120,6 @@ INSTALL (FILES
     TruthValue.h
     TypeIndex.h
     VersionHandle.h
-    md5.h
     types.h
     DESTINATION "include/${PROJECT_NAME}/atomspace"
 )
