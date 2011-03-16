@@ -409,8 +409,8 @@
 ;    (add_action "test_eat_food")
 ;)
 ;
-;(add_rule (cog-new-stv 0.8 1.0) TestEnergyDemandGoal test_eat_food
-;          TestGetFoodGoal 
+;(add_rule (cog-new-stv 0.8 1.0) TestEnergyDemandGoal (add_action "goto_owner")
+;          truePrecondition
 ;)
 ;
 ;(define test_search_food

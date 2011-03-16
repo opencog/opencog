@@ -148,7 +148,16 @@ bool Spawner::processNextMessage(Message *message)
             std::string debuggerPath = opencog::config().get("OAC_DEBUGGER_PATH");
             cmdPrefix = debuggerPath + " ";
             if(opencog::config().get_bool("PASS_OAC_ARG_DEBUGGER_COMMAND")) {
-                command_ss << cmdPrefix << " ./opc " << agentArgs << " &";
+                command_ss << cmdPrefix << " ./opc " << agentArgs << " ";
+
+                if(opencog::config().get_bool("ENABLE_UNITY_CONNECTOR")) {
+                    // This is a hack. To redirect "PROXY_ID" setting to agent id.
+                    // There are also some tweaks in OAC code.
+                    command_ss << message->getFrom() << " " << cmdSuffix << " &";
+                } else {
+                    command_ss << cmdSuffix << " &";
+                }
+
             }
             else {
                 command_ss << cmdPrefix << " ./opc &";
