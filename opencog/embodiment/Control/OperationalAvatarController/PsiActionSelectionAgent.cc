@@ -66,14 +66,19 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
     // Reset the seed for pseudo-random numbers
     srand(time(0));
 
+    // Whether to use PLN while planning
+    this->bPlanByPLN = config().get_bool("PSI_PLAN_BY_PLN");
+
     // Initialize ASW etc.
     // TODO: Shall we have to to do so? 
-    AtomSpaceWrapper* asw = ASW(opencog::server().getAtomSpace());
-    asw->archiveTheorems = false;
-    asw->allowFWVarsInAtomSpace = 
-    config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
+    if (this->bPlanByPLN) {
+        AtomSpaceWrapper* asw = ASW(opencog::server().getAtomSpace());
+        asw->archiveTheorems = false;
+        asw->allowFWVarsInAtomSpace = 
+        config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
 
-    currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
+        currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
+    }
 
     // Initialize other members
     this->currentPsiRule = opencog::Handle::UNDEFINED; 
@@ -1016,8 +1021,10 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
         // Figure out a plan for the selected Demand Goal
         int steps = 2000000;   // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
 
-        this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
-        //this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
+        if (this->bPlanByPLN)
+            this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
+        else
+            this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
     }// if
 
     // Change the current Demand Goal randomly (controlled by the modulator 'SelectionThreshold')
@@ -1055,8 +1062,10 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
             // Figure out a plan for the selected Demand Goal
             int steps = 2000000; // TODO: Emotional states shall have impact on steps, i.e. resource of cognitive process
 
-            this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
-            //this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
+            if (this->bPlanByPLN)
+                this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
+            else
+                this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
         }// if
 
     }// if

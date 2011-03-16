@@ -134,6 +134,8 @@ private:
 
     time_t timeStartCurrentPsiRule; // When the current Psi rule was applied 
 
+    bool bPlanByPLN;     // Indicating whether to use PLN while planning (see config PSI_PLAN_BY_PLN)
+
     // Boost smart pointer to BITNodeRoot, used by PLN
     // 
     // Examples of using PLN (within "PLNModule.cc"):
