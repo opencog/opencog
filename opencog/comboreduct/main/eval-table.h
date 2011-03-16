@@ -36,6 +36,21 @@ using namespace std;
 using namespace boost::assign;
 using namespace ant_combo;
 
+static const pair<string, string> rand_seed_opt("random-seed", "r");
+static const pair<string, string> input_table_opt("input-table", "i");
+static const pair<string, string> combo_str_opt("combo-program", "c");
+static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
+static const pair<string, string> labels_opt("labels", "l");
+static const pair<string, string> output_file_opt("output-file", "o");
+static const pair<string, string> feature_opt("feature", "f");
+static const pair<string, string> features_file_opt("features-file", "F");
+static const pair<string, string> compute_MI_opt("compute-MI", "m");
+static const pair<string, string> display_output_table_opt("display-output-table", "d");
+
+string opt_desc_str(const pair<string, string>& opt) {
+    return string(opt.first).append(",").append(opt.second);
+}
+
 // structure containing the options for the eval-table program
 struct evalTableParameters {
     string input_table_file;
@@ -44,48 +59,27 @@ struct evalTableParameters {
     bool has_labels;
     vector<string> features;
     string features_file;
-    bool compute_MI;
     bool display_output_table;
     string output_file;
 };
 
 template<typename Out, typename OT>
-Out& output_results(Out& out, const evalTableParameters& pa, const OT& ot,
-                    double mi) {
-    if(pa.compute_MI)
-        out << mi << endl; // print mutual information
+Out& output_results(Out& out, const evalTableParameters& pa, const OT& ot) {
     if(pa.display_output_table)
         out << ot << endl; // print output table
     return out;
 }
 
 template<typename OT>
-void output_results(const evalTableParameters& pa, const OT& ot,
-                    const vector<double>& mis) {
+void output_results(const evalTableParameters& pa, const OT& ot) {
     
     if(pa.output_file.empty())
-        foreach(double mi, mis)
-            output_results(cout, pa, ot, mi);
+        output_results(cout, pa, ot);
     else {
         ofstream of(pa.output_file.c_str(), ios_base::app);
-        foreach(double mi, mis)
-            output_results(of, pa, ot, mi);
+        output_results(of, pa, ot);
         of.close();        
     }
-}
-
-set<arity_t> get_features_idx(const vector<string>& features,
-                              const vector<string>& labels,
-                              const evalTableParameters& pa) {
-    set<arity_t> res;
-    foreach(const string& f, features) {
-        arity_t idx = distance(labels.begin(), find(labels, f));
-        OC_ASSERT((size_t)idx != labels.size(),
-                  "No such a feature %s in file %s",
-                  f.c_str(), pa.input_table_file.c_str());
-        res.insert(idx);
-    }
-    return res;
 }
 
 template<typename IT, typename OT>
@@ -99,30 +93,8 @@ void eval_output_results(const evalTableParameters& pa,
         
         ot_tr.set_label(ot.get_label());
         
-        // compute MI for each feature set
-        vector<double> mis;
-        if(pa.compute_MI) {
-            vector<string> labels = read_data_file_labels(pa.input_table_file);
-            if(!pa.features.empty()) {
-                set<arity_t> fs = get_features_idx(pa.features, labels, pa);
-                mis += mutualInformation(it, ot_tr, fs);
-            }
-            if(!pa.features_file.empty()) {
-                ifstream in(pa.features_file.c_str());
-                while(in.good()) {
-                    string line;
-                    getline(in, line);
-                    if(line.empty())
-                        continue;
-                    set<arity_t> fs =
-                        get_features_idx(tokenizeRowVec<string>(line),
-                                         labels, pa);
-                    mis += mutualInformation(it, ot_tr, fs);
-                }
-            }
-        }
         // print results
-        output_results(pa, ot_tr, mis);
+        output_results(pa, ot_tr);
     }
 }
 

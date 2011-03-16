@@ -1,4 +1,4 @@
-/** eval-table.cc --- 
+/** eval-features.cc --- 
  *
  * Copyright (C) 2011 Nil Geisweiller
  *
@@ -27,16 +27,18 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
 
-#include "eval-table.h"
+#include "eval-features.h"
 
 using namespace boost::program_options;
 using boost::lexical_cast;
-using namespace opencog;
 
 /**
- * Program to output the result of a combo program given input data
- * described in CSV format. It has a few additional options to
- * compute the mutual information, and more to add.
+ * Program to output the feature quality of a feature set given a data
+ * set. Optionally the variable correpsonding to the output of the
+ * data set (the last column) can be substituted by a combo program
+ * (or several combo programs, one for each results). Likewise one can
+ * provide a list of feature sets instead of one feature set and
+ * output the results for each data set.
  */
 
 /**
@@ -60,13 +62,10 @@ combo_tree str2combo_tree_label(const std::string& combo_prog_str,
     return tr;
 }
 
-/**
- * Program to evaluate a combo program over a data set repsented as csv file.
- */
 int main(int argc,char** argv) { 
 
     // program options, see options_description below for their meaning
-    evalTableParameters pa;
+    eval_features_parameters pa;
     unsigned long rand_seed;
 
     // Declare the supported options.
@@ -76,20 +75,31 @@ int main(int argc,char** argv) {
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
-        (opt_desc_str(input_table_opt).c_str(),
+        (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&pa.input_table_file),
          "Input table file.\n")
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string> >(&pa.combo_programs),
-         "Combo program to evaluate against the input table. It can be used several time so that several programs are evaluated at once.\n")
+         "Combo program to replace the output (last column) of the data set. It can be used several time so that several programs are evaluated at once.\n")
         (opt_desc_str(combo_prog_file_opt).c_str(),
          value<string>(&pa.combo_programs_file),
-         "File containing combo programs to evaluate against the input table. Each combo program in the file is seperated by a new line and each results are displaied in the same order, seperated by a new line.\n")
+         "File containing combo programs to replace the output (last column) of the data set. Each combo program in the file is seperated by a new line. For each program, all features sets are evaluated and their results displayed.\n")
         (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels #labels1, etc, instead of place holders. For instance one provide the combo program \"and(#large #tall)\" instead of \"and(#24 #124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
-        (opt_desc_str(display_output_table_opt).c_str(), value<bool>(&pa.display_output_table),
-         "Display the output table resulting from applying the combo program on the input table.\n")
+        (opt_desc_str(feature_opt).c_str(), value<vector<string> >(&pa.features),
+         "Feature to consider. Can be used several time for several features.\n")
+        (opt_desc_str(features_file_opt).c_str(), value<string>(&pa.features_file),
+         "File containing feature sets to consider. Each feature set per line, with features seperated by comma.\n")
+        (opt_desc_str(complexity_penalty_intensity_opt).c_str(),
+         value<double>(&pa.complexity_penalty_intensity)->default_value(0),
+         "Complexity penalty of the feature set (the larger the more penalized). Value between 0 to inf. This can be used as a speed prior for the learning algorithm that may use the features.\n")
+        (opt_desc_str(confidence_penalty_intensity_opt).c_str(),
+         value<double>(&pa.confidence_penalty_intensity)->default_value(0),
+         "Confidence penalty of the feature set (the larger the more penalized). Value between 0 to inf. This penalty is different than the complexity penalty as it takes into account the sample number size. The larger the sample size the more confident.\n")
+        (opt_desc_str(resources_opt).c_str(),
+         value<double>(&pa.resources)->default_value(10000),
+         "Resources allocated to the learning algorithm that take in input the selected features. More resource means that the feature set can be larger (as long as it has enough confidence). In this case the algo is supposed to be MOSES and the resources is the number of evaluations.\n")
         ;
 
     variables_map vm;
@@ -103,7 +113,6 @@ int main(int argc,char** argv) {
 
     // set variables
     pa.has_labels = vm.count("labels");
-    // residual_error = vm.count("residual-error");
 
     // init random generator
     opencog::MT19937RandGen rng(rand_seed);
@@ -122,5 +131,3 @@ int main(int argc,char** argv) {
     }
 
 }
-
-
