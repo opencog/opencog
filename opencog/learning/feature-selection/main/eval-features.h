@@ -47,7 +47,7 @@ static const pair<string, string> features_file_opt("features-file", "F");
 static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> complexity_penalty_intensity_opt("complexity-penalty-intensity", "p");
-static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
+static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "d");
 static const pair<string, string> resources_opt("resources", "R");
 
 string opt_desc_str(const pair<string, string>& opt) {
