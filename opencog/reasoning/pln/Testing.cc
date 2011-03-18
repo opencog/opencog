@@ -168,7 +168,9 @@ bool runSCMTargets(string testDir, bool test_bc) {
         // documentation is very obsolete however.
         for (recursive_directory_iterator end, dir(testDir);
               dir != end; ++dir) {
-            if (!is_directory(dir->status())) {
+            // ignore directories and hidden files beginning with "."
+            if (!is_directory(dir->status()) &&
+                    dir->path().filename()[0] != '.') {
                 string filename(dir->path().string());
                 Btr<PLNTest> _test = setupSCMTarget(filename.c_str(), test_bc);
                 if (_test) {
