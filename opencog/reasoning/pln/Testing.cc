@@ -11,6 +11,7 @@
 #include <string>
 
 #define DPRINTF(...)
+//#define DPRINTF printf
 
 using namespace std;
 using namespace opencog;
@@ -54,12 +55,12 @@ float getCount(float c) { return SimpleTruthValue::confidenceToCount(c); }
 void initAxiomSet(string premiseFile)
 {
     AtomSpaceWrapper *asw = GET_ASW;
-    DPRINTF("initAxiomSet: Before reset");
+    DPRINTF("initAxiomSet: Before reset\n");
     asw->reset();
-    DPRINTF("initAxiomSet: After reset");
+    DPRINTF("initAxiomSet: After reset\n");
     asw->allowFWVarsInAtomSpace = true;
 
-    DPRINTF("Loading %s", premiseFile.c_str());
+    DPRINTF("Loading %s\n", premiseFile.c_str());
 
 #if HAVE_GUILE
     int rc = load_scm_file(*(asw->getAtomSpace()), premiseFile.c_str());
@@ -72,10 +73,11 @@ void initAxiomSet(string premiseFile)
     // if there was an error, then the AS is now empty and makeCrispTheorems
     // will (correctly) be updated to indicate that there are none.
     if (rc) throw std::string("failed to load file");
+
+    cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
 #else
     throw std::string("Need Scheme bindings to run PLN tests!");
 #endif
-    cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
 }
 
 //! @todo Replace with an existing method, after tweaking various things to
@@ -111,6 +113,10 @@ Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc)
     // Get target atom
     SchemeEval& eval = SchemeEval::instance();
     Handle h = eval.eval_h(targetScheme);
+    if (h == Handle::UNDEFINED || eval.eval_error()) {
+        std::cout << "Scheme error while evaluating target: " << targetScheme << std::endl;
+        throw RuntimeException(TRACE_INFO,"Scheme error while evaluating target");
+    }
 
     // Get the fake handle for the primary TV of the target
     pHandleSeq fakeHandles =
