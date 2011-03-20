@@ -102,15 +102,13 @@ class SchemeEval
                 }
 				singletonInstance = new SchemeEval(atomspace);
             }
-            // Disable this check, because scheme module creates its own
-            // AtomSpace instance for connecting to the shared AtomSpaceAsync
-            /*else if (atomspace && singletonInstance->atomspace != atomspace) {
+            else if (atomspace && singletonInstance->atomspace->atomSpaceAsync != atomspace->atomSpaceAsync) {
                 // Someone is trying to initialise the Scheme interpretator
                 // on a different AtomSpace. because of the singleton design
                 // there is no easy way to support this...
                 throw (RuntimeException(TRACE_INFO, "Trying to re-initialise"
-                            "scm interpretor with different AtomSpace ptr!"));
-            }*/
+                            "scm interpretor with different AtomSpaceAsync ptr!"));
+            }
 			return *singletonInstance;
 		}
 };
