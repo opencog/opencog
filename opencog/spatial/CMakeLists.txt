@@ -26,6 +26,8 @@ ADD_LIBRARY(SpaceMap
     MapExplorerServer.cc
 )
 
+ADD_DEPENDENCIES(SpaceMap opencog_atom_types)
+
 ADD_LIBRARY(HPASearch
     HPASearch
     QuadTree
