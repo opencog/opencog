@@ -68,7 +68,7 @@ AtomSpaceWrapper* ASW(AtomSpace* a)
             // Ideally we'd be able to set PLN to use a different AtomSpace,
             // but parts of PLN (like the Rule objects) hold on to an ASW
             // pointer.
-            throw RuntimeException("Can't reinitialise ASW with a different AtomSpace");
+            throw RuntimeException(TRACE_INFO,"Can't reinitialise ASW with a different AtomSpace");
             // No need to delete as NormalizingATW does it
             //delete instance;
             //instance = NULL;
