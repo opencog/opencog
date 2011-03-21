@@ -69,17 +69,6 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
     // Whether to use PLN while planning
     this->bPlanByPLN = config().get_bool("PSI_PLAN_BY_PLN");
 
-    // Initialize ASW etc.
-    // TODO: Shall we have to to do so? 
-    if (this->bPlanByPLN) {
-        AtomSpaceWrapper* asw = ASW(opencog::server().getAtomSpace());
-        asw->archiveTheorems = false;
-        asw->allowFWVarsInAtomSpace = 
-        config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
-
-        currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
-    }
-
     // Initialize other members
     this->currentPsiRule = opencog::Handle::UNDEFINED; 
     this->previousPsiRule = opencog::Handle::UNDEFINED;

@@ -100,18 +100,6 @@ void PsiRelationUpdaterAgent::init(opencog::CogServer * server)
                     this->cycleCount
                   );
   
-    // Initialize ASW
-    // TODO: Shall we have to to do so? 
-    AtomSpaceWrapper* asw = ASW(opencog::server().getAtomSpace());
-#if LOCAL_ATW
-    ((LocalATW*)asw)->SetCapacity(10000);
-#endif  
-    asw->archiveTheorems = false;
-    asw->allowFWVarsInAtomSpace = 
-    config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
-
-    currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
-
     // Avoid initialize during next cycle
     this->bInitialized = true;
 }
