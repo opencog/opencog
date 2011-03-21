@@ -118,7 +118,7 @@ foreach file $flist {
 }
 
 foreach file $flistconfig {
-    exec cp -r $file $distDir
+    exec cp -ur $file $distDir
 }
 
 
