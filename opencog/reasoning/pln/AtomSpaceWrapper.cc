@@ -35,6 +35,8 @@
 
 #include  <boost/foreach.hpp>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
 
 using namespace std;
 using namespace opencog;
@@ -63,11 +65,16 @@ AtomSpaceWrapper* ASW(AtomSpace* a)
     static AtomSpaceWrapper* instance = NULL;
     if (instance == NULL || a != NULL) {    
         if (instance != NULL) {
+            // Ideally we'd be able to set PLN to use a different AtomSpace,
+            // but parts of PLN (like the Rule objects) hold on to an ASW
+            // pointer.
+            throw RuntimeException("Can't reinitialise ASW with a different AtomSpace");
             // No need to delete as NormalizingATW does it
             //delete instance;
-            instance = NULL;
+            //instance = NULL;
         }
         LOG(2, "Creating AtomSpaceWrappers...");
+        std::cout << "set atomspacewrapper to use atomspace* " << a << std::endl;
 #if LOCAL_ATW
         instance = &LocalATW::getInstance(a);
 #else
@@ -80,6 +87,7 @@ AtomSpaceWrapper* ASW(AtomSpace* a)
 AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
     USize(800), USizeMode(CONST_SIZE), rootContext("___PLN___"), watchingAtomSpace(false), atomspace(a)
 {
+    DPRINTF("ASW[%p]::constructor atomspace %p\n", this, (void*) atomspace);
     // Add dummy root NULL context node
     rootContextHandle = atomspace->addNode(CONCEPT_NODE, rootContext);
     atomspace->setVLTI(rootContextHandle, AttentionValue::NONDISPOSABLE);
@@ -93,11 +101,13 @@ AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
 
 AtomSpaceWrapper::~AtomSpaceWrapper()
 {
+    DPRINTF("ASW[%p]::deconstructor atomspace %p\n", this,(void*)  atomspace);
     setWatchingAtomSpace(false);
 }
 
 void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
 {
+    DPRINTF("ASW[%p]::setwatching atomspace %p\n", this,(void*) atomspace);
     if (watch) {
         if (!watchingAtomSpace) {
             c_add = atomspace->atomSpaceAsync->addAtomSignal(
@@ -125,6 +135,7 @@ void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
 
 bool AtomSpaceWrapper::handleAddSignal(AtomSpaceImpl *as, Handle h)
 {
+    DPRINTF("ASW[%p]::addsignal atomspace %p\n", this, (void*) atomspace);
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
 #if 0
@@ -192,6 +203,7 @@ bool AtomSpaceWrapper::inheritsType(Type T1, Type T2) const
 
 bool AtomSpaceWrapper::isSubType(pHandle h, Type T)
 {
+    DPRINTF("ASW[%p]::issubtype atomspace %p\n", this,(void*) atomspace);
     if (isType(h))
         return inheritsType((Type) h, T);
 
@@ -201,6 +213,7 @@ bool AtomSpaceWrapper::isSubType(pHandle h, Type T)
 
 pHandleSeq AtomSpaceWrapper::getOutgoing(const pHandle h)
 {
+    DPRINTF("ASW[%p]::getoutgoing atomspace %p\n", this,(void*) atomspace);
 #ifdef STREAMLINE_PHANDLES // In case I wasn't handling the version right
     // Check if link
     if (!isSubType(h, LINK)) {
@@ -229,12 +242,14 @@ pHandleSeq AtomSpaceWrapper::getOutgoing(const pHandle h)
 
 pHandle AtomSpaceWrapper::getOutgoing(const pHandle h, const int i)
 {
+    DPRINTF("ASW[%p]::getoutgoing atomspace %p\n", this,(void*) atomspace);
     OC_ASSERT(i < getArity(h));
     return getOutgoing(h)[i];
 }
 
 pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h) 
 {
+    DPRINTF("ASW[%p]::getincoming atomspace %p\n", this,(void*) atomspace);
     vhpair v = fakeToRealHandle(h);
     Handle sourceContext = v.second.substantive;
     HandleSeq inLinks;
@@ -289,6 +304,7 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
 
 bool AtomSpaceWrapper::isValidPHandle(const pHandle h) const
 {
+    DPRINTF("ASW[%p]::isvalidphandle atomspace %p\n", this,(void*) atomspace);
 #ifdef STREAMLINE_PHANDLES
 	return atomspace->isValidHandle(fakeToRealHandle(h).first);
 #else
@@ -302,6 +318,7 @@ bool AtomSpaceWrapper::isValidPHandle(const pHandle h) const
 
 vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
 {
+    DPRINTF("ASW[%p]::fakeToRealHandle atomspace %p\n", this,(void*) atomspace);
     // Don't map Handles that are Types
     if (isType(h)) {
         throw RuntimeException(TRACE_INFO, "Cannot convert an atom type (%u) "
@@ -333,6 +350,7 @@ vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
 
 pHandle AtomSpaceWrapper::realToFakeHandle(Handle h, VersionHandle vh)
 {
+    DPRINTF("ASW[%p]::realToFakeHandle atomspace %p\n", this,(void*) atomspace);
 #ifdef STREAMLINE_PHANDLES
 	pHandle fakeHandle = (pHandle) h.value() + mapOffset;
 	return fakeHandle;
@@ -358,6 +376,7 @@ pHandle AtomSpaceWrapper::realToFakeHandle(Handle h, VersionHandle vh)
 }
 
 pHandleSeq AtomSpaceWrapper::realToFakeHandle(const Handle h) {
+    DPRINTF("ASW[%p]::realToFakeHandle atomspace %p\n", this,(void*) atomspace);
 #ifdef STREAMLINE_PHANDLES
     return pHandleSeq(1, realToFakeHandle(h, NULL_VERSION_HANDLE));
 #else
@@ -1413,6 +1432,7 @@ pHandleSeq AtomSpaceWrapper::filter_type(Type t)
 
 Type AtomSpaceWrapper::getType(const pHandle h) const
 {
+    DPRINTF("ASW[%p]::getType atomspace %p\n", this,(void*) atomspace);
     if (isType(h)) return (Type) h;
     return atomspace->getType(fakeToRealHandle(h).first);
 }

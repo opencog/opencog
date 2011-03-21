@@ -258,7 +258,6 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     boost::signals::connection c_remove; //! Connection to remove atom signals
 
 protected:
-    AtomSpace *atomspace;
 
     //! Keep track of what FW Variables are in the system
     std::map<std::string,pHandle> variableShadowMap;
@@ -291,6 +290,7 @@ protected:
     pHandle directAddLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
                           bool fresh);
 
+    AtomSpace *atomspace;
 public:
 
     inline AtomSpace* getAtomSpace() const { return atomspace; };
