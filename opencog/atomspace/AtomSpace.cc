@@ -63,20 +63,27 @@ using namespace opencog;
 
 AtomSpace::AtomSpace(void)
 {
-    atomSpaceAsync = new AtomSpaceAsync();
-    ownsAtomSpaceAsync = true;
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    // Ensure caching is ready before anything else happens
     setUpCaching();
 #endif
+    atomSpaceAsync = new AtomSpaceAsync();
+    ownsAtomSpaceAsync = true;
+    c_remove = atomSpaceAsync->removeAtomSignal(
+            boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
+
 }
 
 AtomSpace::AtomSpace(const AtomSpace& other)
 {
-    this->atomSpaceAsync = other.atomSpaceAsync;
-    ownsAtomSpaceAsync = false;
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
+    // Ensure caching is ready before anything else happens
     setUpCaching();
 #endif
+    this->atomSpaceAsync = other.atomSpaceAsync;
+    ownsAtomSpaceAsync = false;
+    c_remove = atomSpaceAsync->removeAtomSignal(
+            boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
 }
 
 
@@ -92,26 +99,22 @@ void AtomSpace::setUpCaching()
     //__getTV = new _getTV(this);
     //getTVCached = new lru_cache<AtomSpace::_getTV>(1000,*__getTV);
 
-    c_remove = atomSpaceAsync->removeAtomSignal(
-            boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
-
 }
 #endif
 
 AtomSpace::AtomSpace(AtomSpaceAsync& a)
 {
-    atomSpaceAsync = &a;
-    ownsAtomSpaceAsync = false;
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     setUpCaching();
 #endif
-
+    atomSpaceAsync = &a;
+    ownsAtomSpaceAsync = false;
 }
 
 AtomSpace::~AtomSpace()
 {
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     c_remove.disconnect();
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     delete __getType;
     delete getTypeCached;
 #endif
@@ -120,13 +123,13 @@ AtomSpace::~AtomSpace()
         delete atomSpaceAsync;
 }
 
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
 bool AtomSpace::handleRemoveSignal(AtomSpaceImpl *as, Handle h)
 {
+#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     getTypeCached->remove(h);
+#endif
     return false;
 }
-#endif
 
 Type AtomSpace::getType(Handle h) const
 {
