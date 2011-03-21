@@ -605,6 +605,7 @@ bool AtomTable::remove(Handle handle, bool recursive)
     HandleEntry* extractedHandles = extract(handle, recursive);
     if (extractedHandles) {
         removeExtractedHandles(extractedHandles);
+        delete extractedHandles;
         return true;
     }
     return false;
