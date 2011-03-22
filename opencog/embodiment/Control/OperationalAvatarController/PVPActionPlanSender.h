@@ -75,6 +75,16 @@ public:
      */
     bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan);
 
+	/**
+	 * Sends a specific action from plan to the target Virtual World.
+	 *
+	 * @param actionPlan
+	 *
+	 * @param actionSequenceNum 
+	 *
+	 * @return
+	 */
+	bool sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan, unsigned int actionSequenceNum);
     /**
      * Sends the emotional feelings meessage to the target Virtual World.
      *

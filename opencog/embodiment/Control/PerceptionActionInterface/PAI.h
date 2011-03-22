@@ -263,6 +263,14 @@ public:
     void sendActionPlan(ActionPlanID planId) throw (opencog::RuntimeException,
             std::bad_exception);
 
+	/**
+	 * In order to support multiple virtual world platforms and make 
+	 * the action plan handling development less painful in them, we
+	 * design to extract and send the actions in a plan one by one orderly.
+	 */
+	void sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSeqNum = 1) 
+		throw (opencog::RuntimeException, std::bad_exception);
+
     /**
      * Sends an Feelings XML message to PVP. Note that not all feelings are
      * sent, only the ones that where updated during last actions selection

@@ -177,6 +177,41 @@ void PAI::sendActionPlan(ActionPlanID planId) throw (opencog::RuntimeException, 
     }
 }
 
+void PAI::sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSeqNum) throw (opencog::RuntimeException, std::bad_exception)
+{
+    ActionPlanMap::const_iterator it = inProgressActionPlans.find(planId);
+
+	// send the first action in plan and mark the plan as a pending one.
+    if (it != inProgressActionPlans.end()) {
+        const ActionPlan& plan = it->second;
+        if (actionSender.sendSpecificActionFromPlan(plan, actionSeqNum)) {
+            // mark action plan as sent by moving it from inProgress to pending map
+            
+            // must be added first. Otherwise the reference to the plan becomes invalid
+            pendingActionPlans[planId] = plan;
+            inProgressActionPlans.erase(it->first);
+
+        } else {
+            throw opencog::RuntimeException(TRACE_INFO,
+                "PAI - ActionPlanSender could not send the ActionPlan '%s'.", planId.c_str());
+        }
+    } else {
+		// Check if the plan id is already in the pending list or not.
+		it = pendingActionPlans.find(planId);
+		if (it != pendingActionPlans.end()) {
+			const ActionPlan& plan = it->second;
+			if (!actionSender.sendSpecificActionFromPlan(plan, actionSeqNum)) {
+				throw opencog::RuntimeException(TRACE_INFO,
+					"PAI - ActionPlanSender could not send the ActionPlan '%s'.", planId.c_str());
+			}
+		} else {
+            throw opencog::RuntimeException(TRACE_INFO,
+                "PAI - ActionPlanSender could not send the ActionPlan '%s'.", planId.c_str());
+        }
+
+    }
+}
+
 void PAI::sendEmotionalFeelings(const std::string& petId, const std::map<std::string, float>& feelingsValueMap)
 {
 
@@ -2519,7 +2554,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
 
         set<unsigned int>::const_iterator itr;
         for (itr = seqNumbers.begin(); itr != seqNumbers.end(); itr++) {
-            unsigned int seqNumber = *itr;
+			unsigned int seqNumber = *itr;
             const char* predicateName;
 
             switch (statusCode) {
@@ -2574,10 +2609,19 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
         if (plan.isFinished()) {
             pendingActionPlans.erase(planId);
             planToActionIdsMaps.erase(planId);
-        }
-
-    } else {
-        logger().warn(
+        } else {
+			// If using loosely ordered action sending mode,
+			// then continue to send the next action of this
+			// unfinished plan.
+			if(config().get_bool("LOOSELY_ORDERED_ACTION_SENDING_MODE")) {
+				if(sequence != 0) {
+					int nextActionSeqNum = sequence + 1;
+					sendExtractedActionFromPlan(planId, nextActionSeqNum);
+				}
+			}
+		} 
+    } else { 
+		logger().warn(
                      "PAI - No pending action plan with the given id '%s'.",
                      planId.c_str());
     }

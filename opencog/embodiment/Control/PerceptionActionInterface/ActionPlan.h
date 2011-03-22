@@ -101,6 +101,15 @@ public:
      * @param petId the id of the pet for which the PVP message will be sent.
      */
     string getPVPmessage(const std::string& petId) const;
+    
+	/**
+	 * Generates the corresponding PVP's message in XML format for a specific action
+	 * of this action plan.
+	 *
+	 * @param petId the id of the pet
+	 * @param actionSeqNum the action sequence number to be capsulated in XML.
+	 */
+	string getPVPmessage(const std::string& petId, unsigned int actionSeqNum) const;
 
     /**
      * Check if the action with the given sequence number was marked tried

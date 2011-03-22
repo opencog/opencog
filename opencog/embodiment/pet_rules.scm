@@ -344,6 +344,10 @@
     (connect_demand_goal TestEnergyDemandSchema     TestEnergyDemandGoal 0.1 0.95)
 )
 
+(define truePrecondition
+    (add_gpn_precondition "truePrecondition")  
+)
+
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Rules
@@ -409,9 +413,9 @@
 ;    (add_action "test_eat_food")
 ;)
 ;
-;(add_rule (cog-new-stv 0.8 1.0) TestEnergyDemandGoal (add_action "goto_owner")
-;          truePrecondition
-;)
+(add_rule (cog-new-stv 0.8 1.0) TestEnergyDemandGoal (add_action "goto_owner") 
+          truePrecondition
+)
 ;
 ;(define test_search_food
 ;    (add_action "test_search_food") 
@@ -518,9 +522,7 @@
 ; Rules related to EnergyDemandGoal
 ;
 
-(define truePrecondition
-    (add_gpn_precondition "truePrecondition")  
-)
+
 
 (define eat_food
     (add_action "eat_food")  

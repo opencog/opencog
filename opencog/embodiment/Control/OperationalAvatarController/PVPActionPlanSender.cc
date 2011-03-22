@@ -54,6 +54,16 @@ bool PVPActionPlanSender::sendActionPlan(const PerceptionActionInterface::Action
     return ne->sendMessage(msg);
 }
 
+bool PVPActionPlanSender::sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan, unsigned int actionSequenceNum)
+{
+	MessagingSystem::StringMessage msg(ne->getID(), config().get("PROXY_ID"), actionPlan.getPVPmessage(petId, actionSequenceNum));
+    if (logPVPMessage) {
+        logger().info("PVPActionPlanSender::sendActionPlan():\n%s\n", msg.getPlainTextRepresentation());
+    }
+    return ne->sendMessage(msg);
+
+}
+
 bool PVPActionPlanSender::sendEmotionalFeelings(const std::string& feelings)
 {
     MessagingSystem::StringMessage msg(ne->getID(), config().get("PROXY_ID"), feelings);

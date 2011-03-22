@@ -378,6 +378,9 @@ protected:
 			// For HK unity project
 			// If following option is set to 'true', multiverse would not work. 
 			"ENABLE_UNITY_CONNECTOR",		"false",
+
+
+			"LOOSELY_ORDERED_ACTION_SENDING_MODE", "true",
             //used as halting condition by reset
             "",                             ""
         };
