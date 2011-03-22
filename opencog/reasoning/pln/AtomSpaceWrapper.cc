@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2011 by The OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -68,18 +69,19 @@ AtomSpaceWrapper* ASW(AtomSpace* a)
             // Ideally we'd be able to set PLN to use a different AtomSpace,
             // but parts of PLN (like the Rule objects) hold on to an ASW
             // pointer.
-            throw RuntimeException(TRACE_INFO,"Can't reinitialise ASW with a different AtomSpace");
+            throw RuntimeException(TRACE_INFO,
+                    "Can't reinitialise ASW with a different AtomSpace");
             // No need to delete as NormalizingATW does it
             //delete instance;
             //instance = NULL;
         }
-        LOG(2, "Creating AtomSpaceWrappers...");
-        std::cout << "set atomspacewrapper to use atomspace* " << a << std::endl;
 #if LOCAL_ATW
         instance = &LocalATW::getInstance(a);
 #else
         instance = &NormalizingATW::getInstance(a);
 #endif
+        LOG(2, "Created AtomSpaceWrapper...");
+        DPRINTF("ASW[%p]::Set ASW to use atomspace %p\n", instance, (void*) a);
     }
     return instance;
 }
