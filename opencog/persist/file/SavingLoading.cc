@@ -118,9 +118,10 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
 
     // calculates the total time that the process of saving has spent
     time_t duration = time(NULL) - start;
-    logger().info("Memory dump: 100%% done (in %d second%c).",
-                  (int) duration, duration == 1 ? '\0' : 's');
+    printf( "Memory dump: 100%% done.\n");
     fflush(stdout);
+    logger().info("Memory dump complete in %d second%c.",
+                  (int) duration, duration == 1 ? '\0' : 's');
 }
 
 void SavingLoading::saveClassServerInfo(FILE *f)
@@ -311,8 +312,6 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     delete(it);
 
     printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
-    fflush(stdout);
-
 
     TimeServerSavable tss;
     tss.setServer(&atomSpace.atomSpaceAsync->getTimeServer());
@@ -663,7 +662,7 @@ void SavingLoading::printProgress(const char *s, int n)
 
     if (old != n) {
         old = n;
-        logger().debug("Memory %s: %d%% done.\r", s, n);
+        logger().debug("Memory %s: %d%% done.", s, n);
     }
 }
 

@@ -29,7 +29,8 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-#include <opencog/guile/load-file.h> // Loading Scheme scripts by C++ code
+// For loading Scheme scripts by C++ code
+#include <opencog/guile/load-file.h>
 
 #include <opencog/util/files.h>
 #include <opencog/util/Config.h>
@@ -504,7 +505,7 @@ void OAC::loadAtomSpace(const std::string& petId)
 
 void OAC::saveState()
 {
-
+    // ensure directory for pet db exists
     if (!createDirectory(getPath(pet->getPetId()).c_str())) {
         logger().error("OAC - Cannot create directory '%s'.",
                      getPath(pet->getPetId()).c_str());
