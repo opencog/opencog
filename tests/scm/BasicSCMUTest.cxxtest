@@ -34,9 +34,9 @@
 #include <opencog/atomspace/TLB.h>
 
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/load-file.h>
 
 #include <opencog/server/CogServer.h>
-#include <opencog/server/load-file.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 

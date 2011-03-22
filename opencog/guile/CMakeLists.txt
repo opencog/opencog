@@ -9,6 +9,7 @@ ADD_LIBRARY (smob SHARED
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
 	SchemeSmobVH.cc
+	load-file
 )
 
 TARGET_LINK_LIBRARIES(smob

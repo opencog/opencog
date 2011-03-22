@@ -31,9 +31,10 @@
 #include "LSMessageSenderMock.h"
 
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/load-file.h>
+
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/server/load-file.h>
 #include <opencog/persist/file/SavingLoading.h>
 
 #include <fstream>

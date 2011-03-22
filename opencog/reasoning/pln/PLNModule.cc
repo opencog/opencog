@@ -47,25 +47,14 @@
 
 #include <opencog/adaptors/tulip/TulipWriter.h>
 
-//! @todo For PLN testing. Maybe move it to another file used by this module and PLNUTest
-//#include <opencog/guile/SchemeEval.h>
-//#include <opencog/server/load-file.h>
-//! @todo For PLN testing. Maybe move it to another file used by this module and PLNUTest
-//#include <boost/filesystem.hpp>
-//using namespace boost::filesystem;
-
-
-
 using namespace opencog;
 using namespace opencog::pln;
-//using namespace opencog::pln::test;
 using namespace test;
 
 using std::string;
 using std::set;
 using std::cout;
 using std::endl;
-
 
 DECLARE_MODULE(PLNModule)
 

@@ -66,7 +66,6 @@ int gettimeofday(struct timeval* tp, void* tzp) {
 #include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/server/load-file.h>
 
 using namespace test;
 using namespace opencog::pln;

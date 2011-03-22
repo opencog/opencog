@@ -21,7 +21,6 @@
 
 #include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
 #include <opencog/server/Agent.h>
-#include <opencog/server/load-file.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/util/files.h>

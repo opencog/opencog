@@ -29,7 +29,7 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-#include <opencog/server/load-file.h> // Loading Scheme scripts by C++ code
+#include <opencog/guile/load-file.h> // Loading Scheme scripts by C++ code
 
 #include <opencog/util/files.h>
 #include <opencog/util/Config.h>

@@ -43,7 +43,7 @@
 #include <opencog/server/NetworkServer.h>
 #include <opencog/server/SystemActivityTable.h>
 #include <opencog/server/Request.h>
-#include <opencog/server/load-file.h>
+#include <opencog/guile/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>

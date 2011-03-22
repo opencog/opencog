@@ -4,10 +4,15 @@
 #include "PLN.h"
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+
 #include <opencog/util/Config.h>
+#include <opencog/util/exceptions.h>
+
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/server/load-file.h>
+#include <opencog/guile/load-file.h>
+
 #include <boost/filesystem.hpp>
+
 #include <string>
 
 #define DPRINTF(...)

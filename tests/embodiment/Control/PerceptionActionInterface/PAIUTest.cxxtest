@@ -42,7 +42,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TruthValue.h>
 
-#include <opencog/server/load-file.h>
+#include <opencog/guile/load-file.h>
 
 using namespace PerceptionActionInterface;
 using namespace Control;

@@ -36,7 +36,6 @@ ADD_LIBRARY (server SHARED
 	ConsoleSocket
 	Agent
 	SystemActivityTable
-	load-file
 )
 
 SET(SERVER_LINK_LIBS 
