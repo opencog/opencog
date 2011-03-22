@@ -34,12 +34,6 @@
 #include <boost/config.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/lexical_cast.hpp>
-// Attempted to use boost::bimap in boost 1.35+ but had too much trouble
-//#include <boost/bimap/unordered_set_of.hpp>
-//#include <boost/bimap/multiset_of.hpp>
-//#include <map>
-//#include <boost/bimap/bimap.hpp>
-
 #include <opencog/atomspace/TimeServer.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/lru_cache.h>
