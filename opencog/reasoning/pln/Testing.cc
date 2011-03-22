@@ -72,11 +72,11 @@ void initAxiomSet(string premiseFile)
     // The error-checking is after the call to makeCrispTheorems, because
     // if there was an error, then the AS is now empty and makeCrispTheorems
     // will (correctly) be updated to indicate that there are none.
-    if (rc) throw std::string("failed to load file");
+    if (rc) throw RuntimeException(TRACE_INFO, "failed to load file");
 
     cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
 #else
-    throw std::string("Need Scheme bindings to run PLN tests!");
+    throw RuntimeException(TRACE_INFO, "Need Scheme bindings to run PLN tests!");
 #endif
 }
 

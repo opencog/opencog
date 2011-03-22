@@ -53,6 +53,7 @@ int load_scm_file (AtomSpace& as, const char * filename)
 
 	SchemeEval &evaluator = SchemeEval::instance(&as);
 	int lineno = 0;
+    int pending_lineno = 0;
 
 	while(1)
 	{
@@ -64,9 +65,19 @@ int load_scm_file (AtomSpace& as, const char * filename)
 		{
 			fprintf(stderr, "File: %s line: %d\n", filename, lineno);
 			fprintf(stderr, "%s\n", rv.c_str());
+            return 1;
 		}
 		lineno ++;
+        // keep a record of where pending input starts
+        if (!evaluator.input_pending()) pending_lineno = lineno;
 	}
+    if (evaluator.input_pending()) {
+        // pending input... print error
+        fprintf(stderr, "Warning file %s ended with unterminated "
+                "input begun at line %d\n", filename, pending_lineno);
+        evaluator.clear_pending();
+        return 1;
+    }
 	
 	fclose (fh);
 	return 0;
