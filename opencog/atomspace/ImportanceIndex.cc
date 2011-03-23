@@ -50,20 +50,18 @@ void ImportanceIndex::updateImportance(Atom* atom, int bin)
 	insert(newbin, h);
 }
 
-void ImportanceIndex::insertHandle(Handle h)
+void ImportanceIndex::insertAtom(const Atom* atom)
 {
-	Atom *atom = TLB::getAtom(h);
 	int sti = atom->getAttentionValue().getSTI();
 	int bin = importanceBin(sti);
-	insert(bin, h);
+	insert(bin, atom->getHandle());
 }
 
-void ImportanceIndex::removeHandle(Handle h)
+void ImportanceIndex::removeAtom(const Atom* atom)
 {
-	Atom *atom = TLB::getAtom(h);
 	int sti = atom->getAttentionValue().getSTI();
 	int bin = importanceBin(sti);
-	remove(bin, h);
+	remove(bin, atom->getHandle());
 }
 
 HandleEntry* ImportanceIndex::decayShortTermImportance(void)

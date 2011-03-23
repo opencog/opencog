@@ -42,28 +42,26 @@ void LinkIndex::resize()
 	idx.resize(classserver().getNumberOfClasses());
 }
 
-void LinkIndex::insertHandle(Handle h)
+void LinkIndex::insertAtom(const Atom* a)
 {
-	Atom *a = TLB::getAtom(h);
 	Type t = a->getType();
 	HandleSeqIndex &hsi = idx[t];
 
-	Link *l = dynamic_cast<Link *>(a);
+	const Link *l = dynamic_cast<const Link *>(a);
 	if (NULL == l) return;
 
-	hsi.insert(l->getOutgoingSet(),h);
+	hsi.insert(l->getOutgoingSet(),a->getHandle());
 }
 
-void LinkIndex::removeHandle(Handle h)
+void LinkIndex::removeAtom(const Atom* a)
 {
-	Atom *a = TLB::getAtom(h);
 	Type t = a->getType();
 	HandleSeqIndex &hsi = idx[t];
 
-	Link *l = dynamic_cast<Link *>(a);
+	const Link *l = dynamic_cast<const Link *>(a);
 	if (NULL == l) return;
 
-	hsi.remove(l->getOutgoingSet(),h);
+	hsi.remove(l->getOutgoingSet(),a->getHandle());
 }
 
 Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const

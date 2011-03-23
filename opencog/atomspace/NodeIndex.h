@@ -46,8 +46,8 @@ class NodeIndex
 		NodeIndex();
 
         void connectAtomTable(const AtomTable* table);
-		void insertHandle(Atom* a);
-		void removeHandle(Atom* a);
+		void insertAtom(Atom* a);
+		void removeAtom(Atom* a);
 		void remove(bool (*)(Handle));
         void resize();
 

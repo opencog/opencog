@@ -473,12 +473,12 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     Handle handle = atom->handle;
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
-    nodeIndex.insertHandle(atom);
-    linkIndex.insertHandle(handle);
-    typeIndex.insertHandle(handle);
-    targetTypeIndex.insertHandle(handle);
-    importanceIndex.insertHandle(handle);
-    predicateIndex.insertHandle(handle);
+    nodeIndex.insertAtom(atom);
+    linkIndex.insertAtom(atom);
+    typeIndex.insertAtom(atom);
+    targetTypeIndex.insertAtom(atom);
+    importanceIndex.insertAtom(atom);
+    predicateIndex.insertAtom(atom);
 
     // Updates incoming set of all targets.
     if (dont_defer_incoming_links && (lll != NULL)) {
@@ -582,12 +582,12 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     // updates all global statistics regarding the removal of this atom
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
-    nodeIndex.removeHandle(atom);
-    linkIndex.removeHandle(handle);
-    typeIndex.removeHandle(handle);
-    targetTypeIndex.removeHandle(handle);
-    importanceIndex.removeHandle(handle);
-    predicateIndex.removeHandle(handle);
+    nodeIndex.removeAtom(atom);
+    linkIndex.removeAtom(atom);
+    typeIndex.removeAtom(atom);
+    targetTypeIndex.removeAtom(atom);
+    importanceIndex.removeAtom(atom);
+    predicateIndex.removeAtom(atom);
 
     Link* link = dynamic_cast<Link*>(atom);
     if (link) {

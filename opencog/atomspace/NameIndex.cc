@@ -26,22 +26,18 @@
 
 using namespace opencog;
 
-void NameIndex::insertHandle(Handle h)
+void NameIndex::insertAtom(const Atom *a)
 {
-	Atom *a = TLB::getAtom(h);
-	Node *n = dynamic_cast<Node *>(a);
+	const Node *n = dynamic_cast<const Node *>(a);
 	if (NULL == n) return;
-
-	insert(n->getName().c_str(), h);
+	insert(n->getName().c_str(), a->getHandle());
 }
 
-void NameIndex::removeHandle(Handle h)
+void NameIndex::removeAtom(const Atom* a)
 {
-	Atom *a = TLB::getAtom(h);
-	Node *n = dynamic_cast<Node *>(a);
+	const Node *n = dynamic_cast<const Node *>(a);
 	if (NULL == n) return;
-
-	remove(n->getName().c_str(), h);
+	remove(n->getName().c_str(), a->getHandle());
 }
 
 HandleEntry * NameIndex::getHandleSet(const char* name) const

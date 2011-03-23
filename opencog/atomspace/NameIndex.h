@@ -25,10 +25,10 @@
 #include <map>
 
 #include <opencog/atomspace/StringIndex.h>
-#include <opencog/atomspace/Handle.h>
 
 namespace opencog
 {
+class Atom;
 class HandleEntry;
 
 /**
@@ -38,8 +38,8 @@ class NameIndex:
     public StringIndex
 {
     public:
-        void insertHandle(Handle);
-        void removeHandle(Handle);
+        void insertAtom(const Atom* a);
+        void removeAtom(const Atom* a);
         HandleEntry* getHandleSet(const char* name) const;
 };
 

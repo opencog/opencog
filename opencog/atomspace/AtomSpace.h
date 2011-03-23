@@ -483,23 +483,6 @@ public:
     _getType* __getType;
     // dummy get type version which is cached using lru_cache
     lru_cache_threaded<AtomSpace::_getType> *getTypeCached;
-
-    typedef std::pair<Handle,VersionHandle> vhpair;
-    class _getTV : public std::unary_function<vhpair, const TruthValue*> {
-        AtomSpace* a;
-        public:
-        _getTV(AtomSpace* _a) : a(_a) { };
-        const TruthValue* operator()(const vhpair& hvh) const {
-            if (hvh.first != Handle::UNDEFINED) {
-                return a->atomSpaceAsync->getTV(hvh.first, hvh.second)->get_result();
-            } else {
-                return &TruthValue::NULL_TV();
-            }
-        }
-    };
-    _getTV* __getTV;
-    // dummy get TV version which is cached using lru_cache
-    lru_cache_threaded<AtomSpace::_getTV> *getTVCached;
 #endif // USE_ATOMSPACE_LOCAL_THREAD_CACHE
 
 

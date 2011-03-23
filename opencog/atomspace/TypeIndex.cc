@@ -37,18 +37,16 @@ void TypeIndex::resize(void)
 	FixedIntegerIndex::resize(num_types + 1);
 }
 
-void TypeIndex::insertHandle(Handle h)
+void TypeIndex::insertAtom(const Atom* a)
 {
-	Atom *a = TLB::getAtom(h);
 	Type t = a->getType();
-	insert(t,h);
+	insert(t,a->getHandle());
 }
 
-void TypeIndex::removeHandle(Handle h)
+void TypeIndex::removeAtom(const Atom* a)
 {
-	Atom *a = TLB::getAtom(h);
 	Type t = a->getType();
-	remove(t,h);
+	remove(t,a->getHandle());
 }
 
 HandleEntry * TypeIndex::getHandleSet(Type type, bool subclass) const

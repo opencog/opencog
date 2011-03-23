@@ -42,8 +42,8 @@ private:
 		                               Handle, bool recursive = false);
 public:
     ImportanceIndex(void);
-    void insertHandle(Handle);
-    void removeHandle(Handle);
+    void insertAtom(const Atom*);
+    void removeAtom(const Atom*);
 
     /** Updates the importance index for the given atom.
      * According to the new importance of the atom, it may change importance

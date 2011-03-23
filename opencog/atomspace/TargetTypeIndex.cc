@@ -31,10 +31,9 @@ TargetTypeIndex::TargetTypeIndex(void)
     resize();
 }
 
-void TargetTypeIndex::insertHandle(Handle h)
+void TargetTypeIndex::insertAtom(const Atom* a)
 {
-	Atom *a = TLB::getAtom(h);
-	Link *l = dynamic_cast<Link *>(a);
+	const Link *l = dynamic_cast<const Link *>(a);
 	if (!l) return;
 
 	int arity = l->getArity();
@@ -47,16 +46,15 @@ void TargetTypeIndex::insertHandle(Handle h)
 		Type type = TLB::getAtom(oset[i])->getType();
 		if (done_already.find(type) == done_already.end())
 		{
-			insert(type, h);
+			insert(type, a->getHandle());
 			done_already.insert(type);
 		}
 	}
 }
 
-void TargetTypeIndex::removeHandle(Handle h)
+void TargetTypeIndex::removeAtom(const Atom* a)
 {
-	Atom *a = TLB::getAtom(h);
-	Link *l = dynamic_cast<Link *>(a);
+	const Link *l = dynamic_cast<const Link *>(a);
 	if (!l) return;
 
 	int arity = l->getArity();
@@ -69,7 +67,7 @@ void TargetTypeIndex::removeHandle(Handle h)
 		Type type = TLB::getAtom(oset[i])->getType();
 		if (done_already.find(type) == done_already.end())
 		{
-			remove(type, h);
+			remove(type, a->getHandle());
 			done_already.insert(type);
 		}
 	}

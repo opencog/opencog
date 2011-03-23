@@ -42,24 +42,23 @@ PredicateIndex::PredicateIndex(void)
 	numberOfPredicateIndices = 0;
 }
 
-void PredicateIndex::insertHandle(Handle h)
+void PredicateIndex::insertAtom(const Atom* atom)
 {
 	// Checks Atom against predicate indices and insert it if needed
-	for (int i = 0; i < numberOfPredicateIndices; i++)
-	{
+	for (int i = 0; i < numberOfPredicateIndices; i++) {
+        Handle h = atom->getHandle();
 		PredicateEvaluator* evaluator = predicateEvaluators[i];
-		if (evaluator->evaluate(h))
-		{
+		if (evaluator->evaluate(h)) {
 			insert(i, h);
 		}
 	}
 }
 
-void PredicateIndex::removeHandle(Handle h)
+void PredicateIndex::removeAtom(const Atom* atom)
 {
+    Handle h = atom->getHandle();
 	std::vector<UnorderedHandleSet>::iterator s;
-	for (s = idx.begin(); s != idx.end(); s++)
-	{
+	for (s = idx.begin(); s != idx.end(); s++) {
 		s->erase(h);
 	}
 }

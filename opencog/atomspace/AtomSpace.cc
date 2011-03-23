@@ -94,11 +94,6 @@ void AtomSpace::setUpCaching()
     __getType = new _getType(this);
     getTypeCached = new lru_cache_threaded<AtomSpace::_getType>(1000,*__getType);
 
-    // Initialise lru cache for getTV (disabled because we can't get TV
-    // changes from other threads)
-    //__getTV = new _getTV(this);
-    //getTVCached = new lru_cache<AtomSpace::_getTV>(1000,*__getTV);
-
 }
 #endif
 
@@ -294,7 +289,6 @@ void AtomSpace::clear()
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     {
         getTypeCached->clear();
-        //getTVCached->clear();
     }
 #endif
     atomSpaceAsync->clear()->get_result();

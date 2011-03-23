@@ -41,18 +41,18 @@ void NodeIndex::resize()
     this->idx.resize(classserver().getNumberOfClasses());
 }
 
-void NodeIndex::insertHandle(Atom *a)
+void NodeIndex::insertAtom(Atom *a)
 {
     Type t = a->getType();
     NameIndex &ni = idx[t];
-    ni.insertHandle(a->getHandle());  // XXX perf optimization if we pass atom not handle!
+    ni.insertAtom(a);
 }
 
-void NodeIndex::removeHandle(Atom *a)
+void NodeIndex::removeAtom(Atom *a)
 {
     Type t = a->getType();
     NameIndex &ni = idx[t];
-    ni.removeHandle(a->getHandle());  // XXX perf optimization if we pass atom not handle!
+    ni.removeAtom(a);
 }
 
 Handle NodeIndex::getHandle(Type t, const char *name) const

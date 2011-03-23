@@ -54,8 +54,8 @@ class PredicateIndex:
 		std::map<Handle, int> predicateHandles2Indices;
 	public:
 		PredicateIndex(void);
-		void insertHandle(Handle);
-		void removeHandle(Handle);
+		void insertAtom(const Atom*);
+		void removeAtom(const Atom*);
 		HandleEntry * getHandleSet(int) const;
 
 		void addPredicateIndex(Handle, PredicateEvaluator*)

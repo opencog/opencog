@@ -43,8 +43,8 @@ class TypeIndex:
 		size_t num_types;
 	public:
 		TypeIndex(void);
-		void insertHandle(Handle);
-		void removeHandle(Handle);
+		void insertAtom(const Atom*);
+		void removeAtom(const Atom*);
 		void resize(void);
 
 		HandleEntry* getHandleSet(Type type, bool subclass) const;
