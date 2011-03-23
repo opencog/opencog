@@ -30,6 +30,7 @@
 
 namespace opencog
 {
+class AtomTable;
 class HandleEntry;
 
 /**
@@ -38,11 +39,15 @@ class HandleEntry;
 class NodeIndex
 {
 	private:
+        const AtomTable* atomTable;
 	public:
 		std::vector<NameIndex> idx;
-		NodeIndex(void);
-		void insertHandle(Handle);
-		void removeHandle(Handle);
+
+		NodeIndex();
+
+        void connectAtomTable(const AtomTable* table);
+		void insertHandle(Atom* a);
+		void removeHandle(Atom* a);
 		void remove(bool (*)(Handle));
         void resize();
 

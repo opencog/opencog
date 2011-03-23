@@ -547,7 +547,7 @@ public:
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(const Handle& h) {
+    bool holds(const Handle& h) const {
         Atom *a = getAtom(h);
         if (NULL == a) return false;
         return true;
@@ -559,7 +559,8 @@ public:
      * @return pointer to Atom object, NULL if no atom within this AtomTable is
      * associated with handle.
      */
-    inline Atom* getAtom(const Handle& h) {
+    inline Atom* getAtom(const Handle& h) const {
+        if (h == Handle::UNDEFINED) return NULL;
         Atom *atom = TLB::getAtom(h);
         if (atom)
             // if the atom isn't linked to this AtomTable
@@ -600,13 +601,23 @@ public:
     bool usesDSA() const;
 
     HandleEntry* getHandleSet(Type type, bool subclass, VersionHandle vh) const;
-    HandleEntry* getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh) const;
-    HandleEntry* getHandleSet(Handle handle, Type type, bool subclass, VersionHandle vh) const;
-    HandleEntry* getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const;
-    HandleEntry* getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh) const;
-    HandleEntry* getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh) const;
-    HandleEntry* getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const;
-    HandleEntry* getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const;
+    HandleEntry* getHandleSet(Type type, Type targetType, bool subclass, bool
+            targetSubclass, VersionHandle vh, VersionHandle targetVh) const;
+    HandleEntry* getHandleSet(Handle handle, Type type, bool subclass,
+            VersionHandle vh) const;
+    HandleEntry* getHandleSet(const std::vector<Handle>& handles, Type* types,
+            bool* subclasses, Arity arity, Type type, bool subclass,
+            VersionHandle vh) const;
+    HandleEntry* getHandleSet(const char* name, Type type, bool subclass,
+            VersionHandle vh) const;
+    HandleEntry* getHandleSet(const char* targetName, Type targetType,
+            Type type, bool subclass, VersionHandle vh,
+            VersionHandle targetVh) const;
+    HandleEntry* getHandleSet(const char** names, Type* types, bool*
+            subclasses, Arity arity, Type type, bool subclass,
+            VersionHandle vh) const;
+    HandleEntry* getHandleSet(Type* types, bool* subclasses, Arity arity,
+            Type type, bool subclass, VersionHandle vh) const;
 
     /*
     * If this method is needed it needs to be refactored to use

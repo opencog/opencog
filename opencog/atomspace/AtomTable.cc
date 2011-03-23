@@ -55,6 +55,7 @@ AtomTable::AtomTable(bool dsa)
     size = 0;
     // This allows one to tune how often the unordered map resizes itself.
     //atomSet.max_load_factor(100.0f);
+    nodeIndex.connectAtomTable(this);
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&iteratorsLock, NULL);
@@ -472,7 +473,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     Handle handle = atom->handle;
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
-    nodeIndex.insertHandle(handle);
+    nodeIndex.insertHandle(atom);
     linkIndex.insertHandle(handle);
     typeIndex.insertHandle(handle);
     targetTypeIndex.insertHandle(handle);
@@ -581,7 +582,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     // updates all global statistics regarding the removal of this atom
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
 
-    nodeIndex.removeHandle(handle);
+    nodeIndex.removeHandle(atom);
     linkIndex.removeHandle(handle);
     typeIndex.removeHandle(handle);
     targetTypeIndex.removeHandle(handle);

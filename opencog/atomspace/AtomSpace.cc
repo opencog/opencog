@@ -204,7 +204,8 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, const TruthValue
             name+=alphanum[rand() % (sizeof(alphanum) - 1)];
         }
         result = getHandle(t, name);
-    } while(isValidHandle(result));//If the name already exists, try again
+    } while(result != Handle::UNDEFINED); //If the name already exists, try again
+
     return addNode(t, name, tvn);
 }
 

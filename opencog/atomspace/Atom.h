@@ -129,16 +129,6 @@ public:
      */
     inline Handle getHandle() const { return handle; }
 
-    /*
-    //! Set the handle of the atom.
-    inline bool setHandle(Handle h) const {
-        if (handle == Handle::UNDEFINED) {
-            handle = h;
-            return;
-        }
-        throw RuntimeException("Can't change atom handle");
-    }*/
-
     /** Returns a pointer to a linked-list containing the atoms that are
      * members of this one's incoming set.
      *
