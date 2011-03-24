@@ -265,10 +265,12 @@ public:
 
 	/**
 	 * In order to support multiple virtual world platforms and make 
-	 * the action plan handling development less painful in them, we
-	 * design to extract and send the actions in a plan one by one orderly.
+	 * the action plan handling development less painful in the platform end, 
+	 * we design to extract the actions from a plan and send them one by one 
+	 * orderly.
 	 */
-	void sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSeqNum = 1) 
+	void sendExtractedActionFromPlan(ActionPlanID planId, 
+			unsigned int actionSeqNum = 1) 
 		throw (opencog::RuntimeException, std::bad_exception);
 
     /**

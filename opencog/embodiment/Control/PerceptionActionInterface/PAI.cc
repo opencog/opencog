@@ -181,7 +181,7 @@ void PAI::sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSe
 {
     ActionPlanMap::const_iterator it = inProgressActionPlans.find(planId);
 
-	// send the first action in plan and mark the plan as a pending one.
+	// send the first action in the plan and mark the plan as a pending one.
     if (it != inProgressActionPlans.end()) {
         const ActionPlan& plan = it->second;
         if (actionSender.sendSpecificActionFromPlan(plan, actionSeqNum)) {
@@ -196,7 +196,8 @@ void PAI::sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSe
                 "PAI - ActionPlanSender could not send the ActionPlan '%s'.", planId.c_str());
         }
     } else {
-		// Check if the plan id is already in the pending list or not.
+		// The plan is not in the progress action plan list. Then check
+		// if the plan is already in the pending list or not.
 		it = pendingActionPlans.find(planId);
 		if (it != pendingActionPlans.end()) {
 			const ActionPlan& plan = it->second;
