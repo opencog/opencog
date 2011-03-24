@@ -23,7 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include <opencog/comboreduct/combo/type_tree.h>
 
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
@@ -61,11 +60,25 @@ BaseServer* OAC::createInstance()
 
 OAC::OAC() {}
 
+bool OAC::customLoopRun(void)
+{
+#ifdef HAVE_ZMQ
+    this->plaza->forwardMessages();
+#endif
+    return EmbodimentCogServer::customLoopRun();
+}
+
 void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
+               const std::string & zmqPublishPort,
                const std::string& petId, const std::string& ownerId,
                const std::string& agentType, const std::string& agentTraits)
 {
     setNetworkElement(new NetworkElement(myId, ip, portNumber));
+
+    // Initialize ZeroMQ
+#ifdef HAVE_ZMQ    
+    this->plaza = new Plaza(ip, zmqPublishPort);
+#endif
 
     std::string aType = (agentType == "pet" || agentType == "humanoid") ?
                         agentType : config().get( "RULE_ENGINE_DEFAULT_AGENT_TYPE" );
@@ -464,6 +477,11 @@ OAC::~OAC()
     delete (psiActionSelectionAgent);
     delete (psiRelationUpdaterAgent); 
     delete (psiFeelingUpdaterAgent); 
+
+    // ZeroMQ 
+#ifdef HAVE_ZMQ    
+    delete plaza;
+#endif    
 
 #ifndef DELETE_ATOMSPACE 
     // TODO: It takes too much time to delete atomspace. So, atomspace removal

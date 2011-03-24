@@ -134,15 +134,23 @@ bool Spawner::processNextMessage(Message *message)
             // TODO: notify PROXY about this problem
             return false;
         }
-        // Calculates the CogServer shell port to be used (based on the opcPort
-        // offset)
+        // Calculates the CogServer shell  and ZeroMQ publish port to be used 
+        // (based on the opcPort offset)
         int portOffset = opcPort - minOpcPort + 1;
         int cogServerShellPort = opencog::config().get_int("SERVER_PORT") + portOffset;
+        int zmqPublishPort = opencog::config().get_int("ZMQ_PUBLISH_PORT") + portOffset;
+
         std::string cmdPrefix;
         std::string cmdSuffix;
-        std::string agentArgs = agentID + " " + ownerID + " " + agentType + " "
-            + agentTraits + " " + boost::lexical_cast<std::string>(opcPort)
-            + " " + boost::lexical_cast<std::string>(cogServerShellPort);
+
+        std::string agentArgs = 
+            agentID + " " +
+            ownerID + " " + 
+            agentType + " " +
+            agentTraits + " " + 
+            boost::lexical_cast<std::string>(opcPort) + " " +
+            boost::lexical_cast<std::string>(cogServerShellPort) + " " +
+            boost::lexical_cast<std::string>(zmqPublishPort); 
 
         if (opencog::config().get_bool("RUN_OAC_DEBUGGER")) {
             std::string debuggerPath = opencog::config().get("OAC_DEBUGGER_PATH");
@@ -191,9 +199,16 @@ bool Spawner::processNextMessage(Message *message)
 				command_ss << cmdSuffix << " &";
 			}
         }
-        logger().info("Starting OAC for %s %s %s (%s) at NE port %d; Shell port %d (command: %s)", 
-                agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), 
-                opcPort, cogServerShellPort,  command_ss.str().c_str( ) );
+        logger().info("Starting OAC for %s %s %s (%s) at NE port %d; Shell port %d; ZeroMQ publish port %d; (command: %s)", 
+                      agentType.c_str( ), 
+                      agentID.c_str(),
+                      ownerID.c_str(),
+                      agentTraits.c_str( ), 
+                      opcPort, 
+                      cogServerShellPort, 
+                      zmqPublishPort, 
+                      command_ss.str().c_str( ) 
+                     );
 
         if (!opencog::config().get_bool("MANUAL_OAC_LAUNCH")) {
             system(command_ss.str().c_str( ) );

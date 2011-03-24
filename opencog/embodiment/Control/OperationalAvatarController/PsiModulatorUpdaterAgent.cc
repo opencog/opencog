@@ -1,11 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiModulatorUpdaterAgent.cc
  *
- * Copyright (C) 2002-2009 Novamente LLC
- * All Rights Reserved
- *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-14
+ * @date 2011-03-23
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,7 +19,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #include "OAC.h"
 #include "PsiModulatorUpdaterAgent.h"
@@ -145,7 +141,9 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator
 
 PsiModulatorUpdaterAgent::~PsiModulatorUpdaterAgent()
 {
-
+#ifdef HAVE_ZMQ
+    delete this->publisher; 
+#endif
 }
 
 PsiModulatorUpdaterAgent::PsiModulatorUpdaterAgent()
@@ -155,6 +153,23 @@ PsiModulatorUpdaterAgent::PsiModulatorUpdaterAgent()
     // Force the Agent initialize itself during its first cycle. 
     this->forceInitNextCycle();
 }
+
+#ifdef HAVE_ZMQ
+void PsiModulatorUpdaterAgent::publishUpdatedValue(Plaza & plaza, 
+                                                   zmq::socket_t & publisher, 
+                                                   const unsigned long timeStamp)
+{
+    std::string keyString = "PsiModulatorUpdaterAgent"; 
+    plaza.publishStringMore(publisher, keyString); 
+
+    foreach (Modulator & modulator, this->modulatorList) {
+        plaza.publishStringMore(publisher, modulator.getModulatorName());
+    }
+
+    std::string endString = "The End"; 
+    plaza.publishString(publisher, endString);
+}
+#endif // HAVE_ZMQ
 
 void PsiModulatorUpdaterAgent::init(opencog::CogServer * server) 
 {
@@ -244,6 +259,16 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
                       );
     }// for
 
+    // Initialize ZeroMQ publisher and add it to the plaza
+#ifdef HAVE_ZMQ
+    Plaza & plaza = oac->getPlaza();
+    this->publisher = new zmq::socket_t (plaza.getZmqContext(), ZMQ_PUB);
+    this->publishEndPoint = "ipc://" + petId + ".PsiModulatorUpdaterAgent.ipc"; 
+    this->publisher->bind( this->publishEndPoint.c_str() );
+
+    plaza.addPublisher(this->publishEndPoint); 
+#endif    
+
     // Avoid initialize during next cycle
     this->bInitialized = true;
 }
@@ -308,5 +333,11 @@ void PsiModulatorUpdaterAgent::run(opencog::CogServer * server)
     foreach (Modulator & modulator, this->modulatorList) {
         modulator.updateModulator(atomSpace, procedureInterpreter, procedureRepository, timeStamp);
     }
+
+#ifdef HAVE_ZMQ    
+    // Publish updated modulator values via ZeroMQ
+    Plaza & plaza = oac->getPlaza();
+    this->publishUpdatedValue(plaza, *this->publisher, timeStamp); 
+#endif 
 }
 

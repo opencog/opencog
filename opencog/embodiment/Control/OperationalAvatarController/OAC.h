@@ -39,6 +39,7 @@
 #include "Pet.h"
 #include "PetMessageSender.h"
 #include "PVPActionPlanSender.h"
+#include "Plaza.h"
 
 #include <opencog/embodiment/Control/OperationalAvatarController/ProcedureInterpreterAgent.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/ActionSelectionAgent.h>
@@ -100,6 +101,13 @@ private:
      * an interface to comunicate with the LS.
      */
     Pet * pet;
+
+#ifdef HAVE_ZMQ    
+    /**
+     * Customized ZeroMQ device used by mind agents to publish messages
+     */
+    Plaza * plaza;
+#endif // HAVE_ZMQ
 
     /*
      * Random generator
@@ -188,7 +196,10 @@ public:
     OAC();
     ~OAC();
 
+    virtual bool customLoopRun(void);
+
     void init(const std::string &myId, const std::string &ip, int portNumber,
+              const std::string & zmqPublishPort,
               const std::string& petId, const std::string& ownerId,
               const std::string& agentType, const std::string& agentTraits);
 
@@ -225,6 +236,15 @@ public:
      * @return The pet's cognitive component.
      */
     Pet & getPet();
+
+#ifdef HAVE_ZMQ    
+    /**
+     * Return the customized ZeroMQ device used by mind agents to publish messages
+     */
+    Plaza & getPlaza() {
+        return * plaza;
+    }
+#endif // HAVE_ZMQ
 
     /**
      * Return the reference to rand generator
@@ -303,4 +323,5 @@ public:
 }; // class
 }  // namespace
 
-#endif
+#endif // OAC_H
+

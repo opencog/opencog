@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiModulatorUpdaterAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-11
+ * @date 2011-03-23
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -119,6 +119,16 @@ private:
     unsigned long cycleCount;
 
     std::vector<Modulator> modulatorList;  // List of Modulators
+
+#ifdef HAVE_ZMQ    
+    std::string publishEndPoint; // Publish all the messages to this end point
+    zmq::socket_t * publisher;   // ZeroMQ publisher
+
+    /**
+     * Publish updated modulator values via ZeroMQ
+     */
+    void publishUpdatedValue(Plaza & plaza, zmq::socket_t & publisher, const unsigned long timeStamp);
+#endif    
 
     // Initialize modulatorList etc.
     void init(opencog::CogServer * server);

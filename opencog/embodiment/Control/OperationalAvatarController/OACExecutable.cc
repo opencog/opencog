@@ -39,12 +39,6 @@ void opc_unexpected_handler()
 
 int main(int argc, char *argv[])
 {
-    // take care of the args number.
-    if (argc < 7 || argc > 8) {
-        logger().error("OACExec - Usage: \n\topc <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> [<agent-id>].");
-        return (1);
-    }
-
     try {
         config(Control::EmbodimentConfig::embodimentCreateInstance, true);
         
@@ -54,14 +48,26 @@ int main(int argc, char *argv[])
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
         }
-        
+
+         // take care of the args number.
+        if ( config().get_bool("ENABLE_UNITY_CONNECTOR") && argc != 9 ) {
+            logger().error("OACExec - Usage: \n\topc <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> <ZeroMQ publish port> <agent-id>");
+            return (1);
+        }
+        else if ( !config().get_bool("ENABLE_UNITY_CONNECTOR") && argc != 8 ) {
+            logger().error("OACExec - Usage: \n\topc <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> <ZeroMQ publish port>");
+            return (1);
+        }
+       
         config().set("EXTERNAL_TICK_MODE", "true");
         config().set("SERVER_PORT", argv[6]);
+        config().set("ZMQ_PUBLISH_PORT", argv[7]);
 
-        // This is a hack!!! To redirect message to OCAvatar in unity game.
-		if(argc == 8) {
-			config().set("PROXY_ID", argv[7]);
+        // This is a hack by Troy!!! To redirect message to OCAvatar in unity game.
+        if( config().get_bool("ENABLE_UNITY_CONNECTOR") ) {
+			config().set("PROXY_ID", argv[8]);
 		}
+
         // setting unexpected handler in case a different exception from the
         // especified ones is throw in the code
         std::set_unexpected(opc_unexpected_handler);
@@ -70,7 +76,7 @@ int main(int argc, char *argv[])
         //int petID = atoi(argv[1]);
         //int portNumber = 5100 + petID;
         int portNumber = atoi(argv[5]);
-        
+
         server(OAC::createInstance);
         OAC& opc = static_cast<OAC&>(server());
         // Open database *before* loading modules, since the modules
@@ -89,10 +95,16 @@ int main(int argc, char *argv[])
         // because OAC::loadSCMModules will load 'rules_core.scm',  which should be loaded 
         // before loading Psi Rules ('xxx_rules.scm') and 
         // OAC::init is responsible for loading Psi Rules via OAC::addRulesToAtomSpace
-        opc.init(argv[1], "127.0.0.1", portNumber, 
-                PerceptionActionInterface::PAIUtils::getInternalId(argv[1]), 
-                PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), 
-                argv[3], argv[4]);
+        opc.init(
+            argv[1],        // agent-brain-id, i.e., id of OAC
+            "127.0.0.1",    // NetworkElement ip 
+            portNumber,     // NetworkElement port number
+            argv[7],        // ZeroMQ port used by subscribers to get messages
+            PerceptionActionInterface::PAIUtils::getInternalId(argv[1]), // pet id 
+            PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), // owner id 
+            argv[3], // agent type
+            argv[4]  // agemt traits
+        );
 
         // enable the network server and run the server's main loop
         opc.enableNetworkServer();

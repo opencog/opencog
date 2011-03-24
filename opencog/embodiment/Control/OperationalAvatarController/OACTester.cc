@@ -65,7 +65,7 @@ int main()
 
     server(OAC::createInstance);
     OAC& opc = static_cast<OAC&>(server());
-    opc.init("teste-opc", "127.0.0.1", 4000, "1", "2", "pet", "neutral");
+    opc.init("teste-opc", "127.0.0.1", 4000, "5000", "1", "2", "pet", "neutral");
     msg->setMessage(xml);
     opc.processNextMessage(msg);
 

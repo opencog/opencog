@@ -1,5 +1,6 @@
 ADD_LIBRARY (oac 
     Pet
+    Plaza
     OAC
     PetMessageSender
     PVPActionPlanSender
@@ -42,6 +43,7 @@ TARGET_LINK_LIBRARIES (oac
     ${LUA_LIBRARIES}
     ${LUABIND_LIBRARIES}
     ${XERCESC_LIBRARIES}
+    ${ZMQ_LIBRARIES}
     PredicateUpdaters
     PAI
     MessagingSystem
@@ -71,6 +73,7 @@ TARGET_LINK_LIBRARIES (opc
     PetComboVocabulary
     ImaginaryLife
     ${Boost_THREAD_LIBRARY} 
+    ${ZMQ_LIBRARIES}
 )
 
 ADD_EXECUTABLE (opcHcTester MockOpcHCTestExec.cc)
