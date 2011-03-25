@@ -68,6 +68,11 @@ private:
             return this->modulatorName;
         }
 
+        inline double getModulatorLevel()
+        {
+            return this->currentModulatorValue; 
+        }
+
         inline Handle getHandleUpdater()
         {
             return this->hUpdater;

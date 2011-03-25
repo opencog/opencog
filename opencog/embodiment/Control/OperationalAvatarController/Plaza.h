@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/Plaza.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-24
+ * @date 2011-03-25
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -147,6 +147,18 @@ public:
      */
     const std::string & getUnifiedEndPoint () {
         return this->unifiedEndPoint; 
+    }
+
+    /**
+     * Handy converters between message and other data type
+     */
+    static void messageToString (zmq::message_t & message, std::string & str) {
+        str = std::string (static_cast<char *>(message.data()), message.size());
+    }
+
+    static void stringToMessage (const std::string & str, zmq::message_t & message) {
+        message.rebuild(str.size());
+        memcpy(message.data(), str.data(), str.size());
     }
 
 private:

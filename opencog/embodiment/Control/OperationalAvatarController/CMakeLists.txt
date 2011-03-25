@@ -44,6 +44,7 @@ TARGET_LINK_LIBRARIES (oac
     ${LUABIND_LIBRARIES}
     ${XERCESC_LIBRARIES}
     ${ZMQ_LIBRARIES}
+    json_spirit
     PredicateUpdaters
     PAI
     MessagingSystem

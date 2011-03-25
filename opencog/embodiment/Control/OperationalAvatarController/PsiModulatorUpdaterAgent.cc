@@ -23,6 +23,8 @@
 #include "OAC.h"
 #include "PsiModulatorUpdaterAgent.h"
 
+#include "opencog/web/json_spirit/json_spirit.h"
+
 #include<boost/tokenizer.hpp>
 
 using namespace OperationalAvatarController;
@@ -159,15 +161,26 @@ void PsiModulatorUpdaterAgent::publishUpdatedValue(Plaza & plaza,
                                                    zmq::socket_t & publisher, 
                                                    const unsigned long timeStamp)
 {
+    using namespace json_spirit; 
+
+    // Send the name of current mind agent which would be used as a filter key by subscribers
     std::string keyString = "PsiModulatorUpdaterAgent"; 
     plaza.publishStringMore(publisher, keyString); 
 
+    // Send timestamp
+    std::string timeStampString = boost::lexical_cast<std::string> (timeStamp);
+    plaza.publishStringMore(publisher, timeStampString);
+
+    // Pack all the modulator values in json format 
+    Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
+
     foreach (Modulator & modulator, this->modulatorList) {
-        plaza.publishStringMore(publisher, modulator.getModulatorName());
+        jsonObj.push_back( Pair( modulator.getModulatorName(), modulator.getModulatorLevel() ) );
     }
 
-    std::string endString = "The End"; 
-    plaza.publishString(publisher, endString);
+    // Publish the data packed in json format
+    std::string dataString = write_formatted(jsonObj);
+    plaza.publishString(publisher, dataString);
 }
 #endif // HAVE_ZMQ
 
