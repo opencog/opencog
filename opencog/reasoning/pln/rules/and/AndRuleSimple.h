@@ -93,7 +93,7 @@ public:
 		const int n = (int)premiseArray.size();
 		pHandle first = hs[0];
 		pHandleSeq dummy_outgoing(1, first);
-        const TruthValue* dummy_tv = asw->getTV(first);
+        TruthValuePtr dummy_tv = asw->getTV(first);
 
 		//printf("AndRule: [%d: %d] %s =>\n", N, v2h(premiseArray[0]), asw->getTV(v2h(premiseArray[0]))->toString().c_str());
 

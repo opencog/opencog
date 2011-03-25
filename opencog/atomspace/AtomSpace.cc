@@ -136,14 +136,18 @@ Type AtomSpace::getType(Handle h) const
 #endif
 }
 
-const TruthValue* AtomSpace::getTV(Handle h, VersionHandle vh) const
+/*tv_summary_t AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
     TruthValueRequest tvr = atomSpaceAsync->getTV(h, vh);
     return tvr->get_result();
-    //const TruthValue& result = *tvr->get_result();
-    // Need to clone the result's TV as it will be deleted when the request
-    // is.
-    //return TruthValue*(result.clone());
+}*/
+
+TruthValuePtr AtomSpace::getTV(Handle h, VersionHandle vh) const
+{
+    TruthValueCompleteRequest tvr = atomSpaceAsync->getTVComplete(h, vh);
+    TruthValuePtr x(tvr->get_result());
+    tvr->result = NULL;
+    return x;
 }
 
 void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
@@ -173,7 +177,7 @@ bool AtomSpace::isLink(const Handle& h) const
 
 void AtomSpace::do_merge_tv(Handle h, const TruthValue& tvn)
 {
-    const TruthValue* currentTV(getTV(h));
+    TruthValuePtr currentTV(getTV(h));
     if (currentTV->isNullTv()) {
         setTV(h, tvn);
     } else {

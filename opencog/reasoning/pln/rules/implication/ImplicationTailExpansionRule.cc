@@ -99,7 +99,7 @@ BoundVertex ImplicationTailExpansionRule::compute(const VertexSeq& premiseArray,
         
     /*for (int i=0;i<premiseArray.size();i++)
         res.append_child(res.begin(), premiseArray[i]*/
-    const TruthValue* tv(asw->getTV(_v2h(SimpleAndRule<2>(asw).compute(premiseArray,CX).value)));
+    TruthValuePtr tv(asw->getTV(_v2h(SimpleAndRule<2>(asw).compute(premiseArray,CX).value)));
     return Vertex(asw->addAtom(res, *tv, true));
 }
 

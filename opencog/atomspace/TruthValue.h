@@ -31,8 +31,6 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/util/exceptions.h>
 
-//#include <boost/shared_ptr.h>
-
 class TruthValueUTest;
 
 namespace opencog
@@ -71,6 +69,12 @@ enum TruthValueType {
     NUMBER_OF_TRUTH_VALUE_TYPES
 };
 #define MAX_TRUTH_VALUE_NAME_LEN 120
+
+struct tv_summary_t {
+    strength_t mean;
+    confidence_t confidence;
+    count_t count;
+};
 
 class TruthValue
 {

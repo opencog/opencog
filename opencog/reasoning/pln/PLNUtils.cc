@@ -588,7 +588,7 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
 
     for (set<pHandle>::iterator i = lookupResults->begin();
             i != lookupResults->end(); i++) {
-        const TruthValue* tv = asw->getTV(*i);
+        TruthValuePtr tv = asw->getTV(*i);
 
         if (tv->isNullTv()) {
             printf("NULL TV! %d\n", *i);
@@ -920,7 +920,7 @@ string printNode1(pHandle h, int level, int LogLevel)
 
     std::stringstream ss;
     Type t = asw->getType(h);
-    const TruthValue* tv = asw->getTV(h);
+    TruthValuePtr tv = asw->getTV(h);
 
     if (!tv->isNullTv())
         ss << asw->getName(h) << ":" << opencog::pln::Type2Name(t) << 
@@ -964,7 +964,7 @@ std::string printTree(pHandle h, int level, int LogLevel)
     } else {
         vector<pHandle> hs = asw->getOutgoing(h);
         Type t = asw->getType(h);
-        const TruthValue* tv = asw->getTV(h);
+        TruthValuePtr tv = asw->getTV(h);
 
         if (!tv->isNullTv())
             ss << opencog::pln::Type2Name(t)
@@ -1152,7 +1152,7 @@ pHandleSet memberLinkSet(pHandle CP,
         OC_ASSERT(hs.size() == 2);
         
         if (equal(hs[1], CP)) {
-            const TruthValue* tv = asw->getTV(h);
+            TruthValuePtr tv = asw->getTV(h);
             
             if (min_membershipStrength <= tv->getMean()
                 && min_membershipCount <= tv->getCount())
@@ -1992,7 +1992,7 @@ bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set)
     pHandle *ph = boost::get<pHandle>(&(*_target->begin()));
     if (ph && !asw->isType(*ph)) {
         cprintf(2, "Arg [%d] exists.\n", *ph);
-        const TruthValue* tv = asw->getTV(*ph);
+        TruthValuePtr tv = asw->getTV(*ph);
         if (tv->isNullTv())
             cprintf(2, "NO TV!\n");
         result_set->insert(*_target->begin());

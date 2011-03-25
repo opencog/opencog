@@ -113,7 +113,7 @@ TVSeq OrRule::formatTVarray(const VertexSeq& premiseArray) const
                                  ), asw);
             cprintf(4,"Look up %s\n", (comb.empty() ? "success." : "fails."));
             tvs.push_back(!comb.empty()? asw->getTV(_v2h(comb[0]))
-                           : &TruthValue::DEFAULT_TV());
+                           : TruthValuePtr(new SimpleTruthValue(0.0,0.0)));
 #else
 #endif
 }

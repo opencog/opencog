@@ -635,7 +635,7 @@ void RuleEngine::logRelations(Logger::Level l)
         //get predicate name
         const string& pred_name = as.getName(as.getOutgoing(*h_it, 0));
         std::set<string>::iterator r_it = relationNameSet.find(pred_name);
-        const TruthValue* tv = as.getTV(*h_it);
+        TruthValuePtr tv = as.getTV(*h_it);
         if (r_it != relationNameSet.end() && tv->getMean() != 0.0) {
 
             //get the predicate arguments
@@ -1956,7 +1956,7 @@ void RuleEngine::applyReinforcement(ReinforcementType type,
     }
 
     float strength = 0.0f;
-    const TruthValue* tv = atomSpace.getTV(implicationLink);
+    TruthValuePtr tv = atomSpace.getTV(implicationLink);
     switch (type) {
     case REWARD: {
         float reinforce = factor * config().get_double("RL_REWARD");

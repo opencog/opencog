@@ -57,6 +57,7 @@ namespace opencog
 {
 
 typedef std::vector<HandleSet*> HandleSetSeq;
+typedef boost::shared_ptr<TruthValue> TruthValuePtr;
 
 /**
  * The AtomSpace class is a legacy interface to OpenCog's AtomSpace and
@@ -486,13 +487,17 @@ public:
 #endif // USE_ATOMSPACE_LOCAL_THREAD_CACHE
 
 
+    /** Retrieve the TruthValue summary of a given Handle
+     */
+    //tv_summary_t getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
+
     /** Retrieve the TruthValue of a given Handle
      * @note This is an unpleasant hack which is unsafe as it returns a pointer
      * to the AtomSpace TV which may be lost if the Atom the TV belongs to is
      * removed. It's much faster than having to copy the value and use smart
      * pointers though. Garbage collection should solve this.
      */
-    const TruthValue* getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
+    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
 
     /** Change the TruthValue of a given Handle */
     void setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE);

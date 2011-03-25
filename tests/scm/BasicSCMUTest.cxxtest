@@ -288,7 +288,7 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		const TruthValue* tv = as->getTV(*i);
+		TruthValuePtr tv = as->getTV(*i);
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
@@ -397,7 +397,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		const TruthValue* tv = as->getTV(*i);
+		TruthValuePtr tv = as->getTV(*i);
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		//the link has TV 0.0
@@ -468,7 +468,7 @@ void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		const TruthValue* tv = as->getTV(*i);
+		TruthValuePtr tv = as->getTV(*i);
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);

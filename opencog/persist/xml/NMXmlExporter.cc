@@ -131,7 +131,7 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
     char aux[1<<16];
     Type t = as->getType(atomHandle);
     typesUsed[t] = true;
-    const TruthValue* tv=as->getTV(atomHandle);
+    TruthValuePtr tv = as->getTV(atomHandle);
     if (classserver().isA(t, NODE)) {
         if (!isInternal) {
             sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ",

@@ -237,7 +237,7 @@ bool UpdateAtomRequest::doTVChanges(AtomSpace* as, Handle h, TruthValue* tv) {
     if (tv_mod == tv_replace) {
         as->setTV(h,*tv);
     } else if (tv_mod == tv_merge) {
-        const TruthValue* oldTV = as->getTV(h);
+        TruthValuePtr oldTV = as->getTV(h);
         TruthValue *newTV = oldTV->merge(*tv);
         as->setTV(h,*newTV);
         delete newTV;

@@ -117,7 +117,7 @@ double DimEmbedModule::findHighestWeightPath(const Handle& startHandle,
                 //if the node has been visited, don't do anything
                 if(visitedNodes.contains(*it2)) continue;
 
-                const TruthValue* linkTV = as->getTV(*it);
+                TruthValuePtr linkTV = as->getTV(*it);
                 //If this path is better than the currently known one, save it
                 double pathWeight
                     = bestNode.second*(linkTV->getMean()*linkTV->getConfidence());
@@ -243,7 +243,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
         for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't of type linkType
             if(as->getType(*it)!=linkType) continue;
-            const TruthValue* linkTV = as->getTV(*it);
+            TruthValuePtr linkTV = as->getTV(*it);
             HandleSeq newNodes = as->getOutgoing(*it);
             for(HandleSeq::iterator it2=newNodes.begin();
                 it2!=newNodes.end(); it2++) {
@@ -338,8 +338,8 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
     //(max(.3*.1,.8*.4),max(.3*.2,.6*.5))    
     for(HandleSeq::iterator it=links.begin(); it<links.end(); it++) {
         HandleSeq nodes = as->getOutgoing(*it);
-        const TruthValue& linkTV = *(as->getTV(*it));        
-        double weight = linkTV.getConfidence()*linkTV.getMean();
+        TruthValuePtr linkTV = as->getTV(*it);        
+        double weight = linkTV->getConfidence()*linkTV->getMean();
         for(HandleSeq::iterator it2=nodes.begin();it2<nodes.end(); it2++) {
             if(*it2==h) continue;
             std::vector<double> embedding =

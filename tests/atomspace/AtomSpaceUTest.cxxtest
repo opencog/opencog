@@ -200,14 +200,14 @@ public:
         // Check primary and versioned TVS
         for (int i = 0; i < NUM_NODES; i++) {
             int vhIdx = i % NUM_VHS;
-            const TruthValue* tv = atomSpace->getTV(h[i]);
+            TruthValuePtr tv = atomSpace->getTV(h[i]);
             TS_ASSERT(!tv->isNullTv());
             logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
             TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
             logger().debug("h: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             if (i < NUM_FORCEUSER_LINKS) {
-                const TruthValue* tv = atomSpace->getTV(FU[i]);
+                TruthValuePtr tv = atomSpace->getTV(FU[i]);
                 TS_ASSERT(!tv->isNullTv());
                 logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
                 logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
@@ -216,7 +216,7 @@ public:
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
             if (i < NUM_HUMAN_LINKS) {
-                const TruthValue* tv = atomSpace->getTV(H[i]);
+                TruthValuePtr tv = atomSpace->getTV(H[i]);
                 TS_ASSERT(!tv->isNullTv());
                 logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
                 logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
@@ -228,18 +228,18 @@ public:
             if (vhIdx) {
                 const TruthValue* expectedTv = &(TruthValue::DEFAULT_TV());
                 VersionHandle vh = VHs[vhIdx];
-                const TruthValue* tv = atomSpace->getTV(h[i], vh);
+                TruthValuePtr tv = atomSpace->getTV(h[i], vh);
                 TS_ASSERT(!tv->isNullTv());
                 TS_ASSERT(fabs(tv->getMean() - expectedTv->getMean()) < FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - expectedTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
                 if (i < NUM_FORCEUSER_LINKS) {
-                    const TruthValue* tv = atomSpace->getTV(FU[i], vh);
+                    TruthValuePtr tv = atomSpace->getTV(FU[i], vh);
                     TS_ASSERT(!tv->isNullTv());
                     TS_ASSERT(fabs(tv->getMean() - expectedTv->getMean()) < FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(tv->getConfidence() - expectedTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
                 }
                 if (i < NUM_HUMAN_LINKS) {
-                    const TruthValue* tv = atomSpace->getTV(H[i], vh);
+                    TruthValuePtr tv = atomSpace->getTV(H[i], vh);
                     TS_ASSERT(!tv->isNullTv());
                     TS_ASSERT(fabs(tv->getMean() - expectedTv->getMean()) < FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(tv->getConfidence() - expectedTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);

@@ -259,7 +259,7 @@ void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) 
             if (printToFile) fprintf(logFile, "[handle=%d]", h);
         }
         if (printOptions & NMP_TRUTH_VALUE) {
-            const TruthValue* tv = atw->getTV(h);
+            TruthValuePtr tv = atw->getTV(h);
             if (tv->isNullTv()) {
                 if (!(printOptions & NMP_NO_TV_WITH_NO_CONFIDENCE)) {
                     out << " <NULL TV>";

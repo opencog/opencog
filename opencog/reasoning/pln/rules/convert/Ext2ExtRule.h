@@ -62,7 +62,7 @@ public:
         
         std::vector<Handle> in_args = asw->getOutgoing(premiseArray[0]);
         
-        const TruthValue* retTV(asw->getTV(premiseArray[0]));
+        TruthValuePtr retTV(asw->getTV(premiseArray[0]));
         
         std::vector<Handle> out_args;
         out_args.push_back(SatisfyingSet(in_args[0]));

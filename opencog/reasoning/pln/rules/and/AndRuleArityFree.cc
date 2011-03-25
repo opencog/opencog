@@ -36,7 +36,7 @@ bool ArityFreeAndRule::asymmetric(Handle* A, Handle* B) const
         bool provenAsymmetric = false;
         bool provenSymmetric = false;
         bool swapped = false;
-        const TruthValue* tvs[2];
+        TruthValuePtr tvs[2];
         vector<Handle> ImpLinks, EvaLinks;
     
         do
@@ -70,7 +70,7 @@ BoundVertex ArityFreeAndRule::compute(Handle A, Handle B, Handle CX)  const //ve
 
         TruthValue* t=NULL;
         
-        const TruthValue* tvs[2];
+        TruthValuePtr tvs[2];
 
         bool is_asymmetric = asymmetric(&A, &B); //, ImpLinks, EvaLinks);
 
@@ -112,7 +112,7 @@ BoundVertex ArityFreeAndRule::computeSymmetric(vector<Handle> nodes, Handle CX)
 {
         const int n = nodes.size();
         TruthValue* t=NULL;
-        const TruthValue** tvs = new const TruthValue*[nodes.size()];
+        TruthValuePtr* tvs = new TruthValuePtr[nodes.size()];
         int ti=0;
         
         for (ti = 0; ti < nodes.size(); ti++)
@@ -123,6 +123,9 @@ BoundVertex ArityFreeAndRule::computeSymmetric(vector<Handle> nodes, Handle CX)
         Handle h = asw->addLink(  AND_LINK, nodes,
             t,
                                 RuleResultFreshness);   
+        
+        for (ti = 0; ti < nodes.size(); ti++)
+            delete tvs[ti];
         
         delete[] tvs;
         

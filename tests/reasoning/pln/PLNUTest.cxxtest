@@ -388,7 +388,7 @@ public:
         top->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
 
         BoundVertex res1a = top->compute();
-        const TruthValue* tvA = asw->getTV(_v2h(res1a.value));
+        TruthValuePtr tvA = asw->getTV(_v2h(res1a.value));
         TS_ASSERT(tvA->getMean() > 0.01);
         TS_ASSERT(tvA->getConfidence() > 0.01);
 
@@ -405,7 +405,7 @@ public:
         // Checks that they have the same pHandles, which is wrong
         //TS_ASSERT_EQUALS(res1a.value, res1b.value);
 
-        const TruthValue* tvB = asw->getTV(_v2h(res1a.value));
+        TruthValuePtr tvB = asw->getTV(_v2h(res1a.value));
         TS_ASSERT(isApproxEq(tvB->getMean(), tvA->getMean(), EPSILON_S));
         TS_ASSERT(isApproxEq(tvB->getConfidence(), tvA->getConfidence(),
                   EPSILON_C));
@@ -415,11 +415,11 @@ public:
         RuleApp* top3 = new RuleApp(invR);
         top3->Bind(0, top2);
 
-        const TruthValue* tv2 = asw->getTV(_v2h(top2->compute().value));
+        TruthValuePtr tv2 = asw->getTV(_v2h(top2->compute().value));
         TS_ASSERT(!isApproxEq(tvB->getMean(), tv2->getMean(), EPSILON_S));
     //  assert(!isApproxEq(tvB->getConfidence(), tv2->getConfidence(), EPSILON_C));
 
-        const TruthValue* tv3 = asw->getTV(_v2h(top3->compute().value));
+        TruthValuePtr tv3 = asw->getTV(_v2h(top3->compute().value));
         // segfaults in this next line
         TS_ASSERT(isApproxEq(tvB->getMean(), tv3->getMean(), EPSILON_S));
         TS_ASSERT(isApproxEq(tvB->getConfidence(), tv3->getConfidence(),
@@ -439,7 +439,7 @@ public:
         BoundVertex resC = topc->compute(args.begin(), args.end());
 
         TS_ASSERT(resC.value == res1b.value);
-        const TruthValue* tvC = asw->getTV(_v2h(resC.value));
+        TruthValuePtr tvC = asw->getTV(_v2h(resC.value));
         TS_ASSERT(isApproxEq(tvB->getMean(), tvC->getMean(), EPSILON_S));
         TS_ASSERT(isApproxEq(tvB->getConfidence(), tvC->getConfidence(),
                   EPSILON_C));
@@ -453,7 +453,7 @@ public:
         BoundVertex resD = topd->compute(args.begin(), args.end());
 
         TS_ASSERT(resD.value == res1b.value);
-        const TruthValue* tvD = asw->getTV(_v2h(resD.value));
+        TruthValuePtr tvD = asw->getTV(_v2h(resD.value));
         TS_ASSERT(isApproxEq(tvB->getMean(), tvD->getMean(), EPSILON_S));
         TS_ASSERT(isApproxEq(tvB->getConfidence(), tvD->getConfidence(),
                   EPSILON_C));

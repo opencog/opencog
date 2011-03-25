@@ -66,7 +66,7 @@ namespace pln {
     assert(TV.size() == 1);   \
     assert(TV[0]); \
     OC_ASSERT(!TV[0]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
-    const TruthValue* linkAB = TV[0]; \
+    TruthValuePtr linkAB = TV[0]; \
     strength_t sAB = linkAB->getMean(); \
     count_t nAB = linkAB->getCount(); \
      
@@ -89,9 +89,9 @@ namespace pln {
     OC_ASSERT(!TV[0]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     OC_ASSERT(!TV[1]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     OC_ASSERT(!TV[2]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
-    const TruthValue* linkAB = TV[0]; \
-    const TruthValue* atomA = TV[1]; \
-    const TruthValue* atomB = TV[2]; \
+    TruthValuePtr linkAB = TV[0]; \
+    TruthValuePtr atomA = TV[1]; \
+    TruthValuePtr atomB = TV[2]; \
     strength_t sAB = linkAB->getMean(); \
     strength_t sA = atomA->getMean(); \
     strength_t sB = atomB->getMean(); \
@@ -109,10 +109,10 @@ namespace pln {
     OC_ASSERT(!TV[1]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     OC_ASSERT(!TV[2]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     OC_ASSERT(!TV[3]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
-    const TruthValue* linkAB = TV[0]; \
-    const TruthValue* linkBA = TV[1]; \
-    const TruthValue* atomA = TV[2]; \
-    const TruthValue* atomB = TV[3]; \
+    TruthValuePtr linkAB = TV[0]; \
+    TruthValuePtr linkBA = TV[1]; \
+    TruthValuePtr atomA = TV[2]; \
+    TruthValuePtr atomB = TV[3]; \
     strength_t sAB = linkAB->getMean(); \
     strength_t sBA = linkBA->getMean(); \
     strength_t sA = atomA->getMean(); \
@@ -134,11 +134,11 @@ namespace pln {
     OC_ASSERT(!TV[2]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     OC_ASSERT(!TV[3]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
     OC_ASSERT(!TV[4]->isNullTv(), "null TV, maybe you are doing contextual reasoning and the TV for that context has not been defined"); \
-    const TruthValue* linkAB = TV[0]; \
-    const TruthValue* linkBC = TV[1]; \
-    const TruthValue* atomA = TV[2]; \
-    const TruthValue* atomB = TV[3]; \
-    const TruthValue* atomC = TV[4]; \
+    TruthValuePtr linkAB = TV[0]; \
+    TruthValuePtr linkBC = TV[1]; \
+    TruthValuePtr atomA = TV[2]; \
+    TruthValuePtr atomB = TV[3]; \
+    TruthValuePtr atomC = TV[4]; \
     strength_t sA = atomA->getMean(); \
     strength_t sB = atomB->getMean(); \
     strength_t sC = atomC->getMean(); \
@@ -268,7 +268,7 @@ TruthValue* DeductionSimpleFormula::simpleCompute(const TVSeq& TV, long U) const
     //     return IndefiniteSymmetricDeductionFormula().simpleCompute(TV, U);
     // }
 
-    const TruthValue* linkTEMP = TV[0];
+    TruthValuePtr linkTEMP = TV[0];
 
     PLNFormulaBodyFor_Link2Node3;
     DebugPLNBodyFor_Link2Node3;
@@ -624,9 +624,9 @@ TruthValue* OrFormula::simpleCompute(const TVSeq& TV, long U) const
         cprintf(-3,  "#%d:%s ", k, TV[k]->toString().c_str());
     cprintf(-3, "\n");
 
-    const TruthValue* res1 = TV[0];
-    const TruthValue* res2 = TV[1];
-    auto_ptr<const TruthValue> ptr1, ptr2;
+    TruthValuePtr res1 = TV[0];
+    TruthValuePtr res2 = TV[1];
+    //auto_ptr<const TruthValue> ptr1, ptr2;
 
     if (N > 2) {
 //  TVType* next[2];
@@ -640,13 +640,13 @@ TruthValue* OrFormula::simpleCompute(const TVSeq& TV, long U) const
         cprintf(-3,  "Division: %d - %d\n", N1, N2);
 
         if (N1 == 1) { //Either (>1, >1) or (1, >1).
-            res2 = simpleCompute(TV2, U);
-            ptr2 = auto_ptr<const TruthValue>(res2);
+            res2 = TruthValuePtr(simpleCompute(TV2, U));
+            //ptr2 = auto_ptr<const TruthValue>(res2);
         } else {
-            res1 = simpleCompute(TV1, U);
-            res2 = simpleCompute(TV2, U);
-            ptr1 = auto_ptr<const TruthValue>(res1);
-            ptr2 = auto_ptr<const TruthValue>(res2);
+            res1 = TruthValuePtr(simpleCompute(TV1, U));
+            res2 = TruthValuePtr(simpleCompute(TV2, U));
+            //ptr1 = auto_ptr<const TruthValue>(res1);
+            //ptr2 = auto_ptr<const TruthValue>(res2);
         }
     }
 
@@ -735,13 +735,11 @@ TruthValue* OrFormula2::simpleCompute(const TVSeq& TV, long U) const
 
     NotFormula notF;
     TVSeq Not_TVs = notF.multiCompute(TV, U);
-    const TruthValue* Not_AndTV(SymmetricAndFormula().simpleCompute(Not_TVs, U));
+    TruthValuePtr Not_AndTV(SymmetricAndFormula().simpleCompute(Not_TVs, U));
     TruthValue* OrTV = notF.simpleCompute(TVSeq(1, Not_AndTV), U);
 
-    delete Not_AndTV;
-
-    for (unsigned int i = 0; i < Not_TVs.size(); i++)
-        delete Not_TVs[i];
+    //for (unsigned int i = 0; i < Not_TVs.size(); i++)
+    //    delete Not_TVs[i];
 
     return OrTV;
 }
@@ -750,6 +748,9 @@ TruthValue* OrFormula2::simpleCompute(const TVSeq& TV, long U) const
 TruthValue* OldOrFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "OldOr...\n");
+    // No longer needed as NOT_TV entries are smart pointers
+    //for (unsigned int i = 0; i < NOT_TVs.size(); i++)
+    //    delete NOT_TVs[i];
 
     strength_t mean = 1 - ((1 - TV[0]->getMean()) * (1 - TV[1]->getMean()));
     count_t count1 = TV[0]->getCount();
@@ -857,13 +858,8 @@ TruthValue* ExistFormula::simpleCompute(const TVSeq& TV, long U) const
 
     NotFormula notF;
     TVSeq Not_TVs = notF.multiCompute(TV, U);
-    const TruthValue* Not_EXTV(ForAllFormula().simpleCompute(Not_TVs, U));
+    TruthValuePtr Not_EXTV(ForAllFormula().simpleCompute(Not_TVs, U));
     TruthValue* EXTV = notF.simpleCompute(TVSeq(1, Not_EXTV), U );
-
-    delete Not_EXTV;
-
-    for (unsigned int i = 0; i < TV.size(); i++)
-        delete Not_TVs[i];
 
     return EXTV;
 
@@ -934,7 +930,7 @@ TVSeq Formula<_TVN>::multiCompute(const TVSeq& TV, long U) const
     for (int group = 0; group < N / TVN; group++) {
         /// @todo maybe can be optimized
         TVSeq groupTV(TV.begin() + group*TVN, TV.begin() + group*TVN + TVN);
-        ret[group] = simpleCompute(groupTV, U);
+        ret[group] = TruthValuePtr(simpleCompute(groupTV, U));
     }
 
     return ret;

@@ -124,18 +124,18 @@ public:
         deduction = false;
     };
 
-    void generateSample(IndefiniteTruthValue* const& TVa,
-                        IndefiniteTruthValue* const& TVb);
+    void generateSample(IndefiniteTruthValuePtr  TVa,
+                        IndefiniteTruthValuePtr  TVb);
 
-    void generateSample(IndefiniteTruthValue* const& TVa,
-                        IndefiniteTruthValue* const& TVb,
-                        IndefiniteTruthValue* const& TVc);
+    void generateSample(IndefiniteTruthValuePtr TVa,
+                        IndefiniteTruthValuePtr TVb,
+                        IndefiniteTruthValuePtr TVc);
 
-    void generateSample(IndefiniteTruthValue* const& TVa,
-                        IndefiniteTruthValue* const& TVb,
-                        IndefiniteTruthValue* const& TVc,
-                        IndefiniteTruthValue* const& TVab,
-                        IndefiniteTruthValue* const& TVbc);
+    void generateSample(IndefiniteTruthValuePtr TVa,
+                        IndefiniteTruthValuePtr TVb,
+                        IndefiniteTruthValuePtr TVc,
+                        IndefiniteTruthValuePtr TVab,
+                        IndefiniteTruthValuePtr TVbc);
 
     void setDimensions(int n1_, int n2_) {
         n1 = n1_;
@@ -160,18 +160,18 @@ public:
     IndefiniteRule () { };
     virtual ~IndefiniteRule () { };
 
-    IndefiniteRule (IndefiniteTruthValue* const& TVa,
-                    IndefiniteTruthValue* const& TVb);
+    IndefiniteRule (IndefiniteTruthValuePtr TVa,
+                    IndefiniteTruthValuePtr TVb);
 
-    IndefiniteRule (IndefiniteTruthValue* const& TVa,
-                    IndefiniteTruthValue* const& TVb,
-                    IndefiniteTruthValue* const& TVc);
+    IndefiniteRule (IndefiniteTruthValuePtr TVa,
+                    IndefiniteTruthValuePtr TVb,
+                    IndefiniteTruthValuePtr TVc);
 
-    IndefiniteRule (IndefiniteTruthValue* const& TVa,
-                    IndefiniteTruthValue* const& TVb,
-                    IndefiniteTruthValue* const& TVc,
-                    IndefiniteTruthValue* const& TVab,
-                    IndefiniteTruthValue* const& TVbc,
+    IndefiniteRule (IndefiniteTruthValuePtr TVa,
+                    IndefiniteTruthValuePtr TVb,
+                    IndefiniteTruthValuePtr TVc,
+                    IndefiniteTruthValuePtr TVab,
+                    IndefiniteTruthValuePtr TVbc,
                     bool deduction);
 
     virtual IndefiniteTruthValue* solve() {
@@ -180,7 +180,7 @@ public:
     IndefiniteTruthValue* conclusion(const pvector& distribution);
 
 protected:
-    std::vector<IndefiniteTruthValue *> tvset;
+    std::vector<IndefiniteTruthValuePtr> tvset;
     Sampler *s;
 };
 
@@ -191,16 +191,16 @@ protected:
 class ConjunctionRule : public IndefiniteRule
 {
 public:
-    ConjunctionRule(IndefiniteTruthValue* const& TVa,
-                    IndefiniteTruthValue* const& TVb);
+    ConjunctionRule(IndefiniteTruthValuePtr TVa,
+                    IndefiniteTruthValuePtr TVb);
     IndefiniteTruthValue* solve();
 };
 
 class ImplicationRule : public IndefiniteRule
 {
 public:
-    ImplicationRule(IndefiniteTruthValue* const& TVa,
-                    IndefiniteTruthValue* const& TVb);
+    ImplicationRule(IndefiniteTruthValuePtr TVa,
+                    IndefiniteTruthValuePtr TVb);
     IndefiniteTruthValue* solve();
     IndefiniteTruthValue* q_r_conclusion(float lower, float upper,
                                          const std::vector<std::vector<float> >& d);
@@ -209,39 +209,39 @@ public:
 class RevisionRule : public IndefiniteRule
 {
 public:
-    RevisionRule   (IndefiniteTruthValue* const& TVa,
-                    IndefiniteTruthValue* const& TVb);
+    RevisionRule   (IndefiniteTruthValuePtr TVa,
+                    IndefiniteTruthValuePtr TVb);
     IndefiniteTruthValue* solve();
 };
 
 class BayesRule : public IndefiniteRule
 {
 public:
-    BayesRule    (IndefiniteTruthValue* const& TVa,
-                  IndefiniteTruthValue* const& TVc,
-                  IndefiniteTruthValue* const& TVac);
+    BayesRule    (IndefiniteTruthValuePtr TVa,
+                  IndefiniteTruthValuePtr TVc,
+                  IndefiniteTruthValuePtr TVac);
     IndefiniteTruthValue* solve();
 };
 
 class AbductionRule : public IndefiniteRule
 {
 public:
-    AbductionRule  (IndefiniteTruthValue* const& TVa,
-                    IndefiniteTruthValue* const& TVb,
-                    IndefiniteTruthValue* const& TVc,
-                    IndefiniteTruthValue* const& TVab,
-                    IndefiniteTruthValue* const& TVbc);
+    AbductionRule  (IndefiniteTruthValuePtr TVa,
+                    IndefiniteTruthValuePtr TVb,
+                    IndefiniteTruthValuePtr TVc,
+                    IndefiniteTruthValuePtr TVab,
+                    IndefiniteTruthValuePtr TVbc);
     IndefiniteTruthValue* solve();
 };
 
 class DeductionRule : public IndefiniteRule
 {
 public:
-    DeductionRule  (IndefiniteTruthValue* const& TVa,
-                    IndefiniteTruthValue* const& TVc,
-                    IndefiniteTruthValue* const& TVb,
-                    IndefiniteTruthValue* const& TVab,
-                    IndefiniteTruthValue* const& TVbc);
+    DeductionRule  (IndefiniteTruthValuePtr TVa,
+                    IndefiniteTruthValuePtr TVc,
+                    IndefiniteTruthValuePtr TVb,
+                    IndefiniteTruthValuePtr TVab,
+                    IndefiniteTruthValuePtr TVbc);
     IndefiniteTruthValue* solve();
 };
 
@@ -252,43 +252,30 @@ template <typename R, typename T>
 class RuleGenerator
 {
 public:
-    R*  CreateRule(T* const& a,
-                   T* const& b);
+    R*  CreateRule(T a, T b);
 
-    R*  CreateRule(T* const& a,
-                   T* const& b,
-                   T* const& c);
+    R*  CreateRule(T a, T b, T c);
 
-    R*  CreateRule(T* const& a,
-                   T* const& b,
-                   T* const& c,
-                   T* const& d,
-                   T* const& e);
+    R*  CreateRule(T a, T b, T c, T d, T e);
 };
 
 template <typename R, typename T>
 R*
-RuleGenerator<R, T>::CreateRule(T* const& a, T* const& b)
+RuleGenerator<R, T>::CreateRule(T a, T b)
 {
     return new R(a, b);
 }
 
 template <typename R, typename T>
 R*
-RuleGenerator<R, T>::CreateRule(T* const& a,
-                                T* const& b,
-                                T* const& c)
+RuleGenerator<R, T>::CreateRule(T a, T b, T c)
 {
     return new R(a, b, c);
 }
 
 template <typename R, typename T>
 R*
-RuleGenerator<R, T>::CreateRule(T* const& a,
-                                T* const& b,
-                                T* const& c,
-                                T* const& d,
-                                T* const& e)
+RuleGenerator<R, T>::CreateRule(T a, T b, T c, T d, T e)
 {
     return new R(a, b, c, d, e);
 }

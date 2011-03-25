@@ -143,7 +143,7 @@ bool NNAdjust::sense_pair(Handle pair_link)
 
 	// If we are here, we've got the link that we want. 
 	// Increase its strength.
-    const TruthValue* tv = as->getTV(pair_link);
+    TruthValuePtr tv = as->getTV(pair_link);
 	float strength = tv->getMean() * (float) strength_adjust;
 	SimpleTruthValue stv(strength, 1.0f);
 

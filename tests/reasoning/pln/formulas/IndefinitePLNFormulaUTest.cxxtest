@@ -57,12 +57,12 @@ public:
   void tearDown(){
   }
   
-  IndefiniteTruthValue* createTV(float l, float u){
-      return new IndefiniteTruthValue(l,u);
+  IndefiniteTruthValuePtr createTV(float l, float u){
+  	return IndefiniteTruthValuePtr(new IndefiniteTruthValue(l,u));
   }
   
-  IndefiniteTruthValue* createTV(float l, float u, float b){
-      return new IndefiniteTruthValue(l,u,b);
+  IndefiniteTruthValuePtr createTV(float l, float u, float b){
+  		return IndefiniteTruthValuePtr(new IndefiniteTruthValue(l,u,b));
   }
  
   void testInferenceTrailPaper(){
@@ -72,86 +72,87 @@ public:
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(10);
 		
-        IndefiniteTruthValue* TVin1 = createTV(0.0f,0.138f,0.8f);//inhib1 - A
-		IndefiniteTruthValue* TVin0 = createTV(0.0f,0.168f,0.8f);//inhib - B
-		IndefiniteTruthValue* TVin2 = createTV(0.0f,0.032f,0.8f);//inhib2 - C
-		IndefiniteTruthValue* TVin10 = createTV(0.95f,1.0f,0.9f);//inh inhib1 inhib - AB
-		IndefiniteTruthValue* TVin20 = createTV(0.95f,1.0f,0.9f);//inh inhib2 inhib - CB
+        IndefiniteTruthValuePtr TVin1 = createTV(0.0f,0.138f,0.8f);//inhib1 - A
+		IndefiniteTruthValuePtr TVin0 = createTV(0.0f,0.168f,0.8f);//inhib - B
+		IndefiniteTruthValuePtr TVin2 = createTV(0.0f,0.032f,0.8f);//inhib2 - C
+		IndefiniteTruthValuePtr TVin10 = createTV(0.95f,1.0f,0.9f);//inh inhib1 inhib - AB
+		IndefiniteTruthValuePtr TVin20 = createTV(0.95f,1.0f,0.9f);//inh inhib2 inhib - CB
 // don't use IndefiniteSymmetricAbductionFormula - use a RuleGenerator
 		
-		//const TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
-//        const TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
+		//TruthValuePtr TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
+//        TruthValuePtr TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
 //		opencog::pln::IndefiniteSymmetricAbductionFormula fAbduction;
-//        IndefiniteTruthValue* TVin12=(IndefiniteTruthValue*)(fAbduction.compute(TV,5));//Inh inhib1 inhib2
+//        IndefiniteTruthValuePtr TVin12=(IndefiniteTruthValue*)(fAbduction.compute(TV,5));//Inh inhib1 inhib2
                 
-		RuleGenerator<AbductionRule, IndefiniteTruthValue> myCreator;
+		RuleGenerator<AbductionRule, IndefiniteTruthValuePtr> myCreator;
 	    AbductionRule *a = myCreator.CreateRule(TVin1, TVin0, TVin2, TVin10,TVin20);
-    	IndefiniteTruthValue* TVin12 = a->solve();//Inh inhib1 inhib2
-		//const TruthValue* TVin12=fAbduction.compute(TV,5);//Inh inhib1 inhib2
+    	IndefiniteTruthValuePtr TVin12 = IndefiniteTruthValuePtr(a->solve());//Inh inhib1 inhib2
+		//TruthValuePtr TVin12=fAbduction.compute(TV,5);//Inh inhib1 inhib2
 		
 		printf("\nTVin12:\nL: %.5f - U: %.5f\n",TVin12->getL(),TVin12->getU());
 		
-		const TruthValue* TVA = createTV(0.0, 0.168f,0.8f);
+		TruthValuePtr TVA = createTV(0.0, 0.168f,0.8f);
 		
-		IndefiniteTruthValue* TVin1A = createTV(0.95f,1.0f);
+		IndefiniteTruthValuePtr TVin1A = createTV(0.95f,1.0f);
 		TVSeq TV1(1, TVin1A);
         opencog::pln::IndefiniteMem2InhFormula fMem2Inh;
-		TVin1A=(IndefiniteTruthValue*)fMem2Inh.compute(TV1);
+		//TVin1A=boost::shared_dynamic_cast<IndefiniteTruthValue>(fMem2Inh.compute(TV1));
+		TVin1A=IndefiniteTruthValuePtr((IndefiniteTruthValue*)fMem2Inh.compute(TV1));
 		
-/*		RuleGenerator<Mem2InhRule, IndefiniteTruthValue*> myCreator2;
+/*		RuleGenerator<Mem2InhRule, IndefiniteTruthValuePtr> myCreator2;
 	    AbductionRule *m = myCreator2.CreateRule(TVin1A);
     	TVin1A = a->solve();*/
     	
 		
 		printf("\nTVin1A:\nL: %.5f - U: %.5f\n",TVin1A->getL(),TVin1A->getU());		
 		
-		const TruthValue* TV2[3] = {TVin1, TVin2, TVin12};
+		TruthValuePtr TV2[3] = {TVin1, TVin2, TVin12};
         opencog::pln::IndefiniteSymmetricBayesFormula fBayes;
-		IndefiniteTruthValue* TVin21=
-            (IndefiniteTruthValue*)fBayes.simpleCompute(TVSeq(TV2,TV2+3));//Inh inhib2 inhib1
+		IndefiniteTruthValuePtr TVin21=
+            IndefiniteTruthValuePtr((IndefiniteTruthValue*)fBayes.simpleCompute(TVSeq(TV2,TV2+3)));//Inh inhib2 inhib1
 		
-//		RuleGenerator<BayesRule, IndefiniteTruthValue*> myCreator3;
+//		RuleGenerator<BayesRule, IndefiniteTruthValuePtr> myCreator3;
 //	    BayesRule *b = myCreator3.CreateRule(TVin1, TVin2, TVin12);
-//   	IndefiniteTruthValue* TVin21 = a->solve();//Inh inhib2 inhib1
+//   	IndefiniteTruthValuePtr TVin21 = a->solve();//Inh inhib2 inhib1
 
 		printf("\nTVin21:\nL: %.5f - U: %.5f\n",TVin21->getL(),TVin21->getU());		
 
-		const TruthValue* TV3[5] = {TVin2, TVin1, TVA, TVin21,TVin1A};
+		TruthValuePtr TV3[5] = {TVin2, TVin1, TVA, TVin21,TVin1A};
         IndefiniteSymmetricDeductionFormula fDeduction;
-		IndefiniteTruthValue* TVin2A = 
-            (IndefiniteTruthValue*)fDeduction.compute(TVSeq(TV3,TV3+5));//Inh inhib2 A
+		IndefiniteTruthValuePtr TVin2A = 
+            IndefiniteTruthValuePtr((IndefiniteTruthValue*)fDeduction.compute(TVSeq(TV3,TV3+5)));//Inh inhib2 A
 					
 		printf("\nTVin2A:\nL: %.5f - U: %.5f\n",TVin2A->getL(),TVin2A->getU());
 					
-//		const TruthValue* TVA = createTV(0.0f,0.032f,0.8f);
-//		const TruthValue* TVC = createTV(0.0f,0.168f,0.8f);
-//		const TruthValue* TVAmem2inh = createTV(0.58f,0.60f);
-//		const TruthValue* TVCAmem2inh = createTV(0.313043f,0.513043f);
-//		const TruthValue* TVBAmem2inh = createTV(0.46666f,0.6f);
+//		TruthValuePtr TVA = createTV(0.0f,0.032f,0.8f);
+//		TruthValuePtr TVC = createTV(0.0f,0.168f,0.8f);
+//		TruthValuePtr TVAmem2inh = createTV(0.58f,0.60f);
+//		TruthValuePtr TVCAmem2inh = createTV(0.313043f,0.513043f);
+//		TruthValuePtr TVBAmem2inh = createTV(0.46666f,0.6f);
 
 		TVSeq TV4(1, TVin2A);
         opencog::pln::IndefiniteInh2MemFormula fInh2Mem;
-		TVin2A=(IndefiniteTruthValue*)fInh2Mem.compute(TV4);
+		TVin2A=IndefiniteTruthValuePtr((IndefiniteTruthValue*)fInh2Mem.compute(TV4));
 		
 		printf("\nTVin2A:\nL: %.5f - U: %.5f\n",TVin2A->getL(), TVin2A->getU());
 		
-		const TruthValue* TVCausalEvent = createTV(0.0, 0.168f,0.8f);
-		const TruthValue* TVin0CausalEvent = createTV(0.95, 1.0f,0.9f);
+		TruthValuePtr TVCausalEvent = createTV(0.0, 0.168f,0.8f);
+		TruthValuePtr TVin0CausalEvent = createTV(0.95, 1.0f,0.9f);
 		
-		const TruthValue* TV5[5] = {TVin2, TVin0, TVCausalEvent, TVin20,TVin0CausalEvent};
+		TruthValuePtr TV5[5] = {TVin2, TVin0, TVCausalEvent, TVin20,TVin0CausalEvent};
 //		opencog::pln::IndefiniteSymmetricDeductionFormula fDeduction;
-		IndefiniteTruthValue* TVin2CausalEvent=(IndefiniteTruthValue*)fDeduction.compute(TVSeq(TV5,TV5+5));//Inh inhib2 causal_event
+		IndefiniteTruthValuePtr TVin2CausalEvent=IndefiniteTruthValuePtr((IndefiniteTruthValue*)fDeduction.compute(TVSeq(TV5,TV5+5)));//Inh inhib2 causal_event
 					
 		printf("\nTVin2CausalEvent:\nL: %.5f - U: %.5f\n",TVin2CausalEvent->getL(),TVin2CausalEvent->getU());
 
-		const TruthValue* TVPrev = createTV(0.0, 0.044f,0.8f);
-		const TruthValue* TVPrev1 = createTV(0.0, 0.044f,0.8f);
-		const TruthValue* TVPrev1Prev = createTV(0.95, 1.0f,0.9f);
-		const TruthValue* TVPrevCausalEvent = createTV(0.95, 1.0f,0.9f);
+		TruthValuePtr TVPrev = createTV(0.0, 0.044f,0.8f);
+		TruthValuePtr TVPrev1 = createTV(0.0, 0.044f,0.8f);
+		TruthValuePtr TVPrev1Prev = createTV(0.95, 1.0f,0.9f);
+		TruthValuePtr TVPrevCausalEvent = createTV(0.95, 1.0f,0.9f);
 		
-		const TruthValue* TV6[5] = {TVPrev1, TVPrev, TVCausalEvent, TVPrev1Prev, TVPrevCausalEvent};
+		TruthValuePtr TV6[5] = {TVPrev1, TVPrev, TVCausalEvent, TVPrev1Prev, TVPrevCausalEvent};
 //		opencog::pln::IndefiniteSymmetricDeductionFormula fDeduction;
-		IndefiniteTruthValue* TVPrev1CausalEvent=(IndefiniteTruthValue*)fDeduction.compute(TVSeq(TV6,TV6+5));//Inh Prev1 causal_event
+		IndefiniteTruthValuePtr TVPrev1CausalEvent=IndefiniteTruthValuePtr((IndefiniteTruthValue*)fDeduction.compute(TVSeq(TV6,TV6+5)));//Inh Prev1 causal_event
 					
 		printf("\nTVPrev1CausalEvent:\nL: %.5f - U: %.5f\n",TVPrev1CausalEvent->getL(),TVPrev1CausalEvent->getU());
   }
@@ -168,11 +169,11 @@ public:
 		float expectedMean=0.990f;
 		float error=0.05;
 		
-	    IndefiniteTruthValue* TVa=createTV(LA,UA);
-	    IndefiniteTruthValue* TVb=createTV(LB,UB);
+	    IndefiniteTruthValuePtr TVa=createTV(LA,UA);
+	    IndefiniteTruthValuePtr TVb=createTV(LB,UB);
 	    IndefiniteTruthValue* result;
 
-	    RuleGenerator<ConjunctionRule, IndefiniteTruthValue> myCreator;
+	    RuleGenerator<ConjunctionRule, IndefiniteTruthValuePtr> myCreator;
 	    ConjunctionRule *a = myCreator.CreateRule(TVa, TVb);
 	    result = a->solve();
 	    printf("\nResult:\nL: %.5f - U: %.5f\n",result->getL(),result->getU());
@@ -187,8 +188,8 @@ public:
 	    float L2A=0.051668044685163f; float L2B=0.731203298626716f;
 	    float U2A=0.264185905611042f; float U2B=0.997599605415954f;
 	    
-	    IndefiniteTruthValue* TV2a=createTV(L2A,U2A);
-	    IndefiniteTruthValue* TV2b=createTV(L2B,U2B);
+	    IndefiniteTruthValuePtr TV2a=createTV(L2A,U2A);
+	    IndefiniteTruthValuePtr TV2b=createTV(L2B,U2B);
 	    IndefiniteTruthValue* result2;
 
 	    ConjunctionRule *a2 = myCreator.CreateRule(TV2a, TV2b);
@@ -213,11 +214,11 @@ public:
 		float expectedMean=0.993f;
 		float error=0.05;
 		
-	    IndefiniteTruthValue* TVa=createTV(LA,UA);
-	    IndefiniteTruthValue* TVab=createTV(LAB,UAB);
+	    IndefiniteTruthValuePtr TVa=createTV(LA,UA);
+	    IndefiniteTruthValuePtr TVab=createTV(LAB,UAB);
 	    IndefiniteTruthValue* result;
 
-	    RuleGenerator<ImplicationRule, IndefiniteTruthValue> myCreator;
+	    RuleGenerator<ImplicationRule, IndefiniteTruthValuePtr> myCreator;
 	    ImplicationRule *a = myCreator.CreateRule(TVa, TVab);
 	    result = a->solve();
 		
@@ -245,11 +246,11 @@ public:
 		float expectedMean=0.995f;
 		float error=0.05;
 		
-	    IndefiniteTruthValue* TVa=createTV(LA,UA);
-	    IndefiniteTruthValue* TVb=createTV(LB,UB);
+	    IndefiniteTruthValuePtr TVa=createTV(LA,UA);
+	    IndefiniteTruthValuePtr TVb=createTV(LB,UB);
 	    IndefiniteTruthValue* result;
 
-	    RuleGenerator<RevisionRule, IndefiniteTruthValue> myCreator;
+	    RuleGenerator<RevisionRule, IndefiniteTruthValuePtr> myCreator;
 	    RevisionRule *a = myCreator.CreateRule(TVa, TVb);
 	    result = a->solve();
 		
@@ -278,18 +279,18 @@ public:
 		float expectedMean=0.113f;
 		float error=0.05;
 		
-/*		const TruthValue* TVA = createTV(0.476190f,0.571428f);//A
-		const TruthValue* TVC = createTV(0.380952f,0.571428f);//C
-		const TruthValue* TVAC = createTV(0.06f,0.14f);//AC
-		const TruthValue* TVRB = createTV(0.06,0.14f);
+/*		TruthValuePtr TVA = createTV(0.476190f,0.571428f);//A
+		TruthValuePtr TVC = createTV(0.380952f,0.571428f);//C
+		TruthValuePtr TVAC = createTV(0.06f,0.14f);//AC
+		TruthValuePtr TVRB = createTV(0.06,0.14f);
 	*/
 		
-		IndefiniteTruthValue* TVa=createTV(LA,UA);			
-	    IndefiniteTruthValue* TVc=createTV(LC,UC);
-	    IndefiniteTruthValue* TVac=createTV(LAC,UAC);
+		IndefiniteTruthValuePtr TVa=createTV(LA,UA);			
+	    IndefiniteTruthValuePtr TVc=createTV(LC,UC);
+	    IndefiniteTruthValuePtr TVac=createTV(LAC,UAC);
 	    IndefiniteTruthValue* result;
 
-	    RuleGenerator<BayesRule, IndefiniteTruthValue> myCreator;
+	    RuleGenerator<BayesRule, IndefiniteTruthValuePtr> myCreator;
 	    BayesRule *a = myCreator.CreateRule(TVa, TVc, TVac);
 	    result = a->solve();
 		
@@ -328,25 +329,25 @@ public:
 		float error=0.05;
 
 
-		IndefiniteTruthValue* TVa = createTV(LA,UA);
-		IndefiniteTruthValue* TVb = createTV(LB,UB);
-		IndefiniteTruthValue* TVc = createTV(LC,UC);
-		IndefiniteTruthValue* TVab = createTV(LAB,UAB);
-		IndefiniteTruthValue* TVcb = createTV(LCB,UCB);
+		IndefiniteTruthValuePtr TVa = createTV(LA,UA);
+		IndefiniteTruthValuePtr TVb = createTV(LB,UB);
+		IndefiniteTruthValuePtr TVc = createTV(LC,UC);
+		IndefiniteTruthValuePtr TVab = createTV(LAB,UAB);
+		IndefiniteTruthValuePtr TVcb = createTV(LCB,UCB);
 
 /****** Other premises - test may fail **********************/
 /*		
-		const TruthValue* TVA = createTV(0.0f,0.138f,0.8f);
-		const TruthValue* TVB = createTV(0.0f,0.168f,0.8f);
-		const TruthValue* TVC = createTV(0.0f,0.032f,0.8f);
-		const TruthValue* TVAB = createTV(0.95f,1.0f,0.9f);
-		const TruthValue* TVCB = createTV(0.95f,1.0f,0.9f);
+		TruthValuePtr TVA = createTV(0.0f,0.138f,0.8f);
+		TruthValuePtr TVB = createTV(0.0f,0.168f,0.8f);
+		TruthValuePtr TVC = createTV(0.0f,0.032f,0.8f);
+		TruthValuePtr TVAB = createTV(0.95f,1.0f,0.9f);
+		TruthValuePtr TVCB = createTV(0.95f,1.0f,0.9f);
 */
 /*************************************************************/
 
-		const TruthValue* TV[5] = {TVa, TVb, TVc, TVab,TVcb};
+		TruthValuePtr TV[5] = {TVa, TVb, TVc, TVab,TVcb};
 		
-		RuleGenerator<AbductionRule, IndefiniteTruthValue> myCreator;
+		RuleGenerator<AbductionRule, IndefiniteTruthValuePtr> myCreator;
 	    AbductionRule *a = myCreator.CreateRule(TVa, TVb, TVc, TVab, TVcb);
     	IndefiniteTruthValue* result = a->solve();
 		
@@ -384,11 +385,11 @@ public:
 		float expectedMean=0.549f;
 		float error=0.5;//a lot of error because the lookup table precision
 
-	    IndefiniteTruthValue* TVa=createTV(LA,UA);
-	    IndefiniteTruthValue* TVb=createTV(LB,UB);
-	    IndefiniteTruthValue* TVc=createTV(LC,UC);
-	    IndefiniteTruthValue* TVab=createTV(LAB,UAB);
-	    IndefiniteTruthValue* TVbc=createTV(LBC,UBC);
+	    IndefiniteTruthValuePtr TVa=createTV(LA,UA);
+	    IndefiniteTruthValuePtr TVb=createTV(LB,UB);
+	    IndefiniteTruthValuePtr TVc=createTV(LC,UC);
+	    IndefiniteTruthValuePtr TVab=createTV(LAB,UAB);
+	    IndefiniteTruthValuePtr TVbc=createTV(LBC,UBC);
 	    IndefiniteTruthValue* result;
 
 	
@@ -397,39 +398,39 @@ public:
  * changes the expected values 
  */
 /*	
-		const TruthValue* TVA = createTV(0.0f,0.032f,0.8f);
-		const TruthValue* TVB = createTV(0.0f,0.168f,0.8f);
-		const TruthValue* TVC = createTV(0.58f,0.60f);
-		const TruthValue* TVAB = createTV(0.313043f,0.513043f);
-		const TruthValue* TVBC = createTV(0.46666f,0.6f);
+		TruthValuePtr TVA = createTV(0.0f,0.032f,0.8f);
+		TruthValuePtr TVB = createTV(0.0f,0.168f,0.8f);
+		TruthValuePtr TVC = createTV(0.58f,0.60f);
+		TruthValuePtr TVAB = createTV(0.313043f,0.513043f);
+		TruthValuePtr TVBC = createTV(0.46666f,0.6f);
 */
 
 /*		
-		const TruthValue* TVA = createTV(0.6f,0.7f,0.9f);
-		const TruthValue* TVB = createTV(0.5f,0.7f,0.9f);
-		const TruthValue* TVC = createTV(0.4f,0.6f,0.9f);
-		const TruthValue* TVAB = createTV(0.2f,0.3f,0.9f);
-		const TruthValue* TVBC = createTV(0.5f,0.7f,0.9f);
+		TruthValuePtr TVA = createTV(0.6f,0.7f,0.9f);
+		TruthValuePtr TVB = createTV(0.5f,0.7f,0.9f);
+		TruthValuePtr TVC = createTV(0.4f,0.6f,0.9f);
+		TruthValuePtr TVAB = createTV(0.2f,0.3f,0.9f);
+		TruthValuePtr TVBC = createTV(0.5f,0.7f,0.9f);
 */
 
 /*
-    const TruthValue* TVA = createTV(0.1f,0.3f);
-		const TruthValue* TVB = createTV(0.1f,0.3f);
-		const TruthValue* TVC = createTV(0.1f,0.3f);
-		const TruthValue* TVAB = createTV(0.1f,0.3f);
-		const TruthValue* TVBC = createTV(0.1f,0.3f);
+    TruthValuePtr TVA = createTV(0.1f,0.3f);
+		TruthValuePtr TVB = createTV(0.1f,0.3f);
+		TruthValuePtr TVC = createTV(0.1f,0.3f);
+		TruthValuePtr TVAB = createTV(0.1f,0.3f);
+		TruthValuePtr TVBC = createTV(0.1f,0.3f);
 */
 
 //inconsistency teste
 /*
-  	const TruthValue* TVA = createTV(0.0f,0.3f);
-		const TruthValue* TVB = createTV(0.7f,1.0f);
-		const TruthValue* TVC = createTV(0.0f,0.3f);
-		const TruthValue* TVAB = createTV(0.0f,0.3f);
-		const TruthValue* TVBC = createTV(0.7f,1.0f);
+  	TruthValuePtr TVA = createTV(0.0f,0.3f);
+		TruthValuePtr TVB = createTV(0.7f,1.0f);
+		TruthValuePtr TVC = createTV(0.0f,0.3f);
+		TruthValuePtr TVAB = createTV(0.0f,0.3f);
+		TruthValuePtr TVBC = createTV(0.7f,1.0f);
 */
 /*****************************************************************************/
-	    RuleGenerator<DeductionRule, IndefiniteTruthValue> myCreator;
+	    RuleGenerator<DeductionRule, IndefiniteTruthValuePtr> myCreator;
 	    DeductionRule *a = myCreator.CreateRule(TVa, TVb, TVc, TVab, TVbc);
 	    result = a->solve();
 
@@ -457,7 +458,7 @@ public:
 		float expectedMean=0.975f;
 		float error=0.05;		
 		
-		const TruthValue* TVA = createTV(LA,UA);
+		TruthValuePtr TVA = createTV(LA,UA);
 		
 		TVSeq TV(1, TVA);
         IndefiniteMem2InhFormula fMem2Inh;
@@ -498,11 +499,11 @@ public:
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(2);
 		
-		IndefiniteTruthValue* TVA;
-		IndefiniteTruthValue* TVB;
-		IndefiniteTruthValue* TVC;
-		IndefiniteTruthValue* TVAB;
-		IndefiniteTruthValue* TVBC;
+		IndefiniteTruthValuePtr TVA;
+		IndefiniteTruthValuePtr TVB;
+		IndefiniteTruthValuePtr TVC;
+		IndefiniteTruthValuePtr TVAB;
+		IndefiniteTruthValuePtr TVBC;
 		IndefiniteTruthValue* result;
 		IndefiniteTruthValue* resultLookupTable;
 		float default_b=0.9f;
@@ -537,7 +538,7 @@ public:
 				TVAB = createTV(Ls[i],Us[j],default_b);
 				TVBC = createTV(Ls[i],Us[j],default_b);
 							
-				RuleGenerator<DeductionRule, IndefiniteTruthValue> myCreator;
+				RuleGenerator<DeductionRule, IndefiniteTruthValuePtr> myCreator;
 	            DeductionRule *d = myCreator.CreateRule(TVA,TVB,TVC, TVAB, TVBC);
 	            result = d->solve();
 

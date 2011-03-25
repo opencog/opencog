@@ -148,7 +148,7 @@ public:
             pHandle eh1=PHANDLE_UNDEFINED; // expected target handle
             eh1 = fc1.fwdChainToTarget(1, test1->target);
             Type t1 = asw->getType(eh1);
-            const TruthValue* tv1 = asw->getTV(eh1);
+            TruthValuePtr tv1 = asw->getTV(eh1);
             int lr1 = fc1.thisLevelResults->size();
 
             std::cout << "== DOING REPEAT 2 ==" << endl;
@@ -158,7 +158,7 @@ public:
             pHandle eh2=PHANDLE_UNDEFINED; // expected target handle
             eh2 = fc2.fwdChainToTarget(1, test2->target);
             Type t2 = asw->getType(eh2);
-            const TruthValue* tv2 = asw->getTV(eh2);
+            TruthValuePtr tv2 = asw->getTV(eh2);
             int lr2 = fc2.thisLevelResults->size();
 
             TS_ASSERT_EQUALS(t1, t2);

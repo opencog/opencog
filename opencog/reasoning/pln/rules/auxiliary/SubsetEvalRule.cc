@@ -106,15 +106,15 @@ TVSeq SubsetEvalRule::formatTVarray(const VertexSeq& premises) const
 
     foreach(const pHandle& h_ml_sub, mlSetSub) {
         //std::cout << _asw->pHandleToString(h_ml_sub) << std::endl;
-        tvsSub.push_back(_asw->getTV(h_ml_sub)->clone());
+        tvsSub.push_back(_asw->getTV(h_ml_sub));
 
         EqOutgoing eqMember(h_ml_sub, 0, _asw);
         pHandleSetConstIt h_ml_super_cit =
             find_if(mlSetSuper.begin(), mlSetSuper.end(), eqMember);
         if (h_ml_super_cit == mlSetSuper.end())
-            tvsSuper.push_back(new SimpleTruthValue(0,0));
+            tvsSuper.push_back(TruthValuePtr(new SimpleTruthValue(0, 0)));
         else {
-            tvsSuper.push_back(_asw->getTV(*h_ml_super_cit)->clone());
+            tvsSuper.push_back(_asw->getTV(*h_ml_super_cit));
             used.insert(*h_ml_super_cit);
         }
     }
@@ -122,8 +122,8 @@ TVSeq SubsetEvalRule::formatTVarray(const VertexSeq& premises) const
     foreach(const pHandle& h_ml_super, mlSetSuper) {
         //std::cout << _asw->pHandleToString(h_ml_super) << std::endl;
         if (!STLhas(used, h_ml_super)) {
-            tvsSuper.push_back(_asw->getTV(h_ml_super)->clone());
-            tvsSub.push_back(new SimpleTruthValue(0,0));
+            tvsSuper.push_back(_asw->getTV(h_ml_super));
+            tvsSub.push_back(TruthValuePtr(new SimpleTruthValue(0, 0)));
         }
     }
 
@@ -142,10 +142,6 @@ BoundVertex SubsetEvalRule::compute(const VertexSeq& premiseArray,
     TVSeq tvs = formatTVarray(premiseArray);
 
     TruthValue* retTV = formula.compute(tvs);
-
-    for (unsigned int i = 0; i < tvs.size(); i++) {
-        delete tvs[i];
-    }
 
     pHandle ret = _asw->addAtom(*i2oType(premiseArray), *retTV, fresh);
     return BoundVertex(ret);

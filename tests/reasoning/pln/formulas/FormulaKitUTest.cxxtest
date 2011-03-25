@@ -39,59 +39,59 @@ using namespace pln;
 class FormulasKitUTest : public CxxTest::TestSuite {
 private:
 //    SimpleTruthValue* atoms[NUM_ATOMS];
-    TruthValue* atoms[NUM_ATOMS];
-    TruthValue* inheritance[NUM_ATOMS][NUM_ATOMS];
-    TruthValue* similarity[NUM_ATOMS][NUM_ATOMS];
+    TruthValuePtr atoms[NUM_ATOMS];
+    TruthValuePtr inheritance[NUM_ATOMS][NUM_ATOMS];
+    TruthValuePtr similarity[NUM_ATOMS][NUM_ATOMS];
 
 public:
     FormulasKitUTest() {
-        atoms[0] = new SimpleTruthValue(0.36,36.0);
-        atoms[1] = new SimpleTruthValue(0.49,49.0);
-        atoms[2] = new SimpleTruthValue(0.42,42.0);
-        atoms[3] = new SimpleTruthValue(0.45,45.0);
-        atoms[4] = new SimpleTruthValue(0.41,41.0);
+        atoms[0] = TruthValuePtr(new SimpleTruthValue(0.36,36.0));
+        atoms[1] = TruthValuePtr(new SimpleTruthValue(0.49,49.0));
+        atoms[2] = TruthValuePtr(new SimpleTruthValue(0.42,42.0));
+        atoms[3] = TruthValuePtr(new SimpleTruthValue(0.45,45.0));
+        atoms[4] = TruthValuePtr(new SimpleTruthValue(0.41,41.0));
 
-        inheritance[0][1] = new SimpleTruthValue(0.5277778,36);
-        inheritance[0][2] = new SimpleTruthValue(0.44444445,36);
-        inheritance[0][3] = new SimpleTruthValue(0.5277778,36);
-        inheritance[0][4] = new SimpleTruthValue(0.3888889,36);
-        inheritance[1][0] = new SimpleTruthValue(0.3877551,49);
-        inheritance[1][2] = new SimpleTruthValue(0.48979592,49);
-        inheritance[1][3] = new SimpleTruthValue(0.5102041,49);
-        inheritance[1][4] = new SimpleTruthValue(0.42857143,49);
-        inheritance[2][0] = new SimpleTruthValue(0.3809524,42);
-        inheritance[2][1] = new SimpleTruthValue(0.5714286,42);
-        inheritance[2][3] = new SimpleTruthValue(0.4047619,42);
-        inheritance[2][4] = new SimpleTruthValue(0.42857143,42);
-        inheritance[3][0] = new SimpleTruthValue(0.42222223,45);
-        inheritance[3][1] = new SimpleTruthValue(0.5555556,45);
-        inheritance[3][2] = new SimpleTruthValue(0.37777779,45);
-        inheritance[3][4] = new SimpleTruthValue(0.4,45);
-        inheritance[4][0] = new SimpleTruthValue(0.34146342,41);
-        inheritance[4][1] = new SimpleTruthValue(0.5121951,41);
-        inheritance[4][2] = new SimpleTruthValue(0.4390244,41);
-        inheritance[4][3] = new SimpleTruthValue(0.4390244,41);
+        inheritance[0][1] = TruthValuePtr(new SimpleTruthValue(0.5277778,36));
+        inheritance[0][2] = TruthValuePtr(new SimpleTruthValue(0.44444445,36));
+        inheritance[0][3] = TruthValuePtr(new SimpleTruthValue(0.5277778,36));
+        inheritance[0][4] = TruthValuePtr(new SimpleTruthValue(0.3888889,36));
+        inheritance[1][0] = TruthValuePtr(new SimpleTruthValue(0.3877551,49));
+        inheritance[1][2] = TruthValuePtr(new SimpleTruthValue(0.48979592,49));
+        inheritance[1][3] = TruthValuePtr(new SimpleTruthValue(0.5102041,49));
+        inheritance[1][4] = TruthValuePtr(new SimpleTruthValue(0.42857143,49));
+        inheritance[2][0] = TruthValuePtr(new SimpleTruthValue(0.3809524,42));
+        inheritance[2][1] = TruthValuePtr(new SimpleTruthValue(0.5714286,42));
+        inheritance[2][3] = TruthValuePtr(new SimpleTruthValue(0.4047619,42));
+        inheritance[2][4] = TruthValuePtr(new SimpleTruthValue(0.42857143,42));
+        inheritance[3][0] = TruthValuePtr(new SimpleTruthValue(0.42222223,45));
+        inheritance[3][1] = TruthValuePtr(new SimpleTruthValue(0.5555556,45));
+        inheritance[3][2] = TruthValuePtr(new SimpleTruthValue(0.37777779,45));
+        inheritance[3][4] = TruthValuePtr(new SimpleTruthValue(0.4,45));
+        inheritance[4][0] = TruthValuePtr(new SimpleTruthValue(0.34146342,41));
+        inheritance[4][1] = TruthValuePtr(new SimpleTruthValue(0.5121951,41));
+        inheritance[4][2] = TruthValuePtr(new SimpleTruthValue(0.4390244,41));
+        inheritance[4][3] = TruthValuePtr(new SimpleTruthValue(0.4390244,41));
 
-        similarity[0][1] = new SimpleTruthValue(0.28787878,66);
-        similarity[0][2] = new SimpleTruthValue(0.2580645,62);
-        similarity[0][3] = new SimpleTruthValue(0.30645162,62);
-        similarity[0][4] = new SimpleTruthValue(0.22222222,63);
-        similarity[1][0] = new SimpleTruthValue(0.28787878,66);
-        similarity[1][2] = new SimpleTruthValue(0.35820895,67);
-        similarity[1][3] = new SimpleTruthValue(0.36231884,69);
-        similarity[1][4] = new SimpleTruthValue(0.3043478,69);
-        similarity[2][0] = new SimpleTruthValue(0.2580645,62);
-        similarity[2][1] = new SimpleTruthValue(0.35820895,67);
-        similarity[2][3] = new SimpleTruthValue(0.24285714,70);
-        similarity[2][4] = new SimpleTruthValue(0.2769231,65);
-        similarity[3][0] = new SimpleTruthValue(0.30645162,62);
-        similarity[3][1] = new SimpleTruthValue(0.36231884,69);
-        similarity[3][2] = new SimpleTruthValue(0.24285714,70);
-        similarity[3][4] = new SimpleTruthValue(0.2647059,68);
-        similarity[4][0] = new SimpleTruthValue(0.22222222,63);
-        similarity[4][1] = new SimpleTruthValue(0.3043478,69);
-        similarity[4][2] = new SimpleTruthValue(0.2769231,65);
-        similarity[4][3] = new SimpleTruthValue(0.2647059,68);
+        similarity[0][1] = TruthValuePtr(new SimpleTruthValue(0.28787878,66));
+        similarity[0][2] = TruthValuePtr(new SimpleTruthValue(0.2580645,62));
+        similarity[0][3] = TruthValuePtr(new SimpleTruthValue(0.30645162,62));
+        similarity[0][4] = TruthValuePtr(new SimpleTruthValue(0.22222222,63));
+        similarity[1][0] = TruthValuePtr(new SimpleTruthValue(0.28787878,66));
+        similarity[1][2] = TruthValuePtr(new SimpleTruthValue(0.35820895,67));
+        similarity[1][3] = TruthValuePtr(new SimpleTruthValue(0.36231884,69));
+        similarity[1][4] = TruthValuePtr(new SimpleTruthValue(0.3043478,69));
+        similarity[2][0] = TruthValuePtr(new SimpleTruthValue(0.2580645,62));
+        similarity[2][1] = TruthValuePtr(new SimpleTruthValue(0.35820895,67));
+        similarity[2][3] = TruthValuePtr(new SimpleTruthValue(0.24285714,70));
+        similarity[2][4] = TruthValuePtr(new SimpleTruthValue(0.2769231,65));
+        similarity[3][0] = TruthValuePtr(new SimpleTruthValue(0.30645162,62));
+        similarity[3][1] = TruthValuePtr(new SimpleTruthValue(0.36231884,69));
+        similarity[3][2] = TruthValuePtr(new SimpleTruthValue(0.24285714,70));
+        similarity[3][4] = TruthValuePtr(new SimpleTruthValue(0.2647059,68));
+        similarity[4][0] = TruthValuePtr(new SimpleTruthValue(0.22222222,63));
+        similarity[4][1] = TruthValuePtr(new SimpleTruthValue(0.3043478,69));
+        similarity[4][2] = TruthValuePtr(new SimpleTruthValue(0.2769231,65));
+        similarity[4][3] = TruthValuePtr(new SimpleTruthValue(0.2647059,68));
     }
 
     void testSimpleFormulas() {
@@ -125,9 +125,9 @@ public:
         
         // run compute over Default TVS, just to compare with primary TVS
         printf("======== PHASE 0: DefaultTVs ==========\n");
-        TruthValue* defaultTVs[NUM_ATOMS];
+        TruthValuePtr defaultTVs[NUM_ATOMS];
         for (int i = 0; i < NUM_ATOMS; i++) {
-            defaultTVs[i] = TruthValue::DEFAULT_TV().clone();
+            defaultTVs[i] = TruthValuePtr(TruthValue::DEFAULT_TV().clone());
         }
         resultTv = OldAndFormula().compute(TVSeq(defaultTVs, defaultTVs+2));
         TS_ASSERT(resultTv);
@@ -154,9 +154,9 @@ public:
         
         // Now run with CompositeTruthValues
         printf("======== PHASE 1: CompositeTVs ==========\n");
-        TruthValue* compositeTVs[NUM_ATOMS];
+        TruthValuePtr compositeTVs[NUM_ATOMS];
         for (int i = 0; i < NUM_ATOMS; i++) {
-            compositeTVs[i] = new CompositeTruthValue(*(atoms[i]), VersionHandle(HYPOTHETICAL, Handle::UNDEFINED));
+            compositeTVs[i] = TruthValuePtr(new CompositeTruthValue(*(atoms[i]), VersionHandle(HYPOTHETICAL, Handle::UNDEFINED)));
             std::cout << "compositeTVs[" << i << "] = " << *compositeTVs[i] << std::endl;
         }
         // run with the same SimpleTruthValues. Must get same results...
@@ -217,8 +217,8 @@ public:
         cout << "\n"
              // << "A->B\t\t\tB->C\t\t\tA\t\t\tB\t\t\tC\t\t\tA->C(expected)\t\tA->C(inferred)\n";
              << "A->B\t\t\tB->C\t\t\tA->C(expected)\t\tA->C(inferred)\n";
-        TruthValue* t;
-        TruthValue* e;
+        TruthValuePtr t;
+        TruthValuePtr e;
         float totalStrError = 0;
         float totalCountError = 0;
         int num = 0;
@@ -413,9 +413,9 @@ public:
     void DISABLEtestRevisionSetWorld() {
         cout << "\n"
              << "A->B\t\t\tA'->B'\t\t\tA->B(expected)\t\tA->B(inferred)\n";
-        TruthValue* e;
-        TruthValue* d;
-        TruthValue* t;
+        TruthValuePtr e;
+        TruthValuePtr d;
+        TruthValuePtr t;
         float totalStrError = 0;
         float totalCountError = 0;
         int num = 0;

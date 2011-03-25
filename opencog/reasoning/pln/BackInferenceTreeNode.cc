@@ -1181,8 +1181,8 @@ bool BITNodeRoot::spawns(const bindingsT& bindings) const
 bool BITNode::expandRule(RulePtr new_rule, int target_i, BBvtree _target, Btr<bindingsT> bindings, spawn_mode spawning)
 {   
     bool ret = true;
-    //try
-    //{
+    try
+    {
         tlog(-2, "Expanding rule... %s", (new_rule ? new_rule->name.c_str() : "?"));      
 
         if (!new_rule->isComposer())          
@@ -1266,7 +1266,7 @@ bool BITNode::expandRule(RulePtr new_rule, int target_i, BBvtree _target, Btr<bi
                 return !children[target_i].empty();
             }
         }
-    //} catch(...) { tlog(0,"Exception in ExpandRule()"); throw; }
+    } catch(...) { tlog(0,"Exception in ExpandRule()"); throw; }
 
     return ret;
 }
@@ -1383,7 +1383,7 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources,
         {
             tlog(0, "get next TV");
             assert(!asw->isType(vt2h(*vtp)));
-            const TruthValue* etv = asw->getTV(vt2h(*vtp));
+            TruthValuePtr etv = asw->getTV(vt2h(*vtp));
             if (!etv->isNullTv()) {
                 if (etv->getConfidence() > minConfidenceForAbort)
                     return *eval_res_vector_set.begin();
@@ -1672,8 +1672,8 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                     pHandle primary_ph = asw->getPrimaryFakeHandle(ph);
 
                     // Revise existing primary TV and newly found TV
-                    const TruthValue* primaryTV = asw->getTV(primary_ph)->clone();
-                    const TruthValue* newlyFoundTV = asw->getTV(ph)->clone();
+                    TruthValuePtr primaryTV = asw->getTV(primary_ph);
+                    TruthValuePtr newlyFoundTV = asw->getTV(ph);
 
                     TVSeq both(2);
                     both[0] = primaryTV;

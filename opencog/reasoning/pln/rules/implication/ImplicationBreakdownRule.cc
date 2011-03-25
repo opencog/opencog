@@ -76,7 +76,7 @@ BoundVertex ImplicationBreakdownRule::compute(const VertexSeq& premiseArray, pHa
     Type T = asw->getType(args[1]);
     std::string pname = asw->getName(args[1]);
     
-    const TruthValue* tvs[] = {
+    TruthValuePtr tvs[] = {
         asw->getTV(_v2h(premiseArray[0])),
         asw->getTV(args[0]),
         asw->getTV(args[1])

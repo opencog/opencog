@@ -207,7 +207,11 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodT
             record_t dataPoint(atomspaceSize,timeTaken,getMemUsage()-rssStart-rssFromIncrease);
             // Only save datapoints if we have to calculate the stats
             // afterwards, otherwise it affects memory usage
-            if (doStats) records.push_back(dataPoint);
+            if (doStats) {
+                if (timeTaken < 0)
+                    cout << "ftumf" << endl;
+                records.push_back(dataPoint);
+            }
             // otherwise, we might write directly to a file
             if (saveToFile) recordToFile(myfile,dataPoint);
         }

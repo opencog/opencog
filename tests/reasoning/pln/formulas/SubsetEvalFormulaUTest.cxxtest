@@ -50,17 +50,17 @@ private:
     TVSeq TVsuper;
 public:
     SubsetEvalFormulaUTest() : TVsub(TV_COUNT), TVsuper(TV_COUNT) {
-        TVsub[0] = new SimpleTruthValue(SUB_S1, 1);
-        TVsub[1] = new SimpleTruthValue(SUB_S2, 1);
-        TVsub[2] = new SimpleTruthValue(SUB_S3, 1);
-        TVsub[3] = new SimpleTruthValue(SUB_S4, 1);
-        TVsub[4] = new SimpleTruthValue(SUB_S5, 1);
+        TVsub[0] = TruthValuePtr(new SimpleTruthValue(SUB_S1, 1));
+        TVsub[1] = TruthValuePtr(new SimpleTruthValue(SUB_S2, 1));
+        TVsub[2] = TruthValuePtr(new SimpleTruthValue(SUB_S3, 1));
+        TVsub[3] = TruthValuePtr(new SimpleTruthValue(SUB_S4, 1));
+        TVsub[4] = TruthValuePtr(new SimpleTruthValue(SUB_S5, 1));
 
-        TVsuper[0] = new SimpleTruthValue(SUPER_S1, 1);
-        TVsuper[1] = new SimpleTruthValue(SUPER_S2, 1);
-        TVsuper[2] = new SimpleTruthValue(SUPER_S3, 1);
-        TVsuper[3] = new SimpleTruthValue(SUPER_S4, 1);
-        TVsuper[4] = new SimpleTruthValue(SUPER_S5, 1);
+        TVsuper[0] = TruthValuePtr(new SimpleTruthValue(SUPER_S1, 1));
+        TVsuper[1] = TruthValuePtr(new SimpleTruthValue(SUPER_S2, 1));
+        TVsuper[2] = TruthValuePtr(new SimpleTruthValue(SUPER_S3, 1));
+        TVsuper[3] = TruthValuePtr(new SimpleTruthValue(SUPER_S4, 1));
+        TVsuper[4] = TruthValuePtr(new SimpleTruthValue(SUPER_S5, 1));
     }
 
     void testSubsetEvalFormula() {

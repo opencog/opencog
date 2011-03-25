@@ -418,7 +418,7 @@ Handle Ass(AtomSpaceWrapper *asw, Handle h, vector<Handle>& ret)
 
     for (vector<Handle>::iterator k = ret.begin(); k != ret.end();k++)
     {
-        const TruthValue* tv = destTable->getTV(*k);
+        TruthValuePtr tv = destTable->getTV(*k);
 
         printTree(
             destTable->addAtom(
@@ -429,7 +429,9 @@ Handle Ass(AtomSpaceWrapper *asw, Handle h, vector<Handle>& ret)
                 *tv,
                 true);  
 //              false);
-            );
+            )
+            ,0,0
+        );
     }
 
     return ass.attach(destTable);

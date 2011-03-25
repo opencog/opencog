@@ -166,7 +166,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 
                     Vertex V=((r->compute(*args, PHANDLE_UNDEFINED, false)).GetValue());
                     pHandle out=boost::get<pHandle>(V);
-                    const TruthValue* tv = GET_ASW->getTV(out);
+                    TruthValuePtr tv = GET_ASW->getTV(out);
                     NMPrinter().print(out,-5);
 
                     if (!tv->isNullTv() && tv->getCount() > minConfidence) {

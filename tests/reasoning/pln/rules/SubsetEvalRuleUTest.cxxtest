@@ -155,7 +155,7 @@ public:
         SubsetEvalRule sser(_asw, CONCEPT_NODE);
         BoundVertex bv = sser.compute(list_of(_sub_h)(_super_h));
         pHandle res_h = _v2h(bv.GetValue());
-        const TruthValue* res_tv = _asw->getTV(res_h);
+        TruthValuePtr res_tv = _asw->getTV(res_h);
         cout << "res = " << _asw->pHandleToString(res_h) << endl;
 
         // build the TV result manually

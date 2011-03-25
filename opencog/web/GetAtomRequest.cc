@@ -113,8 +113,8 @@ void GetAtomRequest::json_makeOutput(Handle h)
     _output << "\"sti\":" << as->getSTI(h) << ",";// <<std::endl;
     _output << "\"lti\":" << as->getLTI(h) << ",";// <<std::endl;
 
-    const TruthValue* tvp = as->getTV(h);
-    _output << "\"truthvalue\":" << tvToJSON(tvp);// << std::endl;
+    TruthValuePtr tvp = as->getTV(h);
+    _output << "\"truthvalue\":" << tvToJSON(tvp.get());// << std::endl;
     _output << "}";
 
 }

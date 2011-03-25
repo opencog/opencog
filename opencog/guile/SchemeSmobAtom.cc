@@ -81,7 +81,7 @@ SCM SchemeSmob::ss_arity (SCM satom)
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
-	const TruthValue* tv = atomspace->getTV(h);
+	TruthValuePtr tv = atomspace->getTV(h);
 	TruthValue *stv = tv->clone();
 	return take_tv(stv);
 }

@@ -92,7 +92,7 @@ public:
         BoundVertex bv = sibr.compute(list_of(_AB_h)(_A_h));
         pHandle res_h = _v2h(bv.GetValue());
 
-        const TruthValue* res_tv = _asw->getTV(res_h);
+        TruthValuePtr res_tv = _asw->getTV(res_h);
         cout << "res = " << _asw->pHandleToString(res_h) << endl;
 
         // build the TV result manually

@@ -51,12 +51,15 @@ public:
     }
 };
 
+class AtomSpace;
+
 /**
  * Request that stores and returns type T
  */
 template<typename T>
 class GenericASR: public ASRequest {
 
+    friend class AtomSpace;
 protected:
     T result;
     void set_result(T _result) { result = _result; }
@@ -406,27 +409,41 @@ public:
     
 };
 
-class GetTruthValueASR : public GenericASR <const TruthValue*> {
+class GetTruthValueASR : public GenericASR <tv_summary_t> {
     Handle h;
     VersionHandle vh;
 public:
     GetTruthValueASR (AtomSpaceImpl *a, Handle _h, VersionHandle& _vh) :
-        GenericASR<const TruthValue*> (a)  {
+        GenericASR<tv_summary_t> (a)  {
+        h=_h; vh=_vh;
+    };
+    
+    virtual void do_work() {
+        const TruthValue& tv = atomspace->getTV(h,vh);
+        tv_summary_t a;
+        a.mean = tv.getMean();
+        a.confidence = tv.getConfidence();
+        a.count = tv.getCount();
+        set_result(a);
+    };
+    
+};
+class GetCompleteTruthValueASR : public GenericASR <TruthValue*> {
+    Handle h;
+    VersionHandle vh;
+public:
+    GetCompleteTruthValueASR (AtomSpaceImpl *a, Handle _h, VersionHandle& _vh) :
+        GenericASR<TruthValue*> (a)  {
         h=_h; vh=_vh;
         result = NULL;
     };
-    ~GetTruthValueASR() {
-        //if (result && *result != TruthValue::DEFAULT_TV()) delete result;
+    ~GetCompleteTruthValueASR() {
+        if (result) delete result;
     }
     
     virtual void do_work() {
         const TruthValue& tv = atomspace->getTV(h,vh);
-        set_result(&tv);
-        /*if (tv != TruthValue::DEFAULT_TV()) {
-            set_result(tv.clone());
-        } else {
-            set_result(&tv);
-        }*/
+        set_result(tv.clone());
     };
     
 };
@@ -956,7 +973,8 @@ typedef boost::shared_ptr< GenericASR<AttentionValue> > AttentionValueRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::sti_t> > STIRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::lti_t> > LTIRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::vlti_t> > VLTIRequest;
-typedef boost::shared_ptr< GenericASR<const TruthValue*> > TruthValueRequest;
+typedef boost::shared_ptr< GenericASR<tv_summary_t> > TruthValueRequest;
+typedef boost::shared_ptr< GenericASR<TruthValue*> > TruthValueCompleteRequest;
 typedef boost::shared_ptr< GenericASR<HandleSeq> > HandleSeqRequest;
 typedef boost::shared_ptr< GenericASR<Type> > TypeRequest;
 typedef boost::shared_ptr< GenericASR<int> > IntRequest;

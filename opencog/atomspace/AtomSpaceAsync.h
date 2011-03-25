@@ -311,9 +311,16 @@ public:
         return r;
     }
 
-    /** Retrieve the TruthValue of a given Handle */
+    /** Retrieve the TruthValue summary of a given Handle */
     TruthValueRequest getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
         TruthValueRequest r(new GetTruthValueASR(&atomspace,h,vh));
+        requestQueue.push(r);
+        return r;
+    }
+
+    /** Retrieve the TruthValue of a given Handle */
+    TruthValueCompleteRequest getTVComplete(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
+        TruthValueCompleteRequest r(new GetCompleteTruthValueASR(&atomspace,h,vh));
         requestQueue.push(r);
         return r;
     }
