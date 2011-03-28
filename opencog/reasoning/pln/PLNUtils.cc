@@ -228,9 +228,6 @@ void reviseVersionedTVs(AtomSpaceWrapper *asw, Handle h) {
         delete tmp;
     }
     asw->atomspace->setTV(h, revisedTV);
-    // flush getTV cache
-    foreach (pHandle p, realToFakeHandles(h)) 
-        asw->getTVCached->remove(p);
 #endif
 }
 
