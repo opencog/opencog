@@ -560,12 +560,11 @@ public:
     }
 
     void testGetHandle_bugfix1() {
-        AtomSpace atomSpace;
         HandleSeq emptyOutgoing;
-        Handle result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
+        Handle result = atomSpace->getHandle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(!Handle::compare(result, Handle::UNDEFINED));
-        atomSpace.addLink(LIST_LINK, emptyOutgoing);
-        result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
+        atomSpace->addLink(LIST_LINK, emptyOutgoing);
+        result = atomSpace->getHandle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(Handle::compare(result, Handle::UNDEFINED));
     }
 
