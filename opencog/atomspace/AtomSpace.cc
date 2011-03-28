@@ -146,7 +146,7 @@ TruthValuePtr AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
     TruthValueCompleteRequest tvr = atomSpaceAsync->getTVComplete(h, vh);
     TruthValuePtr x(tvr->get_result());
-    tvr->result = NULL;
+    tvr->result = NULL; // cheat to avoid copying TruthValue once again
     return x;
 }
 
