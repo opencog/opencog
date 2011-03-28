@@ -162,6 +162,8 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName) {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getType);
     } else if (_methodName == "getTV") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValue);
+    } else if (_methodName == "getTVZmq") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValueZmq);
     } else if (_methodName == "setTV") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
     } else if (_methodName == "getHandleSet") {
@@ -374,6 +376,14 @@ clock_t AtomSpaceBenchmark::bm_getTruthValue()
     Handle h = getRandomHandle();
     clock_t t_begin = clock();
     a->getTV(h); 
+    return clock() - t_begin;
+}
+
+clock_t AtomSpaceBenchmark::bm_getTruthValueZmq()
+{
+    Handle h = getRandomHandle();
+    clock_t t_begin = clock();
+    a->getTVZmq(h); 
     return clock() - t_begin;
 }
 

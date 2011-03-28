@@ -12,6 +12,8 @@
 #include "Handle.h"
 #include "types.h"
 
+#include <zmq.hpp>
+
 class AtomSpaceAsyncUTest;
 
 namespace opencog {
@@ -29,6 +31,8 @@ class AtomSpaceAsync {
 
     bool processingRequests;
     boost::thread m_Thread;
+    boost::thread m_zmq_Thread;
+    zmq::context_t* zmq_context;
     int counter;
 
     AtomSpaceImpl atomspace;
@@ -42,6 +46,7 @@ class AtomSpaceAsync {
     concurrent_queue< boost::shared_ptr<ASRequest> > requestQueue;
 
     void eventLoop();
+    void zmqLoop();
 
     const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
 
@@ -318,14 +323,21 @@ public:
         return r;
     }
 
-    /** Retrieve the TruthValue of a given Handle */
+    /** Retrieve the complete TruthValue of a given Handle */
     TruthValueCompleteRequest getTVComplete(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
         TruthValueCompleteRequest r(new GetCompleteTruthValueASR(&atomspace,h,vh));
         requestQueue.push(r);
         return r;
     }
 
-    /** Change the TruthValue of a given Handle */
+    /** Retrieve the TruthValue of a given Handle using ZeroMQ */
+    TruthValueZmqRequest getTVZmq(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
+        TruthValueZmqRequest r(new GetTruthValueZmq(h,vh));
+        //requestQueue.push(r);
+        return r;
+    }
+
+    /** Change the TruthValue summary of a given Handle */
     VoidRequest setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE) {
         VoidRequest r(new SetTruthValueASR(&atomspace,h,tv,vh));
         requestQueue.push(r);

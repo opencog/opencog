@@ -499,6 +499,8 @@ public:
      */
     TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
 
+    TruthValue* getTVZmq(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
+
     /** Change the TruthValue of a given Handle */
     void setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE);
 

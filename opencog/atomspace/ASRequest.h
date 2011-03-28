@@ -409,6 +409,47 @@ public:
     
 };
 
+class GetTruthValueZmq {
+    Handle h;
+    VersionHandle vh;
+
+    //! For signalling that the request has been completed
+    boost::condition_variable complete_cond;
+    mutable boost::mutex complete_mutex;
+    //! For blocking while fulfilling the request
+    mutable boost::mutex the_mutex;
+    TruthValue* result;
+    bool completed;
+public:
+    GetTruthValueZmq (Handle _h, VersionHandle& _vh) : h(_h), vh(_vh), completed(false) {
+        result = NULL;
+    };
+    ~GetTruthValueZmq() {
+        if (result && *result != TruthValue::DEFAULT_TV()) delete result;
+    }
+
+    TruthValue* get_result() {
+        boost::mutex::scoped_lock lock(the_mutex);
+        if (!is_complete()) complete_cond.wait(lock);
+        return result;
+    }
+
+    bool is_complete() {
+        // Rely on separate mutex for complete, since we don't want to stall
+        // if the do_work method takes a while.
+        boost::mutex::scoped_lock lock(complete_mutex);
+        return completed;
+    }
+    
+    virtual void do_work() {
+        //result = atomspace->getTV(h,vh).clone();
+        boost::mutex::scoped_lock lock2(complete_mutex);
+        completed = true;
+        complete_cond.notify_all();
+    };
+    
+};
+
 class GetTruthValueASR : public GenericASR <tv_summary_t> {
     Handle h;
     VersionHandle vh;
@@ -442,8 +483,7 @@ public:
     }
     
     virtual void do_work() {
-        const TruthValue& tv = atomspace->getTV(h,vh);
-        set_result(tv.clone());
+        set_result(atomspace->getTV(h,vh).clone());
     };
     
 };
@@ -965,6 +1005,9 @@ public:
         atomspace->getSortedHandleSet(back_inserter(result),type,subclass,compare,vh);
     }
 };
+
+// Testing ZeroMQ
+typedef boost::shared_ptr< GetTruthValueZmq > TruthValueZmqRequest;
 
 // Requests are based on their parent class that defines the return type
 typedef boost::shared_ptr< GenericASR<Handle> > HandleRequest;

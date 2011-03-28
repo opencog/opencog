@@ -46,6 +46,7 @@ int main(int argc, char** argv) {
              benchmarker.setMethod("addNode");
              benchmarker.setMethod("addLink");
              benchmarker.setMethod("getTV");
+//             benchmarker.setMethod("getTVZmq");
              benchmarker.setMethod("setTV");
              benchmarker.setMethod("getHandleSet");
              benchmarker.setMethod("getNodeHandles");

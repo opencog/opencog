@@ -60,6 +60,7 @@ TARGET_LINK_LIBRARIES(atomspace
     ${GSL_LIBRARIES}
     ${Boost_SIGNALS_LIBRARY}
     ${Boost_THREAD_LIBRARY}
+    zmq
 )
 
 INSTALL (TARGETS atomspace

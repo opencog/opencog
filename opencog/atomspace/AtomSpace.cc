@@ -136,6 +136,12 @@ Type AtomSpace::getType(Handle h) const
 #endif
 }
 
+TruthValue* AtomSpace::getTVZmq(Handle h, VersionHandle vh) const
+{
+    TruthValueZmqRequest tvr = atomSpaceAsync->getTVZmq(h, vh);
+    return tvr->get_result();
+}
+
 /*tv_summary_t AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
     TruthValueRequest tvr = atomSpaceAsync->getTV(h, vh);
