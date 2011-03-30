@@ -167,12 +167,9 @@ void PsiModulatorUpdaterAgent::publishUpdatedValue(Plaza & plaza,
     std::string keyString = "PsiModulatorUpdaterAgent"; 
     plaza.publishStringMore(publisher, keyString); 
 
-    // Send timestamp
-    std::string timeStampString = boost::lexical_cast<std::string> (timeStamp);
-    plaza.publishStringMore(publisher, timeStampString);
-
-    // Pack all the modulator values in json format 
+    // Pack time stamp and all the modulator values in json format 
     Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
+    jsonObj.push_back( Pair("timestamp", timeStamp) );
 
     foreach (Modulator & modulator, this->modulatorList) {
         jsonObj.push_back( Pair( modulator.getModulatorName(), modulator.getModulatorLevel() ) );
