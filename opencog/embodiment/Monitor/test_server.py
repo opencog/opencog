@@ -27,7 +27,7 @@ while True:
                             'Activation': activation, 
                             'Resolution': resolution, 
                             'SecuringThreshold': securing_threshold, 
-                            'SelectionThreshold': selection_threshold, 
+                            'SelectionThreshold': selection_threshold
                           }
                         )
 

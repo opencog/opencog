@@ -57,58 +57,67 @@ class MonitorThread(QtCore.QThread):
 #        self.signal_name = "signal_" + filter_key
         self.socket.setsockopt(zmq.SUBSCRIBE, self.filter_key)
 
+        # Initialize variables related to graph 
         self.max_data_len = 50
-        self.x_time = []
-        self.y_activation = []
-        self.y_resolution = []
-        self.y_securing_threshold = []
-        self.y_selection_threshold = []
+        self.has_initialized = False
+        self.data_dict = {}
+        self.legend_list = []
+    
+    # Initialize data and legend
+    def initialize_data(self, json_dict):
+        for k, v in json_dict.iteritems():
+            self.data_dict[k] = [v]
+            if k!="timestamp":
+                self.legend_list.append(k)
 
+        self.has_initialized = True
+
+    # Update data list
+    def update_data(self, json_dict):
+        for k, v in json_dict.iteritems():
+            self.data_dict[k].append(v)
+            if (len(self.data_dict[k]) > self.max_data_len):
+                self.data_dict[k].pop(0)
+
+    # Draw the graph on the widget
+    def draw_graph(self):
+        MonitorThread.read_write_lock.lockForWrite()
+
+        self.widget.axes.clear()
+
+        for k in self.data_dict.keys():
+            if (k!="timestamp"):
+                self.widget.axes.plot(self.data_dict["timestamp"], self.data_dict[k])
+
+        leg = self.widget.axes.legend(self.legend_list,
+                                      'upper left',
+                                      shadow=True
+                                     )
+
+        self.widget.draw()
+
+        MonitorThread.read_write_lock.unlock()
+
+    # Execution entrance of the thread
     def run(self):
         while True:
             message = self.socket.recv()
+
+            # if the message contains only filter key, discard it
             if message == self.filter_key: continue
+           
+            json_dict = json.loads(message) 
 
-#            print message
+            if not self.has_initialized:
+                self.initialize_data(json_dict)
+                continue
 
-            data = json.loads(message) 
+            self.update_data(json_dict)
+            self.draw_graph()
 
-            self.x_time.append(data['timestamp'])
-            self.y_activation.append(data['Activation'])
-            self.y_resolution.append(data['Resolution'])
-            self.y_securing_threshold.append(data['SecuringThreshold'])
-            self.y_selection_threshold.append(data['SelectionThreshold'])
+#            self.usleep(50)
 
-            if len(self.x_time) > self.max_data_len:
-                self.x_time.pop(0)
-                self.y_activation.pop(0)
-                self.y_resolution.pop(0)
-                self.y_securing_threshold.pop(0)
-                self.y_selection_threshold.pop(0)
-
-            MonitorThread.read_write_lock.lockForWrite()
-
-            self.widget.axes.clear()
-
-            self.widget.axes.plot(self.x_time, self.y_activation)
-            self.widget.axes.plot(self.x_time, self.y_resolution)
-            self.widget.axes.plot(self.x_time, self.y_securing_threshold)
-            self.widget.axes.plot(self.x_time, self.y_selection_threshold)
-
-            leg = self.widget.axes.legend(('Activation', 
-                                           'Resolution',
-                                           'SecuringThreshold', 
-                                           'SelectionThreshold'
-                                           ),
-                                           'upper left',
-                                           shadow=True
-                                         )
-
-            self.widget.draw()
-
-            MonitorThread.read_write_lock.unlock()
-
-            self.usleep(50)
-
+# A lock used to synchronize all the monitor threads, 
+# We should avoid drawing on the widgets at the same time 
 MonitorThread.read_write_lock = QtCore.QReadWriteLock()
 

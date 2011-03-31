@@ -69,7 +69,8 @@ class MonitorMainWindow(QtGui.QMainWindow):
 
         self.PsiModulatorUpdaterAgentMonitor.start()
 
-#        self.PsiModulatorUpdaterAgentMonitor1.start()
+#        self.PsiModulatorUpdaterAgentMonitor1.widget.hide()
+        self.PsiModulatorUpdaterAgentMonitor1.start()
 
     def file_quit(self):
         self.close()
