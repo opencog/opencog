@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-14
+ * @date 2011-04-01
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -84,6 +84,16 @@ private:
             return this->demandName;
         }
 
+        inline double getDemandValue()
+        {
+            return this->currentDemandValue;
+        }
+
+        inline double getDemandTruthValue()
+        {
+            return this->currentDemandTruthValue;
+        }
+
         inline Handle getHandleDemandGoal()
         {
             return this->hDemandGoal;
@@ -141,13 +151,24 @@ private:
         Handle hDemandGoal;   // Handle to Demand Goal (EvaluationLink)
         Handle hFuzzyWithin;  // Handle to FuzzyWithin (EvaluationLink)
 
-        double currentDemandValue; // Store current (latest) value of Demand, 
+        double currentDemandValue; // Store current (latest) value of Demand
+        double currentDemandTruthValue; // Store current (latest) truth value of Demand
 
     };// class Demand
 
     unsigned long cycleCount;
 
     std::vector<Demand> demandList; // List of Demands
+
+#ifdef HAVE_ZMQ    
+    std::string publishEndPoint; // Publish all the messages to this end point
+    zmq::socket_t * publisher;   // ZeroMQ publisher
+
+    /**
+     * Publish updated modulator values via ZeroMQ
+     */
+    void publishUpdatedValue(Plaza & plaza, zmq::socket_t & publisher, const unsigned long timeStamp);
+#endif    
 
     // Initialize demandList etc.
     void init(opencog::CogServer * server);

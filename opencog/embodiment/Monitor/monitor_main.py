@@ -46,31 +46,40 @@ class MonitorMainWindow(QtGui.QMainWindow):
     def add_widgets(self):
         self.zmq_context = zmq.Context()
         self.main_widget = QtGui.QWidget(self)
-        vbox = QtGui.QVBoxLayout(self.main_widget)
+        grid_layout = QtGui.QGridLayout(self.main_widget)
 
-        # Add widgets here
+        # Add PsiModulatorUpdaterAgentMonitor
         self.PsiModulatorUpdaterAgentMonitor = MonitorThread(self.zmq_context,
                              "tcp://127.0.0.1:18002", 
                              "PsiModulatorUpdaterAgent", 
                              self.main_widget, width=5, height=4, dpi=100
                             )
-        vbox.addWidget(self.PsiModulatorUpdaterAgentMonitor.widget)
+        grid_layout.addWidget(self.PsiModulatorUpdaterAgentMonitor.widget, 0, 0)
 
-        self.PsiModulatorUpdaterAgentMonitor1 = MonitorThread(self.zmq_context,
+        # Add PsiFeelingUpdaterAgentMonitor
+        self.PsiFeelingUpdaterAgentMonitor = MonitorThread(self.zmq_context,
                              "tcp://127.0.0.1:18002", 
-                             "PsiModulatorUpdaterAgent", 
+                             "PsiFeelingUpdaterAgent", 
                              self.main_widget, width=5, height=4, dpi=100
                             )
-        vbox.addWidget(self.PsiModulatorUpdaterAgentMonitor1.widget)
+        grid_layout.addWidget(self.PsiFeelingUpdaterAgentMonitor.widget, 0, 1)
 
+        # Add PsiDemandUpdaterAgentMonitor
+        self.PsiDemandUpdaterAgentMonitor = MonitorThread(self.zmq_context,
+                             "tcp://127.0.0.1:18002", 
+                             "PsiDemandUpdaterAgent", 
+                             self.main_widget, width=5, height=4, dpi=100
+                            )
+        grid_layout.addWidget(self.PsiDemandUpdaterAgentMonitor.widget, 1, 0)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
 
+        # Don't forget start the threads of all the monitors,
+        # otherwise you will get nothing!
         self.PsiModulatorUpdaterAgentMonitor.start()
-
-#        self.PsiModulatorUpdaterAgentMonitor1.widget.hide()
-        self.PsiModulatorUpdaterAgentMonitor1.start()
+        self.PsiFeelingUpdaterAgentMonitor.start()
+        self.PsiDemandUpdaterAgentMonitor.start()
 
     def file_quit(self):
         self.close()

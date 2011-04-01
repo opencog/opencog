@@ -87,12 +87,18 @@ class MonitorThread(QtCore.QThread):
 
         for k in self.data_dict.keys():
             if (k!="timestamp"):
-                self.widget.axes.plot(self.data_dict["timestamp"], self.data_dict[k])
+                self.widget.axes.plot(self.data_dict["timestamp"], 
+                                      self.data_dict[k], 
+                                      '-o'
+                                     )
 
         leg = self.widget.axes.legend(self.legend_list,
                                       'upper left',
                                       shadow=True
                                      )
+
+        self.widget.axes.set_title(self.filter_key)
+        self.widget.axes.grid(True)
 
         self.widget.draw()
 

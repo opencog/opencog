@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiFeelingUpdaterAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-02-21
+ * @date 2011-04-01
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,9 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include "OAC.h"
 #include "PsiFeelingUpdaterAgent.h"
+
+#include "opencog/web/json_spirit/json_spirit.h"
 
 #include<boost/tokenizer.hpp>
 
@@ -30,7 +31,9 @@ using namespace OperationalAvatarController;
 
 PsiFeelingUpdaterAgent::~PsiFeelingUpdaterAgent()
 {
-
+#ifdef HAVE_ZMQ
+    delete this->publisher; 
+#endif
 }
 
 PsiFeelingUpdaterAgent::PsiFeelingUpdaterAgent()
@@ -40,6 +43,42 @@ PsiFeelingUpdaterAgent::PsiFeelingUpdaterAgent()
     // Force the Agent initialize itself during its first cycle. 
     this->forceInitNextCycle();
 }
+
+#ifdef HAVE_ZMQ
+void PsiFeelingUpdaterAgent::publishUpdatedValue(Plaza & plaza, 
+                                                 zmq::socket_t & publisher, 
+                                                 const unsigned long timeStamp)
+{
+    using namespace json_spirit; 
+
+    // Send the name of current mind agent which would be used as a filter key by subscribers
+    std::string keyString = "PsiFeelingUpdaterAgent"; 
+    plaza.publishStringMore(publisher, keyString); 
+
+    // Pack time stamp and all the feeling values in json format 
+    Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
+    jsonObj.push_back( Pair("timestamp", timeStamp) );
+
+    std::map <std::string, FeelingMeta>::iterator iFeeling;
+    std::string feeling;
+    double updatedValue;
+
+    for ( iFeeling = feelingMetaMap.begin();
+          iFeeling != feelingMetaMap.end();
+          iFeeling ++ ) {
+
+        feeling = iFeeling->first;
+        updatedValue = iFeeling->second.updatedValue;
+
+        jsonObj.push_back( Pair(feeling, updatedValue) );
+
+    }// for
+
+    // Publish the data packed in json format
+    std::string dataString = write_formatted(jsonObj);
+    plaza.publishString(publisher, dataString);
+}
+#endif // HAVE_ZMQ
 
 void PsiFeelingUpdaterAgent::init(opencog::CogServer * server) 
 {
@@ -54,7 +93,7 @@ void PsiFeelingUpdaterAgent::init(opencog::CogServer * server)
     // Get AtomSpace
     const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
-    // Get petName
+    // Get petId
     const std::string & petId = oac->getPet().getPetId(); 
 
     // Get petHandle
@@ -128,6 +167,16 @@ void PsiFeelingUpdaterAgent::init(opencog::CogServer * server)
                         feeling.c_str() 
                       );
     }// for
+
+    // Initialize ZeroMQ publisher and add it to the plaza
+#ifdef HAVE_ZMQ
+    Plaza & plaza = oac->getPlaza();
+    this->publisher = new zmq::socket_t (plaza.getZmqContext(), ZMQ_PUB);
+    this->publishEndPoint = "ipc://" + petId + ".PsiFeelingUpdaterAgent.ipc"; 
+    this->publisher->bind( this->publishEndPoint.c_str() );
+
+    plaza.addPublisher(this->publishEndPoint); 
+#endif    
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
@@ -365,6 +414,9 @@ void PsiFeelingUpdaterAgent::run(opencog::CogServer * server)
     // Get petId
     const std::string & petId = oac->getPet().getPetId();
 
+    // Get current time stamp
+    unsigned long timeStamp = atomSpace.getTimeServer().getLatestTimestamp();
+
     // Check if map info data is available
     if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
         logger().warn( "PsiFeelingUpdaterAgent::%s - There is no map info available yet [ cycle = %d ]", 
@@ -395,5 +447,11 @@ void PsiFeelingUpdaterAgent::run(opencog::CogServer * server)
 
     // Send updated values to the virtual world where the pet lives
     this->sendUpdatedValues(server); 
+
+#ifdef HAVE_ZMQ    
+    // Publish updated modulator values via ZeroMQ
+    Plaza & plaza = oac->getPlaza();
+    this->publishUpdatedValue(plaza, *this->publisher, timeStamp); 
+#endif 
 }
 

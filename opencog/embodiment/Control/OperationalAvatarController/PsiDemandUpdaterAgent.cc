@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-14
+ * @date 2011-04-01
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,6 +22,8 @@
 
 #include "OAC.h"
 #include "PsiDemandUpdaterAgent.h"
+
+#include "opencog/web/json_spirit/json_spirit.h"
 
 #include<boost/tokenizer.hpp>
 #include<boost/lexical_cast.hpp>
@@ -249,7 +251,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal
 
     result = procedureInterpreter.getResult(executingSchemaId);
 
-    // Update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
+    // Store the result and update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
     // TODO: Use PLN forward chainer to handle this?
     atomSpace.setTV( this->hDemandGoal,
                      SimpleTruthValue(get_contin(result), 1.0f)
@@ -258,6 +260,8 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal
     atomSpace.setTV( this->hFuzzyWithin,
                      SimpleTruthValue(get_contin(result), 1.0f)
                    );
+
+    this->currentDemandTruthValue = get_contin(result);
 
     logger().debug( "PsiDemandUpdaterAgent::Demand::%s - The level  (truth value) of DemandGoal '%s' has been set to %f", 
                      __FUNCTION__, 
@@ -270,7 +274,9 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal
 
 PsiDemandUpdaterAgent::~PsiDemandUpdaterAgent()
 {
-
+#ifdef HAVE_ZMQ
+    delete this->publisher; 
+#endif
 }
 
 PsiDemandUpdaterAgent::PsiDemandUpdaterAgent()
@@ -280,6 +286,31 @@ PsiDemandUpdaterAgent::PsiDemandUpdaterAgent()
     // Force the Agent initialize itself during its first cycle. 
     this->forceInitNextCycle();
 }
+
+#ifdef HAVE_ZMQ
+void PsiDemandUpdaterAgent::publishUpdatedValue(Plaza & plaza, 
+                                                zmq::socket_t & publisher, 
+                                                const unsigned long timeStamp)
+{
+    using namespace json_spirit; 
+
+    // Send the name of current mind agent which would be used as a filter key by subscribers
+    std::string keyString = "PsiDemandUpdaterAgent"; 
+    plaza.publishStringMore(publisher, keyString); 
+
+    // Pack time stamp and all the Demand values in json format 
+    Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
+    jsonObj.push_back( Pair("timestamp", timeStamp) );
+
+    foreach (Demand & demand, this->demandList) {
+        jsonObj.push_back( Pair( demand.getDemandName()+"TruthValue", demand.getDemandTruthValue() ) );
+    }
+
+    // Publish the data packed in json format
+    std::string dataString = write_formatted(jsonObj);
+    plaza.publishString(publisher, dataString);
+}
+#endif // HAVE_ZMQ
 
 void PsiDemandUpdaterAgent::init(opencog::CogServer * server) 
 {
@@ -299,7 +330,7 @@ void PsiDemandUpdaterAgent::init(opencog::CogServer * server)
                                                oac->getProcedureRepository();
 
     // Get petId
-//    const std::string & petId = oac->getPet().getPetId();
+    const std::string & petId = oac->getPet().getPetId();
 
     // Clear old demandList 
     this->demandList.clear();
@@ -352,6 +383,16 @@ void PsiDemandUpdaterAgent::init(opencog::CogServer * server)
                         this->cycleCount
                       );
     }// for
+
+    // Initialize ZeroMQ publisher and add it to the plaza
+#ifdef HAVE_ZMQ
+    Plaza & plaza = oac->getPlaza();
+    this->publisher = new zmq::socket_t (plaza.getZmqContext(), ZMQ_PUB);
+    this->publishEndPoint = "ipc://" + petId + ".PsiDemandUpdaterAgent.ipc"; 
+    this->publisher->bind( this->publishEndPoint.c_str() );
+
+    plaza.addPublisher(this->publishEndPoint); 
+#endif    
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
@@ -432,6 +473,12 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
 
         demand.updateDemandGoal(atomSpace, procedureInterpreter, procedureRepository, timeStamp);
     }
+
+#ifdef HAVE_ZMQ    
+    // Publish updated Demand values via ZeroMQ
+    Plaza & plaza = oac->getPlaza();
+    this->publishUpdatedValue(plaza, *this->publisher, timeStamp); 
+#endif 
 
     // Update the truth value of previous/ current demand goal
     if ( pet.getPreviousDemandGoal() != opencog::Handle::UNDEFINED ) {

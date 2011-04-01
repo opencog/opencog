@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiFeelingUpdaterAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-02-06
+ * @date 2011-04-01
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,7 +19,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 
 #ifndef PSIFEELINGUPDATERAGENT_H
 #define PSIFEELINGUPDATERAGENT_H
@@ -71,6 +70,16 @@ private:
     bool bInitialized;         // Indicate whether this mind agent has been Initialized
 
     std::map <std::string, FeelingMeta> feelingMetaMap;  // Feeling - Meta data map 
+
+#ifdef HAVE_ZMQ    
+    std::string publishEndPoint; // Publish all the messages to this end point
+    zmq::socket_t * publisher;   // ZeroMQ publisher
+
+    /**
+     * Publish updated modulator values via ZeroMQ
+     */
+    void publishUpdatedValue(Plaza & plaza, zmq::socket_t & publisher, const unsigned long timeStamp);
+#endif    
 
     /**
      * Initialize feelingMetaMap etc.
