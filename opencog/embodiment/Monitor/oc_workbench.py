@@ -16,67 +16,37 @@ from PyQt4.QtGui import *
 
 from monitor_widget import *
 
-
 class OCMonitorPanel(QFrame):
     """
     OCMonitorPanel is the container of MonitorWidgets.
     View of MonitorWidgets can be changed through this panel.
     """
     def __init__(self, parent=None, columnNum=2):
-        """
-        Constructor
-
-        @param columnNum Max number of monitors that are showed in each row
-        """
         super(OCMonitorPanel, self).__init__(parent)
 
         self.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred, True))
-
-        self.setMinimumHeight(500)
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding, True))
+        
         self.monitorList = []
-
-        self.soloist = None
-        self.zmqUrl = None
-
-        self.spacing = 4 
         self.columnNum = columnNum
 
-        self.showMaximized()
+        self.soloist = None
+        self.soloistOldSize = None
+        self.zmqUrl = None
+
+        gridLayout = QGridLayout(self)
+
+        self.setLayout(gridLayout)
 
     def addMonitors(self, monitors):
+        oldCount = len(self.monitorList)
         self.monitorList.extend(monitors)
-        for monitor in monitors:
+        for i, monitor in enumerate(monitors):
+            row = (oldCount + i) / self.columnNum
+            col = (oldCount + i) % self.columnNum
+            self.layout().addWidget(monitor.widget, row, col)
+            self.layout().setRowStretch(row, 0)
             monitor.widget.clicked.connect(self.showSoloView)
-        self.updateLayout()
-
-    def updateLayout(self):
-        """
-        This is a customized layout
-        """
-        rect = self.geometry()
-
-        x = rect.x()
-        y = rect.y()
-        lineHeight = 0
-
-        widgetWidth = (rect.width() - (self.columnNum - 1) * self.spacing) / self.columnNum
-        monitorCount = len(self.monitorList)
-        rowNum = monitorCount / self.columnNum
-        if (monitorCount % self.columnNum) > 0:
-            rowNum += 1
-
-        if rowNum == 0:
-            return
-        widgetHeight = (rect.height() - (rowNum - 1) * self.spacing) / rowNum
-
-        for i, monitor in enumerate(self.monitorList):
-            currentRow = i / self.columnNum
-            currentCol = i % self.columnNum
-            currentX = currentCol * (widgetWidth + self.spacing)
-            currentY = currentRow * (widgetHeight + self.spacing) 
-            monitor.widget.setGeometry(QRect(currentX, currentY, widgetWidth, widgetHeight))
-            monitor.widget.show()
 
     def createMonitors(self, zmqUrl=""):
         if zmqUrl == "":
@@ -109,25 +79,26 @@ class OCMonitorPanel(QFrame):
                     monitor3]) 
         self.startMonitor()
 
-    def setSpacing(self, spacing):
-        self.spacing = spacing
-
     def startMonitor(self):
         for monitor in self.monitorList:
             monitor.start()
 
     def showSoloView(self):
         sender = self.sender()
+
         if self.soloist != sender:
             self.soloist = sender
+            self.soloistOldSize = QSize(sender.size())
         else:
             return
 
         for monitor in self.monitorList:
             if sender != monitor.widget:
                 monitor.widget.hide()
+        sender.update()
+        sender.updateGeometry()
 
-        self.updateSoloView()
+        #self.updateSoloView()
 
     def updateSoloView(self):
         """
@@ -137,19 +108,16 @@ class OCMonitorPanel(QFrame):
         self.soloist.setGeometry(rect)
 
     def showGroupView(self):
+        self.soloist.resize(self.soloistOldSize)
         self.soloist = None
         for monitor in self.monitorList:
             monitor.widget.show()
-        self.updateLayout()
 
-    def resizeEvent(self, event):
-        if len(self.monitorList) == 0:
-            return 
+    def heightForWidth(self, width):
+        return 0.9 * width
 
-        if self.soloist != None:
-            self.updateSoloView()
-        else:
-            self.updateLayout()
+    def sizeHint(self):
+        return QSize(self.geometry().width(), self.heightForWidth(self.geometry().width()))
     
 
 class OCMonitorTabView(QWidget):
@@ -204,10 +172,15 @@ class OCMonitorTabView(QWidget):
         # Add an address bar.
         self.addressEdit = QLineEdit(self.navigationBar)
         self.navigationBar.insertWidget(self.actionStart, self.addressEdit)
+        self.addressEdit.setText("tcp://127.0.0.1:18002")
         self.actionStart.triggered.connect(self.createMonitors)
 
     def createMonitors(self):
         self.monitorPanel.createMonitors(self.addressEdit.text())
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Return:
+            self.createMonitors()
     
 
 class OCMonitorTabWidget(QTabWidget):
