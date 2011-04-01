@@ -23,6 +23,7 @@ class MonitorWidget(FigureCanvas):
     """ Qt4 backend of matplot, which provides a canvas for plotting.
         The actual plotting is done within the MonitorThread class automatically.
     """
+    clicked = QtCore.pyqtSignal()
     def __init__(self, parent=None, width=5, height=4, dpi=100):
 
         # Initialize figure canvas
@@ -37,6 +38,10 @@ class MonitorWidget(FigureCanvas):
                                    QtGui.QSizePolicy.Expanding
                                   )
         FigureCanvas.updateGeometry(self)
+
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.clicked.emit()
 
 class MonitorThread(QtCore.QThread):
     """ Get data from Plaza within OAC via ZeroMQ and draw graphs on MonitorWidget
