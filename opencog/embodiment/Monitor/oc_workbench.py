@@ -54,12 +54,15 @@ class OCMonitorPanel(QFrame):
                     "Please input a valid zmq url.")
             return
         if not self.zmqUrl or self.zmqUrl != zmqUrl:
-            if len(self.monitorList) > 0 and self.zmqUrl != zmqUrl:
-                del self.monitorList[:]
-                self.updateLayout()
             self.zmqUrl = zmqUrl
+            if len(self.monitorList) > 0:
+                for monitor in self.monitorList:
+                    self.layout().removeWidget(monitor.widget)
+                del self.monitorList[:]
+                self.updateGeometry()
         else:
-            pass
+            return 
+
         self.zmq_context = zmq.Context()
         
         monitor1 = MonitorThread(self.zmq_context,
@@ -122,6 +125,7 @@ class OCMonitorPanel(QFrame):
 
 class OCMonitorTabView(QWidget):
     """
+    The tab view include two components: navigation bar and monitor panel.
     """
     def __init__(self, parent=None):
         super(OCMonitorTabView, self).__init__(parent)
