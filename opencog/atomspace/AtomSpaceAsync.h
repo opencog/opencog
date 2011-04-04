@@ -46,7 +46,10 @@ class AtomSpaceAsync {
     concurrent_queue< boost::shared_ptr<ASRequest> > requestQueue;
 
     void eventLoop();
+
+#ifdef ZMQ_EXPERIMENT
     void zmqLoop();
+#endif
 
     const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
 
@@ -316,12 +319,14 @@ public:
         return r;
     }
 
+#ifdef ZMQ_EXPERIMENT
     /** Retrieve the TruthValue summary of a given Handle */
     TruthValueRequest getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
         TruthValueRequest r(new GetTruthValueASR(&atomspace,h,vh));
         requestQueue.push(r);
         return r;
     }
+#endif
 
     /** Retrieve the complete TruthValue of a given Handle */
     TruthValueCompleteRequest getTVComplete(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
@@ -344,12 +349,14 @@ public:
         return r;
     }
 
+#ifdef ZMQ_EXPERIMENT
     /** Retrieve the TruthValue of a given Handle using ZeroMQ */
     TruthValueZmqRequest getTVZmq(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
         TruthValueZmqRequest r(new GetTruthValueZmq(h,vh));
         //requestQueue.push(r);
         return r;
     }
+#endif
 
     /** Change the TruthValue summary of a given Handle */
     VoidRequest setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE) {

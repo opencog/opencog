@@ -162,8 +162,10 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName) {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getType);
     } else if (_methodName == "getTV") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValue);
+#ifdef ZMQ_EXPERIMENT
     } else if (_methodName == "getTVZmq") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValueZmq);
+#endif
     } else if (_methodName == "setTV") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
     } else if (_methodName == "getHandleSet") {
@@ -379,6 +381,7 @@ clock_t AtomSpaceBenchmark::bm_getTruthValue()
     return clock() - t_begin;
 }
 
+#ifdef ZMQ_EXPERIMENT
 clock_t AtomSpaceBenchmark::bm_getTruthValueZmq()
 {
     Handle h = getRandomHandle();
@@ -386,6 +389,7 @@ clock_t AtomSpaceBenchmark::bm_getTruthValueZmq()
     a->getTVZmq(h); 
     return clock() - t_begin;
 }
+#endif
 
 clock_t AtomSpaceBenchmark::bm_setTruthValue()
 {

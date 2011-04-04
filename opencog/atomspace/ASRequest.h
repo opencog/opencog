@@ -409,6 +409,7 @@ public:
     
 };
 
+#ifdef ZMQ_EXPERIMENT
 class GetTruthValueZmq {
     Handle h;
     VersionHandle vh;
@@ -469,6 +470,7 @@ public:
     };
     
 };
+#endif
 
 class GetTruthValueMeanASR : public GenericASR <float> {
     Handle h;
@@ -1039,8 +1041,10 @@ public:
     }
 };
 
+#ifdef ZMQ_EXPERIMENT
 // Testing ZeroMQ
 typedef boost::shared_ptr< GetTruthValueZmq > TruthValueZmqRequest;
+#endif
 
 // Requests are based on their parent class that defines the return type
 typedef boost::shared_ptr< GenericASR<Handle> > HandleRequest;

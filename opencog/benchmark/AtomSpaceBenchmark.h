@@ -96,7 +96,10 @@ public:
     // Get and set TV and AV
     float chanceUseDefaultTV; // if set, this will use default TV for new atoms and bm_setTruthValue
     clock_t bm_getTruthValue();
+
+#ifdef ZMQ_EXPERIMENT
     clock_t bm_getTruthValueZmq();
+#endif
     clock_t bm_setTruthValue();
     void bm_getAttentionValue() {};
     void bm_setAttentionValue() {};

@@ -79,7 +79,7 @@ TruthValue* NullTruthValue::merge(TruthValue*) throw (RuntimeException)
 
 TruthValue* NullTruthValue::clone() const throw (RuntimeException)
 {
-    throw RuntimeException(TRACE_INFO, "Cannot call clone() method of a NullTruthvalue");
+    return new NullTruthValue();
 }
 
 NullTruthValue& NullTruthValue::operator=(const TruthValue & rhs) throw (RuntimeException)

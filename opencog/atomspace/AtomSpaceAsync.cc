@@ -28,8 +28,10 @@ void AtomSpaceAsync::startEventLoop()
 {
     processingRequests = true;
     m_Thread = boost::thread(&AtomSpaceAsync::eventLoop, this);
+#ifdef ZMQ_EXPERIMENT
     zmq_context = new zmq::context_t(1);
     m_zmq_Thread = boost::thread(&AtomSpaceAsync::zmqLoop, this);
+#endif
 }
 
 void AtomSpaceAsync::stopEventLoop()
@@ -39,11 +41,14 @@ void AtomSpaceAsync::stopEventLoop()
     requestQueue.cancel();
     // rejoin thread
     m_Thread.join();
+#ifdef ZMQ_EXPERIMENT
     delete zmq_context;
     m_zmq_Thread.join();
+#endif
 
 }
 
+#ifdef ZMQ_EXPERIMENT
 void AtomSpaceAsync::zmqLoop()
 {
     //  Prepare our context and socket
@@ -69,6 +74,7 @@ void AtomSpaceAsync::zmqLoop()
         socket.send (reply);
     }
 }
+#endif
 
 void AtomSpaceAsync::eventLoop()
 {

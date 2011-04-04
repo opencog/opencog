@@ -428,8 +428,7 @@ TruthValuePtr AtomSpaceWrapper::getTV(pHandle ph) const
 {
     if (ph != PHANDLE_UNDEFINED) {
         vhpair r = fakeToRealHandle(ph);
-        TruthValuePtr ret(atomspace->getTV(r.first,r.second));
-        return ret;
+        return atomspace->getTV(r.first,r.second);
     } else {
         return TruthValuePtr(TruthValue::TRIVIAL_TV().clone());
     }
@@ -437,12 +436,22 @@ TruthValuePtr AtomSpaceWrapper::getTV(pHandle ph) const
 
 strength_t AtomSpaceWrapper::getMean(pHandle h) const
 {
-    return getTV(h)->getMean();
+    if (h != PHANDLE_UNDEFINED) {
+        vhpair r = fakeToRealHandle(h);
+        return atomspace->getMean(r.first,r.second);
+    } else {
+        return 0.0f;
+    }
 }
 
 confidence_t AtomSpaceWrapper::getConfidence(pHandle h) const
 {
-    return getTV(h)->getConfidence();
+    if (h != PHANDLE_UNDEFINED) {
+        vhpair r = fakeToRealHandle(h);
+        return atomspace->getConfidence(r.first,r.second);
+    } else {
+        return 0.0f;
+    }
 }
 
 void AtomSpaceWrapper::setTV(pHandle h, const TruthValue& tv)
