@@ -31,7 +31,6 @@ class OCMonitorPanel(QFrame):
         self.columnNum = columnNum
 
         self.soloist = None
-        self.soloistOldSize = None
         self.zmqUrl = None
 
         gridLayout = QGridLayout(self)
@@ -45,21 +44,26 @@ class OCMonitorPanel(QFrame):
             row = (oldCount + i) / self.columnNum
             col = (oldCount + i) % self.columnNum
             self.layout().addWidget(monitor.widget, row, col)
-            self.layout().setRowStretch(row, 0)
             monitor.widget.clicked.connect(self.showSoloView)
 
     def createMonitors(self, zmqUrl=""):
-        if zmqUrl == "":
+        if zmqUrl == "" or (not str(zmqUrl).startswith("tcp://") and\
+            not str(zmqUrl).startswith("ipc://")):
             warning = QMessageBox.warning(self, "Warning",
-                    "Please input a valid zmq url.")
+                    "Please input a valid zmq url starting with "
+                    "tcp:// or ipc://")
             return
+
+        if self.soloist != None:
+            self.showGroupView()
+
         if not self.zmqUrl or self.zmqUrl != zmqUrl:
             self.zmqUrl = zmqUrl
             if len(self.monitorList) > 0:
                 for monitor in self.monitorList:
-                    self.layout().removeWidget(monitor.widget)
+                    monitor.widget.hide()
+                    #self.layout().removeWidget(monitor.widget)
                 del self.monitorList[:]
-                self.updateGeometry()
         else:
             return 
 
@@ -101,7 +105,6 @@ class OCMonitorPanel(QFrame):
         sender.update()
         sender.updateGeometry()
 
-        #self.updateSoloView()
 
     def updateSoloView(self):
         """
@@ -111,7 +114,6 @@ class OCMonitorPanel(QFrame):
         self.soloist.setGeometry(rect)
 
     def showGroupView(self):
-        self.soloist.resize(self.soloistOldSize)
         self.soloist = None
         for monitor in self.monitorList:
             monitor.widget.show()
