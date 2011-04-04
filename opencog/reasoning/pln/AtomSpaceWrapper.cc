@@ -435,6 +435,16 @@ TruthValuePtr AtomSpaceWrapper::getTV(pHandle ph) const
     }
 }
 
+strength_t AtomSpaceWrapper::getMean(pHandle h) const
+{
+    return getTV(h)->getMean();
+}
+
+confidence_t AtomSpaceWrapper::getConfidence(pHandle h) const
+{
+    return getTV(h)->getConfidence();
+}
+
 void AtomSpaceWrapper::setTV(pHandle h, const TruthValue& tv)
 {
     vhpair real = fakeToRealHandle(h);
@@ -783,13 +793,13 @@ pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs,
 LOG(3, "Add ok.");
 
 /*  if (!tvn.isNullTv())
-        if (isApproxEq(a->getTV(ret)->getMean(), tvn.getMean(), 0.0001))
+        if (isApproxEq(a->getMean(ret), tvn.getMean(), 0.0001))
         {
             printf("ATW: %s / %s\n", a->getTV(ret)->toString().c_str(),
                 tvn.toString().c_str());
         }*/
     
-//  assert(abs(as->getTV(ret)->getMean() - tvn.getMean()) < 0.0001);
+//  assert(abs(as->getMean(ret) - tvn.getMean()) < 0.0001);
 
     return ret;
 }

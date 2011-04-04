@@ -469,6 +469,39 @@ public:
     };
     
 };
+
+class GetTruthValueMeanASR : public GenericASR <float> {
+    Handle h;
+    VersionHandle vh;
+public:
+    GetTruthValueMeanASR (AtomSpaceImpl *a, Handle _h, VersionHandle& _vh) :
+        GenericASR<float> (a)  {
+        h=_h; vh=_vh;
+    };
+    
+    virtual void do_work() {
+        const TruthValue& tv = atomspace->getTV(h,vh);
+        set_result(tv.getMean());
+    };
+    
+};
+
+class GetTruthValueConfidenceASR : public GenericASR <float> {
+    Handle h;
+    VersionHandle vh;
+public:
+    GetTruthValueConfidenceASR (AtomSpaceImpl *a, Handle _h, VersionHandle& _vh) :
+        GenericASR<float> (a)  {
+        h=_h; vh=_vh;
+    };
+    
+    virtual void do_work() {
+        const TruthValue& tv = atomspace->getTV(h,vh);
+        set_result(tv.getConfidence());
+    };
+    
+};
+
 class GetCompleteTruthValueASR : public GenericASR <TruthValue*> {
     Handle h;
     VersionHandle vh;

@@ -1008,7 +1008,7 @@ public:
             Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getTV(evalLink)->getMean(), 1.0f, 0.001);
+            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 1.0f, 0.001);
             }
 
             {
@@ -1024,7 +1024,7 @@ public:
             Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getTV(evalLink)->getMean(), 0.75f, 0.001);
+            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.75f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
@@ -1039,7 +1039,7 @@ public:
             Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getTV(evalLink)->getMean(), 0.5f, 0.001);
+            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.5f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
@@ -1054,7 +1054,7 @@ public:
             Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getTV(evalLink)->getMean(), 0.25f, 0.001);
+            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.25f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
@@ -1069,7 +1069,7 @@ public:
             Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getTV(evalLink)->getMean(), 0.15f, 0.001);
+            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.15f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
@@ -1084,7 +1084,7 @@ public:
             Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getTV(evalLink)->getMean(), 0.1f, 0.001);
+            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.1f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
@@ -1099,7 +1099,7 @@ public:
             Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getTV(evalLink)->getMean(), 0.05f, 0.001);
+            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.05f, 0.001);
             }
 
             HandleSeq seq;

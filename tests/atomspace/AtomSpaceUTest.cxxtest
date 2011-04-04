@@ -202,15 +202,15 @@ public:
             int vhIdx = i % NUM_VHS;
             TruthValuePtr tv = atomSpace->getTV(h[i]);
             TS_ASSERT(!tv->isNullTv());
-            logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
+            logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->getMean(h[i]));
             TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
             logger().debug("h: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             if (i < NUM_FORCEUSER_LINKS) {
                 TruthValuePtr tv = atomSpace->getTV(FU[i]);
                 TS_ASSERT(!tv->isNullTv());
-                logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
-                logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
+                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->getMean(h[i]));
+                logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n", tv->getMean(), atomSpace->getMean(FU[i]));
                 TS_ASSERT(fabs(tv->getMean() - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
                 logger().debug("FU: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
@@ -218,9 +218,9 @@ public:
             if (i < NUM_HUMAN_LINKS) {
                 TruthValuePtr tv = atomSpace->getTV(H[i]);
                 TS_ASSERT(!tv->isNullTv());
-                logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
-                logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
-                logger().debug("H: tv mean = %f,atomSpace->getTV(H[i]) = %f\n", tv->getMean(), atomSpace->getTV(H[i])->getMean());
+                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->getMean(h[i]));
+                logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n", tv->getMean(), atomSpace->getMean(FU[i]));
+                logger().debug("H: tv mean = %f,atomSpace->getMean(H[i]) = %f\n", tv->getMean(), atomSpace->getMean(H[i]));
                 TS_ASSERT(fabs(tv->getMean() - Human[i]) < FLOAT_ACCEPTABLE_ERROR);
                 logger().debug("H: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
@@ -751,7 +751,7 @@ public:
         boost::shared_ptr<Atom> a = atomSpace->cloneAtom(h1);
         a->setTruthValue(SimpleTruthValue(0.001f, 0.00001f));
         atomSpace->commitAtom(*a);
-        TS_ASSERT(atomSpace->getTV(h1)->getMean() == 0.001f);
+        TS_ASSERT(atomSpace->getMean(h1) == 0.001f);
 
     }
 

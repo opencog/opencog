@@ -367,7 +367,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
                 continue;
             } // if
 
-            atHome |= ( atomSpace.getTV(petHome)->getMean() == 1.0f );
+            atHome |= ( atomSpace.getMean(petHome) == 1.0f );
 
         } // else if
 

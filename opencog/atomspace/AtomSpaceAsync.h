@@ -330,6 +330,20 @@ public:
         return r;
     }
 
+    /** Retrieve the complete TruthValue of a given Handle */
+    FloatRequest getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
+        FloatRequest r(new GetTruthValueMeanASR(&atomspace,h,vh));
+        requestQueue.push(r);
+        return r;
+    }
+
+    /** Retrieve the complete TruthValue of a given Handle */
+    FloatRequest getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
+        FloatRequest r(new GetTruthValueConfidenceASR(&atomspace,h,vh));
+        requestQueue.push(r);
+        return r;
+    }
+
     /** Retrieve the TruthValue of a given Handle using ZeroMQ */
     TruthValueZmqRequest getTVZmq(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
         TruthValueZmqRequest r(new GetTruthValueZmq(h,vh));

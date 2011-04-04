@@ -174,7 +174,7 @@ Handle PsiActionSelectionAgent::chooseMostCriticalDemandGoal(opencog::CogServer 
          iDemandGoalList != this->demandGoalList.end();
          iDemandGoalList ++ ) {
 
-        if ( atomSpace.getTV(*iDemandGoalList)->getMean() < atomSpace.getTV(*iCritialDemandGoal)->getMean() ) {
+        if ( atomSpace.getMean(*iDemandGoalList) < atomSpace.getMean(*iCritialDemandGoal) ) {
             iCritialDemandGoal = iDemandGoalList;
         }
     }// for

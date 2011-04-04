@@ -82,8 +82,8 @@ bool getListSortByTVStrengthPredicate (bool descending,
     float tv1, tv2;
     AtomSpace* as = server().getAtomSpace();
 
-    tv1 = as->getTV(h1)->getMean();
-    tv2 = as->getTV(h2)->getMean();
+    tv1 = as->getMean(h1);
+    tv2 = as->getMean(h2);
 
     if (descending)
         return tv1 > tv2;
@@ -100,8 +100,8 @@ bool getListSortByTVConfidencePredicate (bool descending,
     float tv1, tv2;
     AtomSpace* as = server().getAtomSpace();
 
-    tv1 = as->getTV(h1)->getConfidence();
-    tv2 = as->getTV(h2)->getConfidence();
+    tv1 = as->getConfidence(h1);
+    tv2 = as->getConfidence(h2);
 
     if (descending)
         return tv1 > tv2;

@@ -224,12 +224,12 @@ public:
         i.clear();
         TS_ASSERT(in_out_norm[2] != Handle::UNDEFINED);
 
-        TS_ASSERT_DELTA(a->getTV(in_in_norm[2])->getMean(), 0.19f, 0.001);
-        TS_ASSERT_DELTA(a->getTV(in_in_inv[2])->getMean(), 0.01f, 0.001);
-        TS_ASSERT_DELTA(a->getTV(out_in_inv[2])->getMean(), 0.01f, 0.001);
-        TS_ASSERT_DELTA(a->getTV(out_in_norm[2])->getMean(), 0.01f, 0.001);
-        TS_ASSERT_DELTA(a->getTV(in_out_inv[2])->getMean(), 0.19f, 0.001);
-        TS_ASSERT_DELTA(a->getTV(in_out_norm[2])->getMean(), 0.01f, 0.001);
+        TS_ASSERT_DELTA(a->getMean(in_in_norm[2]), 0.19f, 0.001);
+        TS_ASSERT_DELTA(a->getMean(in_in_inv[2]), 0.01f, 0.001);
+        TS_ASSERT_DELTA(a->getMean(out_in_inv[2]), 0.01f, 0.001);
+        TS_ASSERT_DELTA(a->getMean(out_in_norm[2]), 0.01f, 0.001);
+        TS_ASSERT_DELTA(a->getMean(in_out_inv[2]), 0.19f, 0.001);
+        TS_ASSERT_DELTA(a->getMean(in_out_norm[2]), 0.01f, 0.001);
 
        
     }

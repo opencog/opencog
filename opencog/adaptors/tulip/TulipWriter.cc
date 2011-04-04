@@ -179,7 +179,7 @@ void TulipWriter::writeTruthValue()
     myfile << "(property  0 double \"strength\"" << endl;
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
     foreach (Handle h, handles) {
-        myfile << "  (node " << h << " \"" << a->getTV(h)->getMean() << "\")" << endl;
+        myfile << "  (node " << h << " \"" << a->getMean(h) << "\")" << endl;
     }
     myfile << ")" << endl;
 
@@ -195,7 +195,7 @@ void TulipWriter::writeTruthValue()
         // get outgoing set, for each destination add a link
         HandleSeq out = a->getOutgoing(h);
         foreach (Handle d, out) {
-            myfile << "(edge " << h << d << " \"" << 1.0 / (a->getTV(h)->getMean()+0.0000001) << "\")" << endl;
+            myfile << "(edge " << h << d << " \"" << 1.0 / (a->getMean(h)+0.0000001) << "\")" << endl;
         }
     }
     myfile << ")" << endl;
@@ -204,7 +204,7 @@ void TulipWriter::writeTruthValue()
     myfile << "(property  0 double \"count\"" << endl;
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
     foreach (Handle h, handles) {
-        myfile << "  (node " << h << " \"" << a->getTV(h)->getConfidence() << "\")" << endl;
+        myfile << "  (node " << h << " \"" << a->getConfidence(h) << "\")" << endl;
     }
     myfile << ")" << endl;
    

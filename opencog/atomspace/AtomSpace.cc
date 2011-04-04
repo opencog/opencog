@@ -142,6 +142,18 @@ TruthValue* AtomSpace::getTVZmq(Handle h, VersionHandle vh) const
     return tvr->get_result();
 }
 
+strength_t AtomSpace::getMean(Handle h, VersionHandle vh) const
+{
+    FloatRequest tvr = atomSpaceAsync->getMean(h, vh);
+    return tvr->get_result();
+}
+
+confidence_t AtomSpace::getConfidence(Handle h, VersionHandle vh) const
+{
+    FloatRequest tvr = atomSpaceAsync->getConfidence(h, vh);
+    return tvr->get_result();
+}
+
 /*tv_summary_t AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
     TruthValueRequest tvr = atomSpaceAsync->getTV(h, vh);

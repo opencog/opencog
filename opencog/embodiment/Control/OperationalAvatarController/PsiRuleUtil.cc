@@ -363,7 +363,7 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                        atomSpace.atomAsString(hNode).c_str()
                       );
 
-        if ( atomSpace.getTV(hPrecondition)->getMean() >= 0.001 )
+        if ( atomSpace.getMean(hPrecondition) >= 0.001 )
             return true; 
     }
     // For GroundedPredicateNode, run the corresponding combo script, and then analyze the result

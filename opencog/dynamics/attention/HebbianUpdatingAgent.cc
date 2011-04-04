@@ -100,7 +100,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
         outgoing = a->getOutgoing(h);
         new_tc = targetConjunction(outgoing);
         // old link strength decays
-        old_tc = a->getTV(h)->getMean();
+        old_tc = a->getMean(h);
 		if (new_tc != old_tc) isDifferent = true;
 
         if (convertLinks && a->getLTI(h) < conversionThreshold) {

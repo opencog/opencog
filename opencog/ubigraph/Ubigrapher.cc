@@ -204,7 +204,7 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
     case NONE:
         break;
     case TV_STRENGTH:
-        scaler = space->getTV(h)->getMean() * multiplier;
+        scaler = space->getMean(h) * multiplier;
         break;
     case STI:
         scaler = space->getNormalisedZeroToOneSTI(h,false,true)
@@ -261,7 +261,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
         scaler=1.0f;
         break;
     case TV_STRENGTH:
-        scaler = space->getTV(h)->getMean();
+        scaler = space->getMean(h);
         break;
     case STI:
         scaler = space->getNormalisedZeroToOneSTI(h,false,true);
@@ -346,7 +346,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
         case NONE:
             break;
         case TV_STRENGTH:
-            if (space->getTV(h)->getMean() < limit) okToApply = false;
+            if (space->getMean(h) < limit) okToApply = false;
             break;
         case STI:
             if (space->getNormalisedZeroToOneSTI(h,false,true) < limit) okToApply = false;
@@ -426,7 +426,7 @@ bool Ubigrapher::addVertex(Handle h)
             boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
             l = l; // TODO: anything to output for links?
         }*/
-        ost << ":" << space->getTV(h)->getMean();
+        ost << ":" << space->getMean(h);
         ubigraph_set_vertex_attribute(id, "label", ost.str().c_str());
     }
     return false;
@@ -469,7 +469,7 @@ bool Ubigrapher::addEdges(Handle h)
                 } else {
                     ost << type;
                 }
-                ost << ":" << space->getTV(h)->getMean();
+                ost << ":" << space->getMean(h);
                 ubigraph_set_edge_attribute(id, "label", ost.str().c_str());
             }
             return false;

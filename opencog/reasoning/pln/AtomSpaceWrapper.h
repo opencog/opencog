@@ -505,6 +505,9 @@ public:
 
     //tv_summary_t getTV(pHandle h) const;
     TruthValuePtr getTV(pHandle h) const;
+    strength_t getMean(pHandle h) const;
+    confidence_t getConfidence(pHandle h) const;
+
     void setTV(pHandle h, const TruthValue& tv);
 
     bool isType(const pHandle h) const;

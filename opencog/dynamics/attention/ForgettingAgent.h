@@ -124,8 +124,8 @@ struct ForgettingLTIThenTVAscendingSort {
         lti1 = a->getAV(h1).getLTI();
         lti2 = a->getAV(h2).getLTI();
 
-        tv1 = fabs(a->getTV(h1)->getMean());
-        tv2 = fabs(a->getTV(h2)->getMean());
+        tv1 = fabs(a->getMean(h1));
+        tv2 = fabs(a->getMean(h2));
 
         if (lti1 != lti2) return lti1 < lti2;
 

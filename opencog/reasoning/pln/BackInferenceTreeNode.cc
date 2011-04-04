@@ -424,7 +424,7 @@ Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
         Btr<set<BoundVertex> > nontrivial_results(new set<BoundVertex>);
 
         foreach(const BoundVertex& new_result, *results)
-            if (GET_ASW->getTV(_v2h(new_result.value))->getConfidence() > min_confidence)
+            if (GET_ASW->getConfidence(_v2h(new_result.value)) > min_confidence)
             {
                 printTree(_v2h(new_result.value),0,0);
 
@@ -793,7 +793,7 @@ void BITNode::addDirectResult(Btr<set<BoundVertex> > directResult, spawn_mode sp
     bool bdrum_changed = false;
     foreach(BoundVertex bv, *directResult)
     {
-        float confidence = asw->getTV(_v2h(bv.value))->getConfidence();
+        float confidence = asw->getConfidence(_v2h(bv.value));
         if (confidence > my_bdrum)
         {
             my_bdrum = confidence;
@@ -1636,7 +1636,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 {
                     pHandle h = _v2h(*ra->getVtree().begin());
                     if (!asw->isSubType(h, HYPOTHETICAL_LINK) &&
-                        asw->getTV(h)->getConfidence() < MIN_CONFIDENCE_FOR_RULE_APPLICATION)
+                        asw->getConfidence(h) < MIN_CONFIDENCE_FOR_RULE_APPLICATION)
                         goto next_args;
                 }
 
@@ -1747,7 +1747,7 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
         tlog(0,"Generalizing results:");
 
         foreach(const BoundVertex& b, *bvs)
-            if (GET_ASW->getTV(_v2h(b.value))->getConfidence() > min_confidence)
+            if (GET_ASW->getConfidence(_v2h(b.value)) > min_confidence)
             {
                 printTree(_v2h(b.value),0,0);
                 ForAllArgs.push_back(b.value);

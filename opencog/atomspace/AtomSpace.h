@@ -501,6 +501,9 @@ public:
 
     TruthValue* getTVZmq(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
 
+    strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
+    confidence_t getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
+
     /** Change the TruthValue of a given Handle */
     void setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE);
 

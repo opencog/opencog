@@ -2104,7 +2104,7 @@ bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b)
     vtree vb(opencog::pln::make_vtree(b));
 
     return va == vb &&
-           (asw->getTV(b)->getConfidence() - asw->getTV(a)->getConfidence())
+           (asw->getConfidence(b) - asw->getConfidence(a))
            < 0.00000001f;
 }
 

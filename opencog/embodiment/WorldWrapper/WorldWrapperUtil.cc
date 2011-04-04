@@ -756,7 +756,7 @@ throw (opencog::ComboException,
         Handle evalLink = AtomSpaceUtil::getMostRecentEvaluationLink(atomSpace, std::string("is_exemplar_avatar"));
 
         if (evalLink != Handle::UNDEFINED) {
-            if (atomSpace.getTV(evalLink)->getMean() > meanTruthThreshold) {
+            if (atomSpace.getMean(evalLink) > meanTruthThreshold) {
                 Handle ll = atomSpace.getOutgoing(evalLink, 1);
                 if (ll != Handle::UNDEFINED) {
                     Handle teacher = atomSpace.getOutgoing(ll, 0);
@@ -1867,7 +1867,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         return id::logical_false;
 
                     } else {
-                        float tv = atomSpace.getTV(h)->getMean();
+                        float tv = atomSpace.getMean(h);
                         WorldWrapperUtil::cache.add(time, pred, tv);
 
                         return combo::bool_to_vertex
@@ -1923,7 +1923,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                                   self_id, owner_id);
 
                             if (h != Handle::UNDEFINED) {
-                                float tv = atomSpace.getTV(h)->getMean();
+                                float tv = atomSpace.getMean(h);
                                 WorldWrapperUtil::cache.add(time, pred, tv);
 
                                 result = WorldWrapperUtil::evaluateLogicalOperation(operation, tv, value);
@@ -2790,7 +2790,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             Handle h = rec_lookup(atomSpace, tmp_it, self_id, owner_id);
 
             if (h != Handle::UNDEFINED) {
-                float tv = atomSpace.getTV(h)->getMean();
+                float tv = atomSpace.getMean(h);
                 WorldWrapperUtil::cache.add(time, pred, tv);
 
             } else {
@@ -2798,7 +2798,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             }
 
             //closed-world-assumption
-            return combo::bool_to_vertex((h != Handle::UNDEFINED && atomSpace.getTV(h)->getMean() > meanTruthThreshold));
+            return combo::bool_to_vertex((h != Handle::UNDEFINED && atomSpace.getMean(h) > meanTruthThreshold));
         }
 
         // eval wild card
@@ -2848,14 +2848,14 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     Handle h = rec_lookup(atomSpace, tmp_it, self_id, owner_id);
 
                     if (h != Handle::UNDEFINED) {
-                        float tv =  atomSpace.getTV(h)->getMean();
+                        float tv =  atomSpace.getMean(h);
                         WorldWrapperUtil::cache.add(time, pred, tv);
                     } else {
                         WorldWrapperUtil::cache.add(time, pred, 0.0f);
                     }
 
                     result = (h != Handle::UNDEFINED
-                              && (atomSpace.getTV(h)->getMean() > meanTruthThreshold));
+                              && (atomSpace.getMean(h) > meanTruthThreshold));
                 }
 
                 vu.setVariableState(def_obj, result);
@@ -3184,7 +3184,7 @@ float WorldWrapperUtil::getDemandGoalTruthValue(opencog::RandGen & rng,
         if ( hDemandGoal == opencog::Handle::UNDEFINED ) 
             value = rng.randfloat();
         else
-            value = atomSpace.getTV(hDemandGoal)->getMean(); 
+            value = atomSpace.getMean(hDemandGoal); 
     }
 
     logger().debug( "WorldWrapperUtil::%s - '%s' for the pet with id '%s' is '%f'.", 
@@ -3261,7 +3261,7 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
         Handle h = rec_lookup(atomSpace, it, self_id, owner_id);
 
         if (h != Handle::UNDEFINED) {
-            data = atomSpace.getTV(h)->getMean();
+            data = atomSpace.getMean(h);
         }
         WorldWrapperUtil::cache.add(time, pred, data);
 

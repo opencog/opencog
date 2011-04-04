@@ -501,7 +501,7 @@ throw(opencog::NotFoundException)
                ("AtomSpaceUtil - There is no evaluation link for predicate: "
                  + predicateName).c_str() );
     }
-    return atomSpace.getTV(evalLinkHandle)->getMean();
+    return atomSpace.getMean(evalLinkHandle);
 }
 
 
