@@ -11,10 +11,13 @@ using boost::tuple;
 namespace opencog
 {
 
+typedef tuple<clock_t,clock_t> timepair_t;
+
 class AtomSpaceBenchmark
 {
     // size of AtomSpace, time taken for operation, rss memory max
     typedef tuple<size_t,clock_t,long> record_t;
+
 
     struct TimeStats {
         clock_t t_total;
@@ -41,6 +44,7 @@ class AtomSpaceBenchmark
     float maxSize; //! never make the atomspace bigger than this while building it
 
     AtomSpace* a;
+    //AtomSpaceImpl asBackend;
     MT19937RandGen* rng;
 
     Type randomType(Type t);
@@ -60,7 +64,7 @@ public:
     bool doStats;
     bool buildTestData;
     UUID UUID_begin;
-    typedef clock_t (AtomSpaceBenchmark::*BMFn)();
+    typedef timepair_t (AtomSpaceBenchmark::*BMFn)();
     std::vector< BMFn > methodsToTest;
 
     float percentLinks;
@@ -81,13 +85,13 @@ public:
             bool display = true);
     Handle getRandomHandle();
 
-    clock_t bm_addNode();
-    clock_t bm_addLink();
+    timepair_t bm_addNode();
+    timepair_t bm_addLink();
 
-    clock_t bm_getType();
-    clock_t bm_getNodeHandles();
-    clock_t bm_getHandleSet();
-    clock_t bm_getOutgoingSet();
+    timepair_t bm_getType();
+    timepair_t bm_getNodeHandles();
+    timepair_t bm_getHandleSet();
+    timepair_t bm_getOutgoingSet();
 
     void bm_getHandleNode() {};
     void bm_getHandleLink() {};
@@ -95,12 +99,12 @@ public:
 
     // Get and set TV and AV
     float chanceUseDefaultTV; // if set, this will use default TV for new atoms and bm_setTruthValue
-    clock_t bm_getTruthValue();
+    timepair_t bm_getTruthValue();
 
 #ifdef ZMQ_EXPERIMENT
-    clock_t bm_getTruthValueZmq();
+    timepair_t bm_getTruthValueZmq();
 #endif
-    clock_t bm_setTruthValue();
+    timepair_t bm_setTruthValue();
     void bm_getAttentionValue() {};
     void bm_setAttentionValue() {};
 

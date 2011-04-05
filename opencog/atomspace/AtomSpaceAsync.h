@@ -25,6 +25,7 @@ class AtomSpaceAsync {
 
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceAsyncUTest;
+    friend class AtomSpaceBenchmark;
     friend class AtomSpace;
     friend class SavingLoading;
     friend class PersistModule;
