@@ -63,6 +63,7 @@ public:
     int saveInterval;
     bool doStats;
     bool buildTestData;
+    bool testBackend;
     UUID UUID_begin;
     typedef timepair_t (AtomSpaceBenchmark::*BMFn)();
     std::vector< BMFn > methodsToTest;

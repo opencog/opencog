@@ -48,6 +48,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     buildTestData=false;
     chanceUseDefaultTV=1.0f;
     doStats = false;
+    testBackend = false;
 
     a = NULL;
 
@@ -180,7 +181,6 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName) {
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember)) 
 void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodToCall) {
     clock_t sumAsyncTime = 0;
-    clock_t sumImplTime = 0;
     long rssStart, rssEnd;
     std::vector<record_t> records;
     cout << "Benchmarking AtomSpace's " << methodName << " method " << N <<
@@ -207,7 +207,6 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodT
         size_t atomspaceSize = a->getSize();
         timepair_t timeTaken = CALL_MEMBER_FN(*this,methodToCall)();
         sumAsyncTime += get<0>(timeTaken);
-        sumImplTime += get<1>(timeTaken);
         counter++;
         if (saveInterval && counter % saveInterval == 0) {
             // Only save datapoints every saveInterval calls
@@ -230,12 +229,9 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodT
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/N));
     rssEnd = getMemUsage();
-    cout << "Sum clock() time for all Async requests: " << sumAsyncTime << " (" <<
+    cout << "Sum clock() time for all requests: " << sumAsyncTime << " (" <<
         (float) sumAsyncTime / CLOCKS_PER_SEC << " seconds, "<<
         1.0f/(((float)sumAsyncTime/CLOCKS_PER_SEC) / N) << " requests per second)" << endl;
-    cout << "Sum clock() time for all AtomSpaceImpl requests: " << sumImplTime << " (" <<
-        (float) sumImplTime / CLOCKS_PER_SEC << " seconds, "<<
-        1.0f/(((float)sumImplTime/CLOCKS_PER_SEC) / N) << " requests per second)" << endl;
     //cout << "Memory (max RSS) change after benchmark: " <<
     //    (rssEnd - rssStart - rssFromIncrease) / 1024 << "kb" << endl;
 
@@ -380,28 +376,38 @@ Handle AtomSpaceBenchmark::getRandomHandle() {
 timepair_t AtomSpaceBenchmark::bm_getType()
 {
     Handle h = getRandomHandle();
-    clock_t t_begin = clock();
-    a->getType(h); 
-    clock_t asyncTime = clock() - t_begin;
-    t_begin = clock();
-    //a->atomSpaceAsync->atomspace.getType(h);
-    clock_t implTime = clock() - t_begin;
-    return timepair_t(asyncTime,implTime);
+    clock_t t_begin;
+    clock_t time_taken;
+    if (this->testBackend) {
+        t_begin = clock();
+        a->atomSpaceAsync->atomspace.getType(h);
+        time_taken = clock() - t_begin;
+    } else {
+        t_begin = clock();
+        a->getType(h); 
+        time_taken = clock() - t_begin;
+    }
+    return timepair_t(time_taken,0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_getTruthValue()
 {
     Handle h = getRandomHandle();
-    clock_t t_begin = clock();
-    // uncomment this line to test submitting async requests
-    //a->atomSpaceAsync->getTVComplete(h); 
-    // then comment the one below
-    a->getTV(h);
-    clock_t asyncTime = clock() - t_begin;
-    t_begin = clock();
-    //a->atomSpaceAsync->atomspace.getTV(h);
-    clock_t implTime = clock() - t_begin;
-    return timepair_t(asyncTime,implTime);
+    clock_t t_begin;
+    clock_t time_taken;
+    if (this->testBackend) {
+        t_begin = clock();
+        a->atomSpaceAsync->atomspace.getTV(h);
+        time_taken = clock() - t_begin;
+    } else {
+        t_begin = clock();
+        // uncomment this line to test submitting async requests
+        //a->atomSpaceAsync->getTVComplete(h); 
+        // then comment the one below
+        a->getTV(h);
+        time_taken = clock() - t_begin;
+    }
+    return timepair_t(time_taken,0);
 }
 
 #ifdef ZMQ_EXPERIMENT
@@ -418,27 +424,24 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
 {
     Handle h = getRandomHandle();
     bool useDefaultTV = (rng->randfloat() < chanceUseDefaultTV);
-    if (useDefaultTV) {
-        SimpleTruthValue stv(TruthValue::DEFAULT_TV()); 
-        clock_t t_begin = clock();
-        a->setTV(h,stv);
-        clock_t asyncTime = clock() - t_begin;
-        t_begin = clock();
-        //a->atomSpaceAsync->atomspace.setTV(h,stv);
-        clock_t implTime = clock() - t_begin;
-        return timepair_t(asyncTime,implTime);
-    } else {
+    SimpleTruthValue stv(TruthValue::DEFAULT_TV()); 
+    if (!useDefaultTV) {
         float strength = rng->randfloat();
         float conf = rng->randfloat();
-        SimpleTruthValue stv(strength, conf); 
-        clock_t t_begin = clock();
-        a->setTV(h,stv);
-        clock_t asyncTime = clock() - t_begin;
-        t_begin = clock();
-        //a->atomSpaceAsync->atomspace.setTV(h,stv);
-        clock_t implTime = clock() - t_begin;
-        return timepair_t(asyncTime,implTime);
+        stv = SimpleTruthValue(strength, conf); 
     }
+    clock_t t_begin;
+    clock_t time_taken;
+    if (this->testBackend) {
+        t_begin = clock();
+        a->atomSpaceAsync->atomspace.setTV(h,stv);
+        time_taken = clock() - t_begin;
+    } else {
+        t_begin = clock();
+        a->setTV(h,stv);
+        time_taken = clock() - t_begin;
+    }
+    return timepair_t(time_taken,0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
@@ -450,13 +453,18 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     counter++;
     oss << "node " << (rng->randint((atomCount-1) * percentLinks)+1);
 
-    clock_t t_begin = clock();
-    a->getHandleSet(back_inserter(results),NODE,oss.str().c_str(),true);
-    clock_t asyncTime = clock() - t_begin;
-    t_begin = clock();
-    //a->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),NODE,oss.str().c_str(),true);
-    clock_t implTime = clock() - t_begin;
-    return timepair_t(asyncTime,implTime);
+    clock_t t_begin;
+    clock_t time_taken;
+    if (this->testBackend) {
+        t_begin = clock();
+        a->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),NODE,oss.str().c_str(),true);
+        time_taken = clock() - t_begin;
+    } else {
+        t_begin = clock();
+        a->getHandleSet(back_inserter(results),NODE,oss.str().c_str(),true);
+        time_taken = clock() - t_begin;
+    }
+    return timepair_t(time_taken,0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_getHandleSet()
@@ -464,25 +472,35 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     Type t = randomType(ATOM);
     HandleSeq results;
     HandleSeq results2;
-    clock_t t_begin = clock();
-    a->getHandleSet(back_inserter(results),t,true);
-    clock_t asyncTime = clock() - t_begin;
-    t_begin = clock();
-    //a->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),t,true);
-    clock_t implTime = clock() - t_begin;
-    return timepair_t(asyncTime,implTime);
+    clock_t t_begin;
+    clock_t time_taken;
+    if (this->testBackend) {
+        t_begin = clock();
+        a->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),t,true);
+        time_taken = clock() - t_begin;
+    } else {
+        t_begin = clock();
+        a->getHandleSet(back_inserter(results),t,true);
+        time_taken = clock() - t_begin;
+    }
+    return timepair_t(time_taken,0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
 {
     Handle h = getRandomHandle();
-    clock_t t_begin = clock();
-    a->getOutgoing(h);
-    clock_t asyncTime = clock() - t_begin;
-    t_begin = clock();
-    //a->atomSpaceAsync->atomspace.getOutgoing(h);
-    clock_t implTime = clock() - t_begin;
-    return timepair_t(asyncTime,implTime);
+    clock_t t_begin;
+    clock_t time_taken;
+    if (this->testBackend) {
+        t_begin = clock();
+        a->atomSpaceAsync->atomspace.getOutgoing(h);
+        time_taken = clock() - t_begin;
+    } else {
+        t_begin = clock();
+        a->getOutgoing(h);
+        time_taken = clock() - t_begin;
+    }
+    return timepair_t(time_taken,0);
 }
 
 AtomSpaceBenchmark::TimeStats::TimeStats(

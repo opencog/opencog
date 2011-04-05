@@ -12,6 +12,7 @@ int main(int argc, char** argv) {
      "Usage: atomspace_bm [-m <method>] [options]\n"
      "-t        \tPrint information on type sizes\n"
      "-A        \tBenchmark all methods\n"
+     "-x        \tTest the AtomSpaceImpl backend instead of the public AtomSpace API\n"
      "-m <methodname>\tMethod to benchmark\n" 
      "-l        \tList valid method names to benchmark\n"
      "-n <int>  \tHow many times to repeat the method\n" 
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
     opencog::AtomSpaceBenchmark benchmarker;
 
     opterr = 0;
-    while ((c = getopt (argc, argv, "tAm:ln:S:bp:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAxm:ln:S:bp:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -50,6 +51,9 @@ int main(int argc, char** argv) {
              benchmarker.setMethod("setTV");
              benchmarker.setMethod("getHandleSet");
              benchmarker.setMethod("getNodeHandles");
+             break;
+           case 'x':
+             benchmarker.testBackend = true;
              break;
            case 'm':
              benchmarker.setMethod(optarg);
