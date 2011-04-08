@@ -35,6 +35,8 @@
 #include <sys/time.h>
 #endif
 
+// for backward compatibility as from boost 1.46 filesystem 3 is the default
+#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>

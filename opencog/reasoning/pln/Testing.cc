@@ -11,6 +11,8 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
+// for backward compatibility as from boost 1.46 filesystem 3 is the default
+#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem.hpp>
 
 #include <string>

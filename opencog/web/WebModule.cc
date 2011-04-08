@@ -35,6 +35,9 @@
 #include <boost/mem_fn.hpp>
 #include <boost/function.hpp>
 #include <boost/algorithm/string.hpp>
+
+// for backward compatibility as from boost 1.46 filesystem 3 is the default
+#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem.hpp>
 
 using namespace opencog;
