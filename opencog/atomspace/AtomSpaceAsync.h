@@ -12,7 +12,9 @@
 #include "Handle.h"
 #include "types.h"
 
-#include <zmq.hpp>
+#ifdef ZMQ_EXPERIMENT
+    #include <zmq.hpp>
+#endif
 
 class AtomSpaceAsyncUTest;
 
