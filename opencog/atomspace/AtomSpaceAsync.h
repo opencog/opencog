@@ -34,8 +34,10 @@ class AtomSpaceAsync {
 
     bool processingRequests;
     boost::thread m_Thread;
+#ifdef ZMQ_EXPERIMENT
     boost::thread m_zmq_Thread;
     zmq::context_t* zmq_context;
+#endif
     int counter;
 
     AtomSpaceImpl atomspace;

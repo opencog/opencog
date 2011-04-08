@@ -53,14 +53,14 @@ ADD_LIBRARY (atomspace SHARED
 
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
+SET(ATOMSPACE_LINK_LIBS xml util SpaceMap ${GSL_LIBRARIES} ${Boost_SIGNALS_LIBRARY} ${Boost_THREAD_LIBRARY})
+
+IF (HAVE_ZMQ)
+  SET(ATOMSPACE_LINK_LIBS ${ATOMSPACE_LINK_LIBS} zmq)
+ENDIF (HAVE_ZMQ)
+
 TARGET_LINK_LIBRARIES(atomspace
-    xml
-    util
-    SpaceMap
-    ${GSL_LIBRARIES}
-    ${Boost_SIGNALS_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    zmq
+    ${ATOMSPACE_LINK_LIBS}
 )
 
 INSTALL (TARGETS atomspace
