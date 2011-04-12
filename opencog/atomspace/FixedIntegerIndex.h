@@ -22,6 +22,7 @@
 #ifndef _OPENCOG_FIXEDINTEGERINDEX_H
 #define _OPENCOG_FIXEDINTEGERINDEX_H
 
+#include <cstddef>
 #include <vector>
 
 #include <opencog/atomspace/AtomIndex.h>
