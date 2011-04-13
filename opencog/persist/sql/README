@@ -129,6 +129,11 @@ The above stanza associates the name 'PostgreSQL' with a particular
 driver; this name is needed below.  MySQL users need the following stanza: 
 a file can safely contain may stanzas defining many different drivers.
 
+WARNING: MySQL is currently not supported. The atom.sql file that sets up
+tables in the database currently relies on arrays. MySQL doesn't seem to
+support these, or requires a different SQL syntax. Patches to fix this are
+welcome and invited!
+
 [MySQL]
 Description = MySQL driver
 Driver      = /usr/lib/odbc/libmyodbc.so
