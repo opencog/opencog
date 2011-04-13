@@ -132,7 +132,7 @@ a file can safely contain may stanzas defining many different drivers.
 WARNING: MySQL is currently not supported. The atom.sql file that sets up
 tables in the database currently relies on arrays. MySQL doesn't seem to
 support these, or requires a different SQL syntax. Patches to fix this are
-welcome and invited!
+welcome and invited: https://bugs.launchpad.net/opencog/+bug/529735
 
 [MySQL]
 Description = MySQL driver
