@@ -105,13 +105,16 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
         }
 
         // print the outgoing link set.
+        ret += "\n";
         std::vector<Handle> oset = atomspace->getOutgoing(h);
         unsigned int arity = oset.size();
         for (unsigned int i=0; i<arity; i++) {
-            ret += " ";
-            ret += handle_to_string(oset[i], (0==i)?0:indent+1);
-            if (i != arity-1) ret += "\n";
+            //ret += " ";
+            ret += handle_to_string(oset[i], /*(0==i)?0:*/indent+1);
+            ret += "\n";
+            //if (i != arity-1) ret += "\n";
         }
+        for (int i=0; i< indent; i++) ret += "   ";
         ret += ")";
         return ret;
     }
