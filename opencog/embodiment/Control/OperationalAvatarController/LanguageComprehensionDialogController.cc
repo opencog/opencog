@@ -104,7 +104,7 @@ void LanguageComprehension::updateDialogControllers( long elapsedTime )
     std::string answer = SchemeEval::instance().eval( "(choose-sentence)");
     logger().debug( "QuestionAnsweringDialogController::%s - (choose-sentence) answer: %s", __FUNCTION__, answer.c_str() );
     if ( SchemeEval::instance().eval_error() ) {
-        logger().error( "QuestionAnsweringDialogController::%s - An error occurred while trying to resolve reference: %s",
+        logger().error( "QuestionAnsweringDialogController::%s - An error occurred while trying to choose a sentence: %s",
                         __FUNCTION__, answer.c_str( ) );
     } else {
         boost::trim( answer );
