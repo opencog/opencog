@@ -28,16 +28,16 @@
 
 using namespace opencog;
 
-#define DEBUG 0
+// #define DEBUG 1
 #ifdef WIN32
-#ifdef DEBUG
+#if DEBUG
 	#define dbgprt printf
 #else
 	// something better?
 	#define dbgprt
 #endif
 #else
-#ifdef DEBUG
+#if DEBUG
 	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
 	#define dbgprt(f, varargs...) 
@@ -121,11 +121,13 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			return (gnd != hg);
 		}
 
+		// Variable had better be a node; we're not prepared to
+		// deal with anything else.
+		if (!as->isNode(hp)) return true;
+
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
 		// e.g. making sure that grounding is of some certain type.
-		if (!as->isNode(hp) || !as->isNode(hg)) return true;
-
 		if (pmc->variable_match (hp,hg)) return true;
 
 		// Make a record of it.

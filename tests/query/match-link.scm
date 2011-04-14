@@ -16,7 +16,7 @@
 
 (AssociativeLink (stv 1.0 1.0)
    (ConceptNode "want-this")
-   (ListLink
+   (MemberLink
       (WordInstanceNode "color")
       (WordInstanceNode "blue")
    )
@@ -34,9 +34,7 @@
                (VariableNode "$var")
             )
          )
-         (ListLink (stv 1 0.99999988)
-            (VariableNode "$var")
-         )
+         (VariableNode "$var")
       )
    )
 )
