@@ -109,7 +109,6 @@ INSTALL (FILES
 	HelpRequest.h
 	IHasMimeType.h
 	ListRequest.h
-	load-file.h
 	LoadModuleRequest.h
 	LoadRequest.h
 	SaveRequest.h

@@ -35,5 +35,6 @@ INSTALL (FILES
 	SchemeEval.h
 	SchemePrimitive.h
 	SchemeSmob.h
+	load-file.h
 	DESTINATION "include/${PROJECT_NAME}/guile"
 )
