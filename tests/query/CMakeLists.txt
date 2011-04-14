@@ -17,6 +17,9 @@ LINK_LIBRARIES(#PatternUTest
 	${Boost_SIGNALS_LIBRARY}
 )
 
+# We want to run the tests in the order below;
+# Each test gets progressively more complex, and exercises
+# features that the later tests depend on.
 ADD_CXXTEST(PatternUTest)
 ADD_CXXTEST(StackUTest)
 ADD_CXXTEST(BigPatternUTest)
@@ -24,11 +27,15 @@ ADD_CXXTEST(BiggerPatternUTest)
 ADD_CXXTEST(LoopPatternUTest)
 ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
+
+# Its a *lot* easier to write scheme, than to write C++ code!
 IF (GUILE_FOUND)
 	ADD_CXXTEST(ImplicationUTest)
 	ADD_CXXTEST(ExecutionUTest)
 	ADD_CXXTEST(BuggyStackUTest)
 	ADD_CXXTEST(VarTypeNotUTest)
+	ADD_CXXTEST(MatchLinkUTest)
+
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		util
 	)

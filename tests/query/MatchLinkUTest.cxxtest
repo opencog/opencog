@@ -1,0 +1,128 @@
+/*
+ * tests/query/MatchLinkUTest.cxxtest
+ *
+ * Copyright (C) 2011 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/PatternMatch.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class MatchLink :  public CxxTest::TestSuite
+{
+	private:
+		PatternMatch pm;
+		AtomSpace *as;
+		Handle untyped_link_match;
+
+	public:
+
+		MatchLink(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+		}
+
+		~MatchLink()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+
+		void tearDown(void) { }
+
+		void test_exec(void);
+};
+
+/*
+ * This function sets up an implication link, and some data.
+ */
+#define an as->addNode
+#define al as->addLink
+void MatchLink::setUp(void)
+{
+	CogServer& cogserver = static_cast<CogServer&>(server());
+	as = cogserver.getAtomSpace();
+	pm.set_atomspace(as);
+
+	// Load the required data
+	config().set("SCM_PRELOAD",
+		"opencog/scm/type_constructors.scm, "
+		"tests/query/match-link.scm");
+
+	// Blindly search a bunch of paths hoping to find the files
+	// in one of them ...
+	const char * paths[] = 
+	{
+		"./",
+		"../",
+		"../../",
+		"../../../",
+		NULL
+	};
+	cogserver.loadSCMModules(paths);
+
+#ifdef HAVE_GUILE
+	// Create an implication link that will be tested.
+	untyped_link_match = SchemeEval::instance().apply("untyped-link-match", Handle::UNDEFINED);
+#endif /* HAVE_GUILE */
+}
+
+/*
+ * Basic implication link test.
+ */
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+void MatchLink::test_exec(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Result should be a ListLink w/ two solutions
+	Handle result = pm.varscope(untyped_link_match);
+#ifdef HAVE_GUILE
+	logger().debug("untyped-link-match is %s\n", SchemeSmob::to_string(result).c_str());
+#endif
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
