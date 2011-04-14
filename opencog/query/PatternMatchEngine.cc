@@ -105,7 +105,7 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
  */
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
-    AtomSpace *as = atom_space;
+	AtomSpace *as = atom_space;
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (bound_vars.end() != bound_vars.find(hp)) {
@@ -274,9 +274,9 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 		}
 		else
 		{
-            prtmsg("next clause is", curr_root);
-            dbgprt("This clause is %s\n", optionals.count(curr_root)? "optional" : "required");
-            prtmsg("joining handle is", curr_pred_handle);
+			prtmsg("next clause is", curr_root);
+			dbgprt("This clause is %s\n", optionals.count(curr_root)? "optional" : "required");
+			prtmsg("joining handle is", curr_pred_handle);
 
 			// Else, start solving the next unsolved clause. Note: this is
 			// a recursive call, and not a loop. Recursion is halted when
@@ -307,7 +307,7 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 			       (optionals.count(curr_root)))
 			{
 				no_match = pmc->optional_clause_match(curr_pred_handle,
-                        Handle::UNDEFINED);
+				                        Handle::UNDEFINED);
 				dbgprt ("Exhausted search for optional clause, cb=%d\n", no_match);
 				if (no_match) return false;
 
@@ -739,8 +739,7 @@ bool PatternMatchEngine::validate(
 	if (classserver().isNode(clause_type))
 	{
 		std::vector<Handle>::const_iterator i;
-		for (i = vars.begin();
-	     	i != vars.end(); i++)
+		for (i = vars.begin(); i != vars.end(); i++)
 		{
 			Handle h = *i;
 			if (h == clause) return true;
@@ -753,8 +752,7 @@ bool PatternMatchEngine::validate(
 	{
 		const std::vector<Handle> &oset = atom_space->getOutgoing(clause);
 		std::vector<Handle>::const_iterator i;
-		for (i = oset.begin();
-	     	i != oset.end(); i++)
+		for (i = oset.begin(); i != oset.end(); i++)
 		{
 			Handle subclause = *i;
 			if (validate(vars, subclause)) return true;
@@ -778,13 +776,13 @@ void PatternMatchEngine::print_solution(
 		std::pair<Handle, Handle> pv = *j;
 		Handle var = pv.first;
 		Handle soln = pv.second;
-        Type tv = atom_space->getType(var);
-        Type ts = atom_space->getType(soln);
+		Type tv = atom_space->getType(var);
+		Type ts = atom_space->getType(soln);
 		if (classserver().isNode(ts) && classserver().isNode(tv))
 		{
 			printf("\tNode %s maps to %s\n", 
 			       atom_space->getName(var).c_str(),
-                   atom_space->getName(soln).c_str());
+			       atom_space->getName(soln).c_str());
 		}
 	}
 
@@ -809,8 +807,8 @@ void PatternMatchEngine::print_solution(
  * For debug printing only
  */
 void PatternMatchEngine::print_predicate(
-	const std::vector<Handle> &vars,
-   const std::vector<Handle> &clauses)
+                  const std::vector<Handle> &vars,
+                  const std::vector<Handle> &clauses)
 {
 	printf("\nClauses:\n");
 	std::vector<Handle>::const_iterator i;
