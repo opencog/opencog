@@ -134,7 +134,9 @@
             ; the only way to truely fix this is to block the atomspace
             (if (not (eq? (cog-undefined-handle) (car lst))) 
                 (let()
-                    (display (car lst) port)
+                    (if (= (length (cog-incoming-set (car lst))) 0)
+                        (display (car lst) port)
+                    )
                     (prt-atom-list port (cdr lst))
                 )
             )
