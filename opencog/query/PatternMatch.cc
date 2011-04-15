@@ -142,10 +142,10 @@ void PatternMatch::match(PatternMatchCallback *cb,
 namespace opencog {
 class FindVariables
 {
-        AtomSpace* as;
+		AtomSpace* as;
 	public:
 		std::vector<Handle> varlist;
-        FindVariables(AtomSpace *_as) : as(_as) { };
+		FindVariables(AtomSpace *_as) : as(_as) { };
 
 		/**
 		 * Create a list of all of the VariableNodes that lie in the
@@ -153,7 +153,7 @@ class FindVariables
 		 */
 		inline bool find_vars(Handle h)
 		{
-            Type t = as->getType(h);
+			Type t = as->getType(h);
 			if (classserver().isNode(t))
 			{
 				if (t == VARIABLE_NODE)
@@ -222,7 +222,7 @@ Handle Instantiator::execution_link()
 
 bool Instantiator::walk_tree(Handle expr)
 {
-    Type t = as->getType(expr);
+	Type t = as->getType(expr);
 	if (as->isNode(expr))
 	{
 		if (VARIABLE_NODE != t) {
@@ -319,7 +319,7 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
  * implicand, and will create a grounded version of the implicand. If
  * the implcand is alrready grounded, then it's a no-op -- this class
  * alone will *NOT* change its truth value.  Use a derived class for
- * this. 
+ * this.
  *
  * The 'var_soln' argument in the callback contains the map from variables
  * to ground terms. 'class Instantiator' is used to perform the actual
@@ -346,7 +346,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 	Handle h = inst.instantiate(implicand, var_soln);
 	if (as->isValidHandle(h))
 	{
-		result_list.push_back(h);            
+		result_list.push_back(h);
 	}
 	return false;
 }
@@ -435,7 +435,7 @@ Handle PatternMatch::do_imply (Handle himplication,
                                PatternMatchCallback *pmc,
                                std::vector<Handle> *varlist)
 {
-    AtomSpace *as = atom_space;
+	AtomSpace *as = atom_space;
 	// Must be non-empty.
 	if (!as->isLink(himplication)) return Handle::UNDEFINED;
 
@@ -526,7 +526,6 @@ Handle PatternMatch::do_imply (Handle himplication,
 	impl->implicand = implicand;
 	pme.match(pmc, *varlist, affirm, negate);
 
-        
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
 	Handle gl = atom_space->addLink(LIST_LINK, impl->result_list);
@@ -558,13 +557,13 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  *
  * In either case, the variable itself is appended to "vset",
  * and the list of allowed types are associated with the variable
- * via the map "typemap". 
+ * via the map "typemap".
  */
 int PatternMatch::get_vartype(Handle htypelink,
                               std::vector<Handle> &vset,
                               VariableTypeMap &typemap)
 {
-    AtomSpace *as = atom_space;
+	AtomSpace *as = atom_space;
 	const std::vector<Handle>& oset = as->getOutgoing(htypelink);
 	if (2 != oset.size())
 	{
@@ -655,15 +654,15 @@ int PatternMatch::get_vartype(Handle htypelink,
  *          AndList
  *             etc ...
  * Evaluation proceeds as decribed in the "do_imply()" function above.
- * The whole point of the BindLink is to do nothing more than 
+ * The whole point of the BindLink is to do nothing more than
  * to limit the range of the scope of the variables.
  */
 
 Handle PatternMatch::do_varscope (Handle hvarscope,
                                   DefaultPatternMatchCB *pmc)
 {
-    AtomSpace *as = atom_space;
-    Handle h = hvarscope;
+	AtomSpace *as = atom_space;
+	Handle h = hvarscope;
 
 	// Must be non-empty.
 	if (!as->isLink(h)) return Handle::UNDEFINED;
@@ -784,7 +783,7 @@ class CrispImplicator:
 };
 
 /**
- * The crisp implicator needs to tweak the truth value of the 
+ * The crisp implicator needs to tweak the truth value of the
  * resulting implicand. In most cases, this is not (strictly) needed,
  * for example, if the implcand has ungrounded variables, then
  * a truth value can be assigned to it, and the implicand will obtain
@@ -792,7 +791,7 @@ class CrispImplicator:
  *
  * HOWEVER, if the implicand is fully grounded, then it will be given
  * a truth value of (false, uncertain) to start out with, and, if a
- * solution is found, then the goal here is to change its truth value 
+ * solution is found, then the goal here is to change its truth value
  * to (true, certain).  That is the whole point of this function:
  * to tweak (affirm) the truth value of existing clauses!
  */
@@ -801,9 +800,9 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 {
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	inst.as = as;
-        Handle h = inst.instantiate(implicand, var_soln);
+	Handle h = inst.instantiate(implicand, var_soln);
 
-	//Handle h = inst.instantiate(implicand, var_soln);        
+	//Handle h = inst.instantiate(implicand, var_soln);
 	if (h != Handle::UNDEFINED)
 	{
 		result_list.push_back(h);
