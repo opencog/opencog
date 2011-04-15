@@ -53,7 +53,7 @@ class DefaultPatternMatchCB :
 		}
 
 		/**
-		 * Called when a node in the template pattern needs to 
+		 * Called when a node in the template pattern needs to
 		 * be compared to a possibly matching node in the atomspace.
 		 * The first argument is a node from the pattern, and the
 		 * second is a possible solution (grounding) node from the
@@ -82,11 +82,11 @@ class DefaultPatternMatchCB :
 		 */
 		virtual bool variable_match(Handle npat_h, Handle nsoln_h)
 		{
-            AtomSpace *as = pme->get_atomspace();
+			AtomSpace *as = pme->get_atomspace();
 			Type pattype = as->getType(npat_h);
 
 			// If the ungrounded term is not of type VariableNode, then just
-			// accept the match. This allows any kind of node types to be 
+			// accept the match. This allows any kind of node types to be
 			// explicitly bound as variables.  However, the type VariableNode
 			// gets special handling, below.
 			if (pattype != VARIABLE_NODE) return false;
@@ -97,7 +97,7 @@ class DefaultPatternMatchCB :
 			if (soltype == VARIABLE_NODE) return true;
 
 			// If the ungrounded term is a variable, then see if there
-			// are any restrictions on the variable type. 
+			// are any restrictions on the variable type.
 			// If no restrictions, we are good to go.
 			if (NULL == type_restrictions) return false;
 
@@ -122,12 +122,12 @@ class DefaultPatternMatchCB :
 		 * Return false if the links match, else return
 		 * true. (i.e. return true if mis-match).
 		 *
-		 * By default, the link arity and the 
+		 * By default, the link arity and the
 		 * link types must match.
 		 */
 		virtual bool link_match(Handle lpat_h, Handle lsoln_h)
 		{
-            AtomSpace *as = pme->get_atomspace();
+			AtomSpace *as = pme->get_atomspace();
 			if (lpat_h == lsoln_h) return false;
 
 			if (as->getArity(lpat_h) != as->getArity(lsoln_h)) return true;
@@ -164,7 +164,7 @@ class DefaultPatternMatchCB :
 		Handle find_starter(Handle);
 		bool loop_candidate(Handle);
 		VariableTypeMap *type_restrictions;
-    protected:
+	protected:
 		PatternMatchEngine *pme;
 };
 
