@@ -87,13 +87,37 @@
    )
 )
 
-
-; Match any arity two structure
+; Match any arity-two structure
 (define (untyped-any-match)
    (BindLink
       (ListLink 
          (VariableNode "$var-a")
          (VariableNode "$var-b")
+      )
+      (ImplicationLink
+         (AndLink
+            (AssociativeLink (stv 1 0.99999988)
+               (VariableNode "$var-a")
+               (VariableNode "$var-b")
+            )
+         )
+         (ListLink
+            (VariableNode "$var-a")
+            (VariableNode "$var-b")
+         )
+      )
+   )
+)
+
+; Match typed arity-two structure
+(define (typed-memb-link-match)
+   (BindLink
+      (ListLink 
+         (VariableNode "$var-a")
+         (TypedVariableLink
+            (VariableNode "$var-b")
+            (VariableTypeNode "MemberLink")
+         )
       )
       (ImplicationLink
          (AndLink
