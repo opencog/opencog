@@ -38,7 +38,7 @@ class MatchLink :  public CxxTest::TestSuite
 		PatternMatch pm;
 		AtomSpace *as;
 		Handle untyped_link_match, typed_link_match, untyped_any_match;
-		Handle typed_memb_link_match;
+		Handle typed_memb_link_match, typed_pet_node_match;
 
 	public:
 
@@ -107,6 +107,7 @@ void MatchLink::setUp(void)
 	typed_link_match = SchemeEval::instance().apply("typed-link-match", Handle::UNDEFINED);
 	untyped_any_match = SchemeEval::instance().apply("untyped-any-match", Handle::UNDEFINED);
 	typed_memb_link_match = SchemeEval::instance().apply("typed-memb-link-match", Handle::UNDEFINED);
+	typed_pet_node_match = SchemeEval::instance().apply("typed-pet-node-match", Handle::UNDEFINED);
 }
 
 /*
@@ -133,12 +134,16 @@ void MatchLink::test_exec(void)
 	// There are currently four arity-2 associative-links in the atomspace...
 	result = pm.varscope(untyped_any_match);
 	logger().debug("untyped-any-match is: \n%s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
 
 	// There's just one arity-2 associative-link with MemberLink in second place.
 	result = pm.varscope(typed_memb_link_match);
 	logger().debug("typed-memb-link-match is: \n%s\n", SchemeSmob::to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(result));
+
+	result = pm.varscope(typed_pet_node_match);
+	logger().debug("typed-pet-node-match is: \n%s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
