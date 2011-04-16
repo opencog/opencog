@@ -79,7 +79,6 @@ namespace opencog
                     // given point is considered as a point C
                     math::Vector3 segmentAC = point - this->pointA;
                     math::Vector3 segmentBC = point - this->pointB;
-                    math::Vector3 segmentCA = this->pointA - point;
                     math::Vector3 segmentAB = this->pointB - this->pointA;
 
                     float distanceFromSegmentPointAInSegment =
