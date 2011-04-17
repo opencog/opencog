@@ -46,13 +46,13 @@ void SchemeSmob::init(AtomSpace *as)
 		is_inited = true;
 		init_smob_type();
 		register_procs();
-        SchemeSmob::atomspace = as;
+		atomspace = as;
 	}
 }
 
 SchemeSmob::SchemeSmob(AtomSpace *as)
 {
-    printf("atomspace at schemesmob creation is %p", as);
+	// printf("atomspace at schemesmob creation is %p", as);
 	init(as);
 }
 
