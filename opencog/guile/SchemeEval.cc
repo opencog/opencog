@@ -164,7 +164,7 @@ SchemeEval::SchemeEval(AtomSpace* as)
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
-    atomspace = as;
+	atomspace = as;
 
 	scm_with_guile(c_wrap_init, this);
 
@@ -212,107 +212,6 @@ std::string SchemeEval::prt(SCM node)
 	{
 		return "";
 	}
-#if CUSTOM_PRINTING_WHY_DO_WE_HAVE_THIS_DELETE_ME
-	else if (scm_is_pair(node))
-	{
-		std::string str = "(";
-		SCM node_list = node;
-		const char * sp = "";
-		do {
-			str += sp;
-			sp = " ";
-			node = SCM_CAR (node_list);
-			str += prt (node);
-			node_list = SCM_CDR (node_list);
-		}
-		while (scm_is_pair(node_list));
-
-		// Print the rest -- the CDR part
-		if (!scm_is_null(node_list))
-		{
-			str += " . ";
-			str += prt (node_list);
-		}
-		str += ")";
-		return str;
-	}
-	else if (scm_is_true(scm_symbol_p(node)))
-	{
-		node = scm_symbol_to_string(node);
-		char * str = scm_to_locale_string(node);
-		// std::string rv = "'";  // print the symbol escape
-		std::string rv = "";	  // err .. don't print it
-		rv += str;
-		free(str);
-		return rv;
-	}
-	else if (scm_is_true(scm_string_p(node)))
-	{
-		char * str = scm_to_locale_string(node);
-		std::string rv = "\"";
-		rv += str;
-		rv += "\"";
-		free(str);
-		return rv;
-	}
-	else if (scm_is_number(node))
-	{
-#define NUMBUFSZ 60
-		char buff[NUMBUFSZ];
-		if (scm_is_signed_integer(node, INT_MIN, INT_MAX))
-		{
-			snprintf (buff, NUMBUFSZ, "%ld", (long) scm_to_long(node));
-		}
-		else if (scm_is_unsigned_integer(node, 0, UINT_MAX))
-		{
-			snprintf (buff, NUMBUFSZ, "%lu", (unsigned long) scm_to_ulong(node));
-		}
-		else if (scm_is_real(node))
-		{
-			snprintf (buff, NUMBUFSZ, "%g", scm_to_double(node));
-		}
-		else if (scm_is_complex(node))
-		{
-			snprintf (buff, NUMBUFSZ, "%g +i %g",
-					  scm_c_real_part(node),
-					  scm_c_imag_part(node));
-		}
-		else if (scm_is_rational(node))
-		{
-			std::string rv;
-			rv = prt(scm_numerator(node));
-			rv += "/";
-			rv += prt(scm_denominator(node));
-			return rv;
-		}
-		return buff;
-	}
-	else if (scm_is_true(scm_char_p(node)))
-	{
-		std::string rv;
-		rv = (char) scm_to_char(node);
-		return rv;
-	}
-	else if (scm_is_true(scm_boolean_p(node)))
-	{
-		if (scm_to_bool(node)) return "#t";
-		return "#f";
-	}
-	else if (SCM_NULL_OR_NIL_P(node))
-	{
-		// scm_is_null(x) is true when x is SCM_EOL
-		// SCM_NILP(x) is true when x is SCM_ELISP_NIL
-		return "()";
-	}
-	else if (scm_is_eq(node, SCM_UNDEFINED))
-	{
-		return "undefined";
-	}
-	else if (scm_is_eq(node, SCM_EOF_VAL))
-	{
-		return "eof";
-	}
-#endif
 	else
 	{
 		// Let SCM display do the rest of the work.
@@ -368,7 +267,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	}
 
 	// Check for a simple flow-control directive: i.e. just return to
-	// the C code from anywhere withing the scheme code.
+	// the C code from anywhere within the scheme code.
 	if (0 == strcmp(restr, "cog-yield"))
 	{
 		free(restr);

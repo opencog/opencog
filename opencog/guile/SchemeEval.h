@@ -77,7 +77,7 @@ class SchemeEval
 		SchemeEval(AtomSpace* a);
 		~SchemeEval();
 		static SchemeEval* singletonInstance;
-        AtomSpace *atomspace;
+		AtomSpace *atomspace;
 		
 	public:
 					
