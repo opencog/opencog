@@ -425,8 +425,7 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                             preconditionName.c_str()
                           );   		
             return true; 
-        } 
-        else {
+        } else {
             logger().debug( "PsiRuleUtil::%s - The Precondition '%s' is false.", 
                              __FUNCTION__, 
                              preconditionName.c_str() 
@@ -445,6 +444,7 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
 
         return false;    
     }// if
+    return false;
 }
 
 bool PsiRuleUtil::allPreconditionsSatisfied(const AtomSpace & atomSpace, 

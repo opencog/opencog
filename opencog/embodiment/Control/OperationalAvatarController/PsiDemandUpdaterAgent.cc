@@ -300,7 +300,7 @@ void PsiDemandUpdaterAgent::publishUpdatedValue(Plaza & plaza,
 
     // Pack time stamp and all the Demand values in json format 
     Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
-    jsonObj.push_back( Pair("timestamp", timeStamp) );
+    jsonObj.push_back( Pair("timestamp", (uint64_t) timeStamp) );
 
     foreach (Demand & demand, this->demandList) {
         jsonObj.push_back( Pair( demand.getDemandName()+"TruthValue", demand.getDemandTruthValue() ) );

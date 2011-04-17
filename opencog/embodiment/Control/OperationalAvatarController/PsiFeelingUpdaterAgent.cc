@@ -57,7 +57,7 @@ void PsiFeelingUpdaterAgent::publishUpdatedValue(Plaza & plaza,
 
     // Pack time stamp and all the feeling values in json format 
     Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
-    jsonObj.push_back( Pair("timestamp", timeStamp) );
+    jsonObj.push_back( Pair("timestamp", (uint64_t) timeStamp) );
 
     std::map <std::string, FeelingMeta>::iterator iFeeling;
     std::string feeling;
@@ -368,9 +368,6 @@ void PsiFeelingUpdaterAgent::sendUpdatedValues(opencog::CogServer * server)
 
     // Get OAC
     OAC * oac = (OAC *) server;
-
-    // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get petName
     const std::string & petName = oac->getPet().getName(); 
