@@ -695,16 +695,14 @@ double DimEmbedModule::euclidDist(const Handle& h1,
 
 double DimEmbedModule::euclidDist(std::vector<double> v1,
                                   std::vector<double> v2) {
-    assert(v1.size()==v2.size());
+    OC_ASSERT(v1.size()==v2.size());
     std::vector<double>::iterator it1=v1.begin();
     std::vector<double>::iterator it2=v2.begin();
 
     double distance=0;
     //Calculate euclidean distance between v1 and v2
-    for(; it1 != v1.end(); it1++) {
-        distance+=std::pow((*it1 - *it2), 2);
-        if(it2!=v2.end()) it2++;
-    }
+    for(; it1 != v1.end(); it1++, it2++)
+        distance+=sq(*it1 - *it2);
     distance=sqrt(distance);
     return distance;
 }
