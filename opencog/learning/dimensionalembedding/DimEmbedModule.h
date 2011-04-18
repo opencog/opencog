@@ -32,7 +32,8 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/cover_tree.h>
-#include <opencog/learning/dimensionalembedding/CoverTreeNode.h>
+
+#include "CoverTreeNode.h"
 
 namespace opencog
 {
