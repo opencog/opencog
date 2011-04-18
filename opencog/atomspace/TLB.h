@@ -1,12 +1,9 @@
 /*
  * opencog/atomspace/TLB.h
  *
+ * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
- *            Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -62,7 +59,6 @@ namespace opencog
  */
 class TLB
 {
-    friend class AtomSpaceImpl;
     friend class ::AtomSpaceUTest;
     friend class ::AtomSpaceImplUTest;
     friend class AtomTable;
@@ -71,10 +67,7 @@ class TLB
 
     // TODO review these AtomSpace friend classes to see whether they
     // are allowed to access the TLB in the way that they do.
-    friend class Atom;
-    friend class Node;
     friend class ::NodeUTest;
-    friend class Link;
     friend class ::LinkUTest;
     friend class HandleEntry;
     friend class ::HandleEntryUTest;

@@ -57,6 +57,8 @@ AtomTable::AtomTable(bool dsa)
     //atomSet.max_load_factor(100.0f);
     nodeIndex.connectAtomTable(this);
 
+    //logger().fine("Max load factor for TLB handle map is: %f", TLB::handle_map.max_load_factor());
+
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&iteratorsLock, NULL);
 #endif
@@ -481,13 +483,12 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     predicateIndex.insertAtom(atom);
 
     // Updates incoming set of all targets.
+    atom->setAtomTable(this);
     if (dont_defer_incoming_links && (lll != NULL)) {
         for (int i = 0; i < lll->getArity(); i++) {
             lll->getOutgoingAtom(i)->addIncomingHandle(handle);
         }
     }
-
-    atom->setAtomTable(this);
 
     if (useDSA) {
         StatisticsMonitor::getInstance()->add(atom);

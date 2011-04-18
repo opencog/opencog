@@ -343,8 +343,10 @@ public:
     /** Retrieve the TruthValue of a given Handle */
     const TruthValue& getTV(Handle, VersionHandle = NULL_VERSION_HANDLE) const;
 
-    /** Change the TruthValue of a given Handle */
-    void setTV(Handle, const TruthValue&, VersionHandle = NULL_VERSION_HANDLE);
+    /** Change the TruthValue of a given Handle
+     * @return whether TV was successfully set
+     */
+    bool setTV(Handle, const TruthValue&, VersionHandle = NULL_VERSION_HANDLE);
 
     /** Change the primary TV's mean of a given Handle */
     void setMean(Handle, float mean) throw (InvalidParamException);
@@ -383,32 +385,32 @@ public:
 
     /** Retrieve the AttentionValue of a given Handle */
     const AttentionValue& getAV(Handle h) const {
-        return bank.getAV(TLB::getAtom(h));
+        return bank.getAV(atomTable.getAtom(h));
     }
 
     /** Change the AttentionValue of a given Handle */
     void setAV(Handle h, const AttentionValue &av) {
-        bank.setAV(TLB::getAtom(h), av);
+        bank.setAV(atomTable.getAtom(h), av);
     }
 
     /** Change the Short-Term Importance of a given Handle */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        bank.setSTI(TLB::getAtom(h), stiValue);
+        bank.setSTI(atomTable.getAtom(h), stiValue);
     }
 
     /** Change the Long-term Importance of a given Handle */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        bank.setLTI(TLB::getAtom(h), ltiValue);
+        bank.setLTI(atomTable.getAtom(h), ltiValue);
     }
 
     /** Change the Very-Long-Term Importance of a given Handle */
     void setVLTI(Handle h, AttentionValue::vlti_t vltiValue) {
-        bank.setVLTI(TLB::getAtom(h), vltiValue);
+        bank.setVLTI(atomTable.getAtom(h), vltiValue);
     }
 
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
-        return bank.getSTI(TLB::getAtom(h));
+        return bank.getSTI(atomTable.getAtom(h));
     }
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
@@ -423,7 +425,7 @@ public:
      * @return normalised STI between -1..1
      */
     float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return getNormalisedSTI(TLB::getAtom(h), average, clip);
+        return getNormalisedSTI(atomTable.getAtom(h), average, clip);
     }
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
@@ -437,21 +439,22 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return getNormalisedZeroToOneSTI(TLB::getAtom(h), average, clip);
+        return getNormalisedZeroToOneSTI(atomTable.getAtom(h), average, clip);
     }
 
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle h) const {
-        return bank.getLTI(TLB::getAtom(h));
+        return bank.getLTI(atomTable.getAtom(h));
     }
 
     /** Retrieve the Very-Long-Term Importance of a given Handle */
     AttentionValue::vlti_t getVLTI(Handle h) const {
-        return bank.getVLTI(TLB::getAtom(h));
+        return bank.getVLTI(atomTable.getAtom(h));
     }
 
-    /** Clone an atom from the TLB, replaces the public access to TLB::getAtom
-     * that many modules were doing.
+    /** Clone an atom from the AtomSpace.
+     * Threads outside of the AtomSpace thread can safely use this pointer and modify
+     * the atom.
      * @param h Handle of atom to clone
      * @return A smart pointer to the atom
      * @note Any changes to the atom object must be committed using
@@ -938,7 +941,7 @@ public:
         std::vector<Handle> hs;
 
         getHandleSet(back_inserter(hs), type, subclass, vh);
-        sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
+        sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(&atomTable, compare));
 
         // copy the vector and return the iterator.
         return copy(hs.begin(), hs.end(), result);
@@ -948,20 +951,22 @@ public:
     template <typename Compare>
     struct compareAtom{
         Compare* c;
-        compareAtom(Compare* _c) : c(_c) {}
+        const AtomTable* table;
+        compareAtom(const AtomTable* _table, Compare* _c) : c(_c), table(_table) {}
 
         bool operator()(const Handle& h1,const Handle& h2) {
-            return (*c)(*TLB::getAtom(h1),*TLB::getAtom(h2));
+            return (*c)(*table->getAtom(h1),*table->getAtom(h2));
         }
     };
 
     template <typename Compare>
     struct filterAtom{
         Compare *c;
-        filterAtom(Compare *_c) : c(_c) {}
+        const AtomTable* table;
+        filterAtom(const AtomTable* _table, Compare *_c) : c(_c), table(_table) {}
 
         bool operator()(const Handle& h1) {
-            return (*c)(*TLB::getAtom(h1));
+            return (*c)(*table->getAtom(h1));
         }
     };
 
@@ -1023,7 +1028,7 @@ public:
         _getNextAtomPrepare();
         Handle next;
         while ((next = _getNextAtom()) != Handle::UNDEFINED)
-            if ((*compare)(*TLB::getAtom(next)) && containsVersionedTV(next, vh))
+            if ((*compare)(*atomTable.getAtom(next)) && containsVersionedTV(next, vh))
                 result.push_back(next);
         return result;
     }
@@ -1033,7 +1038,7 @@ public:
         _getNextAtomPrepare();
         Handle next;
         while ((next = _getNextAtom()) != Handle::UNDEFINED)
-            if ((*compare)(*TLB::getAtom(next)) && containsVersionedTV(next, vh))
+            if ((*compare)(*atomTable.getAtom(next)) && containsVersionedTV(next, vh))
                 * it++ = next;
         return it;
     }
@@ -1050,7 +1055,7 @@ public:
     HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const {
         HandleSeq result;
         for (; begin != end; begin++)
-            if (filterAtom<AtomPredicate>(compare)(*begin))
+            if (filterAtom<AtomPredicate>(&atomTable,compare)(*begin))
                 result.push_back(*begin);
 
         return result;
@@ -1060,7 +1065,7 @@ public:
     OutputIterator filter(InputIterator begin, InputIterator end,
             OutputIterator it, AtomPredicate* compare) const {
         for (; begin != end; begin++)
-            if (filterAtom<AtomPredicate>(compare)(*begin))
+            if (filterAtom<AtomPredicate>(&atomTable,compare)(*begin))
                 * it++ = *begin;
         return it;
     }
@@ -1092,7 +1097,7 @@ public:
     // AtomSpaceRequests are not allowed to access the TLB, but they may get
     // references to specific atoms.
     inline const Atom& getAtom(Handle h) {
-        return *TLB::getAtom(h);
+        return *atomTable.getAtom(h);
     }
 
 protected:

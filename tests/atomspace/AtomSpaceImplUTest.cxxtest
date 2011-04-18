@@ -389,7 +389,8 @@ public:
         HandleSeq handles;
 
         if (head_handle_ptr != NULL) {
-            return as.addRealAtom(*as.cloneAtom(*head_handle_ptr), tvn);
+            OC_ASSERT(as.isValidHandle(*head_handle_ptr), "head_handle_ptr is not valid");
+            return as.addRealAtom(as.getAtom(*head_handle_ptr), tvn);
         }
 
         for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
@@ -450,8 +451,8 @@ public:
         TS_ASSERT(links.size() == 2);
         delete tr;
 
-        Node *n = new Node(PREDICATE_NODE, "barkingAt");
-        tr = mva(TLB::addAtom(n), NULL);
+        Handle hn = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        tr = mva(hn, NULL);
         Handle h1_ = addAtom(*atomSpace, *tr, SimpleTruthValue(0.5f, 0.5f));
         TS_ASSERT(Handle::compare(h1_, Handle::UNDEFINED));
         // In this case, the expected behavior is to perform a merge and return the
@@ -459,7 +460,6 @@ public:
         TS_ASSERT(!Handle::compare(h1_, h1));
         Atom* atom = TLB::getAtom(h1_);
         TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
-        delete n;
         delete tr;
 
         tr = mva(evalLink, NULL);

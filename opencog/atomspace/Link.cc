@@ -34,7 +34,6 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/Trail.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -74,6 +73,16 @@ Trail* Link::getTrail(void)
     return trail;
 }
 
+Atom* Link::getOutgoingAtom(int pos) const
+{
+    if (!atomTable) {
+        throw RuntimeException(TRACE_INFO,
+            "Link is not embedded in AtomTable, so can't resolve "
+            "outgoing handles to Atom pointers.");
+    }
+    return atomTable->getAtom(getOutgoingHandle(pos));
+}
+
 std::string Link::toShortString(void) const
 {
     std::string answer;
@@ -88,9 +97,15 @@ std::string Link::toShortString(void) const
     answer += "<";
     for (int i = 0; i < getArity(); i++) {
         if (i > 0) answer += ",";
-        answer += classserver().isA(TLB::getAtom(outgoing[i])->getType(), NODE) ?
-                  ((Node*) TLB::getAtom(outgoing[i]))->getName() :
-                  ((Link*) TLB::getAtom(outgoing[i]))->toShortString();
+        if (atomTable) {
+            Atom* a = atomTable->getAtom(outgoing[i]);
+            answer += classserver().isA(a->getType(), NODE) ?
+                      ((Node*) a)->getName() :
+                      ((Link*) a)->toShortString();
+        } else {
+            // No AtomTable connected so just print handles
+            answer += "#" + outgoing[i];
+        }
     }
     answer += ">";
     float mean = this->getTruthValue().getMean();
@@ -118,25 +133,30 @@ std::string Link::toString(void) const
     for (int i = 0; i < getArity(); i++) {
         if (i > 0) answer += ",";
         Handle h = outgoing[i];
-        if (TLB::isValidHandle(h)) {
-            Atom *a = TLB::getAtom(h);
-            Node *nnn = dynamic_cast<Node *>(a);
-            if (nnn) {
-                snprintf(buf, BUFSZ, "[%s ", classserver().getTypeName(a->getType()).c_str());
-                answer += buf;
-                if (nnn->getName() == "")
-                    answer += "#" + h;
-                else
-                    answer += nnn->getName();
-                answer += "]";
+        if (atomTable) {
+            if (atomTable->holds(h)) {
+                Atom *a = atomTable->getAtom(h);
+                Node *nnn = dynamic_cast<Node *>(a);
+                if (nnn) {
+                    snprintf(buf, BUFSZ, "[%s ", classserver().getTypeName(a->getType()).c_str());
+                    answer += buf;
+                    if (nnn->getName() == "")
+                        answer += "#" + h;
+                    else
+                        answer += nnn->getName();
+                    answer += "]";
+                } else {
+                    Link *lll = dynamic_cast<Link *>(a);
+                    answer += lll->toString();
+                }
             } else {
-                Link *lll = dynamic_cast<Link *>(a);
-                answer += lll->toString();
+                logger().error("Link::toString() => invalid handle %lu in position %d of ougoing set!",
+                               h.value(), i);
+                answer += "INVALID_HANDLE!";
             }
         } else {
-            logger().error("Link::toString() => invalid handle %lu in position %d of ougoing set!",
-                           h.value(), i);
-            answer += "INVALID_HANDLE!";
+            // No AtomTable connected so just print handles in outgoing set
+            answer += "#" + h;
         }
     }
     answer += ">]";

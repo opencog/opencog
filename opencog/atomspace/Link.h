@@ -29,7 +29,6 @@
 #include <string>
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/Trail.h>
 #include <opencog/atomspace/types.h>
 
@@ -77,15 +76,14 @@ protected:
     throw (RuntimeException);
 
     /**
-     * Returns a specific atom in the outgoing set (using the TLB).
+     * Returns a specific atom in the outgoing set (using the connected
+     * AtomTable).
      *
      * @param The position of the atom in the array.
-     * @return A specific atom in the outgoing set (using the TLB).
+     * @return A specific atom in the outgoing set. NULL if no AtomTable is
+     * connected.
      */
-    inline Atom * getOutgoingAtom(int pos) const
-    {
-        return TLB::getAtom(getOutgoingHandle(pos));
-    }
+    Atom * getOutgoingAtom(int pos) const;
 
 public:
 

@@ -1,12 +1,9 @@
 /*
  * opencog/atomspace/AtomTable.h
  *
+ * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
- *            Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,6 +29,7 @@
 
 #include <boost/signal.hpp>
 
+#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
@@ -567,6 +565,26 @@ public:
             // then blank pointer
             if (this != atom->getAtomTable()) atom = NULL;
         return atom;
+    }
+
+    /** Get Node object already in the AtomTable.
+     *
+     * @param h Handle of the node to retrieve.
+     * @return pointer to Node object, NULL if no atom within this AtomTable is
+     * associated with handle or if the atom is a link.
+     */
+    inline Node* getNode(const Handle& h) const {
+        return dynamic_cast<Node*>(getAtom(h));
+    }
+
+    /** Get Link object already in the AtomTable.
+     *
+     * @param h Handle of the link to retrieve.
+     * @return pointer to Link object, NULL if no atom within this AtomTable is
+     * associated with handle or if the atom is a node.
+     */
+    inline Link* getLink(const Handle& h) const {
+        return dynamic_cast<Link*>(getAtom(h));
     }
 
     /**

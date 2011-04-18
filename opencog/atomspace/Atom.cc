@@ -37,7 +37,6 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
@@ -131,7 +130,7 @@ void Atom::addIncomingHandle(Handle handle)
 
 void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException)
 {
-    DPRINTF("Entering Atom::removeIncomingHandle(): handle:\n%s\nincoming:\n%s\n", TLB::getAtom(handle)->toShortString().c_str(), incoming->toString().c_str());
+    DPRINTF("Entering Atom::removeIncomingHandle(): handle:\n%lu\nincoming:\n%s\n", handle.value(), incoming->toString().c_str());
     HandleEntry* current = incoming;
     // checks if incoming set is empty
     if (incoming == NULL) {

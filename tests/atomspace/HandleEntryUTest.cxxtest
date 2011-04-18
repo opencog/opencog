@@ -106,34 +106,33 @@ public:
     }
 
     void testFilterSetTypeBoolVersionHandle() {
-        Node* n1 = new Node(CONCEPT_NODE, "TEST1");
-        //Node* n2 = new Node(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE));
-        Node* n3 = new Node(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
+        AtomSpace as;
+        Handle n1 = as.addNode(CONCEPT_NODE, "TEST1");
+        Handle n3 = as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
         CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
         tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
-        Node* n4 = new Node(PREDICATE_NODE, "TEST4", tv);
-        Node* n5 = new Node(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
+        Handle n4 = as.addNode(PREDICATE_NODE, "TEST4", tv);
+        Handle n5 = as.addNode(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
 
         // Create links that contains at least 1 target whose type is CONCEPT_NODE and
         // 1 target whose type is PREDICATE_NODE
         std::vector<Handle> outgoing(2);
-        outgoing[0] = TLB::addAtom(n1); // concept (without any VH)
-        outgoing[1] = TLB::addAtom(n3); // predicate (with VH1)
-        Link* l1 = new Link(LIST_LINK, outgoing);
+        outgoing[0] = n1; // concept (without any VH)
+        outgoing[1] = n3; // predicate (with VH1)
+        Handle l1 = as.addLink(LIST_LINK, outgoing);
         outgoing.resize(3);
-        outgoing[0] = n3->getHandle(); // predicate (with VH1)
-        outgoing[1] = TLB::addAtom(n4); // predicate (with VH1 and VH2)
-        outgoing[2] = TLB::addAtom(n5); // concept (with VH2)
-        Link* l2 = new Link(LIST_LINK, outgoing);
+        outgoing[0] = n3; // predicate (with VH1)
+        outgoing[1] = n4; // predicate (with VH1 and VH2)
+        outgoing[2] = n5; // concept (with VH2)
+        Handle l2 = as.addLink(LIST_LINK, outgoing);
         outgoing.resize(2);
-        outgoing[0] = n4->getHandle(); // predicate (with VH1 and VH2)
-        outgoing[1] = n5->getHandle(); // concept (with VH2)
-        Link* l3 = new Link(LIST_LINK, outgoing);
+        outgoing[0] = n4; // predicate (with VH1 and VH2)
+        outgoing[1] = n5; // concept (with VH2)
+        Handle l3 = as.addLink(LIST_LINK, outgoing);
 
-
-        HandleEntry* he = new HandleEntry(TLB::addAtom(l1));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(l2)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(l3)));
+        HandleEntry* he = new HandleEntry(l1);
+        he  = HandleEntry::concatenation(he, new HandleEntry(l2));
+        he  = HandleEntry::concatenation(he, new HandleEntry(l3));
         TS_ASSERT(he->getSize() == 3);
 
         // Now filter
@@ -163,34 +162,33 @@ public:
     }
 
     void testFilterSetCharPtrTypeVersionHandle() {
-        Node* n1 = new Node(CONCEPT_NODE, "TEST1");
-        //Node* n2 = new Node(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE));
-        Node* n3 = new Node(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
+        AtomSpace as;
+        Handle n1 = as.addNode(CONCEPT_NODE, "TEST1");
+        Handle n3 = as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
         CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
         tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
-        Node* n4 = new Node(PREDICATE_NODE, "TEST4", tv);
-        Node* n5 = new Node(CONCEPT_NODE, "TEST4", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
+        Handle n4 = as.addNode(PREDICATE_NODE, "TEST4", tv);
+        Handle n5 = as.addNode(CONCEPT_NODE, "TEST4", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
 
         // Create links that contains at least 1 target whose type is CONCEPT_NODE and
         // 1 target whose type is PREDICATE_NODE
         std::vector<Handle> outgoing(2);
-        outgoing[0] = TLB::addAtom(n1); // concept (without any VH)
-        outgoing[1] = TLB::addAtom(n4); // predicate (with VH1 and VH2)
-        Link* l1 = new Link(LIST_LINK, outgoing);
+        outgoing[0] = n1; // concept (without any VH)
+        outgoing[1] = n4; // predicate (with VH1 and VH2)
+        Handle l1 = as.addLink(LIST_LINK, outgoing);
         outgoing.resize(3);
-        outgoing[0] = TLB::addAtom(n3); // predicate (with VH1)
-        outgoing[1] = n4->getHandle(); // predicate (with VH1 and VH2)
-        outgoing[2] = TLB::addAtom(n5); // concept (with VH2)
-        Link* l2 = new Link(LIST_LINK, outgoing);
+        outgoing[0] = n3; // predicate (with VH1)
+        outgoing[1] = n4; // predicate (with VH1 and VH2)
+        outgoing[2] = n5; // concept (with VH2)
+        Handle l2 = as.addLink(LIST_LINK, outgoing);
         outgoing.resize(2);
-        outgoing[0] = n4->getHandle(); // predicate (with VH1 and VH2)
-        outgoing[1] = n5->getHandle(); // concept (with VH2)
-        Link* l3 = new Link(LIST_LINK, outgoing);
+        outgoing[0] = n4; // predicate (with VH1 and VH2)
+        outgoing[1] = n5; // concept (with VH2)
+        Handle l3 = as.addLink(LIST_LINK, outgoing);
 
-
-        HandleEntry* he = new HandleEntry(TLB::addAtom(l1));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(l2)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(l3)));
+        HandleEntry* he = new HandleEntry(l1);
+        he  = HandleEntry::concatenation(he, new HandleEntry(l2));
+        he  = HandleEntry::concatenation(he, new HandleEntry(l3));
         TS_ASSERT(he->getSize() == 3);
 
         // Now filter

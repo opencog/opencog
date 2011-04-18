@@ -1,12 +1,9 @@
 /*
  * opencog/atomspace/AtomSpace.h
  *
+ * Copyright (C) 2008-2011 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
- *
- * Written by Welter Silva <welter@vettalabs.com>
- *            Andre Senna <senna@vettalabs.com>
- *            Carlos Lopes <dlopes@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -61,8 +58,9 @@ typedef boost::shared_ptr<TruthValue> TruthValuePtr;
 
 /**
  * The AtomSpace class is a legacy interface to OpenCog's AtomSpace and
- * provides a standard functions that return results immediately. It is
- * a wrapper around opencog::AtomSpaceAsync which submits requests to queue.
+ * provide standard functions that return results immediately.
+ * The AtomSpace is a wrapper around opencog::AtomSpaceAsync which submits
+ * requests to a queue.
  * These requests (defined in ASRequest.h) access the core
  * opencog::AtomSpaceImpl class. For an asynchronous interface that allows
  * AtomSpace requests to be fired and forgot (mostly useful for setting TVs,
@@ -86,15 +84,13 @@ typedef boost::shared_ptr<TruthValue> TruthValuePtr;
  *
  * If one were to add atoms to via atomspace3 or atomspace, they would both be
  * in the same "AtomSpace". Adding atoms via atomSpaceAsync or atomspace2 would
- * place atoms in another separate "AtomSpace".
+ * place atoms in another "AtomSpace" separate from atomspace and atomspace3.
  */
 class AtomSpace
 {
     friend class SavingLoading;
     friend class ::AtomTableUTest;
     friend class SaveRequest;
-
-    void do_merge_tv(Handle, const TruthValue&);
 
     //! Indicates whether the AtomSpace should delete AtomSpaceAsync on destruction
     bool ownsAtomSpaceAsync;
@@ -105,6 +101,8 @@ class AtomSpace
      */
     AtomSpace& operator=(const AtomSpace&);
 public:
+    void do_merge_tv(Handle, const TruthValue&);
+
     /** 
      * The AtomSpace class is essentially just be a wrapper of the asynchronous
      * AtomSpaceAsync which returns ASRequest "futures" as well as allowing

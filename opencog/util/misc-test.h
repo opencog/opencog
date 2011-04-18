@@ -2,12 +2,8 @@
  * src/util/misc-test.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2008-2010 OpenCog Foundation
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
- *            Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -49,7 +45,9 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
     HandleSeq handles;
 
     if (head_handle_ptr != NULL) {
-        return as.addRealAtom(*as.cloneAtom(*head_handle_ptr), tvn);
+        OC_ASSERT(as.isValidHandle(*head_handle_ptr), "head_handle_ptr is not valid");
+        as.do_merge_tv(*head_handle_ptr, tvn);
+        return *head_handle_ptr;
     }
 
     for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
