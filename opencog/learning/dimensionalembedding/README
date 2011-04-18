@@ -1,13 +1,17 @@
 = Dimensional Embedding
 
-This implements a method of dimensional embedding of the atomspace using the Harel-Koren algorithm as described on 
+This implements a method of dimensional embedding of the atomspace
+using the Harel-Koren algorithm as described on
 
 http://wiki.opencog.org/w/OpenCogPrime:WikiBook#Dimensional_Embedding and
 http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.20.5390
 
-k-nearest neighbour queries are answered quickly using the following cover tree implementation: http://hunch.net/~jl/projects/cover_tree/cover_tree.html
+k-nearest neighbour queries are answered quickly using the following
+cover tree implementation:
+http://hunch.net/~jl/projects/cover_tree/cover_tree.html
 
-The clustering code, with documentation, can be found here: http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm#source
+The clustering code, with documentation, can be found here:
+http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm#source
 
 == Using DimEmbedModule in Scheme
 
@@ -23,11 +27,18 @@ eg to find 10 similar things to the "dog" concept node...
 
 	(kNN (cog-node 'ConceptNode "dog") 'SimilarityLink 10)
 
-Note that the atomspace must already be embedded (via embedSpace) for the given link type before you can find the k nearest neighbours for any nodes. This method will return a list of what the k nearest neighbours were of the given node AT THE TIME THE ATOMSPACE WAS EMBEDDED. To take into account newly added nodes and updated link truth values, the atomspace must be re-embedded.
+Note that the atomspace must already be embedded (via embedSpace) for
+the given link type before you can find the k nearest neighbours for
+any nodes. This method will return a list of what the k nearest
+neighbours were of the given node AT THE TIME THE ATOMSPACE WAS
+EMBEDDED. To take into account newly added nodes and updated link
+truth values, the atomspace must be re-embedded.
 
-If a node is removed after embedding, an invalid handle may be returned by a nearest neighbour search.
+If a node is removed after embedding, an invalid handle may be
+returned by a nearest neighbour search.
 
-The entire embedding (the list of pivots and each node's embedding vector) can be written to the cogserver log using
+The entire embedding (the list of pivots and each node's embedding
+vector) can be written to the cogserver log using
 
 	(logEmbedding LinkType)
 	
@@ -59,5 +70,5 @@ The entire embedding (the list of pivots and each node's embedding vector) can b
 > 3000 seconds (50 minutes, 1 minute per pivot), which seems pretty
 > consistent with the random datasets/big-O-predicted complexity.
 
-See the citeseer paper linked above for more
-detail on the embedding algorithm.
+See the citeseer paper linked above for more detail on the embedding
+algorithm.
