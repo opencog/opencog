@@ -9,13 +9,13 @@ This directory contains code that implements a subgraph isomorphism
 algorithm, and then uses this algorithm to support several functions,
 including query processing and a first-order-logic forward chainer.
 The first part of the file describes the generic algorithm; the second
-part describes its applications to query processing, foreward chainging
+part describes its applications to query processing, foreward chaining
 and so on.
 
 This code does not currently expose a "hypergraph query language" (HQL),
 but doing so should not be hard to add. See the design notes below.
 
-A simple example of one possible use of this code is in the file 
+A simple example of one possible use of this code is shown in the file 
 "implication-example.scm".
 
 Subgraph Isomorphism Discovery
@@ -38,10 +38,11 @@ reflect the connectivity of the hypergraph.  The input to the
 algorithm must be specified as a set of trees in the incidence
 graph, with some nodes shared between the trees, so as to form
 a single, connected graph. General mathematical theorems state
-that ever graph can be decomposed into a collection of trees.
+that every graph can be decomposed into a collection of trees.
 As a practical matter, it is very easy to perform this decomposition
 within OpenCog: all OpenCog hypergraphs are always naturally
-specified as trees.
+specified as trees (Note: this is true in practice, but the AtomSpace
+doesn't actually enforce this).
 
 An easy example of decomposing a general graph into a collection 
 of trees comes from natural language (English) that has been 
