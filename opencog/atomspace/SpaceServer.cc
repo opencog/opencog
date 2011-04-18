@@ -1,10 +1,9 @@
 /*
  * opencog/embodiment/SpaceServer.cc
  *
+ * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
- *
- * Written by Welter Luigi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "SpaceServer.h"
-#include "TLB.h"
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringTokenizer.h>
@@ -39,6 +37,8 @@
 
 //#define DPRINTF printf
 #define DPRINTF(...)
+// To simplify debug log output
+#define ATOM_AS_STRING(h) (atomspace->atomAsString(h)->get_result().c_str())
 
 using namespace opencog;
 
@@ -86,7 +86,9 @@ void SpaceServer::setMapBoundaries(double _xMin, double _xMax, double _yMin, dou
     yMax = _yMax;
     xDim = _xDim;
     yDim = _yDim;
-    logger().info("SpaceServer - MapBondaries: xMin: %.3lf, xMax: %.3lf, yMin: %.3lf, yMax: %.3lf, xDim %d, yDim %d.", xMin, xMax, yMin, yMax, xDim, yDim);
+    logger().info("SpaceServer - MapBondaries: xMin: %.3lf, xMax: %.3lf, "
+            "yMin: %.3lf, yMax: %.3lf, xDim %d, yDim %d.",
+            xMin, xMax, yMin, yMax, xDim, yDim);
 }
 
 SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handle spaceMapHandle)
@@ -96,8 +98,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
 
     if (itr == spaceMaps.end()) {
         // a new map
-        logger().info(
-                     "SpaceServer - New map: xMin: %.3lf, xMax: %.3lf, yMin: %.3lf, yMax: %.3lf",
+        logger().info("SpaceServer - New map: xMin: %.3lf, xMax: %.3lf, yMin: %.3lf, yMax: %.3lf",
                      xMin, xMax, yMin, yMax);
 
         if (!sortedMapHandles.empty()) {
@@ -110,12 +111,16 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
                 // latest map dimensions match new map dimensions
                 bool mapReused = false;
                 if (keepPreviousMap) {
-                    if (sortedMapHandles.size() > 1 && persistentMapHandles.find(latestMapHandle) == persistentMapHandles.end()) {
+                    if (sortedMapHandles.size() > 1 &&
+                            persistentMapHandles.find(latestMapHandle) == persistentMapHandles.end()) {
                         Handle lastButOneMapHandle = *(sortedMapHandles.end() - 2);
                         SpaceMap* lastButOneMap = spaceMaps[lastButOneMapHandle];
                         // Check if the 2 latest maps are equals
                         if (*latestMap == *lastButOneMap) {
-                            logger().debug("SpaceServer - The 2 previous maps are equals. Previous map (%s) transfered to new map (%s).", TLB::getAtom(latestMapHandle)->toString().c_str(), TLB::getAtom(spaceMapHandle)->toString().c_str());
+                            logger().debug("SpaceServer - The 2 previous maps are equals. "
+                                    "Previous map (%s) transfered to new map (%s).",
+                                    ATOM_AS_STRING(latestMapHandle),
+                                    ATOM_AS_STRING(spaceMapHandle));
                             sortedMapHandles.erase(sortedMapHandles.end() - 1);
                             spaceMaps.erase(latestMapHandle);
                             mapRemoved(latestMapHandle);
@@ -123,19 +128,24 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
                             mapReused = true;
                             persistentMapHandles.insert(lastButOneMapHandle);
                             mapPersisted(lastButOneMapHandle);
-                            logger().debug("SpaceServer - Map (%s) marked as persistent.", TLB::getAtom(lastButOneMapHandle)->toString().c_str());
+                            logger().debug("SpaceServer - Map (%s) marked as persistent.",
+                                    ATOM_AS_STRING(lastButOneMapHandle));
                         } else {
                             persistentMapHandles.insert(latestMapHandle);
                             mapPersisted(latestMapHandle);
-                            logger().debug("SpaceServer - Map (%s) marked as persistent.", TLB::getAtom(latestMapHandle)->toString().c_str());
+                            logger().debug("SpaceServer - Map (%s) marked as persistent.",
+                                    ATOM_AS_STRING(latestMapHandle));
                         }
                     } else {
                         persistentMapHandles.insert(latestMapHandle);
                         mapPersisted(latestMapHandle);
-                        logger().debug("SpaceServer - Map (%s) marked as persistent.", TLB::getAtom(latestMapHandle)->toString().c_str());
+                        logger().debug("SpaceServer - Map (%s) marked as persistent.",
+                                ATOM_AS_STRING(latestMapHandle));
                     }
                 } else if (persistentMapHandles.find(latestMapHandle) == persistentMapHandles.end()) {
-                    logger().debug("SpaceServer - Previous map (%s) transfered to new map (%s).", TLB::getAtom(latestMapHandle)->toString().c_str(), TLB::getAtom(spaceMapHandle)->toString().c_str());
+                    logger().debug("SpaceServer - Previous map (%s) transfered to new map (%s).",
+                            ATOM_AS_STRING(latestMapHandle),
+                            ATOM_AS_STRING(spaceMapHandle));
                     sortedMapHandles.erase(sortedMapHandles.end() - 1);
                     spaceMaps.erase(latestMapHandle);
                     mapRemoved(latestMapHandle);
@@ -144,18 +154,22 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
                 }
                 if (!mapReused) {
                     // Create the new one by cloning the latest map
-                    logger().debug("SpaceServer - New map (%s) cloned from previous map (%s).", TLB::getAtom(spaceMapHandle)->toString().c_str(), TLB::getAtom(latestMapHandle)->toString().c_str());
+                    logger().debug("SpaceServer - New map (%s) cloned from previous map (%s).",
+                            ATOM_AS_STRING(spaceMapHandle),
+                            ATOM_AS_STRING(latestMapHandle));
                     map = latestMap->clone();
                 }
             } else {
                 // latest map dimensions do not match new map dimensions.
                 // Create an empty map
-                logger().debug("SpaceServer - New map (%s) created by copying.", TLB::getAtom(spaceMapHandle)->toString().c_str());
+                logger().debug("SpaceServer - New map (%s) created by copying.",
+                        ATOM_AS_STRING(spaceMapHandle));
                 map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, agentRadius);
                 // Copy each object in latest map into the new map
                 map->copyObjects(*latestMap);
                 if (!keepPreviousMap) {
-                    logger().debug("SpaceServer - Previous map (%s) removed.", TLB::getAtom(latestMapHandle)->toString().c_str());
+                    logger().debug("SpaceServer - Previous map (%s) removed.",
+                            ATOM_AS_STRING(latestMapHandle));
 
                     sortedMapHandles.erase(sortedMapHandles.end() - 1);
                     spaceMaps.erase(latestMapHandle);
@@ -166,12 +180,14 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
         } else {
             // Create first map
             map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, agentRadius);
-            logger().debug("SpaceServer - First map (%s) created", TLB::getAtom(spaceMapHandle)->toString().c_str());
+            logger().debug("SpaceServer - First map (%s) created",
+                    ATOM_AS_STRING(spaceMapHandle));
         }
         spaceMaps[spaceMapHandle] = map;
         sortedMapHandles.push_back(spaceMapHandle);
         mapPersisted(spaceMapHandle); // Ensure the latest map will not be removed by forgetting mechanism
-        logger().debug("SpaceServer - spaceMaps size: %u, sortedMapHandles size: %u", spaceMaps.size(), sortedMapHandles.size());
+        logger().debug("SpaceServer - spaceMaps size: %u, sortedMapHandles size: %u",
+                spaceMaps.size(), sortedMapHandles.size());
 
     } else {
         // get the existing map
@@ -191,7 +207,8 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
     DPRINTF("SpaceServer::add After addOrGet\n");
 
     logger().fine(
-                 "SpaceServer::add map->xMin() = %lf, map->xMax() = %lf, map->yMin() = %lf, map->yMax() = %lf, map->xGridWidth() = %lf, map->yGridWidth() = %lf",
+                 "SpaceServer::add map->xMin() = %lf, map->xMax() = %lf, map->yMin() = %lf, "
+                 "map->yMax() = %lf, map->xGridWidth() = %lf, map->yGridWidth() = %lf",
                  map->xMin(), map->xMax(), map->yMin(), map->yMax(),
                  map->xGridWidth(), map->yGridWidth());
 
@@ -215,7 +232,8 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
         if (metadata != oldMetadata) {
             needUpdate = true;
             logger().fine(
-                         "SpaceServer::add Old metadata (x=%lf, y=%lf, length=%lf, width=%lf, height=%lf, yaw=%lf) is different: object must be updated",
+                         "SpaceServer::add Old metadata (x=%lf, y=%lf, length=%lf, width=%lf, "
+                         "height=%lf, yaw=%lf) is different: object must be updated",
                          oldMetadata.centerX, oldMetadata.centerY, oldMetadata.centerZ,
                          oldMetadata.length, oldMetadata.width, oldMetadata.height,
                          oldMetadata.yaw);
@@ -223,20 +241,21 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
             bool wasObstacle = map->isObstacle(objectId);
             if (isObstacle != wasObstacle) {
                 needUpdate = true;
-                logger().fine("SpaceServer::add Object is %san obstacle now. So, it must be updated.",
-                             isObstacle ? " " : "not ");
+                logger().fine("SpaceServer::add Object is %san obstacle now. "
+                        "So, it must be updated.", isObstacle ? " " : "not ");
             }
         }
     } else {
-        logger().fine("SpaceServer::add Object does not exist in the map yet. So, it will be added.");
+        logger().fine("SpaceServer::add Object does not exist in the map yet. "
+                "So, it will be added.");
     }
 
     if (!mapContainsObject || needUpdate) {
 
-        logger().debug(
-                     "SpaceServer - add(mapH=%lu, objId=%s, x=%lf, y=%lf, length=%lf, width=%lf, height=%lf, yaw=%lf, isObstacle=%d)",
-                     spaceMapHandle.value(), objectId.c_str(), centerX, centerY, centerZ,
-                     length, width, height, yaw, isObstacle);
+        logger().debug("SpaceServer - add(mapH=%lu, objId=%s, x=%lf, y=%lf, "
+                "length=%lf, width=%lf, height=%lf, yaw=%lf, isObstacle=%d)",
+                 spaceMapHandle.value(), objectId.c_str(), centerX, centerY, centerZ,
+                 length, width, height, yaw, isObstacle);
 
         if (mapContainsObject) {
             logger().fine(
@@ -257,7 +276,7 @@ void SpaceServer::add(Handle spaceMapHandle, SpaceMap * map)
 {
 
     logger().info("SpaceServer - New map (%s) added",
-                 TLB::getAtom(spaceMapHandle)->toString().c_str());
+                 ATOM_AS_STRING(spaceMapHandle));
     sortedMapHandles.push_back(spaceMapHandle);
     spaceMaps[spaceMapHandle] = map;
     logger().debug("SpaceServer - spaceMaps size: %d",
@@ -272,16 +291,20 @@ void SpaceServer::remove(bool keepPreviousMap, Handle spaceMapHandle, const std:
     if (map->containsObject(objectId)) map->removeObject(objectId);
 }
 
-const SpaceServer::SpaceMap& SpaceServer::getMap(Handle spaceMapHandle) const throw (opencog::RuntimeException, std::bad_exception)
+const SpaceServer::SpaceMap& SpaceServer::getMap(Handle spaceMapHandle) const
+    throw (opencog::RuntimeException, std::bad_exception)
 {
-    logger().fine("SpaceServer::getMap() for mapHandle = %s", spaceMapHandle != Handle::UNDEFINED ? TLB::getAtom(spaceMapHandle)->toString().c_str() : "Handle::UNDEFINED");
+    logger().fine("SpaceServer::getMap() for mapHandle = %s",
+            spaceMapHandle != Handle::UNDEFINED ?
+            ATOM_AS_STRING(spaceMapHandle)
+            : "Handle::UNDEFINED");
 
     HandleToSpaceMap::const_iterator itr = spaceMaps.find(spaceMapHandle);
 
     if (itr == spaceMaps.end()) {
         throw opencog::RuntimeException(TRACE_INFO,
-                                        "SpaceServer - Found no SpaceMap associate with handle: '%s'.",
-                                        TLB::getAtom(spaceMapHandle)->toString().c_str());
+                "SpaceServer - Found no SpaceMap associate with handle: '%s'.",
+                ATOM_AS_STRING(spaceMapHandle));
     }
 
     return *(itr->second);
@@ -297,7 +320,8 @@ const bool SpaceServer::isLatestMapValid() const
     return (!sortedMapHandles.empty());
 }
 
-const SpaceServer::SpaceMap& SpaceServer::getLatestMap() const throw (opencog::AssertionException, std::bad_exception)
+const SpaceServer::SpaceMap& SpaceServer::getLatestMap() const
+    throw (opencog::AssertionException, std::bad_exception)
 {
     OC_ASSERT(isLatestMapValid(), "SpaceServer - No lastestMap avaiable to return.");
     HandleToSpaceMap::const_iterator itr = spaceMaps.find(getLatestMapHandle());
@@ -324,7 +348,8 @@ Handle SpaceServer::getPreviousMapHandle(Handle spaceMapHandle) const
 {
     Handle result = Handle::UNDEFINED;
     if (spaceMapHandle != Handle::UNDEFINED) {
-        std::vector<Handle>::const_iterator itr = std::lower_bound(sortedMapHandles.begin(), sortedMapHandles.end(), spaceMapHandle);
+        std::vector<Handle>::const_iterator itr = std::lower_bound( 
+                sortedMapHandles.begin(), sortedMapHandles.end(), spaceMapHandle);
         if (itr != sortedMapHandles.begin() && *itr == spaceMapHandle) {
             result = *(--itr);
         }
@@ -336,11 +361,11 @@ Handle SpaceServer::getNextMapHandle(Handle spaceMapHandle) const
 {
     Handle result = Handle::UNDEFINED;
     if (spaceMapHandle != Handle::UNDEFINED) {
-        std::vector<Handle>::const_iterator itr = std::lower_bound(sortedMapHandles.begin(), sortedMapHandles.end(), spaceMapHandle);
+        std::vector<Handle>::const_iterator itr = std::lower_bound(
+                sortedMapHandles.begin(), sortedMapHandles.end(), spaceMapHandle);
         if (*itr == spaceMapHandle) {
             ++itr;
-            if (itr != sortedMapHandles.end())
-                result = *itr;
+            if (itr != sortedMapHandles.end()) result = *itr;
         }
     }
     return result;
@@ -359,7 +384,8 @@ void SpaceServer::removeMap(Handle spaceMapHandle)
                 logger().error("SpaceServer::removeSpaceMap - Removed is not mapHandle.\n");
                 sortedMapHandles.erase(itr_map);
             }
-            logger().error("SpaceServer::removeSpaceMap - Trying to remove inexisting map. spaceMapSize = %d sortedMapHandlesSize = %d\n", 
+            logger().error("SpaceServer::removeSpaceMap - Trying to remove non-existent map."
+                    " spaceMapSize = %d sortedMapHandlesSize = %d\n", 
                     spaceMaps.size(), sortedMapHandles.size());
         }
 
@@ -376,7 +402,7 @@ void SpaceServer::markMapAsPersistent(Handle spaceMapHandle)
     if (itr == spaceMaps.end()) {
         throw opencog::RuntimeException(TRACE_INFO,
                                         "SpaceServer - Found no SpaceMap associate with handle: '%s'.",
-                                        TLB::getAtom(spaceMapHandle)->toString().c_str());
+                                        ATOM_AS_STRING(spaceMapHandle));
     }
     persistentMapHandles.insert(spaceMapHandle);
     mapPersisted(spaceMapHandle);
@@ -479,7 +505,8 @@ void SpaceServer::cleanupSpaceServer(){
         // mapHandle not among the ones that should be preserved
         if (!containsMap(mapHandle) || !isMapPersistent(mapHandle)){
             j++;
-            logger().debug("SpaceServer - Removing map (%s)", TLB::getAtom(mapHandle)->toString().c_str());
+            logger().debug("SpaceServer - Removing map (%s)",
+                    ATOM_AS_STRING(mapHandle));
             // remove map from SpaceServer, and timeInfo from TimeServer and AtomSpace
             atomspace->removeAtom(mapHandle, true)->get_result();
         }

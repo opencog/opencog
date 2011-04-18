@@ -30,11 +30,8 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 
-#define OBFUSCATE (0x55555555UL)
-
 class TLBUTest;
 class AtomSpaceUTest;
-class AtomSpaceImplUTest;
 class AtomTableUTest;
 class LinkUTest;
 class NodeUTest;
@@ -79,7 +76,6 @@ class TLB
     friend class NameIndex;
     friend class NodeIndex;
     friend class PredicateIndex;
-    friend class SpaceServer;
     friend class TargetTypeIndex;
     friend class Trail;
     friend class TypeIndex;
