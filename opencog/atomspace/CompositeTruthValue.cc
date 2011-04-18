@@ -1,10 +1,9 @@
 /*
  * opencog/atomspace/CompositeTruthValue.cc
  *
+ * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
- *
- * Written by Welter Silva <welter@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -157,7 +156,7 @@ std::string CompositeTruthValue::toString() const
     return result;
 }
 
-/*
+/**
  * The format of string representation of a Composite TV is as follows
  * (primaryTv first, followed by the versionedTvs):
  * {FIRST_PLN_TRUTH_VALUE;[0.000001,0.500000=0.000625]}
@@ -169,9 +168,7 @@ std::string CompositeTruthValue::toString() const
  * directory. It really does not belong here, and things like the
  * UUID wackinesss is just potential for bugs.  In general, all of 
  * the file-persistence code should be removed from this directory.
- * XXX
  */
-
 CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (InvalidParamException)
 {
     char* buff;
