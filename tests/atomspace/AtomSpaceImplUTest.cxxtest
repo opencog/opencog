@@ -30,7 +30,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
@@ -361,7 +360,7 @@ public:
             atomSpace->getHandleSet(back_inserter(allInhLinks), INHERITANCE_LINK, "", true, vh);
             //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
-            //    logger().info("allInhLinks[x]: %s\n", TLB::getAtom(allInhLinks[x])->toString().c_str());
+            //    logger().info("allInhLinks[x]: %s\n", atomSpace.getAtom(allInhLinks[x])->toString().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == (vhIdx == 0 ? 8 : 2));
             HandleSeq justInhLinks;
@@ -458,7 +457,7 @@ public:
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
         TS_ASSERT(!Handle::compare(h1_, h1));
-        Atom* atom = TLB::getAtom(h1_);
+        const Atom* atom = &atomSpace->getAtom(h1_);
         TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
 
@@ -468,7 +467,7 @@ public:
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
         TS_ASSERT(!Handle::compare(evalLink_, evalLink));
-        atom = TLB::getAtom(evalLink_);
+        atom = &atomSpace->getAtom(evalLink_);
         TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
     }
@@ -500,15 +499,15 @@ public:
         Handle h3_ = atomSpace->addNode(CONCEPT_NODE, "tree", tv3_);
 
         TS_ASSERT(!Handle::compare(h1, h1_));
-        const TruthValue& h1tv = TLB::getAtom(h1)->getTruthValue();
+        const TruthValue& h1tv = atomSpace->getAtom(h1).getTruthValue();
         TS_ASSERT(h1tv.getMean() - tv1_.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h1tv.getCount() - tv1_.getCount() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(!Handle::compare(h2, h2_));
-        const TruthValue& h2tv = TLB::getAtom(h2)->getTruthValue();
+        const TruthValue& h2tv = atomSpace->getAtom(h2).getTruthValue();
         TS_ASSERT(h2tv.getMean() - tv2.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h2tv.getCount() - tv2.getCount() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(!Handle::compare(h3, h3_));
-        const TruthValue& h3tv = TLB::getAtom(h3)->getTruthValue();
+        const TruthValue& h3tv = atomSpace->getAtom(h3).getTruthValue();
         TS_ASSERT(h3tv.getMean() - tv3.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h3tv.getCount() - tv3.getCount() < FLOAT_ACCEPTABLE_ERROR);
 
@@ -572,11 +571,11 @@ public:
         Handle l2_ = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2_);
 
         TS_ASSERT(!Handle::compare(l1, l1_));
-        const TruthValue& l1tv = TLB::getAtom(l1)->getTruthValue();
+        const TruthValue& l1tv = atomSpace->getAtom(l1).getTruthValue();
         TS_ASSERT(l1tv.getMean() - tv1_.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(l1tv.getCount() - tv1_.getCount() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(!Handle::compare(l2, l2_));
-        const TruthValue& l2tv = TLB::getAtom(l2)->getTruthValue();
+        const TruthValue& l2tv = atomSpace->getAtom(l2).getTruthValue();
         TS_ASSERT(l2tv.getMean() - tv2.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(l2tv.getCount() - tv2.getCount() < FLOAT_ACCEPTABLE_ERROR);
 
