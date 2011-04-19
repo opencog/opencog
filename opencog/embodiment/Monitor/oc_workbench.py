@@ -4,7 +4,7 @@
 #
 # @author Troy Huang <huangdeheng@gmail.com>
 # @date 2011-03-30
-#
+# @update 2011-04-19
 
 
 
@@ -25,7 +25,9 @@ class OCMonitorPanel(QFrame):
         super(OCMonitorPanel, self).__init__(parent)
 
         self.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        self.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding, True))
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding, True)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
         
         self.monitorList = []
         self.columnNum = columnNum
@@ -118,13 +120,6 @@ class OCMonitorPanel(QFrame):
         for monitor in self.monitorList:
             monitor.widget.show()
 
-    def heightForWidth(self, width):
-        return 0.9 * width
-
-    def sizeHint(self):
-        return QSize(self.geometry().width(), self.heightForWidth(self.geometry().width()))
-    
-
 class OCMonitorTabView(QWidget):
     """
     The tab view include two components: navigation bar and monitor panel.
@@ -140,9 +135,9 @@ class OCMonitorTabView(QWidget):
         
         self.createNavigationBar()
 
-        tabLayout = QVBoxLayout()
+        tabLayout = QVBoxLayout(self)
         tabLayout.addWidget(self.navigationBar, 0, Qt.AlignTop)
-        tabLayout.addWidget(self.monitorPanel, 1, Qt.AlignTop)
+        tabLayout.addWidget(self.monitorPanel, 1)
         self.setLayout(tabLayout)
 
 
@@ -190,8 +185,8 @@ class OCMonitorTabView(QWidget):
     
 
 class OCMonitorTabWidget(QTabWidget):
-    def __init__(self):
-        super(OCMonitorTabWidget, self).__init__(None)
+    def __init__(self, parent=None):
+        super(OCMonitorTabWidget, self).__init__(parent)
         
         # Create an "add tab" button.
         self.addTabButton = QPushButton()
@@ -206,10 +201,10 @@ class OCMonitorTabWidget(QTabWidget):
         self.tabCloseRequested[int].connect(self.closeTab)
         
         # Create a single tab initially
-        self.addTab(OCMonitorTabView(self), "OAC")
+        self.addTab(OCMonitorTabView(), "OAC")
         
     def addNewTab(self):
-        newTab = OCMonitorTabView(self)
+        newTab = OCMonitorTabView()
         self.addTab(newTab, "OAC")
         self.setCurrentWidget(newTab)
     
@@ -232,7 +227,16 @@ class OCWorkbench(QMainWindow):
 
         self.setupWidget()
         #self.createMenus()
-        self.setCentralWidget(OCMonitorTabWidget())
+        self.centralWidget = QWidget(self)
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy.setHeightForWidth(self.centralWidget.sizePolicy().hasHeightForWidth())
+        self.centralWidget.setSizePolicy(sizePolicy)
+        self.mainLayout = QGridLayout(self.centralWidget)
+
+        monitorTabWidget = OCMonitorTabWidget(self.centralWidget)
+
+        self.mainLayout.addWidget(monitorTabWidget, 0, 0)
+        self.setCentralWidget(self.centralWidget)
         
     def setupWidget(self):
         """Setup the initial properties of this widget"""
