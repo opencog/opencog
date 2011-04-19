@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiFeelingUpdaterAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-04-01
+ * @date 2011-04-19
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,6 +23,7 @@
 #include "OAC.h"
 #include "PsiFeelingUpdaterAgent.h"
 
+#include "opencog/guile/SchemeEval.h"
 #include "opencog/web/json_spirit/json_spirit.h"
 
 #include<boost/tokenizer.hpp>
@@ -108,10 +109,6 @@ void PsiFeelingUpdaterAgent::init(opencog::CogServer * server)
         return;
     }
 
-    // Get Procedure repository
-    const Procedure::ProcedureRepository & procedureRepository = 
-                                               oac->getProcedureRepository();
-
     // Clear old feelingMetaMap; 
     this->feelingMetaMap.clear();
 
@@ -134,16 +131,6 @@ void PsiFeelingUpdaterAgent::init(opencog::CogServer * server)
                         __FUNCTION__, 
                         feeling.c_str() 
                       );
-
-        // Search feeling updater
-        // TODO: Load corresponding combo script within OAC
-        if ( !procedureRepository.contains(feelingUpdater) ) {
-            logger().warn( "PsiFeelingUpdaterAgent::%s - Failed to find '%s' in OAC's procedureRepository",
-                           __FUNCTION__, 
-                           feelingUpdater.c_str()
-                         );
-            continue;
-        }
     
         // Get the corresponding EvaluationLink of the pet's feeling
         Handle evaluationLink = this->getFeelingEvaluationLink(server, feeling, petHandle);
@@ -244,27 +231,27 @@ Handle PsiFeelingUpdaterAgent::getFeelingEvaluationLink(opencog::CogServer * ser
 
 void PsiFeelingUpdaterAgent::runUpdaters(opencog::CogServer * server)
 {
-    logger().debug( "PsiFeelingUpdaterAgent::%s - Running feeling updaters (combo scripts) [ cycle = %d ]", 
+    logger().debug( "PsiFeelingUpdaterAgent::%s - Running feeling updaters (scheme scripts) [ cycle = %d ]", 
                     __FUNCTION__ , 
                     this->cycleCount
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+//    OAC * oac = (OAC *) server;
 
-    // Get ProcedureInterpreter
-    Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
+    // Get the AtomSpace
+    AtomSpace & atomSpace = * ( server->getAtomSpace() ); 
 
-    // Get Procedure repository
-    const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
+#if HAVE_GUILE    
+
+    // Initialize scheme evaluator
+    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);    
+    std::string scheme_expression, scheme_return_value;
 
     // Process feelings one by one
     std::map <std::string, FeelingMeta>::iterator iFeeling;
 
     std::string feeling, feelingUpdater;
-    std::vector <combo::vertex> schemaArguments;
-    Procedure::RunningProcedureID executingSchemaId;
-    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
 
     for ( iFeeling = feelingMetaMap.begin();
           iFeeling != feelingMetaMap.end();
@@ -273,20 +260,15 @@ void PsiFeelingUpdaterAgent::runUpdaters(opencog::CogServer * server)
         feeling = iFeeling->first;
         feelingUpdater = iFeeling->second.updaterName;
 
+        scheme_expression = "( " + feelingUpdater + " )";
+
         // Run the Procedure that update feeling and get the updated value
-        const Procedure::GeneralProcedure & procedure = procedureRepository.get(feelingUpdater);
+        scheme_return_value = evaluator.eval(scheme_expression);
 
-        executingSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
-
-        // Wait until the end of combo script execution
-        while ( !procedureInterpreter.isFinished(executingSchemaId) )
-            procedureInterpreter.run(NULL);  
-
-        // Check if the the updater run successfully
-        if ( procedureInterpreter.isFailed(executingSchemaId) ) {
+        if ( evaluator.eval_error() ) {
             logger().error( "PsiFeelingUpdaterAgent::%s - Failed to execute '%s'", 
                              __FUNCTION__, 
-                             feelingUpdater.c_str() 
+                             scheme_expression.c_str() 
                           );
 
             iFeeling->second.bUpdated = false;
@@ -297,11 +279,15 @@ void PsiFeelingUpdaterAgent::runUpdaters(opencog::CogServer * server)
             iFeeling->second.bUpdated = true;
         }
 
-        result = procedureInterpreter.getResult(executingSchemaId);
-
         // Store updated value to FeelingMeta.updatedValue
-        // contin_t is actually of type double (see "comboreduct/combo/vertex.h") 
-        iFeeling->second.updatedValue = get_contin(result);
+        // 
+        // Note: Don't use boost::lexical_cast as below, because SchemeEval will append 
+        //       a '\n' to the end of the result (scheme_return_value),  which will make
+        //       boost::lexical_cast throw exception
+        //
+        // iFeeling->second.updatedValue = boost::lexical_cast<double>(scheme_return_value);
+        //
+        iFeeling->second.updatedValue = atof( scheme_return_value.c_str() );
 
         // TODO: Change the log level to fine, after testing
         logger().debug( "PsiFeelingUpdaterAgent::%s - The new level of feeling '%s' will be %f", 
@@ -310,6 +296,8 @@ void PsiFeelingUpdaterAgent::runUpdaters(opencog::CogServer * server)
                          iFeeling->second.updatedValue                      
                       );
     }// for
+
+#endif // HAVE_GUILE    
 
 }    
 
@@ -368,6 +356,9 @@ void PsiFeelingUpdaterAgent::sendUpdatedValues(opencog::CogServer * server)
 
     // Get OAC
     OAC * oac = (OAC *) server;
+
+    // Get AtomSpace
+//    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get petName
     const std::string & petName = oac->getPet().getName(); 

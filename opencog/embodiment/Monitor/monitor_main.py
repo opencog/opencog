@@ -48,9 +48,11 @@ class MonitorMainWindow(QtGui.QMainWindow):
         self.main_widget = QtGui.QWidget(self)
         grid_layout = QtGui.QGridLayout(self.main_widget)
 
+        plaza_publish_endpoint = "tcp://127.0.0.1:18002"
+
         # Add PsiModulatorUpdaterAgentMonitor
         self.PsiModulatorUpdaterAgentMonitor = MonitorThread(self.zmq_context,
-                             "tcp://127.0.0.1:18002", 
+                             plaza_publish_endpoint, 
                              "PsiModulatorUpdaterAgent", 
                              self.main_widget, width=5, height=4, dpi=100
                             )
@@ -58,7 +60,7 @@ class MonitorMainWindow(QtGui.QMainWindow):
 
         # Add PsiFeelingUpdaterAgentMonitor
         self.PsiFeelingUpdaterAgentMonitor = MonitorThread(self.zmq_context,
-                             "tcp://127.0.0.1:18002", 
+                             plaza_publish_endpoint, 
                              "PsiFeelingUpdaterAgent", 
                              self.main_widget, width=5, height=4, dpi=100
                             )
@@ -66,7 +68,7 @@ class MonitorMainWindow(QtGui.QMainWindow):
 
         # Add PsiDemandUpdaterAgentMonitor
         self.PsiDemandUpdaterAgentMonitor = MonitorThread(self.zmq_context,
-                             "tcp://127.0.0.1:18002", 
+                             plaza_publish_endpoint, 
                              "PsiDemandUpdaterAgent", 
                              self.main_widget, width=5, height=4, dpi=100
                             )

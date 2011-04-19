@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
- * Updated: by Zhenhua Cai, on 2011-02-07
+ * Updated: by Zhenhua Cai, on 2011-04-19
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -111,13 +111,12 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     } else {
         pet->initTraitsAndFeelings();
 
-        logger().info( "OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s', ActionSchemataPreconditions '%s', PsiModulatorUpdaters '%s', PsiDemandUpdaters '%s' and PsiFeelingUpdaterAgent '%s'.",
+        logger().info( "OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s', ActionSchemataPreconditions '%s', PsiModulatorUpdaters '%s' and PsiDemandUpdaters '%s'.",
                        config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
                        config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
                        config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str(), 
                        config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str(), 
-                       config().get("PSI_DEMAND_UPDATERS_REPOSITORY_FILE").c_str(), 
-                       config().get("PSI_FEELING_UPDATERS_REPOSITORY_FILE").c_str()
+                       config().get("PSI_DEMAND_UPDATERS_REPOSITORY_FILE").c_str()
                      );
 
         int cnt = 0;
@@ -189,20 +188,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         logger().info(
                      "OAC - DemandUpdaters combo functions loaded.");
 
-        fin.open(config().get("PSI_FEELING_UPDATERS_REPOSITORY_FILE").c_str());
-        if (fin.good()) {
-            logger().info("OAC - Loading FeelingUpdaters combo.");
-            cnt = procedureRepository->loadComboFromStream(fin);
-        } else {
-            logger().error(
-                         "OAC - Unable to load FeelingUpdaters combo.");
-        }
-        fin.close();
-        logger().info(
-                     "OAC - FeelingUpdaters combo functions loaded.");
-      
     }// if
-
 
     // warning: it must be called after register the agent and it's owner nodes
 //    this->ruleEngine = new RuleEngine( this, petId );
@@ -345,7 +331,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
            config().get_int( "PSI_FEELING_UPDATER_CYCLE_PERIOD" ) );
         this->startAgent(psiFeelingUpdaterAgent);
     }
-   
 
     // TODO: This should be done only after NetworkElement is initialized
     // (i.e., handshake with router is done)
