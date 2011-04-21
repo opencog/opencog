@@ -784,7 +784,7 @@ void OAC::schemaSelection()
 {
     logger().fine("OAC - Executing selectSchemaToExecute().");
 
-    this->pet->getCurrentModeHandler( ).update( );
+//    this->pet->getCurrentModeHandler( ).update( );
 //    this->ruleEngine->processNextAction( );
 //    this->ruleEngine->runSchemaForCurrentAction( );
 
