@@ -3,7 +3,7 @@
 # The main job of a widget is getting data from Plaza within OAC and drawing graphs
 #
 # @author: Zhenhua Cai, czhedu@gmail.com 
-# @date:   2011-03-30
+# @date:   2011-04-23
 #
 # @note: I borrowed some code from 
 # http://matplotlib.sourceforge.net/examples/user_interfaces/embedding_in_qt4.html
@@ -17,14 +17,16 @@ from PyQt4 import QtGui, QtCore
 import zmq
 import json
 
-from collections import deque
+from common import *
 
 class MonitorWidget(FigureCanvas):
     """ Qt4 backend of matplot, which provides a canvas for plotting.
         The actual plotting is done within the MonitorThread class automatically.
     """
     clicked = QtCore.pyqtSignal()
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+
+    def __init__(self, publish_endpoint, filter_key, 
+                 parent=None, width=5, height=4, dpi=100):
 
         # Initialize figure canvas
         self.figure = Figure(figsize=(width, height), dpi=dpi)
@@ -39,35 +41,19 @@ class MonitorWidget(FigureCanvas):
                                   )
         FigureCanvas.updateGeometry(self)
 
-    def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.LeftButton:
-            self.clicked.emit()
-
-class MonitorThread(QtCore.QThread):
-    """ Get data from Plaza within OAC via ZeroMQ and draw graphs on MonitorWidget
-    """
-    def __init__(self, zmq_context, publish_endpoint, filter_key,
-                 parent=None, width=5, height=4, dpi=100):
-
-        # Initialize the thread and locker
-        QtCore.QThread.__init__(self)
-
-        # Create a figure canvas
-        self.widget = MonitorWidget(parent, width, height, dpi)
-
-        # Initialize the zeromq subscriber (socket)
-        self.socket = zmq_context.socket(zmq.SUB)
-        self.socket.connect(publish_endpoint)
-        self.filter_key = filter_key
-#        self.signal_name = "signal_" + filter_key
-        self.socket.setsockopt(zmq.SUBSCRIBE, self.filter_key)
-
         # Initialize variables related to graph 
         self.max_data_len = 50
         self.has_initialized = False
         self.data_dict = {}
         self.legend_list = []
-    
+
+        # Create and start ZeroMQ subscriber thread
+        self.zmq_subscriber_thread = ZmqSubscriberThread(self,
+                                                         publish_endpoint, 
+                                                         filter_key
+                                                         )
+        self.zmq_subscriber_thread.start()
+
     # Initialize data and legend
     def initialize_data(self, json_dict):
         for k, v in json_dict.iteritems():
@@ -86,49 +72,44 @@ class MonitorThread(QtCore.QThread):
 
     # Draw the graph on the widget
     def draw_graph(self):
-        MonitorThread.read_write_lock.lockForWrite()
-
-        self.widget.axes.clear()
+        self.axes.clear()
 
         for k in self.data_dict.keys():
             if (k!="timestamp"):
-                self.widget.axes.plot(self.data_dict["timestamp"], 
-                                      self.data_dict[k], 
-                                      '-o'
-                                     )
+                self.axes.plot(self.data_dict["timestamp"], 
+                               self.data_dict[k], 
+                               '-o'
+                              )
 
-        leg = self.widget.axes.legend(self.legend_list,
-                                      'upper left',
-                                      shadow=True
-                                     )
+        leg = self.axes.legend(self.legend_list,
+                               'upper left',
+                               shadow=True
+                              )
 
-        self.widget.axes.set_title(self.filter_key)
-        self.widget.axes.grid(True)
+        self.axes.set_title(self.zmq_subscriber_thread.filter_key)
+        self.axes.grid(True)
 
-        self.widget.draw()
+        self.draw()
 
-        MonitorThread.read_write_lock.unlock()
-
-    # Execution entrance of the thread
-    def run(self):
-        while True:
-            message = self.socket.recv()
-
-            # if the message contains only filter key, discard it
-            if message == self.filter_key: continue
-           
-            json_dict = json.loads(message) 
-
+    @pyqtSlot(dict)
+    def handle_data_update(self, json_dict):
+            """
+            Process the data in json format
+            """
             if not self.has_initialized:
                 self.initialize_data(json_dict)
-                continue
 
             self.update_data(json_dict)
+
+            # Draw the graph only where no other graph is being rendered.
+            # In principle, the global lock is not necessary,
+            # however drawing graph is very CPU consuming, 
+            # introduce this limit may make GUI response more quickly
+            glb.gui_read_write_lock.lockForWrite()
             self.draw_graph()
+            glb.gui_read_write_lock.unlock()
 
-#            self.usleep(50)
-
-# A lock used to synchronize all the monitor threads, 
-# We should avoid drawing on the widgets at the same time 
-MonitorThread.read_write_lock = QtCore.QReadWriteLock()
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.clicked.emit()
 

@@ -14,6 +14,8 @@ import zmq
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+from common import *
+
 from monitor_widget import *
 
 class OCMonitorPanel(QFrame):
@@ -45,8 +47,8 @@ class OCMonitorPanel(QFrame):
         for i, monitor in enumerate(monitors):
             row = (oldCount + i) / self.columnNum
             col = (oldCount + i) % self.columnNum
-            self.layout().addWidget(monitor.widget, row, col)
-            monitor.widget.clicked.connect(self.showSoloView)
+            self.layout().addWidget(monitor, row, col)
+            monitor.clicked.connect(self.showSoloView)
 
     def createMonitors(self, zmqUrl=""):
         if zmqUrl == "" or (not str(zmqUrl).startswith("tcp://") and\
@@ -63,34 +65,19 @@ class OCMonitorPanel(QFrame):
             self.zmqUrl = zmqUrl
             if len(self.monitorList) > 0:
                 for monitor in self.monitorList:
-                    monitor.widget.hide()
-                    #self.layout().removeWidget(monitor.widget)
+                    monitor.hide()
+                    #self.layout().removeWidget(monitor)
                 del self.monitorList[:]
         else:
             return 
-
-        self.zmq_context = zmq.Context()
         
-        monitor1 = MonitorThread(self.zmq_context,
-                             str(self.zmqUrl),
-                             "PsiModulatorUpdaterAgent", 
-                             self)
-        monitor2 = MonitorThread(self.zmq_context,
-                             str(self.zmqUrl), 
-                             "PsiFeelingUpdaterAgent", 
-                             self)
-        monitor3 = MonitorThread(self.zmq_context,
-                             str(self.zmqUrl), 
-                             "PsiDemandUpdaterAgent", 
-                             self)
+        monitor1 = MonitorWidget(str(self.zmqUrl), "PsiModulatorUpdaterAgent")
+        monitor2 = MonitorWidget(str(self.zmqUrl), "PsiFeelingUpdaterAgent")
+        monitor3 = MonitorWidget(str(self.zmqUrl), "PsiDemandUpdaterAgent")
+                                
         self.addMonitors([monitor1, \
-                    monitor2, \
-                    monitor3]) 
-        self.startMonitor()
-
-    def startMonitor(self):
-        for monitor in self.monitorList:
-            monitor.start()
+                          monitor2, \
+                          monitor3]) 
 
     def showSoloView(self):
         sender = self.sender()
@@ -102,8 +89,8 @@ class OCMonitorPanel(QFrame):
             return
 
         for monitor in self.monitorList:
-            if sender != monitor.widget:
-                monitor.widget.hide()
+            if sender != monitor:
+                monitor.hide()
         sender.update()
         sender.updateGeometry()
 
@@ -118,7 +105,7 @@ class OCMonitorPanel(QFrame):
     def showGroupView(self):
         self.soloist = None
         for monitor in self.monitorList:
-            monitor.widget.show()
+            monitor.show()
 
 class OCMonitorTabView(QWidget):
     """

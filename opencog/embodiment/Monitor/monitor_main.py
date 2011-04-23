@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 #
-# Main window for OAC monitor 
+# Main window for OAC monitor
+# 
+# It is only used for development, you should use 'python oc_workbench.py'
+# to start the OpenCog workbench
 #
 # @author: Zhenhua Cai, czhedu@gmail.com 
 # @date:   2011-03-30

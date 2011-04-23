@@ -14,7 +14,13 @@ import sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+from common import *
+
 from monitor_browser import *
+from nlp_browser import *
+
+# Initialize global variables
+glb.init_global_var()
 
 class OCWorkbench(QMainWindow):
     """The main window of OpenCog workbench.
@@ -26,7 +32,7 @@ class OCWorkbench(QMainWindow):
 
         self.setupWorkbench()
         #self.createMenus()
-
+        
         # Create a central widget to contain module switchs and scenes.
         self.centralWidget = QWidget(self)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -51,7 +57,7 @@ class OCWorkbench(QMainWindow):
         # A stack of scenes that can be switched.
         self.sceneStack = QStackedWidget()
         self.sceneStack.addWidget(OCMonitorBrowser())
-        self.sceneStack.addWidget(QLabel("Dialog"))
+        self.sceneStack.addWidget(NLPBrowser())
         
         self.centralLayout.addWidget(self.moduleIconList)
         self.centralLayout.addWidget(self.sceneStack)
