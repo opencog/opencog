@@ -105,9 +105,10 @@ class MonitorWidget(FigureCanvas):
             # In principle, the global lock is not necessary,
             # however drawing graph is very CPU consuming, 
             # introduce this limit may make GUI response more quickly
-            glb.gui_read_write_lock.lockForWrite()
-            self.draw_graph()
-            glb.gui_read_write_lock.unlock()
+            if self.isVisible(): 
+                glb.gui_read_write_lock.lockForWrite()
+                self.draw_graph()
+                glb.gui_read_write_lock.unlock()
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
