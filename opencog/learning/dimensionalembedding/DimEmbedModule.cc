@@ -333,7 +333,7 @@ void DimEmbedModule::addLink(const Handle& h, const Type& linkType) {
     }
     return;
 }
-    
+
 void DimEmbedModule::clearEmbedding(const Type& linkType){
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
