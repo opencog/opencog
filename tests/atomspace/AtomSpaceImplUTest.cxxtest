@@ -514,6 +514,11 @@ public:
         // test adding a node with no truth value
         Handle h4 = atomSpace->addNode(CONCEPT_NODE, "wood");
         TS_ASSERT(h4 != Handle::UNDEFINED);
+
+        // Check that isNode returns true
+        TS_ASSERT(atomSpace->isNode(h4));
+        // Check that isLink returns false
+        TS_ASSERT(!atomSpace->isLink(h4));
     
 #if 0
 // The current design to support this leaks memory. So I plugged the
@@ -565,6 +570,11 @@ public:
         outgoing2.push_back(l1);
         Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
 
+        // Check that isNode returns false
+        TS_ASSERT(!atomSpace->isNode(l2));
+        // Check that isLink returns true
+        TS_ASSERT(atomSpace->isLink(l2));
+
         SimpleTruthValue tv1_(0.002f, 0.00002f);
         Handle l1_ = atomSpace->addLink(LIST_LINK, outgoing1, tv1_);
         SimpleTruthValue tv2_(0.1f, 0.0f);
@@ -581,6 +591,51 @@ public:
 
     }
 
+    void testIsSource() {
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5f, 0.99f));
+        SimpleTruthValue tv1(0.001f, 0.00001f);
+        SimpleTruthValue tv2(0.001f, 0.00001f);
+        HandleSeq outgoing1;
+        outgoing1.push_back(h2);
+        outgoing1.push_back(h3);
+        Handle l1 = atomSpace->addLink(SET_LINK, outgoing1, tv1);
+        HandleSeq outgoing2;
+        outgoing2.push_back(h1);
+        outgoing2.push_back(l1);
+        Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
+
+        // Ensure first in outgoing is the source
+        TS_ASSERT(atomSpace->isSource(h1,l2));
+        // Ensure second in outgoing is not the source
+        TS_ASSERT(!atomSpace->isSource(l1,l2));
+
+        // Ensure all in the outgoing set of unordered link are considered a source
+        TS_ASSERT(atomSpace->isSource(h2,l1));
+        TS_ASSERT(atomSpace->isSource(h3,l1));
+
+    }
+
+    void testGetNeighbors() {
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5f, 0.99f));
+        SimpleTruthValue tv1(0.001f, 0.00001f);
+        SimpleTruthValue tv2(0.001f, 0.00001f);
+        HandleSeq outgoing1;
+        outgoing1.push_back(h2);
+        outgoing1.push_back(h3);
+        Handle l1 = atomSpace->addLink(SET_LINK, outgoing1, tv1);
+        HandleSeq outgoing2;
+        outgoing2.push_back(h1);
+        outgoing2.push_back(l1);
+        Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
+
+        TS_ASSERT(atomSpace->getNeighbors(h1).size() == 1);
+        Handle badHandle(10000); 
+        TS_ASSERT_THROWS(atomSpace->getNeighbors(badHandle),opencog::InvalidParamException);
+    }
 
     void testGetHandle_bugfix1() {
         AtomSpaceImpl atomSpace;

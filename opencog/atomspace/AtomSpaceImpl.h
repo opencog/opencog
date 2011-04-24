@@ -334,9 +334,6 @@ public:
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle) const;
 
-    /** Change the name of a given Handle */
-    void setName(Handle, const std::string& name);
-
     /** Retrieve the type of a given Handle */
     Type getType(Handle) const;
 
@@ -487,7 +484,7 @@ public:
      * @param linkType Follow only these types of links.
      * @param subClasses Follow subtypes of linkType too.
      */
-    HandleSeq getNeighbors(const Handle h, bool fanin, bool fanout,
+    HandleSeq getNeighbors(const Handle h, bool fanin=true, bool fanout=true,
             Type linkType=LINK, bool subClasses=true) const;
 
     /** Retrieve a single Handle from the outgoing set of a given link */
@@ -496,7 +493,9 @@ public:
     /** Retrieve the arity of a given link */
     int getArity(Handle) const;
 
-    /** Return whether s is the source handle in a link l */ 
+    /** Return whether s is the source handle in a link l
+     * @note Only ORDERED_LINKs have a source handle.
+     */ 
     bool isSource(Handle source, Handle link) const;
 
     /** Retrieve the outgoing set of a given link */

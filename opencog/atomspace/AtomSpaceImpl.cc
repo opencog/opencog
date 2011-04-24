@@ -474,7 +474,7 @@ HandleSeq AtomSpaceImpl::getNeighbors(const Handle h, bool fanin,
 
 bool AtomSpaceImpl::isSource(Handle source, Handle link) const
 {
-    const Link *l = atomTable.getLink(source);
+    const Link *l = atomTable.getLink(link);
     if (l != NULL) {
         return l->isSource(source);
     }
@@ -525,13 +525,6 @@ int AtomSpaceImpl::getArity(Handle h) const
     Link * l = atomTable.getLink(h);
     if (NULL == l) return 0;
     return l->getArity();
-}
-
-void AtomSpaceImpl::setName(Handle h, const string& name)
-{
-    Node *nnn = atomTable.getNode(h);
-    OC_ASSERT(nnn != NULL, "AtomSpaceImpl::setName(): Handle h should be of 'Node' type.");
-    nnn->setName(name);
 }
 
 HandleSeq AtomSpaceImpl::getIncoming(Handle h)
