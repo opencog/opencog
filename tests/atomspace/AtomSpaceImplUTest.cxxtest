@@ -30,6 +30,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
@@ -814,6 +815,20 @@ public:
         atomSpace->removeAtom(contextLink);
         TS_ASSERT(atomSpace->getTV(h,vh) == TruthValue::NULL_TV());
 
+    }
+
+    void testSetTV() {
+        Handle h = atomSpace->addNode(CONCEPT_NODE,"blah");
+        Handle ch = atomSpace->addNode(CONCEPT_NODE,"context");
+        VersionHandle vh1 = VHs[1];
+        VersionHandle vh(CONTEXTUAL, ch); 
+        atomSpace->setTV(h, TruthValue::DEFAULT_TV(), vh);
+        CompositeTruthValue ctv(TruthValue::DEFAULT_TV(), vh);
+        ctv.setVersionedTV(SimpleTruthValue(0.5,0.5),vh1);
+        atomSpace->setTV(h, ctv);
+        ctv.setVersionedTV(SimpleTruthValue(0.6,0.5),vh1);
+        atomSpace->setTV(h, ctv);
+        TS_ASSERT(atomSpace->getTV(h, vh1) == SimpleTruthValue(0.6,0.5));
     }
 
     void testGetNormalisedSTI() {
