@@ -68,17 +68,22 @@ void print(AtomSpace& atomspace, CoverTreeNode& p) {
     printf("%s", oss.str().c_str());
 }
 
+/*
+ * Does not calculate distance fully if it is greater than upper_bound.
+ */
 double distance(CoverTreeNode n1, CoverTreeNode n2, double upper_bound) {
     const std::vector<double>& v1=n1.getVector();
     const std::vector<double>& v2=n2.getVector();
     OC_ASSERT(v1.size()==v2.size());
     std::vector<double>::const_iterator it1=v1.begin();
     std::vector<double>::const_iterator it2=v2.begin();
-    
+
     double distance=0;
     //Calculate euclidean distance between v1 and v2
-    for(; it1!=v1.end(); ++it1, ++it2)
+    for(; it1!=v1.end(); it1++, it2++) {
         distance+=sq(*it1 - *it2);
+        if(distance > sq(upper_bound)) break;
+    }
     distance=sqrt(distance);
     return distance;
 }

@@ -352,9 +352,42 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
             }
         }
     }
+    //TODO:add the node to the cover tree
     return newEmbedding;
 }
 
+void DimEmbedModule::addLink(const Handle& h, const Type& linkType) {
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+
+    std::vector<std::vector<double> > embeddingVectors;
+    AtomEmbedding aE = atomMaps[linkType];
+    HandleSeq nodes = as->getOutgoing(h);
+    HandleSeq::iterator it;
+    for(it=nodes.begin();it!=nodes.end();it++) {
+        embeddingVectors.push_back(aE[*it]);
+    }
+    std::vector<std::vector<double> >::iterator it,it2;
+    int i=0;
+    bool flag changed = false;
+    //double weight = tv.strength*tv.confidence
+    for(it=embeddingVectors.begin();it!=embeddingVectors.end();it++) {
+        for(it2=embeddingVectors.begin();it2!=embeddingVectors.end();it2++) {
+            if((*it)[i]<(weight*(*it2)[i])) {
+                (*it)[i]=(weight*(*it2)[i]);
+                changed=true;
+            }
+        }
+        i++;
+    }
+    if(changed) {
+        //TODO: update the cover tree
+    }
+    return;
+}
+    
 void DimEmbedModule::clearEmbedding(const Type& linkType){
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
@@ -705,4 +738,19 @@ double DimEmbedModule::euclidDist(std::vector<double> v1,
         distance+=sq(*it1 - *it2);
     distance=sqrt(distance);
     return distance;
+}
+
+void DimEmbedModule::handleAddSignal(AtomSpaceImpl* a, Handle h) {
+    if(as->isNode(h)) {
+        AtomEmbedMap::iterator it;
+        //for each link type embedding that exists, add the node
+        for(it=atomMaps.begin();it!=atomMaps.end();it++) {
+            addNode(h,it->first);
+        }
+    }
+    else {//h is a link    
+        for(it=atomMaps.begin();it!=atomMaps.end();it++) {
+            addLink(it->first,h);
+        }
+    }
 }

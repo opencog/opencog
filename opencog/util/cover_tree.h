@@ -56,7 +56,7 @@ struct ds_node {
     P p;
 };
 
-double base = 2;
+double base = 1.3;
 
 
 double il2 = 1. / log(base);

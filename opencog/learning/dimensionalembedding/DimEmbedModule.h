@@ -177,9 +177,27 @@ namespace opencog
          * @param h Handle of node to be embedded.
          * @param linkType Type of link to use to embed h
          * @return The embedding vector (a vector of doubles between 0 and 1)
+         *
+         * @TODO add node to the cover tree after it's embedded
          */
         std::vector<double> addNode(const Handle& h, const Type& linkType);
 
+        /**
+         * Updates nodes directly connected to link in the appropriate
+         * AtomEmbedding for type linkType.
+         *
+         * We assume the atomspace has already been embedded, so we can
+         * update any atoms directly connected by the new link to take
+         * new paths allowed by the link into account. Note that this
+         * will only change directly-connected atoms. Even though nodes
+         * more hops away may now have shorter paths to the pivots, their
+         * embedding vectors will not be updated to reflect this.
+         *
+         * @param h Handle of new link
+         * @param linkType Type of link (which embedding to alter)
+         */
+        void addLink(const Handle& h, const Type& linkType);
+        
         /**
          * Returns true if a dimensional embedding exists for linkType l
          */
@@ -262,6 +280,14 @@ namespace opencog
         //void updateAtom(const Handle& h, const Type& linkType);
 
         void printEmbedding();
+
+
+        /**
+         * Updates the embeddings for a new atom (the atomspace will
+         * still need to be periodically reembedded). Should be registered
+         * with the atomspace via addAtomSignal
+         */
+        void handleAddSignal(AtomSpaceImpl* a, Handle h);
     }; // class
 } //namespace
 
