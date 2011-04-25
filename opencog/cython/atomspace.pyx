@@ -53,6 +53,8 @@ cdef class Handle:
     def is_undefined(self):
         if deref(self.h) == self.h.UNDEFINED: return True
         return False
+    def is_valid(self):
+        return self.atomspace.is_valid(self)
 
 # TruthValue
 ctypedef int count_t
@@ -105,8 +107,9 @@ cdef class TimeServer:
     def __dealloc__(self):
         # Don't do anything because the AtomSpace takes care of cleaning up
         pass
-# AtomSpace
 
+
+# AtomSpace
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
         AtomSpace()
@@ -120,7 +123,9 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle addLink(Type t, vector[cHandle])
         cHandle addLink(Type t, vector[cHandle], cTruthValue tvn)
 
+        bint isValidHandle(cHandle h)
         int getSize()
+        string getName(cHandle h)
 
         cTimeServer getTimeServer()
         void print_list "print" ()
@@ -137,6 +142,11 @@ cdef class AtomSpace:
         del self.atomspace
 
     def add_node(self, Type t, atom_name, TruthValue tv=None, prefixed=False):
+        """ Add Node to AtomSpace
+        @todo support [0.5,0.5] format for TruthValue.
+        @todo support type name for type.
+        @returns handle referencing the newly created Atom
+        """
         # convert to string
         py_byte_string = atom_name.encode('UTF-8')
         # create temporary cpp string
@@ -162,6 +172,11 @@ cdef class AtomSpace:
         return Handle(result.value());
 
     def add_link(self,Type t,outgoing,TruthValue tv=None):
+        """ Add Link to AtomSpace
+        @todo support [0.5,0.5] format for TruthValue.
+        @todo support type name for type.
+        @returns handle referencing the newly created Atom
+        """
         # create temporary cpp vector
         cdef vector[cHandle] o_vect
         for h in outgoing:
@@ -175,6 +190,22 @@ cdef class AtomSpace:
         if result == result.UNDEFINED: return None
         return Handle(result.value());
 
+    def is_valid(self,h):
+        """ Check whether the passed handle refers to an actual handle
+        """
+        try:
+            assert isinstance(h,Handle)
+        except AssertionError:
+            # Try to convert to a Handle object
+            try:
+                uuid = int(h)
+                h = Handle(uuid)
+            except ValueError, TypeError:
+                raise TypeError("Need UUID or Handle object")
+        if self.atomspace.isValidHandle(deref((<Handle>h).h)):
+            return True
+        return False
+
     def size(self):
         return self.atomspace.getSize()
 
@@ -185,6 +216,18 @@ cdef class AtomSpace:
     def print_list(self):
         self.atomspace.print_list()
 
+# Atom wrapper object, we should really do something similar in the
+# core OpenCog API.
+cdef class Atom:
+    cdef Handle handle
+    cdef AtomSpace atomspace
+    def __init__(self,Handle h,AtomSpace a):
+        self.handle = h
+        self.atomspace = a
+    def get_name(self):
+        cdef string name
+        name = self.atomspace.atomspace.getName(deref(self.handle.h))
+        return name.c_str()
 
 # SpaceServer
 cdef extern from "opencog/atomspace/SpaceServer.h" namespace "opencog":

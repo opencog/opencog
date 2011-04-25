@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from opencog import AtomSpace, TruthValue
+from opencog import AtomSpace, TruthValue, Atom
 
 class AtomSpaceTest(TestCase):
 
@@ -23,9 +23,9 @@ class AtomSpaceTest(TestCase):
 
         # test adding with a truthvalue
         h3 = self.space.add_node(1,"test_w_tv",TruthValue(0.5,100))
-
         self.assertEquals(self.space.size(),2)
 
+        # test adding with prefixed node
         h1 = self.space.add_node(1,"test",prefixed=True)
         h2 = self.space.add_node(1,"test",prefixed=True)
         self.assertNotEqual(h1,h2)
@@ -34,6 +34,12 @@ class AtomSpaceTest(TestCase):
         h3 = self.space.add_node(1,"test",TruthValue(0.5,100),prefixed=True)
         self.assertNotEqual(h1,h3)
         self.assertEquals(self.space.size(),5)
+
+        # tests with bad parameters
+        # test with not a proper truthvalue
+        self.assertRaises(TypeError,self.space.add_node,1,"test",0,True)
+        # test with bad type
+        self.assertRaises(TypeError,self.space.add_node,"ConceptNode","test",TruthValue(0.5,100))
 
     def test_add_link(self):
         h1 = self.space.add_node(1,"test1")
@@ -51,6 +57,24 @@ class AtomSpaceTest(TestCase):
         # fails when adding with a link type
         h1 = self.space.add_link(1,[h1,h3])
         self.assertEquals(h1,None)
+
+    def test_is_valid(self):
+        h1 = self.space.add_node(1,"test1")
+        # check with Handle object
+        self.assertTrue(self.space.is_valid(h1))
+        # check with raw UUID
+        self.assertTrue(self.space.is_valid(h1.value()))
+        # check with bad UUID
+        self.assertFalse(self.space.is_valid(2919))
+        # check with bad type
+        self.assertRaises(TypeError,self.space.is_valid,"test")
+
+    def test_atom(self):
+        h1 = self.space.add_node(1,"test1")
+        a = Atom(h1, self.space)
+        self.assertEqual(a.get_name(),"test1")
+
+
 
 
 

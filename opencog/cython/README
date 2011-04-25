@@ -1,0 +1,9 @@
+Development on Python bindings is in progress
+
+To generate with cython:
+
+python setup.py build_ext --inplace
+
+To test bindings (in OSX) with nosetests:
+
+DYLD_LIBRARY_PATH=~/path/to/libatomspace.dylib/ nosetests -s
