@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
          value<unsigned long>(&fs_params.cache_size)->default_value(1000000),
          "Cache size, so that identical candidates are not re-evaluated, 0 means no cache.\n")
         (opt_desc_str(complexity_penalty_intensity_opt).c_str(),
-         value<double>(&fs_params.cpi)->default_value(1.0),
+         value<double>(&fs_params.cpi)->default_value(0.0),
          "Intensity of the feature complexity penalty, in [0,+Inf), 0 means no complexity penalty.\n")
         (opt_desc_str(confidence_penalty_intensity_opt).c_str(),
          value<double>(&fs_params.confi)->default_value(1.0),
