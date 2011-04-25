@@ -46,29 +46,42 @@ cdef class Handle:
             return h1.h.value() >= h2.h.value()
     def __str__(self):
         return "<UUID:" + str(self.h.value()) + ">"
+    def is_undefined(self):
+        if deref(self.h) == self.h.UNDEFINED: return True
+        return False
 
 # TruthValue
+ctypedef int count_t
+ctypedef float confidence_t
+ctypedef float strength_t
+
 cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
     cdef cppclass cTruthValue "opencog::TruthValue":
-        getMean()
-        getConfidence()
-        getCount()
+        strength_t getMean()
+        confidence_t getConfidence()
+        count_t getCount()
         cTruthValue DEFAULT_TV()
 
 cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
         cSimpleTruthValue(float, float)
-        getMean()
-        getConfidence()
-        getCount()
+        strength_t getMean()
+        confidence_t getConfidence()
+        count_t getCount()
         cTruthValue DEFAULT_TV()
 
 cdef class TruthValue:
     cdef cTruthValue *cobj
-    def __cinit__(self):
-        self.cobj = <cTruthValue*> new cSimpleTruthValue(0.5,0.5)
+    def __cinit__(self, float strength, float count):
+        self.cobj = <cTruthValue*> new cSimpleTruthValue(strength,count)
     def __dealloc__(self):
         del self.cobj
+    def mean(self):
+        return deref(self.cobj).getMean()
+    def confidence(self):
+        return deref(self.cobj).getConfidence()
+    def count(self):
+        return deref(self.cobj).getCount()
 
 # HandleSeq
 #ctypedef vector[cHandle] HandleSeq
