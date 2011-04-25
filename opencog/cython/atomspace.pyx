@@ -20,8 +20,12 @@ cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
         cHandle(UUID)
         UUID value()
         bint operator==(cHandle h)
+        bint operator!=(cHandle h)
+        bint operator<(cHandle h)
+        bint operator>(cHandle h)
+        bint operator<=(cHandle h)
+        bint operator>=(cHandle h)
         cHandle UNDEFINED
-
 
 cdef class Handle:
     cdef cHandle *h
@@ -33,17 +37,17 @@ cdef class Handle:
         return self.h.value()
     def __richcmp__(Handle h1, Handle h2, int op):
         if op == 2: # ==
-            return h1.h.value() == h2.h.value()
+            return deref(h1.h) == deref(h2.h)
         elif op == 3: # !=
-            return h1.h.value() != h2.h.value()
+            return deref(h1.h) != deref(h2.h)
         elif op == 4: # >
-            return h1.h.value() > h2.h.value()
+            return deref(h1.h) > deref(h2.h)
         elif op == 0: # <
-            return h1.h.value() < h2.h.value()
+            return deref(h1.h) < deref(h2.h)
         elif op == 1: # <=
-            return h1.h.value() <= h2.h.value()
+            return deref(h1.h) <= deref(h2.h)
         elif op == 5: # >=
-            return h1.h.value() >= h2.h.value()
+            return deref(h1.h) >= deref(h2.h)
     def __str__(self):
         return "<UUID:" + str(self.h.value()) + ">"
     def is_undefined(self):
@@ -132,17 +136,26 @@ cdef class AtomSpace:
     def __dealloc__(self):
         del self.atomspace
 
-    def add_node(self,Type t,n,TruthValue tv=None):
+    def add_node(self, Type t, atom_name, TruthValue tv=None, prefixed=False):
         # convert to string
-        py_byte_string = n.encode('UTF-8')
+        py_byte_string = atom_name.encode('UTF-8')
         # create temporary cpp string
         cdef string *name = new string(py_byte_string)
         cdef cHandle result
-        if tv is None:
-            # get handle
-            result = self.atomspace.addNode(t,deref(name))
+        if prefixed:
+            # prefixed nodes ALWAYS generate a new atom using atom_name
+            # as the prefix
+            if tv is None:
+                # get handle
+                result = self.atomspace.addPrefixedNode(t,deref(name))
+            else:
+                result = self.atomspace.addPrefixedNode(t,deref(name),deref(tv.cobj))
         else:
-            result = self.atomspace.addNode(t,deref(name),deref(tv.cobj))
+            if tv is None:
+                # get handle
+                result = self.atomspace.addNode(t,deref(name))
+            else:
+                result = self.atomspace.addNode(t,deref(name),deref(tv.cobj))
         # delete temporary string
         del name
         if result == result.UNDEFINED: return None

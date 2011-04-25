@@ -22,7 +22,18 @@ class AtomSpaceTest(TestCase):
         self.assertEquals(h1,None)
 
         # test adding with a truthvalue
-        h3 = self.space.add_node(1,"test",TruthValue(0.5,100))
+        h3 = self.space.add_node(1,"test_w_tv",TruthValue(0.5,100))
+
+        self.assertEquals(self.space.size(),2)
+
+        h1 = self.space.add_node(1,"test",prefixed=True)
+        h2 = self.space.add_node(1,"test",prefixed=True)
+        self.assertNotEqual(h1,h2)
+        self.assertEquals(self.space.size(),4)
+
+        h3 = self.space.add_node(1,"test",TruthValue(0.5,100),prefixed=True)
+        self.assertNotEqual(h1,h3)
+        self.assertEquals(self.space.size(),5)
 
     def test_add_link(self):
         h1 = self.space.add_node(1,"test1")
