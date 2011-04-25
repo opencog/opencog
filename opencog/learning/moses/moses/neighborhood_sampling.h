@@ -27,6 +27,7 @@
 #include <limits>
 
 #include <boost/math/special_functions/binomial.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/lazy_random_selector.h>
@@ -39,6 +40,8 @@ namespace moses
 
 using opencog::pow2;
 using boost::math::binomial_coefficient;
+using boost::numeric_cast;
+using boost::numeric::positive_overflow;
 using std::numeric_limits;
 
 /**
@@ -510,12 +513,12 @@ inline unsigned long long count_n_changed_knobs_from_index(const eda::field_set&
         // is no need for recursive call
         unsigned rb = end_bit_idx - starting_index;
         if(n <= rb) {
-            double noi_double = binomial_coefficient<double>(rb , n);
-            // the following is in case the actual number of instances
-            // is greater than what can be represented by an unsigned
-            // long long
-            double noi_max = numeric_limits<unsigned long long>::max();
-            number_of_instances = std::min(noi_max, noi_double);
+            double noi_db = binomial_coefficient<double>(rb , n);
+            try {
+                number_of_instances = numeric_cast<unsigned long long>(noi_db);
+            } catch(positive_overflow&) {
+                number_of_instances = numeric_limits<unsigned long long>::max();
+            }
         }
     }
     return number_of_instances;
