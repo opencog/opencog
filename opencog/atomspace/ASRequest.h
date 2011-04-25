@@ -128,7 +128,14 @@ public:
     }
     
     virtual void do_work() {
-        set_result(atomspace->addNode(p1, p2, *p3));
+        Handle r;
+        try {
+            Handle r = atomspace->addNode(p1, p2, *p3);
+            set_result(r);
+        } catch (InvalidParamException &e) {
+            logger().error(e.what());
+            set_result(r);
+        }
     };
     
 };
