@@ -149,7 +149,7 @@ template<typename IT, typename OT>
 void feature_selection(IT& it, const OT& ot,
                        const feature_selection_parameters& fs_params,
                        RandGen& rng) {
-    optim_parameters op_param(20, 1, 2);
+    optim_parameters op_param(20, 1);
     if(fs_params.algorithm == un) {
         OC_ASSERT(false, "TODO");
     } else if(fs_params.algorithm == sa) {

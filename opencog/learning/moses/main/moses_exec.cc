@@ -462,8 +462,7 @@ int moses_exec(int argc, char** argv) {
                                    revisit, ignore_bscore);
 
     // set optim_parameters
-    optim_parameters opt_params(pop_size_ratio, .1 /*max_dist_ratio*/,
-                                max_score);
+    optim_parameters opt_params(pop_size_ratio, max_score);
 
     // set moses_parameters
     moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);

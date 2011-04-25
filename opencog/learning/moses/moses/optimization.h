@@ -66,8 +66,8 @@ inline double information_theoretic_bits(const eda::field_set& fs)
 // other algo
 struct optim_parameters {
     optim_parameters(double _pop_size_ratio = 20,
-                     double _max_dist_ratio = 0.75,
-                     double _terminate_if_gte = 0) :
+                     double _terminate_if_gte = 0,
+                     double _max_dist_log_ratio = 2) :
         term_total(1),
         term_improv(1),
 
@@ -76,9 +76,9 @@ struct optim_parameters {
         
         pop_size_ratio(_pop_size_ratio),
 
-        max_dist_ratio(_max_dist_ratio),
+        terminate_if_gte(_terminate_if_gte),
 
-        terminate_if_gte(_terminate_if_gte) {}
+        max_dist_log_ratio(_max_dist_log_ratio) {}
 
     //N=p.popsize_ratio*n^1.05
     inline unsigned pop_size(const eda::field_set& fs) {
@@ -103,6 +103,12 @@ struct optim_parameters {
                         window_size_len*information_theoretic_bits(fs)));
     }
 
+    // log(max_dist_log_ratio*information_theoretic_bits(fs))
+    inline unsigned max_distance(const eda::field_set& fs) {
+        double md = log2(max_dist_log_ratio*information_theoretic_bits(fs));
+        return max(1U, numeric_cast<unsigned>(md));
+    }
+
     // optimization is terminated after term_total*n generations, or
     // term_improv*sqrt(n/w) consecutive generations with no
     // improvement (w=windowsize)
@@ -115,12 +121,11 @@ struct optim_parameters {
     // populations are sized at N = popsize_ratio*n^1.05 where n is
     // problem size in info-t bits
     double pop_size_ratio;
-    // defines the max distance to search (either overall or during
-    // one iteration depending on the optimization algo) as
-    // max_dist_ratio * fields.dim_size()
-    double max_dist_ratio;
     // optimization is terminated if best score is >= terminate_if_gte
     double terminate_if_gte;
+    // defines the max distance to search during one iteration (used
+    // in method max_distance)
+    double max_dist_log_ratio;
 };
 
 // Parameters specific to EDA optimization
@@ -260,9 +265,7 @@ struct iterative_hillclimbing {
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
-        unsigned max_distance =
-            max(1U, (unsigned)(opt_params.max_dist_ratio 
-                               * (double)fields.dim_size()));
+        unsigned max_distance = opt_params.max_distance(fields);
 
         // score the initial instance
         eda::instance center_inst(init_inst);
@@ -660,7 +663,7 @@ struct simulated_annealing {
                             const Scoring& score, unsigned max_evals) {
 
         const eda::field_set& fields = deme.fields();
-        max_distance = fields.dim_size();
+        max_distance = opt_params.max_distance(fields);
 
         // @todo this should be adapted for SA
         unsigned pop_size = opt_params.pop_size(fields);
@@ -681,9 +684,7 @@ struct simulated_annealing {
         energy_t center_instance_energy = energy(scored_center_inst);
         double current_temp = sa_params.init_temp;
         do {
-            unsigned current_distance = 
-                max(1U, (unsigned)(opt_params.max_dist_ratio
-                                       * (double)dist_temp(current_temp)));
+            unsigned current_distance = dist_temp(current_temp);
 
             // score all new instances in the deme
             unsigned long long number_of_new_instances = 1; //@todo: possibly change that
