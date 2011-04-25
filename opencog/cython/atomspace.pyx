@@ -148,14 +148,17 @@ cdef class AtomSpace:
         if result == result.UNDEFINED: return None
         return Handle(result.value());
 
-    def add_link(self,Type t,outgoing):
+    def add_link(self,Type t,outgoing,TruthValue tv=None):
         # create temporary cpp vector
         cdef vector[cHandle] o_vect
         for h in outgoing:
             o_vect.push_back(deref((<Handle>h).h))
-        # get handle
-        cdef cHandle result = self.atomspace.addLink(t,o_vect)
-        # delete temporary vector
+        cdef cHandle result
+        if tv is None:
+            # get handle
+            result = self.atomspace.addLink(t,o_vect)
+        else:
+            result = self.atomspace.addLink(t,o_vect,deref(tv.cobj))
         if result == result.UNDEFINED: return None
         return Handle(result.value());
 
