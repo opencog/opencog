@@ -768,7 +768,6 @@ public:
      */
     void testfilter() {
         HandleSeq atoms;
-        logger().debug("BEGIN TEST: filter");
         
         atomSpace->getAtomTable().log(logger(), NODE, true);
         atomSpace->getAtomTable().log(logger(), LINK, true);
@@ -778,8 +777,6 @@ public:
         atomSpace->getAtomTable().log(logger(), NODE, true);
         atomSpace->getAtomTable().log(logger(), LINK, true);
         
-        logger().debug("STIAboveThreshold");
-
         AtomSpaceImpl::STIAboveThreshold stiAbove(1000);
         HandleSeq highSTI = atomSpace->filter(atoms.begin(), atoms.end(), &stiAbove);
         for (unsigned int i = 0; i < highSTI.size(); i++) {
@@ -788,8 +785,6 @@ public:
         TS_ASSERT(highSTI.size() == 1U);
         TS_ASSERT(highSTI[0] == atoms[0]);
                 
-        logger().debug("LTIAboveThreshold");
-        
         AtomSpaceImpl::LTIAboveThreshold ltiAbove(800);
         HandleSeq highLTI = atomSpace->filter(atoms.begin(), atoms.end(), &ltiAbove);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
@@ -797,7 +792,6 @@ public:
         }
         TS_ASSERT(highLTI.size() == 1U);
         TS_ASSERT(highLTI[0] == atoms[1]);
-        logger().debug("END TEST: filter");
     }
 
     void testHandleRemove() {
