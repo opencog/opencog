@@ -484,13 +484,14 @@ struct sliced_iterative_hillclimbing {
 #define FRACTION_OF_REMAINING 10 
 
             number_of_new_instances = (max_number_of_instances - current_number_of_instances) / FRACTION_OF_REMAINING;
-            if (number_of_new_instances  < MINIMUM_DEME_SIZE)
+            if (number_of_new_instances < MINIMUM_DEME_SIZE)
                 number_of_new_instances = (max_number_of_instances - current_number_of_instances);
 
             if (number_of_new_instances < total_number_of_neighbours) {
                 //resize the deme so it can take new instances
                 deme.resize(current_number_of_instances + number_of_new_instances);
-                //sample 'number_of_new_instances' instances on the distance 'distance' from the exemplar
+                //sample 'number_of_new_instances' instances on the
+                //distance 'distance' from the exemplar
                 sample_from_neighborhood(deme.fields(), distance, number_of_new_instances, deme.begin() + current_number_of_instances, deme.end(), rng);
             } else {
                 number_of_new_instances = total_number_of_neighbours;
