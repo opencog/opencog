@@ -56,7 +56,7 @@ cdef class Handle:
     def is_valid(self):
         return self.atomspace.is_valid(self)
 
-# TruthValue
+### TruthValue
 ctypedef int count_t
 ctypedef float confidence_t
 ctypedef float strength_t
@@ -67,6 +67,8 @@ cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
         confidence_t getConfidence()
         count_t getCount()
         cTruthValue DEFAULT_TV()
+        string toString()
+        bint operator==(cTruthValue h)
 
 cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
@@ -75,19 +77,66 @@ cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
         confidence_t getConfidence()
         count_t getCount()
         cTruthValue DEFAULT_TV()
+        string toString()
+        bint operator==(cTruthValue h)
+
+cdef extern from "boost/shared_ptr.hpp":
+
+    cdef cppclass tv_ptr "boost::shared_ptr<opencog::TruthValue>":
+        tv_ptr()
+        tv_ptr(cTruthValue* fun)
+        tv_ptr(cSimpleTruthValue* fun)
+        cTruthValue* get()
 
 cdef class TruthValue:
-    cdef cTruthValue *cobj
-    def __cinit__(self, float strength, float count):
-        self.cobj = <cTruthValue*> new cSimpleTruthValue(strength,count)
+    """ The truth value represents the strength and confidence of
+        a relationship or term. In OpenCog there are a number of TruthValue
+        types, but as these involve additional complexity we focus primarily on
+        the SimpleTruthValue type which allows strength and count
+
+        @todo Support IndefiniteTruthValue, DistributionalTV, NullTV etc
+    """
+    # This stores a pointer to a smart pointer to the C++ TruthValue object
+    # This indirection is unfortunately necessary because cython doesn't
+    # allow C++ objects on the stack
+    cdef tv_ptr *cobj
+
+    def __cinit__(self, strength=0.0, count=0.0):
+        # By default create a SimpleTruthValue
+        self.cobj = new tv_ptr(new cSimpleTruthValue(strength,count))
+
     def __dealloc__(self):
+        # This deletes the *smart pointer*, not the actual pointer
         del self.cobj
-    def mean(self):
-        return deref(self.cobj).getMean()
-    def confidence(self):
-        return deref(self.cobj).getConfidence()
-    def count(self):
-        return deref(self.cobj).getCount()
+
+    def __getattr__(self,aname):
+        if aname == "mean":
+            return self._mean()
+        elif aname == "confidence":
+            return self._confidence()
+        elif aname == "count":
+            return self._count()
+
+    cdef _mean(self):
+        return self._ptr().getMean()
+
+    cdef _confidence(self):
+        return self._ptr().getConfidence()
+
+    cdef _count(self):
+        return self._ptr().getCount()
+
+    def __richcmp__(TruthValue h1, TruthValue h2, int op):
+        " @todo support the rest of the comparison operators"
+        if op == 2: # ==
+            return deref(h1._ptr()) == deref(h2._ptr())
+
+    cdef cTruthValue* _ptr(self):
+        return self.cobj.get()
+
+    def __str__(self):
+        return self._ptr().toString().c_str()
+
 
 # HandleSeq
 #ctypedef vector[cHandle] HandleSeq
@@ -126,6 +175,11 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         bint isValidHandle(cHandle h)
         int getSize()
         string getName(cHandle h)
+        tv_ptr getTV(cHandle h)
+
+        short getSTI(cHandle h)
+        short getLTI(cHandle h)
+        bint getVLTI(cHandle h)
 
         cTimeServer getTimeServer()
         void print_list "print" ()
@@ -159,13 +213,13 @@ cdef class AtomSpace:
                 # get handle
                 result = self.atomspace.addPrefixedNode(t,deref(name))
             else:
-                result = self.atomspace.addPrefixedNode(t,deref(name),deref(tv.cobj))
+                result = self.atomspace.addPrefixedNode(t,deref(name),deref(<cTruthValue*>(tv._ptr())))
         else:
             if tv is None:
                 # get handle
                 result = self.atomspace.addNode(t,deref(name))
             else:
-                result = self.atomspace.addNode(t,deref(name),deref(tv.cobj))
+                result = self.atomspace.addNode(t,deref(name),deref(tv._ptr()))
         # delete temporary string
         del name
         if result == result.UNDEFINED: return None
@@ -186,7 +240,7 @@ cdef class AtomSpace:
             # get handle
             result = self.atomspace.addLink(t,o_vect)
         else:
-            result = self.atomspace.addLink(t,o_vect,deref(tv.cobj))
+            result = self.atomspace.addLink(t,o_vect,deref(tv._ptr()))
         if result == result.UNDEFINED: return None
         return Handle(result.value());
 
@@ -224,10 +278,28 @@ cdef class Atom:
     def __init__(self,Handle h,AtomSpace a):
         self.handle = h
         self.atomspace = a
-    def get_name(self):
+    def __getattr__(self,aname):
+        if aname == "name":
+            return self.__get_name()
+        elif aname == "tv":
+            return self.__get_tv()
+        elif aname == "av":
+            return self.__get_av()
+    def __get_name(self):
         cdef string name
         name = self.atomspace.atomspace.getName(deref(self.handle.h))
         return name.c_str()
+    def __get_tv(self):
+        cdef tv_ptr tv
+        tv = self.atomspace.atomspace.getTV(deref(self.handle.h))
+        return TruthValue(tv.get().getMean(),tv.get().getCount())
+    def __get_av(self):
+        # @todo this is the slow way. quicker way is to support the
+        # AttentionValue object and get all values with one atomspace call
+        sti = self.atomspace.atomspace.getSTI(deref(self.handle.h))
+        lti = self.atomspace.atomspace.getLTI(deref(self.handle.h))
+        vlti = self.atomspace.atomspace.getVLTI(deref(self.handle.h))
+        return { "sti": sti, "lti": lti, "vlti": vlti }
 
 # SpaceServer
 cdef extern from "opencog/atomspace/SpaceServer.h" namespace "opencog":

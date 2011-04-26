@@ -72,9 +72,33 @@ class AtomSpaceTest(TestCase):
     def test_atom(self):
         h1 = self.space.add_node(1,"test1")
         a = Atom(h1, self.space)
-        self.assertEqual(a.get_name(),"test1")
+        self.assertEqual(a.name,"test1")
+        self.assertEqual(a.tv,TruthValue(0.0,0.0))
 
+        tv = TruthValue(0.5, 100)
+        h2 = self.space.add_node(1,"test2",tv)
+        a = Atom(h2, self.space)
+        self.assertEqual(a.tv,tv)
 
+        self.assertEqual(a.av,{'lti': 0, 'sti': 0, 'vlti': False})
+
+    def test_truth_value(self):
+        # check attributes come back as assigned
+        tv = TruthValue(0.5, 100)
+        self.assertEqual(tv.mean,0.5)
+        self.assertEqual(tv.count,100)
+        # test confidence
+        self.assertAlmostEqual(tv.confidence,0.1111,places=4)
+        # test string representation
+        self.assertEqual(str(tv),"[0.500000,100.000000=0.111111]")
+
+        # check equality
+        tv2 = TruthValue(0.5, 100)
+        tv3 = TruthValue(0.6, 100)
+        self.assertTrue(tv == tv2)
+        self.assertFalse(tv == tv3)
+        
+        
 
 
 
