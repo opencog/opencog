@@ -2,15 +2,8 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref
 
-# basic wrapping for std::string conversion
-cdef extern from "<string>" namespace "std":
-    cdef cppclass string:
-        string()
-        string(char *)
-        char * c_str()
-
 # Basic OpenCog types
-ctypedef int UUID
+ctypedef long UUID
 ctypedef int Type
 
 # Handle
@@ -26,6 +19,60 @@ cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
         bint operator<=(cHandle h)
         bint operator>=(cHandle h)
         cHandle UNDEFINED
+
+
+# basic wrapping for std::string conversion
+cdef extern from "<string>" namespace "std":
+    cdef cppclass string:
+        string()
+        string(char *)
+        char * c_str()
+
+### TruthValue
+ctypedef int count_t
+ctypedef float confidence_t
+ctypedef float strength_t
+
+cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
+    cdef cppclass cTruthValue "opencog::TruthValue":
+        strength_t getMean()
+        confidence_t getConfidence()
+        count_t getCount()
+        cTruthValue DEFAULT_TV()
+        string toString()
+        bint operator==(cTruthValue h)
+        bint operator!=(cTruthValue h)
+
+cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
+    cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
+        cSimpleTruthValue(float, float)
+        strength_t getMean()
+        confidence_t getConfidence()
+        count_t getCount()
+        cTruthValue DEFAULT_TV()
+        string toString()
+        bint operator==(cTruthValue h)
+        bint operator!=(cTruthValue h)
+
+cdef extern from "boost/shared_ptr.hpp":
+    cdef cppclass tv_ptr "boost::shared_ptr<opencog::TruthValue>":
+        tv_ptr()
+        tv_ptr(cTruthValue* fun)
+        tv_ptr(cSimpleTruthValue* fun)
+        cTruthValue* get()
+
+
+# ClassServer
+cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
+    cdef cppclass cClassServer "opencog::ClassServer":
+        bint isNode(Type t)
+        bint isLink(Type t)
+        bint isA(Type t, Type t)
+
+        bint isDefined(string typename)
+        Type getType(string typename)
+        string getTypeName(Type t)
+    cdef cClassServer classserver()
 
 cdef class Handle:
     cdef cHandle *h
@@ -55,38 +102,6 @@ cdef class Handle:
         return False
     def is_valid(self):
         return self.atomspace.is_valid(self)
-
-### TruthValue
-ctypedef int count_t
-ctypedef float confidence_t
-ctypedef float strength_t
-
-cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
-    cdef cppclass cTruthValue "opencog::TruthValue":
-        strength_t getMean()
-        confidence_t getConfidence()
-        count_t getCount()
-        cTruthValue DEFAULT_TV()
-        string toString()
-        bint operator==(cTruthValue h)
-
-cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
-    cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
-        cSimpleTruthValue(float, float)
-        strength_t getMean()
-        confidence_t getConfidence()
-        count_t getCount()
-        cTruthValue DEFAULT_TV()
-        string toString()
-        bint operator==(cTruthValue h)
-
-cdef extern from "boost/shared_ptr.hpp":
-
-    cdef cppclass tv_ptr "boost::shared_ptr<opencog::TruthValue>":
-        tv_ptr()
-        tv_ptr(cTruthValue* fun)
-        tv_ptr(cSimpleTruthValue* fun)
-        cTruthValue* get()
 
 cdef class TruthValue:
     """ The truth value represents the strength and confidence of
