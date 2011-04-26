@@ -91,9 +91,16 @@ void feature_selection(IT& it, const OT& ot,
     std::sort(deme.begin(), deme.end(),
               std::greater<scored_instance<composite_score> >());
     eda::instance best_inst = deme[0].first;
+    // get the best feature set
+    std::set<arity_t> best_fs = get_feature_set(fields, best_inst);
     // set the input table accordingly
-    it.set_consider_args_from_zero(get_feature_set(fields, best_inst));
-    // prin the filtered table
+    it.set_consider_args_from_zero(best_fs);
+    // log the set of selected features
+    logger().info("The following set of features has been selected:");
+    stringstream ss;
+    ostreamContainer(ss, it.get_considered_labels(), ",");
+    logger().info(ss.str().c_str());
+    // print the filtered table
     if(fs_params.output_file.empty())
         ostreamTable(std::cout, it, ot);
     else
