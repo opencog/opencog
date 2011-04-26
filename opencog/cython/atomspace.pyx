@@ -1,6 +1,9 @@
 from libcpp cimport bool
 from libcpp.vector cimport vector
-from cython.operator cimport dereference as deref
+from cython.operator cimport dereference as deref, preincrement as inc
+
+# @todo use the guide here to separate out into a hierarchy
+# http://wiki.cython.org/PackageHierarchy
 
 # Basic OpenCog types
 ctypedef long UUID
@@ -193,6 +196,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         tv_ptr getTV(cHandle h)
         void setTV(cHandle h, cTruthValue tvn)
 
+        vector[cHandle] getOutgoing(cHandle h)
+
         # these should alias the proper types for sti/lti/vlti
         short getSTI(cHandle h)
         short getLTI(cHandle h)
@@ -305,6 +310,8 @@ cdef class Atom:
             return self.__get_tv()
         elif aname == "av":
             return self.__get_av()
+        elif aname == "outgoing":
+            return self.__get_outgoing()
     def __setattr__(self,aname,val):
         if aname == "name":
             raise ValueError("Atom name is immutable")
@@ -312,6 +319,8 @@ cdef class Atom:
             self.__set_tv(val)
         elif aname == "av":
             self.set_av(av_dict=val)
+        elif aname == "outgoing":
+            raise ValueError("Outgoing set is immutable")
     def __get_name(self):
         cdef string name
         name = self.atomspace.atomspace.getName(deref(self.handle.h))
@@ -322,6 +331,19 @@ cdef class Atom:
         return TruthValue(tv.get().getMean(),tv.get().getCount())
     def __set_tv(self,TruthValue val):
         self.atomspace.atomspace.setTV(deref(self.handle.h),deref(val._ptr()))
+    def __get_outgoing(self):
+        cdef vector[cHandle] o_vect
+        o_vect = self.atomspace.atomspace.getOutgoing(deref(self.handle.h))
+        cdef vector[cHandle].iterator iter
+        cdef cHandle h
+        result = []
+        iter = o_vect.begin()
+        while iter != o_vect.end():
+            h = deref(iter)
+            handle = Handle(h.value())
+            result.append(handle)
+            inc(iter)
+        return result
     def __get_av(self):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call
@@ -329,6 +351,8 @@ cdef class Atom:
         lti = self.atomspace.atomspace.getLTI(deref(self.handle.h))
         vlti = self.atomspace.atomspace.getVLTI(deref(self.handle.h))
         return { "sti": sti, "lti": lti, "vlti": vlti }
+
+
     def set_av(self,sti=None,lti=None,vlti=None,av_dict=None):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call

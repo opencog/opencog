@@ -8,7 +8,7 @@ class AtomSpaceTest(TestCase):
         self.space = AtomSpace()
 
     def tearDown(self):
-        pass
+        pass #del self.space
 
     def test_add_node(self):
         h1 = self.space.add_node(1,"test")
@@ -89,7 +89,13 @@ class AtomSpaceTest(TestCase):
         # test set av
         a.av = { "sti": 10, "lti": 1, "vlti": True }
         self.assertEqual(a.av,{'sti': 10, 'lti': 1, 'vlti': True})
-        
+
+        # test get outgoing
+        self.assertEqual(a.outgoing, [])
+
+        l1 = self.space.add_link(2,[h1,h2])
+        l = Atom(l1, self.space)
+        self.assertEqual(l.outgoing, [h1,h2])
 
     def test_truth_value(self):
         # check attributes come back as assigned
