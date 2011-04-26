@@ -14,7 +14,9 @@ class Atom(object):
 
     @property
     def name(self):
-        return self.atomspace.get_name(self.handle)
+        if self._name is None:
+            self._name = self.atomspace.get_name(self.handle)
+        return self._name
 
     @property
     def tv(self):
@@ -38,7 +40,9 @@ class Atom(object):
 
     @property
     def type(self):
-        return self.atomspace.get_type(self.handle)
+        if self._atom_type is None:
+            self._atom_type = self.atomspace.get_type(self.handle)
+        return self._atom_type
 
     def is_source(self,h):
         pass
