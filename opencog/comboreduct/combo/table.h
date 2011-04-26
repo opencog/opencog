@@ -141,6 +141,14 @@ public:
         return considered_args;
     }
 
+    // return a vector containing all considered labels
+    std::vector<std::string> get_considered_labels() const {
+        std::vector<std::string> res;
+        foreach(size_t idx, get_considered_args_from_zero())
+            res.push_back(get_labels()[idx]);
+        return res;
+    }
+
     // STL
     typedef typename MT::iterator iterator;
     typedef typename MT::const_iterator const_iterator;
@@ -805,26 +813,34 @@ void istreamTable(const std::string& file_name,
 // ostreamTable //
 //////////////////
 
-// output a data table in CSV format, not that ignored arguments are
+// output the header of a data table in CSV format, note that ignored
+// arguments are not printed
+template<typename IT, typename OT>
+std::ostream& ostreamTableHeader(std::ostream& out, const IT& it, const OT& ot) {
+    // print labels
+    if(!it.get_labels().empty() && !ot.get_label().empty()) {
+        ostreamContainer(out, it.get_considered_labels(), ",", "", ",");
+        out << ot.get_label() << std::endl;
+    }
+    return out;
+}
+
+// output a data table in CSV format, note that ignored arguments are
 // not printed
 template<typename IT, typename OT>
 std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
-    OC_ASSERT(it.size() == ot.size());
-    const std::set<arity_t>& ca = it.get_considered_args_from_zero();
-    // print labels
-    if(!it.get_labels().empty() && !ot.get_label().empty()) {
-        foreach(size_t col, ca)
-            out << it.get_labels()[col] << ",";
-        out << ot.get_label() << std::endl;
-    }
+    // print header
+    ostreamTableHeader(out, it, ot);
     // print data
+    OC_ASSERT(it.size() == ot.size());
     for(size_t row = 0; row < it.size(); row++) {
-        foreach(size_t col, ca)
+        foreach(size_t col, it.get_considered_args_from_zero())
             out << it[row][col] << ",";
         out << ot[row] << std::endl;
     }
     return out;
 }
+
 // like above but takes the file name where to write the table
 template<typename IT, typename OT>
 void ostreamTable(const std::string& file_name, const IT& it, const OT& ot) {
