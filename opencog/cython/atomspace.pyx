@@ -206,6 +206,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void setLTI(cHandle h, short)
         void setVLTI(cHandle h, bint)
 
+        string atomAsString(cHandle h, bint)
+
         cTimeServer getTimeServer()
         void print_list "print" ()
 
@@ -300,9 +302,11 @@ cdef class AtomSpace:
 cdef class Atom:
     cdef Handle handle
     cdef AtomSpace atomspace
+
     def __init__(self,Handle h,AtomSpace a):
         self.handle = h
         self.atomspace = a
+
     def __getattr__(self,aname):
         if aname == "name":
             return self.__get_name()
@@ -312,6 +316,7 @@ cdef class Atom:
             return self.__get_av()
         elif aname == "outgoing":
             return self.__get_outgoing()
+
     def __setattr__(self,aname,val):
         if aname == "name":
             raise ValueError("Atom name is immutable")
@@ -321,16 +326,20 @@ cdef class Atom:
             self.set_av(av_dict=val)
         elif aname == "outgoing":
             raise ValueError("Outgoing set is immutable")
+
     def __get_name(self):
         cdef string name
         name = self.atomspace.atomspace.getName(deref(self.handle.h))
         return name.c_str()
+
     def __get_tv(self):
         cdef tv_ptr tv
         tv = self.atomspace.atomspace.getTV(deref(self.handle.h))
         return TruthValue(tv.get().getMean(),tv.get().getCount())
+
     def __set_tv(self,TruthValue val):
         self.atomspace.atomspace.setTV(deref(self.handle.h),deref(val._ptr()))
+
     def __get_outgoing(self):
         cdef vector[cHandle] o_vect
         o_vect = self.atomspace.atomspace.getOutgoing(deref(self.handle.h))
@@ -344,6 +353,7 @@ cdef class Atom:
             result.append(handle)
             inc(iter)
         return result
+
     def __get_av(self):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call
@@ -351,7 +361,6 @@ cdef class Atom:
         lti = self.atomspace.atomspace.getLTI(deref(self.handle.h))
         vlti = self.atomspace.atomspace.getVLTI(deref(self.handle.h))
         return { "sti": sti, "lti": lti, "vlti": vlti }
-
 
     def set_av(self,sti=None,lti=None,vlti=None,av_dict=None):
         # @todo this is the slow way. quicker way is to support the
@@ -363,6 +372,14 @@ cdef class Atom:
         if sti: self.atomspace.atomspace.setSTI(deref(self.handle.h),sti)
         if lti: self.atomspace.atomspace.setLTI(deref(self.handle.h),lti)
         if vlti: self.atomspace.atomspace.setVLTI(deref(self.handle.h),vlti)
+
+    def long_string(self):
+        return self.atomspace.atomspace.atomAsString(
+                deref(self.handle.h),False).c_str()
+
+    def __str__(self):
+        return self.atomspace.atomspace.atomAsString(
+                deref(self.handle.h),True).c_str()
 
 
 # SpaceServer

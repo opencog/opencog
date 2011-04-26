@@ -97,6 +97,14 @@ class AtomSpaceTest(TestCase):
         l = Atom(l1, self.space)
         self.assertEqual(l.outgoing, [h1,h2])
 
+        # test string representation
+        self.assertEqual(str(a),"node[Node:test2]")
+        self.assertEqual(a.long_string(),
+                "node[Node:test2] av:(10,1) tv:([0.100000,10.000000=0.012346])")
+        self.assertEqual(str(l),"[Link <test1,test2> 0.000000 0.000000]")
+        self.assertEqual(l.long_string(),
+                "link[Link sti:(0,0) tv:([0.000000,0.000000=0.000000]) <[Node test1],[Node test2]>]")
+
     def test_truth_value(self):
         # check attributes come back as assigned
         tv = TruthValue(0.5, 100)
