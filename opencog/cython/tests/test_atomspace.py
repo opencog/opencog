@@ -70,42 +70,6 @@ class AtomSpaceTest(TestCase):
         # check with bad type
         self.assertRaises(TypeError,self.space.is_valid,"test")
 
-    def test_atom(self):
-        h1 = self.space.add_node(1,"test1")
-        a = Atom(h1, self.space)
-        self.assertEqual(a.name,"test1")
-        self.assertEqual(a.tv,TruthValue(0.0,0.0))
-
-        tv = TruthValue(0.5, 100)
-        h2 = self.space.add_node(1,"test2",tv)
-        a = Atom(h2, self.space)
-        self.assertEqual(a.tv,tv)
-
-        self.assertEqual(a.av,{'lti': 0, 'sti': 0, 'vlti': False})
-
-        # test set tv
-        a.tv = TruthValue(0.1,10)
-        self.assertEqual(a.tv,TruthValue(0.1,10))
-        
-        # test set av
-        a.av = { "sti": 10, "lti": 1, "vlti": True }
-        self.assertEqual(a.av,{'sti': 10, 'lti': 1, 'vlti': True})
-
-        # test get outgoing
-        self.assertEqual(a.outgoing, [])
-
-        l1 = self.space.add_link(2,[h1,h2])
-        l = Atom(l1, self.space)
-        self.assertEqual(l.outgoing, [h1,h2])
-
-        # test string representation
-        self.assertEqual(str(a),"node[Node:test2]")
-        self.assertEqual(a.long_string(),
-                "node[Node:test2] av:(10,1) tv:([0.100000,10.000000=0.012346])")
-        self.assertEqual(str(l),"[Link <test1,test2> 0.000000 0.000000]")
-        self.assertEqual(l.long_string(),
-                "link[Link sti:(0,0) tv:([0.000000,0.000000=0.000000]) <[Node test1],[Node test2]>]")
-
     def test_truth_value(self):
         # check attributes come back as assigned
         tv = TruthValue(0.5, 100)
@@ -122,8 +86,71 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(tv == tv2)
         self.assertFalse(tv == tv3)
 
+class AtomTest(TestCase):
 
+    def setUp(self):
+        self.space = AtomSpace()
 
+    def test_creation(self):
+        h1 = self.space.add_node(1,"test1")
+        a = Atom(h1, self.space)
+        self.assertEqual(a.name,"test1")
+        self.assertEqual(a.tv,TruthValue(0.0,0.0))
+
+    def test_w_truthvalue(self):
+        tv = TruthValue(0.5, 100)
+        h2 = self.space.add_node(1,"test2",tv)
+        a = Atom(h2, self.space)
+        self.assertEqual(a.tv,tv)
+
+        # test set tv
+        a.tv = TruthValue(0.1,10)
+        self.assertEqual(a.tv,TruthValue(0.1,10))
+        
+    def test_w_attention_value(self):
+        h = self.space.add_node(1,"test2")
+        a = Atom(h, self.space)
+
+        self.assertEqual(a.av,{'lti': 0, 'sti': 0, 'vlti': False})
+
+        # test set av
+        a.av = { "sti": 10, "lti": 1, "vlti": True }
+        self.assertEqual(a.av,{'sti': 10, 'lti': 1, 'vlti': True})
+
+    def test_outgoing(self):
+        # test get outgoing
+        h1 = self.space.add_node(1,"test2")
+        a = Atom(h1, self.space)
+
+        self.assertEqual(a.outgoing, [])
+
+        tv = TruthValue(0.5, 100)
+        h2 = self.space.add_node(1,"test3",tv)
+
+        l1 = self.space.add_link(2,[h1,h2])
+        l = Atom(l1, self.space)
+        self.assertEqual(l.outgoing, [h1,h2])
+
+    def test_strings(self):
+        # set up a link and atoms
+        tv = TruthValue(0.5, 100)
+        h1 = self.space.add_node(1,"test1",tv)
+
+        h2 = self.space.add_node(1,"test2")
+        a = Atom(h2, self.space)
+        a.av = { "sti": 10, "lti": 1, "vlti": True }
+        a.tv = TruthValue(0.1,10)
+
+        l1 = self.space.add_link(2,[h1,h2])
+        l = Atom(l1, self.space)
+
+        # test string representation
+        self.assertEqual(str(a),"node[Node:test2]")
+        self.assertEqual(a.long_string(),
+                "node[Node:test2] av:(10,1) tv:([0.100000,10.000000=0.012346])")
+        self.assertEqual(str(l),"[Link <test1,test2> 0.000000 0.000000]")
+        self.assertEqual(l.long_string(),
+                "link[Link sti:(0,0) tv:([0.000000,0.000000=0.000000]) <[Node test1],[Node test2]>]")
 
 
 
