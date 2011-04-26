@@ -30,6 +30,7 @@ cdef extern from "<string>" namespace "std":
         string()
         string(char *)
         char * c_str()
+        int size()
 
 ### TruthValue
 ctypedef int count_t
@@ -193,6 +194,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         bint isValidHandle(cHandle h)
         int getSize()
         string getName(cHandle h)
+        Type getType(cHandle h)
         tv_ptr getTV(cHandle h)
         void setTV(cHandle h, cTruthValue tvn)
 
@@ -290,96 +292,64 @@ cdef class AtomSpace:
     def size(self):
         return self.atomspace.getSize()
 
-    #def get_time_server(self):
-        #timeserver = &self.atomspace.getTimeServer()
-        #return TimeServer(timeserver)
-
-    def print_list(self):
-        self.atomspace.print_list()
-
-# Atom wrapper object, we should really do something similar in the
-# core OpenCog API.
-cdef class Atom:
-    cdef Handle handle
-    cdef AtomSpace atomspace
-
-    def __init__(self,Handle h,AtomSpace a):
-        self.handle = h
-        self.atomspace = a
-
-    def __getattr__(self,aname):
-        if aname == "name":
-            return self.__get_name()
-        elif aname == "tv":
-            return self.__get_tv()
-        elif aname == "av":
-            return self.__get_av()
-        elif aname == "outgoing":
-            return self.__get_outgoing()
-
-    def __setattr__(self,aname,val):
-        if aname == "name":
-            raise ValueError("Atom name is immutable")
-        elif aname == "tv":
-            self.__set_tv(val)
-        elif aname == "av":
-            self.set_av(av_dict=val)
-        elif aname == "outgoing":
-            raise ValueError("Outgoing set is immutable")
-
-    def __get_name(self):
-        cdef string name
-        name = self.atomspace.atomspace.getName(deref(self.handle.h))
-        return name.c_str()
-
-    def __get_tv(self):
+    def get_tv(self,Handle h):
         cdef tv_ptr tv
-        tv = self.atomspace.atomspace.getTV(deref(self.handle.h))
+        tv = self.atomspace.getTV(deref(h.h))
         return TruthValue(tv.get().getMean(),tv.get().getCount())
 
-    def __set_tv(self,TruthValue val):
-        self.atomspace.atomspace.setTV(deref(self.handle.h),deref(val._ptr()))
+    def set_tv(self,Handle h,TruthValue val):
+        self.atomspace.setTV(deref(h.h),deref(val._ptr()))
 
-    def __get_outgoing(self):
+    def get_type(self,Handle h):
+        return self.atomspace.getType(deref(h.h))
+
+    def get_name(self,Handle h):
+        cdef string name
+        name = self.atomspace.getName(deref(h.h))
+        return name.c_str()[:name.size()].decode('UTF-8')
+
+    def get_outgoing(self,Handle handle):
         cdef vector[cHandle] o_vect
-        o_vect = self.atomspace.atomspace.getOutgoing(deref(self.handle.h))
         cdef vector[cHandle].iterator iter
-        cdef cHandle h
-        result = []
+        cdef cHandle i
+        o_vect = self.atomspace.getOutgoing(deref(handle.h))
+        outgoing = []
         iter = o_vect.begin()
         while iter != o_vect.end():
-            h = deref(iter)
-            handle = Handle(h.value())
-            result.append(handle)
+            i = deref(iter)
+            temphandle = Handle(i.value())
+            outgoing.append(temphandle)
             inc(iter)
-        return result
+        return outgoing
 
-    def __get_av(self):
+    def get_av(self,Handle h):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call
-        sti = self.atomspace.atomspace.getSTI(deref(self.handle.h))
-        lti = self.atomspace.atomspace.getLTI(deref(self.handle.h))
-        vlti = self.atomspace.atomspace.getVLTI(deref(self.handle.h))
+        sti = self.atomspace.getSTI(deref(h.h))
+        lti = self.atomspace.getLTI(deref(h.h))
+        vlti = self.atomspace.getVLTI(deref(h.h))
         return { "sti": sti, "lti": lti, "vlti": vlti }
 
-    def set_av(self,sti=None,lti=None,vlti=None,av_dict=None):
+    def set_av(self,Handle h,sti=None,lti=None,vlti=None,av_dict=None):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call
         if av_dict:
             if "sti" in av_dict: sti = av_dict["sti"]
             if "lti" in av_dict: lti = av_dict["lti"]
             if "vlti" in av_dict: vlti = av_dict["vlti"]
-        if sti: self.atomspace.atomspace.setSTI(deref(self.handle.h),sti)
-        if lti: self.atomspace.atomspace.setLTI(deref(self.handle.h),lti)
-        if vlti: self.atomspace.atomspace.setVLTI(deref(self.handle.h),vlti)
+        if sti: self.atomspace.setSTI(deref(h.h),sti)
+        if lti: self.atomspace.setLTI(deref(h.h),lti)
+        if vlti: self.atomspace.setVLTI(deref(h.h),vlti)
 
-    def long_string(self):
-        return self.atomspace.atomspace.atomAsString(
-                deref(self.handle.h),False).c_str()
+    def get_atom_string(self, Handle h, terse=False):
+        return self.atomspace.atomAsString(deref(h.h),terse).c_str()
 
-    def __str__(self):
-        return self.atomspace.atomspace.atomAsString(
-                deref(self.handle.h),True).c_str()
+    #def get_time_server(self):
+        #timeserver = &self.atomspace.getTimeServer()
+        #return TimeServer(timeserver)
+
+    def print_list(self):
+        self.atomspace.print_list()
 
 
 # SpaceServer

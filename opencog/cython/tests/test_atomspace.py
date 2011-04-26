@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from opencog import AtomSpace, TruthValue, Atom
+from opencog import AtomSpace, TruthValue
+from atom import Atom 
 
 class AtomSpaceTest(TestCase):
 
