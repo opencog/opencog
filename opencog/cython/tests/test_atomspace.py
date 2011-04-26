@@ -82,6 +82,15 @@ class AtomSpaceTest(TestCase):
 
         self.assertEqual(a.av,{'lti': 0, 'sti': 0, 'vlti': False})
 
+        # test set tv
+        a.tv = TruthValue(0.1,10)
+        self.assertEqual(a.tv,TruthValue(0.1,10))
+        
+        # test set av
+        a.av = { "sti": 10, "lti": 1, "vlti": True }
+        self.assertEqual(a.av,{'sti': 10, 'lti': 1, 'vlti': True})
+        
+
     def test_truth_value(self):
         # check attributes come back as assigned
         tv = TruthValue(0.5, 100)
@@ -97,8 +106,7 @@ class AtomSpaceTest(TestCase):
         tv3 = TruthValue(0.6, 100)
         self.assertTrue(tv == tv2)
         self.assertFalse(tv == tv3)
-        
-        
+
 
 
 

@@ -176,10 +176,15 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         int getSize()
         string getName(cHandle h)
         tv_ptr getTV(cHandle h)
+        void setTV(cHandle h, cTruthValue tvn)
 
+        # these should alias the proper types for sti/lti/vlti
         short getSTI(cHandle h)
         short getLTI(cHandle h)
         bint getVLTI(cHandle h)
+        void setSTI(cHandle h, short)
+        void setLTI(cHandle h, short)
+        void setVLTI(cHandle h, bint)
 
         cTimeServer getTimeServer()
         void print_list "print" ()
@@ -285,6 +290,13 @@ cdef class Atom:
             return self.__get_tv()
         elif aname == "av":
             return self.__get_av()
+    def __setattr__(self,aname,val):
+        if aname == "name":
+            raise ValueError("Atom name is immutable")
+        elif aname == "tv":
+            self.__set_tv(val)
+        elif aname == "av":
+            self.set_av(av_dict=val)
     def __get_name(self):
         cdef string name
         name = self.atomspace.atomspace.getName(deref(self.handle.h))
@@ -293,6 +305,8 @@ cdef class Atom:
         cdef tv_ptr tv
         tv = self.atomspace.atomspace.getTV(deref(self.handle.h))
         return TruthValue(tv.get().getMean(),tv.get().getCount())
+    def __set_tv(self,TruthValue val):
+        self.atomspace.atomspace.setTV(deref(self.handle.h),deref(val._ptr()))
     def __get_av(self):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call
@@ -300,6 +314,17 @@ cdef class Atom:
         lti = self.atomspace.atomspace.getLTI(deref(self.handle.h))
         vlti = self.atomspace.atomspace.getVLTI(deref(self.handle.h))
         return { "sti": sti, "lti": lti, "vlti": vlti }
+    def set_av(self,sti=None,lti=None,vlti=None,av_dict=None):
+        # @todo this is the slow way. quicker way is to support the
+        # AttentionValue object and get all values with one atomspace call
+        if av_dict:
+            if "sti" in av_dict: sti = av_dict["sti"]
+            if "lti" in av_dict: lti = av_dict["lti"]
+            if "vlti" in av_dict: vlti = av_dict["vlti"]
+        if sti: self.atomspace.atomspace.setSTI(deref(self.handle.h),sti)
+        if lti: self.atomspace.atomspace.setLTI(deref(self.handle.h),lti)
+        if vlti: self.atomspace.atomspace.setVLTI(deref(self.handle.h),vlti)
+
 
 # SpaceServer
 cdef extern from "opencog/atomspace/SpaceServer.h" namespace "opencog":
