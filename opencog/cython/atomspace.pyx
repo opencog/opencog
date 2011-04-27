@@ -79,6 +79,9 @@ cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
         int getNumberOfClasses()
     cdef cClassServer classserver()
 
+cdef extern from "opencog/atomspace/atom_types.h" namespace "opencog":
+    cdef Type NOTYPE
+
 # dynamically construct a "types" module
 # this should also listen to "addtype" signals in case new types are
 # added dynamically
@@ -89,8 +92,18 @@ cdef c_get_type_name(Type t):
     s=classserver().getTypeName(t)
     return s.c_str()
 
+cdef c_get_type(char *type_name):
+    return classserver().getType(string(type_name))
+
+# type methods
 def get_type_name(t):
     return c_get_type_name(t)
+
+def get_type(name):
+    return c_get_type(name)
+
+def is_a(Type t1, Type t2):
+    return classserver().isA(t1,t2)
 
 cdef generate_type_module():
     types = {}
@@ -99,11 +112,10 @@ cdef generate_type_module():
         s=classserver().getTypeName(i)
         assert s.size() > 0, "Got blank type name while generating types module"
         types[s.c_str()] = i
+    types["NO_TYPE"] = NOTYPE
     return types
 
-type_dict = generate_type_module()
-types = type('Module', (), type_dict)
-types.get_type_name = get_type_name
+types = type('Module', (), generate_type_module())
 
 cdef class Handle:
     cdef cHandle *h

@@ -191,5 +191,26 @@ class AtomTest(TestCase):
         self.assertEqual(l.long_string(),
                 "link[Link sti:(0,0) tv:([0.000000,0.000000=0.000000]) <[Node test1],[Node test2]>]")
 
+class TypeTest(TestCase):
+
+    def test_is_a(self):
+        self.assertTrue(opencog.is_a(types.ConceptNode,types.Node))
+        self.assertTrue(opencog.is_a(types.ConceptNode,types.Atom))
+
+        self.assertTrue(opencog.is_a(types.ListLink,types.Link))
+        self.assertTrue(opencog.is_a(types.ListLink,types.Atom))
+
+        self.assertFalse(opencog.is_a(types.Link,types.Node))
+
+    def test_get_type(self):
+        self.assertEqual(opencog.get_type("ConceptNode"), types.ConceptNode)
+        self.assertEqual(opencog.get_type(""), types.NO_TYPE)
+        self.assertRaises(TypeError,opencog.get_type,1)
+
+    def test_get_type_name(self):
+        self.assertEqual(opencog.get_type_name(types.Node), "Node")
+        self.assertEqual(opencog.get_type_name(2231), "")
+        self.assertEqual(opencog.get_type_name(types.NO_TYPE), "")
+
 
 
