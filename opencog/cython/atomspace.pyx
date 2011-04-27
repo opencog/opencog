@@ -76,7 +76,34 @@ cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
         bint isDefined(string typename)
         Type getType(string typename)
         string getTypeName(Type t)
+        int getNumberOfClasses()
     cdef cClassServer classserver()
+
+# dynamically construct a "types" module
+# this should also listen to "addtype" signals in case new types are
+# added dynamically
+cdef c_get_type_name(Type t):
+    #cdef cClassServer cs
+    #cs=classserver()
+    cdef string s
+    s=classserver().getTypeName(t)
+    return s.c_str()
+
+def get_type_name(t):
+    return c_get_type_name(t)
+
+cdef generate_type_module():
+    types = {}
+    cdef string s
+    for i in range(0,classserver().getNumberOfClasses()):
+        s=classserver().getTypeName(i)
+        assert s.size() > 0, "Got blank type name while generating types module"
+        types[s.c_str()] = i
+    return types
+
+type_dict = generate_type_module()
+types = type('Module', (), type_dict)
+types.get_type_name = get_type_name
 
 cdef class Handle:
     cdef cHandle *h
@@ -199,6 +226,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void setTV(cHandle h, cTruthValue tvn)
 
         vector[cHandle] getOutgoing(cHandle h)
+        bint isSource(cHandle h, cHandle source)
 
         # these should alias the proper types for sti/lti/vlti
         short getSTI(cHandle h)
@@ -321,6 +349,11 @@ cdef class AtomSpace:
             outgoing.append(temphandle)
             inc(iter)
         return outgoing
+
+    def is_source(self, Handle source, Handle h):
+        # This logic could probably easily be implemented client side, but best to
+        # keep it all in the C++ code for now
+        return self.atomspace.isSource(deref(source.h),deref(h.h))
 
     def get_av(self,Handle h):
         # @todo this is the slow way. quicker way is to support the

@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from opencog import AtomSpace, TruthValue
+import opencog
+from opencog import AtomSpace, TruthValue, types
 from atom import Atom 
 
 class AtomSpaceTest(TestCase):
@@ -12,47 +13,48 @@ class AtomSpaceTest(TestCase):
         pass #del self.space
 
     def test_add_node(self):
-        h1 = self.space.add_node(1,"test")
+
+        h1 = self.space.add_node(types.Node,"test")
         self.assertFalse(h1.is_undefined())
         # duplicates resolve to same handle
-        h2 = self.space.add_node(1,"test")
+        h2 = self.space.add_node(types.Node,"test")
         self.assertEquals(h1,h2)
 
         # fails when adding with a link type
-        h1 = self.space.add_node(2,"test")
+        h1 = self.space.add_node(types.Link,"test")
         self.assertEquals(h1,None)
 
         # test adding with a truthvalue
-        h3 = self.space.add_node(1,"test_w_tv",TruthValue(0.5,100))
+        h3 = self.space.add_node(types.Node,"test_w_tv",TruthValue(0.5,100))
         self.assertEquals(self.space.size(),2)
 
         # test adding with prefixed node
-        h1 = self.space.add_node(1,"test",prefixed=True)
-        h2 = self.space.add_node(1,"test",prefixed=True)
+        h1 = self.space.add_node(types.Node,"test",prefixed=True)
+        h2 = self.space.add_node(types.Node,"test",prefixed=True)
         self.assertNotEqual(h1,h2)
         self.assertEquals(self.space.size(),4)
 
-        h3 = self.space.add_node(1,"test",TruthValue(0.5,100),prefixed=True)
+        h3 = self.space.add_node(types.Node,"test",TruthValue(0.5,100),prefixed=True)
         self.assertNotEqual(h1,h3)
         self.assertEquals(self.space.size(),5)
 
         # tests with bad parameters
         # test with not a proper truthvalue
-        self.assertRaises(TypeError,self.space.add_node,1,"test",0,True)
+        self.assertRaises(TypeError,self.space.add_node,types.Node,"test",0,True)
         # test with bad type
         self.assertRaises(TypeError,self.space.add_node,"ConceptNode","test",TruthValue(0.5,100))
 
     def test_add_link(self):
-        h1 = self.space.add_node(1,"test1")
-        h2 = self.space.add_node(1,"test2")
-        l1 = self.space.add_link(2,[h1,h2])
+        h1 = self.space.add_node(types.Node,"test1")
+        h2 = self.space.add_node(types.Node,"test2")
+        l1 = self.space.add_link(types.Link,[h1,h2])
         self.assertTrue(l1 is not None)
-        l2 = self.space.add_link(2,[h1,h2])
+        l2 = self.space.add_link(types.Link,[h1,h2])
         self.assertTrue(l2 is not None)
         self.assertTrue(l2 == l1)
 
-        h3 = self.space.add_node(1,"test3")
-        l3 = self.space.add_link(2,[h1,h3],TruthValue(0.5,100))
+        h3 = self.space.add_node(types.Node,"test3")
+        l3 = self.space.add_link(types.Link,[h1,h3],TruthValue(0.5,100))
         self.assertTrue(l3 is not None)
 
         # fails when adding with a link type
@@ -60,7 +62,7 @@ class AtomSpaceTest(TestCase):
         self.assertEquals(h1,None)
 
     def test_is_valid(self):
-        h1 = self.space.add_node(1,"test1")
+        h1 = self.space.add_node(types.Node,"test1")
         # check with Handle object
         self.assertTrue(self.space.is_valid(h1))
         # check with raw UUID
@@ -92,14 +94,14 @@ class AtomTest(TestCase):
         self.space = AtomSpace()
 
     def test_creation(self):
-        h1 = self.space.add_node(1,"test1")
+        h1 = self.space.add_node(types.Node,"test1")
         a = Atom(h1, self.space)
         self.assertEqual(a.name,"test1")
         self.assertEqual(a.tv,TruthValue(0.0,0.0))
 
     def test_w_truthvalue(self):
         tv = TruthValue(0.5, 100)
-        h2 = self.space.add_node(1,"test2",tv)
+        h2 = self.space.add_node(types.Node,"test2",tv)
         a = Atom(h2, self.space)
         self.assertEqual(a.tv,tv)
 
@@ -108,7 +110,7 @@ class AtomTest(TestCase):
         self.assertEqual(a.tv,TruthValue(0.1,10))
         
     def test_w_attention_value(self):
-        h = self.space.add_node(1,"test2")
+        h = self.space.add_node(types.Node,"test2")
         a = Atom(h, self.space)
 
         self.assertEqual(a.av,{'lti': 0, 'sti': 0, 'vlti': False})
@@ -119,29 +121,66 @@ class AtomTest(TestCase):
 
     def test_outgoing(self):
         # test get outgoing
-        h1 = self.space.add_node(1,"test2")
+        h1 = self.space.add_node(types.Node,"test2")
         a = Atom(h1, self.space)
 
         self.assertEqual(a.outgoing, [])
 
         tv = TruthValue(0.5, 100)
-        h2 = self.space.add_node(1,"test3",tv)
+        h2 = self.space.add_node(types.Node,"test3",tv)
 
-        l1 = self.space.add_link(2,[h1,h2])
+        l1 = self.space.add_link(types.Link,[h1,h2])
         l = Atom(l1, self.space)
         self.assertEqual(l.outgoing, [h1,h2])
+
+        # ensure outgoing is considered immutable
+        self.assertRaises(AttributeError, setattr, l,"outgoing",[h1])
+
+    def test_is_source(self):
+        # any outgoing item is a source for unordered links
+        # only the fist item is a source of ordered links
+        h1 = self.space.add_node(types.Node,"test1")
+        h2 = self.space.add_node(types.Node,"test2")
+
+        l1 = self.space.add_link(types.OrderedLink,[h1,h2])
+        l_ordered = Atom(l1, self.space)
+        l2 = self.space.add_link(types.UnorderedLink,[h1,h2])
+        l_unordered = Atom(l2, self.space)
+
+        self.assertEqual(l_ordered.is_source(h1), True)
+        self.assertEqual(l_ordered.is_source(h2), False)
+
+        self.assertEqual(l_unordered.is_source(h1), True)
+        self.assertEqual(l_unordered.is_source(h2), True)
+
+    def test_type(self):
+        # test get outgoing
+        h1 = self.space.add_node(types.Node,"test2")
+        a = Atom(h1, self.space)
+
+        self.assertEqual(a.type, 1)
+
+        h2 = self.space.add_node(types.Node,"test3")
+        l1 = self.space.add_link(types.Link,[h1,h2])
+        l = Atom(l1, self.space)
+        self.assertEqual(l.type, 2)
+
+        # ensure type is considered immutable
+        self.assertRaises(AttributeError, setattr, l,"type",5)
+        self.assertRaises(AttributeError, setattr, a,"type",5)
+
 
     def test_strings(self):
         # set up a link and atoms
         tv = TruthValue(0.5, 100)
-        h1 = self.space.add_node(1,"test1",tv)
+        h1 = self.space.add_node(types.Node,"test1",tv)
 
-        h2 = self.space.add_node(1,"test2")
+        h2 = self.space.add_node(types.Node,"test2")
         a = Atom(h2, self.space)
         a.av = { "sti": 10, "lti": 1, "vlti": True }
         a.tv = TruthValue(0.1,10)
 
-        l1 = self.space.add_link(2,[h1,h2])
+        l1 = self.space.add_link(types.Link,[h1,h2])
         l = Atom(l1, self.space)
 
         # test string representation

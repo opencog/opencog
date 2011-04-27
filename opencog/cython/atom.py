@@ -36,7 +36,9 @@ class Atom(object):
 
     @property
     def outgoing(self):
-        return self.atomspace.get_outgoing(self.handle)
+        if self._outgoing is None:
+            self._outgoing = self.atomspace.get_outgoing(self.handle)
+        return self._outgoing
 
     @property
     def type(self):
@@ -45,7 +47,7 @@ class Atom(object):
         return self._atom_type
 
     def is_source(self,h):
-        pass
+        return self.atomspace.is_source(h,self.handle)
 
     def long_string(self):
         return self.atomspace.get_atom_string(self.handle,terse=False)
