@@ -119,25 +119,25 @@ class AtomTest(TestCase):
         a.av = { "sti": 10, "lti": 1, "vlti": True }
         self.assertEqual(a.av,{'sti': 10, 'lti': 1, 'vlti': True})
 
-    def test_outgoing(self):
-        # test get outgoing
+    def test_out(self):
+        # test get out
         h1 = self.space.add_node(types.Node,"test2")
         a = Atom(h1, self.space)
 
-        self.assertEqual(a.outgoing, [])
+        self.assertEqual(a.out, [])
 
         tv = TruthValue(0.5, 100)
         h2 = self.space.add_node(types.Node,"test3",tv)
 
         l1 = self.space.add_link(types.Link,[h1,h2])
         l = Atom(l1, self.space)
-        self.assertEqual(l.outgoing, [h1,h2])
+        self.assertEqual(l.out, [h1,h2])
 
-        # ensure outgoing is considered immutable
-        self.assertRaises(AttributeError, setattr, l,"outgoing",[h1])
+        # ensure out is considered immutable
+        self.assertRaises(AttributeError, setattr, l,"out",[h1])
 
     def test_is_source(self):
-        # any outgoing item is a source for unordered links
+        # any out item is a source for unordered links
         # only the fist item is a source of ordered links
         h1 = self.space.add_node(types.Node,"test1")
         h2 = self.space.add_node(types.Node,"test2")
@@ -154,7 +154,7 @@ class AtomTest(TestCase):
         self.assertEqual(l_unordered.is_source(h2), True)
 
     def test_type(self):
-        # test get outgoing
+        # test get out
         h1 = self.space.add_node(types.Node,"test2")
         a = Atom(h1, self.space)
 

@@ -239,6 +239,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         vector[cHandle] getOutgoing(cHandle h)
         bint isSource(cHandle h, cHandle source)
+        vector[cHandle] getIncoming(cHandle h)
 
         # these should alias the proper types for sti/lti/vlti
         short getSTI(cHandle h)
@@ -361,6 +362,20 @@ cdef class AtomSpace:
             outgoing.append(temphandle)
             inc(iter)
         return outgoing
+
+    def get_incoming(self,Handle handle):
+        cdef vector[cHandle] o_vect
+        cdef vector[cHandle].iterator iter
+        cdef cHandle i
+        o_vect = self.atomspace.getIncoming(deref(handle.h))
+        incoming = []
+        iter = o_vect.begin()
+        while iter != o_vect.end():
+            i = deref(iter)
+            temphandle = Handle(i.value())
+            incoming.append(temphandle)
+            inc(iter)
+        return incoming
 
     def is_source(self, Handle source, Handle h):
         # This logic could probably easily be implemented client side, but best to

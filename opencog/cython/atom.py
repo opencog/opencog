@@ -35,10 +35,14 @@ class Atom(object):
         return self.atomspace.set_av(self.handle,av_dict=val)
 
     @property
-    def outgoing(self):
+    def out(self):
         if self._outgoing is None:
             self._outgoing = self.atomspace.get_outgoing(self.handle)
         return self._outgoing
+
+    @property
+    def incoming(self):
+        return self.atomspace.get_incoming(self.handle)
 
     @property
     def type(self):
@@ -46,8 +50,21 @@ class Atom(object):
             self._atom_type = self.atomspace.get_type(self.handle)
         return self._atom_type
 
+    @property
+    def t(self):
+        return self.type
+
     def is_source(self,h):
         return self.atomspace.is_source(h,self.handle)
+
+    def is_node(self):
+        opencog.is_a(self.t,opencog.types.Node)
+
+    def is_link(self):
+        opencog.is_a(self.t,opencog.types.Link)
+
+    def is_a(self,t):
+        opencog.is_a(self.t,t)
 
     def long_string(self):
         return self.atomspace.get_atom_string(self.handle,terse=False)
