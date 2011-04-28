@@ -22,7 +22,9 @@ cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
         bint operator<=(cHandle h)
         bint operator>=(cHandle h)
         cHandle UNDEFINED
+    cdef cppclass cHandleSeq "opencog::HandleSeq" #vector[cHandle] 
 
+# HandleSeq
 
 # basic wrapping for std::string conversion
 cdef extern from "<string>" namespace "std":
@@ -31,6 +33,11 @@ cdef extern from "<string>" namespace "std":
         string(char *)
         char * c_str()
         int size()
+
+# basic wrapping for back_insert_iterator conversion
+cdef extern from "<vector>" namespace "std":
+    cdef cppclass output_iterator "back_insert_iterator<vector<opencog::Handle> >"
+    cdef output_iterator back_inserter(vector[cHandle])
 
 ### TruthValue
 ctypedef int count_t
@@ -196,9 +203,6 @@ cdef class TruthValue:
         return self._ptr().toString().c_str()
 
 
-# HandleSeq
-#ctypedef vector[cHandle] HandleSeq
-
 # TimeServer
 cdef extern from "opencog/atomspace/TimeServer.h" namespace "opencog":
     cdef cppclass cTimeServer "opencog::TimeServer":
@@ -217,9 +221,18 @@ cdef class TimeServer:
 
 
 # AtomSpace
+# The best way would be to access the Async methods directly, but the request
+# objects would take a while to wrap from cython
+#cdef extern from "opencog/atomspace/AtomSpaceAsync.h" namespace "opencog":
+#    cdef cppclass cAtomSpaceAsync "opencog::AtomSpaceAsync":
+#        vector[cHandle] getHandlesByType(Type t, bint subclass, VersionHandle)
+
+
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
         AtomSpace()
+
+        #cAtomSpaceAsync atomSpaceAsync
 
         cHandle addNode(Type t, string s)
         cHandle addNode(Type t, string s, cTruthValue tvn)
@@ -251,8 +264,34 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         string atomAsString(cHandle h, bint)
 
+        # ==== query methods ====
+        # get by type
+        output_iterator getHandleSet(output_iterator,Type t,bint subclass)
+        # get by name
+        output_iterator getHandleSet(output_iterator,Type t,string& name)
+        output_iterator getHandleSet(output_iterator,Type t,string& name,bint subclass)
+        # get by target types
+        output_iterator getHandleSet(output_iterator,Type t,Type target,bint subclass,bint target_subclass)
+        # get by target handle
+        output_iterator getHandleSet(output_iterator,cHandle& h,Type t,bint subclass)
+
+        # vector[chandle].iterator getHandleSet(output_iterator,Type t,string name,bint subclass,cVersionHandle vh)
+
         cTimeServer getTimeServer()
         void print_list "print" ()
+
+# @todo this should be a generator using the yield statement
+cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
+    cdef vector[cHandle].iterator iter
+    cdef cHandle i
+    result = []
+    iter = handles.begin()
+    while iter != handles.end():
+        i = deref(iter)
+        temphandle = Handle(i.value())
+        result.append(temphandle)
+        inc(iter)
+    return result
 
 cdef class AtomSpace:
     cdef cAtomSpace *atomspace
@@ -351,31 +390,13 @@ cdef class AtomSpace:
 
     def get_outgoing(self,Handle handle):
         cdef vector[cHandle] o_vect
-        cdef vector[cHandle].iterator iter
-        cdef cHandle i
         o_vect = self.atomspace.getOutgoing(deref(handle.h))
-        outgoing = []
-        iter = o_vect.begin()
-        while iter != o_vect.end():
-            i = deref(iter)
-            temphandle = Handle(i.value())
-            outgoing.append(temphandle)
-            inc(iter)
-        return outgoing
+        return convert_handle_seq_to_python_list(o_vect)
 
     def get_incoming(self,Handle handle):
         cdef vector[cHandle] o_vect
-        cdef vector[cHandle].iterator iter
-        cdef cHandle i
         o_vect = self.atomspace.getIncoming(deref(handle.h))
-        incoming = []
-        iter = o_vect.begin()
-        while iter != o_vect.end():
-            i = deref(iter)
-            temphandle = Handle(i.value())
-            incoming.append(temphandle)
-            inc(iter)
-        return incoming
+        return convert_handle_seq_to_python_list(o_vect)
 
     def is_source(self, Handle source, Handle h):
         # This logic could probably easily be implemented client side, but best to
@@ -407,6 +428,38 @@ cdef class AtomSpace:
     #def get_time_server(self):
         #timeserver = &self.atomspace.getTimeServer()
         #return TimeServer(timeserver)
+
+    # query methods
+    # @todo it would be better if we got AtomSpaceAsync request objects directly
+    # to avoid excessive copying
+    def get_atoms_by_type(self, Type t, subtype = True):
+        cdef vector[cHandle] o_vect
+        cdef bint subt = subtype
+        self.atomspace.getHandleSet(back_inserter(o_vect),t,subt)
+        return convert_handle_seq_to_python_list(o_vect)
+
+    def get_atoms_by_name(self, Type t, name, subtype = True):
+        cdef vector[cHandle] o_vect
+        # create temporary cpp string
+        py_byte_string = name.encode('UTF-8')
+        cdef string *cname = new string(py_byte_string)
+        cdef bint subt = subtype
+        self.atomspace.getHandleSet(back_inserter(o_vect),t,deref(cname),subt)
+        del cname
+        return convert_handle_seq_to_python_list(o_vect)
+
+    def get_atoms_by_target_type(self, Type t, Type target_t, subtype = True, target_subtype = True):
+        cdef vector[cHandle] o_vect
+        cdef bint subt = subtype
+        cdef bint target_subt = target_subtype
+        self.atomspace.getHandleSet(back_inserter(o_vect),t,target_t,subt,target_subt)
+        return convert_handle_seq_to_python_list(o_vect)
+
+    def get_atoms_by_target_handle(self, Type t, Handle target_h, subtype = True):
+        cdef vector[cHandle] o_vect
+        cdef bint subt = subtype
+        self.atomspace.getHandleSet(back_inserter(o_vect),deref(target_h.h),t,subt)
+        return convert_handle_seq_to_python_list(o_vect)
 
     def print_list(self):
         self.atomspace.print_list()

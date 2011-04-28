@@ -88,6 +88,87 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(tv == tv2)
         self.assertFalse(tv == tv3)
 
+    def test_get_by_name_and_type(self):
+        h1 = self.space.add_node(types.Node,"test")
+        h2 = self.space.add_node(types.ConceptNode,"test")
+        h3 = self.space.add_node(types.PredicateNode,"test")
+
+        # test recursive subtypes
+        result = self.space.get_atoms_by_name(types.Node,"test")
+        self.assertTrue(h1 in result)
+        self.assertTrue(h2 in result)
+        self.assertTrue(h3 in result)
+
+        # test non-recursive subtype
+        result = self.space.get_atoms_by_name(types.Node,"test",subtype=False)
+        self.assertTrue(h1 in result)
+        self.assertTrue(h2 not in result)
+        self.assertTrue(h3 not in result)
+
+        # test empty
+        result = self.space.get_atoms_by_name(types.SemeNode,"test",subtype=False)
+        self.assertEqual(len(result),0)
+
+    def test_get_by_type(self):
+        h1 = self.space.add_node(types.Node,"test1")
+        h2 = self.space.add_node(types.ConceptNode,"test2")
+        h3 = self.space.add_node(types.PredicateNode,"test3")
+
+        # test recursive subtypes
+        result = self.space.get_atoms_by_type(types.Node)
+        self.assertTrue(h1 in result)
+        self.assertTrue(h2 in result)
+        self.assertTrue(h3 in result)
+
+        # links
+        l1 = self.space.add_link(types.InheritanceLink,[h1,h2])
+        result = self.space.get_atoms_by_type(types.Link)
+        self.assertTrue(l1 in result)
+        
+        # test non-recursive subtype
+        result = self.space.get_atoms_by_type(types.Node,subtype=False)
+        self.assertTrue(h1 in result)
+        self.assertTrue(h2 not in result)
+        self.assertTrue(h3 not in result)
+
+        # test empty
+        result = self.space.get_atoms_by_type(types.SemeNode,subtype=False)
+        self.assertEqual(len(result),0)
+
+    def test_get_by_target_type(self):
+        h1 = self.space.add_node(types.Node,"test1")
+        h2 = self.space.add_node(types.ConceptNode,"test2")
+        h3 = self.space.add_node(types.PredicateNode,"test3")
+
+        # test it doesn't apply to Nodes
+        result = self.space.get_atoms_by_target_type(types.Node,types.Node)
+        self.assertTrue(h1 not in result)
+
+        # links
+        l1 = self.space.add_link(types.InheritanceLink,[h1,h2])
+        result = self.space.get_atoms_by_target_type(types.Link,types.ConceptNode,target_subtype=False)
+        self.assertTrue(l1 in result)
+        
+        # test recursive target subtype
+        result = self.space.get_atoms_by_target_type(types.Link,types.Node,target_subtype=True)
+        self.assertTrue(l1 in result)
+
+    def test_get_by_target_handle(self):
+        h1 = self.space.add_node(types.Node,"test1")
+        h2 = self.space.add_node(types.ConceptNode,"test2")
+        h3 = self.space.add_node(types.PredicateNode,"test3")
+
+        # test it doesn't apply to Nodes
+        result = self.space.get_atoms_by_target_handle(types.Node,h1)
+        self.assertTrue(h1 not in result)
+
+        # links
+        l1 = self.space.add_link(types.InheritanceLink,[h1,h2])
+        result = self.space.get_atoms_by_target_handle(types.Link,h1)
+        self.assertTrue(l1 in result)
+        result = self.space.get_atoms_by_target_handle(types.Link,h3)
+        self.assertTrue(l1 not in result)
+
 class AtomTest(TestCase):
 
     def setUp(self):
