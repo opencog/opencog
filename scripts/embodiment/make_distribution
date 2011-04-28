@@ -54,6 +54,7 @@ $binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
 ./demand_updaters.combo \
 $pdh/opencog/embodiment/rules_core.scm \
 $pdh/opencog/embodiment/pet_rules.scm \
+$pdh/opencog/embodiment/dialog_system.scm \
 $pdh/opencog/embodiment/psi_util.scm \
 $pdh/opencog/embodiment/feeling_updaters.scm \
 $pdh/opencog/embodiment/rules_core.lua \
@@ -82,6 +83,7 @@ $pdh/opencog/scm/debug.scm \
 ]
 
 set schemeEmbodimentFiles [list \
+$pdh/opencog/embodiment/scm/type_constructors.scm \
 $pdh/opencog/embodiment/scm/predicates-frames.scm \
 $pdh/opencog/embodiment/scm/language-comprehension.scm \
 $pdh/opencog/embodiment/scm/reference-resolution-rules.scm \
