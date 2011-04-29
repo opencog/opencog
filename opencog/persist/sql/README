@@ -232,6 +232,10 @@ you'll need to repeat some of the above instructions:
 
 After the above steps, the BasicSaveUTest should pass.
 
+Unit test status
+----------------
+As of 2011-04-29 bzr revision 5314, BasicSaveUTest (still) passes.
+
 
 Bulk save and restore
 ---------------------
