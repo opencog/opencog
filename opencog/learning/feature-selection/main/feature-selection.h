@@ -112,11 +112,11 @@ eda::instance initial_instance(const feature_selection_parameters& fs_params,
     eda::instance res(fields.packed_width());
     vector<std::string> labels = read_data_file_labels(fs_params.input_file);
     foreach(const std::string& f, fs_params.initial_features) {
-        arity_t idx = std::distance(labels.begin(), find(labels, f));
-        OC_ASSERT((size_t)idx != labels.size(),
-                  "No such a feature %s in file %s",
-                  f.c_str(), fs_params.input_file.c_str());
-        *(fields.begin_bits(res) + idx) = true;
+        size_t idx = std::distance(labels.begin(), find(labels, f));
+        if(idx < labels.size()) // feature found
+            *(fields.begin_bits(res) + idx) = true;
+        else // feature not found
+            logger().warn("No such a feature #%s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
     }
     return res;
 }
