@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
- * Updated: by Zhenhua Cai, on 2011-04-19
+ * Updated: by Zhenhua Cai, on 2011-04-28
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -421,7 +421,7 @@ int OAC::addRulesToAtomSpace()
           __FUNCTION__
                      );
             
-    // Load the rules file, including Modulators, DemandGoals and Rules 
+    // Load the psi rules file, including Modulators, DemandGoals and Rules 
     std::string psi_rules_file_name = 
                                 ( boost::format(config().get("PSI_RULES_FILENAME_MASK")) %
                                                                 this->getPet().getType()
@@ -436,6 +436,20 @@ int OAC::addRulesToAtomSpace()
         logger().error( "OAC::%s - Failed to load psi rules file: '%s'", 
                          __FUNCTION__, 
                         psi_rules_file_name.c_str() 
+                      );
+
+    // Load the dialog system rules file, including triggers, responsers, and rules 
+    std::string dialog_system_rules_file_name = "dialog_system.scm"; 
+
+    if ( load_scm_file( *(this->atomSpace), dialog_system_rules_file_name.c_str() ) == 0  ) 
+        logger().info( "OAC::%s - Loaded dialog system rules file: '%s'", 
+                        __FUNCTION__, 
+                       dialog_system_rules_file_name.c_str() 
+                     );
+    else
+        logger().error( "OAC::%s - Failed to load dialog system rules file: '%s'", 
+                         __FUNCTION__, 
+                        dialog_system_rules_file_name.c_str() 
                       );
 
     return 0;

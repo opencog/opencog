@@ -8,3 +8,5 @@ killall -9 learningServer_CogServer >& /dev/null
 killall -9 LSMocky >& /dev/null
 killall -9 pvpSimulator >& /dev/null
 killall -9 pbTester >& /dev/null
+
+rm -rf *.ipc >& /dev/null
