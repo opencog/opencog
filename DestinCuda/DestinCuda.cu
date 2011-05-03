@@ -30,7 +30,11 @@ void PrintHelp()
 
     cout << "Usage: DestinCuda CodeWord MAXCNT LayerToShow ParamsFile TrainingDataFile DestinOutputFile TargetDirectory [OutputDistillationLevel]" << endl;
     cout << "Where:" << endl;
-    cout << "    CodeWord is an 11-digit value of the form." << endl;
+    cout << "    CodeWord is greater than 1000 but must have 11 digits RRRR XX YYYYY" << endl;
+    cout << "        RRRR >= 0000 to 9999 where 0000 is real random time" << endl;
+    cout << "        XX    = 01 to 10 number of classes" << endl;
+    cout << "        YYYYY = 00000 to 99999 number of examples of each class." << endl;
+    cout << "                00000 means RANDOMLY PICK EXAMPLES until we finish clustering, period, up to max iterations." << endl;
     cout << "        RRRRXXYYYYY where RRRR is reserved, XX is number of classes, YYYYY is number of examples" << endl;
     cout << "    MAXCNT is the number of digits we show it to train the unsupervised DeSTIN architecture" << endl;
     cout << "    LayerToShow = layer written to output file; it is given as S:E:O:P:T where " << endl;
@@ -173,61 +177,61 @@ int MainDestinExperiments(int argc, char* argv[])
     OutputTypes eTypeOfOutput = eBeliefs;
 
     string sLayerSpecs = argv[3];
-        int iColon = sLayerSpecs.find(":");
-        if ( iColon == -1 || sLayerSpecs.substr(iColon).empty() )  //first layer = last layer, and no sampling specified.
+    int iColon = sLayerSpecs.find(":");
+    if ( iColon == -1 || sLayerSpecs.substr(iColon).empty() )  //first layer = last layer, and no sampling specified.
+    {
+        // S
+        FirstLayerToShowHECK=atoi(sLayerSpecs.c_str());
+        LastLayerToShow=FirstLayerToShowHECK;
+    }
+    else
+    {
+        // S:E
+        FirstLayerToShowHECK=atoi(sLayerSpecs.substr(0,1).c_str());
+        LastLayerToShow=atoi(sLayerSpecs.substr(iColon+1,1).c_str());
+        sLayerSpecs = sLayerSpecs.substr(iColon+1);
+        iColon = sLayerSpecs.find(":");
+        if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
         {
-            // S
-            FirstLayerToShowHECK=atoi(sLayerSpecs.c_str());
-            LastLayerToShow=FirstLayerToShowHECK;
-        }
-        else
-        {
-            // S:E
-            FirstLayerToShowHECK=atoi(sLayerSpecs.substr(0,1).c_str());
-            LastLayerToShow=atoi(sLayerSpecs.substr(iColon+1,1).c_str());
+            //S:E:O
             sLayerSpecs = sLayerSpecs.substr(iColon+1);
+            iMovementOutputOffset = atoi(sLayerSpecs.substr(0,1).c_str());
             iColon = sLayerSpecs.find(":");
             if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
             {
-                //S:E:O
+                //S:E:O:P
                 sLayerSpecs = sLayerSpecs.substr(iColon+1);
-                iMovementOutputOffset = atoi(sLayerSpecs.substr(0,1).c_str());
+                iMovementOutputPeriod = atoi(sLayerSpecs.substr(0,1).c_str());
                 iColon = sLayerSpecs.find(":");
                 if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
                 {
-                    //S:E:O:P
+                    //S:E:O:P:T
                     sLayerSpecs = sLayerSpecs.substr(iColon+1);
-                    iMovementOutputPeriod = atoi(sLayerSpecs.substr(0,1).c_str());
-                    iColon = sLayerSpecs.find(":");
-                    if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
+                    if ( sLayerSpecs.substr(0,1)=="A" )
                     {
-                        //S:E:O:P:T
-                        sLayerSpecs = sLayerSpecs.substr(iColon+1);
-                        if ( sLayerSpecs.substr(0,1)=="A" )
-                        {
-                            eTypeOfOutput = eBeliefInAdviceTabular;
-                        }
-                        else if ( sLayerSpecs.substr(0,1)=="B" )
-                        {
-                            eTypeOfOutput = eBeliefs;
-                        }
-                        else if ( sLayerSpecs.substr(0,1)=="N" )
-                        {
-                            eTypeOfOutput = eBeliefInAdviceNNFA;
-                        }
-                        else if ( sLayerSpecs.substr(0,1)=="L" )
-                        {
-                            eTypeOfOutput = eBeliefInAdviceLinearFA;
-                        }
-                        else
-                        {
-                            cout << "Do not understand the output type " << sLayerSpecs.c_str() << endl;
-                            return 0;
-                        }
+                        eTypeOfOutput = eBeliefInAdviceTabular;
+                    }
+                    else if ( sLayerSpecs.substr(0,1)=="B" )
+                    {
+                        eTypeOfOutput = eBeliefs;
+                    }
+                    else if ( sLayerSpecs.substr(0,1)=="N" )
+                    {
+                        eTypeOfOutput = eBeliefInAdviceNNFA;
+                    }
+                    else if ( sLayerSpecs.substr(0,1)=="L" )
+                    {
+                        eTypeOfOutput = eBeliefInAdviceLinearFA;
+                    }
+                    else
+                    {
+                        cout << "Do not understand the output type " << sLayerSpecs.c_str() << endl;
+                        return 0;
                     }
                 }
             }
         }
+    }
 
     // Argument: TargetDirectory
     // A given location instead or default
@@ -289,6 +293,150 @@ int MainDestinExperiments(int argc, char* argv[])
         return 0;
     }
     // end of data loading
+
+    // now get the file creation parameters
+    int iNumberOfExamplesFromEachLabel;
+    int MAX_CNT = 1000;
+    int iTestSequence = 0;
+    string ParametersFileName;
+    vector< pair<int,int> > vIndicesAndGTLabelToUse;
+    vector< pair<int,int> > LabelsAndIndicesForUse;
+
+    // When TestSequence >= 1000 we will interpret it differently
+    int NumberOfUniqueLabelsToUse;
+
+    if ( bCreateFromFile==false )
+    {
+        // Argument: MAXCNT
+        MAX_CNT=atoi(argv[2]);
+        // Argument: CodeWord
+        iTestSequence=atoi(argv[1]);
+        string sBuff=argv[1];
+
+        if (sBuff.length() != 11 )
+        {
+            PrintHelp();
+            return 0;
+        }
+
+        string sNumInp;
+        sNumInp="";
+
+        int kj=0;
+        sNumInp = sNumInp+sBuff[kj++];
+        sNumInp = sNumInp+sBuff[kj++];
+        sNumInp = sNumInp+sBuff[kj++];
+        sNumInp = sNumInp+sBuff[kj++];
+
+        // if the first 4 digits are 0000 make a TRUE random, otherwise use the complete number.
+        int iReserve = atoi( sNumInp.c_str() );
+        if ( iReserve == 0 )
+        {
+            srand( time(NULL) );
+        }
+        else
+        {
+            int iRandSeed = iTestSequence;
+            srand( (unsigned int)iRandSeed );
+        }
+
+        // next two digits = number of inputs
+        sNumInp = "";
+        sNumInp = sNumInp+sBuff[kj++];
+        sNumInp = sNumInp+sBuff[kj++];
+        NumberOfUniqueLabelsToUse = atoi( sNumInp.c_str() );
+
+        sNumInp = "";
+        sNumInp = sNumInp+sBuff[kj++];
+        sNumInp = sNumInp+sBuff[kj++];
+        sNumInp = sNumInp+sBuff[kj++];
+        sNumInp = sNumInp+sBuff[kj++];
+        sNumInp = sNumInp+sBuff[kj++];
+        iNumberOfExamplesFromEachLabel=atoi( sNumInp.c_str() );
+
+        // if iNumberOfExamplesFromEachLabel is 0 we randomly pick examples from the available
+        // classes and only show them ONE TIME
+
+        // Generate the examples from the dictates given here.
+        if ( iNumberOfExamplesFromEachLabel > 0 )
+        {
+            for(int iLabel=0;iLabel<NumberOfUniqueLabelsToUse;iLabel++)
+            {
+                vector<int> IndicesForThisLabel;
+                DataSourceForTraining.GetIndicesForThisLabel(iLabel,IndicesForThisLabel);
+
+                for(int jj=0;jj<iNumberOfExamplesFromEachLabel;jj++)
+                {
+                    pair<int,int> P;
+                    P.first = IndicesForThisLabel[jj];
+                    P.second = iLabel;
+                    LabelsAndIndicesForUse.push_back(P);
+                }
+            }
+        }
+        else
+        {
+            // In this mode, simply get ALL the examples for this class and put them in
+            // LabelsAndIndicesForUse. BUT, skip according to the value of DestinTrainSampleStep
+            int FirstTrainingIndex = 0;  // this was set to 1 for the ICMLA tests, I think.
+            for(int iLabel=0;iLabel<NumberOfUniqueLabelsToUse;iLabel++)
+            {
+                int DestinTrainSampleStep = 25;
+                vector<int> IndicesForThisLabel;
+                DataSourceForTraining.GetIndicesForThisLabel(iLabel,IndicesForThisLabel);
+                for(int jj=FirstTrainingIndex;jj<IndicesForThisLabel.size();jj=jj+DestinTrainSampleStep)
+                {
+                    cout << "Get sample " << jj << " for destin network" << endl;
+                    pair<int,int> P;
+                    P.first = IndicesForThisLabel[jj];
+                    P.second = iLabel;
+                    LabelsAndIndicesForUse.push_back(P);
+                }
+            }
+            iNumberOfExamplesFromEachLabel = LabelsAndIndicesForUse.size()/NumberOfUniqueLabelsToUse;
+        }
+
+        //Now generate MAX_CNT+1000 random numbers from 0 to LabelsAndIndicesForUse-1
+        // and use these to populate vIndicesAndGTLabelToUse
+        int iChoice;
+        int Picked[10];
+        for(int jj=0;jj<10;jj++)
+        {
+            Picked[jj]=0;
+        }
+        iChoice=RAND_MAX;
+        int Digit;
+        for(int jj=0;jj<MAX_CNT;jj++)
+        {
+            //pick the digit first...
+            Digit=rand() % NumberOfUniqueLabelsToUse;
+            iChoice=Digit*iNumberOfExamplesFromEachLabel;
+            iChoice = iChoice+rand()%iNumberOfExamplesFromEachLabel;
+
+//                  iChoice = rand() % LabelsAndIndicesForUse.size();
+            pair<int,int> P;
+            P = LabelsAndIndicesForUse[iChoice];
+            //LabelsAndIndicesForUse.erase( LabelsAndIndicesForUse.begin()+iChoice ); //erase the chosen one
+            vIndicesAndGTLabelToUse.push_back( P );
+            Picked[P.second]=1;
+        }
+        cout << "------------------" << endl;
+        for(int jj=0;jj<10;jj++)
+        {
+            cout << jj << "," << Picked[jj] << endl;
+        }
+        cout << "------------------" << endl;
+
+        // Get the destin network parameters from a run file...
+        ParametersFileName=argv[4];
+
+
+    }  //check on bCreateFromFile==false
+    else
+    {
+        // TODO: We want to create the network from an INPUT FILE!
+        cout << "We want to create the network from an INPUT FILE!" << endl;
+    }
 
     return 0;
 }
