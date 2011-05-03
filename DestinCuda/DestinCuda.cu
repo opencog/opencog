@@ -1,3 +1,4 @@
+#include "AdviceData.h"
 #include "DestinData.h"
 
 #include <iostream>
@@ -162,6 +163,72 @@ int MainDestinExperiments(int argc, char* argv[])
         strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
     }
 
+    // Argument: LayerToShow
+    // Structure of processing S:E:O:P:T
+    // List of default values
+    int FirstLayerToShowHECK = 3;
+    int LastLayerToShow = FirstLayerToShowHECK;
+    int iMovementOutputOffset = 0;
+    int iMovementOutputPeriod = 1;
+    OutputTypes eTypeOfOutput = eBeliefs;
+
+    string sLayerSpecs = argv[3];
+        int iColon = sLayerSpecs.find(":");
+        if ( iColon == -1 || sLayerSpecs.substr(iColon).empty() )  //first layer = last layer, and no sampling specified.
+        {
+            // S
+            FirstLayerToShowHECK=atoi(sLayerSpecs.c_str());
+            LastLayerToShow=FirstLayerToShowHECK;
+        }
+        else
+        {
+            // S:E
+            FirstLayerToShowHECK=atoi(sLayerSpecs.substr(0,1).c_str());
+            LastLayerToShow=atoi(sLayerSpecs.substr(iColon+1,1).c_str());
+            sLayerSpecs = sLayerSpecs.substr(iColon+1);
+            iColon = sLayerSpecs.find(":");
+            if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
+            {
+                //S:E:O
+                sLayerSpecs = sLayerSpecs.substr(iColon+1);
+                iMovementOutputOffset = atoi(sLayerSpecs.substr(0,1).c_str());
+                iColon = sLayerSpecs.find(":");
+                if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
+                {
+                    //S:E:O:P
+                    sLayerSpecs = sLayerSpecs.substr(iColon+1);
+                    iMovementOutputPeriod = atoi(sLayerSpecs.substr(0,1).c_str());
+                    iColon = sLayerSpecs.find(":");
+                    if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
+                    {
+                        //S:E:O:P:T
+                        sLayerSpecs = sLayerSpecs.substr(iColon+1);
+                        if ( sLayerSpecs.substr(0,1)=="A" )
+                        {
+                            eTypeOfOutput = eBeliefInAdviceTabular;
+                        }
+                        else if ( sLayerSpecs.substr(0,1)=="B" )
+                        {
+                            eTypeOfOutput = eBeliefs;
+                        }
+                        else if ( sLayerSpecs.substr(0,1)=="N" )
+                        {
+                            eTypeOfOutput = eBeliefInAdviceNNFA;
+                        }
+                        else if ( sLayerSpecs.substr(0,1)=="L" )
+                        {
+                            eTypeOfOutput = eBeliefInAdviceLinearFA;
+                        }
+                        else
+                        {
+                            cout << "Do not understand the output type " << sLayerSpecs.c_str() << endl;
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+
     // Argument: TargetDirectory
     // A given location instead or default
     string strDiagnosticFileNameForData;
@@ -186,7 +253,42 @@ int MainDestinExperiments(int argc, char* argv[])
         OutputDistillationLevel = atoi(argv[8]);
     }
 
+    // **********************
+    // Loading data source(s)
+    // **********************
+    // Arguments: TrainingDataFile
+    // Load the training file for DeSTIN
+    string strDestinTrainingFileName = argv[5];
 
+    // Data object containing source training
+    DestinData DataSourceForTraining;
+
+    int NumberOfUniqueLabels;
+    DataSourceForTraining.LoadFile(strDestinTrainingFileName.c_str());
+    NumberOfUniqueLabels = DataSourceForTraining.GetNumberOfUniqueLabels();
+    if ( NumberOfUniqueLabels==0 )
+    {
+        cout << "There seems to be something off with data source " << strDestinTrainingFileName.c_str() << endl;
+        return 0;
+    }
+
+    // A vector with all the labels of the data source
+    vector<int> vLabelList;
+    DataSourceForTraining.GetUniqueLabels(vLabelList);
+
+    // Load the test file for DeSTIN
+    string strTesting = strDestinTrainingFileName;
+    strTesting = strTesting + "_TESTING";
+    // Data object of test source
+    DestinData DataSourceForTesting;
+
+    DataSourceForTesting.LoadFile((char*)(strTesting.c_str()));
+    if ( DataSourceForTesting.GetNumberOfUniqueLabels()!=NumberOfUniqueLabels )
+    {
+        cout << "Test set does not have the same number of labels as train set " << endl;
+        return 0;
+    }
+    // end of data loading
 
     return 0;
 }
