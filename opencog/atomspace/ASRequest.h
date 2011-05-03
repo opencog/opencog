@@ -130,7 +130,7 @@ public:
     virtual void do_work() {
         Handle r;
         try {
-            Handle r = atomspace->addNode(p1, p2, *p3);
+            r = atomspace->addNode(p1, p2, *p3);
             set_result(r);
         } catch (InvalidParamException &e) {
             logger().error(e.what());
@@ -152,7 +152,14 @@ public:
     }
     
     virtual void do_work() {
-        set_result(atomspace->addLink(p1, p2, *p3));
+        Handle r;
+        try {
+            r = atomspace->addLink(p1, p2, *p3);
+            set_result(r);
+        } catch (InvalidParamException &e) {
+            logger().error(e.what());
+            set_result(r);
+        }
     };
     
 };
