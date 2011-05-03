@@ -5,9 +5,6 @@ PROJECT(DeSTIN_CUDA)
 #is distributed since version 2.8
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-#Output folder
-${CMAKE_CURRENT_SOURCE_DIR}/debug
-
 #Searching CUDA
 FIND_PACKAGE(CUDA)
 
