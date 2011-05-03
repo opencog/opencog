@@ -24,6 +24,8 @@
 #ifndef _OPENCOG_FEATURE_SELECTION_H
 #define _OPENCOG_FEATURE_SELECTION_H
 
+#include <boost/assign/std/vector.hpp> // for 'operator+=()'
+
 #include <opencog/learning/moses/eda/field_set.h>
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/comboreduct/combo/table.h>
@@ -34,6 +36,7 @@
 using namespace eda;
 using namespace moses;
 using namespace combo;
+using namespace boost::assign; // bring 'operator+=()' into scope
 
 // optimization algorithms
 static const string un="un"; // univariate
@@ -111,13 +114,23 @@ eda::instance initial_instance(const feature_selection_parameters& fs_params,
                                const field_set& fields) {
     eda::instance res(fields.packed_width());
     vector<std::string> labels = read_data_file_labels(fs_params.input_file);
+    vector<std::string> vif; // valid initial features, used for logging
     foreach(const std::string& f, fs_params.initial_features) {
         size_t idx = std::distance(labels.begin(), find(labels, f));
-        if(idx < labels.size()) // feature found
+        if(idx < labels.size()) { // feature found
             *(fields.begin_bits(res) + idx) = true;
+            // for logging
+            vif += f;
+        }
         else // feature not found
             logger().warn("No such a feature #%s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
     }
+    // Logger
+    logger().info("The search will start with the following feature set:");
+    stringstream ss;
+    ostreamContainer(ss, vif, ",");
+    logger().info(ss.str().c_str());
+    // ~Logger
     return res;
 }
 
