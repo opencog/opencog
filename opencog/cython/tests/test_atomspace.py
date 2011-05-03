@@ -57,7 +57,7 @@ class AtomSpaceTest(TestCase):
         l3 = self.space.add_link(types.Link,[h1,h3],TruthValue(0.5,100))
         self.assertTrue(l3 is not None)
 
-        # fails when adding with a link type
+        # fails when adding with a node type
         h1 = self.space.add_link(1,[h1,h3])
         self.assertEquals(h1,None)
 

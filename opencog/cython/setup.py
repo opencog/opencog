@@ -17,9 +17,12 @@ ext = Extension(
         ],
     libraries=["stdc++",
         "boost_system-mt","boost_thread-mt", # boost dependencies
-        "atomspace"    # OpenCog libraries
+        "atomspace",
+        "util"
         ],
-    extra_link_args=["-L../../bin/opencog/atomspace","-L/opt/local/lib"],
+    extra_link_args=["-L../../bin/opencog/atomspace","-L/opt/local/lib",
+        "-L/usr/local/lib/opencog"],
+    runtime_library_dirs=["/usr/local/lib/opencog"]
     )
 
 setup(name = 'pyopencog',
