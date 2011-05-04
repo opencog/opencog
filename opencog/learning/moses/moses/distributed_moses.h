@@ -91,7 +91,7 @@ string build_cmdline(const variables_map& vm,
         res = string("ssh ") + host_name + " 'moses-exec";
     // replicate initial command's options, except:
     // exemplar, output options, jobs, max_evals, max_gens and log_file_dep_opt
-    for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
+    for(variables_map::const_iterator it = vm.begin(); it != vm.end(); ++it) {
         if(it->first != exemplars_str_opt.first
            && it->first != exemplars_str_opt.first
            && it->first != output_bscore_opt.first
@@ -282,7 +282,7 @@ void killall(host_proc_map& hpm) {
 host_proc_map::iterator find_free_resource(host_proc_map& hpm, const jobs_t& jobs) {
     host_proc_map::iterator hpm_it = hpm.begin();
     for(jobs_t::const_iterator jit = jobs.begin(); jit != jobs.end();
-        jit++, hpm_it++) {
+        ++jit, ++hpm_it) {
         OC_ASSERT(jit->first == hpm_it->first);
         if(hpm_it->second.size() < jit->second)
             break;

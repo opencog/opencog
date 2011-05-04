@@ -47,7 +47,7 @@ unsigned int ant_perception::get_basic_description_array_count() const {
 const ant_perception* ant_perception::init_perceptions() {
   static ant_perception* perceptions =
     new ant_perception[id::ant_perception_count];
-  for(unsigned int i = 0; i < id::ant_perception_count; i++)
+  for(unsigned int i = 0; i < id::ant_perception_count; ++i)
     perceptions[i].set_perception((ant_perception_enum)i);
   return perceptions;
 }
@@ -84,7 +84,7 @@ const ant_perception* ant_perception::instance(const std::string& name) {
   //look up for pet_builtin_action_enum corresponding to that name
   bool found = false;
   const ant_perception* p = NULL;
-  for(unsigned int i = 0; i<id::ant_perception_count && !found; i++) {
+  for(unsigned int i = 0; i<id::ant_perception_count && !found; ++i) {
     p = ant_perception::instance((ant_perception_enum)i);
     found = p->get_name()==name;
   }

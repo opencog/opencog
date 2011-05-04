@@ -86,7 +86,7 @@ struct tree_transform {
         //now handle hidden nodes, which require a little more finesse
         //because now we must handle their connections
         for(ann_connection_it cons = node->in_connections.begin();
-            cons != node->in_connections.end(); cons++)
+            cons != node->in_connections.end(); ++cons)
         {
             combo_tree tmp = encode_node(the_ann, (*cons)->source);
 
@@ -105,7 +105,7 @@ struct tree_transform {
         //now we want to add each of the output nodes
         //to the tree
         for(ann_node_it node_it = the_ann.outputs.begin(); 
-            node_it != the_ann.outputs.end(); node_it++)
+            node_it != the_ann.outputs.end(); ++node_it)
         {
             combo_tree str = encode_node(the_ann, *node_it);
             tr.insert_subtree(tr.begin().begin(),str.begin());

@@ -390,7 +390,7 @@ void reduce_repeat_in_action_while::operator() (combo_tree& tr, pre_it it) const
                 //get the start and the end of the pattern
                 sib_it pattern_from = while_child.begin();
                 sib_it pattern_to = pattern_from;
-                for (int i = 0; i < sd; i++)
+                for (int i = 0; i < sd; ++i)
                     ++pattern_to;
                 sib_it pattern_to_cpy = pattern_to;
                 //compare that pattern to the rest of the action sequence
@@ -612,7 +612,7 @@ void reduce_additive::operator() (combo_tree& tr, combo_tree::iterator it) const
                 OC_ASSERT(tr.number_of_children(it) == tr.number_of_children(ns_it),
                                  "combo_tree node and its next sibling should have the same number of children.");
                 std::vector<int> arg_add; //vector of additive arguments
-                for (unsigned int i = 0; i < tr.number_of_children(it); i++) {
+                for (unsigned int i = 0; i < tr.number_of_children(it); ++i) {
                     if (a->is_additive(i))
                         arg_add.push_back(i);
                     else if (!tr.equal_subtree(tr.child(it, i), tr.child(ns_it, i)))
@@ -665,7 +665,7 @@ void reduce_modular_argument::operator() (combo_tree& tr, combo_tree::iterator i
 {
     if (is_builtin_action(*it)) {
         builtin_action a = get_builtin_action(*it);
-        for (unsigned int i = 0;i < it.number_of_children();i++) {
+        for (unsigned int i = 0;i < it.number_of_children();++i) {
             if (a->is_modulo(i)) {
                 double min = a->modulo_min(i);
                 double max = a->modulo_max(i);
@@ -730,7 +730,7 @@ bool reduce_free_post_action (builtin_action pre_a, builtin_action post_a, bool 
         case id::boolean_while:
         case id::repeat_n:
 
-            for (unsigned int i = 0;i < it.number_of_children();i++) {
+            for (unsigned int i = 0;i < it.number_of_children();++i) {
                 pre_it child_it = tr.child(it, i);
                 free_pre_action |= reduce_free_post_action (pre_a, post_a, free_pre_action, tr, child_it);
             }
@@ -744,7 +744,7 @@ bool reduce_free_post_action (builtin_action pre_a, builtin_action post_a, bool 
         case id::action_action_if:
 
             free_pre_action = false;
-            for (unsigned int i = 0;i < it.number_of_children();i++) {
+            for (unsigned int i = 0;i < it.number_of_children();++i) {
                 pre_it child_it = tr.child(it, i);
                 free_pre_action |= reduce_free_post_action (pre_a, post_a, free_pre_action_before, tr, child_it);
             }

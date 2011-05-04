@@ -59,7 +59,7 @@ double CartPole::evalNet(ann *net)
             //Activate the net
             //If it loops, exit returning only fitness of 1 step
             int depth = net->feedforward_depth();
-            for(int x=0;x<depth;x++)
+            for(int x=0;x<depth;++x)
                 net->propagate();
 
             output=net->outputs[0]->activation;
@@ -106,7 +106,7 @@ double CartPole::evalNet(ann *net)
             //Activate the net
             //If it loops, exit returning only fitness of 1 step
             int depth = net->feedforward_depth();
-            for(int x=0;x<depth;x++)
+            for(int x=0;x<depth;++x)
                 net->propagate();
 
             output=net->outputs[0]->activation;
@@ -132,7 +132,7 @@ double CartPole::evalNet(ann *net)
             jiggletotal=0;
             cout<<"step "<<steps-99-2<<" to step "<<steps-2<<endl;
             //Adjust for array bounds and count
-            for (count=steps-99-2;count<=steps-2;count++)
+            for (count=steps-99-2;count<=steps-2;++count)
                 jiggletotal+=jigglestep[count];
         }
 
@@ -305,17 +305,17 @@ void CartPole::rk4(double f, double y[], double dydx[], double yout[])
 
 	hh=TAU*0.5;
 	h6=TAU/6.0;
-	for (i=0;i<=5;i++) yt[i]=y[i]+hh*dydx[i];
+	for (i=0;i<=5;++i) yt[i]=y[i]+hh*dydx[i];
 	step(f,yt,dyt);
 	dyt[0] = yt[1];
 	dyt[2] = yt[3];
 	dyt[4] = yt[5];
-	for (i=0;i<=5;i++) yt[i]=y[i]+hh*dyt[i];
+	for (i=0;i<=5;++i) yt[i]=y[i]+hh*dyt[i];
 	step(f,yt,dym);
 	dym[0] = yt[1];
 	dym[2] = yt[3];
 	dym[4] = yt[5];
-	for (i=0;i<=5;i++) {
+	for (i=0;i<=5;++i) {
 		yt[i]=y[i]+TAU*dym[i];
 		dym[i] += dyt[i];
 	}
@@ -323,7 +323,7 @@ void CartPole::rk4(double f, double y[], double dydx[], double yout[])
 	dyt[0] = yt[1];
 	dyt[2] = yt[3];
 	dyt[4] = yt[5];
-	for (i=0;i<=5;i++)
+	for (i=0;i<=5;++i)
 		yout[i]=y[i]+h6*(dydx[i]+dyt[i]+2.0*dym[i]);
 }
 

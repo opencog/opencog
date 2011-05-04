@@ -71,7 +71,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
     FeatureSet rel; // set of relevant features for a given iteration
     FeatureSet res; // set of relevant non-redundant features to return
 
-    for(unsigned i = 1; i <= max_interaction_terms; i++) {
+    for(unsigned i = 1; i <= max_interaction_terms; ++i) {
         // define the set of set of features to test for relevancy
         FeatureSet tf = set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);

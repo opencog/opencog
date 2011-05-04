@@ -40,7 +40,7 @@ unsigned int ant_action_symbol::get_basic_description_array_count() const {
 const ant_action_symbol* ant_action_symbol::init_action_symbol() {
   static ant_action_symbol* action_symbols =
     new ant_action_symbol[id::ant_action_symbol_count];
-  for(unsigned int i = 0; i < id::ant_action_symbol_count; i++)
+  for(unsigned int i = 0; i < id::ant_action_symbol_count; ++i)
     action_symbols[i].set_action_symbol((ant_action_symbol_enum)i);
   return action_symbols;
 }
@@ -56,7 +56,7 @@ action_symbol ant_action_symbol::instance(const std::string& name) {
   //look up for pet_action_symbol_enum corresponding to that name
   bool found = false;
   action_symbol as = NULL;
-  for(unsigned int i = 0; i<id::ant_action_symbol_count && !found; i++) {
+  for(unsigned int i = 0; i<id::ant_action_symbol_count && !found; ++i) {
     as = ant_action_symbol::instance((ant_action_symbol_enum)i);
     found = as->get_name()==name;
   }

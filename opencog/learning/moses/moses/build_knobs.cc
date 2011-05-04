@@ -418,7 +418,7 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
 
         int rand_int = rng.randint(_perceptions->size());
         combo_tree_ns_set_it p_it = _perceptions->begin();
-        for (int ind = 0; ind < rand_int; ind++)
+        for (int ind = 0; ind < rand_int; ++ind)
             ++p_it;
 
         combo_tree vp(*p_it);
@@ -680,7 +680,7 @@ static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
     {
         bool duplicate=false;
         for(vector<ann_type>::iterator node_it = nodes.begin();
-                node_it!=nodes.end();node_it++)
+                node_it!=nodes.end();++node_it)
             if(get_ann_type(*it).idx==(*node_it).idx)
             {
                 duplicate=true;

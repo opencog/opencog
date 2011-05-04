@@ -345,7 +345,7 @@ struct iterative_hillclimbing {
             // check if there is an instance in the deme better than
             // the exemplar
             for (unsigned i = current_number_of_instances;
-                 deme.begin() + i != deme.end(); i++) {
+                 deme.begin() + i != deme.end(); ++i) {
                 composite_score inst_score = deme[i].second;
                 if (get_score(inst_score) > get_score(best_score)) {
                     best_score = inst_score;
@@ -524,7 +524,7 @@ struct sliced_iterative_hillclimbing {
 
             // check if there is an instance in the deme better than the exemplar
             for (int i = 0; deme.begin() + current_number_of_instances != deme.end() &&
-                    i < _evals_per_slice && !has_improved; i++) {
+                    i < _evals_per_slice && !has_improved; ++i) {
 
                 *(deme.begin_scores() + current_number_of_instances) = score(*(deme.begin() + current_number_of_instances));
 

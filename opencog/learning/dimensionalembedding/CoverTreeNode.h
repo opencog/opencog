@@ -60,7 +60,7 @@ void print(AtomSpace& atomspace, CoverTreeNode& p) {
     }
     const std::vector<double>& embedVector = p.getVector();
     for(std::vector<double>::const_iterator it=embedVector.begin();
-        it!=embedVector.end(); it++)
+        it!=embedVector.end(); ++it)
         {
             oss << *it << " ";
         }       
@@ -77,7 +77,7 @@ double distance(CoverTreeNode n1, CoverTreeNode n2, double upper_bound) {
     
     double distance=0;
     //Calculate euclidean distance between v1 and v2
-    for(; it1!=v1.end(); it1++, it2++)
+    for(; it1!=v1.end(); ++it1, ++it2)
         distance+=sq(*it1 - *it2);
     distance=sqrt(distance);
     return distance;

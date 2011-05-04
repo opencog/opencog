@@ -84,9 +84,8 @@ public:
     // set binding prior calling the combo evaluation, ignoring inputs
     // to be ignored
     void set_binding(const std::vector<T>& args) const {
-        for(std::set<arity_t>::const_iterator cit = considered_args.begin();
-            cit != considered_args.end(); cit++)
-            binding(*cit + 1) = args[*cit];
+        foreach(arity_t a, considered_args)
+            binding(a+1) = args[a];
     }
     arity_t get_arity() const {
         return matrix.front().size();
@@ -103,7 +102,7 @@ public:
     // like above but takes a set of indices instead of vertex
     void set_ignore_args_from_zero(const std::set<arity_t>& ignore_idxs) {
         considered_args.clear();
-        for(arity_t idx = 0; idx < get_arity(); idx++)
+        for(arity_t idx = 0; idx < get_arity(); ++idx)
             if(ignore_idxs.find(idx) == ignore_idxs.end())
                 considered_args.insert(idx);
         OC_ASSERT(!considered_args.empty(), "You cannot ignore all arguments");
@@ -129,7 +128,7 @@ public:
     // the reverse of get_considered_args
     vertex_set get_ignore_args() {
         vertex_set res;
-        for(arity_t idx = 0; idx < get_arity(); idx++)
+        for(arity_t idx = 0; idx < get_arity(); ++idx)
             if(considered_args.find(idx) == considered_args.end())
                 res.insert(argument(argument::idx_from_zero_to_idx(idx)));
         return res;
@@ -318,9 +317,8 @@ public:
     // set binding prior calling the combo evaluation, ignoring inputs
     // to be ignored
     void set_binding(const std::vector<bool>& args) const {
-        for(std::set<arity_t>::const_iterator cit = considered_args.begin();
-            cit != considered_args.end(); cit++)
-            binding(*cit + 1) = bool_to_vertex(args[*cit]);
+        foreach(arity_t a, considered_args)
+            binding(a+1) = bool_to_vertex(args[a]);
     }
 };
 
@@ -824,7 +822,7 @@ std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
     ostreamTableHeader(out, it, ot);
     // print data
     OC_ASSERT(it.size() == ot.size());
-    for(size_t row = 0; row < it.size(); row++) {
+    for(size_t row = 0; row < it.size(); ++row) {
         foreach(size_t col, it.get_considered_args_from_zero())
             out << it[row][col] << ",";
         out << ot[row] << std::endl;

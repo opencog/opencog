@@ -85,9 +85,9 @@ int main(int argc, char** argv)
     
     int depth = bestnet.feedforward_depth();
     
-    for (int pattern = 0;pattern < 4;pattern++) {
+    for (int pattern = 0;pattern < 4;++pattern) {
         bestnet.load_inputs(inputs[pattern]);
-        for (int x = 0;x < depth;x++)
+        for (int x = 0;x < depth;++x)
             bestnet.propagate();
         cout << "Input [ " << inputs[pattern][0] << " " << inputs[pattern][1] << " ] : Output " << bestnet.outputs[0]->activation << endl;
     

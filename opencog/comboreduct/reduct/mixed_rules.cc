@@ -1269,10 +1269,10 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
     unsigned int h = dm.size(); //number of rows
     OC_ASSERT(h>0, "Number of rows should be greater than 0 (gaussJordanElimitation)");
     unsigned int w = dm[h-1].size(); //number of columns
-    for(unsigned int y = 0; y < h; y++) {
+    for(unsigned int y = 0; y < h; ++y) {
       unsigned int maxrow = y;
       //find max pivot
-      for(unsigned int y2 = y+1; y2 < h; y2++)
+      for(unsigned int y2 = y+1; y2 < h; ++y2)
 	if(std::fabs(dm[y2][y]) > std::fabs(dm[maxrow][y]))
 	  maxrow = y2;
       std::vector<double> tmp_row = dm[y];
@@ -1282,20 +1282,20 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
       if(std::fabs(dm[y][y]) <= eps)
 	return false;
       //eliminate column y
-      for(unsigned int y2 = y+1; y2 < h; y2++) {
+      for(unsigned int y2 = y+1; y2 < h; ++y2) {
 	double c = dm[y2][y]/dm[y][y];
-	for(unsigned int x = y; x < w; x++)
+	for(unsigned int x = y; x < w; ++x)
 	  dm[y2][x] -= c*dm[y][x];
       }
     }
     //backsubstitute
-    for(int y = h-1; y >= 0; y--) {
+    for(int y = h-1; y >= 0; --y) {
       double c = dm[y][y];
-      for(int y2 = 0; y2 < y; y2++)
-	for(int x = w-1; x > y-1; x--)
+      for(int y2 = 0; y2 < y; ++y2)
+	for(int x = w-1; x > y-1; --x)
 	  dm[y2][x] -= dm[y][x]*dm[y2][y]/c;
       dm[y][y] /= c;
-      for(unsigned x = (h>w?w:h); x < (h>w?h:w); x++)
+      for(unsigned x = (h>w?w:h); x < (h>w?h:w); ++x)
 	dm[y][x] /= c;
     }
     return true;
@@ -1305,10 +1305,10 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
     unsigned int m = dm.size(); //number of rows
     OC_ASSERT(m>0, "Number of rows should be greater than 0 (gaussianElimitation)");
     unsigned int n = dm[m-1].size(); //number of columns
-    for(unsigned int i = 0; i < m; i++) {
-      for(unsigned int j = 0; j < n; j++) {
+    for(unsigned int i = 0; i < m; ++i) {
+      for(unsigned int j = 0; j < n; ++j) {
 	unsigned int maxi = i;
-	for(unsigned int k = i+1; k < m; k++) {
+	for(unsigned int k = i+1; k < m; ++k) {
 	  if(std::fabs(dm[k][j])>fabs(dm[maxi][j]))
 	    maxi = k;
 	}
@@ -1318,11 +1318,11 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
 	  dm[maxi] = tmp_row;
 	  double c = dm[i][j];
 	  OC_ASSERT(c != 0.0, "dm[%d][%d] == 0.0. Should be diferent", i, j);
-	  for(unsigned int k = 0; k < n; k++)
+	  for(unsigned int k = 0; k < n; ++k)
 	    dm[i][k] = dm[i][k] / c;
-	  for(unsigned int u = i+1; u < m; u++) {
+	  for(unsigned int u = i+1; u < m; ++u) {
 	    double d = dm[u][j];
-	    for(unsigned int k = 0; k < n; k++)
+	    for(unsigned int k = 0; k < n; ++k)
 	      dm[u][k] = dm[u][k] - d*dm[i][k];
 	  }
 	}
@@ -1335,10 +1335,10 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
     OC_ASSERT(m>0, "Number of rows should be greater than 0 (gaussianElimitation2)");
     int n = dm[m-1].size(); //number of columns
     OC_ASSERT(n>0, "Number of columns should be greater than 0 (gaussianElimitation2)");
-    for(int i = 0; i < std::min(m, n-1); i++) {
+    for(int i = 0; i < std::min(m, n-1); ++i) {
       //swap below until find non-zero
       int ipivot = -1;
-      for(int i2  = i; i2 < m; i2++)
+      for(int i2  = i; i2 < m; ++i2)
 	if(std::fabs(dm[i2][i]) > eps)
 	  ipivot = i2;
       //swap row i and row
@@ -1349,12 +1349,12 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
       dm[ipivot] = tmp;
       //divide pivot by itself to be 1
       contin_t c = dm[i][i];
-      for(int j = 0; j < n; j++)
+      for(int j = 0; j < n; ++j)
 	dm[i][j] /= c;
       //reduce to 0 all column below
-      for(int i2 = i+1; i2 < m; i2++) {
+      for(int i2 = i+1; i2 < m; ++i2) {
 	contin_t c = dm[i2][i];
-	for(int j = 0; j < n; j++)
+	for(int j = 0; j < n; ++j)
 	  dm[i2][j] -= c*dm[i][j];
       }
     }
@@ -1369,17 +1369,17 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
     OC_ASSERT(n>0, "Number of rows should be greater than 0 (backSubstitution)");
     solution.resize(n-1, 0.0);
     bool allNull = true;
-    for(int i = m-1; i >= 0; i--) {
+    for(int i = m-1; i >= 0; --i) {
       //check if there is contradiction in the equationnal system
-      for(int j = 0; j < n-1; j++)
+      for(int j = 0; j < n-1; ++j)
 	if(std::fabs(dm[i][j]) > eps) 
 	  allNull = false;
       if(allNull && std::fabs(dm[i][n-1]) > eps) //something in contradiction
 	return false;
-      for(int j = 0; j < n-1; j++) {	
+      for(int j = 0; j < n-1; ++j) {	
 	if(dm[i][j]==1.0) {
 	  solution[j] = dm[i][n-1];
-	  for(int i2 = i-1; i2 >= 0; i2--) {
+	  for(int i2 = i-1; i2 >= 0; --i2) {
 	    dm[i2][n-1] -= solution[j]*dm[i2][j];
 	    dm[i2][j] = 0;
 	  }
@@ -1539,7 +1539,7 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
 	  //complete sr and free_coefs with the assumptions
 	  //either by adding new expressions not found in ctr and coef 0.0
 	  //or by filling the matrix
-	  for(unsigned int i = 0; i < assumptions.size(); i++) {
+	  for(unsigned int i = 0; i < assumptions.size(); ++i) {
 	    pre_it assum = assumptions[i];
 	    OC_ASSERT(*assum==id::greater_than_zero && assum.has_one_child(),
                "Assum diferent from greater_than_zero or has none or more than one child.");
@@ -1624,8 +1624,8 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
 	  mat.push_back(free_coefs);
 	  //print matrix before
 	  /*std::cout << "MATRIX BEFORE :" << std::endl;
-	  for(unsigned int i = 0; i < mat.size(); i++) {
-	    for(unsigned int j = 0; j < mat[i].size(); j++)
+	  for(unsigned int i = 0; i < mat.size(); ++i) {
+	    for(unsigned int j = 0; j < mat[i].size(); ++j)
 	      std::cout << mat[i][j] << " ";
 	    std::cout << std::endl;
 	    }*/
@@ -1633,8 +1633,8 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
 	  bool resGJ = gaussianElimination2(mat);
 	  //print matrix after
 	  /*std::cout << "MATRIX AFTER :" << std::endl;
-	  for(unsigned int i = 0; i < mat.size(); i++) {
-	    for(unsigned int j = 0; j < mat[i].size(); j++)
+	  for(unsigned int i = 0; i < mat.size(); ++i) {
+	    for(unsigned int j = 0; j < mat[i].size(); ++j)
 	      std::cout << mat[i][j] << " ";
 	    std::cout << std::endl;
 	    }*/
@@ -1647,12 +1647,12 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
 	  bool BSres = backSubstitution(mat, solution);
 	  //print vector solution
 	  /*std::cout << "SOLUTION :" << std::endl;
-	  for(unsigned int i = 0; i < solution.size(); i++)
+	  for(unsigned int i = 0; i < solution.size(); ++i)
 	    std::cout << solution[i] << " ";
 	  std::cout << std::endl;
 	  //print vector isStrictPositives
 	  std::cout << "ISSTRICTPOSITIVES :" << std::endl;
-	  for(unsigned int i = 0; i < isStrictPositives.size(); i++)
+	  for(unsigned int i = 0; i < isStrictPositives.size(); ++i)
 	    std::cout << (bool)isStrictPositives[i] << " ";
 	    std::cout << std::endl;*/
 	  if(!BSres) {
@@ -1661,7 +1661,7 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
 	  bool existsStrictPositive = false;
 	  bool existsStrictFromStrictPositive = false;
 	  bool allPositiveOrNull = true;
-	  for(unsigned int i = 0; i < solution.size(); i++) {
+	  for(unsigned int i = 0; i < solution.size(); ++i) {
 	    if(isStrictPositives[i]) {
 	      if(solution[i] > 0) {
 		existsStrictPositive = true;

@@ -98,7 +98,7 @@ combo_tree ann_exemplar(arity_t arity) {
     combo_tree::iterator output_node =
         ann_tr.append_child(root_node, ann_type(1, id::ann_node));
     // input nodes
-    for(arity_t i = 0; i <= arity; i++) 
+    for(arity_t i = 0; i <= arity; ++i) 
         ann_tr.append_child(output_node, ann_type(i + 2, id::ann_input));
     // input nodes' weights
     ann_tr.append_children(output_node, 0.0, arity + 1);
@@ -167,7 +167,7 @@ arity_t infer_arity(const string& problem,
 
 // returns n such that a = n+2^n
 arity_t multiplex_arity(arity_t a) {
-    for(unsigned int n = 1; n <= integer_log2(a); n++)
+    for(unsigned int n = 1; n <= integer_log2(a); ++n)
         if(n+pow2(n) == (unsigned int)a)
             return n;
     // not found, exit
@@ -178,7 +178,7 @@ arity_t multiplex_arity(arity_t a) {
 }
 
 int moses_exec(int argc, char** argv) { 
-    // for(int i = 0; i < argc; i++)
+    // for(int i = 0; i < argc; ++i)
     //     std::cout << "arg = " << argv[i] << std::endl;
 
     // program options, see options_description below for their meaning
@@ -421,7 +421,7 @@ int moses_exec(int argc, char** argv) {
                 ignore_ops.erase(v);
             } else if(argument_str_to_vertex(s, v)) {
                 if(!ignore_arguments) {
-                    for(arity_t arg = 1; arg <= arity; arg++)
+                    for(arity_t arg = 1; arg <= arity; ++arg)
                         ignore_ops.insert(argument(arg));
                     ignore_arguments = true;
                 }
@@ -775,7 +775,7 @@ int moses_exec(int argc, char** argv) {
 
 int moses_exec(const vector<string>& argvs) {
     char** argv = new char*[argvs.size()];
-    for(size_t i = 0; i < argvs.size(); i++) {
+    for(size_t i = 0; i < argvs.size(); ++i) {
         argv[i] = const_cast<char*>(argvs[i].c_str());
     }
     int res = moses_exec(argvs.size(), argv);

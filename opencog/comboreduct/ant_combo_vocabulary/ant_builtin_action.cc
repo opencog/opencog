@@ -46,7 +46,7 @@ unsigned int ant_builtin_action::get_basic_description_array_count() const {
 const ant_builtin_action* ant_builtin_action::init_actions() {
   ant_builtin_action* action_array =
     new ant_builtin_action[id::ant_builtin_action_count];
-  for(unsigned int i = 0; i < id::ant_builtin_action_count; i++)
+  for(unsigned int i = 0; i < id::ant_builtin_action_count; ++i)
     action_array[i].set_action((ant_builtin_action_enum)i, action_array);
   return action_array;
 }
@@ -83,7 +83,7 @@ void ant_builtin_action::set_action(ant_builtin_action_enum abae,
     sizeof(aapd)/sizeof(action_argument_property_description);
   std::set<arity_t> arg_not_found; //contains all argument indices
   //set arg_not_found
-  for(arity_t a = 0; a < _arity; a++)
+  for(arity_t a = 0; a < _arity; ++a)
     arg_not_found.insert(a);
   //initialize all argument fast arrays
   _arg_additive.resize(_arity);
@@ -127,7 +127,7 @@ builtin_action ant_builtin_action::instance(const std::string& name) {
   //look up for ant_builtin_action_enum corresponding to that name
   bool found = false;
   builtin_action a = NULL;
-  for(unsigned int i = 0; i<id::ant_builtin_action_count && !found; i++) {
+  for(unsigned int i = 0; i<id::ant_builtin_action_count && !found; ++i) {
     a = ant_builtin_action::instance((ant_builtin_action_enum)i);
     found = a->get_name()==name;
   }

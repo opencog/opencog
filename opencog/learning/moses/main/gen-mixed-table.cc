@@ -142,7 +142,7 @@ int main(int argc, char ** argv)
     	    				combo::const_cv_it contin_it = (*i).begin();    
         					argument_type_list_it it = arg_type_list.begin() ;
         				    if(is_output){    								
-             					for( unsigned int k =0; k<arg_number;k++) { 			  			
+             					for( unsigned int k =0; k<arg_number;++k) { 			  			
              						type_tree_pre_it tp_it = (*(it+k)).begin();          		
              						if((*tp_it)== id::boolean_type){             				
              							cout<<bool_arg_count%2<<"  ";             					
@@ -170,7 +170,7 @@ int main(int argc, char ** argv)
        					combo::const_cv_it contin_it = (*i).begin();    
        					argument_type_list_it it = arg_type_list.begin() ;
        			       								
-      					for( unsigned int k =0; k<arg_number;k++) { 			  			
+      					for( unsigned int k =0; k<arg_number;++k) { 			  			
        						type_tree_pre_it tp_it = (*(it+k)).begin();          		
        						if((*tp_it)== id::boolean_type){             				
        							cout<<bool_arg_count%2<<"  ";             					

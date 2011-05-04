@@ -91,7 +91,7 @@ int main(int argc,char** argv) {
 
     if(verbose) {
         // print info column
-        for(size_t arg = 1; arg < arity+1; arg++)
+        for(size_t arg = 1; arg < arity+1; ++arg)
             std::cout << "#" << arg << "\t";
         std::cout << "target\t" << "result\t"
                   << "sqr_error\t" << "abs_error" << std::endl;
@@ -99,7 +99,7 @@ int main(int argc,char** argv) {
         contin_input_table::const_iterator it_cit = it.begin();
         contin_table::const_iterator ct_cit = ct.begin();
         contin_table::const_iterator ct_tr_cit = ct_tr.begin();
-        for(; it_cit != it.end(); it_cit++, ct_cit++, ct_tr_cit++) {
+        for(; it_cit != it.end(); ++it_cit, ++ct_cit, ++ct_tr_cit) {
             contin_t tar(*ct_cit), res(*ct_tr_cit);
             printContainer(*it_cit, "\t", "", "\t");
             std::cout << tar << "\t" << res << "\t"

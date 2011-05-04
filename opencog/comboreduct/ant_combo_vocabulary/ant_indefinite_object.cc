@@ -40,7 +40,7 @@ unsigned int ant_indefinite_object::get_basic_description_array_count() const {
 const ant_indefinite_object* ant_indefinite_object::init_indefinite_object() {
   static ant_indefinite_object* indefinite_objects =
     new ant_indefinite_object[id::ant_indefinite_object_count];
-  for(unsigned int i = 0; i < id::ant_indefinite_object_count; i++)
+  for(unsigned int i = 0; i < id::ant_indefinite_object_count; ++i)
     indefinite_objects[i].set_indefinite_object((ant_indefinite_object_enum)i);
   return indefinite_objects;
 }
@@ -56,7 +56,7 @@ indefinite_object ant_indefinite_object::instance(const std::string& name) {
   //look up for pet_indefinite_object_enum corresponding to that name
   bool found = false;
   indefinite_object as = NULL;
-  for(unsigned int i = 0; i<id::ant_indefinite_object_count && !found; i++) {
+  for(unsigned int i = 0; i<id::ant_indefinite_object_count && !found; ++i) {
     as = ant_indefinite_object::instance((ant_indefinite_object_enum)i);
     found = as->get_name()==name;
   }

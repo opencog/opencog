@@ -966,7 +966,7 @@ void set_arg_type(const type_tree& tt, unsigned int idx,
     unsigned int idxfz = idx - 1;
     unsigned int s = arg_types.size();
     if (s < idx)
-        for (unsigned int i = s; i < idx; i++)
+        for (unsigned int i = s; i < idx; ++i)
             arg_types.push_back(type_tree(id::unknown_type));
     arg_types[idxfz] = tt;
 }
@@ -1183,7 +1183,7 @@ type_tree declare_function(const type_tree& iotype, arity_t arity)
     type_tree res(id::lambda_type);
     type_tree::iterator root = res.begin();
     res.append_children(root, arity+1);
-    for(type_tree::sibling_iterator sib = root.begin(); sib!= root.end(); sib++)
+    for(type_tree::sibling_iterator sib = root.begin(); sib!= root.end(); ++sib)
         sib = res.replace(sib, iotype.begin());
     return res;
 }

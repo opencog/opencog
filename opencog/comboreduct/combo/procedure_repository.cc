@@ -138,7 +138,7 @@ namespace combo {
     //define and fill the dependency graph
     typedef boost::adjacency_list<> Graph;
     Graph g(pc_vec.size());
-    for(unsigned int i = 0; i < pc_vec.size(); i++) {
+    for(unsigned int i = 0; i < pc_vec.size(); ++i) {
       std::set<procedure_call> spc = procedure_call_dependencies(pc_vec[i]);
       for(std::set<procedure_call>::const_iterator spci = spc.begin();
 	  spci != spc.end(); ++spci) {
@@ -159,7 +159,7 @@ namespace combo {
     
     //print debug
     //std::cout << "PARTITION SIZE : " << num << std::endl;
-    //for(unsigned int i = 0; i < component.size(); i++) {
+    //for(unsigned int i = 0; i < component.size(); ++i) {
     //  std::cout << "INDEX : " << i << " CORRESPONDING TO SCHEMA : "
     //	<< pc_vec[i] << " IS IN CATEGORY : " << component[i]
     //	<< std::endl;
@@ -170,11 +170,11 @@ namespace combo {
     //connected components
     strongly_connected_components scc(num);
     //create vertices
-    for(unsigned int i = 0; i < component.size(); i++) {
+    for(unsigned int i = 0; i < component.size(); ++i) {
       scc[component[i]].insert(pc_vec[i]);
     }
     //print debug
-    //for(unsigned int i = 0; i < scc.size(); i++) {
+    //for(unsigned int i = 0; i < scc.size(); ++i) {
     //  std::cout << "SCC INDEX : " << i << " SET :" ;
     //  for(procedure_call_const_it pci = scc[i].begin();
     //  pci != scc[i].end(); ++pci) {
@@ -185,7 +185,7 @@ namespace combo {
     //~print debug
     Graph hg(num); //the partition graph
     //create edges
-    for(unsigned int i = 0; i < scc.size(); i++) {
+    for(unsigned int i = 0; i < scc.size(); ++i) {
       procedure_call_set pcs = procedure_call_dependencies(scc[i]);
       
       //print debug

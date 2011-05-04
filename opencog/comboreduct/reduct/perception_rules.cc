@@ -44,8 +44,8 @@ namespace reduct {
 	  arg1.push_back(pre_it(tr.child(*it_vec_it, 0)));
 	  arg2.push_back(pre_it(tr.child(*it_vec_it, 1)));
 	}
-	for(unsigned int i2 = 0; i2 < arg2.size(); i2++) {
-	  for(unsigned int i1 = 0; i1 < arg2.size(); i1++) {
+	for(unsigned int i2 = 0; i2 < arg2.size(); ++i2) {
+	  for(unsigned int i1 = 0; i1 < arg2.size(); ++i1) {
 	    if(i1 != i2 && tr.equal_subtree(arg1[i2], arg2[i1])) {
 	      //must build and add 0<f(a,c)-f(a,b) and 0<f(a,c)-f(b,c)
 	      //that is :
@@ -115,8 +115,8 @@ namespace reduct {
 	  }
 	}
 	if(!arg1.empty() /*or arg2 not empty*/) {
-	  for(unsigned int i2 = 0; i2 < arg2.size(); i2++) {
-	    for(unsigned int i1 = 0; i1 < arg2.size(); i1++) {
+	  for(unsigned int i2 = 0; i2 < arg2.size(); ++i2) {
+	    for(unsigned int i1 = 0; i1 < arg2.size(); ++i1) {
 	      if(i1 != i2 && tr.equal_subtree(arg1[i2], arg2[i1])) {
 		//build new assumption *it(arg1[i1], arg2[i2])
 		combo_tree new_assum_tr;
@@ -177,7 +177,7 @@ namespace reduct {
 	if(!arg1.empty() /*or arg2 not empty*/) {
 	  OC_ASSERT(arg1.size()==arg2.size(),
               "arg1 and arg2 vectors should have the same size.");
-	  for(unsigned int i = 0; i < arg1.size(); i++) {
+	  for(unsigned int i = 0; i < arg1.size(); ++i) {
 	    if(!tr.equal_subtree(arg1[i], arg2[i])) {
 	      //build new assumption *it(arg2[i], arg1[i])
 	      combo_tree new_assum_tr;

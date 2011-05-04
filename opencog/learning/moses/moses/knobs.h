@@ -245,7 +245,7 @@ struct logical_subtree_knob : public knob_with_arity<3> {
     string toStr() const {
         stringstream ss;
         ss << "[";
-        for(int i = 0; i < arity(); i++)
+        for(int i = 0; i < arity(); ++i)
             ss << posStr(map_idx(i)) << (i < arity()-1? " " : "");
         ss << "]";
         return ss.str();
@@ -307,7 +307,7 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
         OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
 
-        for (int i = _perms.size() + 1;i < MAX_PERM_ACTIONS;i++)
+        for (int i = _perms.size() + 1;i < MAX_PERM_ACTIONS;++i)
             disallow(i);
 
         _default = 0;

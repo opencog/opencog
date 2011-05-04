@@ -122,10 +122,10 @@ public:
         //reset sort value
         sort_val=0.0;
         //add magnitude of all incoming connections
-        for(it=in_connections.begin();it!=in_connections.end();it++)
+        for(it=in_connections.begin();it!=in_connections.end();++it)
             sort_val += fabs((*it)->weight);
         //add magnitude of all outgoing connections
-        for(it=out_connections.begin();it!=out_connections.end();it++)
+        for(it=out_connections.begin();it!=out_connections.end();++it)
             sort_val += fabs((*it)->weight);
     }
 
@@ -165,7 +165,7 @@ public:
 
     ~ann() {
         ann_node_it iter;
-        for (iter = nodes.begin();iter != nodes.end();iter++)
+        for (iter = nodes.begin();iter != nodes.end();++iter)
             delete (*iter);
     }
    
@@ -179,7 +179,7 @@ public:
            // remove impact-less connections. @todo: the code can be
            // both simpler and more efficient by having
            // remove_connection return the next iterator
-           for (iter = connections.begin();iter != connections.end(); iter++)
+           for (iter = connections.begin();iter != connections.end(); ++iter)
            {
               if((*iter)->weight != 0.0)
                  continue;
@@ -193,7 +193,7 @@ public:
            //remove disconnected hidden neurons
            ann_node_it node_iter;
            for (node_iter = hidden.begin(); node_iter != hidden.end(); 
-                   node_iter++)
+                   ++node_iter)
            {
                //if there are no outgoing connections and it is not
                //used as input of a memory neurone, then this neuron
@@ -214,13 +214,13 @@ public:
        //cannonical order of expressing an nn)
        ann_node_it node_iter;
        for (node_iter = nodes.begin(); node_iter != nodes.end();
-               node_iter++)
+               ++node_iter)
        {
           (*node_iter)->calculate_sort_value();
        }
        
        for (node_iter = nodes.begin(); node_iter != nodes.end();
-               node_iter++)
+               ++node_iter)
        {
           (*node_iter)->sort_connections();
        }
@@ -236,17 +236,17 @@ public:
         ann_node_it nit; 
         outfile << "digraph g { " << endl;
 
-        for(nit=inputs.begin();nit!=inputs.end();nit++)
+        for(nit=inputs.begin();nit!=inputs.end();++nit)
         {
             outfile << "N" << (*nit)->tag << " [shape=box]" << endl;
         }
         
-        for(nit=outputs.begin();nit!=outputs.end();nit++)
+        for(nit=outputs.begin();nit!=outputs.end();++nit)
         {
             outfile << "N" << (*nit)->tag << " [shape=triangle]" << endl;
         }
 
-        for(it=connections.begin();it!=connections.end();it++)
+        for(it=connections.begin();it!=connections.end();++it)
         {
             int n1 = (*it)->source->tag;
             int n2 = (*it)->dest->tag;
@@ -259,7 +259,7 @@ public:
         }
 
         
-        for(nit=inputs.begin();nit!=inputs.end();nit++)
+        for(nit=inputs.begin();nit!=inputs.end();++nit)
         {
             if((*nit)->memory_ptr)
             {
@@ -271,7 +271,7 @@ public:
         }
 
         outfile << " { rank=same; ";
-        for(nit=inputs.begin();nit!=inputs.end();nit++)
+        for(nit=inputs.begin();nit!=inputs.end();++nit)
         {
             outfile << "N" << (*nit)->tag << " ";
         }
@@ -279,7 +279,7 @@ public:
 
 
         outfile << " { rank=same; ";
-        for(nit=outputs.begin();nit!=outputs.end();nit++)
+        for(nit=outputs.begin();nit!=outputs.end();++nit)
         {
             outfile << "N" << (*nit)->tag << " ";
         }
@@ -301,7 +301,7 @@ public:
         ann_node *new_hidden = new ann_node(nodetype_hidden,tag,NULL);
 
         //connect the new node to all outputs
-        for(iter=outputs.begin();iter!=outputs.end();iter++)
+        for(iter=outputs.begin();iter!=outputs.end();++iter)
         {
             add_connection(new_hidden,(*iter),0.0);
         }
@@ -313,7 +313,7 @@ public:
 
             //selectively connect the node from inputs
             int add_chance = 100;
-            for(iter=inputs.begin();iter!=inputs.end();iter++)
+            for(iter=inputs.begin();iter!=inputs.end();++iter)
             {
                 if (rand()%100 < add_chance) 
                 {
@@ -323,7 +323,7 @@ public:
             }
 
             //connect all hidden nodes to the new hidden node
-            for(iter=hidden.begin();iter!=hidden.end();iter++)
+            for(iter=hidden.begin();iter!=hidden.end();++iter)
             {
                 if (rand()%100 < add_chance)
                 {
@@ -348,10 +348,10 @@ public:
         
         //see if there are any viable hidden nodes that are
         //not already being used to feed a memory input
-        for (iter = hidden.begin(); iter !=hidden.end();iter++)
+        for (iter = hidden.begin(); iter !=hidden.end();++iter)
         {
             bool memory=false;
-            for(in_iter = inputs.begin();in_iter!= inputs.end(); in_iter++)
+            for(in_iter = inputs.begin();in_iter!= inputs.end(); ++in_iter)
             {
                 if(!(*in_iter)->memory_ptr)
                     continue;
@@ -389,14 +389,14 @@ public:
         while(!connected)
         {
             int add_chance = 100;
-            for(iter=hidden.begin();iter!=hidden.end();iter++)
+            for(iter=hidden.begin();iter!=hidden.end();++iter)
                 if (rand()%100 < add_chance)
                 {
                     connected=true;
                     add_connection(new_input,(*iter),0.0);
                 }
 
-            for(iter=outputs.begin();iter!=outputs.end();iter++)
+            for(iter=outputs.begin();iter!=outputs.end();++iter)
                 if (rand()%100 < add_chance)
                 {
                     connected=true;
@@ -412,7 +412,7 @@ public:
     {
         int max = -1;
         ann_node_it iter;
-        for(iter = nodes.begin();iter != nodes.end();iter++)
+        for(iter = nodes.begin();iter != nodes.end();++iter)
             if ((*iter)->tag > max)
                 max = (*iter)->tag;
         return max;
@@ -421,13 +421,13 @@ public:
     //make all nodes appear unvisited, useful for graph algorithms
     void reset_visited() {
         ann_node_it iter;
-        for (iter = nodes.begin();iter != nodes.end();iter++)
+        for (iter = nodes.begin();iter != nodes.end();++iter)
             (*iter)->visited=false;
     }
 
     //return the node with a given tag
     ann_node* find_tag(int t) {
-        for(ann_node_it iter = nodes.begin(); iter != nodes.end(); iter++)
+        for(ann_node_it iter = nodes.begin(); iter != nodes.end(); ++iter)
             if ((*iter)->tag == t)
                 return *iter;
         return NULL;
@@ -450,7 +450,7 @@ public:
     //are connected to
     void load_inputs(double* vals) {
         unsigned int counter=0;
-        for (unsigned int x = 0;x < inputs.size();x++) {
+        for (unsigned int x = 0;x < inputs.size();++x) {
             if(inputs[x]->memory_ptr)
                 inputs[x]->activation = inputs[x]->memory_ptr->activation;
             else
@@ -460,7 +460,7 @@ public:
 
     void load_inputs(const vector<double>& vals) {
         unsigned int counter = 0;
-        for (unsigned int x = 0;x < inputs.size();x++) {
+        for (unsigned int x = 0;x < inputs.size();++x) {
             if(inputs[x]->memory_ptr)
                 inputs[x]->activation = inputs[x]->memory_ptr->activation;
             else
@@ -473,7 +473,7 @@ public:
         ann_node_it iter;
 
         //propagate signals through net
-        for (iter = nodes.begin();iter != nodes.end();iter++) {
+        for (iter = nodes.begin();iter != nodes.end();++iter) {
 
             //skip input nodes, their activations are already set
             if ((*iter)->nodetype == nodetype_input)
@@ -483,7 +483,7 @@ public:
             (*iter)->incoming = 0.0;
 
             //accumulate incoming singal from incoming connections
-            for (unsigned int y = 0;y < (*iter)->in_connections.size();y++)
+            for (unsigned int y = 0;y < (*iter)->in_connections.size();++y)
                 (*iter)->incoming +=
                     (*iter)->in_connections[y]->weight *
                     (*iter)->in_connections[y]->source->activation;
@@ -499,19 +499,19 @@ public:
     int feedforward_depth() {
         
         //reset the node counters
-        for (unsigned int x = 0;x < nodes.size();x++)
+        for (unsigned int x = 0;x < nodes.size();++x)
             nodes[x]->counter = 0;
 
         //recursively determine longest feedforward path 
         //through net
-        for (unsigned int x = 0;x < inputs.size();x++)
+        for (unsigned int x = 0;x < inputs.size();++x)
             feedforward_depth_recurse(inputs[x]);
 
         //the output counters will contain the longest
         //path to that particular output, we want the
         //maximum of all of these counters
         int max_depth = 0;
-        for (unsigned int x = 0;x < outputs.size();x++)
+        for (unsigned int x = 0;x < outputs.size();++x)
             if (outputs[x]->counter > max_depth)
                 max_depth = outputs[x]->counter;
 
@@ -525,7 +525,7 @@ public:
         int depth = n->counter + 1;
 
         //consider all of the outgoing connections
-        for (unsigned int x = 0;x < n->out_connections.size();x++) {
+        for (unsigned int x = 0;x < n->out_connections.size();++x) {
             //what is the destination of this particular connection
             ann_node* dest = n->out_connections[x]->dest;
             //what is the longest distance found to the destination node?
@@ -590,7 +590,7 @@ public:
     //set n->memory_ptr = NULL for all input nodes using n
     void remove_from_memory_ptr(ann_node* n)
     {
-        for(ann_node_it it=inputs.begin(); it!=inputs.end(); it++) {
+        for(ann_node_it it=inputs.begin(); it!=inputs.end(); ++it) {
             if((*it)->memory_ptr == n)
                 (*it)->memory_ptr = NULL;
         }
@@ -625,7 +625,7 @@ public:
     }
 
     friend ostream& operator<<(ostream& os, const ann *a) {
-        for (unsigned int x = 0;x < a->connections.size();x++)
+        for (unsigned int x = 0;x < a->connections.size();++x)
             cout << a->connections[x]->source->id << " -> " <<
                  a->connections[x]->dest->id << " : " <<
                  a->connections[x]->weight << endl;

@@ -96,7 +96,7 @@ void variable_unifier::unify(combo::UnifierOperation operation,
     UnifierIt it = begin();
     UnifierConstIt otherIt = unifier.begin();
 
-    for (; it != end() && otherIt != unifier.end(); it++, otherIt++) {
+    for (; it != end() && otherIt != unifier.end(); ++it, ++otherIt) {
 
         if (it->first != otherIt->first) {
             // log

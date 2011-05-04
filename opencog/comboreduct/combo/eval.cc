@@ -60,18 +60,18 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
                             idx_bound = implicit_idx + ama;
                         else //that is at uses arg_list
                             idx_bound = ap_args;
-                        for (; implicit_idx < idx_bound; implicit_idx++)
+                        for (; implicit_idx < idx_bound; ++implicit_idx)
                             tr.append_child(at, args[implicit_idx]);
                     } else { //raise an assert
                         std::stringstream ss;
                         ss << *at;
                         OC_ASSERT(false,
-                                          "There is not enough arguments given"
-                                          " in input, %s needs at least %d"
-                                          " arguments and only %d are provided",
-                                          ss.str().c_str(),
-                                          static_cast<int>(ama),
-                                          static_cast<int>(rest_ap_arg));
+                                  "There is not enough arguments given"
+                                  " in input, %s needs at least %d"
+                                  " arguments and only %d are provided",
+                                  ss.str().c_str(),
+                                  static_cast<int>(ama),
+                                  static_cast<int>(rest_ap_arg));
                     }
                 }
             }
@@ -116,7 +116,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
                             idx_bound = implicit_idx + ama;
                         else //that is at uses arg_list
                             idx_bound = ap_args;
-                        for (; implicit_idx < idx_bound; implicit_idx++) {
+                        for (; implicit_idx < idx_bound; ++implicit_idx) {
                             combo_tree tmp(args[implicit_idx]);
                             tr.move_ontop(tr.append_child(at), tmp.begin());
                         }

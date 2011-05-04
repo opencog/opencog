@@ -53,7 +53,7 @@ struct knob_mapper {
 
     // find the disc knob corresponding to 'it'
     disc_map_cit find_disc_knob(combo_tree::iterator it) const {
-        for(disc_map_cit d_cit = disc.begin(); d_cit != disc.end(); d_cit++) {
+        for(disc_map_cit d_cit = disc.begin(); d_cit != disc.end(); ++d_cit) {
             if(d_cit->second->get_loc() == it)
                 return d_cit;
         }
@@ -62,7 +62,7 @@ struct knob_mapper {
     // find the contin knob corresponding to 'it'
     contin_map_cit find_contin_knob(combo_tree::iterator it) const {
         for(contin_map_cit c_cit = contin.begin(); c_cit != contin.end();
-            c_cit++) {
+            ++c_cit) {
             if(c_cit->second.get_loc() == it)
                 return c_cit;
         }

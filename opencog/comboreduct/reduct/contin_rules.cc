@@ -440,7 +440,7 @@ void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const
         if(plus_it != it.end()) {
             unsigned int idx = 0;
             for(sib_it fac_it = it.begin();
-                fac_it != it.end(); fac_it++, idx++) {
+                fac_it != it.end(); fac_it++, ++idx) {
                 if(*fac_it != id::plus) { // found a factor to distribute
                     combo_tree tr_copy(it);
                     unsigned int size_before_reduct = tr_copy.size();
@@ -450,7 +450,7 @@ void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const
                     sib_it plus_ci = std::find(tr_cr.begin(), tr_cr.end(),
                                                vertex(id::plus));
                     for(sib_it child = plus_ci.begin();
-                        child != plus_ci.end(); child++) {
+                        child != plus_ci.end(); ++child) {
                         if(*child != id::times)
                             child = tr_copy.insert_above(child, id::times);
                         tr_copy.replace(tr_copy.append_child(child, vertex()),

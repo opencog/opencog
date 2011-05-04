@@ -360,7 +360,7 @@ private:
 
     void estimate_fitness_at_most(int n) {
         OC_ASSERT(n > 0);
-        for (int i = 0; i < n && !_neighborhood.empty(); i++) {
+        for (int i = 0; i < n && !_neighborhood.empty(); ++i) {
 #ifdef COUNT_NUMBER_OF_FITNESS
             _number_of_fitness++;
 #endif
@@ -415,7 +415,7 @@ private:
     ordered_neighborhood_it nth_best_candidate(int n) {
         OC_ASSERT(n >= 0 && n < (int)_ordered_best_estimates.size());
         ordered_neighborhood_it res = _ordered_best_estimates.begin();
-        for (int i_co = 0; i_co < n; i_co++)
+        for (int i_co = 0; i_co < n; ++i_co)
             ++res;
         return res;
     }
@@ -448,7 +448,7 @@ private:
         int plateau_size = _ordered_best_estimates.count(fit);
         if (plateau_size > 1) {
             int chosen_one = rng.randint(plateau_size);
-            for (int i_co = 0; i_co < chosen_one; i_co++)
+            for (int i_co = 0; i_co < chosen_one; ++i_co)
                 ++res;
         }
         OC_ASSERT(fit == res->first);

@@ -222,7 +222,7 @@ struct AnnFitnessFunction : public unary_function<combo_tree, contin_t> {
         int depth = nn.feedforward_depth();
 
         contin_t error = 0.0;
-        for (int pattern = 0;pattern < 4;pattern++) {
+        for (int pattern = 0;pattern < 4;++pattern) {
             nn.load_inputs(inputs[pattern]);
             dorepeat(depth)
                 nn.propagate();

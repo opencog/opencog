@@ -76,7 +76,7 @@ int main(int argc, char** argv)
         antHC();//the first one is for the control
         //std::cout << "CURRENT PROG : " << antHC.current_program()
         //      << " CURRENT FIT EST : " << antHC.current_fitness() << std::endl;
-        for (int j = 0; j < number_of_cycle_per_iteration; j++) {
+        for (int j = 0; j < number_of_cycle_per_iteration; ++j) {
             //std::cout << "CYCLE : " << j+1 << std::endl;
             antHC();
             //std::cout << "CURRENT PROG : " << antHC.current_program()

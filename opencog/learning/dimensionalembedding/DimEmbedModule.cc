@@ -180,7 +180,7 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
         v_array<v_array<CoverTreeNode> > res;
         k_nearest_neighbor(embedTreeMap[l], batch_create(v), res, k);
         HandleSeq results = HandleSeq();
-        for (int j = 1; j<res[0].index; j++) {
+        for (int j = 1; j<res[0].index; ++j) {
             //print(*(this->as), res[0][j]);
             results.push_back(res[0][j].getHandle());
         }
@@ -226,7 +226,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
 
         /*std::cout << "U=" << u << " distmap={";
         for(std::map<Handle, double>::iterator it = distMap.begin();
-                it != distMap.end(); it++) {
+                it != distMap.end(); ++it) {
             std::cout << it->second << ":h=" << it->first << ",";
         }
         std::cout << "}" << std::endl;*/
@@ -246,7 +246,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
             TruthValuePtr linkTV = as->getTV(*it);
             HandleSeq newNodes = as->getOutgoing(*it);
             for(HandleSeq::iterator it2=newNodes.begin();
-                it2!=newNodes.end(); it2++) {
+                it2!=newNodes.end(); ++it2) {
                 double alt =
                     distMap[u] * linkTV->getMean() * linkTV->getConfidence();
                 double oldDist=distMap[*it2];
@@ -257,7 +257,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
                     std::pair<pQueue_t::iterator, pQueue_t::iterator>
                         itPair = pQueue.equal_range(oldDist);
 
-                    for(it3=itPair.first;it3!=itPair.second;it3++) {
+                    for(it3=itPair.first;it3!=itPair.second;++it3) {
                          if(it3->second==*it2) {pQueue.erase(it3); break;}
                     }
                     pQueue.insert(std::pair<double, Handle>(alt,*it2));
@@ -267,7 +267,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
         }
     }
     for(std::map<Handle, double>::iterator it = distMap.begin();
-            it != distMap.end(); it++) {
+            it != distMap.end(); ++it) {
         atomMaps[linkType][it->first].push_back(it->second);
     }
 }
@@ -312,7 +312,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     AtomEmbedding& aE = atomMaps[linkType];
     
     AtomEmbedding::const_iterator it = aE.begin();
-    for(;it!=aE.end();it++) {
+    for(;it!=aE.end();++it) {
         CoverTreeNode c = CoverTreeNode(it);
         push(v,c);
     }
@@ -336,16 +336,16 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
     //with link weight .3, and to node B with embedding (.4,.5)
     //with link weight .6, then the new node's embedding is...
     //(max(.3*.1,.8*.4),max(.3*.2,.6*.5))    
-    for(HandleSeq::iterator it=links.begin(); it<links.end(); it++) {
+    for(HandleSeq::iterator it=links.begin(); it<links.end(); ++it) {
         HandleSeq nodes = as->getOutgoing(*it);
         TruthValuePtr linkTV = as->getTV(*it);        
         double weight = linkTV->getConfidence()*linkTV->getMean();
-        for(HandleSeq::iterator it2=nodes.begin();it2<nodes.end(); it2++) {
+        for(HandleSeq::iterator it2=nodes.begin();it2<nodes.end(); ++it2) {
             if(*it2==h) continue;
             std::vector<double> embedding =
                 getEmbedVector(*it2,linkType);
             //Alter our embedding whenever we find a higher weight path
-            for(int i=0; i<embedding.size(); i++) {
+            for(int i=0; i<embedding.size(); ++i) {
                 if(weight*embedding[i]>newEmbedding[i]) {
                     newEmbedding[i]=weight*embedding[i];
                 }
@@ -366,15 +366,15 @@ void DimEmbedModule::clearEmbedding(const Type& linkType){
     dimensionMap.erase(linkType);
 
     std::map<Handle,int>::iterator vIt = vLTIMap.begin();
-    for(;vIt!=vLTIMap.end();vIt++) {
+    for(;vIt!=vLTIMap.end();++vIt) {
         bool revert=true;
         //In case multiple embeddings (ie for different link types) use the
         //same pivot, check before reverting the VLTI.
         for(PivotMap::iterator it = pivotsMap.begin();
-            it!=pivotsMap.end(); it++) {
+            it!=pivotsMap.end(); ++it) {
             PivotSeq pivots = it->second;
             PivotSeq::iterator it2=pivots.begin();
-            for(; it2!=pivots.end(); it2++) {
+            for(; it2!=pivots.end(); ++it2) {
                 if(vIt->first==*it2) revert=false;
             }
         }
@@ -422,7 +422,7 @@ void DimEmbedModule::printEmbedding() {
     std::ostringstream oss;
     AtomEmbedMap::const_iterator mit = atomMaps.begin();
     oss << "Node Embeddings" << std::endl;
-    for (; mit != atomMaps.end(); mit++) {
+    for (; mit != atomMaps.end(); ++mit) {
         oss << "=== for type" << classserver().getTypeName(mit->first).c_str() << std::endl;
         AtomEmbedding atomEmbedding=mit->second;
         AtomEmbedding::const_iterator it;
@@ -487,12 +487,12 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters) {
     int i=0;
     int j;
     //add the values to the embeddingmatrix...
-    for(;aEit!=aE.end();aEit++) {
+    for(;aEit!=aE.end();++aEit) {
         handleArray[i]=aEit->first;
         std::vector<double> embedding = aEit->second;
         std::vector<double>::iterator vit=embedding.begin();
         j=0;
-        for(;vit!=embedding.end();vit++) {
+        for(;vit!=embedding.end();++vit) {
             embedMatrix[i][j]=*vit;
             mask[i][j]=1;
             j++;
@@ -500,13 +500,13 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters) {
         i++;
     }
     double* weight = new double[numDimensions];
-    for(int i=0;i<numDimensions;i++) {weight[i]=1;}
+    for(int i=0;i<numDimensions;++i) {weight[i]=1;}
 
     int* clusterid = new int[numVectors]; //stores the result of clustering
     double error;
     int ifound;
-    for(int i=0;i<numVectors;i++) {
-        for(int j=0;j<numDimensions;j++) {
+    for(int i=0;i<numVectors;++i) {
+        for(int j=0;j<numDimensions;++j) {
             mask[i][j]=1;
         }
     }
@@ -533,19 +533,19 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters) {
                           mask, clusterid, centroidMatrix,
                           cmask, 0, 'a');
     ClusterSeq clusters(numClusters);
-    for(int i=0;i<numVectors;i++) {
+    for(int i=0;i<numVectors;++i) {
         //clusterid[i] indicates which cluster handleArray[i] is in.
         int clustInd=clusterid[i];
         clusters[clustInd].first.push_back(handleArray[i]);
     }
-    for(int i=0;i<numClusters;i++) {
+    for(int i=0;i<numClusters;++i) {
         std::vector<double> centroid(centroidMatrix[i],
                                      centroidMatrix[i]+numDimensions);
         clusters[i].second=centroid;
     }
     
     //for(std::vector<HandleSeq>::const_iterator it=clusters.begin();
-    //    it!=clusters.end(); it++) {
+    //    it!=clusters.end(); ++it) {
     //    std::cout << "Homogeneity: " << homogeneity(*it,l) << std::endl;
     //    std::cout << "Separation: " << separation(*it,l) << std::endl;
     //}
@@ -576,11 +576,11 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
     //make a Priority Queue of (HandleSeq,vector<double>) pairs, where
     //we can easily extract those with the lowest value to discard if we
     //exceed maxClusters.
-    for(int i=1;i<kPasses+1;i++) {
+    for(int i=1;i<kPasses+1;++i) {
         int k = std::pow(2,std::log(aE.size()/std::log(2)));
         ClusterSeq newClusts = kMeansCluster(l,k);
         for(ClusterSeq::iterator it = newClusts.begin();
-            it!=newClusts.end();it++) {
+            it!=newClusts.end();++it) {
             //if we still have room for more clusters and the cluster quality
             //is high enough, insert the cluster into the pQueue
             double quality = separation(it->first,l)*homogeneity(it->first,l);
@@ -600,11 +600,11 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
         }
     }
     //Make a new node for each cluster and connect it with InheritanceLinks.
-    for(pQueue_t::iterator it = clusters.begin();it!=clusters.end();it++) {
+    for(pQueue_t::iterator it = clusters.begin();it!=clusters.end();++it) {
         HandleSeq cluster = it->second.first;
         std::vector<double> centroid = it->second.second;
         Handle newNode = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
-        for(HandleSeq::iterator it2=cluster.begin();it2!=cluster.end();it2++) {
+        for(HandleSeq::iterator it2=cluster.begin();it2!=cluster.end();++it2) {
             //Connect newNode to each handle in its cluster.
             //@TODO: Decide how to set this truth value.
             SimpleTruthValue tv(.99,
@@ -623,11 +623,11 @@ double DimEmbedModule::homogeneity(const HandleSeq& cluster,
     assert(cluster.size()>1);
     
     double average=0;
-    for(HandleSeq::const_iterator it=cluster.begin();it!=cluster.end();it++) {
+    for(HandleSeq::const_iterator it=cluster.begin();it!=cluster.end();++it) {
         double minDist=DBL_MAX;
         //find the distance to nearest clustermate
         for(HandleSeq::const_iterator it2=cluster.begin();
-                                      it2!=cluster.end();it2++) {
+                                      it2!=cluster.end();++it2) {
             if(*it==*it2) continue;
             double dist=euclidDist(*it,*it2,linkType);
             if(dist<minDist) minDist=dist;
@@ -647,13 +647,13 @@ double DimEmbedModule::separation(const HandleSeq& cluster,
 
     AtomEmbedding aE = (atomMaps.find(linkType))->second;
     double minDist=DBL_MAX;
-    for(AtomEmbedding::iterator it=aE.begin();it!=aE.end();it++) {
+    for(AtomEmbedding::iterator it=aE.begin();it!=aE.end();++it) {
         bool inCluster=false; //whether *it is in cluster
         bool better=false; //whether *it is closer to some element of cluster
                            //than minDist
         double dist;
         for(HandleSeq::const_iterator it2=cluster.begin();
-                                      it2!=cluster.end();it2++) {
+                                      it2!=cluster.end();++it2) {
             if(it->first==*it2) {
                 inCluster=true;
                 break;
@@ -673,7 +673,7 @@ double DimEmbedModule::separation(const HandleSeq& cluster,
 
 double DimEmbedModule::euclidDist(double v1[], double v2[], int size) {
     double dist=0;
-    for(int i=0; i<size;i++) {
+    for(int i=0; i<size;++i) {
         dist+=std::pow((v1[i]-v2[i]), 2);
     }
     dist=sqrt(dist);
@@ -701,7 +701,7 @@ double DimEmbedModule::euclidDist(std::vector<double> v1,
 
     double distance=0;
     //Calculate euclidean distance between v1 and v2
-    for(; it1 != v1.end(); it1++, it2++)
+    for(; it1 != v1.end(); ++it1, ++it2)
         distance+=sq(*it1 - *it2);
     distance=sqrt(distance);
     return distance;

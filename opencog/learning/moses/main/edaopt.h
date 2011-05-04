@@ -75,7 +75,7 @@ private:
     string usage(const std::vector<std::string>& args) {
         string res;
         for(std::vector<string>::const_iterator i = args.begin();
-            i != args.end(); i++) {
+            i != args.end(); ++i) {
             res += *i + std::string(" ");
         }
         return res;

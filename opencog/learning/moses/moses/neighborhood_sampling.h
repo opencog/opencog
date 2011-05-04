@@ -369,7 +369,7 @@ Out vary_n_knobs(const eda::field_set& fs,
                                                       // discs including
                                                       // the current one
             if(remRLs <= n) {
-                for(; relative_raw_idx < num; num--, itr++) {
+                for(; relative_raw_idx < num; --num, ++itr) {
                     // Stop
                     *itr = eda::field_set::contin_spec::Stop;
                 }
@@ -388,7 +388,7 @@ Out vary_n_knobs(const eda::field_set& fs,
         // recursive call, moved for one position
         out = vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out, end);
         // modify the disc and recursive call, moved for one position
-        for(unsigned i = 1; i <= itd.arity() - 1; i++) {
+        for(unsigned i = 1; i <= itd.arity() - 1; ++i) {
             // vary all legal values, the neighborhood should 
             // not equals to itself, so if it is same, set it to 0.
             if(static_cast<unsigned>(tmp_val) == i)
@@ -465,20 +465,20 @@ inline unsigned long long count_n_changed_knobs_from_index(const eda::field_set&
         OC_ASSERT(starting_index - fs.contin_to_raw_idx(contin_idx) == 0);
         // calculate number_of_instances for each possible distance i
         // of the current contin
-        for(int i = 0; i <= min((int)n, depth); i++) {
+        for(int i = 0; i <= min((int)n, depth); ++i) {
             // number of instances for that contin, at distance i
             unsigned cni = 0;
             // count combinations when Left or Right are switched and
             // added after Stop, where j represents the number of
             // Left or Right added after Stop
-            for(int j = max(0, i-num); j <= min(i, depth-num); j++)
+            for(int j = max(0, i-num); j <= min(i, depth-num); ++j)
                 cni += (unsigned)binomial_coefficient<double>(num, i-j)
                     * pow2(j);
             // count combinations when Left or Right are switched and
             // removed before Stop, where j represents the number of
             // removed Left or Right before Stop
             if(i <= num)
-                for(int j = 1; j <= min(i, num); j++)
+                for(int j = 1; j <= min(i, num); ++j)
                     cni += (unsigned)binomial_coefficient<double>(num-j, i-j);
             // recursive call
             number_of_instances +=
