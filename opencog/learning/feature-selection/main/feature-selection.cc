@@ -158,7 +158,6 @@ int main(int argc, char** argv) {
         partial_truth_table ot;
         istreamTable<truth_table_inputs,
                      partial_truth_table, bool>(*in, it, ot);
-        std::cout << "are you here?" << std::endl;
         in->close();
         feature_selection(it, ot, fs_params, rng);
     } else if(inferred_type == id::contin_type) {

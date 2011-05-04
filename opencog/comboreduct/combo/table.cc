@@ -174,8 +174,9 @@ bool checkCarriageReturn(istream& in) {
 }
 
 void removeCarriageReturn(string& str) {
-    if ((str.size() > 0) && (*str.end()-- == '\r'))
-        str.resize(str.size() - 1);
+    size_t s = str.size();
+    if((s > 0) && (str[s-1] == '\r'))
+        str.resize(s-1);
 }
 
 void removeNonASCII(string& str) {
