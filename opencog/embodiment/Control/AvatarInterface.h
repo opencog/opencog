@@ -23,14 +23,12 @@
 
 #ifndef PET_INTERFACE_H_
 #define PET_INTERFACE_H_
+
 /**
  * AvatarInterface.h
  *
  * This is an abstract class to define the interface that the Pet class must
  * provide for usage by other classes (like PAI, Predavese parser and handlers, etc).
- *
- * Author: Welter Luigi
- * Copyright(c), 2007
  */
 
 #include <opencog/atomspace/AtomSpace.h>

@@ -25,13 +25,11 @@
 
 #ifndef ATOMSPACEUTIL_H_
 #define ATOMSPACEUTIL_H_
+
 /**
  * AtomSpaceUtil.h
  *
  * Class with util methods for related to AtomSpace manipulation
- *
- * Author: Welter Luigi
- * Copyright(c), 2007
  */
 
 #include <opencog/atomspace/AtomSpace.h>
