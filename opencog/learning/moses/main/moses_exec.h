@@ -155,22 +155,32 @@ void metapop_moses_results(RandGen& rng,
     } else moses::distributed_moses(metapop, vm, pa.jobs, moses_params);
 
     // output result
-    stringstream ss;
-    metapop.ostream(ss,
-                    pa.result_count, pa.output_score,
-                    pa.output_complexity,
-                    pa.output_score_complexity_old_moses,
-                    pa.output_bscore);
-    if(pa.output_eval_number)
-        ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
-    string res = (pa.output_with_labels && !pa.labels.empty()?
-                  ph2l(ss.str(), pa.labels) : ss.str());
-    if(pa.output_file.empty())
-        std::cout << res;
-    else {
-        ofstream of(pa.output_file.c_str());
-        of << res;
-        of.close();
+    {
+        stringstream ss;
+        metapop.ostream(ss,
+                        pa.result_count, pa.output_score,
+                        pa.output_complexity,
+                        pa.output_score_complexity_old_moses,
+                        pa.output_bscore);
+        if(pa.output_eval_number)
+            ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
+        string res = (pa.output_with_labels && !pa.labels.empty()?
+                      ph2l(ss.str(), pa.labels) : ss.str());
+        if(pa.output_file.empty())
+            std::cout << res;
+        else {
+            ofstream of(pa.output_file.c_str());
+            of << res;
+            of.close();
+        }
+    }
+    // Log the best candidate
+    {
+        stringstream ss;
+        metapop.ostream(ss, 1, true, true);
+        string res = (pa.output_with_labels && !pa.labels.empty()?
+                      ph2l(ss.str(), pa.labels) : ss.str());
+        logger().info(string("Best candidate (preceded by its score and complexity): ") + res);
     }
 }
 

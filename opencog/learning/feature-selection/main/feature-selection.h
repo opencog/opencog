@@ -27,6 +27,7 @@
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 #include <opencog/learning/moses/eda/field_set.h>
+#include <opencog/learning/moses/eda/instance_set.h>
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/comboreduct/combo/table.h>
 
@@ -52,10 +53,11 @@ static const string default_log_file = default_log_file_prefix + "." + default_l
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> opt_algo_opt("opt-algo", "a");
 static const pair<string, string> input_data_file_opt("input-file", "i");
+static const pair<string, string> initial_feature_opt("initial-feature", "f");
 static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> log_level_opt("log-level", "l");
-static const pair<string, string> log_file_opt("log-file", "f");
+static const pair<string, string> log_file_opt("log-file", "F");
 static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
 static const pair<string, string> cache_size_opt("cache-size", "s");
 static const pair<string, string> complexity_penalty_intensity_opt("complexity-penalty-intensity", "p");
@@ -93,16 +95,27 @@ void feature_selection(IT& it, const OT& ot,
     // get the best one
     std::sort(deme.begin(), deme.end(),
               std::greater<scored_instance<composite_score> >());
-    eda::instance best_inst = deme[0].first;
+    eda::instance best_inst = *deme.begin_instances();
+    composite_score best_score = *deme.begin_scores();
     // get the best feature set
     std::set<arity_t> best_fs = get_feature_set(fields, best_inst);
     // set the input table accordingly
     it.set_consider_args_from_zero(best_fs);
-    // log the set of selected features
-    logger().info("The following set of features has been selected:");
-    stringstream ss;
-    ostreamContainer(ss, it.get_considered_labels(), ",");
-    logger().info(ss.str().c_str());
+    // Logger
+    {
+        // log set of selected feature set
+        stringstream ss;
+        ss << "The following set of features has been selected: ";
+        ostreamContainer(ss, it.get_considered_labels(), ",");
+        logger().info(ss.str());
+    }
+    {
+        // log its score
+        stringstream ss;
+        ss << "with composite score: " << best_score;
+        logger().info(ss.str());
+    }
+    // ~Logger
     // print the filtered table
     if(fs_params.output_file.empty())
         ostreamTable(std::cout, it, ot);
@@ -126,10 +139,14 @@ eda::instance initial_instance(const feature_selection_parameters& fs_params,
             logger().warn("No such a feature #%s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
     }
     // Logger
-    logger().info("The search will start with the following feature set:");
-    stringstream ss;
-    ostreamContainer(ss, vif, ",");
-    logger().info(ss.str().c_str());
+    if(vif.empty())
+        logger().info("The search will start with the empty feature set");
+    else {
+        stringstream ss;
+        ss << "The search will start with the following feature set: ";
+        ostreamContainer(ss, vif, ",");
+        logger().info(ss.str());
+    }
     // ~Logger
     return res;
 }

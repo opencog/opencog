@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&fs_params.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
-        ("initial-feature,f", value<vector<string> >(&fs_params.initial_features),
+        (opt_desc_str(initial_feature_opt).c_str(), value<vector<string> >(&fs_params.initial_features),
          "Initial feature to search from. This option can be used as many times as features to include in the initial feature set. An initial feature set close to the one maximizing the feature quality measure can greatly increase feature selection speed.\n")
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned>(&fs_params.max_evals)->default_value(10000),
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 
     // help
     if (vm.count("help") || argc == 1) {
-        cout << desc << "\n";
+        cout << desc << std::endl;
         return 1;
     }
 
