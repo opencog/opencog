@@ -30,12 +30,11 @@ void PrintHelp()
 
     cout << "Usage: DestinCuda CodeWord MAXCNT LayerToShow ParamsFile TrainingDataFile DestinOutputFile TargetDirectory [OutputDistillationLevel]" << endl;
     cout << "Where:" << endl;
-    cout << "    CodeWord is greater than 1000 but must have 11 digits RRRR XX YYYYY" << endl;
-    cout << "        RRRR >= 0000 to 9999 where 0000 is real random time" << endl;
-    cout << "        XX    = 01 to 10 number of classes" << endl;
+    cout << "    CodeWord must have 11 digits RRRRXXYYYYY" << endl;
+    cout << "        RRRR  = 0000 to 9999 where 0000 is real random time." << endl;
+    cout << "        XX    = 01 to 99 number of classes will not be higher then training file." << endl;
     cout << "        YYYYY = 00000 to 99999 number of examples of each class." << endl;
     cout << "                00000 means RANDOMLY PICK EXAMPLES until we finish clustering, period, up to max iterations." << endl;
-    cout << "        RRRRXXYYYYY where RRRR is reserved, XX is number of classes, YYYYY is number of examples" << endl;
     cout << "    MAXCNT is the number of digits we show it to train the unsupervised DeSTIN architecture" << endl;
     cout << "    LayerToShow = layer written to output file; it is given as S:E:O:P:T where " << endl;
     cout << "        S = first layer to write" << endl;
@@ -152,6 +151,7 @@ int MainDestinExperiments(int argc, char* argv[])
             cout << "designated input network file named " << strDestinNetworkFileToRead.c_str() << " does not exist" << endl;
             return 0;
         }
+        cout << "Writing destin file to: " << strDestinNetworkFileToWrite << endl;
     }
     else
     {
@@ -162,7 +162,7 @@ int MainDestinExperiments(int argc, char* argv[])
         {
             // If given -D
             strDestinNetworkFileToWrite=strDiagnosticFileName + "DestinNetwork.dat";
-            cout << "Writing to default destin file name..." << endl;
+            cout << "Writing default destin file to: " << strDestinNetworkFileToWrite << endl;
         }
         strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
     }
@@ -191,19 +191,19 @@ int MainDestinExperiments(int argc, char* argv[])
         LastLayerToShow=atoi(sLayerSpecs.substr(iColon+1,1).c_str());
         sLayerSpecs = sLayerSpecs.substr(iColon+1);
         iColon = sLayerSpecs.find(":");
-        if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
+        if ( iColon!=-1 && !( sLayerSpecs.substr(iColon).empty() ) )
         {
             //S:E:O
             sLayerSpecs = sLayerSpecs.substr(iColon+1);
             iMovementOutputOffset = atoi(sLayerSpecs.substr(0,1).c_str());
             iColon = sLayerSpecs.find(":");
-            if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
+            if ( iColon!=-1 && !( sLayerSpecs.substr(iColon).empty() ) )
             {
                 //S:E:O:P
                 sLayerSpecs = sLayerSpecs.substr(iColon+1);
                 iMovementOutputPeriod = atoi(sLayerSpecs.substr(0,1).c_str());
                 iColon = sLayerSpecs.find(":");
-                if ( iColon!=-1 || !( sLayerSpecs.substr(iColon).empty() ) )
+                if ( iColon!=-1 && !( sLayerSpecs.substr(iColon).empty() ) )
                 {
                     //S:E:O:P:T
                     sLayerSpecs = sLayerSpecs.substr(iColon+1);
@@ -292,18 +292,16 @@ int MainDestinExperiments(int argc, char* argv[])
         cout << "Test set does not have the same number of labels as train set " << endl;
         return 0;
     }
-    // end of data loading
 
-    // now get the file creation parameters
-    int iNumberOfExamplesFromEachLabel;
+    // **************************
+    // Preparing working data set
+    // **************************
+    // now get the data set creation parameters
+    int NumberOfUniqueLabelsToUse;
     int MAX_CNT = 1000;
     int iTestSequence = 0;
     string ParametersFileName;
     vector< pair<int,int> > vIndicesAndGTLabelToUse;
-    vector< pair<int,int> > LabelsAndIndicesForUse;
-
-    // When TestSequence >= 1000 we will interpret it differently
-    int NumberOfUniqueLabelsToUse;
 
     if ( bCreateFromFile==false )
     {
@@ -311,22 +309,15 @@ int MainDestinExperiments(int argc, char* argv[])
         MAX_CNT=atoi(argv[2]);
         // Argument: CodeWord
         iTestSequence=atoi(argv[1]);
-        string sBuff=argv[1];
-
-        if (sBuff.length() != 11 )
+        string sCodeWord=argv[1];
+        if (sCodeWord.length() != 11 )
         {
             PrintHelp();
             return 0;
         }
-
+        // First part of code word RRRR = for time seeding
         string sNumInp;
-        sNumInp="";
-
-        int kj=0;
-        sNumInp = sNumInp+sBuff[kj++];
-        sNumInp = sNumInp+sBuff[kj++];
-        sNumInp = sNumInp+sBuff[kj++];
-        sNumInp = sNumInp+sBuff[kj++];
+        sNumInp= sCodeWord.substr(0,4);
 
         // if the first 4 digits are 0000 make a TRUE random, otherwise use the complete number.
         int iReserve = atoi( sNumInp.c_str() );
@@ -340,102 +331,109 @@ int MainDestinExperiments(int argc, char* argv[])
             srand( (unsigned int)iRandSeed );
         }
 
-        // next two digits = number of inputs
-        sNumInp = "";
-        sNumInp = sNumInp+sBuff[kj++];
-        sNumInp = sNumInp+sBuff[kj++];
+        // Second part of code word XX = number of inputs
+        sNumInp = sCodeWord.substr(4,2);
         NumberOfUniqueLabelsToUse = atoi( sNumInp.c_str() );
 
-        sNumInp = "";
-        sNumInp = sNumInp+sBuff[kj++];
-        sNumInp = sNumInp+sBuff[kj++];
-        sNumInp = sNumInp+sBuff[kj++];
-        sNumInp = sNumInp+sBuff[kj++];
-        sNumInp = sNumInp+sBuff[kj++];
+        // Last part of code word YYYYY
+        int iNumberOfExamplesFromEachLabel;
+        sNumInp = sCodeWord.substr(6,5);
         iNumberOfExamplesFromEachLabel=atoi( sNumInp.c_str() );
 
         // if iNumberOfExamplesFromEachLabel is 0 we randomly pick examples from the available
         // classes and only show them ONE TIME
-
         // Generate the examples from the dictates given here.
-        if ( iNumberOfExamplesFromEachLabel > 0 )
+        vector< pair<int,int> > LabelsAndIndicesForUse;
+        cout << "------------------" << endl;
+        int DestinTrainSampleStep = 1;
+        if(iNumberOfExamplesFromEachLabel == 0)
         {
-            for(int iLabel=0;iLabel<NumberOfUniqueLabelsToUse;iLabel++)
+            DestinTrainSampleStep = 25;
+        }
+        for(int iLabel=0;iLabel<NumberOfUniqueLabelsToUse;iLabel++)
+        {
+            int cnt = 0;
+            vector<int> IndicesForThisLabel;
+            DataSourceForTraining.GetIndicesForThisLabel(iLabel,IndicesForThisLabel);
+            if ( IndicesForThisLabel.size() > iNumberOfExamplesFromEachLabel && iNumberOfExamplesFromEachLabel != 0)
             {
-                vector<int> IndicesForThisLabel;
-                DataSourceForTraining.GetIndicesForThisLabel(iLabel,IndicesForThisLabel);
-
                 for(int jj=0;jj<iNumberOfExamplesFromEachLabel;jj++)
                 {
+                    cnt++;
                     pair<int,int> P;
                     P.first = IndicesForThisLabel[jj];
                     P.second = iLabel;
                     LabelsAndIndicesForUse.push_back(P);
                 }
             }
-        }
-        else
-        {
-            // In this mode, simply get ALL the examples for this class and put them in
-            // LabelsAndIndicesForUse. BUT, skip according to the value of DestinTrainSampleStep
-            int FirstTrainingIndex = 0;  // this was set to 1 for the ICMLA tests, I think.
-            for(int iLabel=0;iLabel<NumberOfUniqueLabelsToUse;iLabel++)
+            else
             {
-                int DestinTrainSampleStep = 25;
-                vector<int> IndicesForThisLabel;
-                DataSourceForTraining.GetIndicesForThisLabel(iLabel,IndicesForThisLabel);
-                for(int jj=FirstTrainingIndex;jj<IndicesForThisLabel.size();jj=jj+DestinTrainSampleStep)
+                for(int jj=0;jj<IndicesForThisLabel.size();jj=jj+DestinTrainSampleStep)
                 {
-                    cout << "Get sample " << jj << " for destin network" << endl;
+                    cnt++;
                     pair<int,int> P;
                     P.first = IndicesForThisLabel[jj];
                     P.second = iLabel;
                     LabelsAndIndicesForUse.push_back(P);
                 }
-            }
-            iNumberOfExamplesFromEachLabel = LabelsAndIndicesForUse.size()/NumberOfUniqueLabelsToUse;
-        }
 
-        //Now generate MAX_CNT+1000 random numbers from 0 to LabelsAndIndicesForUse-1
+            }
+            cout << "Label: " << iLabel << " got " << cnt << " unique sample(s)." << endl;
+        }
+        iNumberOfExamplesFromEachLabel = LabelsAndIndicesForUse.size()/NumberOfUniqueLabelsToUse;
+
+        // Now generate MAX_CNT+1000 random numbers from 0 to LabelsAndIndicesForUse-1
         // and use these to populate vIndicesAndGTLabelToUse
-        int iChoice;
-        int Picked[10];
-        for(int jj=0;jj<10;jj++)
+
+        // Debug list of labels to be used
+        int Picked[NumberOfUniqueLabels];
+        for(int jj=0;jj<NumberOfUniqueLabels;jj++)
         {
             Picked[jj]=0;
         }
-        iChoice=RAND_MAX;
+
         int Digit;
+        int iChoice;
         for(int jj=0;jj<MAX_CNT;jj++)
         {
             //pick the digit first...
-            Digit=rand() % NumberOfUniqueLabelsToUse;
-            iChoice=Digit*iNumberOfExamplesFromEachLabel;
-            iChoice = iChoice+rand()%iNumberOfExamplesFromEachLabel;
+            Digit = rand() % NumberOfUniqueLabelsToUse;
+            iChoice = Digit * iNumberOfExamplesFromEachLabel;
+            iChoice = iChoice+rand() % iNumberOfExamplesFromEachLabel;
 
-//                  iChoice = rand() % LabelsAndIndicesForUse.size();
             pair<int,int> P;
             P = LabelsAndIndicesForUse[iChoice];
-            //LabelsAndIndicesForUse.erase( LabelsAndIndicesForUse.begin()+iChoice ); //erase the chosen one
+
             vIndicesAndGTLabelToUse.push_back( P );
-            Picked[P.second]=1;
+            // Debug counter of labels used by label
+            Picked[P.second] += 1;
         }
+
+        // Debug information on amount of examples we use each label
         cout << "------------------" << endl;
-        for(int jj=0;jj<10;jj++)
+        for(int jj=0;jj<NumberOfUniqueLabels;jj++)
         {
-            cout << jj << "," << Picked[jj] << endl;
+            cout << "Label: " << jj << " will show " << Picked[jj] << " sample(s)." << endl;
         }
         cout << "------------------" << endl;
-
-        // Get the destin network parameters from a run file...
-        ParametersFileName=argv[4];
-
-
     }  //check on bCreateFromFile==false
     else
     {
         // TODO: We want to create the network from an INPUT FILE!
         cout << "We want to create the network from an INPUT FILE!" << endl;
+    }
+
+    // Argument: ParamsFile
+    // A configuration file for DeSTIN
+    ParametersFileName=argv[4];
+    if ( !FileExists(ParametersFileName) )
+    {
+        if ( bCreateFromFile == false )
+        {
+            cout << "Parameters file name does not exist" << endl;
+            return 0;
+        }
+        //otherwise we are OK, we don't need parameters if the network file was already created, as we are supposed to get the parameters from it...I think...
     }
 
     return 0;
@@ -446,7 +444,7 @@ int main(int argc, char* argv[])
     // ********************
     // Startup check DeSTIN
     // ********************
-
+    // There should be 8 or 9 arguments at this time if not show how to use DeSTIN
     if ( argc==8 || argc==9 )
     {
         return MainDestinExperiments(argc,argv);

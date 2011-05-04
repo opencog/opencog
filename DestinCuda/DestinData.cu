@@ -41,17 +41,11 @@ void DestinData::LoadFile(const char* sFileName)
 
 	std::ifstream stmIn;
 	stmIn.open(sFileName,ios::in | ios::binary );
-	long pos;
-	pos = stmIn.tellg();
+
 	int iSignals;
 	stmIn.read( (char*)&iSignals,sizeof(iSignals));
-	pos = stmIn.tellg();
-
 	stmIn.read( (char*)&mRows, sizeof(mRows) );
-	pos = stmIn.tellg();
-
 	stmIn.read( (char*)&mCols, sizeof(mCols) );
-	pos = stmIn.tellg();
 
 	int iLabel;
 	unsigned char* cImageData;
@@ -245,10 +239,7 @@ void DestinData::GetIndicesForThisLabel(int iLabel, vector<int>& IndicesForThisL
 	map<int, vector<int> >::iterator it;
 
 	it = mMapLabelToIndexVector.find(iLabel);
-	if ( it==mMapLabelToIndexVector.end() ) //didn't find it
-	{
-	}
-	else
+	if ( it!=mMapLabelToIndexVector.end() ) //find it
 	{
 		vector<int>::iterator vit;
 		vit = it->second.begin();

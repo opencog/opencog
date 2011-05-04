@@ -61,7 +61,6 @@ AdviceData::AdviceData(AdviceData& oN)
 
 AdviceData& AdviceData::operator = (AdviceData& oN)
 {
-
 	mTempID = oN.mTempID;
 	mCountNumber = oN.mCountNumber;
 
@@ -160,7 +159,6 @@ void AdviceData::SetParentUnsupervisedAdvice( float* pUnsup, int iN )
 		mNumberOfParentUnsupervisedMemberships = iN;
 	}
 }
-
 
 bool AdviceData::ReadFromStream(std::ifstream& stmInput)
 {
