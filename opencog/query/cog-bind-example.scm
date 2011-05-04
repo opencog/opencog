@@ -1,4 +1,3 @@
-scm
 ;
 ; implication-example.scm
 ;

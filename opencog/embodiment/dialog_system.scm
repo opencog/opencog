@@ -8,7 +8,7 @@
 ; @note:  It should be loaded after rules_core.scm and pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-04-27
+; @date   2011-05-04
 ;
 ; Below is an example of how the rule of Dialog System is represented in AtomSpace
 ;
@@ -96,67 +96,53 @@
     )
 )
 
-
-
-
-
-
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Return the only ReferenceLink that containing the given node. We would use
-; this function to get the ReferenceLink of DialogNode and UtteranceNode. 
+; Return a BindLink used by pattern matcher to search a ReferenceLink
+; containing the given node and a ListLink 
+; 
+; The format of the structure being searched is as follows:
 ;
-; If there's none or more than 1 ReferenceLink containing the given node, it 
-; woule return an empty list. 
+; ReferenceLink
+;     first_node
+;     ListLink
 ;
 
-(define (get_single_reference_link node)
-    (let* ( (reference_link (list) )
-          )
+(define (find_reference_link first_node)
+    (BindLink
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$var_list_link_type") 
+                (VariableTypeNode "ListLink") 
+            )
+        ) 
+        
+        (ImplicationLink
+                ; Pattern to be searched
+                (ReferenceLink
+                    first_node
+                    (VariableNode "$var_list_link_type")
+                ) 
 
-          ; Get the ReferenceLink that contains the node
-          (map
-              (lambda (incoming_link)
-                  (if (equal? 'ReferenceLink (cog-type incoming_link) )
-                      (set! reference_link 
-                          (append reference_link '(incoming_link) )
-                      )
-                  )
-              ); lambda 
+                ; Return two values encapsulated by a ListLink
+                (ListLink
+                    (ReferenceLink
+                        first_node    
+                        (VariableNode "$var_list_link_type")
+                    )
 
-              (cog-incoming-set node)
-          ); map
+                    (VariableNode "$var_list_link_type")
+                )
 
-          ; Check there's only one ReferenceLink containing the node
-          (if (equal? (length reference_link) 1) 
-              (set! reference_link (cat reference_link) ) 
-
-              (begin
-                  (print_debug_info INFO_TYPE_FAIL "get_single_reference_link"
-                      (string-append "There should be exactly one ReferenceLink "
-                                     " that contains the node named: " 
-                                     (cog-name node)    
-                                     ". But got " 
-                                     (number->string (length reference_link) )
-                      )
-                  )
-
-                  (set! reference_link (list) )
-              )
-          ); if
-
-    ); let* 
-
-    ; Return the single ReferenceLink containing the node
-    reference_link
-
+        ); ImplicationLink
+    ); BindLink
 ); define
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Append a bunch of sentence nodes to the end of the dialog history
 ;
-; Return the created ReferenceLink or NIL if fails
+; Return the created ReferenceLink or an empty list if fails
 ;
 ; The dialog history is represented in ActomSpace as follows:
 ;
@@ -167,65 +153,211 @@
 ;         SentenceNode  "sentence content"
 ;         ....
 ;
+; @param sentences can be a series of SentenceNode or plain text or mix of them
+;
 
-(define (update_dialog_history handle_dialog_node . handles_sentence_node)
-    (let* ( (old_reference_link (get_single_reference_link handle_dialog_node) )
+(define (update_dialog_node dialog_node_name . sentences)
+    (let* ( (dialog_node (cog-node 'DialogNode dialog_node_name) )
+            (find_reference_link_for_dialog_node (find_reference_link dialog_node) )
+            (query_result_list_link (cog-bind find_reference_link_for_dialog_node) )
+            (query_result (cog-outgoing-set query_result_list_link) )
+            (old_reference_link (list) )
             (old_list_link (list) )
+            (old_sentence_nodes (list) )
             (new_reference_link (list) )
+            (sentence_handle (list) )
           )
-    
-          (if (null? old_reference_link)
-              ; if failed to get the single ReferenceLink containing the DialogNode
-              (print_debug_info INFO_TYPE_FAIL "update_dialog_history"
-                  "Failed to get the single ReferenceLink containing " 
-                  (cog-name handle_dialog_node)
-              )
 
-              ; if success to get the single ReferenceLink containing the DialogNode
+          ; Delete the ListLink of query, otherwise old_reference_link and 
+          ; old_list_link would never be deleted, since they are contained 
+          ; within this ListLink
+          (cog-delete-recursive query_result_list_link) 
+
+          (if (equal? (length query_result) 1)
+      
+              ; If success to get the single ReferenceLink of the DialogNode
               (begin
-                  (set! old_list_link (cog-outcoming-set old_reference_link) ) 
+                  (set! query_result_list_link (car query_result) )
+                  (set! query_result (cog-outgoing-set query_result_list_link) )
+                  (cog-delete-recursive query_result_list_link)
+      
+                  (set! old_reference_link (list-ref query_result 0) )
+                  (set! old_list_link (list-ref query_result 1) )
+                  (set! old_sentence_nodes (cog-outgoing-set old_list_link) )
 
-                  (if (equal? (length old_list_link) 1)
-                      ; if there's a single ListLink inside the ReferenceLink
-                      (begin
-                          (set! old_list_link (cat old_list_link) )
+                  ; Delete the old ReferenceLink and ListLink
+                  ; Try to avoid using cog-delete-recursive, unless you know 
+                  ; the Atoms are definitely not used by other Links 
+                  (cog-delete old_reference_link)
+                  (cog-delete old_list_link)
 
-                          (if (equal? 'ListLink (cog-type old_list_link) )
-                              (begin
-                                  ; Create new ListLink and ReferenceLink
-                                  (ReferenceLink
-                                      handle_dialog_node 
-
-                                      (cog-new-link 'ListLink
-                                          (apply (append
-                                                     (cog-outcoming-set old_reference_link)
-                                                     handles_sentence_node
-                                                 )
+                  ; Create new ListLink and ReferenceLink
+                  (set! new_reference_link
+                      (ReferenceLink (stv 1.0 1.0)
+                          dialog_node 
+      
+                          (apply cog-new-link
+                              (append
+                                  (list 'ListLink) 
+                                  old_sentence_nodes
+                                  ; Process the new sentences
+                                  (map-in-order 
+                                      (lambda (sentence)
+                                          (if (cog-atom? sentence)
+                                              (set! sentence_handle sentence) 
+                                              (set! sentence_handle
+                                                  (SentenceNode sentence)
+                                              )    
                                           )
-                                      ) 
-                                  ); ReferenceLink
-                            
-                                  ; Delete the old ReferenceLink and ListLink
-                                  (cog-delete old_reference_link)
-                                  (cog-delete old_list_link)
-                              ) 
-                          ); if
-                      ); begin
-
-                      ; if there's none or more than one ListLink inside the ReferenceLink
-                      (print_debug_info INFO_TYPE_FAIL "update_dialog_history"
-                          (string-append "There should be exactly one ListLink "
-                                         "inside the ReferenceLink. " 
-                                         "But got " 
-                                         (number->string (length old_list_link) )
-                                         )
-                      )
-
-                  ); if (equal? (length old_list_link) 1
+                                          ; Return the handle of SentenceNode
+                                          sentence_handle
+                                      ); lambda 
+                                     
+                                      sentences
+                                  ); map-in-order
+                              )
+                          ); apply 
+                     ); ReferenceLink
+                  )
+      
               ); begin
-
-          ); if (null? old_reference_link)
-
-    ); let*        
-
+      
+              ; If get none or more than one ReferenceLink of the DialogNode
+              (print_debug_info INFO_TYPE_FAIL "update_dialog_node"
+                  (string-append "The number of ReferenceLink containing the " 
+                                 " DialogNode named: " dialog_node_name 
+                                 " should be exactly one. " 
+                                 "But got " 
+                                 (number->string (length query_result) )
+                  )
+              )
+          ); if
+          
+          ; Return the newly created ReferenceLink containing the DialogNode
+          new_reference_link
+    ); let*
 ); define
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Append a bunch of sentence nodes to the end of the utterance history and 
+; move the old utterance sentences to the end of dialog history
+;
+; Return the created ReferenceLink or an empty list if fails
+;
+; The utterance history is represented in ActomSpace as follows:
+;
+; ReferenceLink
+;     UtteranceNode  "utterance_sentences"
+;     ListLink
+;         SentenceNode  "sentence content"
+;         SentenceNode  "sentence content"
+;         ...
+;
+; @param sentences can be a series of SentenceNode or plain text or mix of them
+;
+
+(define (update_utterance_node utterance_node_name . sentences)
+    (let* ( (utterance_node (cog-node 'UtteranceNode utterance_node_name) )
+            (find_reference_link_for_utterance_node (find_reference_link utterance_node) )
+            (query_result_list_link (cog-bind find_reference_link_for_utterance_node) )
+            (query_result (cog-outgoing-set query_result_list_link) )
+            (old_reference_link (list) )
+            (old_list_link (list) )
+            (old_sentence_nodes (list) )
+            (new_reference_link (list) )
+            (sentence_handle (list) )
+          )
+
+          ; Delete the ListLink of query, otherwise old_reference_link and 
+          ; old_list_link would never be deleted, since they are contained 
+          ; within this ListLink
+          (cog-delete-recursive query_result_list_link) 
+
+          (if (equal? (length query_result) 1)
+      
+              ; If success to get the single ReferenceLink of the UtteranceNode
+              (begin
+
+                  (set! query_result_list_link (car query_result) )
+                  (set! query_result (cog-outgoing-set query_result_list_link) )
+                  (cog-delete-recursive query_result_list_link)
+      
+                  (set! old_reference_link (list-ref query_result 0) )
+                  (set! old_list_link (list-ref query_result 1) )
+                  (set! old_sentence_nodes (cog-outgoing-set old_list_link) )
+
+                  ; Delete the old ReferenceLink and ListLink
+                  ; Try to avoid using cog-delete-recursive, unless you know 
+                  ; the Atoms are definitely not used by other Links 
+                  (cog-delete old_reference_link)
+                  (cog-delete old_list_link)
+
+                  ; Append the old utterance sentences to the end of dialog history
+                  (apply update_dialog_node "dialog_history" old_sentence_nodes)
+
+                  ; Create new ListLink and ReferenceLink
+                  (set! new_reference_link
+                      (ReferenceLink (stv 1.0 1.0)
+                          utterance_node 
+      
+                          (apply cog-new-link
+                              (append
+                                  (list 'ListLink) 
+                                  ; Process the new sentences
+                                  (map-in-order 
+                                      (lambda (sentence)
+                                          (if (cog-atom? sentence)
+                                              (set! sentence_handle sentence) 
+                                              (set! sentence_handle
+                                                  (SentenceNode sentence)
+                                              )    
+                                          )
+                                          ; Return the handle of SentenceNode
+                                          sentence_handle
+                                      ); lambda 
+                                     
+                                      sentences
+                                  ); map-in-order
+                              )
+                          ); apply 
+
+                     ); ReferenceLink
+                  )
+      
+              ); begin
+      
+              ; If get none or more than one ReferenceLink of the UtteranceNode
+              (print_debug_info INFO_TYPE_FAIL "update_utterance_node"
+                  (string-append "The number of ReferenceLink containing the " 
+                                 " UtteranceNode named: " utterance_node_name 
+                                 " should be exactly one. " 
+                                 "But got " 
+                                 (number->string (length query_result) )
+                  )
+              )
+          ); if
+          
+          ; Return the newly created ReferenceLink containing the UtteranceNode
+          new_reference_link
+    ); let*
+); define
+
+;******************************************************************************
+;******************************************************************************
+;******************************************************************************
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+(ReferenceLink (stv 1.0 1.0)
+    (DialogNode "dialog_history")
+    (ListLink)
+)    
+
+(ReferenceLink (stv 1.0 1.0) 
+    (UtteranceNode "utterance_sentences")
+    (ListLink)
+)
+
+
+
+
