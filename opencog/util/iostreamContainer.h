@@ -1,6 +1,6 @@
 /** printContainer.h --- 
  *
- * Copyright (C) 2010 Nil Geisweiller
+ * Copyright (C) 2010 OpenCog Foundation
  *
  * Author: Nil Geisweiller <nilg@nilg-laptop>
  *

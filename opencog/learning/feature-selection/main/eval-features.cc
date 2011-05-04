@@ -1,6 +1,6 @@
 /** eval-features.cc --- 
  *
- * Copyright (C) 2011 Nil Geisweiller
+ * Copyright (C) 2011 OpenCog Foundation
  *
  * Author: Nil Geisweiller <nilg@desktop>
  *

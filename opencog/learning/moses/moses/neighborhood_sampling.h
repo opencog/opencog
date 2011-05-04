@@ -1,6 +1,6 @@
 /** neighborhood_sampling.h --- 
  *
- * Copyright (C) 2010 Moshe Looks, Nil Geisweiller, Xiaohui Liu
+ * Copyright (C) 2010 Moshe Looks, OpenCog Foundation, Xiaohui Liu
  *
  * Author: Moshe Looks, Nil Geisweiller, Xiaohui Liu
  *
