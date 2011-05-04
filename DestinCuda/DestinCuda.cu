@@ -1,5 +1,6 @@
 #include "AdviceData.h"
 #include "DestinData.h"
+#include "DestinLayer.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -48,7 +49,7 @@ void PrintHelp()
     cout << "    ParamsFile is a file that has the run parameters" << endl;
     cout << "    TrainingDataFile is the binary data file for training.  A testing file with the SAME NAME and appended with _TESTING is assumed" << endl;
     cout << "    DestinOutputFile is the name of the DeSTIN network output file for saving." << endl;
-    cout << "         Use -D as default, which is the experiment number with a .dat at the end, in the ../DiagnosticData directory" << endl;
+    cout << "         Use -D as default, which is the experiment number with a .dat at the end, in the TargetDirectory directory" << endl;
     cout << "    TargetDirectory is where we want to put the MAIN OUTPUT DATA FILES.  We ALWAYS write an experiment marker to the " << endl;
     cout << "        ../DiagnosticData area.  But if you are writing out a lot of data you can specify another directory." << endl;
     cout << "        Put D for default which is the ../DiagnosticData area." << endl;
@@ -111,8 +112,87 @@ string GetNextFileForDiagnostic()
 
         bFileFound = FileExists(strFileName);
     }
+    strFileName = strFileName.substr(18);
 
     return strFileName;
+}
+
+void GetParameters(const char* cFilename, int& NumberOfLayers, double*& dcMu, double*& dcSigma, double*& dcRho,
+                   int*& NumberOfStates,
+            bool& bAveraging,bool& bFFT,bool& bBinaryPOS,int* DistanceMeasureArray,
+            bool& bUseStarvationTrace,int& PSSAUpdateDelay,bool& bIgnoreAdvice,
+            int**& SEQ, int& SEQ_LENGTH, string& sFileContents, int& iBlocksToProcess,
+            bool& bBasicOnlineClustering,
+            bool& bClanDestin, bool& bInitialLayerIsTransformOnly,bool& bUseGoodPOSMethod )
+{
+    // **************************************
+    // Read the config file (parameters file)
+    // **************************************
+    ifstream stmInput;
+    stmInput.open(cFilename);
+
+    vector<string> vFileContents;
+
+    stringstream sFileContent;
+
+    char cBuffer[1024];
+    sFileContent << "~PARAMETERSFILE:";
+    sFileContent << cFilename << ":";
+    while ( stmInput.eof() == false )
+    {
+        stmInput.getline(cBuffer,1024);
+        if ( stmInput.eof() == false )
+        {
+            string sNextLine;
+            sNextLine = cBuffer;
+            sFileContent << "~" << sNextLine;
+            vFileContents.push_back(sNextLine);
+        }
+    }
+    sFileContents = sFileContent.str();
+    stmInput.close();
+    cout << sFileContents << endl;
+}
+
+bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& NumberOfLayers, DestinLayer*& DLayers,
+                          int iTestSequence, int FirstLayerToShowHECK, int LastLayerToShow, int MAX_CNT, string& sCommandLineData,
+                          DestinData& DataSourceForTraining, string& sDiagnosticFileName, string& sDestinTrainingFileName,
+                          vector< pair<int,int> >& vIndicesAndGTLabelToUse,
+                          map<int,int>& LabelsUsedToCreateNetwork, map<int,int>& IndicesUsedToCreateNetwork, float* BufferForLogs,
+                          int iLayerOfInputToShow, int iRowOfInputToShow, int iColOfInputToShow, int NumberOfMovementsToWrite)
+
+{
+    // *********************
+    // Create DeSTIN network
+    // *********************
+
+    double* dcMu;
+    double* dcSigma;
+    double* dcRho;
+    int* NumberOfCentroids;
+    bool bAveraging;
+    bool bFFT;
+    bool bBinaryPOS;
+    int DistanceMeasureArray[128];
+    bool bUseStarvationTrace;
+    int PSSAUpdateDelay;
+    bool bIgnoreAdvice;
+    int** SEQ;
+    int SEQ_LENGTH;
+    string sParametersFileContents;
+    int iBlocksToProcess;
+    bool bBasicOnlineClustering;
+    bool bClanDestin;
+    bool bInitialLayerIsTransformOnly;
+    bool bDoGoodPOS = false;
+
+    GetParameters(ParametersFileName.c_str(),NumberOfLayers,dcMu,dcSigma,dcRho,NumberOfCentroids,
+        bAveraging,bFFT,bBinaryPOS,DistanceMeasureArray,
+        bUseStarvationTrace,PSSAUpdateDelay,bIgnoreAdvice,SEQ,SEQ_LENGTH,
+        sParametersFileContents,iBlocksToProcess,
+        bBasicOnlineClustering, bClanDestin, bInitialLayerIsTransformOnly,bDoGoodPOS);
+
+    return 0;
 }
 
 int MainDestinExperiments(int argc, char* argv[])
@@ -133,6 +213,22 @@ int MainDestinExperiments(int argc, char* argv[])
     {
         strCommandLineData += argv[i];
         strCommandLineData += " ";
+    }
+
+    // Argument: TargetDirectory
+    // A given location instead or default
+    string strDiagnosticDirectoryForData;
+    string strArg7 = argv[7];
+    if ( strArg7 == "D" )
+    {
+        strDiagnosticDirectoryForData = "../DiagnosticData/";
+    }
+    else
+    {
+        // Buffer with path + filename where to put diagnostic data
+        stringstream buffer;
+        buffer << strArg7.c_str() << "/";
+        strDiagnosticDirectoryForData = buffer.str();
     }
 
     // Argument: DestinOutputFile or InputNetworkFile
@@ -161,11 +257,15 @@ int MainDestinExperiments(int argc, char* argv[])
         if ( strDestinNetworkFileToWrite == "-D" )
         {
             // If given -D
-            strDestinNetworkFileToWrite=strDiagnosticFileName + "DestinNetwork.dat";
+            strDestinNetworkFileToWrite= strDiagnosticDirectoryForData + strDiagnosticFileName + ".dat";
             cout << "Writing default destin file to: " << strDestinNetworkFileToWrite << endl;
         }
         strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
     }
+    // Create the old variable sDiagnosticFileNameForMarking
+    // it have the location based on TargetDirectory + FileName
+    string sDiagnosticFileNameForMarking;
+    sDiagnosticFileNameForMarking = strDiagnosticDirectoryForData + strDiagnosticFileName;
 
     // Argument: LayerToShow
     // Structure of processing S:E:O:P:T
@@ -231,22 +331,6 @@ int MainDestinExperiments(int argc, char* argv[])
                 }
             }
         }
-    }
-
-    // Argument: TargetDirectory
-    // A given location instead or default
-    string strDiagnosticFileNameForData;
-    string strArg7 = argv[7];
-    if ( strArg7 == "D" )
-    {
-        strDiagnosticFileNameForData = strDiagnosticFileName;
-    }
-    else
-    {
-        // Buffer with path + filename where to put diagnostic data
-        stringstream buffer;
-        buffer << strArg7.c_str() << "/" << strDiagnosticFileName;
-        strDiagnosticFileNameForData = buffer.str();
     }
 
     // Optional argument: OutputDistillationLevel
@@ -428,12 +512,51 @@ int MainDestinExperiments(int argc, char* argv[])
     ParametersFileName=argv[4];
     if ( !FileExists(ParametersFileName) )
     {
-        if ( bCreateFromFile == false )
-        {
-            cout << "Parameters file name does not exist" << endl;
-            return 0;
-        }
-        //otherwise we are OK, we don't need parameters if the network file was already created, as we are supposed to get the parameters from it...I think...
+        // According to the help the ParamsFile is always used? Maybe some vital information on how to load data?
+        // Or some testing to see how the network reacts when expanding or shrinking the network.
+        cout << "Parameters file name does not exist" << endl;
+        return 0;
+    }
+
+    // ***********************
+    // Creating DeSTIN network
+    // ***********************
+    // Yes its going to happen we going to create the network where we are waiting for.
+    // The movement log records are unacceptably slow. Don't know why but it seems to be related to allocation & deallocating memory
+    // so instead make a single big old pool here so each one that needs a bunch of memory won't really have to realloc & dealloc it each time.
+    // TODO: See if this can be done different.
+    float* BufferForMovementLogRecords;
+    BufferForMovementLogRecords = new float[1024*4*64*128];  //this should be enough for all movements and all layers / nodes
+
+    DestinLayer* DLayer;
+    map<int,int> LabelsUsedToCreateNetwork;
+    map<int,int> IndicesUsedToCreateNetwork;
+    int NumberOfLayers=4;
+    if ( !bCreateFromFile )
+    {
+        int LayerToShow=-1;   //normally this should be -1 for regular operation.  For debugging, set it to 0 to look at the particular input for layer 0
+        int RowToShowInputs=3;
+        int ColToShowInputs=3;
+
+        CreateDestinOnTheFly(ParametersFileName, strDestinNetworkFileToWrite, NumberOfLayers, DLayer, iTestSequence, FirstLayerToShowHECK,
+            LastLayerToShow, MAX_CNT, strCommandLineData, DataSourceForTraining, sDiagnosticFileNameForMarking, strDestinTrainingFileName,
+            vIndicesAndGTLabelToUse, LabelsUsedToCreateNetwork, IndicesUsedToCreateNetwork, BufferForMovementLogRecords,
+            LayerToShow, RowToShowInputs, ColToShowInputs, 0);  // no movements to write, as we don't write DeSTIN responses out in this case
+    }
+    else
+    {
+        // even if you don't create the file here, we want to mark the experiment number so make a dummy file...
+        ofstream stmDummy;
+        stmDummy.open(strDiagnosticFileName.c_str(),ios::out);
+        stmDummy << strCommandLineData.c_str() << endl;
+        stmDummy << "DummyHeader" << endl;
+        stmDummy.close();
+    }
+
+    if ( !FileExists(strDestinNetworkFileToRead) )
+    {
+        cout << "Destin network file " << strDestinNetworkFileToRead.c_str() << " not found!" << endl;
+        return 0;
     }
 
     return 0;

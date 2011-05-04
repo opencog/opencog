@@ -8,4 +8,4 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #Searching CUDA
 FIND_PACKAGE(CUDA)
 
-CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu AdviceData.h AdviceData.cu DestinData.h DestinData.cu)
+CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu DestinData.cu AdviceData.cu)
