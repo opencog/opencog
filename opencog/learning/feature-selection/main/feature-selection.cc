@@ -57,7 +57,7 @@ const static unsigned max_filename_size = 255;
  * Display error message about unsupported type and exit
  */
 void unsupported_type_exit(const type_tree& tt) {
-    std::cerr << "error: type " << tt << " currently not supported" << std::endl;
+    std::cerr << "error: type " << tt << "currently not supported" << std::endl;
     exit(1);
 }
 void unsupported_type_exit(type_node type) {
@@ -158,6 +158,7 @@ int main(int argc, char** argv) {
         partial_truth_table ot;
         istreamTable<truth_table_inputs,
                      partial_truth_table, bool>(*in, it, ot);
+        std::cout << "are you here?" << std::endl;
         in->close();
         feature_selection(it, ot, fs_params, rng);
     } else if(inferred_type == id::contin_type) {

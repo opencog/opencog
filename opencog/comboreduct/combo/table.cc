@@ -186,7 +186,7 @@ void removeNonASCII(string& str) {
 arity_t istreamArity(istream& in) {
     std::string line;
     getline(in, line);    
-    return tokenizeRow<string>(line).first.size();
+    return tokenizeRowIO<std::string>(line).first.size();
 }
 
 ifstream* open_data_file(const string& fileName) {
@@ -199,11 +199,11 @@ ifstream* open_data_file(const string& fileName) {
     return in;
 }
 
-vector<string> read_data_file_labels(const string& file) {
+vector<string> readInputLabels(const string& file) {
     auto_ptr<ifstream> in(open_data_file(file));
     std::string line;
     getline(*in, line);    
-    return tokenizeRow<std::string>(line).first;
+    return tokenizeRowIO<std::string>(line).first;
 }
 
 arity_t dataFileArity(const string& fileName) {
@@ -236,10 +236,10 @@ type_node inferDataType(const string& fileName) {
     string line;
     // check the last token of the first row
     getline(*in, line);
-    res = infer_type_from_token(tokenizeRow<string>(line).second);
-    if(res == id::ill_formed_type) { // check the last token if the second row
+    res = infer_type_from_token(tokenizeRowIO<string>(line).second);
+    if(res == id::ill_formed_type) { // check the last token of the second row
         getline(*in, line);
-        res = infer_type_from_token(tokenizeRow<string>(line).second);
+        res = infer_type_from_token(tokenizeRowIO<string>(line).second);
     }
     return res;
 }

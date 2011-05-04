@@ -113,7 +113,7 @@ void feature_selection(IT& it, const OT& ot,
 eda::instance initial_instance(const feature_selection_parameters& fs_params,
                                const field_set& fields) {
     eda::instance res(fields.packed_width());
-    vector<std::string> labels = read_data_file_labels(fs_params.input_file);
+    vector<std::string> labels = readInputLabels(fs_params.input_file);
     vector<std::string> vif; // valid initial features, used for logging
     foreach(const std::string& f, fs_params.initial_features) {
         size_t idx = std::distance(labels.begin(), find(labels, f));

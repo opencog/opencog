@@ -105,7 +105,7 @@ vector<set<arity_t> > feature_sets(const eval_features_parameters& pa,
             getline(in, line);
             if(line.empty())
                 continue;
-            res += get_features_idx(tokenizeRowVec<string>(line), labels, pa);
+            res += get_features_idx(tokenizeRow<string>(line), labels, pa);
         }
     }
     return res;
@@ -166,7 +166,7 @@ void read_eval_output_results(const eval_features_parameters& pa,
     istreamTable<IT, OT, Type>(pa.input_table_file, it, ot);
 
     // determine labels
-    vector<string> labels = read_data_file_labels(pa.input_table_file);
+    vector<string> labels = readInputLabels(pa.input_table_file);
 
     // read feature sets
     vector<set<arity_t> > fss = feature_sets(pa, labels);

@@ -470,7 +470,7 @@ int moses_exec(int argc, char** argv) {
     // read labels on data file
     vector<string> labels;
     if(output_with_labels && !input_data_file.empty())
-        labels = read_data_file_labels(input_data_file);
+        labels = readInputLabels(input_data_file);
 
     // set metapop_moses_results_parameters
     metapop_moses_results_parameters mmr_pa(result_count,

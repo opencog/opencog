@@ -700,43 +700,39 @@ arity_t dataFileArity(const std::string& dataFileName);
 type_node inferDataType(const std::string& dataFileName);
 
 /**
- * take a line and return the input vector and output.
- * Used by istreamTable.
- * Please note that it may modify line to be Unix compatible
+ * take a line and return a vector containing the elements parsed.
+ * Used by istreamTable. Please note that it may modify line to be
+ * Unix compatible.
  */
 template<typename T>
-void tokenizeRow(std::string& line, std::vector<T>& input_vec, T& output) {
-    typedef boost::escaped_list_separator<char> seperator;
+std::vector<T> tokenizeRow(std::string& line) {
+    //typedef boost::escaped_list_separator<char> seperator;
+    typedef boost::char_separator<char> seperator;
     typedef boost::tokenizer<seperator> tokenizer;
     typedef tokenizer::const_iterator tokenizer_cit;
 
-    // remove weird symbols and carriage return symbol (for DOS files)
+    // remove weird symbols at the start of the line and carriage
+    // return symbol (for DOS files)
     removeNonASCII(line);
     removeCarriageReturn(line);
 
     // tokenize line
-    seperator sep("\\", ", \t", "\"");
+    // static const seperator sep("\\", ","/*" \t"*/, "\"");
+    static const seperator sep(", \t");
     tokenizer tok(line, sep);
-    for(tokenizer_cit it = tok.begin(); it != tok.end(); it++) {
-        //std::cout << "Token = " << *it << std::endl;
-        if(++tokenizer_cit(it) != tok.end())
-            input_vec.push_back(boost::lexical_cast<T>(*it));
-        else output = boost::lexical_cast<T>(*it);
-    }
+    std::vector<T> res;
+    foreach(const std::string& t, tok)
+        res.push_back(boost::lexical_cast<T>(t));
+    return res;
 }
-// helper
+// Like above but split the result into an vector (the inputs) and an
+// element (the output)
 template<typename T>
-std::pair<std::vector<T>, T> tokenizeRow(std::string& line) {
-    std::vector<T> input_vec;
-    T output;
-    tokenizeRow(line, input_vec, output);
-    return std::make_pair(input_vec, output);
-}
-template<typename T>
-std::vector<T> tokenizeRowVec(std::string& line) {
-    std::pair<std::vector<T>, T> p = tokenizeRow<T>(line);
-    p.first.push_back(p.second);
-    return p.first;
+std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line) {
+    std::vector<T> inputs = tokenizeRow<T>(line);
+    T output = inputs.back();
+    inputs.pop_back();
+    return std::make_pair(inputs, output);
 }
 
 /**
@@ -746,9 +742,6 @@ std::vector<T> tokenizeRowVec(std::string& line) {
  * 
  * It is assumed that each row have the same number of columns, if not
  * an assert is raised.
- *
- * @todo this function can probably be optimized in speed by using
- * boost.tokenizer on istream instead of string.
  */
 template<typename IT, typename OT, typename T>
 std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
@@ -758,41 +751,39 @@ std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table)
     // first row, check if they are labels or values //
     ///////////////////////////////////////////////////
     getline(in, line);    
-    std::vector<std::string> input_labels; // possibly labels
-    std::string output_label; // possibly label
-    tokenizeRow<std::string>(line, input_labels, output_label);
+    std::pair<std::vector<std::string>, std::string> ioh = tokenizeRowIO<std::string>(line);
     try { // try to interpret then as values
-        std::vector<T> input_vec;
+        std::vector<T> inputs;
         T output;
-        foreach(std::string& s, input_labels)
-            input_vec.push_back(boost::lexical_cast<T>(s));
-        output = boost::lexical_cast<T>(output_label);
+        foreach(std::string& s, ioh.first)
+            inputs.push_back(boost::lexical_cast<T>(s));
+        output = boost::lexical_cast<T>(ioh.second);
         // they are values so we add them
-        table_inputs.push_back(input_vec);
+        table_inputs.push_back(inputs);
         output_table.push_back(output);        
     } catch (boost::bad_lexical_cast &) { // not interpretable, they
                                           // must be labels
-        table_inputs.set_labels(input_labels);
-        output_table.set_label(output_label);
+        table_inputs.set_labels(ioh.first);
+        output_table.set_label(ioh.second);
     }
-    arity_t arity = input_labels.size();
+    arity_t arity = ioh.first.size();
     
     //////////////////////////////////////////
     // next rows, we assume they are values //
     //////////////////////////////////////////
     while (getline(in, line)) {
         // tokenize the line and fill the input vector and output
-        std::pair<std::vector<T>, T> iop = tokenizeRow<T>(line);
+        std::pair<std::vector<T>, T> io = tokenizeRowIO<T>(line);
         
         // check arity
-        OC_ASSERT(arity == (arity_t)iop.first.size(),
+        OC_ASSERT(arity == (arity_t)io.first.size(),
                   "The row %u has %u columns while the first row has %d"
                   " columns, all rows should have the same number of"
-                  " columns", output_table.size(), iop.first.size(), arity);
+                  " columns", output_table.size(), io.first.size(), arity);
         
         // fill table
-        table_inputs.push_back(iop.first);
-        output_table.push_back(iop.second);
+        table_inputs.push_back(io.first);
+        output_table.push_back(io.second);
     }
     return in;
 }
@@ -884,7 +875,7 @@ void subsampleTable(IT& table_inputs, unsigned int nsamples, RandGen& rng) {
 /**
  * if the data file has a first row with labels
  */
-std::vector<std::string> read_data_file_labels(const std::string& file);
+std::vector<std::string> readInputLabels(const std::string& file);
 
 std::ifstream* open_data_file(const std::string& fileName);
 
