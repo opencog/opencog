@@ -63,10 +63,12 @@ INSTALL(FILES
 	cluster.h
 	Config.h
 	cover_tree.h
+    concurrent_queue.h
 	digraph.h
 	dorepeat.h
 	exceptions.h
 	files.h
+    foreach.h
 	functional.h
 	oc_assert.h
 	hashing.h

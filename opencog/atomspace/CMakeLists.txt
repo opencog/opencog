@@ -68,6 +68,7 @@ INSTALL (TARGETS atomspace
 )
 
 INSTALL (FILES
+    ASRequest.h
     Atom.h
     AtomIndex.h
     AtomSpaceDefinitions.h
@@ -107,6 +108,8 @@ INSTALL (FILES
     PredicateEvaluator.h
     PredicateIndex.h
     SimpleTruthValue.h
+    SpaceServer.h
+    SpaceServerContainer.h
     StatisticsMonitor.h
     StringIndex.h
     TargetTypeIndex.h

@@ -90,3 +90,46 @@ TARGET_LINK_LIBRARIES(MapTools
     ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 ENDIF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
+
+INSTALL (FILES
+    Agent.h
+    AStarController.h
+    Entity.h
+    fsa.h
+    HPASearch.h
+    HumanoidAgent.h
+    LocalSpaceMap2D.h
+    LocalSpaceMap2DUtil.h
+    LSMap2DSearchNode.h
+    MapExplorer.h
+    MapExplorerServer.h
+    MovableEntity.h
+    PetAgent.h
+    Prerequisites.h
+    QuadTree.h
+    StaticEntity.h
+    stlastar.h
+    SuperEntity.h
+    VisibilityMap.h
+    DESTINATION "include/${PROJECT_NAME}/spatial"
+)
+INSTALL (FILES
+    math/BoundingBox.h
+    math/Dimension2.h
+    math/Dimension3.h
+    math/Face.h
+    math/Line.h
+    math/LineSegment.h
+    math/Matrix3.h
+    math/Matrix4.h
+    math/Plane.h
+    math/Quaternion.h
+    math/Rectangle.h
+    math/SquareFace.h
+    math/Triangle.h
+    math/Vector2.h
+    math/Vector3.h
+    math/Vector4.h
+    DESTINATION "include/${PROJECT_NAME}/spatial/math"
+)
+
