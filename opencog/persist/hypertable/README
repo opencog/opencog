@@ -1,7 +1,6 @@
-
                      HyperTable Support
                      ------------------
-               Jeremy Schlatter Summer 2009
+               Author: Jeremy Schlatter, Summer 2009
 
 This directory uses Hypertable to support persistent and (eventually)
 distributed storage of atoms. Two things are needed in order for it

@@ -1,7 +1,7 @@
 /*
  * opencog/hypertable/AtomspaceHTabler.h
  *
- * Copyright (C) 2009 Jeremy Schlatter <jeremy.schlatter@gmail.com>
+ * Copyright (C) 2009-2011 OpenCog Foundation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
