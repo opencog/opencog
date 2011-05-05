@@ -21,6 +21,20 @@ namespace opencog
 
 class CogServer;
 
+/* Defines a factory template, following Alexandrescu's pattern from 'Modern
+ * C++ Design' */
+template< typename _Type, typename _BaseType >
+class PythonAgentFactory : public AbstractFactory<_BaseType>
+{
+    PyObject* srcPyModule;
+public:
+    explicit Factory() : AbstractFactory<_BaseType>(s) {}
+    virtual ~Factory() {}
+    virtual _BaseType* create() const { return new _Type; }
+    virtual const ClassInfo& info() const { return _Type::info(); }
+}; 
+
+
 class PythonModule : public Module
 {
     DECLARE_CMD_REQUEST(PythonModule, "loadpy", do_load_py, 
