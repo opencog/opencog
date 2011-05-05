@@ -53,10 +53,7 @@ private:
 
 public:
 
-    static inline const char* id() {
-        static const char* _id = "opencog::AttentionModule";
-        return _id;
-    }
+    static inline const char* id();
 
     AttentionModule();
     virtual ~AttentionModule();

@@ -30,10 +30,7 @@
 
 using namespace opencog;
 
-// load/unload functions for the Module interface
-extern "C" const char* opencog_module_id()                   { return AttentionModule::id(); }
-extern "C" Module*     opencog_module_load()                 { return new AttentionModule(); }
-extern "C" void        opencog_module_unload(Module* module) { delete module; }
+DECLARE_MODULE(AttentionModule)
 
 AttentionModule::AttentionModule()
 {
