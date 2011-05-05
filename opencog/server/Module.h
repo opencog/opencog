@@ -1,10 +1,9 @@
 /*
- * src/CogServer/Module.h
+ * opencog/CogServer/Module.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2011 OpenCog Foundation
  * All Rights Reserved
- *
- * Written by Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
