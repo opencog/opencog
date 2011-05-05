@@ -1,6 +1,6 @@
 /** simple_nn.h --- 
  *
- * Copyright (C) 2010 Joel Lehman
+ * Copyright (C) 2010-2011 OpenCog Foundation
  *
  * Author: Joel Lehman
  *
