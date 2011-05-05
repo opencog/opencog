@@ -98,6 +98,39 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
+; Label the SentenceNode
+;
+; For each sentence the agent said (or observed other agent said) is labeled
+; as below:
+; 
+; AtTimeLink
+;     TimeNode "timestamp"
+;     EvaluationLink
+;         PredicateNode "said"
+;         ListLink
+;         SentenceNode "sentence content"
+;            AvtarNode "speaker_id"
+;            AvtarNode "listener_id"
+;            SpeechActTriggerNode "responser_name"
+;
+; For each sentence the agent heard (or observed other agent heard) is labeled
+; as below: 
+;
+; AtTimeLink
+;     TimeNode "timestamp"
+;     EvaluationLink
+;         PredicateNode "heard"
+;         ListLink
+;         SentenceNode "sentence content"
+;            AvtarNode "speaker_id"
+;            AvtarNode "listener_id"
+;
+
+;(define (set_sentence_label sentence_node time_stamp predicate_name handle_speaker handle_listener . handle_responser)
+;)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
 ; Return a BindLink used by pattern matcher to search a ReferenceLink
 ; containing the given node and a ListLink 
 ; 

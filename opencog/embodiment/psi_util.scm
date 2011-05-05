@@ -2,7 +2,12 @@
 ; Helper functions used by all sorts of psi scheme scripts
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-04-18
+; @date   2011-05-04
+;
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Fuzzy logic related functions
 ;
 
 ; Return the probability of x equals to t (the target number)
@@ -54,10 +59,25 @@
     (fuzzy_greater_than x t a) 
 )
 
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ; TODO: Finish this function
+;
+
+; Modulator is represented as:
+;
+; AtTimeLink
+;     TimeNode "timestamp"
+;     SimilarityLink (stv 1.0 1.0)
+;         NumberNode: "modulator_value"
+;         ExecutionOutputLink
+;             GroundedSchemaNode: "modulator_schema_name"
+;             ListLink (empty)
+
 (define (get_modulator_value modulator_name)
     (random:uniform)
 )
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ; Get pleasure based on previously/ currently selected demand goal
 ; TODO: Finish this function
