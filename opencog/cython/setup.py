@@ -1,28 +1,49 @@
 from distutils.core import setup
 from distutils.extension import Extension
+from distutils.sysconfig import get_python_inc
 from Cython.Distutils import build_ext
+import os
+
+# How can we make this configurable by CMake?
+# Perhaps has a environment variable or a command line argument
+opencog_library_dir = "/usr/local/lib/opencog"
+# for OSX:
+#opencog_library_dir = "/opt/local/lib/opencog"
+# for non-installed build:
+#opencog_library_dir = "../../bin/opencog/atomspace",
+
+# Utility function to read the README file.
+# Used for the long_description.  It's nice, because now 1) we have a top level
+# README file and 2) it's easier to type in the README file than to put a raw
+# string in below ...
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+incdir = os.path.join(get_python_inc(plat_specific=1), 'Numerical')
 
 # This extension stuff should use info from CMake somehow...
 ext = Extension(
     "opencog",                 # name of extension
     define_macros = [('MAJOR_VERSION', '0'),
-                     ('MINOR_VERSION', '5')],
-    sources=["atomspace.pyx"],     # filename of our Cython source
+                     ('MINOR_VERSION', '1')],
+    sources=["opencog.pyx"],     # filename of our Cython source
     language="c++",              # this causes Cython to create C++ source
 
     include_dirs=[".", # needed to find local pyx/pxd files
-        "../..",       # to eventually be replaced with the prefix for
-                       # OpenCog's headers
-        "/opt/local/include" # For the rest...
+        "../..",       # to support building in source directory
+        "/usr/local/include", # For local includes
+        "/opt/local/include" # For MacPorts
         ],
     libraries=["stdc++",
         "boost_system-mt","boost_thread-mt", # boost dependencies
+        # opencog libraries
         "atomspace",
         "util"
         ],
-    extra_link_args=["-L../../bin/opencog/atomspace","-L/opt/local/lib",
-        "-L/usr/local/lib/opencog"],
-    runtime_library_dirs=["/usr/local/lib/opencog"]
+    library_dirs=[
+        "/opt/local/lib", # For MacPorts
+        opencog_library_dir],
+    runtime_library_dirs=[opencog_library_dir]
     )
 
 setup(name = 'pyopencog',
@@ -30,11 +51,14 @@ setup(name = 'pyopencog',
     author = 'Joel Pitt',
     author_email = 'joel@opencog.org',
     url = 'http://wiki.opencog.org/w/Python',
-    long_description = '''
-Python bindings for OpenCog, the General Artificial Inteligence (GAI)
-research framework. http://opencog.org/
-''',
-    version = '0.5',
+    long_description = read('README'),
+    version = '0.1',
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        #"Development Status :: 4 - Beta",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
+    ],
     cmdclass = {'build_ext': build_ext},
     ext_modules = [ext]
     )

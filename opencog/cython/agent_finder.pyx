@@ -24,6 +24,7 @@ cdef public api:
 module_agents = {}
 
 import imp
+from opencog import agent
 cdef vector[string] load_module(string& module_name):
     cdef bytes c_str = module_name.c_str()
     filep,pathname,desc = imp.find_module(c_str)

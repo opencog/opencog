@@ -1,14 +1,13 @@
-
-class MindAgent():
+cdef class MindAgent:
     def get_frequency(self):
         """ Return 0 if the agent runs continuously, return 1
         """
         pass
-    def start(AtomSpace atomspace):
+    def start(self, AtomSpace atomspace):
         pass
 
-    def end():
+    def end(self):
         pass
 
-    def run(AtomSpace atomspace):
+    def run(self, AtomSpace atomspace):
         pass

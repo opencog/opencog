@@ -49,7 +49,17 @@ protected:
 
 public:
 
-    /** Agent's constructor. Pass a PyObject that is a Python MindAgent object. */
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::PyMindAgent");
+        return _ci;
+    }
+
+
+    PyMindAgent();
+
+    /** Agent's constructor. Pass a PyObject that is a Python MindAgent object.
+     */
     PyMindAgent(PyObject* py_agent, std::string& moduleFileName);
 
     /** Agent's destructor */
@@ -57,80 +67,7 @@ public:
 
     /** Abstract run method. Should be overriden by a derived agent with the
      *  actual agent's behavior. */
-    virtual void run(CogServer* server) = 0;
-
-    /** Returns the agent's frequency. */
-    virtual int frequency(void) const { return _frequency; }
-
-    /** Sets the agent's frequency. */
-    virtual void setFrequency(int frequency) { _frequency=frequency; }
-
-    /** Returns the agent's class info. */
-    virtual const ClassInfo& classinfo() const = 0;
-    
-    /** Dumps the agent's name and all its configuration parameters
-     * to a string. */    
-    std::string to_string() const;
-
-    /** Returns the sequence of handle sets for this cycle that the agent
-     *  would like to claim credit for in the System Activity Table. */
-    virtual const HandleSetSeq& getUtilizedHandleSets() const
-    {
-        return _utilizedHandleSets;
-    }
-
-    /** Resets the utilized handle sets */
-    void resetUtilizedHandleSets();
-
-    /**
-     * Stimulate a Handle's atom.
-     *
-     * @param atom handle
-     * @param amount of stimulus to give.
-     * @return total stimulus given since last reset.
-     */
-    stim_t stimulateAtom(Handle h, stim_t amount);
-
-    /**
-     * Stimulate all atoms in HandleSeq evenly with a given amount of stimulus.
-     *
-     * @param hs set of atoms to spread stimulus across.
-     * @param amount amount of stimulus to share.
-     * @return remainder stimulus after equal spread between atoms.
-     */
-    stim_t stimulateAtom(HandleSeq hs, stim_t amount);
-
-    /**
-     * Remove stimulus from a Handle's atom.
-     *
-     * @param atom handle
-     */
-    void removeAtomStimulus(Handle h);
-
-    /**
-     * Reset stimulus.
-     *
-     * @return new stimulus since reset, usually zero unless another
-     * thread adds more.
-     */
-    stim_t resetStimulus();
-
-    /**
-     * Get total stimulus.
-     *
-     * @return total stimulus since last reset.
-     */
-    stim_t getTotalStimulus() const;
-
-    /**
-     * Get stimulus for Atom.
-     *
-     * @param handle of atom to get stimulus for.
-     * @return total stimulus since last reset.
-     */
-    stim_t getAtomStimulus(Handle h) const;
-
-
+    virtual void run(CogServer* server);
 
 
 }; // class

@@ -1,9 +1,13 @@
-Development on Python bindings is in progress
+Python bindings for OpenCog, the General Artificial Inteligence (GAI)
+research framework. http://opencog.org/
+
+*In Development and liable for API to change*
 
 To generate with cython:
 
-python setup.py build_ext --inplace
+$ python setup.py build_ext --inplace
 
 To test bindings (in OSX) with nosetests:
 
-DYLD_LIBRARY_PATH=~/path/to/libatomspace.dylib/ nosetests -s
+$ DYLD_LIBRARY_PATH=~/path/to/libatomspace.dylib/ nosetests -s
+
