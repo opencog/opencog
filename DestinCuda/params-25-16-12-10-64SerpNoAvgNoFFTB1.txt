@@ -1,5 +1,5 @@
 HeaderForParametersFile V2
-64					%SEQ_LENGTH
+64      %SEQ_LENGTH
 0 0
 0 1
 0 2
@@ -64,22 +64,22 @@ HeaderForParametersFile V2
 2 6
 3 6
 4 6
-4				%Number of layers
-0.9 0.9 0.95  	%mu sigma rho smoother for layer 0
-0.9 0.9 0.95  	%mu sigma rho smoother for layer 1
-0.9 0.9 0.95  	%mu sigma rho smoother for layer 2
-0.9 0.9 0.95  	%mu sigma rho smoother for layer 3
-25				%states for layer 0
-16				%states for layer 1
-12				%states for layer 2
-10				%states for layer 3
-0				%bAveraging for first layer
-0				%FFT for first layer
-0				%binary POS
-1				%DISTANCE MEASURE 1=cosine
-1				%use starvation trace
-1000			%PSSA update delay.  Use > SEQ_LENGTH to never update
-1				%ignore advice
-1       		%processing temporal block size
-1       		%Basic online clustering
-0     			%Clan Destin
+4       %Number of layers
+0.9 0.9 0.95    %mu sigma rho smoother for layer 0
+0.9 0.9 0.95    %mu sigma rho smoother for layer 1
+0.9 0.9 0.95    %mu sigma rho smoother for layer 2
+0.9 0.9 0.95    %mu sigma rho smoother for layer 3
+25      %states for layer 0
+16      %states for layer 1
+12      %states for layer 2
+10      %states for layer 3
+0       %bAveraging for first layer
+0       %FFT for first layer
+0       %binary POS
+1       %DISTANCE MEASURE 1=cosine
+1       %use starvation trace
+1000    %PSSA update delay.  Use > SEQ_LENGTH to never update
+1       %ignore advice
+1       %processing temporal block size
+1       %Basic online clustering
+0       %Clan DeSTIN

@@ -13,6 +13,7 @@
 
 #ifdef _WIN32
 #include <direct.h>
+#include <string>
 #else
 // Linux only requirements...
 #include <errno.h>
@@ -130,28 +131,27 @@ void GetParameters(const char* cFilename, int& NumberOfLayers, double*& dcMu, do
     // **************************************
     ifstream stmInput;
     stmInput.open(cFilename);
-
     vector<string> vFileContents;
-
-    stringstream sFileContent;
-
+    string sNextLine;
     char cBuffer[1024];
-    sFileContent << "~PARAMETERSFILE:";
-    sFileContent << cFilename << ":";
+
+    // Put the config file into a vector and as one big string back to sFileCOntents
+    sFileContents = "~PARAMETERSFILE:";
+    sFileContents += cFilename + ":";
     while ( stmInput.eof() == false )
     {
         stmInput.getline(cBuffer,1024);
         if ( stmInput.eof() == false )
         {
-            string sNextLine;
+            sFileContents += "~" + cBuffer + "\n";
             sNextLine = cBuffer;
-            sFileContent << "~" << sNextLine;
             vFileContents.push_back(sNextLine);
         }
     }
-    sFileContents = sFileContent.str();
     stmInput.close();
-    cout << sFileContents << endl;
+    sFileContents += "~";
+
+
 }
 
 bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& NumberOfLayers, DestinLayer*& DLayers,
