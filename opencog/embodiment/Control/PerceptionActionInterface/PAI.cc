@@ -564,7 +564,7 @@ void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeExcept
             break;
         }
         case STRING_CODE: {
-            // TODO: converts the string to lowercase?
+            // TODO: convert the string to lowercase?
             parametersListLink.push_back(AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, paramValue));
             break;
         }
