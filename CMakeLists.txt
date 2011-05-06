@@ -343,20 +343,24 @@ IF (Boost_PYTHON_FOUND)
         COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
         OUTPUT_VARIABLE PYTHON_DEST
     )
+    # Cython is used to generate bindings
+    FIND_PROGRAM(CYTHON_EXECUTABLE cython)
+
     # replace new line at end
     STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
     IF ("${PYTHON_DEST}" STREQUAL "")
         MESSAGE(FATAL_ERROR "Python destination dir not found")
     ELSE ("${PYTHON_DEST}" STREQUAL "") 
         MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-        #MESSAGE(STATUS "Found Boost::Python and Python, we will build Python bindings")
     ENDIF ("${PYTHON_DEST}" STREQUAL "")
-  #ELSE(PYTHONLIBS_FOUND)
-      #MESSAGE(WARNING "Python not found, we won't build Python bindings." )
   ENDIF(PYTHONLIBS_FOUND)
 ELSE (Boost_PYTHON_FOUND)
   MESSAGE(STATUS "Boost Python libraries were not found, we won't build Python bindings.")
 ENDIF (Boost_PYTHON_FOUND)
+
+IF(CYTHON_EXECUTABLE AND HAVE_ATOMSPACE)
+   SET(HAVE_CYTHON 1)
+ENDIF(CYTHON_EXECUTABLE AND HAVE_ATOMSPACE)
 
 IF(Boost_PYTHON_FOUND AND PYTHONLIBS_FOUND AND HAVE_ATOMSPACE)
    SET(HAVE_PYTHON_BINDING 1)
@@ -564,5 +568,6 @@ SUMMARY_ADD("Hypertable" "Use HyperTable for scalable persistance (experimental)
 SUMMARY_ADD("WebInterface" "Web server and REST API" HAVE_WEB)
 SUMMARY_ADD("SchemeBinding" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("PythonBinding" "Python bindings" HAVE_PYTHON_BINDING)
+SUMMARY_ADD("CythonBinding" "Cython bindings" HAVE_CYTHON)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_SHOW()
