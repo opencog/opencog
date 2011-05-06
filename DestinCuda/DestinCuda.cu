@@ -2,6 +2,8 @@
 #include "DestinData.h"
 #include "DestinLayer.h"
 
+#include "pugixml/pugixml.hpp"
+
 #include <iostream>
 #include <stdio.h>
 #include <vector>
@@ -118,40 +120,87 @@ string GetNextFileForDiagnostic()
     return strFileName;
 }
 
-void GetParameters(const char* cFilename, int& NumberOfLayers, double*& dcMu, double*& dcSigma, double*& dcRho,
-                   int*& NumberOfStates,
-            bool& bAveraging,bool& bFFT,bool& bBinaryPOS,int* DistanceMeasureArray,
-            bool& bUseStarvationTrace,int& PSSAUpdateDelay,bool& bIgnoreAdvice,
-            int**& SEQ, int& SEQ_LENGTH, string& sFileContents, int& iBlocksToProcess,
-            bool& bBasicOnlineClustering,
-            bool& bClanDestin, bool& bInitialLayerIsTransformOnly,bool& bUseGoodPOSMethod )
+void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, double*& dcSigma, double*& dcRho,
+                    int*& NumberOfStates, bool& bAveraging,bool& bFFT,bool& bBinaryPOS,int* DistanceMeasureArray,
+                    bool& bUseStarvationTrace,int& PSSAUpdateDelay,bool& bIgnoreAdvice,
+                    int**& SEQ, int& SEQ_LENGTH, string& sFileContents, int& iBlocksToProcess,
+                    bool& bBasicOnlineClustering,
+                    bool& bClanDestin, bool& bInitialLayerIsTransformOnly,bool& bUseGoodPOSMethod )
 {
-    // **************************************
-    // Read the config file (parameters file)
-    // **************************************
-    ifstream stmInput;
-    stmInput.open(cFilename);
-    vector<string> vFileContents;
-    string sNextLine;
-    char cBuffer[1024];
-
+    // ******************************************
+    // Read the xml config file (parameters file)
+    // ******************************************
+    ifstream stmInput(cFilename);
+    string sBuffer;
     // Put the config file into a vector and as one big string back to sFileCOntents
-    sFileContents = "~PARAMETERSFILE:";
-    sFileContents += cFilename + ":";
-    while ( stmInput.eof() == false )
+    while ( getline(stmInput, sBuffer) )
     {
-        stmInput.getline(cBuffer,1024);
-        if ( stmInput.eof() == false )
-        {
-            sFileContents += "~" + cBuffer + "\n";
-            sNextLine = cBuffer;
-            vFileContents.push_back(sNextLine);
-        }
+        sFileContents = sFileContents + "~" + sBuffer + "\n";
     }
     stmInput.close();
-    sFileContents += "~";
 
+    pugi::xml_document xFile;
+    pugi::xml_parse_result result = xFile.load_file(cFilename);
+    std::cout << "XML config file Load result: " << result.description() << endl;
+    if ( result )
+    {
+        // Root node is destin
+        pugi::xml_node root = xFile.child("destin");
 
+        // Retrieve SEQ_LENGTH
+        pugi::xml_node seq = root.child("seq");
+        SEQ_LENGTH = seq.attribute("length").as_int();
+
+        // Retrieve all steps
+        SEQ = new int*[SEQ_LENGTH];
+        pugi::xml_node step = seq.child("step");
+        for( int iStep = 0; iStep < SEQ_LENGTH; iStep++ )
+        {
+            SEQ[iStep]=new int[2];
+            SEQ[iStep][0] = step.attribute("x").as_int();
+            SEQ[iStep][1] = step.attribute("y").as_int();
+            step = step.next_sibling("step");
+        }
+
+        // Retrieve amount of layers
+        pugi::xml_node layers = root.child("layers");
+        NumberOfLayers = layers.attribute("value").as_int();
+
+        // Retrieve configuration each layer
+        dcMu = new double[NumberOfLayers];
+        dcSigma = new double[NumberOfLayers];
+        dcRho = new double[NumberOfLayers];
+        NumberOfStates = new int[NumberOfLayers];
+        DistanceMeasureArray = new int[NumberOfLayers];
+
+        pugi::xml_node layer = layers.child("layer");
+        for( int iLayer = 0; iLayer < NumberOfLayers; iLayer++ )
+        {
+            dcMu[iLayer] = layer.attribute("mu").as_double();
+            dcSigma[iLayer] = layer.attribute("sigma").as_double();
+            dcRho[iLayer] = layer.attribute("rho").as_double();
+            NumberOfStates[iLayer] = layer.attribute("states").as_int();
+            DistanceMeasureArray[iLayer] = layer.attribute("distance").as_int();
+            layer = layer.next_sibling("layer");
+        }
+
+        // Retrieve settings for overal DeSTIN
+        pugi::xml_node settings = root.child("settings");
+        bAveraging = settings.child("averaging").attribute("value").as_bool();
+        bFFT = settings.child("fft").attribute("value").as_bool();
+        bBinaryPOS = settings.child("binaryPos").attribute("value").as_bool();
+        bUseStarvationTrace = settings.child("starvationTrace").attribute("value").as_bool();
+        PSSAUpdateDelay = settings.child("pssaDelay").attribute("value").as_int();
+        bIgnoreAdvice = settings.child("ignoreAdvice").attribute("value").as_bool();
+        iBlocksToProcess = settings.child("processingBlockSize").attribute("value").as_int();
+        bBasicOnlineClustering = settings.child("basicOnlineClustering").attribute("value").as_bool();
+        bClanDestin = settings.child("clanDestin").attribute("value").as_bool();
+    }
+    else
+    {
+        std::cout << "Error description: " << result.description() << "\n";
+        std::cout << "Error offset: " << result.offset << " (error at [..." << (cFilename + result.offset) << "]\n\n";
+    }
 }
 
 bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& NumberOfLayers, DestinLayer*& DLayers,

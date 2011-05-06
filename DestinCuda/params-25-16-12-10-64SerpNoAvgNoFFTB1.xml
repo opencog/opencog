@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<destin version="1.0" type="params">
+    <header name="HeaderForParametersFile" value="V2"/>
+    <seq length="64">
+        <step x="0" y="0"/>
+        <step x="0" y="1"/>
+        <step x="0" y="2"/>
+        <step x="0" y="3"/>
+        <step x="0" y="4"/>
+        <step x="0" y="5"/>
+        <step x="0" y="6"/>
+        <step x="0" y="7"/>
+        <step x="1" y="7"/>
+        <step x="2" y="7"/>
+        <step x="2" y="6"/>
+        <step x="2" y="5"/>
+        <step x="2" y="4"/>
+        <step x="2" y="3"/>
+        <step x="2" y="2"/>
+        <step x="2" y="1"/>
+        <step x="2" y="0"/>
+        <step x="3" y="0"/>
+        <step x="4" y="0"/>
+        <step x="4" y="1"/>
+        <step x="4" y="2"/>
+        <step x="4" y="3"/>
+        <step x="4" y="4"/>
+        <step x="4" y="5"/>
+        <step x="4" y="6"/>
+        <step x="4" y="7"/>
+        <step x="5" y="7"/>
+        <step x="6" y="7"/>
+        <step x="6" y="6"/>
+        <step x="6" y="5"/>
+        <step x="6" y="4"/>
+        <step x="6" y="3"/>
+        <step x="6" y="2"/>
+        <step x="6" y="1"/>
+        <step x="6" y="0"/>
+        <step x="5" y="1"/>
+        <step x="4" y="1"/>
+        <step x="3" y="1"/>
+        <step x="2" y="1"/>
+        <step x="1" y="1"/>
+        <step x="1" y="2"/>
+        <step x="2" y="2"/>
+        <step x="3" y="2"/>
+        <step x="4" y="2"/>
+        <step x="5" y="3"/>
+        <step x="5" y="3"/>
+        <step x="4" y="3"/>
+        <step x="3" y="3"/>
+        <step x="2" y="3"/>
+        <step x="1" y="3"/>
+        <step x="1" y="4"/>
+        <step x="2" y="4"/>
+        <step x="3" y="4"/>
+        <step x="4" y="4"/>
+        <step x="5" y="4"/>
+        <step x="5" y="5"/>
+        <step x="4" y="5"/>
+        <step x="3" y="5"/>
+        <step x="2" y="5"/>
+        <step x="1" y="5"/>
+        <step x="1" y="6"/>
+        <step x="2" y="6"/>
+        <step x="3" y="6"/>
+        <step x="4" y="6"/>
+    </seq>
+    <layers value="4">
+    <!--Distance can be: COSINE=1, EUCLIDEAN=2, GAUSSIANPDF=3, EXPONENTIALCOSINELAZY=4, GAUSSIANCOSINELAZY=5, RAYLEIGHCOSINELAZY=6-->
+        <layer name="0" mu="0.9" sigma="0.9" rho="0.95" states="25" distance="1"/>
+        <layer name="1" mu="0.9" sigma="0.9" rho="0.95" states="16" distance="1"/>
+        <layer name="2" mu="0.9" sigma="0.9" rho="0.95" states="12" distance="1"/>
+        <layer name="3" mu="0.9" sigma="0.9" rho="0.95" states="10" distance="1"/>
+    </layers>
+    <settings>
+        <averaging value="false"/>
+        <fft value="false"/>
+        <binaryPos value="false"/>
+        <starvationTrace value="true"/>
+        <pssaDelay value="1000"/>
+        <ignoreAdvice value="true"/>
+        <processingBlockSize value="1"/>
+        <basicOnlineClustering value="true"/>
+        <clanDestin value="false"/>
+    </settings>
+</destin>
