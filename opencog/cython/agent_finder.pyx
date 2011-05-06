@@ -38,10 +38,6 @@ cdef extern from "PythonModule.h" namespace "opencog":
 #
 #signal.signal(signal.SIGINT, exit_catcher)
 
-import sys, os
-# TODO this should look in a standard python extension folder for opencog
-sys.path.append(".")
-
 cdef api requests_and_agents_t load_module(string& module_name) with gil:
     """ Load module and return a vector of MindAgent names """
     cdef bytes c_str = module_name.c_str()

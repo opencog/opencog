@@ -1,5 +1,4 @@
 #include "PythonModule.h"
-#include <signal.h>
 
 #include "agent_finder_api.h"
 
@@ -12,19 +11,12 @@ DECLARE_MODULE(PythonModule);
 
 PythonModule::PythonModule() : Module()
 {
-    // We need to back up the SIGINT handler otherwise Python
-    // steals Ctrl-C and we can't easily kill the CogServer when it runs in the
-    // foreground
-    __sighandler_t prev;
-    prev = signal(SIGINT, SIG_DFL);
-
     logger().info("[PythonModule] constructor");
-    // Start up Python
-    Py_Initialize();
+    // Start up Python (this init method skips registering signal handlers)
+    Py_InitializeEx(1);
     PyEval_InitThreads();
-
-    // Now that Python is initialised, restore the SIGINT handler
-    prev = signal(SIGINT, prev);
+    PyRun_SimpleString("import sys; print sys.path\n");
+    //PyRun_SimpleString("import sys; sys.path.insert(0,'')\n");
 
     // Initialise the agent_finder module which helps with the Python side of
     // things
@@ -53,8 +45,20 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
     if (args.size() == 0) return "Please specify Python module to load.";
     requests_and_agents_t thingsInModule;
     thingsInModule = load_module(args.front());
-    foreach(std::string s, thingsInModule.agents) {
-        std::cout << "I found agent with name " << s << std::endl;
+    std::ostringstream oss;
+    if (thingsInModule.agents.size() > 0) {
+        bool first = true;
+        oss << "Python MindAgents found: ";
+        foreach(std::string s, thingsInModule.agents) {
+            if (!first) {
+                oss << ", ";
+                first = false;
+            }
+            oss << s;
+        }
+        oss << ".";
+    } else {
+        oss << "No subclasses of opencog.MindAgent found.";
     }
     // TODO save the py_module somewhere
     // ...
@@ -64,6 +68,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
     // load with given Python class
     //cogserver.registerAgent(PyMindAgent::info().id, &forgettingFactory);
     // TODO return info on what requests and mindagents were found
-    return "Loaded python module";
+    return oss.str();
+
 }
 
