@@ -15,11 +15,11 @@
 ;
 ; Modulator is represented as:
 ;
-; AtTimeLink
+; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
 ;     SimilarityLink (stv 1.0 1.0)
 ;         NumberNode: "modulator_value"
-;         ExecutionOutputLink
+;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "modulator_schema_name"
 ;             ListLink (empty)
 ;
@@ -27,11 +27,11 @@
 ;
 ; DemandSchema/DemandValue is represented as:
 ; 
-; AtTimeLink
+; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
 ;     SimilarityLink (stv 1.0 1.0)
 ;         NumberNode: "demand_value"
-;         ExecutionOutputLink
+;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "demand_schema_name"
 ;             ListLink (empty)
 ;
@@ -134,7 +134,7 @@
 ;
 ; Default Attention Value 
 (define (DEFAULT_AV) 
-    (cog-new-av DEFAULT_STI 1 #t)
+    (cog-new-av DEFAULT_STI 1 DEFAULT_VLTI)
 )
 
 ; Default Simple Truth Value
@@ -262,24 +262,24 @@
 ;
 ; Modulator is represented as:
 ;
-; AtTimeLink
+; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
 ;     SimilarityLink (stv 1.0 1.0)
 ;         NumberNode: "modulator_value"
-;         ExecutionOutputLink
+;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "modulator_schema_name"
 ;             ListLink (empty)
 ;
 
 (define (add_modulator modulator_name default_value)
-    (let ( (schema_handle (ExecutionOutputLink (DEFAULT_STV) (DEFAULT_AV) 
+    (let ( (schema_handle (ExecutionOutputLink (stv 1.0 1.0) (DEFAULT_AV) 
                               (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") ) 
                               (ListLink)
                           );ExecutionOutputLink
            );schema_handle
          )
 
-         (AtTimeLink
+         (AtTimeLink (stv 1.0 1.0)
              (TimeNode CURRENT_TIMESTAMP)
 
              (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
@@ -302,11 +302,11 @@
 ;
 ; DemandSchema/DemandValue is represented as:
 ;
-; AtTimeLink
+; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
 ;     SimilarityLink (stv 1.0 1.0)
 ;         NumberNode: "demand_value"
-;         ExecutionOutputLink
+;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "demand_schema_name"
 ;             ListLink (empty)
 ;
@@ -314,14 +314,14 @@
 ;
 
 (define (add_demand_schema demand_name default_value)
-    (let ( (schema_handle (ExecutionOutputLink (DEFAULT_STV) (DEFAULT_AV)
+    (let ( (schema_handle (ExecutionOutputLink (stv 1.0 1.0) (DEFAULT_AV)
                               (GroundedSchemaNode (string-append (string-trim-both demand_name) "Updater") )
                               (ListLink)
                           );ExecutionOutputLink
            );schema_handle    
          )    
 
-        (AtTimeLink
+        (AtTimeLink (stv 1.0 1.0)
             (TimeNode CURRENT_TIMESTAMP)
 
             (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
