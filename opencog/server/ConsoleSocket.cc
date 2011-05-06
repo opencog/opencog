@@ -53,7 +53,15 @@ ConsoleSocket::~ConsoleSocket()
 void ConsoleSocket::OnConnection()
 {
     logger().debug("[ConsoleSocket] OnConnection");
-    if (!isClosed()) Send(config()["PROMPT"]);
+    if (!isClosed()) sendPrompt()
+}
+
+ConsoleSocket::sendPrompt()
+{
+    if (config().get_bool("ANSI_ENABLED"))
+        Send(config()["ANSI_PROMPT"]);
+    else 
+        Send(config()["PROMPT"]);
 }
 
 tcp::socket& ConsoleSocket::getSocket()
@@ -177,7 +185,7 @@ void ConsoleSocket::OnRawData(const char *buf, size_t len)
 void ConsoleSocket::OnRequestComplete()
 {
     logger().debug("[ConsoleSocket] OnRequestComplete");
-    Send(config()["PROMPT"]);
+    sendPrompt();
 }
 
 void ConsoleSocket::SetDataRequest()

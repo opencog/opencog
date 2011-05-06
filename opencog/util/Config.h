@@ -58,6 +58,7 @@ protected:
             "LTI_FUNDS_BUFFER",      "10000",
             "MIN_STI",               "-400",
             "PROMPT",                "opencog> ",
+            "ANSI_PROMPT",           "opencog> ",
             "MODULES",               "libbuiltinreqs.so",
             "SCM_PRELOAD",           ""
             "",                      ""
