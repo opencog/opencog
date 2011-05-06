@@ -45,6 +45,7 @@ class AtomSpaceImpl;
 class PyMindAgent : public Agent
 {
 
+    PyObject* pyagent;
 protected:
 
 public:
@@ -60,7 +61,7 @@ public:
 
     /** Agent's constructor. Pass a PyObject that is a Python MindAgent object.
      */
-    PyMindAgent(PyObject* py_agent, std::string& moduleFileName);
+    PyMindAgent(const std::string& moduleName, const std::string& className);
 
     /** Agent's destructor */
     virtual ~PyMindAgent();

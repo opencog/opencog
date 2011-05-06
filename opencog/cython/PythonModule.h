@@ -16,24 +16,28 @@
 
 #include "PyMindAgent.h"
 
+using std::string;
+
 namespace opencog
 {
 
 class CogServer;
 
-/* Defines a factory template, following Alexandrescu's pattern from 'Modern
- * C++ Design' */
-template< typename _Type, typename _BaseType >
-class PythonAgentFactory : public AbstractFactory<_BaseType>
+class PythonAgentFactory : public AbstractFactory<Agent>
 {
-    PyObject* srcPyModule;
+    // Store the name of the python module and class so that we can instantiate
+    // them
+    string pySrcModuleName;
+    string pyClassName;
 public:
-    explicit Factory() : AbstractFactory<_BaseType>(s) {}
-    virtual ~Factory() {}
-    virtual _BaseType* create() const { return new _Type; }
-    virtual const ClassInfo& info() const { return _Type::info(); }
+    explicit PythonAgentFactory(string& module, string& clazz) : AbstractFactory<Agent>() {
+        pySrcModuleName = module;
+        pyClassName = clazz;
+    }
+    virtual ~PythonAgentFactory() {}
+    virtual Agent* create() const { return new PyMindAgent(pySrcModuleName,pyClassName); }
+    virtual const ClassInfo& info() const { return PyMindAgent::info(); }
 }; 
-
 
 class PythonModule : public Module
 {

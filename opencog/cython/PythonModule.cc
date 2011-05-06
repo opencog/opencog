@@ -1,5 +1,7 @@
 #include "PythonModule.h"
 
+//#include "agent_finder_api.h"
+
 using namespace opencog;
 
 DECLARE_MODULE(PythonModule);
