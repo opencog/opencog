@@ -250,6 +250,17 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         vectorOfMovementsToSave.push_back(false);
     }
 
+    DestinLayerLatch* DLatch;
+    DestinLayer* DLayer;
+    float* FixedRate;
+    int* RowsPerLayer;
+    int* ColsPerLayer;
+    int* NumberOfParentStates=NULL;
+    int* InputDimensionality=NULL;
+    int* OffsetSelf=NULL;
+    int* OffsetSelfFeedback=NULL;
+    bool* bSelfAndUpperFeedback;
+
     return 0;
 }
 
