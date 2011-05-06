@@ -9,7 +9,11 @@ ADD_LIBRARY (PythonModule SHARED
 
 ADD_DEPENDENCIES(PythonModule opencog_atom_types)
 
-#TARGET_LINK_LIBRARIES(opencog_cython )
+TARGET_LINK_LIBRARIES(PythonModule
+    server
+    #python2.6_d
+    ${PYTHON_LIBRARIES}
+)
 
 IF (WIN32)
     INSTALL (TARGETS PythonModule DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

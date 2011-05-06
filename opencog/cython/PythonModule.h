@@ -16,10 +16,14 @@
 
 #include "PyMindAgent.h"
 
-using std::string;
-
 namespace opencog
 {
+
+// This type is returned from the agent_finder_api
+struct requests_and_agents_t {
+    std::vector<std::string> agents;
+    std::vector<std::string> requests;
+};
 
 class CogServer;
 
@@ -27,10 +31,10 @@ class PythonAgentFactory : public AbstractFactory<Agent>
 {
     // Store the name of the python module and class so that we can instantiate
     // them
-    string pySrcModuleName;
-    string pyClassName;
+    std::string pySrcModuleName;
+    std::string pyClassName;
 public:
-    explicit PythonAgentFactory(string& module, string& clazz) : AbstractFactory<Agent>() {
+    explicit PythonAgentFactory(std::string& module, std::string& clazz) : AbstractFactory<Agent>() {
         pySrcModuleName = module;
         pyClassName = clazz;
     }
@@ -68,7 +72,7 @@ public:
 
     std::string name;
 
-    PyObject* load_module(string& filename);
+    //PyObject* load_module(std::string& filename);
 }; // class
 
 } // namespace opencog

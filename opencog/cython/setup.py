@@ -48,7 +48,7 @@ ext = Extension(
 
 # This extension stuff should use info from CMake somehow...
 helper_ext = Extension(
-    "opencog_helper",                 # name of extension
+    "agent_finder",                 # name of extension
     define_macros = [('MAJOR_VERSION', '0'),
                      ('MINOR_VERSION', '1')],
     sources=["agent_finder.pyx"],     # filename of our Cython source
