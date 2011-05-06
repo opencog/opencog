@@ -128,8 +128,10 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
                     bool& bClanDestin, bool& bInitialLayerIsTransformOnly,bool& bUseGoodPOSMethod )
 {
     // ******************************************
-    // Read the xml config file (parameters file)
+    // Read the XML config file (parameters file)
     // ******************************************
+    // This function is rewritten and is not backwards compatible with the DestinPort one.
+    // Instead of a txt file its now a XML file pugixml is used for parching it.
     ifstream stmInput(cFilename);
     string sBuffer;
     // Put the config file into a vector and as one big string back to sFileCOntents
@@ -235,11 +237,18 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     bool bInitialLayerIsTransformOnly;
     bool bDoGoodPOS = false;
 
-    GetParameters(ParametersFileName.c_str(),NumberOfLayers,dcMu,dcSigma,dcRho,NumberOfCentroids,
-        bAveraging,bFFT,bBinaryPOS,DistanceMeasureArray,
-        bUseStarvationTrace,PSSAUpdateDelay,bIgnoreAdvice,SEQ,SEQ_LENGTH,
-        sParametersFileContents,iBlocksToProcess,
-        bBasicOnlineClustering, bClanDestin, bInitialLayerIsTransformOnly,bDoGoodPOS);
+    GetParameters( ParametersFileName.c_str(), NumberOfLayers, dcMu, dcSigma, dcRho, NumberOfCentroids,
+                   bAveraging, bFFT, bBinaryPOS, DistanceMeasureArray,
+                   bUseStarvationTrace, PSSAUpdateDelay, bIgnoreAdvice, SEQ, SEQ_LENGTH,
+                   sParametersFileContents, iBlocksToProcess,
+                   bBasicOnlineClustering, bClanDestin, bInitialLayerIsTransformOnly, bDoGoodPOS );
+
+    // The name and loop looks like it is giving to option to save steps of the movements.
+    vector<bool> vectorOfMovementsToSave;
+    for( int c=0;c<SEQ_LENGTH;c++ )
+    {
+        vectorOfMovementsToSave.push_back(false);
+    }
 
     return 0;
 }
