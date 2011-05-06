@@ -108,15 +108,19 @@ INSTALL (FILES
 	Factory.h
 	HelpRequest.h
 	IHasMimeType.h
+	IRequestComplete.h
 	ListRequest.h
 	LoadModuleRequest.h
 	LoadRequest.h
 	SaveRequest.h
 	Module.h
 	NetworkServer.h
+	SocketListener.h
+	SocketPort.h
 	SystemActivityTable.h
 	Registry.h
 	Request.h
+    RequestResult.h
 	ShutdownRequest.h
 	UnloadModuleRequest.h
 	DESTINATION "include/${PROJECT_NAME}/server"
