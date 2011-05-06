@@ -130,6 +130,8 @@ public:
       */
     void SendResult(const std::string& res);
 
+    void sendPrompt();
+
     /** Called when a Request exits the connection
      */ 
     void Exit();

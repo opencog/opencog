@@ -53,10 +53,10 @@ ConsoleSocket::~ConsoleSocket()
 void ConsoleSocket::OnConnection()
 {
     logger().debug("[ConsoleSocket] OnConnection");
-    if (!isClosed()) sendPrompt()
+    if (!isClosed()) sendPrompt();
 }
 
-ConsoleSocket::sendPrompt()
+void ConsoleSocket::sendPrompt()
 {
     if (config().get_bool("ANSI_ENABLED"))
         Send(config()["ANSI_PROMPT"]);
