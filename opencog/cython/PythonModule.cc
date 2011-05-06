@@ -13,7 +13,7 @@ PythonModule::PythonModule() : Module()
 {
     logger().info("[PythonModule] constructor");
     // Start up Python (this init method skips registering signal handlers)
-    Py_InitializeEx(1);
+    Py_InitializeEx(0);
     PyEval_InitThreads();
     PyRun_SimpleString("import sys; print sys.path\n");
     //PyRun_SimpleString("import sys; sys.path.insert(0,'')\n");
