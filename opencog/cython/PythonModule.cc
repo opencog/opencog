@@ -1,6 +1,6 @@
 #include "PythonModule.h"
 
-//#include "agent_finder_api.h"
+#include "agent_finder_api.h"
 
 using namespace opencog;
 
