@@ -1,8 +1,22 @@
 Python bindings for OpenCog, the General Artificial Inteligence (GAI)
 research framework. http://opencog.org/
+==============
 
-*In Development and liable for API to change*
+Written by Joel Pitt <joel@opencog.org>
 
+WARNING: In Development and the API is liable to change.
+
+Requirements:
+ - Cython 0.14 or later.
+ - Python 2.6 or later - these bindings may work with earlier version, but
+   they have not been tested at all.
+
+The below details might be useful for working locally and hacking around
+with the bindings, but these bindings should be close to building correctly
+with CMake now. Thus all you need to use is "make opencogcy" from the build
+directory.
+
+---
 To generate with cython:
 
 $ python setup.py build_ext --inplace
