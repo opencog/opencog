@@ -48,10 +48,19 @@ void AttentionBank::setLTI(AttentionValueHolder *avh, AttentionValue::lti_t ltiV
     setAV(avh, AttentionValue(currentAv.getSTI(), ltiValue, currentAv.getVLTI()));
 }
 
-void AttentionBank::setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t vltiValue)
+void AttentionBank::incVLTI(AttentionValueHolder *avh)
 {
     const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(currentAv.getSTI(), currentAv.getLTI(), vltiValue));
+    setAV(avh, AttentionValue(currentAv.getSTI(), currentAv.getLTI(), currentAv.getVLTI()+1));
+}
+
+void AttentionBank::decVLTI(AttentionValueHolder *avh)
+{
+    const AttentionValue& currentAv = getAV(avh);
+    AttentionValue::vlti_t vlti = currentAv.getVLTI();
+    //we only want to decrement the vlti if it's not already disposable.
+    if(vlti!=AttentionValue::DISPOSABLE) vlti--;
+    setAV(avh, AttentionValue(currentAv.getSTI(), currentAv.getLTI(), vlti));
 }
 
 AttentionValue::sti_t AttentionBank::getSTI(AttentionValueHolder *avh) const

@@ -149,7 +149,7 @@ public:
         //Every node is a pivot, so every node should be nondisposable
         for(int i=0;i<7;i++) {
             TS_ASSERT(atomSpace->getVLTI(handles[i])
-                      ==AttentionValue::NONDISPOSABLE);
+                      !=AttentionValue::DISPOSABLE);
         }
         
         //Throw in a few nodes and links after embedding to make sure the

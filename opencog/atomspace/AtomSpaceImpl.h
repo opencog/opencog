@@ -287,9 +287,14 @@ public:
         bank.setLTI(atomTable.getAtom(h), ltiValue);
     }
 
-    /** Change the Very-Long-Term Importance of a given Handle */
-    void setVLTI(Handle h, AttentionValue::vlti_t vltiValue) {
-        bank.setVLTI(atomTable.getAtom(h), vltiValue);
+    /** Increase the Very-Long-Term Importance of a given Handle by 1 */
+    void incVLTI(Handle h) {
+        bank.incVLTI(atomTable.getAtom(h));
+    }
+
+    /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
+    void decVLTI(Handle h) {
+        bank.decVLTI(atomTable.getAtom(h));
     }
 
     /** Retrieve the Short-Term Importance of a given Handle */

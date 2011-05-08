@@ -425,9 +425,16 @@ public:
         return r;
     }
 
-    /** Change the Very Long-Term Importance of an Atom */
-    VoidRequest setVLTI(Handle h, AttentionValue::vlti_t vlti) {
-        VoidRequest r(new SetAttentionValueVLTIASR(&atomspace,h,vlti));
+    /** Increase the Very Long-Term Importance of an Atom by 1*/
+    VoidRequest incVLTI(Handle h) {
+        VoidRequest r(new IncAttentionValueVLTIASR(&atomspace,h));
+        requestQueue.push(r);
+        return r;
+    }
+
+    /** Decrease the Very Long-Term Importance of an Atom by 1*/
+    VoidRequest decVLTI(Handle h) {
+        VoidRequest r(new DecAttentionValueVLTIASR(&atomspace,h));
         requestQueue.push(r);
         return r;
     }

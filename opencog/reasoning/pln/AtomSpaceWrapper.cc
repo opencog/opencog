@@ -92,7 +92,7 @@ AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
     DPRINTF("ASW[%p]::constructor atomspace %p\n", this, (void*) atomspace);
     // Add dummy root NULL context node
     rootContextHandle = atomspace->addNode(CONCEPT_NODE, rootContext);
-    atomspace->setVLTI(rootContextHandle, AttentionValue::NONDISPOSABLE);
+    atomspace->incVLTI(rootContextHandle);
     
     //! @todo Replace srand with opencog::RandGen
     srand(12345678);
@@ -552,7 +552,7 @@ void AtomSpaceWrapper::reset()
     variableShadowMap.clear();
     atomspace->clear();
     rootContextHandle = atomspace->addNode(CONCEPT_NODE, rootContext);
-    atomspace->setVLTI(rootContextHandle, AttentionValue::NONDISPOSABLE);
+    atomspace->incVLTI(rootContextHandle);
 }
 
 bool AtomSpaceWrapper::loadAxioms(const string& path)

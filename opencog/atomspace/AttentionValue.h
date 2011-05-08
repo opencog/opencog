@@ -46,7 +46,6 @@ public:
     typedef unsigned short vlti_t; // very long-term importance type
 
     static const int DISPOSABLE = 0; //Status flag for vlti
-    static const int NONDISPOSABLE = 1; //Status flag for vlti
 
     // CLASS CONSTANTS
     static const sti_t DEFAULTATOMSTI = 0;
@@ -71,7 +70,8 @@ private:
     //CLASS FIELDS
     sti_t m_STI;
     lti_t m_LTI;
-    vlti_t m_VLTI; //Needs to be chnaged to a bit field after debugging
+    vlti_t m_VLTI; //represents the number of processes that currently need the
+                   //atom as nondisposable. So it's only disposable if this is 0
     static AttentionValue* m_defaultAV;
 
 public:
@@ -80,7 +80,7 @@ public:
 
     // @param int STI: The STI value to set for the atom
     // @param int LTI: The LTI value to set for the atom
-    // @param unsigned short VLTI: The VLTI flag value to set for this atom
+    // @param unsigned short VLTI: The VLTI value to set for this atom
     AttentionValue(sti_t STI = DEFAULTATOMSTI,
                    lti_t LTI = DEFAULTATOMLTI,
                    vlti_t VLTI = DEFAULTATOMVLTI);

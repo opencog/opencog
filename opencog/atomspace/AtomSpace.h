@@ -418,11 +418,16 @@ public:
         atomSpaceAsync->setLTI(h, ltiValue)->get_result();
     }
 
-    /** Change the Very-Long-Term Importance of a given Handle */
-    void setVLTI(Handle h, AttentionValue::vlti_t vltiValue) {
-        atomSpaceAsync->setVLTI(h, vltiValue)->get_result();
+    /** Increase the Very-Long-Term Importance of a given Handle by 1 */
+    void incVLTI(Handle h) {
+        atomSpaceAsync->incVLTI(h)->get_result();
     }
 
+    /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
+    void decVLTI(Handle h) {
+        atomSpaceAsync->decVLTI(h)->get_result();
+    }
+    
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
         return atomSpaceAsync->getSTI(h)->get_result();

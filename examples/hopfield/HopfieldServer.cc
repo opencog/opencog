@@ -356,7 +356,7 @@ void HopfieldServer::init(int width, int height, int numLinks)
             Handle h = atomSpace->addNode(CONCEPT_NODE, nodeName.c_str());
             // We don't want the forgetting process to remove
             // the atoms perceiving the patterns
-            atomSpace->setVLTI(h, AttentionValue::NONDISPOSABLE);
+            atomSpace->incVLTI(h);
             hGrid.push_back(h);
             if (options->keyNodes) {
                 hGridKey.push_back(false);

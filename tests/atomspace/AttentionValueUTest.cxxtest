@@ -150,6 +150,27 @@ public:
         }
     }
 
+    void testVLTI() {
+        AtomSpaceImpl* atomSpace = new AtomSpaceImpl();
+        vector<Handle> atoms = createSimpleGraph(atomSpace, "vlti");
+        
+        TS_ASSERT(atomSpace->getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+        atomSpace->incVLTI(atoms[0]);//VLTI=1
+        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        atomSpace->incVLTI(atoms[0]);//VLTI=2
+        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        atomSpace->decVLTI(atoms[0]);//VLTI=1
+        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        atomSpace->incVLTI(atoms[0]);//VLTI=2
+        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        atomSpace->decVLTI(atoms[0]);//VLTI=1
+        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        atomSpace->decVLTI(atoms[0]);//VLTI=0
+        TS_ASSERT(atomSpace->getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+        atomSpace->decVLTI(atoms[0]);//VLTI=0
+        TS_ASSERT(atomSpace->getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+    }
+
     void testComparisons() {
         logger().debug("BEGIN TEST:");
         

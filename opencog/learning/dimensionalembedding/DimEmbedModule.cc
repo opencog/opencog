@@ -79,58 +79,6 @@ void DimEmbedModule::init() {
 #endif
 }
 
-// Uses a slightly modified version of Dijkstra's algorithm
-double DimEmbedModule::findHighestWeightPath(const Handle& startHandle,
-                                             const Handle& targetHandle,
-                                             const Type& linkType)
-{
-    if(!classserver().isLink(linkType))
-        throw InvalidParamException(TRACE_INFO,
-            "DimensionalEmbedding requires link type, not %s",
-            classserver().getTypeName(linkType).c_str());
-                                                                    
-    typedef std::map<Handle, double> NodeMap;
-    NodeMap nodeMap;
-    nodeMap[startHandle]=1;
-
-    HandleSet visitedNodes;
-    while(!nodeMap.empty()) {
-        std::pair<Handle, double> bestNode = std::make_pair(startHandle, -1);
-
-        //set bestNode to the node in nodeMap with the highest weight
-        for(NodeMap::iterator it=nodeMap.begin(); it!=nodeMap.end(); ++it){
-            if(it->second > bestNode.second) bestNode=(*it);
-        }
-        visitedNodes.add(bestNode.first);
-        //Check whether we've reached the targetHandle
-        if(bestNode.first==targetHandle) return bestNode.second;
-        //Look at all of the links connected to the bestNode
-        HandleSeq newLinks = as->getIncoming(bestNode.first);
-        for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
-            //ignore links that aren't of type linkType
-            if(as->getType(*it)!=linkType) continue;
-            
-            HandleSeq newNodes = as->getOutgoing(*it);
-            //update all of the nodes' weights.
-            for(HandleSeq::iterator it2=newNodes.begin();
-                it2!=newNodes.end(); ++it2){
-                //if the node has been visited, don't do anything
-                if(visitedNodes.contains(*it2)) continue;
-
-                TruthValuePtr linkTV = as->getTV(*it);
-                //If this path is better than the currently known one, save it
-                double pathWeight
-                    = bestNode.second*(linkTV->getMean()*linkTV->getConfidence());
-                if(nodeMap[*it2] < pathWeight) {
-                    nodeMap[*it2] = pathWeight;
-                }
-            }
-        }  
-        nodeMap.erase(bestNode.first);
-    }
-    return 0; //no path found, return 0
-}
-
 std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
                                                          const Type& l) {
     if(!classserver().isLink(l))
@@ -170,9 +118,9 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
     //an embedding exists, but h has not been added yet
     if(aEit==aE.end()) {
         logger().error("Embedding exists, but %s is not in it",
-                       this->as->atomAsString(h).c_str());
+                       as->atomAsString(h).c_str());
         throw std::string("Embedding exists, but %s is not in it",
-                          this->as->atomAsString(h).c_str());
+                          as->atomAsString(h).c_str());
     } else {
         v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
         CoverTreeNode c = CoverTreeNode(aEit);
@@ -194,14 +142,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
 
-    //If we haven't already from another embedding, we must record the very
-    //long term importance (VLTI) before we set it to nondisposable. This way
-    //we know what to revert it to when we reembed and find different pivots.
-    std::map<Handle,int>::iterator p = vLTIMap.find(h);
-    if(p==vLTIMap.end()) {
-        vLTIMap[h]=as->getVLTI(h);
-        as->setVLTI(h,AttentionValue::NONDISPOSABLE);
-    }
+    as->incVLTI(h);//We don't want pivot atoms to be forgotten...
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
 
@@ -284,7 +225,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
     
-    PivotSeq& pivots = pivotsMap[linkType];
+    HandleSeq& pivots = pivotsMap[linkType];
     if(nodes.empty()) return;
     Handle bestChoice = nodes.back();
 
@@ -334,7 +275,7 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
     //node.
     //eg if our new node is connected to node A with embedding (.1,.2)
     //with link weight .3, and to node B with embedding (.4,.5)
-    //with link weight .6, then the new node's embedding is...
+    //with link weight .6, then the new node's embedding is the vector...
     //(max(.3*.1,.8*.4),max(.3*.2,.6*.5))    
     for(HandleSeq::iterator it=links.begin(); it<links.end(); ++it) {
         HandleSeq nodes = as->getOutgoing(*it);
@@ -365,14 +306,13 @@ void DimEmbedModule::addLink(const Handle& h, const Type& linkType) {
     std::vector<std::vector<double> > embeddingVectors;
     AtomEmbedding aE = atomMaps[linkType];
     HandleSeq nodes = as->getOutgoing(h);
-    HandleSeq::iterator it;
-    for(it=nodes.begin();it!=nodes.end();it++) {
+    for(HandleSeq::iterator it=nodes.begin();it!=nodes.end();it++) {
         embeddingVectors.push_back(aE[*it]);
     }
     std::vector<std::vector<double> >::iterator it,it2;
     int i=0;
-    bool flag changed = false;
-    //double weight = tv.strength*tv.confidence
+    bool changed = false;
+    double weight = as->getMean(h)*as->getConfidence(h);
     for(it=embeddingVectors.begin();it!=embeddingVectors.end();it++) {
         for(it2=embeddingVectors.begin();it2!=embeddingVectors.end();it2++) {
             if((*it)[i]<(weight*(*it2)[i])) {
@@ -393,38 +333,24 @@ void DimEmbedModule::clearEmbedding(const Type& linkType){
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-    
+
+    HandleSeq pivots  = pivotsMap[linkType];
+    for(HandleSeq::iterator it = pivots.begin();it!=pivots.end();it++) {
+        as->decVLTI(*it);
+    }
     atomMaps.erase(linkType);
     pivotsMap.erase(linkType);
     dimensionMap.erase(linkType);
-
-    std::map<Handle,int>::iterator vIt = vLTIMap.begin();
-    for(;vIt!=vLTIMap.end();++vIt) {
-        bool revert=true;
-        //In case multiple embeddings (ie for different link types) use the
-        //same pivot, check before reverting the VLTI.
-        for(PivotMap::iterator it = pivotsMap.begin();
-            it!=pivotsMap.end(); ++it) {
-            PivotSeq pivots = it->second;
-            PivotSeq::iterator it2=pivots.begin();
-            for(; it2!=pivots.end(); ++it2) {
-                if(vIt->first==*it2) revert=false;
-            }
-        }
-        //If we weren't able to find the pivot being used in another
-        //embedding, we can reset the VLTI to what it was before we
-        //did any embedding.
-        if(revert) as->setVLTI(vIt->first,vIt->second);
-    }
 }
+
 void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
     AtomEmbedding atomEmbedding=atomMaps[linkType];
-    PivotSeq pivots = pivotsMap[linkType];
+    HandleSeq pivots = pivotsMap[linkType];
 
     std::ostringstream oss;
     
     oss << "PIVOTS:" << std::endl;
-    for(PivotSeq::const_iterator it=pivots.begin(); it!=pivots.end(); ++it){
+    for(HandleSeq::const_iterator it=pivots.begin(); it!=pivots.end(); ++it){
         if(as->isValidHandle(*it)) {
             oss << as->atomAsString(*it,true) << std::endl;
         } else {
@@ -653,7 +579,7 @@ double DimEmbedModule::homogeneity(const HandleSeq& cluster,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-    assert(cluster.size()>1);
+    OC_ASSERT(cluster.size()>1);
     
     double average=0;
     for(HandleSeq::const_iterator it=cluster.begin();it!=cluster.end();++it) {
@@ -741,8 +667,8 @@ double DimEmbedModule::euclidDist(std::vector<double> v1,
 }
 
 void DimEmbedModule::handleAddSignal(AtomSpaceImpl* a, Handle h) {
+    AtomEmbedMap::iterator it;
     if(as->isNode(h)) {
-        AtomEmbedMap::iterator it;
         //for each link type embedding that exists, add the node
         for(it=atomMaps.begin();it!=atomMaps.end();it++) {
             addNode(h,it->first);
@@ -750,7 +676,7 @@ void DimEmbedModule::handleAddSignal(AtomSpaceImpl* a, Handle h) {
     }
     else {//h is a link    
         for(it=atomMaps.begin();it!=atomMaps.end();it++) {
-            addLink(it->first,h);
+            addLink(h,it->first);
         }
     }
 }

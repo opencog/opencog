@@ -682,13 +682,25 @@ public:
     
 };
 
-class SetAttentionValueVLTIASR : public TwoParamASR <bool, Handle, AttentionValue::vlti_t> {
+class IncAttentionValueVLTIASR : public OneParamASR <bool, Handle> {
 public:
-    SetAttentionValueVLTIASR(AtomSpaceImpl *a, Handle h, AttentionValue::vlti_t vlti) :
-        TwoParamASR<bool,Handle,AttentionValue::vlti_t>(a,h,vlti) {}
+    IncAttentionValueVLTIASR(AtomSpaceImpl *a, Handle h) :
+    OneParamASR<bool,Handle>(a,h) {}
     
     virtual void do_work() {
-        atomspace->setVLTI(p1,p2);
+        atomspace->incVLTI(p1);
+        set_result(true);
+    }
+    
+};
+
+class DecAttentionValueVLTIASR : public OneParamASR <bool, Handle> {
+public:
+    DecAttentionValueVLTIASR(AtomSpaceImpl *a, Handle h) :
+    OneParamASR<bool,Handle>(a,h) {}
+    
+    virtual void do_work() {
+        atomspace->decVLTI(p1);
         set_result(true);
     }
     

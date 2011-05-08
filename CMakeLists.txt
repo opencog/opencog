@@ -562,7 +562,7 @@ SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTIO
 SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
 SUMMARY_ADD("Spatial" "Spatial tools" HAVE_SPATIAL)
 SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
-SUMMARY_ADD("Dim. Embedding" "Module for adding dimensional embedding to the AtomSpace" HAVE_DIMEMBED)
+SUMMARY_ADD("Dim. Embedding" "Module for computing dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace and PLN's BIT" HAVE_UBIGRAPH)
 SUMMARY_ADD("Hypertable" "Use HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("WebInterface" "Web server and REST API" HAVE_WEB)

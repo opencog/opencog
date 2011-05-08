@@ -48,8 +48,7 @@ namespace opencog
     {
     private:
         typedef std::map<Handle, std::vector<double> > AtomEmbedding;
-        typedef std::vector<Handle> PivotSeq;
-        typedef std::map<Type, PivotSeq> PivotMap;
+        typedef std::map<Type, HandleSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
         typedef std::map<Type, node<CoverTreeNode> > EmbedTreeMap;
         typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
@@ -61,13 +60,12 @@ namespace opencog
         EmbedTreeMap embedTreeMap;
         std::map<Type,int> dimensionMap;//Stores the number of dimensions that
                                         //each link type is embedded under
-        std::map<Handle,int> vLTIMap; //Stores what the VLTI for pivots
-        //was before we added them, setting them to nondisposable. This way
-        //we know what to revert VLTI to when we re-embed.
-        
+
         /**
          * Adds h as a pivot and adds the distances from each node to
-         * the pivot to the appropriate atomEmbedding.
+         * the pivot to the appropriate atomEmbedding. Also increase
+         * the VLTI of the new pivot (we don't want pivot atoms to be
+         * forgotten).
          *
          * @param h Handle to be added as a pivot
          * @param linkType Type of link for which h should be added as a pivot
@@ -147,8 +145,7 @@ namespace opencog
         
         /**
          * Clears the AtomEmbedMap and PivotMap for linkType, also
-         * reverting the VLTI of any pivots to what they were before
-         * embedding.
+         * decreasing the VLTI of any pivots by 1.
          *
          * @param linkType Type of link for which the embedding should be
          * cleared.
@@ -280,7 +277,6 @@ namespace opencog
         //void updateAtom(const Handle& h, const Type& linkType);
 
         void printEmbedding();
-
 
         /**
          * Updates the embeddings for a new atom (the atomspace will

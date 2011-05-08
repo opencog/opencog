@@ -176,7 +176,13 @@ public:
     void setLTI(AttentionValueHolder *avh, AttentionValue::lti_t);
 
     /** Change the Very-Long-Term Importance of an attention value holder */
-    void setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t);
+    //void setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t);
+
+    /** Incr the Very-Long-Term Importance of an attention value holder by 1*/
+    void incVLTI(AttentionValueHolder *avh);
+
+    /** Decr the Very-Long-Term Importance of an attention value holder by 1*/
+    void decVLTI(AttentionValueHolder *avh);
 
     /** Retrieve the Short-Term Importance of an attention value holder */
     AttentionValue::sti_t getSTI(AttentionValueHolder *avh) const;

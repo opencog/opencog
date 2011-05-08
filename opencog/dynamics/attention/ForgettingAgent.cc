@@ -102,7 +102,7 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     for (unsigned int i = 0; i < atomsVector.size(); i++) {
         if (a->getLTI(atomsVector[i]) <= forgetThreshold
                 && count < removalAmount) {
-            if (a->getVLTI(atomsVector[i]) != AttentionValue::NONDISPOSABLE ) {
+            if (a->getVLTI(atomsVector[i]) == AttentionValue::DISPOSABLE ) {
                 std::string atomName = a->atomAsString(atomsVector[i]);
                 log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
