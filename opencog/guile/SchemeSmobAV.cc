@@ -51,13 +51,9 @@ std::string SchemeSmob::av_to_string(const AttentionValue *av)
 #define BUFLEN 120
 	char buff[BUFLEN];
 
-    if (av->getVLTI() == 0) {
-        snprintf(buff, BUFLEN, "(av %d %d #f)", 
-            av->getSTI(), av->getLTI());
-    } else {
-        snprintf(buff, BUFLEN, "(av %d %d #t)", 
-            av->getSTI(), av->getLTI());
-    }
+    snprintf(buff, BUFLEN, "(av %d %d %u)", 
+             av->getSTI(), av->getLTI(), av->getVLTI());
+
 	std::string ret = buff;
 	return ret;
 }
@@ -85,14 +81,7 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 {
 	AttentionValue::sti_t sti = scm_to_short(ssti);
 	AttentionValue::lti_t lti = scm_to_short(slti);
-    AttentionValue::vlti_t vlti = false;
-    if (!scm_is_bool(svlti)) {
-        scm_wrong_type_arg_msg("cog-new-av", 3, svlti, "boolean value");
-    }
-    if (scm_is_true(svlti)) {
-        vlti = true;
-    }
-
+    AttentionValue::vlti_t vlti = scm_to_ushort(svlti);
 	AttentionValue *av = new AttentionValue(sti, lti, vlti);
 	return take_av(av);
 }
@@ -142,7 +131,7 @@ SCM SchemeSmob::ss_av_get_value (SCM s)
 
 	SCM sti = scm_from_short(av->getSTI());
 	SCM lti = scm_from_short(av->getLTI());
-	SCM vlti = scm_from_bool((int)av->getVLTI());
+	SCM vlti = scm_from_ushort(av->getVLTI());
 
 	SCM ssti = scm_from_locale_symbol("sti");
 	SCM slti = scm_from_locale_symbol("lti");

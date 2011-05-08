@@ -17,7 +17,7 @@
 using namespace opencog;
 
 /**
- * Two scheme smob types are used to impelment the interface.
+ * Two scheme smob types are used to implement the interface.
  *
  * The cog_handle_tag is used to store atom handles only.
  * The cog_misc_tag is used to store all other structures, such
@@ -116,6 +116,8 @@ void SchemeSmob::register_procs(void)
 	// property setters
 	scm_c_define_gsubr("cog-set-av!",           2, 0, 0, C(ss_set_av));
 	scm_c_define_gsubr("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
+    scm_c_define_gsubr("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
+    scm_c_define_gsubr("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
 
 	// property getters
 	scm_c_define_gsubr("cog-name",              1, 0, 0, C(ss_name));
