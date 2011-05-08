@@ -35,6 +35,7 @@ IF (GUILE_FOUND)
 	ADD_CXXTEST(BuggyStackUTest)
 	ADD_CXXTEST(VarTypeNotUTest)
 	ADD_CXXTEST(MatchLinkUTest)
+	ADD_CXXTEST(UnorderedUTest)
 
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		util
