@@ -115,8 +115,11 @@ void BuggyStackUTest::setUp(void)
 
 void BuggyStackUTest::test_exec(void)
 {
-    AtomSpace* as = cogserver().getAtomSpace();
+	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != restrict);
 
 	// Result should be a ListLink w/ one solution
 	Handle result = pm.varscope(restrict);

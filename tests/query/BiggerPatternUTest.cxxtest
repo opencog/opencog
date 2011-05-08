@@ -1,7 +1,7 @@
 /*
  * tests/query/BiggerPatternUTest.cxxtest
  *
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009,2011 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,10 +25,8 @@
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-#include <opencog/nlp/wsd/WordSenseProcessor.h>
-
-#include <cstdio>
 
 using namespace opencog;
 
@@ -46,13 +44,22 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
 
 		BiggerPatternUTest(void)
 		{
-			logger().setLevel(Logger::DEBUG);
-			logger().setPrintToStdoutFlag(true);
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 		}
 
 		~BiggerPatternUTest()
 		{
-			// erase the log file if no assertions failed
+			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().getFilename().c_str());
 		}

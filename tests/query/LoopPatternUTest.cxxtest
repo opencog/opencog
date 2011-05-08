@@ -27,8 +27,6 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
-#include <cstdio>
-
 using namespace opencog;
 
 class LoopPatternUTest :  public CxxTest::TestSuite
@@ -152,7 +150,7 @@ void LoopPatternUTest::cycle(Handle va, Handle vb, Handle vc)
 
 void LoopPatternUTest::verify(Handle soln)
 {
-    AtomSpace *as = cogserver().getAtomSpace();
+	AtomSpace *as = cogserver().getAtomSpace();
 	Handle va = getlink(soln, 0);
 	Handle vb = getlink(soln, 1);
 	Handle vc = getlink(soln, 2);
@@ -167,8 +165,8 @@ void LoopPatternUTest::test_prep(void)
 	// Result should be a ListLink
 	Handle result = pm.imply(imlink);
 
-   // Expect three answers.
-   TSM_ASSERT_EQUALS("incorrect arity", as->getArity(result), 3);
+	// Expect three answers.
+	TSM_ASSERT_EQUALS("incorrect arity", as->getArity(result), 3);
 
 	// Check that each answer gives the loop in cyclic order.
 	verify (getlink(result, 0));

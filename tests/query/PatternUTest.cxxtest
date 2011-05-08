@@ -1,7 +1,7 @@
 /*
  * tests/query/PatternUTest.cxxtest
  *
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009,2011 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,14 +25,12 @@
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-#include <opencog/nlp/wsd/WordSenseProcessor.h>
-
-#include <cstdio>
 
 using namespace opencog;
 
-class PatternUTest :  public CxxTest::TestSuite
+class PatternUTest: public CxxTest::TestSuite
 {
 	private:
 		PatternMatchEngine pme;
@@ -65,18 +63,28 @@ class PatternUTest :  public CxxTest::TestSuite
 
 	public:
 
-        static PatternUTest* createSuite() { return new PatternUTest(); }
-        static void destroySuite(PatternUTest* suite) { delete suite; }
+		// WTF ?? what are these for? Other tests don't need 'em ...
+		static PatternUTest* createSuite() { return new PatternUTest(); }
+		static void destroySuite(PatternUTest* suite) { delete suite; }
 
 		PatternUTest(void)
 		{
-			logger().setLevel(Logger::DEBUG);
-			logger().setPrintToStdoutFlag(true);
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 		}
 
 		~PatternUTest()
 		{
-			// erase the log file if no assertions failed
+			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().getFilename().c_str());
 		}
@@ -98,7 +106,7 @@ class PMCB : public DefaultPatternMatchCB
 		PMCB(AtomSpace *_as);
 		virtual bool node_match(Node *, Node *);
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-                            std::map<Handle, Handle> &var_soln);
+		                      std::map<Handle, Handle> &var_soln);
 
 		int found;
 		std::map<Handle, Handle> preds;
@@ -459,4 +467,3 @@ void PatternUTest::test_implication(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-

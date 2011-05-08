@@ -10,7 +10,7 @@ LINK_DIRECTORIES(
 	${PROJECT_BINARY_DIR}/opencog/util
 )
 
-LINK_LIBRARIES(#PatternUTest
+LINK_LIBRARIES(
 	atomspace
 	query
 	server

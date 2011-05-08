@@ -28,8 +28,6 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
-#include <cstdio>
-
 using namespace opencog;
 
 class Boolean2NotUTest :  public CxxTest::TestSuite
@@ -266,7 +264,7 @@ void Boolean2NotUTest::setUp(void)
 
 void Boolean2NotUTest::test_isa(void)
 {
-    AtomSpace *as = cogserver().getAtomSpace();
+	AtomSpace *as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink

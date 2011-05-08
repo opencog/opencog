@@ -62,7 +62,7 @@ class MatchLink :  public CxxTest::TestSuite
 
 		~MatchLink()
 		{
-			// erase the log file if no assertions failed
+			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().getFilename().c_str());
 		}
@@ -120,6 +120,13 @@ void MatchLink::test_exec(void)
 {
 	Handle result;
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != untyped_link_match);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != typed_link_match);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != untyped_any_match);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != typed_memb_link_match);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != typed_pet_node_match);
 
 	// Result should be a ListLink w/ three solutions
 	result = pm.varscope(untyped_link_match);
