@@ -90,7 +90,7 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 	}
 	AttentionValue::sti_t sti = scm_to_short(ssti);
 	AttentionValue::lti_t lti = scm_to_short(slti);
-	AttentionValue::vlti_t vlti = scm_to_ushort(svlti);
+    AttentionValue::vlti_t vlti = scm_to_ushort(svlti);
 	AttentionValue *av = new AttentionValue(sti, lti, vlti);
 	return take_av(av);
 }
