@@ -87,7 +87,7 @@ void BuggyStackUTest::setUp(void)
 	// Load the required data
 	config().set("SCM_PRELOAD",
 		"opencog/scm/type_constructors.scm, "
-		"tests/query/stack-bug.scm");
+		"tests/query/buggy-stack.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
