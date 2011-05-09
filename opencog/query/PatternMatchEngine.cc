@@ -162,15 +162,22 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		depth ++;
 		var_solutn_stack.push(var_grounding);
 
-//		mismatch = foreach_outgoing_atom_pair(hp, hg,
-//		              	      &PatternMatchEngine::tree_compare, this);
-//		
-        // Since foreach_outgoing_atom_pair doesn't take permutations of 
-        // outgoing into consideration, it can not handle unordered links properly. 
-        // This is a quick hack to solve the problem temporarily. 
-        // (by Zhenhua Cai, on 2011-05-05)
-		mismatch = foreach_outgoing_atom_combination(hp, hg,
-		              	      &PatternMatchEngine::tree_compare, this);
+        // We usually only need to check one handle, as link_match ensures
+        // they are the same type. But link_match is a callback so any custom
+        // callback might not ensure this.
+        // We should however base this decision on the the predicate, not
+        // the grounding.
+        if (classserver().isA(as->getType(hp),UNORDERED_LINK)) {
+            // foreach_outgoing_atom_pair doesn't take permutations of 
+            // outgoing into consideration, so it can't handle unordered links properly. 
+            // This is a quick hack to solve the problem temporarily. 
+            mismatch = foreach_outgoing_atom_combination(hp, hg,
+                                  &PatternMatchEngine::tree_compare, this);
+        } else {
+    		mismatch = foreach_outgoing_atom_pair(hp, hg,
+    	              	      &PatternMatchEngine::tree_compare, this);
+        }
+    		
 		depth --;
 		dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 
