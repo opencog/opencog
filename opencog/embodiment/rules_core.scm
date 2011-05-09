@@ -274,7 +274,7 @@
 (define (add_modulator modulator_name default_value)
     (let ( (schema_handle (ExecutionOutputLink (stv 1.0 1.0) (DEFAULT_AV) 
                               (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") ) 
-                              (ListLink)
+                              (ListLink) 
                           );ExecutionOutputLink
            );schema_handle
          )

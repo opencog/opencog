@@ -296,6 +296,17 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 	vmap = &vars;
 	oset.clear();
 	did_exec = false;
+
+//Debug begin
+//    std::cout<<"Found "<<vars.size()<<" groundings for: "<<as->atomAsString(expr)<<std::endl<<std::endl; 
+//    std::map<Handle, Handle>::iterator i_var;
+//    int i=1; 
+//    for (i_var = vars.begin(); i_var != vars.end(); ++ i_var, ++i) {
+//        std::cout<<"No."<<i<<": "<<as->atomAsString(i_var->first)<<" <== "<<as->atomAsString(i_var->second)<<std::endl; 
+//    }
+//    std::cout<<std::endl; 
+//Debug end
+
 	walk_tree(expr);
 	if ((false == did_exec) && (oset.size() != 1))
 	{

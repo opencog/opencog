@@ -130,6 +130,11 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// e.g. making sure that grounding is of some certain type.
 		if (pmc->variable_match (hp,hg)) return true;
 
+        // Make sure the grounding is a valid handle
+        if (!atom_space->isValidHandle(hg)) {
+            return true; 
+        }
+
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
 		prtmsg("$$ variable:    ", hp);

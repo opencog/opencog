@@ -104,7 +104,7 @@ class DefaultPatternMatchCB :
 			// If we are here, there's a restriction on the grounding type.
 			// Validate the node type, if needed.
 			VariableTypeMap::const_iterator it = type_restrictions->find(npat_h);
-			if (it == type_restrictions->end()) return false;
+			if (it == type_restrictions->end()) return true; //false;
 
 			// Is the ground-atom type in our list of allowed types?
 			const std::set<Type> &tset = it->second;

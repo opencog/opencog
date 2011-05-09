@@ -24,7 +24,7 @@ inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
                                        bool (T::*cb)(Handle, Handle), T *data)
 {
     const AtomSpace *as = data->get_atomspace();
-    if (!as->isLink(ha) || !as->isLink(hb)) return false;
+    if (!as->isLink(ha) || !as->isLink(hb)) return true;
     const std::vector<Handle> &va = as->getOutgoing(ha);
     const std::vector<Handle> &vb = as->getOutgoing(hb);
 
@@ -63,7 +63,7 @@ inline bool foreach_outgoing_atom_combination(Handle ha, Handle hb,
                                               T *data)
 {
     const AtomSpace *as = data->get_atomspace();
-    if (!as->isLink(ha) || !as->isLink(hb)) return false;
+    if (!as->isLink(ha) || !as->isLink(hb)) return true;
 
     // If ha is of ordered link, degrade to foreach_outgoing_atom_pair 
     Type ta = as->getType(ha);

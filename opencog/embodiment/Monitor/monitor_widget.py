@@ -42,7 +42,7 @@ class MonitorWidget(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         # Initialize variables related to graph 
-        self.max_data_len = 50
+        self.max_data_len = 25
         self.has_initialized = False
         self.data_dict = {}
         self.legend_list = []
@@ -106,9 +106,9 @@ class MonitorWidget(FigureCanvas):
             # however drawing graph is very CPU consuming, 
             # introduce this limit may make GUI response more quickly
             if self.isVisible(): 
-                glb.gui_read_write_lock.lockForWrite()
+#                glb.gui_read_write_lock.lockForWrite()
                 self.draw_graph()
-                glb.gui_read_write_lock.unlock()
+#                glb.gui_read_write_lock.unlock()
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:

@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     system("./router &");
     sleep(5);
     system("./learningServer &");
+//    system("nemiver ./learningServer &"); 
     //system("./pvpSimulator &"); // proxy
 
     try {
