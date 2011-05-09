@@ -2,6 +2,11 @@
 
 #include "agent_finder_api.h"
 
+// for backward compatibility as from boost 1.46 filesystem 3 is the default
+#define BOOST_FILESYSTEM_VERSION 2
+#include <boost/filesystem/operations.hpp>
+
+
 using std::vector;
 using std::string;
 
@@ -9,22 +14,21 @@ using namespace opencog;
 
 DECLARE_MODULE(PythonModule);
 
+static const char* DEFAULT_PYTHON_MODULE_PATHS[] = 
+{
+    "opencog/cython",
+    "../opencog/cython/tests",
+    DATADIR"/python",
+#ifndef WIN32
+    "/usr/share/opencog/python",
+    "/usr/local/share/opencog/python",
+#endif // !WIN32
+    NULL
+};
+
 PythonModule::PythonModule() : Module()
 {
     logger().info("[PythonModule] constructor");
-    // Start up Python (this init method skips registering signal handlers)
-    Py_InitializeEx(0);
-    PyEval_InitThreads();
-    PyRun_SimpleString("import sys; print sys.path\n");
-    //PyRun_SimpleString("import sys; sys.path.insert(0,'')\n");
-
-    // Initialise the agent_finder module which helps with the Python side of
-    // things
-    if (import_agent_finder() == -1) {
-        PyErr_Print();
-        logger().error("[PythonModule] Failed to load helper python module");
-    }
-    do_load_py_register();
 }
 
 PythonModule::~PythonModule()
@@ -37,6 +41,30 @@ PythonModule::~PythonModule()
 void PythonModule::init()
 {
     logger().info("[PythonModule] init");
+
+    // Start up Python (this init method skips registering signal handlers)
+    Py_InitializeEx(0);
+    PyEval_InitThreads();
+    PyRun_SimpleString("import sys; print sys.path\n");
+
+    const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
+    PyRun_SimpleString("paths=[]");
+    for (int i = 0; config_paths[i] != NULL; ++i) {
+        boost::filesystem::path modulePath(config_paths[i]);
+        if (boost::filesystem::exists(modulePath)) {
+            PyRun_SimpleString(("paths.append('" + modulePath.string() + "')\n").c_str());
+        }
+    }
+    PyRun_SimpleString("sys.path = paths + sys.path\n");
+    PyRun_SimpleString("import sys; print sys.path\n");
+
+    // Initialise the agent_finder module which helps with the Python side of
+    // things
+    if (import_agent_finder() == -1) {
+        PyErr_Print();
+        logger().error("[PythonModule] Failed to load helper python module");
+    }
+    do_load_py_register();
 }
 
 std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args)
