@@ -1,0 +1,5 @@
+IF(PYTHONINTERP_FOUND)
+    ADD_TEST(CythonBindings ${PYTHON_EXECUTABLE}
+        ${CMAKE_SOURCE_DIR}/tests/web/test_atomspace.py)
+ENDIF(PYTHONINTERP_FOUND)
+

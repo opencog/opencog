@@ -45,8 +45,8 @@ void PythonModule::init()
     // Start up Python (this init method skips registering signal handlers)
     Py_InitializeEx(0);
     PyEval_InitThreads();
-    PyRun_SimpleString("import sys; print sys.path\n");
 
+    // Add our module directories to the Python interprator's path
     const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
     PyRun_SimpleString("paths=[]");
     for (int i = 0; config_paths[i] != NULL; ++i) {
@@ -55,8 +55,7 @@ void PythonModule::init()
             PyRun_SimpleString(("paths.append('" + modulePath.string() + "')\n").c_str());
         }
     }
-    PyRun_SimpleString("sys.path = paths + sys.path\n");
-    PyRun_SimpleString("import sys; print sys.path\n");
+    PyRun_SimpleString("import sys; sys.path = paths + sys.path\n");
 
     // Initialise the agent_finder module which helps with the Python side of
     // things
@@ -64,6 +63,7 @@ void PythonModule::init()
         PyErr_Print();
         logger().error("[PythonModule] Failed to load helper python module");
     }
+    // Register our Python loader request
     do_load_py_register();
 }
 

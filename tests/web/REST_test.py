@@ -238,9 +238,6 @@ class TestPostAtom(unittest.TestCase):
         self.assertTrue("result" in result)
         self.assertEqual(result["result"], "created")
 
-
-
-
 if __name__ == "__main__":
     print "Starting REST interface test"
     spawn_server()
