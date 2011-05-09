@@ -106,10 +106,11 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
 bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 {
 	AtomSpace *as = atom_space;
+
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (bound_vars.end() != bound_vars.find(hp)) {
-		// But... if atom g happens to also be a bound var,
+		// But... if handle hg happens to also be a bound var,
 		// then its a mismatch.
 		if (bound_vars.end() != bound_vars.find(hg)) return true;
 
@@ -144,7 +145,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	}
 
 	// If they're the same atom, then clearly they match.
-	// ... but only if ag is not a subclause of the current clause.
+	// ... but only if hg is not a subclause of the current clause.
 	if ((hp == hg) && (hg != curr_pred_handle))
 	{
 		var_grounding[hp] = hg;
@@ -167,21 +168,11 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		depth ++;
 		var_solutn_stack.push(var_grounding);
 
-        // We usually only need to check one handle, as link_match ensures
-        // they are the same type. But link_match is a callback so any custom
-        // callback might not ensure this.
-        // We should however base this decision on the the predicate, not
-        // the grounding.
-        if (classserver().isA(as->getType(hp),UNORDERED_LINK)) {
-            // foreach_outgoing_atom_pair doesn't take permutations of 
-            // outgoing into consideration, so it can't handle unordered links properly. 
-            // This is a quick hack to solve the problem temporarily. 
-            mismatch = foreach_outgoing_atom_combination(hp, hg,
-                                  &PatternMatchEngine::tree_compare, this);
-        } else {
-    		mismatch = foreach_outgoing_atom_pair(hp, hg,
-    	              	      &PatternMatchEngine::tree_compare, this);
-        }
+        // foreach_outgoing_atom_pair doesn't take permutations of 
+        // outgoing into consideration, so it can't handle unordered links properly. 
+        // This is a quick hack to solve the problem temporarily. 
+        mismatch = foreach_outgoing_atom_combination(hp, hg,
+                              &PatternMatchEngine::tree_compare, this);
     		
 		depth --;
 		dbgprt("tree_comp down link mismatch=%d\n", mismatch);

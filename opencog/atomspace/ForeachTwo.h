@@ -101,11 +101,9 @@ inline bool foreach_outgoing_atom_combination(Handle ha, Handle hb,
             if (rc) continue; 
         }
 
-        return false; 
-
     } while ( next_permutation(vb.begin(), vb.end()) ); 
 
-    return true;
+    return false;
 }
 
 } // namespace opencog
