@@ -40,7 +40,7 @@ using namespace opencog;
 #if DEBUG
 	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
-	#define dbgprt(f, varargs...) 
+	#define dbgprt(f, varargs...)
 #endif
 #endif
 
@@ -87,16 +87,16 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
 /**
  * tree_compare compares two trees, side-by-side.
  *
- * Compare two incidence trees, side-by-side. It is assumed that the 
+ * Compare two incidence trees, side-by-side. It is assumed that the
  * first of these is a clause in the predicate, and so the comparison
- * is between the clause, and a candidate grounding. 
+ * is between the clause, and a candidate grounding.
  *
- * The graph/tree refered to here is the incidence graph/tree (aka 
+ * The graph/tree refered to here is the incidence graph/tree (aka
  * Levi graph) of the hypergraph (and not the hypergraph itself).
  * The incidence graph is given by the "outgoing set" of the atom.
  *
- * This routine is recursive, calling itself on each subtree of the 
- * predicate clause, performing comparisions until a match is found 
+ * This routine is recursive, calling itself on each subtree of the
+ * predicate clause, performing comparisions until a match is found
  * (or not found).
  *
  * Return true if there's a mis-match. The goal here is to walk over
@@ -163,12 +163,30 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		depth ++;
 		var_solutn_stack.push(var_grounding);
 
-        // foreach_outgoing_atom_pair doesn't take permutations of 
-        // outgoing into consideration, so it can't handle unordered links properly. 
-        // This is a quick hack to solve the problem temporarily. 
-        mismatch = foreach_outgoing_atom_combination(hp, hg,
-                              &PatternMatchEngine::tree_compare, this);
-    		
+		// If the two links are both ordered, its enough to compare
+		// them "side-by-side"; the foreach_outgoing_atom_pair
+		// iterator does this. If they are un-ordered, then we
+		// have to compare (at most) every possible permutation.
+		// The foreach_outgoing_atom_combination iterator does this.
+		// In many (most?) cases, exploring every permutation is
+		// overkill, but its difficult to write an efficient algorithm
+		// that can do better -- in particular, the callbacks do an
+		// effective job of quickly eliminating combinations we don't
+		// want, and so exploring all possible combinations is a
+		// very reasonable solution.
+		//
+		Type tp = as->getType(hp);
+		if (classserver().isA(tp, ORDERED_LINK))
+		{
+			mismatch = foreach_outgoing_atom_pair(hp, hg,
+			                   &PatternMatchEngine::tree_compare, this);
+		}
+		else
+		{
+			mismatch = foreach_outgoing_atom_combination(hp, hg,
+			                   &PatternMatchEngine::tree_compare, this);
+		}
+
 		depth --;
 		dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 
@@ -198,7 +216,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 	}
 
 	// If we got to here, there is a clear mismatch, probably because
-	// one is a node, and the other a link. 
+	// one is a node, and the other a link.
 	return true;
 }
 
@@ -230,8 +248,8 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 	// If no match, then try the next one.
 	if (no_match) return false;
 
-	// If we've navigated to the top of the clause, and its matched, 
-	// then it is fully grounded, and we're done with it. 
+	// If we've navigated to the top of the clause, and its matched,
+	// then it is fully grounded, and we're done with it.
 	// Start work on the next unsovled predicate. But do all of this
 	// only if the callback allows it.
 	if (curr_pred_handle == curr_root)
@@ -256,7 +274,7 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 		prtmsg("---------------------\nclause:", curr_root);
 		prtmsg("ground:", curr_soln_handle);
 		dbgprt("--- That's it, now push and do the next one.\n\n");
-		
+
 		root_handle_stack.push(curr_root);
 		pred_handle_stack.push(curr_pred_handle);
 		soln_handle_stack.push(curr_soln_handle);
@@ -298,17 +316,17 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 			found = soln_up(curr_soln_handle);
 
 			// If we are here, and found is false, then we've exhausted all
-			// of the search possibilities for the current clause. If this 
+			// of the search possibilities for the current clause. If this
 			// is an optional clause, and no solutions were reported for it,
 			// then report the failure of finding a solution now. If this was
-			// also the final optional clause, then in fact, we've got a 
+			// also the final optional clause, then in fact, we've got a
 			// grounding for the whole thing ... report that!
 			//
 			// Note that lack of a match halts recursion; thus, we can't
-			// depend on recursion to find additional unmatched optional 
+			// depend on recursion to find additional unmatched optional
 			// clauses; thus we have to explicitly loop over all optional
-			// clauses that don't have matches. 
-			while ((false == found) && 
+			// clauses that don't have matches.
+			while ((false == found) &&
 			       (false == clause_accepted) &&
 			       (optionals.count(curr_root)))
 			{
@@ -317,7 +335,7 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 				dbgprt ("Exhausted search for optional clause, cb=%d\n", no_match);
 				if (no_match) return false;
 
-				// XXX Maybe should push n pop here? No, maybe not ... 
+				// XXX Maybe should push n pop here? No, maybe not ...
 				clause_grounding[curr_root] = invalid_grounding;
 				get_next_untried_clause();
 				prtmsg("Next optional clause is", curr_root);
@@ -341,7 +359,7 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 			}
 		}
 
-		// If we failed to find anything at this level, we need to 
+		// If we failed to find anything at this level, we need to
 		// backtrack, i.e. pop the stack, and begin a search for
 		// other possible matches and groundings.
 		pmc->pop();
@@ -387,7 +405,7 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 bool PatternMatchEngine::pred_up(Handle h)
 {
 	// Is this link even a part of the predicate we are considering?
-	// If not, try the next atom. 
+	// If not, try the next atom.
 	bool valid = ot.is_node_in_tree(curr_root, h);
 	if (!valid) return false;
 
@@ -409,8 +427,8 @@ bool PatternMatchEngine::pred_up(Handle h)
  * The "issued" set contains those clauses which are currently in play,
  * i.e. those for which a grounding is currently being explored. Both
  * grounded, and as-yet-ungrounded clauses may be in this set.  The
- * sole reason of this set is to avoid infinite resursion, i.e. of 
- * re-identifying the same clause over and over as unsolved. 
+ * sole reason of this set is to avoid infinite resursion, i.e. of
+ * re-identifying the same clause over and over as unsolved.
  */
 void PatternMatchEngine::get_next_untried_clause(void)
 {
@@ -456,8 +474,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	{
 		// Pursue is a pointer to a node that's shared between
 		// several clauses. One of the predicates has been
-		// solved, another has not.  We want to now traverse 
-		// upwards from this node, to find the top of the 
+		// solved, another has not.  We want to now traverse
+		// upwards from this node, to find the top of the
 		// unsolved clause.
 		curr_root = unsolved_clause;
 		curr_pred_handle = pursue;
@@ -504,8 +522,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	{
 		// Pursue is a pointer to a node that's shared between
 		// several clauses. One of the predicates has been
-		// solved, another has not.  We want to now traverse 
-		// upwards from this node, to find the top of the 
+		// solved, another has not.  We want to now traverse
+		// upwards from this node, to find the top of the
 		// unsolved clause.
 		curr_root = unsolved_clause;
 		curr_pred_handle = pursue;
@@ -582,13 +600,13 @@ bool PatternMatchEngine::note_root(Handle h)
  * in that the subgraph defined by the predicate might not actually
  * be found in the universe of all atoms in the atomspace.
  *
- * The list of "bound vars" are to be solved for ("grounded", or 
+ * The list of "bound vars" are to be solved for ("grounded", or
  * "evaluated") during pattern matching. That is, if the subgraph
- * defined by the clauses is located, then the vars are given the 
+ * defined by the clauses is located, then the vars are given the
  * corresponding values associated to that match.
  *
  * The negations are a set of clauses whose truth values are to be
- * inverted.  That is, while the clauses define a subgraph that 
+ * inverted.  That is, while the clauses define a subgraph that
  * *must* be found, the negations define a subgraph that probably
  * should not be found, or, if found, should have a truth value of
  * 'false'.  The precise handing of the negated clauses is determined
@@ -598,7 +616,7 @@ bool PatternMatchEngine::note_root(Handle h)
  * matched, if possible, but are not required to be matched. The idea
  * that these are actually "negated" is governed by the callback.
  *
- * The PatternMatchCallback is consulted to determine whether a 
+ * The PatternMatchCallback is consulted to determine whether a
  * veritable match has been found, or not. The callback is given
  * individual nodes and links to compare for a match.
  */
@@ -681,7 +699,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 #endif
 
 	// Perform the actual search!
-	cb->perform_search(this, vars, clauses,negations); 
+	cb->perform_search(this, vars, clauses,negations);
 
 	dbgprt ("==================== Done Matching ==================\n");
 #ifdef DEBUG
@@ -698,7 +716,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
  * The core idea is that pattern matching against a constant expression
  * "doesn't make sense" -- the constant expression will always match to
  * itself and is thus "trivial".  In principle, the programmer should
- * never include constants in the list of clauses ... but, due to 
+ * never include constants in the list of clauses ... but, due to
  * programmer error, this can happen, and will lead to failures during
  * pattern matching. Thus, the routine below can be used to validate
  * the input.
@@ -786,7 +804,7 @@ void PatternMatchEngine::print_solution(
 		Type ts = atom_space->getType(soln);
 		if (classserver().isNode(ts) && classserver().isNode(tv))
 		{
-			printf("\tNode %s maps to %s\n", 
+			printf("\tNode %s maps to %s\n",
 			       atom_space->getName(var).c_str(),
 			       atom_space->getName(soln).c_str());
 		}
@@ -796,7 +814,7 @@ void PatternMatchEngine::print_solution(
 	printf("\nGrounded clauses:\n");
 	std::map<Handle, Handle>::const_iterator m;
 	int i = 0;
-	for (m = clauses.begin(); m != clauses.end(); m++, i++) 
+	for (m = clauses.begin(); m != clauses.end(); m++, i++)
 	{
 		if (m->second == Handle::UNDEFINED)
 		{
