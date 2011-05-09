@@ -58,12 +58,9 @@ EVALUATION_LINK <- ORDERED_LINK
 // Generic association
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
-// Inheritance and association links
+// Inheritence and association links
 INHERITANCE_LINK <- ORDERED_LINK
-
-// SIMILARITY_LINK should be inherited from UNORDERED_LINK, 
-// once the pattern matcher can really handle UNORDERED_LINK correctly
-SIMILARITY_LINK <- ORDERED_LINK //UNORDERED_LINK
+SIMILARITY_LINK <- UNORDERED_LINK
 
 
 // that one is redundant with SUBSET_LINK and officially disabled

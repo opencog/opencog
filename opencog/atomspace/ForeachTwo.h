@@ -24,7 +24,7 @@ inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
                                        bool (T::*cb)(Handle, Handle), T *data)
 {
     const AtomSpace *as = data->get_atomspace();
-    if (!as->isLink(ha) || !as->isLink(hb)) return true;
+    if (!as->isLink(ha) || !as->isLink(hb)) return false;
     const std::vector<Handle> &va = as->getOutgoing(ha);
     const std::vector<Handle> &vb = as->getOutgoing(hb);
 
@@ -63,23 +63,23 @@ inline bool foreach_outgoing_atom_combination(Handle ha, Handle hb,
                                               T *data)
 {
     const AtomSpace *as = data->get_atomspace();
-    if (!as->isLink(ha) || !as->isLink(hb)) return true;
+    if (!as->isLink(ha) || !as->isLink(hb)) return false;
 
     // If ha is of ordered link, degrade to foreach_outgoing_atom_pair 
     Type ta = as->getType(ha);
-    if ( classserver().isA(ta, ORDERED_LINK) )
+    if (classserver().isA(ta, ORDERED_LINK) )
         return foreach_outgoing_atom_pair(ha, hb, cb, data);
 
-    // If hb is of unordered link, enumerate all the permutations of 
-    // the outgoing of hb
-    const std::vector<Handle> &va = as->getOutgoing(ha);
-    std::vector<Handle> vb = as->getOutgoing(hb);
+    // If ha is of unordered link, enumerate all the permutations of 
+    // the outgoing of ha
+    std::vector<Handle> va = as->getOutgoing(ha);
+    const std::vector<Handle> &vb = as->getOutgoing(hb);
 
     size_t vasz = va.size();
     size_t vbsz = vb.size();
     size_t minsz = std::min(vasz, vbsz);
 
-    sort(vb.begin(), vb.end()); 
+    sort(va.begin(), va.end()); 
 
     do {
         for (size_t i = 0; i < minsz; i++) {
@@ -101,9 +101,10 @@ inline bool foreach_outgoing_atom_combination(Handle ha, Handle hb,
             if (rc) continue; 
         }
 
-    } while ( next_permutation(vb.begin(), vb.end()) ); 
 
-    return false;
+    } while ( next_permutation(va.begin(), va.end()) ); 
+
+    return false; 
 }
 
 } // namespace opencog
