@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2009, 2011 Linas Vepstas
  * Copyright (C) 2010 OpenCog Foundation
  * All Rights Reserved
  *
@@ -30,6 +31,7 @@
 #include "Config.h"
 
 #ifndef WIN32
+#include <cxxabi.h>
 #include <execinfo.h>
 #endif
 
@@ -167,7 +169,31 @@ static void prt_backtrace(FILE *fh)
 	fprintf(fh, "\tStack Trace:\n");
 	for (int i=2; i< stack_depth; i++)
 	{
-		fprintf(fh, "\t%d: %s\n", i, syms[i]);
+		// Most things we'll print are mangled C++ names,
+		// So demangle them, get them to pretty-print.
+		char * begin = strchr(syms[i], '(');
+		char * end = strchr(syms[i], '+');
+		if (!(begin && end) || end <= begin)
+		{
+			// Failed to pull apart the symbol names
+			fprintf(fh, "\t%d: %s\n", i, syms[i]);
+		}
+		else
+		{
+			*begin = 0x0;
+			fprintf(fh, "\t%d: %s", i, syms[i]);
+			*begin = '(';
+			size_t sz = 250;
+			int status;
+			char *fname = (char *) malloc(sz);
+			*end = 0x0;
+			char *rv = abi::__cxa_demangle(begin+1, fname, &sz, &status);
+			*end = '+';
+			if (rv) fname = rv; // might have re-alloced
+			fprintf(fh, "%s", fname);
+			free(fname);
+			fprintf(fh, "%s\n", end);
+		}
 	}
 	fprintf(fh, "\n");
 	free(syms);
