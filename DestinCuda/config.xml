@@ -69,10 +69,10 @@
     </seq>
     <layers value="4">
     <!--Distance can be: COSINE=1, EUCLIDEAN=2, GAUSSIANPDF=3, EXPONENTIALCOSINELAZY=4, GAUSSIANCOSINELAZY=5, RAYLEIGHCOSINELAZY=6-->
-        <layer name="0" mu="0.9" sigma="0.9" rho="0.95" states="25" distance="1"/>
-        <layer name="1" mu="0.9" sigma="0.9" rho="0.95" states="16" distance="1"/>
-        <layer name="2" mu="0.9" sigma="0.9" rho="0.95" states="12" distance="1"/>
-        <layer name="3" mu="0.9" sigma="0.9" rho="0.95" states="10" distance="1"/>
+        <layer name="0" mu="0.9" sigma="0.9" rho="0.95" states="25" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="8"/>
+        <layer name="1" mu="0.9" sigma="0.9" rho="0.95" states="16" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="4"/>
+        <layer name="2" mu="0.9" sigma="0.9" rho="0.95" states="12" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="2"/>
+        <layer name="3" mu="0.9" sigma="0.9" rho="0.95" states="10" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="1"/>
     </layers>
     <settings>
         <averaging value="false"/>

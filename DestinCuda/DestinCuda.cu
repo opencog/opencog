@@ -269,38 +269,55 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     // These are changed inside the XML file
     if ( bFFT )
     {
-        InputDimensionality[0] = 10;  // 4x4 FFT has 10 unique magnitude values...
+        InputDimensionality[0] = 10;  //4x4 FFT has 10 unique magnitude values...
     }
     else
     {
-        InputDimensionality[0] = 16;  // 4x4 has 16 inputs
+        InputDimensionality[0] = 16;  //4x4 has 16 inputs
     }
-    OffsetSelf[0] = InputDimensionality[0]; // the basic value.
 
-    // When using initial layer transform only, the first layer should is different
+    // TODO: Should this been fixed inside the code? (I mean static rows for the first layer does not really looks flexible)
+    RowsPerLayer[0] = 8;
     if ( bInitialLayerIsTransformOnly )
     {
-        InputDimensionality[1] = NumberOfCentroids[0]; //is not having the 4x on the first layer
+        InputDimensionality[1] = NumberOfCentroids[0];
         NumberOfParentStates[0] = NumberOfCentroids[1];
-        OffsetSelf[1] = InputDimensionality[1]; // the basic value.
-
+        RowsPerLayer[1] = 8;
         for( int Layer=2; Layer<NumberOfLayers; Layer++ )
         {
             InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
             NumberOfParentStates[Layer-1] = NumberOfCentroids[Layer];
-            OffsetSelf[Layer] = InputDimensionality[Layer]; // the basic value.
+            RowsPerLayer[Layer] = RowsPerLayer[Layer-1]/2;
         }
     }
     else
     {
-        for( int Layer=1; Layer<NumberOfLayers; Layer++ )
+        for(int Layer=1; Layer<NumberOfLayers; Layer++ )
         {
             InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
             NumberOfParentStates[Layer-1] = NumberOfCentroids[Layer];
-            OffsetSelf[Layer] = InputDimensionality[Layer]; // the basic value.
+            RowsPerLayer[Layer] = RowsPerLayer[Layer-1]/2;
         }
     }
     NumberOfParentStates[NumberOfLayers-1]=1;
+
+    // change false line below to true for feedback (currently not implemented)
+    for( int Layer=0; Layer<NumberOfLayers; Layer++ )
+    {
+        OffsetSelf[Layer] = InputDimensionality[Layer]; // the basic value.
+        ColsPerLayer[Layer] = RowsPerLayer[Layer];
+        bSelfAndUpperFeedback[Layer] = false;  // feedback
+        // increase the input dimensionality if you are using the self-upper feedback
+        if ( bSelfAndUpperFeedback[Layer] )
+        {
+            InputDimensionality[Layer] = InputDimensionality[Layer]+NumberOfCentroids[Layer];  // all layers get self-feedback
+            OffsetSelfFeedback[Layer] = InputDimensionality[Layer];
+            if ( Layer<NumberOfLayers-1 )
+            {
+                InputDimensionality[Layer] = InputDimensionality[Layer]+NumberOfCentroids[Layer+1];  // all layers but the top get feedback from above
+            }
+        }
+    }
 
     return 0;
 }
