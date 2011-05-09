@@ -106,14 +106,18 @@ void UnorderedUTest::setUp(void)
 }
 
 /*
- * Basic implication link test.
+ * Test of pattern matching on unordered links. This turns out to be
+ * rather stressful on the pattern matcher, as it requires a bit of a
+ * combinatoric explosion of the search space, under certain circumstances.
+ * The trick is, of course, not to search too much, and not to search too
+ * little.
  */
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define getarity(hand) as->getArity(hand)
 
 void UnorderedUTest::test_exec(void)
 {
-	// AtomSpace* as = cogserver().getAtomSpace();
+	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
@@ -121,8 +125,9 @@ void UnorderedUTest::test_exec(void)
 
 	// Result should be a ListLink w/ one solution
 	Handle result = pm.varscope(disordered);
+
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
-	// TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
