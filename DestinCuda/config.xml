@@ -84,5 +84,7 @@
         <processingBlockSize value="1"/>
         <basicOnlineClustering value="true"/>
         <clanDestin value="false"/>
+        <initialLayerIsTransformOnly value="false"/>
+        <useGoodPOSMethod value="false"/>
     </settings>
 </destin>

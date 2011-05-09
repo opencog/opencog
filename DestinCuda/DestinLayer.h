@@ -2,8 +2,8 @@
 #define DESTIN_LAYER_H
 //#include "DestinNode.h"
 #include <boost/tr1/memory.hpp>
-using namespace std;
 
+using namespace std;
 using std::tr1::shared_ptr;
 
 class DestinLayerLatch
@@ -39,13 +39,13 @@ public:
 
 	bool GetReset(){ return mbReset; };
 
-	void DisplayDiagnosticInformation(ostream& stm)
-	{
-		stm << "GTLabel," << mGTLabel << endl;
-		stm << "SignalIndex," << mSignalIndex << endl;
-		stm << "MovementNumber," << mMovementNumber << endl;
-		stm << "ObservationNumber," << mObservationNumber << endl;
-	};
+//	void DisplayDiagnosticInformation(ostream& stm)
+//	{
+//		stm << "GTLabel," << mGTLabel << endl;
+//		stm << "SignalIndex," << mSignalIndex << endl;
+//		stm << "MovementNumber," << mMovementNumber << endl;
+//		stm << "ObservationNumber," << mObservationNumber << endl;
+//	};
 };
 
 class DestinLayer

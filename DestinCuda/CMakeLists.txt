@@ -11,7 +11,7 @@ add_subdirectory( pugixml )
 FIND_PACKAGE(CUDA)
 
 #Make solution
-CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu DestinData.cu AdviceData.cu)
+CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu DestinData.cu AdviceData.cu DestinLayer.cu)
 
 TARGET_LINK_LIBRARIES( destinCuda
     pugixml

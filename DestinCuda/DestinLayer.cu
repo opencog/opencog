@@ -1,12 +1,13 @@
 #include "DestinLayer.h"
 
+#include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <math.h>
 #include <vector>
 #include <stdexcept>
 
 using namespace std;
-
 using std::tr1::shared_ptr;
 
 DestinLayer::DestinLayer(void)
@@ -27,12 +28,11 @@ DestinLayer::~DestinLayer(void)
 
 void DestinLayer::ClearAndDestroy(void)
 {
-	int r;
-	for(r=0;r<(int)(mDestinNodeUnits.size());r++)
-	{
-		delete mDestinNodeUnits[r];
-	}
-	mDestinNodeUnits.clear();
+//	for(int r=0;r<(int)(mDestinNodeUnits.size());r++)
+//	{
+//		delete mDestinNodeUnits[r];
+//	}
+//	mDestinNodeUnits.clear();
 }
 
 //This assumes that the csv files are in this directory and have a convention:
@@ -50,8 +50,8 @@ void DestinLayer::OverrideCentroidsAndSMaxWithCSVFiles(int Layer, char* sDirecto
 		{
 			sprintf(cCentroidFileName,"%s/Layer%.2d_Row_%.2d_Col_%.2d_CENTROIDS.csv",sDirectory,Layer,r,c);			
 			sprintf(cSMAXFileName,"%s/Layer%.2d_Row_%.2d_Col_%.2d_SMAX.csv",sDirectory,Layer,r,c);	
-			mDestinNodeUnits[c+r*mCols]->OverrideCentroidsWithCSV(cCentroidFileName);
-			mDestinNodeUnits[c+r*mCols]->OverrideSMaxWithCSV(cSMAXFileName);
+//			mDestinNodeUnits[c+r*mCols]->OverrideCentroidsWithCSV(cCentroidFileName);
+//			mDestinNodeUnits[c+r*mCols]->OverrideSMaxWithCSV(cSMAXFileName);
 		}
 	}
 }
@@ -67,16 +67,16 @@ bool DestinLayer::WriteToStream(std::ofstream& stmOutput)
 	stmOutput.write( (char*)&mMovementNumber, sizeof(mMovementNumber) );
 	stmOutput.write( (char*)&mObservationNumber, sizeof(mObservationNumber) );
 
-	DestinNode* MyNode;
-	int r,c;
-	for(r=0;r<mRows;r++)
-	{
-		for(c=0;c<mCols;c++)
-		{
-			MyNode = this->GetPointerToNode(r,c);
-			MyNode->WriteToStream(stmOutput);
-		}
-	}
+//	DestinNode* MyNode;
+//	int r,c;
+//	for(r=0;r<mRows;r++)
+//	{
+//		for(c=0;c<mCols;c++)
+//		{
+//			MyNode = this->GetPointerToNode(r,c);
+//			MyNode->WriteToStream(stmOutput);
+//		}
+//	}
 
 	return true;
 }
@@ -92,22 +92,22 @@ bool DestinLayer::ReadFromStream(std::ifstream& stmInput)
 	stmInput.read( (char*)&mMovementNumber, sizeof(mMovementNumber) );
 	stmInput.read( (char*)&mObservationNumber, sizeof(mObservationNumber) );
 
-	DestinNode* MyNode;
-	int r,c;
-	for (r=0;r<mDestinNodeUnits.size();r++)
-	{
-		delete mDestinNodeUnits[r];
-	}
-	mDestinNodeUnits.clear();
-	for(r=0;r<mRows;r++)
-	{
-		for(c=0;c<mCols;c++)
-		{
-			MyNode = new DestinNode();
-			MyNode->ReadFromStream(stmInput);
-			mDestinNodeUnits.push_back(MyNode);
-		}
-	}
+//	DestinNode* MyNode;
+//	int r,c;
+//	for (r=0;r<mDestinNodeUnits.size();r++)
+//	{
+//		delete mDestinNodeUnits[r];
+//	}
+//	mDestinNodeUnits.clear();
+//	for(r=0;r<mRows;r++)
+//	{
+//		for(c=0;c<mCols;c++)
+//		{
+//			MyNode = new DestinNode();
+//			MyNode->ReadFromStream(stmInput);
+//			mDestinNodeUnits.push_back(MyNode);
+//		}
+//	}
 
 	return true;
 }
@@ -123,26 +123,26 @@ bool DestinLayer::operator == (DestinLayer& o)
 	if ( mMovementNumber != o.mMovementNumber ) bReturn = false;
 	if ( mObservationNumber != o.mObservationNumber ) bReturn = false;
 
-	DestinNode* MyNode;
-	DestinNode* ItsNode;
-
-	if ( bReturn )
-	{
-		int r,c;
-		for(r=0;r<mRows;r++)
-		{
-			for(c=0;c<mCols;c++)
-			{
-				MyNode = this->GetPointerToNode(r,c);
-				ItsNode = o.GetPointerToNode(r,c);
-				if ( !(*MyNode==*ItsNode) )
-				{
-					bool bTest = (*MyNode==*ItsNode);
-					bReturn = false;
-				}
-			}
-		}
-	}
+//	DestinNode* MyNode;
+//	DestinNode* ItsNode;
+//
+//	if ( bReturn )
+//	{
+//		int r,c;
+//		for(r=0;r<mRows;r++)
+//		{
+//			for(c=0;c<mCols;c++)
+//			{
+//				MyNode = this->GetPointerToNode(r,c);
+//				ItsNode = o.GetPointerToNode(r,c);
+//				if ( !(*MyNode==*ItsNode) )
+//				{
+//					bool bTest = (*MyNode==*ItsNode);
+//					bReturn = false;
+//				}
+//			}
+//		}
+//	}
 
 
 	return bReturn;
@@ -172,43 +172,42 @@ void DestinLayer::Create(int Rows, int Cols,
     DestinLayer();
 	mRows=Rows;
 	mCols=Cols;
-	mDestinNodeUnits.clear();
-	DestinNode* p;
-	int r,c;
-	int iNodeID;
-
-	for(r=0;r<mRows;r++)
-	{
-		for(c=0;c<mCols;c++)
-		{
-			if(inputDimensionalities!=NULL){
-				InputDimensionality = inputDimensionalities[r*mCols + c];
-			}
-			iNodeID = c+1000*r+LayerNumber*10000;
-			p=new DestinNode();
-			p->Create(States,ParentStates,InputDimensionality,
-				DType,
-				bBinaryPOS,
-				bAveraging,
-				bUseStarvationCoefficient,
-				bIgnoreAdvice,
-				dcMu, dcSigma, dcRho,
-				bUseDecayingLearningRate, 
-				iDecayKickInPoint,
-				fRhoThresholdPoint, 
-				bUseRhoDerivative,
-				bConstrainInitialCentroids,
-				iBlocksToProcess,
-				iNodeID,
-				iMovementsForCluster,
-				BasicOnlineClustering,
-				FixedRate,r,c,LayerNumber, bDoGoodPOS, SequenceLength,bTopNode);
-
-			p->SetPSSAUpdateDelay(PSSAUpdateDelay);
-			mDestinNodeUnits.push_back(p);
-
-		}
-	}
+//	mDestinNodeUnits.clear();
+//	DestinNode* p;
+//
+//	int iNodeID;
+//	for(int r=0;r<mRows;r++)
+//	{
+//		for(int c=0;c<mCols;c++)
+//		{
+//			if(inputDimensionalities!=NULL){
+//				InputDimensionality = inputDimensionalities[r*mCols + c];
+//			}
+//			iNodeID = c+1000*r+LayerNumber*10000;
+//			p=new DestinNode();
+//			p->Create(States,ParentStates,InputDimensionality,
+//				DType,
+//				bBinaryPOS,
+//				bAveraging,
+//				bUseStarvationCoefficient,
+//				bIgnoreAdvice,
+//				dcMu, dcSigma, dcRho,
+//				bUseDecayingLearningRate,
+//				iDecayKickInPoint,
+//				fRhoThresholdPoint,
+//				bUseRhoDerivative,
+//				bConstrainInitialCentroids,
+//				iBlocksToProcess,
+//				iNodeID,
+//				iMovementsForCluster,
+//				BasicOnlineClustering,
+//				FixedRate,r,c,LayerNumber, bDoGoodPOS, SequenceLength,bTopNode);
+//
+//			p->SetPSSAUpdateDelay(PSSAUpdateDelay);
+//			mDestinNodeUnits.push_back(p);
+//
+//		}
+//	}
 }
 void DestinLayerLatch::SetDiagnosticData(int GTLabel, int SignalIndex, int MovementNumber, int ObservationNumber)
 {
@@ -229,63 +228,58 @@ void DestinLayer::SetDiagnosticData(int GTLabel, int SignalIndex, int MovementNu
 
 void DestinLayer::ClearValidOutputFlag()
 {
-	int r,c;
-	for(r=0;r<mRows;r++)
-	{
-		for(c=0;c<mCols;c++)
-		{
-			mDestinNodeUnits[c+r*mCols]->ClearValidOutputFlag(); // put relevant data in latch...
-		}
-	}
+//	for(int r=0;r<mRows;r++)
+//	{
+//		for(int c=0;c<mCols;c++)
+//		{
+//			mDestinNodeUnits[c+r*mCols]->ClearValidOutputFlag(); // put relevant data in latch...
+//		}
+//	}
 }
 
 void DestinLayer::SetNextUpdateCountAndSequenceLength(int UC, int SL)
 {
-	int r,c;
-	for(r=0;r<mRows;r++)
-	{
-		for(c=0;c<mCols;c++)
-		{
-			mDestinNodeUnits[c+r*mCols]->SetNextUpdateCountAndSequenceLength(UC,SL);
-		}
-	}
+//	for(int r=0;r<mRows;r++)
+//	{
+//		for(int c=0;c<mCols;c++)
+//		{
+//			mDestinNodeUnits[c+r*mCols]->SetNextUpdateCountAndSequenceLength(UC,SL);
+//		}
+//	}
 }
 
 void DestinLayer::SetCompileCentroidShiftMetrics(bool b)
 {
-	int r,c;
-	for(r=0;r<mRows;r++)
-	{
-		for(c=0;c<mCols;c++)
-		{
-			mDestinNodeUnits[c+r*mCols]->SetCompileCentroidShiftMetrics(b); 
-		}
-	}
+//	for(int r=0;r<mRows;r++)
+//	{
+//		for(int c=0;c<mCols;c++)
+//		{
+//			mDestinNodeUnits[c+r*mCols]->SetCompileCentroidShiftMetrics(b);
+//		}
+//	}
 }
 
 void DestinLayer::LatchData(DestinLayerLatch& oLatch)
 {
-	int r,c;
-	DestinNodeLatchData* LatchData;
-	for(r=0;r<mRows;r++)
-	{
-		for(c=0;c<mCols;c++)
-		{
-			LatchData=oLatch.GetPointerToNode(r,c); //get pointer to nodes latch data...
-			mDestinNodeUnits[c+r*mCols]->GetDataForLatching(*LatchData); // put relevant data in latch...
-			// For feedback, you can use LatchData
-		}
-	}
-	//set the diagnostic data too...
-	oLatch.SetDiagnosticData(mGTLabel,mSignalIndex,mMovementNumber,mObservationNumber);
-
+//	DestinNodeLatchData* LatchData;
+//	for(int r=0;r<mRows;r++)
+//	{
+//		for(int c=0;c<mCols;c++)
+//		{
+//			LatchData=oLatch.GetPointerToNode(r,c); //get pointer to nodes latch data...
+//			mDestinNodeUnits[c+r*mCols]->GetDataForLatching(*LatchData); // put relevant data in latch...
+//			// For feedback, you can use LatchData
+//		}
+//	}
+//	//set the diagnostic data too...
+//	oLatch.SetDiagnosticData(mGTLabel,mSignalIndex,mMovementNumber,mObservationNumber);
 }
 
 
-DestinNode* DestinLayer::GetPointerToNode(int r, int c)
-{
-	return mDestinNodeUnits[c+r*mCols];
-}
+//DestinNode* DestinLayer::GetPointerToNode(int r, int c)
+//{
+//	return mDestinNodeUnits[c+r*mCols];
+//}
 
 DestinLayerLatch::DestinLayerLatch(void)
 {
@@ -299,38 +293,36 @@ DestinLayerLatch::DestinLayerLatch(void)
 
 DestinLayerLatch::~DestinLayerLatch(void)
 {
-	int r;
-	for(r=0;r<(int)(mDestinNodeLatchUnits.size());r++)
-	{
-		delete mDestinNodeLatchUnits[r];
-	}
+//	for(int r=0;r<(int)(mDestinNodeLatchUnits.size());r++)
+//	{
+//		delete mDestinNodeLatchUnits[r];
+//	}
 }
-DestinNodeLatchData* DestinLayerLatch::GetPointerToNode(int r, int c)
-{
-	return mDestinNodeLatchUnits[c+r*mCols];
-}
+//DestinNodeLatchData* DestinLayerLatch::GetPointerToNode(int r, int c)
+//{
+//	return mDestinNodeLatchUnits[c+r*mCols];
+//}
 
 void DestinLayerLatch::Create(int Rows, int Cols, int States )
 {
 	mRows=Rows;
 	mCols=Cols;
-	mDestinNodeLatchUnits.clear();
+	//mDestinNodeLatchUnits.clear();
 	mGTLabel=-1;
 	mSignalIndex=-1;
 	mMovementNumber=-1;
 	mObservationNumber=-1;
 
-	DestinNodeLatchData* p;// = mDestinNodeLatchUnits;
-	int r,c;
-	for(r=0;r<mRows;r++)
-	{
-		for(c=0;c<mCols;c++)
-		{
-			p=new DestinNodeLatchData();
-			p->Create(States);
-			mDestinNodeLatchUnits.push_back(p);
-		}
-	}
+//	DestinNodeLatchData* p;// = mDestinNodeLatchUnits;
+//	for(int r=0;r<mRows;r++)
+//	{
+//		for(int c=0;c<mCols;c++)
+//		{
+//			p=new DestinNodeLatchData();
+//			p->Create(States);
+//			mDestinNodeLatchUnits.push_back(p);
+//		}
+//	}
 }
 
 DestinLayer::FamilySizes DestinLayer::calcFamilySizes(int parentLayerNodeCount, int childNodeCount) {
@@ -362,7 +354,8 @@ DestinLayer::FamilySizes DestinLayer::calcFamilySizes(int parentLayerNodeCount, 
 void DestinLayer::AssignChildrenAndParents(int childLayerRows, int childLayerCols, int parentLayerRows, int parentLayerCols){
     const int nParentNodes = parentLayerRows * parentLayerCols;
     const int nChildNodes = childLayerCols * childLayerRows;
-    const int nn=mDestinNodeUnits.size();//number of nodes
+    //const int nn=mDestinNodeUnits.size();//number of nodes
+    const int nn=0;//number of nodes
 
     if(nn<1){
         throw logic_error("Can't assign children and parents for a layer with no nodes.");
@@ -385,7 +378,7 @@ void DestinLayer::AssignChildrenAndParents(int childLayerRows, int childLayerCol
         for(int cn = 0 ; cn  < fs.largeFamilySize ; cn ++){
             r = pn / parentLayerCols;
             c = pn % parentLayerCols;
-            mDestinNodeUnits.at(pn * fs.largeFamilySize + cn)->AddParentNode(r,c);
+            //mDestinNodeUnits.at(pn * fs.largeFamilySize + cn)->AddParentNode(r,c);
         }
     }
     int offset  = fs.nLargeFamilies * fs.largeFamilySize;
@@ -393,7 +386,7 @@ void DestinLayer::AssignChildrenAndParents(int childLayerRows, int childLayerCol
         for(int cn = 0 ; cn < fs.smallFamilySize ; cn++){
             r = (pn + fs.nLargeFamilies) / parentLayerCols;
             c = (pn + fs.nLargeFamilies) % parentLayerCols;
-            mDestinNodeUnits.at(pn * fs.smallFamilySize + cn + offset)->AddParentNode(r,c);
+            //mDestinNodeUnits.at(pn * fs.smallFamilySize + cn + offset)->AddParentNode(r,c);
         }
     }
 
@@ -405,7 +398,7 @@ void DestinLayer::AssignChildrenAndParents(int childLayerRows, int childLayerCol
         for(int cn = 0 ; cn < fs.largeFamilySize ; cn++){
             r = (pn * fs.largeFamilySize + cn) / childLayerCols;
             c = (pn * fs.largeFamilySize + cn) % childLayerCols;
-            mDestinNodeUnits.at(pn )->AddChildNode(r,c);
+            //mDestinNodeUnits.at(pn )->AddChildNode(r,c);
         }
     }
     offset  = fs.nLargeFamilies * fs.largeFamilySize;
@@ -415,7 +408,7 @@ void DestinLayer::AssignChildrenAndParents(int childLayerRows, int childLayerCol
             int index = pn * fs.smallFamilySize + cn + offset;
             r = index / childLayerCols;
             c = index % childLayerCols;
-            mDestinNodeUnits.at(pn + fs.nLargeFamilies)->AddChildNode(r,c);
+            //mDestinNodeUnits.at(pn + fs.nLargeFamilies)->AddChildNode(r,c);
         }
     }
     mMaxChildrenPerNode = fs.largeFamilySize;
@@ -427,8 +420,6 @@ void DestinLayer::AssignChildrenAndParents(int childLayerRows, int childLayerCol
 //uses the 'default' 4:1 method UNLESS bUsesTransformationalLayer is true in which cases layers 1-up are 4:1 but 0-1 are 1:1
 void DestinLayer::AssignChildrenAndParents(int Layer, int NumberOfLayers, bool bUsesTransformationalLayer) 
 {
-	int ChildRow,ChildCol;
-	int r,c;
 	int parentR;
 	int parentC;
 
@@ -438,27 +429,27 @@ void DestinLayer::AssignChildrenAndParents(int Layer, int NumberOfLayers, bool b
 		// except the first two layers which are 1:1
 		if ( Layer==1 )
 		{
-			for (r=0;r<mRows;r++)
+			for (int r=0;r<mRows;r++)
 			{
-				for(c=0;c<mCols;c++)
+				for(int c=0;c<mCols;c++)
 				{
-					mDestinNodeUnits[c+r*mCols]->AddChildNode(r,c);
+					//mDestinNodeUnits[c+r*mCols]->AddChildNode(r,c);
 				}	//c
 			}	//r
 		}
 		else if ( Layer >=2 )
 		{
-			for (r=0;r<mRows;r++)
+			for (int r=0;r<mRows;r++)
 			{
-				for(c=0;c<mCols;c++)
+				for(int c=0;c<mCols;c++)
 				{
 					// to match MATLAB, add the child nodes by row first...
-					for (ChildCol=2*c;ChildCol<=2*c+1;ChildCol++)
+					for (int ChildCol=2*c;ChildCol<=2*c+1;ChildCol++)
 					{
-						for (ChildRow=2*r;ChildRow<=2*r+1;ChildRow++)
+						for (int ChildRow=2*r;ChildRow<=2*r+1;ChildRow++)
 						{
 							//The children here are ChildRow,ChildCol...
-							mDestinNodeUnits[c+r*mCols]->AddChildNode(ChildRow,ChildCol);
+							//mDestinNodeUnits[c+r*mCols]->AddChildNode(ChildRow,ChildCol);
 						}	//ChildCol
 					}	//ChildRow
 				}	//c
@@ -471,25 +462,25 @@ void DestinLayer::AssignChildrenAndParents(int Layer, int NumberOfLayers, bool b
 		{
 			if ( Layer==0 )
 			{
-				for (r=0;r<mRows;r++)
+				for (int r=0;r<mRows;r++)
 				{
-					for(c=0;c<mCols;c++)
+					for(int c=0;c<mCols;c++)
 					{
 						//The parents here are r c since this is 1:1
-						mDestinNodeUnits[c+r*mCols]->AddParentNode(r,c);
+						//mDestinNodeUnits[c+r*mCols]->AddParentNode(r,c);
 					}	//c
 				}	//r	
 			}
 			else
 			{
-				for (r=0;r<mRows;r++)
+				for (int r=0;r<mRows;r++)
 				{
-					for(c=0;c<mCols;c++)
+					for(int c=0;c<mCols;c++)
 					{
 						//The parents here are floor(mRows/2),floor(mCols/2)
 						parentR=(int)floor((float)r/(float)2.0);
 						parentC=(int)floor((float)c/(float)2.0);
-						mDestinNodeUnits[c+r*mCols]->AddParentNode(parentR,parentC);
+						//mDestinNodeUnits[c+r*mCols]->AddParentNode(parentR,parentC);
 					}	//c
 				}	//r		
 			}
@@ -500,17 +491,17 @@ void DestinLayer::AssignChildrenAndParents(int Layer, int NumberOfLayers, bool b
 		//Assign the children of each node here assuming a 4x1 relationship, i.e., I have 4 children laid out in 2-d space...
 		if ( Layer != 0 )
 		{
-			for (r=0;r<mRows;r++)
+			for (int r=0;r<mRows;r++)
 			{
-				for(c=0;c<mCols;c++)
+				for(int c=0;c<mCols;c++)
 				{
 					// to match MATLAB, add the child nodes by row first...
-					for (ChildCol=2*c;ChildCol<=2*c+1;ChildCol++)
+					for (int ChildCol=2*c;ChildCol<=2*c+1;ChildCol++)
 					{
-						for (ChildRow=2*r;ChildRow<=2*r+1;ChildRow++)
+						for (int ChildRow=2*r;ChildRow<=2*r+1;ChildRow++)
 						{
 							//The children here are ChildRow,ChildCol...
-							mDestinNodeUnits[c+r*mCols]->AddChildNode(ChildRow,ChildCol);
+							//mDestinNodeUnits[c+r*mCols]->AddChildNode(ChildRow,ChildCol);
 						}	//ChildCol
 					}	//ChildRow
 
@@ -522,14 +513,14 @@ void DestinLayer::AssignChildrenAndParents(int Layer, int NumberOfLayers, bool b
 
 		if ( Layer != NumberOfLayers-1 )
 		{
-			for (r=0;r<mRows;r++)
+			for (int r=0;r<mRows;r++)
 			{
-				for(c=0;c<mCols;c++)
+				for(int c=0;c<mCols;c++)
 				{
 					//The parents here are floor(mRows/2),floor(mCols/2)
 					parentR=(int)floor((float)r/(float)2.0);
 					parentC=(int)floor((float)c/(float)2.0);
-					mDestinNodeUnits[c+r*mCols]->AddParentNode(parentR,parentC);
+					//mDestinNodeUnits[c+r*mCols]->AddParentNode(parentR,parentC);
 				}	//c
 			}	//r		
 		}

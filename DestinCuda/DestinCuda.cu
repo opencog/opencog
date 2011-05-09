@@ -197,6 +197,8 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
         iBlocksToProcess = settings.child("processingBlockSize").attribute("value").as_int();
         bBasicOnlineClustering = settings.child("basicOnlineClustering").attribute("value").as_bool();
         bClanDestin = settings.child("clanDestin").attribute("value").as_bool();
+        bInitialLayerIsTransformOnly = settings.child("initialLayerIsTransformOnly").attribute("value").as_bool();
+        bUseGoodPOSMethod = settings.child("useGoodPOSMethod").attribute("value").as_bool();
     }
     else
     {
@@ -235,7 +237,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     bool bBasicOnlineClustering;
     bool bClanDestin;
     bool bInitialLayerIsTransformOnly;
-    bool bDoGoodPOS = false;
+    bool bDoGoodPOS;
 
     GetParameters( ParametersFileName.c_str(), NumberOfLayers, dcMu, dcSigma, dcRho, NumberOfCentroids,
                    bAveraging, bFFT, bBinaryPOS, DistanceMeasureArray,
@@ -250,16 +252,55 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         vectorOfMovementsToSave.push_back(false);
     }
 
-    DestinLayerLatch* DLatch;
-    DestinLayer* DLayer;
-    float* FixedRate;
-    int* RowsPerLayer;
-    int* ColsPerLayer;
-    int* NumberOfParentStates=NULL;
-    int* InputDimensionality=NULL;
-    int* OffsetSelf=NULL;
-    int* OffsetSelfFeedback=NULL;
-    bool* bSelfAndUpperFeedback;
+    DestinLayerLatch* DLatch = new DestinLayerLatch[NumberOfLayers];
+    DestinLayer* DLayer = new DestinLayer[NumberOfLayers];
+    float* FixedRate = new float[NumberOfLayers];
+    int* RowsPerLayer = new int[NumberOfLayers];
+    int* ColsPerLayer = new int[NumberOfLayers];
+    int* NumberOfParentStates = new int[NumberOfLayers];
+    int* InputDimensionality = new int[NumberOfLayers];
+    int* OffsetSelf = new int[NumberOfLayers];
+    int* OffsetSelfFeedback = new int[NumberOfLayers];
+    bool* bSelfAndUpperFeedback = new bool[NumberOfLayers];
+
+    // TODO: Is this the right place?
+    srand( (unsigned int)iTestSequence );
+
+    // These are changed inside the XML file
+    if ( bFFT )
+    {
+        InputDimensionality[0] = 10;  // 4x4 FFT has 10 unique magnitude values...
+    }
+    else
+    {
+        InputDimensionality[0] = 16;  // 4x4 has 16 inputs
+    }
+    OffsetSelf[0] = InputDimensionality[0]; // the basic value.
+
+    // When using initial layer transform only, the first layer should is different
+    if ( bInitialLayerIsTransformOnly )
+    {
+        InputDimensionality[1] = NumberOfCentroids[0]; //is not having the 4x on the first layer
+        NumberOfParentStates[0] = NumberOfCentroids[1];
+        OffsetSelf[1] = InputDimensionality[1]; // the basic value.
+
+        for( int Layer=2; Layer<NumberOfLayers; Layer++ )
+        {
+            InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
+            NumberOfParentStates[Layer-1] = NumberOfCentroids[Layer];
+            OffsetSelf[Layer] = InputDimensionality[Layer]; // the basic value.
+        }
+    }
+    else
+    {
+        for( int Layer=1; Layer<NumberOfLayers; Layer++ )
+        {
+            InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
+            NumberOfParentStates[Layer-1] = NumberOfCentroids[Layer];
+            OffsetSelf[Layer] = InputDimensionality[Layer]; // the basic value.
+        }
+    }
+    NumberOfParentStates[NumberOfLayers-1]=1;
 
     return 0;
 }
