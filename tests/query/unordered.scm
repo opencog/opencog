@@ -1,7 +1,7 @@
 
 (define (stv mean conf) (cog-new-stv mean conf))
 
-(SimilarityLink (stv 1.0 1.0)
+(UnorderedLink (stv 1.0 1.0)
 ;; (ListLink (stv 1.0 1.0)
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
@@ -10,7 +10,7 @@
 	)
 )
 
-;; Note that the SimilarityLink is unordered ... 
+;; Note that the UnorderedLink is unordered ... 
 (define (blink)
 	(BindLink
 		;; variable decls
@@ -22,7 +22,7 @@
 		)
 		(ImplicationLink
 			;; body
-			(SimilarityLink
+			(UnorderedLink
 			;; (ListLink
 				(VariableNode "$var_number_node_type")
 				(ExecutionOutputLink
