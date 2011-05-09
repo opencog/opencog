@@ -152,14 +152,13 @@ public:
     }
     
     virtual void do_work() {
-        Handle r;
+        Handle r = Handle::UNDEFINED;
         try {
             r = atomspace->addLink(p1, p2, *p3);
-            set_result(r);
         } catch (InvalidParamException &e) {
             logger().error(e.what());
-            set_result(r);
         }
+        set_result(r);
     };
     
 };
