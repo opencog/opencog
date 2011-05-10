@@ -76,7 +76,9 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
 #endif
 }
 
-#define POPTOP(soln,stack) {         \
+/* Reset the current variable grounding to the last grounding pushed
+ * onto the stack. */
+#define POPGND(soln,stack) {         \
    stack.pop();                      \
    if (stack.empty()) soln.clear();  \
    else soln = stack.top();          \
@@ -109,7 +111,8 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (bound_vars.end() != bound_vars.find(hp)) {
+	if (bound_vars.end() != bound_vars.find(hp))
+	{
 		// But... if handle hg happens to also be a bound var,
 		// then its a mismatch.
 		if (bound_vars.end() != bound_vars.find(hg)) return true;
@@ -158,16 +161,11 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		prtmsg("> tree_compare", hp);
 		prtmsg(">           to", hg);
 
-		// The recursion step: traverse down the tree.
-		// Only links can have non-empty outgoing sets.
-		depth ++;
-		var_solutn_stack.push(var_grounding);
-
 		// If the two links are both ordered, its enough to compare
-		// them "side-by-side"; the foreach_outgoing_atom_pair
-		// iterator does this. If they are un-ordered, then we
-		// have to compare (at most) every possible permutation.
-		// The foreach_outgoing_atom_combination iterator does this.
+		// them "side-by-side"; the foreach_atom_pair iterator does
+		// this. If they are un-ordered, then we have to compare (at
+		// most) every possible permutation. 
+		//
 		// In many (most?) cases, exploring every permutation is
 		// overkill, but its difficult to write an efficient algorithm
 		// that can do better -- in particular, the callbacks do an
@@ -178,25 +176,62 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		Type tp = as->getType(hp);
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
-			mismatch = foreach_outgoing_atom_pair(hp, hg,
+			const std::vector<Handle> &osp = atom_space->getOutgoing(hp);
+			const std::vector<Handle> &osg = atom_space->getOutgoing(hg);
+
+			// The recursion step: traverse down the tree.
+			// Only links can have non-empty outgoing sets.
+			var_solutn_stack.push(var_grounding);
+			depth ++;
+
+			mismatch = foreach_atom_pair(osp, osg,
 			                   &PatternMatchEngine::tree_compare, this);
+			depth --;
+			dbgprt("tree_comp down link mismatch=%d\n", mismatch);
+
+			if (false == mismatch)
+			{
+				var_grounding[hp] = hg;
+				// Pop entry created, but keep grounding.
+				var_solutn_stack.pop();
+			}
+			else
+				POPGND(var_grounding, var_solutn_stack);
+			return mismatch;
 		}
 		else
 		{
-			mismatch = foreach_outgoing_atom_combination(hp, hg,
-			                   &PatternMatchEngine::tree_compare, this);
+			// Enumerate all the permutations of the outgoing set of
+			// the predicate.
+			std::vector<Handle> osp = atom_space->getOutgoing(hp);
+			const std::vector<Handle> &osg = atom_space->getOutgoing(hg);
+			sort(osp.begin(), osp.end());
+
+			do {
+				// The recursion step: traverse down the tree.
+				// Only links can have non-empty outgoing sets.
+				dbgprt("tree_comp being down unordered link\n");
+				var_solutn_stack.push(var_grounding);
+				depth ++;
+
+				mismatch = foreach_atom_pair(osp, osg,
+				                   &PatternMatchEngine::tree_compare, this);
+				depth --;
+				dbgprt("tree_comp down unordered link mismatch=%d\n", mismatch);
+
+				if (false == mismatch)
+				{
+					var_grounding[hp] = hg;
+					// Pop entry created, but keep grounding.
+					var_solutn_stack.pop();
+				}
+				else
+					POPGND(var_grounding, var_solutn_stack);
+			} while (next_permutation(osp.begin(), osp.end()));
+
+			return mismatch;
 		}
 
-		depth --;
-		dbgprt("tree_comp down link mismatch=%d\n", mismatch);
-
-		if (false == mismatch)
-		{
-			var_grounding[hp] = hg;
-			var_solutn_stack.pop();  // pop entry created, but keep current.
-		}
-		else
-			POPTOP(var_grounding, var_solutn_stack);
 		return mismatch;
 	}
 
@@ -232,7 +267,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	}
 	else
 	{
-		POPTOP(var_grounding, var_solutn_stack);
+		POPGND(var_grounding, var_solutn_stack);
 	}
 
 	return found;
@@ -373,8 +408,8 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 		soln_handle_stack.pop();
 
 		// The grounding stacks are handled differently.
-		POPTOP(clause_grounding, pred_solutn_stack);
-		POPTOP(var_grounding, var_solutn_stack);
+		POPGND(clause_grounding, pred_solutn_stack);
+		POPGND(var_grounding, var_solutn_stack);
 
 		issued = issued_stack.top();
 		issued_stack.pop();
