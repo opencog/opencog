@@ -125,7 +125,8 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
                     bool& bUseStarvationTrace,int& PSSAUpdateDelay,bool& bIgnoreAdvice,
                     int**& SEQ, int& SEQ_LENGTH, string& sFileContents, int& iBlocksToProcess,
                     bool& bBasicOnlineClustering,
-                    bool& bClanDestin, bool& bInitialLayerIsTransformOnly,bool& bUseGoodPOSMethod )
+                    bool& bClanDestin, bool& bInitialLayerIsTransformOnly,bool& bUseGoodPOSMethod,
+                    int*& RowsPerLayer, float*& FixedLearningRateLayer, bool*& bSelfAndUpperFeedback )
 {
     // ******************************************
     // Read the XML config file (parameters file)
@@ -183,6 +184,9 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
             dcRho[iLayer] = layer.attribute("rho").as_double();
             NumberOfStates[iLayer] = layer.attribute("states").as_int();
             DistanceMeasureArray[iLayer] = layer.attribute("distance").as_int();
+            RowsPerLayer[iLayer] = layer.attribute("rowsColmsPerLayer").as_int();
+            FixedLearningRateLayer[iLayer] = layer.attribute("fixedLearningRate").as_float();
+            bSelfAndUpperFeedback[iLayer] = layer.attribute("selfAndUpperFeedback").as_bool();
             layer = layer.next_sibling("layer");
         }
 
@@ -205,6 +209,7 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
         std::cout << "Error description: " << result.description() << "\n";
         std::cout << "Error offset: " << result.offset << " (error at [..." << (cFilename + result.offset) << "]\n\n";
     }
+    cout << "------------------" << endl;
 }
 
 bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& NumberOfLayers, DestinLayer*& DLayers,
@@ -238,12 +243,16 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     bool bClanDestin;
     bool bInitialLayerIsTransformOnly;
     bool bDoGoodPOS;
+    int* RowsPerLayer;
+    float* FixedLearningRateLayer;
+    bool* bSelfAndUpperFeedback;
 
     GetParameters( ParametersFileName.c_str(), NumberOfLayers, dcMu, dcSigma, dcRho, NumberOfCentroids,
                    bAveraging, bFFT, bBinaryPOS, DistanceMeasureArray,
                    bUseStarvationTrace, PSSAUpdateDelay, bIgnoreAdvice, SEQ, SEQ_LENGTH,
                    sParametersFileContents, iBlocksToProcess,
-                   bBasicOnlineClustering, bClanDestin, bInitialLayerIsTransformOnly, bDoGoodPOS );
+                   bBasicOnlineClustering, bClanDestin, bInitialLayerIsTransformOnly, bDoGoodPOS,
+                   RowsPerLayer, FixedLearningRateLayer, bSelfAndUpperFeedback );
 
     // The name and loop looks like it is giving to option to save steps of the movements.
     vector<bool> vectorOfMovementsToSave;
@@ -254,14 +263,17 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
 
     DestinLayerLatch* DLatch = new DestinLayerLatch[NumberOfLayers];
     DestinLayer* DLayer = new DestinLayer[NumberOfLayers];
-    float* FixedRate = new float[NumberOfLayers];
-    int* RowsPerLayer = new int[NumberOfLayers];
     int* ColsPerLayer = new int[NumberOfLayers];
     int* NumberOfParentStates = new int[NumberOfLayers];
     int* InputDimensionality = new int[NumberOfLayers];
     int* OffsetSelf = new int[NumberOfLayers];
     int* OffsetSelfFeedback = new int[NumberOfLayers];
-    bool* bSelfAndUpperFeedback = new bool[NumberOfLayers];
+
+    int MovementsForClusteringOption = 1;
+    if ( bClanDestin )
+    {
+        MovementsForClusteringOption=SEQ_LENGTH; // use this if you want one clustering engine per movement
+    }
 
     // TODO: Is this the right place?
     srand( (unsigned int)iTestSequence );
@@ -276,13 +288,11 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         InputDimensionality[0] = 16;  //4x4 has 16 inputs
     }
 
-    // TODO: Should this been fixed inside the code? (I mean static rows for the first layer does not really looks flexible)
-    RowsPerLayer[0] = 8;
     if ( bInitialLayerIsTransformOnly )
     {
         InputDimensionality[1] = NumberOfCentroids[0];
         NumberOfParentStates[0] = NumberOfCentroids[1];
-        RowsPerLayer[1] = 8;
+        RowsPerLayer[1] = RowsPerLayer[0];
         for( int Layer=2; Layer<NumberOfLayers; Layer++ )
         {
             InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
@@ -296,29 +306,56 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         {
             InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
             NumberOfParentStates[Layer-1] = NumberOfCentroids[Layer];
-            RowsPerLayer[Layer] = RowsPerLayer[Layer-1]/2;
         }
     }
     NumberOfParentStates[NumberOfLayers-1]=1;
 
-    // change false line below to true for feedback (currently not implemented)
+    //if you want to FORCE stability, an exponential / gaussian decay will start at iDecayPoint
+    bool bUseDecayLR = false;
+    int DigitToStartDecay=1000;
+    int iDecayPoint = SEQ_LENGTH*DigitToStartDecay;
+    float fRhoThreshold = (float)(1e-2);
+    bool bUseRhoDerivative = false;
     for( int Layer=0; Layer<NumberOfLayers; Layer++ )
     {
+        bool bTopNode = false;
+        bool bAveragingLayer = false;
+        bool bConstrainInitialCentroids = true;
+
         OffsetSelf[Layer] = InputDimensionality[Layer]; // the basic value.
         ColsPerLayer[Layer] = RowsPerLayer[Layer];
-        bSelfAndUpperFeedback[Layer] = false;  // feedback
         // increase the input dimensionality if you are using the self-upper feedback
         if ( bSelfAndUpperFeedback[Layer] )
         {
-            InputDimensionality[Layer] = InputDimensionality[Layer]+NumberOfCentroids[Layer];  // all layers get self-feedback
+            InputDimensionality[Layer] = InputDimensionality[Layer]+NumberOfCentroids[Layer];  // layers get self-feedback
             OffsetSelfFeedback[Layer] = InputDimensionality[Layer];
             if ( Layer<NumberOfLayers-1 )
             {
                 InputDimensionality[Layer] = InputDimensionality[Layer]+NumberOfCentroids[Layer+1];  // all layers but the top get feedback from above
             }
         }
-    }
+        // Initial layer does this a little different (input is raw instead of centroids)
+        if ( Layer==0 )
+        {
+            bAveragingLayer=bAveraging;
+            bConstrainInitialCentroids=false;
+        }
+        if ( Layer==NumberOfLayers-1)
+        {
+            // Yes you are the top layer
+            bTopNode = true;
+        }
+        cout << Layer << " Input Output Dimension " << InputDimensionality[Layer] << " " << NumberOfCentroids[Layer] << endl;
+        DLatch[Layer].Create(RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer]);
 
+        DLayer[Layer].Create( RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], NumberOfParentStates[Layer],
+                              InputDimensionality[Layer], NULL,  // if this is NULL, then use the same InputDimensionality for all the nodes, otherwize, use this array of inputDimensinality to assign each node its own.
+                              DistanceMeasureArray[Layer], bBinaryPOS, bAveragingLayer, bUseStarvationTrace, PSSAUpdateDelay,
+                              bIgnoreAdvice, dcMu[Layer], dcSigma[Layer], dcRho[Layer], bUseDecayLR, iDecayPoint, fRhoThreshold,
+                              bUseRhoDerivative, bConstrainInitialCentroids, iBlocksToProcess, Layer, MovementsForClusteringOption,
+                              bBasicOnlineClustering, FixedLearningRateLayer[Layer], bDoGoodPOS, SEQ_LENGTH, bTopNode );
+    }
+    cout << "------------------" << endl;
     return 0;
 }
 
@@ -697,6 +734,8 @@ int main(int argc, char* argv[])
     // There should be 8 or 9 arguments at this time if not show how to use DeSTIN
     if ( argc==8 || argc==9 )
     {
+        cout << "Starting DeSTIN" << endl;
+        cout << "------------------" << endl;
         return MainDestinExperiments(argc,argv);
     }
     else

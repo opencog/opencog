@@ -12,7 +12,8 @@ using std::tr1::shared_ptr;
 
 DestinLayer::DestinLayer(void)
 {
-	mRows=mCols=0;
+	mRows=0;
+	mCols=0;
 	mGTLabel=-1;	//ground truth label, i.e, "letter A", "digit B", "Dog"
 	mSignalIndex=-1; //index, for example if we have 100 things in the data set this could be 0-99
 	mMovementNumber=-1; // which movement we are on
@@ -148,26 +149,12 @@ bool DestinLayer::operator == (DestinLayer& o)
 	return bReturn;
 }
 
-void DestinLayer::Create(int Rows, int Cols,
-						 int States, int ParentStates, int InputDimensionality, int inputDimensionalities [],
-						int DType,		//distance method
-						bool bBinaryPOS,
-						bool bAveraging,
-						bool bUseStarvationCoefficient,
-						int PSSAUpdateDelay,
-						bool bIgnoreAdvice,
-						double dcMu, double dcSigma, double dcRho,
-						bool bUseDecayingLearningRate, int iDecayKickInPoint, float fRhoThresholdPoint,
-						bool bUseRhoDerivative,
-						bool bConstrainInitialCentroids,
-						int iBlocksToProcess,
-						int LayerNumber,
-						int iMovementsForCluster,
-						bool BasicOnlineClustering,
-						float FixedRate,
-						bool bDoGoodPOS,
-						int SequenceLength,
-						bool bTopNode)
+void DestinLayer::Create( int Rows, int Cols, int States, int ParentStates, int InputDimensionality, int inputDimensionalities[],
+                          int DType, bool bBinaryPOS, bool bAveraging, bool bUseStarvationCoefficient, int PSSAUpdateDelay,
+                          bool bIgnoreAdvice, double dcMu, double dcSigma, double dcRho, bool bUseDecayingLearningRate,
+                          int iDecayKickInPoint, float fRhoThresholdPoint, bool bUseRhoDerivative, bool bConstrainInitialCentroids,
+                          int iBlocksToProcess,	int LayerNumber, int iMovementsForCluster, bool BasicOnlineClustering,
+                          float FixedRate, bool bDoGoodPOS, int SequenceLength, bool bTopNode )
 {
     DestinLayer();
 	mRows=Rows;
@@ -283,7 +270,8 @@ void DestinLayer::LatchData(DestinLayerLatch& oLatch)
 
 DestinLayerLatch::DestinLayerLatch(void)
 {
-	mRows=mCols=0;
+	mRows=0;
+	mCols=0;
 	mGTLabel=-1;	//ground truth label, i.e, "letter A", "digit B", "Dog"
 	mSignalIndex=-1; //index, for example if we have 100 things in the data set this could be 0-99
 	mMovementNumber=-1; // which movement we are on
@@ -305,13 +293,10 @@ DestinLayerLatch::~DestinLayerLatch(void)
 
 void DestinLayerLatch::Create(int Rows, int Cols, int States )
 {
+    DestinLayerLatch();
 	mRows=Rows;
 	mCols=Cols;
 	//mDestinNodeLatchUnits.clear();
-	mGTLabel=-1;
-	mSignalIndex=-1;
-	mMovementNumber=-1;
-	mObservationNumber=-1;
 
 //	DestinNodeLatchData* p;// = mDestinNodeLatchUnits;
 //	for(int r=0;r<mRows;r++)

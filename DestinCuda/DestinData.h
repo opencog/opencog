@@ -6,20 +6,21 @@ using namespace std;
 
 class DestinData
 {
-	vector<float**> mImagePointer;
-	vector<int> mLabels;
-	map< int, vector<int> > mMapLabelToIndexVector;
-	vector<int> mUniqueLabels;
+    private:
+        vector<float**> mImagePointer;
+        vector<int> mLabels;
+        map< int, vector<int> > mMapLabelToIndexVector;
+        vector<int> mUniqueLabels;
 
-	int mLastImageIndex;
-	float mImageWithOffset[50][50];
-	int mRows;
-	int mCols;
-	float** mShiftedImageCache;
+        int mLastImageIndex;
+        float mImageWithOffset[50][50];
+        int mRows;
+        int mCols;
+        float** mShiftedImageCache;
 
-	//scratch for real & imag part of FFT
-	float mRP[4][4];
-	float mIP[4][4];
+        //scratch for real & imag part of FFT
+        float mRP[4][4];
+        float mIP[4][4];
 
 public:
 	DestinData(void);

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <destin version="1.0" type="params">
+    <!-- Some value that where used in old file not yet found where. -->
     <header name="HeaderForParametersFile" value="V2"/>
     <seq length="64">
+        <!-- a step have a x and a y position its a sequence so next step also looks at the previous one -->
         <step x="0" y="0"/>
         <step x="0" y="1"/>
         <step x="0" y="2"/>
@@ -68,23 +70,24 @@
         <step x="4" y="6"/>
     </seq>
     <layers value="4">
+    <!-- Current layout of a layer is: name, mu, sigma, states, distance type, learning rate, rows/cloms, self and upper feedback -->
     <!--Distance can be: COSINE=1, EUCLIDEAN=2, GAUSSIANPDF=3, EXPONENTIALCOSINELAZY=4, GAUSSIANCOSINELAZY=5, RAYLEIGHCOSINELAZY=6-->
-        <layer name="0" mu="0.9" sigma="0.9" rho="0.95" states="25" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="8"/>
-        <layer name="1" mu="0.9" sigma="0.9" rho="0.95" states="16" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="4"/>
-        <layer name="2" mu="0.9" sigma="0.9" rho="0.95" states="12" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="2"/>
-        <layer name="3" mu="0.9" sigma="0.9" rho="0.95" states="10" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="1"/>
+        <layer name="0" mu="0.9" sigma="0.9" rho="0.95" states="25" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="8" selfAndUpperFeedback="false"/>
+        <layer name="1" mu="0.9" sigma="0.9" rho="0.95" states="16" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="4" selfAndUpperFeedback="false"/>
+        <layer name="2" mu="0.9" sigma="0.9" rho="0.95" states="12" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="2" selfAndUpperFeedback="false"/>
+        <layer name="3" mu="0.9" sigma="0.9" rho="0.95" states="10" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="1" selfAndUpperFeedback="false"/>
     </layers>
     <settings>
-        <averaging value="false"/>
-        <fft value="false"/>
+        <averaging value="false"/> <!-- Averaging for first layer -->
+        <fft value="false"/> <!-- FFT for first layer -->
         <binaryPos value="false"/>
-        <starvationTrace value="true"/>
-        <pssaDelay value="1000"/>
+        <starvationTrace value="true"/> <!-- use starvation trace -->
+        <pssaDelay value="1000"/> <!-- PSSA update delay.  Use > SEQ_LENGTH to never update -->
         <ignoreAdvice value="true"/>
-        <processingBlockSize value="1"/>
-        <basicOnlineClustering value="true"/>
-        <clanDestin value="false"/>
-        <initialLayerIsTransformOnly value="false"/>
+        <processingBlockSize value="1"/> <!-- temporal block size -->
+        <basicOnlineClustering value="true"/> <!-- Basic online clustering -->
+        <clanDestin value="false"/> <!-- use this if you want one clustering engine per movement -->
+        <initialLayerIsTransformOnly value="false"/> <!-- When set to true only first rowsColmsPerLayer will be used -->
         <useGoodPOSMethod value="false"/>
     </settings>
 </destin>
