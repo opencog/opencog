@@ -25,7 +25,7 @@
 ; variable: command-resolution-rules (at the end of this file)
 
 (define evaluate-color-reference
-  (BindLink (stv 1 1) (cog-new-av 0 1 #f)
+  (BindLink (stv 1 1) (cog-new-av 0 1 0)
     (ListLink
      (TypedVariableLink
       (VariableNode "$entityValue")
@@ -120,7 +120,7 @@
 
 
 (define evaluate-dimension-reference
-  (BindLink (stv 1 1) (cog-new-av 0 1 #f)
+  (BindLink (stv 1 1) (cog-new-av 0 1 0)
     (ListLink
      (TypedVariableLink
       (VariableNode "$framePredicateNode")
@@ -211,7 +211,7 @@
   )
 
 (define evaluate-distance-reference
-  (BindLink (stv 1 1) (cog-new-av 0 1 #f)
+  (BindLink (stv 1 1) (cog-new-av 0 1 0)
     (ListLink
      (TypedVariableLink
       (VariableNode "$framePredicateNode")

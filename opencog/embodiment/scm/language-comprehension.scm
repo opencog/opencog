@@ -1989,15 +1989,15 @@
 
          (if (member name frameElements)                            
              (let ((elementPredicateNode (PredicateNode (string-append instanceName "_" name ))))
-               (InheritanceLink (stv 1 1) (cog-new-av 0 1 #f)
+               (InheritanceLink (stv 1 1) (cog-new-av 0 1 0)
                 elementPredicateNode
                 (assoc-ref frameElementsNodes name)
                 )
-               (FrameElementLink (stv 1 1) (cog-new-av 0 1 #f)
+               (FrameElementLink (stv 1 1) (cog-new-av 0 1 0)
                 (PredicateNode instanceName)
                 elementPredicateNode
                 )
-               (EvaluationLink (stv 1 1) (cog-new-av 0 1 #f)
+               (EvaluationLink (stv 1 1) (cog-new-av 0 1 0)
                 elementPredicateNode
                 value
                 )               
@@ -2011,7 +2011,7 @@
      )
 
     (if isFrameInstance?
-        (InheritanceLink (stv 1 1) (cog-new-av 0 1 #f)
+        (InheritanceLink (stv 1 1) (cog-new-av 0 1 0)
          (PredicateNode instanceName)
          (DefinedFrameNode type)         
          )

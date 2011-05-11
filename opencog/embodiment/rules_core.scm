@@ -125,7 +125,7 @@
 ;
 (define DEFAULT_STI 0)
 (define DEFAULT_LTI 0)
-(define DEFAULT_VLTI #f)
+(define DEFAULT_VLTI 0)
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;

@@ -29,15 +29,15 @@
 
 (cog-bind human-implies-animal)
 
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)
 	(DefinedFrameNode "#Ingestion")
 	(DefinedFrameNode "#Manipulation")
 )
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)
 	(PredicateNode "grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation")
 	(DefinedFrameNode "#Manipulation")
 )
-(FrameElementLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 1 0 0)
 	(DefinedFrameNode "#Manipulation")
 	(DefinedFrameElementNode "#Manipulation:Agent")
 )

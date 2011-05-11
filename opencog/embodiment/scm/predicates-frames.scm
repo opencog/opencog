@@ -36,23 +36,23 @@
 ; to represent some custom (extends Framenet) Embodiment Perceptions.
 
 ; #Substance <- liquid
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0)
    (ConceptNode "liquid")
    (DefinedFrameNode "#Substance")
 )
 
-(ReferenceLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+(ReferenceLink (stv 1.0 1.0) (cog-new-av 0 1 0)
    (WordNode "#liquid")
    (ConceptNode "liquid")
 )
 
 ; liquid <- water
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0)
    (ConceptNode "water")
    (ConceptNode "liquid")
 )
 
-(ReferenceLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+(ReferenceLink (stv 1.0 1.0) (cog-new-av 0 1 0)
    (WordNode "#water")
    (ConceptNode "water")
 )
@@ -60,12 +60,12 @@
 
 
 ; #Food <- bone
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0)
    (ConceptNode "bone")
    (DefinedFrameNode "#Food")
 )
 
-(ReferenceLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+(ReferenceLink (stv 1.0 1.0) (cog-new-av 0 1 0)
    (WordNode "#bone")
    (ConceptNode "bone")
 )
@@ -77,55 +77,55 @@
 ; but will be used to compose perceptions which use frames
 
 ; Object <- StaticObject
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0) 
    (ConceptNode "StaticObject")
    (ConceptNode "Object")
 )
 
 ; Object <- Unknown
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0) 
    (ConceptNode "Unknown")
    (ConceptNode "Object")
 )
 
 ; StaticObject <- Structure
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0) 
    (ConceptNode "Structure")
    (ConceptNode "StaticObject")
 )
 
 ; Object <- MovableObject
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0) 
    (ConceptNode "MovableObject")
    (ConceptNode "Object")
 )
 
 ; MovableObject <- Item
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0) 
    (ConceptNode "Item")
    (ConceptNode "MovableAgent")
 )
 
 ; MovableObject <- Agent
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0) 
    (ConceptNode "Agent")
    (ConceptNode "MovableAgent")
 )
 
 ; Agent <- Humanoid
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0) 
    (ConceptNode "Humanoid")
    (ConceptNode "Agent")
 )
 
 ; Agent <- Pet
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0) 
    (ConceptNode "Pet")
    (ConceptNode "Agent")
 )
 
 ; Agent <- Avatar
-(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 0) 
    (ConceptNode "Avatar")
    (ConceptNode "Agent")
 )
