@@ -24,7 +24,7 @@ def find_subclasses(module, clazz):
 import imp
 import opencog
 
-cdef extern from "PythonModule.h" namespace "opencog":
+cdef extern from "agent_finder_types.h" namespace "opencog":
     cdef struct requests_and_agents_t:
         vector[string] agents
         vector[string] requests

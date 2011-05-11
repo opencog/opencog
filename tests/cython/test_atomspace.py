@@ -1,8 +1,12 @@
 from unittest import TestCase
 
-import opencog
-from opencog import AtomSpace, TruthValue, types
-from atom import Atom 
+# How it should be?
+# from opencog.atomspace import AtomSpace, TruthValue, types
+# from opencog.atom import Atom
+
+#import opencog
+from opencog.atomspace import AtomSpace, TruthValue, types, is_a, get_type, get_type_name
+from opencog.atom import Atom 
 
 class AtomSpaceTest(TestCase):
 
@@ -275,23 +279,23 @@ class AtomTest(TestCase):
 class TypeTest(TestCase):
 
     def test_is_a(self):
-        self.assertTrue(opencog.is_a(types.ConceptNode,types.Node))
-        self.assertTrue(opencog.is_a(types.ConceptNode,types.Atom))
+        self.assertTrue(is_a(types.ConceptNode,types.Node))
+        self.assertTrue(is_a(types.ConceptNode,types.Atom))
 
-        self.assertTrue(opencog.is_a(types.ListLink,types.Link))
-        self.assertTrue(opencog.is_a(types.ListLink,types.Atom))
+        self.assertTrue(is_a(types.ListLink,types.Link))
+        self.assertTrue(is_a(types.ListLink,types.Atom))
 
-        self.assertFalse(opencog.is_a(types.Link,types.Node))
+        self.assertFalse(is_a(types.Link,types.Node))
 
     def test_get_type(self):
-        self.assertEqual(opencog.get_type("ConceptNode"), types.ConceptNode)
-        self.assertEqual(opencog.get_type(""), types.NO_TYPE)
-        self.assertRaises(TypeError,opencog.get_type,1)
+        self.assertEqual(get_type("ConceptNode"), types.ConceptNode)
+        self.assertEqual(get_type(""), types.NO_TYPE)
+        self.assertRaises(TypeError,get_type,1)
 
     def test_get_type_name(self):
-        self.assertEqual(opencog.get_type_name(types.Node), "Node")
-        self.assertEqual(opencog.get_type_name(2231), "")
-        self.assertEqual(opencog.get_type_name(types.NO_TYPE), "")
+        self.assertEqual(get_type_name(types.Node), "Node")
+        self.assertEqual(get_type_name(2231), "")
+        self.assertEqual(get_type_name(types.NO_TYPE), "")
 
 
 

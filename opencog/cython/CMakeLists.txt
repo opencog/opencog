@@ -8,22 +8,12 @@ INCLUDE_DIRECTORIES(
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
 
 # How to Cython the .pyx file
-add_custom_command(OUTPUT opencog.cpp
+add_custom_command(OUTPUT opencog/atomspace.cpp
   COMMAND
-  ${CYTHON_EXECUTABLE} -o opencog.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog.pyx")
-#add_custom_command(OUTPUT atomspace.cpp
-#COMMAND
-#${CYTHON_EXECUTABLE} -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/atomspace.pyx")
-#add_custom_command(OUTPUT agent.cpp
-#COMMAND
-#${CYTHON_EXECUTABLE} -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent.pyx")
-#add_custom_command(OUTPUT classserver.cpp
-#COMMAND
-#${CYTHON_EXECUTABLE} -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/classserver.pyx")
-add_custom_command(OUTPUT atom.cpp
-    COMMAND
-    ${CYTHON_EXECUTABLE} -o atom.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/atom.py")
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog.cpp" "atom.cpp") # "atomspace.cpp" "classserver.cpp" "agent.cpp")
+  ${CYTHON_EXECUTABLE} -o opencog/atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/atomspace.pyx"
+  DEPENDS "opencog/atomspace.pyx" "opencog/atomspace_details.pyx" "opencog/agent.pyx" "opencog/classserver.pyx")
+
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/atomspace.cpp")
 
 # How to Cython the .pyx file
 add_custom_command(OUTPUT agent_finder.cpp agent_finder_api.h
@@ -31,22 +21,28 @@ add_custom_command(OUTPUT agent_finder.cpp agent_finder_api.h
   ${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx")
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
 
-# opencog Python bindings
-ADD_LIBRARY(opencogcy SHARED
-    opencog.cpp
-    atom.cpp
+# opencog.atomspace Python bindings
+ADD_LIBRARY(atomspace_cython SHARED
+    opencog/atomspace.cpp
 )
-# These dependencies are are all included within the opencog.pyx file
-ADD_DEPENDENCIES(opencogcy atomspace.pyx agent.pyx classserver.pyx)
 
-TARGET_LINK_LIBRARIES(opencogcy
+TARGET_LINK_LIBRARIES(atomspace_cython
+	${Boost_THREAD_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
     atomspace
     util
 )
 
-SET_TARGET_PROPERTIES(opencogcy PROPERTIES
+SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
     PREFIX ""
-    OUTPUT_NAME opencog)
+    OUTPUT_NAME opencog/atomspace)
+
+# direct file and path creation for stuff that doesn't need to be compiled
+file(MAKE_DIRECTORY opencog)
+# module init
+file(COPY opencog/__init__.py DESTINATION opencog)
+# opencog.atom
+file(COPY opencog/atom.py DESTINATION opencog)
 ##
 
 # utility library for PythonModule
@@ -54,7 +50,12 @@ ADD_LIBRARY(agent_finder SHARED
     agent_finder.cpp
 )
 
-ADD_DEPENDENCIES(agent_finder agent_finder_api.h)
+TARGET_LINK_LIBRARIES(agent_finder
+	${Boost_THREAD_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+)
+
+ADD_DEPENDENCIES(agent_finder atomspace_cython)
 
 SET_TARGET_PROPERTIES(agent_finder PROPERTIES
     PREFIX ""
@@ -68,16 +69,26 @@ ADD_LIBRARY (PythonModule SHARED
 )
 
 ADD_DEPENDENCIES(PythonModule 
-    cython_bindings agent_finder opencog_atom_types)
+    agent_finder
+    opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(PythonModule
     server
-    #python2.6_d
     ${PYTHON_LIBRARIES}
 )
 
 IF (WIN32)
     INSTALL (TARGETS PythonModule DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+    # this isn't right, we need the python data dir
+    INSTALL (TARGETS atomspace_cython DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
+    INSTALL (TARGETS agent_finder DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
 ELSE (WIN32)
     INSTALL (TARGETS PythonModule LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+    # this isn't right, we need the python data dir
+    INSTALL (TARGETS atomspace_cython LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
+    INSTALL (TARGETS agent_finder LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
 ENDIF (WIN32)
+INSTALL (FILES 
+    atom.py
+    # this isn't right, we need the python data dir
+    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")

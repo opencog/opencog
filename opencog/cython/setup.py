@@ -4,6 +4,10 @@ from distutils.sysconfig import get_python_inc
 from Cython.Distutils import build_ext
 import os
 
+# WARNING: This file is deprecated as the cython bindings are integrated with
+# CMake now. This file is still useful for reference on how to use distutils
+# with cython
+
 # How can we make this configurable by CMake?
 # Perhaps has a environment variable or a command line argument
 opencog_library_dir = "/usr/local/lib/opencog"

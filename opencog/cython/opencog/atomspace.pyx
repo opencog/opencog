@@ -5,5 +5,6 @@
 # note that the ordering of include statements may influence whether things work or not
 
 include "classserver.pyx"
-include "atomspace.pyx"
+include "atomspace_details.pyx"
 include "agent.pyx"
+
