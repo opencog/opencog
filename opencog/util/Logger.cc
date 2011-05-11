@@ -181,7 +181,7 @@ static void prt_backtrace(FILE *fh)
 		else
 		{
 			*begin = 0x0;
-			fprintf(fh, "\t%d: %s", i, syms[i]);
+			fprintf(fh, "\t%d: %s ", i, syms[i]);
 			*begin = '(';
 			size_t sz = 250;
 			int status;
@@ -190,7 +190,7 @@ static void prt_backtrace(FILE *fh)
 			char *rv = abi::__cxa_demangle(begin+1, fname, &sz, &status);
 			*end = '+';
 			if (rv) fname = rv; // might have re-alloced
-			fprintf(fh, "%s", fname);
+			fprintf(fh, "(%s ", fname);
 			free(fname);
 			fprintf(fh, "%s\n", end);
 		}
