@@ -174,34 +174,39 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
             perms.push_back(combo_tree(arg));
     }
 
-    //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
-    //TODO: should bias the selection of these (and possibly choose larger subtrees)
+    // and n random pairs out of the total
+    // 2 * choose(n,2) = n * (n - 1) of these
+
+    // TODO: should bias the selection of these (and possibly choose
+    // larger subtrees)
     unsigned int max_pairs = _arity*(_arity - 1);
-    opencog::lazy_random_selector select(max_pairs, rng);
-    unsigned int n_pairs =
-        _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
-    dorepeat(n_pairs) {
-        //while (!select.empty()) {
-        combo_tree v(*it == id::logical_and ? id::logical_or : id::logical_and);
-        int x = select();
-        int a = x / (_arity - 1);
-        int b = x - a * (_arity - 1);
-        if (b == a)
-            b = _arity - 1;
-
-        argument arg_b(1 + b);
-        argument arg_a(1 + a);
-
-        if(permit_ops(arg_a) && permit_ops(arg_b)) {
-            if (b < a) {
-                v.append_child(v.begin(), arg_b);
-                v.append_child(v.begin(), arg_a);
-            } else {
-                arg_a.negate();
-                v.append_child(v.begin(), arg_a);
-                v.append_child(v.begin(), arg_b);
+    if(max_pairs > 0) {
+        opencog::lazy_random_selector select(max_pairs, rng);
+        unsigned int n_pairs =
+            _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
+        dorepeat(n_pairs) {
+            //while (!select.empty()) {
+            combo_tree v(*it == id::logical_and ? id::logical_or : id::logical_and);
+            int x = select();
+            int a = x / (_arity - 1);
+            int b = x - a * (_arity - 1);
+            if (b == a)
+                b = _arity - 1;
+            
+            argument arg_b(1 + b);
+            argument arg_a(1 + a);
+            
+            if(permit_ops(arg_a) && permit_ops(arg_b)) {
+                if (b < a) {
+                    v.append_child(v.begin(), arg_b);
+                    v.append_child(v.begin(), arg_a);
+                } else {
+                    arg_a.negate();
+                    v.append_child(v.begin(), arg_a);
+                    v.append_child(v.begin(), arg_b);
+                }
+                perms.push_back(v);
             }
-            perms.push_back(v);
         }
     }
 
