@@ -49,7 +49,7 @@
 ;         ListLink (empty)
 ;
 ;     EvaluationLink
-;         GroundedPredicateNode: FuzzyWithin
+;         GroundedPredicateNode: fuzzy_within
 ;         ListLink
 ;             NumberNode: min_acceptable_value
 ;             NumberNode: max_acceptable_value
@@ -351,7 +351,7 @@
 ;         PredicateNode: "demand_name_goal" 
 ;         ListLink (empty)
 ;     EvaluationLink
-;         GroundedPredicateNode: "FuzzyWithin"
+;         GroundedPredicateNode: "fuzzy_within"
 ;         ListLink
 ;             NumberNode: "min_acceptable_value"
 ;             NumberNode: "max_acceptable_value"
@@ -365,7 +365,7 @@
         goal_handle
 
         (EvaluationLink (DEFAULT_STV) (DEFAULT_AV)
-            (GroundedPredicateNode "FuzzyWithin")  
+            (GroundedPredicateNode "fuzzy_within")  
             (ListLink 
                 (NumberNode (number->string min_acceptable_value) )
                 (NumberNode (number->string max_acceptable_value) )

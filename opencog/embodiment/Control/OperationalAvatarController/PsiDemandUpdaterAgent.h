@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-04-01
+ * @date 2011-05-09
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -55,7 +55,7 @@ namespace OperationalAvatarController
  *         PredicateNode: "demand_name_goal" 
  *         ListLink (empty)
  *     EvaluationLink
- *         GroundedPredicateNode: "FuzzyWithin"
+ *         GroundedPredicateNode: "fuzzy_within"
  *         ListLink
  *             NumberNode: "min_acceptable_value"
  *             NumberNode: "max_acceptable_value"
@@ -109,9 +109,7 @@ private:
          *
          * @return return true if update successfully, otherwise false
          */
-        bool runUpdater(const AtomSpace & atomSpace, 
-                        Procedure::ProcedureInterpreter & procedureInterpreter, 
-                        const Procedure::ProcedureRepository & procedureRepository);
+        bool runUpdater(AtomSpace & atomSpace);
 
         /**
          * Update the truth value of Demand Goal
@@ -139,10 +137,7 @@ private:
          *       2. Run the procedure named "FuzzyWithin", and then set the result to the truth value of 
          *         both EvaluationLink of Demand Goal and FuzzyWithin
          */
-        bool updateDemandGoal(AtomSpace & atomSpace, 
-                              Procedure::ProcedureInterpreter & procedureInterpreter,
-                              const Procedure::ProcedureRepository & procedureRepository, 
-                              const unsigned long timeStamp);
+        bool updateDemandGoal(AtomSpace & atomSpace, const unsigned long timeStamp);
 
     private:        
 

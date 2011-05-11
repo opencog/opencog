@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiModulatorUpdaterAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-23
+ * @date 2011-05-11
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -59,8 +59,7 @@ private:
     {
     public:
 
-        Modulator(const std::string & modulatorName, Handle hUpdater) :
-            modulatorName(modulatorName), hUpdater(hUpdater)
+        Modulator(const std::string & modulatorName) : modulatorName(modulatorName)
         {};
 
         inline const std::string & getModulatorName() 
@@ -72,20 +71,13 @@ private:
         {
             return this->currentModulatorValue; 
         }
-
-        inline Handle getHandleUpdater()
-        {
-            return this->hUpdater;
-        }
   
         /**
          * Update the Modulator Value
          *
          * @return return true if update successfully, otherwise false
          */
-        bool runUpdater(const AtomSpace & atomSpace, 
-                        Procedure::ProcedureInterpreter & procedureInterpreter, 
-                        const Procedure::ProcedureRepository & procedureRepository);
+        bool runUpdater(AtomSpace & atomSpace);
 
         /**
          * Set the new modulator value to the AtomSpace
@@ -108,15 +100,11 @@ private:
          *                       GroundedSchemaNode: xxxModulatorUpdater
          *                       ListLink (empty)
          */
-        bool updateModulator(AtomSpace & atomSpace, 
-                             Procedure::ProcedureInterpreter & procedureInterpreter,
-                             const Procedure::ProcedureRepository & procedureRepository, 
-                             const unsigned long timeStamp);
+        bool updateModulator(AtomSpace & atomSpace, const unsigned long timeStamp);
 
     private:        
 
         std::string modulatorName;    // The name of the Modulator
-        Handle hUpdater;              // Handle to Modulator updater (ExecutionOutputLink)
         double currentModulatorValue; // Store current (latest) value of Modulator
 
     };// class Modulator

@@ -2304,13 +2304,13 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (const AtomSpace & atomSpace,
 
     Handle hListLink = *iListLink;
 
-    // Get GroundedPredicateNode ("FuzzyWithin")
-    Handle hGroundedPredicateNode = atomSpace.getHandle(GROUNDED_PREDICATE_NODE, "FuzzyWithin");
+    // Get GroundedPredicateNode ("fuzzy_within")
+    Handle hGroundedPredicateNode = atomSpace.getHandle(GROUNDED_PREDICATE_NODE, "fuzzy_within");
 
     if ( hGroundedPredicateNode == opencog::Handle::UNDEFINED ||
          atomSpace.getType(hGroundedPredicateNode) != GROUNDED_PREDICATE_NODE ) {
 
-        logger().error("AtomSpaceUtil::%s - Failed to get GROUNDED_PREDICATE_NODE named 'FuzzyWithin'", 
+        logger().error("AtomSpaceUtil::%s - Failed to get GROUNDED_PREDICATE_NODE named 'fuzzy_within'", 
                        __FUNCTION__
                       );
 
