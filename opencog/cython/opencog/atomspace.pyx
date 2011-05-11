@@ -6,5 +6,4 @@
 
 include "classserver.pyx"
 include "atomspace_details.pyx"
-include "agent.pyx"
 

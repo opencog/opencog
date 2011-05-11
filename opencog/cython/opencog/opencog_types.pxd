@@ -151,3 +151,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 cdef extern from "opencog/atomspace/SpaceServer.h" namespace "opencog":
     cdef cppclass cSpaceServer "opencog::SpaceServer":
         SpaceServer()
+
+#cdef class AtomSpace:
+#    cdef cAtomSpace *atomspace
+#    cdef cTimeServer *timeserver
+

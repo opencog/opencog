@@ -2,10 +2,14 @@
 
 using namespace opencog;
 
+PyMindAgent::PyMindAgent()
+{
+    pyagent=NULL;
+}
+
 PyMindAgent::PyMindAgent(const std::string& moduleName, const std::string& className)
 {
     pyagent=NULL;
-
 }
 
 PyMindAgent::~PyMindAgent()

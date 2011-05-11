@@ -1,3 +1,6 @@
+# it'd be nice to define the type of atomspace
+#from opencog_types cimport AtomSpace
+
 cdef class MindAgent:
     
     # TODO add a pointer to the Agent C++ object so that calls to stimulate atoms
@@ -9,11 +12,12 @@ cdef class MindAgent:
         """
         return 1
 
-    def start(self, AtomSpace atomspace):
+    # it'd be nice to define the type of atomspace
+    def start(self, atomspace):
         pass
 
     def end(self):
         pass
 
-    def run(self, AtomSpace atomspace):
+    def run(self, atomspace):
         pass

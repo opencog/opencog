@@ -6,6 +6,8 @@
 #define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/operations.hpp>
 
+#include <opencog/util/Config.h>
+#include <opencog/util/misc.h>
 
 using std::vector;
 using std::string;
@@ -49,6 +51,19 @@ void PythonModule::init()
     // Add our module directories to the Python interprator's path
     const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
     PyRun_SimpleString("paths=[]");
+
+    // Add custom paths for python modules from the config file
+    std::vector<std::string> pythonpaths;
+    tokenize(config()["PYTHON_EXTENSION_DIRS"], std::back_inserter(pythonpaths), ", ");
+    for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
+         it != pythonpaths.end(); ++it) {
+        boost::filesystem::path modulePath(*it);
+        if (boost::filesystem::exists(modulePath)) {
+            PyRun_SimpleString(("paths.append('" + modulePath.string() + "')\n").c_str());
+        }
+    }
+
+    // Default paths for python modules
     for (int i = 0; config_paths[i] != NULL; ++i) {
         boost::filesystem::path modulePath(config_paths[i]);
         if (boost::filesystem::exists(modulePath)) {
@@ -63,6 +78,7 @@ void PythonModule::init()
         PyErr_Print();
         logger().error("[PythonModule] Failed to load helper python module");
     }
+    PyRun_SimpleString("print sys.path\n");
     // Register our Python loader request
     do_load_py_register();
 }
@@ -72,8 +88,13 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
     //AtomSpace *space = CogServer::getAtomSpace();
     if (args.size() == 0) return "Please specify Python module to load.";
     requests_and_agents_t thingsInModule;
-    thingsInModule = load_module(args.front());
+    std::string moduleName = args.front();
     std::ostringstream oss;
+    if (moduleName.substr(moduleName.size()-3,3) == ".py") {
+        oss << "Warning: Python module name should be passed without .py extension" << std::endl;
+        moduleName.replace(moduleName.size()-3,3,"");
+    }
+    thingsInModule = load_module(moduleName);
     if (thingsInModule.agents.size() > 0) {
         bool first = true;
         oss << "Python MindAgents found: ";
@@ -82,11 +103,13 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
                 oss << ", ";
                 first = false;
             }
+            std::cout << s << std::endl;
             oss << s;
         }
         oss << ".";
     } else {
-        oss << "No subclasses of opencog.MindAgent found.";
+        oss << "No subclasses of opencog.cogserver.MindAgent found.";
+        std::cout << "No subclasses of opencog.cogserver.MindAgent found.";
     }
     // TODO save the py_module somewhere
     // ...

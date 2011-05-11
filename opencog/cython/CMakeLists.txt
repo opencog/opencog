@@ -11,14 +11,19 @@ INCLUDE_DIRECTORIES(
 add_custom_command(OUTPUT opencog/atomspace.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/atomspace.pyx"
-  DEPENDS "opencog/atomspace.pyx" "opencog/atomspace_details.pyx" "opencog/agent.pyx" "opencog/classserver.pyx")
+  DEPENDS "opencog/atomspace.pyx" "opencog/atomspace_details.pyx" "opencog/classserver.pyx")
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/atomspace.cpp")
+add_custom_command(OUTPUT opencog/cogserver.cpp
+  COMMAND
+  ${CYTHON_EXECUTABLE} -o opencog/cogserver.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/cogserver.pyx"
+  DEPENDS "opencog/cogserver.pyx" "opencog/agent.pyx")
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/cogserver.cpp" "opencog/atomspace.cpp")
 
 # How to Cython the .pyx file
 add_custom_command(OUTPUT agent_finder.cpp agent_finder_api.h
   COMMAND
-  ${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx")
+  ${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx"
+  DEPENDS "agent_finder.pyx")
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
 
 # opencog.atomspace Python bindings
@@ -36,6 +41,19 @@ TARGET_LINK_LIBRARIES(atomspace_cython
 SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
     PREFIX ""
     OUTPUT_NAME opencog/atomspace)
+
+# opencog.cogserver Python bindings
+ADD_LIBRARY(cogserver_cython SHARED
+    opencog/cogserver.cpp
+)
+
+# cogserver just has the MindAgent template class at the moment
+#TARGET_LINK_LIBRARIES(cogserver_cython
+#)
+
+SET_TARGET_PROPERTIES(cogserver_cython PROPERTIES
+    PREFIX ""
+    OUTPUT_NAME opencog/cogserver)
 
 # direct file and path creation for stuff that doesn't need to be compiled
 file(MAKE_DIRECTORY opencog)
@@ -55,7 +73,7 @@ TARGET_LINK_LIBRARIES(agent_finder
     ${Boost_SYSTEM_LIBRARY}
 )
 
-ADD_DEPENDENCIES(agent_finder atomspace_cython)
+ADD_DEPENDENCIES(agent_finder cogserver_cython atomspace_cython)
 
 SET_TARGET_PROPERTIES(agent_finder PROPERTIES
     PREFIX ""

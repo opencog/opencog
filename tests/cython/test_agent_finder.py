@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from agent_finder import find_subclasses
-import opencog
+import opencog.cogserver
 import test_agent
 
 class HelperTest(TestCase):
@@ -13,7 +13,7 @@ class HelperTest(TestCase):
         pass
 
     def test_find_agents(self):
-        x=find_subclasses(test_agent,opencog.MindAgent)
+        x=find_subclasses(test_agent,opencog.cogserver.MindAgent)
         self.assertEqual(len(x),1)
         self.assertEqual(x[0][0], 'TestAgent')
 

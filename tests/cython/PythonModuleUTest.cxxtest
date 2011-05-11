@@ -1,0 +1,117 @@
+#include <string>
+#include <cstdio>
+
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/cython/PyMindAgent.h>
+
+using std::string;
+
+using namespace opencog;
+
+class TestCogServer : public CogServer
+{
+    int tickCount;
+    bool tickBased;
+    int maxCount;
+    public: 
+
+        static BaseServer* createInstance() {
+            return new TestCogServer();
+        }
+
+        TestCogServer() : tickCount(1), tickBased(false), maxCount(1000) {}
+
+        void setTickBased(bool _tickBased) {
+            tickBased = _tickBased;
+        }
+
+        void setMaxCount(int _maxCount) {
+            maxCount = _maxCount;
+        }
+
+        bool customLoopRun() {
+            bool runCycle  = tickBased?(tickCount % 100 == 0):true; 
+            if (++tickCount > maxCount) stop();
+            return runCycle;
+        }
+};
+
+class PythonModuleUTest :  public CxxTest::TestSuite
+{
+
+private:
+
+
+public:
+
+    PythonModuleUTest() {
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
+    }
+
+    ~PythonModuleUTest() {
+	    // erase the log file if no assertions failed
+	    if (!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp() {
+        // Load special config file for the test
+        string configFile = PROJECT_SOURCE_DIR"/tests/cython/pymodule.conf";
+        try {
+            config().load(configFile.c_str(), false);
+        } catch (RuntimeException &e) {
+            std::cerr << e.getMessage() << std::endl;
+            exit(1);
+        }
+        // setup global logger
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+        // set cycle duration to a smaller value so that this test do not take too long.
+        config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
+    }
+
+    void tearDown() {
+    }
+
+    void testProcessAgents() {
+        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
+        cogserver.loadModule("libPythonModule.so");
+
+        Request* loadpyRequest = cogserver.createRequest("loadpy");
+        loadpyRequest->addParameter("test_agent");
+        cogserver.pushRequest(loadpyRequest);
+        cogserver.runLoopStep();
+
+        Agent* pythonTestAgent = cogserver.createAgent("TestAgent",true);
+
+        cogserver.runLoopStep();
+        //TS_ASSERT(pythonTestAgent->count() == 50);
+
+        //SystemActivityTable &sat = cogserver.systemActivityTable();
+        //AgentActivityTable &aat = sat.agentActivityTable();
+        //TS_ASSERT(aat[pythonTestAgent].size() == 50);
+
+        /* for (size_t j = 0; j < aat[a[i]].size(); j++)
+            {
+                Activity *act = aat[a[i]][j];
+                // check nothing takes zero time
+                TS_ASSERT(act->elapsedTime > 0);
+                // or memory (disabled: current implementation not accurate).
+                //TS_ASSERT(act->memUsed > 0);
+                // or atoms
+                TS_ASSERT(act->atomsUsed > 0);
+                // each should have 1 utilized handle set
+                TS_ASSERT(act->utilizedHandleSets.size() == 1);
+                // and one handle in the set
+                TS_ASSERT(act->utilizedHandleSets[0]->getSize() == 1);
+            }
+            */
+        cogserver.unloadModule("PythonModule");
+    }
+
+};

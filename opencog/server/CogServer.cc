@@ -266,7 +266,7 @@ std::list<const char*> CogServer::agentIds() const
 Agent* CogServer::createAgent(const std::string& id, const bool start)
 {
     Agent* a = Registry<Agent>::create(id);
-    if (start) startAgent(a);
+    if (a && start) startAgent(a);
     return a; 
 }
 

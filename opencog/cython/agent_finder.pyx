@@ -22,7 +22,7 @@ def find_subclasses(module, clazz):
             if inspect.isclass(cls[1]) and issubclass(cls[1], clazz) ]    
 
 import imp
-import opencog
+import opencog.cogserver
 
 cdef extern from "agent_finder_types.h" namespace "opencog":
     cdef struct requests_and_agents_t:
@@ -51,7 +51,7 @@ cdef api requests_and_agents_t load_module(string& module_name) with gil:
         the_module = imp.load_module(c_str,filep,pathname,desc)
         # now we need to scan the module for subclasses of MindAgent
         # each entry is a tuple with ("ClassName", <classobject>)
-        agent_classes = find_subclasses(the_module,opencog.MindAgent)
+        agent_classes = find_subclasses(the_module,opencog.cogserver.MindAgent)
     finally:
         # Since we may exit via an exception, close fp explicitly.
         if filep: filep.close()
