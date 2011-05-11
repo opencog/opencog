@@ -90,7 +90,7 @@ int main(int argc,char** argv) {
         (opt_desc_str(feature_opt).c_str(), value<vector<string> >(&pa.features),
          "Feature to consider. Can be used several time for several features.\n")
         (opt_desc_str(features_file_opt).c_str(), value<string>(&pa.features_file),
-         "File containing feature sets to consider. Each feature set per line, with features seperated by comma. The results of each feature set is displaied in a row seperated by a whitespace. So if there several combo programs (if any at all), each row corresponds to a program and each column corresponds to a feature set.\n")
+         "File containing feature sets to consider. Each feature set per line, with features seperated by comma. The results of each feature set is displayed in a row seperated by a whitespace. So if there several combo programs (if any at all), each row corresponds to a program and each column corresponds to a feature set.\n")
         (opt_desc_str(complexity_penalty_intensity_opt).c_str(),
          value<double>(&pa.complexity_penalty_intensity)->default_value(0),
          "Complexity penalty of the feature set (the larger the more penalized). Value between 0 to inf. This can be used as a speed prior for the learning algorithm that may use the features.\n")
