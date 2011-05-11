@@ -116,8 +116,8 @@ void SchemeSmob::register_procs(void)
 	// property setters
 	scm_c_define_gsubr("cog-set-av!",           2, 0, 0, C(ss_set_av));
 	scm_c_define_gsubr("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
-    scm_c_define_gsubr("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
-    scm_c_define_gsubr("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
+	scm_c_define_gsubr("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
+	scm_c_define_gsubr("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
 
 	// property getters
 	scm_c_define_gsubr("cog-name",              1, 0, 0, C(ss_name));
@@ -156,7 +156,7 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-type?",             1, 0, 0, C(ss_type_p));
 	scm_c_define_gsubr("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
 	scm_c_define_gsubr("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
-	
+
 	// Iterators
 	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));
 }
