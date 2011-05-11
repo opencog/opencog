@@ -803,7 +803,6 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 	inst.as = as;
 	Handle h = inst.instantiate(implicand, var_soln);
 
-	//Handle h = inst.instantiate(implicand, var_soln);
 	if (h != Handle::UNDEFINED)
 	{
 		result_list.push_back(h);

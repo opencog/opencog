@@ -180,8 +180,18 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			const std::vector<Handle> &osg = atom_space->getOutgoing(hg);
 
 			// The recursion step: traverse down the tree.
-			// Only links can have non-empty outgoing sets.
-			var_solutn_stack.push(var_grounding);
+			// In principle, we could/should push the current groundings
+			// onto the stack before recursing, and then pop them off on
+			// return.  Failure to do so could leave some bogus groundings,
+			// sitting around, i.e. groundings that were found during
+			// recursion but then discarded due to a later mistmatch.
+			//
+			// In practice, I was unable to come up with any test case
+			// where this mattered; any bogus groundings eventually get
+			// replaced by valid ones.  Thus, we save some unknown amount
+			// of cpu time by simply skipping the push & pop here.
+			//
+			// var_solutn_stack.push(var_grounding);
 			depth ++;
 
 			mismatch = foreach_atom_pair(osp, osg,
@@ -189,14 +199,15 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			depth --;
 			dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 
+			// If we've found a grounding, record it.
 			if (false == mismatch)
-			{
 				var_grounding[hp] = hg;
-				// Pop entry created, but keep grounding.
-				var_solutn_stack.pop();
-			}
-			else
-				POPGND(var_grounding, var_solutn_stack);
+
+			// if (false == mismatch)
+			//		var_solutn_stack.pop();
+			// else
+			//		POPGND(var_grounding, var_solutn_stack);
+
 			return mismatch;
 		}
 		else
@@ -209,7 +220,6 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 			do {
 				// The recursion step: traverse down the tree.
-				// Only links can have non-empty outgoing sets.
 				dbgprt("tree_comp being down unordered link\n");
 				var_solutn_stack.push(var_grounding);
 				depth ++;
@@ -221,9 +231,9 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 				if (false == mismatch)
 				{
-					var_grounding[hp] = hg;
 					// Pop entry created, but keep grounding.
 					var_solutn_stack.pop();
+					var_grounding[hp] = hg;
 				}
 				else
 					POPGND(var_grounding, var_solutn_stack);
@@ -278,6 +288,7 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 	// Let's not look at our own navel
 	if (hsoln == curr_root) return false;
 	depth = 1;
+
 	bool no_match = tree_compare(curr_pred_handle, hsoln);
 
 	// If no match, then try the next one.
