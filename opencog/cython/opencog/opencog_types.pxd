@@ -127,7 +127,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         bint getVLTI(cHandle h)
         void setSTI(cHandle h, short)
         void setLTI(cHandle h, short)
-        void setVLTI(cHandle h, bint)
+        void incVLTI(cHandle h)
+        void decVLTI(cHandle h)
 
         string atomAsString(cHandle h, bint)
 

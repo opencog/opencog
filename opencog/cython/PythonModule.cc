@@ -54,13 +54,19 @@ void PythonModule::init()
 
     // Add custom paths for python modules from the config file
     std::vector<std::string> pythonpaths;
-    tokenize(config()["PYTHON_EXTENSION_DIRS"], std::back_inserter(pythonpaths), ", ");
-    for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
-         it != pythonpaths.end(); ++it) {
-        boost::filesystem::path modulePath(*it);
-        if (boost::filesystem::exists(modulePath)) {
-            PyRun_SimpleString(("paths.append('" + modulePath.string() + "')\n").c_str());
+    try {
+        tokenize(config()["PYTHON_EXTENSION_DIRS"], std::back_inserter(pythonpaths), ", ");
+        for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
+             it != pythonpaths.end(); ++it) {
+            boost::filesystem::path modulePath(*it);
+            if (boost::filesystem::exists(modulePath)) {
+                PyRun_SimpleString(("paths.append('" + modulePath.string() + "')\n").c_str());
+            }
         }
+    } catch (InvalidParamException &e) {
+        size_t found;
+        found = std::string(e.what()).find("parameter not found (PYTHON_EXTENSION_DIRS)");
+        OC_ASSERT(found != string::npos, "Unknown error reading PYTHON_EXTENSION_DIRS parameter: %s", e.what());
     }
 
     // Default paths for python modules
