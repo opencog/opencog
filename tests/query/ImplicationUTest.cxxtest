@@ -236,11 +236,11 @@ void ImplicationUTest::setUp(void)
 
 	// Create data on which the above pattern should match
 	const char * str = 
-	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)\n"
+	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)\n"
 	"   (DefinedFrameNode \"#Ingestion\")\n"
 	"   (DefinedFrameNode \"#Manipulation\")\n"
 	")\n"
-	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)\n"
+	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)\n"
 	"   (PredicateNode \"grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation\")\n"
 	"   (DefinedFrameNode \"#Manipulation\")\n"
 	")\n";
