@@ -204,9 +204,9 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				var_grounding[hp] = hg;
 
 			// if (false == mismatch)
-			//		var_solutn_stack.pop();
+			//	   var_solutn_stack.pop();
 			// else
-			//		POPGND(var_grounding, var_solutn_stack);
+			//	   POPGND(var_grounding, var_solutn_stack);
 
 			return mismatch;
 		}
@@ -221,7 +221,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			do {
 				// The recursion step: traverse down the tree.
 				dbgprt("tree_comp being down unordered link\n");
-				var_solutn_stack.push(var_grounding);
+				// var_solutn_stack.push(var_grounding);
 				depth ++;
 
 				mismatch = foreach_atom_pair(osp, osg,
@@ -230,13 +230,13 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				dbgprt("tree_comp down unordered link mismatch=%d\n", mismatch);
 
 				if (false == mismatch)
-				{
-					// Pop entry created, but keep grounding.
-					var_solutn_stack.pop();
 					var_grounding[hp] = hg;
-				}
-				else
-					POPGND(var_grounding, var_solutn_stack);
+
+				// if (false == mismatch)
+				//	   var_solutn_stack.pop();
+				// else
+				//	   POPGND(var_grounding, var_solutn_stack);
+
 			} while (next_permutation(osp.begin(), osp.end()));
 
 			return mismatch;
