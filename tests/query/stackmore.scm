@@ -1,8 +1,15 @@
 
 (define (stv mean conf) (cog-new-stv mean conf))
+;;
+;; The matching solution, and the bind link are in the middle 
+;; of this file, so that the pattern matcher doesn't accidentally
+;; start searching with the correct solution first, just because
+;; we loaded it into the atomspace first. Its down in the middle
+;; of this file ...
 
 ;; this should not match.
 (SetLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -16,6 +23,7 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -28,6 +36,7 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(LatestLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -41,6 +50,7 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(CWColorNode "Big Red Button")
@@ -54,9 +64,24 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(PetNode "here kitty kitty")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(CountLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
+		(ListLink
+			(LemmaNode "thing1")
+			(LemmaNode "thing2")
+			(LemmaNode "thing3")
+		)
+	)
+)
+
+;; this should not match.
+(MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
+	(ConceptNode "big idea")
+	(ExecutionOutputLink (stv 1.0 1.0)
+		(FeatureNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
 			(LemmaNode "thing2")
@@ -71,6 +96,7 @@
 ;; handle uuid's) nor at the end (highest handle numbers) of the
 ;; atomspace
 (MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -84,6 +110,7 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -96,6 +123,7 @@
 
 ;; this should not match.
 (FeatureLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -109,6 +137,7 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(WordNode "bird is the word")
@@ -122,6 +151,7 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(HumanoidNode "ActivationModulatorUpdater")
 	(ConceptNode "big idea")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -135,6 +165,7 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(HebbianLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -150,18 +181,13 @@
 	(BindLink
 		;; variable decls
 		(ListLink
-			(TypedVariableLink
-				(VariableNode "$var_number")
-				(VariableTypeNode "NumberNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$var_schema")
-				(VariableTypeNode "GroundedSchemaNode")
-			)
+			(VariableNode "$var_number")
+			(VariableNode "$var_schema")
 		)
 		(ImplicationLink
 			;; body
 			(MemberLink (stv 1.0 1.0)
+				(VariableNode "$var_schema")
 				(VariableNode "$var_number")
 				(ExecutionOutputLink (stv 1.0 1.0)
 					(VariableNode "$var_schema")
@@ -183,6 +209,7 @@
 
 ;; this should not match.
 (SubsetLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -196,8 +223,9 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(WordNode "bird is the word")
 	(NumberNode "0.24")
-	(AtTimeLink (stv 1.0 1.0)
+	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -209,11 +237,40 @@
 
 ;; this should not match.
 (MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
+	(NumberNode "0.24")
+	(ParseLink (stv 1.0 1.0)
+		(GroundedSchemaNode "ActivationModulatorUpdater")
+		(ListLink
+			(LemmaNode "thing1")
+			(LemmaNode "thing2")
+			(LemmaNode "thing3")
+		)
+	)
+)
+
+;; this should not match.
+(MemberLink (stv 1.0 1.0)
+	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing ohh noo")
+			(LemmaNode "thing2")
+			(LemmaNode "thing3")
+		)
+	)
+)
+
+;; this should not match.
+(MemberLink (stv 1.0 1.0)
+	(CWColorNode "Big Red Button")
+	(NumberNode "0.24")
+	(ExecutionOutputLink (stv 1.0 1.0)
+		(GroundedSchemaNode "ActivationModulatorUpdater")
+		(ListLink
+			(LemmaNode "thing1")
 			(LemmaNode "thing2")
 			(LemmaNode "thing3")
 		)
