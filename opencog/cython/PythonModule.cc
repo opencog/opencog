@@ -110,9 +110,26 @@ void PythonModule::init()
     }
     // For debugging the python path:
     //PyRun_SimpleString("print sys.path\n");
+    if (config().has("PYTHON_PRELOAD")) {
+        preloadModules();
+    }
     
     // Register our Python loader request
     do_load_py_register();
+}
+
+bool PythonModule::preloadModules()
+{
+    std::vector<std::string> pythonmodules;
+    tokenize(config()["PYTHON_PRELOAD"], std::back_inserter(pythonmodules), ", ");
+    for (std::vector<std::string>::const_iterator it = pythonmodules.begin();
+         it != pythonmodules.end(); ++it) {
+        std::list<std::string> args;
+        args.push_back(*it);
+        do_load_py(NULL,args);
+    }
+    // TODO check for errors
+    return true;
 }
 
 std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args)
@@ -165,6 +182,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
                 oss << ", ";
                 first = false;
             }
+            // TODO implement support for CogServer requests in Python
             //PythonAgentFactory(moduleName,s);
             // Register agent with cogserver using dotted name:
             // module.AgentName

@@ -69,6 +69,8 @@ public:
 
     bool stopPythonAgents();
     std::string name;
+    
+    bool preloadModules();
 
     //PyObject* load_module(std::string& filename);
 }; // class

@@ -6,9 +6,9 @@ class TestAgent(opencog.cogserver.MindAgent):
     def __init__(self):
         self.counter = 1
 
-    def run(self,a):
-        a.add_node(types.ConceptNode, "testnode"+str(self.counter))
+    def run(self,atomspace):
+        atomspace.add_node(types.ConceptNode, "testnode"+str(self.counter))
         print "I am running and the atomspace contains: "
-        a.print_list()
+        atomspace.print_list()
         self.counter+=1
 
