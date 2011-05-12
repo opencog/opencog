@@ -107,6 +107,6 @@ ELSE (WIN32)
     INSTALL (TARGETS agent_finder LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
 ENDIF (WIN32)
 INSTALL (FILES 
-    atom.py
+    opencog/atom.py
     # this isn't right, we need the python data dir
     DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
