@@ -87,8 +87,9 @@ public:
         cogserver.pushRequest(loadpyRequest);
         cogserver.runLoopStep();
 
-        Agent* pythonTestAgent = cogserver.createAgent("TestAgent",true);
+        Agent* pythonTestAgent = cogserver.createAgent("test_agent.TestAgent",true);
 
+        cogserver.runLoopStep();
         cogserver.runLoopStep();
         //TS_ASSERT(pythonTestAgent->count() == 50);
 
@@ -111,7 +112,7 @@ public:
                 TS_ASSERT(act->utilizedHandleSets[0]->getSize() == 1);
             }
             */
-        cogserver.unloadModule("PythonModule");
+        cogserver.unloadModule("opencog::PythonModule");
     }
 
 };

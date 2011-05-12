@@ -1,5 +1,5 @@
 # it'd be nice to define the type of atomspace
-#from opencog_types cimport AtomSpace
+from opencog.atomspace cimport cAtomSpace, AtomSpace_factory
 
 cdef class MindAgent:
     
@@ -12,12 +12,18 @@ cdef class MindAgent:
         """
         return 1
 
-    # it'd be nice to define the type of atomspace
-    def start(self, atomspace):
-        pass
+# These methods are not available until we have support for MindAgents running
+# continuously in their own threads
+#    def start(self, AtomSpace atomspace):
+#        pass
 
-    def end(self):
-        pass
+#    def end(self):
+#        pass
+    cdef api __run_wrap(self,cAtomSpace *c_atomspace):
+        a = AtomSpace_factory(c_atomspace)
+        self.run(a)
 
     def run(self, atomspace):
-        pass
+        print "Implement me in your MindAgent subclass: " + atomspace
+
+

@@ -148,6 +148,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cTimeServer getTimeServer()
         void print_list "print" ()
 
+cdef AtomSpace_factory(cAtomSpace *to_wrap)
+
 # SpaceServer
 cdef extern from "opencog/atomspace/SpaceServer.h" namespace "opencog":
     cdef cppclass cSpaceServer "opencog::SpaceServer":

@@ -34,7 +34,7 @@ public:
         pyClassName = clazz;
     }
     virtual ~PythonAgentFactory() {}
-    virtual Agent* create() const { return new PyMindAgent(pySrcModuleName,pyClassName); }
+    virtual Agent* create() const;
     virtual const ClassInfo& info() const { return PyMindAgent::info(); }
 }; 
 
@@ -47,10 +47,8 @@ class PythonModule : public Module
        false);
 
 private:
-    static inline AbstractFactory<Agent>& factory() {
-        static Factory<PyMindAgent, Agent> _factory;
-        return _factory;
-    }
+
+    std::vector<std::string> agentNames;
 
 public:
 
@@ -65,6 +63,7 @@ public:
     ~PythonModule();
     void init();
 
+    bool stopPythonAgents();
     std::string name;
 
     //PyObject* load_module(std::string& filename);

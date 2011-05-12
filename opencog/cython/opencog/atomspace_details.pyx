@@ -2,7 +2,7 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from opencog_types cimport *
+from atomspace cimport *
 
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
@@ -110,12 +110,19 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
         inc(iter)
     return result
 
+cdef AtomSpace_factory(cAtomSpace *to_wrap):
+    cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
+    instance.atomspace = to_wrap
+
 cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef cTimeServer *timeserver
 
     # TODO how do we do a copy constructor that shares the AtomSpaceAsync?
     def __cinit__(self):
+        pass
+
+    def __init__(self):
         self.atomspace = new cAtomSpace()
 
     def __dealloc__(self):

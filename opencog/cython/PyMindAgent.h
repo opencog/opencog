@@ -56,18 +56,16 @@ public:
         return _ci;
     }
 
+    //PyMindAgent();
 
-    PyMindAgent();
+    /** Pass a PyObject that is a Python MindAgent object.  */
+    PyMindAgent(const std::string& moduleName, const std::string& className, PyObject* o);
 
-    /** Agent's constructor. Pass a PyObject that is a Python MindAgent object.
-     */
-    PyMindAgent(const std::string& moduleName, const std::string& className);
-
-    /** Agent's destructor */
     virtual ~PyMindAgent();
 
-    /** Abstract run method. Should be overriden by a derived agent with the
-     *  actual agent's behavior. */
+    /** Run method - this calls the run method of the encapsulated Python
+     * MindAgent class.
+     */
     virtual void run(CogServer* server);
 
 

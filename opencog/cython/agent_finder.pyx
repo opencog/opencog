@@ -61,7 +61,25 @@ cdef api requests_and_agents_t load_module(string& module_name) with gil:
     return results
 
 # Initialise an agent of class "agent_name"
-cdef api object init_agent(string& agent_name, string& module_name) with gil:
-    print "load agent" + agent_name.c_str()
+cdef api object instantiate_agent(string module_name, string agent_name) with gil:
+    cdef bytes module_str = module_name.c_str()
+    cdef bytes agent_str = agent_name.c_str()
+    cdef requests_and_agents_t results
+    print "Instantiating agent " + module_str + "." + agent_str
+    agent = None
+    try:
+        # find and load the module
+        filep,pathname,desc = imp.find_module(module_str)
+        the_module = imp.load_module(module_str,filep,pathname,desc)
+        # get the class object
+        agentClass = getattr(the_module, agent_str) 
+        # instantiate it
+        if agentClass: agent = agentClass()
+    except Exception, e:
+        print str(e)
+    finally:
+        # Since we may exit via an exception, close fp explicitly.
+        if filep: filep.close()
+    return agent
 
     

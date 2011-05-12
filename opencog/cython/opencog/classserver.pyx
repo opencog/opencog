@@ -1,4 +1,4 @@
-from opencog_types cimport cClassServer, classserver, NOTYPE, string, Type
+from atomspace cimport cClassServer, classserver, NOTYPE, string, Type
 
 # dynamically construct a "types" module
 # this should also listen to "addtype" signals in case new types are

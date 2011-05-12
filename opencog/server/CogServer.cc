@@ -294,6 +294,10 @@ void CogServer::destroyAgent(Agent *agent)
 
 void CogServer::destroyAllAgents(const std::string& id)
 {
+    // TODO: This will need to be changed for MindAgents that are not
+    // constrained to only running every N cognitive cycles. I.e. when
+    // they have their own thread they'll have to be stopped and their threads
+    // "joined"
     pthread_mutex_lock(&agentsLock);
     // place agents with classinfo().id == id at the end of the container
     std::vector<Agent*>::iterator last = 
@@ -306,7 +310,7 @@ void CogServer::destroyAllAgents(const std::string& id)
     // remove those agents from the main container
     agents.erase(last, agents.end());
 
-    // remove their activities
+    // remove statistical record of their activities
     for (size_t n = 0; n < to_delete.size(); n++)
         _systemActivityTable.clearActivity(to_delete[n]);
 

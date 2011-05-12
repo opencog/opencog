@@ -6,13 +6,22 @@
 #define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/operations.hpp>
 
+#include <boost/foreach.hpp>
+#ifndef foreach
+#define foreach  BOOST_FOREACH
+#endif
+
 #include <opencog/util/Config.h>
 #include <opencog/util/misc.h>
+
 
 using std::vector;
 using std::string;
 
 using namespace opencog;
+
+#define DPRINTF printf
+//#define DPRINTF(...)
 
 DECLARE_MODULE(PythonModule);
 
@@ -28,6 +37,15 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
     NULL
 };
 
+Agent* PythonAgentFactory::create() const {
+    // call out to our helper module in cython
+    PyObject* o = instantiate_agent(pySrcModuleName, pyClassName);
+    if (o == Py_None)
+        throw RuntimeException(TRACE_INFO, "Error creating Python MindAgent");
+    PyMindAgent* pma = new PyMindAgent(pySrcModuleName,pyClassName,o);
+    return pma;
+}
+
 PythonModule::PythonModule() : Module()
 {
     logger().info("[PythonModule] constructor");
@@ -36,8 +54,18 @@ PythonModule::PythonModule() : Module()
 PythonModule::~PythonModule()
 {
     logger().info("[PythonModule] destructor");
+    stopPythonAgents();
     do_load_py_unregister();
     Py_Finalize();
+}
+
+bool PythonModule::stopPythonAgents()
+{
+    foreach (std::string s, agentNames) {
+        DPRINTF("Deleting all instances of %s\n", s.c_str());
+        cogserver().destroyAllAgents(s);
+    }
+    return true;
 }
 
 void PythonModule::init()
@@ -52,9 +80,9 @@ void PythonModule::init()
     const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
     PyRun_SimpleString("paths=[]");
 
-    // Add custom paths for python modules from the config file
-    std::vector<std::string> pythonpaths;
-    try {
+    // Add custom paths for python modules from the config file if available
+    if (config().has("PYTHON_EXTENSION_DIRS")) {
+        std::vector<std::string> pythonpaths;
         tokenize(config()["PYTHON_EXTENSION_DIRS"], std::back_inserter(pythonpaths), ", ");
         for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
              it != pythonpaths.end(); ++it) {
@@ -63,10 +91,6 @@ void PythonModule::init()
                 PyRun_SimpleString(("paths.append('" + modulePath.string() + "')\n").c_str());
             }
         }
-    } catch (InvalidParamException &e) {
-        size_t found;
-        found = std::string(e.what()).find("parameter not found (PYTHON_EXTENSION_DIRS)");
-        OC_ASSERT(found != string::npos, "Unknown error reading PYTHON_EXTENSION_DIRS parameter: %s", e.what());
     }
 
     // Default paths for python modules
@@ -84,7 +108,9 @@ void PythonModule::init()
         PyErr_Print();
         logger().error("[PythonModule] Failed to load helper python module");
     }
-    PyRun_SimpleString("print sys.path\n");
+    // For debugging the python path:
+    //PyRun_SimpleString("print sys.path\n");
+    
     // Register our Python loader request
     do_load_py_register();
 }
@@ -97,34 +123,67 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
     std::string moduleName = args.front();
     std::ostringstream oss;
     if (moduleName.substr(moduleName.size()-3,3) == ".py") {
-        oss << "Warning: Python module name should be passed without .py extension" << std::endl;
+        oss << "Warning: Python module name should be "
+            << "passed without .py extension" << std::endl;
         moduleName.replace(moduleName.size()-3,3,"");
     }
     thingsInModule = load_module(moduleName);
     if (thingsInModule.agents.size() > 0) {
         bool first = true;
         oss << "Python MindAgents found: ";
+        DPRINTF("Python MindAgents found: ");
         foreach(std::string s, thingsInModule.agents) {
             if (!first) {
                 oss << ", ";
                 first = false;
             }
-            std::cout << s << std::endl;
+            PythonAgentFactory(moduleName,s);
+            // Register agent with cogserver using dotted name:
+            // module.AgentName
+            std::string dottedName = moduleName + "." + s;
+            // register the agent with a custom factory that knows how to
+            // instantiate new Python MindAgents
+
+            cogserver().registerAgent(dottedName, new PythonAgentFactory(moduleName,s));
+            // save a list of Python agents that we've added to the CogServer
+            agentNames.push_back(dottedName);
             oss << s;
+            DPRINTF("%s ", s.c_str());
+        }
+        oss << "." << std::endl;
+        DPRINTF("\n");
+    } else {
+        oss << "No subclasses of opencog.cogserver.MindAgent found.";
+        DPRINTF("No subclasses of opencog.cogserver.MindAgent found.\n");
+    }
+    if (thingsInModule.requests.size() > 0) {
+        bool first = true;
+        oss << "Python Requests found: ";
+        DPRINTF("Python Requests found: ");
+        foreach(std::string s, thingsInModule.requests) {
+            if (!first) {
+                oss << ", ";
+                first = false;
+            }
+            //PythonAgentFactory(moduleName,s);
+            // Register agent with cogserver using dotted name:
+            // module.AgentName
+            std::string dottedName = moduleName + "." + s;
+            // register the agent with a custom factory that knows how to
+            // instantiate new Python MindAgents
+            //cogserver().registerAgent(dottedName, PythonAgentFactory(moduleName,s));
+            // save a list of Python agents that we've added to the CogServer
+            //agentNames.push_back(dottedName);
+            oss << s;
+            DPRINTF("%s ", s.c_str());
         }
         oss << ".";
     } else {
-        oss << "No subclasses of opencog.cogserver.MindAgent found.";
-        std::cout << "No subclasses of opencog.cogserver.MindAgent found.";
+        oss << "No subclasses of opencog.cogserver.Request found.";
+        DPRINTF("No subclasses of opencog.cogserver.Request found.\n");
     }
-    // TODO save the py_module somewhere
-    // ...
-    // TODO register the agents
-    //CogServer& cogserver = static_cast<CogServer&>(server());
-    // How do we initialise a mind agent with a factory that will
-    // load with given Python class
-    //cogserver.registerAgent(PyMindAgent::info().id, &forgettingFactory);
-    // TODO return info on what requests and mindagents were found
+
+    // return info on what requests and mindagents were found
     return oss.str();
 
 }
