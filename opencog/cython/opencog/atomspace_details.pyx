@@ -113,20 +113,24 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
 cdef AtomSpace_factory(cAtomSpace *to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.atomspace = to_wrap
+    return instance
 
 cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef cTimeServer *timeserver
+    cdef bint owns_atomspace
 
     # TODO how do we do a copy constructor that shares the AtomSpaceAsync?
     def __cinit__(self):
-        pass
+        self.owns_atomspace = False
 
     def __init__(self):
         self.atomspace = new cAtomSpace()
+        self.owns_atomspace = True
 
     def __dealloc__(self):
-        del self.atomspace
+        if self.owns_atomspace:
+            del self.atomspace
 
     def add_node(self, Type t, atom_name, TruthValue tv=None, prefixed=False):
         """ Add Node to AtomSpace

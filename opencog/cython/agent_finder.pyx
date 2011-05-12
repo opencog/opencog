@@ -23,11 +23,16 @@ def find_subclasses(module, clazz):
 
 import imp
 import opencog.cogserver
+from opencog.atomspace cimport cAtomSpace, AtomSpace_factory
 
 cdef extern from "agent_finder_types.h" namespace "opencog":
     cdef struct requests_and_agents_t:
         vector[string] agents
         vector[string] requests
+
+cdef api run_agent(object o,cAtomSpace *c_atomspace):
+    a = AtomSpace_factory(c_atomspace)
+    o.run(a)
 
 #import signal
 #import sys

@@ -1,5 +1,5 @@
-# it'd be nice to define the type of atomspace
-from opencog.atomspace cimport cAtomSpace, AtomSpace_factory
+# it'd be nice to define the type of atomspace but I can't get this working
+#from opencog.atomspace cimport AtomSpace
 
 cdef class MindAgent:
     
@@ -19,9 +19,6 @@ cdef class MindAgent:
 
 #    def end(self):
 #        pass
-    cdef api __run_wrap(self,cAtomSpace *c_atomspace):
-        a = AtomSpace_factory(c_atomspace)
-        self.run(a)
 
     def run(self, atomspace):
         print "Implement me in your MindAgent subclass: " + atomspace

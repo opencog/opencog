@@ -38,7 +38,7 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 };
 
 Agent* PythonAgentFactory::create() const {
-    // call out to our helper module in cython
+    // call out to our helper module written in cython
     PyObject* o = instantiate_agent(pySrcModuleName, pyClassName);
     if (o == Py_None)
         throw RuntimeException(TRACE_INFO, "Error creating Python MindAgent");

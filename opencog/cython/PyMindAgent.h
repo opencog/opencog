@@ -46,15 +46,13 @@ class PyMindAgent : public Agent
 {
 
     PyObject* pyagent;
+    std::string moduleName;
+    std::string className;
 protected:
 
 public:
 
-    virtual const ClassInfo& classinfo() const { return info(); }
-    static const ClassInfo& info() {
-        static const ClassInfo _ci("opencog::PyMindAgent");
-        return _ci;
-    }
+    virtual const ClassInfo& classinfo() const;
 
     //PyMindAgent();
 

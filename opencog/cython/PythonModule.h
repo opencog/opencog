@@ -28,14 +28,18 @@ class PythonAgentFactory : public AbstractFactory<Agent>
     // them
     std::string pySrcModuleName;
     std::string pyClassName;
+    ClassInfo* ci;
 public:
     explicit PythonAgentFactory(std::string& module, std::string& clazz) : AbstractFactory<Agent>() {
         pySrcModuleName = module;
         pyClassName = clazz;
+        ci = new ClassInfo("opencog::PyMindAgent(" + module + "." + clazz + ")");
     }
-    virtual ~PythonAgentFactory() {}
+    virtual ~PythonAgentFactory() {
+        delete ci;
+    }
     virtual Agent* create() const;
-    virtual const ClassInfo& info() const { return PyMindAgent::info(); }
+    virtual const ClassInfo& info() const { return *ci; }
 }; 
 
 class PythonModule : public Module
