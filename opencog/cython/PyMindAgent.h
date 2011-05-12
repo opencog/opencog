@@ -57,7 +57,7 @@ public:
     //PyMindAgent();
 
     /** Pass a PyObject that is a Python MindAgent object.  */
-    PyMindAgent(const std::string& moduleName, const std::string& className, PyObject* o);
+    PyMindAgent(const std::string& moduleName, const std::string& className);
 
     virtual ~PyMindAgent();
 
@@ -67,10 +67,10 @@ public:
     virtual void run(CogServer* server);
 
     /** Returns the agent's frequency. */
-    virtual int frequency(void) const;
+//    virtual int frequency(void) const;
 
     /** Sets the agent's frequency. */
-    virtual void setFrequency(int frequency);
+//    virtual void setFrequency(int frequency);
 
 }; // class
 

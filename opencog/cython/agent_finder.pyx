@@ -24,6 +24,7 @@ def find_subclasses(module, clazz):
 import imp
 import opencog.cogserver
 from opencog.atomspace cimport cAtomSpace, AtomSpace_factory
+from opencog.cogserver cimport cAgent, stim_t
 
 cdef extern from "agent_finder_types.h" namespace "opencog":
     cdef struct requests_and_agents_t:
@@ -33,15 +34,6 @@ cdef extern from "agent_finder_types.h" namespace "opencog":
 cdef api run_agent(object o,cAtomSpace *c_atomspace):
     a = AtomSpace_factory(c_atomspace)
     o.run(a)
-
-#import signal
-#import sys
-#def exit_catcher(sig,stack):
-    #if sig == signal.SIGINT:
-        #print("Caught interrupt signal")
-    #sys.exit(sig)
-#
-#signal.signal(signal.SIGINT, exit_catcher)
 
 cdef api requests_and_agents_t load_module(string& module_name) with gil:
     """ Load module and return a vector of MindAgent names """
@@ -65,13 +57,14 @@ cdef api requests_and_agents_t load_module(string& module_name) with gil:
         results.agents.push_back(string(a[0]))
     return results
 
+from opencog.cogserver cimport MindAgent
 # Initialise an agent of class "agent_name"
-cdef api object instantiate_agent(string module_name, string agent_name) with gil:
+cdef api object instantiate_agent(string module_name, string agent_name, cAgent *cpp_agent) with gil:
     cdef bytes module_str = module_name.c_str()
     cdef bytes agent_str = agent_name.c_str()
     cdef requests_and_agents_t results
     print "Instantiating agent " + module_str + "." + agent_str
-    agent = None
+    cdef MindAgent agent = None
     try:
         # find and load the module
         filep,pathname,desc = imp.find_module(module_str)
@@ -79,7 +72,9 @@ cdef api object instantiate_agent(string module_name, string agent_name) with gi
         # get the class object
         agentClass = getattr(the_module, agent_str) 
         # instantiate it
-        if agentClass: agent = agentClass()
+        if agentClass:
+            agent = agentClass()
+            agent.c_obj = cpp_agent
     except Exception, e:
         print str(e)
     finally:

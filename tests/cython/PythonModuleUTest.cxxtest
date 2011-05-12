@@ -91,6 +91,11 @@ public:
 
         cogserver.runLoopStep();
         cogserver.runLoopStep();
+
+        TS_ASSERT(pythonTestAgent->frequency() == 1);
+        pythonTestAgent->setFrequency(2);
+        TS_ASSERT(pythonTestAgent->frequency() == 2);
+
         //TS_ASSERT(pythonTestAgent->count() == 50);
 
         //SystemActivityTable &sat = cogserver.systemActivityTable();

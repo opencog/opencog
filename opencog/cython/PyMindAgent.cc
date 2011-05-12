@@ -8,13 +8,16 @@
 
 using namespace opencog;
 
-PyMindAgent::PyMindAgent(const std::string& _moduleName, const std::string& _className, PyObject* o)
+PyMindAgent::PyMindAgent(const std::string& _moduleName, const std::string& _className)
 {
     // TODO move the class instantiation code here
     import_agent_finder();
     moduleName = _moduleName;
     className = _className;
-    pyagent=o;
+    // call out to our helper module written in cython
+    pyagent = instantiate_agent(moduleName, className, this);
+    if (pyagent == Py_None)
+        throw RuntimeException(TRACE_INFO, "Error creating Python MindAgent");
 }
 
 const ClassInfo& PyMindAgent::classinfo() const
@@ -39,7 +42,7 @@ void PyMindAgent::run(CogServer* server)
     // PyErr_Print();
 }
 
-int PyMindAgent::frequency() const
+/*int PyMindAgent::frequency() const
 {
     PyObject* freq = PyObject_GetAttrString(pyagent,"frequency");
     PyErr_Print();
@@ -53,4 +56,4 @@ void PyMindAgent::setFrequency(int freq)
     PyObject* p_freq = Py_BuildValue("i", freq);
     PyObject_SetAttrString(pyagent,"frequency",p_freq);
     Py_DECREF(p_freq);
-}
+}*/

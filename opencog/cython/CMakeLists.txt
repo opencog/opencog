@@ -16,14 +16,14 @@ add_custom_command(OUTPUT opencog/atomspace.cpp
 add_custom_command(OUTPUT opencog/cogserver.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/cogserver.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/cogserver.pyx"
-  DEPENDS "opencog/cogserver.pyx" "opencog/agent.pyx")
+  DEPENDS "opencog/cogserver.pyx" "opencog/agent.pyx" "opencog/cogserver.pxd")
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/cogserver.cpp" "opencog/atomspace.cpp")
 
 # How to Cython the .pyx file
 add_custom_command(OUTPUT agent_finder.cpp agent_finder_api.h
   COMMAND
   ${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx"
-  DEPENDS "agent_finder.pyx")
+  DEPENDS "agent_finder.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd")
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
 
 # opencog.atomspace Python bindings

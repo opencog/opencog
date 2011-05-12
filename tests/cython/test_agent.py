@@ -12,3 +12,4 @@ class TestAgent(opencog.cogserver.MindAgent):
         atomspace.print_list()
         self.counter+=1
 
+
