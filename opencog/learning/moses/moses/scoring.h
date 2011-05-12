@@ -289,7 +289,7 @@ struct occam_truth_table_bscore
         : target(t), tti(i), rng(_rng) {
         occam = p > 0 && p < 0.5;
         if(occam)
-            complexity_coef = log((double)alphabet_size) / log(p/(1-p));
+            complexity_coef = - log((double)alphabet_size) / log(p/(1-p));
     }
 
     behavioral_score operator()(const combo_tree& tr) const;

@@ -122,9 +122,9 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 }
 
 void occam_contin_bscore::set_complexity_coef(double variance,
-                                                  double alphabet_size) {
+                                              double alphabet_size) {
     if(occam)
-        complexity_coef = - log((double)alphabet_size) * 2 * variance;
+        complexity_coef = log((double)alphabet_size) * 2 * variance;
 }
 
 behavioral_score occam_truth_table_bscore::operator()(const combo_tree& tr) const
