@@ -66,6 +66,11 @@ public:
      */
     virtual void run(CogServer* server);
 
+    /** Returns the agent's frequency. */
+    virtual int frequency(void) const;
+
+    /** Sets the agent's frequency. */
+    virtual void setFrequency(int frequency);
 
 }; // class
 
