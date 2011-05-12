@@ -861,7 +861,8 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 Handle PatternMatch::varscope (Handle himplication)
 {
 	// Now perform the search.
-	CrispImplicator impl;
+//	CrispImplicator impl;
+    DefaultImplicator impl; 	
 	impl.as = atom_space;
 	return do_varscope(himplication, &impl);
 }

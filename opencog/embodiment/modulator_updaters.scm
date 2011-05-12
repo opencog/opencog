@@ -16,31 +16,23 @@
 ;
 
 (define (ActivationModulatorUpdater)
-    (random:uniform)
-)
+    (* (get_predicate_truth_value_mean "CertaintyDemandGoal")
 
-;ActivationModulatorUpdater(0) := 
-;    *( get_certainty_demand_goal_truth_value
-;            
-;       +( 1
-;          neg( power(get_competence_demand_goal_truth_value 0.5)
-;             ) 
-;        ) 
-;     )
+       (- 1
+          (expt (get_predicate_truth_value_mean "CompetenceDemandGoal") 0.5)  
+       )
+    )
+)
 
 ; Resolution level affects perception. 
 ; The range of resolution level is [0, 1]
 ; A low resolution level tends to miss differences, then the agent would get a better overview
 
 (define (ResolutionModulatorUpdater)
-    (random:uniform) 
+    (- 1
+       (expt (get_latest_modulator_or_demand "ActivationModulator") 0.5)
+    ) 
 )
-
-;ResolutionModulatorUpdater(0) :=
-;    +( 1 
-;       neg( power(get_activation_modulator 0.5)
-;          ) 
-;     )
 
 ; The frequency of the securing behavior is inversily determined by SecuringThreshold.
 ; The range of securing threshold is [0, 1]
@@ -50,17 +42,14 @@
 ; An undetermined environment requires more orientation, i.e. lower securing threshold. 
 
 (define (SecuringThresholdModulatorUpdater)
-    (random:uniform) 
-)
+    (normalize (/ (+ (get_predicate_truth_value_mean "CertaintyDemandGoal") 1)
+                  (+ (get_predicate_truth_value_mean "CurrentDemandGoal") 1)
+               )
 
-;SecuringThresholdModulatorUpdater(0) :=
-;    normalize( /( +(get_certainty_demand_goal_truth_value 1)
-;
-;                  +(get_current_demand_goal_truth_value 1)
-;                )
-;                0.5
-;                2
-;             )
+               0.5
+               2
+    )
+)
 
 ; SelectionThreshold is a bias added to the strength of the currently selected motive (Demand Goal). 
 ; The range of SelectionThreshold is [0, 1]
@@ -69,14 +58,12 @@
 ; While a lower one results in opportunism/flexibility, or even motive fluttering. 
 
 (define (SelectionThresholdModulatorUpdater)
-    (random:uniform) 
+    (clip_within (* (get_latest_modulator_or_demand_value "SelectionThresholdModulator")
+                    (+ (get_latest_modulator_or_demand_value "ActivationModulator") 0.5)
+                 )
+
+                 0.001
+                 1
+    )
 )
 
-;SelectionThresholdModulatorUpdater(0) :=
-;    clip_within( *( get_selection_threshold_modulator
-;                    +(get_activation_modulator 0.5)     
-;                  )
-;                 0.001
-;                 1
-;
-;)

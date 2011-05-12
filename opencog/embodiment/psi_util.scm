@@ -2,7 +2,7 @@
 ; Helper functions used by all sorts of psi scheme scripts
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-06
+; @date   2011-05-12
 ;
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -93,6 +93,46 @@
           
           (unpack_query_result query_rusult_list_link)
     ) 
+)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Helper functions for numbers
+;
+
+; Return the normalized value ( falls in [0, 1] ) of x, given min and max values
+(define (normalize x min_value max_value)
+    (/ (- x min_value)
+       (- max_value min_value) 
+    ) 
+)
+ 
+; Return the clipped value ( fallss in [#2, #3] ) of #1, given min (#2) and max (#3) values
+(define (clip_within x min_value max_value)
+    (cond
+        ( (< x min_value) 
+          min_value
+        )
+
+        ( (> x max_value)
+          max_value
+        )
+
+        (else x)
+    ) 
+)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Helper functions about truth value
+;
+
+(define (get_truth_value_mean truth_value)
+    (assoc-ref (cog-tv->alist truth_value) 'mean)
+)
+
+(define (get_truth_value_confidence truth_value)
+    (assoc-ref (cog-tv->alist truth_value) 'confidence) 
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -379,6 +419,149 @@
           at_time_link
     ); let*
 )
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Getter/ Setters for EvaluationLink, which are useful for Demand Goals, Feelings etc.
+;
+
+; BindLink used by cog-bind to search the EvaluationLink given PredicateNode name
+;
+; The format of EvaluationLink is as follows:
+;
+; EvaluationLink
+;     PredicateNode  "predicate_name"
+;     ListLink
+;         ...
+;
+
+(define (find_evaluation_link predicate_name)
+    (BindLink
+        ; Variables to be used
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$var_list_link_type") 
+                (VariableTypeNode "ListLink")
+            ) 
+        ) 
+
+        (ImplicationLink
+            ; Pattern to be searched    
+            (EvaluationLink
+                (PredicateNode
+                    (string-trim-both predicate_name)                  
+                ) 
+                (VariableNode "$var_list_link_type")
+            )
+
+            ; Return values
+            (EvaluationLink
+                (PredicateNode
+                    (string-trim-both predicate_name)                  
+                ) 
+                (VariableNode "$var_list_link_type")
+            )
+        )
+
+    ); BindLink 
+)
+
+; Return the single EvaluationLink given the predicate_name
+; if failed or found multiple EvaluationLink, return an empty list
+(define (get_evaluation_link predicate_name)
+    (let* ( (evaluation_link_list 
+                (query_atom_space (find_evaluation_link predicate_name) )
+            )    
+          )
+
+          (if (null? evaluation_link_list)
+              ; If failed to find the EvaluationLink, return an empty list
+              (list)
+
+              (if (equal? (length evaluation_link_list) 1)
+                  ; If found the single EvaluationLink, return it
+                  (car evaluation_link_list)
+
+                  ; If found multiple EvaluationLink, return an empty list
+                  (begin
+                      (print_debug_info INFO_TYPE_WARN 
+                          "get_evaluation_link"
+                          (string-append "NUmber of EvaluationLink containing "
+                                         "PredicateNode: " predicate_name 
+                                         " should be exactly 1. But got "
+                                         (number->string (length evaluation_link_list) )
+                          )
+                      )
+                      (list)
+                  )
+              ); if
+          ); if 
+
+    ); let*
+); define
+
+; Return the truth value of EvaluationLink given the predicate name. 
+; If fails to retrieve the EvaluationLink from AtomSpace, it would return a
+; random SimpleTruthValue with both mean and confidence in [0, 1]
+(define (get_predicate_truth_value predicate_name)
+    (let* ( (evaluation_link (get_evaluation_link predicate_name) )
+          )
+          
+          (if (null? evaluation_link)
+              (begin
+                  (print_debug_info INFO_TYPE_WARN "get_predicate_truth_value"
+                                    (string-append "Failed to retrieve EvaluationLink " 
+                                                    "containing PredicateNode: "
+                                                    predicate_name " from AtomSpace. "
+                                                    "Return a random SimpleTruthValue " 
+                                                    "in [0, 1] instead."
+                                    )
+                  )
+
+                  (stv (random:uniform) (random:uniform) )
+              ); begin    
+
+              (cog-tv evaluation_link)
+          ); if
+
+    ); let*
+); define
+
+; Return the mean of the truth value of EvaluationLink given the 
+; PredicateNode name. 
+; If fails to retrieve the corresponding EvaluationLink, return a random number
+; in [0, 1]
+(define (get_predicate_truth_value_mean predicate_name)
+    (get_truth_value_mean (get_predicate_truth_value predicate_name) ) 
+)
+
+; Set the truth value of EvaluationLink given predicate name and return the 
+; EvaluationLink with udpated truth value. 
+; If fails, return an empty scheme list. 
+(define (set_predicate_truth_value predicate_name truth_value)
+    (let* ( (evaluation_link (get_evaluation_link predicate_name) )
+          )
+          
+          (if (null? evaluation_link)
+              (print_debug_info INFO_TYPE_WARN "set_predicate_truth_value"
+                                (string-append "Failed to set truth value for " 
+                                                "EvaluationLink containing " 
+                                                "PredicateNode: " predicate_name 
+                                                " from AtomSpace. "
+                                                "Because we can not retrieve it "
+                                                "from AtomSpace."             
+                                )
+              )
+
+              (cog-set-tv! evaluation_link truth_value)
+          ); if
+         
+          ; Return the EvaluationLink with updated truth value
+          ; or an empty scheme list if fails. 
+          evaluation_link
+    ); let*
+)
+
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 

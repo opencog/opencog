@@ -60,7 +60,7 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 
 // Inheritence and association links
 INHERITANCE_LINK <- ORDERED_LINK
-SIMILARITY_LINK <- UNORDERED_LINK
+SIMILARITY_LINK <- ORDERED_LINK // UNORDERED_LINK
 
 
 // that one is redundant with SUBSET_LINK and officially disabled
