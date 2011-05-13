@@ -175,8 +175,11 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
         dcRho = new double[NumberOfLayers];
         NumberOfStates = new int[NumberOfLayers];
         DistanceMeasureArray = new int[NumberOfLayers];
-
+        RowsPerLayer = new int[NumberOfLayers];
+        FixedLearningRateLayer = new float[NumberOfLayers];
+        bSelfAndUpperFeedback = new bool[NumberOfLayers];
         pugi::xml_node layer = layers.child("layer");
+        // Loop true each layer configuration
         for( int iLayer = 0; iLayer < NumberOfLayers; iLayer++ )
         {
             dcMu[iLayer] = layer.attribute("mu").as_double();

@@ -37,7 +37,7 @@ void DestinLayer::ClearAndDestroy(void)
 //	mDestinNodeUnits.clear();
 }
 
-//This assumes that the csv files are in this directory and have a convention:
+// This assumes that the csv files are in this directory and have a convention:
 // Layer01_Row_03_Col_01_CENTROIDS.csv
 // Layer01_Row_03_Col_01_SMAX.csv
 void DestinLayer::OverrideCentroidsAndSMaxWithCSVFiles(int Layer, char* sDirectory)
@@ -57,22 +57,20 @@ void DestinLayer::OverrideCentroidsAndSMaxWithCSVFiles(int Layer, char* sDirecto
 	}
 }
 
-//Write to a stream...
+// Write to a stream.
 bool DestinLayer::WriteToStream(std::ofstream& stmOutput)
 {
 	stmOutput.write( (char*)&mRows, sizeof(mRows) );
 	stmOutput.write( (char*)&mCols, sizeof(mCols) );
-
 	stmOutput.write( (char*)&mGTLabel, sizeof(mGTLabel) );
 	stmOutput.write( (char*)&mSignalIndex, sizeof(mSignalIndex) );
 	stmOutput.write( (char*)&mMovementNumber, sizeof(mMovementNumber) );
 	stmOutput.write( (char*)&mObservationNumber, sizeof(mObservationNumber) );
 
 //	DestinNode* MyNode;
-//	int r,c;
-//	for(r=0;r<mRows;r++)
+//	for(int r=0;r<mRows;r++)
 //	{
-//		for(c=0;c<mCols;c++)
+//		for(int c=0;c<mCols;c++)
 //		{
 //			MyNode = this->GetPointerToNode(r,c);
 //			MyNode->WriteToStream(stmOutput);
@@ -94,15 +92,11 @@ bool DestinLayer::ReadFromStream(std::ifstream& stmInput)
 	stmInput.read( (char*)&mObservationNumber, sizeof(mObservationNumber) );
 
 //	DestinNode* MyNode;
-//	int r,c;
-//	for (r=0;r<mDestinNodeUnits.size();r++)
+//	ClearAndDestroy();
+//
+//	for(int r=0;r<mRows;r++)
 //	{
-//		delete mDestinNodeUnits[r];
-//	}
-//	mDestinNodeUnits.clear();
-//	for(r=0;r<mRows;r++)
-//	{
-//		for(c=0;c<mCols;c++)
+//		for(int c=0;c<mCols;c++)
 //		{
 //			MyNode = new DestinNode();
 //			MyNode->ReadFromStream(stmInput);
@@ -143,7 +137,6 @@ bool DestinLayer::operator == (DestinLayer& o)
 //			}
 //		}
 //	}
-
 
 	return bReturn;
 }
@@ -445,6 +438,4 @@ void DestinLayer::AssignChildrenAndParents(int Layer, int NumberOfLayers, bool b
 			}	//r		
 		}
 	}
-
 }
-
