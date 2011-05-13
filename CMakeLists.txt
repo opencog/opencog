@@ -333,39 +333,34 @@ ELSE (HYPERTABLE_FOUND)
 	MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\nTo over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS are set.")
 ENDIF (HYPERTABLE_FOUND)
 
-# Needed for testing
-FIND_PACKAGE(PythonInterp)
-IF (Boost_PYTHON_FOUND)
-  # find python destination dir for python bindings
-  FIND_PACKAGE(PythonLibs)
-
-  IF (PYTHONLIBS_FOUND)
-    EXECUTE_PROCESS(
-        COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
-        OUTPUT_VARIABLE PYTHON_DEST
-    )
+# Python bindings using Cython
+IF(HAVE_ATOMSPACE)
+    # Needed for testing
+    FIND_PACKAGE(PythonInterp)
+    FIND_PACKAGE(PythonLibs)
     # Cython is used to generate bindings
     FIND_PROGRAM(CYTHON_EXECUTABLE cython)
+    FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+    IF(CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
+       # find python destination dir for python bindings
+       SET(HAVE_CYTHON 1)
+       EXECUTE_PROCESS(
+           COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
+            OUTPUT_VARIABLE PYTHON_DEST
+       )
 
-    # replace new line at end
-    STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-    IF ("${PYTHON_DEST}" STREQUAL "")
-        MESSAGE(FATAL_ERROR "Python destination dir not found")
-    ELSE ("${PYTHON_DEST}" STREQUAL "") 
-        MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-    ENDIF ("${PYTHON_DEST}" STREQUAL "")
-  ENDIF(PYTHONLIBS_FOUND)
-ELSE (Boost_PYTHON_FOUND)
-  MESSAGE(STATUS "Boost Python libraries were not found, we won't build Python bindings.")
-ENDIF (Boost_PYTHON_FOUND)
-
-IF(CYTHON_EXECUTABLE AND HAVE_ATOMSPACE)
-   SET(HAVE_CYTHON 1)
-ENDIF(CYTHON_EXECUTABLE AND HAVE_ATOMSPACE)
-
-IF(Boost_PYTHON_FOUND AND PYTHONLIBS_FOUND AND HAVE_ATOMSPACE)
-   SET(HAVE_PYTHON_BINDING 1)
-ENDIF(Boost_PYTHON_FOUND AND PYTHONLIBS_FOUND AND HAVE_ATOMSPACE)
+       # replace new line at end
+       STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+       IF ("${PYTHON_DEST}" STREQUAL "")
+           MESSAGE(FATAL_ERROR "Python destination dir not found")
+       ELSE ("${PYTHON_DEST}" STREQUAL "") 
+           MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+       ENDIF ("${PYTHON_DEST}" STREQUAL "")
+       SET(HAVE_PYTHON_BINDING 1)
+    ELSE(CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
+        MESSAGE(STATUS "Cython or Python libraries not found.")
+    ENDIF(CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
+ENDIF(HAVE_ATOMSPACE)
 
 # global includes
 

@@ -42,6 +42,8 @@ cdef api requests_and_agents_t load_module(string& module_name) with gil:
     try:
         filep,pathname,desc = imp.find_module(c_str)
     except:
+        # TODO use opencog logger
+        #print "Could not find module " + c_str
         return results
     agent_classes = []
     try:
@@ -63,7 +65,6 @@ cdef api object instantiate_agent(string module_name, string agent_name, cAgent 
     cdef bytes module_str = module_name.c_str()
     cdef bytes agent_str = agent_name.c_str()
     cdef requests_and_agents_t results
-    print "Instantiating agent " + module_str + "." + agent_str
     cdef MindAgent agent = None
     try:
         # find and load the module

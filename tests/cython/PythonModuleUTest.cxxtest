@@ -46,6 +46,7 @@ private:
 public:
 
     PythonModuleUTest() {
+        std::cout << "constructor" << std::endl;
         logger().setLevel(Logger::DEBUG);
         logger().setPrintToStdoutFlag(true);
     }
@@ -57,8 +58,9 @@ public:
     }
 
     void setUp() {
+        std::cout << "setup" << std::endl;
         // Load special config file for the test
-        string configFile = PROJECT_SOURCE_DIR"/tests/cython/pymodule.conf";
+        string configFile = PROJECT_BINARY_DIR"/tests/cython/pymodule.conf";
         try {
             config().load(configFile.c_str(), false);
         } catch (RuntimeException &e) {
@@ -82,16 +84,21 @@ public:
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
         cogserver.loadModule("libPythonModule.so");
 
+        // test loading a module
         Request* loadpyRequest = cogserver.createRequest("loadpy");
+        TS_ASSERT(loadpyRequest != NULL);
         loadpyRequest->addParameter("test_agent");
         cogserver.pushRequest(loadpyRequest);
         cogserver.runLoopStep();
 
+        // create agent
         Agent* pythonTestAgent = cogserver.createAgent("test_agent.TestAgent",true);
+        TS_ASSERT(pythonTestAgent != NULL);
 
         cogserver.runLoopStep();
         cogserver.runLoopStep();
 
+        // test setting properties
         TS_ASSERT(pythonTestAgent->frequency() == 1);
         pythonTestAgent->setFrequency(2);
         TS_ASSERT(pythonTestAgent->frequency() == 2);

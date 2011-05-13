@@ -14,21 +14,20 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/misc.h>
 
-
 using std::vector;
 using std::string;
 
 using namespace opencog;
 
-#define DPRINTF printf
-//#define DPRINTF(...)
+//#define DPRINTF printf
+#define DPRINTF(...)
 
 DECLARE_MODULE(PythonModule);
 
 static const char* DEFAULT_PYTHON_MODULE_PATHS[] = 
 {
     "opencog/cython",
-    "../opencog/cython/tests",
+    "../tests/cython",
     DATADIR"/python",
 #ifndef WIN32
     "/usr/share/opencog/python",
@@ -79,12 +78,17 @@ void PythonModule::init()
     // Add custom paths for python modules from the config file if available
     if (config().has("PYTHON_EXTENSION_DIRS")) {
         std::vector<std::string> pythonpaths;
+        // For debugging current path
+        //boost::filesystem::path getcwd = boost::filesystem::current_path();
+        //std::cout << getcwd << std::endl;
         tokenize(config()["PYTHON_EXTENSION_DIRS"], std::back_inserter(pythonpaths), ", ");
         for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
              it != pythonpaths.end(); ++it) {
             boost::filesystem::path modulePath(*it);
             if (boost::filesystem::exists(modulePath)) {
                 PyRun_SimpleString(("paths.append('" + modulePath.string() + "')\n").c_str());
+            } else {
+                logger().error("Could not find custom python extension directory: " + *it);
             }
         }
     }
@@ -106,9 +110,8 @@ void PythonModule::init()
     }
     // For debugging the python path:
     //PyRun_SimpleString("print sys.path\n");
-    if (config().has("PYTHON_PRELOAD")) {
-        preloadModules();
-    }
+    
+    if (config().has("PYTHON_PRELOAD")) preloadModules();
     
     // Register our Python loader request
     do_load_py_register();
