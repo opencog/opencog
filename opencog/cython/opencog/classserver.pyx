@@ -23,6 +23,14 @@ def get_type(name):
 def is_a(Type t1, Type t2):
     return classserver().isA(t1,t2)
 
+# From Roger's suggestion:
+#import sys
+#mod = sys.modules[__name__]
+#
+#for name in ['A', 'B', 'C']:
+#    class_ = type(name, (object, ), {})
+#    setattr(mod, name, class_)
+
 cdef generate_type_module():
     types = {}
     cdef string s
@@ -33,5 +41,5 @@ cdef generate_type_module():
     types["NO_TYPE"] = NOTYPE
     return types
 
-types = type('Module', (), generate_type_module())
+types = type('atom_types', (), generate_type_module())
 

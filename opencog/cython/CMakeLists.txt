@@ -11,15 +11,15 @@ INCLUDE_DIRECTORIES(
 add_custom_command(OUTPUT opencog/atomspace.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/atomspace.pyx"
-  DEPENDS "opencog/atomspace.pyx" "opencog/atomspace_details.pyx" "opencog/classserver.pyx")
+  DEPENDS "opencog/classserver.pyx" "opencog/atomspace.pyx" "opencog/atomspace_details.pyx")
 
 add_custom_command(OUTPUT opencog/cogserver.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/cogserver.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/cogserver.pyx"
   DEPENDS "opencog/cogserver.pyx" "opencog/agent.pyx" "opencog/cogserver.pxd")
+
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/cogserver.cpp" "opencog/atomspace.cpp")
 
-# How to Cython the .pyx file
 add_custom_command(OUTPUT agent_finder.cpp agent_finder_api.h
   COMMAND
   ${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx"
@@ -94,10 +94,12 @@ TARGET_LINK_LIBRARIES(PythonModule
 
 IF (WIN32)
     INSTALL (TARGETS PythonModule DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-    INSTALL (TARGETS atomspace_cython cogserver_cython agent_finder DESTINATION "${DATADIR}/python/opencog")
+    INSTALL (TARGETS agent_finder DESTINATION "${DATADIR}/python")
+    INSTALL (TARGETS atomspace_cython cogserver_cython DESTINATION "${DATADIR}/python/opencog")
 ELSE (WIN32)
     INSTALL (TARGETS PythonModule LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-    INSTALL (TARGETS atomspace_cython cogserver_cython agent_finder LIBRARY DESTINATION "${DATADIR}/python/opencog")
+    INSTALL (TARGETS agent_finder LIBRARY DESTINATION "${DATADIR}/python")
+    INSTALL (TARGETS atomspace_cython cogserver_cython LIBRARY DESTINATION "${DATADIR}/python/opencog")
 ENDIF (WIN32)
 INSTALL (FILES 
     opencog/atom.py

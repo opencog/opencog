@@ -73,9 +73,9 @@ void PythonModule::init()
 
     // Add our module directories to the Python interprator's path
     const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
-    PyRun_SimpleString("paths=[]");
+    PyRun_SimpleString("import sys\n");
+    PyRun_SimpleString("paths=[]\n");
 
-    PyRun_SimpleString("import sys; print sys.path\n");
     // Add custom paths for python modules from the config file if available
     if (config().has("PYTHON_EXTENSION_DIRS")) {
         std::vector<std::string> pythonpaths;
@@ -105,8 +105,8 @@ void PythonModule::init()
             PyRun_SimpleString(("if \"" + x + "\" not in paths: paths.append('" + x + "')\n").c_str());
         }
     }
-    PyRun_SimpleString("import sys; sys.path = paths + sys.path\n");
-    PyRun_SimpleString("import sys; print sys.path\n");
+    PyRun_SimpleString("sys.path = paths + sys.path\n");
+    //PyRun_SimpleString("import sys; print sys.path\n");
 
     // Initialise the agent_finder module which helps with the Python side of
     // things
@@ -131,7 +131,8 @@ bool PythonModule::preloadModules()
          it != pythonmodules.end(); ++it) {
         std::list<std::string> args;
         args.push_back(*it);
-        do_load_py(NULL,args);
+        std::string result = do_load_py(NULL,args);
+        logger().info(result);
     }
     // TODO check for errors
     return true;
