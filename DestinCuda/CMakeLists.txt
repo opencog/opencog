@@ -8,7 +8,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 
 #Searching CUDA
-FIND_PACKAGE(CUDA)
+FIND_PACKAGE(CUDA 4.0)
 
 if(CUDA_FOUND)
 	add_subdirectory( pugixml )
@@ -18,6 +18,8 @@ if(CUDA_FOUND)
 	
 	TARGET_LINK_LIBRARIES( destinCuda
 	    pugixml
+		${Boost_FILESYSTEM_LIBRARY}
+		${Boost_SYSTEM_LIBRARY}
 	)
 else()
 	MESSAGE("CUDA not found. Not building CUDA DestinPort.")
