@@ -123,7 +123,7 @@ private:
             Handle atTimeLink);
 
 public:
-    /**
+   /**
      * Returns the current level of the given feeling name.
      * If the feeling does not exists on AtomSpace or some problem occurs when invoked,
      * this method will return -1.
@@ -133,9 +133,10 @@ public:
      * @param feelingName name of the feeling wanted
      * @return The current level of a given feeling
      */
-    static float getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
+    static float getCurrentPetFeelingLevel(       AtomSpace& atomSpace,
                                             const std::string& petId,
                                             const std::string& feelingName );
+
     /**
      * Returns the current level of the given Modulator.
      *
@@ -372,9 +373,6 @@ public:
      *                  predicate.
      * @param objectB   The handle of the second object to be used in the
      *                  predicate.
-     *
-     * @note the above, inside and below predicates depend on 3D information
-     * currently not available (26/09/2007).
      */
     static bool getPredicateValueAtSpaceMap(const AtomSpace& atomSpace,
                                             const std::string predicate,
@@ -390,9 +388,6 @@ public:
      * @param objectA   The handle of the first object to be used in the predicate.
      * @param objectB   The handle of the second object to be used in the
      * predicate.
-     *
-     * @note the above, inside and below predicates depends on 3D information
-     * currently not available (26/09/2007).
      */
     static bool getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
             const std::string& predicate,

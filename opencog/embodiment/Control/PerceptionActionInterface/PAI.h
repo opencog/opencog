@@ -601,10 +601,10 @@ private:
      *                     Node "paramValue2"
      *                 ...    
      */
-    Handle addPhysiologicalFeeling(const char* petID,
-                                   const char* name,
+    Handle addPhysiologicalFeeling(const string petID,
+                                   const string name,
                                    unsigned long timestamp,
-                                   const HandleSeq& feelingParams);
+                                   float level);
 
     /**
      * Add a ownership predicate between the object.

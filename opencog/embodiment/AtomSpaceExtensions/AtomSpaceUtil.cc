@@ -714,68 +714,30 @@ Handle AtomSpaceUtil::getMostRecentEvaluationLink(const AtomSpace& atomSpace,
     return selectedHandle;
 }
 
-float AtomSpaceUtil::getCurrentPetFeelingLevel( const AtomSpace& atomSpace,
+float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
         const std::string& petId,
-        const std::string& feelingName )
+        const std::string& feeling)
 {
-    std::string predicateName = petId + "." + feelingName;
+    //! @todo This code was copypasted from PAI::addPhysiologicalFeeling. It should use getHandleSet etc
+    Handle feelingNode = atomSpace.addNode(PREDICATE_NODE, feeling);
 
-    Handle selectedEvalLink = getMostRecentEvaluationLink( atomSpace,
-                              predicateName );
+    //! @todo Can only be a "Pet". But we're going to merge the Pet and Humanoid agent-types anyway
+    Handle agentNode = atomSpace.addNode(PET_NODE, petId);
 
-    if (selectedEvalLink == Handle::UNDEFINED) {
-        logger().fine(
-                     "AtomSpaceUtil - Found no EvaluationLink for PredicateNode '%s'.",
-                     predicateName.c_str());
-        return -1;
-    } // if
+    // Add EvaluationLink
+    HandleSeq evalLinkOutgoing;
+    evalLinkOutgoing.push_back(feelingNode);
+    evalLinkOutgoing.push_back(atomSpace.addLink(LIST_LINK, agentNode));
+    Handle evalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle primaryListLink = atomSpace.getOutgoing(selectedEvalLink, 1);
-    if (primaryListLink == Handle::UNDEFINED) {
-        logger().warn("AtomSpaceUtil - Found no signals for "
-                "PredicateNode '%s'. Null primary listLink.",
-                predicateName.c_str());
-        return -1;
-    }
+    TimeServer& ts = atomSpace.getTimeServer();
+    ulong latest = ts.getLatestTimestamp();
 
-    int i = 0;
-    while (true) {
-        Handle secondaryListLink = atomSpace.getOutgoing(primaryListLink, i);
-        if (secondaryListLink == Handle::UNDEFINED) {
-            logger().warn("AtomSpaceUtil - Found no signals for "
-                    "PredicateNode '%s'. Null secondary listLink.",
-                     predicateName.c_str());
-            return -1;
-        }
-        Handle paramName = atomSpace.getOutgoing(secondaryListLink, 0);
-        if (paramName == Handle::UNDEFINED) {
-            logger().warn("AtomSpaceUtil - Found no signals for "
-                    "PredicateNode '%s'. Null paramName.",
-                     predicateName.c_str());
-            return -1;
-        }
+    // An error could occur here, but that should never happen
+    Temporal t(latest);
+    Handle atTime = ts.getAtTimeLink(HandleTemporalPair(evalLink, &t));
 
-        if (atomSpace.getName(paramName) == "level") {
-            Handle paramValue = atomSpace.getOutgoing(secondaryListLink, 1);
-            if (paramValue == Handle::UNDEFINED) {
-                logger().warn("AtomSpaceUtil - Found no signals for "
-                        "PredicateNode '%s'. Null paramValue.",
-                         predicateName.c_str());
-                return -1;
-            }
-            return atof( atomSpace.getName(paramValue).c_str( ) );
-        }
-
-        i++;
-        if (i >= atomSpace.getArity(primaryListLink)) {
-            logger().warn("AtomSpaceUtil - Found no signals for "
-                    "PredicateNode '%s'. Invalid listLink.",
-                     predicateName.c_str());
-            return -1;
-        }
-    }
-
-    return -1;
+    return atomSpace.getTV(atTime)->getMean();
 }
 
 float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,

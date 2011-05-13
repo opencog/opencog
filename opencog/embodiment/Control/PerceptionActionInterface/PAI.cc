@@ -727,7 +727,6 @@ void PAI::processPetSignal(DOMElement * element)
     /// getting name atribute value
     XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* name = XMLString::transcode(element->getAttribute(tag));
-    string nameStr = camelCaseToUnderscore(name);
 
     /// getting the plan-id, if any
     XMLString::transcode(ACTION_PLAN_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -757,28 +756,13 @@ void PAI::processPetSignal(DOMElement * element)
         // For feeling signals
         HandleSeq feelingParams;
 
-        for (unsigned int i = 0; i < list->getLength(); i++) {
-            XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* paramName = XMLString::transcode(((DOMElement *)list->item(i))->getAttribute(tag));
-
-            XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* paramValue = XMLString::transcode(((DOMElement *)list->item(i))->getAttribute(tag));
-
-            // TODO: Technically, the param type may be composed like vector, rotation or entity. 
-            //       If so, it would need to parse an additional element for getting the value.
-            //        Should they be considered in this case?
-
-//            logger().debug("PAI - processPetSignal - before addPhysiologicalFeelingParam.");
-            Handle paramListLink = addPhysiologicalFeelingParam(paramName, paramValue);
-            feelingParams.push_back(paramListLink);
-
-            XMLString::release(&paramName);
-            XMLString::release(&paramValue);
-//            logger().debug("PAI - processPetSignal - after addPhysiologicalFeelingParam.");
-        }
+        XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* levelString = XMLString::transcode(((DOMElement *)list->item(0))->getAttribute(tag));
+        float level = boost::lexical_cast<float>(levelString);
+        XMLString::release(&levelString);
 
 //        logger().debug("PAI - processPetSignal - before addPhysiologicalFeeling.");
-        addPhysiologicalFeeling(internalPetId.c_str(), name, tsValue, feelingParams);
+        addPhysiologicalFeeling(internalPetId, name, tsValue, level);
 //        logger().debug("PAI - processPetSignal - after addPhysiologicalFeeling.");
 
     } else {
@@ -2371,31 +2355,22 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
     return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle);
 }
 
-Handle PAI::addPhysiologicalFeelingParam(const char* paramName, const char* paramValue)
-{
-    HandleSeq outgoing;
-    outgoing.push_back(AtomSpaceUtil::addNode(atomSpace, NODE, paramName));
-    outgoing.push_back(AtomSpaceUtil::addNode(atomSpace, NODE, paramValue));
-    Handle result = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, outgoing);
-    return result;
-}
-
-Handle PAI::addPhysiologicalFeeling(const char* petID,
-                                    const char* name,
+Handle PAI::addPhysiologicalFeeling(const string petID,
+                                    const string feeling,
                                     unsigned long timestamp,
-                                    const HandleSeq& feelingParams)
+                                    float level)
 {
     HandleSeq evalLinkOutgoing;
 
-    // Add PredicateNode
-    string predicateName = petID;
-    predicateName += ".";
-    predicateName += name;
-    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName.c_str());
+    Handle feelingNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, feeling);
+
+    //! @todo Can only be a "Pet". But we're going to merge the Pet and Humanoid agent-types anyway
+    Handle agentNode = AtomSpaceUtil::addNode(atomSpace, PET_NODE, petID);
 
     // Add EvaluationLink
-    evalLinkOutgoing.push_back(predicateNode);
-    evalLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, feelingParams));
+    evalLinkOutgoing.push_back(feelingNode);
+    HandleSeq dummy;dummy.push_back(agentNode);
+    evalLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, dummy));
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
     // Time stamp the EvaluationLink
@@ -2406,51 +2381,42 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
     //
     Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp);
 
+    // count=1, i.e. one observation of this biological urge
+    atomSpace.setTV(atTimeLink,SimpleTruthValue((strength_t)level, 1));
+
     // TODO: what does this for? [by Zhenhua Cai, on 2011-03-08]
-    AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, predicateNode);
+    AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, feelingNode);
     
     // setup the frame for the given physiological feeling
-    //
-    // Note: What does this for?
-    float value = 0.0f;
-    if (feelingParams.size() > 1) {
-        try {
-            // Note: Since feelingParams is a vector of handles to ListLinks without names,
-            //       it seems impossible to get the value! [By ZhenhuaCai, on 2011-03-08]
-            value = boost::lexical_cast<float>( atomSpace.getName( feelingParams[1] ) );
-        } catch ( boost::bad_lexical_cast &ex ) { } // ignore
-    } // if
 
     // Create the name for the frame
-    std::string feeling = name;
-    boost::replace_first(feeling, "_urgency", "");
-    std::string frameInstanceName = avatarInterface.getPetId() + "_" + feeling + "_biological_urge";
+    string frameName(feeling);
+    boost::replace_first(frameName, "_urgency", "");
+    std::string frameInstanceName = avatarInterface.getPetId() + "_" + frameName + "_biological_urge";
 
-    // TODO: The if block below may cause problems because the value of the 'value' variable is undetermined. 
-    //       [By ZhenhuaCai, on 2011-03-08]
-    if (value > 0) {
-        std::string degree = (value >= 0.7) ? 
+    if (level > 0) {
+        std::string degree = (level >= 0.7) ?
                                  "High" :
-                                 (value >= 0.3) ?
+                                 (level >= 0.3) ?
                                      "Medium" : 
                                      "Low";
 
         std::map<std::string, Handle> elements;
         elements["Experiencer"] = atomSpace.addNode( SEME_NODE, avatarInterface.getPetId() );
-        elements["State"] = atomSpace.addNode( CONCEPT_NODE, feeling );
+        elements["State"] = atomSpace.addNode( CONCEPT_NODE, frameName );
         elements["Degree"] = atomSpace.addNode( CONCEPT_NODE, degree );
-        elements["Value"] = atomSpace.addNode( NUMBER_NODE, boost::lexical_cast<std::string>( value ) );
+        elements["Value"] = atomSpace.addNode( NUMBER_NODE, boost::lexical_cast<std::string>( level ) );
 
         AtomSpaceUtil::setPredicateFrameFromHandles( atomSpace,
                                                      "#Biological_urge", 
                                                      frameInstanceName,
                                                      elements, 
-                                                     SimpleTruthValue( (value < 0.5) ? 0.0 : value, 1.0 ) 
+                                                     SimpleTruthValue( (level < 0.5) ? 0.0 : level, 1.0 )
                                                     );
     } else {
         Handle predicateNode = atomSpace.getHandle(PREDICATE_NODE, frameInstanceName);
         if ( predicateNode != Handle::UNDEFINED ) {
-            AtomSpaceUtil::deleteFrameInstance(atomSpace, predicateNode);
+            AtomSpaceUtil::deleteFrameInstance(atomSpace, feelingNode);
         } // if
     } // else
     
@@ -2567,6 +2533,8 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
             }
             ActionID actionHandle = planToActionIdsMaps[planId][seqNumber];
             //printf("calling addActionPredicate for action with seqNumber = %u\n", seqNumber);
+            //! @todo
+            assert(atomSpace.isValidHandle(actionHandle));
             addActionPredicate(predicateName, plan.getAction(seqNumber), timestamp, actionHandle);
         }
 

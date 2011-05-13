@@ -3076,7 +3076,7 @@ bool WorldWrapperUtil::evaluateLogicalOperation(int operation,
     } // switch
 }
 
-float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& atomSpace,
+float WorldWrapperUtil::getPhysiologicalFeeling(AtomSpace& atomSpace,
         const std::string& feeling,
         const std::string& target,
         unsigned long time)
