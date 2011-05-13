@@ -18,6 +18,7 @@ from common import *
 
 from monitor_browser import *
 from nlp_browser import *
+from emotion_space_browser import *
 
 # Initialize global variables
 glb.init_global_var()
@@ -56,8 +57,13 @@ class OCWorkbench(QMainWindow):
         self.createModuleIconList()
         # A stack of scenes that can be switched.
         self.sceneStack = QStackedWidget()
+        # Psi Monitor Widget
         self.sceneStack.addWidget(OCMonitorBrowser())
+        # Dialog System Widget
         self.sceneStack.addWidget(NLPBrowser())
+        # Emotion Space Widget
+        emotion_space = EmotionSpace("tcp://192.168.1.250:18002")
+        self.sceneStack.addWidget(emotion_space)
         
         self.centralLayout.addWidget(self.moduleIconList)
         self.centralLayout.addWidget(self.sceneStack)
@@ -108,6 +114,13 @@ class OCWorkbench(QMainWindow):
         dialogButton.setText("Dialog System")
         dialogButton.setTextAlignment(Qt.AlignHCenter)
         dialogButton.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+        #icon for emotion space browser
+        emotionButton = QListWidgetItem(self.moduleIconList)
+        emotionButton.setIcon(QIcon('images/heart-beat.png'))
+        emotionButton.setText("Emotion Space")
+        emotionButton.setTextAlignment(Qt.AlignHCenter)
+        emotionButton.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
         self.moduleIconList.currentItemChanged.connect(self.changeScene)
 
