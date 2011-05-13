@@ -42,18 +42,3 @@ void PyMindAgent::run(CogServer* server)
     // PyErr_Print();
 }
 
-/*int PyMindAgent::frequency() const
-{
-    PyObject* freq = PyObject_GetAttrString(pyagent,"frequency");
-    PyErr_Print();
-    int f;
-    PyArg_ParseTuple(freq,"i",&f);
-    return f;
-}
-
-void PyMindAgent::setFrequency(int freq)
-{
-    PyObject* p_freq = Py_BuildValue("i", freq);
-    PyObject_SetAttrString(pyagent,"frequency",p_freq);
-    Py_DECREF(p_freq);
-}*/

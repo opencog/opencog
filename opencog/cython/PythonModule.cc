@@ -97,7 +97,7 @@ void PythonModule::init()
     for (int i = 0; config_paths[i] != NULL; ++i) {
         boost::filesystem::path modulePath(config_paths[i]);
         if (boost::filesystem::exists(modulePath)) {
-            PyRun_SimpleString(("paths.append('" + modulePath.string() + "')\n").c_str());
+            PyRun_SimpleString(("if \"" + modulePath.string() + "\" not in paths: paths.append('" + modulePath.string() + "')\n").c_str());
         }
     }
     PyRun_SimpleString("import sys; sys.path = paths + sys.path\n");
@@ -106,10 +106,11 @@ void PythonModule::init()
     // things
     if (import_agent_finder() == -1) {
         PyErr_Print();
-        logger().error("[PythonModule] Failed to load helper python module");
+        throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
     }
     // For debugging the python path:
     //PyRun_SimpleString("print sys.path\n");
+    logger().info("Python sys.path is: " + get_path_as_string());
     
     if (config().has("PYTHON_PRELOAD")) preloadModules();
     

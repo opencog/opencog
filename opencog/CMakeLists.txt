@@ -37,11 +37,9 @@ IF (HAVE_GUILE)
 	ADD_SUBDIRECTORY (shell)
 ENDIF (HAVE_GUILE)
 
-# Python bindings currently don't compile because of clash with
-# Node class in python lib.
-IF (HAVE_PYTHON_BINDING)
-	ADD_SUBDIRECTORY (python)
-ENDIF (HAVE_PYTHON_BINDING)
+#IF (HAVE_PYTHON_BINDING)
+#ADD_SUBDIRECTORY (python)
+#ENDIF (HAVE_PYTHON_BINDING)
 
 IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)

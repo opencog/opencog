@@ -85,10 +85,7 @@ ADD_LIBRARY (PythonModule SHARED
 	PythonModule.cc 
     PyMindAgent.cc
 )
-
-ADD_DEPENDENCIES(PythonModule 
-    agent_finder
-    opencog_atom_types)
+ADD_DEPENDENCIES(PythonModule agent_finder)
 
 TARGET_LINK_LIBRARIES(PythonModule
     server
@@ -97,16 +94,13 @@ TARGET_LINK_LIBRARIES(PythonModule
 
 IF (WIN32)
     INSTALL (TARGETS PythonModule DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-    # this isn't right, we need the python data dir
-    INSTALL (TARGETS atomspace_cython DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
-    INSTALL (TARGETS agent_finder DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
+    INSTALL (TARGETS atomspace_cython cogserver_cython agent_finder DESTINATION "${DATADIR}/python/opencog")
 ELSE (WIN32)
     INSTALL (TARGETS PythonModule LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-    # this isn't right, we need the python data dir
-    INSTALL (TARGETS atomspace_cython LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
-    INSTALL (TARGETS agent_finder LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
+    INSTALL (TARGETS atomspace_cython cogserver_cython agent_finder LIBRARY DESTINATION "${DATADIR}/python/opencog")
 ENDIF (WIN32)
 INSTALL (FILES 
     opencog/atom.py
-    # this isn't right, we need the python data dir
-    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/python")
+    opencog/__init__.py
+    DESTINATION "${DATADIR}/python/opencog")
+

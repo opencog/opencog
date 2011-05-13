@@ -31,9 +31,14 @@ cdef extern from "agent_finder_types.h" namespace "opencog":
         vector[string] agents
         vector[string] requests
 
-cdef api run_agent(object o,cAtomSpace *c_atomspace):
+cdef api run_agent(object o,cAtomSpace *c_atomspace) with gil:
     a = AtomSpace_factory(c_atomspace)
     o.run(a)
+
+cdef api string get_path_as_string() with gil:
+    import sys
+    cdef bytes c_str = str(sys.path)
+    return string(c_str)
 
 cdef api requests_and_agents_t load_module(string& module_name) with gil:
     """ Load module and return a vector of MindAgent names """
