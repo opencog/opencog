@@ -1,10 +1,11 @@
 #ifndef DESTIN_LAYER_H
 #define DESTIN_LAYER_H
+
+#include <iostream>
+#include <fstream>
 //#include "DestinNode.h"
-#include <boost/tr1/memory.hpp>
 
 using namespace std;
-using std::tr1::shared_ptr;
 
 class DestinLayerLatch
 {
@@ -80,33 +81,43 @@ public:
 
 	void SetCompileCentroidShiftMetrics(bool b);
 
-	void Create(int Rows, int Cols,
-			int States, int ParentStates, 
-			int InputDimensionality,
-			int inputDimensionalities[], // if this is NULL, then use the same InputDimensionality for all the nodes,
-										 // otherwise, use this array of inputDimensinality to assign each node its own.
-			int DType,		//distance method
-			bool bBinaryPOS,
-			bool bAveraging,
-			bool bUseStarvationCoefficient,
-			int PSSAUpdateDelay,
-			bool bIgnoreAdvice,
-			double dcMu, 
-			double dcSigma, 
-			double dcRho,
-			bool bUseDecayLearningRate, 
-			int iDecayKickInPoint, 
-			float fRhoThreshold,
-			bool bUseRhoDerivative,
-			bool bConstrainInitialCentroids,
-			int iBlocksToProcess,
-			int iLayerNumber,
-			int iMovementsForCluster,
-			bool BasicOnlineClustering,
-			float FixedRate,
-			bool bUseGoodPOS,
-			int SequenceLength,
-			bool bTopNode);
+	/**
+	 * Create Layer
+	 * @param Rows number of rows
+	 * @param Cols number of columns
+	 * @param States number of states
+	 * @param ParentStates amount of states of parent
+	 * @param InputDimensionality
+	 * @param inputDimensionalities[] if this is NULL, then InputDimensionality is used for all the nodes, otherwise, use this array of inputDimensinality to assign each node its own.
+	 * @param DType distance method
+	 * @param bBinaryPOS
+	 * @param bAveraging
+	 * @param bUseStarvationCoefficient
+	 * @param PSSAUpdateDelay
+	 * @param bIgnoreAdvice
+	 * @param dcMu
+	 * @param dcSigma
+	 * @param dcRho
+	 * @param bUseDecayLearningRate
+	 * @param iDecayKickInPoint
+	 * @param fRhoThreshold
+	 * @param bUseRhoDerivative
+	 * @param bConstrainInitialCentroids
+	 * @param iBlocksToProcess
+	 * @param iLayerNumber
+	 * @param iMovementsForCluster
+	 * @param BasicOnlineClustering
+	 * @param FixedRate
+	 * @param bUseGoodPOS
+	 * @param SequenceLength
+	 * @param bTopNode
+	 */
+	void Create(int Rows, int Cols,	int States, int ParentStates, int InputDimensionality, int inputDimensionalities[],
+	            int DType, bool bBinaryPOS, bool bAveraging, bool bUseStarvationCoefficient, int PSSAUpdateDelay,
+	            bool bIgnoreAdvice, double dcMu, double dcSigma, double dcRho, bool bUseDecayLearningRate,
+	            int iDecayKickInPoint, float fRhoThreshold, bool bUseRhoDerivative, bool bConstrainInitialCentroids,
+	            int iBlocksToProcess, int iLayerNumber, int iMovementsForCluster, bool BasicOnlineClustering,
+	            float FixedRate, bool bUseGoodPOS, int SequenceLength, bool bTopNode);
 
 	void OverrideCentroidsAndSMaxWithCSVFiles(int Layer, char* sDirectory);
 

@@ -6,10 +6,8 @@
 #include <math.h>
 #include <vector>
 #include <stdexcept>
-#include <boost/tr1/memory.hpp>
 
 using namespace std;
-using std::tr1::shared_ptr;
 
 DestinLayer::DestinLayer(void)
 {
