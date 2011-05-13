@@ -25,8 +25,8 @@
 
 #include "opencog/web/json_spirit/json_spirit.h"
 
-#include<boost/tokenizer.hpp>
-#include<boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace OperationalAvatarController;
 
@@ -126,7 +126,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
     // Note: Since OpenCog would forget (remove) those Nodes and Links gradually, 
     //       unless you create them to be permanent, don't worry about the overflow of memory. 
     scheme_expression = "( set_modulator_or_demand_value \"" + 
-                               this->demandName + "\" " +
+                               this->demandName + "Demand\" " +
                                boost::lexical_cast<std::string>(this->currentDemandValue) + " " + 
                                boost::lexical_cast<std::string>(timeStamp) + " " +
                          ")";   

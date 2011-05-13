@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
- * Updated: by Zhenhua Cai, on 2011-04-28
+ * Updated: by Zhenhua Cai, on 2011-05-13
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -231,15 +231,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     // Three steps to run a MindAgent
     // registerAgent, createAgent and startAgent
-    this->registerAgent( PsiModulatorUpdaterAgent::info().id, 
-                         &psiModulatorUpdaterAgentFactory
-                       );
-    psiModulatorUpdaterAgent = static_cast<PsiModulatorUpdaterAgent*>(
-                                   this->createAgent( PsiModulatorUpdaterAgent::info().id,
-                                                      false
-                                                    )
-                                                                     );
-
     this->registerAgent( PsiDemandUpdaterAgent::info().id, 
                          &psiDemandUpdaterAgentFactory
                        );
@@ -248,6 +239,15 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                    false
                                                  )
                                                                );
+
+    this->registerAgent( PsiModulatorUpdaterAgent::info().id, 
+                         &psiModulatorUpdaterAgentFactory
+                       );
+    psiModulatorUpdaterAgent = static_cast<PsiModulatorUpdaterAgent*>(
+                                   this->createAgent( PsiModulatorUpdaterAgent::info().id,
+                                                      false
+                                                    )
+                                                                     );
 
     this->registerAgent( PsiActionSelectionAgent::info().id, 
                          &psiActionSelectionAgentFactory

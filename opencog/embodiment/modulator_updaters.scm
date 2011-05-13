@@ -30,7 +30,7 @@
 
 (define (ResolutionModulatorUpdater)
     (- 1
-       (expt (get_latest_modulator_or_demand "ActivationModulator") 0.5)
+       (expt (get_latest_modulator_or_demand_value "ActivationModulator") 0.5)
     ) 
 )
 

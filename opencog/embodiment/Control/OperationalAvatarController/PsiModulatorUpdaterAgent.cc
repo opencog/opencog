@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiModulatorUpdaterAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-05-11
+ * @date 2011-05-13
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -25,7 +25,7 @@
 
 #include "opencog/web/json_spirit/json_spirit.h"
 
-#include<boost/tokenizer.hpp>
+#include <boost/tokenizer.hpp>
 
 using namespace OperationalAvatarController;
 
@@ -81,7 +81,7 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
     // Note: Since OpenCog would forget (remove) those Nodes and Links gradually, 
     //       unless you create them to be permanent, don't worry about the overflow of memory. 
     scheme_expression = "( set_modulator_or_demand_value \"" + 
-                               this->modulatorName + "\" " +
+                               this->modulatorName + "Modulator\" " +
                                boost::lexical_cast<std::string>(this->currentModulatorValue) + " " + 
                                boost::lexical_cast<std::string>(timeStamp) + " " +
                          ")";   
