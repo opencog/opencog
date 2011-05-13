@@ -57,7 +57,7 @@ AtomSpace.
 
 Without further ado, here's how to add a node:
 
- from opencog.atomspace import AtomSpace, ConceptNode
+ from opencog.atomspace import AtomSpace, types
 
  a = AtomSpace()
  a.add_node(types.ConceptNode, "My first python created node")
@@ -65,11 +65,18 @@ Without further ado, here's how to add a node:
  Result:
  <opencog.atomspace.Handle object at 0x203fa80>
 
+of course, to make things more succinct when referring to types you can alias stuff:
+
+ t=types
+ a.add_node(t.ConceptNode, "Ah, more concise")
+ ConceptNode = t.ConceptNode
+ a.add_node(ConceptNode, "Ah, more concise")
+
 Now, just adding the [[atom]] isn't that useful if we can't refer to it later. So let's reme,ber the handles of a couple of nodes and create our first link:
 
- h1 = a.add_node(ConceptNode, "I can refer to this atom now")
- h2 = a.add_node(ConceptNode, "this one too")
- lh = a.add_node(SimilarityLink, [h1,h2])
+ n1 = a.add_node(t.ConceptNode, "I can refer to this atom now")
+ n2 = a.add_node(t.ConceptNode, "this one too")
+ l = a.add_link(t.SimilarityLink, [n1,n2])
 
 
 Note: It occurs to me that it'd be trivial to replace add_node/add_link with a simple add method. So next round of improvements will probably have this. It'd also be nice to somehow import types using "from opencog.atomspace.types import ConceptNode" (or use a * import)

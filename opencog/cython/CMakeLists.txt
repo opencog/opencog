@@ -11,7 +11,7 @@ INCLUDE_DIRECTORIES(
 add_custom_command(OUTPUT opencog/atomspace.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/atomspace.pyx"
-  DEPENDS "opencog/classserver.pyx" "opencog/atomspace.pyx" "opencog/atomspace_details.pyx")
+  DEPENDS "opencog/atom.pyx" "opencog/classserver.pyx" "opencog/atomspace.pyx" "opencog/atomspace_details.pyx")
 
 add_custom_command(OUTPUT opencog/cogserver.cpp
   COMMAND
@@ -59,8 +59,6 @@ SET_TARGET_PROPERTIES(cogserver_cython PROPERTIES
 file(MAKE_DIRECTORY opencog)
 # module init
 file(COPY opencog/__init__.py DESTINATION opencog)
-# opencog.atom
-file(COPY opencog/atom.py DESTINATION opencog)
 ##
 
 # utility library for PythonModule
