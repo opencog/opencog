@@ -77,7 +77,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     // Initialize ZeroMQ
 #ifdef HAVE_ZMQ    
-    this->plaza = new Plaza(ip, zmqPublishPort);
+    this->plaza = new Plaza(config().get("ZMQ_PUBLISH_IP"), zmqPublishPort);
 #endif
 
     std::string aType = (agentType == "pet" || agentType == "humanoid") ?
