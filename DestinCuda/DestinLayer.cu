@@ -6,6 +6,7 @@
 #include <math.h>
 #include <vector>
 #include <stdexcept>
+#include <boost/tr1/memory.hpp>
 
 using namespace std;
 using std::tr1::shared_ptr;
@@ -44,10 +45,9 @@ void DestinLayer::OverrideCentroidsAndSMaxWithCSVFiles(int Layer, char* sDirecto
 	char cCentroidFileName[128];
 	char cSMAXFileName[128];
 
-	int r,c;
-	for(r=0;r<mRows;r++)
+	for(int r=0;r<mRows;r++)
 	{
-		for(c=0;c<mCols;c++)
+		for(int c=0;c<mCols;c++)
 		{
 			sprintf(cCentroidFileName,"%s/Layer%.2d_Row_%.2d_Col_%.2d_CENTROIDS.csv",sDirectory,Layer,r,c);			
 			sprintf(cSMAXFileName,"%s/Layer%.2d_Row_%.2d_Col_%.2d_SMAX.csv",sDirectory,Layer,r,c);	
@@ -129,10 +129,9 @@ bool DestinLayer::operator == (DestinLayer& o)
 //
 //	if ( bReturn )
 //	{
-//		int r,c;
-//		for(r=0;r<mRows;r++)
+//		for(int r=0;r<mRows;r++)
 //		{
-//			for(c=0;c<mCols;c++)
+//			for(int c=0;c<mCols;c++)
 //			{
 //				MyNode = this->GetPointerToNode(r,c);
 //				ItsNode = o.GetPointerToNode(r,c);
@@ -170,7 +169,7 @@ void DestinLayer::Create( int Rows, int Cols, int States, int ParentStates, int 
 //			if(inputDimensionalities!=NULL){
 //				InputDimensionality = inputDimensionalities[r*mCols + c];
 //			}
-//			iNodeID = c+1000*r+LayerNumber*10000;
+//			iNodeID = c+1000*r+10000*LayerNumber;
 //			p=new DestinNode();
 //			p->Create(States,ParentStates,InputDimensionality,
 //				DType,
@@ -334,70 +333,6 @@ DestinLayer::FamilySizes DestinLayer::calcFamilySizes(int parentLayerNodeCount, 
 		}
 	}
 	return fs;
-}
-
-void DestinLayer::AssignChildrenAndParents(int childLayerRows, int childLayerCols, int parentLayerRows, int parentLayerCols){
-    const int nParentNodes = parentLayerRows * parentLayerCols;
-    const int nChildNodes = childLayerCols * childLayerRows;
-    //const int nn=mDestinNodeUnits.size();//number of nodes
-    const int nn=0;//number of nodes
-
-    if(nn<1){
-        throw logic_error("Can't assign children and parents for a layer with no nodes.");
-    }
-
-    if(nChildNodes!=0 && nn > nChildNodes){
-        throw invalid_argument("This layer can't have more nodes than its child layer.");
-    }
-
-    if(nParentNodes!=0 && nParentNodes > nn ){
-        throw invalid_argument("Parent layer can't have more nodes than this layer.");
-    }
-
-    int r, c;
-
-	FamilySizes fs = calcFamilySizes(nParentNodes,nn);
-
-    //assign parent nodes
-    for(int pn = 0 ; pn < fs.nLargeFamilies ; pn ++){
-        for(int cn = 0 ; cn  < fs.largeFamilySize ; cn ++){
-            r = pn / parentLayerCols;
-            c = pn % parentLayerCols;
-            //mDestinNodeUnits.at(pn * fs.largeFamilySize + cn)->AddParentNode(r,c);
-        }
-    }
-    int offset  = fs.nLargeFamilies * fs.largeFamilySize;
-    for(int pn = 0 ; pn < fs.nSmallFamilies ; pn ++){
-        for(int cn = 0 ; cn < fs.smallFamilySize ; cn++){
-            r = (pn + fs.nLargeFamilies) / parentLayerCols;
-            c = (pn + fs.nLargeFamilies) % parentLayerCols;
-            //mDestinNodeUnits.at(pn * fs.smallFamilySize + cn + offset)->AddParentNode(r,c);
-        }
-    }
-
-	fs = calcFamilySizes(nn,nChildNodes);
-
-	//assign child nodes
-	
-    for(int pn = 0 ; pn < fs.nLargeFamilies ; pn++){
-        for(int cn = 0 ; cn < fs.largeFamilySize ; cn++){
-            r = (pn * fs.largeFamilySize + cn) / childLayerCols;
-            c = (pn * fs.largeFamilySize + cn) % childLayerCols;
-            //mDestinNodeUnits.at(pn )->AddChildNode(r,c);
-        }
-    }
-    offset  = fs.nLargeFamilies * fs.largeFamilySize;
-
-    for(int pn = 0 ; pn < fs.nSmallFamilies ; pn++){
-        for(int cn = 0 ; cn< fs.smallFamilySize ; cn++){
-            int index = pn * fs.smallFamilySize + cn + offset;
-            r = index / childLayerCols;
-            c = index % childLayerCols;
-            //mDestinNodeUnits.at(pn + fs.nLargeFamilies)->AddChildNode(r,c);
-        }
-    }
-    mMaxChildrenPerNode = fs.largeFamilySize;
-	return;
 }
 
 //This assumes layer=0 is the sensory interface layer...with no children...

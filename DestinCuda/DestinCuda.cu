@@ -346,6 +346,8 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
             bTopNode = true;
         }
         cout << Layer << " Input Output Dimension " << InputDimensionality[Layer] << " " << NumberOfCentroids[Layer] << endl;
+
+        // Creation of layer and layerLatch
         DLatch[Layer].Create(RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer]);
 
         DLayer[Layer].Create( RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], NumberOfParentStates[Layer],
@@ -354,6 +356,8 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
                               bIgnoreAdvice, dcMu[Layer], dcSigma[Layer], dcRho[Layer], bUseDecayLR, iDecayPoint, fRhoThreshold,
                               bUseRhoDerivative, bConstrainInitialCentroids, iBlocksToProcess, Layer, MovementsForClusteringOption,
                               bBasicOnlineClustering, FixedLearningRateLayer[Layer], bDoGoodPOS, SEQ_LENGTH, bTopNode );
+        // Assign Childeren and Parrents of nodes
+        DLayer[Layer].AssignChildrenAndParents(Layer,NumberOfLayers,bInitialLayerIsTransformOnly); //uses the 'default' 4:1 method
     }
     cout << "------------------" << endl;
     return 0;

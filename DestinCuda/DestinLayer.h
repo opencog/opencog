@@ -8,6 +8,7 @@ using std::tr1::shared_ptr;
 
 class DestinLayerLatch
 {
+private:
 	int mRows;
 	int mCols;
 	//vector< DestinNodeLatchData* > mDestinNodeLatchUnits;
@@ -50,6 +51,7 @@ public:
 
 class DestinLayer
 {
+private:
     int mRows;
 	int mCols;
 	//vector<DestinNode*> mDestinNodeUnits;
