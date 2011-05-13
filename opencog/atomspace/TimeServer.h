@@ -283,6 +283,8 @@ public:
      *       in TimeServer:
      *           std::list<HandleTemporalPair> ret;
      *           timeServer.get(back_inserter(ret), Handle::UNDEFINED);
+     *
+     * @todo This is redundant! Why not just use get()?
      */
     template<typename OutputIterator> OutputIterator
     getTimeInfo(OutputIterator outIt,
