@@ -158,11 +158,16 @@ directories to be loaded automatically and scanned for MindAgents.
 
 === CogServer Requests in Python ===
 
-CogServer Requests are commands that can be issued in the shell or by other
+TODO: CogServer Requests are commands that can be issued in the shell or by other
 modules in the code. Allowing Python code to instantiate requests would be
 a simple way to make Python code callable from C++.
 
 == Improving the bindings ==
+
+As you can tell from the miscellaneous references in this document, there is
+much more that can be added to this interface between C++ and Python. Further
+improvements will be made by Joel in due course and as needed, but feel free to
+lend a hand!
 
 See the Cython documentation, and then check out the source code in
 SOURCE_ROOT/opencog/cython/opencog. Note the use of Cython .pxd definition
