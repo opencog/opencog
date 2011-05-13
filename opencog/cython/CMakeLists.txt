@@ -100,7 +100,6 @@ ELSE (WIN32)
     INSTALL (TARGETS atomspace_cython cogserver_cython LIBRARY DESTINATION "${DATADIR}/python/opencog")
 ENDIF (WIN32)
 INSTALL (FILES 
-    opencog/atom.py
     opencog/__init__.py
     DESTINATION "${DATADIR}/python/opencog")
 

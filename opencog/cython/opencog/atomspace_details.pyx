@@ -33,8 +33,6 @@ cdef class Handle:
     def is_undefined(self):
         if deref(self.h) == self.h.UNDEFINED: return True
         return False
-    def is_valid(self):
-        return self.atomspace.is_valid(self)
 
 cdef class TruthValue:
     """ The truth value represents the strength and confidence of
