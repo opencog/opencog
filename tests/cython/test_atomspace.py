@@ -1,12 +1,7 @@
 from unittest import TestCase
 
-# How it should be?
-# from opencog.atomspace import AtomSpace, TruthValue, types
-# from opencog.atom import Atom
-
-#import opencog
-from opencog.atomspace import AtomSpace, TruthValue, types, is_a, get_type, get_type_name
-from opencog.atom import Atom 
+from opencog.atomspace import AtomSpace, TruthValue, Atom
+from opencog.atomspace import types, is_a, get_type, get_type_name
 
 class AtomSpaceTest(TestCase):
 

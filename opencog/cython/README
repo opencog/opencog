@@ -76,9 +76,13 @@ You'll notice these return Handle objects, which internally store a UUID and tha
  h = a.add_node(ConceptNode, "handle bar")
  print str(h)
  Output => '<UUID:4>'
+ print a.get_type(h)
+ Output => '3'
+ print a.get_name(h)
+ Output => 'handle bar'
 
 Or you may get a different UUID. Now, the handle object can't do a lot on it's
-own, so we wrap it in a helper class called Atom (the "Handle" may eventually
+own, so we wrap it in a helper class opencog.atomspace.Atom (the "Handle" may eventually
 disappear from the Python API as it's only really important for
 low-level graph storage and lookup). The Atom class ties the Handle to the AtomSpace an request the information from the AtomSpace as required.
 
@@ -101,21 +105,15 @@ for the atom type because it's immutable and gets cached internally. If you try
 to set an immutable property of an Atom, you get an AttributeError exception:
 
  an_atom.name = 'change your name man, it sucks.'
- ---------------------------------------------------------------------------
- AttributeError                            Traceback (most recent call last)
- /home/joel/src/opencog/examples/python/<ipython console> in <module>()
- AttributeError: attribute 'name' of 'opencog.atomspace.Atom' objects is not writable
+ Result => AttributeError: attribute 'name' of 'opencog.atomspace.Atom' objects is not writable
 
 I guess the 'handle bar' Atom is stuck with it's amusing but unfortunate name.
 
-Now, just adding the [[atom]] isn't that useful if we can't refer to it later.
-So let's reme,ber the handles of a couple of nodes and create our first link:
+Lets create our first link:
 
  n1 = a.add_node(t.ConceptNode, "I can refer to this atom now")
  n2 = a.add_node(t.ConceptNode, "this one too")
  l = a.add_link(t.SimilarityLink, [n1,n2])
-
-
 
 Note: It occurs to me that it'd be trivial to replace add_node/add_link with a simple add method. So next round of improvements will probably have this. It'd also be nice to somehow import types using "from opencog.atomspace.types import ConceptNode" (or use a * import)
 
@@ -143,6 +141,20 @@ path. If you use:
 
 Then you'll get MindAgent showing up in the cogserver too. I'm not currently
 sure why, but supporting this is another improvement to add eventually.
+
+To actually allow the CogServer to use this MindAgent there are several things to check:
+
+1. Place the module containing the MindAgent within one of these place:
+    * <your OpenCog data directory>/python
+    * a directory specified in the configuration parameter PYTHON_EXTENSION_DIRS,
+    * somewhere on your PYTHONPATH. 
+2. Ensure you are loading the libPythonModule.so CogServer plugin.
+3. Either use the CogServer loadpy command to load the module (you should leave
+   off the .py extension, e.g. "loadpy my_module") or place the module name in
+   PYTHON_PRELOAD.
+
+Note: Yet another thing to do is allow all modules in the OpenCog Python
+directories to be loaded automatically and scanned for MindAgents.
 
 === CogServer Requests in Python ===
 
