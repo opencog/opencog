@@ -23,12 +23,20 @@ server_process=None
 
 base_url = 'http://localhost:17034/'
 rest_url = base_url + 'rest/0.2/'
+connected = True
 
 def spawn_server():
     global server_process
     print "Spawning server"
     server_process = subprocess.Popen([server_exe, '-c',
             opencog_conf], stdout=sys.stdout)
+    # while not connected: 
+        # try:
+            # req = urllib2.Request(rest_url + 'atom/',data)
+            # response = urllib2.urlopen(req).read()
+        # except:
+    # TODO add a CogServer command to see if all preload modules have been setup
+
     time.sleep(10) # Allow modules time to load
     print "Server spawned with pid %d" % (server_process.pid,)
 

@@ -26,8 +26,8 @@ DECLARE_MODULE(PythonModule);
 
 static const char* DEFAULT_PYTHON_MODULE_PATHS[] = 
 {
-    "opencog/cython",
-    "../tests/cython",
+    PROJECT_BINARY_DIR"/opencog/cython",
+    PROJECT_SOURCE_DIR"/tests/cython",
     DATADIR"/python",
 #ifndef WIN32
     "/usr/share/opencog/python",
@@ -75,6 +75,7 @@ void PythonModule::init()
     const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
     PyRun_SimpleString("paths=[]");
 
+    PyRun_SimpleString("import sys; print sys.path\n");
     // Add custom paths for python modules from the config file if available
     if (config().has("PYTHON_EXTENSION_DIRS")) {
         std::vector<std::string> pythonpaths;
@@ -97,10 +98,15 @@ void PythonModule::init()
     for (int i = 0; config_paths[i] != NULL; ++i) {
         boost::filesystem::path modulePath(config_paths[i]);
         if (boost::filesystem::exists(modulePath)) {
-            PyRun_SimpleString(("if \"" + modulePath.string() + "\" not in paths: paths.append('" + modulePath.string() + "')\n").c_str());
+            std::string x = modulePath.string();
+            // remove the path if it already exists in sys.path
+            PyRun_SimpleString(("if \"" + x + "\" in sys.path: sys.path.remove(\"" + x + "\")").c_str());
+            // and then place it at the new position
+            PyRun_SimpleString(("if \"" + x + "\" not in paths: paths.append('" + x + "')\n").c_str());
         }
     }
     PyRun_SimpleString("import sys; sys.path = paths + sys.path\n");
+    PyRun_SimpleString("import sys; print sys.path\n");
 
     // Initialise the agent_finder module which helps with the Python side of
     // things
@@ -109,7 +115,6 @@ void PythonModule::init()
         throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
     }
     // For debugging the python path:
-    //PyRun_SimpleString("print sys.path\n");
     logger().info("Python sys.path is: " + get_path_as_string());
     
     if (config().has("PYTHON_PRELOAD")) preloadModules();
