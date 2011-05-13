@@ -2222,16 +2222,27 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (const AtomSpace & atomSpace,
                                               // i.e. returned link should be exactly of 
                   );                          // type EXECUTION_OUTPUT_LINK
 
-    if ( executionOutputLinkSet.size() != 1 ) { 
-        logger().error("AtomSpaceUtil::%s - The number of ExecutionOutputLink that contains '%s' should be exactly 1. But got %d", 
-                        __FUNCTION__, 
-                        atomSpace.atomAsString(hGroundedSchemaNode).c_str(), 
-                        executionOutputLinkSet.size()
-                      );
+    // Pick up the ExecutionOutputLink containing ListLink
+    std::vector<Handle>::iterator iExecutionOutputLink;
+
+    for(iExecutionOutputLink = executionOutputLinkSet.begin(); 
+        iExecutionOutputLink != executionOutputLinkSet.end(); 
+        ++ iExecutionOutputLink ) {
+
+        if ( atomSpace.getArity(*iExecutionOutputLink) == 2 &&
+             atomSpace.getType( atomSpace.getOutgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
+           )
+            break; 
+    }
+
+    if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
+        logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.", 
+                       __FUNCTION__
+                      ); 
         return false; 
     }
 
-    Handle hExecutionOutputLink = executionOutputLinkSet[0];
+    Handle hExecutionOutputLink = *iExecutionOutputLink;
 
     // Get the Handle to ListLink that contains ExecutionOutputLink
     std::vector<Handle> listLinkSet;
