@@ -44,3 +44,30 @@
 	)
 )
 
+; reverse order of the two variable decls.
+(define (blinker)
+	(BindLink
+		;; variable decls
+		(ListLink
+			(VariableNode "$var_schema")
+			(VariableNode "$var_number")
+		)
+		(ImplicationLink
+			;; body
+			(SimilarityLink (stv 1.0 1.0)
+				(VariableNode "$var_schema")
+				(VariableNode "$var_number")
+				(ExecutionOutputLink (stv 1.0 1.0)
+					(VariableNode "$var_schema")
+					(ListLink)
+				)
+			)
+			;; implicand -- result
+			(ListLink
+				(VariableNode "$var_number")
+				(VariableNode "$var_schema")
+			)
+		)
+	)
+)
+
