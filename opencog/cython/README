@@ -34,26 +34,29 @@ Eventually, when other components of OpenCog are accessible, they'll follow a si
 
 == Tutorial == 
 
-This tutorial is a first look at the Python bindings. It assumes that you've got a good grasp on the concept of the AtomSpace and the CogServer. Oh, and it helps to know a bit of Python too!
+This tutorial is a first look at the Python bindings. It assumes that you've
+got a good grasp on the concept of the AtomSpace and the CogServer. Oh, and it
+helps to know a bit of Python too!
 
 === Setting up ===
 
 Go through the normal process of [[building OpenCog]]. Then ensure that the
-OpenCog data directory is in your Python path. By default this is at
-/usr/local/share/opencog/python, and you can modify your PYTHON_PATH
-environment variable:
+OpenCog data directory is in your Python sys.path. By default the opencog
+python module lives at /usr/local/share/opencog/python when you do "make
+install", and you can modify your PYTHONPATH environment variable to ensure
+Python checks that location. If you just want to use your build dir you can use
+something like:
 
- $> export PYTHON_PATH=/home/joel/src/opencog/bin/opencog/cython
+ $> export PYTHONPATH=/home/joel/src/opencog/bin/opencog/cython
 
 === AtomSpace API ===
 
 One great thing about these bindings is that they let you interact and
 instantiate your own AtomSpace objects interactively. I recommend [[ IPython]],
 which is a very capable Python shell. Prior to this, the only
-interactive way
-of modifying the AtomSpace was using the Scheme bindings embedded in active
-CogServer, and even then you'd only be able to modify the core CogServer
-AtomSpace. 
+interactive way of modifying the AtomSpace was using the Scheme bindings
+embedded in an active CogServer, and even then you'd only be able to modify the
+core CogServer AtomSpace. 
 
 Without further ado, here's how to add a node:
 
@@ -69,7 +72,7 @@ Of course, to make things more succinct when referring to types you can alias st
  t=types
  a.add_node(t.ConceptNode, "Ah, more concise")
  ConceptNode = t.ConceptNode
- a.add_node(ConceptNode, "Ah, more concise")
+ a.add_node(ConceptNode, "Ah, a bit more concise")
 
 You'll notice these return Handle objects, which internally store a UUID and that allow you refer to the Atom later:
 
@@ -82,9 +85,10 @@ You'll notice these return Handle objects, which internally store a UUID and tha
  Output => 'handle bar'
 
 Or you may get a different UUID. Now, the handle object can't do a lot on it's
-own, so we wrap it in a helper class opencog.atomspace.Atom (the "Handle" may eventually
-disappear from the Python API as it's only really important for
-low-level graph storage and lookup). The Atom class ties the Handle to the AtomSpace an request the information from the AtomSpace as required.
+own, so we wrap it in a helper class opencog.atomspace.Atom (the "Handle" may
+eventually disappear from the Python API as it's only really important
+for low-level graph storage and lookup). The Atom class in Python ties the Handle
+to the AtomSpace and requests the information from the AtomSpace as required.
 
  from opencog.atom import Atom
  an_atom = Atom(h,as)
@@ -114,8 +118,36 @@ Lets create our first link:
  n1 = a.add_node(t.ConceptNode, "I can refer to this atom now")
  n2 = a.add_node(t.ConceptNode, "this one too")
  l = a.add_link(t.SimilarityLink, [n1,n2])
+ alink = Atom(h3,a)
+ alink.out
+ Output => [Handle(5), Handle(6)]
 
-Note: It occurs to me that it'd be trivial to replace add_node/add_link with a simple add method. So next round of improvements will probably have this. It'd also be nice to somehow import types using "from opencog.atomspace.types import ConceptNode" (or use a * import)
+Up until now we've ignored Truthvalues. The TruthValue implementation is not entirely complete.Currently the bindings only support "[[SimpleTruthValues]]", since these are the most frequently used.
+
+ from opencog.atomspace import TruthValue
+ str(alink.tv)
+ Output => '[0.000000,0.000000=0.000000]'
+ alink.tv = TruthValue(0.5,0.1)
+ str(alink)
+ Output => '[SimilarityLink <I can refer to this atom now,this one too> 0.500000 0.200000]'
+
+Next up is queries to the AtomSpace. What if we want to iterate over all the
+ConceptNodes we've added so far? Most of the AtomSpace getHandleSet methods
+have be wrapped and also have more descriptive names for each variant (instead
+of the numerous overloads in the C++ API, that IMO makes things confusing).
+
+ my_nodes = a.get_atoms_by_type(t.ConceptNode) 
+
+By default, subtypes are also retrieved, but we can exclude subtypes if we want to be specific.
+ 
+ a.add_node(t.Node, "I am the one true Node")
+ a.get_atoms_by_type(t.Node,subtype=False)
+ my_specific_nodes = a.get_atoms_by_type(t.ConceptNode) 
+
+Note: It occurs to me that it'd be trivial to replace add_node/add_link with
+a simple add method. So next round of improvements will probably have this.
+It'd also be nice to somehow import types using "from opencog.atomspace.types
+import ConceptNode" (or use a * import)
 
 === MindAgents in Python ===
 
@@ -174,4 +206,12 @@ SOURCE_ROOT/opencog/cython/opencog. Note the use of Cython .pxd definition
 files which show how to make C++ classes and functions available to cython
 code.
 
+=== TODO ===
+
+* Implement support for CogServer requests written in Python
+* Support a generic AtomSpace.add method.
+* Make the AtomSpace return opencog.atom.Atom objects instead of Handles
+* Support VersionHandles and contextual truth values
+* Support add/remove signals (but depends on changing from boost::signals to
+  ZeroMQ messaging first)
 
