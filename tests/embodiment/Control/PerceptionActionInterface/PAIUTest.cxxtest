@@ -354,28 +354,23 @@ public:
         // Check Physiological feeling in AtomSpace
         {
             cout << "checking pet signals: physiological feelings " << endl;
-            string str = PAIUtils::getInternalId("1");
-            str += ".hunger";
-            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, str.c_str());
+            string id = PAIUtils::getInternalId("1");
+            string pred = "hunger";
+            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, pred.c_str());
+            cout << atomSpace.cloneAtom(predNode)->toString() << endl;
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-            Handle paramNameNode = atomSpace.getHandle(NODE, "level");
-            TS_ASSERT(Handle::compare(paramNameNode, Handle::UNDEFINED));
-            Handle paramValueNode = atomSpace.getHandle(NODE, "0.90");
-            TS_ASSERT(Handle::compare(paramValueNode, Handle::UNDEFINED));
-            HandleSeq innerListLinkOutgoing;
-            innerListLinkOutgoing.push_back(paramNameNode);
-            innerListLinkOutgoing.push_back(paramValueNode);
-            Handle innerListLink = atomSpace.getHandle(LIST_LINK, innerListLinkOutgoing);
-            TS_ASSERT(Handle::compare(innerListLink, Handle::UNDEFINED));
-            HandleSeq outterListLinkOutgoing;
-            outterListLinkOutgoing.push_back(innerListLink);
-            Handle outterListLink = atomSpace.getHandle(LIST_LINK, outterListLinkOutgoing);
-            TS_ASSERT(Handle::compare(outterListLink, Handle::UNDEFINED));
-            HandleSeq evalLinkOutgoing;
-            evalLinkOutgoing.push_back(predNode);
-            evalLinkOutgoing.push_back(outterListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
-            TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
+
+            Handle eval = atomSpace.getIncoming(predNode)[0];
+            cout << atomSpace.cloneAtom(eval)->toString() << endl;
+            TS_ASSERT_EQUALS(atomSpace.getIncoming(predNode).size(), 1);
+
+            Handle atTime = atomSpace.getIncoming(eval)[0];
+            cout << atomSpace.cloneAtom(atTime)->toString() << endl;
+            TS_ASSERT_EQUALS(atomSpace.getIncoming(atTime).size(), 1);
+
+            TS_ASSERT_DELTA(atomSpace.getTV(atTime)->getMean(), 0.9, 0.0001);
+
+            // @todo check the ListLink and pet node
         }
 
         // Check Action Plan status
