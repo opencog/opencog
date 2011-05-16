@@ -861,6 +861,13 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 Handle PatternMatch::varscope (Handle himplication)
 {
 	// Now perform the search.
+// XXX temporary HACK! replace crisp implicator by default;
+// this will break the VarTypeNotUTest; it expects crisp logic, 
+// it will break some of the (currently unused) nlp code as well.
+// But, for now, the embodiment code needs, so let it be broken.
+// We really need something extensible, though, in the long run.
+// XXX FIXME!  TODO!
+//
 //	CrispImplicator impl;
     DefaultImplicator impl; 	
 	impl.as = atom_space;
