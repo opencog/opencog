@@ -1,7 +1,7 @@
 /*
  * PatternMatchEngine.cc
  *
- * Copyright (C) 2008,2009 Linas Vepstas
+ * Copyright (C) 2008,2009,2011 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  February 2008
  *
@@ -166,13 +166,6 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// this. If they are un-ordered, then we have to compare (at
 		// most) every possible permutation. 
 		//
-		// In many (most?) cases, exploring every permutation is
-		// overkill, but its difficult to write an efficient algorithm
-		// that can do better -- in particular, the callbacks do an
-		// effective job of quickly eliminating combinations we don't
-		// want, and so exploring all possible combinations is a
-		// very reasonable solution.
-		//
 		Type tp = as->getType(hp);
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
@@ -213,15 +206,24 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		else
 		{
 			// Enumerate all the permutations of the outgoing set of
-			// the predicate.
+			// the predicate.  We keep trying different permuations
+			// until we find one that works, and just return that, and
+			// ignore the rest.  We have to push/pop the stack as we try
+			// each permutation, so that each permutation has a chance
+			// of finding a grounding.
+			//
+			// We don't try all possible groundings; this is not the place
+			// to do this; this is done elsewhere. Here, its enough to find
+			// any grunding that works (i.e. is consistent with all 
+			// groundings up till now).
 			std::vector<Handle> osp = atom_space->getOutgoing(hp);
 			const std::vector<Handle> &osg = atom_space->getOutgoing(hg);
 			sort(osp.begin(), osp.end());
 
 			do {
 				// The recursion step: traverse down the tree.
-				dbgprt("tree_comp being down unordered link\n");
-				// var_solutn_stack.push(var_grounding);
+				dbgprt("tree_comp begin down unordered link\n");
+				var_solutn_stack.push(var_grounding);
 				depth ++;
 
 				mismatch = foreach_atom_pair(osp, osg,
@@ -230,12 +232,13 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				dbgprt("tree_comp down unordered link mismatch=%d\n", mismatch);
 
 				if (false == mismatch)
+				{
+				   var_solutn_stack.pop();
 					var_grounding[hp] = hg;
+					return false;
+				}
 
-				// if (false == mismatch)
-				//	   var_solutn_stack.pop();
-				// else
-				//	   POPGND(var_grounding, var_solutn_stack);
+				POPGND(var_grounding, var_solutn_stack);
 
 			} while (next_permutation(osp.begin(), osp.end()));
 
