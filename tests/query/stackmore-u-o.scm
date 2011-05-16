@@ -8,7 +8,7 @@
 ;; of this file ...
 
 ;; this should not match.
-(ContextLink (stv 1.0 1.0)
+(InheritanceLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
