@@ -316,27 +316,27 @@
 ;
 
 (define ConnectEnergyDemandGoal
-    (connect_demand_goal EnergyDemandSchema         EnergyDemandGoal 0.1 1.0)
+    (connect_demand_goal EnergyDemandSchema         EnergyDemandGoal 0.5 1.0)
 )
 
 (define ConnectWaterDemandGoal
-    (connect_demand_goal WaterDemandSchema          WaterDemandGoal 0.1 0.9)
+    (connect_demand_goal WaterDemandSchema          WaterDemandGoal 0.7 1.0)
 )
 
 (define ConnectIntegrityDemandGoal
-    (connect_demand_goal IntegrityDemandSchema      IntegrityDemandGoal 0.3 1.0)
+    (connect_demand_goal IntegrityDemandSchema      IntegrityDemandGoal 0.8 1.0)
 )
 
 (define ConnectAffiliationDemandGoal
-    (connect_demand_goal AffiliationDemandSchema    AffiliationDemandGoal 0.3 0.9)
+    (connect_demand_goal AffiliationDemandSchema    AffiliationDemandGoal 0.4 1.0)
 )
 
 (define ConnectCertaintyDemandGoal
-    (connect_demand_goal CertaintyDemandSchema      CertaintyDemandGoal 0.2 1.0)
+    (connect_demand_goal CertaintyDemandSchema      CertaintyDemandGoal 0.6 1.0)
 )
 
 (define ConnectCompetenceDemandGoal
-    (connect_demand_goal CompetenceDemandSchema     CompetenceDemandGoal 0.25 0.95)
+    (connect_demand_goal CompetenceDemandSchema     CompetenceDemandGoal 0.7 1.0)
 )
 
 ; TestEnergy is only used for debugging. Remove it once finished. 

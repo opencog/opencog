@@ -2,7 +2,7 @@
 ; Helper functions used by all sorts of psi scheme scripts
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-12
+; @date   2011-05-16
 ;
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -486,7 +486,7 @@
                   (begin
                       (print_debug_info INFO_TYPE_WARN 
                           "get_evaluation_link"
-                          (string-append "NUmber of EvaluationLink containing "
+                          (string-append "Number of EvaluationLink containing "
                                          "PredicateNode: " predicate_name 
                                          " should be exactly 1. But got "
                                          (number->string (length evaluation_link_list) )
@@ -562,6 +562,141 @@
     ); let*
 )
 
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Getter/ Setters for LatestLink containing EvaluationLink, which are useful for 
+; all kinds of physiological levels, such as energy, hungry, thirst etc.
+;
+
+; BindLink used by cog-bind to search the latest AtTimeLink given PredicateNode name
+;
+; The format of EvaluationLink is as follows:
+;
+; AtTimeLink (physiological level is stored as truth value here)
+;     TimeNode "timestamp"
+;     EvaluationLink
+;         PredicateNode  "predicate_name"
+;         ListLink
+;             ...
+;
+
+(define (find_latest_at_time_link predicate_name)
+    (BindLink
+        ; Variables to be used
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$var_time_node_type") 
+                (VariableTypeNode "TimeNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$var_list_link_type") 
+                (VariableTypeNode "ListLink")
+            ) 
+        ) 
+
+        (ImplicationLink
+            ; Pattern to be searched    
+            (LatestLink 
+                (AtTimeLink
+                    (VariableNode "$var_time_node_type") 
+                    (EvaluationLink
+                        (PredicateNode
+                            (string-trim-both predicate_name)                  
+                        ) 
+                        (VariableNode "$var_list_link_type")
+                    )
+                ) 
+            ); LatestLink     
+                 
+            ; Return values
+            (AtTimeLink
+                (VariableNode "$var_time_node_type") 
+                (EvaluationLink
+                    (PredicateNode
+                        (string-trim-both predicate_name)                  
+                    ) 
+                    (VariableNode "$var_list_link_type")
+                )
+            ); AtTimeLink 
+        )
+
+    ); BindLink 
+)
+
+; Return the latest AtTimeLink given the predicate_name
+; if failed or found multiple EvaluationLink, return an empty list
+(define (get_latest_at_time_link predicate_name)
+    (let* ( (query_result_list_link 
+                (cog-bind (find_latest_at_time_link predicate_name) )
+            )    
+
+            (latest_at_time_link_list (list))
+          )
+
+          (set! latest_at_time_link_list
+              (cog-outgoing-set query_result_list_link)
+          )    
+
+          (if (null? latest_at_time_link_list)
+              ; If failed to find the latest AtTimeLink, return an empty list
+              (list)
+
+              (if (equal? (length latest_at_time_link_list) 1)
+                  ; If found the latest AtTimeLink, return it
+                  (car latest_at_time_link_list)
+
+                  ; If found multiple latest AtTimeLink, return an empty list
+                  (begin
+                      (print_debug_info INFO_TYPE_WARN 
+                          "get_latest_at_time_link"
+                          (string-append "Number of latest AtTimeLink containing "
+                                         "PredicateNode: " predicate_name 
+                                         " should be exactly 1. But got "
+                                         (number->string (length latest_at_time_link_list) )
+                          )
+                      )
+                      (list)
+                  )
+              ); if
+          ); if 
+
+    ); let*
+); define
+
+; Return the truth value of latest AtTimeLink given the predicate name. 
+; If fails to retrieve the latest AtTimeLink from AtomSpace, it would return a
+; random SimpleTruthValue with both mean and confidence in [0, 1]
+(define (get_latest_predicate_truth_value predicate_name)
+    (let* ( (latest_at_time_link (get_latest_at_time_link predicate_name) )
+          )
+          
+          (if (null? latest_at_time_link)
+              (begin
+                  (print_debug_info INFO_TYPE_WARN "get_latest_predicate_truth_value"
+                                    (string-append "Failed to retrieve latest AtTimeLink " 
+                                                    "containing PredicateNode: "
+                                                    predicate_name " from AtomSpace. "
+                                                    "Return a random SimpleTruthValue " 
+                                                    "in [0, 1] instead."
+                                    )
+                  )
+
+                  (stv (random:uniform) (random:uniform) )
+              ); begin    
+
+              (cog-tv latest_at_time_link)
+          ); if
+
+    ); let*
+); define
+
+; Return the mean of the truth value of latest AtTimeLink given the 
+; PredicateNode name. 
+; If fails to retrieve the latest AtTimeLink, return a random number
+; in [0, 1]
+(define (get_latest_predicate_truth_value_mean predicate_name)
+    (get_truth_value_mean (get_latest_predicate_truth_value predicate_name) ) 
+)
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 

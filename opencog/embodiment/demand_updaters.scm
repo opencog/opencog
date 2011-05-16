@@ -2,29 +2,21 @@
 ; Demand updaters
 ;
 ; @author Zhenhua Cai czhedu@gmail.com
-; @date   2011-05-09
-;
-
-; The script below is only for test. 
-;
-; For real OpenPsi, it would be much more complex. Such as the example provided by Nil:
-;
-;     EnergyDemandSchema = (FoodIntake - MovementAmount) + EnergyDemandValue * 0.9
-;
-; Where EnergyDemandValue is obviously the value of EnergyDemandSchema 
-; calculated at the previous cycle
+; @date   2011-05-16
 ;
 
 (define (EnergyDemandUpdater)
-    (random:uniform) 
+    (get_latest_predicate_truth_value_mean "energy") 
 ) 
 
 (define (WaterDemandUpdater)
-    (random:uniform) 
+    (- 1
+       (get_latest_predicate_truth_value_mean "thirst") 
+    ) 
 )    
 
 (define (IntegrityDemandUpdater)
-    (random:uniform) 
+    (get_latest_predicate_truth_value_mean "fitness")
 )
 
 (define (AffiliationDemandUpdater)

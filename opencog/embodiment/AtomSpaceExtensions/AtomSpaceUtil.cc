@@ -778,17 +778,27 @@ float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
                                               // i.e. returned link should be exactly of 
                   );                          // type EXECUTION_OUTPUT_LINK
 
-    if ( executionOutputLinkSet.size() != 1 ) { 
-        logger().warn("AtomSpaceUtil::%s - The number of ExecutionOutputLink that contains '%s' should be exactly 1. But got %d. Return random value: %f",
-                      __FUNCTION__, 
-                      atomSpace.atomAsString(hGroundedSchemaNode).c_str(), 
-                      executionOutputLinkSet.size(), 
-                      errorValue
-                     );
-        return errorValue;
+    // Pick up the ExecutionOutputLink containing ListLink
+    std::vector<Handle>::iterator iExecutionOutputLink;
+
+    for(iExecutionOutputLink = executionOutputLinkSet.begin(); 
+        iExecutionOutputLink != executionOutputLinkSet.end(); 
+        ++ iExecutionOutputLink ) {
+
+        if ( atomSpace.getArity(*iExecutionOutputLink) == 2 &&
+             atomSpace.getType( atomSpace.getOutgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
+           )
+            break; 
     }
 
-    Handle hExecutionOutputLink = executionOutputLinkSet[0];
+    if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
+        logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.", 
+                       __FUNCTION__
+                      ); 
+        return false; 
+    }
+
+    Handle hExecutionOutputLink = *iExecutionOutputLink;
 
     // Get all the SimilarityLink that contains the ExecutionOutputLink
     //
@@ -925,17 +935,27 @@ float AtomSpaceUtil::getCurrentDemandLevel(const AtomSpace & atomSpace,
                                               // i.e. returned link should be exactly of 
                   );                          // type EXECUTION_OUTPUT_LINK
 
-    if ( executionOutputLinkSet.size() != 1 ) { 
-        logger().warn("AtomSpaceUtil::%s - The number of ExecutionOutputLink that contains '%s' should be exactly 1. But got %d. Return random value: %f",
-                      __FUNCTION__, 
-                      atomSpace.atomAsString(hGroundedSchemaNode).c_str(), 
-                      executionOutputLinkSet.size(), 
-                      errorValue
-                     );
-        return errorValue;
+    // Pick up the ExecutionOutputLink containing ListLink
+    std::vector<Handle>::iterator iExecutionOutputLink;
+
+    for(iExecutionOutputLink = executionOutputLinkSet.begin(); 
+        iExecutionOutputLink != executionOutputLinkSet.end(); 
+        ++ iExecutionOutputLink ) {
+
+        if ( atomSpace.getArity(*iExecutionOutputLink) == 2 &&
+             atomSpace.getType( atomSpace.getOutgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
+           )
+            break; 
     }
 
-    Handle hExecutionOutputLink = executionOutputLinkSet[0];
+    if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
+        logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.", 
+                       __FUNCTION__
+                      ); 
+        return false; 
+    }
+
+    Handle hExecutionOutputLink = *iExecutionOutputLink;
 
     // Get all the SimilarityLink that contains the ExecutionOutputLink
     //

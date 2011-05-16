@@ -58,7 +58,7 @@
 ; While a lower one results in opportunism/flexibility, or even motive fluttering. 
 
 (define (SelectionThresholdModulatorUpdater)
-    (clip_within (* (get_latest_modulator_or_demand_value "SelectionThresholdModulator")
+    (clip_within (* (+ (get_latest_modulator_or_demand_value "SelectionThresholdModulator") 0.5)
                     (+ (get_latest_modulator_or_demand_value "ActivationModulator") 0.5)
                  )
 
