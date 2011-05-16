@@ -110,6 +110,9 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle addLink(Type t, vector[cHandle])
         cHandle addLink(Type t, vector[cHandle], cTruthValue tvn)
 
+        cHandle getHandle(Type t, string s)
+        cHandle getHandle(Type t, vector[cHandle])
+
         bint isValidHandle(cHandle h)
         int getSize()
         string getName(cHandle h)
@@ -144,6 +147,9 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         output_iterator getHandleSet(output_iterator,cHandle& h,Type t,bint subclass)
 
         # vector[chandle].iterator getHandleSet(output_iterator,Type t,string name,bint subclass,cVersionHandle vh)
+
+        void clear()
+        bint removeAtom(cHandle h, bint recursive) 
 
         cTimeServer getTimeServer()
         void print_list "print" ()

@@ -30,9 +30,15 @@ cdef class Handle:
             return deref(h1.h) >= deref(h2.h)
     def __str__(self):
         return "<UUID:" + str(self.h.value()) + ">"
+    def __repr__(self):
+        return "Handle(" + str(self.h.value()) + ")"
     def is_undefined(self):
         if deref(self.h) == self.h.UNDEFINED: return True
         return False
+    def __nonzero__(self):
+        """ Allows boolean comparison, return false is handle == UNDEFINED """
+        return not self.is_undefined()
+    
 
 cdef class TruthValue:
     """ The truth value represents the strength and confidence of
@@ -194,6 +200,19 @@ cdef class AtomSpace:
         if self.atomspace.isValidHandle(deref((<Handle>h).h)):
             return True
         return False
+
+    def remove(self,h,recursive=False):
+        """ Removes an atom from the atomspace
+        h --  The Handle of the atom to be removed.
+        recursive -- Recursive-removal flag; if set, the links in the
+            incoming set of the atom to be removed will also be removed.
+         
+        Returns True if the Atom for the given Handle was successfully
+        removed. False, otherwise.
+
+        """
+        cdef bint recurse = recursive
+        return self.atomspace.removeAtom(h,recurse)
 
     def size(self):
         return self.atomspace.getSize()
