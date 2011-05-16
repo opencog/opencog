@@ -185,7 +185,7 @@ cdef class AtomSpace:
         if result == result.UNDEFINED: return None
         return Handle(result.value());
 
-    def is_valid(self,h):
+    def is_valid(self,Handle h):
         """ Check whether the passed handle refers to an actual handle
         """
         try:
@@ -201,7 +201,7 @@ cdef class AtomSpace:
             return True
         return False
 
-    def remove(self,h,recursive=False):
+    def remove(self,Handle h,recursive=False):
         """ Removes an atom from the atomspace
         h --  The Handle of the atom to be removed.
         recursive -- Recursive-removal flag; if set, the links in the
@@ -212,7 +212,11 @@ cdef class AtomSpace:
 
         """
         cdef bint recurse = recursive
-        return self.atomspace.removeAtom(h,recurse)
+        return self.atomspace.removeAtom(deref((<Handle>h).h),recurse)
+
+    def clear(self):
+        """ Remove all atoms from the AtomSpace """
+        self.atomspace.clear()
 
     def size(self):
         return self.atomspace.getSize()
