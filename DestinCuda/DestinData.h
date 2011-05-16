@@ -18,7 +18,7 @@ class DestinData
         int mCols;
         float** mShiftedImageCache;
 
-        //scratch for real & imag part of FFT
+        //scratch for real & image part of FFT
         float mRP[4][4];
         float mIP[4][4];
 

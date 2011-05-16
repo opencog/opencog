@@ -129,6 +129,14 @@ void DestinData::GetSubImage(int ImageIndex,int RowShift,int ColShift,
 	}
 }
 
+//note: this only does a 4x4 FFT and returns all 16 coefficients as magnitude in fSubImage
+void DestinData::GetSubImageFFT(int ImageIndex,int RowShift,int ColShift,
+        int rS, int rE,int cS,int cE,float** &fSubImage, float* fUniqueVector)
+{
+    GetSubImage(ImageIndex,RowShift,ColShift,rS,rE,cS,cE,fSubImage);
+    DoSpecial4x4FFT(fSubImage,fUniqueVector);
+}
+
 void DestinData::GetSubImageVector(int ImageIndex,int RowShift,int ColShift,
 		int rS, int rE,int cS,int cE,float** &fSubImage, float* fVector)
 {
@@ -247,14 +255,6 @@ void DestinData::GetIndicesForThisLabel(int iLabel, vector<int>& IndicesForThisL
 			IndicesForThisLabel.push_back( *vit++ );
 		}
 	}
-}
-
-//note: this only does a 4x4 FFT and returns all 16 coefficients as magnitude in fSubImage
-void DestinData::GetSubImageFFT(int ImageIndex,int RowShift,int ColShift,
-		int rS, int rE,int cS,int cE,float** &fSubImage, float* fUniqueVector)
-{
-	GetSubImage(ImageIndex,RowShift,ColShift,rS,rE,cS,cE,fSubImage);
-	DoSpecial4x4FFT(fSubImage,fUniqueVector);
 }
 
 void DestinData::DoSpecial4x4FFT(float** &fSubImage, float* fUniqueVector)

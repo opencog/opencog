@@ -319,6 +319,9 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     int iDecayPoint = SEQ_LENGTH*DigitToStartDecay;
     float fRhoThreshold = (float)(1e-2);
     bool bUseRhoDerivative = false;
+    int MaxNumberOfInputs=-1;
+    int MaxNumberOfOutputs=-1;
+
     for( int Layer=0; Layer<NumberOfLayers; Layer++ )
     {
         bool bTopNode = false;
@@ -361,6 +364,15 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
                               bBasicOnlineClustering, FixedLearningRateLayer[Layer], bDoGoodPOS, SEQ_LENGTH, bTopNode );
         // Assign Childeren and Parrents of nodes
         DLayer[Layer].AssignChildrenAndParents(Layer,NumberOfLayers,bInitialLayerIsTransformOnly); //uses the 'default' 4:1 method
+
+        if ( NumberOfCentroids[Layer] > MaxNumberOfOutputs )
+        {
+            MaxNumberOfOutputs=NumberOfCentroids[Layer];
+        }
+        if ( InputDimensionality[Layer] > MaxNumberOfInputs )
+        {
+            MaxNumberOfInputs=InputDimensionality[Layer];
+        }
     }
     cout << "------------------" << endl;
     return 0;
