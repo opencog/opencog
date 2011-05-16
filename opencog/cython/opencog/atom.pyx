@@ -56,6 +56,10 @@ cdef class Atom(object):
                 self._atom_type = self.atomspace.get_type(self.handle)
             return self._atom_type
 
+    property type_name:
+        def __get__(self):
+            return get_type_name(self.type)
+
     property t:
         def __get__(self):
             return self.type
