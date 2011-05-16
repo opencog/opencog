@@ -183,7 +183,7 @@ To actually allow the CogServer to use this MindAgent there are several things t
 2. Ensure you are loading the libPythonModule.so CogServer plugin.
 3. Either use the CogServer loadpy command to load the module (you should leave
    off the .py extension, e.g. "loadpy my_module") or place the module name in
-   PYTHON_PRELOAD.
+   the configuration parameter PYTHON_PRELOAD.
 
 Note: Yet another thing to do is allow all modules in the OpenCog Python
 directories to be loaded automatically and scanned for MindAgents.

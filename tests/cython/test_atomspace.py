@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from opencog.atomspace import AtomSpace, TruthValue, Atom
+from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
 
 class AtomSpaceTest(TestCase):
@@ -167,6 +167,53 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(l1 in result)
         result = self.space.get_atoms_by_target_handle(types.Link,h3)
         self.assertTrue(l1 not in result)
+
+    def test_remove(self):
+        h1 = self.space.add_node(types.Node,"test1")
+        h2 = self.space.add_node(types.ConceptNode,"test2")
+        h3 = self.space.add_node(types.PredicateNode,"test3")
+
+        self.assertTrue(h1 in self.space)
+        self.assertTrue(h2 in self.space)
+        self.assertTrue(h3 in self.space)
+
+        self.space.remove(h1)
+        self.assertTrue(h1 not in self.space)
+        self.assertTrue(h2 in self.space)
+        self.assertTrue(h3 in self.space)
+
+        l = self.space.add_link(types.SimilarityLink,[h2,h3])
+        self.space.remove(h2) # won't remove it unless recursive is True
+        self.assertTrue(h2 in self.space)
+        self.space.remove(h2,True) # won't remove it unless recursive is True
+        self.assertTrue(h2 not in self.space)
+        self.assertTrue(l not in self.space)
+
+    def test_clear(self):
+        h1 = self.space.add_node(types.Node,"test1")
+        h2 = self.space.add_node(types.ConceptNode,"test2")
+        h3 = self.space.add_node(types.PredicateNode,"test3")
+        self.space.clear()
+        self.assertEquals(self.space.size(),0) 
+        self.assertEquals(self.space.size(),0) 
+        self.assertEquals(len(self.space),0) 
+
+    def test_container_methods(self):
+        self.assertEquals(len(self.space),0) 
+        h = Handle(100)
+        self.assertRaises(KeyError,self.space.__getitem__,"blah")
+        self.assertRaises(IndexError,self.space.__getitem__,h)
+        h1 = self.space.add_node(types.Node,"test1")
+        h2 = self.space.add_node(types.ConceptNode,"test2")
+        h3 = self.space.add_node(types.PredicateNode,"test3")
+        a = Atom(h1,self.space)
+        self.assertEquals(a,self.space[h1])
+
+        self.assertTrue(h1 in self.space)
+        self.assertTrue(a in self.space)
+        self.assertTrue(h2 in self.space)
+
+        self.assertTrue(len(self.space), 3)
 
 class AtomTest(TestCase):
 

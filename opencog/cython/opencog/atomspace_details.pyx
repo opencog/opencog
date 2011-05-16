@@ -185,7 +185,7 @@ cdef class AtomSpace:
         if result == result.UNDEFINED: return None
         return Handle(result.value());
 
-    def is_valid(self,Handle h):
+    def is_valid(self,h):
         """ Check whether the passed handle refers to an actual handle
         """
         try:
@@ -218,31 +218,58 @@ cdef class AtomSpace:
         """ Remove all atoms from the AtomSpace """
         self.atomspace.clear()
 
+    # Methods to make the atomspace act more like a standard Python container
+    def __contains__(self,o):
+        """ Custom checker to see if object is in AtomSpace """
+        if isinstance(o,Handle):
+            return self.is_valid(o)
+        elif isinstance(o,Atom):
+            return self.is_valid((<Atom>o).handle)
+
+    def __len__(self):
+        """ Return the number of atoms in the AtomSpace """
+        return self.size()
+
+    def __getitem__(self,key):
+        """ Support self[handle] lookup to get an atom """
+        if not isinstance(key,Handle):
+            raise KeyError("Lookup only supported by opencog.atomspace.Handle")
+        if key in self:
+            return Atom(key,self)
+        raise IndexError("No Atom with handle %s" % str(key))
+
     def size(self):
+        """ Return the number of atoms in the AtomSpace """
         return self.atomspace.getSize()
 
     def get_tv(self,Handle h):
+        """ Return the TruthValue of an Atom in the AtomSpace """
         cdef tv_ptr tv
         tv = self.atomspace.getTV(deref(h.h))
         return TruthValue(tv.get().getMean(),tv.get().getCount())
 
     def set_tv(self,Handle h,TruthValue val):
+        """ Set the TruthValue of an Atom in the AtomSpace """
         self.atomspace.setTV(deref(h.h),deref(val._ptr()))
 
     def get_type(self,Handle h):
+        """ Get the Type of an Atom in the AtomSpace """
         return self.atomspace.getType(deref(h.h))
 
     def get_name(self,Handle h):
+        """ Get the Name of a Node in the AtomSpace """
         cdef string name
         name = self.atomspace.getName(deref(h.h))
         return name.c_str()[:name.size()].decode('UTF-8')
 
     def get_outgoing(self,Handle handle):
+        """ Get the outgoing set for a Link in the AtomSpace """
         cdef vector[cHandle] o_vect
         o_vect = self.atomspace.getOutgoing(deref(handle.h))
         return convert_handle_seq_to_python_list(o_vect)
 
     def get_incoming(self,Handle handle):
+        """ Get the incoming set for an Atom in the AtomSpace """
         cdef vector[cHandle] o_vect
         o_vect = self.atomspace.getIncoming(deref(handle.h))
         return convert_handle_seq_to_python_list(o_vect)

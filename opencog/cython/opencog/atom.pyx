@@ -81,3 +81,24 @@ cdef class Atom(object):
     def __repr__(self):
         return "Atom(%s,%s)" % (repr(self.handle),repr(self.atomspace))
 
+    def __richcmp__(Atom a1, Atom a2, int op):
+        is_equal = True
+        if a1.atomspace != a2.atomspace:
+            is_equal = False
+        if is_equal:
+            if a1.handle != a2.handle:
+                is_equal = False
+        if op == 2: # ==
+            return is_equal
+        elif op == 3: # !=
+            return not is_equal
+        #elif op == 4: # >
+            #return deref(h1.h) > deref(h2.h)
+        #elif op == 0: # <
+            #return deref(h1.h) < deref(h2.h)
+        #elif op == 1: # <=
+            #return deref(h1.h) <= deref(h2.h)
+        #elif op == 5: # >=
+            #return deref(h1.h) >= deref(h2.h)
+
+
