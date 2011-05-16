@@ -90,18 +90,17 @@ eventually disappear from the Python API as it's only really important
 for low-level graph storage and lookup). The Atom class in Python ties the Handle
 to the AtomSpace and requests the information from the AtomSpace as required.
 
- from opencog.atom import Atom
- an_atom = Atom(h,as)
+ from opencog.atomspace import Atom
+ an_atom = Atom(h,a)
  print str(an_atom)
  Output => 'node[ConceptNode:handle bar]'
  print an_atom.long_string()
  Output => 'node[ConceptNode:handle bar] av:(0,0) tv:([0.000000,0.000000=0.000000])'
  print an_atom.name
  Output => 'handle bar'
- print str(an_atom.t)
+ print str(an_atom.t) # can also use an_atom.type if you want to be verbose
  Output => '3'
- from opencog.atomspace import get_type_name
- print get_type_name(an_atom.t)
+ print an_atom.type_name
  Output => 'ConceptNode'
 
 Note that on the second reference to an_atom.t, it won't recheck the AtomSpace
@@ -118,17 +117,19 @@ Lets create our first link:
  n1 = a.add_node(t.ConceptNode, "I can refer to this atom now")
  n2 = a.add_node(t.ConceptNode, "this one too")
  l = a.add_link(t.SimilarityLink, [n1,n2])
- alink = Atom(h3,a)
+ alink = Atom(l,a)
  alink.out
  Output => [Handle(5), Handle(6)]
 
-Up until now we've ignored Truthvalues. The TruthValue implementation is not entirely complete.Currently the bindings only support "[[SimpleTruthValues]]", since these are the most frequently used.
+Up until now we've ignored Truthvalues. The TruthValue implementation is not
+entirely complete.Currently the bindings only support "[[SimpleTruthValues]]",
+since these are the most frequently used.
 
  from opencog.atomspace import TruthValue
- str(alink.tv)
+ print alink.tv
  Output => '[0.000000,0.000000=0.000000]'
  alink.tv = TruthValue(0.5,0.1)
- str(alink)
+ print alink
  Output => '[SimilarityLink <I can refer to this atom now,this one too> 0.500000 0.200000]'
 
 Next up is queries to the AtomSpace. What if we want to iterate over all the
@@ -137,17 +138,42 @@ have be wrapped and also have more descriptive names for each variant (instead
 of the numerous overloads in the C++ API, that IMO makes things confusing).
 
  my_nodes = a.get_atoms_by_type(t.ConceptNode) 
+ print my_nodes
+ Output => [Handle(6), Handle(5), Handle(4), Handle(3), Handle(2), Handle(1)]
 
 By default, subtypes are also retrieved, but we can exclude subtypes if we want to be specific.
  
  a.add_node(t.Node, "I am the one true Node")
- a.get_atoms_by_type(t.Node,subtype=False)
- my_specific_nodes = a.get_atoms_by_type(t.ConceptNode) 
+ my_specific_nodes = a.get_atoms_by_type(t.ConceptNode,subtype=False)
+ print my_specific_nodes
+ Output => [Handle(8)]
+ print Atom(my_specific_nodes[0],a)
+ Output => node[Node:I am the one true Node]
+
+There are other queries by type, outgoing set, name etc. See 
+tests/opencog/cython/test_atomspace.py for the complete picture.
 
 Note: It occurs to me that it'd be trivial to replace add_node/add_link with
 a simple add method. So next round of improvements will probably have this.
 It'd also be nice to somehow import types using "from opencog.atomspace.types
 import ConceptNode" (or use a * import)
+
+==== The AtomSpace as a container ====
+
+The AtomSpace supports the container methods Python expects for a container-like object:
+
+ alink in a    # is this atom in this atomspace
+ result => True
+ h in a        # works for handles too
+ result => True
+ len(a)        # how many atoms are in the atomspace?
+ result => 8
+ a[h]          # using [] notation, returns the Atom, or IndexError exception
+               # if handle not in AtomSpace
+ result => Atom(Handle(4),<opencog.atomspace.AtomSpace object at 0x14b2918>)
+ 
+I'm very interested in making this Pythonic as possible, so if you notice
+aberrations please email joel@opencog.org.
 
 === MindAgents in Python ===
 
