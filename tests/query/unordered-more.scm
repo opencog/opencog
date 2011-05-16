@@ -1,8 +1,13 @@
+;;
+;; unordered-more.scm
+;;
+;; A slightly more complicated unordered-link test case; 
+;; has some confounding graphs that should not be found ...
 
 (define (stv mean conf) (cog-new-stv mean conf))
-;;
+
+;; should match to this.
 (SimilarityLink (stv 1.0 1.0)
-	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -10,27 +15,75 @@
 	)
 )
 
+;; this should not match.
+(SimilarityLink (stv 1.0 1.0)
+	(NumberNode "0.24")
+	(ExecutionOutputLink (stv 1.0 1.0)
+		(HumanoidNode "We are legion; we are Anonymous")
+		(ListLink)
+	)
+)
+
+;; this should not match.
+(SimilarityLink (stv 1.0 1.0)
+	(NumberNode "0.24")
+	(ExecutionOutputLink (stv 1.0 1.0)
+		(GroundedSchemaNode "ActivationModulatorUpdater")
+		(ListLink
+			(ConceptNode "ring a ling a ding")
+		)
+	)
+)
+
+;; this should not match.
+(SimilarityLink (stv 1.0 1.0)
+	(NumberNode "0.24")
+	(LatestLink (stv 1.0 1.0)
+		(GroundedSchemaNode "ActivationModulatorUpdater")
+		(ListLink)
+	)
+)
+
+;; this should not match.
+(UnorderedLink (stv 1.0 1.0)
+	(NumberNode "0.24")
+	(ExecutionOutputLink (stv 1.0 1.0)
+		(GroundedSchemaNode "ActivationModulatorUpdater")
+		(ListLink)
+	)
+)
+
+;; this should not match.
+(SimilarityLink (stv 1.0 1.0)
+	(WordNode "0.24")
+	(ExecutionOutputLink (stv 1.0 1.0)
+		(GroundedSchemaNode "ActivationModulatorUpdater")
+		(ListLink)
+	)
+)
+
+;; Note that the UnorderedLink is unordered ... 
 (define (blank)
 	(BindLink
 		;; variable decls
 		(ListLink
-			(VariableNode "$var_number")
-			(VariableNode "$var_schema")
+			(TypedVariableLink
+				(VariableNode "$var_number_node_type")
+				(VariableTypeNode "NumberNode")
+			)
 		)
 		(ImplicationLink
 			;; body
-			(SimilarityLink (stv 1.0 1.0)
-				(VariableNode "$var_schema")
-				(VariableNode "$var_number")
-				(ExecutionOutputLink (stv 1.0 1.0)
-					(VariableNode "$var_schema")
+			(SimilarityLink
+				(VariableNode "$var_number_node_type")
+				(ExecutionOutputLink
+					(GroundedSchemaNode "ActivationModulatorUpdater")
 					(ListLink)
 				)
 			)
 			;; implicand -- result
 			(ListLink
-				(VariableNode "$var_number")
-				(VariableNode "$var_schema")
+				(VariableNode "$var_number_node_type")
 			)
 		)
 	)
