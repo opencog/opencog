@@ -53,7 +53,11 @@ ADD_LIBRARY (atomspace SHARED
 
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
-SET(ATOMSPACE_LINK_LIBS xml util SpaceMap ${GSL_LIBRARIES} ${Boost_SIGNALS_LIBRARY} ${Boost_THREAD_LIBRARY})
+SET(ATOMSPACE_LINK_LIBS
+    xml util SpaceMap
+    ${GSL_LIBRARIES}
+    ${Boost_SIGNALS_LIBRARY} ${Boost_THREAD_LIBRARY}
+)
 
 IF (HAVE_ZMQ)
   SET(ATOMSPACE_LINK_LIBS ${ATOMSPACE_LINK_LIBS} zmq)
@@ -135,4 +139,5 @@ ADD_EXECUTABLE (atomspace_async
 TARGET_LINK_LIBRARIES (atomspace_async
     atomspace
     util
+    ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY}
 )
