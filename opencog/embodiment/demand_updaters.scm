@@ -20,7 +20,22 @@
 )
 
 (define (AffiliationDemandUpdater)
-    (random:uniform) 
+    (let* ( (proximity
+                 (get_proximity (get_owner) (get_self) )
+            )
+
+            (fitness
+                (get_latest_predicate_truth_value_mean "fitness") 
+            )
+          )
+
+         ; We take fitness into consideration,
+         ; because when you are in bad situation, you would probably miss your
+         ; family and friends
+          (* (expt proximity 0.5) 
+             (expt fitness 0.5)  
+          )   
+    )
 )
 
 (define (CertaintyDemandUpdater)

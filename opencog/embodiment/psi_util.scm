@@ -626,16 +626,10 @@
 ; Return the latest AtTimeLink given the predicate_name
 ; if failed or found multiple EvaluationLink, return an empty list
 (define (get_latest_at_time_link predicate_name)
-    (let* ( (query_result_list_link 
-                (cog-bind (find_latest_at_time_link predicate_name) )
-            )    
-
-            (latest_at_time_link_list (list))
+    (let* ( (latest_at_time_link_list 
+                (query_atom_space (find_latest_at_time_link predicate_name) ) 
+            )
           )
-
-          (set! latest_at_time_link_list
-              (cog-outgoing-set query_result_list_link)
-          )    
 
           (if (null? latest_at_time_link_list)
               ; If failed to find the latest AtTimeLink, return an empty list
@@ -707,5 +701,96 @@
 ;
 (define (get_pleasure_value)
     (random:uniform) 
+)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+;
+
+
+; Get handle to the owner/ self
+;
+; The ownership (i.e. OWNERSHIP_PREDICATE_NAME) stored in AtomSpace is as follows:
+;
+; (EvaluationLink (stv 1 0) (av -9 1 0)
+;     (PredicateNode "owns" (av -9 1 0))
+;     (ListLink (av 0 1 0)
+;         (AvatarNode "id_265" (av 0 1 0))
+;         (PetNode "id_73565" (av 0 1 0))
+;     )
+; )
+;
+
+(define (get_owner)
+    (let ( (ownership_evaluation_link_list (get_evaluation_link "owns") )
+           (list_link (list) )
+         )
+
+         (if (null? ownership_evaluation_link_list)
+             (list) 
+
+             (begin
+                 (set! list_link
+                     (list-ref (cog-outgoing-set ownership_evaluation_link_list) 1)
+                 )
+
+                 (list-ref (cog-outgoing-set list_link) 0)
+             )
+         ); if
+
+    ); let
+)
+
+(define (get_self)
+    (let ( (ownership_evaluation_link_list (get_evaluation_link "owns") )
+           (list_link (list) )
+         )
+
+         (if (null? ownership_evaluation_link_list)
+             (list) 
+
+             (begin
+                 (set! list_link
+                     (list-ref (cog-outgoing-set ownership_evaluation_link_list) 1)
+                 )
+
+                 (list-ref (cog-outgoing-set list_link) 1)
+             )
+         ); if
+
+    ); let
+
+)
+
+; Get proximity
+;
+; (EvaluationLink (stv 0.65710086 0.0012484394) (av -9 1 0)
+;     (PredicateNode "proximity" (av -9 1 0))
+;     (ListLink
+;         (AccessoryNode "id_73548" (av -9 0 0))
+;         (AvatarNode "id_265" (av 0 1 0))
+;    )
+; )
+;
+; The truth value of 'proximity' is defined as 
+; SimpleTruthValue tv(1.0 - (distance/mapDiagonal), 1);
+; See also ./opencog/embodiment/Control/PredicateUpdaters/NearPredicateUpdater.cc
+
+(define (get_proximity object_a object_b)
+    (let ( (proximity_evaluation_link (list) )
+         )
+
+         (set! proximity_evaluation_link
+             (EvaluationLink
+                 (PredicateNode "proximity")
+                 (ListLink
+                     object_a
+                     object_b
+                 ) 
+             ) 
+         ); set!
+
+         (get_truth_value_mean (cog-tv proximity_evaluation_link) )
+    ) 
 )
 

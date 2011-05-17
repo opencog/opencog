@@ -9,6 +9,8 @@
 
 (use-modules (srfi srfi-1))
 
+(define (av sti lti vlti) (cog-new-av sti lti vlti))    
+
 (define (stv mean conf) (cog-new-stv mean conf))
 (define (itv lower upper conf) (cog-new-itv lower upper conf))
 (define (ctv mean conf count) (cog-new-ctv mean conf count))
