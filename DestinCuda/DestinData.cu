@@ -4,6 +4,7 @@
 #include <map>
 #include <math.h>
 #include <iostream>
+
 using namespace std;
 
 DestinData::DestinData(void)
@@ -110,6 +111,52 @@ void DestinData::GetLabelList(vector<int>& Labels)
 	}
 }
 
+void DestinData::GetShiftedImage(int ImageIndex, int RowShift, int ColShift, float** &fData )
+{
+    int R,C;
+    R=4;
+    C=4;
+    //allocate memory if necessary...
+    if ( fData==NULL )
+    {
+        fData = new float*[32];
+        for (int rr=0;rr<32;rr++)
+        {
+            fData[rr]=new float[32];
+        }
+    }
+    if ( ImageIndex!=mLastImageIndex )
+    {
+        //Load the image into the 50x50 buffer with the "0,0" offset...
+        for(int r=0;r<50;r++)
+        {
+            for(int c=0;c<50;c++)
+            {
+                mImageWithOffset[r][c]=0;
+            }
+        }
+        float** fImage = mImagePointer[ImageIndex];
+        for(int r=0;r<mRows;r++)
+        {
+            for(int c=0;c<mCols;c++)
+            {
+                mImageWithOffset[r+R][c+C]=fImage[r][c];
+            }
+        }
+    }
+
+    //Now load the data using the offset provided...
+    for(int r=0;r<mRows;r++)
+    {
+        for(int c=0;c<mCols;c++)
+        {
+            fData[r][c]=mImageWithOffset[r+RowShift][c+ColShift];
+        }
+    }
+
+    mLastImageIndex=ImageIndex;
+}
+
 void DestinData::GetSubImage(int ImageIndex,int RowShift,int ColShift,
 		int rS, int rE,int cS,int cE,float** &fSubImage)
 {
@@ -180,52 +227,6 @@ void DestinData::WriteToCSV(int ImageIndex, int RowShift, int ColShift, char* cF
 		stmCSV << endl;
 	}
 	stmCSV.close();
-}
-
-void DestinData::GetShiftedImage(int ImageIndex, int RowShift, int ColShift, float** &fData )
-{
-	int R,C;
-	R=4;
-	C=4;
-	//allocate memory if necessary...
-	if ( fData==NULL )
-	{
-		fData = new float*[32];
-		for (int rr=0;rr<32;rr++)
-		{
-			fData[rr]=new float[32];
-		}
-	}
-	if ( ImageIndex!=mLastImageIndex )
-	{
-		//Load the image into the 50x50 buffer with the "0,0" offset...
-		for(int r=0;r<50;r++)
-		{
-			for(int c=0;c<50;c++)
-			{
-				mImageWithOffset[r][c]=0;
-			}
-		}
-		float** fImage = mImagePointer[ImageIndex];
-        for(int r=0;r<mRows;r++)
-        {
-            for(int c=0;c<mCols;c++)
-            {
-                mImageWithOffset[r+R][c+C]=fImage[r][c];
-            }
-        }
-	}
-
-	//Now load the data using the offset provided...
-	for(int r=0;r<mRows;r++)
-	{
-		for(int c=0;c<mCols;c++)
-		{
-			fData[r][c]=mImageWithOffset[r+RowShift][c+ColShift];
-		}
-	}
-
-	mLastImageIndex=ImageIndex;
 }
 
 void DestinData::GetUniqueLabels(vector<int>& vLabels)

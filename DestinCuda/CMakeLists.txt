@@ -11,6 +11,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 FIND_PACKAGE(CUDA 4.0)
 
 if(CUDA_FOUND)
+    #Enable debug for CUDA
+    set(CUDA_COMPILE_TIME_EXTRA_FLAGS -g -G)
+    
 	add_subdirectory( pugixml )
 
 	#Make solution
