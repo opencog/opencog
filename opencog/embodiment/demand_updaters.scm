@@ -2,7 +2,7 @@
 ; Demand updaters
 ;
 ; @author Zhenhua Cai czhedu@gmail.com
-; @date   2011-05-16
+; @date   2011-05-17
 ;
 
 (define (EnergyDemandUpdater)
@@ -29,9 +29,8 @@
             )
           )
 
-         ; We take fitness into consideration,
-         ; because when you are in bad situation, you would probably miss your
-         ; family and friends
+         ; Note: We take fitness into consideration, because when you are in bad
+         ; situation, you would probably miss your family and friends
           (* (expt proximity 0.5) 
              (expt fitness 0.5)  
           )   
@@ -39,8 +38,136 @@
 )
 
 (define (CertaintyDemandUpdater)
-     (random:uniform) 
-) 
+    (let* ( (curious_about_evaluation_link_list
+                (query_atom_space (find_evaluation_link "curious_about") ) 
+            )
+
+            (familiar_with_evaluation_link_list 
+                (query_atom_space (find_evaluation_link "familiar_with") )
+            )   
+
+            (know_evaluation_link_list
+                (query_atom_space (find_evaluation_link "know") ) 
+            )
+
+            (curious_about_level 0)
+            (familiar_with_level 0)
+            (know_level 0)
+          )
+
+          ; Accumulate all the truth value of curious_about EvaluationLink
+          (map 
+              (lambda (curious_about_evaluation_link)
+                  (set! curious_about_level 
+                      (+ curious_about_level 
+                          (get_truth_value_mean (cog-tv curious_about_evaluation_link) ) 
+                      ) 
+                  ) 
+              )
+
+              curious_about_evaluation_link_list
+          ); map
+
+          ; Accumulate all the truth value of familiar_with EvaluationLink
+          (map 
+              (lambda (familiar_with_evaluation_link)
+                  (set! familiar_with_level 
+                      (+ familiar_with_level 
+                          (get_truth_value_mean (cog-tv familiar_with_evaluation_link) ) 
+                      ) 
+                  ) 
+              )
+
+              familiar_with_evaluation_link_list
+          ); map
+
+          ; Accumulate all the truth value of know EvaluationLink
+          (map 
+              (lambda (know_evaluation_link)
+                  (set! know_level 
+                      (+ know_level 
+                          (get_truth_value_mean (cog-tv know_evaluation_link) ) 
+                      ) 
+                  ) 
+              )
+
+              know_evaluation_link_list
+          ); map
+
+          ; Normalize levels of familiar_with, know and curious_about to [0, 1]
+          ;
+          ; Note: The formular is 
+          ;       xxx_level = 1 / {1 + a * exp[-(xxx_level+rand)/b] }
+          ;
+          ;       a controls the output xxx_level when input xxx_level equals 0, 
+          ;       the bigger a, the smaller the output
+          ;
+          ;       b controls the corresponding input xxx_level when output 
+          ;       xxx_level approaching 1, bigger b would result larger input 
+          ;       xxx_level to get output approaching 1. 
+          ;       
+          ;       After playing with gnuplot for a while, I found (a=100, b=1.5)
+          ;       seems reasonable, which would make the output xxx_level close 
+          ;       to 0 when input is 0, and make the output xxx_level approaching
+          ;       1, when input is 20. 
+          ;
+          ; TODO: we add a random number to introduce some noise, which would
+          ;       make this function still works even the virtual world is not 
+          ;       ready to populate interesting stuff. Remove these random noise later. 
+          ;
+          
+          (set! curious_about_level
+              (/ 1
+                 (+ 1 
+                    (* 100 
+                       (exp (/ (* (+ curious_about_level (* 15 (random:uniform))) -1)
+                               1.5
+                            )
+                       ) 
+                    )  
+                 )
+              )
+          )
+
+          (set! familiar_with_level
+              (/ 1
+                 (+ 1 
+                    (* 100 
+                       (exp (/ (* (+ familiar_with_level (* 15 (random:uniform))) -1)
+                               1.5
+                            )
+                       ) 
+                    )  
+                 )
+              )
+          )
+
+          (set! know_level
+              (/ 1
+                 (+ 1 
+                    (* 100 
+                       (exp (/ (* (+ know_level (* 15 (random:uniform))) -1)
+                               1.5
+                            )
+                       ) 
+                    )  
+                 )
+              )
+          )
+
+          ; Return certainty level
+          ;
+          ; note: At first, you are curious about something, after you playing
+          ;       with it for a while, you are familiar with it, at last you 
+          ;       claim you know it.
+          ;
+          (+ (* 0.2 curious_about_level) 
+             (* 0.3 familiar_with_level)
+             (* 0.5 know_level)
+          )
+
+    ); let*
+); define 
 
 (define (CompetenceDemandUpdater)
       (random:uniform) 
