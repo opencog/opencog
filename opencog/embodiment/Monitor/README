@@ -1,0 +1,29 @@
+Workbench for OpenCog, currently supports OpenPsi architecture.
+
+=======================================
+
+Writtern by Zhenhua Cai <czhedu@gmail.com> and Troy Huang <huangdeheng@gmail.com>
+
+Requirements:
+ - Python 2.6 or later
+ - Python-qt4 4.7.4 or later. http://www.riverbankcomputing.co.uk/software/pyqt/ 
+ - Matplotlib 0.99 or later. http://matplotlib.sourceforge.net/
+
+If you are using Ubuntu, just simply try:
+  
+  sudo apt-get install python-qt4 python-matplotlib
+
+In other linux distributions, both Python-qt4 and Matplotlib can be installed 
+with easy_install:
+
+  sudo easy_install pyqt matplotlib
+
+Usage:
+
+  $> python $PATH_TO_WORKBENCH/oc_workbench.py
+
+You will see three modules, "Psi Monitor", "Language" and "Emotion Space", choose one
+of them and start using it!
+
+TODO:
+  Workbench now is in experimental stage, so updates might happen in different revisions.

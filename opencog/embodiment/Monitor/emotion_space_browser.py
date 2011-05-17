@@ -2,11 +2,11 @@ import numpy as np
 import zmq
 import json
 
-import pylab
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
 # configure the matplotlib settings
 #mpl.rcParams['legend.fontsize'] = 10
@@ -94,7 +94,11 @@ class EmotionSpace(FigureCanvas):
         self.legend_list = []
 
         # Chosen 3 modulators to be the axes of 3-dimensional space.
-        self.modulator_axes = ['Activation', 'Resolution', 'SecuringThreshold']
+        self.modulator_axes = []
+
+        self.axes_group_box = QtGui.QGroupBox("Modulator Axes:")
+
+        
         # Initialize variables related to graphics.
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = Axes3D(self.fig)
@@ -126,11 +130,28 @@ class EmotionSpace(FigureCanvas):
             self.modulator_dict[k] = {}
             self.modulator_dict[k][timestamp] = v
             
-            self.legend_list.append(k)
+            self.modulator_axes.append(k)
 
         self.has_modulator_dict_initialized = True
-
+        #self.initialize_axes_group()
+    
+    def initialize_axes_group(self):
+        vLayout = QtGui.QVBoxLayout()
+        for axes in self.emotion_space.get_axes_list():
+            vLayout.addWidget(QtGui.QCheckBox(axes))
+        self.axes_group.setLayout(vLayout)
+        axesGroupSizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Maximum, True)
+        self.axes_group.setSizePolicy(axesGroupSizePolicy)
+        self.layout().insert(self.axes_group, 0)
+ 
     def update_data(self, json_dict):
+        ''' 
+        Update the data of feeling and modulators.
+        As the parameter might be either feeling data or modulator data,
+        we return the state of the updating result, in which, 0 indicates
+        feeling dictionary has been updated, 1 indicates modulator dictionary 
+        has been updated.
+        '''
         if json_dict['filter_key'] == "PsiFeelingUpdaterAgent":
             # Just leave feelings alone
             del json_dict['filter_key']
@@ -142,6 +163,8 @@ class EmotionSpace(FigureCanvas):
 
             # Cache the pair in the feeling dictionary
             self.feeling_dict[timestamp] = dominant_feeling
+
+            # return state 0
             return 0
 
 
@@ -157,6 +180,8 @@ class EmotionSpace(FigureCanvas):
             del json_dict['timestamp']
             for k, v in json_dict.iteritems():
                 self.modulator_dict[k][timestamp] = v
+
+            # return state 1
             return 1
         else:
             pass
@@ -168,9 +193,11 @@ class EmotionSpace(FigureCanvas):
         Process the data in json format
         """
         
-        update_seq = self.update_data(json_dict)
+        update_state = self.update_data(json_dict)
 
-        if self.isVisible() and update_seq == 1:
+        # Only update the graphic when the widget is visible and
+        # modulator data has been updated.
+        if self.isVisible() and update_state == 1:
             self.do_draw()
 
     def do_draw(self):
@@ -195,3 +222,26 @@ class EmotionSpace(FigureCanvas):
         self.axes.grid(True)
         self.axes.plot(X, Y, Z, '-o')
         self.draw()
+
+    def get_axes_list(self):
+        return self.modulator_axes
+
+    
+
+class EmotionSpaceExplorer(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(EmotionSpaceExplorer, self).__init__(parent)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding, True)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
+
+        self.emotion_space = EmotionSpace("tcp://192.168.1.250:18002", self)
+        
+        self.navigation_toolbar = NavigationToolbar(self.emotion_space, self)
+
+        mainLayout = QtGui.QVBoxLayout(self)
+        mainLayout.addWidget(self.emotion_space)
+        mainLayout.addWidget(self.navigation_toolbar)
+        self.setLayout(mainLayout)
+        
+    

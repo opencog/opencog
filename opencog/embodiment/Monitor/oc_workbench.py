@@ -62,7 +62,7 @@ class OCWorkbench(QMainWindow):
         # Dialog System Widget
         self.sceneStack.addWidget(NLPBrowser())
         # Emotion Space Widget
-        emotion_space = EmotionSpace("tcp://127.0.0.1:18002")
+        emotion_space = EmotionSpaceExplorer()
         self.sceneStack.addWidget(emotion_space)
         
         self.centralLayout.addWidget(self.moduleIconList)
