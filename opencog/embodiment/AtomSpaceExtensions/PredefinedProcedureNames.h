@@ -38,6 +38,8 @@
 // Predicate names
 
 // basic predicates
+#define PLAN_DONE_PREDICATE_NAME "planDone"
+#define PLAN_FAILED_PREDICATE_NAME "planFailed"
 #define ACTION_TRIED_PREDICATE_NAME "actionTried"
 #define ACTION_DONE_PREDICATE_NAME "actionDone"
 #define ACTION_FAILED_PREDICATE_NAME "actionFailed"

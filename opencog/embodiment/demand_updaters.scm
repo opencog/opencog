@@ -170,7 +170,40 @@
 ); define 
 
 (define (CompetenceDemandUpdater)
-      (random:uniform) 
+    (let* ( (plan_done_at_time_link_list 
+                (query_atom_space (find_at_time_link "planDone") ) 
+            )
+
+            (plan_failed_at_time_link_list
+                (query_atom_space (find_at_time_link "planFailed") ) 
+            )
+
+            (plan_done_number (length plan_done_at_time_link_list) )
+            (plan_failed_number (length plan_failed_at_time_link_list) )
+          )
+ 
+          ; avoid division by zero
+          (set! plan_done_number
+              (+ plan_done_number 1)
+          )
+
+          (set! plan_failed_number
+              (+ plan_failed_number 1) 
+          )
+
+          ; TODO: remove random noise, once the virtual world is more interesting
+          (set! plan_done_number
+                (+ plan_done_number (* 35 (random:uniform)))
+          )
+
+          (set! plan_failed_number
+                (+ plan_failed_number (* 15 (random:uniform)))
+          )
+
+          (/ plan_done_number
+             (+ plan_done_number (* 1.0 plan_failed_number) )
+          )
+    )     
 )
 
 ; TODO: TestEnergy is only used for debugging. Remove it once finished. 

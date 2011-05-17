@@ -707,7 +707,6 @@
 ;
 ;
 
-
 ; Get handle to the owner/ self
 ;
 ; The ownership (i.e. OWNERSHIP_PREDICATE_NAME) stored in AtomSpace is as follows:
@@ -792,5 +791,60 @@
 
          (get_truth_value_mean (cog-tv proximity_evaluation_link) )
     ) 
+)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+
+; BindLink used by cog-bind to get all the AtTimeLink given PredicateNode name
+;
+; The format of EvaluationLink is as follows:
+;
+; AtTimeLink (physiological level is stored as truth value here)
+;     TimeNode "timestamp"
+;     EvaluationLink
+;         PredicateNode  "predicate_name"
+;         ListLink
+;             ...
+
+(define (find_at_time_link predicate_name)
+    (BindLink
+        ; Variables to be used
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$var_time_node_type") 
+                (VariableTypeNode "TimeNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$var_list_link_type") 
+                (VariableTypeNode "ListLink")
+            ) 
+        ) 
+
+        (ImplicationLink
+            ; Pattern to be searched    
+            (AtTimeLink
+                (VariableNode "$var_time_node_type") 
+                (EvaluationLink
+                    (PredicateNode
+                        (string-trim-both predicate_name)                  
+                    ) 
+                    (VariableNode "$var_list_link_type")
+                )
+            )
+                 
+            ; Return values
+            (AtTimeLink
+                (VariableNode "$var_time_node_type") 
+                (EvaluationLink
+                    (PredicateNode
+                        (string-trim-both predicate_name)                  
+                    ) 
+                    (VariableNode "$var_list_link_type")
+                )
+            ); AtTimeLink 
+        )
+
+    ); BindLink 
 )
 
