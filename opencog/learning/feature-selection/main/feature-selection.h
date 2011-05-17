@@ -63,6 +63,7 @@ static const pair<string, string> cache_size_opt("cache-size", "s");
 static const pair<string, string> complexity_penalty_intensity_opt("complexity-penalty-intensity", "p");
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> resources_opt("resources", "R");
+static const pair<string, string> max_score_opt("max-score", "A");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -81,6 +82,7 @@ struct feature_selection_parameters {
     double confi; //  confidence intensity
     double resources; // resources of the learning algo that will take
                       // in input the feature set
+    double max_score;
 };
 
 template<typename IT, typename OT, typename Optimize, typename Scorer>
@@ -91,7 +93,7 @@ void feature_selection(IT& it, const OT& ot,
                        Optimize& optimize, const Scorer& scorer,
                        const feature_selection_parameters& fs_params) {
     // optimize feature set
-    optimize(deme, init_inst, scorer, fs_params.max_evals);
+    unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals);
     // get the best one
     std::sort(deme.begin(), deme.end(),
               std::greater<scored_instance<composite_score> >());
@@ -114,6 +116,10 @@ void feature_selection(IT& it, const OT& ot,
         stringstream ss;
         ss << "with composite score: " << best_score;
         logger().info(ss.str());
+    }
+    {
+        // Log the actual number of evaluations
+        logger().info("Actual number of evaluations: %u", evals);
     }
     // ~Logger
     // print the filtered table
@@ -186,7 +192,7 @@ template<typename IT, typename OT>
 void feature_selection(IT& it, const OT& ot,
                        const feature_selection_parameters& fs_params,
                        RandGen& rng) {
-    optim_parameters op_param(20, 1);
+    optim_parameters op_param(20, fs_params.max_score);
     if(fs_params.algorithm == un) {
         OC_ASSERT(false, "TODO");
     } else if(fs_params.algorithm == sa) {

@@ -116,6 +116,9 @@ int main(int argc, char** argv) {
         (opt_desc_str(resources_opt).c_str(),
          value<double>(&fs_params.resources)->default_value(10000),
          "Resources allocated to the learning algorithm that take in input the selected features. More resource means that the feature set can be larger (as long as it has enough confidence). In this case the algo is supposed to be MOSES and the resources is the number of evaluations.\n")        
+        (opt_desc_str(max_score_opt).c_str(),
+         value<double>(&fs_params.max_score)->default_value(1),
+         "The max score to reach, once reached feature selection halts.\n")
         ;
 
     variables_map vm;
