@@ -542,6 +542,8 @@ int MainDestinExperiments(int argc, char* argv[])
         cout << "There seems to be something off with data source " << strDestinTrainingFileName.c_str() << endl;
         return 0;
     }
+    float** data;
+    DataSourceForTraining.GetShiftedImage(0,0,0,data);
 
     // A vector with all the labels of the data source
     vector<int> vLabelList;

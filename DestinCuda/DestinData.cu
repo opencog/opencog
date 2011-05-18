@@ -10,7 +10,8 @@ using namespace std;
 DestinData::DestinData(void)
 {
 	mLastImageIndex=-1;
-	mRows=mCols=0;
+	mRows=0;
+	mCols=0;
 	mShiftedImageCache=NULL;
 }
 
@@ -113,18 +114,21 @@ void DestinData::GetLabelList(vector<int>& Labels)
 
 void DestinData::GetShiftedImage(int ImageIndex, int RowShift, int ColShift, float** &fData )
 {
-    int R,C;
-    R=4;
-    C=4;
+    int R=4;
+    int C=4;
+    int size = mRows*mCols*sizeof(float);
+    cout << "Single image is: " << size << " Bytes." << endl;
+    cout << "Single image is: " << 256*256*sizeof(float) << " Bytes." << endl;
     //allocate memory if necessary...
     if ( fData==NULL )
     {
-        fData = new float*[32];
-        for (int rr=0;rr<32;rr++)
+        fData = new float*[mRows];
+        for (int rr=0;rr<mRows;rr++)
         {
-            fData[rr]=new float[32];
+            fData[rr]=new float[mCols];
         }
     }
+
     if ( ImageIndex!=mLastImageIndex )
     {
         //Load the image into the 50x50 buffer with the "0,0" offset...
@@ -153,7 +157,6 @@ void DestinData::GetShiftedImage(int ImageIndex, int RowShift, int ColShift, flo
             fData[r][c]=mImageWithOffset[r+RowShift][c+ColShift];
         }
     }
-
     mLastImageIndex=ImageIndex;
 }
 
