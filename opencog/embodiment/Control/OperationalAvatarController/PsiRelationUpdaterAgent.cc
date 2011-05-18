@@ -124,12 +124,14 @@ void PsiRelationUpdaterAgent::init(opencog::CogServer * server)
                 // Split the Psi Rule into Goal, Action and Preconditions
                 Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink; 
 
-                if (PsiRuleUtil::splitPsiRule( atomSpace,
+                if ( PsiRuleUtil::isHandleToPsiRule(atomSpace, hImplicationLink) ) {
+
+                    PsiRuleUtil::splitPsiRule( atomSpace,
                                                hImplicationLink, 
                                                hGoalEvaluationLink, 
                                                hActionExecutionLink,
                                                hPreconditionAndLink
-                                             ) ) {
+                                             ); 
 
                     // Check if this Psi Rule contains a NULL_ACTION
                     // About NULL_ACTION, please refer to './opencog/embodiment/rules_core.scm'
@@ -145,8 +147,10 @@ void PsiRelationUpdaterAgent::init(opencog::CogServer * server)
                                        (*iRelationName).c_str(), 
                                        this->cycleCount
                                       );
-                    }// if
+                   }// if
+
                 }// if
+
             }// foreach
 
         }// foreach

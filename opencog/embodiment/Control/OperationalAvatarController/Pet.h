@@ -132,11 +132,6 @@ private:
 
     opencog::spatial::MapExplorerServer* visualDebuggerServer;
 
-    // Handles to currently/ previously selected Demand Goal
-    // PsiActionSelectionAgent would update these handles during "cognitive cycle"
-    Handle currentDemandGoal;
-    Handle previousDemandGoal;
-
 public:
 
     static const unsigned long UNDEFINED_TIMESTAMP;
@@ -418,26 +413,6 @@ public:
      * @param map Latest LocalSpaceMap
      */
     void sendMapToVisualDebuggerClients( const spatial::LocalSpaceMap2D& map );
-
-    /**
-     * Getter/ setters of current/previous DemandGoal
-     */
-    Handle getCurrentDemandGoal() {
-        return this->currentDemandGoal;
-    }
-
-    void setCurrentDemandGoal(Handle currentDemandGoal) {
-
-        if ( this->currentDemandGoal == currentDemandGoal )
-            return; 
-
-        this->previousDemandGoal = this->currentDemandGoal; 
-        this->currentDemandGoal = currentDemandGoal;
-    }
-
-    Handle getPreviousDemandGoal() {
-        return this->previousDemandGoal;
-    }
 
 }; // class
 }  // namespace

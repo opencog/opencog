@@ -116,9 +116,6 @@ Pet::Pet(const std::string& petId, const std::string& petName, const
         new ScavengerHuntAgentModeHandler( this );
 
     this->languageTool = new LanguageComprehension( *this );
-
-    this->currentDemandGoal = opencog::Handle::UNDEFINED; 
-    this->previousDemandGoal = opencog::Handle::UNDEFINED; 
 }
 
 Pet::~Pet()

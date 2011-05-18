@@ -23,6 +23,8 @@
 #include "OAC.h"
 #include "PsiDemandUpdaterAgent.h"
 
+#include "PsiRuleUtil.h"
+
 #include "opencog/web/json_spirit/json_spirit.h"
 
 #include <boost/tokenizer.hpp>
@@ -395,15 +397,19 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
 #endif 
 
     // Update the truth value of previous/ current demand goal
-    if ( pet.getPreviousDemandGoal() != opencog::Handle::UNDEFINED ) {
+    Handle hReferenceLink, hPreviousDemandGoal, hCurrentDemandGoal; 
+
+    hPreviousDemandGoal = PsiRuleUtil::getPreviousDemandGoal(atomSpace, hReferenceLink); 
+
+    if ( hPreviousDemandGoal != opencog::Handle::UNDEFINED ) {
         logger().debug("PsiDemandUpdaterAgent::%s - Previous demand goal stored in pet is '%s' [cycle = %d]", 
                        __FUNCTION__, 
-                       atomSpace.atomAsString(pet.getPreviousDemandGoal()).c_str(), 
+                       atomSpace.atomAsString(hPreviousDemandGoal).c_str(), 
                        this->cycleCount
                       );
 
         atomSpace.setTV( AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, PREVIOUS_DEMAND_NAME), 
-                         * atomSpace.getTV( pet.getPreviousDemandGoal() )
+                         * atomSpace.getTV( hPreviousDemandGoal )
                        );
 
         logger().debug("PsiDemandUpdaterAgent::%s - Previous demand goal has been updated to: '%s' [cycle = %d]", 
@@ -413,16 +419,18 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
                       );
     }
 
-    if ( pet.getCurrentDemandGoal() != opencog::Handle::UNDEFINED ) {
+    hCurrentDemandGoal = PsiRuleUtil::getCurrentDemandGoal(atomSpace, hCurrentDemandGoal); 
+
+    if ( hCurrentDemandGoal != opencog::Handle::UNDEFINED ) {
         logger().debug("PsiDemandUpdaterAgent::%s - Current demand goal stored in pet is '%s' [cycle = %d]", 
                        __FUNCTION__, 
-                       atomSpace.atomAsString(pet.getCurrentDemandGoal()).c_str(), 
+                       atomSpace.atomAsString(hCurrentDemandGoal).c_str(), 
                        this->cycleCount
                       );
 
 
         atomSpace.setTV( AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, CURRENT_DEMAND_NAME), 
-                         * atomSpace.getTV( pet.getCurrentDemandGoal() )
+                         * atomSpace.getTV( hCurrentDemandGoal )
                        );
 
         logger().debug("PsiDemandUpdaterAgent::%s - Current demand goal has been updated to: '%s' [cycle = %d]", 

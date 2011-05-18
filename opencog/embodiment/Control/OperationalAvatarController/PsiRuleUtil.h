@@ -7,7 +7,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiRuleUtil.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-02
+ * @date 2011-05-18
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -257,6 +257,29 @@ public:
                                                       const std::vector<std::string> & varBindCandidates, 
                                                       RandGen & randGen);
 
+    /**
+     * Get/ set previous/ current Demand Goal (EvaluationLink)
+     *
+     * These information are stored in AtomSpace as follows:
+     *
+     * ReferenceLink
+     *     ConceptNode "PreviousDemandGoal"
+     *     EvaluationLink
+     *         PredicateNode "XxxDemandGoal"
+     *         ListLink (empty)
+     *         
+     * ReferenceLink
+     *     ConceptNode "CurrentDemandGoal"
+     *     EvaluationLink
+     *         PredicateNode "XxxDemandGoal"
+     *         ListLink (empty)
+     *
+     */
+    static Handle getPreviousDemandGoal(const AtomSpace & atomSpace, Handle & referenceLink); 
+
+    static Handle getCurrentDemandGoal(const AtomSpace & atomSpace, Handle & referenceLink); 
+
+    static Handle setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal); 
 }; // class
 
 }  // namespace

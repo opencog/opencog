@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiRuleUtil.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-03-02
+ * @date 2011-05-18
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -163,7 +163,8 @@ bool PsiRuleUtil::isHandleToPsiRule(const AtomSpace & atomSpace, Handle h)
     // Check goal
     if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
          atomSpace.getArity(evaluationLinkGoal) != 2 ||
-         ! classserver().isA(atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0)), PREDICATE_NODE)
+         ! classserver().isA(atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0)), PREDICATE_NODE) ||
+         ! classserver().isA(atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 1)), LIST_LINK)
        )
         return false; 
 
@@ -586,5 +587,187 @@ Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSp
                   );
 
     return executingSchemaId; 
+}
+
+    /**
+     * Get/ set previous/ current Demand Goal
+     *
+     * These information are stored in AtomSpace as follows:
+     *
+     * ReferenceLink
+     *     ConceptNode "PreviousDemandGoal"
+     *     EvaluationLink
+     *         PredicateNode "XxxDemandGoal"
+     *         ListLink (empty)
+     *         
+     * ReferenceLink
+     *     ConceptNode "CurrentDemandGoal"
+     *     EvaluationLink
+     *         PredicateNode "XxxDemandGoal"
+     *         ListLink (empty)
+     *
+     */
+Handle PsiRuleUtil::getPreviousDemandGoal(const AtomSpace & atomSpace, Handle & referenceLink)
+{
+    // Get the (ConceptNode "PreviousDemandGoal")
+    Handle hConceptNode = atomSpace.getHandle
+                              ( CONCEPT_NODE,        // Type of the Atom wanted
+                                "PreviousDemandGoal" // Name of the Atom wanted
+                              );
+
+    if ( hConceptNode == Handle::UNDEFINED ||
+         atomSpace.getType(hConceptNode) != CONCEPT_NODE ) {
+
+        logger().warn( "PsiRuleUtil::%s - Found no ConceptNode named 'PreviousDemandGoal'. Return UNDEFINED handle",
+                       __FUNCTION__
+                     );
+
+        referenceLink = Handle::UNDEFINED; 
+        return Handle::UNDEFINED; 
+    }
+
+    // Get the HandleSet to ReferenceLink
+    std::vector<Handle> referenceLinkSet;
+
+    atomSpace.getHandleSet
+                  ( back_inserter(referenceLinkSet), // return value
+                    hConceptNode,      // returned link should contain this node
+                    REFERENCE_LINK,    // type of the returned link 
+                    false              // subclass is not acceptable, 
+                                       // i.e. returned link should be exactly of 
+                  );                   // type REFERENCE_LINK
+
+    if ( referenceLinkSet.size() != 1 ) {
+        logger().error( "PsiRuleUtil::%s - Number of ReferenceLink containing '%s' should be exactly 1, but got %d", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(hConceptNode).c_str(), 
+                        referenceLinkSet.size()
+                      );
+
+        referenceLink = Handle::UNDEFINED; 
+        return Handle::UNDEFINED; 
+    }
+
+    // Get the Handle to previous DemandGoal (EvaluationLink)
+    referenceLink = referenceLinkSet[0]; 
+    Handle hDemandGoalEvaluationLink = atomSpace.getOutgoing(referenceLink, 1); 
+
+    if ( atomSpace.getType(hDemandGoalEvaluationLink) != EVALUATION_LINK ||
+         atomSpace.getArity(hDemandGoalEvaluationLink) != 2 ) {
+        logger().error( "PsiRuleUtil::%s - The previous DemandGoal should be an EvaluationLink with 2 outgoing. But got '%s'", 
+                         __FUNCTION__, 
+                         atomSpace.atomAsString(hConceptNode).c_str()
+                      );
+
+        return Handle::UNDEFINED; 
+    }
+
+    // Return the Handle to previous Demand Goal (EvaluationLink)
+    return hDemandGoalEvaluationLink; 
+}
+
+Handle PsiRuleUtil::getCurrentDemandGoal(const AtomSpace & atomSpace, Handle & referenceLink)
+{
+    // Get the (ConceptNode "CurrentDemandGoal")
+    Handle hConceptNode = atomSpace.getHandle
+                              ( CONCEPT_NODE,        // Type of the Atom wanted
+                                "CurrentDemandGoal"  // Name of the Atom wanted
+                              );
+
+    if ( hConceptNode == Handle::UNDEFINED ||
+         atomSpace.getType(hConceptNode) != CONCEPT_NODE ) {
+
+        logger().warn( "PsiRuleUtil::%s - Found no ConceptNode named 'CurrentDemandGoal'. Return UNDEFINED handle",
+                       __FUNCTION__
+                     );
+
+        referenceLink = Handle::UNDEFINED; 
+        return Handle::UNDEFINED; 
+    }
+
+    // Get the HandleSet to ReferenceLink
+    std::vector<Handle> referenceLinkSet;
+
+    atomSpace.getHandleSet
+                  ( back_inserter(referenceLinkSet), // return value
+                    hConceptNode,      // returned link should contain this node
+                    REFERENCE_LINK,    // type of the returned link 
+                    false              // subclass is not acceptable, 
+                                       // i.e. returned link should be exactly of 
+                  );                   // type REFERENCE_LINK
+
+    if ( referenceLinkSet.size() != 1 ) {
+        logger().error( "PsiRuleUtil::%s - Number of ReferenceLink containing '%s' should be exactly 1, but got %d", 
+                        __FUNCTION__, 
+                        atomSpace.atomAsString(hConceptNode).c_str(), 
+                        referenceLinkSet.size()
+                      );
+
+        referenceLink = Handle::UNDEFINED; 
+        return Handle::UNDEFINED; 
+    }
+
+    // Get the Handle to current DemandGoal (EvaluationLink)
+    referenceLink = referenceLinkSet[0]; 
+    Handle hDemandGoalEvaluationLink = atomSpace.getOutgoing(referenceLink, 1); 
+
+    if ( atomSpace.getType(hDemandGoalEvaluationLink) != EVALUATION_LINK ||
+         atomSpace.getArity(hDemandGoalEvaluationLink) != 2 ) {
+        logger().error( "PsiRuleUtil::%s - The current DemandGoal should be an EvaluationLink with 2 outgoing. But got '%s'", 
+                         __FUNCTION__, 
+                         atomSpace.atomAsString(hConceptNode).c_str()
+                      );
+
+        return Handle::UNDEFINED; 
+    }
+
+    // Return the Handle to current Demand Goal (EvaluationLink)
+    return hDemandGoalEvaluationLink; 
+}
+
+Handle PsiRuleUtil::setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal)
+{
+    // Get Handles to old ReferenceLink and EvaluationLink
+    Handle hOldCurrentDemandGoalReferenceLink, hOldPreviousDemandGoalReferenceLink; 
+
+    Handle hOldCurrentDemandGoalEvaluationLink = 
+        PsiRuleUtil::getCurrentDemandGoal(atomSpace, hOldCurrentDemandGoalReferenceLink); 
+
+    Handle hOldPreviousDemandGoalEvaluationLink = 
+        PsiRuleUtil::getPreviousDemandGoal(atomSpace, hOldPreviousDemandGoalReferenceLink); 
+
+    // If currently selected Demand Goal doesn't change
+    if (hCurrentlySelectedDemandGoal == hOldCurrentDemandGoalEvaluationLink) {
+        return hCurrentlySelectedDemandGoal; 
+    }
+
+    // Try to delete old ReferenceLink containing previous/ current DemandGoal 
+    if ( hOldCurrentDemandGoalEvaluationLink != Handle::UNDEFINED )
+        atomSpace.removeAtom( hOldCurrentDemandGoalReferenceLink );
+
+    if ( hOldPreviousDemandGoalEvaluationLink != Handle::UNDEFINED ) 
+        atomSpace.removeAtom( hOldPreviousDemandGoalReferenceLink );
+
+    // Create ReferenceLink containing previous DemandGoal
+    std::vector<Handle> outgoingSet;
+
+    if ( hOldCurrentDemandGoalEvaluationLink != Handle::UNDEFINED ) {
+        outgoingSet.clear(); 
+        outgoingSet.push_back( atomSpace.addNode(CONCEPT_NODE, "PreviousDemandGoal") ); 
+        outgoingSet.push_back( hOldCurrentDemandGoalEvaluationLink );
+
+        atomSpace.addLink(REFERENCE_LINK, outgoingSet); 
+    }
+
+    // Create ReferenceLink containing current DemandGoal
+    if ( hCurrentlySelectedDemandGoal != Handle::UNDEFINED )  {
+        outgoingSet.clear(); 
+        outgoingSet.push_back( atomSpace.addNode(CONCEPT_NODE, "CurrentDemandGoal") ); 
+        outgoingSet.push_back( hCurrentlySelectedDemandGoal ); 
+    }
+    else 
+        return Handle::UNDEFINED; 
+
+    return atomSpace.addLink(REFERENCE_LINK, outgoingSet); 
 }
 

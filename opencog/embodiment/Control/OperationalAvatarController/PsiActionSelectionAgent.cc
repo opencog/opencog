@@ -113,7 +113,7 @@ void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
         demand = (*iDemandName);
 
         // Get the Handle to EvaluationLinks given demad name 
-        if ( !AtomSpaceUtil::getDemandEvaluationLinks(atomSpace, 
+        if ( !AtomSpaceUtil::getDemandEvaluationLinks( atomSpace, 
                                                        demand, 
                                                        hDemandGoal, 
                                                        hFuzzyWithin
@@ -856,10 +856,10 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     if (this->currentPsiRule != opencog::Handle::UNDEFINED) {
 
         logger().debug( "PsiActionSelectionAgent::%s currentSchemaId = %d [ cycle = %d] ", 
-			__FUNCTION__, 
-			this->currentSchemaId,
-                        this->cycleCount	
-		      );
+                        __FUNCTION__, 
+                       this->currentSchemaId,
+                       this->cycleCount	
+                      );
 
         // If the Action has been done, check the result
         if ( procedureInterpreter.isFinished(this->currentSchemaId) ) {
@@ -907,14 +907,15 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
             // If check result: fail
             else if ( is_action_result(result) || is_builtin(result) ) {
 
-                this->currentPsiRule = opencog::Handle::UNDEFINED;
-                this->currentSchemaId = 0;
-
                 logger().warn( "PsiActionSelectionAgent::%s - Failed to execute the Action, while applying the Psi Rule: %s [ cycle = %d ].", 
                                __FUNCTION__, 
                                atomSpace.atomAsString(this->currentPsiRule).c_str(), 
                                this->cycleCount
                              );
+
+                this->currentPsiRule = opencog::Handle::UNDEFINED;
+                this->currentSchemaId = 0;
+
             }
             // If check result: unexpected result
             else {
@@ -943,15 +944,14 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
             //       We should erase one of them, when we really understand the difference between both. 
             //       
             //       [By Zhennua Cai, on 2011-02-03]
-
-            this->currentPsiRule = opencog::Handle::UNDEFINED;
-            this->currentSchemaId = 0;
-
             logger().warn( "PsiActionSelectionAgent::%s - Failed to execute the Action, while applying the Psi Rule: %s [ cycle = %d ].", 
                            __FUNCTION__, 
                            atomSpace.atomAsString(this->currentPsiRule).c_str(), 
                            this->cycleCount
                          );
+
+            this->currentPsiRule = opencog::Handle::UNDEFINED;
+            this->currentSchemaId = 0;
         }
         // If the Action is time out
         else if ( time(NULL) - this->timeStartCurrentPsiRule >  this->procedureExecutionTimeout ) { 
@@ -997,7 +997,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
         }
 
         // Update the pet's previously/ currently Demand Goal
-        pet.setCurrentDemandGoal( selectedDemandGoal );
+        PsiRuleUtil::setCurrentDemandGoal(atomSpace, selectedDemandGoal);         
 
         logger().debug( "PsiActionSelectionAgent::%s - Select the Demand Goal: %s [ cycle = %d ].", 
                         __FUNCTION__, 
@@ -1035,10 +1035,13 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
             return; 
         }
 
-        if ( selectedDemandGoal != pet.getCurrentDemandGoal() ) {
+        Handle hCurrentDemandGoal, hReferenceLink; 
+        hCurrentDemandGoal = PsiRuleUtil::getCurrentDemandGoal(atomSpace, hReferenceLink); 
+
+        if ( selectedDemandGoal != hCurrentDemandGoal ) {
 
             // Update the pet's previously/ currently Demand Goal
-            pet.setCurrentDemandGoal( selectedDemandGoal );
+            PsiRuleUtil::setCurrentDemandGoal(atomSpace, selectedDemandGoal);         
            
             logger().debug( "PsiActionSelectionAgent::%s - Switch the Demand Goal to: %s [ cycle = %d ].", 
                             __FUNCTION__, 
