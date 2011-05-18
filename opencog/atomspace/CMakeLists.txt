@@ -139,5 +139,4 @@ ADD_EXECUTABLE (atomspace_async
 TARGET_LINK_LIBRARIES (atomspace_async
     atomspace
     util
-    ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY}
 )
