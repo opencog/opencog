@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
 # An elegant workbench GUI for OpenCog.
@@ -6,8 +5,6 @@
 # @author Troy Huang <huangdeheng@gmail.com>
 # @date 2011-04-18
 #
-
-
 
 import sys
 

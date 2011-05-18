@@ -6,8 +6,6 @@
 # @date 2011-03-30
 # @update 2011-04-19
 
-
-
 import sys
 import zmq
 

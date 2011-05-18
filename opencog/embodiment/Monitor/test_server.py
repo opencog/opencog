@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Publish mock messages via ZeroMQ
 # 
@@ -7,7 +8,6 @@
 # @date   2011-04-22
 #
 # @note   This server is only used for development 
-#
 
 import time
 import zmq
