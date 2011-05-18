@@ -8,6 +8,7 @@ Requirements:
  - Python 2.6 or later
  - Python-qt4 4.7.4 or later. http://www.riverbankcomputing.co.uk/software/pyqt/ 
  - Matplotlib 0.99 or later. http://matplotlib.sourceforge.net/
+ - Python ZeroMQ bindings pyzmq
 
 If you are using Ubuntu, just simply try:
   
@@ -17,6 +18,10 @@ In other linux distributions, both Python-qt4 and Matplotlib can be installed
 with easy_install:
 
   sudo easy_install pyqt matplotlib
+
+ZeroMQ should be installed manually and the bindings can be installed with:
+
+  sudo easy_install pyzmq
 
 Usage:
 
