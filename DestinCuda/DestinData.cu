@@ -12,26 +12,22 @@ DestinData::DestinData(void)
 	mLastImageIndex=-1;
 	mRows=0;
 	mCols=0;
-	mShiftedImageCache=NULL;
+    for(int r=0;r<40;r++)
+    {
+        for(int c=0;c<40;c++)
+        {
+            mImageWithOffset[r][c]=0;
+        }
+    }
+	cout << "Destin data created" << endl;
 }
 
 DestinData::~DestinData(void)
 {
-	if ( mShiftedImageCache != NULL ) 
-	{
-		for(int r=0;r<mRows;r++)
-		{
-			delete mShiftedImageCache[r];
-		}
-		delete mShiftedImageCache;
-	}
+	cudaFree(dmImage);
+	delete [] mImage;
+	cout << "Destin data deleted" << endl;
 }
-
-int DestinData::GetLabel(int iIndexOfImage)
-{
-	return mLabels[iIndexOfImage];
-}
-
 
 void DestinData::LoadFile(const char* sFileName)
 {
@@ -47,6 +43,12 @@ void DestinData::LoadFile(const char* sFileName)
 	stmIn.read( (char*)&iSignals,sizeof(iSignals));
 	stmIn.read( (char*)&mRows, sizeof(mRows) );
 	stmIn.read( (char*)&mCols, sizeof(mCols) );
+	// Create the array for pinned memory for CUDA
+    int size = mRows*mCols;
+    // Host side memory
+    mImage = new float[size];
+    // Device side memory
+    cudaMalloc( (void**)&dmImage, size*sizeof(float) );
 
 	int iLabel;
 	unsigned char* cImageData;
@@ -90,17 +92,8 @@ void DestinData::LoadFile(const char* sFileName)
 		mImagePointer.push_back(fImageDataByRow);
 	}
 	stmIn.close();
+	//cudaMalloc();
 	cout << "Finished reading file." << endl;
-}
-
-int DestinData::GetNumberOfImages()
-{
-	return mLabels.size();
-}
-
-int DestinData::GetNumberOfUniqueLabels()
-{
-	return mUniqueLabels.size();
 }
 
 void DestinData::GetLabelList(vector<int>& Labels)
@@ -112,33 +105,15 @@ void DestinData::GetLabelList(vector<int>& Labels)
 	}
 }
 
-void DestinData::GetShiftedImage(int ImageIndex, int RowShift, int ColShift, float** &fData )
+void DestinData::SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShift)
 {
-    int R=4;
-    int C=4;
-    int size = mRows*mCols*sizeof(float);
-    cout << "Single image is: " << size << " Bytes." << endl;
-    cout << "Single image is: " << 256*256*sizeof(float) << " Bytes." << endl;
-    //allocate memory if necessary...
-    if ( fData==NULL )
-    {
-        fData = new float*[mRows];
-        for (int rr=0;rr<mRows;rr++)
-        {
-            fData[rr]=new float[mCols];
-        }
-    }
-
+    // TODO: Might want to set C and R more dynamic. in case of different data set?
+    int C = 4;
+    int R = 4;
+    // We don't have to load the image if it is the same one as before
     if ( ImageIndex!=mLastImageIndex )
     {
-        //Load the image into the 50x50 buffer with the "0,0" offset...
-        for(int r=0;r<50;r++)
-        {
-            for(int c=0;c<50;c++)
-            {
-                mImageWithOffset[r][c]=0;
-            }
-        }
+        // Load the image into the buffer with the "0,0" offset.
         float** fImage = mImagePointer[ImageIndex];
         for(int r=0;r<mRows;r++)
         {
@@ -148,88 +123,20 @@ void DestinData::GetShiftedImage(int ImageIndex, int RowShift, int ColShift, flo
             }
         }
     }
-
-    //Now load the data using the offset provided...
+    // Now load the data using the offset provided.
+    // Convert a 2D array back to a 1D array
+    int i = 0;
     for(int r=0;r<mRows;r++)
     {
         for(int c=0;c<mCols;c++)
         {
-            fData[r][c]=mImageWithOffset[r+RowShift][c+ColShift];
+            mImage[i]=mImageWithOffset[r+RowShift][c+ColShift];
+            i++;
         }
     }
+    // Copy data from host to device
+    cudaMemcpy( dmImage, mImage, mRows*mCols*sizeof(float), cudaMemcpyHostToDevice );
     mLastImageIndex=ImageIndex;
-}
-
-void DestinData::GetSubImage(int ImageIndex,int RowShift,int ColShift,
-		int rS, int rE,int cS,int cE,float** &fSubImage)
-{
-	GetShiftedImage(ImageIndex,RowShift,ColShift,mShiftedImageCache);
-	int nRows=rE-rS+1;
-	int nCols=cE-cS+1;
-	float* fRowOut;
-	float* fShiftedImageCacheRow;
-	for(int r=0;r<nRows;r++)
-	{
-		fRowOut = fSubImage[r];
-		fShiftedImageCacheRow=mShiftedImageCache[r+rS];
-		for(int c=0;c<nCols;c++)
-		{
-			*(fRowOut+c)=fShiftedImageCacheRow[c+cS];	
-		}
-	}
-}
-
-//note: this only does a 4x4 FFT and returns all 16 coefficients as magnitude in fSubImage
-void DestinData::GetSubImageFFT(int ImageIndex,int RowShift,int ColShift,
-        int rS, int rE,int cS,int cE,float** &fSubImage, float* fUniqueVector)
-{
-    GetSubImage(ImageIndex,RowShift,ColShift,rS,rE,cS,cE,fSubImage);
-    DoSpecial4x4FFT(fSubImage,fUniqueVector);
-}
-
-void DestinData::GetSubImageVector(int ImageIndex,int RowShift,int ColShift,
-		int rS, int rE,int cS,int cE,float** &fSubImage, float* fVector)
-{
-	GetShiftedImage(ImageIndex,RowShift,ColShift,mShiftedImageCache);
-	int nRows=rE-rS+1;
-	int nCols=cE-cS+1;
-	float* fRowOut;
-	float* fShiftedImageCacheRow;
-	int kj=0;
-	for(int r=0;r<nRows;r++)
-	{
-		fRowOut = fSubImage[r];
-		fShiftedImageCacheRow=mShiftedImageCache[r+rS];
-		for(int c=0;c<nCols;c++)
-		{
-			*(fRowOut+c)=fShiftedImageCacheRow[c+cS];	
-			*(fVector+kj)=fShiftedImageCacheRow[c+cS];
-			kj++;
-		}
-	}
-}
-
-void DestinData::WriteToCSV(int ImageIndex, int RowShift, int ColShift, char* cFile)
-{
-	float** fData = NULL;
-	GetShiftedImage(ImageIndex, RowShift, ColShift, fData );
-	std::ofstream stmCSV;
-	stmCSV.open(cFile,ios::out);
-	float* fRow;
-	for(int r=0;r<mRows;r++)
-	{
-		fRow = fData[r];
-		for(int c=0;c<mCols;c++)
-		{
-			stmCSV << *(fRow+c);
-			if ( c != mCols-1 )
-			{
-				stmCSV << ",";
-			}
-		}
-		stmCSV << endl;
-	}
-	stmCSV.close();
 }
 
 void DestinData::GetUniqueLabels(vector<int>& vLabels)
