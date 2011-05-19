@@ -36,9 +36,13 @@ PyMindAgent::~PyMindAgent()
 
 void PyMindAgent::run(CogServer* server)
 {
-    // clear error
-    run_agent(pyagent,server->getAtomSpace());
-    // TODO: check for exceptions and print error
-    // PyErr_Print();
+    string result = run_agent(pyagent,server->getAtomSpace());
+    // errors only with result is not empty... && duplicate errors are not reported.
+    if (result.size() > 0 && result != last_result) {
+        // Any string returned is a traceback
+        logger().error("[%s::run] Python Exception:\n%s",
+                this->classinfo().id.c_str(),result.c_str());
+    }
+    last_result = result;
 }
 

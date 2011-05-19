@@ -32,6 +32,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
 
+class PythonModuleUTest;
+
 namespace opencog
 {
 
@@ -44,11 +46,13 @@ class AtomSpaceImpl;
  */
 class PyMindAgent : public Agent
 {
+    friend class ::PythonModuleUTest;
 
     PyObject* pyagent;
     std::string moduleName;
     std::string className;
 protected:
+    std::string last_result;
 
 public:
 

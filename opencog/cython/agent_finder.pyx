@@ -33,9 +33,15 @@ cdef extern from "agent_finder_types.h" namespace "opencog":
         vector[string] requests
         string err_string 
 
-cdef api run_agent(object o,cAtomSpace *c_atomspace) with gil:
+cdef api string run_agent(object o,cAtomSpace *c_atomspace) with gil:
+    cdef string result
     a = AtomSpace_factory(c_atomspace)
-    o.run(a)
+    try:
+        o.run(a)
+    except Exception, e:
+        s = traceback.format_exc(10)
+        result = string(s)
+    return result
 
 cdef api string get_path_as_string() with gil:
     import sys
