@@ -29,3 +29,11 @@ cdef extern from "opencog/server/Agent.h" namespace "opencog":
 
 cdef class MindAgent:
     cdef cAgent *c_obj
+
+cdef extern from "opencog/server/Request.h" namespace "opencog":
+    cdef cppclass cRequest "opencog::Request":
+        void send(string s)
+
+cdef class Request:
+    cdef cRequest *c_obj
+

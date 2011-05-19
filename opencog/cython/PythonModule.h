@@ -15,6 +15,7 @@
 #include <opencog/server/CogServer.h>
 
 #include "PyMindAgent.h"
+#include "PyRequest.h"
 #include "agent_finder_types.h"
 
 namespace opencog
@@ -42,6 +43,33 @@ public:
     virtual const ClassInfo& info() const { return *ci; }
 }; 
 
+class PythonRequestFactory : public AbstractFactory<Request>
+{
+    // Store the name of the python module and class so that we can instantiate
+    // them
+    std::string pySrcModuleName;
+    std::string pyClassName;
+    RequestClassInfo* cci;
+public:
+    const ClassInfo& info() const {
+        // TODO, allow this stuff to come from the Python file...
+        return *cci;
+    }
+    explicit PythonRequestFactory(std::string& module, std::string& clazz) : AbstractFactory<Request>() {
+        pySrcModuleName = module;
+        pyClassName = clazz;
+        cci = new RequestClassInfo(
+              pySrcModuleName + pyClassName,
+              "A python implemented request",
+              "long description including parameter types"
+        );
+    }
+    virtual ~PythonRequestFactory() {
+        delete cci;
+    }
+    virtual Request* create() const;
+}; 
+
 class PythonModule : public Module
 {
     DECLARE_CMD_REQUEST(PythonModule, "loadpy", do_load_py, 
@@ -53,6 +81,9 @@ class PythonModule : public Module
 private:
 
     std::vector<std::string> agentNames;
+    std::vector<std::string> requestNames;
+
+    PyThreadState *tstate;
 
 public:
 

@@ -10,12 +10,14 @@ using namespace opencog;
 
 PyMindAgent::PyMindAgent(const std::string& _moduleName, const std::string& _className)
 {
-    // TODO move the class instantiation code here
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure(); 
     import_agent_finder();
     moduleName = _moduleName;
     className = _className;
     // call out to our helper module written in cython
     pyagent = instantiate_agent(moduleName, className, this);
+    PyGILState_Release(gstate); 
     if (pyagent == Py_None)
         throw RuntimeException(TRACE_INFO, "Error creating Python MindAgent");
 }
@@ -28,10 +30,11 @@ const ClassInfo& PyMindAgent::classinfo() const
 
 PyMindAgent::~PyMindAgent()
 {
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure(); 
     // decrement python object reference counter
     Py_DECREF(pyagent);
-    // TODO: check for exceptions and print error
-    // PyErr_Print();
+    PyGILState_Release(gstate); 
 }
 
 void PyMindAgent::run(CogServer* server)

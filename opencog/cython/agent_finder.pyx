@@ -25,23 +25,13 @@ import imp
 import traceback
 import opencog.cogserver
 from opencog.atomspace cimport cAtomSpace, AtomSpace_factory
-from opencog.cogserver cimport cAgent, stim_t
+from opencog.cogserver cimport cAgent, stim_t, cRequest
 
 cdef extern from "agent_finder_types.h" namespace "opencog":
     cdef struct requests_and_agents_t:
         vector[string] agents
         vector[string] requests
         string err_string 
-
-cdef api string run_agent(object o,cAtomSpace *c_atomspace) with gil:
-    cdef string result
-    a = AtomSpace_factory(c_atomspace)
-    try:
-        o.run(a)
-    except Exception, e:
-        s = traceback.format_exc(10)
-        result = string(s)
-    return result
 
 cdef api string get_path_as_string() with gil:
     import sys
@@ -61,11 +51,13 @@ cdef api requests_and_agents_t load_module(string& module_name) with gil:
         results.err_string = string(s)
         return results
     agent_classes = []
+    request_classes = []
     try:
         the_module = imp.load_module(c_str,filep,pathname,desc)
         # now we need to scan the module for subclasses of MindAgent
         # each entry is a tuple with ("ClassName", <classobject>)
         agent_classes = find_subclasses(the_module,opencog.cogserver.MindAgent)
+        request_classes = find_subclasses(the_module,opencog.cogserver.Request)
     except Exception, e:
         s = "Exception while loading module " + c_str + "\n"
         s += traceback.format_exc(10)
@@ -76,6 +68,8 @@ cdef api requests_and_agents_t load_module(string& module_name) with gil:
     # convert names into strings
     for a in agent_classes:
         results.agents.push_back(string(a[0]))
+    for r in request_classes:
+        results.requests.push_back(string(r[0]))
     return results
 
 from opencog.cogserver cimport MindAgent
@@ -96,10 +90,53 @@ cdef api object instantiate_agent(string module_name, string agent_name, cAgent 
             agent = agentClass()
             agent.c_obj = cpp_agent
     except Exception, e:
-        print str(e)
+        print traceback.format_exc(10)
     finally:
         # Since we may exit via an exception, close fp explicitly.
         if filep: filep.close()
     return agent
 
+cdef api string run_agent(object o,cAtomSpace *c_atomspace) with gil:
+    cdef string result
+    a = AtomSpace_factory(c_atomspace)
+    try:
+        o.run(a)
+    except Exception, e:
+        s = traceback.format_exc(10)
+        result = string(s)
+    return result
+
+from opencog.cogserver cimport Request
+# Initialise a request of class "r_name"
+cdef api object instantiate_request(string module_name, string r_name, cRequest *cpp_request) with gil:
+    cdef bytes module_str = module_name.c_str()
+    cdef bytes request_str = r_name.c_str()
+    cdef requests_and_agents_t results
+    cdef Request request = None
+    try:
+        # find and load the module
+        filep,pathname,desc = imp.find_module(module_str)
+        the_module = imp.load_module(module_str,filep,pathname,desc)
+        # get the class object
+        rClass = getattr(the_module, request_str) 
+        # instantiate it
+        if rClass:
+            request = rClass()
+            request.c_obj = cpp_request
+    except Exception, e:
+        print traceback.format_exc(10)
+    finally:
+        # Since we may exit via an exception, close fp explicitly.
+        if filep: filep.close()
+    return request
+
+cdef api string run_request(object o,cAtomSpace *c_atomspace) with gil:
+    cdef string result
+    a = AtomSpace_factory(c_atomspace)
+    try:
+        o.run(a)
+    except Exception, e:
+        s = traceback.format_exc(10)
+        result = string(s)
+    return result
     

@@ -36,16 +36,26 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
     NULL
 };
 
+// Factories
+
 Agent* PythonAgentFactory::create() const {
     PyMindAgent* pma = new PyMindAgent(pySrcModuleName,pyClassName);
     return pma;
 }
+
+Request* PythonRequestFactory::create() const {
+    PyRequest* pma = new PyRequest(pySrcModuleName,pyClassName);
+    return pma;
+}
+
+// ------
 
 PythonModule::PythonModule() : Module()
 { }
 
 PythonModule::~PythonModule()
 {
+    PyEval_RestoreThread(tstate);
     logger().info("[PythonModule] destructor");
     stopPythonAgents();
     do_load_py_unregister();
@@ -54,6 +64,7 @@ PythonModule::~PythonModule()
 
 bool PythonModule::stopPythonAgents()
 {
+    // Requires GIL
     foreach (std::string s, agentNames) {
         DPRINTF("Deleting all instances of %s\n", s.c_str());
         cogserver().destroyAllAgents(s);
@@ -119,10 +130,12 @@ void PythonModule::init()
     
     // Register our Python loader request
     do_load_py_register();
+    tstate = PyEval_SaveThread();
 }
 
 bool PythonModule::preloadModules()
 {
+    // requires GIL
     std::vector<std::string> pythonmodules;
     tokenize(config()["PYTHON_PRELOAD"], std::back_inserter(pythonmodules), ", ");
     for (std::vector<std::string>::const_iterator it = pythonmodules.begin();
@@ -133,7 +146,6 @@ bool PythonModule::preloadModules()
         std::string result = do_load_py(NULL,args);
         logger().info("[PythonModule] " + result);
     }
-    // TODO check for errors
     return true;
 }
 
@@ -162,14 +174,15 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
                 oss << ", ";
                 first = false;
             }
-            PythonAgentFactory(moduleName,s);
+
             // Register agent with cogserver using dotted name:
             // module.AgentName
             std::string dottedName = moduleName + "." + s;
+
             // register the agent with a custom factory that knows how to
             // instantiate new Python MindAgents
-
             cogserver().registerAgent(dottedName, new PythonAgentFactory(moduleName,s));
+
             // save a list of Python agents that we've added to the CogServer
             agentNames.push_back(dottedName);
             oss << s;
@@ -190,22 +203,19 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
                 oss << ", ";
                 first = false;
             }
-            // TODO implement support for CogServer requests in Python
-            //PythonAgentFactory(moduleName,s);
-            // Register agent with cogserver using dotted name:
-            // module.AgentName
+            // CogServer requests in Python
+            // Register request with cogserver using dotted name: module.RequestName
             std::string dottedName = moduleName + "." + s;
             // register the agent with a custom factory that knows how to
-            // instantiate new Python MindAgents
-            //cogserver().registerAgent(dottedName, PythonAgentFactory(moduleName,s));
+            cogserver().registerRequest(dottedName, new PythonRequestFactory(moduleName,s));
             // save a list of Python agents that we've added to the CogServer
-            //agentNames.push_back(dottedName);
+            requestNames.push_back(dottedName);
             oss << s;
             DPRINTF("%s ", s.c_str());
         }
         oss << ".";
     } else {
-        oss << "No subclasses of opencog.cogserver.Request found.";
+        oss << "No subclasses of opencog.cogserver.Request found.\n";
         DPRINTF("No subclasses of opencog.cogserver.Request found.\n");
     }
 

@@ -16,7 +16,7 @@ add_custom_command(OUTPUT opencog/atomspace.cpp
 add_custom_command(OUTPUT opencog/cogserver.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/cogserver.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/cogserver.pyx"
-  DEPENDS "opencog/cogserver.pyx" "opencog/agent.pyx" "opencog/cogserver.pxd")
+  DEPENDS "opencog/cogserver.pyx" "opencog/request.pyx" "opencog/agent.pyx" "opencog/cogserver.pxd")
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/cogserver.cpp" "opencog/atomspace.cpp")
 
@@ -82,6 +82,7 @@ SET_TARGET_PROPERTIES(agent_finder PROPERTIES
 ADD_LIBRARY (PythonModule SHARED
 	PythonModule.cc 
     PyMindAgent.cc
+    PyRequest.cc
 )
 ADD_DEPENDENCIES(PythonModule agent_finder)
 
