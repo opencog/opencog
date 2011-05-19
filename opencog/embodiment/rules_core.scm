@@ -2,7 +2,7 @@
 ; @file embodiment/rules_core.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-03-11
+; @date   2011-05-19
 ;
 ; Scheme core functions for adding Modulators, Demands and Rules etc. into AtomSpace
 ;
@@ -17,6 +17,7 @@
 ;
 ; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
+;
 ;     SimilarityLink (stv 1.0 1.0)
 ;         NumberNode: "modulator_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
@@ -29,6 +30,7 @@
 ; 
 ; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
+;
 ;     SimilarityLink (stv 1.0 1.0)
 ;         NumberNode: "demand_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
@@ -39,56 +41,65 @@
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; The connection of Demand and Goal is represented as:
+; Each none grounded goal or precondition should have a corresponding 
+; GroundedPredicateNode to check if the goal or precondition has been achieved 
+; or not. They are related via an SimultaneousEquivalenceLink as follows:
 ;
 ; SimultaneousEquivalenceLink
 ;     EvaluationLink
-;         (SimpleTruthValue indicates how well the demand is satisfied)
-;         (ShortTermInportance indicates the urgency of the demand)
-;         PredicateNode: "demand_name_goal" 
+;         PredicateNode "none_grounded_goal_or_precondition_name"
+;         ListLink
+;             ...
+;
+;     EvaluationLink
+;         GroundedPredicateNode "updater_schema_name"
+;         ListLink
+;             ...
+;
+; A special case is the DemandGoal, which uses a "fuzzy_within" scheme function
+; to calculate its truth value. While the XxxDemandUpdater is a scheme function 
+; of updating the demand level (not the truth value of it). 
+;
+; Take CertaintyDemand as an example, the CertaintyDemandUpdater is responsible 
+; for updating the certainty level of the agent via a bunch of information stored 
+; in AtomSpace, while the truth value of the CertaintyDemandGoal is calculated 
+; via fuzzy_within function, which would evaluate how well the certainty level is 
+; within the suitable range [min_acceptable_value, max_acceptable_value]. 
+;
+; SimultaneousEquivalenceLink
+;     EvaluationLink
+;         PredicateNode "XxxDemandGoal" 
 ;         ListLink (empty)
 ;
 ;     EvaluationLink
-;         GroundedPredicateNode: fuzzy_within
+;         GroundedPredicateNode "fuzzy_within"
 ;         ListLink
 ;             NumberNode: min_acceptable_value
 ;             NumberNode: max_acceptable_value
 ;             ExecutionOutputLink
-;                 GroundedSchemaNode: "demand_schema_name"
+;                 GroundedSchemaNode "XxxDemandUpdater"
 ;                 ListLink (empty)
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Finally, Rule is represented as:
+; Finally, a Psi Rule is represented as:
 ;
-; PredictiveImplicationLink
+; ImplicationLink (truth value indicates the probability to be selected while planning)
 ;     AndLink
 ;         AndLink
-;             EvaluationLink
-;                 GroundedPredicateNode "precondition_1_name"
-;                 ListLink
-;                     Node:arguments
-;                     ...
-;             EvaluationLink
-;                 PredicateNode         "precondition_2_name"
-;                 ListLink 
-;                     Node:arguments
-;                     ...
+;             precondition_1 (truth value indicates how well the precondition or subgoal is satisfied)
+;             subgoal_1
 ;             ...
-;                        
-;         ExecutionLink
-;             GroundedSchemaNode "schema_name"
-;             ListLink
-;                 Node:arguments
-;                 ...
 ;
-;     EvaluationLink
-;         (SimpleTruthValue indicates how well the demand is satisfied)
-;         (ShortTermInportance indicates the urgency of the demand)
-;         PredicateNode: "goal_name" 
-;         ListLink
-;             Node:arguments
+;         AndLink
+;             action_1 (truth value indicates whether the action has been done successfully)
+;             action_2
 ;             ...
+;
+;     AndLink
+;         goal_1 (truth value indicates how well the goal is satisfied)
+;         goal_2
+;         ...
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -337,44 +348,30 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ; 
-; Connect a Demand and a Goal given demand_schema_handle, goal_handle, min_value and max_value
-;
-; The Goal here should be a Final Goal, also known as Demand Goal, 
-; which is the starting point of the planer (backward chaining).
+; Connect a none grounded goal and a grounded predicate node. 
 ; 
-; The connection is represented as:
+; Each none grounded goal or precondition should have a corresponding 
+; GroundedPredicateNode to check if the goal or precondition has been achieved or
+; not. They are related via an SimultaneousEquivalenceLink as follows:
 ;
 ; SimultaneousEquivalenceLink
 ;     EvaluationLink
-;         (SimpleTruthValue indicates how well the demand is satisfied)
-;         (ShortTermInportance indicates the urgency of the demand)
-;         PredicateNode: "demand_name_goal" 
-;         ListLink (empty)
-;     EvaluationLink
-;         GroundedPredicateNode: "fuzzy_within"
+;         PredicateNode "none_grounded_goal_or_precondition_name"
 ;         ListLink
-;             NumberNode: "min_acceptable_value"
-;             NumberNode: "max_acceptable_value"
-;             ExecutionOutputLink
-;                 GroundedSchemaNode: "demand_schema_name"
-;                 ListLink (empty)
+;             ...
+;
+;     EvaluationLink
+;         GroundedPredicateNode "updater_schema_name"
+;         ListLink
+;             ...
 ;
 
-(define (connect_demand_goal demand_schema_handle goal_handle min_acceptable_value max_acceptable_value)
+(define (connect_goal_updater goal_evaluation_link goal_truth_value_updater_evaluation_link)
     (SimultaneousEquivalenceLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
-        goal_handle
-
-        (EvaluationLink (DEFAULT_STV) (DEFAULT_AV)
-            (GroundedPredicateNode "fuzzy_within")  
-            (ListLink 
-                (NumberNode (number->string min_acceptable_value) )
-                (NumberNode (number->string max_acceptable_value) )
-                demand_schema_handle
-            );ListLink
-        );EvaluationLink
-
-    );SimultaneousEquivalenceLink
-);define
+        goal_evaluation_link
+        goal_truth_value_updater_evaluation_link
+    ) 
+)
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -453,75 +450,63 @@
 ;
 ; Add Goal to AtomSpace. 
 ;
-; A Goal is an EvaluationLink with a PredicateNode, which can be represented as below:
+; A Goal is an EvaluationLink with a PredicateNode or GroundedSchemaNode, 
+; which can be represented as below:
 ;
 ; EvaluationLink
-;     PredicateNode "goal_pred_name"
+;     PredicateNode "ungrounded_goal_name"
 ;     ListLink
 ;         Node:arguments
 ;         ...
 ;
-; There are two kinds of Goals, Final Goal and Intermediate Goal.
+; or 
 ;
-; A Final Goal, also known as Demand Goal, is to keep a specific Demand in a suitable range, 
-; Which is the starting point of backward chaining. 
-;
-; While an Intermediate Goal should be used as other Rule's Precondition. 
+; EvaluationLink
+;     GroundedPredicateNode "grounded_goal_name"
+;     ListLink
+;         Node:arguments
+;         ...
 ;
 
-(define (add_goal goal_pred_name . arguments)
+(define (add_goal pred_or_gpn_handle . arguments)
     (EvaluationLink (DEFAULT_AV) 
-        (PredicateNode (string-trim-both goal_pred_name) )
+        pred_or_gpn_handle   
 
         (ListLink 
             (apply parse_arguments arguments)
         )
-    );EvaluationLink
-);define
+    )
+)
+
+; goal updater is responsible for updating the truth value of ungrounded goal. 
+(define (add_goal_updater gpn_handle . arguments)
+    (add_goal gpn_handle . arguments) 
+)
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Add GPN (GroundedPredicateNode) Precondition to AtomSpace.
+; Add Precondition to AtomSpace, which are represented as:
 ;
-; There are two kinds of Preconditions: 
-; 
-; 1. One is an EvaluationLink with a PredicateNode. 
+; AndLink
+;     EvaluationLink
+;         PredicateNode "sub_goal_name_1"
+;         ListLink
+;             ...
+;     EvaluationLink
+;         GroundedPredicateNode "gpn_sub_goal_name_2"
+;             ...
+;     ...        
 ;
-; Since this kind of Precondition is used as other Rule's Goal, say Intermediate Goal, 
-; there's no special function to create it, just use "add_goal" function below. 
-;
-; EvaluationLink
-;     PredicateNode "precondition_name"
-;     ListLink
-;         Node:arguments
-;         ...
-;
-; 2. Another is an EvaluationLink with a GroundedPredicateNode, say GPN Precondition,  
-; which's Truth Value can only be evaluated by corresponding combo script.
-;
-; You should use this "add_gpn_precondition" function to create it. 
-; schema_name should be exactly the same as the function name of the corresponding combo script
-;
-; EvaluationLink
-;     GroundedPredicateNode "schema_name"
-;     ListLink 
-;         Node:arguments
-;         ...
+; Technically speaking, there's no distinction between goal and precondition, 
+; because a goal in one psi rule may serves as the precondition in another
+; rule, vice versa.  
 ;
 
-(define (add_gpn_precondition schema_name . arguments)
-    (EvaluationLink (DEFAULT_STV) (DEFAULT_AV)
+(define (add_precondition pred_or_gpn_handle . arguments)
+    (add_goal pred_or_gpn_handle . arguments) 
+)
 
-       (GroundedPredicateNode (string-trim-both schema_name) )
-
-       (ListLink 
-           (apply parse_arguments arguments)
-       )
-
-    );EvaluationLink
-);define
-
-; NULL_PRECONDITION is a dummy Goal that is always satisfied!
+; NULL_PRECONDITION is a dummy Precondition that is always satisfied!
 ; 
 ; It is used when the Precondition (in another word Contex) is not necessary in a Rule.
 ;
@@ -534,7 +519,10 @@
 ;
 
 (define NULL_PRECONDITION 
-    (add_goal "NoPrecondition")
+    (cog-set-tv! 
+        (add_goal (PredicateNode "NoPrecondition") )
+        (stv 1.0 1.0)
+    )    
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -562,8 +550,8 @@
             (apply parse_arguments arguments)
         )
 
-    );ExecutionLink
-);define
+    )
+)
 
 ; NULL_ACTION is a dummy Action that actually does nothing and its truth value is always ture!
 ; 
@@ -582,108 +570,92 @@
 ;
 
 (define NULL_ACTION 
-    (ExecutionLink (stv 1.0 1.0) (DEFAULT_AV)
-        (GroundedSchemaNode "DoNothing")
-        (ListLink)
-    );ExecutionLink
+    (cog-set-tv! 
+        (add_action "DoNothing")
+        (stv 1.0 1.0)
+    )
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Add Rule (a PredictiveImplicationLink) to AtomSpace given Handles of Goal, Action and Preconditions
+; Add Rule (an ImplicationLink) to AtomSpace given Handles of Goals, Actions and Preconditions
 ;
-; A Rule is represented as below (AtTimeLink is missing currently): 
+; Multiple Goals, Actions and Preconditions are wrapped in an AndLink respectively. 
 ;
-; PredictiveImplicationLink
+; 1. Psi Rule is represented as follows:
+;
+; ImplicationLink (higher truth value means higher probability of selection when planning)
 ;     AndLink
-;         AndLink
-;             EvaluationLink
-;                 GroundedPredicateNode "precondition_1_name"
-;                 ListLink
-;                     Node:arguments
-;                     ...
-;             EvaluationLink
-;                 PredicateNode         "precondition_2_name"
-;                 ListLink
-;                     Node:arguments
-;                     ...
-;             ...
-;                        
-;         ExecutionLink
-;             GroundedSchemaNode "schema_name"
-;             ListLink
-;                 Node:arguments
-;                 ...
+;         Preconditions
+;         Actions
+;     Goals
 ;
-;     EvaluationLink
-;         (SimpleTruthValue indicates how well the demand is satisfied)
-;         (ShortTermInportance indicates the urgency of the demand)
-;         PredicateNode: "demand_name_goal" 
-;         ListLink (empty)
-;
-; For each Rule, there's only a Goal, an Action and a bunch of Preconditions. 
-; And all these Preconditions should be grouped in an AndLink.
-; If you want to use OrLink, then just split the Rule into several Rules.
-; For the efficiency and simplicity of the planer (backward chainging), NotLink is forbidden currently.  
-;
-; 1. A Goal is an EvaluationLink with a PredicateNode, which can be represented as below:
-;
-; EvaluationLink
-;     PredicateNode "goal_name"
-;     ListLink
-;         Node:arguments
-;         ...
-;
-; There are two kinds of Goals, Final Goal and Intermediate Goal.
-;
-; A Final Goal, also known as Demand Goal, is to keep a specific Demand in a suitable range, 
-; Which is the starting point of backward chaining. 
-;
-; While an Intermediate Goal should be used as other Rule's Precondition. 
-;
-; 2. An Action is an ExecutionLink with a GroundedSchemaNode, 
-;    which's Truth Value can only be evaluated by corresponding combo script. 
-;    It can be represented as follows:
-;
-; ExecutionLink
-;     GroundedSchemaNode "schema_name"
-;     ListLink
-;         Node:arguments
-;         ...
-;
-; 3. There are two kinds of Preconditions. 
+; 2. Goals are represented as:
 ; 
-; One is an EvaluationLink with a PredicateNode, which may be set to other Rule's Goal, 
-; say Intermediate Goal.
+; AndLink
+;     EvaluationLink
+;         PredicateNode "goal_name_1"
+;         ListLink
+;             ...
+;     EvaluationLink
+;         GroundedPredicateNode "gpn_goal_name_2"
+;         ListLink
+;             ...
+;     ...
 ;
-; EvaluationLink
-;     PredicateNode "precondition_name"
-;     ListLink
-;         Node:arguments
-;         ...
+; 3. Preconditions are represented as:
 ;
-; Another is an EvaluationLink with a GroundedPredicateNode, say GPN Precondition, 
-; which's Truth Value can only be evaluated by corresponding combo script, 
+; AndLink
+;     EvaluationLink
+;         PredicateNode "sub_goal_name_1"
+;         ListLink
+;             ...
+;     EvaluationLink
+;         GroundedPredicateNode "gpn_sub_goal_name_2"
+;             ...
+;     ...        
 ;
-; EvaluationLink
-;     GroundedPredicateNode "schema_name"
-;     ListLink 
-;         Node:arguments
-;         ...
+; 4. Actions are represented as: 
+;
+; AndLink
+;     ExecutionLink (truth value means if the action has been done successfully)
+;         GroundedSchemaNode "schema_name_1"
+;         ListLink
+;             ...
+;     ExecutionLink
+;         GroundedSchemaNode "schema_name_2"
+;         ListLink
+;             ...
+;     ...
+;
+; Note: For each goal or precondition, we can use PredicateNode or GroundedPredicateNode 
+;       within EvaluationLink. The truth value means how well the goal or 
+;       precondition are satisfied. The attention value means the urgency. 
+; 
+;       Each none grounded goal or precondition should have a corresponding 
+;       GroundedPredicateNode to check if the goal or precondition has been 
+;       achieved or not. They are related via an SimultaneousEquivalenceLink
+;       as follows:
+;
+;       SimultaneousEquivalenceLink
+;           EvaluationLink
+;               PredicateNode "none_grounded_goal_or_precondition_name"
+;               ListLink
+;                   ...
+;           EvaluationLink
+;               GroundedPredicateNode "updater_schema_name"
+;               ListLink
+;                   ...
 ;
 
-; TODO: Use PredictiveImplicationLink instead of ImplicationLink
+(define (add_rule truth_value goals_and_link preconditions_and_link actions_and_link)
+    (ImplicationLink (DEFAULT_AV) truth_value
+        (AndLink
+            preconditions_and_link
+            actions_and_link
+        ) 
 
-(define (add_rule tv_handle goal_handle action_handle . precondition_handles)
-    (ImplicationLink (DEFAULT_AV) tv_handle 
-        (AndLink 
-             (AndLink
-                 precondition_handles
-             )
-            action_handle
-        );AndLink
-
-        goal_handle
-    );PredictiveImplicationLink
-);define
+        goals_and_link
+    ) 
+)
 

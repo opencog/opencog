@@ -418,7 +418,7 @@
 ;)
 ;
 ;(add_rule (cog-new-stv 0.8 1.0) TestGetFoodGoal test_search_food
-;          (add_gpn_precondition "testSearchFoodPrecondition") 
+;          (add_gpn "testSearchFoodPrecondition") 
 ;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -510,7 +510,7 @@
 ;)
 ;
 ;(add_rule (cog-new-stv 0.8 1.0)  EnergyDemandGoal random_step_searching
-;    (add_gpn_precondition "searchForFoodPrecondition")
+;    (add_gpn "searchForFoodPrecondition")
 ;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -519,7 +519,7 @@
 ;
 
 (define truePrecondition
-    (add_gpn_precondition "truePrecondition")  
+    (add_gpn "truePrecondition")  
 )
 
 (define eat_food
@@ -577,7 +577,7 @@
 )
 
 (add_rule (cog-new-stv 1.0 1.0) IntegrityDemandGoal flee
-    (add_gpn_precondition "fleePrecondition")
+    (add_gpn "fleePrecondition")
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -656,7 +656,7 @@
 
     (add_rule (cog-new-stv 1.0 1.0) FamiliarWithRelation NULL_ACTION
         CuriousAboutRelation
-        (add_gpn_precondition "familiarWithPrecondition")
+        (add_gpn "familiarWithPrecondition")
     )
 )
 
@@ -669,7 +669,7 @@
 
     (add_rule (cog-new-stv 1.0 1.0) KnowRelation NULL_ACTION
         FamiliarWithRelation 
-        (add_gpn_precondition "knowPrecondition")	      
+        (add_gpn "knowPrecondition")	      
     )
 )
 
@@ -679,7 +679,7 @@
     (ListLink EntityVar) 
 
     (add_rule (cog-new-stv 1.0 1.0) EnemyRelation NULL_ACTION
-        (add_gpn_precondition "enemyPrecondition")	      
+        (add_gpn "enemyPrecondition")	      
     )
 )
 
@@ -690,7 +690,7 @@
 
     (add_rule (cog-new-stv 1.0 1.0) FriendRelation NULL_ACTION
         FamiliarWithRelation
-        (add_gpn_precondition "friendPrecondition")	      
+        (add_gpn "friendPrecondition")	      
     )
 )
 
@@ -700,7 +700,7 @@
     (ListLink EntityVar)	    
 
     (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
-        (add_gpn_precondition "angerForFoodThreatenPrecondition")      
+        (add_gpn "angerForFoodThreatenPrecondition")      
     )
 )
 
@@ -708,7 +708,7 @@
     (ListLink EntityVar)
 
     (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
-        (add_gpn_precondition "angerForEnemyPrecondition")     
+        (add_gpn "angerForEnemyPrecondition")     
     )
 )
 
@@ -716,7 +716,7 @@
     (ListLink EntityVar)	    
 
     (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
-        (add_gpn_precondition "angerWhenAttackedPrecondition")	      
+        (add_gpn "angerWhenAttackedPrecondition")	      
     )
 )
 
