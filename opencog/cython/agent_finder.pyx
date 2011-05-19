@@ -2,6 +2,7 @@
 # probably be simpler
 from libcpp cimport bool
 from libcpp.vector cimport vector
+from libcpp.list cimport list as cpplist
 from cython.operator cimport dereference as deref, preincrement as inc
 
 # basic wrapping for std::string conversion
@@ -11,6 +12,11 @@ cdef extern from "<string>" namespace "std":
         string(char *)
         char * c_str()
         int size()
+
+#cdef extern from "<list>" namespace "std":
+    #cdef cppclass cpplist[T]:
+        #list()
+        #pop_front()
 
 # we need to store module names with modules objects, and which modules 
 # agents are from
@@ -130,11 +136,23 @@ cdef api object instantiate_request(string module_name, string r_name, cRequest 
         if filep: filep.close()
     return request
 
-cdef api string run_request(object o,cAtomSpace *c_atomspace) with gil:
+cdef api string run_request(object o,cpplist[string] args,cAtomSpace *c_atomspace) with gil:
     cdef string result
+    cdef bytes tostring 
+    cdef cpplist[string].iterator the_iter
+
+    # wrap atomspace
     a = AtomSpace_factory(c_atomspace)
+
+    # convert args to python list of strings
+    args_as_python_str_list = []
+    the_iter = args.begin()
+    while the_iter != args.end():
+        tostring = deref(the_iter).c_str()
+        args_as_python_str_list.append(tostring)
+        inc(the_iter)
     try:
-        o.run(a)
+        o.run(a,args=args_as_python_str_list,atomspace=a)
     except Exception, e:
         s = traceback.format_exc(10)
         result = string(s)
