@@ -42,9 +42,7 @@ Agent* PythonAgentFactory::create() const {
 }
 
 PythonModule::PythonModule() : Module()
-{
-    logger().info("[PythonModule] constructor");
-}
+{ }
 
 PythonModule::~PythonModule()
 {
@@ -65,7 +63,7 @@ bool PythonModule::stopPythonAgents()
 
 void PythonModule::init()
 {
-    logger().info("[PythonModule] init");
+    logger().info("[PythonModule] Initialising Python CogServer module.");
 
     // Start up Python (this init method skips registering signal handlers)
     Py_InitializeEx(0);
@@ -115,7 +113,7 @@ void PythonModule::init()
         throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
     }
     // For debugging the python path:
-    logger().info("Python sys.path is: " + get_path_as_string());
+    logger().debug("Python sys.path is: " + get_path_as_string());
     
     if (config().has("PYTHON_PRELOAD")) preloadModules();
     
@@ -131,8 +129,9 @@ bool PythonModule::preloadModules()
          it != pythonmodules.end(); ++it) {
         std::list<std::string> args;
         args.push_back(*it);
+        logger().info("[PythonModule] Preloading python module " + *it);
         std::string result = do_load_py(NULL,args);
-        logger().info(result);
+        logger().info("[PythonModule] " + result);
     }
     // TODO check for errors
     return true;
@@ -151,6 +150,9 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
         moduleName.replace(moduleName.size()-3,3,"");
     }
     thingsInModule = load_module(moduleName);
+    if (thingsInModule.err_string.size() > 0) {
+        return thingsInModule.err_string;
+    }
     if (thingsInModule.agents.size() > 0) {
         bool first = true;
         oss << "Python MindAgents found: ";
@@ -176,7 +178,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
         oss << "." << std::endl;
         DPRINTF("\n");
     } else {
-        oss << "No subclasses of opencog.cogserver.MindAgent found.";
+        oss << "No subclasses of opencog.cogserver.MindAgent found.\n";
         DPRINTF("No subclasses of opencog.cogserver.MindAgent found.\n");
     }
     if (thingsInModule.requests.size() > 0) {

@@ -2,12 +2,26 @@
 #include <cstdio>
 
 #include <opencog/server/CogServer.h>
+#include <opencog/server/RequestResult.h>
 #include <opencog/util/Config.h>
 #include <opencog/cython/PyMindAgent.h>
 
 using std::string;
 
 using namespace opencog;
+
+class StringRequestResult : public RequestResult
+{
+public:
+    string result;
+    StringRequestResult(): RequestResult ("text/plain"){};
+    ~StringRequestResult(){};
+    virtual void SendResult(const std::string& res) {
+        result = res;
+    }
+    virtual void OnRequestComplete() {
+    }
+};
 
 class TestCogServer : public CogServer
 {
@@ -46,19 +60,9 @@ private:
 public:
 
     PythonModuleUTest() {
-        std::cout << "constructor" << std::endl;
         logger().setLevel(Logger::DEBUG);
         logger().setPrintToStdoutFlag(true);
-    }
 
-    ~PythonModuleUTest() {
-	    // erase the log file if no assertions failed
-	    if (!CxxTest::TestTracker::tracker().suiteFailed())
-            std::remove(logger().getFilename().c_str());
-    }
-
-    void setUp() {
-        std::cout << "setup" << std::endl;
         // Load special config file for the test
         string configFile = PROJECT_BINARY_DIR"/tests/cython/pymodule.conf";
         try {
@@ -75,14 +79,52 @@ public:
 
         // set cycle duration to a smaller value so that this test do not take too long.
         config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
+        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
+        cogserver.loadModule("libPythonModule.so");
+    }
+
+    ~PythonModuleUTest() {
+        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
+	    // erase the log file if no assertions failed
+	    if (!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().getFilename().c_str());
+        cogserver.unloadModule("opencog::PythonModule");
+    }
+
+    void setUp() {
     }
 
     void tearDown() {
     }
 
+    void testLoadExceptionAgent() {
+        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
+        // test loading a module
+        Request* loadpyRequest = cogserver.createRequest("loadpy");
+        TS_ASSERT(loadpyRequest != NULL);
+        loadpyRequest->addParameter("test_agent_w_load_exception");
+        StringRequestResult *srr = new StringRequestResult();
+        loadpyRequest->setRequestResult(srr);
+        // add request to queue
+        cogserver.pushRequest(loadpyRequest);
+        // process request
+        cogserver.runLoopStep();
+        // ensure that 
+        TS_ASSERT_DIFFERS(srr->result.find("TypeError"), std::string::npos);
+
+    }
+
+    void testPreloadAgent () {
+        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
+        // agent is actually loaded from python module in test constructor
+        // just check it actually can be created though
+        Agent* pythonTestAgent = cogserver.createAgent("preload_test.PreloadTestAgent");
+        TS_ASSERT(pythonTestAgent != NULL);
+        delete pythonTestAgent;
+    }
+
     void testProcessAgents() {
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
-        cogserver.loadModule("libPythonModule.so");
 
         // test loading a module
         Request* loadpyRequest = cogserver.createRequest("loadpy");
@@ -124,7 +166,6 @@ public:
                 TS_ASSERT(act->utilizedHandleSets[0]->getSize() == 1);
             }
             */
-        cogserver.unloadModule("opencog::PythonModule");
     }
 
 };

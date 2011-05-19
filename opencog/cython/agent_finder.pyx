@@ -22,6 +22,7 @@ def find_subclasses(module, clazz):
             if inspect.isclass(cls[1]) and issubclass(cls[1], clazz) ]    
 
 import imp
+import traceback
 import opencog.cogserver
 from opencog.atomspace cimport cAtomSpace, AtomSpace_factory
 from opencog.cogserver cimport cAgent, stim_t
@@ -30,6 +31,7 @@ cdef extern from "agent_finder_types.h" namespace "opencog":
     cdef struct requests_and_agents_t:
         vector[string] agents
         vector[string] requests
+        string err_string 
 
 cdef api run_agent(object o,cAtomSpace *c_atomspace) with gil:
     a = AtomSpace_factory(c_atomspace)
@@ -43,12 +45,14 @@ cdef api string get_path_as_string() with gil:
 cdef api requests_and_agents_t load_module(string& module_name) with gil:
     """ Load module and return a vector of MindAgent names """
     cdef bytes c_str = module_name.c_str()
+    # for return results
     cdef requests_and_agents_t results
     try:
         filep,pathname,desc = imp.find_module(c_str)
-    except:
-        # TODO use opencog logger
-        #print "Could not find module " + c_str
+    except Exception, e:
+        s = "Exception while searching for module " + c_str + "\n"
+        s = traceback.format_exc(10)
+        results.err_string = string(s)
         return results
     agent_classes = []
     try:
@@ -56,6 +60,10 @@ cdef api requests_and_agents_t load_module(string& module_name) with gil:
         # now we need to scan the module for subclasses of MindAgent
         # each entry is a tuple with ("ClassName", <classobject>)
         agent_classes = find_subclasses(the_module,opencog.cogserver.MindAgent)
+    except Exception, e:
+        s = "Exception while loading module " + c_str + "\n"
+        s += traceback.format_exc(10)
+        results.err_string = string(s)
     finally:
         # Since we may exit via an exception, close fp explicitly.
         if filep: filep.close()
