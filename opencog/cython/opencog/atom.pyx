@@ -68,13 +68,13 @@ cdef class Atom(object):
         return self.atomspace.is_source(a.h,self.handle)
 
     def is_node(self):
-        is_a(self.t,types.Node)
+        return is_a(self.t,types.Node)
 
     def is_link(self):
-        is_a(self.t,types.Link)
+        return is_a(self.t,types.Link)
 
     def is_a(self,t):
-        is_a(self.t,t)
+        return is_a(self.t,t)
 
     def long_string(self):
         return self.atomspace.get_atom_string(self.handle,terse=False)
