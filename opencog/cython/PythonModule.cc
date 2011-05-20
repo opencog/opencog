@@ -57,18 +57,23 @@ PythonModule::~PythonModule()
 {
     PyEval_RestoreThread(tstate);
     logger().info("[PythonModule] destructor");
-    stopPythonAgents();
+    unregisterAgentsAndRequests();
     do_load_py_unregister();
     Py_Finalize();
 }
 
-bool PythonModule::stopPythonAgents()
+bool PythonModule::unregisterAgentsAndRequests()
 {
     // Requires GIL
     foreach (std::string s, agentNames) {
         DPRINTF("Deleting all instances of %s\n", s.c_str());
-        cogserver().destroyAllAgents(s);
+        cogserver().unregisterAgent(s);
     }
+    foreach (std::string s, requestNames) {
+        DPRINTF("Unregistering requests of id %s\n", s.c_str());
+        cogserver().unregisterRequest(s);
+    }
+
     return true;
 }
 

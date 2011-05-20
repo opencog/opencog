@@ -98,7 +98,7 @@ public:
     ~PythonModule();
     void init();
 
-    bool stopPythonAgents();
+    bool unregisterAgentsAndRequests();
     std::string name;
     
     bool preloadModules();
