@@ -2,11 +2,6 @@
 # Atom wrapper object, we should really do something similar in the
 # core OpenCog API.
 cdef class Atom(object):
-    cdef Handle handle
-    cdef AtomSpace atomspace
-    cdef object _atom_type
-    cdef object _name
-    cdef object _outgoing
 
     def __init__(self,Handle h,AtomSpace a):
         self.handle = h
@@ -20,7 +15,12 @@ cdef class Atom(object):
     def __nonzero__(self):
         """ Allows boolean comparison, return false is handle is
         UNDEFINED or doesn't exist in AtomSpace """
-        return self.atomspace.is_valid(self.handle)
+        if self.handle:
+            return self.atomspace.is_valid(self.handle)
+        else: return False
+
+    property h:
+        def __get__(self): return self.handle
     
     property name:
         def __get__(self):
@@ -64,8 +64,8 @@ cdef class Atom(object):
         def __get__(self):
             return self.type
 
-    def is_source(self,h):
-        return self.atomspace.is_source(h,self.handle)
+    def is_source(self,Atom a):
+        return self.atomspace.is_source(a.h,self.handle)
 
     def is_node(self):
         is_a(self.t,types.Node)

@@ -3,12 +3,10 @@ from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
 from atomspace cimport *
-
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
 
 cdef class Handle:
-    cdef cHandle *h
     def __cinit__(self, h):
         self.h=new cHandle(h)
     def __dealloc__(self):
@@ -102,7 +100,7 @@ cdef class TimeServer:
         pass
 
 # @todo this should be a generator using the yield statement
-cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
+cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
     cdef vector[cHandle].iterator iter
     cdef cHandle i
     result = []
@@ -110,7 +108,7 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
     while iter != handles.end():
         i = deref(iter)
         temphandle = Handle(i.value())
-        result.append(temphandle)
+        result.append(Atom(temphandle,atomspace))
         inc(iter)
     return result
 
@@ -120,9 +118,9 @@ cdef AtomSpace_factory(cAtomSpace *to_wrap):
     return instance
 
 cdef class AtomSpace:
-    cdef cAtomSpace *atomspace
-    cdef cTimeServer *timeserver
-    cdef bint owns_atomspace
+    ##cdef cAtomSpace *atomspace
+    #cdef cTimeServer *timeserver
+    #cdef bint owns_atomspace
 
     # TODO how do we do a copy constructor that shares the AtomSpaceAsync?
     def __cinit__(self):
@@ -135,6 +133,16 @@ cdef class AtomSpace:
     def __dealloc__(self):
         if self.owns_atomspace:
             del self.atomspace
+
+    def add(self, Type t, name=None, out=None, TruthValue tv=None, prefixed=False):
+        """ add method that determines exact method to call from type """
+        if is_a(t,types.Node):
+            assert out is None # nodes can't have outgoing sets
+            atom = self.add_node(t,name,tv,prefixed)
+        else:
+            assert name is None # links can't have names
+            atom = self.add_link(t,out,tv)
+        return atom
 
     def add_node(self, Type t, atom_name, TruthValue tv=None, prefixed=False):
         """ Add Node to AtomSpace
@@ -164,7 +172,7 @@ cdef class AtomSpace:
         # delete temporary string
         del name
         if result == result.UNDEFINED: return None
-        return Handle(result.value());
+        return Atom(Handle(result.value()), self);
 
     def add_link(self,Type t,outgoing,TruthValue tv=None):
         """ Add Link to AtomSpace
@@ -175,7 +183,10 @@ cdef class AtomSpace:
         # create temporary cpp vector
         cdef vector[cHandle] o_vect
         for h in outgoing:
-            o_vect.push_back(deref((<Handle>h).h))
+            if isinstance(h,Handle):
+                o_vect.push_back(deref((<Handle>h).h))
+            elif isinstance(h,Atom):
+                o_vect.push_back(deref((<Handle>(h.h)).h))
         cdef cHandle result
         if tv is None:
             # get handle
@@ -183,7 +194,8 @@ cdef class AtomSpace:
         else:
             result = self.atomspace.addLink(t,o_vect,deref(tv._ptr()))
         if result == result.UNDEFINED: return None
-        return Handle(result.value());
+        #return Handle(result.value());
+        return Atom(Handle(result.value()), self);
 
     def is_valid(self,h):
         """ Check whether the passed handle refers to an actual handle
@@ -201,9 +213,9 @@ cdef class AtomSpace:
             return True
         return False
 
-    def remove(self,Handle h,recursive=False):
+    def remove(self,atom,recursive=False):
         """ Removes an atom from the atomspace
-        h --  The Handle of the atom to be removed.
+        atom --  The Atom of the atom to be removed.
         recursive -- Recursive-removal flag; if set, the links in the
             incoming set of the atom to be removed will also be removed.
          
@@ -212,7 +224,7 @@ cdef class AtomSpace:
 
         """
         cdef bint recurse = recursive
-        return self.atomspace.removeAtom(deref((<Handle>h).h),recurse)
+        return self.atomspace.removeAtom(deref((<Handle>(atom.h)).h),recurse)
 
     def clear(self):
         """ Remove all atoms from the AtomSpace """
@@ -266,13 +278,13 @@ cdef class AtomSpace:
         """ Get the outgoing set for a Link in the AtomSpace """
         cdef vector[cHandle] o_vect
         o_vect = self.atomspace.getOutgoing(deref(handle.h))
-        return convert_handle_seq_to_python_list(o_vect)
+        return convert_handle_seq_to_python_list(o_vect,self)
 
     def get_incoming(self,Handle handle):
         """ Get the incoming set for an Atom in the AtomSpace """
         cdef vector[cHandle] o_vect
         o_vect = self.atomspace.getIncoming(deref(handle.h))
-        return convert_handle_seq_to_python_list(o_vect)
+        return convert_handle_seq_to_python_list(o_vect,self)
 
     def is_source(self, Handle source, Handle h):
         # This logic could probably easily be implemented client side, but best to
@@ -312,7 +324,7 @@ cdef class AtomSpace:
         cdef vector[cHandle] o_vect
         cdef bint subt = subtype
         self.atomspace.getHandleSet(back_inserter(o_vect),t,subt)
-        return convert_handle_seq_to_python_list(o_vect)
+        return convert_handle_seq_to_python_list(o_vect,self)
 
     def get_atoms_by_name(self, Type t, name, subtype = True):
         cdef vector[cHandle] o_vect
@@ -322,25 +334,24 @@ cdef class AtomSpace:
         cdef bint subt = subtype
         self.atomspace.getHandleSet(back_inserter(o_vect),t,deref(cname),subt)
         del cname
-        return convert_handle_seq_to_python_list(o_vect)
+        return convert_handle_seq_to_python_list(o_vect,self)
 
     def get_atoms_by_target_type(self, Type t, Type target_t, subtype = True, target_subtype = True):
         cdef vector[cHandle] o_vect
         cdef bint subt = subtype
         cdef bint target_subt = target_subtype
         self.atomspace.getHandleSet(back_inserter(o_vect),t,target_t,subt,target_subt)
-        return convert_handle_seq_to_python_list(o_vect)
+        return convert_handle_seq_to_python_list(o_vect,self)
 
-    def get_atoms_by_target_handle(self, Type t, Handle target_h, subtype = True):
+    def get_atoms_by_target_atom(self, Type t, Atom target_atom, subtype = True):
         cdef vector[cHandle] o_vect
         cdef bint subt = subtype
+        cdef Handle target_h = target_atom.h
         self.atomspace.getHandleSet(back_inserter(o_vect),deref(target_h.h),t,subt)
-        return convert_handle_seq_to_python_list(o_vect)
+        return convert_handle_seq_to_python_list(o_vect,self)
 
     def print_list(self):
         self.atomspace.print_list()
-
-
 
 cdef class SpaceServer:
     cdef cSpaceServer *spaceserver
