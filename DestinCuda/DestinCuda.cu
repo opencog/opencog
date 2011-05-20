@@ -1,6 +1,6 @@
 #include "AdviceData.h"
 #include "DestinData.h"
-#include "DestinLayer.h"
+#include "DestinKernel.h"
 
 #include "pugixml/pugixml.hpp"
 
@@ -215,7 +215,7 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
     cout << "------------------" << endl;
 }
 
-bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& NumberOfLayers, DestinLayer*& DLayers,
+bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& NumberOfLayers, DestinKernel*& DLayers,
                           int iTestSequence, int FirstLayerToShowHECK, int LastLayerToShow, int MAX_CNT, string& sCommandLineData,
                           DestinData& DataSourceForTraining, string& sDiagnosticFileName, string& sDestinTrainingFileName,
                           vector< pair<int,int> >& vIndicesAndGTLabelToUse,
@@ -264,8 +264,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         vectorOfMovementsToSave.push_back(false);
     }
 
-    DestinLayerLatch* DLatch = new DestinLayerLatch[NumberOfLayers];
-    DestinLayer* DLayer = new DestinLayer[NumberOfLayers];
+    DestinKernel* DLayer = new DestinKernel[NumberOfLayers];
     int* ColsPerLayer = new int[NumberOfLayers];
     int* NumberOfParentStates = new int[NumberOfLayers];
     int* InputDimensionality = new int[NumberOfLayers];
@@ -354,17 +353,8 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         cout << Layer << " Input Output Dimension " << InputDimensionality[Layer] << " " << NumberOfCentroids[Layer] << endl;
 
         // Creation of layer and layerLatch
-        DLatch[Layer].Create(RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer]);
-
-        DLayer[Layer].Create( RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], NumberOfParentStates[Layer],
-                              InputDimensionality[Layer], NULL,  // if this is NULL, then use the same InputDimensionality for all the nodes, otherwize, use this array of inputDimensinality to assign each node its own.
-                              DistanceMeasureArray[Layer], bBinaryPOS, bAveragingLayer, bUseStarvationTrace, PSSAUpdateDelay,
-                              bIgnoreAdvice, dcMu[Layer], dcSigma[Layer], dcRho[Layer], bUseDecayLR, iDecayPoint, fRhoThreshold,
-                              bUseRhoDerivative, bConstrainInitialCentroids, iBlocksToProcess, Layer, MovementsForClusteringOption,
-                              bBasicOnlineClustering, FixedLearningRateLayer[Layer], bDoGoodPOS, SEQ_LENGTH, bTopNode );
+        DLayer[Layer].Create( RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer] );
         // Assign Childeren and Parrents of nodes
-        DLayer[Layer].AssignChildrenAndParents(Layer,NumberOfLayers,bInitialLayerIsTransformOnly); //uses the 'default' 4:1 method
-
         if ( NumberOfCentroids[Layer] > MaxNumberOfOutputs )
         {
             MaxNumberOfOutputs=NumberOfCentroids[Layer];
@@ -712,7 +702,7 @@ int MainDestinExperiments(int argc, char* argv[])
     float* BufferForMovementLogRecords;
     BufferForMovementLogRecords = new float[1024*4*64*128];  //this should be enough for all movements and all layers / nodes
 
-    DestinLayer* DLayer;
+    DestinKernel* DLayer;
     map<int,int> LabelsUsedToCreateNetwork;
     map<int,int> IndicesUsedToCreateNetwork;
     int NumberOfLayers=4;
