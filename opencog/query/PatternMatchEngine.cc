@@ -79,9 +79,12 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
 /* Reset the current variable grounding to the last grounding pushed
  * onto the stack. */
 #define POPGND(soln,stack) {         \
-   stack.pop();                      \
-   if (stack.empty()) soln.clear();  \
+   if (stack.empty()) {              \
+      printf("ERROR: Unbalanced stack pop!\n"); \
+      soln.clear();                  \
+   }                                 \
    else soln = stack.top();          \
+   stack.pop();                      \
 }
 
 /* ======================================================== */
@@ -125,9 +128,14 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			return (gnd != hg);
 		}
 
-		// Variable had better be a node; we're not prepared to
-		// deal with anything else.
-		if (!as->isNode(hp)) return true;
+		// VariableNode had better be an actual node!
+		// If it's not then we are very very confused ...
+		if (!as->isNode(hp))
+		{
+			printf("ERROR: expected variable to be a node, got this: %s\n",
+				as->atomAsString(hp).c_str());
+			return true;
+		}
 
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
@@ -214,7 +222,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			//
 			// We don't try all possible groundings; this is not the place
 			// to do this; this is done elsewhere. Here, its enough to find
-			// any grunding that works (i.e. is consistent with all 
+			// any grounding that works (i.e. is consistent with all 
 			// groundings up till now).
 			std::vector<Handle> osp = atom_space->getOutgoing(hp);
 			const std::vector<Handle> &osg = atom_space->getOutgoing(hg);
@@ -239,9 +247,9 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 				}
 
 				POPGND(var_grounding, var_solutn_stack);
-
 			} while (next_permutation(osp.begin(), osp.end()));
 
+			dbgprt("tree_comp down unordered exhausted all permuations\n");
 			return mismatch;
 		}
 
