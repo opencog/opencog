@@ -35,7 +35,7 @@ class StackMoreUTest :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
-		Handle bindlink;
+		Handle bind_oo, bind_ou, bind_uo, bind_uu;
 
 	public:
 
@@ -68,7 +68,10 @@ class StackMoreUTest :  public CxxTest::TestSuite
 
 		void tearDown(void) { }
 
-		void test_exec(void);
+		void test_oo(void);
+		void test_ou(void);
+		void test_uo(void);
+		void test_uu(void);
 };
 
 /*
@@ -85,7 +88,10 @@ void StackMoreUTest::setUp(void)
 	// Load the required data
 	config().set("SCM_PRELOAD",
 		"opencog/scm/type_constructors.scm, "
-		"tests/query/stackmore.scm");
+		"tests/query/stackmore-o-o.scm, "
+		"tests/query/stackmore-o-u.scm, "
+		"tests/query/stackmore-u-o.scm, "
+		"tests/query/stackmore-u-u.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
@@ -100,7 +106,10 @@ void StackMoreUTest::setUp(void)
 	cogserver.loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	bindlink = SchemeEval::instance().apply("bindlink", Handle::UNDEFINED);
+	bind_oo = SchemeEval::instance().apply("bind_oo", Handle::UNDEFINED);
+	bind_ou = SchemeEval::instance().apply("bind_ou", Handle::UNDEFINED);
+	bind_uo = SchemeEval::instance().apply("bind_uo", Handle::UNDEFINED);
+	bind_uu = SchemeEval::instance().apply("bind_uu", Handle::UNDEFINED);
 }
 
 /*
@@ -110,16 +119,67 @@ void StackMoreUTest::setUp(void)
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define getarity(hand) as->getArity(hand)
 
-void StackMoreUTest::test_exec(void)
+void StackMoreUTest::test_oo(void)
 {
 	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlink);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bind_oo);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.varscope(bindlink);
+	Handle result = pm.varscope(bind_oo);
+
+	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void StackMoreUTest::test_ou(void)
+{
+	AtomSpace* as = cogserver().getAtomSpace();
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bind_ou);
+
+	// Result should be a ListLink w/ one solution
+	Handle result = pm.varscope(bind_ou);
+
+	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void StackMoreUTest::test_uo(void)
+{
+	AtomSpace* as = cogserver().getAtomSpace();
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bind_uo);
+
+	// Result should be a ListLink w/ one solution
+	Handle result = pm.varscope(bind_uo);
+
+	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void StackMoreUTest::test_uu(void)
+{
+	AtomSpace* as = cogserver().getAtomSpace();
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bind_uu);
+
+	// Result should be a ListLink w/ one solution
+	Handle result = pm.varscope(bind_uu);
 
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));

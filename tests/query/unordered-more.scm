@@ -62,7 +62,7 @@
 	)
 )
 
-;; Note that the UnorderedLink is unordered ... 
+;; Note that the SimilarityLink is unordered ... 
 (define (blank)
 	(BindLink
 		;; variable decls

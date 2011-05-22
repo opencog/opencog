@@ -177,7 +177,7 @@
 	)
 )
 
-(define (bindlink)
+(define (bind_uu)
 	(BindLink
 		;; variable decls
 		(ListLink
