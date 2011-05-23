@@ -25,15 +25,12 @@
 #ifndef _OPENCOG_DEFAULT_PATTERN_MATCH_H
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
-#include <set>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
-
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
 /**
  * Callback mixin class, used to provide a default node and link
@@ -154,7 +151,7 @@ class DefaultPatternMatchCB :
 		 * The typemap contains a map from variables to a set of types
 		 * that the groundings for the variable are allowed to have.
 		 */
-		void set_type_restrictions(VariableTypeMap &tm)
+		virtual void set_type_restrictions(VariableTypeMap &tm)
 		{
 			type_restrictions = &tm;
 		}

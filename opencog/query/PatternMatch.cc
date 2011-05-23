@@ -661,7 +661,7 @@ int PatternMatch::get_vartype(Handle htypelink,
  */
 
 Handle PatternMatch::do_bindlink (Handle hbindlink,
-                                  DefaultPatternMatchCB *pmc)
+                                  PatternMatchCallback *pmc)
 {
 	AtomSpace *as = atom_space;
 	Handle h = hbindlink;

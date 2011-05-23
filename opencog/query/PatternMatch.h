@@ -28,7 +28,7 @@
 #include <vector>
 
 #include <opencog/atomspace/types.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
@@ -42,7 +42,7 @@ class PatternMatch
 		                std::vector<Handle> &,
 		                VariableTypeMap &);
 		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
-		Handle do_bindlink(Handle, DefaultPatternMatchCB *);
+		Handle do_bindlink(Handle, PatternMatchCallback *);
 
 	public:
 		PatternMatch(void);

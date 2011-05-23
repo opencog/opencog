@@ -25,9 +25,12 @@
 #define _OPENCOG_PATTERN_MATCH_CALLBACK_H
 
 #include <map>
+#include <set>
+#include <opencog/atomspace/types.h>
 
 namespace opencog {
 class PatternMatchEngine;
+typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
 /**
  * Callback interface, used to implement specifics of hypergraph
@@ -129,6 +132,15 @@ class PatternMatchCallback
 		 * if needed.
 		 */
 		virtual void pop(void) {}
+
+		/**
+		 * Called very early, before pattern-matching has begun. This
+		 * conveys how the variable declarations in a BindLink were
+		 * decoded.  The argument is nothing more than the variable
+		 * declarations, as given in the atomspace, but rexpressed
+		 * in a slightly more convenient C++ form, is all.
+		 */
+		virtual void set_type_restrictions(VariableTypeMap &tm) {}
 
 		/**
 		 * Called to start search. Must iterate over the portion of the
