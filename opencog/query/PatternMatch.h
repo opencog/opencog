@@ -57,10 +57,12 @@ class PatternMatch
 		           Handle clauses,
 		           Handle negations = Handle::UNDEFINED);
 
+		Handle bindlink(Handle);
+		Handle crisp_logic_bindlink(Handle);
+
+		// deprecated; used only in the unit-test cases.
 		Handle imply(Handle);             // deprecated
 		Handle crisp_logic_imply(Handle); // deprecated
-
-		Handle bindlink(Handle);
 };
 
 } // namespace opencog

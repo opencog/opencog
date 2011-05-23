@@ -118,18 +118,12 @@ void VarTypeNot::test_exec(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_good);
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_bad);
 
-//XXXXX this test is currently failing because PatternMatch::varscope has
-// been modified to use DefaultImplicator instead of CrispImplicator
-// This test really needs CrispImplicator in order to pass.
-// This note can be removed once a generic solution for the crisp-vs-default implication
-// problem is found and implemented!
-// XXX FIXME TODO
 	// Result should be a ListLink w/ zero solutions
-	Handle result_good = pm.bindlink(vscope_good);
+	Handle result_good = pm.crisp_logic_bindlink(vscope_good);
 	logger().debug("result-good is %s\n", SchemeSmob::to_string(result_good).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result_good));
 
-	Handle result_bad = pm.bindlink(vscope_bad);
+	Handle result_bad = pm.crisp_logic_bindlink(vscope_bad);
 	logger().debug("result-bad is %s\n", SchemeSmob::to_string(result_bad).c_str());
 	TSM_ASSERT_EQUALS("expecting undefined value", Handle::UNDEFINED, result_bad);
 

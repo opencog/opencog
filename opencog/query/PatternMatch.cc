@@ -355,7 +355,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 
 /* ================================================================= */
 /**
- * Evaluate an ImplicationLink.
+ * do_imply -- Evaluate an ImplicationLink.
  *
  * Given an ImplicationLink, this method will "evaluate" it, matching
  * the predicate, and creating a grounded implicand, assuming the
@@ -414,18 +414,28 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  * As the above example illustrates, this function expects that the
  * input handle is an implication link. It expects the implication link
  * to consist entirely of one disjunct (one AndList) and one (ungrounded)
- * implicand.  All variables are implicit, and are identified by being
- * VariableNodes.  These variables are interpreted as 'free variables'
- * having no binding.  The act of pattern-matching to the predicate of
- * the implication has an implicit 'for-all' flavour to it: the pattern
- * is matched to 'all' matches in the atomspace.
+ * implicand.  The variables are explicitly declared in the 'varlist'
+ * argument to this function. These variables should be understood as
+ * 'bound variables' in the usual sense of lambda-calculus. (It is
+ * strongly suggested that variables always be declared as VariableNodes;
+ * there are several spots in the code where this is explicitly assumed,
+ * and declaring some other node type as a vaiable may lead to
+ * unexpected results.)
  *
+ * Pattern-matching proceeds by finding groundings for these variables.
  * When a pattern match is found, the variables can be understood as
- * being grounded by some explicit ground terms in the atomspace. This
+ * being grounded by some explicit terms in the atomspace. This
  * grounding is then used to create a grounded version of the
  * (ungrounded) implicand. That is, the variables in the implicand are
  * substituted by their grounding values.  This method then returns a
  * list of all of the grounded implicands that were created.
+ *
+ * The act of pattern-matching to the predicate of the implication has
+ * an implicit 'for-all' flavour to it: the pattern is matched to 'all'
+ * matches in the atomspace.  However, with a suitably defined
+ * PatternMatchCallback, the search can be terminated at any time, and
+ * so this method can be used to implement a 'there-exists' predicate,
+ * or any quantifier whatsoever.
  *
  * Note that this method can be used to create a simple forward-chainer:
  * One need only to take a set of implication links, and call this
@@ -657,7 +667,8 @@ int PatternMatch::get_vartype(Handle htypelink,
  *
  * Evaluation proceeds as decribed in the "do_imply()" function above.
  * The whole point of the BindLink is to do nothing more than
- * to limit the range of the scope of the variables.
+ * to indicate the bindings of the variables, and (optionally) limit
+ * the types of acceptable groundings for the varaibles.
  */
 
 Handle PatternMatch::do_bindlink (Handle hbindlink,
@@ -757,22 +768,6 @@ class DefaultImplicator:
 
 } // namespace opencog
 
-/**
- * DEPRECATED: USE VAR_SCOPE INSTEAD!
- * Default evaluator of implication statements.  Does not consider
- * the truth value of any of the matched clauses; instead, looks
- * purely for a structural match.
- *
- * See the do_imply function for details.
- */
-Handle PatternMatch::imply (Handle himplication)
-{
-	// Now perform the search.
-	DefaultImplicator impl;
-	impl.as = atom_space;
-	return do_imply(himplication, &impl, NULL);
-}
-
 namespace opencog {
 
 class CrispImplicator:
@@ -819,7 +814,73 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 } // namespace opencog
 
 /**
- * DEPRECATED: USE VAR_SCOPE INSTEAD!
+ * Evaluate an ImplicationLink embedded in a BindLink
+ *
+ * Use the default implicator to find pattern-matches. Associated truth
+ * values are completely ignored during pattern matching; if a set of
+ * atoms that could be a ground are found in the atomspace, then they
+ * will be reported.
+ *
+ * See the do_bindlink function documentation for details.
+ */
+Handle PatternMatch::bindlink (Handle himplication)
+{
+	// Now perform the search.
+	DefaultImplicator impl;
+	impl.as = atom_space;
+	return do_bindlink(himplication, &impl);
+}
+
+/**
+ * Evaluate an ImplicationLink embedded in a BindLink
+ *
+ * Use the crisp-logic callback to evaluate boolean implication
+ * statements; i.e. statements that have truth values assigned
+ * their clauses, and statements that start with NotLink's.
+ * These are evaluated using "crisp" logic: if a matched clause
+ * is true, its accepted, if its false, its rejected. If the
+ * clause begins with a NotLink, true and false are reversed.
+ *
+ * The NotLink is also interpreted as an "absence of a clause";
+ * if the atomspace does NOT contain a NotLink clause, then the
+ * match is considered postive, and the clause is accepted (and
+ * it has a null or "invalid" grounding).
+ *
+ * See the do_bindlink function documentation for details.
+ */
+Handle PatternMatch::crisp_logic_bindlink (Handle himplication)
+{
+	// Now perform the search.
+	CrispImplicator impl;
+	impl.as = atom_space;
+	return do_bindlink(himplication, &impl);
+}
+
+/* ================================================================= */
+/**
+ * DEPRECATED: USE BIND_LINK INSTEAD!
+ * Right now, this method is used only in the unit test cases;
+ * and it should stay that way.
+ *
+ * Default evaluator of implication statements.  Does not consider
+ * the truth value of any of the matched clauses; instead, looks
+ * purely for a structural match.
+ *
+ * See the do_imply function for details.
+ */
+Handle PatternMatch::imply (Handle himplication)
+{
+	// Now perform the search.
+	DefaultImplicator impl;
+	impl.as = atom_space;
+	return do_imply(himplication, &impl, NULL);
+}
+
+/**
+ * DEPRECATED: USE CRISP_LOGIC_BINDLINK INSTEAD!
+ * At this time, this method is used only by the unit test cases.
+ * It should stay that way, too; no one else should use this.
+ *
  * Use the crisp-logic callback to evaluate boolean implication
  * statements; i.e. statements that have truth values assigned
  * their clauses, and statements that start with NotLink's.
@@ -840,39 +901,6 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 	CrispImplicator impl;
 	impl.as = atom_space;
 	return do_imply(himplication, &impl, NULL);
-}
-
-/**
- * Evaluate an ImplicationLink embedded in a VarScopeLink
- *
- * Use the crisp-logic callback to evaluate boolean implication
- * statements; i.e. statements that have truth values assigned
- * their clauses, and statements that start with NotLink's.
- * These are evaluated using "crisp" logic: if a matched clause
- * is true, its accepted, if its false, its rejected. If the
- * clause begins with a NotLink, true and false are reversed.
- *
- * The NotLink is also interpreted as an "absence of a clause";
- * if the atomspace does NOT contain a NotLink clause, then the
- * match is considered postive, and the clause is accepted (and
- * it has a null or "invalid" grounding).
- *
- * See the do_bindlink function documentation for details.
- */
-Handle PatternMatch::bindlink (Handle himplication)
-{
-	// Now perform the search.
-// XXX temporary HACK! replace crisp implicator by default;
-// this will break the VarTypeNotUTest; it expects crisp logic, 
-// it will break some of the (currently unused) nlp code as well.
-// But, for now, the embodiment code needs, so let it be broken.
-// We really need something extensible, though, in the long run.
-// XXX FIXME!  TODO!
-//
-//	CrispImplicator impl;
-	DefaultImplicator impl; 	
-	impl.as = atom_space;
-	return do_bindlink(himplication, &impl);
 }
 
 /* ===================== END OF FILE ===================== */

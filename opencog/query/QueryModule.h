@@ -17,6 +17,7 @@ class QueryModule : public Module
 {
 	private:
 		Handle do_bindlink(Handle);
+		Handle do_crisp_bindlink(Handle);
    public:
       QueryModule(void);
       virtual ~QueryModule();
