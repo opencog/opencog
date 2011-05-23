@@ -46,7 +46,7 @@ class AtomSpaceImpl;
 class Activity
 {
 public:
-    Activity(long cycleCount, time_t elapsedTime, size_t memUsed, 
+    Activity(long cycleCount, struct timeval &elapsedTime, size_t memUsed, 
                               size_t atomsUsed,
                               const HandleSetSeq &utilized) :
             cycleCount(cycleCount), 
@@ -61,7 +61,7 @@ public:
             delete utilizedHandleSets[n];
     }
     long cycleCount;
-    time_t elapsedTime;
+    struct timeval elapsedTime;
     size_t memUsed;
     size_t atomsUsed;
     HandleSetSeq utilizedHandleSets;
@@ -121,7 +121,7 @@ public:
      *  This will call agent->getUtilizedHandleSets() to get a list of handle
      *  sets utilized in the activity that has just been completed.
      */
-    void logActivity(Agent *agent, time_t elapsedTime, size_t memUsed, 
+    void logActivity(Agent *agent, struct timeval &elapsedTime, size_t memUsed, 
                                    size_t atomsUsed);
 
     /** Clear activity of a specified Agent. */

@@ -88,7 +88,7 @@ void SystemActivityTable::atomRemoved(AtomSpaceImpl *as, Handle h)
     }
 }
 
-void SystemActivityTable::logActivity(Agent *agent, time_t elapsedTime, 
+void SystemActivityTable::logActivity(Agent *agent, struct timeval &elapsedTime, 
                                       size_t memUsed, size_t atomsUsed)
 {
     ActivitySeq &as = _agentActivityTable[agent];

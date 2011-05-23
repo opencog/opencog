@@ -156,7 +156,7 @@ public:
             {
                 Activity *act = aat[a[i]][j];
                 // check nothing takes zero time
-                TS_ASSERT(act->elapsedTime > 0);
+                TS_ASSERT(act->elapsedTime.tv_usec > 0 || act->elapsedTime.tv_sec > 0);
                 // or memory (disabled: current implementation not accurate).
                 //TS_ASSERT(act->memUsed > 0);
                 // or atoms

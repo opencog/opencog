@@ -203,9 +203,9 @@ void CogServer::processRequests(void)
 void CogServer::runAgent(Agent *agent)
 {
     struct timeval timer_start, timer_end;
+    struct timeval elapsed_time;
     size_t mem_start, mem_end;
     size_t atoms_start, atoms_end;
-    time_t elapsed_time;
     size_t mem_used, atoms_used;
 
     gettimeofday(&timer_start, NULL);
@@ -219,9 +219,8 @@ void CogServer::runAgent(Agent *agent)
     mem_end = getMemUsage();
     atoms_end = atomSpace->getSize();
      
-    elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) 
-                                                    * 1000000) +
-                    (timer_end.tv_usec - timer_start.tv_usec);
+    elapsed_time.tv_sec = timer_end.tv_sec - timer_start.tv_sec;
+    elapsed_time.tv_usec = timer_end.tv_usec - timer_start.tv_usec;
     if (mem_start > mem_end)
         mem_used = 0;
     else
