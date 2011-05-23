@@ -25,8 +25,8 @@ class GraphConverter:
 
     def output(self):
         self.writer.start()
-        [self.addVertex(Atom(h,self.a)) for h in sorted(self.a.get_atoms_by_type(t.Atom))]
-        [self.addEdges(Atom(h,self.a)) for h in sorted(self.a.get_atoms_by_type(t.Link))]
+        [self.addVertex(atom) for atom in sorted(self.a.get_atoms_by_type(t.Atom))]
+        [self.addEdges(atom) for atom in sorted(self.a.get_atoms_by_type(t.Link))]
         self.writer.stop()
 
     def is_compactable(self,atom):
@@ -48,7 +48,7 @@ class DottyOutput:
             label = '%s:%s' %(a.name, a.type_name)
 
         out = ""
-        out+=str(a.handle.value())+" "
+        out+=str(a.h.value())+" "
         out+='[label="'+label+'"]'
         print out
 
@@ -56,7 +56,7 @@ class DottyOutput:
         assert a.is_link()
         assert len(a.out) == 2
 
-        (out0, out1) = a.out[0].value(), a.out[1].value()
+        (out0, out1) = a.out[0].h.value(), a.out[1].h.value()
 
         out = ""
         out+= str(out0) + '->' + str(out1) + ' '
@@ -67,7 +67,7 @@ class DottyOutput:
         assert a.is_link()
 
         output = ""
-        output+= str(a.handle.value()) + " "
+        output+= str(a.h.value()) + " "
         output+= '[label="' + a.type_name + '" shape="diamond"]'
         print output
 
@@ -79,8 +79,8 @@ class DottyOutput:
 
         output = ""
         for i in xrange(0, len(outgoing)):
-            outi = Atom(outgoing[i], self._as)
-            output+= str(a.handle.value())+"->"+str(outi.handle.value())+' '
+            outi = outgoing[i]
+            output+= str(a.h.value())+"->"+str(outi.h.value())+' '
             output+= 'label="'+str(i)+'"]'
             output+= '\n'
         print output,
@@ -105,7 +105,7 @@ class SubdueTextOutput:
         if label==None:
             label = '%s:%s' %(a.name, a.type_name)
 
-        self.handle2id[a.handle.value()] = self.i
+        self.handle2id[a.h.value()] = self.i
 
         out = 'v %s "%s"' % (str(self.i), label)
 
@@ -123,7 +123,7 @@ class SubdueTextOutput:
         if outgoing==None:
             outgoing = a.out
 
-        (out0, out1) = outgoing[0].value(), outgoing[1].value()
+        (out0, out1) = outgoing[0].h.value(), outgoing[1].h.value()
         (out0, out1) = (self.handle2id[out0], self.handle2id[out1])
 
         if a.is_a(t.OrderedLink):
@@ -138,7 +138,7 @@ class SubdueTextOutput:
         if label==None:
             label = a.type_name
 
-        self.handle2id[a.handle.value()] = self.i
+        self.handle2id[a.h.value()] = self.i
 
         output = 'v %s "%s"' % (str(self.i), label)
         self.i+=1
@@ -151,12 +151,12 @@ class SubdueTextOutput:
         if outgoing==None:
             outgoing = a.out
 
-        a_id = self.handle2id[a.handle.value()]        
+        a_id = self.handle2id[a.h.value()]        
 
         output = ''
         for i in xrange(0, len(outgoing)):
-            #outi = Atom(outgoing[i], self._as)
-            outi_id = self.handle2id[outgoing[i].value()]
+            #outi = outgoing[i]
+            outi_id = self.handle2id[outgoing[i].h.value()]
 
             if a.is_a(t.OrderedLink):
                 output+= 'd %s %s "%s"\n' % (str(a_id), str(outi_id), str(i))
@@ -202,8 +202,8 @@ class FishgramFilter:
         if not a.is_a(t.EvaluationLink):
             self.writer.outputLinkEdge(a)
         else:
-            label = Atom(a.out[0],self._as).name #PredicateNode name
-            outgoing = Atom(a.out[1],self._as).out # ListLink outgoing
+            label = a.out[0].name #PredicateNode name
+            outgoing = a.out[1].out # ListLink outgoing
             self.writer.outputLinkEdge(a,label,outgoing)
 
     def outputLinkVertex(self,a):
@@ -218,7 +218,7 @@ class FishgramFilter:
             if self.is_compactableEvalLink(a):
                 self.outputLinkEdge(a)
             else:
-                label = Atom(a.out[0],self._as).name #PredicateNode name
+                label = a.out[0].name #PredicateNode name
                 self.writer.outputLinkVertex(a,label)
 
     def outputLinkArgumentEdges(self,a):
@@ -233,7 +233,7 @@ class FishgramFilter:
             if self.is_compactableEvalLink(a):
                 return #Already handled by outputLinkEdge
             else:
-                outgoing = Atom(a.out[1],self._as).out # ListLink outgoing
+                outgoing = a.out[1].out # ListLink outgoing
                 self.writer.outputLinkArgumentEdges(a,outgoing)
 
     def ignore(self,a):
@@ -243,7 +243,7 @@ class FishgramFilter:
         return (not (a.is_a(t.Node) or a.is_a(t.InheritanceLink) or a.is_a(t.EvaluationLink) )# or
                      #a.is_a(t.WRLink))
                or (a.is_a(t.EvaluationLink) and (a.tv.mean < 0.5 or a.tv.count == 0))
-               or (a.is_a(t.EvaluationLink) and Atom(a.out[0],self._as).name == "proximity"))
+               or (a.is_a(t.EvaluationLink) and a.out[0].name == "proximity"))
 #        return a.is_a(t.ListLink) or a.is_a(t.PredicateNode)
 
     def simplify(self,a):
@@ -254,8 +254,8 @@ class FishgramFilter:
     def is_compactableEvalLink(self,a):
         # Check that the EvaluationLink can be replaced with a single edge
         # i.e. if the EvalLink has no incoming and _its ListLink_ has 2 arguments
-        #label = Atom(a.out[0],self._as).name #PredicateNode name
-        outgoing = Atom(a.out[1],self._as).out # ListLink outgoing
+        #label = a.out[0].name #PredicateNode name
+        outgoing = a.out[1].out # ListLink outgoing
         return len(outgoing) == 2 and len(a.incoming) == 0
 
 # Hacks
@@ -286,11 +286,7 @@ if __name__ == "__main__":
                    [a.add_node(t.PredicateNode, 'next'),
                     a.add_link(t.ListLink, [obj1, obj2])])
 
-    next = Atom(next,a)
     next.tv = TruthValue(1, 1)
-
-    bob = Atom(bob,a)
-    alice = Atom(alice,a)
 
     f = FishgramFilter(a,SubdueTextOutput(a))
 
