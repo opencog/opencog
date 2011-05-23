@@ -638,6 +638,9 @@ interface.
       do-wsd                -- run word-sense disambiguation
       cog-bind handle       -- run pattern matcher on handle.
                                handle must be an BindLink.
+      cog-bind-crisp handle -- run pattern matcher on handle.
+                               handle must be an BindLink.
+                               Use crisp logic during implication.
       store-atom handle     -- store indicated atom to SQL/persistent 
                                storage.
       fetch-atom handle     -- fetch indicated atom from SQL/persistent 
