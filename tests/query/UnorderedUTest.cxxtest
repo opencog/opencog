@@ -129,13 +129,13 @@ void UnorderedUTest::test_un1(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disordered);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.varscope(disorder);
+	Handle result = pm.bindlink(disorder);
 
 	logger().debug("first result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	// Result should be a ListLink w/ one solution
-	result = pm.varscope(disordered);
+	result = pm.bindlink(disordered);
 
 	logger().debug("next result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -152,7 +152,7 @@ void UnorderedUTest::test_un2(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disor_more);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.varscope(disor_more);
+	Handle result = pm.bindlink(disor_more);
 
 	logger().debug("second result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
