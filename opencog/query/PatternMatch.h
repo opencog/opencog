@@ -42,7 +42,7 @@ class PatternMatch
 		                std::vector<Handle> &,
 		                VariableTypeMap &);
 		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
-		Handle do_varscope(Handle, DefaultPatternMatchCB *);
+		Handle do_bindlink(Handle, DefaultPatternMatchCB *);
 
 	public:
 		PatternMatch(void);
@@ -59,7 +59,8 @@ class PatternMatch
 
 		Handle imply(Handle);             // deprecated
 		Handle crisp_logic_imply(Handle); // deprecated
-		Handle varscope(Handle);
+
+		Handle bindlink(Handle);
 };
 
 } // namespace opencog

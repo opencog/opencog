@@ -16,7 +16,7 @@ namespace opencog {
 class QueryModule : public Module
 {
 	private:
-		Handle do_varscope(Handle);
+		Handle do_bindlink(Handle);
    public:
       QueryModule(void);
       virtual ~QueryModule();

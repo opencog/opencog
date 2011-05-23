@@ -654,16 +654,17 @@ int PatternMatch::get_vartype(Handle htypelink,
  *       ImplicationLink
  *          AndList
  *             etc ...
+ *
  * Evaluation proceeds as decribed in the "do_imply()" function above.
  * The whole point of the BindLink is to do nothing more than
  * to limit the range of the scope of the variables.
  */
 
-Handle PatternMatch::do_varscope (Handle hvarscope,
+Handle PatternMatch::do_bindlink (Handle hbindlink,
                                   DefaultPatternMatchCB *pmc)
 {
 	AtomSpace *as = atom_space;
-	Handle h = hvarscope;
+	Handle h = hbindlink;
 
 	// Must be non-empty.
 	if (!as->isLink(h)) return Handle::UNDEFINED;
@@ -856,9 +857,9 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
  * match is considered postive, and the clause is accepted (and
  * it has a null or "invalid" grounding).
  *
- * See the do_varscope function documentation for details.
+ * See the do_bindlink function documentation for details.
  */
-Handle PatternMatch::varscope (Handle himplication)
+Handle PatternMatch::bindlink (Handle himplication)
 {
 	// Now perform the search.
 // XXX temporary HACK! replace crisp implicator by default;
@@ -869,9 +870,9 @@ Handle PatternMatch::varscope (Handle himplication)
 // XXX FIXME!  TODO!
 //
 //	CrispImplicator impl;
-    DefaultImplicator impl; 	
+	DefaultImplicator impl; 	
 	impl.as = atom_space;
-	return do_varscope(himplication, &impl);
+	return do_bindlink(himplication, &impl);
 }
 
 /* ===================== END OF FILE ===================== */
