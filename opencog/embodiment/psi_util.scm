@@ -706,7 +706,6 @@
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ;
-
 ; Get handle to the owner/ self
 ;
 ; The ownership (i.e. OWNERSHIP_PREDICATE_NAME) stored in AtomSpace is as follows:
@@ -760,6 +759,7 @@
     ); let
 
 )
+
 
 ; Get proximity
 ;

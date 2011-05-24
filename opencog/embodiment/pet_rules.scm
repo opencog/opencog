@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-03-11
+; @date   2011-05-23
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into AtomSpace
 ;
@@ -102,19 +102,19 @@
 ;
 
 (define ActivationModulator 
-    (add_modulator "ActivationModulator" 0.3)
+    (add_modulator "ActivationModulator" 0.6)
 )
 
 (define ResolutionModulator 
-    (add_modulator "ResolutionModulator" 0.3)
+    (add_modulator "ResolutionModulator" 0.8)
 )
 
 (define SecuringThreshold 
-    (add_modulator "SecuringThresholdModulator"  0.8)
+    (add_modulator "SecuringThresholdModulator"  0.35)
 )
 
 (define SelectionThresholdModulator 
-    (add_modulator "SelectionThresholdModulator" 0.85)
+    (add_modulator "SelectionThresholdModulator" 0.75)
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -139,19 +139,19 @@
 ;
 
 (define EnergyDemandSchema
-    (add_demand_schema "EnergyDemand" 0.1)
+    (add_demand_schema "EnergyDemand" 0.85)
 )
 
 (define WaterDemandSchema
-    (add_demand_schema "WaterDemand" 0.80)
+    (add_demand_schema "WaterDemand" 0.90)
 )
 
 (define IntegrityDemandSchema
-    (add_demand_schema "IntegrityDemand" 0.90)
+    (add_demand_schema "IntegrityDemand" 0.95)
 )
 
 (define AffiliationDemandSchema
-    (add_demand_schema "AffiliationDemand" 0.70)
+    (add_demand_schema "AffiliationDemand" 0.75)
 )
 
 (define CertaintyDemandSchema
@@ -169,27 +169,31 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Add Goals
+; Add Goal to AtomSpace. 
 ;
-; Usage:
-;     (add_goal goal_pred_name arg1 arg2 ...)
-;
-; Goal is represented as:
+; A Goal is an EvaluationLink with a PredicateNode or GroundedSchemaNode, 
+; which can be represented as below:
 ;
 ; EvaluationLink
-;     (SimpleTruthValue indicates how well the demand is satisfied)
-;     (ShortTermInportance indicates the urgency of the demand)
-;     PredicateNode "goal_pred_name"
+;     PredicateNode "ungrounded_goal_name"
 ;     ListLink
 ;         Node:arguments
 ;         ...
 ;
-; There are two kinds of Goals, Final Goal and Intermediate Goal.
+; or 
 ;
-; A Final Goal, also known as Demand Goal, is to keep a specific Demand in a suitable range, 
-; Which is the starting point of backward chaining. 
+; EvaluationLink
+;     GroundedPredicateNode "grounded_goal_name"
+;     ListLink
+;         Node:arguments
+;         ...
 ;
-; While an Intermediate Goal should be used as other Rule's Precondition. 
+; After you add an ungrounded goal, you should connect it with a grounded
+; PredicateNode via 'connect_goal_updater' function
+;
+; Usage: 
+;     (add_goal pred_or_gpn_handle . arguments)
+;     (add_goal_updater gpn_handle . arguments)
 ;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -198,40 +202,85 @@
 ;
 
 (define CurrentDemandGoal
-    (add_goal "CurrentDemandGoal") 
+    (add_goal (PredicateNode "CurrentDemandGoal") )
+)
+
+(ReferenceLink
+    (ConceptNode "CurrentDemandGoal") 
+    CurrentDemandGoal
 )
 
 (define PreviousDemandGoal
-    (add_goal "PreviousDemandGoal") 
+    (add_goal (PredicateNode "PreviousDemandGoal") )
+)
+
+(ReferenceLink
+    (ConceptNode "PreviousDemandGoal") 
+    PreviousDemandGoal
 )
 
 (define EnergyDemandGoal 
-    (add_goal "EnergyDemandGoal")
+    (add_goal (PredicateNode "EnergyDemandGoal") )
+)
+
+(ReferenceLink
+    (ConceptNode "EnergyDemandGoal") 
+    EnergyDemandGoal
 )
 
 (define WaterDemandGoal
-    (add_goal "WaterDemandGoal")
+    (add_goal (PredicateNode "WaterDemandGoal") )
+)
+
+(ReferenceLink
+    (ConceptNode "WaterDemandGoal") 
+    WaterDemandGoal
 )
 
 (define IntegrityDemandGoal
-    (add_goal "IntegrityDemandGoal")
+    (add_goal (PredicateNode "IntegrityDemandGoal") )
+)
+
+(ReferenceLink
+    (ConceptNode "IntegrityDemandGoal") 
+    IntegrityDemandGoal
 )
 
 (define AffiliationDemandGoal
-    (add_goal "AffiliationDemandGoal")
+    (add_goal (PredicateNode "AffiliationDemandGoal") )
+)
+
+(ReferenceLink
+    (ConceptNode "AffiliationDemandGoal") 
+    AffiliationDemandGoal
 )
 
 (define CertaintyDemandGoal
-    (add_goal "CertaintyDemandGoal")
+    (add_goal (PredicateNode "CertaintyDemandGoal") )
+)
+
+(ReferenceLink
+    (ConceptNode "CertaintyDemandGoal") 
+    CertaintyDemandGoal
 )
 
 (define CompetenceDemandGoal
-    (add_goal "CompetenceDemandGoal")
+    (add_goal (PredicateNode "CompetenceDemandGoal") )
+)
+
+(ReferenceLink
+    (ConceptNode "CompetenceDemandGoal")
+    CompetenceDemandGoal
 )
 
 ; TODO: TestEnergy is only used for debugging. Remove it once finished. 
 (define TestEnergyDemandGoal
-    (add_goal "TestEnergyDemandGoal")
+    (add_goal (PredicateNode "TestEnergyDemandGoal") )
+)
+
+(ReferenceLink
+    (ConceptNode "TestEnergyDemandGoal") 
+    TestEnergyDemandGoal
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -253,58 +302,71 @@
 )
 
 (define FriendRelation
-    (add_goal "friend" "'self'" EntityVar) 
+    (add_goal (PredicateNode "friend") "'self'" EntityVar) 
 )
 
 (define EnemyRelation
-    (add_goal "enemy" "'self'" EntityVar)
+    (add_goal (PredicateNode "enemy") "'self'" EntityVar)
 )
 
 (define GratitudeRelation
-    (add_goal "gratitude" "'self'" EntityVar)
+    (add_goal (PredicateNode "gratitude") "'self'" EntityVar)
 )
 
 (define LoveRelation
-    (add_goal "love" "'self'" EntityVar)
+    (add_goal (PredicateNode "love") "'self'" EntityVar)
 )
 
 (define FearRelation
-    (add_goal "fear" "'self'" EntityVar)
+    (add_goal (PredicateNode "fear") "'self'" EntityVar)
 )
 
 (define AngerRelation
-    (add_goal "anger" "'self'" EntityVar) 
+    (add_goal (PredicateNode "anger") "'self'" EntityVar) 
 )
 
 (define KnowRelation
-    (add_goal "know" "'self'" EntityVar)
+    (add_goal (PredicateNode "know") "'self'" EntityVar)
 )
 
 (define CuriousAboutRelation
-    (add_goal "curious_about" "'self'" EntityVar)
+    (add_goal (PredicateNode "curious_about") "'self'" EntityVar)
 )
 
 (define FamiliarWithRelation
-    (add_goal "familiar_with" "'self'" EntityVar)
+    (add_goal (PredicateNode "familiar_with") "'self'" EntityVar)
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Connect Demands with their corresponding Demand Goals. 
+; Connect a none grounded goal and a grounded predicate node. 
 ;
 ; Usage:
-;     (connect_demand_goal demand_schema_handle goal_handle min_acceptable_value max_acceptable_value)
-;
-; The connection is represented as:
+;     (connect_goal_updater goal_evaluation_link goal_truth_value_updater_evaluation_link)
+; 
+; Each none grounded goal or precondition should have a corresponding 
+; GroundedPredicateNode to check if the goal or precondition has been achieved or
+; not. They are related via an SimultaneousEquivalenceLink as follows:
 ;
 ; SimultaneousEquivalenceLink
 ;     EvaluationLink
-;         (SimpleTruthValue indicates how well the demand is satisfied)
-;         (ShortTermInportance indicates the urgency of the demand)
-;         PredicateNode: "demand_name_goal" 
+;         PredicateNode "none_grounded_goal_or_precondition_name"
+;         ListLink
+;             ...
+;
+;     EvaluationLink
+;         GroundedPredicateNode "updater_schema_name"
+;         ListLink
+;             ...
+;
+; Below is the specific case for DemandGoals in detail:
+;
+; SimultaneousEquivalenceLink
+;     EvaluationLink
+;         PredicateNode: "XxxDemandGoal" 
 ;         ListLink (empty)
 ;     EvaluationLink
-;         GroundedPredicateNode: "FuzzyWithin"
+;         GroundedPredicateNode: "fuzzy_within"
 ;         ListLink
 ;             NumberNode: "min_acceptable_value"
 ;             NumberNode: "max_acceptable_value"
@@ -315,83 +377,53 @@
 ;                     ListLink (empty)
 ;
 
-(define ConnectEnergyDemandGoal
-    (connect_demand_goal EnergyDemandSchema         EnergyDemandGoal 0.5 1.0)
+(connect_goal_updater 
+     EnergyDemandGoal
+     (add_gpn_goal (GroundedPredicateNode "fuzzy_within") 0.6 1.0 EnergyDemandSchema)
 )
 
-(define ConnectWaterDemandGoal
-    (connect_demand_goal WaterDemandSchema          WaterDemandGoal 0.7 1.0)
+(connect_goal_updater
+     WaterDemandGoal
+     (add_gpn_goal (GroundedPredicateNode "fuzzy_within") 0.7 1.0 WaterDemandSchema)
 )
 
-(define ConnectIntegrityDemandGoal
-    (connect_demand_goal IntegrityDemandSchema      IntegrityDemandGoal 0.8 1.0)
+(connect_goal_updater
+     IntegrityDemandGoal
+     (add_gpn_goal (GroundedSchemaNode "fuzzy_within") 0.8 1.0 IntegrityDemandSchema)
 )
 
-(define ConnectAffiliationDemandGoal
-    (connect_demand_goal AffiliationDemandSchema    AffiliationDemandGoal 0.4 1.0)
+(connect_goal_updater   
+     AffiliationDemandGoal 
+     (add_gpn_goal (GroundedPredicateNode "fuzzy_within") 0.4 1.0 AffiliationDemandSchema)
 )
 
-(define ConnectCertaintyDemandGoal
-    (connect_demand_goal CertaintyDemandSchema      CertaintyDemandGoal 0.6 1.0)
+(connect_goal_updater
+     CertaintyDemandGoal
+     (add_gpn_goal (GroundedSchemaNode "fuzzy_within") 0.6 1.0 CertaintyDemandSchema)
 )
 
-(define ConnectCompetenceDemandGoal
-    (connect_demand_goal CompetenceDemandSchema     CompetenceDemandGoal 0.7 1.0)
+(connect_goal_updater
+     CompetenceDemandGoal 
+     (add_gpn_goal (GroundedPredicateNode "fuzzy_within" 0.7 1.0 CompetenceDemandSchema) 
 )
 
 ; TestEnergy is only used for debugging. Remove it once finished. 
-(define ConnectTestEnergyDemandGoal
-    (connect_demand_goal TestEnergyDemandSchema     TestEnergyDemandGoal 0.1 0.95)
+(connect_goal_updater     
+     TestEnergyDemandGoal 
+     (add_gpn_goal (GroundedPredicateNode "fuzzy_within" 0.1 0.95 TestEnergyDemandSchema)
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Rules
 ;
-; Usage:
-;     (add_rule tv_handle goal_handle action_handle precondition_handle_1 precondition_handle_2 ...)
+; Usage: 
 ;
-; Note: 
-;     Each Rule here means a cognitive schematic, that is 
-;         Contex & Procedure ==> Goal
-;
-;     Rules here has nothing to do with that in PLN, so don't confuse them!
-;
-; A Rule is represented as below (AtTimeLink is missing currently): 
-;
-; PredictiveImplicationLink
-;     AndLink
-;         AndLink
-;             EvaluationLink
-;                 GroundedPredicateNode "precondition_1_name"
-;                 ListLink
-;                     Node:arguments
-;                     ...
-;             EvaluationLink
-;                 PredicateNode         "precondition_2_name"
-;                 ListLink
-;                     Node:arguments
-;                     ...
-;             ...
-;                        
-;         ExecutionLink
-;             GroundedSchemaNode "schema_name"
-;             ListLink
-;                 Node:arguments
-;                 ...
-;
-;     EvaluationLink
-;         (SimpleTruthValue indicates how well the demand is satisfied)
-;         (ShortTermInportance indicates the urgency of the demand)
-;         PredicateNode: "goal_name" 
-;         ListLink
-;             Node:arguments
-;             ...
-;
-; For each Rule, there's only a Goal, an Action and a bunch of Preconditions. 
-; And all these Preconditions should be grouped in an AndLink.
-; If you want to use OrLink, then just split the Rule into several Rules.
-; For the efficiency and simplicity of the planer (backward chainging), NotLink is forbidden currently.  
+; (add_rule truth_value goal_evaluation_link action_execution_link
+;     precondition_1
+;     precondition_2
+;     ...
+; )   
 ;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -518,28 +550,30 @@
 ; Rules related to EnergyDemandGoal
 ;
 
-(define truePrecondition
-    (add_gpn "truePrecondition")  
-)
-
-(define eat_food
-    (add_action "eat_food")  
-)
-
 (define GetFoodGoal
-    (add_goal "GetFoodGoal") 
+    (AndLink 
+        (add_goal (PredicateNode "is_editable") (VariableNode "$var_food") ) 
+        (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_food") )
+    )    
 )
 
-(add_rule (cog-new-stv 1.0 1.0) EnergyDemandGoal eat_food
-    GetFoodGoal   	  
+(ReferenceLink
+    (ConceptNode "GetFoodGoal") 
+    GetFoodGoal
 )
 
-(define search_for_food 
-    (add_action "search_for_food")  
-)
+(ForAllLink
+    (ListLink
+        (VariableNode "$var_food") 
+    ) 
 
-(add_rule (cog-new-stv 1.0 1.0) GetFoodGoal search_for_food
-    truePrecondition	  
+    (add_rule (stv 1.0 1.0) EnergyDemandGoal (add_action "eat_food" (VariableNode "$var_food") )
+        GetFoodGoal
+    )
+)    
+
+(add_rule (stv 1.0 1.0) GetFoodGoal (add_action "random_search")
+    NULL_PRECONDITION
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -547,49 +581,119 @@
 ; Rules related to WaterDemandGoal
 ;
 
-(define drink_water
-    (add_action "drink_water")  
+(define GetWaterGoal
+    (AndLink 
+        (add_goal (PredicateNode "is_drinkable") (VariableNode "$var_water") ) 
+        (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_water") )
+    )    
 )
 
-(define GetWaterGoal 
-    (add_goal "GetWaterGoal")  
+(ReferenceLink
+    (ConceptNode "GetWaterGoal") 
+    GetWaterGoal
 )
 
-(add_rule (cog-new-stv 1.0 1.0) WaterDemandGoal drink_water
-    GetWaterGoal	  
-)
+(ForAllLink
+    (ListLink
+        (VariableNode "$var_water") 
+    ) 
 
-(define search_for_water
-    (add_action "search_for_water")  
-)
+    (add_rule (stv 1.0 1.0) WaterDemandGoal (add_action "drink_water" (VariableNode "$var_water") ) 
+        GetWaterGoal
+    )
+)    
 
-(add_rule (cog-new-stv 1.0 1.0) GetWaterGoal search_for_water
-    truePrecondition	  
+(add_rule (stv 1.0 1.0) GetWaterGoal (add_action "random_search")
+    NULL_PRECONDITION
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Rules related to IntegrityDemandGoal
 ;
+; TODO: if the pet/avatar in the virtual can really fight or get hurt, change 
+;       the definition of IntegrityDemandGoal updater and the rules below. 
+;
 
-(define flee
-    (add_action "flee")
+(define GetPeePlaceGoal
+    (AndLink
+        (add_goal (PredicateNode "is_pee_place") (VariableNode "$var_pee_place") ) 
+        (add_goal (PredicateNode "near" (get_self) (VariableNode "$var_pee_place") )
+    )
 )
 
-(add_rule (cog-new-stv 1.0 1.0) IntegrityDemandGoal flee
-    (add_gpn "fleePrecondition")
+(ReferenceLink
+    (ConceptNode "GetPeePlaceGoal") 
+    GetPeePlaceGoal
+)    
+
+(define GetPooPlaceGoal
+    (AndLink
+        (add_goal (PredicateNode "is_poo_place") (VariableNode "$var_poo_place") ) 
+        (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_poo_place") )
+    )
+)
+
+(ReferenceLink
+    (ConceptNode "GetPooPlaceGoal") 
+    GetPooPlaceGoal
+)
+
+(ForAllLink
+    (ListLink
+        (VariableNode "$var_pee_place") 
+    )
+
+    (add_rule (stv 1.0 1.0) IntegrityDemandGoal (add_action "pee_at" (VariableNode "$var_pee_place") )
+        GetPeePlaceGoal
+    )
+)
+
+(ForAllLink
+    (ListLink
+        (VariableNode "$var_poo_place") 
+    )
+
+    (add_rule (stv 1.0 1.0) IntegrityDemandGoal (add_action "poo_at" (VariableNode "$var_poo_place") )
+        GetPooPlaceGoal
+    )
+)
+
+(ForAllLink
+    (ListLink
+        (VariableNode "$var_food") 
+    ) 
+
+    (add_rule (stv 0.8 1.0) IntegrityDemandGoal (add_action "eat_food" (VariableNode "$var_food") )
+        GetFoodGoal
+    )
+)    
+
+(ForAllLink
+    (ListLink
+        (VariableNode "$var_water") 
+    )
+
+    (add_rule (stv 0.8 1.0) IntegrityDemandGoal (add_action "drink_water" (VariableNode "$var_water") )
+        GetWaterGoal
+    )
+)
+
+(add_rule (stv 1.0 1.0) GetPeePlaceGoal (add_action "random_search")
+    NULL_PRECONDITION
+)
+
+(add_rule (stv 1.0 1.0) GetPooPlaceGoal (add_action "random_search")
+    NULL_PRECONDITION
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
 ; Rules related to AffiliationDemandGoal
 ;
 
-(define goto_owner
-    (add_action "goto_owner")  
-)
-
-(add_rule (cog-new-stv 1.0 1.0) AffiliationDemandGoal goto_owner
-    truePrecondition
+(add_rule (stv 1.0 1.0) AffiliationDemandGoal (add_action "goto_obj" (get_owner) (NumberNode "2") )
+    NULL_PRECONDITION
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -597,12 +701,55 @@
 ; Rules related to CertaintyDemandGoal
 ;
 
-(define play
-    (add_action "play")  
+(define GetNearObjectGoal
+    (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_near_object") )
 )
 
-(add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal play
-    truePrecondition	  
+(ReferenceLink
+    (ConceptNode "GetNearObjectGoal") 
+    GetNearObjectGoal
+)
+
+(define GetNearPickupableObjectGoal
+    (AndLink
+        (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_near_pickupable_object") ) 
+        (add_goal (PredicateNode "is_pickupable") (VariableNode "$var_near_pickupable_object") )
+    ) 
+)
+
+(ReferenceLink
+    (ConceptNode "GetNearPickupableObjectGoal") 
+    GetNearPickupableObjectGoal
+)
+
+(ForAllLink
+    (ListLink
+        (VariableNode "$var_near_object") 
+    )   
+
+    (add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
+              (add_action "play_without_grab_and_drop" (VariableNode "$var_near_object") )
+              GetNearObjectGoal
+    )
+)
+
+(ForAllLink
+    (ListLink
+        (VariableNode "$var_near_pickupable_object") 
+    )     
+
+    (add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
+              (add_action "play_with_grab_and_drop" (VariableNode "$var_near_pickupable_object") )
+              GetNearPickupableObjectGoal 
+    ) 
+)
+
+(add_rule (stv 1.0 1.0) GetNearObjectGoal (add_action "random_search")
+    NULL_PRECONDITION
+)
+
+(add_rule (stv 1.0 1.0) GetNearPickupableObjectGoal (add_action "random_search")
+    NULL_PRECONDITION
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -610,8 +757,8 @@
 ; Rules related to CompetenceDemandGoal
 ;
 
-(add_rule (cog-new-stv 1.0 1.0) CompetenceDemandGoal play
-    truePrecondition	  
+(add_rule (cog-new-stv 1.0 1.0) CompetenceDemandGoal (add_action "random_simple_action")
+    NULL_PRECONDITION 
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

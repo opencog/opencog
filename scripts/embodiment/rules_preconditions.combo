@@ -4,6 +4,14 @@
 # Copyright(c) 2002-2008 VettaLabs Ltda
 #
 
+is_food_available(0) := near(self nearest_edible)
+
+is_water_available(0) := near(self nearest_drinkable)
+
+is_pee_place_available(0) := near(self nearest_pee_place)
+
+is_poo_place_available(0) := near(self nearest_poo_place)
+
 # debug preconditions
 truePrecondition(0) := true
 

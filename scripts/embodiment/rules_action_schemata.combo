@@ -42,6 +42,9 @@ drop_n_pee(0) := and_seq( drop pee )
 drop_n_play(0) := and_seq( drop play )
 drop_n_celebrate(0) := and_seq( drop back_flip run_in_circle bark )
 
+pee_at(1) := and_seq( goto_obj(#1 2) pee )
+poo_at(1) := and_seq( goto_obj(#1 2) poo )
+
 grab_nearest_pickupable(0) :=
     action_boolean_if( near(self nearest_pickupable)
                        and_seq( drop grab(nearest_pickupable) )
@@ -90,6 +93,22 @@ random_step_searching(0) :=
 
 wander(0) := random_step_searching
 
+random_search(0) := random_step_searching
+
+play_with_grab_and_drop(1) := and_seq( goto_obj(#1 2) grab(#1) drop )
+
+play_without_grab_and_drop(1) := and_seq( goto_obj(#1 2) 
+                                          sniff_at(#1) 
+#                                          bite(#1) 
+                                          lick_at(#1)
+#                                          kick(#1) 
+                                        )
+
+random_simple_action(0) := and_seq( sit bark sleep jump_up 
+                                    step_forward step_backward 
+                                    rotate_left rotate_right
+                                  ) 
+
 #############################################
 ########### RULE ENGINE FUNCTIONS ###########
 #############################################
@@ -105,11 +124,11 @@ wander(0) := random_step_searching
 #        goto_obj(nearest_edible 3) drop wag eat(nearest_edible)
 #    )
     
-eat_food(0) :=
-    and_seq( goto_obj(nearest_edible 3)
+eat_food(1) :=
+    and_seq( goto_obj(#1 2)
              drop
              wag
-             eat(nearest_edible)
+             eat(#1)
              wander
            )
 
@@ -125,11 +144,11 @@ search_for_food(0) :=
 #        and_seq(goto_obj(nearest_drinkable 3) drop wag drink(nearest_drinkable))
 #    )
 
-drink_water(0) :=  
-    and_seq( goto_obj(nearest_drinkable 3)
+drink_water(1) :=  
+    and_seq( goto_obj(#1 2)
              drop 
              wag 
-             drink(nearest_drinkable)
+             drink(#1)
              wander
            )
 
@@ -139,18 +158,31 @@ search_for_water(0) :=
            )
 
 #Looking for pee place. If does not exist, random_step_searching until find one
-wander_searching_pee_place(0) :=
+search_for_pee_place(0) := 
     and_seq(
     	boolean_while(not(exists_pee_place) random_step_searching)
-        and_seq(goto_obj(nearest_pee_place 3) wag pee)
+        and_seq(goto_obj(nearest_pee_place 3) wag) 
     )
 
+
+#wander_searching_pee_place(0) :=
+#    and_seq(
+#    	boolean_while(not(exists_pee_place) random_step_searching)
+#        and_seq(goto_obj(nearest_pee_place 3) wag pee)
+#    )
+
 #Looking for poo place. If does not exist, random_step_searching until find one
-wander_searching_poo_place(0) :=
+search_for_poo_place(0) :=
     and_seq(
     	boolean_while(not(exists_poo_place) random_step_searching)
-        and_seq(goto_obj(nearest_poo_place 3) wag poo)
+        and_seq(goto_obj(nearest_poo_place 3) wag)
     )
+
+#wander_searching_poo_place(0) :=
+#    and_seq(
+#    	boolean_while(not(exists_poo_place) random_step_searching)
+#        and_seq(goto_obj(nearest_poo_place 3) wag poo)
+#    )
 
 
 # Behavior functions

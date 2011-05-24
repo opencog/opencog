@@ -2,7 +2,7 @@
 ; @file embodiment/rules_core.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-19
+; @date   2011-05-23
 ;
 ; Scheme core functions for adding Modulators, Demands and Rules etc. into AtomSpace
 ;
@@ -91,15 +91,11 @@
 ;             subgoal_1
 ;             ...
 ;
-;         AndLink
-;             action_1 (truth value indicates whether the action has been done successfully)
-;             action_2
-;             ...
+;         ExecutionLink (truth value indicates whether the action has been done successfully)
+;             action 
 ;
-;     AndLink
-;         goal_1 (truth value indicates how well the goal is satisfied)
-;         goal_2
-;         ...
+;     EvaluationLink (truth value indicates how well the goal is satisfied)
+;         goal 
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -307,7 +303,7 @@
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add a DemandSchema/DemandValue given demand_name and default_value, 
-; return the handle to ExecutionOutputLink, which would be used by 'connect_demand_goal' function
+; return the handle to ExecutionOutputLink, which would be used by 'fuzzy_within' function
 ;
 ; The updater of the demand value is a combo script, named after demand_name with suffix "Updater"
 ;
@@ -467,6 +463,8 @@
 ;         Node:arguments
 ;         ...
 ;
+; After you add an ungrounded goal, you should connect it with a grounded
+; PredicateNode via 'connect_goal_updater' function
 
 (define (add_goal pred_or_gpn_handle . arguments)
     (EvaluationLink (DEFAULT_AV) 
@@ -578,30 +576,35 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Add Rule (an ImplicationLink) to AtomSpace given Handles of Goals, Actions and Preconditions
+; Add Rule (an ImplicationLink) to AtomSpace given Handles of Goal, Action and Preconditions
 ;
-; Multiple Goals, Actions and Preconditions are wrapped in an AndLink respectively. 
+; For each Rule, there's only a Goal, an Action and a bunch of Preconditions. 
+; And all these Preconditions should be grouped in an AndLink.
+; If you want to use OrLink, then just split the Rule into several Rules.
+; For the efficiency and simplicity of the planer (backward chainging), NotLink is forbidden currently.  
 ;
 ; 1. Psi Rule is represented as follows:
 ;
 ; ImplicationLink (higher truth value means higher probability of selection when planning)
 ;     AndLink
-;         Preconditions
-;         Actions
-;     Goals
+;         AndLink
+;             Preconditions
+;         Action
+;     Goal
 ;
-; 2. Goals are represented as:
+; 2. Goal is represented as:
 ; 
-; AndLink
-;     EvaluationLink
-;         PredicateNode "goal_name_1"
-;         ListLink
-;             ...
-;     EvaluationLink
-;         GroundedPredicateNode "gpn_goal_name_2"
-;         ListLink
-;             ...
-;     ...
+; EvaluationLink
+;     PredicateNode "goal_name_1"
+;     ListLink
+;         ...
+;
+; or
+;
+; EvaluationLink
+;     GroundedPredicateNode "gpn_goal_name_2"
+;     ListLink
+;         ...
 ;
 ; 3. Preconditions are represented as:
 ;
@@ -610,23 +613,18 @@
 ;         PredicateNode "sub_goal_name_1"
 ;         ListLink
 ;             ...
+;
 ;     EvaluationLink
 ;         GroundedPredicateNode "gpn_sub_goal_name_2"
-;             ...
-;     ...        
-;
-; 4. Actions are represented as: 
-;
-; AndLink
-;     ExecutionLink (truth value means if the action has been done successfully)
-;         GroundedSchemaNode "schema_name_1"
 ;         ListLink
 ;             ...
-;     ExecutionLink
-;         GroundedSchemaNode "schema_name_2"
-;         ListLink
-;             ...
-;     ...
+;
+; 4. Action is represented as: 
+;
+; ExecutionLink (truth value means if the action has been done successfully)
+;     GroundedSchemaNode "schema_name_1"
+;     ListLink
+;         ...
 ;
 ; Note: For each goal or precondition, we can use PredicateNode or GroundedPredicateNode 
 ;       within EvaluationLink. The truth value means how well the goal or 
@@ -648,14 +646,14 @@
 ;                   ...
 ;
 
-(define (add_rule truth_value goals_and_link preconditions_and_link actions_and_link)
+(define (add_rule truth_value goal_evaluation_link action_execution_link precondition_and_link)
     (ImplicationLink (DEFAULT_AV) truth_value
         (AndLink
-            preconditions_and_link
-            actions_and_link
+            precondition_and_link
+            action_execution_link
         ) 
 
-        goals_and_link
+        goal_evaluation_link
     ) 
 )
 
