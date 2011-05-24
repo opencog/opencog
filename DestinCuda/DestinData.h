@@ -54,11 +54,51 @@ class DestinData
          */
         void SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShift);
 
+        /**
+         * Returns the index of requested image
+         * @param int iIndexOfImage
+         * @return int label of requested index of image
+         */
         int GetLabel(int iIndexOfImage){ return mLabels[iIndexOfImage]; };
+
+        /**
+         * Returns the number of images loaded
+         * @return int number of images
+         */
         int GetNumberOfImages(){ return mLabels.size(); };
+
+        /**
+         * Returns the number of unique labels loaded
+         * @return int unique labels
+         */
         int GetNumberOfUniqueLabels(){ return mUniqueLabels.size(); };
-        void GetLabelList(vector<int>& Labels);
-        void GetUniqueLabels(vector<int>& UniqueLabels);
+
+        /**
+         * Get the list of labels
+         * @param vector for int (Will be cleared)
+         * @return the vector filled with the labels
+         */
+        void GetLabelList(vector<int>& vLabels);
+
+        /**
+         * Get the unique list of labels
+         * @param vector for int (Will be cleared)
+         * @return the vector filled with the unique labels
+         */
+        void GetUniqueLabels(vector<int>& vUniqueLabels);
+
+        /**
+         * Get the index numbers of a certain label
+         * @param int label where you want the index of
+         * @param vector int for index of label
+         * @return vector int with index of requested label
+         */
         void GetIndicesForThisLabel(int Label, vector<int>& IndicesForThisLabel );
+
+        /**
+         * Very big function from original DeSTIN to do FFT on 4x4
+         * @param float** sub image
+         * @param float* vector
+         */
         void DoSpecial4x4FFT(float** &fSubImage, float* fUniqueVector);
 };

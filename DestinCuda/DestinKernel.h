@@ -6,6 +6,8 @@ class DestinKernel
 private:
     int mRows;
 	int mCols;
+	int mStates;
+	int mDevices;
         
 public:
 	DestinKernel(void);

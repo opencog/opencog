@@ -96,15 +96,6 @@ void DestinData::LoadFile(const char* sFileName)
 	cout << "Finished reading file." << endl;
 }
 
-void DestinData::GetLabelList(vector<int>& Labels)
-{
-	Labels.clear();
-	for(int i=0;i<(int)(mLabels.size());i++)
-	{
-		Labels.push_back(mLabels[i]);
-	}
-}
-
 void DestinData::SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShift)
 {
     // TODO: Might want to set C and R more dynamic. in case of different data set?
@@ -139,13 +130,22 @@ void DestinData::SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShif
     mLastImageIndex=ImageIndex;
 }
 
-void DestinData::GetUniqueLabels(vector<int>& vLabels)
+void DestinData::GetLabelList(vector<int>& Labels)
 {
-	vLabels.clear();
+    Labels.clear();
+    for(int i=0;i<(int)(mLabels.size());i++)
+    {
+        Labels.push_back(mLabels[i]);
+    }
+}
+
+void DestinData::GetUniqueLabels(vector<int>& vUniqueLabels)
+{
+    vUniqueLabels.clear();
 	vector<int>::iterator it = this->mUniqueLabels.begin();
 	while ( it != mUniqueLabels.end() )
 	{
-		vLabels.push_back(*it++);
+	    vUniqueLabels.push_back(*it++);
 	}
 
 }
