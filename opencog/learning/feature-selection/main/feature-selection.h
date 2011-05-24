@@ -93,7 +93,8 @@ void feature_selection(IT& it, const OT& ot,
                        Optimize& optimize, const Scorer& scorer,
                        const feature_selection_parameters& fs_params) {
     // optimize feature set
-    unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals);
+    unsigned ae; // actual number of evaluations to reached the best candidate
+    unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals, &ae);
     // get the best one
     std::sort(deme.begin(), deme.end(),
               std::greater<scored_instance<composite_score> >());
@@ -119,7 +120,8 @@ void feature_selection(IT& it, const OT& ot,
     }
     {
         // Log the actual number of evaluations
-        logger().info("Actual number of evaluations: %u", evals);
+        logger().info("Total number of evaluations performed: %u", evals);
+        logger().info("Actual number of evaluations to reach the best feature set: %u", ae);
     }
     // ~Logger
     // print the filtered table
