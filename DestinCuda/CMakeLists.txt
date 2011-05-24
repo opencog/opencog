@@ -12,7 +12,7 @@ FIND_PACKAGE(CUDA 4.0)
 
 if(CUDA_FOUND)
     #Enable debug for CUDA
-    set(CUDA_COMPILE_TIME_EXTRA_FLAGS -g -G)
+    set(CUDA_COMPILE_TIME_EXTRA_FLAGS -g -G -arch=sm_13)
     
 	add_subdirectory( pugixml )
 
