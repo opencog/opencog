@@ -243,12 +243,15 @@ struct iterative_hillclimbing {
      * @prama init_inst start the seach from this instance
      * @param score the scoring function
      * @param max_evals the maximum number of evaluations
+     * @param eval_best the actual number of evaluations to reach
+     *                  the best solution
      * @return number of evaluations actually performed
      */
     template<typename Scoring>
     unsigned operator()(eda::instance_set<composite_score>& deme,
                         const eda::instance& init_inst,
-                        const Scoring& score, unsigned max_evals) {
+                        const Scoring& score, unsigned max_evals,
+                        unsigned* eval_best = NULL) {
         // Logger
         logger(). debug("Iterative HillClimbing Optimization");
         // ~Logger
@@ -357,6 +360,7 @@ struct iterative_hillclimbing {
             current_number_of_instances += number_of_new_instances;
             if(has_improved) {
                 distance = 1;
+                if(eval_best) *eval_best = current_number_of_instances;
                 // Logger
                 {
                     std::stringstream ss;
