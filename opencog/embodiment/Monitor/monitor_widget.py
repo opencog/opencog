@@ -59,7 +59,10 @@ class MonitorWidget(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         # Initialize variables related to graph 
-        self.max_data_len = 25 # this should be multiple of 5
+        self.max_data_len = 50
+        # timestamps can be erratic, so we can't assume they'll be
+        # evenly spaced
+        self.max_time_period = 2000
         self.has_initialized = False
 
         # expected format for data to be plotted is:
@@ -87,10 +90,15 @@ class MonitorWidget(FigureCanvas):
 
     # Update data list
     def update_data(self, json_dict):
+        latestTimeStamp = json_dict["timestamp"]
+        forgetFirst = False
+        # forget old data
+        if latestTimeStamp - self.data_dict["timestamp"][0] > self.max_time_period or \
+            len(self.data_dict["timestamp"]) > self.max_data_len:
+            forgetFirst = True
         for k, v in json_dict.iteritems():
             self.data_dict[k].append(v)
-            if (len(self.data_dict[k]) > self.max_data_len):
-                self.data_dict[k].pop(0)
+            if forgetFirst: self.data_dict[k].pop(0)
 
     # Draw the graph on the widget
     def draw_graph(self):
@@ -109,7 +117,7 @@ class MonitorWidget(FigureCanvas):
 
         self.axes.set_title(self.zmq_subscriber_thread.filter_key)
         self.axes.grid(True)
-        self.axes.set_xlim(-(self.max_data_len - 1),0)
+        self.axes.set_xlim(-self.max_time_period,0)
         self.axes.set_ylim(0,1)
 
         self.draw()
