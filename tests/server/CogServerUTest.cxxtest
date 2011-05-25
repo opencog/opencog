@@ -61,6 +61,12 @@ public:
         HandleSet *s = new HandleSet();
         s->add(h);
         _utilizedHandleSets.push_back(s);
+        // Random loop doing random things so that agent's take more than one
+        // cpu tick to complete
+        for (int i=0; i < 1000; i++) {
+            int j = i * 100 / 200;
+            sprintf(tmp, "%d", j);
+        }
     }
 };
 
