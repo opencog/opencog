@@ -37,6 +37,12 @@ namespace moses {
   
     //basic types
     typedef double score_t;
+    static const score_t worst_score =
+        -(std::numeric_limits<score_t>::max()-score_t(1));
+        // for some weird reasons what is below leads to bugs
+        // std::numeric_limits<score_t>::min(),
+        // so does this!!!
+        // std::numeric_limits<score_t>::min()+1,
 
     typedef std::pair<score_t,complexity_t> composite_score;
     typedef opencog::tagged_item<combo::combo_tree,
@@ -52,7 +58,7 @@ namespace moses {
     typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
                                  boost::hash<combo::combo_tree> > metapop_candidates;
   
-    extern const composite_score worst_possible_score;
+    extern const composite_score worst_composite_score;
 
     //convenience accessors
     inline const combo::combo_tree& get_tree(const scored_combo_tree& st) { 

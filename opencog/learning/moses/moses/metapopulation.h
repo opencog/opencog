@@ -92,20 +92,12 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
                                                            bool> {
     bool operator()(const bscored_combo_tree& bs_tr1,
                     const bscored_combo_tree& bs_tr2) const {
-        score_t sc1 = get_score(bs_tr1);
-        score_t sc2 = get_score(bs_tr2);
-        if(sc1 > sc2)
-            return true;
-        if(sc1 < sc2)
-            return false;
-        complexity_t c1 = get_complexity(bs_tr1);
-        complexity_t c2 = get_complexity(bs_tr2);
-        if(c1 < c2)
-            return true;
-        if(c1 > c2)
-            return false;
-        return opencog::size_tree_order<combo::vertex>()(get_tree(bs_tr1),
-                                                         get_tree(bs_tr2));
+        composite_score csc1 = get_composite_score(bs_tr1);
+        composite_score csc2 = get_composite_score(bs_tr2);
+        return csc1 > csc2
+            || (!(csc1 < csc2) && 
+                opencog::size_tree_order<combo::vertex>()(get_tree(bs_tr1),
+                                                          get_tree(bs_tr2)));
     }
 };
     
@@ -172,7 +164,7 @@ struct metapopulation : public set < bscored_combo_tree,
         rng(_rng), type(tt), simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
-        _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
+        _best_score(worst_composite_score), _rep(NULL), _deme(NULL)
     {
         init(bases);
     }
@@ -190,7 +182,7 @@ struct metapopulation : public set < bscored_combo_tree,
         rng(_rng), type(tt), simplify_candidate(&si),
         simplify_knob_building(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
-        _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
+        _best_score(worst_composite_score), _rep(NULL), _deme(NULL)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases);
@@ -280,15 +272,15 @@ struct metapopulation : public set < bscored_combo_tree,
             complexity_t c = get_complexity(*it);
 
             // this to not consider too complex exemplar
-            if (c - cmin > params.selection_max_range) 
+            if (cmin - c > params.selection_max_range) 
                 break;
             const combo_tree& tr = get_tree(*it);
             if(_visited_exemplars.find(tr) == _visited_exemplars.end()) {
                 probs.push_back(c);
                 exist_exemplar = true;
-            } else // hack: if the tree is visited then put a complexity positive
-                   // so we know it must be ignored
-                probs.push_back(-1);
+            } else // hack: if the tree is visited then put a positive
+                   // complexity so we know it must be ignored
+                probs.push_back(1);
         }
         
         if(!exist_exemplar) {
@@ -296,12 +288,12 @@ struct metapopulation : public set < bscored_combo_tree,
         }
 
         complexity_t sum = 0;
-        complexity_t max_comp = *max_element(probs.begin(), probs.end());
+        complexity_t highest_comp = *min_element(probs.begin(), probs.end());
         // convert complexities into (non-normalized) probabilities
         foreach(complexity_t& p, probs) {
             // in case p has the max complexity (already visited) then
             // the probability is set to null
-            p = (p < 0? 0 : pow2(max_comp - p));
+            p = (p > 0? 0 : pow2(p - highest_comp));
             sum += p;
         }
 
@@ -561,7 +553,7 @@ struct metapopulation : public set < bscored_combo_tree,
                 break;
 
             // if it's really bad just skip it and all that follow
-            if (get_score(inst.second) == get_score(worst_possible_score))
+            if (get_score(inst.second) == get_score(worst_composite_score))
                 break;
 
             // generate the tree coded by inst

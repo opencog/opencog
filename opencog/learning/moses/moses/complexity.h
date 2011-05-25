@@ -31,10 +31,19 @@
 #include <limits>
 
 namespace moses {
+
+    // due to stl_pair.h considering that
+    //
+    // (a1,b1) < (a2,b2) if b1<b2 when a1==a2
+    //
+    // it is easier to assume a negative complexity, that is the lower
+    // the value of complexity_t the higher the complexity. That way
+    // comparing composite_scores is automatically provided by
+    // stl_pair.h
     typedef int complexity_t ;
   
-    static const complexity_t max_complexity =
-        std::numeric_limits<complexity_t>::max();
+    static const complexity_t worst_complexity =
+        std::numeric_limits<complexity_t>::min();
 
     complexity_t complexity(combo::combo_tree::iterator);
     

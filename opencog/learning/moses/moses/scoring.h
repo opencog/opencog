@@ -85,7 +85,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
                 << ee.get_message() << " " << ee.get_vertex();
             logger().warn(ss2.str());
             // ~Logger
-            return get_score(worst_possible_score);
+            return get_score(worst_composite_score);
         }
     }
     const BScore& bscore;
@@ -378,7 +378,7 @@ struct complexity_based_scorer : public unary_function<eda::instance,
              ss << "The following instance has failed to be evaluated: " 
                 << _rep.fields().stream(inst);
              logger().warn(ss.str());
-             return worst_possible_score;
+             return worst_composite_score;
          }
     }
 

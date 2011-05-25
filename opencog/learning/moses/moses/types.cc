@@ -26,8 +26,7 @@
 
 namespace moses {
 
-    const composite_score worst_possible_score=
-        std::make_pair(-(std::numeric_limits<score_t>::max()-score_t(1)),
-                       max_complexity);
+    const composite_score worst_composite_score=
+        std::make_pair(worst_score,worst_complexity);
 
 } //~namespace moses

@@ -70,7 +70,7 @@ contin_t contin_score::operator()(const combo_tree& tr) const
         return sc;
     } catch (...) {
         std::cout << "threw" << std::endl;
-        return get_score(worst_possible_score);
+        return get_score(worst_composite_score);
     }
 }
 
@@ -82,7 +82,7 @@ contin_t contin_score_sq::operator()(const combo_tree& tr) const
         stringstream ss;
         ss << "The following candidate has failed to be evaluated: " << tr;
         logger().warn(ss.str());
-        return get_score(worst_possible_score);
+        return get_score(worst_composite_score);
     }
 }
 

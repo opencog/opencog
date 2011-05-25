@@ -30,23 +30,23 @@ namespace moses {
 
 using namespace combo;
 
-// for a Boolean formula, the complexity is the # of literals
+// for a Boolean formula, the complexity is the neg(# of literals)
 
 complexity_t complexity(combo_tree::iterator it) {
     if (*it==id::logical_true || *it==id::logical_false || *it==id::null_vertex)
         return 0;
 
     if (is_argument(*it))
-        return 1;
+        return -1;
 
     if (is_builtin_action(*it))
-        return 1;
+        return -1;
 
     if (*it==id::logical_not)
         return complexity(it.begin());
 
     if (is_ann_type(*it))
-        return 1;
+        return -1;
 
     int c=0;
     for (combo_tree::sibling_iterator sib = it.begin(); sib != it.end(); ++sib)

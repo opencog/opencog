@@ -192,7 +192,7 @@ struct univariate_optimization {
                    (deme, n_select, n_generate, max_gens_total, score,
                     eda::terminate_if_gte_or_no_improv<composite_score>
                     (composite_score(opt_params.terminate_if_gte,
-                                      worst_possible_score.second),
+                                      worst_composite_score.second),
                      max_gens_improv),
                     opencog::tournament_selection((unsigned)eda_params.selection, rng),
                     eda::univariate(), eda::local_structure_probs_learning(),
@@ -272,24 +272,13 @@ struct iterative_hillclimbing {
 
         // score the initial instance
         eda::instance center_inst(init_inst);
-        eda::scored_instance<composite_score> scored_center_inst = 
-            eda::score_instance(center_inst, score);
-        composite_score best_score = score(scored_center_inst);
+        composite_score best_cscore = worst_composite_score;
 
-        unsigned distance = 1;
-        bool has_improved; // whether the score has improved
-
+        unsigned distance = 0;
         unsigned iteration = 0;
 
-        // Logger
-        {
-            std::stringstream ss;
-            ss << "Initial center instance: " << fields.stream(center_inst)
-               << " " << best_score;
-            logger().debug(ss.str());
-        }
-        // ~Logger
-
+        // whether the score has improved during an iteration
+        bool has_improved;
         do {
             has_improved = false;
 
@@ -346,12 +335,12 @@ struct iterative_hillclimbing {
                       // ref instead of by copy
                       boost::bind(boost::cref(score), _1)); 
             // check if there is an instance in the deme better than
-            // the exemplar
+            // the best candidate
             for (unsigned i = current_number_of_instances;
                  deme.begin() + i != deme.end(); ++i) {
-                composite_score inst_score = deme[i].second;
-                if (get_score(inst_score) > get_score(best_score)) {
-                    best_score = inst_score;
+                composite_score inst_cscore = deme[i].second;
+                if (inst_cscore > best_cscore) {
+                    best_cscore = inst_cscore;
                     center_inst = deme[i].first;
                     has_improved = true;
                 }
@@ -360,12 +349,13 @@ struct iterative_hillclimbing {
             current_number_of_instances += number_of_new_instances;
             if(has_improved) {
                 distance = 1;
-                if(eval_best) *eval_best = current_number_of_instances;
+                if(eval_best)
+                    *eval_best = current_number_of_instances;         
                 // Logger
                 {
                     std::stringstream ss;
-                    ss << "New center instance: " << fields.stream(center_inst)
-                       << " " << best_score;
+                    ss << "Center instance: " << fields.stream(center_inst)
+                       << " " << best_cscore;
                     logger().debug(ss.str());
                 }
                 // ~Logger
@@ -373,10 +363,12 @@ struct iterative_hillclimbing {
             else
                 distance++;
             
-        } while ((!hc_params.terminate_if_improvement || !has_improved) &&
+        } while ((!hc_params.terminate_if_improvement ||
+                  !has_improved ||
+                  current_number_of_instances == 1) &&
                  distance <= max_distance &&
                  current_number_of_instances < max_number_of_instances &&
-                 get_score(best_score) < opt_params.terminate_if_gte);
+                 get_score(best_cscore) < opt_params.terminate_if_gte);
         
         return current_number_of_instances;
     }
