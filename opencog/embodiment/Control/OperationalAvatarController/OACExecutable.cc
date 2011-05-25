@@ -129,12 +129,12 @@ int main(int argc, char *argv[])
                      ". Check log for more information.",
                      se.getMessage());
         static_cast<OAC&>(server()).saveState();
-    } catch (...) {
+    } /*catch (...) {
         logger().error(
                      "OACExecutable - An exceptional situation occured"
                      ". Check log for more information.");
         static_cast<OAC&>(server()).saveState();
-    }
+    }*/
 
     return (0);
 }
