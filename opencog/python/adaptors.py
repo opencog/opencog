@@ -1,6 +1,10 @@
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
 import opencog.cogserver
 
+# to debug within the cogserver, try these, inside the relevant function:
+#import code; code.interact(local=locals())
+#import ipdb; ipdb.set_trace()
+
 t = types
 
 class GraphConverter:
@@ -25,12 +29,27 @@ class GraphConverter:
 
     def output(self):
         self.writer.start()
-        [self.addVertex(atom) for atom in sorted(self.a.get_atoms_by_type(t.Atom))]
-        [self.addEdges(atom) for atom in sorted(self.a.get_atoms_by_type(t.Link))]
+        # Use inline generators when you want to return all the results (or use a callback?)
+        try:
+            for atom in self.sorted_by_handle(self.a.get_atoms_by_type(t.Atom)):
+                #print atom
+                self.addVertex(atom)
+            for atom in self.sorted_by_handle(self.a.get_atoms_by_type(t.Link)):
+                self.addEdges(atom)
+        except Exception, e:
+            print e.__class__,  str(e)
+            import pdb; pdb.set_trace()
         self.writer.stop()
 
+    # This got a bit convoluted. The reason why it's necessary is to make sure children of an atom will be
+    # output first (although there would be other ways to do that)
+    def sorted_by_handle(self,atoms):
+        handles = [atom.h for atom in atoms]
+        handles.sort()
+        return [Atom(h,self.a) for h in handles] # When I mistakenly said a instead of self.a, no Exception was reported!
+    
     def is_compactable(self,atom):
-        return len(atom.out) == 2 and len(atom.incoming) == 0 and not atom.is_a(t.EvaluationLink) # TODO haxx?
+        return len(atom.out) == 2 and len(atom.incoming) == 0 and not FishgramFilter.is_application_link(atom) # TODO haxx?
 
 class DottyOutput:
     def __init__(self,space):
@@ -52,30 +71,41 @@ class DottyOutput:
         out+='[label="'+label+'"]'
         print out
 
-    def outputLinkEdge(self,a):
+    def outputLinkEdge(self,a, label=None,outgoing=None):
         assert a.is_link()
         assert len(a.out) == 2
+        assert (label==None) == (outgoing==None)
 
-        (out0, out1) = a.out[0].h.value(), a.out[1].h.value()
+        if label==None:
+            label = a.type_name
+
+        if outgoing==None:
+            outgoing = a.out
+
+        (out0, out1) = outgoing[0].h.value(), outgoing[1].h.value()
 
         out = ""
         out+= str(out0) + '->' + str(out1) + ' '
-        out+= '[label="' + a.type_name + '"]'
+        out+= '[label="' + label + '"]'
         print out
 
-    def outputLinkVertex(self,a):
+    def outputLinkVertex(self,a, label=None):
         assert a.is_link()
+
+        if label==None:
+            label = a.type_name
 
         output = ""
         output+= str(a.h.value()) + " "
-        output+= '[label="' + a.type_name + '" shape="diamond"]'
+        output+= '[label="' + label + '" shape="diamond"]'
         print output
 
-    def outputLinkArgumentEdges(self,a):
+    def outputLinkArgumentEdges(self,a, outgoing=None):
         assert a.is_link()
         # assumes outgoing links/nodes have already been output
 
-        outgoing = a.out
+        if outgoing==None:
+            outgoing = a.out
 
         output = ""
         for i in xrange(0, len(outgoing)):
@@ -151,17 +181,20 @@ class SubdueTextOutput:
         if outgoing==None:
             outgoing = a.out
 
-        a_id = self.handle2id[a.h.value()]        
+        try:
+            a_id = self.handle2id[a.h.value()]        
 
-        output = ''
-        for i in xrange(0, len(outgoing)):
-            #outi = outgoing[i]
-            outi_id = self.handle2id[outgoing[i].h.value()]
+            output = ''
+            for i in xrange(0, len(outgoing)):
+                #outi = outgoing[i]
+                outi_id = self.handle2id[outgoing[i].h.value()]
 
-            if a.is_a(t.OrderedLink):
-                output+= 'd %s %s "%s"\n' % (str(a_id), str(outi_id), str(i))
-            else:
-                output+= 'u %s %s "%s"\n' % (str(a_id), str(outi_id), str(i))
+                if a.is_a(t.OrderedLink):
+                    output+= 'd %s %s "%s"\n' % (str(a_id), str(outi_id), str(i))
+                else:
+                    output+= 'u %s %s "%s"\n' % (str(a_id), str(outi_id), str(i))
+        except KeyError, e:
+            print "%% Processing", str(a), "!!! Error - did not previously output the vertex for this link:", str(Atom(Handle(e.args[0]),  self._as))
 
         print output,
 
@@ -176,6 +209,17 @@ class FishgramFilter:
         self.writer = writer
 
     def start(self):
+        times = self._as.get_atoms_by_type(t.TimeNode)
+        times = sorted([f for f in times if f.name != "0"]) # Related to a bug in the Psi Modulator system
+        
+        # Have links to represent which TimeNodes happen (shortly) after another.
+        # So the graph miner will hopefully find common sequences of events
+        for i in xrange(len(times)-1):
+            (time1,  time2) = (times[i],  times[i+1])
+            # TODO SeqAndLink was not supposed to be used on TimeNodes directly.
+            # But that's more useful for fishgram
+            print self._as.add_link(t.SequentialAndLink,  [time1,  time2])
+        
         self.writer.start()
 
     def stop(self):
@@ -188,7 +232,7 @@ class FishgramFilter:
 
         # TODO: keep the ID if it's a Pet/Avatar/Humanoid; include Node type?
         # Remember that there is always an InheritanceLink to (ConceptNode "PetNode"), etc.
-        if a.is_a(t.ObjectNode):
+        if a.is_a(t.ObjectNode) or a.is_a(t.TimeNode):
             self.writer.outputNodeVertex(a,label=a.type_name) #'_OBJECT_')
         else:
             self.writer.outputNodeVertex(a)
@@ -199,7 +243,7 @@ class FishgramFilter:
 
         if self.ignore(a): return
 
-        if not a.is_a(t.EvaluationLink):
+        if not self.is_application_link(a):
             self.writer.outputLinkEdge(a)
         else:
             label = a.out[0].name #PredicateNode name
@@ -211,7 +255,7 @@ class FishgramFilter:
 
         if self.ignore(a): return
 
-        if not a.is_a(t.EvaluationLink):
+        if not self.is_application_link(a):
             self.writer.outputLinkVertex(a)
         else:
             # Send this predicate to the single-edge system if possible
@@ -227,36 +271,67 @@ class FishgramFilter:
 
         if self.ignore(a): return
 
-        if not a.is_a(t.EvaluationLink):
+        #import ipdb; ipdb.set_trace()
+
+        if not self.is_application_link(a):
             self.writer.outputLinkArgumentEdges(a)
         else:
             if self.is_compactableEvalLink(a):
                 return #Already handled by outputLinkEdge
             else:
-                outgoing = a.out[1].out # ListLink outgoing
+                label = a.out[0].name
+                outgoing = a.out[1].out # ListLink outgoing -TODO assumes a ListLink even when the Predicate has 1 argument
+                self.writer.outputLinkVertex(a, label)
                 self.writer.outputLinkArgumentEdges(a,outgoing)
 
     def ignore(self,a):
         # allows WRLinks (WordReference) to make it more interesting.
         # e.g. there's a WRLink from WordNode:"soccer ball", but the most specific ConceptNode is "ball"
         #return not (a.is_a(t.Node) or a.is_a(t.InheritanceLink) or a.is_a(t.EvaluationLink))
-        return (not (a.is_a(t.Node) or a.is_a(t.InheritanceLink) or a.is_a(t.EvaluationLink) )# or
-                     #a.is_a(t.WRLink))
-               or (a.is_a(t.EvaluationLink) and (a.tv.mean < 0.5 or a.tv.count == 0))
-               or (a.is_a(t.EvaluationLink) and a.out[0].name == "proximity"))
-#        return a.is_a(t.ListLink) or a.is_a(t.PredicateNode)
+        include = True # proably safe to allow any link now, except false EvaluationLinks
+#        include = (a.is_a(t.Node) or a.is_a(t.InheritanceLink) or a.is_a(t.SimilarityLink) or
+#                        self.is_application_link(a) or
+#                        a.is_a(t.AtTimeLink) )
+        # Can't assume that EvalLinks or similar can be converted into single Edges (they may have something else pointing to them)
+        #if a.is_a(t.PredicateNode): include = False
+        if a.is_a(t.LatestLink): include = False
+        if self.is_application_link(a):
+           # TODO hack to deal with actionDone predicates not having TVs
+           # TODO Won't handle cases where an EvalLink with no TV is wrapped in something OTHER than an AtTimeLink
+           times = [x for x in a.out if x.t == t.AtTimeLink]
+           # Deal with AtTime(T, SimilarityLink( ExecutionOutputLink ...
+           times += [x for x in times if x.t == t.AtTimeLink]
+           if any(self.is_true_tv(o.tv) for o in [a]+times): include = True
+           if a.out[0].name == "proximity": include = False
+        
+        # Allow nested ListLinks, but still replace ones that are inside an EvaluationLink or similar
+        if a.is_a(t.ListLink):
+            if len(a.incoming) == 0 or self.is_application_link(a.incoming[0]):
+                include = False
+            else:
+                include = True
+
+        return not include
+
+    def is_true_tv(self, tv):
+            return tv.mean >= 0.5 and tv.count > 0
 
     def simplify(self,a):
         """If it is an EvaluationLink, replace it with a simple Predicate. Otherwise return the same thing"""
         if a.is_a(t.EvaluationLink):
             return None
 
-    def is_compactableEvalLink(self,a):
+    @staticmethod
+    def is_compactableEvalLink(a):
         # Check that the EvaluationLink can be replaced with a single edge
         # i.e. if the EvalLink has no incoming and _its ListLink_ has 2 arguments
         #label = a.out[0].name #PredicateNode name
         outgoing = a.out[1].out # ListLink outgoing
         return len(outgoing) == 2 and len(a.incoming) == 0
+
+    @staticmethod
+    def is_application_link(a):
+        return a.is_a(t.EvaluationLink) or a.is_a(t.ExecutionOutputLink) or a.is_a(t.ExecutionLink)
 
 # Hacks
 class FishgramMindAgent(opencog.cogserver.MindAgent):
@@ -264,12 +339,21 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
         self.cycles = 1
 
     def run(self,atomspace):
-        g = GraphConverter(atomspace,
-            FishgramFilter(atomspace,
-            SubdueTextOutput(atomspace)))
-        g.output()
+#        import pdb; pdb.set_trace()
+
+        try:
+            import pdb; pdb.set_trace()
+            g = GraphConverter(atomspace,
+                FishgramFilter(atomspace,
+                SubdueTextOutput(atomspace)))
+            g.output()
+        except KeyError,  e:
+            KeyError
+        except Exception, e:
+            import traceback; traceback.print_exc(file=sys.stdout)
         self.cycles+=1
 
+print __name__
 if __name__ == "__main__":
     a = AtomSpace()
     t=types
@@ -288,6 +372,14 @@ if __name__ == "__main__":
 
     next.tv = TruthValue(1, 1)
 
+    arity3 = a.add_link(t.AndLink, [bob, alice, obj1])
+
+    time = a.add_link(t.AtTimeLink, [a.add_node(t.TimeNode, "t-0"), a.add_node(t.ConceptNode, "blast-off")])
+
+    eval_arity1 = a.add_link(t.EvaluationLink, [a.add_node(t.PredicateNode, "is_edible"),
+                    a.add_link(t.ListLink, [a.add_node(t.ConceptNode, "bowl123")])])
+    eval_arity1.tv = TruthValue(1,  1)
+
     f = FishgramFilter(a,SubdueTextOutput(a))
 
 #    d = DottyOutput(a)
@@ -296,5 +388,5 @@ if __name__ == "__main__":
 #    g = GraphConverter(a,SubdueTextOutput(a))
     g = GraphConverter(a, f)
 
-    #g.output()
+    g.output()
 
