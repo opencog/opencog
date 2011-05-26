@@ -13,6 +13,14 @@ class ForestExtractor:
     def __init__(self, a, writer):
         self.a = a
         self.writer = writer
+        
+        # policy
+        # Whether to create miner-friendly output, rather than human-friendly output
+        self.miner_friendly = True
+        # Only affects output
+        self.compact_binary_links = True
+        
+        # state
         self.all_objects  = set()# all objects in the AtomSpace
         self.unique_trees = set()
         self.all_trees = []
@@ -33,6 +41,7 @@ class ForestExtractor:
             return tuple(tmp)
 
     def extractForest(self):
+        # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently
         for link in [x for x in self.a.get_atoms_by_type(t.Link) if x.tv.mean > 0 and x.tv.count > 0]:
             objects = []
             self.i = 0
@@ -67,20 +76,38 @@ class ForestExtractor:
 
     def output_tree(self, atom,  tree,  bindings):
         vertex_name = self.tree_to_string(tree)
-        self.writer.outputLinkVertex(atom,  label=vertex_name)
-        self.writer.outputLinkArgumentEdges(atom,  outgoing=bindings)
+        
+        # policy
+        if self.compact_binary_links and len(bindings) == 2:
+            self.writer.outputLinkEdge(atom,  label=vertex_name,  outgoing=bindings)
+        else:
+            self.writer.outputLinkVertex(atom,  label=vertex_name)
+            self.writer.outputLinkArgumentEdges(atom,  outgoing=bindings)
 
     def output(self):
         self.writer.start()
         self.extractForest()
         for obj in self.all_objects:
-            self.writer.outputNodeVertex(obj)
+            # policy
+            if self.miner_friendly and self.is_object(obj):
+                self.writer.outputNodeVertex(obj, self.object_label(obj))
+            else:
+                self.writer.outputNodeVertex(obj)
         for i in xrange(len(self.all_trees)):
             self.output_tree(self.all_trees_atoms[i],  self.all_trees[i],  self.bindings[i])
         self.writer.stop()
 
     def is_object(self,  atom):
         return atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode)
+        
+    def object_label(self,  atom):
+        return 'some_'+atom.type_name
+
+    # NOT USED YET
+    def include_node(self,  node):
+        """Whether to include a given node in the results. If it is not included, all trees containing it will be ignored as well."""
+        include = True
+        if (a.type == t.PredicateNode and a.name == "proximity"): include = False
 
 class GraphConverter:
     def __init__(self, a, writer):
@@ -303,17 +330,6 @@ class FishgramFilter:
         self.writer = writer
 
     def start(self):
-        times = self._as.get_atoms_by_type(t.TimeNode)
-        times = sorted([f for f in times if f.name != "0"]) # Related to a bug in the Psi Modulator system
-        
-        # Have links to represent which TimeNodes happen (shortly) after another.
-        # So the graph miner will hopefully find common sequences of events
-        for i in xrange(len(times)-1):
-            (time1,  time2) = (times[i],  times[i+1])
-            # TODO SeqAndLink was not supposed to be used on TimeNodes directly.
-            # But that's more useful for fishgram
-            print self._as.add_link(t.SequentialAndLink,  [time1,  time2])
-        
         self.writer.start()
 
     def stop(self):
@@ -441,6 +457,17 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #                FishgramFilter(atomspace,
 #                SubdueTextOutput(atomspace)))
 #            g.output()
+
+            # add Links between TimeNodes to indicate time sequences
+            times = atomspace.get_atoms_by_type(t.TimeNode)
+            times = sorted([f for f in times if f.name != "0"]) # Related to a bug in the Psi Modulator system
+
+            for i in xrange(len(times)-1):
+                (time1,  time2) = (times[i],  times[i+1])
+                # TODO SeqAndLink was not supposed to be used on TimeNodes directly.
+                # But that's more useful for fishgram
+                print atomspace.add_link(t.SequentialAndLink,  [time1,  time2])
+
             te = ForestExtractor(atomspace, SubdueTextOutput(atomspace))
             te.output()
         except KeyError,  e:
