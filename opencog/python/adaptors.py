@@ -38,12 +38,14 @@ class ForestExtractor:
             self.i = 0
             #print self.extractTree(link, objects),  objects, self.i
             tree = self.extractTree(link, objects)
-            self.all_trees.append(tree)
-            self.all_trees_atoms.append(link)
-            self.unique_trees.add(tree)
-            self.bindings.append(objects)
-            for obj in objects:
-                self.all_objects.add(obj)
+            # policy - throw out trees with no objects
+            if len(objects):
+                self.all_trees.append(tree)
+                self.all_trees_atoms.append(link)
+                self.unique_trees.add(tree)
+                self.bindings.append(objects)
+                for obj in objects:
+                    self.all_objects.add(obj)
 
     def tree_to_string(self,  tree):
 
@@ -58,7 +60,10 @@ class ForestExtractor:
             else:
                 return treenode.name+':'+treenode.type_name
         
-        return helper(tree)
+        ret = helper(tree)
+        # haxx - because SUBDUE allocates a buffer of size 256!
+        ret = ret[:200]
+        return ret
 
     def output_tree(self, atom,  tree,  bindings):
         vertex_name = self.tree_to_string(tree)
