@@ -7,6 +7,76 @@ import opencog.cogserver
 
 t = types
 
+class ForestExtractor:
+    """Extracts a forest of trees, where each tree is a Link (and children) that are true in the AtomSpace.
+    The trees may share some of the same Nodes."""
+    def __init__(self, a, writer):
+        self.a = a
+        self.writer = writer
+        self.all_objects  = set()# all objects in the AtomSpace
+        self.unique_trees = set()
+        self.all_trees = []
+        self.all_trees_atoms = []
+        self.bindings = []
+
+    def extractTree(self,  atom, objects):
+        if self.is_object(atom):
+            objects.append(atom)
+            self.i+=1
+            return self.i-1
+        elif atom.is_node():
+            return atom
+        else:
+            tmp = [atom.type_name]
+            for x in atom.out:
+                tmp.append(self.extractTree(x,  objects))
+            return tuple(tmp)
+
+    def extractForest(self):
+        for link in [x for x in self.a.get_atoms_by_type(t.Link) if x.tv.mean > 0 and x.tv.count > 0]:
+            objects = []
+            self.i = 0
+            #print self.extractTree(link, objects),  objects, self.i
+            tree = self.extractTree(link, objects)
+            self.all_trees.append(tree)
+            self.all_trees_atoms.append(link)
+            self.unique_trees.add(tree)
+            self.bindings.append(objects)
+            for obj in objects:
+                self.all_objects.add(obj)
+
+    def tree_to_string(self,  tree):
+
+        def helper(treenode):            
+            if isinstance(treenode ,  tuple):
+                ret = str(treenode[0])+'('
+                ret+= ' '.join([helper(x) for x in treenode[1:]])
+                ret+= ')'
+                return ret
+            elif isinstance(treenode,  int):
+                return str(treenode)
+            else:
+                return treenode.name+':'+treenode.type_name
+        
+        return helper(tree)
+
+    def output_tree(self, atom,  tree,  bindings):
+        vertex_name = self.tree_to_string(tree)
+        self.writer.outputLinkVertex(atom,  label=vertex_name)
+        self.writer.outputLinkArgumentEdges(atom,  outgoing=bindings)
+
+    def output(self):
+        self.writer.start()
+        self.extractForest()
+        for obj in self.all_objects:
+            self.writer.outputNodeVertex(obj)
+        for i in xrange(len(self.all_trees)):
+            self.output_tree(self.all_trees_atoms[i],  self.all_trees[i],  self.bindings[i])
+        self.writer.stop()
+
+    def is_object(self,  atom):
+        return atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode)
+
 class GraphConverter:
     def __init__(self, a, writer):
         self.a = a
@@ -111,7 +181,7 @@ class DottyOutput:
         for i in xrange(0, len(outgoing)):
             outi = outgoing[i]
             output+= str(a.h.value())+"->"+str(outi.h.value())+' '
-            output+= 'label="'+str(i)+'"]'
+            output+= '[label="'+str(i)+'"]'
             output+= '\n'
         print output,
 
@@ -197,6 +267,25 @@ class SubdueTextOutput:
             print "%% Processing", str(a), "!!! Error - did not previously output the vertex for this link:", str(Atom(Handle(e.args[0]),  self._as))
 
         print output,
+
+# Does the following three transformations:
+# * All ObjectNodes and TimeNodes are replaced with just a label. This means that a subgraph miner will find patterns
+# where ANY ObjectNode has certain links; in other words objects are distinguished based on their features rather than
+# treating every object differently. This enables generaliing patterns between different objects - very important!
+# * Any time a PredicateNode or ConceptNode is used, make a separate copy. Otherwise every concept will have large numbers of links
+# coming out of it (increasing connectivity without making it any more expressive). Greater connectivity is BAD for graph mining runtimes.
+# * Every EvaluationLink, ExecutionLink etc is replaced with a new node. e.g [in OpenCog Scheme format].
+# (ExecutionLink (PredicateNode "near")
+#   (ListLink
+#     (ObjectNode "id_123")
+#     (ObjectNode "id_456")
+# ))
+# is translated into:
+# a vertex called "ObjectNode" (with an id of say 1)
+# another vertex called "ObjectNode" (with an id of 2)
+# a vertex called "near" (with an id of 3)
+# a link marked "0"  which goes from the near vertex to the first object vertex
+# a link marked "1"  which goes from the near vertex to the second object vertex
 
 # TODO: FishgramFilter doesn't treat unordered links any differently (and DottyOutput couldn't handle it anyway?)
 # TODO: Treat symmetric relations as unordered links. Have an option for unordered, and switch it off for dotty output
@@ -342,11 +431,13 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #        import pdb; pdb.set_trace()
 
         try:
-            import pdb; pdb.set_trace()
-            g = GraphConverter(atomspace,
-                FishgramFilter(atomspace,
-                SubdueTextOutput(atomspace)))
-            g.output()
+            #import pdb; pdb.set_trace()
+#            g = GraphConverter(atomspace,
+#                FishgramFilter(atomspace,
+#                SubdueTextOutput(atomspace)))
+#            g.output()
+            te = ForestExtractor(atomspace, SubdueTextOutput(atomspace))
+            te.output()
         except KeyError,  e:
             KeyError
         except Exception, e:
@@ -380,13 +471,15 @@ if __name__ == "__main__":
                     a.add_link(t.ListLink, [a.add_node(t.ConceptNode, "bowl123")])])
     eval_arity1.tv = TruthValue(1,  1)
 
-    f = FishgramFilter(a,SubdueTextOutput(a))
+    #    f = FishgramFilter(a,SubdueTextOutput(a))
+    #
+    ##    d = DottyOutput(a)
+    ##    g = GraphConverter(a,d)
+    #
+    ##    g = GraphConverter(a,SubdueTextOutput(a))
+    #    g = GraphConverter(a, f)
+    #
+    #    g.output()
 
-#    d = DottyOutput(a)
-#    g = GraphConverter(a,d)
-
-#    g = GraphConverter(a,SubdueTextOutput(a))
-    g = GraphConverter(a, f)
-
-    g.output()
-
+    te = ForestExtractor(a,  SubdueTextOutput(a))
+    te.output()
