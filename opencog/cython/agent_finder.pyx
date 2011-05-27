@@ -152,7 +152,7 @@ cdef api string run_request(object o,cpplist[string] args,cAtomSpace *c_atomspac
         args_as_python_str_list.append(tostring)
         inc(the_iter)
     try:
-        o.run(a,args=args_as_python_str_list,atomspace=a)
+        o.run(args=args_as_python_str_list,atomspace=a)
     except Exception, e:
         s = traceback.format_exc(10)
         result = string(s)

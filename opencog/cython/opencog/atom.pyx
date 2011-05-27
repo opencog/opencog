@@ -105,4 +105,5 @@ cdef class Atom(object):
         #elif op == 5: # >=
             #return deref(h1.h) >= deref(h2.h)
 
-
+    def __hash__(a1):
+        return hash(a1.h.value())
