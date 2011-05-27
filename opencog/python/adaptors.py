@@ -26,6 +26,10 @@ class ForestExtractor:
         self.all_trees = []
         self.all_trees_atoms = []
         self.bindings = []
+        
+        # fishgram-specific experiments. Refactor later
+        # map from unique tree to set of embeddings. An embedding is a set of bindings. Maybe store the corresponding link too.
+        self.tree_embeddings = {} 
 
     def extractTree(self,  atom, objects):
         if self.is_object(atom):
@@ -47,6 +51,7 @@ class ForestExtractor:
             self.i = 0
             #print self.extractTree(link, objects),  objects, self.i
             tree = self.extractTree(link, objects)
+            objects = tuple(objects)
             # policy - throw out trees with no objects
             if len(objects):
                 self.all_trees.append(tree)
@@ -55,6 +60,17 @@ class ForestExtractor:
                 self.bindings.append(objects)
                 for obj in objects:
                     self.all_objects.add(obj)
+                    
+            # fishgram-specific experiments. Refactor later
+            size = len(objects)
+            if size not in self.tree_embeddings:
+                self.tree_embeddings[size] = {}
+            if tree not in self.tree_embeddings[size]:
+                self.tree_embeddings[size][tree] = set()
+            self.tree_embeddings[size][tree].add(objects)
+            # You can output it using something like this:
+            # for (tree,embeddingset_list) in te.tree_embeddings[1].items(): print len(embeddingset_list)
+            # len([tree for (tree,embeddingset_list) in te.tree_embeddings[1].items() if len(embeddingset_list) > 0])
 
     def tree_to_string(self,  tree):
 
@@ -108,6 +124,134 @@ class ForestExtractor:
         """Whether to include a given node in the results. If it is not included, all trees containing it will be ignored as well."""
         include = True
         if (a.type == t.PredicateNode and a.name == "proximity"): include = False
+
+class Fishgram:
+    def __init__(self,  atomspace):
+        self.forest = ForestExtractor(atomspace,  None)
+        # settings
+        self.min_embeddings = 2
+
+        
+    def run(self):
+        self.forest.extractForest()
+
+        print '# predicates(1arg) including infrequent:', len(self.forest.tree_embeddings[1])
+        self.forest.tree_embeddings[1] = dict([(tree, argslist_set)
+                                               for (tree, argslist_set) in self.forest.tree_embeddings[1] .items()
+                                               if len(argslist_set) >= self.min_embeddings])
+        unary_conjunctions = dict([((tree, ), argslist_set) for (tree, argslist_set) in self.forest.tree_embeddings[1].items()])
+
+        print '# predicates(1arg):', len(unary_conjunctions)
+        #return self.add_all_predicates_1var(unary_conjunctions)
+
+        return self.add_all_predicates_1var_dfs()
+
+#        size = 1
+#        # shortcuts
+#        all_for_size = self.forest.tree_embeddings[size]
+#        trees = all_for_size.keys()
+#        # results
+#        jointtree_embeddings_for_size = {}
+#        # a joint pattern (same arity) is represented as a tuple of the individual trees
+#        for i in xrange(0,  len(trees)):
+#            for j in xrange(i+1,  len(trees)):
+#                joint = (trees[i],  trees[j])
+#                intersection = all_for_size[trees[i]] & all_for_size[trees[j]]
+#                if len(intersection) >= self.min_embeddings:
+#                    #print [self.forest.tree_to_string(t) for t in joint],  len(intersection)
+#                    joint = (trees[i],  trees[j])
+#                    jointtree_embeddings_for_size[joint] = intersection
+#        return jointtree_embeddings_for_size
+
+    def add_all_predicates_1var(self, conjunctions,  level = 0):
+        length = level + 2
+        bigger_conjunctions = self.add_predicates_1var(conjunctions,  level)
+        print '# conjunctions(size=%s): %s' % (length, len(bigger_conjunctions))
+        if len(bigger_conjunctions) == 0:
+            return {}
+        else:
+            conjunctions_all_lengths = self.add_all_predicates_1var(bigger_conjunctions,  level+1)
+            conjunctions_all_lengths[length] = bigger_conjunctions
+            return conjunctions_all_lengths
+
+    def add_all_predicates_1var_dfs(self, conjunctions = {},  previous_dfs_code = []):
+        conjunctions = {}
+        return self.add_all_predicates_1var_dfs_recursion(conjunctions,  previous_dfs_code)
+
+    def add_all_predicates_1var_dfs_recursion(self, conjunctions,  previous_dfs_code):
+        function_arity = 1
+        # shortcuts
+        all_for_size = self.forest.tree_embeddings[function_arity]
+        if len(previous_dfs_code):
+            istart  = previous_dfs_code[-1]+1
+        else:
+            istart = 0
+        for i in xrange(istart,  len(all_for_size)):
+            dfs_code = previous_dfs_code+[i]
+            print dfs_code
+            (joint,  embeddings) = self.get_predicate_1var(conjunctions, dfs_code)
+            print self.conjunction_to_string(joint),  len(embeddings)
+            if len(embeddings) >= self.min_embeddings:
+                conjunctions[joint] = embeddings
+                self.add_all_predicates_1var_dfs_recursion(conjunctions,  dfs_code)
+        return conjunctions
+
+    def get_predicate_1var(self, conjunctions, dfs_code):
+        function_arity = 1
+        # shortcuts
+        all_for_size = self.forest.tree_embeddings[function_arity]
+        
+        prev_conjunctions = conjunctions.keys()
+        trees = all_for_size.keys()
+
+        # Get previous conjunction i , and convert it into a list to modify it
+        tmp = [trees[x] for x in dfs_code]
+        prev_joint = tuple(tmp[:-1])
+        joint = tuple(tmp)
+        #print len(conjunctions[prev_joint])
+        #print len(all_for_size[trees[dfs_code[-1]]])
+        #print [str(atom) for atom in conjunctions[prev_joint]]
+        #print [str(atom) for atom in all_for_size[trees[dfs_code[-1]]]]
+        if len(dfs_code) == 1:
+            intersection = all_for_size[trees[dfs_code[-1]]]
+        else:            
+            intersection = conjunctions[prev_joint] & all_for_size[trees[dfs_code[-1]]]
+        print len(intersection)
+        return (joint,  intersection)
+
+    # level only works in depth-first search...
+    def add_predicates_1var(self,  conjunctions,  level = 0):
+        function_arity = 1
+        # shortcuts
+        all_for_size = self.forest.tree_embeddings[function_arity]
+        prev_conjunctions = conjunctions.keys()
+        trees = all_for_size.keys()
+        # results
+        jointtree_embeddings_for_size = {}
+        # a joint pattern (same arity) is represented as a tuple of the individual trees
+        #level = prev_conjunctions
+        for i in xrange(0,  len(prev_conjunctions)):
+            #jstart = level+1
+            # Find what 'i' it would be
+            # The last predicate in the previous conjunction
+            last_prev_predicate = prev_conjunctions[i][-1]
+            #print "jstart ", 
+            jstart = trees.index(last_prev_predicate)+1
+            #print jstart
+            for j in xrange(jstart,  len(trees)):
+                # Get previous conjunction i , and convert it into a list to modify it
+                tmp = list(prev_conjunctions[i]) + [trees[j]]
+                joint = tuple(tmp)
+                intersection = conjunctions[prev_conjunctions[i]] & all_for_size[trees[j]]
+                if len(intersection) >= self.min_embeddings:
+                    #print [self.forest.tree_to_string(t) for t in joint],  len(intersection)
+                    jointtree_embeddings_for_size[joint] = intersection
+                #print [self.forest.tree_to_string(t) for t in joint], len(intersection)
+        return jointtree_embeddings_for_size
+    
+    def conjunction_to_string(self,  conjunction):
+        return str(tuple([self.forest.tree_to_string(tree) for tree in conjunction]))
+
 
 class GraphConverter:
     def __init__(self, a, writer):
