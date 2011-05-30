@@ -175,7 +175,9 @@ namespace opencog
          * @param linkType Type of link to use to embed h
          * @return The embedding vector (a vector of doubles between 0 and 1)
          */
-        std::vector<double> addNode(const Handle& h, const Type& linkType);
+        std::vector<double> addNode(const Handle& h,
+                                    const Type& linkType,
+                                    AtomSpaceImpl* a);
 
         /**
          * Removes the node from the AtomEmbedding and Cover Tree for linkType.
@@ -199,7 +201,7 @@ namespace opencog
          * @param h Handle of new link
          * @param linkType Type of link (which embedding to alter)
          */
-        void addLink(const Handle& h, const Type& linkType);
+        void addLink(const Handle& h, const Type& linkType, AtomSpaceImpl* a);
         
         /**
          * Returns true if a dimensional embedding exists for linkType l
@@ -291,6 +293,13 @@ namespace opencog
          * with the atomspace via addAtomSignal
          */
         void handleAddSignal(AtomSpaceImpl* a, Handle h);
+
+        /**
+         * Removes the node from embedding & cover tree. Does not alter
+         * the embedding vector of any nodes. Does nothing if removed
+         * atom is a link.
+         */
+        void handleRemoveSignal(AtomSpaceImpl* a, Handle h);
     }; // class
 } //namespace
 

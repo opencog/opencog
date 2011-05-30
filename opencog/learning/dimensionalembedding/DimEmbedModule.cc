@@ -46,6 +46,12 @@ DECLARE_MODULE(DimEmbedModule)
 
 DimEmbedModule::DimEmbedModule(AtomSpace* atomSpace) {
     this->as=atomSpace;
+    as->atomSpaceAsync->
+        addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal,
+                                  this, _1, _2));
+    as->atomSpaceAsync->
+        removeAtomSignal(boost::bind(&DimEmbedModule::handleRemoveSignal,
+                                     this, _1, _2));
 }
 DimEmbedModule::DimEmbedModule() {
 	logger().info("[DimEmbedModule] constructor");
@@ -91,14 +97,9 @@ std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-    AtomEmbedding aE = (atomMaps.find(l))->second;
+    AtomEmbedding& aE = (atomMaps.find(l))->second;
     AtomEmbedding::const_iterator aEit = aE.find(h);
-    //an embedding exists, but h has not been added yet
-    if(aEit==aE.end()) {
-        return addNode(h,l);
-    } else {
-        return aEit->second;
-    }
+    return aEit->second;
 }
 
 HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int k) {
@@ -269,7 +270,8 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
 }
 
 std::vector<double> DimEmbedModule::addNode(const Handle& h,
-                                            const Type& linkType){    
+                                            const Type& linkType,
+                                            AtomSpaceImpl* a) {    
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -279,7 +281,7 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-    HandleSeq links = as->getIncoming(h);
+    HandleSeq links = a->getIncoming(h);
     std::vector<double> newEmbedding (dimensionMap[linkType], 0.0);
     //The embedding for each coordinate is the max of
     //tv.strength*tv.confidence*embedding of every directly connected
@@ -289,9 +291,9 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
     //with link weight .6, then the new node's embedding is the vector...
     //(max(.3*.1,.8*.4),max(.3*.2,.6*.5))    
     for(HandleSeq::iterator it=links.begin(); it<links.end(); ++it) {
-        HandleSeq nodes = as->getOutgoing(*it);
-        TruthValuePtr linkTV = as->getTV(*it);        
-        double weight = linkTV->getConfidence()*linkTV->getMean();
+        HandleSeq nodes = a->getOutgoing(*it);
+        const TruthValue& linkTV = a->getTV(*it);        
+        double weight = linkTV.getConfidence()*linkTV.getMean();
         for(HandleSeq::iterator it2=nodes.begin();it2<nodes.end(); ++it2) {
             if(*it2==h) continue;
             std::vector<double> embedding =
@@ -312,7 +314,8 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
     return newEmbedding;
 }
 
-void DimEmbedModule::removeNode(const Handle& h, const Type& linkType) {
+void DimEmbedModule::removeNode(const Handle& h,
+                                const Type& linkType) {
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -332,7 +335,9 @@ void DimEmbedModule::removeNode(const Handle& h, const Type& linkType) {
     atomMaps[linkType].erase(aEit);
 }
 
-void DimEmbedModule::addLink(const Handle& h, const Type& linkType) {
+void DimEmbedModule::addLink(const Handle& h,
+                             const Type& linkType,
+                             AtomSpaceImpl* a) {
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -344,28 +349,28 @@ void DimEmbedModule::addLink(const Handle& h, const Type& linkType) {
     }
     int dim = dimensionMap[linkType];
     std::vector<std::pair<Handle, std::vector<double> > > embeddingVectors;
-    AtomEmbedding aE = atomMaps[linkType];
-    HandleSeq nodes = as->getOutgoing(h);
-    for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it) {
-        embeddingVectors.push_back(aE[*it]);
-    }
-    std::vector<std::pair<Handle, std::vector<double> > >::iterator it,it2;
-    double weight = as->getMean(h)*as->getConfidence(h);
-    for(it=embeddingVectors.begin(); it!=embeddingVectors.end(); ++it) {
-        bool changed = false;
-        for(it2=embeddingVectors.begin(); it2!=embeddingVectors.end(); ++it2) {
-            for(int i=0; i<dim; i++) {
-                if(it->second[i]<(weight*(it2->second)[i])) {
-                    (it->second)[i]=(weight*(it2->second)[i]);
+    AtomEmbedding& aE = atomMaps[linkType];
+    const TruthValue& linkTV = a->getTV(h);        
+    double weight = linkTV.getConfidence()*linkTV.getMean();
+    HandleSeq nodes = a->getOutgoing(h);
+    for(HandleSeq::iterator it=nodes.begin();it!=nodes.end();++it) {
+        AtomEmbedding::iterator aEit = aE.find(*it);
+        bool changed=false;
+        for(HandleSeq::iterator it2=nodes.begin();it2!=nodes.end();++it2) {
+            std::vector<double> vec = aE[*it2];
+            for(int i=0; i<dim; ++i) {
+                if((aEit->second)[i]<weight*vec[i]) {
+                    (aEit->second)[i]=weight*vec[i];
                     changed=true;
                 }
             }
         }
         if(changed) {
+            aE[aEit->first]=aEit->second;
             EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);
             OC_ASSERT(treeMapIt!=embedTreeMap.end());
             CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
-            cTree.insert(CoverTreePoint(it->first,it->second));                
+            cTree.insert(CoverTreePoint(aEit->first,aEit->second));
         }
     }
 }
@@ -711,15 +716,24 @@ double DimEmbedModule::euclidDist(const std::vector<double>& v1,
 
 void DimEmbedModule::handleAddSignal(AtomSpaceImpl* a, Handle h) {
     AtomEmbedMap::iterator it;
-    if(as->isNode(h)) {
+    if(a->isNode(h)) {
         //for each link type embedding that exists, add the node
-        for(it=atomMaps.begin(); it!=atomMaps.end(); ++it) {
-            addNode(h,it->first);
+            addNode(h,it->first,a);
         }
     }
-    else {//h is a link    
-        for(it=atomMaps.begin(); it!=atomMaps.end(); ++it) {
-            addLink(h,it->first);
+    else {//h is a link
+        for(it=atomMaps.begin();it!=atomMaps.end();it++) {
+            addLink(h,it->first,a);
+        }
+    }
+}
+
+void DimEmbedModule::handleRemoveSignal(AtomSpaceImpl* a, Handle h) {
+    if(a->isNode(h)) {
+        //for each link type embedding that exists, remove the node
+        AtomEmbedMap::iterator it;
+        for(it=atomMaps.begin();it!=atomMaps.end();it++) {
+            removeNode(h,it->first);
         }
     }
 }

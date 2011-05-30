@@ -82,25 +82,26 @@ public:
                 TS_ASSERT_DELTA(dist,dists[i][j],.000001);
             }
         }
+        
         Handle h5 = atomSpace->addNode(CONCEPT_NODE, "dog5", SimpleTruthValue(0.001f, 0.00001f));
         atomSpace->addLink(SIMILARITY_LINK, h1, h5,
                            SimpleTruthValue(0.5, SimpleTruthValue::confidenceToCount(1.0)));
         atomSpace->addLink(SIMILARITY_LINK, h3, h5,
                            SimpleTruthValue(0.6, SimpleTruthValue::confidenceToCount(1.0)));
-        dimEmbed.addNode(h5,SIMILARITY_LINK);
+        //dimEmbed.addNode(h5,SIMILARITY_LINK);
         //h1:(1, .5, .7, .9)
         //h3:(.7, .35, 1, .63)
         //So h5 should be some permutation of
         //h5:(.5, .25, .6, .45)
         //so we know what its distance from the others should be
-        /*
-        std::cout << "h5Embed: ";
-        std::vector<double> h5Embed =
-            dimEmbed.getEmbedVector(h5,SIMILARITY_LINK);
-        for(int i=0;i<h5Embed.size();i++) {
-            std::cout << h5Embed[i] << " ";
-        } 
-        */
+        
+        //std::cout << "h5Embed: ";
+        //std::vector<double> h5Embed =
+        //    dimEmbed.getEmbedVector(h5,SIMILARITY_LINK);
+        //for(int i=0;i<h5Embed.size();i++) {
+        //    std::cout << h5Embed[i] << " ";
+        //} 
+        
         
         TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h1,SIMILARITY_LINK),
                         0.72456883,
@@ -155,13 +156,7 @@ public:
         //functions we're testing are robust against nodes added after
         //embedding. These atoms should't affect the embedding at all
         //unless we call dimEmbed.addNode(...) or we re-embed the atomspace.
-        Handle h8 = atomSpace->addNode(CONCEPT_NODE, "8", SimpleTruthValue(0.001f, 0.00001f));
-        Handle h9 = atomSpace->addNode(CONCEPT_NODE, "9", SimpleTruthValue(0.001f, 0.00001f));
-        link(atomSpace,h1,h8,.8,.9);
-        link(atomSpace,h8,h9,.5,1.0);
-        link(atomSpace,h5,h9,1.0,.89);
-        link(atomSpace,h4,h7,.9,1.0);
-        link(atomSpace,h2,h8,1.0,.95);
+
         
         //dimEmbed.logAtomEmbedding(SIMILARITY_LINK);
         //We have no guarantee on the order that the pivots
@@ -270,7 +265,7 @@ public:
         TS_ASSERT_DELTA(DBL_MAX,
                         dimEmbed.separation(cluster4,SIMILARITY_LINK),.00001);
 
-        dimEmbed.embedAtomSpace(SIMILARITY_LINK,1);
+        dimEmbed.clearEmbedding(SIMILARITY_LINK);
         //We cleared the embedding, so the VLTI of each pivot should be back
         //to normal
         for(int i=0;i<7;i++) {
