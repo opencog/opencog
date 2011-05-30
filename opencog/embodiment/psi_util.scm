@@ -85,10 +85,20 @@
     ) 
 )
 
-; Return the scheme list of querying result given BindLink, 
+; Return the scheme list of querying result given BindLink (using cog-bind), 
 ; return an empty list if fails
 (define (query_atom_space bind_link)
     (let* ( (query_rusult_list_link (cog-bind bind_link) )
+          )
+          
+          (unpack_query_result query_rusult_list_link)
+    ) 
+)
+
+; Return the scheme list of querying result given BindLink (using cog-bind-crisp),  
+; return an empty list if fails
+(define (query_atom_space_crisp bind_link)
+    (let* ( (query_rusult_list_link (cog-bind-crisp bind_link) )
           )
           
           (unpack_query_result query_rusult_list_link)

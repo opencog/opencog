@@ -2,8 +2,10 @@
 ; Action planner
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-27
+; @date   2011-05-30
 ;
+
+; TODO: create and AndSeq link, inherits from ordered link for Actions
 
 ; Return a random member of the given list, 
 ; return an empty list, if the given list is empty. 
@@ -28,17 +30,17 @@
 
 ; Return #t if given atom is a Link    
 (define (cog-link? atom)
-    (cog-subtype? (cog-type atom) 'Link) 
+    (cog-subtype? 'Link (cog-type atom) ) 
 )    
 
 ; Return #t if given atom is an Node
 (define (cog-node? atom)
-    (cog-subtype? (cog-type atom) 'Node) 
+    (cog-subtype? 'Node (cog-type atom) ) 
 )
 
-; Return a BinkLink used by pattern matcher to search psi rules given goal
+; Return a BindLink used by pattern matcher to search psi rules given goal
 (define (find_psi_rule goal)
-    (BinkLink
+    (BindLink
         (VariableNode "$var_any")
 
         (ImplicationLink
@@ -55,10 +57,10 @@
             ) 
         )
 
-    ); BinkLink 
+    ); BindLink 
 )
 
-; Return a BinkLink used by pattern matcher to search the action with suitable 
+; Return a BindLink used by pattern matcher to search the action with suitable 
 ; groundings of all the variables that make the context True
 ;
 ; @param variables Usually it is the first outgoing of ForAllLink. 
@@ -86,10 +88,7 @@
 ; Split an atom into context and action,
 ; the return value is 
 ;
-; (list
-;     (list context_atom) 
-;     (list action_atom)
-; )
+; (list context_atom action_atom)
 ;
 (define (split_context_action atom)
     (if (cog-atom? atom)
@@ -98,15 +97,19 @@
             (let ( (atom_type (cog-type atom) )
                  )
 
+;                 (display "Get an Atom ") (newline) (display atom) (newline)
+
                  (cond 
                      ; If the input is an ExecutionLink, return the input as action
                      ( (equal? atom_type 'ExecutionLink)
-                       (list (list) (list atom) )
+;                       (display "Found an Action") (newline) (display (list (list) (list atom) )) (newline)
+                       (list (list) atom)
                      )
 
                      ; If the input is a Node but NOT a VariableNode, return the input as context 
-                     ( (cog-subtype? atom_type 'Node)
-                         (list (list atom) (list) )
+                     ( (cog-subtype? 'Node atom_type)
+;                       (display "Found a Node ") (newline) (display (list (list atom) (list) )) (newline)
+                       (list atom (list) )
                      )
 
                      ; If the input is a Link, process its outgoings recursively
@@ -116,54 +119,92 @@
                                (context_outgoings (list) )
                                (action_outgoings (list) )
                              ) 
-                            
+                        
+;                             (display "Get a Link ") (newline) (display atom) (newline)
+
                              ; Split the outgoings into context and action
                              (map-in-order
-                                 (lambda (outgoing)
-                                     
-                                     (let ( (split_result (split_context_action outgoing) )
-                                          )
+                                 (lambda (outgoing)                                    
+                                     (let* ( (split_result (split_context_action outgoing) )
+                                             (context (list-ref split_result 0) )
+                                             (action (list-ref split_result 1) )
+                                           )
+                                          
+                                           (if (not (null? context) )
+                                               (set! context_outgoings
+                                                     (append context_outgoings (list context) )
+                                               )
+                                           )
 
-                                          (append context_outgoings (list-ref split_result 0) )
-                                          (append action_outgoings (list-ref split_result 1) )
+                                           (if (not (null? action) )
+                                               (set! action_outgoings
+                                                     (append action_outgoings (list action) )
+                                               )
+                                           )
                                      ) 
-                                      
                                  ); lambda
   
                                  atom_outgoings
   
                              ); map-in-order
-  
+ 
+;                             (display "Get outgoings ") (newline) (display atom_outgoings) (newline)
+;                             (display "Get context outgoings ") (newline) (display context_outgoings) (newline)
+;                             (display "Get action outgoings ") (newline) (display action_outgoings) (newline)
+
                              ; Create and return the context and action
                              (list
 
                                  ; Build context atom
-                                 (if (null? context_outgoings)
-                                     (list)
+                                 (cond
+                                     ( (null? context_outgoings)
+                                       (list) 
+                                     )
 
-                                     (list
+                                     ( (and (or (equal? atom_type 'AndLink)
+                                                (equal? atom_type 'OrLink)
+                                            )
+                                            (equal? (length context_outgoings) 1)
+                                       )
+
+                                       (car context_outgoings)
+                                     )
+
+                                     (else
                                          (apply cog-new-link
                                              (append (list atom_type)
                                                       context_outgoings  
-                                                     (list (cog-tv atom) (cog-av-atom) )
+                                                     (list (cog-tv atom) (cog-av atom) )
                                              ) 
                                          )
-                                     ); list
-                                 ); if
+                                     )
+                                 ); cond
   
                                  ; Build action atom
-                                 (if (null? action_outgoings)
-                                     (list) 
+                                 (cond
+                                     ( (null? action_outgoings)
+                                       (list) 
+                                     )
 
-                                     (list 
+                                     ( (and (or (equal? atom_type 'AndLink)
+                                                (equal? atom_type 'OrLink)
+                                            )
+                                            (equal? (length action_outgoings) 1)
+                                       )
+
+                                       (car action_outgoings)
+                                     )
+
+                                     (else
                                          (apply cog-new-link
-                                                (append (list atom_type)
-                                                        action_outgoings
-                                                        (list (cog-tv atom) (cog-av atom) )
-                                                )  
+                                             (append (list atom_type)
+                                                      action_outgoings  
+                                                     (list (cog-tv atom) (cog-av atom) )
+                                             ) 
                                          )
-                                     ); list
-                                 ); if
+                                     )
+                                 ); cond
+
                              ); list
       
                        ); let
@@ -184,7 +225,7 @@
 ; Calculate the truth value of the given atom
 ; It simply use the truth value the atom and its outgoings already holds.
 ; It will NOT try to ground the variables. So if there are variables in the atom 
-; or its outgoings recursively, using cog-bind-crisp to ground the variables
+; or its outgoings recursively, using cog-bind-crisp instead to ground the variables
 (define (cal_truth_value atom)
     (let* ( (atom_type (cog-type atom) )
             (atom_outgoings (cog-outgoing-set atom) )
@@ -259,6 +300,14 @@
 ; @note If the context is true, then all the variables in returned context and
 ;       action would be properly grounded. 
 ;
+;       If the context is empty, which means the agent can take the action at 
+;       any situations, then this function will return an empty context and 
+;       the action, if there exists
+;
+;       If the action is empty, which means the context will result some outcome, 
+;       without the agent taking any action, then this function will return the
+;       context and an empty action. 
+;
 (define (is_psi_context_true rule)
     (let* ( (precondition 
                 (list-ref (cog-outgoing-set rule) 0)
@@ -269,51 +318,68 @@
             (variables (list) )
           ) 
 
-          ; Get the variables of the rule,
-          ; the first step is to get a ForAllLink, ExistsLink or AverageLink 
-          ; contaning the rule, and then return the first outgoing of the link 
-          (let search_variables ( (incomings (cog-incoming-set rule) )
-                                ) 
-               (if (not (null? incomings) )
-                   (let* ( (first_incoming (car incomings) )
-                           (first_incoming_type (cog-type first_incoming) )
-                         )
-                        
-                         (if (or (equal? first_incoming_type 'ForAllLink)
-                                 (equal? first_incoming_type 'ExistsLink)
-                                 (equal? first_incoming_type 'AverageLink)
-                             )
-
-                             (set! variables 
-                                   (list-ref (cog-outgoing-set first_incoming) 0)
-                             )
-
-                             (search_variables (cdr incomings) )
-                         ); if
-
-                   ); let* 
-               ); let
-          );let 
-
-          (if (null? variables)
-
-              ; If there's no variable in the psi rule, calculate the truth value
-              ; of context directly
-              (if (> (cal_truth_value context) 
-                      0.5
-                  )
-                  (list (list context action) )
+          (if (null? context)
+              ; If the context is empty, which implies the agent can do the 
+              ; action in any context, then return the action if there exists any
+              (if (null? action) 
                   (list)
+                  (list 
+                      (list context action)
+                  )    
               )
 
-              ; If there are variables in the psi rule, use pattern matcher to
-              ; find suitable groundings that makes the context True
-              (map unpack_query_result 
-                  (query_atom_space (find_psi_action variables context action) )
-              )   
-              
-          ); if
-         
+              ; If the context is NOT empty, then we should return the action 
+              ; only when the context is true
+              (begin
+                  ; Get the variables of the rule,
+                  ; the first step is to get a ForAllLink, ExistsLink or AverageLink 
+                  ; contaning the rule, and then return the first outgoing of the link 
+                  (let search_variables ( (incomings (cog-incoming-set rule) )
+                                        ) 
+                       (if (not (null? incomings) )
+                           (let* ( (first_incoming (car incomings) )
+                                   (first_incoming_type (cog-type first_incoming) )
+                                 )
+                                
+                                 (if (or (equal? first_incoming_type 'ForAllLink)
+                                         (equal? first_incoming_type 'ExistsLink)
+                                         (equal? first_incoming_type 'AverageLink)
+                                     )
+
+                                     (set! variables 
+                                           (list-ref (cog-outgoing-set first_incoming) 0)
+                                     )
+
+                                     (search_variables (cdr incomings) )
+                                 ); if
+
+                           ); let* 
+                       ); let
+                  );let 
+
+;                  (display "Get variables") (newline) (display variables) (newline)
+
+                  (if (null? variables)
+
+                      ; If there's no variable in the psi rule, calculate the truth value
+                      ; of context directly
+                      (if (> (cal_truth_value context) 
+                              0.5
+                          )
+                          (list (list context action) )
+                          (list)
+                      )
+
+                      ; If there are variables in the psi rule, use pattern matcher to
+                      ; find suitable groundings that makes the context True
+                      (map unpack_query_result 
+                          (query_atom_space_crisp (find_psi_action variables context action) )
+                      )   
+                      
+                  ); if
+                  ); begin
+          ); if (null? context)
+
     ); let*
 ); define
 
@@ -336,6 +402,26 @@
 ;             )   
 ;         )
 ;
+; @note This function will only return a list of actions that can be performed
+;       immediately in current cognitive cycle. That means it will not preserve 
+;       a complete chain of actions that would lead to the goal, if some 
+;       preconditions of rules are not satisfied right now. It that situation, 
+;       this function returns a bunch of actions that would be helpful for the
+;       goal. 
+;
+;       For example there are tow rules as below:
+;
+;       RandomSearchAction => GetFoodGoal
+;       GetFoodGoal AND EatFoodAction => EnergyDemandGoal
+;   
+;       If there's food nearby now, this function will only return the action 
+;       EatFoodAction. 
+;
+;       If there's no food nearby now, this function will only return the action 
+;       RandomSearchAction.Since the world is always changing and there's chance
+;       that the agent failes to get the food after it randomly search for a
+;       while, it will not return EatFoodAction. 
+;
 (define (make_psi_plan goal)
     (let ( (planned_goal_list (list) )
            (reachable_rule_list (list) )
@@ -349,9 +435,8 @@
 
              ; If current goal is not empty and it has not been planned yet,
              ; make a plan for it
-             (if (and (not (null? current_goal) 
-                            (equal? (member current_goal planned_goal_list) #f)
-                      )    
+             (if (and (not (null? current_goal) )
+                      (equal? (member current_goal planned_goal_list) #f)
                  )    
 
                 ; Get all the rules related to current goal 
@@ -359,6 +444,8 @@
                            (query_atom_space (find_psi_rule current_goal) ) 
                        )
                      ) 
+
+                    (display "do_plan for ") (newline) (display current_goal) (newline)
 
                     ; Append current goal to end of the planned goal list,
                     ; then it will not be planned twice. 
@@ -372,7 +459,9 @@
                         (let ( (atom_type (cog-type current_goal) )
                                (atom_outgoings (cog-outgoing-set current_goal) )
                              )
-  
+
+                             (display "No direct rules for ") (newline) (display current_goal) (newline)
+                            
                              (if (not (null? atom_outgoings) )
                                  (cond 
                                      ( (equal? atom_type 'AndLink)
@@ -387,12 +476,14 @@
                                  ); cond
                              ); if
                         ); let
-                       
+                     
                         ; If there are rules attaching to the current goal
                         (let ( (selected_rule (list) )
                                (search_result (list) )
                              )
-  
+
+                             (display "Available rules ") (newline) (display available_rule_list) (newline)
+                             
                              ; Search a rule with True context 
                              (let search_rule_with_true_context ( (rule_list available_rule_list)
                                                                 )
@@ -401,33 +492,38 @@
                                       (let ( (current_rule (car rule_list) )
                                            )
 
-                                           (if (not (equal? (member current_rule unreachable_rule_list)
-                                                             #f
-                                                    )
-                                               )    
-                                               
-                                               ; Search
-                                               (set! search_result 
-                                                     (is_psi_context_true (car rule_list) )
-                                               ) 
-                        
-                                               (if (null? search_result)
-                                                   ; Not found
-                                                   (begin
-                                                       (set! unreachable_rule_list 
-                                                             (append unreachable_rule_list (list current_rule) ) 
-                                                       )
-                                                       (search_rule_with_true_context (cdr rule_list) ) 
-                                                   )   
+                                           (if (equal? (member current_rule unreachable_rule_list)
+                                                       #f
+                                               )
+                                              
+                                               (begin 
+                                                   ; Search
+                                                   (set! search_result 
+                                                         (is_psi_context_true current_rule)
+                                                   ) 
+                           
+                                                   (if (null? search_result)
+                                                       ; Not found
+                                                       (begin
+                                                           (set! unreachable_rule_list 
+                                                                 (append unreachable_rule_list (list current_rule) ) 
+                                                           )
+                                                           (display "search_result ") (newline) (display search_result) (newline)
+                                                           (display "False context rule ") (newline) (display current_rule) (newline)
+                                                           (search_rule_with_true_context (cdr rule_list) ) 
+                                                       )   
 
-                                                   ; Found
-                                                   (begin
-                                                       (set! reachable_rule_list
-                                                             (append reachable_rule_list (list current_rule) )
-                                                       )
-                                                       (set! selected_rule (car rule_list) )
-                                                   )   
-                                               ); if 
+                                                       ; Found
+                                                       (begin
+                                                           (set! reachable_rule_list
+                                                                 (append reachable_rule_list (list current_rule) )
+                                                           )
+                                                           (display "search_result ") (newline) (display search_result) (newline)
+                                                           (display "True context rule ") (newline) (display current_rule) (newline)
+                                                           (set! selected_rule current_rule)
+                                                       )   
+                                                   ); if 
+                                               ); begin
 
                                            ); if 
 
@@ -441,40 +537,47 @@
                                  ; TODO: we should take advantage of weights (truth value) of
                                  ;       rules for selection using roulette wheel selection. 
                                  (begin
+                                     (display "Failed to find any rule with true context ") (newline)
+
                                      (set! selected_rule 
                                            (random_select available_rule_list)
                                      )
-  
-                                     (do_plan
-                                         (get_psi_precondition selected_rule) 
+ 
+                                     (let* ( (precondition (get_psi_precondition selected_rule) )
+                                             (split_result (split_context_action precondition) )
+                                             (context (list-ref split_result 0) )
+                                           ) 
+                                           (do_plan context)
                                      )
                                  )
    
                                  ; If found a rule with True context
-                                 (let (selected_context_action 
-                                          (random_select search_result)
+                                 (let ( (selected_context_action (random_select search_result) )
                                       ) 
+
+                                      (display "Found a rule with true context ") (display search_result) (newline)
 
                                       (if (equal? (member selected_context_action context_action_list)
                                                   #f
                                           )
 
-                                          (set! context_action_list 
-                                                (append context_action_list
-                                                        (list selected_context_action)
-                                                )
-                                          )
+                                          (begin
+                                              (set! context_action_list 
+                                                    (append context_action_list
+                                                            (list selected_context_action)
+                                                    )
+                                              )
 
-                                          (set! solved_rule_list
-                                                (append solved_rule_list
-                                                        (list selected_rule)
-                                                ) 
-                                          )
+                                              (set! solved_rule_list
+                                                    (append solved_rule_list
+                                                            (list selected_rule)
+                                                    ) 
+                                              )
+                                          ); begin
                                       )
                                  ); let
    
-                             ); if
-  
+                             ); if (null? selected_rule)
                         ); let
                     ); if (null? available_rule_list)
 
@@ -482,6 +585,17 @@
              ); if
 
          ); let do_plan
+
+         ; Return the result of planning
+         (if (and (null? solved_rule_list)
+                  (null? context_action_list)
+             )
+             
+             (list)
+
+             (list solved_rule_list context_action_list)
+         )
+
     ); let    
 ); define
 
