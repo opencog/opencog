@@ -5,6 +5,7 @@ ADD_LIBRARY (AtomSpaceExtensions SHARED
     atom_types_init
     #atom_types
     AtomSpaceUtil
+    makeVirtualAtom
     CompareAtomTreeTemplate
 )
 

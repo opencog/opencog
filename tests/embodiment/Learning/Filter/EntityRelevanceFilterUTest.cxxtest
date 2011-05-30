@@ -29,11 +29,13 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Learning/Filter/EntityRelevanceFilter.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/AtomSpaceExtensions/makeVirtualAtom.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
 
 using namespace PetCombo;
+using namespace opencog;
 
 #include <string>
 

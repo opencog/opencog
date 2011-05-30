@@ -26,12 +26,9 @@
 #define COMPAREATOMTREETEMPLATE_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/util/tree.h>
+#include "makeVirtualAtom.h"
 
 using namespace opencog;
-
-typedef tree<Vertex> atom_tree;
-typedef atom_tree::iterator atom_tree_it;
 
 //Methods to compare a atom_tree template and atom_tree
 
@@ -41,8 +38,8 @@ typedef atom_tree::iterator atom_tree_it;
  * instantiation of temple tr1
  */
 struct is_atom_tree_template_of : public std::binary_function < atom_tree,
-            atom_tree,
-            bool > {
+                                                                atom_tree,
+                                                                bool > {
     bool operator()(const atom_tree& tr1, const atom_tree& tr2,
                     const AtomSpace* as, bool ec) const;
 

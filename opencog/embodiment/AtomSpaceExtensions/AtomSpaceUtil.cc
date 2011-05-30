@@ -46,6 +46,7 @@
 
 using std::string;
 using std::list;
+using namespace opencog; /// @todo make it under the namespace opencog
 
 #define IS_HOLDING_PREDICATE_NAME "isHolding"
 #define IS_HOLDING_SOMETHING_PREDICATE_NAME "isHoldingSomething"

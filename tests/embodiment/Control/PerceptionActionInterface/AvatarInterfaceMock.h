@@ -29,6 +29,7 @@
 #include <opencog/embodiment/Learning/behavior/BDTracker.h>
 #include <opencog/embodiment/Learning/behavior/PAIWorldProvider.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/AtomSpaceExtensions/makeVirtualAtom.h>
 #include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/Control/AgentModeHandler.h>

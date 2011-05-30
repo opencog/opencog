@@ -38,6 +38,8 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
 
+#include "makeVirtualAtom.h"
+
 using namespace opencog;
 using namespace std;
 
@@ -398,7 +400,7 @@ public:
      *
      * virtual Handle addAtom(tree<Vertex>& a, const TruthValue& tvn, bool fresh=false, bool managed=true);
      */
-    #define mva makeVirtualAtom
+#define mva makeVirtualAtom
     void testAddAtomVtreeTruthValueBool() {
         Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));

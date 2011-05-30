@@ -52,7 +52,7 @@
 using namespace behavior;
 using namespace OperationalAvatarController;
 using namespace WorldWrapper;
-using namespace opencog;
+using namespace opencog; /// @todo make it under the namespace opencog
 
 const unsigned long Pet::UNDEFINED_TIMESTAMP = 0;
 

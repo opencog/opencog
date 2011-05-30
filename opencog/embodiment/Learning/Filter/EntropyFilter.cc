@@ -64,6 +64,7 @@ using namespace PerceptionActionInterface;
 using namespace WorldWrapper;
 using namespace PetCombo;
 using namespace boost::assign;
+using namespace opencog; /// @todo make it under the namespace opencog
 
 //constructor, desctructor
 EntropyFilter::EntropyFilter(const std::string& self_id,

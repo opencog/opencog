@@ -32,7 +32,7 @@
 namespace opencog
 {
 
-typedef tree<Vertex> vtree; // Vertex defined in atomsapce/types.h
+typedef tree<Vertex> vtree; // Vertex defined in atomspace/types.h
 
 
 #define mva MakeVirtualAtom_slow

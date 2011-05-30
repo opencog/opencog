@@ -35,9 +35,6 @@
 #include <cxxabi.h>
 #endif
 
-#include <opencog/atomspace/types.h>
-#include <opencog/util/tree.h>
-
 namespace opencog
 {
 
@@ -77,9 +74,6 @@ struct safe_deleter : public std::unary_function<_T*&, void>
         }
     }
 };
-
-tree<Vertex>* makeVirtualAtom(Handle h, ...);
-tree<Vertex>* makeVirtualAtom(Vertex vertex, ...);
 
 #ifndef WIN32
 std::string demangle(const std::string& mangled);

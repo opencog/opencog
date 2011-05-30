@@ -29,7 +29,7 @@
 
 using namespace opencog;
 
-// TODO: Review this method for both 32/64-bit processor compatibility
+// MIT HAKMEM Count
 unsigned int opencog::bitcount(unsigned long n)
 {
     /* works for 32-bit numbers only    */
@@ -39,43 +39,6 @@ unsigned int opencog::bitcount(unsigned long n)
     tmp = n - ((n >> 1) & 033333333333)
           - ((n >> 2) & 011111111111);
     return ((tmp + (tmp >> 3)) & 030707070707) % 63;
-}
-
-static void internalMakeVirtualAtom(tree<Vertex>* ret, tree<Vertex>::iterator& head, va_list args)
-{
-    for (void* vp = va_arg(args, void*); vp != NULL; vp = va_arg(args, void*)) {
-        const tree<Vertex>* t = ( const tree<Vertex>* ) vp;
-        ret->replace(ret->append_child(head), t->begin());
-        delete t;
-    }
-}
-
-tree<Vertex>* opencog::makeVirtualAtom(Handle h, ...)
-{
-    tree<Vertex>* ret = new tree<Vertex>();
-    ret->set_head(Vertex(h));
-    tree<Vertex>::iterator head = ret->begin();
-
-    va_list args;
-    va_start(args, h);
-    internalMakeVirtualAtom(ret, head, args);
-    va_end(args);
-
-    return ret; 
-}
-
-tree<Vertex>* opencog::makeVirtualAtom(Vertex vertex, ...)
-{
-    tree<Vertex>* ret = new tree<Vertex>();
-    ret->set_head(vertex);
-    tree<Vertex>::iterator head = ret->begin();
-
-    va_list args;
-    va_start(args, vertex);
-    internalMakeVirtualAtom(ret, head, args);
-    va_end(args);
-
-    return ret; 
 }
 
 #ifndef WIN32
