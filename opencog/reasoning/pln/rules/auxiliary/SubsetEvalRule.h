@@ -50,7 +50,7 @@ public:
     TVSeq formatTVarray(const VertexSeq& premises) const;
 
     BoundVertex compute(const VertexSeq& premiseArray,
-                        pHandle CX = NULL,
+                        pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const;
 
     bool validate2(MPs& args) const {
