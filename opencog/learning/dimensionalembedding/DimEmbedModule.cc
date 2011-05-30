@@ -80,7 +80,7 @@ void DimEmbedModule::init() {
 }
 
 std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
-                                                         const Type& l) {
+                                                   const Type& l) {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -115,22 +115,22 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
 
     AtomEmbedding aE = (atomMaps.find(l))->second;
     AtomEmbedding::iterator aEit = aE.find(h);
-    //an embedding exists, but h has not been added yet
-    if(aEit==aE.end()) {
+    if(aEit==aE.end()) { //an embedding exists, but h has not been added yet
         logger().error("Embedding exists, but %s is not in it",
                        as->atomAsString(h).c_str());
         throw std::string("Embedding exists, but %s is not in it",
                           as->atomAsString(h).c_str());
     } else {
-        v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
-        CoverTreeNode c = CoverTreeNode(aEit);
-        push(v,c);
-        v_array<v_array<CoverTreeNode> > res;
-        k_nearest_neighbor(embedTreeMap[l], batch_create(v), res, k);
-        HandleSeq results = HandleSeq();
-        for (int j = 1; j<res[0].index; ++j) {
-            //print(*(this->as), res[0][j]);
-            results.push_back(res[0][j].getHandle());
+        EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(l);
+        //if there is an AtomEmbedding, there should also be a tree.
+        OC_ASSERT(treeMapIt!=embedTreeMap.end());
+        CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
+        std::vector<CoverTreePoint>
+            points = cTree.kNearestNeighbors(CoverTreePoint(h,aEit->second),k);
+        HandleSeq results;
+        std::vector<CoverTreePoint>::const_iterator it;
+        for (it=points.begin(); it!=points.end(); it++) {
+            results.push_back(it->getHandle());
         }
         return results;
     }
@@ -255,15 +255,16 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     }
     //Now that all the points are calculated, we construct a
     //cover tree for them.
-    v_array<CoverTreeNode> v = v_array<CoverTreeNode>();
+    //since every element of each embedding vector ranges from 0 to 1, no
+    //two elements will have distance greater than numDimensions.
+    CoverTree<CoverTreePoint>& cTree =
+        embedTreeMap.insert(make_pair(linkType,CoverTree<CoverTreePoint>(numDimensions+.1))).first->second;
     AtomEmbedding& aE = atomMaps[linkType];
-    
     AtomEmbedding::const_iterator it = aE.begin();
     for(;it!=aE.end();++it) {
-        CoverTreeNode c = CoverTreeNode(it);
-        push(v,c);
+        cTree.insert(CoverTreePoint(it->first,it->second));
     }
-    embedTreeMap[linkType]=batch_create(v);
+    
     //logger().info("done embedding");
 }
 
@@ -339,13 +340,14 @@ void DimEmbedModule::clearEmbedding(const Type& linkType){
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-
+    
     HandleSeq pivots  = pivotsMap[linkType];
     for(HandleSeq::iterator it = pivots.begin(); it!=pivots.end(); ++it) {
         as->decVLTI(*it);
     }
     atomMaps.erase(linkType);
     pivotsMap.erase(linkType);
+    embedTreeMap.erase(linkType);
     dimensionMap.erase(linkType);
 }
 

@@ -31,9 +31,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/util/cover_tree.h>
+#include <opencog/util/Cover_Tree.h>
 
-#include "CoverTreeNode.h"
+#include "CoverTreePoint.h"
 
 namespace opencog
 {
@@ -50,7 +50,7 @@ namespace opencog
         typedef std::map<Handle, std::vector<double> > AtomEmbedding;
         typedef std::map<Type, HandleSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
-        typedef std::map<Type, node<CoverTreeNode> > EmbedTreeMap;
+        typedef std::map<Type, CoverTree<CoverTreePoint> > EmbedTreeMap;
         typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
             ClusterSeq; //the vector of doubles is the centroid of the cluster
         
@@ -256,6 +256,7 @@ namespace opencog
          */
         void addKMeansClusters(const Type& l, int maxClusters,
                                double threshold=0., int kPasses=1);
+
         /**
          * Calculate the homogeneity of a cluster of handles for given linkType.
          *

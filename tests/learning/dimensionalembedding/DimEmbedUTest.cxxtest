@@ -151,7 +151,6 @@ public:
             TS_ASSERT(atomSpace->getVLTI(handles[i])
                       !=AttentionValue::DISPOSABLE);
         }
-        
         //Throw in a few nodes and links after embedding to make sure the
         //functions we're testing are robust against nodes added after
         //embedding. These atoms should't affect the embedding at all
@@ -198,7 +197,6 @@ public:
                 TS_ASSERT_DELTA(dist,dists[i][j],.00001);
             }
         }
-
         //Tests for the k-nearest-neighbor functionality...
         //In order from nearest-to-h1 to farthest-from-h1, we have
         //h1,h4,h7,h5,h2=h3,h6
@@ -235,7 +233,6 @@ public:
                 TS_ASSERT(found);
             }
         }
-
         //Test the separation and homogeneity functions on a few clusters
         HandleSeq cluster1,cluster2,cluster3;
         cluster1.push_back(h1);cluster1.push_back(h2);cluster1.push_back(h3);
@@ -350,7 +347,7 @@ public:
         }
 
         //Small problem: even though I tried to make the clusters
-        //"obvious", sometimes kMeansCluster won't make the correct clusters
+        //"obvious", sometimes kMeansCluster won't make the predicted clusters
         //even when functioning properly. So I gotta fix this test.
         /*
         typedef std::vector<std::pair<HandleSeq,std::vector<double> > >

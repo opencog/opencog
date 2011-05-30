@@ -16,7 +16,7 @@ ADD_LIBRARY(util SHARED
 	based_variant
 	cluster
 	Config
-	cover_tree
+	Cover_Tree
 	digraph
 	dorepeat
 	exceptions
@@ -54,7 +54,7 @@ INSTALL(FILES
 	based_variant.h
 	cluster.h
 	Config.h
-	cover_tree.h
+	Cover_Tree.h
     concurrent_queue.h
 	digraph.h
 	dorepeat.h
