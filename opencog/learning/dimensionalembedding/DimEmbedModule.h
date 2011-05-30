@@ -174,11 +174,17 @@ namespace opencog
          * @param h Handle of node to be embedded.
          * @param linkType Type of link to use to embed h
          * @return The embedding vector (a vector of doubles between 0 and 1)
-         *
-         * @TODO add node to the cover tree after it's embedded
          */
         std::vector<double> addNode(const Handle& h, const Type& linkType);
 
+        /**
+         * Removes the node from the AtomEmbedding and Cover Tree for linkType.
+         *
+         * @param h Handle of node to be removed.
+         * @param linkType Type for which h is removed from the embedding.
+         */
+        void removeNode(const Handle& h, const Type& linkType);
+        
         /**
          * Updates nodes directly connected to link in the appropriate
          * AtomEmbedding for type linkType.

@@ -33,7 +33,6 @@ ADD_LIBRARY(util SHARED
 	mt19937ar
     random
 	platform
-	stack
 	StringManipulator
 	StringTokenizer
     octime
@@ -78,7 +77,6 @@ INSTALL(FILES
 	RandGen.h
 	recent_val.h
 	selection.h
-	stack.h
 	StringManipulator.h
 	StringTokenizer.h
 	tree.h

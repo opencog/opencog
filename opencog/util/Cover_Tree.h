@@ -37,8 +37,8 @@
  * queries.
  *
  * The user should define double Point::distance(const Point& p) and
- * bool Point::equals(const Point& p), where
- * p1.distance(p2)==0 doesn't necessarily mean that p1.equals(p2). 
+ * bool Point::operator==(const Point& p), where
+ * p1.distance(p2)==0 doesn't necessarily mean that p1==p2). 
  *
  * For example, a point could consist of a vector and a string
  * name, where their distance measure is simply euclidean distance but to be

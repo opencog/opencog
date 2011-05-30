@@ -58,7 +58,7 @@ class CoverTreePoint {
         return (_handle==p.getHandle() && this->distance(p)==0.0);
     } 
 };
- 
+
  void CoverTreePoint::print(AtomSpace& atomspace) {
      std::ostringstream oss;
      if(!atomspace.isValidHandle(_handle)) {

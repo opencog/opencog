@@ -126,7 +126,7 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
         OC_ASSERT(treeMapIt!=embedTreeMap.end());
         CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
         std::vector<CoverTreePoint>
-            points = cTree.kNearestNeighbors(CoverTreePoint(h,aEit->second),k);
+            points = cTree.kNearestNeighbors(CoverTreePoint(h,aEit->second),k); 
         HandleSeq results;
         std::vector<CoverTreePoint>::const_iterator it;
         for (it=points.begin(); it!=points.end(); it++) {
@@ -274,7 +274,11 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-
+    if(!isEmbedded(linkType)) {
+        const char* tName = classserver().getTypeName(linkType).c_str();
+        logger().error("No embedding exists for type %s", tName);
+        throw std::string("No embedding exists for type %s", tName);
+    }
     HandleSeq links = as->getIncoming(h);
     std::vector<double> newEmbedding (dimensionMap[linkType], 0.0);
     //The embedding for each coordinate is the max of
@@ -300,8 +304,32 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
             }
         }
     }
-    //TODO:add the node to the cover tree
+    atomMaps[linkType][h] = newEmbedding;
+    EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);
+    OC_ASSERT(treeMapIt!=embedTreeMap.end());
+    CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
+    cTree.insert(CoverTreePoint(h,newEmbedding));
     return newEmbedding;
+}
+
+void DimEmbedModule::removeNode(const Handle& h, const Type& linkType) {
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+    if(!isEmbedded(linkType)) {
+        const char* tName = classserver().getTypeName(linkType).c_str();
+        logger().error("No embedding exists for type %s", tName);
+        throw std::string("No embedding exists for type %s", tName);
+    }
+
+
+    EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);
+    OC_ASSERT(treeMapIt!=embedTreeMap.end());
+    CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
+    AtomEmbedding::iterator aEit = atomMaps[linkType].find(h);
+    cTree.remove(CoverTreePoint(h,aEit->second));
+    atomMaps[linkType].erase(aEit);
 }
 
 void DimEmbedModule::addLink(const Handle& h, const Type& linkType) {
@@ -309,30 +337,37 @@ void DimEmbedModule::addLink(const Handle& h, const Type& linkType) {
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-
-    std::vector<std::vector<double> > embeddingVectors;
+    if(!isEmbedded(linkType)) {
+        const char* tName = classserver().getTypeName(linkType).c_str();
+        logger().error("No embedding exists for type %s", tName);
+        throw std::string("No embedding exists for type %s", tName);
+    }
+    int dim = dimensionMap[linkType];
+    std::vector<std::pair<Handle, std::vector<double> > > embeddingVectors;
     AtomEmbedding aE = atomMaps[linkType];
     HandleSeq nodes = as->getOutgoing(h);
     for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it) {
         embeddingVectors.push_back(aE[*it]);
     }
-    std::vector<std::vector<double> >::iterator it,it2;
-    int i=0;
-    bool changed = false;
+    std::vector<std::pair<Handle, std::vector<double> > >::iterator it,it2;
     double weight = as->getMean(h)*as->getConfidence(h);
     for(it=embeddingVectors.begin(); it!=embeddingVectors.end(); ++it) {
+        bool changed = false;
         for(it2=embeddingVectors.begin(); it2!=embeddingVectors.end(); ++it2) {
-            if((*it)[i]<(weight*(*it2)[i])) {
-                (*it)[i]=(weight*(*it2)[i]);
-                changed=true;
+            for(int i=0; i<dim; i++) {
+                if(it->second[i]<(weight*(it2->second)[i])) {
+                    (it->second)[i]=(weight*(it2->second)[i]);
+                    changed=true;
+                }
             }
         }
-        i++;
+        if(changed) {
+            EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);
+            OC_ASSERT(treeMapIt!=embedTreeMap.end());
+            CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
+            cTree.insert(CoverTreePoint(it->first,it->second));                
+        }
     }
-    if(changed) {
-        //TODO: update the cover tree
-    }
-    return;
 }
 
 void DimEmbedModule::clearEmbedding(const Type& linkType){
