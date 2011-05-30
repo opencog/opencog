@@ -76,6 +76,19 @@ public:
     bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan);
 
     /**
+     * Sends a specific(atomic) action from plan to the target virtual world.
+     *
+     * @param actionPlan a reference to the object that contains the action plan to be sent. 
+     *
+     * @param actionSequenceNum a specific sequence number of an atomic action in a 
+     *        given action plan
+     *
+     * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
+     */
+    bool sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan,
+            unsigned int actionSequenceNum);
+
+    /**
      * Sends the emotional feelings meessage to the target Virtual World.
      *
      * @param feelings The XML message already converted int a string representation

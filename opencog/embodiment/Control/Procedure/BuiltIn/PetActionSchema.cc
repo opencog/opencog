@@ -205,7 +205,11 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
     pai.addAction(planId, action);
 
     // this function can throw a RuntimeException
-    pai.sendActionPlan(planId);
+	if(!config().get_bool("EXTRACTED_ACTION_SENDING_MODE")) {
+		pai.sendActionPlan(planId);
+	} else {
+		pai.sendExtractedActionFromPlan(planId);
+	}
 
     return planId;
 }

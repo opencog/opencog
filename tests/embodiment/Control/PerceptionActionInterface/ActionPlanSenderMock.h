@@ -56,6 +56,10 @@ public:
         return true;
     }
 
+    bool sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan, unsigned int actionSequenceNum) {
+        return true;
+    }
+
     void proccessSentMessage() {
 
         if (pvpMsg.length() > 0) {
@@ -89,6 +93,10 @@ public:
         return true;
     }
 
+    bool sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan, unsigned int actionSequenceNum) {
+        return true;
+    }
+
     bool sendEmotionalFeelings(const std::string& feelings) {
         return true;
     }
@@ -102,6 +110,10 @@ public:
 
     bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan) {
         //printf("Could not sent Action plan\n");
+        return false;
+    }
+
+    bool sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan, unsigned int actionSequenceNum) {
         return false;
     }
 

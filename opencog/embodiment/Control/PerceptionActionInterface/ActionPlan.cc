@@ -129,6 +129,23 @@ string ActionPlan::getPVPmessage(const std::string& petId) const
     return result;
 }
 
+string ActionPlan::getPVPmessage(const std::string& petId, unsigned int actionSeqNum) const
+{
+    XERCES_CPP_NAMESPACE::DOMDocument* xmlDoc = createPetaverseXMLDocument();
+
+    XERCES_CPP_NAMESPACE::DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
+
+	const PetAction& action = getAction(actionSeqNum);
+	action.createPVPXmlElement(xmlDoc, actionPlanElem);
+
+	string result = PAIUtils::getSerializedXMLString(xmlDoc);
+
+    // free memory of the DomDocument
+    xmlDoc->release();
+
+    return result;
+}
+
 bool ActionPlan::isTried(unsigned int seqNumber) const
 {
     bool result = false;

@@ -38,7 +38,12 @@ void ActionPlanDispatcher::dispatch()
         for (std::list<PetAction>::const_iterator itr = actionPlan.begin(); itr != actionPlan.end(); itr++) {
             pai.addAction(planId, *itr);
         }
-        pai.sendActionPlan(planId);
+
+        if(!config().get_bool("EXTRACTED_ACTION_SENDING_MODE")) {
+			pai.sendActionPlan(planId);
+		} else {
+			pai.sendExtractedActionFromPlan(planId);
+		} 
     } catch (...) {
         badlyFailed = true;
     }

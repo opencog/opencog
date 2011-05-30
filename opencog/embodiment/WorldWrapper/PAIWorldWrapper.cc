@@ -434,7 +434,11 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             MAIN_LOGGER_ACTION_PLAN_FAILED;
             return false;
         } else {
-            pai.sendActionPlan(planID);
+            if(!config().get_bool("EXTRACTED_ACTION_SENDING_MODE")) {
+				pai.sendActionPlan(planID);
+			} else {
+				pai.sendExtractedActionFromPlan(planID);
+			}
             MAIN_LOGGER_ACTION_PLAN_SUCCEEDED;
             return true;
         }
@@ -471,7 +475,11 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             MAIN_LOGGER_ACTION_PLAN_FAILED;
             return false;
         } else {
-            pai.sendActionPlan(planID);
+            if(!config().get_bool("EXTRACTED_ACTION_SENDING_MODE")) {
+				pai.sendActionPlan(planID);
+			} else {
+				pai.sendExtractedActionFromPlan(planID);
+			}
             MAIN_LOGGER_ACTION_PLAN_SUCCEEDED;
             return true;
         }
