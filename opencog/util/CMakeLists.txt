@@ -10,15 +10,7 @@ ELSE (APPLE)
     SET(APPLE_STRNDUP_FILES)
 ENDIF (APPLE)
 
-# XXX FIXME -- setting util as a shared library breaks the build,
-# since it requires a link to libatomspace, which hasn't been built yet.
-# This is because misc.cc references Handles.  Similar problem with 
-# misc-test.cc,  Yucko.  Basically, we need to ditch the misc* files
-# somehow, banish them somewhere ... (no, they don't belong in
-# atomspace...)
-#
-# ADD_LIBRARY(util SHARED
-ADD_LIBRARY(util 
+ADD_LIBRARY(util SHARED
     ansi
 	algorithm
 	based_variant
