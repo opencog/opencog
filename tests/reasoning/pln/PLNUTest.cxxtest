@@ -187,6 +187,12 @@ private:
         try
         {
             config().load("pln-test.conf");
+            
+            logger().setFilename(config()["LOG_FILE"]);
+            logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+            logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
+            logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+            logger().info("Initializing PLN test env...");
         }
         catch (RuntimeException &e)
         {
@@ -219,9 +225,7 @@ public:
         testFitnessEvaluator = BEST;
     
         // Initialize PLN test environment
-        try {        
-            logger().info("Initializing PLN test env...");
-
+        try {
             f = fopen("results.txt","a");
 
             asw = ASW(cogserver().getAtomSpace());                                  
