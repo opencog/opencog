@@ -97,7 +97,8 @@ AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
     //! @todo Replace srand with opencog::RandGen
     srand(12345678);
     allowFWVarsInAtomSpace = true;
-    archiveTheorems = false;
+    //! @todo archiveTheorems must be true
+    archiveTheorems = true;
     setWatchingAtomSpace(true);
 }
 

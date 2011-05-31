@@ -154,7 +154,7 @@ void PLNModule::init()
 #if LOCAL_ATW
     ((LocalATW*)asw)->SetCapacity(10000);
 #endif  
-    asw->archiveTheorems = false;
+    asw->archiveTheorems = true;
     asw->allowFWVarsInAtomSpace = 
         config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
 
