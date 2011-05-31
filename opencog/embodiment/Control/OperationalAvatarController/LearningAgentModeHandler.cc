@@ -48,7 +48,7 @@ void LearningAgentModeHandler::handleCommand( const std::string& name, const std
         boost::split( tokens, arguments[0], boost::is_any_of(" ") );
         unsigned long timestamp = boost::lexical_cast<unsigned long>( arguments[1] );
 
-        if ( tokens.size( ) == 3 && tokens[1] == "WILL" ) {            
+        if ( tokens.size( ) == 3 && (tokens[1] == "WILL" || tokens[1] == "DO" || tokens[1] == "DOES")) {
             std::string exemplarAvatarId = tokens[0];
             if ( exemplarAvatarId == "I" ) {
                 exemplarAvatarId = this->agent->getOwnerId( );
