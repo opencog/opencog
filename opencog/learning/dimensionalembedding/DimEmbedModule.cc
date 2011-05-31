@@ -65,6 +65,12 @@ void DimEmbedModule::init() {
     logger().info("[DimEmbedModule] init");
     CogServer& cogServer = static_cast<CogServer&>(server());
     this->as=cogServer.getAtomSpace();
+    as->atomSpaceAsync->
+        addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal,
+                                  this, _1, _2));
+    as->atomSpaceAsync->
+        removeAtomSignal(boost::bind(&DimEmbedModule::handleRemoveSignal,
+                                     this, _1, _2));
 #ifdef HAVE_GUILE
     //Functions available to scheme shell
     define_scheme_primitive("embedSpace",
@@ -383,7 +389,7 @@ void DimEmbedModule::clearEmbedding(const Type& linkType){
     
     HandleSeq pivots  = pivotsMap[linkType];
     for(HandleSeq::iterator it = pivots.begin(); it!=pivots.end(); ++it) {
-        as->decVLTI(*it);
+        if(as->isValidHandle(*it)) as->decVLTI(*it);
     }
     atomMaps.erase(linkType);
     pivotsMap.erase(linkType);
