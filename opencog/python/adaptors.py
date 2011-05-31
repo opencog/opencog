@@ -30,6 +30,7 @@ class ForestExtractor:
         # fishgram-specific experiments. Refactor later
         # map from unique tree to set of embeddings. An embedding is a set of bindings. Maybe store the corresponding link too.
         self.tree_embeddings = {} 
+        self.unique_trees_at_each_size = {}
 
     def extractTree(self,  atom, objects):
         if self.is_object(atom):
@@ -71,6 +72,9 @@ class ForestExtractor:
             # You can output it using something like this:
             # for (tree,embeddingset_list) in te.tree_embeddings[1].items(): print len(embeddingset_list)
             # len([tree for (tree,embeddingset_list) in te.tree_embeddings[1].items() if len(embeddingset_list) > 0])
+            if size not in self.unique_trees_at_each_size:
+                self.unique_trees_at_each_size[size] = set()
+            self.unique_trees_at_each_size[size] .add(tree)
 
     def tree_to_string(self,  tree):
 
@@ -125,13 +129,21 @@ class ForestExtractor:
         include = True
         if (a.type == t.PredicateNode and a.name == "proximity"): include = False
 
+
+from itertools import *
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return izip(a, b)
+    
 class Fishgram:
     def __init__(self,  atomspace):
         self.forest = ForestExtractor(atomspace,  None)
         # settings
         self.min_embeddings = 2
 
-        
     def run(self):
         self.forest.extractForest()
 
@@ -195,6 +207,23 @@ class Fishgram:
                 conjunctions[joint] = embeddings
                 self.add_all_predicates_1var_dfs_recursion(conjunctions,  dfs_code)
         return conjunctions
+
+    # A list of all possible combinations. Doesn't prune in any of the several, necessary ways.
+    # ALSO: Must allow mixing pred sizes (or just adding onto // the previous layer)
+    def combinations_idealized(self):
+        for numvars in xrange(1, 5): # 10):
+            for predsize in xrange(1,  numvars+1):
+                #all_embeddings_for_size = self.forest.tree_embeddings[predsize]
+                preds = self.forest.unique_trees_at_each_size[predsize] # unique trees whose arity is predsize
+                preds = map(self.forest.tree_to_string, preds)
+                for conjsize in xrange(0,  5):
+                    vars = xrange(0,  numvars)
+                    perms = permutations(vars, numvars)
+                    
+                    bound_preds = product(preds, perms)
+                    
+                    for conj in combinations(bound_preds, conjsize):
+                        print  conj
 
     def get_predicate_1var(self, conjunctions, dfs_code):
         function_arity = 1
@@ -296,6 +325,68 @@ class GraphConverter:
     
     def is_compactable(self,atom):
         return len(atom.out) == 2 and len(atom.incoming) == 0 and not FishgramFilter.is_application_link(atom) # TODO haxx?
+
+import pygephi
+class GephiOutput:
+
+    def __init__(self, space):
+        self._as = space
+        self.g = pygephi.JSONClient('http://localhost:8080/workspace0', autoflush=True)
+        self.g.clean()
+        self.node_attributes = {'size':10, 'r':0.0, 'g':0.0, 'b':1.0, 'x':1}
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def outputNodeVertex(self, a, label = None):
+        assert a.is_node()
+        if label==None:
+            label = '%s:%s' % (a.name, a.type_name)
+
+        self.g.add_node(str(a.h.value()), label=label,  **self.node_attributes)
+
+    def outputLinkEdge(self, a, label=None,outgoing=None):
+        
+        assert a.is_link()
+        assert len(a.out) == 2
+        assert (label==None) == (outgoing==None)
+
+        if label==None:
+            label = a.type_name
+
+        if outgoing==None:
+            outgoing = a.out
+
+        (out0, out1) = outgoing[0].h.value(), outgoing[1].h.value()       
+     
+        self.g.add_edge(str(a.h.value()), out0, out1, directed=True, label=label)
+       
+    def outputLinkVertex(self, a, label=None):
+        #import code; code.interact(local=locals())
+        #import ipdb; ipdb.set_trace()
+        assert a.is_link()
+       
+        if label==None:
+            label = a.type_name
+
+        self.g.add_node(str(a.h.value()), label=label, **self.node_attributes)
+   
+    def outputLinkArgumentEdges(self,a, outgoing=None):
+        #import code; code.interact(local=locals())
+        #import ipdb; ipdb.set_trace()
+        assert a.is_link()
+        # assumes outgoing links/nodes have already been output
+
+        if outgoing==None:
+            outgoing = a.out
+
+        for i in xrange(0, len(outgoing)):
+            outi = outgoing[i]
+            id = str(a.h.value())+'->'+str(outi.h.value())
+            self.g.add_edge(id, a.h.value(), outi.h.value(), directed = True,  label=str(i))
 
 class DottyOutput:
     def __init__(self,space):
@@ -612,7 +703,7 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
                 # But that's more useful for fishgram
                 print atomspace.add_link(t.SequentialAndLink,  [time1,  time2])
 
-            te = ForestExtractor(atomspace, SubdueTextOutput(atomspace))
+            te = ForestExtractor(atomspace, GephiOutput(atomspace))
             te.output()
         except KeyError,  e:
             KeyError
@@ -657,5 +748,5 @@ if __name__ == "__main__":
     #
     #    g.output()
 
-    te = ForestExtractor(a,  SubdueTextOutput(a))
+    te = ForestExtractor(a,  GephiOutput(a))
     te.output()
