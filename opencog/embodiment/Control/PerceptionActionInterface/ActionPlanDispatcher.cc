@@ -39,7 +39,7 @@ void ActionPlanDispatcher::dispatch()
             pai.addAction(planId, *itr);
         }
 
-        if(!config().get_bool("EXTRACTED_ACTION_SENDING_MODE")) {
+        if(!config().get_bool("ENABLE_UNITY_CONNECTOR")) {
 			pai.sendActionPlan(planId);
 		} else {
 			pai.sendExtractedActionFromPlan(planId);

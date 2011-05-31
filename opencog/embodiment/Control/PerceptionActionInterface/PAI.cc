@@ -2582,7 +2582,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
 			// If using loosely ordered action sending mode,
 			// then continue to send the next action of this
 			// unfinished plan.
-			if(config().get_bool("EXTRACTED_ACTION_SENDING_MODE")) {
+			if(config().get_bool("ENABLE_UNITY_CONNECTOR")) {
 				if(sequence != 0) {
 					int nextActionSeqNum = sequence + 1;
 					sendExtractedActionFromPlan(planId, nextActionSeqNum);
