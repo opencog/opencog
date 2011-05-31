@@ -729,6 +729,8 @@ public:
     /**
      * Returns the set of atoms with a given target handle in their
      * outgoing set (atom type and its subclasses optionally).
+     * i.e. returns the incoming set for that handle, but filtered by the Type you specify.
+     * Uses a special index, so it's more efficient than filtering it yourself.
      *
      * @param result An output iterator.
      * @param handle The handle that must be in the outgoing set of the atom.
@@ -742,8 +744,9 @@ public:
      * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
      *          Example of call to this method, which would return all entries in AtomSpace:
      * @code
+     *         // Handle h == the Handle for your choice of Atom
      *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     *         atomSpace.getHandleSet(back_inserter(ret), h, ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
