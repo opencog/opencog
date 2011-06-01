@@ -38,7 +38,7 @@
 )
 
 (EvaluationLink (stv 0.0 1.0)
-    (PredicateNode "near") 
+    (PredicateNode "near") plan_demand_goal_list
     (ListLink
         (ObjectNode "pear") 
     )
@@ -167,4 +167,27 @@
 (display "========================================================") (make_psi_plan GetFoodGoal)
 
 (display "========================================================") (make_psi_plan EnergyDemandGoal)
+
+(ReferenceLink
+    (ConceptNode "plan_demand_goal_list")
+    (ListLink
+        EnergyDemandGoal
+    )
+)
+
+(find_reference_link (ConceptNode "plan_demand_goal_list") )
+(get_reference_link (ConceptNode "plan_demand_goal_list") )
+(get_reference (ConceptNode "plan_demand_goal_list") )
+(update_reference_link (ConceptNode "plan_demand_goal_list") (ListLink EnergyDemandGoal) )
+
+(get_demand_goal_list)
+
+(get_random_demand_goal)
+(get_most_critical_demand_goal)    
+
+(do_planning)
+(get_reference (ConceptNode "plan_selected_demand_goal") )    
+(get_reference (ConceptNode "plan_rule_list") )
+(get_reference (ConceptNode "plan_context_list") )
+(get_reference (ConceptNode "plan_action_list") )
 

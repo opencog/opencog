@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
- * Updated: by Zhenhua Cai, on 2011-05-13
+ * Updated: by Zhenhua Cai, on 2011-06-01
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -129,29 +129,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         }
         fin.close();
         logger().info(
-                     "OAC - %d Combo functions loaded.", cnt);
-
-        fin.open(config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
-        if (fin.good()) {
-            cnt = procedureRepository->loadComboFromStream(fin);
-        } else {
-            logger().error(
-                         "OAC - Unable to load RulePreconditions combo.");
-        }
-        fin.close();
-        logger().info(
-                     "OAC - RulesPreconditions combo functions loaded.");
-
-        fin.open(config().get("COMBO_SELECT_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
-        if (fin.good()) {
-            cnt = procedureRepository->loadComboSelectFromStream(fin);
-        } else {
-            logger().error(
-                         "OAC - Unable to load RulePreconditions combo select.");
-        }
-        fin.close();
-        logger().info(
-                     "OAC - RulesPreconditions combo select functions loaded.");
+                     "OAC - %d Combo stdlib functions loaded.", cnt);
 
         fin.open(config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
         if (fin.good()) {
@@ -163,30 +141,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         fin.close();
         logger().info(
                      "OAC - RulesActionSchemata combo functions loaded.");
-
-        fin.open(config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str());
-        if (fin.good()) {
-            logger().info("OAC - Loading ModulatorUpdaters combo.");
-            cnt = procedureRepository->loadComboFromStream(fin);
-        } else {
-            logger().error(
-                         "OAC - Unable to load ModulatorUpdaters combo.");
-        }
-        fin.close();
-        logger().info(
-                     "OAC - ModulatorUpdaters combo functions loaded.");
-
-        fin.open(config().get("PSI_DEMAND_UPDATERS_REPOSITORY_FILE").c_str());
-        if (fin.good()) {
-            logger().info("OAC - Loading DemandUpdaters combo.");
-            cnt = procedureRepository->loadComboFromStream(fin);
-        } else {
-            logger().error(
-                         "OAC - Unable to load DemandUpdaters combo.");
-        }
-        fin.close();
-        logger().info(
-                     "OAC - DemandUpdaters combo functions loaded.");
 
     }// if
 
@@ -640,10 +594,10 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
         if (!result) {
             logger().error("OAC - Unable to process XML message.");
         } else {
-
             // PVP message processed, update predicates for the
             // added/updated atoms
             predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
+
             logger().debug("OAC - Message successfully  processed.");
         }
         return false;

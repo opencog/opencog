@@ -523,6 +523,13 @@
     )    
 )
 
+(define NULL_CONTEXT
+    (cog-set-tv! 
+        (add_goal (PredicateNode "NoContext") )
+        (stv 1.0 1.0)
+    )    
+)
+
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Action to AtomSpace.

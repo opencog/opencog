@@ -51,13 +51,14 @@ $binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
 ./rules_preconditions.combo-select \
 ./rules_action_schemata.combo \
 ./modulator_updaters.combo \
+$pdh/opencog/embodiment/psi_util.scm \
 $pdh/opencog/embodiment/rules_core.scm \
 $pdh/opencog/embodiment/pet_rules.scm \
-$pdh/opencog/embodiment/dialog_system.scm \
-$pdh/opencog/embodiment/psi_util.scm \
+$pdh/opencog/embodiment/action_selection.scm \
 $pdh/opencog/embodiment/feeling_updaters.scm \
 $pdh/opencog/embodiment/demand_updaters.scm \
 $pdh/opencog/embodiment/modulator_updaters.scm \
+$pdh/opencog/embodiment/dialog_system.scm \
 $pdh/opencog/embodiment/rules_core.lua \
 $pdh/opencog/embodiment/humanoid_rules.lua \
 $pdh/opencog/embodiment/humanoid_traits_maria.lua \

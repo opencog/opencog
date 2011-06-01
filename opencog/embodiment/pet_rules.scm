@@ -69,18 +69,18 @@
 
 ; Check that CURRENT_TIMESTAMP is not null
 ;
-(if (null? CURRENT_TIMESTAMP)
-    (begin
-        (print_debug_info INFO_TYPE_FAIL "pet_rules.scm" 
-                          (string-append "CURRENT_TIMESTAMP is null. " 
-                                         "Please call (set! CURRENT_TIMESTAMP 'current_time_stamp') "
-                                         "firstly, in c++ code before actually loading any Rules!"
-                          )              
-        );print_debug_info
-
-        (exit -1)
-    );begin
-);if
+;(if (null? CURRENT_TIMESTAMP)
+;    (begin
+;        (print_debug_info INFO_TYPE_FAIL "pet_rules.scm" 
+;                          (string-append "CURRENT_TIMESTAMP is null. " 
+;                                         "Please call (set! CURRENT_TIMESTAMP 'current_time_stamp') "
+;                                         "firstly, in c++ code before actually loading any Rules!"
+;                          )              
+;        );print_debug_info
+;
+;        (exit -1)
+;    );begin
+;);if
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -379,38 +379,38 @@
 
 (connect_goal_updater 
      EnergyDemandGoal
-     (add_gpn_goal (GroundedPredicateNode "fuzzy_within") 0.6 1.0 EnergyDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.6 1.0 EnergyDemandSchema)
 )
 
 (connect_goal_updater
      WaterDemandGoal
-     (add_gpn_goal (GroundedPredicateNode "fuzzy_within") 0.7 1.0 WaterDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.7 1.0 WaterDemandSchema)
 )
 
 (connect_goal_updater
      IntegrityDemandGoal
-     (add_gpn_goal (GroundedSchemaNode "fuzzy_within") 0.8 1.0 IntegrityDemandSchema)
+     (add_goal (GroundedSchemaNode "fuzzy_within") 0.8 1.0 IntegrityDemandSchema)
 )
 
 (connect_goal_updater   
      AffiliationDemandGoal 
-     (add_gpn_goal (GroundedPredicateNode "fuzzy_within") 0.4 1.0 AffiliationDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.4 1.0 AffiliationDemandSchema)
 )
 
 (connect_goal_updater
      CertaintyDemandGoal
-     (add_gpn_goal (GroundedSchemaNode "fuzzy_within") 0.6 1.0 CertaintyDemandSchema)
+     (add_goal (GroundedSchemaNode "fuzzy_within") 0.6 1.0 CertaintyDemandSchema)
 )
 
 (connect_goal_updater
      CompetenceDemandGoal 
-     (add_gpn_goal (GroundedPredicateNode "fuzzy_within" 0.7 1.0 CompetenceDemandSchema) 
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.7 1.0 CompetenceDemandSchema) 
 )
 
 ; TestEnergy is only used for debugging. Remove it once finished. 
 (connect_goal_updater     
      TestEnergyDemandGoal 
-     (add_gpn_goal (GroundedPredicateNode "fuzzy_within" 0.1 0.95 TestEnergyDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.1 0.95 TestEnergyDemandSchema)
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -553,7 +553,7 @@
 (define GetFoodGoal
     (AndLink 
         (add_goal (PredicateNode "is_editable") (VariableNode "$var_food") ) 
-        (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_food") )
+        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_food") )
     )    
 )
 
@@ -584,7 +584,7 @@
 (define GetWaterGoal
     (AndLink 
         (add_goal (PredicateNode "is_drinkable") (VariableNode "$var_water") ) 
-        (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_water") )
+        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_water") )
     )    
 )
 
@@ -618,7 +618,7 @@
 (define GetPeePlaceGoal
     (AndLink
         (add_goal (PredicateNode "is_pee_place") (VariableNode "$var_pee_place") ) 
-        (add_goal (PredicateNode "near" (get_self) (VariableNode "$var_pee_place") )
+        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_pee_place") )
     )
 )
 
@@ -630,7 +630,7 @@
 (define GetPooPlaceGoal
     (AndLink
         (add_goal (PredicateNode "is_poo_place") (VariableNode "$var_poo_place") ) 
-        (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_poo_place") )
+        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_poo_place") )
     )
 )
 
@@ -692,7 +692,7 @@
 ; Rules related to AffiliationDemandGoal
 ;
 
-(add_rule (stv 1.0 1.0) AffiliationDemandGoal (add_action "goto_obj" (get_owner) (NumberNode "2") )
+(add_rule (stv 1.0 1.0) AffiliationDemandGoal (add_action "goto_obj" OWNER_HANDLE (NumberNode "2") )
     NULL_PRECONDITION
 )
 
@@ -702,7 +702,7 @@
 ;
 
 (define GetNearObjectGoal
-    (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_near_object") )
+    (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_near_object") )
 )
 
 (ReferenceLink
@@ -712,7 +712,7 @@
 
 (define GetNearPickupableObjectGoal
     (AndLink
-        (add_goal (PredicateNode "near") (get_self) (VariableNode "$var_near_pickupable_object") ) 
+        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_near_pickupable_object") ) 
         (add_goal (PredicateNode "is_pickupable") (VariableNode "$var_near_pickupable_object") )
     ) 
 )
@@ -798,72 +798,72 @@
 ; familiar_with is the first step before knowing
 ; for instance sniffing something makes the pet familiar with it
 
-(ForAllLink (stv 1.0 1.0)
-    (ListLink EntityVar)	    
-
-    (add_rule (cog-new-stv 1.0 1.0) FamiliarWithRelation NULL_ACTION
-        CuriousAboutRelation
-        (add_gpn "familiarWithPrecondition")
-    )
-)
+;(ForAllLink (stv 1.0 1.0)
+;    (ListLink EntityVar)	    
+;
+;    (add_rule (cog-new-stv 1.0 1.0) FamiliarWithRelation NULL_ACTION
+;        CuriousAboutRelation
+;        (add_gpn "familiarWithPrecondition")
+;    )
+;)
 
 ; know
 ; know it one step above familiar with, for instance if the pet is familiar
 ; with something and then lick it is considered to be known 
 
-(ForAllLink (stv 1.0 1.0)
-    (ListLink EntityVar)	    
-
-    (add_rule (cog-new-stv 1.0 1.0) KnowRelation NULL_ACTION
-        FamiliarWithRelation 
-        (add_gpn "knowPrecondition")	      
-    )
-)
+;(ForAllLink (stv 1.0 1.0)
+;    (ListLink EntityVar)	    
+;
+;    (add_rule (cog-new-stv 1.0 1.0) KnowRelation NULL_ACTION
+;        FamiliarWithRelation 
+;        (add_gpn "knowPrecondition")	      
+;    )
+;)
 
 ; enemy
 
-(ForAllLink (stv 1.0 1.0)
-    (ListLink EntityVar) 
-
-    (add_rule (cog-new-stv 1.0 1.0) EnemyRelation NULL_ACTION
-        (add_gpn "enemyPrecondition")	      
-    )
-)
+;(ForAllLink (stv 1.0 1.0)
+;    (ListLink EntityVar) 
+;
+;    (add_rule (cog-new-stv 1.0 1.0) EnemyRelation NULL_ACTION
+;        (add_gpn "enemyPrecondition")	      
+;    )
+;)
 
 ; friend
 
-(ForAllLink (stv 1.0 1.0)
-    (ListLink EntityVar)	    
-
-    (add_rule (cog-new-stv 1.0 1.0) FriendRelation NULL_ACTION
-        FamiliarWithRelation
-        (add_gpn "friendPrecondition")	      
-    )
-)
+;(ForAllLink (stv 1.0 1.0)
+;    (ListLink EntityVar)	    
+;
+;    (add_rule (cog-new-stv 1.0 1.0) FriendRelation NULL_ACTION
+;        FamiliarWithRelation
+;        (add_gpn "friendPrecondition")	      
+;    )
+;)
 
 ; anger
 
-(ForAllLink (stv 1.0 1.0)
-    (ListLink EntityVar)	    
-
-    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
-        (add_gpn "angerForFoodThreatenPrecondition")      
-    )
-)
-
-(ForAllLink (stv 1.0 1.0)
-    (ListLink EntityVar)
-
-    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
-        (add_gpn "angerForEnemyPrecondition")     
-    )
-)
-
-(ForAllLink (stv 1.0 1.0)
-    (ListLink EntityVar)	    
-
-    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
-        (add_gpn "angerWhenAttackedPrecondition")	      
-    )
-)
+;(ForAllLink (stv 1.0 1.0)
+;    (ListLink EntityVar)	    
+;
+;    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
+;        (add_gpn "angerForFoodThreatenPrecondition")      
+;    )
+;)
+;
+;(ForAllLink (stv 1.0 1.0)
+;    (ListLink EntityVar)
+;
+;    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
+;        (add_gpn "angerForEnemyPrecondition")     
+;    )
+;)
+;
+;(ForAllLink (stv 1.0 1.0)
+;    (ListLink EntityVar)	    
+;
+;    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
+;        (add_gpn "angerWhenAttackedPrecondition")	      
+;    )
+;)
 

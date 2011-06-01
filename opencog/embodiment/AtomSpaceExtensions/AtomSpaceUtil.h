@@ -123,6 +123,23 @@ private:
             Handle atTimeLink);
 
 public:
+
+    /**
+     * Return the RefrenceLink given its first outgoing
+     *
+     * @note We assume there should be only one ReferenceLink containing the given atom
+     *
+     * ReferenceLink
+     *     firstOutgoing
+     *     secondOutgoing
+     */
+    static Handle getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgoing); 
+
+    /**
+     * Return the second outgoing of a RefrenceLink given the first outgoing
+     */
+    static Handle getReference(AtomSpace & atomSpace, Handle hFirstOutgoing); 
+
    /**
      * Returns the current level of the given feeling name.
      * If the feeling does not exists on AtomSpace or some problem occurs when invoked,

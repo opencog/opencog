@@ -2,7 +2,7 @@
 ; Action planner
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-30
+; @date   2011-05-31
 ;
 
 ; TODO: create and AndSeq link, inherits from ordered link for Actions
@@ -409,7 +409,7 @@
 ;       this function returns a bunch of actions that would be helpful for the
 ;       goal. 
 ;
-;       For example there are tow rules as below:
+;       For example there are two rules as below:
 ;
 ;       RandomSearchAction => GetFoodGoal
 ;       GetFoodGoal AND EatFoodAction => EnergyDemandGoal
@@ -421,6 +421,11 @@
 ;       RandomSearchAction.Since the world is always changing and there's chance
 ;       that the agent failes to get the food after it randomly search for a
 ;       while, it will not return EatFoodAction. 
+;
+; @todo Currently you should use the same variables in different rules if they 
+;       have the same meaning. For instance, in the previous example, you should 
+;       stick to (VariableNode "$var_food") in both two rules. We will remove this 
+;       limitation later. Probably just add a new function like get_psi_rules.   
 ;
 (define (make_psi_plan goal)
     (let ( (planned_goal_list (list) )
@@ -445,7 +450,7 @@
                        )
                      ) 
 
-                    (display "do_plan for ") (newline) (display current_goal) (newline)
+;                    (display "do_plan for ") (newline) (display current_goal) (newline)
 
                     ; Append current goal to end of the planned goal list,
                     ; then it will not be planned twice. 
@@ -460,7 +465,7 @@
                                (atom_outgoings (cog-outgoing-set current_goal) )
                              )
 
-                             (display "No direct rules for ") (newline) (display current_goal) (newline)
+;                              (display "No direct rules for ") (newline) (display current_goal) (newline)
                             
                              (if (not (null? atom_outgoings) )
                                  (cond 
@@ -482,7 +487,7 @@
                                (search_result (list) )
                              )
 
-                             (display "Available rules ") (newline) (display available_rule_list) (newline)
+;                              (display "Available rules ") (newline) (display available_rule_list) (newline)
                              
                              ; Search a rule with True context 
                              (let search_rule_with_true_context ( (rule_list available_rule_list)
@@ -508,8 +513,8 @@
                                                            (set! unreachable_rule_list 
                                                                  (append unreachable_rule_list (list current_rule) ) 
                                                            )
-                                                           (display "search_result ") (newline) (display search_result) (newline)
-                                                           (display "False context rule ") (newline) (display current_rule) (newline)
+;                                                            (display "search_result ") (newline) (display search_result) (newline)
+;                                                            (display "False context rule ") (newline) (display current_rule) (newline)
                                                            (search_rule_with_true_context (cdr rule_list) ) 
                                                        )   
 
@@ -518,8 +523,8 @@
                                                            (set! reachable_rule_list
                                                                  (append reachable_rule_list (list current_rule) )
                                                            )
-                                                           (display "search_result ") (newline) (display search_result) (newline)
-                                                           (display "True context rule ") (newline) (display current_rule) (newline)
+;                                                            (display "search_result ") (newline) (display search_result) (newline)
+;                                                            (display "True context rule ") (newline) (display current_rule) (newline)
                                                            (set! selected_rule current_rule)
                                                        )   
                                                    ); if 
@@ -537,7 +542,7 @@
                                  ; TODO: we should take advantage of weights (truth value) of
                                  ;       rules for selection using roulette wheel selection. 
                                  (begin
-                                     (display "Failed to find any rule with true context ") (newline)
+;                                      (display "Failed to find any rule with true context ") (newline)
 
                                      (set! selected_rule 
                                            (random_select available_rule_list)
@@ -555,7 +560,7 @@
                                  (let ( (selected_context_action (random_select search_result) )
                                       ) 
 
-                                      (display "Found a rule with true context ") (display search_result) (newline)
+;                                       (display "Found a rule with true context ") (display search_result) (newline)
 
                                       (if (equal? (member selected_context_action context_action_list)
                                                   #f
@@ -598,4 +603,195 @@
 
     ); let    
 ); define
+
+; BindLink used by pattern matcher to get the ReferenceLink given the first
+; outgoing
+(define (find_reference_link first_outgoing)
+    (BindLink
+        ; Variables
+        (VariableNode "$var_any")
+
+        (ImplicationLink
+            ; Pattern to be searched
+            (ReferenceLink
+                first_outgoing
+                (VariableNode "$var_any")
+            ) 
+
+            ; Return result
+            (ReferenceLink
+                first_outgoing
+                (VariableNode "$var_any")
+            ) 
+        ); ImplicationLink
+
+    ); BindLink 
+)
+
+; Return the ReferenceLink given the first outgoing
+(define (get_reference_link first_outgoing)
+    (let ( (reference_link_list 
+                (query_atom_space (find_reference_link first_outgoing) ) 
+           )
+         )
+
+         (if (null? reference_link_list) 
+             (list)
+             (car reference_link_list)
+         )
+    ) 
+)
+
+; Return the reference of the given atom
+(define (get_reference first_outgoing)
+    (let ( (reference_link (get_reference_link first_outgoing) )
+         )
+       
+         (if (null? reference_link)
+             (list) 
+             (list-ref (cog-outgoing-set reference_link) 1)
+         )   
+    ) 
+)
+
+; Remove the old ReferenceLink (if any) holding the first_outgoing and 
+; create a new ReferenceLink containing the given outgoings, 
+; return the newly created ReferenceLink
+(define (update_reference_link first_outgoing second_outgoing)
+    (let ( (old_reference_link (get_reference_link first_outgoing) )
+         )
+
+         (if (not (null? old_reference_link) )
+             (cog-delete old_reference_link) 
+         )
+
+         (ReferenceLink
+             first_outgoing
+             second_outgoing
+         )
+    )
+)
+
+; Return a list containing all the demand goals (EvaluationLink) 
+; The list of demand goals is initialized by PsiActionSelectionAgent::initDemandGoalList
+(define (get_demand_goal_list)
+    (let ( (demand_goal_list_list_link
+               (get_reference (ConceptNode "plan_demand_goal_list") ) 
+           ) 
+         )
+
+         (cog-outgoing-set demand_goal_list_list_link)
+    )
+)
+
+; Return a randomly selected demand goal (EvaluationLink)
+(define (get_random_demand_goal) 
+    (random_select (get_demand_goal_list) )
+)
+
+; Reuturn the demand goal (EvaluationLink) with lowest truth value
+(define (get_most_critical_demand_goal)
+    (let ( (demand_goal_list (get_demand_goal_list) )
+           (most_critical_demand_goal (list) )
+           (most_critical_truth_value 1)
+         )
+        
+         (map 
+             (lambda (demand_goal)
+                 (let ( (demand_goal_truth_value
+                             (get_truth_value_mean (cog-tv demand_goal) )
+                        )
+                      )
+
+                      (if (< demand_goal_truth_value most_critical_truth_value)
+                          (begin
+                              (set! most_critical_truth_value demand_goal_truth_value) 
+                              (set! most_critical_demand_goal demand_goal)
+                          )    
+                      )
+                 ) 
+             )
+
+             demand_goal_list
+         )
+       
+         ; Return the demand goal with lowest truth value
+         most_critical_demand_goal
+    )
+)
+
+; Do the planning, this function is called by PsiActionSelectionAgent::doPlanning
+; TODO: take advantage of modulators later
+(define (do_planning)
+    (let ( (selected_demand_goal (list) )
+           (plan_result (list) )
+           (rule_list (list) )
+           (context_list (list) )
+           (action_list (list) )
+         )
+
+         ; Select the most critical demand goal
+         ; TODO: if selected_demand_goal is null?
+         (set! selected_demand_goal (get_most_critical_demand_goal) )
+
+         ; Planning
+         ; TODO: if the planning result is null?
+         (set! plan_result (make_psi_plan selected_demand_goal) )
+
+         ; Get rule list
+         (set! rule_list (car plan_result) )
+
+         ; Get context and action list
+         ; replace empty (list) with NULL_CONTEXT or NULL_ACTION
+         (map-in-order
+             (lambda (context_action)
+                 (let ( (context (list-ref context_action 0) )
+                        (action (list-ref context_action 1) )
+                      )
+
+                      (if (null? context)
+                          (set! context NULL_CONTEXT) 
+                      )
+
+                      (if (null? action)
+                          (set! action NULL_ACTION) 
+                      )
+
+                      (set! context_list
+                            (append context_list (list context) )
+                      )
+
+                      (set! action_list
+                            (append action_list (list action) )
+                      )
+                 ); let 
+             ); lambda 
+
+             (list-ref plan_result 1)
+         )
+
+         ; Update the planning result stored in AtomSpace
+         ; PsiActionSelectionAgent will actually execute the plan
+         (update_reference_link 
+             (ConceptNode "plan_rule_list") 
+             (apply ListLink rule_list) 
+         )
+
+         (update_reference_link
+             (ConceptNode "plan_context_list") 
+             (apply ListLink context_list)
+         )
+
+         (update_reference_link
+             (ConceptNode "plan_action_list") 
+             (apply ListLink action_list)
+         )
+
+         (update_reference_link
+             (ConceptNode "plan_selected_demand_goal") 
+             selected_demand_goal
+         )
+
+    ); let        
+)
 

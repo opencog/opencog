@@ -15,4 +15,5 @@ ADD_DEPENDENCIES(AtomSpaceExtensions embodiment_atom_types)
 TARGET_LINK_LIBRARIES (AtomSpaceExtensions
     util
     atomspace
+    query
 )

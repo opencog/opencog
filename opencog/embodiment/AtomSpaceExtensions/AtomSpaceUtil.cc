@@ -30,6 +30,8 @@
 #include <opencog/atomspace/Temporal.h>
 #include <opencog/atomspace/TemporalTable.h>
 
+#include <opencog/query/PatternMatch.h>
+
 #include <opencog/util/misc.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
@@ -713,6 +715,57 @@ Handle AtomSpaceUtil::getMostRecentEvaluationLink(const AtomSpace& atomSpace,
     }
 
     return selectedHandle;
+}
+
+Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgoing) 
+{
+    // Create BindLink used by pattern matcher
+    std::vector<Handle> referenceLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings; 
+
+    Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any");
+
+    referenceLinkOutgoings.push_back(hFirstOutgoing); 
+    referenceLinkOutgoings.push_back(hVariableNode); 
+    Handle hReferenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoings);
+
+    implicationLinkOutgoings.push_back(hReferenceLink); 
+    implicationLinkOutgoings.push_back(hReferenceLink); 
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings); 
+
+    bindLinkOutgoings.push_back(hVariableNode);  
+    bindLinkOutgoings.push_back(hImplicationLink); 
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);  
+
+    // Run pattern matcher
+    PatternMatch pm; 
+    pm.set_atomspace(&atomSpace); 
+    Handle hResultListLink = pm.bindlink(hBindLink);
+
+    // Check and return the result
+    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink); 
+  
+//    foreach(Handle hResult, resultSet) {
+//        std::cout<<atomSpace.atomAsString(hResult)<<std::endl; 
+//    }
+
+    if ( resultSet.size() != 1 ) {
+        logger().error( "AtomSpaceUtil::%s - The number of ReferenceLink containing '%s' should be exactly 1, but got %d", 
+                       __FUNCTION__, 
+                       atomSpace.atomAsString(hFirstOutgoing).c_str(), 
+                       resultSet.size()
+                      );
+
+        return Handle::UNDEFINED; 
+    }
+    
+   
+    return resultSet[0];  
+}
+
+Handle AtomSpaceUtil::getReference(AtomSpace & atomSpace, Handle hFirstOutgoing)
+{
+    Handle hReferenceLink = AtomSpaceUtil::getReferenceLink(atomSpace, hFirstOutgoing); 
+    return atomSpace.getOutgoing(hReferenceLink, 1); 
 }
 
 float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
