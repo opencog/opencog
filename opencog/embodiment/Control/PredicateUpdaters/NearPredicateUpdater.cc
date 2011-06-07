@@ -124,6 +124,10 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
 
 void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, string entityA_id, string entityB_id, string entityC_id, AtomSpace& atomSpace);
 
+//! @todo Doesn't process 3-object relations (i.e. BETWEEN). Should use more filtering to restrict its search (e.g. based on the
+//! spatial grid, and/or apriori knowledge about which things can happen (e.g. "A is between B and C" can only happen if
+//! "B is left of A" and "C is right of A".) Maybe respond only when an object has moved (or the agent - these relations are
+//! evaluated from a certain perspective).
 void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::AtomSpace& atomSpace)
 {
     HandleSeq resultingFrames;
@@ -173,15 +177,15 @@ void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::
                 addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], "", atomSpace);
                 numRelations += relations.size();
 
-                for( k = 0; k < entitiesC.size( ); ++k ) {
-                    if ( entitiesA[i] == entitiesC[k] || entitiesB[j] == entitiesC[k] ) {
-                        continue;
-                    } // if
-                    const spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
-                    relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB, *entityC );
-                    addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], entitiesC[k], atomSpace );
-                    numRelations += relations.size();
-                } // for
+//                for( k = 0; k < entitiesC.size( ); ++k ) {
+//                    if ( entitiesA[i] == entitiesC[k] || entitiesB[j] == entitiesC[k] ) {
+//                        continue;
+//                    } // if
+//                    const spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
+//                    relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB, *entityC );
+//                    addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], entitiesC[k], atomSpace );
+//                    numRelations += relations.size();
+//                } // for
             } // for
         } // for
     } catch( const opencog::NotFoundException& ex ) {
