@@ -776,7 +776,6 @@ void PAI::processPetSignal(DOMElement * element)
 
     ActionStatus statusCode = PerceptionActionInterface::NONE;
     if (planIdStr && strlen(planIdStr)) {
-std::cout<<"timestamp = "<<timestamp<<" status = "<<status<<" action-plan-id = "<<planIdStr<<" name = "<<name<<std::endl;
         if (!strcmp(status, DONE_ACTION_STATUS)) {
             statusCode = PerceptionActionInterface::DONE;
 //std::cout<<"ActionStatus: Done"<<std::endl; 

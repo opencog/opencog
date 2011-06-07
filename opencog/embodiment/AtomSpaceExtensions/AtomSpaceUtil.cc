@@ -741,9 +741,15 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgo
     pm.set_atomspace(&atomSpace); 
     Handle hResultListLink = pm.bindlink(hBindLink);
 
-    // Check and return the result
+    // Get result
+    // Note: Don't forget remove the hResultListLink, otherwise some scheme script
+    //       may fail to remove the ReferenceLink when necessary. 
+    //       Because the ReferenceLink would have an incoming (i.e. hResultListLink here), 
+    //       which would make cog-delete scheme function fail.  
     std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink); 
-  
+    atomSpace.removeAtom(hResultListLink);
+
+    // Check and return the result
 //    foreach(Handle hResult, resultSet) {
 //        std::cout<<atomSpace.atomAsString(hResult)<<std::endl; 
 //    }

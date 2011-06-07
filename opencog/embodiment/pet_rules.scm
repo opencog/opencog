@@ -205,82 +205,37 @@
     (add_goal (PredicateNode "CurrentDemandGoal") )
 )
 
-(ReferenceLink
-    (ConceptNode "CurrentDemandGoal") 
-    CurrentDemandGoal
-)
-
 (define PreviousDemandGoal
     (add_goal (PredicateNode "PreviousDemandGoal") )
-)
-
-(ReferenceLink
-    (ConceptNode "PreviousDemandGoal") 
-    PreviousDemandGoal
 )
 
 (define EnergyDemandGoal 
     (add_goal (PredicateNode "EnergyDemandGoal") )
 )
 
-(ReferenceLink
-    (ConceptNode "EnergyDemandGoal") 
-    EnergyDemandGoal
-)
-
 (define WaterDemandGoal
     (add_goal (PredicateNode "WaterDemandGoal") )
-)
-
-(ReferenceLink
-    (ConceptNode "WaterDemandGoal") 
-    WaterDemandGoal
 )
 
 (define IntegrityDemandGoal
     (add_goal (PredicateNode "IntegrityDemandGoal") )
 )
 
-(ReferenceLink
-    (ConceptNode "IntegrityDemandGoal") 
-    IntegrityDemandGoal
-)
-
 (define AffiliationDemandGoal
     (add_goal (PredicateNode "AffiliationDemandGoal") )
-)
-
-(ReferenceLink
-    (ConceptNode "AffiliationDemandGoal") 
-    AffiliationDemandGoal
 )
 
 (define CertaintyDemandGoal
     (add_goal (PredicateNode "CertaintyDemandGoal") )
 )
 
-(ReferenceLink
-    (ConceptNode "CertaintyDemandGoal") 
-    CertaintyDemandGoal
-)
-
 (define CompetenceDemandGoal
     (add_goal (PredicateNode "CompetenceDemandGoal") )
-)
-
-(ReferenceLink
-    (ConceptNode "CompetenceDemandGoal")
-    CompetenceDemandGoal
 )
 
 ; TODO: TestEnergy is only used for debugging. Remove it once finished. 
 (define TestEnergyDemandGoal
     (add_goal (PredicateNode "TestEnergyDemandGoal") )
-)
-
-(ReferenceLink
-    (ConceptNode "TestEnergyDemandGoal") 
-    TestEnergyDemandGoal
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -557,11 +512,6 @@
     )    
 )
 
-(ReferenceLink
-    (ConceptNode "GetFoodGoal") 
-    GetFoodGoal
-)
-
 (ForAllLink
     (ListLink
         (VariableNode "$var_food") 
@@ -586,11 +536,6 @@
         (add_goal (PredicateNode "is_drinkable") (VariableNode "$var_water") ) 
         (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_water") )
     )    
-)
-
-(ReferenceLink
-    (ConceptNode "GetWaterGoal") 
-    GetWaterGoal
 )
 
 (ForAllLink
@@ -622,21 +567,11 @@
     )
 )
 
-(ReferenceLink
-    (ConceptNode "GetPeePlaceGoal") 
-    GetPeePlaceGoal
-)    
-
 (define GetPooPlaceGoal
     (AndLink
         (add_goal (PredicateNode "is_poo_place") (VariableNode "$var_poo_place") ) 
         (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_poo_place") )
     )
-)
-
-(ReferenceLink
-    (ConceptNode "GetPooPlaceGoal") 
-    GetPooPlaceGoal
 )
 
 (ForAllLink
@@ -705,21 +640,11 @@
     (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_near_object") )
 )
 
-(ReferenceLink
-    (ConceptNode "GetNearObjectGoal") 
-    GetNearObjectGoal
-)
-
 (define GetNearPickupableObjectGoal
     (AndLink
         (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_near_pickupable_object") ) 
         (add_goal (PredicateNode "is_pickupable") (VariableNode "$var_near_pickupable_object") )
     ) 
-)
-
-(ReferenceLink
-    (ConceptNode "GetNearPickupableObjectGoal") 
-    GetNearPickupableObjectGoal
 )
 
 (ForAllLink

@@ -663,7 +663,7 @@
          )
 
          (if (not (null? old_reference_link) )
-             (cog-delete old_reference_link) 
+             (cog-delete-recursive old_reference_link) 
          )
 
          (ReferenceLink

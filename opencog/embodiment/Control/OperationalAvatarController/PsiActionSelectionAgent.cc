@@ -160,6 +160,8 @@ void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
 
     this->plan_selected_demand_goal = hSelectedDemandGoal; 
 
+/**    
+    // TODO: The code below would crash, and I don't know why. 
     Handle hRuleList =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE, 
@@ -168,7 +170,7 @@ void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
                                    );
 
     this->plan_rule_list = atomSpace.getOutgoing(hRuleList); 
-
+*/
     Handle hContextList =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE, 
