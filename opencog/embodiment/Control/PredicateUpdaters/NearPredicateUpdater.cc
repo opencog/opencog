@@ -26,9 +26,11 @@
 
 #include "NearPredicateUpdater.h"
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/spatial/Entity.h>
 
 using namespace OperationalAvatarController;
 using namespace opencog;
+using namespace spatial;
 
 NearPredicateUpdater::NearPredicateUpdater(AtomSpace &_atomSpace) :
         BasicPredicateUpdater(_atomSpace) {}
@@ -118,6 +120,109 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
                         __FUNCTION__, ex.getMessage( ) );
     } // catch
         
+}
+
+void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, string entityA_id, string entityB_id, string entityC_id, AtomSpace& atomSpace);
+
+void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::AtomSpace& atomSpace)
+{
+    HandleSeq resultingFrames;
+
+    Handle objectA;
+    Handle objectB;
+    Handle objectC;
+
+    // there is no map, no update is possible
+    if (!atomSpace.getSpaceServer().isLatestMapValid()) {
+        logger().warn( "%s - No space map handle found!", __FUNCTION__);
+        return;
+    }
+    const SpaceServer::SpaceMap& spaceMap =
+        atomSpace.getSpaceServer( ).getLatestMap( );
+
+    double besideDistance = spaceMap.getNextDistance( );
+
+    std::vector<std::string> entitiesA;
+    std::vector<std::string> entitiesB;
+    std::vector<std::string> entitiesC;
+
+    spaceMap.getAllObjects( std::back_inserter( entitiesA ) );
+    spaceMap.getAllObjects( std::back_inserter( entitiesB ) );
+    spaceMap.getAllObjects( std::back_inserter( entitiesC ) );
+
+    logger().debug( "%s - %d candidates for objectA. %d candidates for objectB. %d candidates for objectC",
+                    __FUNCTION__, entitiesA.size( ), entitiesB.size( ), entitiesC.size( ) );
+
+    int numRelations = 0;
+
+    try {
+        const spatial::EntityPtr& observerEntity = spaceMap.getEntity( atomSpace.getName( observer ) );
+
+        unsigned int i, j, k;
+        for( i = 0; i < entitiesA.size( ); ++i ) {
+            const spatial::EntityPtr& entityA = spaceMap.getEntity( entitiesA[i] );
+            for( j = 0; j < entitiesB.size( ); ++j ) {
+                if ( entitiesA[i] == entitiesB[j] ) {
+                    continue;
+                } // if
+                const spatial::EntityPtr& entityB = spaceMap.getEntity( entitiesB[j] );
+                std::list<Entity::SPATIAL_RELATION> relations;
+
+                // All size-2 and all size-3 relations
+                relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB );
+                addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], "", atomSpace);
+                numRelations += relations.size();
+
+                for( k = 0; k < entitiesC.size( ); ++k ) {
+                    if ( entitiesA[i] == entitiesC[k] || entitiesB[j] == entitiesC[k] ) {
+                        continue;
+                    } // if
+                    const spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
+                    relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB, *entityC );
+                    addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], entitiesC[k], atomSpace );
+                    numRelations += relations.size();
+                } // for
+            } // for
+        } // for
+    } catch( const opencog::NotFoundException& ex ) {
+        logger().error( "%s - %s", __FUNCTION__, ex.getMessage( ) );
+        return;
+    } // if
+
+    logger().debug( "%s - Finished evaluating: %d spatial relations are true: %d combinations of 3 objects",
+            __FUNCTION__, numRelations, entitiesA.size()*entitiesB.size()*entitiesC.size());
+
+    return;
+}
+
+void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, std::string entityA_id, std::string entityB_id, std::string entityC_id, AtomSpace& atomSpace)
+{
+//    const SpaceServer::SpaceMap& spaceMap =
+//        atomSpace.getSpaceServer().getLatestMap();
+    HandleSeq justEntityA, justEntityB, justEntityC;
+    atomSpace.getHandleSet(back_inserter(justEntityA), OBJECT_NODE, entityA_id, true);
+    atomSpace.getHandleSet(back_inserter(justEntityB), OBJECT_NODE, entityB_id, true);
+
+    Handle entityA, entityB, entityC;
+
+    entityA = justEntityA[0];
+    entityB = justEntityB[0];
+
+    if (entityC_id.size()) {
+        atomSpace.getHandleSet(back_inserter(justEntityC), OBJECT_NODE, entityC_id, true);
+        entityC = justEntityC[0];
+    } else {
+        entityC == Handle::UNDEFINED;
+    }
+
+    SimpleTruthValue tv( 1, 1 );
+    foreach (Entity::SPATIAL_RELATION rel, relations) {
+        string predicateName = Entity::spatialRelationToString(rel);
+        if (entityC == Handle::UNDEFINED)
+            AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB );
+        else
+            AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB, entityC );
+    }
 }
 
 void NearPredicateUpdater::setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean )

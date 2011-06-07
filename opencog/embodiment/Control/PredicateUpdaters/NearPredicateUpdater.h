@@ -44,8 +44,10 @@ public:
 
     virtual void update(Handle object, Handle pet, unsigned long timestamp );
 
- protected:
-    
+    static void computeAllSpatialRelations(Handle observer, opencog::AtomSpace& atomSpace);
+
+protected:
+
     void setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean );    
 
     unsigned long lastTimestamp;

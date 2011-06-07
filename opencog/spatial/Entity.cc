@@ -612,9 +612,6 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
              ( *it == ABOVE && relationsAB[5] ) ) {
             relations.push_back( BETWEEN );
         } // if
-        if ( activeRelationsAB[*it] ) {
-            relations.push_back( *it );
-        } // if
     } // for
 
     return relations;
@@ -782,7 +779,6 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
     return spatialRelations;
     
 }
-
 
 std::string Entity::spatialRelationToString( Entity::SPATIAL_RELATION relation ) {
     switch( relation ) {

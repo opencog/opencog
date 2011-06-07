@@ -41,6 +41,9 @@
 
 namespace opencog
 {
+    class Handle;
+    class AtomSpace;
+
     namespace spatial
     {
 
@@ -431,15 +434,8 @@ namespace opencog
                                                                  const Entity& entityB ) const;
 
             /**
-             * Extract the spatial relations that are common
-             * to all the three entities. i.e. 
-             * if B is near A and C is near A
-             * so NEAR will compose the final relations list
-             * but if C is right of A and B is left of A
-             * so nor left of neither right of will compose
-             * the final relations list.
-             * The final list can also contains the relation BETWEEN
-             * what states that A is between B and C
+             * Finds the list of spatial relationships that apply to the three entities.
+             * Currently this can only be BETWEEN, which states that A is between B and C
              *
              * @param observer The observer entity
              * @param besideDistance A distance used as threshold for considering an object beside or not another
