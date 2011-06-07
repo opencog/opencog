@@ -82,7 +82,6 @@ EntropyFilter::EntropyFilter(const std::string& self_id,
         _idos(idos), _dos(dos), _ms(ms), _atas(atas),
         _input_arg_types(input_arg_types),
         _total_time(0),
-        _is_moving_str(IS_MOVING_STR),
         _indefToDef(id::pet_indefinite_object_count, ""),
         _rng(rng)
 {
@@ -199,8 +198,8 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
         //compute isMoving for all object, if the object does not belong
         //to the hash_map yet it goes with true, because we don't have previous
         //value of the predicate at this point
-        for (definite_object_set_const_it doi = _dos.begin(); doi != _dos.end(); ++doi)
-            setIsMoving(*doi, pre_sm, sm);
+        foreach(const definite_object& obj, _dos)
+            setIsMoving(obj, pre_sm, sm);
         //eval each perception
         for (combo_tree_bool_time_map_it vti = _perceptToBoolTime.begin();
                 vti != _perceptToBoolTime.end(); ++vti)
@@ -331,60 +330,6 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                         t = cur_tu + 1;
                     }
                 }
-
-
-                /*
-
-                //get listLink
-                Handle listLink_h = as.getOutgoing(evalLink_h, 1);
-                //check all arguments of is_last_agent_action
-                //exept the first argument which has already been checked
-                bool does_match = true;
-                unsigned arity = as.getArity(listLink_h);
-                if(head_it.number_of_children()== arity && arity>=2) {
-                ++head_child_it;
-                Handle action_h = as.getOutgoing(listLink_h, 1);
-                if(*head_child_it == get_action_definite_object(action_h)) {
-                for(unsigned a = 2; a < arity && does_match;
-                 a++, ++head_child_it) {
-                Handle arg_h = as.getOutgoing(listLink_h, a);
-                const vertex& v = *head_child_it;
-                does_match = is_definite_object(v) &&
-                 definite_object_equal(get_definite_object(v),
-                  defintie_object(as.getName(arg_h)));
-
-                }
-                }
-                }
-                Handle action_h = as.getOutgoing(listLink_h, 1);
-                definite_object action_name =
-                get_action_definite_object(as.getName(action_h));
-
-                }
-                }
-
-
-                unsigned int ilaad = IS_LAST_AGENT_ACTION_DELAY;
-                for(unsigned long i = ltu; i > ltl; i-=ilaad) {
-                if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
-                       smh,
-                       i,
-                       _spaceServer,
-                       _self_id,
-                       _owner_id,
-                       head_it,
-                       true))) {
-                unsigned long idiff;
-                if(i-ilaad>ltl)
-                idiff = ilaad;
-                else idiff = i-ltl;
-                std::pair<bool, unsigned long>& p = vti->second;
-                p.second += idiff;
-                }
-                }
-                */
-
-
             }
             //check if we can use the previous value rather than computing
             //a new one
@@ -393,9 +338,9 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                 if (isMovOptPossible && doesInvolveMoving(head)) {
                     canUsePreviousValue = true;
                     for (sib_it opra = head_it.begin();
-                            opra != head_it.end() && canUsePreviousValue; ++opra) {
-                        canUsePreviousValue = !getIsMoving(get_definite_object(*opra));
-                    }
+                         opra != head_it.end() && canUsePreviousValue; ++opra)
+                        canUsePreviousValue =
+                            !getIsMoving(get_definite_object(*opra));
                 } else canUsePreviousValue = false;
                 //eval the new perception
                 std::pair<bool, unsigned long>& p = vti->second;
@@ -409,7 +354,8 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                                               head_it,
                                               true));
                 }
-                if (p.first)
+                if (p.first)    // use the previous value (isMoving
+                                // optimization)
                     p.second += ldiff;
             }
 
@@ -476,11 +422,11 @@ void EntropyFilter::rebuildPerceptToTime()
 
 //fill pred_set with all predicates with entropy above threshold
 void EntropyFilter::generateFilteredPerceptions(combo_tree_ns_set& pred_set,
-        double threshold)
+                                                double threshold)
 {
 #ifdef ISMOVING_OPTIMIZE
     for (combo_tree_bool_time_map_it is = _perceptToBoolTime.begin();
-            is != _perceptToBoolTime.end(); ++is) {
+         is != _perceptToBoolTime.end(); ++is) {
         std::pair<bool, unsigned long>& pa = is->second;
         float p = (float)pa.second / (float)_total_time;
         float entropy = opencog::binaryEntropy(p);
@@ -508,41 +454,31 @@ inline bool EntropyFilter::doesInvolveMoving(vertex v)
             || v == instance(id::above) || v == instance(id::inside));
 }
 
+inline void EntropyFilter::setIsMoving(const definite_object& obj, bool val)
+{
+#ifdef ISMOVING_SET
+    if(val)
+        _isMoving.insert(obj);
+    else
+        _isMoving.erase(obj);
+#else
+    _isMoving[obj] = val;
+#endif
+}
+
 inline void EntropyFilter::setIsMoving(const definite_object& obj,
                                        const SpaceServer::SpaceMap* pre_sm,
                                        const SpaceServer::SpaceMap& sm)
 {
-#ifdef ISMOVING_SET
     if (pre_sm == NULL)
-        _isMoving.insert(obj);
+        setIsMoving(obj, true);
     else {
-        Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace,
-                       obj,
-                       _self_id,
-                       _owner_id);
-        definite_object_hash_set_const_it obj_it = _isMoving.find(obj);
-        if (AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace, *pre_sm, sm, obj_h)) {
-            if (obj_it == _isMoving.end())
-                _isMoving.insert(obj);
-        } else {
-            if (obj_it != _isMoving.end())
-                _isMoving.erase(obj_it);
-        }
+        Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace, obj,
+                                                  _self_id, _owner_id);
+        setIsMoving(obj, AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace,
+                                                            *pre_sm, sm,
+                                                            obj_h));
     }
-#else
-    if (pre_sm == NULL)
-        _isMoving[obj] = true;
-    else {
-        Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace,
-                       obj,
-                       _self_id,
-                       _owner_id);
-        _isMoving[obj] = AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace,
-                         obj,
-                         sm,
-                         obj_h);
-    }
-#endif
 }
 
 inline bool EntropyFilter::getIsMoving(const definite_object& obj)
@@ -593,10 +529,9 @@ void EntropyFilter::build_and_insert_atomic_perceptions(perception p)
 }
 
 void EntropyFilter::build_and_insert_atomic_perceptions(const combo_tree& tr,
-        arity_t arity)
+                                                        arity_t arity)
 {
-    OC_ASSERT(arity >= 0,
-                     "arity is necessarily positive or null");
+    OC_ASSERT(arity >= 0, "arity is necessarily positive or null");
     OC_ASSERT(!tr.empty(), "tr cannot be empty");
     pre_it head = tr.begin();
 

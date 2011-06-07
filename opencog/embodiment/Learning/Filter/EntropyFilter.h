@@ -39,7 +39,12 @@
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 
-//enable optimization of the algo based on is_moving
+// Enable optimization of the algo based on _isMoving. It computes
+// _isMoving (via setIsMoving) for all entities over the given time
+// interval and at each considered instant do not calculate the
+// predicates that are invariant over fixed entites (via checking the
+// predicate with the method doesInvolveMoving) and use their previous
+// value instead (via _perceptToBoolTime)
 #define ISMOVING_OPTIMIZE
 
 //enable optimize using lru_cache
@@ -49,11 +54,8 @@
 //#define LRU_CACHE_OPTIMIZE
 
 //use a set of definite_object rather than a map to bool, can be faster
-//if there are only a few mobing object
+//if there are only a few moving object
 #define ISMOVING_SET
-
-//that string is used by the predicate evaluator
-#define IS_MOVING_STR "is_moving"
 
 namespace Filter
 {
@@ -194,8 +196,6 @@ private:
 
     Handle _spaceMapNode;
 
-    std::string _is_moving_str;
-
 #ifdef ISMOVING_SET
     definite_object_hash_set _isMoving;
 #else
@@ -211,9 +211,22 @@ private:
 
     opencog::RandGen& _rng;
 
+    /**
+     * Return true is the vertex corresponds to a predicate that is
+     * invariant if the entities involved are immobile.
+     */
     inline bool doesInvolveMoving(vertex v);
 
-    //set up obj in the cache isMoving
+    /**
+     * Set the value of the cache _isMoving with val for entity obj
+     */
+    inline void setIsMoving(const definite_object& obj,
+                            bool val);
+
+    /**
+     * Set the value of the cache _isMoving for entity obj with true
+     * if the object has moved between SpaceMap pre_sm and sm.
+     */
     inline void setIsMoving(const definite_object& obj,
                             const SpaceServer::SpaceMap* pre_sm,
                             const SpaceServer::SpaceMap& sm);
