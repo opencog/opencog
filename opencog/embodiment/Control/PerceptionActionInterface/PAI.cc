@@ -772,12 +772,17 @@ void PAI::processPetSignal(DOMElement * element)
     XMLString::transcode(STATUS_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* status = XMLString::transcode(element->getAttribute(tag));
 
+//std::cout<<"timestamp = "<<timestamp<<" status = "<<status<<" action-plan-id = "<<planIdStr<<" name = "<<name<<std::endl; 
+
     ActionStatus statusCode = PerceptionActionInterface::NONE;
     if (planIdStr && strlen(planIdStr)) {
+std::cout<<"timestamp = "<<timestamp<<" status = "<<status<<" action-plan-id = "<<planIdStr<<" name = "<<name<<std::endl;
         if (!strcmp(status, DONE_ACTION_STATUS)) {
             statusCode = PerceptionActionInterface::DONE;
+//std::cout<<"ActionStatus: Done"<<std::endl; 
         } else if (!strcmp(status, ERROR_ACTION_STATUS)) {
             statusCode = PerceptionActionInterface::ERROR;
+//std::cout<<"ActionStatus: ERROR"<<std::endl; 
         }
     }
 

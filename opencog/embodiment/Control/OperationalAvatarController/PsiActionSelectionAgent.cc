@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-05-31
+ * @date 2011-06-02
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -50,7 +50,10 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
                   );
 
     // Get OAC
-//    OAC * oac = (OAC *) server;
+    OAC * oac = (OAC *) server;
+
+    // Get AtomSpace
+    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get Procedure repository
 //    const Procedure::ProcedureRepository & procedureRepository = 
@@ -60,7 +63,7 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
 //    const std::string & petId = oac->getPet().getPetId();
 
     // Initialize the list of Demand Goals
-    this->initDemandGoalList(server);
+    this->initDemandGoalList(atomSpace);
 
     // Reset the seed for pseudo-random numbers
     srand(time(0));
@@ -73,7 +76,7 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
     this->bInitialized = true;
 }
 
-void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
+void PsiActionSelectionAgent::initDemandGoalList(AtomSpace & atomSpace)
 {
     logger().debug(
             "PsiActionSelectionAgent::%s - Initializing the list of Demand Goals (Final Goals) [ cycle =%d ]",
@@ -81,14 +84,8 @@ void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
                     this->cycleCount
                   );
 
-    // Get OAC
-    OAC * oac = (OAC *) server;
-
-    // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get petId
-//    const std::string & petId = oac->getPet().getPetId();
+    // Clear the old demand goal list
+    this->psi_demand_goal_list.clear(); 
 
     // Get demand names from the configuration file
     std::string demandNames = config()["PSI_DEMANDS"];
@@ -98,11 +95,9 @@ void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
 
     std::string demandPredicateName;
     std::vector<Handle> outgoings; 
-    std::vector<Handle> demandGoalOutgoings; 
 
     outgoings.clear(); 
     Handle hListLink = atomSpace.addLink(LIST_LINK, outgoings);
-    Handle hDemandGoalEvaluationLink; 
 
     for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
           iDemandName != demandNamesTok.end();
@@ -115,14 +110,14 @@ void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
         outgoings.push_back( atomSpace.addNode(PREDICATE_NODE, demandPredicateName) ); 
         outgoings.push_back(hListLink); 
 
-        demandGoalOutgoings.push_back( atomSpace.addLink(EVALUATION_LINK, outgoings) ); 
-        
+        this->psi_demand_goal_list.push_back( atomSpace.addLink(EVALUATION_LINK, outgoings) ); 
+
     }// for
 
     // Create an ReferenceLink holding all the demand goals (EvaluationLink)
     outgoings.clear(); 
-    outgoings.push_back( atomSpace.addNode(CONCEPT_NODE, "plan_demand_goal_list") );
-    outgoings.push_back( atomSpace.addLink(LIST_LINK, demandGoalOutgoings) );  
+    outgoings.push_back( atomSpace.addNode(CONCEPT_NODE, "psi_demand_goal_list") );
+    outgoings.push_back( atomSpace.addLink(LIST_LINK, this->psi_demand_goal_list) );  
     Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, outgoings);
 
     logger().debug("PsiActionSelectionAgent::%s - Add the list of demand goals to AtomSpace: %s [cycle = %d]", 
@@ -132,16 +127,38 @@ void PsiActionSelectionAgent::initDemandGoalList(opencog::CogServer * server)
                   ); 
 }
 
-void PsiActionSelectionAgent::printPlan(opencog::CogServer * server)
+void PsiActionSelectionAgent::getActions(AtomSpace & atomSpace, Handle hStep, 
+                                         std::vector<Handle> & actions)
 {
-    AtomSpace & atomSpace = * ( server->getAtomSpace() ); 
+    opencog::Type atomType = atomSpace.getType(hStep); 
 
+    if (atomType == EXECUTION_LINK) {
+        actions.push_back(hStep); 
+    }
+    else if (atomType == AND_LINK ||
+            atomType == SEQUENTIAL_AND_LINK) {
+        foreach( Handle hOutgoing, atomSpace.getOutgoing(hStep) ) {
+            this->getActions(atomSpace, hOutgoing, actions); 
+        }
+    }
+    else if (atomType == OR_LINK ) {
+        const std::vector<Handle> & outgoings = atomSpace.getOutgoing(hStep); 
+        int randomIndex = (int) (1.0*rand()/RAND_MAX * outgoings.size() - 0.5); 
+        Handle hRandomSelected = outgoings[randomIndex]; 
+        this->getActions(atomSpace, hRandomSelected, actions); 
+    }
+}
+
+void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
+{
     Handle hSelectedDemandGoal =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE,
                                                         "plan_selected_demand_goal"
                                                        )
                                    );
+
+    this->plan_selected_demand_goal = hSelectedDemandGoal; 
 
     Handle hRuleList =
         AtomSpaceUtil::getReference(atomSpace, 
@@ -150,12 +167,16 @@ void PsiActionSelectionAgent::printPlan(opencog::CogServer * server)
                                                        )
                                    );
 
+    this->plan_rule_list = atomSpace.getOutgoing(hRuleList); 
+
     Handle hContextList =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE, 
                                                         "plan_context_list"
                                                        )
                                    );
+
+    this->plan_context_list = atomSpace.getOutgoing(hContextList); 
 
     Handle hActionList =
         AtomSpaceUtil::getReference(atomSpace, 
@@ -164,12 +185,19 @@ void PsiActionSelectionAgent::printPlan(opencog::CogServer * server)
                                                        )
                                    );
 
+    this->plan_action_list = atomSpace.getOutgoing(hActionList);
+    this->temp_action_list = this->plan_action_list; 
+}
+
+void PsiActionSelectionAgent::printPlan(AtomSpace & atomSpace)
+{
     std::cout<<std::endl<<"Selected Demand Goal [cycle = "<<this->cycleCount<<"]:"
-             <<std::endl<<atomSpace.atomAsString(hSelectedDemandGoal)<<std::endl; 
+             <<std::endl<<atomSpace.atomAsString(this->plan_selected_demand_goal)
+             <<std::endl; 
 
     int i = 1; 
 
-    foreach( const Handle hAction, atomSpace.getOutgoing(hActionList) ) {
+    foreach( const Handle hAction, this->plan_action_list ) {
         std::cout<<std::endl<<"Action No."<<i
                  <<std::endl<<atomSpace.atomAsString(hAction);
 
@@ -177,6 +205,60 @@ void PsiActionSelectionAgent::printPlan(opencog::CogServer * server)
     }
 
     std::cout << std::endl;
+}
+
+void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace, 
+                                            Procedure::ProcedureInterpreter & procedureInterpreter, 
+                                            const Procedure::ProcedureRepository & procedureRepository, 
+                                            Handle hActionExecutionLink)
+{
+    // Variables used by combo interpreter
+    std::vector <combo::vertex> schemaArguments;
+
+    // Get Action name
+    std::string actionName = atomSpace.getName( atomSpace.getOutgoing(hActionExecutionLink, 0)
+                                              );
+    // Get combo arguments for Action
+    Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments
+
+    // Process the arguments according to its type
+    foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
+
+        Type argumentType = atomSpace.getType(hArgument);
+
+        if (argumentType == NUMBER_NODE) {
+            schemaArguments.push_back(combo::contin_t(
+                                          boost::lexical_cast<combo::contin_t>(atomSpace.getName(hArgument)
+                                                                              )
+                                                     ) 
+                                     );
+        }
+        else {
+            schemaArguments.push_back( atomSpace.getName(hArgument) );
+        }
+    }// foreach
+
+    // Run the Procedure of the Action
+    //
+    // We will not check the state of the execution of the Action here. Because it may take some time to finish it. 
+    // Instead, we will check the result of the execution within 'run' method during next "cognitive cycle". 
+    //
+    // There are three kinds of results: success, fail and time out (defined by 'PROCEDURE_EXECUTION_TIMEOUT')
+    //
+    // TODO: Before running the combo procedure, check the number of arguments the procedure needed and it actually got
+    //
+    // Reference: "SchemaRunner.cc" line 264-286
+    //
+    const Procedure::GeneralProcedure & procedure = procedureRepository.get(actionName);
+
+    this->currentSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
+
+    logger().debug( "PsiActionSelectionAgent::%s - running action: %s [schemaId = %d, cycle = %d]",
+                    __FUNCTION__,
+                    procedure.getName().c_str(), 
+                    this->currentSchemaId,
+                    this->cycleCount
+                  );
 }
 
 void PsiActionSelectionAgent::run(opencog::CogServer * server)
@@ -204,7 +286,6 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
 
     // Variables used by combo interpreter
-    std::vector <combo::vertex> schemaArguments;
     combo::vertex result; // combo::vertex is actually of type boost::variant <...>
 
     // Get pet
@@ -235,39 +316,12 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     if ( !this->bInitialized )
         this->init(server);
 
-#if HAVE_GUILE    
-
-    // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);    
-    std::string scheme_expression, scheme_return_value;
-
-    scheme_expression = "( do_planning )";
-
-    // Run the Procedure that do planning
-    scheme_return_value = evaluator.eval(scheme_expression);
-
-    if ( evaluator.eval_error() ) {
-        logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
-                         __FUNCTION__, 
-                         scheme_expression.c_str() 
-                      );
-
-        return; 
-    }
-
-    // Print the plan to the screen
-    this->printPlan(server); 
-
-#endif // HAVE_GUILE    
-
-
-/**    
     // Check the state of current running Action: 
     //
     // If it success, fails, or is time out, update corresponding information respectively, and continue processing.
     // Otherwise, say the current Action is still running, do nothing and simply returns. 
     //
-    if (this->currentPsiRule != opencog::Handle::UNDEFINED) {
+    if (this->currentSchemaId != 0) {
 
         logger().debug( "PsiActionSelectionAgent::%s currentSchemaId = %d [ cycle = %d] ", 
                         __FUNCTION__, 
@@ -278,12 +332,16 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
         // If the Action has been done, check the result
         if ( procedureInterpreter.isFinished(this->currentSchemaId) ) {
 
-            logger().debug( "PsiActionSelectionAgent::%s - The Action [ id = %d ] is finished for the Psi Rule: %s [ cycle = %d ].", 
+            logger().debug( "PsiActionSelectionAgent::%s - The Action %s is finished [SchemaId = %d, cycle = %d]", 
                             __FUNCTION__,
+                            atomSpace.atomAsString(this->current_action).c_str(), 
                             this->currentSchemaId,
-                            atomSpace.atomAsString(this->currentPsiRule).c_str(), 
                             this->cycleCount
                           );
+
+std::cout<<std::endl<<"Action " <<atomSpace.atomAsString(this->current_action) 
+         <<" is done [SchemaId = "  << this->currentSchemaId
+         << ", cycle = " << this->cycleCount <<"]"<<std::endl; 
 
             combo::vertex result = procedureInterpreter.getResult(this->currentSchemaId);
 
@@ -292,58 +350,45 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                  ( is_builtin(result) && get_builtin(result) == combo::id::logical_true )
                ) {   
 
-                // Update the truth value of the Goal related to the Action
-                Handle evaluationLinkGoal = atomSpace.getOutgoing(this->currentPsiRule, 1);
-                SimpleTruthValue stvTrue(1.0, 1.0); 
-                atomSpace.setTV(evaluationLinkGoal, stvTrue);
+               logger().debug( "PsiActionSelectionAgent::%s - The Action %s succeeds [SchemaId = %d, cycle = %d]", 
+                              __FUNCTION__,
+                              atomSpace.atomAsString(this->current_action).c_str(), 
+                              this->currentSchemaId,
+                              this->cycleCount
+                            );
 
-                // Remove the corresponding Psi Rule from the rule list
-                //
-                // Note: std::remove itself actually removes NOTHING! 
-                //       It only move all the elements to be removed to the end of the vector, 
-                //       and then returns the iterator pointing to the first element to be removed.
-                //       So you should call 'erase' method to really REMOVE. 
-                //
-                //       An exception is std::list, its remove method really remove element. 
-                //       The behavior of 'remove_if' and 'unique' is similar to 'remove'
-                this->psiPlanList[0].erase( std::remove( this->psiPlanList[0].begin(), 
-                                                         this->psiPlanList[0].end(),
-                                                         this->currentPsiRule
-                                                       ), 
-                                            this->psiPlanList[0].end()
-                                          );      
+std::cout<<"Success"<<std::endl; 
+               // TODO: record the success and update the weight of corresponding rule
 
-               // Update current/ previous Psi Rule 
-                this->previousPsiRule = this->currentPsiRule; 
-                this->currentPsiRule = opencog::Handle::UNDEFINED; 
-                this->currentSchemaId = 0;
             }
             // If check result: fail
             else if ( is_action_result(result) || is_builtin(result) ) {
 
-                logger().warn( "PsiActionSelectionAgent::%s - Failed to execute the Action, while applying the Psi Rule: %s [ cycle = %d ].", 
-                               __FUNCTION__, 
-                               atomSpace.atomAsString(this->currentPsiRule).c_str(), 
-                               this->cycleCount
-                             );
+               logger().debug( "PsiActionSelectionAgent::%s - The Action %s fails [SchemaId = %d, cycle = %d]", 
+                              __FUNCTION__,
+                              atomSpace.atomAsString(this->current_action).c_str(), 
+                              this->currentSchemaId,
+                              this->cycleCount
+                            );
 
-                this->currentPsiRule = opencog::Handle::UNDEFINED;
-                this->currentSchemaId = 0;
+std::cout<<"Fail"<<std::endl; 
 
+               // TODO: record the failure and update the weight of corresponding rule
             }
             // If check result: unexpected result
             else {
-
-                this->currentPsiRule = opencog::Handle::UNDEFINED; 
-                this->currentSchemaId = 0; 
-
                 stringstream unexpected_result;
                 unexpected_result << result;
-                logger().warn( "PsiActionSelectionAgent::%s - Action procedure result should be 'built-in' or 'action result'. Got '%s' [ cycle = %d ].",
+                logger().warn( "PsiActionSelectionAgent::%s - Action procedure result should be 'built-in' or 'action result'. Got '%s' [SchemaId = %d,  cycle = %d].",
                                __FUNCTION__, 
                                unexpected_result.str().c_str(), 
+                               this->currentSchemaId, 
                                this->cycleCount
                              );
+
+std::cout<<"Unexpected result"<<std::endl; 
+
+                // TODO: record the failure and update the weight of corresponding rule
             }
         } 
         // If the Action fails
@@ -358,85 +403,133 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
             //       We should erase one of them, when we really understand the difference between both. 
             //       
             //       [By Zhennua Cai, on 2011-02-03]
-            logger().warn( "PsiActionSelectionAgent::%s - Failed to execute the Action, while applying the Psi Rule: %s [ cycle = %d ].", 
-                           __FUNCTION__, 
-                           atomSpace.atomAsString(this->currentPsiRule).c_str(), 
+            logger().debug( "PsiActionSelectionAgent::%s - The Action %s fails [SchemaId = %d, cycle = %d]", 
+                           __FUNCTION__,
+                           atomSpace.atomAsString(this->current_action).c_str(), 
+                           this->currentSchemaId,
                            this->cycleCount
                          );
 
-            this->currentPsiRule = opencog::Handle::UNDEFINED;
-            this->currentSchemaId = 0;
+std::cout<<"Fail"<<std::endl; 
+
+            // TODO: record the failure and update the weight of corresponding rule
         }
         // If the Action is time out
-        else if ( time(NULL) - this->timeStartCurrentPsiRule >  this->procedureExecutionTimeout ) { 
+        else if ( time(NULL) - this->timeStartCurrentAction >  this->procedureExecutionTimeout ) { 
 
             // Stop the time out Action
             procedureInterpreter.stopProcedure(this->currentSchemaId);
 
-            logger().warn( "PsiActionSelectionAgent::%s - Execution of the Action is time out, while applying the Psi Rule: %s [ cycle = %d ].", 
-                           __FUNCTION__, 
-                           atomSpace.atomAsString(this->currentPsiRule).c_str(), 
+            logger().debug( "PsiActionSelectionAgent::%s - The Action %s is time out [SchemaId = %d, cycle = %d]", 
+                           __FUNCTION__,
+                           atomSpace.atomAsString(this->current_action).c_str(), 
+                           this->currentSchemaId,
                            this->cycleCount
                          );
+            
+std::cout<<"Timeout"<<std::endl; 
 
-            this->currentPsiRule = opencog::Handle::UNDEFINED;
-            this->currentSchemaId = 0;
+            // TODO: record the time out and update the weight of corresponding rule
         }
-        // If the Action is still running, simply returns
+        // If the Action is still running and is not time out, simply returns
         else {  
-            logger().debug( "PsiActionSelectionAgent::%s - Current Action is still running. [ cycle = %d ].", 
-                            __FUNCTION__, 
+            logger().debug( "PsiActionSelectionAgent::%s - Current Action is still running. [SchemaId = %d, cycle = %d]", 
+                            __FUNCTION__,
+                            this->currentSchemaId, 
                             this->cycleCount
+                          );
+
+std::cout<<"+_*"<<std::endl; 
+
+            return; 
+        }
+
+        // Reset current schema id
+        this->currentSchemaId = 0; 
+
+    }// if (this->currentSchemaId != 0)
+
+#if HAVE_GUILE    
+    // If we've used up the current plan, do a new planning
+    if ( this->temp_action_list.empty() ) {
+        // Initialize scheme evaluator
+        SchemeEval & evaluator = SchemeEval::instance(&atomSpace);    
+        std::string scheme_expression, scheme_return_value;
+
+        scheme_expression = "( do_planning )";
+
+        // Run the Procedure that do planning
+        scheme_return_value = evaluator.eval(scheme_expression);
+
+        if ( evaluator.eval_error() ) {
+            logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
+                             __FUNCTION__, 
+                             scheme_expression.c_str() 
                           );
 
             return; 
         }
 
-    }// if (this->currentPsiRule != opencog::Handle::UNDEFINED)
+        // Get the plan stored in AtomSpace
+        this->getPlan(atomSpace); 
 
-    // Select a Demand Goal
-    Handle selectedDemandGoal;
-
-    if ( this->psiPlanList.empty() || this->psiPlanList[0].empty() ) {
-
-        // Select the Demand Goal with lowest truth value
-        selectedDemandGoal = this->chooseMostCriticalDemandGoal(server);
-
-        if ( selectedDemandGoal == opencog::Handle::UNDEFINED ) {
-            logger().warn("PsiActionSelectionAgent::%s - Failed to select the most critical Demand Goal [cycle = %d]", 
-                          __FUNCTION__, 
-                          this->cycleCount
-                         );
-            return; 
-        }
+        // Print the plan to the screen
+        this->printPlan(atomSpace); 
 
         // Update the pet's previously/ currently Demand Goal
-        PsiRuleUtil::setCurrentDemandGoal(atomSpace, selectedDemandGoal);         
+        PsiRuleUtil::setCurrentDemandGoal(atomSpace, this->plan_selected_demand_goal);         
 
-        logger().debug( "PsiActionSelectionAgent::%s - Select the Demand Goal: %s [ cycle = %d ].", 
+        logger().debug( "PsiActionSelectionAgent::%s - do planning for the Demand Goal: %s [cycle = %d]", 
                         __FUNCTION__, 
-                        atomSpace.getName( atomSpace.getOutgoing(selectedDemandGoal, 0)
-                                         ).c_str(), 
+                        atomSpace.atomAsString(this->plan_selected_demand_goal).c_str(), 
                         this->cycleCount
                       );
+    }
+#endif // HAVE_GUILE    
 
-        // Figure out a plan for the selected Demand Goal
-        int steps = 2000000;   // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
+    // Get next action from current plan
+    if ( !this->current_actions.empty() ) {
+        this->current_action = this->current_actions.back(); 
+        this->current_actions.pop_back(); 
+    }
+    else if ( !this->temp_action_list.empty() ) {
+        this->getActions(atomSpace, this->temp_action_list.back(), this->current_actions); 
+        this->temp_action_list.pop_back(); 
 
-        if (this->bPlanByPLN)
-            this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
-        else
-            this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
-    }// if
+        this->current_action = this->current_actions.back(); 
+        this->current_actions.pop_back(); 
+    }
+    else {
+        logger().debug("PsiActionSelectionAgent::%s - Failed to get any actions from the planner. Try planning next cycle [cycle = %d]", 
+                        __FUNCTION__, 
+                        this->cycleCount
+                      ); 
+        return; 
+    }
+
+    // Execute current action
+    this->executeAction(atomSpace, procedureInterpreter, procedureRepository, this->current_action);
+    this->timeStartCurrentAction = time(NULL); 
+/**
+    // TODO: The code snippets below show the idea of how the modulators 
+    // (or emotions) have impact on cognitive process, more specifically planning
+    // here. We should implement the ideas in action_selection.scm later. 
+
+    // Figure out a plan for the selected Demand Goal
+    int steps = 2000000;   // TODO: Emotional states shall have impact on steps, i.e., resource of cognitive process
+
+    if (this->bPlanByPLN)
+        this->planByPLN(server, selectedDemandGoal, this->psiPlanList, steps);
+    else
+        this->planByNaiveBreadthFirst(server, selectedDemandGoal, this->psiPlanList, steps);
+
 
     // Change the current Demand Goal randomly (controlled by the modulator 'SelectionThreshold')
     float selectionThreshold = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
                                                                        SELECTION_THRESHOLD_MODULATOR_NAME,
                                                                        randGen
                                                                       );
-// TODO: uncomment the line below once finish testing
     if ( randGen.randfloat() > selectionThreshold )
-//    if ( false )  // skip this for debugging
     {
 
         selectedDemandGoal = this->chooseRandomDemandGoal(); 
@@ -474,55 +567,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
         }// if
 
     }// if
-
-    // Choose a Psi Rule to be applied
-    Handle hSelectedPsiRule = opencog::Handle::UNDEFINED;
-
-    // This vector has all possible objects/avatars ids to replace wildcard in Psi Rules
-    //
-    // TODO: We would not use wildcard later, 
-    //       and the vector here should be used to replace VariableNode in Psi Rules with ForAllLink
-    std::vector<std::string> varBindCandidates;
-
-    if ( !this->psiPlanList.empty() ) {
-        hSelectedPsiRule = this->pickUpPsiRule(server, this->psiPlanList[0], varBindCandidates);
-    }
-    else {
-        logger().warn( "PsiActionSelectionAgent::%s - Failed to select a Psi Rule to apply because Psi Rule Lists is empty [ cycle = %d].", 
-                       __FUNCTION__, 
-                       this->cycleCount
-                     );
-        return; 
-    }
-
-    // Apply the selected Psi Rule
-    if ( hSelectedPsiRule != opencog::Handle::UNDEFINED ) {
-
-        logger().debug( "PsiActionSelectionAgent::%s - Applying the selected Psi Rule: %s [ cycle = %d ].", 
-                        __FUNCTION__, 
-                        atomSpace.atomAsString(hSelectedPsiRule).c_str(),  
-                        this->cycleCount
-                      );
-      
-        this->currentSchemaId = PsiRuleUtil::applyPsiRule( atomSpace,
-                                                           procedureInterpreter, 
-                                                           procedureRepository, 
-                                                           hSelectedPsiRule, 
-                                                           varBindCandidates,
-                                                           randGen
-                                                         );
-        this->currentPsiRule = hSelectedPsiRule; 
-        this->timeStartCurrentPsiRule = time(NULL);
-    }
-    else {
-        logger().warn( "PsiActionSelectionAgent::%s - Failed to select a Psi Rule to apply because none of them meets their Precondition [ cycle = %d ] .", 
-                       __FUNCTION__, 
-                       this->cycleCount
-                     );
-
-        return; 
-    }
-*/    
+*/
 
 }
 

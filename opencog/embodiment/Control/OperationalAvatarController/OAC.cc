@@ -63,7 +63,7 @@ OAC::OAC() {}
 bool OAC::customLoopRun(void)
 {
 #ifdef HAVE_ZMQ
-    this->plaza->forwardMessages();
+//    this->plaza->forwardMessages();
 #endif
     return EmbodimentCogServer::customLoopRun();
 }

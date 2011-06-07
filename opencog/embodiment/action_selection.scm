@@ -188,6 +188,7 @@
 
                                      ( (and (or (equal? atom_type 'AndLink)
                                                 (equal? atom_type 'OrLink)
+                                                (equal? atom_type 'SequentialAndLink)
                                             )
                                             (equal? (length action_outgoings) 1)
                                        )
@@ -676,7 +677,7 @@
 ; The list of demand goals is initialized by PsiActionSelectionAgent::initDemandGoalList
 (define (get_demand_goal_list)
     (let ( (demand_goal_list_list_link
-               (get_reference (ConceptNode "plan_demand_goal_list") ) 
+               (get_reference (ConceptNode "psi_demand_goal_list") ) 
            ) 
          )
 

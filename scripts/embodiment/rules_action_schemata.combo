@@ -29,20 +29,22 @@ say(2) := say(#1 #2)
 
 #walk random, but more forward and more right and does not rotate every time
 random_search(0) := 
-    and_seq( action_boolean_if(greater_than(rand 0.5) 
-                               action_boolean_if(greater_than(rand 0.6)
-          	                                     rotate_left
-                                                 rotate_right
-                                                )
-                               step_forward
-                              )
-
-             action_boolean_if(greater_than(rand 0.3)
-                               step_forward
-                               step_backward
-                              )
-           )
-
+    jump_up
+#    goto_obj(owner 2)
+#    and_seq( action_boolean_if(greater_than(rand 0.5) 
+#                               action_boolean_if(greater_than(rand 0.6)
+#          	                                     rotate_left
+#                                                 rotate_right
+#                                                )
+#                               step_forward
+#                              )
+#
+#             action_boolean_if(greater_than(rand 0.3)
+#                               step_forward
+#                               step_backward
+#                              )
+#           )
+#
 
 play_with_grab_and_drop(1) := and_seq( goto_obj(#1 2) grab(#1) drop )
 

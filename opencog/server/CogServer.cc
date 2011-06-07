@@ -152,16 +152,24 @@ void CogServer::serverLoop()
     gettimeofday(&timer_start, NULL);
     for (running = true; running;) {
         runLoopStep();
+
+        gettimeofday(&timer_end, NULL);
+        elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                       (timer_end.tv_usec - timer_start.tv_usec);
+
         if (!externalTickMode) {
             // sleep long enough so that the next cycle will only start
             // after config["SERVER_CYCLE_DURATION"] milliseconds
-            gettimeofday(&timer_end, NULL);
-            elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                           (timer_end.tv_usec - timer_start.tv_usec);
             if ((cycle_duration - elapsed_time) > 0)
                 usleep((unsigned int) (cycle_duration - elapsed_time));
-            timer_start = timer_end;
         }
+
+        logger().debug("[CogServer] running server loop, elapsed time: %f [cycle = %d]",
+                       1.0*elapsed_time/1000000, this->cycleCount
+                      );
+
+        timer_start = timer_end;
+
     }
 }
 
@@ -207,6 +215,7 @@ void CogServer::runAgent(Agent *agent)
     size_t mem_start, mem_end;
     size_t atoms_start, atoms_end;
     size_t mem_used, atoms_used;
+    time_t time_used; 
 
     gettimeofday(&timer_start, NULL);
     mem_start = getMemUsage();
@@ -218,9 +227,13 @@ void CogServer::runAgent(Agent *agent)
     gettimeofday(&timer_end, NULL);
     mem_end = getMemUsage();
     atoms_end = atomSpace->getSize();
-     
-    elapsed_time.tv_sec = timer_end.tv_sec - timer_start.tv_sec;
-    elapsed_time.tv_usec = timer_end.tv_usec - timer_start.tv_usec;
+    
+    time_used =  timer_end.tv_sec*1000000 + timer_end.tv_usec -
+                (timer_start.tv_sec*1000000  + timer_start.tv_usec); 
+
+    elapsed_time.tv_sec = time_used/1000000; 
+    elapsed_time.tv_usec = time_used - elapsed_time.tv_sec*1000000; 
+
     if (mem_start > mem_end)
         mem_used = 0;
     else
@@ -229,6 +242,10 @@ void CogServer::runAgent(Agent *agent)
         atoms_used = 0;
     else
         atoms_used = atoms_end - atoms_start;
+
+    logger().debug("[CogServer] running mind agent: %s, elapsed time (sec): %f, memory used: %d, atom used: %d [cycle = %d]",
+                   agent->classinfo().id.c_str(), 1.0*time_used/1000000, mem_used, atoms_used, this->cycleCount
+                  );
 
     _systemActivityTable.logActivity(agent, elapsed_time, mem_used, 
                                             atoms_used);

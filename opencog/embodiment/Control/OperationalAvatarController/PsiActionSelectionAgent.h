@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-05-31
+ * @date 2011-06-02
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -113,7 +113,35 @@ private:
     // Time out for executing Action (combo script) defined by PROCEDURE_EXECUTION_TIMEOUT
     long procedureExecutionTimeout; 
 
-    time_t timeStartCurrentPsiRule; // When the current Psi rule was applied 
+    time_t timeStartCurrentAction; // When the current action was executed 
+
+    std::vector<Handle> psi_demand_goal_list; // Handles to all the demand goals (EvaluationLink)
+
+    // Planning result
+    Handle plan_selected_demand_goal; 
+    std::vector<Handle> plan_rule_list; 
+    std::vector<Handle> plan_context_list; 
+    std::vector<Handle> plan_action_list;
+
+    // A copy of plan_demand_list, each time pop up and execute one of the action
+    std::vector<Handle> temp_action_list;     
+
+    // Each action(or step) in plan_demand_list (or temp_action_list) may actually 
+    // contains multiple actions. For example in plan_demand_list there might
+    // be an SequentialAndLink containing goto_obj(food) and eat(food) actions. 
+    // However, OAC can not do both actions all at once. So in planner side both
+    // actions can be considered as just one action, while in OAC side they are 
+    // two actions. 
+    //
+    // Currently our solution is that firstly we copy both actions to current_actions,
+    // then make OAC execute actions in current_actions one by one. When all the
+    // actions in current_actions have been done, we ask temp_action_list for more 
+    // actions. 
+    std::vector<Handle> current_actions; 
+    Handle current_action; 
+
+    // Return actions given one step in plan_action_list (or temp_action_list)
+    void getActions(AtomSpace & atomSpace, Handle hStep, std::vector<Handle> & actions); 
 
     // Add the list of demand goals in AtomSpace
     //
@@ -131,12 +159,25 @@ private:
     //             ListLink
     //         ...
     //
-    void initDemandGoalList(opencog::CogServer * server);
+    void initDemandGoalList(AtomSpace & atomSpace);
+
+    /**
+     * Get the plan stored in AtomSpace
+     */
+    void getPlan(AtomSpace & atomSpace);
 
     /**
      * Print the plan to the screen, only used for debugging
      */
-    void printPlan(opencog::CogServer * server);
+    void printPlan(AtomSpace & atomSpace);
+
+    /**
+     * Execute the given action
+     */
+    void executeAction(AtomSpace & atomSpace, 
+                       Procedure::ProcedureInterpreter & procedureInterpreter, 
+                       const Procedure::ProcedureRepository & procedureRepository, 
+                       Handle hActionExecutionLink); 
 
 public:
 

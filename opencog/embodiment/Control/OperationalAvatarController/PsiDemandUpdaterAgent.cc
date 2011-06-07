@@ -393,7 +393,7 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
 #ifdef HAVE_ZMQ    
     // Publish updated Demand values via ZeroMQ
     Plaza & plaza = oac->getPlaza();
-    this->publishUpdatedValue(plaza, *this->publisher, timeStamp); 
+//    this->publishUpdatedValue(plaza, *this->publisher, timeStamp); 
 #endif 
 
     // Update the truth value of previous/ current demand goal
