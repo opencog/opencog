@@ -771,27 +771,38 @@
              (list-ref plan_result 1)
          )
 
-         ; Update the planning result stored in AtomSpace
+         ; Update the planning result stored in AtomSpace and return the handle
          ; PsiActionSelectionAgent will actually execute the plan
-         (update_reference_link 
-             (ConceptNode "plan_rule_list") 
-             (apply ListLink rule_list) 
-         )
+         ;
+         ; TODO: Actually there's no need to return the handle because the planning 
+         ;       result has been stored in AtomSpace. However, in PsiActionSelectionAgent 
+         ;       side, it will retrieve multiple planning results, which SHOULD NOT 
+         ;       happen! Because 'update_reference_link' will automatically delete 
+         ;       the old planning result.  
+         ;
+;         (cog-handle
+;             (ListLink
+                 (update_reference_link 
+                     (ConceptNode "plan_rule_list") 
+                     (apply ListLink rule_list) 
+                 )
 
-         (update_reference_link
-             (ConceptNode "plan_context_list") 
-             (apply ListLink context_list)
-         )
+                 (update_reference_link
+                     (ConceptNode "plan_context_list") 
+                     (apply ListLink context_list)
+                 )
 
-         (update_reference_link
-             (ConceptNode "plan_action_list") 
-             (apply ListLink action_list)
-         )
+                 (update_reference_link
+                     (ConceptNode "plan_action_list") 
+                     (apply ListLink action_list)
+                 )
 
-         (update_reference_link
-             (ConceptNode "plan_selected_demand_goal") 
-             selected_demand_goal
-         )
+                 (update_reference_link
+                     (ConceptNode "plan_selected_demand_goal") 
+                     selected_demand_goal
+                 )
+;             ); ListLink
+;         ); cog-handle
 
     ); let        
 )

@@ -253,7 +253,7 @@ void PsiDemandUpdaterAgent::init(opencog::CogServer * server)
     OAC * oac = (OAC *) server;
 
     // Get AtomSpace
-    const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get petId
     const std::string & petId = oac->getPet().getPetId();

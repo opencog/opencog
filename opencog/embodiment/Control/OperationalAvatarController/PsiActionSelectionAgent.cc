@@ -191,6 +191,33 @@ void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
     this->temp_action_list = this->plan_action_list; 
 }
 
+void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace, Handle hPlanning)
+{
+    std::vector<Handle> resultHandleSet = atomSpace.getOutgoing(hPlanning); 
+
+    Handle planRuleListReferenceLink = resultHandleSet[0]; 
+    Handle planContextListReferenceLink = resultHandleSet[1]; 
+    Handle planActionListReferenceLink = resultHandleSet[2];
+    Handle planSelectedDemandGoalReferenceLink = resultHandleSet[3]; 
+
+    this->plan_selected_demand_goal =
+        atomSpace.getOutgoing(planSelectedDemandGoalReferenceLink, 1); 
+
+    this->plan_rule_list = atomSpace.getOutgoing(
+                               atomSpace.getOutgoing(planRuleListReferenceLink, 1)
+                                                ); 
+
+    this->plan_context_list = atomSpace.getOutgoing(
+                                  atomSpace.getOutgoing(planContextListReferenceLink, 1)
+                                                   ); 
+
+    this->plan_action_list = atomSpace.getOutgoing(
+                                 atomSpace.getOutgoing(planActionListReferenceLink, 1)
+                                                  );
+    this->temp_action_list = this->plan_action_list; 
+
+}
+
 void PsiActionSelectionAgent::printPlan(AtomSpace & atomSpace)
 {
     std::cout<<std::endl<<"Selected Demand Goal [cycle = "<<this->cycleCount<<"]:"

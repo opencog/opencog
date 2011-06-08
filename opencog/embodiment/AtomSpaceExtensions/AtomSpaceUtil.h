@@ -909,7 +909,7 @@ public:
      *             ListLink (empty)
      *
      */
-    static bool getDemandEvaluationLinks (const AtomSpace & atomSpace, 
+    static bool getDemandEvaluationLinks (AtomSpace & atomSpace, 
                                           const std::string & demandName, 
                                           Handle & hDemandGoal, 
                                           Handle & hFuzzyWithin);

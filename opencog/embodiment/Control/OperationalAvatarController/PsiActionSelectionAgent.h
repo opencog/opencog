@@ -167,6 +167,11 @@ private:
     void getPlan(AtomSpace & atomSpace);
 
     /**
+     * Get the plan stored in AtomSpace given handle to planning result
+     */
+    void getPlan(AtomSpace & atomSpace, Handle hPlanning);
+
+    /**
      * Print the plan to the screen, only used for debugging
      */
     void printPlan(AtomSpace & atomSpace);

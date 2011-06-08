@@ -467,7 +467,7 @@
 ; PredicateNode via 'connect_goal_updater' function
 
 (define (add_goal pred_or_gpn_handle . arguments)
-    (EvaluationLink (DEFAULT_AV) 
+    (EvaluationLink (DEFAULT_STV) (DEFAULT_AV) 
         pred_or_gpn_handle   
 
         (ListLink 

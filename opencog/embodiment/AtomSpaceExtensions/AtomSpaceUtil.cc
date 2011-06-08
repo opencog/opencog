@@ -747,12 +747,19 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgo
     //       Because the ReferenceLink would have an incoming (i.e. hResultListLink here), 
     //       which would make cog-delete scheme function fail.  
     std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink); 
-    atomSpace.removeAtom(hResultListLink);
+    atomSpace.removeAtom(hResultListLink, true);
 
     // Check and return the result
-//    foreach(Handle hResult, resultSet) {
-//        std::cout<<atomSpace.atomAsString(hResult)<<std::endl; 
-//    }
+    foreach(Handle hResult, resultSet) {
+        std::cout<<"Found a ReferenceLink: "<<atomSpace.atomAsString(hResult)<<std::endl; 
+
+        std::vector<Handle> incomingSet = atomSpace.getIncoming(hResult);
+        foreach(Handle hIncoming, incomingSet) {
+            std::cout<<"An incoming: "<< atomSpace.atomAsString(hIncoming)<<std::endl;
+        }
+
+        std::cout<<std::endl;
+    }
 
     if ( resultSet.size() != 1 ) {
         logger().error( "AtomSpaceUtil::%s - The number of ReferenceLink containing '%s' should be exactly 1, but got %d", 
@@ -2268,11 +2275,96 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(const AtomSpace & atomSpace,
     return similarityLink;
 }
 
-bool AtomSpaceUtil::getDemandEvaluationLinks (const AtomSpace & atomSpace, 
+bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace, 
                                               const std::string & demandName, 
                                               Handle & hDemandGoal, 
                                               Handle & hFuzzyWithin)
 {
+    // Create BindLink used by pattern matcher
+    std::vector<Handle> variableListLinkOutgoings, tempOutgoings; 
+
+    Handle hVariableTypeNodeListLink = atomSpace.addNode(VARIABLE_TYPE_NODE, "ListLink"); 
+
+    tempOutgoings.clear(); 
+    Handle hVariableNodeDemandGoal = atomSpace.addNode(VARIABLE_NODE, "$var_list_link_type_demand_goal");
+    tempOutgoings.push_back(hVariableNodeDemandGoal); 
+    tempOutgoings.push_back(hVariableTypeNodeListLink); 
+    variableListLinkOutgoings.push_back( atomSpace.addLink(TYPED_VARIABLE_LINK, tempOutgoings) ); 
+
+    tempOutgoings.clear(); 
+    Handle hVariableNodeFuzzyWithin = atomSpace.addNode(VARIABLE_NODE, "$var_list_link_type_fuzzy_within");  
+    tempOutgoings.push_back(hVariableNodeFuzzyWithin); 
+    tempOutgoings.push_back(hVariableTypeNodeListLink); 
+    variableListLinkOutgoings.push_back( atomSpace.addLink(TYPED_VARIABLE_LINK, tempOutgoings) ); 
+
+    Handle hVariableListLink = atomSpace.addLink(LIST_LINK, variableListLinkOutgoings);
+
+    tempOutgoings.clear();
+    tempOutgoings.push_back( atomSpace.addNode(PREDICATE_NODE, demandName+"DemandGoal") ); 
+    tempOutgoings.push_back(hVariableNodeDemandGoal);
+    Handle hEvaluationLinkDemandGoal = atomSpace.addLink(EVALUATION_LINK, tempOutgoings);  
+
+    tempOutgoings.clear(); 
+    tempOutgoings.push_back( atomSpace.addNode(GROUNDED_PREDICATE_NODE, "fuzzy_within") ); 
+    tempOutgoings.push_back(hVariableNodeFuzzyWithin); 
+    Handle hEvaluationLinkFuzzyWithin = atomSpace.addLink(EVALUATION_LINK, tempOutgoings); 
+
+    tempOutgoings.clear(); 
+    tempOutgoings.push_back(hEvaluationLinkDemandGoal); 
+    tempOutgoings.push_back(hEvaluationLinkFuzzyWithin); 
+    Handle hSimultaneousEquivalenceLink = atomSpace.addLink(SIMULTANEOUS_EQUIVALENCE_LINK, tempOutgoings); 
+    Handle hReturnListLink = atomSpace.addLink(LIST_LINK, tempOutgoings); 
+
+    tempOutgoings.clear(); 
+    tempOutgoings.push_back(hSimultaneousEquivalenceLink); 
+    tempOutgoings.push_back(hReturnListLink); 
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, tempOutgoings); 
+
+    tempOutgoings.clear(); 
+    tempOutgoings.push_back(hVariableListLink); 
+    tempOutgoings.push_back(hImplicationLink); 
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, tempOutgoings); 
+
+    // Run pattern matcher
+    PatternMatch pm; 
+    pm.set_atomspace(&atomSpace); 
+    Handle hResultListLink = pm.bindlink(hBindLink);
+
+    // Get result
+    // Note: Don't forget remove the hResultListLink, otherwise some scheme script
+    //       may fail to remove the ReferenceLink when necessary. 
+    //       Because the ReferenceLink would have an incoming (i.e. hResultListLink here), 
+    //       which would make cog-delete scheme function fail.  
+    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink); 
+    atomSpace.removeAtom(hResultListLink);
+
+    // Check and return the result
+//    foreach(Handle hResult, resultSet) {
+//        std::cout<<atomSpace.atomAsString(hResult)<<std::endl; 
+//    }
+
+    if ( resultSet.size() != 1 ) {
+        logger().error( "AtomSpaceUtil::%s - The number of SimultaneousEquivalenceLink containing '%s' and '%s' should be exactly 1, but got %d", 
+                       __FUNCTION__, 
+                       atomSpace.atomAsString(hEvaluationLinkDemandGoal).c_str(), 
+                       atomSpace.atomAsString(hEvaluationLinkFuzzyWithin).c_str(), 
+                       resultSet.size()
+                      );
+
+        return false; 
+    }
+    
+    hResultListLink = resultSet[0]; 
+    resultSet = atomSpace.getOutgoing(hResultListLink); 
+
+    hDemandGoal = resultSet[0]; 
+    hFuzzyWithin = resultSet[1]; 
+
+    return true; 
+
+
+
+/**
     // Get the Handle to GroundSchemaNode
     std::string demandUpdater = demandName + "DemandUpdater";
 
@@ -2370,7 +2462,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (const AtomSpace & atomSpace,
         return false; 
     }
 
-    // Get the EaluationLink that contains both FuzzyWithin GroundedPredicateNode and ListLink above
+    // Get the EvaluationLink that contains both FuzzyWithin GroundedPredicateNode and ListLink above
     std::vector<Handle> evaluationLinkOutgoing;
 
     evaluationLinkOutgoing.push_back(hGroundedPredicateNode);
@@ -2439,6 +2531,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (const AtomSpace & atomSpace,
     hDemandGoal = *iEvaluationLink;
 
     return true; 
+*/
 }
 
 Handle AtomSpaceUtil::getRuleImplicationLink(const AtomSpace& atomSpace,
