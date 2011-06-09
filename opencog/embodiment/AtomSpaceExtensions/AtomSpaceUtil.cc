@@ -1214,13 +1214,18 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
         std::string predicateName,
         const TruthValue &tv,
         Handle object1,
-        Handle object2 )
+        Handle object2,
+        Handle object3 )
 {
     HandleSeq listLink;
     listLink.push_back( object1 );
     if ( object2 != Handle::UNDEFINED ) {
         listLink.push_back( object2 );
     }
+    if ( object3 != Handle::UNDEFINED ) {
+        listLink.push_back( object3 );
+    }
+
     Handle listLinkHandle = AtomSpaceUtil::addLink(atomSpace,
                             LIST_LINK,
                             listLink);
@@ -1236,7 +1241,6 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
     atomSpace.setTV( evalLinkHandle, tv );
     return evalLinkHandle;
 }
-
 
 Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
         std::string predicateName,

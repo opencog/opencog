@@ -32,7 +32,14 @@ namespace OperationalAvatarController
 
 /**
  * This class is used to update the near predicates whenever an object
- * changes its position in the latest SpaceMap.
+ * changes its position in the latest SpaceMap. All EvaluationLinks are recorded
+ * within AtTimeLinks. NOTE: The EvaluationLink is given the current TruthValue,
+ * as is the EvaluationLink.
+ * @todo Uses the (previously) separate code to handle other spatial relationships. This should be unified more.
+ * @todo computeAllSpatialRelations should only update for objects that have moved.
+ * @todo computeAllSpatialRelations could be made much more efficient through avoiding redundant computation.
+ * @todo computeAllSpatialRelations should check which objects are near to each other using the spatial grid system.
+ * @todo computeAllSpatialRelations doesn't handle the "between" relation (connected to the above)
  */
 class NearPredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
 {
@@ -44,18 +51,18 @@ public:
 
     virtual void update(Handle object, Handle pet, unsigned long timestamp );
 
-    static void computeAllSpatialRelations(Handle observer, opencog::AtomSpace& atomSpace);
+    static void computeAllSpatialRelations(Handle observer, opencog::AtomSpace& atomSpace, unsigned long timestamp);
 
 protected:
 
-    void setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean );    
+    void setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean, unsigned long timestamp );
 
     unsigned long lastTimestamp;
 
     boost::unordered_set<std::string, boost::hash<std::string> > processedEntities;
-        
 
-    
+
+
 }; // class
 }  // namespace
 

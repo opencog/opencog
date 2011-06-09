@@ -255,6 +255,7 @@ public:
      *    ListLink
      *       object1
      *       object2 (optional)
+     *       object3 (optional)
      * </code>
      *
      * @param atomSpace The AtomSpace.
@@ -264,6 +265,7 @@ public:
      * than 0.5 it will be added anyway
      * @param object1 The handle of the object1
      * @param object1 The handle of the object2
+     * @param object1 The handle of the object3
      * @return On success, the handle of the predicate's EvalLink (if not
      * timestamped) or Handle::UNDEFINED, if predicate is false but it is not
      * represented in AtomSpace. On failure, return Handle::UNDEFINED.
@@ -272,7 +274,8 @@ public:
                                      std::string predicateName,
                                      const TruthValue &tv,
                                      Handle object1,
-                                     Handle object2 = Handle::UNDEFINED );
+                                     Handle object2 = Handle::UNDEFINED,
+                                     Handle object3 = Handle::UNDEFINED );
 
 
     const static double highLongTermImportance = 0.7;

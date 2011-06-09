@@ -58,7 +58,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
         lastTimestamp = timestamp;
         processedEntities.clear( );
     } // if
-    
+
     const std::string& entityAId = atomSpace.getName( object );
     if ( processedEntities.find( entityAId ) != processedEntities.end( ) ) {
         return;
@@ -68,10 +68,10 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
     try {
 
         const spatial::EntityPtr& entityA = spaceMap.getEntity( entityAId );
-    
+
         bool mapContainsEntity = spaceMap.containsObject( entityAId );
 
-        for( unsigned int i = 0; i < entities.size( ); ++i ) {        
+        for( unsigned int i = 0; i < entities.size( ); ++i ) {
             const std::string& entityBId = entities[i];
             if ( processedEntities.find( entityBId ) != processedEntities.end( ) ) {
                 continue;
@@ -82,8 +82,8 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
                 logger().debug( "NearPredicateUpdater::%s - Removing predicates "
                         "from '%s' and '%s'", __FUNCTION__,
                         entityAId.c_str( ), entityBId.c_str( ) );
-                setPredicate( object, entityBHandle, "near", 0.0f );
-                setPredicate( object, entityBHandle, "next", 0.0f );
+                setPredicate( object, entityBHandle, "near", 0.0f, timestamp);
+                setPredicate( object, entityBHandle, "next", 0.0f, timestamp);
             } else {
                 const spatial::EntityPtr& entityB = spaceMap.getEntity( entityBId );
                 double distance = entityA->distanceTo( *entityB );
@@ -93,42 +93,42 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
 
                 spatial::math::Vector3 minCorner( spaceMap.xMin( ), spaceMap.yMin( ) );
                 spatial::math::Vector3 maxCorner( spaceMap.xMax( ), spaceMap.yMax( ) );
-            
+
                 double mapDiagonal = ( maxCorner - minCorner ).length( );
-            
+
                 double nearDistance = spaceMap.getNearDistance( );
                 double nextDistance = spaceMap.getNextDistance( );
-            
+
                 logger().debug( "NearPredicateUpdater::%s - nearDistance '%f'",
                                 __FUNCTION__, nearDistance );
 
                 setPredicate( object, entityBHandle, "near",
-                        ( distance < nearDistance ) ? 1.0 : 0.0f );
+                        ( distance < nearDistance ) ? 1.0 : 0.0f,
+                        timestamp);
                 setPredicate( object, entityBHandle, "next",
-                        ( distance < nextDistance ) ? 1.0 - (distance/nextDistance) : 0.0f );
+                        ( distance < nextDistance ) ? 1.0 - (distance/nextDistance) : 0.0f,
+                        timestamp);
 
-                SimpleTruthValue tv(1.0 - (distance/mapDiagonal), 1);
-                AtomSpaceUtil::setPredicateValue( atomSpace, "proximity", tv,
-                        object, entityBHandle );
-                AtomSpaceUtil::setPredicateValue( atomSpace, "proximity", tv,
-                        entityBHandle, object );
-            
+                float mean = 1.0 - (distance/mapDiagonal);
+                setPredicate( object, entityBHandle, "proximity", mean,
+                         timestamp);
+
             } // else
         } // for
     } catch( const opencog::NotFoundException& ex ) {
         logger().error( "NearPredicateUpdater::%s - Entity not found '%s'",
                         __FUNCTION__, ex.getMessage( ) );
     } // catch
-        
+
 }
 
-void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, string entityA_id, string entityB_id, string entityC_id, AtomSpace& atomSpace);
+void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, string entityA_id, string entityB_id, string entityC_id, AtomSpace& atomSpace, unsigned int timestamp);
 
 //! @todo Doesn't process 3-object relations (i.e. BETWEEN). Should use more filtering to restrict its search (e.g. based on the
 //! spatial grid, and/or apriori knowledge about which things can happen (e.g. "A is between B and C" can only happen if
 //! "B is left of A" and "C is right of A".) Maybe respond only when an object has moved (or the agent - these relations are
 //! evaluated from a certain perspective).
-void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::AtomSpace& atomSpace)
+void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::AtomSpace& atomSpace, unsigned long timestamp)
 {
     HandleSeq resultingFrames;
 
@@ -174,7 +174,7 @@ void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::
 
                 // All size-2 and all size-3 relations
                 relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB );
-                addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], "", atomSpace);
+                addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], "", atomSpace, timestamp);
                 numRelations += relations.size();
 
 //                for( k = 0; k < entitiesC.size( ); ++k ) {
@@ -183,7 +183,7 @@ void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::
 //                    } // if
 //                    const spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
 //                    relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB, *entityC );
-//                    addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], entitiesC[k], atomSpace );
+//                    addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], entitiesC[k], atomSpace, timestamp);
 //                    numRelations += relations.size();
 //                } // for
             } // for
@@ -199,7 +199,7 @@ void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::
     return;
 }
 
-void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, std::string entityA_id, std::string entityB_id, std::string entityC_id, AtomSpace& atomSpace)
+void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, std::string entityA_id, std::string entityB_id, std::string entityC_id, AtomSpace& atomSpace, unsigned int timestamp)
 {
 //    const SpaceServer::SpaceMap& spaceMap =
 //        atomSpace.getSpaceServer().getLatestMap();
@@ -222,16 +222,27 @@ void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, std:
     SimpleTruthValue tv( 1, 1 );
     foreach (Entity::SPATIAL_RELATION rel, relations) {
         string predicateName = Entity::spatialRelationToString(rel);
-        if (entityC == Handle::UNDEFINED)
-            AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB );
-        else
-            AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB, entityC );
+        if (entityC == Handle::UNDEFINED) {
+            Handle eval = AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB );
+            Handle atTime = atomSpace.getTimeServer().addTimeInfo(eval, timestamp);
+            atomSpace.setTV(atTime, tv);
+        } else {
+            Handle eval = AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB, entityC );
+            Handle atTime = atomSpace.getTimeServer().addTimeInfo(eval, timestamp);
+            atomSpace.setTV(atTime, tv);
+        }
     }
 }
 
-void NearPredicateUpdater::setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean )
+void NearPredicateUpdater::setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean, unsigned long timestamp)
 {
+    // Don't record 0-strength relations
+    if (mean == 0) return;
     SimpleTruthValue tv( mean, 1 );
-    AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB );
-    AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityB, entityA );
+    Handle direction1 = AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB );
+    Handle direction2 = AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityB, entityA );
+    Handle atTime1 = atomSpace.getTimeServer().addTimeInfo(direction1, timestamp);
+    Handle atTime2 = atomSpace.getTimeServer().addTimeInfo(direction2, timestamp);
+    atomSpace.setTV(atTime1, tv);
+    atomSpace.setTV(atTime2, tv);
 }
