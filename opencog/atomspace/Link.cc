@@ -107,7 +107,17 @@ std::string Link::toShortString(void) const
     answer += ">";
     float mean = this->getTruthValue().getMean();
     float count = this->getTruthValue().getCount();
-    snprintf(buf, BUFSZ, " %f %f", mean, count);
+    if (mean == 0.0f) {
+        snprintf(buf, BUFSZ, " 0.0");
+    } else {
+        snprintf(buf, BUFSZ, " %f", mean);
+    }
+    answer += buf;
+    if (count == 0.0f) {
+        snprintf(buf, BUFSZ, " 0.0");
+    } else {
+        snprintf(buf, BUFSZ, " %.2f", count);
+    }
     answer += buf;
     answer += "]";
     return answer;
