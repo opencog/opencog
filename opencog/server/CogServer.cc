@@ -164,8 +164,8 @@ void CogServer::serverLoop()
                 usleep((unsigned int) (cycle_duration - elapsed_time));
         }
 
-        logger().debug("[CogServer] running server loop, elapsed time: %f [cycle = %d]",
-                       1.0*elapsed_time/1000000, this->cycleCount
+        logger().debug("[CogServer] running server loop, all elapsed time: %f [cycle = %d]",
+                       1.0*elapsed_time/1000000, this->cycleCount-1
                       );
 
         timer_start = timer_end;
@@ -175,12 +175,38 @@ void CogServer::serverLoop()
 
 void CogServer::runLoopStep(void) 
 {
+    struct timeval timer_start, timer_end;
+    time_t elapsed_time;
+
+    // Process requests
+    gettimeofday(&timer_start, NULL);
+
     if (getRequestQueueSize() != 0) {
         processRequests();
     }
 
+    gettimeofday(&timer_end, NULL); 
+    elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                   (timer_end.tv_usec - timer_start.tv_usec);
+
+    logger().debug("[CogServer] running server loop, time of processing requests: %f [cycle = %d]",
+                   1.0*elapsed_time/1000000, this->cycleCount
+                  );
+
+    // Run custom loop
+    timer_start = timer_end;
     bool runCycle = customLoopRun();
 
+    gettimeofday(&timer_end, NULL); 
+    elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                   (timer_end.tv_usec - timer_start.tv_usec);
+
+    logger().debug("[CogServer] running server loop, time of running custom loop: %f [cycle = %d]",
+                   1.0*elapsed_time/1000000, this->cycleCount
+                  );
+
+    // Process mind agents
+    timer_start = timer_end;
     if (runCycle) {
         if (agentsRunning) {
             processAgents();
@@ -189,6 +215,14 @@ void CogServer::runLoopStep(void)
         cycleCount++;
         if (cycleCount < 0) cycleCount = 0;
     }
+
+    gettimeofday(&timer_end, NULL); 
+    elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                   (timer_end.tv_usec - timer_start.tv_usec);
+
+    logger().debug("[CogServer] running server loop, time of processing mind agents: %f [cycle = %d]",
+                   1.0*elapsed_time/1000000, this->cycleCount-1
+                  );
 
 }
 
