@@ -809,3 +809,5 @@ void AtomSpaceImpl::clear()
     assert(allAtoms.size() == 0);
 }
 
+void AtomSpaceImpl::printGDB() const { print(); }
+void AtomSpaceImpl::printTypeGDB(Type t) const { print(std::cout,t,true); }

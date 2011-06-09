@@ -137,10 +137,9 @@ public:
     void print(std::ostream& output = std::cout,
                Type type = ATOM, bool subclass = true) const;
 
-    //helper for GDB, because print seems to mess things up
-    void printGDB() const {
-        print();
-    }
+    //helpers for GDB debugging, because trying to get std::cout is annoying
+    void printGDB() const;
+    void printTypeGDB(Type t) const;
 
     /** Add a new node to the Atom Table,
      * if the atom already exists then the old and the new truth value is merged
