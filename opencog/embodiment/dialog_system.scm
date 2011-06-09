@@ -1,4 +1,8 @@
 ;
+; TODO: There are two 'find_reference_link', one is here, 
+;       and another in 'psi_util.scm', we should change the code here, and use 
+;       the version in 'psi_util.scm' instead. 
+;
 ; This file contains all sorts of triggers, reponsers and rules of Dialog System
 ; inspired by Speech Act Theory. For more details of the original design of the 
 ; dialog system, please refer to the document written by Ben as below:

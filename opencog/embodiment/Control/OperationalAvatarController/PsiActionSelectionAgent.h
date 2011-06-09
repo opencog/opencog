@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.h
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-06-02
+ * @date 2011-06-09
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as

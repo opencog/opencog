@@ -747,19 +747,19 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgo
     //       Because the ReferenceLink would have an incoming (i.e. hResultListLink here), 
     //       which would make cog-delete scheme function fail.  
     std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink); 
-    atomSpace.removeAtom(hResultListLink, true);
+    atomSpace.removeAtom(hResultListLink); 
 
     // Check and return the result
-    foreach(Handle hResult, resultSet) {
-        std::cout<<"Found a ReferenceLink: "<<atomSpace.atomAsString(hResult)<<std::endl; 
-
-        std::vector<Handle> incomingSet = atomSpace.getIncoming(hResult);
-        foreach(Handle hIncoming, incomingSet) {
-            std::cout<<"An incoming: "<< atomSpace.atomAsString(hIncoming)<<std::endl;
-        }
-
-        std::cout<<std::endl;
-    }
+//    foreach(Handle hResult, resultSet) {
+//        std::cout<<"Found a ReferenceLink: "<<atomSpace.atomAsString(hResult)<<std::endl; 
+//
+//        std::vector<Handle> incomingSet = atomSpace.getIncoming(hResult);
+//        foreach(Handle hIncoming, incomingSet) {
+//            std::cout<<"An incoming: "<< atomSpace.atomAsString(hIncoming)<<std::endl;
+//        }
+//
+//        std::cout<<std::endl;
+//    }
 
     if ( resultSet.size() != 1 ) {
         logger().error( "AtomSpaceUtil::%s - The number of ReferenceLink containing '%s' should be exactly 1, but got %d", 

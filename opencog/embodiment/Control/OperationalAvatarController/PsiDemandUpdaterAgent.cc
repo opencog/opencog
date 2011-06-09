@@ -316,7 +316,7 @@ void PsiDemandUpdaterAgent::init(opencog::CogServer * server)
 
 void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
 {
-    this->cycleCount ++;
+    this->cycleCount = server->getCycleCount(); 
 
     logger().debug( "PsiDemandUpdaterAgent::%s - Executing run %d times",
                      __FUNCTION__, 

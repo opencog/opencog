@@ -2,7 +2,7 @@
 ; Helper functions used by all sorts of psi scheme scripts
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-16
+; @date   2011-06-09
 ;
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -856,5 +856,77 @@
         )
 
     ); BindLink 
+)
+
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Helper functions related to ReferenceLink
+;
+; BindLink used by pattern matcher to get the ReferenceLink given the first
+; outgoing
+(define (find_reference_link first_outgoing)
+    (BindLink
+        ; Variables
+        (VariableNode "$var_any")
+
+        (ImplicationLink
+            ; Pattern to be searched
+            (ReferenceLink
+                first_outgoing
+                (VariableNode "$var_any")
+            ) 
+
+            ; Return result
+            (ReferenceLink
+                first_outgoing
+                (VariableNode "$var_any")
+            ) 
+        ); ImplicationLink
+
+    ); BindLink 
+)
+
+; Return the ReferenceLink given the first outgoing
+(define (get_reference_link first_outgoing)
+    (let ( (reference_link_list 
+                (query_atom_space (find_reference_link first_outgoing) ) 
+           )
+         )
+
+         (if (null? reference_link_list) 
+             (list)
+             (car reference_link_list)
+         )
+    ) 
+)
+
+; Return the reference of the given atom
+(define (get_reference first_outgoing)
+    (let ( (reference_link (get_reference_link first_outgoing) )
+         )
+       
+         (if (null? reference_link)
+             (list) 
+             (list-ref (cog-outgoing-set reference_link) 1)
+         )   
+    ) 
+)
+
+; Remove the old ReferenceLink (if any) holding the first_outgoing and 
+; create a new ReferenceLink containing the given outgoings, 
+; return the newly created ReferenceLink
+(define (update_reference_link first_outgoing second_outgoing)
+    (let ( (old_reference_link (get_reference_link first_outgoing) )
+         )
+
+         (if (not (null? old_reference_link) )
+             (cog-delete old_reference_link) 
+         )
+
+         (ReferenceLink
+             first_outgoing
+             second_outgoing
+         )
+    )
 )
 

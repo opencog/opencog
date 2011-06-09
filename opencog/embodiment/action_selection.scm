@@ -2,7 +2,7 @@
 ; Action planner
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-31
+; @date   2011-06-09
 ;
 
 ; TODO: create and AndSeq link, inherits from ordered link for Actions
@@ -605,73 +605,6 @@
     ); let    
 ); define
 
-; BindLink used by pattern matcher to get the ReferenceLink given the first
-; outgoing
-(define (find_reference_link first_outgoing)
-    (BindLink
-        ; Variables
-        (VariableNode "$var_any")
-
-        (ImplicationLink
-            ; Pattern to be searched
-            (ReferenceLink
-                first_outgoing
-                (VariableNode "$var_any")
-            ) 
-
-            ; Return result
-            (ReferenceLink
-                first_outgoing
-                (VariableNode "$var_any")
-            ) 
-        ); ImplicationLink
-
-    ); BindLink 
-)
-
-; Return the ReferenceLink given the first outgoing
-(define (get_reference_link first_outgoing)
-    (let ( (reference_link_list 
-                (query_atom_space (find_reference_link first_outgoing) ) 
-           )
-         )
-
-         (if (null? reference_link_list) 
-             (list)
-             (car reference_link_list)
-         )
-    ) 
-)
-
-; Return the reference of the given atom
-(define (get_reference first_outgoing)
-    (let ( (reference_link (get_reference_link first_outgoing) )
-         )
-       
-         (if (null? reference_link)
-             (list) 
-             (list-ref (cog-outgoing-set reference_link) 1)
-         )   
-    ) 
-)
-
-; Remove the old ReferenceLink (if any) holding the first_outgoing and 
-; create a new ReferenceLink containing the given outgoings, 
-; return the newly created ReferenceLink
-(define (update_reference_link first_outgoing second_outgoing)
-    (let ( (old_reference_link (get_reference_link first_outgoing) )
-         )
-
-         (if (not (null? old_reference_link) )
-             (cog-delete-recursive old_reference_link) 
-         )
-
-         (ReferenceLink
-             first_outgoing
-             second_outgoing
-         )
-    )
-)
 
 ; Return a list containing all the demand goals (EvaluationLink) 
 ; The list of demand goals is initialized by PsiActionSelectionAgent::initDemandGoalList
@@ -773,12 +706,6 @@
 
          ; Update the planning result stored in AtomSpace and return the handle
          ; PsiActionSelectionAgent will actually execute the plan
-         ;
-         ; TODO: Actually there's no need to return the handle because the planning 
-         ;       result has been stored in AtomSpace. However, in PsiActionSelectionAgent 
-         ;       side, it will retrieve multiple planning results, which SHOULD NOT 
-         ;       happen! Because 'update_reference_link' will automatically delete 
-         ;       the old planning result.  
          ;
 ;         (cog-handle
 ;             (ListLink

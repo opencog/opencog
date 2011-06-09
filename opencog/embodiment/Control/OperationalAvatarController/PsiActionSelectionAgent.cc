@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-06-02
+ * @date 2011-06-09
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -44,7 +44,7 @@ PsiActionSelectionAgent::PsiActionSelectionAgent()
 
 void PsiActionSelectionAgent::init(opencog::CogServer * server) 
 {
-    logger().debug( "PsiActionSelectionAgent::%s - Initializing the Agent [ cycle = %d ]",
+    logger().debug( "PsiActionSelectionAgent::%s - Initializing the Agent [cycle = %d]",
                     __FUNCTION__, 
                     this->cycleCount
                   );
@@ -292,7 +292,7 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
 
 void PsiActionSelectionAgent::run(opencog::CogServer * server)
 {
-    this->cycleCount ++;
+    this->cycleCount = server->getCycleCount(); 
 
     logger().debug( "PsiActionSelectionAgent::%s - Executing run %d times",
                      __FUNCTION__, 
@@ -468,7 +468,7 @@ std::cout<<"Timeout"<<std::endl;
                             this->cycleCount
                           );
 
-std::cout<<"+_*"<<std::endl; 
+std::cout<<"current action is still running [SchemaId = "<<this->currentSchemaId<<", cycle = "<<this->cycleCount<<"] ... "<<std::endl; 
 
             return; 
         }
@@ -482,7 +482,7 @@ std::cout<<"+_*"<<std::endl;
     // If we've used up the current plan, do a new planning
     if ( this->temp_action_list.empty() ) {
         // Initialize scheme evaluator
-        SchemeEval & evaluator = SchemeEval::instance(&atomSpace);    
+        SchemeEval & evaluator = SchemeEval::instance();    
         std::string scheme_expression, scheme_return_value;
 
         scheme_expression = "( do_planning )";
@@ -501,6 +501,9 @@ std::cout<<"+_*"<<std::endl;
 
         // Get the plan stored in AtomSpace
         this->getPlan(atomSpace); 
+//        std::cout<<std::endl<<"Done (do_planning), scheme_return_value(Handle): "<<scheme_return_value; 
+//        Handle hPlanning = Handle( atol(scheme_return_value.c_str()) );         
+//        this->getPlan(atomSpace, hPlanning); 
 
         // Print the plan to the screen
         this->printPlan(atomSpace); 

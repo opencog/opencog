@@ -126,38 +126,6 @@ protected:
             "COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE",
                                             "rules_action_schemata.combo",
 
-            // OpenPsi parameters
-            // Updated by Zhenhua Cai, on 2011-02-07
-            "PSI_MODULATOR_UPDATERS_REPOSITORY_FILE", "modulator_updaters.combo", 
-            "PSI_MODULATORS",      "Activation, Resolution, Certainty, SelectionThreshold", 
-
-            "PSI_DEMAND_UPDATERS_REPOSITORY_FILE", "demand_updaters.combo",    
-            // TODO: TestEnergy is only used for debugging, remove it once finished
-            "PSI_DEMANDS", "Energy, Water, Integrity, Affiliation, Certainty, Competence, TestEnergy",  
-
-            "PSI_FEELING_UPDATERS_REPOSITORY_FILE", "feeling_updaters.combo", 
-            "PSI_FEELINGS", "anger", 
-
-            "PSI_RELATIONS", "friend, enemy", 
-
-            "PSI_RULES_CORE_FILE",          "rules_core.scm", 
-            "PSI_RULES_FILENAME_MASK",      "%s_rules.scm",
-
-            "PSI_MODULATOR_UPDATER_ENABLED",        "true",
-            "PSI_MODULATOR_UPDATER_CYCLE_PERIOD",   "1",
-
-            "PSI_DEMAND_UPDATER_ENABLED",           "true", 
-            "PSI_DEMAND_UPDATER_CYCLE_PERIOD",      "1", 
-
-            "PSI_ACTION_SELECTION_ENABLED",         "true", 
-            "PSI_ACTION_SELECTION_CYCLE_PERIOD",    "1",
-
-            "PSI_RELATION_UPDATER_ENABLED",         "true",  
-            "PSI_RELATION_UPDATER_CYCLE_PERIOD",    "1", 
-
-            "PSI_FEELING_UPDATER_ENABLED",          "true", 
-            "PSI_FEELING_UPDATER_CYCLE_PERIOD",     "1", 
-
             // TODO: Remove Rule Engine configurations once OpenPsi works fine
             //
             // Rule Engine parameters

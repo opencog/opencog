@@ -111,12 +111,9 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     } else {
         pet->initTraitsAndFeelings();
 
-        logger().info( "OAC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s', ActionSchemataPreconditions '%s', PsiModulatorUpdaters '%s' and PsiDemandUpdaters '%s'.",
+        logger().info( "OAC - Loading initial Combo stdlib file '%s', ActionSchemataPreconditions '%s'",
                        config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
-                       config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
-                       config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str(), 
-                       config().get("PSI_MODULATOR_UPDATERS_REPOSITORY_FILE").c_str(), 
-                       config().get("PSI_DEMAND_UPDATERS_REPOSITORY_FILE").c_str()
+                       config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str() 
                      );
 
         int cnt = 0;
@@ -165,14 +162,9 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     // IMPORTANT: the order the agents are created matters
     //            if they must be executed sequencially.
 
-    this->registerAgent(ProcedureInterpreterAgent::info().id, &procedureInterpreterAgentFactory);
-    procedureInterpreterAgent = static_cast<ProcedureInterpreterAgent*>(
-                                    this->createAgent(ProcedureInterpreterAgent::info().id, false));
-    procedureInterpreterAgent->setInterpreter(procedureInterpreter);
-
-    this->registerAgent(ActionSelectionAgent::info().id, &actionSelectionAgentFactory);
-    actionSelectionAgent = static_cast<ActionSelectionAgent*>(
-                               this->createAgent(ActionSelectionAgent::info().id, false));
+//    this->registerAgent(ActionSelectionAgent::info().id, &actionSelectionAgentFactory);
+//    actionSelectionAgent = static_cast<ActionSelectionAgent*>(
+//                               this->createAgent(ActionSelectionAgent::info().id, false));
 
     this->registerAgent(ImportanceDecayAgent::info().id, &importanceDecayAgentFactory);
     importanceDecayAgent = static_cast<ImportanceDecayAgent*>(
@@ -212,6 +204,11 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                    )
                                                                    );
 
+    this->registerAgent(ProcedureInterpreterAgent::info().id, &procedureInterpreterAgentFactory);
+    procedureInterpreterAgent = static_cast<ProcedureInterpreterAgent*>(
+                                    this->createAgent(ProcedureInterpreterAgent::info().id, false));
+    procedureInterpreterAgent->setInterpreter(procedureInterpreter);
+
     this->registerAgent( PsiRelationUpdaterAgent::info().id, 
                          &psiRelationUpdaterAgentFactory
                        );
@@ -229,20 +226,16 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                     false
                                                   )
                                                                  );
-                    
-    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
-        this->startAgent(procedureInterpreterAgent);
-    }
 
-    if (config().get_bool("ACTION_SELECTION_ENABLED")) {
-        actionSelectionAgent->setFrequency(config().get_int("RE_CYCLE_PERIOD"));
-        this->startAgent(actionSelectionAgent);
-    }
+//    if (config().get_bool("ACTION_SELECTION_ENABLED")) {
+//        actionSelectionAgent->setFrequency(config().get_int("RE_CYCLE_PERIOD"));
+//        this->startAgent(actionSelectionAgent);
+//    }
 
-    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
+//    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         // adds the same procedure interpreter agent to schedule again
-        this->startAgent(procedureInterpreterAgent);
-    }
+//        this->startAgent(procedureInterpreterAgent);
+//    }
 
     if (config().get_bool("IMPORTANCE_DECAY_ENABLED")) {
         importanceDecayAgent->setFrequency( 
@@ -272,6 +265,11 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->psiActionSelectionAgent->setFrequency(
            config().get_int( "PSI_ACTION_SELECTION_CYCLE_PERIOD" ) );
         this->startAgent(psiActionSelectionAgent);
+    }
+
+    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
+        procedureInterpreterAgent->setFrequency(1); 
+        this->startAgent(procedureInterpreterAgent);
     }
 
     if (config().get_bool("PSI_RELATION_UPDATER_ENABLED")) {
@@ -392,6 +390,10 @@ int OAC::addRulesToAtomSpace()
                         psi_rules_file_name.c_str() 
                       );
 
+/**    
+    // TODO: Disable dialog_system for the moment, because the 'find_reference_link'
+    //       function conflicts with the version in 'psi_util.scm'
+
     // Load the dialog system rules file, including triggers, responsers, and rules 
     std::string dialog_system_rules_file_name = "dialog_system.scm"; 
 
@@ -405,7 +407,7 @@ int OAC::addRulesToAtomSpace()
                          __FUNCTION__, 
                         dialog_system_rules_file_name.c_str() 
                       );
-
+*/
     return 0;
 }
 
