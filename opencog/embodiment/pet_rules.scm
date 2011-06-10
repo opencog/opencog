@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-23
+; @date   2011-06-10
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into AtomSpace
 ;
@@ -344,7 +344,7 @@
 
 (connect_goal_updater
      IntegrityDemandGoal
-     (add_goal (GroundedSchemaNode "fuzzy_within") 0.8 1.0 IntegrityDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.8 1.0 IntegrityDemandSchema)
 )
 
 (connect_goal_updater   
@@ -354,7 +354,7 @@
 
 (connect_goal_updater
      CertaintyDemandGoal
-     (add_goal (GroundedSchemaNode "fuzzy_within") 0.6 1.0 CertaintyDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.6 1.0 CertaintyDemandSchema)
 )
 
 (connect_goal_updater
