@@ -220,6 +220,8 @@ void CogServer::runLoopStep(void)
 
         cycleCount++;
         if (cycleCount < 0) cycleCount = 0;
+    } else {
+        logger().debug("[CogServer] customRunLoop returned false, skipping Agents.");
     }
 
     gettimeofday(&timer_end, NULL); 

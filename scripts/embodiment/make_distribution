@@ -14,7 +14,7 @@
 set pdh "../.."
 
 set binDir "bin" 
-set tag ""
+set tag "embodiment"
 
 # typedist = dev | user
 set type_dist "dev"
