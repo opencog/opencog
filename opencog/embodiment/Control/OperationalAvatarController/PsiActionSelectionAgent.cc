@@ -357,9 +357,10 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                        this->currentSchemaId,
                        this->cycleCount	
                       );
-
-        // If the Action has been done, check the result
-        if ( procedureInterpreter.isFinished(this->currentSchemaId) ) {
+        bool schemaFailed = procedureInterpreter.isFailed(this->currentSchemaId);
+        bool schemaComplete = procedureInterpreter.isFinished(this->currentSchemaId);
+        // If the Action has completed, and was reported successful, check the result
+        if ( schemaComplete && !schemaFailed ) {
 
             logger().debug( "PsiActionSelectionAgent::%s - The Action %s is finished [SchemaId = %d, cycle = %d]", 
                             __FUNCTION__,
@@ -421,7 +422,7 @@ std::cout<<"Unexpected result"<<std::endl;
             }
         } 
         // If the Action fails
-        else if ( procedureInterpreter.isFailed(this->currentSchemaId) ) {
+        else if ( schemaFailed ) {
 
             // TODO: How to judge whether an Action has failed?
             //
