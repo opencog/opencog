@@ -162,7 +162,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
                     "(%p). Handle %d", &atomTable, atomHandle.value() );
             continue;
         }
-        logger().info( "Saving Node handle %d name %s", atomHandle.value(),
+        logger().fine( "Saving Node handle %d name %s", atomHandle.value(),
                 node->toString().c_str() );
         writeNode(f, node);
         numNodes++;
@@ -457,7 +457,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
 
 void SavingLoading::writeAtom(FILE *f, Atom *atom)
 {
-    logger().info("SavingLoading::writeAtom: %p (type = %d) (handle = %d)", atom, atom->getType(), atom->getHandle().value());
+    logger().fine("SavingLoading::writeAtom: %p (type = %d) (handle = %d)", atom, atom->getType(), atom->getHandle().value());
 
     // writes the atom type
     fwrite(&atom->type, sizeof(Type), 1, f);
@@ -584,7 +584,7 @@ void SavingLoading::writeAttentionValue(FILE *f, const AttentionValue& attention
 void SavingLoading::writeTruthValue(FILE *f, const TruthValue& tv)
 {
     std::string tvStr = tv.toString();
-    logger().info( "SavingLoading::writeTruthValue() tvStr = %s\n", tvStr.c_str());
+    logger().fine( "SavingLoading::writeTruthValue() tvStr = %s\n", tvStr.c_str());
     TruthValueType type = tv.getType();
     int length = tvStr.size();
 
