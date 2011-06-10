@@ -53,8 +53,6 @@
 using namespace opencog;
 
 #define FULL_NETWORK_DUMP          (1 << 0)
-#define ATOM_SET                   (1 << 1)
-#define PHYSICAL_ADDRESSING        (1 << 2)
 
 #define INDEX_REPORT_FACTOR             1.02
 #define POST_PROCESSING_REPORT_FACTOR   1.10
@@ -68,7 +66,7 @@ SavingLoading::SavingLoading()
 
 void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOException)
 {
-    logger().info("Starting Memory dump");
+    logger().info("Saving OpenCog instance");
 
     time_t start = time(NULL);
 
