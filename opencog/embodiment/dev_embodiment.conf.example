@@ -270,7 +270,7 @@ RUN_OAC_DEBUGGER                = false
 OAC_DEBUGGER_PATH               = /usr/bin/nemiver
 # Another debugging possibility. If set to true, the spawner will print the correct command to start each OAC.
 # You can then type this into your debugger (e.g. in Eclipse, you have to run it from within the IDE)
-MANUAL_OAC_LAUNCH		= true
+MANUAL_OAC_LAUNCH		= false
 
 #Call the debugger with the OAC arguments directly appended at the end of the
 #command line of the debugger call, some debuggers, like nemiver, accept
