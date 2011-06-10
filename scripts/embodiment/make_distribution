@@ -131,6 +131,7 @@ foreach file $flist {
 foreach file $flistconfig {
     exec cp -ur $file $distDir
 }
+puts "Using config file $embodimentConf"
 exec cp -ur $embodimentConf $distDir/embodiment.conf
 
 
