@@ -94,8 +94,12 @@ $pdh/opencog/embodiment/scm/question-answering.scm \
 ]
 
 if {$type_dist == "dev"} {
+    # embodiment config - use example file if it doesn't exist
+    set embodimentConf $pdh/opencog/embodiment/dev_embodiment.conf
+    if { [file exists $embodimentConf] != 1 } {
+        set embodimentConf $pdh/opencog/embodiment/dev_embodiment.conf.example
+    }
     set flistconfig [list \
-    $pdh/opencog/embodiment/dev_config/embodiment.conf \
     $binDirH/opencog/embodiment/AutomatedSystemTest/pbTest \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_0.txt \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_1.txt \
@@ -104,9 +108,11 @@ if {$type_dist == "dev"} {
     run_system_test.sh \
     ]
 } elseif {$type_dist == "user"} {
-    set flistconfig [list \
-    $pdh/opencog/embodiment/embodiment.conf \
-    ]
+    # embodiment config - use example file if it doesn't exist
+    set embodimentConf $pdh/opencog/embodiment/embodiment.conf
+    if { [file exists $embodimentConf] != 1 } {
+        set embodimentConf $pdh/opencog/embodiment/embodiment.conf.example
+    }
 }
 
 if {$tag == ""} {
@@ -125,6 +131,7 @@ foreach file $flist {
 foreach file $flistconfig {
     exec cp -ur $file $distDir
 }
+exec cp -ur $embodimentConf $distDir/embodiment.conf
 
 
 # copy scheme sripts
