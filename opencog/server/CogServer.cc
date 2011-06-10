@@ -177,6 +177,9 @@ void CogServer::runLoopStep(void)
 {
     struct timeval timer_start, timer_end;
     time_t elapsed_time;
+    // this refers to the current cycle, so that logging reports correctly
+    // regardless of whether cycle is incremented.
+    long currentCycle = this->cycleCount;
 
     // Process requests
     gettimeofday(&timer_start, NULL);
@@ -190,7 +193,7 @@ void CogServer::runLoopStep(void)
                    (timer_end.tv_usec - timer_start.tv_usec);
 
     logger().debug("[CogServer] running server loop, time of processing requests: %f [cycle = %d]",
-                   1.0*elapsed_time/1000000, this->cycleCount
+                   1.0*elapsed_time/1000000, currentCycle
                   );
 
     // Run custom loop
@@ -202,8 +205,9 @@ void CogServer::runLoopStep(void)
                    (timer_end.tv_usec - timer_start.tv_usec);
 
     logger().debug("[CogServer] running server loop, time of running custom loop: %f [cycle = %d]",
-                   1.0*elapsed_time/1000000, this->cycleCount
+                   1.0*elapsed_time/1000000, currentCycle
                   );
+
 
     // Process mind agents
     timer_start = timer_end;
@@ -221,7 +225,7 @@ void CogServer::runLoopStep(void)
                    (timer_end.tv_usec - timer_start.tv_usec);
 
     logger().debug("[CogServer] running server loop, time of processing mind agents: %f [cycle = %d]",
-                   1.0*elapsed_time/1000000, this->cycleCount-1
+                   1.0*elapsed_time/1000000, currentCycle
                   );
 
 }

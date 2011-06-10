@@ -171,7 +171,7 @@ public:
     /** Returns the number of executed cycles so far */
     virtual long getCycleCount(void);
 
-    /** Interrupts the main loop. Not the loop will only exit after the current
+    /** Interrupts the main loop. Note that the loop will only exit after the current
      *  interaction is finished. */
     virtual void stop(void);
 

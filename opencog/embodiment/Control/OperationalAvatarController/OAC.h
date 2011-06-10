@@ -281,6 +281,7 @@ public:
 
     /**
      * Method inherited from EmbodimentCogServer 
+     * @return True if the server should exit.
      */
     bool processNextMessage(MessagingSystem::Message *msg);
 

@@ -77,10 +77,13 @@ bool EmbodimentCogServer::customLoopRun(void)
         for (unsigned int i = 0; i < messages.size(); i++) {
             Message *message = messages[i];
             if (message->getType() != Message::TICK) {
-                running = !processNextMessage(message);
+                // If processNextMessage returns false then we stop the
+                // CogServer
+                this->running = !processNextMessage(message);
                 delete(message);
-                if (!running) return false;
+                if (!this->running) return false;
             } else {
+                logger().warning("EmbodimentCogServer - got a tick, but not using external tick mode.");
                 delete(message);
             }
         }
@@ -103,9 +106,11 @@ bool EmbodimentCogServer::customLoopRun(void)
                 delete(message);
                 return true;
             } else {
-                running = !processNextMessage(message);
+                // If processNextMessage returns false then we stop the
+                // CogServer
+                this->running = !processNextMessage(message);
                 delete(message);
-                if (!running) return false;
+                if (!this->running) return false;
             }
         }
     }
