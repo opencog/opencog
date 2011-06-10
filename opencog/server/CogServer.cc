@@ -151,6 +151,8 @@ void CogServer::serverLoop()
 
     gettimeofday(&timer_start, NULL);
     for (running = true; running;) {
+        // Because cycleCount may or may not get incremented
+        long currentCycle = this->cycleCount;
         runLoopStep();
 
         gettimeofday(&timer_end, NULL);
@@ -165,7 +167,7 @@ void CogServer::serverLoop()
         }
 
         logger().debug("[CogServer] running server loop, all elapsed time: %f [cycle = %d]",
-                       1.0*elapsed_time/1000000, this->cycleCount-1
+                       1.0*elapsed_time/1000000, currentCycle
                       );
 
         timer_start = timer_end;
