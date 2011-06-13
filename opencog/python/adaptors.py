@@ -28,12 +28,18 @@ class ForestExtractor:
         self.all_trees_atoms = []
         self.bindings = []
         # variable counter
-        self.i = 0
+        # NOTE: If you set it to 0 here, it will give unique variables to every tree. BUT it will then count every occurrence of
+        # a tree as different (because of the different variables!)
+        #self.i = 0
         
         # fishgram-specific experiments. Refactor later
         # map from unique tree to set of embeddings. An embedding is a set of bindings. Maybe store the corresponding link too.
         self.tree_embeddings = {} 
         self.unique_trees_at_each_size = {}
+        
+        # The incoming links (or rather trees/predicates) for each object.
+        # For each object, for each predsize, for each slot, the list of preds. (Indexes into self.all_trees)
+        self.incoming = {}
 
     def extractTree(self,  atom, objects):
         if self.is_object(atom):
@@ -63,6 +69,7 @@ class ForestExtractor:
         for link in [x for x in self.a.get_atoms_by_type(t.Link) if x.tv.mean > 0 and x.tv.count > 0]:
             objects = []            
             #print self.extractTree(link, objects),  objects, self.i
+            self.i = 0
             tree = self.extractTree(link, objects)
             objects = tuple(objects)
             # policy - throw out trees with no objects
@@ -87,6 +94,19 @@ class ForestExtractor:
             if size not in self.unique_trees_at_each_size:
                 self.unique_trees_at_each_size[size] = set()
             self.unique_trees_at_each_size[size] .add(tree)
+            
+            size= len(objects)
+            tree_id = len(self.all_trees) - 1
+            for slot in xrange(size):
+                obj = objects[slot]
+                
+                if obj not in self.incoming:
+                    self.incoming[obj] = {}
+                if size not in self.incoming[obj]:
+                    self.incoming[obj][size] = {}
+                if slot not in self.incoming[obj][size]:
+                    self.incoming[obj][size][slot] = []
+                self.incoming[obj][size][slot].append(tree_id)
 
     def tree_to_string(self,  tree):
 
