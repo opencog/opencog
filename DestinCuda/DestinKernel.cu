@@ -11,26 +11,42 @@
 
 using namespace std;
 
+__global__ void Layer(int States, int InputDimensionlity, float *image);
+
 DestinKernel::DestinKernel(void)
 {
 	mRows=0;
 	mCols=0;
 	mStates=0;
+	mInputDimensionlity=0;
 	cuDeviceGetCount(&mDevices);
 }
 
 DestinKernel::~DestinKernel(void)
 {
+    cudaFree(dLayerData);
 }
 
-void DestinKernel::Create( int Rows, int Cols, int States)
+void DestinKernel::Create( int Rows, int Cols, int States, int InputDimensionlity)
 {
     mRows = Rows;
     mCols = Cols;
     mStates = States;
+    mInputDimensionlity = InputDimensionlity;
 }
 
-__global__ void Layer()
+void DestinKernel::DoDestin(float *image)
 {
+    int size = mRows*mCols*mStates;
+    cudaMalloc( (void**)&dLayerData, size*sizeof(float) );
 
+    dim3 threads(64,1);
+    dim3 grid(mCols,mRows);
+    Layer<<<threads,grid>>>(mStates, mInputDimensionlity, image);
+}
+
+__global__ void Layer(int States, int InputDimensionlity, float *image)
+{
+    threadIdx.x;
+    blockIdx.x;
 }

@@ -353,7 +353,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         cout << Layer << " Input Output Dimension " << InputDimensionality[Layer] << " " << NumberOfCentroids[Layer] << endl;
 
         // Creation of layer and layerLatch
-        DLayer[Layer].Create( RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer] );
+        DLayer[Layer].Create( RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer] );
         // Assign Childeren and Parrents of nodes
         if ( NumberOfCentroids[Layer] > MaxNumberOfOutputs )
         {
