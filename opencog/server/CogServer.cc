@@ -147,7 +147,7 @@ void CogServer::serverLoop()
     time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
     bool externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
 
-    logger().info("opencog server ready.");
+    logger().info("Starting CogServer loop.");
 
     gettimeofday(&timer_start, NULL);
     for (running = true; running;) {
@@ -166,8 +166,9 @@ void CogServer::serverLoop()
                 usleep((unsigned int) (cycle_duration - elapsed_time));
         }
 
-        logger().debug("[CogServer] running server loop, all elapsed time: %f [cycle = %d]",
-                       1.0*elapsed_time/1000000, currentCycle
+        logger().debug("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
+                        currentCycle,
+                       elapsed_time/1000000.0
                       );
 
         timer_start = timer_end;
@@ -185,6 +186,7 @@ void CogServer::runLoopStep(void)
 
     // Process requests
     gettimeofday(&timer_start, NULL);
+    logger().debug("[CogServer::runLoopStep cycle = %d]", currentCycle);
 
     if (getRequestQueueSize() != 0) {
         processRequests();
@@ -194,8 +196,9 @@ void CogServer::runLoopStep(void)
     elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                    (timer_end.tv_usec - timer_start.tv_usec);
 
-    logger().debug("[CogServer] running server loop, time of processing requests: %f [cycle = %d]",
-                   1.0*elapsed_time/1000000, currentCycle
+    logger().debug("[CogServer::runLoopStep cycle = %d] Time to process requests: %f",
+                   currentCycle,
+                   elapsed_time/1000000.0
                   );
 
     // Run custom loop
@@ -206,10 +209,10 @@ void CogServer::runLoopStep(void)
     elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                    (timer_end.tv_usec - timer_start.tv_usec);
 
-    logger().debug("[CogServer] running server loop, time of running custom loop: %f [cycle = %d]",
-                   1.0*elapsed_time/1000000, currentCycle
+    logger().debug("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
+                   currentCycle,
+                   elapsed_time/1000000.0
                   );
-
 
     // Process mind agents
     timer_start = timer_end;
@@ -220,17 +223,17 @@ void CogServer::runLoopStep(void)
 
         cycleCount++;
         if (cycleCount < 0) cycleCount = 0;
-    } else {
-        logger().debug("[CogServer] customRunLoop returned false, skipping Agents.");
-    }
 
-    gettimeofday(&timer_end, NULL); 
-    elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                   (timer_end.tv_usec - timer_start.tv_usec);
-
-    logger().debug("[CogServer] running server loop, time of processing mind agents: %f [cycle = %d]",
-                   1.0*elapsed_time/1000000, currentCycle
+        gettimeofday(&timer_end, NULL); 
+        elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                       (timer_end.tv_usec - timer_start.tv_usec);
+        logger().debug("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
+                   currentCycle,
+                   elapsed_time/1000000.0, currentCycle
                   );
+    } else {
+        logger().debug("[CogServer::runLoopStep cycle = %d] customRunLoop returned false. Skipping MindAgents, and not incremented cycle counter.", currentCycle);
+    }
 
 }
 

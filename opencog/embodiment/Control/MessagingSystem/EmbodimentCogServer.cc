@@ -108,7 +108,7 @@ bool EmbodimentCogServer::customLoopRun(void)
                 delete(message);
                 if (!this->running) return false;
             } else {
-                logger().warn("EmbodimentCogServer - got a tick, but not using external tick mode.");
+                logger().warn("EmbodimentCogServer - got a TICK, but not using external tick mode.");
                 delete(message);
             }
         }
