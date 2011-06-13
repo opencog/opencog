@@ -227,8 +227,8 @@ void PsiModulatorUpdaterAgent::run(opencog::CogServer * server)
     const std::string & petId = oac->getPet().getPetId();
 
     // Get current time stamp
-    unsigned long timeStamp = atomSpace.getTimeServer().getLatestTimestamp();
-   
+    unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();   
+
     // Check if map info data is available
     if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
         logger().warn( 
