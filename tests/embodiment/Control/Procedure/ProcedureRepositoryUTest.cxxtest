@@ -167,7 +167,7 @@ public:
             }
             fin.close();
         }
-        TS_ASSERT(pr->contains(string("pay_attention")));
+        TS_ASSERT(pr->contains(string("random_search")));
 
     }
 
