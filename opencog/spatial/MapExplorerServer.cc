@@ -107,7 +107,7 @@ void MapExplorerServer::wait( void )
 void MapExplorerServer::stop( void )
 {
     if ( this->running ) {
-        logger().debug( "MapExplorerServer::%s - Stoping the service ", __FUNCTION__ );
+        logger().debug( "MapExplorerServer::%s - Stopping the service ", __FUNCTION__ );
         this->running = false;
         this->clients.join_all( );
         this->visualDebuggerAcceptor->close( );
