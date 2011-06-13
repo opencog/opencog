@@ -53,6 +53,12 @@ protected:
      */
     int unreadMessagesRetrievalLimit;
 
+    /**
+     * Maximum size of the message queue. Some old messages would be discraded,
+     * if the message queue size exceeds the limit. 
+     */
+    int maxMessageQueueSize; 
+
 public:
 
     EmbodimentCogServer();

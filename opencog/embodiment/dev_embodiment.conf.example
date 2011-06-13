@@ -128,19 +128,19 @@ PSI_RULES_CORE_FILE =          rules_core.scm
 PSI_RULES_FILENAME_MASK =      %s_rules.scm
 
 PSI_MODULATOR_UPDATER_ENABLED =        true
-PSI_MODULATOR_UPDATER_CYCLE_PERIOD =   15
+PSI_MODULATOR_UPDATER_CYCLE_PERIOD =   29
 
 PSI_DEMAND_UPDATER_ENABLED =           true
-PSI_DEMAND_UPDATER_CYCLE_PERIOD =      3 
+PSI_DEMAND_UPDATER_CYCLE_PERIOD =      13
 
 PSI_ACTION_SELECTION_ENABLED =         true
-PSI_ACTION_SELECTION_CYCLE_PERIOD =    3
+PSI_ACTION_SELECTION_CYCLE_PERIOD =    13
 
 PSI_RELATION_UPDATER_ENABLED =         true
-PSI_RELATION_UPDATER_CYCLE_PERIOD =    20
+PSI_RELATION_UPDATER_CYCLE_PERIOD =    29
 
-PSI_FEELING_UPDATER_ENABLED =          false
-PSI_FEELING_UPDATER_CYCLE_PERIOD =     15 
+PSI_FEELING_UPDATER_ENABLED =          true
+PSI_FEELING_UPDATER_CYCLE_PERIOD =     29
 
 # If you would like to use PLN planner, set it to true, otherwise it will use random breadth-first planner
 PSI_PLAN_BY_PLN = false
@@ -152,7 +152,7 @@ RE_CYCLE_PERIOD                                  = 2
 ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD = 1
 
 # how much cycles the importance decay will take
-IMPORTANCE_DECAY_CYCLE_PERIOD = 15
+IMPORTANCE_DECAY_CYCLE_PERIOD = 5
 
 #RE_DEFAULT_COUNT	    18
 #RE_DEFAULT_MEAN		0.5  
@@ -164,7 +164,7 @@ IMPORTANCE_DECAY_CYCLE_PERIOD = 15
 
 # Parameter to control the maximal time spent by a procedure to be executed by Procedure Interpreter (in seconds)
 #PROCEDURE_EXECUTION_TIMEOUT     = 90 
-PROCEDURE_EXECUTION_TIMEOUT     = 90 
+PROCEDURE_EXECUTION_TIMEOUT     = 20 
 
 # Indicates if walk actions sent to PVP can be canceled so that new navigation plan be sent to PVP when needed.
 ALLOW_WALKING_CANCELATION       = false
@@ -282,6 +282,8 @@ UNREAD_MESSAGES_CHECK_INTERVAL  = 1
 # -1 for unlimited number of retrieved messages
 UNREAD_MESSAGES_RETRIEVAL_LIMIT = -1
 NO_ACK_MESSAGES                 = true
+# Old messages exceed this limit would be discarded
+MAX_MESSAGE_QUEUE_SIZE          = 60
 
 # options(tangentbug, astar, hpa). Default is tangentbug 
 # tangengbug generates smoother paths than hpa's in Multiverse (did not try astart yet...)

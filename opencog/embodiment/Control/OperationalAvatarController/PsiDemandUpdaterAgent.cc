@@ -131,7 +131,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
                                this->demandName + "Demand\" " +
                                boost::lexical_cast<std::string>(this->currentDemandValue) + " " + 
                                boost::lexical_cast<std::string>(timeStamp) + " " +
-                         ")";   
+                        ")";   
 
     // Run the scheme procedure
     scheme_return_value = evaluator.eval(scheme_expression);
@@ -342,7 +342,7 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
     const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
 
     // Get current time stamp
-    unsigned long timeStamp = atomSpace.getTimeServer().getLatestTimestamp();
+    unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp(); 
 
     // Check if map info data is available
     if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
@@ -393,7 +393,7 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
 #ifdef HAVE_ZMQ    
     // Publish updated Demand values via ZeroMQ
     Plaza & plaza = oac->getPlaza();
-//    this->publishUpdatedValue(plaza, *this->publisher, timeStamp); 
+    this->publishUpdatedValue(plaza, *this->publisher, timeStamp); 
 #endif 
 
     // Update the truth value of previous/ current demand goal

@@ -105,9 +105,6 @@ private:
     // unless you call 'forceInitNextCycle' method. 
     bool bInitialized; 
 
-    // Initialize demandGoalList etc.
-    void init(opencog::CogServer * server);
-
     Procedure::RunningProcedureID currentSchemaId;  // Scheme Id of current running Action (a combo script)
 
     // Time out for executing Action (combo script) defined by PROCEDURE_EXECUTION_TIMEOUT
@@ -142,6 +139,9 @@ private:
 
     // Return actions given one step in plan_action_list (or temp_action_list)
     void getActions(AtomSpace & atomSpace, Handle hStep, std::vector<Handle> & actions); 
+
+    // Initialize demandGoalList etc.
+    void init(opencog::CogServer * server);
 
     // Add the list of demand goals in AtomSpace
     //
@@ -200,6 +200,7 @@ public:
 
     // Entry of the Agent, CogServer will invoke this function during its cycle
     void run(opencog::CogServer * server);
+
 
     // After calling this function, the Agent will invoke its "init" method firstly 
     // in "run" function during its next cycle

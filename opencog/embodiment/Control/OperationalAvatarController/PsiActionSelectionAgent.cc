@@ -55,18 +55,8 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
-    // Get Procedure repository
-//    const Procedure::ProcedureRepository & procedureRepository = 
-//                                               oac->getProcedureRepository();
-
-    // Get petId
-//    const std::string & petId = oac->getPet().getPetId();
-
     // Initialize the list of Demand Goals
     this->initDemandGoalList(atomSpace);
-
-    // Reset the seed for pseudo-random numbers
-    srand(time(0));
 
     // Initialize other members
     this->currentSchemaId = 0;
@@ -101,7 +91,7 @@ void PsiActionSelectionAgent::initDemandGoalList(AtomSpace & atomSpace)
 
     for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
           iDemandName != demandNamesTok.end();
-          iDemandName ++ ) {
+          ++ iDemandName ) {
 
         demandPredicateName = (*iDemandName) + "DemandGoal";
 
@@ -161,7 +151,6 @@ void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
     this->plan_selected_demand_goal = hSelectedDemandGoal; 
 
 /**    
-    // TODO: The code below would crash, and I don't know why. 
     Handle hRuleList =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE, 
@@ -170,7 +159,7 @@ void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
                                    );
 
     this->plan_rule_list = atomSpace.getOutgoing(hRuleList); 
-*/
+
     Handle hContextList =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE, 
@@ -179,7 +168,7 @@ void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
                                    );
 
     this->plan_context_list = atomSpace.getOutgoing(hContextList); 
-
+*/
     Handle hActionList =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE, 
@@ -325,7 +314,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
 
     // Check if map info data is available
     if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
-        logger().warn( "PsiActionSelectionAgent::%s - There is no map info available yet [ cycle = %d ]", 
+        logger().warn( "PsiActionSelectionAgent::%s - There is no map info available yet [cycle = %d]", 
                         __FUNCTION__, 
                         this->cycleCount
                      );
@@ -334,7 +323,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
 
     // Check if the pet spatial info is already received
     if ( !atomSpace.getSpaceServer().getLatestMap().containsObject(petId) ) {
-        logger().warn( "PsiActionSelectionAgent::%s - Pet was not inserted in the space map yet [ cycle = %d ]", 
+        logger().warn( "PsiActionSelectionAgent::%s - Pet was not inserted in the space map yet [cycle = %d]", 
                        __FUNCTION__, 
                        this->cycleCount
                      );
@@ -342,7 +331,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     }
 
     // Initialize the Mind Agent (demandGoalList etc)
-    if ( !this->bInitialized )
+    if ( !this->bInitialized ) 
         this->init(server);
 
     // Check the state of current running Action: 
@@ -352,7 +341,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     //
     if (this->currentSchemaId != 0) {
 
-        logger().debug( "PsiActionSelectionAgent::%s currentSchemaId = %d [ cycle = %d] ", 
+        logger().debug( "PsiActionSelectionAgent::%s currentSchemaId = %d [cycle = %d] ", 
                         __FUNCTION__, 
                        this->currentSchemaId,
                        this->cycleCount	

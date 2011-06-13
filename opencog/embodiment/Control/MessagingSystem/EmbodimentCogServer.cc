@@ -46,6 +46,7 @@ void EmbodimentCogServer::setNetworkElement(NetworkElement* _ne)
     externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
     unreadMessagesCheckInterval = opencog::config().get_int("UNREAD_MESSAGES_CHECK_INTERVAL");
     unreadMessagesRetrievalLimit = opencog::config().get_int("UNREAD_MESSAGES_RETRIEVAL_LIMIT");
+    maxMessageQueueSize = opencog::config().get_int("MAX_MESSAGE_QUEUE_SIZE"); 
 }
 
 NetworkElement& EmbodimentCogServer::getNetworkElement(void)
@@ -56,11 +57,35 @@ NetworkElement& EmbodimentCogServer::getNetworkElement(void)
 bool EmbodimentCogServer::customLoopRun(void)
 {
     unsigned int msgQueueSize = ne->getIncomingQueueSize();
-    if (msgQueueSize > 0) {
-        logger().debug("EmbodimentCogServer(%s) - messageCentral size: %d",
-                       ne->getID().c_str(), msgQueueSize);
+
+    // Discard some old messages if the message queue size exceeds the 
+    // MAX_MESSAGE_QUEUE_SIZE. This would miss some messages which may probably cause 
+    // other problems. We should figure out a better solution.
+    int obsoleteMessageNum = msgQueueSize - this->maxMessageQueueSize;
+
+    if (obsoleteMessageNum > 0) {
+        logger().debug("EmbodimentCogServer(%s) - messageCentral size: %d exceeds MAX_MESSAGE_QUEUE_SIZE: %d [cycle = %d]",
+                       ne->getID().c_str(), 
+                       msgQueueSize, 
+                       this->maxMessageQueueSize,
+                       this->getCycleCount()
+                      );
     }
 
+    for ( ; obsoleteMessageNum > 0; -- obsoleteMessageNum ) {
+        Message * message = ne->popIncomingQueue(); 
+        delete message; 
+    }
+
+    msgQueueSize = ne->getIncomingQueueSize();
+
+    if (msgQueueSize > 0) {
+        logger().debug("EmbodimentCogServer(%s) - messageCentral size: %d [cycle = %d]",
+                       ne->getID().c_str(), 
+                       msgQueueSize,
+                       this->getCycleCount()
+                      );
+    }
 
     if (!externalTickMode) {
         // Retrieve new messages from router, if any
@@ -102,7 +127,9 @@ bool EmbodimentCogServer::customLoopRun(void)
             Message *message = messages[i];
             //check type of message
             if (message->getType() == Message::TICK) {
-                logger().debug("EmbodimentCogServer - got a tick");
+                logger().debug("EmbodimentCogServer - No.%d message is a TICK, %d messages left unprocessed [cycle = %d]", 
+                               i+1, msgQueueSize-i-1, this->getCycleCount()
+                              );
                 delete(message);
                 return true;
             } else {
@@ -110,7 +137,14 @@ bool EmbodimentCogServer::customLoopRun(void)
                 // CogServer
                 this->running = !processNextMessage(message);
                 delete(message);
-                if (!this->running) return false;
+
+                if (!running) {
+                    logger().debug("EmbodimentCogServer - Fail to process No.%d message, %d messages left unprocessed [cycle = %d]", 
+                                   i+1, msgQueueSize-i-1, this->getCycleCount()
+                                  );
+
+                    return false;
+                }
             }
         }
     }
