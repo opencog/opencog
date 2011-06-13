@@ -30,10 +30,8 @@
 
 #include "pet_operator.h"
 
-namespace combo
-{
+namespace combo { namespace id {
 
-namespace id {
 enum pet_builtin_action_enum {
 
     //Note that all following comments are based on experimentation

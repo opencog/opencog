@@ -28,13 +28,15 @@
 
 using namespace Procedure;
 
-ComboSelectInterpreter::ComboSelectInterpreter(PerceptionActionInterface::PAI& pai, opencog::RandGen& rng)
+ComboSelectInterpreter::ComboSelectInterpreter(
+        PerceptionActionInterface::PAI& pai, opencog::RandGen& rng)
 {
     this->comboInterpreter = new ComboInterpreter(pai, rng);
     this->next = 0;
 }
 
-ComboSelectInterpreter::ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng)
+ComboSelectInterpreter::ComboSelectInterpreter(
+        VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng)
 {
     this->comboInterpreter = new ComboInterpreter(v, rng);
     this->next = 0;
@@ -48,17 +50,14 @@ ComboSelectInterpreter::~ComboSelectInterpreter()
 
 void ComboSelectInterpreter::run(MessagingSystem::NetworkElement* ne)
 {
-    if (runningProc.empty()) {
-        return;
-    }
+    if (runningProc.empty()) return;
 
     // select the head of the map, since the RunningId is the map's key
     idProcedureMap::iterator it = runningProc.begin();
     RunningComboSelectProcedure& rp = it->second;
 
     rp.cycle();
-    logger().debug(
-                 "RunningComboSelect - Terminei o cycle.");
+    logger().debug("RunningComboSelect - Terminei o cycle.");
 
     if (!rp.isFinished()) {
 

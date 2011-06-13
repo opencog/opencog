@@ -4,13 +4,13 @@
 ; @author Zhenhua Cai <czhedu@gmail.com>
 ; @date   2011-06-10
 ;
-; Scheme scripts for adding Modulators, Demands and Rules into AtomSpace
+; Scheme scripts for adding Modulators, Demands and Rules into the AtomSpace.
 ;
-; Note: Many of the openPsi Rules in this file are inspired by original Rules used in RuleEngine. 
+; Many of the OpenPsi rules in this file are inspired from the original rules used by
+; the old embodiment RuleEngine. 
 ;
 ; TODO: These Rules are very experimental and only for debugging. 
 ;       Once PsiActionSelectionAgent is finished, we would tune these Rules, observing Pet's behaviors.
-
 
 ;
 ; Initialize PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP for Test 
@@ -240,21 +240,18 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; Relation Goals, which are usually served as other Rule's Precondition  
+; Relation Goals, these usually serve as another Rule's precondition.
 ;
-; Note: There's no need to set truth value and attention value for Nodes. 
-;       If you insist in doing this, be carefule about the sequence of node name and truth value. 
+; Note: There's no need to set truth value and attention value for these Nodes. 
+;       If you insist in doing this, be careful about the sequence of node name and truth value. 
 ;
-;       For instance, 
+;       For instance, this is wrong:
 ;           (VariableNode (DEFAULT_STV) "$VarName") 
-;       is fault. 
 ;       The correct version is
 ;           (VariableNode "$VarName" (DEFAULT_STV))
 ;
 
-(define EntityVar
-    (VariableNode "$EntityVar")
-)
+(define EntityVar (VariableNode "$EntityVar"))
 
 (define FriendRelation
     (add_goal (PredicateNode "friend") "'self'" EntityVar) 
@@ -294,14 +291,14 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Connect a none grounded goal and a grounded predicate node. 
+; Connect a ungrounded goal and a grounded predicate node. 
 ;
 ; Usage:
 ;     (connect_goal_updater goal_evaluation_link goal_truth_value_updater_evaluation_link)
 ; 
-; Each none grounded goal or precondition should have a corresponding 
+; Each ungrounded goal or precondition should have a corresponding 
 ; GroundedPredicateNode to check if the goal or precondition has been achieved or
-; not. They are related via an SimultaneousEquivalenceLink as follows:
+; not. They are related via a SimultaneousEquivalenceLink as follows:
 ;
 ; SimultaneousEquivalenceLink
 ;     EvaluationLink

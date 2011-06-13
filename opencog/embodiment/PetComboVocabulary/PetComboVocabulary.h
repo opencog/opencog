@@ -34,9 +34,10 @@
 namespace combo
 {
 
-//some common def
+// Some common definitions
 
 namespace id {
+
 static const definite_object self = "self";
 static const definite_object owner = "owner";
 static const definite_object null_obj = "null_obj";
@@ -53,8 +54,8 @@ static const definite_object all_agents = "all_agents";
 
 } //~namespace combo
 
-//this namespace is defined in order to break ambiguities
-//and make coexist several vocabularies
+// this namespace is defined in order to break ambiguities
+// and allow several vocabularies to coexist 
 namespace PetCombo
 {
 

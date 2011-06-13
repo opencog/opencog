@@ -97,20 +97,21 @@ ProcedureInterpreter::~ProcedureInterpreter()
     delete rng;
 }
 
-RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p, const std::vector<combo::vertex>& arguments)
+RunningProcedureID ProcedureInterpreter::runProcedure(
+        const GeneralProcedure& p, const std::vector<combo::vertex>& arguments)
 {
-
-    logger().info(
-                 "ProcedureInterpreter - runProcedure(%s)", p.getName().c_str());
+    logger().info("ProcedureInterpreter - runProcedure(%s)", p.getName().c_str());
 
     if (p.getType() == COMBO) {
-        logger().debug(
-                     "ProcedureInterpreter - Running a combo procedure.");
+
+        logger().debug("ProcedureInterpreter - Running a combo procedure.");
+
         RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
         _map.insert(std::make_pair(++_next, rcpID));
     } else if (p.getType() == COMBO_SELECT) {
-        logger().debug(
-                     "ProcedureInterpreter - Running a combo select procedure.");
+
+        logger().debug("ProcedureInterpreter - Running a combo select procedure.");
+
         const ComboSelectProcedure& procedure = ((const ComboSelectProcedure&) p);
         RunningProcedureId rcpID =
             comboSelectInterpreter->runProcedure(procedure.getFirstScript(),
@@ -119,8 +120,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
         _map.insert(std::make_pair(++_next, rcpID));
 
     } else if (p.getType() == BUILT_IN) {
-        logger().debug(
-                     "ProcedureInterpreter - Running a builtin procedure.");
+        logger().debug("ProcedureInterpreter - Running a builtin procedure.");
         RunningBuiltInProcedure rbp = RunningBuiltInProcedure(*_pai, (const BuiltInProcedure&) p, arguments);
         // For now, runs built-in procedure immediately, since they are atomic
         // and caller may want to check for failure or get its result synchronously.

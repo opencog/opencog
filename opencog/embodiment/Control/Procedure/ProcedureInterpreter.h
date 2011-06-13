@@ -44,10 +44,14 @@ public:
 
     ~ProcedureInterpreter();
 
-    // call ComboInterpreter::run() method and execute pending running BuiltIn procedures.
+    //! call ComboInterpreter::run() method and execute pending running BuiltIn procedures.
     void run(MessagingSystem::NetworkElement *ne);
 
-    // add a procedure to be run by the interpreter
+    /** Add a procedure to be run by the interpreter
+     * @param p The procedure to run.
+     * @param arguments The arguments to the procedure.
+     * @return The procedure ID
+     */
     RunningProcedureID runProcedure(const GeneralProcedure& p, const std::vector<combo::vertex>& arguments);
 
     // add a procedure to be run by the interpreter

@@ -32,7 +32,6 @@ RunningComboSelectProcedure::RunningComboSelectProcedure(ComboInterpreter& i,
         combo::variable_unifier& vu)
         : interpreter(i), firstScript(f), secondScript(s), unifier(vu)
 {
-
     this->firstScriptFinished = false;
     this->firstScriptFailed = false;
 
@@ -46,7 +45,6 @@ RunningComboSelectProcedure::RunningComboSelectProcedure(ComboInterpreter& i,
 
 void RunningComboSelectProcedure::cycle()
 {
-
     // for now the first script wont support parameters, only wild-cards
     std::vector<combo::vertex> empty_args;
     Procedure::RunningProcedureId firstScriptId = interpreter.runProcedure(firstScript.getComboTree(), empty_args, unifier);
@@ -80,17 +78,19 @@ void RunningComboSelectProcedure::cycle()
 
     ss << firstScriptResult;
     OC_ASSERT(is_builtin(firstScriptResult),
-                     "RunningComboSelectProcedure - First script result should be a buit-in. Got '%s'",
-                     ss.str().c_str());
+             "RunningComboSelectProcedure - First script result should be a buit-in. Got '%s'",
+             ss.str().c_str());
 
     // only execute the second script if the first one evaluates true.
     if (get_builtin(firstScriptResult) == combo::id::logical_true) {
 
         // no need for unification, normal execution
         if (this->secondScript.getArity() == 0) {
-            OC_ASSERT(this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
+            OC_ASSERT(this->arguments.size() == 0,
+                    "RunningComboSelectProcedure - args should be empty.");
 
-            Procedure::RunningProcedureId id = interpreter.runProcedure(secondScript.getComboTree(), empty_args);
+            Procedure::RunningProcedureId id = interpreter.runProcedure(
+                    secondScript.getComboTree(), empty_args);
             while (!interpreter.isFinished(id)) {
                 interpreter.run(NULL);
             }
@@ -100,16 +100,15 @@ void RunningComboSelectProcedure::cycle()
             if (!interpreter.isFailed(id)) {
                 this->result = interpreter.getResult(id);
                 this->secondScriptFailed = false;
-
             } else {
                 this->secondScriptFailed = true;
             }
 
-
             // one or more parameters, if unifier isn't empty, the last parameter MUST be an
             // unifier result
         } else {
-            OC_ASSERT(this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
+            OC_ASSERT(this->arguments.size() == 0,
+                    "RunningComboSelectProcedure - args should be empty.");
 
             // variable unifier - use it
             if (!unifier.empty()) {
@@ -120,12 +119,12 @@ void RunningComboSelectProcedure::cycle()
 
                 for (it = unifier.begin(); it != unifier.end(); it++) {
                     if (it->second) {
-                        logger().debug(
-                                     "RunningComboSelect - unfied var '%s'.",
+                        logger().debug("RunningComboSelect - unified var '%s'.",
                                      it->first.c_str());
 
                         this->arguments.push_back(it->first);
-                        Procedure::RunningProcedureId id = interpreter.runProcedure(secondScript.getComboTree(), arguments);
+                        Procedure::RunningProcedureId id = interpreter.runProcedure(
+                                secondScript.getComboTree(), arguments);
 
                         // execute the first script until it's end
                         while (!interpreter.isFinished(id)) {
@@ -136,8 +135,10 @@ void RunningComboSelectProcedure::cycle()
                             this->secondScriptFailed = false;
                             combo::vertex res = interpreter.getResult(id);
 
-                            if ((is_builtin(res) && get_builtin(res) == combo::id::logical_true) ||
-                                    (is_action_result(res) && get_action(res) == combo::id::action_success)) {
+                            if ( (is_builtin(res) &&
+                                 get_builtin(res) == combo::id::logical_true) ||
+                                 (is_action_result(res) &&
+                                 get_action(res) == combo::id::action_success)) {
 
                                 this->result = res;
 
@@ -163,7 +164,9 @@ void RunningComboSelectProcedure::cycle()
 
                 // no unifier - normal case
             } else {
-                Procedure::RunningProcedureId id = interpreter.runProcedure(secondScript.getComboTree(), arguments);
+                Procedure::RunningProcedureId id = interpreter.runProcedure(
+                        secondScript.getComboTree(), arguments);
+
                 while (!interpreter.isFinished(id)) {
                     interpreter.run(NULL);
                 }
