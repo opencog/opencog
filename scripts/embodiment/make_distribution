@@ -59,17 +59,7 @@ $pdh/opencog/embodiment/feeling_updaters.scm \
 $pdh/opencog/embodiment/demand_updaters.scm \
 $pdh/opencog/embodiment/modulator_updaters.scm \
 $pdh/opencog/embodiment/dialog_system.scm \
-$pdh/opencog/embodiment/rules_core.lua \
-$pdh/opencog/embodiment/humanoid_rules.lua \
-$pdh/opencog/embodiment/humanoid_traits_maria.lua \
-$pdh/opencog/embodiment/pet_rules.lua \
-$pdh/opencog/embodiment/pet_traits_bob.lua \
-$pdh/opencog/embodiment/pet_traits_diablo.lua \
-$pdh/opencog/embodiment/pet_traits_maxie.lua \
-$pdh/opencog/embodiment/pet_traits_princess.lua \
-$pdh/opencog/embodiment/pet_traits_sleepy.lua \
 $pdh/opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorld.xsd \
-$pdh/opencog/embodiment/RuleValidation/Processor/validation_core.lua \
 ./SPCTools.py \
 $pdh/opencog/embodiment/frames2relex.rules \
 $pdh/opencog/embodiment/frames.list \
