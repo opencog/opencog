@@ -350,7 +350,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
             // Yes you are the top layer
             bTopNode = true;
         }
-        cout << Layer << " Input Output Dimension " << InputDimensionality[Layer] << " " << NumberOfCentroids[Layer] << endl;
+        cout << "Layer: " << Layer << " InputDimension " << InputDimensionality[Layer] << " OutputDimension (Each node) " << NumberOfCentroids[Layer] << endl;
 
         // Creation of layer and layerLatch
         DLayer[Layer].Create( RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer] );
