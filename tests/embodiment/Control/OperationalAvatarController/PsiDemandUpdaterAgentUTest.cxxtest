@@ -1,0 +1,77 @@
+/*
+ * tests/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgentUTest.cxxtest
+ *
+ * @author Zhenhua Cai <czhedu@gmail.com>
+ * @date   2011-06-14
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <OACMock.h>
+
+class PsiDemandUpdaterAgentUTest: public CxxTest::TestSuite {
+
+private:
+    
+    OACMock oacMock; 
+
+public:
+
+    /**
+     * Since this test suit needs a constructor, then we should tell cxxtest how
+     * to create a test suit dynamically by writing two static functions
+     * createSuite and destroySuite
+     */
+    static PsiDemandUpdaterAgentUTest * createSuite() {
+        return new PsiDemandUpdaterAgentUTest();
+    }
+
+    static void destroySuite(PsiDemandUpdaterAgentUTest * suite) {
+        delete suite;
+    }
+
+    /**
+     * Constructor
+     */
+    PsiDemandUpdaterAgentUTest() {
+
+        oacMock.setConfig();
+
+        // Set your specific configurations before invoking createOAC. 
+        //
+
+        oacMock.createOAC(); 
+    }
+
+    ~PsiDemandUpdaterAgentUTest() {
+
+    }
+
+    /**
+     * setUp and tearDown would be invoked before and after each single test. 
+     */
+    void setUp() {
+
+    }
+
+    void tearDown(){
+
+    }
+
+    void testRun() {
+
+    }
+};
