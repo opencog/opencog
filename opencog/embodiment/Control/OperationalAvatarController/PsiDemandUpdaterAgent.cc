@@ -212,6 +212,7 @@ PsiDemandUpdaterAgent::~PsiDemandUpdaterAgent()
 PsiDemandUpdaterAgent::PsiDemandUpdaterAgent()
 {
     this->cycleCount = 0;
+    this->publisher = NULL; 
 
     // Force the Agent initialize itself during its first cycle. 
     this->forceInitNextCycle();

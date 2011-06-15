@@ -292,8 +292,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     StringMessage successLoad(myId, config().get("PROXY_ID"), str);
     logger().info("OAC spawned. Acking requestor");
     if (!sendMessage(successLoad)) {
-        logger().error("Could not send SUCCESS LOAD to PROXY!");
-        exit(-1);
+        logger().error("OAC - Could not send SUCCESS LOAD to PROXY!");
     }
 
     if ( config().get("VISUAL_DEBUGGER_ACTIVE") == "true" ) {
@@ -427,7 +426,7 @@ OAC::~OAC()
     // agents
     delete (procedureInterpreterAgent);
     delete (importanceDecayAgent);
-    delete (actionSelectionAgent);
+//    delete (actionSelectionAgent);
     delete (psiModulatorUpdaterAgent);
     delete (psiActionSelectionAgent);
     delete (psiRelationUpdaterAgent); 

@@ -138,7 +138,7 @@ private:
     /** opencog Agents */
     ProcedureInterpreterAgent* procedureInterpreterAgent;
     ImportanceDecayAgent* importanceDecayAgent;
-    ActionSelectionAgent* actionSelectionAgent;
+//    ActionSelectionAgent* actionSelectionAgent;
     EntityExperienceAgent* entityExperienceAgent;
 
     PsiModulatorUpdaterAgent * psiModulatorUpdaterAgent;
@@ -313,7 +313,7 @@ public:
 
     SingletonFactory<ProcedureInterpreterAgent, Agent> procedureInterpreterAgentFactory;
     SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
-    SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
+//    SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
     SingletonFactory<EntityExperienceAgent, Agent> entityExperienceAgentFactory;
 
     SingletonFactory <PsiModulatorUpdaterAgent, Agent> psiModulatorUpdaterAgentFactory;
