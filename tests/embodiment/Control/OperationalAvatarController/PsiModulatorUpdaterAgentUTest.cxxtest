@@ -87,6 +87,9 @@ public:
 
         oacMock.getOAC().processNextMessage(p_message); 
         delete p_message; 
+
+        OAC & oac = oacMock.getOAC(); 
+        oac.psiModulatorUpdaterAgent->init(&oac);  
     }
 
     ~PsiModulatorUpdaterAgentUTest() {
@@ -106,7 +109,6 @@ public:
 
     void test_Init() {
         OAC & oac = oacMock.getOAC(); 
-        oac.psiModulatorUpdaterAgent->init(&oac);  
 
         std::string modulator_names = config().get("PSI_MODULATORS");
         int modulator_num = std::count(modulator_names.begin(), modulator_names.end(), ',') + 1;  
