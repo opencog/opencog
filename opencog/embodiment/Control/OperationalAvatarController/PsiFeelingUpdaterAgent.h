@@ -26,6 +26,8 @@
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
 
+class PsiFeelingUpdaterAgentUTest; 
+
 namespace OperationalAvatarController
 {
 
@@ -43,6 +45,8 @@ namespace OperationalAvatarController
  */
 class PsiFeelingUpdaterAgent : public opencog::Agent
 {
+    friend class::PsiFeelingUpdaterAgentUTest; 
+
 private:
 
     /**
