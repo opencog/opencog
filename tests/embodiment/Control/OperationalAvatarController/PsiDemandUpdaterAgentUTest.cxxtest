@@ -87,6 +87,9 @@ public:
 
         oacMock.getOAC().processNextMessage(p_message); 
         delete p_message; 
+
+        OAC & oac = oacMock.getOAC(); 
+        oac.psiDemandUpdaterAgent->init(&oac);  
     }
 
     ~PsiDemandUpdaterAgentUTest() {
@@ -106,7 +109,6 @@ public:
 
     void test_Init() {
         OAC & oac = oacMock.getOAC(); 
-        oac.psiDemandUpdaterAgent->init(&oac);  
 
         std::string demand_names = config().get("PSI_DEMANDS");
         int demand_num = std::count(demand_names.begin(), demand_names.end(), ',') + 1;  
