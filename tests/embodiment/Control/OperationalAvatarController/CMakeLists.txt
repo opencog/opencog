@@ -34,8 +34,12 @@ IF (GUILE_FOUND)
 ENDIF (GUILE_FOUND)
 
 ADD_CUSTOM_TARGET(DistributeOACStuff
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Scaffold ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Scaffold ${CMAKE_CURRENT_BINARY_DIR}
+
     COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/scripts/embodiment ./make_distribution bin Embodiment
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/dist/Embodiment ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/dist/Embodiment ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 ADD_LIBRARY(oacmock

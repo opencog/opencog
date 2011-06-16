@@ -49,7 +49,8 @@ Plaza::~Plaza ()
 {
     delete this->pFrontend;
     delete this->pBackend; 
-    delete this->zmqContext; 
+    // Delete context never succeed, it blocks here
+//    delete this->zmqContext; 
 }
 
 void Plaza::addPublisher (const std::string & publishEndPoint)

@@ -78,6 +78,37 @@ private:
 public:
 
     /**
+     * Getters
+     */
+    std::string & getAgentBrainId() {
+        return this->agentBrainId; 
+    }
+
+    std::string & getOwnerId() {
+        return this->ownerId; 
+    }
+
+    std::string & getAgentType() {
+        return this->agentType; 
+    }
+
+    std::string & getAgentTrait() {
+        return this->agentTrait; 
+    }
+
+    std::string & getNetworkElementPort() {
+        return this->networkElementPort; 
+    }
+
+    std::string & getCogServerShellPort() {
+        return this->cogServerShellPort; 
+    }
+
+    std::string & getZmqPublishPort() {
+        return this->zmqPublishPort; 
+    }
+
+    /**
      * Set configurations before creating an instance of OAC
      */
     void setConfig(); 
@@ -100,4 +131,14 @@ public:
     OAC & getOAC() {
         return *(this->oac);
     }
+
+    /**
+     * Generate a message from given file, which can be processed by
+     * OAC::processNextMessage or PAI::processPVPMessage
+     */
+    Message * createMessageFromFile(const std::string & from, 
+                                    const std::string & to,
+                                    int msgType,
+                                    const char * fileName
+                                   ); 
 };

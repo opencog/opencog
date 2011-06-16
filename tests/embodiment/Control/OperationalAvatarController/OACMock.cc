@@ -66,7 +66,11 @@ void OACMock::setConfig() {
     // we change the log file to user's home directory and also print log to 
     // the screen. 
     config().set("LOG_DIR", "/home/$USER"); 
-    config().set("PRINT_LOG_TO_STDOUT", "true"); 
+    config().set("PRINT_LOG_TO_STDOUT", "true");
+
+    // Disable opencog::spatial::MapExplorerServer, which raises
+    // 'bad file descriptor' error during unit test
+    config().set("VISUAL_DEBUGGER_ACTIVE", "false"); 
 };
 
 OAC & OACMock::createOAC()
@@ -109,5 +113,31 @@ OAC & OACMock::createOAC()
 
     // Return the reference of newly created OAC
     return *(this->oac); 
+}
+
+Message * OACMock::createMessageFromFile(const std::string & from, 
+                                         const std::string & to, 
+                                         int msgType,
+                                         const char * fileName)
+{
+    Message * p_message = NULL; 
+
+    std::ifstream in(fileName);
+
+    if ( in.good() ) {
+        std::istreambuf_iterator<char> beg(in), end; 
+        std::string msgContent(beg, end); 
+        p_message = Message::factory(from, to, msgType, msgContent);
+    }
+    else {
+        logger().error("OACMock::%s - Fail to create message from file '%s'", 
+                       __FUNCTION__, 
+                       fileName
+                      ); 
+    }
+
+    in.close(); 
+
+    return p_message; 
 }
 
