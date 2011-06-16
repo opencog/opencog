@@ -177,7 +177,6 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
     boost::tokenizer< boost::char_separator<char> > modulatorNamesTok (modulatorNames, sep);
 
     std::string modulatorName, modulatorUpdater;
-    Handle hUpdater, hGroundedSchemaNode;
 
     for ( boost::tokenizer< boost::char_separator<char> >::iterator iModulatorName = modulatorNamesTok.begin();
           iModulatorName != modulatorNamesTok.end();

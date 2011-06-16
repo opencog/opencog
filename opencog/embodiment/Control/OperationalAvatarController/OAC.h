@@ -54,6 +54,7 @@
 
 #include "RuleEngine.h"
 
+class PsiModulatorUpdaterAgentUTest; 
 class PsiDemandUpdaterAgentUTest;
 
 namespace OperationalAvatarController
@@ -75,6 +76,7 @@ public:
 
 class OAC : public EmbodimentCogServer
 {
+    friend class::PsiModulatorUpdaterAgentUTest; 
     friend class::PsiDemandUpdaterAgentUTest;
 
 private:

@@ -26,6 +26,8 @@
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
 
+class PsiModulatorUpdaterAgentUTest;
+
 namespace OperationalAvatarController
 {
 
@@ -50,6 +52,8 @@ namespace OperationalAvatarController
 */
 class PsiModulatorUpdaterAgent : public opencog::Agent
 {
+    friend class::PsiModulatorUpdaterAgentUTest; 
+
 private:
 
     /**

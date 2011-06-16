@@ -67,3 +67,8 @@ TARGET_LINK_LIBRARIES(PsiDemandUpdaterAgentUTest
     oacmock
 )
 
+ADD_CXXTEST(PsiModulatorUpdaterAgentUTest)
+TARGET_LINK_LIBRARIES(PsiModulatorUpdaterAgentUTest
+    oacmock
+)
+
