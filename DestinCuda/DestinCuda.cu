@@ -264,7 +264,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         vectorOfMovementsToSave.push_back(false);
     }
 
-    DestinKernel* DLayer = new DestinKernel[NumberOfLayers];
+    DestinKernel* DKernel = new DestinKernel[NumberOfLayers];
     int* ColsPerLayer = new int[NumberOfLayers];
     int* NumberOfParentStates = new int[NumberOfLayers];
     int* InputDimensionality = new int[NumberOfLayers];
@@ -276,9 +276,6 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     {
         MovementsForClusteringOption=SEQ_LENGTH; // use this if you want one clustering engine per movement
     }
-
-    // TODO: Is this the right place?
-    srand( (unsigned int)iTestSequence );
 
     // These are changed inside the XML file
     if ( bFFT )
@@ -353,7 +350,14 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         cout << "Layer: " << Layer << " InputDimension " << InputDimensionality[Layer] << " OutputDimension (Each node) " << NumberOfCentroids[Layer] << endl;
 
         // Creation of layer and layerLatch
-        DLayer[Layer].Create( RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer] );
+        if(Layer == NumberOfLayers-1)
+        {
+            DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer], true );
+        }
+        else
+        {
+            DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer], false );
+        }
         // Assign Childeren and Parrents of nodes
         if ( NumberOfCentroids[Layer] > MaxNumberOfOutputs )
         {

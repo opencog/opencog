@@ -10,14 +10,17 @@
 
 using namespace std;
 
-__global__ void Destin( int States, int InputDimensionlity, float *image, float *dLayerData );
+__global__ void Destin( int States, float *image, float *dLayerData );
+__global__ void DestinLast( int States, float *image, float *dLayerData, int inputRows, int inputColms );
 
 DestinKernel::DestinKernel( void )
 {
+    mID=0;
 	mRows=0;
 	mCols=0;
 	mStates=0;
 	mInputDimensionlity=0;
+	mLast = false;
 	cuDeviceGetCount(&mDevices);
 	cout << "Layer created" << endl;
 }
@@ -29,12 +32,14 @@ DestinKernel::~DestinKernel( void )
     cout << "Layer destroyed" << endl;
 }
 
-void DestinKernel::Create( int Rows, int Cols, int States, int InputDimensionlity )
+void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, bool Last)
 {
+    mID = ID;
     mRows = Rows;
     mCols = Cols;
     mStates = States;
     mInputDimensionlity = InputDimensionlity;
+    mLast = Last;
 
     // Data holder for whole layer including centroids
     // Size of data holder is rows times columns.
@@ -50,23 +55,42 @@ void DestinKernel::Create( int Rows, int Cols, int States, int InputDimensionlit
     // TODO: Put seed code at the place of 1
     curandSetPseudoRandomGeneratorSeed( gen, 1 );
     curandGenerateUniform( gen, dLayerData, size );
+
     // TODO: Remove debug line.
     cudaMemcpy ( mLayerData ,dLayerData , size*sizeof(float), cudaMemcpyDeviceToHost );
+
+    // The generator have to be destroyed after use.
     curandDestroyGenerator( gen );
 }
 
 void DestinKernel::DoDestin( float *image )
 {
-    dim3 threads( 64, 1 );
+    dim3 threads( mInputDimensionlity);
     dim3 grid( mCols, mRows );
-    Destin<<<grid,threads>>>( mStates, mInputDimensionlity, image, dLayerData );
+    if(mLast)
+    {
+        DestinLast<<<grid,threads>>>( mStates, image, dLayerData, 4, 4 );
+    }
+    else
+    {
+        Destin<<<grid,threads>>>( mStates, image, dLayerData );
+    }
 }
 
-__global__ void Destin( int States, int InputDimensionlity, float *image, float *dLayerData )
+__global__ void DestinLast( int States, float *image, float *dLayerData, int inputRows, int inputColms )
 {
     __shared__ float* observation;
     int x,y;
     x = blockDim.x;
     y = blockDim.y;
+    threadIdx.x;
+    threadIdx.y;
+}
 
+__global__ void Destin( int States, float *dInputLayerData, float *dOutLayerData )
+{
+    __shared__ float* observation;
+    int x,y;
+    x = blockDim.x;
+    y = blockDim.y;
 }

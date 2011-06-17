@@ -24,7 +24,7 @@ DestinData::DestinData(void)
 
 DestinData::~DestinData(void)
 {
-	cudaFree(dmImage);
+	cudaFree(dImage);
 	delete [] mImage;
 	cout << "Destin data deleted" << endl;
 }
@@ -48,7 +48,7 @@ void DestinData::LoadFile(const char* sFileName)
     // Host side memory
     mImage = new float[size];
     // Device side memory
-    cudaMalloc( (void**)&dmImage, size*sizeof(float) );
+    cudaMalloc( (void**)&dImage, size*sizeof(float) );
 
 	int iLabel;
 	unsigned char* cImageData;
@@ -126,7 +126,7 @@ void DestinData::SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShif
         }
     }
     // Copy data from host to device
-    cudaMemcpy( dmImage, mImage, mRows*mCols*sizeof(float), cudaMemcpyHostToDevice );
+    cudaMemcpy( dImage, mImage, mRows*mCols*sizeof(float), cudaMemcpyHostToDevice );
     mLastImageIndex=ImageIndex;
 }
 

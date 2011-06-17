@@ -16,7 +16,7 @@ class DestinData
         float mImageWithOffset[40][40];
         int mRows;
         int mCols;
-        float* dmImage;
+        float* dImage;
         float *mImage;
 
         //scratch for real & image part of FFT
@@ -44,7 +44,7 @@ class DestinData
          * Returns the pointer of the shifted image located on the GPU
          * @return float* pointer of shifted image
          */
-        float* GetPointerDeviceImage(){ return dmImage; };
+        float* GetPointerDeviceImage(){ return dImage; };
 
         /**
          * Puts the selected image on the GPU with the shift applayed to it
