@@ -452,6 +452,13 @@ private:
      */
     void processObjectSignal(XERCES_CPP_NAMESPACE::DOMElement * element);
 
+    /** 
+     * Extract double attributes from XML message.
+     * @param tagName the name of the attribute.
+     * @return the value of the attribute parsed as a double.
+     */
+    double getPositionAttribute(XERCES_CPP_NAMESPACE::DOMElement * element, const char* tagName);
+
     /**
      * @param element The map-info element to be processed
      * @param toUpdateHandles a vector where the handles of all objects

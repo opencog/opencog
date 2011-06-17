@@ -1549,6 +1549,19 @@ void PAI::processObjectSignal(DOMElement * element)
 
 }
 
+double PAI::getPositionAttribute(DOMElement * element, const char* tagName)
+{
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+    XMLString::transcode(tagName, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* strvalue = XMLString::transcode(element->getAttribute(tag));
+    if (!strlen(strvalue)) {
+        logger().error("PAI - processMapInfo(): got no %s attribute", tagName);
+    }
+    double result = atof(strvalue);
+    XMLString::release(&strvalue);
+    return result;
+}
+
 void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
@@ -1556,34 +1569,18 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
     logger().debug("PAI - processMapInfo(): init.");
 
     // gets global position offset (to be added to global x and y positions to get map dimensions)
-    XMLString::transcode(GLOBAL_POS_OFFSET_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* globalPosOffsetStr = XMLString::transcode(element->getAttribute(tag));
-    if (!strlen(globalPosOffsetStr)) {
-        logger().error("PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_Y_ATTRIBUTE);
-    }
-    double offset = atof(globalPosOffsetStr);
-    logger().fine("PAI - processMapInfo(): global position offset = %s => offset = %lf", globalPosOffsetStr, offset);
-
+    double offset = getPositionAttribute(element, GLOBAL_POS_OFFSET_ATTRIBUTE);
+    logger().fine("PAI - processMapInfo(): global position offset = %s => offset = %lf", GLOBAL_POS_OFFSET_ATTRIBUTE, offset);
 
     // gets global position x
-    XMLString::transcode(GLOBAL_POS_X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* globalPosXStr = XMLString::transcode(element->getAttribute(tag));
-    if (!strlen(globalPosXStr)) {
-        logger().error("PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_X_ATTRIBUTE);
-    }
-    xMin = atof(globalPosXStr);
+    xMin = getPositionAttribute(element, GLOBAL_POS_X_ATTRIBUTE);
     xMax = xMin + offset;
-    logger().fine("PAI - processMapInfo(): global position x = %s => xMin = %lf, xMax = %lf", globalPosXStr, xMin, xMax);
+    logger().fine("PAI - processMapInfo(): global position x = %s => xMin = %lf, xMax = %lf", GLOBAL_POS_X_ATTRIBUTE, xMin, xMax);
 
     // gets global position y
-    XMLString::transcode(GLOBAL_POS_Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* globalPosYStr = XMLString::transcode(element->getAttribute(tag));
-    if (!strlen(globalPosYStr)) {
-        logger().error("PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_Y_ATTRIBUTE);
-    }
-    yMin = atof(globalPosYStr);
+    yMin = getPositionAttribute(element, GLOBAL_POS_Y_ATTRIBUTE);
     yMax = yMin + offset;
-    logger().fine("PAI - processMapInfo(): global position y = %s => yMin = %lf, yMax = %lf", globalPosYStr, yMin, yMax);
+    logger().fine("PAI - processMapInfo(): global position y = %s => yMin = %lf, yMax = %lf", GLOBAL_POS_Y_ATTRIBUTE, yMin, yMax);
 
     // getting grid map dimensions from system parameters
     unsigned int xDim = opencog::config().get_int("MAP_XDIM");
@@ -2040,9 +2037,6 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
         */
 
     }
-    XMLString::release(&globalPosXStr);
-    XMLString::release(&globalPosYStr);
-    XMLString::release(&globalPosOffsetStr);
 
 
     // TODO: Check if this is really needed. It seems ImportanceDecayAgent
