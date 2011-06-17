@@ -1564,6 +1564,8 @@ double PAI::getPositionAttribute(DOMElement * element, const char* tagName)
 
 void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 {
+    struct timeval timer_start, timer_end;
+    time_t elapsed_time = 0;
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     logger().debug("PAI - processMapInfo(): init.");
@@ -1597,7 +1599,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
     //printf("Blip List: %d\n",blipList->getLength());
 
     for (unsigned int i = 0; i < blipList->getLength(); i++) {
-    
+        gettimeofday(&timer_start, NULL);
 
         DOMElement* blipElement = (DOMElement*) blipList->item(i);
 
@@ -1627,6 +1629,11 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
         bool petHome=false;
         bool foodBowl=false;
         bool waterBowl=false;
+
+        // Currently, we don't need to update predicates (e.g. isSmall, isMovable)
+        // of terrain object. So when this flag is set to true, we don't need to add
+        // this terrain object in the "toUpdateHandles" set, just insert it into space map.
+        bool isTerrainObject = false;
 
         std::string entityClass="unknown";
         std::map<std::string, float> colors;
@@ -1705,6 +1712,10 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 //entity class
                 else if( strcmp(name, ENTITY_CLASS_ATTRIBUTE) == 0 ){
                     entityClass = value;
+
+                    // Check if this entity is a terrain object(a.k.a a block)
+                    if (entityClass == "block")
+                        isTerrainObject = true;
                 } 
                 //color
                 else if( strncmp(name, COLOR_ATTRIBUTE, strlen(COLOR_ATTRIBUTE)) == 0 ){
@@ -1807,8 +1818,10 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
         }
 
 
-        // objectNode with new/updated atom created add to ToUpdateHandles
-        toUpdateHandles.push_back(objectNode);
+        if (!isTerrainObject) {
+            // objectNode with new/updated atom created add to ToUpdateHandles
+            toUpdateHandles.push_back(objectNode);
+        }
 
         if (objRemoval) {
             atomSpace.getSpaceServer().removeSpaceInfo(keepPreviousMap, objectNode, tsValue);
@@ -1850,7 +1863,16 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
             // TODO: velocity vector is not being added to SpaceMaps. Add it when needed.
             addSpacePredicates(keepPreviousMap, objectNode, tsValue,
                                positionElement, rotationElement,
-                               length, width, height, edible, drinkable);
+                               length, width, height, edible, drinkable, isTerrainObject);
+
+            gettimeofday(&timer_end, NULL);
+            elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                           (timer_end.tv_usec - timer_start.tv_usec);
+            // If this entity is a terrain object, then following code can be skipped.
+            // Because properties such as edible, drinkable are nonsense to a terrain object.
+            if (isTerrainObject)
+                continue;
+
             if ( moving ) {
                 addVectorPredicate( objectNode, AGISIM_VELOCITY_PREDICATE_NAME, tsValue, velocityElement );
             } // if
@@ -2022,7 +2044,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
     }
 
-
+    printf("PAI - processMapInfo: consuming %f seconds.\n", 1.0 * elapsed_time/1000000);
     // TODO: Check if this is really needed. It seems ImportanceDecayAgent
     // will eventually remove the atoms that represents the space maps and, this
     // way, these maps will be removed from spaceServer as well throught the
@@ -2280,7 +2302,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
                              DOMElement* positionElement,
                              DOMElement* rotationElement,
                              double length, double width, double height,
-                             bool isEdible, bool isDrinkable)
+                             bool isEdible, bool isDrinkable, bool isTerrainObject)
 {
 
     bool isSelfObject = (avatarInterface.getPetId() == atomSpace.getName(objectNode));
@@ -2357,18 +2379,24 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
     }
 
     // SPACE SERVER INSERTION:
+    bool isObstacle;
 
-    Handle petHandle = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId());
-    std::string objectName = atomSpace.getName( objectNode );
-    bool isAgent = AtomSpaceUtil::getAgentHandle( atomSpace, objectName ) != Handle::UNDEFINED;
-    double pet_length, pet_width, pet_height;
+    if (!isTerrainObject) {
+        Handle petHandle = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId());
+        std::string objectName = atomSpace.getName( objectNode );
+        bool isAgent = AtomSpaceUtil::getAgentHandle( atomSpace, objectName ) != Handle::UNDEFINED;
+        double pet_length, pet_width, pet_height;
 
-    bool hasPetHeight = (petHandle != Handle::UNDEFINED) && AtomSpaceUtil::getSizeInfo(atomSpace, petHandle, pet_length, pet_width, pet_height);
+        bool hasPetHeight = (petHandle != Handle::UNDEFINED) && AtomSpaceUtil::getSizeInfo(atomSpace, petHandle, pet_length, pet_width, pet_height);
 
-    bool isPickupable = AtomSpaceUtil::isPredicateTrue(atomSpace, "is_pickupable", objectNode);
-    bool isObstacle = !isSelfObject && (isAgent || ((hasPetHeight ? (height > 0.3f * pet_height) : true) && !isPickupable));
+        bool isPickupable = AtomSpaceUtil::isPredicateTrue(atomSpace, "is_pickupable", objectNode);
+        isObstacle = !isSelfObject && (isAgent || ((hasPetHeight ? (height > 0.3f * pet_height) : true) && !isPickupable));
 
-    logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
+        logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
+    } else {
+        isObstacle = false;
+    }
+
 
     return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle);
 }

@@ -513,13 +513,14 @@ private:
      * @param height the height of the object's bounding box.
      * @param isEdible if the object is edible.
      * @param isDrinkable if the object is drinkable.
+     * @param isTerrainObject if the object is a terrain object.
      * @return true if any property of the object has changed (or it's a new object). False, otherwise.
      */
     bool addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
                             XERCES_CPP_NAMESPACE::DOMElement* positionElement,
                             XERCES_CPP_NAMESPACE::DOMElement* rotationElement,
                             double length, double width, double height,
-                            bool isEdible, bool isDrinkable);
+                            bool isEdible, bool isDrinkable, bool isTerrainObject);
 
     /**
      * Add a property predicate in atomSpace
