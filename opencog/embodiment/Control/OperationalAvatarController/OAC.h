@@ -57,6 +57,7 @@
 class PsiModulatorUpdaterAgentUTest; 
 class PsiDemandUpdaterAgentUTest;
 class PsiFeelingUpdaterAgentUTest; 
+class PsiActionSelectionAgentUTest; 
 
 namespace OperationalAvatarController
 {
@@ -80,6 +81,7 @@ class OAC : public EmbodimentCogServer
     friend class::PsiModulatorUpdaterAgentUTest; 
     friend class::PsiDemandUpdaterAgentUTest;
     friend class::PsiFeelingUpdaterAgentUTest; 
+    friend class::PsiActionSelectionAgentUTest; 
 
 private:
 

@@ -77,3 +77,8 @@ TARGET_LINK_LIBRARIES(PsiFeelingUpdaterAgentUTest
     oacmock
 )
 
+ADD_CXXTEST(PsiActionSelectionAgentUTest)
+TARGET_LINK_LIBRARIES(PsiActionSelectionAgentUTest
+    oacmock
+)
+
