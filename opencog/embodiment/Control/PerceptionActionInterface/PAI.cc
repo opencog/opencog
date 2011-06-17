@@ -1662,65 +1662,52 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 // The detector boolean simply means that the blip indicated was the one that the object reported on itself.     
                 if( strcmp(name, DETECTOR_ATTRIBUTE) == 0 ){
                     detector = value;
-                }
-
-                if( strcmp(name, REMOVE_ATTRIBUTE) == 0 ){
+                } else if( strcmp(name, REMOVE_ATTRIBUTE) == 0 ){
                     //objRemoval = !strcmp(value, "true");
                     objRemoval = (strcmp(value, "true") == 0 ? true : false);
-                }
-
+                } 
                 // visibility-status
-                if( strcmp(name, VISIBILITY_STATUS_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, VISIBILITY_STATUS_ATTRIBUTE) == 0 ){
                    isObjectInsidePetFov = !strcmp(value, "visible" );
-                }
-        
+                } 
                 // length
-                if( strcmp(name, LENGTH_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, LENGTH_ATTRIBUTE) == 0 ){
                    length = atof(value);
-                }
-
+                } 
                 // width
-                if( strcmp(name, WIDTH_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, WIDTH_ATTRIBUTE) == 0 ){
                    width = atof(value);
-                }
-
+                } 
                 // height
-                if( strcmp(name, HEIGHT_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, HEIGHT_ATTRIBUTE) == 0 ){
                    height = atof(value);
-                }
-
+                } 
                 // edible
-                if( strcmp(name, EDIBLE_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, EDIBLE_ATTRIBUTE) == 0 ){
                     edible = (strcmp(value, "true") == 0 ? true : false);
-                }
-
+                } 
                 // drinkable
-                if( strcmp(name, DRINKABLE_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, DRINKABLE_ATTRIBUTE) == 0 ){
                     drinkable = (strcmp(value, "true") == 0 ? true : false);
-                }
-
+                } 
                 // pet home
-                if( strcmp(name, PET_HOME_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, PET_HOME_ATTRIBUTE) == 0 ){
                     petHome = (strcmp(value, "true") == 0 ? true : false);
-                }
-
+                } 
                 // food bowl
-                if( strcmp(name, FOOD_BOWL_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, FOOD_BOWL_ATTRIBUTE) == 0 ){
                     foodBowl = (strcmp(value, "true") == 0 ? true : false);
-                }
-
+                } 
                 // water bowl
-                if( strcmp(name, WATER_BOWL_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, WATER_BOWL_ATTRIBUTE) == 0 ){
                     waterBowl = (strcmp(value, "true") == 0 ? true : false);
-                }
-
+                } 
                 //entity class
-                if( strcmp(name, ENTITY_CLASS_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, ENTITY_CLASS_ATTRIBUTE) == 0 ){
                     entityClass = value;
-                }
-
+                } 
                 //color
-                if( strncmp(name, COLOR_ATTRIBUTE, strlen(COLOR_ATTRIBUTE)) == 0 ){
+                else if( strncmp(name, COLOR_ATTRIBUTE, strlen(COLOR_ATTRIBUTE)) == 0 ){
                     // color properties in the following format:
                     // color-<sequencial>
                     char *savePtr;
@@ -1731,20 +1718,17 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                     } else {
                         logger().error("Got an invalid value for color attribute in blip element");
                     }
-                }
-                
+                } 
                 // is toy
-                if( strcmp(name, IS_TOY_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, IS_TOY_ATTRIBUTE) == 0 ){
                    isToy = (strcmp(value, "true") == 0 ? true : false);
-                }
- 
+                } 
                 //material
-                if( strcmp(name, MATERIAL_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, MATERIAL_ATTRIBUTE) == 0 ){
                     material = value;
-                }
- 
+                } 
                 //texture
-                if( strcmp(name, TEXTURE_ATTRIBUTE) == 0 ){
+                else if( strcmp(name, TEXTURE_ATTRIBUTE) == 0 ){
                     texture = value;
                 }
 
