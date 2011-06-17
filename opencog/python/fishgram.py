@@ -37,6 +37,8 @@ class Fishgram:
 # you only need to add extensions if they're in the closure.
 
     def closed_bfs(self):
+        all_conjs = []
+        
         all_bindinglists = [(obj, ) for obj in self.forest.all_objects]
         prev_layer = [((), all_bindinglists, )]
         
@@ -47,7 +49,9 @@ class Fishgram:
 #                for conj, bindingsets in new_layer:
 #                    print self.conjunction_to_string(conj), len(bindingsets)
                 new_layer = self.prune_frequency(new_layer)
-                prev_layer = new_layer        
+                prev_layer = new_layer
+                all_conjs.append(new_layer)
+        return all_conjs
 
 # You need to store the real hyperlinks from each Atom, which means you can look up other stuff as necessary.
 
