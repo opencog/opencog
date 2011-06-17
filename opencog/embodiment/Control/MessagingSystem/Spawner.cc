@@ -106,6 +106,8 @@ bool Spawner::processNextMessage(Message *message)
     logger().info("Spawner - line(%s) command(%s) # of parsed arguments(%d).",
                   cmdLine.c_str( ), command.c_str( ), args.size( ) );
 
+    // Order of arguments is:
+    // AGENT_ID, OWNER_ID, AGENT_TYPE, AGENT_TRAITS
     if (command == "LOAD_AGENT") {
         std::string agentID = args.front();
         args.pop( );
@@ -120,8 +122,8 @@ bool Spawner::processNextMessage(Message *message)
                       agentTraits.c_str( ) );
 
         // TODO: Find a way to figure out that OAC is already running.
-        // The call to isElementAvailable method does not work because it only knows the unavailable elements, not the
-        // available ones:
+        // The call to isElementAvailable method does not work because it only
+        // knows the unavailable elements, not the available ones:
         //if (isElementAvailable(petID)) {
         //logger().warn("Trying to load an OAC that is already available: %s\n", petID.c_str());
         // TODO: send the LOAD SUCCESS message back
@@ -168,7 +170,7 @@ bool Spawner::processNextMessage(Message *message)
 
             }
             else {
-                command_ss << cmdPrefix << " ./opc &";
+                command_ss << cmdPrefix << " ./opc ";
                 std::cout << "====== YOU MUST ENTER DEBUGGER PARAMETERS ======"
                           << std::endl;
                 std::cout << "Please enter the following 2 parameters in "
