@@ -49,15 +49,15 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
     }
     const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
 
-    std::vector<std::string> entities;
-    spaceMap.findAllEntities(back_inserter(entities));
-
     logger().debug( "NearPredicateUpdater::%s - Processing timestamp '%lu'",
             __FUNCTION__, timestamp );
     if ( lastTimestamp != timestamp ) {
         lastTimestamp = timestamp;
         processedEntities.clear( );
     } // if
+
+    std::vector<std::string> entities;
+    spaceMap.findAllEntities(back_inserter(entities));
 
     const std::string& entityAId = atomSpace.getName( object );
     if ( processedEntities.find( entityAId ) != processedEntities.end( ) ) {
@@ -66,10 +66,22 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
     processedEntities.insert( entityAId );
 
     try {
-
         const spatial::EntityPtr& entityA = spaceMap.getEntity( entityAId );
 
         bool mapContainsEntity = spaceMap.containsObject( entityAId );
+
+        // A more efficient version which only processes objects that are nearby in the grid.
+        // Note: It won't remove previous links correctly (i.e. when objects move away from each other).
+        // Could easily just remove all of them before the loop below (or give them 0 TV) and then replace them in the loop.
+//        Point center = spaceMap.centerOf(entityAId);
+//        GridPoint gridPoint = spaceMap.snap(center);
+//        //! @todo WARNING: Since Near and Next are reversed, it'll be necessary to change this if you correct it.
+//        //! Also the grid distance used is only an approximation
+//        spatial::Distance distance = spaceMap.getNextDistance();
+//        spatial::Distance gridDistance = distance/(spaceMap.xDim()+spaceMap.yDim());
+//        spaceMap.findEntities(gridPoint, gridDistance, back_inserter(entities));
+        logger().debug( "NearPredicateUpdater::%s - Nearby entities: %d",
+                        __FUNCTION__, entities.size());
 
         for( unsigned int i = 0; i < entities.size( ); ++i ) {
             const std::string& entityBId = entities[i];
