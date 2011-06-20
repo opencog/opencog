@@ -126,7 +126,7 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
                     int**& SEQ, int& SEQ_LENGTH, string& sFileContents, int& iBlocksToProcess,
                     bool& bBasicOnlineClustering,
                     bool& bClanDestin, bool& bInitialLayerIsTransformOnly,bool& bUseGoodPOSMethod,
-                    int*& RowsPerLayer, float*& FixedLearningRateLayer, bool*& bSelfAndUpperFeedback )
+                    int*& RowsPerLayer, float*& FixedLearningRateLayer, bool*& bSelfAndUpperFeedback, int& LastLayerInputX, int& LastLayerInputY )
 {
     // ******************************************
     // Read the XML config file (parameters file)
@@ -168,6 +168,8 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
         // Retrieve amount of layers
         pugi::xml_node layers = root.child("layers");
         NumberOfLayers = layers.attribute("value").as_int();
+        LastLayerInputX = layers.attribute("inputX").as_int();
+        LastLayerInputY = layers.attribute("inputY").as_int();
 
         // Retrieve configuration each layer
         dcMu = new double[NumberOfLayers];
@@ -215,7 +217,7 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
     cout << "------------------" << endl;
 }
 
-bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& NumberOfLayers, DestinKernel*& DLayers,
+bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& NumberOfLayers, DestinKernel*& DKernel,
                           int iTestSequence, int FirstLayerToShowHECK, int LastLayerToShow, int MAX_CNT, string& sCommandLineData,
                           DestinData& DataSourceForTraining, string& sDiagnosticFileName, string& sDestinTrainingFileName,
                           vector< pair<int,int> >& vIndicesAndGTLabelToUse,
@@ -249,13 +251,14 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     int* RowsPerLayer;
     float* FixedLearningRateLayer;
     bool* bSelfAndUpperFeedback;
+    int lastLayerInputX, LastLayerInputY;
 
     GetParameters( ParametersFileName.c_str(), NumberOfLayers, dcMu, dcSigma, dcRho, NumberOfCentroids,
                    bAveraging, bFFT, bBinaryPOS, DistanceMeasureArray,
                    bUseStarvationTrace, PSSAUpdateDelay, bIgnoreAdvice, SEQ, SEQ_LENGTH,
                    sParametersFileContents, iBlocksToProcess,
                    bBasicOnlineClustering, bClanDestin, bInitialLayerIsTransformOnly, bDoGoodPOS,
-                   RowsPerLayer, FixedLearningRateLayer, bSelfAndUpperFeedback );
+                   RowsPerLayer, FixedLearningRateLayer, bSelfAndUpperFeedback, lastLayerInputX, LastLayerInputY);
 
     // The name and loop looks like it is giving to option to save steps of the movements.
     vector<bool> vectorOfMovementsToSave;
@@ -264,7 +267,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         vectorOfMovementsToSave.push_back(false);
     }
 
-    DestinKernel* DKernel = new DestinKernel[NumberOfLayers];
+    DKernel = new DestinKernel[NumberOfLayers];
     int* ColsPerLayer = new int[NumberOfLayers];
     int* NumberOfParentStates = new int[NumberOfLayers];
     int* InputDimensionality = new int[NumberOfLayers];
@@ -308,7 +311,6 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         }
     }
     NumberOfParentStates[NumberOfLayers-1]=1;
-
     //if you want to FORCE stability, an exponential / gaussian decay will start at iDecayPoint
     bool bUseDecayLR = false;
     int DigitToStartDecay=1000;
@@ -318,6 +320,8 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     int MaxNumberOfInputs=-1;
     int MaxNumberOfOutputs=-1;
 
+    // Here we put the first image into the device memory
+    DataSourceForTraining.SetShiftedDeviceImage(0, SEQ[0][0], SEQ[0][1], lastLayerInputX, LastLayerInputY);
     for( int Layer=0; Layer<NumberOfLayers; Layer++ )
     {
         bool bTopNode = false;
@@ -350,14 +354,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
         cout << "Layer: " << Layer << " InputDimension " << InputDimensionality[Layer] << " OutputDimension (Each node) " << NumberOfCentroids[Layer] << endl;
 
         // Creation of layer and layerLatch
-        if(Layer == NumberOfLayers-1)
-        {
-            DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer], true );
-        }
-        else
-        {
-            DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer], false );
-        }
+        DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer]);
         // Assign Childeren and Parrents of nodes
         if ( NumberOfCentroids[Layer] > MaxNumberOfOutputs )
         {
@@ -525,7 +522,7 @@ int MainDestinExperiments(int argc, char* argv[])
     // Load the training file for DeSTIN
     string strDestinTrainingFileName = argv[5];
 
-    // Data object containing source training
+    // Data object containing source (training)
     DestinData DataSourceForTraining;
 
     int NumberOfUniqueLabels;
@@ -536,7 +533,6 @@ int MainDestinExperiments(int argc, char* argv[])
         cout << "There seems to be something off with data source " << strDestinTrainingFileName.c_str() << endl;
         return 0;
     }
-    DataSourceForTraining.SetShiftedDeviceImage(0,0,0);
 
     // A vector with all the labels of the data source
     vector<int> vLabelList;
@@ -706,7 +702,7 @@ int MainDestinExperiments(int argc, char* argv[])
     float* BufferForMovementLogRecords;
     BufferForMovementLogRecords = new float[1024*4*64*128];  //this should be enough for all movements and all layers / nodes
 
-    DestinKernel* DLayer;
+    DestinKernel* DKernel;
     map<int,int> LabelsUsedToCreateNetwork;
     map<int,int> IndicesUsedToCreateNetwork;
     int NumberOfLayers=4;
@@ -715,8 +711,7 @@ int MainDestinExperiments(int argc, char* argv[])
         int LayerToShow=-1;   //normally this should be -1 for regular operation.  For debugging, set it to 0 to look at the particular input for layer 0
         int RowToShowInputs=3;
         int ColToShowInputs=3;
-
-        CreateDestinOnTheFly(ParametersFileName, strDestinNetworkFileToWrite, NumberOfLayers, DLayer, iTestSequence, FirstLayerToShowHECK,
+        CreateDestinOnTheFly(ParametersFileName, strDestinNetworkFileToWrite, NumberOfLayers, DKernel, iTestSequence, FirstLayerToShowHECK,
             LastLayerToShow, MAX_CNT, strCommandLineData, DataSourceForTraining, sDiagnosticFileNameForMarking, strDestinTrainingFileName,
             vIndicesAndGTLabelToUse, LabelsUsedToCreateNetwork, IndicesUsedToCreateNetwork, BufferForMovementLogRecords,
             LayerToShow, RowToShowInputs, ColToShowInputs, 0);  // no movements to write, as we don't write DeSTIN responses out in this case
@@ -731,6 +726,17 @@ int MainDestinExperiments(int argc, char* argv[])
         stmDummy.close();
     }
 
+    for (int i; i<NumberOfLayers;i++)
+    {
+        cout << "DeSTIN Layer information" << endl;
+        cout << "Layer: " << DKernel[i].GetID() << endl;
+        cout << "Dimension (row, col): " << DKernel[i].GetNumberOfRows() << " X " << DKernel[i].GetNumberOfCols() << endl;
+        cout << "Input: " << DKernel[i].GetNumberOfInputDimensionlity() << endl;
+        cout << "Centroids: " << DKernel[i].GetNumberOfStates() << endl;
+        cout << endl;
+    }
+    cout << "------------------" << endl;
+    // DKernel[4].DoDestin(DataSourceForTraining.GetPointerDeviceImage());
     if ( !FileExists(strDestinNetworkFileToRead) )
     {
         cout << "Destin network file " << strDestinNetworkFileToRead.c_str() << " not found!" << endl;

@@ -9,7 +9,6 @@ private:
      * mRows and mCols are the layer size information.
      * mStates(centroids) and mInputDemensionlity are node information.
      * mDevices contain the number of CUDA capable devices.
-     * mLast tells if it is the last layer
      * mLayerData is the pointer for CPU memory so we can copy from CPU to GPU and back
      * dLayerData is the pointer for GPU memory (It's empty as long as you don't use cudaMemcpy(to, from, size, direction))
      */
@@ -19,18 +18,27 @@ private:
 	int mStates;
 	int mInputDimensionlity;
 	int mDevices;
-	bool mLast;
 	float *mLayerData;
 	float *dLayerData;
+	float *mNodeData;
+	float *dNodeData;
         
 public:
 	DestinKernel( void );
 
 	~DestinKernel( void );
 
-	void Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, bool Last );
+	/*
+	 * Create a DeSTIN kernel here the layer and node and clustering is put all together.
+	 *
+	 */
+	void Create( int ID, int Rows, int Cols, int States, int InputDimensionlity);
 
-	void DoDestin( float *image );
+	/*
+	 * Do DeSTIN is the launcher of the GPU kernel.
+	 * @param *Input It's input can be a dLayerData or a image(for lowest layer)
+	 */
+	void DoDestin( float *Input );
 
 	int GetID(){ return mID; }
 
@@ -43,8 +51,6 @@ public:
 	int GetNumberOfDevices(){ return mDevices; }
 
 	int GetNumberOfInputDimensionlity(){ return mInputDimensionlity; }
-
-	bool GetInfoLast(){ return mLast; }
 };
 
 #endif

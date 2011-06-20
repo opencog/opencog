@@ -69,7 +69,8 @@
         <step x="3" y="6"/>
         <step x="4" y="6"/>
     </seq>
-    <layers value="4">
+    <!-- value tells the amount of layers to use. inputX/Y tells the input dimensions for last layer -->
+    <layers value="4" inputX="4" inputY="4">
     <!-- Current layout of a layer is: name, mu, sigma, states, distance type, learning rate, rows/cloms, self and upper feedback -->
     <!--Distance can be: COSINE=1, EUCLIDEAN=2, GAUSSIANPDF=3, EXPONENTIALCOSINELAZY=4, GAUSSIANCOSINELAZY=5, RAYLEIGHCOSINELAZY=6-->
         <layer name="0" mu="0.9" sigma="0.9" rho="0.95" states="25" distance="1" fixedLearningRate="0.001" rowsColmsPerLayer="8" selfAndUpperFeedback="false"/>

@@ -12,6 +12,7 @@ DestinData::DestinData(void)
 	mLastImageIndex=-1;
 	mRows=0;
 	mCols=0;
+	// TODO: This is also not dynamic works for numbers of 32x32 images
     for(int r=0;r<40;r++)
     {
         for(int c=0;c<40;c++)
@@ -96,7 +97,7 @@ void DestinData::LoadFile(const char* sFileName)
 	cout << "Finished reading file." << endl;
 }
 
-void DestinData::SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShift)
+void DestinData::SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShift, int DemRow, int DemCol)
 {
     // TODO: Might want to set C and R more dynamic. in case of different data set?
     int C = 4;
@@ -104,7 +105,7 @@ void DestinData::SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShif
     // We don't have to load the image if it is the same one as before
     if ( ImageIndex!=mLastImageIndex )
     {
-        // Load the image into the buffer with the "0,0" offset.
+        // Load the image into the buffer with the "R,C" offset.
         float** fImage = mImagePointer[ImageIndex];
         for(int r=0;r<mRows;r++)
         {
@@ -117,12 +118,20 @@ void DestinData::SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShif
     // Now load the data using the offset provided.
     // Convert a 2D array back to a 1D array
     int i = 0;
-    for(int r=0;r<mRows;r++)
+    for(int row=0;row<mRows;row+=DemRow)
     {
-        for(int c=0;c<mCols;c++)
+        for(int col=0;col<mCols;col+=DemCol)
         {
-            mImage[i]=mImageWithOffset[r+RowShift][c+ColShift];
-            i++;
+            // To optimize the memory use inside CUDA put the DemRow*DemCol as one block.
+            // This makes the kernel do the same for all layers also.
+            for(int r=0;r<DemRow;r++)
+            {
+                for(int c=0;c<DemCol;c++)
+                {
+                    mImage[i]=mImageWithOffset[r+RowShift][c+ColShift];
+                    i++;
+                }
+            }
         }
     }
     // Copy data from host to device

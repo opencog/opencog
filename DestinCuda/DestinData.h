@@ -52,7 +52,7 @@ class DestinData
          * @param RowShift int how many rows you want to shift the image
          * @param ColShift int home many cols you want to shift the image
          */
-        void SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShift);
+        void SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShift, int DemRow, int DemCol);
 
         /**
          * Returns the index of requested image
