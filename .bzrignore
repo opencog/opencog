@@ -78,3 +78,5 @@ cscope.out
 lib/opencog-test.conf
 ../opencog/embodiment/embodiment.conf
 ../opencog/embodiment/dev_embodiment.conf
+./CMakeLists.txt
+opencog/embodiment/AtomSpaceExtensions/CMakeLists.txt

@@ -36,7 +36,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
   ELSE (APPLE)
     SET(CMAKE_C_FLAGS "-Wall -fPIC")
-    SET(CMAKE_C_FLAGS_DEBUG "-g -fstack-protector")
+    SET(CMAKE_C_FLAGS_DEBUG "-g -fstack-protector -pg")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")
   ENDIF (APPLE)
   
