@@ -43,7 +43,7 @@ class Fishgram:
         prev_layer = [((), all_bindinglists, )]
         
         while len(prev_layer) > 0:
-            print "Previous layer length:",  len(prev_layer)
+            print "\x1B[1;32mPrevious layer length:",  len(prev_layer), '\x1B[0m'
             for prev_conj in prev_layer:
                 new_layer = self.extend(prev_conj)
 #                for conj, bindingsets in new_layer:
@@ -111,7 +111,8 @@ class Fishgram:
                 # (This check could be avoided, as well as this tree, by only processing links that haven't been processed
                 # yet.)
                 # Bound trees contain variable numbers = the numbers inside the fragment                            
-                if bound_tree not in set(prev_conj): # set is created just so we can use hash instead of equality
+                #if bound_tree not in set(prev_conj): # set is created just so we can use hash instead of equality
+                if self.after_conj(bound_tree,  prev_conj):
                     new_conj = prev_conj+(bound_tree,)
                     if new_conj not in new_layer:
                         new_layer[new_conj] = []
@@ -126,6 +127,16 @@ class Fishgram:
     def prune_frequency(self, layer):
         return [(conj, bindingsets) for (conj, bindingsets) in layer
                     if len(bindingsets) > self.min_embeddings]
+
+    def after(self, tree1, tree2):
+        # Simply use Python's tuple-comparison mechanism. Ideally the order would be based on which
+        # (unbound) tree is used and then on the bindings, but in the current code those will be mixed up (due to being
+        # at a mix of levels in the bound tree).
+        return tree1 > tree2
+
+    def after_conj(self, tree, conj):
+        # May only be necessary to check the last one.
+        return all([self.after(tree, tree2) for tree2 in conj])
 
 # Broken! Not sure how.
 #    def conj_contains_tree(self, conj, tree):

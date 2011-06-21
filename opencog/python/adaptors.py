@@ -67,6 +67,8 @@ class ForestExtractor:
     def extractForest(self):
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
         for link in [x for x in self.a.get_atoms_by_type(t.Link) if x.tv.mean > 0 and x.tv.count > 0]:
+            if not self.include_tree(link): continue
+            
             objects = []            
             #print self.extractTree(link, objects),  objects, self.i
             self.i = 0
@@ -160,6 +162,17 @@ class ForestExtractor:
         """Whether to include a given node in the results. If it is not included, all trees containing it will be ignored as well."""
         include = True
         if (a.type == t.PredicateNode and a.name == "proximity"): include = False
+        
+    def include_tree(self,  link):
+        """Whether to make a separate tree corresponding to this link. If you don't, links in its outgoing set can
+        still get their own trees."""
+        # TODO check the TruthValue the same way as you would for other links.
+        if link.is_a(t.SimultaneousEquivalenceLink):
+            return False
+        elif any([i.is_a(t.AtTimeLink) for i in link.incoming]):
+            return False
+        else:
+            return True
   
 class GraphConverter:
     def __init__(self, a, writer):
