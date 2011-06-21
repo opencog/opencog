@@ -40,7 +40,10 @@ PsiFeelingUpdaterAgent::~PsiFeelingUpdaterAgent()
 PsiFeelingUpdaterAgent::PsiFeelingUpdaterAgent()
 {
     this->cycleCount = 0;
+
+#ifdef HAVE_ZMQ
     this->publisher = NULL; 
+#endif
 
     // Force the Agent initialize itself during its first cycle. 
     this->forceInitNextCycle();
