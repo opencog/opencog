@@ -88,6 +88,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     this->petMessageSender = new PetMessageSender(&(getNetworkElement()));
 
     // load pet
+// Note: Disable reload pet from external file temporally. It crashes. 
 //    if (fileExists(getPath(petId, config().get("PET_DUMP")).c_str())) {
 //        loadPet(petId);
 //    } else {
