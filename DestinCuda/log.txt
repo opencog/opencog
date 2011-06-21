@@ -1,0 +1,1784 @@
+Starting DeSTIN
+------------------
+Writing default destin file to: ../DiagnosticData/DestinDiagnostics3.csv.dat
+Destin data created
+Finished reading file.
+Destin data created
+Finished reading file.
+------------------
+Label: 0 got 237 unique sample(s).
+------------------
+Label: 0 will show 2000 sample(s).
+Label: 1 will show 0 sample(s).
+Label: 2 will show 0 sample(s).
+Label: 3 will show 0 sample(s).
+Label: 4 will show 0 sample(s).
+Label: 5 will show 0 sample(s).
+Label: 6 will show 0 sample(s).
+Label: 7 will show 0 sample(s).
+Label: 8 will show 0 sample(s).
+Label: 9 will show 0 sample(s).
+------------------
+XML config file Load result: No error
+------------------
+Kernel created
+Kernel created
+Kernel created
+Kernel created
+------------------
+DeSTIN Layer information
+Layer: 0
+Dimension (row, col): 8 X 8
+Input each node: 16
+Centroids: 25
+
+DeSTIN Layer information
+Layer: 1
+Dimension (row, col): 4 X 4
+Input each node: 100
+Centroids: 16
+
+DeSTIN Layer information
+Layer: 2
+Dimension (row, col): 2 X 2
+Input each node: 64
+Centroids: 12
+
+DeSTIN Layer information
+Layer: 3
+Dimension (row, col): 1 X 1
+Input each node: 48
+Centroids: 10
+
+------------------
+Node: 0
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 1
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 2
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 3
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 4
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 5
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 6
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 7
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 8
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 9
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 10
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 11
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 12
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 13
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 14
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 15
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 1.44462e-38
+Centroid: 18 : 1.70284e-38
+Centroid: 19 : 1.69355e-38
+Centroid: 20 : 1.37079e-38
+Centroid: 21 : 1.27888e-38
+Centroid: 22 : 1.38044e-38
+Centroid: 23 : 1.2513e-38
+Centroid: 24 : 8.91737e-39
+
+Node: 16
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 17
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 18
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 19
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 20
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 21
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 22
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 23
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 1.44462e-38
+Centroid: 10 : 1.70284e-38
+Centroid: 11 : 1.69355e-38
+Centroid: 12 : 1.37079e-38
+Centroid: 13 : 1.27888e-38
+Centroid: 14 : 1.38044e-38
+Centroid: 15 : 1.2513e-38
+Centroid: 16 : 8.91737e-39
+Centroid: 17 : 1.26934e-38
+Centroid: 18 : 1.55515e-38
+Centroid: 19 : 1.77642e-38
+Centroid: 20 : 1.74879e-38
+Centroid: 21 : 8.54752e-39
+Centroid: 22 : 1.19587e-38
+Centroid: 23 : 1.45402e-38
+Centroid: 24 : 1.45398e-38
+
+Node: 24
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 25
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 26
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 27
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 28
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 29
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 30
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 31
+Centroid: 0 : 0
+Centroid: 1 : 1.44462e-38
+Centroid: 2 : 1.70284e-38
+Centroid: 3 : 1.69355e-38
+Centroid: 4 : 1.37079e-38
+Centroid: 5 : 1.27888e-38
+Centroid: 6 : 1.38044e-38
+Centroid: 7 : 1.2513e-38
+Centroid: 8 : 8.91737e-39
+Centroid: 9 : 1.26934e-38
+Centroid: 10 : 1.55515e-38
+Centroid: 11 : 1.77642e-38
+Centroid: 12 : 1.74879e-38
+Centroid: 13 : 8.54752e-39
+Centroid: 14 : 1.19587e-38
+Centroid: 15 : 1.45402e-38
+Centroid: 16 : 1.45398e-38
+Centroid: 17 : 7.81247e-39
+Centroid: 18 : 9.38013e-39
+Centroid: 19 : 1.11308e-38
+Centroid: 20 : 1.17761e-38
+Centroid: 21 : 9.28866e-39
+Centroid: 22 : 1.00262e-38
+Centroid: 23 : 1.04861e-38
+Centroid: 24 : 9.93258e-39
+
+Node: 32
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 33
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 34
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 35
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 36
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 37
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 38
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 1.44462e-38
+Centroid: 19 : 1.70284e-38
+Centroid: 20 : 1.69355e-38
+Centroid: 21 : 1.37079e-38
+Centroid: 22 : 1.27888e-38
+Centroid: 23 : 1.38044e-38
+Centroid: 24 : 1.2513e-38
+
+Node: 39
+Centroid: 0 : 8.91737e-39
+Centroid: 1 : 1.26934e-38
+Centroid: 2 : 1.55515e-38
+Centroid: 3 : 1.77642e-38
+Centroid: 4 : 1.74879e-38
+Centroid: 5 : 8.54752e-39
+Centroid: 6 : 1.19587e-38
+Centroid: 7 : 1.45402e-38
+Centroid: 8 : 1.45398e-38
+Centroid: 9 : 7.81247e-39
+Centroid: 10 : 9.38013e-39
+Centroid: 11 : 1.11308e-38
+Centroid: 12 : 1.17761e-38
+Centroid: 13 : 9.28866e-39
+Centroid: 14 : 1.00262e-38
+Centroid: 15 : 1.04861e-38
+Centroid: 16 : 9.93258e-39
+Centroid: 17 : 1.17761e-38
+Centroid: 18 : 1.1223e-38
+Centroid: 19 : 1.05776e-38
+Centroid: 20 : 1.04854e-38
+Centroid: 21 : 1.36186e-38
+Centroid: 22 : 1.19598e-38
+Centroid: 23 : 1.18676e-38
+Centroid: 24 : 1.26981e-38
+
+Node: 40
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 41
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 42
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 43
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 44
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 45
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 46
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 1.44462e-38
+Centroid: 11 : 1.70284e-38
+Centroid: 12 : 1.69355e-38
+Centroid: 13 : 1.37079e-38
+Centroid: 14 : 1.27888e-38
+Centroid: 15 : 1.38044e-38
+Centroid: 16 : 1.2513e-38
+Centroid: 17 : 8.91737e-39
+Centroid: 18 : 1.26934e-38
+Centroid: 19 : 1.55515e-38
+Centroid: 20 : 1.77642e-38
+Centroid: 21 : 1.74879e-38
+Centroid: 22 : 8.54752e-39
+Centroid: 23 : 1.19587e-38
+Centroid: 24 : 1.45402e-38
+
+Node: 47
+Centroid: 0 : 1.45398e-38
+Centroid: 1 : 7.81247e-39
+Centroid: 2 : 9.38013e-39
+Centroid: 3 : 1.11308e-38
+Centroid: 4 : 1.17761e-38
+Centroid: 5 : 9.28866e-39
+Centroid: 6 : 1.00262e-38
+Centroid: 7 : 1.04861e-38
+Centroid: 8 : 9.93258e-39
+Centroid: 9 : 1.17761e-38
+Centroid: 10 : 1.1223e-38
+Centroid: 11 : 1.05776e-38
+Centroid: 12 : 1.04854e-38
+Centroid: 13 : 1.36186e-38
+Centroid: 14 : 1.19598e-38
+Centroid: 15 : 1.18676e-38
+Centroid: 16 : 1.26981e-38
+Centroid: 17 : 1.62001e-38
+Centroid: 18 : 1.36193e-38
+Centroid: 19 : 1.40799e-38
+Centroid: 20 : 1.50019e-38
+Centroid: 21 : 1.41714e-38
+Centroid: 22 : 1.17751e-38
+Centroid: 23 : 1.24204e-38
+Centroid: 24 : 1.14995e-38
+
+Node: 48
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 49
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 50
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 51
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 52
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 53
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 54
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 1.44462e-38
+Centroid: 3 : 1.70284e-38
+Centroid: 4 : 1.69355e-38
+Centroid: 5 : 1.37079e-38
+Centroid: 6 : 1.27888e-38
+Centroid: 7 : 1.38044e-38
+Centroid: 8 : 1.2513e-38
+Centroid: 9 : 8.91737e-39
+Centroid: 10 : 1.26934e-38
+Centroid: 11 : 1.55515e-38
+Centroid: 12 : 1.77642e-38
+Centroid: 13 : 1.74879e-38
+Centroid: 14 : 8.54752e-39
+Centroid: 15 : 1.19587e-38
+Centroid: 16 : 1.45402e-38
+Centroid: 17 : 1.45398e-38
+Centroid: 18 : 7.81247e-39
+Centroid: 19 : 9.38013e-39
+Centroid: 20 : 1.11308e-38
+Centroid: 21 : 1.17761e-38
+Centroid: 22 : 9.28866e-39
+Centroid: 23 : 1.00262e-38
+Centroid: 24 : 1.04861e-38
+
+Node: 55
+Centroid: 0 : 9.93258e-39
+Centroid: 1 : 1.17761e-38
+Centroid: 2 : 1.1223e-38
+Centroid: 3 : 1.05776e-38
+Centroid: 4 : 1.04854e-38
+Centroid: 5 : 1.36186e-38
+Centroid: 6 : 1.19598e-38
+Centroid: 7 : 1.18676e-38
+Centroid: 8 : 1.26981e-38
+Centroid: 9 : 1.62001e-38
+Centroid: 10 : 1.36193e-38
+Centroid: 11 : 1.40799e-38
+Centroid: 12 : 1.50019e-38
+Centroid: 13 : 1.41714e-38
+Centroid: 14 : 1.17751e-38
+Centroid: 15 : 1.24204e-38
+Centroid: 16 : 1.14995e-38
+Centroid: 17 : 1.61972e-38
+Centroid: 18 : 1.47235e-38
+Centroid: 19 : 1.37094e-38
+Centroid: 20 : 1.59228e-38
+Centroid: 21 : 1.38001e-38
+Centroid: 22 : 1.41703e-38
+Centroid: 23 : 1.50923e-38
+Centroid: 24 : 1.62916e-38
+
+Node: 56
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 57
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 58
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 59
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 60
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 0
+Centroid: 20 : 0
+Centroid: 21 : 0
+Centroid: 22 : 0
+Centroid: 23 : 0
+Centroid: 24 : 0
+
+Node: 61
+Centroid: 0 : 0
+Centroid: 1 : 0
+Centroid: 2 : 0
+Centroid: 3 : 0
+Centroid: 4 : 0
+Centroid: 5 : 0
+Centroid: 6 : 0
+Centroid: 7 : 0
+Centroid: 8 : 0
+Centroid: 9 : 0
+Centroid: 10 : 0
+Centroid: 11 : 0
+Centroid: 12 : 0
+Centroid: 13 : 0
+Centroid: 14 : 0
+Centroid: 15 : 0
+Centroid: 16 : 0
+Centroid: 17 : 0
+Centroid: 18 : 0
+Centroid: 19 : 1.44462e-38
+Centroid: 20 : 1.70284e-38
+Centroid: 21 : 1.69355e-38
+Centroid: 22 : 1.37079e-38
+Centroid: 23 : 1.27888e-38
+Centroid: 24 : 1.38044e-38
+
+Node: 62
+Centroid: 0 : 1.2513e-38
+Centroid: 1 : 8.91737e-39
+Centroid: 2 : 1.26934e-38
+Centroid: 3 : 1.55515e-38
+Centroid: 4 : 1.77642e-38
+Centroid: 5 : 1.74879e-38
+Centroid: 6 : 8.54752e-39
+Centroid: 7 : 1.19587e-38
+Centroid: 8 : 1.45402e-38
+Centroid: 9 : 1.45398e-38
+Centroid: 10 : 7.81247e-39
+Centroid: 11 : 9.38013e-39
+Centroid: 12 : 1.11308e-38
+Centroid: 13 : 1.17761e-38
+Centroid: 14 : 9.28866e-39
+Centroid: 15 : 1.00262e-38
+Centroid: 16 : 1.04861e-38
+Centroid: 17 : 9.93258e-39
+Centroid: 18 : 1.17761e-38
+Centroid: 19 : 1.1223e-38
+Centroid: 20 : 1.05776e-38
+Centroid: 21 : 1.04854e-38
+Centroid: 22 : 1.36186e-38
+Centroid: 23 : 1.19598e-38
+Centroid: 24 : 1.18676e-38
+
+Node: 63
+Centroid: 0 : 1.26981e-38
+Centroid: 1 : 1.62001e-38
+Centroid: 2 : 1.36193e-38
+Centroid: 3 : 1.40799e-38
+Centroid: 4 : 1.50019e-38
+Centroid: 5 : 1.41714e-38
+Centroid: 6 : 1.17751e-38
+Centroid: 7 : 1.24204e-38
+Centroid: 8 : 1.14995e-38
+Centroid: 9 : 1.61972e-38
+Centroid: 10 : 1.47235e-38
+Centroid: 11 : 1.37094e-38
+Centroid: 12 : 1.59228e-38
+Centroid: 13 : 1.38001e-38
+Centroid: 14 : 1.41703e-38
+Centroid: 15 : 1.50923e-38
+Centroid: 16 : 1.62916e-38
+Centroid: 17 : 1.14974e-38
+Centroid: 18 : 1.41732e-38
+Centroid: 19 : 1.18683e-38
+Centroid: 20 : 1.04854e-38
+Centroid: 21 : 1.35242e-38
+Centroid: 22 : 1.31569e-38
+Centroid: 23 : 1.07598e-38
+Centroid: 24 : 1.19591e-38
+
+Destin network file ../DiagnosticData/DestinDiagnostics3.csv.dat not found!
+Destin data deleted
+Destin data deleted

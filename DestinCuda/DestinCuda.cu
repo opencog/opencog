@@ -26,6 +26,8 @@
 
 using namespace std;
 
+// TODO: This main file is still pretty messy.
+
 void PrintHelp()
 {
     // ***************************
@@ -351,7 +353,6 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
             // Yes you are the top layer
             bTopNode = true;
         }
-        cout << "Layer: " << Layer << " InputDimension " << InputDimensionality[Layer] << " OutputDimension (Each node) " << NumberOfCentroids[Layer] << endl;
 
         // Creation of layer and layerLatch
         DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer]);
@@ -702,7 +703,7 @@ int MainDestinExperiments(int argc, char* argv[])
     float* BufferForMovementLogRecords;
     BufferForMovementLogRecords = new float[1024*4*64*128];  //this should be enough for all movements and all layers / nodes
 
-    DestinKernel* DKernel;
+    DestinKernel* DKernel=NULL;
     map<int,int> LabelsUsedToCreateNetwork;
     map<int,int> IndicesUsedToCreateNetwork;
     int NumberOfLayers=4;
@@ -715,6 +716,16 @@ int MainDestinExperiments(int argc, char* argv[])
             LastLayerToShow, MAX_CNT, strCommandLineData, DataSourceForTraining, sDiagnosticFileNameForMarking, strDestinTrainingFileName,
             vIndicesAndGTLabelToUse, LabelsUsedToCreateNetwork, IndicesUsedToCreateNetwork, BufferForMovementLogRecords,
             LayerToShow, RowToShowInputs, ColToShowInputs, 0);  // no movements to write, as we don't write DeSTIN responses out in this case
+
+        for (int i=0; i<NumberOfLayers;i++)
+        {
+            cout << "DeSTIN Layer information" << endl;
+            cout << "Layer: " << DKernel[i].GetID() << endl;
+            cout << "Dimension (row, col): " << DKernel[i].GetNumberOfRows() << " X " << DKernel[i].GetNumberOfCols() << endl;
+            cout << "Input each node: " << DKernel[i].GetNumberOfInputDimensionlity() << endl;
+            cout << "Centroids: " << DKernel[i].GetNumberOfStates() << endl;
+            cout << endl;
+        }
     }
     else
     {
@@ -726,17 +737,9 @@ int MainDestinExperiments(int argc, char* argv[])
         stmDummy.close();
     }
 
-    for (int i; i<NumberOfLayers;i++)
-    {
-        cout << "DeSTIN Layer information" << endl;
-        cout << "Layer: " << DKernel[i].GetID() << endl;
-        cout << "Dimension (row, col): " << DKernel[i].GetNumberOfRows() << " X " << DKernel[i].GetNumberOfCols() << endl;
-        cout << "Input: " << DKernel[i].GetNumberOfInputDimensionlity() << endl;
-        cout << "Centroids: " << DKernel[i].GetNumberOfStates() << endl;
-        cout << endl;
-    }
+
     cout << "------------------" << endl;
-    // DKernel[4].DoDestin(DataSourceForTraining.GetPointerDeviceImage());
+    DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage());
     if ( !FileExists(strDestinNetworkFileToRead) )
     {
         cout << "Destin network file " << strDestinNetworkFileToRead.c_str() << " not found!" << endl;

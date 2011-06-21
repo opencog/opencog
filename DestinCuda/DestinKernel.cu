@@ -13,6 +13,7 @@ const int AmountThreads = 128;
 using namespace std;
 
 __global__ void Destin( int States, int InputDimensionlity, float *dInputData, float *dLayerData, float *dNodeData );
+__global__ void sum(int a, int b, int *c);
 
 DestinKernel::DestinKernel( void )
 {
@@ -22,7 +23,7 @@ DestinKernel::DestinKernel( void )
 	mStates=0;
 	mInputDimensionlity=0;
 	cuDeviceGetCount(&mDevices);
-	cout << "Layer created" << endl;
+	cout << "Kernel created" << endl;
 }
 
 DestinKernel::~DestinKernel( void )
@@ -31,7 +32,7 @@ DestinKernel::~DestinKernel( void )
     cudaFree( dLayerData );
     free ( mNodeData ) ;
     cudaFree( dNodeData );
-    cout << "Layer destroyed" << endl;
+    cout << "Kernel destroyed" << endl;
 }
 
 void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDimensionlity)
@@ -45,8 +46,8 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     // Data holder for whole layer including centroids
     // Size of data holder is rows times columns.
     // Cause it needs to hold amount of centroids (mStates) including its vector the whole structure is time centroids and InputDimensionlity.
-    int sizeOfLayerData = mRows*mCols*mStates*mInputDimensionlity;
-    mLayerData = (float*) calloc(sizeOfLayerData, sizeof(float) );
+    sizeOfLayerData = mRows*mCols*mStates*mInputDimensionlity;
+    mLayerData = new float[sizeOfLayerData];
     cudaMalloc( (void**)&dLayerData, sizeOfLayerData*sizeof(float) );
 
     // curandGenerator_t is a CUDA version of rand
@@ -54,16 +55,17 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     curandGenerator_t gen;
     curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
     // TODO: Put seed code at the place of 1
-    curandSetPseudoRandomGeneratorSeed( gen, 1 );
+    curandSetPseudoRandomGeneratorSeed( gen, mID );
     curandGenerateUniform( gen, dLayerData, sizeOfLayerData );
 
     // TODO: Remove debug line.
-    cudaMemcpy ( mLayerData ,dLayerData , sizeOfLayerData*sizeof(float), cudaMemcpyDeviceToHost );
+    cudaMemcpy ( mLayerData, dLayerData, sizeOfLayerData*sizeof(float), cudaMemcpyDeviceToHost );
 
     // The generator have to be destroyed after use.
     curandDestroyGenerator( gen );
     // Node data contain the distance to the observation (It's is empty the first run)
-    int sizeOfNodeData = mRows*mCols*mStates;
+    sizeOfNodeData = mRows*mCols*mStates;
+    mNodeData = new float[sizeOfNodeData];
     cudaMalloc( (void**)&dNodeData, sizeOfNodeData*sizeof(float) );
 }
 
@@ -74,19 +76,35 @@ void DestinKernel::DoDestin( float *Input )
     // Grid is the amount of blocks inside a grid
     dim3 grid( mCols, mRows );
     // The launch of the kernel itself with centroids(states), dimension, input data and the Data of the layer itself
-    Destin<<<grid, threads>>>( mStates, mInputDimensionlity, Input, dLayerData, dNodeData );
+
+    Destin<<<grid, threads, (mInputDimensionlity+mStates)*sizeof(float)>>>( mStates, mInputDimensionlity, Input, dLayerData, dNodeData );
+
+    cudaMemcpy(mNodeData, dNodeData, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
+    for(int r=0;r<mRows;r++)
+    {
+        for(int c=0;c<mCols;c++)
+        {
+            cout << "Node: " << r*mCols+c << endl;
+            for(int s=0;s<mStates;s++)
+            {
+                cout << "Centroid: " << s << " : ";
+                cout << mNodeData[r*mCols+c*mStates+s] << endl;
+            }
+            cout << endl;
+        }
+    }
 }
 
-extern __shared__ float shared[];
 __global__ void Destin( int States, int InputDimensionlity, float *dInputData, float *dLayerData, float *dNodeData )
 {
-    // This is how to declare a shared memory inside cuda.
+    // This is how to declare a shared memory inside CUDA.
+    extern __shared__ float shared[];
     float* input = (float*)&shared;
     float* distance = (float*)&input[InputDimensionlity*sizeof(float)];
 
     // We use many threads they need to know where they have to do there work.
     int tid = threadIdx.x;
-    int bid = blockIdx.x;
+    int bid = blockIdx.x + blockIdx.y*gridDim.x;
 
     // make sure the input data is inside shared memory this we are going to compare the amount of centroids.
     while(tid < InputDimensionlity)
@@ -115,22 +133,22 @@ __global__ void Destin( int States, int InputDimensionlity, float *dInputData, f
         // all threads have to wait here so we know all distance have been calculated
         __syncthreads();
 
+        // bit wise divide by 2
         int d = InputDimensionlity >> 1;
         int dOld = d*2;
         tid = threadIdx.x;
         // a sum reduction
         while (d != 0)
         {
-            // the basic
-            if(tid < d)
+            dOld = dOld - d*2;
+            while(tid < d)
             {
                 distance[tid] += distance[tid + d];
-            }
-            // Nasty solution inside CUDA. In case of odd numbers
-            dOld = dOld - d*2;
-            if (dOld == 1 && tid == d)
-            {
-                distance[tid] += distance[tid+d+1];
+                if (dOld == 1 && tid == d)
+                {
+                    distance[tid] += distance[tid+d+1];
+                }
+                tid += blockDim.x;
             }
             // Sync moment before starting with next iteration of reduction.
             __syncthreads();

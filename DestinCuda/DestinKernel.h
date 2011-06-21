@@ -18,6 +18,10 @@ private:
 	int mStates;
 	int mInputDimensionlity;
 	int mDevices;
+
+	int sizeOfLayerData;
+	int sizeOfNodeData;
+
 	float *mLayerData;
 	float *dLayerData;
 	float *mNodeData;
