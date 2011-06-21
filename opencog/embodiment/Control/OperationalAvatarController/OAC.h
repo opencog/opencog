@@ -88,7 +88,7 @@ private:
     /**
      * Object used to save/load atomSpace dumps. Other componentes that
      * need persistence should extend SavableRepository interface and
-     * add thenselfs to this savingLoading object.
+     * add themselves to this savingLoading object.
      */
     SavingLoading savingLoading;
 
@@ -103,8 +103,8 @@ private:
     PerceptionActionInterface::PAI * pai;
 
     /**
-     * Store metadata concerning a pet controled by the OAC. Also implements
-     * an interface to comunicate with the LS.
+     * Store metadata concerning a pet controlled by the OAC. Also implements
+     * an interface to communicate with the LS.
      */
     Pet * pet;
 

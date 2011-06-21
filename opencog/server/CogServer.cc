@@ -145,7 +145,7 @@ void CogServer::serverLoop()
     struct timeval timer_start, timer_end;
     time_t elapsed_time;
     time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
-    bool externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
+//    bool externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
 
     logger().info("Starting CogServer loop.");
 
@@ -159,12 +159,12 @@ void CogServer::serverLoop()
         elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                        (timer_end.tv_usec - timer_start.tv_usec);
 
-        if (!externalTickMode) {
+//        if (!externalTickMode) {
             // sleep long enough so that the next cycle will only start
             // after config["SERVER_CYCLE_DURATION"] milliseconds
             if ((cycle_duration - elapsed_time) > 0)
                 usleep((unsigned int) (cycle_duration - elapsed_time));
-        }
+//        }
 
         logger().debug("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
                         currentCycle,

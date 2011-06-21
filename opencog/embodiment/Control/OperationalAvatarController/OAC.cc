@@ -76,7 +76,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     setNetworkElement(new NetworkElement(myId, ip, portNumber));
 
     // Initialize ZeroMQ
-#ifdef HAVE_ZMQ    
+#ifdef HAVE_ZMQ
     this->plaza = new Plaza(config().get("ZMQ_PUBLISH_IP"), zmqPublishPort);
 #endif
 

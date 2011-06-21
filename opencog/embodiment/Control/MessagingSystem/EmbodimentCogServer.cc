@@ -58,27 +58,6 @@ bool EmbodimentCogServer::customLoopRun(void)
 {
     unsigned int msgQueueSize = ne->getIncomingQueueSize();
 
-    // Discard some old messages if the message queue size exceeds the 
-    // MAX_MESSAGE_QUEUE_SIZE. This would miss some messages which may probably cause 
-    // other problems. We should figure out a better solution.
-    int obsoleteMessageNum = msgQueueSize - this->maxMessageQueueSize;
-
-    if (obsoleteMessageNum > 0) {
-        logger().debug("EmbodimentCogServer(%s) - messageCentral size: %d exceeds MAX_MESSAGE_QUEUE_SIZE: %d [cycle = %d]",
-                       ne->getID().c_str(), 
-                       msgQueueSize, 
-                       this->maxMessageQueueSize,
-                       this->getCycleCount()
-                      );
-    }
-
-    for ( ; obsoleteMessageNum > 0; -- obsoleteMessageNum ) {
-        Message * message = ne->popIncomingQueue(); 
-        delete message; 
-    }
-
-    msgQueueSize = ne->getIncomingQueueSize();
-
     if (msgQueueSize > 0) {
         logger().debug("EmbodimentCogServer(%s) - messageCentral size: %d [cycle = %d]",
                        ne->getID().c_str(), 
@@ -86,6 +65,8 @@ bool EmbodimentCogServer::customLoopRun(void)
                        this->getCycleCount()
                       );
     }
+
+    bool runAgents = false;
 
     if (!externalTickMode) {
         // Retrieve new messages from router, if any
@@ -121,25 +102,26 @@ bool EmbodimentCogServer::customLoopRun(void)
         while (!ne->isIncomingQueueEmpty()) {
             Message *message = ne->popIncomingQueue();
             messages.push_back(message);
-            if (message->getType() == Message::TICK) break;
+            //if (message->getType() == Message::TICK) break;
         }
         for (unsigned int i = 0; i < messages.size(); i++) {
             Message *message = messages[i];
             //check type of message
             if (message->getType() == Message::TICK) {
-                logger().debug("EmbodimentCogServer - No.%d message is a TICK, %d messages left unprocessed [cycle = %d]", 
+                logger().debug("EmbodimentCogServer - No.%d message is a TICK, %d messages still unprocessed. Will process them then run MindAgents [cycle = %d]",
                                i+1, msgQueueSize-i-1, this->getCycleCount()
                               );
                 delete(message);
-                return true;
+                runAgents = true;
             } else {
-                // If processNextMessage returns false then we stop the
-                // CogServer
+                // If processNextMessage returns true then we stop the
+                // CogServer. It only returns true when the spawner
+                // sends a SAVE_AND_EXIT message to this OAC.
                 this->running = !processNextMessage(message);
                 delete(message);
 
                 if (!running) {
-                    logger().debug("EmbodimentCogServer - Fail to process No.%d message, %d messages left unprocessed [cycle = %d]", 
+                    logger().debug("EmbodimentCogServer - Shutting down. Failed to process No.%d message, %d messages left unprocessed [cycle = %d]",
                                    i+1, msgQueueSize-i-1, this->getCycleCount()
                                   );
 
@@ -150,9 +132,9 @@ bool EmbodimentCogServer::customLoopRun(void)
     }
 
     //sleep a bit to not keep cpu busy and do not keep requesting for unread messages
-    usleep(50000);
+    //usleep(50000);
 
-    return false;
+    return runAgents;
 }
 
 bool EmbodimentCogServer::sendMessage(Message &msg)

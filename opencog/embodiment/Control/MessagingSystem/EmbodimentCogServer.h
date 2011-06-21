@@ -49,12 +49,12 @@ protected:
     int unreadMessagesCheckInterval;
 
     /** sets the limit of messages per request to be retrieved from the
-     * router (-1 for unlimitted)
+     * router (-1 for unlimited)
      */
     int unreadMessagesRetrievalLimit;
 
     /**
-     * Maximum size of the message queue. Some old messages would be discraded,
+     * Maximum size of the message queue. Some old messages would be discarded,
      * if the message queue size exceeds the limit. 
      */
     int maxMessageQueueSize; 

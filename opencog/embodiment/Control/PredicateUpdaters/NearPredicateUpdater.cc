@@ -132,19 +132,19 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
                         __FUNCTION__, ex.getMessage( ) );
     } // catch
 
+    computeAllSpatialRelations(pet, object, timestamp);
 }
 
 void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, string entityA_id, string entityB_id, string entityC_id, AtomSpace& atomSpace, unsigned int timestamp);
 
 //! @todo Doesn't process 3-object relations (i.e. BETWEEN). Should use more filtering to restrict its search (e.g. based on the
 //! spatial grid, and/or apriori knowledge about which things can happen (e.g. "A is between B and C" can only happen if
-//! "B is left of A" and "C is right of A".) Maybe respond only when an object has moved (or the agent - these relations are
-//! evaluated from a certain perspective).
-void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::AtomSpace& atomSpace, unsigned long timestamp)
+//! "B is left of A" and "C is right of A".) Responds only when an object has moved. (Should it also be every time the agent moves? -
+//! these relations are evaluated from a certain perspective...)
+void NearPredicateUpdater::computeAllSpatialRelations(Handle objectA, Handle observer, unsigned long timestamp)
 {
     HandleSeq resultingFrames;
 
-    Handle objectA;
     Handle objectB;
     Handle objectC;
 
@@ -158,55 +158,56 @@ void NearPredicateUpdater::computeAllSpatialRelations(Handle observer, opencog::
 
     double besideDistance = spaceMap.getNextDistance( );
 
-    std::vector<std::string> entitiesA;
+    //std::vector<std::string> entitiesA;
     std::vector<std::string> entitiesB;
     std::vector<std::string> entitiesC;
 
-    spaceMap.getAllObjects( std::back_inserter( entitiesA ) );
+    //spaceMap.getAllObjects( std::back_inserter( entitiesA ) );
     spaceMap.getAllObjects( std::back_inserter( entitiesB ) );
     spaceMap.getAllObjects( std::back_inserter( entitiesC ) );
 
-    logger().debug( "%s - %d candidates for objectA. %d candidates for objectB. %d candidates for objectC",
-                    __FUNCTION__, entitiesA.size( ), entitiesB.size( ), entitiesC.size( ) );
+    std::string entityID_A = atomSpace.getName(objectA);
+
+    logger().debug( "%s - objectA: %s. %d candidates for objectB. %d candidates for objectC",
+                    __FUNCTION__,  entityID_A.c_str(), entitiesB.size( ), entitiesC.size( ) );
 
     int numRelations = 0;
 
     try {
         const spatial::EntityPtr& observerEntity = spaceMap.getEntity( atomSpace.getName( observer ) );
 
-        unsigned int i, j, k;
-        for( i = 0; i < entitiesA.size( ); ++i ) {
-            const spatial::EntityPtr& entityA = spaceMap.getEntity( entitiesA[i] );
-            for( j = 0; j < entitiesB.size( ); ++j ) {
-                if ( entitiesA[i] == entitiesB[j] ) {
-                    continue;
-                } // if
-                const spatial::EntityPtr& entityB = spaceMap.getEntity( entitiesB[j] );
-                std::list<Entity::SPATIAL_RELATION> relations;
+        unsigned int j, k;
+        const spatial::EntityPtr& entityA = spaceMap.getEntity( entityID_A );
+        for( j = 0; j < entitiesB.size( ); ++j ) {
+            if ( entityID_A == entitiesB[j] ) {
+                continue;
+            } // if
+            const spatial::EntityPtr& entityB = spaceMap.getEntity( entitiesB[j] );
+            std::list<Entity::SPATIAL_RELATION> relations;
 
-                // All size-2 and all size-3 relations
-                relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB );
-                addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], "", atomSpace, timestamp);
-                numRelations += relations.size();
+            // All size-2 and all size-3 relations
+            relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB );
+            addRelationsToAtomSpace(relations, entityID_A, entitiesB[j], "", atomSpace, timestamp);
+            numRelations += relations.size();
 
-//                for( k = 0; k < entitiesC.size( ); ++k ) {
-//                    if ( entitiesA[i] == entitiesC[k] || entitiesB[j] == entitiesC[k] ) {
-//                        continue;
-//                    } // if
-//                    const spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
-//                    relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB, *entityC );
-//                    addRelationsToAtomSpace(relations, entitiesA[i], entitiesB[j], entitiesC[k], atomSpace, timestamp);
-//                    numRelations += relations.size();
-//                } // for
-            } // for
+            // todo: avoid redundant computation here.
+//            for( k = 0; k < entitiesC.size( ); ++k ) {
+//                if ( entityID_A == entitiesC[k] || entitiesB[j] == entitiesC[k] ) {
+//                    continue;
+//                } // if
+//                const spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
+//                relations = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB, *entityC );
+//                addRelationsToAtomSpace(relations, entityID_A, entitiesB[j], entitiesC[k], atomSpace, timestamp);
+//                numRelations += relations.size();
+//            } // for
         } // for
     } catch( const opencog::NotFoundException& ex ) {
         logger().error( "%s - %s", __FUNCTION__, ex.getMessage( ) );
         return;
     } // if
 
-    logger().debug( "%s - Finished evaluating: %d spatial relations are true: %d combinations of 3 objects",
-            __FUNCTION__, numRelations, entitiesA.size()*entitiesB.size()*entitiesC.size());
+    logger().debug( "%s - Finished evaluating: %d spatial relations are true. %d combinations of this and 2 other objects",
+            __FUNCTION__, numRelations, entitiesB.size()*entitiesC.size());
 
     return;
 }

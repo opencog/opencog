@@ -83,6 +83,4 @@ void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timest
     if (objects.size() > 0) {
         petPsychePredicatesUpdater->update( Handle::UNDEFINED, petHandle, timestamp );
     }
-
-    NearPredicateUpdater::computeAllSpatialRelations(petHandle, atomSpace, timestamp);
 }

@@ -36,7 +36,6 @@ namespace OperationalAvatarController
  * within AtTimeLinks. NOTE: The EvaluationLink is given the current TruthValue,
  * as is the EvaluationLink.
  * @todo Uses the (previously) separate code to handle other spatial relationships. This should be unified more.
- * @todo computeAllSpatialRelations should only update for objects that have moved.
  * @todo computeAllSpatialRelations could be made much more efficient through avoiding redundant computation.
  * @todo computeAllSpatialRelations should check which objects are near to each other using the spatial grid system.
  * @todo computeAllSpatialRelations doesn't handle the "between" relation (connected to the above)
@@ -51,7 +50,7 @@ public:
 
     virtual void update(Handle object, Handle pet, unsigned long timestamp );
 
-    static void computeAllSpatialRelations(Handle observer, opencog::AtomSpace& atomSpace, unsigned long timestamp);
+    virtual void computeAllSpatialRelations(Handle objectA, Handle observer, unsigned long timestamp);
 
 protected:
 
