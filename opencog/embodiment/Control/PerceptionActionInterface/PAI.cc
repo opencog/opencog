@@ -2044,7 +2044,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
     }
 
-    printf("PAI - processMapInfo: consuming %f seconds.\n", 1.0 * elapsed_time/1000000);
+//    printf("PAI - processMapInfo: consuming %f seconds.\n", 1.0 * elapsed_time/1000000);
     // TODO: Check if this is really needed. It seems ImportanceDecayAgent
     // will eventually remove the atoms that represents the space maps and, this
     // way, these maps will be removed from spaceServer as well throught the
