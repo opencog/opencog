@@ -1,8 +1,4 @@
 ;
-; TODO: There are two 'find_reference_link', one is here, 
-;       and another in 'psi_util.scm', we should change the code here, and use 
-;       the version in 'psi_util.scm' instead. 
-;
 ; This file contains all sorts of triggers, reponsers and rules of Dialog System
 ; inspired by Speech Act Theory. For more details of the original design of the 
 ; dialog system, please refer to the document written by Ben as below:
@@ -12,7 +8,7 @@
 ; @note:  It should be loaded after rules_core.scm and pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-04
+; @date   2011-06-21
 ;
 ; Below is an example of how the rule of Dialog System is represented in AtomSpace
 ;
@@ -263,4 +259,16 @@
     (UtteranceNode "utterance_sentences")
     (ListLink)
 )
+;******************************************************************************
+;******************************************************************************
+;******************************************************************************
 
+; Speech act schemas
+
+(define (AskForFood)
+    (update_utterance_node "utterance_sentences"  
+        (SentenceNode "IS_NEW: TRUE, TO:  , RESPONSER: AskForFood, CONTENT: I'm so hungry")
+        (SentenceNode "IS_NEW: TRUE, TO:  , RESPONSER: AskForFood, CONTENT: Could you give me some food?")
+        (SentenceNode "IS_NEW: TRUE, TO:  , RESPONSER: AskForFood, CONTENT: OK. Forget it. I'm testing the dialog system :-)")
+    )
+)

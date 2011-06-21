@@ -2,7 +2,7 @@
 ; @file embodiment/rules_core.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-05-23
+; @date   2011-06-21
 ;
 ; Scheme core functions for adding Modulators, Demands and Rules etc. into AtomSpace
 ;
@@ -313,7 +313,7 @@
 ;     TimeNode "timestamp"
 ;     SimilarityLink (stv 1.0 1.0)
 ;         NumberNode: "demand_value"
-;         ExecutionOutputLink (stv 1.0 1.0)
+;         ExecutionOutputLink 
 ;             GroundedSchemaNode: "demand_schema_name"
 ;             ListLink (empty)
 ;
@@ -321,7 +321,7 @@
 ;
 
 (define (add_demand_schema demand_name default_value)
-    (let ( (schema_handle (ExecutionOutputLink (stv 1.0 1.0) (DEFAULT_AV)
+    (let ( (schema_handle (ExecutionOutputLink (DEFAULT_AV)
                               (GroundedSchemaNode (string-append (string-trim-both demand_name) "Updater") )
                               (ListLink)
                           );ExecutionOutputLink
@@ -534,8 +534,10 @@
 ;
 ; Add Action to AtomSpace.
 ;
-; An Action is an ExecutionLink with a GroundedSchemaNode, 
-; which's Truth Value can only be evaluated by corresponding combo script. 
+; An Action is an ExecutionLink with a schema node, such as GroundedSchemaNode 
+; or SpeechActSchemaNode
+;
+; Its Truth Value can only be evaluated by corresponding combo script. 
 ; 
 ; It can be represented as follows:
 ;
@@ -545,16 +547,22 @@
 ;         Node:arguments
 ;         ...
 ;
+; or
+;
+; ExecutionLink
+;     SpeechActSchemaNode "schema_name"
+;     ListLink
+;         Node:arguments
+;         ...
+;
 
-(define (add_action schema_name . arguments)
+(define (add_action schema_handle . arguments)
     (ExecutionLink (DEFAULT_STV) (DEFAULT_AV)
-
-        (GroundedSchemaNode (string-trim-both schema_name) )
+        schema_handle
 
         (ListLink 
             (apply parse_arguments arguments)
         )
-
     )
 )
 
@@ -576,7 +584,7 @@
 
 (define NULL_ACTION 
     (cog-set-tv! 
-        (add_action "DoNothing")
+        (add_action (GroundedSchemaNode "DoNothing") )
         (stv 1.0 1.0)
     )
 )

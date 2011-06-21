@@ -24,6 +24,7 @@
 #include "PsiRuleUtil.h"
 
 #include <boost/tokenizer.hpp>
+#include <boost/regex.hpp>
 
 using namespace OperationalAvatarController;
 
@@ -230,6 +231,7 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
                                             const Procedure::ProcedureRepository & procedureRepository, 
                                             Handle hActionExecutionLink)
 {
+
     // Variables used by combo interpreter
     std::vector <combo::vertex> schemaArguments;
 
@@ -243,6 +245,9 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
                                  atomSpace.getOutgoing(hActionExecutionLink, 0)
                                               );
 
+    // If it is a SPEECH_ACT_SCHEMA_NODE, run the corresponding scheme function, 
+    // and then generate a bunch of say actions (one for each sentence node) 
+    // which would be executed from next cog cycle
     if (actionType == SPEECH_ACT_SCHEMA_NODE) {
 #if HAVE_GUILE    
         // Initialize scheme evaluator
@@ -276,10 +281,66 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
                         this->cycleCount
                       );
 
-        // TODO call 'say' combo function
-        
+        // Create 'say' actions according to the answers
+        std::string sentenceNodeName, listerner, content; 
+
+        boost::regex expListener("TODO\\s*:\\s*([^,\\s]*)[\\s|,]*");
+        boost::regex expContent("CONTENT\\s*:\\s*(.*)");
+        boost::smatch what; 
+
+        Handle hSpeakAction, hSpeakActionArgument; 
+        std::vector<Handle> tempOutgoingSet; 
+
+        Handle hUtteranceSentencesList =
+            AtomSpaceUtil::getReference(atomSpace, 
+                                        atomSpace.getHandle(UTTERANCE_NODE, 
+                                                            "utterance_sentences"
+                                                           )
+                                       );
+
+        foreach(Handle hSentenceNode, atomSpace.getOutgoing(hUtteranceSentencesList) ) {
+            sentenceNodeName = atomSpace.getName(hSentenceNode); 
+
+            if ( boost::regex_search(sentenceNodeName, what, expListener) && 
+                 what.size() == 2 && what[1].matched ) {
+                listerner = what[1]; 
+            }
+            else 
+                listerner = ""; 
+
+            if ( boost::regex_search(sentenceNodeName, what, expContent) && 
+                 what.size() == 2 && what[1].matched ) {
+                content = what[1]; 
+            }
+            else 
+                content = ""; 
+
+            tempOutgoingSet.clear();
+            tempOutgoingSet.push_back( atomSpace.addNode(WORD_NODE, content) );
+            tempOutgoingSet.push_back( atomSpace.addNode(OBJECT_NODE, listerner) );
+            hSpeakActionArgument = atomSpace.addLink(LIST_LINK, tempOutgoingSet); 
+
+            tempOutgoingSet.clear(); 
+            tempOutgoingSet.push_back( atomSpace.addNode(GROUNDED_PREDICATE_NODE, "say") ); 
+            tempOutgoingSet.push_back( hSpeakActionArgument ); 
+            hSpeakAction = atomSpace.addLink(EXECUTION_LINK, tempOutgoingSet); 
+
+            this->temp_action_list.push_back(hSpeakAction);
+
+            logger().debug( "PsiActionSelectionAgent::%s - generate say action: %s [cycle = %d]",
+                            __FUNCTION__,
+                            atomSpace.atomAsString(hSpeakAction).c_str(), 
+                            this->cycleCount
+                          );
+
+std::cout<<std::endl<<"Generate say action " <<atomSpace.atomAsString(hSpeakAction) 
+         << " [cycle = " << this->cycleCount <<"]"<<std::endl; 
+
+        } // foreach
+       
 #endif // HAVE_GUILE    
     }
+    // If it is a combo function, call ProcedureInterpreter to execute the function
     else {
         // Get combo arguments for Action
         Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments

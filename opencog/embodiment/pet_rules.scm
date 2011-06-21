@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-06-10
+; @date   2011-06-21
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into the AtomSpace.
 ;
@@ -390,15 +390,16 @@
 ;)
 ;
 ;(define test_eat_food
-;    (add_action "test_eat_food")
+;    (add_action (GroundedSchemaNode "test_eat_food") )
 ;)
 ;
-;(add_rule (cog-new-stv 0.8 1.0) TestEnergyDemandGoal (add_action "goto_owner")
+;(add_rule (cog-new-stv 0.8 1.0) TestEnergyDemandGoal
+;          (add_action (GroundedSchemaNode "goto_owner") )
 ;          truePrecondition
 ;)
 ;
 ;(define test_search_food
-;    (add_action "test_search_food") 
+;    (add_action (GroundedSchemaNode "test_search_food") )
 ;)
 ;
 ;(add_rule (cog-new-stv 0.8 1.0) TestGetFoodGoal test_search_food
@@ -482,15 +483,15 @@
 ;
 
 ;(define wander_searching_food
-;    (add_action "wander_searching_food")
+;    (add_action (GroundedSchemaNode "wander_searching_food") )
 ;)
 ;
 ;(define goto_owner
-;    (add_action "goto_owner")
+;    (add_action (GroundedSchemaNode "goto_owner") )
 ;)
 ;
 ;(define random_step_searching
-;    (add_action "random_step_searching")
+;    (add_action (GroundedSchemaNode "random_step_searching") )
 ;)
 ;
 ;(add_rule (cog-new-stv 0.8 1.0)  EnergyDemandGoal random_step_searching
@@ -503,10 +504,10 @@
 ;
 
 (define GetFoodGoal
-;    (AndLink 
+    (AndLink 
         (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
-;        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_food") )
-;    )    
+        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_food") )
+    )    
 )
 
 (ForAllLink
@@ -514,12 +515,20 @@
         (VariableNode "$var_food") 
     ) 
 
-    (add_rule (stv 1.0 1.0) EnergyDemandGoal (add_action "eat_food" (VariableNode "$var_food") )
+    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
+        (add_action (GroundedSchemaNode "eat_food") (VariableNode "$var_food") )
         GetFoodGoal
     )
 )    
 
-(add_rule (stv 1.0 1.0) GetFoodGoal (add_action "random_search")
+(add_rule (stv 1.0 1.0) GetFoodGoal 
+    (add_action (GroundedSchemaNode "random_search") )
+    NULL_PRECONDITION
+)
+
+; TODO: very file rules only for testing dialog_system
+(add_rule (stv 1.0 1.0) GetFoodGoal 
+    (add_action (SpeechActSchemaNode "AskForFood") )
     NULL_PRECONDITION
 )
 
@@ -540,12 +549,14 @@
         (VariableNode "$var_water") 
     ) 
 
-    (add_rule (stv 1.0 1.0) WaterDemandGoal (add_action "drink_water" (VariableNode "$var_water") ) 
+    (add_rule (stv 1.0 1.0) WaterDemandGoal
+        (add_action (GroundedSchemaNode "drink_water") (VariableNode "$var_water") ) 
         GetWaterGoal
     )
 )    
 
-(add_rule (stv 1.0 1.0) GetWaterGoal (add_action "random_search")
+(add_rule (stv 1.0 1.0) GetWaterGoal 
+    (add_action (GroundedSchemaNode "random_search") )
     NULL_PRECONDITION
 )
 
@@ -576,7 +587,8 @@
         (VariableNode "$var_pee_place") 
     )
 
-    (add_rule (stv 1.0 1.0) IntegrityDemandGoal (add_action "pee_at" (VariableNode "$var_pee_place") )
+    (add_rule (stv 1.0 1.0) IntegrityDemandGoal 
+        (add_action (GroundedSchemaNode "pee_at") (VariableNode "$var_pee_place") )
         GetPeePlaceGoal
     )
 )
@@ -586,7 +598,8 @@
         (VariableNode "$var_poo_place") 
     )
 
-    (add_rule (stv 1.0 1.0) IntegrityDemandGoal (add_action "poo_at" (VariableNode "$var_poo_place") )
+    (add_rule (stv 1.0 1.0) IntegrityDemandGoal
+        (add_action (GroundedSchemaNode "poo_at") (VariableNode "$var_poo_place") )
         GetPooPlaceGoal
     )
 )
@@ -596,7 +609,8 @@
         (VariableNode "$var_food") 
     ) 
 
-    (add_rule (stv 0.8 1.0) IntegrityDemandGoal (add_action "eat_food" (VariableNode "$var_food") )
+    (add_rule (stv 0.8 1.0) IntegrityDemandGoal 
+        (add_action (GroundedSchemaNode "eat_food") (VariableNode "$var_food") )
         GetFoodGoal
     )
 )    
@@ -606,16 +620,19 @@
         (VariableNode "$var_water") 
     )
 
-    (add_rule (stv 0.8 1.0) IntegrityDemandGoal (add_action "drink_water" (VariableNode "$var_water") )
+    (add_rule (stv 0.8 1.0) IntegrityDemandGoal 
+        (add_action (GroundedSchemaNode "drink_water") (VariableNode "$var_water") )
         GetWaterGoal
     )
 )
 
-(add_rule (stv 1.0 1.0) GetPeePlaceGoal (add_action "random_search")
+(add_rule (stv 1.0 1.0) GetPeePlaceGoal 
+    (add_action (GroundedSchemaNode "random_search") )
     NULL_PRECONDITION
 )
 
-(add_rule (stv 1.0 1.0) GetPooPlaceGoal (add_action "random_search")
+(add_rule (stv 1.0 1.0) GetPooPlaceGoal 
+    (add_action (GroundedSchemaNode "random_search") )
     NULL_PRECONDITION
 )
 
@@ -624,7 +641,8 @@
 ; Rules related to AffiliationDemandGoal
 ;
 
-(add_rule (stv 1.0 1.0) AffiliationDemandGoal (add_action "goto_obj" OWNER_HANDLE (NumberNode "2") )
+(add_rule (stv 1.0 1.0) AffiliationDemandGoal 
+    (add_action (GroundedSchemaNode "goto_obj") OWNER_HANDLE (NumberNode "2") )
     NULL_PRECONDITION
 )
 
@@ -650,7 +668,7 @@
     )   
 
     (add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
-              (add_action "play_without_grab_and_drop" (VariableNode "$var_near_object") )
+              (add_action (GroundedSchemaNode "play_without_grab_and_drop") (VariableNode "$var_near_object") )
               GetNearObjectGoal
     )
 )
@@ -661,16 +679,18 @@
     )     
 
     (add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
-              (add_action "play_with_grab_and_drop" (VariableNode "$var_near_pickupable_object") )
+              (add_action (GroundedSchemaNode "play_with_grab_and_drop") (VariableNode "$var_near_pickupable_object") )
               GetNearPickupableObjectGoal 
     ) 
 )
 
-(add_rule (stv 1.0 1.0) GetNearObjectGoal (add_action "random_search")
+(add_rule (stv 1.0 1.0) GetNearObjectGoal 
+    (add_action (GroundedSchemaNode "random_search") )
     NULL_PRECONDITION
 )
 
-(add_rule (stv 1.0 1.0) GetNearPickupableObjectGoal (add_action "random_search")
+(add_rule (stv 1.0 1.0) GetNearPickupableObjectGoal 
+    (add_action (GroundedSchemaNode "random_search") )
     NULL_PRECONDITION
 )
 
@@ -679,7 +699,8 @@
 ; Rules related to CompetenceDemandGoal
 ;
 
-(add_rule (cog-new-stv 1.0 1.0) CompetenceDemandGoal (add_action "random_simple_action")
+(add_rule (cog-new-stv 1.0 1.0) CompetenceDemandGoal 
+    (add_action (GroundedSchemaNode "random_simple_action") )
     NULL_PRECONDITION 
 )
 
