@@ -180,8 +180,11 @@ void Pet::initTraitsAndFeelings()
 
     std::ifstream fin;
     if (fileExists(name.str().c_str())) {
-        fin.open(name.str().c_str(), std::ios_base::in);
-    } else {
+        fin.open(name.str().c_str(), std::ios_base::in); 
+    } 
+    /**
+     // TODO: disable traits file for the moment, because we've removed these lua files
+    else {
         logger().error("Pet - File does not exist '%s'.", name.str().c_str());
         name.str(std::string());
         name << boost::format( traitsFilenameMask ) % this->agentType %
@@ -193,6 +196,7 @@ void Pet::initTraitsAndFeelings()
             logger().error("Pet - File does not exist '%s'.",
                     name.str().c_str()); }
     }
+    */
 
     if (fin.is_open()) {
         while (!fin.eof()) {
