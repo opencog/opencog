@@ -18,13 +18,10 @@
 ;
 ; ImplicationLink
 ;     AndLink
-;         EvaluationLink
-;             SpeechActTriggerNode  "truth_value_answer_trigger"
-;             DialogNode  "dialog_history"
-;         ExecutionOutputLink
-;             SpeechActSchemaNode  "truth_value_answer_reponser"
-;             DialogNode  "dialog_history"
-;             UtteranceNode  "utterance_sentences"
+;         Context
+;         ExecutionLink
+;             SpeechActSchemaNode "truth_value_answer_reponser"
+;             ListLink
 ;     EvaluationLink
 ;         PredicateNode  "goal_name"
 ;         ListLink  (empty link)
@@ -135,48 +132,6 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Return a BindLink used by pattern matcher to search a ReferenceLink
-; containing the given node and a ListLink 
-; 
-; The format of the structure being searched is as follows:
-;
-; ReferenceLink
-;     first_node
-;     ListLink
-;
-
-(define (find_reference_link first_node)
-    (BindLink
-        (ListLink
-            (TypedVariableLink
-                (VariableNode "$var_list_link_type") 
-                (VariableTypeNode "ListLink") 
-            )
-        ) 
-        
-        (ImplicationLink
-                ; Pattern to be searched
-                (ReferenceLink
-                    first_node
-                    (VariableNode "$var_list_link_type")
-                ) 
-
-                ; Return two values encapsulated by a ListLink
-                (ListLink
-                    (ReferenceLink
-                        first_node    
-                        (VariableNode "$var_list_link_type")
-                    )
-
-                    (VariableNode "$var_list_link_type")
-                )
-
-        ); ImplicationLink
-    ); BindLink
-); define
-
-;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-;
 ; Append a bunch of sentence nodes to the end of the dialog history
 ;
 ; Return the created ReferenceLink or an empty list if fails
@@ -195,83 +150,38 @@
 
 (define (update_dialog_node dialog_node_name . sentences)
     (let* ( (dialog_node (cog-node 'DialogNode dialog_node_name) )
-            (find_reference_link_for_dialog_node (find_reference_link dialog_node) )
-            (query_result_list_link (cog-bind find_reference_link_for_dialog_node) )
-            (query_result (cog-outgoing-set query_result_list_link) )
-            (old_reference_link (list) )
-            (old_list_link (list) )
-            (old_sentence_nodes (list) )
-            (new_reference_link (list) )
-            (sentence_handle (list) )
+            (old_list_link (get_reference dialog_node) )
+            (old_sentence_nodes_list (list) )
           )
 
-          ; Delete the ListLink of query, otherwise old_reference_link and 
-          ; old_list_link would never be deleted, since they are contained 
-          ; within this ListLink
-          (cog-delete-recursive query_result_list_link) 
-
-          (if (equal? (length query_result) 1)
-      
-              ; If success to get the single ReferenceLink of the DialogNode
-              (begin
-                  (set! query_result_list_link (car query_result) )
-                  (set! query_result (cog-outgoing-set query_result_list_link) )
-                  (cog-delete-recursive query_result_list_link)
-      
-                  (set! old_reference_link (list-ref query_result 0) )
-                  (set! old_list_link (list-ref query_result 1) )
-                  (set! old_sentence_nodes (cog-outgoing-set old_list_link) )
-
-                  ; Delete the old ReferenceLink and ListLink
-                  ; Try to avoid using cog-delete-recursive, unless you know 
-                  ; the Atoms are definitely not used by other Links 
-                  (cog-delete old_reference_link)
-                  (cog-delete old_list_link)
-
-                  ; Create new ListLink and ReferenceLink
-                  (set! new_reference_link
-                      (ReferenceLink (stv 1.0 1.0)
-                          dialog_node 
-      
-                          (apply cog-new-link
-                              (append
-                                  (list 'ListLink) 
-                                  old_sentence_nodes
-                                  ; Process the new sentences
-                                  (map-in-order 
-                                      (lambda (sentence)
-                                          (if (cog-atom? sentence)
-                                              (set! sentence_handle sentence) 
-                                              (set! sentence_handle
-                                                  (SentenceNode sentence)
-                                              )    
-                                          )
-                                          ; Return the handle of SentenceNode
-                                          sentence_handle
-                                      ); lambda 
-                                     
-                                      sentences
-                                  ); map-in-order
-                              )
-                          ); apply 
-                     ); ReferenceLink
-                  )
-      
-              ); begin
-      
-              ; If get none or more than one ReferenceLink of the DialogNode
-              (print_debug_info INFO_TYPE_FAIL "update_dialog_node"
-                  (string-append "The number of ReferenceLink containing the " 
-                                 " DialogNode named: " dialog_node_name 
-                                 " should be exactly one. " 
-                                 "But got " 
-                                 (number->string (length query_result) )
-                  )
+          (if (not (null? old_list_link) )
+              (set! old_sentence_nodes_list 
+                    (cog-outgoing-set old_list_link)
               )
-          ); if
-          
-          ; Return the newly created ReferenceLink containing the DialogNode
-          new_reference_link
+          )
+
+          (update_reference_link
+              dialog_node 
+
+              (apply cog-new-link
+                  (append
+                      (list 'ListLink) 
+                      old_sentence_nodes_list
+                      ; Process the new sentences
+                      (map-in-order 
+                          (lambda (sentence)
+                              (if (cog-atom? sentence)
+                                  sentence 
+                                  (SentenceNode sentence)
+                              )
+                          ); lambda 
+                         
+                          sentences
+                      ); map-in-order
+                  )
+              ); apply 
+         ); ReferenceLink
+
     ); let*
 ); define
 
@@ -296,88 +206,47 @@
 
 (define (update_utterance_node utterance_node_name . sentences)
     (let* ( (utterance_node (cog-node 'UtteranceNode utterance_node_name) )
-            (find_reference_link_for_utterance_node (find_reference_link utterance_node) )
-            (query_result_list_link (cog-bind find_reference_link_for_utterance_node) )
-            (query_result (cog-outgoing-set query_result_list_link) )
-            (old_reference_link (list) )
-            (old_list_link (list) )
-            (old_sentence_nodes (list) )
-            (new_reference_link (list) )
-            (sentence_handle (list) )
+            (old_reference_link (get_reference_link utterance_node) )
+            (old_list_link (list-ref (cog-outgoing-set old_reference_link) 1) )
+            (old_sentence_nodes_list (list) )
           )
 
-          ; Delete the ListLink of query, otherwise old_reference_link and 
-          ; old_list_link would never be deleted, since they are contained 
-          ; within this ListLink
-          (cog-delete-recursive query_result_list_link) 
-
-          (if (equal? (length query_result) 1)
-      
-              ; If success to get the single ReferenceLink of the UtteranceNode
-              (begin
-
-                  (set! query_result_list_link (car query_result) )
-                  (set! query_result (cog-outgoing-set query_result_list_link) )
-                  (cog-delete-recursive query_result_list_link)
-      
-                  (set! old_reference_link (list-ref query_result 0) )
-                  (set! old_list_link (list-ref query_result 1) )
-                  (set! old_sentence_nodes (cog-outgoing-set old_list_link) )
-
-                  ; Delete the old ReferenceLink and ListLink
-                  ; Try to avoid using cog-delete-recursive, unless you know 
-                  ; the Atoms are definitely not used by other Links 
-                  (cog-delete old_reference_link)
-                  (cog-delete old_list_link)
-
-                  ; Append the old utterance sentences to the end of dialog history
-                  (apply update_dialog_node "dialog_history" old_sentence_nodes)
-
-                  ; Create new ListLink and ReferenceLink
-                  (set! new_reference_link
-                      (ReferenceLink (stv 1.0 1.0)
-                          utterance_node 
-      
-                          (apply cog-new-link
-                              (append
-                                  (list 'ListLink) 
-                                  ; Process the new sentences
-                                  (map-in-order 
-                                      (lambda (sentence)
-                                          (if (cog-atom? sentence)
-                                              (set! sentence_handle sentence) 
-                                              (set! sentence_handle
-                                                  (SentenceNode sentence)
-                                              )    
-                                          )
-                                          ; Return the handle of SentenceNode
-                                          sentence_handle
-                                      ); lambda 
-                                     
-                                      sentences
-                                  ); map-in-order
-                              )
-                          ); apply 
-
-                     ); ReferenceLink
-                  )
-      
-              ); begin
-      
-              ; If get none or more than one ReferenceLink of the UtteranceNode
-              (print_debug_info INFO_TYPE_FAIL "update_utterance_node"
-                  (string-append "The number of ReferenceLink containing the " 
-                                 " UtteranceNode named: " utterance_node_name 
-                                 " should be exactly one. " 
-                                 "But got " 
-                                 (number->string (length query_result) )
-                  )
+          (if (not (null? old_list_link) )
+              (set! old_sentence_nodes_list 
+                    (cog-outgoing-set old_list_link)
               )
-          ); if
-          
-          ; Return the newly created ReferenceLink containing the UtteranceNode
-          new_reference_link
+          )
+
+          (apply update_dialog_node 
+              (append (list "dialog_history") old_sentence_nodes_list) 
+          )
+
+          (cog-delete old_reference_link)
+
+          (update_reference_link
+              utterance_node 
+
+              (apply cog-new-link
+                  (append
+                      (list 'ListLink) 
+                      ; Process the new sentences
+                      (map-in-order 
+                          (lambda (sentence)
+                              (if (cog-atom? sentence)
+                                  sentence
+                                  (SentenceNode sentence)
+                              )
+                          ); lambda 
+                         
+                          sentences
+                      ); map-in-order
+                  )
+              ); apply 
+
+         ); ReferenceLink
+
     ); let*
+
 ); define
 
 ;******************************************************************************
@@ -394,7 +263,4 @@
     (UtteranceNode "utterance_sentences")
     (ListLink)
 )
-
-
-
 

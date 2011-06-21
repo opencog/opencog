@@ -233,50 +233,97 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
     // Variables used by combo interpreter
     std::vector <combo::vertex> schemaArguments;
 
+    // Get Action type
+    Type actionType = atomSpace.getType(
+                          atomSpace.getOutgoing(hActionExecutionLink, 0)
+                                       );     
+
     // Get Action name
-    std::string actionName = atomSpace.getName( atomSpace.getOutgoing(hActionExecutionLink, 0)
+    std::string actionName = atomSpace.getName( 
+                                 atomSpace.getOutgoing(hActionExecutionLink, 0)
                                               );
-    // Get combo arguments for Action
-    Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments
 
-    // Process the arguments according to its type
-    foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
+    if (actionType == SPEECH_ACT_SCHEMA_NODE) {
+#if HAVE_GUILE    
+        // Initialize scheme evaluator
+        SchemeEval & evaluator = SchemeEval::instance();    
+        std::string scheme_expression, scheme_return_value;
 
-        Type argumentType = atomSpace.getType(hArgument);
+        scheme_expression = "( " + actionName + " )";
 
-        if (argumentType == NUMBER_NODE) {
-            schemaArguments.push_back(combo::contin_t(
-                                          boost::lexical_cast<combo::contin_t>(atomSpace.getName(hArgument)
-                                                                              )
-                                                     ) 
-                                     );
+        // Run the speech act schema to generate answers, which would be stored in 
+        //
+        // ReferenceLink
+        //     UtteranceNode "utterance_sentences"
+        //     ListLink
+        //         SentenceNode ...
+        //         ...
+        //
+        scheme_return_value = evaluator.eval(scheme_expression);
+
+        if ( evaluator.eval_error() ) {
+            logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
+                             __FUNCTION__, 
+                             scheme_expression.c_str() 
+                          );
+
+            return; 
         }
-        else {
-            schemaArguments.push_back( atomSpace.getName(hArgument) );
-        }
-    }// foreach
 
-    // Run the Procedure of the Action
-    //
-    // We will not check the state of the execution of the Action here. Because it may take some time to finish it. 
-    // Instead, we will check the result of the execution within 'run' method during next "cognitive cycle". 
-    //
-    // There are three kinds of results: success, fail and time out (defined by 'PROCEDURE_EXECUTION_TIMEOUT')
-    //
-    // TODO: Before running the combo procedure, check the number of arguments the procedure needed and it actually got
-    //
-    // Reference: "SchemaRunner.cc" line 264-286
-    //
-    const Procedure::GeneralProcedure & procedure = procedureRepository.get(actionName);
+        logger().debug( "PsiActionSelectionAgent::%s - generate answers successfully by SpeechActSchema: %s [cycle = %d]", 
+                        __FUNCTION__, 
+                        actionName.c_str(), 
+                        this->cycleCount
+                      );
 
-    this->currentSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
+        // TODO call 'say' combo function
+        
+#endif // HAVE_GUILE    
+    }
+    else {
+        // Get combo arguments for Action
+        Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments
 
-    logger().debug( "PsiActionSelectionAgent::%s - running action: %s [schemaId = %d, cycle = %d]",
-                    __FUNCTION__,
-                    procedure.getName().c_str(), 
-                    this->currentSchemaId,
-                    this->cycleCount
-                  );
+        // Process the arguments according to its type
+        foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
+
+            Type argumentType = atomSpace.getType(hArgument);
+
+            if (argumentType == NUMBER_NODE) {
+                schemaArguments.push_back(combo::contin_t(
+                                              boost::lexical_cast<combo::contin_t>(atomSpace.getName(hArgument)
+                                                                                  )
+                                                         ) 
+                                         );
+            }
+            else {
+                schemaArguments.push_back( atomSpace.getName(hArgument) );
+            }
+        }// foreach
+
+        // Run the Procedure of the Action
+        //
+        // We will not check the state of the execution of the Action here. Because it may take some time to finish it. 
+        // Instead, we will check the result of the execution within 'run' method during next "cognitive cycle". 
+        //
+        // There are three kinds of results: success, fail and time out (defined by 'PROCEDURE_EXECUTION_TIMEOUT')
+        //
+        // TODO: Before running the combo procedure, check the number of arguments the procedure needed and it actually got
+        //
+        // Reference: "SchemaRunner.cc" line 264-286
+        //
+        const Procedure::GeneralProcedure & procedure = procedureRepository.get(actionName);
+
+        this->currentSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
+
+        logger().debug( "PsiActionSelectionAgent::%s - running action: %s [schemaId = %d, cycle = %d]",
+                        __FUNCTION__,
+                        procedure.getName().c_str(), 
+                        this->currentSchemaId,
+                        this->cycleCount
+                      );
+
+    } // if (actionType == SPEECH_ACT_SCHEMA_NODE)
 }
 
 void PsiActionSelectionAgent::run(opencog::CogServer * server)

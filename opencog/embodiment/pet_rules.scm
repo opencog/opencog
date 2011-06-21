@@ -503,10 +503,10 @@
 ;
 
 (define GetFoodGoal
-    (AndLink 
-        (add_goal (PredicateNode "is_editable") (VariableNode "$var_food") ) 
-        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_food") )
-    )    
+;    (AndLink 
+        (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+;        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_food") )
+;    )    
 )
 
 (ForAllLink

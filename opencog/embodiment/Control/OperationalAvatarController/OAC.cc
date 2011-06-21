@@ -88,13 +88,13 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     this->petMessageSender = new PetMessageSender(&(getNetworkElement()));
 
     // load pet
-    if (fileExists(getPath(petId, config().get("PET_DUMP")).c_str())) {
-        loadPet(petId);
-    } else {
+//    if (fileExists(getPath(petId, config().get("PET_DUMP")).c_str())) {
+//        loadPet(petId);
+//    } else {
         this->pet = new Pet(petId, config().get("UNKNOWN_PET_NAME"),
                             aType, agentTraits, ownerId,
                             atomSpace, petMessageSender);
-    }
+//    }
 
     this->pai = new PerceptionActionInterface::PAI(*atomSpace, *planSender, *pet);
 
@@ -106,9 +106,9 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     // adds all savable repositories for further calls to save/load methods.
     savingLoading.addSavableRepository(procedureRepository);
 
-    if (fileExists(getPath(petId, config().get("ATOM_SPACE_DUMP")).c_str())) {
-        loadAtomSpace(petId);
-    } else {
+//    if (fileExists(getPath(petId, config().get("ATOM_SPACE_DUMP")).c_str())) {
+//        loadAtomSpace(petId);
+//    } else {
         pet->initTraitsAndFeelings();
 
         logger().info( "OAC - Loading initial Combo stdlib file '%s', ActionSchemataPreconditions '%s'",
@@ -139,7 +139,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         logger().info(
                      "OAC - RulesActionSchemata combo functions loaded.");
 
-    }// if
+//    }// if
 
     // warning: it must be called after register the agent and it's owner nodes
 //    this->ruleEngine = new RuleEngine( this, petId );
@@ -389,10 +389,6 @@ int OAC::addRulesToAtomSpace()
                         psi_rules_file_name.c_str() 
                       );
 
-/**    
-    // TODO: Disable dialog_system for the moment, because the 'find_reference_link'
-    //       function conflicts with the version in 'psi_util.scm'
-
     // Load the dialog system rules file, including triggers, responsers, and rules 
     std::string dialog_system_rules_file_name = "dialog_system.scm"; 
 
@@ -406,7 +402,7 @@ int OAC::addRulesToAtomSpace()
                          __FUNCTION__, 
                         dialog_system_rules_file_name.c_str() 
                       );
-*/
+
     return 0;
 }
 
