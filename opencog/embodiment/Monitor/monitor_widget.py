@@ -20,7 +20,7 @@ import json
 from common import *
 
 import matplotlib as mpl
-mpl.rcParams['lines.linewidth'] = 0.5 
+mpl.rcParams['lines.linewidth'] = 1.0
 mpl.rcParams['font.size'] = 8.0
 mpl.rcParams['axes.titlesize'] = 'large'
 mpl.rcParams['legend.fancybox'] = True
@@ -62,7 +62,7 @@ class MonitorWidget(FigureCanvas):
         self.max_data_len = 50
         # timestamps can be erratic, so we can't assume they'll be
         # evenly spaced
-        self.max_time_period = 2000
+        self.max_time_period = 30000
         self.has_initialized = False
 
         # expected format for data to be plotted is:
