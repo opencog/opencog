@@ -1,5 +1,6 @@
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
 import opencog.cogserver
+from tree import *
 from fishgram import *
 
 # to debug within the cogserver, try these, inside the relevant function:
@@ -45,24 +46,19 @@ class ForestExtractor:
         if self.is_object(atom):
             objects.append(atom)
             self.i+=1
-            return self.i-1
+            return tree(self.i-1)
         elif atom.is_node():
-            return atom
+            return tree(atom)
         else:
-            tmp = [atom.type_name]
-            for x in atom.out:
-                tmp.append(self.extractTree(x,  objects))
-            return tuple(tmp)
+            args = [self.extractTree(x,  objects) for x in atom.out]
+            return tree(atom, args)
             
     def atomToTree(self,  atom):
         if atom.is_node():
-            return atom
+            return tree(atom)
         else:
-            tmp = [atom.type_name]
-            for x in atom.out:
-                tmp.append(self.atomToTree(x,  objects))
-            return tuple(tmp)
-
+            args = [self.extractTree(x,  objects) for x in atom.out]
+            return tree(atom.t, args)
 
     def extractForest(self):
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
@@ -74,6 +70,9 @@ class ForestExtractor:
             self.i = 0
             tree = self.extractTree(link, objects)
             objects = tuple(objects)
+            
+            #print tree,  [str(o) for o in objects]
+            
             # policy - throw out trees with no objects
             if len(objects):
                 self.all_trees.append(tree)
@@ -110,26 +109,26 @@ class ForestExtractor:
                     self.incoming[obj][size][slot] = []
                 self.incoming[obj][size][slot].append(tree_id)
 
-    def tree_to_string(self,  tree):
-
-        def helper(treenode):            
-            if isinstance(treenode ,  tuple):
-                ret = str(treenode[0])+'('
-                ret+= ' '.join([helper(x) for x in treenode[1:]])
-                ret+= ')'
-                return ret
-            elif isinstance(treenode,  int):
-                return str(treenode)
-            else:
-                return treenode.name+':'+treenode.type_name
-        
-        ret = helper(tree)
-        # haxx - because SUBDUE allocates a buffer of size 256!
-        ret = ret[:200]
-        return ret
+#    def tree_to_string(self,  tree):
+#
+#        def helper(treenode):            
+#            if isinstance(treenode ,  tuple):
+#                ret = str(treenode[0])+'('
+#                ret+= ' '.join([helper(x) for x in treenode[1:]])
+#                ret+= ')'
+#                return ret
+#            elif isinstance(treenode,  int):
+#                return str(treenode)
+#            else:
+#                return treenode.name+':'+treenode.type_name
+#        
+#        ret = helper(tree)
+#        # haxx - because SUBDUE allocates a buffer of size 256!
+#        ret = ret[:200]
+#        return ret
 
     def output_tree(self, atom,  tree,  bindings):
-        vertex_name = self.tree_to_string(tree)
+        vertex_name = str(tree)
         
         # policy
         if self.compact_binary_links and len(bindings) == 2:

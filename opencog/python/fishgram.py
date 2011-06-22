@@ -1,8 +1,8 @@
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
+from tree import *
 from adaptors import *
 
 from itertools import *
-from copy import copy, deepcopy
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -42,13 +42,22 @@ class Fishgram:
         all_bindinglists = [(obj, ) for obj in self.forest.all_objects]
         prev_layer = [((), all_bindinglists, )]
         
-        while len(prev_layer) > 0:
-            print "\x1B[1;32mPrevious layer length:",  len(prev_layer), '\x1B[0m'
+        while len(prev_layer) > 0:            
             for prev_conj in prev_layer:
                 new_layer = self.extend(prev_conj)
 #                for conj, bindingsets in new_layer:
 #                    print self.conjunction_to_string(conj), len(bindingsets)
+                pruned = len(new_layer)
                 new_layer = self.prune_frequency(new_layer)
+                pruned-= len(new_layer)
+                
+                if len(new_layer):
+                    print new_layer[0][0]
+                    conj_length = len(new_layer[0][0])
+                else:
+                    conj_length = -1
+                assert all([ len(conj) == conj_length for (conj, embs) in new_layer ])
+                print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
                 prev_layer = new_layer
                 all_conjs.append(new_layer)
         return all_conjs
@@ -80,6 +89,8 @@ class Fishgram:
                             extension_tree_ids.add(tree_id)
                             embeddings[tree_id] = emb
 
+        skipped = 0
+
         for tree_id in extension_tree_ids:            
             # Using the particular tree-instance, find its outgoing set
             bindings = self.forest.bindings[tree_id]
@@ -107,19 +118,28 @@ class Fishgram:
                 bound_tree = subst(s, tree)
 
                 # Add this embedding for this bound tree.
-                # If the bound tree was already at a previous place in the conjunction, then don't include it again!
-                # (This check could be avoided, as well as this tree, by only processing links that haven't been processed
-                # yet.)
                 # Bound trees contain variable numbers = the numbers inside the fragment                            
-                #if bound_tree not in set(prev_conj): # set is created just so we can use hash instead of equality
-                if self.after_conj(bound_tree,  prev_conj):
+                if bound_tree not in prev_conj:
+                #if self.after_conj(bound_tree,  prev_conj):
                     new_conj = prev_conj+(bound_tree,)
-                    if new_conj not in new_layer:
-                        new_layer[new_conj] = []
-                    new_embedding = tuple(new_embedding)
-                    new_layer[new_conj].append(new_embedding)
-                    #print self.conjunction_to_string(new_conj), ":", len(new_layer[new_conj]), "so far"
+                    # Sort the bound trees in the conjunction. So e.g.  ((TreeB 1 2) (TreeA 1 3))  becomes  ((TreeA 1 3) (TreeB 1 2))
+                    # This ensures that only one ordering is produced (out of the many possible orderings).
+                    # If we assume breadth-first search it's possible to just do it here, because all the conjunctions of the same length
+                    # are produced at the same time.
+                    #import timeit; timeit.Timer('new_conj = tuple(sorted(new_conj))').timeit(1)
+                    sc = tuple(sorted(new_conj))
+                    #if sc != new_conj: print self.conjunction_to_string(new_conj), "=>", self.conjunction_to_string(sc)                    
 
+                    if sc == new_conj:
+                        if sc not in new_layer:
+                            new_layer[sc] = []
+                        new_embedding = tuple(new_embedding)
+                        new_layer[sc].append(new_embedding)
+                        #print self.conjunction_to_string(new_conj), ":", len(new_layer[new_conj]), "so far"
+                    else:
+                        skipped+= 1
+
+        print "[skipped", skipped, "conjunction-embeddings that were only reorderings]", 
         return new_layer.items()
 #        # Can't just use new_layer.items() because we want one entry for each conjunction (plus all of its embeddings)
 #        return [(conj, new_layer[conj]) for conj in new_layer]
@@ -129,7 +149,8 @@ class Fishgram:
                     if len(bindingsets) > self.min_embeddings]
 
     def after(self, tree1, tree2):
-        # Simply use Python's tuple-comparison mechanism. Ideally the order would be based on which
+        # Simply use Python's tuple-comparison mechanism (tree automatically converts to a suitable tuple for comparisons).
+        # Ideally the order would be based on which
         # (unbound) tree is used and then on the bindings, but in the current code those will be mixed up (due to being
         # at a mix of levels in the bound tree).
         return tree1 > tree2
@@ -344,157 +365,4 @@ class Fishgram:
 #        return jointtree_embeddings_for_size
     
     def conjunction_to_string(self,  conjunction):
-        return str(tuple([self.forest.tree_to_string(tree) for tree in conjunction]))
-
-# Further code adapted from AIMA-Python under the MIT License (see http://code.google.com/p/aima-python/)
-def unify(x, y, s):
-    """Unify expressions x,y with substitution s; return a substitution that
-    would make x,y equal, or None if x,y can not unify. x and y can be
-    variables (e.g. 1, Nodes, or tuples of the form ('link type name', arg0, arg1...)
-    where arg0 and arg1 are any of the above. NOTE: If you unify two Links, they 
-    must both be in tuple-tree format, and their variables must be standardized apart.
-    >>> ppsubst(unify(x + y, y + C, {}))
-    {x: y, y: C}
-    """
-    if s == None:
-        return None
-    elif is_variable(x):
-        return unify_var(x, y, s)
-    elif is_variable(y):
-        return unify_var(y, x, s)
-    elif isinstance(x,  tuple) and isinstance(y,  tuple):
-        if x ==  y == ():
-            return s
-        if x == () or y == ():
-            # One is empty and the other is not.
-            return None
-        return unify(x[1:],  y[1:], unify(x[0],  y[0],  s))
-    elif type(x) != type(y):
-        return None
-    elif x == y:
-        return s
-#    elif isinstance(x, Expr) and isinstance(y, Expr):
-#        return unify(x.args, y.args, unify(x.op, y.op, s))
-#    elif isinstance(x, str) or isinstance(y, str) or not x or not y:
-#        # orig. return if_(x == y, s, None) but we already know x != y
-#        return None
-    else:
-        return None
-
-def is_variable(x):
-    "A variable is an int starting from 0"
-    return isinstance(x, int)
-
-def unify_var(var, x, s):
-    if var in s:
-        return unify(s[var], x, s)
-    elif occur_check(var, x, s):
-        return None
-    else:
-        return extend(s, var, x)
-
-def occur_check(var, x, s):
-    """Return true if variable var occurs anywhere in x
-    (or in subst(s, x), if s has a binding for x)."""
-
-    if is_variable(x) and var == x:
-        return True
-    elif is_variable(x) and s.has_key(x):
-        return occur_check(var, s[x], s) # fixed
-    # What else might x be?  A tuple (subtree), a type, an Atom?
-    elif isinstance(x, tuple) and len(x):
-        # Compare link type and arguments
-        return (occur_check(var, x[0], s) or # Not sure that's necessary
-                occur_check(var, x[1:], s))
-    else:
-        # A variable cannot occur in a string
-        return False
-
-def extend(s, var, val):
-    """Copy the substitution s and extend it by setting var to val;
-    return copy.
-    
-    >>> ppsubst(extend({x: 1}, y, 2))
-    {x: 1, y: 2}
-    """
-    s2 = s.copy()
-    s2[var] = val
-    return s2
-    
-def subst(s, x):
-    """Substitute the substitution s into the expression x.
-    >>> subst({x: 42, y:0}, F(x) + y)
-    (F(42) + 0)
-    """
-    if is_variable(x): 
-        return s.get(x, x)
-    elif not isinstance(x,  tuple): 
-        return x
-    else: 
-        return tuple([x[0]]+ [subst(s, arg) for arg in x[1:]])
-
-def standardize_apart(tree, dic={}):
-    """Replace all the variables in tree with new variables.
-    >>> standardize_apart(expr('F(a, b, c) & G(c, A, 23)'))
-    (F(v_1, v_2, v_3) & G(v_3, A, 23))
-    >>> is_variable(standardize_apart(expr('x')))
-    True
-    """
-    if is_variable(tree): 
-        if tree in dic:
-            return dic[tree]
-        else:
-            standardize_apart.counter += 1
-            v = standardize_apart.counter
-            dic[tree] = v
-            return v
-    elif not isinstance(tree, tuple):
-        return tree
-    else: 
-        return tuple([tree[0]]+
-                    [standardize_apart(a, dic) for a in tree[1:]])
-
-standardize_apart.counter = 0
-
-# These functions print their arguments in a standard order
-# to compensate for the random order in the standard representation
-
-def ppsubst(s):
-    """Print substitution s"""
-    ppdict(s)
-
-def ppdict(d):
-    """Print the dictionary d.
-    
-    Prints a string representation of the dictionary
-    with keys in sorted order according to their string
-    representation: {a: A, d: D, ...}.
-    >>> ppdict({'m': 'M', 'a': 'A', 'r': 'R', 'k': 'K'})
-    {'a': 'A', 'k': 'K', 'm': 'M', 'r': 'R'}
-    >>> ppdict({z: C, y: B, x: A})
-    {x: A, y: B, z: C}
-    """
-
-    def format(k, v):
-        return "%s: %s" % (repr(k), repr(v))
-
-    ditems = d.items()
-    ditems.sort(key=str)
-    k, v = ditems[0]
-    dpairs = format(k, v)
-    for (k, v) in ditems[1:]:
-        dpairs += (', ' + format(k, v))
-    print '{%s}' % dpairs
-
-def ppset(s):
-    """Print the set s.
-
-    >>> ppset(set(['A', 'Q', 'F', 'K', 'Y', 'B']))
-    set(['A', 'B', 'F', 'K', 'Q', 'Y'])
-    >>> ppset(set([z, y, x]))
-    set([x, y, z])
-    """
-
-    slist = list(s)
-    slist.sort(key=str)
-    print 'set(%s)' % slist
+        return str(tuple([str(tree) for tree in conjunction]))
