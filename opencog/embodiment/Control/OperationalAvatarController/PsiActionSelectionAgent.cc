@@ -325,7 +325,7 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
             tempOutgoingSet.push_back( hSpeakActionArgument ); 
             hSpeakAction = atomSpace.addLink(EXECUTION_LINK, tempOutgoingSet); 
 
-            this->temp_action_list.push_back(hSpeakAction);
+            this->temp_action_list.insert(this->temp_action_list.begin(), hSpeakAction);
 
             logger().debug( "PsiActionSelectionAgent::%s - generate say action: %s [cycle = %d]",
                             __FUNCTION__,
