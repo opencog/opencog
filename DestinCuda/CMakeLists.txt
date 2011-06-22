@@ -11,7 +11,8 @@ FIND_PACKAGE(CUDA 4.0)
 
 if(CUDA_FOUND)
     #Enable debug for CUDA and set Tesla build command
-    set(CUDA_NVCC_FLAGS -g -G -gencode arch=compute_13,code=sm_13)
+    #Change the 20 for the type of you card: (CUDA computable of 1.3 = 13)
+    set(CUDA_NVCC_FLAGS -g -G -gencode arch=compute_20,code=sm_20)
     
     #Add Pugi XML
 	add_subdirectory( pugixml )

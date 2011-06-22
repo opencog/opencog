@@ -12,6 +12,8 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <math.h>
+// CUDA Lib
+#include <curand.h>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -322,6 +324,14 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     int MaxNumberOfInputs=-1;
     int MaxNumberOfOutputs=-1;
 
+    // curandGenerator_t is a CUDA version of rand
+    // This fills the whole memory block with number between 0.0 and 1.0
+    curandGenerator_t gen;
+    curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
+    // TODO: Add seed code instead of 1
+    // This is the right place to do this saves the most time creating numbers. (Inside layer increase the time by +/- 5 times)
+    curandSetPseudoRandomGeneratorSeed( gen, 1 );
+
     // Here we put the first image into the device memory
     DataSourceForTraining.SetShiftedDeviceImage(0, SEQ[0][0], SEQ[0][1], lastLayerInputX, LastLayerInputY);
     for( int Layer=0; Layer<NumberOfLayers; Layer++ )
@@ -354,8 +364,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
             bTopNode = true;
         }
 
-        // Creation of layer and layerLatch
-        DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer]);
+        DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer], gen);
         // Assign Childeren and Parrents of nodes
         if ( NumberOfCentroids[Layer] > MaxNumberOfOutputs )
         {
@@ -366,6 +375,8 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
             MaxNumberOfInputs=InputDimensionality[Layer];
         }
     }
+    // The generator have to be destroyed after use.
+    curandDestroyGenerator( gen );
     cout << "------------------" << endl;
     return 0;
 }
@@ -739,7 +750,9 @@ int MainDestinExperiments(int argc, char* argv[])
 
 
     cout << "------------------" << endl;
+    // Run lowest layer (Kernel)
     DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage());
+
     if ( !FileExists(strDestinNetworkFileToRead) )
     {
         cout << "Destin network file " << strDestinNetworkFileToRead.c_str() << " not found!" << endl;

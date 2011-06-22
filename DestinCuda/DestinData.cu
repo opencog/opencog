@@ -128,7 +128,7 @@ void DestinData::SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShif
             {
                 for(int c=0;c<DemCol;c++)
                 {
-                    mImage[i]=mImageWithOffset[r+RowShift][c+ColShift];
+                    mImage[i]=mImageWithOffset[r+row+RowShift][c+col+ColShift];
                     i++;
                 }
             }

@@ -1,5 +1,7 @@
 #ifndef DESTIN_KERNEL_H
 #define DESTIN_KERNEL_H
+#include <cuda.h>
+#include <curand.h>
 
 class DestinKernel
 {
@@ -18,14 +20,20 @@ private:
 	int mStates;
 	int mInputDimensionlity;
 	int mDevices;
+	float mSTARVATION_COEFFICIENT;
 
 	int sizeOfLayerData;
 	int sizeOfNodeData;
+	int sizeOfNodes;
 
-	float *mLayerData;
-	float *dLayerData;
-	float *mNodeData;
-	float *dNodeData;
+	float *mCentroidVectorData;
+	float *dCentroidVectorData;
+	float *mCentroidData;
+	float *dCentroidData;
+	float *mCentroidStarvation;
+	float *dCentroidStarvation;
+	int *mWinningCentroids;
+	int *dWinningCentroids;
         
 public:
 	DestinKernel( void );
@@ -36,7 +44,7 @@ public:
 	 * Create a DeSTIN kernel here the layer and node and clustering is put all together.
 	 *
 	 */
-	void Create( int ID, int Rows, int Cols, int States, int InputDimensionlity);
+	void Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, curandGenerator_t gen);
 
 	/*
 	 * Do DeSTIN is the launcher of the GPU kernel.
