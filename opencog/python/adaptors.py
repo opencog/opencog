@@ -18,7 +18,7 @@ class ForestExtractor:
         
         # policy
         # Whether to create miner-friendly output, rather than human-friendly output
-        self.miner_friendly = True
+        self.miner_friendly = False
         # Only affects output
         self.compact_binary_links = True
         
@@ -52,13 +52,6 @@ class ForestExtractor:
         else:
             args = [self.extractTree(x,  objects) for x in atom.out]
             return tree(atom, args)
-            
-    def atomToTree(self,  atom):
-        if atom.is_node():
-            return tree(atom)
-        else:
-            args = [self.extractTree(x,  objects) for x in atom.out]
-            return tree(atom.t, args)
 
     def extractForest(self):
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
@@ -151,7 +144,7 @@ class ForestExtractor:
         self.writer.stop()
 
     def is_object(self,  atom):
-        return atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode)
+        return atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode) or atom.is_a(t.ConceptNode)
         
     def object_label(self,  atom):
         return 'some_'+atom.type_name

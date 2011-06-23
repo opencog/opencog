@@ -1,15 +1,13 @@
-from opencog.atomspace import Atom
+from opencog.atomspace import Atom, get_type
 from copy import copy, deepcopy
 from functools import *
 
-def if_(cond, t, f):
-    if cond:
-        return t
-    else:
-        return f
-
 class tree:
-    def __init__(self, op, args = []):
+    def __init__(self, op, *args):
+        # Transparently allow using passing a list or using it in the more streamlined way
+        # (better for constructing trees by hand)
+        if len(args) and isinstance(args[0], list):
+            args = args[0]
         # Transparently record Links as strings rather than Handles
         if len(args):
             if isinstance(op, Atom):
@@ -65,6 +63,17 @@ def tree_from_atom(atom):
     else:
         args = [tree_from_atom(x) for x in atom.out]
         return tree(atom.type_name, args)
+
+def atom_from_tree(tree, a):
+    if tree.is_leaf():
+        # Node (simply the handle)
+        if isinstance (tree.op, Atom):
+            return tree.op
+        # Empty Link
+        # Currently still recorded as an Atom (wrong?)
+    else:
+        out = [atom_from_tree(x, a) for x in tree.args]
+        return a.add(get_type(tree.op), out=out)
 
 # Further code adapted from AIMA-Python under the MIT License (see http://code.google.com/p/aima-python/)
 def unify(x, y, s):
@@ -178,39 +187,3 @@ standardize_apart.counter = 0
 def ppsubst(s):
     """Print substitution s"""
     ppdict(s)
-
-def ppdict(d):
-    """Print the dictionary d.
-    
-    Prints a string representation of the dictionary
-    with keys in sorted order according to their string
-    representation: {a: A, d: D, ...}.
-    >>> ppdict({'m': 'M', 'a': 'A', 'r': 'R', 'k': 'K'})
-    {'a': 'A', 'k': 'K', 'm': 'M', 'r': 'R'}
-    >>> ppdict({z: C, y: B, x: A})
-    {x: A, y: B, z: C}
-    """
-
-    def format(k, v):
-        return "%s: %s" % (repr(k), repr(v))
-
-    ditems = d.items()
-    ditems.sort(key=str)
-    k, v = ditems[0]
-    dpairs = format(k, v)
-    for (k, v) in ditems[1:]:
-        dpairs += (', ' + format(k, v))
-    print '{%s}' % dpairs
-
-def ppset(s):
-    """Print the set s.
-
-    >>> ppset(set(['A', 'Q', 'F', 'K', 'Y', 'B']))
-    set(['A', 'B', 'F', 'K', 'Q', 'Y'])
-    >>> ppset(set([z, y, x]))
-    set([x, y, z])
-    """
-
-    slist = list(s)
-    slist.sort(key=str)
-    print 'set(%s)' % slist
