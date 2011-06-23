@@ -16,7 +16,9 @@ AUTOMATED_SYSTEM_TESTS          = false
 
 # Are we working with the older Multiverse or newer Unity client?
 # Note: eventually Multiverse will be deprecated as Unity integration improves
-ENABLE_UNITY_CONNECTOR          = true
+#       if you want to use unity world now, please set the PSI_DEMANDS carefully, 
+#       since many demands are not available for the moment.  
+ENABLE_UNITY_CONNECTOR          = false
 
 # IP and port used by subscribers to get messages from mind agents via ZeroMQ
 # If you want oc_workbench work in another machine other than the one running 
@@ -101,14 +103,11 @@ ROUTER_DATABASE_DIR             = /tmp/$USER/Petaverse/RouterDatabase
 #ROUTER_DATA_FILE router.dat
 
 # OpenPsi parameters
-# Updated by Zhenhua Cai, on 2011-02-07
-# TODO: This configuration file is only for debugging, 
-# once finished we should modify 'EmbodimentConfig.cc' and the main 'embodiment.config' file
-PSI_MODULATOR_UPDATERS_REPOSITORY_FILE = modulator_updaters.combo
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
-#PSI_DEMANDS = Energy, Water, Affiliation, Competence
-# Complete list of demands
+# Demands currently available in unity world
+#PSI_DEMANDS = Energy
+# Complete list of demands (all availabe in multiverse world)
 PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
 # TODO: TestEnergy is only used for debugging, remove it once finished
@@ -389,7 +388,9 @@ NLGEN_SERVER_PORT     = 5555
 NLGEN_SERVER_HOST     = localhost
 
 # Visual debugger host and port
-VISUAL_DEBUGGER_ACTIVE = true
+# Note: the socket used by visual debugger can not be destructed normally, which 
+#       would cause an error in oac destruction
+VISUAL_DEBUGGER_ACTIVE = false 
 VISUAL_DEBUGGER_HOST   = localhost
 VISUAL_DEBUGGER_PORT   = 6000
 
