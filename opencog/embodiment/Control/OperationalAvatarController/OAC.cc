@@ -584,8 +584,8 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
         return false;
     }
 
-    // message from petaverse proxy - send to PAI
-    if (msg->getFrom() == config().get("PROXY_ID")) {
+    // message that has been parsed by RelEx server
+    if(msg->getFrom() == config().get("RELEX_SERVER_ID")) {
         HandleSeq toUpdateHandles;
         result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
 
@@ -595,8 +595,37 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
             // PVP message processed, update predicates for the
             // added/updated atoms
             predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
-
             logger().debug("OAC - Message successfully  processed.");
+        }
+        return false;
+    }
+
+    // message from petaverse proxy - send to PAI
+    if (msg->getFrom() == config().get("PROXY_ID")) {
+        // @note:
+        // The message type RAW is used for unity environment to handle dialog.
+		// If you use multiverse, just ignore this.
+        if(msg->getType() == MessagingSystem::Message::RAW) {
+			// message from OC Avatar, forward it to RelEx server.
+            StringMessage rawMessage(getID(), config().get("RELEX_SERVER_ID"), msg->getPlainTextRepresentation());
+
+            logger().info("Forward raw message to RelEx server.");
+            if (!sendMessage(rawMessage)) {
+                logger().error("Could not send raw message to RelEx server!");
+            }
+        } else {
+            HandleSeq toUpdateHandles;
+            result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
+
+            if (!result) {
+                logger().error("OAC - Unable to process XML message.");
+            } else {
+                // PVP message processed, update predicates for the
+                // added/updated atoms
+                predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
+
+                logger().debug("OAC - Message successfully  processed.");
+            }
         }
         return false;
     }
