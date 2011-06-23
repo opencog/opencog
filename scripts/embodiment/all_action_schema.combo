@@ -1,3 +1,11 @@
+#
+# This file contains all the combo action schemas. However, it is neither used 
+# by multiverse nor unity. It only serves as an example of using buit-in or 
+# creating your own combo action schema. 
+# 
+# @date 2011-06-23
+#
+
 # Built-in Actions directly mapped to a schema
 #################
 

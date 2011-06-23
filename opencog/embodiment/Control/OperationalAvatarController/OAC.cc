@@ -112,7 +112,8 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 //    } else {
         pet->initTraitsAndFeelings();
 
-        logger().info( "OAC - Loading initial Combo stdlib file '%s', ActionSchemataPreconditions '%s'",
+        logger().info( "OAC::%s Loading initial Combo stdlib file '%s', ActionSchemataPreconditions '%s'",
+                       __FUNCTION__, 
                        config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
                        config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str() 
                      );
@@ -122,23 +123,31 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         if (fin.good()) {
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
-            logger().error(
-                         "OAC - Unable to load Combo stdlib.");
+            logger().error("OAC::%s Unable to load Combo stdlib.", __FUNCTION__);
         }
         fin.close();
-        logger().info(
-                     "OAC - %d Combo stdlib functions loaded.", cnt);
+        logger().info("OAC::%s %d combo stdlib functions loaded.",
+                      __FUNCTION__,  
+                      cnt
+                     );
 
-        fin.open(config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
+        std::string action_schema_name; 
+        if ( config().get_bool("ENABLE_UNITY_CONNECTOR") ) 
+            action_schema_name = "unity_action_schema.combo";
+        else
+            action_schema_name = "multiverse_action_schema.combo"; 
+
+        fin.open( action_schema_name.c_str() );
         if (fin.good()) {
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
-            logger().error(
-                         "OAC - Unable to load RulesActionSchemata combo.");
+            logger().error("OAC::%s Unable to load action schema combo.", __FUNCTION__);
         }
         fin.close();
-        logger().info(
-                     "OAC - RulesActionSchemata combo functions loaded.");
+        logger().info("OAC::%s %d action schema combo functions loaded.", 
+                      __FUNCTION__, 
+                      cnt
+                     );
 
 //    }// if
 
@@ -374,10 +383,17 @@ int OAC::addRulesToAtomSpace()
                      );
             
     // Load the psi rules file, including Modulators, DemandGoals and Rules 
-    std::string psi_rules_file_name = 
-                                ( boost::format(config().get("PSI_RULES_FILENAME_MASK")) %
-                                                                this->getPet().getType()
-                                ).str();
+    std::string psi_rules_file_name; 
+
+//    std::string psi_rules_file_name = 
+//                                ( boost::format(config().get("PSI_RULES_FILENAME_MASK")) %
+//                                                                this->getPet().getType()
+//                                ).str();
+
+    if ( config().get_bool("ENABLE_UNITY_CONNECTOR") ) 
+        psi_rules_file_name = "unity_rules.scm"; 
+    else
+        psi_rules_file_name = "multiverse_rules.scm"; 
 
     if ( load_scm_file( *(this->atomSpace), psi_rules_file_name.c_str() ) == 0  ) 
         logger().info( "OAC::%s - Loaded psi rules file: '%s'", 
@@ -390,7 +406,7 @@ int OAC::addRulesToAtomSpace()
                         psi_rules_file_name.c_str() 
                       );
 
-    // Load the dialog system rules file, including triggers, responsers, and rules 
+    // Load the dialog system rules file
     std::string dialog_system_rules_file_name = "dialog_system.scm"; 
 
     if ( load_scm_file( *(this->atomSpace), dialog_system_rules_file_name.c_str() ) == 0  ) 
@@ -402,6 +418,25 @@ int OAC::addRulesToAtomSpace()
         logger().error( "OAC::%s - Failed to load dialog system rules file: '%s'", 
                          __FUNCTION__, 
                         dialog_system_rules_file_name.c_str() 
+                      );
+
+    // Load the speech act schema file
+    std::string speech_act_schema_file_name; 
+
+    if ( config().get_bool("ENABLE_UNITY_CONNECTOR") ) 
+        speech_act_schema_file_name = "unity_speech_act_schema.scm"; 
+    else
+        speech_act_schema_file_name = "multiverse_speech_act_schema.scm"; 
+
+    if ( load_scm_file( *(this->atomSpace), speech_act_schema_file_name.c_str() ) == 0  ) 
+        logger().info( "OAC::%s - Loaded speech act schema file: '%s'", 
+                        __FUNCTION__, 
+                       speech_act_schema_file_name.c_str() 
+                     );
+    else
+        logger().error( "OAC::%s - Failed to load speech act schema file: '%s'", 
+                         __FUNCTION__, 
+                        speech_act_schema_file_name.c_str() 
                       );
 
     return 0;

@@ -1,3 +1,11 @@
+#
+# This file contains all the combo action schemas used by unity world. 
+# For a full list of available combo action schemas, please refer to file
+# all_action_schema.combo
+#
+# @date 2011-06-23
+#
+
 # Built-in Actions directly mapped to a schema
 #################
 
