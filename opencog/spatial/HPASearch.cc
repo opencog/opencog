@@ -402,7 +402,7 @@ bool HPASearch::Level::processPath( const math::Vector2& startPoint, const math:
     if ( cluster1Id == cluster2Id && cluster1NumberOfVertices == 0 ) {
         float distanceFromStartToGoal = ( startPoint - endPoint ).length( );
 
-        // 0,1% of the map width
+        // 0.1% of the map width
         float distanceTreshold = ( map->xMax( ) - map->xMin( ) ) * 0.001;
 
         if ( distanceFromStartToGoal > distanceTreshold ) {

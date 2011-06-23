@@ -34,7 +34,7 @@ namespace opencog
         /**
          * class QuadTree
          * Subdivides the grid on a quad tree and builds
-         * a graph that tepresents the free nodes of the tree
+         * a graph that represents the free nodes of the tree
          */
         class QuadTree
         {
