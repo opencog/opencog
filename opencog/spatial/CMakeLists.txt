@@ -64,6 +64,9 @@ ENDIF(TB_PRINT_NCURSES)
 ADD_LIBRARY (AStar
     AStarController
     LSMap2DSearchNode
+
+    AStar3DController
+    LSMap3DSearchNode
 )
 
 ADD_EXECUTABLE (astartest AStarTest)
@@ -94,6 +97,7 @@ ENDIF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUN
 INSTALL (FILES
     Agent.h
     AStarController.h
+    AStar3DController.h
     Entity.h
     fsa.h
     HPASearch.h
@@ -101,6 +105,7 @@ INSTALL (FILES
     LocalSpaceMap2D.h
     LocalSpaceMap2DUtil.h
     LSMap2DSearchNode.h
+    LSMap3DSearchNode.h
     MapExplorer.h
     MapExplorerServer.h
     MovableEntity.h

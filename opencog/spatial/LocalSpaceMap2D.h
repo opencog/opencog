@@ -212,6 +212,14 @@ namespace opencog
             bool gridOccupied_nonObstacle(const GridPoint& gp) const;
             bool gridOccupied_nonObstacle(unsigned int i, unsigned int j) const;
 
+            // Handle 3D information in the map
+
+            // If point "dest" is an obstacle, we can still use it in pathfinding only when its delta
+            // height with point "src" is within a specific value "delta".
+            bool edgeIllegal(const GridPoint& src, const GridPoint& dest, double delta) const;
+
+            double getMinHeightByGridPoint(const GridPoint& gp) const;
+            double getMaxHeightByGridPoint(const GridPoint& gp) const;
             //const ObjectMetaData& getMetaData(const ObjectID& id) const throw(opencog::NotFoundException);
 
             bool containsObject(const ObjectID& id) const;

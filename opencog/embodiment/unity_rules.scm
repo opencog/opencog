@@ -510,14 +510,18 @@
     )    
 )
 
+(define GotoFoodGoal
+    (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+)
+
 (ForAllLink
     (ListLink
         (VariableNode "$var_food") 
     ) 
 
     (add_rule (stv 1.0 1.0) EnergyDemandGoal 
-        (add_action (GroundedSchemaNode "eat_food") (VariableNode "$var_food") )
-        GetFoodGoal
+        (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
+        GotoFoodGoal
     )
 )    
 

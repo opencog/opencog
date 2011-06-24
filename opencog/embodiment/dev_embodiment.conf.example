@@ -284,10 +284,13 @@ NO_ACK_MESSAGES                 = true
 # Old messages exceed this limit would be discarded
 MAX_MESSAGE_QUEUE_SIZE          = 60
 
-# options(tangentbug, astar, hpa). Default is tangentbug 
+# options(tangentbug, astar, hpa, astar3d). Default is tangentbug 
 # tangengbug generates smoother paths than hpa's in Multiverse (did not try astart yet...)
-NAVIGATION_ALGORITHM		= hpa
+#  astar3d is used by Unity3D, before it is switched on by default, do not use it...
+NAVIGATION_ALGORITHM		    = hpa
 HPA_MAXIMUM_CLUSTERS	        = 1
+# 3D pathfinding, to see if next vertex is legal in height
+ASTAR3D_DELTA_HEIGHT            = 1.2
 
 # Speed used by pet walk commands. If set to a non-positive number, it generates random speed values between 0.5 and 3.5
 #PET_WALKING_SPEED              = -1.0 

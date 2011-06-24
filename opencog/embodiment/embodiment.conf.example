@@ -236,7 +236,7 @@ UNREAD_MESSAGES_CHECK_INTERVAL  = 1
 UNREAD_MESSAGES_RETRIEVAL_LIMIT = -1
 NO_ACK_MESSAGES                 = true
 
-# options(tangentbug, astar, hpa). Default is tangentbug 
+# options(tangentbug, astar, hpa, astar3d). Default is tangentbug 
 # tangengbug generates smoother paths than hpa's in Multiverse (did not try
 # astart yet...)
 NAVIGATION_ALGORITHM            = hpa

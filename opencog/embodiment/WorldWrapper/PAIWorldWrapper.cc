@@ -27,6 +27,7 @@
 #include <opencog/spatial/TangentBug.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 #include <opencog/spatial/AStarController.h>
+#include <opencog/spatial/AStar3DController.h>
 #include <opencog/atomspace/Node.h>
 #include <boost/bind.hpp>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
@@ -42,6 +43,7 @@
 
 #include <sstream>
 #include <limits>
+#include <cstdio>
 
 
 // The percentage bellow is related to the diagonal of the SpaceMap
@@ -124,6 +126,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             logger().debug("PAIWorldWrapper - goto_obj(%s, %f)",
                     target.c_str(), walkSpeed );
             if ( target == "custom_path" ) {
+                //printf("PAIWorldWrapper - target : custom_path\n");
                 std::string customWaypoints = pai.getAvatarInterface().
                     getCurrentModeHandler().getPropertyValue( "customPath" );
 
@@ -167,7 +170,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 std::vector<std::string> arguments;
                 pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "followCustomPathDone", arguments );
             } else {
-
+                //printf("PAIWorldWrapper - target : custom_object\n");
                 if ( target == "custom_object" ) {
                     target = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
                 } // if
@@ -591,6 +594,8 @@ spatial::Point PAIWorldWrapper::getValidPosition( const spatial::Point& location
 void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
         const spatial::Point& endPoint, std::vector<spatial::Point>& actions )
 {
+    struct timeval timer_start, timer_end;
+    time_t elapsed_time = 0;
     const std::string pathFindingAlgorithm =
         opencog::config().get("NAVIGATION_ALGORITHM");
 
@@ -612,6 +617,7 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
             end = correctedEndLocation;
         }
 
+        gettimeofday(&timer_start, NULL);
         if ( pathFindingAlgorithm == "astar") {
             spatial::LSMap2DSearchNode petNode = sm.snap(spatial::Point(begin.first, begin.second));
             spatial::LSMap2DSearchNode goalNode = sm.snap(spatial::Point(end.first, end.second));
@@ -624,6 +630,26 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
             //finally, run AStar
             _hasPlanFailed = (AStar.findPath() != spatial::AStarSearch<spatial::LSMap2DSearchNode>::SEARCH_STATE_SUCCEEDED);
             actions = AStar.getShortestCalculatedPath( );
+
+            logger().debug("PAIWorldWrapper - AStar result %s.",
+                    !_hasPlanFailed ? "true" : "false");
+        } else if ( pathFindingAlgorithm == "astar3d") {
+            float maxDeltaHeight = (float)opencog::config().get_double("ASTAR3D_DELTA_HEIGHT");
+
+            printf("Start A* 3D navigation. Delta height for each node: %.2f\n", maxDeltaHeight);
+            spatial::AStar3DController AStar3D;
+            SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
+            AStar3D.setMap( map );
+
+            spatial::LSMap3DSearchNode petNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(begin.first, begin.second)), maxDeltaHeight);
+            spatial::LSMap3DSearchNode goalNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(end.first, end.second)), maxDeltaHeight);
+
+            AStar3D.setStartAndGoalStates(petNode, goalNode);
+
+
+            //finally, run AStar
+            _hasPlanFailed = (AStar3D.findPath() != spatial::AStarSearch<spatial::LSMap3DSearchNode>::SEARCH_STATE_SUCCEEDED);
+            actions = AStar3D.getShortestCalculatedPath( );
 
             logger().debug("PAIWorldWrapper - AStar result %s.",
                     !_hasPlanFailed ? "true" : "false");
@@ -663,6 +689,21 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
             logger().debug("PAIWorldWrapper - TangetBug result %s.",
                          !_hasPlanFailed ? "true" : "false");
         } // else
+
+        gettimeofday(&timer_end, NULL);
+        elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                       (timer_end.tv_usec - timer_start.tv_usec);
+        /*
+        printf("PAIWorldWrapper - pathfinding [%s]: consuming %f seconds.\n",
+               pathFindingAlgorithm.c_str(),
+               1.0 * elapsed_time/1000000);
+        printf("Path found:");
+        foreach (spatial::Point& point, actions) {
+            printf("=> <%.3f, %.3f> ", point.first, point.second);
+        }
+        printf("\n");
+        */
+
     } catch ( opencog::RuntimeException& e ) {
         _hasPlanFailed = true;
     } catch ( opencog::AssertionException& e) {

@@ -480,6 +480,61 @@ bool LocalSpaceMap2D::gridOccupied_nonObstacle(unsigned int i, unsigned int j) c
     return (gridOccupied_nonObstacle(GridPoint(i, j)));
 }
 
+bool LocalSpaceMap2D::edgeIllegal(const spatial::GridPoint &src, const spatial::GridPoint &dest, double delta) const
+{
+    if (!coordinatesAreOnGrid(dest.first, dest.second)) {
+        logger().fine("LocalSpaceMap - gridIllegal(%u, %u): coordinates not on grid!", dest.first, dest.second);
+        return true;
+    }
+    bool is_obstacle = gridOccupied(dest.first, dest.second);
+    if (!is_obstacle) {
+        // None obstacle, OK
+        return false;
+    } else {
+        // Get the maximum height of src point
+        double srcHeight = getMaxHeightByGridPoint(src);
+        // Get the minimum height of dest point
+        double destHeight = getMinHeightByGridPoint(dest);
+
+        if (destHeight - srcHeight <= delta)
+            return false;
+
+        return true;
+    }
+}
+
+double LocalSpaceMap2D::getMinHeightByGridPoint(const GridPoint &gp) const
+{
+    if (!gridOccupied(gp))
+        return 0.0;
+    // use HUGE_DISTANCE here to represent a huge height...
+    double height = HUGE_DISTANCE;
+    const spatial::ObjectIDSet& objIdSet = _grid.at(gp);
+    // Get the minimum height of the given grid point
+    foreach (const char* internalId, objIdSet) {
+        spatial::ObjectID entityId = spatial::ObjectID(internalId);
+        const EntityPtr& entityPtr = getEntity(entityId);
+        if (entityPtr->getHeight() < height)
+            height = entityPtr->getHeight();
+    }
+    return height;
+}
+
+double LocalSpaceMap2D::getMaxHeightByGridPoint(const GridPoint &gp) const
+{
+    if (!gridOccupied(gp))
+        return 0.0;
+    double height = 0.0;
+    const spatial::ObjectIDSet& objIdSet = _grid.at(gp);
+    foreach (const char* internalId, objIdSet) {
+        spatial::ObjectID entityId = spatial::ObjectID(internalId);
+        const EntityPtr& entityPtr = getEntity(entityId);
+        if (entityPtr->getHeight() > height)
+            height = entityPtr->getHeight();
+    }
+    return height;
+}
+
 bool LocalSpaceMap2D::containsObject(const spatial::ObjectID& id) const
 {
     try {
