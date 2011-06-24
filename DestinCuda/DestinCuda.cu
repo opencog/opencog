@@ -29,7 +29,13 @@
 using namespace std;
 
 // TODO: This main file is still pretty messy.
-
+/*
+ * It's almost a copy of the original main of DeSTIN where the custom file reader is replaced by a XML reader(pugixml)
+ * Because of the quite basic understanding of the code and a more overall understanding of DeSTIN there are a lot of variables not been used.
+ * Also cause there is still work in progress.
+ * It still might be a idea to just replace the command line complete and do everything from the configuration
+ * This will save a lot of code to analyze the input arguments
+ */
 void PrintHelp()
 {
     // ***************************
@@ -750,8 +756,16 @@ int MainDestinExperiments(int argc, char* argv[])
 
 
     cout << "------------------" << endl;
+    cout << "Test run Destin" << endl;
     // Run lowest layer (Kernel)
+    time_t start = time(NULL);
     DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage());
+    for(int i=1;i<NumberOfLayers;i++)
+    {
+        DKernel[i].DoDestin(DKernel[i-1].GetDevicePointerOutput());
+    }
+    time_t stop = time(NULL);
+    cout << "Procces 1 image true all layers: " << stop-start << " seconds" << endl;
 
     if ( !FileExists(strDestinNetworkFileToRead) )
     {

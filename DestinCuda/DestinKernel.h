@@ -3,6 +3,15 @@
 #include <cuda.h>
 #include <curand.h>
 
+/*
+ * DeSTIN Kernel
+ * This now the before layer,nodes,centroids,clustering system of DeSTIN
+ * When started to create this one i did not find it necessarily to create all the classes for it.
+ * Aldo it should be possible to create the old structure of files back and make sure you pass all the pointers to the kernel.
+ * This would have been donr if the research did not take so long to understand DeSTIN original version.
+ * You need to open the DestinKernel.cu to see the actual Kernels
+ * This because they have to be more like C and creating special CUDA headers is most of the time avoided (CUDA forums)
+ */
 class DestinKernel
 {
 private:
@@ -13,6 +22,10 @@ private:
      * mDevices contain the number of CUDA capable devices.
      * mLayerData is the pointer for CPU memory so we can copy from CPU to GPU and back
      * dLayerData is the pointer for GPU memory (It's empty as long as you don't use cudaMemcpy(to, from, size, direction))
+     * mSTARVATION_COEFFICIENT this came from original DeSTIN and was been used for updating starvation
+     *
+     * size of Layer Data/Node Data/Nodes this is many been used for data copying between Host and Device
+     * Pointers: where pointer starting with a m is on Host and d is on the device
      */
     int mID;
     int mRows;
@@ -26,12 +39,14 @@ private:
 	int sizeOfNodeData;
 	int sizeOfNodes;
 
-	float *mCentroidVectorData;
-	float *dCentroidVectorData;
-	float *mCentroidData;
-	float *dCentroidData;
+	float *mCentroidsVectorData;
+	float *dCentroidsVectorData;
+	float *mCentroidsDistance;
+	float *dCentroidsDistance;
 	float *mCentroidStarvation;
 	float *dCentroidStarvation;
+	float *mNodeOutput;
+	float *dNodeOutput;
 	int *mWinningCentroids;
 	int *dWinningCentroids;
         
@@ -42,16 +57,17 @@ public:
 
 	/*
 	 * Create a DeSTIN kernel here the layer and node and clustering is put all together.
-	 *
 	 */
 	void Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, curandGenerator_t gen);
 
 	/*
 	 * Do DeSTIN is the launcher of the GPU kernel.
-	 * @param *Input It's input can be a dLayerData or a image(for lowest layer)
+	 * @param *Input It's input can be a dNodeOutput or a image(for lowest layer)
+	 * Make sure it is the device pointer and not the host pointer (kernel will crash/not run with it)
 	 */
 	void DoDestin( float *Input );
 
+	// Mostly getters i name should be clear enough
 	int GetID(){ return mID; }
 
 	int GetNumberOfRows(){ return mRows; }
@@ -63,6 +79,8 @@ public:
 	int GetNumberOfDevices(){ return mDevices; }
 
 	int GetNumberOfInputDimensionlity(){ return mInputDimensionlity; }
+
+	float *GetDevicePointerOutput(){ return dNodeOutput; }
 };
 
 #endif
