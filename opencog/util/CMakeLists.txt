@@ -87,4 +87,4 @@ INSTALL(FILES
 )
 
 # is it useful to install since it is static ?
-#INSTALL(TARGETS util ARCHIVE DESTINATION lib)
+INSTALL(TARGETS util LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
