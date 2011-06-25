@@ -142,7 +142,7 @@ def publish_relex_server_message():
 #
 while True:
     # Increase the timestamp
-    timestamp = timestamp + 1
+    timestamp = timestamp + 1000
 
     publish_modulator_message(timestamp)
     publish_demand_message(timestamp)
