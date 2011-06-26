@@ -16,16 +16,24 @@ if(CUDA_FOUND)
     
     #Add Pugi XML
 	add_subdirectory( pugixml )
-	
+        
 	#Add cuRAND libary of CUDA
-    FIND_LIBRARY(lib_curand curand "/usr/local/cuda/lib64")
-	
+        if(WIN32)
+	        #find_library_local_first is nifty macro found in cmake's FindCUDA script 
+	        find_library_local_first(lib_curand curand "curand library")	
+	else()
+       		 FIND_LIBRARY(lib_curand curand "/usr/local/cuda/lib64" )
+	endif()
+
 	#Make solution
 	CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu DestinData.cu AdviceData.cu DestinKernel.cu)
 	TARGET_LINK_LIBRARIES( destinCuda
 	    pugixml
         ${lib_curand}
 	)
+        if(WIN32)
+        link_directories( $ENV{CUDA_LIB_PATH} )
+        endif()
 else()
 	MESSAGE("CUDA not found. Not building CUDA DestinPort.")
 endif()

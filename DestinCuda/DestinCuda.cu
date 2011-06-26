@@ -662,7 +662,9 @@ int MainDestinExperiments(int argc, char* argv[])
         // and use these to populate vIndicesAndGTLabelToUse
 
         // Debug list of labels to be used
-        int Picked[NumberOfUniqueLabels];
+        int * Picked;
+        Picked = (int *) malloc(sizeof(int) * NumberOfUniqueLabels);
+
         for(int jj=0;jj<NumberOfUniqueLabels;jj++)
         {
             Picked[jj]=0;
@@ -691,6 +693,7 @@ int MainDestinExperiments(int argc, char* argv[])
         {
             cout << "Label: " << jj << " will show " << Picked[jj] << " sample(s)." << endl;
         }
+        free( Picked);
         cout << "------------------" << endl;
     }  //check on bCreateFromFile==false
     else
