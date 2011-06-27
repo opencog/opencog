@@ -18,7 +18,7 @@ if(CUDA_FOUND)
 	add_subdirectory( pugixml )
 	
 	#Add cuRAND libary of CUDA
-    FIND_LIBRARY(lib_curand curand "/usr/local/cuda/lib64")
+    FIND_LIBRARY(lib_curand curand "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v4.0/lib/x64")
 	
 	#Make solution
 	CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu DestinData.cu AdviceData.cu DestinKernel.cu)
