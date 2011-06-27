@@ -1,6 +1,7 @@
-from opencog.atomspace import Atom, get_type
+from opencog.atomspace import Atom, get_type, types
 from copy import copy, deepcopy
 from functools import *
+from itertools import permutations
 
 class tree:
     def __init__(self, op, *args):
@@ -63,9 +64,12 @@ def tree_from_atom(atom):
     else:
         args = [tree_from_atom(x) for x in atom.out]
         return tree(atom.type_name, args)
+    assert False
 
 def atom_from_tree(tree, a):
-    if tree.is_leaf():
+    if tree.is_variable():
+        return a.add(types.VariableNode, name='$'+str(tree.op))
+    elif tree.is_leaf():
         # Node (simply the handle)
         if isinstance (tree.op, Atom):
             return tree.op
@@ -74,9 +78,10 @@ def atom_from_tree(tree, a):
     else:
         out = [atom_from_tree(x, a) for x in tree.args]
         return a.add(get_type(tree.op), out=out)
+    assert False
 
 # Further code adapted from AIMA-Python under the MIT License (see http://code.google.com/p/aima-python/)
-def unify(x, y, s):
+def unify(x, y, s,  vars_only = False):
     """Unify expressions x,y with substitution s; return a substitution that
     would make x,y equal, or None if x,y can not unify. x and y can be
     variables (e.g. 1, Nodes, or tuples of the form ('link type name', arg0, arg1...)
@@ -85,32 +90,46 @@ def unify(x, y, s):
     >>> ppsubst(unify(x + y, y + C, {}))
     {x: y, y: C}
     """
+    if vars_only:
+        if isinstance(x, tree) and isinstance(y, tree):
+            if x.is_variable() != y.is_variable():
+                return None
+
     if s == None:
         return None
     elif x == y:
         return s
     elif isinstance(x, tree) and x.is_variable():
-        return unify_var(x, y, s)
+        return unify_var(x, y, s, vars_only)
     elif isinstance(y, tree) and y.is_variable():
-        return unify_var(y, x, s)
+        return unify_var(y, x, s, vars_only)
         
     elif isinstance(x, tree):
         assert isinstance(y, tree)
 
-        s2 = unify(x.op, y.op, s)
-        return unify(x.args,  y.args, s2)
-     
+        s2 = unify(x.op, y.op, s, vars_only)
+        return unify(x.args,  y.args, s2, vars_only)
+
+    # Handle conjunctions.
+    elif isinstance(x, tuple) and isinstance(y, tuple) and len(x) == len(y):
+        for permu in permutations(x):
+            s2 = unify(list(permu), list(y), s, vars_only)
+            if s2 != None:
+                return s2
+        return None
+
+    # Recursion to handle arguments.
     elif isinstance(x, list) and isinstance(y, list) and len(x) == len(y):
             # unify all the arguments (works with any number of arguments, including 0)
-            s2 = unify(x[0], y[0], s)
-            return unify(x[1:], y[1:], s2)
-     
+            s2 = unify(x[0], y[0], s, vars_only)
+            return unify(x[1:], y[1:], s2, vars_only)
+        
     else:
         return None
 
-def unify_var(var, x, s):
+def unify_var(var, x, s, vars_only):
     if var in s:
-        return unify(s[var], x, s)
+        return unify(s[var], x, s, vars_only)
     elif occur_check(var, x, s):
         return None
     else:

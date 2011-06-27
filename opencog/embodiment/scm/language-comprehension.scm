@@ -1540,14 +1540,7 @@
              (VariableNode "$value")
             )
       )
-;      (EvaluationLink (PredicateNode "frame")
-;        (ListLink
-;            (VariableNode "$frameInstance")
-;            (VariableNode "$frameElement")
-;            (VariableNode "$value")
-;        )
-;      )
-      ; Even better format.
+
       (EvaluationLink (VariableNode "$frameElement")
         (ListLink
             (VariableNode "$frameInstance")
@@ -2199,7 +2192,7 @@
         (question? #f)
         (questionType '())
         
-        (use-pln #f)
+        (use-pln #t)
         )
         
     (map

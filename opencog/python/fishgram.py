@@ -1,7 +1,7 @@
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, types as t
 from tree import *
 from adaptors import *
-
+from util import *
 from itertools import *
 
 def pairwise(iterable):
@@ -21,6 +21,8 @@ class Fishgram:
         # settings
         self.min_embeddings = 2
         self.atomspace = atomspace
+        
+        self.max_per_layer = 600
 
     def run(self):
         self.forest.extractForest()
@@ -47,29 +49,31 @@ class Fishgram:
         
         all_bindinglists = [(obj, ) for obj in self.forest.all_objects]
         prev_layer = [((), all_bindinglists, )]
-        
-        while len(prev_layer) > 0:            
-            for prev_conj in prev_layer:
-                new_layer = self.extend(prev_conj)
-#                for conj, bindingsets in new_layer:
-#                    print self.conjunction_to_string(conj), len(bindingsets)
-                pruned = len(new_layer)
-                new_layer = self.prune_frequency(new_layer)
-                pruned-= len(new_layer)
-                
-                if len(new_layer):
-                    conj_length = len(new_layer[0][0])
-                else:
-                    conj_length = -1
-                assert all([ len(conj) == conj_length for (conj, embs) in new_layer ])
-                print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
-                prev_layer = new_layer
-                all_conjs.append(new_layer)
+
+        while len(prev_layer) > 0 and len(all_conjs) < 3: # tacky hack just to make it finish faster
+            new_layer = self.extend(prev_layer)
+#            for prev_conj in prev_layer:
+#                new_layer += self.extend(prev_conj)
+#            for conj, bindingsets in new_layer:
+#                print self.conjunction_to_string(conj), len(bindingsets)
+            pruned = len(new_layer)
+            new_layer = self.prune_frequency(new_layer)
+            pruned-= len(new_layer)
+            
+            if len(new_layer):
+                conj_length = len(new_layer[0][0])
+            else:
+                conj_length = -1
+            assert all([ len(conj) == conj_length for (conj, embs) in new_layer ])            
+            prev_layer = new_layer
+            all_conjs.append(new_layer)
+            print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
         return all_conjs
 
 # You need to store the real hyperlinks from each Atom, which means you can look up other stuff as necessary.
 
-    def extend(self,  prev_conj_and_embeddings):
+    #def extend(self,  prev_conj_and_embeddings):
+    def extend(self,  prev_layer):
         """Find all extensions for that fragment. An extension means adding one link to a particular
         node in the fragment. Nodes in the fragment are numbered from 0 onwards, and the numbers
         don't correspond to exact nodes in the AtomSpace. Each fragment has 1 or more embeddings,
@@ -77,48 +81,51 @@ class Fishgram:
         # for each embedding
         # for each extension
         # add the new embedding to the set for that extension
-        prev_conj,  prev_embeddings = prev_conj_and_embeddings
         new_layer = {}
         
-        extension_tree_ids = set()
-        embeddings = {}
-        
-        for emb in prev_embeddings:
-            #for obj in emb:
-            for conj_arg in xrange(len(emb)):
-                obj = emb[conj_arg]
-                for predsize in sorted(self.forest.incoming[obj].keys()):
-                    if predsize > 1: continue
-                    for slot in sorted(self.forest.incoming[obj][predsize].keys()):
-                        for tree_id in self.forest.incoming[obj][predsize][slot]:
-                            extension_tree_ids.add(tree_id)
-                            embeddings[tree_id] = emb
-
         skipped = 0
+        for (prev_conj,  prev_embeddings) in prev_layer:
+            if len(new_layer) > self.max_per_layer:
+                break
 
-        for tree_id in extension_tree_ids:            
-            # Using the particular tree-instance, find its outgoing set
-            bindings = self.forest.bindings[tree_id]
-            emb = embeddings[tree_id]
-            i = len(emb)
-            # The mapping from the (abstract) tree to node numbers in this conjunction            
-            s = {}
-            # Since we allow N-ary patterns, it could be connected to any number (>=1) of
-            # nodes in the conjunction so far, and 0+ new ones
-            new_embedding = copy(emb)
-            for slot in xrange(len(bindings)):
-                obj = bindings[slot]
-                
-                if obj in emb:
-                    s[tree(slot)] = tree(emb.index(obj))
-                else:
-                    s[tree(slot)] = tree(i)
-                    tmp = list(new_embedding)
-                    tmp.append(obj)
-                    new_embedding = tuple(tmp)
-                    assert obj == new_embedding[i]
-                    i+=1
+            extension_tree_ids = set()
+            embeddings = {}
 
+            for emb in prev_embeddings:
+                for obj in emb:
+                    for predsize in sorted(self.forest.incoming[obj].keys()):
+                        #if predsize > 1: continue
+                        for slot in sorted(self.forest.incoming[obj][predsize].keys()):
+                            for tree_id in self.forest.incoming[obj][predsize][slot]:
+                                if tree_id not in extension_tree_ids:
+                                    extension_tree_ids.add(tree_id)
+                                    embeddings[tree_id] = emb
+
+            for tree_id in extension_tree_ids:
+
+                # Using the particular tree-instance, find its outgoing set
+                bindings = self.forest.bindings[tree_id]
+                emb = embeddings[tree_id]
+                i = len(emb)
+                # The mapping from the (abstract) tree to node numbers in this conjunction            
+                s = {}
+                # Since we allow N-ary patterns, it could be connected to any number (>=1) of
+                # nodes in the conjunction so far, and 0+ new ones
+                new_embedding = copy(emb)
+                for slot in xrange(len(bindings)):
+                    obj = bindings[slot]
+                    
+                    if obj in emb:
+                        s[tree(slot)] = tree(emb.index(obj))
+                    else:
+                        s[tree(slot)] = tree(i)
+                        tmp = list(new_embedding)
+                        tmp.append(obj)
+                        new_embedding = tuple(tmp)
+                        assert obj == new_embedding[i]
+                        i+=1
+
+                # After completing the substitution...
                 tr = self.forest.all_trees[tree_id]
                 bound_tree = subst(s, tr)
 
@@ -185,7 +192,7 @@ class Fishgram:
         return str(tuple([str(tree) for tree in conjunction]))
 
     def outputConceptNodes(self, layers):
-        id = 9001
+        id = 1001
         
         for layer in layers:
             for (conj, embs) in layer:
@@ -198,4 +205,155 @@ class Fishgram:
                         bound_tree = subst(s, tr)
                         #print bound_tree
                         print atom_from_tree(bound_tree, self.atomspace)
+
+    def outputPredicateNodes(self, layers):
+        id = 9001
         
+        for layer in layers:
+            for (conj, embs) in layer:
+                predicate = self.a_.add_node(t.PredicateNode, 'fishgram_'+str(id))
+                id+=1
+                #print predicate
+                
+                vars = self.get_varlist(conj)
+                #print [str(var) for var in vars]
+
+                evalLink = tree('EvaluationLink',
+                                    predicate, 
+                                    tree('ListLink', vars))
+                andLink = tree('AndLink',
+                                    conj)
+                
+                qLink = tree('ForAllLink', 
+                                tree('ListLink', vars), 
+                                tree('ImplicationLink',
+                                    andLink,
+                                    evalLink))
+                a = atom_from_tree(qLink, self.a_)
+                
+                a.tv = TruthValue(1, 10.0**9)
+                count = len(embs)
+                #eval_a = atom_from_tree(evalLink, self.a_)
+                #eval_a.tv = TruthValue(1, count)
+                
+                print a
+
+#                for tr in conj:
+#                    s = {tree(0):concept}
+#                    bound_tree = subst(s, tr)
+#                    #print bound_tree
+#                    print atom_from_tree(bound_tree, self.a_)
+
+    def outputImplications(self, layers):
+        for layer_id, layer in enumerate(layers):
+            if len(layer[0][0]) < 2:
+                continue
+            for (conj, embs) in layer:
+                vars = self.get_varlist(conj)
+                #print [str(var) for var in vars]
+                
+                for i in xrange(0, len(conj)):
+                    conclusion = conj[i]
+                    premises = conj[:i] + conj[i+1:]
+                    
+                    if not (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):# == len(self.get_varlist(conclusion)) ):
+                        continue
+                    prev_layer = layers[layer_id-1]
+                    
+                    try:
+                        ce_premises = next(ce for ce in prev_layer if unify(premises, ce[0], {}, True) != None)
+                        premises_original, premises_embs = ce_premises
+                        
+#                        ce_conclusion = next(ce for ce in layers[0] if unify( (conclusion,) , ce[0], {}, True) != None)
+#                        conclusion_original, conclusion_embs = ce_conclusion
+                    except StopIteration:
+                        print "[didn't create required subconjunction due to tackypruning and ordering]"
+    #                print map(str, premises)
+    #                print ce_premises[0]
+    #                print len(premises_embs), len(embs)
+                    
+    #                c_norm = normalize( (conj, emb), ce_conclusion )
+    #                p_norm = normalize( (conj, emb), ce_premises )
+    #                print p_norm, c_norm
+
+                    count_conj = len(embs)*1.0
+                    # Called the "confidence" in rule learning literature
+                    freq =  count_conj / len(premises_embs)
+    #                count_unconditional = len(conclusion_embs)
+    #                surprise = count_conj / count_unconditional
+                    
+                    if freq > 0.05:
+                        assert len(premises)
+                        andLink = tree('AndLink',
+                                            list(premises)) # premises is a tuple remember
+                        
+                        #print andLink                
+
+                        qLink = tree('AverageLink', 
+                                        tree('ListLink', vars), 
+                                        tree('ImplicationLink',
+                                            andLink,
+                                            conclusion))
+                        a = atom_from_tree(qLink, self.a_)
+                        
+                        a.tv = TruthValue( freq , len(premises_embs) )
+                        #count = len(embs)
+                        #eval_a = atom_from_tree(evalLink, self.a_)
+                        #eval_a.tv = TruthValue(1, count)
+                        
+                        print a
+
+    # Wait, we need count(  P(X,Y) ) / count( G(X,Y). Not equal to count( P(X) * count(Y in G))
+    def normalize(self, big_conj_and_embeddings, small_conj_and_embeddings):
+        """If you take some of the conditions (trees) from a conjunction, the result will sometimes
+        only refer to some of the variables. In this case the embeddings stored for that sub-conjunction
+        will only include objects mentioned by the smaller conjunction. This function normalizes the
+        count of embeddings. Suppose you have F(X,Y) == G(X, Y) AND H(X). The count for H(X) will be
+        too low and you really need the count of "H(X) for all X and Y". This function will multiply the count
+        by the number of objects in Y."""""
+        big_conj, big_embs = big_conj_and_embeddings
+        small_conj, small_embs = small_conj_and_embeddings
+        
+        # Count the number of possibilities for each variable. (Only possibilities that actually occur.)
+        numvars = len(big_embs[0])
+        var_objs = [set() for i in xrange(numvars)]
+        
+        for i in xrange(0, len(numvars)):
+            for emb in big_embs:
+                obj = emb[i]
+                var_objs[i].add(obj)
+        
+        var_numobjs = [len(objs) for objs in var_objs]
+        
+        varlist_big = sorted(self.get_varlist(big_conj))
+        varlist_small = sorted(self.get_varlist(small_conj))
+        missing_vars = [v for v in varlist_big if v not in varlist_small]
+        
+        # the counts of possible objects for each variable missing in the smaller conjunction.
+        numobjs_missing = [var_numobjs[v] for v in missing_vars]
+        
+        implied_cases = reduce(op.times, numobjs_missing, 1)
+        
+        return len(small_embs) * implied_cases
+
+def make_seq(atomspace):
+    # unit of timestamps is 0.1 second so multiply by 10
+    interval = 10* 10
+    times = atomspace.get_atoms_by_type(t.TimeNode)
+    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
+    times = sorted(times, key= lambda t: int(t.name) )
+
+    for (i, time_atom) in enumerate(times[:-1]):
+        t1 = int(time_atom.name)
+        for time2_atom in times[i+1:]:
+            t2 = int(time2_atom.name)
+            if t2 - t1 <= interval:
+                print atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
+            else:
+                break
+
+#    for i in xrange(len(times)-1):
+#        (time1,  time2) = (times[i],  times[i+1])
+#        # TODO SeqAndLink was not supposed to be used on TimeNodes directly.
+#        # But that's more useful for fishgram
+#        print atomspace.add_link(t.SequentialAndLink,  [time1,  time2])

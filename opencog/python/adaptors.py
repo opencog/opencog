@@ -2,6 +2,7 @@ from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
 import opencog.cogserver
 from tree import *
 from fishgram import *
+from util import *
 
 # to debug within the cogserver, try these, inside the relevant function:
 #import code; code.interact(local=locals())

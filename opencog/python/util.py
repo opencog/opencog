@@ -31,9 +31,12 @@ def ppdict(d):
     >>> ppdict({z: C, y: B, x: A})
     {x: A, y: B, z: C}
     """
+    
+    if not len(d):
+        return str(d)
 
     def format(k, v):
-        return "%s: %s" % (repr(k), repr(v))
+        return "%s: %s" % (pp(k), pp(v))
 
     ditems = d.items()
     ditems.sort(key=str)
@@ -54,4 +57,4 @@ def ppset(s):
 
     slist = list(s)
     slist.sort(key=str)
-    return 'set(%s)' % slist
+    return 'set(%s)' % pp(slist)
