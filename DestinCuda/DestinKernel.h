@@ -1,7 +1,12 @@
 #ifndef DESTIN_KERNEL_H
 #define DESTIN_KERNEL_H
+// C/C++ headers
+#include <sstream>
+// Cuda header
 #include <cuda.h>
 #include <curand.h>
+
+using namespace std;
 
 /*
  * DeSTIN Kernel
@@ -33,6 +38,7 @@ private:
 	int mStates;
 	int mInputDimensionlity;
 	int mDevices;
+	float mLearningRate;
 	float mSTARVATION_COEFFICIENT;
 
 	int sizeOfLayerData;
@@ -49,7 +55,10 @@ private:
 	float *dNodeOutput;
 	int *mWinningCentroids;
 	int *dWinningCentroids;
-        
+	int *mCentroidWinCounter;
+
+	void WriteData(stringstream& xml);
+
 public:
 	DestinKernel( void );
 
@@ -58,14 +67,14 @@ public:
 	/*
 	 * Create a DeSTIN kernel here the layer and node and clustering is put all together.
 	 */
-	void Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, curandGenerator_t gen);
+	void Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, float FixedLeaningRate, curandGenerator_t gen);
 
 	/*
 	 * Do DeSTIN is the launcher of the GPU kernel.
 	 * @param *Input It's input can be a dNodeOutput or a image(for lowest layer)
 	 * Make sure it is the device pointer and not the host pointer (kernel will crash/not run with it)
 	 */
-	void DoDestin( float *Input );
+	void DoDestin( float *Input, stringstream& xml);
 
 	// Mostly getters i name should be clear enough
 	int GetID(){ return mID; }
