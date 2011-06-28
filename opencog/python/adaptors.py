@@ -12,8 +12,8 @@ t = types
 class ForestExtractor:
     """Extracts a forest of trees, where each tree is a Link (and children) that are true in the AtomSpace.
     The trees may share some of the same Nodes."""
-    def __init__(self, a, writer):
-        self.a = a
+    def __init__(self, atomspace, writer):
+        self.a = atomspace
         self.writer = writer
         
         # policy
@@ -205,10 +205,10 @@ class GraphConverter:
     def sorted_by_handle(self,atoms):
         handles = [atom.h for atom in atoms]
         handles.sort()
-        return [Atom(h,self.a) for h in handles] # When I mistakenly said a instead of self.a, no Exception was reported!
+        return [Atom(h,self.a) for h in handles]
     
     def is_compactable(self,atom):
-        return len(atom.out) == 2 and len(atom.incoming) == 0 and not FishgramFilter.is_application_link(atom) # TODO haxx?
+        return atom.arity == 2 and len(atom.incoming) == 0 and not FishgramFilter.is_application_link(atom) # TODO haxx?
 
 import pygephi
 class GephiOutput:
