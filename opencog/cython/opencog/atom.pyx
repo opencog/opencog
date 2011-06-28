@@ -46,6 +46,10 @@ cdef class Atom(object):
                 self._outgoing = self.atomspace.get_outgoing(self.handle)
             return self._outgoing
 
+    property arity:
+        def __get__(self):
+            return len(self.out)
+
     property incoming:
         def __get__(self):
             return self.atomspace.get_incoming(self.handle)

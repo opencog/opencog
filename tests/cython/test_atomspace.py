@@ -262,6 +262,20 @@ class AtomTest(TestCase):
         # ensure out is considered immutable
         self.assertRaises(AttributeError, setattr, l,"out",[a1])
 
+    def test_arity(self):
+        a1 = self.space.add_node(types.Node,"test2")
+
+        self.assertEqual(a1.arity, 0)
+
+        tv = TruthValue(0.5, 100)
+        a2 = self.space.add_node(types.Node,"test3",tv)
+
+        l = self.space.add_link(types.Link,[a1,a2])
+        self.assertEqual(l.arity, 2)
+
+        # ensure arity is considered immutable
+        self.assertRaises(AttributeError, setattr, l,"arity",4)
+
     def test_is_source(self):
         # any out item is a source for unordered links
         # only the fist item is a source of ordered links
