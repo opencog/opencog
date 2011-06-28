@@ -5,7 +5,12 @@ from adaptors import *
 from itertools import *
 
 def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    """
+    s -> (s0,s1), (s1,s2), (s2, s3), ...
+
+    >>> list(pairwise((1,2,3,4)))
+    [(1, 2), (2, 3), (3, 4)]
+    """
     a, b = tee(iterable)
     next(b, None)
     return izip(a, b)
@@ -15,7 +20,7 @@ class Fishgram:
         self.forest = ForestExtractor(atomspace,  None)
         # settings
         self.min_embeddings = 2
-        self.a_ = atomspace
+        self.atomspace = atomspace
 
     def run(self):
         self.forest.extractForest()
@@ -185,12 +190,12 @@ class Fishgram:
         for layer in layers:
             for (conj, embs) in layer:
                 if (len(self.get_varlist(conj)) == 1):
-                    concept = self.a_.add_node(t.ConceptNode, 'fishgram_'+str(id))
+                    concept = self.atomspace.add_node(t.ConceptNode, 'fishgram_'+str(id))
                     id+=1
                     print concept
                     for tr in conj:
                         s = {tree(0):concept}
                         bound_tree = subst(s, tr)
                         #print bound_tree
-                        print atom_from_tree(bound_tree, self.a_)
+                        print atom_from_tree(bound_tree, self.atomspace)
         
