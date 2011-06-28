@@ -121,10 +121,11 @@ string GetNextFileForDiagnostic()
     {
         iExperimentNumber++;
         stringstream buffer;
-        buffer << "../DiagnosticData/DestinDiagnostics" << iExperimentNumber << ".xml";
+        buffer << "../DiagnosticData/DestinDiagnostics" << iExperimentNumber << "-0.xml";
         strFileName =  buffer.str();
 
         bFileFound = FileExists(strFileName);
+        strFileName.erase(strFileName.length()-6,2);
     }
     strFileName = strFileName.substr(18);
 
@@ -752,13 +753,14 @@ int MainDestinExperiments(int argc, char* argv[])
 
     cout << "------------------" << endl;
     cout << "Run Destin" << endl;
-    stringstream xml;
-    xml << "<destin>" << endl;
     cout << "Images to be processed: " << MAX_CNT << endl;
     cout << "Each image moves: " << SEQ_LENGTH << " times." << endl;
 
     for(int i=0;i<MAX_CNT;i++)
     {
+        stringstream xml;
+        xml << "<destin>" << endl;
+
         pair<int,int> element = vIndicesAndGTLabelToUse[i];
         int indexOfExample = element.first;
         int label = element.second;
@@ -785,15 +787,19 @@ int MainDestinExperiments(int argc, char* argv[])
         }
         time_t iStop = time(NULL);
         xml << "<image id=\"" << i << "\" label=\"" << label << "\" labelIndex=\"" << indexOfExample << "\" runtime=\"" << iStop-iStart << "\" />" << endl;
+        xml << "</destin>" << endl;
+        pugi::xml_document outputFile;
+        outputFile.load(xml.str().c_str());
+        string file = strDestinNetworkFileToRead;
+        stringstream num;
+        num << "-" << i;
+        file.insert(file.length()-4, num.str());
+        outputFile.save_file(file.c_str());
     }
     time_t destinStop = time(NULL);
-    xml << "<totalTime>" << destinStop-destinStart << "</totalTime>" << endl;
-    xml << "</destin>" << endl;
-    pugi::xml_document outputFile;
-    outputFile.load(xml.str().c_str());
-    outputFile.save_file(strDestinNetworkFileToRead.c_str());
-    xml.clear();
-    delete DKernel;
+    cout << "Time run: " << destinStop-destinStart << endl;
+
+    free(DKernel);
 
     return 0;
 }
