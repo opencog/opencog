@@ -740,6 +740,10 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line) {
  * 
  * It is assumed that each row have the same number of columns, if not
  * an assert is raised.
+ *
+ * If the table has no header then it uses "v1" to "vn" as input
+ * labels, where n is the number of inputs, and "output" as output
+ * label.
  */
 template<typename IT, typename OT, typename T>
 std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
@@ -758,7 +762,17 @@ std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table)
         output = boost::lexical_cast<T>(ioh.second);
         // they are values so we add them
         table_inputs.push_back(inputs);
-        output_table.push_back(output);        
+        output_table.push_back(output);
+        // set the input labels as i1, ..., in, where n is the number
+        // of inputs, and the output label as output
+        std::vector<std::string> ilabels;
+        for(unsigned i = 1; i < inputs.size(); i++) {
+            std::string label("v");
+            label += boost::lexical_cast<std::string>(i);
+            ilabels.push_back(label);
+        }
+        table_inputs.set_labels(ilabels);
+        output_table.set_label("output");
     } catch (boost::bad_lexical_cast &) { // not interpretable, they
                                           // must be labels
         table_inputs.set_labels(ioh.first);
