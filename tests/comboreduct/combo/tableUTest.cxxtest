@@ -39,6 +39,10 @@ private:
         IT it_test;
         OT ot_test;
         istreamTable<IT, OT, T>(ss, it_test, ot_test);
+        std::cout << "it =" << std::endl;
+        std::cout << it << std::endl;
+        std::cout << "it_test =" << std::endl;
+        std::cout << it_test << std::endl;
         std::cout << "ot =" << std::endl;
         std::cout << ot << std::endl;
         std::cout << "ot_test =" << std::endl;

@@ -155,8 +155,14 @@ public:
     typedef typename MT::value_type value_type;
     MT& get_matrix() { return matrix;}
     const MT& get_matrix() const {return matrix;}
-    std::vector<std::string>& get_labels() { return labels; }
-    const std::vector<std::string>& get_labels() const { return labels; }
+    const std::vector<std::string>& get_labels() const {
+        if(labels.empty() and !empty()) {
+            // return default labels
+            static const std::vector<std::string> default_labels(get_default_labels());
+            return default_labels;
+        } else
+            return labels;
+    }
     VT& operator[](size_t i) { return get_matrix()[i]; }
     const VT& operator[](size_t i) const { return get_matrix()[i]; }
     iterator begin() {return matrix.begin();}
@@ -166,6 +172,9 @@ public:
     bool operator==(const input_table<T>& rhs) const {
         return get_matrix() == rhs.get_matrix()
             && get_labels() == rhs.get_labels();
+    }
+    bool empty() const {
+        return matrix.empty();
     }
     
     // Warning: this method also update considered_args, by assuming
@@ -184,14 +193,26 @@ protected:
     // the set of arguments (represented directly as column indices)
     // to consider
     std::set<arity_t> considered_args; 
+private:
+    std::vector<std::string> get_default_labels() const {
+        std::vector<std::string> res;
+        for(arity_t i = 1; i <= get_arity(); ++i)
+            res.push_back(std::string("v")
+                          + boost::lexical_cast<std::string>(i));
+        return res;
+    }
 };
+
+static const std::string default_output_label("output");
 
 template<typename T>
 class output_table : public std::vector<T> {
     typedef std::vector<T> super;
 public:
-    output_table() {}
-    output_table(const super& ot, std::string& ol = "") 
+
+    output_table(const std::string& ol = default_output_label)
+        : label(ol) {}
+    output_table(const super& ot, const std::string& ol = default_output_label)
         : super(ot), label(ol) {}
 
     void set_label(const std::string& ol) { label = ol; }
@@ -326,8 +347,10 @@ public:
  * partial_truth_table, column of result of a corresponding truth_table_inputs
  */
 struct partial_truth_table : public output_table<bool> {
-    partial_truth_table() {}
-    partial_truth_table(const bool_vector& bv, std::string ol = "")
+    partial_truth_table(const std::string& ol = default_output_label)
+        : output_table<bool>(ol) {}
+    partial_truth_table(const bool_vector& bv,
+                        std::string ol = default_output_label)
         : output_table<bool>(bv, ol) {}
     partial_truth_table(const combo_tree& tr, const truth_table_inputs& tti,
                         RandGen& rng);
@@ -372,8 +395,10 @@ public:
     //typedef contin_vector super;
 
     //constructors
-    contin_table() {}
-    contin_table(const contin_vector& cv, std::string ol = "") 
+    contin_table(const std::string& ol = default_output_label)
+        : output_table<contin_t>(ol) {}
+    contin_table(const contin_vector& cv,
+                 std::string ol = default_output_label) 
         : output_table<contin_t>(cv, ol) {}
     contin_table(const combo_tree& tr, const contin_input_table& cti,
                  RandGen& rng);
@@ -763,16 +788,16 @@ std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table)
         // they are values so we add them
         table_inputs.push_back(inputs);
         output_table.push_back(output);
-        // set the input labels as i1, ..., in, where n is the number
-        // of inputs, and the output label as output
-        std::vector<std::string> ilabels;
-        for(unsigned i = 1; i < inputs.size(); i++) {
-            std::string label("v");
-            label += boost::lexical_cast<std::string>(i);
-            ilabels.push_back(label);
-        }
-        table_inputs.set_labels(ilabels);
-        output_table.set_label("output");
+        // // set the input labels as i1, ..., in, where n is the number
+        // // of inputs, and the output label as output
+        // std::vector<std::string> ilabels;
+        // for(unsigned i = 1; i < inputs.size(); i++) {
+        //     std::string label("v");
+        //     label += boost::lexical_cast<std::string>(i);
+        //     ilabels.push_back(label);
+        // }
+        // table_inputs.set_labels(ilabels);
+        // output_table.set_label("output");
     } catch (boost::bad_lexical_cast &) { // not interpretable, they
                                           // must be labels
         table_inputs.set_labels(ioh.first);
