@@ -49,7 +49,7 @@ public:
 
     FileMessageCentralUTest() {
         TS_ASSERT(fileExists(TEST_CONFIG_FILE));
-        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config(control::EmbodimentConfig::embodimentCreateInstance, true);
         config().load(TEST_CONFIG_FILE);
     }
 

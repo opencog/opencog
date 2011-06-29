@@ -30,9 +30,9 @@ using namespace std;
 
 bool chatty = true;
 
-class ChattyActionPlanSender : public PerceptionActionInterface::ActionPlanSender
+class ChattyActionPlanSender : public opencog::pai::ActionPlanSender
 {
-    bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan) {
+    bool sendActionPlan(const opencog::pai::ActionPlan& actionPlan) {
         for (unsigned int i = 0;i < actionPlan.size();++i)
             cout << "[" << actionPlan.getAction(i).getName() << " "
                  << actionPlan.getAction(i).getType() << "]" << endl;

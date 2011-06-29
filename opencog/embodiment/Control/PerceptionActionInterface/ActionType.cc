@@ -27,7 +27,7 @@
 #include <opencog/util/Logger.h>
 #include <iostream>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 /*====================================*
  * Static data members declaration    *

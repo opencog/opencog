@@ -39,8 +39,7 @@
 
 using namespace opencog;
 
-namespace Control
-{
+namespace opencog { namespace control {
 
 class AvatarInterface
 {
@@ -182,6 +181,6 @@ public:
 
 };
 
-} // Control
+}} // opencog::control
 
 #endif /*PET_INTERFACE_H_*/

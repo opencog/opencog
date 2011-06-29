@@ -35,10 +35,7 @@
 
 #include <opencog/util/exceptions.h>
 
-namespace PerceptionActionInterface
-{
-
-
+namespace opencog { namespace pai {
 
 /**
  * Some usefull methods for the Operational Pet Controller.
@@ -118,6 +115,6 @@ public:
     static int getTimeFactor();
 
 }; // class
-}  // namespace
+} }  // namespace opencog::pai
 
 #endif

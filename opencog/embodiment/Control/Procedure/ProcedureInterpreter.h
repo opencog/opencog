@@ -40,7 +40,7 @@ class ProcedureInterpreter : public boost::noncopyable
 {
 
 public:
-    ProcedureInterpreter(PerceptionActionInterface::PAI& p);
+    ProcedureInterpreter(opencog::pai::PAI& p);
 
     ~ProcedureInterpreter();
 
@@ -102,7 +102,7 @@ protected:
     ResultMap _resultMap;
     UnifierResultMap _unifierResultMap;
 
-    PerceptionActionInterface::PAI* _pai;
+    opencog::pai::PAI* _pai;
 
     RunningProcedureID _next;
 };

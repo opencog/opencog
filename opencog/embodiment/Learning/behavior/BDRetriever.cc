@@ -32,7 +32,7 @@
 namespace behavior
 {
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 using namespace opencog;
 
 void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,

@@ -41,7 +41,7 @@ class ComboSelectInterpreter
 
 public:
 
-    ComboSelectInterpreter(PerceptionActionInterface::PAI& pai, opencog::RandGen& rng);
+    ComboSelectInterpreter(opencog::pai::PAI& pai, opencog::RandGen& rng);
     ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng);
     ~ComboSelectInterpreter();
 

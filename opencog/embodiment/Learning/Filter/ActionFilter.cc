@@ -33,7 +33,7 @@
 namespace Filter
 {
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 using namespace WorldWrapper;
 using namespace PetCombo;
 

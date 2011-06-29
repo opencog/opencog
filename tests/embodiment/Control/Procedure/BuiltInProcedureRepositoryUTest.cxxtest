@@ -28,8 +28,8 @@
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace Procedure;
-using namespace PerceptionActionInterface;
-using namespace Control;
+using namespace opencog::pai;
+using namespace opencog::control;
 using namespace opencog;
 using namespace std;
 

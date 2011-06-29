@@ -25,7 +25,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/StringManipulator.h>

@@ -43,6 +43,7 @@ extern bool behlog;
 }
 
 using namespace behavior;
+using namespace opencog::pai;
 
 int countEvLinks(AtomSpace* as, string s)
 {
@@ -145,15 +146,15 @@ void BEtest(bool continuous)
     BehaviorEncoder repo(new RealTimeWorldProvider(&atomspace), trickExemplarAtTimeLink, UPDATE_INTERVAL);
     addBasicBDTrackers(atomspace, repo);
 
-    // printf("now = %lu\n", PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+    // printf("now = %lu\n", PAITestUtil::getCurrentTimestamp());
 
     rup;
 
     Handle a = addAction(atomspace);
 
-    // printf("now2 = %lu\n", PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+    // printf("now2 = %lu\n", PAITestUtil::getCurrentTimestamp());
 
-    atomspace.addTimeInfo(a, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+    atomspace.addTimeInfo(a, PAITestUtil::getCurrentTimestamp());
 
     // atomspace.addTimeInfo(a, 3281934);
     HandleSeq hs1;
@@ -171,9 +172,9 @@ void BEtest(bool continuous)
     Handle h =  atomspace.addLink(EVALUATION_LINK, hs2);
 
     // getc(stdin);
-    atomspace.addTimeInfo(h,  PerceptionActionInterface::PAITestUtil::getCurrentTimestamp()); // toString().c_str());
+    atomspace.addTimeInfo(h,  PAITestUtil::getCurrentTimestamp()); // toString().c_str());
 
-    // printf("now3 = %lu\n", PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+    // printf("now3 = %lu\n", PAITestUtil::getCurrentTimestamp());
 
     printEvLinks(&atomspace);
 
@@ -193,8 +194,8 @@ void BEtest(bool continuous)
 
     printEvLinks(&atomspace);
 
-    atomspace.addTimeInfo(h2, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
-    atomspace.addTimeInfo(a, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+    atomspace.addTimeInfo(h2, PAITestUtil::getCurrentTimestamp());
+    atomspace.addTimeInfo(a, PAITestUtil::getCurrentTimestamp());
 
     rup;
     // if (!continuous)
@@ -203,7 +204,7 @@ void BEtest(bool continuous)
     printEvLinks(&atomspace);
 
     //getc(stdin);
-    atomspace.addTimeInfo(h2, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+    atomspace.addTimeInfo(h2, PAITestUtil::getCurrentTimestamp());
 
     if (behlog)
         puts("\nTest continuous\n\n");
@@ -226,7 +227,7 @@ void BEtest(bool continuous)
     hs2c.push_back(h0c);
     Handle h3 =  atomspace.addLink(EVALUATION_LINK, hs2c);
 
-    atomspace.addTimeInfo(h3, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+    atomspace.addTimeInfo(h3, PAITestUtil::getCurrentTimestamp());
 
     sleep(1);
     rup;

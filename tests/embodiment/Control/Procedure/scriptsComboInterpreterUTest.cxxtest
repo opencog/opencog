@@ -33,7 +33,7 @@
 
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 using namespace PetCombo;
 using namespace std;
 using namespace Procedure;

@@ -33,6 +33,7 @@
 using namespace OperationalAvatarController;
 using namespace std;
 using namespace opencog;
+using namespace opencog::pai;
 
 PVPActionPlanSender::PVPActionPlanSender(const std::string& petId, NetworkElement * ne)
 {
@@ -45,7 +46,7 @@ PVPActionPlanSender::~PVPActionPlanSender()
 {
 }
 
-bool PVPActionPlanSender::sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan)
+bool PVPActionPlanSender::sendActionPlan(const ActionPlan& actionPlan)
 {
     MessagingSystem::StringMessage msg(ne->getID(), config().get("PROXY_ID"), actionPlan.getPVPmessage(petId));
     if (logPVPMessage) {
@@ -54,7 +55,7 @@ bool PVPActionPlanSender::sendActionPlan(const PerceptionActionInterface::Action
     return ne->sendMessage(msg);
 }
 
-bool PVPActionPlanSender::sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan, unsigned int actionSequenceNum)
+bool PVPActionPlanSender::sendSpecificActionFromPlan(const ActionPlan& actionPlan, unsigned int actionSequenceNum)
 {
 	MessagingSystem::StringMessage msg(ne->getID(), config().get("PROXY_ID"), actionPlan.getPVPmessage(petId, actionSequenceNum));
     if (logPVPMessage) {

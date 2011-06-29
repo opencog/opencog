@@ -41,7 +41,7 @@ public:
 
     static void destroySuite(PsiDemandUpdaterAgentUTest * suite) {
         delete suite;
-        system("./stop_embodiment.sh"); 
+        ::system("./stop_embodiment.sh"); 
     }
 
     /**

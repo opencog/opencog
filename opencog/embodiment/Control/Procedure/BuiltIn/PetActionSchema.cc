@@ -28,7 +28,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 
 using namespace Procedure;
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 PetActionSchema::PetActionSchema(PAI& _pai, const ActionType& _actionType) : pai(_pai), actionType(_actionType)
 {

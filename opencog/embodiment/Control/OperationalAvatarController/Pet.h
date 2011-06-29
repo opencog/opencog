@@ -42,6 +42,8 @@
 #include "MessageSender.h"
 
 using namespace opencog;
+using namespace opencog::pai;
+using namespace opencog::control;
 
 namespace OperationalAvatarController
 {
@@ -58,7 +60,7 @@ enum PetMode {
 /**
  *
  */
-class Pet : public Control::AvatarInterface
+class Pet : public AvatarInterface
 {
 
 private:    
@@ -76,14 +78,14 @@ private:
     double rayOfVicinity;
 
     PetMode mode;
-    std::map<PetMode, Control::AgentModeHandler*> modeHandler;
+    std::map<PetMode, AgentModeHandler*> modeHandler;
 
     // opc components received as constructor parameter
     AtomSpace* atomSpace;
     MessageSender* sender;
     RuleEngine* ruleEngine;
 
-    PerceptionActionInterface::PAI* pai;
+    PAI* pai;
 
     //! The ID of the avatar that is performing the exemplars
     std::string exemplarAvatarId;
@@ -167,11 +169,11 @@ public:
 
     /** Set the PAI of this Pet
      */
-    void setPAI(PerceptionActionInterface::PAI* pai);
+    void setPAI(PAI* pai);
 
     /** Get the PAI of this Pet
      */
-    inline PerceptionActionInterface::PAI& getPai( void ) {
+    inline PAI& getPai( void ) {
         return *pai;
     }
 
@@ -304,7 +306,7 @@ public:
     void reward(unsigned long timestamp);
     void punish(unsigned long timestamp);
 
-    Control::AgentModeHandler& getCurrentModeHandler( void );
+    AgentModeHandler& getCurrentModeHandler( void );
 
     float computeWalkingSpeed() const;
 

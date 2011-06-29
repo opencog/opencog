@@ -52,7 +52,8 @@
 using namespace behavior;
 using namespace OperationalAvatarController;
 using namespace WorldWrapper;
-using namespace opencog; /// @todo make it under the namespace opencog
+using namespace opencog;
+using namespace opencog::control;
 
 const unsigned long Pet::UNDEFINED_TIMESTAMP = 0;
 
@@ -121,10 +122,10 @@ Pet::Pet(const std::string& petId, const std::string& petName, const
 Pet::~Pet()
 {
     delete(rng);
-    std::map<PetMode, Control::AgentModeHandler*>::iterator it;
+    std::map<PetMode, AgentModeHandler*>::iterator it;
     for ( it = this->modeHandler.begin( );
             it != this->modeHandler.end( ); ++it ) {
-        Control::AgentModeHandler* handler = it->second;
+        AgentModeHandler* handler = it->second;
         it->second = 0;
         delete handler;
     } // for
@@ -226,7 +227,7 @@ void Pet::setRuleEngine(RuleEngine *ruleEngine)
     this->ruleEngine = ruleEngine;
 }
 
-void Pet::setPAI(PerceptionActionInterface::PAI *pai)
+void Pet::setPAI(PAI *pai)
 {
     this->pai = pai;
 }
@@ -842,7 +843,7 @@ void Pet::punish(unsigned long timestamp)
     }
 }
 
-Control::AgentModeHandler& Pet::getCurrentModeHandler( void )
+AgentModeHandler& Pet::getCurrentModeHandler( void )
 {
     return *this->modeHandler[ this->mode ];
 }

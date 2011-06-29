@@ -48,12 +48,12 @@ class PetActionSchema : public BuiltInProcedure
 
 protected:
 
-    PerceptionActionInterface::PAI& pai;
-    const PerceptionActionInterface::ActionType& actionType;
+    opencog::pai::PAI& pai;
+    const opencog::pai::ActionType& actionType;
 
 public:
 
-    PetActionSchema(PerceptionActionInterface::PAI& pai, const PerceptionActionInterface::ActionType& actionType);
+    PetActionSchema(opencog::pai::PAI& pai, const opencog::pai::ActionType& actionType);
     virtual ~PetActionSchema();
 
     const std::string& getName() const;

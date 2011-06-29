@@ -35,8 +35,7 @@
 #include <vector>
 #include <exception>
 
-namespace PerceptionActionInterface
-{
+namespace opencog { namespace pai {
 
 typedef std::string ActionPlanID;
 
@@ -193,6 +192,6 @@ private:
 
 };
 
-} // namespace
+} } // namespace opencog::pai
 
 #endif // ACTIONPLAN_H_ 

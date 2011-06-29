@@ -30,7 +30,7 @@
 #include "PAIUtils.h"
 #include "PVPXmlConstants.h"
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 using namespace opencog;
 
 PetAction::PetAction()

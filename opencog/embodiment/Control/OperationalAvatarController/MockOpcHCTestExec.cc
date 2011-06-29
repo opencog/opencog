@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     if(argc == 6)
         max_cycle = lexical_cast<unsigned long>(argv[5]);
 
-    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+    config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
 
 
     // if exists load file with configuration parameters

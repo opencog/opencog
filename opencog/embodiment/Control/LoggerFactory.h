@@ -29,8 +29,8 @@
 #include <opencog/util/Logger.h>
 #include "EmbodimentConfig.h"
 
-namespace Control
-{
+namespace opencog {
+namespace control {
 
 class LoggerFactory
 {
@@ -44,6 +44,6 @@ public:
     static opencog::Logger getLogger(const std::string &id);
 
 }; // class
-}  // namespace
+} } // namespace
 
 #endif

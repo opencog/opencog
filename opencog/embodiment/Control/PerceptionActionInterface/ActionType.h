@@ -38,8 +38,7 @@
 
 #include "ActionParamType.h"
 
-namespace PerceptionActionInterface
-{
+namespace opencog { namespace pai {
 
 /**
  * Numeric codes for the action types
@@ -547,8 +546,9 @@ private:
 
 };
 
-};
+std::ostream& operator<<(std::ostream& out, const ActionType& arg);
 
-std::ostream& operator<<(std::ostream& out, const PerceptionActionInterface::ActionType& arg);
+} } // namespace opencog::pai
+
 
 #endif //_ACTION_TYPE_H_

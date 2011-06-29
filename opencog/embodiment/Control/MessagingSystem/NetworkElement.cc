@@ -114,7 +114,7 @@ void NetworkElement::initialize(const std::string &myId, const std::string &ip, 
 
     // Initializes the main logger (static logger for this process)
     // merely specify the file name of the logger
-    opencog::logger() = Control::LoggerFactory::getLogger(myId);
+    opencog::logger() = opencog::control::LoggerFactory::getLogger(myId);
 
     this->routerID.assign(opencog::config().get("ROUTER_ID"));
     this->routerIP.assign(opencog::config().get("ROUTER_IP"));

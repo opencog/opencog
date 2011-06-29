@@ -28,7 +28,7 @@
 #include "BehaviorSchema.h"
 
 using namespace Procedure;
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 #if defined( _WIN32) && !defined(__CYGWIN__)
 typedef __int64 mytime_t;
@@ -118,7 +118,7 @@ public:
         hs2b.push_back(h0b);
         Handle h2 = pai.getAtomSpace().addLink(EVALUATION_LINK, hs2b);
 
-        pai.getAtomSpace().addTimeInfo(h2, PerceptionActionInterface::PAI::getCurrentTimestamp());
+        pai.getAtomSpace().addTimeInfo(h2, PAI::getCurrentTimestamp());
         args.push_back("obj223");
         v = isMoving.execute(args);
         TS_ASSERT(boost::get<combo::id::builtin>(v) == combo::id::logical_true);
@@ -139,7 +139,7 @@ public:
         hsF2.push_back(hF0);
         Handle hF2 = pai.getAtomSpace().addLink(EVALUATION_LINK, hsF2);
 
-        pai.getAtomSpace().addTimeInfo(hF2, PerceptionActionInterface::PAI::getCurrentTimestamp());
+        pai.getAtomSpace().addTimeInfo(hF2, PAI::getCurrentTimestamp());
         args.push_back("obj223");
         v = isFriendly.execute(args);
         TS_ASSERT(boost::get<combo::id::builtin>(v) == combo::id::logical_true);

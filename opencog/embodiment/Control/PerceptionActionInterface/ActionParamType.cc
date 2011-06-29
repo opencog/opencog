@@ -26,7 +26,7 @@
 #include <opencog/util/oc_assert.h>
 #include <iostream>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 /*====================================*
  * Static data members initialization *

@@ -28,7 +28,7 @@
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace behavior;
-using namespace Control;
+using namespace opencog::control;
 using namespace opencog;
 using namespace std;
 

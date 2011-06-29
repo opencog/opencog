@@ -30,7 +30,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/StringManipulator.h>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 ActionParameter::ActionParameter() : type(ActionParamType::STRING())
 {

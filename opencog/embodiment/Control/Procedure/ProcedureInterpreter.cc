@@ -33,6 +33,7 @@
 namespace Procedure
 {
 using namespace boost;
+using namespace opencog::pai;
 
 void ProcedureInterpreter::run(MessagingSystem::NetworkElement *ne)
 {
@@ -74,7 +75,7 @@ void ProcedureInterpreter::run(MessagingSystem::NetworkElement *ne)
     }
 }
 
-ProcedureInterpreter::ProcedureInterpreter(PerceptionActionInterface::PAI& p) : _pai(&p)
+ProcedureInterpreter::ProcedureInterpreter(PAI& p) : _pai(&p)
 {
     //initialize the random generator
     unsigned long rand_seed;

@@ -33,6 +33,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 
+using opencog::control::AvatarInterface;
+
 namespace OperationalAvatarController
 {
 
@@ -99,11 +101,11 @@ namespace OperationalAvatarController
         protected:
             std::string name;
             LanguageComprehension* langComp;
-            Control::AvatarInterface* agent;
+            AvatarInterface* agent;
             Handle agentHandle;
         };
 
-        LanguageComprehension( Control::AvatarInterface& agent );
+        LanguageComprehension(AvatarInterface& agent );
         
         virtual ~LanguageComprehension( void );        
         
@@ -146,7 +148,7 @@ namespace OperationalAvatarController
         /**
          * Getter for the agent interface
          */
-        inline Control::AvatarInterface& getAgent( void )
+        inline AvatarInterface& getAgent( void )
         {
             return this->agent;
         }
@@ -210,9 +212,9 @@ namespace OperationalAvatarController
         static void createFrameInstancesFromRelations( AtomSpace& atomSpace, HandleSeq& resultingFrames,
                                                        const std::list<spatial::Entity::SPATIAL_RELATION>& relations,
                                                        const std::string& objectA, const std::string& objectB, const std::string& objectC );
-        static Control::AvatarInterface* localAgent;
+        static AvatarInterface* localAgent;
         
-        Control::AvatarInterface& agent;
+        AvatarInterface& agent;
         std::string nlgen_server_host;
         int nlgen_server_port;
         FramesToRelexRuleEngine framesToRelexRuleEngine;

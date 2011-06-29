@@ -54,8 +54,9 @@
 // This is the time unit of the values returned by getTimestampFromXsdDateTimeStr() and getLatestSimWorldTimestamp().
 //#define DATETIME_DECIMAL_RESOLUTION
 
-namespace PerceptionActionInterface
-{
+using namespace opencog::control;
+
+namespace opencog { namespace pai {
 
 // action plan status
 typedef enum {
@@ -105,7 +106,7 @@ private:
     /**
      * A reference to a AvatarInterface (actualy a pet)
      */
-    Control::AvatarInterface& avatarInterface;
+    AvatarInterface& avatarInterface;
 
     /**
      * The ID for the next action plan to be created
@@ -221,7 +222,7 @@ public:
      * instance). If not provided, assumes 0 as default.
      */
     PAI(AtomSpace& _atomSpace, ActionPlanSender& actionSender,
-            Control::AvatarInterface& avatarInterface, unsigned long nextPlanID = 0);
+            AvatarInterface& avatarInterface, unsigned long nextPlanID = 0);
 
     /**
      * Destructor
@@ -236,7 +237,7 @@ public:
     /**
      * Gets the reference to the AvatarInterface this PAI works with
      */
-    Control::AvatarInterface& getAvatarInterface();
+    AvatarInterface& getAvatarInterface();
 
 
     /**
@@ -662,6 +663,6 @@ private:
                              ActionStatus statusCode, unsigned long timestamp);
 }; // class
 
-}  // namespace
+} }  // namespace opencog::pai
 
 #endif // PAI_H 

@@ -31,7 +31,8 @@
 #include "ActionPlanSenderMock.h"
 
 using namespace OperationalAvatarController;
-using namespace PerceptionActionInterface;
+using namespace opencog;
+using namespace opencog::pai;
 
 static const std::string petId  = "1";
 static const std::string owner  = "Dudu";
@@ -50,7 +51,7 @@ class PopulateAtomSpace
 private:
 
     AtomSpace atomSpace;
-    Control::SystemParameters parameters;
+    control::SystemParameters parameters;
     PAI * pai;
     AvatarInterfaceMock * pet;
     PredicatesUpdater * updater;

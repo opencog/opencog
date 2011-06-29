@@ -48,6 +48,8 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapper.h>
 
+using namespace opencog::pai;
+
 namespace Procedure
 {
 
@@ -58,8 +60,8 @@ struct RunningComboProcedure : public combo::Evaluator {
     //the exception that
     //TODO
     struct ActionPlanSendingFailure {
-        ActionPlanSendingFailure(PerceptionActionInterface::ActionPlanID _id) : id(_id) { }
-        PerceptionActionInterface::ActionPlanID id;
+        ActionPlanSendingFailure(ActionPlanID _id) : id(_id) { }
+        ActionPlanID id;
     };
 
     //these implement the callback interface combo::Evaluator used by the

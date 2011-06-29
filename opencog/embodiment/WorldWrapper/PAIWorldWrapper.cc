@@ -57,7 +57,7 @@ namespace WorldWrapper
 
 using namespace PetCombo;
 using namespace opencog;
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 /**
  * public methods
@@ -1124,7 +1124,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             logger().debug(
                          "PAIWorldWrapper - verifying agent[%s]", agentId.c_str( ) );
 
-            unsigned long delay_past = 10 * PerceptionActionInterface::PAIUtils::getTimeFactor();
+            unsigned long delay_past = 10 * PAIUtils::getTimeFactor();
             unsigned long t_past = ( delay_past < current_time ? current_time - delay_past : 0 );
 
             Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLink( as, agentId, "group_command", Temporal( t_past, current_time ), TemporalTable::OVERLAPS );

@@ -76,7 +76,7 @@ Router::Router()
         config().get_int("ROUTER_AVAILABLE_NOTIFICATION_INTERVAL");
     noAckMessages = config().get_bool("NO_ACK_MESSAGES");
 
-    logger() = Control::LoggerFactory::getLogger(routerId);
+    logger() = opencog::control::LoggerFactory::getLogger(routerId);
 
     pthread_mutex_init(&unavailableIdsLock, NULL);
     stopListenerThreadFlag = false;

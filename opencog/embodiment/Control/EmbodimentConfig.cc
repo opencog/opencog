@@ -26,7 +26,8 @@
 #include <iostream>
 #include "EmbodimentConfig.h"
 
-namespace Control {
+using namespace opencog;
+using namespace opencog::control;
 
 Config* EmbodimentConfig::embodimentCreateInstance()
 {
@@ -54,4 +55,3 @@ void EmbodimentConfig::reset() {
     }
 }
 
-} // namespace Control

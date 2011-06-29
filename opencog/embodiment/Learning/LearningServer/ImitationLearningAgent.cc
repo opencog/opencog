@@ -58,9 +58,9 @@ ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),
 
     //instanciate the learning vocabulary provider
     const std::string ILALGO = config().get("IMITATION_LEARNING_ALGORITHM");
-    if (ILALGO == Control::ImitationLearningAlgo::HillClimbing)
+    if (ILALGO == opencog::control::ImitationLearningAlgo::HillClimbing)
         _PVoc = new HCPetaverseVocabularyProvider();
-    else if (ILALGO == Control::ImitationLearningAlgo::MOSES)
+    else if (ILALGO == opencog::control::ImitationLearningAlgo::MOSES)
         _PVoc = new HCPetaverseVocabularyProvider();
     else OC_ASSERT(false, "A valid learning algo must be selected");
 }
@@ -331,7 +331,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
 
         //instanciate the learning algo
         const std::string ILALGO = config().get("IMITATION_LEARNING_ALGORITHM");
-        if (ILALGO == Control::ImitationLearningAlgo::HillClimbing) {
+        if (ILALGO == opencog::control::ImitationLearningAlgo::HillClimbing) {
             bool abibb = config().get_bool("ACTION_BOOLEAN_IF_BOTH_BRANCHES_HC_EXPENSION");
             bool neic = config().get_bool("HC_NEW_EXEMPLAR_INITIALIZES_CENTER");
             _PIL = new petaverse_hillclimber(nepc, *_fitnessEstimator,
@@ -340,7 +340,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                              _atomic_actions,
                                              abibb, neic, true,
                                              *_rng);
-        } else if (ILALGO == Control::ImitationLearningAlgo::MOSES) {
+        } else if (ILALGO == opencog::control::ImitationLearningAlgo::MOSES) {
             _PIL = new moses::moses_learning(nepc, *_fitnessEstimator,
                                              _definite_objects,
                                              // Warning, the following

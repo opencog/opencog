@@ -37,7 +37,7 @@ namespace OperationalAvatarController
 
 using namespace MessagingSystem;
 
-class PVPActionPlanSender: public PerceptionActionInterface::ActionPlanSender
+class PVPActionPlanSender: public opencog::pai::ActionPlanSender
 {
 
 private:
@@ -73,7 +73,7 @@ public:
      *
      * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
      */
-    bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan);
+    bool sendActionPlan(const opencog::pai::ActionPlan& actionPlan);
 
     /**
      * Sends a specific(atomic) action from plan to the target virtual world.
@@ -85,7 +85,7 @@ public:
      *
      * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
      */
-    bool sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan,
+    bool sendSpecificActionFromPlan(const opencog::pai::ActionPlan& actionPlan,
             unsigned int actionSequenceNum);
 
     /**

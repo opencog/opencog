@@ -23,7 +23,7 @@
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 class ActionTypeUTest :  public CxxTest::TestSuite
 {

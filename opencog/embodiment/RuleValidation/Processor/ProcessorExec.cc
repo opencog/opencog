@@ -36,7 +36,7 @@ int main(int argc, char * argv[])
         return (1);
     }
 
-    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+    config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
 
     if (fileExists(config().get("CONFIG_FILE").c_str())) {
         config().load(config().get("CONFIG_FILE").c_str());

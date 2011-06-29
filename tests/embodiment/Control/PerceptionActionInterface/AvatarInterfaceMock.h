@@ -36,7 +36,14 @@
 
 #include <cassert>
 
-class DummyAgentModeHandler : public Control::AgentModeHandler
+using namespace opencog;
+using namespace opencog::pai;
+using namespace opencog::spatial;
+using namespace behavior;
+
+using namespace std;
+
+class DummyAgentModeHandler : public control::AgentModeHandler
 {
 public:
     DummyAgentModeHandler( void ) : modeName( "DUMMY" ) {}
@@ -51,14 +58,7 @@ private:
     std::string modeName;
 };
 
-using namespace behavior;
-using namespace PerceptionActionInterface;
-using namespace opencog;
-using namespace opencog::spatial;
-using namespace std;
-
-
-class AvatarInterfaceMock: public Control::AvatarInterface
+class AvatarInterfaceMock: public control::AvatarInterface
 {
 
     std::pair<std::string, spatial::Point> latestGotoTarget;
@@ -67,7 +67,7 @@ class AvatarInterfaceMock: public Control::AvatarInterface
     string ownerId;
     string exemplarAvatarId;
     string grabbedObjId;
-    PerceptionActionInterface::PAI* pai;
+    PAI* pai;
     bool isLearning;
     set<string> learningWhat;
     bool exemplarInProgress;
@@ -147,7 +147,7 @@ public:
         pai = NULL;
     }
 
-    void setPAI(PerceptionActionInterface::PAI* _pai) {
+    void setPAI(PAI* _pai) {
         pai = _pai;
     }
 
@@ -210,7 +210,7 @@ public:
         cout << "AvatarInterfaceMock: Punishing pet!" << endl;
     }
 
-    Control::AgentModeHandler& getCurrentModeHandler( void ) {
+    control::AgentModeHandler& getCurrentModeHandler( void ) {
         return modeHandler;
     }
 

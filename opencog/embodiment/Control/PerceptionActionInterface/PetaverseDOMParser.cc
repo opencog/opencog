@@ -25,7 +25,7 @@
 #include <opencog/util/Logger.h>
 #include <xercesc/dom/DOMException.hpp>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 void PetaverseDOMParser::error (const unsigned int    errCode,
                                 const XMLCh *const   errDomain,

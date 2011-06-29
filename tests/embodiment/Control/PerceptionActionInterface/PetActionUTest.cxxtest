@@ -22,7 +22,7 @@
  */
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 #include <opencog/util/exceptions.h>
 

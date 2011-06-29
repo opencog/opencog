@@ -23,6 +23,8 @@
 #include "PopulateAtomSpace.h"
 #include "PAITestUtil.h"
 
+using opencog::pai;
+
 PopulateAtomSpace::PopulateAtomSpace()
 {
 
@@ -66,7 +68,7 @@ void PopulateAtomSpace::addOnwerInfo()
 void PopulateAtomSpace::addSpaceInfoMock(int baseX, int baseY)
 {
     handles.clear();
-    unsigned long timestamp = PerceptionActionInterface::PAITestUtil::getCurrentTimestamp();
+    unsigned long timestamp = PAITestUtil::getCurrentTimestamp();
 
     // adding pet
     Handle objs = atomSpace.addNode(PET_NODE, petId);

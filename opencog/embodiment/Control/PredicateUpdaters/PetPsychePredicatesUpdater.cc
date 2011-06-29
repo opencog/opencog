@@ -37,6 +37,7 @@
 
 using namespace OperationalAvatarController;
 using namespace opencog;
+using namespace opencog::pai;
 
 PetPsychePredicatesUpdater::PetPsychePredicatesUpdater(AtomSpace &_atomSpace ) : BasicPredicateUpdater(_atomSpace)
 {
@@ -374,7 +375,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
     } // foreach
 
 
-    tm timeInfo = PerceptionActionInterface::PAIUtils::getTimeInfo( timestamp );
+    tm timeInfo = PAIUtils::getTimeInfo( timestamp );
 
     // night 19:00 -> 6:00
     atNight = ( timeInfo.tm_hour > 19 || timeInfo.tm_hour < 6 );

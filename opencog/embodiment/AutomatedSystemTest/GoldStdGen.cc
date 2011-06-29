@@ -111,6 +111,6 @@ unsigned long GoldStdGen::getCurrentTimestamp()
     boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
     std::string timeStr = to_iso_extended_string(now);
     //cout << "Current date/time = " << timeStr << endl;
-    return PerceptionActionInterface::PAI::getTimestampFromXsdDateTimeStr(timeStr.c_str());
+    return opencog::pai::PAI::getTimestampFromXsdDateTimeStr(timeStr.c_str());
 }
 

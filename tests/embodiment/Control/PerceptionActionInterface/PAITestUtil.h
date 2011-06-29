@@ -26,8 +26,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-namespace PerceptionActionInterface
-{
+namespace opencog { namespace pai {
 
 class PAITestUtil
 {
@@ -42,11 +41,11 @@ public:
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
         string timeStr = to_iso_extended_string(now);
         cout << "Current date/time = " << timeStr << endl;
-        return PerceptionActionInterface::PAI::getTimestampFromXsdDateTimeStr(timeStr.c_str());
+        return PAI::getTimestampFromXsdDateTimeStr(timeStr.c_str());
     }
 
 };
 
-}
+} } // namespace opencog::pai
 
 #endif // _PAI_TEST_UTIL_H_

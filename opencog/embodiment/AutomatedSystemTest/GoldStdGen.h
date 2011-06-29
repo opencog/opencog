@@ -27,7 +27,9 @@
 
 #include <stdio.h>
 #include "GoldStdMessage.h"
-#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h> // This should be here (not in cc file) since it defines DATETIME_DECIMAL_RESOLUTION
+
+// This should be here (not in cc file) since it defines DATETIME_DECIMAL_RESOLUTION
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 #define SENT_MESSAGE_FLAG "SENT MESSAGE:\n"
 #define RECEIVED_MESSAGE_FLAG "RECEIVED MESSAGE:\n"

@@ -31,7 +31,7 @@ using namespace OperationalAvatarController;
 using namespace opencog;
 using namespace opencog::spatial;
 
-Control::AvatarInterface* LanguageComprehension::localAgent = NULL;
+opencog::control::AvatarInterface* LanguageComprehension::localAgent = NULL;
 
 #ifdef HAVE_GUILE
 // XXX TODO This code should not be using SCM directly, it should

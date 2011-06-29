@@ -101,7 +101,7 @@ private:
     /**
      * Component to deal with perceptions and actions from PVP proxy.
      */
-    PerceptionActionInterface::PAI * pai;
+    opencog::pai::PAI * pai;
 
     /**
      * Store metadata concerning a pet controlled by the OAC. Also implements
@@ -233,7 +233,7 @@ public:
      * @return The Percpetion/Action Interface object used to exchange
      *            (send and receive) data with virtual world.
      */
-    PerceptionActionInterface::PAI & getPAI();
+    opencog::pai::PAI & getPAI();
 
     /**
      * Return the pet's cognitive component. This component is responsible

@@ -29,10 +29,9 @@
 #include <string>
 #include <map>
 
-namespace Control
-{
+namespace opencog {
+namespace control {
 
-using namespace opencog;
 
 namespace ImitationLearningAlgo {
 static const char MOSES[] = "MOSES";
@@ -368,6 +367,6 @@ public:
     virtual void reset();
 
 }; // class
-}  // namespace Control
+}}  // namespace opencog::control
 
 #endif

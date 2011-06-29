@@ -41,7 +41,8 @@
 
 #define NUMBER_OF_COMBO_TREES 2
 
-using namespace PerceptionActionInterface;
+using namespace opencog;
+using namespace opencog::pai;
 using namespace combo;
 
 class ComboSelectInterpreterUTest
@@ -50,7 +51,7 @@ class ComboSelectInterpreterUTest
 protected:
 
     AtomSpace* atomSpace;
-    Control::SystemParameters parameters;
+    control::SystemParameters parameters;
     HandleSeq toUpdateHandles;
     std::list<ActionPlan> sentActionPlans;
     ResponsiveActionPlanSender *sender;

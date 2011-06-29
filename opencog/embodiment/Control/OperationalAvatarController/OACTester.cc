@@ -37,7 +37,7 @@ using namespace OperationalAvatarController;
 
 int main()
 {
-    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+    config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
 
     MessagingSystem::StringMessage *msg = new MessagingSystem::StringMessage("", "", "");
     int length;

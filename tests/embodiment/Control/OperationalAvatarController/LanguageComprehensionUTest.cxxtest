@@ -42,7 +42,7 @@
 using namespace std;
 
 using namespace OperationalAvatarController;
-using namespace Control;
+using namespace opencog::control;
 
 class LanguageComprehensionUTest : public CxxTest::TestSuite
 {

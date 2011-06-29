@@ -30,7 +30,7 @@
 #include <opencog/persist/xml/NMXmlExporter.h>
 
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 using namespace OperationalAvatarController;
 
 int main(int argc, char* argv[])
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
         printf("Wrong number of arguments\nUsage: %s <pvp_msg_xml_file1> [<pvp_msg_xml_file2>... [<pvp_msg_xml_fileN>]]\n", argv[0]);
         exit(-1);
     }
-    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+    config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
     if (fileExists(config().get("CONFIG_FILE").c_str())) {
         config().load(config().get("CONFIG_FILE").c_str());
     }

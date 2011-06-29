@@ -29,6 +29,7 @@
 
 using namespace MessagingSystem;
 using namespace opencog;
+using namespace opencog::control;
 
 void spawner_unexpected_handler()
 {
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
 
     Spawner *spawner = NULL;
     
-    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+    config(EmbodimentConfig::embodimentCreateInstance, true);
 
     // if exists load file with configuration parameters
     // IMPORTANT: this file should be the same for all executables that create

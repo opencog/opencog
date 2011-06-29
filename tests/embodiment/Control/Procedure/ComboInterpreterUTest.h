@@ -40,9 +40,9 @@
 
 #define NUMBER_OF_COMBO_TREES 2
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 using namespace combo;
-using namespace Control;
+using namespace opencog::control;
 using namespace opencog;
 
 class ComboInterpreterUTest

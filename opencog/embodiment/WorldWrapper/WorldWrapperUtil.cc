@@ -48,6 +48,7 @@
 using namespace PetCombo;
 using namespace boost::assign;
 using namespace opencog;
+using namespace opencog::pai;
 
 namespace WorldWrapper
 {
@@ -2042,7 +2043,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     // TODO is 30 secs enough?
                     //Note that by using getMostRecentAgentActionLinkWithinTime
                     //we handle in once the now and isInThePast cases
-                    unsigned long delay_past = 30 * PerceptionActionInterface::PAIUtils::getTimeFactor();
+                    unsigned long delay_past = 30 * PAIUtils::getTimeFactor();
                     unsigned long t_past = (delay_past < time ? time - delay_past : 0);
 
                     Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLink( atomSpace, def_obj, "group_command", Temporal( t_past, time ) );
@@ -2203,7 +2204,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     // TODO is 30 secs enough?
                     //Note that by using getMostRecentAgentActionLinkWithinTime
                     //we handle in once the now and isInThePast cases
-                    unsigned long delay_past = 30 * PerceptionActionInterface::PAIUtils::getTimeFactor();
+                    unsigned long delay_past = 30 * PAIUtils::getTimeFactor();
                     unsigned long t_past = (delay_past < time ? time - delay_past : 0);
                     Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(atomSpace,
                                              std::string(def_obj),
@@ -2325,7 +2326,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
             // look for the latest executed action (30 secs frame)
             // TODO is 30 secs enough?
-            unsigned long  t = time - (30 * PerceptionActionInterface::PAIUtils::getTimeFactor());
+            unsigned long  t = time - (30 * PAIUtils::getTimeFactor());
             Handle execLink = AtomSpaceUtil::getMostRecentPetSchemaExecLink(atomSpace, t, schemaSuccessful);
 
             // found no executed action in recent past,

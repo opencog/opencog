@@ -46,8 +46,7 @@
 
 #include <opencog/util/exceptions.h>
 
-namespace PerceptionActionInterface
-{
+namespace opencog { namespace pai {
 
 /**
  * Numeric codes for each action parameter type:
@@ -125,8 +124,8 @@ private:
     static bool existCode(ActionParamTypeCode code);
 };
 
-};
+std::ostream& operator<<(std::ostream& out, const ActionParamType& arg);
 
-std::ostream& operator<<(std::ostream& out, const PerceptionActionInterface::ActionParamType& arg);
+} } // namespace opencog::pai
 
 #endif //_ACTION_PARAM_TYPE_H_

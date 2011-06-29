@@ -30,7 +30,7 @@
 namespace AutomatedSystemTest
 {
 
-class TestConfig : public Control::EmbodimentConfig
+class TestConfig : public opencog::control::EmbodimentConfig
 {
 
 protected: 

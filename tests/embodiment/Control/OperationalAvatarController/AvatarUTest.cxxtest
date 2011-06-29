@@ -34,9 +34,9 @@
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace OperationalAvatarController;
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 using namespace opencog;
-using namespace Control;
+using namespace opencog::control;
 
 #include <iostream>
 using namespace std;
@@ -70,7 +70,7 @@ public:
 
         atomSpace = new AtomSpace();
         sender = new LSMessageSenderMock();
-        timestamp2 = PerceptionActionInterface::PAITestUtil::getCurrentTimestamp();
+        timestamp2 = PAITestUtil::getCurrentTimestamp();
         timestamp = timestamp2 - 30;
         printf("AvatarUTest(): timestamp = %lu, timestamp2 = %lu\n", timestamp, timestamp2);
         atomSpace->addNode(PET_NODE, petId);

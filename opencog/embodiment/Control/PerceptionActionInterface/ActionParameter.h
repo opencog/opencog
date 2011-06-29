@@ -36,8 +36,7 @@
 
 #include "ActionParamType.h"
 
-namespace PerceptionActionInterface
-{
+namespace opencog { namespace pai {
 
 using namespace std;
 using namespace boost;
@@ -207,6 +206,6 @@ public:
 
 };
 
-};
+} } // namespace opencog::pai
 
 #endif /*ACTIONPARAMETER_H_*/

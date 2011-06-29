@@ -26,9 +26,7 @@
 
 #include "ActionPlan.h"
 
-namespace PerceptionActionInterface
-{
-
+namespace opencog { namespace pai {
 
 class ActionPlanSender
 {
@@ -62,6 +60,6 @@ public:
 
 };
 
-} // namespace
+} } // namespace opencog::pai
 
 #endif /*ACTIONPLANSENDER_H_*/

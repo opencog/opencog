@@ -41,7 +41,7 @@ void OACMock::setConfig() {
     logger().enable();
 
     // Load config file and reset some configurations  
-    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+    config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
     
     if ( fileExists(config().get("CONFIG_FILE").c_str()) ) {
         config().load(config().get("CONFIG_FILE").c_str());
@@ -102,8 +102,8 @@ OAC & OACMock::createOAC()
         "127.0.0.1",        // NetworkElement ip 
         portNumber,         // NetworkElement port number
         zmqPublishPort,     // ZeroMQ port used by subscribers to get messages
-        PerceptionActionInterface::PAIUtils::getInternalId(agentBrainId.c_str()), // pet id 
-        PerceptionActionInterface::PAIUtils::getInternalId(ownerId.c_str()),      // owner id 
+        PAIUtils::getInternalId(agentBrainId.c_str()), // pet id 
+        PAIUtils::getInternalId(ownerId.c_str()),      // owner id 
         agentType,  // agent type
         agentTrait  // agent traits
     );

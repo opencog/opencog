@@ -27,11 +27,13 @@
 #include "WorldProvider.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
+using opencog::pai::PAI;
+
 class PAIWorldProvider : public WorldProvider
 {
-    PerceptionActionInterface::PAI* pai;
+    PAI* pai;
 public:
-    PAIWorldProvider(PerceptionActionInterface::PAI* _pai);
+    PAIWorldProvider(PAI* _pai);
     unsigned long getLatestSimWorldTimestamp() const;
     AtomSpace& getAtomSpace() const;
 };

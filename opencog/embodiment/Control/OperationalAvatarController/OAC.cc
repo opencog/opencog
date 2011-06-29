@@ -52,6 +52,7 @@ using namespace OperationalAvatarController;
 using namespace Procedure;
 using namespace PetCombo;
 using namespace opencog;
+using namespace opencog::pai;
 
 BaseServer* OAC::createInstance()
 {
@@ -97,7 +98,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                             atomSpace, petMessageSender);
 //    }
 
-    this->pai = new PerceptionActionInterface::PAI(*atomSpace, *planSender, *pet);
+    this->pai = new PAI(*atomSpace, *planSender, *pet);
 
     this->procedureRepository = new ProcedureRepository(*pai);
     this->procedureInterpreter = new ProcedureInterpreter(*pai);
@@ -298,7 +299,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     // (i.e., handshake with router is done)
     // Send SUCCESS_LOAD to PROXY, so that it can start sending perception messages
     char str[100];
-    sprintf(str, "SUCCESS LOAD %s %s", myId.c_str(), PerceptionActionInterface::PAIUtils::getExternalId(petId.c_str()).c_str());
+    sprintf(str, "SUCCESS LOAD %s %s", myId.c_str(), PAIUtils::getExternalId(petId.c_str()).c_str());
     StringMessage successLoad(myId, config().get("PROXY_ID"), str);
     logger().info("OAC spawned. Acking requestor");
     if (!sendMessage(successLoad)) {
@@ -527,7 +528,7 @@ void OAC::saveState()
 
     // Pet state saved, send success unload message to proxy
     char str[100];
-    sprintf(str, "SUCCESS UNLOAD %s %s", getID().c_str(), PerceptionActionInterface::PAIUtils::getExternalId(pet->getPetId().c_str()).c_str());
+    sprintf(str, "SUCCESS UNLOAD %s %s", getID().c_str(), PAIUtils::getExternalId(pet->getPetId().c_str()).c_str());
     StringMessage successUnload(getID(), config().get("PROXY_ID"), str);
     logger().info("OAC - OAC despawned (state saved). Acking requestor");
     if (!sendMessage(successUnload)) {
@@ -567,7 +568,7 @@ bool OAC::processSpawnerMessage(const std::string & spawnerMessage)
  * --------------------------------------
  */
 
-PerceptionActionInterface::PAI & OAC::getPAI()
+PAI & OAC::getPAI()
 {
     return *pai;
 }

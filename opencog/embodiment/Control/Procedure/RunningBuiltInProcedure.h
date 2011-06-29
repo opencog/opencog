@@ -34,7 +34,7 @@ class RunningBuiltInProcedure
 {
 
 public:
-    RunningBuiltInProcedure(const PerceptionActionInterface::PAI& _pai, const BuiltInProcedure& _p, const std::vector<combo::vertex>& _arguments);
+    RunningBuiltInProcedure(const opencog::pai::PAI& _pai, const BuiltInProcedure& _p, const std::vector<combo::vertex>& _arguments);
     ~RunningBuiltInProcedure();
 
     void run();
@@ -45,7 +45,7 @@ public:
 
 protected:
 
-    const PerceptionActionInterface::PAI& pai;
+    const opencog::pai::PAI& pai;
     const BuiltInProcedure& p;
     bool finished;
     bool failed;

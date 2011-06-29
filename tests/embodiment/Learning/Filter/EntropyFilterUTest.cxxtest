@@ -40,7 +40,7 @@
 //using namespace behavior;
 using namespace PetCombo;
 using namespace std;
-using namespace Control;
+using namespace opencog::control;
 using namespace opencog;
 
 #define ENTROPY_THRESHOLD 0.1

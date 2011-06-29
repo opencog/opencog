@@ -37,7 +37,7 @@ class PAIWorldWrapper : public WorldWrapperBase
 {
 public:
 
-    PAIWorldWrapper(PerceptionActionInterface::PAI& _pai, opencog::RandGen& _rng);
+    PAIWorldWrapper(opencog::pai::PAI& _pai, opencog::RandGen& _rng);
     ~PAIWorldWrapper();
 
     /**
@@ -73,8 +73,8 @@ public:
            combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
 private:
-    PerceptionActionInterface::PAI& pai;
-    PerceptionActionInterface::ActionPlanID planID;
+    opencog::pai::PAI& pai;
+    opencog::pai::ActionPlanID planID;
     opencog::RandGen& rng;
 
     // sometimes it is possible to know in advance whether the plan has failed
@@ -139,7 +139,7 @@ private:
                          float walkSpeed = 0);
 
     //! synthesize a PetAction obj from a subtree
-    PerceptionActionInterface::PetAction buildPetAction(sib_it from);
+    opencog::pai::PetAction buildPetAction(sib_it from);
 
     //! convert string to camelCase
     std::string toCamelCase(const std::string& str);

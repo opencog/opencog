@@ -33,8 +33,7 @@
 
 #include "PAI.h"
 
-namespace PerceptionActionInterface
-{
+namespace opencog { namespace pai {
 
 class ActionPlanDispatcher
 {
@@ -51,6 +50,6 @@ public:
     bool failed();
 };
 
-}
+} } // namespace opencog::pai
 
 #endif /*ACTIONPLANDISPATCHER_H_*/

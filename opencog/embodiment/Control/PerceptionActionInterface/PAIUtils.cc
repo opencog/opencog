@@ -29,7 +29,7 @@
 #include <xercesc/util/OutOfMemoryException.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 const int PAIUtils::MAX_TAG_LENGTH = 512;
 

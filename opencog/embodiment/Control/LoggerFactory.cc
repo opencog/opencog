@@ -27,8 +27,8 @@
 #include "string.h"
 #include <opencog/util/Config.h>
 
-using namespace Control;
 using namespace opencog;
+using namespace opencog::control;
 
 LoggerFactory::LoggerFactory()
 {

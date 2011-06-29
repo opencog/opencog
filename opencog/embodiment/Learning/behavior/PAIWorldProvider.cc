@@ -23,7 +23,7 @@
 
 #include "PAIWorldProvider.h"
 
-PAIWorldProvider::PAIWorldProvider(PerceptionActionInterface::PAI* _pai) : pai(_pai)
+PAIWorldProvider::PAIWorldProvider(opencog::pai::PAI* _pai) : pai(_pai)
 {}
 
 unsigned long PAIWorldProvider::getLatestSimWorldTimestamp() const

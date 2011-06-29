@@ -31,8 +31,8 @@
 #include <string>
 #include <exception>
 
-namespace PerceptionActionInterface
-{
+namespace opencog { namespace pai {
+
 using namespace std;
 
 /**
@@ -174,6 +174,6 @@ public:
     std::string stringRepresentation() const;
 
 }; // class
-}  // namespace
+} }  // namespace opencog::pai
 
 #endif

@@ -53,6 +53,7 @@ static const std::string wall = "wall";
 
 
 using namespace OperationalAvatarController;
+using namespace opencog::pai;
 
 class PredicatesUpdaterUTest :  public CxxTest::TestSuite
 {
@@ -116,7 +117,7 @@ public:
 
     void addSpaceInfoMock(double baseX, double baseY) {
         handles.clear();
-        unsigned long timestamp = PerceptionActionInterface::PAITestUtil::getCurrentTimestamp();
+        unsigned long timestamp = PAITestUtil::getCurrentTimestamp();
 
         TS_ASSERT(lastTimestamp != timestamp);
 
@@ -196,7 +197,7 @@ public:
 
         // add objs
         addSpaceInfoMock(10, 10);
-        updater->update(handles, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+        updater->update(handles, PAITestUtil::getCurrentTimestamp());
 
 
         printf("---------------------------------------------------------------\n");
@@ -317,7 +318,7 @@ public:
 
         // add objs
         addSpaceInfoMock(15, 15);
-        updater->update(handles, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+        updater->update(handles, PAITestUtil::getCurrentTimestamp());
 
         printf("---------------------------------------------------------------\n");
         printf("Round 02 - stick predicates - should move\n");
@@ -425,7 +426,7 @@ public:
 
         // add objs
         addSpaceInfoMock(15, 15);
-        updater->update(handles, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+        updater->update(handles, PAITestUtil::getCurrentTimestamp());
 
         printf("---------------------------------------------------------------\n");
         printf("Round 03 - stick predicates - should not move\n");

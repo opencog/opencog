@@ -277,7 +277,7 @@ void LS::initLearn(LearningServerMessages::LearnMessage * msg)
         ILAgent->initLearning(config().get_int("NUMBER_OF_ESTIMATIONS_PER_CYCLE"),
                               wp,
                               al,
-                              PerceptionActionInterface::PAIUtils::getInternalId(learningPet.c_str()),
+                              opencog::pai::PAIUtils::getInternalId(learningPet.c_str()),
                               ownerID,
                               avatarID,
                               learningSchema);

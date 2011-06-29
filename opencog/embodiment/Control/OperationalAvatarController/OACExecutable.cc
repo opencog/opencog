@@ -31,6 +31,7 @@
 
 using namespace OperationalAvatarController;
 using namespace opencog;
+using namespace opencog::pai;
 
 void opc_unexpected_handler()
 {
@@ -40,7 +41,7 @@ void opc_unexpected_handler()
 int main(int argc, char *argv[])
 {
     try {
-        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
         
         // if exists load file with configuration parameters
         // IMPORTANT: this file should be the same for all executables that create
@@ -100,8 +101,8 @@ int main(int argc, char *argv[])
             "127.0.0.1",    // NetworkElement ip 
             portNumber,     // NetworkElement port number
             argv[7],        // ZeroMQ port used by subscribers to get messages
-            PerceptionActionInterface::PAIUtils::getInternalId(argv[1]), // pet id 
-            PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), // owner id 
+            PAIUtils::getInternalId(argv[1]), // pet id 
+            PAIUtils::getInternalId(argv[2]), // owner id 
             argv[3], // agent type
             argv[4]  // agemt traits
         );

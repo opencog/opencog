@@ -25,7 +25,7 @@
 
 using namespace Procedure;
 
-ProcedureRepository::ProcedureRepository(PerceptionActionInterface::PAI& pai) :
+ProcedureRepository::ProcedureRepository(opencog::pai::PAI& pai) :
         builtInRepository(*(new BuiltInProcedureRepository(pai)))
 {
 

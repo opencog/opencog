@@ -76,7 +76,7 @@ bool PetMessageSender::sendFeedback(const std::string &petId, const std::string 
 {
 
     MessagingSystem::FeedbackMessage msg(ne->getID(), config().get("PROXY_ID"),
-                                         PerceptionActionInterface::PAIUtils::getExternalId(petId.c_str()), feedback);
+                                         opencog::pai::PAIUtils::getExternalId(petId.c_str()), feedback);
     return ne->sendMessage(msg);
 }
 

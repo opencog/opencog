@@ -28,7 +28,7 @@
 #include "BuiltInProcedureRepository.h"
 
 using namespace Procedure;
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 BuiltInProcedureRepository::BuiltInProcedureRepository(PAI& pai)
 {

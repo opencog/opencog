@@ -23,7 +23,7 @@
 
 #include "ActionPlanDispatcher.h"
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 ActionPlanDispatcher::ActionPlanDispatcher(PAI& _pai, const std::list<PetAction>&  _actionPlan) :
         pai(_pai),  actionPlan(_actionPlan)

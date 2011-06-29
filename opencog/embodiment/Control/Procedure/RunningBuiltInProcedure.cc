@@ -24,7 +24,7 @@
 #include "RunningBuiltInProcedure.h"
 
 using namespace Procedure;
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 RunningBuiltInProcedure::RunningBuiltInProcedure(const PAI& _pai, const BuiltInProcedure& _p, const std::vector<combo::vertex>& _arguments) : pai(_pai), p(_p), arguments(_arguments)
 {

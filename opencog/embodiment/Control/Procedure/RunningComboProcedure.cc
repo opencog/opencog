@@ -40,7 +40,7 @@ using namespace combo;
 using namespace opencog;
 using namespace opencog::spatial;
 using namespace boost::assign;
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 RunningComboProcedure::RunningComboProcedure(WorldWrapperBase& ww,
         const combo::combo_tree& tr,

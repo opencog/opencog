@@ -29,8 +29,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace Procedure;
-using namespace PerceptionActionInterface;
-using namespace Control;
+using namespace opencog::pai;
+using namespace opencog::control;
 using namespace opencog;
 
 class ProcedureInterpreterUTest :  public CxxTest::TestSuite

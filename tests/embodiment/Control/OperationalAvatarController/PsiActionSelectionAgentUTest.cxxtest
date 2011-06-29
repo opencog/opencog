@@ -41,7 +41,7 @@ public:
 
     static void destroySuite(PsiActionSelectionAgentUTest * suite) {
         delete suite;
-        system("./stop_embodiment.sh"); 
+        ::system("./stop_embodiment.sh"); 
     }
 
     /**

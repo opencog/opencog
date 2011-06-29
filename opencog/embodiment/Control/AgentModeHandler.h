@@ -28,8 +28,8 @@
 #include <vector>
 #include <sstream>
 
-namespace Control
-{
+namespace opencog {
+namespace control {
 
 /**
  * Interface responsible for handle all the specific tasks of an agent action mode
@@ -97,6 +97,6 @@ protected:
     std::map<std::string, std::string> properties;
 };
 
-}; // Control
+}; }; // opencog::control
 
 #endif // AGENT_MODE_HANDLER_H

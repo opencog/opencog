@@ -24,7 +24,7 @@
 #include "PetaverseErrorHandler.h"
 #include <opencog/util/Logger.h>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 void PetaverseErrorHandler::warning(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
 {

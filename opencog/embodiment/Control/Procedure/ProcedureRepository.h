@@ -46,7 +46,7 @@ private:
     ComboSelectProcedureRepository * comboSelectRepository;
 
 public:
-    ProcedureRepository(PerceptionActionInterface::PAI&);
+    ProcedureRepository(opencog::pai::PAI&);
     virtual ~ProcedureRepository();
     bool contains(const std::string& name) const;
     void remove(const std::string& name); //remove a combo procedure_call

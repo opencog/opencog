@@ -214,13 +214,20 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
 }
 
 void DimEmbedModule::embedAtomSpace(const Type& linkType,
-                                    const int numDimensions){    
+                                    const int _numDimensions)
+{
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
     //logger().info("starting embedding");
     clearEmbedding(linkType);
+
+    // Scheme wrapper doesn't deal with unsigned ints, so double check it's not
+    // negative, or zero for that matter
+    unsigned int numDimensions = 5;
+    if (_numDimensions > 0) numDimensions = _numDimensions;
+
     dimensionMap[linkType]=numDimensions;
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
@@ -229,7 +236,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     if(nodes.empty()) return;
     Handle bestChoice = nodes.back();
 
-    while((pivots.size() < numDimensions) && (!nodes.empty())){
+    while((pivots.size() < (unsigned int) numDimensions) && (!nodes.empty())){
         addPivot(bestChoice, linkType);
         logger().info("Pivot %d picked", pivots.size());
         nodes.erase(std::find(nodes.begin(), nodes.end(), bestChoice));
@@ -286,7 +293,7 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
             std::vector<double> embedding =
                 getEmbedVector(*it2,linkType);
             //Alter our embedding whenever we find a higher weight path
-            for(int i=0; i<embedding.size(); ++i) {
+            for(unsigned int i=0; i<embedding.size(); ++i) {
                 if(weight*embedding[i]>newEmbedding[i]) {
                     newEmbedding[i]=weight*embedding[i];
                 }
@@ -544,7 +551,7 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
             //is high enough, insert the cluster into the pQueue
             double quality = separation(it->first,l)*homogeneity(it->first,l);
             if(quality>threshold) {
-                if(clusters.size()<maxClusters) {
+                if( (int) clusters.size() < maxClusters) {
                     clusters.insert(cPair(quality,*it));
                 } else {
                     //if there is no room, but our new cluster is better

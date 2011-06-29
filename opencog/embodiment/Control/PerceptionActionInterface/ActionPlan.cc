@@ -34,7 +34,7 @@
 #include <iostream>
 #include <vector>
 
-using namespace PerceptionActionInterface;
+using namespace opencog::pai;
 
 
 ActionPlan::ActionPlan()

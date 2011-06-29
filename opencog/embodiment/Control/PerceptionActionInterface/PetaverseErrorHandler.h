@@ -31,8 +31,7 @@
 #include <xercesc/sax/SAXParseException.hpp>
 #include "PAIUtils.h"
 
-namespace PerceptionActionInterface
-{
+namespace opencog { namespace pai {
 
 class PetaverseErrorHandler : public XERCES_CPP_NAMESPACE::ErrorHandler
 {
@@ -48,6 +47,6 @@ public:
 
 };
 
-}
+} } // namespace opencog::pai
 
 #endif // PETAVERSES_ERROR_HANDLER_H_

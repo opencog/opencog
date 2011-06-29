@@ -24,12 +24,13 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 using std::string;
+using namespace opencog::pai;
 
 // Mock subclasses of ActionPlanSender
-class ResponsiveActionPlanSender : public PerceptionActionInterface::ActionPlanSender
+class ResponsiveActionPlanSender : public ActionPlanSender
 {
 private:
-    PerceptionActionInterface::PAI* pai;
+    PAI* pai;
     string pvpMsg;
 
 public:
@@ -37,10 +38,10 @@ public:
     ResponsiveActionPlanSender() {}
     virtual ~ResponsiveActionPlanSender() {}
 
-    void setPai(PerceptionActionInterface::PAI* _pai) {
+    void setPai(PAI* _pai) {
         pai = _pai;
     }
-    bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan) {
+    bool sendActionPlan(const ActionPlan& actionPlan) {
         printf("Action plan sent/executed successfully: %s\n", actionPlan.getID().c_str());
         printf("message:\n%s\n", actionPlan.getPVPmessage(pai->getAvatarInterface().getPetId()).c_str());
         // Create a XML PVP message with the action plan status
@@ -56,7 +57,7 @@ public:
         return true;
     }
 
-    bool sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan, unsigned int actionSequenceNum) {
+    bool sendSpecificActionFromPlan(const ActionPlan& actionPlan, unsigned int actionSequenceNum) {
         return true;
     }
 
@@ -77,23 +78,23 @@ public:
     }
 };
 
-class OKActionPlanSender : public PerceptionActionInterface::ActionPlanSender
+class OKActionPlanSender : public ActionPlanSender
 {
 private:
-    std::list<PerceptionActionInterface::ActionPlan>& plans;
+    std::list<ActionPlan>& plans;
 
 public:
 
-    OKActionPlanSender(std::list<PerceptionActionInterface::ActionPlan>& _plans) : plans(_plans) {}
+    OKActionPlanSender(std::list<ActionPlan>& _plans) : plans(_plans) {}
     virtual ~OKActionPlanSender() {}
 
-    bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan) {
+    bool sendActionPlan(const ActionPlan& actionPlan) {
         //printf("Action plan sent successfully\n");
         plans.push_back(actionPlan);
         return true;
     }
 
-    bool sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan, unsigned int actionSequenceNum) {
+    bool sendSpecificActionFromPlan(const ActionPlan& actionPlan, unsigned int actionSequenceNum) {
         return true;
     }
 
@@ -103,17 +104,17 @@ public:
 
 };
 
-class FailureActionPlanSender : public PerceptionActionInterface::ActionPlanSender
+class FailureActionPlanSender : public ActionPlanSender
 {
 public:
     virtual ~FailureActionPlanSender() {}
 
-    bool sendActionPlan(const PerceptionActionInterface::ActionPlan& actionPlan) {
+    bool sendActionPlan(const ActionPlan& actionPlan) {
         //printf("Could not sent Action plan\n");
         return false;
     }
 
-    bool sendSpecificActionFromPlan(const PerceptionActionInterface::ActionPlan& actionPlan, unsigned int actionSequenceNum) {
+    bool sendSpecificActionFromPlan(const ActionPlan& actionPlan, unsigned int actionSequenceNum) {
         return false;
     }
 

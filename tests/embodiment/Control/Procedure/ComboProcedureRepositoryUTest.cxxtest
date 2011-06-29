@@ -32,7 +32,7 @@
 using namespace Procedure;
 using namespace PetCombo;
 using namespace std;
-using namespace Control;
+using namespace opencog::control;
 using namespace opencog;
 
 #define NUMBER_OF_COMBO_TREES 2

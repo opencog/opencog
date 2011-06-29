@@ -70,19 +70,17 @@ public:
         }
         printf("Router notified message arrival. Requesting it...\n");
         retrieveMessages(-1);
-        printf("Messages retrieved:\n");
-        /*
+        /*printf("Messages retrieved:\n");
         for (int i = 0; i < messages->size(); i++) {
             printf("%s\n", messages->at(i)->getPlainTextRepresentation());
-        }
-        */
+        }*/
     }
 };
 
 int main(int argc, char *argv[])
 {
 
-    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+    config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
 
     printf("Handshaking with router...\n");
     MyElement *myElement = new MyElement(argv[1], argv[2], atoi(argv[3]), atoi(argv[4]));

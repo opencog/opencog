@@ -37,6 +37,8 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
+using namespace opencog::pai;
+
 namespace Procedure
 {
 
@@ -68,7 +70,7 @@ class ComboInterpreter : public boost::noncopyable
 {
 
 public:
-    ComboInterpreter(PerceptionActionInterface::PAI& p, opencog::RandGen& rng);
+    ComboInterpreter(PAI& p, opencog::RandGen& rng);
     ComboInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng);
     virtual ~ComboInterpreter();
 

@@ -37,7 +37,7 @@ using namespace MessagingSystem;
 using namespace boost;
 using namespace std;
 
-ComboInterpreter::ComboInterpreter(PerceptionActionInterface::PAI& p, opencog::RandGen& _rng) : rng(_rng), _ww(new WorldWrapper::PAIWorldWrapper(p, _rng)), _next(0)
+ComboInterpreter::ComboInterpreter(PAI& p, opencog::RandGen& _rng) : rng(_rng), _ww(new WorldWrapper::PAIWorldWrapper(p, _rng)), _next(0)
 {
 }
 

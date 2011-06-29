@@ -57,22 +57,21 @@
 #include "PetaverseDOMParser.h"
 #include "PetaverseErrorHandler.h"
 
-using namespace boost::posix_time;
-using namespace boost::gregorian;
-using namespace PerceptionActionInterface;
-using namespace Control;
-using namespace opencog;
-
-// The number of possible matchs for the DateTime RegEx. This will change if the
-// expression is altered.
-#define REGEX_OUTPUT_SIZE 8
-
 using XERCES_CPP_NAMESPACE::XMLString;
 using XERCES_CPP_NAMESPACE::DOMDocument;
 using XERCES_CPP_NAMESPACE::DOMElement;
 
-PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, AvatarInterface& _avatarInterface, unsigned long nextPlanID) :
-        atomSpace(_atomSpace), actionSender(_actionSender), avatarInterface(_avatarInterface), nextActionPlanId(nextPlanID)
+using namespace boost::posix_time;
+using namespace boost::gregorian;
+
+using namespace opencog::pai;
+using namespace opencog::control;
+using namespace opencog;
+
+PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
+        AvatarInterface& _avatarInterface, unsigned long nextPlanID) :
+    atomSpace(_atomSpace), actionSender(_actionSender),
+    avatarInterface(_avatarInterface), nextActionPlanId(nextPlanID)
 {
     PAIUtils::initializeXMLPlatform();
     xMin = -1;
@@ -777,20 +776,20 @@ void PAI::processPetSignal(DOMElement * element)
 
 //std::cout<<"timestamp = "<<timestamp<<" status = "<<status<<" action-plan-id = "<<planIdStr<<" name = "<<name<<std::endl; 
 
-    ActionStatus statusCode = PerceptionActionInterface::NONE;
+    ActionStatus statusCode = opencog::pai::NONE;
     if (planIdStr && strlen(planIdStr)) {
         if (!strcmp(status, DONE_ACTION_STATUS)) {
-            statusCode = PerceptionActionInterface::DONE;
+            statusCode = opencog::pai::DONE;
 //std::cout<<"ActionStatus: Done"<<std::endl; 
         } else if (!strcmp(status, ERROR_ACTION_STATUS)) {
-            statusCode = PerceptionActionInterface::ERROR;
+            statusCode = opencog::pai::ERROR;
 //std::cout<<"ActionStatus: ERROR"<<std::endl; 
         }
     }
 
     logger().fine("PAI - pet-id %s (%s), name: %s, status: %s, statusCode: %d", petID, internalPetId.c_str(), name, status, statusCode);
 
-    if (statusCode == PerceptionActionInterface::NONE) {
+    if (statusCode == opencog::pai::NONE) {
         // This is just a common pet physiological feeling (not a status for a previously sent action)
 
         XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -864,6 +863,10 @@ bool PAI::setLatestSimWorldTimestamp(unsigned long timestamp)
 
 unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) throw (opencog::RuntimeException, std::bad_exception)
 {
+// The number of possible matchs for the DateTime RegEx. This will change if the
+// expression is altered.
+#define REGEX_OUTPUT_SIZE 8
+
 
     // Date time format (complete)
     // YYYY-MM-DDThh:mm:ss.sTZD
@@ -2545,7 +2548,7 @@ void PAI::setPendingActionPlansFailed()
     for (it =  pendingActionPlans.begin(); it != pendingActionPlans.end(); it++) {
         ActionPlanID planId = it->first;
 
-        setActionPlanStatus(planId, 0, PerceptionActionInterface::ERROR,
+        setActionPlanStatus(planId, 0, opencog::pai::ERROR,
                             getLatestSimWorldTimestamp());
     }
 }
@@ -2581,40 +2584,39 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
             const char* predicateName;
 
             switch (statusCode) {
-            case PerceptionActionInterface::DONE: {
-                const PetAction& action = plan.getAction(seqNumber);
+            case opencog::pai::DONE:
+                {
+                    const PetAction& action = plan.getAction(seqNumber);
 
-                // if a GRAB action, set grabbed object
-                if (action.getType() == ActionType::GRAB()) {
-                    const std::list<ActionParameter>& params = action.getParameters();
+                    // if a GRAB action, set grabbed object
+                    if (action.getType() == ActionType::GRAB()) {
+                        const std::list<ActionParameter>& params = action.getParameters();
 
-                    foreach(ActionParameter param, params) {
-                        if (param.getName() == "target") {
-                            const Entity& entity = param.getEntityValue();
-                            AtomSpaceUtil::setupHoldingObject(  atomSpace,
-                                                                avatarInterface.getPetId( ),
-                                                                entity.id,
-                                                                getLatestSimWorldTimestamp() );
-                            avatarInterface.setGrabbedObj(entity.id);
+                        foreach(ActionParameter param, params) {
+                            if (param.getName() == "target") {
+                                const Entity& entity = param.getEntityValue();
+                                AtomSpaceUtil::setupHoldingObject(  atomSpace,
+                                                                    avatarInterface.getPetId( ),
+                                                                    entity.id,
+                                                                    getLatestSimWorldTimestamp() );
+                                avatarInterface.setGrabbedObj(entity.id);
+                            }
                         }
                     }
+                    // if a DROP or NUDGE_TO action unset grabbed object
+                    else if (action.getType() == ActionType::DROP() ||
+                             action.getType() == ActionType::NUDGE_TO()) {
+                        AtomSpaceUtil::setupHoldingObject(  atomSpace,
+                                                            avatarInterface.getPetId( ), "",
+                                                            getLatestSimWorldTimestamp() );
+                        avatarInterface.setGrabbedObj(std::string(""));
+                    }
+
+                    plan.markAsDone(seqNumber);
+                    predicateName = ACTION_DONE_PREDICATE_NAME;
+                    break;
                 }
-
-                // if a DROP or NUDGE_TO action unset grabbed object
-                else if (action.getType() == ActionType::DROP() ||
-                         action.getType() == ActionType::NUDGE_TO()) {
-                    AtomSpaceUtil::setupHoldingObject(  atomSpace,
-                                                        avatarInterface.getPetId( ), "",
-                                                        getLatestSimWorldTimestamp() );
-                    avatarInterface.setGrabbedObj(std::string(""));
-                }
-
-                plan.markAsDone(seqNumber);
-                predicateName = ACTION_DONE_PREDICATE_NAME;
-                break;
-            }
-
-            case PerceptionActionInterface::ERROR:
+            case opencog::pai::ERROR:
                 plan.markAsFailed(seqNumber);
                 predicateName = ACTION_FAILED_PREDICATE_NAME;
                 failedActionPlans.insert(planId);

@@ -29,7 +29,7 @@
 using namespace Procedure;
 
 ComboSelectInterpreter::ComboSelectInterpreter(
-        PerceptionActionInterface::PAI& pai, opencog::RandGen& rng)
+        opencog::pai::PAI& pai, opencog::RandGen& rng)
 {
     this->comboInterpreter = new ComboInterpreter(pai, rng);
     this->next = 0;

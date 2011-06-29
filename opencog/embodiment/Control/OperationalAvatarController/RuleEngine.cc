@@ -1790,7 +1790,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
 {
     unsigned long timeWindow =
         boost::numeric_cast<unsigned long>(config().get_double("RL_TIME_WINDOW") *
-                                           PerceptionActionInterface::PAIUtils::getTimeFactor());
+                                           opencog::pai::PAIUtils::getTimeFactor());
     float petaverseTimePerSlot =
         (float)timeWindow / this->gaussianVector.size();
 

@@ -23,16 +23,16 @@
 
 #ifndef PETAVERSES_DOM_PARSERT_H_
 #define PETAVERSES_DOM_PARSERT_H_
-/**
- * This is an extension of XercesDOMParser to log the parse errors according with Petaverse log policy.
- */
 
 #include <xercesc/parsers/XercesDOMParser.hpp>
 #include "PAIUtils.h"
 
-namespace PerceptionActionInterface
-{
+namespace opencog { namespace pai {
 
+/**
+ * This is an extension of XercesDOMParser to log the parse errors according
+ * with Petaverse log policy.
+ */
 class PetaverseDOMParser : public XERCES_CPP_NAMESPACE::XercesDOMParser
 {
 
@@ -53,6 +53,6 @@ public:
 
 };
 
-}
+} } // namespace opencog::pai
 
 #endif // PETAVERSES_DOM_PARSERT_H_

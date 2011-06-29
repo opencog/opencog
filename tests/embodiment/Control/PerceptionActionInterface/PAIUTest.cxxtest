@@ -44,9 +44,9 @@
 
 #include <opencog/guile/load-file.h>
 
-using namespace PerceptionActionInterface;
-using namespace Control;
 using namespace opencog;
+using namespace opencog::pai;
+using namespace opencog::control;
 
 std::list<ActionPlan> sentActionPlans;
 
@@ -70,7 +70,7 @@ public:
     }
 
     void testConstructor() {
-        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
@@ -92,7 +92,7 @@ public:
 
 #define NUM_PLANS 100
     void testCreateActionPlan() {
-        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config(EmbodimentConfig::embodimentCreateInstance, true);
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
@@ -118,7 +118,7 @@ public:
     }
 
     void testSendActionPlan() {
-        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config(EmbodimentConfig::embodimentCreateInstance, true);
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
@@ -161,7 +161,7 @@ public:
 
     void testAddAction() {
         printf("testAddAction\n");
-        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config(EmbodimentConfig::embodimentCreateInstance, true);
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
@@ -188,7 +188,7 @@ public:
         pai.addAction(plan2, walkAction);
         pai.addAction(plan2, PetAction(ActionType::BARK()));
         PetAction eatAction(ActionType::EAT());
-        eatAction.addParameter(ActionParameter("object", ActionParamType::ENTITY(), PerceptionActionInterface::Entity(PAIUtils::getInternalId("10"), "pet")));
+        eatAction.addParameter(ActionParameter("object", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("10"), "pet")));
         pai.addAction(plan2, eatAction);
         PetAction flyAction(ActionType::FLY());
         flyAction.addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(1.2, 1.3, 1.4)));
@@ -209,7 +209,7 @@ public:
     void testProcessPVPMessage() {
         printf("testProcessPVPMessage\n");
         HandleSeq toUpdateHandles;
-        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config(EmbodimentConfig::embodimentCreateInstance, true);
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
@@ -235,7 +235,7 @@ public:
         TS_ASSERT(planId == "10");
 
         PetAction action1(ActionType::BARK());
-        action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), PerceptionActionInterface::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
+        action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
         action1.addParameter(ActionParameter("duration", ActionParamType::FLOAT(), "1.0"));
         ActionID actionId1 = pai.addAction(planId, action1);
 
@@ -259,7 +259,7 @@ public:
         TS_ASSERT(planId == "12");
 
         PetAction action4(ActionType::GRAB());
-        action4.addParameter(ActionParameter("target", ActionParamType::ENTITY(), PerceptionActionInterface::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
+        action4.addParameter(ActionParameter("target", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
         ActionID actionId4 = pai.addAction(planId, action4);
 
         pai.sendActionPlan(planId);
@@ -520,7 +520,7 @@ public:
 
             //Action parameters:
             //action1.addParameter(ActionParameter("duration", ActionParamType::FLOAT(), "1.0"));
-            //action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), PerceptionActionInterface::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
+            //action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
             Handle avatarNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("Wynx").c_str());
             TS_ASSERT(Handle::compare(avatarNode, Handle::UNDEFINED));
             schemaListLinkOutgoing.push_back(avatarNode);
@@ -1424,7 +1424,7 @@ public:
         TS_ASSERT(t2 <= t1 + 200); // 1 more second of tolerance
 #endif
 
-        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config(EmbodimentConfig::embodimentCreateInstance, true);
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
@@ -1490,7 +1490,7 @@ public:
     void testProcessPVPMessageWithScheme(){
         printf("testProcessPVPMessageWithScheme\n");
         HandleSeq toUpdateHandles;
-        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config(EmbodimentConfig::embodimentCreateInstance, true);
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());

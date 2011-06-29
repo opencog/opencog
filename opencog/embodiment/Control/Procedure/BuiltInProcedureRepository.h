@@ -43,7 +43,7 @@ private:
     void add(BuiltInProcedure* proc);
 
 public:
-    BuiltInProcedureRepository(PerceptionActionInterface::PAI&);
+    BuiltInProcedureRepository(opencog::pai::PAI&);
     ~BuiltInProcedureRepository();
 
     bool contains(const std::string& name) const;
