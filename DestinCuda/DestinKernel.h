@@ -45,7 +45,6 @@ private:
 	int sizeOfNodeData;
 	int sizeOfNodes;
 
-	float *mCentroidsVectorData;
 	float *dCentroidsVectorData;
 	float *mCentroidsDistance;
 	float *dCentroidsDistance;
@@ -57,7 +56,7 @@ private:
 	int *dWinningCentroids;
 	int *mCentroidWinCounter;
 
-	void WriteData(stringstream& xml, float *Input);
+	void WriteData( stringstream& xml );
 
 public:
 	DestinKernel( void );

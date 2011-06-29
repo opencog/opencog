@@ -35,7 +35,6 @@ DestinKernel::DestinKernel( void )
 
 DestinKernel::~DestinKernel( void )
 {
-    free ( mCentroidsVectorData );
     cudaFree( dCentroidsVectorData );
     free ( mCentroidsDistance );
     cudaFree( dCentroidsDistance );
@@ -100,9 +99,6 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     mNodeOutput = new float[sizeOfNodeData];
     cudaMalloc( (void**)&dNodeOutput, sizeOfNodeData*sizeof(float) );
 
-    // The layer data is the one that hold all vectors for all centroids inside each layer
-    // TODO: This should not be declared on host (it's on the GPU don't need to be moved only in case of debugging)
-    mCentroidsVectorData = new float[sizeOfLayerData];
     cudaMalloc( (void**)&dCentroidsVectorData, sizeOfLayerData*sizeof(float) );
     // This is to fill the dLayerData with all random numbers between 0.0 and 1.0
     curandGenerateUniform( gen, dCentroidsVectorData, sizeOfLayerData );
@@ -132,20 +128,15 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     sharedMem = (mStates+mStates)*sizeof(float);
     CalculateOutput<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dNodeOutput );
 
-    this->WriteData(xml,Input);
+    this->WriteData(xml);
 }
 
-void DestinKernel::WriteData(stringstream& xml, float *Input)
+void DestinKernel::WriteData( stringstream& xml )
 {
     cudaMemcpy(mCentroidsDistance, dCentroidsDistance, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mCentroidStarvation, dCentroidStarvation, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mNodeOutput, dNodeOutput, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mWinningCentroids, dWinningCentroids, sizeOfNodes*sizeof(int), cudaMemcpyDeviceToHost);
-    // TODO: I should not copy this
-    cudaMemcpy(mCentroidsVectorData, dCentroidsVectorData, sizeOfLayerData*sizeof(float), cudaMemcpyDeviceToHost);
-    int inputSize = mRows*mCols*mInputDimensionlity;
-    float* Image = new float[inputSize];
-    cudaMemcpy(Image, Input, inputSize*sizeof(float), cudaMemcpyDeviceToHost);
 
     xml << "<layer id=\"" << mID << "\">" << endl;
     for(int r=0;r<mRows;r++)
@@ -156,17 +147,6 @@ void DestinKernel::WriteData(stringstream& xml, float *Input)
             mCentroidWinCounter[(c+r*mCols)*mStates+winningCentroid] += 1;
             xml << "<node id=\"" << r*mCols+c << "\">" << endl;
             xml << "<winningCentroid>" << mWinningCentroids[r*mCols+c] << "</winningCentroid>" << endl;
-            // This is not fun (O'RLY)
-            cout << "Debug vectors:" << endl;
-            cout << "Layer: " << mID << " Node: " << r*mCols+c << endl;
-            for(int in=0;in<mInputDimensionlity;in++)
-            {
-                // matching input data: tid + bid * InputDimensionlity
-                // centroid vector data: InputDimensionlity*States*bid+centroid*InputDimensionlity+tid
-                cout << "Input <-> Vector: " << Image[in+(c+r*mCols)*mInputDimensionlity];
-                cout << " <-> ";
-                cout << mCentroidsVectorData[mInputDimensionlity*mStates*(c+r*mCols)+0*mInputDimensionlity+in] << endl;
-            }
             for(int s=0;s<mStates;s++)
             {
                 xml << "<centroid id=\"" << s << "\" ";
