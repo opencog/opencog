@@ -983,12 +983,18 @@ void PAI::processInstruction(DOMElement * element)
     XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* timestamp = XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
-    if (!setLatestSimWorldTimestamp(tsValue)) {
-        logger().error("PAI - Received old timestamp in instruction => Message discarded!");
-        XMLString::release(&timestamp);
-        return;
-    }
 
+    // Note: Discard the time stamp from RelexServer. Because RelexServer and 
+    //       unity game server would probably run on two different machines, 
+    //       one in Linux and the other in Windows, we can not trust both time
+    //       stamps. 
+    //
+//    if (!setLatestSimWorldTimestamp(tsValue)) {
+//        logger().error("PAI - Received old timestamp in instruction => Message discarded!");
+//        XMLString::release(&timestamp);
+//        return;
+//    }
+    
     /// getting pet-id atribute value
     XMLString::transcode(PET_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* petID = XMLString::transcode(element->getAttribute(tag));

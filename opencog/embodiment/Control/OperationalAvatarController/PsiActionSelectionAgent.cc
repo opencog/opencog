@@ -316,7 +316,7 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
                 content = ""; 
 
             tempOutgoingSet.clear();
-            tempOutgoingSet.push_back( atomSpace.addNode(WORD_NODE, content) );
+            tempOutgoingSet.push_back( atomSpace.addNode(SENTENCE_NODE, content) );
             tempOutgoingSet.push_back( atomSpace.addNode(OBJECT_NODE, listerner) );
             hSpeakActionArgument = atomSpace.addLink(LIST_LINK, tempOutgoingSet); 
 

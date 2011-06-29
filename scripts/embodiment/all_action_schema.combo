@@ -101,7 +101,7 @@ random_step_searching(0) :=
 
 #wander(0) := random_step_searching
 
-#random_search(0) := random_step_searching
+random_search(0) := random_step_searching
 
 #play_with_grab_and_drop(1) := and_seq( goto_obj(#1 2) grab(#1) drop )
 

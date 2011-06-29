@@ -157,7 +157,7 @@ public:
             fin.close();
         }
         {
-            ifstream fin(PROJECT_SOURCE_DIR "/scripts/embodiment/rules_action_schemata.combo");
+            ifstream fin(PROJECT_SOURCE_DIR "/scripts/embodiment/multiverse_action_schema.combo");
 
             int n = 0;
             if (fin.good()) {
