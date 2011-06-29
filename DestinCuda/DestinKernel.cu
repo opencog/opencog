@@ -14,10 +14,10 @@ const int AmountThreads = 128;
 
 using namespace std;
 
-__global__ void CalculateDistance( int States, int InputDimensionlity, float *InputData, float *CentroidVectorData, float *CentroidDist, float *CentroidStarvation );
+__global__ void CalculateDistance( int States, int InputDimensionlity, float *InputData, float *CentroidVectorData, float *CentroidDist, float *CentroidStarvation);
 __global__ void CalculateWinningCentroids( int States, float *CentroidDist, int *WinningCentroids );
 __global__ void UpdateStarvation( int States, float StarvationCoefficient, int *WinningCentroids, float *CentroidStarvation );
-__global__ void UpdateWinningCentroids( int States, int InputDimensionlity, float LearningRate, float *InputData, float *CentroidVectorData, int *WinningCentroids );
+__global__ void UpdateWinningCentroids( int States, int InputDimensionlity, float LearningRate, float *InputData, float *CentroidVectorData, int *WinningCentroids, float *CentroidDist );
 __global__ void CalculateOutput( int States, float *CentroidDist, float *Output );
 
 DestinKernel::DestinKernel( void )
@@ -101,6 +101,7 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     cudaMalloc( (void**)&dNodeOutput, sizeOfNodeData*sizeof(float) );
 
     // The layer data is the one that hold all vectors for all centroids inside each layer
+    // TODO: This should not be declared on host (it's on the GPU don't need to be moved only in case of debugging)
     mCentroidsVectorData = new float[sizeOfLayerData];
     cudaMalloc( (void**)&dCentroidsVectorData, sizeOfLayerData*sizeof(float) );
     // This is to fill the dLayerData with all random numbers between 0.0 and 1.0
@@ -114,30 +115,37 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     // Grid is the amount of blocks inside a grid.
     dim3 grid( mCols, mRows );
     // Cause of the use of dynamic shared memory you have to tell the kernel how much shared memory space you need for each block.
-    int sharedMem = 0;
+    int sharedMem;
     // The launch of the kernels itself with centroids(states), dimension, input data and the Data of the layer itself
+    // Calculating the distance of the centroids to a observation
     sharedMem = (mInputDimensionlity+mInputDimensionlity)*sizeof(float);
     CalculateDistance<<<grid, threads, sharedMem>>>( mStates, mInputDimensionlity, Input, dCentroidsVectorData, dCentroidsDistance, dCentroidStarvation );
-
+    // Kernel for finding the winning centroids
     sharedMem = (mStates+mStates)*sizeof(float);
     CalculateWinningCentroids<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dWinningCentroids );
-
+    // Kernel for starvation updates
     UpdateStarvation<<<grid, threads>>>( mStates, mSTARVATION_COEFFICIENT, dWinningCentroids, dCentroidStarvation );
-
-    UpdateWinningCentroids<<<grid, threads>>>( mStates, mInputDimensionlity, mLearningRate, Input, dCentroidsVectorData, dWinningCentroids );
-
+    // Kernel for updating winning centroids
+    sharedMem = mInputDimensionlity*sizeof(float);
+    UpdateWinningCentroids<<<grid, threads, sharedMem>>>( mStates, mInputDimensionlity, mLearningRate, Input, dCentroidsVectorData, dWinningCentroids, dCentroidsDistance );
+    // Kernel for calculating output
     sharedMem = (mStates+mStates)*sizeof(float);
     CalculateOutput<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dNodeOutput );
 
-    this->WriteData(xml);
+    this->WriteData(xml,Input);
 }
 
-void DestinKernel::WriteData(stringstream& xml)
+void DestinKernel::WriteData(stringstream& xml, float *Input)
 {
     cudaMemcpy(mCentroidsDistance, dCentroidsDistance, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mCentroidStarvation, dCentroidStarvation, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mNodeOutput, dNodeOutput, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mWinningCentroids, dWinningCentroids, sizeOfNodes*sizeof(int), cudaMemcpyDeviceToHost);
+    // TODO: I should not copy this
+    cudaMemcpy(mCentroidsVectorData, dCentroidsVectorData, sizeOfLayerData*sizeof(float), cudaMemcpyDeviceToHost);
+    int inputSize = mRows*mCols*mInputDimensionlity;
+    float* Image = new float[inputSize];
+    cudaMemcpy(Image, Input, inputSize*sizeof(float), cudaMemcpyDeviceToHost);
 
     xml << "<layer id=\"" << mID << "\">" << endl;
     for(int r=0;r<mRows;r++)
@@ -148,6 +156,17 @@ void DestinKernel::WriteData(stringstream& xml)
             mCentroidWinCounter[(c+r*mCols)*mStates+winningCentroid] += 1;
             xml << "<node id=\"" << r*mCols+c << "\">" << endl;
             xml << "<winningCentroid>" << mWinningCentroids[r*mCols+c] << "</winningCentroid>" << endl;
+            // This is not fun (O'RLY)
+            cout << "Debug vectors:" << endl;
+            cout << "Layer: " << mID << " Node: " << r*mCols+c << endl;
+            for(int in=0;in<mInputDimensionlity;in++)
+            {
+                // matching input data: tid + bid * InputDimensionlity
+                // centroid vector data: InputDimensionlity*States*bid+centroid*InputDimensionlity+tid
+                cout << "Input <-> Vector: " << Image[in+(c+r*mCols)*mInputDimensionlity];
+                cout << " <-> ";
+                cout << mCentroidsVectorData[mInputDimensionlity*mStates*(c+r*mCols)+0*mInputDimensionlity+in] << endl;
+            }
             for(int s=0;s<mStates;s++)
             {
                 xml << "<centroid id=\"" << s << "\" ";
@@ -331,8 +350,9 @@ __global__ void UpdateStarvation( int States, float StarvationCoefficient, int *
 }
 
 // Move the winning centroids closer to the observation
-__global__ void UpdateWinningCentroids( int States, int InputDimensionlity, float LearningRate, float *InputData, float *CentroidVectorData, int *WinningCentroids )
+__global__ void UpdateWinningCentroids( int States, int InputDimensionlity, float LearningRate, float *InputData, float *CentroidVectorData, int *WinningCentroids, float *CentroidDist )
 {
+    extern __shared__ float newDistance[];
     int tid = threadIdx.x;
     int bid = blockIdx.x + blockIdx.y * gridDim.x;
 
@@ -343,10 +363,42 @@ __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, floa
     {
         pos = InputDimensionlity*States*bid+centroid*InputDimensionlity+tid;
         temp = CentroidVectorData[pos];
-        CentroidVectorData[pos] = temp-(temp -InputData[tid])*LearningRate;
+        temp = temp -( temp - InputData[tid + bid * InputDimensionlity] ) * LearningRate;
+        CentroidVectorData[pos] = temp;
+        newDistance[tid] = temp;
 
         tid += blockDim.x;
         pos += blockDim.x;
+    }
+    __syncthreads();
+
+    int dOld = InputDimensionlity;
+    int d = InputDimensionlity >> 1;
+    while (d != 0)
+    {
+        tid = threadIdx.x;
+        dOld = dOld - d*2;
+        while(tid < d)
+        {
+            newDistance[tid] += newDistance[tid + d];
+            if (dOld == 1 && tid == d-1)
+            {
+                // special case of odd numbers
+                newDistance[tid] += newDistance[tid + d + 1];
+            }
+            tid += blockDim.x;
+        }
+        // Sync moment before starting with next iteration of reduction.
+        __syncthreads();
+
+        dOld = d;
+        d >>= 1;
+    }
+
+    tid = threadIdx.x;
+    if(tid == 0)
+    {
+        CentroidDist[States*bid+centroid] = sqrt(newDistance[0]);
     }
 }
 
