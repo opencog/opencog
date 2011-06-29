@@ -36,14 +36,14 @@ DestinKernel::DestinKernel( void )
 DestinKernel::~DestinKernel( void )
 {
     cudaFree( dCentroidsVectorData );
-    free ( mCentroidsDistance );
-    cudaFree( dCentroidsDistance );
-    free ( mCentroidStarvation );
-    cudaFree( dCentroidStarvation );
-    free ( mWinningCentroids );
-    cudaFree( dWinningCentroids );
-    free ( mNodeOutput );
     cudaFree( dNodeOutput );
+    cudaFree( dCentroidsDistance );
+    cudaFree( dCentroidStarvation );
+    cudaFree( dWinningCentroids );
+    free ( mCentroidsDistance );
+    free ( mCentroidStarvation );
+    free ( mWinningCentroids );
+    free ( mNodeOutput );
     free(mCentroidWinCounter);
     cout << "Kernel destroyed" << endl;
 }
