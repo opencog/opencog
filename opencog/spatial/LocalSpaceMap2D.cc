@@ -277,22 +277,23 @@ void LocalSpaceMap2D::save( FILE* fp ) const
 void LocalSpaceMap2D::load( FILE* fp )
 {
     unsigned int numberOfObjects;
-    fread(&numberOfObjects, sizeof(unsigned int), 1, fp);
+    size_t readSize;
+    readSize = fread(&numberOfObjects, sizeof(unsigned int), 1, fp);
 
     for (unsigned int i = 0; i < numberOfObjects; ++i) {
 
         unsigned int length;
-        fread(&length, sizeof(unsigned int), 1, fp);
+        readSize = fread(&length, sizeof(unsigned int), 1, fp);
 
         char* id = new char[length+1];
-        fread(id, sizeof(char), length, fp);
+        readSize = fread(id, sizeof(char), length, fp);
         id[length] = '\0';
 
         spatial::ObjectMetaData metadata;
-        fread(&metadata, sizeof(spatial::ObjectMetaData), 1, fp);
+        readSize = fread(&metadata, sizeof(spatial::ObjectMetaData), 1, fp);
 
         bool isObstacle;
-        fread(&isObstacle, sizeof(bool), 1, fp);
+        readSize = fread(&isObstacle, sizeof(bool), 1, fp);
 
         addObject(std::string(id), metadata, isObstacle );
 
