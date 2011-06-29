@@ -14,7 +14,7 @@ const int AmountThreads = 128;
 
 using namespace std;
 
-__global__ void CalculateDistance( int States, int InputDimensionlity, float *InputData, float *CentroidVectorData, float *CentroidDist, float *CentroidStarvation);
+__global__ void CalculateDistance( int States, int InputDimensionlity, float *InputData, float *CentroidVectorData, float *CentroidDist, float *CentroidStarvation );
 __global__ void CalculateWinningCentroids( int States, float *CentroidDist, int *WinningCentroids );
 __global__ void UpdateStarvation( int States, float StarvationCoefficient, int *WinningCentroids, float *CentroidStarvation );
 __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, float LearningRate, float *InputData, float *CentroidVectorData, int *WinningCentroids );
@@ -114,15 +114,21 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     // Grid is the amount of blocks inside a grid.
     dim3 grid( mCols, mRows );
     // Cause of the use of dynamic shared memory you have to tell the kernel how much shared memory space you need for each block.
-    int sharedMem = (mInputDimensionlity+mInputDimensionlity)*sizeof(float);
-    // The launch of the kernel itself with centroids(states), dimension, input data and the Data of the layer itself
-
+    int sharedMem = 0;
+    // The launch of the kernels itself with centroids(states), dimension, input data and the Data of the layer itself
+    sharedMem = (mInputDimensionlity+mInputDimensionlity)*sizeof(float);
     CalculateDistance<<<grid, threads, sharedMem>>>( mStates, mInputDimensionlity, Input, dCentroidsVectorData, dCentroidsDistance, dCentroidStarvation );
+
     sharedMem = (mStates+mStates)*sizeof(float);
     CalculateWinningCentroids<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dWinningCentroids );
+
     UpdateStarvation<<<grid, threads>>>( mStates, mSTARVATION_COEFFICIENT, dWinningCentroids, dCentroidStarvation );
+
     UpdateWinningCentroids<<<grid, threads>>>( mStates, mInputDimensionlity, mLearningRate, Input, dCentroidsVectorData, dWinningCentroids );
+
+    sharedMem = (mStates+mStates)*sizeof(float);
     CalculateOutput<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dNodeOutput );
+
     this->WriteData(xml);
 }
 
@@ -205,10 +211,10 @@ __global__ void CalculateDistance( int States, int InputDimensionlity, float *In
         // all threads have to wait here so we know all distance have been calculated
         __syncthreads();
 
+        // Cause DeSTIN don't work with numbers that are 2^? we have to check for odd numbers
+        int dOld = InputDimensionlity;
         // bite wise divide by 2 (should be faster the /2)
         int d = InputDimensionlity >> 1;
-        // Cause DeSTIN don't work with numbers that are 2^? we have to check for odd numbers
-        int dOld = d*2;
         // a sum reduction, This is a common trick on CUDA to add shared memory instead of striding true memory
         // You have to use half the memory each step and each thread will add itself to with the other half.
         while (d != 0)
@@ -265,8 +271,8 @@ __global__ void CalculateWinningCentroids( int States, float *CentroidDist, int 
     }
     __syncthreads();
 
+    int dOld = States;
     int d = States >> 1;
-    int dOld = d*2;
     while (d != 0)
     {
         tid = threadIdx.x;
@@ -360,8 +366,8 @@ __global__ void CalculateOutput( int States, float *CentroidDist, float *Output 
     }
     __syncthreads();
 
+    int dOld = States;
     int d = States >> 1;
-    int dOld = d*2;
     while (d != 0)
     {
         tid = threadIdx.x;
