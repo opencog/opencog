@@ -19,6 +19,11 @@ AUTOMATED_SYSTEM_TESTS          = false
 #       if you want to use unity world now, please set the PSI_DEMANDS carefully, 
 #       since many demands are not available for the moment.  
 ENABLE_UNITY_CONNECTOR          = false
+# There are two modes of action plan sending procedure. One is to send the whole action
+# plan to client at one time, the other is to extract individual actions from an action
+# plan and to send them one by one. This switch controls the mode. While extracted sending
+# mode seems to affect the fluency of actions in the virtual world, it is turned off by 
+# default.
 EXTRACTED_ACTION_MODE           = false
 
 # IP and port used by subscribers to get messages from mind agents via ZeroMQ
