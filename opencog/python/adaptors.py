@@ -18,8 +18,9 @@ class ForestExtractor:
         self.writer = writer
         
         # policy
-        # Whether to create miner-friendly output, rather than human-friendly output
-        self.miner_friendly = False
+        # Whether to create miner-friendly output, rather than human-friendly output.
+        # Makes it output all object-nodes with the same label. May be more useful for visualisation anyway.
+        self.miner_friendly = True
         # Only affects output
         self.compact_binary_links = True
         
@@ -43,8 +44,13 @@ class ForestExtractor:
         # For each object, for each predsize, for each slot, the list of preds. (Indexes into self.all_trees)
         self.incoming = {}
 
+    class UnwantedAtomException(Exception):
+        pass
+
     def extractTree(self,  atom, objects):
-        if self.is_object(atom):
+        if not self.include_atom(atom):
+            raise self.UnwantedAtomException
+        elif self.is_object(atom):
             objects.append(atom)
             self.i+=1
             return tree(self.i-1)
@@ -56,13 +62,16 @@ class ForestExtractor:
 
     def extractForest(self):
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
-        for link in [x for x in self.a.get_atoms_by_type(t.Link) if x.tv.mean > 0 and x.tv.count > 0]:
+        for link in [x for x in self.a.get_atoms_by_type(t.Link) if x.tv.mean > 0.5 and x.tv.count > 0]:
             if not self.include_tree(link): continue
             
             objects = []            
             #print self.extractTree(link, objects),  objects, self.i
             self.i = 0
-            tree = self.extractTree(link, objects)
+            try:
+                tree = self.extractTree(link, objects)
+            except(self.UnwantedAtomException):
+                continue
             objects = tuple(objects)
             
             #print tree,  [str(o) for o in objects]
@@ -103,24 +112,6 @@ class ForestExtractor:
                     self.incoming[obj][size][slot] = []
                 self.incoming[obj][size][slot].append(tree_id)
 
-#    def tree_to_string(self,  tree):
-#
-#        def helper(treenode):            
-#            if isinstance(treenode ,  tuple):
-#                ret = str(treenode[0])+'('
-#                ret+= ' '.join([helper(x) for x in treenode[1:]])
-#                ret+= ')'
-#                return ret
-#            elif isinstance(treenode,  int):
-#                return str(treenode)
-#            else:
-#                return treenode.name+':'+treenode.type_name
-#        
-#        ret = helper(tree)
-#        # haxx - because SUBDUE allocates a buffer of size 256!
-#        ret = ret[:200]
-#        return ret
-
     def output_tree(self, atom,  tree,  bindings):
         vertex_name = str(tree)
         
@@ -145,24 +136,32 @@ class ForestExtractor:
         self.writer.stop()
 
     def is_object(self,  atom):
-        return atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode) or atom.is_a(t.ConceptNode)
+        return atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode)
         
     def object_label(self,  atom):
         return 'some_'+atom.type_name
 
-    # NOT USED YET
-    def include_node(self,  node):
-        """Whether to include a given node in the results. If it is not included, all trees containing it will be ignored as well."""
-        include = True
-        if (a.type == t.PredicateNode and a.name == "proximity"): include = False
-        
+    def include_atom(self,  atom):
+        """Whether to include a given atom in the results. If it is not included, all trees containing it will be ignored as well."""
+        if atom.is_node():
+            if atom.name in ["proximity", "near", 'next', "AGISIM_rotation", "AGISIM_position", "SpaceMap", "inside_pet_fov", 'walk', 'turn',
+                             'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst']: # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
+                return False
+        else:
+            if (atom.is_a(t.SimultaneousEquivalenceLink) or atom.is_a(t.SimilarityLink) or atom.is_a(t.ImplicationLink) or
+                atom.is_a(t.AtTimeLink) ):
+                return False
+
+        return True
+    
     def include_tree(self,  link):
         """Whether to make a separate tree corresponding to this link. If you don't, links in its outgoing set can
         still get their own trees."""
-        # TODO check the TruthValue the same way as you would for other links.
-        if link.is_a(t.SimultaneousEquivalenceLink):
+        if not link.is_a(t.SequentialAndLink):
             return False
-        elif any([i.is_a(t.AtTimeLink) for i in link.incoming]):
+            
+        # TODO check the TruthValue the same way as you would for other links.
+        if any([i.is_a(t.AtTimeLink) for i in link.incoming]): # work around hacks in other modules
             return False
         else:
             return True
@@ -564,7 +563,7 @@ class FishgramFilter:
         return a.is_a(t.EvaluationLink) or a.is_a(t.ExecutionOutputLink) or a.is_a(t.ExecutionLink)
 
 # Hacks
-class FishgramMindAgent(opencog.cogserver.MindAgent):
+class GephiMindAgent(opencog.cogserver.MindAgent):
     def __init__(self):
         self.cycles = 1
 
@@ -578,17 +577,7 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #                SubdueTextOutput(atomspace)))
 #            g.output()
 
-            # add Links between TimeNodes to indicate time sequences
-            times = atomspace.get_atoms_by_type(t.TimeNode)
-            times = sorted([f for f in times if f.name != "0"]) # Related to a bug in the Psi Modulator system
-
-            for i in xrange(len(times)-1):
-                (time1,  time2) = (times[i],  times[i+1])
-                # TODO SeqAndLink was not supposed to be used on TimeNodes directly.
-                # But that's more useful for fishgram
-                print atomspace.add_link(t.SequentialAndLink,  [time1,  time2])
-
-            te = ForestExtractor(atomspace, DottyOutput(atomspace))
+            te = ForestExtractor(atomspace, GephiOutput(atomspace))
             te.output()
         except KeyError,  e:
             KeyError

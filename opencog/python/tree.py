@@ -10,6 +10,7 @@ class tree:
         if len(args) and isinstance(args[0], list):
             args = args[0]
         # Transparently record Links as strings rather than Handles
+        assert type(op) != type(None)
         if len(args):
             if isinstance(op, Atom):
                 self.op = op.type_name
@@ -21,6 +22,7 @@ class tree:
             self.args = args
     
     def coerce_tree(self, x):
+        assert type(x) != type(None)
         if isinstance(x, tree):
             return x
         else:
@@ -53,8 +55,9 @@ class tree:
     def to_tuple(self):
         # Atom doesn't support comparing to different types in the Python-standard way.
         if isinstance(self.op, Atom):
-            #return self.op.h.value()
-            return self.op.type_name+':'+self.op.name # Easier to understand, though a bit less efficient
+            #assert type(self.op.h) != type(None)
+            return self.op.h.value()
+            #return self.op.type_name+':'+self.op.name # Easier to understand, though a bit less efficient
         else:
             return tuple([self.op]+[x.to_tuple() for x in self.args])
 

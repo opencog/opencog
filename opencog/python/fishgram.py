@@ -3,6 +3,7 @@ from tree import *
 from adaptors import *
 from util import *
 from itertools import *
+import sys
 
 def pairwise(iterable):
     """
@@ -37,43 +38,49 @@ class Fishgram:
         #return self.add_all_predicates_1var(unary_conjunctions)
 
         #return self.add_all_predicates_1var_dfs()
-        return self.closed_bfs()
+        return [layer for layer in self.closed_bfs_layers()]
+
+    def implications(self):
+        self.forest.extractForest()
+
+        layers = []
+        for layer in self.closed_bfs_layers():
+            layers.append(layer)
+            if len(layers) >= 2:
+                self.output_implications_for_last_layer(layers)
 
 # breadth-first search (to make it simpler!)
 # use the extension list.
 # prune unclosed conjunctions.
 # you only need to add extensions if they're in the closure.
 
-    def closed_bfs(self):
-        all_conjs = []
-        
+    def closed_bfs_extend_layer(self, prev_layer):
+        next_layer_iter = self.extensions(prev_layer)
+        return self.prune_frequency(next_layer_iter)
+
+    def closed_bfs_layers(self):
+        """Main function to run the breadth-first search. It yields results one layer at a time. A layer
+        contains all of the conjunctions resulting from extending previous conjunctions with one extra
+        tree. For some purposes it would be better to return results immediately rather than one layer at
+        a time, however creating ImplicationLinks requires previous layers."""
         all_bindinglists = [(obj, ) for obj in self.forest.all_objects]
         prev_layer = [((), all_bindinglists, )]
 
-        while len(prev_layer) > 0 and len(all_conjs) < 3: # tacky hack just to make it finish faster
-            new_layer = self.extend(prev_layer)
-#            for prev_conj in prev_layer:
-#                new_layer += self.extend(prev_conj)
-#            for conj, bindingsets in new_layer:
-#                print self.conjunction_to_string(conj), len(bindingsets)
-            pruned = len(new_layer)
-            new_layer = self.prune_frequency(new_layer)
-            pruned-= len(new_layer)
+        while len(prev_layer) > 0:
+            # Mixing generator and list style because future results depend on previous results.
+            # It's less efficient with memory but still allows returning results sooner.
+            new_layer = [conj_embs for conj_embs in self.closed_bfs_extend_layer(prev_layer)]
             
             if len(new_layer):
                 conj_length = len(new_layer[0][0])
-            else:
-                conj_length = -1
-            assert all([ len(conj) == conj_length for (conj, embs) in new_layer ])            
+                #print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
+                print '\x1B[1;32m# Conjunctions of size', conj_length, ':', len(new_layer), '\x1B[0m'
+                yield new_layer
+
             prev_layer = new_layer
-            all_conjs.append(new_layer)
-            print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
-        return all_conjs
+            
 
-# You need to store the real hyperlinks from each Atom, which means you can look up other stuff as necessary.
-
-    #def extend(self,  prev_conj_and_embeddings):
-    def extend(self,  prev_layer):
+    def extensions(self,  prev_layer):
         """Find all extensions for that fragment. An extension means adding one link to a particular
         node in the fragment. Nodes in the fragment are numbered from 0 onwards, and the numbers
         don't correspond to exact nodes in the AtomSpace. Each fragment has 1 or more embeddings,
@@ -90,6 +97,9 @@ class Fishgram:
 
             extension_tree_ids = set()
             embeddings = {}
+            
+            # Results for extending this conjunction. All results for this conjunction are produced in this iteration.
+            res = {}
 
             for emb in prev_embeddings:
                 for obj in emb:
@@ -101,6 +111,8 @@ class Fishgram:
                                     extension_tree_ids.add(tree_id)
                                     embeddings[tree_id] = emb
 
+            extension_tree_ids_sorted = sorted(extension_tree_ids,  key=lambda id: self.forest.all_trees[id])
+            # If you sort the tree_ids by what bound-tree they are then you can return results more incrementally
             for tree_id in extension_tree_ids:
 
                 # Using the particular tree-instance, find its outgoing set
@@ -144,20 +156,30 @@ class Fishgram:
                     if sc == new_conj:
                         if sc not in new_layer:
                             new_layer[sc] = []
+                            res[sc] = []
                         new_embedding = tuple(new_embedding)
                         new_layer[sc].append(new_embedding)
+                        
+                        res[sc].append(new_embedding)
                         #print self.conjunction_to_string(new_conj), ":", len(new_layer[new_conj]), "so far"
                     else:
                         skipped+= 1
+            
+            # Yield the results (once you know they aren't going to be changed...)
+            for conj_emb_pair in res.items():
+                yield conj_emb_pair
 
         print "[skipped", skipped, "conjunction-embeddings that were only reorderings]", 
-        return new_layer.items()
+        #return new_layer.items()
+        # Stops iteration at the end of the function
+        
 #        # Can't just use new_layer.items() because we want one entry for each conjunction (plus all of its embeddings)
 #        return [(conj, new_layer[conj]) for conj in new_layer]
 
     def prune_frequency(self, layer):
-        return [(conj, bindingsets) for (conj, bindingsets) in layer
-                    if len(bindingsets) > self.min_embeddings]
+        for (conj, embeddings) in layer:
+            if len(embeddings) > self.min_embeddings:
+                yield (conj, embeddings)
 
     def after(self, tree1, tree2):
         # Simply use Python's tuple-comparison mechanism (tree automatically converts to a suitable tuple for comparisons).
@@ -211,7 +233,7 @@ class Fishgram:
         
         for layer in layers:
             for (conj, embs) in layer:
-                predicate = self.a_.add_node(t.PredicateNode, 'fishgram_'+str(id))
+                predicate = self.atomspace.add_node(t.PredicateNode, 'fishgram_'+str(id))
                 id+=1
                 #print predicate
                 
@@ -229,11 +251,11 @@ class Fishgram:
                                 tree('ImplicationLink',
                                     andLink,
                                     evalLink))
-                a = atom_from_tree(qLink, self.a_)
+                a = atom_from_tree(qLink, self.atomspace)
                 
                 a.tv = TruthValue(1, 10.0**9)
                 count = len(embs)
-                #eval_a = atom_from_tree(evalLink, self.a_)
+                #eval_a = atom_from_tree(evalLink, self.atomspace)
                 #eval_a.tv = TruthValue(1, count)
                 
                 print a
@@ -242,66 +264,76 @@ class Fishgram:
 #                    s = {tree(0):concept}
 #                    bound_tree = subst(s, tr)
 #                    #print bound_tree
-#                    print atom_from_tree(bound_tree, self.a_)
+#                    print atom_from_tree(bound_tree, self.atomspace)
 
-    def outputImplications(self, layers):
-        for layer_id, layer in enumerate(layers):
-            if len(layer[0][0]) < 2:
-                continue
-            for (conj, embs) in layer:
-                vars = self.get_varlist(conj)
-                #print [str(var) for var in vars]
+    def output_implications_for_last_layer(self, layers):
+        if len(layers) < 2:
+            return
+        layer = layers[-1]
+        prev_layer = layers[-2]
+        for (conj, embs) in layer:
+            vars = self.get_varlist(conj)
+            #print [str(var) for var in vars]
+            
+            for i in xrange(0, len(conj)):
+                conclusion = conj[i]
+                premises = conj[:i] + conj[i+1:]
                 
-                for i in xrange(0, len(conj)):
-                    conclusion = conj[i]
-                    premises = conj[:i] + conj[i+1:]
+                if not (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):# == len(self.get_varlist(conclusion)) ):
+                    continue
+                
+                try:
+                    ce_premises = next(ce for ce in prev_layer if unify(premises, ce[0], {}, True) != None)
+                    premises_original, premises_embs = ce_premises
                     
-                    if not (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):# == len(self.get_varlist(conclusion)) ):
-                        continue
-                    prev_layer = layers[layer_id-1]
-                    
-                    try:
-                        ce_premises = next(ce for ce in prev_layer if unify(premises, ce[0], {}, True) != None)
-                        premises_original, premises_embs = ce_premises
-                        
 #                        ce_conclusion = next(ce for ce in layers[0] if unify( (conclusion,) , ce[0], {}, True) != None)
 #                        conclusion_original, conclusion_embs = ce_conclusion
-                    except StopIteration:
-                        print "[didn't create required subconjunction due to tackypruning and ordering]"
-    #                print map(str, premises)
-    #                print ce_premises[0]
-    #                print len(premises_embs), len(embs)
-                    
-    #                c_norm = normalize( (conj, emb), ce_conclusion )
-    #                p_norm = normalize( (conj, emb), ce_premises )
-    #                print p_norm, c_norm
+                except StopIteration:
+                    sys.stderr.write("[didn't create required subconjunction due to tackypruning and ordering]\n")
+                    continue
+#                print map(str, premises)
+#                print ce_premises[0]
+#                print len(premises_embs), len(embs)
+                
+#                c_norm = normalize( (conj, emb), ce_conclusion )
+#                p_norm = normalize( (conj, emb), ce_premises )
+#                print p_norm, c_norm
 
-                    count_conj = len(embs)*1.0
-                    # Called the "confidence" in rule learning literature
-                    freq =  count_conj / len(premises_embs)
-    #                count_unconditional = len(conclusion_embs)
-    #                surprise = count_conj / count_unconditional
+                # WRONG. Why?
+                count_conj = len(embs)*1.0
+                # Called the "confidence" in rule learning literature
+                freq =  count_conj / len(premises_embs)
+#                count_unconditional = len(conclusion_embs)
+#                surprise = count_conj / count_unconditional
+                
+                # haxx: ignore the bug and still produce the rest of the outputs.
+                if count_conj > len(premises_embs):
+                    sys.stderr.write("[embedding glitch?]\n")
+                    continue
+                
+                if freq > 0.05:
+                    assert len(premises)
+                    andLink = tree('AndLink',
+                                        list(premises)) # premises is a tuple remember
                     
-                    if freq > 0.05:
-                        assert len(premises)
-                        andLink = tree('AndLink',
-                                            list(premises)) # premises is a tuple remember
-                        
-                        #print andLink                
+                    #print andLink                
 
-                        qLink = tree('AverageLink', 
-                                        tree('ListLink', vars), 
-                                        tree('ImplicationLink',
-                                            andLink,
-                                            conclusion))
-                        a = atom_from_tree(qLink, self.a_)
-                        
-                        a.tv = TruthValue( freq , len(premises_embs) )
-                        #count = len(embs)
-                        #eval_a = atom_from_tree(evalLink, self.a_)
-                        #eval_a.tv = TruthValue(1, count)
-                        
-                        print a
+                    qLink = tree('AverageLink', 
+                                    tree('ListLink', vars), 
+                                    tree('ImplicationLink',
+                                        andLink,
+                                        conclusion))
+                    a = atom_from_tree(qLink, self.atomspace)
+                    
+                    a.tv = TruthValue( freq , len(premises_embs) )
+                    #count = len(embs)
+                    #eval_a = atom_from_tree(evalLink, self.atomspace)
+                    #eval_a.tv = TruthValue(1, count)
+                    
+                    print a
+                
+                assert count_conj <= len(premises_embs)
+
 
     # Wait, we need count(  P(X,Y) ) / count( G(X,Y). Not equal to count( P(X) * count(Y in G))
     def normalize(self, big_conj_and_embeddings, small_conj_and_embeddings):
@@ -336,9 +368,9 @@ class Fishgram:
         
         return len(small_embs) * implied_cases
 
-def make_seq(atomspace):
+def make_seq_alt(atomspace):
     # unit of timestamps is 0.1 second so multiply by 10
-    interval = 10* 10
+    interval = 10* 5
     times = atomspace.get_atoms_by_type(t.TimeNode)
     times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
     times = sorted(times, key= lambda t: int(t.name) )
@@ -352,8 +384,44 @@ def make_seq(atomspace):
             else:
                 break
 
+def make_seq(atomspace):
+    # unit of timestamps is 0.1 second so multiply by 10
+    interval = 10* 5
+    times = atomspace.get_atoms_by_type(t.TimeNode)
+    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
+    times = sorted(times, key= lambda t: int(t.name) )
+
+    for (i, time_atom) in enumerate(times[:-1]):
+        t1 = int(time_atom.name)
+        for time2_atom in times[i+1:]:
+            t2 = int(time2_atom.name)
+            if t2 - t1 <= interval:
+                #atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
+                for atTime in time_atom.incoming:
+                    for atTime2 in time2_atom.incoming:                        
+                        print atomspace.add_link(t.SequentialAndLink,  [atTime,  atTime2], TruthValue(1, 1))
+                        #event1, event2 = atTime.out[1], atTime2.out[1]
+                        #print atomspace.add_link(t.SequentialAndLink,  [event1, event2], TruthValue(1, 1))
+            else:
+                break
+
 #    for i in xrange(len(times)-1):
 #        (time1,  time2) = (times[i],  times[i+1])
 #        # TODO SeqAndLink was not supposed to be used on TimeNodes directly.
 #        # But that's more useful for fishgram
 #        print atomspace.add_link(t.SequentialAndLink,  [time1,  time2])
+
+class FishgramMindAgent(opencog.cogserver.MindAgent):
+    def __init__(self):
+        self.cycles = 1
+
+    def run(self,atomspace):
+        try:
+            fish = Fishgram(atomspace)
+            make_seq(atomspace)
+            fish.implications()            
+        except KeyError,  e:
+            KeyError
+        except Exception, e:
+            import traceback; traceback.print_exc(file=sys.stdout)
+        self.cycles+=1
