@@ -140,8 +140,18 @@ void PsiActionSelectionAgent::getActions(AtomSpace & atomSpace, Handle hStep,
     }
 }
 
-void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
+bool PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
 {
+    // Check the state of latest planning
+    std::vector<Handle> tempOutgoingSet, emptyOutgoingSet; 
+    tempOutgoingSet.push_back( atomSpace.addNode(PREDICATE_NODE, "plan_success") ); 
+    tempOutgoingSet.push_back( atomSpace.addLink(LIST_LINK, emptyOutgoingSet) ); 
+
+    Handle hPlanSuccessEvaluationLink = atomSpace.addLink(EVALUATION_LINK, tempOutgoingSet); 
+    if ( atomSpace.getTV(hPlanSuccessEvaluationLink)->getMean() < 0.9 )
+        return false; 
+
+    // Get the planning result
     Handle hSelectedDemandGoal =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE,
@@ -179,6 +189,8 @@ void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
 
     this->plan_action_list = atomSpace.getOutgoing(hActionList);
     this->temp_action_list = this->plan_action_list; 
+
+    return true; 
 }
 
 void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace, Handle hPlanning)
@@ -597,8 +609,17 @@ std::cout<<"current action is still running [SchemaId = "<<this->currentSchemaId
             return; 
         }
 
-        // Get the plan stored in AtomSpace
-        this->getPlan(atomSpace); 
+        // Try to get the plan stored in AtomSpace
+        if ( !this->getPlan(atomSpace) ) {
+            logger().warn("PsiActionSelectionAgent::%s - 'do_planning' can not find any suitable plan for the selected demand goal [cycle = %d]", 
+                           __FUNCTION__, 
+                           this->cycleCount
+                         ); 
+
+std::cout<<"'do_planning' can not find any suitable plan for the selected demand goal [cycle = "<<this->cycleCount<<"]."<<std::endl; 
+            return;  
+        }
+
 //        std::cout<<std::endl<<"Done (do_planning), scheme_return_value(Handle): "<<scheme_return_value; 
 //        Handle hPlanning = Handle( atol(scheme_return_value.c_str()) );         
 //        this->getPlan(atomSpace, hPlanning); 

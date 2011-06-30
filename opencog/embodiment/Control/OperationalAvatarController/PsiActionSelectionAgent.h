@@ -163,8 +163,10 @@ private:
 
     /**
      * Get the plan stored in AtomSpace
+     *
+     * @return true if get the plan successfully, false otherwise 
      */
-    void getPlan(AtomSpace & atomSpace);
+    bool getPlan(AtomSpace & atomSpace);
 
     /**
      * Get the plan stored in AtomSpace given handle to planning result

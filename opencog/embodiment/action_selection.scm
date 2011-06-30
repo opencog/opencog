@@ -669,67 +669,93 @@
          (set! selected_demand_goal (get_most_critical_demand_goal) )
 
          ; Planning
-         ; TODO: if the planning result is null?
          (set! plan_result (make_psi_plan selected_demand_goal) )
 
-         ; Get rule list
-         (set! rule_list (car plan_result) )
+         (if (null? plan_result)
+             ; If the planner fails to find any plan for the selected demand goal 
+             (begin
+                 ; Set the truth value of planning state to false
+                 (cog-set-tv! 
+                     (EvaluationLink
+                         (PredicateNode "plan_success") 
+                         (ListLink)
+                     ) 
+                     (stv 0.0 1.0)
+                 )
+             )
 
-         ; Get context and action list
-         ; replace empty (list) with NULL_CONTEXT or NULL_ACTION
-         (map-in-order
-             (lambda (context_action)
-                 (let ( (context (list-ref context_action 0) )
-                        (action (list-ref context_action 1) )
-                      )
+             ; If the planner successfully figures out a plan for the selected demand goal
+             (begin    
 
-                      (if (null? context)
-                          (set! context NULL_CONTEXT) 
-                      )
-
-                      (if (null? action)
-                          (set! action NULL_ACTION) 
-                      )
-
-                      (set! context_list
-                            (append context_list (list context) )
-                      )
-
-                      (set! action_list
-                            (append action_list (list action) )
-                      )
-                 ); let 
-             ); lambda 
-
-             (list-ref plan_result 1)
-         )
-
-         ; Update the planning result stored in AtomSpace and return the handle
-         ; PsiActionSelectionAgent will actually execute the plan
-         ;
-;         (cog-handle
-;             (ListLink
-                 (update_reference_link 
-                     (ConceptNode "plan_rule_list") 
-                     (apply ListLink rule_list) 
+                 ; Set the truth value of planning state to true
+                 (cog-set-tv! 
+                     (EvaluationLink
+                         (PredicateNode "plan_success") 
+                         (ListLink)
+                     ) 
+                     (stv 1.0 1.0)
                  )
 
-                 (update_reference_link
-                     (ConceptNode "plan_context_list") 
-                     (apply ListLink context_list)
+                 ; Get rule list
+                 (set! rule_list (car plan_result) )
+
+                 ; Get context and action list
+                 ; replace empty (list) with NULL_CONTEXT or NULL_ACTION
+                 (map-in-order
+                     (lambda (context_action)
+                         (let ( (context (list-ref context_action 0) )
+                                (action (list-ref context_action 1) )
+                              )
+
+                              (if (null? context)
+                                  (set! context NULL_CONTEXT) 
+                              )
+
+                              (if (null? action)
+                                  (set! action NULL_ACTION) 
+                              )
+
+                              (set! context_list
+                                    (append context_list (list context) )
+                              )
+
+                              (set! action_list
+                                    (append action_list (list action) )
+                              )
+                         ); let 
+                     ); lambda 
+
+                     (list-ref plan_result 1)
                  )
 
-                 (update_reference_link
-                     (ConceptNode "plan_action_list") 
-                     (apply ListLink action_list)
-                 )
+                 ; Update the planning result stored in AtomSpace and return the handle
+                 ; PsiActionSelectionAgent will actually execute the plan
+                 ;
+;                 (cog-handle
+;                     (ListLink
+                         (update_reference_link 
+                             (ConceptNode "plan_rule_list") 
+                             (apply ListLink rule_list) 
+                         )
 
-                 (update_reference_link
-                     (ConceptNode "plan_selected_demand_goal") 
-                     selected_demand_goal
-                 )
-;             ); ListLink
-;         ); cog-handle
+                         (update_reference_link
+                             (ConceptNode "plan_context_list") 
+                             (apply ListLink context_list)
+                         )
+
+                         (update_reference_link
+                             (ConceptNode "plan_action_list") 
+                             (apply ListLink action_list)
+                         )
+
+                         (update_reference_link
+                             (ConceptNode "plan_selected_demand_goal") 
+                             selected_demand_goal
+                         )
+;                     ); ListLink
+;                 ); cog-handle
+             );begin
+         ); if (not (null? plan_result)
 
     ); let        
 )
