@@ -191,11 +191,11 @@ float LSMap3DSearchNode::GetCost(const LSMap3DSearchNode &successor)
 {
     //if horizontal or vertical coast is one
     if (x == successor.x || y == successor.y) {
-        return 1.0 + deltaZ;
+        return 1.0 + std::abs(successor.z - z);
     }
     //else it is diagonal, so cost is sqrt(2), (sqrt(1^2 + 1^2))
     else {
-        return 1.41421356 + deltaZ; //sqrt(2)
+        return 1.41421356 + std::abs(successor.z - z); //sqrt(2)
     }
 }
 

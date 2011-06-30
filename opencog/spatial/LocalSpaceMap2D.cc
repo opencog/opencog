@@ -494,7 +494,7 @@ bool LocalSpaceMap2D::edgeIllegal(const spatial::GridPoint &src, const spatial::
         // Get the maximum height of src point
         double srcHeight = getMaxHeightByGridPoint(src);
         // Get the minimum height of dest point
-        double destHeight = getMinHeightByGridPoint(dest);
+        double destHeight = getMaxHeightByGridPoint(dest);
 
         if (destHeight - srcHeight <= delta)
             return false;
@@ -936,6 +936,7 @@ void LocalSpaceMap2D::calculateObjectPoints( std::vector<spatial::GridPoint>& po
         } // else
     } // for
 
+
 }
 
 void LocalSpaceMap2D::addObject( const spatial::ObjectID& id, const spatial::ObjectMetaData& metadata, bool isObstacle )
@@ -956,12 +957,30 @@ void LocalSpaceMap2D::addObject( const spatial::ObjectID& id, const spatial::Obj
 
     const math::BoundingBox& bb = entity->getBoundingBox( );
 
+    /*
+    printf("entity[%s]: position %s, width %lf, length %lf, height %lf\n", entity->getName().c_str(),
+                        entity->getPosition().toString().c_str(),
+                        entity->getWidth(),
+                        entity->getLength(),
+                        entity->getHeight());
+    */
     std::vector<math::LineSegment> bottomSegments;
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
 
+    /*
+    printf("    BoundingBox: %s ---- %s\n "
+           "                  |       |\n "
+           "                  |       |\n "
+           "                 %s ---- %s\n ", 
+            bb.getCorner(math::BoundingBox::NEAR_LEFT_BOTTOM).toString().c_str(),
+            bb.getCorner(math::BoundingBox::FAR_LEFT_BOTTOM).toString().c_str(),
+            bb.getCorner(math::BoundingBox::NEAR_RIGHT_BOTTOM).toString().c_str(),
+            bb.getCorner(math::BoundingBox::FAR_RIGHT_BOTTOM).toString().c_str()
+            );
+    */
     calculateObjectPoints( gridPoints[idHash], bottomSegments );
     this->entities.insert( LongEntityPtrHashMap::value_type( idHash, entity ) );
 
