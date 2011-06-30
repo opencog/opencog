@@ -28,8 +28,7 @@
 #include <opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorldState.h>
 #include <opencog/util/exceptions.h>
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 class RuleValidationWorldWrapper : public WorldWrapperBase
 {
@@ -60,8 +59,7 @@ public:
 private:
 
     VirtualWorldData::VirtualWorldState& virtualWorld;
-    //opencog::RandGen& rng;
 };
-}
+} } // namespace opencog::world
 
 #endif

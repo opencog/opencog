@@ -37,11 +37,14 @@ using namespace opencog::messaging;
 using namespace boost;
 using namespace std;
 
-ComboInterpreter::ComboInterpreter(PAI& p, opencog::RandGen& _rng) : rng(_rng), _ww(new WorldWrapper::PAIWorldWrapper(p, _rng)), _next(0)
+using opencog::world::PAIWorldWrapper;
+using opencog::world::RuleValidationWorldWrapper;
+
+ComboInterpreter::ComboInterpreter(PAI& p, opencog::RandGen& _rng) : rng(_rng), _ww(new PAIWorldWrapper(p, _rng)), _next(0)
 {
 }
 
-ComboInterpreter::ComboInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& _rng) : rng(_rng), _ww(new WorldWrapper::RuleValidationWorldWrapper(v)), _next(0)
+ComboInterpreter::ComboInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& _rng) : rng(_rng), _ww(new RuleValidationWorldWrapper(v)), _next(0)
 {
 }
 

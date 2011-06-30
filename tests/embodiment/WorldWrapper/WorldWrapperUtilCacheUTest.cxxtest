@@ -36,7 +36,7 @@ static std::string arg3 = "id_Stick";
 static std::string arg4 = "id_Wynx";
 static std::string arg5 = "id_Home";
 
-using namespace WorldWrapper;
+using namespace opencog::world;
 
 class WorldWrapperUtilCacheUTest :  public CxxTest::TestSuite
 {

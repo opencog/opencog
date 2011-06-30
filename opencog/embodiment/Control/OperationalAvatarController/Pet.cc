@@ -50,7 +50,7 @@
 #include <boost/format.hpp>
 
 using namespace behavior;
-using namespace WorldWrapper;
+using namespace opencog::world;
 using namespace opencog;
 using namespace opencog::oac;
 using namespace opencog::control;

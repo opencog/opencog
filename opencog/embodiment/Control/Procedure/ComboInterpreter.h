@@ -38,6 +38,7 @@
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 using namespace opencog::pai;
+using opencog::world::WorldWrapperBase;
 
 namespace Procedure
 {
@@ -115,7 +116,7 @@ protected:
 
     opencog::RandGen& rng;
 //    WorldWrapper::PAIWorldWrapper _ww;
-    WorldWrapper::WorldWrapperBase * _ww;
+    WorldWrapperBase * _ww;
     Map _map;
     Vec _vec;
     Set _failed;

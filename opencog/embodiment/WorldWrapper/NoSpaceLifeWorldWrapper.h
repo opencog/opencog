@@ -29,8 +29,7 @@
 #include "WorldWrapper.h"
 #include <opencog/embodiment/Learning/NoSpaceLife/NoSpaceLife.h>
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 using namespace ImaginaryLife;
 using namespace behavior;
@@ -108,6 +107,6 @@ private:
     opencog::RandGen& rng;
 };
 
-}
+} } // namespace opencog::world
 
 #endif

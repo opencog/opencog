@@ -28,8 +28,7 @@
 
 #define LOOK_IN_THE_PAST true
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 using namespace PetCombo;
 
@@ -135,4 +134,4 @@ NoSpaceLife& NoSpaceLifeWorldWrapper::getNoSpaceLife()
     return _noSpaceLife;
 }
 
-}
+} } // namespace opencog::world

@@ -49,9 +49,11 @@ using namespace PetCombo;
 using namespace boost::assign;
 using namespace opencog;
 using namespace opencog::pai;
+// This is already available in opencog::world, but this is placed here to
+// make it obvious where predicate comes from
+using opencog::world::predicate;
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 typedef combo_tree::iterator pre_it;
 typedef combo_tree::sibling_iterator sib_it;
@@ -937,7 +939,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
         combo::definite_object& def_obj = definite_objects[0];
         argument.push_back(std::string(def_obj));
-        WorldWrapper::predicate pred(name, argument);
+        predicate pred(name, argument);
         float data = WorldWrapperUtil::cache.find(time, pred);
 
         bool result;
@@ -980,7 +982,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
             argument.clear();
             argument.push_back(std::string(def_obj));
-            WorldWrapper::predicate pred(name, argument);
+            predicate pred(name, argument);
             float data = WorldWrapperUtil::cache.find(time, pred);
 
             bool result;
@@ -1038,7 +1040,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
-                WorldWrapper::predicate pred(name, argument);
+                predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result;
@@ -1094,7 +1096,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
-                WorldWrapper::predicate pred(name, argument);
+                predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result;
@@ -1172,7 +1174,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
-                WorldWrapper::predicate pred(name, argument);
+                predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result;
@@ -1235,7 +1237,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 argument.clear();
                 argument.push_back(std::string(def_obj));
-                WorldWrapper::predicate pred(name, argument);
+                predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result;
@@ -1391,7 +1393,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             argument.clear();
             argument.push_back(std::string(def_obj));
             argument.push_back(message);
-            WorldWrapper::predicate pred(name, argument);
+            predicate pred(name, argument);
             float data = WorldWrapperUtil::cache.find(time, pred);
 
             bool result;
@@ -1456,7 +1458,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         std::vector<std::string> argument;
         argument.push_back(target);
 
-        WorldWrapper::predicate pred(name, argument);
+        predicate pred(name, argument);
         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
         if(feeling == CACHE_MISS){
@@ -1496,7 +1498,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         std::vector<std::string> argument;
                         argument.push_back(target);
 
-                        WorldWrapper::predicate pred(name, argument);
+                        predicate pred(name, argument);
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
@@ -1535,7 +1537,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         std::vector<std::string> argument;
                         argument.push_back(target);
 
-                        WorldWrapper::predicate pred(name, argument);
+                        predicate pred(name, argument);
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
@@ -1574,7 +1576,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         std::vector<std::string> argument;
                         argument.push_back(target);
 
-                        WorldWrapper::predicate pred(name, argument);
+                        predicate pred(name, argument);
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
@@ -1612,7 +1614,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         std::vector<std::string> argument;
                         argument.push_back(target);
 
-                        WorldWrapper::predicate pred(name, argument);
+                        predicate pred(name, argument);
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
@@ -1650,7 +1652,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         std::vector<std::string> argument;
                         argument.push_back(target);
 
-                        WorldWrapper::predicate pred(name, argument);
+                        ::predicate pred(name, argument);
                         float feeling = WorldWrapperUtil::cache.find(time, pred);
 
                         if(feeling == CACHE_MISS){
@@ -1669,7 +1671,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         std::string name = p->get_name();
         std::vector<std::string> argument;
 
-        WorldWrapper::predicate pred(name, argument);
+        predicate pred(name, argument);
         float repetition = WorldWrapperUtil::cache.find(time, pred);
 
         if (repetition == CACHE_MISS) {
@@ -1729,7 +1731,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         std::vector<std::string> argument;
         argument.push_back( stateNumber );
 
-        WorldWrapper::predicate pred(name, argument);
+        predicate pred(name, argument);
         float state = WorldWrapperUtil::cache.find(time, pred);
 
         if (state == CACHE_MISS) {
@@ -1850,7 +1852,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     arguments.push_back(get_definite_object(*arg));
                 }
 
-                WorldWrapper::predicate pred(name, arguments);
+                predicate pred(name, arguments);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 if (data != CACHE_MISS) {
@@ -1910,7 +1912,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         for (sib_it arg = tree_it.begin(); arg != tree_it.end(); arg++) {
                             arguments.push_back(get_definite_object(*arg));
                         }
-                        WorldWrapper::predicate pred(name, arguments);
+                        predicate pred(name, arguments);
                         float data = WorldWrapperUtil::cache.find(time, pred);
 
                         bool result = false;
@@ -2025,7 +2027,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 argument.push_back( command );
                 argument.push_back( stringParameters.str( ) );
 
-                WorldWrapper::predicate pred(name, argument);
+                predicate pred(name, argument);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 if (data != CACHE_MISS) {
@@ -2185,7 +2187,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     arguments.push_back(parameters[i]);
                 }
 
-                WorldWrapper::predicate pred(name, arguments);
+                predicate pred(name, arguments);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 if (data != CACHE_MISS) {
@@ -2767,7 +2769,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                      "WWUtil - default - %s - pred created",
                      ss.str().c_str());
 
-        WorldWrapper::predicate pred(name, arguments);
+        predicate pred(name, arguments);
         float data = WorldWrapperUtil::cache.find(time, pred);
 
         logger().debug(
@@ -2838,7 +2840,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     arguments.push_back(get_definite_object(*arg));
                 }
 
-                WorldWrapper::predicate pred(name, arguments);
+                predicate pred(name, arguments);
                 float data = WorldWrapperUtil::cache.find(time, pred);
 
                 bool result = false;
@@ -3088,7 +3090,7 @@ float WorldWrapperUtil::getPhysiologicalFeeling(AtomSpace& atomSpace,
     std::vector<std::string> argument;
     argument.push_back(target);
 
-    WorldWrapper::predicate pred(name, argument);
+    predicate pred(name, argument);
     float value = WorldWrapperUtil::cache.find(time, pred);
 
     if (value == CACHE_MISS) {
@@ -3115,7 +3117,7 @@ float WorldWrapperUtil::getModulator(const AtomSpace & atomSpace,
     std::string name(modulatorName);
     std::vector<std::string> argument;
 
-    WorldWrapper::predicate pred(name, argument);
+    predicate pred(name, argument);
     float value = WorldWrapperUtil::cache.find(time, pred);
 
     if (value == CACHE_MISS) {
@@ -3145,7 +3147,7 @@ float WorldWrapperUtil::getDemand(const AtomSpace & atomSpace,
     std::string name(demandName);
     std::vector<std::string> argument;
 
-    WorldWrapper::predicate pred(name, argument);
+    predicate pred(name, argument);
     float value = WorldWrapperUtil::cache.find(time, pred);
 
     if (value == CACHE_MISS) {
@@ -3176,7 +3178,7 @@ float WorldWrapperUtil::getDemandGoalTruthValue(opencog::RandGen & rng,
     std::string name(demand);
     std::vector<std::string> argument;
 
-    WorldWrapper::predicate pred(name, argument);
+    predicate pred(name, argument);
     float value = WorldWrapperUtil::cache.find(time, pred);
 
     if (value == CACHE_MISS) {
@@ -3246,7 +3248,7 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
         arguments.push_back(get_definite_object(*arg));
     }
 
-    WorldWrapper::predicate pred(name, arguments);
+    predicate pred(name, arguments);
     float data = WorldWrapperUtil::cache.find(time, pred);
 
     if (data != CACHE_MISS) {
@@ -3272,5 +3274,5 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
     }
 }
 
-} // namespace
+} } // namespace opencog::world
 

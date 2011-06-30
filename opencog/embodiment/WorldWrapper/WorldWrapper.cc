@@ -23,10 +23,9 @@
 
 #include "WorldWrapper.h"
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 WorldWrapperBase::WorldWrapperBase() {}
 WorldWrapperBase::~WorldWrapperBase() {}
 
-}//~namespace WorldWrapper
+} } // namespace opencog::world

@@ -25,8 +25,7 @@
 #include "ShellWorldWrapper.h"
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 using namespace PetCombo;
 
@@ -92,5 +91,5 @@ combo::vertex ShellWorldWrapper::evalIndefiniteObject(combo::indefinite_object i
     return v;
 }
 
-}//~namespace WorldWrapper
+} } // namespace opencog::world
 

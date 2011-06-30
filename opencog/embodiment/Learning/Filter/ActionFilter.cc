@@ -34,7 +34,7 @@ namespace Filter
 {
 
 using namespace opencog::pai;
-using namespace WorldWrapper;
+using namespace opencog::world;
 using namespace PetCombo;
 
 //constructor, desctructor

@@ -24,27 +24,32 @@
 
 #include "PAIWorldWrapper.h"
 #include "WorldWrapperUtil.h"
-#include <opencog/spatial/TangentBug.h>
+
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
-#include <opencog/spatial/AStarController.h>
-#include <opencog/spatial/AStar3DController.h>
-#include <opencog/atomspace/Node.h>
-#include <boost/bind.hpp>
-#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
-#include <opencog/util/RandGen.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
-#include <opencog/spatial/HPASearch.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
+#include <opencog/atomspace/Node.h>
+
+#include <opencog/spatial/HPASearch.h>
+#include <opencog/spatial/TangentBug.h>
+#include <opencog/spatial/AStarController.h>
+#include <opencog/spatial/AStar3DController.h>
+
+#include <opencog/util/RandGen.h>
+
+#include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <opencog/util/tree.h>
+
 #include <sstream>
 #include <limits>
 #include <cstdio>
-
 
 // The percentage bellow is related to the diagonal of the SpaceMap
 #define STEP_SIZE_PERCENTAGE 2.0
@@ -52,12 +57,17 @@
 #define MAIN_LOGGER_ACTION_PLAN_FAILED logger().debug("PAIWorldWrapper - No action plan has been sent");
 #define MAIN_LOGGER_ACTION_PLAN_SUCCEEDED logger().debug("PAIWorldWrapper - The action plan has been successfully sent");
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 using namespace PetCombo;
 using namespace opencog;
 using namespace opencog::pai;
+
+// Somehow these global namespace operators get hidden unless
+// we make these using declarations. Strangely, this wasn't a problem
+// when the namespace was "WorldWrapper" instead of "opencog::world"
+using ::operator<<;
+using ::operator==;
 
 /**
  * public methods
@@ -83,6 +93,7 @@ bool PAIWorldWrapper::isPlanFailed() const
 bool PAIWorldWrapper::sendSequential_and(sib_it from, sib_it to)
 throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 {
+    using namespace ::opencog;
 
     // DEBUG log
     if (logger().isDebugEnabled()) {
@@ -1587,4 +1598,4 @@ Handle PAIWorldWrapper::toHandle(combo::definite_object obj)
                                       selfName(), ownerName());
 }
 
-}
+} } // namespace opencog::world

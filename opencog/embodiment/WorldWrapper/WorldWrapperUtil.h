@@ -40,8 +40,7 @@
 
 #include <exception>
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 using namespace opencog;
 
@@ -394,6 +393,7 @@ public:
     static bool is_builtin_compound_action(const combo::vertex& v);
     static bool is_builtin_atomic_action(const combo::vertex& v);
 };
-}
+
+} } // namespace opencog::world
 
 #endif

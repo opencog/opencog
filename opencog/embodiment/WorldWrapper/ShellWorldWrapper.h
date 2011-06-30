@@ -26,8 +26,7 @@
 
 #include "WorldWrapper.h"
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 /**
  * interactive shell world wrapper
@@ -82,6 +81,6 @@ private:
     bool _isFinished;
 };
 
-}//~namespace WorldWrapper
+} } // namespace opencog::world
 
 #endif

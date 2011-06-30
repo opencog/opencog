@@ -36,7 +36,7 @@ using namespace PetCombo;
 using namespace boost::assign;
 using namespace opencog;
 
-using namespace WorldWrapper;
+using namespace opencog::world;
 
 typedef combo_tree::iterator pre_it;
 typedef combo_tree::sibling_iterator sib_it;

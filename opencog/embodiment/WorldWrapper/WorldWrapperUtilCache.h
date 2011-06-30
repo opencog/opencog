@@ -33,8 +33,7 @@
 #define CACHE_MISS -9999.0f
 #define STR_SIZE_FOR_HASH 3
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 /**
  * Predicate data that should be cached. These predicates are the key in
@@ -125,8 +124,8 @@ class WorldWrapperUtilCache
 public:
 
     // typedefs
-    typedef boost::unordered_map < WorldWrapper::predicate, float,
-    boost::hash<WorldWrapper::predicate> > cacheMap;
+    typedef boost::unordered_map < predicate, float,
+    boost::hash<predicate> > cacheMap;
     typedef cacheMap::iterator cacheMapIt;
 
     /**
@@ -142,7 +141,7 @@ public:
      * @param value The predicate cached value
      * @return true if the information was cached and false otherwise.
      */
-    bool add(unsigned long timestamp, WorldWrapper::predicate& pred, float value);
+    bool add(unsigned long timestamp, predicate& pred, float value);
 
     /**
      * Lookup for a cached value for the given predicate.
@@ -152,7 +151,7 @@ public:
      * searched.
      * @return The cached value or -1.0 if cache miss.
      */
-    float find(unsigned long timestamp, WorldWrapper::predicate& pred);
+    float find(unsigned long timestamp, predicate& pred);
 
     /**
      * Get cache's current timestamp. It holds information only for the
@@ -193,5 +192,5 @@ private:
 
 }; // class WorldWrapperUtilCache
 
-}  // namespace
+} } // namespace opencog::world
 #endif

@@ -36,7 +36,7 @@
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
 using namespace PetCombo;
-using namespace WorldWrapper;
+using namespace opencog::world;
 using namespace opencog; /// @todo make it under the namespace opencog
 
 //using namespace opencog::oac;

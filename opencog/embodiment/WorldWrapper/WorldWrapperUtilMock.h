@@ -31,8 +31,7 @@
 #include <opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorldState.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 /**
  *
@@ -133,6 +132,7 @@ private:
             combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
 };
-}
+
+} } // namespace opencog::world
 
 #endif

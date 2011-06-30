@@ -27,8 +27,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/combo/variable_unifier.h>
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 /**
  * The WorldWrapperBase class is a layer used between the combo interpreter
@@ -90,6 +89,6 @@ public:
 
 };
 
-}//~namespace WorldWrapper
+} } // namespace opencog::world
 
 #endif

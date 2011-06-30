@@ -32,7 +32,7 @@
 namespace ImaginaryLife
 {
 
-using namespace WorldWrapper;
+using namespace opencog::world;
 using namespace PetCombo;
 
 /**

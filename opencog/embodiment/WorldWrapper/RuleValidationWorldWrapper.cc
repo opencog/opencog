@@ -24,7 +24,7 @@
 #include "RuleValidationWorldWrapper.h"
 #include "WorldWrapperUtilMock.h"
 
-using namespace WorldWrapper;
+using namespace opencog::world;
 
 RuleValidationWorldWrapper::RuleValidationWorldWrapper(VirtualWorldData::VirtualWorldState& _vw) :
         virtualWorld(_vw) {}

@@ -30,8 +30,7 @@
 
 #include <exception>
 
-namespace WorldWrapper
-{
+namespace opencog { namespace world {
 
 class PAIWorldWrapper : public WorldWrapperBase
 {
@@ -165,6 +164,7 @@ private:
     bool eval_percept_with_pai(pre_it it);
 
 };
-}
+
+} } // namespace opencog::world
 
 #endif

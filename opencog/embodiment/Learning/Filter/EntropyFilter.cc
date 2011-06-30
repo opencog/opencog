@@ -61,7 +61,7 @@ namespace Filter
 {
 
 using namespace opencog::pai;
-using namespace WorldWrapper;
+using namespace opencog::world;
 using namespace PetCombo;
 using namespace boost::assign;
 using namespace opencog; /// @todo make it under the namespace opencog

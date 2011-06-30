@@ -30,7 +30,7 @@
 #include <opencog/util/Config.h>
 
 using namespace LearningServer;
-using namespace WorldWrapper;
+using namespace opencog::world;
 using namespace opencog;
 
 BaseServer* LS::derivedCreateInstance()

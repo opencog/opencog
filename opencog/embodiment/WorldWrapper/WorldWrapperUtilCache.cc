@@ -23,7 +23,7 @@
 
 #include "WorldWrapperUtilCache.h"
 
-using namespace WorldWrapper;
+using namespace opencog::world;
 
 WorldWrapperUtilCache::WorldWrapperUtilCache()
 {
@@ -35,7 +35,7 @@ WorldWrapperUtilCache::WorldWrapperUtilCache()
     this->timestamp = 0;
 }
 
-bool WorldWrapperUtilCache::add(unsigned long timestamp, WorldWrapper::predicate& pred, float value)
+bool WorldWrapperUtilCache::add(unsigned long timestamp, predicate& pred, float value)
 {
     if (this->timestamp != timestamp) {
         clearCache(timestamp);
@@ -47,7 +47,7 @@ bool WorldWrapperUtilCache::add(unsigned long timestamp, WorldWrapper::predicate
     return result.second;
 }
 
-float WorldWrapperUtilCache::find(unsigned long timestamp, WorldWrapper::predicate& pred)
+float WorldWrapperUtilCache::find(unsigned long timestamp, predicate& pred)
 {
     this->finds++;
 

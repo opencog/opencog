@@ -53,7 +53,7 @@ using namespace opencog::pai;
 namespace Procedure
 {
 
-using namespace WorldWrapper;
+using namespace opencog::world;
 
 struct RunningComboProcedure : public combo::Evaluator {
 
