@@ -23,14 +23,17 @@
 
 
 #include <stdio.h>
+
 #include "Message.h"
 #include "MessagingSystemExceptions.h"
 #include "StringMessage.h"
 #include "RouterMessage.h"
-#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
+
 #include <opencog/embodiment/Control/MessagingSystem/TickMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/RawMessage.h>
+
+#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
@@ -38,6 +41,8 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
 
 namespace opencog { namespace messaging {
+    
+using namespace opencog::learningserver::messages;
 
 Message::~Message()
 {
@@ -61,19 +66,19 @@ Message *Message::factory(const std::string &from, const std::string &to, int
         break;
     }
     case LEARN: {
-        return new LearningServerMessages::LearnMessage(from, to, msg);
+        return new LearnMessage(from, to, msg);
         break;
     }
     case REWARD: {
-        return new LearningServerMessages::RewardMessage(from, to, msg);
+        return new RewardMessage(from, to, msg);
         break;
     }
     case TRY: {
-        return new LearningServerMessages::TrySchemaMessage(from, to, msg);
+        return new TrySchemaMessage(from, to, msg);
         break;
     }
     case STOP_LEARNING: {
-        return new LearningServerMessages::StopLearningMessage(from, to, msg);
+        return new StopLearningMessage(from, to, msg);
         break;
     }
     case SCHEMA:
@@ -81,12 +86,12 @@ Message *Message::factory(const std::string &from, const std::string &to, int
         // Same message class, but with different types.
         // CANDIDATE_SCHEMA, besides the schema being learned,
         // also has the name of the candidate to be tried out
-        return new LearningServerMessages::SchemaMessage(from, to, msg, msgType);
+        return new SchemaMessage(from, to, msg, msgType);
         break;
     }
     case LS_CMD: {
         std::cout << "LS_CMD : " << msg << std::endl;
-        return new LearningServerMessages::LSCmdMessage(from, to, msg);
+        return new LSCmdMessage(from, to, msg);
         break;
     }
     case TICK: {

@@ -26,8 +26,7 @@
 
 #include <opencog/embodiment/Control/MessagingSystem/Message.h>
 
-namespace LearningServerMessages
-{
+namespace opencog { namespace learningserver { namespace messages {
 
 class LSCmdMessage : public opencog::messaging::Message
 {
@@ -70,6 +69,6 @@ public:
     const std::string & getSchema();
 
 }; // class
-}  // namespcae
+} } } // namespace opencog::learningserver::messages
 
 #endif

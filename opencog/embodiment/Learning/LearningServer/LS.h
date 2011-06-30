@@ -40,8 +40,7 @@
 
 #include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 
-namespace LearningServer
-{
+namespace opencog { namespace learningserver {
 
 using namespace opencog::messaging;
 
@@ -174,6 +173,6 @@ private:
 
 
 }; // class
-}  // namespace
+} } // namespace opencog::learningserver
 
 #endif

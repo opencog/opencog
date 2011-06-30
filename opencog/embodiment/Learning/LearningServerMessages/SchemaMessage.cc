@@ -26,7 +26,7 @@
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-using namespace LearningServerMessages;
+using namespace opencog::learningserver::messages;
 using namespace PetCombo;
 
 SchemaMessage::~SchemaMessage()

@@ -28,8 +28,7 @@
 #include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-namespace LearningServerMessages
-{
+namespace opencog { namespace learningserver { namespace messages {
 
 class TrySchemaMessage : public opencog::messaging::Message
 {
@@ -80,5 +79,6 @@ public:
     void setSchemaArguments(const std::vector<std::string> &argumentsList);
 
 }; // class
-}  // namespace
+
+} } } // namespace opencog::learningserver::messages
 #endif

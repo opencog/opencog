@@ -48,11 +48,12 @@
  */
 //#define DELETE_ATOMSPACE
 
-using namespace opencog::oac;
 using namespace Procedure;
 using namespace PetCombo;
 using namespace opencog;
 using namespace opencog::pai;
+using namespace opencog::oac;
+using opencog::learningserver::messages::SchemaMessage;
 
 BaseServer* OAC::createInstance()
 {
@@ -698,7 +699,7 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
 
     // message from learning server
     if (msg->getFrom() == config().get("LS_ID")) {
-        LearningServerMessages::SchemaMessage * sm = (LearningServerMessages::SchemaMessage *)msg;
+        SchemaMessage * sm = (SchemaMessage *)msg;
         logger().debug("OAC - Got msg from LS: '%s'", msg->getPlainTextRepresentation());
 
         // sanity check to see if LS does not return an empty

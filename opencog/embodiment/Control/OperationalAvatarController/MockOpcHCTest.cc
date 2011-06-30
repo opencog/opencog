@@ -212,6 +212,8 @@ Pet & MockOpcHCTest::getPet()
 
 bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
 {
+    using opencog::learningserver::messages::SchemaMessage;
+
     logger().debug("DEBUG - OAC - Received msg");
 
     std::cout << "OAC RECEIVED MSG" << std::endl;
@@ -223,8 +225,8 @@ bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
 
     // message from learning server
     if (msg->getFrom() == config().get("LS_ID")) {
-        LearningServerMessages::SchemaMessage* sm
-        = (LearningServerMessages::SchemaMessage *)msg;
+        SchemaMessage* sm
+        = (SchemaMessage *)msg;
 
         switch (sm->getType()) {
             // note: assuming arity==0 for now - Moshe

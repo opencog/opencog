@@ -24,7 +24,7 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 #include <string.h>
 
-using namespace LearningServerMessages;
+using namespace opencog::learningserver::messages;
 
 static const std::string from  = "PET";
 static const std::string to    = "LS";

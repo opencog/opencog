@@ -23,7 +23,7 @@
 
 #include "SleepAgent.h"
 
-using namespace LearningServer;
+using namespace opencog::learningserver;
 using namespace opencog;
 
 SleepAgent::~SleepAgent()

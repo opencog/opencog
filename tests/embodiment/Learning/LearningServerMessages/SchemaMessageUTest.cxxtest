@@ -27,9 +27,9 @@
 #include <sstream>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-using namespace LearningServerMessages;
 using namespace PetCombo;
 using opencog::messaging::Message;
+using namespace opencog::learningserver::messages;
 
 static const std::string from  = "PET";
 static const std::string to    = "LS";

@@ -32,8 +32,7 @@
 
 using namespace opencog;
 
-namespace LearningServer
-{
+namespace opencog { namespace learningserver {
 
 class LSMocky : public opencog::messaging::EmbodimentCogServer
 {
@@ -61,6 +60,6 @@ private:
     std::string learningSchema;     // the trick being learned
 
 }; // class
-}  // namespace
+} } // namespace opencog::learningserver
 
 #endif

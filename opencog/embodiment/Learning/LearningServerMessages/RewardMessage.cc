@@ -27,7 +27,7 @@
 #include <opencog/util/StringManipulator.h>
 #include "stdlib.h"
 
-using namespace LearningServerMessages;
+using namespace opencog::learningserver::messages;
 
 RewardMessage::~RewardMessage()
 {

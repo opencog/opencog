@@ -28,7 +28,7 @@
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include "LS.h"
 
-using namespace LearningServer;
+using namespace opencog::learningserver;
 using namespace opencog;
 
 void ls_unexpected_handler()

@@ -28,8 +28,7 @@
 #include <opencog/server/Factory.h>
 #include <opencog/server/Agent.h>
 
-namespace LearningServer
-{
+namespace opencog { namespace learningserver {
 
 using namespace opencog;
 
@@ -54,6 +53,6 @@ public:
     void run(opencog::CogServer *opc);
 
 }; // class
-}  // namespace
+} } // namespace opencog::learningserver
 
 #endif

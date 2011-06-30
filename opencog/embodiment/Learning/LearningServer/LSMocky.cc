@@ -27,7 +27,7 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 
-using namespace LearningServer;
+using namespace opencog::learningserver;
 using namespace opencog;
 using namespace opencog::messaging;
 

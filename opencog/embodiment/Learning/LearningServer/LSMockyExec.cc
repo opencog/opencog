@@ -26,7 +26,7 @@
 #include <opencog/util/files.h>
 #include "LSMocky.h"
 
-using namespace LearningServer;
+using namespace opencog::learningserver;
 using namespace opencog;
 
 int main(int argc, char *argv[])

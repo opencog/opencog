@@ -29,7 +29,7 @@
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 #include <opencog/util/Config.h>
 
-using namespace LearningServer;
+using namespace opencog::learningserver;
 using namespace opencog::world;
 using namespace opencog;
 

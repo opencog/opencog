@@ -24,7 +24,7 @@
 #include "LSCmdMessage.h"
 #include <opencog/util/StringTokenizer.h>
 
-using namespace LearningServerMessages;
+using namespace opencog::learningserver::messages;
 
 /**
  * Constructor and destructor

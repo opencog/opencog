@@ -30,8 +30,7 @@
 
 using namespace opencog;
 
-namespace LearningServerMessages
-{
+namespace opencog { namespace learningserver { namespace messages {
 
 class LearnMessage : public opencog::messaging::Message
 {
@@ -126,5 +125,5 @@ public:
     void setSchemaArguments(const std::vector<std::string> &argumentsList);
 
 }; // class
-}  // namespace
+} } } // namespace opencog::learningserver::messages
 #endif

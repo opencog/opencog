@@ -27,8 +27,7 @@
 #include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include <opencog/comboreduct/combo/vertex.h>
 
-namespace LearningServerMessages
-{
+namespace opencog { namespace learningserver { namespace messages {
 
 /**
  * This message type carries the schemas learned in LS. The candidate and the final
@@ -106,6 +105,6 @@ public:
     const std::string & getCandidateSchemaName();
 
 }; // class
-}  // namespace
+} } } // namespace opencog::learningserver::messages
 
 #endif

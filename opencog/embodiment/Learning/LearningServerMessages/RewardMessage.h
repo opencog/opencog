@@ -27,8 +27,7 @@
 #include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include <vector>
 
-namespace LearningServerMessages
-{
+namespace opencog { namespace learningserver { namespace messages {
 
 class RewardMessage : public opencog::messaging::Message
 {
@@ -91,6 +90,6 @@ public:
     };
 
 }; // class
-}  // namespace
+} } } // namespace opencog::learningserver::messages
 
 #endif

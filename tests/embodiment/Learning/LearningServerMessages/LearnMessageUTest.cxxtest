@@ -36,7 +36,7 @@
 #define OBJ_HEIGHT 0.5
 #define OBJ_YAW 0.0
 
-using namespace LearningServerMessages;
+using namespace opencog::learningserver::messages;
 
 static const std::string from   = "PET";
 static const std::string to     = "LS";

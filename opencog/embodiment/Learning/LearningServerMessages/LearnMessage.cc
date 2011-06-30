@@ -31,7 +31,7 @@
 #include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/persist/xml/StringXMLBufferReader.h>
 
-using namespace LearningServerMessages;
+using namespace opencog::learningserver::messages;
 
 /**
  * Constructor and destructor
