@@ -2,6 +2,7 @@
 #include "DestinData.h"
 #include "DestinKernel.h"
 
+//pugiXML read/writer
 #include "pugixml/pugixml.hpp"
 
 #include <iostream>
@@ -62,7 +63,7 @@ void PrintHelp()
     cout << "    ParamsFile is a file that has the run parameters" << endl;
     cout << "    TrainingDataFile is the binary data file for training.  A testing file with the SAME NAME and appended with _TESTING is assumed" << endl;
     cout << "    DestinOutputFile is the name of the DeSTIN network output file for saving." << endl;
-    cout << "         Use -D as default, which is the experiment number with a .dat at the end, in the TargetDirectory directory" << endl;
+    cout << "         Use -D as default, which is the experiment number with a .xml at the end, in the TargetDirectory directory" << endl;
     cout << "    TargetDirectory is where we want to put the MAIN OUTPUT DATA FILES.  We ALWAYS write an experiment marker to the " << endl;
     cout << "        ../DiagnosticData area.  But if you are writing out a lot of data you can specify another directory." << endl;
     cout << "        Put D for default which is the ../DiagnosticData area." << endl;
@@ -120,10 +121,11 @@ string GetNextFileForDiagnostic()
     {
         iExperimentNumber++;
         stringstream buffer;
-        buffer << "../DiagnosticData/DestinDiagnostics" << iExperimentNumber << ".csv";
+        buffer << "../DiagnosticData/DestinDiagnostics" << iExperimentNumber << "-0.xml";
         strFileName =  buffer.str();
 
         bFileFound = FileExists(strFileName);
+        strFileName.erase(strFileName.length()-6,2);
     }
     strFileName = strFileName.substr(18);
 
@@ -153,6 +155,7 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
     stmInput.close();
 
     pugi::xml_document xFile;
+
     pugi::xml_parse_result result = xFile.load_file(cFilename);
     std::cout << "XML config file Load result: " << result.description() << endl;
     if ( result )
@@ -227,12 +230,9 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
     cout << "------------------" << endl;
 }
 
-bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& NumberOfLayers, DestinKernel*& DKernel,
-                          int iTestSequence, int FirstLayerToShowHECK, int LastLayerToShow, int MAX_CNT, string& sCommandLineData,
-                          DestinData& DataSourceForTraining, string& sDiagnosticFileName, string& sDestinTrainingFileName,
-                          vector< pair<int,int> >& vIndicesAndGTLabelToUse,
-                          map<int,int>& LabelsUsedToCreateNetwork, map<int,int>& IndicesUsedToCreateNetwork, float* BufferForLogs,
-                          int iLayerOfInputToShow, int iRowOfInputToShow, int iColOfInputToShow, int NumberOfMovementsToWrite)
+bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, DestinKernel*& DKernel,
+                          DestinData& DataSourceForTraining, int& SEQ_LENGTH, int**& SEQ,
+                          int*& ImageInput)
 
 {
     // *********************
@@ -250,8 +250,6 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     bool bUseStarvationTrace;
     int PSSAUpdateDelay;
     bool bIgnoreAdvice;
-    int** SEQ;
-    int SEQ_LENGTH;
     string sParametersFileContents;
     int iBlocksToProcess;
     bool bBasicOnlineClustering;
@@ -261,14 +259,14 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     int* RowsPerLayer;
     float* FixedLearningRateLayer;
     bool* bSelfAndUpperFeedback;
-    int lastLayerInputX, LastLayerInputY;
+    ImageInput = new int[2];
 
     GetParameters( ParametersFileName.c_str(), NumberOfLayers, dcMu, dcSigma, dcRho, NumberOfCentroids,
                    bAveraging, bFFT, bBinaryPOS, DistanceMeasureArray,
                    bUseStarvationTrace, PSSAUpdateDelay, bIgnoreAdvice, SEQ, SEQ_LENGTH,
                    sParametersFileContents, iBlocksToProcess,
                    bBasicOnlineClustering, bClanDestin, bInitialLayerIsTransformOnly, bDoGoodPOS,
-                   RowsPerLayer, FixedLearningRateLayer, bSelfAndUpperFeedback, lastLayerInputX, LastLayerInputY);
+                   RowsPerLayer, FixedLearningRateLayer, bSelfAndUpperFeedback, ImageInput[0], ImageInput[1]);
 
     // The name and loop looks like it is giving to option to save steps of the movements.
     vector<bool> vectorOfMovementsToSave;
@@ -339,7 +337,6 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
     curandSetPseudoRandomGeneratorSeed( gen, 1 );
 
     // Here we put the first image into the device memory
-    DataSourceForTraining.SetShiftedDeviceImage(0, SEQ[0][0], SEQ[0][1], lastLayerInputX, LastLayerInputY);
     for( int Layer=0; Layer<NumberOfLayers; Layer++ )
     {
         bool bTopNode = false;
@@ -370,7 +367,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
             bTopNode = true;
         }
 
-        DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer], gen);
+        DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer], FixedLearningRateLayer[Layer], gen);
         // Assign Childeren and Parrents of nodes
         if ( NumberOfCentroids[Layer] > MaxNumberOfOutputs )
         {
@@ -389,6 +386,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, string& sNetworkFile, int& 
 
 int MainDestinExperiments(int argc, char* argv[])
 {
+    time_t destinStart = time(NULL);
     // ********************************************
     // Main experiment of DeSTIN (Also called main)
     // ********************************************
@@ -449,7 +447,7 @@ int MainDestinExperiments(int argc, char* argv[])
         if ( strDestinNetworkFileToWrite == "-D" )
         {
             // If given -D
-            strDestinNetworkFileToWrite= strDiagnosticDirectoryForData + strDiagnosticFileName + ".dat";
+            strDestinNetworkFileToWrite= strDiagnosticDirectoryForData + strDiagnosticFileName;
             cout << "Writing default destin file to: " << strDestinNetworkFileToWrite << endl;
         }
         strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
@@ -662,7 +660,9 @@ int MainDestinExperiments(int argc, char* argv[])
         // and use these to populate vIndicesAndGTLabelToUse
 
         // Debug list of labels to be used
-        int Picked[NumberOfUniqueLabels];
+        int * Picked;
+        Picked = (int *) malloc(sizeof(int) * NumberOfUniqueLabels);
+
         for(int jj=0;jj<NumberOfUniqueLabels;jj++)
         {
             Picked[jj]=0;
@@ -691,6 +691,7 @@ int MainDestinExperiments(int argc, char* argv[])
         {
             cout << "Label: " << jj << " will show " << Picked[jj] << " sample(s)." << endl;
         }
+        free( Picked);
         cout << "------------------" << endl;
     }  //check on bCreateFromFile==false
     else
@@ -714,11 +715,9 @@ int MainDestinExperiments(int argc, char* argv[])
     // Creating DeSTIN network
     // ***********************
     // Yes its going to happen we going to create the network where we are waiting for.
-    // The movement log records are unacceptably slow. Don't know why but it seems to be related to allocation & deallocating memory
-    // so instead make a single big old pool here so each one that needs a bunch of memory won't really have to realloc & dealloc it each time.
-    // TODO: See if this can be done different.
-    float* BufferForMovementLogRecords;
-    BufferForMovementLogRecords = new float[1024*4*64*128];  //this should be enough for all movements and all layers / nodes
+    int SEQ_LENGTH = 0;
+    int** SEQ;
+    int* ImageInput;
 
     DestinKernel* DKernel=NULL;
     map<int,int> LabelsUsedToCreateNetwork;
@@ -729,10 +728,8 @@ int MainDestinExperiments(int argc, char* argv[])
         int LayerToShow=-1;   //normally this should be -1 for regular operation.  For debugging, set it to 0 to look at the particular input for layer 0
         int RowToShowInputs=3;
         int ColToShowInputs=3;
-        CreateDestinOnTheFly(ParametersFileName, strDestinNetworkFileToWrite, NumberOfLayers, DKernel, iTestSequence, FirstLayerToShowHECK,
-            LastLayerToShow, MAX_CNT, strCommandLineData, DataSourceForTraining, sDiagnosticFileNameForMarking, strDestinTrainingFileName,
-            vIndicesAndGTLabelToUse, LabelsUsedToCreateNetwork, IndicesUsedToCreateNetwork, BufferForMovementLogRecords,
-            LayerToShow, RowToShowInputs, ColToShowInputs, 0);  // no movements to write, as we don't write DeSTIN responses out in this case
+        CreateDestinOnTheFly(ParametersFileName, NumberOfLayers, DKernel,
+                             DataSourceForTraining, SEQ_LENGTH, SEQ, ImageInput);
 
         for (int i=0; i<NumberOfLayers;i++)
         {
@@ -754,24 +751,55 @@ int MainDestinExperiments(int argc, char* argv[])
         stmDummy.close();
     }
 
-
     cout << "------------------" << endl;
-    cout << "Test run Destin" << endl;
-    // Run lowest layer (Kernel)
-    time_t start = time(NULL);
-    DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage());
-    for(int i=1;i<NumberOfLayers;i++)
-    {
-        DKernel[i].DoDestin(DKernel[i-1].GetDevicePointerOutput());
-    }
-    time_t stop = time(NULL);
-    cout << "Procces 1 image true all layers: " << stop-start << " seconds" << endl;
+    cout << "Run Destin" << endl;
+    cout << "Images to be processed: " << MAX_CNT << endl;
+    cout << "Each image moves: " << SEQ_LENGTH << " times." << endl;
 
-    if ( !FileExists(strDestinNetworkFileToRead) )
+    for(int i=0;i<MAX_CNT;i++)
     {
-        cout << "Destin network file " << strDestinNetworkFileToRead.c_str() << " not found!" << endl;
-        return 0;
+        stringstream xml;
+        xml << "<destin>" << endl;
+
+        pair<int,int> element = vIndicesAndGTLabelToUse[i];
+        int indexOfExample = element.first;
+        int label = element.second;
+        time_t iStart = time(NULL);
+        for(int seq=0;seq<SEQ_LENGTH;seq++)
+        {
+            stringstream xmlLayer;
+            // Run lowest layer (Kernel)
+
+            time_t lStart = time(NULL);
+            DataSourceForTraining.SetShiftedDeviceImage(indexOfExample, SEQ[seq][0], SEQ[seq][1], ImageInput[0], ImageInput[1]);
+            DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage(),xmlLayer);
+            for(int i=1;i<NumberOfLayers;i++)
+            {
+                DKernel[i].DoDestin(DKernel[i-1].GetDevicePointerOutput(),xmlLayer);
+            }
+            time_t lStop = time(NULL);
+            xmlLayer << "<layerRuntime>" << lStop-lStart << "</layerRuntime>" << endl;
+            if(seq == SEQ_LENGTH-1)
+            {
+                xml << xmlLayer.str().c_str();
+            }
+            xmlLayer.clear();
+        }
+        time_t iStop = time(NULL);
+        xml << "<image id=\"" << i << "\" label=\"" << label << "\" labelIndex=\"" << indexOfExample << "\" runtime=\"" << iStop-iStart << "\" />" << endl;
+        xml << "</destin>" << endl;
+        pugi::xml_document outputFile;
+        outputFile.load(xml.str().c_str());
+        string file = strDestinNetworkFileToRead;
+        stringstream num;
+        num << "-" << i;
+        file.insert(file.length()-4, num.str());
+        outputFile.save_file(file.c_str());
     }
+    time_t destinStop = time(NULL);
+    cout << "Time run: " << destinStop-destinStart << endl;
+
+    free(DKernel);
 
     return 0;
 }
