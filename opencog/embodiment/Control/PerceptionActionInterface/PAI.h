@@ -434,7 +434,12 @@ private:
     void processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element);
 
     /**
-     * @param element The instuction element to be processed
+     * @param element The instruction element to be processed. 
+     *
+     * @note The instruction can be a command or any English sentences parsed by
+     *        RelexServer. This function only update the AtomSpace based on the
+     *        message and the actual work like generating corresponding answers
+     *        or actions is done within PsiActionSelectionAgent and dialog_system.scm
      */
     void processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element);
 
