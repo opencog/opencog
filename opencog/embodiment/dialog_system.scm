@@ -249,6 +249,28 @@
 ;******************************************************************************
 ;******************************************************************************
 
+; Clean up information of previous sentences and prepare for new incoming sentence 
+(define (reset_dialog_system)
+    (let* ( (new_parsed_anchor_node (AnchorNode "# New Parsed Sentence") )
+            (new_parsed_list_link_list (cog-incoming-set new_parsed_anchor_node) ) 
+          )
+
+          ; Delete all the ListLink that contains the New Parsed AnchorNode
+          (map
+              (lambda (new_parsed_list_link)
+                  (if (equal? (cog-type new_parsed_list_link) 'ListLink)
+                      (cog-delete-recursive new_parsed_list_link)
+                  )
+              )
+              new_parsed_list_link_list
+          )
+    )
+)
+
+;******************************************************************************
+;******************************************************************************
+;******************************************************************************
+
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 (ReferenceLink (stv 1.0 1.0)
     (DialogNode "dialog_history")

@@ -1015,7 +1015,6 @@ void PAI::processInstruction(DOMElement * element)
     /// getting target-mode atribute value
     XMLString::transcode(TARGET_MODE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* targetMode = XMLString::transcode(element->getAttribute(tag));
-
     
     OC_ASSERT(strlen(contentType) > 0 );
     OC_ASSERT(strlen(targetMode) > 0 );
@@ -1056,16 +1055,33 @@ void PAI::processInstruction(DOMElement * element)
 
 #ifdef HAVE_GUILE
     if(parsedSentenceText != NULL){
-        logger().debug("Running eval of scheme instructions");
-        std::string answer = SchemeEval::instance().eval( parsedSentenceText );
-        logger().debug( "PAI::%s - loading atoms", __FUNCTION__ );
-        if ( SchemeEval::instance().eval_error() ) {
-            logger().error( "PAI::%s - An error occurred while trying to resolve reference: %s",
-                            __FUNCTION__, answer.c_str( ) );
-        } // if
-        SchemeEval::instance().clear_pending( );
+        SchemeEval & evaluator = SchemeEval::instance(); 
+        std::string scheme_expression, scheme_return_value; 
+
+        // Clean up all the information of previous sentence, such as detach 
+        // the AnchorNode of previous sentence if it has not been processed. 
+        scheme_expression = "( reset_dialog_system )";
+        scheme_return_value = evaluator.eval(scheme_expression); 
+        if ( evaluator.eval_error() ) {
+            logger().error("PAI::%s - Failed to execute '%s'", 
+                            __FUNCTION__, 
+                           scheme_expression.c_str()
+                          ); 
+        }
+
+        // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent 
+        // and dialog_system.scm will continue processing it. 
+        scheme_return_value = evaluator.eval(parsedSentenceText); 
+        if ( evaluator.eval_error() ) {
+            logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace", 
+                           __FUNCTION__
+                          ); 
+        }
     }    
 #endif
+
+    // TODO: some code below may be not necessary, since the PsiActionSelectionAgent
+    //       and dialog_system.scm will do most of the work instead. 
 
     // Add the perceptions into AtomSpace
 
