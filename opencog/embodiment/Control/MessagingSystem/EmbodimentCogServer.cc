@@ -28,7 +28,7 @@
 #include <opencog/util/Config.h>
 
 using namespace opencog;
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 EmbodimentCogServer::EmbodimentCogServer()
 {

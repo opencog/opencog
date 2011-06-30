@@ -26,7 +26,7 @@
 
 #include <opencog/embodiment/Control/MessagingSystem/Message.h> 
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 namespace AutomatedSystemTest
 {

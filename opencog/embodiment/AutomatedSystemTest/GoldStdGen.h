@@ -51,7 +51,7 @@ public:
     GoldStdGen(const char* goldStdFilename);
     ~GoldStdGen();
 
-    void writeMessage(MessagingSystem::Message& message, bool sending);
+    void writeMessage(opencog::messaging::Message& message, bool sending);
     static GoldStdMessage* readMessage(char* line_buf, size_t lineBufSize, FILE* file);
     static unsigned long getCurrentTimestamp();
 

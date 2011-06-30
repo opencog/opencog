@@ -36,7 +36,7 @@ using namespace Procedure;
 using namespace PetCombo;
 using namespace boost;
 using namespace std;
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 BaseServer* ComboShellServer::createInstance()
 {
@@ -55,7 +55,7 @@ void ComboShellServer::init()
     _waiting = false;
 }
 
-bool ComboShellServer::processNextMessage(MessagingSystem::Message *msg)
+bool ComboShellServer::processNextMessage(opencog::messaging::Message *msg)
 {
     if (msg->getTo() != getID())
         return false;

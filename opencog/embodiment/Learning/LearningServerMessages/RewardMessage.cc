@@ -34,7 +34,7 @@ RewardMessage::~RewardMessage()
 }
 
 RewardMessage::RewardMessage(const std::string &from, const std::string &to) :
-        Message(from, to, MessagingSystem::Message::REWARD)
+        Message(from, to, opencog::messaging::Message::REWARD)
 {
 
     schema.assign("");
@@ -44,7 +44,7 @@ RewardMessage::RewardMessage(const std::string &from, const std::string &to) :
 
 RewardMessage::RewardMessage(const std::string &from, const std::string &to,
                              const std::string &msg) :
-        Message(from, to, MessagingSystem::Message::REWARD)
+        Message(from, to, opencog::messaging::Message::REWARD)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -54,7 +54,7 @@ RewardMessage::RewardMessage(const std::string &from, const std::string &to,
                              const std::string &schema,
                              const std::vector<std::string> & schemaArgs,
                              const std::string &candidateSchema,
-                             double reward) : Message(from, to, MessagingSystem::Message::REWARD)
+                             double reward) : Message(from, to, opencog::messaging::Message::REWARD)
 {
     this->reward = reward;
     this->schema.assign(schema);

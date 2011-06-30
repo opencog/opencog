@@ -29,6 +29,7 @@
 
 using namespace LearningServerMessages;
 using namespace PetCombo;
+using opencog::messaging::Message;
 
 static const std::string from  = "PET";
 static const std::string to    = "LS";
@@ -61,7 +62,7 @@ public:
 
         std::string invalidMsg = "trick_name***";
         SchemaMessage message(from, to);
-        TS_ASSERT_THROWS(SchemaMessage(from, to, invalidMsg, MessagingSystem::Message::SCHEMA), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(SchemaMessage(from, to, invalidMsg, Message::SCHEMA), opencog::InvalidParamException&);
     }
 
     void testGetPlainTextRepresentation() {

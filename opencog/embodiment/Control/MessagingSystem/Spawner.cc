@@ -33,7 +33,7 @@
 #include <sstream>
 #include "NetworkElementCommon.h"
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 
 BaseServer* Spawner::createInstance()

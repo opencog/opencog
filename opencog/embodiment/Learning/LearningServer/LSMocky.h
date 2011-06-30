@@ -35,7 +35,7 @@ using namespace opencog;
 namespace LearningServer
 {
 
-class LSMocky : public MessagingSystem::EmbodimentCogServer
+class LSMocky : public opencog::messaging::EmbodimentCogServer
 {
 
 public:
@@ -48,7 +48,7 @@ public:
     void init(const std::string &myId, const std::string &ip, int portNumber);
     ~LSMocky();
 
-    bool processNextMessage(MessagingSystem::Message *msg);
+    bool processNextMessage(opencog::messaging::Message *msg);
 
     Factory<SleepAgent, Agent> sleepAgentFactory;
 

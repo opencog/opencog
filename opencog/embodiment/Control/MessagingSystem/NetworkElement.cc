@@ -52,7 +52,7 @@
 #include <boost/bind.hpp>
 
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 using boost::asio::ip::tcp;
 

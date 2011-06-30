@@ -33,7 +33,7 @@
 
 namespace Procedure
 {
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace boost;
 using namespace std;
 
@@ -49,7 +49,7 @@ ComboInterpreter::~ComboInterpreter()
 {
 }
 
-void ComboInterpreter::run(MessagingSystem::NetworkElement *ne)
+void ComboInterpreter::run(opencog::messaging::NetworkElement *ne)
 {
     if (_vec.empty())
         return;

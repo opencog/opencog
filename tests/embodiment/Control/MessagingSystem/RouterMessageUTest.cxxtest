@@ -26,7 +26,7 @@
 #include <string>
 #include <string.h>
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 static const std::string to = "Fido";
 static const std::string from = "Proxy";

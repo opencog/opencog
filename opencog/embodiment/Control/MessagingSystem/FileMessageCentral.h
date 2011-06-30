@@ -39,8 +39,7 @@
 #include <iostream>
 #include <exception>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 using namespace boost::filesystem;
 
@@ -81,6 +80,6 @@ public:
     Message* pop(const std::string id);
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

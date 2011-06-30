@@ -26,7 +26,7 @@
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace opencog;
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 int main(int argc, char** argv)
 {

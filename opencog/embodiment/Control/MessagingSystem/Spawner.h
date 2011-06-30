@@ -31,8 +31,7 @@
 #include <opencog/util/exceptions.h>
 #include "EmbodimentCogServer.h"
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 class Spawner : public EmbodimentCogServer
 {
@@ -70,6 +69,7 @@ public:
     void releaseOpcPort(const std::string& petId);
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::messaging
 
 #endif

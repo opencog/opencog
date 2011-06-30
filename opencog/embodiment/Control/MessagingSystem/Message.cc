@@ -37,8 +37,7 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 Message::~Message()
 {
@@ -149,4 +148,5 @@ int Message::getType() const
     return type;
 }
 
-}
+} } // namespace opencog::messaging
+

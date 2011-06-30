@@ -28,8 +28,7 @@
 #include <string>
 #include "Message.h"
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 /**
  * Interface implemented by classes which deal with Message Queue
@@ -106,6 +105,6 @@ public:
 
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

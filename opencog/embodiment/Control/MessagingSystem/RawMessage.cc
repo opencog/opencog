@@ -24,7 +24,7 @@
 
 #include "RawMessage.h"
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 // ***********************************************/
 // Constructors/destructors

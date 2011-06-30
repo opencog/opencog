@@ -28,8 +28,7 @@
 #include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 class ComboShellServer : public EmbodimentCogServer
 {
@@ -45,6 +44,6 @@ public:
 private:
     bool _waiting;
 }; // class
-} // namespace
+} } // namespace opencog::messaging
 
 #endif

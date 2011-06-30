@@ -33,7 +33,7 @@
 
 #include <iostream>
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 class MemoryMessageCentralUTest :  public CxxTest::TestSuite
 {

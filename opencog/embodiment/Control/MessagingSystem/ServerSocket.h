@@ -29,8 +29,7 @@
 
 #include <boost/thread/thread.hpp>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 class ServerSocket
 {
@@ -81,6 +80,6 @@ public:
     void OnLine(const std::string&);
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

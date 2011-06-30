@@ -23,7 +23,7 @@
 
 #include "MemoryMessageCentral.h"
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 MemoryMessageCentral::~MemoryMessageCentral()
 {

@@ -42,8 +42,7 @@
 #include <boost/asio.hpp>
 using boost::asio::ip::tcp;
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
     class ServerSocket;
 
@@ -359,6 +358,6 @@ public:
     }
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

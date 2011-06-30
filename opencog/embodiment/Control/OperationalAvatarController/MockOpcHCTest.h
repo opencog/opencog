@@ -40,7 +40,7 @@ using namespace opencog;
 
 namespace opencog { namespace oac {
 
-class MockOpcHCTest : public MessagingSystem::EmbodimentCogServer
+class MockOpcHCTest : public opencog::messaging::EmbodimentCogServer
 {
 
 private:
@@ -116,7 +116,7 @@ public:
     /**
      * Method inherited from network element
      */
-    bool processNextMessage(MessagingSystem::Message *msg);
+    bool processNextMessage(opencog::messaging::Message *msg);
 
     /**
      * Method inherited from network element

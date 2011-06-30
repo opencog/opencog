@@ -28,8 +28,7 @@
 #include <string>
 #include "Message.h"
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 class TickMessage : public Message
 {
@@ -69,6 +68,6 @@ public:
 
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

@@ -28,7 +28,7 @@
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/Logger.h>
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 const std::string NetworkElementCommon::OK_MESSAGE = "OK";
 const std::string NetworkElementCommon::FAILED_MESSAGE = "FAILED";

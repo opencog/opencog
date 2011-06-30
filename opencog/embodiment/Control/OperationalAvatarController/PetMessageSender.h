@@ -37,7 +37,7 @@ private:
     /**
      * A network element object used to send the messages to LS
      */
-    MessagingSystem::NetworkElement * ne;
+    opencog::messaging::NetworkElement * ne;
 
 public:
 
@@ -45,7 +45,7 @@ public:
      * Constructor
      */
     ~PetMessageSender();
-    PetMessageSender(MessagingSystem::NetworkElement * ne);
+    PetMessageSender(opencog::messaging::NetworkElement * ne);
 
     /**
      *

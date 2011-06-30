@@ -30,7 +30,7 @@
 namespace LearningServerMessages
 {
 
-class RewardMessage : public MessagingSystem::Message
+class RewardMessage : public opencog::messaging::Message
 {
 
 private:

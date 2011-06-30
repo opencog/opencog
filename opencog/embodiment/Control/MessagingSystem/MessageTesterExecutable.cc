@@ -39,7 +39,7 @@ unsigned sleep(unsigned seconds)
 }
 #endif
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 class MyElement : public NetworkElement
 {

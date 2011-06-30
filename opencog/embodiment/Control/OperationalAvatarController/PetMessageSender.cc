@@ -22,24 +22,27 @@
  */
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
+#include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
+
 #include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
-#include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
+
 #include <opencog/util/Config.h>
 
 #include "PetMessageSender.h"
 
-using namespace opencog::oac;
 using namespace opencog;
+using namespace opencog::oac;
+using opencog::messaging::FeedbackMessage;
 
 PetMessageSender::~PetMessageSender()
 {
 }
 
-PetMessageSender::PetMessageSender(MessagingSystem::NetworkElement * ne)
+PetMessageSender::PetMessageSender(opencog::messaging::NetworkElement * ne)
 {
     this->ne = ne;
 }
@@ -75,8 +78,8 @@ bool PetMessageSender::sendCommand(const std::string &command,
 bool PetMessageSender::sendFeedback(const std::string &petId, const std::string &feedback)
 {
 
-    MessagingSystem::FeedbackMessage msg(ne->getID(), config().get("PROXY_ID"),
-                                         opencog::pai::PAIUtils::getExternalId(petId.c_str()), feedback);
+    FeedbackMessage msg(ne->getID(), config().get("PROXY_ID"),
+                        opencog::pai::PAIUtils::getExternalId(petId.c_str()), feedback);
     return ne->sendMessage(msg);
 }
 

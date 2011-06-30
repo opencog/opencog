@@ -45,7 +45,7 @@ public:
     ~ProcedureInterpreter();
 
     //! call ComboInterpreter::run() method and execute pending running BuiltIn procedures.
-    void run(MessagingSystem::NetworkElement *ne);
+    void run(opencog::messaging::NetworkElement *ne);
 
     /** Add a procedure to be run by the interpreter
      * @param p The procedure to run.

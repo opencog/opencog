@@ -37,7 +37,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 using boost::asio::ip::tcp;
 

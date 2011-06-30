@@ -289,7 +289,7 @@ public:
      * Method inherited from EmbodimentCogServer 
      * @return True if the server should exit.
      */
-    bool processNextMessage(MessagingSystem::Message *msg);
+    bool processNextMessage(opencog::messaging::Message *msg);
 
     /**
      * Method inherited from EmbodimentCogServer

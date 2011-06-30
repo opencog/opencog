@@ -34,8 +34,9 @@ namespace Procedure
 {
 using namespace boost;
 using namespace opencog::pai;
+using opencog::messaging::NetworkElement;
 
-void ProcedureInterpreter::run(MessagingSystem::NetworkElement *ne)
+void ProcedureInterpreter::run(NetworkElement *ne)
 {
 
     // If a separate Agent is used for comboInterpreter, just comment the

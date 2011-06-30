@@ -48,7 +48,7 @@ ComboSelectInterpreter::~ComboSelectInterpreter()
     delete this->comboInterpreter;
 }
 
-void ComboSelectInterpreter::run(MessagingSystem::NetworkElement* ne)
+void ComboSelectInterpreter::run(opencog::messaging::NetworkElement* ne)
 {
     if (runningProc.empty()) return;
 

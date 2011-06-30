@@ -27,8 +27,7 @@
 
 #include <stdarg.h>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 /**
  * Thrown when a listener unsucessfully tries to bind to a given port
@@ -62,6 +61,6 @@ public:
     BrokedPortBindingException(int port);
 };
 
-} // namespace
+} } // namespace opencog::messaging
 
 #endif

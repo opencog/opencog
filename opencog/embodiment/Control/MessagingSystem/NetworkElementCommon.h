@@ -28,8 +28,7 @@
 #include <string>
 #include <queue>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 /**
  * Common definitions used by classes using NetworkElement protocol
@@ -56,6 +55,7 @@ public:
     static void reportThreadError(const int &errorCode);
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::messaging
 
 #endif

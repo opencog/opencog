@@ -29,7 +29,7 @@
 namespace LearningServerMessages
 {
 
-class LSCmdMessage : public MessagingSystem::Message
+class LSCmdMessage : public opencog::messaging::Message
 {
 
 private:

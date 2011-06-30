@@ -32,8 +32,7 @@
 #define END_TOKEN "***"
 #define sizeOfToken() strlen(END_TOKEN);
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 /**
  * Interface supposed to be implemented by classes which actually
@@ -113,6 +112,6 @@ public:
     void setType(int type);
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

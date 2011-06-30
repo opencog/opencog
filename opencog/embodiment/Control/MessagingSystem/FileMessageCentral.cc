@@ -29,7 +29,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/files.h>
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 
 

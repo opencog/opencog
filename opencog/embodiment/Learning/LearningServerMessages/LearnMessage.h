@@ -33,7 +33,7 @@ using namespace opencog;
 namespace LearningServerMessages
 {
 
-class LearnMessage : public MessagingSystem::Message
+class LearnMessage : public opencog::messaging::Message
 {
 
 private:

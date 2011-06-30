@@ -34,8 +34,7 @@
 
 #include "ImitationLearningAgent.h"
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 using namespace opencog;
 
@@ -552,4 +551,4 @@ const combo_tree& ImitationLearningAgent::getBestSchemaEstimated()
     return cp;
 }
 
-}//~MessagingSystem
+} } // namespace opencog::messaging

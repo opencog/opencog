@@ -46,7 +46,7 @@ public:
     ~ComboSelectInterpreter();
 
     // from idle task
-    void run(MessagingSystem::NetworkElement *ne);
+    void run(opencog::messaging::NetworkElement *ne);
 
     /**
      * add a ComboSelect procedure to be run by the interpreter.

@@ -31,7 +31,7 @@
 namespace LearningServerMessages
 {
 
-class StopLearningMessage : public MessagingSystem::Message
+class StopLearningMessage : public opencog::messaging::Message
 {
 
 private:

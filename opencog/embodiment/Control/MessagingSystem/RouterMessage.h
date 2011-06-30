@@ -28,8 +28,7 @@
 #include <string>
 #include "Message.h"
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 /**
  * The router message encapsulates all messages to avoid checking messages bad
@@ -96,6 +95,6 @@ public:
     int  getEncapsulateType();
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

@@ -42,7 +42,7 @@ TrySchemaMessage::~TrySchemaMessage()
 }
 
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to) :
-        Message(from, to, MessagingSystem::Message::TRY)
+        Message(from, to, opencog::messaging::Message::TRY)
 {
     schema.assign("");
     schemaArguments.clear();
@@ -50,7 +50,7 @@ TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &t
 
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to,
                                    const std::string &msg) :
-        Message(from, to, MessagingSystem::Message::TRY)
+        Message(from, to, opencog::messaging::Message::TRY)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -59,7 +59,7 @@ TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &t
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to,
                                    const std::string &schm,  const std::vector<std::string> &argumentsList)
 throw (opencog::InvalidParamException, std::bad_exception):
-        Message(from, to, MessagingSystem::Message::TRY)
+        Message(from, to, opencog::messaging::Message::TRY)
 {
 
     schema.assign(schm);

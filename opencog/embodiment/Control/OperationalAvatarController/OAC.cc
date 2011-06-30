@@ -606,7 +606,7 @@ PVPActionPlanSender & OAC::getPlanSender()
     return *planSender;
 }
 
-bool OAC::processNextMessage(MessagingSystem::Message *msg)
+bool OAC::processNextMessage(opencog::messaging::Message *msg)
 {
     using namespace combo;
 
@@ -641,7 +641,7 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
         // @note:
         // The message type RAW is used for unity environment to handle dialog.
 		// If you use multiverse, just ignore this.
-        if(msg->getType() == MessagingSystem::Message::RAW) {
+        if(msg->getType() == opencog::messaging::Message::RAW) {
 			// message from OC Avatar, forward it to RelEx server.
             StringMessage rawMessage(getID(), config().get("RELEX_SERVER_ID"), msg->getPlainTextRepresentation());
 
@@ -732,7 +732,7 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
         switch (sm->getType()) {
             // note: assuming arity==0 for now - Moshe
 
-        case MessagingSystem::Message::SCHEMA: {
+        case opencog::messaging::Message::SCHEMA: {
             // learning is finished, set pet to PLAYING state. This
             // design ensure that the learning info will not be lost
             // until a learned schema is received
@@ -746,7 +746,7 @@ bool OAC::processNextMessage(MessagingSystem::Message *msg)
         }
         break;
 
-        case MessagingSystem::Message::CANDIDATE_SCHEMA: {
+        case opencog::messaging::Message::CANDIDATE_SCHEMA: {
             // Add schema to RuleEngine learned schemata ...
 //            ruleEngine->addLearnedSchema( sm->getSchemaName( ) );
 

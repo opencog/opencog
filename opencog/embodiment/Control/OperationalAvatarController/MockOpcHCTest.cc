@@ -87,7 +87,7 @@ void MockOpcHCTest::init(const std::string & myId,
                          unsigned long mc)
 {
 
-    setNetworkElement(new MessagingSystem::NetworkElement(myId, ip, portNumber));
+    setNetworkElement(new opencog::messaging::NetworkElement(myId, ip, portNumber));
 
     this->atomSpace  = new AtomSpace();
     this->lsMessageSender = new PetMessageSender(&(getNetworkElement()));
@@ -210,7 +210,7 @@ Pet & MockOpcHCTest::getPet()
     return *pet;
 }
 
-bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
+bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
 {
     logger().debug("DEBUG - OAC - Received msg");
 
@@ -229,7 +229,7 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
         switch (sm->getType()) {
             // note: assuming arity==0 for now - Moshe
 
-        case MessagingSystem::Message::SCHEMA:
+        case opencog::messaging::Message::SCHEMA:
             std::cout << "SCHEMA" << std::endl;
             std::cout << "SCHEMA NAME : " << sm->getSchemaName() << std::endl;
             std::cout << "COMBO SCHEMA : " << sm->getComboSchema() << std::endl;
@@ -241,7 +241,7 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
             //gai->addSchema(sm->getSchemaName());
             break;
 
-        case MessagingSystem::Message::CANDIDATE_SCHEMA:
+        case opencog::messaging::Message::CANDIDATE_SCHEMA:
             std::cout << "CANDIDATE_SCHEMA" << std::endl;
             std::cout << "SCHEMA NAME : " << sm->getSchemaName() << std::endl;
             std::cout << "COMBO SCHEMA : " << sm->getComboSchema() << std::endl;

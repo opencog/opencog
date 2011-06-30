@@ -41,7 +41,7 @@ LearnMessage::~LearnMessage()
 }
 
 LearnMessage::LearnMessage(const std::string &from, const std::string &to) :
-        Message(from, to, MessagingSystem::Message::LEARN)
+        Message(from, to, opencog::messaging::Message::LEARN)
 {
     schema.assign("");
     //spaceMap.assign("");
@@ -50,7 +50,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to) :
 
 LearnMessage::LearnMessage(const std::string &from, const std::string &to,
                            const std::string &msg) :
-        Message(from, to, MessagingSystem::Message::LEARN)
+        Message(from, to, opencog::messaging::Message::LEARN)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -61,7 +61,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
                            const std::string &owId,
                            const std::string &avId, AtomSpace &atomSpace)
 throw (opencog::InvalidParamException, std::bad_exception):
-        Message(from, to, MessagingSystem::Message::LEARN)
+        Message(from, to, opencog::messaging::Message::LEARN)
 {
 
 

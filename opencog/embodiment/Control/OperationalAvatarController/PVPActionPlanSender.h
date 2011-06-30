@@ -34,7 +34,7 @@
 
 namespace opencog { namespace oac {
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 class PVPActionPlanSender: public opencog::pai::ActionPlanSender
 {

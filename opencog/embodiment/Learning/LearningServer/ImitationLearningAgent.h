@@ -36,8 +36,7 @@
 
 #include <opencog/server/Agent.h>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 using namespace hillclimbing;
 using namespace std;
@@ -117,7 +116,7 @@ private:
     RandGen* _rng;
 };
 
-}//~MessageSystem
+} } // namespace opencog::messaging
 
 
 #endif

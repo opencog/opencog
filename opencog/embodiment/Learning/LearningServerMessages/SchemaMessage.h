@@ -34,7 +34,7 @@ namespace LearningServerMessages
  * This message type carries the schemas learned in LS. The candidate and the final
  * ones.
  */
-class SchemaMessage : public MessagingSystem::Message
+class SchemaMessage : public opencog::messaging::Message
 {
 
 private:

@@ -28,8 +28,7 @@
 #include <string>
 #include "Message.h"
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 class StringMessage : public Message
 {
@@ -76,6 +75,6 @@ public:
 
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

@@ -25,7 +25,7 @@
 
 #include <boost/bind.hpp>
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 
 NetworkElement *ServerSocket::master = NULL;

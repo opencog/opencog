@@ -42,14 +42,14 @@ StopLearningMessage::~StopLearningMessage()
 }
 
 StopLearningMessage::StopLearningMessage(const std::string &from, const std::string &to) :
-        Message(from, to, MessagingSystem::Message::STOP_LEARNING)
+        Message(from, to, opencog::messaging::Message::STOP_LEARNING)
 {
     schema.assign("");
 }
 
 StopLearningMessage::StopLearningMessage(const std::string &from, const std::string &to,
         const std::string &msg) :
-        Message(from, to, MessagingSystem::Message::STOP_LEARNING)
+        Message(from, to, opencog::messaging::Message::STOP_LEARNING)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -58,7 +58,7 @@ StopLearningMessage::StopLearningMessage(const std::string &from, const std::str
 StopLearningMessage::StopLearningMessage(const std::string &from, const std::string &to,
         const std::string &schm,  const std::vector<std::string> &argumentsList)
 throw (opencog::InvalidParamException, std::bad_exception):
-        Message(from, to, MessagingSystem::Message::STOP_LEARNING)
+        Message(from, to, opencog::messaging::Message::STOP_LEARNING)
 {
 
     schema.assign(schm);

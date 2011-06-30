@@ -25,7 +25,7 @@
 #include "FeedbackMessage.h"
 #include <opencog/util/StringTokenizer.h>
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 // ***********************************************/
 // Constructors/destructors

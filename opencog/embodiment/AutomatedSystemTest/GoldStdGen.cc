@@ -26,7 +26,7 @@
 #include <opencog/util/Logger.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace AutomatedSystemTest;
 
 GoldStdGen::GoldStdGen(const char* goldStdFilename)
@@ -49,7 +49,7 @@ GoldStdGen::~GoldStdGen()
 }
 
 
-void GoldStdGen::writeMessage(MessagingSystem::Message& message, bool sending)
+void GoldStdGen::writeMessage(opencog::messaging::Message& message, bool sending)
 {
     if (file) {
         fprintf(file, "%s%lu\n%s %s %d\n%s\n%s",

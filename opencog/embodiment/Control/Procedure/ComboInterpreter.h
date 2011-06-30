@@ -75,7 +75,7 @@ public:
     virtual ~ComboInterpreter();
 
     //run executes a single action plan of some procedure (if any are ready)
-    void run(MessagingSystem::NetworkElement *ne);
+    void run(opencog::messaging::NetworkElement *ne);
 
     //add a procedure to be run by the interpreter
     RunningProcedureId runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments);

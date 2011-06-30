@@ -30,10 +30,11 @@
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <opencog/util/Config.h>
 
-using namespace opencog::oac;
 using namespace std;
 using namespace opencog;
 using namespace opencog::pai;
+using namespace opencog::oac;
+using opencog::messaging::StringMessage;
 
 PVPActionPlanSender::PVPActionPlanSender(const std::string& petId, NetworkElement * ne)
 {
@@ -48,7 +49,7 @@ PVPActionPlanSender::~PVPActionPlanSender()
 
 bool PVPActionPlanSender::sendActionPlan(const ActionPlan& actionPlan)
 {
-    MessagingSystem::StringMessage msg(ne->getID(), config().get("PROXY_ID"), actionPlan.getPVPmessage(petId));
+    StringMessage msg(ne->getID(), config().get("PROXY_ID"), actionPlan.getPVPmessage(petId));
     if (logPVPMessage) {
         logger().info("PVPActionPlanSender::sendActionPlan():\n%s\n", msg.getPlainTextRepresentation());
     }
@@ -57,7 +58,7 @@ bool PVPActionPlanSender::sendActionPlan(const ActionPlan& actionPlan)
 
 bool PVPActionPlanSender::sendSpecificActionFromPlan(const ActionPlan& actionPlan, unsigned int actionSequenceNum)
 {
-	MessagingSystem::StringMessage msg(ne->getID(), config().get("PROXY_ID"), actionPlan.getPVPmessage(petId, actionSequenceNum));
+	StringMessage msg(ne->getID(), config().get("PROXY_ID"), actionPlan.getPVPmessage(petId, actionSequenceNum));
     if (logPVPMessage) {
         logger().info("PVPActionPlanSender::sendActionPlan():\n%s\n", msg.getPlainTextRepresentation());
     }
@@ -67,7 +68,7 @@ bool PVPActionPlanSender::sendSpecificActionFromPlan(const ActionPlan& actionPla
 
 bool PVPActionPlanSender::sendEmotionalFeelings(const std::string& feelings)
 {
-    MessagingSystem::StringMessage msg(ne->getID(), config().get("PROXY_ID"), feelings);
+    StringMessage msg(ne->getID(), config().get("PROXY_ID"), feelings);
     if (logPVPMessage) {
         logger().info("PVPActionPlanSender::sendEmotionalFeelings():\n%s\n", msg.getPlainTextRepresentation());
     }

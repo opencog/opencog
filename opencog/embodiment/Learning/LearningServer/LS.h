@@ -43,7 +43,7 @@
 namespace LearningServer
 {
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 class LS : public EmbodimentCogServer
 {
@@ -64,7 +64,7 @@ public:
     /**
      * Method inherited from network element
      */
-    bool processNextMessage(MessagingSystem::Message *msg);
+    bool processNextMessage(opencog::messaging::Message *msg);
 
     /**
      * Informs whenever the LS is busy performing a learning action or not.
@@ -105,7 +105,7 @@ private:
     int candidateSchemaCnt;
 
     //imitation learning task (can plug hillclimbing or MOSES)
-    MessagingSystem::ImitationLearningAgent* ILAgent;
+    ImitationLearningAgent* ILAgent;
 
     Factory<ImitationLearningAgent, Agent> factory;
 

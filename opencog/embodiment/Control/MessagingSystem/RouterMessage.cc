@@ -23,7 +23,7 @@
 
 #include "RouterMessage.h"
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 
 RouterMessage::~RouterMessage()
 {

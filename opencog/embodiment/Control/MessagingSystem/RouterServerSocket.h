@@ -30,8 +30,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/regex.hpp>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 class RouterServerSocket
 {
@@ -88,6 +87,6 @@ public:
     void OnLine(const std::string &line);
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

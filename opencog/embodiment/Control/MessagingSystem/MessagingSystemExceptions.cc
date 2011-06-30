@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,8 +28,7 @@
 #include <time.h>
 #include "MessagingSystemExceptions.h"
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 CantBindToPortException::CantBindToPortException(int port)
 {
@@ -44,4 +42,4 @@ BrokedPortBindingException::BrokedPortBindingException(int port)
     fflush(stdout);
 }
 
-}
+} } // namespace opencog::messaging

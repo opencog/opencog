@@ -66,7 +66,7 @@ void LS::init(const std::string &myId, const std::string &ip,
     ILAgent = static_cast<ImitationLearningAgent*>(this->createAgent(ImitationLearningAgent::info().id, true));
 }
 
-bool LS::processNextMessage(MessagingSystem::Message *msg)
+bool LS::processNextMessage(opencog::messaging::Message *msg)
 {
     LearningServerMessages::LearnMessage  * lm;
     LearningServerMessages::RewardMessage * rm;
@@ -74,7 +74,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
 
     switch (msg->getType()) {
 
-    case MessagingSystem::Message::LS_CMD:
+    case opencog::messaging::Message::LS_CMD:
         cm = (LearningServerMessages::LSCmdMessage *)msg;
 
         if (learningPet == cm->getFrom() &&
@@ -92,7 +92,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         }
         break;
 
-    case MessagingSystem::Message::LEARN:
+    case opencog::messaging::Message::LEARN:
         lm = (LearningServerMessages::LearnMessage *)msg;
 
         ownerID = lm->getOwnerId();
@@ -134,7 +134,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         logger().warn("LS - LS does not support concurent learning (LS busy right now).");
         break;
 
-    case MessagingSystem::Message::REWARD:
+    case opencog::messaging::Message::REWARD:
         rm = (LearningServerMessages::RewardMessage *)msg;
 
         if (!isBusy()) {
@@ -149,7 +149,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
             rewardCandidateSchema(rm);
         }
         break;
-    case MessagingSystem::Message::TRY:
+    case opencog::messaging::Message::TRY:
         LearningServerMessages::TrySchemaMessage  * tryMsg;
         tryMsg = (LearningServerMessages::TrySchemaMessage  *)msg;
 
@@ -159,7 +159,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         }
         break;
 
-    case MessagingSystem::Message::STOP_LEARNING:
+    case opencog::messaging::Message::STOP_LEARNING:
         LearningServerMessages::StopLearningMessage  * stopLearningMsg;
         stopLearningMsg = (LearningServerMessages::StopLearningMessage  *)msg;
 

@@ -28,7 +28,7 @@
 #include <opencog/util/files.h>
 #include "Router.h"
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 
 void router_unexpected_handler()

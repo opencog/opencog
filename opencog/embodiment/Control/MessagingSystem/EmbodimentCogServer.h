@@ -29,8 +29,7 @@
 #include "Message.h"
 #include "NetworkElement.h"
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 /** Abstract CogServer class for embodiment servers which needs a NetworkElement
  */
@@ -90,6 +89,7 @@ public:
     void logoutFromRouter();
 
 };
-}
+
+} } // namespace opencog::messaging
 
 #endif // _EMBODIMENT_COG_SERVER_H

@@ -36,7 +36,7 @@
 #include <string.h>
 
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 
 Router *RouterServerSocket::master = NULL;

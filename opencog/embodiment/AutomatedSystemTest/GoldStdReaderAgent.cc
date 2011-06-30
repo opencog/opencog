@@ -27,7 +27,7 @@
 #include <unistd.h>
 
 using namespace AutomatedSystemTest;
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 
 GoldStdReaderAgent::~GoldStdReaderAgent()

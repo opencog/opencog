@@ -37,7 +37,7 @@
 namespace AutomatedSystemTest
 {
 
-class PBTester : public MessagingSystem::EmbodimentCogServer
+class PBTester : public opencog::messaging::EmbodimentCogServer
 {
 
 private:
@@ -47,7 +47,7 @@ private:
 
     void initialize();
 
-    std::vector<MessagingSystem::Message*> expectedMessages;
+    std::vector<opencog::messaging::Message*> expectedMessages;
     std::vector<unsigned long> receivedTimeMessages;
 
     GoldStdGen* goldStdGen;
@@ -61,8 +61,8 @@ public:
     void init(const std::string &myId, const std::string &ip, int portNumber);
     ~PBTester();
 
-    bool processNextMessage(MessagingSystem::Message *message);
-    void addExpectedMessage(MessagingSystem::Message* message, unsigned long time);
+    bool processNextMessage(opencog::messaging::Message *message);
+    void addExpectedMessage(opencog::messaging::Message* message, unsigned long time);
     bool hasExpectedMessages();
     void notifyEndOfGoldStdFile();
     GoldStdGen* getGoldStdGen();

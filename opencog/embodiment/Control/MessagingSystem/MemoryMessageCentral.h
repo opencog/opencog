@@ -29,8 +29,7 @@
 #include <map>
 #include <queue>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 /**
  * Implements MessageCentral using a map of queue, in memory.
@@ -70,6 +69,6 @@ public:
     Message* pop(const std::string id);
 
 }; // class
-}  // namespace
+} } // namespace opencog::messaging
 
 #endif

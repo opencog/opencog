@@ -34,7 +34,7 @@ SchemaMessage::~SchemaMessage()
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to) :
-        Message(from, to, MessagingSystem::Message::SCHEMA)
+        Message(from, to, opencog::messaging::Message::SCHEMA)
 {
     schema.assign("");
     schemaName.assign("");
@@ -52,7 +52,7 @@ SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
                              const combo::combo_tree & comboSchema, const std::string &schemaName,
                              const std::string &candidateSchemaName) :
-        Message(from, to, MessagingSystem::Message::SCHEMA)
+        Message(from, to, opencog::messaging::Message::SCHEMA)
 {
 
     this->schemaName.assign(schemaName);

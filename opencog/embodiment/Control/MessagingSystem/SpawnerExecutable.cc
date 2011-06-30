@@ -27,7 +27,7 @@
 #include <opencog/util/files.h>
 #include "Spawner.h"
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 using namespace opencog::control;
 

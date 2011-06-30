@@ -31,7 +31,7 @@
 namespace LearningServerMessages
 {
 
-class TrySchemaMessage : public MessagingSystem::Message
+class TrySchemaMessage : public opencog::messaging::Message
 {
 
 private:

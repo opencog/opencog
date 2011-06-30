@@ -34,7 +34,7 @@ LSCmdMessage::~LSCmdMessage()
 }
 
 LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to) :
-        Message(from, to, MessagingSystem::Message::LS_CMD)
+        Message(from, to, opencog::messaging::Message::LS_CMD)
 {
     schema.assign("");
     command.assign("");
@@ -42,7 +42,7 @@ LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to) :
 
 LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to,
                            const std::string &msg) :
-        Message(from, to, MessagingSystem::Message::LS_CMD)
+        Message(from, to, opencog::messaging::Message::LS_CMD)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -50,7 +50,7 @@ LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to,
 
 LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to,
                            const std::string &command, const std::string &schema) :
-        Message(from, to, MessagingSystem::Message::LS_CMD)
+        Message(from, to, opencog::messaging::Message::LS_CMD)
 {
 
     this->schema.assign(schema);

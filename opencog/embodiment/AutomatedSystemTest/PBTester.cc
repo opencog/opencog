@@ -35,7 +35,7 @@
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 using namespace AutomatedSystemTest;
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 
 static const bool EXIT_ON_FAILURE = false;
@@ -76,7 +76,7 @@ void PBTester::initialize()
     numberOfReceivedMessages = 0;
 }
 
-bool PBTester::processNextMessage(MessagingSystem::Message *message)
+bool PBTester::processNextMessage(opencog::messaging::Message *message)
 {
     //logger().info("RECEIVED MESSAGE:\n%s", message->getPlainTextRepresentation());
 

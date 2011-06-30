@@ -36,7 +36,7 @@
 
 #include <iostream>
 
-using namespace MessagingSystem;
+using namespace opencog::messaging;
 using namespace opencog;
 
 class FileMessageCentralUTest :  public CxxTest::TestSuite

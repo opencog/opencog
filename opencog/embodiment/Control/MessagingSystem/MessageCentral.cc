@@ -30,8 +30,7 @@
 
 #include <opencog/embodiment/Control/LoggerFactory.h>
 
-namespace MessagingSystem
-{
+namespace opencog { namespace messaging {
 
 MessageCentral::~MessageCentral()
 {
@@ -53,5 +52,4 @@ void MessageCentral::unlockQueue()
     pthread_mutex_unlock(&messageQueueLock);
 }
 
-
-}
+} } // namespace opencog::messaging
