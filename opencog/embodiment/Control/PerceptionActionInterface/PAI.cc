@@ -716,6 +716,9 @@ void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeExcept
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
     Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue);
+    //! JaredW: not sure if this is quite right, but it should have some truth value (I think).
+    //! Probability of 1, count 1, of this action happening at that time.
+    atomSpace.setTV(atTimeLink, SimpleTruthValue(1,1));
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
 
     //if the action is grab or drop created/update isHoldingSomething
@@ -1940,7 +1943,6 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 classReference[0] = objClassNode;
                 classReference[1] = objSemeNode;
 
-
                 Handle referenceLink = 
                     atomSpace.addLink( REFERENCE_LINK, classReference, TruthValue::TRUE_TV( ) );
                 atomSpace.setLTI( referenceLink, 1 );
@@ -1953,10 +1955,33 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 AtomSpaceUtil::setPredicateFrameFromHandles( 
                     atomSpace, "#Entity", internalEntityId + "_entity",
                         elements, TruthValue::TRUE_TV() );
-            } // end block
-            
-            
 
+                // JaredW: connect the AccessoryNode[etc] directly to the ConceptNode.
+                // Sometimes the ObjectNode[subtype] is connected to a (Node "accessory") or similar.
+                // It should use the (ConceptNode "Accessory"), as defined above (and only that).
+                // Useful for inference and frequent subgraph mining
+                {
+                    HandleSeq inheritance(2);
+                    inheritance[0] = objectNode;
+                    inheritance[1] = objectType;
+
+                    Handle link = atomSpace.addLink( INHERITANCE_LINK,
+                        inheritance, SimpleTruthValue( 1, 1 ) );
+                    atomSpace.setLTI( link, 1 );
+                }
+            } // end block
+
+            // JaredW: Add e.g. (InheritanceLink (AccessoryNode "id_315840") (ConceptNode "ball"))
+            {
+                HandleSeq inheritance(2);
+                inheritance[0] = objectNode;
+                inheritance[1] = objClassNode;
+
+                Handle link = atomSpace.addLink( INHERITANCE_LINK,
+                    inheritance, SimpleTruthValue( 1, 1 ) );
+                atomSpace.setLTI( link, 1 );
+            }
+            
             //connect the acessory node to the seme node
             HandleSeq referenceLinkOutgoing1;
 
@@ -1966,7 +1991,6 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing1, TruthValue::TRUE_TV( ) );
                 atomSpace.setLTI( referenceLink, 1 );
             }
-
 
             //connect the seme node to the word node
             HandleSeq referenceLinkOutgoing2;
@@ -2595,6 +2619,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                 predicateName = ACTION_FAILED_PREDICATE_NAME;
                 failedActionPlans.insert(planId);
                 // TODO: Log the value of the parameter with name="reason"
+                cout << "PAI Action plan FAILED: " << plan.getID() << endl;
                 break;
             default:
                 break;
@@ -2608,6 +2633,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
 
         // If there is no pending actions anymore
         if (plan.isFinished()) {
+            cout << "PAI Action plan OK: " << plan.getID() << endl;
             pendingActionPlans.erase(planId);
             planToActionIdsMaps.erase(planId);
         } else {
