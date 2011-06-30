@@ -28,8 +28,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 using namespace opencog;
 
@@ -71,5 +70,6 @@ public:
     virtual bool sendStopLearning(const std::string &schemaName, const std::vector<std::string> & schemaArgs) = 0;
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 #endif

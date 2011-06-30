@@ -24,7 +24,7 @@
 #include <opencog/embodiment/Control/OperationalAvatarController/OutputRelex.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 std::string OutputRelex::getOutput( const AtomSpace &atomSpace, const std::vector< std::pair<std::string, Handle> >& handles ) 
 {

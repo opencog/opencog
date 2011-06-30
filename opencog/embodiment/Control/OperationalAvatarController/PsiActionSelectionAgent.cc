@@ -26,7 +26,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 extern int currentDebugLevel;
 

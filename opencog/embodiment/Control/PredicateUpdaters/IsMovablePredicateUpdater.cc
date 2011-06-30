@@ -28,7 +28,7 @@
 #include "IsMovablePredicateUpdater.h"
 
 using namespace opencog;
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 IsMovablePredicateUpdater::IsMovablePredicateUpdater(AtomSpace &atomSpace) :
         BasicPredicateUpdater(atomSpace)

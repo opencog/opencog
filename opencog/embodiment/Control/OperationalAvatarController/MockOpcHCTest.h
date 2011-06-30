@@ -38,8 +38,7 @@
 
 using namespace opencog;
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class MockOpcHCTest : public MessagingSystem::EmbodimentCogServer
 {
@@ -125,6 +124,7 @@ public:
     void setUp();
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif

@@ -25,7 +25,7 @@
 #include "Plaza.h"
 #include <iostream>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 Plaza::Plaza (const std::string & ip, const std::string & publishPort) : ip(ip), publishPort(publishPort)
 {

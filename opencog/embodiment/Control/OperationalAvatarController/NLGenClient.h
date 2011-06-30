@@ -37,29 +37,30 @@
 using boost::asio::ip::tcp;
 #endif
 
-namespace OperationalAvatarController
-{
-    class NLGenClient {
+namespace opencog { namespace oac {
 
-    public:
-        NLGenClient( const std::string& host, unsigned int port );
-        
-        virtual ~NLGenClient( );
-        
-        bool connect( void );
-        
-        std::string send(const std::string& text);
-        
-    private:
+class NLGenClient {
+
+public:
+    NLGenClient( const std::string& host, unsigned int port );
+    
+    virtual ~NLGenClient( );
+    
+    bool connect( void );
+    
+    std::string send(const std::string& text);
+    
+private:
 #if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
-        boost::asio::io_service io_service;
-        tcp::socket *socket;
-        std::string host; 
-        unsigned int port;
-        bool connected;
+    boost::asio::io_service io_service;
+    tcp::socket *socket;
+    std::string host; 
+    unsigned int port;
+    bool connected;
 #endif
-    };
 };
+
+} } // namespace opencog::oac
 
 #endif //NLGENCLIENT_H
 

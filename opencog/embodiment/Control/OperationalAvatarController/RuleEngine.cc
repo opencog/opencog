@@ -50,6 +50,8 @@
 #include "OAC.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 
+#include <opencog/comboreduct/combo/vertex.h>
+
 #include <boost/regex.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -62,8 +64,7 @@
 
 #define WILD_CARD_STR "_*_"
 
-using namespace OperationalAvatarController;
-using namespace opencog;
+using namespace opencog::oac;
 
 RuleEngine::RuleEngine( OAC* opc, const std::string& petName )
 throw( RuntimeException ) :
@@ -1309,7 +1310,7 @@ void RuleEngine::processRules( void )
             throw RuntimeException(TRACE_INFO, "processRules - Invalid procedure type. Accepted ones: COMBO and COMBO_SELECT.");
         }
 
-        if (result == combo::id::logical_true) {
+        if (::operator==(result,combo::id::logical_true)) {
 
             if (procedureId.getType() == Procedure::COMBO) {
                 updateValidTargets(comboInterpreter.getUnifierResult(procedureId));

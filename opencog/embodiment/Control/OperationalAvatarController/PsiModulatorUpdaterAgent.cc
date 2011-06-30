@@ -27,7 +27,7 @@
 
 #include <boost/tokenizer.hpp>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 bool PsiModulatorUpdaterAgent::Modulator::runUpdater (AtomSpace & atomSpace)
 {

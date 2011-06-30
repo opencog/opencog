@@ -27,8 +27,7 @@
 #include <opencog/embodiment/Control/PredicateUpdaters/BasicPredicateUpdater.h>
 #include <opencog/spatial/math/Triangle.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 /**
  * This class is used to update all the predicates related with PetPsyche
@@ -50,6 +49,6 @@ public:
 
 }; // class
 
-} // OperationalAvatarController
+} } // namespace opencog::oac
 
 #endif // PETPSYCHEPREDICATESUPDATER_H

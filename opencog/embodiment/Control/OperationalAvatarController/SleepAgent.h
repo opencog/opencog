@@ -27,8 +27,7 @@
 
 #include <opencog/server/Agent.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 using namespace opencog;
 
@@ -53,6 +52,7 @@ public:
     void run(CogServer *opc);
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif

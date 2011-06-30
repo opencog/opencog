@@ -29,9 +29,10 @@
 #include <sstream>
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
+
 class Pet;
+
 /**
  * Handle commands used by scavenger Hunt mode
  */
@@ -155,6 +156,6 @@ protected:
     bool needToCollectProcedureId;
 };
 
-}; // OperationalAvatarController
+} } // namespace opencog::oac
 
 #endif // SCAVENGER_HUNT_AGENT_MODE_HANDLER_H

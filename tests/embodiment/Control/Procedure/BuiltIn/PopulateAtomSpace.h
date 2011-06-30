@@ -30,7 +30,7 @@
 #include "PredicatesUpdater.h"
 #include "ActionPlanSenderMock.h"
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 using namespace opencog::pai;
 

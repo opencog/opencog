@@ -24,8 +24,7 @@
 #ifndef RULE_ENGINEUTIL_H_
 #define RULE_ENGINEUTIL_H_
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class RuleEngine;
 
@@ -67,5 +66,6 @@ private:
     int cyclesDuringNovelty;
 };
 
-}; // OperationalAvatarController
+} } // namespace opencog::oac
+
 #endif /*NEWRULEENGINEUTIL_H_*/

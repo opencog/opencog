@@ -26,8 +26,8 @@
 
 #include "BaseAgentModeHandler.h"
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
+
 class Pet;
 /**
  * Handle commands used by Learning mode
@@ -49,6 +49,6 @@ protected:
     Pet* agent;
 };
 
-}; // OperationalAvatarController
+} } // namespace opencog::oac
 
 #endif // LEARNING_AGENT_MODE_HANDLER_H

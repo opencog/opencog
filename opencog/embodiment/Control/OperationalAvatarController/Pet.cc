@@ -50,9 +50,9 @@
 #include <boost/format.hpp>
 
 using namespace behavior;
-using namespace OperationalAvatarController;
 using namespace WorldWrapper;
 using namespace opencog;
+using namespace opencog::oac;
 using namespace opencog::control;
 
 const unsigned long Pet::UNDEFINED_TIMESTAMP = 0;
@@ -306,12 +306,12 @@ void Pet::setExemplarAvatarId(const std::string& exemplarAvatarId)
     adjustIsExemplarAvatarPredicate(true);
 }
 
-const OperationalAvatarController::PetMode Pet::getMode() const
+const PetMode Pet::getMode() const
 {
     return (this->mode);
 }
 
-void Pet::setMode(OperationalAvatarController::PetMode  mode)
+void Pet::setMode(PetMode  mode)
 {
     this->mode = mode;
 

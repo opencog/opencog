@@ -26,8 +26,8 @@
 #include <opencog/embodiment/Control/OperationalAvatarController/BaseAgentModeHandler.h>
 #include <opencog/spatial/VisibilityMap.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
+
 class Pet;
 /**
  * If a given mode doesn't need a handler, use a default handler to be returned by AvatarInterface
@@ -53,6 +53,7 @@ protected:
     Pet* agent;
     opencog::spatial::VisibilityMap* visibilityMap;
 };
-}; // OperationalAvatarController
+
+} } // namespace opencog::oac
 
 #endif // DEFAULT_AGENT_MODE_HANDLER

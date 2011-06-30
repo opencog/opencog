@@ -30,8 +30,7 @@
 
 using namespace opencog;
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class BasicPredicateUpdater
 {
@@ -87,6 +86,7 @@ public:
 
 
 }; // class
-} // namespace
+
+} } // namespace opencog::oac
 
 #endif

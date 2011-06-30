@@ -28,8 +28,7 @@
 
 class PsiDemandUpdaterAgentUTest;
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 /**
  * @class
@@ -199,7 +198,7 @@ public:
 
 }; // class
 
-}  // namespace
+} } // namespace opencog::oac
 
 #endif
 

@@ -30,8 +30,7 @@
 
 #include <zmq.hpp>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 /**
  * @class
@@ -171,7 +170,7 @@ private:
     zmq::socket_t * pBackend;   // Bind to unifiedEndPoint, provide the public endpoint for subscribers
 }; // class 
 
-}  // namespace
+} } // namespace opencog::oac
 
 #endif // PLAZA_H
 

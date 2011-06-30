@@ -26,7 +26,7 @@
 
 #include<boost/tokenizer.hpp>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 PsiRelationUpdaterAgent::~PsiRelationUpdaterAgent()
 {

@@ -30,8 +30,7 @@
 #include <opencog/atomspace/Node.h>
 #include "OAC.h"
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 /**
  * class SchemaRunner
@@ -138,6 +137,6 @@ private:
     friend class RuleEngineUtil;
 };
 
-}; // OperationalAvatarController;
+} } // namespace opencog::oac
 
 #endif // SCHEMARUNNER_H

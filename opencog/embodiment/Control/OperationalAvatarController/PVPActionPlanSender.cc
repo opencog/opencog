@@ -30,7 +30,7 @@
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <opencog/util/Config.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace std;
 using namespace opencog;
 using namespace opencog::pai;

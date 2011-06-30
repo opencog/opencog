@@ -34,7 +34,7 @@
 #include <vector>
 
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 BaseAgentModeHandler::BaseAgentModeHandler( Pet* agent ) :
     modeName( "PLAYING_MODE" ), agent( agent )

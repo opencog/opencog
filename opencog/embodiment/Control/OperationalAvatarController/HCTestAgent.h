@@ -28,8 +28,7 @@
 #include <opencog/server/Agent.h>
 #include "MessageSender.h"
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 using namespace opencog;
 
@@ -98,6 +97,7 @@ public:
     }
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif

@@ -25,7 +25,7 @@
 #include <opencog/atomspace/HandleTemporalPair.h>
 #include <boost/regex.hpp>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 SchemaRunner::SchemaRunner( OAC* opc ) : opc( opc )
 {
@@ -151,7 +151,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                         // logger().info("SchemaRunner - Replanning walk(new: %s args: %d old: %s, %s)...", schemaName.c_str(), arguments.size(), currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str() );
                         // this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
 
-                        if (this->opc->getPet().getMode() == OperationalAvatarController::SCAVENGER_HUNT) {
+                        if (this->opc->getPet().getMode() == opencog::oac::SCAVENGER_HUNT) {
                             logger().info("SchemaRunner - Replanning walk(new: %s args: %d old: %s, %s)...", schemaName.c_str(), arguments.size(), currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str() );
 
                             this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );

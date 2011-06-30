@@ -45,8 +45,7 @@ using namespace opencog;
 
 struct lua_State;
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class OAC;
 class SchemaRunner;
@@ -593,6 +592,6 @@ private:
     throw(opencog::RuntimeException);
 };
 
-}; // OperationalAvatarController
+} } // namespace opencog::oac
 
 #endif /*NEWRULEENGINE_H_*/

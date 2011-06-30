@@ -26,10 +26,9 @@
 
 #include "BasicPredicateUpdater.h"
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
-class IsPickupablePredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
+class IsPickupablePredicateUpdater : public BasicPredicateUpdater
 {
 
 private:
@@ -49,6 +48,7 @@ public:
     void update(Handle object, Handle pet, unsigned long timestamp );
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif /*ISPICKUPABLEPREDICATEUPDATER_H_*/

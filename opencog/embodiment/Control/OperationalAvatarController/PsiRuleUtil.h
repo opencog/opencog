@@ -33,12 +33,7 @@
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>
 
-//#include <opencog/spatial/math/Vector3.h>
-
-using namespace opencog;
-
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 /**
  * @class
@@ -89,7 +84,6 @@ namespace OperationalAvatarController
  * If you want to use OrLink, then just split the Rule into several Rules.
  * For the efficiency and simplicity of the planer (backward chainging), NotLink is forbidden currently.  
 */
-
 class PsiRuleUtil
 {
 
@@ -282,6 +276,6 @@ public:
     static Handle setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal); 
 }; // class
 
-}  // namespace
+} } // namespace opencog::oac
 
 #endif

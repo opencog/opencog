@@ -27,7 +27,7 @@
 #include <opencog/util/files.h>
 #include "MockOpcHCTest.h"
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 using namespace boost;
 

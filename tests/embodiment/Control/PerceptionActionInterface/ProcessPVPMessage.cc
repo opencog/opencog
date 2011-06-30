@@ -31,7 +31,7 @@
 
 
 using namespace opencog::pai;
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 int main(int argc, char* argv[])
 {

@@ -24,7 +24,7 @@
 
 #include <GoalsActionsImportance.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 class GoalsActionsImportanceUTest : public CxxTest::TestSuite
 {

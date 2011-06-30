@@ -30,7 +30,7 @@
 #include "RuleEngineUtil.h"
 #include "RuleEngineLearnedTricksHandler.h"
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 RuleEngineUtil::RuleEngineUtil( RuleEngine* ruleEngine )
         : ruleEngine( ruleEngine )

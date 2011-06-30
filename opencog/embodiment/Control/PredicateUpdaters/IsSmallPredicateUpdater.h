@@ -26,10 +26,9 @@
 
 #include "BasicPredicateUpdater.h"
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
-class IsSmallPredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
+class IsSmallPredicateUpdater : public BasicPredicateUpdater
 {
 
 protected:
@@ -63,6 +62,7 @@ public:
     void update(Handle object, Handle pet, unsigned long timestamp );
 
 }; // class
-} // namespace
+
+} } // namespace opencog::oac
 
 #endif /*ISSMALLPREDICATEUPDATER_H_*/

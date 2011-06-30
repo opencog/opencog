@@ -28,7 +28,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/atomspace/Link.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 
 Handle BasicPredicateUpdater::getPredHandle(Handle object, std::string predicateName)

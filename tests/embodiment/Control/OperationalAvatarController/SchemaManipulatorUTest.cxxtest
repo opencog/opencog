@@ -24,7 +24,7 @@
 
 #include <SchemaManipulator.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 class SchemaManipulatorUTest : public CxxTest::TestSuite
 {

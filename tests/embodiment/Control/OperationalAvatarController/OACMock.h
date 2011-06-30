@@ -39,7 +39,7 @@
 
 #include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace Procedure;
 using namespace PetCombo;
 using namespace opencog;

@@ -33,7 +33,7 @@
 
 using namespace std;
 using namespace opencog;
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 int main()
 {

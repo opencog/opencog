@@ -25,7 +25,7 @@
 #include "OAC.h"
 #include "ActionSelectionAgent.h"
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 ActionSelectionAgent::~ActionSelectionAgent()
 {

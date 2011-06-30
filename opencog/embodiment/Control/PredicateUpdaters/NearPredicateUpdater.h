@@ -27,8 +27,7 @@
 #include "BasicPredicateUpdater.h"
 #include <opencog/atomspace/AtomSpace.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 /**
  * This class is used to update the near predicates whenever an object
@@ -40,7 +39,7 @@ namespace OperationalAvatarController
  * @todo computeAllSpatialRelations should check which objects are near to each other using the spatial grid system.
  * @todo computeAllSpatialRelations doesn't handle the "between" relation (connected to the above)
  */
-class NearPredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
+class NearPredicateUpdater : public BasicPredicateUpdater
 {
 
 public:
@@ -63,7 +62,8 @@ protected:
 
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif
 

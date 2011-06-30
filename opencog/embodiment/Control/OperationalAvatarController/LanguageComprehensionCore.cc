@@ -26,7 +26,7 @@
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <boost/regex.hpp>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 
 LanguageComprehension::LanguageComprehension( opencog::control::AvatarInterface& agent ) : 

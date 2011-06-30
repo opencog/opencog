@@ -32,7 +32,7 @@
 
 #include "PetMessageSender.h"
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 
 PetMessageSender::~PetMessageSender()

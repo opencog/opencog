@@ -28,7 +28,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/spatial/Entity.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 using namespace spatial;
 

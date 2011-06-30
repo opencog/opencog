@@ -25,7 +25,7 @@
 #include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/EntityExperienceAgent.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 EntityExperienceAgent::~EntityExperienceAgent()
 {

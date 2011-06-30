@@ -33,7 +33,7 @@
 //#define WAIT3_TIME 10000 //time to wait for the second learning iteration
 #define WAIT4_TIME 2
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 
 HCTestAgent::HCTestAgent()

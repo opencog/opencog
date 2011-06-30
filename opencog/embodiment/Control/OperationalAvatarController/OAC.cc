@@ -48,7 +48,7 @@
  */
 //#define DELETE_ATOMSPACE
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace Procedure;
 using namespace PetCombo;
 using namespace opencog;

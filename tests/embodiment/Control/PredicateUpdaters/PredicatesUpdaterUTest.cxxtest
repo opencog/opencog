@@ -52,7 +52,7 @@ static const std::string drink = "water";
 static const std::string wall = "wall";
 
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog::pai;
 
 class PredicatesUpdaterUTest :  public CxxTest::TestSuite

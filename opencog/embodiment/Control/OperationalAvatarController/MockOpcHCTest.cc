@@ -67,7 +67,7 @@ std::vector<std::string> TRICK_ARGS;
 #define REWARD_1 0.5
 #define REWARD_2 1.0
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace PetCombo;
 using namespace opencog;
 

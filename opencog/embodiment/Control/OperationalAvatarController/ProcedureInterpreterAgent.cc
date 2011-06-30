@@ -25,7 +25,7 @@
 #include "OAC.h"
 #include "ProcedureInterpreterAgent.h"
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 ProcedureInterpreterAgent::~ProcedureInterpreterAgent()
 {

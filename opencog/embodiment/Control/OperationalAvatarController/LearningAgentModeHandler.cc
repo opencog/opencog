@@ -28,7 +28,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 LearningAgentModeHandler::LearningAgentModeHandler( Pet* agent ) :
     BaseAgentModeHandler( agent ), modeName( "LEARNING_MODE" ), agent(agent)

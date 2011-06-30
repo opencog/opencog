@@ -38,7 +38,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 const unsigned int ScavengerHuntAgentModeHandler::NUMBER_OF_AREAS = 9;
 const std::string ScavengerHuntAgentModeHandler::RED_TEAM_BASE("red_base");

@@ -28,8 +28,7 @@
 
 #include <time.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 using namespace std;
 
@@ -57,6 +56,7 @@ public:
     void run(opencog::CogServer *server);
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif

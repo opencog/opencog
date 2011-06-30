@@ -35,7 +35,7 @@
 #include <opencog/spatial/MovableEntity.h>
 
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 using namespace opencog::pai;
 

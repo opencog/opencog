@@ -60,8 +60,7 @@ class PsiDemandUpdaterAgentUTest;
 class PsiFeelingUpdaterAgentUTest; 
 class PsiActionSelectionAgentUTest; 
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 /* Defines a single factory template to allow insert a same agent
  * multiple times in the Cogserver schedule */
@@ -329,7 +328,8 @@ public:
     SingletonFactory <PsiRelationUpdaterAgent, Agent> psiRelationUpdaterAgentFactory; 
     SingletonFactory <PsiFeelingUpdaterAgent, Agent> psiFeelingUpdaterAgentFactory; 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif // OAC_H
 

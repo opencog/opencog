@@ -21,8 +21,9 @@
  */
 
 #include "PsiRuleUtil.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 bool PsiRuleUtil::splitPsiRule(const AtomSpace & atomSpace,
                                const Handle hPsiRule, 
@@ -420,7 +421,7 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                        preconditionName.c_str()
                       );
 
-        if ( result == combo::id::logical_true ) {
+        if ( ::operator==(result,combo::id::logical_true) ) {
             logger().debug( "PsiRuleUtil::%s - The Precondition '%s' is true.", 
                             __FUNCTION__, 
                             preconditionName.c_str()

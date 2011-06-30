@@ -26,8 +26,7 @@
 
 #include "OAC.h"
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class RuleEngineLearnedTricksHandler
 {
@@ -66,6 +65,6 @@ private:
     opencog::RandGen* randGen;
 };
 
-}; // OperationalAvatarController
+} } // namespace opencog::oac
 
 #endif // RULEENGINELEARNEDTRICKSHANDLER_H

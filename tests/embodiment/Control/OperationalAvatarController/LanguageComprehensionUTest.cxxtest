@@ -41,7 +41,7 @@
 #include <iostream>
 using namespace std;
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog::control;
 
 class LanguageComprehensionUTest : public CxxTest::TestSuite

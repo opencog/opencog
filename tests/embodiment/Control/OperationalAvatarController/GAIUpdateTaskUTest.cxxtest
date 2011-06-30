@@ -24,7 +24,7 @@
 
 #include <GAIUpdateTask.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 class GAIUpdateTaskUTest : public CxxTest::TestSuite
 {

@@ -26,10 +26,9 @@
 
 #include "BasicPredicateUpdater.h"
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
-class IsPeePlacePredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
+class IsPeePlacePredicateUpdater : public BasicPredicateUpdater
 {
 
 public:
@@ -39,6 +38,7 @@ public:
     void update(Handle object, Handle pet, unsigned long timestamp );
 
 }; // class;
-} // namespace
+
+} } // namespace opencog::oac
 
 #endif /*ISDRINKABLE_H_*/

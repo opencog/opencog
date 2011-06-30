@@ -24,7 +24,7 @@
 
 #include <SchemaGoalLinkMiningTask.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 class SchemaGoalLinkMiningTaskUTest : public CxxTest::TestSuite
 {

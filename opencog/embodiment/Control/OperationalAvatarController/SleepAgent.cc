@@ -24,7 +24,7 @@
 
 #include "SleepAgent.h"
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 SleepAgent::~SleepAgent()
 {

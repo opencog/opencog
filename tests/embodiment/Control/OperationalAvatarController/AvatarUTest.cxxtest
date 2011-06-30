@@ -33,7 +33,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog::pai;
 using namespace opencog;
 using namespace opencog::control;

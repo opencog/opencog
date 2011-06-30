@@ -25,7 +25,7 @@
 #include "OAC.h"
 #include "ImportanceDecayAgent.h"
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 ImportanceDecayAgent::~ImportanceDecayAgent()
 {

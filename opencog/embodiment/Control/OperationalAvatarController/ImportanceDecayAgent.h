@@ -29,8 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <time.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class ImportanceDecayAgent : public opencog::Agent
 {
@@ -52,7 +51,7 @@ public:
         return info();
     }
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalAvatarController::ImportanceDecayAgent");
+        static const ClassInfo _ci("opencog::oac::ImportanceDecayAgent");
         return _ci;
     }
 
@@ -67,6 +66,7 @@ public:
     void atomMerged(AtomSpaceImpl* as, Handle h);
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif

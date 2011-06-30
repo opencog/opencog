@@ -26,7 +26,7 @@
 
 #include <limits>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 const std::string RuleEngineLearnedTricksHandler::LEARNED_TRICK_NODE_NAME = "learnedTrick";
 const int RuleEngineLearnedTricksHandler::REWARD_VALUE = 80;

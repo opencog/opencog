@@ -25,7 +25,7 @@
 #include <opencog/util/Logger.h>
 #include <boost/lexical_cast.hpp>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 
 NLGenClient::NLGenClient(const std::string& host, unsigned int port)

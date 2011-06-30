@@ -37,8 +37,7 @@
 
 using namespace opencog;
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class PredicatesUpdater
 {
@@ -73,6 +72,7 @@ public:
     void update(std::vector<Handle> objects, unsigned long timestamp);
 
 };// class
-} // namespace
+
+} } // namespace opencog::oac
 
 #endif /*PREDICATEUPDATER_H_*/

@@ -28,8 +28,7 @@
 #include <opencog/server/Agent.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class ProcedureInterpreterAgent : public opencog::Agent
 {
@@ -55,6 +54,7 @@ public:
     void run(opencog::CogServer *server);
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif

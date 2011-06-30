@@ -35,7 +35,7 @@
 // this time frame corresponde to one minute
 static const unsigned long timeWindow = 600;
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_petId) :
         atomSpace(_atomSpace), petId(_petId)

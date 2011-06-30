@@ -24,7 +24,7 @@
 
 #include <Goalsmanipulator.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 class GoalsmanipulatorUTest : public CxxTest::TestSuite
 {

@@ -29,7 +29,7 @@
 #include <boost/bind.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 void LanguageComprehension::addDialogController( DialogController* dialogController )
 {

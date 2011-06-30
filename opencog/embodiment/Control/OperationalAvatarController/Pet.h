@@ -45,8 +45,7 @@ using namespace opencog;
 using namespace opencog::pai;
 using namespace opencog::control;
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class RuleEngine;
 
@@ -417,6 +416,7 @@ public:
     void sendMapToVisualDebuggerClients( const spatial::LocalSpaceMap2D& map );
 
 }; // class
-}  // namespace
+
+} } // namespace opencog::oac
 
 #endif

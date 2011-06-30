@@ -33,7 +33,7 @@
 #include <vector>
 
 using namespace opencog;
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 DefaultAgentModeHandler::DefaultAgentModeHandler( Pet* agent ) :
     BaseAgentModeHandler( agent ), modeName( "PLAYING_MODE" ), 

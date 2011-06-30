@@ -24,7 +24,7 @@
 #include "FramesToRelexRuleEngine.h"
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 
 FramesToRelexRuleEngine::FramesToRelexRuleEngine( void ) 

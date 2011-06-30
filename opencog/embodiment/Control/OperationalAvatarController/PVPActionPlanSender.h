@@ -32,8 +32,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlanSender.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 using namespace MessagingSystem;
 
@@ -99,6 +98,6 @@ public:
 
 };
 
-} // namespace
+} } // namespace opencog::oac
 
 #endif // PVPACTIONPLANSENDER_H_

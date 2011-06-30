@@ -28,8 +28,8 @@
 
 #include "../AgentModeHandler.h"
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
+
 class Pet;
 /**
  * If a given mode doesn't need a handler, use a base handler to be returned by AvatarInterface
@@ -55,6 +55,7 @@ protected:
     std::queue<std::vector<std::string> > commandsQueue;
     Pet* agent;
 };
-}; // OperationalAvatarController
+
+} } // namespace opencog::oac
 
 #endif // BASE_AGENT_MODE_HANDLER

@@ -24,7 +24,7 @@
 
 #include <FeelingsManipulator.h>
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 class FeelingsManipulatorUTest : public CxxTest::TestSuite
 {

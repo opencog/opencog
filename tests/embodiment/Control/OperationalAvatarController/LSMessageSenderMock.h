@@ -24,7 +24,7 @@
 #define LSMESSAGESENDERMOCK_H_
 
 #include <opencog/embodiment/Control/OperationalAvatarController/MessageSender.h>
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 
 #include <stdio.h>
 

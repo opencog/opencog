@@ -27,7 +27,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "IsPeePlacePredicateUpdater.h"
 
-using namespace OperationalAvatarController;
+using namespace opencog::oac;
 using namespace opencog;
 
 IsPeePlacePredicateUpdater::IsPeePlacePredicateUpdater(AtomSpace &atomSpace) :

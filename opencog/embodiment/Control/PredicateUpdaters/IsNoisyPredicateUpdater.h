@@ -26,10 +26,9 @@
 
 #include "BasicPredicateUpdater.h"
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
-class IsNoisyPredicateUpdater : public OperationalAvatarController::BasicPredicateUpdater
+class IsNoisyPredicateUpdater : public BasicPredicateUpdater
 {
 
 public:
@@ -40,6 +39,7 @@ public:
 
 
 }; // class
-} // namespace
+
+} } // namespace opencog::oac
 
 #endif /*ISNOISYPREDICATEUPDATER_H_*/

@@ -32,8 +32,7 @@
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 /**
  * @class
@@ -135,6 +134,6 @@ public:
 
 }; // class
 
-}  // namespace
+} } // namespace opencog::oac
 
 #endif

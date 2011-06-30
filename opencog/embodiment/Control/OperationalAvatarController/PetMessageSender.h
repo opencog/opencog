@@ -27,8 +27,7 @@
 #include "MessageSender.h"
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
-namespace OperationalAvatarController
-{
+namespace opencog { namespace oac {
 
 class PetMessageSender : public MessageSender
 {
@@ -80,8 +79,8 @@ public:
 
 
 }; // class
-}  // namespace
 
+} } // namespace opencog::oac
 
 #endif
 
