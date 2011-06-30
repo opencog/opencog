@@ -2,6 +2,7 @@ from opencog.atomspace import Atom, get_type, types
 from copy import copy, deepcopy
 from functools import *
 from itertools import permutations
+from util import *
 
 class tree:
     def __init__(self, op, *args):
@@ -33,7 +34,7 @@ class tree:
             if isinstance(self.op, Atom):
                 return self.op.name+':'+self.op.type_name
             else:
-                return str(self.op)
+                return 'tree:'+str(self.op)
         else:
             return '(' + str(self.op) + ' '+ ' '.join(map(str, self.args)) + ')'
 
@@ -48,7 +49,8 @@ class tree:
         return len(self.args) == 0
     
     def __cmp__(self, other):
-        assert isinstance(other, tree)
+        if not isinstance(other, tree):
+            return cmp(tree, type(other))
         #print self.to_tuple(), other.to_tuple()
         return cmp(self.to_tuple(), other.to_tuple())
     
@@ -93,6 +95,8 @@ def unify(x, y, s,  vars_only = False):
     >>> ppsubst(unify(x + y, y + C, {}))
     {x: y, y: C}
     """
+    print "unify %s %s" % (str(x), str(y))
+    
     if vars_only:
         if isinstance(x, tree) and isinstance(y, tree):
             if x.is_variable() != y.is_variable():

@@ -89,7 +89,13 @@ cdef class Atom(object):
     def __repr__(self):
         return "Atom(%s,%s)" % (repr(self.handle),repr(self.atomspace))
 
-    def __richcmp__(Atom a1, Atom a2, int op):
+    def __richcmp__(a1_, a2_, int op):
+        if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):
+            return NotImplemented
+        cdef Atom a1,  a2
+        a1 = a1_
+        a2 = a2_
+        
         is_equal = True
         if a1.atomspace != a2.atomspace:
             is_equal = False
