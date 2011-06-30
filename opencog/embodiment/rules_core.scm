@@ -146,7 +146,7 @@
 
 ; Default Simple Truth Value
 (define (DEFAULT_STV) 
-    (cog-new-stv 0.01 0.01) 
+    (cog-new-stv 0 0) 
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -467,7 +467,7 @@
 ; PredicateNode via 'connect_goal_updater' function
 
 (define (add_goal pred_or_gpn_handle . arguments)
-    (EvaluationLink (DEFAULT_STV) (DEFAULT_AV) 
+    (EvaluationLink
         pred_or_gpn_handle   
 
         (ListLink 
@@ -557,7 +557,7 @@
 ;
 
 (define (add_action schema_handle . arguments)
-    (ExecutionLink (DEFAULT_STV) (DEFAULT_AV)
+    (ExecutionLink (DEFAULT_AV) 
         schema_handle
 
         (ListLink 

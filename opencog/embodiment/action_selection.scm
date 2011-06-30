@@ -7,6 +7,12 @@
 
 ; TODO: create and AndSeq link, inherits from ordered link for Actions
 
+; Modules for debug
+;(use-modules (ice-9 debugger)
+;             (ice-9 debugging ice-9-debugger-extensions)
+;             (ice-9 debugging traps)
+;)
+
 ; Return a random member of the given list, 
 ; return an empty list, if the given list is empty. 
 (define (random_select selection_list)
@@ -376,9 +382,9 @@
                       (map unpack_query_result 
                           (query_atom_space_crisp (find_psi_action variables context action) )
                       )   
-                      
+                    
                   ); if
-                  ); begin
+              ); begin
           ); if (null? context)
 
     ); let*
