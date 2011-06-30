@@ -27,6 +27,11 @@
 #include <opencog/atomspace/Atom.h>
 
 /**
+NOTE: RuleApps deliberately include NULL pointers in the arguments list, when dealing with Rules
+with variable arity (flexible numbers of arguments). Seems to only be SimpleAndRule right now,
+which doesn't even use flexible arities anyway? -- JaredW
+
+
 BITNode class implements a compact inference tree representation, where each BITNode encapsulates
 a Rule and
 a vector of sets of other BITNode, where each set contains all the possible ways to get a result
@@ -138,6 +143,8 @@ class RuleApp : public VtreeProvider, public Rule
     mutable bool arg_changes_since_last_compute;
     mutable std::vector<VtreeProvider*> args;
     RulePtr root_rule;
+
+    friend class BITNodeRoot;
 public:
     virtual ~RuleApp();
     RuleApp(RulePtr _root_rule);
@@ -217,10 +224,10 @@ public:
         nextUnusedArg = begin;
         
         for (std::vector<VtreeProvider*>::iterator ai = args.begin();
-             ai != args.end(); ++ai) {
+                ai != args.end(); ++ai) {
             BoundVertex bv;
             RuleApp* ra;
-                
+
             if ((ra = dynamic_cast<RuleApp*>(*ai)) != NULL)
                 //A bound a arg is a RuleApp
                 bv = ra->compute(nextUnusedArg, end, nextUnusedArg, CX, fresh);
@@ -234,42 +241,42 @@ public:
 #else
                 {
                     if (!root_rule->hasFreeInputArity())
-                        {
-                            result = BoundVertex(PHANDLE_UNDEFINED);
-                            goto out;
-                        }
+                    {
+                        result = BoundVertex(PHANDLE_UNDEFINED);
+                        goto out;
+                    }
                     else // If no more arg information, and free input arity.
-                        {
-                            break;
-                        }
+                    {
+                        break;
+                    }
                 }
 #endif
-                        
+
                 bv = *(*(nextUnusedArg++))->getVtree().begin();
             }
-                
+
 #if !FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS
             if (bv.value == Vertex(PHANDLE_UNDEFINED))
-                {
-                    nextUnusedArg = end;
-                    result = BoundVertex(PHANDLE_UNDEFINED);
-                    goto out;
-                }
+            {
+                nextUnusedArg = end;
+                result = BoundVertex(PHANDLE_UNDEFINED);
+                goto out;
+            }
 #endif
-                
+
             //assert(v2h(bv.value)->isReal());
             assert(!GET_ASW->isType(boost::get<pHandle>(bv.value)));
-                
+
             bound_args.push_back(bv);
         }
 
         result = root_rule->compute(bound_args, CX, fresh);
-        
+
         /// This used to be below out, but when args are empty so is
         ///result.value and isReal is false
         assert(!GET_ASW->isType(boost::get<pHandle>(result.value)));
-    out:
-                
+        out:
+
         return result;
     }
 };

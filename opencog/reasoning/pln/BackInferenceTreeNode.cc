@@ -192,7 +192,8 @@ namespace pln {
 const bool USE_GENERATOR_CACHE = false;
 
 const bool DIRECT_RESULTS_SPAWN = true;
-static const float MIN_CONFIDENCE_FOR_RULE_APPLICATION = 0.00001f;
+static const float MIN_CONFIDENCE_FOR_RULE_APPLICATION = 0.0000000000000001f;
+// An obsolete approach to preventing looping; use DIRECT_RESULTS_SPAWN (true) above.
 const bool PREVENT_LOOPS = false;
 
 extern Btr<set<pHandle> > ForAll_handles;
@@ -1632,18 +1633,30 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 RuleApp* ruleApp = NULL;
                 ValidateRuleArgs(rule_args.begin(), rule_args.end());
 
+                // Whether to skip to the next input combination (vector of arguments for the Rule).
+                bool skip = false;
                 foreach(VtreeProvider* ra, rule_args)
                 {
                     pHandle h = _v2h(*ra->getVtree().begin());
                     if (!asw->isSubType(h, HYPOTHETICAL_LINK) &&
-                        asw->getConfidence(h) < MIN_CONFIDENCE_FOR_RULE_APPLICATION)
-                        goto next_args;
+                        asw->getTV(h)->getConfidence() < MIN_CONFIDENCE_FOR_RULE_APPLICATION) {
+                        skip = true;
+                        break;
+                    }
                 }
+                if (skip) continue;
 
                 tlog(-1, "Evaluating...");
 
                 ruleApp = new RuleApp(rule);
-                next_result = ruleApp->compute(rule_args.begin(), rule_args.end());
+                // Turn it into a macro rule instead, so that it will actually store the info
+                // about which arguments were used (i.e. inference trail info)
+                int arg_i = 0;
+                foreach (VtreeProvider* ra, rule_args) {
+                    ruleApp->Bind(arg_i++, ra);
+                }
+                //next_result = ruleApp->compute(rule_args.begin(), rule_args.end());
+                next_result = ruleApp->compute();
 
                 assert(!asw->isType(_v2h(next_result.value)));
                 
@@ -1664,27 +1677,23 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                     // BITNode/inference path each TV came from.
                     //! @todo After doing that, refactor this and integrate it into FC
 
-                    RevisionFormula formula;
-                    // Assumes that an Atom's TV is a CompositeTV already
-                    //SimpleTruthValue* revisedTV = new SimpleTruthValue(TruthValue::DEFAULT_TV());
-                    //CompositeTruthValue& all;
-                    pHandle ph = _v2h(next_result.value);
-                    pHandle primary_ph = asw->getPrimaryFakeHandle(ph);
-
-                    // Revise existing primary TV and newly found TV
-                    TruthValuePtr primaryTV = asw->getTV(primary_ph);
-                    TruthValuePtr newlyFoundTV = asw->getTV(ph);
-
-                    TVSeq both(2);
-                    both[0] = primaryTV;
-                    both[1] = newlyFoundTV;
-                    TruthValue* tmp = formula.simpleCompute(both);
-
-                    asw->setTV(primary_ph, *tmp);
-
-
-                    //! @todo use the primary TV higher up
-                    NotifyParentOfResult(ruleApp);
+//                    RevisionFormula formula;
+//                    // Assumes that an Atom's TV is a CompositeTV already
+//                    //SimpleTruthValue* revisedTV = new SimpleTruthValue(TruthValue::DEFAULT_TV());
+//                    //CompositeTruthValue& all;
+//                    pHandle ph = _v2h(next_result.value);
+//                    pHandle primary_ph = asw->getPrimaryFakeHandle(ph);
+//
+//                    // Revise existing primary TV and newly found TV
+//                    const TruthValue* primaryTV = asw->getTV(primary_ph)->clone();
+//                    const TruthValue* newlyFoundTV = asw->getTV(ph)->clone();
+//
+//                    TVSeq both(2);
+//                    both[0] = primaryTV;
+//                    both[1] = newlyFoundTV;
+//                    TruthValue* tmp = formula.simpleCompute(both);
+//
+//                    asw->setTV(primary_ph, *tmp);
 
                     root->hsource[_v2h(next_result.value)] = const_cast<BITNode*>(this);
 
@@ -1698,8 +1707,10 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                             haxx::inferred_with[_v2h(next_result.value)] = rule;
                         }                       
                     }
+
+                    //! @todo use the primary TV higher up
+                    NotifyParentOfResult(ruleApp);
                 }
-next_args:; //! @todo replace goto!
                 //! @todo memory leak! Segfaults if we try to free this memory.. not sure why.
                 //! Probably because the destructor deletes rule arguments?
                 // delete ruleApp;
@@ -2164,67 +2175,40 @@ string BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > usedBITNod
 
 static int _trail_print_more_count = 0;
 
-string BITNodeRoot::printTrail(pHandle h, unsigned int level, Btr<set<pHandle> > usedPHandles) const
+string BITNodeRoot::printTrail(VtreeProvider* vp, unsigned int level) const
 {
-    AtomSpaceWrapper *asw = GET_ASW;
     stringstream ss;
+    AtomSpaceWrapper* asw = ASW();
 
-    // Initialise the set of handles that have already been printed
-    if (usedPHandles == NULL) {
-        //usedPHandles = Btr<set<pHandle> >(new set<pHandle>());
-        usedPHandles.reset(new set<pHandle>());
-    }
+    NMPrinter np;
+    //ss << np.toString(vp->getVtree(),-10);
 
-    if (h == PHANDLE_UNDEFINED || asw->isType(h))
-        ss << "Error, trying to print trail for NULL / Virtual atom." << endl;
-
-    // Working around a trail _recording_ glitch
-    // (which only happens while there isn't a pHandle->Handle map)
-    if (level > 20) {
-        ss << repeatc(' ', level*3) << "(maximum recursion depth exceeded)\n";
-    	return ss.str();
-    }
-
-    map<pHandle,RulePtr> ::const_iterator rule = haxx::inferred_with.find(h);
-    if (rule != haxx::inferred_with.end())
-    {
-        string name;
-        
-        // Working around a trail _recording_ glitch
-        // (which only happened while there was a pHandle->Handle map)
-        try {
-            rp->findRule(rule->second->getName());
-            name = rule->second->getName();
-        } catch (InvalidParamException& e) {
-            name = "<!!! INVALID RULE !!!>";
-        }
+    RuleApp* ra = dynamic_cast<RuleApp*>(vp);
+    if (!ra) // RuleApps only apply Composers, not Generators.
+        ss << repeatc(' ', level*3) << "which is trivial (or axiom).\n";
+    else {
+        string name( ra->root_rule->getName() );
+        pHandle h = _v2h(ra->result.value);
 
         ss << repeatc(' ', level*3) << "[" << h << "] was produced by applying ";
         ss << name << " to:\n";
 
-        map<pHandle,vector<pHandle> >::const_iterator h_it = haxx::inferred_from.find(h);
-        assert (h_it != haxx::inferred_from.end());
-
         NMPrinter nmp(NMP_BRACKETED | NMP_TYPE_NAME | NMP_NODE_NAME |
                 NMP_HANDLE | NMP_TRUTH_VALUE | NMP_NO_TV_WITH_NO_CONFIDENCE, 0,
                 NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0,
-                0); //level+1);
+                level+1);
 
-        foreach(pHandle arg_h, h_it->second)
-        {
-            if (STLhas2(*usedPHandles,h)) {
-                ss << repeatc(' ', (level+1)*3 ) << "***";
-                ss << nmp.toString(arg_h, -10);
-            } else {
+        foreach (VtreeProvider* vp_arg, ra->args) {
+            // Extra NULL pointers are deliberately left there, to deal with Rules
+            // with variable arity (flexible numbers of arguments).
+            if (vp_arg) {
+                pHandle arg_h = _v2h(*vp_arg->getVtree().begin());
                 ss << repeatc(' ', (level+1)*3 ) << nmp.toString(arg_h, -10);
-                ss << printTrail(arg_h, level+1, usedPHandles);
+                ss << printTrail(vp_arg, level+1);
             }
         }
-
-        usedPHandles->insert(h);
     }
-    else
-        ss << repeatc(' ', level*3) << "which is trivial (or axiom).\n";
+
     return ss.str();
 }
 
@@ -2232,12 +2216,11 @@ string BITNodeRoot::printTrail(pHandle h) const
 {
     stringstream ss;
     AtomSpaceWrapper* asw = ASW();
-    if (asw->isValidPHandle(h)) {
-        ss << printTree(h,0,0);
-        ss << printTrail(h,0);
-    } else {
-        ss << "Unknown pHandle " << h << endl;
-    }
+
+    VtreeProvider* first_result = *eval_results[0].begin();
+    ss << printTree(h,0,-10);
+    ss << printTrail(first_result,0);
+
     cout << ss.str();
     return ss.str();
 }

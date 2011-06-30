@@ -677,6 +677,8 @@ class BITNodeRoot : public BITNode
     friend class ::BITNodeUTest;
     friend class ::InferenceCache;
     friend class ExpansionPoolUpdater<std::list<BITNode*> >;
+
+    friend class RuleApp;
 public:
 
     ~BITNodeRoot();
@@ -815,7 +817,9 @@ protected:
                         
     /// Basically a helper function for the public printTrail(pHandle)
     //! @todo Support multiple paths better, and adjust the code that detects loops
-    std::string printTrail(pHandle h, unsigned int level, Btr<std::set<pHandle> > usedPHandles = Btr<std::set<pHandle> >()) const;
+    //std::string printTrail(pHandle h, unsigned int level, Btr<std::set<pHandle> > usedPHandles = Btr<std::set<pHandle> >()) const;
+    std::string printTrail(VtreeProvider* vp, unsigned int level) const;
+
 
     void setTreeDepth(const unsigned int newDepth);
     // The current depth of the tree (i.e. the depth of the lowest BITNode)
