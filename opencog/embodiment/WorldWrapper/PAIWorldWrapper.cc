@@ -437,7 +437,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             MAIN_LOGGER_ACTION_PLAN_FAILED;
             return false;
         } else {
-            if(!config().get_bool("ENABLE_UNITY_CONNECTOR")) {
+            if(!config().get_bool("EXTRACTED_ACTION_MODE")) {
 				pai.sendActionPlan(planID);
 			} else {
 				pai.sendExtractedActionFromPlan(planID);

@@ -19,6 +19,7 @@ AUTOMATED_SYSTEM_TESTS          = false
 #       if you want to use unity world now, please set the PSI_DEMANDS carefully, 
 #       since many demands are not available for the moment.  
 ENABLE_UNITY_CONNECTOR          = false
+EXTRACTED_ACTION_MODE           = false
 
 # IP and port used by subscribers to get messages from mind agents via ZeroMQ
 # If you want oc_workbench work in another machine other than the one running 

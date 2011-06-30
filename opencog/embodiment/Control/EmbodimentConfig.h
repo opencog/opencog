@@ -346,6 +346,7 @@ protected:
 			// For HK unity project
 			// If following option is set to 'true', multiverse would not work. 
 			"ENABLE_UNITY_CONNECTOR",		"false",
+            "EXTRACTED_ACTION_MODE",        "false",
             //used as halting condition by reset
             "",                             ""
         };

@@ -18,6 +18,7 @@ AUTOMATED_SYSTEM_TESTS          = false
 # Are we working with the older Multiverse or newer Unity client?
 # Note: eventually Multiverse will be deprecated as Unity integration improves
 ENABLE_UNITY_CONNECTOR          = false
+EXTRACTED_ACTION_MODE           = false
 
 # Router ID, IP and Port parameters
 #
