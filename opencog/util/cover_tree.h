@@ -648,19 +648,17 @@ void descend(const node<P>* query, double* upper_bound,
       if (parent->dist <= upper_dist + par->max_dist)
 	{
 	  node<P> *chi = par->children;
-	  if (parent->dist <= upper_dist + chi->max_dist)
-	    if (chi->num_children > 0)
-	      {
-		if (max_scale < chi->scale)
-		  max_scale = chi->scale;
-		d_node<P> temp = {parent->dist, chi};
-		push(cover_sets[chi->scale], temp);
-	      }
-	    else if (parent->dist <= upper_dist)
-	      {
-		d_node<P> temp = {parent->dist, chi};
-		push(zero_set, temp);
-	      }
+	  if (parent->dist <= upper_dist + chi->max_dist) {
+	    if (chi->num_children > 0) {
+            if (max_scale < chi->scale)
+                max_scale = chi->scale;
+            d_node<P> temp = {parent->dist, chi};
+            push(cover_sets[chi->scale], temp);
+        } else if (parent->dist <= upper_dist) {
+            d_node<P> temp = {parent->dist, chi};
+            push(zero_set, temp);
+	    }
+      }
 	  node<P> *child_end = par->children + par->num_children;
 	  for (chi++; chi != child_end; chi++)
 	    {
