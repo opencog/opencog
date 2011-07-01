@@ -256,7 +256,8 @@ bool ImitationLearningAgent::initLearning(int nepc,
             for (combo_tree_ns_set_const_it pi = _atomic_perceptions.begin();
                     pi != _atomic_perceptions.end(); ++pi) {
                 stringstream ss;
-                ss << *pi;
+                // TODO reenable the following line
+                // ss << *pi;
                 logger().debug(
                              "ImitationLearningAgent - %s", ss.str().c_str());
             }
@@ -288,7 +289,8 @@ bool ImitationLearningAgent::initLearning(int nepc,
                 for (combo_tree_ns_set_const_it ai = _atomic_actions.begin();
                         ai != _atomic_actions.end(); ++ai) {
                     stringstream ss;
-                    ss << *ai;
+                    // TODO reenable the following line
+                    // ss << *ai;
                     logger().debug(
                                  "ImitationLearningAgent - %s", ss.str().c_str());
                 }
@@ -433,7 +435,8 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
             for (combo_tree_ns_set_const_it pi = _atomic_perceptions.begin();
                     pi != _atomic_perceptions.end(); ++pi) {
                 stringstream ss;
-                ss << *pi;
+                // TODO reenable the following line
+                // ss << *pi;
                 logger().debug(
                              "ImitationLearningAgent - %s", ss.str().c_str());
             }
@@ -464,9 +467,9 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
             for (combo_tree_ns_set_const_it ai = _atomic_actions.begin();
                     ai != _atomic_actions.end(); ++ai) {
                 stringstream ss;
-                ss << *ai;
-                logger().debug(
-                             "ImitationLearningAgent - %s", ss.str().c_str());
+                // TODO reenable the following line
+                // ss << *ai;
+                logger().debug("ImitationLearningAgent - %s", ss.str().c_str());
             }
         }
         //~debug log

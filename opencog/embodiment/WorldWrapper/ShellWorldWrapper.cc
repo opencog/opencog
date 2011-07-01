@@ -60,11 +60,13 @@ bool ShellWorldWrapper::sendSequential_and(sib_it from, sib_it to)
         tr.replace(tr.append_child(head), sib);
     }
     std::cout << "What should the result of sending plan "
-              << tr << "be (action_success or action_failure)?"
+        // TODO reenable the following line
+              // << tr << "be (action_success or action_failure)?"
               << std::endl;
     std::cout << "> ";
     vertex v;
-    std::cin >> v;
+    // TODO reenable the following line
+    // std::cin >> v;
     _isFailed = v != id::action_success;
     _isFinished = true;
     return true;
@@ -74,10 +76,13 @@ combo::vertex ShellWorldWrapper::evalPerception(pre_it per, combo::variable_unif
 {
     using namespace combo;
     std::cout << "What should the result of "
-              << combo::combo_tree(per) << "be (true or false)?" << std::endl;
+        // TODO reenable the following line
+              // << combo::combo_tree(per) << "be (true or false)?" << std::endl;
+        ;
     std::cout << "> ";
     vertex v;
-    std::cin >> v;
+    // TODO reenable the following line
+    // std::cin >> v;
     return v;
 }
 
@@ -87,7 +92,8 @@ combo::vertex ShellWorldWrapper::evalIndefiniteObject(combo::indefinite_object i
     std::cout << "What should " << io << " return?" << std::endl;
     std::cout << "> ";
     vertex v;
-    std::cin >> v;
+    // TODO reenable the following line
+    // std::cin >> v;
     return v;
 }
 

@@ -32,7 +32,7 @@
 namespace FitnessEstimator
 {
 
-SizePenalty::SizePenalty(const std::set<combo::definite_object>& dos,
+SizePenalty::SizePenalty(const std::set<opencog::combo::definite_object>& dos,
                          int indefinite_object_count, int operator_count,
                          int predicate_count, int action_count)
         : _dos(dos)
@@ -48,7 +48,7 @@ SizePenalty::~SizePenalty() { }
 //Occam's razor factor
 //tends to 0 when the size of the combo tends to infinity
 //tends to 1 when the size of the combo tends to 1
-double SizePenalty::computeSizePenalty(const combo::combo_tree& tr) const
+double SizePenalty::computeSizePenalty(const opencog::combo::combo_tree& tr) const
 {
     OC_ASSERT(!tr.empty(),
                      "SizePenalty - combo_tree should not be empty.");

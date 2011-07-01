@@ -42,8 +42,8 @@ class PetaverseVocabularyProviderBase
 
 public:
 
-    typedef std::set<combo::vertex> operator_set;
-    typedef std::set<combo::indefinite_object> indefinite_object_set;
+    typedef std::set<opencog::combo::vertex> operator_set;
+    typedef std::set<opencog::combo::indefinite_object> indefinite_object_set;
 
     //ctor, dtor
 
@@ -56,10 +56,10 @@ public:
     virtual const operator_set& get_elementary_operators() const = 0;
 
     //return a reference of the set of actions
-    virtual const combo::builtin_action_set& get_elementary_actions() const = 0;
+    virtual const opencog::combo::builtin_action_set& get_elementary_actions() const = 0;
 
     //return a reference of the set of perceptions
-    virtual const combo::perception_set& get_elementary_perceptions() const = 0;
+    virtual const opencog::combo::perception_set& get_elementary_perceptions() const = 0;
 
     //return a reference of the set of indefinite objects
     virtual const indefinite_object_set& get_indefinite_objects() const = 0;

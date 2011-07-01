@@ -400,7 +400,8 @@ void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
 
             // random_object case
             if (is_random(io)) {
-                if (io == id::random_object)
+                // TODO fix that thing
+                if (combo::operator==(io, id::random_object))
                     opras.insert(io);
                 //check that the object could be such random indefinite object
                 else {

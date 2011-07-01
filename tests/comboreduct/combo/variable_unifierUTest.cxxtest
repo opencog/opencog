@@ -12,7 +12,7 @@ class variable_unifierUTest : public CxxTest::TestSuite
 public:
 
     void test_constructor() {
-        combo::variable_unifier vu;
+        opencog::combo::variable_unifier vu;
 
         TS_ASSERT(vu.empty());
 
@@ -32,12 +32,12 @@ public:
     }
 
     void test_copy_constructor() {
-        combo::variable_unifier vu;
+        opencog::combo::variable_unifier vu;
         vu.insert(v1);
         vu.insert(v2, true);
         vu.insert(v3, false);
 
-        combo::variable_unifier vu_copy(vu);
+        opencog::combo::variable_unifier vu_copy(vu);
 
         TS_ASSERT(vu_copy.contains(v1));
         TS_ASSERT(vu_copy.contains(v2));
@@ -60,18 +60,18 @@ public:
     }
 
     void test_unify() {
-        combo::variable_unifier vu;
+        opencog::combo::variable_unifier vu;
         vu.insert(v1);
         vu.insert(v2, true);
         vu.insert(v3, false);
 
-        combo::variable_unifier vu_other;
+        opencog::combo::variable_unifier vu_other;
         vu_other.insert(v1, true);
         vu_other.insert(v2, false);
         vu_other.insert(v3, false);
         vu_other.setUpdated(true);
 
-        vu.unify(combo::UNIFY_AND, vu_other);
+        vu.unify(opencog::combo::UNIFY_AND, vu_other);
 
         TS_ASSERT(vu.contains(v1));
         TS_ASSERT(vu.contains(v2));
@@ -81,13 +81,13 @@ public:
         TS_ASSERT(!vu.getVariableState(v2));
         TS_ASSERT(!vu.getVariableState(v3));
 
-        combo::variable_unifier vu_other2;
+        opencog::combo::variable_unifier vu_other2;
         vu_other2.insert(v1, false);
         vu_other2.insert(v2, true);
         vu_other2.insert(v3, false);
         vu_other2.setUpdated(true);
 
-        vu.unify(combo::UNIFY_OR, vu_other2);
+        vu.unify(opencog::combo::UNIFY_OR, vu_other2);
 
         TS_ASSERT(vu.contains(v1));
         TS_ASSERT(vu.contains(v2));
@@ -97,13 +97,13 @@ public:
         TS_ASSERT(vu.getVariableState(v2));
         TS_ASSERT(!vu.getVariableState(v3));
 
-        combo::variable_unifier vu_other3;
+        opencog::combo::variable_unifier vu_other3;
         vu_other3.insert(v1, false);
         vu_other3.insert(v2, true);
         vu_other3.insert(v3, true);
         vu_other3.setUpdated(true);
 
-        vu.unify(combo::UNIFY_NOT, vu_other3);
+        vu.unify(opencog::combo::UNIFY_NOT, vu_other3);
 
         TS_ASSERT(vu.contains(v1));
         TS_ASSERT(vu.contains(v2));

@@ -122,7 +122,7 @@ private:
      *
      * @param msg Learning message with enviroment data
      */
-    void initLearn(LearningServerMessages::LearnMessage * msg);
+    void initLearn(learningserver::messages::LearnMessage * msg);
 
     /**
      * Add new data into the learning algorithm enviroment. This data represents
@@ -131,14 +131,14 @@ private:
      *
      * @param msg Learning message with enviroment data
      */
-    void addLearnExample(LearningServerMessages::LearnMessage * msg);
+    void addLearnExample(learningserver::messages::LearnMessage * msg);
 
     /**
      * Insert user feedback into the learning process (via RewardMessage).
      *
      * @param msg A RewardMessage with user feedback about a candidate schema
      */
-    void rewardCandidateSchema(LearningServerMessages::RewardMessage * msg);
+    void rewardCandidateSchema(learningserver::messages::RewardMessage * msg);
 
     /**
      * Clear all LS structures used during learning process.

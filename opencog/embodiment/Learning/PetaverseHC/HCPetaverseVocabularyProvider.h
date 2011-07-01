@@ -29,7 +29,7 @@
 namespace hillclimbing
 {
 
-using namespace combo;
+using namespace opencog::combo;
 
 //-----------------------------------------------------------------------
 //Definitions of the operators, actions and perceptions used in petaverse

@@ -60,14 +60,14 @@ LSMocky::~LSMocky()
 
 bool LSMocky::processNextMessage(opencog::messaging::Message *msg)
 {
-    LearningServerMessages::LearnMessage  * lm;
-    LearningServerMessages::RewardMessage * rm;
-    LearningServerMessages::LSCmdMessage  * cm;
+    learningserver::messages::LearnMessage  * lm;
+    learningserver::messages::RewardMessage * rm;
+    learningserver::messages::LSCmdMessage  * cm;
 
     switch (msg->getType()) {
 
     case opencog::messaging::Message::LS_CMD:
-        cm = (LearningServerMessages::LSCmdMessage *)msg;
+        cm = (learningserver::messages::LSCmdMessage *)msg;
         logger().info("LSMocky - CMD - Command: %s, Pet: %s,  Schema: %s.",
                      cm->getCommand().c_str(),
                      cm->getFrom().c_str(),
@@ -75,14 +75,14 @@ bool LSMocky::processNextMessage(opencog::messaging::Message *msg)
         break;
 
     case opencog::messaging::Message::LEARN:
-        lm = (LearningServerMessages::LearnMessage *)msg;
+        lm = (learningserver::messages::LearnMessage *)msg;
         logger().info("LSMocky - LEARN - Pet: %s, Learning Schema: %s.",
                      lm->getFrom().c_str(),
                      lm->getSchema().c_str());
         break;
 
     case opencog::messaging::Message::REWARD:
-        rm = (LearningServerMessages::RewardMessage *)msg;
+        rm = (learningserver::messages::RewardMessage *)msg;
         logger().info("LSMocky - REWARD - Pet: %s, Tried Schema: %s.",
                      rm->getFrom().c_str(),
                      rm->getCandidateSchema().c_str());

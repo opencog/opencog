@@ -46,7 +46,7 @@ protected:
 public:
     virtual ~BuiltInProcedure() {}
 
-    virtual combo::vertex execute(const std::vector<combo::vertex>& arguments) const = 0;
+    virtual opencog::combo::vertex execute(const std::vector<opencog::combo::vertex>& arguments) const = 0;
 
     ProcedureType getType() const {
         return BUILT_IN;

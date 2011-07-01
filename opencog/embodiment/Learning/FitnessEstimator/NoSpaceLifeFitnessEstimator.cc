@@ -130,7 +130,7 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
 #endif
             for (int i = 0; i < trial_count; i++) {
                 //generate behavior description with NoSpaceLife
-                WorldWrapper::NoSpaceLifeWorldWrapper nspww(_wp->getAtomSpace(),
+                world::NoSpaceLifeWorldWrapper nspww(_wp->getAtomSpace(),
                         _petName,
                         _ownerName,
                         _avatarName,

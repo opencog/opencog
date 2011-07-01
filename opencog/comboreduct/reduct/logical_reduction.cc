@@ -31,7 +31,7 @@ namespace reduct {
 
 // effort 0
 const rule& logical_reduction(int effort) {
-    using namespace combo;
+    using namespace opencog::combo;
 
     // extra_simple
     static downwards extra_simple = downwards(reduce_nots(), id::boolean_type,

@@ -1310,7 +1310,8 @@ void RuleEngine::processRules( void )
             throw RuntimeException(TRACE_INFO, "processRules - Invalid procedure type. Accepted ones: COMBO and COMBO_SELECT.");
         }
 
-        if (::operator==(result,combo::id::logical_true)) {
+        // TODO fix that thing
+        if (combo::operator==(result,combo::id::logical_true)) {
 
             if (procedureId.getType() == Procedure::COMBO) {
                 updateValidTargets(comboInterpreter.getUnifierResult(procedureId));

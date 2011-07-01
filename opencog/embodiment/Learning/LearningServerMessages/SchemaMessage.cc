@@ -123,7 +123,8 @@ const opencog::combo::combo_tree SchemaMessage::getComboSchema()
     combo_tree comboSchema;
     std::stringstream stream(schema);
 
-    stream >> comboSchema;
+    // TODO reenable the following line
+    // stream >> comboSchema;
 
     return comboSchema;
 }

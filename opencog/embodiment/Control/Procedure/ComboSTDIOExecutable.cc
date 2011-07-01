@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     opencog::MT19937RandGen rng(0);
 
     combo_tree tr;
-    WorldWrapper::ShellWorldWrapper sww;
+    world::ShellWorldWrapper sww;
     while (cin.good()) {
         cout << "> ";
         if (cin.peek() == ' ' ||

@@ -1,7 +1,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <boost/assign/list_of.hpp>
 
-using namespace combo;
+using namespace opencog::combo;
 using namespace std;
 using namespace boost::assign;
 

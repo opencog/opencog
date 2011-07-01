@@ -42,7 +42,7 @@ class SchemaMessageUTest : public CxxTest::TestSuite
 
 private:
     SchemaMessage * sm;
-    combo::combo_tree schema;
+    opencog::combo::combo_tree schema;
 
     std::string toLoad;
     std::string loaded;
@@ -80,9 +80,9 @@ public:
         TS_ASSERT(sm2.getSchemaName() == sm->getSchemaName());
         TS_ASSERT(sm2.getSchema() == sm->getSchema());
 
-        combo::combo_tree comboSchema2 = sm2.getComboSchema();
+        opencog::combo::combo_tree comboSchema2 = sm2.getComboSchema();
 
-        combo::type_tree comboType = infer_type_tree(comboSchema2);
+        opencog::combo::type_tree comboType = infer_type_tree(comboSchema2);
         bool ct = is_well_formed(comboType);
 
         TS_ASSERT(ct);

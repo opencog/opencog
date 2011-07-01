@@ -68,14 +68,14 @@ void LS::init(const std::string &myId, const std::string &ip,
 
 bool LS::processNextMessage(opencog::messaging::Message *msg)
 {
-    LearningServerMessages::LearnMessage  * lm;
-    LearningServerMessages::RewardMessage * rm;
-    LearningServerMessages::LSCmdMessage  * cm;
+    learningserver::messages::LearnMessage  * lm;
+    learningserver::messages::RewardMessage * rm;
+    learningserver::messages::LSCmdMessage  * cm;
 
     switch (msg->getType()) {
 
     case opencog::messaging::Message::LS_CMD:
-        cm = (LearningServerMessages::LSCmdMessage *)msg;
+        cm = (learningserver::messages::LSCmdMessage *)msg;
 
         if (learningPet == cm->getFrom() &&
                 learningSchema == cm->getSchema()) {
@@ -93,7 +93,7 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
         break;
 
     case opencog::messaging::Message::LEARN:
-        lm = (LearningServerMessages::LearnMessage *)msg;
+        lm = (learningserver::messages::LearnMessage *)msg;
 
         ownerID = lm->getOwnerId();
 
@@ -135,7 +135,7 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
         break;
 
     case opencog::messaging::Message::REWARD:
-        rm = (LearningServerMessages::RewardMessage *)msg;
+        rm = (learningserver::messages::RewardMessage *)msg;
 
         if (!isBusy()) {
             logger().warn("LS - LS should be learning when receive a reward message.");
@@ -150,8 +150,8 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
         }
         break;
     case opencog::messaging::Message::TRY:
-        LearningServerMessages::TrySchemaMessage  * tryMsg;
-        tryMsg = (LearningServerMessages::TrySchemaMessage  *)msg;
+        learningserver::messages::TrySchemaMessage  * tryMsg;
+        tryMsg = (learningserver::messages::TrySchemaMessage  *)msg;
 
         // TODO: verify if the arguments are the same?
         if (learningPet == tryMsg->getFrom() &&  learningSchema == tryMsg->getSchema()) {
@@ -160,8 +160,8 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
         break;
 
     case opencog::messaging::Message::STOP_LEARNING:
-        LearningServerMessages::StopLearningMessage  * stopLearningMsg;
-        stopLearningMsg = (LearningServerMessages::StopLearningMessage  *)msg;
+        learningserver::messages::StopLearningMessage  * stopLearningMsg;
+        stopLearningMsg = (learningserver::messages::StopLearningMessage  *)msg;
 
         // TODO: verify if the arguments are the same?
         if (learningPet == stopLearningMsg->getFrom() &&  learningSchema == stopLearningMsg->getSchema()) {
@@ -204,9 +204,10 @@ void LS::sendBestSchema(const combo::combo_tree& schema)
 void LS::sendSchema(const combo::combo_tree & schema, std::string schemaName, std::string candidateName)
 {
     stringstream ss;
-    ss << schema;
+    // TODO reenable the following line
+    // ss << schema;
     logger().info("LS - Sending schema: (%s, %s, %s).", learningPet.c_str(), schemaName.c_str(), ss.str().c_str());
-    LearningServerMessages::SchemaMessage msg(this->getID(), learningPet, schema, schemaName, candidateName);
+    learningserver::messages::SchemaMessage msg(this->getID(), learningPet, schema, schemaName, candidateName);
     sendMessage(msg);
 }
 
@@ -236,7 +237,7 @@ void LS::resetLearningServer()
     avatarID.assign("");
 }
 
-void LS::initLearn(LearningServerMessages::LearnMessage * msg)
+void LS::initLearn(learningserver::messages::LearnMessage * msg)
 {
     logger().debug("LS - Getting data from LearnMessage (populating atomSpace).");
 
@@ -289,7 +290,7 @@ void LS::initLearn(LearningServerMessages::LearnMessage * msg)
     }
 }
 
-void LS::addLearnExample(LearningServerMessages::LearnMessage * msg)
+void LS::addLearnExample(learningserver::messages::LearnMessage * msg)
 {
     logger().debug("LS - Getting data from LearnMessage (populating atomSpace).");
 
@@ -322,7 +323,7 @@ void LS::addLearnExample(LearningServerMessages::LearnMessage * msg)
     logger().debug("LS - Adding exemplar to Learning Process - done.");
 }
 
-void LS::rewardCandidateSchema(LearningServerMessages::RewardMessage * msg)
+void LS::rewardCandidateSchema(learningserver::messages::RewardMessage * msg)
 {
     logger().info("LS - Receive Reward: %f.",
                  msg->getReward());
@@ -343,10 +344,10 @@ void LS::stopLearn()
         //no need because sendBestSchema reset the task
         //ILAgent->stopLearning();
         stringstream ss;
-        ss << bestSchema;
+        // TODO reenable the following line
+        // ss << bestSchema;
         string s = ss.str();
-        logger().debug(
-                     "LS - Send the final learned schema : %s", s.c_str());
+        logger().debug("LS - Send the final learned schema : %s", s.c_str());
         sendBestSchema(bestSchema);
 
         //delete wp
@@ -369,7 +370,8 @@ void LS::trySchema()
         // a reward message is received.
         bestSchema = ILAgent->getBestSchemaEstimated();
         stringstream ss;
-        ss << bestSchema;
+        // TODO reenable the following line
+        // ss << bestSchema;
         string s = ss.str();
         logger().debug(
                      "LS - Trying the following schema : %s", s.c_str());

@@ -25,6 +25,7 @@
 #include "WorldWrapperUtilMock.h"
 
 using namespace opencog::world;
+using namespace opencog::combo;
 
 RuleValidationWorldWrapper::RuleValidationWorldWrapper(VirtualWorldData::VirtualWorldState& _vw) :
         virtualWorld(_vw) {}
@@ -54,7 +55,7 @@ bool RuleValidationWorldWrapper::sendSequential_and(sib_it from, sib_it to)
 /**
  * @override
  */
-combo::vertex RuleValidationWorldWrapper::evalPerception(pre_it it, combo::variable_unifier& vu)
+vertex RuleValidationWorldWrapper::evalPerception(pre_it it, variable_unifier& vu)
 {
     return WorldWrapperUtilMock::evalPerception(it, virtualWorld, vu);
 }
@@ -62,7 +63,7 @@ combo::vertex RuleValidationWorldWrapper::evalPerception(pre_it it, combo::varia
 /**
  * @override
  */
-combo::vertex RuleValidationWorldWrapper::evalIndefiniteObject(combo::indefinite_object io, combo::variable_unifier& vu)
+vertex RuleValidationWorldWrapper::evalIndefiniteObject(indefinite_object io, variable_unifier& vu)
 {
     return WorldWrapperUtilMock::evalIndefiniteObject(io, virtualWorld, vu);
 }

@@ -33,8 +33,8 @@
 
 using namespace moses;
 using namespace reduct;
-using namespace combo;
 using namespace opencog;
+using namespace combo;
 using namespace std;
 using boost::assign::list_of;
 

@@ -420,8 +420,8 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                        __FUNCTION__, 
                        preconditionName.c_str()
                       );
-
-        if ( ::operator==(result,combo::id::logical_true) ) {
+        // TODO fix that thing
+        if (combo::operator==(result,opencog::combo::id::logical_true) ) {
             logger().debug( "PsiRuleUtil::%s - The Precondition '%s' is true.", 
                             __FUNCTION__, 
                             preconditionName.c_str()
