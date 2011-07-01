@@ -46,13 +46,13 @@
 #include "indefinite_object.h"
 #include "message.h"
 #include "ann.h"
+#include "common_def.h"
 //#include "procedure_call.h"
 
 // uncomment that if you want to interpret log(x) as log(abs(x))
 // #define ABS_LOG
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 class procedure_call_base;
 
@@ -187,299 +187,297 @@ typedef std::vector<argument_list> argument_list_list;
 typedef argument_list_list::iterator argument_list_list_it;
 typedef argument_list_list::const_iterator argument_list_list_const_it;
 
-} //~namespace combo
-
-std::ostream& operator<<(std::ostream&, const combo::ann_type&);
-std::ostream& operator<<(std::ostream&, const combo::builtin&);
-std::ostream& operator<<(std::ostream&, const combo::wild_card&);
-std::ostream& operator<<(std::ostream&, const combo::argument&);
+std::ostream& operator<<(std::ostream&, const ann_type&);
+std::ostream& operator<<(std::ostream&, const builtin&);
+std::ostream& operator<<(std::ostream&, const wild_card&);
+std::ostream& operator<<(std::ostream&, const argument&);
 // output argument #n when positive, !#n when negative 
-std::ostream& ostream_abbreviate_literal(std::ostream&, const combo::argument&);
-std::ostream& operator<<(std::ostream&, const combo::vertex&);
+std::ostream& ostream_abbreviate_literal(std::ostream&, const argument&);
+std::ostream& operator<<(std::ostream&, const vertex&);
 
 //builtin == vertex
-inline bool operator==(const combo::vertex& v, combo::builtin h)
+inline bool operator==(const vertex& v, builtin h)
 {
-    if (const combo::builtin* vh = boost::get<combo::builtin>(&v))
+    if (const builtin* vh = boost::get<builtin>(&v))
         return (*vh == h);
     return false;
 }
-inline bool operator==(combo::builtin h, const combo::vertex& v)
+inline bool operator==(builtin h, const vertex& v)
 {
     return (v == h);
 }
-inline bool operator!=(const combo::vertex& v, combo::builtin h)
+inline bool operator!=(const vertex& v, builtin h)
 {
     return !(v == h);
 }
-inline bool operator!=(combo::builtin h, const combo::vertex& v)
+inline bool operator!=(builtin h, const vertex& v)
 {
     return !(v == h);
 }
 
 //wild_card == vertex
-inline bool operator==(const combo::vertex& v, combo::wild_card w)
+inline bool operator==(const vertex& v, wild_card w)
 {
-    if (const combo::wild_card* vw = boost::get<combo::wild_card>(&v))
+    if (const wild_card* vw = boost::get<wild_card>(&v))
         return (*vw == w);
     return false;
 }
-inline bool operator==(combo::wild_card w, const combo::vertex& v)
+inline bool operator==(wild_card w, const vertex& v)
 {
     return (w == v);
 }
-inline bool operator!=(const combo::vertex& v, combo::wild_card w)
+inline bool operator!=(const vertex& v, wild_card w)
 {
     return !(v == w);
 }
-inline bool operator!=(combo::wild_card w, const combo::vertex& v)
+inline bool operator!=(wild_card w, const vertex& v)
 {
     return !(v == w);
 }
 
 //action == vertex
-inline bool operator==(const combo::vertex& v, combo::action a)
+inline bool operator==(const vertex& v, action a)
 {
-    if (const combo::action* va = boost::get<combo::action>(&v))
+    if (const action* va = boost::get<action>(&v))
         return (*va == a);
     return false;
 }
-inline bool operator==(combo::action a, const combo::vertex& v)
+inline bool operator==(action a, const vertex& v)
 {
     return (v == a);
 }
-inline bool operator!=(const combo::vertex& v, combo::action a)
+inline bool operator!=(const vertex& v, action a)
 {
     return !(v == a);
 }
-inline bool operator!=(combo::action a, const combo::vertex& v)
+inline bool operator!=(action a, const vertex& v)
 {
     return !(v == a);
 }
 
 //builtin_action == vertex
-inline bool operator==(const combo::vertex& v, combo::builtin_action a)
+inline bool operator==(const vertex& v, builtin_action a)
 {
-    if (const combo::builtin_action* va = boost::get<combo::builtin_action>(&v))
+    if (const builtin_action* va = boost::get<builtin_action>(&v))
         return (*va == a);
     return false;
 }
-inline bool operator==(combo::builtin_action a, const combo::vertex& v)
+inline bool operator==(builtin_action a, const vertex& v)
 {
     return (v == a);
 }
-inline bool operator!=(const combo::vertex& v, combo::builtin_action a)
+inline bool operator!=(const vertex& v, builtin_action a)
 {
     return !(v == a);
 }
-inline bool operator!=(combo::builtin_action a, const combo::vertex& v)
+inline bool operator!=(builtin_action a, const vertex& v)
 {
     return !(v == a);
 }
 
 //perception == vertex
-inline bool operator==(const combo::vertex& v, combo::perception p)
+inline bool operator==(const vertex& v, perception p)
 {
-    if (const combo::perception* vp = boost::get<combo::perception>(&v))
+    if (const perception* vp = boost::get<perception>(&v))
         return (*vp == p);
     return false;
 }
-inline bool operator==(combo::perception p, const combo::vertex& v)
+inline bool operator==(perception p, const vertex& v)
 {
     return (v == p);
 }
-inline bool operator!=(const combo::vertex& v, combo::perception p)
+inline bool operator!=(const vertex& v, perception p)
 {
     return !(v == p);
 }
-inline bool operator!=(combo::perception p, const combo::vertex& v)
+inline bool operator!=(perception p, const vertex& v)
 {
     return !(v == p);
 }
 
 //definite_object == vertex
-inline bool operator==(const combo::vertex& v, combo::definite_object d)
+inline bool operator==(const vertex& v, definite_object d)
 {
-    if (const combo::definite_object*
-            vd = boost::get<combo::definite_object>(&v))
+    if (const definite_object*
+            vd = boost::get<definite_object>(&v))
         return (*vd == d);
     return false;
 }
-inline bool operator==(combo::definite_object d, const combo::vertex& v)
+inline bool operator==(definite_object d, const vertex& v)
 {
     return (v == d);
 }
-inline bool operator!=(const combo::vertex& v, combo::definite_object d)
+inline bool operator!=(const vertex& v, definite_object d)
 {
     return !(v == d);
 }
-inline bool operator!=(combo::definite_object d, const combo::vertex& v)
+inline bool operator!=(definite_object d, const vertex& v)
 {
     return !(v == d);
 }
 
 //indefinite_object == vertex
-inline bool operator==(const combo::vertex& v, combo::indefinite_object i)
+inline bool operator==(const vertex& v, indefinite_object i)
 {
-    if (const combo::indefinite_object*
-            vi = boost::get<combo::indefinite_object>(&v))
+    if (const indefinite_object*
+            vi = boost::get<indefinite_object>(&v))
         return (*vi == i);
     return false;
 }
-inline bool operator==(combo::indefinite_object i, const combo::vertex& v)
+inline bool operator==(indefinite_object i, const vertex& v)
 {
     return (v == i);
 }
-inline bool operator!=(const combo::vertex& v, combo::indefinite_object i)
+inline bool operator!=(const vertex& v, indefinite_object i)
 {
     return !(v == i);
 }
-inline bool operator!=(combo::indefinite_object i, const combo::vertex& v)
+inline bool operator!=(indefinite_object i, const vertex& v)
 {
     return !(v == i);
 }
 
 /*
 //ann_ids == vertex
-inline bool operator==(const combo::vertex& v, combo::ann_type a)
+inline bool operator==(const vertex& v, ann_type a)
 {
-   if (const combo::ann_ids* va = boost::get<combo::ann_ids>(&v))
+   if (const ann_ids* va = boost::get<ann_ids>(&v))
 	return (*va == a);
    return false;
 }
-inline bool operator==(combo::ann_ids a, const combo::vertex& v)
+inline bool operator==(ann_ids a, const vertex& v)
 {
-   if (const combo::ann_ids* va = boost::get<combo::ann_ids>(&v))
+   if (const ann_ids* va = boost::get<ann_ids>(&v))
 	return (*va == a);
    return false;
 }
-inline bool operator!=(const combo::vertex& v, combo::ann_ids a)
+inline bool operator!=(const vertex& v, ann_ids a)
 {
     return !(v == a);
 }
-inline bool operator!=(combo::ann_ids a,const combo::vertex& v)
+inline bool operator!=(ann_ids a,const vertex& v)
 { 
     return !(v == a);
 }
 */
 
 //message == vertex
-inline bool operator==(const combo::vertex& v, combo::message m)
+inline bool operator==(const vertex& v, message m)
 {
-    if (const combo::message* vm = boost::get<combo::message>(&v))
+    if (const message* vm = boost::get<message>(&v))
         return (*vm == m);
     return false;
 }
-inline bool operator==(combo::message m, const combo::vertex& v)
+inline bool operator==(message m, const vertex& v)
 {
     return (v == m);
 }
-inline bool operator!=(const combo::vertex& v, combo::message m)
+inline bool operator!=(const vertex& v, message m)
 {
     return !(v == m);
 }
-inline bool operator!=(combo::message m, const combo::vertex& v)
+inline bool operator!=(message m, const vertex& v)
 {
     return !(v == m);
 }
 
 //action_symbol == vertex
-inline bool operator==(const combo::vertex& v, combo::action_symbol i)
+inline bool operator==(const vertex& v, action_symbol i)
 {
-    if (const combo::action_symbol*
-            vi = boost::get<combo::action_symbol>(&v))
+    if (const action_symbol*
+            vi = boost::get<action_symbol>(&v))
         return (*vi == i);
     return false;
 }
-inline bool operator==(combo::action_symbol i, const combo::vertex& v)
+inline bool operator==(action_symbol i, const vertex& v)
 {
     return (v == i);
 }
-inline bool operator!=(const combo::vertex& v, combo::action_symbol i)
+inline bool operator!=(const vertex& v, action_symbol i)
 {
     return !(v == i);
 }
-inline bool operator!=(combo::action_symbol i, const combo::vertex& v)
+inline bool operator!=(action_symbol i, const vertex& v)
 {
     return !(v == i);
 }
 
-namespace boost
-{
 //don't know why this is needed *in namespace boost*, but it is,
 //for e.g. calling a generic stl function that compares vertices for inequality
-inline bool operator!=(const combo::vertex& v1, const combo::vertex& v2)
+inline bool operator!=(const vertex& v1, const vertex& v2)
 {
     return !(v1 == v2);
 }
 
-inline size_t hash_value(const combo::message& m)
+inline size_t hash_value(const message& m)
 {
     return hash_value(m.getContent());
 }
 
-inline size_t hash_value(const combo::vertex& v)
+inline size_t hash_value(const vertex& v)
 {
-    static const size_t c1 = size_t(combo::id::builtin_count);
+    using boost::hash_combine;
+
+    static const size_t c1 = size_t(id::builtin_count);
     //it is likely that a combo will rarely have over 15 arguments
     static const size_t c2 = c1 + 15;
-    static const size_t c3 = c2 + size_t(combo::id::action_count);
+    static const size_t c3 = c2 + size_t(id::action_count);
     static const size_t c_last = c3;
 
     //there will be some overlap between contin_t, definite_object, message
     //and procedure_call but this overlap is unavoidable
 
-    if (const combo::builtin* h = boost::get<combo::builtin>(&v))
+    if (const builtin* h = boost::get<builtin>(&v))
         return size_t(*h);
-    if (const combo::wild_card* w = boost::get<combo::wild_card>(&v))
+    if (const wild_card* w = boost::get<wild_card>(&v))
         return size_t(*w);
-    if (const combo::argument* a = boost::get<combo::argument>(&v))
+    if (const argument* a = boost::get<argument>(&v))
         return size_t(a->idx * (a->is_negated() + 2)) + c1;
-    if (const combo::contin_t* c = boost::get<combo::contin_t>(&v)) {
+    if (const contin_t* c = boost::get<contin_t>(&v)) {
         size_t tmp = c_last;
         hash_combine(tmp, hash_value(*c));
         return tmp;
     }
-    if (const combo::action* a = boost::get<combo::action>(&v))
+    if (const action* a = boost::get<action>(&v))
         return size_t(*a) + c2;
-    if (const combo::builtin_action* b = boost::get<combo::builtin_action>(&v)) {
+    if (const builtin_action* b = boost::get<builtin_action>(&v)) {
         size_t tmp = c_last;
         hash_combine(tmp, hash_value(*b));
         return tmp;
     }
-    if (const combo::perception* p = boost::get<combo::perception>(&v)) {
+    if (const perception* p = boost::get<perception>(&v)) {
         size_t tmp = c_last;
         hash_combine(tmp, hash_value(*p));
         return tmp;
     }
-    if (const combo::definite_object*
-            d = boost::get<combo::definite_object>(&v)) {
+    if (const definite_object*
+            d = boost::get<definite_object>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(*d));
+        hash_combine(tmp, boost::hash_value(*d));
         return tmp;
     }
-    if (const combo::indefinite_object*
-            i = boost::get<combo::indefinite_object>(&v)) {
+    if (const indefinite_object*
+            i = boost::get<indefinite_object>(&v)) {
         size_t tmp = c_last;
         hash_combine(tmp, hash_value(*i));
         return tmp;
     }
-    if (const combo::message* m = boost::get<combo::message>(&v)) {
+    if (const message* m = boost::get<message>(&v)) {
         size_t tmp = c_last;
         hash_combine(tmp, hash_value(*m));
         return tmp;
     }
-    if (const combo::procedure_call* pc = boost::get<combo::procedure_call>(&v)) {
+    if (const procedure_call* pc = boost::get<procedure_call>(&v)) {
         size_t tmp = c_last;
         hash_combine(tmp, hash_value(*pc));
         return tmp;
     }
-    if (const combo::action_symbol* as = boost::get<combo::action_symbol>(&v)) {
+    if (const action_symbol* as = boost::get<action_symbol>(&v)) {
         size_t tmp = c_last;
         hash_combine(tmp, hash_value(*as));
         return tmp;
     }
-    if (const combo::ann_type* a = boost::get<combo::ann_type>(&v)) {
+    if (const ann_type* a = boost::get<ann_type>(&v)) {
         size_t tmp = c_last;
         hash_combine(tmp, hash_value(a->idx));
         return tmp;
@@ -487,10 +485,7 @@ inline size_t hash_value(const combo::vertex& v)
     OC_ASSERT(false, "A case is missing");
     return 0;
 }
-} //~namespace boost
 
-namespace combo
-{
 //typedef util::hash_set<vertex,boost::hash<vertex> > vset;
 //typedef std::set<vertex> vset;
 typedef opencog::tree<vertex> combo_tree;
@@ -983,7 +978,8 @@ template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDE
 std::istream& stream_to_combo_tree(std::istream& in, combo_tree& tr)
 {
     opencog::tree<std::string> tmp;
-    in >> tmp;
+    // TODO reenable the following line
+    // in >> tmp;
     strtree_to_combo_tree<BUILTIN_ACTION, PERCEPTION, ACTION_SYMBOL, INDEFINITE_OBJECT>(tmp, tr);
     return  in;
 }
@@ -1005,36 +1001,34 @@ std::string ph2l(const std::string& ce,
 std::string l2ph(const std::string& ce,
                  const std::vector<std::string>& labels);
 
-} //~namespace combo
+// template<>
+// struct range_iterator<combo_tree::pre_order_iterator> {
+//     typedef boost::counting_iterator<combo_tree::sibling_iterator> type;
+// };
+// template<>
+// struct range_const_iterator<combo_tree::pre_order_iterator> {
+//     typedef boost::counting_iterator<combo_tree::sibling_iterator> type;
+// };
 
-namespace boost
-{
-template<>
-struct range_iterator<combo::combo_tree::pre_order_iterator> {
-    typedef boost::counting_iterator<combo::combo_tree::sibling_iterator> type;
-};
-template<>
-struct range_const_iterator<combo::combo_tree::pre_order_iterator> {
-    typedef boost::counting_iterator<combo::combo_tree::sibling_iterator> type;
-};
-
-template<>
-struct range_iterator<combo::combo_tree> {
-    typedef boost::counting_iterator<combo::combo_tree::iterator> type;
-};
-template<>
-struct range_const_iterator<combo::combo_tree> {
-    typedef boost::counting_iterator<combo::combo_tree::iterator> type;
-};
+// template<>
+// struct range_iterator<combo_tree> {
+//     typedef boost::counting_iterator<combo_tree::iterator> type;
+// };
+// template<>
+// struct range_const_iterator<combo_tree> {
+//     typedef boost::counting_iterator<combo_tree::iterator> type;
+// };
 
 /*  template<>
-struct range_iterator<combo::combo_tree::p_iterator> {
-  typedef boost::counting_iterator<combo::combo_tree::sibling_iterator> type;
+struct range_iterator<combo_tree::p_iterator> {
+  typedef boost::counting_iterator<combo_tree::sibling_iterator> type;
 };
 template<>
-struct range_const_iterator<combo::combo_tree::pre_order_iterator> {
-  typedef boost::counting_iterator<combo::combo_tree::sibling_iterator> type;
+struct range_const_iterator<combo_tree::pre_order_iterator> {
+  typedef boost::counting_iterator<combo_tree::sibling_iterator> type;
   };*/
-} //~namespace boost
+
+} // ~namespace combo
+} // ~namespace opencog
 
 #endif

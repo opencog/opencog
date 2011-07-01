@@ -104,7 +104,7 @@ string build_cmdline(const variables_map& vm,
            && !it->second.defaulted()) {
             string opt_name(" --");
             opt_name += it->first + " \"";
-            res += opt_name + to_string(it->second, string("\"") + opt_name) + "\"";
+            res += opt_name + opencog::to_string(it->second, string("\"") + opt_name) + "\"";
         }
     }
     // add exemplar option

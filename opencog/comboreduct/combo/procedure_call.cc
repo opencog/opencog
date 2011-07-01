@@ -24,8 +24,7 @@
 #include "procedure_call.h"
 #include "type_tree.h"
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 procedure_call_base::procedure_call_base(const std::string& name,
                                          arity_t arity,
@@ -109,38 +108,34 @@ combo_tree& procedure_call_base::get_mutable_body()
 }
 
 std::ostream& procedure_call_base::toStream(std::ostream& out,
-        bool complete) const
+                                            bool complete) const
 {
     out << get_name();
     if (complete)
-        out << "(" << ((int)arity()) << ") := " << get_body();
+        // TODO reenable get_body
+        out << "(" << ((int)arity()) << ") := ";// << get_body();
     return out;
 }
 
-}//~namespace combo
-
-bool operator==(const combo::procedure_call_base& pc1,
-                const combo::procedure_call_base& pc2)
+bool operator==(const procedure_call_base& pc1, const procedure_call_base& pc2)
 {
     return (pc1.get_name() == pc2.get_name())
         && (pc1.get_body() == pc2.get_body());
 }
-bool operator!=(const combo::procedure_call_base& pc1,
-                const combo::procedure_call_base& pc2)
+bool operator!=(const procedure_call_base& pc1, const procedure_call_base& pc2)
 {
     return !(pc1 == pc2);
 }
 
-std::ostream& operator<<(std::ostream& out,
-                         const combo::procedure_call_base& pc)
+std::ostream& operator<<(std::ostream& out, const procedure_call_base& pc)
 {
-
     return pc.toStream(out);
 }
 
-std::ostream& operator<<(std::ostream& out, combo::procedure_call pc)
+std::ostream& operator<<(std::ostream& out, procedure_call pc)
 {
     OC_ASSERT(pc);
     return pc->toStream(out);
 }
 
+}} // ~namespaces combo opencog

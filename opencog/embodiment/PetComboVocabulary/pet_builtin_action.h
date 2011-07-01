@@ -30,7 +30,9 @@
 
 #include "pet_operator.h"
 
-namespace combo { namespace id {
+namespace opencog { namespace combo {
+
+namespace id {
 
 enum pet_builtin_action_enum {
 
@@ -318,7 +320,8 @@ enum pet_builtin_action_enum {
 
     pet_builtin_action_count //to give the number of actions
 };
-}
+
+} // ~namespace id
 
 typedef id::pet_builtin_action_enum pet_builtin_action_enum;
 
@@ -330,7 +333,7 @@ typedef id::pet_builtin_action_enum pet_builtin_action_enum;
 namespace pet_builtin_action_properties {
 
 //struct for description of name and type
-typedef combo::pet_operator<pet_builtin_action_enum, id::pet_builtin_action_count>::basic_description action_basic_description;
+typedef pet_operator<pet_builtin_action_enum, id::pet_builtin_action_count>::basic_description action_basic_description;
 
 //struct for decription of action properties
 struct action_property_description {
@@ -677,6 +680,6 @@ public:
     bool is_compound() const;
 };
 
-}//~namespace combo
+}} // ~namespaces combo opencog
 
 #endif

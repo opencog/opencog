@@ -24,8 +24,7 @@
  */
 #include "eval.h"
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 void set_bindings(combo_tree& tr, combo_tree::iterator it,
                   const std::vector<vertex>& args, arity_t explicit_arity)
@@ -44,7 +43,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
                 argument& arg = get_argument(*at);
                 if (arg.is_negated()) {
                     tr.append_child(at, *at);
-                    *at = combo::id::logical_not;
+                    *at = id::logical_not;
                     at = at.begin();
                     arg.negate();
                 }
@@ -150,4 +149,4 @@ void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent)
         set_bindings(tr, tr.begin(), arg_parent, explicit_arity(tr));
 }
 
-} //~namespace combo
+}} // ~namespaces combo opencog

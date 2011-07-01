@@ -30,7 +30,7 @@
 #include "type_tree.h"
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
-namespace trees {
+namespace opencog { namespace trees {
 
   using namespace ant_combo;
 
@@ -39,16 +39,16 @@ namespace trees {
   public:
 
     template<typename Selector>
-    opencog::tree<typename Selector::value_type> operator()(const Selector& sel,
+    tree<typename Selector::value_type> operator()(const Selector& sel,
 							 int dp) const {
       typename Selector::value_type tmp;
-      opencog::tree<typename Selector::value_type> tr(tmp);
+      tree<typename Selector::value_type> tr(tmp);
       build(sel,dp,tr,tr.begin());
       return tr;
     }
 
     template<typename Selector,typename T,typename iterator>
-    void build(const Selector& sel,int dp,opencog::tree<T>& tr,iterator it) const {
+    void build(const Selector& sel,int dp,tree<T>& tr,iterator it) const {
         if (dp==1) {
             tr.replace(it,sel.select(0));
         } else {
@@ -78,9 +78,10 @@ namespace trees {
       well_typed = true;
       if(type_check_enabled) {
 	std::stringstream strs;
-	combo::combo_tree vtr;
-	strs << (*tr);
-	strs >> vtr;
+    combo::combo_tree vtr;
+    // TODO reenable the following 2 lines
+	// strs << (*tr);
+	// strs >> vtr;
 	try {
 	  combo::infer_type_tree(vtr);
 	}
@@ -95,6 +96,6 @@ namespace trees {
     }
   }
 
-} //~namespace trees
+}} // ~namespaces trees opencog
 
 #endif

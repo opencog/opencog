@@ -24,8 +24,8 @@
 #ifndef _OPENCOG_ANN_H
 #define _OPENCOG_ANN_H
 
-namespace combo
-{
+namespace opencog { namespace combo {
+
 namespace id {
 enum ann_id {
     ann, ann_node, ann_input //ann additions
@@ -50,6 +50,6 @@ public:
     }
 };
 
-} // ~namespace combo
+}} // ~namespaces combo opencog
 
 #endif // _OPENCOG_ANN_H

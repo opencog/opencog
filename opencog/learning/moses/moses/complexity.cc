@@ -28,7 +28,7 @@
 
 namespace moses {
 
-using namespace combo;
+using namespace opencog::combo;
 
 // for a Boolean formula, the complexity is the neg(# of literals)
 

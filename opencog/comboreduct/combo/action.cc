@@ -24,18 +24,13 @@
 #include "action.h"
 #include "descriptions.h"
 
+namespace opencog { namespace combo {
 
-namespace combo
+arity_t get_arity(action a)
 {
-
-    arity_t get_arity(action a)
-    {
-        using namespace action_properties;
-        return actions_properties::instance().action_arity(a);
-    }
+    using namespace action_properties;
+    return actions_properties::instance().action_arity(a);
 }
-
-
 
 std::ostream& operator<<(std::ostream& out, const combo::action& a)
 {
@@ -73,3 +68,5 @@ std::ostream& operator<<(std::ostream& out, const combo::action& a)
         return out << "ACTION : UNKNOWN_HANDLE";
     }
 }
+
+}} // ~namespaces combo opencog

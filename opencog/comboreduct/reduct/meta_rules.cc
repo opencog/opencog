@@ -93,7 +93,7 @@ void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
     ++end;
     
     static const type_tree unknown_type_tree = 
-        type_tree(combo::id::unknown_type);
+        type_tree(opencog::combo::id::unknown_type);
     
     if (input==unknown_type_tree)
         for(;it!=end;++it) {
@@ -107,7 +107,7 @@ void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
                //&& 
                //@todo: checking that it inherits would be better
                //but has to be sure of it (Nil)
-               combo::get_output_type_tree(*it)==type_tree(output))
+               opencog::combo::get_output_type_tree(*it)==type_tree(output))
                 (*r)(tr,it);
         }
     DEC_TAB

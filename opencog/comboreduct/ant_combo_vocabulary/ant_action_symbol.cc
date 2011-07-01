@@ -24,7 +24,8 @@
 #include "ant_action_symbol.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-using namespace combo;
+namespace opencog { namespace combo {
+
 using namespace ant_action_symbol_properties;
 
 ant_action_symbol::ant_action_symbol() { }
@@ -88,3 +89,5 @@ type_tree ant_action_symbol::get_output_type_tree() const {
 const type_tree& ant_action_symbol::get_input_type_tree(arity_t i) const {
   return argument_type_list_input_type(_arg_type_tree, _arity, i);
 }
+
+}} // ~namespaces combo opencog

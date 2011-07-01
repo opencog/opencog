@@ -12,8 +12,8 @@
 
 using namespace std;
 using namespace boost;
-using namespace combo;
 using namespace opencog;
+using namespace combo;
 using namespace ant_combo;
 
 int main(int argc, char ** argv)

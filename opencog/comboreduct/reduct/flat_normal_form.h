@@ -39,7 +39,7 @@
 namespace reduct {
   typedef std::set<int,opencog::absolute_value_order<int> > clause;
   typedef std::list<clause> nf;
-  using namespace combo;
+    using namespace opencog::combo;
 
   //does c contain p and !p?
   bool tautology(const clause& c);

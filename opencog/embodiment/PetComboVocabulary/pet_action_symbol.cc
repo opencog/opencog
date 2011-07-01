@@ -24,7 +24,7 @@
 #include "pet_action_symbol.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-using namespace combo;
+using namespace opencog::combo;
 using namespace pet_action_symbol_properties;
 
 pet_action_symbol::pet_action_symbol() { }

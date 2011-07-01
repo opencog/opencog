@@ -27,10 +27,10 @@
 #include "procedure_call.h"
 #include <opencog/util/algorithm.h>
 
+namespace opencog { namespace combo {
+
 using namespace std;
 using namespace boost;
-using namespace combo;
-using namespace opencog;
 
 // uncomment this to output a negative literal !#n instead of not(#n)
 #define ABBREVIATE_NEGATIVE_LITERAL
@@ -51,7 +51,6 @@ ostream& operator<<(ostream& out, const ann_type& h)
 
 ostream& operator<<(ostream& out, const builtin& h)
 {
-    using namespace combo;
     switch (h) {
     case id::null_vertex:
         return out << "null_vertex";
@@ -94,7 +93,6 @@ ostream& operator<<(ostream& out, const builtin& h)
 
 ostream& operator<<(ostream& out, const wild_card& w)
 {
-    using namespace combo;
     switch (w) {
     case id::asterisk:
         return out << "_*_";
@@ -151,10 +149,6 @@ ostream& operator<<(ostream& out, const vertex& v)
     }
     return out << get<contin_t>(v);
 }
-
-
-namespace combo
-{
 
 void copy_without_null_vertices(combo_tree::iterator src,
                                 combo_tree& dst_tr, combo_tree::iterator dst)
@@ -226,4 +220,4 @@ string l2ph(const string& ce, const vector<string>& labels)
     return res;
 }
 
-} //~namespace combo
+}} // ~namespaces combo opencog

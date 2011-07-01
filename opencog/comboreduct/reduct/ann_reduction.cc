@@ -26,9 +26,9 @@
 #include "ann_rules.h"
 
 namespace reduct {
-  const rule& ann_reduction() {
-    using namespace combo;
+const rule& ann_reduction() {
+    using namespace opencog::combo;
     static ann_rule r;
     return r;
-  }
+}
 } //~namespace reduct

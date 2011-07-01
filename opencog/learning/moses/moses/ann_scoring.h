@@ -34,7 +34,8 @@
 #include "scoring_functions.h" 
 #include "pole_balancing.h"
 
-using namespace combo;
+using namespace opencog::combo;
+using namespace opencog;
 using namespace std;
 using namespace moses;
 #define MIN_FITNESS -1.0e10

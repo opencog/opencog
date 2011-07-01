@@ -31,53 +31,53 @@
 
 #define COMBO_MESSAGE_PREFIX "message:"
 
-namespace combo {
+namespace opencog { namespace combo {
 
-  //message is essentially a string but is coded as a different type
-  //as definite_object because it semantically denotes something else
-  class message {
-  private:
+//message is essentially a string but is coded as a different type
+//as definite_object because it semantically denotes something else
+class message {
+private:
     std::string _content;
-  public:
+public:
     message(std::string m) {
-      _content = m;
+        _content = m;
     }
 
     std::string getContent() const {
-      return _content;
+        return _content;
     }
 
     bool operator==(message m) const {
-      return _content==m.getContent();
+        return _content==m.getContent();
     }
     bool operator!=(message m) const {
-      return _content!=m.getContent();
+        return _content!=m.getContent();
     }
     bool operator<(message m) const {
-      return _content<m.getContent();
+        return _content<m.getContent();
     }
     bool operator<=(message m) const {
-      return _content<=m.getContent();
+        return _content<=m.getContent();
     }
     bool operator>(message m) const {
-      return _content>m.getContent();
+        return _content>m.getContent();
     }
     bool operator>=(message m) const {
-      return _content>=m.getContent();
+        return _content>=m.getContent();
     }
     
     static std::string prefix() {
-      return COMBO_MESSAGE_PREFIX;
+        return COMBO_MESSAGE_PREFIX;
     }
-  };
+};
 
-  typedef std::set<message> message_set;
-  typedef message_set::iterator message_set_it;
-  typedef message_set::const_iterator message_set_const_it;
+typedef std::set<message> message_set;
+typedef message_set::iterator message_set_it;
+typedef message_set::const_iterator message_set_const_it;
 
-}//~namespace combo
+std::ostream& operator<<(std::ostream&,const message&);
 
-std::ostream& operator<<(std::ostream&,const combo::message&);
+}} // ~namespaces combo opencog
 
 #endif
 

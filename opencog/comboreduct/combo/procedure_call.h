@@ -35,8 +35,7 @@
 #include "operator_base.h"
 #include "vertex.h"
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 class procedure_call_base : public operator_base
 {
@@ -88,8 +87,6 @@ public:
 //typedef std::set<procedure_call> procedure_call_set;
 //typedef procedure_call_set::iterator procedure_call_set_it;
 //typedef procedure_call_set::const_iterator procedure_call_const_it;
-
-}//~namespace combo
 
 bool operator==(const combo::procedure_call_base& pc1,
                 const combo::procedure_call_base& pc2);
@@ -202,5 +199,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
 
 std::ostream& operator<<(std::ostream&, const combo::procedure_call_base&);
 std::ostream& operator<<(std::ostream&, combo::procedure_call);
+
+}} // ~namespaces combo opencog
 
 #endif

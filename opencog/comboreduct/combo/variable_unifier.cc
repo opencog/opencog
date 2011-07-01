@@ -26,12 +26,11 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 variable_unifier& variable_unifier::DEFAULT_VU()
 {
-    static combo::variable_unifier * vu = new combo::variable_unifier();
+    static variable_unifier * vu = new combo::variable_unifier();
     return *vu;
 }
 
@@ -76,7 +75,7 @@ bool variable_unifier::contains(const std::string& variable) const
     return (find(variable) != end());
 }
 
-void variable_unifier::unify(combo::UnifierOperation operation,
+void variable_unifier::unify(UnifierOperation operation,
                              const variable_unifier& unifier)
 {
 
@@ -147,4 +146,4 @@ std::string variable_unifier::toString() const {
     return res;
 }
 
-} // namespace combo
+}} // ~namespaces combo opencog

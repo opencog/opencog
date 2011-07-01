@@ -31,7 +31,7 @@
 
 namespace reduct {
 
-using namespace combo;
+using namespace opencog::combo;
     
 struct rule {
     typedef combo_tree argument_type; // useful for cache rule

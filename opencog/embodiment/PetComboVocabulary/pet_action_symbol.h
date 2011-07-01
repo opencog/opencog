@@ -29,8 +29,7 @@
 #include <opencog/comboreduct/combo/action_symbol.h>
 #include "pet_operator.h"
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 namespace id {
 enum pet_action_symbol_enum {
@@ -65,7 +64,7 @@ typedef id::pet_action_symbol_enum pet_action_symbol_enum;
 namespace pet_action_symbol_properties {
 
 //struct for description of name and type
-typedef combo::pet_operator<pet_action_symbol_enum, id::pet_action_symbol_count>::basic_description action_symbol_basic_description;
+typedef pet_operator<pet_action_symbol_enum, id::pet_action_symbol_count>::basic_description action_symbol_basic_description;
 
 static const action_symbol_basic_description asbd[] = {
     //action_symbol          name                 type
@@ -135,6 +134,7 @@ public:
     static action_symbol instance(pet_action_symbol_enum);
 
 };
-}//~namespace combo
+
+}} // ~namespaces combo opencog
 
 #endif

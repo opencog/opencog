@@ -26,8 +26,7 @@
 #include "type_tree.h"
 #include "descriptions.h"
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 // ------------ support for builtins --------------------------
 
@@ -605,7 +604,8 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 if(!tr.empty()) { //trace info debug is available
                     message << ", involved in the"
                             << " application '"
-                            << combo_tree(ct_it)
+                        // TODO reenable following line
+                            // << combo_tree(ct_it)
                             << "' located at pre-order index "
                             << opencog::pre_order_index(tr, ct_it)
                             << " of procedure '"
@@ -680,7 +680,9 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                         << tt.sibling_index(arg_app)
                                         << "th applied argument ";
                                 if(!tr.empty()) { //trace debug info available
-                                    message << "'" << combo_tree(ct_it_child)
+                                    message << "'" 
+                                        // TODO reenable followinf line
+                                            // << combo_tree(ct_it_child)
                                             << "' (located at pre-order index "
                                             << opencog::pre_order_index(tr,
                                                                          ct_it_child)
@@ -690,11 +692,13 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                             << *ct_it << "', ";
                                 }
                                 message << "has type "
-                                        << type_tree(output_it)
+                                    // TODO reenable following line
+                                        // << type_tree(output_it)
                                         << " which does not inherits from "
-                                        << type_tree(input_arg_it);
-                                opencog::logger().error(
-                                                message.str().c_str());
+                                    // TODO reenanle following line
+                                        // << type_tree(input_arg_it);
+                                    ;
+                                logger().error(message.str().c_str());
                                 //~log message
 
                                 *it = id::ill_formed_type;
@@ -713,21 +717,24 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                     << tt.sibling_index(arg_app)
                                     << "th applied argument ";
                             if(!tr.empty()) { //trace debug info available
-                                message << "'" << combo_tree(ct_it_child)
+                                message 
+                                    // TODO reenable the following line
+                                    // << "'" << combo_tree(ct_it_child)
                                         << "' (located at pre-order index "
-                                        << opencog::pre_order_index(tr,
-                                                                     ct_it_child)
+                                        << pre_order_index(tr, ct_it_child)
                                         << " of procedure '"
                                         << proc_name << "')"
                                         << " of operator '"
                                         << *ct_it << "', ";
                             }
                             message << "has type "
-                                    << type_tree(arg_app)
+                                // TODO reenable the following line
+                                    // << type_tree(arg_app)
                                     << " which does not inherits from "
-                                    << type_tree(input_arg_it);
-                            opencog::logger().error(
-                                            message.str().c_str());
+                                // TODO reenable the following line
+                                    // << type_tree(input_arg_it);
+                                ;
+                            logger().error(message.str().c_str());
                             //~log message
 
                             *it = id::ill_formed_type;
@@ -785,7 +792,9 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
             }
             message << "is not typed as a function (that is lambda)"
                     << " but is typed "
-                    << type_tree(it_child);
+                // TODO reenable the following line
+                    // << type_tree(it_child);
+                ;
             opencog::logger().error(message.str().c_str());
             //~log message
 
@@ -1193,12 +1202,8 @@ type_tree declare_function(type_node iotype, arity_t arity)
     return declare_function(tt, arity);
 }
 
-}//~namespace combo
-
-
-std::ostream& operator<<(std::ostream& out, const combo::type_node& n)
+std::ostream& operator<<(std::ostream& out, const type_node& n)
 {
-    using namespace combo;
     switch (n) {
         //type operators
     case id::lambda_type:
@@ -1239,9 +1244,8 @@ std::ostream& operator<<(std::ostream& out, const combo::type_node& n)
     }
 }
 
-std::istream& operator>>(std::istream& in, combo::type_node& n)
+std::istream& operator>>(std::istream& in, type_node& n)
 {
-    using namespace combo;
     std::string str;
     in >> str;
     OC_ASSERT(!str.empty(),
@@ -1290,3 +1294,5 @@ std::istream& operator>>(std::istream& in, combo::type_node& n)
     }
     return in;
 }
+
+}} // ~namespaces combo opencog

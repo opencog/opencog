@@ -32,9 +32,9 @@
 #include "../combo/vertex.h"
 #include "../combo/convert_ann_combo.h"
 
-using namespace combo;
-
 namespace reduct {
+
+using namespace opencog::combo;
 
 //ann reduction rule
 // WARNING: this rule should only be used alone, not combined with meta_rules

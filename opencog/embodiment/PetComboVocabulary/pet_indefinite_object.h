@@ -29,8 +29,7 @@
 #include <opencog/comboreduct/combo/indefinite_object.h>
 #include "pet_operator.h"
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 namespace id {
 enum pet_indefinite_object_enum {
@@ -83,7 +82,7 @@ typedef id::pet_indefinite_object_enum pet_indefinite_object_enum;
 namespace pet_indefinite_object_properties {
 
 //struct for description of name and type
-typedef combo::pet_operator<pet_indefinite_object_enum, id::pet_indefinite_object_count>::basic_description indefinite_object_basic_description;
+typedef pet_operator<pet_indefinite_object_enum, id::pet_indefinite_object_count>::basic_description indefinite_object_basic_description;
 
 //struct for property description
 struct indefinite_object_property_description {
@@ -214,6 +213,7 @@ public:
     bool is_random() const;
 
 };
-}//~namespace combo
+
+}} // ~namespaces combo opencog
 
 #endif

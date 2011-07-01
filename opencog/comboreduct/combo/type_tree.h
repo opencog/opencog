@@ -38,8 +38,7 @@
 #include "perception.h"
 #include "procedure_call.h"
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 // returns the arity of builtin b
 char get_arity(builtin b);
@@ -366,9 +365,9 @@ arity_t explicit_arity(const combo_tree& tr);
 type_tree declare_function(const type_tree& iotype, arity_t arity);
 type_tree declare_function(type_node iotype, arity_t arity);
 
-} //~namespace combo
+std::ostream& operator<<(std::ostream&, const type_node&);
+std::istream& operator>>(std::istream&, type_node&);
 
-std::ostream& operator<<(std::ostream&, const combo::type_node&);
-std::istream& operator>>(std::istream&, combo::type_node&);
+}} // ~namespaces combo opencog
 
 #endif

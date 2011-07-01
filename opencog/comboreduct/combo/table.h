@@ -35,11 +35,11 @@
 
 #include "eval.h"
 #include "vertex.h"
+#include "common_def.h"
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
-using namespace opencog;
+using boost::variant;
 
 ///////////////////
 // Generic table //
@@ -916,14 +916,12 @@ std::vector<std::string> readInputLabels(const std::string& file);
 
 std::ifstream* open_data_file(const std::string& fileName);
 
-} // ~namespace combo
-
 template<typename T>
 inline std::ostream& operator<<(std::ostream& out,
                                 const std::vector<std::vector<T> >& mt)
 {
     foreach(const std::vector<T>& row, mt) {
-        opencog::ostreamContainer(out, row, ",");
+        ostreamContainer(out, row, ",");
         out << std::endl;
     }
     return out;
@@ -931,10 +929,10 @@ inline std::ostream& operator<<(std::ostream& out,
 
 template<typename T>
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::input_table<T>& it)
+                                const input_table<T>& it)
 {
     if(!it.get_labels().empty()) {
-        opencog::ostreamContainer(out, it.get_labels(), ",");
+        ostreamContainer(out, it.get_labels(), ",");
         out << std::endl;
     }
     out << it.get_matrix();
@@ -943,44 +941,48 @@ inline std::ostream& operator<<(std::ostream& out,
 
 template<typename T>
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::output_table<T>& ot)
+                                const output_table<T>& ot)
 {
     if(!ot.get_label().empty())
         out << ot.get_label() << std::endl;
-    return opencog::ostreamContainer(out, ot, "\n");
+    return ostreamContainer(out, ot, "\n");
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::truth_table& tt)
+                                const truth_table& tt)
 {
     return opencog::ostreamContainer(out, tt);
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::mixed_table& mt)
+                                const mixed_table& mt)
 {
-    const std::vector<boost::variant<bool, combo::contin_t> >& vt = mt.get_vt();
+    const std::vector<boost::variant<bool, contin_t> >& vt = mt.get_vt();
     for (unsigned i = 0; i != vt.size(); ++i)
-        out << (boost::get<combo::contin_t>(&vt[i]) ?
-                boost::get<combo::contin_t>(vt[i]) :
+        out << (boost::get<contin_t>(&vt[i]) ?
+                boost::get<contin_t>(vt[i]) :
                 boost::get<bool>(vt[i])) << " ";
     return out;
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::mixed_action_table& mat)
+                                const mixed_action_table& mat)
 {
-    const std::vector<boost::variant<bool, combo::contin_t> >& vt = mat.get_vt();
+    const std::vector<boost::variant<bool, contin_t> >& vt = mat.get_vt();
     for (unsigned i = 0; i != vt.size(); ++i)
-        out << (boost::get<combo::contin_t>(&vt[i]) ?
-                boost::get<combo::contin_t>(vt[i]) :
+        out << (boost::get<contin_t>(&vt[i]) ?
+                boost::get<contin_t>(vt[i]) :
                 boost::get<bool>(vt[i])) << " ";
     return out;
 }
 
+}} // ~namespaces combo opencog
+
+
+// TODO see if we can put that under opencog combo
 namespace boost
 {
-inline size_t hash_value(const combo::truth_table& tt)
+inline size_t hash_value(const opencog::combo::truth_table& tt)
 {
     return hash_range(tt.begin(), tt.end());
 }

@@ -23,7 +23,7 @@
  */
 #include "exception.h"
 
-using namespace combo;
+namespace opencog { namespace combo {
 
 ComboReductException::ComboReductException(std::string m = "")
   : _message(m) {}
@@ -31,11 +31,13 @@ std::string ComboReductException::get_message() {
     return _message;
 }
 
-EvalException::EvalException(combo::vertex v = combo::vertex())
+EvalException::EvalException(vertex v = vertex())
     : ComboReductException("Eval Exception"), _vertex(v) {}
-combo::vertex EvalException::get_vertex() {
+vertex EvalException::get_vertex() {
     return _vertex;
 }
 
 TypeCheckException::TypeCheckException(int arg = 0)
     : ComboReductException("Type check Exception"), _arg(arg) {} 
+
+}} // ~namespaces combo opencog

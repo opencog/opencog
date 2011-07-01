@@ -30,7 +30,7 @@
 // (uncomment META_RULE_DEBUG in meta_rules.cc)
 
 namespace reduct {
-const rule& contin_reduction(const combo::vertex_set& ignore_ops, 
+const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops, 
                              opencog::RandGen& rng,
                              unsigned int cache_size) {
     // rules that do not involve factorizing or distributing

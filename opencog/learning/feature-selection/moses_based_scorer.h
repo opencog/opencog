@@ -68,8 +68,9 @@ struct moses_based_scorer : public unary_function<eda::instance, composite_score
         // Logger
         if(logger().getLevel() >= Logger::FINE) {
             stringstream ss;
-            ss << "moses_based_scorer - Evaluate instance: " 
-               << _fields.stream(inst) << " " << csc << std::endl;
+            // TODO reenable the following 2 lines
+            // ss << "moses_based_scorer - Evaluate instance: " 
+            //    << _fields.stream(inst) << " " << csc << std::endl;
             logger().fine(ss.str());
         }
         // ~Logger

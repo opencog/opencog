@@ -3,6 +3,8 @@
 
 #include <opencog/comboreduct/combo/simple_nn.h>
 
+namespace opencog { 
+
 class CartPole {
 public:
     CartPole(bool randomize,bool velocity);
@@ -62,4 +64,7 @@ private:
     double polepos_sum;
     double polev_sum;
 };
+
+} // ~namespace opencog
+
 #endif

@@ -24,7 +24,7 @@
 #include "pet_perception.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-using namespace combo;
+using namespace opencog::combo;
 using namespace pet_perception_properties;
 
 pet_perception::pet_perception()

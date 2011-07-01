@@ -27,21 +27,19 @@
 #include "operator_base.h"
 #include "type_tree_def.h"
 
-namespace combo {
+namespace opencog { namespace combo {
 
-  //action_symbol_base inherit operator_base
-  //without additional properties
-  class action_symbol_base : public operator_base {
-  public:
+//action_symbol_base inherit operator_base
+//without additional properties
+class action_symbol_base : public operator_base {
+public:
     virtual ~action_symbol_base() {}
-  };
+};
 
-  typedef const action_symbol_base* action_symbol;
+typedef const action_symbol_base* action_symbol;
   
-}//~namespace combo
-
-
 std::ostream& operator<<(std::ostream&,combo::action_symbol);
 
+}} // ~namespaces combo opencog
 
 #endif

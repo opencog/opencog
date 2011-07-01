@@ -24,7 +24,8 @@
 #include "ant_indefinite_object.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-using namespace combo;
+namespace opencog { namespace combo {
+
 using namespace ant_indefinite_object_properties;
 
 ant_indefinite_object::ant_indefinite_object() { }
@@ -88,3 +89,5 @@ type_tree ant_indefinite_object::get_output_type_tree() const {
 const type_tree& ant_indefinite_object::get_input_type_tree(arity_t i) const {
   return argument_type_list_input_type(_arg_type_tree, _arity, i);
 }
+
+}} // ~namespaces combo opencog

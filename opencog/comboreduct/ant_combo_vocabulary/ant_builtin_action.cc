@@ -24,7 +24,8 @@
 #include "ant_builtin_action.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-using namespace combo;
+namespace opencog { namespace combo {
+
 using namespace ant_builtin_action_properties;
 
 ant_builtin_action::ant_builtin_action() {
@@ -213,3 +214,5 @@ const std::set<builtin_action> ant_builtin_action::preconditions() const {
   static const std::set<const builtin_action_base*> empty_precondition_set;
   return empty_precondition_set;
 }
+
+}} // ~namespaces combo opencog

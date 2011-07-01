@@ -31,8 +31,7 @@
 
 #include <opencog/comboreduct/combo/vertex.h>
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 // Some common definitions
 
@@ -52,14 +51,13 @@ static const definite_object all_agents = "all_agents";
 
 }
 
-} //~namespace combo
+}} // ~namespaces combo opencog
 
 // this namespace is defined in order to break ambiguities
 // and allow several vocabularies to coexist 
-namespace PetCombo
-{
+namespace PetCombo {
 
-using namespace combo;
+using namespace opencog::combo;
 
 //return a pointer to class base instance
 //of a given action or perception enum
@@ -92,29 +90,29 @@ std::ostream& operator<<(std::ostream& out, pet_indefinite_object_enum e);
 std::istream& operator>>(std::istream& in, vertex& v);
 std::istream& operator>>(std::istream& in, combo_tree& tr);
 
-}//~namespace PetCombo
-
 //this is added to be sure that the operators == and != between
 //combo operator type and enum is used
 //That means that different vocabularies will not be able to coexist
 //with the same code file but will be able within the same library
 //using namespace PetCombo;
-bool operator==(combo::builtin_action, PetCombo::pet_builtin_action_enum);
-bool operator==(PetCombo::pet_builtin_action_enum, combo::builtin_action);
-bool operator!=(combo::builtin_action, PetCombo::pet_builtin_action_enum);
-bool operator!=(PetCombo::pet_builtin_action_enum, combo::builtin_action);
-bool operator==(combo::perception, PetCombo::pet_perception_enum);
-bool operator==(PetCombo::pet_perception_enum, combo::perception);
-bool operator!=(combo::perception, PetCombo::pet_perception_enum);
-bool operator!=(PetCombo::pet_perception_enum, combo::perception);
-bool operator==(combo::action_symbol, PetCombo::pet_action_symbol_enum);
-bool operator==(PetCombo::pet_action_symbol_enum, combo::action_symbol);
-bool operator!=(combo::action_symbol, PetCombo::pet_action_symbol_enum);
-bool operator!=(PetCombo::pet_action_symbol_enum, combo::action_symbol);
-bool operator==(combo::indefinite_object, PetCombo::pet_indefinite_object_enum);
-bool operator==(PetCombo::pet_indefinite_object_enum, combo::indefinite_object);
-bool operator!=(combo::indefinite_object, PetCombo::pet_indefinite_object_enum);
-bool operator!=(PetCombo::pet_indefinite_object_enum, combo::indefinite_object);
+bool operator==(builtin_action, pet_builtin_action_enum);
+bool operator==(pet_builtin_action_enum, builtin_action);
+bool operator!=(builtin_action, pet_builtin_action_enum);
+bool operator!=(pet_builtin_action_enum, builtin_action);
+bool operator==(perception, pet_perception_enum);
+bool operator==(pet_perception_enum, perception);
+bool operator!=(perception, pet_perception_enum);
+bool operator!=(pet_perception_enum, perception);
+bool operator==(action_symbol, pet_action_symbol_enum);
+bool operator==(pet_action_symbol_enum, action_symbol);
+bool operator!=(action_symbol, pet_action_symbol_enum);
+bool operator!=(pet_action_symbol_enum, action_symbol);
+bool operator==(indefinite_object, pet_indefinite_object_enum);
+bool operator==(pet_indefinite_object_enum, indefinite_object);
+bool operator!=(indefinite_object, pet_indefinite_object_enum);
+bool operator!=(pet_indefinite_object_enum, indefinite_object);
+
+}//~namespace PetCombo
 
 #endif
 

@@ -35,7 +35,7 @@
 
 #define LINE_CHAR_MAX 4096
 
-namespace combo {
+namespace opencog { namespace combo {
 
   typedef std::set<const procedure_call_base*> procedure_call_set;
   typedef procedure_call_set::const_iterator procedure_call_set_const_it;
@@ -122,58 +122,55 @@ namespace combo {
     void print(bool with_type = false) const;
   };
   
-}//~namespace combo
-
 template<class BUILTIN_ACTION,
 	 class PERCEPTION,
 	 class ACTION_SYMBOL,
 	 class INDEFINITE_OBJECT>
 unsigned int load_procedure_repository(std::istream& in,
-				       combo::procedure_repository& pr,
-				       bool type_checking = false) {
-  unsigned int n = 0;
-  
-  while (in.good()) {
-    while (in.peek()==' ' || in.peek()=='\n' || in.peek()=='\t')
-      in.get();
+                                       combo::procedure_repository& pr,
+                                       bool type_checking = false) {
+    unsigned int n = 0;
     
-    if(in.peek()=='#') { //a comment line
-      char tmp[LINE_CHAR_MAX];
-      in.getline(tmp,LINE_CHAR_MAX);
-      continue;
-    }
+    while (in.good()) {
+        while (in.peek()==' ' || in.peek()=='\n' || in.peek()=='\t')
+            in.get();
+        
+        if(in.peek()=='#') { //a comment line
+            char tmp[LINE_CHAR_MAX];
+            in.getline(tmp,LINE_CHAR_MAX);
+            continue;
+        }
+        
+        procedure_call pc = load_procedure_call<BUILTIN_ACTION, PERCEPTION,
+                                                ACTION_SYMBOL, INDEFINITE_OBJECT>(in, false);
     
-    combo::procedure_call pc = load_procedure_call<BUILTIN_ACTION, PERCEPTION,
-      ACTION_SYMBOL, INDEFINITE_OBJECT>(in, false);
+        if (!in.good()){
+            break;
+        }
     
-    if (!in.good()){
-      break;
+        if(pc) {
+            pr.add(const_cast<procedure_call_base*>(pc));
+            ++n;
+            logger().fine("procedure_repository - Loaded '%s' with arity '%d'.", 
+                          pc->get_name().c_str(), pc->arity());
+            
+        } else {
+            logger().error("procedure_repository - Error parsing combo function.");
+        }
     }
-    
-    if(pc) {
-      pr.add(const_cast<combo::procedure_call_base*>(pc));
-      ++n;
-      opencog::logger().fine(
-		      "procedure_repository - Loaded '%s' with arity '%d'.", 
-		      pc->get_name().c_str(), pc->arity());
-      
-    } else {
-      opencog::logger().error(
-		      "procedure_repository - Error parsing combo function.");
+    //doing the resolution and type checking here
+    //allows mutual recursion amongst functions to be defined in the input
+    pr.instantiate_procedure_calls(true);
+    if(type_checking) {
+        bool type_check_success = pr.infer_types_repo();
+        if(!type_check_success) {
+            logger().error("procedure_repository - Error type checking.");      
+        }
     }
-  }
-  //doing the resolution and type checking here
-  //allows mutual recursion amongst functions to be defined in the input
-  pr.instantiate_procedure_calls(true);
-  if(type_checking) {
-    bool type_check_success = pr.infer_types_repo();
-    if(!type_check_success) {
-      opencog::logger().error(
-		      "procedure_repository - Error type checking.");      
-    }
-  }
-  return n;
+    return n;
 }
+
+}} // ~namespaces combo opencog
 
 #endif
 

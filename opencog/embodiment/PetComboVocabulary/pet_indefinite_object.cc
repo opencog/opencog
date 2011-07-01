@@ -24,7 +24,7 @@
 #include "pet_indefinite_object.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-using namespace combo;
+using namespace opencog::combo;
 using namespace pet_indefinite_object_properties;
 
 pet_indefinite_object::pet_indefinite_object()

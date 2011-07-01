@@ -27,7 +27,7 @@
 #include "common_def.h"
 #include "type_tree_def.h"
 
-namespace combo {
+namespace opencog { namespace combo {
 
   //that abstract class contains common methods
   //of builtin_action_base and perception_base
@@ -50,6 +50,6 @@ namespace combo {
     virtual const type_tree& get_input_type_tree(arity_t i) const = 0;
   };
 
-}
+}} // ~namespace combo opencog
 
 #endif

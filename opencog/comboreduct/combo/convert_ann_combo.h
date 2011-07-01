@@ -27,7 +27,7 @@
 #include "simple_nn.h"
 #include "vertex.h"
 
-namespace combo {
+namespace opencog { namespace combo {
 
 /**
  * converter combo_tree <-> ann
@@ -202,6 +202,6 @@ struct tree_transform {
     }
 };
 
-} // ~namespace combo
+}} // ~namespaces combo opencog
 
 #endif // _OPENCOG_CONVERTER_ANN_COMBO_TREE_H

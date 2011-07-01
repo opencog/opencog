@@ -27,7 +27,7 @@
 #include <string>
 #include <opencog/comboreduct/combo/vertex.h>
 
-namespace combo {
+namespace opencog { namespace combo {
 
 class ComboReductException {
 protected:
@@ -40,12 +40,12 @@ public:
 };
 
 class EvalException : public ComboReductException {
-    combo::vertex _vertex;
+    vertex _vertex;
 public:
     EvalException();
-    EvalException(combo::vertex v);
+    EvalException(vertex v);
 
-    combo::vertex get_vertex();
+    vertex get_vertex();
 };
 
 class TypeCheckException : public ComboReductException {
@@ -55,5 +55,6 @@ public:
     TypeCheckException(int arg);
 };
 
-}
+}} // ~namespaces combo opencog
+
 #endif

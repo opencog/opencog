@@ -24,14 +24,15 @@
 #include "type_tree_def.h"
 #include <opencog/util/oc_assert.h>
 
-namespace combo {
+namespace opencog { namespace combo {
 
-  bool is_argument_type(type_node n) {
+bool is_argument_type(type_node n) {
     return (int)n>=id::argument_type;
-  }
-  unsigned int arg_to_idx(type_node n) {
-    OC_ASSERT(is_argument_type(n),
-		      "Cannot find the idx of a non-argument type");
-    return (unsigned int)((int)n-(int)id::argument_type+1);
-  }
 }
+unsigned int arg_to_idx(type_node n) {
+    OC_ASSERT(is_argument_type(n),
+              "Cannot find the idx of a non-argument type");
+    return (unsigned int)((int)n-(int)id::argument_type+1);
+}
+
+}} // ~namespaces combo opencog

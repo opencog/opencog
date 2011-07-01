@@ -28,9 +28,8 @@
 #include "simple_nn.h"
 #include "convert_ann_combo.h"
 
-namespace combo {
+namespace opencog { namespace combo {
 
-using opencog::sq;
 using namespace boost;
 
 truth_table::size_type
@@ -245,4 +244,4 @@ type_node inferDataType(const string& fileName) {
     return res;
 }
 
-} // ~namespace combo
+}} // ~namespaces combo opencog

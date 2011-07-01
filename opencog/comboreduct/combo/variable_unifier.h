@@ -29,8 +29,7 @@
 #include <string>
 #include <vector>
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 enum UnifierOperation {
     UNIFY_NOT,
@@ -191,6 +190,7 @@ private:
     bool updated;
 
 }; // class
-}  // namespace combo
+
+}} // ~namespaces combo opencog
 
 #endif /*VARIABLE_UNIFIER_H_*/

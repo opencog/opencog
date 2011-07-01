@@ -29,8 +29,7 @@
 #include <opencog/comboreduct/combo/perception.h>
 #include "pet_operator.h"
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 namespace id {
 enum pet_perception_enum {
@@ -164,7 +163,7 @@ typedef id::pet_perception_enum pet_perception_enum;
 namespace pet_perception_properties {
 
 //struct for description of name and type
-typedef combo::pet_operator<pet_perception_enum, id::pet_perception_count>::basic_description perception_basic_description;
+typedef pet_operator<pet_perception_enum, id::pet_perception_count>::basic_description perception_basic_description;
 
 //struct for decription of perception properties
 struct perception_property_description {
@@ -458,6 +457,7 @@ public:
     bool is_identity_of_indiscernibles() const;
 
 };
-}//~namespace combo
+
+}} // ~namespaces combo opencog
 
 #endif

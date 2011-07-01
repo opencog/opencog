@@ -27,8 +27,7 @@
 #include <opencog/comboreduct/combo/operator_base.h>
 #include <opencog/comboreduct/combo/type_tree.h>
 
-namespace combo
-{
+namespace opencog { namespace combo {
 
 using namespace std;
 
@@ -104,7 +103,9 @@ void pet_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_ENU
             //setting perception type tree
             std::istringstream is(bd[i].type);
             try {
-                is >> _type_tree;
+                std::cout << "FIX THAT!" << std::endl;
+                // TODO reenable the following line (and remove the previous line)
+                // is >> _type_tree;
             } catch (opencog::InconsistenceException& ie) {
                 std::cout << "WARNING : there must be a problem with the type description of " << _name << ", as the interpretation of the type string : " << "\"" << is.str() << "\"" << " has raised the following exception : " << ie.getMessage() << std::endl;
             }
@@ -127,7 +128,6 @@ OPERATOR_ENUM pet_operator<OPERATOR_ENUM, enum_count>::get_enum() const
     return _enum;
 }
 
-
-}//~namespace combo
+}} // ~namespaces combo opencog
 
 #endif

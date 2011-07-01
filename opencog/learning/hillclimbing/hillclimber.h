@@ -60,7 +60,7 @@
 namespace hillclimbing
 {
 
-using namespace combo;
+using namespace opencog::combo;
 using namespace opencog;
 
 typedef double fitness_t;

@@ -24,10 +24,10 @@
 #ifndef _COMBO_COMMON_DEF_H
 #define _COMBO_COMMON_DEF_H
 
-namespace combo {
+namespace opencog { namespace combo {
 
-  typedef int arity_t;
+typedef int arity_t;
 
-}
+}}
 
 #endif

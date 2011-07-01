@@ -45,7 +45,7 @@ using opencog::from_one;
 
 build_knobs::build_knobs(opencog::RandGen& _rng,
                          combo_tree& exemplar,
-                         const combo::type_tree& tt,
+                         const opencog::combo::type_tree& tt,
                          representation& rep,
                          const operator_set& ignore_ops,
                          const combo_tree_ns_set* perceptions,
@@ -59,20 +59,20 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
       _perm_ratio(0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
-    type_tree output_type = combo::type_tree_output_type_tree(_type);
-    combo::type_tree action_result_type_tree =
-        combo::type_tree(combo::id::action_result_type);
-    combo::type_tree boolean_type_tree =
-        combo::type_tree(combo::id::boolean_type);
-    combo::type_tree contin_type_tree =
-        combo::type_tree(combo::id::contin_type);
-    combo::type_tree ann_type_tree =
-        combo::type_tree(combo::id::ann_type);
+    type_tree output_type = opencog::combo::type_tree_output_type_tree(_type);
+    opencog::combo::type_tree action_result_type_tree =
+        opencog::combo::type_tree(opencog::combo::id::action_result_type);
+    opencog::combo::type_tree boolean_type_tree =
+        opencog::combo::type_tree(opencog::combo::id::boolean_type);
+    opencog::combo::type_tree contin_type_tree =
+        opencog::combo::type_tree(opencog::combo::id::contin_type);
+    opencog::combo::type_tree ann_type_tree =
+        opencog::combo::type_tree(opencog::combo::id::ann_type);
     // OC_ASSERT
     stringstream ss;
     ss << output_type;
     stringstream art_ss; //action_result_type
-    art_ss << combo::id::action_result_type;
+    art_ss << opencog::combo::id::action_result_type;
     OC_ASSERT((((perceptions != NULL || actions != NULL) && 
                 output_type == action_result_type_tree) ||
                output_type == boolean_type_tree ||
@@ -96,7 +96,7 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
         build_contin(_exemplar.begin());
     } else {
         OC_ASSERT(output_type == contin_type_tree,
-                  "Types differ. Expected 'combo::id::contin_type', got '%s'",
+                  "Types differ. Expected 'opencog::combo::id::contin_type', got '%s'",
                   ss.str().c_str());
 
         contin_canonize(_exemplar.begin());

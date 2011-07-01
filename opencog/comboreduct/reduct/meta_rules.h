@@ -88,11 +88,11 @@ protected:
 struct downwards : public crule<downwards> {
     explicit downwards(const rule& r_, string name = "downwards")
         : crule<downwards>::crule(name), r(r_.clone()),
-          input(combo::id::unknown_type), output(combo::id::unknown_type) { }
-    downwards(const rule& r_, combo::type_node t, string name = "downwards")
+          input(opencog::combo::id::unknown_type), output(opencog::combo::id::unknown_type) { }
+    downwards(const rule& r_, opencog::combo::type_node t, string name = "downwards")
         : crule<downwards>::crule(name),
           r(r_.clone()), input(t), output(t) { }
-    downwards(const rule& r_, combo::type_node input_, combo::type_node output_,
+    downwards(const rule& r_, opencog::combo::type_node input_, opencog::combo::type_node output_,
               string name = "downwards")
         : crule<downwards>::crule(name),
           r(r_.clone()), input(input_), output(output_) { }
@@ -104,8 +104,8 @@ struct downwards : public crule<downwards> {
 
 protected:
     shared_ptr<const rule> r;
-    combo::type_tree input;
-    combo::type_node output;
+    opencog::combo::type_tree input;
+    opencog::combo::type_node output;
 };
 //apply rule in post-order (left-to-right, children before parents,
 //starting from the leftmost lowermost node) from a given node, to visit

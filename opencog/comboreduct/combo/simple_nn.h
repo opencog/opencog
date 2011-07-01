@@ -37,12 +37,9 @@
 
 #include "vertex.h"
 
-namespace combo {
+namespace opencog { namespace combo {
 
 using namespace std;
-
-using opencog::printContainer;
-using opencog::RandGen;
 
 //anns are composed of nodes and connections
 class ann;
@@ -633,6 +630,6 @@ public:
     }
 };
 
-} // ~namespace combo
+}} // ~namespaces combo opencog
 
 #endif // _OPENCOG_SIMPLE_NN_H

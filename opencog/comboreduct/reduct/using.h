@@ -39,7 +39,7 @@
 /// anything that gets imported into the reduct namespace with a using
 /// directive should go here
 namespace reduct {
-  using namespace combo;
+  using namespace opencog::combo;
   using boost::variant;
   using boost::static_visitor;
   //  using boost::bind;

@@ -1,5 +1,6 @@
 #include "pole_balancing.h"
 
+using namespace opencog;
 using namespace combo;
 
 CartPole::CartPole(bool randomize,bool velocity)

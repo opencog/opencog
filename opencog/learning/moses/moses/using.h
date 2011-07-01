@@ -44,7 +44,7 @@
 
 namespace moses {
 
-    using namespace combo;
+    using namespace opencog::combo;
 
     using std::min;
     using std::max;

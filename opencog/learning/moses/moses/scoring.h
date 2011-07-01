@@ -103,7 +103,7 @@ struct logical_score : public unary_function<combo_tree, int> {
 
     int operator()(const combo_tree& tr) const;
 
-    combo::truth_table target;
+    opencog::combo::truth_table target;
     int arity;
     opencog::RandGen& rng;
 };
@@ -122,7 +122,7 @@ struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    combo::truth_table target;
+    opencog::combo::truth_table target;
     int arity;
 };
 
@@ -133,14 +133,14 @@ struct contin_score : public unary_function<combo_tree, score_t> {
                  opencog::RandGen& _rng)
             : target(func, r), cti(r), rng(_rng) { }
 
-    contin_score(const combo::contin_table& t,
+    contin_score(const opencog::combo::contin_table& t,
                  const contin_input_table& r,
                  opencog::RandGen& _rng)
         : target(t),cti(r),rng(_rng) { }
 
     score_t operator()(const combo_tree& tr) const;
 
-    combo::contin_table target;
+    opencog::combo::contin_table target;
     contin_input_table cti;
     opencog::RandGen& rng;
 };
@@ -152,14 +152,14 @@ struct contin_score_sq : public unary_function<combo_tree,score_t> {
                     opencog::RandGen& _rng)
         : target(func,r),cti(r),rng(_rng) { }
     
-    contin_score_sq(const combo::contin_table& t,
+    contin_score_sq(const opencog::combo::contin_table& t,
                     const contin_input_table& r,
                     opencog::RandGen& _rng)
         : target(t),cti(r),rng(_rng) { }
     
     score_t operator()(const combo_tree& tr) const;
     
-    combo::contin_table target;
+    opencog::combo::contin_table target;
     contin_input_table cti;
     opencog::RandGen& rng;
 };
@@ -171,14 +171,14 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
                   opencog::RandGen& _rng)
         : target(func, r), cti(r), rng(_rng) { }
 
-    contin_bscore(const combo::contin_table& t,
+    contin_bscore(const opencog::combo::contin_table& t,
                   const contin_input_table& r,
                   opencog::RandGen& _rng)
         : target(t), cti(r), rng(_rng) { }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    combo::contin_table target;
+    opencog::combo::contin_table target;
     contin_input_table cti;
     opencog::RandGen& rng;
 };
@@ -223,7 +223,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
         set_complexity_coef(variance, alphabet_size);
     }
 
-    occam_contin_bscore(const combo::contin_table& t,
+    occam_contin_bscore(const opencog::combo::contin_table& t,
                         const contin_input_table& r,
                         float variance,
                         float alphabet_size,
@@ -235,7 +235,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    combo::contin_table target;
+    opencog::combo::contin_table target;
     mutable contin_input_table cti; // mutable due to set_consider_args
     bool occam;
     score_t complexity_coef;
@@ -252,7 +252,7 @@ private:
  * samples are very large.
  */
 struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
-    occam_contin_bscore_opt_binding(const combo::contin_table& t,
+    occam_contin_bscore_opt_binding(const opencog::combo::contin_table& t,
                                     const contin_input_table& r,
                                     float variance,
                                     float alphabet_size,

@@ -29,24 +29,24 @@
 #include "type_tree_def.h"
 #include "operator_base.h"
 
-namespace combo {
+namespace opencog { namespace combo {
   
-  //indefinite_object inherits from operator_base
-  //without additional properties
-  class indefinite_object_base : public operator_base {
-  public:
+//indefinite_object inherits from operator_base
+//without additional properties
+class indefinite_object_base : public operator_base {
+public:
     virtual ~indefinite_object_base() {}
-  };
+};
 
-  typedef const indefinite_object_base* indefinite_object;
+typedef const indefinite_object_base* indefinite_object;
 
-  typedef std::set<indefinite_object> indefinite_object_set;
-  typedef indefinite_object_set::iterator indefinite_object_set_it;
-  typedef indefinite_object_set::const_iterator indefinite_object_set_const_it;
+typedef std::set<indefinite_object> indefinite_object_set;
+typedef indefinite_object_set::iterator indefinite_object_set_it;
+typedef indefinite_object_set::const_iterator indefinite_object_set_const_it;
 
-}//~namespace combo
+std::ostream& operator<<(std::ostream&, indefinite_object);
 
-std::ostream& operator<<(std::ostream&, combo::indefinite_object);
+}} // ~namespaces combo opencog
 
 #endif
 

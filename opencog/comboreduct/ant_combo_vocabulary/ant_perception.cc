@@ -24,7 +24,8 @@
 #include "ant_perception.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-using namespace combo;
+namespace opencog { namespace combo {
+
 using namespace ant_perception_properties;
 
 ant_perception::ant_perception() {
@@ -135,3 +136,5 @@ bool ant_perception::is_symmetric() const {
 bool ant_perception::is_identity_of_indiscernibles() const {
   return _identity_of_indiscernibles;
 }
+
+}} // ~namespaces combo opencog

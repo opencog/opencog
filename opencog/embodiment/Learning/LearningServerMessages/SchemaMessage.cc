@@ -50,7 +50,7 @@ SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
-                             const combo::combo_tree & comboSchema, const std::string &schemaName,
+                             const opencog::combo::combo_tree & comboSchema, const std::string &schemaName,
                              const std::string &candidateSchemaName) :
         Message(from, to, opencog::messaging::Message::SCHEMA)
 {
@@ -108,7 +108,7 @@ throw (opencog::InvalidParamException, std::bad_exception)
     }
 }
 
-void SchemaMessage::setSchema(const combo::combo_tree & comboSchema)
+void SchemaMessage::setSchema(const opencog::combo::combo_tree & comboSchema)
 {
     std::stringstream stream;
     stream << comboSchema;
@@ -116,11 +116,11 @@ void SchemaMessage::setSchema(const combo::combo_tree & comboSchema)
     this->schema = stream.str();
 }
 
-const combo::combo_tree SchemaMessage::getComboSchema()
+const opencog::combo::combo_tree SchemaMessage::getComboSchema()
 {
-    using namespace combo;
+    using namespace opencog::combo;
 
-    combo::combo_tree comboSchema;
+    combo_tree comboSchema;
     std::stringstream stream(schema);
 
     stream >> comboSchema;

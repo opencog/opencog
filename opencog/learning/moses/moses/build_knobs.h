@@ -33,12 +33,12 @@
 #include <opencog/comboreduct/combo/action.h>
 #include <opencog/comboreduct/combo/perception.h>
 
-using namespace combo;
+using namespace opencog::combo;
 
-typedef std::set<combo::vertex> operator_set;
+typedef std::set<vertex> operator_set;
 typedef operator_set::iterator operator_set_it;
 
-typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> >
+typedef std::set<combo_tree, opencog::size_tree_order<vertex> >
 combo_tree_ns_set;
 typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
 
@@ -54,7 +54,7 @@ struct build_knobs : boost::noncopyable {
     //used to be ss = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions
     build_knobs(opencog::RandGen& rng, combo_tree& exemplar,
-                const combo::type_tree& tt, representation& rep,
+                const type_tree& tt, representation& rep,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL,
@@ -67,9 +67,9 @@ struct build_knobs : boost::noncopyable {
 protected:
     opencog::RandGen& rng;
     combo_tree& _exemplar;
-    combo::type_tree _type;
+    type_tree _type;
     representation& _rep;
-    combo::arity_t _arity; // number of arguments of the combo program
+    arity_t _arity; // number of arguments of the combo program
     contin_t _step_size, _expansion;
     eda::field_set::arity_t _depth;
 

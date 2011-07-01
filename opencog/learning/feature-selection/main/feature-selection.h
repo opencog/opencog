@@ -36,7 +36,7 @@
 
 using namespace eda;
 using namespace moses;
-using namespace combo;
+using namespace opencog::combo;
 using namespace boost::assign; // bring 'operator+=()' into scope
 
 // optimization algorithms

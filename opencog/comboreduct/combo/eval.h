@@ -43,23 +43,20 @@
 #define COEF_SAMPLE_COUNT 20.0 //involved in the formula that counts
 //the number of trials needed to check a formula
 
-namespace combo
-{
-
-using opencog::isApproxEq;
+namespace opencog { namespace combo {
 
 struct Evaluator {
     virtual ~Evaluator() { }
-    virtual vertex eval_action(combo_tree::iterator, combo::variable_unifier&) = 0;
-    virtual vertex eval_percept(combo_tree::iterator, combo::variable_unifier&) = 0;
+    virtual vertex eval_action(combo_tree::iterator, variable_unifier&) = 0;
+    virtual vertex eval_percept(combo_tree::iterator, variable_unifier&) = 0;
     // @todo : this could be generic and not in the Evaluator
     // there would be a way to specify with the procedure is lazy or note
     // in order to be fully compatible with the way it is already used
-    virtual vertex eval_procedure(combo_tree::iterator, combo::variable_unifier&) = 0;
+    virtual vertex eval_procedure(combo_tree::iterator, variable_unifier&) = 0;
     // eval_indefinite_object takes no arguments because it is assumed
     // that it has no child, this assumption may change over time
     virtual vertex eval_indefinite_object(indefinite_object,
-                                          combo::variable_unifier&) = 0;
+                                          variable_unifier&) = 0;
 };
 
 // there are 2 ways of binding input arguments to a combo_tree
@@ -488,6 +485,6 @@ inline int sample_count(arity_t arity)
     else return (int)(COEF_SAMPLE_COUNT*log((float)arity + EXPONENTIAL));
 }
 
-} //~namespace combo
+}} // ~namespaces combo opencog
 
 #endif

@@ -46,8 +46,8 @@ namespace moses
 struct representation : public knob_mapper, boost::noncopyable {
     typedef eda::instance instance;
 
-    typedef std::set<combo::vertex> operator_set;
-    typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> >
+    typedef std::set<opencog::combo::vertex> operator_set;
+    typedef std::set<opencog::combo::combo_tree, opencog::size_tree_order<opencog::combo::vertex> >
     combo_tree_ns_set;
 
 
@@ -55,7 +55,7 @@ struct representation : public knob_mapper, boost::noncopyable {
     representation(const reduct::rule& simplify_candidate,
                    const reduct::rule& simplify_knob_building,
                    const combo_tree& exemplar_,
-                   const combo::type_tree& t,
+                   const opencog::combo::type_tree& t,
                    opencog::RandGen& rng,
                    const operator_set& ignore_ops = operator_set(),
                    const combo_tree_ns_set* perceptions = NULL,

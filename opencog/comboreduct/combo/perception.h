@@ -34,30 +34,30 @@
 //perception property methods which have not been implemented
 #define NO_DEFAULT_PERCEPTION_PROPERTY_METHODS
 
-namespace combo {
+namespace opencog { namespace combo {
 
-  /**
-   * perception_base is an abstract class to be implemented
-   * to define the set of perceptions, their name (get_name()),
-   * their type (get_type_tree(), get_output_type_tree(), etc) and properties
-   * (is_symetric(), etc)
-   * It is up to the user how to represent the set of actions
-   * (std::set, enum, etc)
-   * Name, type (and type helpers) are mandatory because of the type
-   * checker engine
-   * whereas perception properties are only mandatory when using the
-   * reduct engine
-   * is that case the macro NO_DEFAULT_PERCEPTION_PROPERTY_METHODS should be
-   * enabled.
-   *
-   * For an example of an implementation of that class see ant_perception
-   * in files ant_perception.h/cc
-   */
+/**
+ * perception_base is an abstract class to be implemented
+ * to define the set of perceptions, their name (get_name()),
+ * their type (get_type_tree(), get_output_type_tree(), etc) and properties
+ * (is_symetric(), etc)
+ * It is up to the user how to represent the set of actions
+ * (std::set, enum, etc)
+ * Name, type (and type helpers) are mandatory because of the type
+ * checker engine
+ * whereas perception properties are only mandatory when using the
+ * reduct engine
+ * is that case the macro NO_DEFAULT_PERCEPTION_PROPERTY_METHODS should be
+ * enabled.
+ *
+ * For an example of an implementation of that class see ant_perception
+ * in files ant_perception.h/cc
+ */
 
-  class perception_base : public operator_base {
-  public:
+class perception_base : public operator_base {
+public:
     virtual ~perception_base() {}
-    
+  
     //action properties required for reduction
 #ifdef NO_DEFAULT_ACTION_PROPERTY_METHODS
     virtual bool is_ultrametric() const = 0;
@@ -68,37 +68,35 @@ namespace combo {
     virtual bool is_identity_of_indiscernibles() const = 0;
 #else
     virtual bool is_ultrametric() const {
-      return false;
+        return false;
     }
     virtual bool is_transitive() const {
-      return false;
+        return false;
     }
     virtual bool is_irreflexive() const {
-      return false;
+        return false;
     }
     virtual bool is_reflexive() const {
-      return false;
+        return false;
     }
     virtual bool is_symmetric() const {
-      return false;
+        return false;
     }
     virtual bool is_identity_of_indiscernibles() const {
-      return false;
+        return false;
     }
 #endif
-  };
+};
 
-  typedef const perception_base* perception;
+typedef const perception_base* perception;
 
-  typedef std::set<perception> perception_set;
-  typedef perception_set::iterator perception_set_it;
-  typedef perception_set::const_iterator perception_set_const_it;
-
-}//~namespace combo
-
+typedef std::set<perception> perception_set;
+typedef perception_set::iterator perception_set_it;
+typedef perception_set::const_iterator perception_set_const_it;
 
 std::ostream& operator<<(std::ostream&,combo::perception);
 
+}} // ~namespaces combo opencog
 
 #endif
 

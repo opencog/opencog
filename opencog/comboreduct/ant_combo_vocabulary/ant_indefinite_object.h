@@ -29,38 +29,38 @@
 #include <opencog/comboreduct/combo/indefinite_object.h>
 #include "ant_operator.h"
 
-namespace combo {
+namespace opencog { namespace combo {
 
-  namespace id {
+namespace id {
     enum ant_indefinite_object_enum {
-      ant_indefinite_object_count
+        ant_indefinite_object_count
     };
-  }
+}
 
-  typedef id::ant_indefinite_object_enum ant_indefinite_object_enum;
+typedef id::ant_indefinite_object_enum ant_indefinite_object_enum;
 
-  /*********************************************************************
-   *   Arrays containing indefinite_object name type and properties    *
-   *                 to be edited by the developer                     *
-   *********************************************************************/
+/*********************************************************************
+ *   Arrays containing indefinite_object name type and properties    *
+ *                 to be edited by the developer                     *
+ *********************************************************************/
 
-  namespace ant_indefinite_object_properties {
+namespace ant_indefinite_object_properties {
 
     //struct for description of name and type
-    typedef combo::ant_operator<ant_indefinite_object_enum, id::ant_indefinite_object_count>::basic_description indefinite_object_basic_description;
+    typedef ant_operator<ant_indefinite_object_enum, id::ant_indefinite_object_count>::basic_description indefinite_object_basic_description;
 
     //empty but kept for example
     static const indefinite_object_basic_description iobd[] = {
-      //indefinite_object        name                   type
+        //indefinite_object        name                   type
     };
 
-  }//~namespace ant_perception_properties
+}//~namespace ant_perception_properties
 
-  //ant_indefinite_object both derive
-  //from indefinite_object_base and ant_operator
-  class ant_indefinite_object : public ant_operator<ant_indefinite_object_enum, id::ant_indefinite_object_count>, public indefinite_object_base {
+//ant_indefinite_object both derive
+//from indefinite_object_base and ant_operator
+class ant_indefinite_object : public ant_operator<ant_indefinite_object_enum, id::ant_indefinite_object_count>, public indefinite_object_base {
 
-  private:
+private:
 
     //private methods
 
@@ -73,7 +73,7 @@ namespace combo {
     static const ant_indefinite_object* init_indefinite_object();
     void set_indefinite_object(ant_indefinite_object_enum);
 
-  public:
+public:
     //name
     const std::string& get_name() const;
 
@@ -99,7 +99,8 @@ namespace combo {
     //to a given pet_perception_enum
     static indefinite_object instance(ant_indefinite_object_enum);
 
-  };
-}//~namespace combo
+};
+
+}} // ~namespaces combo opencog
 
 #endif

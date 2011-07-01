@@ -12,8 +12,8 @@
 
 using namespace std;
 using namespace boost;
-using namespace combo;
 using namespace opencog;
+using namespace combo;
 using namespace ant_combo;
 
 
@@ -136,10 +136,10 @@ int main(int argc, char ** argv)
     	    	if(partial_probability >=0 && partial_probability<=1){        	
         			for ( int j = 0 ; j < nsamples_bool; ++j) {
         				is_output= biased_randbool(partial_probability, rng);
-        				for (combo::const_cm_it i = rands.begin(); i != rands.end(); ++i) {
+        				for (const_cm_it i = rands.begin(); i != rands.end(); ++i) {
         				
 	        				bool_arg_count=j;        			       			
-    	    				combo::const_cv_it contin_it = (*i).begin();    
+    	    				const_cv_it contin_it = (*i).begin();    
         					argument_type_list_it it = arg_type_list.begin() ;
         				    if(is_output){    								
              					for( unsigned int k =0; k<arg_number;++k) { 			  			
@@ -163,11 +163,11 @@ int main(int argc, char ** argv)
 				else if (partial_probability == -1)
 				{
 					int contin_indx=0,bool_indx;
-					for (combo::const_cm_it i = rands.begin(); i != rands.end(); ++i, ++contin_indx) {
+					for (const_cm_it i = rands.begin(); i != rands.end(); ++i, ++contin_indx) {
         			
 	    	   			bool_indx=rng.randint(nsamples_bool); 
 	    	   			bool_arg_count=bool_indx;       			       			
-       					combo::const_cv_it contin_it = (*i).begin();    
+       					const_cv_it contin_it = (*i).begin();    
        					argument_type_list_it it = arg_type_list.begin() ;
        			       								
       					for( unsigned int k =0; k<arg_number;++k) { 			  			

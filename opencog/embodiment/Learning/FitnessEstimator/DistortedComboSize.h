@@ -29,7 +29,7 @@
 namespace FitnessEstimator
 {
 
-using namespace combo;
+using namespace opencog::combo;
 
 typedef combo_tree::iterator pre_it;
 

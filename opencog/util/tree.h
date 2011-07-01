@@ -103,10 +103,6 @@ void destructor(T1* p)
 
 }
 
-}
-
-namespace opencog {
-
 /// A node in the tree, combining links to other nodes as well as the actual data.
 template<class T>
 class tree_node_ { // size: 5*4=20 bytes (on 32 bit arch), can be reduced by 8.
@@ -141,10 +137,11 @@ class tree {
 
       /// Base class for iterators, only pointers stored, no traversal logic.
 #ifdef __SGI_STL_PORT
-      class iterator_base : public stlport::bidirectional_iterator<T, ptrdiff_t> {
+      class iterator_base : public stlport::bidirectional_iterator<T, ptrdiff_t>
 #else
-      class iterator_base {
+      class iterator_base
 #endif
+      {
          public:
             typedef T                               value_type;
             typedef T*                              pointer;
@@ -2995,15 +2992,15 @@ typename tree<T, tree_node_allocator>::upwards_iterator& tree<T, tree_node_alloc
    return (*this);
    }
 
-} //~namespace opencog
+} // ~namespace opencog
 
 namespace std {
 
-  template<typename T>
-  void swap(opencog::tree<T>& x,opencog::tree<T>& y) {
+template<typename T>
+void swap(opencog::tree<T>& x,opencog::tree<T>& y) {
     std::swap(x.head,y.head);
     std::swap(x.feet,y.feet);
-  }
+}
 
 } //~namespace std
 
@@ -3011,6 +3008,13 @@ template<typename T>
 std::ostream& operator<<(std::ostream&,const opencog::tree<T>&);
 template<typename T>
 std::istream& operator>>(std::istream&,opencog::tree<T>&) throw (opencog::InconsistenceException, std::bad_exception);
+
+// TODO replace that by operator>> in descriptions.h
+template<typename T>
+std::istream& TROCTRUC(std::istream& in,opencog::tree<T>& tr) throw (opencog::InconsistenceException, std::bad_exception) {
+    std::cout << "GATEAU!!!!" << std::endl;
+    return in;
+}
 
 
 std::istream& operator>>(std::istream& in,opencog::tree<std::string>& t) throw (opencog::InconsistenceException, std::bad_exception);
@@ -3207,7 +3211,7 @@ struct size_tree_order : lexicographic_subtree_order<T, compare> {
   }                                
 
 
-} //namespace opencog
+} // ~namespace opencog
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr) {

@@ -24,7 +24,7 @@
 #include "pet_builtin_action.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-using namespace combo;
+using namespace opencog::combo;
 using namespace pet_builtin_action_properties;
 
 pet_builtin_action::pet_builtin_action()

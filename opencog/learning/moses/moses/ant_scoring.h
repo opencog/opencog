@@ -32,7 +32,7 @@
 
 #include "types.h"
 
-using namespace combo;
+using namespace opencog::combo;
 using moses::score_t;
 
 #define MIN_FITNESS -1.0e10

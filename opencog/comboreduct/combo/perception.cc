@@ -24,7 +24,11 @@
 #include "perception.h"
 #include "descriptions.h"
 
-std::ostream& operator<<(std::ostream& out, combo::perception p) {
+namespace opencog { namespace combo {
+
+std::ostream& operator<<(std::ostream& out, perception p) {
   OC_ASSERT(p);
   return out << p->get_name();
 }
+
+}} // ~namespaces combo opencog

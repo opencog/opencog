@@ -37,18 +37,19 @@
 
 /// anything that gets imported into the combo namespace with a using
 /// directive should go here
-namespace combo {
-  using boost::variant;
-  using boost::static_visitor;
-  //  using boost::bind;
-  using boost::make_counting_iterator;
-  using boost::make_indirect_iterator;
-  using boost::make_transform_iterator;
-  using boost::apply_visitor;
-  using boost::assign::list_of;
-  using boost::multi_array;
-  using std::find_if;
-  using std::accumulate;
-}
+namespace opencog { namespace combo {
+using boost::variant;
+using boost::static_visitor;
+//  using boost::bind;
+using boost::make_counting_iterator;
+using boost::make_indirect_iterator;
+using boost::make_transform_iterator;
+using boost::apply_visitor;
+using boost::assign::list_of;
+using boost::multi_array;
+using std::find_if;
+using std::accumulate;
+
+}} // ~namespaces combo opencog
 
 #endif
