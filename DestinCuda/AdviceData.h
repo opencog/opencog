@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ADVICE_DATA_H
+#define ADVICE_DATA_H
 
 #include <vector>
 #include <fstream>
@@ -73,3 +74,5 @@ public:
 
 	int GetNumberOfParentUnsupervisedMemberships(){ return mNumberOfParentUnsupervisedMemberships; };
 };
+
+#endif

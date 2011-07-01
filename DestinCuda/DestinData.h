@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DESTIN_DATA_H
+#define DESTIN_DATA_H
 
 #include <vector>
 #include <map>
@@ -102,3 +103,5 @@ class DestinData
          */
         void DoSpecial4x4FFT(float** &fSubImage, float* fUniqueVector);
 };
+
+#endif
