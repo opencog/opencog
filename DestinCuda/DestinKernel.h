@@ -56,7 +56,7 @@ private:
 	int *dWinningCentroids;
 	int *mCentroidWinCounter;
 
-	void WriteData( stringstream& xml );
+	void WriteData( stringstream& xml, float *Input );
 
 public:
 	DestinKernel( void );

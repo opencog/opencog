@@ -128,15 +128,17 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     sharedMem = (mStates+mStates)*sizeof(float);
     CalculateOutput<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dNodeOutput );
 
-    this->WriteData(xml);
+    this->WriteData(xml, Input);
 }
 
-void DestinKernel::WriteData( stringstream& xml )
+void DestinKernel::WriteData( stringstream& xml, float *Input )
 {
     cudaMemcpy(mCentroidsDistance, dCentroidsDistance, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mCentroidStarvation, dCentroidStarvation, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mNodeOutput, dNodeOutput, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mWinningCentroids, dWinningCentroids, sizeOfNodes*sizeof(int), cudaMemcpyDeviceToHost);
+    float * dInput = new float[sizeOfNodes*mInputDimensionlity];
+    cudaMemcpy(dInput, Input, sizeOfNodes*mInputDimensionlity*sizeof(float), cudaMemcpyDeviceToHost);
 
     xml << "<layer id=\"" << mID << "\">" << endl;
     for(int r=0;r<mRows;r++)
@@ -146,6 +148,12 @@ void DestinKernel::WriteData( stringstream& xml )
             int winningCentroid = mWinningCentroids[r*mCols+c];
             mCentroidWinCounter[(c+r*mCols)*mStates+winningCentroid] += 1;
             xml << "<node id=\"" << r*mCols+c << "\">" << endl;
+            xml << "<input ";
+            for (int i=0;i<mInputDimensionlity;i++)
+            {
+                xml << "vID" << i << "=\"" << dInput[(r*mCols+c)*mInputDimensionlity+i] << "\" ";
+            }
+            xml << "/>" << endl;
             xml << "<winningCentroid>" << mWinningCentroids[r*mCols+c] << "</winningCentroid>" << endl;
             for(int s=0;s<mStates;s++)
             {
@@ -202,7 +210,7 @@ __global__ void CalculateDistance( int States, int InputDimensionlity, float *In
             float temp = 0.0f;
             // distance to input = (input - centroid)*(input - centroid)
             // Small formula to get to the right working position: dimension*centroids*block+current centroid*dimension+thread
-            temp = input[tid] - CentroidVectorData[InputDimensionlity*States*bid+centroid*InputDimensionlity+tid];
+            temp = input[tid] - CentroidVectorData[InputDimensionlity*States*bid+centroid*InputDimensionlity+tid] ;
             distance[tid] = temp * temp;
             // A trick for when the dimension is bigger then the amount of threads
             tid += blockDim.x;
@@ -338,13 +346,16 @@ __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, floa
 
     int centroid = WinningCentroids[bid];
     float temp;
+    float inputD;
     int pos;
     while(tid < InputDimensionlity)
     {
         pos = InputDimensionlity*States*bid+centroid*InputDimensionlity+tid;
         temp = CentroidVectorData[pos];
-        temp = temp -( temp - InputData[tid + bid * InputDimensionlity] ) * LearningRate;
+        inputD = InputData[tid + bid * InputDimensionlity];
+        temp = temp - (inputD * LearningRate);
         CentroidVectorData[pos] = temp;
+        temp = (inputD - temp) * (inputD - temp);
         newDistance[tid] = temp;
 
         tid += blockDim.x;
@@ -378,7 +389,7 @@ __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, floa
     tid = threadIdx.x;
     if(tid == 0)
     {
-        CentroidDist[States*bid+centroid] = sqrt(newDistance[0]);
+        CentroidDist[centroid+bid*States] = sqrt(newDistance[0]);
     }
 }
 

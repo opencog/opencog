@@ -804,6 +804,7 @@ int MainDestinExperiments(int argc, char* argv[])
     return 0;
 }
 
+// Simple run command: destinCuda(.exe) 00010100000 120 2:3 ./config.xml ../../data/MNISTTraining32 -D D
 int main(int argc, char* argv[])
 {
     // ********************
