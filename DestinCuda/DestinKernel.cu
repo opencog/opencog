@@ -128,17 +128,15 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     sharedMem = (mStates+mStates)*sizeof(float);
     CalculateOutput<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dNodeOutput );
 
-    this->WriteData(xml, Input);
+    this->WriteData(xml);
 }
 
-void DestinKernel::WriteData( stringstream& xml, float *Input )
+void DestinKernel::WriteData( stringstream& xml )
 {
     cudaMemcpy(mCentroidsDistance, dCentroidsDistance, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mCentroidStarvation, dCentroidStarvation, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mNodeOutput, dNodeOutput, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mWinningCentroids, dWinningCentroids, sizeOfNodes*sizeof(int), cudaMemcpyDeviceToHost);
-    float * dInput = new float[sizeOfNodes*mInputDimensionlity];
-    cudaMemcpy(dInput, Input, sizeOfNodes*mInputDimensionlity*sizeof(float), cudaMemcpyDeviceToHost);
 
     xml << "<layer id=\"" << mID << "\">" << endl;
     for(int r=0;r<mRows;r++)
@@ -146,15 +144,10 @@ void DestinKernel::WriteData( stringstream& xml, float *Input )
         for(int c=0;c<mCols;c++)
         {
             int winningCentroid = mWinningCentroids[r*mCols+c];
+            // winning counter finds place on the host might not be the best place to put this still
+            // cause we are already writing here some output why create a special loop for it.
             mCentroidWinCounter[(c+r*mCols)*mStates+winningCentroid] += 1;
-            xml << "<node id=\"" << r*mCols+c << "\">" << endl;
-            xml << "<input ";
-            for (int i=0;i<mInputDimensionlity;i++)
-            {
-                xml << "vID" << i << "=\"" << dInput[(r*mCols+c)*mInputDimensionlity+i] << "\" ";
-            }
-            xml << "/>" << endl;
-            xml << "<winningCentroid>" << mWinningCentroids[r*mCols+c] << "</winningCentroid>" << endl;
+            xml << "<node id=\"" << r*mCols+c << "\" centroidWin=\"" << mWinningCentroids[r*mCols+c] << "\">" << endl;
             for(int s=0;s<mStates;s++)
             {
                 xml << "<centroid id=\"" << s << "\" ";
@@ -353,7 +346,7 @@ __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, floa
         pos = InputDimensionlity*States*bid+centroid*InputDimensionlity+tid;
         temp = CentroidVectorData[pos];
         inputD = InputData[tid + bid * InputDimensionlity];
-        temp = temp - (inputD * LearningRate);
+        temp = inputD - (temp * LearningRate);
         CentroidVectorData[pos] = temp;
         temp = (inputD - temp) * (inputD - temp);
         newDistance[tid] = temp;
