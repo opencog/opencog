@@ -103,9 +103,7 @@ void pet_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_ENU
             //setting perception type tree
             std::istringstream is(bd[i].type);
             try {
-                std::cout << "FIX THAT!" << std::endl;
-                // TODO reenable the following line (and remove the previous line)
-                // is >> _type_tree;
+                is >> _type_tree;
             } catch (opencog::InconsistenceException& ie) {
                 std::cout << "WARNING : there must be a problem with the type description of " << _name << ", as the interpretation of the type string : " << "\"" << is.str() << "\"" << " has raised the following exception : " << ie.getMessage() << std::endl;
             }

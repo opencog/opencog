@@ -31,6 +31,7 @@
 #include <opencog/learning/moses/moses/optimization.h>
 #include <opencog/learning/moses/moses/scoring_functions.h>
 
+using namespace opencog;
 using namespace moses;
 using namespace reduct;
 using namespace boost;
@@ -38,7 +39,7 @@ using namespace std;
 
 int main(int argc,char** argv) { 
     combo_tree tr;
-    opencog::MT19937RandGen rng(0);
+    MT19937RandGen rng(0);
     while (cin.good()) {
         cin >> tr;
         if (!cin.good())

@@ -37,15 +37,14 @@
 
 using namespace std;
 
-namespace moses
-{
+namespace opencog { namespace moses {
+
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
-using opencog::from_one;
 
-build_knobs::build_knobs(opencog::RandGen& _rng,
+build_knobs::build_knobs(RandGen& _rng,
                          combo_tree& exemplar,
-                         const opencog::combo::type_tree& tt,
+                         const combo::type_tree& tt,
                          representation& rep,
                          const operator_set& ignore_ops,
                          const combo_tree_ns_set* perceptions,
@@ -59,20 +58,20 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
       _perm_ratio(0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
-    type_tree output_type = opencog::combo::type_tree_output_type_tree(_type);
-    opencog::combo::type_tree action_result_type_tree =
-        opencog::combo::type_tree(opencog::combo::id::action_result_type);
-    opencog::combo::type_tree boolean_type_tree =
-        opencog::combo::type_tree(opencog::combo::id::boolean_type);
-    opencog::combo::type_tree contin_type_tree =
-        opencog::combo::type_tree(opencog::combo::id::contin_type);
-    opencog::combo::type_tree ann_type_tree =
-        opencog::combo::type_tree(opencog::combo::id::ann_type);
+    type_tree output_type = combo::type_tree_output_type_tree(_type);
+    combo::type_tree action_result_type_tree =
+        combo::type_tree(combo::id::action_result_type);
+    combo::type_tree boolean_type_tree =
+        combo::type_tree(combo::id::boolean_type);
+    combo::type_tree contin_type_tree =
+        combo::type_tree(combo::id::contin_type);
+    combo::type_tree ann_type_tree =
+        combo::type_tree(combo::id::ann_type);
     // OC_ASSERT
     stringstream ss;
     ss << output_type;
     stringstream art_ss; //action_result_type
-    art_ss << opencog::combo::id::action_result_type;
+    art_ss << combo::id::action_result_type;
     OC_ASSERT((((perceptions != NULL || actions != NULL) && 
                 output_type == action_result_type_tree) ||
                output_type == boolean_type_tree ||
@@ -96,7 +95,7 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
         build_contin(_exemplar.begin());
     } else {
         OC_ASSERT(output_type == contin_type_tree,
-                  "Types differ. Expected 'opencog::combo::id::contin_type', got '%s'",
+                  "Types differ. Expected 'combo::id::contin_type', got '%s'",
                   ss.str().c_str());
 
         contin_canonize(_exemplar.begin());
@@ -181,7 +180,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     // larger subtrees)
     unsigned int max_pairs = _arity*(_arity - 1);
     if(max_pairs > 0) {
-        opencog::lazy_random_selector select(max_pairs, rng);
+        lazy_random_selector select(max_pairs, rng);
         unsigned int n_pairs =
             _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
         dorepeat(n_pairs) {
@@ -408,14 +407,14 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
     for (combo_tree_ns_set_it i = _actions->begin(); i != _actions->end(); ++i)
         perms.push_back(*i);
 
-    // opencog::lazy_random_selector sel(number_of_actions);
+    // lazy_random_selector sel(number_of_actions);
     // dorepeat(n) {  // add n builtin actions
     //   int i=sel();  // since this argument is varied, it doesn't matter what was the initial value
     // }
 
     //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
     //TODO: should bias the selection of these (and possibly choose larger subtrees)
-    opencog::lazy_random_selector select(number_of_actions*(number_of_actions - 1), rng);
+    lazy_random_selector select(number_of_actions*(number_of_actions - 1), rng);
 
     dorepeat(n) {
         combo_tree v(id::action_boolean_if);
@@ -765,4 +764,5 @@ void build_knobs::ann_canonize(pre_it it) {
 */
 }
 
-} //~namespace moses
+} // ~namespace moses
+} // ~namespace opencog

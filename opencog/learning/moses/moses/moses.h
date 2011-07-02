@@ -26,11 +26,10 @@
 
 #include "metapopulation.h"
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
-typedef std::set<opencog::combo::vertex> operator_set;
-typedef std::set<opencog::combo::combo_tree, opencog::size_tree_order<opencog::combo::vertex> >
+typedef std::set<combo::vertex> operator_set;
+typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> >
 combo_tree_ns_set;
 
 static const operator_set empty_ignore_ops = operator_set();
@@ -140,6 +139,7 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
 }
 
 
-} //~namespace moses
+} // ~namespace moses
+} // ~namespace opencog
 
 #endif

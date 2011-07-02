@@ -30,7 +30,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <limits>
 
-namespace moses {
+namespace opencog { namespace moses {
 
     // due to stl_pair.h considering that
     //
@@ -45,9 +45,11 @@ namespace moses {
     static const complexity_t worst_complexity =
         std::numeric_limits<complexity_t>::min();
 
-    complexity_t complexity(opencog::combo::combo_tree::iterator);
+    complexity_t complexity(combo::combo_tree::iterator);
     
-    complexity_t complexity(const opencog::combo::combo_tree&);
-} //~namespace combo
+    complexity_t complexity(const combo::combo_tree&);
+
+} //~namespace moses
+} //~namespace opencog
 
 #endif

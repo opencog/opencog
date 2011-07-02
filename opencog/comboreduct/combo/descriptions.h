@@ -136,7 +136,7 @@ private:
             // must be one of the defined builtins
             
             std::istringstream is(bd[i].builtin_type);
-            TROCTRUC<typename type_tree::value_type>(is, t);
+            is >> t;
             builtin_type_tree[bd[i].b] = t;
             
             type_tree::iterator ty_it = t.begin();  // setting the arity
@@ -262,7 +262,7 @@ private:
             // must be one of the defined actions
             
             std::istringstream is(ad[i].action_type);
-            TROCTRUC<typename type_tree::value_type>(is, t);
+            is >> t;
             action_type_tree[ad[i].a] = t;
             
             type_tree::iterator ty_it = t.begin();  // setting the arity

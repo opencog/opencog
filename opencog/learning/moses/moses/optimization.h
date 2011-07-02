@@ -43,8 +43,7 @@
 #define MINIMUM_DEME_SIZE         2
 #define MAX_EVALS_PER_SLICE       10
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 inline double information_theoretic_bits(const eda::field_set& fs)
 {
@@ -156,7 +155,7 @@ struct eda_parameters {
 };
 
 struct univariate_optimization {
-    univariate_optimization(opencog::RandGen& _rng,
+    univariate_optimization(RandGen& _rng,
                             const optim_parameters& op = optim_parameters(),
                             const eda_parameters& ep = eda_parameters())
         : rng(_rng), opt_params(op), eda_params(ep) {}
@@ -194,7 +193,7 @@ struct univariate_optimization {
                     (composite_score(opt_params.terminate_if_gte,
                                       worst_composite_score.second),
                      max_gens_improv),
-                    opencog::tournament_selection((unsigned)eda_params.selection, rng),
+                    tournament_selection((unsigned)eda_params.selection, rng),
                     eda::univariate(), eda::local_structure_probs_learning(),
                     eda::rtr_replacement(deme.fields(),
                                          opt_params.rtr_window_size(deme.fields()),
@@ -216,7 +215,7 @@ struct univariate_optimization {
         }
     }
 
-    opencog::RandGen& rng;
+    RandGen& rng;
     optim_parameters opt_params;
     eda_parameters eda_params;
 };
@@ -231,7 +230,7 @@ struct hc_parameters {
 };
 
 struct iterative_hillclimbing {
-    iterative_hillclimbing(opencog::RandGen& _rng,
+    iterative_hillclimbing(RandGen& _rng,
                            const optim_parameters& op = optim_parameters(),
                            const hc_parameters& hc = hc_parameters())
         : rng(_rng), opt_params(op), hc_params(hc) {}
@@ -380,7 +379,7 @@ struct iterative_hillclimbing {
         return operator()(deme, init_inst, score, max_evals);
     }
 
-    opencog::RandGen& rng;
+    RandGen& rng;
     optim_parameters opt_params;
     hc_parameters hc_params;
 };
@@ -396,7 +395,7 @@ struct sliced_iterative_hillclimbing {
     } MState;
 
 
-    sliced_iterative_hillclimbing(opencog::RandGen& _rng,
+    sliced_iterative_hillclimbing(RandGen& _rng,
                                   const optim_parameters& p = optim_parameters())
         : rng(_rng), opt_params(p), m_state(M_INIT),
           _evals_per_slice(MAX_EVALS_PER_SLICE) {}
@@ -573,7 +572,7 @@ struct sliced_iterative_hillclimbing {
     int current_number_of_instances;
     int target_size;
 
-    opencog::RandGen& rng;
+    RandGen& rng;
     optim_parameters opt_params;
     MState m_state;
     int _evals_per_slice;
@@ -602,7 +601,7 @@ struct simulated_annealing {
      
     typedef score_t energy_t;
  
-    simulated_annealing(opencog::RandGen& _rng,
+    simulated_annealing(RandGen& _rng,
                         const optim_parameters& op = optim_parameters(),
                         const sa_parameters& sa = sa_parameters())
         : rng(_rng), 
@@ -742,13 +741,14 @@ struct simulated_annealing {
         return operator()(deme, init_inst, score, max_evals);
     }
       
-    opencog::RandGen& rng;
+    RandGen& rng;
     optim_parameters opt_params;
     sa_parameters sa_params;
 protected:
     unsigned max_distance;
 };
 
-} //~namespace moses
-  
+} // ~namespace moses
+} // ~namespace opencog
+
 #endif

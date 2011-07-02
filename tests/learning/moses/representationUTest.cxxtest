@@ -31,9 +31,9 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
 
+using namespace opencog;
 using namespace moses;
 using namespace reduct;
-using namespace opencog;
 using namespace combo;
 using namespace std;
 using boost::assign::list_of;

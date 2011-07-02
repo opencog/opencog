@@ -365,9 +365,14 @@ arity_t explicit_arity(const combo_tree& tr);
 type_tree declare_function(const type_tree& iotype, arity_t arity);
 type_tree declare_function(type_node iotype, arity_t arity);
 
-std::ostream& operator<<(std::ostream&, const type_node&);
-std::istream& operator>>(std::istream&, type_node&);
+} // ~namespace combo
+} // ~namespace opencog
 
-}} // ~namespaces combo opencog
+namespace std {
+
+std::ostream& operator<<(std::ostream&, const opencog::combo::type_node&);
+std::istream& operator>>(std::istream&, opencog::combo::type_node&);
+
+} // ~namespace std
 
 #endif

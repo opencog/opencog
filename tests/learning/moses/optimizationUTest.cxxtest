@@ -28,6 +28,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/numeric.h>
 
+using namespace opencog;
 using namespace moses;
 using namespace eda;
 

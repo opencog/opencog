@@ -38,8 +38,7 @@
 #define INIT_FITNESS 0.0 //supposed to be the average, neither good nor bad
 
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 typedef FitnessEstimator::NoSpaceLifeFitnessEstimator FE;
 typedef FitnessEstimator::DistortedComboSizeOrder Comp;
@@ -71,7 +70,7 @@ public:
                    const operator_set& ignore_ops,
                    const combo_tree_ns_set& perceptions,
                    const combo_tree_ns_set& actions,
-                   opencog::RandGen& rng);
+                   RandGen& rng);
 
     ~moses_learning();
 
@@ -103,7 +102,7 @@ private:
 
     int _nepc;
 
-    opencog::RandGen& _rng;
+    RandGen& _rng;
 
     HCState _hcState;
 
@@ -156,6 +155,7 @@ private:
     const FE& _fitnessEstimator;
 };
 
-}//~namespace moses
+} // ~namespace moses
+} // ~namespace opencog
 
 #endif

@@ -48,9 +48,6 @@ ant_builtin_action_enum get_enum(builtin_action);
 ant_perception_enum get_enum(perception);
 ant_action_symbol_enum get_enum(action_symbol);
 ant_indefinite_object_enum get_enum(indefinite_object);
-
-std::istream& operator>>(std::istream& in, vertex& v);
-std::istream& operator>>(std::istream& in, combo_tree& tr);
     
 //this is added to be sure that the operators == and != between
 //combo operator type and enum are used
@@ -74,5 +71,13 @@ bool operator!=(indefinite_object, ant_indefinite_object_enum);
 bool operator!=(ant_indefinite_object_enum, indefinite_object);
 
 } // ~namespace ant_combo
+
+namespace opencog { namespace combo {
+
+std::istream& operator>>(std::istream& in, combo::vertex& v);
+std::istream& operator>>(std::istream& in, combo::combo_tree& tr);
+
+} // ~namespace combo
+} // ~namespace opencog
 
 #endif

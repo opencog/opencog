@@ -28,15 +28,15 @@
 namespace opencog { namespace combo {
 
 bool is_action_definite_object(const definite_object& d) {
-  return std::string::npos != d.rfind(ACTION_NAME_POSTFIX);
+    return std::string::npos != d.rfind(ACTION_NAME_POSTFIX);
 }
 
 std::string get_action_name(const definite_object& d) {
-  return d.substr(0, d.rfind(ACTION_NAME_POSTFIX));
+    return d.substr(0, d.rfind(ACTION_NAME_POSTFIX));
 }
 
 definite_object get_action_definite_object(const std::string& action_name) {
-  return definite_object(action_name + std::string(ACTION_NAME_POSTFIX));
+    return definite_object(action_name + std::string(ACTION_NAME_POSTFIX));
 }
 
 }} // ~namespaces combo opencog

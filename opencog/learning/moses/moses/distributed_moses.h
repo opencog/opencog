@@ -40,8 +40,7 @@
 #include "metapopulation.h"
 #include "moses.h"
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 using namespace boost::program_options;
 using boost::tuple;
@@ -104,7 +103,7 @@ string build_cmdline(const variables_map& vm,
            && !it->second.defaulted()) {
             string opt_name(" --");
             opt_name += it->first + " \"";
-            res += opt_name + opencog::to_string(it->second, string("\"") + opt_name) + "\"";
+            res += opt_name + to_string(it->second, string("\"") + opt_name) + "\"";
         }
     }
     // add exemplar option
@@ -217,13 +216,13 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
             in >> tr;
             // read bscore
             behavioral_score bscore;
-            opencog::istreamContainer(in, std::back_inserter(bscore), "[", "]");
+            istreamContainer(in, std::back_inserter(bscore), "[", "]");
             // insert read element in candidates
             bscored_combo_tree candidate =
                 make_pair(tr, make_pair(bscore, make_pair(score, complexity)));
             candidates.insert(candidate);
             // Logger
-            if(logger().getLevel() >= opencog::Logger::FINE) {
+            if(logger().getLevel() >= Logger::FINE) {
                 logger().fine("Parsed candidate:");
                 stringstream ss;
                 logger().fine(ostream_bscored_combo_tree(ss, candidate,
@@ -379,7 +378,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     // Logger
                     logger().info("Merge %u candidates with the metapopulation",
                                   candidates.size());
-                    if(logger().getLevel() >= opencog::Logger::FINE) {
+                    if(logger().getLevel() >= Logger::FINE) {
                         logger().fine("Candidates with their bscores to merge with"
                                       " the metapopulation:");
                         stringstream ss;
@@ -399,7 +398,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
                     // Logger
                     logger().info("Metapopulation size is %u", mp.size());
-                    if(logger().getLevel() >= opencog::Logger::FINE) {
+                    if(logger().getLevel() >= Logger::FINE) {
                         stringstream ss;
                         ss << "Metapopulation after merging: " << std::endl;
                         logger().fine(mp.ostream(ss, -1, true, true).str());
@@ -434,5 +433,6 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 }
 
 } // ~namespace moses
+} // ~namespace opencog
 
 #endif // _OPENCOG_DISTRIBUTED_MOSES_H

@@ -256,10 +256,8 @@ bool ImitationLearningAgent::initLearning(int nepc,
             for (combo_tree_ns_set_const_it pi = _atomic_perceptions.begin();
                     pi != _atomic_perceptions.end(); ++pi) {
                 stringstream ss;
-                // TODO reenable the following line
-                // ss << *pi;
-                logger().debug(
-                             "ImitationLearningAgent - %s", ss.str().c_str());
+                ss << *pi;
+                logger().debug("ImitationLearningAgent - %s", ss.str().c_str());
             }
         }
         //~debug log
@@ -289,8 +287,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                 for (combo_tree_ns_set_const_it ai = _atomic_actions.begin();
                         ai != _atomic_actions.end(); ++ai) {
                     stringstream ss;
-                    // TODO reenable the following line
-                    // ss << *ai;
+                    ss << *ai;
                     logger().debug(
                                  "ImitationLearningAgent - %s", ss.str().c_str());
                 }
@@ -435,10 +432,8 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
             for (combo_tree_ns_set_const_it pi = _atomic_perceptions.begin();
                     pi != _atomic_perceptions.end(); ++pi) {
                 stringstream ss;
-                // TODO reenable the following line
-                // ss << *pi;
-                logger().debug(
-                             "ImitationLearningAgent - %s", ss.str().c_str());
+                ss << *pi;
+                logger().debug("ImitationLearningAgent - %s", ss.str().c_str());
             }
         }
         //~debug log
@@ -467,8 +462,7 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
             for (combo_tree_ns_set_const_it ai = _atomic_actions.begin();
                     ai != _atomic_actions.end(); ++ai) {
                 stringstream ss;
-                // TODO reenable the following line
-                // ss << *ai;
+                ss << *ai;
                 logger().debug("ImitationLearningAgent - %s", ss.str().c_str());
             }
         }

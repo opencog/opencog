@@ -26,7 +26,7 @@
 #include "complexity.h"
 #include "using.h"
 
-namespace moses {
+namespace opencog { namespace moses {
 
 using namespace opencog::combo;
 
@@ -58,4 +58,5 @@ complexity_t complexity(const combo_tree& tr) {
     return complexity(tr.begin());
 }
 
-} //~namespace combo
+} // ~namespace moses
+} // ~namespace opencog

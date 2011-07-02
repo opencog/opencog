@@ -25,13 +25,12 @@
 #include <opencog/util/numeric.h>
 #include <cmath>
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 // helper to log a combo_tree and its behavioral score
 inline void log_candidate_bscore(const combo_tree& tr,
                                  const behavioral_score& bs) {
-    if(logger().getLevel() >= opencog::Logger::FINE) {
+    if(logger().getLevel() >= Logger::FINE) {
         stringstream ss_tr;
         ss_tr << "Evaluate candidate: " << tr;
         logger().fine(ss_tr.str());
@@ -48,11 +47,11 @@ int logical_score::operator()(const combo_tree& tr) const
     //   << target << " " << opencog::combo::truth_table(tr,arity) << " "
     //   << (target.hamming_distance(opencog::combo::truth_table(tr,arity))) << std::endl; // PJ
 
-    return -int(target.hamming_distance(opencog::combo::truth_table(tr, arity)));
+    return -int(target.hamming_distance(combo::truth_table(tr, arity)));
 }
 behavioral_score logical_bscore::operator()(const combo_tree& tr) const
 {
-    opencog::combo::truth_table tt(tr, arity);
+    combo::truth_table tt(tr, arity);
     behavioral_score bs(target.size());
 
     std::transform(tt.begin(), tt.end(), target.begin(), bs.begin(),
@@ -65,7 +64,7 @@ contin_t contin_score::operator()(const combo_tree& tr) const
 {
     try {
         std::cout << "scoring " << tr << std::endl;
-        contin_t sc = -target.abs_distance(opencog::combo::contin_table(tr, cti, rng));
+        contin_t sc = -target.abs_distance(combo::contin_table(tr, cti, rng));
         std::cout << sc << " X " << tr << std::endl;
         return sc;
     } catch (...) {
@@ -77,7 +76,7 @@ contin_t contin_score::operator()(const combo_tree& tr) const
 contin_t contin_score_sq::operator()(const combo_tree& tr) const
 {
     try {
-        return -target.sum_squared_error(opencog::combo::contin_table(tr, cti, rng));
+        return -target.sum_squared_error(combo::contin_table(tr, cti, rng));
     } catch (...) {
         stringstream ss;
         ss << "The following candidate has failed to be evaluated: " << tr;
@@ -88,11 +87,11 @@ contin_t contin_score_sq::operator()(const combo_tree& tr) const
 
 behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 {
-    opencog::combo::contin_table ct(tr, cti, rng);
+    combo::contin_table ct(tr, cti, rng);
     behavioral_score bs(target.size());
 
     behavioral_score::iterator dst = bs.begin();
-    for (opencog::combo::contin_table::const_iterator it1 = ct.begin(), it2 = target.begin();
+    for (combo::contin_table::const_iterator it1 = ct.begin(), it2 = target.begin();
          it1 != ct.end();)
         *dst++ = fabs((*it1++) - (*it2++));
 
@@ -102,11 +101,11 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 {
     cti.set_consider_args(argument_set(tr)); // to speed up binding
-    opencog::combo::contin_table ct(tr, cti, rng);
+    combo::contin_table ct(tr, cti, rng);
     behavioral_score bs(target.size() + (occam?1:0));
         
     behavioral_score::iterator dst = bs.begin();
-    for(opencog::combo::contin_table::const_iterator it1 = ct.begin(), 
+    for(combo::contin_table::const_iterator it1 = ct.begin(), 
             it2 = target.begin(); it1 != ct.end(); ++it1, ++it2) {
         *dst++ = sq(*it1 - *it2);
     }
@@ -147,4 +146,5 @@ behavioral_score occam_truth_table_bscore::operator()(const combo_tree& tr) cons
     return bs;
 }
 
-} //~namespace moses
+} // ~namespace moses
+} // ~namespace opencog

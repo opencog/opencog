@@ -112,8 +112,7 @@ std::ostream& procedure_call_base::toStream(std::ostream& out,
 {
     out << get_name();
     if (complete)
-        // TODO reenable get_body
-        out << "(" << ((int)arity()) << ") := ";// << get_body();
+        out << "(" << ((int)arity()) << ") := " << get_body();
     return out;
 }
 
@@ -127,15 +126,17 @@ bool operator!=(const procedure_call_base& pc1, const procedure_call_base& pc2)
     return !(pc1 == pc2);
 }
 
-std::ostream& operator<<(std::ostream& out, const procedure_call_base& pc)
+std::ostream& operator<<(std::ostream& out, const opencog::combo::procedure_call_base& pc)
 {
     return pc.toStream(out);
 }
 
-std::ostream& operator<<(std::ostream& out, procedure_call pc)
+std::ostream& operator<<(std::ostream& out, opencog::combo::procedure_call pc)
 {
     OC_ASSERT(pc);
     return pc->toStream(out);
 }
 
-}} // ~namespaces combo opencog
+} // ~namespace combo
+} // ~namespace opencog
+

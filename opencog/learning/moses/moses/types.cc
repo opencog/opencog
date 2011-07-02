@@ -24,9 +24,10 @@
 #include "types.h"
 #include "complexity.h"
 
-namespace moses {
+namespace opencog { namespace moses {
 
     const composite_score worst_composite_score=
         std::make_pair(worst_score,worst_complexity);
 
-} //~namespace moses
+} // ~namespace moses
+} // ~namespace opencog

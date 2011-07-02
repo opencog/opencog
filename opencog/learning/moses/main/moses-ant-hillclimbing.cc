@@ -40,18 +40,18 @@
 
 #include <boost/lexical_cast.hpp>
 
+using namespace opencog;
 using namespace moses;
 using namespace reduct;
 using namespace boost;
 using namespace ant_combo;
 using namespace std;
-using namespace opencog;
 
 
 //typedef std::set<combo::vertex> operator_set;
 //typedef operator_set::iterator operator_set_it;  
 
-//typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> > 
+//typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> > 
 //    combo_tree_ns_set;
 
 int main(int argc,char** argv) { 
@@ -72,7 +72,7 @@ int main(int argc,char** argv) {
   ant_score scorer;
   ant_bscore bscorer;
 
-  opencog::MT19937RandGen rng(rand_seed);
+  MT19937RandGen rng(rand_seed);
 
   operator_set ignore_ops;
   combo_tree_ns_set perceptions;

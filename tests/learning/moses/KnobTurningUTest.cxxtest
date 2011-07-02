@@ -27,9 +27,10 @@
 #include <string>
 #include "opencog/learning/moses/moses/knobs.h"
 
+using namespace opencog;
 using namespace moses;
 using namespace reduct;
-using namespace opencog::combo;
+using namespace combo;
 //using namespace util;
 using namespace std;
 

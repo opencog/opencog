@@ -124,12 +124,12 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
                         std::stringstream ss;
                         ss << *at;
                         OC_ASSERT(false,
-                                          "There is not enough arguments given"
-                                          " in input, %s needs at least %d"
-                                          " arguments and only %d are provided",
-                                          ss.str().c_str(),
-                                          static_cast<int>(ama),
-                                          static_cast<int>(rest_ap_arg));
+                                  "There is not enough arguments given"
+                                  " in input, %s needs at least %d"
+                                  " arguments and only %d are provided",
+                                  ss.str().c_str(),
+                                  static_cast<int>(ama),
+                                  static_cast<int>(rest_ap_arg));
                     }
                 }
             }

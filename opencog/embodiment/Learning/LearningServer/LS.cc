@@ -204,8 +204,7 @@ void LS::sendBestSchema(const combo::combo_tree& schema)
 void LS::sendSchema(const combo::combo_tree & schema, std::string schemaName, std::string candidateName)
 {
     stringstream ss;
-    // TODO reenable the following line
-    // ss << schema;
+    ss << schema;
     logger().info("LS - Sending schema: (%s, %s, %s).", learningPet.c_str(), schemaName.c_str(), ss.str().c_str());
     learningserver::messages::SchemaMessage msg(this->getID(), learningPet, schema, schemaName, candidateName);
     sendMessage(msg);
@@ -344,8 +343,7 @@ void LS::stopLearn()
         //no need because sendBestSchema reset the task
         //ILAgent->stopLearning();
         stringstream ss;
-        // TODO reenable the following line
-        // ss << bestSchema;
+        ss << bestSchema;
         string s = ss.str();
         logger().debug("LS - Send the final learned schema : %s", s.c_str());
         sendBestSchema(bestSchema);
@@ -370,8 +368,7 @@ void LS::trySchema()
         // a reward message is received.
         bestSchema = ILAgent->getBestSchemaEstimated();
         stringstream ss;
-        // TODO reenable the following line
-        // ss << bestSchema;
+        ss << bestSchema;
         string s = ss.str();
         logger().debug(
                      "LS - Trying the following schema : %s", s.c_str());

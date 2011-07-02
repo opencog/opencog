@@ -53,7 +53,7 @@ protected:
 public:
     procedure_call_base(const std::string& name,
                         arity_t arity,
-                        const combo::combo_tree& tr,
+                        const combo_tree& tr,
                         bool infer_type = false);
     virtual ~procedure_call_base();
 
@@ -88,10 +88,10 @@ public:
 //typedef procedure_call_set::iterator procedure_call_set_it;
 //typedef procedure_call_set::const_iterator procedure_call_const_it;
 
-bool operator==(const combo::procedure_call_base& pc1,
-                const combo::procedure_call_base& pc2);
-bool operator!=(const combo::procedure_call_base& pc1,
-                const combo::procedure_call_base& pc2);
+bool operator==(const procedure_call_base& pc1,
+                const procedure_call_base& pc2);
+bool operator!=(const procedure_call_base& pc1,
+                const procedure_call_base& pc2);
 //allocate a procedure_call given an input stream
 //if loading failes then return NULL pointer
 //infer_type is true then when the procedure_call is create
@@ -101,11 +101,10 @@ template < class BUILTIN_ACTION,
            class PERCEPTION,
            class ACTION_SYMBOL,
            class INDEFINITE_OBJECT >
-combo::procedure_call load_procedure_call(std::istream& in,
-                                          bool infer_type = false)
+procedure_call load_procedure_call(std::istream& in,
+                                   bool infer_type = false)
 {
     using namespace std;
-    using namespace combo;
     string str, tmp;
     int nparen = 0;
 
@@ -118,9 +117,8 @@ combo::procedure_call load_procedure_call(std::istream& in,
         tmp.assign("");
     } while (in.good() && nparen > 0);
     if (nparen != 0) {
-        opencog::logger().error(
-                        "procedure_call - Mismatched parenthesis in the arity definition procedure '%s'",
-                        str.c_str());
+        logger().error("procedure_call - Mismatched parenthesis in the arity definition procedure '%s'",
+                       str.c_str());
         return NULL;
     }
     if (!in.good()) return NULL;
@@ -128,9 +126,8 @@ combo::procedure_call load_procedure_call(std::istream& in,
     //recognize :=
     in >> tmp;
     if (tmp != ":=" || !in.good()) {
-        opencog::logger().error(
-                        "procedure_call - Wrong procedure definition operator '%s' in procedure definition '%s' should be ':=' instead",
-                        tmp.c_str(), str.c_str());
+        logger().error("procedure_call - Wrong procedure definition operator '%s' in procedure definition '%s' should be ':=' instead",
+                       tmp.c_str(), str.c_str());
         return NULL;
     }
 
@@ -146,9 +143,8 @@ combo::procedure_call load_procedure_call(std::istream& in,
         tmp.assign("");
     } while (in.good() && nparen > 0);
     if (nparen != 0) {
-        opencog::logger().error(
-                        "procedure_call - Mismatched parenthesis in the body of procedure '%s'. The total of parenthesis, with '(' counting for 1 and ')' counting for -1, sums up to %d",
-                        str.c_str(), nparen);
+        logger().error("procedure_call - Mismatched parenthesis in the body of procedure '%s'. The total of parenthesis, with '(' counting for 1 and ')' counting for -1, sums up to %d",
+                       str.c_str(), nparen);
         return NULL;
     }
 
@@ -164,12 +160,11 @@ combo::procedure_call load_procedure_call(std::istream& in,
     try {
         arity = boost::lexical_cast<int>(arity_str);
     } catch (...) {
-        opencog::logger().error(
-                              "procedure_call - Lexical error: '%s'"
-                              " supposed to be an arity in procedure"
-                              " definition '%s' does not correspond to"
-                              " a number",
-                              arity_str.c_str(), str.c_str());
+        logger().error("procedure_call - Lexical error: '%s'"
+                       " supposed to be an arity in procedure"
+                       " definition '%s' does not correspond to"
+                       " a number",
+                       arity_str.c_str(), str.c_str());
         return NULL;
     }
 
@@ -184,12 +179,11 @@ combo::procedure_call load_procedure_call(std::istream& in,
             if(!arg.is_idx_valid(arity)) {
                 stringstream arg_ss;
                 arg_ss << arg;
-                opencog::logger().error(
-                                      "procedure_call - Semantic error:"
-                                      " the procedure '%s' has arity '%d'"
-                                      " but contains variable argument '%s'"
-                                      " out of range",
-                                      str.c_str(), arity, arg_ss.str().c_str());
+                logger().error("procedure_call - Semantic error:"
+                               " the procedure '%s' has arity '%d'"
+                               " but contains variable argument '%s'"
+                               " out of range",
+                               str.c_str(), arity, arg_ss.str().c_str());
                 return NULL;
             }
         }
@@ -197,9 +191,10 @@ combo::procedure_call load_procedure_call(std::istream& in,
     return new procedure_call_base(name, arity, tr, infer_type);
 }
 
-std::ostream& operator<<(std::ostream&, const combo::procedure_call_base&);
-std::ostream& operator<<(std::ostream&, combo::procedure_call);
+std::ostream& operator<<(std::ostream&, const opencog::combo::procedure_call_base&);
+std::ostream& operator<<(std::ostream&, opencog::combo::procedure_call);
 
-}} // ~namespaces combo opencog
+} // ~namespace combo
+} // ~namespace opencog
 
 #endif

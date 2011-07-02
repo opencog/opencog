@@ -236,8 +236,7 @@ struct AnnFitnessFunction : public unary_function<combo_tree, contin_t> {
 
 };
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 struct ann_pole2nv_score : public unary_function<combo_tree, contin_t> {
     ann_pole2nv_score() { }
@@ -319,5 +318,8 @@ struct ann_bscore : public unary_function<combo_tree, behavioral_score> {
         return bs;
     }
 };
-}
+
+} // ~namespace moses
+} // ~namespace opencog
+
 #endif

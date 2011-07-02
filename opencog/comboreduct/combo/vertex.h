@@ -187,14 +187,6 @@ typedef std::vector<argument_list> argument_list_list;
 typedef argument_list_list::iterator argument_list_list_it;
 typedef argument_list_list::const_iterator argument_list_list_const_it;
 
-std::ostream& operator<<(std::ostream&, const ann_type&);
-std::ostream& operator<<(std::ostream&, const builtin&);
-std::ostream& operator<<(std::ostream&, const wild_card&);
-std::ostream& operator<<(std::ostream&, const argument&);
-// output argument #n when positive, !#n when negative 
-std::ostream& ostream_abbreviate_literal(std::ostream&, const argument&);
-std::ostream& operator<<(std::ostream&, const vertex&);
-
 //builtin == vertex
 inline bool operator==(const vertex& v, builtin h)
 {
@@ -978,8 +970,7 @@ template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDE
 std::istream& stream_to_combo_tree(std::istream& in, combo_tree& tr)
 {
     opencog::tree<std::string> tmp;
-    // TODO reenable the following line
-    // in >> tmp;
+    in >> tmp;
     strtree_to_combo_tree<BUILTIN_ACTION, PERCEPTION, ACTION_SYMBOL, INDEFINITE_OBJECT>(tmp, tr);
     return  in;
 }
@@ -1027,6 +1018,14 @@ template<>
 struct range_const_iterator<combo_tree::pre_order_iterator> {
   typedef boost::counting_iterator<combo_tree::sibling_iterator> type;
   };*/
+
+std::ostream& operator<<(std::ostream&, const opencog::combo::ann_type&);
+std::ostream& operator<<(std::ostream&, const opencog::combo::builtin&);
+std::ostream& operator<<(std::ostream&, const opencog::combo::wild_card&);
+std::ostream& operator<<(std::ostream&, const opencog::combo::argument&);
+// output argument #n when positive, !#n when negative 
+std::ostream& ostream_abbreviate_literal(std::ostream&, const opencog::combo::argument&);
+std::ostream& operator<<(std::ostream&, const opencog::combo::vertex&);
 
 } // ~namespace combo
 } // ~namespace opencog

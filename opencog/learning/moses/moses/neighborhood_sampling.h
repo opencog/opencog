@@ -35,10 +35,8 @@
 #include "using.h"
 #include "../eda/initialization.h"
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
-using opencog::pow2;
 using boost::math::binomial_coefficient;
 using boost::numeric_cast;
 using boost::numeric::positive_overflow;
@@ -56,7 +54,7 @@ using std::numeric_limits;
  */
 template<typename Out>
 void generate_initial_sample(const eda::field_set& fs, int n, Out out, Out end,
-                             opencog::RandGen& rng)
+                             RandGen& rng)
 {
     dorepeat(n) {
 
@@ -102,7 +100,7 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out, Out end,
 inline void generate_contin_neighbor(const eda::field_set& fs,
                                      eda::instance& inst, 
                                      eda::field_set::contin_iterator it, 
-                                     unsigned n, opencog::RandGen& rng)
+                                     unsigned n, RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
     size_t num = fs.count_n_before_stop(inst, it.idx());
@@ -110,7 +108,7 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
     // a random_selector is used not to pick up twice the same idx.
     // The max idx coresponds either to the first Stop, or, in case
     // there is no Stop, the last disc (i.e. either Left or Right)
-    opencog::lazy_random_selector select(std::min(num + 1, depth), rng);
+    lazy_random_selector select(std::min(num + 1, depth), rng);
 
     for(unsigned i = n; i > 0; i--) {
         size_t r = select();
@@ -158,7 +156,7 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
 template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
                               unsigned sample_size, Out out, Out end,
-                              opencog::RandGen& rng,
+                              RandGen& rng,
                               const eda::instance & center_inst )
 {
     OC_ASSERT(center_inst.size() == fs.packed_width(),
@@ -174,7 +172,7 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
     dorepeat(sample_size) {
 
         eda::instance new_inst(center_inst);
-        opencog::lazy_random_selector select(dim, rng);
+        lazy_random_selector select(dim, rng);
 
         for (unsigned i = 1;i <= n;) {
             size_t r = select();
@@ -227,7 +225,7 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
 template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
                               unsigned sample_size, Out out, Out end,
-                              opencog::RandGen& rng)
+                              RandGen& rng)
 {
     eda::instance inst(fs.packed_width());
 
@@ -554,5 +552,6 @@ inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
 }
 
 } // ~namespace moses
+} // ~namespace opencog
 
 #endif // _OPENCOG_NEIGHBORHOOD_SAMPLING_H

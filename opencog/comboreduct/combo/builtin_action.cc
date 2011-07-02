@@ -24,11 +24,11 @@
 #include "builtin_action.h"
 #include <opencog/util/oc_assert.h>
 
-namespace opencog { namespace combo {
+namespace opencog {
 
-std::ostream& operator<<(std::ostream& out, builtin_action a) {
+std::ostream& operator<<(std::ostream& out, combo::builtin_action a) {
     OC_ASSERT(a);
     return out << a->get_name();
 }
 
-}} // ~namespaces combo opencog
+} // ~namespace opencog

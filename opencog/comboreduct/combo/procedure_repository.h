@@ -170,6 +170,8 @@ unsigned int load_procedure_repository(std::istream& in,
     return n;
 }
 
+std::ostream& operator<<(std::ostream& out, opencog::combo::procedure_repository pr);
+
 }} // ~namespaces combo opencog
 
 #endif

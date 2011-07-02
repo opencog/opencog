@@ -604,10 +604,9 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 if(!tr.empty()) { //trace info debug is available
                     message << ", involved in the"
                             << " application '"
-                        // TODO reenable following line
-                            // << combo_tree(ct_it)
+                            << combo_tree(ct_it)
                             << "' located at pre-order index "
-                            << opencog::pre_order_index(tr, ct_it)
+                            << pre_order_index(tr, ct_it)
                             << " of procedure '"
                             << proc_name << "'";
                 }
@@ -680,24 +679,19 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                         << tt.sibling_index(arg_app)
                                         << "th applied argument ";
                                 if(!tr.empty()) { //trace debug info available
-                                    message << "'" 
-                                        // TODO reenable followinf line
-                                            // << combo_tree(ct_it_child)
+                                    message << "'"
+                                            << combo_tree(ct_it_child)
                                             << "' (located at pre-order index "
-                                            << opencog::pre_order_index(tr,
-                                                                         ct_it_child)
+                                            << pre_order_index(tr, ct_it_child)
                                             << " of procedure '"
                                             << proc_name << "')"
                                             << " of operator '"
                                             << *ct_it << "', ";
                                 }
                                 message << "has type "
-                                    // TODO reenable following line
-                                        // << type_tree(output_it)
+                                        << type_tree(output_it)
                                         << " which does not inherits from "
-                                    // TODO reenanle following line
-                                        // << type_tree(input_arg_it);
-                                    ;
+                                        << type_tree(input_arg_it);
                                 logger().error(message.str().c_str());
                                 //~log message
 
@@ -717,9 +711,8 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                     << tt.sibling_index(arg_app)
                                     << "th applied argument ";
                             if(!tr.empty()) { //trace debug info available
-                                message 
-                                    // TODO reenable the following line
-                                    // << "'" << combo_tree(ct_it_child)
+                                message << "'"
+                                        << combo_tree(ct_it_child)
                                         << "' (located at pre-order index "
                                         << pre_order_index(tr, ct_it_child)
                                         << " of procedure '"
@@ -728,12 +721,9 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                         << *ct_it << "', ";
                             }
                             message << "has type "
-                                // TODO reenable the following line
-                                    // << type_tree(arg_app)
+                                    << type_tree(arg_app)
                                     << " which does not inherits from "
-                                // TODO reenable the following line
-                                    // << type_tree(input_arg_it);
-                                ;
+                                    << type_tree(input_arg_it);
                             logger().error(message.str().c_str());
                             //~log message
 
@@ -792,9 +782,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
             }
             message << "is not typed as a function (that is lambda)"
                     << " but is typed "
-                // TODO reenable the following line
-                    // << type_tree(it_child);
-                ;
+                    << type_tree(it_child);
             opencog::logger().error(message.str().c_str());
             //~log message
 
@@ -1202,8 +1190,14 @@ type_tree declare_function(type_node iotype, arity_t arity)
     return declare_function(tt, arity);
 }
 
-std::ostream& operator<<(std::ostream& out, const type_node& n)
+} // ~namespace combo
+} // ~namespace opencog
+
+namespace std {
+
+std::ostream& operator<<(std::ostream& out, const opencog::combo::type_node& n)
 {
+    using namespace opencog::combo;
     switch (n) {
         //type operators
     case id::lambda_type:
@@ -1244,8 +1238,9 @@ std::ostream& operator<<(std::ostream& out, const type_node& n)
     }
 }
 
-std::istream& operator>>(std::istream& in, type_node& n)
+std::istream& operator>>(std::istream& in, opencog::combo::type_node& n)
 {
+    using namespace opencog::combo;
     std::string str;
     in >> str;
     OC_ASSERT(!str.empty(),
@@ -1295,4 +1290,4 @@ std::istream& operator>>(std::istream& in, type_node& n)
     return in;
 }
 
-}} // ~namespaces combo opencog
+} // ~namespace std

@@ -79,9 +79,8 @@ namespace opencog { namespace trees {
       if(type_check_enabled) {
 	std::stringstream strs;
     combo::combo_tree vtr;
-    // TODO reenable the following 2 lines
-	// strs << (*tr);
-	// strs >> vtr;
+	strs << (*tr);
+	strs >> vtr;
 	try {
 	  combo::infer_type_tree(vtr);
 	}

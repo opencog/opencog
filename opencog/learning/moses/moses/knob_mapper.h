@@ -28,8 +28,7 @@
 #include "../eda/field_set.h"
 #include "knobs.h"
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 /**
  * maps disc_spec (resp. contin_spec) to actual disc_knob (resp. contin_knob)
@@ -71,5 +70,6 @@ struct knob_mapper {
 };
 
 } //~namespace moses
+} //~namespace opencog
 
 #endif

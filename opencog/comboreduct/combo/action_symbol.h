@@ -38,8 +38,10 @@ public:
 
 typedef const action_symbol_base* action_symbol;
   
-std::ostream& operator<<(std::ostream&,combo::action_symbol);
+} // ~namespace combo
 
-}} // ~namespaces combo opencog
+std::ostream& operator<<(std::ostream&, combo::action_symbol);
+
+} // ~namespace opencog
 
 #endif

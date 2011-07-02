@@ -31,13 +31,12 @@
 
 #include "moses-learning.h"
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 typedef std::set<combo::vertex> operator_set;
 typedef operator_set::iterator operator_set_it;
 
-typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> >
+typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> >
 combo_tree_ns_set;
 typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
 
@@ -51,7 +50,7 @@ moses_learning::moses_learning(int nepc,
                                const operator_set& ignore_ops,
                                const combo_tree_ns_set& perceptions,
                                const combo_tree_ns_set& actions,
-                               opencog::RandGen& rng)
+                               RandGen& rng)
         : _fitness_estimator(fitness_estimator), _comp(dos), _dos(dos), 
           _ignore_ops(ignore_ops),
           _perceptions(perceptions), _actions(actions), 
@@ -318,4 +317,5 @@ void moses_learning::reset_estimator()
     _hcState = HC_START_ITERATION;
 }
 
-}//~namespace moses
+} // ~namespace moses
+} // ~namespace opencog

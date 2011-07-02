@@ -39,10 +39,7 @@
 #include "types.h"
 #include "ant_scoring.h"
 
-namespace moses
-{
-
-using opencog::sq;
+namespace opencog { namespace moses {
 
 #define NEG_INFINITY INT_MIN
  
@@ -64,7 +61,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             behavioral_score bs = bscore(tr);
             score_t res = -std::accumulate(bs.begin(), bs.end(), 0.0);
             // Logger
-            if(logger().getLevel() >= opencog::Logger::FINE) {
+            if(logger().getLevel() >= Logger::FINE) {
                 stringstream ss_tr;
                 ss_tr << "bscore_based_score - Candidate: " << tr;
                 logger().fine(ss_tr.str());
@@ -98,14 +95,14 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
  */
 struct logical_score : public unary_function<combo_tree, int> {
     template<typename Func>
-    logical_score(const Func& func, int a, opencog::RandGen& _rng)
+    logical_score(const Func& func, int a, RandGen& _rng)
             : target(func, a, _rng), arity(a), rng(_rng) { }
 
     int operator()(const combo_tree& tr) const;
 
-    opencog::combo::truth_table target;
+    combo::truth_table target;
     int arity;
-    opencog::RandGen& rng;
+    RandGen& rng;
 };
 
 /**
@@ -122,7 +119,7 @@ struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    opencog::combo::truth_table target;
+    combo::truth_table target;
     int arity;
 };
 
@@ -130,57 +127,57 @@ struct contin_score : public unary_function<combo_tree, score_t> {
     template<typename Func>
     contin_score(const Func& func,
                  const contin_input_table& r,
-                 opencog::RandGen& _rng)
+                 RandGen& _rng)
             : target(func, r), cti(r), rng(_rng) { }
 
-    contin_score(const opencog::combo::contin_table& t,
+    contin_score(const combo::contin_table& t,
                  const contin_input_table& r,
-                 opencog::RandGen& _rng)
+                 RandGen& _rng)
         : target(t),cti(r),rng(_rng) { }
 
     score_t operator()(const combo_tree& tr) const;
 
-    opencog::combo::contin_table target;
+    combo::contin_table target;
     contin_input_table cti;
-    opencog::RandGen& rng;
+    RandGen& rng;
 };
 
 struct contin_score_sq : public unary_function<combo_tree,score_t> {
     template<typename Func>
     contin_score_sq(const Func& func,
                     const contin_input_table& r,
-                    opencog::RandGen& _rng)
+                    RandGen& _rng)
         : target(func,r),cti(r),rng(_rng) { }
     
-    contin_score_sq(const opencog::combo::contin_table& t,
+    contin_score_sq(const combo::contin_table& t,
                     const contin_input_table& r,
-                    opencog::RandGen& _rng)
+                    RandGen& _rng)
         : target(t),cti(r),rng(_rng) { }
     
     score_t operator()(const combo_tree& tr) const;
     
-    opencog::combo::contin_table target;
+    combo::contin_table target;
     contin_input_table cti;
-    opencog::RandGen& rng;
+    RandGen& rng;
 };
 
 struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
     template<typename Func>
     contin_bscore(const Func& func,
                   const contin_input_table& r,
-                  opencog::RandGen& _rng)
+                  RandGen& _rng)
         : target(func, r), cti(r), rng(_rng) { }
 
-    contin_bscore(const opencog::combo::contin_table& t,
+    contin_bscore(const combo::contin_table& t,
                   const contin_input_table& r,
-                  opencog::RandGen& _rng)
+                  RandGen& _rng)
         : target(t), cti(r), rng(_rng) { }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    opencog::combo::contin_table target;
+    combo::contin_table target;
     contin_input_table cti;
-    opencog::RandGen& rng;
+    RandGen& rng;
 };
 
 /**
@@ -217,17 +214,17 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
                         const contin_input_table& r,
                         float variance,
                         float alphabet_size,
-                        opencog::RandGen& _rng)
+                        RandGen& _rng)
         : target(score, r), cti(r), rng(_rng) {
         occam = variance > 0;
         set_complexity_coef(variance, alphabet_size);
     }
 
-    occam_contin_bscore(const opencog::combo::contin_table& t,
+    occam_contin_bscore(const combo::contin_table& t,
                         const contin_input_table& r,
                         float variance,
                         float alphabet_size,
-                        opencog::RandGen& _rng)
+                        RandGen& _rng)
         : target(t), cti(r), rng(_rng) {
         occam = variance > 0;
         set_complexity_coef(variance, alphabet_size);
@@ -235,11 +232,11 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    opencog::combo::contin_table target;
+    combo::contin_table target;
     mutable contin_input_table cti; // mutable due to set_consider_args
     bool occam;
     score_t complexity_coef;
-    opencog::RandGen& rng;
+    RandGen& rng;
 
 private:
     void set_complexity_coef(double variance, double alphabet_size);
@@ -252,11 +249,11 @@ private:
  * samples are very large.
  */
 struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
-    occam_contin_bscore_opt_binding(const opencog::combo::contin_table& t,
+    occam_contin_bscore_opt_binding(const combo::contin_table& t,
                                     const contin_input_table& r,
                                     float variance,
                                     float alphabet_size,
-                                    opencog::RandGen& _rng) :
+                                    RandGen& _rng) :
         occam_contin_bscore(t, r, variance, alphabet_size, _rng) {}
 
     behavioral_score operator()(const combo_tree& tr) const {
@@ -285,7 +282,7 @@ struct occam_truth_table_bscore
                              const truth_table_inputs& i,
                              float p,
                              float alphabet_size,
-                             opencog::RandGen& _rng) 
+                             RandGen& _rng) 
         : target(t), tti(i), rng(_rng) {
         occam = p > 0 && p < 0.5;
         if(occam)
@@ -298,7 +295,7 @@ struct occam_truth_table_bscore
     mutable truth_table_inputs tti; // mutable due to set_consider_args
     bool occam; // if true the Occam's razor is taken into account
     score_t complexity_coef;
-    opencog::RandGen& rng;
+    RandGen& rng;
 };
 
 /** 
@@ -312,7 +309,7 @@ struct occam_truth_table_bscore_opt_binding : public occam_truth_table_bscore {
                                          const truth_table_inputs& i,
                                          float p,
                                          float alphabet_size,
-                                         opencog::RandGen& _rng) :
+                                         RandGen& _rng) :
         occam_truth_table_bscore(t, i, p, alphabet_size, _rng) {}
 
     behavioral_score operator()(const combo_tree& tr) const {
@@ -335,7 +332,7 @@ struct distance_based_scorer : public unary_function<eda::instance,
     composite_score operator()(const eda::instance& inst) const {
         score_t sc = -fs.hamming_distance(target_inst, inst);
         // Logger
-        if(logger().getLevel() >= opencog::Logger::FINE) {
+        if(logger().getLevel() >= Logger::FINE) {
             stringstream ss;
             ss << "distance_based_scorer - Evaluate instance: " 
                << fs.stream(inst) << std::endl << "Score = " << sc << std::endl;
@@ -360,7 +357,7 @@ struct complexity_based_scorer : public unary_function<eda::instance,
         using namespace reduct;
 
         // Logger
-        if(logger().getLevel() >= opencog::Logger::FINE) {
+        if(logger().getLevel() >= Logger::FINE) {
             stringstream ss;
             ss << "complexity_based_scorer - Evaluate instance: " 
                << _rep.fields().stream(inst);
@@ -391,5 +388,6 @@ protected:
 };
 
 } //~namespace moses
+} //~namespace opencog
 
 #endif

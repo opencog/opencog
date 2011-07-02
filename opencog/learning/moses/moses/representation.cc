@@ -52,14 +52,13 @@ void set_depth(int new_depth)
     depth = new_depth;
 }
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 representation::representation(const reduct::rule& simplify_candidate,
                                const reduct::rule& simplify_knob_building,
                                const combo_tree& exemplar_,
                                const type_tree& tt,
-                               opencog::RandGen& _rng,
+                               RandGen& _rng,
                                const operator_set& ignore_ops,
                                const combo_tree_ns_set* perceptions,
                                const combo_tree_ns_set* actions)
@@ -155,7 +154,7 @@ combo_tree representation::get_clean_exemplar(bool reduce)
 
     if(reduce) { //reduce
         // Logger
-        if(logger().getLevel() >= opencog::Logger::FINE) {
+        if(logger().getLevel() >= Logger::FINE) {
             stringstream ss;
             ss << "Reduce candidate: " 
                << result;
@@ -194,4 +193,5 @@ void representation::set_exemplar_inst() {
     }
 }
 
-} //~namespace moses
+} // ~namespace moses
+} // ~namespace opencog

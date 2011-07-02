@@ -42,7 +42,7 @@
 // uncomment this line for debug information to be given during execution
 // #define DEBUG_INFO 
 
-namespace moses {
+namespace opencog { namespace moses {
 
     using namespace opencog::combo;
 
@@ -66,6 +66,8 @@ namespace moses {
     using boost::make_indirect_iterator;
 
     using opencog::logger;
-} //~namespace moses
+
+} // ~namespace moses
+} // ~namespace opencog
 
 #endif

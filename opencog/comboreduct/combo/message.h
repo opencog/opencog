@@ -75,9 +75,10 @@ typedef std::set<message> message_set;
 typedef message_set::iterator message_set_it;
 typedef message_set::const_iterator message_set_const_it;
 
-std::ostream& operator<<(std::ostream&,const message&);
+std::ostream& operator<<(std::ostream&, const opencog::combo::message&);
 
-}} // ~namespaces combo opencog
+} // ~namespace combo
+} // ~namespace opencog
 
 #endif
 

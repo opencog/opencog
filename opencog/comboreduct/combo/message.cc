@@ -25,8 +25,9 @@
 
 namespace opencog { namespace combo {
 
-std::ostream& operator<<(std::ostream& out,const message& m) {
-  return out << message::prefix() << '\"' << m.getContent() << '\"';
+std::ostream& operator<<(std::ostream& out, const combo::message& m) {
+    return out << combo::message::prefix() << '\"' << m.getContent() << '\"';
 }
 
-}} // ~namespaces combo opencog
+} // ~namespace combo
+} // ~namespace opencog

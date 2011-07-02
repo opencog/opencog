@@ -58,9 +58,9 @@ using namespace boost::program_options;
 using boost::lexical_cast;
 using boost::assign::list_of;
 using namespace std;
+using namespace opencog;
 using namespace moses;
 using namespace reduct;
-using namespace opencog;
 using namespace ant_combo;
 
 // default number of samples to describe a problem

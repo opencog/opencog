@@ -94,9 +94,11 @@ typedef std::set<perception> perception_set;
 typedef perception_set::iterator perception_set_it;
 typedef perception_set::const_iterator perception_set_const_it;
 
-std::ostream& operator<<(std::ostream&,combo::perception);
+} // ~namespace combo
 
-}} // ~namespaces combo opencog
+std::ostream& operator<<(std::ostream&, combo::perception);
+
+} // ~namespace opencog
 
 #endif
 

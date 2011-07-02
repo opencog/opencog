@@ -30,6 +30,7 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
+using namespace opencog;
 using namespace moses;
 using namespace reduct;
 using namespace boost;
@@ -49,7 +50,7 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    opencog::MT19937RandGen rng(rand_seed);
+    MT19937RandGen rng(rand_seed);
 
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::action_result_type, 1);

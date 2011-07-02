@@ -44,9 +44,11 @@ typedef std::set<indefinite_object> indefinite_object_set;
 typedef indefinite_object_set::iterator indefinite_object_set_it;
 typedef indefinite_object_set::const_iterator indefinite_object_set_const_it;
 
-std::ostream& operator<<(std::ostream&, indefinite_object);
+} // ~namespace combo
 
-}} // ~namespaces combo opencog
+std::ostream& operator<<(std::ostream&, combo::indefinite_object);
+
+} // ~namespace opencog
 
 #endif
 

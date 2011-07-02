@@ -95,10 +95,6 @@ std::istream& operator>>(std::istream& in, combo_tree& tr)
     return stream_to_combo_tree<pet_builtin_action, pet_perception, pet_action_symbol, pet_indefinite_object>(in, tr);
 }
 
-}//~namespace PetCombo
-
-using namespace PetCombo;
-
 bool operator==(builtin_action b, pet_builtin_action_enum e)
 {
     return instance(e) == b;
@@ -164,3 +160,4 @@ bool operator!=(pet_indefinite_object_enum e, indefinite_object i)
     return instance(e) == i;
 }
 
+}//~namespace PetCombo

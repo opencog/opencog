@@ -38,8 +38,7 @@
 #include "../eda/field_set.h"
 #include "complexity.h"
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 using namespace ant_combo;
 
@@ -502,6 +501,7 @@ typedef opencog::based_variant < boost::variant<logical_subtree_knob,
                                                 simple_action_subtree_knob>,
                                  disc_knob_base > disc_knob;
 } //~namespace moses
+} //~namespace opencog
 
 #endif
 

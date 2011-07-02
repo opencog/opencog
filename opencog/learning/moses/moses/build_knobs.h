@@ -44,8 +44,7 @@ typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
 
 
 
-namespace moses
-{
+namespace opencog { namespace moses {
 
 //need to call a generator method... (dispatched based on type
 
@@ -53,7 +52,7 @@ namespace moses
 struct build_knobs : boost::noncopyable {
     //used to be ss = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions
-    build_knobs(opencog::RandGen& rng, combo_tree& exemplar,
+    build_knobs(RandGen& rng, combo_tree& exemplar,
                 const type_tree& tt, representation& rep,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
@@ -65,7 +64,7 @@ struct build_knobs : boost::noncopyable {
     void build_action(combo_tree::iterator it);
     void build_contin(combo_tree::iterator it);
 protected:
-    opencog::RandGen& rng;
+    RandGen& rng;
     combo_tree& _exemplar;
     type_tree _type;
     representation& _rep;
@@ -133,5 +132,6 @@ protected:
 };
 
 } //~namespace moses
+} //~namespace opencog
 
 #endif

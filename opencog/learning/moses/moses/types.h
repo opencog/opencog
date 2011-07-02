@@ -33,7 +33,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include "complexity.h"
 
-namespace moses {
+namespace opencog { namespace moses {
   
     //basic types
     typedef double score_t;
@@ -44,27 +44,27 @@ namespace moses {
         // so does this!!!
         // std::numeric_limits<score_t>::min()+1,
 
-    typedef std::pair<score_t,complexity_t> composite_score;
-    typedef opencog::tagged_item<opencog::combo::combo_tree,
+    typedef std::pair<score_t, complexity_t> composite_score;
+    typedef tagged_item<combo::combo_tree,
                                  composite_score> scored_combo_tree;
 
     typedef std::vector<score_t> behavioral_score;
 
-    typedef opencog::tagged_item<behavioral_score,
+    typedef tagged_item<behavioral_score,
                                  composite_score> composite_behavioral_score;
-    typedef opencog::tagged_item<opencog::combo::combo_tree,
+    typedef tagged_item<combo::combo_tree,
                                  composite_behavioral_score> bscored_combo_tree;
 
-    typedef boost::unordered_map<opencog::combo::combo_tree, composite_behavioral_score, 
-                                 boost::hash<opencog::combo::combo_tree> > metapop_candidates;
+    typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
+                                 boost::hash<combo::combo_tree> > metapop_candidates;
   
     extern const composite_score worst_composite_score;
 
     //convenience accessors
-    inline const opencog::combo::combo_tree& get_tree(const scored_combo_tree& st) { 
+    inline const combo::combo_tree& get_tree(const scored_combo_tree& st) { 
         return st.first; 
     }
-    inline const opencog::combo::combo_tree& get_tree(const bscored_combo_tree& bst) { 
+    inline const combo::combo_tree& get_tree(const bscored_combo_tree& bst) { 
         return bst.first;
     }
 
@@ -111,7 +111,7 @@ namespace moses {
     // ostream functions
     template<typename Out>
     Out& ostream_behavioral_score(Out& out, const behavioral_score& bs) {
-        return opencog::ostreamContainer(out, bs, " ", "[", "]");
+        return ostreamContainer(out, bs, " ", "[", "]");
     }
 
     /**
@@ -153,5 +153,7 @@ inline std::ostream& operator<<(std::ostream& out,
     out << ", " << s.second;
     return out;
 }
+
+} // ~namespace opencog
 
 #endif

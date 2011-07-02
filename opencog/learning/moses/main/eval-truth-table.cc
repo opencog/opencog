@@ -27,6 +27,7 @@
 //ant_combo_vocabulary is used only for the boolean core vocabulary
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
+using namespace opencog;
 using namespace moses;
 using namespace ant_combo;
 

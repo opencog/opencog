@@ -27,10 +27,7 @@
 #include "using.h"
 #include "ant_scoring.h"
 
-namespace moses
-{
-
-using opencog::pow2;
+namespace opencog { namespace moses {
 
 // even_parity(x1, ..., xn) = true iff (int)x1 + ... + (int)xn is even
 // where n is the arity of even_parity
@@ -137,9 +134,9 @@ struct CaseBasedBoolean : public unary_function<combo_tree, score_t> {
 
     bool bool_evaluate(const vector<bool>& bindings, const combo_tree& tr) const
     {
-        static opencog::MT19937RandGen rng(0); // this is not useful anyway,
-                                               // remove once rng has a
-                                               // factory and is optional
+        static MT19937RandGen rng(0); // this is not useful anyway,
+                                      // remove once rng has a factory
+                                      // and is optional
         for(unsigned int i = 0; i < bindings.size(); ++i) {
             binding(i+1) = bool_to_vertex(bindings[i]);
         }
@@ -282,8 +279,7 @@ struct ant_bscore : public unary_function<combo_tree, behavioral_score> {
 };
 
 
-
-
-} //~namespace moses
+} // ~namespace moses
+} // ~namespace opencog
 
 #endif
