@@ -529,7 +529,7 @@ void procedure_repository::print(bool with_type) const {
     toStream(std::cout, with_type);
 }
 
-std::ostream& operator<<(std::ostream& out, opencog::combo::procedure_repository pr) {
+std::ostream& operator<<(std::ostream& out, procedure_repository pr) {
     return pr.toStream(out);
 }
 

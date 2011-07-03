@@ -32,9 +32,8 @@ arity_t get_arity(action a)
     return actions_properties::instance().action_arity(a);
 }
 
-std::ostream& operator<<(std::ostream& out, const combo::action& a)
+std::ostream& operator<<(std::ostream& out, const action& a)
 {
-    using namespace combo;
     switch (a) {
     case id::sequential_and:
         return out << "and_seq";

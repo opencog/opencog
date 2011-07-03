@@ -2946,6 +2946,10 @@ perception WorldWrapperUtil::nearest_random_X_to_is_X(indefinite_object io)
 
 perception WorldWrapperUtil::nearest_random_X_to_is_X(pet_indefinite_object_enum ioe)
 {
+
+    // print debug
+    std::cout << "ioe = " << instance(ioe) << std::endl;
+
     switch (ioe) {
         //edible
     case id::random_edible:

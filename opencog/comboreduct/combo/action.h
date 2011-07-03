@@ -58,10 +58,9 @@ typedef id::action action;
 //if an argument of the action is arg_list, then the arity is -1
 arity_t get_arity(action aa);
 
+std::ostream& operator<<(std::ostream&, const action&);
+
 } // ~namespace combo
-
-std::ostream& operator<<(std::ostream&, const combo::action&);
-
 } // ~namespace opencog
 
 #endif

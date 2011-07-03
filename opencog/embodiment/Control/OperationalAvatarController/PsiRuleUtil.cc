@@ -23,7 +23,9 @@
 #include "PsiRuleUtil.h"
 #include <opencog/comboreduct/combo/vertex.h>
 
-using namespace opencog::oac;
+using namespace opencog;
+using namespace oac;
+using namespace combo;
 
 bool PsiRuleUtil::splitPsiRule(const AtomSpace & atomSpace,
                                const Handle hPsiRule, 
@@ -176,7 +178,7 @@ bool PsiRuleUtil::isHandleToPsiRule(const AtomSpace & atomSpace, Handle h)
 bool PsiRuleUtil::getSchemaArguments(const AtomSpace & atomSpace, 
                                      Handle hListLink, 
                                      const std::vector<std::string> & varBindCandidates, 
-                                     std::vector <combo::vertex> & schemaArguments, 
+                                     std::vector <vertex> & schemaArguments, 
                                      RandGen & randGen) 
 {
     // Check hListLink is of type ListLink
@@ -215,15 +217,15 @@ bool PsiRuleUtil::getSchemaArguments(const AtomSpace & atomSpace,
         Type argumentType = atomSpace.getType(hArgument);
 
         if (argumentType == NUMBER_NODE) {
-            schemaArguments.push_back(combo::contin_t(
-                                          boost::lexical_cast<combo::contin_t>(atomSpace.getName(hArgument)
+            schemaArguments.push_back(contin_t(
+                                          boost::lexical_cast<contin_t>(atomSpace.getName(hArgument)
                                                                               )
                                                      ) 
                                      );
         }
         else if (argumentType == VARIABLE_NODE) {
-            schemaArguments.push_back(combo::contin_t(
-                                          boost::lexical_cast<combo::contin_t>(atomSpace.getName(hArgument)
+            schemaArguments.push_back(contin_t(
+                                          boost::lexical_cast<contin_t>(atomSpace.getName(hArgument)
                                                                               )
                                                      ) 
                                      );
@@ -255,7 +257,7 @@ void PsiRuleUtil::initVarBindCandidates(const AtomSpace & atomSpace,
     spaceMap.findAllEntities( back_inserter(varBindCandidates) );
 }
 
-void PsiRuleUtil::initUnifier(combo::variable_unifier & unifier,
+void PsiRuleUtil::initUnifier(variable_unifier & unifier,
                               const std::vector<std::string> & varBindCandidates)
 {
     unifier.clear(); 
@@ -269,7 +271,7 @@ void PsiRuleUtil::initUnifier(combo::variable_unifier & unifier,
     }
 } 
 
-void PsiRuleUtil::updateVarBindCandidates(const combo::variable_unifier & unifier, 
+void PsiRuleUtil::updateVarBindCandidates(const variable_unifier & unifier, 
                                           std::vector<std::string> & varBindCandidates)
 {
     varBindCandidates.clear();
@@ -312,7 +314,7 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
     //
     // Initially all the entities the pet encounters are considered as valid variable bindings.
     // Then the combo interpreter would update the states (valid/ invalid) of each binding.
-    combo::variable_unifier unifier;
+    variable_unifier unifier;
     PsiRuleUtil::initUnifier(unifier, varBindCandidates);
 
     logger().debug( "PsiRuleUtil::%s Initialize the unifier ( size = %d )",
@@ -332,13 +334,13 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                               Procedure::ProcedureInterpreter & procedureInterpreter, 
                               const Procedure::ProcedureRepository & procedureRepository, 
                               Handle hPrecondition, 
-                              combo::variable_unifier & unifier, 
+                              variable_unifier & unifier, 
                               RandGen & randGen) 
 {
     // Variables used by combo interpreter
-    std::vector <combo::vertex> schemaArguments;
+    std::vector <vertex> schemaArguments;
     Procedure::RunningProcedureID executingSchemaId;
-    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
+    vertex result; // vertex is actually of type boost::variant <...>
 
     // Check the input (hPrecondition)
     if ( atomSpace.getType(hPrecondition) != EVALUATION_LINK ||
@@ -420,8 +422,11 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                        __FUNCTION__, 
                        preconditionName.c_str()
                       );
+
         // TODO fix that thing
+        // see comment in combo/vertex.h
         if (combo::operator==(result,opencog::combo::id::logical_true) ) {
+        // if (result == id::logical_true) {
             logger().debug( "PsiRuleUtil::%s - The Precondition '%s' is true.", 
                             __FUNCTION__, 
                             preconditionName.c_str()
@@ -482,7 +487,7 @@ bool PsiRuleUtil::allPreconditionsSatisfied(const AtomSpace & atomSpace,
     //
     // Initially all the entities the pet encounters are considered as valid variable bindings. 
     // Then the combo interpreter would update the states (valid/ invalid) of each binding.
-    combo::variable_unifier unifier; 
+    variable_unifier unifier; 
     PsiRuleUtil::initUnifier(unifier, varBindCandidates);
 
     logger().debug( "PsiRuleUtil::%s Initialize the unifier ( size = %d )", 
@@ -549,9 +554,9 @@ Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSp
         return errorExecutingSchemaId; 
 
     // Variables used by combo interpreter
-    std::vector <combo::vertex> schemaArguments;
+    std::vector <vertex> schemaArguments;
     Procedure::RunningProcedureID executingSchemaId;
-    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
+    vertex result; // combo::vertex is actually of type boost::variant <...>
 
     // Get Action name
     std::string actionName = atomSpace.getName( atomSpace.getOutgoing(executionLinkAction, 0)

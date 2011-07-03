@@ -191,8 +191,8 @@ procedure_call load_procedure_call(std::istream& in,
     return new procedure_call_base(name, arity, tr, infer_type);
 }
 
-std::ostream& operator<<(std::ostream&, const opencog::combo::procedure_call_base&);
-std::ostream& operator<<(std::ostream&, opencog::combo::procedure_call);
+std::ostream& operator<<(std::ostream&, const procedure_call_base&);
+std::ostream& operator<<(std::ostream&, procedure_call);
 
 } // ~namespace combo
 } // ~namespace opencog

@@ -60,21 +60,14 @@
 namespace opencog { namespace world {
 
 using namespace PetCombo;
-using namespace opencog;
 using namespace opencog::pai;
-
-// Somehow these global namespace operators get hidden unless
-// we make these using declarations. Strangely, this wasn't a problem
-// when the namespace was "WorldWrapper" instead of "opencog::world"
-using ::operator<<;
-using ::operator==;
 
 /**
  * public methods
  */
 
 //ctor, stor
-PAIWorldWrapper::PAIWorldWrapper(PAI& _pai, opencog::RandGen& _rng)
+PAIWorldWrapper::PAIWorldWrapper(PAI& _pai, RandGen& _rng)
         : pai(_pai), rng(_rng), _hasPlanFailed(false) { }
 
 PAIWorldWrapper::~PAIWorldWrapper() { }
@@ -91,7 +84,7 @@ bool PAIWorldWrapper::isPlanFailed() const
 }
 
 bool PAIWorldWrapper::sendSequential_and(sib_it from, sib_it to)
-throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
+throw (ComboException, AssertionException, std::bad_exception)
 {
     using namespace ::opencog;
 
@@ -440,7 +433,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
         default:
             std::stringstream stream (std::stringstream::out);
             stream << "Unrecognized compound schema '"  << combo_tree(it) << "'" << std::endl;
-            throw opencog::ComboException(TRACE_INFO, "PAIWorldWrapper - %s.", stream.str().c_str());
+            throw ComboException(TRACE_INFO, "PAIWorldWrapper - %s.", stream.str().c_str());
         }
         //try { //TODO
         if (pai.isActionPlanEmpty(planID)) {
@@ -466,10 +459,10 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 PetAction action = buildPetAction(from);
                 pai.addAction(planID, action);
                 ++from;
-            } catch( const opencog::StandardException& ex ) {
+            } catch( const StandardException& ex ) {
                 std::stringstream ss (stringstream::out);
                 ss << combo_tree(from);
-                ss << " " << const_cast<opencog::StandardException*>( &ex )->getMessage( );
+                ss << " " << const_cast<StandardException*>( &ex )->getMessage( );
                 logger().error( "PAIWorldWrapper::%s - Failed to build PetAction '%s'",
                                 __FUNCTION__, ss.str().c_str( )  );
                 from = to;
@@ -608,7 +601,7 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
     struct timeval timer_start, timer_end;
     time_t elapsed_time = 0;
     const std::string pathFindingAlgorithm =
-        opencog::config().get("NAVIGATION_ALGORITHM");
+        config().get("NAVIGATION_ALGORITHM");
 
     const SpaceServer::SpaceMap& sm = pai.getAtomSpace().getSpaceServer().getLatestMap();
 
@@ -645,7 +638,7 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
             logger().debug("PAIWorldWrapper - AStar result %s.",
                     !_hasPlanFailed ? "true" : "false");
         } else if ( pathFindingAlgorithm == "astar3d") {
-            float maxDeltaHeight = (float)opencog::config().get_double("ASTAR3D_DELTA_HEIGHT");
+            float maxDeltaHeight = (float)config().get_double("ASTAR3D_DELTA_HEIGHT");
 
             printf("Start A* 3D navigation. Delta height for each node: %.2f\n", maxDeltaHeight);
             spatial::AStar3DController AStar3D;
@@ -667,7 +660,7 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
         } else if ( pathFindingAlgorithm == "hpa" ) {
 
             SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
-            unsigned int maximumClusters = opencog::config().get_int("HPA_MAXIMUM_CLUSTERS");
+            unsigned int maximumClusters = config().get_int("HPA_MAXIMUM_CLUSTERS");
             spatial::HPASearch search( map, 1, maximumClusters );
 
             _hasPlanFailed = !search.processPath( spatial::math::Vector2( begin.first, begin.second ), spatial::math::Vector2( end.first, end.second ) );
@@ -715,9 +708,9 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
         printf("\n");
         */
 
-    } catch ( opencog::RuntimeException& e ) {
+    } catch ( RuntimeException& e ) {
         _hasPlanFailed = true;
-    } catch ( opencog::AssertionException& e) {
+    } catch ( AssertionException& e) {
         _hasPlanFailed = true;
     }
 }
@@ -826,7 +819,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
                 logger().error("PAIWorldWrapper - nearby point selected and invalid point.");
             }
         } // else
-    } catch ( opencog::AssertionException& e ) {
+    } catch ( AssertionException& e ) {
         logger().error("PAIWorldWrapper - Unable to get pet or goal location.");
         _hasPlanFailed = true;
         return false;
@@ -972,7 +965,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
     case id::look_at: {
         if ( from.number_of_children( ) != 1 ) {
-            throw opencog::InvalidParamException(TRACE_INFO,
+            throw InvalidParamException(TRACE_INFO,
                                                  "PAIWorldWrapper - Invalid number of arguments for look_at %d", from.number_of_children( )  );
         } // if
 
@@ -998,7 +991,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
     case id::say: {
         if ( from.number_of_children( ) != 2 ) {
-            throw opencog::InvalidParamException(TRACE_INFO,
+            throw InvalidParamException(TRACE_INFO,
                                                  "PAIWorldWrapper - Invalid number of arguments for say %d", from.number_of_children( )  );
         } // if
         sib_it arguments = from.begin( );
@@ -1045,7 +1038,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                      from.number_of_children( ) );
 
         if ( from.number_of_children( ) < 2 ) {
-            throw opencog::InvalidParamException(TRACE_INFO,
+            throw InvalidParamException(TRACE_INFO,
                                                  "PAIWorldWrapper - Invalid number of arguments for group_command" );
         } // if
 
@@ -1570,7 +1563,7 @@ string PAIWorldWrapper::ownerName()
                NumberNode "$roll"
                NumberNode "$yaw"
 **/
-double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
+double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (ComboException, AssertionException, std::bad_exception)
 {
     const AtomSpace& as = pai.getAtomSpace();
     const SpaceServer& spaceServer = as.getSpaceServer();
@@ -1588,7 +1581,7 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
     std::stringstream stream (std::stringstream::out);
     stream << "Can't find angle that Object '" << as.getName(slobj)
         << "' is facing at" << std::endl;
-    throw opencog::ComboException(TRACE_INFO, "PAIWorldWrapper - %s.",
+    throw ComboException(TRACE_INFO, "PAIWorldWrapper - %s.",
                                   stream.str().c_str());
 }
 

@@ -249,7 +249,15 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
     //determine whether the action is in the action_set _bas
     vertex head_v;
     stringstream ss(action_name);
+
+    // print debug
+    std::cout << "action_name = " << action_name << std::endl;
+
     ss >> head_v;
+
+    // print debug
+    std::cout << "head_v = " << head_v << std::endl;
+
     OC_ASSERT(is_builtin_action(head_v),
                      "%s is not a builtin_action", ss.str().c_str());
 
@@ -400,8 +408,7 @@ void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
 
             // random_object case
             if (is_random(io)) {
-                // TODO fix that thing
-                if (combo::operator==(io, id::random_object))
+                if(io == id::random_object)
                     opras.insert(io);
                 //check that the object could be such random indefinite object
                 else {

@@ -64,7 +64,9 @@
 
 #define WILD_CARD_STR "_*_"
 
-using namespace opencog::oac;
+using namespace opencog;
+using namespace oac;
+using namespace combo;
 
 RuleEngine::RuleEngine( OAC* opc, const std::string& petName )
 throw( RuntimeException ) :
@@ -318,7 +320,7 @@ const std::vector<std::string>& RuleEngine::getValidTargets( void )
     return this->varBindCandidates;
 }
 
-void RuleEngine::updateValidTargets(combo::variable_unifier& unifier)
+void RuleEngine::updateValidTargets(variable_unifier& unifier)
 {
     this->varBindCandidates.clear();
 
@@ -326,7 +328,7 @@ void RuleEngine::updateValidTargets(combo::variable_unifier& unifier)
         return;
     }
 
-    combo::UnifierIt it;
+    UnifierIt it;
     for (it = unifier.begin(); it != unifier.end(); it++) {
         if (it->second) {
             this->varBindCandidates.push_back((*it).first);
@@ -1107,17 +1109,17 @@ void RuleEngine::updateSchemaExecutionStatus()
         updateCurrentActionRepetitions();
 
         bool petActionDoneResult;
-        combo::vertex result = schemaRunner->getSchemaExecResult();
+        vertex result = schemaRunner->getSchemaExecResult();
 
         if (is_action_result(result)) {
-            if (get_action(result) == combo::id::action_success) {
+            if (get_action(result) == id::action_success) {
                 petActionDoneResult = true;
             } else {
                 petActionDoneResult = false;
             }
 
         } else if (is_builtin(result)) {
-            if (get_builtin(result) == combo::id::logical_true) {
+            if (get_builtin(result) == id::logical_true) {
                 petActionDoneResult = true;
             } else {
                 petActionDoneResult = false;
@@ -1243,7 +1245,7 @@ void RuleEngine::processRules( void )
         this->currentInspectedRuleName = (*it).first;
         std::string precondition = (*it).second;
 
-        combo::variable_unifier unifier;
+        variable_unifier unifier;
         const std::vector<std::string>& validTargets = getValidTargets();
 
         // all targets are initially considered part of the final unification
@@ -1255,11 +1257,11 @@ void RuleEngine::processRules( void )
             unifier.insert(this->opc->getPet().getPetId(), true);
         }
 
-        std::vector<combo::vertex> arguments;
+        std::vector<vertex> arguments;
 
         const Procedure::GeneralProcedure& genp = repository.get(precondition);
 
-        combo::vertex result;
+        vertex result;
         Procedure::RunningProcedureId procedureId;
       
 
@@ -1311,7 +1313,9 @@ void RuleEngine::processRules( void )
         }
 
         // TODO fix that thing
+        // see comment in combo/vertex.h
         if (combo::operator==(result,combo::id::logical_true)) {
+        // if (result == id::logical_true) {
 
             if (procedureId.getType() == Procedure::COMBO) {
                 updateValidTargets(comboInterpreter.getUnifierResult(procedureId));
@@ -1705,7 +1709,7 @@ void RuleEngine::processNextAction( void )
                         *(opc->getAtomSpace()), "#Emotion_directed", frameInstanceName,
                             elements, SimpleTruthValue( (revisedValue < 0.5) ? 0.0 : revisedValue, 0.0 ) );        
                         
-                } catch ( const opencog::NotFoundException& ex ) {
+                } catch ( const NotFoundException& ex ) {
                     Handle predicateNode = opc->getAtomSpace()->getHandle( PREDICATE_NODE, frameInstanceName );
                     if ( predicateNode != Handle::UNDEFINED ) {
                         AtomSpaceUtil::deleteFrameInstance( *this->opc->getAtomSpace(), predicateNode );
@@ -1792,7 +1796,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
 {
     unsigned long timeWindow =
         boost::numeric_cast<unsigned long>(config().get_double("RL_TIME_WINDOW") *
-                                           opencog::pai::PAIUtils::getTimeFactor());
+                                           pai::PAIUtils::getTimeFactor());
     float petaverseTimePerSlot =
         (float)timeWindow / this->gaussianVector.size();
 

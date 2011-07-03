@@ -120,10 +120,9 @@ typedef std::set<builtin_action> builtin_action_set;
 typedef builtin_action_set::iterator builtin_action_set_it;
 typedef builtin_action_set::const_iterator builtin_action_set_const_it;
 
-} // ~namespace combo
-
 std::ostream& operator<<(std::ostream&, combo::builtin_action);
 
+} // ~namespace combo
 } // ~namespace opencog
 
 #endif

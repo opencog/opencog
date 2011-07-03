@@ -24,11 +24,12 @@
 #include "action_symbol.h"
 #include <opencog/util/oc_assert.h>
 
-namespace opencog {
+namespace opencog { namespace combo {
 
-std::ostream& operator<<(std::ostream& out, combo::action_symbol as) {
+std::ostream& operator<<(std::ostream& out, action_symbol as) {
     OC_ASSERT(as);
     return out << as->get_name();
 }
 
+} // ~namespace combo
 } // ~namespace opencog
