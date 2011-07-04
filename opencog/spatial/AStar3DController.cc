@@ -69,7 +69,7 @@ unsigned int AStar3DController::findPath()
         SearchState = astarsearch->SearchStep();
         SearchSteps++;
 
-#if DEBUG_LISTS  //TODO make this a class method
+#if DEBUG_LISTS
         debugLists(SearchSteps);
 #endif  //DEBUG_LISTS
 
@@ -176,16 +176,14 @@ vector<GridPoint> AStar3DController::getSolutionGridPoints()
 }
 
 
-vector<spatial::Point> AStar3DController::getSolutionPoints()
+vector<spatial::Point3D> AStar3DController::getSolutionPoints()
 {
-    vector<spatial::Point> solution_points;
+    vector<spatial::Point3D> solution_points;
     spatial::GridPoint gp;
-    MapSearchNode *node = astarsearch->GetSolutionStart();
+    MapSearchNode *previous_node, *node;
     Map *map = MapSearchNode::map;
 
-    gp.first = node->x;
-    gp.second = node->y;
-    solution_points.push_back(map->unsnap(gp));
+    previous_node = node = astarsearch->GetSolutionStart();
 
     while (true) {
         node = astarsearch->GetSolutionNext();
@@ -193,33 +191,47 @@ vector<spatial::Point> AStar3DController::getSolutionPoints()
             break;
         }
 
-        gp.first = node->x;
-        gp.second = node->y;
-        solution_points.push_back(map->unsnap(gp));
+        gp.first = previous_node->x;
+        gp.second = previous_node->y;
+
+        spatial::Point point2d = map->unsnap(gp);
+        double height = node->z - previous_node->z;
+        spatial::Point3D point3d(point2d.first, point2d.second, height);
+
+        solution_points.push_back(point3d);
+        previous_node = node;
     };
+
+    // Push back the goal point.
+    gp.first = previous_node->x;
+    gp.second = previous_node->y;
+    spatial::Point point2d = map->unsnap(gp);
+    spatial::Point3D goal(point2d.first, point2d.second, 0.0);
+    solution_points.push_back(goal);
 
     return solution_points;
 }
 
-vector<spatial::Point> AStar3DController::getShortestCalculatedPath()
+vector<spatial::Point3D> AStar3DController::getShortestCalculatedPath()
 {
 
-    vector<spatial::Point>  calculatedPath = getSolutionPoints();
-    vector<spatial::Point>  shortestCalculatedPath;
+    vector<spatial::Point3D>  calculatedPath = getSolutionPoints();
+    vector<spatial::Point3D>  shortestCalculatedPath;
 
-    opencog::logger().info("AStar - Shortening action plan. It has %d elem.",
+    opencog::logger().info("AStar - Shortening action plan. It has %d elements.",
                           calculatedPath.size());
 
     if (calculatedPath.size() < 2 )
         return calculatedPath;
 
-    vector<spatial::Point>::iterator it_point = calculatedPath.begin();
+    vector<spatial::Point3D>::iterator it_point = calculatedPath.begin();
     shortestCalculatedPath.push_back( *it_point );
-    double alpha = (it_point->second - (it_point + 1)->second) / (it_point->first - (it_point + 1)->first);
+    //double alpha = ( - (it_point + 1)->second) / (it_point->first - (it_point + 1)->first);
+    double alpha = ( - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
     it_point++;
     while ( (it_point + 1) != calculatedPath.end() ) {
-        double new_alpha = (it_point->second - (it_point + 1)->second) / (it_point->first - (it_point + 1)->first);
-        if ( abs(new_alpha - alpha) > 0.002 ) {
+        double new_alpha = (it_point->get<1>() - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
+        if (it_point->get<2>() > 0.0 || abs(new_alpha - alpha) > 0.002 ) {
             shortestCalculatedPath.push_back( *it_point );
             alpha = new_alpha;
         }
@@ -227,7 +239,7 @@ vector<spatial::Point> AStar3DController::getShortestCalculatedPath()
     }
     shortestCalculatedPath.push_back( *it_point );
 
-    opencog::logger().info(" AStar - Shortening action plan complete. It has %d elem.",
+    opencog::logger().info(" AStar - Shortening action plan complete. It has %d elements.",
                           shortestCalculatedPath.size());
     return shortestCalculatedPath;
 }

@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Dan Zwell, Samir Araujo
+ * Author(s): Dan Zwell, Samir Araujo, Troy Huang
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -487,6 +487,12 @@ bool LocalSpaceMap2D::edgeIllegal(const spatial::GridPoint &src, const spatial::
         logger().fine("LocalSpaceMap - gridIllegal(%u, %u): coordinates not on grid!", dest.first, dest.second);
         return true;
     }
+
+    if (isDiagonal(src, dest)) {
+        bool illegal = this->edgeIllegal(src, spatial::GridPoint(src.first, dest.second), 0.0001)
+                        || this->edgeIllegal(src, spatial::GridPoint(dest.first, src.second), 0.0001);
+        if (illegal) return true;
+    }
     bool is_obstacle = gridOccupied(dest.first, dest.second);
     if (!is_obstacle) {
         // None obstacle, OK
@@ -502,6 +508,11 @@ bool LocalSpaceMap2D::edgeIllegal(const spatial::GridPoint &src, const spatial::
 
         return true;
     }
+}
+
+bool LocalSpaceMap2D::isDiagonal(const spatial::GridPoint &src, const spatial::GridPoint &dest) const
+{
+    return (std::abs(dest.first - src.first) == std::abs(dest.second - src.second));
 }
 
 double LocalSpaceMap2D::getMinHeightByGridPoint(const GridPoint &gp) const
@@ -958,13 +969,13 @@ void LocalSpaceMap2D::addObject( const spatial::ObjectID& id, const spatial::Obj
 
     const math::BoundingBox& bb = entity->getBoundingBox( );
 
-    /*
+
     printf("entity[%s]: position %s, width %lf, length %lf, height %lf\n", entity->getName().c_str(),
                         entity->getPosition().toString().c_str(),
                         entity->getWidth(),
                         entity->getLength(),
                         entity->getHeight());
-    */
+
     std::vector<math::LineSegment> bottomSegments;
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );

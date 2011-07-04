@@ -34,6 +34,7 @@
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <opencog/spatial/math/Triangle.h>
 #include <opencog/spatial/math/LineSegment.h>
@@ -49,6 +50,7 @@ namespace opencog
         typedef std::string ObjectID;
 
         typedef std::pair<Distance, Distance> Point;
+        typedef boost::tuple<spatial::Distance, spatial::Distance, spatial::Distance> Point3D;
         typedef std::pair<unsigned int, unsigned int> GridPoint;
 
         typedef boost::unordered_set<GridPoint, boost::hash<GridPoint> > GridSet;

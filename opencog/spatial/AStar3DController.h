@@ -62,7 +62,6 @@ namespace opencog
 {
     namespace spatial
     {
-
         class AStar3DController
         {
 
@@ -100,8 +99,8 @@ namespace opencog
             //get solution path as vector of grid points
             vector<spatial::GridPoint> getSolutionGridPoints();
             //get solution path as vector of distance points
-            vector<spatial::Point> getSolutionPoints();
-            vector<spatial::Point> getShortestCalculatedPath();
+            vector<spatial::Point3D> getSolutionPoints();
+            vector<spatial::Point3D> getShortestCalculatedPath();
 
             //MapSearchNode nodeStart, nodeEnd;
 

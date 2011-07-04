@@ -174,7 +174,6 @@ throw (ComboException, AssertionException, std::bad_exception)
                 std::vector<std::string> arguments;
                 pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "followCustomPathDone", arguments );
             } else {
-                //printf("PAIWorldWrapper - target : custom_object\n");
                 if ( target == "custom_object" ) {
                     target = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
                 } // if
@@ -598,8 +597,6 @@ spatial::Point PAIWorldWrapper::getValidPosition( const spatial::Point& location
 void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
         const spatial::Point& endPoint, std::vector<spatial::Point>& actions )
 {
-    struct timeval timer_start, timer_end;
-    time_t elapsed_time = 0;
     const std::string pathFindingAlgorithm =
         config().get("NAVIGATION_ALGORITHM");
 
@@ -621,7 +618,6 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
             end = correctedEndLocation;
         }
 
-        gettimeofday(&timer_start, NULL);
         if ( pathFindingAlgorithm == "astar") {
             spatial::LSMap2DSearchNode petNode = sm.snap(spatial::Point(begin.first, begin.second));
             spatial::LSMap2DSearchNode goalNode = sm.snap(spatial::Point(end.first, end.second));
@@ -634,26 +630,6 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
             //finally, run AStar
             _hasPlanFailed = (AStar.findPath() != spatial::AStarSearch<spatial::LSMap2DSearchNode>::SEARCH_STATE_SUCCEEDED);
             actions = AStar.getShortestCalculatedPath( );
-
-            logger().debug("PAIWorldWrapper - AStar result %s.",
-                    !_hasPlanFailed ? "true" : "false");
-        } else if ( pathFindingAlgorithm == "astar3d") {
-            float maxDeltaHeight = (float)config().get_double("ASTAR3D_DELTA_HEIGHT");
-
-            printf("Start A* 3D navigation. Delta height for each node: %.2f\n", maxDeltaHeight);
-            spatial::AStar3DController AStar3D;
-            SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
-            AStar3D.setMap( map );
-
-            spatial::LSMap3DSearchNode petNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(begin.first, begin.second)), maxDeltaHeight);
-            spatial::LSMap3DSearchNode goalNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(end.first, end.second)), maxDeltaHeight);
-
-            AStar3D.setStartAndGoalStates(petNode, goalNode);
-
-
-            //finally, run AStar
-            _hasPlanFailed = (AStar3D.findPath() != spatial::AStarSearch<spatial::LSMap3DSearchNode>::SEARCH_STATE_SUCCEEDED);
-            actions = AStar3D.getShortestCalculatedPath( );
 
             logger().debug("PAIWorldWrapper - AStar result %s.",
                     !_hasPlanFailed ? "true" : "false");
@@ -693,26 +669,65 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
             logger().debug("PAIWorldWrapper - TangetBug result %s.",
                          !_hasPlanFailed ? "true" : "false");
         } // else
-
-        gettimeofday(&timer_end, NULL);
-        elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                       (timer_end.tv_usec - timer_start.tv_usec);
-        /*
-        printf("PAIWorldWrapper - pathfinding [%s]: consuming %f seconds.\n",
-               pathFindingAlgorithm.c_str(),
-               1.0 * elapsed_time/1000000);
-        printf("Path found:");
-        foreach (spatial::Point& point, actions) {
-            printf("=> <%.3f, %.3f> ", point.first, point.second);
-        }
-        printf("\n");
-        */
-
-    } catch ( RuntimeException& e ) {
+    } catch ( opencog::RuntimeException& e ) {
         _hasPlanFailed = true;
     } catch ( AssertionException& e) {
         _hasPlanFailed = true;
     }
+}
+
+void PAIWorldWrapper::get3DWaypoints( const spatial::Point& startPoint,
+        const spatial::Point& endPoint, std::vector<spatial::Point3D>& actions )
+{
+    struct timeval timer_start, timer_end;
+    time_t elapsed_time = 0;
+    const SpaceServer::SpaceMap& sm = pai.getAtomSpace().getSpaceServer().getLatestMap();
+    float maxDeltaHeight = (float)opencog::config().get_double("ASTAR3D_DELTA_HEIGHT");
+
+    gettimeofday(&timer_start, NULL);
+    printf("Start A* 3D navigation. Delta height for each node: %.2f\n", maxDeltaHeight);
+    spatial::Point begin = startPoint;
+    spatial::Point end = endPoint;
+
+    spatial::Point correctedAgentLocation = getValidPosition( begin );
+    spatial::Point correctedEndLocation = getValidPosition( end );
+
+    if ( correctedAgentLocation != begin ) {
+        begin = correctedAgentLocation;
+        spatial::Point3D begin3DPoint(begin.first, begin.second, 0.0);
+        actions.push_back( begin3DPoint );
+    }
+
+    if ( correctedEndLocation != end ) {
+        end = correctedEndLocation;
+    }
+    spatial::AStar3DController AStar3D;
+    SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
+    AStar3D.setMap( map );
+
+    spatial::LSMap3DSearchNode petNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(begin.first, begin.second)), maxDeltaHeight);
+    spatial::LSMap3DSearchNode goalNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(end.first, end.second)), maxDeltaHeight);
+
+    AStar3D.setStartAndGoalStates(petNode, goalNode);
+
+    //finally, run AStar
+    _hasPlanFailed = (AStar3D.findPath() != spatial::AStarSearch<spatial::LSMap3DSearchNode>::SEARCH_STATE_SUCCEEDED);
+    actions = AStar3D.getShortestCalculatedPath( );
+
+    logger().debug("PAIWorldWrapper - AStar result %s.",
+            !_hasPlanFailed ? "true" : "false");
+
+    gettimeofday(&timer_end, NULL);
+    elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                   (timer_end.tv_usec - timer_start.tv_usec);
+    
+    printf("PAIWorldWrapper - pathfinding [ASTAR3D]: consuming %f seconds.\n",
+           1.0 * elapsed_time/1000000);
+    printf("Path found:");
+    foreach (spatial::Point3D& point, actions) {
+        printf("=> <%.3f, %.3f> ", point.get<0>(), point.get<1>());
+    }
+    printf("\n");
 }
 
 bool PAIWorldWrapper::buildGotoPlan( const spatial::Point& position, float customSpeed )
@@ -720,19 +735,35 @@ bool PAIWorldWrapper::buildGotoPlan( const spatial::Point& position, float custo
 
     const AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
-    std::vector<spatial::Point> actions;
+    if (config().get_bool("ENABLE_UNITY_CONNECTOR")) {
+        std::vector<spatial::Point3D> actions;
 
-    spatial::Point startPoint = WorldWrapperUtil::getLocation(sm, as,
-                                WorldWrapperUtil::selfHandle( as, selfName( ) ) );
-    spatial::Point endPoint = position;
+        spatial::Point startPoint = WorldWrapperUtil::getLocation(sm, as,
+                                    WorldWrapperUtil::selfHandle( as, selfName( ) ) );
+        spatial::Point endPoint = position;
 
-    getWaypoints( startPoint, endPoint, actions );
+        
+        get3DWaypoints( startPoint, endPoint, actions );
 
-    if ( !_hasPlanFailed ) {
-        clearPlan( actions, startPoint, endPoint );
-        return createWalkPlanAction( actions, false, Handle::UNDEFINED, customSpeed );
-    } // if
+        if ( !_hasPlanFailed ) {
+            //clearPlan( actions, startPoint, endPoint );
+            return createNavigationPlanAction( actions, false, Handle::UNDEFINED, customSpeed );
+        } // if
+    } else {
+        std::vector<spatial::Point> actions;
 
+        spatial::Point startPoint = WorldWrapperUtil::getLocation(sm, as,
+                                    WorldWrapperUtil::selfHandle( as, selfName( ) ) );
+        spatial::Point endPoint = position;
+
+        
+        getWaypoints( startPoint, endPoint, actions );
+
+        if ( !_hasPlanFailed ) {
+            clearPlan( actions, startPoint, endPoint );
+            return createWalkPlanAction( actions, false, Handle::UNDEFINED, customSpeed );
+        } // if
+    }
     // plan has failed
     return false;
 }
@@ -782,6 +813,64 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
                     customSpeed, speed );
             action.addParameter(ActionParameter("speed", ActionParamType::FLOAT(),
                     lexical_cast<string>( speed) ) );
+
+        } // else
+        pai.addAction( planID, action );
+    } // foreach
+
+    return true;
+}
+
+bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>& actions, bool useExistingId, Handle toNudge, float customSpeed )
+{
+
+    if ( actions.empty( ) ) {
+        // we're done. No need to create any walk sequency
+        logger().debug("PAIWorldWrapper - Zero actions from AStar3D.");
+        return false;
+    }
+
+    // --------------------------------------------------------------------
+    // transform to a sequence of navigation commands
+    // --------------------------------------------------------------------
+
+    if (!useExistingId ) {
+        planID = pai.createActionPlan( );
+    } // if
+
+    foreach(const spatial::Point3D& it_action, actions ) {
+        PetAction action;
+
+        if (toNudge != Handle::UNDEFINED) {
+            action = PetAction(ActionType::NUDGE_TO());
+            action.addParameter(ActionParameter("moveableObj",
+                                                ActionParamType::ENTITY(),
+                                                Entity(pai.getAtomSpace().getName(toNudge),
+                                                       resolveType(toNudge))));
+            action.addParameter(ActionParameter("target",
+                                                ActionParamType::VECTOR(),
+                                                Vector(it_action.get<0>(),
+                                                       it_action.get<1>(),
+                                                       it_action.get<2>())));
+        } else {
+            action = PetAction(ActionType::WALK());
+            action.addParameter(ActionParameter("target",
+                                                ActionParamType::VECTOR(),
+                                                Vector(it_action.get<0>(),
+                                                       it_action.get<1>(),
+                                                       0.0)));
+                                                       //it_action.get<2>())));
+
+            float speed = ( customSpeed != 0 ) ?
+                    customSpeed : pai.getAvatarInterface().computeWalkingSpeed();
+            logger().debug("PAIWorldWrapper::createWalkPlanAction customSpeed[%f] finalSpeed[%f]",
+                    customSpeed, speed );
+            action.addParameter(ActionParameter("speed", ActionParamType::FLOAT(),
+                    lexical_cast<string>( speed) ) );
+
+            if (it_action.get<2>() > 0.0) {
+                action = PetAction(ActionType::JUMP_UP());
+            }
 
         } // else
         pai.addAction( planID, action );

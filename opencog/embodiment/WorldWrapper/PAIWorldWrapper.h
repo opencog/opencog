@@ -109,6 +109,8 @@ private:
      */
     void getWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point>& actions );
 
+    void get3DWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point3D>& actions);
+
     /**
      * Uses the current PathPlanner (HPA, Astar, TangentBUG, etc.) to build
      * a path to achieve a given position
@@ -130,6 +132,18 @@ private:
                                Handle toNudge = Handle::UNDEFINED,
                                float customSpeed = 0);
 
+    /**
+     * Create a navigation planning action sequence(including walk, jump, climb
+     * etc.) that will be sent to OAC.
+     * @param actions Calculated path plan
+     * @param useExistingID If this method get called two or more times and this
+     * var is true, the new walks will be added to the same navigation plan
+     * @param tuNudge nudge actions will be added to walk plan if it is not null
+     */
+    bool createNavigationPlanAction( std::vector<spatial::Point3D>& actions,
+                                     bool useExistingID = false,
+                                     Handle toNudge = Handle::UNDEFINED,
+                                     float customSpeed = 0);
 
     //! Builds plans for actions relying on goto (goto_obj, follow, etc)
     bool build_goto_plan(Handle, bool useExistingID = false,
