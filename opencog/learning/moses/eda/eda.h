@@ -38,8 +38,8 @@
 
 //#define EDALIB_64
 
-namespace eda
-{
+namespace opencog { 
+namespace eda {
 //storage types for packed populations
 #ifdef EDALIB_64
 #  if LLONG_MAX==9223372036854775807LL
@@ -70,10 +70,11 @@ const unsigned int bits_per_packed_t = 32;
 typedef double       contin_t;
 typedef int          disc_t;
 typedef std::string  onto_t;
-typedef opencog::tree<onto_t> onto_tree;
+typedef tree<onto_t> onto_tree;
 
-typedef vector<packed_t> instance;
+typedef std::vector<packed_t> instance;
 
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog
 
 #endif

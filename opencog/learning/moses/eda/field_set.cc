@@ -28,10 +28,9 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/iostreamContainer.h>
 
-using opencog::ostreamContainer;
+namespace opencog { 
+namespace eda {
 
-namespace eda
-{
 const disc_t field_set::contin_spec::Stop = 0;
 const disc_t field_set::contin_spec::Left = 1;
 const disc_t field_set::contin_spec::Right = 2;
@@ -161,7 +160,7 @@ void field_set::build_spec(const spec& s, size_t n)
 
 void field_set::build_disc_spec(const disc_spec& ds, size_t n)
 {
-    arity_t width = opencog::nbits_to_pack(ds.arity);
+    arity_t width = nbits_to_pack(ds.arity);
     size_t base = back_offset();
     for (size_t idx = 0;idx < n;++idx)
         _fields.push_back(field(width,
@@ -175,7 +174,7 @@ void field_set::build_disc_spec(const disc_spec& ds, size_t n)
 void field_set::build_contin_spec(const contin_spec& cs, size_t n)
 {
     //depth must be a power of 2
-    OC_ASSERT(cs.depth == opencog::next_power_of_two(cs.depth),
+    OC_ASSERT(cs.depth == next_power_of_two(cs.depth),
               "depth must be a power of 2 and it is %d", 
               cs.depth); 
     //all have arity of 3 (left, right, or stop) and hence are 2 wide
@@ -190,7 +189,7 @@ void field_set::build_contin_spec(const contin_spec& cs, size_t n)
 
 void field_set::build_onto_spec(const onto_spec& os, size_t n)
 {
-    size_t base = back_offset(), width = opencog::nbits_to_pack(os.branching);
+    size_t base = back_offset(), width = nbits_to_pack(os.branching);
     size_t total_width = size_t((width * os.depth - 1) /
                                 bits_per_packed_t + 1) * bits_per_packed_t;
         
@@ -205,4 +204,5 @@ void field_set::build_onto_spec(const onto_spec& os, size_t n)
     _onto.insert(_onto.end(), n, os);
 }
 
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog

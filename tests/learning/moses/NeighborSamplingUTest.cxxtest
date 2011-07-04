@@ -8,6 +8,7 @@
 #include <opencog/learning/moses/moses/neighborhood_sampling.h>
 
 
+using namespace opencog;
 using namespace eda;
 using namespace moses;
 

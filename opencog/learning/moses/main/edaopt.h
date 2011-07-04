@@ -33,16 +33,16 @@
 
 #include <boost/lexical_cast.hpp>
 
-using namespace eda;
+using namespace std;
 using namespace opencog;
-
+using namespace eda;
 
 //WARNING: the additional arguments must be handled by the caller,
 //but it is informed here for checking and usage printing
 //It is ugly but that was the fastest fix I could come up with (Nil)
 struct optargs {
     optargs(int argc, char** argv,
-            const std::vector<std::string>& additional_args = std::vector<std::string>()) { 
+            const vector<string>& additional_args = vector<string>()) { 
         if (argc != (5 + static_cast<int>(additional_args.size()))) {
             cerr << "not the right number of args, usage: " << argv[0] 
                  << " seed length popsize ngens "
@@ -72,11 +72,11 @@ struct optargs {
     int max_gens;
 
 private:
-    string usage(const std::vector<std::string>& args) {
+    string usage(const vector<string>& args) {
         string res;
-        for(std::vector<string>::const_iterator i = args.begin();
+        for(vector<string>::const_iterator i = args.begin();
             i != args.end(); ++i) {
-            res += *i + std::string(" ");
+            res += *i + string(" ");
         }
         return res;
     }

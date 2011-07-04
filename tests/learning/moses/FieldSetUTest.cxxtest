@@ -5,6 +5,7 @@
 #include <opencog/util/mt19937ar.h>
 #include <vector>
 
+using namespace opencog;
 using namespace eda;
 using boost::assign::list_of;
 

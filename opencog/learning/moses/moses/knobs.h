@@ -103,7 +103,7 @@ struct contin_knob : public knob_base {
     contin_knob(combo_tree& tr, combo_tree::iterator tgt,
                 contin_t step_size, contin_t expansion,
                 eda::field_set::arity_t depth)
-        : knob_base(tr, tgt), _spec(opencog::combo::get_contin(*tgt),
+        : knob_base(tr, tgt), _spec(combo::get_contin(*tgt),
                                     step_size, expansion, depth) { }
 
     bool in_exemplar() const {
@@ -496,7 +496,7 @@ protected:
     int _current;
 };
 
-typedef opencog::based_variant < boost::variant<logical_subtree_knob,
+typedef based_variant < boost::variant<logical_subtree_knob,
                                                 action_subtree_knob,
                                                 simple_action_subtree_knob>,
                                  disc_knob_base > disc_knob;

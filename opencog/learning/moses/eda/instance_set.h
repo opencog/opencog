@@ -27,25 +27,25 @@
 #include "field_set.h"
 #include "scoring.h"
 
-namespace eda
-{
+namespace opencog {
+namespace eda {
 
 template<typename ScoreT>
 struct instance_set : public vector<scored_instance<ScoreT> > {
     typedef vector<scored_instance<ScoreT> > super;
-    typedef boost::transform_iterator < opencog::select_tag,
+    typedef boost::transform_iterator < select_tag,
                                         typename super::iterator,
                                         ScoreT&,
                                         ScoreT& > score_iterator;
-    typedef boost::transform_iterator < opencog::select_tag,
+    typedef boost::transform_iterator < select_tag,
                                         typename super::const_iterator,
                                         const ScoreT&,
                                         const ScoreT& > const_score_iterator;
-    typedef boost::transform_iterator < opencog::select_item,
+    typedef boost::transform_iterator < select_item,
                                         typename super::iterator,
                                         instance&,
                                         instance& > instance_iterator;
-    typedef boost::transform_iterator < opencog::select_item,
+    typedef boost::transform_iterator < select_item,
                                         typename super::const_iterator,
                                         const instance&,
                                         const instance& > const_instance_iterator;
@@ -91,6 +91,7 @@ protected:
     const field_set& _fields;
 };
 
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog
 
 #endif

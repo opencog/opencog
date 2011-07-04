@@ -24,8 +24,10 @@
 #include "initialization.h"
 #include "../moses/neighborhood_sampling.h"
 
-namespace eda
-{
+namespace opencog { 
+namespace eda {
+
+using namespace std;
 
 void occam_randomize_contin(const field_set& fs, instance& inst,
                             field_set::contin_iterator it,
@@ -80,7 +82,7 @@ void uniform_randomize_bits(const field_set& fs, instance& inst,
 {
     //could be faster
     generate(fs.begin_bits(inst), fs.end_bits(inst),
-             bind(&opencog::RandGen::randbool, ref(rng)));
+             bind(&RandGen::randbool, ref(rng)));
 }
 
 void uniform_randomize_disc(const field_set& fs, instance& inst,
@@ -100,4 +102,6 @@ void randomize(const field_set& fs, instance& inst,
     uniform_randomize_bits(fs, inst, rng);
 }
 
-}
+} // ~namespace eda
+} // ~namespace opencog
+

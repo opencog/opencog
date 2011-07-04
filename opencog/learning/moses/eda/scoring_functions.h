@@ -33,17 +33,17 @@
 #include <cmath>
 #include <boost/lexical_cast.hpp>
 
-namespace eda
-{
+namespace opencog { 
+namespace eda {
 
 struct one_max : public unary_function<instance, int> {
     int operator()(const instance& inst) const {
         //operates directly on packed_t
         return accumulate
                (make_transform_iterator(inst.begin(),
-                                        opencog::count_bits<packed_t>),
+                                        count_bits<packed_t>),
                 make_transform_iterator(inst.end(),
-                                        opencog::count_bits<packed_t>), 0);
+                                        count_bits<packed_t>), 0);
     }
 };
 
@@ -66,12 +66,12 @@ struct contin_max : public unary_function<instance, contin_t> {
 
 struct contin_uniform : public unary_function<instance, contin_t> {
     contin_uniform(const field_set& fs, contin_t minval, contin_t maxval,
-                   opencog::RandGen& rng)
+                   RandGen& rng)
         : fields(fs), target(fs.n_contin()) {
         generate(target.begin(), target.end(),
                  bind(std::plus<contin_t>(),
                       bind(std::multiplies<contin_t>(),
-                           bind(&opencog::RandGen::randdouble, ref(rng)),
+                           bind(&RandGen::randdouble, ref(rng)),
                            maxval - minval), minval));
     }
     contin_t operator()(const instance& inst) const {
@@ -118,6 +118,7 @@ struct ontomax: public unary_function<instance, contin_t> {
     const field_set& fields;
 };
 
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog
 
 #endif

@@ -26,7 +26,8 @@
 
 #include "metapopulation.h"
 
-namespace opencog { namespace moses {
+namespace opencog {
+ namespace moses {
 
 typedef std::set<combo::vertex> operator_set;
 typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> >

@@ -44,7 +44,7 @@
 
 namespace opencog { namespace moses {
 
-    using namespace opencog::combo;
+    using namespace combo;
 
     using std::min;
     using std::max;
@@ -64,8 +64,6 @@ namespace opencog { namespace moses {
     using boost::make_transform_iterator;
     using boost::make_permutation_iterator;
     using boost::make_indirect_iterator;
-
-    using opencog::logger;
 
 } // ~namespace moses
 } // ~namespace opencog

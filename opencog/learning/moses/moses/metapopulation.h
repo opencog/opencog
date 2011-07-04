@@ -42,7 +42,8 @@
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
-namespace opencog { namespace moses {
+namespace opencog { 
+namespace moses {
 
 using boost::logic::tribool;
 using boost::logic::indeterminate;

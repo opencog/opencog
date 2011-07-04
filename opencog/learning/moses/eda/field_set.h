@@ -29,8 +29,9 @@
 #include <opencog/util/RandGen.h>
 #include <opencog/util/dorepeat.h>
 
-namespace eda
-{
+namespace opencog { 
+namespace eda {
+
  /**
   * A field set creates a simple, optimally compact representation of a set of
   * ontological, continuous, and discrete variables. This is made possible by
@@ -78,7 +79,7 @@ struct field_set {
         arity_t width;
         size_t major_offset, minor_offset;
     };
-    typedef vector<field>::const_iterator field_iterator;
+    typedef std::vector<field>::const_iterator field_iterator;
 
     struct disc_spec {
         disc_spec(arity_t a) : arity(a) { }
@@ -190,7 +191,7 @@ struct field_set {
     struct onto_spec {
         onto_spec(const onto_tree& t)
                 : tr(&t), depth(t.max_depth(t.begin())),
-                branching(opencog::next_power_of_two(1 + t.max_branching(t.begin()))) { }
+                branching(next_power_of_two(1 + t.max_branching(t.begin()))) { }
         // @todo: could be a source of bug if such order is not total
         // as it's gonna make problems with field_set(from, to)
         bool operator<(const onto_spec& rhs) const { //sort descending by size
@@ -708,7 +709,7 @@ public:
                 _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
                 _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].arity;
         }
-        void randomize(opencog::RandGen& rng) {
+        void randomize(RandGen& rng) {
             _fs->set_raw(*_inst, _idx, rng.randint(arity()));
         }
     protected:
@@ -896,7 +897,7 @@ Out field_set::pack(It from, Out out) const
     unsigned int offset = 0;
 
     foreach(const onto_spec& o, _onto) {
-        size_t width = opencog::nbits_to_pack(o.branching);
+        size_t width = nbits_to_pack(o.branching);
         size_t total_width = size_t((width * o.depth - 1) /
                                     bits_per_packed_t + 1) * bits_per_packed_t;
         for (arity_t i = 0;i < o.depth;++i) {
@@ -927,7 +928,7 @@ Out field_set::pack(It from, Out out) const
 
     foreach(const disc_spec& d, _disc) {
         *out |= (*from++) << offset;
-        offset += opencog::nbits_to_pack(d.arity);
+        offset += nbits_to_pack(d.arity);
         if (offset == bits_per_packed_t) {
             offset = 0;
             ++out;
@@ -938,6 +939,7 @@ Out field_set::pack(It from, Out out) const
     return out;
 }
 
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog
 
 #endif

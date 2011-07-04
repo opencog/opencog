@@ -29,8 +29,9 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 
-namespace eda
-{
+namespace opencog { 
+namespace eda {
+
 //true if the range is uniform on the variable at index idx
 bool local_structure_model::is_uniform_on(iptr_iter l, iptr_iter u, int idx)
 {
@@ -63,9 +64,9 @@ void local_structure_model::rec_split_onto(iptr_iter l, iptr_iter u,
     if (src_idx < idx - 1) { //important - needs to match onto_spec::Left/Right
         vector<iptr_iter> pivots(raw_arity);
         pivots.back() = u;
-        opencog::n_way_partition
+        n_way_partition
         (l, u, bind(&field_set::get_raw, &_fields,
-                    bind(opencog::valueof<const instance>, _1), src_idx),
+                    bind(valueof<const instance>, _1), src_idx),
          raw_arity, pivots.begin());
 
         //we don't recurse on the leftmost partition - it's onto_spec::Stop
@@ -100,9 +101,9 @@ void local_structure_model::rec_split_contin
 
     if (src_idx < idx - 1) { //important - needs to match contin_spec::Left/Right
         vector<iptr_iter> pivots(2);
-        opencog::n_way_partition
+        n_way_partition
         (l, u, bind(&field_set::get_raw, &_fields,
-                    bind(opencog::valueof<const instance>, _1), src_idx),
+                    bind(valueof<const instance>, _1), src_idx),
          3, pivots.begin());
         rec_split_contin(pivots[0], pivots[1], src_idx + 1, idx, ++node.begin());
         rec_split_contin(pivots[1], u, src_idx + 1, idx, node.last_child());
@@ -142,8 +143,8 @@ void local_structure_model::sample(dtree::iterator dtr, disc_t& dst,
     if (dtr.is_childless()) { //a leaf
         if (dtr->back() > 0)
             dst = distance(dtr->begin(),
-                           opencog::roulette_select(dtr->begin(), --(dtr->end()),
-                                                    dtr->back(), rng));
+                           roulette_select(dtr->begin(), --(dtr->end()),
+                                           dtr->back(), rng));
         else
             dst = 0;//rng.randint(dtr->size()-1); //if no data, do uniform selection
     } else {
@@ -157,4 +158,5 @@ void local_structure_model::sample(dtree::iterator dtr, disc_t& dst,
     }
 }
 
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog

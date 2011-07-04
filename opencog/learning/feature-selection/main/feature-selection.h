@@ -34,9 +34,10 @@
 #include "../feature_scorer.h"
 #include "../moses_based_scorer.h"
 
+using namespace opencog;
 using namespace eda;
 using namespace moses;
-using namespace opencog::combo;
+using namespace combo;
 using namespace boost::assign; // bring 'operator+=()' into scope
 
 // optimization algorithms

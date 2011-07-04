@@ -31,8 +31,8 @@
 #include "field_set.h"
 #include "scoring.h"
 
-namespace eda
-{
+namespace opencog { 
+namespace eda {
 
 //note that NewInst only models InputIterator
 
@@ -49,7 +49,7 @@ struct replace_the_worst {
 
 
 struct rtr_replacement {
-    rtr_replacement(const field_set& fs, int ws, opencog::RandGen& _rng)
+    rtr_replacement(const field_set& fs, int ws, RandGen& _rng)
         : window_size(ws), _fields(&fs), rng(_rng) { }
 
     template<typename NewInst, typename Dst>
@@ -64,7 +64,7 @@ struct rtr_replacement {
     template<typename Dst, typename ScoreT>
     void operator()(const scored_instance<ScoreT>& inst,
                     Dst from_dst, Dst to_dst) const {
-        opencog::lazy_random_selector select(distance(from_dst, to_dst), rng);
+        lazy_random_selector select(distance(from_dst, to_dst), rng);
         Dst closest = from_dst + select();
         int closest_distance = _fields->hamming_distance(inst, *closest);
         for (int i = 1;i < window_size;++i) {
@@ -82,9 +82,10 @@ struct rtr_replacement {
     int window_size;
 protected:
     const field_set* _fields;
-    opencog::RandGen& rng;
+    RandGen& rng;
 };
 
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog
 
 #endif

@@ -42,8 +42,8 @@
 
 /// anything that gets imported into the eda namespace with a using
 /// directive should go here
-namespace eda
-{
+namespace opencog { 
+namespace eda {
 using boost::bind;
 using boost::ref;
 using boost::make_counting_iterator;
@@ -54,13 +54,6 @@ using boost::result_of;
 using boost::next;
 using boost::prior;
 
-using opencog::begin_generator;
-using opencog::end_generator;
-using opencog::make_transform_output_iterator;
-
-using opencog::integer_log2;
-
-using opencog::nullary_function;
 using std::unary_function;
 using std::binary_function;
 
@@ -76,8 +69,7 @@ using std::adjacent_find;
 using std::pair;
 using std::make_pair;
 
-using opencog::select1st;
-using opencog::select2nd;
-}
+} // ~namespace eda
+} // ~namespace opencog
 
 #endif

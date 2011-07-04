@@ -27,8 +27,8 @@
 #include <algorithm>
 #include <limits>
 
-namespace eda
-{
+namespace opencog { 
+namespace eda {
 
 template<typename ScoreT>
 struct terminate_if_gte {
@@ -64,6 +64,7 @@ protected:
     mutable int at;
 };
 
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog
 
 #endif

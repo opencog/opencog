@@ -31,6 +31,7 @@
 
 #include "field_set.h"
 
+namespace opencog { 
 namespace eda {
 
     struct cout_log_best_and_gen {
@@ -40,14 +41,15 @@ namespace eda {
                 return;
             
             It best=std::max_element(from,to);
-            opencog::logger().debug("Generation: %d", gen);
+            logger().debug("Generation: %d", gen);
             std::stringstream ss;
             ss << "Best instance: " << best->second << " " 
                << fs.stream(best->first);
-            opencog::logger().debug(ss.str());
+            logger().debug(ss.str());
         }
     };
     
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog
 
 #endif

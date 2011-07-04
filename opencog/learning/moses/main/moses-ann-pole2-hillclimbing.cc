@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 {
 
     //set flag to print only cassert and other ERROR level logs on stdout
-    opencog::logger().setPrintErrorLevelStdout();
+    logger().setPrintErrorLevelStdout();
 
     combo_tree tr;
     cin >> tr; 
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
     cout << "Network depth: " << nn.feedforward_depth() << endl;
     cout << &nn << endl;
 
-    opencog::MT19937RandGen rng(0);
+    MT19937RandGen rng(0);
 
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::ann_type, 1);

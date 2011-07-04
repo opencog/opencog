@@ -44,8 +44,8 @@ inline void log_candidate_bscore(const combo_tree& tr,
 int logical_score::operator()(const combo_tree& tr) const
 {
     // std::cout << "scoring " << tr << " " << arity << " "
-    //   << target << " " << opencog::combo::truth_table(tr,arity) << " "
-    //   << (target.hamming_distance(opencog::combo::truth_table(tr,arity))) << std::endl; // PJ
+    //   << target << " " << combo::truth_table(tr,arity) << " "
+    //   << (target.hamming_distance(combo::truth_table(tr,arity))) << std::endl; // PJ
 
     return -int(target.hamming_distance(combo::truth_table(tr, arity)));
 }

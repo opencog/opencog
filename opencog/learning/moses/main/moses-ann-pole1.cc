@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 {
 
     //set flag to print only cassert and other ERROR level logs on stdout
-    opencog::logger().setPrintErrorLevelStdout();
+    logger().setPrintErrorLevelStdout();
 
     //read in maximum evaluations and RNG seed from command line
     int max_evals;
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     combo_tree tr;
     cin >> tr; 
 
-    opencog::MT19937RandGen rng(seed);
+    MT19937RandGen rng(seed);
 
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::ann_type, 1);

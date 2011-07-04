@@ -28,11 +28,9 @@
 #include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
+namespace opencog { 
 namespace eda {
     
-    using namespace std;
-    using opencog::logger;
-  
     //return # of evaluations actually performed
     template <typename ScoreT,
               typename ScoringPolicy,
@@ -51,7 +49,7 @@ namespace eda {
                  const ProbsLearningPolicy& learn_probs,
                  const ReplacementPolicy& replace,
                  LoggingPolicy& write_log, 
-                 opencog::RandGen& rng) 
+                 RandGen& rng) 
     {
         // Logger
         logger().debug("Probabilistic Learning Optimization");
@@ -110,6 +108,7 @@ namespace eda {
         return current.size()+gen*n_generate;
     }
     
-} //~namespace eda
+} // ~namespace eda
+} // ~namespace opencog
 
 #endif
