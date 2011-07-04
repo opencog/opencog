@@ -515,36 +515,58 @@ bool LocalSpaceMap2D::isDiagonal(const spatial::GridPoint &src, const spatial::G
     return (std::abs(dest.first - src.first) == std::abs(dest.second - src.second));
 }
 
-double LocalSpaceMap2D::getMinHeightByGridPoint(const GridPoint &gp) const
+spatial::ObjectID LocalSpaceMap2D::getTallestObjectInGrid(const GridPoint &gp) const
 {
     if (!gridOccupied(gp))
-        return 0.0;
+        return "";
+    double height = 0.0;
+    spatial::ObjectID id;
+    const spatial::ObjectIDSet& objIdSet = _grid.at(gp);
+    foreach (const char* internalId, objIdSet) {
+        spatial::ObjectID entityId = spatial::ObjectID(internalId);
+        const EntityPtr& entityPtr = getEntity(entityId);
+        if (entityPtr->getHeight() > height) {
+            height = entityPtr->getHeight();
+            id = entityId;
+        }
+    }
+    return id;
+}
+
+spatial::ObjectID LocalSpaceMap2D::getLowestObjectInGrid(const GridPoint &gp) const
+{
+    if (!gridOccupied(gp))
+        return "";
     // use HUGE_DISTANCE here to represent a huge height...
     double height = HUGE_DISTANCE;
+    spatial::ObjectID id;
     const spatial::ObjectIDSet& objIdSet = _grid.at(gp);
     // Get the minimum height of the given grid point
     foreach (const char* internalId, objIdSet) {
         spatial::ObjectID entityId = spatial::ObjectID(internalId);
         const EntityPtr& entityPtr = getEntity(entityId);
-        if (entityPtr->getHeight() < height)
+        if (entityPtr->getHeight() < height) {
             height = entityPtr->getHeight();
+            id = entityId;
+        }
     }
-    return height;
+    return id; 
+}
+
+double LocalSpaceMap2D::getMinHeightByGridPoint(const GridPoint &gp) const
+{
+    spatial::ObjectID id = getLowestObjectInGrid(gp);
+    if (id == "") return 0.0;
+    const EntityPtr& entityPtr = getEntity(id);
+    return entityPtr->getHeight();
 }
 
 double LocalSpaceMap2D::getMaxHeightByGridPoint(const GridPoint &gp) const
 {
-    if (!gridOccupied(gp))
-        return 0.0;
-    double height = 0.0;
-    const spatial::ObjectIDSet& objIdSet = _grid.at(gp);
-    foreach (const char* internalId, objIdSet) {
-        spatial::ObjectID entityId = spatial::ObjectID(internalId);
-        const EntityPtr& entityPtr = getEntity(entityId);
-        if (entityPtr->getHeight() > height)
-            height = entityPtr->getHeight();
-    }
-    return height;
+    spatial::ObjectID id = getTallestObjectInGrid(gp);
+    if (id == "") return 0.0;
+    const EntityPtr& entityPtr = getEntity(id);
+    return entityPtr->getHeight();
 }
 
 bool LocalSpaceMap2D::containsObject(const spatial::ObjectID& id) const
@@ -969,13 +991,13 @@ void LocalSpaceMap2D::addObject( const spatial::ObjectID& id, const spatial::Obj
 
     const math::BoundingBox& bb = entity->getBoundingBox( );
 
-
+    /*
     printf("entity[%s]: position %s, width %lf, length %lf, height %lf\n", entity->getName().c_str(),
                         entity->getPosition().toString().c_str(),
                         entity->getWidth(),
                         entity->getLength(),
                         entity->getHeight());
-
+    */
     std::vector<math::LineSegment> bottomSegments;
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );

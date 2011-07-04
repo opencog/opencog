@@ -218,6 +218,8 @@ namespace opencog
             // height with point "src" is within a specific value "delta".
             bool edgeIllegal(const GridPoint& src, const GridPoint& dest, double delta) const;
             bool isDiagonal(const GridPoint& src, const GridPoint& dest) const;
+            ObjectID getTallestObjectInGrid(const GridPoint& gp) const; 
+            ObjectID getLowestObjectInGrid(const GridPoint& gp) const; 
             double getMinHeightByGridPoint(const GridPoint& gp) const;
             double getMaxHeightByGridPoint(const GridPoint& gp) const;
             //const ObjectMetaData& getMetaData(const ObjectID& id) const throw(opencog::NotFoundException);

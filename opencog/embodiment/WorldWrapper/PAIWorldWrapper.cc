@@ -725,7 +725,7 @@ void PAIWorldWrapper::get3DWaypoints( const spatial::Point& startPoint,
            1.0 * elapsed_time/1000000);
     printf("Path found:");
     foreach (spatial::Point3D& point, actions) {
-        printf("=> <%.3f, %.3f> ", point.get<0>(), point.get<1>());
+        printf("=> <%.3f, %.3f, %.3f> ", point.get<0>(), point.get<1>(), point.get<2>());
     }
     printf("\n");
 }
@@ -858,8 +858,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
                                                 ActionParamType::VECTOR(),
                                                 Vector(it_action.get<0>(),
                                                        it_action.get<1>(),
-                                                       0.0)));
-                                                       //it_action.get<2>())));
+                                                       it_action.get<2>())));
 
             float speed = ( customSpeed != 0 ) ?
                     customSpeed : pai.getAvatarInterface().computeWalkingSpeed();

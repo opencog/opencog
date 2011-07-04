@@ -194,7 +194,14 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
         gp.first = previous_node->x;
         gp.second = previous_node->y;
 
-        spatial::Point point2d = map->unsnap(gp);
+        spatial::Point point2d;
+
+        if (map->gridIllegal(gp)) {
+            spatial::ObjectID id = map->getTallestObjectInGrid(gp);
+            point2d = map->centerOf(id);
+        } else {
+            point2d = map->unsnap(gp);
+        }
         double height = node->z - previous_node->z;
         spatial::Point3D point3d(point2d.first, point2d.second, height);
 
@@ -231,7 +238,10 @@ vector<spatial::Point3D> AStar3DController::getShortestCalculatedPath()
     it_point++;
     while ( (it_point + 1) != calculatedPath.end() ) {
         double new_alpha = (it_point->get<1>() - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
-        if (it_point->get<2>() > 0.0 || abs(new_alpha - alpha) > 0.002 ) {
+        if (it_point->get<2>() > 0.0) {
+            shortestCalculatedPath.push_back( *it_point );
+            alpha = ( - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
+        } else if (abs(new_alpha - alpha) > 0.002 ) {
             shortestCalculatedPath.push_back( *it_point );
             alpha = new_alpha;
         }
