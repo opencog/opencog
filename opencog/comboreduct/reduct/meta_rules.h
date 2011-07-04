@@ -36,8 +36,7 @@
 #include <opencog/comboreduct/combo/type_tree.h>
 #include "reduct.h"
 
-namespace reduct
-{
+namespace opencog { namespace reduct {
 
 using std::string;
 
@@ -178,6 +177,7 @@ struct sequential : public crule<sequential> {
     ptr_vector<rule> rules;
 };
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

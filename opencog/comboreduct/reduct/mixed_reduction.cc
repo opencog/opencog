@@ -28,7 +28,7 @@
 #include "contin_rules.h"
 #include "mixed_rules.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 const rule& mixed_reduction(opencog::RandGen& rng) {
     static sequential non_recursive = 
         sequential(//general
@@ -116,5 +116,6 @@ const rule& mixed_reduction(opencog::RandGen& rng) {
     return r;
 }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 

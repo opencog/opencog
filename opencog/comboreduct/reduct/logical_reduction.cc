@@ -27,7 +27,7 @@
 #include "logical_rules.h"
 #include "mixed_rules.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
 // effort 0
 const rule& logical_reduction(int effort) {
@@ -83,4 +83,5 @@ const rule& logical_reduction(int effort) {
     }
 }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog

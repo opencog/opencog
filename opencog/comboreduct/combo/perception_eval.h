@@ -34,7 +34,7 @@
 #include "comboreduct/combo/type_tree.h"
 
 
-namespace combo {
+namespace opencog { namespace combo {
 
   template<typename It>
   vertex action_eval_throws(It it) throw(EvalException, std::bad_exception) {
@@ -55,6 +55,7 @@ namespace combo {
     }
   }
 
-}
+} // ~namespace combo
+} // ~namespace opencog 
 
 #endif

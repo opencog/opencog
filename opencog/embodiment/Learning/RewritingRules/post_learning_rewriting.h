@@ -26,9 +26,9 @@
 
 #include <opencog/comboreduct/reduct/reduct.h>
 
-namespace reduct
+namespace opencog { namespace reduct
 {
 const rule& post_learning_rewriting();
-}
+}}
 
 #endif

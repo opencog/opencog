@@ -29,7 +29,7 @@
 #include "reduct.h"
 #include <opencog/comboreduct/combo/eval.h>
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
 //flattens all associative functions: f(a,f(b,c)) -> f(a,b,c)
 //note that level is recursive that is f(a,f(b,f(c,d))) -> f(a,b,c,d)
@@ -69,6 +69,7 @@ struct remove_all_assumptions : public crule<remove_all_assumptions> {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

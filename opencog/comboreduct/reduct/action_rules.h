@@ -27,8 +27,9 @@
 #include "reduct.h"
 #include <boost/logic/tribool.hpp>
 
-namespace reduct
-{
+namespace opencog { namespace reduct {
+
+using namespace combo;
 
 //for some intriguing reason the operator tribool.safe_bool() is not usable
 //because considered private by gcc?
@@ -265,6 +266,7 @@ struct preconditions_check : public crule<preconditions_check> {
 //auxilary function for the preconditions check
 bool reduce_free_post_action (builtin_action pre_a, builtin_action post_a, bool free_pre_action_before, combo_tree& tr, combo_tree::iterator it);
 
-}
+} // ~namespace reduct
+} // ~namespace opencog 
 
 #endif

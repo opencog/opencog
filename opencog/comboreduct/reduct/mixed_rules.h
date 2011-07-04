@@ -26,7 +26,7 @@
 
 #include "reduct.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
 //0<c*x -> 0<x if c>0
 //0<c*x -> 0<-1*x if c<0
@@ -282,6 +282,7 @@ struct reduce_inequality_from_assumptions : public crule<reduce_inequality_from_
     bool backSubstitution(double_matrix& dm, std::vector<double>& solution, double eps = 1.0e-10) const;
 };
   
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

@@ -28,7 +28,7 @@
 #include "contin_rules.h"
 #include "mixed_rules.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
 const rule& full_reduction(opencog::RandGen& rng) {
     static iterative r_without_reduce_gt_zero_prod;
@@ -218,4 +218,6 @@ const rule& full_reduction(opencog::RandGen& rng) {
          );
     return r;
 }
-} //~namespace reduct
+
+} // ~namespace reduct
+} // ~namespace opencog

@@ -26,9 +26,9 @@
 
 #include <opencog/comboreduct/reduct/reduct.h>
 
-namespace reduct
+namespace opencog { namespace reduct
 {
 const rule& hillclimbing_perception_reduction();
-}
+}}
 
 #endif

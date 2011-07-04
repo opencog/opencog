@@ -23,7 +23,8 @@
  */
 #include "reduct.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 reduct::rule* new_clone(const reduct::rule& r) { return r.clone(); }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog

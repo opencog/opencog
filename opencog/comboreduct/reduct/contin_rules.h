@@ -26,7 +26,7 @@
 
 #include "reduct.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
 //x+0 -> x
 struct reduce_plus_zero : public crule<reduce_plus_zero> {
@@ -174,6 +174,7 @@ struct reduce_sin : public crule<reduce_sin> {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

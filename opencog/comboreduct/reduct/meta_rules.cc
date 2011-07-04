@@ -29,7 +29,7 @@
 // uncomment if you want to have a trace of the rules
 // #define META_RULE_DEBUG
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
 #ifdef META_RULE_DEBUG
 
@@ -158,5 +158,6 @@ void assum_iterative::operator()(combo_tree& tr,combo_tree::iterator it) const {
     DEC_TAB
 }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 

@@ -11,10 +11,10 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
+using namespace std;
+using namespace opencog;
 using namespace reduct;
 using namespace ant_combo;
-using namespace opencog;
-using namespace std;
 
 static opencog::MT19937RandGen rng(0);
 

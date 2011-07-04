@@ -26,9 +26,10 @@
 
 #include <opencog/comboreduct/reduct/reduct.h>
 
-namespace reduct
+namespace opencog { namespace reduct
 {
 const rule& hillclimbing_action_reduction();
-}
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

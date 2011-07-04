@@ -27,8 +27,7 @@
 #include <opencog/comboreduct/reduct/general_rules.h>
 #include <opencog/comboreduct/reduct/action_rules.h>
 
-namespace reduct
-{
+namespace opencog { namespace reduct {
 const rule& hillclimbing_action_reduction()
 {
     static iterative r;
@@ -50,4 +49,6 @@ const rule& hillclimbing_action_reduction()
 
     return r;
 }
-}
+
+} // ~namespace reduct
+} // ~namespace opencog

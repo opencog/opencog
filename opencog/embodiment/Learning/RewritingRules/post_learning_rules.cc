@@ -24,8 +24,7 @@
 #include "post_learning_rules.h"
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-namespace reduct
-{
+namespace opencog { namespace reduct {
 
 using namespace PetCombo;
 
@@ -59,4 +58,5 @@ void post_learning_empty_and_seq::operator()(combo_tree& tr,
     }
 }
 
-}//~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog

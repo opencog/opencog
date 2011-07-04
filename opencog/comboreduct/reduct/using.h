@@ -38,19 +38,21 @@
 
 /// anything that gets imported into the reduct namespace with a using
 /// directive should go here
-namespace reduct {
-  using namespace opencog::combo;
-  using boost::variant;
-  using boost::static_visitor;
-  //  using boost::bind;
-  using boost::make_counting_iterator;
-  using boost::make_indirect_iterator;
-  using boost::apply_visitor;
-  using boost::shared_ptr;
-  using boost::ptr_vector;
-  using std::find_if;
-  using std::distance;
-  using std::make_pair;  
-}
+namespace opencog { namespace reduct {
+using namespace opencog::combo;
+using boost::variant;
+using boost::static_visitor;
+//  using boost::bind;
+using boost::make_counting_iterator;
+using boost::make_indirect_iterator;
+using boost::apply_visitor;
+using boost::shared_ptr;
+using boost::ptr_vector;
+using std::find_if;
+using std::distance;
+using std::make_pair;  
+
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

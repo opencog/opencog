@@ -30,6 +30,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace opencog;
 using namespace PetCombo;
 using namespace reduct;
 

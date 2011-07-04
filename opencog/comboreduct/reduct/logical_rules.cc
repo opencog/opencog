@@ -29,7 +29,7 @@
 #include "logical_rules.h"
 #include "../combo/table.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
 
@@ -650,5 +650,6 @@ void reduce_remove_subtree_equal_tt::operator()(combo_tree& tr,
     }
 }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 

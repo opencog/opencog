@@ -26,7 +26,7 @@
 #include "general_rules.h"
 #include "logical_rules.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
 const rule& clean_reduction() {
     static sequential r= sequential(downwards(remove_null_vertices()),
@@ -34,4 +34,5 @@ const rule& clean_reduction() {
     return r;
 }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog

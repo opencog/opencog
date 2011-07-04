@@ -30,8 +30,7 @@
 #include "hillclimbing_full_reduction.h"
 #include "post_learning_rewriting.h"
 
-namespace reduct
-{
+namespace opencog { namespace reduct {
 
 //hillclimbing
 inline void hillclimbing_full_reduce(combo_tree& tr, combo_tree::iterator it)
@@ -76,6 +75,7 @@ inline void post_learning_rewrite(combo_tree& tr)
 }
 
 
-}//~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

@@ -27,7 +27,7 @@
 #include "reduct.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-namespace reduct {
+namespace opencog { namespace reduct {
   
 //add in the set of assumptions such knowledge
 //f(x, z) <= max{d(x, y), d(y, z)}
@@ -79,6 +79,7 @@ struct reduce_identity_of_indiscernibles : public crule<reduce_identity_of_indis
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-}
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

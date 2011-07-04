@@ -25,7 +25,7 @@
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/assumption.h>
 
-namespace reduct {
+namespace opencog { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 
 //flattens all associative functions: f(a,f(b,c)) -> f(a,b,c)
@@ -93,5 +93,6 @@ void remove_all_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) 
     delete_all_assumptions(tr);
 }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 

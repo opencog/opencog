@@ -36,7 +36,7 @@
 
 #include <opencog/comboreduct/combo/vertex.h>
 
-namespace reduct {
+namespace opencog { namespace reduct {
   typedef std::set<int,opencog::absolute_value_order<int> > clause;
   typedef std::list<clause> nf;
     using namespace opencog::combo;
@@ -258,11 +258,10 @@ namespace reduct {
     }
   }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
-std::ostream& operator<<
-  (std::ostream& out,const reduct::clause& c);
-std::ostream& operator<<
-  (std::ostream& out,const reduct::nf& d);
+std::ostream& operator<<(std::ostream& out,const opencog::reduct::clause& c);
+std::ostream& operator<<(std::ostream& out,const opencog::reduct::nf& d);
 
 #endif

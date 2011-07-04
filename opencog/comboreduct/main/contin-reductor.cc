@@ -31,8 +31,8 @@
 #include "../ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace std;
-using namespace reduct;
 using namespace opencog;
+using namespace reduct;
 using namespace ant_combo;
 
 int main()

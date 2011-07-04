@@ -29,7 +29,7 @@
 // Note: the rule names are useful when debugging the reduct engine
 // (uncomment META_RULE_DEBUG in meta_rules.cc)
 
-namespace reduct {
+namespace opencog { namespace reduct {
 const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops, 
                              opencog::RandGen& rng,
                              unsigned int cache_size) {
@@ -104,5 +104,7 @@ const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops,
     //    static cache res_cache(res, cache_size);
 
     return res;
-  }
-} //~namespace reduct
+}
+
+} // ~namespace reduct
+} // ~namespace opencog

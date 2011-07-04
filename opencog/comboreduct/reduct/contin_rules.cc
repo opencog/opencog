@@ -25,9 +25,7 @@
 #include <opencog/util/exceptions.h>
 #include <map>
 
-namespace reduct {
-
-using namespace opencog;
+namespace opencog { namespace reduct {
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
@@ -922,5 +920,6 @@ void reduce_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
     }
 }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 

@@ -32,7 +32,7 @@
 #include "../combo/vertex.h"
 #include "../combo/convert_ann_combo.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
 using namespace opencog::combo;
 
@@ -49,6 +49,7 @@ struct ann_rule : public crule<ann_rule> {
     }
 };
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

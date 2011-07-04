@@ -27,8 +27,7 @@
 #include "post_learning_rewriting.h"
 #include "post_learning_rules.h"
 
-namespace reduct
-{
+namespace opencog { namespace reduct {
 
 const rule& post_learning_rewriting()
 {
@@ -38,4 +37,7 @@ const rule& post_learning_rewriting()
 
     return r;
 }
-}
+
+} // ~namespace reduct
+} // ~namespace opencog
+

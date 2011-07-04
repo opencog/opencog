@@ -26,8 +26,7 @@
 
 #include <opencog/comboreduct/reduct/reduct.h>
 
-namespace reduct
-{
+namespace opencog { namespace reduct {
 
 //add a drop action in front of a grab action
 struct post_learning_drop_before_grab
@@ -43,6 +42,7 @@ struct post_learning_empty_and_seq
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
-}//~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

@@ -32,7 +32,7 @@
 #include "flat_normal_form.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
-namespace reduct {
+namespace opencog { namespace reduct {
 //ensure that all arguments and or nodes have an and node as their parent.
 //this is important for other normalizations to be able to catch all cases
 struct insert_ands : public crule<insert_ands> {
@@ -208,6 +208,7 @@ struct reduce_remove_subtree_equal_tt
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

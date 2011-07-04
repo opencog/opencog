@@ -26,8 +26,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/comboreduct/combo/descriptions.h>
 
-namespace reduct
-{
+namespace opencog { namespace reduct {
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
@@ -386,7 +385,7 @@ void reduce_repeat_in_action_while::operator() (combo_tree& tr, pre_it it) const
         if (*while_child == id::sequential_and) {
             if (while_child.number_of_children() > 1) {
                 int seq_size = while_child.number_of_children();
-                int sd = opencog::smallest_divisor(seq_size);
+                int sd = smallest_divisor(seq_size);
                 //get the start and the end of the pattern
                 sib_it pattern_from = while_child.begin();
                 sib_it pattern_to = pattern_from;
@@ -758,7 +757,5 @@ bool reduce_free_post_action (builtin_action pre_a, builtin_action post_a, bool 
     return false;
 }
 
-
-
-
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog 

@@ -25,10 +25,12 @@
 #include "meta_rules.h"
 #include "ann_rules.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 const rule& ann_reduction() {
     using namespace opencog::combo;
     static ann_rule r;
     return r;
 }
-} //~namespace reduct
+
+} // ~namespace reduct
+} // ~namespace opencog

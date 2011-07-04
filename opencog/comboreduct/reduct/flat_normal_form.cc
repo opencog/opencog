@@ -23,7 +23,7 @@
  */
 #include "flat_normal_form.h"
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
   //does c contain p and !p?
   bool tautology(const clause& c) {
@@ -47,23 +47,24 @@ namespace reduct {
 			   bind(std::plus<int>(),_1,bind(&clause::size,_2)));
   }
 
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
-std::ostream& operator<<(std::ostream& out,const reduct::clause& c) {
-  out << "(";
-  if (!c.empty()) {
-    out << *c.begin();
-    for (reduct::clause::iterator i1=++c.begin();
-	 i1!=c.end();++i1)
-      out << " " << *i1;
-  }
-  out << ")";
-  return out;
+std::ostream& operator<<(std::ostream& out,const opencog::reduct::clause& c) {
+    out << "(";
+    if (!c.empty()) {
+        out << *c.begin();
+        for (opencog::reduct::clause::iterator i1=++c.begin();
+             i1!=c.end();++i1)
+            out << " " << *i1;
+    }
+    out << ")";
+    return out;
 }
 
-std::ostream& operator<<(std::ostream& out,const reduct::nf& d) {
-  for (reduct::nf::const_iterator c=d.begin();c!=d.end();++c)
-    out << *c;
-  return out;
+std::ostream& operator<<(std::ostream& out,const opencog::reduct::nf& d) {
+    for (opencog::reduct::nf::const_iterator c=d.begin();c!=d.end();++c)
+        out << *c;
+    return out;
 }
 

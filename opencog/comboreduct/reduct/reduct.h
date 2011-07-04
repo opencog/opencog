@@ -29,7 +29,7 @@
 #include "using.h"
 #include <opencog/comboreduct/combo/vertex.h>
 
-namespace reduct {
+namespace opencog { namespace reduct {
 
 using namespace opencog::combo;
     
@@ -153,7 +153,7 @@ inline void replace_without_changing_it(combo_tree& tr,
     }    
 }
 
-
-} //~namespace reduct
+} // ~namespace reduct
+} // ~namespace opencog
 
 #endif

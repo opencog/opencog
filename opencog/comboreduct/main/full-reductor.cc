@@ -32,9 +32,9 @@
 #include "../ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace std;
+using namespace opencog;
 using namespace ant_combo;
 using namespace reduct;
-using namespace opencog;
 
 int main()
 {

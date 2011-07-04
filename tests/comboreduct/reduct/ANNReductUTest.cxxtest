@@ -24,9 +24,9 @@
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace std;
+using namespace opencog;
 using namespace reduct;
 using namespace ant_combo;
-using namespace opencog;
 
 class ANNReductUTest : public CxxTest::TestSuite {
 public:
