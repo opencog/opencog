@@ -11,7 +11,6 @@ INSTALL(FILES
 	replacement.h
 	scoring_functions.h
 	scoring.h
-	scratch_model.h
 	termination.h
 	using.h
 
