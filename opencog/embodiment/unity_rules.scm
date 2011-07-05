@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-06-21
+; @date   2011-07-05
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into the AtomSpace.
 ;
@@ -504,13 +504,6 @@
 ;
 
 (define GetFoodGoal
-    (AndLink 
-        (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
-        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_food") )
-    )    
-)
-
-(define GotoFoodGoal
     (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
 )
 
@@ -520,21 +513,25 @@
     ) 
 
     (add_rule (stv 1.0 1.0) EnergyDemandGoal 
-        (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
-        GotoFoodGoal
+        (SequentialAndLink
+            (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
+; TODO: enable eat action, once unity world is ready            
+;            (add_action (GroundedSchemaNode "eat") (VariableNode "$var_food") )
+        )    
+        GetFoodGoal
     )
 )    
 
-(add_rule (stv 1.0 1.0) GetFoodGoal 
-    (add_action (GroundedSchemaNode "random_search") )
-    NULL_PRECONDITION
-)
+;(add_rule (stv 1.0 1.0) GetFoodGoal 
+;    (add_action (GroundedSchemaNode "random_search") )
+;    NULL_PRECONDITION
+;)
 
 ; TODO: very file rules only for testing dialog_system
-(add_rule (stv 1.0 1.0) GetFoodGoal 
-    (add_action (SpeechActSchemaNode "AskForFood") )
-    NULL_PRECONDITION
-)
+;(add_rule (stv 1.0 1.0) GetFoodGoal 
+;    (add_action (SpeechActSchemaNode "AskForFood") )
+;    NULL_PRECONDITION
+;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -572,71 +569,8 @@
 ;       the definition of IntegrityDemandGoal updater and the rules below. 
 ;
 
-(define GetPeePlaceGoal
-    (AndLink
-        (add_goal (PredicateNode "is_pee_place") (VariableNode "$var_pee_place") ) 
-        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_pee_place") )
-    )
-)
-
-(define GetPooPlaceGoal
-    (AndLink
-        (add_goal (PredicateNode "is_poo_place") (VariableNode "$var_poo_place") ) 
-        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_poo_place") )
-    )
-)
-
-(ForAllLink
-    (ListLink
-        (VariableNode "$var_pee_place") 
-    )
-
-    (add_rule (stv 1.0 1.0) IntegrityDemandGoal 
-        (add_action (GroundedSchemaNode "pee_at") (VariableNode "$var_pee_place") )
-        GetPeePlaceGoal
-    )
-)
-
-(ForAllLink
-    (ListLink
-        (VariableNode "$var_poo_place") 
-    )
-
-    (add_rule (stv 1.0 1.0) IntegrityDemandGoal
-        (add_action (GroundedSchemaNode "poo_at") (VariableNode "$var_poo_place") )
-        GetPooPlaceGoal
-    )
-)
-
-(ForAllLink
-    (ListLink
-        (VariableNode "$var_food") 
-    ) 
-
-    (add_rule (stv 0.8 1.0) IntegrityDemandGoal 
-        (add_action (GroundedSchemaNode "eat_food") (VariableNode "$var_food") )
-        GetFoodGoal
-    )
-)    
-
-(ForAllLink
-    (ListLink
-        (VariableNode "$var_water") 
-    )
-
-    (add_rule (stv 0.8 1.0) IntegrityDemandGoal 
-        (add_action (GroundedSchemaNode "drink_water") (VariableNode "$var_water") )
-        GetWaterGoal
-    )
-)
-
-(add_rule (stv 1.0 1.0) GetPeePlaceGoal 
-    (add_action (GroundedSchemaNode "random_search") )
-    NULL_PRECONDITION
-)
-
-(add_rule (stv 1.0 1.0) GetPooPlaceGoal 
-    (add_action (GroundedSchemaNode "random_search") )
+(add_rule (stv 1.0 1.0) IntegrityDemandGoal 
+    (add_action (GroundedSchemaNode "go_home") )     
     NULL_PRECONDITION
 )
 
@@ -655,45 +589,7 @@
 ; Rules related to CertaintyDemandGoal
 ;
 
-(define GetNearObjectGoal
-    (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_near_object") )
-)
-
-(define GetNearPickupableObjectGoal
-    (AndLink
-        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_near_pickupable_object") ) 
-        (add_goal (PredicateNode "is_pickupable") (VariableNode "$var_near_pickupable_object") )
-    ) 
-)
-
-(ForAllLink
-    (ListLink
-        (VariableNode "$var_near_object") 
-    )   
-
-    (add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
-              (add_action (GroundedSchemaNode "play_without_grab_and_drop") (VariableNode "$var_near_object") )
-              GetNearObjectGoal
-    )
-)
-
-(ForAllLink
-    (ListLink
-        (VariableNode "$var_near_pickupable_object") 
-    )     
-
-    (add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
-              (add_action (GroundedSchemaNode "play_with_grab_and_drop") (VariableNode "$var_near_pickupable_object") )
-              GetNearPickupableObjectGoal 
-    ) 
-)
-
-(add_rule (stv 1.0 1.0) GetNearObjectGoal 
-    (add_action (GroundedSchemaNode "random_search") )
-    NULL_PRECONDITION
-)
-
-(add_rule (stv 1.0 1.0) GetNearPickupableObjectGoal 
+(add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
     (add_action (GroundedSchemaNode "random_search") )
     NULL_PRECONDITION
 )
