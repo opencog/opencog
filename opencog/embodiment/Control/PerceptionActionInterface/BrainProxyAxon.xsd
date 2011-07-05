@@ -24,22 +24,13 @@
                 <xsd:element name="object-signal" type="pet:ObjectSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="avatar-signal" type="pet:AvatarSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="pet-signal" type="pet:PetSignalType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="instruction" type="pet:PetInstructionType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="agent-signal" type="pet:AgentSignalType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="instruction" type="pet:PetInstructionType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="communication" type="pet:CommunicationType" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>
         </xsd:sequence>
         <xsd:attribute name="request-id" type="xsd:string" use="optional"/>
     </xsd:complexType>    
-
-    <!-- FIXME: cleanup the ObjectRezType so it only adds a bit more data to the
-         grand scheme of header + blip data -->
-    <xsd:complexType name="RezType">
-                <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
-    </xsd:complexType>
-
-    <xsd:complexType name="DerezType">
-        <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
-    </xsd:complexType>
 
     <xsd:annotation>
         <xsd:documentation>
@@ -238,15 +229,7 @@
 
     <xsd:annotation>
         <xsd:documentation>
-        Map data aggregated from SecondLife, the goal here will be to provide
-        information on which blips are ours.  The map size will be difficult to
-        determine as LSL sensors search spherically.  Even though certain 
-        pieces of information will be easier to gather on Sheep owned islands
-        the limits of LSL will make it difficult to provide a complete "live" map.
-        The map data will represent all that is known about a gridParcel at a particular
-        time.  Blip coordinates will be global to all simulators (regions).  The 
-        gridParcel attribute may not prove useful here, but will remain until I'm certain
-        it's not.
+        An aggregate of all map data from virtual world which consists of "blips".
         </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType name="MapInfoType">
@@ -273,7 +256,6 @@
       </xsd:annotation>
 
     <xsd:complexType name="BlipType">
-        
         <xsd:sequence>
             <xsd:element name="entity" type="pet:EntityType" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="position" type="common:VectorDataType" minOccurs="1" maxOccurs="1"/>
@@ -284,27 +266,6 @@
          </xsd:sequence>
          
         <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
-
-               <!--
-        <xsd:attribute name="detector" type="xsd:boolean" use="optional" default="false">
-            <xsd:annotation>
-                <xsd:documentation>
-                if the detector attribute is true this means that this blip did
-                some of the sensing
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="remove" type="xsd:boolean" use="optional" default="false"/>
-        <xsd:attribute name="visibility-status" type="xsd:string" use="optional" default="non-visible"/>
-        <xsd:attribute name="length" type="xsd:double" use="optional" default="0.67"/>
-        <xsd:attribute name="width" type="xsd:double" use="optional" default="0.33"/>
-        <xsd:attribute name="height" type="xsd:double" use="optional" default="0.5"/>
-        <xsd:attribute name="edible" type="xsd:boolean" use="optional" default="false"/>
-        <xsd:attribute name="drinkable" type="xsd:boolean" use="optional" default="false"/>
-        <xsd:attribute name="petHome" type="xsd:boolean" use="optional" default="false"/>
-        <xsd:attribute name="foodBowl" type="xsd:boolean" use="optional" default="false"/>
-        <xsd:attribute name="waterBowl" type="xsd:boolean" use="optional" default="false"/>
-        -->
     </xsd:complexType>
 
     <xsd:complexType name="PropertiesType">
@@ -322,7 +283,7 @@
     <xsd:annotation>
         <xsd:documentation>
         The entity id and type will allow for reasonably simple differentiation of 
-        pet, pet toys, avatars, and static structures. Owner-id may not be necessary,
+        agents, objects, avatars, and static structures. Owner-id may not be necessary,
         but it could potentially be useful.
         </xsd:documentation>
     </xsd:annotation>
@@ -343,11 +304,9 @@
 
     <xsd:annotation>
         <xsd:documentation><![CDATA[
-        All pets will be able to perform some sort of action, whether this action
-        is navigation or a simple head-tilt or ear waggle.  To enable complicated
-        movements, I've allowed the specification of the action sequence to be
-        somewhat open-ended.  In most cases, I imagine the action sequence will 
-        look like so:
+        All agents are be able to perform various actions. For example, the action
+        may be navigation, a simple head-tilt, or ear wiggle. To enable complicated
+        movements, the specification of the action sequence is flexible.
             <action-plan id="#unique-id#" pet-id"1138">
                 <action name="walk" sequence="1">                  
                     <param name="destination" type="vector">
@@ -356,16 +315,16 @@
                     <param name="speed" type="int" value="30"/>
                 </action>
                 <action name="fly" sequence="2">
-                    // fly approximately 50 meters
+                    <!-- fly approximately 50 meters -->
                     <param name="destination" type="vector">
                         <vector x="259.1" y="20.0" z="31.4"/>
-                    </param
-                    // instead of flying in a diagonal line, we
-                    // make the flight an arc through space.
+                    </param>
+                    <!-- instead of flying in a diagonal line, we -->
+                    <!-- make the flight an arc through space. -->
                     <param name="arc" type="rotation">
                         <rotation yaw="5" pitch="10" roll="0"/>
                     </param>
-                    // speed is in meters/second
+                    <!-- speed is in meters/second -->
                     <param name="speed" type="int" value="60"/>
                 </action>
             </action-plan>
@@ -463,6 +422,15 @@
         <xsd:simpleContent>
             <xsd:extension base="xsd:string">
                 <xsd:attribute name="name" type="xsd:string" use="required"/>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="CommunicationType">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="sourceId" type="xsd:string" use="required"/>
+                <xsd:attribute name="timestamp" type="xsd:string" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
