@@ -14,38 +14,6 @@
     <xsd:import namespace="http://www.opencog.org/metadata/action"
                 schemaLocation="PetActionMetadata.xsd"/>    
 
-    <xsd:annotation>
-        <xsd:documentation>
-        &lt;sl-request&gt; messages are the XML representation of the JSON-esque
-        messages sent by our pets and objects.  These messages can express the
-        complexity of any SL requestContext in its entirety.
-        </xsd:documentation>
-    </xsd:annotation>
-    <xsd:element name="sl-request" type="pet:RequestType"/>
-
-    <xsd:complexType name="RequestType">
-        <xsd:sequence>
-            <xsd:element name="rez" type="pet:RezType" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="derez" type="pet:DerezType" minOccurs="0" maxOccurs="1"/>
-            <xsd:choice minOccurs="1" maxOccurs="unbounded">
-                <xsd:element name="map-info" type="pet:MapInfoType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="agent-sensor-info" type="pet:AgentSensorInfoType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="object-signals" type="pet:ObjectSignalsType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="avatar-signals" type="pet:AvatarSignalsType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="pet-signals" type="pet:PetSignalsType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="instructions" type="pet:PetInstructionsType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="agent-signals" type="pet:AgentSignalsType" minOccurs="1" maxOccurs="1"/>
-            </xsd:choice>
-        </xsd:sequence>
-        <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
-        <!-- make sure to add a requestor-id as an optional attribute,
-             I'm sure it will help lookups later in the call sequence -->
-        <xsd:attribute name="request-id" type="xsd:string" use="required"/>
-        <xsd:attribute name="entity-id" type="xsd:string" use="optional" default=""/>
-        <xsd:attribute name="requestor-type" type="common:EntityDataType" use="optional" default="unknown"/>
-        <xsd:attribute name="version" type="xsd:string" use="optional"/>
-    </xsd:complexType>
-
     <xsd:element name="embodiment-msg" type="pet:EmbodimentMsgType"/>
 
     <xsd:complexType name="EmbodimentMsgType">
