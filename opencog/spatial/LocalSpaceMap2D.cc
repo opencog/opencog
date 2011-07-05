@@ -31,6 +31,7 @@
 #include <opencog/spatial/StaticEntity.h>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/type_traits/make_signed.hpp>
 
 #include <fstream>
 #include <map>
@@ -39,6 +40,7 @@
 
 using namespace opencog;
 using namespace opencog::spatial;
+using boost::make_signed;
 
 const double LocalSpaceMap2D::NEXT_FACTOR = 0.1;
 const double LocalSpaceMap2D::NEAR_FACTOR = 0.003125;
@@ -512,7 +514,11 @@ bool LocalSpaceMap2D::edgeIllegal(const spatial::GridPoint &src, const spatial::
 
 bool LocalSpaceMap2D::isDiagonal(const spatial::GridPoint &src, const spatial::GridPoint &dest) const
 {
-    return (std::abs(dest.first - src.first) == std::abs(dest.second - src.second));
+    // Nil: I've added that because otherwise abs(unsigned int) is
+    // ambiguious. Using boost::make_signed so the sign-ification is
+    // generic in case the type of GridPoint is modified.
+    typedef make_signed<GridPoint::first_type>::type SInt;
+    return (std::abs((SInt)dest.first - (SInt)src.first) == std::abs((SInt)dest.second - (SInt)src.second));
 }
 
 spatial::ObjectID LocalSpaceMap2D::getTallestObjectInGrid(const GridPoint &gp) const
