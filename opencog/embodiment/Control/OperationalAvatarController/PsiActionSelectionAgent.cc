@@ -124,7 +124,7 @@ void PsiActionSelectionAgent::getActions(AtomSpace & atomSpace, Handle hStep,
     opencog::Type atomType = atomSpace.getType(hStep); 
 
     if (atomType == EXECUTION_LINK) {
-        actions.push_back(hStep); 
+        actions.insert(actions.begin(), hStep);
     }
     else if (atomType == AND_LINK ||
             atomType == SEQUENTIAL_AND_LINK) {
@@ -453,6 +453,25 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     // Initialize the Mind Agent (demandGoalList etc)
     if ( !this->bInitialized ) 
         this->init(server);
+
+    // TODO: process heard sentences here 
+     
+    // Initialize scheme evaluator
+    SchemeEval & evaluator = SchemeEval::instance();    
+    std::string scheme_expression, scheme_return_value;
+
+    scheme_expression = "( resolve-reference )";
+
+    // Run the Procedure that do planning
+    scheme_return_value = evaluator.eval(scheme_expression);
+
+    if ( evaluator.eval_error() ) {
+        logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
+                         __FUNCTION__, 
+                         scheme_expression.c_str() 
+                      );
+    }
+
 
     // Check the state of current running Action: 
     //
