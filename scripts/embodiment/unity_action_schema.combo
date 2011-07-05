@@ -35,6 +35,8 @@ turn_to_face(1) := turn_to_face(#1)
 
 say(2) := say(#1 #2)
 
+go_home(0) := goto_obj(pet_home 2)
+
 #walk random, but more forward and more right and does not rotate every time
 random_search(0) := 
     and_seq(jump_up step_backward jump_up step_forward)
