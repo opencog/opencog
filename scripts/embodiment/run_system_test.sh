@@ -17,7 +17,7 @@ for gsfile in `find . -name "gsfile_*" ` ; do
         ./pbTester $currfile
 		result=$?
 
-		grep -i "Error" /tmp/$USER/Petaverse/Logs/PROXY  > /dev/null 2>&1
+		grep -i "Error" /tmp/$USER/opencog/log/PROXY  > /dev/null 2>&1
 
 		if [  $? -eq 0 ] || [ $result -eq 255 ]; then
 			printf "Failed \n";
@@ -27,7 +27,7 @@ for gsfile in `find . -name "gsfile_*" ` ; do
             mkdir -p $LOGS_DIR
 
             printf "Saving logs to $LOGS_DIR \n"
-            cp -r /tmp/$USER/Petaverse/Logs $LOGS_DIR
+            cp -r /tmp/$USER/opencog/log $LOGS_DIR
 
 			failed=true;
 		else

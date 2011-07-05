@@ -36,9 +36,9 @@ namespace opencog
 {
 
 /**
- * Check if a file exists in PetDatabase (currently a directory)
+ * Check if a file exists in the current directory
  *
- * @param filemane The name of the file to check if it exists.
+ * @param filename The name of the file to check if it exists.
  * @return true if file exists, false otherwise
  */
 bool fileExists(const char* filename);

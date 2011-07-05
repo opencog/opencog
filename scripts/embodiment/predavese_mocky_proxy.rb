@@ -40,7 +40,7 @@ class ActionExtractor
 end
 
 class PerceptionSimulator
- P_TEMPLATE = %{<pet:petaverse-msg xmlns:pet="http://proxy.esheepco.com/brain">
+ P_TEMPLATE = %{<pet:embodiment-msg xmlns:pet="http://www.opencog.org/brain">
     <map-info region="ESC25">
         <blip timestamp="%s" detector="false">
             <entity id="Wynx" type="avatar"/>
@@ -65,14 +65,14 @@ class PerceptionSimulator
 	    <param name="old-level" type="float" value="%.2f"/> 
         <param name="new-level" type="float" value="%.2f"/> 
     </pet-signal>
-</pet:petaverse-msg>}
+</pet:embodiment-msg>}
 
- C_TEMPLATE = %{<pet:petaverse-msg xmlns:pet="http://proxy.esheepco.com/brain">
+ C_TEMPLATE = %{<pet:embodiment-msg xmlns:pet="http://www.opencog.org/brain">
     <pet-signal pet-id="1" name="whatever" status="done" action-plan-id="%s" timestamp="%s" />
     <instruction pet-id="1" avatar-id="10" timestamp="%s">
         <value>%s</value>
     </instruction>
-</pet:petaverse-msg>}
+</pet:embodiment-msg>}
 
   def initialize
     @hunger = 0.0
