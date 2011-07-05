@@ -43,8 +43,8 @@
 #include <vector>
 #include <exception>
 
-#include "PetaverseDOMParser.h"
-#include "PetaverseErrorHandler.h"
+#include "EmbodimentDOMParser.h"
+#include "EmbodimentErrorHandler.h"
 
 #ifdef HAVE_LIBPTHREAD
 #include <pthread.h>
@@ -176,8 +176,8 @@ private:
      **/
     unsigned long latestSimWorldTimestamp;
 
-    PetaverseDOMParser * parser;
-    PetaverseErrorHandler errorHandler;
+    EmbodimentDOMParser * parser;
+    EmbodimentErrorHandler errorHandler;
     string schemaLocation;
 
     /**

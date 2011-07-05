@@ -799,7 +799,7 @@ public:
     /*
         // this test can be used to evaluate the latest sentence
         // stored into the agent atomTable. To use it copy
-        // the content of the dir /tmp/<user>/Petaverse/PetDatabase/pet_id_xxxxx/
+        // the content of the dir /tmp/<user>/opencog/agent_db/pet_id_xxxxx/
         // to the bin dir of this test and change the id in the Pet class instantiation
         // bellow. Compile and run the test
         SavingLoading savingLoading;

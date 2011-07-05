@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world-definition
-    xmlns="http://www.vettalabs.com/petaverse"
+    xmlns="http://www.opencog.org/embodiment"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.vettalabs.com/petaverse VirtualWorld.xsd">
+    xsi:schemaLocation="http://www.opencog.org/embodiment VirtualWorld.xsd">
     <entity-info>
         <entity-object name="petHome" type="object" noisy="false" small="false"
                        edible="false" movable="false" 

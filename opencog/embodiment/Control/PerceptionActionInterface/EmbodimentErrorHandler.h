@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/PerceptionActionInterface/PetaverseErrorHandler.h
+ * opencog/embodiment/Control/PerceptionActionInterface/EmbodimentErrorHandler.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,11 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PETAVERSES_ERROR_HANDLER_H_
-#define PETAVERSES_ERROR_HANDLER_H_
-/**
- * This is an extension of ErrorHandler to log the parse errors according with Petaverse log policy.
- */
+#ifndef EMBODIMENT_ERROR_HANDLER_H_
+#define EMBODIMENT_ERROR_HANDLER_H_
 
 #include <xercesc/sax/ErrorHandler.hpp>
 #include <xercesc/sax/SAXParseException.hpp>
@@ -33,15 +30,21 @@
 
 namespace opencog { namespace pai {
 
-class PetaverseErrorHandler : public XERCES_CPP_NAMESPACE::ErrorHandler
+using XERCES_CPP_NAMESPACE::ErrorHandler;
+using XERCES_CPP_NAMESPACE::SAXParseException;
+
+/**
+ * This is an extension of ErrorHandler to log the parse errors according with OpenCog log policy.
+ */
+class EmbodimentErrorHandler : public ErrorHandler
 {
-    void warning(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
-    void error(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
-    void fatalError(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
+    void warning(const SAXParseException& exc);
+    void error(const SAXParseException& exc);
+    void fatalError(const SAXParseException& exc);
     void resetErrors();
 
 public:
-    PetaverseErrorHandler() {
+    EmbodimentErrorHandler() {
         PAIUtils::initializeXMLPlatform();
     }
 
@@ -49,4 +52,4 @@ public:
 
 } } // namespace opencog::pai
 
-#endif // PETAVERSES_ERROR_HANDLER_H_
+#endif // EMBODIMENT_ERROR_HANDLER_H_

@@ -89,11 +89,12 @@ public:
     void setAtomSpace(AtomSpace *atomSpace);
 
     /**
-     * Given a category and a behavior description, this method computes the odds that behavior description belongs to the category,
+     * Given a category and a behavior description, this method computes the
+     * odds that behavior description belongs to the category,
      * answering with a [0,1] float.
      *
-     * The algorithm used in this method is described in the project's TWiki page under the topic BehaviorSimilarityAlgorithm
-     * (https://extranet.vettalabs.com:8443/bin/view/Petaverse/BehaviorSimilarityAlgorithm)
+     * The algorithm used in this method is described in OpenCog's wikipage
+     * under the topic BehaviorSimilarityAlgorithm
      *
      * @param behaviorDescription CompositeBehaviorDescription to be evaluated
      * @param category BehaviorCategory to be considered

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://proxy.esheepco.com/metadata/common"
-            xmlns:common="http://proxy.esheepco.com/metadata/common"
+            targetNamespace="http://www.opencog.org/metadata/common"
+            xmlns:common="http://www.opencog.org/metadata/common"
             elementFormDefault="unqualified"
             attributeFormDefault="unqualified">
 

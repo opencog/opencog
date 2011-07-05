@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://proxy.esheepco.com/brain"
-            xmlns:pet="http://proxy.esheepco.com/brain"
-            xmlns:common="http://proxy.esheepco.com/metadata/common"
-            xmlns:action="http://proxy.esheepco.com/metadata/action"
+            targetNamespace="http://www.opencog.org/brain"
+            xmlns:pet="http://www.opencog.org/brain"
+            xmlns:common="http://www.opencog.org/metadata/common"
+            xmlns:action="http://www.opencog.org/metadata/action"
             elementFormDefault="unqualified"
             attributeFormDefault="unqualified">
 
-    <xsd:import namespace="http://proxy.esheepco.com/metadata/common"
+    <xsd:import namespace="http://www.opencog.org/metadata/common"
                 schemaLocation="CommonMetadata.xsd"/>
 
-    <xsd:import namespace="http://proxy.esheepco.com/metadata/action"
+    <xsd:import namespace="http://www.opencog.org/metadata/action"
                 schemaLocation="PetActionMetadata.xsd"/>    
 
     <xsd:annotation>
@@ -46,9 +46,9 @@
         <xsd:attribute name="version" type="xsd:string" use="optional"/>
     </xsd:complexType>
 
-    <xsd:element name="petaverse-msg" type="pet:PetaverseMsgType"/>
+    <xsd:element name="embodiment-msg" type="pet:EmbodimentMsgType"/>
 
-    <xsd:complexType name="PetaverseMsgType">
+    <xsd:complexType name="EmbodimentMsgType">
         <xsd:sequence>
             <xsd:choice minOccurs="0" maxOccurs="unbounded">
                 <xsd:element name="map-info" type="pet:MapInfoType" minOccurs="1" maxOccurs="1"/>

@@ -51,32 +51,34 @@ bool PetActionSchema::isPetAction() const
 }
 
 /**
- * This is the map from the actions (for similarity purposes) at https://extranet.vettalabs.com:8443/bin/view/Petaverse/PetPredicateSimilarityMatrix
- * to the action schemata defined at https://extranet.vettalabs.com:8443/bin/view/Petaverse/SchemaVocabulary
-
- goto_obj(object)
- grab(object)        => Status grab(EntityID id, float RangeRadius)
- step_forward
- step_backward
- rotate_left
- rotate_right
- jump                => void jump(float theta, Vector velocity)
-* drop                => void drop()
- grab                => Status grab(EntityID id, float RangeRadius)
-* sniff               => void sniff([EntityID id, short bodyPart])
-* bark                => void bark([EntityID id])
-* look_up_turn_head   => void look_up_turn_head()
-* bare_teeth          => void bareTeeth([EntityID id])
- back_flip
-* wag                 => void wag([float duration])
-* stretch             => void stretch()
-* sit                 => void sit([short duration])
-* beg                 => void beg()
-* heel                => void heel()
- random_step
-
-**/
-
+ * This is the map from the actions (for similarity purposes) at
+ * https://extranet.vettalabs.com:8443/bin/view/Petaverse/PetPredicateSimilarityMatrix
+ * (no idea what the equivalent link on the opencog wiki should be...)
+ * to the action schemata defined at
+ * http://wiki.opencog.org/w/SchemaVocabulary_%28Embodiment%29
+ *
+ * 
+ *  goto_obj(object)
+ *  grab(object)        => Status grab(EntityID id, float RangeRadius)
+ *  step_forward
+ *  step_backward
+ *  rotate_left
+ *  rotate_right
+ *  jump                => void jump(float theta, Vector velocity)
+ *  drop                => void drop()
+ *  grab                => Status grab(EntityID id, float RangeRadius)
+ *  sniff               => void sniff([EntityID id, short bodyPart])
+ *  bark                => void bark([EntityID id])
+ *  look_up_turn_head   => void look_up_turn_head()
+ *  bare_teeth          => void bareTeeth([EntityID id])
+ *  back_flip
+ *  wag                 => void wag([float duration])
+ *  stretch             => void stretch()
+ *  sit                 => void sit([short duration])
+ *  beg                 => void beg()
+ *  heel                => void heel()
+ *  random_step
+ */
 combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& arguments) const throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     PetAction action(actionType);

@@ -105,11 +105,11 @@ protected:
             "BACK_TRACE_LOG_LEVEL",         "error",
             
             // paths
-            "LOG_DIR",                      "/tmp/$USER/Petaverse/Logs",
-            "MESSAGE_DIR",                  "/tmp/$USER/Petaverse/queue",
-            "PET_DATABASE",                 "/tmp/$USER/Petaverse/PetDatabase",
-            "PROXY_DATABASE_DIR",           "/tmp/$USER/Petaverse/ProxyDataBase",
-            "ROUTER_DATABASE_DIR",          "/tmp/$USER/Petaverse/RouterDataBase",
+            "LOG_DIR",                      "/tmp/$USER/opencog/log",
+            "MESSAGE_DIR",                  "/tmp/$USER/opencog/queue",
+            "PET_DATABASE",                 "/tmp/$USER/opencog/agent_db",
+            "PROXY_DATABASE_DIR",           "/tmp/$USER/opencog/proxy_db",
+            "ROUTER_DATABASE_DIR",          "/tmp/$USER/opencog/router_db",
             
             // filenames
             "PET_DUMP",                     "pet.dump",

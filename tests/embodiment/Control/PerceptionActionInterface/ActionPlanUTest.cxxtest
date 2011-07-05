@@ -83,11 +83,11 @@ public:
         const char* expectedPVPMessages[NUM_ACTIONS+1] = {
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://proxy.esheepco.com/brain\" entity-id=\"0\" id=\"10\"/>\n"
+            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" entity-id=\"0\" id=\"10\"/>\n"
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://proxy.esheepco.com/brain\" entity-id=\"1\" id=\"10\">\n"
+            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" entity-id=\"1\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"
@@ -95,7 +95,7 @@ public:
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://proxy.esheepco.com/brain\" entity-id=\"2\" id=\"10\">\n"
+            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" entity-id=\"2\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"
@@ -113,7 +113,7 @@ public:
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://proxy.esheepco.com/brain\" entity-id=\"3\" id=\"10\">\n"
+            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" entity-id=\"3\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"
@@ -133,7 +133,7 @@ public:
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://proxy.esheepco.com/brain\" entity-id=\"4\" id=\"10\">\n"
+            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" entity-id=\"4\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"
@@ -159,7 +159,7 @@ public:
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://proxy.esheepco.com/brain\" entity-id=\"5\" id=\"10\">\n"
+            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" entity-id=\"5\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"

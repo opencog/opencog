@@ -1,9 +1,9 @@
 /*
- * opencog/embodiment/Control/PerceptionActionInterface/PetaverseDOMParser.h
+ * opencog/embodiment/Control/PerceptionActionInterface/EmbodimentDOMParser.h
  *
+ * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Novamente team
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PETAVERSES_DOM_PARSERT_H_
-#define PETAVERSES_DOM_PARSERT_H_
+#ifndef EMBODIMENT_DOM_PARSER_H_
+#define EMBODIMENT_DOM_PARSER_H_
 
 #include <xercesc/parsers/XercesDOMParser.hpp>
 #include "PAIUtils.h"
@@ -31,16 +31,16 @@ namespace opencog { namespace pai {
 
 /**
  * This is an extension of XercesDOMParser to log the parse errors according
- * with Petaverse log policy.
+ * with Embodiment log policy.
  */
-class PetaverseDOMParser : public XERCES_CPP_NAMESPACE::XercesDOMParser
+class EmbodimentDOMParser : public XERCES_CPP_NAMESPACE::XercesDOMParser
 {
 
 public:
-    PetaverseDOMParser() {
+    EmbodimentDOMParser() {
         PAIUtils::initializeXMLPlatform();
     }
-    virtual ~PetaverseDOMParser() {};
+    virtual ~EmbodimentDOMParser() {};
 
     void error(const unsigned int    errCode,
                const XMLCh *const   errDomain,
@@ -55,4 +55,4 @@ public:
 
 } } // namespace opencog::pai
 
-#endif // PETAVERSES_DOM_PARSERT_H_
+#endif // EMBODIMENT_DOM_PARSER_H_

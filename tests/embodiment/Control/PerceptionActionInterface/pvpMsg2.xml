@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:petaverse-msg xmlns:pet="http://proxy.esheepco.com/brain">
+<pet:embodiment-msg xmlns:pet="http://www.opencog.org/brain">
     <pet-signal pet-id="1" name="whatever" status="done" action-plan-id="10" timestamp="2007-06-18T20:15:02.000-07:00"/>
     <pet-signal pet-id="1" name="whatever" status="done" action-plan-id="11" sequence = "1" timestamp="2007-06-18T20:15:02.000-07:00"/>
      <pet-signal pet-id="1" name="whatever" status="done" action-plan-id="12" sequence = "1" timestamp="2007-06-18T20:15:02.000-07:00"/>
@@ -149,5 +149,5 @@
            <rotation pitch="0" roll="0" yaw="2.5"/>
        </param>
     </object-signal>
-</pet:petaverse-msg>
+</pet:embodiment-msg>
 

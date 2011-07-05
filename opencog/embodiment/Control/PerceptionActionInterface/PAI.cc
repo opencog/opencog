@@ -54,8 +54,8 @@
 #include "PAI.h"
 #include "PAIUtils.h"
 #include "PVPXmlConstants.h"
-#include "PetaverseDOMParser.h"
-#include "PetaverseErrorHandler.h"
+#include "EmbodimentDOMParser.h"
+#include "EmbodimentErrorHandler.h"
 
 using XERCES_CPP_NAMESPACE::XMLString;
 using XERCES_CPP_NAMESPACE::DOMDocument;
@@ -86,7 +86,7 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
     latestSimWorldTimestamp = 0;
 
     // Set up the xml parser
-    parser = new PetaverseDOMParser();
+    parser = new EmbodimentDOMParser();
     parser->setErrorHandler(&errorHandler);
 
     // The following lines enable validation
@@ -98,7 +98,7 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 //    parser->setDoNamespaces(false);
     parser->setDoSchema(true);
 #if 1 // Add the XSD file to be used for xml validation   
-#define XSD_NAMESPACE "http://proxy.esheepco.com/brain"
+#define XSD_NAMESPACE "http://www.opencog.org/brain"
 #define XSD_FILE_NAME "BrainProxyAxon.xsd"
 
     if (fileExists(XSD_FILE_NAME))  {
@@ -220,7 +220,7 @@ void PAI::sendEmotionalFeelings(const std::string& petId, const std::map<std::st
     // creating XML DOC
     XMLCh namespaceURI[PAIUtils::MAX_TAG_LENGTH+1];
     XMLCh qualifiedName[PAIUtils::MAX_TAG_LENGTH+1];
-    XMLString::transcode("http://proxy.esheepco.com/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode("http://www.opencog.org/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
     XMLString::transcode(EMOTIONAL_FEELING_ELEMENT, qualifiedName, PAIUtils::MAX_TAG_LENGTH);
     DOMDocument* doc = PAIUtils::getDOMImplementation()->createDocument(
                 namespaceURI,

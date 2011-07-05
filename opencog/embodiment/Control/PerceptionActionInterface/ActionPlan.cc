@@ -114,7 +114,7 @@ unsigned int ActionPlan::size() const
 string ActionPlan::getPVPmessage(const std::string& petId) const
 {
 
-    XERCES_CPP_NAMESPACE::DOMDocument* xmlDoc = createPetaverseXMLDocument();
+    XERCES_CPP_NAMESPACE::DOMDocument* xmlDoc = createEmbodimentXMLDocument();
 
     XERCES_CPP_NAMESPACE::DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
 
@@ -131,7 +131,7 @@ string ActionPlan::getPVPmessage(const std::string& petId) const
 
 string ActionPlan::getPVPmessage(const std::string& petId, unsigned int actionSeqNum) const
 {
-    XERCES_CPP_NAMESPACE::DOMDocument* xmlDoc = createPetaverseXMLDocument();
+    XERCES_CPP_NAMESPACE::DOMDocument* xmlDoc = createEmbodimentXMLDocument();
 
     XERCES_CPP_NAMESPACE::DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
 
@@ -222,11 +222,11 @@ bool ActionPlan::hasFailed() const
  * Private methods used to create XML elements
  * --------------------------------------------
  */
-XERCES_CPP_NAMESPACE::DOMDocument* ActionPlan::createPetaverseXMLDocument() const throw (opencog::XMLException, std::bad_exception)
+XERCES_CPP_NAMESPACE::DOMDocument* ActionPlan::createEmbodimentXMLDocument() const throw (opencog::XMLException, std::bad_exception)
 {
     XMLCh namespaceURI[PAIUtils::MAX_TAG_LENGTH+1];
     XMLCh qualifiedName[PAIUtils::MAX_TAG_LENGTH+1];
-    XERCES_CPP_NAMESPACE::XMLString::transcode("http://proxy.esheepco.com/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
+    XERCES_CPP_NAMESPACE::XMLString::transcode("http://www.opencog.org/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::XMLString::transcode(ACTION_PLAN_ELEMENT, qualifiedName, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMDocument* doc = PAIUtils::getDOMImplementation()->createDocument(
                 namespaceURI,

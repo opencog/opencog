@@ -23,10 +23,6 @@
  */
 
 
-/* -Short description-
- * This agent implements another forgetting mechanism, way
- * simpler than Joel's forgetting agent. It mimmics the forgetting mechanism
- * used by Petaverse's novamente */
 
 #ifndef _OPENCOG_STI_DECAYING_AGENT_H
 #define _OPENCOG_STI_DECAYING_AGENT_H
@@ -40,6 +36,13 @@ namespace opencog
 
 class CogServer;
 
+/**
+ * This agent implements a simple forgetting mechanism that doesn't rely on the
+ * complexities of the full Economic attention allocation system.
+ *
+ * It's primary use is as part of the Embodiment system when we're not
+ * concerned with having to tune attention allocation.
+ */
 class STIDecayingAgent : public Agent
 {
 

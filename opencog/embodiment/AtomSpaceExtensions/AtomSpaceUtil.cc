@@ -628,8 +628,6 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
         const HandleSeq& ll_out,
         const TruthValue &tv, bool permanent, const Temporal &t)
 {
-    // truth criterion as defined in
-    // https://extranet.vettalabs.com:8443/bin/view/Petaverse/PetaverseCombo
     bool predBool = true;
     if (tv.getMean() >= 0.5) {
         predBool = false;

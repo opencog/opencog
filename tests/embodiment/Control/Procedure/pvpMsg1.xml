@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:petaverse-msg 
-  xmlns:pet="http://proxy.esheepco.com/brain"
+<pet:embodiment-msg 
+  xmlns:pet="http://www.opencog.org/brain"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://proxy.esheepco.com/brain BrainProxyAxon.xsd">
+  xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
     <map-info global-position-x="0" global-position-y="0" global-position-offset="256">
     <blip timestamp="2007-06-18T20:15:00.000-07:00" >
         <entity id="32f56136-7973-4703-915b-6ec1bf5c67fa" name="32f56136-7973-4703-915b-6ec1bf5c67fa" owner-id="Wynx" owner-name="Wynx" type="pet"/>
@@ -167,5 +167,5 @@
 		<param name="level" type="float" value="0.8"/>
 	</pet-signal>					
    
-</pet:petaverse-msg>
+</pet:embodiment-msg>
 

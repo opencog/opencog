@@ -52,7 +52,7 @@ XmlLoader::XmlLoader()
     parser->setDoNamespaces(true);
     parser->setDoSchema(true);
 
-#define XSD_NAMESPACE "http://www.vettalabs.com/petaverse"
+#define XSD_NAMESPACE "http://www.opencog.org/embodiment"
 #define XSD_FILE_NAME "VirtualWorld.xsd"
 
     if (fileExists(XSD_FILE_NAME)) {

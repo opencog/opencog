@@ -1,9 +1,8 @@
 # -----------------------------------------------------------------------------
-# Petaverse parameters configuratio file
-# Copyright(r) 2007 - Vettalabs / Novamente
+# OpenCog Embodiment parameters configuration file
 #
 # This file contains pair parameters configuration used to govern the execution
-# of the Petaverse system. All parameters configured in this file should have a 
+# of the OpenCog Embodiment system. All parameters configured in this file should have a 
 # default value presented in SystemParameters class
 # (src/Control/SystemParameters.cc). 
 #
@@ -70,9 +69,8 @@ MAX_OAC_PORT                    = 16340
 # period in cycles:
 #LOCAL_MAP_INTERFACE_UPDATE_PERIOD 10 
 
-# Log levels for each Petaverse component
+# Log levels for each embodiment component
 # Values: ERROR, WARN, INFO, DEBUG, FINE
-#
 LS_LOG_LEVEL                    = INFO
 OAC_LOG_LEVEL  	                = DEBUG
 ROUTER_LOG_LEVEL                = INFO
@@ -91,15 +89,15 @@ BACK_TRACE_LOG_LEVEL            = error
 TIMESTAMP_ENABLED_IN_LOGS       = true
 
 # Paths to pet database and log files. NOTE: Full paths should be provided
-PET_DATABASE                    = /tmp/$USER/Petaverse/PetDatabase
-LOG_DIR                         = /tmp/$USER/Petaverse/Logs
+PET_DATABASE                    = /tmp/$USER/opencog/agent_db
+LOG_DIR                         = /tmp/$USER/opencog/log
 
 # Path to message queue directory. NOTE: Full path and permission to write should exists
-MESSAGE_DIR                     = /tmp/$USER/Petaverse/queue
+MESSAGE_DIR                     = /tmp/$USER/opencog/queue
     
 # Path to router recovery files directory. NOTE: Full path and permission to write should exists
 #    
-ROUTER_DATABASE_DIR             = /tmp/$USER/Petaverse/RouterDatabase    
+ROUTER_DATABASE_DIR             = /tmp/$USER/opencog/router_db
 
 # Filenames for Petaveser dumpfiles and system
 #
@@ -305,8 +303,9 @@ PET_WALKING_SPEED               = 2.0
 #evanescence delay of has_said perception in time unit
 HAS_SAID_DELAY                  = 5000
 
-# lower bound (high age) of atoms in atomTable (default is -400, which corresponds to about 50 minutes of atom lifetime)
-# Changed to a higher bound (low age) due to performance issues after porting Petaverse code to Opencog
+# lower bound (high age) of atoms in atomTable (default is -400, which
+# corresponds to about 50 minutes of atom lifetime). Changed to a higher bound
+# (low age) due to performance issues.
 MIN_STI                        = -40
 
 # Reinforcement learning parameters

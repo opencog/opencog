@@ -637,7 +637,7 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
         return false;
     }
 
-    // message from petaverse proxy - send to PAI
+    // message from embodiment proxy - send to PAI
     if (msg->getFrom() == config().get("PROXY_ID")) {
         // @note:
         // The message type RAW is used for unity environment to handle dialog.

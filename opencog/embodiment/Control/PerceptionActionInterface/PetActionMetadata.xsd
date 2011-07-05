@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://proxy.esheepco.com/metadata/action"
-            xmlns:action="http://proxy.esheepco.com/metadata/action"
-            xmlns:common="http://proxy.esheepco.com/metadata/common"
+            targetNamespace="http://www.opencog.org/metadata/action"
+            xmlns:action="http://www.opencog.org/metadata/action"
+            xmlns:common="http://www.opencog.org/metadata/common"
             elementFormDefault="unqualified"
             attributeFormDefault="unqualified">
 
-    <xsd:import namespace="http://proxy.esheepco.com/metadata/common"
+    <xsd:import namespace="http://www.opencog.org/metadata/common"
                 schemaLocation="CommonMetadata.xsd"/>
 
     <xsd:element name="action-macro-metadata" type="action:ActionMacroMetadataType">

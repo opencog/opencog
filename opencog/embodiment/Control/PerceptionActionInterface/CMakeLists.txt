@@ -11,8 +11,8 @@ ADD_LIBRARY (PAI
 	ActionPlan
 	PAI
 	ActionPlanDispatcher
-	PetaverseDOMParser
-	PetaverseErrorHandler
+    EmbodimentDOMParser
+    EmbodimentErrorHandler
 )
 
 SET(PAI_LINK_LIBS

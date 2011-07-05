@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:petaverse-msg xmlns:pet="http://proxy.esheepco.com/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://proxy.esheepco.com/brain BrainProxyAxon.xsd">
+<pet:embodiment-msg xmlns:pet="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
 <instruction pet-id="817751" avatar-id="779547" timestamp="2009-05-29T18:40:02.437" content-type="SPECIFIC_COMMAND" target-mode="SCAVENGER_HUNT_MODE">
 <sentence length="12">lets play sh</sentence>
 </instruction>
-</pet:petaverse-msg>
+</pet:embodiment-msg>

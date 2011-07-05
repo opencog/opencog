@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:petaverse-msg xmlns:pet="http://proxy.esheepco.com/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://proxy.esheepco.com/brain BrainProxyAxon.xsd">
+<pet:embodiment-msg xmlns:pet="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
 <instruction pet-id="816951" avatar-id="779547" timestamp="2009-05-29T18:29:57.187" content-type="FACT" target-mode="ANY">
 <sentence length="22">go fetch the blue pill</sentence>
 <parsed-sentence length="27364"><![CDATA[(ReferenceLink (stv 1.0 1.0)
@@ -986,4 +986,4 @@
 )
 (ListLink   (AnchorNode "# New Parsed Sentence")   (SentenceNode "sentence@364a3d3d-f42f-4c5d-b3b0-73f5b824581d")); END OF SENTENCE]]></parsed-sentence>
 </instruction>
-</pet:petaverse-msg>
+</pet:embodiment-msg>

@@ -28,7 +28,7 @@ allocation among atoms within OpenCog.
   - ForgettingAgent - "forgets" atoms with low LTI.
   - HebbianUpdatingAgent - updates the weights of HebbianLinks based on what
     is in the Attentional focus of the OpenCog instance at the time it's run. 
-  - STIDecayingAgent - legacy forgetting mechanism (Used in Petaverse).
+  - STIDecayingAgent - simplified forgetting mechanism (Used by Embodiment).
 
 - AttentionValues - Each atom has an AttentionValue to record it's Short
 Importance (STI) and Long Term Importance (LTI).

@@ -28,7 +28,7 @@
  */
 
 // xml elements
-#define FROM_PROXY_ROOT_ELEMENT  "petaverse-msg"
+#define FROM_PROXY_ROOT_ELEMENT  "embodiment-msg"
 #define ENTITY_ELEMENT           "entity"
 #define POSITION_ELEMENT         "position"
 #define VELOCITY_ELEMENT         "velocity"

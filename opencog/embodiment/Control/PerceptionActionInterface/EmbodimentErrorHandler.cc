@@ -1,9 +1,9 @@
 /*
- * opencog/embodiment/Control/PerceptionActionInterface/PetaverseErrorHandler.cc
+ * opencog/embodiment/Control/PerceptionActionInterface/EmbodimentErrorHandler.cc
  *
+ * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Novamente team
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,17 +21,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PetaverseErrorHandler.h"
+#include "EmbodimentErrorHandler.h"
 #include <opencog/util/Logger.h>
 
 using namespace opencog::pai;
 
-void PetaverseErrorHandler::warning(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
+void EmbodimentErrorHandler::warning(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
 {
     char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
     char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
     char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().warn("PetaverseErrorHandling - Got a warning while parsing XML: %s\n"
+    logger().warn("EmbodimentErrorHandling - Got a warning while parsing XML: %s\n"
                  "Line: %d\n"
                  "Column: %d\n"
                  //"PublicId: %s\n"
@@ -47,34 +47,12 @@ void PetaverseErrorHandler::warning(const XERCES_CPP_NAMESPACE::SAXParseExceptio
     XERCES_CPP_NAMESPACE::XMLString::release(&systemIdStr);
 }
 
-void PetaverseErrorHandler::error(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
+void EmbodimentErrorHandler::error(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
 {
     char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
     char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
     char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().error("PetaverseErrorHandling - Got an error while parsing XML: %s\n"
-                 "Line: %d\n"
-                 "Column: %d\n"
-                 //"PublicId: %s\n"
-                 "SystemId: %s\n"
-                 , errorMsg
-                 , exc.getLineNumber()
-                 , exc.getColumnNumber()
-                 //, publicIdStr
-                 , systemIdStr
-                );
-    XERCES_CPP_NAMESPACE::XMLString::release(&errorMsg);
-    XERCES_CPP_NAMESPACE::XMLString::release(&publicIdStr);
-    XERCES_CPP_NAMESPACE::XMLString::release(&systemIdStr);
-    throw exc;
-}
-
-void PetaverseErrorHandler::fatalError(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
-{
-    char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
-    char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
-    char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().error("PetaverseErrorHandling - Got a fatal error while parsing XML: %s\n"
+    logger().error("EmbodimentErrorHandling - Got an error while parsing XML: %s\n"
                  "Line: %d\n"
                  "Column: %d\n"
                  //"PublicId: %s\n"
@@ -91,8 +69,30 @@ void PetaverseErrorHandler::fatalError(const XERCES_CPP_NAMESPACE::SAXParseExcep
     throw exc;
 }
 
-void PetaverseErrorHandler::resetErrors()
+void EmbodimentErrorHandler::fatalError(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
 {
-    logger().info("PetaverseErrorHandling - resetErrors() called\n");
+    char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
+    char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
+    char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
+    logger().error("EmbodimentErrorHandling - Got a fatal error while parsing XML: %s\n"
+                 "Line: %d\n"
+                 "Column: %d\n"
+                 //"PublicId: %s\n"
+                 "SystemId: %s\n"
+                 , errorMsg
+                 , exc.getLineNumber()
+                 , exc.getColumnNumber()
+                 //, publicIdStr
+                 , systemIdStr
+                );
+    XERCES_CPP_NAMESPACE::XMLString::release(&errorMsg);
+    XERCES_CPP_NAMESPACE::XMLString::release(&publicIdStr);
+    XERCES_CPP_NAMESPACE::XMLString::release(&systemIdStr);
+    throw exc;
+}
+
+void EmbodimentErrorHandler::resetErrors()
+{
+    logger().info("EmbodimentErrorHandling - resetErrors() called\n");
 }
 

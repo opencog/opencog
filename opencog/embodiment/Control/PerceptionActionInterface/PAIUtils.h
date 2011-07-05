@@ -109,7 +109,7 @@ public:
     static tm getTimeInfo( unsigned long timestamp );
 
     /**
-     * Return the time factor used to converse seconds into petaverse time
+     * Return the time factor used to convert seconds into embodiment time
      * representation.
      */
     static int getTimeFactor();

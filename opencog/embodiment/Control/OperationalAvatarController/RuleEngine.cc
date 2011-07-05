@@ -1797,7 +1797,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
     unsigned long timeWindow =
         boost::numeric_cast<unsigned long>(config().get_double("RL_TIME_WINDOW") *
                                            pai::PAIUtils::getTimeFactor());
-    float petaverseTimePerSlot =
+    float embodimentTimePerSlot =
         (float)timeWindow / this->gaussianVector.size();
 
     // avoid usigned long underflow
@@ -1873,7 +1873,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
             // timestamp value from time window.
             unsigned int index =
                 (int)floor((pair.getTemporal()->getUpperBound() - t)
-                           / petaverseTimePerSlot);
+                           / embodimentTimePerSlot);
             if (index > this->gaussianVector.size()) {
                 logger().error(
                              "RuleEngine - Calculated index '%d' greater"
@@ -1938,7 +1938,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
             // default, executing actions started within the time window
         } else {
             unsigned int index = (int)floor((executingSchemaTimestamp - t)
-                                            / petaverseTimePerSlot);
+                                            / embodimentTimePerSlot);
 
             if (index <  this->gaussianVector.size()) {
                 applyReinforcement(type, schemaRunner->getExecutingSchemaImplicationLink(), this->gaussianVector[index]);

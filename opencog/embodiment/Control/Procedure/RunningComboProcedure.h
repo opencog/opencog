@@ -24,17 +24,18 @@
 #ifndef _RUNNING_PROCEDURE_H
 #define _RUNNING_PROCEDURE_H
 
-/***
-    encapsulates a procedure currently running inside some ComboInterpreter
-    (that returns an action result - non-action procs should be run via the
-    combo::eval or combo::eval_throws functions)
+/**
+ * encapsulates a procedure currently running inside some ComboInterpreter
+ *  (that returns an action result - non-action procs should be run via the
+ *  combo::eval or combo::eval_throws functions)
+ *
+ * do YOU have any procedures running? then you'd better go to catch them!
+ *
+ * for general design documentation, see the section "Interpreter Design" in
+ *  the document Embodiment Combo Dialect:
+ *  http://wiki.opencog.org/w/EmbodimentCombo_%28Embodiment%29#Interpreter_Design
+ */
 
-    do YOU have any procedures running? then you'd better go to catch them!
-
-    for general design documentation, see the section "Interpreter Desgin" in
-    the document Petaverse Combo Dialect:
-    https://extranet.vettalabs.com:8443/bin/view/Petaverse/PetaverseCombo
-***/
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
@@ -48,11 +49,9 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapper.h>
 
+namespace Procedure {
+
 using namespace opencog::pai;
-
-namespace Procedure
-{
-
 using namespace opencog::world;
 
 struct RunningComboProcedure : public combo::Evaluator {
@@ -150,13 +149,16 @@ protected:
     WorldWrapperBase& _ww;
 
     combo::combo_tree _tr;
-    sib_it _it; //_it is kept pointing at the tree node to be executed next; an
-    //invalid iterator indicates nothing more to execute. for an
-    //action_action_if conditional, pointing at the root of the
-    //first child indicates that the condition branch has been
-    //fully evaluated but not acted on yet (whereas pointing at the
-    //conditional node itself indicates that the condition branch
-    //has not yet been evaluated
+    
+    /** _it is kept pointing at the tree node to be executed next; an
+     * invalid iterator indicates nothing more to execute. for an
+     * action_action_if conditional, pointing at the root of the
+     * first child indicates that the condition branch has been
+     * fully evaluated but not acted on yet (whereas pointing at the
+     * conditional node itself indicates that the condition branch
+     * has not yet been evaluated.
+     */
+    sib_it _it;
 
     opencog::RandGen& _rng;
 
@@ -174,34 +176,38 @@ protected:
     }
     bool execSeq(sib_it, sib_it, combo::variable_unifier& vu);
 
-    //returns true iff an action plan gets executed
+    /// @return true iff an action plan gets executed
     bool beginCompound();
-    //returns true iff an action plan gets executed
+    /// @return true iff an action plan gets executed
     bool continueCompound();
 
-    //update _it to go to the next point of execution
+    /// update _it to go to the next point of execution
     void moveOn();
 
-    //for evaluating procedures inplace
-    void expand_procedure_call(combo::combo_tree::iterator) throw (opencog::ComboException, opencog::AssertionException, std::bad_exception);
+    /// for evaluating procedures inplace
+    void expand_procedure_call(combo::combo_tree::iterator) throw
+        (opencog::ComboException, opencog::AssertionException, std::bad_exception);
     void expand_and_evaluate_subtree(combo::combo_tree::iterator it, combo::variable_unifier&);
 
 private:
-    ///initialization - only called from ctors
+    /// initialization - only called from ctors
     void init(const std::vector<combo::vertex>&);
 
-    bool _doesSendDefinitePlan; //true if the combo interpreter
-    //evaluate the indefinite aguments
-    //of a plan during interpretation
-    //(that is the plan once sent contains only
-    //definite objects)
-    //false if the combo interpreter
-    //sends directly unevaluated indefinite objects
-    //in the plan
-    //this is escentially used by NoSpaceLife
-    //in order to deal with the random operators
-    //optimization, to avoid Monte Carlos
-    //simulations
+    /**
+     * true if the combo interpreter
+     * evaluates the indefinite aguments
+     * of a plan during interpretation
+     * (that is the plan once sent contains only
+     * definite objects)
+     * false if the combo interpreter
+     * sends directly unevaluated indefinite objects
+     * in the plan
+     * this is escentially used by NoSpaceLife
+     * in order to deal with the random operators
+     * optimization, to avoid Monte Carlos
+     * simulations
+     */
+    bool _doesSendDefinitePlan;
 
     // unifier that holds options to be tested when a wild card character "_*_" is
     // used in a combo script

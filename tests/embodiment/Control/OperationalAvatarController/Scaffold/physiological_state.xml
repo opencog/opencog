@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:petaverse-msg xmlns:pet="http://proxy.esheepco.com/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://proxy.esheepco.com/brain BrainProxyAxon.xsd">
+<pet:embodiment-msg xmlns:pet="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
 <pet-signal pet-id="138765" name="energy" timestamp="2011-06-15T14:35:52.074">
 <param name="level" type="float" value="0.83" />
 </pet-signal>
@@ -18,4 +18,4 @@
 <pet-signal pet-id="138765" name="fitness" timestamp="2011-06-15T14:35:52.074">
 <param name="level" type="float" value="0.728292824074074" />
 </pet-signal>
-</pet:petaverse-msg>
+</pet:embodiment-msg>

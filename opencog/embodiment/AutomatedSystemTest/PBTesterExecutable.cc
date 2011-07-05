@@ -3,7 +3,6 @@
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Welter Luigi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,19 +22,19 @@
 
 
 /**
- * PBTester.cc
  * This program performs automated system tests on PB-side of Petaverse code.
  * It simulates the PVP Proxy by reading from a file a sequence of messages to be sent and
- * received to/from Petaverse ROUTER.
+ * received to/from embodiment ROUTER.
  *
- * Author: Welter Luigi
+ * @author: Welter Luigi
  */
 
-
 #include "PBTester.h"
+
 #include <exception>
 #include <unistd.h>
 #include <opencog/util/files.h>
+
 #include "GoldStdReaderAgent.h"
 #include "TestConfig.h"
 

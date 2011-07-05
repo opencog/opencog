@@ -172,7 +172,8 @@ private:
      *
      * @return The DOMDocument just created.
      */
-    XERCES_CPP_NAMESPACE::DOMDocument* createPetaverseXMLDocument() const throw (opencog::XMLException, std::bad_exception);
+    XERCES_CPP_NAMESPACE::DOMDocument* createEmbodimentXMLDocument() const
+        throw (opencog::XMLException, std::bad_exception);
 
     /**
      * Create a action-plan element in the DOMDocument XML document. An

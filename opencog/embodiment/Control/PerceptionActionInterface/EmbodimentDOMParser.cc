@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/PerceptionActionInterface/PetaverseDOMParser.cc
+ * opencog/embodiment/Control/PerceptionActionInterface/EmbodimentDOMParser.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,13 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PetaverseDOMParser.h"
+#include "EmbodimentDOMParser.h"
 #include <opencog/util/Logger.h>
 #include <xercesc/dom/DOMException.hpp>
 
 using namespace opencog::pai;
 
-void PetaverseDOMParser::error (const unsigned int    errCode,
+void EmbodimentDOMParser::error (const unsigned int    errCode,
                                 const XMLCh *const   errDomain,
                                 const ErrTypes  type,
                                 const XMLCh *const   errorText,
@@ -42,7 +42,7 @@ void PetaverseDOMParser::error (const unsigned int    errCode,
     char* errorTextStr  = XERCES_CPP_NAMESPACE::XMLString::transcode(errorText);
     char* systemIdStr  = XERCES_CPP_NAMESPACE::XMLString::transcode(systemId);
     char* publicIdStr  = XERCES_CPP_NAMESPACE::XMLString::transcode(publicId);
-    logger().error("PetaverseDOMParser - XML Parser error:"
+    logger().error("EmbodimentDOMParser - XML Parser error:"
                  "\n  code = %u"
                  "\n  domain = %s"
                  "\n  type = %d"
