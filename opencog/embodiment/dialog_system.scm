@@ -6,6 +6,7 @@
 ; ./doc/dialog_system/DialogueSystemSketch_v3.pdf
 ;  
 ; @note:  It should be loaded after rules_core.scm and xxx_rules.scm
+;         Some code are directly copied from Linas's NLP pipeline 
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
 ; @date   2011-06-23
@@ -280,5 +281,82 @@
 (ReferenceLink (stv 1.0 1.0) 
     (UtteranceNode "utterance_sentences")
     (ListLink)
+)
+
+; -----------------------------------------------------------------------
+; Release items attached to the named anchor
+;
+(define (release-from-anchor anchor)
+   (for-each (lambda (x) (cog-delete x))
+      (cog-incoming-set anchor)
+   )
+)
+
+; -----------------------------------------------------------------------
+; global vars:
+; new-sent anchor points at the node to which all new sentences are connected
+;
+(define *new-parsed-sent-anchor* (AnchorNode "# New Parsed Sentence" (stv 1 1)))
+
+; Return the list of SentenceNodes that are attached to the 
+; freshly-parsed anchor.  This list will be non-empty if relex-parse
+; has been recently run. This list can be emptied with the call
+; release-new-parsed-sent below.
+;
+(define (get-new-parsed-sentences)
+	(cog-chase-link 'ListLink 'SentenceNode *new-parsed-sent-anchor*)
+)
+
+; release-new-parsed-sents deletes the links that anchor sentences to 
+; to new-parsed-sent anchor.
+;
+(define (release-new-parsed-sents)
+	(release-from-anchor *new-parsed-sent-anchor*)
+)
+
+; -----------------------------------------------------------------------
+; get-parses-of-sents -- return parses of the sentences
+; Given a list of sentences, return a list of parses of those sentences.
+; That is, given a List of SentenceNode's, return a list of ParseNode's
+; associated with those sentences.
+;
+; OPENCOG RULE: FYI this could be easily implemented as a pattern match,
+; and probably should be, when processing becomes fully rule-driven.
+
+(define (get-parses-of-sents sent-list)
+	(define (get-parses sent)
+		(cog-chase-link 'ParseLink 'ParseNode sent)
+	)
+	(concatenate! (map get-parses sent-list))
+)
+
+; -----------------------------------------------------------------------
+; attach-parses-to-anchor -- given sentences, attach the parses to anchor.
+; 
+; Given a list of sentences i.e. a list of SentenceNodes, go through them,
+; locate the ParseNodes, and attach the parse nodes to the anchor.
+;
+; return value is undefined (no return value).
+;
+; OPENCOG RULE: FYI this could be easily implemented as a pattern match,
+; and probably should be, when processing becomes fully rule-driven.
+;
+(define (attach-parses-to-anchor sent-list anchor)
+
+	;; Attach all parses of a sentence to the anchor.
+	(define (attach-parses sent)
+		;; Get list of parses for the sentence.
+		(define (get-parses sent)
+			(cog-chase-link 'ParseLink 'ParseNode sent)
+		)
+		;; Attach all parses of the sentence to the anchor.
+		;; This must have a true/confident TV so that the pattern
+		;; matcher will find and use this link.
+		(for-each (lambda (x) (ListLink anchor x (stv 1 1)))
+			(get-parses sent)
+		)
+	)
+	;; Attach all parses of all sentences to the anchor.
+	(for-each attach-parses sent-list)
 )
 
