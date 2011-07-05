@@ -1,5 +1,7 @@
 ; opencog/embodiment/scm/language-comprehension.scm
 ;
+; TODO: many of the functions can be repalced by using the pattern matcher
+; 
 ; Copyright (C) 2009 Novamente LLC
 ; All Rights Reserved
 ; Author(s): Samir Araujo
@@ -227,7 +229,7 @@
            (EvaluationLink (stv 1 1)
             (PredicateNode "knownSpatialRelations" )
             (cog-emb-compute-spatial-relations 
-             (get-sentence-author (car (get-latest-sentences)))
+             (get-sentence-author (car (get-new-parsed-sentences)))
              (get-grounded-element-value (get-frame-instance-element-value (get-frame-instance-element-predicate predicateNode "Figure")))
              (get-grounded-element-value (get-frame-instance-element-value (get-frame-instance-element-predicate predicateNode "Ground")))
              (get-grounded-element-value (get-frame-instance-element-value (get-frame-instance-element-predicate predicateNode "Ground_2")))
@@ -312,20 +314,10 @@
 
 ; Retrieve a list containing the sentences that belong to the most
 ; recent parsed text
+;
+; TODO: remove 'get-latest-sentences' and use 'get-new-parsed-sentences' directly
 (define (get-latest-sentences)
-  (let ((anchors 
-         (cog-get-link 
-          'ListLink 
-          'SentenceNode 
-          (AnchorNode "# New Parsed Sentence") 
-          ) 
-         ) 
-        )
-    (if (not (null? anchors))        
-        (gdr (car anchors) )
-        (list)
-        )
-    )  
+    (get-new-parsed-sentences)
 )
 
 ; Retrieve the node of the agent who says the given sentence
@@ -346,58 +338,82 @@
     )
   )
 
-; Retrieve a list containing the parses that belongs to the most
-; recent parsed sentences
+; Retrieve a list containing the parses (ParseNode) that belongs to the most
+; recent parsed sentences (SentenceNode)
+;
+; (ParseLink
+;     (ParseNode "sentence@2d19c7e7-2e02-4d5e-9cbe-6772174f3f4d_parse_0")
+;     (SentenceNode "sentence@2d19c7e7-2e02-4d5e-9cbe-6772174f3f4d")
+; )
+;
 (define (get-latest-parses)
-  (let ((parses (list)))
-    (map
-     (lambda (sentence)
-       (map 
-        (lambda (parse)          
-          (set! parses (append parses (list (gar parse) )))
-          )
-        (cog-get-link
-         'ParseLink
-         'ParseNode
-         sentence
-         )
-        )
-       )
-     (get-latest-sentences)
-     )
-    parses
+    (let ( (parse_node_list (list)) )
+         (map
+             (lambda (sentence)
+                 (map 
+                     (lambda (parse_link)          
+                         (set! parse_node_list
+                               (append parse_node_list (list (gar parse_link)) ) 
+                         )
+                     )
+                     ; Get ParseLink
+                     (cog-get-link 'ParseLink 'ParseNode sentence)
+                 )
+             ); lambda
+
+             ; Get a list of SenseNodes with (AnchorNode "# New Parsed Sentence")
+             (get-new-parsed-sentences)
+         ); map
+
+         ; return value
+         parse_node_list
     )
 )
 
 ; Retrieve a list containing the WordInstanceNodes that belongs to the most
 ; recent sentences parses
+;
+; (ReferenceLink (stv 1.0 1.0)
+;     (ParseNode "sentence@2d19c7e7-2e02-4d5e-9cbe-6772174f3f4d_parse_0")
+;     (ListLink
+;         (WordInstanceNode "humans@52c30b4d-5717-47cb-822d-b2caa44f94b9")
+;         (WordInstanceNode "have@0f223d17-31a6-49fe-9d37-350d50c53926")
+;         (WordInstanceNode "two@f6c2a2a2-232b-4e33-9c93-72f211b475d3")
+;         (WordInstanceNode "feet@bf71826c-487e-42df-a941-0ecd3c942a76")
+;     )
+; )
+;
 (define (get-latest-word-instance-nodes . parses)
-  (let ((wins (list)))
-    (map
-     (lambda (win)
-       (map
-        (lambda (refLink)
-          (set! wins (append wins (cog-outgoing-set (car (gdr refLink)) ) ) )
-          )
-        (cog-get-link
-         'ReferenceLink
-         'ListLink
-         win
-         )
-        )
-       )
-     (if (= (length parses) 0) 
-         (get-latest-parses) 
-         (if (list? (car parses))
-             (car parses)
-             parses
-             ) ; if
-         ) ; if     
-     ) ; map
-    wins
-    ) ; let
-  )
+    (let ( (word_instance_node_list (list)) )
+         (map
+             (lambda (parse_node)
+                 (map
+                     (lambda (reference_link)
+                         (set! word_instance_node_list
+                             (append word_instance_node_list 
+                                     (cog-outgoing-set (car (gdr reference_link)) ) 
+                             ) 
+                         )
+                     )
+                    
+                     ; Get a list of ReferenceLink containing parse_node
+                     (cog-get-link 'ReferenceLink 'ListLink parse_node)
+                 )
+             )
 
+             (if (= (length parses) 0) 
+                 (get-latest-parses) 
+                 (if (list? (car parses))
+                     (car parses)
+                     parses
+                 ); if
+             ); if     
+         ); map
+
+         ; return value
+         word_instance_node_list
+    ); let
+)
 
 ; Retrieve a list containing all the PredicateNodes, that represent
 ; Frames, which belong to the most recent parsed sentences
@@ -543,79 +559,105 @@
     )  
   )
 
-; Given a WordInstanceNode, this function will try
-; to find all the Corresponding SemeNodes.
-; SemeNodes can be grounded by WordInstanceNodes of
-; type nouns and pronouns, so only this two types
-; of WordInstanceNodes will return candidate SemeNodes
-; SemeNodes are connected to WordNodes, so getting 
-; the WordNode of the WordInstanceNode it is possible
-; to retrieve its SemeNodes. If the WordInstanceNode was a pronoun
-; the anaphoric suggestions will be used to build the SemeNodes list
-; Each WordInstanceNode, suggested in the anaphora, will have its 
-; WordNode evaluated and, consequently, all the SemeNodes related
-; to these WordNodes will become part of the final list
-; The final list contains not only the SemeNodes but its strengths
+; Given a WordInstanceNode, this function will try to find all the Corresponding
+; SemeNodes.
+;
+; SemeNodes can be grounded by WordInstanceNodes of type nouns and pronouns, so
+; only this two types of WordInstanceNodes will return candidate SemeNodes. 
+;
+; SemeNodes are connected to WordNodes, so getting the WordNode of the 
+; WordInstanceNode it is possible to retrieve its SemeNodes. 
+;
+; If the WordInstanceNode was a pronoun the anaphoric suggestions will be used
+; to build the SemeNodes list. Each WordInstanceNode, suggested in the anaphora,
+; will have its WordNode evaluated and, consequently, all the SemeNodes related 
+; to these WordNodes will become part of the final list .
+;
+; The final list contains not only the SemeNodes but its strengths 
 ; i.e. ( ( (SemeNode "1") . 0.03)
 ;        ( (SemeNode "2") . 0)
 ;        ( (SemeNode "3") . 1.) )
+;
 (define (get-candidates-seme-nodes wordInstanceNode)
-  (let ((wordInstanceNodes '())
-        (semeNodes '()))
+    (let ( (wordInstanceNodes '())
+           (semeNodes '())
+         )
     
-    (cond ( (not (null?
-                  (cog-link 
-                   'InheritanceLink
-                   wordInstanceNode
-                   (DefinedLinguisticConceptNode "pronoun")           
-                   ) ) )
-                   ; look for anaphoric reference
-            (let ((anaphoricSuggestions (get-anaphoric-suggestions wordInstanceNode) ))
-              (if (not (null? anaphoricSuggestions ) )
-                  (map
-                   (lambda (suggestedWin)
-                     (set! wordInstanceNodes (append wordInstanceNodes (list suggestedWin ) ) )
-                     )
-                   anaphoricSuggestions
-                   )
-                  (set! wordInstanceNodes (append wordInstanceNodes (list (cons wordInstanceNode 0 ) ) ) )
-                  )
-              ) ; let          
-            )
-          ( (not (null? 
-                  (cog-link 
-                   'PartOfSpeechLink ; else if
-                   wordInstanceNode
-                   (DefinedLinguisticConceptNode "noun" )
-                   ) ) )
-            (set! wordInstanceNodes (append wordInstanceNodes (list (cons wordInstanceNode 0 ) ) ) )
-            )
-          ); cond
+         (cond 
+             ( (not (null? (cog-link 
+                           'InheritanceLink
+                            wordInstanceNode
+                            (DefinedLinguisticConceptNode "pronoun")           
+                           ) 
+                    ) 
+                )
 
-    (map
-     (lambda (candidate)
-       (let* (
-              (noun (car candidate))
-              (strength (cdr candidate))
-              (groundedSemeNode (cog-get-link 'ReferenceLink 'SemeNode noun ))
-              )
-         (if (not (null? groundedSemeNode))
-             (set! semeNodes (append semeNodes (list (cons strength (list (gar (car groundedSemeNode)) ) ) )))
-             (let ((wordNode (get-word-node noun ) ) ) ; else
-               (if (not (null? wordNode))
-                   (set! semeNodes (append semeNodes (list (cons strength (get-seme-nodes-using-ontology wordNode)) ) ))
-                   ) ; if
-               ); let
-             ) ; if
-         ) ; let
-       )
-     wordInstanceNodes
-     ) ; map
+                ; look for anaphoric reference
+                (let ( (anaphoricSuggestions (get-anaphoric-suggestions wordInstanceNode) ) )
+                     (if (not (null? anaphoricSuggestions ) )
+                         (map
+                             (lambda (suggestedWin)
+                                 (set! wordInstanceNodes
+                                       (append wordInstanceNodes (list suggestedWin ) ) 
+                                 )
+                             )
+                             anaphoricSuggestions
+                         ); map
 
-    semeNodes
+                         (set! wordInstanceNodes
+                               (append wordInstanceNodes (list (cons wordInstanceNode 0 ) ) ) 
+                         )
+                     ); if
+                ); let          
+             )
+
+             ( (not (null? (cog-link 
+                           'PartOfSpeechLink 
+                            wordInstanceNode
+                            (DefinedLinguisticConceptNode "noun")
+                           )
+                    )
+                )
+
+                (set! wordInstanceNodes
+                      (append wordInstanceNodes (list (cons wordInstanceNode 0) ) )
+                )
+            )
+         ); cond
+
+        (map
+            (lambda (candidate)
+                (let* ( (noun (car candidate))
+                        (strength (cdr candidate))
+                        (groundedSemeNode (cog-get-link 'ReferenceLink 'SemeNode noun ))
+                      )
+
+                      (if (not (null? groundedSemeNode))
+                          (set! semeNodes
+                                (append semeNodes 
+                                        (list (cons strength (list (gar (car groundedSemeNode)) ) ) )
+                                )
+                          )
+
+                          (let ( (wordNode (get-word-node noun) ) 
+                               ) 
+                               (if (not (null? wordNode))
+                                   (set! semeNodes
+                                         (append semeNodes
+                                                 (list (cons strength (get-seme-nodes-using-ontology wordNode)) ) 
+                                         )
+                                   )
+                               ) ; if
+                          ); let
+                      ); if
+                ); let
+            )
+            wordInstanceNodes
+        ); map
+
+        semeNodes
     ); let
 )
-
 
 ; Remove duplicated elements from list
 (define (unique-list ls)
@@ -2024,115 +2066,152 @@
 ; and one SemeNode for each WordInstanceNode that was chosen by the Reference resolution
 ; process
 (define (resolve-reference)
-  (let ((objects '())
-        (resolvedReferences '())
-        (anaphoricSemeNodeStrength '())
-        (groundedRulesCounter '())
-        )    
-    (set! word-node-seme-nodes-cache '())
-    ; first retrieve all objects, from the latest sentence, to be evaluated
-    (map 
-     (lambda (win)
+    (let ( (objects '())
+           (resolvedReferences '())
+           (anaphoricSemeNodeStrength '())
+           (groundedRulesCounter '())
+         )    
 
-       (let ((semeNodes '())
-             (semeNodesCandidates (get-candidates-seme-nodes win)))
+         (set! word-node-seme-nodes-cache '())
 
+         ; first retrieve all objects, from the latest sentence, to be evaluated
+         (map 
+             (lambda (win)
+                 (let ( (semeNodes '())
+                        (semeNodesCandidates (get-candidates-seme-nodes win))
+                      )
+
+                      (map
+                          (lambda (candidateSemeNodesList)          
+                              (let ( (strength (car candidateSemeNodesList))
+                                     (values (cdr candidateSemeNodesList))
+                                   )
+
+                                (map
+                                    (lambda (semeNode)
+                                        (set! semeNodes
+                                            (append semeNodes (list semeNode) ) 
+                                        )
+                                        ; keep the greater strength suggestion
+                                        (let ( (oldSuggestion
+                                                   (assoc semeNode anaphoricSemeNodeStrength)
+                                               )
+                                             )
+                                             (cond 
+                                                 ( (and oldSuggestion
+                                                          (> strength (cdr oldSuggestion) ) 
+                                                   )
+                                                   (set! anaphoricSemeNodeStrength 
+                                                         (alist-delete semeNode anaphoricSemeNodeStrength) 
+                                                   )
+                                                   (set! oldSuggestion #f)
+                                                 )
+                                             )
+                 
+                                            (if (not oldSuggestion)
+                                                (set! anaphoricSemeNodeStrength 
+                                                    (append anaphoricSemeNodeStrength 
+                                                            (list (cons semeNode strength) ) 
+                                                    ) 
+                                                )
+                                            )
+                                        
+                                        ) ; let                 
+                                        (set! groundedRulesCounter 
+                                             (append groundedRulesCounter (list (cons semeNode 0 ) ) )
+                                        )
+                                    ); lambda
+                                    values
+                                ); map
+                              ); let
+                          ); lambda
+                          semeNodesCandidates
+                      ); map
+ 
+                      (if (not (null? semeNodes))
+                          (set! objects 
+                                (append objects 
+                                         (list (cons win (delete-duplicates semeNodes)))
+                                )
+                          )
+                      )
+ 
+                 ); let
+             ); lambda
+
+             (get-latest-word-instance-nodes)
+         ); map
+
+         ; now use the rules to filter the objects list
          (map
-          (lambda (candidateSemeNodesList)          
-            (let ((strength (car candidateSemeNodesList))
-                  (values (cdr candidateSemeNodesList)))
-              (map
-               (lambda (semeNode)
-                 (set! semeNodes (append semeNodes (list semeNode) ) )
-                 ; keep the greater strength suggestion
-                 (let ((oldSuggestion (assoc semeNode anaphoricSemeNodeStrength)))
-                   (cond ( (and 
-                            oldSuggestion
-                            (> strength (cdr oldSuggestion) ) 
-                            )
-                           (set! anaphoricSemeNodeStrength (alist-delete semeNode anaphoricSemeNodeStrength ) )
-                           (set! oldSuggestion #f)
-                           ))
+             (lambda (rule)
+               (map
+                   (lambda (winAndSemesListLink)
+                       (cond
+                           ( (not (null? winAndSemesListLink))
+                             (let* ( (winAndSemes (cog-outgoing-set winAndSemesListLink))
+                                     (win (car winAndSemes))
+                                     (semes (cdr winAndSemes))
+                                   )
+        
+                                   (map
+                                       (lambda (semeNode)
+                                           (let ( (rulesCounter
+                                                      (+ (assoc-ref groundedRulesCounter semeNode) 1)
+                                                  ) 
+                                                )
+                                                (set! groundedRulesCounter 
+                                                    (alist-delete semeNode groundedRulesCounter)
+                                                )
+                                                (set! groundedRulesCounter
+                                                    (alist-cons semeNode rulesCounter groundedRulesCounter)
+                                                )
+                                           )
+                                       );lambda
+                                       semes
+                                   )
 
-                   (if (not oldSuggestion)
-                       (set! anaphoricSemeNodeStrength (append anaphoricSemeNodeStrength (list (cons semeNode strength ) ) ) )
-                       )
-                   
-                   ) ; let                 
-                 (set! groundedRulesCounter (append groundedRulesCounter (list (cons semeNode 0 ) ) ) )
-                 ) ; lambda
-               values
-               ) ; map
-              ) ; let
-            ) ; lambda
-          semeNodesCandidates
-          ) ; map
-
-         (if (not (null? semeNodes))
-             (set! objects (append objects (list (cons win (delete-duplicates semeNodes )))))
-             )
-
-         ) ; let
-       ) ; lambda
-     (get-latest-word-instance-nodes)
-     )
-
-    ; now use the rules to filter the objects list
-    (map
-     (lambda (rule)
-       (map
-        (lambda (winAndSemesListLink)
-          (cond ((not (null? winAndSemesListLink))
-                 (let* ((winAndSemes (cog-outgoing-set winAndSemesListLink))
-                        (win (car winAndSemes))
-                        (semes (cdr winAndSemes))
-                        )
-
-                        (map
-                         (lambda (semeNode)
-                           (let ((rulesCounter (+ (assoc-ref groundedRulesCounter semeNode) 1)) )
-                             (set! groundedRulesCounter (alist-delete semeNode groundedRulesCounter))
-                             (set! groundedRulesCounter (alist-cons semeNode rulesCounter groundedRulesCounter))
-                             )
+                                   ; remove those semeNodes that must not be present in the answer
+                                   (set! objects (filter-objects objects winAndSemes) )
+                             ); let*
                            )
-                         semes
+                       ); cond
+                   )
+                   (cog-outgoing-set (cog-bind rule ) )
+                ); map
+        
+             ); lambda
+
+             reference-resolution-rules
+         ); map
+
+        ; filter by the number of satisfied rules
+        (set! objects (filter-by-strength objects groundedRulesCounter ) )
+
+        ; filter the objects by their strengths given by the anaphora resolution
+        ; if there is no anaphoric suggestion, the objects list will remains the same
+        (set! objects (filter-by-strength objects anaphoricSemeNodeStrength ) )
+    
+        ; now apply the last filter, the distance
+        (map
+            (lambda (instance)
+                (let ( (semeNode 
+                           (get-nearest-candidate (cdr instance) ) 
+                       )
+                       (win (car instance))             
+                     )
+                     (set! resolvedReferences 
+                         (append resolvedReferences 
+                             (list (ReferenceLink (stv 1 1) semeNode win))
                          )
-                        ; remove those semeNodes that must not be present in the answer
-                        (set! objects (filter-objects objects winAndSemes) )
-                        ) ; let*
-                 )) ; cond
-          )
-        (cog-outgoing-set (cog-bind rule ) )
+                     )
+                )       
+            )
+            objects
         )
-
-       )
-     reference-resolution-rules
-     )
-
-
-    ; filter by the number of satisfied rules
-    (set! objects (filter-by-strength objects groundedRulesCounter ) )
-
-    ; filter the objects by their strengths given by the anaphora resolution
-    ; if there is no anaphoric suggestion, the objects list will remains the same
-    (set! objects (filter-by-strength objects anaphoricSemeNodeStrength ) )
     
-    ; now apply the last filter, the distance
-    (map
-     (lambda (instance)
-       (let ((semeNode (get-nearest-candidate (cdr instance) ))
-             (win (car instance))             
-             )
-         (set! resolvedReferences (append resolvedReferences (list (ReferenceLink (stv 1 1) semeNode win))))
-         )       
-       )
-     objects
-     )
-    
-    resolvedReferences
-    
-    )
-  
+        resolvedReferences
+    ); let
 )
 
 ; When a sentence containing an imperative verb is parsed
