@@ -109,6 +109,14 @@ private:
      */
     void getWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point>& actions );
 
+    /**
+     * Given a start and an end point, return the 3D waypoints necessary to
+     * travel between them.
+     *
+     * @param startPoint Start point
+     * @param endPoint End point
+     * @param actions Return the vector of 3d points.
+     */
     void get3DWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point3D>& actions);
 
     /**
@@ -133,7 +141,7 @@ private:
                                float customSpeed = 0);
 
     /**
-     * Create a navigation planning action sequence(including walk, jump, climb
+     * Create a navigation planning action sequence(including walk, jump 
      * etc.) that will be sent to OAC.
      * @param actions Calculated path plan
      * @param useExistingID If this method get called two or more times and this

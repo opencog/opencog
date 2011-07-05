@@ -825,7 +825,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
 {
 
     if ( actions.empty( ) ) {
-        // we're done. No need to create any walk sequency
+        // we're done. No need to create any navigation actions
         logger().debug("PAIWorldWrapper - Zero actions from AStar3D.");
         return false;
     }
@@ -837,8 +837,9 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
     if (!useExistingId ) {
         planID = pai.createActionPlan( );
     } // if
+    vector<spatial::Point3D>::iterator it_point = actions.begin();
 
-    foreach(const spatial::Point3D& it_action, actions ) {
+    while (it_point != actions.end()) {
         PetAction action;
 
         if (toNudge != Handle::UNDEFINED) {
@@ -849,16 +850,17 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
                                                        resolveType(toNudge))));
             action.addParameter(ActionParameter("target",
                                                 ActionParamType::VECTOR(),
-                                                Vector(it_action.get<0>(),
-                                                       it_action.get<1>(),
-                                                       it_action.get<2>())));
+                                                Vector(it_point->get<0>(),
+                                                       it_point->get<1>(),
+                                                       it_point->get<2>())));
+            pai.addAction( planID, action );
         } else {
             action = PetAction(ActionType::WALK());
             action.addParameter(ActionParameter("target",
                                                 ActionParamType::VECTOR(),
-                                                Vector(it_action.get<0>(),
-                                                       it_action.get<1>(),
-                                                       it_action.get<2>())));
+                                                Vector(it_point->get<0>(),
+                                                       it_point->get<1>(),
+                                                       it_point->get<2>())));
 
             float speed = ( customSpeed != 0 ) ?
                     customSpeed : pai.getAvatarInterface().computeWalkingSpeed();
@@ -867,13 +869,22 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
             action.addParameter(ActionParameter("speed", ActionParamType::FLOAT(),
                     lexical_cast<string>( speed) ) );
 
-            if (it_action.get<2>() > 0.0) {
-                action = PetAction(ActionType::JUMP_UP());
+            pai.addAction( planID, action );
+
+            if (it_point->get<2>() > 0.0) {
+                action = PetAction(ActionType::JUMP_TOWARD());
+                action.addParameter(ActionParameter("direction",
+                                                    ActionParamType::VECTOR(),
+                                                    Vector((it_point+1)->get<0>(),
+                                                           (it_point+1)->get<1>(),
+                                                           (it_point)->get<2>())));
+                pai.addAction( planID, action );
             }
 
         } // else
-        pai.addAction( planID, action );
-    } // foreach
+        
+        it_point++;
+    } // while
 
     return true;
 }

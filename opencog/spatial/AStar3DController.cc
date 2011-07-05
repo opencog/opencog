@@ -197,11 +197,16 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
         spatial::Point point2d;
 
         if (map->gridIllegal(gp)) {
+            // Adjust the precise coordinate of obstacle.
             spatial::ObjectID id = map->getTallestObjectInGrid(gp);
             point2d = map->centerOf(id);
         } else {
+            // If not an obstacle, just get its unsnapped position.
             point2d = map->unsnap(gp);
         }
+
+        //@note the height here is *not* the altitude, but indeed the gap between 
+        //two continuous points. 
         double height = node->z - previous_node->z;
         spatial::Point3D point3d(point2d.first, point2d.second, height);
 
@@ -209,10 +214,11 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
         previous_node = node;
     };
 
-    // Push back the goal point.
+    // Push back the final goal point.
     gp.first = previous_node->x;
     gp.second = previous_node->y;
     spatial::Point point2d = map->unsnap(gp);
+    // We never need to jump at the goal point. 
     spatial::Point3D goal(point2d.first, point2d.second, 0.0);
     solution_points.push_back(goal);
 
@@ -233,12 +239,12 @@ vector<spatial::Point3D> AStar3DController::getShortestCalculatedPath()
 
     vector<spatial::Point3D>::iterator it_point = calculatedPath.begin();
     shortestCalculatedPath.push_back( *it_point );
-    //double alpha = ( - (it_point + 1)->second) / (it_point->first - (it_point + 1)->first);
     double alpha = ( - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
     it_point++;
     while ( (it_point + 1) != calculatedPath.end() ) {
         double new_alpha = (it_point->get<1>() - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
         if (it_point->get<2>() > 0.0) {
+            // If we need to jump at this point, then it should be stored.
             shortestCalculatedPath.push_back( *it_point );
             alpha = ( - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
         } else if (abs(new_alpha - alpha) > 0.002 ) {
