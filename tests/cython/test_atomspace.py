@@ -9,7 +9,7 @@ class AtomSpaceTest(TestCase):
         self.space = AtomSpace()
 
     def tearDown(self):
-        pass #del self.space
+        del self.space
 
     def test_add_node(self):
 
