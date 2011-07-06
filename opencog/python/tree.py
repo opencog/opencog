@@ -4,6 +4,13 @@ from functools import *
 from itertools import permutations
 from util import *
 
+def coerce_tree(x):
+    assert type(x) != type(None)
+    if isinstance(x, tree):
+        return x
+    else:
+        return tree(x)
+
 class tree:
     def __init__(self, op, *args):
         # Transparently allow using passing a list or using it in the more streamlined way
@@ -17,17 +24,10 @@ class tree:
                 self.op = op.type_name
             else:
                 self.op = op
-            self.args = [self.coerce_tree(x) for x in args]
+            self.args = [coerce_tree(x) for x in args]
         else:
             self.op = op
             self.args = args
-    
-    def coerce_tree(self, x):
-        assert type(x) != type(None)
-        if isinstance(x, tree):
-            return x
-        else:
-            return tree(x)
 
     def __str__(self):
         if self.is_leaf():
@@ -69,7 +69,6 @@ def tree_from_atom(atom):
     else:
         args = [tree_from_atom(x) for x in atom.out]
         return tree(atom.type_name, args)
-    assert False
 
 def atom_from_tree(tree, a):
     if tree.is_variable():
@@ -83,7 +82,6 @@ def atom_from_tree(tree, a):
     else:
         out = [atom_from_tree(x, a) for x in tree.args]
         return a.add(get_type(tree.op), out=out)
-    assert False
 
 # Further code adapted from AIMA-Python under the MIT License (see http://code.google.com/p/aima-python/)
 def unify(x, y, s,  vars_only = False):
@@ -163,8 +161,11 @@ def extend(s, var, val):
     """Copy the substitution s and extend it by setting var to val;
     return copy.
     
-    >>> ppsubst(extend({x: 1}, y, 2))
-    {x: 1, y: 2}
+    >>> initial = {'x': 1}
+    >>> extend({'x': 1}, 'y', 2)
+    {'y': 2, 'x': 1}
+    >>> initial
+    {'x': 1}
     """
     s2 = s.copy()
     s2[var] = val

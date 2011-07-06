@@ -10,7 +10,7 @@ import fishgram
 
 # run doctests
 import doctest
-doctest.testmod(doctest)
+doctest.testmod(fishgram)
 
 # For testing python modules separate from all the other tests,
 # go to bin/tests, then run "ctest -v -I 56,56" to run just the Python module

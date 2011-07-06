@@ -137,10 +137,10 @@ cdef class AtomSpace:
     def add(self, Type t, name=None, out=None, TruthValue tv=None, prefixed=False):
         """ add method that determines exact method to call from type """
         if is_a(t,types.Node):
-            assert out is None # nodes can't have outgoing sets
+            assert out is None, "Nodes can't have outgoing sets"
             atom = self.add_node(t,name,tv,prefixed)
         else:
-            assert name is None # links can't have names
+            assert name is None, "Links can't have names"
             atom = self.add_link(t,out,tv)
         return atom
 
