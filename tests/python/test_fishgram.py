@@ -1,4 +1,6 @@
 from unittest import TestCase
+# uses Python mock, installed with "sudo easy_install mock"
+# http://www.voidspace.org.uk/python/mock/
 from mock import patch, patch_object
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
