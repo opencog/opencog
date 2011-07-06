@@ -7,13 +7,18 @@ def if_(cond, t, f):
         return f
 
 def pp(x):
-    """Pretty-print any collection type (or generator). Prints the easy-to-read version of its members."""
+    """Pretty-print any collection type (or generator).
+    Prints the easy-to-read version of its members."""
     if isinstance(x, dict):
         return ppdict(x)
     elif isinstance(x, set):
         return ppset(x)
     elif isinstance(x, (tuple, list) ):
         return x.__class__ ( [pp(e) for e in x] )
+    elif isinstance(x, str):
+        # Python strings are iterables, so we need to prevent the
+        # infinite recursion of the next call
+        return str(x)
     elif isinstance(x, collections.Iterable):
         return x.__class__.__name__ + [pp(e) for e in x]
     else:
@@ -27,13 +32,14 @@ def ppdict(d):
     with keys in sorted order according to their string
     representation: {a: A, d: D, ...}.
     >>> ppdict({'m': 'M', 'a': 'A', 'r': 'R', 'k': 'K'})
-    {'a': 'A', 'k': 'K', 'm': 'M', 'r': 'R'}
-    >>> ppdict({z: C, y: B, x: A})
-    {x: A, y: B, z: C}
+    '{a: A, k: K, m: M, r: R}'
+
+    # This doctest doesn't make sense, as there are no
+    # symbols with these names!
+    #>>> ppdict({z: C, y: B, x: A})
+    #"{x: A, y: B, z: C}"
     """
-    
-    if not len(d):
-        return str(d)
+    if not len(d): return str(d)
 
     def format(k, v):
         return "%s: %s" % (pp(k), pp(v))
@@ -50,9 +56,10 @@ def ppset(s):
     """Print the set s.
 
     >>> ppset(set(['A', 'Q', 'F', 'K', 'Y', 'B']))
-    set(['A', 'B', 'F', 'K', 'Q', 'Y'])
-    >>> ppset(set([z, y, x]))
-    set([x, y, z])
+    "set([A, B, F, K, Q, Y])"
+
+    #>>> ppset(set([z, y, x]))
+    #"set([x, y, z])"
     """
 
     slist = list(s)
