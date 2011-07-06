@@ -415,9 +415,9 @@
               )              
 
               (set! at_time_link
-                  (AtTimeLink (stv 1.0 1.0) (DEFAULT_AV) 
+                  (AtTimeLink (stv 1.0 1.0)  
                       (TimeNode (number->string timestamp) )
-                      (SimilarityLink (stv 1.0 1.0) (DEFAULT_AV)
+                      (SimilarityLink (stv 1.0 1.0) 
                           (NumberNode (number->string updated_value) )
                           updater_execution_output_link
                       )

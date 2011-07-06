@@ -66,7 +66,7 @@
 ;
 
 (define (add_speech_act_trigger trigger_name . handle_dialog_node)
-    (EvaluationLink (DEFAULT_STV) (DEFAULT_AV)
+    (EvaluationLink (cog-new-stv 1.0 1.0) (cog-new-av 1 1 1)
     
         (SpeechActTriggerNode (string-trim-both trigger_name) ) 
         handle_dialog_node
@@ -87,7 +87,7 @@
 ;     UtteranceNode  "utterance_sentences"
 
 (define (add_speech_act_schema responser_name handle_dialog_node handle_utterance_node)
-    (ExecutionOutputLink (DEFAULT_STV) (DEFAULT_AV)
+    (ExecutionOutputLink (cog-new-stv 1.0 1.0) (cog-new-av 1 1 1)
         (SpeechActSchemaNode (string-trim-both responser_name) )
         handle_dialog_node
         handle_utterance_node

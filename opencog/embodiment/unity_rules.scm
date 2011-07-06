@@ -242,14 +242,6 @@
 ;
 ; Relation Goals, these usually serve as another Rule's precondition.
 ;
-; Note: There's no need to set truth value and attention value for these Nodes. 
-;       If you insist in doing this, be careful about the sequence of node name and truth value. 
-;
-;       For instance, this is wrong:
-;           (VariableNode (DEFAULT_STV) "$VarName") 
-;       The correct version is
-;           (VariableNode "$VarName" (DEFAULT_STV))
-;
 
 (define EntityVar (VariableNode "$EntityVar"))
 
