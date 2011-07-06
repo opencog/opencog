@@ -54,7 +54,8 @@ namespace opencog { namespace oac {
  * An OpenPsi Rule is represented in AtomSpace as below: 
  *
  * Note: AtTimeLink is missing currently
- *       ImplicationLink is used instead of PredictiveImplicationLink, since PLN doesn't support it while implementation
+ *       ImplicationLink is used instead of PredictiveImplicationLink, since
+ *       PLN doesn't support it while implementation
  *
  *     PredictiveImplicationLink
  *         AndLink
@@ -88,7 +89,8 @@ namespace opencog { namespace oac {
  * For each Rule, there's only a Goal, an Action and a bunch of Preconditions. 
  * And all these Preconditions should be grouped in an AndLink.
  * If you want to use OrLink, then just split the Rule into several Rules.
- * For the efficiency and simplicity of the planer (backward chainging), NotLink is forbidden currently.  
+ * For the efficiency and simplicity of the planner (backward chaining),
+ * NotLink is forbidden currently.  
 */
 
 class PsiActionSelectionAgent : public opencog::Agent
