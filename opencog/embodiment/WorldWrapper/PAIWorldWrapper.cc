@@ -184,6 +184,7 @@ throw (ComboException, AssertionException, std::bad_exception)
                     if (!build_goto_plan(targetHandle, false, Handle::UNDEFINED, Handle::UNDEFINED, walkSpeed )) {
                         if (_hasPlanFailed) {
                             logger().error("PAIWorldWrapper - Failed to create a goto plan to the goal.");
+                            throw ComboException(TRACE_INFO, "PAIWorldWrapper - %s.", "Failed to create a goto plan to the goal");
                         } else {
                             logger().info("PAIWorldWrapper - No goto plan needed since the goal was already near enough.");
                             std::vector<std::string> arguments;
@@ -871,7 +872,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
 
             pai.addAction( planID, action );
 
-            if (it_point->get<2>() > 0.0) {
+            if (it_point->get<2>() != 0.0) {
                 action = PetAction(ActionType::JUMP_TOWARD());
                 action.addParameter(ActionParameter("direction",
                                                     ActionParamType::VECTOR(),

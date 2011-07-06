@@ -456,6 +456,7 @@ bool RunningComboProcedure::execSeq(sib_it from, sib_it to, combo::variable_unif
         std::cout << "BEWARE : WorldWrapper has failed handling the plan, please see the application log for more detail."
                   << std::endl;
         _planSent = false;
+        _failed = true;
     }
 
     _it = to;
