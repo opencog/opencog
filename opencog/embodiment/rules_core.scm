@@ -126,31 +126,6 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Default Attention Values
-;
-; Settings here are the same with "AttentionValue.h" line 48-50
-;
-(define DEFAULT_STI 0)
-(define DEFAULT_LTI 0)
-(define DEFAULT_VLTI 0)
-
-;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-;
-; These Default values are only used for loading Demand, Rules etc, and 
-; has nothing to do with other C++ code
-;
-; Default Attention Value 
-(define (DEFAULT_AV) 
-    (cog-new-av DEFAULT_STI 1 DEFAULT_VLTI)
-)
-
-; Default Simple Truth Value
-(define (DEFAULT_STV) 
-    (cog-new-stv 0 0) 
-)
-
-;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-;
 ; Handles for pet and its owner, 
 ; which is used by add_action, if its action parameters contain 'self', or 'owner'
 ;
@@ -279,7 +254,7 @@
 ;
 
 (define (add_modulator modulator_name default_value)
-    (let ( (schema_handle (ExecutionOutputLink (stv 1.0 1.0) (DEFAULT_AV) 
+    (let ( (schema_handle (ExecutionOutputLink (stv 1.0 1.0) (cog-new-av 1 1 1) 
                               (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") ) 
                               (ListLink) 
                           );ExecutionOutputLink
@@ -289,7 +264,7 @@
          (AtTimeLink (stv 1.0 1.0)
              (TimeNode CURRENT_TIMESTAMP)
 
-             (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
+             (SimilarityLink (cog-new-stv 1.0 1.0) 
                  (NumberNode (number->string default_value) )
                  schema_handle
              );SimilarityLink
@@ -321,7 +296,7 @@
 ;
 
 (define (add_demand_schema demand_name default_value)
-    (let ( (schema_handle (ExecutionOutputLink (DEFAULT_AV)
+    (let ( (schema_handle (ExecutionOutputLink (cog-new-av 1 1 1)
                               (GroundedSchemaNode (string-append (string-trim-both demand_name) "Updater") )
                               (ListLink)
                           );ExecutionOutputLink
@@ -331,7 +306,7 @@
         (AtTimeLink (stv 1.0 1.0)
             (TimeNode CURRENT_TIMESTAMP)
 
-            (SimilarityLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
+            (SimilarityLink (cog-new-stv 1.0 1.0)
                 (NumberNode (number->string default_value) )
                 schema_handle
             );SimilarityLink
@@ -363,7 +338,7 @@
 ;
 
 (define (connect_goal_updater goal_evaluation_link goal_truth_value_updater_evaluation_link)
-    (SimultaneousEquivalenceLink (cog-new-stv 1.0 1.0) (DEFAULT_AV)
+    (SimultaneousEquivalenceLink (cog-new-stv 1.0 1.0) (cog-new-av 1 1 1)
         goal_evaluation_link
         goal_truth_value_updater_evaluation_link
     ) 
@@ -467,7 +442,7 @@
 ; PredicateNode via 'connect_goal_updater' function
 
 (define (add_goal pred_or_gpn_handle . arguments)
-    (EvaluationLink
+    (EvaluationLink (cog-new-av 1 1 1)
         pred_or_gpn_handle   
 
         (ListLink 
@@ -557,7 +532,7 @@
 ;
 
 (define (add_action schema_handle . arguments)
-    (ExecutionLink (DEFAULT_AV) 
+    (ExecutionLink (cog-new-av 1 1 1)
         schema_handle
 
         (ListLink 
@@ -662,7 +637,7 @@
 ;
 
 (define (add_rule truth_value goal_evaluation_link action_execution_link precondition_and_link)
-    (ImplicationLink (DEFAULT_AV) truth_value
+    (ImplicationLink (cog-new-av 1 1 1) truth_value
         (AndLink
             precondition_and_link
             action_execution_link
