@@ -507,7 +507,7 @@
     (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
 )
 
-(ForAllLink
+(ForAllLink (cog-new-av 1 1 1)
     (ListLink
         (VariableNode "$var_food") 
     ) 
@@ -545,7 +545,7 @@
     )    
 )
 
-(ForAllLink
+(ForAllLink (cog-new-av 1 1 1)
     (ListLink
         (VariableNode "$var_water") 
     ) 
