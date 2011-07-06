@@ -7,7 +7,9 @@ from opencog.atomspace import types, is_a, get_type, get_type_name
 import fishgram
 
 # For testing python modules separate from all the other tests,
-# go to bin/tests, then run ctest -I 
+# go to bin/tests, then run "ctest -v -I 56,56" to run just the Python module
+# tests. Use ctest to find out the right number if the test ordering changes
+# for some reason.
 
 def add_fishgram_data(atomspace):
     a = atomspace
