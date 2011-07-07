@@ -165,6 +165,8 @@ void Pet::initTraitsAndFeelings()
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("happiness"), tv, petHandle), 1);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+                std::string("sadness"), tv, petHandle), 1);
+    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("excitement"), tv, petHandle), 1);
 
     // traits

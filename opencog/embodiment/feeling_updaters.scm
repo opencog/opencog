@@ -2,7 +2,7 @@
 ; Feeling updaters
 ;
 ; @author Zhenhua Cai czhedu@gmail.com
-; @date   2011-05-06
+; @date   2011-07-07
 ;
 
 ; How emotions emerge from the system?
@@ -51,7 +51,15 @@
 ;       
 ;   Emotion       ||    Activation    Resolution    SecuringThreshold    SelectionThreshold    Pleasure
 ;  ======================================================================================================
-;   fear          ||        H             L                L                                       L 
+;   anger         ||        H             L                H                      L                L
+;  ------------------------------------------------------------------------------------------------------ 
+;   fear          ||        H             L                L                      H                L 
+;  ------------------------------------------------------------------------------------------------------ 
+;   happiness     ||        H             L                H                      H                H
+;  ------------------------------------------------------------------------------------------------------ 
+;   sadness       ||        L             H                L                      L                L
+;  ------------------------------------------------------------------------------------------------------ 
+;   excitement    ||        H             L                                       L                EH/EL  
 ;  ------------------------------------------------------------------------------------------------------ 
 ;   pride         ||                      L                H                      H                H 
 ;  ------------------------------------------------------------------------------------------------------ 
@@ -59,13 +67,7 @@
 ;  ------------------------------------------------------------------------------------------------------ 
 ;   hate          ||        EH            EL               EH                                      EL
 ;  ------------------------------------------------------------------------------------------------------ 
-;   anger         ||        H             L                H                      L                L
-;  ------------------------------------------------------------------------------------------------------ 
 ;   gratitude     ||                                                              H                H
-;  ------------------------------------------------------------------------------------------------------ 
-;   happiness     ||                                       H                      H                H
-;  ------------------------------------------------------------------------------------------------------ 
-;   excitement    ||       H              L                                       L                EH/EL  
 ;
 ;   ( H = high, L = low, M = medium, E = extremely )
 ;
@@ -164,15 +166,64 @@
 )
 
 ; Feeling updaters    
+(define (angerFeelingUpdater)
+    (feeling_calculator modulator_high_indicator
+                        modulator_low_indicator
+                        modulator_high_indicator
+                        modulator_low_indicator
+                        modulator_low_indicator
+                        5
+    )
+)
+
 (define (fearFeelingUpdater) 
     (feeling_calculator modulator_high_indicator
                         modulator_low_indicator
                         modulator_low_indicator
-                        modulator_undefined_indicator
+                        modulator_high_indicator
                         modulator_low_indicator
-                        4
+                        5
     )
- )
+)
+
+(define (happinessFeelingUpdater) 
+    (feeling_calculator modulator_high_indicator
+                        modulator_low_indicator
+                        modulator_high_indicator
+                        modulator_high_indicator
+                        modulator_high_indicator
+                        5
+    )
+)    
+
+(define (sadnessFeelingUpdater) 
+    (feeling_calculator modulator_low_indicator
+                        modulator_high_indicator
+                        modulator_low_indicator
+                        modulator_low_indicator
+                        modulator_low_indicator
+                        5
+    )
+)    
+
+(define (excitementFeelingUpdater) 
+    (max (feeling_calculator modulator_high_indicator
+                             modulator_low_indicator
+                             modulator_undefined_indicator
+                             modulator_low_indicator
+                             modulator_extremely_high_indicator
+                             4
+         )
+
+         (feeling_calculator modulator_high_indicator
+                             modulator_low_indicator
+                             modulator_undefined_indicator
+                             modulator_low_indicator
+                             modulator_extremely_low_indicator
+                             4
+         )
+    )
+)
 
 (define (prideFeelingUpdater) 
     (feeling_calculator modulator_undefined_indicator
@@ -204,16 +255,6 @@
     )
 )
 
-(define (angerFeelingUpdater)
-    (feeling_calculator modulator_high_indicator
-                        modulator_low_indicator
-                        modulator_high_indicator
-                        modulator_low_indicator
-                        modulator_low_indicator
-                        5
-    )
-)
-
 (define (gratitudeFeelingUpdater) 
     (feeling_calculator modulator_undefined_indicator
                         modulator_undefined_indicator
@@ -221,35 +262,6 @@
                         modulator_high_indicator
                         modulator_high_indicator
                         2
-    )
-)
-
-(define (happinessFeelingUpdater) 
-    (feeling_calculator modulator_undefined_indicator
-                        modulator_undefined_indicator
-                        modulator_high_indicator
-                        modulator_high_indicator
-                        modulator_high_indicator
-                        3
-    )
-)    
-
-(define (excitementFeelingUpdater) 
-    (max (feeling_calculator modulator_high_indicator
-                             modulator_low_indicator
-                             modulator_undefined_indicator
-                             modulator_low_indicator
-                             modulator_extremely_high_indicator
-                             4
-         )
-
-         (feeling_calculator modulator_high_indicator
-                             modulator_low_indicator
-                             modulator_undefined_indicator
-                             modulator_low_indicator
-                             modulator_extremely_low_indicator
-                             4
-         )
     )
 )
 

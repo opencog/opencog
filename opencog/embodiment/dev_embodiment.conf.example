@@ -110,13 +110,13 @@ ROUTER_DATABASE_DIR             = /tmp/$USER/opencog/router_db
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
-#PSI_DEMANDS = Energy
+#PSI_DEMANDS = Energy, Certainty
 # Complete list of demands (all availabe in multiverse world)
 PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
 # TODO: TestEnergy is only used for debugging, remove it once finished
 
-PSI_FEELINGS = fear, anger, happiness, excitement
+PSI_FEELINGS = fear, anger, happiness, sadness, excitement
 # Complete list of feelings
 #PSI_FEELINGS = fear, pride, love, hate, anger, gratitude, happiness, excitement 
 
