@@ -35,6 +35,8 @@ turn_to_face(1) := turn_to_face(#1)
 
 say(2) := say(#1 #2)
 
+eat(1) := eat(#1)
+
 go_home(0) := goto_obj(pet_home 2)
 
 #walk random, but more forward and more right and does not rotate every time
