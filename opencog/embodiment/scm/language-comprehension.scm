@@ -469,70 +469,93 @@
 
 ; Retrieve all the anaphoric suggestions for a given WordInstanceNode
 ; that belong to the most recent parsed sentence 
-(define (get-anaphoric-suggestions wordInstanceNode)
-  ; EvaluationLink
-  ;    ConceptNode "anaphoric reference"
-  ;    ListLink
-  ;       WordInstanceNode <- pronoun
-  ;       WordInstanceNode <- suggestion
-  (let ((suggestions '()))
-    (map
-     (lambda (suggestion)
-       (let (( pair (car (gdr suggestion ) ) )
-             ( strength (assoc-ref (cog-tv->alist (cog-tv suggestion)) 'confidence ) )
-             )
-         (if (equal? (gar pair) wordInstanceNode)
-             (set! suggestions (append suggestions (list (cons (car (gdr pair) ) strength)) ) )
-             )
+;
+; @return 
+;
+; ( (suggestion_win_1 . strength_1)
+;   (suggestion_win_2 . strength_2)
+;   ...
+; )
+;
+; @note The anaphoric suggestions are stored as follows, 
+;
+;     EvaluationLink
+;        ConceptNode "anaphoric reference"
+;        ListLink
+;           WordInstanceNode <- pronoun
+;           WordInstanceNode <- suggestion
+;
+(define (get-anaphoric-suggestions pronoun_win)
+    (let ( (suggestions '()) 
          )
-       )
-     (cog-get-link
-      'EvaluationLink
-      'ListLink
-      (ConceptNode "anaphoric reference")
-      )
-     )
-    suggestions
-    )
-  
+         (map
+             (lambda (suggestion_evaluation_link)
+                 (let ( (list_link (car (gdr suggestion_evaluation_link) ) )
+                        (strength
+                            (get_truth_value_confidence (cog-tv suggestion_evaluation_link) )  
+                        )
+                      )
+                      
+                      (if (equal? (gar list_link) pronoun_win)
+                          (set! suggestions
+                                (append suggestions 
+                                       (list (cons (car (gdr list_link)) strength)) 
+                                ) 
+                          )
+                      )
+                 )
+             ); lambda
+
+             (cog-get-link 'EvaluationLink 'ListLink 
+                           (ConceptNode "anaphoric reference") 
+             )
+         ); map
+
+         ; return value
+         suggestions
+    ); let
 )
 
 ; Retrieve the WordNode related to a given WordInstanceNode
+;
+; @note This is an example below, 
+;
+;       ReferenceLink
+;           WordInstanceNode "red@216e8536-4867-49bc-970a-fc69608e39d2"
+;           WordNode "red"
+;      
 (define (get-word-node wordInstanceNode)
-  ; ReferenceLink
-  ;    WordInstanceNode
-  ;    WordNode
-  (let ((wordNodes (cog-get-link
-                    'ReferenceLink
-                    'WordNode
-                    wordInstanceNode
-                    )
-                   ))
-    (if (not (null? wordNodes))
-          (car (gdr (car wordNodes)))
-          '()
-          )    
+    (let ( (reference_link_list
+               (cog-get-link 'ReferenceLink 'WordNode wordInstanceNode)
+           )
+         )
+
+         (if (not (null? reference_link_list) )
+             (car (gdr (car reference_link_list)))
+             '()
+         )    
     )
-  )
+)
 
+; Retrieves all the SemeNodes attached to a given WordNode. 
+;
+; Each WordNode can have many SemeNodes attached to it by a ReferenceLink as below
+;
+;     ReferenceLink
+;         SemeNode
+;         WordNode  
+;
+(define word-node-seme-nodes-cache '() )
 
-; SemeNodes are described by WordNodes
-; Each WordNode can have many SemeNodes attached
-; to it by a ReferenceLink. This function retrieves
-; all the SemeNodes attached to a given WordNode
-(define word-node-seme-nodes-cache '())
 (define (get-seme-nodes wordNode)
-  ; ReferenceLink
-  ;    SemeNode
-  ;    WordNode  
-  (fold 
-   (lambda (refLink result)
-     (append result (list (gar refLink) ))
-     )
-   '()
-   (cog-get-link 'ReferenceLink 'SemeNode wordNode)
+    (fold 
+        (lambda (refLink result)
+            (append result (list (gar refLink)) )
+        )
+        '()
+        (cog-get-link 'ReferenceLink 'SemeNode wordNode)
    )
-  )
+)
 
 ; Each SemeNode is connected to a node that represents
 ; a real object into the Environment. So this function
@@ -574,88 +597,112 @@
 ; to these WordNodes will become part of the final list .
 ;
 ; The final list contains not only the SemeNodes but its strengths 
+;
+; TODO: the sequence of SemeNode and strength below is different from the code, 
+;       one of them must be wrong! 
+;
 ; i.e. ( ( (SemeNode "1") . 0.03)
 ;        ( (SemeNode "2") . 0)
 ;        ( (SemeNode "3") . 1.) )
 ;
-(define (get-candidates-seme-nodes wordInstanceNode)
-    (let ( (wordInstanceNodes '())
+(define (get-candidates-seme-nodes win)
+    (let ( (noun_suggestions '())
            (semeNodes '())
          )
-    
+
+         ; Step 1: ground proun to nouns
+         ;
+         ;         ( (suggestion_win_1 . strength_1)
+         ;           (suggestion_win_2 . strength_2)
+         ;           ...
+         ;         )
+         ;
          (cond 
+             ; If it is a pronoun, ground it to suitable nouns firstly 
              ( (not (null? (cog-link 
                            'InheritanceLink
-                            wordInstanceNode
+                            win
                             (DefinedLinguisticConceptNode "pronoun")           
                            ) 
                     ) 
                 )
 
                 ; look for anaphoric reference
-                (let ( (anaphoricSuggestions (get-anaphoric-suggestions wordInstanceNode) ) )
-                     (if (not (null? anaphoricSuggestions ) )
+                (let ( (anaphoric_suggestions (get-anaphoric-suggestions win) ) )
+                     (if (not (null? anaphoric_suggestions) )
                          (map
-                             (lambda (suggestedWin)
-                                 (set! wordInstanceNodes
-                                       (append wordInstanceNodes (list suggestedWin ) ) 
+                             (lambda (suggested_win)
+                                 (set! noun_suggestions
+                                       (append noun_suggestions (list suggested_win) ) 
                                  )
                              )
-                             anaphoricSuggestions
+                             anaphoric_suggestions
                          ); map
 
-                         (set! wordInstanceNodes
-                               (append wordInstanceNodes (list (cons wordInstanceNode 0 ) ) ) 
+                         (set! noun_suggestions
+                               (append noun_suggestions (list (cons win 0) ) ) 
                          )
                      ); if
                 ); let          
              )
 
+             ; If it is a noun, add it to the noun_suggestions
              ( (not (null? (cog-link 
                            'PartOfSpeechLink 
-                            wordInstanceNode
+                            win
                             (DefinedLinguisticConceptNode "noun")
                            )
                     )
                 )
 
-                (set! wordInstanceNodes
-                      (append wordInstanceNodes (list (cons wordInstanceNode 0) ) )
+                (set! noun_suggestions
+                      (append noun_suggestions (list (cons win 0) ) )
                 )
             )
          ); cond
 
-        (map
-            (lambda (candidate)
-                (let* ( (noun (car candidate))
-                        (strength (cdr candidate))
-                        (groundedSemeNode (cog-get-link 'ReferenceLink 'SemeNode noun ))
-                      )
+         ; Step 2: ground nouns to SemeNodes 
+         (map
+             (lambda (candidate)
+                 (let* ( (noun_win (car candidate) )
+                         (strength (cdr candidate) )
+                         (grounded_reference_link (cog-get-link 'ReferenceLink 'SemeNode noun) )
+                       )
+ 
+                       (if (not (null? grounded_reference_link))
+                           ; If the noun WordInstanceNode has already been 
+                           ; grounded to suitable SemeNode, use the result 
+                           ; directly. 
+                           (set! semeNodes
+                                 (append semeNodes 
+                                         (list (cons strength (list (gar (car grounded_reference_link)) ) ) )
+                                 )
+                           )
 
-                      (if (not (null? groundedSemeNode))
-                          (set! semeNodes
-                                (append semeNodes 
-                                        (list (cons strength (list (gar (car groundedSemeNode)) ) ) )
-                                )
-                          )
+                           ; If the noun WordInstanceNode has not been grounded 
+                           ; to any SemeNode yet, get the corresponding WordNode 
+                           ; and then get all the SemeNodes realted to the WordNode
+                           (let ( (wordNode (get-word-node noun_win) ) 
+                                ) 
+                                (if (not (null? wordNode))
+                                    (set! semeNodes
+                                          (append semeNodes
+                                                  (list (cons strength (get-seme-nodes-using-ontology wordNode)) ) 
+                                          )
+                                    )
+                                ) ; if
+                           ); let
 
-                          (let ( (wordNode (get-word-node noun) ) 
-                               ) 
-                               (if (not (null? wordNode))
-                                   (set! semeNodes
-                                         (append semeNodes
-                                                 (list (cons strength (get-seme-nodes-using-ontology wordNode)) ) 
-                                         )
-                                   )
-                               ) ; if
-                          ); let
-                      ); if
-                ); let
-            )
-            wordInstanceNodes
-        ); map
+                       ); if
 
-        semeNodes
+                 ); let
+             ); lambda
+
+             noun_suggestions
+         ); map
+
+         ; return value
+         semeNodes
     ); let
 )
 
@@ -948,15 +995,15 @@
     (map
      (lambda (elementPredicate)
        (let* (
-	      (name (get-frame-instance-element-type elementPredicate))
-	      (colonIndex (list-index (lambda (char) (char=? char #\:)) (string->list name)))
-	      )
-	 ; do a split in the element name and compare it without the frame prefix
-	 ; i.e. it name is #Color:Entity, but compares only the second part Entity == elementName
-	 (if (and colonIndex (string=? (substring name (+ colonIndex 1) (string-length name)) elementName) )
-	     (set! elementPredicateNode elementPredicate)
-	     )
-	 )
+        (name (get-frame-instance-element-type elementPredicate))
+        (colonIndex (list-index (lambda (char) (char=? char #\:)) (string->list name)))
+        )
+   ; do a split in the element name and compare it without the frame prefix
+   ; i.e. it name is #Color:Entity, but compares only the second part Entity == elementName
+   (if (and colonIndex (string=? (substring name (+ colonIndex 1) (string-length name)) elementName) )
+       (set! elementPredicateNode elementPredicate)
+       )
+   )
        )
      (get-frame-instance-elements-predicates predicateNode)
      )
@@ -1167,9 +1214,9 @@
                    instances 
                    (append 
                     instances
-		    (list
-		     (gar (car (cog-get-link 'FrameElementLink 'PredicateNode (gar link))))                    
-		     )
+        (list
+         (gar (car (cog-get-link 'FrameElementLink 'PredicateNode (gar link))))                    
+         )
                     )
                    )
                   
@@ -1416,10 +1463,10 @@
                            (not (null? (cog-link 'InheritanceLink candidate elementTypeNode))) )
                       (let ((frameInstancePredicate (gar (car (cog-filter-incoming 'FrameElementLink candidate)))))
                         (if (not (equal? frameInstancePredicate predicateNode))
-                    	    (begin
-                        	(set! elementsCandidates (append elementsCandidates (list frameInstancePredicate)))
-                        	(set! elementsStrength (append elementsStrength (list (cons frameInstancePredicate 
-                            	     (assoc-ref (cog-tv->alist (cog-tv (cog-link 'InheritanceLink candidate elementTypeNode))) 'mean)))))
+                          (begin
+                          (set! elementsCandidates (append elementsCandidates (list frameInstancePredicate)))
+                          (set! elementsStrength (append elementsStrength (list (cons frameInstancePredicate 
+                                   (assoc-ref (cog-tv->alist (cog-tv (cog-link 'InheritanceLink candidate elementTypeNode))) 'mean)))))
                              )
                             )
                         )
@@ -1455,19 +1502,19 @@
 ; of the its elements that are marked as VariableNodes
 (define (build-implication-link predicateNode)
   (let ((variableCounter 1)
-	(variablesDeclaration '())
-	(elementsDeclaration '())
+  (variablesDeclaration '())
+  (elementsDeclaration '())
         (frameType (get-frame-instance-type predicateNode))
-	)
+  )
     (map
      (lambda (predicate)
        (let* ((value (get-frame-instance-element-value predicate))
-	      (groundedValue (get-grounded-element-value value))
+        (groundedValue (get-grounded-element-value value))
               (variable? (and value (equal? 'VariableNode (cog-type value))))
               (elementNode (get-frame-element-node frameType (get-frame-element-name (get-frame-instance-element-type predicate) )))
-	     )
+       )
          (set! variablesDeclaration (append variablesDeclaration (list
-	    (TypedVariableLink
+      (TypedVariableLink
              (VariableNode (string-append "$var" (number->string variableCounter)))
              (VariableTypeNode "PredicateNode")
              ) 
@@ -1487,8 +1534,8 @@
                ) ; begin
              ) ; if
          
-         (set! elementsDeclaration (append elementsDeclaration (list		     
-	    (FrameElementLink
+         (set! elementsDeclaration (append elementsDeclaration (list         
+      (FrameElementLink
              (VariableNode "$var0")
              (VariableNode (string-append "$var" (number->string variableCounter) ))
              )
@@ -1501,8 +1548,8 @@
              groundedValue
              )
             ) ) )
-	 (set! variableCounter (+ variableCounter 1))
-	 ) ; let
+   (set! variableCounter (+ variableCounter 1))
+   ) ; let
        ) ; lambda
      (get-frame-instance-elements-predicates predicateNode)
      )
@@ -1518,9 +1565,9 @@
      (ImplicationLink
       (AndLink
        (InheritanceLink
-	(VariableNode "$var0")
-	(DefinedFrameNode (get-frame-instance-type predicateNode))
-	)
+  (VariableNode "$var0")
+  (DefinedFrameNode (get-frame-instance-type predicateNode))
+  )
        elementsDeclaration
        )
       (EvaluationLink
@@ -1566,10 +1613,10 @@
      (ImplicationLink
       (AndLink
 ;            (InheritanceLink
-;	        (VariableNode "$frameInstance")
-;	        (VariableNode "$frame")
+;          (VariableNode "$frameInstance")
+;          (VariableNode "$frame")
 ;            )
-	    (FrameElementLink
+      (FrameElementLink
              (VariableNode "$frameInstance")
              (VariableNode "$frameElementInstance")
              )
@@ -1791,19 +1838,19 @@
 ; Just a prototype for now. Uses a possibly-obsolete approach. For every Frame element, looks up an InheritanceLink, FrameElementLink and EvaluationLink.
 (define (build-query_alt predicateNode)
   (let ((variableCounter 1)
-	(variablesDeclaration '())
-	(elementsDeclaration '())
+  (variablesDeclaration '())
+  (elementsDeclaration '())
         (frameType (get-frame-instance-type predicateNode))
-	)
+  )
     (map
      (lambda (predicate)
        (let* ((value (get-frame-instance-element-value predicate))
-	      (groundedValue (get-grounded-element-value value))
+        (groundedValue (get-grounded-element-value value))
               (variable? (and value (equal? 'VariableNode (cog-type value))))
               (elementNode (get-frame-element-node frameType (get-frame-element-name (get-frame-instance-element-type predicate) )))
-	     )
+       )
          (set! variablesDeclaration (append variablesDeclaration (list
-	    (TypedVariableLink
+      (TypedVariableLink
              (FWVariableNode (string-append "$var" (number->string variableCounter)))
              (VariableTypeNode "PredicateNode")
              ) 
@@ -1824,23 +1871,23 @@
              ) ; if
          
          (set! elementsDeclaration (append elementsDeclaration (list
-	    (AndLink ; Nested AndLink because of PLN's current limitations
-	     (FrameElementLink
-	      (FWVariableNode "$var0")
-	      (FWVariableNode (string-append "$var" (number->string variableCounter) ))
-	      )
-	     (InheritanceLink
-	      (FWVariableNode (string-append "$var" (number->string variableCounter) ))
-	      elementNode
-	      )
-	     (EvaluationLink
-	      (FWVariableNode (string-append "$var" (number->string variableCounter) ))
-	      groundedValue
-	     )
-	    )
+      (AndLink ; Nested AndLink because of PLN's current limitations
+       (FrameElementLink
+        (FWVariableNode "$var0")
+        (FWVariableNode (string-append "$var" (number->string variableCounter) ))
+        )
+       (InheritanceLink
+        (FWVariableNode (string-append "$var" (number->string variableCounter) ))
+        elementNode
+        )
+       (EvaluationLink
+        (FWVariableNode (string-append "$var" (number->string variableCounter) ))
+        groundedValue
+       )
+      )
             ) ) )
-	 (set! variableCounter (+ variableCounter 1))
-	 ) ; let
+   (set! variableCounter (+ variableCounter 1))
+   ) ; let
        ) ; lambda
      (get-frame-instance-elements-predicates predicateNode)
      )
@@ -1857,9 +1904,9 @@
       (AndLink
        elementsDeclaration
        (InheritanceLink
-	(FWVariableNode "$var0")
-	(DefinedFrameNode (get-frame-instance-type predicateNode))
-	)
+  (FWVariableNode "$var0")
+  (DefinedFrameNode (get-frame-instance-type predicateNode))
+  )
       )
 ;     )
 
@@ -1869,19 +1916,19 @@
 ; Just a prototype for now. Takes a Frame instance, and Produces a query for PLN, to look up all matching Frame instances (including all of their Frame elements).
 (define (build-query predicateNode)
   (let ((variableCounter 1)
-	(variablesDeclaration '())
-	(elementsDeclaration '())
+  (variablesDeclaration '())
+  (elementsDeclaration '())
         (frameType (get-frame-instance-type predicateNode))
-	)
+  )
     (map
      (lambda (predicate)
        (let* ((value (get-frame-instance-element-value predicate))
-	      (groundedValue (get-grounded-element-value value))
+        (groundedValue (get-grounded-element-value value))
               (variable? (and value (equal? 'VariableNode (cog-type value))))
               (elementNode (get-frame-element-node frameType (get-frame-element-name (get-frame-instance-element-type predicate) )))
-	     )
+       )
          (set! variablesDeclaration (append variablesDeclaration (list
-	    (TypedVariableLink
+      (TypedVariableLink
              (FWVariableNode (string-append "$var" (number->string variableCounter)))
              (VariableTypeNode "PredicateNode")
              ) 
@@ -1900,8 +1947,8 @@
                 )
             )
          ) ) )
-	 (set! variableCounter (+ variableCounter 1))
-	 ) ; let
+   (set! variableCounter (+ variableCounter 1))
+   ) ; let
        ) ; lambda
      (get-frame-instance-elements-predicates predicateNode)
      )
@@ -1919,9 +1966,9 @@
 ;      (AndLink
 ;       elementsDeclaration
 ;       (InheritanceLink
-;	(FWVariableNode "$var0")
-;	(DefinedFrameNode (get-frame-instance-type predicateNode))
-;	)
+;  (FWVariableNode "$var0")
+;  (DefinedFrameNode (get-frame-instance-type predicateNode))
+;  )
 ;      )
       (AndLink
           elementsDeclaration
@@ -2768,73 +2815,72 @@
   
   )
 
-
-; This return all the SemeNode associated with a given
-; WordNode. If none SemeNodes was found, so it will
-; use the WordNet ontology to infer the meaning of the
-; given WordNode. Perhaps the given WordNode refers to
-; some SemeNode which really exists inside the agent's
-; mind, but it is an abstraction. So, using the WordNet
-; ontology is possible to determine if the mentioned
-; WordNode refers or not the an existing SemeNode.
+; This return all the SemeNode associated with a given WordNode.
+;
+; If none SemeNodes was found, it will use the WordNet ontology to infer the 
+; meaning of the given WordNode. Perhaps the given WordNode refers to some 
+; SemeNode which really exists inside the agent's mind, but it is an abstraction.
+; So, using the WordNet ontology is possible to determine if the mentioned 
+; WordNode refers or not the existing SemeNode.
+;
 (define (get-seme-nodes-using-ontology wordNode)
-  (define useWordNet #f) ; if true will use the WordNet ontology
+    (define useWordNet #f) ; if true will use the WordNet ontology
 
-  (if (assoc-ref word-node-seme-nodes-cache wordNode)
-      (assoc-ref word-node-seme-nodes-cache wordNode)
-      (let ((semeNodes (get-seme-nodes wordNode)))
-        (if (or (not (null? semeNodes)) (not useWordNet))
-            semeNodes        
-            (let ((nodes
-                   (delete-duplicates
-                    (fold 
-                     (lambda (semeNode result)
-                       (let ((link (cog-get-link 'ReferenceLink 'WordNode semeNode)))
-                         (if (not (null? link))
-                             (cons (gadr (car link)) result)
-                             result
-                             )
+    (if (assoc-ref word-node-seme-nodes-cache wordNode)
+        (assoc-ref word-node-seme-nodes-cache wordNode)
+        (let ((semeNodes (get-seme-nodes wordNode)))
+          (if (or (not (null? semeNodes)) (not useWordNet))
+              semeNodes        
+              (let ((nodes
+                     (delete-duplicates
+                      (fold 
+                       (lambda (semeNode result)
+                         (let ((link (cog-get-link 'ReferenceLink 'WordNode semeNode)))
+                           (if (not (null? link))
+                               (cons (gadr (car link)) result)
+                               result
+                               )
+                           )
                          )
+                       '()
+                       (cog-get-atoms 'SemeNode)
                        )
-                     '()
-                     (cog-get-atoms 'SemeNode)
-                     )
-                    )
-                   ))            
-              (let ((parentCheck (check-parentage wordNode nodes)))
-                (if (car parentCheck)
-                    (let ((result (get-seme-nodes (car parentCheck))))
-                      (set! word-node-seme-nodes-cache
-                            (append word-node-seme-nodes-cache 
-                                    (list (cons wordNode result))))
-                      result                      
                       )
-                    (let ((partCheck (check-part-whole wordNode nodes)))
-                      (if (car partCheck)
-                          (let ((result (get-seme-nodes (car partCheck))))
-                            (set! word-node-seme-nodes-cache 
-                                  (append word-node-seme-nodes-cache 
-                                          (list (cons wordNode result))))
-                            result
-                            )
-                          (begin
-                            (EvaluationLink (stv 1 1)
-                             (PredicateNode "unknownTerm")
-                             (ListLink
-                              wordNode
+                     ))            
+                (let ((parentCheck (check-parentage wordNode nodes)))
+                  (if (car parentCheck)
+                      (let ((result (get-seme-nodes (car parentCheck))))
+                        (set! word-node-seme-nodes-cache
+                              (append word-node-seme-nodes-cache 
+                                      (list (cons wordNode result))))
+                        result                      
+                        )
+                      (let ((partCheck (check-part-whole wordNode nodes)))
+                        (if (car partCheck)
+                            (let ((result (get-seme-nodes (car partCheck))))
+                              (set! word-node-seme-nodes-cache 
+                                    (append word-node-seme-nodes-cache 
+                                            (list (cons wordNode result))))
+                              result
                               )
-                             )
-                            '()
+                            (begin
+                              (EvaluationLink (stv 1 1)
+                               (PredicateNode "unknownTerm")
+                               (ListLink
+                                wordNode
+                                )
+                               )
+                              '()
+                              )
                             )
-                          )
+                        )
                       )
-                    )
+                  ) ; let
                 ) ; let
-              ) ; let
-            )
-        )
-      )
-  )
+              )
+          )
+    ); if
+)
 
 ; Called by C++ (updateDialogControllers). Chooses a sentence to say (that has
 ; already been stored in the AtomSpace by other processing).
