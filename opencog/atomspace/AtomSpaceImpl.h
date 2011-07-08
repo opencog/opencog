@@ -760,7 +760,8 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);
-        return getHandleSetFiltered(result, type, subclass, &STIAboveThreshold(bank.getAttentionalFocusBoundary()), vh);
+        STIAboveThreshold s = STIAboveThreshold(bank.getAttentionalFocusBoundary());
+        return getHandleSetFiltered(result, type, subclass, &s, vh);
 
     }
 

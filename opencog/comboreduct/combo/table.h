@@ -70,14 +70,14 @@ public:
     input_table() {}
 
     input_table(const MT& mt,
-                std::vector<std::string>& il = std::vector<std::string>())
+                std::vector<std::string> il = std::vector<std::string>())
         : labels(il) {
         foreach(std::vector<T>& row, mt)
             push_back(row); // using push_back to update considered_args
     }
 
     // set input labels
-    void set_labels(std::vector<std::string>& il) {
+    void set_labels(std::vector<std::string> il) {
         labels = il;
     }
 

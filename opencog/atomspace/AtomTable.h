@@ -195,9 +195,7 @@ public:
      *        subclass of the given type. If false, matches only atoms of the
      *        exact type.
      */
-    void log(Logger& logger = logger(),
-             Type type = ATOM,
-             bool subclass = true) const;
+    void log(Logger& l = logger(), Type t = ATOM, bool subclass = true) const;
 
     /**
      * Return the number of atoms contained in a table.

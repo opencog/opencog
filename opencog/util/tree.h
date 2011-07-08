@@ -3126,15 +3126,15 @@ struct lexicographic_subtree_order {
 //if size(tr1)!=size(tr2) then tr1 < tr2
 //otherwise lexicographic_subtree_order
 template<typename T,typename compare=std::less<T> >
-struct size_tree_order : lexicographic_subtree_order<T, compare> {
+struct size_tree_order : public lexicographic_subtree_order<T, compare> {
     bool operator()(const opencog::tree<T>& tr1,
                     const opencog::tree<T>& tr2) const {
         int s1 = tr1.size();
         int s2 = tr2.size();
-        if(s1==s2) {
-            return (cmp(tr1.begin(),tr2.begin())>0);
+        if(s1 == s2) {
+            return (lexicographic_subtree_order<T, compare>::cmp(tr1.begin(),tr2.begin())>0);
         }
-        else return (s1<s2);
+        else return (s1 < s2);
     }
 };
 
