@@ -229,13 +229,13 @@ void PsiActionSelectionAgent::printPlan(AtomSpace & atomSpace)
     int i = 1; 
 
     foreach( const Handle hAction, this->plan_action_list ) {
-        std::cout<<std::endl<<"Action No."<<i
+        std::cout<<std::endl<<"Step No."<<i
                  <<std::endl<<atomSpace.atomAsString(hAction);
 
         ++i; 
     }
 
-    std::cout << std::endl;
+    std::cout<<std::endl<<std::endl;
 }
 
 void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace, 
@@ -243,6 +243,7 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
                                             const Procedure::ProcedureRepository & procedureRepository, 
                                             Handle hActionExecutionLink)
 {
+std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_action)<<std::endl<<std::endl;  
 
     // Variables used by combo interpreter
     std::vector <combo::vertex> schemaArguments;
@@ -515,7 +516,7 @@ std::cout<<std::endl<<"Action " <<atomSpace.atomAsString(this->current_action)
                               this->cycleCount
                             );
 
-std::cout<<"Success"<<std::endl; 
+std::cout<<"action state: success"<<std::endl<<std::endl; 
                // TODO: record the success and update the weight of corresponding rule
 
             }
@@ -609,7 +610,7 @@ std::cout<<"current action is still running [SchemaId = "<<this->currentSchemaId
 
 #if HAVE_GUILE    
     // If we've used up the current plan, do a new planning
-    if ( this->temp_action_list.empty() ) {
+    if ( this->temp_action_list.empty() && this->current_actions.empty() ) {
         // Initialize scheme evaluator
         SchemeEval & evaluator = SchemeEval::instance();    
         std::string scheme_expression, scheme_return_value;
@@ -659,7 +660,7 @@ std::cout<<"'do_planning' can not find any suitable plan for the selected demand
 
     // Get next action from current plan
     if ( !this->current_actions.empty() ) {
-        this->current_action = this->current_actions.back(); 
+        this->current_action = this->current_actions.back();
         this->current_actions.pop_back(); 
     }
     else if ( !this->temp_action_list.empty() ) {
