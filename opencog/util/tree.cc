@@ -1,8 +1,8 @@
 #include "tree.h"
-#include <boost/spirit/core.hpp>
+#include <boost/spirit/include/classic_core.hpp>
 
 namespace {
-using namespace boost::spirit;
+using namespace boost::spirit::classic;
 using std::string;
 using namespace opencog;
 
