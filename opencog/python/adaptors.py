@@ -136,20 +136,23 @@ class ForestExtractor:
         self.writer.stop()
 
     def is_object(self,  atom):
-        return atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode)
-        
+        return (atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode)
+                     or self.is_important_atom(atom)) # haxx!
+    
+    def is_important_atom(self, atom):
+        return atom.name in ['actionFailed', 'actionDone'] or "DemandGoal" in atom.name
+    
     def object_label(self,  atom):
         return 'some_'+atom.type_name
 
     def include_atom(self,  atom):
         """Whether to include a given atom in the results. If it is not included, all trees containing it will be ignored as well."""
         if atom.is_node():
-            if atom.name in ["proximity", "near", 'next', "AGISIM_rotation", "AGISIM_position", "SpaceMap", "inside_pet_fov", 'walk', 'turn',
+            if atom.name in ["proximity", "near", 'next', "AGISIM_rotation", "AGISIM_position", "SpaceMap", "inside_pet_fov", 'turn', # 'walk',
                              'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst']: # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
                 return False
         else:
-            if (atom.is_a(t.SimultaneousEquivalenceLink) or atom.is_a(t.SimilarityLink) or atom.is_a(t.ImplicationLink) or
-                atom.is_a(t.AtTimeLink) ):
+            if (atom.is_a(t.SimultaneousEquivalenceLink) or atom.is_a(t.SimilarityLink) or atom.is_a(t.ImplicationLink) or atom.is_a(t.ReferenceLink) ):
                 return False
 
         return True
@@ -157,9 +160,9 @@ class ForestExtractor:
     def include_tree(self,  link):
         """Whether to make a separate tree corresponding to this link. If you don't, links in its outgoing set can
         still get their own trees."""
-        if not link.is_a(t.SequentialAndLink):
-            return False
-            
+#        if not link.is_a(t.SequentialAndLink):
+#            return False
+
         # TODO check the TruthValue the same way as you would for other links.
         if any([i.is_a(t.AtTimeLink) for i in link.incoming]): # work around hacks in other modules
             return False

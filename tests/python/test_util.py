@@ -6,7 +6,7 @@ import doctest
 doctest.testmod(util)
 
 from unittest import TestCase
-from mock import patch, patch_object
+from mock import patch
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name

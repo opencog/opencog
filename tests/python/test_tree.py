@@ -1,7 +1,7 @@
 from unittest import TestCase
 # uses Python mock, installed with "sudo easy_install mock"
 # http://www.voidspace.org.uk/python/mock/
-from mock import patch, patch_object
+from mock import patch
 
 import opencog.atomspace
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
@@ -70,5 +70,34 @@ class TreeTest(TestCase):
         self.assertEquals(var_tree.is_variable(),True)
         node_tree = tree.tree(self.x1)
         self.assertEquals(node_tree.is_variable(),False)
+
+    def test_unify(self):
+        x1_template = tree.tree(self.x1)
+        x1_tree = tree.tree_from_atom(self.x1)
+        s = tree.unify(x1_template, x1_tree, {})
+        self.assertEquals(s, {})
+
+        x2_template = tree.tree(self.x2)
+        s = tree.unify(x2_template, x1_tree, {})
+        self.assertEquals(s, None)
+        
+        all_template = tree.tree(1)
+        l2_tree = tree.tree_from_atom(self.l2)
+        s = tree.unify(all_template, l2_tree, {})
+        s_correct = {all_template : l2_tree}
+        self.assertEquals(s, s_correct)
+        
+    def test_apply_rule(self):
+        atoms = [self.l1, self.l2]
+        
+        # This is supposed to look up all Atoms of (exactly) type 'Link', and return their first outgoing atom
+        link_template = tree.tree('Link', 1, 2)
+        first = tree.tree(1)
+        result_trees = tree.apply_rule(link_template, first, atoms)
+        result_correct = map(tree.tree_from_atom, [self.x1, self.l1])
+        self.assertEquals(result_trees, result_correct)
+
+#eval_template = tree('EvaluationLink', 1, tree('ListLink', 2, 3))
+#imp_template = tree('ImplicationLink', 1,  2)
 
 

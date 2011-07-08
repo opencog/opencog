@@ -23,7 +23,7 @@ class Fishgram:
         self.min_embeddings = 2
         self.atomspace = atomspace
         
-        self.max_per_layer = 600
+        self.max_per_layer = 1000000 # 600
 
     def run(self):
         self.forest.extractForest()
@@ -46,7 +46,7 @@ class Fishgram:
         layers = []
         for layer in self.closed_bfs_layers():
             layers.append(layer)
-            if len(layers) >= 2:
+            if len(layers) >= 2 and len(layers) <= 6:
                 self.output_implications_for_last_layer(layers)
 
 # breadth-first search (to make it simpler!)
@@ -279,7 +279,10 @@ class Fishgram:
                 conclusion = conj[i]
                 premises = conj[:i] + conj[i+1:]
                 
-                if not (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):# == len(self.get_varlist(conclusion)) ):
+                # Let's say P implies Q. To keep things simple, P&Q must have the same number of variables as P.
+                # In other words, the conclusion can't add extra variables. This would be equivalent to proving an
+                # AverageLink (as the conclusion of the Implication).
+                if not (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):
                     continue
                 
                 try:
@@ -313,27 +316,78 @@ class Fishgram:
                 
                 if freq > 0.05:
                     assert len(premises)
-                    andLink = tree('AndLink',
-                                        list(premises)) # premises is a tuple remember
                     
-                    #print andLink                
+                    # Convert it into a Psi Rule. Note that this will remove variables corresponding to the TimeNodes, but
+                    # the embedding counts will still be equivalent.
+                    tmp = self.make_psi_rule(premises, conclusion)
+                    if tmp:
+                        (premises, conclusion) = tmp
+                        
+                        andLink = tree('AndLink',
+                                            list(premises)) # premises is a tuple remember
+                        
+                        #print andLink                
 
-                    qLink = tree('AverageLink', 
-                                    tree('ListLink', vars), 
-                                    tree('ImplicationLink',
-                                        andLink,
-                                        conclusion))
-                    a = atom_from_tree(qLink, self.atomspace)
-                    
-                    a.tv = TruthValue( freq , len(premises_embs) )
-                    #count = len(embs)
-                    #eval_a = atom_from_tree(evalLink, self.atomspace)
-                    #eval_a.tv = TruthValue(1, count)
-                    
-                    print a
+                        qLink = tree('AverageLink', 
+                                        tree('ListLink', vars), 
+                                        tree('ImplicationLink',
+                                            andLink,
+                                            conclusion))
+                        a = atom_from_tree(qLink, self.atomspace)
+                        
+                        a.tv = TruthValue( freq , len(premises_embs) )
+                        #count = len(embs)
+                        #eval_a = atom_from_tree(evalLink, self.atomspace)
+                        #eval_a.tv = TruthValue(1, count)
+                        
+                        print a
                 
                 assert count_conj <= len(premises_embs)
 
+    def make_psi_rule(self, premises_, conclusion_):
+        """Looks for a suitable combination of conditions to make a Psi Rule. Returns premises and conclusions for the Psi Rule."""
+        # Remove the (one!) SequentialAnd
+        # convert AtTime by itself
+        # convert Eval-actionDone
+        
+        # Because modifying inputs is evil
+        premises, conclusion = list(premises_), conclusion_
+        
+        a = self.atomspace.add
+        
+        seq_and_template = tree('SequentialAndLink', -1, -2) # two TimeNodes
+        time_template = tree('AtTimeLink', -1, -2) # 1 is a TimeNode, 2 is an EvaluationLink
+        action_template = tree('EvaluationLink',
+                                                a(t.PredicateNode, name='actionDone'),
+                                                tree('ListLink', -1)) # 1 is the ExecutionLink for the action
+        
+        # Can currently only handle one thing following another, not a series (>2)
+        seq_ands_prem = [ x for x in premises if unify(seq_and_template, x, {}) != None ]
+        actions_prem = [ x for x in premises if unify(action_template, x, {}) != None ]
+        conc_is_seq_and = unify(seq_and_template, conclusion, {})  != None
+
+        if 1 == len( seq_ands_prem ) and 1 == len(actions_prem) and not conc_is_seq_and:
+            premises.remove(seq_ands_prem[0])
+            
+            premises = [ self.replace(time_template, x, -2) for x in premises ]
+            premises = [ self.replace(action_template, x, -1) for x in premises ]
+            
+            conclusion = replace(time_template, conclusion, -2)
+            conclusion = replace(action_template, conclusion, -1)
+        
+            return tuple(premises), conclusion
+        else:
+            return None
+
+    def replace(self, pattern, example, var):
+        s = unify(pattern, example, {})
+        if s != None:
+            return s[tree(var)]
+        else:
+            return example
+    
+    def none_filter(self, list):
+        return [x for x in list if x != None]
 
     # Wait, we need count(  P(X,Y) ) / count( G(X,Y). Not equal to count( P(X) * count(Y in G))
     def normalize(self, big_conj_and_embeddings, small_conj_and_embeddings):
@@ -368,7 +422,7 @@ class Fishgram:
         
         return len(small_embs) * implied_cases
 
-def make_seq_alt(atomspace):
+def make_seq(atomspace):
     # unit of timestamps is 0.1 second so multiply by 10
     interval = 10* 5
     times = atomspace.get_atoms_by_type(t.TimeNode)
@@ -384,7 +438,63 @@ def make_seq_alt(atomspace):
             else:
                 break
 
-def make_seq(atomspace):
+def notice_changes(atomspace, targets):
+    tv_delta = 0.001
+    a = atomspace.add
+    
+    print len(targets)
+    
+    times = atomspace.get_atoms_by_type(t.TimeNode)
+    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
+    times = sorted(times, key= lambda t: int(t.name) )
+
+    print len(times)
+
+    for atom in targets:
+        target = tree_from_atom(atom)
+        
+        for (i, time_atom) in enumerate(times[:-1]):
+            time2_atom = times[i+1]
+            
+            template = tree('AtTimeLink', time_atom, target)
+            matches =[x for x in time_atom.incoming if unify(template, target, {}) != None]
+            
+            if len(matches) != 1:
+                continue
+            
+            template2 = tree('AtTimeLink', time2_atom, target)
+            matches2 =[x for x in time2_atom.incoming if unify(template2, target, {}) != None]
+
+            if len(matches2) == 1:
+                
+                tv1 = matches[0].tv
+                tv2 = matches2[0].tv
+                
+                if tv2 - tv1 > tv_delta:
+                    # increased
+                    pred = 'increased'
+                elif tv1 - tv2 > tv_delta:
+                    # decreased
+                    pred = 'decreased'
+                else:
+                    continue
+                
+                tv = TruthValue(1, 1e35)
+                res = tree('AtTimeLink',
+                         time2_atom, 
+                         tree('EvaluationLink',
+                                    a(t.PredicateNode, name=pred),
+                                    tree('ListLink', target)
+                                    )
+                         )
+                a = atom_from_tree(res, atomspace)
+                a.tv = tv
+                
+                print str(a)
+            else:
+                print '[no match]'
+
+def make_seq_alt(atomspace):
     # unit of timestamps is 0.1 second so multiply by 10
     interval = 10* 5
     times = atomspace.get_atoms_by_type(t.TimeNode)
@@ -396,12 +506,12 @@ def make_seq(atomspace):
         for time2_atom in times[i+1:]:
             t2 = int(time2_atom.name)
             if t2 - t1 <= interval:
-                #atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
-                for atTime in time_atom.incoming:
-                    for atTime2 in time2_atom.incoming:                        
-                        print atomspace.add_link(t.SequentialAndLink,  [atTime,  atTime2], TruthValue(1, 1))
-                        #event1, event2 = atTime.out[1], atTime2.out[1]
-                        #print atomspace.add_link(t.SequentialAndLink,  [event1, event2], TruthValue(1, 1))
+                atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
+#                for atTime in time_atom.incoming:
+#                    for atTime2 in time2_atom.incoming:                        
+#                        print atomspace.add_link(t.SequentialAndLink,  [atTime,  atTime2], TruthValue(1, 1))
+#                        #event1, event2 = atTime.out[1], atTime2.out[1]
+#                        #print atomspace.add_link(t.SequentialAndLink,  [event1, event2], TruthValue(1, 1))
             else:
                 break
 
@@ -419,6 +529,10 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
         try:
             fish = Fishgram(atomspace)
             make_seq(atomspace)
+            
+            demands = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
+            
+            notice_changes(atomspace, demands)
             fish.implications()            
         except KeyError,  e:
             KeyError

@@ -1,7 +1,7 @@
 from unittest import TestCase
 # uses Python mock, installed with "sudo easy_install mock"
 # http://www.voidspace.org.uk/python/mock/
-from mock import patch, patch_object
+from mock import patch
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
@@ -21,7 +21,7 @@ def add_fishgram_data(atomspace):
     a = atomspace
     # load and parse a file, or just add some dummy nodes.
     # it shouldn't be huge amounts of data, just enough to demonstrate
-    # that the code is functionally correct
+    # that the code is functionally correct    
 
 
 class FishgramTest(TestCase):
@@ -50,3 +50,5 @@ class FishgramTest(TestCase):
         i = self.fishgram.implications()
         self.assertEquals(mock_bfs.called,True)
 
+    def test_notice_changes(self):
+        pass

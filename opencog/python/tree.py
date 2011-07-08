@@ -83,6 +83,19 @@ def atom_from_tree(tree, a):
         out = [atom_from_tree(x, a) for x in tree.args]
         return a.add(get_type(tree.op), out=out)
 
+def find(template, atoms):
+    return [a for a in atoms if unify(tree_from_atom(a), template, {}) != None]
+
+def apply_rule(precedent, conclusion, atoms):
+    ret = []
+    for x in atoms:
+        if isinstance(x, Atom):
+            x = tree_from_atom(x)
+        s = unify(precedent, x, {})
+        if s != None:
+            ret.append( subst(s, conclusion) )
+    return ret
+
 # Further code adapted from AIMA-Python under the MIT License (see http://code.google.com/p/aima-python/)
 def unify(x, y, s,  vars_only = False):
     """Unify expressions x,y with substitution s; return a substitution that
@@ -93,7 +106,7 @@ def unify(x, y, s,  vars_only = False):
     >>> ppsubst(unify(x + y, y + C, {}))
     {x: y, y: C}
     """
-    print "unify %s %s" % (str(x), str(y))
+    #print "unify %s %s" % (str(x), str(y))
     
     if vars_only:
         if isinstance(x, tree) and isinstance(y, tree):

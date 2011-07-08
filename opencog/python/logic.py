@@ -44,9 +44,6 @@ def fc(a):
         #atom_from_tree(t, a)
     return layer_results
 
-def find(template, atoms):
-    return [a for a in atoms if unify(tree_from_atom(a), template, {})]
-
 def all_atoms(a):
     return a.get_atoms_by_type(t.Atom)
 
