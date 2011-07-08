@@ -65,6 +65,7 @@ static const pair<string, string> complexity_penalty_intensity_opt("complexity-p
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> resources_opt("resources", "R");
 static const pair<string, string> max_score_opt("max-score", "A");
+static const pair<string, string> fraction_of_remaining_opt("fraction-of-remaining", "C");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -84,6 +85,7 @@ struct feature_selection_parameters {
     double resources; // resources of the learning algo that will take
                       // in input the feature set
     double max_score;
+    unsigned fraction_of_remaining;
 };
 
 template<typename IT, typename OT, typename Optimize, typename Scorer>
@@ -201,7 +203,8 @@ void feature_selection(IT& it, const OT& ot,
     } else if(fs_params.algorithm == sa) {
         OC_ASSERT(false, "TODO");        
     } else if(fs_params.algorithm == hc) {
-        hc_parameters hc_param(false); // do not terminate if improvement
+        hc_parameters hc_param(false, // do not terminate if improvement
+                               fs_params.fraction_of_remaining);
         iterative_hillclimbing hc(rng, op_param, hc_param);
         feature_selection(it, ot, hc, fs_params);            
     }

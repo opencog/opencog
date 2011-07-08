@@ -1,4 +1,4 @@
-/** feature-selection.cc --- 
+/** feature-selection.cc ---
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -64,7 +64,7 @@ void unsupported_type_exit(type_node type) {
     unsupported_type_exit(type_tree(type));
 }
 
-int main(int argc, char** argv) { 
+int main(int argc, char** argv) {
 
     unsigned long rand_seed;
     string log_level;
@@ -93,9 +93,6 @@ int main(int argc, char** argv) {
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned>(&fs_params.max_evals)->default_value(10000),
          "Maximum number of fitness function evaluations.\n")
-        // ("result-count,c",
-        //  value<long>(&fs_params.result_count)->default_value(10),
-        //  "The number of non-dominated best results to return ordered according to their score, if negative then returns all of them.\n")
         (opt_desc_str(log_level_opt).c_str(),
          value<string>(&log_level)->default_value("DEBUG"),
          "Log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter.\n")
@@ -115,10 +112,13 @@ int main(int argc, char** argv) {
          "Intensity of the confidence penalty, in [0,+Inf), 0 means no confidence penalty. This parameter influences how much importance we attribute to the confidence of the feature quality measure. The less samples in the data set, the more features the less confidence in the feature set quality measure.\n")
         (opt_desc_str(resources_opt).c_str(),
          value<double>(&fs_params.resources)->default_value(10000),
-         "Resources allocated to the learning algorithm that take in input the selected features. More resource means that the feature set can be larger (as long as it has enough confidence). In this case the algo is supposed to be MOSES and the resources is the number of evaluations.\n")        
+         "Resources allocated to the learning algorithm that take in input the selected features. More resource means that the feature set can be larger (as long as it has enough confidence). In this case the algo is supposed to be MOSES and the resources is the number of evaluations.\n")
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&fs_params.max_score)->default_value(1),
          "The max score to reach, once reached feature selection halts.\n")
+        (opt_desc_str(fraction_of_remaining_opt).c_str(),
+         value<unsigned>(&fs_params.fraction_of_remaining)->default_value(10),
+         "Hillclimbing parameter. Determine the fraction of the remaining number of eval to use for the current iteration.\n")
         ;
 
     variables_map vm;
