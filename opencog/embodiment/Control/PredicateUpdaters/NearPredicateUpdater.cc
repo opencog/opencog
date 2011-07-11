@@ -128,8 +128,11 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             } // else
         } // for
     } catch( const opencog::NotFoundException& ex ) {
-        logger().error( "NearPredicateUpdater::%s - Entity not found '%s'",
-                        __FUNCTION__, ex.getMessage( ) );
+// Disable the log below, which prints almost useless info in log file. When the
+// object is removed, it will fail to find the object. That is normal and happens  
+// quite often for consumable objects, such as FoodCube
+//        logger().error( "NearPredicateUpdater::%s - Entity not found '%s'",
+//                        __FUNCTION__, ex.getMessage( ) );
     } // catch
 
     computeAllSpatialRelations(pet, object, timestamp);
@@ -202,7 +205,10 @@ void NearPredicateUpdater::computeAllSpatialRelations(Handle objectA, Handle obs
 //            } // for
         } // for
     } catch( const opencog::NotFoundException& ex ) {
-        logger().error( "%s - %s", __FUNCTION__, ex.getMessage( ) );
+// Disable the log below, which prints almost useless info in log file. When the
+// object is removed, it will fail to find the object. That is normal and happens  
+// quite often for consumable objects, such as FoodCube
+//        logger().error( "%s - %s", __FUNCTION__, ex.getMessage( ) );
         return;
     } // if
 
