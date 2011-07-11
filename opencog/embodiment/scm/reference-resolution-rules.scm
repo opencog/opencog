@@ -25,312 +25,347 @@
 ; variable: command-resolution-rules (at the end of this file)
 
 (define evaluate-color-reference
-  (BindLink (stv 1 1) (cog-new-av 0 1 0)
-    (ListLink
-     (TypedVariableLink
-      (VariableNode "$entityValue")
-      (VariableTypeNode "WordInstanceNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$colorValue")
-      (VariableTypeNode "WordInstanceNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$entityWordNode")
-      (VariableTypeNode "WordNode")
-      ) 
-     (TypedVariableLink
-      (VariableNode "$colorWordNode")
-      (VariableTypeNode "WordNode")
-      )
+    (BindLink (stv 1 1) (cog-new-av 1 1 1)
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$entityValue")
+                (VariableTypeNode "WordInstanceNode")
+            )
+
+            (TypedVariableLink
+                (VariableNode "$colorValue")
+                (VariableTypeNode "WordInstanceNode")
+            )
+
+            (TypedVariableLink
+                (VariableNode "$entityWordNode")
+                (VariableTypeNode "WordNode")
+            ) 
+
+            (TypedVariableLink
+                (VariableNode "$colorWordNode")
+                (VariableTypeNode "WordNode")
+            )
     
-     (TypedVariableLink
-      (VariableNode "$framePredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$frameEntityPredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$frameColorPredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     )
-    (ImplicationLink
-     (AndLink     
-       ; filter by Color frame
-      (InheritanceLink
-       (VariableNode "$framePredicateNode")
-       (DefinedFrameNode "#Color")
-       )
-      (InheritanceLink
-       (VariableNode "$frameEntityPredicateNode")
-       (DefinedFrameElementNode "#Color:Entity")
-       )
-      (InheritanceLink
-       (VariableNode "$frameColorPredicateNode")
-       (DefinedFrameElementNode "#Color:Color")
-       )
+            (TypedVariableLink
+                (VariableNode "$framePredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
+
+            (TypedVariableLink
+                (VariableNode "$frameEntityPredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
+
+            (TypedVariableLink
+                (VariableNode "$frameColorPredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
+        ); ListLink
+
+        (ImplicationLink
+            (AndLink     
+                ; filter by Color frame
+                (InheritanceLink
+                    (VariableNode "$framePredicateNode")
+                    (DefinedFrameNode "#Color")
+                )
+
+                (InheritanceLink
+                    (VariableNode "$frameEntityPredicateNode")
+                    (DefinedFrameElementNode "#Color:Entity")
+                )
+
+                (InheritanceLink
+                    (VariableNode "$frameColorPredicateNode")
+                    (DefinedFrameElementNode "#Color:Color")
+                )
       
-      (FrameElementLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$frameEntityPredicateNode")
-       )
-      (FrameElementLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$frameColorPredicateNode")
-       )
+                (FrameElementLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$frameEntityPredicateNode")
+                )
+
+                (FrameElementLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$frameColorPredicateNode")
+                )
       
-      (EvaluationLink
-       (VariableNode "$frameEntityPredicateNode")
-       (VariableNode "$entityValue")
-       )
-      (EvaluationLink
-       (VariableNode "$frameColorPredicateNode")
-       (VariableNode "$colorValue")
-       )
+                (EvaluationLink
+                    (VariableNode "$frameEntityPredicateNode")
+                    (VariableNode "$entityValue")
+                )
+
+                (EvaluationLink
+                    (VariableNode "$frameColorPredicateNode")
+                    (VariableNode "$colorValue")
+                )
   
-       ; get the WordNodes from the frame elements
-      (ReferenceLink
-       (VariableNode "$entityValue")
-       (VariableNode "$entityWordNode")
-       )
+                ; get the WordNodes from the frame elements
+                (ReferenceLink
+                    (VariableNode "$entityValue")
+                    (VariableNode "$entityWordNode")
+                )
 
-      (ReferenceLink
-       (VariableNode "$colorValue")
-       (VariableNode "$colorWordNode")
-       )
+                (ReferenceLink
+                    (VariableNode "$colorValue")
+                    (VariableNode "$colorWordNode")
+                )
              
-      )
-     ; ImplicationLink output
-     (ExecutionLink      
-      (GroundedSchemaNode "scm:filterByColor")
-      (ListLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$entityValue")
-       (VariableNode "$entityWordNode")
-       (VariableNode "$colorWordNode")
-       )
-      )
+            ); AndLink
 
-     )
-    )
-  )
-
+            ; ImplicationLink output
+            (ExecutionLink      
+                (GroundedSchemaNode "scm:filterByColor")
+                (ListLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$entityValue")
+                    (VariableNode "$entityWordNode")
+                    (VariableNode "$colorWordNode")
+                )
+            )
+        ); ImplicationLink
+    ); BindLink
+)
 
 (define evaluate-dimension-reference
-  (BindLink (stv 1 1) (cog-new-av 0 1 0)
-    (ListLink
-     (TypedVariableLink
-      (VariableNode "$framePredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$frameObjectPredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$frameMeasurementPredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$objectValue")
-      (VariableTypeNode "WordInstanceNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$dimensionValue")
-      (VariableTypeNode "WordInstanceNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$dimensionWordNode")
-      (VariableTypeNode "WordNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$objectWordNode")
-      (VariableTypeNode "WordNode")
-      )
-     )
-    (ImplicationLink
-     (AndLink
-      (InheritanceLink
-       (VariableNode "$framePredicateNode")
-       (DefinedFrameNode "#Dimension")
-       )
-      (InheritanceLink
-       (VariableNode "$frameObjectPredicateNode")
-       (DefinedFrameElementNode "#Dimension:Object")
-       )
-      (InheritanceLink
-       (VariableNode "$frameMeasurementPredicateNode")
-       (DefinedFrameElementNode "#Dimension:Measurement")
-       )
-      
-      (FrameElementLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$frameObjectPredicateNode")
-       )
-      (FrameElementLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$frameMeasurementPredicateNode")
-       )
-      
-      (EvaluationLink
-       (VariableNode "$frameObjectPredicateNode")
-       (VariableNode "$objectValue")
-       )
-      (EvaluationLink
-       (VariableNode "$frameMeasurementPredicateNode")
-       (VariableNode "$dimensionValue")
-       )             
-      
-      (ReferenceLink
-       (VariableNode "$dimensionValue")
-       (VariableNode "$dimensionWordNode")
-       )      
-      
-      (ReferenceLink
-       (VariableNode "$objectValue")
-       (VariableNode "$objectWordNode")
-       )
+    (BindLink (stv 1 1) (cog-new-av 1 1 1)
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$framePredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
 
-      )
-     
-     (ExecutionLink
-      (GroundedSchemaNode "scm:filterByDimension")
-      (ListLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$objectValue")
-       (VariableNode "$objectWordNode")
-       (VariableNode "$dimensionWordNode")
-       )
-      )
-            
-     ); ImplicationLink
+            (TypedVariableLink
+                (VariableNode "$frameObjectPredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
+
+            (TypedVariableLink
+                (VariableNode "$frameMeasurementPredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
+
+            (TypedVariableLink
+                (VariableNode "$objectValue")
+                (VariableTypeNode "WordInstanceNode")
+            )
+
+            (TypedVariableLink
+                (VariableNode "$dimensionValue")
+                (VariableTypeNode "WordInstanceNode")
+            )
+
+            (TypedVariableLink
+                (VariableNode "$dimensionWordNode")
+                (VariableTypeNode "WordNode")
+            )
+
+            (TypedVariableLink
+                (VariableNode "$objectWordNode")
+                (VariableTypeNode "WordNode")
+            )
+        ); ListLink
+   
+        (ImplicationLink
+            (AndLink
+                (InheritanceLink
+                    (VariableNode "$framePredicateNode")
+                    (DefinedFrameNode "#Dimension")
+                )
+   
+                (InheritanceLink
+                    (VariableNode "$frameObjectPredicateNode")
+                    (DefinedFrameElementNode "#Dimension:Object")
+                )
+   
+                (InheritanceLink
+                    (VariableNode "$frameMeasurementPredicateNode")
+                    (DefinedFrameElementNode "#Dimension:Measurement")
+                )
+         
+                (FrameElementLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$frameObjectPredicateNode")
+                )
+   
+                (FrameElementLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$frameMeasurementPredicateNode")
+                )
+         
+                (EvaluationLink
+                    (VariableNode "$frameObjectPredicateNode")
+                    (VariableNode "$objectValue")
+                )
+   
+                (EvaluationLink
+                    (VariableNode "$frameMeasurementPredicateNode")
+                    (VariableNode "$dimensionValue")
+                )             
+         
+                (ReferenceLink
+                    (VariableNode "$dimensionValue")
+                    (VariableNode "$dimensionWordNode")
+                )      
+         
+                (ReferenceLink
+                    (VariableNode "$objectValue")
+                    (VariableNode "$objectWordNode")
+                )
+            ); AndLink
+        
+            (ExecutionLink
+                (GroundedSchemaNode "scm:filterByDimension")
+                (ListLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$objectValue")
+                    (VariableNode "$objectWordNode")
+                    (VariableNode "$dimensionWordNode")
+                )
+            )
+               
+        ); ImplicationLink
     )
-  )
+)
 
 (define evaluate-distance-reference
-  (BindLink (stv 1 1) (cog-new-av 0 1 0)
-    (ListLink
-     (TypedVariableLink
-      (VariableNode "$framePredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$frameFigurePredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$frameGroundPredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$frameRelationTypePredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$figureValue")
-      (VariableTypeNode "WordInstanceNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$groundValue")
-      (VariableTypeNode "WordInstanceNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$figureWordNode")
-      (VariableTypeNode "WordNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$groundWordNode")
-      (VariableTypeNode "WordNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$relationTypeValue")
-      (VariableTypeNode "ConceptNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$relationTypePredicateNode")
-      (VariableTypeNode "PredicateNode")
-      )
-     )
+    (BindLink (stv 1 1) (cog-new-av 1 1 1)
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$framePredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
 
-    (ImplicationLink
-     (AndLink
-      (InheritanceLink
-       (VariableNode "$framePredicateNode")
-       (DefinedFrameNode "#Locative_relation")
-       )
-      (InheritanceLink
-       (VariableNode "$frameFigurePredicateNode")
-       (DefinedFrameElementNode "#Locative_relation:Figure") 
-       )
-      (InheritanceLink
-       (VariableNode "$frameGroundPredicateNode")
-       (DefinedFrameElementNode "#Locative_relation:Ground") 
-       )
-      (InheritanceLink
-       (VariableNode "$frameRelationTypePredicateNode")
-       (DefinedFrameElementNode "#Locative_relation:Relation_type") 
-       )
+            (TypedVariableLink
+                (VariableNode "$frameFigurePredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
 
-      (FrameElementLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$frameFigurePredicateNode")
-       )             
-      (FrameElementLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$frameGroundPredicateNode")
-       )             
-      (FrameElementLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$frameRelationTypePredicateNode")
-       )             
+            (TypedVariableLink
+                (VariableNode "$frameGroundPredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
+  
+            (TypedVariableLink
+                (VariableNode "$frameRelationTypePredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
+  
+            (TypedVariableLink
+                (VariableNode "$figureValue")
+                (VariableTypeNode "WordInstanceNode")
+            )
+  
+            (TypedVariableLink
+                (VariableNode "$groundValue")
+                (VariableTypeNode "WordInstanceNode")
+            )
+  
+            (TypedVariableLink
+                (VariableNode "$figureWordNode")
+                (VariableTypeNode "WordNode")
+            )
+  
+            (TypedVariableLink
+                (VariableNode "$groundWordNode")
+                (VariableTypeNode "WordNode")
+            )
+  
+            (TypedVariableLink
+                (VariableNode "$relationTypeValue")
+                (VariableTypeNode "ConceptNode")
+            )
+  
+            (TypedVariableLink
+                (VariableNode "$relationTypePredicateNode")
+                (VariableTypeNode "PredicateNode")
+            )
+        ); ListLink
 
-      (EvaluationLink
-       (VariableNode "$frameFigurePredicateNode")
-       (VariableNode "$figureValue")
-       )
-      (EvaluationLink
-       (VariableNode "$frameGroundPredicateNode")
-       (VariableNode "$groundValue")
-       )
-      (EvaluationLink
-       (VariableNode "$frameRelationTypePredicateNode")
-       (VariableNode "$relationTypeValue") 
-       )
+        (ImplicationLink
+            (AndLink
+                (InheritanceLink
+                    (VariableNode "$framePredicateNode")
+                     (DefinedFrameNode "#Locative_relation")
+                )
 
-      (ReferenceLink
-       (VariableNode "$figureValue") 
-       (VariableNode "$figureWordNode") 
-       )
-      (ReferenceLink
-       (VariableNode "$groundValue") 
-       (VariableNode "$groundWordNode") 
-       )
-      
-      )
+                (InheritanceLink
+                    (VariableNode "$frameFigurePredicateNode")
+                    (DefinedFrameElementNode "#Locative_relation:Figure") 
+                )
 
-     (ExecutionLink
-      (GroundedSchemaNode "scm:filterByDistance")
-      (ListLink
-       (VariableNode "$framePredicateNode")
-       (VariableNode "$figureValue")
-       (VariableNode "$figureWordNode") 
-       (VariableNode "$groundValue")
-       (VariableNode "$groundWordNode")
-       (VariableNode "$relationTypeValue") 
-       )
-      )
+                (InheritanceLink
+                    (VariableNode "$frameGroundPredicateNode")
+                    (DefinedFrameElementNode "#Locative_relation:Ground") 
+                )
 
-     )
-    )
-  )
+                (InheritanceLink
+                    (VariableNode "$frameRelationTypePredicateNode")
+                    (DefinedFrameElementNode "#Locative_relation:Relation_type") 
+                )
+
+                (FrameElementLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$frameFigurePredicateNode")
+                )             
+
+                (FrameElementLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$frameGroundPredicateNode")
+                )             
+
+                (FrameElementLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$frameRelationTypePredicateNode")
+                )             
+
+                (EvaluationLink
+                    (VariableNode "$frameFigurePredicateNode")
+                    (VariableNode "$figureValue")
+                )
+
+                (EvaluationLink
+                    (VariableNode "$frameGroundPredicateNode")
+                    (VariableNode "$groundValue")
+                )
+
+                (EvaluationLink
+                    (VariableNode "$frameRelationTypePredicateNode")
+                    (VariableNode "$relationTypeValue") 
+                )
+
+                (ReferenceLink
+                    (VariableNode "$figureValue") 
+                    (VariableNode "$figureWordNode") 
+                )
+
+                (ReferenceLink
+                    (VariableNode "$groundValue") 
+                    (VariableNode "$groundWordNode") 
+                )
+            ); AndLink
+
+            (ExecutionLink
+                (GroundedSchemaNode "scm:filterByDistance")
+                (ListLink
+                    (VariableNode "$framePredicateNode")
+                    (VariableNode "$figureValue")
+                    (VariableNode "$figureWordNode") 
+                    (VariableNode "$groundValue")
+                    (VariableNode "$groundWordNode")
+                    (VariableNode "$relationTypeValue") 
+                )
+            )
+
+        ); ImplicationLink
+    ); BindLink
+)
 
 (define reference-resolution-rules
-  (list 
-   evaluate-color-reference
-   evaluate-dimension-reference
-   evaluate-distance-reference
-   )
-  )
+    (list 
+        evaluate-color-reference
+        evaluate-dimension-reference
+        evaluate-distance-reference
+    )
+)

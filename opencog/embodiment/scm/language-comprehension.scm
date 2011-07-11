@@ -545,6 +545,8 @@
 ;         SemeNode
 ;         WordNode  
 ;
+; TODO: a better solution is using pattern matcher to do this job. 
+;
 (define word-node-seme-nodes-cache '() )
 
 (define (get-seme-nodes wordNode)
@@ -598,12 +600,10 @@
 ;
 ; The final list contains not only the SemeNodes but its strengths 
 ;
-; TODO: the sequence of SemeNode and strength below is different from the code, 
-;       one of them must be wrong! 
-;
-; i.e. ( ( (SemeNode "1") . 0.03)
-;        ( (SemeNode "2") . 0)
-;        ( (SemeNode "3") . 1.) )
+; i.e. ( (0.03 .  (SemeNode "1") )
+;        (0    .  (SemeNode "2") )
+;        (1    .  (SemeNode "3") ) 
+;      )
 ;
 (define (get-candidates-seme-nodes win)
     (let ( (noun_suggestions '())
@@ -2113,7 +2113,7 @@
 ; and one SemeNode for each WordInstanceNode that was chosen by the Reference resolution
 ; process
 (define (resolve-reference)
-    (let ( (objects '())
+    (let ( (objects '()) ; a list of (WordInstanceNode . SemeNodes)
            (resolvedReferences '())
            (anaphoricSemeNodeStrength '())
            (groundedRulesCounter '())
@@ -2121,7 +2121,8 @@
 
          (set! word-node-seme-nodes-cache '())
 
-         ; first retrieve all objects, from the latest sentence, to be evaluated
+         ; Step 1. retrieve all objects, from the latest sentence, to be evaluated
+         ;         objects is a list of (WordInstanceNode . SemeNodes)
          (map 
              (lambda (win)
                  (let ( (semeNodes '())
@@ -2130,46 +2131,50 @@
 
                       (map
                           (lambda (candidateSemeNodesList)          
-                              (let ( (strength (car candidateSemeNodesList))
-                                     (values (cdr candidateSemeNodesList))
+                              (let ( (strength (car candidateSemeNodesList) )
+                                     (seme_node_list (cdr candidateSemeNodesList) )
                                    )
 
-                                (map
-                                    (lambda (semeNode)
-                                        (set! semeNodes
-                                            (append semeNodes (list semeNode) ) 
-                                        )
-                                        ; keep the greater strength suggestion
-                                        (let ( (oldSuggestion
-                                                   (assoc semeNode anaphoricSemeNodeStrength)
-                                               )
-                                             )
-                                             (cond 
-                                                 ( (and oldSuggestion
-                                                          (> strength (cdr oldSuggestion) ) 
-                                                   )
-                                                   (set! anaphoricSemeNodeStrength 
-                                                         (alist-delete semeNode anaphoricSemeNodeStrength) 
-                                                   )
-                                                   (set! oldSuggestion #f)
-                                                 )
-                                             )
-                 
-                                            (if (not oldSuggestion)
-                                                (set! anaphoricSemeNodeStrength 
-                                                    (append anaphoricSemeNodeStrength 
-                                                            (list (cons semeNode strength) ) 
-                                                    ) 
+                                   (map
+                                       (lambda (semeNode)
+                                           (set! semeNodes
+                                               (append semeNodes (list semeNode) ) 
+                                           )
+
+                                           ; keep the greater strength suggestion
+                                           (let ( (oldSuggestion
+                                                      (assoc semeNode anaphoricSemeNodeStrength)
+                                                  )
                                                 )
-                                            )
-                                        
-                                        ) ; let                 
-                                        (set! groundedRulesCounter 
-                                             (append groundedRulesCounter (list (cons semeNode 0 ) ) )
-                                        )
-                                    ); lambda
-                                    values
-                                ); map
+                                                (cond 
+                                                    ( (and oldSuggestion
+                                                           (> strength (cdr oldSuggestion) ) 
+                                                      )
+                                                      (set! anaphoricSemeNodeStrength 
+                                                            (alist-delete semeNode anaphoricSemeNodeStrength) 
+                                                      )
+                                                      (set! oldSuggestion #f)
+                                                    )
+                                                )
+                    
+                                                (if (not oldSuggestion)
+                                                    (set! anaphoricSemeNodeStrength 
+                                                        (append anaphoricSemeNodeStrength 
+                                                            (list (cons semeNode strength) ) 
+                                                        ) 
+                                                    )
+                                                )
+                                           
+                                           ); let                 
+
+                                           (set! groundedRulesCounter 
+                                                (append groundedRulesCounter (list (cons semeNode 0) ) )
+                                           )
+                                       ); lambda
+
+                                       seme_node_list
+                                   ); map
+
                               ); let
                           ); lambda
                           semeNodesCandidates
@@ -2189,42 +2194,44 @@
              (get-latest-word-instance-nodes)
          ); map
 
-         ; now use the rules to filter the objects list
+         ; Step 2. use the all sorts of rules to filter the objects list,
+         ;         i.e. pick up most suitable SemeNode for each WordInstanceNode
          (map
              (lambda (rule)
-               (map
-                   (lambda (winAndSemesListLink)
-                       (cond
-                           ( (not (null? winAndSemesListLink))
-                             (let* ( (winAndSemes (cog-outgoing-set winAndSemesListLink))
-                                     (win (car winAndSemes))
-                                     (semes (cdr winAndSemes))
-                                   )
+                 (map
+                     (lambda (winAndSemesListLink)
+                         (cond
+                             ( (not (null? winAndSemesListLink) )
+                               (let* ( (winAndSemes (cog-outgoing-set winAndSemesListLink))
+                                       (win (car winAndSemes))
+                                       (semes (cdr winAndSemes))
+                                     )
         
-                                   (map
-                                       (lambda (semeNode)
-                                           (let ( (rulesCounter
-                                                      (+ (assoc-ref groundedRulesCounter semeNode) 1)
-                                                  ) 
-                                                )
-                                                (set! groundedRulesCounter 
-                                                    (alist-delete semeNode groundedRulesCounter)
-                                                )
-                                                (set! groundedRulesCounter
-                                                    (alist-cons semeNode rulesCounter groundedRulesCounter)
-                                                )
-                                           )
-                                       );lambda
-                                       semes
-                                   )
+                                     (map
+                                         (lambda (semeNode)
+                                             (let ( (rulesCounter
+                                                        (+ (assoc-ref groundedRulesCounter semeNode) 1)
+                                                    ) 
+                                                  )
+                                                  (set! groundedRulesCounter 
+                                                        (alist-delete semeNode groundedRulesCounter)
+                                                  )
+                                                  (set! groundedRulesCounter
+                                                        (alist-cons semeNode rulesCounter groundedRulesCounter)
+                                                  )
+                                             )
+                                         );lambda
+                                         semes
+                                     )
 
                                    ; remove those semeNodes that must not be present in the answer
                                    (set! objects (filter-objects objects winAndSemes) )
-                             ); let*
-                           )
-                       ); cond
-                   )
-                   (cog-outgoing-set (cog-bind rule ) )
+                               ); let*
+                             )
+                         ); cond
+                     ); lambda
+
+                    (cog-outgoing-set (cog-bind rule) )
                 ); map
         
              ); lambda
@@ -2657,7 +2664,7 @@
        )
    (get-tick startTime)
    )
-  )
+)
 
 
 ; This function will execute a part-whole inference to check
@@ -2827,58 +2834,83 @@
     (define useWordNet #f) ; if true will use the WordNet ontology
 
     (if (assoc-ref word-node-seme-nodes-cache wordNode)
+    
+        ; If we can get corresponding SemeNodes from cache, return these SemeNodes
         (assoc-ref word-node-seme-nodes-cache wordNode)
-        (let ((semeNodes (get-seme-nodes wordNode)))
-          (if (or (not (null? semeNodes)) (not useWordNet))
-              semeNodes        
-              (let ((nodes
-                     (delete-duplicates
-                      (fold 
-                       (lambda (semeNode result)
-                         (let ((link (cog-get-link 'ReferenceLink 'WordNode semeNode)))
-                           (if (not (null? link))
-                               (cons (gadr (car link)) result)
-                               result
-                               )
-                           )
-                         )
-                       '()
-                       (cog-get-atoms 'SemeNode)
-                       )
-                      )
-                     ))            
-                (let ((parentCheck (check-parentage wordNode nodes)))
-                  (if (car parentCheck)
-                      (let ((result (get-seme-nodes (car parentCheck))))
-                        (set! word-node-seme-nodes-cache
-                              (append word-node-seme-nodes-cache 
-                                      (list (cons wordNode result))))
-                        result                      
-                        )
-                      (let ((partCheck (check-part-whole wordNode nodes)))
-                        (if (car partCheck)
-                            (let ((result (get-seme-nodes (car partCheck))))
-                              (set! word-node-seme-nodes-cache 
-                                    (append word-node-seme-nodes-cache 
-                                            (list (cons wordNode result))))
-                              result
-                              )
-                            (begin
-                              (EvaluationLink (stv 1 1)
-                               (PredicateNode "unknownTerm")
-                               (ListLink
-                                wordNode
+
+        ; If we fail to get corresponding SemeNodes from cache, search in the AtomSpace
+        (let ( (semeNodes (get-seme-nodes wordNode)) 
+             )
+             (if (or (not (null? semeNodes)) 
+                     (not useWordNet)
+                 )
+
+                 ; If we found corresponding SemeNodes in AtomSpace, return them
+                 semeNodes        
+
+                 ; If we failed to get any SemeNode in AtomSpace, search in WordNet
+                 (let ( (nodes ; contains all the grounded SemeNodes without duplications?
+                        (delete-duplicates
+                            (fold 
+                                (lambda (semeNode result)
+                                    (let ( (reference_link_list
+                                               (cog-get-link 'ReferenceLink 'WordNode semeNode) 
+                                           )
+                                         )
+                                         (if (null? reference_link_list)
+                                             result
+                                             (cons (gadr (car reference_link_list)) result)
+                                         )
+                                    )
                                 )
-                               )
-                              '()
-                              )
+                                '()
+                                (cog-get-atoms 'SemeNode)
                             )
                         )
-                      )
-                  ) ; let
-                ) ; let
+                        )
+                      )            
+
+                      (let ( (parentCheck (check-parentage wordNode nodes))
+                           )
+
+                           (if (car parentCheck)
+                               (let ( (result (get-seme-nodes (car parentCheck)))
+                                    )
+                                    (set! word-node-seme-nodes-cache
+                                         (append word-node-seme-nodes-cache 
+                                         (list (cons wordNode result)))
+                                    )
+                                    result                      
+                               )
+
+                              (let ( (partCheck (check-part-whole wordNode nodes))
+                                   )
+                                   (if (car partCheck)
+                                       (let ( (result (get-seme-nodes (car partCheck)))
+                                            )
+                                            (set! word-node-seme-nodes-cache 
+                                                  (append word-node-seme-nodes-cache 
+                                                  (list (cons wordNode result)))
+                                            )
+                                            result
+                                       )
+
+                                      (begin
+                                          (EvaluationLink (stv 1 1)
+                                              (PredicateNode "unknownTerm")
+                                              (ListLink
+                                                   wordNode
+                                              )
+                                          )
+                                          '()
+                                      )
+                                   )
+                              )
+                           ); if
+                      ); let
+                 ); let
               )
-          )
+        ); let
     ); if
 )
 
