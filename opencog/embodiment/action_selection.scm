@@ -744,10 +744,10 @@
                              (apply ListLink rule_list) 
                          )
 
-                         (update_reference_link
-                             (ConceptNode "plan_context_list") 
-                             (apply ListLink context_list)
-                         )
+;                         (update_reference_link
+;                             (ConceptNode "plan_context_list") 
+;                             (apply ListLink context_list)
+;                         )
 
                          (update_reference_link
                              (ConceptNode "plan_action_list") 
