@@ -1844,6 +1844,9 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
             toUpdateHandles.push_back(objectNode);
         }
 
+        // Update existance predicate 
+        addPropertyPredicate(std::string("exist"), objectNode, !objRemoval, false);
+
         if (objRemoval) {
             atomSpace.getSpaceServer().removeSpaceInfo(keepPreviousMap, objectNode, tsValue);
 
@@ -2061,7 +2064,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                         elements, tv );
 
             }
-        }
+        }// if (objRemoval)
 
         XMLString::release(&entityId);
         XMLString::release(&entityType);
