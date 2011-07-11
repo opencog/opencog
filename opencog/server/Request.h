@@ -191,7 +191,7 @@ struct RequestClassInfo : public ClassInfo
     /** Whether default shell should be hidden from help */
     bool hidden;
 
-    RequestClassInfo() {};
+    RequestClassInfo() : is_shell(false), hidden(false) {};
     RequestClassInfo(const char* i, const char *d, const char* h,
             bool s = false, bool hide = false)
         : ClassInfo(i), description(d), help(h), is_shell(s), hidden(hide) {};

@@ -265,6 +265,10 @@ TemporalEntry* TemporalEntry::intersection(TemporalEntry** sets, int n) throw (I
         }
 
         if (j != size[i]) {
+            // Ugh, lots of memory to free...
+            delete[] size;
+            for (int k = 0; k <= i; k++) delete v[k];
+            delete v;
             throw InconsistenceException(TRACE_INFO,
                                          "TemporalEntry - Consistency check failed for intersection.");
         }

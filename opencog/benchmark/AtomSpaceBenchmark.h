@@ -26,7 +26,7 @@ class AtomSpaceBenchmark
         clock_t t_mean;
         clock_t t_std;
         long t_N;
-        TimeStats(const std::vector<record_t> records);
+        TimeStats(const std::vector<record_t>& records);
         void print();
     };
 

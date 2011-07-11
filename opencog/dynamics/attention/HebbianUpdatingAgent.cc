@@ -87,7 +87,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
     // get links again to include the new ones
     a->getHandleSet(link_output, HEBBIAN_LINK, true);
 
-    for (current_l = links.begin(); current_l != links.end(); current_l++) {
+    for (current_l = links.begin(); current_l != links.end(); ++current_l) {
         // for each hebbian link, find targets, work out conjunction and convert
         // that into truthvalue change. the change should be based on existing TV.
         Handle h;
@@ -202,7 +202,7 @@ std::vector<Handle>& HebbianUpdatingAgent::moveSourceToFront(std::vector<Handle>
             foundTheSource = true;
             outgoing_i = outgoing.erase(outgoing_i);
         } else
-            outgoing_i++;
+            ++outgoing_i;
     }
     if (foundTheSource) {
         outgoing.insert(outgoing.begin(), theSource);
@@ -228,9 +228,7 @@ float HebbianUpdatingAgent::targetConjunction(std::vector<Handle> handles)
 
 	log->fine("HebbianUpdatingAgent::targetConjunction");
 
-    for (h_i = handles.begin();
-            h_i != handles.end();
-            h_i++) {
+    for (h_i = handles.begin(); h_i != handles.end(); ++h_i) {
         h = *h_i;
         sti = a->getSTI(h);
 

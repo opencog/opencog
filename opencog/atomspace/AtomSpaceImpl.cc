@@ -414,7 +414,7 @@ const string& AtomSpaceImpl::getName(Handle h) const
         return emptyName;
 }
 
-boost::shared_ptr<Atom> AtomSpaceImpl::cloneAtom(const Handle h) const
+boost::shared_ptr<Atom> AtomSpaceImpl::cloneAtom(const Handle& h) const
 {
     // TODO: Add timestamp to atoms and add vector clock to AtomSpace
     // Need to use the newly added clone methods as the copy constructors for
@@ -444,7 +444,7 @@ std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
     return std::string("ERROR: Bad handle");
 }
 
-HandleSeq AtomSpaceImpl::getNeighbors(const Handle h, bool fanin,
+HandleSeq AtomSpaceImpl::getNeighbors(const Handle& h, bool fanin,
         bool fanout, Type desiredLinkType, bool subClasses) const 
 {
     Atom* a = atomTable.getAtom(h);
@@ -481,12 +481,12 @@ bool AtomSpaceImpl::isSource(Handle source, Handle link) const
     return false;
 }
 
-size_t AtomSpaceImpl::getAtomHash(const Handle h) const 
+size_t AtomSpaceImpl::getAtomHash(const Handle& h) const 
 {
     return atomTable.getAtom(h)->hashCode();
 }
 
-bool AtomSpaceImpl::isValidHandle(const Handle h) const 
+bool AtomSpaceImpl::isValidHandle(const Handle& h) const 
 {
     return atomTable.holds(h);
 }
@@ -734,7 +734,7 @@ void AtomSpaceImpl::_getNextAtomPrepare_type(Type type)
 Handle AtomSpaceImpl::_getNextAtom_type(Type type)
 {
     Handle h = *type_itr;
-    type_itr ++;
+    type_itr++;
     return h;
 }
 
@@ -794,7 +794,7 @@ void AtomSpaceImpl::clear()
     logger().enable();
     logger().setLevel(Logger::DEBUG);
 
-    for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
+    for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
         result = removeAtom(*i,true);
         if (result) {
             DPRINTF("%d: Atom %lu removed, %d nodes %d links left to delete\n",

@@ -120,7 +120,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
 #ifdef DEBUG
     logger().fine("Finding atoms involved with STI diffusion and their matrix indices");
 #endif
-    for (hi = links.begin(); hi != links.end(); hi++) {
+    for (hi = links.begin(); hi != links.end(); ++hi) {
         // Get all atoms in outgoing set of links
         std::vector<Handle> targets;
         std::vector<Handle>::iterator targetItr;
@@ -134,7 +134,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
         targets = a->getOutgoing(linkHandle);
 
         for (targetItr = targets.begin(); targetItr != targets.end();
-                targetItr++) {
+                ++targetItr) {
             if (diffusionAtomsMap.find(*targetItr) == diffusionAtomsMap.end()) {
                 diffusionAtomsMap[*targetItr] = totalDiffusionAtoms;
 #ifdef DEBUG
@@ -164,7 +164,7 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
     //gsl_vector_set_zero(stiVector);
 
     for (std::map<Handle,int>::iterator i=diffusionAtomsMap.begin();
-            i != diffusionAtomsMap.end(); i++) {
+            i != diffusionAtomsMap.end(); ++i) {
         Handle dAtom = (*i).first;
 // For some reason I thought linearising -ve and +ve separately might
 // be a good idea, but this messes up the conservation of STI
@@ -200,7 +200,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
     // obviously the use of sparse matrixes means this isn't necessary
 //    gsl_matrix_set_zero(connections);
 
-    for (hi=links.begin(); hi != links.end(); hi++) {
+    for (hi=links.begin(); hi != links.end(); ++hi) {
         // Get all atoms in outgoing set of link
         std::vector<Handle> targets;
         std::vector<Handle>::iterator targetItr;
@@ -242,10 +242,10 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
             // Then spread from index 1 (since source is at index 0)
             
             targetItr = targets.begin();
-            targetItr++;
+            ++targetItr;
             for (; targetItr != targets.end();
             //for (targetItr = (targets.begin())++; targetItr != targets.end(); 
-                     targetItr++) {
+                     ++targetItr) {
                 targetPosItr = diffusionAtomsMap.find(*targetItr);
                 targetIndex = (*targetPosItr).second;
                 if (type == INVERSE_HEBBIAN_LINK) {
@@ -265,7 +265,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
             logger().fine("Unordered link");
 #endif
             for (sourceItr = targets.begin(); sourceItr != targets.end();
-                    sourceItr++) {
+                    ++sourceItr) {
                 Handle sourceHandle;
                 sourceHandle = (*sourceItr);
                 // If source atom isn't within diffusionThreshold, then skip
@@ -273,7 +273,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                     continue;
                 }
                 for (targetItr = targets.begin(); targetItr != targets.end();
-                        targetItr++) {
+                        ++targetItr) {
                     if (*targetItr == *sourceItr) continue;
                     sourcePosItr = diffusionAtomsMap.find(*sourceItr);
                     sourceIndex = (*sourcePosItr).second;
@@ -383,7 +383,7 @@ void ImportanceDiffusionAgent::spreadImportance()
     int totalSTI_After = 0;
 #endif
     for (std::map<Handle,int>::iterator i=diffusionAtomsMap.begin();
-            i != diffusionAtomsMap.end(); i++) {
+            i != diffusionAtomsMap.end(); ++i) {
         Handle dAtom = (*i).first;
 //        double val = gsl_vector_get(result,(*i).second);
         double val = result((*i).second);

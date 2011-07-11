@@ -47,7 +47,7 @@ void CompositeTruthValue::clear()
         delete primaryTV;
     }
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
-            itr != versionedTVs.end(); itr++) {
+            itr != versionedTVs.end(); ++itr) {
         TruthValue* tv = itr->second;
         if (tv != &(TruthValue::DEFAULT_TV())) {
             delete tv;
@@ -62,7 +62,7 @@ void CompositeTruthValue::copy(CompositeTruthValue const& source)
         (TruthValue*) & (TruthValue::DEFAULT_TV()) :
         source.primaryTV->clone();
     for (VersionedTruthValueMap::const_iterator itr = source.versionedTVs.begin();
-            itr != source.versionedTVs.end(); itr++) {
+            itr != source.versionedTVs.end(); ++itr) {
         VersionHandle vh = itr->first;
         TruthValue* tv = itr->second;
         versionedTVs[vh] = (tv == &(TruthValue::DEFAULT_TV())) ?
@@ -141,7 +141,7 @@ std::string CompositeTruthValue::toString() const
             primaryTV->toString().c_str());
     result += buffer;
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
-         itr != versionedTVs.end(); itr++) {
+         itr != versionedTVs.end(); ++itr) {
         VersionHandle key = itr->first;
         TruthValue* tv = itr->second;
         DPRINTF("{%p;%s;%s;%s}", key.substantive, VersionHandle::indicatorToStr(key.indicator), TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
@@ -271,7 +271,7 @@ bool CompositeTruthValue::operator==(const TruthValue& rhs) const
     if (getNumberOfVersionedTVs() != crhs.getNumberOfVersionedTVs()) return false;
     VersionedTruthValueMap::const_iterator itr;
     for (itr = versionedTVs.begin();
-         itr != versionedTVs.end(); itr++)
+         itr != versionedTVs.end(); ++itr)
     {
         VersionHandle key = itr->first;
         VersionedTruthValueMap::const_iterator oitr;
@@ -310,7 +310,7 @@ TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
         }
         // merge the common versioned TVs
         for (VersionedTruthValueMap::const_iterator itr = result->versionedTVs.begin();
-                itr != result->versionedTVs.end(); itr++) {
+                itr != result->versionedTVs.end(); ++itr) {
             VersionHandle key = itr->first;
             TruthValue* tv = itr->second;
             VersionedTruthValueMap::const_iterator otherItr = otherCTv->versionedTVs.find(key);
@@ -323,7 +323,7 @@ TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
         }
         // adds the non-existing versioned TVs
         for (VersionedTruthValueMap::const_iterator otherItr = otherCTv->versionedTVs.begin();
-                otherItr != otherCTv->versionedTVs.end(); otherItr++) {
+                otherItr != otherCTv->versionedTVs.end(); ++otherItr) {
             VersionHandle key = otherItr->first;
             TruthValue* otherTv = otherItr->second;
             VersionedTruthValueMap::const_iterator itr = result->versionedTVs.find(key);
@@ -401,7 +401,7 @@ void CompositeTruthValue::removeVersionedTVs(const Handle &substantive)
 
     VersionedTruthValueMap::const_iterator itr;
     for (itr = versionedTVs.begin();
-         itr != versionedTVs.end(); itr++)
+         itr != versionedTVs.end(); ++itr)
     {
         VersionHandle key = itr->first;
         if (key.substantive == substantive)
@@ -416,7 +416,7 @@ void CompositeTruthValue::removeVersionedTVs(const Handle &substantive)
         }
     }
     for (itr = toBeRemovedEntries.begin();
-         itr != toBeRemovedEntries.end(); itr++)
+         itr != toBeRemovedEntries.end(); ++itr)
     {
         VersionHandle key = itr->first;
         versionedTVs.erase(key);
@@ -432,7 +432,7 @@ void CompositeTruthValue::removeInvalidTVs(AtomSpace& atomspace)
 
     VersionedTruthValueMap::const_iterator itr;
     for (itr = versionedTVs.begin();
-         itr != versionedTVs.end(); itr++)
+         itr != versionedTVs.end(); ++itr)
     {
         VersionHandle key = itr->first;
         if (!atomspace.isValidHandle(key.substantive))
@@ -446,7 +446,7 @@ void CompositeTruthValue::removeInvalidTVs(AtomSpace& atomspace)
         }
     }
     for (itr = toBeRemovedEntries.begin();
-         itr != toBeRemovedEntries.end(); itr++)
+         itr != toBeRemovedEntries.end(); ++itr)
     {
         VersionHandle key = itr->first;
         versionedTVs.erase(key);
@@ -461,7 +461,7 @@ int CompositeTruthValue::getNumberOfVersionedTVs() const {
 VersionHandle CompositeTruthValue::getVersionHandle(int i) const {
     int index = 0;
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
-            itr != versionedTVs.end(); itr++) {
+            itr != versionedTVs.end(); ++itr) {
         VersionHandle vh = itr->first;
         if (index++ == i) {
             return vh;

@@ -148,7 +148,7 @@ bool TimeServer::removeTimeInfo(Handle h, const Temporal& t,
     get(back_inserter(existingEntries), h, t, criterion);
     bool result = !existingEntries.empty();
     for (std::list<HandleTemporalPair>::const_iterator itr = existingEntries.begin();
-            itr != existingEntries.end(); itr++) {
+            itr != existingEntries.end(); ++itr) {
         Handle atTimeLink = getAtTimeLink(*itr);
         DPRINTF("Got atTimeLink = %lu\n", atTimeLink.value());
         if (atomspace->isValidHandle(atTimeLink)->get_result()) {

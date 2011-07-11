@@ -70,26 +70,22 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 
 	unsigned int bin;
     if (IMPORTANCE_INDEX_SIZE != (1 << 16) ) {
-        for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++)
-        {
+        for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++) {
             UnorderedHandleSet move_it;
             UnorderedHandleSet & band = idx[bin];
             UnorderedHandleSet::iterator hit;
-            for (hit = band.begin(); hit != band.end(); hit++)
-            {
+            for (hit = band.begin(); hit != band.end(); ++hit) {
                 Handle h = *hit;
                 Atom *atom = TLB::getAtom(h);
 
                 atom->attentionValue.decaySTI();
                 unsigned int newbin = importanceBin(atom->attentionValue.getSTI());
-                if (newbin != bin)
-                {
+                if (newbin != bin) {
                     insert(newbin, h);
                     move_it.insert(h);
                 }
             }
-            for (hit = move_it.begin(); hit != move_it.end(); hit++)
-            {
+            for (hit = move_it.begin(); hit != move_it.end(); ++hit) {
                 remove(bin, *hit);
             }
         }
@@ -129,8 +125,7 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 	{
 		UnorderedHandleSet::iterator hit;
 		UnorderedHandleSet & band = idx[bin];
-		for (hit = band.begin(); hit != band.end(); hit++)
-		{
+		for (hit = band.begin(); hit != band.end(); ++hit) {
 			Atom *atom = TLB::getAtom(*hit);
 
 			// Remove it if too old.
@@ -197,7 +192,7 @@ HandleEntry* ImportanceIndex::getHandleSet(
 	// Build a list of atoms whose importance is equal to the lower bound.
 	UnorderedHandleSet::const_iterator hit;
 	const UnorderedHandleSet &sl = idx[lowerBin];
-	for (hit = sl.begin(); hit != sl.end(); hit++) {
+	for (hit = sl.begin(); hit != sl.end(); ++hit) {
 		HandleEntry *he = new HandleEntry(*hit);
 		he->next = set;
 		set = he;
@@ -219,7 +214,7 @@ HandleEntry* ImportanceIndex::getHandleSet(
 	// add to the list.
 	while (++lowerBin < upperBin) {
 		const UnorderedHandleSet &ss = idx[lowerBin];
-		for (hit = ss.begin(); hit != ss.end(); hit++) {
+		for (hit = ss.begin(); hit != ss.end(); ++hit) {
 			HandleEntry *he = new HandleEntry(*hit);
 			he->next = set;
 			set = he;
@@ -228,7 +223,7 @@ HandleEntry* ImportanceIndex::getHandleSet(
 
 	HandleEntry *uset = NULL;
 	const UnorderedHandleSet &su = idx[upperBin];
-	for (hit = su.begin(); hit != su.end(); hit++) {
+	for (hit = su.begin(); hit != su.end(); ++hit) {
 		HandleEntry *he = new HandleEntry(*hit);
 		he->next = uset;
 		uset = he;

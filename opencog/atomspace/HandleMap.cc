@@ -220,7 +220,7 @@ Handle HandleMapIterator<T>::next() throw (IndexErrorException)
 
     Handle ret = current->first;
 
-    current++;
+    ++current;
 
     map->unlock();
 

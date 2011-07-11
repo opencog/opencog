@@ -120,7 +120,7 @@ class AddNodeASR : public ThreeParamASR <Handle,Type,std::string,const TruthValu
 public:
     AddNodeASR(AtomSpaceImpl *a, Type type, const std::string& name, const TruthValue* tvn) :
         ThreeParamASR<Handle,Type,std::string,const TruthValue*>(a,type,name,tvn)
-        { };
+        { return; };
     ~AddNodeASR() {
         // clean up TruthValue as we are responsible for any passed parameters.
         if (!p3->isNullTv())
@@ -708,7 +708,7 @@ public:
 
 class SaveToXMLASR : public OneParamASR<bool,std::string> {
 public:
-    SaveToXMLASR(AtomSpaceImpl *a, const std::string filename) :
+    SaveToXMLASR(AtomSpaceImpl *a, const std::string& filename) :
         OneParamASR<bool,std::string>(a,filename) {}
     
     virtual void do_work() {
@@ -719,7 +719,7 @@ public:
 
 class GetAtomHashASR : public OneParamASR<size_t,Handle> {
 public:
-    GetAtomHashASR (AtomSpaceImpl *a, const Handle h) :
+    GetAtomHashASR (AtomSpaceImpl *a, const Handle& h) :
         OneParamASR<size_t,Handle>(a,h) {}
     
     virtual void do_work() {
@@ -763,7 +763,7 @@ class GetNeighborsASR : public GenericASR<HandleSeq> {
 
 public:
     GetNeighborsASR(AtomSpaceImpl* a,
-            const Handle _h, bool _fanin, bool _fanout,
+            const Handle& _h, bool _fanin, bool _fanout,
             Type _linkType, bool _subclasses) :
         GenericASR<HandleSeq>(a), h(_h), linkType(_linkType),
         subclasses(_subclasses), fanin(_fanin), fanout(_fanout)

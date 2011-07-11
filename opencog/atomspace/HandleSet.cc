@@ -120,7 +120,7 @@ Handle HandleSetIterator::next() throw (IndexErrorException)
 
     Handle ret = *current;
 
-    current++;
+    ++current;
 
     return(ret);
 }

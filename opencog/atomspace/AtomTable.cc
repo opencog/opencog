@@ -144,7 +144,7 @@ void AtomTable::unregisterIterator(HandleIterator* iterator) throw (RuntimeExcep
             unlockIterators();
             return;
         } else {
-            it++;
+            ++it;
         }
     }
 
@@ -507,7 +507,7 @@ int AtomTable::getSize() const
 void AtomTable::log(Logger& logger, Type type, bool subclass) const
 {
     AtomHashSet::const_iterator it;
-    for (it = atomSet.begin(); it != atomSet.end(); it++) {
+    for (it = atomSet.begin(); it != atomSet.end(); ++it) {
         const Atom* atom = *it;
         bool matched = (subclass && classserver().isA(atom->getType(), type)) || type == atom->getType();
         if (matched)
@@ -519,7 +519,7 @@ void AtomTable::log(Logger& logger, Type type, bool subclass) const
 void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 {
     AtomHashSet::const_iterator it;
-    for (it = atomSet.begin(); it != atomSet.end(); it++) {
+    for (it = atomSet.begin(); it != atomSet.end(); ++it) {
         const Atom* atom = *it;
         bool matched = (subclass && classserver().isA(atom->getType(), type)) || type == atom->getType();
         if (matched) output << atom->getHandle() << ": " << atom->toString() << std::endl;
@@ -807,7 +807,7 @@ HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity,
 void AtomTable::scrubIncoming(void)
 {
     AtomHashSet::const_iterator it;
-    for (it = atomSet.begin(); it != atomSet.end(); it++) {
+    for (it = atomSet.begin(); it != atomSet.end(); ++it) {
         const Atom* atom = *it;
         Handle handle = atom->getHandle();
 

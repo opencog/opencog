@@ -66,7 +66,7 @@ Handle NodeIndex::getHandle(Type t, const char *name) const
 void NodeIndex::remove(bool (*filter)(Handle))
 {
     std::vector<NameIndex>::iterator s;
-    for (s = idx.begin(); s != idx.end(); s++) {
+    for (s = idx.begin(); s != idx.end(); ++s) {
         s->remove(filter);
     }
 }

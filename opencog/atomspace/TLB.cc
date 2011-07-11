@@ -35,7 +35,7 @@ TLB::map_t TLB::handle_map;
 void TLB::print()
 {
     map_t::iterator it = handle_map.begin();
-    for (; it != handle_map.end(); it++) {
+    for (; it != handle_map.end(); ++it) {
         cout << it->first << ": " << it->second->toString() << endl;
     }
 }

@@ -44,7 +44,7 @@ size_t FixedIntegerIndex::size(void) const
 {
 	size_t cnt = 0;
 	std::vector<UnorderedHandleSet >::const_iterator s;
-	for (s = idx.begin(); s != idx.end(); s++)
+	for (s = idx.begin(); s != idx.end(); ++s)
 	{
 		cnt += s->size();
 	}
@@ -54,7 +54,7 @@ size_t FixedIntegerIndex::size(void) const
 void FixedIntegerIndex::remove(bool (*filter)(Handle))
 {
 	std::vector<UnorderedHandleSet >::iterator s;
-	for (s = idx.begin(); s != idx.end(); s++)
+	for (s = idx.begin(); s != idx.end(); ++s)
 	{
 		UnorderedHandleSet::iterator i, j;
 	

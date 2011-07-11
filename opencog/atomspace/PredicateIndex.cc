@@ -58,7 +58,7 @@ void PredicateIndex::removeAtom(const Atom* atom)
 {
     Handle h = atom->getHandle();
 	std::vector<UnorderedHandleSet>::iterator s;
-	for (s = idx.begin(); s != idx.end(); s++) {
+	for (s = idx.begin(); s != idx.end(); ++s) {
 		s->erase(h);
 	}
 }

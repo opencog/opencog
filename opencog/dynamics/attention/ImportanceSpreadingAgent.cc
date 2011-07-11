@@ -76,7 +76,7 @@ void ImportanceSpreadingAgent::spreadImportance()
             // spread fraction of importance to nodes it's linked to
             spreadAtomImportance(h);
 
-        hi++;
+        ++hi;
     }
 }
 
@@ -112,7 +112,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
     targets = a->getOutgoing(link);
 
     if (a->getType(link) == INVERSE_HEBBIAN_LINK) {
-        for (t = targets.begin(); t != targets.end(); t++) {
+        for (t = targets.begin(); t != targets.end(); ++t) {
             Handle target_h = *t;
             if (target_h == source) continue;
             targetSTI = a->getSTI(target_h);
@@ -126,7 +126,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
             linkDifference += calcInverseDifference(sourceSTI, targetSTI, linkWeight);
         }
     } else {
-        for (t = targets.begin(); t != targets.end(); t++) {
+        for (t = targets.begin(); t != targets.end(); ++t) {
             Handle target_h = *t;
             if (target_h == source) continue;
             targetSTI = a->getSTI(target_h);
@@ -204,7 +204,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
             differenceScaling);
 
     for (linksVector_i = linksVector.begin();
-            linksVector_i != linksVector.end(); linksVector_i++) {
+            linksVector_i != linksVector.end(); ++linksVector_i) {
         double transferWeight;
         std::vector<Handle> targets;
         std::vector<Handle>::iterator t;
@@ -223,7 +223,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 
         for (t = targets.begin();
                 t != targets.end();
-                t++) {
+                ++t) {
             Handle target_h = *t;
             AttentionValue::sti_t targetSTI;
             double transferAmount;

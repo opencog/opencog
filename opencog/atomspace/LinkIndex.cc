@@ -75,8 +75,7 @@ Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
 void LinkIndex::remove(bool (*filter)(Handle))
 {
 	std::vector<HandleSeqIndex>::iterator s;
-	for (s = idx.begin(); s != idx.end(); s++)
-	{
+	for (s = idx.begin(); s != idx.end(); ++s) {
 		s->remove(filter);
 	}
 }

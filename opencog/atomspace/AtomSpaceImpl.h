@@ -50,7 +50,6 @@ namespace opencog
 
 class AtomSpaceImpl;
 
-typedef std::vector<HandleSet*> HandleSetSeq;
 typedef boost::signal<void (AtomSpaceImpl*,Handle)> AtomSignal;
 
 /** 
@@ -349,7 +348,7 @@ public:
      * AtomSpace::commitAtom for them to be merged with the AtomSpace.
      * Otherwise changes are lost.
      */
-    boost::shared_ptr<Atom> cloneAtom(const Handle h) const;
+    boost::shared_ptr<Atom> cloneAtom(const Handle& h) const;
 
     /** Commit an atom that has been cloned from the AtomSpace.
      *
@@ -360,9 +359,9 @@ public:
 
     /** Get hash for an atom
      */
-    size_t getAtomHash(const Handle h) const;
+    size_t getAtomHash(const Handle& h) const;
 
-    bool isValidHandle(const Handle h) const;
+    bool isValidHandle(const Handle& h) const;
 
     /**
      * Returns neighboring atoms, following links and returning their
@@ -375,7 +374,7 @@ public:
      * @param linkType Follow only these types of links.
      * @param subClasses Follow subtypes of linkType too.
      */
-    HandleSeq getNeighbors(const Handle h, bool fanin=true, bool fanout=true,
+    HandleSeq getNeighbors(const Handle& h, bool fanin=true, bool fanout=true,
             Type linkType=LINK, bool subClasses=true) const;
 
     /** Retrieve a single Handle from the outgoing set of a given link */

@@ -56,7 +56,7 @@ void HandleSeqIndex::remove(bool (*filter)(Handle))
 	while (i != idx.end())
 	{
 		j = i;
-		i++;
+		++i;
 		if (filter(j->second))
 			idx.erase(j->first);
 	}

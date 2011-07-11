@@ -229,7 +229,7 @@ Temporal* TemporalMapIterator::next() throw (IndexErrorException)
 
     Temporal* ret = current->first;
 
-    current++;
+    ++current;
 
     map->unlock();
 

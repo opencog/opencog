@@ -52,8 +52,8 @@ typedef std::vector<Vertex> VertexSeq;
 
 class HandlePredicate {
 public:
-    inline bool operator()(const Handle h) { return this->test(h); }
-    virtual bool test(const Handle h) { return true; }
+    inline bool operator()(const Handle& h) { return this->test(h); }
+    virtual bool test(const Handle& h) { return true; }
 };
 class AtomPredicate {
 public:

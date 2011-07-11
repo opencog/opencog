@@ -504,7 +504,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
 }
 
 AtomSpaceBenchmark::TimeStats::TimeStats(
-        const std::vector<record_t> records) {
+        const std::vector<record_t>& records) {
     double sum;
     t_min = 1 << 31;
     t_max = 0;

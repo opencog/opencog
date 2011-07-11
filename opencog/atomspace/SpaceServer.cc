@@ -59,7 +59,8 @@ SpaceServer::SpaceServer(AtomSpaceAsync &_atomspace): atomspace(&_atomspace)
 
 SpaceServer::~SpaceServer()
 {
-    for (HandleToSpaceMap::iterator itr = spaceMaps.begin(); itr != spaceMaps.end(); itr++) {
+    for (HandleToSpaceMap::iterator itr = spaceMaps.begin();
+            itr != spaceMaps.end(); ++itr) {
         delete itr->second;
     }
 }
@@ -415,7 +416,7 @@ bool SpaceServer::isMapPersistent(Handle spaceMapHandle) const
 
 void SpaceServer::removeObject(const std::string& objectId)
 {
-    for (HandleToSpaceMap::iterator itr = spaceMaps.begin(); itr != spaceMaps.end(); itr++) {
+    for (HandleToSpaceMap::iterator itr = spaceMaps.begin(); itr != spaceMaps.end(); ++itr) {
         itr->second->removeObject(objectId);
     }
 }
@@ -427,7 +428,7 @@ unsigned int SpaceServer::getSpaceMapsSize() const
 
 void SpaceServer::clear()
 {
-    for (HandleToSpaceMap::iterator itr = spaceMaps.begin(); itr != spaceMaps.end(); itr++) {
+    for (HandleToSpaceMap::iterator itr = spaceMaps.begin(); itr != spaceMaps.end(); ++itr) {
         delete itr->second;
     }
     spaceMaps.clear();

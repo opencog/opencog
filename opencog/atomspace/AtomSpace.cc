@@ -252,17 +252,17 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
     return result;
 }
 
-boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle h) const
+boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle& h) const
 {
     return atomSpaceAsync->getAtom(h)->get_result();
 }
 
-size_t AtomSpace::getAtomHash(const Handle h) const 
+size_t AtomSpace::getAtomHash(const Handle& h) const 
 {
     return atomSpaceAsync->getAtomHash(h)->get_result();
 }
 
-bool AtomSpace::isValidHandle(const Handle h) const 
+bool AtomSpace::isValidHandle(const Handle& h) const 
 {
     return atomSpaceAsync->isValidHandle(h)->get_result();
 }

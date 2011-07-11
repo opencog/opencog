@@ -818,16 +818,18 @@ bool HandleEntry::matchesFilterCriteria(Atom* atom, Type targetType, bool target
     bool result = false;
     Link *link = dynamic_cast<Link *>(atom);
     int larry = 0;
-    if (link) larry = link->getArity();
-    for (int i = 0; i < larry && !result; i++) {
-        const Atom* target = link->getOutgoingAtom(i);
-        DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
-        if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
-                !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
-            if (targetSubclasses) {
-                result = classserver().isA(target->getType(), targetType);
-            } else {
-                result = targetType == target->getType();
+    if (link) {
+        larry = link->getArity();
+        for (int i = 0; i < larry && !result; i++) {
+            const Atom* target = link->getOutgoingAtom(i);
+            DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
+            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
+                    !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
+                if (targetSubclasses) {
+                    result = classserver().isA(target->getType(), targetType);
+                } else {
+                    result = targetType == target->getType();
+                }
             }
         }
     }
@@ -883,19 +885,21 @@ bool HandleEntry::matchesFilterCriteria(Atom* atom, const char* targetName, Type
     bool result = false;
     Link *link = dynamic_cast<Link *>(atom);
     int larry = 0;
-    if (link) larry = link->getArity();
-    for (int i = 0; i < larry && !result; i++) {
-        const Atom* target = link->getOutgoingAtom(i);
-        DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
-        if (classserver().isA(target->getType(), NODE)) {
-            DPRINTF("Node name = %s\n", ((Node*) target)->getName().c_str());
-        }
+    if (link) {
+        larry = link->getArity();
+        for (int i = 0; i < larry && !result; i++) {
+            const Atom* target = link->getOutgoingAtom(i);
+            DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
+            if (classserver().isA(target->getType(), NODE)) {
+                DPRINTF("Node name = %s\n", ((Node*) target)->getName().c_str());
+            }
 
-        if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
-                !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
-            if (targetType == target->getType()) {
-                const char* nodeName = ((Node*) target)->getName().c_str();
-                result = !strcmp(targetName, nodeName);
+            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
+                    !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
+                if (targetType == target->getType()) {
+                    const char* nodeName = ((Node*) target)->getName().c_str();
+                    result = !strcmp(targetName, nodeName);
+                }
             }
         }
     }

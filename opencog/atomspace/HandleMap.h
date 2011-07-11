@@ -350,7 +350,7 @@ public:
 
         Handle ret = current->first;
 
-        current++;
+        ++current;
 
         map->unlock();
 

@@ -127,7 +127,7 @@ public:
         return hr;
     }
 
-    AtomRequest getAtom(const Handle h) {
+    AtomRequest getAtom(const Handle& h) {
         AtomRequest r(new GetAtomASR(&atomspace,h));
         requestQueue.push(r);
         return r;
@@ -470,7 +470,7 @@ public:
      * @param linkType Follow only these types of links.
      * @param subClasses Follow subtypes of linkType too.
      */
-    HandleSeqRequest getNeighbors(const Handle h, bool fanin, bool fanout,
+    HandleSeqRequest getNeighbors(const Handle& h, bool fanin, bool fanout,
             Type linkType=LINK, bool subClasses=true) {
         HandleSeqRequest hr(new GetNeighborsASR(&atomspace,h,fanin,fanout,linkType,subClasses));
         requestQueue.push(hr);

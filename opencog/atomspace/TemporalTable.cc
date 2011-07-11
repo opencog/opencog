@@ -77,7 +77,8 @@ TemporalTable::~TemporalTable()
     delete(sortedTemporalList);
     delete[](temporalIndexTable);
     // delete all Temporal* keys
-    for (std::set<Temporal*>::iterator it = toBeDeleted.begin(); it != toBeDeleted.end(); it++) {
+    for (std::set<Temporal*>::iterator it = toBeDeleted.begin();
+            it != toBeDeleted.end(); ++it) {
         delete *it;
     }
 }
@@ -462,7 +463,8 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
         DPRINTF("HandleMap entries reinserted!\n");
     }
     // If empty temporal list => already removed from handleMap
-    for (std::set<Temporal*>::iterator it = toBeDeleted.begin(); it != toBeDeleted.end(); it++) {
+    for (std::set<Temporal*>::iterator it = toBeDeleted.begin();
+            it != toBeDeleted.end(); ++it) {
         delete *it;
     }
 

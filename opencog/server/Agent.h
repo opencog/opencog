@@ -34,7 +34,6 @@
 namespace opencog
 {
 
-typedef short stim_t;
 typedef boost::unordered_map<Handle, stim_t> AtomStimHashMap;
 
 class CogServer;
