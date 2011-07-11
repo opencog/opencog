@@ -496,7 +496,10 @@
 ;
 
 (define GetFoodGoal
-    (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+    (AndLink 
+        (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+        (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+    )
 )
 
 (ForAllLink (cog-new-av 1 1 1)
@@ -532,7 +535,8 @@
 (define GetWaterGoal
     (AndLink 
         (add_goal (PredicateNode "is_drinkable") (VariableNode "$var_water") ) 
-        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_water") )
+        (add_goal (PredicateNode "exist") (VariableNode "$var_water") )
+;        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_water") )
     )    
 )
 
