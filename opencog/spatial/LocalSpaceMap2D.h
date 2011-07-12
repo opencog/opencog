@@ -121,11 +121,14 @@ namespace opencog
             Distance _yMax;
             unsigned int _yDim;
 
+            Distance _floorHeight;
+
             Distance _diagonalSize;
 
             //this is an argument to the constructor and stored so we can
             //cache things for performance
             Distance _radius;
+            Distance _agentHeight;
 
             // used only for test
             const GridSet _empty_set;
@@ -161,10 +164,13 @@ namespace opencog
              *       of the rectangle.
              * radius: the radius of the agent which uses this map (for navigation
              * purposes).
+             * floor: the height of the terrain
+             * agentHeight: the height of the agent which uses this map
              */
             LocalSpaceMap2D(Distance xMin, Distance xMax, unsigned int xDim,
                             Distance yMin, Distance yMax, unsigned int yDim,
-                            Distance radius);
+                            Distance radius, Distance agentHeight = 0.0,
+                            Distance floor = 0.0);
 
             LocalSpaceMap2D* clone() const;
             ~LocalSpaceMap2D();
@@ -195,6 +201,10 @@ namespace opencog
 
             Distance radius() const;
 
+            Distance agentHeight() const;
+            
+            Distance floorHeight() const;
+
             // Is the given point occupied by any obstacle or out of bounds?
             bool illegal(const Point& pt) const;
 
@@ -216,11 +226,12 @@ namespace opencog
 
             // If point "dest" is an obstacle, we can still use it in pathfinding only when its delta
             // height with point "src" is within a specific value "delta".
-            bool edgeIllegal(const GridPoint& src, const GridPoint& dest, double delta) const;
+            bool edgeIllegal(const GridPoint& src, const GridPoint& dest, double srcHeight, double delta) const;
+            double getProperDestHeight(const GridPoint& src, const GridPoint& dest, double srcHeight, double delta) const;
             bool isDiagonal(const GridPoint& src, const GridPoint& dest) const;
             ObjectID getTallestObjectInGrid(const GridPoint& gp) const; 
             ObjectID getLowestObjectInGrid(const GridPoint& gp) const; 
-            double getMinHeightByGridPoint(const GridPoint& gp) const;
+            double getLowestSurfaceHeightByGridPoint(const GridPoint& gp) const;
             double getMaxHeightByGridPoint(const GridPoint& gp) const;
             //const ObjectMetaData& getMetaData(const ObjectID& id) const throw(opencog::NotFoundException);
 

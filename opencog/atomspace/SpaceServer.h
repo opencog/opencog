@@ -182,10 +182,13 @@ public:
     // navigation purposes
     void setAgentRadius(double radius);
 
+    // Sets the agent height.
+    void setAgentHeight(double height);
+
     // Sets the boundaries of the map and the number of grid points it will have
     // in each dimension.:w
     void setMapBoundaries(double xMin, double xMax, double yMin, double yMax,
-                          unsigned int xDim, unsigned int yDim);
+                          unsigned int xDim, unsigned int yDim, double floorHeight);
 
     void clear();
 
@@ -296,6 +299,16 @@ private:
      * Current agent radius
      */
     double agentRadius;
+
+    /**
+     * Current floor height
+     */
+    double floorHeight;
+
+    /**
+     * Current agent height
+     */
+    double agentHeight;
 
     SpaceMap* addOrGetSpaceMap(bool keepPreviousMap, Handle spaceMapHandle);
 

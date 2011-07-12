@@ -54,6 +54,7 @@ SpaceServer::SpaceServer(AtomSpaceAsync &_atomspace): atomspace(&_atomspace)
     yMax = 256;
     xDim = 1024;
     yDim = 1024;
+    floorHeight = 0;
     timeServer = NULL;
 }
 
@@ -78,8 +79,16 @@ void SpaceServer::setAgentRadius(double _radius)
     }
 }
 
+void SpaceServer::setAgentHeight(double _height)
+{
+    if (agentHeight != _height) {
+        agentHeight = _height;
+        logger().info("SpaceServer - AgentRadius: %.3lf", agentHeight);
+    }
+}
+
 void SpaceServer::setMapBoundaries(double _xMin, double _xMax, double _yMin, double _yMax,
-                                   unsigned int _xDim, unsigned int _yDim)
+                                   unsigned int _xDim, unsigned int _yDim, double _floorHeight)
 {
     xMin = _xMin;
     xMax = _xMax;
@@ -87,6 +96,7 @@ void SpaceServer::setMapBoundaries(double _xMin, double _xMax, double _yMin, dou
     yMax = _yMax;
     xDim = _xDim;
     yDim = _yDim;
+    floorHeight = _floorHeight;
     logger().info("SpaceServer - MapBondaries: xMin: %.3lf, xMax: %.3lf, "
             "yMin: %.3lf, yMax: %.3lf, xDim %d, yDim %d.",
             xMin, xMax, yMin, yMax, xDim, yDim);
@@ -165,7 +175,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
                 // Create an empty map
                 logger().debug("SpaceServer - New map (%s) created by copying.",
                         ATOM_AS_STRING(spaceMapHandle));
-                map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, agentRadius);
+                map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, agentRadius, agentHeight, floorHeight);
                 // Copy each object in latest map into the new map
                 map->copyObjects(*latestMap);
                 if (!keepPreviousMap) {
@@ -180,7 +190,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
             }
         } else {
             // Create first map
-            map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, agentRadius);
+            map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, agentRadius, agentHeight, floorHeight);
             logger().debug("SpaceServer - First map (%s) created",
                     ATOM_AS_STRING(spaceMapHandle));
         }

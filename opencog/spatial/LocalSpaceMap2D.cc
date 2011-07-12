@@ -176,10 +176,11 @@ LocalSpaceMap2D::LocalSpaceMap2D(const LocalSpaceMap2D& other)
  */
 LocalSpaceMap2D::LocalSpaceMap2D(spatial::Distance xMin, spatial::Distance xMax, unsigned int xDim,
                                  spatial::Distance yMin, spatial::Distance yMax, unsigned int yDim,
-                                 spatial::Distance radius) :
+                                 spatial::Distance radius,spatial::Distance agentHeight,
+                                 spatial::Distance floor):
         _xMin(xMin), _xMax(xMax), _xDim(xDim),
         _yMin(yMin), _yMax(yMax), _yDim(yDim),
-        _radius(radius)
+        _radius(radius), _floorHeight(floor), _agentHeight(agentHeight)
 {
     Distance xDelta = xMax - xMin;
     Distance yDelta = yMax - yMin;
@@ -193,8 +194,7 @@ LocalSpaceMap2D::~LocalSpaceMap2D()
 LocalSpaceMap2D* LocalSpaceMap2D::clone() const
 {
     LocalSpaceMap2D* clonedMap = new LocalSpaceMap2D(_xMin, _xMax, _xDim,
-            _yMin, _yMax, _xDim,
-            _radius);
+            _yMin, _yMax, _xDim, _radius, _agentHeight, _floorHeight);
     //clonedMap->objects = objects;
     LongEntityPtrHashMap::const_iterator it1;
     for ( it1 = this->entities.begin( ); it1 != this->entities.end( ); ++it1 ) {
@@ -222,6 +222,8 @@ bool LocalSpaceMap2D::operator==(const LocalSpaceMap2D& other) const
             other._xDim != _xDim ||
             other._yDim != _yDim ||
             other._radius != _radius ||
+            other._agentHeight != _agentHeight ||
+            other._floorHeight != _floorHeight ||
             //other.objects.size( ) != objects.size( ) ||
             other.superEntities.size( ) != other.superEntities.size( ) ||
             other.entities.size( ) != entities.size( ) ||
@@ -351,6 +353,16 @@ spatial::Distance LocalSpaceMap2D::diagonalSize() const
 spatial::Distance LocalSpaceMap2D::radius() const
 {
     return _radius;
+}
+
+spatial::Distance LocalSpaceMap2D::agentHeight() const
+{
+    return _agentHeight;
+}
+
+spatial::Distance LocalSpaceMap2D::floorHeight() const
+{
+    return _floorHeight;
 }
 
 bool LocalSpaceMap2D::illegal(const spatial::Point& pt) const
@@ -483,7 +495,7 @@ bool LocalSpaceMap2D::gridOccupied_nonObstacle(unsigned int i, unsigned int j) c
     return (gridOccupied_nonObstacle(GridPoint(i, j)));
 }
 
-bool LocalSpaceMap2D::edgeIllegal(const spatial::GridPoint &src, const spatial::GridPoint &dest, double delta) const
+bool LocalSpaceMap2D::edgeIllegal(const spatial::GridPoint &src, const spatial::GridPoint &dest, double srcHeight, double delta) const
 {
     if (!coordinatesAreOnGrid(dest.first, dest.second)) {
         logger().fine("LocalSpaceMap - gridIllegal(%u, %u): coordinates not on grid!", dest.first, dest.second);
@@ -491,24 +503,36 @@ bool LocalSpaceMap2D::edgeIllegal(const spatial::GridPoint &src, const spatial::
     }
 
     if (isDiagonal(src, dest)) {
-        bool illegal = this->edgeIllegal(src, spatial::GridPoint(src.first, dest.second), 0.0001)
-                        || this->edgeIllegal(src, spatial::GridPoint(dest.first, src.second), 0.0001);
+        bool illegal = this->edgeIllegal(src, spatial::GridPoint(src.first, dest.second), srcHeight, 0.0001)
+                        || this->edgeIllegal(src, spatial::GridPoint(dest.first, src.second), srcHeight, 0.0001);
         if (illegal) return true;
     }
+    
+    if (getProperDestHeight(src, dest, srcHeight, delta)) return false;
+
+    return true;
+}
+
+double LocalSpaceMap2D::getProperDestHeight(const spatial::GridPoint &src, const spatial::GridPoint &dest, double srcHeight, double delta) const
+{
     bool is_obstacle = gridOccupied(dest.first, dest.second);
     if (!is_obstacle) {
         // None obstacle, OK
-        return false;
+        return _floorHeight;
     } else {
-        // Get the maximum height of src point
-        double srcHeight = getMaxHeightByGridPoint(src);
-        // Get the minimum height of dest point
-        double destHeight = getMaxHeightByGridPoint(dest);
+        double destHeight;
+        // Get lowest surface in this grid, if the agent can go directly under
+        // the object, then it is legal.
+        destHeight = getLowestSurfaceHeightByGridPoint(dest);
+        if (srcHeight + _agentHeight < destHeight) return _floorHeight; 
+        
+        // Get the maximum height of dest point
+        destHeight = getMaxHeightByGridPoint(dest);
 
         if (destHeight - srcHeight <= delta)
-            return false;
+            return destHeight;
 
-        return true;
+        return -1;
     }
 }
 
@@ -531,8 +555,9 @@ spatial::ObjectID LocalSpaceMap2D::getTallestObjectInGrid(const GridPoint &gp) c
     foreach (const char* internalId, objIdSet) {
         spatial::ObjectID entityId = spatial::ObjectID(internalId);
         const EntityPtr& entityPtr = getEntity(entityId);
-        if (entityPtr->getHeight() > height) {
-            height = entityPtr->getHeight();
+        double tmp_height = entityPtr->getPosition().z + 0.5 * entityPtr->getHeight();
+        if (tmp_height > height) {
+            height = tmp_height;
             id = entityId;
         }
     }
@@ -551,28 +576,29 @@ spatial::ObjectID LocalSpaceMap2D::getLowestObjectInGrid(const GridPoint &gp) co
     foreach (const char* internalId, objIdSet) {
         spatial::ObjectID entityId = spatial::ObjectID(internalId);
         const EntityPtr& entityPtr = getEntity(entityId);
-        if (entityPtr->getHeight() < height) {
-            height = entityPtr->getHeight();
+        double tmp_height = entityPtr->getPosition().z + 0.5 * entityPtr->getHeight();
+        if (tmp_height < height) {
+            height = tmp_height;
             id = entityId;
         }
     }
     return id; 
 }
 
-double LocalSpaceMap2D::getMinHeightByGridPoint(const GridPoint &gp) const
+double LocalSpaceMap2D::getLowestSurfaceHeightByGridPoint(const GridPoint &gp) const
 {
     spatial::ObjectID id = getLowestObjectInGrid(gp);
-    if (id == "") return 0.0;
+    if (id == "") return _floorHeight;
     const EntityPtr& entityPtr = getEntity(id);
-    return entityPtr->getHeight();
+    return entityPtr->getPosition().z - 0.5 * entityPtr->getHeight();
 }
 
 double LocalSpaceMap2D::getMaxHeightByGridPoint(const GridPoint &gp) const
 {
     spatial::ObjectID id = getTallestObjectInGrid(gp);
-    if (id == "") return 0.0;
+    if (id == "") return _floorHeight;
     const EntityPtr& entityPtr = getEntity(id);
-    return entityPtr->getHeight();
+    return entityPtr->getPosition().z + 0.5 * entityPtr->getHeight();
 }
 
 bool LocalSpaceMap2D::containsObject(const spatial::ObjectID& id) const
@@ -1282,7 +1308,8 @@ std::string LocalSpaceMap2D::toString( const LocalSpaceMap2D& map )
 
     out << map.xMin( ) << " " << map.xMax( ) << " " << map.xDim( ) << " ";
     out << map.yMin( ) << " " << map.yMax( ) << " " << map.yDim( ) << " ";
-    out << map.radius( ) << " ";
+    out << map.floorHeight() << " ";
+    out << map.radius( ) << " " << map.agentHeight() << " ";
 
     out << map.entities.size() << " ";
 
@@ -1295,7 +1322,7 @@ std::string LocalSpaceMap2D::toString( const LocalSpaceMap2D& map )
             << it->second->getPosition( ).z << " ";
 
         out << it->second->getLength( ) << " " 
-            << it->second->getWidth( ) << " " 
+            << it->second->getWidth( ) << " "
             << it->second->getHeight( ) << " ";
 
         out << it->second->getOrientation( ).x << " "
@@ -1315,14 +1342,18 @@ LocalSpaceMap2D* LocalSpaceMap2D::fromString( const std::string& map )
 
     double xMin = 0, xMax = 0;
     double yMin = 0, yMax = 0;
+    double floorHeight = 0;
     double agentRadius = 0;
+    double agentHeight = 0;
     unsigned int xDim = 0, yDim = 0, numberOfObjects = 0;
 
     parser >> xMin >> xMax >> xDim;
     parser >> yMin >> yMax >> yDim;
+    parser >> floorHeight;
     parser >> agentRadius;
+    parser >> agentHeight;
    
-    LocalSpaceMap2D* newMap = new LocalSpaceMap2D( xMin, xMax, xDim, yMin, yMax, yDim, agentRadius );
+    LocalSpaceMap2D* newMap = new LocalSpaceMap2D( xMin, xMax, xDim, yMin, yMax, yDim, floorHeight, agentRadius, agentHeight );
 
     parser >> numberOfObjects;
     unsigned int i;
