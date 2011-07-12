@@ -98,6 +98,7 @@
 #define GLOBAL_POS_X_ATTRIBUTE   "global-position-x"
 #define GLOBAL_POS_Y_ATTRIBUTE   "global-position-y"
 #define GLOBAL_POS_OFFSET_ATTRIBUTE   "global-position-offset"
+#define GLOBAL_FLOOR_HEIGHT_ATTRIBUTE "global-floor-height"
 
 // xml object types
 #define PET_OBJECT_TYPE          "pet"

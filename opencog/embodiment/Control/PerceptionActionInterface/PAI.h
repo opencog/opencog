@@ -164,6 +164,16 @@ private:
      */
     double agentRadius;
 
+    /**
+     * Current agent height
+     */
+    double agentHeight;
+
+    /**
+     * Current floor height
+     */
+    double floorHeight;
+
 #ifdef HAVE_LIBPTHREAD
     /**
      * A mutex variable to control the increment of action plan IDs.

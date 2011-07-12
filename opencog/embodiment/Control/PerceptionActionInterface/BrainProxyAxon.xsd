@@ -245,6 +245,7 @@
         <xsd:attribute name="global-position-x" type="xsd:int" use="required"/>
         <xsd:attribute name="global-position-y" type="xsd:int" use="required"/>        
         <xsd:attribute name="global-position-offset" type="xsd:int" use="required"/>
+        <xsd:attribute name="global-floor-height" type="xsd:int" use="optional"/>
         <xsd:attribute name="gridParcel" type="xsd:string" use="optional"/>
     </xsd:complexType>
         

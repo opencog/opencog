@@ -79,6 +79,8 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
     xMax = -1;
     yMax = -1;
     agentRadius = -1;
+    agentHeight = -1;
+    floorHeight = 0;
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&plock, NULL);
@@ -1605,12 +1607,17 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
     yMax = yMin + offset;
     logger().fine("PAI - processMapInfo(): global position y = %s => yMin = %lf, yMax = %lf", GLOBAL_POS_Y_ATTRIBUTE, yMin, yMax);
 
+    // gets global level height
+    floorHeight = getPositionAttribute(element, GLOBAL_FLOOR_HEIGHT_ATTRIBUTE);
+    logger().debug("PAI - processMapInfo(): global floor height = %lf", floorHeight);
+
+
     // getting grid map dimensions from system parameters
     unsigned int xDim = opencog::config().get_int("MAP_XDIM");
     unsigned int yDim = opencog::config().get_int("MAP_YDIM");
 
     SpaceServer& spaceServer = atomSpace.getSpaceServer();
-    spaceServer.setMapBoundaries(xMin, xMax, yMin, yMax, xDim, yDim);
+    spaceServer.setMapBoundaries(xMin, xMax, yMin, yMax, xDim, yDim, floorHeight);
 
     bool keepPreviousMap = avatarInterface.isExemplarInProgress();
     // Gets each blip element
@@ -2386,7 +2393,9 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
         // If the object is the Pet, save its radius for new space maps
         if (isSelfObject) {
             agentRadius = sqrt(length * length + width * width) / 2;
+            agentHeight = height;
             atomSpace.getSpaceServer().setAgentRadius(agentRadius);
+            atomSpace.getSpaceServer().setAgentHeight(agentHeight);
         }
     } else {
         // Get the length, width and height of the object
