@@ -332,7 +332,10 @@ bool Logger::isFineEnabled() const
 
 const char* Logger::getLevelString(const Logger::Level level)
 {
-    return levelStrings[level];
+    if (level == BAD_LEVEL)
+        return "Bad level";
+    else 
+        return levelStrings[level];
 }
 
 const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
@@ -342,7 +345,7 @@ const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
         if (boost::iequals(levelStrings[i], levelStr))
             return ((Logger::Level) i);
     }
-    return ((Logger::Level) - 1);
+    return ((Logger::Level) BAD_LEVEL);
 }
 
 // create and return the single instance

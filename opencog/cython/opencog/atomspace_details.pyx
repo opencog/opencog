@@ -118,7 +118,8 @@ cdef AtomSpace_factory(cAtomSpace *to_wrap):
     return instance
 
 cdef class AtomSpace:
-    ##cdef cAtomSpace *atomspace
+    # these are defined in atomspace.pxd:
+    #cdef cAtomSpace *atomspace
     #cdef cTimeServer *timeserver
     #cdef bint owns_atomspace
 

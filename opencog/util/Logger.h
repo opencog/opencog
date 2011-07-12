@@ -45,7 +45,7 @@ public:
 
     //WARNING: if you change the levels don't forget to update
     //levelStrings[] in Logger.cc
-    enum Level { NONE, ERROR, WARN, INFO, DEBUG, FINE };
+    enum Level { NONE, ERROR, WARN, INFO, DEBUG, FINE, BAD_LEVEL=255 };
 
     /** Convert from 'enum' (int) to 'string' and vice-versa */
     static const Level getLevelFromString(const std::string&);
