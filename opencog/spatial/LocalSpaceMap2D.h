@@ -231,8 +231,10 @@ namespace opencog
             bool isDiagonal(const GridPoint& src, const GridPoint& dest) const;
             ObjectID getTallestObjectInGrid(const GridPoint& gp) const; 
             ObjectID getLowestObjectInGrid(const GridPoint& gp) const; 
-            double getLowestSurfaceHeightByGridPoint(const GridPoint& gp) const;
-            double getMaxHeightByGridPoint(const GridPoint& gp) const;
+            double getBottomSurfaceHeightByGridPoint(const GridPoint& gp) const;
+            double getTopSurfaceHeightByGridPoint(const GridPoint& gp) const;
+
+            std::vector<Gradient> getObjectGradientsByGridPoint(const GridPoint& gp) const;
             //const ObjectMetaData& getMetaData(const ObjectID& id) const throw(opencog::NotFoundException);
 
             bool containsObject(const ObjectID& id) const;

@@ -47,11 +47,19 @@ namespace opencog
         class LocalSpaceMap2D;
 
         typedef double Distance;
+        typedef double Altitude;
         typedef std::string ObjectID;
 
         typedef std::pair<Distance, Distance> Point;
         typedef boost::tuple<spatial::Distance, spatial::Distance, spatial::Distance> Point3D;
         typedef std::pair<unsigned int, unsigned int> GridPoint;
+        typedef std::pair<Altitude, Altitude> Gradient;
+
+        struct gradient_cmp_by_lower_altitude {
+            bool operator() (const Gradient& a, const Gradient& b) const {
+                return a.first < b.first;
+            }
+        };
 
         typedef boost::unordered_set<GridPoint, boost::hash<GridPoint> > GridSet;
 

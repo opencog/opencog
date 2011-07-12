@@ -95,7 +95,9 @@ void ComboInterpreter::run(opencog::messaging::NetworkElement *ne)
         } else if (rp.isFinished()) {
             logger().debug("Done procedure id '%d'.", ((RunningProcedureId&) (*it)->first).getId());
             done.insert((*it)->first);
-        }
+        } /*else if (rp.isFailed()) {
+            _failed.insert((*it)->first);
+        }*/
     }
 #endif
 

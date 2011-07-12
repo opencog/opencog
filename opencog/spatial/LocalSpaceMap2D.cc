@@ -35,6 +35,7 @@
 
 #include <fstream>
 #include <map>
+#include <algorithm>
 
 #define HUGE_DISTANCE 999999.9
 
@@ -180,8 +181,10 @@ LocalSpaceMap2D::LocalSpaceMap2D(spatial::Distance xMin, spatial::Distance xMax,
                                  spatial::Distance floor):
         _xMin(xMin), _xMax(xMax), _xDim(xDim),
         _yMin(yMin), _yMax(yMax), _yDim(yDim),
-        _radius(radius), _floorHeight(floor), _agentHeight(agentHeight)
+        _radius(radius)
 {
+    _floorHeight = floor;
+    _agentHeight = agentHeight;
     Distance xDelta = xMax - xMin;
     Distance yDelta = yMax - yMin;
     _diagonalSize = sqrt(xDelta * xDelta + yDelta * yDelta);
@@ -520,17 +523,27 @@ double LocalSpaceMap2D::getProperDestHeight(const spatial::GridPoint &src, const
         // None obstacle, OK
         return _floorHeight;
     } else {
-        double destHeight;
-        // Get lowest surface in this grid, if the agent can go directly under
-        // the object, then it is legal.
-        destHeight = getLowestSurfaceHeightByGridPoint(dest);
-        if (srcHeight + _agentHeight < destHeight) return _floorHeight; 
-        
-        // Get the maximum height of dest point
-        destHeight = getMaxHeightByGridPoint(dest);
+        double topSurface = _floorHeight;
+        std::vector<spatial::Gradient> grads = getObjectGradientsByGridPoint(dest);
+        std::vector<spatial::Gradient>::iterator it = grads.begin();
+        for (; it != grads.end(); it++) {
+            if (srcHeight >= it->first) {
+                // bottom surface is lower the src height, then the height of
+                // top surface should be no smaller than its opposite surface.
+                topSurface = (topSurface > it->second) ? topSurface : it->second;
+                continue;
+            }
+            if (topSurface + _agentHeight <= it->first) {
+                break;
+            } else {
+                topSurface = (topSurface > it->second) ? topSurface : it->second;
+            }
+        }
 
-        if (destHeight - srcHeight <= delta)
-            return destHeight;
+        // Check if the agent can reach that height.
+        if (srcHeight + delta >= topSurface) {
+            return topSurface;
+        }
 
         return -1;
     }
@@ -585,7 +598,7 @@ spatial::ObjectID LocalSpaceMap2D::getLowestObjectInGrid(const GridPoint &gp) co
     return id; 
 }
 
-double LocalSpaceMap2D::getLowestSurfaceHeightByGridPoint(const GridPoint &gp) const
+double LocalSpaceMap2D::getBottomSurfaceHeightByGridPoint(const GridPoint &gp) const
 {
     spatial::ObjectID id = getLowestObjectInGrid(gp);
     if (id == "") return _floorHeight;
@@ -593,12 +606,32 @@ double LocalSpaceMap2D::getLowestSurfaceHeightByGridPoint(const GridPoint &gp) c
     return entityPtr->getPosition().z - 0.5 * entityPtr->getHeight();
 }
 
-double LocalSpaceMap2D::getMaxHeightByGridPoint(const GridPoint &gp) const
+double LocalSpaceMap2D::getTopSurfaceHeightByGridPoint(const GridPoint &gp) const
 {
     spatial::ObjectID id = getTallestObjectInGrid(gp);
     if (id == "") return _floorHeight;
     const EntityPtr& entityPtr = getEntity(id);
     return entityPtr->getPosition().z + 0.5 * entityPtr->getHeight();
+}
+
+std::vector<spatial::Gradient> LocalSpaceMap2D::getObjectGradientsByGridPoint(const GridPoint& gp) const
+{
+    std::vector<spatial::Gradient> grads;
+    if (!gridOccupied(gp))
+        return grads;
+    const spatial::ObjectIDSet& objIdSet = _grid.at(gp);
+    foreach (const char* internalId, objIdSet) {
+        spatial::ObjectID entityId = spatial::ObjectID(internalId);
+        const EntityPtr& entityPtr = getEntity(entityId);
+        spatial::Altitude altitude = entityPtr->getPosition().z;
+        double semiHeight = 0.5 * entityPtr->getHeight();
+        grads.push_back(spatial::Gradient(altitude - semiHeight, altitude + semiHeight));
+    }
+
+    // Sort the grads by the altitude of bottom surface
+    spatial::gradient_cmp_by_lower_altitude gradient_cmp;
+    std::sort(grads.begin(), grads.end(), gradient_cmp);
+    return grads;
 }
 
 bool LocalSpaceMap2D::containsObject(const spatial::ObjectID& id) const

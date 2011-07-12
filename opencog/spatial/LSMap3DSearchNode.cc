@@ -35,18 +35,18 @@ LocalSpaceMap2D *LSMap3DSearchNode::map;
 
 LSMap3DSearchNode::LSMap3DSearchNode(): x(0), y(0) {}
 
-LSMap3DSearchNode::LSMap3DSearchNode(unsigned int px, unsigned int py, float deltaHeight):
+LSMap3DSearchNode::LSMap3DSearchNode(unsigned int px, unsigned int py, double deltaHeight):
         x(px), y(py) {
     if (LSMap3DSearchNode::map) {
-        z = (float)map->getMaxHeightByGridPoint(GridPoint(px, py));
+        z = map->getTopSurfaceHeightByGridPoint(GridPoint(px, py));
     }
     deltaZ = deltaHeight;
 }
 
-LSMap3DSearchNode::LSMap3DSearchNode(spatial::GridPoint gp, float deltaHeight):
+LSMap3DSearchNode::LSMap3DSearchNode(spatial::GridPoint gp, double deltaHeight):
         x(gp.first), y(gp.second) {
     if (LSMap3DSearchNode::map) {
-        z = (float)map->getMaxHeightByGridPoint(gp);
+        z = (float)map->getTopSurfaceHeightByGridPoint(gp);
     }
     deltaZ = deltaHeight;
 }
@@ -66,7 +66,13 @@ bool LSMap3DSearchNode::isLegal(unsigned int x, unsigned int y)
 {
     spatial::GridPoint dest(x, y);
     spatial::GridPoint src(this->x, this->y);
-    return !map->edgeIllegal(src, dest, deltaZ);
+    return !map->edgeIllegal(src, dest, this->z, deltaZ);
+}
+
+double LSMap3DSearchNode::getDestHeight(const spatial::GridPoint& dest) const
+{
+    spatial::GridPoint src(this->x, this->y);
+    return map->getProperDestHeight(src, dest, this->z, deltaZ); 
 }
 
 bool LSMap3DSearchNode::IsSameState(const LSMap3DSearchNode &rhs)
@@ -142,22 +148,26 @@ bool LSMap3DSearchNode::GetSuccessors(AStarSearch<LSMap3DSearchNode> *astarsearc
     //horizontal and vertical moves
     if (isLegal(x - 1, y) && !((parent_x == x - 1) && (parent_y == y)) ) {
         NewNode = LSMap3DSearchNode(x - 1, y, deltaZ);
+        NewNode.z = getDestHeight(spatial::GridPoint(x - 1, y));
         astarsearch->AddSuccessor(NewNode);
     }
 
     if (isLegal(x, y - 1) && !((parent_x == x) && (parent_y == y - 1)) ) {
         NewNode = LSMap3DSearchNode(x, y - 1, deltaZ);
+        NewNode.z = getDestHeight(spatial::GridPoint(x, y - 1));
         astarsearch->AddSuccessor(NewNode);
     }
 
     if ( isLegal( x + 1, y ) && !((parent_x == x + 1) && (parent_y == y)) ) {
         NewNode = LSMap3DSearchNode(x + 1, y, deltaZ);
+        NewNode.z = getDestHeight(spatial::GridPoint(x + 1, y));
         astarsearch->AddSuccessor(NewNode);
     }
 
 
     if ( isLegal(x, y + 1) && !((parent_x == x) && (parent_y == y + 1)) ) {
         NewNode = LSMap3DSearchNode(x, y + 1, deltaZ);
+        NewNode.z = getDestHeight(spatial::GridPoint(x, y + 1));
         astarsearch->AddSuccessor(NewNode);
     }
 
@@ -165,21 +175,25 @@ bool LSMap3DSearchNode::GetSuccessors(AStarSearch<LSMap3DSearchNode> *astarsearc
     //diagonal moves
     if ( isLegal( x + 1, y + 1 ) && !((parent_x == x + 1) && (parent_y == y + 1)) ) {
         NewNode = LSMap3DSearchNode(x + 1, y + 1, deltaZ);
+        NewNode.z = getDestHeight(spatial::GridPoint(x + 1, y + 1));
         astarsearch->AddSuccessor(NewNode);
     }
 
     if ( isLegal(x + 1, y - 1) && !((parent_x == x + 1) && (parent_y == y - 1)) ) {
         NewNode = LSMap3DSearchNode(x + 1, y - 1, deltaZ);
+        NewNode.z = getDestHeight(spatial::GridPoint(x + 1, y - 1));
         astarsearch->AddSuccessor(NewNode);
     }
 
     if ( isLegal( x - 1, y + 1 ) && !((parent_x == x - 1) && (parent_y == y + 1)) ) {
         NewNode = LSMap3DSearchNode(x - 1, y + 1, deltaZ);
+        NewNode.z = getDestHeight(spatial::GridPoint(x - 1, y + 1));
         astarsearch->AddSuccessor(NewNode);
     }
 
     if ( isLegal( x - 1, y - 1 ) && !((parent_x == x - 1) && (parent_y == y - 1)) ) {
         NewNode = LSMap3DSearchNode(x - 1, y - 1, deltaZ);
+        NewNode.z = getDestHeight(spatial::GridPoint(x - 1, y - 1));
         astarsearch->AddSuccessor(NewNode);
     }
 

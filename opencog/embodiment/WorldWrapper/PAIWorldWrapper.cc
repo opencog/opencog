@@ -683,7 +683,7 @@ void PAIWorldWrapper::get3DWaypoints( const spatial::Point& startPoint,
     struct timeval timer_start, timer_end;
     time_t elapsed_time = 0;
     const SpaceServer::SpaceMap& sm = pai.getAtomSpace().getSpaceServer().getLatestMap();
-    float maxDeltaHeight = (float)opencog::config().get_double("ASTAR3D_DELTA_HEIGHT");
+    double maxDeltaHeight = opencog::config().get_double("ASTAR3D_DELTA_HEIGHT");
 
     gettimeofday(&timer_start, NULL);
     printf("Start A* 3D navigation. Delta height for each node: %.2f\n", maxDeltaHeight);
@@ -707,7 +707,9 @@ void PAIWorldWrapper::get3DWaypoints( const spatial::Point& startPoint,
     AStar3D.setMap( map );
 
     spatial::LSMap3DSearchNode petNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(begin.first, begin.second)), maxDeltaHeight);
+    petNode.z = map->floorHeight();
     spatial::LSMap3DSearchNode goalNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(end.first, end.second)), maxDeltaHeight);
+    goalNode.z = map->floorHeight();
 
     AStar3D.setStartAndGoalStates(petNode, goalNode);
 

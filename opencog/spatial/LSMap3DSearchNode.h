@@ -51,16 +51,16 @@ namespace opencog
             unsigned int x;  // the (x,y) grid positions of the node
             unsigned int y;
 
-            float z;  // the height of object in the grid position
-            float deltaZ; // the maximum delat height that allows next node to be
+            double z;  // the height of object in the grid position
+            double deltaZ; // the maximum delat height that allows next node to be
                           // in the path.
 
             //typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
             typedef LocalSpaceMap2D Map;
 
             LSMap3DSearchNode();
-            LSMap3DSearchNode(unsigned int px, unsigned int py, float deltaHeight);
-            LSMap3DSearchNode(GridPoint, float deltaHeight);
+            LSMap3DSearchNode(unsigned int px, unsigned int py, double deltaHeight);
+            LSMap3DSearchNode(GridPoint, double deltaHeight);
 
             static void setMap(Map *map);
             float GoalDistanceEstimate(const LSMap3DSearchNode &nodeGoal);
@@ -70,6 +70,7 @@ namespace opencog
             bool IsSameState(const LSMap3DSearchNode &rhs);
             bool isLegal();
             bool isLegal(unsigned int, unsigned int);
+            double getDestHeight(const GridPoint& dest) const;
             static void setHeuristic(int h);
             void PrintNodeInfo();
 
