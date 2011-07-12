@@ -120,7 +120,7 @@ class ForestExtractor:
             self.writer.outputLinkEdge(atom,  label=vertex_name,  outgoing=bindings)
         else:
             self.writer.outputLinkVertex(atom,  label=vertex_name)
-            self.writer.outputLinkArgumentEdges(atom,  outgoing=bindings)
+            self.writer.outputLinkArgumentEdges(atom, outgoing=bindings)
 
     def output(self):
         self.writer.start()
@@ -168,7 +168,34 @@ class ForestExtractor:
             return False
         else:
             return True
-  
+
+    # tr = fish.forest.all_trees[0]
+    # fish.forest.lookup_embeddings((tr,))
+    def lookup_embeddings(self, conj, s = {}):
+        """Given a conjunction, do a naive search for all embeddings. Fishgram usually finds the embeddings as part of the search,
+        which is probably more efficient. But this is simpler and guaranteed to be correct. So it is useful for testing and performance comparison.
+        It could also be used to find (the embeddings for) extra conjunctions that fishgram has skipped
+       (which would be useful for the calculations used when finding implication rules)."""
+       
+       # Find all compatible embeddings. Then commit to that tree
+        tr = conj[0]
+
+        print pp(tr)
+        print
+        for size in self.tree_embeddings:
+            if size == 0: continue
+            for t in self.tree_embeddings[size]:
+                s2 = unify(t, tr, {})
+                
+                if s2 != None:
+                    for binding in embs:
+                        print pp(t)
+                        var_mapping = dict([ (tree(i), obj) for i, obj in enumerate(binding)])
+                        print pp(var_mapping)
+    #                    grounded_t = subst(var_mapping, t)
+    #                    print pp(grounded_t)
+
+
 class GraphConverter:
     def __init__(self, a, writer):
         self.a = a

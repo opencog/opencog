@@ -28,28 +28,28 @@ goalId   = 100
 #print fc()
 #print kb
 
-def fc(a):
-    layer_results = set()
-    
-    rules = find(imp_template, all_atoms(a))
-    facts = find(all_template, all_atoms(a))
-    
-    for r in rules:
-        (premise,  conclusion) = r.out
-        if premise in facts:
-            layer_results.add(conclusion)
-        
-    for atom in layer_results:
-        atom.tv = TruthValue(1, 1)
-        #atom_from_tree(t, a)
-    return layer_results
-
-def all_atoms(a):
-    return a.get_atoms_by_type(t.Atom)
-
-all_template = tree(1)
-eval_template = tree('EvaluationLink', 1, tree('ListLink', 2, 3))
-imp_template = tree('ImplicationLink', 1,  2)
+#def fc(a):
+#    layer_results = set()
+#    
+#    rules = find(imp_template, all_atoms(a))
+#    facts = find(all_template, all_atoms(a))
+#    
+#    for r in rules:
+#        (premise,  conclusion) = r.out
+#        if premise in facts:
+#            layer_results.add(conclusion)
+#        
+#    for atom in layer_results:
+#        atom.tv = TruthValue(1, 1)
+#        #atom_from_tree(t, a)
+#    return layer_results
+#
+#def all_atoms(a):
+#    return a.get_atoms_by_type(t.Atom)
+#
+#all_template = tree(1)
+#eval_template = tree('EvaluationLink', 1, tree('ListLink', 2, 3))
+#imp_template = tree('ImplicationLink', 1,  2)
 
 
 

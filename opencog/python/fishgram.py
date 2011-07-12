@@ -192,20 +192,21 @@ class Fishgram:
         # May only be necessary to check the last one.
         return all([self.after(tree, tree2) for tree2 in conj])
 
-    def get_varlist(self,  t):
+    @classmethod
+    def get_varlist(class_, t):
         """Return a list of variables in tree, in the order they appear (with depth-first traversal). Would also work on a conjunction."""
         if isinstance(t, tree) and t.is_variable():
             return [t]
         elif isinstance(t, tree):
             ret = []
             for arg in t.args:
-                ret+=([x for x in self.get_varlist(arg) if x not in ret])
+                ret+=([x for x in class_.get_varlist(arg) if x not in ret])
             return ret
         # Representing a conjunction as a tuple of trees.
         elif isinstance(t, tuple):
             ret = []
             for arg in t:
-                ret+=([x for x in self.get_varlist(arg) if x not in ret])
+                ret+=([x for x in class_.get_varlist(arg) if x not in ret])
             return ret
         else:
             return []
@@ -508,7 +509,7 @@ def make_seq_alt(atomspace):
             if t2 - t1 <= interval:
                 atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
 #                for atTime in time_atom.incoming:
-#                    for atTime2 in time2_atom.incoming:                        
+#                    for atTime2 in time2_atom.incoming:
 #                        print atomspace.add_link(t.SequentialAndLink,  [atTime,  atTime2], TruthValue(1, 1))
 #                        #event1, event2 = atTime.out[1], atTime2.out[1]
 #                        #print atomspace.add_link(t.SequentialAndLink,  [event1, event2], TruthValue(1, 1))
@@ -533,7 +534,13 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
             demands = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
             
             notice_changes(atomspace, demands)
-            fish.implications()            
+            
+#            fish.forest.extractForest()
+#            
+#            conj = (fish.forest.all_trees[0],)
+#            fish.forest.lookup_embeddings(conj)
+            
+            fish.implications()
         except KeyError,  e:
             KeyError
         except Exception, e:
