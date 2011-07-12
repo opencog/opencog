@@ -14,6 +14,8 @@ cdef extern from "opencog/util/Logger.h" namespace "opencog":
         FINE "opencog::Logger::FINE"
         BAD_LEVEL "opencog::Logger::BAD_LEVEL"
     cdef cppclass cLogger "opencog::Logger":
+        cLogger()
+        cLogger(string s)
         void setLevel(loglevel lvl)
         loglevel getLevel()
         void setPrintToStdoutFlag(bool flag)
@@ -26,8 +28,24 @@ cdef extern from "opencog/util/Logger.h" namespace "opencog":
     cdef string log_level_to_string "opencog::Logger::getLevelString"(loglevel lvl)
     cLogger& logger()
 
+def create_logger(filename):
+    cdef Logger l = Logger.__new__(Logger)
+    py_byte_string = filename.encode('UTF-8')
+    # create temporary cpp string
+    cdef string *c_filename = new string(py_byte_string)
+    l.clog = new cLogger(deref(c_filename))
+    l.owns_atomspace = True
+    # delete temporary string
+    del c_filename 
+    return l
+
 cdef class Logger:
     cdef cLogger *clog
+    cdef owns_atomspace
+    def __cinit__(self):
+        self.owns_atomspace = False
+    def __dealloc__(self):
+        if self.owns_atomspace: del self.clog
     def __init__(self):
         self.clog = &logger()
     def log(self, int lvl, txt):
