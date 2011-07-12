@@ -81,7 +81,7 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     mWinningCentroids = new int[sizeOfNodes];
     cudaMalloc( (void**)&dWinningCentroids, sizeOfNodes*sizeof(int) );
 
-    // Node data contain the distance to the observation of all centroids (It's is empty the first run)
+    // Node data contains the distance to the observation of all centroids (It's is empty the first run)
     mCentroidsDistance = new float[sizeOfNodeData];
     cudaMalloc( (void**)&dCentroidsDistance, sizeOfNodeData*sizeof(float) );
 

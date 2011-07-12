@@ -144,7 +144,7 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
     // Read the XML config file (parameters file)
     // ******************************************
     // This function is rewritten and is not backwards compatible with the DestinPort one.
-    // Instead of a txt file its now a XML file pugixml is used for parching it.
+    // Instead of a txt file its now a XML file pugixml is used for parsing it.
     ifstream stmInput(cFilename);
     string sBuffer;
     // Put the config file into a vector and as one big string back to sFileCOntents
@@ -384,27 +384,19 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
     return 0;
 }
 
-int MainDestinExperiments(int argc, char* argv[])
-{
-    time_t destinStart = time(NULL);
-    // ********************************************
-    // Main experiment of DeSTIN (Also called main)
-    // ********************************************
+struct CommandArgsStuc {
 
-    // File for diagnostic
-    string strDiagnosticFileName;
-    strDiagnosticFileName = GetNextFileForDiagnostic();
+	bool bCreateFromFile;
+};
 
-    // arguments processing
-
-    // For debug information we output the command line to our Diagnostic file.
-    string strCommandLineData = "";
-    for( int i=0; i<argc; i++ )
-    {
-        strCommandLineData += argv[i];
-        strCommandLineData += " ";
-    }
-
+/**
+ *  parse the program command line arguments.
+ *  This doesn't actually have any side affects at the moment
+ *  because none of the variables are used and most of the
+ *  functionality is not yet ported from the single cpu version of
+ *  destin.
+ */
+int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], CommandArgsStuc &out){
     // Argument: TargetDirectory
     // A given location instead or default
     string strDiagnosticDirectoryForData;
@@ -422,14 +414,14 @@ int MainDestinExperiments(int argc, char* argv[])
     }
 
     // Argument: DestinOutputFile or InputNetworkFile
-    bool bCreateFromFile;
+
     string strDestinNetworkFileToRead;
     string strDestinNetworkFileToWrite;
     string FirstArg = argv[1];
     if ( FirstArg=="-F" )
     {
         // Argument: InputNetworkFile
-        bCreateFromFile = true;
+        out.bCreateFromFile = true;
         strDestinNetworkFileToRead = argv[2];  // we read from this file...
 
         if ( !FileExists( strDestinNetworkFileToRead ) )
@@ -442,7 +434,7 @@ int MainDestinExperiments(int argc, char* argv[])
     else
     {
         // Argument: DestinOutputFile
-        bCreateFromFile = false;
+        out.bCreateFromFile = false;
         strDestinNetworkFileToWrite = argv[6]; // we write to this file, and then we read from it too!!
         if ( strDestinNetworkFileToWrite == "-D" )
         {
@@ -452,11 +444,12 @@ int MainDestinExperiments(int argc, char* argv[])
         }
         strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
     }
+
+
     // Create the old variable sDiagnosticFileNameForMarking
     // it have the location based on TargetDirectory + FileName
     string sDiagnosticFileNameForMarking;
     sDiagnosticFileNameForMarking = strDiagnosticDirectoryForData + strDiagnosticFileName;
-
     // Argument: LayerToShow
     // Structure of processing S:E:O:P:T
     // List of default values
@@ -516,7 +509,7 @@ int MainDestinExperiments(int argc, char* argv[])
                     else
                     {
                         cout << "Do not understand the output type " << sLayerSpecs.c_str() << endl;
-                        return 0;
+                        return 1;
                     }
                 }
             }
@@ -530,6 +523,39 @@ int MainDestinExperiments(int argc, char* argv[])
     {
         OutputDistillationLevel = atoi(argv[8]);
     }
+
+
+    return 0;
+}
+
+
+int MainDestinExperiments(int argc, char* argv[])
+{
+    time_t destinStart = time(NULL);
+    // ********************************************
+    // Main experiment of DeSTIN (Also called main)
+    // ********************************************
+
+    // File for diagnostic
+    string strDiagnosticFileName;
+    strDiagnosticFileName = GetNextFileForDiagnostic();
+
+    // arguments processing
+
+    // For debug information we output the command line to our Diagnostic file.
+    string strCommandLineData = "";
+    for( int i=0; i<argc; i++ )
+    {
+        strCommandLineData += argv[i];
+        strCommandLineData += " ";
+    }
+
+
+    CommandArgsStuc argsStruc;
+    if(parseCommandArgs(strDiagnosticFileName, argc, argv, argsStruc)!=0){
+    	return 1;
+    }
+
 
     // **********************
     // Loading data source(s)
@@ -577,7 +603,7 @@ int MainDestinExperiments(int argc, char* argv[])
     string ParametersFileName;
     vector< pair<int,int> > vIndicesAndGTLabelToUse;
 
-    if ( bCreateFromFile==false )
+    if (argsStruc.bCreateFromFile==false )
     {
         // Argument: MAXCNT
         MAX_CNT=atoi(argv[2]);
@@ -723,7 +749,7 @@ int MainDestinExperiments(int argc, char* argv[])
     map<int,int> LabelsUsedToCreateNetwork;
     map<int,int> IndicesUsedToCreateNetwork;
     int NumberOfLayers=4;
-    if ( !bCreateFromFile )
+    if ( !argsStruc.bCreateFromFile)
     {
         int LayerToShow=-1;   //normally this should be -1 for regular operation.  For debugging, set it to 0 to look at the particular input for layer 0
         int RowToShowInputs=3;

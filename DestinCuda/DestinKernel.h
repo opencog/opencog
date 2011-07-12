@@ -12,8 +12,8 @@ using namespace std;
  * DeSTIN Kernel
  * This now the before layer,nodes,centroids,clustering system of DeSTIN
  * When started to create this one i did not find it necessarily to create all the classes for it.
- * Aldo it should be possible to create the old structure of files back and make sure you pass all the pointers to the kernel.
- * This would have been donr if the research did not take so long to understand DeSTIN original version.
+ * Although it should be possible to create the old structure of files back and make sure you pass all the pointers to the kernel.
+ * This would have been done if the research did not take so long to understand DeSTIN original version.
  * You need to open the DestinKernel.cu to see the actual Kernels
  * This because they have to be more like C and creating special CUDA headers is most of the time avoided (CUDA forums)
  */
