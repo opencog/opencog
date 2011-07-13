@@ -83,7 +83,7 @@ int main(int argc, char ** argv)
 				if(partial_probability >=0 && partial_probability <=1){
             		//  generate the truth-table
 	            	nsamples_bool = arg_number_bls;
-    	        	truth_table truthtable(combo_tr, nsamples_bool);
+    	        	complete_truth_table truthtable(combo_tr, nsamples_bool);
 	
     	        	// output the truth-table
         		   	for ( int i = 0 ; i < nsamples_bool; ++i) {
@@ -104,7 +104,7 @@ int main(int argc, char ** argv)
         	    		nsamples_bool = arg_number_bls;
        	    		else
        	    			nsamples_bool = nsamples_contin;
-       	    			truth_table truthtable(combo_tr, nsamples_bool);
+       	    			complete_truth_table truthtable(combo_tr, nsamples_bool);
         	    		        	    
         	    	for ( int i = 0 ; i < nsamples_bool; ++i) {        	    		              	
 						for ( size_t j = 0; j < arg_number; ++j) 

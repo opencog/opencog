@@ -76,9 +76,9 @@ int main(int argc,char** argv) {
 
     // read input_table_file file
     contin_input_table it;
-    contin_table ct;
+    contin_output_table ct;
     istreamTable<contin_input_table,
-                 contin_table, contin_t>(input_table_file, it, ct);
+                 contin_output_table, contin_t>(input_table_file, it, ct);
     size_t arity = it.get_arity();
 
     // read combo program
@@ -87,7 +87,7 @@ int main(int argc,char** argv) {
     ss >> tr;
 
     // evaluated tr over input table
-    contin_table ct_tr = contin_table(tr, it, rng);
+    contin_output_table ct_tr = contin_output_table(tr, it, rng);
 
     if(verbose) {
         // print info column
@@ -97,8 +97,8 @@ int main(int argc,char** argv) {
                   << "sqr_error\t" << "abs_error" << std::endl;
         // print data
         contin_input_table::const_iterator it_cit = it.begin();
-        contin_table::const_iterator ct_cit = ct.begin();
-        contin_table::const_iterator ct_tr_cit = ct_tr.begin();
+        contin_output_table::const_iterator ct_cit = ct.begin();
+        contin_output_table::const_iterator ct_tr_cit = ct_tr.begin();
         for(; it_cit != it.end(); ++it_cit, ++ct_cit, ++ct_tr_cit) {
             contin_t tar(*ct_cit), res(*ct_tr_cit);
             printContainer(*it_cit, "\t", "", "\t");

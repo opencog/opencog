@@ -32,11 +32,11 @@ namespace opencog { namespace combo {
 
 using namespace boost;
 
-truth_table::size_type
-truth_table::hamming_distance(const truth_table& other) const
+complete_truth_table::size_type
+complete_truth_table::hamming_distance(const complete_truth_table& other) const
 {
     OC_ASSERT(other.size() == size(),
-              "truth_tables size should be the same.");
+              "complete_truth_tables size should be the same.");
 
     size_type res = 0;
     for (const_iterator x = begin(), y = other.begin();x != end();)
@@ -44,7 +44,7 @@ truth_table::hamming_distance(const truth_table& other) const
     return res;
 }
 
-bool truth_table::same_truth_table(const combo_tree& tr) const {
+bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const {
     const_iterator cit = begin();
     for (int i = 0; cit != end(); ++i, ++cit) {
         for (int j = 0; j < _arity; ++j)
@@ -55,8 +55,8 @@ bool truth_table::same_truth_table(const combo_tree& tr) const {
     return true;
 }
 
-partial_truth_table::partial_truth_table(const combo_tree& tr,
-                                         const truth_table_inputs& tti,
+truth_output_table::truth_output_table(const combo_tree& tr,
+                                         const truth_input_table& tti,
                                          opencog::RandGen& rng) {
     for(bm_cit i = tti.begin(); i != tti.end(); ++i) {
         tti.set_binding(*i);
@@ -82,7 +82,7 @@ contin_input_table::contin_input_table(int sample_count, int arity,
     }
 }
 
-contin_table::contin_table(const combo_tree& tr, const contin_input_table& cti,
+contin_output_table::contin_output_table(const combo_tree& tr, const contin_input_table& cti,
                            opencog::RandGen& rng)
 {
     OC_ASSERT(!tr.empty());
@@ -113,7 +113,7 @@ contin_table::contin_table(const combo_tree& tr, const contin_input_table& cti,
     }
 }
 
-bool contin_table::operator==(const contin_table& ct) const
+bool contin_output_table::operator==(const contin_output_table& ct) const
 {
     if (get_label() != ct.get_label())
         return false;
@@ -127,10 +127,10 @@ bool contin_table::operator==(const contin_table& ct) const
     } else return false;
 }
 
-contin_t contin_table::abs_distance(const contin_table& other) const
+contin_t contin_output_table::abs_distance(const contin_output_table& other) const
 {
     OC_ASSERT(other.size() == size(),
-              "contin_tables should have the same size.");
+              "contin_output_tables should have the same size.");
 
     contin_t res = 0;
     for (const_iterator x = begin(), y = other.begin();x != end();)
@@ -138,10 +138,10 @@ contin_t contin_table::abs_distance(const contin_table& other) const
     return res;
 }
 
-contin_t contin_table::sum_squared_error(const contin_table& other) const
+contin_t contin_output_table::sum_squared_error(const contin_output_table& other) const
 {
     OC_ASSERT(other.size() == size(),
-              "contin_tables should have the same size.");
+              "contin_output_tables should have the same size.");
 
     contin_t res = 0;
     for (const_iterator x = begin(), y = other.begin();x != end();)
@@ -149,17 +149,17 @@ contin_t contin_table::sum_squared_error(const contin_table& other) const
     return res;
 }
 
-contin_t contin_table::mean_squared_error(const contin_table& other) const
+contin_t contin_output_table::mean_squared_error(const contin_output_table& other) const
 {
     OC_ASSERT(other.size() == size() && size() > 0,
-              "contin_tables should have the same size > 0.");
+              "contin_output_tables should have the same size > 0.");
     return sum_squared_error(other) / (contin_t)other.size();
 }
 
-contin_t contin_table::root_mean_square_error(const contin_table& other) const
+contin_t contin_output_table::root_mean_square_error(const contin_output_table& other) const
 {
     OC_ASSERT(other.size() == size() && size() > 0,
-              "contin_tables should have the same size > 0.");
+              "contin_output_tables should have the same size > 0.");
     return sqrt(mean_squared_error(other));
 }
 

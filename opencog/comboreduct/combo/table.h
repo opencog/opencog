@@ -233,7 +233,7 @@ private:
 // Truth table //
 /////////////////
 
-//shorthands used by class contin_table_inputs and contin_table
+//shorthands used by class contin_input_table and contin_output_table
 typedef std::vector<bool> bool_vector;
 typedef bool_vector::iterator bv_it;
 typedef bool_vector::const_iterator bv_cit;
@@ -246,33 +246,33 @@ typedef bool_matrix::const_iterator bm_cit;
  * assumed to be ordered in the conventional way, for instance if
  * there are 2 inputs, the output is ordered as follows:
  *
- * +--+--+--------------+
- * |#1|#2|Output        |
- * +--+--+--------------+
- * |F |F |truth_table[0]|
- * +--+--+--------------+
- * |T |F |truth_table[1]|
- * +--+--+--------------+
- * |F |T |truth_table[2]|
- * +--+--+--------------+
- * |T |T |truth_table[3]|
- * +--+--+--------------+
+ * +--+--+-----------------------+
+ * |#1|#2|Output                 |
+ * +--+--+-----------------------+
+ * |F |F |complete_truth_table[0]|
+ * +--+--+-----------------------+
+ * |T |F |complete_truth_table[1]|
+ * +--+--+-----------------------+
+ * |F |T |complete_truth_table[2]|
+ * +--+--+-----------------------+
+ * |T |T |complete_truth_table[3]|
+ * +--+--+-----------------------+
  */
-class truth_table : public bool_vector
+class complete_truth_table : public bool_vector
 {
 public:
     typedef bool_vector super;
 
-    truth_table() : _rng(NULL) { }
+    complete_truth_table() : _rng(NULL) { }
     template<typename It>
-    truth_table(It from, It to) : super(from, to), _rng(NULL) { }
+    complete_truth_table(It from, It to) : super(from, to), _rng(NULL) { }
     template<typename T>
-    truth_table(const tree<T>& tr, arity_t arity)
+    complete_truth_table(const tree<T>& tr, arity_t arity)
         : super(pow2(arity)), _arity(arity), _rng(NULL) {
         populate(tr);
     }
     template<typename T>
-    truth_table(const tree<T>& tr) {
+    complete_truth_table(const tree<T>& tr) {
         _arity = arity(tr);
         _rng = NULL;
         this->resize(pow2(_arity));
@@ -280,7 +280,7 @@ public:
     }
 
     template<typename Func>
-    truth_table(const Func& f, arity_t arity)
+    complete_truth_table(const Func& f, arity_t arity)
         : super(pow2(arity)), _arity(arity), _rng(NULL) {
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
@@ -293,8 +293,8 @@ public:
 
     /*
       this operator allows to access quickly to the results of a
-      truth_table. [from, to) points toward a chain of boolean describing
-      the inputs of the function coded into the truth_table and
+      complete_truth_table. [from, to) points toward a chain of boolean describing
+      the inputs of the function coded into the complete_truth_table and
       the operator returns the results.
     */
     template<typename It>
@@ -306,14 +306,14 @@ public:
         return *it;
     }
 
-    size_type hamming_distance(const truth_table& other) const;
+    size_type hamming_distance(const complete_truth_table& other) const;
 
     /**
      * compute the truth table of tr and compare it to self. This
      * method is optimized so that if there are not equal it can be
      * detected before calculating the entire table.
      */
-    bool same_truth_table(const combo_tree& tr) const;
+    bool same_complete_truth_table(const combo_tree& tr) const;
 protected:
     template<typename T>
     void populate(const tree<T>& tr) {
@@ -330,10 +330,10 @@ protected:
 
 
 /**
- * truth_table_inputs, matrix of booleans, each row corresponds to a
+ * truth_input_table, matrix of booleans, each row corresponds to a
  * possible vector input
  */
-class truth_table_inputs : public input_table<bool> {
+class truth_input_table : public input_table<bool> {
 public:
     // set binding prior calling the combo evaluation, ignoring inputs
     // to be ignored
@@ -344,15 +344,15 @@ public:
 };
 
 /**
- * partial_truth_table, column of result of a corresponding truth_table_inputs
+ * truth_output_table, column of result of a corresponding truth_input_table
  */
-struct partial_truth_table : public output_table<bool> {
-    partial_truth_table(const std::string& ol = default_output_label)
+struct truth_output_table : public output_table<bool> {
+    truth_output_table(const std::string& ol = default_output_label)
         : output_table<bool>(ol) {}
-    partial_truth_table(const bool_vector& bv,
+    truth_output_table(const bool_vector& bv,
                         std::string ol = default_output_label)
         : output_table<bool>(bv, ol) {}
-    partial_truth_table(const combo_tree& tr, const truth_table_inputs& tti,
+    truth_output_table(const combo_tree& tr, const truth_input_table& tti,
                         RandGen& rng);
     
 };
@@ -362,7 +362,7 @@ struct partial_truth_table : public output_table<bool> {
 // contin table //
 //////////////////
 
-//shorthands used by class contin_table_inputs and contin_table
+//shorthands used by class contin_input_table and contin_output_table
 typedef std::vector<contin_t> contin_vector;
 typedef contin_vector::iterator cv_it;
 typedef contin_vector::const_iterator const_cv_it;
@@ -371,7 +371,7 @@ typedef contin_matrix::iterator cm_it;
 typedef contin_matrix::const_iterator const_cm_it;
 
 /*
-  class contin_table_inputs
+  class contin_input_table
     matrix of randomly generated contin_t of sample_count rows and arity columns
 */
 class contin_input_table : public input_table<contin_t>
@@ -384,43 +384,43 @@ public:
 };
 
 /*
-  class contin_table
+  class contin_output_table
     contains sample_count evaluations obtained by evaluating t, a tree, over
     a RndNumTable cti.
     assumption : t has only contin inputs and output
 */
-class contin_table : public output_table<contin_t>   //a column of results
+class contin_output_table : public output_table<contin_t>   //a column of results
 {
 public:
     //typedef contin_vector super;
 
     //constructors
-    contin_table(const std::string& ol = default_output_label)
+    contin_output_table(const std::string& ol = default_output_label)
         : output_table<contin_t>(ol) {}
-    contin_table(const contin_vector& cv,
+    contin_output_table(const contin_vector& cv,
                  std::string ol = default_output_label) 
         : output_table<contin_t>(cv, ol) {}
-    contin_table(const combo_tree& tr, const contin_input_table& cti,
+    contin_output_table(const combo_tree& tr, const contin_input_table& cti,
                  RandGen& rng);
     template<typename Func>
-    contin_table(const Func& f, const contin_input_table& cti) {
+    contin_output_table(const Func& f, const contin_input_table& cti) {
         foreach(const contin_vector& v, cti.get_matrix())
             push_back(f(v.begin(), v.end()));
     }
 
     //equality operator
-    bool operator==(const contin_table& ct) const;
-    bool operator!=(const contin_table& ct) const {
+    bool operator==(const contin_output_table& ct) const;
+    bool operator!=(const contin_output_table& ct) const {
         return !operator==(ct);
     }
     // total of the absolute distance of each value
-    contin_t abs_distance(const contin_table& other) const;
+    contin_t abs_distance(const contin_output_table& other) const;
     // total of the squared error of each value
-    contin_t sum_squared_error(const contin_table& other) const;
+    contin_t sum_squared_error(const contin_output_table& other) const;
     // mean of the squared error of each value
-    contin_t mean_squared_error(const contin_table& other) const;
+    contin_t mean_squared_error(const contin_output_table& other) const;
     // sqrt of mean_squared_error
-    contin_t root_mean_square_error(const contin_table& other) const;
+    contin_t root_mean_square_error(const contin_output_table& other) const;
 };
 
 
@@ -436,7 +436,7 @@ class mixed_table
     //size = 2^|boolean inputs| * _cti.size()
     //each slice of cti.size() corresponds to a particular boolean input
     //all possible boolean inputs are enumerated in lexico order as for
-    //truth_table
+    //complete_truth_table
     //each element in a slice of cti.size() corresponds to the result of
     //a particular contin input, all obtained from cti
     std::vector<variant<bool, contin_t> > _vt;
@@ -560,7 +560,7 @@ class mixed_action_table
     //size = 2^|boolean+action_result inputs| * _cti.size()
     //each slice of cti.size() corresponds to a particular
     //boolean+action_result input, all possible boolean+action_result inputs
-    //are enumerated in lexico order as for truth_table
+    //are enumerated in lexico order as for complete_truth_table
     //each element in a slice of cti.size() corresponds to the result of
     //a particular contin input, all obtained from cti
     std::vector<variant<bool, contin_t> > _vt;
@@ -949,7 +949,7 @@ inline std::ostream& operator<<(std::ostream& out,
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const truth_table& tt)
+                                const complete_truth_table& tt)
 {
     return opencog::ostreamContainer(out, tt);
 }
@@ -982,7 +982,7 @@ inline std::ostream& operator<<(std::ostream& out,
 // TODO see if we can put that under opencog combo
 namespace boost
 {
-inline size_t hash_value(const opencog::combo::truth_table& tt)
+inline size_t hash_value(const opencog::combo::complete_truth_table& tt)
 {
     return hash_range(tt.begin(), tt.end());
 }

@@ -79,9 +79,9 @@ int main(int argc, char** argv) {
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
-        (opt_desc_str(opt_algo_opt).c_str(),
+        (opt_desc_str(algo_opt).c_str(),
          value<string>(&fs_params.algorithm)->default_value(hc),
-         string("Algorithm of the feature selection optimization. For the moment the algorithms are ").append(un).append(" for univariate, ").append(sa).append("simulated annealing, ").append(hc).append(" for hillclimbing.\n").c_str())
+         string("Feature selection algorithm. Supported algorithms are ").append(un).append(" for univariate, ").append(sa).append(" for simulated annealing, ").append(hc).append(" for hillclimbing, ").append(inc).append(" for incremental.").c_str())
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&fs_params.input_file),
          "Input table file, DSV file using comman, whitespace or tabulation as seperator.\n")
@@ -115,10 +115,22 @@ int main(int argc, char** argv) {
          "Resources allocated to the learning algorithm that take in input the selected features. More resource means that the feature set can be larger (as long as it has enough confidence). In this case the algo is supposed to be MOSES and the resources is the number of evaluations.\n")
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&fs_params.max_score)->default_value(1),
-         "The max score to reach, once reached feature selection halts.\n")
+         "For MOSES based algorithms. The max score to reach, once reached feature selection halts.\n")
         (opt_desc_str(fraction_of_remaining_opt).c_str(),
-         value<unsigned>(&fs_params.fraction_of_remaining)->default_value(10),
+         value<unsigned>(&fs_params.hc_fraction_of_remaining)->default_value(10),
          "Hillclimbing parameter. Determine the fraction of the remaining number of eval to use for the current iteration.\n")
+        (opt_desc_str(feature_selection_intensity_opt).c_str(),
+         value<double>(&fs_params.inc_intensity)->default_value(0),
+         "Incremental Selection parameter. Value between 0 and 1. 0 means all features are selected, 1 corresponds to the stronger selection pressure, probably no features are selected at 1.\n")
+        (opt_desc_str(feature_selection_target_size_opt).c_str(),
+         value<unsigned>(&fs_params.inc_target_size)->default_value(0),
+         "Incremental Selection parameter. The number of features to attempt to select. This option overwrites feature-selection-intensity. 0 means disabled.\n")
+        (opt_desc_str(redundant_feature_intensity_opt).c_str(),
+         value<double>(&fs_params.inc_rintensity)->default_value(0.1),
+         "Incremental Selection parameter. Value between 0 and 1. 0 means no redundant features are discarded, 1 means redudant features are maximally discarded. This option is only active when feature selection is active.\n")
+        (opt_desc_str(feature_selection_interaction_terms_opt).c_str(),
+         value<unsigned>(&fs_params.inc_interaction_terms)->default_value(1),
+         "Incremental Selection parameter. Maximum number of interaction terms considered during feature selection. Higher values make the feature selection more accurate but is computationally expensive.\n")
         ;
 
     variables_map vm;
@@ -157,18 +169,18 @@ int main(int argc, char** argv) {
 
     if(inferred_type == id::boolean_type) {
         // read input_data_file file
-        truth_table_inputs it;
-        partial_truth_table ot;
-        istreamTable<truth_table_inputs,
-                     partial_truth_table, bool>(*in, it, ot);
+        truth_input_table it;
+        truth_output_table ot;
+        istreamTable<truth_input_table,
+                     truth_output_table, bool>(*in, it, ot);
         in->close();
         feature_selection(it, ot, fs_params, rng);
     } else if(inferred_type == id::contin_type) {
         // read input_data_file file
         contin_input_table it;
-        contin_table ot;
+        contin_output_table ot;
         istreamTable<contin_input_table,
-                     contin_table, combo::contin_t>(*in, it, ot);
+                     contin_output_table, combo::contin_t>(*in, it, ot);
         in->close();
         feature_selection(it, ot, fs_params, rng);
     } else {

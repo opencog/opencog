@@ -52,12 +52,12 @@ private:
     }
 public:
     void test_TruthTable() {
-        truth_table_inputs it;
+        truth_input_table it;
         it.push_back(list_of(true)(false));
         it.push_back(list_of(false)(true));
         bool_vector o = list_of(true)(false);
-        partial_truth_table ot(o);
-        testIStreamTable<truth_table_inputs, partial_truth_table,
+        truth_output_table ot(o);
+        testIStreamTable<truth_input_table, truth_output_table,
                          bool>("1,0,1\n"
                                "0,1,0\n", it, ot);
     }
@@ -66,8 +66,8 @@ public:
         it.push_back(list_of(0.4)(244.2));
         it.push_back(list_of(9.5)(4.2));
         contin_vector o = list_of(10.1)(6.5);
-        contin_table ot(o);
-        testIStreamTable<contin_input_table, contin_table,
+        contin_output_table ot(o);
+        testIStreamTable<contin_input_table, contin_output_table,
                          contin_t>("0.4,244.2,10.1\n"
                                    "9.5,4.2,6.5\n", it, ot);
     }
@@ -78,14 +78,14 @@ public:
         vector<string> il = list_of(label1)(label2);
         it.set_labels(il);
         contin_vector o = list_of(10.1)(6.5);
-        contin_table ot(o, olabel);
-        testIStreamTable<contin_input_table, contin_table,
+        contin_output_table ot(o, olabel);
+        testIStreamTable<contin_input_table, contin_output_table,
                          contin_t>("price,temperature,happiness\n"
                                    "0.4,244.2,10.1\n"
                                    "9.5,4.2,6.5\n", it, ot);
     }
     void test_ostreamTrueTable() {
-        truth_table_inputs it;
+        truth_input_table it;
         it.push_back(list_of(true)(false));
         it.push_back(list_of(false)(true));
         vector<string> lbs = list_of("truc")("trac");
@@ -93,7 +93,7 @@ public:
         bool_vector o = list_of(true)(false);
         // ignore second argument trac
         it.set_ignore_args_from_zero(list_of(1));
-        partial_truth_table ot(o);
+        truth_output_table ot(o);
         ot.set_label("troc");
         stringstream ss;
         ostreamTable(ss, it, ot);

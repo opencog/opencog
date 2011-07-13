@@ -59,7 +59,7 @@ int main()
 
 
             //evalutate tr over cti and fill ct1
-            contin_table ct1(tr, cti, rng);
+            contin_output_table ct1(tr, cti, rng);
 
             //print the tree before reduction, for debugging
             cout << "Before : " << tr << endl;
@@ -67,7 +67,7 @@ int main()
             contin_reduce(tr, vertex_set(), rng);
 
             //evaluate tr over cti and fill ct2
-            contin_table ct2(tr, cti, rng);
+            contin_output_table ct2(tr, cti, rng);
 
             cout << "After  : " << tr << endl;
             if (ct1 != ct2) {

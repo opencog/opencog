@@ -32,6 +32,7 @@
 #include <opencog/comboreduct/combo/table.h>
 
 #include "../feature_scorer.h"
+#include "../feature_optimization.h"
 #include "../moses_based_scorer.h"
 
 using namespace opencog;
@@ -40,10 +41,12 @@ using namespace moses;
 using namespace combo;
 using namespace boost::assign; // bring 'operator+=()' into scope
 
-// optimization algorithms
-static const string un="un"; // univariate
-static const string sa="sa"; // simulation annealing
-static const string hc="hc"; // hillclimbing
+// feature selection algorithms
+static const string un="un"; // moses based univariate
+static const string sa="sa"; // moses based simulation annealing
+static const string hc="hc"; // moses based hillclimbing
+static const string inc="inc"; // incremental_selection (see
+                               // feature_optimization.h)
 
 static const string default_log_file_prefix = "feature-selection";
 static const string default_log_file_suffix = "log";
@@ -52,7 +55,7 @@ static const string default_log_file = default_log_file_prefix + "." + default_l
 // program option names and abbreviations
 // for their meanings see options_description in moses-exec.cc
 static const pair<string, string> rand_seed_opt("random-seed", "r");
-static const pair<string, string> opt_algo_opt("opt-algo", "a");
+static const pair<string, string> algo_opt("algo", "a");
 static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> initial_feature_opt("initial-feature", "f");
 static const pair<string, string> max_evals_opt("max-evals", "m");
@@ -65,10 +68,28 @@ static const pair<string, string> complexity_penalty_intensity_opt("complexity-p
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> resources_opt("resources", "R");
 static const pair<string, string> max_score_opt("max-score", "A");
-static const pair<string, string> fraction_of_remaining_opt("fraction-of-remaining", "C");
+static const pair<string, string> fraction_of_remaining_opt("fraction-of-remaining", "Q");
+static const pair<string, string> feature_selection_intensity_opt("feature-selection-intensity", "T");
+static const pair<string, string> feature_selection_target_size_opt("feature-selection-target-size", "C");
+static const pair<string, string> redundant_feature_intensity_opt("redundant-feature-intensity", "D");
+static const pair<string, string> feature_selection_interaction_terms_opt("feature-selection-interaction-terms", "U");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
+}
+
+void err_empty_features() {
+    std::cerr << "No features have been selected." << std::endl;
+    exit(1);
+}
+
+template<typename IT>
+void log_selected_features(const IT& it) {
+    // log set of selected feature set
+    stringstream ss;
+    ss << "The following set of features has been selected: ";
+    ostreamContainer(ss, it.get_considered_labels(), ",");
+    logger().info(ss.str());
 }
 
 // parameters of feature-selection, see desc.add_options() in
@@ -85,16 +106,20 @@ struct feature_selection_parameters {
     double resources; // resources of the learning algo that will take
                       // in input the feature set
     double max_score;
-    unsigned fraction_of_remaining;
+    unsigned hc_fraction_of_remaining;
+    double inc_intensity;
+    unsigned inc_target_size;
+    double inc_rintensity;
+    unsigned inc_interaction_terms;
 };
 
 template<typename IT, typename OT, typename Optimize, typename Scorer>
-void feature_selection(IT& it, const OT& ot,
-                       const field_set& fields,
-                       instance_set<composite_score>& deme,
-                       eda::instance& init_inst,
-                       Optimize& optimize, const Scorer& scorer,
-                       const feature_selection_parameters& fs_params) {
+void moses_feature_selection(IT& it, const OT& ot,
+                             const field_set& fields,
+                             instance_set<composite_score>& deme,
+                             eda::instance& init_inst,
+                             Optimize& optimize, const Scorer& scorer,
+                             const feature_selection_parameters& fs_params) {
     // optimize feature set
     unsigned ae; // actual number of evaluations to reached the best candidate
     unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals, &ae);
@@ -108,13 +133,7 @@ void feature_selection(IT& it, const OT& ot,
     // set the input table accordingly
     it.set_consider_args_from_zero(best_fs);
     // Logger
-    {
-        // log set of selected feature set
-        stringstream ss;
-        ss << "The following set of features has been selected: ";
-        ostreamContainer(ss, it.get_considered_labels(), ",");
-        logger().info(ss.str());
-    }
+    log_selected_features(it);
     {
         // log its score
         stringstream ss;
@@ -162,10 +181,11 @@ eda::instance initial_instance(const feature_selection_parameters& fs_params,
     return res;
 }
 
+// run feature selection given an moses optimizer
 template<typename IT, typename OT, typename Optimize>
-void feature_selection(IT& it, const OT& ot,
-                       Optimize& optimize,
-                       const feature_selection_parameters& fs_params) {
+void moses_feature_selection(IT& it, const OT& ot,
+                             Optimize& optimize,
+                             const feature_selection_parameters& fs_params) {
     arity_t arity = it.get_arity();
     field_set fields(field_set::disc_spec(2), arity);
     instance_set<composite_score> deme(fields);
@@ -181,16 +201,47 @@ void feature_selection(IT& it, const OT& ot,
     if(fs_params.cache_size > 0) {
         typedef prr_cache<MBScorer> ScorerCache;
         ScorerCache sc_cache(fs_params.cache_size, mb_sc);
-        feature_selection(it, ot, fields, deme, init_inst, optimize,
-                          sc_cache, fs_params);
+        moses_feature_selection(it, ot, fields, deme, init_inst, optimize,
+                                sc_cache, fs_params);
         // Logger
         logger().info("Number of cache failures = %u",
                       sc_cache.get_failures());
         // ~Logger
     } else {
-        feature_selection(it, ot, fields, deme, init_inst, optimize,
-                          mb_sc, fs_params);
+        moses_feature_selection(it, ot, fields, deme, init_inst, optimize,
+                                mb_sc, fs_params);
     }
+}
+
+template<typename IT, typename OT>
+void incremental_feature_selection(IT& it, const OT& ot,
+                                   const feature_selection_parameters& fs_params) {
+    if(fs_params.inc_intensity > 0 || fs_params.inc_target_size > 0) {
+        typedef MutualInformation<IT, OT, std::set<arity_t> > FeatureScorer;
+        FeatureScorer fsc(it, ot);
+        std::set<arity_t> features = it.get_considered_args_from_zero();
+        std::set<arity_t> selected_features = 
+            fs_params.inc_target_size > 0?
+            cached_adaptive_incremental_selection(features, fsc,
+                                                  fs_params.inc_target_size,
+                                                  fs_params.inc_interaction_terms,
+                                                  fs_params.inc_rintensity)
+            : cached_incremental_selection(features, fsc,
+                                           fs_params.inc_intensity,
+                                           fs_params.inc_interaction_terms,
+                                           fs_params.inc_rintensity);
+        if(selected_features.empty()) {
+            err_empty_features();
+        } else {
+            it.set_consider_args_from_zero(selected_features);
+            log_selected_features(it);
+        }
+    }
+    // print the filtered table
+    if(fs_params.output_file.empty())
+        ostreamTable(std::cout, it, ot);
+    else
+        ostreamTable(fs_params.output_file, it, ot);
 }
 
 template<typename IT, typename OT>
@@ -204,9 +255,14 @@ void feature_selection(IT& it, const OT& ot,
         OC_ASSERT(false, "TODO");        
     } else if(fs_params.algorithm == hc) {
         hc_parameters hc_param(false, // do not terminate if improvement
-                               fs_params.fraction_of_remaining);
+                               fs_params.hc_fraction_of_remaining);
         iterative_hillclimbing hc(rng, op_param, hc_param);
-        feature_selection(it, ot, hc, fs_params);            
+        moses_feature_selection(it, ot, hc, fs_params);            
+    } else if(fs_params.algorithm == inc) {
+        incremental_feature_selection(it, ot, fs_params);
+    } else {
+        std::cerr << "Unknown algorithm, please consult the help for the list of algorithms." << std::endl;
+        exit(1);
     }
 }
 

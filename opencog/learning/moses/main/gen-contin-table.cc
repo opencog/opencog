@@ -54,7 +54,7 @@ int main(int argc, char ** argv)
         contin_input_table cti(nsamples, arg_number, rng, max_randvalue, min_randvalue);
 
         try {
-            contin_table contintable(combo_tr, cti, rng);
+            contin_output_table contintable(combo_tr, cti, rng);
 
             // output the contin-table
             int k = 0;

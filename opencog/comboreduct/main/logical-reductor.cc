@@ -47,11 +47,11 @@ int main()
         cin >> tr;
         if (!cin.good())
             break;
-        truth_table tt1(tr);
+        complete_truth_table tt1(tr);
         //cout << "AR" << endl;
         logical_reduce(effort, tr);
         //cout << "RA" << endl;
-        truth_table tt2(tr, integer_log2(tt1.size()));
+        complete_truth_table tt2(tr, integer_log2(tt1.size()));
         cout << tr << endl;
         //cout << "checking tt" << endl;
         if (tt1 != tt2) {

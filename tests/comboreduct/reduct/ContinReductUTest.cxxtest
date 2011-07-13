@@ -62,11 +62,11 @@ public:
     int size_before,size_after;
     try {
       
-      contin_table ct1(tr, cti, rng); 
+      contin_output_table ct1(tr, cti, rng); 
       size_before=tr.size();
       contin_reduce(tr, vertex_set(), rng);
       size_after=tr.size();
-      contin_table ct2(tr, cti, rng);
+      contin_output_table ct2(tr, cti, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
@@ -94,11 +94,11 @@ public:
 
     int size_before,size_after;
     try {
-      contin_table ct1(tr, cti, rng);
+      contin_output_table ct1(tr, cti, rng);
       size_before=tr.size();
       contin_reduce(tr, vertex_set(), rng);
       size_after=tr.size();
-      contin_table ct2(tr, cti, rng);
+      contin_output_table ct2(tr, cti, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
@@ -126,11 +126,11 @@ public:
 
     int size_before,size_after;
     try {
-      contin_table ct1(tr, cti, rng);
+      contin_output_table ct1(tr, cti, rng);
       size_before=tr.size();
       contin_reduce(tr, vertex_set(), rng);
       size_after=tr.size();
-      contin_table ct2(tr, cti, rng);
+      contin_output_table ct2(tr, cti, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
@@ -159,11 +159,11 @@ public:
 
     int size_before,size_after;
     try {
-      contin_table ct1(tr, cti, rng);
+      contin_output_table ct1(tr, cti, rng);
       size_before=tr.size();
       contin_reduce(tr, vertex_set(), rng);
       size_after=tr.size();
-      contin_table ct2(tr, cti, rng);
+      contin_output_table ct2(tr, cti, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
@@ -192,13 +192,13 @@ public:
 
     int size_before,size_after;
     try {
-      contin_table ct1(tr, cti, rng);
+      contin_output_table ct1(tr, cti, rng);
       size_before=tr.size();
       std::cout << "before: " << tr << std::endl;
       contin_reduce(tr, vertex_set(), rng);
       std::cout << "after:  " << tr << std::endl;      
       size_after=tr.size();
-      contin_table ct2(tr, cti, rng);
+      contin_output_table ct2(tr, cti, rng);
 
 // the following TS_ASSERT is not valid if log has the semantics
 // log(abs(x)) because the rule exp(log(x)+y) -> x*exp(y) is not
@@ -230,13 +230,13 @@ public:
 
     int size_before,size_after;
 
-    contin_table ct1(tr, cti, rng);
+    contin_output_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, cti, rng);
+    contin_output_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -258,13 +258,13 @@ public:
 
     int size_before,size_after;
 
-    contin_table ct1(tr, cti, rng);
+    contin_output_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, cti, rng);
+    contin_output_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -286,13 +286,13 @@ public:
 
     int size_before,size_after;
 
-    contin_table ct1(tr, cti, rng);
+    contin_output_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, cti, rng);
+    contin_output_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -314,13 +314,13 @@ public:
 
     int size_before,size_after;
 
-    contin_table ct1(tr, cti, rng);
+    contin_output_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, cti, rng);
+    contin_output_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -342,13 +342,13 @@ public:
 
     int size_before,size_after;
 
-    contin_table ct1(tr, cti, rng);
+    contin_output_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, cti, rng);
+    contin_output_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -370,13 +370,13 @@ public:
 
     int size_before,size_after;
 
-    contin_table ct1(tr, rnt, rng);
+    contin_output_table ct1(tr, rnt, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, rnt, rng);
+    contin_output_table ct2(tr, rnt, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -398,13 +398,13 @@ void test_simplify12() {
 
     int size_before,size_after;
 
-    contin_table ct1(tr, rnt, rng);
+    contin_output_table ct1(tr, rnt, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, rnt, rng);
+    contin_output_table ct2(tr, rnt, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -426,14 +426,14 @@ void test_simplify13() {
 
     int size_before,size_after;
 
-    contin_table ct1(tr, rnt, rng);
+    contin_output_table ct1(tr, rnt, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
 
     contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, rnt, rng);
+    contin_output_table ct2(tr, rnt, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);

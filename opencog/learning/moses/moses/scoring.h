@@ -100,7 +100,7 @@ struct logical_score : public unary_function<combo_tree, int> {
 
     int operator()(const combo_tree& tr) const;
 
-    combo::truth_table target;
+    combo::complete_truth_table target;
     int arity;
     RandGen& rng;
 };
@@ -119,7 +119,7 @@ struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    combo::truth_table target;
+    combo::complete_truth_table target;
     int arity;
 };
 
@@ -130,14 +130,14 @@ struct contin_score : public unary_function<combo_tree, score_t> {
                  RandGen& _rng)
             : target(func, r), cti(r), rng(_rng) { }
 
-    contin_score(const combo::contin_table& t,
+    contin_score(const combo::contin_output_table& t,
                  const contin_input_table& r,
                  RandGen& _rng)
         : target(t),cti(r),rng(_rng) { }
 
     score_t operator()(const combo_tree& tr) const;
 
-    combo::contin_table target;
+    combo::contin_output_table target;
     contin_input_table cti;
     RandGen& rng;
 };
@@ -149,14 +149,14 @@ struct contin_score_sq : public unary_function<combo_tree,score_t> {
                     RandGen& _rng)
         : target(func,r),cti(r),rng(_rng) { }
     
-    contin_score_sq(const combo::contin_table& t,
+    contin_score_sq(const combo::contin_output_table& t,
                     const contin_input_table& r,
                     RandGen& _rng)
         : target(t),cti(r),rng(_rng) { }
     
     score_t operator()(const combo_tree& tr) const;
     
-    combo::contin_table target;
+    combo::contin_output_table target;
     contin_input_table cti;
     RandGen& rng;
 };
@@ -168,14 +168,14 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
                   RandGen& _rng)
         : target(func, r), cti(r), rng(_rng) { }
 
-    contin_bscore(const combo::contin_table& t,
+    contin_bscore(const combo::contin_output_table& t,
                   const contin_input_table& r,
                   RandGen& _rng)
         : target(t), cti(r), rng(_rng) { }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    combo::contin_table target;
+    combo::contin_output_table target;
     contin_input_table cti;
     RandGen& rng;
 };
@@ -220,7 +220,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
         set_complexity_coef(variance, alphabet_size);
     }
 
-    occam_contin_bscore(const combo::contin_table& t,
+    occam_contin_bscore(const combo::contin_output_table& t,
                         const contin_input_table& r,
                         float variance,
                         float alphabet_size,
@@ -232,7 +232,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    combo::contin_table target;
+    combo::contin_output_table target;
     mutable contin_input_table cti; // mutable due to set_consider_args
     bool occam;
     score_t complexity_coef;
@@ -249,7 +249,7 @@ private:
  * samples are very large.
  */
 struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
-    occam_contin_bscore_opt_binding(const combo::contin_table& t,
+    occam_contin_bscore_opt_binding(const combo::contin_output_table& t,
                                     const contin_input_table& r,
                                     float variance,
                                     float alphabet_size,
@@ -278,8 +278,8 @@ struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
  */
 struct occam_truth_table_bscore 
     : public unary_function<combo_tree, behavioral_score> {
-    occam_truth_table_bscore(const partial_truth_table& t,
-                             const truth_table_inputs& i,
+    occam_truth_table_bscore(const truth_output_table& t,
+                             const truth_input_table& i,
                              float p,
                              float alphabet_size,
                              RandGen& _rng) 
@@ -291,8 +291,8 @@ struct occam_truth_table_bscore
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    partial_truth_table target;
-    mutable truth_table_inputs tti; // mutable due to set_consider_args
+    truth_output_table target;
+    mutable truth_input_table tti; // mutable due to set_consider_args
     bool occam; // if true the Occam's razor is taken into account
     score_t complexity_coef;
     RandGen& rng;
@@ -305,8 +305,8 @@ struct occam_truth_table_bscore
  * samples are very large.
  */
 struct occam_truth_table_bscore_opt_binding : public occam_truth_table_bscore {
-    occam_truth_table_bscore_opt_binding(const partial_truth_table& t,
-                                         const truth_table_inputs& i,
+    occam_truth_table_bscore_opt_binding(const truth_output_table& t,
+                                         const truth_input_table& i,
                                          float p,
                                          float alphabet_size,
                                          RandGen& _rng) :

@@ -44,9 +44,6 @@
 // for operator>> to combo 
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h> 
 
-#include <opencog/learning/feature-selection/feature_optimization.h>
-#include <opencog/learning/feature-selection/feature_scorer.h>
-
 #include "../moses/moses.h"
 #include "../moses/distributed_moses.h"
 #include "../moses/optimization.h"
@@ -83,12 +80,6 @@ static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 static const string un="un"; // univariate
 static const string sa="sa"; // simulation annealing
 static const string hc="hc"; // hillclimbing
-
-// feature selection algorithms
-static const string is="is"; // incremental selection
-
-// feature selection scorer
-static const string en="en"; // entropy
 
 // used by the main function, it is included in the library for its
 // convenience

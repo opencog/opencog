@@ -213,10 +213,6 @@ int moses_exec(int argc, char** argv) {
     int reduct_knob_building_effort;
     unsigned long cache_size;
     vector<string> jobs_str;
-    double fs_intensity;
-    unsigned int fs_target_size;
-    double rf_intensity;
-    unsigned int fs_interaction_terms;
     // metapop_param
     int max_candidates;
     bool reduce_all;
@@ -350,18 +346,6 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(jobs_opt).c_str(),
          value<vector<string> >(&jobs_str),
          string("Number of jobs allocated for deme optimization. Jobs can be executed on a remote machine as well, in such case the notation -j N:REMOTE_HOST is used. For instance one can enter the options -j 4 -j 16").append(job_seperator).append("my_server.org (or -j 16").append(job_seperator).append("user@my_server.org if wishes to run the remote jobs under a different user name), meaning that 4 jobs are allocated on the local machine and 16 jobs are allocated on my_server.org. The assumption is that moses-exec must be on the remote machine and is located in a directory included in the PATH environment variable. Beware that a lot of log files are gonna be generated when using this option.\n").c_str())
-        (opt_desc_str(feature_selection_intensity_opt).c_str(),
-         value<double>(&fs_intensity)->default_value(0),
-         "Value between 0 and 1. 0 means all features are selected, 1 corresponds to the stronger selection pressure, probably no features are selected at 1.\n")
-        (opt_desc_str(feature_selection_target_size_opt).c_str(),
-         value<unsigned int>(&fs_target_size)->default_value(0),
-         "The number of features to attempt to select. This option overwrites feature-selection-intensity. 0 means disabled.\n")
-        (opt_desc_str(redundant_feature_intensity_opt).c_str(),
-         value<double>(&rf_intensity)->default_value(0.1),
-         "Value between 0 and 1. 0 means no redundant features are discarded, 1 means redudant features are maximally discarded. This option is only active when feature selection is active.\n")
-        (opt_desc_str(feature_selection_interaction_terms_opt).c_str(),
-         value<unsigned int>(&fs_interaction_terms)->default_value(1),
-         "Maximum number of interaction terms considered during feature selection. Higher values make the feature selection more accurate but is computationally expensive.\n")
         (opt_desc_str(pop_size_ratio_opt).c_str(),
          value<double>(&pop_size_ratio)->default_value(20),
          "The higher the more effort is spent on a deme.\n")
@@ -500,54 +484,13 @@ int moses_exec(int argc, char** argv) {
 
         if(output_type == id::boolean_type) {
             // read input_data_file file
-            truth_table_inputs it;
-            partial_truth_table ot;
-            istreamTable<truth_table_inputs,
-                         partial_truth_table, bool>(*in, it, ot);
+            truth_input_table it;
+            truth_output_table ot;
+            istreamTable<truth_input_table,
+                         truth_output_table, bool>(*in, it, ot);
             it.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(it, ot, nsamples, rng);
-
-            // feature selection
-            if(fs_intensity > 0 || fs_target_size > 0) {
-                // Logger
-                logger().info("Computing feature selection");
-                // ~Logger
-
-                typedef MutualInformation<truth_table_inputs,
-                                          partial_truth_table,
-                                          std::set<arity_t> > FeatureScorer;
-                FeatureScorer fs(it, ot);
-                std::set<arity_t> features = it.get_considered_args_from_zero();
-                std::set<arity_t> selected_features = 
-                    fs_target_size > 0?
-                    cached_adaptive_incremental_selection(features, fs,
-                                                          fs_target_size,
-                                                          fs_interaction_terms,
-                                                          rf_intensity)
-                    : cached_incremental_selection(features, fs,
-                                                   fs_intensity,
-                                                   fs_interaction_terms,
-                                                   rf_intensity);
-
-                if(selected_features.empty()) {
-                    std::cerr << "No features have been selected. Please retry with a lower feature selection intensity" << std::endl;
-                    exit(1);
-                } else {
-                    it.set_consider_args_from_zero(selected_features);
-                    vertex_set ignore_args = it.get_ignore_args();
-                    moses_params.ignore_ops.insert(ignore_args.begin(),
-                                                   ignore_args.end());
-                    
-                    // Logger
-                    vertex_set selected_args = it.get_considered_args();
-                    logger().info("%u inputs have been selected", selected_args.size());
-                    stringstream ss;
-                    ostreamContainer(ss, it.get_considered_args());
-                    logger().info(ss.str());
-                    // ~Logger
-                }
-            }
 
             type_tree tt = declare_function(output_type, arity);
 
@@ -564,9 +507,9 @@ int moses_exec(int argc, char** argv) {
         else if(output_type == id::contin_type) {
             // read input_data_file file
             contin_input_table it;
-            contin_table ot;
+            contin_output_table ot;
             istreamTable<contin_input_table,
-                         contin_table, contin_t>(*in, it, ot);
+                         contin_output_table, contin_t>(*in, it, ot);
             it.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(it, ot, nsamples, rng);
@@ -618,7 +561,7 @@ int moses_exec(int argc, char** argv) {
             contin_input_table it(nsamples, arity, rng,
                                            max_rand_input, min_rand_input);
             it.set_ignore_args(ignore_ops); // to speed up binding
-            contin_table table_outputs(tr, it, rng);
+            contin_output_table table_outputs(tr, it, rng);
             
             int as = alphabet_size(tt, ignore_ops);
             
@@ -715,10 +658,10 @@ int moses_exec(int argc, char** argv) {
     } else if(problem == ann_it) { // regression based on input table using ann
         auto_ptr<ifstream> in(open_data_file(input_data_file));
         contin_input_table it;
-        contin_table ot;
+        contin_output_table ot;
         // read input_data_file file
         istreamTable<contin_input_table,
-                     contin_table, contin_t>(*in, it, ot);
+                     contin_output_table, contin_t>(*in, it, ot);
         // if no exemplar has been provided in option insert the default one
         if(exemplars.empty()) {
             exemplars.push_back(ann_exemplar(arity));
@@ -754,7 +697,7 @@ int moses_exec(int argc, char** argv) {
         
         contin_input_table it(nsamples, arity, rng,
                               max_rand_input, min_rand_input);
-        contin_table table_outputs(tr, it, rng);
+        contin_output_table table_outputs(tr, it, rng);
         
         type_tree tt = declare_function(id::ann_type, 0);
         

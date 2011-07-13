@@ -636,12 +636,12 @@ subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
 
 void reduce_remove_subtree_equal_tt::operator()(combo_tree& tr,
                                                 combo_tree::iterator it) const {
-    truth_table tr_tt(tr);
+    complete_truth_table tr_tt(tr);
     for(pre_it pit = it.begin(); pit != it.end();) {
         pit = tr.insert_above(pit, id::null_vertex);
         combo_tree amputated_tr(tr);
         clean_reduce(amputated_tr);
-        if(tr_tt.same_truth_table(amputated_tr)) // amputate tr
+        if(tr_tt.same_complete_truth_table(amputated_tr)) // amputate tr
             pit = tr.erase(pit);
         else { // remove only the previously added null_vertex
             pit = tr.erase(tr.flatten(pit));
