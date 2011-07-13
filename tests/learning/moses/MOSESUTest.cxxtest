@@ -33,7 +33,7 @@ const string MOSESUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/mose
  * MOSES test on toy problems
  */
 class MOSESUTest : public CxxTest::TestSuite {
-    void moses_test(vector<string> arguments) {
+    void moses_test(vector<string> arguments, score_t expected_sc = 0) {
         // build arguments
         char tempfile[] = "/tmp/MOSESUTestXXXXXX";
         int tmp = mkstemp(tempfile);
@@ -51,7 +51,7 @@ class MOSESUTest : public CxxTest::TestSuite {
         std::cout << "s = " << s << std::endl;
         pclose(fp);
         // check that the result is 0
-        TS_ASSERT(lexical_cast<int>(s) == 0);
+        TS_ASSERT(lexical_cast<int>(s) == expected_sc);
     }
 public:
     MOSESUTest() {
@@ -75,7 +75,8 @@ public:
         moses_test(list_of("-Hmux")("-k3")("-asa"));
     }
     void test_hc_it() {
-        string data_file_path = MOSESUTest_dir + "dataset.csv";
-        moses_test(list_of(string("-i").append(data_file_path)));
+        string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
+        string max_evals("-m1000");
+        moses_test(list_of(data_file_path)(max_evals), -3);
     }
 };

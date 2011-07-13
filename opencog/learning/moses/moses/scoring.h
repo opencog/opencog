@@ -243,13 +243,13 @@ private:
 };
 
 /** 
- * like occam_truth_bscore but only binds variables that are present
+ * like occam_contin_bscore but only binds variables that are present
  * in the candidate. This optimization is useful when the candidates
  * tend to be short, and both the number of inputs and the number of
  * samples are very large.
  */
 struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
-    occam_contin_bscore_opt_binding(const combo::contin_output_table& t,
+    occam_contin_bscore_opt_binding(const contin_output_table& t,
                                     const contin_input_table& r,
                                     float variance,
                                     float alphabet_size,
