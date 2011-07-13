@@ -98,19 +98,17 @@ void eval_output_results(const evalTableParameters& pa,
     }
 }
 
-template<typename IT, typename OT, typename Type>
+template<typename Table>
 void read_eval_output_results(const evalTableParameters& pa,
                               opencog::RandGen& rng) {
-    IT it;
-    OT ot;
-
     // read data table
-    istreamTable<IT, OT, Type>(pa.input_table_file, it, ot);
+    Table table(pa.input_table_file);
 
     // read combo programs
     vector<combo_tree> trs;
     foreach(const string& tr_str, pa.combo_programs)
-        trs += str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
+        trs += str2combo_tree_label(tr_str, pa.has_labels,
+                                    table.input.get_labels());
     if(!pa.combo_programs_file.empty()) {
         ifstream in(pa.combo_programs_file.c_str());
         while(in.good()) {
@@ -118,11 +116,12 @@ void read_eval_output_results(const evalTableParameters& pa,
             getline(in, line);
             if(line.empty())
                 continue;
-            trs += str2combo_tree_label(line, pa.has_labels, it.get_labels());
+            trs += str2combo_tree_label(line, pa.has_labels,
+                                        table.input.get_labels());
         }
     }
     // eval and output the results
-    eval_output_results(pa, trs, it, ot, rng);
+    eval_output_results(pa, trs, table.input, table.output, rng);
 }
 
 #endif // _OPENCOG_EVAL_TABLE_H

@@ -484,19 +484,16 @@ int moses_exec(int argc, char** argv) {
 
         if(output_type == id::boolean_type) {
             // read input_data_file file
-            truth_input_table it;
-            truth_output_table ot;
-            istreamTable<truth_input_table,
-                         truth_output_table, bool>(*in, it, ot);
-            it.set_ignore_args(ignore_ops); // to speed up binding
+            truth_table table(*in);
+            table.input.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
-                subsampleTable(it, ot, nsamples, rng);
+                subsampleTable(table.input, table.output, nsamples, rng);
 
             type_tree tt = declare_function(output_type, arity);
 
             int as = alphabet_size(tt, ignore_ops);
 
-            occam_truth_table_bscore bscore(ot, it, prob, as, rng);
+            occam_truth_table_bscore bscore(table, prob, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   logical_reduction(reduct_candidate_effort),
                                   logical_reduction(reduct_knob_building_effort),
@@ -508,8 +505,7 @@ int moses_exec(int argc, char** argv) {
             // read input_data_file file
             contin_input_table it;
             contin_output_table ot;
-            istreamTable<contin_input_table,
-                         contin_output_table, contin_t>(*in, it, ot);
+            istreamTable(*in, it, ot);
             it.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(it, ot, nsamples, rng);
@@ -559,7 +555,7 @@ int moses_exec(int argc, char** argv) {
                 nsamples = default_nsamples;
             
             contin_input_table it(nsamples, arity, rng,
-                                           max_rand_input, min_rand_input);
+                                  max_rand_input, min_rand_input);
             it.set_ignore_args(ignore_ops); // to speed up binding
             contin_output_table table_outputs(tr, it, rng);
             
@@ -660,8 +656,7 @@ int moses_exec(int argc, char** argv) {
         contin_input_table it;
         contin_output_table ot;
         // read input_data_file file
-        istreamTable<contin_input_table,
-                     contin_output_table, contin_t>(*in, it, ot);
+        istreamTable(*in, it, ot);
         // if no exemplar has been provided in option insert the default one
         if(exemplars.empty()) {
             exemplars.push_back(ann_exemplar(arity));

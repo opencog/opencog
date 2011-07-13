@@ -220,7 +220,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
         set_complexity_coef(variance, alphabet_size);
     }
 
-    occam_contin_bscore(const combo::contin_output_table& t,
+    occam_contin_bscore(const contin_output_table& t,
                         const contin_input_table& r,
                         float variance,
                         float alphabet_size,
@@ -232,7 +232,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    combo::contin_output_table target;
+    contin_output_table target;
     mutable contin_input_table cti; // mutable due to set_consider_args
     bool occam;
     score_t complexity_coef;
@@ -278,12 +278,11 @@ struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
  */
 struct occam_truth_table_bscore 
     : public unary_function<combo_tree, behavioral_score> {
-    occam_truth_table_bscore(const truth_output_table& t,
-                             const truth_input_table& i,
+    occam_truth_table_bscore(const truth_table& _tt,
                              float p,
                              float alphabet_size,
                              RandGen& _rng) 
-        : target(t), tti(i), rng(_rng) {
+        : tt(_tt), rng(_rng) {
         occam = p > 0 && p < 0.5;
         if(occam)
             complexity_coef = - log((double)alphabet_size) / log(p/(1-p));
@@ -291,31 +290,10 @@ struct occam_truth_table_bscore
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    truth_output_table target;
-    mutable truth_input_table tti; // mutable due to set_consider_args
+    const truth_table& tt;
     bool occam; // if true the Occam's razor is taken into account
     score_t complexity_coef;
     RandGen& rng;
-};
-
-/** 
- * like occam_truth_bscore but only binds variables that are present
- * in the candidate. This optimization is useful when the candidates
- * tend to be short, and both the number of inputs and the number of
- * samples are very large.
- */
-struct occam_truth_table_bscore_opt_binding : public occam_truth_table_bscore {
-    occam_truth_table_bscore_opt_binding(const truth_output_table& t,
-                                         const truth_input_table& i,
-                                         float p,
-                                         float alphabet_size,
-                                         RandGen& _rng) :
-        occam_truth_table_bscore(t, i, p, alphabet_size, _rng) {}
-
-    behavioral_score operator()(const combo_tree& tr) const {
-        tti.set_consider_args(argument_set(tr)); // to speed up binding
-        return occam_truth_table_bscore::operator()(tr);
-    }
 };
 
 /**

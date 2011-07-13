@@ -112,13 +112,9 @@ int main(int argc,char** argv) {
     type_node data_type = inferDataType(pa.input_table_file);
 
     if(data_type == id::boolean_type) {
-        typedef truth_input_table IT;
-        typedef truth_output_table OT;
-        read_eval_output_results<IT, OT, bool>(pa, rng);
+        read_eval_output_results<truth_table>(pa, rng);
     } else if(data_type == id::contin_type) {
-        typedef contin_input_table IT;
-        typedef contin_output_table OT;
-        read_eval_output_results<IT, OT, contin_t>(pa, rng);
+        read_eval_output_results<contin_table>(pa, rng);
     }
 
 }

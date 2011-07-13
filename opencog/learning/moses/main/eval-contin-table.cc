@@ -77,8 +77,7 @@ int main(int argc,char** argv) {
     // read input_table_file file
     contin_input_table it;
     contin_output_table ct;
-    istreamTable<contin_input_table,
-                 contin_output_table, contin_t>(input_table_file, it, ct);
+    istreamTable(input_table_file, it, ct);
     size_t arity = it.get_arity();
 
     // read combo program

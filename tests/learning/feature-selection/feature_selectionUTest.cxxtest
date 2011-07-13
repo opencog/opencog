@@ -37,27 +37,21 @@ using namespace std;
 using namespace boost::assign;
 
 class feature_selectionUTest : public CxxTest::TestSuite {
-    truth_input_table input_table;
-    truth_output_table output_table;
+    truth_table table;
 
 public:
-    typedef MutualInformation<truth_input_table, truth_output_table, 
+    typedef MutualInformation<truth_table::InputTable,
+                              truth_table::OutputTable, 
                               set<arity_t> > FeatureScorer;
 
 
-    feature_selectionUTest() {
-        // load dataset
-        string filename(FEATURE_SELECTION_TEST_DIR"dataset");
-        istreamTable<truth_input_table, truth_output_table, bool>(filename,
-                                                                  input_table,
-                                                                  output_table);
-    }
+    feature_selectionUTest() : table(FEATURE_SELECTION_TEST_DIR"dataset") {}
 
     void test_incremental_selection() {
-        FeatureScorer fs(input_table, output_table);
+        FeatureScorer fs(table.input, table.output);
         set<arity_t> selected_features = 
-            incremental_selection(input_table.get_considered_args_from_zero(), fs,
-                                  0.1, 1, false);
+            incremental_selection(table.input.get_considered_args_from_zero(),
+                                  fs, 0.1, 1, false);
 
         ostreamContainer(cout, selected_features);
         cout << endl;
@@ -66,7 +60,7 @@ public:
     }
 
     void test_redundant_features() {
-        FeatureScorer fs(input_table, output_table);
+        FeatureScorer fs(table.input, table.output);
         set<arity_t> features = list_of(3)(4)(10)(17);
         set<arity_t> redundant = redundant_features(features, fs, 0.001);
 
@@ -76,4 +70,3 @@ public:
         TS_ASSERT_EQUALS(redundant.size(), 2);        
     }
 };
-

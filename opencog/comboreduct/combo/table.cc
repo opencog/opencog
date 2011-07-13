@@ -83,7 +83,7 @@ contin_input_table::contin_input_table(int sample_count, int arity,
 }
 
 contin_output_table::contin_output_table(const combo_tree& tr, const contin_input_table& cti,
-                           opencog::RandGen& rng)
+                                         opencog::RandGen& rng)
 {
     OC_ASSERT(!tr.empty());
     if(is_ann_type(*tr.begin())) { 

@@ -171,16 +171,14 @@ int main(int argc, char** argv) {
         // read input_data_file file
         truth_input_table it;
         truth_output_table ot;
-        istreamTable<truth_input_table,
-                     truth_output_table, bool>(*in, it, ot);
+        istreamTable(*in, it, ot);
         in->close();
         feature_selection(it, ot, fs_params, rng);
     } else if(inferred_type == id::contin_type) {
         // read input_data_file file
         contin_input_table it;
         contin_output_table ot;
-        istreamTable<contin_input_table,
-                     contin_output_table, combo::contin_t>(*in, it, ot);
+        istreamTable(*in, it, ot);
         in->close();
         feature_selection(it, ot, fs_params, rng);
     } else {

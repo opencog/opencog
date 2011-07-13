@@ -33,12 +33,12 @@ const string olabel = "happiness";
 
 class tableUTest : public CxxTest::TestSuite {
 private:
-    template<typename IT, typename OT, typename T>
+    template<typename IT, typename OT>
     void testIStreamTable(const string& ts, const IT& it, const OT& ot) {
         stringstream ss(ts);
         IT it_test;
         OT ot_test;
-        istreamTable<IT, OT, T>(ss, it_test, ot_test);
+        istreamTable(ss, it_test, ot_test);
         std::cout << "it =" << std::endl;
         std::cout << it << std::endl;
         std::cout << "it_test =" << std::endl;
@@ -57,9 +57,8 @@ public:
         it.push_back(list_of(false)(true));
         bool_vector o = list_of(true)(false);
         truth_output_table ot(o);
-        testIStreamTable<truth_input_table, truth_output_table,
-                         bool>("1,0,1\n"
-                               "0,1,0\n", it, ot);
+        testIStreamTable("1,0,1\n"
+                         "0,1,0\n", it, ot);
     }
     void test_ContinTable() {
         contin_input_table it;
@@ -67,9 +66,8 @@ public:
         it.push_back(list_of(9.5)(4.2));
         contin_vector o = list_of(10.1)(6.5);
         contin_output_table ot(o);
-        testIStreamTable<contin_input_table, contin_output_table,
-                         contin_t>("0.4,244.2,10.1\n"
-                                   "9.5,4.2,6.5\n", it, ot);
+        testIStreamTable("0.4,244.2,10.1\n"
+                         "9.5,4.2,6.5\n", it, ot);
     }
     void test_ContinTableLabels() {
         contin_input_table it;
@@ -79,10 +77,9 @@ public:
         it.set_labels(il);
         contin_vector o = list_of(10.1)(6.5);
         contin_output_table ot(o, olabel);
-        testIStreamTable<contin_input_table, contin_output_table,
-                         contin_t>("price,temperature,happiness\n"
-                                   "0.4,244.2,10.1\n"
-                                   "9.5,4.2,6.5\n", it, ot);
+        testIStreamTable("price,temperature,happiness\n"
+                         "0.4,244.2,10.1\n"
+                         "9.5,4.2,6.5\n", it, ot);
     }
     void test_ostreamTrueTable() {
         truth_input_table it;

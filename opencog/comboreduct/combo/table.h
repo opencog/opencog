@@ -41,6 +41,228 @@ namespace opencog { namespace combo {
 
 using boost::variant;
 
+//////////////////
+// istreamTable //
+//////////////////
+
+/**
+ * remove the carriage return (for DOS format)
+ */
+void removeCarriageReturn(std::string& str);
+
+/**
+ * remove non ASCII char at the begining of the string
+ */
+void removeNonASCII(std::string& str);
+
+/**
+ * Return true if the next chars in 'in' correspond to carriage return
+ * (support UNIX and DOS format) and advance in of the checked chars.
+ */
+bool checkCarriageReturn(std::istream& in);
+ 
+/**
+ * Return the arity of the table provided in istream (by counting the
+ * number of elements of the first line).
+ */
+arity_t istreamArity(std::istream& in);
+/**
+ * Helper, like above but given the file name instead of istream
+ */
+arity_t dataFileArity(const std::string& dataFileName);
+
+/**
+ * Infer the type of elements of the data file
+ */
+type_node inferDataType(const std::string& dataFileName);
+
+/**
+ * take a line and return a vector containing the elements parsed.
+ * Used by istreamTable. Please note that it may modify line to be
+ * Unix compatible.
+ */
+template<typename T>
+std::vector<T> tokenizeRow(std::string& line) {
+    //typedef boost::escaped_list_separator<char> seperator;
+    typedef boost::char_separator<char> seperator;
+    typedef boost::tokenizer<seperator> tokenizer;
+    typedef tokenizer::const_iterator tokenizer_cit;
+
+    // remove weird symbols at the start of the line and carriage
+    // return symbol (for DOS files)
+    removeNonASCII(line);
+    removeCarriageReturn(line);
+
+    // tokenize line
+    // static const seperator sep("\\", ","/*" \t"*/, "\"");
+    static const seperator sep(", \t");
+    tokenizer tok(line, sep);
+    std::vector<T> res;
+    foreach(const std::string& t, tok)
+        res.push_back(boost::lexical_cast<T>(t));
+    return res;
+}
+// Like above but split the result into an vector (the inputs) and an
+// element (the output)
+template<typename T>
+std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line) {
+    std::vector<T> inputs = tokenizeRow<T>(line);
+    T output = inputs.back();
+    inputs.pop_back();
+    return std::make_pair(inputs, output);
+}
+
+/**
+ * template to fill an input table (IT) and output table (OT) of type
+ * T, given a DSV (delimiter-seperated values) file format, where
+ * delimiters are ',', ' ' or '\t'.
+ * 
+ * It is assumed that each row have the same number of columns, if not
+ * an assert is raised.
+ *
+ * If the table has no header then it uses "v1" to "vn" as input
+ * labels, where n is the number of inputs, and "output" as output
+ * label.
+ */
+template<typename IT, typename OT>
+std::istream& istreamTable(std::istream& in, IT& input_table, OT& output_table) {
+    typedef typename OT::value_type T;
+    std::string line;
+
+    ///////////////////////////////////////////////////
+    // first row, check if they are labels or values //
+    ///////////////////////////////////////////////////
+    getline(in, line);    
+    std::pair<std::vector<std::string>, std::string> ioh = tokenizeRowIO<std::string>(line);
+    try { // try to interpret then as values
+        std::vector<T> inputs;
+        T output;
+        foreach(std::string& s, ioh.first)
+            inputs.push_back(boost::lexical_cast<T>(s));
+        output = boost::lexical_cast<T>(ioh.second);
+        // they are values so we add them
+        input_table.push_back(inputs);
+        output_table.push_back(output);
+        // // set the input labels as i1, ..., in, where n is the number
+        // // of inputs, and the output label as output
+        // std::vector<std::string> ilabels;
+        // for(unsigned i = 1; i < inputs.size(); i++) {
+        //     std::string label("v");
+        //     label += boost::lexical_cast<std::string>(i);
+        //     ilabels.push_back(label);
+        // }
+        // input_table.set_labels(ilabels);
+        // output_table.set_label("output");
+    } catch (boost::bad_lexical_cast &) { // not interpretable, they
+                                          // must be labels
+        input_table.set_labels(ioh.first);
+        output_table.set_label(ioh.second);
+    }
+    arity_t arity = ioh.first.size();
+    
+    //////////////////////////////////////////
+    // next rows, we assume they are values //
+    //////////////////////////////////////////
+    while (getline(in, line)) {
+        // tokenize the line and fill the input vector and output
+        std::pair<std::vector<T>, T> io = tokenizeRowIO<T>(line);
+        
+        // check arity
+        OC_ASSERT(arity == (arity_t)io.first.size(),
+                  "The row %u has %u columns while the first row has %d"
+                  " columns, all rows should have the same number of"
+                  " columns", output_table.size(), io.first.size(), arity);
+        
+        // fill table
+        input_table.push_back(io.first);
+        output_table.push_back(io.second);
+    }
+    return in;
+}
+/**
+ * like above but take an string (file name) instead of istream. If
+ * the file name is not correct then an OC_ASSERT is raised.
+ */
+template<typename IT, typename OT>
+void istreamTable(const std::string& file_name,
+                  IT& input_table, OT& output_table) {
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    std::ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+    istreamTable(in, input_table, output_table);
+}
+
+//////////////////
+// ostreamTable //
+//////////////////
+
+// output the header of a data table in CSV format, note that ignored
+// arguments are not printed
+template<typename IT, typename OT>
+std::ostream& ostreamTableHeader(std::ostream& out, const IT& it, const OT& ot) {
+    // print labels
+    if(!it.get_labels().empty() && !ot.get_label().empty()) {
+        ostreamContainer(out, it.get_considered_labels(), ",", "", ",");
+        out << ot.get_label() << std::endl;
+    }
+    return out;
+}
+
+// output a data table in CSV format, note that ignored arguments are
+// not printed
+template<typename IT, typename OT>
+std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
+    // print header
+    ostreamTableHeader(out, it, ot);
+    // print data
+    OC_ASSERT(it.size() == ot.size());
+    for(size_t row = 0; row < it.size(); ++row) {
+        foreach(size_t col, it.get_considered_args_from_zero())
+            out << it[row][col] << ",";
+        out << ot[row] << std::endl;
+    }
+    return out;
+}
+
+// like above but takes the file name where to write the table
+template<typename IT, typename OT>
+void ostreamTable(const std::string& file_name, const IT& it, const OT& ot) {
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    std::ofstream out(file_name.c_str());
+    OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
+    ostreamTable(out, it, ot);
+}
+
+/**
+ * template to subsample input and output tables, after subsampling
+ * the table have size min(nsamples, *table.size())
+ */
+template<typename IT, typename OT>
+void subsampleTable(IT& it, OT& ot, unsigned int nsamples, RandGen& rng) {
+    OC_ASSERT(it.size() == ot.size());
+    if(nsamples < ot.size()) {
+        unsigned int nremove = ot.size() - nsamples;
+        dorepeat(nremove) {
+            unsigned int ridx = rng.randint(ot.size());
+            it.erase(it.begin()+ridx);
+            ot.erase(ot.begin()+ridx);
+        }
+    }
+}
+/**
+ * like above but subsample only the input table
+ */
+template<typename IT>
+void subsampleTable(IT& input_table, unsigned int nsamples, RandGen& rng) {
+    if(nsamples < input_table.size()) {
+        unsigned int nremove = input_table.size() - nsamples;
+        dorepeat(nremove) {
+            unsigned int ridx = rng.randint(input_table.size());
+            input_table.erase(input_table.begin()+ridx);
+        }
+    }
+}
+
 ///////////////////
 // Generic table //
 ///////////////////
@@ -209,6 +431,7 @@ template<typename T>
 class output_table : public std::vector<T> {
     typedef std::vector<T> super;
 public:
+    typedef T value_type;
 
     output_table(const std::string& ol = default_output_label)
         : label(ol) {}
@@ -227,6 +450,23 @@ public:
     }
 private:
     std::string label; // output label
+};
+
+template<typename IT, typename OT>
+struct table {
+    typedef IT InputTable;
+    typedef OT OutputTable;
+    typedef typename OT::value_type value_type;
+
+    table() {}
+    table(std::istream& in) {
+        istreamTable(in, input, output);
+    }
+    table(const std::string& file_name) {
+        istreamTable(file_name, input, output);
+    }
+    IT input;
+    OT output;
 };
 
 /////////////////
@@ -357,6 +597,11 @@ struct truth_output_table : public output_table<bool> {
     
 };
 
+struct truth_table : public table<truth_input_table, truth_output_table> {
+    typedef table<truth_input_table, truth_output_table> super;
+    truth_table(std::istream& in) : super(in) {}
+    truth_table(const std::string& file_name) : super(file_name) {}
+};
 
 //////////////////
 // contin table //
@@ -392,14 +637,14 @@ public:
 class contin_output_table : public output_table<contin_t>   //a column of results
 {
 public:
-    //typedef contin_vector super;
+    typedef output_table<contin_t> super;
 
     //constructors
     contin_output_table(const std::string& ol = default_output_label)
-        : output_table<contin_t>(ol) {}
+        : super(ol) {}
     contin_output_table(const contin_vector& cv,
-                 std::string ol = default_output_label) 
-        : output_table<contin_t>(cv, ol) {}
+                        std::string ol = default_output_label) 
+        : super(cv, ol) {}
     contin_output_table(const combo_tree& tr, const contin_input_table& cti,
                  RandGen& rng);
     template<typename Func>
@@ -423,6 +668,11 @@ public:
     contin_t root_mean_square_error(const contin_output_table& other) const;
 };
 
+struct contin_table : public table<contin_input_table, contin_output_table> {
+    typedef table<contin_input_table, contin_output_table> super;
+    contin_table(std::istream& in) : super(in) {}
+    contin_table(const std::string& file_name) : super(file_name) {}
+};
 
 /////////////////
 // Mixed table //
@@ -686,228 +936,6 @@ public:
         return !operator==(mat);
     }
 };
-
-//////////////////
-// istreamTable //
-//////////////////
-
-/**
- * remove the carriage return (for DOS format)
- */
-void removeCarriageReturn(std::string& str);
-
-/**
- * remove non ASCII char at the begining of the string
- */
-void removeNonASCII(std::string& str);
-
-/**
- * Return true if the next chars in 'in' correspond to carriage return
- * (support UNIX and DOS format) and advance in of the checked chars.
- */
-bool checkCarriageReturn(std::istream& in);
- 
-/**
- * Return the arity of the table provided in istream (by counting the
- * number of elements of the first line).
- */
-arity_t istreamArity(std::istream& in);
-/**
- * Helper, like above but given the file name instead of istream
- */
-arity_t dataFileArity(const std::string& dataFileName);
-
-/**
- * Infer the type of elements of the data file
- */
-type_node inferDataType(const std::string& dataFileName);
-
-/**
- * take a line and return a vector containing the elements parsed.
- * Used by istreamTable. Please note that it may modify line to be
- * Unix compatible.
- */
-template<typename T>
-std::vector<T> tokenizeRow(std::string& line) {
-    //typedef boost::escaped_list_separator<char> seperator;
-    typedef boost::char_separator<char> seperator;
-    typedef boost::tokenizer<seperator> tokenizer;
-    typedef tokenizer::const_iterator tokenizer_cit;
-
-    // remove weird symbols at the start of the line and carriage
-    // return symbol (for DOS files)
-    removeNonASCII(line);
-    removeCarriageReturn(line);
-
-    // tokenize line
-    // static const seperator sep("\\", ","/*" \t"*/, "\"");
-    static const seperator sep(", \t");
-    tokenizer tok(line, sep);
-    std::vector<T> res;
-    foreach(const std::string& t, tok)
-        res.push_back(boost::lexical_cast<T>(t));
-    return res;
-}
-// Like above but split the result into an vector (the inputs) and an
-// element (the output)
-template<typename T>
-std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line) {
-    std::vector<T> inputs = tokenizeRow<T>(line);
-    T output = inputs.back();
-    inputs.pop_back();
-    return std::make_pair(inputs, output);
-}
-
-/**
- * template to fill an input table (IT) and output table (OT) of type
- * T, given a DSV (delimiter-seperated values) file format, where
- * delimiters are ',', ' ' or '\t'.
- * 
- * It is assumed that each row have the same number of columns, if not
- * an assert is raised.
- *
- * If the table has no header then it uses "v1" to "vn" as input
- * labels, where n is the number of inputs, and "output" as output
- * label.
- */
-template<typename IT, typename OT, typename T>
-std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
-    std::string line;
-
-    ///////////////////////////////////////////////////
-    // first row, check if they are labels or values //
-    ///////////////////////////////////////////////////
-    getline(in, line);    
-    std::pair<std::vector<std::string>, std::string> ioh = tokenizeRowIO<std::string>(line);
-    try { // try to interpret then as values
-        std::vector<T> inputs;
-        T output;
-        foreach(std::string& s, ioh.first)
-            inputs.push_back(boost::lexical_cast<T>(s));
-        output = boost::lexical_cast<T>(ioh.second);
-        // they are values so we add them
-        table_inputs.push_back(inputs);
-        output_table.push_back(output);
-        // // set the input labels as i1, ..., in, where n is the number
-        // // of inputs, and the output label as output
-        // std::vector<std::string> ilabels;
-        // for(unsigned i = 1; i < inputs.size(); i++) {
-        //     std::string label("v");
-        //     label += boost::lexical_cast<std::string>(i);
-        //     ilabels.push_back(label);
-        // }
-        // table_inputs.set_labels(ilabels);
-        // output_table.set_label("output");
-    } catch (boost::bad_lexical_cast &) { // not interpretable, they
-                                          // must be labels
-        table_inputs.set_labels(ioh.first);
-        output_table.set_label(ioh.second);
-    }
-    arity_t arity = ioh.first.size();
-    
-    //////////////////////////////////////////
-    // next rows, we assume they are values //
-    //////////////////////////////////////////
-    while (getline(in, line)) {
-        // tokenize the line and fill the input vector and output
-        std::pair<std::vector<T>, T> io = tokenizeRowIO<T>(line);
-        
-        // check arity
-        OC_ASSERT(arity == (arity_t)io.first.size(),
-                  "The row %u has %u columns while the first row has %d"
-                  " columns, all rows should have the same number of"
-                  " columns", output_table.size(), io.first.size(), arity);
-        
-        // fill table
-        table_inputs.push_back(io.first);
-        output_table.push_back(io.second);
-    }
-    return in;
-}
-/**
- * like above but take an string (file name) instead of istream. If
- * the file name is not correct then an OC_ASSERT is raised.
- */
-template<typename IT, typename OT, typename T>
-void istreamTable(const std::string& file_name,
-                  IT& table_inputs, OT& output_table) {
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    std::ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamTable<IT, OT, T>(in, table_inputs, output_table);
-}
-
-//////////////////
-// ostreamTable //
-//////////////////
-
-// output the header of a data table in CSV format, note that ignored
-// arguments are not printed
-template<typename IT, typename OT>
-std::ostream& ostreamTableHeader(std::ostream& out, const IT& it, const OT& ot) {
-    // print labels
-    if(!it.get_labels().empty() && !ot.get_label().empty()) {
-        ostreamContainer(out, it.get_considered_labels(), ",", "", ",");
-        out << ot.get_label() << std::endl;
-    }
-    return out;
-}
-
-// output a data table in CSV format, note that ignored arguments are
-// not printed
-template<typename IT, typename OT>
-std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
-    // print header
-    ostreamTableHeader(out, it, ot);
-    // print data
-    OC_ASSERT(it.size() == ot.size());
-    for(size_t row = 0; row < it.size(); ++row) {
-        foreach(size_t col, it.get_considered_args_from_zero())
-            out << it[row][col] << ",";
-        out << ot[row] << std::endl;
-    }
-    return out;
-}
-
-// like above but takes the file name where to write the table
-template<typename IT, typename OT>
-void ostreamTable(const std::string& file_name, const IT& it, const OT& ot) {
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    std::ofstream out(file_name.c_str());
-    OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
-    ostreamTable(out, it, ot);
-}
-
-/**
- * template to subsample input and output tables, after subsampling
- * the table have size min(nsamples, *table.size())
- */
-template<typename IT, typename OT>
-void subsampleTable(IT& input_table, OT& output_table,
-                    unsigned int nsamples, RandGen& rng) {
-    OC_ASSERT(input_table.size() == output_table.size());
-    if(nsamples < output_table.size()) {
-        unsigned int nremove = output_table.size() - nsamples;
-        dorepeat(nremove) {
-            unsigned int ridx = rng.randint(output_table.size());
-            input_table.erase(input_table.begin()+ridx);
-            output_table.erase(output_table.begin()+ridx);
-        }
-    }
-}
-/**
- * like above but subsample only the input table
- */
-template<typename IT>
-void subsampleTable(IT& table_inputs, unsigned int nsamples, RandGen& rng) {
-    if(nsamples < table_inputs.size()) {
-        unsigned int nremove = table_inputs.size() - nsamples;
-        dorepeat(nremove) {
-            unsigned int ridx = rng.randint(table_inputs.size());
-            table_inputs.erase(table_inputs.begin()+ridx);
-        }
-    }
-}
 
 /**
  * if the data file has a first row with labels
