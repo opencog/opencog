@@ -132,9 +132,16 @@ FeatureSet adaptive_incremental_selection(const FeatureSet& features,
                                           double min = 0, double max = 1,
                                           double epsilon = 0.01) {
     double mean = (min+max)/2;
+    // Logger
+    logger().debug("Call adaptive_incremental_selection with threshold %f",
+                   mean);
+    // ~Logger
     FeatureSet res = incremental_selection(features, scorer, mean,
                                            max_interaction_terms, red_threshold);
     unsigned rsize = res.size();
+    // Logger
+    logger().debug("Selected %d features", rsize);
+    // ~Logger
     if(isWithin(min, max, epsilon) || rsize == features_size_target)
         return res;
     else {
@@ -142,7 +149,8 @@ FeatureSet adaptive_incremental_selection(const FeatureSet& features,
         double nmax = rsize < features_size_target? mean : max;
         return adaptive_incremental_selection(features, scorer,
                                               features_size_target,
-                                              max_interaction_terms, red_threshold,
+                                              max_interaction_terms,
+                                              red_threshold,
                                               nmin, nmax, epsilon);
     }
 }

@@ -278,7 +278,7 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
  */
 template<typename It> double entropy(It from, It to) {
     double res = 0;
-    for(; from != to; from++)
+    for(; from != to; ++from)
         res += weightInformation(*from);
     return res;
 }
@@ -297,7 +297,7 @@ double OTEntropy(const OT& ot) {
     typedef std::map<EntryT, unsigned int> entryCount;
     entryCount oc;
     foreach(const EntryT& y, ot)
-        oc[y]++;
+        ++oc[y];
     // Compute the probability distributions
     double total = ot.size();
     std::vector<double> py;
@@ -333,14 +333,14 @@ double mutualInformation(const IT& it, const OT& ot, const FeatureSet& fs) {
     double total = ot.size();
     typename IT::const_iterator i_it = it.begin();
     typename OT::const_iterator o_it = ot.begin();
-    for(; i_it != it.end(); i_it++, o_it++) {
+    for(; i_it != it.end(); ++i_it, ++o_it) {
         std::vector<EntryT> ic_vec;
         foreach(const typename FeatureSet::value_type& idx, fs)
             ic_vec.push_back((*i_it)[idx]);
-        ic[ic_vec]++;
+        ++ic[ic_vec];
         std::vector<EntryT> ioc_vec(ic_vec);
         ioc_vec.push_back(*o_it);
-        ioc[ioc_vec]++;
+        ++ioc[ioc_vec];
     }
     // Compute the probability distributions
     std::vector<double> ip, iop;
