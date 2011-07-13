@@ -128,13 +128,14 @@ void occam_contin_bscore::set_complexity_coef(double variance,
 
 behavioral_score occam_truth_table_bscore::operator()(const combo_tree& tr) const
 {
-    truth_output_table ptt(tr, tt.input, rng);
-    behavioral_score bs(tt.output.size() + (occam?1:0));
+    truth_output_table ptt(tr, tt.cinput, rng);
+    behavioral_score bs(tt.coutput.size() + (occam?1:0));
         
     behavioral_score::iterator dst = bs.begin();
-    for(truth_output_table::const_iterator it1 = ptt.begin(), 
-            it2 = tt.output.begin(); it1 != ptt.end(); ++it1, ++it2) {
-        *dst++ = (*it1 == *it2 ? 0.0 : 1.0);
+    truth_output_table::const_iterator it1 = ptt.begin();
+    truth_table::CompressedOutput::const_iterator it2 = tt.coutput.begin();
+    for(; it1 != ptt.end(); ++it1, ++it2) {
+        *dst++ = *it1? it2->first : it2->second;
     }
     // add the Occam's razor feature
     if(occam)

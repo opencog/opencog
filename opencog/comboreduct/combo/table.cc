@@ -66,6 +66,24 @@ truth_output_table::truth_output_table(const combo_tree& tr,
     }
 }
 
+void truth_table::compress() {
+    InputTable::iterator in_it = input.begin();
+    OutputTable::iterator out_it = output.begin();
+    for(; in_it != input.end(); ++in_it, ++out_it) {
+        InputTable::iterator dup_in_it 
+            = std::find(cinput.begin(), cinput.end(), *in_it);
+        if(dup_in_it == cinput.end()) { // not found, push row to
+                                        // cinput and coutput
+            cinput.push_back(*in_it);
+            coutput.push_back(uintpair(*out_it?0:1, *out_it?1:0));
+        } else {            // found, update duplicate's coutput
+            uintpair& p = coutput[std::distance(cinput.begin(), dup_in_it)];
+            p.first += *out_it?0:1;
+            p.second += *out_it?1:0;
+        }
+    }
+}
+
 contin_input_table::contin_input_table(int sample_count, int arity,
                                        opencog::RandGen& rng, 
                                        double max_randvalue,

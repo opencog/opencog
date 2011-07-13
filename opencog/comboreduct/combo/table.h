@@ -599,8 +599,35 @@ struct truth_output_table : public output_table<bool> {
 
 struct truth_table : public table<truth_input_table, truth_output_table> {
     typedef table<truth_input_table, truth_output_table> super;
-    truth_table(std::istream& in) : super(in) {}
-    truth_table(const std::string& file_name) : super(file_name) {}
+    truth_table(std::istream& in) : super(in) {
+        compress();
+    }
+    truth_table(const std::string& file_name) : super(file_name) {
+        compress();
+    }
+
+    truth_input_table cinput;
+    typedef std::pair<unsigned, unsigned> uintpair;
+    typedef std::vector<uintpair> CompressedOutput;
+    CompressedOutput coutput;
+
+private:
+    /// this method compresses the input table as follows
+    ///
+    /// i1,i2,o
+    /// 1,0,1
+    /// 1,1,0
+    /// 1,0,1
+    /// 1,0,0
+    /// =>
+    /// i1,i2,o
+    /// 1,0,(1,2)
+    /// 1,1,(1,0)
+    ///
+    /// that is the duplicated inputs are removed and the output is
+    /// replaced by a counter of the false ones and the true ones
+    /// respectively. The results are stored in cinput and coutput.
+    void compress();
 };
 
 //////////////////
