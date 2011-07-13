@@ -4,15 +4,11 @@ INCLUDE_DIRECTORIES(
 
 IF(HAVE_CYTHON AND PYTHONINTERP_FOUND)
     IF (NOSETESTS_EXECUTABLE)
-        ADD_TEST(CythonAtomSpace ${NOSETESTS_EXECUTABLE} -vs
-            ${CMAKE_SOURCE_DIR}/tests/cython/test_atomspace.py)
-        SET_TESTS_PROPERTIES(CythonAtomSpace
-            PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+        ADD_TEST(Cython ${NOSETESTS_EXECUTABLE} -vs
+            ${CMAKE_SOURCE_DIR}/tests/cython/)
+        SET_TESTS_PROPERTIES(Cython
+            PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/agents")
 
-        ADD_TEST(CythonAgentFinder ${NOSETESTS_EXECUTABLE} -vs
-            ${CMAKE_SOURCE_DIR}/tests/cython/test_agent_finder.py)
-        SET_TESTS_PROPERTIES(CythonAgentFinder 
-            PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
     ELSE (NOSETESTS_EXECUTABLE)
         MESSAGE(WARNING "Nosetests executable for testing Python bindings not found. Install with \"sudo easy_install nose\".")
     ENDIF (NOSETESTS_EXECUTABLE)
