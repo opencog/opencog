@@ -276,21 +276,16 @@ struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
  * |M|*log|A|/log(p/(1-p)) - |D1|
  * with p<0.5 and |D1| the number of outputs that match
  */
-struct occam_truth_table_bscore 
+struct occam_ctruth_table_bscore 
     : public unary_function<combo_tree, behavioral_score> {
-    occam_truth_table_bscore(const truth_table& _tt,
-                             float p,
-                             float alphabet_size,
-                             RandGen& _rng) 
-        : tt(_tt), rng(_rng) {
-        occam = p > 0 && p < 0.5;
-        if(occam)
-            complexity_coef = - log((double)alphabet_size) / log(p/(1-p));
-    }
+    occam_ctruth_table_bscore(const ctruth_table& _ctt,
+                              float p,
+                              float alphabet_size,
+                              RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    const truth_table& tt;
+    const ctruth_table& ctt;
     bool occam; // if true the Occam's razor is taken into account
     score_t complexity_coef;
     RandGen& rng;

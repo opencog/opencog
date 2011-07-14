@@ -56,8 +56,8 @@ bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
 }
 
 truth_output_table::truth_output_table(const combo_tree& tr,
-                                         const truth_input_table& tti,
-                                         opencog::RandGen& rng) {
+                                       const truth_input_table& tti,
+                                       opencog::RandGen& rng) {
     for(bm_cit i = tti.begin(); i != tti.end(); ++i) {
         tti.set_binding(*i);
         vertex res = eval_throws(rng, tr);
@@ -66,22 +66,43 @@ truth_output_table::truth_output_table(const combo_tree& tr,
     }
 }
 
-void truth_table::compress() {
+truth_output_table::truth_output_table(const combo_tree& tr,
+                                       const ctruth_table& ctt,
+                                       opencog::RandGen& rng) {
+    for(ctruth_table::const_iterator i = ctt.begin();
+        i != ctt.end(); ++i) {
+        ctt.set_binding(i->first);
+        vertex res = eval_throws(rng, tr);
+        OC_ASSERT(is_boolean(res), "res must be boolean");
+        push_back(vertex_to_bool(res));
+    }
+}
+
+ctruth_table truth_table::compress() {
+
+    // Logger
+    logger().debug("Compress the dataset, current size is %d", input.size());
+    // ~Logger
+
+    ctruth_table res;
+
     InputTable::iterator in_it = input.begin();
     OutputTable::iterator out_it = output.begin();
     for(; in_it != input.end(); ++in_it, ++out_it) {
-        InputTable::iterator dup_in_it 
-            = std::find(cinput.begin(), cinput.end(), *in_it);
-        if(dup_in_it == cinput.end()) { // not found, push row to
-                                        // cinput and coutput
-            cinput.push_back(*in_it);
-            coutput.push_back(uintpair(*out_it?0:1, *out_it?1:0));
-        } else {            // found, update duplicate's coutput
-            uintpair& p = coutput[std::distance(cinput.begin(), dup_in_it)];
-            p.first += *out_it?0:1;
-            p.second += *out_it?1:0;
+        ctruth_table::iterator dup_in_it = res.find(*in_it);
+        if(dup_in_it == res.end())
+            res[*in_it] = std::make_pair(*out_it?0:1, *out_it?1:0);
+        else {            // found, update duplicate's the output
+            dup_in_it->second.first += *out_it?0:1;
+            dup_in_it->second.second += *out_it?1:0;
         }
     }
+
+    // Logger
+    logger().debug("Size of the compressed dataset is %d", res.size());
+    // ~Logger
+
+    return res;
 }
 
 contin_input_table::contin_input_table(int sample_count, int arity,

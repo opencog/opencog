@@ -488,12 +488,13 @@ int moses_exec(int argc, char** argv) {
             table.input.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(table.input, table.output, nsamples, rng);
+            ctruth_table ctable = table.compress();
 
             type_tree tt = declare_function(output_type, arity);
 
             int as = alphabet_size(tt, ignore_ops);
 
-            occam_truth_table_bscore bscore(table, prob, as, rng);
+            occam_ctruth_table_bscore bscore(ctable, prob, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   logical_reduction(reduct_candidate_effort),
                                   logical_reduction(reduct_knob_building_effort),

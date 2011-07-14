@@ -583,6 +583,32 @@ public:
     }
 };
 
+/// Struct to contain a compressed truth table, for instance if
+/// the following truth table is:
+///
+/// i1,i2,o
+/// 1,0,1
+/// 1,1,0
+/// 1,0,1
+/// 1,0,0
+///
+/// the compressed truth table is
+///
+/// i1,i2,o
+/// 1,0,(1,2)
+/// 1,1,(1,0)
+///
+/// that is the duplicated inputs are removed and the output is
+/// replaced by a counter of the false ones and the true ones
+/// respectively.
+struct ctruth_table : public std::map<std::vector<bool>, std::pair<unsigned, unsigned> > {
+    void set_binding(const std::vector<bool>& args) const {
+        for(size_t i = 0; i < size(); ++i) {
+            binding(i+1) = bool_to_vertex(args[i]);
+        }
+    }
+};
+
 /**
  * truth_output_table, column of result of a corresponding truth_input_table
  */
@@ -592,42 +618,22 @@ struct truth_output_table : public output_table<bool> {
     truth_output_table(const bool_vector& bv,
                         std::string ol = default_output_label)
         : output_table<bool>(bv, ol) {}
-    truth_output_table(const combo_tree& tr, const truth_input_table& tti,
-                        RandGen& rng);
+    truth_output_table(const combo_tree& tr,
+                       const truth_input_table& tti,
+                       RandGen& rng);
+    truth_output_table(const combo_tree& tr,
+                       const ctruth_table& ctt,
+                       RandGen& rng);
     
 };
 
 struct truth_table : public table<truth_input_table, truth_output_table> {
     typedef table<truth_input_table, truth_output_table> super;
-    truth_table(std::istream& in) : super(in) {
-        compress();
-    }
-    truth_table(const std::string& file_name) : super(file_name) {
-        compress();
-    }
+    truth_table(std::istream& in) : super(in) {}
+    truth_table(const std::string& file_name) : super(file_name) {}
 
-    truth_input_table cinput;
-    typedef std::pair<unsigned, unsigned> uintpair;
-    typedef std::vector<uintpair> CompressedOutput;
-    CompressedOutput coutput;
-
-private:
-    /// this method compresses the input table as follows
-    ///
-    /// i1,i2,o
-    /// 1,0,1
-    /// 1,1,0
-    /// 1,0,1
-    /// 1,0,0
-    /// =>
-    /// i1,i2,o
-    /// 1,0,(1,2)
-    /// 1,1,(1,0)
-    ///
-    /// that is the duplicated inputs are removed and the output is
-    /// replaced by a counter of the false ones and the true ones
-    /// respectively. The results are stored in cinput and coutput.
-    void compress();
+    /// return the corresponding compressed truth table 
+    ctruth_table compress();
 };
 
 //////////////////

@@ -126,16 +126,26 @@ void occam_contin_bscore::set_complexity_coef(double variance,
         complexity_coef = log((double)alphabet_size) * 2 * variance;
 }
 
-behavioral_score occam_truth_table_bscore::operator()(const combo_tree& tr) const
+occam_ctruth_table_bscore::occam_ctruth_table_bscore(const ctruth_table& _ctt,
+                                                     float p,
+                                                     float alphabet_size,
+                                                     RandGen& _rng) 
+    : ctt(_ctt), rng(_rng) {
+    occam = p > 0 && p < 0.5;
+    if(occam)
+        complexity_coef = - log((double)alphabet_size) / log(p/(1-p));
+}
+
+behavioral_score occam_ctruth_table_bscore::operator()(const combo_tree& tr) const
 {
-    truth_output_table ptt(tr, tt.cinput, rng);
-    behavioral_score bs(tt.coutput.size() + (occam?1:0));
+    truth_output_table ptt(tr, ctt, rng);
+    behavioral_score bs(ctt.size() + (occam?1:0));
         
     behavioral_score::iterator dst = bs.begin();
     truth_output_table::const_iterator it1 = ptt.begin();
-    truth_table::CompressedOutput::const_iterator it2 = tt.coutput.begin();
+    ctruth_table::const_iterator it2 = ctt.begin();
     for(; it1 != ptt.end(); ++it1, ++it2) {
-        *dst++ = *it1? it2->first : it2->second;
+        *dst++ = *it1? it2->second.first : it2->second.second;
     }
     // add the Occam's razor feature
     if(occam)
