@@ -233,33 +233,13 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     behavioral_score operator()(const combo_tree& tr) const;
 
     contin_output_table target;
-    mutable contin_input_table cti; // mutable due to set_consider_args
+    contin_input_table cti;
     bool occam;
     score_t complexity_coef;
     RandGen& rng;
 
 private:
     void set_complexity_coef(double variance, double alphabet_size);
-};
-
-/** 
- * like occam_contin_bscore but only binds variables that are present
- * in the candidate. This optimization is useful when the candidates
- * tend to be short, and both the number of inputs and the number of
- * samples are very large.
- */
-struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
-    occam_contin_bscore_opt_binding(const contin_output_table& t,
-                                    const contin_input_table& r,
-                                    float variance,
-                                    float alphabet_size,
-                                    RandGen& _rng) :
-        occam_contin_bscore(t, r, variance, alphabet_size, _rng) {}
-
-    behavioral_score operator()(const combo_tree& tr) const {
-        cti.set_consider_args(argument_set(tr)); // to speed up binding
-        return occam_contin_bscore::operator()(tr);
-    }
 };
 
 /**

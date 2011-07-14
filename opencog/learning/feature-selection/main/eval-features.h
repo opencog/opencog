@@ -141,9 +141,6 @@ void eval_output_results(const eval_features_parameters& pa,
     } else {
         foreach(const combo_tree& tr, trs) {
             // evaluated tr over input table
-            it.set_consider_args(argument_set(tr)); // to speed up
-                                                    // ot_tr
-                                                    // computation
             OT ot_tr(tr, it, rng);
             ot_tr.set_label(ot.get_label());
 

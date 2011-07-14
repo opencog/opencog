@@ -485,7 +485,6 @@ int moses_exec(int argc, char** argv) {
         if(output_type == id::boolean_type) {
             // read input_data_file file
             truth_table table(*in);
-            table.input.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(table.input, table.output, nsamples, rng);
             ctruth_table ctable = table.compress();
@@ -507,7 +506,6 @@ int moses_exec(int argc, char** argv) {
             contin_input_table it;
             contin_output_table ot;
             istreamTable(*in, it, ot);
-            it.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(it, ot, nsamples, rng);
 
@@ -557,7 +555,6 @@ int moses_exec(int argc, char** argv) {
             
             contin_input_table it(nsamples, arity, rng,
                                   max_rand_input, min_rand_input);
-            it.set_ignore_args(ignore_ops); // to speed up binding
             contin_output_table table_outputs(tr, it, rng);
             
             int as = alphabet_size(tt, ignore_ops);

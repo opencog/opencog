@@ -196,15 +196,11 @@ void istreamTable(const std::string& file_name,
 // ostreamTable //
 //////////////////
 
-// output the header of a data table in CSV format, note that ignored
-// arguments are not printed
+// output the header of a data table in CSV format.
 template<typename IT, typename OT>
 std::ostream& ostreamTableHeader(std::ostream& out, const IT& it, const OT& ot) {
-    // print labels
-    if(!it.get_labels().empty() && !ot.get_label().empty()) {
-        ostreamContainer(out, it.get_considered_labels(), ",", "", ",");
-        out << ot.get_label() << std::endl;
-    }
+    ostreamContainer(out, it.get_labels(), ",", "", ",");
+    out << ot.get_label() << std::endl;
     return out;
 }
 
@@ -217,7 +213,7 @@ std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
     // print data
     OC_ASSERT(it.size() == ot.size());
     for(size_t row = 0; row < it.size(); ++row) {
-        foreach(size_t col, it.get_considered_args_from_zero())
+        for(arity_t col = 0; col < it.get_arity(); col++)
             out << it[row][col] << ",";
         out << ot[row] << std::endl;
     }
@@ -267,159 +263,76 @@ void subsampleTable(IT& input_table, unsigned int nsamples, RandGen& rng) {
 // Generic table //
 ///////////////////
 
+static const std::string default_input_label("i");
+
 /**
  * Matrix of type T.
  * Rows represent samples.
  * Columns represent input variables
  * Optionally a list of labels (input variable names)
- *
- * It contains additional methods to ignore some variables, this is
- * done only for speeding up evaluation of data fitting objective
- * functions when variables in the function to evaluate are
- * scarce. The gain is noticable but not tremendous (if I remember no
- * more 10% depending on the case). If it's too ugly and constraining
- * to maintain I don't think it would be a big loss to remove that
- * optimization. Of course in the case where there are millions of
- * columns and only a few variables to evaluate the gain could be
- * tremendous.
  */
 template<typename T>
-class input_table {
+class input_table : public std::vector<std::vector<T> > {
+    typedef std::vector<std::vector<T> > super;
 public:
-    typedef std::vector<T> VT;
-    typedef std::vector<VT> MT;
-
     input_table() {}
-
-    input_table(const MT& mt,
+    input_table(const super& mt,
                 std::vector<std::string> il = std::vector<std::string>())
-        : labels(il) {
-        foreach(std::vector<T>& row, mt)
-            push_back(row); // using push_back to update considered_args
+        : super(mt), labels(il) {
     }
-
     // set input labels
     void set_labels(std::vector<std::string> il) {
         labels = il;
     }
-
+    const std::vector<std::string>& get_labels() const {
+        if(labels.empty() and !super::empty()) { // return default labels
+            static const std::vector<std::string> dl(get_default_labels());
+            return dl;
+        } else return labels;
+    }
+    // like get_labels but filter accordingly to a container of arity_t
+    template<typename F>
+    std::vector<std::string> get_filtered_labels(const F& filter) {
+        std::vector<std::string> res;
+        foreach(arity_t a, filter)
+            res.push_back(get_labels()[a]);
+        return res;
+    }
     // set binding prior calling the combo evaluation, ignoring inputs
     // to be ignored
     void set_binding(const std::vector<T>& args) const {
-        foreach(arity_t a, considered_args)
-            binding(a+1) = args[a];
+        for(arity_t i = 0; i < (arity_t)args.size(); ++i)
+            binding(i+1) = args[i];
     }
     arity_t get_arity() const {
-        return matrix.front().size();
+        return super::front().size();
     }
-    // set the inputs to ignore, if all are ignored an assert is
-    // raised. That method resets arguments.
-    void set_ignore_args(const vertex_set& ignore_args) {
-        std::set<arity_t> ii;
-        foreach(const vertex& ia, ignore_args)
-            if(is_argument(ia))
-                ii.insert(get_argument(ia).abs_idx_from_zero());
-        set_ignore_args_from_zero(ii);
-    }
-    // like above but takes a set of indices instead of vertex
-    void set_ignore_args_from_zero(const std::set<arity_t>& ignore_idxs) {
-        considered_args.clear();
-        for(arity_t idx = 0; idx < get_arity(); ++idx)
-            if(ignore_idxs.find(idx) == ignore_idxs.end())
-                considered_args.insert(idx);
-        OC_ASSERT(!considered_args.empty(), "You cannot ignore all arguments");
-    }
-    // set the inputs to consider. That method resets arguments.
-    void set_consider_args(const vertex_set& consider_args) {
-        considered_args.clear();
-        foreach(const vertex& arg, consider_args)
-            considered_args.insert(get_argument(arg).abs_idx_from_zero());
-    }
-    // like above but take the indices of columns instead of arguments
-    void set_consider_args_from_zero(const std::set<arity_t>& consider_idx) {
-        considered_args = consider_idx;
-    }
-
-    vertex_set get_considered_args() {
-        vertex_set res;
-        foreach(arity_t idx, considered_args)
-            res.insert(argument(argument::idx_from_zero_to_idx(idx)));
-        return res;
-    }
-
-    // the reverse of get_considered_args
-    vertex_set get_ignore_args() {
-        vertex_set res;
-        for(arity_t idx = 0; idx < get_arity(); ++idx)
-            if(considered_args.find(idx) == considered_args.end())
-                res.insert(argument(argument::idx_from_zero_to_idx(idx)));
-        return res;
-    }
-
-    // returns the set of column indices corresponding to the
-    // considered arguments
-    const std::set<arity_t>& get_considered_args_from_zero() const {
-        return considered_args;
-    }
-
-    // return a vector containing all considered labels
-    std::vector<std::string> get_considered_labels() const {
-        std::vector<std::string> res;
-        foreach(size_t idx, get_considered_args_from_zero())
-            res.push_back(get_labels()[idx]);
-        return res;
-    }
-
-    // STL
-    typedef typename MT::iterator iterator;
-    typedef typename MT::const_iterator const_iterator;
-    typedef typename MT::size_type size_type;
-    typedef typename MT::value_type value_type;
-    MT& get_matrix() { return matrix;}
-    const MT& get_matrix() const {return matrix;}
-    const std::vector<std::string>& get_labels() const {
-        if(labels.empty() and !empty()) {
-            // return default labels
-            static const std::vector<std::string> default_labels(get_default_labels());
-            return default_labels;
-        } else
-            return labels;
-    }
-    VT& operator[](size_t i) { return get_matrix()[i]; }
-    const VT& operator[](size_t i) const { return get_matrix()[i]; }
-    iterator begin() {return matrix.begin();}
-    iterator end() {return matrix.end();}
-    const_iterator begin() const {return matrix.begin();}
-    const_iterator end() const {return matrix.end();}
     bool operator==(const input_table<T>& rhs) const {
-        return get_matrix() == rhs.get_matrix()
+        return 
+            static_cast<const super&>(*this) == static_cast<const super&>(rhs)
             && get_labels() == rhs.get_labels();
     }
-    bool empty() const {
-        return matrix.empty();
+    /// return a copy of the input table filtered according to a given
+    /// container of arity_t
+    template<typename F>
+    input_table filter(const F& f) {
+        input_table res;
+        res.set_labels(get_filtered_labels(f));
+        foreach(const typename super::value_type& row, *this) {
+            std::vector<T> new_row;
+            foreach(arity_t a, f)
+                new_row.push_back(row[a]);
+            res.push_back(new_row);
+        }
+        return res;
     }
-    
-    // Warning: this method also update considered_args, by assuming
-    // all are considered
-    void push_back(const std::vector<T>& t) {
-        matrix.push_back(t);
-        if(considered_args.empty())
-            considered_args.insert(boost::counting_iterator<arity_t>(0),
-                                   boost::counting_iterator<arity_t>(get_arity()));
-    }
-    size_type size() const {return matrix.size();}
-    iterator erase(iterator it) {return matrix.erase(it);}
 protected:
-    MT matrix;
     std::vector<std::string> labels; // list of input labels
-    // the set of arguments (represented directly as column indices)
-    // to consider
-    std::set<arity_t> considered_args; 
 private:
     std::vector<std::string> get_default_labels() const {
         std::vector<std::string> res;
         for(arity_t i = 1; i <= get_arity(); ++i)
-            res.push_back(std::string("v")
+            res.push_back(default_input_label 
                           + boost::lexical_cast<std::string>(i));
         return res;
     }
@@ -441,8 +354,6 @@ public:
     void set_label(const std::string& ol) { label = ol; }
     std::string& get_label() { return label; }
     const std::string& get_label() const { return label; }
-
-    // STL
     bool operator==(const output_table<T>& rhs) const {
         return 
             static_cast<const super&>(*this) == static_cast<const super&>(rhs)
@@ -574,12 +485,16 @@ protected:
  * possible vector input
  */
 class truth_input_table : public input_table<bool> {
+    typedef input_table<bool> super;
 public:
+    truth_input_table() {}
+    truth_input_table(const super& it) : super(it) {}
     // set binding prior calling the combo evaluation, ignoring inputs
     // to be ignored
     void set_binding(const std::vector<bool>& args) const {
-        foreach(arity_t a, considered_args)
-            binding(a+1) = bool_to_vertex(args[a]);
+        for(size_t i = 0; i < args.size(); ++i) {
+            binding(i+1) = bool_to_vertex(args[i]);
+        }
     }
 };
 
@@ -603,7 +518,7 @@ public:
 /// respectively.
 struct ctruth_table : public std::map<std::vector<bool>, std::pair<unsigned, unsigned> > {
     void set_binding(const std::vector<bool>& args) const {
-        for(size_t i = 0; i < size(); ++i) {
+        for(size_t i = 0; i < args.size(); ++i) {
             binding(i+1) = bool_to_vertex(args[i]);
         }
     }
@@ -627,8 +542,9 @@ struct truth_output_table : public output_table<bool> {
     
 };
 
-struct truth_table : public table<truth_input_table, truth_output_table> {
+class truth_table : public table<truth_input_table, truth_output_table> {
     typedef table<truth_input_table, truth_output_table> super;
+public:
     truth_table(std::istream& in) : super(in) {}
     truth_table(const std::string& file_name) : super(file_name) {}
 
@@ -654,9 +570,11 @@ typedef contin_matrix::const_iterator const_cm_it;
 */
 class contin_input_table : public input_table<contin_t>
 {
+    typedef input_table<contin_t> super;
 public:
     // constructors
     contin_input_table() {}
+    contin_input_table(const super& it) : super(it) {}
     contin_input_table(int sample_count, int arity, RandGen& rng,
                        double max_randvalue = 1.0, double min_randvalue = -1.0);
 };
@@ -682,7 +600,7 @@ public:
                  RandGen& rng);
     template<typename Func>
     contin_output_table(const Func& f, const contin_input_table& cti) {
-        foreach(const contin_vector& v, cti.get_matrix())
+        foreach(const contin_vector& v, cti)
             push_back(f(v.begin(), v.end()));
     }
 
@@ -979,24 +897,13 @@ std::ifstream* open_data_file(const std::string& fileName);
 
 template<typename T>
 inline std::ostream& operator<<(std::ostream& out,
-                                const std::vector<std::vector<T> >& mt)
+                                const input_table<T>& it)
 {
-    foreach(const std::vector<T>& row, mt) {
+    ostreamContainer(out, it.get_labels(), ",");
+    foreach(const std::vector<T>& row, it) {
         ostreamContainer(out, row, ",");
         out << std::endl;
     }
-    return out;
-}
-
-template<typename T>
-inline std::ostream& operator<<(std::ostream& out,
-                                const input_table<T>& it)
-{
-    if(!it.get_labels().empty()) {
-        ostreamContainer(out, it.get_labels(), ",");
-        out << std::endl;
-    }
-    out << it.get_matrix();
     return out;
 }
 

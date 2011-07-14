@@ -40,6 +40,7 @@ using namespace eda;
 using namespace moses;
 using namespace combo;
 using namespace boost::assign; // bring 'operator+=()' into scope
+using boost::counting_iterator;
 
 // feature selection algorithms
 static const string un="un"; // moses based univariate
@@ -83,12 +84,12 @@ void err_empty_features() {
     exit(1);
 }
 
-template<typename IT>
-void log_selected_features(const IT& it) {
+template<typename C>
+void log_selected_features(const C& fs) {
     // log set of selected feature set
     stringstream ss;
     ss << "The following set of features has been selected: ";
-    ostreamContainer(ss, it.get_considered_labels(), ",");
+    ostreamContainer(ss, fs, ",");
     logger().info(ss.str());
 }
 
@@ -130,10 +131,9 @@ void moses_feature_selection(IT& it, const OT& ot,
     composite_score best_score = *deme.begin_scores();
     // get the best feature set
     std::set<arity_t> best_fs = get_feature_set(fields, best_inst);
-    // set the input table accordingly
-    it.set_consider_args_from_zero(best_fs);
+    IT fit = it.filter(best_fs);
     // Logger
-    log_selected_features(it);
+    log_selected_features(best_fs);
     {
         // log its score
         stringstream ss;
@@ -146,11 +146,8 @@ void moses_feature_selection(IT& it, const OT& ot,
         logger().info("Actual number of evaluations to reach the best feature set: %u", ae);
     }
     // ~Logger
-    // print the filtered table
-    if(fs_params.output_file.empty())
-        ostreamTable(std::cout, it, ot);
-    else
-        ostreamTable(fs_params.output_file, it, ot);
+    // write the filtered table
+    write_results(fit, ot, fs_params);
 }
 
 eda::instance initial_instance(const feature_selection_parameters& fs_params,
@@ -214,12 +211,22 @@ void moses_feature_selection(IT& it, const OT& ot,
 }
 
 template<typename IT, typename OT>
+void write_results(IT& it, OT& ot,
+                   const feature_selection_parameters& fs_params) {
+    if(fs_params.output_file.empty())
+        ostreamTable(std::cout, it, ot);
+    else
+        ostreamTable(fs_params.output_file, it, ot);
+}
+
+template<typename IT, typename OT>
 void incremental_feature_selection(IT& it, const OT& ot,
                                    const feature_selection_parameters& fs_params) {
     if(fs_params.inc_intensity > 0 || fs_params.inc_target_size > 0) {
         typedef MutualInformation<IT, OT, std::set<arity_t> > FeatureScorer;
         FeatureScorer fsc(it, ot);
-        std::set<arity_t> features = it.get_considered_args_from_zero();
+        std::set<arity_t> features(counting_iterator<arity_t>(0),
+                                   counting_iterator<arity_t>(it.get_arity()));
         std::set<arity_t> selected_features = 
             fs_params.inc_target_size > 0?
             cached_adaptive_incremental_selection(features, fsc,
@@ -233,15 +240,13 @@ void incremental_feature_selection(IT& it, const OT& ot,
         if(selected_features.empty()) {
             err_empty_features();
         } else {
-            it.set_consider_args_from_zero(selected_features);
-            log_selected_features(it);
+            log_selected_features(selected_features);
+            IT cit(it.filter(selected_features));
+            write_results(cit, ot, fs_params);
         }
     }
-    // print the filtered table
-    if(fs_params.output_file.empty())
-        ostreamTable(std::cout, it, ot);
-    else
-        ostreamTable(fs_params.output_file, it, ot);
+    // nothing happened, print the initial table
+    write_results(it, ot, fs_params);
 }
 
 template<typename IT, typename OT>

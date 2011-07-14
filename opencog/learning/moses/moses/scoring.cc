@@ -100,7 +100,6 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 {
-    cti.set_consider_args(argument_set(tr)); // to speed up binding
     combo::contin_output_table ct(tr, cti, rng);
     behavioral_score bs(target.size() + (occam?1:0));
         

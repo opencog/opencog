@@ -89,11 +89,12 @@ public:
         it.set_labels(lbs);
         bool_vector o = list_of(true)(false);
         // ignore second argument trac
-        it.set_ignore_args_from_zero(list_of(1));
+        vector<arity_t> args = list_of(0);
+        truth_input_table fit = it.filter(args);
         truth_output_table ot(o);
         ot.set_label("troc");
         stringstream ss;
-        ostreamTable(ss, it, ot);
+        ostreamTable(ss, fit, ot);
         TS_ASSERT_EQUALS(ss.str(), "truc,troc\n1,1\n0,0\n");
     }
 };

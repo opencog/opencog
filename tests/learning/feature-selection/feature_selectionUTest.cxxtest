@@ -35,6 +35,7 @@ using namespace opencog;
 using namespace combo;
 using namespace std;
 using namespace boost::assign;
+using boost::counting_iterator;
 
 class feature_selectionUTest : public CxxTest::TestSuite {
     truth_table table;
@@ -49,9 +50,10 @@ public:
 
     void test_incremental_selection() {
         FeatureScorer fs(table.input, table.output);
+        set<arity_t> features(counting_iterator<arity_t>(0),
+                              counting_iterator<arity_t>(table.input.get_arity()));
         set<arity_t> selected_features = 
-            incremental_selection(table.input.get_considered_args_from_zero(),
-                                  fs, 0.1, 1, false);
+            incremental_selection(features, fs, 0.1, 1, false);
 
         ostreamContainer(cout, selected_features);
         cout << endl;
