@@ -35,6 +35,7 @@ turn_to_face(1) := turn_to_face(#1)
 
 say(2) := say(#1 #2)
 
+grab(1) := grab(#1)
 eat(1) := eat(#1)
 
 go_home(0) := goto_obj(pet_home 2)

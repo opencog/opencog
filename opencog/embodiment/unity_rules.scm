@@ -510,6 +510,7 @@
     (add_rule (stv 1.0 1.0) EnergyDemandGoal 
         (SequentialAndLink
             (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
+            (add_action (GroundedSchemaNode "grab") (VariableNode "$var_food") )
             (add_action (GroundedSchemaNode "eat") (VariableNode "$var_food") )
         )    
         GetFoodGoal
