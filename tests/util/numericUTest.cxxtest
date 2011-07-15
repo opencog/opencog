@@ -20,9 +20,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <opencog/util/numeric.h>
+#include <boost/assign/list_of.hpp>
 
+#include <opencog/util/numeric.h>
+#include <opencog/comboreduct/combo/table.h>
+
+using namespace std;
+using namespace boost::assign;
 using namespace opencog;
+using namespace combo;
 
 class numericUTest : public CxxTest::TestSuite
 {
@@ -35,14 +41,28 @@ public:
         unsigned int res_4 = nbits_to_pack(4);
         unsigned int res_5 = nbits_to_pack(5);
 
-        std::cout << res_1 << " " << res_2 << " " << res_3 << " " 
-                  << res_4 << " " << res_5 << std::endl;
+        cout << res_1 << " " << res_2 << " " << res_3 << " " 
+             << res_4 << " " << res_5 << endl;
 
         TS_ASSERT_EQUALS(res_1, 1);
         TS_ASSERT_EQUALS(res_2, 1);
         TS_ASSERT_EQUALS(res_3, 2);
         TS_ASSERT_EQUALS(res_4, 2);
         TS_ASSERT_EQUALS(res_5, 4);
+    }
+
+    void test_mutualInformation() {
+        stringstream ss("1,1,1\n"
+                        "1,1,1\n"
+                        "1,0,0\n"
+                        "1,1,0\n"
+                        "0,0,0\n");
+        truth_table tt(ss);
+        set<arity_t> fs = list_of(0)(1);
+        ctruth_table ctt = tt.compress();
+        double mi = mutualInformation(ctt, fs);
+        cout << "mi = " << mi << endl;
+        TS_ASSERT_DELTA(0.419973, mi, 0.0001);
     }
 };
 

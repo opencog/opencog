@@ -7,7 +7,8 @@ LINK_DIRECTORIES(
 	${PROJECT_BINARY_DIR}/opencog/util
 )
 
-LINK_LIBRARIES(util)
+LINK_LIBRARIES(util
+  comboreduct)
 
 ADD_CXXTEST(ConfigUTest)
 ADD_CXXTEST(LoggerUTest)

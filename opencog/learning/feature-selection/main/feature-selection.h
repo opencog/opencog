@@ -84,12 +84,12 @@ void err_empty_features() {
     exit(1);
 }
 
-template<typename C>
-void log_selected_features(const C& fs) {
+template<typename Table>
+void log_selected_features(const Table& ftable) {
     // log set of selected feature set
     stringstream ss;
-    ss << "The following set of features has been selected: ";
-    ostreamContainer(ss, fs, ",");
+    ss << "The following features have been selected: ";
+    ostreamContainer(ss, ftable.input.get_labels(), ",");
     logger().info(ss.str());
 }
 
@@ -114,8 +114,8 @@ struct feature_selection_parameters {
     unsigned inc_interaction_terms;
 };
 
-template<typename IT, typename OT, typename Optimize, typename Scorer>
-void moses_feature_selection(IT& it, const OT& ot,
+template<typename Table, typename Optimize, typename Scorer>
+void moses_feature_selection(Table& table,
                              const field_set& fields,
                              instance_set<composite_score>& deme,
                              eda::instance& init_inst,
@@ -131,9 +131,9 @@ void moses_feature_selection(IT& it, const OT& ot,
     composite_score best_score = *deme.begin_scores();
     // get the best feature set
     std::set<arity_t> best_fs = get_feature_set(fields, best_inst);
-    IT fit = it.filter(best_fs);
+    Table ftable = table.filter(best_fs);
     // Logger
-    log_selected_features(best_fs);
+    log_selected_features(ftable);
     {
         // log its score
         stringstream ss;
@@ -147,7 +147,7 @@ void moses_feature_selection(IT& it, const OT& ot,
     }
     // ~Logger
     // write the filtered table
-    write_results(fit, ot, fs_params);
+    write_results(ftable, fs_params);
 }
 
 eda::instance initial_instance(const feature_selection_parameters& fs_params,
@@ -179,54 +179,55 @@ eda::instance initial_instance(const feature_selection_parameters& fs_params,
 }
 
 // run feature selection given an moses optimizer
-template<typename IT, typename OT, typename Optimize>
-void moses_feature_selection(IT& it, const OT& ot,
+template<typename Table, typename Optimize>
+void moses_feature_selection(Table& table,
                              Optimize& optimize,
                              const feature_selection_parameters& fs_params) {
-    arity_t arity = it.get_arity();
+    arity_t arity = table.get_arity();
     field_set fields(field_set::disc_spec(2), arity);
     instance_set<composite_score> deme(fields);
     // determine the initial instance given the initial feature set
     eda::instance init_inst = initial_instance(fs_params, fields);
     // define feature set quality scorer
-    typedef MICSScorer<IT, OT, set<arity_t> > FSScorer;
-    FSScorer fs_sc(it, ot,
-                   fs_params.cpi, fs_params.confi, fs_params.resources);
+    typedef MICSScorerTable<Table, set<arity_t> > FSScorer;
+    FSScorer fs_sc(table, fs_params.cpi, fs_params.confi, fs_params.resources);
     typedef moses_based_scorer<FSScorer> MBScorer;
     MBScorer mb_sc(fs_sc, fields);
     // possibly wrap in a cache
     if(fs_params.cache_size > 0) {
         typedef prr_cache<MBScorer> ScorerCache;
         ScorerCache sc_cache(fs_params.cache_size, mb_sc);
-        moses_feature_selection(it, ot, fields, deme, init_inst, optimize,
+        moses_feature_selection(table, fields, deme, init_inst, optimize,
                                 sc_cache, fs_params);
         // Logger
         logger().info("Number of cache failures = %u",
                       sc_cache.get_failures());
         // ~Logger
     } else {
-        moses_feature_selection(it, ot, fields, deme, init_inst, optimize,
+        moses_feature_selection(table, fields, deme, init_inst, optimize,
                                 mb_sc, fs_params);
     }
 }
 
-template<typename IT, typename OT>
-void write_results(IT& it, OT& ot,
+template<typename Table>
+void write_results(const Table& table,
                    const feature_selection_parameters& fs_params) {
     if(fs_params.output_file.empty())
-        ostreamTable(std::cout, it, ot);
+        ostreamTable(std::cout, table);
     else
-        ostreamTable(fs_params.output_file, it, ot);
+        ostreamTable(fs_params.output_file, table);
 }
 
-template<typename IT, typename OT>
-void incremental_feature_selection(IT& it, const OT& ot,
+template<typename Table>
+void incremental_feature_selection(Table& table,
                                    const feature_selection_parameters& fs_params) {
+    typedef typename Table::CTable CTable;
     if(fs_params.inc_intensity > 0 || fs_params.inc_target_size > 0) {
-        typedef MutualInformation<IT, OT, std::set<arity_t> > FeatureScorer;
-        FeatureScorer fsc(it, ot);
+        CTable ctable = table.compress();
+        typedef MutualInformation<CTable, std::set<arity_t> > FeatureScorer;
+        FeatureScorer fsc(ctable);
         std::set<arity_t> features(counting_iterator<arity_t>(0),
-                                   counting_iterator<arity_t>(it.get_arity()));
+                                   counting_iterator<arity_t>(table.get_arity()));
         std::set<arity_t> selected_features = 
             fs_params.inc_target_size > 0?
             cached_adaptive_incremental_selection(features, fsc,
@@ -240,17 +241,18 @@ void incremental_feature_selection(IT& it, const OT& ot,
         if(selected_features.empty()) {
             err_empty_features();
         } else {
-            log_selected_features(selected_features);
-            IT cit(it.filter(selected_features));
-            write_results(cit, ot, fs_params);
+            Table ftable = table.filter(selected_features);
+            log_selected_features(ftable);
+            write_results(ftable, fs_params);
         }
+    } else {
+        // nothing happened, print the initial table
+        write_results(table, fs_params);
     }
-    // nothing happened, print the initial table
-    write_results(it, ot, fs_params);
 }
 
-template<typename IT, typename OT>
-void feature_selection(IT& it, const OT& ot,
+template<typename Table>
+void feature_selection(Table& table,
                        const feature_selection_parameters& fs_params,
                        RandGen& rng) {
     optim_parameters op_param(20, fs_params.max_score);
@@ -262,9 +264,9 @@ void feature_selection(IT& it, const OT& ot,
         hc_parameters hc_param(false, // do not terminate if improvement
                                fs_params.hc_fraction_of_remaining);
         iterative_hillclimbing hc(rng, op_param, hc_param);
-        moses_feature_selection(it, ot, hc, fs_params);            
+        moses_feature_selection(table, hc, fs_params);            
     } else if(fs_params.algorithm == inc) {
-        incremental_feature_selection(it, ot, fs_params);
+        incremental_feature_selection(table, fs_params);
     } else {
         std::cerr << "Unknown algorithm, please consult the help for the list of algorithms." << std::endl;
         exit(1);

@@ -219,6 +219,11 @@ std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
     }
     return out;
 }
+// like above but take a table instead of a input and output table
+template<typename Table>
+std::ostream& ostreamTable(std::ostream& out, const Table& table) {
+    return ostreamTable(out, table.input, table.output);
+}
 
 // like above but takes the file name where to write the table
 template<typename IT, typename OT>
@@ -227,6 +232,11 @@ void ostreamTable(const std::string& file_name, const IT& it, const OT& ot) {
     std::ofstream out(file_name.c_str());
     OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
     ostreamTable(out, it, ot);
+}
+// like above but take a table instead of a input and output table
+template<typename Table>
+void ostreamTable(const std::string& file_name, const Table& table) {
+    ostreamTable(file_name, table.input, table.output);
 }
 
 /**
@@ -367,7 +377,7 @@ template<typename IT, typename OT>
 struct table {
     typedef IT InputTable;
     typedef OT OutputTable;
-    typedef typename OT::value_type value_type;
+    typedef typename IT::value_type value_type;
 
     table() {}
     table(std::istream& in) {
@@ -375,6 +385,14 @@ struct table {
     }
     table(const std::string& file_name) {
         istreamTable(file_name, input, output);
+    }
+    size_t size() const { return input.size(); }
+    arity_t get_arity() const { return input.get_arity(); }
+    template<typename F> table filter(const F& f) {
+        table res;
+        res.input = input.filter(f);
+        res.output = output;
+        return res;
     }
     IT input;
     OT output;
@@ -516,7 +534,13 @@ public:
 /// that is the duplicated inputs are removed and the output is
 /// replaced by a counter of the false ones and the true ones
 /// respectively.
-struct ctruth_table : public std::map<std::vector<bool>, std::pair<unsigned, unsigned> > {
+///
+/// Note: this could generalized using a mapping<T, unsigned> instead
+/// of std::pair for non-boolean case. Here with T = bool it's fine
+/// though.
+class ctruth_table : public std::map<std::vector<bool>, std::pair<unsigned, unsigned> > {
+    typedef typename std::map<std::vector<bool>, std::pair<unsigned, unsigned> > super;
+public:
     void set_binding(const std::vector<bool>& args) const {
         for(size_t i = 0; i < args.size(); ++i) {
             binding(i+1) = bool_to_vertex(args[i]);
@@ -545,11 +569,14 @@ struct truth_output_table : public output_table<bool> {
 class truth_table : public table<truth_input_table, truth_output_table> {
     typedef table<truth_input_table, truth_output_table> super;
 public:
+    typedef ctruth_table CTable;
+
+    truth_table(const super& t) : super(t) {}
     truth_table(std::istream& in) : super(in) {}
     truth_table(const std::string& file_name) : super(file_name) {}
 
     /// return the corresponding compressed truth table 
-    ctruth_table compress();
+    CTable compress() const;
 };
 
 //////////////////

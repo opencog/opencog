@@ -128,7 +128,8 @@ void eval_output_results(const eval_features_parameters& pa,
                          const vector<string>& labels,
                          const vector<set<arity_t> > fss,
                          const vector<combo_tree>& trs,
-                         IT& it, const OT& ot,
+                         const IT& it,
+                         const OT& ot,
                          opencog::RandGen& rng) {
 
     typedef MICSScorer<IT, OT, set<arity_t> > FSScorer;

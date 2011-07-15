@@ -41,17 +41,16 @@ class feature_selectionUTest : public CxxTest::TestSuite {
     truth_table table;
 
 public:
-    typedef MutualInformation<truth_table::InputTable,
-                              truth_table::OutputTable, 
-                              set<arity_t> > FeatureScorer;
+    typedef MutualInformation<ctruth_table, set<arity_t> > FeatureScorer;
 
 
     feature_selectionUTest() : table(FEATURE_SELECTION_TEST_DIR"dataset") {}
 
     void test_incremental_selection() {
-        FeatureScorer fs(table.input, table.output);
+        ctruth_table ctable = table.compress();
+        FeatureScorer fs(ctable);
         set<arity_t> features(counting_iterator<arity_t>(0),
-                              counting_iterator<arity_t>(table.input.get_arity()));
+                              counting_iterator<arity_t>(table.get_arity()));
         set<arity_t> selected_features = 
             incremental_selection(features, fs, 0.1, 1, false);
 
@@ -62,7 +61,8 @@ public:
     }
 
     void test_redundant_features() {
-        FeatureScorer fs(table.input, table.output);
+        ctruth_table ctable = table.compress();
+        FeatureScorer fs(ctable);
         set<arity_t> features = list_of(3)(4)(10)(17);
         set<arity_t> redundant = redundant_features(features, fs, 0.001);
 

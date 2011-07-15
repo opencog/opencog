@@ -32,23 +32,19 @@ namespace opencog {
  * Compute the MutualInformation
  *
  * H(Y;X1, ..., Xn) = H(X1, ..., Xn) + H(Y) - H(X1, ..., Xn, Y)
- *
- * Slightly more expensive than Conditional Entropy but more relevant
- * across problems.
  */
-template<typename IT, typename OT, typename FeatureSet>
+template<typename CTable, typename FeatureSet>
 struct MutualInformation : public std::unary_function<FeatureSet, double> {
 
-    MutualInformation(const IT& it, const OT& ot) 
-        : _it(it), _ot(ot) {}
+    MutualInformation(const CTable& ctable) 
+        : _ctable(ctable) {}
 
     double operator()(const FeatureSet& features) const {
-        return mutualInformation(_it, _ot, features);
+        return mutualInformation(_ctable, features);
     }
 
 protected:
-    const IT& _it;
-    const OT& _ot;
+    const CTable& _ctable;
 };
 
 /**
@@ -89,6 +85,35 @@ struct MICSScorer : public std::unary_function<FeatureSet, double> {
 
     const IT& _it;
     const OT& _ot;
+    double _cpi; // complexity penalty intensity
+    double _confi; //  confidence intensity
+    double _resources; // resources of the learning algo that will take
+                       // in input the feature set
+};
+/// like above but using Table instead of input and output table
+template<typename Table, typename FeatureSet>
+struct MICSScorerTable : public std::unary_function<FeatureSet, double> {
+
+    MICSScorerTable(const Table& table,
+               double cpi = 1, double confi = 0, double resources = 10000)
+        : _table(table), _cpi(cpi), _confi(confi), _resources(resources) {
+        _ctable = table.compress();
+    }
+
+    /**
+     * The feature set is represented by an eda::instance encoding a
+     * field of booleans. Each boolean represents whether its
+     * corresponding feature is in the feature set of not.
+     */
+    double operator()(const FeatureSet& fs) const {
+        double MI = mutualInformation(_ctable, fs);
+        double confidence = _table.size()/(_table.size() + _confi*fs.size());
+        double speedPrior = std::min(1.0, _resources/exp(_cpi*fs.size()));
+        return MI * confidence * speedPrior;
+    }
+
+    const Table& _table;
+    typename Table::CTable _ctable;
     double _cpi; // complexity penalty intensity
     double _confi; //  confidence intensity
     double _resources; // resources of the learning algo that will take

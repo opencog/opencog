@@ -78,7 +78,7 @@ truth_output_table::truth_output_table(const combo_tree& tr,
     }
 }
 
-ctruth_table truth_table::compress() {
+ctruth_table truth_table::compress() const {
 
     // Logger
     logger().debug("Compress the dataset, current size is %d", input.size());
@@ -86,8 +86,8 @@ ctruth_table truth_table::compress() {
 
     ctruth_table res;
 
-    InputTable::iterator in_it = input.begin();
-    OutputTable::iterator out_it = output.begin();
+    InputTable::const_iterator in_it = input.begin();
+    OutputTable::const_iterator out_it = output.begin();
     for(; in_it != input.end(); ++in_it, ++out_it) {
         ctruth_table::iterator dup_in_it = res.find(*in_it);
         if(dup_in_it == res.end())

@@ -40,6 +40,8 @@
 #include "oc_assert.h"
 #include "foreach.h"
 
+#include "iostreamContainer.h"
+
 #define PI 3.141592653589793
 #define EXPONENTIAL 2.71828182845905
 
@@ -350,6 +352,57 @@ double mutualInformation(const IT& it, const OT& ot, const FeatureSet& fs) {
         iop.push_back(vioc.second/total);
     // Compute the entropies
     return entropy(ip) + OTEntropy(ot) - entropy(iop);
+}
+
+/**
+ * like above but uses a compressed table instead of input and output
+ * table. Note that it assumes that the compressed table is boolean.
+ */
+template<typename CTable, typename FeatureSet>
+double mutualInformation(const CTable& ct, const FeatureSet& fs) {
+    typedef typename CTable::value_type MapET;
+    typedef typename CTable::key_type TupleT;
+    // the following mapping is used to keep track of the number
+    // of inputs a given setting. For instance X1=false, X2=true,
+    // X3=true is one possible setting. It is then used to compute
+    // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
+    typedef std::map<TupleT, unsigned> TupleCount;
+    TupleCount ic, // for H(X1, ..., Xn)
+        ioc; // for H(Y, X1, ..., Xn)
+    unsigned oc = 0; // for H(Y)
+    double total = 0;
+    foreach(const MapET& row, ct) {
+        unsigned falses = row.second.first;
+        unsigned trues = row.second.second;
+        unsigned row_total = falses + trues;
+        // update ic
+        TupleT vec;
+        foreach(const typename FeatureSet::value_type& idx, fs)
+            vec.push_back(row.first[idx]);
+        ic[vec] += row_total;
+        // update ioc
+        if(falses > 0) {
+            vec.push_back(false);
+            ioc[vec] += falses;
+            vec.pop_back();
+        }
+        if(trues > 0) {
+            vec.push_back(true);
+            ioc[vec] += trues;
+        }
+        // update oc
+        oc += trues;
+        // update total
+        total += row_total;
+    }
+    // Compute the probability distributions
+    std::vector<double> ip, iop;
+    foreach(const typename TupleCount::value_type& vic, ic)
+        ip.push_back(vic.second/total);
+    foreach(const typename TupleCount::value_type& vioc, ioc)
+        iop.push_back(vioc.second/total);
+    // Compute the entropies
+    return entropy(ip) + binaryEntropy(oc/total) - entropy(iop);
 }
 
 // compute the smallest divisor of n

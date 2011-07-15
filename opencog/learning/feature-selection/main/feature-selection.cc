@@ -169,18 +169,10 @@ int main(int argc, char** argv) {
 
     if(inferred_type == id::boolean_type) {
         // read input_data_file file
-        truth_input_table it;
-        truth_output_table ot;
-        istreamTable(*in, it, ot);
+        truth_table table(*in);
         in->close();
-        feature_selection(it, ot, fs_params, rng);
-    } else if(inferred_type == id::contin_type) {
-        // read input_data_file file
-        contin_input_table it;
-        contin_output_table ot;
-        istreamTable(*in, it, ot);
-        in->close();
-        feature_selection(it, ot, fs_params, rng);
+        ctruth_table ctable = table.compress();
+        feature_selection(table, fs_params, rng);
     } else {
         unsupported_type_exit(inferred_type);
     }
