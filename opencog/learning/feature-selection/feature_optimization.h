@@ -130,7 +130,7 @@ FeatureSet adaptive_incremental_selection(const FeatureSet& features,
                                           unsigned max_interaction_terms = 1,
                                           double red_threshold = 0,
                                           double min = 0, double max = 1,
-                                          double epsilon = 0.01) {
+                                          double epsilon = 0.001) {
     double mean = (min+max)/2;
     // Logger
     logger().debug("Call adaptive_incremental_selection with threshold %f",

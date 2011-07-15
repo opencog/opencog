@@ -69,11 +69,12 @@ static const pair<string, string> complexity_penalty_intensity_opt("complexity-p
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> resources_opt("resources", "R");
 static const pair<string, string> max_score_opt("max-score", "A");
-static const pair<string, string> fraction_of_remaining_opt("fraction-of-remaining", "Q");
-static const pair<string, string> feature_selection_intensity_opt("feature-selection-intensity", "T");
-static const pair<string, string> feature_selection_target_size_opt("feature-selection-target-size", "C");
-static const pair<string, string> redundant_feature_intensity_opt("redundant-feature-intensity", "D");
-static const pair<string, string> feature_selection_interaction_terms_opt("feature-selection-interaction-terms", "U");
+static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "Q");
+static const pair<string, string> inc_intensity_opt("inc-intensity", "T");
+static const pair<string, string> inc_target_size_opt("inc-target-size", "C");
+static const pair<string, string> inc_target_size_epsilon_opt("inc-target-size-epsilon", "E");
+static const pair<string, string> inc_redundant_intensity_opt("inc-redundant-intensity", "D");
+static const pair<string, string> inc_interaction_terms_opt("inc-interaction-terms", "U");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -110,6 +111,7 @@ struct feature_selection_parameters {
     unsigned hc_fraction_of_remaining;
     double inc_intensity;
     unsigned inc_target_size;
+    double inc_target_size_epsilon;
     double inc_rintensity;
     unsigned inc_interaction_terms;
 };
@@ -233,7 +235,9 @@ void incremental_feature_selection(Table& table,
             cached_adaptive_incremental_selection(features, fsc,
                                                   fs_params.inc_target_size,
                                                   fs_params.inc_interaction_terms,
-                                                  fs_params.inc_rintensity)
+                                                  fs_params.inc_rintensity,
+                                                  0, 1,
+                                                  fs_params.inc_target_size_epsilon)
             : cached_incremental_selection(features, fsc,
                                            fs_params.inc_intensity,
                                            fs_params.inc_interaction_terms,

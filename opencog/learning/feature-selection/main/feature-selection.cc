@@ -116,19 +116,22 @@ int main(int argc, char** argv) {
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&fs_params.max_score)->default_value(1),
          "For MOSES based algorithms. The max score to reach, once reached feature selection halts.\n")
-        (opt_desc_str(fraction_of_remaining_opt).c_str(),
+        (opt_desc_str(hc_fraction_of_remaining_opt).c_str(),
          value<unsigned>(&fs_params.hc_fraction_of_remaining)->default_value(10),
          "Hillclimbing parameter. Determine the fraction of the remaining number of eval to use for the current iteration.\n")
-        (opt_desc_str(feature_selection_intensity_opt).c_str(),
+        (opt_desc_str(inc_intensity_opt).c_str(),
          value<double>(&fs_params.inc_intensity)->default_value(0),
          "Incremental Selection parameter. Value between 0 and 1. 0 means all features are selected, 1 corresponds to the stronger selection pressure, probably no features are selected at 1.\n")
-        (opt_desc_str(feature_selection_target_size_opt).c_str(),
+        (opt_desc_str(inc_target_size_opt).c_str(),
          value<unsigned>(&fs_params.inc_target_size)->default_value(0),
          "Incremental Selection parameter. The number of features to attempt to select. This option overwrites feature-selection-intensity. 0 means disabled.\n")
-        (opt_desc_str(redundant_feature_intensity_opt).c_str(),
+        (opt_desc_str(inc_target_size_epsilon_opt).c_str(),
+         value<double>(&fs_params.inc_target_size_epsilon)->default_value(0.001),
+         "Incremental Selection parameter. Error interval tolerated to control the automatically adjust feature selection intensity when using option -C.\n")
+        (opt_desc_str(inc_redundant_intensity_opt).c_str(),
          value<double>(&fs_params.inc_rintensity)->default_value(0.1),
          "Incremental Selection parameter. Value between 0 and 1. 0 means no redundant features are discarded, 1 means redudant features are maximally discarded. This option is only active when feature selection is active.\n")
-        (opt_desc_str(feature_selection_interaction_terms_opt).c_str(),
+        (opt_desc_str(inc_interaction_terms_opt).c_str(),
          value<unsigned>(&fs_params.inc_interaction_terms)->default_value(1),
          "Incremental Selection parameter. Maximum number of interaction terms considered during feature selection. Higher values make the feature selection more accurate but is computationally expensive.\n")
         ;
@@ -165,13 +168,13 @@ int main(int argc, char** argv) {
     // init random generator
     MT19937RandGen rng(rand_seed);
 
-    auto_ptr<ifstream> in(open_data_file(fs_params.input_file));
+    // Logger
+    logger().info("Start feature-selection, read input file");
+    // ~Logger
 
     if(inferred_type == id::boolean_type) {
         // read input_data_file file
-        truth_table table(*in);
-        in->close();
-        ctruth_table ctable = table.compress();
+        truth_table table(fs_params.input_file);
         feature_selection(table, fs_params, rng);
     } else {
         unsupported_type_exit(inferred_type);
