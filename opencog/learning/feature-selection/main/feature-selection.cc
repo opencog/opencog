@@ -169,7 +169,7 @@ int main(int argc, char** argv) {
     MT19937RandGen rng(rand_seed);
 
     // Logger
-    logger().info("Start feature-selection, read input file");
+    logger().info("Read input file %s", fs_params.input_file.c_str());
     // ~Logger
 
     if(inferred_type == id::boolean_type) {
