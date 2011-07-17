@@ -47,6 +47,7 @@
 #include "../moses/moses.h"
 #include "../moses/distributed_moses.h"
 #include "../moses/optimization.h"
+#include "../moses/metapopulation.h"
 #include "../moses/scoring_functions.h"
 #include "../moses/scoring.h"
 #include "moses_exec_def.h"
@@ -92,7 +93,6 @@ struct metapop_moses_results_parameters {
     metapop_moses_results_parameters(long _result_count,
                                      bool _output_score,
                                      bool _output_complexity,
-                                     bool _output_score_complexity_old_moses,
                                      bool _output_bscore,
                                      bool _output_eval_number,
                                      bool _output_with_labels,
@@ -101,7 +101,6 @@ struct metapop_moses_results_parameters {
                                      const jobs_t& _jobs) : 
         result_count(_result_count), output_score(_output_score), 
         output_complexity(_output_complexity),
-        output_score_complexity_old_moses(_output_score_complexity_old_moses),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels), labels(_labels),
         output_file(_output_file),
@@ -109,7 +108,6 @@ struct metapop_moses_results_parameters {
     long result_count;
     bool output_score;
     bool output_complexity;
-    bool output_score_complexity_old_moses;
     bool output_bscore;
     bool output_eval_number;
     bool output_with_labels;
@@ -151,7 +149,6 @@ void metapop_moses_results(RandGen& rng,
         metapop.ostream(ss,
                         pa.result_count, pa.output_score,
                         pa.output_complexity,
-                        pa.output_score_complexity_old_moses,
                         pa.output_bscore);
         if(pa.output_eval_number)
             ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;

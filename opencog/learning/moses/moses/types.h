@@ -122,18 +122,12 @@ namespace opencog { namespace moses {
     Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
                                     bool output_score = true,
                                     bool output_complexity = false,
-                                    bool output_score_complexity_old_moses = false,
                                     bool output_bscore = false) {
-        if(output_score_complexity_old_moses) {            
-            out << get_tree(candidate) << " " << -get_complexity(candidate)
-                << " " << get_score(candidate) << std::endl;
-        } else {
-            if(output_score)
-                out << get_score(candidate) << " ";
-            if(output_complexity)
-                out << get_complexity(candidate) << " ";
-            out << get_tree(candidate) << std::endl;
-        }
+        if(output_score)
+            out << get_score(candidate) << " ";
+        if(output_complexity)
+            out << get_complexity(candidate) << " ";
+        out << get_tree(candidate) << std::endl;
         if(output_bscore) {
             ostream_behavioral_score(out, get_bscore(candidate));
             out << std::endl;

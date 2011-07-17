@@ -49,7 +49,6 @@ static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> result_count_opt("result-count", "c");
 static const pair<string, string> output_score_opt("output-score", "S");
 static const pair<string, string> output_complexity_opt("output-complexity", "x");
-static const pair<string, string> output_score_complexity_old_moses_opt("output-score-complexity-old-moses", "X");
 static const pair<string, string> output_bscore_opt("output-bscore", "t");
 static const pair<string, string> output_eval_number_opt("output-eval-number", "V");
 static const pair<string, string> output_with_labels_opt("output-with-labels", "W");

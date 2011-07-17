@@ -717,13 +717,10 @@ struct metapopulation : public set < bscored_combo_tree,
     Out& ostream(Out& out, In from, In to, long n = -1,
                  bool output_score = true,
                  bool output_complexity = false,
-                 bool output_score_complexity_old_moses = false,
                  bool output_bscore = false) {
         for(; from != to && n != 0; from++, n--) {
             ostream_bscored_combo_tree(out, *from, output_score,
-                                       output_complexity,
-                                       output_score_complexity_old_moses,
-                                       output_bscore);
+                                       output_complexity, output_bscore);
         }
         return out;
     }
@@ -732,22 +729,16 @@ struct metapopulation : public set < bscored_combo_tree,
     Out& ostream(Out& out, long n = -1,
                  bool output_score = true,
                  bool output_complexity = false,
-                 bool output_score_complexity_old_moses = false,
                  bool output_bscore = false) {
         return ostream(out, begin(), end(),
-                       n, output_score, output_complexity,
-                       output_score_complexity_old_moses,
-                       output_bscore);
+                       n, output_score, output_complexity, output_bscore);
     }
     // like above but using std::cout
     void print(long n = -1,
                bool output_score = true,
                bool output_complexity = false,
-               bool output_score_complexity_old_moses = false,
-               bool output_bscore = false) {
-        ostream(std::cout, n, output_score, output_complexity,
-                output_score_complexity_old_moses,
-                output_bscore);
+                bool output_bscore = false) {
+        ostream(std::cout, n, output_score, output_complexity, output_bscore);
     }
 
     RandGen& rng;
