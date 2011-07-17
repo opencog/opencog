@@ -212,7 +212,7 @@ namespace opencog
          */
         double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
         static double euclidDist
-            (const std::vector<double> v1, const std::vector<double> v2);
+            (const std::vector<double>& v1, const std::vector<double>& v2);
         static double euclidDist(double v1[], double v2[], int size);
         
         /**
