@@ -202,8 +202,7 @@ void moses_feature_selection(Table& table,
         moses_feature_selection(table, fields, deme, init_inst, optimize,
                                 sc_cache, fs_params);
         // Logger
-        logger().info("Number of cache failures = %u",
-                      sc_cache.get_failures());
+        logger().info("Number of cache failures = %u", sc_cache.get_failures());
         // ~Logger
     } else {
         moses_feature_selection(table, fields, deme, init_inst, optimize,

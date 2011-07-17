@@ -96,6 +96,7 @@ string build_cmdline(const variables_map& vm,
            && it->first != output_bscore_opt.first
            && it->first != output_complexity_opt.first
            && it->first != output_eval_number_opt.first
+           && it->first != output_with_labels_opt.first
            && it->first != jobs_opt.first
            && it->first != max_evals_opt.first
            && it->first != max_gens_opt.first
