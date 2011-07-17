@@ -93,6 +93,7 @@ string build_cmdline(const variables_map& vm,
     for(variables_map::const_iterator it = vm.begin(); it != vm.end(); ++it) {
         if(it->first != exemplars_str_opt.first
            && it->first != exemplars_str_opt.first
+           && it->first != output_score_opt.first
            && it->first != output_bscore_opt.first
            && it->first != output_complexity_opt.first
            && it->first != output_eval_number_opt.first
