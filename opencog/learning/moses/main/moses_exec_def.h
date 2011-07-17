@@ -78,6 +78,7 @@ static const pair<string, string> pop_size_ratio_opt("pop-size-ratio", "P");
 static const pair<string, string> max_score_opt("max-score", "A");
 static const pair<string, string> max_candidates_opt("max-candidates", "M");
 static const pair<string, string> ignore_bscore_opt("ignore-bscore", "I");
+static const pair<string, string> hc_terminate_if_improvement_opt("hc-terminate-if-improvement", "T");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);

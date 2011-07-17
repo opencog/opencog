@@ -98,13 +98,15 @@ struct metapop_moses_results_parameters {
                                      bool _output_with_labels,
                                      const vector<string>& _labels,
                                      string _output_file,
-                                     const jobs_t& _jobs) : 
+                                     const jobs_t& _jobs,
+                                     bool _hc_terminate_if_improvement) : 
         result_count(_result_count), output_score(_output_score), 
         output_complexity(_output_complexity),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels), labels(_labels),
         output_file(_output_file),
-        jobs(_jobs) {}
+        jobs(_jobs),
+        hc_terminate_if_improvement(_hc_terminate_if_improvement) {}
     long result_count;
     bool output_score;
     bool output_complexity;
@@ -114,6 +116,7 @@ struct metapop_moses_results_parameters {
     const vector<string>& labels;
     string output_file;
     const jobs_t& jobs;
+    bool hc_terminate_if_improvement;
 };
 
 /**
@@ -198,8 +201,9 @@ void metapop_moses_results(RandGen& rng,
                               simulated_annealing(rng, opt_params),
                               meta_params, moses_params, vm, pa);
     } else if(opt_algo == hc) { // hillclimbing
+        hc_parameters hc_params(pa.hc_terminate_if_improvement);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              iterative_hillclimbing(rng, opt_params),
+                              iterative_hillclimbing(rng, opt_params, hc_params),
                               meta_params, moses_params, vm, pa);
     } else {
         std::cerr << "Unknown optimization algo " << opt_algo 

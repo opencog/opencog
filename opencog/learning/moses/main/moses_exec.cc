@@ -220,6 +220,8 @@ int moses_exec(int argc, char** argv) {
     // optim_param
     double pop_size_ratio;
     double max_score;
+    // hc_param
+    bool hc_terminate_if_improvement;
 
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -349,6 +351,9 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(ignore_bscore_opt).c_str(),
          value<bool>(&ignore_bscore)->default_value(false),
          "Ignore the behavioral score when merging candidates in the population. This option is useful either when the problem has no obvious behavioral score, or it happens that dominated candidates worth keeping.\n")
+        (opt_desc_str(hc_terminate_if_improvement_opt).c_str(),
+         value<bool>(&hc_terminate_if_improvement)->default_value(true),
+         "Hillclimbing parameter. If 1 then deme search terminates when an improvement is found, if 0 it keeps searching until another termination condition is reached.\n")
         ;
 
     variables_map vm;
@@ -376,6 +381,7 @@ int moses_exec(int argc, char** argv) {
     logger().setFilename(log_file);
     logger().setLevel(logger().getLevelFromString(log_level));
     logger().setBackTraceLevel(Logger::ERROR);
+
     // init random generator
     MT19937RandGen rng(rand_seed);
 
@@ -455,7 +461,8 @@ int moses_exec(int argc, char** argv) {
                                             output_score, output_complexity,
                                             output_bscore, output_eval_number,
                                             output_with_labels, labels,
-                                            output_file, jobs);
+                                            output_file, jobs,
+                                            hc_terminate_if_improvement);
 
     if(problem == it) { // regression based on input table
         
@@ -477,6 +484,7 @@ int moses_exec(int argc, char** argv) {
 
         if(output_type == id::boolean_type) {
             // read input_data_file file
+            logger().debug("Read data file %s", input_data_file.c_str());
             truth_table table(*in);
             if(nsamples>0)
                 subsampleTable(table.input, table.output, nsamples, rng);
