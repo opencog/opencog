@@ -132,11 +132,11 @@ int main(int argc, char ** argv)
     	    	boost::unordered_map<int, int> arg_idx_map=mt.get_arg_idx_map();
         		//variable to keep track of each boolean variable
         		int bool_arg_count;
-	        	bool is_output;
     	    	if(partial_probability >=0 && partial_probability<=1){        	
-        			for ( int j = 0 ; j < nsamples_bool; ++j) {
-        				is_output= biased_randbool(partial_probability, rng);
-        				for (const_cm_it i = rands.begin(); i != rands.end(); ++i) {
+        			for(int j = 0 ; j < nsamples_bool; ++j) {
+        				bool is_output =
+                            biased_randbool(partial_probability, rng);
+        				for(const_cm_it i = rands.begin(); i != rands.end(); ++i) {
         				
 	        				bool_arg_count=j;        			       			
     	    				const_cv_it contin_it = (*i).begin();    
@@ -156,7 +156,7 @@ int main(int argc, char ** argv)
       							std::cout<< (*il)<<endl;
         			    	}
             				if (il!=vt.end())
-	            				il++;
+	            				++il;
     	    			}
         			}	        	
         		}			

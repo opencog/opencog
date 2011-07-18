@@ -23,7 +23,7 @@
 
 namespace opencog { namespace combo {
 
-bool compare_connection::operator() (ann_connection* lhs, ann_connection* rhs) {
+bool compare_connection::operator() (ann_connection* lhs, ann_connection* rhs) const {
   return lhs->source->sort_val < rhs->source->sort_val; 
 }
 

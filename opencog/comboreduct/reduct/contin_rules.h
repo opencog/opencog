@@ -84,7 +84,6 @@ struct reduce_factorize : public crule<reduce_factorize> {
 struct reduce_distribute : public crule<reduce_distribute> {
     reduce_distribute(const rule& r) : 
         crule<reduce_distribute>::crule("reduce_distribute"), _reduction(&r) {}
-    reduce_distribute() : crule<reduce_distribute>::crule("reduce_distribute") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 protected:
     const rule* _reduction;

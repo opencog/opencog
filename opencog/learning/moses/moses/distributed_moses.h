@@ -140,9 +140,9 @@ string build_cmdline(const variables_map& vm,
     // add one generation option
     res += string(" -") + max_gens_opt.second + " 1";
     // add log option determined name option
-    res += string(" -") + log_file_opt.second 
-        + "distributed_moses_gen_" + lexical_cast<string>(gen_idx)
-        + "_from_parent_" + lexical_cast<string>(get_parent_pid()) + ".log";
+    res += string(" -") + log_file_opt.second + "distributed_moses"
+        + "_from_parent_" + lexical_cast<string>(get_parent_pid())
+        + "_gen_" + lexical_cast<string>(gen_idx) + ".log";
     // add option to return all results
     res += string(" -") + result_count_opt.second + " -1";
 
@@ -185,7 +185,7 @@ proc_map::value_type launch_cmd(string cmd) {
 }
 
 // check if a file is being used by process of PID pid 
-    bool is_being_written(const string& file_name, int pid) {
+bool is_being_written(const string& file_name, int pid) {
     FILE* fp = popen(string("fuser ").append(file_name).append(" 2> /dev/null").c_str(), "r");
     while(!feof(fp)) {
         int p;

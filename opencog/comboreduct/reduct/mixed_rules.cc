@@ -216,12 +216,14 @@ void reduce_gt_zero_log::operator()(combo_tree& tr,combo_tree::iterator it) cons
         void reduce_gt_zero_prod_exp::operator()(combo_tree& tr,combo_tree::iterator it) const {
             if(*it==id::greater_than_zero) {
                 OC_ASSERT(it.has_one_child(), 
-                          "combo_tree node should have exactly one child (reduce_gt_zero_prod_exp).");
+                          "combo_tree node should have exactly one child.");
                 pre_it it_child = it.begin();
                 if(*it_child==id::times) {
-                    for(sib_it sib = it_child.begin(); sib != it_child.end(); ++sib) {
+                    for(sib_it sib = it_child.begin(); sib != it_child.end();) {
                         if(*sib==id::exp)
-                            tr.erase(sib);
+                            sib = tr.erase(sib);
+                        else
+                            ++sib;
                     }
                     if(it_child.is_childless()) {
                         tr.erase_children(it);

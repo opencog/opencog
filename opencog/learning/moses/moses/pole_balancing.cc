@@ -29,11 +29,6 @@ double CartPole::evalNet(ann *net)
 
     int nmarkovmax;  
 
-    double nmarkov_fitness;
-
-    double jiggletotal; //total jiggle in last 100
-    int count;  //step counter
-
     //init(randomize);		// restart at some point
   
     if (nmarkov_long) nmarkovmax=100000;
@@ -128,16 +123,17 @@ double CartPole::evalNet(ann *net)
             return (double) balanced_sum;
  
         //Sum last 100
+        double jiggletotal; //total jiggle in last 100
         if ((steps>100)&&(!nmarkov_long)) {
-
             jiggletotal=0;
             cout<<"step "<<steps-99-2<<" to step "<<steps-2<<endl;
             //Adjust for array bounds and count
-            for (count=steps-99-2;count<=steps-2;++count)
-                jiggletotal+=jigglestep[count];
+            for(int count = steps-99-2; count<=steps-2; ++count)
+                jiggletotal += jigglestep[count];
         }
 
         if (!nmarkov_long) {
+            double nmarkov_fitness;
             if (balanced_sum>100) 
                 nmarkov_fitness=((0.1*(((double) balanced_sum)/1000.0))+
                                  (0.9*(0.75/(jiggletotal))));

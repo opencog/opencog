@@ -47,7 +47,6 @@
 #include "message.h"
 #include "ann.h"
 #include "common_def.h"
-//#include "procedure_call.h"
 
 // uncomment that if you want to interpret log(x) as log(abs(x))
 // #define ABS_LOG
@@ -57,10 +56,6 @@ namespace opencog { namespace combo {
 class procedure_call_base;
 
 typedef const procedure_call_base* procedure_call;
-typedef std::set<procedure_call> procedure_call_set;
-typedef procedure_call_set::iterator procedure_call_set_it;
-typedef procedure_call_set::const_iterator procedure_call_const_it;
-
 
 //this idiom allows builtin to live in namespace combo, but all
 //ids to be hidden inside the namespace id

@@ -176,8 +176,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
         //nodes that are the same distance from our pivot, and we can't
         //pass erase p_it because it's a reverseiterator, thus this awkwardness
         pQueue_t::iterator erase_it = pQueue.end();
-        erase_it--;
-        pQueue.erase(erase_it);
+        pQueue.erase(--erase_it);
         
         if (distMap[u]==0) { break;}
         HandleSeq newLinks = as->getIncoming(u);
@@ -313,15 +312,15 @@ void DimEmbedModule::addLink(const Handle& h, const Type& linkType) {
     std::vector<std::vector<double> > embeddingVectors;
     AtomEmbedding aE = atomMaps[linkType];
     HandleSeq nodes = as->getOutgoing(h);
-    for(HandleSeq::iterator it=nodes.begin();it!=nodes.end();it++) {
+    for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it) {
         embeddingVectors.push_back(aE[*it]);
     }
     std::vector<std::vector<double> >::iterator it,it2;
     int i=0;
     bool changed = false;
     double weight = as->getMean(h)*as->getConfidence(h);
-    for(it=embeddingVectors.begin();it!=embeddingVectors.end();it++) {
-        for(it2=embeddingVectors.begin();it2!=embeddingVectors.end();it2++) {
+    for(it=embeddingVectors.begin(); it!=embeddingVectors.end(); ++it) {
+        for(it2=embeddingVectors.begin(); it2!=embeddingVectors.end(); ++it2) {
             if((*it)[i]<(weight*(*it2)[i])) {
                 (*it)[i]=(weight*(*it2)[i]);
                 changed=true;
@@ -342,7 +341,7 @@ void DimEmbedModule::clearEmbedding(const Type& linkType){
             classserver().getTypeName(linkType).c_str());
 
     HandleSeq pivots  = pivotsMap[linkType];
-    for(HandleSeq::iterator it = pivots.begin();it!=pivots.end();it++) {
+    for(HandleSeq::iterator it = pivots.begin(); it!=pivots.end(); ++it) {
         as->decVLTI(*it);
     }
     atomMaps.erase(linkType);
@@ -677,12 +676,12 @@ void DimEmbedModule::handleAddSignal(AtomSpaceImpl* a, Handle h) {
     AtomEmbedMap::iterator it;
     if(as->isNode(h)) {
         //for each link type embedding that exists, add the node
-        for(it=atomMaps.begin();it!=atomMaps.end();it++) {
+        for(it=atomMaps.begin(); it!=atomMaps.end(); ++it) {
             addNode(h,it->first);
         }
     }
     else {//h is a link    
-        for(it=atomMaps.begin();it!=atomMaps.end();it++) {
+        for(it=atomMaps.begin(); it!=atomMaps.end(); ++it) {
             addLink(h,it->first);
         }
     }

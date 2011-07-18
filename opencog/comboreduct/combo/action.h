@@ -29,7 +29,6 @@
 
 #include <iostream>
 #include <vector>
-//#include <cassert>
 #include "common_def.h"
 
 namespace opencog { namespace combo {

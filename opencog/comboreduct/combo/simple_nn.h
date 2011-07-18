@@ -51,7 +51,7 @@ typedef combo_tree::iterator pre_it;
 
 struct compare_connection
 {
-    bool operator() (ann_connection* lhs, ann_connection* rhs);
+    bool operator() (ann_connection* lhs, ann_connection* rhs) const;
 };
 
 //simple iterator types
@@ -67,7 +67,6 @@ class ann_connection
 public:
     ann_connection(ann_node* s, ann_node* d, double w):
             source(s), dest(d), weight(w) { }
-    bool visited;
     ann_node* source;
     ann_node* dest;
     double weight;
@@ -365,7 +364,7 @@ public:
         }
 
         //if no valid nodes, return failure
-        if(possible.size() == 0 )
+        if(possible.empty())
         {
             return false;
         }
@@ -431,14 +430,14 @@ public:
     }
 
     //simple threshold unit
-    double inline activation_fn_thresh(double incoming) {
+    double inline activation_fn_thresh(double incoming) const {
         if (incoming >= 0.0)
             return 1.0;
         return -1.0;
     }
 
     //simple sigmoid activation
-    double inline activation_fn(double incoming) {
+    double inline activation_fn(double incoming) const {
         return 1.0 / (1.0 + exp(-incoming));
     }
 

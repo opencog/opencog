@@ -27,13 +27,13 @@ namespace opencog { namespace combo {
 
 ComboReductException::ComboReductException(std::string m = "")
   : _message(m) {}
-std::string ComboReductException::get_message() {
+std::string ComboReductException::get_message() const {
     return _message;
 }
 
 EvalException::EvalException(vertex v = vertex())
     : ComboReductException("Eval Exception"), _vertex(v) {}
-vertex EvalException::get_vertex() {
+vertex EvalException::get_vertex() const {
     return _vertex;
 }
 

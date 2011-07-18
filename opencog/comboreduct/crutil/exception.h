@@ -36,7 +36,7 @@ public:
     ComboReductException();
     ComboReductException(std::string m);
 
-    std::string get_message();
+    std::string get_message() const;
 };
 
 class EvalException : public ComboReductException {
@@ -45,7 +45,7 @@ public:
     EvalException();
     EvalException(vertex v);
 
-    vertex get_vertex();
+    vertex get_vertex() const;
 };
 
 class TypeCheckException : public ComboReductException {
