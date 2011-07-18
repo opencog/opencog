@@ -82,51 +82,49 @@ Atom* Link::getOutgoingAtom(int pos) const
 
 std::string Link::toShortString(void) const
 {
-    std::string answer;
-#define BUFSZ 1024
-    char buf[BUFSZ];
+    std::stringstream answer;
 
-    snprintf(buf, BUFSZ, "[%s %s", classserver().getTypeName(type).c_str(),
-             (getFlag(HYPOTETHICAL_FLAG) ? "h " : ""));
-    answer += buf;
+    answer << "[" << classserver().getTypeName(type) << " ";
+    answer << (getFlag(HYPOTETHICAL_FLAG) ? "h " : "");
+
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    answer += "<";
+    answer << "<";
     for (int i = 0; i < getArity(); i++) {
-        if (i > 0) answer += ",";
+        if (i > 0) answer << ",";
         if (atomTable) {
             Atom* a = atomTable->getAtom(outgoing[i]);
-            answer += classserver().isA(a->getType(), NODE) ?
-                      ((Node*) a)->getName() :
-                      ((Link*) a)->toShortString();
+            if (classserver().isA(a->getType(), NODE))
+                answer << ((Node*) a)->getName();
+            else 
+                answer << ((Link*) a)->toShortString();
         } else {
             // No AtomTable connected so just print handles
-            answer += "#" + outgoing[i];
+            answer << "#" << outgoing[i];
         }
     }
-    answer += ">";
+    answer << ">";
     float mean = this->getTruthValue().getMean();
-    float count = this->getTruthValue().getCount();
+    float confidence = this->getTruthValue().getConfidence();
     if (mean == 0.0f) {
-        snprintf(buf, BUFSZ, " 0.0");
+        answer << " 0.0";
     } else {
-        snprintf(buf, BUFSZ, " %f", mean);
+        answer << " " << mean;
     }
-    answer += buf;
-    if (count == 0.0f) {
-        snprintf(buf, BUFSZ, " 0.0");
+    if (confidence == 0.0f) {
+        answer << " 0.0";
     } else {
-        snprintf(buf, BUFSZ, " %.2f", count);
+        answer << " " << confidence;
     }
-    answer += buf;
-    answer += "]";
-    return answer;
+    answer << "]";
+    return answer.str();
 }
 
 std::string Link::toString(void) const
 {
     std::string answer;
-    char buf[BUFSZ];
+#define BUFSZ 1024
+    static char buf[BUFSZ];
 
     snprintf(buf, BUFSZ, "link[%s sti:(%d,%d) tv:(%s) ",
              classserver().getTypeName(type).c_str(),
