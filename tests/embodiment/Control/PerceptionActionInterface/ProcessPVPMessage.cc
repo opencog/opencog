@@ -65,8 +65,9 @@ int main(int argc, char* argv[])
         }
     }
 
-    NMXmlExporter exporter;
-    HandleEntry *handles = atomSpace.getAtomTable().getHandleSet(ATOM, true);
+    NMXmlExporter exporter(&atomSpace);
+    HandleSeq handles;
+    atomSpace.getHandleSet(back_inserter(handles), ATOM, true);
     std::string xml = exporter.toXML(handles);
     printf("%s\n", xml.c_str());
 }
