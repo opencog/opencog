@@ -166,10 +166,12 @@ void CogServer::serverLoop()
                 usleep((unsigned int) (cycle_duration - elapsed_time));
 //        }
 
-        logger().debug("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
-                        currentCycle,
-                       elapsed_time/1000000.0
-                      );
+        if (currentCycle != this->cycleCount) {
+            logger().debug("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
+                            currentCycle,
+                           elapsed_time/1000000.0
+                          );
+        }
 
         timer_start = timer_end;
 
@@ -180,26 +182,27 @@ void CogServer::runLoopStep(void)
 {
     struct timeval timer_start, timer_end;
     time_t elapsed_time;
+    time_t requests_time;
     // this refers to the current cycle, so that logging reports correctly
     // regardless of whether cycle is incremented.
     long currentCycle = this->cycleCount;
 
     // Process requests
     gettimeofday(&timer_start, NULL);
-    logger().debug("[CogServer::runLoopStep cycle = %d]", currentCycle);
 
     if (getRequestQueueSize() != 0) {
         processRequests();
-    }
-
-    gettimeofday(&timer_end, NULL); 
-    elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+        gettimeofday(&timer_end, NULL); 
+        requests_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                    (timer_end.tv_usec - timer_start.tv_usec);
 
-    logger().debug("[CogServer::runLoopStep cycle = %d] Time to process requests: %f",
+        logger().debug("[CogServer::runLoopStep cycle = %d] Time to process requests: %f",
                    currentCycle,
-                   elapsed_time/1000000.0
+                   requests_time/1000000.0
                   );
+    } else {
+        gettimeofday(&timer_end, NULL); 
+    }
 
     // Run custom loop
     timer_start = timer_end;
@@ -232,7 +235,8 @@ void CogServer::runLoopStep(void)
                    elapsed_time/1000000.0, currentCycle
                   );
     } else {
-        logger().debug("[CogServer::runLoopStep cycle = %d] customRunLoop returned false. Skipping MindAgents, and not incremented cycle counter.", currentCycle);
+        // Skipping MindAgents, and not incremented cycle counter.
+        logger().debug("[CogServer::runLoopStep cycle = %d] customRunLoop returned false.", currentCycle);
     }
 
 }
