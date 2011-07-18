@@ -79,11 +79,17 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
                         __FUNCTION__, msg.str( ).c_str( ) );
     }
     
-    
     std::vector<std::string> entitiesA;
     std::vector<std::string> entitiesB;
     std::vector<std::string> entitiesC;
-    
+   
+    // Get the corresponding ObjectNode (or child of it) of SemeNode. 
+    // ObjectA, ObjectB and ObjectC are all SemeNodes. 
+    //
+    // (ReferenceLink (stv 1 1) (av -8 1 0)
+    //     (AccessoryNode "id_4410" (av -8 1 0))
+    //     (SemeNode "id_4410" (stv 1 0.051008303))
+    // )
     if ( atomSpace.getType( objectA ) == VARIABLE_NODE ) {
         spaceMap.getAllObjects( std::back_inserter( entitiesA ) );
     } else {
