@@ -280,7 +280,7 @@ std::string Entity::getStringProperty( PROPERTY property ) const
 {
     PropertyHashMap::const_iterator it = this->properties.find( property );
     const std::string* result = NULL;
-    if ( it == this->properties.end( ) && ( result = boost::get<std::string>( &it->second ) ) == NULL ) {
+    if ( it == this->properties.end( ) || ( result = boost::get<std::string>( &it->second ) ) == NULL ) {
         return "";
     } // if
     return *result;
@@ -290,7 +290,7 @@ double Entity::getDoubleProperty( PROPERTY property ) const
 {
     PropertyHashMap::const_iterator it = this->properties.find( property );
     const double* result = NULL;
-    if ( it == this->properties.end( ) && ( result = boost::get<double>( &it->second ) ) == NULL ) {
+    if ( it == this->properties.end( ) || ( result = boost::get<double>( &it->second ) ) == NULL ) {
         return 0.0;
     } // if
     return *result;
@@ -300,7 +300,7 @@ int Entity::getIntProperty( PROPERTY property ) const
 {
     PropertyHashMap::const_iterator it = this->properties.find( property );
     const int* result = NULL;
-    if ( it == this->properties.end( ) && ( result = boost::get<int>( &it->second ) ) == NULL ) {
+    if ( it == this->properties.end( ) || ( result = boost::get<int>( &it->second ) ) == NULL ) {
         return 0;
     } // if
     return *result;

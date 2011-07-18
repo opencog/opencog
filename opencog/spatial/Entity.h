@@ -140,6 +140,7 @@ namespace opencog
                 FOOD_BOWL,
                 WATER_BOWL,
                 OBSTACLE,
+                ENTITY_CLASS,
 
                 NUMBER_OF_PROPERTIES
             };

@@ -161,7 +161,7 @@ public:
     bool add(bool keepPreviousMap, Handle spaceMapHandle,
              const std::string& objectId,
              double centerX, double centerY, double centerZ, double length, double width,
-             double height, double yaw, bool isObstacle = true);
+             double height, double yaw, const std::string& entityClass, bool isObstacle = true);
 
     // Add a whole space map into the SpaceServer.
     // NOTE: This is just used when a whole space map is received from a remote
@@ -213,7 +213,7 @@ public:
     bool addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
                               double objX, double objY, double objZ,
                               double objLength, double objWidth, double objHeight,
-                              double objYaw, bool isObstacle = true);
+                              double objYaw, bool isObstacle = true, const std::string& entityClass = "common");
     /**
      * Add a whole space map into the SpaceServer.
      * NOTE: This is just used when a whole space map is received

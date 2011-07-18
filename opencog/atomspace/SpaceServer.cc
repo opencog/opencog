@@ -210,7 +210,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
 bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::string& objectId,
                       double centerX, double centerY, double centerZ,
                       double length, double width, double height,
-                      double yaw, bool isObstacle)
+                      double yaw, const std::string& entityClass, bool isObstacle)
 {
 
 
@@ -223,7 +223,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
                  map->xMin(), map->xMax(), map->yMin(), map->yMax(),
                  map->xGridWidth(), map->yGridWidth());
 
-    SpaceServer::ObjectMetadata metadata(centerX, centerY, centerZ, length, width, height, yaw);
+    SpaceServer::ObjectMetadata metadata(centerX, centerY, centerZ, length, width, height, yaw, entityClass);
     bool mapContainsObject = map->containsObject(objectId);
     bool needUpdate = false;
     DPRINTF("SpaceServer::add After contains\n");
@@ -461,12 +461,12 @@ Handle SpaceServer::getSpaceMapNode()
 bool SpaceServer::addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
                               double objX, double objY, double objZ,
                               double objLength, double objWidth, double objHeight,
-                              double objYaw, bool isObstacle) {
+                              double objYaw, bool isObstacle, const std::string& entityClass) {
 
     Handle spaceMapNode = getSpaceMapNode();
     Handle spaceMapAtTimeLink = timeServer->addTimeInfo(spaceMapNode, timestamp);
     bool result =  add( keepPreviousMap, spaceMapAtTimeLink, atomspace->getName(objectNode)->get_result(),
-                        objX, objY, objZ, objLength, objWidth, objHeight, objYaw, isObstacle);
+                        objX, objY, objZ, objLength, objWidth, objHeight, objYaw, entityClass, isObstacle);
 
     return result;
 }

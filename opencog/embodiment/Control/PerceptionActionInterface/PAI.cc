@@ -2362,8 +2362,12 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
     // Position predicate
     Vector position = addVectorPredicate(objectNode, AGISIM_POSITION_PREDICATE_NAME, timestamp, positionElement);
 
-    // Position predicate
+    // rotation predicate
     Rotation rotation = addRotationPredicate(objectNode, timestamp, rotationElement);
+
+
+    // Entity class
+    std::string entityClass = "common";
 
     // Size predicate
     if (length > 0 && width > 0 && height > 0) {
@@ -2449,10 +2453,11 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
         logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
     } else {
         isObstacle = true;
+        entityClass = "terrain_block";
     }
 
 
-    return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle);
+    return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle, entityClass);
 }
 
 Handle PAI::addPhysiologicalFeeling(const string petID,
