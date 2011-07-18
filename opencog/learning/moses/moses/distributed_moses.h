@@ -28,10 +28,14 @@
 #include <stdlib.h>
 #include <signal.h>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <ext/stdio_filebuf.h>
 
 #include <boost/program_options.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/log_prog_name.h>
@@ -45,6 +49,14 @@ namespace opencog { namespace moses {
 using namespace boost::program_options;
 using boost::tuple;
 using boost::make_tuple;
+using boost::lexical_cast;
+
+// get the pid of the main instance of moses (the one launching the
+// others). This is useful to have more uniqueness in the log names of
+// the launched moseses.
+pid_t get_parent_pid() {
+    return getpid();
+}
 
 // map the PID to the command line (cmd), the temporary file name
 // (tmp), and the FILE of the output of the process (file)
@@ -66,8 +78,8 @@ FILE* get_file(const proc_map::value_type& pmv) {
 typedef std::map<string, proc_map> host_proc_map;
 
 // number of running processes
-unsigned int running_proc_count(const host_proc_map& hpm) {
-    unsigned int acc = 0;
+unsigned running_proc_count(const host_proc_map& hpm) {
+    unsigned acc = 0;
     foreach(const host_proc_map::value_type& hpmv, hpm)
         acc += hpmv.second.size();
     return acc;
@@ -82,14 +94,17 @@ unsigned int running_proc_count(const host_proc_map& hpm) {
 string build_cmdline(const variables_map& vm, 
                      const combo_tree& tr,
                      const string& host_name,
-                     unsigned int max_evals) {
+                     unsigned max_evals,
+                     unsigned gen_idx) {
     string res;
     if(host_name == localhost)
         res = "moses-exec";
     else
         res = string("ssh ") + host_name + " 'moses-exec";
-    // replicate initial command's options, except:
-    // exemplar, output options, jobs, max_evals, max_gens and log_file_dep_opt
+    // replicate initial command's options, except all of those
+    // interfering with the command to be built, that is:
+    // exemplar, output options, jobs, max_evals, max_gens and
+    // log file name options.
     for(variables_map::const_iterator it = vm.begin(); it != vm.end(); ++it) {
         if(it->first != exemplars_str_opt.first
            && it->first != exemplars_str_opt.first
@@ -103,6 +118,8 @@ string build_cmdline(const variables_map& vm,
            && it->first != max_evals_opt.first
            && it->first != max_gens_opt.first
            && it->first != result_count_opt.first
+           && it->first != log_file_opt.first
+           && it->first != log_file_dep_opt_opt.first
            && !it->second.defaulted()) {
             string opt_name(" --");
             opt_name += it->first + " \"";
@@ -119,11 +136,13 @@ string build_cmdline(const variables_map& vm,
     res += string(" -") + output_eval_number_opt.second + " 1";    
     // add number of evals option
     res += string(" -") + max_evals_opt.second + " " 
-        + boost::lexical_cast<string>(max_evals);
+        + lexical_cast<string>(max_evals);
     // add one generation option
     res += string(" -") + max_gens_opt.second + " 1";
     // add log option determined name option
-    res += string(" -") + log_file_dep_opt_opt.second;
+    res += string(" -") + log_file_opt.second 
+        + "distributed_moses_gen_" + lexical_cast<string>(gen_idx)
+        + "_from_parent_" + lexical_cast<string>(get_parent_pid()) + ".log";
     // add option to return all results
     res += string(" -") + result_count_opt.second + " -1";
 
@@ -210,7 +229,7 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
             in >> evals;
         } else {
             // read score
-            score_t score = boost::lexical_cast<score_t>(s);
+            score_t score = lexical_cast<score_t>(s);
             // read complexity
             complexity_t complexity;
             in >> complexity;
@@ -334,7 +353,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
                 string cmdline =
                     build_cmdline(vm, tr, hpm_it->first,
-                                  pa.max_evals - mp.n_evals());
+                                  pa.max_evals - mp.n_evals(), gen_idx);
 
                 proc_map::value_type pmv(launch_cmd(cmdline));
                 hpm_it->second.insert(pmv);
