@@ -539,7 +539,7 @@ public:
 /// of std::pair for non-boolean case. Here with T = bool it's fine
 /// though.
 class ctruth_table : public std::map<std::vector<bool>, std::pair<unsigned, unsigned> > {
-    typedef typename std::map<std::vector<bool>, std::pair<unsigned, unsigned> > super;
+    typedef std::map<std::vector<bool>, std::pair<unsigned, unsigned> > super;
 public:
     void set_binding(const std::vector<bool>& args) const {
         for(size_t i = 0; i < args.size(); ++i) {
