@@ -86,7 +86,7 @@ float EvaluationLinkSimilarityEvaluator::computeHandleSimilarity(AtomSpace& a, H
     HandleSeq set = a.getIncoming(h1);
     HandleSeq::iterator si;
     bool found = false;
-    for (si = set.begin(); (! found) && (si != set.end()); si++) {
+    for (si = set.begin(); (! found) && (si != set.end()); ++si) {
         //printf("set.next\n");
         //printf("set.handle = %s\n", a.atomAsString(*si).c_str());
         Handle sh = *si;

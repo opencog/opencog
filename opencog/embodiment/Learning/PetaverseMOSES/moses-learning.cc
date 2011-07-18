@@ -253,7 +253,7 @@ const combo_tree& moses_learning::current_program()
 {
     //returns the best program which has never been sent to the owner
     for(metapop_t::const_iterator mci = metapop->begin();
-        mci != metapop->end(); mci++)  {
+        mci != metapop->end(); ++mci)  {
         _current_program = get_tree(*mci);
 
         // if this one has already been sent, check the next one

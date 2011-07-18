@@ -303,7 +303,7 @@ std::string BehaviorDescriptionMatcher::toStringAllSets(BehaviorCategory &catego
     std::set<PredicateHandleSet>::iterator it = allSets.begin();
     while (it != allSets.end()) {
         answer.append((*it).toString(*atomSpace));
-        it++;
+        ++it;
         if (it != allSets.end()) {
             answer.append(",");
         }
@@ -326,7 +326,7 @@ std::string BehaviorDescriptionMatcher::toStringMapping(BehaviorCategory &catego
         answer.append("->");
         answer.append((*it).second.toString(*atomSpace));
         answer.append(")");
-        it++;
+        ++it;
         if (it != mapping.end()) {
             answer.append(",");
         } else {
@@ -359,7 +359,7 @@ std::string BehaviorDescriptionMatcher::toStringSetDistribution(BehaviorCategory
             }
         }
         answer.append("}");
-        it++;
+        ++it;
         answer.append("\n");
         if (it == setDistribution.end()) {
             break;
@@ -472,7 +472,7 @@ std::string BehaviorDescriptionMatcher::toStringBounds(BehaviorCategory &categor
         answer.append(tmp);
         sprintf(tmp, "%ld)\n", upperBound[*it]);
         answer.append(tmp);
-        it++;
+        ++it;
     }
 
     return answer;
@@ -491,7 +491,6 @@ float BehaviorDescriptionMatcher::computeIntervalFitness(CompositeBehaviorDescri
 
     float sum = 0;
     for (unsigned int i = 0; i < sets.size(); i++) {
-        long d;
         long t = intervals[i];
         long ub = upperBound[mapping[sets[i]]];
         long lb = lowerBound[mapping[sets[i]]];
@@ -500,6 +499,7 @@ float BehaviorDescriptionMatcher::computeIntervalFitness(CompositeBehaviorDescri
         if ((lb <= t) && (t <= ub)) {
             v = 1;
         } else {
+            long d;
             if (t > ub) {
                 d = t - ub;
             } else {
@@ -717,8 +717,8 @@ void BehaviorDescriptionMatcher::computeSucessorMatrix(BehaviorCategory &categor
             unsigned int j = 0;
             while (it != allSets.end()) {
                 matrixIndex[*it] = j;
-                j++;
-                it++;
+                ++j;
+                ++it;
             }
         }
 
@@ -786,12 +786,12 @@ float BehaviorDescriptionMatcher::computeSetsDistributionFitness(CompositeBehavi
         }
     }
 
-    if (bdSetsNoRepetition.size() == 0) {
+    if (bdSetsNoRepetition.empty()) {
         return 0;
     }
 
     float sum = 0;
-    for (std::set<PredicateHandleSet>::iterator it = bdSetsNoRepetition.begin(); it != bdSetsNoRepetition.end(); it++) {
+    for(std::set<PredicateHandleSet>::iterator it = bdSetsNoRepetition.begin(); it != bdSetsNoRepetition.end(); ++it) {
         //printf("count[%s] = %d\n", (*it).toString().c_str(), bdCount[*it]);
         if (! relevanceFlag) {
             //printf("mapping[%s] = %s\n", (*it).toString().c_str(), mapping[*it].toString().c_str());
@@ -804,7 +804,7 @@ float BehaviorDescriptionMatcher::computeSetsDistributionFitness(CompositeBehavi
         } else {
             v = setDistribution[mapping[*it]];
         }
-        if (v.size() == 0) {
+        if (v.empty()) {
             return 0;
         }
         float s = 0;
@@ -895,7 +895,7 @@ float BehaviorDescriptionMatcher::intersectionOverUnion(const PredicateHandleSet
 {
 
     int intersectionSize = 0;
-    for (std::set<Handle>::iterator it = set1.getSet().begin(); it != set1.getSet().end(); it++) {
+    for (std::set<Handle>::iterator it = set1.getSet().begin(); it != set1.getSet().end(); ++it) {
         if (set2.getSet().find(*it) != set2.getSet().end()) {
             intersectionSize++;
         }
@@ -908,9 +908,9 @@ float BehaviorDescriptionMatcher::weightedIntersectionOverUnion(const PredicateH
 {
 
     float intersectionSize = 0;
-    for (std::set<Handle>::iterator it1 = set1.getSet().begin(); it1 != set1.getSet().end(); it1++) {
+    for (std::set<Handle>::iterator it1 = set1.getSet().begin(); it1 != set1.getSet().end(); ++it1) {
         float bestSimilarity = 0;
-        for (std::set<Handle>::iterator it2 = set2.getSet().begin(); it2 != set2.getSet().end(); it2++) {
+        for (std::set<Handle>::iterator it2 = set2.getSet().begin(); it2 != set2.getSet().end(); ++it2) {
             float similarity = EvaluationLinkSimilarityEvaluator::similarity(*atomSpace, *it1, *it2);
             if (similarity > bestSimilarity) {
                 bestSimilarity = similarity;
@@ -929,7 +929,7 @@ void BehaviorDescriptionMatcher::buildMapping(BehaviorCategory &category, Compos
 
     std::vector<PredicateHandleSet> bdSets = behaviorDescription.getTimelineSets();
 
-    if ((allSets.size() == 0) || (bdSets.size() == 0)) {
+    if (allSets.empty() || bdSets.empty()) {
         return;
     }
 
@@ -939,7 +939,7 @@ void BehaviorDescriptionMatcher::buildMapping(BehaviorCategory &category, Compos
     for (unsigned int i = 0; i < bdSets.size(); i++) {
         //printf("mapping %s\n", bdSets[i].toString(*atomSpace).c_str());
         float betterSimilarity = -1;
-        for (std::set<PredicateHandleSet>::iterator it = allSets.begin(); it != allSets.end(); it++) {
+        for (std::set<PredicateHandleSet>::iterator it = allSets.begin(); it != allSets.end(); ++it) {
             //printf("comparing against %s\n", (*it).toString(*atomSpace).c_str());
             float similarity = computeSetSimilarity(bdSets[i], *it);
             //printf("similarity = %f\n", similarity);
@@ -963,7 +963,7 @@ void BehaviorDescriptionMatcher::computeSetDistribution(BehaviorCategory &catego
 
     setDistribution.clear();
 
-    for (std::set<PredicateHandleSet>::iterator it = allSets.begin(); it != allSets.end(); it++) {
+    for (std::set<PredicateHandleSet>::iterator it = allSets.begin(); it != allSets.end(); ++it) {
         //printf("computing %s\n", (*it).toString().c_str());
         std::vector<CompositeBehaviorDescription> entries = category.getEntries();
         for (unsigned int i = 0; i < entries.size(); i++) {

@@ -58,7 +58,7 @@ unsigned int CompositeBehaviorDescription::size() const
 void CompositeBehaviorDescription::clear()
 {
 
-    if (entries.size() == 0) {
+    if (entries.empty()) {
         return;
     }
 
@@ -390,13 +390,13 @@ std::string CompositeBehaviorDescription::toStringTimeline(
         answer.append("(");
         answer.append("{");
         std::vector<std::string> names;
-        for (std::set<Handle>::iterator it = timelineSets[i].getSet().begin(); it != timelineSets[i].getSet().end(); it++) {
+        for (std::set<Handle>::iterator it = timelineSets[i].getSet().begin(); it != timelineSets[i].getSet().end(); ++it) {
             //the assert below is here to insure that the atom is a node
             OC_ASSERT(atomspace->isNode(*it));
             names.push_back(atomspace->getName(*it));
         }
         std::sort(names.begin(), names.end());
-        for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); it++) {
+        for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {
             if (it != names.begin()) {
                 answer.append(",");
             }

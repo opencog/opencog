@@ -50,7 +50,7 @@ public:
      */
     static void retrieveExemplar(CompositeBehaviorDescription& bd,
                                  const WorldProvider& wp,
-                                 const std::string trick_name,
+                                 const std::string& trick_name,
                                  const Temporal& temp);
     /**
      * as previously but uses directly the Handle of a trick concept node

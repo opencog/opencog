@@ -71,19 +71,17 @@ int main(int argc, char *argv[])
     try  {
         static_cast<LS&>(server()).CogServer::serverLoop();
 
-    } catch (std::bad_alloc) {
+    } catch(std::bad_alloc) {
         logger().error(
                      "LSExec - LS raised a bad_alloc exception.");
-    } catch (StandardException se) {
-        logger().error(
-                     "OAC executable - An exceptional situation occured"
-                     " with the following message '%s'"
-                     ". Check log for more information.",
-                     se.getMessage());
+    } catch(const StandardException& se) {
+        logger().error("OAC executable - An exceptional situation occured"
+                       " with the following message '%s'"
+                       ". Check log for more information.",
+                       se.getMessage());
     } catch (...) {
-        logger().error(
-                     "LSExec - An exceptional situation occured."
-                     " Check log for more information.");
+        logger().error("LSExec - An exceptional situation occured."
+                       " Check log for more information.");
     }
 
     return (0);

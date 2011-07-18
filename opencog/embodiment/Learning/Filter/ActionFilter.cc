@@ -69,7 +69,7 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                      " as argument lists");
     std::vector<CompositeBehaviorDescription>::const_iterator ie = cbds.begin();
     argument_list_list_const_it alci = all.begin();
-    for (; ie != cbds.end(); ie++, alci++)
+    for (; ie != cbds.end(); ++ie, ++alci)
         insertActionSubseqs(actSubseq_set, *ie, *alci,
                             max_size, only_min_max);
 }
@@ -358,21 +358,16 @@ void ActionFilter::completePrefixOperands(std::set< std::vector<vertex> >& prefi
         generatePossibleOperands(opra_set, operand, al, smh, time);
         //base case
         if (prefix_opras.empty()) {
-            for (std::set<vertex>::const_iterator asi = opra_set.begin();
-                    asi != opra_set.end(); asi++) {
-                std::vector<vertex> vv;
-                vv.push_back(*asi);
+            foreach(const vertex& v, opra_set) {
+                std::vector<vertex> vv(1, v);
                 prefix_opras.insert(vv);
             }
         } else {
             std::set< std::vector<vertex> > prefix_opras_copy = prefix_opras;
             prefix_opras.clear();
-            for (std::set< std::vector<vertex> >::const_iterator si =
-                        prefix_opras_copy.begin(); si != prefix_opras_copy.end(); si++) {
-                for (std::set<vertex>::const_iterator asi = opra_set.begin();
-                        asi != opra_set.end(); asi++) {
-                    std::vector<vertex> vv = *si;
-                    vv.push_back(*asi);
+            foreach(std::vector<vertex> vv, prefix_opras_copy) {
+                foreach(const vertex& v, opra_set) {
+                    vv.push_back(v);
                     prefix_opras.insert(vv);
                 }
             }

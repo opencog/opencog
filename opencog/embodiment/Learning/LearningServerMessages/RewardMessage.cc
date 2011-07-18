@@ -25,6 +25,7 @@
 #include "RewardMessage.h"
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/StringManipulator.h>
+#include <opencog/util/foreach.h>
 #include "stdlib.h"
 
 using namespace opencog::learningserver::messages;
@@ -72,8 +73,8 @@ const char * RewardMessage::getPlainTextRepresentation()
     message.append(schema);
     message.append(END_TOKEN);
 
-    for ( std::vector<std::string>::iterator it = schemaArguments.begin(); it != schemaArguments.end(); it++ ) {
-        message.append(*it);
+    foreach(const std::string& sa, schemaArguments) {
+        message.append(sa);
         message.append(END_TOKEN);
     }
     message.append(candidateSchema);

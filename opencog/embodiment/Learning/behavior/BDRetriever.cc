@@ -37,7 +37,7 @@ using namespace opencog;
 
 void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
                                    const WorldProvider& wp,
-                                   const std::string name,
+                                   const std::string& name,
                                    const Temporal& temp)
 {
     Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, name);

@@ -79,7 +79,7 @@ public:
      */
     Handle getCurrentMapHandle();
 
-    unsigned long getCurrentTime();
+    unsigned long getCurrentTime() const;
 
     AtomSpace& getAtomSpace() const;
 

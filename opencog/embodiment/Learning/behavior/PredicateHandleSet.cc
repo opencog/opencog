@@ -58,7 +58,7 @@ bool PredicateHandleSet::equals(const PredicateHandleSet &other) const
     }
 
     std::set<Handle>::iterator it1, it2;
-    for (it1 = handles.begin(), it2 = other.handles.begin(); it1 != handles.end(); it1++, it2++ ) {
+    for (it1 = handles.begin(), it2 = other.handles.begin(); it1 != handles.end(); ++it1, ++it2) {
         if (*it1 != *it2) {
             return false;
         }
@@ -85,7 +85,7 @@ std::string PredicateHandleSet::toString(AtomSpace &atomspace) const
             str = atomspace.atomAsString((*it));
         }
         answer.append(str);
-        it++;
+        ++it;
         if (it != handles.end()) {
             answer.append(",");
         }
@@ -119,7 +119,7 @@ PredicateHandleSet &PredicateHandleSet::operator=(const PredicateHandleSet & oth
     //printf("operator %s = %s\n", toString().c_str(), other.toString().c_str());
 
     handles.clear();
-    for (std::set<Handle>::iterator it = other.handles.begin(); it != other.handles.end(); it++) {
+    for (std::set<Handle>::iterator it = other.handles.begin(); it != other.handles.end(); ++it) {
         handles.insert(*it);
     }
     //printf("exiting operator %s = %s\n", toString().c_str(), other.toString().c_str());
@@ -153,8 +153,8 @@ bool PredicateHandleSet::operator<(const PredicateHandleSet& other) const
                 //printf("false 1\n");
                 return false;
             } else {
-                it1++;
-                it2++;
+                ++it1;
+                ++it2;
                 if (it1 == handles.end()) {
                     if (it2 == other.handles.end()) {
                         //printf("false 2\n");
@@ -193,7 +193,7 @@ int PredicateHandleSet::hashCode()
     int hashCode = 0;
 
     std::set<Handle>::iterator it;
-    for (it = handles.begin(); it != handles.end(); it++ ) {
+    for (it = handles.begin(); it != handles.end(); ++it) {
         hashCode += (int) (it->value());
     }
 

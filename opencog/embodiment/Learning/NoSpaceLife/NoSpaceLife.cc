@@ -109,7 +109,7 @@ Handle NoSpaceLife::getCurrentMapHandle()
     return _currentMapHandle;
 }
 
-unsigned long NoSpaceLife::getCurrentTime()
+unsigned long NoSpaceLife::getCurrentTime() const
 {
     return _currentTime;
 }
