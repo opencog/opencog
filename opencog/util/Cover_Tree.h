@@ -32,6 +32,7 @@
 #include <iostream>
 
 /**
+ * https://github.com/DNCrane/Cover-Tree
  * Cover Tree. Allows for insertion, removal, and k-nearest-neighbor
  * queries.
  *
