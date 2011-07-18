@@ -84,7 +84,7 @@ class ann_node
 {
 public:
     ann_node(ann_nodetype type, int _tag = 0, ann_node* _ptr=NULL)
-        : memory_ptr(_ptr), activation(0.0), tag(_tag), nodetype(type) {}
+        : visited(false), memory_ptr(_ptr), activation(0.0), tag(_tag), nodetype(type) {}
 
     bool visited; //used for constructing combotrees
     int counter; //used for determining network depth
@@ -445,8 +445,8 @@ public:
     //memory inputs are fed by the hidden nodes they
     //are connected to
     void load_inputs(double* vals) {
-        unsigned int counter=0;
-        for (unsigned int x = 0;x < inputs.size();++x) {
+        unsigned counter = 0;
+        for (unsigned x = 0;x < inputs.size();++x) {
             if(inputs[x]->memory_ptr)
                 inputs[x]->activation = inputs[x]->memory_ptr->activation;
             else
@@ -455,8 +455,8 @@ public:
     }
 
     void load_inputs(const vector<double>& vals) {
-        unsigned int counter = 0;
-        for (unsigned int x = 0;x < inputs.size();++x) {
+        unsigned counter = 0;
+        for (unsigned x = 0;x < inputs.size();++x) {
             if(inputs[x]->memory_ptr)
                 inputs[x]->activation = inputs[x]->memory_ptr->activation;
             else

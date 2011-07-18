@@ -184,6 +184,10 @@ typedef std::set<vertex> vertex_set;
 typedef vertex_set::iterator vertex_set_it;
 typedef vertex_set::const_iterator vertex_set_const_it;
 
+typedef std::set<vertex> operator_set;
+typedef operator_set::iterator operator_set_it;
+typedef operator_set::iterator operator_set_const_it;
+
 typedef std::vector<vertex> argument_list;
 typedef argument_list::iterator argument_list_it;
 typedef argument_list::const_iterator argument_list_const_it;
@@ -482,9 +486,11 @@ inline size_t hash_value(const vertex& v)
     return 0;
 }
 
-//typedef util::hash_set<vertex,boost::hash<vertex> > vset;
-//typedef std::set<vertex> vset;
-typedef opencog::tree<vertex> combo_tree;
+typedef tree<vertex> combo_tree;
+// ns stands for normal size
+typedef std::set<combo_tree, size_tree_order<vertex> > combo_tree_ns_set;
+typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
+typedef combo_tree_ns_set::const_iterator combo_tree_ns_set_const_it;
 
 template<typename T>
 inline bool is_associative(const T& v)

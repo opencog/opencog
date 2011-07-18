@@ -31,11 +31,11 @@
 #include "../moses/ann_scoring.h"
 #include "../moses/representation.h"
 
+using namespace std;
+using namespace boost;
+using namespace opencog;
 using namespace moses;
 using namespace reduct;
-using namespace boost;
-using namespace std;
-using namespace opencog;
 
 int main(int argc, char** argv)
 {
@@ -52,7 +52,6 @@ int main(int argc, char** argv)
         //    throw "foo";
         max_evals=lexical_cast<int>(argv[1]);
         seed=lexical_cast<int>(argv[2]);
-        
         
         set_stepsize(lexical_cast<double>(argv[3]));
         set_expansion(lexical_cast<double>(argv[4]));

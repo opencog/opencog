@@ -12,11 +12,11 @@
 #include <opencog/util/Logger.h>
 #include <opencog/learning/moses/moses/representation.h>
 
+using namespace std;
+using namespace boost;
+using namespace opencog;
 using namespace moses;
 using namespace reduct;
-using namespace boost;
-using namespace std;
-using namespace opencog;
 
 
 int main(int argc, char** argv)

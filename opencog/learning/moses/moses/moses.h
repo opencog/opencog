@@ -29,9 +29,7 @@
 namespace opencog {
  namespace moses {
 
-typedef std::set<combo::vertex> operator_set;
-typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> >
-combo_tree_ns_set;
+using namespace combo;
 
 static const operator_set empty_ignore_ops = operator_set();
 

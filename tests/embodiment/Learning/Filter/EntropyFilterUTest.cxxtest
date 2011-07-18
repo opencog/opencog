@@ -38,10 +38,10 @@
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 //using namespace behavior;
-using namespace PetCombo;
 using namespace std;
-using namespace opencog::control;
 using namespace opencog;
+using namespace PetCombo;
+using namespace opencog::control;
 
 #define ENTROPY_THRESHOLD 0.1
 
@@ -344,7 +344,7 @@ public:
         ef.updatePerceptToTime(10*TIME_INTERVAL, 12*TIME_INTERVAL, al);
         ef.updatePerceptToTime(20*TIME_INTERVAL, 22*TIME_INTERVAL, al);
 
-        combo_tree_ns_set filteredPerceptions;
+        combo::combo_tree_ns_set filteredPerceptions;
         ef.generateFilteredPerceptions(filteredPerceptions, ENTROPY_THRESHOLD);
 
         std::cout << std::endl;

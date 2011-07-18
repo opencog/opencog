@@ -33,11 +33,11 @@
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
 
+using namespace std;
+using namespace boost;
+using namespace opencog;
 using namespace moses;
 using namespace reduct;
-using namespace boost;
-using namespace std;
-using namespace opencog;
 
 
 int main(int argc, char** argv)

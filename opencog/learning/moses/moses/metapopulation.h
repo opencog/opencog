@@ -47,10 +47,7 @@ namespace moses {
 
 using boost::logic::tribool;
 using boost::logic::indeterminate;
-
-typedef std::set<combo::vertex> operator_set;
-typedef std::set<combo::combo_tree,
-                 size_tree_order<combo::vertex> > combo_tree_ns_set;
+using namespace combo;
 
 /**
  * parameters about deme management
@@ -98,8 +95,8 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
         composite_score csc2 = get_composite_score(bs_tr2);
         return csc1 > csc2
             || (!(csc1 < csc2) && 
-                size_tree_order<combo::vertex>()(get_tree(bs_tr1),
-                                                          get_tree(bs_tr2)));
+                size_tree_order<vertex>()(get_tree(bs_tr1),
+                                          get_tree(bs_tr2)));
     }
 };
     
@@ -157,7 +154,7 @@ struct metapopulation : public set < bscored_combo_tree,
      */
     metapopulation(RandGen& _rng,
                    const std::vector<combo_tree>& bases,
-                   const combo::type_tree& tt,
+                   const type_tree& tt,
                    const reduct::rule& si_ca,
                    const reduct::rule& si_kb,
                    const Scoring& sc, const BScoring& bsc,
@@ -176,7 +173,7 @@ struct metapopulation : public set < bscored_combo_tree,
     // eventually removed
     metapopulation(RandGen& _rng,
                    const combo_tree& base,
-                   const combo::type_tree& tt,
+                   const type_tree& tt,
                    const reduct::rule& si,
                    const Scoring& sc, const BScoring& bsc,
                    const Optimization& opt = Optimization(),

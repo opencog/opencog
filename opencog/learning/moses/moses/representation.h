@@ -33,11 +33,11 @@
 #include "using.h"
 #include "knob_mapper.h"
 
+namespace opencog { namespace moses {
+
 void set_stepsize(double new_ss);
 void set_expansion(double new_ex);
 void set_depth(int new_depth);
-
-namespace opencog { namespace moses {
 
 /**
  * Do the representation-building, create a field_set

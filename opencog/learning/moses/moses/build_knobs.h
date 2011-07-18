@@ -33,18 +33,9 @@
 #include <opencog/comboreduct/combo/action.h>
 #include <opencog/comboreduct/combo/perception.h>
 
-using namespace opencog::combo;
-
-typedef std::set<vertex> operator_set;
-typedef operator_set::iterator operator_set_it;
-
-typedef std::set<combo_tree, opencog::size_tree_order<vertex> >
-combo_tree_ns_set;
-typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
-
-
-
 namespace opencog { namespace moses {
+
+using namespace combo;
 
 //need to call a generator method... (dispatched based on type
 

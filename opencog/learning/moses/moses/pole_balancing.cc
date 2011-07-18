@@ -123,9 +123,8 @@ double CartPole::evalNet(ann *net)
             return (double) balanced_sum;
  
         //Sum last 100
-        double jiggletotal; //total jiggle in last 100
+        double jiggletotal = 0; //total jiggle in last 100
         if ((steps>100)&&(!nmarkov_long)) {
-            jiggletotal=0;
             cout<<"step "<<steps-99-2<<" to step "<<steps-2<<endl;
             //Adjust for array bounds and count
             for(int count = steps-99-2; count<=steps-2; ++count)

@@ -47,15 +47,6 @@ using namespace opencog;
 using namespace combo;
 using namespace reduct;
 
-//ns = normal size
-typedef std::set<combo_tree, size_tree_order<vertex> > combo_tree_ns_set;
-typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
-typedef combo_tree_ns_set::const_iterator combo_tree_ns_set_const_it;
-
-typedef std::set<vertex> operator_set;
-typedef operator_set::iterator operator_set_it;
-typedef operator_set::const_iterator operator_set_const_it;
-
 typedef std::set<vertex> object_set;
 typedef object_set::iterator object_set_it;
 typedef object_set::const_iterator object_const_set_it;

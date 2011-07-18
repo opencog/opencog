@@ -33,6 +33,8 @@
 #include "representation.h"
 #include "build_knobs.h"
 
+namespace opencog { namespace moses {
+
 static contin_t stepsize = 1.0;
 static contin_t expansion = 1.0;
 static int depth = 4;
@@ -51,8 +53,6 @@ void set_depth(int new_depth)
 {
     depth = new_depth;
 }
-
-namespace opencog { namespace moses {
 
 representation::representation(const reduct::rule& simplify_candidate,
                                const reduct::rule& simplify_knob_building,
