@@ -1,6 +1,4 @@
 /*
- * opencog/util/Cover_Tree.h
- *
  * Copyright (C) 2011 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
@@ -56,7 +54,7 @@ class CoverTree
     {
     private:
         //_childMap[i] is a vector of the node's children at level i
-        std::map<int,std::vector<CoverTreeNode* > > _childMap;
+        std::map<int,std::vector<CoverTreeNode*> > _childMap;
         //_points is all of the points with distance 0 which are not equal.
         std::vector<Point> _points;
     public:
@@ -68,7 +66,7 @@ class CoverTree
          * Does not include the node itself, though technically every node
          * has itself as a child in a cover tree.
          */
-        std::vector<CoverTreeNode* > getChildren(int level) const;
+        std::vector<CoverTreeNode*> getChildren(int level) const;
         void addChild(int level, CoverTreeNode* p);
         void removeChild(int level, CoverTreeNode* p);
         void addPoint(const Point& p);
@@ -85,35 +83,36 @@ class CoverTree
          * Return every child of the node from any level. This is handy for
          * the destructor.
          */
-        std::vector<CoverTreeNode* > getAllChildren() const;
+        std::vector<CoverTreeNode*> getAllChildren() const;
     }; // CoverTreeNode class
  private:
+    typedef std::pair<double, CoverTreeNode*> distNodePair;
+
     CoverTreeNode* _root;
     unsigned int _numNodes;
     int _maxLevel;//base^_maxLevel should be the max distance
                   //between any 2 points
     int _minLevel;//A level beneath which there are no more new nodes.
 
-    std::vector<CoverTreeNode* >
-        kNearestNodes(const Point& p, const unsigned int& k);
+    std::vector<CoverTreeNode*>
+        kNearestNodes(const Point& p, const unsigned int& k) const;
     /**
      * Recursive implementation of the insert algorithm (see paper).
      */
     bool insert_rec(const Point& p,
-                    const std::vector<std::pair<double, CoverTreeNode* > >& Qi,
+                    const std::vector<distNodePair>& Qi,
                     const int& level);
     
     /**
      * Finds the node in Q with the minimum distance to p. Returns a
      * pair consisting of this node and the distance.
      */
-    std::pair<double, CoverTreeNode* >
-        distance(const Point& p,
-                 const std::vector<CoverTreeNode* >& Q);
+    distNodePair distance(const Point& p,
+                          const std::vector<CoverTreeNode*>& Q);
 
     
     void remove_rec(const Point& p,
-                    std::map<int,std::vector<std::pair<double,CoverTreeNode* > > >& coverSets,
+                    std::map<int,std::vector<distNodePair> >& coverSets,
                     int level,
                     bool& multi);
 
@@ -140,7 +139,7 @@ class CoverTree
      * or equal to base^i distance from its children). See the cover tree
      * papers for details.
      */
-    bool isValidTree();
+    bool isValidTree() const;
 
     /**
      * Insert newPoint into the cover tree. If newPoint is already present,
@@ -163,7 +162,7 @@ class CoverTree
      * is closest to p, 1th is next, etc). It may return greater than k points
      * if there is a tie for the kth place.
      */
-    std::vector<Point> kNearestNeighbors(const Point& p, const unsigned int& k);
+    std::vector<Point> kNearestNeighbors(const Point& p, const unsigned int& k) const;
 
     CoverTreeNode* getRoot() const;
 
@@ -193,41 +192,39 @@ CoverTree<Point>::~CoverTree()
     if(_root==NULL) return;
     //Get all of the root's children (from any level),
     //delete the root, repeat for each of the children
-    std::vector<CoverTreeNode* > nodes;
+    std::vector<CoverTreeNode*> nodes;
     nodes.push_back(_root);
     while(!nodes.empty()) {
         CoverTreeNode* byeNode = nodes[0];
         nodes.erase(nodes.begin());
-        std::vector<CoverTreeNode* > children = byeNode->getAllChildren();
+        std::vector<CoverTreeNode*> children = byeNode->getAllChildren();
         nodes.insert(nodes.begin(),children.begin(),children.end());
         //std::cout << _numNodes << "\n";
         delete byeNode;
-        _numNodes--;
+        //_numNodes--;
     }   
 }
 
 template<class Point>
 std::vector<typename CoverTree<Point>::CoverTreeNode*>
-CoverTree<Point>::kNearestNodes(const Point& p, const unsigned int& k)
+CoverTree<Point>::kNearestNodes(const Point& p, const unsigned int& k) const
 {
-    if(_root==NULL) return std::vector<CoverTreeNode* >();
+    if(_root==NULL) return std::vector<CoverTreeNode*>();
     //maxDist is the kth nearest known point to p, and also the farthest
     //point from p in the set minNodes defined below.
     double maxDist = p.distance(_root->getPoint());
     //minNodes stores the k nearest known points to p.
-    std::set<std::pair<double, CoverTreeNode* > > minNodes;
+    std::set<distNodePair> minNodes;
 
-    minNodes.insert(make_pair(maxDist,
-                              _root));
-    std::vector<std::pair<double,CoverTreeNode* > >
-        Qj(1,make_pair(maxDist,_root));
+    minNodes.insert(make_pair(maxDist,_root));
+    std::vector<distNodePair> Qj(1,make_pair(maxDist,_root));
     for(int level = _maxLevel; level>=_minLevel;level--) {
-        typename std::vector<std::pair<double,CoverTreeNode* > >::const_iterator it;
+        typename std::vector<distNodePair>::const_iterator it;
         int size = Qj.size();
         for(int i=0; i<size; i++) {
-            std::vector<CoverTreeNode* > children =
+            std::vector<CoverTreeNode*> children =
                 Qj[i].second->getChildren(level);
-            typename std::vector<CoverTreeNode* >::const_iterator it2;
+            typename std::vector<CoverTreeNode*>::const_iterator it2;
             for(it2=children.begin(); it2!=children.end(); ++it2) {
                 double d = p.distance((*it2)->getPoint());
                 if(d < maxDist || minNodes.size() < k) {
@@ -251,8 +248,8 @@ CoverTree<Point>::kNearestNodes(const Point& p, const unsigned int& k)
             }
         }
     }
-    std::vector<CoverTreeNode* > kNN;
-    typename std::set<std::pair<double, CoverTreeNode* > >::iterator it;
+    std::vector<CoverTreeNode*> kNN;
+    typename std::set<distNodePair>::const_iterator it;
     for(it=minNodes.begin();it!=minNodes.end();++it) {
         kNN.push_back(it->second);
     }
@@ -260,7 +257,7 @@ CoverTree<Point>::kNearestNodes(const Point& p, const unsigned int& k)
 }
 template<class Point>
 bool CoverTree<Point>::insert_rec(const Point& p,
-                                  const std::vector<std::pair<double, CoverTreeNode* > >& Qi,
+                                  const std::vector<distNodePair>& Qi,
                                   const int& level)
 {
     std::vector<std::pair<double, CoverTreeNode*> > Qj;
@@ -287,7 +284,7 @@ bool CoverTree<Point>::insert_rec(const Point& p,
         return true;
     } else {
         bool found = insert_rec(p,Qj,level-1);
-        //std::pair<double,CoverTreeNode* > minQiDist = distance(p,Qi);
+        //distNodePair minQiDist = distance(p,Qi);
         if(found && minQiDist.first <= sep) {
             if(level-1<_minLevel) _minLevel=level-1;
             minQiDist.second->addChild(level,
@@ -304,23 +301,23 @@ bool CoverTree<Point>::insert_rec(const Point& p,
 
 template<class Point>
 void CoverTree<Point>::remove_rec(const Point& p,
-                                  std::map<int,std::vector<std::pair<double,CoverTreeNode* > > >& coverSets,
+                                  std::map<int,std::vector<distNodePair> >& coverSets,
                                   int level,
                                   bool& multi)
 {
-    std::vector<std::pair<double, CoverTreeNode* > >& Qi = coverSets[level];
-    std::vector<std::pair<double, CoverTreeNode* > >& Qj = coverSets[level-1];
+    std::vector<distNodePair>& Qi = coverSets[level];
+    std::vector<distNodePair>& Qj = coverSets[level-1];
     double minDist = DBL_MAX;
     CoverTreeNode* minNode = _root;
     CoverTreeNode* parent = 0;
     double sep = pow(base, level);
-    typename std::vector<std::pair<double, CoverTreeNode* > >::const_iterator it;
+    typename std::vector<distNodePair>::const_iterator it;
     //set Qj to be all children q of Qi such that p.distance(q)<=sep
     //and also keep track of the minimum distance from p to a node in Qj
     //note that every node has itself as a child, but the
     //getChildren function only returns non-self-children.
     for(it=Qi.begin();it!=Qi.end();++it) {
-        std::vector<CoverTreeNode* > children = it->second->getChildren(level);
+        std::vector<CoverTreeNode*> children = it->second->getChildren(level);
         double dist = it->first;
         if(dist<minDist) {
             minDist = dist;
@@ -329,7 +326,7 @@ void CoverTree<Point>::remove_rec(const Point& p,
         if(dist <= sep) {
             Qj.push_back(*it);
         }
-        typename std::vector<CoverTreeNode* >::const_iterator it2;
+        typename std::vector<CoverTreeNode*>::const_iterator it2;
         for(it2=children.begin();it2!=children.end();++it2) {
             dist = p.distance((*it2)->getPoint());
             if(dist<minDist) {
@@ -343,9 +340,10 @@ void CoverTree<Point>::remove_rec(const Point& p,
         }
     }
     if(level>_minLevel) remove_rec(p,coverSets,level-1,multi);
-    if(minDist == 0.0) {//if minDist is 0.0 then minNode must be removed.
+    if(minNode->hasPoint(p)) {
         //the multi flag indicates the point we removed is from a
-        //node containing multiple points, and we have removed it.
+        //node containing multiple points, and we have removed it,
+        //so we don't need to do anything else.
         if(multi) return;
         if(!minNode->isSingle()) {
             minNode->removePoint(p);
@@ -353,8 +351,8 @@ void CoverTree<Point>::remove_rec(const Point& p,
             return;
         }
         if(parent!=NULL) parent->removeChild(level, minNode);
-        std::vector<CoverTreeNode* > children = minNode->getChildren(level-1);
-        std::vector<std::pair<double, CoverTreeNode* > >& Q = coverSets[level-1];
+        std::vector<CoverTreeNode*> children = minNode->getChildren(level-1);
+        std::vector<distNodePair>& Q = coverSets[level-1];
         if(Q.size()==1 && Q[0].second==minNode) {
             Q.pop_back();
         } else {
@@ -366,7 +364,7 @@ void CoverTree<Point>::remove_rec(const Point& p,
                 }
             }
         }
-        typename std::vector<CoverTreeNode* >::const_iterator it;
+        typename std::vector<CoverTreeNode*>::const_iterator it;
         for(it=children.begin();it!=children.end();++it) {
             int i = level-1;
             Point q = (*it)->getPoint();
@@ -375,9 +373,9 @@ void CoverTree<Point>::remove_rec(const Point& p,
             double sep = pow(base,i);
             bool br=false;
             while(true) {
-                std::vector<std::pair<double, CoverTreeNode* > >&
+                std::vector<distNodePair>&
                     Q = coverSets[i];
-                typename std::vector<std::pair<double, CoverTreeNode* > >::const_iterator it2;
+                typename std::vector<distNodePair>::const_iterator it2;
                 minDQ = DBL_MAX;
                 for(it2=Q.begin();it2!=Q.end();++it2) {
                     double d = q.distance(it2->second->getPoint());
@@ -409,13 +407,13 @@ void CoverTree<Point>::remove_rec(const Point& p,
 }
 
 template<class Point>
-std::pair<double, typename CoverTree<Point>::CoverTreeNode* >
+std::pair<double, typename CoverTree<Point>::CoverTreeNode*>
 CoverTree<Point>::distance(const Point& p,
-                           const std::vector<CoverTreeNode* >& Q)
+                           const std::vector<CoverTreeNode*>& Q)
 {
     double minDist = DBL_MAX;
     CoverTreeNode* minNode;
-    typename std::vector<CoverTreeNode* >::const_iterator it;
+    typename std::vector<CoverTreeNode*>::const_iterator it;
     for(it=Q.begin();it!=Q.end();++it) {
         double dist = p.distance((*it)->getPoint());
         if(dist < minDist) {
@@ -443,7 +441,7 @@ void CoverTree<Point>::insert(const Point& newPoint)
         //insert_rec acts under the assumption that there are no nodes with
         //distance 0 to newPoint in the cover tree (the previous lines check it)
         insert_rec(newPoint,
-                   std::vector<std::pair<double, CoverTreeNode* > >
+                   std::vector<distNodePair>
                    (1,make_pair(_root->distance(newPoint),_root)),
                    _maxLevel);
     }
@@ -477,7 +475,7 @@ void CoverTree<Point>::remove(const Point& p)
             }
         }
     }
-    std::map<int, std::vector<std::pair<double, CoverTreeNode* > > > coverSets;
+    std::map<int, std::vector<distNodePair> > coverSets;
     coverSets[_maxLevel].push_back(make_pair(_root->distance(p),_root));
     if(removingRoot)
         coverSets[_maxLevel].push_back(make_pair(newRoot->distance(p),newRoot));
@@ -492,12 +490,12 @@ void CoverTree<Point>::remove(const Point& p)
 
 template<class Point>
 std::vector<Point> CoverTree<Point>::kNearestNeighbors(const Point& p,
-                                                       const unsigned int& k)
+                                                       const unsigned int& k) const
 {
     if(_root==NULL) return std::vector<Point>();
-    std::vector<CoverTreeNode* > v = kNearestNodes(p, k);
+    std::vector<CoverTreeNode*> v = kNearestNodes(p, k);
     std::vector<Point> kNN;
-    typename std::vector<CoverTreeNode* >::const_iterator it;
+    typename std::vector<CoverTreeNode*>::const_iterator it;
     for(it=v.begin();it!=v.end();++it) {
         const std::vector<Point>& p = (*it)->getPoints();
         kNN.insert(kNN.end(),p.begin(),p.end());
@@ -510,24 +508,24 @@ template<class Point>
 void CoverTree<Point>::print() const
 {
     int d = _maxLevel-_minLevel+1;
-    std::vector<CoverTreeNode* > Q;
+    std::vector<CoverTreeNode*> Q;
     Q.push_back(_root);
     for(int i=0;i<d;i++) {
         std::cout << "LEVEL " << _maxLevel-i << "\n";
-        typename std::vector<CoverTreeNode* >::const_iterator it;
+        typename std::vector<CoverTreeNode*>::const_iterator it;
         for(it=Q.begin();it!=Q.end();++it) {
             (*it)->getPoint().print();
-            std::vector<CoverTreeNode* >
+            std::vector<CoverTreeNode*>
                 children = (*it)->getChildren(_maxLevel-i);
-            typename std::vector<CoverTreeNode* >::const_iterator it2;
+            typename std::vector<CoverTreeNode*>::const_iterator it2;
             for(it2=children.begin();it2!=children.end();++it2) {
                 std::cout << "  ";
                 (*it2)->getPoint().print();
             }
         }
-        std::vector<CoverTreeNode* > newQ;
+        std::vector<CoverTreeNode*> newQ;
         for(it=Q.begin();it!=Q.end();++it) {
-            std::vector<CoverTreeNode* >
+            std::vector<CoverTreeNode*>
                 children = (*it)->getChildren(_maxLevel-i);
             newQ.insert(newQ.end(),children.begin(),children.end());
         }
@@ -551,12 +549,12 @@ template<class Point>
 std::vector<typename CoverTree<Point>::CoverTreeNode*>
 CoverTree<Point>::CoverTreeNode::getChildren(int level) const
 {
-    typename std::map<int,std::vector<CoverTreeNode* > >::const_iterator
+    typename std::map<int,std::vector<CoverTreeNode*> >::const_iterator
         it = _childMap.find(level);
     if(it!=_childMap.end()) {
         return it->second;
     }
-    return std::vector<CoverTreeNode* >();
+    return std::vector<CoverTreeNode*>();
 }
 
 template<class Point>
@@ -568,7 +566,7 @@ void CoverTree<Point>::CoverTreeNode::addChild(int level, CoverTreeNode* p)
 template<class Point>
 void CoverTree<Point>::CoverTreeNode::removeChild(int level, CoverTreeNode* p)
 {
-    std::vector<CoverTreeNode* >& v = _childMap[level];
+    std::vector<CoverTreeNode*>& v = _childMap[level];
     for(unsigned int i=0;i<v.size();i++) {
         if(v[i]==p) {
             v[i]=v.back();
@@ -609,11 +607,7 @@ bool CoverTree<Point>::CoverTreeNode::isSingle() const
 template<class Point>
 bool CoverTree<Point>::CoverTreeNode::hasPoint(const Point& p) const
 {
-    typename std::vector<Point>::const_iterator it;
-    for(it=_points.begin(); it!=_points.end(); it++) {
-        if(p==(*it)) return true;
-    }
-    return false;
+    return find(_points.begin(), _points.end(), p) != _points.end();
 }
 
 template<class Point>
@@ -623,8 +617,8 @@ template<class Point>
 std::vector<typename CoverTree<Point>::CoverTreeNode*>
 CoverTree<Point>::CoverTreeNode::getAllChildren() const
 {
-    std::vector<CoverTreeNode* > children;
-    typename std::map<int,std::vector<CoverTreeNode* > >::const_iterator it;
+    std::vector<CoverTreeNode*> children;
+    typename std::map<int,std::vector<CoverTreeNode*> >::const_iterator it;
     for(it=_childMap.begin();it!=_childMap.end();++it) {
         children.insert(children.end(), it->second.begin(), it->second.end());
     }
@@ -632,15 +626,15 @@ CoverTree<Point>::CoverTreeNode::getAllChildren() const
 }
 
 template<class Point>
-bool CoverTree<Point>::isValidTree() {
+bool CoverTree<Point>::isValidTree() const {
     if(_numNodes==0)
         return _root==NULL;
 
-    std::vector<CoverTreeNode* > nodes;
+    std::vector<CoverTreeNode*> nodes;
     nodes.push_back(_root);
     for(int i=_maxLevel;i>_minLevel;i--) {
         double sep = pow(base,i);
-        typename std::vector<CoverTreeNode* >::const_iterator it, it2;
+        typename std::vector<CoverTreeNode*>::const_iterator it, it2;
         //verify separation invariant of cover tree: for each level,
         //every point is farther than base^level away
         for(it=nodes.begin(); it!=nodes.end(); ++it) {
@@ -652,9 +646,9 @@ bool CoverTree<Point>::isValidTree() {
                 }
             }
         }
-        std::vector<CoverTreeNode* > allChildren;
+        std::vector<CoverTreeNode*> allChildren;
         for(it=nodes.begin(); it!=nodes.end(); ++it) {        
-            std::vector<CoverTreeNode* > children = (*it)->getChildren(i);
+            std::vector<CoverTreeNode*> children = (*it)->getChildren(i);
             //verify covering tree invariant: the children of node n at level
             //i are no further than base^i away
             for(it2=children.begin(); it2!=children.end(); ++it2) {
