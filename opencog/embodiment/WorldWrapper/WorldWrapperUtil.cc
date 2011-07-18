@@ -2923,6 +2923,23 @@ WorldWrapperUtil::getLocation(const SpaceServer::SpaceMap& sm,
 }
 
 double
+WorldWrapperUtil::getAltitude(const SpaceServer::SpaceMap& sm,
+                              const AtomSpace& atomSpace,
+                              const std::string& handleName)
+throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception)
+{
+    if (!sm.containsObject(handleName)) {
+        throw opencog::InvalidParamException(TRACE_INFO,
+                                             "WorldWrapperUtil - Space map does not contain '%s'.",
+                                             handleName.c_str());
+    }
+
+    //const SpaceServer::ObjectMetadata& md = sm.getMetaData(handleName);
+    const spatial::EntityPtr& entity = sm.getEntity( handleName );
+    return entity->getPosition().z;
+}
+
+double
 WorldWrapperUtil::getOrientation(const SpaceServer::SpaceMap& sm,
                                  const AtomSpace& atomSpace,
                                  Handle h) throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception)
