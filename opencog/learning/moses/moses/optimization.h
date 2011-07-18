@@ -66,7 +66,7 @@ inline double information_theoretic_bits(const eda::field_set& fs)
 struct optim_parameters {
     optim_parameters(double _pop_size_ratio = 20,
                      double _terminate_if_gte = 0,
-                     double _max_dist_log_ratio = 2) :
+                     double _max_dist_ratio = 1) :
         term_total(1),
         term_improv(1),
 
@@ -77,7 +77,7 @@ struct optim_parameters {
 
         terminate_if_gte(_terminate_if_gte),
 
-        max_dist_log_ratio(_max_dist_log_ratio) {}
+        max_dist_ratio(_max_dist_ratio) {}
 
     //N=p.popsize_ratio*n^1.05
     inline unsigned pop_size(const eda::field_set& fs) {
@@ -104,7 +104,7 @@ struct optim_parameters {
 
     // log(max_dist_log_ratio*information_theoretic_bits(fs))
     inline unsigned max_distance(const eda::field_set& fs) {
-        double md = log2(max_dist_log_ratio*information_theoretic_bits(fs));
+        double md = max_dist_ratio*log2(information_theoretic_bits(fs));
         return max(1U, numeric_cast<unsigned>(md));
     }
 
@@ -124,7 +124,7 @@ struct optim_parameters {
     double terminate_if_gte;
     // defines the max distance to search during one iteration (used
     // in method max_distance)
-    double max_dist_log_ratio;
+    double max_dist_ratio;
 };
 
 // Parameters specific to EDA optimization

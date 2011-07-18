@@ -220,6 +220,7 @@ int moses_exec(int argc, char** argv) {
     // optim_param
     double pop_size_ratio;
     double max_score;
+    double max_dist_ratio;
     // hc_param
     bool hc_terminate_if_improvement;
 
@@ -348,6 +349,9 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&max_score)->default_value(0),
          "The max score to reach, once reached MOSES halts.\n")
+        (opt_desc_str(max_dist_ratio_opt).c_str(),
+         value<double>(&max_dist_ratio)->default_value(1),
+         "The max distance from the exemplar to explore a deme is determined by that value * log2(information_theoretic_bits(deme)).\n")
         (opt_desc_str(ignore_bscore_opt).c_str(),
          value<bool>(&ignore_bscore)->default_value(false),
          "Ignore the behavioral score when merging candidates in the population. This option is useful either when the problem has no obvious behavioral score, or it happens that dominated candidates worth keeping.\n")
@@ -446,7 +450,7 @@ int moses_exec(int argc, char** argv) {
                                    revisit, ignore_bscore);
 
     // set optim_parameters
-    optim_parameters opt_params(pop_size_ratio, max_score);
+    optim_parameters opt_params(pop_size_ratio, max_score, max_dist_ratio);
 
     // set moses_parameters
     moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);
