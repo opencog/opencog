@@ -180,13 +180,14 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 
     // Store the result and update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
     // TODO: Use PLN forward chainer to handle this?
-    atomSpace.setTV( this->hDemandGoal,
-                     SimpleTruthValue(atof(scheme_return_value.c_str()), 1.0f)
-                   );
+    SimpleTruthValue demand_satisfaction = SimpleTruthValue(atof(scheme_return_value.c_str()), 1.0f); 
 
-    atomSpace.setTV( this->hFuzzyWithin,
-                     SimpleTruthValue(atof(scheme_return_value.c_str()), 1.0f)
-                   );
+    atomSpace.setTV(this->hDemandGoal, demand_satisfaction);
+
+    // Add AtTimeLink around EvaluationLink of  DemandGoal, which is required by fishgram
+    atomSpace.getTimeServer().addTimeInfo(this->hDemandGoal, timeStamp, demand_satisfaction); 
+
+    atomSpace.setTV( this->hFuzzyWithin, demand_satisfaction); 
 
     this->currentDemandTruthValue = atof(scheme_return_value.c_str());
 
