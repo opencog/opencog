@@ -362,6 +362,10 @@ int OAC::addRulesToAtomSpace()
                                             this->getPet().getPetId() + 
                                             "\") )";
 
+    scheme_expression += "(define agentSemeNode (SemeNode \"" +
+                                                 this->getPet().getPetId() +
+                                                 "\") )";
+
     scheme_expression += "(set! OWNER_HANDLE (get_owner_handle \"" + 
                                               this->getPet().getOwnerId() + 
                                              "\") )";
