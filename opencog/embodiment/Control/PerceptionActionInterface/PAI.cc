@@ -513,7 +513,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processMapInfo((DOMElement *)list->item(i), toUpdateHandles);
     }
-    logger().debug("PAI - Processing %d map-infos done", list->getLength());
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d map-infos done", list->getLength());
 
     // getting <pet-signal> elements from the XML message
     XMLString::transcode(PET_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -522,7 +523,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processPetSignal((DOMElement *)list->item(i));
     }
-    logger().debug("PAI - Processing %d pet-signals done", list->getLength());
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d pet-signals done", list->getLength());
 
     // getting <avatar-signal> elements from the XML message
     XMLString::transcode(AVATAR_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -531,7 +533,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAvatarSignal((DOMElement *)list->item(i));
     }
-    logger().debug("PAI - Processing %d avatar-signal done", list->getLength());
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d avatar-signal done", list->getLength());
 
     // getting <agent-signal> elements from the XML message
     XMLString::transcode(AGENT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -540,7 +543,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAgentSignal((DOMElement *)list->item(i));
     }
-    logger().debug("PAI - Processing %d agent-signals done", list->getLength());
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d agent-signals done", list->getLength());
 
     // getting <object-signal> elements from the XML message
     XMLString::transcode(OBJECT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -549,7 +553,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processObjectSignal((DOMElement *)list->item(i));
     }
-    logger().debug("PAI - Processing %d object-signals done", list->getLength());
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d object-signals done", list->getLength());
 
     // getting <instructions> elements from the XML message
     XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -558,7 +563,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processInstruction((DOMElement *)list->item(i));
     }
-    logger().debug("PAI - Processing %d instructions done", list->getLength());
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d instructions done", list->getLength());
 
     // getting <agent-sensor-info> elements from the XML message
     XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -567,7 +573,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAgentSensorInfo((DOMElement *)list->item(i));
     } // for
-    logger().debug("PAI - Processing %d agent-sensor-infos done", list->getLength());
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d agent-sensor-infos done", list->getLength());
 }
 
 void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
