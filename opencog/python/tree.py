@@ -38,6 +38,9 @@ class tree:
         else:
             return '(' + str(self.op) + ' '+ ' '.join(map(str, self.args)) + ')'
 
+    def __repr__(self):
+        return str(self)
+
     def __hash__(self):
         return hash( self.to_tuple() )
 
@@ -86,6 +89,33 @@ def atom_from_tree(tree, a):
 def find(template, atoms):
     return [a for a in atoms if unify(tree_from_atom(a), template, {}) != None]
 
+class Match(object):
+    def __init__(self, subst = {}, atoms = []):
+        self.subst = subst
+        self.atoms = atoms
+    
+    def __eq__(self, other):
+        return self.subst == other.subst and self.atoms == other.atoms
+
+def find_conj(conj, atoms, match = Match()):
+    if conj == ():
+        return [match]
+    
+    ret = []
+    for a in atoms:
+        s2 = unify(conj[0], tree_from_atom(a), match.subst)
+        if s2 != None:
+            match2 = Match(s2, match.atoms+[a])
+            
+            #print pp(match2.subst), pp(match2.atoms)
+            
+            later = find_conj(conj[1:], atoms, match2)
+            
+            for final_match in later:
+                if final_match not in ret:
+                    ret.append(final_match)
+    return ret
+
 def apply_rule(precedent, conclusion, atoms):
     ret = []
     for x in atoms:
@@ -122,9 +152,7 @@ def unify(x, y, s,  vars_only = False):
     elif isinstance(y, tree) and y.is_variable():
         return unify_var(y, x, s, vars_only)
         
-    elif isinstance(x, tree):
-        assert isinstance(y, tree)
-
+    elif isinstance(x, tree) and isinstance(y, tree):
         s2 = unify(x.op, y.op, s, vars_only)
         return unify(x.args,  y.args, s2, vars_only)
 
@@ -197,29 +225,46 @@ def subst(s, x):
         #return tuple([x[0]]+ [subst(s, arg) for arg in x[1:]])
         return tree(x.op, [subst(s, arg) for arg in x.args])
 
+def subst_conjunction(substitution, conjunction):
+    ret = []
+    for tr in conjunction:
+        ret.append(subst(substitution, tr))
+    return tuple(ret)
+
+def subst_from_binding(binding):
+    return dict([ (tree(i), obj) for i, obj in enumerate(binding)])
+
+def bind_conj(conj, b):
+    return subst_conjunction(subst_from_binding(b), conj)
+
 def standardize_apart(tree, dic={}):
-    """Replace all the variables in tree with new variables.
-    >>> standardize_apart(expr('F(a, b, c) & G(c, A, 23)'))
-    (F(v_1, v_2, v_3) & G(v_3, A, 23))
-    >>> is_variable(standardize_apart(expr('x')))
-    True
-    """
+    """Replace all the variables in tree with new variables."""
 
     if tree.is_variable:
         if tree in dic:
             return dic[tree]
         else:
-            standardize_apart.counter += 1
-            v = standardize_apart.counter
+            v = new_var()
             dic[tree] = v
             return v
     elif not isinstance(tree, tuple):
         return tree
-    else: 
+    else:
         return tuple([tree[0]]+
                     [standardize_apart(a, dic) for a in tree[1:]])
 
-standardize_apart.counter = 0
+#def standardize_apart_subst(s, dic={}):
+#    """Replace all the variables in subst with new variables."""
+#    new_s = dict(
+#                 ( (new_var(), new_var()) for (v1, v2) in s.items() )
+#                 )
+
+def new_var():
+    new_var.counter += 1
+    return tree(new_var.counter)
+
+new_var.counter = 10**6
+
 
 # These functions print their arguments in a standard order
 # to compensate for the random order in the standard representation

@@ -149,7 +149,8 @@ class ForestExtractor:
         """Whether to include a given atom in the results. If it is not included, all trees containing it will be ignored as well."""
         if atom.is_node():
             if atom.name in ["proximity", "near", 'next', "AGISIM_rotation", "AGISIM_position", "SpaceMap", "inside_pet_fov", 'turn', # 'walk',
-                             'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst']: # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
+                             'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst',  # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
+                             'far', 'left_of', 'right_of', 'between', 'inside', 'outside', 'touching', 'above', 'below', 'behind', 'in_front_of', 'beside']:
                 return False
         else:
             if (atom.is_a(t.SimultaneousEquivalenceLink) or atom.is_a(t.SimilarityLink) or atom.is_a(t.ImplicationLink) or atom.is_a(t.ReferenceLink) ):
@@ -171,29 +172,58 @@ class ForestExtractor:
 
     # tr = fish.forest.all_trees[0]
     # fish.forest.lookup_embeddings((tr,))
-    def lookup_embeddings(self, conj, s = {}):
+    def lookup_embeddings(self, conj):
         """Given a conjunction, do a naive search for all embeddings. Fishgram usually finds the embeddings as part of the search,
         which is probably more efficient. But this is simpler and guaranteed to be correct. So it is useful for testing and performance comparison.
         It could also be used to find (the embeddings for) extra conjunctions that fishgram has skipped
-       (which would be useful for the calculations used when finding implication rules)."""
-       
-       # Find all compatible embeddings. Then commit to that tree
+        (which would be useful for the calculations used when finding implication rules)."""
+
+        # Find all bound trees
+#        try:
+#            self.all_bound_trees
+#        except AttributeError:
+#            self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
+        self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
+        
+        return self.lookup_embeddings_helper(conj, (), {}, self.all_bound_trees)
+
+    def lookup_embeddings_helper(self, conj, bound_conj_so_far, s, all_bound_trees):
+
+        if conj == ():            
+            #return bound_conj_so_far
+            return [s]
+
+        # Find all compatible embeddings. Then commit to that tree
         tr = conj[0]
 
-        print pp(tr)
-        print
-        for size in self.tree_embeddings:
-            if size == 0: continue
-            for t in self.tree_embeddings[size]:
-                s2 = unify(t, tr, {})
-                
-                if s2 != None:
-                    for binding in embs:
-                        print pp(t)
-                        var_mapping = dict([ (tree(i), obj) for i, obj in enumerate(binding)])
-                        print pp(var_mapping)
-    #                    grounded_t = subst(var_mapping, t)
-    #                    print pp(grounded_t)
+        ret = []
+        for bound_tr in all_bound_trees:
+            s2 = unify(tr, bound_tr, s)
+            
+            if s2 != None:
+                bc = bound_conj_so_far + ( bound_tr , )
+                later = self.lookup_embeddings_helper(conj[1:], bc, s2, all_bound_trees)
+                # Add the (complete) substitutions from lower down in the recursive search,
+                # but only if they are not duplicates.
+                # TODO I wonder why the duplication happens?
+                for final_s in later:
+                    if final_s not in ret:
+                        ret.append(final_s)
+        
+        return ret
+        
+#        for size in self.tree_embeddings:
+#            if size == 0: continue
+#            for t in self.tree_embeddings[size]:
+#                s2 = unify(t, tr, {})
+#                
+#                if s2 != None:
+#                    for binding in embs:
+#                        print pp(t)
+#                        var_mapping = dict([ (tree(i), obj) for i, obj in enumerate(binding)])
+#                        print pp(var_mapping)
+#    #                    grounded_t = subst(var_mapping, t)
+#    #                    print pp(grounded_t)
 
 
 class GraphConverter:

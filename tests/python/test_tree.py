@@ -87,6 +87,19 @@ class TreeTest(TestCase):
         s_correct = {all_template : l2_tree}
         self.assertEquals(s, s_correct)
         
+    def  test_find_conj(self):
+        conj = (tree.tree_from_atom(self.l1), tree.tree_from_atom(self.l2))
+        
+        matches = tree.find_conj(conj, self.a.get_atoms_by_type(t.Atom))
+        
+        self.assertEquals(len(matches), 1)
+        
+        if len(matches) == 1:
+            first = matches[0]
+            
+            self.assertEquals(first.subst, {})
+            self.assertEquals(first.atoms, [self.l1, self.l2])
+        
     def test_apply_rule(self):
         atoms = [self.l1, self.l2]
         
