@@ -28,12 +28,12 @@
  * A* 3d pathfinding functionality
  *
  * Current implementation uses LocalSpaceMap2D for map
- * LSMap2DSearchNode implements functionality specific to LocalSpaceMap2D
+ * LSMap3DSearchNode implements functionality specific to LocalSpaceMap2D
  * stlastar.h (and fsa.h) contains generic astar algorithm implementation
  * Currently, start and goal coordinates are based on gridpoints,
- * solution path movement is in 8 directions--horizontal, vertical, diagonal
+ * solution path movement is in 10 directions--horizontal, vertical, diagonal,
+ * up and down.
  *
- * See AStarTest.cc for example usage
  *
  * General usage:
  *    AStar3DController asc;
@@ -53,7 +53,7 @@
 
 #include <opencog/spatial/LSMap3DSearchNode.h>
 
-#define MAX_SEARCH_NODES 20000
+#define MAX_SEARCH_NODES 5000
 #define DEBUG_LISTS 0
 #define DEBUG_LIST_LENGTHS_ONLY 0
 #define DISPLAY_SOLUTION 0
