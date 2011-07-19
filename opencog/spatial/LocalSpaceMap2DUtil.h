@@ -85,9 +85,11 @@ namespace opencog
             double width;
             double height;
             double yaw;
+            std::string entityClass;
 
             ObjectMetaData();
             ObjectMetaData(double cx, double cy, double cz, double l, double w, double h, double y);
+            ObjectMetaData(double cx, double cy, double cz, double l, double w, double h, double y, const std::string& ec);
 
             bool operator==(const ObjectMetaData& rhs) const;
             bool operator!=(const ObjectMetaData& rhs) const;

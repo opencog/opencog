@@ -78,6 +78,12 @@ ObjectMetaData::ObjectMetaData() {}
 ObjectMetaData::ObjectMetaData(double cx, double cy, double cz, double l, double w, double h, double y) :
         centerX(cx), centerY(cy), centerZ(cz), length(l), width(w), height(h),  yaw(y)
 {
+    entityClass = "";
+}
+
+ObjectMetaData::ObjectMetaData(double cx, double cy, double cz, double l, double w, double h, double y, const std::string& ec) :
+        centerX(cx), centerY(cy), centerZ(cz), length(l), width(w), height(h),  yaw(y), entityClass(ec)
+{
 }
 
 bool ObjectMetaData::operator==(const ObjectMetaData& rhs) const
@@ -88,7 +94,8 @@ bool ObjectMetaData::operator==(const ObjectMetaData& rhs) const
             length == rhs.length &&
             width == rhs.width &&
             height == rhs.height &&
-            yaw == rhs.yaw);
+            yaw == rhs.yaw &&
+            entityClass == rhs.entityClass);
 }
 
 bool ObjectMetaData::operator!=(const ObjectMetaData& rhs) const
@@ -120,6 +127,7 @@ void opencog::spatial::populateRandom(opencog::RandGen& rng, spatial::LocalSpace
         metaData.height = 1;
         metaData.length = radius_y;
         metaData.yaw = 0;
+        metaData.entityClass = "";
         lsm.addObject( opencog::toString(cnt), metaData, true );
 
     } // for
