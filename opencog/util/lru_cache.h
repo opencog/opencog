@@ -148,136 +148,99 @@ protected:
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
-struct lru_cache_threaded {
-    typedef typename F::argument_type argument_type;
-    typedef typename F::result_type result_type;
-    typedef typename std::list<argument_type> list;
+struct lru_cache_threaded : public lru_cache<F, Hash, Equals> {
+private:
+    typedef lru_cache<F, Hash, Equals> super;
+public:
+    typedef typename super::argument_type argument_type;
+    typedef typename super::result_type result_type;
+    typedef typename super::list list;
     typedef typename list::iterator list_iter;
-    typedef boost::unordered_map<list_iter,result_type,
-                                 opencog::deref_hash<list_iter,Hash>,
-                                 opencog::deref_equals<list_iter,Equals> > map;
+    typedef typename super::map map;
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
-    lru_cache_threaded(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f),_failures(0),_hits(0) {}
+    lru_cache_threaded(size_type n, const F& f=F()) : super(n, f) {}
 
     inline bool full() const {
         boost::mutex::scoped_lock lock(cache_mutex);
-        return _map.size()==_n;
+        return super::full();
     }
     inline bool empty() const {
         boost::mutex::scoped_lock lock(cache_mutex);
-        return _map.empty();
+        return super::empty();
     }
 
     //! Remove (aka make dirty) x from cache because entry invalid
     void remove(const argument_type& x) {
         boost::mutex::scoped_lock lock(cache_mutex);
-        _lru.push_front(x); // temporary so we can get an iterator for searching map
-        map_iter it=_map.find(_lru.begin());
-        if (it != _map.end()) {
-            // remove existing entry
-            _lru.erase(it->first);
-            _map.erase(it);
-        }
-        // remove temporary
-        _lru.pop_front();
+        super::remove(x);
     }
 
     result_type operator()(const argument_type& x) const
     {
         boost::mutex::scoped_lock lock(cache_mutex);
-        if (_empty()) {
-            if (_full()) {
+        if (super::empty()) {
+            if (super::full()) {
                 // a size-0 cache never needs hashing
                 lock.unlock();
-                return _f(x); // note that cache failures are not counted
+                return super::_f(x); // note that cache failures are not counted
             }
             // briefly free lock for external call
             lock.unlock();
-            result_type r = call_f(x);
+            result_type r = super::call_f(x);
             lock.lock();
             //--
-            _lru.push_front(x);
-            map_iter it=_map.insert(make_pair(_lru.begin(),r)).first;
+            super::_lru.push_front(x);
+            map_iter it =
+                super::_map.insert(make_pair(super::_lru.begin(),r)).first;
             return it->second;
         }
       
         //search for it
-        _lru.push_front(x);
-        map_iter it=_map.find(_lru.begin());
-        _lru.pop_front();
+        super::_lru.push_front(x);
+        map_iter it=super::_map.find(super::_lru.begin());
+        super::_lru.pop_front();
       
         //if we've found it, update lru and return
-        if (it!=_map.end()) {
-            _lru.splice(_lru.begin(),_lru,it->first);
-            _hits++;
+        if (it!=super::_map.end()) {
+            super::_lru.splice(super::_lru.begin(),super::_lru,it->first);
+            super::_hits++;
             return it->second;
         }
       
         //otherwise, call _f and do an insertion
         // briefly free lock for external call
         lock.unlock();
-        result_type r = call_f(x);
+        result_type r = super::call_f(x);
         lock.lock();
         //--
-        _lru.push_front(x);
-        it=_map.insert(make_pair(_lru.begin(), r)).first;
+        super::_lru.push_front(x);
+        it=super::_map.insert(make_pair(super::_lru.begin(), r)).first;
       
         //if full, remove least-recently-used
-        if (_map.size()>_n) {
-            _map.erase(--_lru.end());
-            _lru.pop_back();
+        if (super::_map.size()>super::_n) {
+            super::_map.erase(--super::_lru.end());
+            super::_lru.pop_back();
         }
       
-        OC_ASSERT(_map.size() <= _n,
-                  "lru_cache - _map size greater than _n (%d).", _n);
-        OC_ASSERT(_lru.size() == _map.size(),
+        OC_ASSERT(super::_map.size() <= super::_n,
+                  "lru_cache - _map size greater than _n (%d).", super::_n);
+        OC_ASSERT(super::_lru.size() == super::_map.size(),
                   "lru_cache - _lru size different from _map size.");
       
         //return the result
         return it->second;
     }
-    
-    unsigned get_failures() const { return _failures; }
-    unsigned get_hits() const { return _hits; }
 
     void clear() {
         boost::mutex::scoped_lock lock(cache_mutex);
-        _map.clear();
-        _lru.clear();
+        super::clear();
     }
     
 protected:
-    size_type _n;
-    mutable map _map;
-    F _f;
     // lock is freed when calling _f to prevent potential deadlock
     mutable boost::mutex cache_mutex;
-    mutable list _lru; // this list is only here so that we know what
-                       // is the last used element to remove it from
-                       // the cache when it gets full
-    
-    mutable unsigned _failures; // number of cache failures
-    mutable unsigned _hits; // number of cache hits
-
-    inline result_type call_f(const argument_type& x) const {
-        _failures++;
-        try {
-            return _f(x);
-        } catch(...) {
-            _lru.pop_front(); // remove x, previously inserted in _lru
-            throw;
-        }
-    }
-
-    // non-locked functions for internal use
-    inline bool _full() const {
-        return _map.size()==_n;
-    }
-    inline bool _empty() const {
-        return _map.empty();
-    }
 };
  
 // Pseudo Random Replacement Cache, very fast but very dumb, it just
@@ -338,8 +301,8 @@ protected:
 
 };
   
-/// @todo this stuff sucks an should be removed. It is kept before
-/// some code in embodiment uses it
+/// @todo this stuff sucks an should be removed. It is kept because
+/// some code in embodiment still uses it
 
 // like above but hacked to handle a function that changes, it is
 // embodiment, but all this is ugly and should be replaced by an
