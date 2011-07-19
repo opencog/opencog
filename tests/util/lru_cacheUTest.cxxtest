@@ -55,7 +55,7 @@ public:
     void test_lru_cache() {
         _function f;
         float answer;
-        lru_cache<lru_cacheUTest::_function> cache(1000,f);
+        lru_cache<lru_cacheUTest::_function> cache(1000, f);
         for (unsigned int i=0; i < 1000; i++) {
             answer = cache(i);
             TS_ASSERT(answer >= i);

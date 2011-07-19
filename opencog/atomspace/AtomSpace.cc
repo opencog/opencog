@@ -92,7 +92,7 @@ void AtomSpace::setUpCaching()
 {
     // Initialise lru cache for getType
     __getType = new _getType(this);
-    getTypeCached = new lru_cache_threaded<AtomSpace::_getType>(1000,*__getType);
+    getTypeCached = new lru_cache_threaded<AtomSpace::_getType>(1000, *__getType);
 
 }
 #endif

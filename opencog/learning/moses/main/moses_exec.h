@@ -96,6 +96,7 @@ struct metapop_moses_results_parameters {
                                      bool _output_bscore,
                                      bool _output_eval_number,
                                      bool _output_with_labels,
+                                     long _cache_size,
                                      const vector<string>& _labels,
                                      string _output_file,
                                      const jobs_t& _jobs,
@@ -113,6 +114,7 @@ struct metapop_moses_results_parameters {
     bool output_bscore;
     bool output_eval_number;
     bool output_with_labels;
+    long cache_size;
     const vector<string>& labels;
     string output_file;
     const jobs_t& jobs;
@@ -224,28 +226,35 @@ void metapop_moses_results(RandGen& rng,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            const BScore& bsc,
-                           unsigned long cache_size,
                            const string& opt_algo,
                            const optim_parameters& opt_params,
                            const metapop_parameters& meta_params,
                            const moses_parameters& moses_params,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
-    if(cache_size > 0) {
-        typedef prr_cache<BScore> BScoreCache;
-        typedef bscore_based_score<BScoreCache> Score;
-        typedef prr_cache<Score> ScoreCache;
-        BScoreCache bscore_cache(cache_size, bsc);
-        Score score(bscore_cache);
-        ScoreCache score_cache(cache_size, score);
-        metapop_moses_results(rng, bases, tt, si_ca, si_kb,
-                              score_cache, bscore_cache, opt_algo,
-                              opt_params, meta_params, moses_params, vm, pa);
-        // log the number of cache failures
-        if(pa.jobs.empty()) { // do not print the cache if using distributed moses
-            logger().info("Number of cache failures for score = %u"
-                          " and bscore = %u",
-                          score_cache.get_failures(), bscore_cache.get_failures());
+    if(pa.cache_size != 0) {
+        typedef lru_cache<BScore> BScoreCache;
+        if(pa.cache_size > 0) {
+            typedef bscore_based_score<BScoreCache> Score;
+            typedef lru_cache<Score> ScoreCache;
+            BScoreCache bscore_cache(pa.cache_size, bsc);
+            Score score(bscore_cache);
+            ScoreCache score_cache(pa.cache_size, score);
+            metapop_moses_results(rng, bases, tt, si_ca, si_kb,
+                                  score_cache, bscore_cache, opt_algo,
+                                  opt_params, meta_params, moses_params, vm, pa);
+            // log the number of cache failures
+            if(pa.jobs.empty()) { // do not print if using distributed moses
+                logger().info("Number of cache failures for score = %u"
+                              " and bscore = %u",
+                              score_cache.get_failures(),
+                              bscore_cache.get_failures());
+            }
+        // } else {
+        //     typedef adaptive_cache<BScoreCache> BScoreACache;
+        //     typedef bscore_based_score<BScoreACache> Score;
+        //     typedef lru_cache<Score> ScoreCache;
+        //     typedef adaptive_cache<ScoreCache> ScoreACache;
         }
     } else {
         bscore_based_score<BScore> score(bsc);
