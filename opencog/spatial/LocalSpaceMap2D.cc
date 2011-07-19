@@ -460,6 +460,155 @@ spatial::Point LocalSpaceMap2D::getNearestFreePoint(const spatial::Point& pt) co
     return nearestFreePoint;
 }
 
+spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& pt, double delta) const throw (opencog::RuntimeException, std::bad_exception)
+{
+    const double MAX_ALTITUDE_DELTA = 0.1;
+    double destAltitude = pt.get<2>();
+
+    GridPoint gp = snap(spatial::Point(pt.get<0>(), pt.get<1>()));
+    if (!gridIllegal(gp)) {
+        return pt;
+    }
+
+    bool valid_lower_x = (gp.first > 0);
+    bool valid_lower_y = (gp.second > 0);
+    bool valid_upper_x = (_xDim > gp.first + 1);
+    bool valid_upper_y = (_yDim > gp.second + 1);
+
+    if (!valid_lower_x && !valid_lower_y && !valid_upper_x && !valid_upper_y) {
+        throw opencog::RuntimeException(TRACE_INFO,
+                                        "LocalSpaceMap2D - Could not find the nearest valid grid point from (%u,%u)",
+                                        gp.first, gp.second);
+    }
+
+    unsigned int lower_x = valid_lower_x ? (gp.first - 1) : 0;
+    unsigned int lower_y = valid_lower_y ? (gp.second - 1) : 0;
+    unsigned int upper_x = valid_upper_x ? (gp.first + 1) : _xDim - 1;
+    unsigned int upper_y = valid_upper_y ? (gp.second + 1) : _yDim - 1;
+
+    // Check if there's some point to reach that goal.
+    bool foundFreePoint = false;
+    spatial::GridPoint nearestFreePoint;
+    double nearestAltitude = HUGE_DISTANCE;
+
+    if (valid_lower_x) {
+        for (unsigned int y = lower_y; y <= upper_y; y++) {
+            double altitude = getProperFreePointAltitude(spatial::GridPoint(lower_x, y), pt, delta);
+            if (altitude + delta >= destAltitude) {
+                if (!foundFreePoint ||
+                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                    nearestAltitude = altitude;
+                    nearestFreePoint = spatial::GridPoint(lower_x, y);
+                    foundFreePoint = true;
+                }
+            } else {
+                if (!foundFreePoint &&
+                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                    nearestAltitude = altitude;
+                    nearestFreePoint = spatial::GridPoint(lower_x, y);
+                }
+            }
+        }
+    }
+
+    if (valid_lower_y) {
+        for (unsigned int x = lower_x; x <= upper_x; x++) {
+            double altitude = getProperFreePointAltitude(spatial::GridPoint(x, lower_y), pt, delta);
+            if (altitude + delta >= destAltitude) {
+                if (!foundFreePoint ||
+                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                    nearestAltitude = altitude;
+                    nearestFreePoint = spatial::GridPoint(x, lower_y);
+                    foundFreePoint = true;
+                }
+            } else {
+                if (!foundFreePoint &&
+                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                    nearestAltitude = altitude;
+                    nearestFreePoint = spatial::GridPoint(x, lower_y);
+                }
+            }
+        }
+    }
+
+    if (valid_upper_x) {
+        for (unsigned int y = lower_y; y <= upper_y; y++) {
+            double altitude = getProperFreePointAltitude(spatial::GridPoint(upper_x, y), pt, delta);
+            if (altitude + delta >= destAltitude) {
+                if (!foundFreePoint ||
+                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                    nearestAltitude = altitude;
+                    nearestFreePoint = spatial::GridPoint(upper_x, y);
+                    foundFreePoint = true;
+                }
+            } else {
+                if (!foundFreePoint &&
+                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                    nearestAltitude = altitude;
+                    nearestFreePoint = spatial::GridPoint(upper_x, y);
+                }
+            }
+        }
+    }
+
+    if (valid_upper_y) {
+        for (unsigned int x = lower_x; x <= upper_x; x++) {
+            double altitude = getProperFreePointAltitude(spatial::GridPoint(x, upper_y), pt, delta);
+            if (altitude + delta >= destAltitude) {
+                if (!foundFreePoint ||
+                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                    nearestAltitude = altitude;
+                    nearestFreePoint = spatial::GridPoint(x, upper_y);
+                    foundFreePoint = true;
+                }
+            } else {
+                if (!foundFreePoint &&
+                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                    nearestAltitude = altitude;
+                    nearestFreePoint = spatial::GridPoint(x, upper_y);
+                }
+            }
+        }
+    }
+
+    spatial::Point freePoint2D = unsnap(nearestFreePoint);
+    spatial::Point3D freePoint3D = spatial::Point3D(freePoint2D.first, freePoint2D.second, nearestAltitude);
+    if (foundFreePoint) { // Goal point can be reached from free point.
+        if (std::abs(nearestAltitude - destAltitude) < MAX_ALTITUDE_DELTA) { // at the same altitude level
+            return pt;
+        }
+    }
+    return freePoint3D;
+}
+
+
+double LocalSpaceMap2D::getProperFreePointAltitude(const spatial::GridPoint& gp, const spatial::Point3D& dest, double delta) const
+{
+    bool is_obstacle = gridOccupied(gp);
+    double destHeight = dest.get<2>();
+    if (!is_obstacle) {
+        // None obstacle, then it has to be the floor.
+        return _floorHeight;
+    } else {
+        double topSurface = _floorHeight;
+        std::vector<spatial::Gradient> grads = getObjectGradientsByGridPoint(gp);
+        std::vector<spatial::Gradient>::iterator it = grads.begin();
+        for (; it != grads.end(); it++) {
+            if (topSurface + _agentHeight < it->first) {
+                topSurface = (topSurface > it->second) ? topSurface : it->second;
+                continue;
+            }
+            if (topSurface + delta >= destHeight) {
+                break;
+            } else {
+                topSurface = (topSurface > it->second) ? topSurface : it->second;
+            }
+        }
+
+        return topSurface;
+    }
+}
+
 bool LocalSpaceMap2D::gridIllegal(const spatial::GridPoint& gp) const
 {
     return gridIllegal(gp.first, gp.second);
@@ -511,12 +660,12 @@ bool LocalSpaceMap2D::edgeIllegal(const spatial::GridPoint &src, const spatial::
         if (illegal) return true;
     }
     
-    if (getProperDestHeight(src, dest, srcHeight, delta)) return false;
+    if (getProperDestAltitude(src, dest, srcHeight, delta) > 0) return false;
 
     return true;
 }
 
-double LocalSpaceMap2D::getProperDestHeight(const spatial::GridPoint &src, const spatial::GridPoint &dest, double srcHeight, double delta) const
+double LocalSpaceMap2D::getProperDestAltitude(const spatial::GridPoint &src, const spatial::GridPoint &dest, const double srcHeight, double delta) const
 {
     bool is_obstacle = gridOccupied(dest.first, dest.second);
     if (!is_obstacle) {
@@ -528,7 +677,7 @@ double LocalSpaceMap2D::getProperDestHeight(const spatial::GridPoint &src, const
         std::vector<spatial::Gradient>::iterator it = grads.begin();
         for (; it != grads.end(); it++) {
             if (srcHeight >= it->first) {
-                // bottom surface is lower the src height, then the height of
+                // bottom surface is lower than src altitude, then the altitude of
                 // top surface should be no smaller than its opposite surface.
                 topSurface = (topSurface > it->second) ? topSurface : it->second;
                 continue;
@@ -548,6 +697,7 @@ double LocalSpaceMap2D::getProperDestHeight(const spatial::GridPoint &src, const
         return -1;
     }
 }
+
 
 bool LocalSpaceMap2D::isDiagonal(const spatial::GridPoint &src, const spatial::GridPoint &dest) const
 {
@@ -631,6 +781,7 @@ std::vector<spatial::Gradient> LocalSpaceMap2D::getObjectGradientsByGridPoint(co
     // Sort the grads by the altitude of bottom surface
     spatial::gradient_cmp_by_lower_altitude gradient_cmp;
     std::sort(grads.begin(), grads.end(), gradient_cmp);
+
     return grads;
 }
 
@@ -685,8 +836,6 @@ spatial::Point LocalSpaceMap2D::getNearestObjectPoint( const spatial::Point& ref
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
 
 
-
-
     math::Vector3 point( referencePoint.first, referencePoint.second );
     //const ObjectMetaData& md = getMetaData(objectID);
     //math::Vector3 nearestPoint( md.centerX, md.centerY);
@@ -720,7 +869,8 @@ void LocalSpaceMap2D::copyObjects(const LocalSpaceMap2D& otherMap)
                                           it->second->getLength( ),
                                           it->second->getWidth( ),
                                           it->second->getHeight( ),
-                                          it->second->getOrientation( ).getRoll( ) );
+                                          it->second->getOrientation( ).getRoll( ),
+                                          it->second->getStringProperty( Entity::ENTITY_CLASS ));
         addObject( it->second->getName( ), metaData, it->second->getBooleanProperty( Entity::OBSTACLE ) );
     } // for
 }
@@ -831,7 +981,9 @@ spatial::Point LocalSpaceMap2D::nearbyPoint(const spatial::Point& src, const spa
     // getNearestObjectPoint will throw an exception if the object isn't inside the map
     spatial::Point closestPoint = getNearestObjectPoint( src, id );
 
-    return getNearestFreePoint(closestPoint); //Suggested by Welter
+    return closestPoint; // we don't need to invoke getNearestFreePoint here, since that will be triggered
+                         // when getting way points.
+    //return getNearestFreePoint(closestPoint); //Suggested by Welter
     //return findFree(closestPoint, Point(src.first - closestPoint.first,
     //         src.second - closestPoint.second));
 }
@@ -1049,6 +1201,7 @@ void LocalSpaceMap2D::addObject( const spatial::ObjectID& id, const spatial::Obj
     long idHash = boost::hash<std::string>()( id );
     EntityPtr entity( new StaticEntity( idHash, id, math::Vector3( metadata.centerX, metadata.centerY, metadata.centerZ ), math::Dimension3( metadata.width, metadata.height, metadata.length ), math::Quaternion( math::Vector3::Z_UNIT, metadata.yaw ), _radius ) );
     entity->setProperty( Entity::OBSTACLE, isObstacle );
+    entity->setProperty( Entity::ENTITY_CLASS, metadata.entityClass);
 
     if ( isObstacle ) {
         addToSuperEntity( entity );
@@ -1110,7 +1263,8 @@ void LocalSpaceMap2D::updateObject( const spatial::ObjectID& id, const spatial::
                                           entity->getLength( ),
                                           entity->getWidth( ),
                                           entity->getHeight( ),
-                                          entity->getOrientation( ).getRoll( ) );
+                                          entity->getOrientation( ).getRoll( ),
+                                          entity->getStringProperty( Entity::ENTITY_CLASS ));
         if ( isObstacle == entity->getBooleanProperty( Entity::OBSTACLE ) && metaData == metadata ) {
             return;
         } // if
@@ -1363,6 +1517,7 @@ std::string LocalSpaceMap2D::toString( const LocalSpaceMap2D& map )
             << it->second->getOrientation( ).z << " "
             << it->second->getOrientation( ).w << " ";
         
+        out << it->second->getStringProperty( Entity::ENTITY_CLASS ) << " ";
         out << it->second->getBooleanProperty( Entity::OBSTACLE ) << " ";
     } // for
     return out.str( );
@@ -1395,11 +1550,13 @@ LocalSpaceMap2D* LocalSpaceMap2D::fromString( const std::string& map )
         math::Vector3 position( 0, 0, 0);
         math::Dimension3 dimension;
         double orientationX = 0, orientationY = 0, orientationZ = 0, orientationW = 0;
+        std::string entityClass;
         bool obstacle = false;
         parser >> name 
                >> position.x >> position.y >> position.z
                >> dimension.length >> dimension.width >> dimension.height
                >> orientationX >> orientationY >> orientationZ >> orientationW
+               >> entityClass
                >> obstacle;
         math::Quaternion orientation( orientationX, orientationY, orientationZ, orientationW );
         spatial::ObjectMetaData metaData( position.x, 
@@ -1408,7 +1565,8 @@ LocalSpaceMap2D* LocalSpaceMap2D::fromString( const std::string& map )
                                           dimension.length,
                                           dimension.width,
                                           dimension.height,
-                                          orientation.getRoll( ) );
+                                          orientation.getRoll( ),
+                                          entityClass);
         newMap->addObject( name, metaData, obstacle );
     } // for  
 
