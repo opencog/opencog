@@ -241,7 +241,7 @@ namespace opencog
          * each HandleSeq represents a cluster and the vector of doubles its
          * centroid.
          */
-        ClusterSeq kMeansCluster(const Type& l, int numClusters);
+        ClusterSeq kMeansCluster(const Type& l, int numClusters, int nPasses=1);
 
         /**
          * Use k-means clustering to add new nodes to the atomspace (one

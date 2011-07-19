@@ -29,13 +29,7 @@ eg to find 10 similar things to the "dog" concept node...
 
 Note that the atomspace must already be embedded (via embedSpace) for
 the given link type before you can find the k nearest neighbours for
-any nodes. This method will return a list of what the k nearest
-neighbours were of the given node AT THE TIME THE ATOMSPACE WAS
-EMBEDDED. To take into account newly added nodes and updated link
-truth values, the atomspace must be re-embedded.
-
-If a node is removed after embedding, an invalid handle may be
-returned by a nearest neighbour search.
+any nodes.
 
 The entire embedding (the list of pivots and each node's embedding
 vector) can be written to the cogserver log using

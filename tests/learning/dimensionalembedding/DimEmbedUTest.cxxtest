@@ -42,7 +42,6 @@ public:
     void testMisc() {
         AtomSpace *atomSpace = new AtomSpace();
         DimEmbedModule dimEmbed=DimEmbedModule(atomSpace);
-        
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog2", SimpleTruthValue(0.001f, 0.00001f));
         Handle h3 = atomSpace->addNode(CONCEPT_NODE, "dog3", SimpleTruthValue(0.001f, 0.00001f));
@@ -53,8 +52,9 @@ public:
         link(atomSpace, h1, h4, 1.0, 0.9);
         link(atomSpace, h3, h4, 0.2, 1.0);
         link(atomSpace, h2, h3, 0.2, 1.0);
-                
+
         dimEmbed.embedAtomSpace(SIMILARITY_LINK, 4);
+
         //dimEmbed.logAtomEmbedding(SIMILARITY_LINK);
         //We have no guarantee on the order that the pivots
         //were picked in, but since numDimensions=numNodes,
@@ -82,7 +82,7 @@ public:
                 TS_ASSERT_DELTA(dist,dists[i][j],.000001);
             }
         }
-        
+
         Handle h5 = atomSpace->addNode(CONCEPT_NODE, "dog5", SimpleTruthValue(0.001f, 0.00001f));
         atomSpace->addLink(SIMILARITY_LINK, h1, h5,
                            SimpleTruthValue(0.5, SimpleTruthValue::confidenceToCount(1.0)));
@@ -341,13 +341,9 @@ public:
             }
         }
 
-        //Small problem: even though I tried to make the clusters
-        //"obvious", sometimes kMeansCluster won't make the predicted clusters
-        //even when functioning properly. So I gotta fix this test.
-        /*
         typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
             ClusterSeq;
-        ClusterSeq clusters = dimEmbed.kMeansCluster(SIMILARITY_LINK, 3);
+        ClusterSeq clusters = dimEmbed.kMeansCluster(SIMILARITY_LINK, 3, 5);
         
         double cent78 [8] = //centroid of (h7,h8) cluster
             {0.1, 0.1, 0.08, 0.1, 0.09, 0.09, 1, 1};
@@ -362,9 +358,9 @@ public:
         //and that their centroids are correct.
         for(ClusterSeq::iterator it=clusters.begin();it!=clusters.end();it++) {
             HandleSeq clust = it->first;
-            for(HandleSeq::iterator it2=clust.begin();it2!=clust.end();it2++) {
-                std::cout << atomSpace->atomAsString(*it2) << "\n";
-            } std::cout << "\n\n";
+            //for(HandleSeq::iterator it2=clust.begin();it2!=clust.end();it2++) {
+                //std::cout << atomSpace->atomAsString(*it2) << "\n";
+            //} std::cout << "\n\n";
             std::vector<double> centroid = it->second;
             if(clust.size()==2) {//it should be the (7,8) cluster
                 TS_ASSERT((clust[0]==h7 && clust[1]==h8) ||
@@ -407,7 +403,7 @@ public:
                     }
                 }
             }
-            }      */
+        }
         delete atomSpace;
     }
 };

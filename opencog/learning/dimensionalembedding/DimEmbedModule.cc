@@ -353,8 +353,10 @@ void DimEmbedModule::addLink(const Handle& h,
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
+    EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);
+    OC_ASSERT(treeMapIt!=embedTreeMap.end());
+    CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
     int dim = dimensionMap[linkType];
-    std::vector<std::pair<Handle, std::vector<double> > > embeddingVectors;
     AtomEmbedding& aE = atomMaps[linkType];
     const TruthValue& linkTV = a->getTV(h);        
     double weight = linkTV.getConfidence()*linkTV.getMean();
@@ -366,18 +368,15 @@ void DimEmbedModule::addLink(const Handle& h,
             std::vector<double> vec = aE[*it2];
             for(int i=0; i<dim; ++i) {
                 if((aEit->second)[i]<weight*vec[i]) {
+                    if(!changed) {
+                        changed=true;
+                        cTree.remove(CoverTreePoint(aEit->first,aEit->second));
+                    }
                     (aEit->second)[i]=weight*vec[i];
-                    changed=true;
                 }
             }
         }
-        if(changed) {
-            aE[aEit->first]=aEit->second;
-            EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);
-            OC_ASSERT(treeMapIt!=embedTreeMap.end());
-            CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
-            cTree.insert(CoverTreePoint(aEit->first,aEit->second));
-        }
+        if(changed) cTree.insert(CoverTreePoint(aEit->first,aEit->second));
     }
 }
 
@@ -471,14 +470,13 @@ bool DimEmbedModule::isEmbedded(const Type& linkType) {
     return true;
 }
 
-ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters) {
+ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npass) {
     if(!isEmbedded(l)) {
         const char* tName = classserver().getTypeName(l).c_str();
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
     int numDimensions=dimensionMap[l];
-    int npass=1;
     AtomEmbedding& aE = atomMaps[l];
     int numVectors=aE.size();
     if(numVectors<numClusters) {
@@ -594,6 +592,7 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
         ClusterSeq newClusts = kMeansCluster(l,k);
         for(ClusterSeq::iterator it = newClusts.begin();
             it!=newClusts.end();++it) {
+            if(it->first.size()==1) continue;//ignore singleton clusters
             //if we still have room for more clusters and the cluster quality
             //is high enough, insert the cluster into the pQueue
             double quality = separation(it->first,l)*homogeneity(it->first,l);
@@ -602,7 +601,7 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
                     clusters.insert(cPair(quality,*it));
                 } else {
                     //if there is no room, but our new cluster is better
-                    //than the worst current cluster, remove it and add new one
+                    //than the worst current cluster, replace the worst one
                     pQueue_t::iterator p_it = clusters.begin();
                     if(quality>p_it->first) {
                         clusters.erase(p_it);
@@ -619,9 +618,11 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
         Handle newNode = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
         for(HandleSeq::iterator it2=cluster.begin();it2!=cluster.end();++it2) {
             //Connect newNode to each handle in its cluster.
-            //@TODO: Decide how to set this truth value.
-            SimpleTruthValue tv(.99,
-                                SimpleTruthValue::confidenceToCount(.99));
+            double dist = euclidDist(centroid,getEmbedVector(*it2,l));
+            //TODO: we should do some normalizing of this probably...
+            double strength = std::pow(2.0, -dist);
+            SimpleTruthValue tv(strength,
+                                SimpleTruthValue::confidenceToCount(strength));
             as->addLink(INHERITANCE_LINK, *it2, newNode, tv);
         }
     }
@@ -700,10 +701,7 @@ double DimEmbedModule::euclidDist(const Handle& h1,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
- 
-    std::vector<double> v1=getEmbedVector(h1,l);
-    std::vector<double> v2=getEmbedVector(h2,l);
-    return euclidDist(v1, v2);
+    return euclidDist(getEmbedVector(h1,l), getEmbedVector(h2,l));
 }
 
 double DimEmbedModule::euclidDist(const std::vector<double>& v1,
@@ -724,6 +722,7 @@ void DimEmbedModule::handleAddSignal(AtomSpaceImpl* a, Handle h) {
     AtomEmbedMap::iterator it;
     if(a->isNode(h)) {
         //for each link type embedding that exists, add the node
+        for(it=atomMaps.begin();it!=atomMaps.end();it++) {
             addNode(h,it->first,a);
         }
     }
