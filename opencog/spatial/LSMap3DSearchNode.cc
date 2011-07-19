@@ -72,7 +72,7 @@ bool LSMap3DSearchNode::isLegal(unsigned int x, unsigned int y)
 double LSMap3DSearchNode::getDestHeight(const spatial::GridPoint& dest) const
 {
     spatial::GridPoint src(this->x, this->y);
-    return map->getProperDestHeight(src, dest, this->z, deltaZ); 
+    return map->getProperDestAltitude(src, dest, this->z, deltaZ); 
 }
 
 bool LSMap3DSearchNode::IsSameState(const LSMap3DSearchNode &rhs)
@@ -100,11 +100,13 @@ float LSMap3DSearchNode::GoalDistanceEstimate(const LSMap3DSearchNode &nodeGoal)
         float xd = abs((float)x - (float)nodeGoal.x);
         float yd = abs((float)y - (float)nodeGoal.y);
 
-        float h_diagonal = min(xd, yd);
-        float h_straight = xd + yd;
-        float h_delta = (/* sqrt(2) */ 1.41421356 * h_diagonal) + (h_straight - 2*h_diagonal);
-        float zd = nodeGoal.z - (float)z;
-        return h_delta + zd;
+        float horizon_diagonal = min(xd, yd);
+        float horizon_straight = xd + yd;
+        float horizon_delta = (/* sqrt(2) */1.41421356 * horizon_diagonal) + (horizon_straight - 2 * horizon_diagonal);
+        float vertical_delta = abs((float)nodeGoal.z - (float)z);
+        float distance3d = (float)sqrt(horizon_delta * horizon_delta + vertical_delta * vertical_delta);
+        //return h_delta + zd;
+        return distance3d;
     }
 
     //TODO: handle invalid heuristic error
@@ -117,7 +119,10 @@ float LSMap3DSearchNode::GoalDistanceEstimate(const LSMap3DSearchNode &nodeGoal)
 
 bool LSMap3DSearchNode::IsGoal(const LSMap3DSearchNode &nodeGoal)
 {
-    if (x == nodeGoal.x && y == nodeGoal.y) {
+    // When the altitude distance is within the height of the agent, we think
+    // the agent can reach the goal.
+    double agentHeight = LSMap3DSearchNode::map->agentHeight();
+    if (x == nodeGoal.x && y == nodeGoal.y && std::abs(z - nodeGoal.z) <= agentHeight) {
         return true;
     }
 
@@ -158,40 +163,38 @@ bool LSMap3DSearchNode::GetSuccessors(AStarSearch<LSMap3DSearchNode> *astarsearc
         astarsearch->AddSuccessor(NewNode);
     }
 
-    if ( isLegal( x + 1, y ) && !((parent_x == x + 1) && (parent_y == y)) ) {
+    if (isLegal(x + 1, y) && !((parent_x == x + 1) && (parent_y == y)) ) {
         NewNode = LSMap3DSearchNode(x + 1, y, deltaZ);
         NewNode.z = getDestHeight(spatial::GridPoint(x + 1, y));
         astarsearch->AddSuccessor(NewNode);
     }
 
-
-    if ( isLegal(x, y + 1) && !((parent_x == x) && (parent_y == y + 1)) ) {
+    if (isLegal(x, y + 1) && !((parent_x == x) && (parent_y == y + 1)) ) {
         NewNode = LSMap3DSearchNode(x, y + 1, deltaZ);
         NewNode.z = getDestHeight(spatial::GridPoint(x, y + 1));
         astarsearch->AddSuccessor(NewNode);
     }
 
-
     //diagonal moves
-    if ( isLegal( x + 1, y + 1 ) && !((parent_x == x + 1) && (parent_y == y + 1)) ) {
+    if (isLegal(x + 1, y + 1) && !((parent_x == x + 1) && (parent_y == y + 1)) ) {
         NewNode = LSMap3DSearchNode(x + 1, y + 1, deltaZ);
         NewNode.z = getDestHeight(spatial::GridPoint(x + 1, y + 1));
         astarsearch->AddSuccessor(NewNode);
     }
 
-    if ( isLegal(x + 1, y - 1) && !((parent_x == x + 1) && (parent_y == y - 1)) ) {
+    if (isLegal(x + 1, y - 1) && !((parent_x == x + 1) && (parent_y == y - 1)) ) {
         NewNode = LSMap3DSearchNode(x + 1, y - 1, deltaZ);
         NewNode.z = getDestHeight(spatial::GridPoint(x + 1, y - 1));
         astarsearch->AddSuccessor(NewNode);
     }
 
-    if ( isLegal( x - 1, y + 1 ) && !((parent_x == x - 1) && (parent_y == y + 1)) ) {
+    if (isLegal(x - 1, y + 1) && !((parent_x == x - 1) && (parent_y == y + 1)) ) {
         NewNode = LSMap3DSearchNode(x - 1, y + 1, deltaZ);
         NewNode.z = getDestHeight(spatial::GridPoint(x - 1, y + 1));
         astarsearch->AddSuccessor(NewNode);
     }
 
-    if ( isLegal( x - 1, y - 1 ) && !((parent_x == x - 1) && (parent_y == y - 1)) ) {
+    if (isLegal(x - 1, y - 1) && !((parent_x == x - 1) && (parent_y == y - 1)) ) {
         NewNode = LSMap3DSearchNode(x - 1, y - 1, deltaZ);
         NewNode.z = getDestHeight(spatial::GridPoint(x - 1, y - 1));
         astarsearch->AddSuccessor(NewNode);
@@ -203,13 +206,14 @@ bool LSMap3DSearchNode::GetSuccessors(AStarSearch<LSMap3DSearchNode> *astarsearc
 // given this node, what does it cost to move to successor.
 float LSMap3DSearchNode::GetCost(const LSMap3DSearchNode &successor)
 {
+    float vertical_delta = (float)abs(successor.z - z);
     //if horizontal or vertical coast is one
     if (x == successor.x || y == successor.y) {
-        return 1.0 + std::abs(successor.z - z);
+        return sqrt(1.0 + vertical_delta * vertical_delta);
     }
     //else it is diagonal, so cost is sqrt(2), (sqrt(1^2 + 1^2))
     else {
-        return 1.41421356 + std::abs(successor.z - z); //sqrt(2)
+        return sqrt(2.0 + vertical_delta * vertical_delta); //sqrt(2)
     }
 }
 
