@@ -87,4 +87,8 @@ INSTALL(FILES
 )
 
 # is it useful to install since it is static ?
-INSTALL(TARGETS util LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+IF (WIN32)
+   INSTALL(TARGETS util DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ELSE (WIN32)
+   INSTALL(TARGETS util LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (WIN32)

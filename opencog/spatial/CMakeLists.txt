@@ -6,7 +6,7 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g -fno-inline")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
-ADD_LIBRARY(SpaceMap
+ADD_LIBRARY(SpaceMap SHARED
     LocalSpaceMap2DUtil
     LocalSpaceMap2D
     VisibilityMap
@@ -26,7 +26,13 @@ ADD_LIBRARY(SpaceMap
     MapExplorerServer.cc
 )
 
-ADD_DEPENDENCIES(SpaceMap opencog_atom_types)
+ADD_DEPENDENCIES(SpaceMap
+    opencog_atom_types
+)
+
+TARGET_LINK_LIBRARIES(SpaceMap
+    ${Boost_THREAD_LIBRARY}
+)
 
 ADD_LIBRARY(HPASearch
     HPASearch
@@ -89,7 +95,6 @@ TARGET_LINK_LIBRARIES(MapTools
     ${SDL_LIBRARY}
     ${SDLGFX_LIBRARY}
     ${OPENGL_LIBRARY}
-    ${Boost_THREAD_LIBRARY} 
     ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 ENDIF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
