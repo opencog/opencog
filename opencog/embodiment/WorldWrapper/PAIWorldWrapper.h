@@ -117,7 +117,7 @@ private:
      * @param endPoint End point
      * @param actions Return the vector of 3d points.
      */
-    void get3DWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point3D>& actions);
+    void get3DWaypoints( const spatial::Point3D& startPoint, const spatial::Point3D& endPoint, std::vector<spatial::Point3D>& actions);
 
     /**
      * Uses the current PathPlanner (HPA, Astar, TangentBUG, etc.) to build
@@ -125,7 +125,7 @@ private:
      * @param position Goal position
      * @return false if path planning has failed and true if successfull
      */
-    bool buildGotoPlan( const spatial::Point& position, float customSpeed = 0 );
+    bool buildGotoPlan( const spatial::Point3D& position, float customSpeed = 0 );
 
     /**
      * Create a walk planning action that will be sent to OAC

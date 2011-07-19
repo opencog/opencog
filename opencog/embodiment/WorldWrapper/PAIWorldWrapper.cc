@@ -241,7 +241,10 @@ throw (ComboException, AssertionException, std::bad_exception)
                         entity->getOrientation( ).toString( ).c_str( ),
                         entity->getPosition( ).toString( ).c_str( ), distanceFromGoal );
 
-                if ( !buildGotoPlan( position, walkSpeed ) ) {
+                spatial::Point3D position3d = spatial::Point3D(position.first, position.second,
+                                                    sm.floorHeight());
+
+                if ( !buildGotoPlan( position3d, walkSpeed ) ) {
                     if ( _hasPlanFailed ) {
                         logger().error("PAIWorldWrapper - Failed to create a goto plan to the goal.");
                     } else {
@@ -307,7 +310,9 @@ throw (ComboException, AssertionException, std::bad_exception)
             pai.getAvatarInterface( ).setLatestGotoTarget(
                 std::pair<std::string, spatial::Point>( target, spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ) ) );
 
-            if ( !buildGotoPlan( goalPoint, walkSpeed ) ) {
+            spatial::Point3D goalPoint3d(goalPoint.first, goalPoint.second, sm.floorHeight());
+
+            if ( !buildGotoPlan( goalPoint3d, walkSpeed ) ) {
                 if (_hasPlanFailed) {
                     logger().error(
                                  "PAIWorldWrapper - Failed to create a gobehind_obj plan to the goal.");
@@ -677,8 +682,8 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
     }
 }
 
-void PAIWorldWrapper::get3DWaypoints( const spatial::Point& startPoint,
-        const spatial::Point& endPoint, std::vector<spatial::Point3D>& actions )
+void PAIWorldWrapper::get3DWaypoints( const spatial::Point3D& startPoint,
+        const spatial::Point3D& endPoint, std::vector<spatial::Point3D>& actions )
 {
     struct timeval timer_start, timer_end;
     time_t elapsed_time = 0;
@@ -687,29 +692,24 @@ void PAIWorldWrapper::get3DWaypoints( const spatial::Point& startPoint,
 
     gettimeofday(&timer_start, NULL);
     printf("Start A* 3D navigation. Delta height for each node: %.2f\n", maxDeltaHeight);
-    spatial::Point begin = startPoint;
-    spatial::Point end = endPoint;
 
-    spatial::Point correctedAgentLocation = getValidPosition( begin );
-    spatial::Point correctedEndLocation = getValidPosition( end );
+printf("Original start point (%lf, %lf, %lf); goal point (%lf, %lf, %lf).\n", 
+        startPoint.get<0>(), startPoint.get<1>(), startPoint.get<2>(),
+        endPoint.get<0>(), endPoint.get<1>(), endPoint.get<2>());
 
-    if ( correctedAgentLocation != begin ) {
-        begin = correctedAgentLocation;
-        spatial::Point3D begin3DPoint(begin.first, begin.second, 0.0);
-        actions.push_back( begin3DPoint );
-    }
+    spatial::Point3D correctedEndPoint = sm.getNearestFree3DPoint(endPoint, config().get_double("ASTAR3D_DELTA_HEIGHT"));
+    //spatial::Point3D correctedEndPoint = endPoint;
 
-    if ( correctedEndLocation != end ) {
-        end = correctedEndLocation;
-    }
+printf("Corrected goal point (%lf, %lf, %lf).\n", correctedEndPoint.get<0>(), correctedEndPoint.get<1>(), correctedEndPoint.get<2>());
+
     spatial::AStar3DController AStar3D;
     SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
     AStar3D.setMap( map );
 
-    spatial::LSMap3DSearchNode petNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(begin.first, begin.second)), maxDeltaHeight);
-    petNode.z = map->floorHeight();
-    spatial::LSMap3DSearchNode goalNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(end.first, end.second)), maxDeltaHeight);
-    goalNode.z = map->floorHeight();
+    spatial::LSMap3DSearchNode petNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(startPoint.get<0>(), startPoint.get<1>())), maxDeltaHeight);
+    petNode.z = startPoint.get<2>();
+    spatial::LSMap3DSearchNode goalNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(correctedEndPoint.get<0>(), correctedEndPoint.get<1>())), maxDeltaHeight);
+    goalNode.z = correctedEndPoint.get<2>();
 
     AStar3D.setStartAndGoalStates(petNode, goalNode);
 
@@ -733,7 +733,7 @@ void PAIWorldWrapper::get3DWaypoints( const spatial::Point& startPoint,
     printf("\n");
 }
 
-bool PAIWorldWrapper::buildGotoPlan( const spatial::Point& position, float customSpeed )
+bool PAIWorldWrapper::buildGotoPlan( const spatial::Point3D& position, float customSpeed )
 {
 
     const AtomSpace& as = pai.getAtomSpace();
@@ -743,10 +743,12 @@ bool PAIWorldWrapper::buildGotoPlan( const spatial::Point& position, float custo
 
         spatial::Point startPoint = WorldWrapperUtil::getLocation(sm, as,
                                     WorldWrapperUtil::selfHandle( as, selfName( ) ) );
-        spatial::Point endPoint = position;
+        spatial::Point3D startPoint3d = spatial::Point3D(startPoint.first, startPoint.second,
+                                    WorldWrapperUtil::getAltitude(sm, as, selfName()));
+        spatial::Point3D endPoint = position;
 
         
-        get3DWaypoints( startPoint, endPoint, actions );
+        get3DWaypoints( startPoint3d, endPoint, actions );
 
         if ( !_hasPlanFailed ) {
             //clearPlan( actions, startPoint, endPoint );
@@ -757,7 +759,7 @@ bool PAIWorldWrapper::buildGotoPlan( const spatial::Point& position, float custo
 
         spatial::Point startPoint = WorldWrapperUtil::getLocation(sm, as,
                                     WorldWrapperUtil::selfHandle( as, selfName( ) ) );
-        spatial::Point endPoint = position;
+        spatial::Point endPoint = spatial::Point(position.get<0>(), position.get<1>());
 
         
         getWaypoints( startPoint, endPoint, actions );
@@ -874,7 +876,11 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
 
             pai.addAction( planID, action );
 
-            if (it_point->get<2>() != 0.0) {
+            // The agent need to jump only when the delta height is larger than
+            // a threshold, which is the minimum delta height used in AStar 3D
+            // pathfinding.
+            double minJumpHeight = opencog::config().get_double("ASTAR3D_DELTA_HEIGHT");
+            if (std::abs(it_point->get<2>()) >= minJumpHeight) {
                 action = PetAction(ActionType::JUMP_TOWARD());
                 action.addParameter(ActionParameter("direction",
                                                     ActionParamType::VECTOR(),
@@ -909,16 +915,22 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
     spatial::Point endPoint;
     spatial::Point targetCenterPosition;
 
+    double targetAltitude = 0.0;
+
     try {
+
         startPoint = WorldWrapperUtil::getLocation(spaceMap, atomSpace,
                      WorldWrapperUtil::selfHandle(atomSpace, selfName()));
         targetCenterPosition = WorldWrapperUtil::getLocation(spaceMap, atomSpace, goalHandle );
+        targetAltitude = WorldWrapperUtil::getAltitude(spaceMap, atomSpace, goalName);
         if ( goBehind != Handle::UNDEFINED ) {
             endPoint = spaceMap.behindPoint(WorldWrapperUtil::getLocation(spaceMap, atomSpace, goBehind), goalName);
         } else {
             endPoint = spaceMap.nearbyPoint(startPoint, goalName);
-            if (spaceMap.gridIllegal(spaceMap.snap(endPoint))) {
-                logger().error("PAIWorldWrapper - nearby point selected and invalid point.");
+            if (!config().get_bool("ENABLE_UNITY_CONNECTOR")) {
+                if (spaceMap.gridIllegal(spaceMap.snap(endPoint))) {
+                    logger().error("PAIWorldWrapper - nearby point selected and invalid point.");
+                }
             }
         } // else
     } catch ( AssertionException& e ) {
@@ -935,7 +947,8 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
     pai.getAvatarInterface( ).setLatestGotoTarget(
         std::pair<std::string, spatial::Point>( goalName, targetCenterPosition ) );
 
-    return buildGotoPlan( endPoint, walkSpeed );
+    spatial::Point3D goalPoint = spatial::Point3D(endPoint.first, endPoint.second, targetAltitude);
+    return buildGotoPlan( goalPoint, walkSpeed );
 }
 
 PetAction PAIWorldWrapper::buildPetAction(sib_it from)
