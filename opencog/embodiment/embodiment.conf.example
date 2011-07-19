@@ -245,6 +245,9 @@ NO_ACK_MESSAGES                 = true
 # astart yet...)
 NAVIGATION_ALGORITHM            = hpa
 HPA_MAXIMUM_CLUSTERS            = 1
+# 3D pathfinding, to check if next vertex is legal in height. Currently, the delta height is
+# according to a single block height in unity world.
+ASTAR3D_DELTA_HEIGHT            = 1.0
 
 # Speed used by pet walk commands. If set to a non-positive number, it generates
 # random speed values between 0.5 and 3.5
