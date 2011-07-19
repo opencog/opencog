@@ -168,3 +168,12 @@ size_t opencog::getMemUsage() {
     return diff;
 }
 
+#include <sys/sysinfo.h>
+
+unsigned long opencog::getTotalRAM() {
+    return getpagesize() * get_phys_pages();
+}
+
+unsigned long opencog::getFreeRAM() {
+    return getpagesize() * get_avphys_pages();
+}

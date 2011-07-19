@@ -83,6 +83,12 @@ unsigned int       sleep(unsigned seconds);
 
 size_t             getMemUsage();
 
+/// return the number of bytes of RAM
+unsigned long      getTotalRAM();
+
+/// return the number of free bytes in RAM
+unsigned long      getFreeRAM();
+
 } // namespace opencog
 
 #endif // _OPENCOG_PLATFORM_H
