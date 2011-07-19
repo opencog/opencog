@@ -516,6 +516,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d map-infos done", list->getLength());
 
+    /*
     // getting <pet-signal> elements from the XML message
     XMLString::transcode(PET_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
@@ -525,6 +526,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d pet-signals done", list->getLength());
+    */
 
     // getting <avatar-signal> elements from the XML message
     XMLString::transcode(AVATAR_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -577,11 +579,12 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         logger().debug("PAI - Processing %d agent-sensor-infos done", list->getLength());
 }
 
-void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+void PAI::processAgentSignal(DOMElement * element)
+    throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    /// getting timestamp atribute value
+    // getting timestamp attribute value
     XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* timestamp = XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
@@ -591,17 +594,17 @@ void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeExcept
         return;
     }
 
-    /// getting agent-id atribute value
+    // getting agent-id attribute value
     XMLString::transcode(AGENT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* agentID = XMLString::transcode(element->getAttribute(tag));
     string internalAgentId = PAIUtils::getInternalId(agentID);
 
-    /// getting agent type
+    // getting agent type
     XMLString::transcode(AGENT_TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* agentType = XMLString::transcode(element->getAttribute(tag));
     string agentTypeStr( agentType );
 
-    /// getting agent name atribute value
+    // getting agent name attribute value
     XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* name = XMLString::transcode(element->getAttribute(tag));
     string nameStr(camelCaseToUnderscore(name)); //that's for the atomSpace name storage
@@ -818,32 +821,28 @@ void PAI::processPetSignal(DOMElement * element)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    /// getting timestamp atribute value
-    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XMLString::transcode(element->getAttribute(tag));
-    logger().fine("PAI:processPetSignal - timestamp: %s", timestamp);
-    unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
+    unsigned long tsValue = getTimestampFromElement(element);
     if (!setLatestSimWorldTimestamp(tsValue)) {
         logger().error("PAI - Received old timestamp in pet-signal => Message discarded!");
-        XMLString::release(&timestamp);
         return;
     }
 
-    /// getting pet-id atribute value
+    // getting pet-id attribute value
     XMLString::transcode(PET_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* petID = XMLString::transcode(element->getAttribute(tag));
     string internalPetId = PAIUtils::getInternalId(petID);
-    // TODO: Do we need to check if pedID matches the id of the Pet being controlled by this OAC?
+    // TODO: Do we need to check if petID matches the id of the Pet being controlled by this OAC?
 
-    /// getting name atribute value
+    // getting name attribute value
     XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* name = XMLString::transcode(element->getAttribute(tag));
 
-    /// getting the plan-id, if any
+    // getting the plan-id, if any
     XMLString::transcode(ACTION_PLAN_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* planIdStr = XMLString::transcode(element->getAttribute(tag));
 
-    /// getting status atribute value (NOTE: it's always present since it has a default value = "done")
+    // getting status attribute value
+    // NOTE: it's always present since it has a default value = "done"
     XMLString::transcode(STATUS_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* status = XMLString::transcode(element->getAttribute(tag));
 
@@ -912,7 +911,6 @@ void PAI::processPetSignal(DOMElement * element)
 
     XMLString::release(&petID);
     XMLString::release(&name);
-    XMLString::release(&timestamp);
     XMLString::release(&status);
     XMLString::release(&planIdStr);
 }
@@ -932,6 +930,17 @@ bool PAI::setLatestSimWorldTimestamp(unsigned long timestamp)
         return false;
     }
     return true;
+}
+
+unsigned long PAI::getTimestampFromElement(DOMElement* element) const
+{
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+    // getting timestamp attribute value
+    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* timestamp = XMLString::transcode(element->getAttribute(tag));
+    unsigned long result = getTimestampFromXsdDateTimeStr(timestamp);
+    XMLString::release(&timestamp);
+    return result;
 }
 
 unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) throw (opencog::RuntimeException, std::bad_exception)
@@ -1055,36 +1064,33 @@ unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) th
 
 void PAI::processInstruction(DOMElement * element)
 {
-
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    /// getting timestamp atribute value
-    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XMLString::transcode(element->getAttribute(tag));
-    unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
+    unsigned long tsValue = getTimestampFromElement(element);
 
     // Note: The time stamp from RelexServer represents whatever timestamp
-    // it was originally sent.
+    // it was originally sent by this OAC, so the result of this call is
+    // safe to ignore.
     setLatestSimWorldTimestamp(tsValue);
     
-    /// getting pet-id atribute value
+    // getting pet-id attribute value
     XMLString::transcode(PET_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* petID = XMLString::transcode(element->getAttribute(tag));
     string internalPetId = PAIUtils::getInternalId(petID);
-    // TODO: Do we need to check if pedID matches the id of the Pet being controlled by this OAC?
+    // TODO: Do we need to check if petID matches the id of the Pet being controlled by this OAC?
 
-    /// getting avatar-id atribute value
+    // getting avatar-id attribute value
     // TODO: Rename avatar-id to agent-id, since any agent (avatar, pet,
     // humanoid) may say something.
     XMLString::transcode(AVATAR_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* avatarID = XMLString::transcode(element->getAttribute(tag));
     string internalAvatarId = PAIUtils::getInternalId(avatarID);
 
-    /// getting content-type atribute value
+    /// getting content-type attribute value
     XMLString::transcode(CONTENT_TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* contentType = XMLString::transcode(element->getAttribute(tag));
 
-    /// getting target-mode atribute value
+    /// getting target-mode attribute value
     XMLString::transcode(TARGET_MODE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* targetMode = XMLString::transcode(element->getAttribute(tag));
     
@@ -1279,7 +1285,6 @@ void PAI::processInstruction(DOMElement * element)
 
     XMLString::release(&petID);
     XMLString::release(&avatarID);
-    XMLString::release(&timestamp);
     XMLString::release(&contentType);
     XMLString::release(&targetMode);
     XMLString::release(&sentenceText);
@@ -1330,27 +1335,24 @@ void PAI::processAvatarSignal(DOMElement * element) throw (opencog::RuntimeExcep
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    /// getting timestamp atribute value
-    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XMLString::transcode(element->getAttribute(tag));
-    unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
+    // getting timestamp attribute value
+    unsigned long tsValue = getTimestampFromElement(element);
     if (!setLatestSimWorldTimestamp(tsValue)) {
         logger().error("PAI - Received old timestamp in avatar-signal => Message discarded!");
-        XMLString::release(&timestamp);
         return;
     }
 
-    /// getting pet-id atribute value
+    /// getting pet-id attribute value
     XMLString::transcode(AVATAR_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* avatarID = XMLString::transcode(element->getAttribute(tag));
     string internalAvatarId = PAIUtils::getInternalId(avatarID);
 
-    /// getting avatar-id atribute value
+    /// getting avatar-id attribute value
     XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* name = XMLString::transcode(element->getAttribute(tag));
     string nameStr(camelCaseToUnderscore(name));
 
-    logger().debug("PAI - Got avatar-signal: avatarId = %s (%s), name = %s, timestamp = %s\n", avatarID, internalAvatarId.c_str(), name, timestamp);
+    logger().debug("PAI - Got avatar-signal: avatarId = %s (%s), name = %s, timestamp = %u\n", avatarID, internalAvatarId.c_str(), name, tsValue);
 
     // Add the perceptions into AtomSpace
 
@@ -1531,7 +1533,6 @@ void PAI::processAvatarSignal(DOMElement * element) throw (opencog::RuntimeExcep
 
     XMLString::release(&avatarID);
     XMLString::release(&name);
-    XMLString::release(&timestamp);
 }
 
 Type PAI::getSLObjectNodeType(const char* objectType)
@@ -1558,22 +1559,18 @@ void PAI::processObjectSignal(DOMElement * element)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    /// getting timestamp atribute value
-    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XMLString::transcode(element->getAttribute(tag));
-    unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
+    unsigned long tsValue = getTimestampFromElement(element);
     if (!setLatestSimWorldTimestamp(tsValue)) {
         logger().error("PAI - Received old timestamp in object-signal => Message discarded!");
-        XMLString::release(&timestamp);
         return;
     }
 
-    /// getting object id atribute value
+    // getting object id attribute value
     XMLString::transcode(OBJECT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* objectID = XMLString::transcode(element->getAttribute(tag));
     string internalObjectId = PAIUtils::getInternalId(objectID);
 
-    /// getting object name atribute value
+    // getting object name attribute value
     XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* name = XMLString::transcode(element->getAttribute(tag));
 
@@ -1639,7 +1636,6 @@ void PAI::processObjectSignal(DOMElement * element)
 
     XMLString::release(&objectID);
     XMLString::release(&name);
-    XMLString::release(&timestamp);
 
 }
 
@@ -1702,12 +1698,9 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
         DOMElement* blipElement = (DOMElement*) blipList->item(i);
 
-        XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* timestamp = XMLString::transcode(blipElement->getAttribute(tag));
-        unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
+        unsigned long tsValue = getTimestampFromElement(blipElement);
         if (!setLatestSimWorldTimestamp(tsValue)) {
             logger().error("PAI - Received old timestamp in blip => Message discarded!");
-            XMLString::release(&timestamp);
             continue;
         }
 
@@ -2149,7 +2142,6 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
         XMLString::release(&objName);
         XMLString::release(&ownerId);
 
-        XMLString::release(&timestamp);
 
         /*
         delete detector;

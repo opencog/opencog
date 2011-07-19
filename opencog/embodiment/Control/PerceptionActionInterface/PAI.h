@@ -56,6 +56,9 @@
 
 using namespace opencog::control;
 
+using XERCES_CPP_NAMESPACE::DOMElement;
+using XERCES_CPP_NAMESPACE::DOMDocument;
+
 namespace opencog { namespace pai {
 
 // action plan status
@@ -218,6 +221,8 @@ public:
     static unsigned long getTimestampFromXsdDateTimeStr(
             const char* xsdDateTimeStr)
         throw (opencog::RuntimeException, std::bad_exception);
+
+    unsigned long getTimestampFromElement(DOMElement* element) const;
 
     /**
      * Constructor
@@ -430,25 +435,25 @@ private:
      * added/update by the processing of a PVPMessage. This information is used
      * to update is_X predicates in the OAC (by PredicatesUpdater class).
      */
-    void processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq
+    void processPVPDocument(DOMDocument * doc, HandleSeq
             &toUpdateHandles);
 
     /**
      * @param element The agent-signal element to be processed
      */
-    void processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw
+    void processAgentSignal(DOMElement * element) throw
         (opencog::RuntimeException, opencog::InvalidParamException,
          std::bad_exception);
 
     /**
      * @param element The agent-sensor-info element to be processed
      */
-    void processAgentSensorInfo(XERCES_CPP_NAMESPACE::DOMElement * element);
+    void processAgentSensorInfo(DOMElement * element);
 
     /**
      * @param element The pet-signal element to be processed
      */
-    void processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element);
+    void processPetSignal(DOMElement * element);
 
     /**
      * @param element The instruction element to be processed. 
@@ -458,12 +463,12 @@ private:
      *        message and the actual work like generating corresponding answers
      *        or actions is done within PsiActionSelectionAgent and dialog_system.scm
      */
-    void processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element);
+    void processInstruction(DOMElement * element);
 
     /**
      * @param element The avatar-signal element to be processed
      */
-    void processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw
+    void processAvatarSignal(DOMElement * element) throw
         (opencog::RuntimeException, opencog::InvalidParamException,
          std::bad_exception);
 
@@ -472,14 +477,14 @@ private:
      *  going to be used at all.
      *  @param element The object-signal element to be processed
      */
-    void processObjectSignal(XERCES_CPP_NAMESPACE::DOMElement * element);
+    void processObjectSignal(DOMElement * element);
 
     /** 
      * Extract double attributes from XML message.
      * @param tagName the name of the attribute.
      * @return the value of the attribute parsed as a double.
      */
-    double getPositionAttribute(XERCES_CPP_NAMESPACE::DOMElement * element, const char* tagName);
+    double getPositionAttribute(DOMElement * element, const char* tagName);
 
     /**
      * @param element The map-info element to be processed
@@ -487,7 +492,7 @@ private:
      * added/update by the processing of a PVPMessage. This information is used
      * to update is_X predicates in the OAC (by PredicatesUpdater class).
      */
-    void processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq
+    void processMapInfo(DOMElement * element, HandleSeq
             &toUpdateHandles);
 
     /**
@@ -495,7 +500,7 @@ private:
      *
      * @param velocityElement The velocity element to be processed
      */
-    Vector getVelocityData(XERCES_CPP_NAMESPACE::DOMElement* velocityElement);
+    Vector getVelocityData(DOMElement* velocityElement);
 
     /**
      * Adds the representation of the given action in the AtomSpace.
@@ -539,8 +544,8 @@ private:
      * @return true if any property of the object has changed (or it's a new object). False, otherwise.
      */
     bool addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                            XERCES_CPP_NAMESPACE::DOMElement* positionElement,
-                            XERCES_CPP_NAMESPACE::DOMElement* rotationElement,
+                            DOMElement* positionElement,
+                            DOMElement* rotationElement,
                             double length, double width, double height,
                             bool isEdible, bool isDrinkable, bool isTerrainObject);
 
@@ -587,7 +592,7 @@ private:
      */
     Vector addVectorPredicate(Handle objectNode, const std::string&
             predicateName, unsigned long timestamp,
-            XERCES_CPP_NAMESPACE::DOMElement* vectorElement);
+            DOMElement* vectorElement);
 
     /**
      * Adds a rotation predicate for the given object
@@ -598,7 +603,7 @@ private:
     * @return a Rotation object with the (pitch,roll,yaw) rotation values
      */
     Rotation addRotationPredicate(Handle objectNode, unsigned long timestamp,
-            XERCES_CPP_NAMESPACE::DOMElement* rotationElement);
+            DOMElement* rotationElement);
 
     /**
      * Adds a physiological feeling into the AtomSpace
