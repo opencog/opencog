@@ -164,8 +164,9 @@ namespace opencog
              *       of the rectangle.
              * radius: the radius of the agent which uses this map (for navigation
              * purposes).
-             * floor: the height of the terrain
-             * agentHeight: the height of the agent which uses this map
+             * agentHeight: the height of the agent which uses this map, zero by
+             * default for 2D map.
+             * floor: the height of the terrain, zero by default for 2D map.
              */
             LocalSpaceMap2D(Distance xMin, Distance xMax, unsigned int xDim,
                             Distance yMin, Distance yMax, unsigned int yDim,
@@ -211,6 +212,11 @@ namespace opencog
             // Get the nearest free (not occupied or out of bounds)
             // point from the given point
             Point getNearestFreePoint(const Point& pt) const throw (opencog::RuntimeException, std::bad_exception);
+            Point3D getNearestFree3DPoint(const Point3D& pt, double delta) const throw (opencog::RuntimeException, std::bad_exception);
+
+            // Get the proper altitude of a given grid point in order 
+            // to reach a target 3D point with a limited delta upwards height.
+            double getProperFreePointAltitude(const GridPoint& gp, const Point3D& dest, double delta) const;
 
             // Is the given point occupied by any obstacle or out of bounds?
             bool gridIllegal(const GridPoint& gp) const;
@@ -227,7 +233,7 @@ namespace opencog
             // If point "dest" is an obstacle, we can still use it in pathfinding only when its delta
             // height with point "src" is within a specific value "delta".
             bool edgeIllegal(const GridPoint& src, const GridPoint& dest, double srcHeight, double delta) const;
-            double getProperDestHeight(const GridPoint& src, const GridPoint& dest, double srcHeight, double delta) const;
+            double getProperDestAltitude(const GridPoint& src, const GridPoint& dest, const double srcHeight, double delta) const;
             bool isDiagonal(const GridPoint& src, const GridPoint& dest) const;
             ObjectID getTallestObjectInGrid(const GridPoint& gp) const; 
             ObjectID getLowestObjectInGrid(const GridPoint& gp) const; 
@@ -387,6 +393,24 @@ namespace opencog
                 for ( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
                     //localObjects.insert( it->first.c_str( ) );
                     localObjects.insert( it->second->getName( ).c_str( ) );
+                } // for
+
+                return std::copy(localObjects.begin(), localObjects.end(), out);
+            }
+
+            // return id's of all objects within the space map
+            template<typename Out>
+                Out findEntitiesWithClassFilter(Out out, const std::string& filterStr) const {
+
+                // If one object id is stored as an obstacle and a non-obstacle,
+                // only count it once:
+                ObjectIDSet localObjects;
+
+                LongEntityPtrHashMap::const_iterator it;
+                for ( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
+                    const std::string& entity_class = it->second->getStringProperty(Entity::ENTITY_CLASS);
+                    if (entity_class != filterStr)
+                        localObjects.insert( it->second->getName( ).c_str( ) );
                 } // for
 
                 return std::copy(localObjects.begin(), localObjects.end(), out);
