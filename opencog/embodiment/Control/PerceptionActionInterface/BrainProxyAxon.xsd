@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- WARNING THIS SCHEMA IS OUT OF DATE 
+
+    It was somewhat inconsistent already, but since the xml messages
+    are never checked against this XSD, this was never noticed.
+
+    Given how long it takes to write XML Schema properly (xml is too verbose)
+    and the fact we want to eventually move to a non-xml message format,
+    we'll leave it unaltered but obsolete for now.
+
+    19 July 2011 - Joel Pitt
+
+     --> 
+
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             targetNamespace="http://www.opencog.org/brain"
             xmlns:pet="http://www.opencog.org/brain"
@@ -21,7 +34,6 @@
             <xsd:choice minOccurs="0" maxOccurs="unbounded">
                 <xsd:element name="map-info" type="pet:MapInfoType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="agent-sensor-info" type="pet:AgentSensorInfoType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="object-signal" type="pet:ObjectSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="avatar-signal" type="pet:AvatarSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="pet-signal" type="pet:PetSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="agent-signal" type="pet:AgentSignalType" minOccurs="1" maxOccurs="1"/>
@@ -113,29 +125,6 @@
         </xsd:complexContent>
     </xsd:complexType>
     
-    <xsd:annotation>
-        <xsd:documentation>
-        signals from objects that were created with the proper scripts
-        by our vendors
-        </xsd:documentation>
-    </xsd:annotation>
-    <xsd:complexType name="ObjectSignalsType">
-        <xsd:sequence>
-            <xsd:element name="object-signal" type="pet:ObjectSignalType" minOccurs="1" maxOccurs="unbounded"/>
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:element name="object-signal" type="pet:ObjectSignalType"/>
-    
-    <xsd:complexType name="ObjectSignalType">
-        <xsd:complexContent>
-            <xsd:extension base="pet:BaseSignalType">
-                <xsd:sequence/>
-                <xsd:attribute name="object-id" type="xsd:string" use="required"/>
-            </xsd:extension>
-        </xsd:complexContent>        
-    </xsd:complexType>
-
     <xsd:complexType name="BaseSignalType" abstract="true">
         <xsd:sequence>
             <xsd:element name="param" type="pet:ParamType" minOccurs="0" maxOccurs="unbounded"/>

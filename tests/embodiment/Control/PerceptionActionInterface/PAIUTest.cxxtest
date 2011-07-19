@@ -482,7 +482,7 @@ public:
         TS_ASSERT(pai.processPVPMessage(pvpMsg2, toUpdateHandles));
 
         // Check latest received/processed timestamp
-        TS_ASSERT(pai.getLatestSimWorldTimestamp() == PAI::getTimestampFromXsdDateTimeStr("2007-06-18T20:15:03.000-07:00"));
+        TS_ASSERT(pai.getLatestSimWorldTimestamp() == PAI::getTimestampFromXsdDateTimeStr("2007-06-18T20:15:02.000-07:00"));
 
         // Check Action Plan status
         TS_ASSERT(!pai.hasPlanFailed("0"));
@@ -793,134 +793,6 @@ public:
             evalLinkOutgoing.push_back(predicateListLink);
             Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
-        }
-
-
-
-
-        // Check object-signal atoms
-        {
-            cout << "checking object signals" << endl;
-
-            Handle objectNode = atomSpace.getHandle(OBJECT_NODE, PAIUtils::getInternalId("Stick").c_str());
-            TS_ASSERT(Handle::compare(objectNode, Handle::UNDEFINED));
-            Handle actionNode = atomSpace.getHandle(WORD_NODE, "attached");
-            TS_ASSERT(Handle::compare(actionNode, Handle::UNDEFINED));
-
-            // State predicates
-            {
-                Handle predNode = atomSpace.getHandle(PREDICATE_NODE, "ObjectState");
-                TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-
-                {
-                    Handle paramNameNode = atomSpace.getHandle(NODE, "avatar-id");
-                    TS_ASSERT(Handle::compare(paramNameNode, Handle::UNDEFINED));
-                    Handle paramValueNode = atomSpace.getHandle(NODE, "Wynx"); // This is not converted to internal id. Should it be? If so what other param names (besides avatar-id) must be handled the same way?
-                    TS_ASSERT(Handle::compare(paramValueNode, Handle::UNDEFINED));
-
-                    HandleSeq paramListLinkOutgoing;
-                    paramListLinkOutgoing.push_back(paramNameNode);
-                    paramListLinkOutgoing.push_back(paramValueNode);
-                    Handle paramListLink = atomSpace.getHandle(LIST_LINK, paramListLinkOutgoing);
-                    TS_ASSERT(Handle::compare(paramListLink, Handle::UNDEFINED));
-
-                    HandleSeq statePredListLinkOutgoing;
-                    statePredListLinkOutgoing.push_back(objectNode);
-                    statePredListLinkOutgoing.push_back(actionNode);
-                    statePredListLinkOutgoing.push_back(paramListLink);
-                    Handle statePredListLink = atomSpace.getHandle(LIST_LINK, statePredListLinkOutgoing);
-                    TS_ASSERT(Handle::compare(statePredListLink, Handle::UNDEFINED));
-
-                    HandleSeq evalLinkOutgoing;
-                    evalLinkOutgoing.push_back(predNode);
-                    evalLinkOutgoing.push_back(statePredListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
-                    TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
-                }
-
-
-                {
-                    Handle paramNameNode = atomSpace.getHandle(NODE, "bodyPart");
-                    TS_ASSERT(Handle::compare(paramNameNode, Handle::UNDEFINED));
-                    Handle paramValueNode = atomSpace.getHandle(NODE, "RIGHT_HAND");
-                    TS_ASSERT(Handle::compare(paramValueNode, Handle::UNDEFINED));
-
-                    HandleSeq paramListLinkOutgoing;
-                    paramListLinkOutgoing.push_back(paramNameNode);
-                    paramListLinkOutgoing.push_back(paramValueNode);
-                    Handle paramListLink = atomSpace.getHandle(LIST_LINK, paramListLinkOutgoing);
-                    TS_ASSERT(Handle::compare(paramListLink, Handle::UNDEFINED));
-
-                    HandleSeq statePredListLinkOutgoing;
-                    statePredListLinkOutgoing.push_back(objectNode);
-                    statePredListLinkOutgoing.push_back(actionNode);
-                    statePredListLinkOutgoing.push_back(paramListLink);
-                    Handle statePredListLink = atomSpace.getHandle(LIST_LINK, statePredListLinkOutgoing);
-                    TS_ASSERT(Handle::compare(statePredListLink, Handle::UNDEFINED));
-
-                    HandleSeq evalLinkOutgoing;
-                    evalLinkOutgoing.push_back(predNode);
-                    evalLinkOutgoing.push_back(statePredListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
-                    TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
-                }
-
-            }
-
-            // Position predicate
-            {
-                Handle predNode = atomSpace.getHandle(PREDICATE_NODE, AGISIM_POSITION_PREDICATE_NAME);
-                TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-
-                Handle xNode = atomSpace.getHandle(NUMBER_NODE, "5.05");
-                TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
-                Handle yNode = atomSpace.getHandle(NUMBER_NODE, "64.25");
-                TS_ASSERT(Handle::compare(yNode, Handle::UNDEFINED));
-                Handle zNode = atomSpace.getHandle(NUMBER_NODE, "4.25");
-                TS_ASSERT(Handle::compare(zNode, Handle::UNDEFINED));
-
-                HandleSeq predicateListLinkOutgoing;
-                predicateListLinkOutgoing.push_back(objectNode);
-                predicateListLinkOutgoing.push_back(xNode);
-                predicateListLinkOutgoing.push_back(yNode);
-                predicateListLinkOutgoing.push_back(zNode);
-                Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
-                TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
-
-                HandleSeq evalLinkOutgoing;
-                evalLinkOutgoing.push_back(predNode);
-                evalLinkOutgoing.push_back(predicateListLink);
-                Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
-                TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
-            }
-
-            // Rotation predicate
-            {
-                Handle predNode = atomSpace.getHandle(PREDICATE_NODE, "AGISIM_rotation");
-                TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-
-                Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "0");
-                TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
-                Handle rollNode = atomSpace.getHandle(NUMBER_NODE, "0");
-                TS_ASSERT(Handle::compare(rollNode, Handle::UNDEFINED));
-                Handle yawNode = atomSpace.getHandle(NUMBER_NODE, "2.5");
-                TS_ASSERT(Handle::compare(yawNode, Handle::UNDEFINED));
-
-                HandleSeq predicateListLinkOutgoing;
-                predicateListLinkOutgoing.push_back(objectNode);
-                predicateListLinkOutgoing.push_back(pitchNode);
-                predicateListLinkOutgoing.push_back(rollNode);
-                predicateListLinkOutgoing.push_back(yawNode);
-                Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
-                TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
-
-                HandleSeq evalLinkOutgoing;
-                evalLinkOutgoing.push_back(predNode);
-                evalLinkOutgoing.push_back(predicateListLink);
-                Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
-                TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
-            }
-
         }
 
         // Check map-info atoms

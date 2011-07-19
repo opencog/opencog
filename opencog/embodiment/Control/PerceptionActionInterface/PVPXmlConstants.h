@@ -40,7 +40,6 @@
 #define MAP_INFO_ELEMENT         "map-info"
 #define BLIP_ELEMENT             "blip"
 #define PET_SIGNAL_ELEMENT       "pet-signal"
-#define OBJECT_SIGNAL_ELEMENT    "object-signal"
 #define AVATAR_SIGNAL_ELEMENT    "avatar-signal"
 #define INSTRUCTION_ELEMENT      "instruction"
 #define AGENT_SENSOR_INFO_ELEMENT      "agent-sensor-info"

@@ -222,6 +222,11 @@ public:
             const char* xsdDateTimeStr)
         throw (opencog::RuntimeException, std::bad_exception);
 
+    /**
+     * Retrieve timestamp from an element's TIMESTAMP_ATTIBUTE.
+     * Better abstracted than getTimestampFromXsdDateTimeStr because
+     * you don't have to deal with all the XML scaffolding crap.
+     */
     unsigned long getTimestampFromElement(DOMElement* element) const;
 
     /**
@@ -439,6 +444,11 @@ private:
             &toUpdateHandles);
 
     /**
+     * @param element The agent-sensor-info element to be processed
+     */
+    void processAgentSensorInfo(DOMElement * element);
+
+    /**
      * @param element The agent-signal element to be processed
      */
     void processAgentSignal(DOMElement * element) throw
@@ -446,14 +456,16 @@ private:
          std::bad_exception);
 
     /**
-     * @param element The agent-sensor-info element to be processed
-     */
-    void processAgentSensorInfo(DOMElement * element);
-
-    /**
      * @param element The pet-signal element to be processed
      */
     void processPetSignal(DOMElement * element);
+
+    /**
+     * @param element The avatar-signal element to be processed
+     */
+    void processAvatarSignal(DOMElement * element) throw
+        (opencog::RuntimeException, opencog::InvalidParamException,
+         std::bad_exception);
 
     /**
      * @param element The instruction element to be processed. 
@@ -464,20 +476,6 @@ private:
      *        or actions is done within PsiActionSelectionAgent and dialog_system.scm
      */
     void processInstruction(DOMElement * element);
-
-    /**
-     * @param element The avatar-signal element to be processed
-     */
-    void processAvatarSignal(DOMElement * element) throw
-        (opencog::RuntimeException, opencog::InvalidParamException,
-         std::bad_exception);
-
-    /**
-     *  @todo DEPRECATED => actually, never used. Remove this later if it's not
-     *  going to be used at all.
-     *  @param element The object-signal element to be processed
-     */
-    void processObjectSignal(DOMElement * element);
 
     /** 
      * Extract double attributes from XML message.

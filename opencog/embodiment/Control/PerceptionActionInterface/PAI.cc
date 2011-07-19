@@ -516,7 +516,6 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d map-infos done", list->getLength());
 
-    /*
     // getting <pet-signal> elements from the XML message
     XMLString::transcode(PET_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
@@ -526,7 +525,6 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d pet-signals done", list->getLength());
-    */
 
     // getting <avatar-signal> elements from the XML message
     XMLString::transcode(AVATAR_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -547,16 +545,6 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d agent-signals done", list->getLength());
-
-    // getting <object-signal> elements from the XML message
-    XMLString::transcode(OBJECT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-    list = doc->getElementsByTagName(tag);
-
-    for (unsigned int i = 0; i < list->getLength(); i++) {
-        processObjectSignal((DOMElement *)list->item(i));
-    }
-    if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d object-signals done", list->getLength());
 
     // getting <instructions> elements from the XML message
     XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -584,13 +572,9 @@ void PAI::processAgentSignal(DOMElement * element)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    // getting timestamp attribute value
-    XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* timestamp = XMLString::transcode(element->getAttribute(tag));
-    unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
+    unsigned long tsValue = getTimestampFromElement(element);
     if (!setLatestSimWorldTimestamp(tsValue)) {
         logger().error("PAI - Received old timestamp in agent-signal => Message discarded!");
-        XMLString::release(&timestamp);
         return;
     }
 
@@ -609,7 +593,7 @@ void PAI::processAgentSignal(DOMElement * element)
     char* name = XMLString::transcode(element->getAttribute(tag));
     string nameStr(camelCaseToUnderscore(name)); //that's for the atomSpace name storage
 
-    logger().debug("PAI - Got agent-signal: agentId = %s (%s), name = %s, timestamp = %s\n", agentID, internalAgentId.c_str(), name, timestamp);
+    logger().debug("PAI - Got agent-signal: agentId = %s (%s), name = %s, timestamp = %u\n", agentID, internalAgentId.c_str(), name, tsValue);
 
     // Add the perceptions into AtomSpace
 
@@ -813,7 +797,6 @@ void PAI::processAgentSignal(DOMElement * element)
     XMLString::release(&agentID);
     XMLString::release(&agentType);
     XMLString::release(&name);
-    XMLString::release(&timestamp);
 
 }
 
@@ -1552,91 +1535,6 @@ Type PAI::getSLObjectNodeType(const char* objectType)
         result = OBJECT_NODE;
     }
     return result;
-}
-
-// TODO: DEPRECATED => actually, never used. Remove this later if it's not going to be used at all.
-void PAI::processObjectSignal(DOMElement * element)
-{
-    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
-
-    unsigned long tsValue = getTimestampFromElement(element);
-    if (!setLatestSimWorldTimestamp(tsValue)) {
-        logger().error("PAI - Received old timestamp in object-signal => Message discarded!");
-        return;
-    }
-
-    // getting object id attribute value
-    XMLString::transcode(OBJECT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* objectID = XMLString::transcode(element->getAttribute(tag));
-    string internalObjectId = PAIUtils::getInternalId(objectID);
-
-    // getting object name attribute value
-    XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* name = XMLString::transcode(element->getAttribute(tag));
-
-    Handle objectNode = AtomSpaceUtil::addNode(atomSpace, OBJECT_NODE, internalObjectId.c_str());
-
-    // Get param lists
-    XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-    XERCES_CPP_NAMESPACE::DOMNodeList * list = element->getElementsByTagName(tag);
-
-    for (unsigned int i = 0; i < list->getLength(); i++) {
-        DOMElement* paramElement = (DOMElement*) list->item(i);
-
-        XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* paramName = XMLString::transcode(paramElement->getAttribute(tag));
-
-        if (!strcmp(paramName, POSITION_PARAMETER_NAME)) {
-            XMLString::transcode(VECTOR_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-            XERCES_CPP_NAMESPACE::DOMNodeList* vectorList = paramElement->getElementsByTagName(tag);
-            if (vectorList->getLength()) {
-                DOMElement* vectorElement = (DOMElement*) vectorList->item(0);
-                addVectorPredicate(objectNode, AGISIM_POSITION_PREDICATE_NAME, tsValue, vectorElement);
-            }
-        } else if (!strcmp(paramName, ROTATE_PARAMETER_NAME)) {
-            XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-            XERCES_CPP_NAMESPACE::DOMNodeList* rotationList = paramElement->getElementsByTagName(tag);
-            if (rotationList->getLength()) {
-                DOMElement* rotationElement = (DOMElement*) rotationList->item(0);
-                addRotationPredicate(objectNode, tsValue, rotationElement);
-            }
-        } else {
-            XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* paramValue = XMLString::transcode(((DOMElement *)list->item(i))->getAttribute(tag));
-
-            if (paramValue && strlen(paramValue) > 0) {
-                Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, OBJECT_STATE_PREDICATE_NAME, true);
-                Handle actionNode = AtomSpaceUtil::addNode(atomSpace, WORD_NODE, name);
-
-                HandleSeq predicateListLinkOutgoing;
-                predicateListLinkOutgoing.push_back(objectNode);
-                predicateListLinkOutgoing.push_back(actionNode);
-
-                HandleSeq paramListLinkOutgoing;
-                paramListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, NODE, paramName));
-                paramListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, NODE, paramValue));
-                Handle paramListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, paramListLinkOutgoing);
-                predicateListLinkOutgoing.push_back(paramListLink);
-
-                Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
-                HandleSeq evalLinkOutgoing;
-                evalLinkOutgoing.push_back(predicateNode);
-                evalLinkOutgoing.push_back(predicateListLink);
-                Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-                atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue); // NOTE: latest info not handled because this is not used at all.
-            } else {
-                logger().warn("PAI - The object-signal param '%s' has no value!\n", paramName);
-            }
-
-            XMLString::release(&paramValue);
-
-        }
-        XMLString::release(&paramName);
-    }
-
-    XMLString::release(&objectID);
-    XMLString::release(&name);
-
 }
 
 double PAI::getPositionAttribute(DOMElement * element, const char* tagName)

@@ -139,15 +139,5 @@
     </blip>
  
     </map-info>
-    <object-signal object-id="Stick" name="attached" timestamp="2007-06-18T20:15:03.000-07:00">
-       <param name="avatar-id" type="string" value="Wynx"/>
-       <param name="bodyPart" type="string" value="RIGHT_HAND"/>
-       <param name="position" type="vector">
-           <vector x="5.05" y="64.25" z="4.25"/>
-       </param>
-       <param name="rotate" type="rotation">
-           <rotation pitch="0" roll="0" yaw="2.5"/>
-       </param>
-    </object-signal>
 </pet:embodiment-msg>
 
