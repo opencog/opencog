@@ -32,6 +32,7 @@
 #include "hashing.h"
 #include "exceptions.h"
 #include "oc_assert.h"
+#include "platform.h"
 
 namespace opencog {
 
@@ -56,8 +57,10 @@ struct lru_cache {
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
-    lru_cache(size_type n,const F& f=F()) : _n(n), _map(n+1), _f(f), _failures(0), _hits(0) {}
+    lru_cache(size_type n, const F& f=F())
+        : _n(n), _map(n+1), _f(f), _failures(0), _hits(0) {}
 
+    inline size_type size() const { return _map.size(); }
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
 
@@ -100,7 +103,7 @@ struct lru_cache {
         it=_map.insert(make_pair(_lru.begin(), call_f(x))).first;
       
         //if full, remove least-recently-used
-        if (_map.size()>_n) {
+        if (_map.size() > _n) {
             _map.erase(--_lru.end());
             _lru.pop_back();
         }
@@ -121,6 +124,20 @@ struct lru_cache {
 
     unsigned get_failures() const { return _failures; }
     unsigned get_hits() const { return _hits; }
+
+    void resize(size_type n) {
+        _n = n;
+        while(_map.size() > _n) {
+            _lru.begin();
+            map_iter it = _map.find(_lru.begin());
+            OC_ASSERT(it != _map.end(),
+                      "Element in _lru has no corresponding iterator in _map");
+            _lru(it->first);
+            _map(it);
+        }
+        OC_ASSERT(_lru.size() == _map.size(),
+                  "lru_cache - _lru size different from _map size.");
+    }
     
 protected:
     size_type _n;
@@ -152,8 +169,8 @@ struct lru_cache_threaded : public lru_cache<F, Hash, Equals> {
 private:
     typedef lru_cache<F, Hash, Equals> super;
 public:
-    typedef typename super::argument_type argument_type;
-    typedef typename super::result_type result_type;
+    typedef typename F::argument_type argument_type;
+    typedef typename F::result_type result_type;
     typedef typename super::list list;
     typedef typename list::iterator list_iter;
     typedef typename super::map map;
@@ -161,6 +178,11 @@ public:
     typedef typename map::size_type size_type;
   
     lru_cache_threaded(size_type n, const F& f=F()) : super(n, f) {}
+
+    inline size_type size() const {
+        boost::mutex::scoped_lock lock(cache_mutex);
+        return super::_map.size();
+    }
 
     inline bool full() const {
         boost::mutex::scoped_lock lock(cache_mutex);
@@ -258,6 +280,7 @@ struct prr_cache {
     prr_cache(size_type n, const F& f=F()) 
         : _n(n), _map(n+1), _f(f), _failures(0), _hits(0) {}
 
+    size_type size() const { return _map.size(); }
     bool full() const { return _map.size()==_n; }
     bool empty() const { return _map.empty(); }
 
@@ -300,7 +323,47 @@ protected:
     }
 
 };
-  
+
+/// Cache adjusting automatically its size to avoid running out of RAM
+/// or not using enough of the available RAM. The adjustment is done
+/// every n calls (as provided in the constructor).
+template<typename Cache>
+struct adaptive_cache : public Cache {
+    typedef typename Cache::result_type result_type;
+    typedef typename Cache::argument_type argument_type;
+    
+    /// If free memory / total memory > ulimit then the cache size is
+    /// divided by ufrac. If free memory / total memory < llimit then
+    /// the cache size is multiplied by lfact.
+    adaptive_cache(unsigned ncycles = 1000,
+                   float llimit = 0.25, float lfact = 2,
+                   float ulimit = 0.75, float ufrac = 2)
+        : _counter(0), _ncycles(ncycles),
+          _llimit(llimit), _lfact(lfact),
+          _ulimit(ulimit), _ufrac(ufrac) {}
+
+    result_type operator()(const argument_type& x) const {
+        if(_counter++ % _ncycles) {
+            float free_mem_ratio = (float)getFreeRAM() / (float)getTotalRAM();
+            if(free_mem_ratio < _llimit)
+                Cache::resize(Cache::size() * _lfact);
+            else if(free_mem_ratio > _ulimit)
+                Cache::resize(Cache::size() / _ufrac);
+        }
+        return Cache::operator()(x);
+    }
+private:
+    mutable unsigned _counter; // call counter, if it eventually wraps around
+                               // it's no big deal
+
+    unsigned _ncycles;
+    float _llimit;
+    float _lfact;
+    float _ulimit;
+    float _ufrac;
+};
+
+
 /// @todo this stuff sucks an should be removed. It is kept because
 /// some code in embodiment still uses it
 
