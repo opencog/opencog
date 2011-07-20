@@ -369,6 +369,8 @@ public :
     }
 
     void testGoto() {
+        logger().setLevel(Logger::FINE);
+        logger().setPrintToStdoutFlag(true);
         std::string str("goto_obj(random_pet 2)");
         runProcedureInCombo(str, id::action_success);
     }
@@ -396,13 +398,12 @@ public :
         //charge scripts
         cpr.instantiateProcedureCalls(tree, true);
 
-
         vector<vertex> arguments ;
         Procedure::ComboInterpreter interpreter(*ppai, *rng);
         Procedure::RunningProcedureId runningId = interpreter.runProcedure(tree, arguments);
         while (! interpreter.isFinished(runningId)) {
             interpreter.run(NULL);
-            sender->proccessSentMessage();
+            sender->processSentMessage();
         }
 
         if (!interpreter.isFailed(runningId)) {
@@ -444,7 +445,7 @@ public :
         Procedure::RunningProcedureId runningId = interpreter.runProcedure(tree, arguments);
         while (! interpreter.isFinished(runningId)) {
             interpreter.run(NULL);
-            sender->proccessSentMessage();
+            sender->processSentMessage();
         }
 
         if (!interpreter.isFailed(runningId)) {
@@ -494,7 +495,7 @@ public :
 
         while (! interpreter.isFinished(runningId)) {
             interpreter.run(NULL);
-            sender->proccessSentMessage();
+            sender->processSentMessage();
         }
 
         if (!interpreter.isFailed(runningId)) {

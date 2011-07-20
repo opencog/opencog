@@ -44,6 +44,8 @@
         <xsd:attribute name="request-id" type="xsd:string" use="optional"/>
     </xsd:complexType>    
 
+    <xsd:element name="pet-signal" type="pet:PetSignalType"/>
+
     <xsd:annotation>
         <xsd:documentation>
         Physical signals may be processed simultaneously or as a result of one
@@ -54,22 +56,10 @@
         internally to send signals in the appropriate order to the Brain.
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:complexType name="PetSignalsType">
-        <xsd:sequence>
-            <xsd:element name="pet-signal" type="pet:PetSignalType" minOccurs="1" maxOccurs="unbounded"/>
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:element name="pet-signal" type="pet:PetSignalType"/>
-
     <xsd:complexType name="PetSignalType">
         <xsd:complexContent>
             <xsd:extension base="pet:BaseSignalType">
                 <xsd:sequence/>
-                <xsd:attribute name="pet-id" type="xsd:string" use="required"/>                 
-                <xsd:attribute name="action-plan-id" type="xsd:string" use="optional"/>
-                <xsd:attribute name="sequence" type="xsd:positiveInteger" use="optional"/>
-                <xsd:attribute name="status" type="pet:StatusType" use="optional" default="done"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -77,76 +67,62 @@
 
 
     <!-- agent-signal -->
+    <xsd:element name="agent-signal" type="pet:AgentSignalType"/>
+    
     <xsd:annotation>
         <xsd:documentation>
         signals from agents, pertaining to agent specific actions
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:complexType name="AgentSignalsType">
-        <xsd:sequence>
-            <xsd:element name="agent-signal" type="pet:AgentSignalType" minOccurs="1" maxOccurs="unbounded"/>
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:element name="agent-signal" type="pet:AgentSignalType"/>
-    
     <xsd:complexType name="AgentSignalType">
         <xsd:complexContent>
             <xsd:extension base="pet:BaseSignalType">
                 <xsd:sequence/>
-                <xsd:attribute name="agent-id" type="xsd:string" use="required"/>
-                <xsd:attribute name="agent-type" type="xsd:string" use="required"/>
+                <xsd:attribute name="type" type="xsd:string" use="required"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
-    <!-- agent-signal -->
 
 
-
+    <!-- avatar-signal -->
+    <xsd:element name="avatar-signal" type="pet:AvatarSignalType"/>
+    
     <xsd:annotation>
         <xsd:documentation>
         signals from avatars, pertaining to avatar specific actions
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:complexType name="AvatarSignalsType">
-        <xsd:sequence>
-            <xsd:element name="avatar-signal" type="pet:AvatarSignalType" minOccurs="1" maxOccurs="unbounded"/>
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:element name="avatar-signal" type="pet:AvatarSignalType"/>
-    
     <xsd:complexType name="AvatarSignalType">
         <xsd:complexContent>
             <xsd:extension base="pet:BaseSignalType">
                 <xsd:sequence/>
-                <xsd:attribute name="avatar-id" type="xsd:string" use="required"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
     
     <xsd:complexType name="BaseSignalType" abstract="true">
         <xsd:sequence>
-            <xsd:element name="param" type="pet:ParamType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="action" type="pet:ActionSignalType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="physiology-level" type="pet:PhysiologyType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="name" type="xsd:string" use="optional"/>        
+        <xsd:attribute name="id" type="xsd:string" use="required"/>
         <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
     </xsd:complexType>
 
-    <xsd:annotation>
-        <xsd:documentation>
-        Instruction to pets will be sent as raw text strings. At some point the 
-        PetBrain will be able to correlate these instructions (and variants)
-        to an action plan template, which remains to be defined.  Since we would
-        like pets to respond to commands issued by people other than just their
-        owners, we'll give owners dog whistles (transferrable) that allow them to 
-        instruct their pet or designate someone else to instruct them.
-        </xsd:documentation>
-    </xsd:annotation>
-    <xsd:complexType name="PetInstructionsType">
+    <xsd:complexType name="ActionSignalType">
         <xsd:sequence>
-            <xsd:element name="instruction" type="pet:PetInstructionType" minOccurs="1" maxOccurs="unbounded"/>            
+            <xsd:element name="param" type="pet:ParamType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>        
+        <xsd:attribute name="plan-id" type="xsd:string" use="optional"/>
+        <xsd:attribute name="sequence" type="xsd:positiveInteger" use="optional"/>
+        <xsd:attribute name="status" type="pet:StatusType" use="optional" default="done"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="PhysiologyType">
+        <xsd:sequence/>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>        
+        <xsd:attribute name="value" type="xsd:float" use="required"/>
     </xsd:complexType>
 
     <xsd:element name="instruction"/>
@@ -168,6 +144,16 @@
       </xsd:simpleContent>
     </xsd:complexType>    
 
+    <xsd:annotation>
+        <xsd:documentation>
+        Instruction to pets will be sent as raw text strings. At some point the 
+        PetBrain will be able to correlate these instructions (and variants)
+        to an action plan template, which remains to be defined.  Since we would
+        like pets to respond to commands issued by people other than just their
+        owners, we'll give owners dog whistles (transferrable) that allow them to 
+        instruct their pet or designate someone else to instruct them.
+        </xsd:documentation>
+    </xsd:annotation>
     <xsd:complexType name="PetInstructionType">
         <xsd:sequence>
             <xsd:element name="sentence" type="pet:PetInstructionTextType" minOccurs="1" maxOccurs="1"/>
@@ -186,16 +172,16 @@
 
     <xsd:annotation>
         <xsd:documentation>
-	This type of message is required to provide informations about the agents sensory.
-	Sensors like vision and hearing can exchange it's data to OAC via this message type
+        This type of message is required to provide informations about the agents sensory.
+        Sensors like vision and hearing can exchange it's data to OAC via this message type
         </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType name="AgentSensorInfoType">
         <xsd:sequence>            
             <xsd:annotation>
                 <xsd:documentation>
-		Several perceptions may be exchanged in just oe agent sensor info.
-		A perception is the signal generated by a specific sensor
+                Several perceptions may be exchanged in just one agent sensor info.
+                A perception is the signal generated by a specific sensor.
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:element name="perception" type="pet:SensorPerceptionType" minOccurs="1" maxOccurs="unbounded"/>
@@ -204,8 +190,8 @@
 
     <xsd:annotation>
         <xsd:documentation>
-	A perception is a data generated by a specific sensor. The subject is a classifier
-	of the sensor signal. The signal is the raw data of the sensor's perception
+        A perception is a data generated by a specific sensor. The subject is a classifier
+        of the sensor signal. The signal is the raw data of the sensor's perception
         </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType name="SensorPerceptionType">

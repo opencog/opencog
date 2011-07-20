@@ -36,6 +36,9 @@
 
 using namespace opencog::pai;
 
+using XERCES_CPP_NAMESPACE::DOMDocument;
+using XERCES_CPP_NAMESPACE::DOMElement;
+using XERCES_CPP_NAMESPACE::XMLString;
 
 ActionPlan::ActionPlan()
 {
@@ -114,9 +117,9 @@ unsigned int ActionPlan::size() const
 string ActionPlan::getPVPmessage(const std::string& petId) const
 {
 
-    XERCES_CPP_NAMESPACE::DOMDocument* xmlDoc = createEmbodimentXMLDocument();
+    DOMDocument* xmlDoc = createEmbodimentXMLDocument();
 
-    XERCES_CPP_NAMESPACE::DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
+    DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
 
     for (vector<PetAction>::const_iterator itr = actions.begin(); itr != actions.end(); itr++) {
         itr->createPVPXmlElement(xmlDoc, actionPlanElem);
@@ -131,9 +134,9 @@ string ActionPlan::getPVPmessage(const std::string& petId) const
 
 string ActionPlan::getPVPmessage(const std::string& petId, unsigned int actionSeqNum) const
 {
-    XERCES_CPP_NAMESPACE::DOMDocument* xmlDoc = createEmbodimentXMLDocument();
+    DOMDocument* xmlDoc = createEmbodimentXMLDocument();
 
-    XERCES_CPP_NAMESPACE::DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
+    DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
 
 	const PetAction& action = getAction(actionSeqNum);
 	action.createPVPXmlElement(xmlDoc, actionPlanElem);
@@ -222,13 +225,13 @@ bool ActionPlan::hasFailed() const
  * Private methods used to create XML elements
  * --------------------------------------------
  */
-XERCES_CPP_NAMESPACE::DOMDocument* ActionPlan::createEmbodimentXMLDocument() const throw (opencog::XMLException, std::bad_exception)
+DOMDocument* ActionPlan::createEmbodimentXMLDocument() const throw (opencog::XMLException, std::bad_exception)
 {
     XMLCh namespaceURI[PAIUtils::MAX_TAG_LENGTH+1];
     XMLCh qualifiedName[PAIUtils::MAX_TAG_LENGTH+1];
-    XERCES_CPP_NAMESPACE::XMLString::transcode("http://www.opencog.org/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
-    XERCES_CPP_NAMESPACE::XMLString::transcode(ACTION_PLAN_ELEMENT, qualifiedName, PAIUtils::MAX_TAG_LENGTH);
-    XERCES_CPP_NAMESPACE::DOMDocument* doc = PAIUtils::getDOMImplementation()->createDocument(
+    XMLString::transcode("http://www.opencog.org/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(ACTION_PLAN_ELEMENT, qualifiedName, PAIUtils::MAX_TAG_LENGTH);
+    DOMDocument* doc = PAIUtils::getDOMImplementation()->createDocument(
                 namespaceURI,
                 qualifiedName,
                 NULL
@@ -239,32 +242,32 @@ XERCES_CPP_NAMESPACE::DOMDocument* ActionPlan::createEmbodimentXMLDocument() con
     }
 
     XMLCh tmpStr[PAIUtils::MAX_TAG_LENGTH+1];
-    XERCES_CPP_NAMESPACE::XMLString::transcode("UTF-8", tmpStr, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode("UTF-8", tmpStr, PAIUtils::MAX_TAG_LENGTH);
     doc->setEncoding(tmpStr);
-    XERCES_CPP_NAMESPACE::XMLString::transcode("1.0", tmpStr, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode("1.0", tmpStr, PAIUtils::MAX_TAG_LENGTH);
     doc->setVersion(tmpStr);
 
     return doc;
 }
 
-XERCES_CPP_NAMESPACE::DOMElement* ActionPlan::createActionPlanElement(XERCES_CPP_NAMESPACE::DOMDocument* doc,
-        XERCES_CPP_NAMESPACE::DOMElement* parent,
+DOMElement* ActionPlan::createActionPlanElement(DOMDocument* doc,
+        DOMElement* parent,
         const std::string& petId) const
 {
 
-    XERCES_CPP_NAMESPACE::DOMElement *actionPlan = parent;
+    DOMElement *actionPlan = parent;
 
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    XERCES_CPP_NAMESPACE::XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    XMLCh* idStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(id).c_str());
+    XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLCh* idStr = XMLString::transcode(opencog::toString(id).c_str());
     actionPlan->setAttribute(tag, idStr);
-    XERCES_CPP_NAMESPACE::XMLString::release(&idStr);
+    XMLString::release(&idStr);
 
-    XERCES_CPP_NAMESPACE::XMLString::transcode(ENTITY_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    XMLCh* entityIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(PAIUtils::getExternalId(petId.c_str()).c_str());
+    XMLString::transcode(ENTITY_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLCh* entityIdStr = XMLString::transcode(PAIUtils::getExternalId(petId.c_str()).c_str());
     actionPlan->setAttribute(tag, entityIdStr);
-    XERCES_CPP_NAMESPACE::XMLString::release(&entityIdStr);
+    XMLString::release(&entityIdStr);
 
     return actionPlan;
 }

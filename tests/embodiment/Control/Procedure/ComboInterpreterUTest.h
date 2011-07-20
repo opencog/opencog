@@ -132,7 +132,7 @@ public:
         Procedure::RunningProcedureId runningId = interpreter.runProcedure(tree, arguments);
         while (! interpreter.isFinished(runningId)) {
             interpreter.run(NULL);
-            sender->proccessSentMessage();
+            sender->processSentMessage();
         }
 
         if (!interpreter.isFailed(runningId)) {
@@ -174,7 +174,7 @@ public:
         Procedure::RunningProcedureId runningId = interpreter.runProcedure(tree, arguments);
         while (! interpreter.isFinished(runningId)) {
             interpreter.run(NULL);
-            sender->proccessSentMessage();
+            sender->processSentMessage();
         }
 
         if (!interpreter.isFailed(runningId)) {

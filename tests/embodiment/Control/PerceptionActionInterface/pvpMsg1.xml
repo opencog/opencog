@@ -18,10 +18,12 @@
     <instruction pet-id="1" avatar-id="2" timestamp="2007-06-18T20:15:00.000-07:00" content-type="FACT" target-mode="ANY">
         <sentence length="9">Bad boy!!</sentence>
     </instruction>
-    <pet-signal pet-id="1" name="hunger" timestamp="2007-06-18T20:15:00.000-07:00">
-        <param name="level" type="float" value="0.90" />
+    <pet-signal id="1" timestamp="2007-06-18T20:15:00.000-07:00">
+        <physiology-level name="hunger" value="0.90"/>
     </pet-signal>
-    <pet-signal pet-id="1" name="whatever" status="error" action-plan-id="10" sequence = "2" timestamp="2007-06-18T20:15:00.000-07:00" />
+    <pet-signal id="1" timestamp="2007-06-18T20:15:00.000-07:00">
+        <action name="whatever" status="error" plan-id="10" sequence = "2" />
+    </pet-signal>
     <instruction pet-id="1" avatar-id="2" timestamp="2007-06-18T20:15:01.000-07:00" content-type="FACT" target-mode="ANY">
         <sentence length="10">Good boy!!</sentence>
     </instruction>

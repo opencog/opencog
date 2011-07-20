@@ -113,7 +113,7 @@ bool PetAction::containsValidParameters() const
 {
     std::string errorMessage = validateParameters(ActionType::getFromCode(type), parameters);
     if (errorMessage.size() > 0) {
-        logger().warn("PetAction - " + errorMessage);
+        logger().warn("PetAction::" + errorMessage);
         return false;
     }
     return true;
@@ -127,13 +127,13 @@ std::string PetAction::validateParameters(const ActionType& actionType, const li
     const ActionType::ParamTypes& mandatoryParamTypes = actionType.getMandatoryParamTypes();
     // Check lower bound
     if (params.size() < mandatoryParamTypes.size()) {
-        sprintf(buffer, "PetAction's parameter validation: Insuficient number of parameters (%zu) for action '%s'", params.size(), actionType.getName().c_str());
+        sprintf(buffer, "validateParameters(): Insufficient number of parameters (%zu) for action '%s'", params.size(), actionType.getName().c_str());
         return buffer;
     }
     const ActionType::ParamTypes& optionalParamTypes = actionType.getOptionalParamTypes();
     // Check upper bound
     if (params.size() > (mandatoryParamTypes.size() + optionalParamTypes.size())) {
-        sprintf(buffer, "PetAction::containsValidParameters(): Exceeded number of parameters (%zu) for action '%s'", params.size(), actionType.getName().c_str());
+        sprintf(buffer, "validateParameters(): Exceeded number of parameters (%zu) for action '%s'", params.size(), actionType.getName().c_str());
         return buffer;
     }
 
@@ -144,7 +144,7 @@ std::string PetAction::validateParameters(const ActionType& actionType, const li
     ActionType::ParamTypes::const_iterator paramTypeItr = mandatoryParamTypes.begin();
     while (paramTypeItr != mandatoryParamTypes.end()) {
         if (paramItr->getType() != *paramTypeItr) {
-            sprintf(buffer, "PetAction::containsValidParameters(): Mandatory parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());
+            sprintf(buffer, "validateParameters(): Mandatory parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());
             return buffer;
         }
         paramTypeItr++;

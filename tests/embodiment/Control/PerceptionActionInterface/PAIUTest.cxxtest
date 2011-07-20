@@ -167,7 +167,6 @@ public:
             config().load(config().get("CONFIG_FILE").c_str());
         }
 
-
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
@@ -357,8 +356,8 @@ public:
             string id = PAIUtils::getInternalId("1");
             string pred = "hunger";
             Handle predNode = atomSpace.getHandle(PREDICATE_NODE, pred.c_str());
-            cout << atomSpace.cloneAtom(predNode)->toString() << endl;
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
+            cout << atomSpace.atomAsString(predNode) << endl;
 
             Handle eval = atomSpace.getIncoming(predNode)[0];
             cout << atomSpace.cloneAtom(eval)->toString() << endl;
