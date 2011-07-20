@@ -323,12 +323,12 @@
 
 (connect_goal_updater 
      EnergyDemandGoal
-     (add_goal (GroundedPredicateNode "fuzzy_within") 0.6 1.0 EnergyDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.85 1.0 EnergyDemandSchema)
 )
 
 (connect_goal_updater
      WaterDemandGoal
-     (add_goal (GroundedPredicateNode "fuzzy_within") 0.7 1.0 WaterDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.90 1.0 WaterDemandSchema)
 )
 
 (connect_goal_updater
