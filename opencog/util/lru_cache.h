@@ -24,10 +24,13 @@
 #define _OPENCOG_LRU_CACHE_H
 
 #include <list>
+#include <limits>
+
 #include <boost/unordered_map.hpp>
 #include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 #include "hashing.h"
 #include "exceptions.h"
@@ -56,13 +59,13 @@ struct lru_cache {
                                  opencog::deref_equals<list_iter,Equals> > map;
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
-  
+
     lru_cache(size_type n, const F& f=F())
         : _n(n), _map(n+1), _f(f), _failures(0), _hits(0) {}
 
-    inline size_type size() const { return _map.size(); }
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
+    inline unsigned usize() const { return _n; } // size upper bound
 
     //! Remove (aka make dirty) x from cache because entry invalid
     void remove(const argument_type& x) {
@@ -125,15 +128,15 @@ struct lru_cache {
     unsigned get_failures() const { return _failures; }
     unsigned get_hits() const { return _hits; }
 
-    void resize(size_type n) {
+    void resize(unsigned n) {
         _n = n;
         while(_map.size() > _n) {
             _lru.begin();
             map_iter it = _map.find(_lru.begin());
             OC_ASSERT(it != _map.end(),
                       "Element in _lru has no corresponding iterator in _map");
-            _lru(it->first);
-            _map(it);
+            _lru.erase(it->first);
+            _map.erase(it);
         }
         OC_ASSERT(_lru.size() == _map.size(),
                   "lru_cache - _lru size different from _map size.");
@@ -179,11 +182,6 @@ public:
   
     lru_cache_threaded(size_type n, const F& f=F()) : super(n, f) {}
 
-    inline size_type size() const {
-        boost::mutex::scoped_lock lock(cache_mutex);
-        return super::_map.size();
-    }
-
     inline bool full() const {
         boost::mutex::scoped_lock lock(cache_mutex);
         return super::full();
@@ -191,6 +189,10 @@ public:
     inline bool empty() const {
         boost::mutex::scoped_lock lock(cache_mutex);
         return super::empty();
+    }
+    inline unsigned usize() const {
+        boost::mutex::scoped_lock lock(cache_mutex);
+        return super::usize();
     }
 
     //! Remove (aka make dirty) x from cache because entry invalid
@@ -280,9 +282,9 @@ struct prr_cache {
     prr_cache(size_type n, const F& f=F()) 
         : _n(n), _map(n+1), _f(f), _failures(0), _hits(0) {}
 
-    size_type size() const { return _map.size(); }
     bool full() const { return _map.size()==_n; }
     bool empty() const { return _map.empty(); }
+    unsigned usize() const { return _n; }
 
     result_type operator()(const argument_type& x) const
     {
@@ -328,31 +330,49 @@ protected:
 /// or not using enough of the available RAM. The adjustment is done
 /// every n calls (as provided in the constructor).
 template<typename Cache>
-struct adaptive_cache : public Cache {
+struct adaptive_cache {
     typedef typename Cache::result_type result_type;
     typedef typename Cache::argument_type argument_type;
     
-    /// If free memory / total memory > ulimit then the cache size is
-    /// divided by ufrac. If free memory / total memory < llimit then
+    /// If 1 - (free memory / total memory) > ulimit then the cache size is
+    /// divided by ufrac. If used 1 - (free memory / total memory) < llimit then
     /// the cache size is multiplied by lfact.
-    adaptive_cache(unsigned ncycles = 1000,
-                   float llimit = 0.25, float lfact = 2,
-                   float ulimit = 0.75, float ufrac = 2)
-        : _counter(0), _ncycles(ncycles),
+    adaptive_cache(const Cache& cache, unsigned ncycles = 1000,
+                   float llimit = 0.75, float lfact = 2,
+                   float ulimit = 0.99, float ufrac = 2)
+        : _cache(cache), _counter(0), _ncycles(ncycles),
           _llimit(llimit), _lfact(lfact),
           _ulimit(ulimit), _ufrac(ufrac) {}
 
     result_type operator()(const argument_type& x) const {
-        if(_counter++ % _ncycles) {
-            float free_mem_ratio = (float)getFreeRAM() / (float)getTotalRAM();
-            if(free_mem_ratio < _llimit)
-                Cache::resize(Cache::size() * _lfact);
-            else if(free_mem_ratio > _ulimit)
-                Cache::resize(Cache::size() / _ufrac);
+        using boost::numeric_cast;
+        using boost::numeric::positive_overflow;
+        using std::numeric_limits;
+
+        if(_counter++ % _ncycles == 0) {
+            float tram = getTotalRAM();
+            float fram = getFreeRAM();
+            float free_mem_ratio = 1 - fram/tram;
+            if(free_mem_ratio < _llimit && _cache.full()) {
+                try {
+                    _cache.resize(numeric_cast<unsigned>(_cache.usize()*_lfact));
+                } catch(positive_overflow&) {
+                    _cache.resize(numeric_limits<unsigned>::max());
+                }
+            }
+            else if(free_mem_ratio > _ulimit) {
+                _cache.resize(std::max(1U, (unsigned)(_cache.usize()/_ufrac)));
+            }
         }
-        return Cache::operator()(x);
+        return _cache(x);
     }
+
+    unsigned get_failures() const { return _cache.get_failures(); }
+    unsigned get_hits() const { return _cache.get_hits(); }
+
 private:
+    mutable Cache _cache;
+
     mutable unsigned _counter; // call counter, if it eventually wraps around
                                // it's no big deal
 

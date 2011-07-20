@@ -69,7 +69,7 @@ static const pair<string, string> exemplars_str_opt("exemplar", "e");
 static const pair<string, string> reduct_candidate_effort_opt("reduct-candidate-effort", "E");
 static const pair<string, string> reduct_knob_building_effort_opt("reduct-knob-building-effort", "B");
 static const pair<string, string> reduce_all_opt("reduce-all", "d");
-static const pair<string, string> cache_size_opt("cache-size", "s");
+static const pair<string, string> enable_cache_opt("enable-cache", "s");
 static const pair<string, string> revisit_opt("revisit", "R");
 static const pair<string, string> jobs_opt("jobs", "j");
 static const string job_seperator(":");

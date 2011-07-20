@@ -46,16 +46,16 @@ class MOSESUTest : public CxxTest::TestSuite {
         FILE* fp = fopen(tempfile, "r");
         __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
         istream sp(&pipe_buf);
-        string s;
-        sp >> s;
-        std::cout << "s = " << s << std::endl;
+        string score;
+        sp >> score;
+        std::cout << "score = " << score << std::endl;
         pclose(fp);
         // check that the result is 0
-        TS_ASSERT(lexical_cast<int>(s) == expected_sc);
+        TS_ASSERT(lexical_cast<int>(score) == expected_sc);
     }
 public:
     MOSESUTest() {
-        // logger().setPrintToStdoutFlag(true);
+        logger().setPrintToStdoutFlag(true);
         // to control the log level use option -l
     }
 

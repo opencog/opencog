@@ -210,7 +210,7 @@ int moses_exec(int argc, char** argv) {
     vector<string> exemplars_str;
     int reduct_candidate_effort;
     int reduct_knob_building_effort;
-    long cache_size;
+    bool enable_cache;
     vector<string> jobs_str;
     // metapop_param
     int max_candidates;
@@ -335,9 +335,9 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
          value<int>(&reduct_knob_building_effort)->default_value(2),
          "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
-        (opt_desc_str(cache_size_opt).c_str(),
-         value<long>(&cache_size)->default_value(-1),
-         "Cache size, so that identical candidates are not re-evaluated, 0 means no cache. A negative value means that the cache size is dynamically adjusted according to the amount of available RAM.\n")
+        (opt_desc_str(enable_cache_opt).c_str(),
+         value<bool>(&enable_cache)->default_value(true),
+         "Cache, so that identical candidates are not re-evaluated, the cache siz is dynamically adjusted to fit in the RAM.\n")
         (opt_desc_str(revisit_opt).c_str(),
          "Revisit visited examplars when all have been visited.\n")
         (opt_desc_str(jobs_opt).c_str(),
@@ -465,7 +465,7 @@ int moses_exec(int argc, char** argv) {
                                             output_score, output_complexity,
                                             output_bscore, output_eval_number,
                                             output_with_labels,
-                                            cache_size, labels,
+                                            enable_cache, labels,
                                             output_file, jobs,
                                             hc_terminate_if_improvement);
 

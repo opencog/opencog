@@ -96,7 +96,7 @@ struct metapop_moses_results_parameters {
                                      bool _output_bscore,
                                      bool _output_eval_number,
                                      bool _output_with_labels,
-                                     long _cache_size,
+                                     bool _enable_cache,
                                      const vector<string>& _labels,
                                      string _output_file,
                                      const jobs_t& _jobs,
@@ -104,7 +104,8 @@ struct metapop_moses_results_parameters {
         result_count(_result_count), output_score(_output_score), 
         output_complexity(_output_complexity),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
-        output_with_labels(_output_with_labels), labels(_labels),
+        output_with_labels(_output_with_labels),
+        enable_cache(_enable_cache), labels(_labels),
         output_file(_output_file),
         jobs(_jobs),
         hc_terminate_if_improvement(_hc_terminate_if_improvement) {}
@@ -114,7 +115,7 @@ struct metapop_moses_results_parameters {
     bool output_bscore;
     bool output_eval_number;
     bool output_with_labels;
-    long cache_size;
+    bool enable_cache;
     const vector<string>& labels;
     string output_file;
     const jobs_t& jobs;
@@ -232,30 +233,26 @@ void metapop_moses_results(RandGen& rng,
                            const moses_parameters& moses_params,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
-    if(pa.cache_size != 0) {
-        typedef lru_cache<BScore> BScoreCache;
-        if(pa.cache_size > 0) {
-            typedef bscore_based_score<BScoreCache> Score;
-            typedef lru_cache<Score> ScoreCache;
-            BScoreCache bscore_cache(pa.cache_size, bsc);
-            Score score(bscore_cache);
-            ScoreCache score_cache(pa.cache_size, score);
-            metapop_moses_results(rng, bases, tt, si_ca, si_kb,
-                                  score_cache, bscore_cache, opt_algo,
-                                  opt_params, meta_params, moses_params, vm, pa);
-            // log the number of cache failures
-            if(pa.jobs.empty()) { // do not print if using distributed moses
-                logger().info("Number of cache failures for score = %u"
-                              " and bscore = %u",
-                              score_cache.get_failures(),
-                              bscore_cache.get_failures());
-            }
-        // } else {
-        //     typedef adaptive_cache<BScoreCache> BScoreACache;
-        //     typedef bscore_based_score<BScoreACache> Score;
-        //     typedef lru_cache<Score> ScoreCache;
-        //     typedef adaptive_cache<ScoreCache> ScoreACache;
-        }
+    if(pa.enable_cache) {
+        typedef adaptive_cache<lru_cache<BScore> > BScoreACache;
+        typedef bscore_based_score<BScoreACache> Score;
+        typedef adaptive_cache<lru_cache<Score> > ScoreACache;
+        static const unsigned initial_cache_size = 1000000;
+        lru_cache<BScore> bscore_lrucache(initial_cache_size, bsc);
+        BScoreACache bscore_acache(bscore_lrucache);
+        Score score(bscore_acache);
+        lru_cache<Score> score_lrucache(initial_cache_size, score);
+        ScoreACache score_acache(score_lrucache);
+        metapop_moses_results(rng, bases, tt, si_ca, si_kb,
+                              score_acache, bscore_acache, opt_algo,
+                              opt_params, meta_params, moses_params, vm, pa);
+        // log the number of cache failures
+        if(pa.jobs.empty()) { // do not print if using distributed moses
+            logger().info("Number of cache failures for score = %u"
+                          " and bscore = %u",
+                          score_acache.get_failures(),
+                          bscore_acache.get_failures());
+        }            
     } else {
         bscore_based_score<BScore> score(bsc);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, score, bsc,

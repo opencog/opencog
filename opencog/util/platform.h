@@ -86,7 +86,7 @@ size_t             getMemUsage();
 /// return the number of bytes of RAM
 unsigned long      getTotalRAM();
 
-/// return the number of free bytes in RAM
+/// return the number of free bytes in RAM (excluding OS caches)
 unsigned long      getFreeRAM();
 
 } // namespace opencog
