@@ -906,8 +906,7 @@ void PAI::processPetSignal(DOMElement * element)
             float level = boost::lexical_cast<float>(levelString);
             XMLString::release(&levelString);
 
-            std::cout << "physiology levelStr was " << levelString << std::endl;
-            std::cout << "physiology level " << name << " at value " << level << std::endl;
+            logger().fine("physiology level %s at value %.3f", name, level);
 
             addPhysiologicalFeeling(internalPetId, name, tsValue, level);
 
