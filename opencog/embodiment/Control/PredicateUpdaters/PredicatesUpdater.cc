@@ -50,9 +50,9 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
     updaters.push_back(new IsPooPlacePredicateUpdater(atomSpace));
     updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
     // relation predicates
-    //updaters.push_back(new NearPredicateUpdater(atomSpace));
+    updaters.push_back(new NearPredicateUpdater(atomSpace));
 
-    //petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);
+    petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);
 }
 
 PredicatesUpdater::~PredicatesUpdater()
@@ -61,7 +61,7 @@ PredicatesUpdater::~PredicatesUpdater()
         delete updater;
     }
     updaters.clear();
-    //delete this->petPsychePredicatesUpdater;
+    delete this->petPsychePredicatesUpdater;
 }
 
 void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timestamp)
@@ -81,6 +81,6 @@ void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timest
     } // for
 
     if (objects.size() > 0) {
-        //petPsychePredicatesUpdater->update( Handle::UNDEFINED, petHandle, timestamp );
+        petPsychePredicatesUpdater->update( Handle::UNDEFINED, petHandle, timestamp );
     }
 }
