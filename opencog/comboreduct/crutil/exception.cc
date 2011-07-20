@@ -25,19 +25,19 @@
 
 namespace opencog { namespace combo {
 
-ComboReductException::ComboReductException(std::string m = "")
+ComboReductException::ComboReductException(std::string m)
   : _message(m) {}
 std::string ComboReductException::get_message() const {
     return _message;
 }
 
-EvalException::EvalException(vertex v = vertex())
+EvalException::EvalException(vertex v)
     : ComboReductException("Eval Exception"), _vertex(v) {}
 vertex EvalException::get_vertex() const {
     return _vertex;
 }
 
-TypeCheckException::TypeCheckException(int arg = 0)
+TypeCheckException::TypeCheckException(int arg)
     : ComboReductException("Type check Exception"), _arg(arg) {} 
 
 }} // ~namespaces combo opencog

@@ -51,6 +51,10 @@ string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
 }
 
+combo_tree str2combo_tree_label(const std::string& combo_prog_str,
+                                bool has_labels,
+                                const std::vector<std::string>& labels);
+
 // structure containing the options for the eval-table program
 struct evalTableParameters {
     string input_table_file;

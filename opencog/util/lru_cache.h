@@ -275,7 +275,7 @@ struct prr_cache {
             if(full()) { // if the cache is full randomly remove an element
                 _map.erase(_map.begin());
             }
-            _map.insert(make_pair(x, res)).first;
+            _map.insert(make_pair(x, res));
             return res;
         }
     }

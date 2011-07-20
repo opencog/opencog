@@ -34,7 +34,7 @@ protected:
     std::string _message;
 public:
     ComboReductException();
-    ComboReductException(std::string m);
+    ComboReductException(std::string m = "");
 
     std::string get_message() const;
 };
@@ -43,7 +43,7 @@ class EvalException : public ComboReductException {
     vertex _vertex;
 public:
     EvalException();
-    EvalException(vertex v);
+    EvalException(vertex v = vertex());
 
     vertex get_vertex() const;
 };
@@ -52,7 +52,7 @@ class TypeCheckException : public ComboReductException {
     int _arg;
 public:
     TypeCheckException();
-    TypeCheckException(int arg);
+    TypeCheckException(int arg = 0);
 };
 
 }} // ~namespaces combo opencog
