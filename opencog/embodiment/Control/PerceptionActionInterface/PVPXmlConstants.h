@@ -47,6 +47,8 @@
 #define PERCEPTION_ELEMENT       "perception"
 #define EMOTIONAL_FEELING_ELEMENT "pet:emotional-feeling"
 #define FEELING_ELEMENT           "feeling"
+#define PSI_DEMAND_ELEMENT       "pet:psi-demand"   
+#define DEMAND_ELEMENT           "demand"
 #define AGENT_SIGNAL_ELEMENT     "agent-signal"
 #define PROPERTIES_ELEMENT       "properties"
 #define PROPERTY_ELEMENT         "property"

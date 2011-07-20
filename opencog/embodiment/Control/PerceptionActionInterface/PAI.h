@@ -297,6 +297,12 @@ public:
             std::map<std::string, float>& feelingsValueMap);
 
     /**
+     * Send a Demands XML message to PVP. 
+     */
+    void sendDemandSatisfactions(const std::string& petId,
+        const std::map<std::string, float> & demandsValueMap); 
+
+    /**
      * Insert an action into the an action-plan. Adds the corresponding
      * representation of the action in the AtomSpace which PAI is working with.
      *

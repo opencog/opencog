@@ -203,6 +203,33 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 
 }    
 
+void PsiDemandUpdaterAgent::sendUpdatedValues(opencog::CogServer * server)
+{
+    logger().debug( "PsiDemandUpdaterAgent::%s - Sending updated demand truth values to the virtual world [ cycle =%d ]",
+                    __FUNCTION__, 
+                    this->cycleCount
+                  );
+
+    // Get OAC
+    OAC * oac = (OAC *) server;
+
+    // Get AtomSpace
+//    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+
+    // Get petName
+    const std::string & petName = oac->getPet().getName(); 
+
+    // Prepare the data to be sent
+    std::map <std::string, float> demandValueMap; 
+
+    foreach (Demand & demand, this->demandList) {
+       demandValueMap[ demand.getDemandName() ] = demand.getDemandTruthValue(); 
+    }
+
+    // Send updated feelings to the virtual world where the pet lives
+    oac->getPAI().sendDemandSatisfactions(petName, demandValueMap);
+}
+
 PsiDemandUpdaterAgent::~PsiDemandUpdaterAgent()
 {
 #ifdef HAVE_ZMQ
@@ -394,6 +421,9 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
 
         demand.updateDemandGoal(atomSpace, timeStamp);
     }
+
+    // Send the truth values of demand goals to the virtual world
+    this->sendUpdatedValues(server); 
 
 #ifdef HAVE_ZMQ    
     // Publish updated Demand values via ZeroMQ

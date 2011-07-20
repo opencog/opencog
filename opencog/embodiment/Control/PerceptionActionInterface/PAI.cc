@@ -280,6 +280,70 @@ void PAI::sendEmotionalFeelings(const std::string& petId, const std::map<std::st
     doc->release();
 }
 
+void PAI::sendDemandSatisfactions(const std::string& petId, const std::map<std::string, float> & demandsValueMap)
+{
+    if (demandsValueMap.empty()) return;
+
+    // creating XML DOC
+    XMLCh namespaceURI[PAIUtils::MAX_TAG_LENGTH+1];
+    XMLCh qualifiedName[PAIUtils::MAX_TAG_LENGTH+1];
+    XMLString::transcode("http://www.opencog.org/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(PSI_DEMAND_ELEMENT, qualifiedName, PAIUtils::MAX_TAG_LENGTH);
+    DOMDocument* doc = PAIUtils::getDOMImplementation()->createDocument(namespaceURI,
+                                                                        qualifiedName,
+                                                                        NULL
+                                                                        );
+
+    if (!doc) {
+        throw opencog::XMLException(TRACE_INFO, "ActionPlan - Error creating DOMDocument.");
+    }
+
+    XMLCh tmpStr[PAIUtils::MAX_TAG_LENGTH+1];
+    // set encoding
+    XMLString::transcode("UTF-8", tmpStr, PAIUtils::MAX_TAG_LENGTH);
+    doc->setEncoding(tmpStr);
+    // set version
+    XMLString::transcode("1.0", tmpStr, PAIUtils::MAX_TAG_LENGTH);
+    doc->setVersion(tmpStr);
+
+    // filling emotional feeling element with pet id
+    DOMElement * demandSatisfaction = doc->getDocumentElement();
+
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+
+    XMLString::transcode(ENTITY_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLCh* entityIdStr = XMLString::transcode(PAIUtils::getExternalId(petId.c_str()).c_str());
+    demandSatisfaction->setAttribute(tag, entityIdStr);
+    XMLString::release(&entityIdStr);
+
+    // adding all the demand satisfactions
+    std::map<std::string, float>::const_iterator it;
+    for (it = demandsValueMap.begin(); it != demandsValueMap.end(); it++) {
+
+        XMLString::transcode(DEMAND_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+        DOMElement * demandElement = doc->createElement(tag);
+
+        XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        XMLCh* nameStr = XMLString::transcode(it->first.c_str());
+        demandElement->setAttribute(tag, nameStr);
+        XMLString::release(&nameStr);
+
+        XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        XMLCh* valueStr = XMLString::transcode(opencog::toString(it->second).c_str());
+        demandElement->setAttribute(tag, valueStr);
+        XMLString::release(&valueStr);
+
+        demandSatisfaction->appendChild(demandElement);
+    }
+
+    // sending message
+    string result = PAIUtils::getSerializedXMLString(doc);
+    actionSender.sendEmotionalFeelings(result);
+
+    // free memory of the DomDocument
+    doc->release();
+}
+
 ActionID PAI::addAction(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     ActionID result = Handle::UNDEFINED;

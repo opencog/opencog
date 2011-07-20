@@ -163,9 +163,15 @@ private:
     zmq::socket_t * publisher;   // ZeroMQ publisher
 
     /**
-     * Publish updated modulator values via ZeroMQ
+     * Publish updated demand truth values via ZeroMQ
      */
     void publishUpdatedValue(Plaza & plaza, zmq::socket_t & publisher, const unsigned long timeStamp);
+
+    /**
+     * Send updated values to the virtual world where the pet lives
+     */
+    void sendUpdatedValues(opencog::CogServer * server); 
+
 #endif    
 
     // Initialize demandList etc.
