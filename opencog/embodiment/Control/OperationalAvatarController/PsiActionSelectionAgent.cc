@@ -571,6 +571,10 @@ std::cout<<"Unexpected result"<<std::endl;
 
 std::cout<<"Fail"<<std::endl; 
 
+            // Troy: now that this action failed, the following action sequence
+            // should be dropped.
+            this->current_actions.clear();
+            this->temp_action_list.clear();
             // TODO: record the failure and update the weight of corresponding rule
         }
         // If the Action is time out
