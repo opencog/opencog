@@ -34,7 +34,7 @@
             <xsd:choice minOccurs="0" maxOccurs="unbounded">
                 <xsd:element name="map-info" type="pet:MapInfoType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="agent-sensor-info" type="pet:AgentSensorInfoType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="avatar-signal" type="pet:AvatarSignalType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="temp-signal" type="pet:AvatarSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="pet-signal" type="pet:PetSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="agent-signal" type="pet:AgentSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="instruction" type="pet:PetInstructionType" minOccurs="1" maxOccurs="1"/>
@@ -84,8 +84,8 @@
     </xsd:complexType>
 
 
-    <!-- avatar-signal -->
-    <xsd:element name="avatar-signal" type="pet:AvatarSignalType"/>
+    <!-- temp-signal -->
+    <xsd:element name="temp-signal" type="pet:AvatarSignalType"/>
     
     <xsd:annotation>
         <xsd:documentation>

@@ -455,13 +455,15 @@ private:
         (opencog::RuntimeException, opencog::InvalidParamException,
          std::bad_exception);
 
+    //! Support method from processAgentSignal
+    Handle processAgentType(const string& agentTypeStr, const string& internalAgentId);
+    //! Support method from processAgentSignal
+    Handle processAgentActionParameter(DOMElement* paramElement);
+    //! Support method from processAgentSignal
+    void processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr, DOMElement* signal);
+    void processAgentActionPlanResult(char* agentID, unsigned long tsValue, const string& name, char* planIdStr, DOMElement* signal);
     /**
-     * @param element The pet-signal element to be processed
-     */
-    void processPetSignal(DOMElement * element);
-
-    /**
-     * @param element The avatar-signal element to be processed
+     * @param element The temp-signal element to be processed
      */
     void processAvatarSignal(DOMElement * element) throw
         (opencog::RuntimeException, opencog::InvalidParamException,
