@@ -35,7 +35,6 @@
                 <xsd:element name="map-info" type="pet:MapInfoType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="agent-sensor-info" type="pet:AgentSensorInfoType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="temp-signal" type="pet:AvatarSignalType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="pet-signal" type="pet:PetSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="agent-signal" type="pet:AgentSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="instruction" type="pet:PetInstructionType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="communication" type="pet:CommunicationType" minOccurs="1" maxOccurs="1"/>
@@ -44,34 +43,19 @@
         <xsd:attribute name="request-id" type="xsd:string" use="optional"/>
     </xsd:complexType>    
 
-    <xsd:element name="pet-signal" type="pet:PetSignalType"/>
-
-    <xsd:annotation>
-        <xsd:documentation>
-        Physical signals may be processed simultaneously or as a result of one
-        another, as such they bear an uncanny resemblance to an action plan, but
-        may occur with or without the prompting of an action plan from NM and
-        will be returned individually rather than in batch.  At one point I had
-        considered using a session id, but the Proxy can use a session id
-        internally to send signals in the appropriate order to the Brain.
-        </xsd:documentation>
-    </xsd:annotation>
-    <xsd:complexType name="PetSignalType">
-        <xsd:complexContent>
-            <xsd:extension base="pet:BaseSignalType">
-                <xsd:sequence/>
-            </xsd:extension>
-        </xsd:complexContent>
-    </xsd:complexType>
-
-
-
     <!-- agent-signal -->
     <xsd:element name="agent-signal" type="pet:AgentSignalType"/>
     
     <xsd:annotation>
         <xsd:documentation>
-        signals from agents, pertaining to agent specific actions
+        Signals from agents, pertaining to agent specific actions.
+
+        Physical signals may be processed simultaneously or as a result of one
+        another, as such they bear an uncanny resemblance to an action plan, but
+        may occur with or without the prompting of an action plan from OpenCog and
+        will be returned individually rather than in batch.  At one point I had
+        considered using a session id, but the Proxy can use a session id
+        internally to send signals in the appropriate order to the Brain.
         </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType name="AgentSignalType">

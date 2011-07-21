@@ -40,7 +40,6 @@
 #define PHYSIOLOGY_LEVEL_ELEMENT "physiology-level"
 #define MAP_INFO_ELEMENT         "map-info"
 #define BLIP_ELEMENT             "blip"
-#define PET_SIGNAL_ELEMENT       "pet-signal"
 #define AVATAR_SIGNAL_ELEMENT    "temp-signal"
 #define INSTRUCTION_ELEMENT      "instruction"
 #define AGENT_SENSOR_INFO_ELEMENT      "agent-sensor-info"
@@ -118,7 +117,7 @@
 #define POSITION_PARAMETER_NAME  "position"
 #define ROTATE_PARAMETER_NAME    "rotate"
 
-// xml action status (values for <pet-signal>'s status attribute)
+// xml action status (values for <agent-signal>'s status attribute)
 #define DONE_ACTION_STATUS       "done"
 #define ERROR_ACTION_STATUS      "error"
 

@@ -229,7 +229,7 @@ public:
         TS_ASSERT(pai.isPlanFinished("9"));
         TS_ASSERT(!pai.isPlanFinished("10"));
 
-        // Send an action-plan to get/process the corresponding pet-signal later
+        // Send an action-plan to get/process the corresponding agent-signal later
         ActionPlanID planId = pai.createActionPlan();
         TS_ASSERT(planId == "10");
 
