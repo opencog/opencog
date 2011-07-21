@@ -528,15 +528,15 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d avatar-signals done", list->getLength());
 
-    // getting <temp-signal> elements from the XML message
-    XMLString::transcode(TEMP_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    // getting <agent-signal> elements from the XML message
+    XMLString::transcode(AGENT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processTempSignal((DOMElement *)list->item(i));
+        processAgentSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d temp-signal done", list->getLength());
+        logger().debug("PAI - Processing %d agent-signal done", list->getLength());
 
     // getting <instructions> elements from the XML message
     XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -1322,14 +1322,14 @@ void PAI::processAgentSensorInfo(DOMElement * element)
 
 
 
-void PAI::processTempSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     // getting timestamp attribute value
     unsigned long tsValue = getTimestampFromElement(element);
     if (!setLatestSimWorldTimestamp(tsValue)) {
-        logger().error("PAI - Received old timestamp in temp-signal => Message discarded!");
+        logger().error("PAI - Received old timestamp in agent-signal => Message discarded!");
         return;
     }
 
@@ -1354,7 +1354,7 @@ void PAI::processTempSignal(DOMElement * element) throw (opencog::RuntimeExcepti
         // We only know how to deal with action elements
         if (strcmp(signalName,ACTION_ELEMENT) != 0) continue;
 
-        logger().debug("PAI - Got temp-signal: avatarId = %s (%s), name = %s, timestamp = %u\n", avatarID, internalAvatarId.c_str(), name, tsValue);
+        logger().debug("PAI - Got agent-signal: avatarId = %s (%s), name = %s, timestamp = %u\n", avatarID, internalAvatarId.c_str(), name, tsValue);
 
         // Add the perceptions into AtomSpace
         Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);

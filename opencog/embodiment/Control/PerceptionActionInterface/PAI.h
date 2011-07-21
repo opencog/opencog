@@ -463,9 +463,9 @@ private:
     void processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr, DOMElement* signal);
     void processAgentActionPlanResult(char* agentID, unsigned long tsValue, const string& name, char* planIdStr, DOMElement* signal);
     /**
-     * @param element The temp-signal element to be processed
+     * @param element The agent-signal element to be processed
      */
-    void processTempSignal(DOMElement * element) throw
+    void processAgentSignal(DOMElement * element) throw
         (opencog::RuntimeException, opencog::InvalidParamException,
          std::bad_exception);
 

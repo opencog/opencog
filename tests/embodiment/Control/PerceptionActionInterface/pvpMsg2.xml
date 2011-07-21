@@ -10,7 +10,7 @@
         <action name="whatever" status="done" plan-id="12" sequence = "1" />
     </avatar-signal>
 
-    <temp-signal id="1" timestamp="2007-06-18T20:15:02.000-07:00">
+    <agent-signal id="1" timestamp="2007-06-18T20:15:02.000-07:00">
         <action name="walk">
             <param name="target" type="vector">
                <vector x="1" y="1.5" z="2"/>
@@ -20,7 +20,7 @@
                <rotation pitch="0.1" roll="0.2" yaw="0.3"/>
             </param>
         </action>
-    </temp-signal>
+    </agent-signal>
 
     <avatar-signal id="3" type="pet" timestamp="2007-06-18T20:15:02.000-07:00">
         <action name="walk">

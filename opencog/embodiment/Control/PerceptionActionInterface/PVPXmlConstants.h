@@ -40,7 +40,7 @@
 #define PHYSIOLOGY_LEVEL_ELEMENT "physiology-level"
 #define MAP_INFO_ELEMENT         "map-info"
 #define BLIP_ELEMENT             "blip"
-#define TEMP_SIGNAL_ELEMENT    "temp-signal"
+#define AGENT_SIGNAL_ELEMENT    "agent-signal"
 #define INSTRUCTION_ELEMENT      "instruction"
 #define AGENT_SENSOR_INFO_ELEMENT      "agent-sensor-info"
 #define PERCEPTION_ELEMENT       "perception"
