@@ -465,7 +465,7 @@ private:
     /**
      * @param element The temp-signal element to be processed
      */
-    void processAvatarSignal(DOMElement * element) throw
+    void processTempSignal(DOMElement * element) throw
         (opencog::RuntimeException, opencog::InvalidParamException,
          std::bad_exception);
 

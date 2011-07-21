@@ -529,11 +529,11 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         logger().debug("PAI - Processing %d agent-signals done", list->getLength());
 
     // getting <temp-signal> elements from the XML message
-    XMLString::transcode(AVATAR_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(TEMP_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processAvatarSignal((DOMElement *)list->item(i));
+        processTempSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d temp-signal done", list->getLength());
@@ -1322,7 +1322,7 @@ void PAI::processAgentSensorInfo(DOMElement * element)
 
 
 
-void PAI::processAvatarSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+void PAI::processTempSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
