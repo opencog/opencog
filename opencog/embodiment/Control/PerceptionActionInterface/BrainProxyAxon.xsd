@@ -35,7 +35,7 @@
                 <xsd:element name="map-info" type="pet:MapInfoType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="agent-sensor-info" type="pet:AgentSensorInfoType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="temp-signal" type="pet:TempSignalType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="agent-signal" type="pet:AgentSignalType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="avatar-signal" type="pet:AvatarSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="instruction" type="pet:PetInstructionType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="communication" type="pet:CommunicationType" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>
@@ -43,8 +43,8 @@
         <xsd:attribute name="request-id" type="xsd:string" use="optional"/>
     </xsd:complexType>    
 
-    <!-- agent-signal -->
-    <xsd:element name="agent-signal" type="pet:AgentSignalType"/>
+    <!-- avatar-signal -->
+    <xsd:element name="avatar-signal" type="pet:AvatarSignalType"/>
     
     <xsd:annotation>
         <xsd:documentation>
@@ -58,7 +58,7 @@
         internally to send signals in the appropriate order to the Brain.
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:complexType name="AgentSignalType">
+    <xsd:complexType name="AvatarSignalType">
         <xsd:complexContent>
             <xsd:extension base="pet:BaseSignalType">
                 <xsd:sequence/>

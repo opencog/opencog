@@ -18,12 +18,12 @@
     <instruction pet-id="1" avatar-id="2" timestamp="2007-06-18T20:15:00.000-07:00" content-type="FACT" target-mode="ANY">
         <sentence length="9">Bad boy!!</sentence>
     </instruction>
-    <agent-signal id="1" timestamp="2007-06-18T20:15:00.000-07:00">
+    <avatar-signal id="1" timestamp="2007-06-18T20:15:00.000-07:00">
         <physiology-level name="hunger" value="0.90"/>
-    </agent-signal>
-    <agent-signal id="1" timestamp="2007-06-18T20:15:00.000-07:00">
+    </avatar-signal>
+    <avatar-signal id="1" timestamp="2007-06-18T20:15:00.000-07:00">
         <action name="whatever" status="error" plan-id="10" sequence = "2" />
-    </agent-signal>
+    </avatar-signal>
     <instruction pet-id="1" avatar-id="2" timestamp="2007-06-18T20:15:01.000-07:00" content-type="FACT" target-mode="ANY">
         <sentence length="10">Good boy!!</sentence>
     </instruction>

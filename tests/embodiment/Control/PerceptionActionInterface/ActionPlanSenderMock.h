@@ -50,8 +50,8 @@ public:
                 "xmlns:pet=\"http://www.opencog.org/brain\"\n"
                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
                 "xsi:schemaLocation=\"http://www.opencog.org/brain BrainProxyAxon.xsd\">\n"
-                "<agent-signal id=\"%s\" timestamp=\"2007-06-18T20:15:00.000-07:00\">\n"
-                "<action name=\"whatever\" status=\"done\" plan-id=\"%s\"/></agent-signal>\n"
+                "<avatar-signal id=\"%s\" timestamp=\"2007-06-18T20:15:00.000-07:00\">\n"
+                "<action name=\"whatever\" status=\"done\" plan-id=\"%s\"/></avatar-signal>\n"
                 "</pet:embodiment-msg>",
                 pai->getAvatarInterface().getPetId().c_str(), actionPlan.getID().c_str());
         pvpMsg.assign(msg);

@@ -229,7 +229,7 @@ public:
         TS_ASSERT(pai.isPlanFinished("9"));
         TS_ASSERT(!pai.isPlanFinished("10"));
 
-        // Send an action-plan to get/process the corresponding agent-signal later
+        // Send an action-plan to get/process the corresponding avatar-signal later
         ActionPlanID planId = pai.createActionPlan();
         TS_ASSERT(planId == "10");
 
@@ -662,9 +662,9 @@ public:
 
 
 
-        // Check Agent-signal atoms (pet)
+        // Check Avatar-signal atoms (pet)
         {
-            cout << "checking agent signals" << endl;
+            cout << "checking avatar signals" << endl;
 
             Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
@@ -728,9 +728,9 @@ public:
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
         }
 
-        // Check Agent-signal atoms (avatar)
+        // Check Avatar-signal atoms (avatar)
         {
-            cout << "checking agent signals" << endl;
+            cout << "checking avatar signals" << endl;
 
             Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));

@@ -48,7 +48,7 @@
 #define FEELING_ELEMENT           "feeling"
 #define PSI_DEMAND_ELEMENT       "pet:psi-demand"   
 #define DEMAND_ELEMENT           "demand"
-#define AGENT_SIGNAL_ELEMENT     "agent-signal"
+#define AGENT_SIGNAL_ELEMENT     "avatar-signal"
 #define PROPERTIES_ELEMENT       "properties"
 #define PROPERTY_ELEMENT         "property"
 
@@ -117,7 +117,7 @@
 #define POSITION_PARAMETER_NAME  "position"
 #define ROTATE_PARAMETER_NAME    "rotate"
 
-// xml action status (values for <agent-signal>'s status attribute)
+// xml action status (values for <avatar-signal>'s status attribute)
 #define DONE_ACTION_STATUS       "done"
 #define ERROR_ACTION_STATUS      "error"
 

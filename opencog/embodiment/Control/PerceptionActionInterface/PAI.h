@@ -449,17 +449,17 @@ private:
     void processAgentSensorInfo(DOMElement * element);
 
     /**
-     * @param element The agent-signal element to be processed
+     * @param element The avatar-signal element to be processed
      */
-    void processAgentSignal(DOMElement * element) throw
+    void processAvatarSignal(DOMElement * element) throw
         (opencog::RuntimeException, opencog::InvalidParamException,
          std::bad_exception);
 
-    //! Support method from processAgentSignal
+    //! Support method from processAvatarSignal
     Handle processAgentType(const string& agentTypeStr, const string& internalAgentId);
-    //! Support method from processAgentSignal
+    //! Support method from processAvatarSignal
     Handle processAgentActionParameter(DOMElement* paramElement);
-    //! Support method from processAgentSignal
+    //! Support method from processAvatarSignal
     void processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr, DOMElement* signal);
     void processAgentActionPlanResult(char* agentID, unsigned long tsValue, const string& name, char* planIdStr, DOMElement* signal);
     /**
