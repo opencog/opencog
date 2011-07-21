@@ -205,8 +205,8 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
             point2d = map->unsnap(gp);
         }
 
-        //@note the height here is *not* the altitude, but indeed the gap between 
-        //two continuous points. 
+        //@note the height here is *not* the altitude, but indeed the difference
+        //of altitudes between two continuous points. 
         double height = node->z - previous_node->z;
         spatial::Point3D point3d(point2d.first, point2d.second, height);
 
@@ -243,7 +243,7 @@ vector<spatial::Point3D> AStar3DController::getShortestCalculatedPath()
     it_point++;
     while ( (it_point + 1) != calculatedPath.end() ) {
         double new_alpha = (it_point->get<1>() - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());
-        if (it_point->get<2>() > 0.0) {
+        if (std::abs(it_point->get<2>()) > 0.0) {
             // If we need to jump at this point, then it should be stored.
             shortestCalculatedPath.push_back( *it_point );
             alpha = ( - (it_point + 1)->get<1>()) / (it_point->get<0>() - (it_point + 1)->get<0>());

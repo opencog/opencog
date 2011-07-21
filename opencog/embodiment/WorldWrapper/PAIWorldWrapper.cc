@@ -691,8 +691,9 @@ void PAIWorldWrapper::get3DWaypoints( const spatial::Point3D& startPoint,
     double maxDeltaHeight = opencog::config().get_double("ASTAR3D_DELTA_HEIGHT");
 
     gettimeofday(&timer_start, NULL);
+    /*
     printf("Start A* 3D navigation. Delta height for each node: %.2f\n", maxDeltaHeight);
-
+    */
 printf("Original start point (%lf, %lf, %lf); goal point (%lf, %lf, %lf).\n", 
         startPoint.get<0>(), startPoint.get<1>(), startPoint.get<2>(),
         endPoint.get<0>(), endPoint.get<1>(), endPoint.get<2>());
@@ -880,7 +881,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
             // a threshold, which is the minimum delta height used in AStar 3D
             // pathfinding.
             double minJumpHeight = opencog::config().get_double("ASTAR3D_DELTA_HEIGHT");
-            if (std::abs(it_point->get<2>()) >= minJumpHeight) {
+            if (std::abs(it_point->get<2>()) > 0.1) {
                 action = PetAction(ActionType::JUMP_TOWARD());
                 action.addParameter(ActionParameter("direction",
                                                     ActionParamType::VECTOR(),

@@ -38,7 +38,7 @@ LSMap3DSearchNode::LSMap3DSearchNode(): x(0), y(0) {}
 LSMap3DSearchNode::LSMap3DSearchNode(unsigned int px, unsigned int py, double deltaHeight):
         x(px), y(py) {
     if (LSMap3DSearchNode::map) {
-        z = map->getTopSurfaceHeightByGridPoint(GridPoint(px, py));
+        z = map->floorHeight();
     }
     deltaZ = deltaHeight;
 }
@@ -46,7 +46,7 @@ LSMap3DSearchNode::LSMap3DSearchNode(unsigned int px, unsigned int py, double de
 LSMap3DSearchNode::LSMap3DSearchNode(spatial::GridPoint gp, double deltaHeight):
         x(gp.first), y(gp.second) {
     if (LSMap3DSearchNode::map) {
-        z = (float)map->getTopSurfaceHeightByGridPoint(gp);
+        z = map->floorHeight();
     }
     deltaZ = deltaHeight;
 }
@@ -77,8 +77,7 @@ double LSMap3DSearchNode::getDestHeight(const spatial::GridPoint& dest) const
 
 bool LSMap3DSearchNode::IsSameState(const LSMap3DSearchNode &rhs)
 {
-    // same state in LocalSpaceMap2D is simply when (x,y) are the same
-    if (x == rhs.x && y == rhs.y) {
+    if (x == rhs.x && y == rhs.y && abs(z-rhs.z) < 0.1) {
         return true;
     } else {
         return false;
@@ -137,8 +136,6 @@ bool LSMap3DSearchNode::GetSuccessors(AStarSearch<LSMap3DSearchNode> *astarsearc
                                       LSMap3DSearchNode *parent_node )
 {
 
-    //int parent_x = -1;
-    //int parent_y = -1;
     unsigned int parent_x = map->xDim() + 1;
     unsigned int parent_y = map->yDim() + 1;
 
@@ -211,7 +208,7 @@ float LSMap3DSearchNode::GetCost(const LSMap3DSearchNode &successor)
     if (x == successor.x || y == successor.y) {
         return sqrt(1.0 + vertical_delta * vertical_delta);
     }
-    //else it is diagonal, so cost is sqrt(2), (sqrt(1^2 + 1^2))
+    //else it is diagonal, so cost is sqrt( (1^2 + 1^2) + vertical_delta^2 )
     else {
         return sqrt(2.0 + vertical_delta * vertical_delta); //sqrt(2)
     }
