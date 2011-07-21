@@ -589,9 +589,9 @@ public:
             TS_ASSERT(pai.getAvatarInterface().getGrabbedObj() == PAIUtils::getInternalId("Wynx"));
         }
 
-        // Check Avatar-signal atoms
+        // Check Temp-signal atoms
         {
-            cout << "checking avatar signals" << endl;
+            cout << "checking temp signals" << endl;
 
             Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));

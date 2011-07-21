@@ -62,7 +62,7 @@
         <xsd:complexContent>
             <xsd:extension base="pet:BaseSignalType">
                 <xsd:sequence/>
-                <xsd:attribute name="type" type="xsd:string" use="required"/>
+                <xsd:attribute name="type" type="xsd:string" use="optional"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
