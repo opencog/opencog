@@ -467,7 +467,7 @@ spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& 
 
     GridPoint gp = snap(spatial::Point(pt.get<0>(), pt.get<1>()));
     if (!gridIllegal(gp)) {
-        return pt;
+        return spatial::Point3D(pt.get<0>(), pt.get<1>(), _floorHeight);
     }
 
     bool valid_lower_x = (gp.first > 0);
@@ -494,7 +494,7 @@ spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& 
     if (valid_lower_x) {
         for (unsigned int y = lower_y; y <= upper_y; y++) {
             double altitude = getProperFreePointAltitude(spatial::GridPoint(lower_x, y), pt, delta);
-            if (altitude + delta >= destAltitude) {
+            if (altitude + _agentHeight >= destAltitude) {
                 if (!foundFreePoint ||
                     std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
                     nearestAltitude = altitude;
@@ -514,7 +514,7 @@ spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& 
     if (valid_lower_y) {
         for (unsigned int x = lower_x; x <= upper_x; x++) {
             double altitude = getProperFreePointAltitude(spatial::GridPoint(x, lower_y), pt, delta);
-            if (altitude + delta >= destAltitude) {
+            if (altitude + _agentHeight >= destAltitude) {
                 if (!foundFreePoint ||
                     std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
                     nearestAltitude = altitude;
@@ -534,7 +534,7 @@ spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& 
     if (valid_upper_x) {
         for (unsigned int y = lower_y; y <= upper_y; y++) {
             double altitude = getProperFreePointAltitude(spatial::GridPoint(upper_x, y), pt, delta);
-            if (altitude + delta >= destAltitude) {
+            if (altitude + _agentHeight >= destAltitude) {
                 if (!foundFreePoint ||
                     std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
                     nearestAltitude = altitude;
@@ -554,7 +554,7 @@ spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& 
     if (valid_upper_y) {
         for (unsigned int x = lower_x; x <= upper_x; x++) {
             double altitude = getProperFreePointAltitude(spatial::GridPoint(x, upper_y), pt, delta);
-            if (altitude + delta >= destAltitude) {
+            if (altitude + _agentHeight >= destAltitude) {
                 if (!foundFreePoint ||
                     std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
                     nearestAltitude = altitude;
@@ -589,24 +589,29 @@ double LocalSpaceMap2D::getProperFreePointAltitude(const spatial::GridPoint& gp,
     if (!is_obstacle) {
         // None obstacle, then it has to be the floor.
         return _floorHeight;
-    } else {
-        double topSurface = _floorHeight;
-        std::vector<spatial::Gradient> grads = getObjectGradientsByGridPoint(gp);
-        std::vector<spatial::Gradient>::iterator it = grads.begin();
-        for (; it != grads.end(); it++) {
-            if (topSurface + _agentHeight < it->first) {
-                topSurface = (topSurface > it->second) ? topSurface : it->second;
-                continue;
-            }
-            if (topSurface + delta >= destHeight) {
-                break;
-            } else {
-                topSurface = (topSurface > it->second) ? topSurface : it->second;
-            }
-        }
-
-        return topSurface;
     }
+
+    double topSurface = _floorHeight;
+    std::vector<spatial::Gradient> grads = getObjectGradientsByGridPoint(gp);
+    std::vector<spatial::Gradient>::iterator it = grads.begin();
+    for (; it != grads.end(); it++) {
+        if (topSurface + _agentHeight > it->first) {
+            // The agent is not able to stand on this point because the roof of
+            // this point can not cover the agent.
+            topSurface = (topSurface > it->second) ? topSurface : it->second;
+            continue;
+        }
+        if (topSurface + _agentHeight > destHeight || topSurface + delta >= destHeight) {
+            // Now that from the altitude that it is standing on, the agent is
+            // able to reach the goal altitude, we think it is a proper
+            // altitude.
+            break;
+        } else {
+            topSurface = (topSurface > it->second) ? topSurface : it->second;
+        }
+    }
+
+    return topSurface;
 }
 
 bool LocalSpaceMap2D::gridIllegal(const spatial::GridPoint& gp) const
@@ -1045,8 +1050,8 @@ spatial::GridPoint LocalSpaceMap2D::snap(const spatial::Point& p) const
 
 spatial::Point LocalSpaceMap2D::unsnap(const spatial::GridPoint& g) const
 {
-    return spatial::Point(spatial::Distance(g.first) * xGridWidth() + _xMin + xGridWidth() / 2,
-                          spatial::Distance(g.second) * yGridWidth() + _yMin + yGridWidth() / 2);
+    return spatial::Point((spatial::Distance(g.first) + 0.35) * xGridWidth() + _xMin,
+                          (spatial::Distance(g.second) + 0.35) * yGridWidth() + _yMin);
 }
 
 spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const spatial::Point& position, float distance, const spatial::Point& startDirection ) const throw (opencog::NotFoundException)
@@ -1209,30 +1214,12 @@ void LocalSpaceMap2D::addObject( const spatial::ObjectID& id, const spatial::Obj
 
     const math::BoundingBox& bb = entity->getBoundingBox( );
 
-    /*
-    printf("entity[%s]: position %s, width %lf, length %lf, height %lf\n", entity->getName().c_str(),
-                        entity->getPosition().toString().c_str(),
-                        entity->getWidth(),
-                        entity->getLength(),
-                        entity->getHeight());
-    */
     std::vector<math::LineSegment> bottomSegments;
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
 
-    /*
-    printf("    BoundingBox: %s ---- %s\n "
-           "                  |       |\n "
-           "                  |       |\n "
-           "                 %s ---- %s\n ", 
-            bb.getCorner(math::BoundingBox::NEAR_LEFT_BOTTOM).toString().c_str(),
-            bb.getCorner(math::BoundingBox::FAR_LEFT_BOTTOM).toString().c_str(),
-            bb.getCorner(math::BoundingBox::NEAR_RIGHT_BOTTOM).toString().c_str(),
-            bb.getCorner(math::BoundingBox::FAR_RIGHT_BOTTOM).toString().c_str()
-            );
-    */
     calculateObjectPoints( gridPoints[idHash], bottomSegments );
     this->entities.insert( LongEntityPtrHashMap::value_type( idHash, entity ) );
 
