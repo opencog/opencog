@@ -1050,8 +1050,8 @@ spatial::GridPoint LocalSpaceMap2D::snap(const spatial::Point& p) const
 
 spatial::Point LocalSpaceMap2D::unsnap(const spatial::GridPoint& g) const
 {
-    return spatial::Point((spatial::Distance(g.first) + 0.35) * xGridWidth() + _xMin,
-                          (spatial::Distance(g.second) + 0.35) * yGridWidth() + _yMin);
+    return spatial::Point((spatial::Distance(g.first) + 0.5) * xGridWidth() + _xMin,
+                          (spatial::Distance(g.second) + 0.5) * yGridWidth() + _yMin);
 }
 
 spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const spatial::Point& position, float distance, const spatial::Point& startDirection ) const throw (opencog::NotFoundException)
