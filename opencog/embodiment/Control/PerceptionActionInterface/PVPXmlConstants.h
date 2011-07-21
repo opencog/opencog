@@ -58,6 +58,7 @@
 #define INSTRUCTION_FROM_ATTRIBUTE           "avatar-id"
 #define ACTION_PLAN_AVATAR_ID                "pet-id"
 #define ENTITY_ID_ATTRIBUTE                  "entity-id"
+#define DEMAND_ATTRIBUTE                     "demand"
 #define NAME_ATTRIBUTE                       "name"
 #define TIMESTAMP_ATTRIBUTE                  "timestamp"
 #define DETECTOR_ATTRIBUTE                   "detector"

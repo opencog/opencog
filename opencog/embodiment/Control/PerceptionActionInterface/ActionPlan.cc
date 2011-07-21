@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -46,10 +45,11 @@ ActionPlan::ActionPlan()
     this->id = opencog::toString(ULONG_MAX); // invalid id.
 }
 
-ActionPlan::ActionPlan(ActionPlanID id)
+ActionPlan::ActionPlan(ActionPlanID id, std::string demandName)
 {
     PAIUtils::initializeXMLPlatform();
     this->id = id;
+    this->demandName = demandName; 
 }
 
 ActionPlanID ActionPlan::getID() const
@@ -57,11 +57,17 @@ ActionPlanID ActionPlan::getID() const
     return id;
 }
 
+std::string ActionPlan::getDemandName() const
+{
+    return demandName; 
+}
+
 // TODO: Add an option "parallel" boolean argument to this method to indicate if this action
 //       should be executed in parallel with the previous or next actions also marked as parallel (default value should be false).
 //       If this argument is true, a "parallel" xml element must encapsulate all consecutive
 //       actions added to this action plan and marked as parallel, as follows:
-//   <action-plan id="0" ...
+//
+//   <action-plan id="0" demand="Energy" ...
 //       <parallel>
 //           <action name="bark" sequence="1"/>
 //           <action name="walk" sequence="2">
@@ -268,6 +274,11 @@ DOMElement* ActionPlan::createActionPlanElement(DOMDocument* doc,
     XMLCh* entityIdStr = XMLString::transcode(PAIUtils::getExternalId(petId.c_str()).c_str());
     actionPlan->setAttribute(tag, entityIdStr);
     XMLString::release(&entityIdStr);
+
+    XERCES_CPP_NAMESPACE::XMLString::transcode(DEMAND_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLCh* demandNameStr = XERCES_CPP_NAMESPACE::XMLString::transcode(demandName.c_str());
+    actionPlan->setAttribute(tag, demandNameStr);
+    XERCES_CPP_NAMESPACE::XMLString::release(&demandNameStr);
 
     return actionPlan;
 }

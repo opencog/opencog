@@ -44,6 +44,7 @@ class ActionPlan
 
 private:
     ActionPlanID id;
+    std::string demandName; 
     std::vector<PetAction> actions;
     std::vector<bool> actionTried;
     std::vector<bool> actionDone;
@@ -61,17 +62,24 @@ public:
 
     /**
      * Constructor
-     * @param id the ID of this action plan
+     *
+     * @param id          the ID of this action plan
+     * @param demandName  corresponding demand name for the action plan
      */
-    ActionPlan(ActionPlanID id);
+    ActionPlan(ActionPlanID id, std::string demandName);
 
     /**
-     * Gets the ID of this action plan
+     * Get the ID of this action plan
      */
     ActionPlanID getID() const;
 
     /**
-     * Adds an action to this plan
+     * Get the deman name of this action plan
+     */
+    std::string getDemandName() const; 
+
+    /**
+     * Add an action to this plan
      *
      * @param action A reference to the action to be added. A new PetAction object is created from this argument and
      *         its sequence number is set, according with its position in this action plan.
@@ -86,23 +94,23 @@ public:
     bool empty() const;
 
     /**
-     * Gets the number of actions in this action plan
+     * Get the number of actions in this action plan
      */
     unsigned int size() const;
 
     /**
-     * Gets the action of this action plan, given its sequence number
+     * Get the action of this action plan, given its sequence number
      */
     const PetAction& getAction(unsigned int seqNumber) const throw (opencog::IndexErrorException, std::bad_exception);
 
     /**
-     * Generates the corresponding PVP's message in XML format for this action plan
+     * Generate the corresponding PVP's message in XML format for this action plan
      * @param petId the id of the pet for which the PVP message will be sent.
      */
     string getPVPmessage(const std::string& petId) const;
 
     /**
-	 * Generates the corresponding PVP's message in XML format for a given atomic action
+	 * Generate the corresponding PVP's message in XML format for a given atomic action
 	 * of this action plan.
 	 *
 	 * @param petId the id of the pet
@@ -167,7 +175,7 @@ public:
 private:
 
     /**
-     * Creates a DOMDocument object that will contain the DOM tree
+     * Create a DOMDocument object that will contain the DOM tree
      * representing the XML message to be sent to the PVP.
      *
      * @return The DOMDocument just created.

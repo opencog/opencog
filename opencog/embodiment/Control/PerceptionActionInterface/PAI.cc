@@ -149,10 +149,25 @@ ActionPlanID PAI::createActionPlan()
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_unlock(&plock);
 #endif
-    ActionPlan plan(planId);
+
+    // Get currently selected demand name 
+    Handle hCurrentDemandEvaluationLink =
+        AtomSpaceUtil::getReference(atomSpace, 
+                                    atomSpace.getHandle(CONCEPT_NODE,
+                                                        "plan_selected_demand_goal"
+                                                       )
+                                   );
+    Handle hCurrentDemandPredicateNode = 
+        atomSpace.getOutgoing(hCurrentDemandEvaluationLink, 0); 
+
+    std::string demandName = atomSpace.getName(hCurrentDemandPredicateNode); 
+    demandName = demandName.substr(0, demandName.rfind("DemandGoal")); // Strip "DemandGoal" in the end
+
+    ActionPlan plan(planId, demandName);
     inProgressActionPlans[planId] = plan;
     ActionIdMap actionIdMap;
     planToActionIdsMaps[planId] = actionIdMap;
+
     return planId;
 }
 

@@ -264,6 +264,16 @@ const std::string& Pet::getOwnerId() const
     return (this->ownerId);
 }
 
+const std::string & Pet::getDemandName() const
+{
+    return this->demandName; 
+}
+
+void Pet::setDemandName(const std::string & demandName) 
+{
+    this->demandName = demandName;
+}
+
 const std::string& Pet::getExemplarAvatarId() const
 {
     return (this->exemplarAvatarId);

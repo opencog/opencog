@@ -69,6 +69,7 @@ private:
     std::string petName;
     std::string agentTraits;
     std::string ownerId;
+    std::string demandName; // Currently selected demand name 
 
     // NOTE: pet class will became a generic Agent class so that it could be
     // used by pets or humanoids. So the type used here.
@@ -216,9 +217,16 @@ public:
     /** Getter for owner id.
      */
     const std::string& getOwnerId() const;
+
     /** Setter for owner id.
      */
-    void  setOwnerId(const std::string& ownerId);
+    void setOwnerId(const std::string& ownerId);
+
+    /**
+     * Getter and setter for currently selected demand name
+     */
+    const std::string & getDemandName() const;
+    void setDemandName(const std::string & demandName);
 
     const std::string& getExemplarAvatarId() const;
 
