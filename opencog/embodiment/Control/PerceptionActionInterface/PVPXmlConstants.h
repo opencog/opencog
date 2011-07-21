@@ -40,6 +40,7 @@
 #define PHYSIOLOGY_LEVEL_ELEMENT "physiology-level"
 #define MAP_INFO_ELEMENT         "map-info"
 #define BLIP_ELEMENT             "blip"
+#define AVATAR_SIGNAL_ELEMENT    "avatar-signal"
 #define AGENT_SIGNAL_ELEMENT    "agent-signal"
 #define INSTRUCTION_ELEMENT      "instruction"
 #define AGENT_SENSOR_INFO_ELEMENT      "agent-sensor-info"
@@ -48,7 +49,6 @@
 #define FEELING_ELEMENT           "feeling"
 #define PSI_DEMAND_ELEMENT       "pet:psi-demand"   
 #define DEMAND_ELEMENT           "demand"
-#define AGENT_SIGNAL_ELEMENT     "avatar-signal"
 #define PROPERTIES_ELEMENT       "properties"
 #define PROPERTY_ELEMENT         "property"
 
