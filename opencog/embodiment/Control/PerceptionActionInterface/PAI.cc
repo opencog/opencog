@@ -611,7 +611,7 @@ void PAI::processAvatarSignal(DOMElement * element)
         XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* name = XMLString::transcode(signal->getAttribute(tag));
 
-        logger().debug("PAI - Got avatar-signal: agentId = %s (%s), timestamp = %u\n", agentID, internalAgentId.c_str(), tsValue);
+        logger().debug("PAI - Got avatar-signal: avatarId = %s (%s), timestamp = %u\n", agentID, internalAgentId.c_str(), tsValue);
 
         char* signalName = XMLString::transcode(signal->getTagName());
         if (strcmp(signalName,ACTION_ELEMENT) == 0) {
@@ -676,7 +676,8 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement)
     case BOOLEAN_CODE: {
         if (strcmp(paramValue, "true") && strcmp(paramValue, "false")) {
             throw opencog::InvalidParamException(TRACE_INFO,
-                                                 "PAI - Invalid value for boolean parameter: '%s'. It should be true or false.", paramValue);
+                     "PAI - Invalid value for boolean parameter: "
+                     "'%s'. It should be true or false.", paramValue);
         }
         resultHandle = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, paramValue);
         break;
