@@ -776,7 +776,11 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgo
 Handle AtomSpaceUtil::getReference(AtomSpace & atomSpace, Handle hFirstOutgoing)
 {
     Handle hReferenceLink = AtomSpaceUtil::getReferenceLink(atomSpace, hFirstOutgoing); 
-    return atomSpace.getOutgoing(hReferenceLink, 1); 
+
+    if (hReferenceLink==Handle::UNDEFINED)
+        return Handle::UNDEFINED; 
+    else 
+        return atomSpace.getOutgoing(hReferenceLink, 1); 
 }
 
 float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,

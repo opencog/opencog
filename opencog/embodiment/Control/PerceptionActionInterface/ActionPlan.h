@@ -66,7 +66,7 @@ public:
      * @param id          the ID of this action plan
      * @param demandName  corresponding demand name for the action plan
      */
-    ActionPlan(ActionPlanID id, std::string demandName);
+    ActionPlan(ActionPlanID id, std::string demandName="");
 
     /**
      * Get the ID of this action plan
