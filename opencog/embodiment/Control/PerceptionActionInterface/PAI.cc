@@ -162,7 +162,7 @@ ActionPlanID PAI::createActionPlan()
     if ( hDemandEvaluationLink != Handle::UNDEFINED ) {
         Handle hDemandPredicateNode = atomSpace.getOutgoing(hDemandEvaluationLink, 0);
         demandName = atomSpace.getName(hDemandPredicateNode); 
-        demandName = demandName.substr(demandName.rfind("DemandGoal")); 
+        demandName = demandName.substr(0, demandName.rfind("DemandGoal")); 
     }
 
     ActionPlan plan(planId, demandName);
