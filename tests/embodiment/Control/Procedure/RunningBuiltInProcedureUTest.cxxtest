@@ -34,28 +34,44 @@ using namespace opencog;
 
 class RunningBuiltInProcedureUTest :  public CxxTest::TestSuite
 {
-
+private:
+    AtomSpace atomSpace; 
+    
 public:
     RunningBuiltInProcedureUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
     }
 
     ~RunningBuiltInProcedureUTest() {
+
     }
 
     void setUp() {
+        std::vector<Handle> outgoing_list; 
+        std::vector<Handle> empty_outgoing_list; 
+
+        Handle h_concept_node = atomSpace.addNode(CONCEPT_NODE, "plan_selected_demand_goal"); 
+
+        outgoing_list.clear(); 
+        outgoing_list.push_back( atomSpace.addNode(PREDICATE_NODE, "EnergyDemandGoal") ); 
+        outgoing_list.push_back( atomSpace.addLink(LIST_LINK, empty_outgoing_list) ); 
+        Handle h_demand_evaluation_link = atomSpace.addLink(EVALUATION_LINK, outgoing_list); 
+
+        outgoing_list.clear(); 
+        outgoing_list.push_back(h_concept_node); 
+        outgoing_list.push_back(h_demand_evaluation_link); 
+        Handle h_demand_reference_link = atomSpace.addLink(REFERENCE_LINK, outgoing_list); 
+        std::cout<<atomSpace.atomAsString(h_demand_reference_link); 
     }
 
     void tearDown() {
     }
 
     void testOk() {
-        AtomSpace as;
-
         std::list<ActionPlan> plans;
         OKActionPlanSender ap(plans);
         AvatarInterfaceMock pi;
-        PAI pai(as, ap, pi);
+        PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;
         PetActionSchema p(pai, ActionType::BARK());
@@ -76,11 +92,9 @@ public:
     }
 
     void testFailure() {
-        AtomSpace as;
-
         FailureActionPlanSender ap;
         AvatarInterfaceMock pi;
-        PAI pai(as, ap, pi);
+        PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         PetActionSchema p(pai, ActionType::BARK());
         std::vector<combo::vertex> arguments;

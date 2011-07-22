@@ -54,6 +54,7 @@ class PAIUTest :  public CxxTest::TestSuite
 {
 
 private:
+    AtomSpace atomSpace;
 
 public:
     PAIUTest() {
@@ -63,6 +64,21 @@ public:
     }
 
     void setUp() {
+        std::vector<Handle> outgoing_list; 
+        std::vector<Handle> empty_outgoing_list; 
+
+        Handle h_concept_node = atomSpace.addNode(CONCEPT_NODE, "plan_selected_demand_goal"); 
+
+        outgoing_list.clear(); 
+        outgoing_list.push_back( atomSpace.addNode(PREDICATE_NODE, "EnergyDemandGoal") ); 
+        outgoing_list.push_back( atomSpace.addLink(LIST_LINK, empty_outgoing_list) ); 
+        Handle h_demand_evaluation_link = atomSpace.addLink(EVALUATION_LINK, outgoing_list); 
+
+        outgoing_list.clear(); 
+        outgoing_list.push_back(h_concept_node); 
+        outgoing_list.push_back(h_demand_evaluation_link); 
+        Handle h_demand_reference_link = atomSpace.addLink(REFERENCE_LINK, outgoing_list); 
+        std::cout<<atomSpace.atomAsString(h_demand_reference_link); 
     }
 
     void tearDown() {
@@ -75,8 +91,6 @@ public:
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
         }
-
-        AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
@@ -98,7 +112,6 @@ public:
             config().load(config().get("CONFIG_FILE").c_str());
         }
 
-        AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
@@ -123,8 +136,6 @@ public:
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
         }
-
-        AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
@@ -167,8 +178,6 @@ public:
             config().load(config().get("CONFIG_FILE").c_str());
         }
 
-        AtomSpace atomSpace;
-
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
         PAI pai(atomSpace, sender, avatarInterface);
@@ -200,9 +209,6 @@ public:
         TS_ASSERT(sentActionPlans.back().getAction(2).getType() == ActionType::BARK());
         TS_ASSERT(sentActionPlans.back().getAction(3).getType() == ActionType::EAT());
         TS_ASSERT(sentActionPlans.back().getAction(4).getType() == ActionType::FLY());
-
-
-
     }
 
     void testProcessPVPMessage() {
@@ -213,8 +219,6 @@ public:
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
         }
-
-        AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
@@ -1270,15 +1274,6 @@ public:
         TS_ASSERT(appendFileContent(PVP_XML_FILE_PATH "/pvpMsg4.xml", pvpMsg4));
         cout << "processing forth pvp message (" << PVP_XML_FILE_PATH << "/pvpMsg4.xml" << ")" << endl << pvpMsg4 << endl;
         TS_ASSERT(! pai.processPVPMessage(pvpMsg4, toUpdateHandles));
-
-
-
-
-        
-
-
-
-
     } // testProcessPVPMessage
 
     void testTimestampRelatedMethods() {
@@ -1355,7 +1350,6 @@ public:
                 TS_ASSERT(!pai.setLatestSimWorldTimestamp(t4));
                 TS_ASSERT(pai.getLatestSimWorldTimestamp() == t2);
         */
-
     }
 
     void testProcessPVPMessageWithScheme(){
@@ -1647,7 +1641,6 @@ public:
         TS_ASSERT(appendFileContent(PVP_XML_FILE_PATH "/schemeMsg6.xml", schemeMsg6));
         cout << "processing sixth scheme message (" << PVP_XML_FILE_PATH << "/schemeMsg6.xml" << ")" << endl << schemeMsg6 << endl;
         TS_ASSERT(pai.processPVPMessage(schemeMsg6, toUpdateHandles));        
-       
     }
 
 

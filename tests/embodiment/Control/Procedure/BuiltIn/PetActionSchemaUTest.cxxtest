@@ -35,6 +35,8 @@ using namespace std;
 
 class PetActionSchemaUTest :  public CxxTest::TestSuite
 {
+private:
+    AtomSpace atomSpace; 
 
 public:
     PetActionSchemaUTest() {
@@ -45,30 +47,40 @@ public:
     }
 
     void setUp() {
+        std::vector<Handle> outgoing_list; 
+        std::vector<Handle> empty_outgoing_list; 
+
+        Handle h_concept_node = atomSpace.addNode(CONCEPT_NODE, "plan_selected_demand_goal"); 
+
+        outgoing_list.clear(); 
+        outgoing_list.push_back( atomSpace.addNode(PREDICATE_NODE, "EnergyDemandGoal") ); 
+        outgoing_list.push_back( atomSpace.addLink(LIST_LINK, empty_outgoing_list) ); 
+        Handle h_demand_evaluation_link = atomSpace.addLink(EVALUATION_LINK, outgoing_list); 
+
+        outgoing_list.clear(); 
+        outgoing_list.push_back(h_concept_node); 
+        outgoing_list.push_back(h_demand_evaluation_link); 
+        Handle h_demand_reference_link = atomSpace.addLink(REFERENCE_LINK, outgoing_list); 
+        std::cout<<atomSpace.atomAsString(h_demand_reference_link); 
     }
 
     void tearDown() {
     }
 
-
     void testGetName() {
-        AtomSpace as;
-
         FailureActionPlanSender ap;
         AvatarInterfaceMock pi;
-        PAI pai(as, ap, pi);
+        PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         PetActionSchema bark(pai, ActionType::BARK());
         TS_ASSERT(!strcmp(bark.getName().c_str(), "BARK"));
     }
 
     void testExecuteOk() {
-        AtomSpace as;
-
         std::list<ActionPlan> plans;
         OKActionPlanSender ap(plans);
         AvatarInterfaceMock pi;
-        PAI pai(as, ap, pi);
+        PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         PetActionSchema bark(pai, ActionType::BARK());
         std::vector<combo::vertex> args(1, "Wynx");
@@ -81,11 +93,9 @@ public:
     }
 
     void testExecuteFailure() {
-        AtomSpace as;
-
         FailureActionPlanSender ap;
         AvatarInterfaceMock pi;
-        PAI pai(as, ap, pi);
+        PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         PetActionSchema bark(pai, ActionType::BARK());
         PetActionSchema eat(pai, ActionType::EAT());
