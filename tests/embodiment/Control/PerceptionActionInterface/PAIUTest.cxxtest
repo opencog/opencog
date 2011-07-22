@@ -593,7 +593,7 @@ public:
             TS_ASSERT(pai.getAvatarInterface().getGrabbedObj() == PAIUtils::getInternalId("Wynx"));
         }
 
-        // Check Temp-signal atoms
+        // Check agent-signal atoms
         {
             cout << "checking agent signals" << endl;
 
@@ -601,6 +601,7 @@ public:
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
 
             HandleSeq predicateListLinkOutgoing;
+            HandleSeq parametersListLinkOutgoing;
 
             // Avatar node
             Handle avatarNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("1").c_str());
@@ -633,12 +634,12 @@ public:
             targetListLinkOutgoing.push_back(yNode);
             targetListLinkOutgoing.push_back(zNode);
             Handle targetListLink = atomSpace.getHandle(LIST_LINK, targetListLinkOutgoing);
-            predicateListLinkOutgoing.push_back(targetListLink);
+            parametersListLinkOutgoing.push_back(targetListLink);
 
             // Speed <param name=\"speed\" type=\"float\" value=\"3.5\"/>"
             Handle speedNode = atomSpace.getHandle(NUMBER_NODE, "3.5");
             TS_ASSERT(Handle::compare(speedNode, Handle::UNDEFINED));
-            predicateListLinkOutgoing.push_back(speedNode);
+            parametersListLinkOutgoing.push_back(speedNode);
 
             // Rotation <rotation pitch=\"0.1\" roll=\"0.2\" yaw=\"0.3\"/>"
             Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "0.1");
@@ -652,7 +653,11 @@ public:
             rotateListLinkOutgoing.push_back(rollNode);
             rotateListLinkOutgoing.push_back(yawNode);
             Handle rotateListLink = atomSpace.getHandle(LIST_LINK, rotateListLinkOutgoing);
-            predicateListLinkOutgoing.push_back(rotateListLink);
+            parametersListLinkOutgoing.push_back(rotateListLink);
+            
+            Handle parametersListLink = atomSpace.getHandle(LIST_LINK, parametersListLinkOutgoing);
+            TS_ASSERT(Handle::compare(parametersListLink, Handle::UNDEFINED));
+            predicateListLinkOutgoing.push_back(parametersListLink);
 
             Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));

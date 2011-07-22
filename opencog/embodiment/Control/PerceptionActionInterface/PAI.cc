@@ -1336,8 +1336,6 @@ void PAI::processAgentSensorInfo(DOMElement * element)
     } // for
 }
 
-
-
 void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
@@ -1349,10 +1347,10 @@ void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeExcept
         return;
     }
 
-    // getting avatar id attribute value
-    XMLString::transcode(AVATAR_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-    char* avatarID = XMLString::transcode(element->getAttribute(tag));
-    string internalAvatarId = PAIUtils::getInternalId(avatarID);
+    // getting agent id attribute value
+    XMLString::transcode(AGENT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* agentID = XMLString::transcode(element->getAttribute(tag));
+    string internalAgentId = PAIUtils::getInternalId(agentID);
 
     DOMNodeList * signals = element->getChildNodes();
     for (unsigned int i = 0; i < signals->getLength(); i++) {
@@ -1366,191 +1364,22 @@ void PAI::processAgentSignal(DOMElement * element) throw (opencog::RuntimeExcept
         char* name = XMLString::transcode(signal->getAttribute(tag));
         string nameStr(camelCaseToUnderscore(name));
 
+        logger().debug("PAI - Got agent-signal: agentId = %s (%s), name = %s, timestamp = %u\n", agentID, internalAgentId.c_str(), name, tsValue);
+
         char* signalName = XMLString::transcode(signal->getTagName());
         // We only know how to deal with action elements
-        if (strcmp(signalName,ACTION_ELEMENT) != 0) continue;
-
-        logger().debug("PAI - Got agent-signal: avatarId = %s (%s), name = %s, timestamp = %u\n", avatarID, internalAvatarId.c_str(), name, tsValue);
-
-        // Add the perceptions into AtomSpace
-        Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
-        Handle avatarNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId.c_str());
-        Handle actionNode = AtomSpaceUtil::addNode(atomSpace, NODE, nameStr.c_str());
-
-        HandleSeq predicateListLinkOutgoing;
-        predicateListLinkOutgoing.push_back(avatarNode);
-        predicateListLinkOutgoing.push_back(actionNode);
-
-        XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-        DOMNodeList * list = element->getElementsByTagName(tag);
-
-        //used only in case the name of the action is 'grab'
-        string grabObjectId;
-
-        for (unsigned int i = 0; i < list->getLength(); i++) {
-            DOMElement* paramElement = (DOMElement*) list->item(i);
-
-            XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* paramName = XMLString::transcode(paramElement->getAttribute(tag));
-
-            XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* paramType = XMLString::transcode(paramElement->getAttribute(tag));
-
-            XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-            char* paramValue = XMLString::transcode(paramElement->getAttribute(tag));
-
-            logger().debug("PAI - Got param: name = %s, type = %s, value = %s", paramName, paramType, paramValue);
-
-            // This function can throw an InvalidParamException
-            const ActionParamType& actionParamType = ActionParamType::getFromName(paramType);
-
-            switch (actionParamType.getCode()) {
-            case BOOLEAN_CODE: {
-                if (strcmp(paramValue, "true") && strcmp(paramValue, "false")) {
-                    throw opencog::InvalidParamException(TRACE_INFO,
-                                                         "PAI - Invalid value for boolean parameter: '%s'. It should be true or false.", paramValue);
-                }
-                predicateListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, paramValue));
-                break;
-            }
-            case INT_CODE:
-            case FLOAT_CODE: {
-                // TODO: check if string is a valid number?
-                predicateListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, paramValue));
-                break;
-            }
-            case STRING_CODE: {
-                // TODO: converts the string to lowercase?
-                predicateListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, paramValue));
-                break;
-            }
-            case VECTOR_CODE: {
-                XMLString::transcode(VECTOR_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-                DOMNodeList * vectorList = paramElement->getElementsByTagName(tag);
-                if (vectorList->getLength() <= 0) {
-                    throw opencog::InvalidParamException(TRACE_INFO,
-                                                         "PAI - Got a parameter element with vector type without a vector child element.");
-                }
-                DOMElement* vectorElement = (DOMElement*) vectorList->item(0);
-                XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* xStr = XMLString::transcode(vectorElement->getAttribute(tag));
-                XMLString::transcode(Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* yStr = XMLString::transcode(vectorElement->getAttribute(tag));
-                XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* zStr = XMLString::transcode(vectorElement->getAttribute(tag));
-                logger().debug("PAI - Got vector: x = %s, y = %s, z = %s\n", xStr, yStr, zStr);
-                HandleSeq rotationListLink;
-                // TODO: check if string is a valid number?
-                rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, xStr));
-                rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, yStr));
-                rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, zStr));
-                predicateListLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, rotationListLink));
-
-                XMLString::release(&xStr);
-                XMLString::release(&yStr);
-                XMLString::release(&zStr);
-                break;
-            }
-            case ROTATION_CODE: {
-                XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-                DOMNodeList * rotationList = paramElement->getElementsByTagName(tag);
-                if (rotationList->getLength() <= 0) {
-                    throw opencog::InvalidParamException(TRACE_INFO,
-                                                         "PAI - Got a parameter element with Rotation type without a rotation child element.");
-                }
-                DOMElement* rotationElement = (DOMElement*) rotationList->item(0);
-                XMLString::transcode(PITCH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* pitchStr = XMLString::transcode(rotationElement->getAttribute(tag));
-                XMLString::transcode(ROLL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* rollStr = XMLString::transcode(rotationElement->getAttribute(tag));
-                XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* yawStr = XMLString::transcode(rotationElement->getAttribute(tag));
-                logger().debug("PAI - Got rotaion: pitch = %s, roll = %s, yaw = %s\n", pitchStr, rollStr, yawStr);
-
-                HandleSeq rotationListLink;
-                // TODO: check if string is a valid number?
-                rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, pitchStr));
-                rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, rollStr));
-                rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, yawStr));
-                predicateListLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, rotationListLink));
-
-                XMLString::release(&pitchStr);
-                XMLString::release(&rollStr);
-                XMLString::release(&yawStr);
-                break;
-            }
-            case ENTITY_CODE: {
-                XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-                DOMNodeList * entityList = paramElement->getElementsByTagName(tag);
-                if (entityList->getLength() <= 0) {
-                    throw opencog::InvalidParamException(TRACE_INFO,
-                                                         "PAI - Got a parameter element with Entity type without an entity child element.");
-                }
-                DOMElement* entityElement = (DOMElement*) entityList->item(0);
-
-                XMLString::transcode(ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* entityId = XMLString::transcode(entityElement->getAttribute(tag));
-                string internalEntityId = PAIUtils::getInternalId(entityId);
-                XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* entityType = XMLString::transcode(entityElement->getAttribute(tag));
-                XMLString::transcode(OWNER_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* entityOwnerId = XMLString::transcode(entityElement->getAttribute(tag));
-                string internalEntityOwnerId = PAIUtils::getInternalId(entityOwnerId);
-                XMLString::transcode(OWNER_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-                char* entityOwnerName = XMLString::transcode(entityElement->getAttribute(tag));
-                logger().debug("PAI - Got Entity: id = %s (%s), type = %s, ownerId = %s (%s), ownerName = %s\n", entityId, internalEntityId.c_str(), entityType, entityOwnerId, internalEntityOwnerId.c_str(), entityOwnerName);
-                //if action name is 'grab' then temporarly store
-                //the argument to create isHolding predicate (see below)
-                if (nameStr == "grab") {
-                    grabObjectId = internalEntityId;
-                }
-
-                predicateListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType), internalEntityId.c_str()));
-
-                XMLString::release(&entityId);
-                XMLString::release(&entityType);
-                XMLString::release(&entityOwnerId);
-                XMLString::release(&entityOwnerName);
-                break;
-            }
-            default: {
-                // Should never get here, but...
-                throw opencog::RuntimeException(TRACE_INFO,
-                                                "PAI - Undefined map from '%s' type to an Atom type.", paramType);
-            }
-            }
-
-            XMLString::release(&paramName);
-            XMLString::release(&paramType);
-            XMLString::release(&paramValue);
-        } // for each parameter
-
-        Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
-
-        HandleSeq evalLinkOutgoing;
-        evalLinkOutgoing.push_back(predicateNode);
-        evalLinkOutgoing.push_back(predicateListLink);
-        Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-        Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue);
-        AtomSpaceUtil::updateLatestAvatarActionDone(atomSpace, atTimeLink, avatarNode);
-
-        //if the action is grab or drop created/update isHoldingSomething
-        //and isHolding predicates
-        if (nameStr == "grab") {
-            AtomSpaceUtil::setupHoldingObject(atomSpace,
-                                              internalAvatarId,
-                                              grabObjectId,
-                                              getLatestSimWorldTimestamp());
-        } else if (nameStr == "drop") {
-            AtomSpaceUtil::setupHoldingObject(atomSpace,
-                                              internalAvatarId,
-                                              string(""),
-                                              getLatestSimWorldTimestamp());
+        if (strcmp(signalName,ACTION_ELEMENT) != 0) {
+            XMLString::release(&signalName);
+            continue;
         }
+        XMLString::release(&signalName);
+
+        Handle agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAgentId.c_str());
+        processAgentActionWithParameters(agentNode, internalAgentId, tsValue, nameStr, signal);
         XMLString::release(&name);
     }
 
-    XMLString::release(&avatarID);
+    XMLString::release(&agentID);
 }
 
 Type PAI::getSLObjectNodeType(const char* objectType)
@@ -2652,7 +2481,9 @@ std::string PAI::camelCaseToUnderscore(std::string s)
     for (string::iterator it = s.begin(); it != s.end(); ++it)
         if (*it >= 'A' && *it <= 'Z') {
             *it = tolower(*it);
-            it = s.insert(it, '_');
+            // Don't put an underscore in front of a string beginning with
+            // a capital
+            if (it != s.begin()) it = s.insert(it, '_');
             ++it;
         }
     return s;
