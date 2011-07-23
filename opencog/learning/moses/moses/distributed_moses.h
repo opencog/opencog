@@ -341,7 +341,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     host_proc_map hpm = init(jobs);
 
-    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx) 
+    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx++) 
            && (mp.best_score() < pa.max_score)) {
         // if there exists free resource, launch a process
         host_proc_map::iterator hpm_it = find_free_resource(hpm, jobs);
@@ -359,12 +359,10 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 hpm_it->second.insert(pmv);
 
                 // Logger
-                logger().info("Generation: %d", gen_idx + 1);
+                logger().info("Generation: %d", gen_idx);
                 logger().info("Launch command: %s", get_cmd(pmv).c_str());
                 logger().info("corresponding to PID = %d", get_pid(pmv));
                 // ~Logger
-
-                gen_idx++;
             } else if(all_resources_free(hpm)) { // can't find any
                                              // available exemplar and
                                              // there is no hope that
