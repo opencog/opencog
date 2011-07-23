@@ -226,7 +226,10 @@ struct hc_parameters {
         : terminate_if_improvement(_terminate_if_improvement),
           fraction_of_remaining(_fraction_of_remaining) {}
     bool terminate_if_improvement;
-    unsigned fraction_of_remaining;
+    unsigned fraction_of_remaining; // better vary the optim_parameter
+                                    // pop_size_ratio to control the
+                                    // allocation of resources in the
+                                    // search of a deme
 };
 
 struct iterative_hillclimbing {
