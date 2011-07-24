@@ -123,7 +123,7 @@ namespace opencog
          * @return A vector of doubles corresponding to handle h's distance
          * from each of the pivots.
          */
-        std::vector<double> getEmbedVector(const Handle& h, const Type& l);
+        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l);
 
         /**
          * Creates an AtomEmbedding of the atomspace using linkType
@@ -282,8 +282,11 @@ namespace opencog
          */
         double separation(const HandleSeq& cluster, const Type& linkType);
 
-        /** updates the given atom (recalculates its distance from pivots) */
-        //void updateAtom(const Handle& h, const Type& linkType);
+        /**
+         * Create a new node by blending the two existing nodes, n1 and n2,
+         * based on their embeddings link type l.
+         */
+        Handle blendNodes(const Handle& n1, const Handle& n2, const Type& l);
 
         void printEmbedding();
 

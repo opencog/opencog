@@ -31,6 +31,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/exceptions.h>
 #include <limits>
+#include <string>
 extern "C" {
 #include <opencog/util/cluster.h>
 }
@@ -90,8 +91,8 @@ void DimEmbedModule::init() {
 #endif
 }
 
-std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
-                                                   const Type& l) {
+const std::vector<double>& DimEmbedModule::getEmbedVector(const Handle& h,
+                                                          const Type& l) {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -102,7 +103,7 @@ std::vector<double> DimEmbedModule::getEmbedVector(const Handle& h,
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-    AtomEmbedding& aE = (atomMaps.find(l))->second;
+    const AtomEmbedding& aE = (atomMaps.find(l))->second;
     AtomEmbedding::const_iterator aEit = aE.find(h);
     return aEit->second;
 }
@@ -301,7 +302,7 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
         double weight = linkTV.getConfidence()*linkTV.getMean();
         for(HandleSeq::iterator it2=nodes.begin();it2<nodes.end(); ++it2) {
             if(*it2==h) continue;
-            std::vector<double> embedding =
+            const std::vector<double>& embedding =
                 getEmbedVector(*it2,linkType);
             //Alter our embedding whenever we find a higher weight path
             for(unsigned int i=0; i<embedding.size(); ++i) {
@@ -330,7 +331,6 @@ void DimEmbedModule::removeNode(const Handle& h,
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-
 
     EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);
     OC_ASSERT(treeMapIt!=embedTreeMap.end());
@@ -628,7 +628,7 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
             const std::vector<double>& embedVec = getEmbedVector(*it2,l);
             double dist = euclidDist(centroid,embedVec);
             //TODO: we should do some normalizing of this probably...
-            double strength = std::pow(2.0, -dist);
+            double strength = sqrt(std::pow(2.0, -dist));
             SimpleTruthValue tv(strength,
                                 SimpleTruthValue::confidenceToCount(strength));
             as->addLink(INHERITANCE_LINK, *it2, newNode, tv);
@@ -640,7 +640,7 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
         for(int i=0; i<numDims; ++i) {
             //the link between a clusterNode and an attribute (pivot) is
             //a weighted average of the cluster's members' links to the pivot
-            double attrStrength = strNumer[i]/strDenom[i];
+            double attrStrength = sqrt(strNumer[i]/strDenom[i]);
             SimpleTruthValue tv(attrStrength,
                                 SimpleTruthValue::confidenceToCount(attrStrength));
             as->addLink(l, newNode, pivots[i], tv);
@@ -703,6 +703,54 @@ double DimEmbedModule::separation(const HandleSeq& cluster,
         inCluster=false;
     }
     return minDist;
+}
+
+Handle DimEmbedModule::blendNodes(const Handle& n1,
+                                  const Handle& n2, const Type& l) {
+    if(!classserver().isLink(l))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(l).c_str());
+    if(!as->isNode(n1) || !as->isNode(n2))
+        throw InvalidParamException(TRACE_INFO,
+                                    "blendNodes requires two nodes.");
+    if(!isEmbedded(l)) {
+        const char* tName = classserver().getTypeName(l).c_str();
+        logger().error("No embedding exists for type %s", tName);
+        throw std::string("No embedding exists for type %s", tName);
+    }
+    const HandleSeq& pivots = pivotsMap[l];
+    const unsigned int numDims = (unsigned int) dimensionMap[l];
+    const std::vector<double>& embedVec1 = getEmbedVector(n1,l);
+    const std::vector<double>& embedVec2 = getEmbedVector(n2,l);
+    OC_ASSERT(numDims==embedVec1.size() &&
+              numDims==embedVec2.size() && numDims==pivots.size());
+    std::vector<double> newVec(embedVec1.begin(), embedVec1.end());
+
+    EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(l);
+    OC_ASSERT(treeMapIt!=embedTreeMap.end());
+    CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
+    //For each pivot, see whether replacing embedVec1's embedding with
+    //embedVec2's will make newVec farther from any existing point. Replace
+    //it if so.
+    for(unsigned int i=0; i<numDims; i++) {
+        CoverTreePoint p1(Handle::UNDEFINED,newVec);
+        newVec[i]=embedVec2[i];
+        CoverTreePoint p2(Handle::UNDEFINED,newVec);
+        double dist1 = p1.distance(cTree.kNearestNeighbors(p1,1)[0]);
+        double dist2 = p2.distance(cTree.kNearestNeighbors(p2,1)[0]);
+        if(dist1>dist2) newVec[i]=embedVec2[i];
+    }
+    std::string prefix("blend_"+as->getName(n1)+"_"+as->getName(n2)+"_");
+    Handle newNode = as->addPrefixedNode(as->getType(n1), prefix);
+    
+    for(unsigned int i=0; i<numDims; i++) {
+        double strength = sqrt(newVec[i]);
+        SimpleTruthValue tv(strength,
+                            SimpleTruthValue::confidenceToCount(strength));
+        as->addLink(l, newNode, pivots[i], tv);
+    }
+    return newNode;
 }
 
 double DimEmbedModule::euclidDist(double v1[], double v2[], int size) {
