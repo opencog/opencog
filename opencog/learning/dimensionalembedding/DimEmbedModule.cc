@@ -1,4 +1,3 @@
-
 /*
  * opencog/learning/dimensionalembedding/DimEmbedModule.cc
  *
@@ -579,6 +578,7 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npa
 void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
                                        double threshold, int kPasses) {
     AtomEmbedding aE = atomMaps[l];
+    if(kPasses==-1) kPasses = (std::log(aE.size())/std::log(2))-1;
 
     typedef std::pair<double,std::pair<HandleSeq,vector<double> > > cPair;
     typedef std::multimap<double,std::pair<HandleSeq,vector<double> > >
@@ -587,8 +587,9 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
     //make a Priority Queue of (HandleSeq,vector<double>) pairs, where
     //we can easily extract those with the lowest value to discard if we
     //exceed maxClusters.
-    for(int i=1;i<kPasses+1;++i) {
-        int k = std::pow(2,std::log(aE.size()/std::log(2)));
+    int k = aE.size()/2;
+    double c = std::pow(2,(std::log(k)/std::log(2))/kPasses);
+    while(k>2) {
         ClusterSeq newClusts = kMeansCluster(l,k);
         for(ClusterSeq::iterator it = newClusts.begin();
             it!=newClusts.end();++it) {
@@ -610,20 +611,39 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
                 }
             }
         }
+        k=k/c;
     }
+    const HandleSeq& pivots = pivotsMap[l];
+    const int& numDims = dimensionMap[l];
     //Make a new node for each cluster and connect it with InheritanceLinks.
     for(pQueue_t::iterator it = clusters.begin();it!=clusters.end();++it) {
-        HandleSeq cluster = it->second.first;
-        std::vector<double> centroid = it->second.second;
+        const HandleSeq& cluster = it->second.first;
+        const std::vector<double>& centroid = it->second.second;
         Handle newNode = as->addPrefixedNode(CONCEPT_NODE, "cluster_");
-        for(HandleSeq::iterator it2=cluster.begin();it2!=cluster.end();++it2) {
-            //Connect newNode to each handle in its cluster.
-            double dist = euclidDist(centroid,getEmbedVector(*it2,l));
+        std::vector<double> strNumer(0,numDims);
+        std::vector<double> strDenom(0,numDims);
+        //Connect newNode to each handle in its cluster and each pivot
+        for(HandleSeq::const_iterator it2=cluster.begin();
+            it2!=cluster.end();++it2) {
+            const std::vector<double>& embedVec = getEmbedVector(*it2,l);
+            double dist = euclidDist(centroid,embedVec);
             //TODO: we should do some normalizing of this probably...
             double strength = std::pow(2.0, -dist);
             SimpleTruthValue tv(strength,
                                 SimpleTruthValue::confidenceToCount(strength));
             as->addLink(INHERITANCE_LINK, *it2, newNode, tv);
+            for(int i=0; i<numDims; ++i) {
+                strNumer[i]+=strength*embedVec[i];
+                strDenom[i]+=strength;
+            }
+        }
+        for(int i=0; i<numDims; ++i) {
+            //the link between a clusterNode and an attribute (pivot) is
+            //a weighted average of the cluster's members' links to the pivot
+            double attrStrength = strNumer[i]/strDenom[i];
+            SimpleTruthValue tv(attrStrength,
+                                SimpleTruthValue::confidenceToCount(attrStrength));
+            as->addLink(l, newNode, pivots[i], tv);
         }
     }
 }

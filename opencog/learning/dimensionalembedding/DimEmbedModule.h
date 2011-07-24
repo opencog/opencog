@@ -263,7 +263,7 @@ namespace opencog
          * kPasses=3, the k values are 2^(n/4), 2^(2n/4), and 2^(3n/4).
          */
         void addKMeansClusters(const Type& l, int maxClusters,
-                               double threshold=0., int kPasses=1);
+                               double threshold=0., int kPasses=-1);
 
         /**
          * Calculate the homogeneity of a cluster of handles for given linkType.
