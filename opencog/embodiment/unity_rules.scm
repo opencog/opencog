@@ -147,7 +147,7 @@
 )
 
 (define IntegrityDemandSchema
-    (add_demand_schema "IntegrityDemand" 0.95)
+    (add_demand_schema "IntegrityDemand" 0.8)
 )
 
 (define AffiliationDemandSchema
