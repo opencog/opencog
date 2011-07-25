@@ -126,7 +126,7 @@ interface.
 
           ; Change the truth value of an existing node:
           guile> (cog-node 'ConceptNode "asdf" (cog-new-stv 0.8 0.9))
-          #<node[3:some nodcog-e name] sti:(0,0) tv:(0.800000,0.900000)>
+          #<node[3:some node name] sti:(0,0) tv:(0.800000,0.900000)>
 
 
 === cog-new-link link-type atom ... atom ===

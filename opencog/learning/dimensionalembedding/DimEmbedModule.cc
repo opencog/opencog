@@ -97,7 +97,6 @@ const std::vector<double>& DimEmbedModule::getEmbedVector(const Handle& h,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
- 
     if(!isEmbedded(l)) {
         const char* tName = classserver().getTypeName(l).c_str();
         logger().error("No embedding exists for type %s", tName);
@@ -106,6 +105,19 @@ const std::vector<double>& DimEmbedModule::getEmbedVector(const Handle& h,
     const AtomEmbedding& aE = (atomMaps.find(l))->second;
     AtomEmbedding::const_iterator aEit = aE.find(h);
     return aEit->second;
+}
+
+const HandleSeq& DimEmbedModule::getPivots(const Type& l) {
+    if(!classserver().isLink(l))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(l).c_str());
+    if(!isEmbedded(l)) {
+        const char* tName = classserver().getTypeName(l).c_str();
+        logger().error("No embedding exists for type %s", tName);
+        throw std::string("No embedding exists for type %s", tName);
+    }
+    return pivotsMap[l];
 }
 
 HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int k) {
@@ -397,7 +409,7 @@ void DimEmbedModule::clearEmbedding(const Type& linkType){
 
 void DimEmbedModule::logAtomEmbedding(const Type& linkType) {
     AtomEmbedding atomEmbedding=atomMaps[linkType];
-    HandleSeq pivots = pivotsMap[linkType];
+    const HandleSeq& pivots = getPivots(linkType);
 
     std::ostringstream oss;
     
@@ -460,16 +472,13 @@ bool DimEmbedModule::isEmbedded(const Type& linkType) {
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-
     //See if atomMaps holds an embedding for linkType
     AtomEmbedMap::iterator aEMit = atomMaps.find(linkType);
-    if(aEMit==atomMaps.end()) {
-        return false;
-    }
-    return true;
+    if(aEMit==atomMaps.end()) return false;
+    else return true;
 }
 
-ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npass) {
+ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npass, bool pivotWise) {
     if(!isEmbedded(l)) {
         const char* tName = classserver().getTypeName(l).c_str();
         logger().error("No embedding exists for type %s", tName);
@@ -520,10 +529,12 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npa
             mask[i][j]=1;
         }
     }
-
+    int transpose;
+    if(pivotWise) transpose=0;
+    else transpose=1;
     //clusterid[i]==j will indicate that handle i belongs in cluster j
     ::kcluster(numClusters, numVectors, numDimensions, embedMatrix,
-               mask, weight, 0, npass, 'a', 'e', clusterid, &error, &ifound);
+               mask, weight, transpose, npass, 'a', 'e', clusterid, &error, &ifound);
 
     //Now that we have the clusters (stored in clusterid), we find the centroid
     //of each cluster so we will know how to weight the inheritance links
@@ -543,10 +554,18 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npa
                           mask, clusterid, centroidMatrix,
                           cmask, 0, 'a');
     ClusterSeq clusters(numClusters);
-    for(int i=0;i<numVectors;++i) {
-        //clusterid[i] indicates which cluster handleArray[i] is in.
-        int clustInd=clusterid[i];
-        clusters[clustInd].first.push_back(handleArray[i]);
+    const HandleSeq& pivots = getPivots(l);
+    if(!pivotWise) {
+        for(int i=0;i<numVectors;++i) {
+            //clusterid[i] indicates which cluster handleArray[i] is in.
+            int clustInd=clusterid[i];
+            clusters[clustInd].first.push_back(handleArray[i]);
+        }
+    } else {
+        for(int i=0;i<numDimensions;++i) {
+            int clustInd=clusterid[i];
+            clusters[clustInd].first.push_back(pivots[i]);
+        }
     }
     for(int i=0;i<numClusters;++i) {
         std::vector<double> centroid(centroidMatrix[i],
@@ -613,7 +632,7 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
         }
         k=k/c;
     }
-    const HandleSeq& pivots = pivotsMap[l];
+    const HandleSeq& pivots = getPivots(l);
     const int& numDims = dimensionMap[l];
     //Make a new node for each cluster and connect it with InheritanceLinks.
     for(pQueue_t::iterator it = clusters.begin();it!=clusters.end();++it) {
@@ -719,7 +738,7 @@ Handle DimEmbedModule::blendNodes(const Handle& n1,
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-    const HandleSeq& pivots = pivotsMap[l];
+    const HandleSeq& pivots = getPivots(l);
     const unsigned int numDims = (unsigned int) dimensionMap[l];
     const std::vector<double>& embedVec1 = getEmbedVector(n1,l);
     const std::vector<double>& embedVec2 = getEmbedVector(n2,l);

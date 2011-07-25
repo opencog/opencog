@@ -32,7 +32,6 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Cover_Tree.h>
-
 #include "CoverTreePoint.h"
 
 namespace opencog
@@ -125,6 +124,10 @@ namespace opencog
          */
         const std::vector<double>& getEmbedVector(const Handle& h, const Type& l);
 
+        /**
+         * Returns the list of pivots for the embedding of type l.
+         */
+        const HandleSeq& getPivots(const Type& l);
         /**
          * Creates an AtomEmbedding of the atomspace using linkType
          * and registers it with the AtomEmbedMap. If an AtomEmbedding
@@ -226,6 +229,10 @@ namespace opencog
         /**
          * Returns a vector of Handles of the k nearest nodes for the given 
          * link type.
+         *
+         * The 0th element of the vector is the closest, the 1st is next,
+         * etc. If there is a tie for the kth closest, this may return more
+         * than k handles.
          */
         HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k);
 
@@ -237,16 +244,22 @@ namespace opencog
          *
          * @param l type of link for which to find clusters.
          * @param numClusters The number of clusters to return.
+         * @param nPasses The number of times to try clustering (there is
+         * a stochastic component to k-means clustering, so the clustering
+         * may be slightly different each time).
          * @return A vector of (HandleSeq,vector<double>) pairs, where
          * each HandleSeq represents a cluster and the vector of doubles its
          * centroid.
          */
-        ClusterSeq kMeansCluster(const Type& l, int numClusters, int nPasses=1);
+        ClusterSeq kMeansCluster(const Type& l, int numClusters, int nPasses=1, bool pivotWise=false);
 
         /**
          * Use k-means clustering to add new nodes to the atomspace (one
          * new node for each good cluster found, plus inheritance links
          * between each new node and its corresponding cluster members).
+         *
+         * This will add up to maxClusters new clusters, choosing those
+         * clusters which maximize homogeneity*separation.
          *
          * @param l Type of link for which to find clusters.
          * @param maxClusters The maximum number of nodes to add to the
@@ -284,7 +297,7 @@ namespace opencog
 
         /**
          * Create a new node by blending the two existing nodes, n1 and n2,
-         * based on their embeddings link type l.
+         * based on their embeddings for link type l.
          */
         Handle blendNodes(const Handle& n1, const Handle& n2, const Type& l);
 
