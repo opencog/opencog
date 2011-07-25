@@ -2142,7 +2142,6 @@ void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, boo
 
 void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, bool inheritanceValue)
 {
-
     if (inheritanceValue) {
         logger().debug("PAI - Inheritance: %s => %s",
                      atomSpace.getName(subNodeHandle).c_str(),

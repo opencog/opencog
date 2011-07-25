@@ -384,7 +384,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 
     // setup predicates
     meanValue = atHome ? 1.0f : 0.0f;
-    AtomSpaceUtil::setPredicateValue( atomSpace, "home", SimpleTruthValue( meanValue, 1.0f ), pet );
+    AtomSpaceUtil::setPredicateValue( atomSpace, "at_home", SimpleTruthValue( meanValue, 1.0f ), pet );
 
     meanValue = !atHome ? 1.0f : 0.0f;
     AtomSpaceUtil::setPredicateValue( atomSpace, "outside", SimpleTruthValue( meanValue, 1.0f ), pet );
@@ -433,6 +433,5 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
     logger().info("PetPsychePredicatesUpdater - context predicates updated." );
 
     this->latestSimWorldTimestamp = timestamp;
-
 }
 
