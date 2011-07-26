@@ -85,7 +85,7 @@ int opencog::gettimeofday(struct timeval* tp, void* tzp)
     return 0;
 }
 
-void opencog::usleep(unsigned int useconds)
+void opencog::usleep(unsigned useconds)
 {
     // Sleep is in milliseconds
     // If 0 is passed to Sleep()

@@ -63,7 +63,7 @@ struct eqint {
 char*              __strtok_r(char *s1, const char *s2, char **lasts);
 #endif
 
-#ifdef WIN32
+#ifdef WIN32_NOT_UNIX
 
 #define M_PI 3.14159265358979323846
 
@@ -72,14 +72,14 @@ struct timezone {};
 int                round(float x);
 char*              __strtok_r(char *s1, const char *s2, char **lasts);
 int                gettimeofday(struct timeval* tp, void* tzp);
-void               usleep(unsigned int useconds);
+void               usleep(unsigned useconds);
 int                __getpid(void);
 double             rint(double nr);
 int                __dup2(int, int);
 unsigned long long atoll(const char *str);
 unsigned int       sleep(unsigned seconds);
 
-#endif // WIN32!
+#endif // ~WIN32_NOT_UNIX
 
 size_t             getMemUsage();
 
