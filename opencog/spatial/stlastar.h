@@ -125,6 +125,7 @@ namespace opencog
 #endif
                     m_AllocateNodeCount(0),
                     m_CancelRequest( false ) {
+
                 }
 
                 ~AStarSearch() {
@@ -308,6 +309,7 @@ namespace opencog
                                     // the one on Closed is cheaper than this one
                                     FreeNode( (*successor) );
 
+
                                     continue;
                                 }
                             }
@@ -331,7 +333,7 @@ namespace opencog
                                 // Greg Douglas <gregdouglasmail@gmail.com>
                                 // who noticed that this code path was incorrect
                                 // Here we have found a new state which is already CLOSED
-                                // anus
+                                // anus 
 
                             }
 
@@ -347,6 +349,31 @@ namespace opencog
                                 // it in detail. sort_heap called on an invalid heap does not work
                                 make_heap( m_OpenList.begin(), m_OpenList.end(), HeapCompare_f() );
 
+                                // Search for a fake path that can lead to a
+                                // point closest to the goal.
+                                std::vector<UserState> tmpFakeSolution;
+
+                                m_CurrentSolutionNode = *successor; 
+                                Node *nodeParent = m_CurrentSolutionNode->parent;
+                                do {
+                                    tmpFakeSolution.push_back(m_CurrentSolutionNode->m_UserState);
+                                    m_CurrentSolutionNode = nodeParent;
+                                    if (!m_CurrentSolutionNode) {
+                                        break;
+                                    }
+                                    nodeParent = m_CurrentSolutionNode->parent;
+                                } while (m_CurrentSolutionNode != m_Start);
+                                tmpFakeSolution.push_back(m_Start->m_UserState);
+                                
+                                if ((int)tmpFakeSolution.size() > (int)m_FakeSolution.size()) {
+                                    m_FakeSolution.clear();
+                                    typename std::vector<UserState>::reverse_iterator rit; 
+                                    // Record the fake solution in a right
+                                    // order.
+                                    for (rit = tmpFakeSolution.rbegin(); rit != tmpFakeSolution.rend(); ++rit) {
+                                        m_FakeSolution.push_back(*rit);
+                                    }
+                                }
                             }
 
                             // heap now unsorted
@@ -361,6 +388,7 @@ namespace opencog
 
                         m_ClosedList.push_back( n );
 
+                        
                     } // end else (not goal so expand)
 
                     return m_State; // Succeeded bool is false at this point.
@@ -549,6 +577,10 @@ namespace opencog
 #endif
 
                 }
+                
+                std::vector<UserState> GetFakeSolution() {
+                    return m_FakeSolution;
+                }
 
             private: // methods
 
@@ -650,6 +682,8 @@ namespace opencog
 #endif
                 }
 
+                
+
             private: // data
 
                 // Heap (simple vector but used as a heap, cf. Steve Rabin's game gems article)
@@ -689,6 +723,11 @@ namespace opencog
 
                 bool m_CancelRequest;
 
+
+                // Customized: add a feature that even if a solution is failed
+                // to be found, a path that can get closed to the goal can still 
+                // be recorded.
+                std::vector<UserState> m_FakeSolution;
             };
 
     } // spatial

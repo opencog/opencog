@@ -29,7 +29,8 @@ using namespace opencog;
 using namespace opencog::spatial;
 
 AStar3DController::AStar3DController():
-        astarsearch(new AStarSearch<MapSearchNode>(MAX_SEARCH_NODES)) {}
+        astarsearch(new AStarSearch<MapSearchNode>(MAX_SEARCH_NODES)),
+        useFakeSolution(false) {}
 
 AStar3DController::~AStar3DController()
 {
@@ -107,6 +108,9 @@ unsigned int AStar3DController::findPath()
 
     else if ( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_FAILED ) {
         cout << "Search terminated. Did not find goal state\n";
+
+        useFakeSolution = true;
+        fakeSolution = astarsearch->GetFakeSolution();
     }
 
     // Display the number of loops the search went through
@@ -180,47 +184,84 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
 {
     vector<spatial::Point3D> solution_points;
     spatial::GridPoint gp;
-    MapSearchNode *previous_node, *node;
     Map *map = MapSearchNode::map;
 
-    previous_node = node = astarsearch->GetSolutionStart();
+    if (!useFakeSolution) {
+        MapSearchNode *previous_node, *node;
+        previous_node = node = astarsearch->GetSolutionStart();
 
-    while (true) {
-        node = astarsearch->GetSolutionNext();
-        if (!node) {
-            break;
-        }
+        while (true) {
+            node = astarsearch->GetSolutionNext();
+            if (!node) {
+                break;
+            }
 
+            gp.first = previous_node->x;
+            gp.second = previous_node->y;
+
+            spatial::Point point2d;
+
+            if (map->gridIllegal(gp)) {
+                // Adjust the precise coordinate of obstacle.
+                spatial::ObjectID id = map->getTallestObjectInGrid(gp);
+                point2d = map->centerOf(id);
+            } else {
+                // If not an obstacle, just get its unsnapped position.
+                point2d = map->unsnap(gp);
+            }
+
+            //@note the height here is *not* the altitude, but indeed the difference
+            //of altitudes between two continuous points. 
+            double height = node->z - previous_node->z;
+            spatial::Point3D point3d(point2d.first, point2d.second, height);
+
+            solution_points.push_back(point3d);
+            previous_node = node;
+        };
+
+        // Push back the final goal point.
         gp.first = previous_node->x;
         gp.second = previous_node->y;
+        spatial::Point point2d = map->unsnap(gp);
+        // We never need to jump at the goal point. 
+        spatial::Point3D goal(point2d.first, point2d.second, 0.0);
+        solution_points.push_back(goal);
+    } else {
+        if (fakeSolution.empty()) return solution_points;
+        std::vector<MapSearchNode>::iterator prev_node, node;
+        prev_node = node = fakeSolution.begin();
+        for (++node; node != fakeSolution.end(); node++) {
+            gp.first = prev_node->x;
+            gp.second = prev_node->y;
 
-        spatial::Point point2d;
+            spatial::Point point2d;
 
-        if (map->gridIllegal(gp)) {
-            // Adjust the precise coordinate of obstacle.
-            spatial::ObjectID id = map->getTallestObjectInGrid(gp);
-            point2d = map->centerOf(id);
-        } else {
-            // If not an obstacle, just get its unsnapped position.
-            point2d = map->unsnap(gp);
+            if (map->gridIllegal(gp)) {
+                // Adjust the precise coordinate of obstacle.
+                spatial::ObjectID id = map->getTallestObjectInGrid(gp);
+                point2d = map->centerOf(id);
+            } else {
+                // If not an obstacle, just get its unsnapped position.
+                point2d = map->unsnap(gp);
+            }
+
+            //@note the height here is *not* the altitude, but indeed the difference
+            //of altitudes between two continuous points. 
+            double height = node->z - prev_node->z;
+            spatial::Point3D point3d(point2d.first, point2d.second, height);
+
+            solution_points.push_back(point3d);
+            prev_node = node;
         }
-
-        //@note the height here is *not* the altitude, but indeed the difference
-        //of altitudes between two continuous points. 
-        double height = node->z - previous_node->z;
-        spatial::Point3D point3d(point2d.first, point2d.second, height);
-
-        solution_points.push_back(point3d);
-        previous_node = node;
-    };
-
-    // Push back the final goal point.
-    gp.first = previous_node->x;
-    gp.second = previous_node->y;
-    spatial::Point point2d = map->unsnap(gp);
-    // We never need to jump at the goal point. 
-    spatial::Point3D goal(point2d.first, point2d.second, 0.0);
-    solution_points.push_back(goal);
+        // Push back the final goal point.
+        gp.first = prev_node->x;
+        gp.second = prev_node->y;
+        spatial::Point point2d = map->unsnap(gp);
+        // We never need to jump at the goal point. 
+        spatial::Point3D goal(point2d.first, point2d.second, 0.0);
+        solution_points.push_back(goal);
+        useFakeSolution = false;
+    }
 
     return solution_points;
 }

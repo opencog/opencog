@@ -751,10 +751,10 @@ bool PAIWorldWrapper::buildGotoPlan( const spatial::Point3D& position, float cus
         
         get3DWaypoints( startPoint3d, endPoint, actions );
 
-        if ( !_hasPlanFailed ) {
+        //if ( !_hasPlanFailed ) {
             //clearPlan( actions, startPoint, endPoint );
-            return createNavigationPlanAction( actions, false, Handle::UNDEFINED, customSpeed );
-        } // if
+        return createNavigationPlanAction( actions, false, Handle::UNDEFINED, customSpeed );
+        //} // if
     } else {
         std::vector<spatial::Point> actions;
 

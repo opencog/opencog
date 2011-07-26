@@ -103,7 +103,9 @@ namespace opencog
             vector<spatial::Point3D> getShortestCalculatedPath();
 
             //MapSearchNode nodeStart, nodeEnd;
-
+        private:
+            bool useFakeSolution;
+            vector<MapSearchNode> fakeSolution;
         };
 
     } // spatial

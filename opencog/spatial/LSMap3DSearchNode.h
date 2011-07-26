@@ -63,6 +63,10 @@ namespace opencog
             LSMap3DSearchNode(GridPoint, double deltaHeight);
 
             static void setMap(Map *map);
+
+            /**
+             * Estimate the distance to goal from current node.
+             */
             float GoalDistanceEstimate(const LSMap3DSearchNode &nodeGoal);
             bool IsGoal(const LSMap3DSearchNode &nodeGoal );
             bool GetSuccessors(AStarSearch<LSMap3DSearchNode> *astarsearch, LSMap3DSearchNode *parent_node );
