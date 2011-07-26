@@ -49,14 +49,23 @@ namespace opencog
         typedef std::map<Handle, std::vector<double> > AtomEmbedding;
         typedef std::map<Type, HandleSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
+        typedef std::map<Type, std::pair<AtomEmbedding, AtomEmbedding> >
+            AsymAtomEmbedMap; //For asymmetric embeddings: The first of the pair
+                              //is for links like (inheritance atom pivot)
+                              //the second is for (inheritance pivot atom)
         typedef std::map<Type, CoverTree<CoverTreePoint> > EmbedTreeMap;
+        typedef std::map<Type, std::pair<CoverTree<CoverTreePoint>,
+                                         CoverTree<CoverTreePoint> > >
+            AsymEmbedTreeMap;
         typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
             ClusterSeq; //the vector of doubles is the centroid of the cluster
         
         AtomSpace* as;
         AtomEmbedMap atomMaps;
+        AsymAtomEmbedMap asymAtomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
         EmbedTreeMap embedTreeMap;
+        AsymEmbedTreeMap asymEmbedTreeMap;
         std::map<Type,int> dimensionMap;//Stores the number of dimensions that
                                         //each link type is embedded under
 
@@ -68,100 +77,10 @@ namespace opencog
          *
          * @param h Handle to be added as a pivot
          * @param linkType Type of link for which h should be added as a pivot
+         * @param backward For asymmetric link types, we need to embed twice,
+         * once with backward=true and once with backward=false
          */
-        void addPivot(const Handle& h, const Type& linkType);
-
-        /**
-         * Returns the highest weight path between the handles following
-         * links of type linkType, where path weight is the product of
-
-         * (tv.strength*tv.confidence) of the links in the path. ie if
-         * (l1, l2,...ln) are the links in the path, then the path weight is
-         * defined as
-         * (l1.tv.strength*l1.tv.confidence)*(l2.tv.strength*l2.tv.confidence)*
-         * ...(ln.tv.strength*ln.tv.confidence).
-         * The greater the path weight, the closer the two nodes are.
-         *
-         * Path weight will always be between 0 and 1. Returns 0 if no path
-         * exists and 1 if startHandle == targetHandle.
-         *
-         * Uses a modified version of Dijkstra's algorithm.
-         *
-         * @param startHandle The starting handle for pathfinding
-         * @param targetHandle The target handle for pathfinding
-         * @param linkType The type of link to follow in pathfinding
-         *
-         * @return The highest weight path from startHandle to targetHandle
-         * following only links of type linkType, where path weight is defined
-         * above.
-         *
-         * @todo implement some kind of threshold or limit (as an optional 4th 
-         * parameter) after which two nodes are considered unconnected.
-         */
-        double findHighestWeightPath(const Handle& startHandle,
-                                     const Handle& targetHandle,
-                                     const Type& linkType);
-
-    public:
-        const char* id();
-
-        DimEmbedModule(AtomSpace* atomSpace);
-        DimEmbedModule();
-        virtual ~DimEmbedModule();
-        virtual void init();
-
-        /**
-         * Returns a vector of doubles corresponding to the handle h's
-         * embedding of link type l. Throws an exception if no embedding
-         * exists yet for type l. Calculates the vector if an embedding exists
-         * (ie pivots are picked) but handle h has not been calculated yet.
-         *
-         * @param h The handle whose embedding vector is returned
-         * @param l The link type for which h's embedding vector is wanted
-         *
-         * @return A vector of doubles corresponding to handle h's distance
-         * from each of the pivots.
-         */
-        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l);
-
-        /**
-         * Returns the list of pivots for the embedding of type l.
-         */
-        const HandleSeq& getPivots(const Type& l);
-        /**
-         * Creates an AtomEmbedding of the atomspace using linkType
-         * and registers it with the AtomEmbedMap. If an AtomEmbedding
-         * already exists for the supplied link type it will replace
-         * it.
-         *
-         * @param linkType The type of link for which a dimensional embedding
-         * is wanted.
-         * @param numDimensions The number of dimensions to embed the atomspace
-         * in.
-         *
-         * @todo improve pivot-picking technique: currently pivots are just
-         * picked as the farthest from the current pivots, but connectedness
-         * should be incorporated to avoid picking pivots with no links
-         */
-        void embedAtomSpace(const Type& linkType, const int numDimensions=5);
-
-        
-        /**
-         * Clears the AtomEmbedMap and PivotMap for linkType, also
-         * decreasing the VLTI of any pivots by 1.
-         *
-         * @param linkType Type of link for which the embedding should be
-         * cleared.
-         */
-        void clearEmbedding(const Type& linkType);
-        
-        /**
-         * Logs a string representation of of the (Handle,vector<Double>)
-         * pairs for linkType. This will have as many entries as there are nodes
-         * in the atomspace (unless nodes have been added since the embedding).
-         * Just used for testing/debugging.
-         */
-        void logAtomEmbedding(const Type& linkType);
+        void addPivot(const Handle& h, const Type& linkType, bool backward=false);
 
         /**
          * Adds node to the appropriate AtomEmbedding in the AtomEmbedMap.
@@ -205,6 +124,75 @@ namespace opencog
          * @param linkType Type of link (which embedding to alter)
          */
         void addLink(const Handle& h, const Type& linkType, AtomSpaceImpl* a);
+        /**
+         * For adding symmetric links after the atomspace has been embedded. See
+         * addLink.
+         */
+        void symAddLink(const Handle& h, const Type& linkType, AtomSpaceImpl* a);
+        /**
+         * For adding asymmetric links after the atomspace has been embedded.
+         * See addLink.
+         */
+        void asymAddLink(const Handle& h, const Type& linkType, AtomSpaceImpl* a);
+    public:
+        const char* id();
+
+        DimEmbedModule(AtomSpace* atomSpace);
+        DimEmbedModule();
+        virtual ~DimEmbedModule();
+        virtual void init();
+
+        /**
+         * Returns a vector of doubles corresponding to the handle h's
+         * embedding of link type l. Throws an exception if no embedding
+         * exists yet for type l. Calculates the vector if an embedding exists
+         * (ie pivots are picked) but handle h has not been calculated yet.
+         *
+         * @param h The handle whose embedding vector is returned
+         * @param l The link type for which h's embedding vector is wanted
+         * @return A vector of doubles corresponding to handle h's distance
+         * from each of the pivots.
+         */
+        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l);
+
+        /**
+         * Returns the list of pivots for the embedding of type l.
+         */
+        const HandleSeq& getPivots(const Type& l);
+
+        /**
+         * Creates an AtomEmbedding of the atomspace using linkType
+         * and registers it with the AtomEmbedMap. If an AtomEmbedding
+         * already exists for the supplied link type it will replace
+         * it.
+         *
+         * @param linkType The type of link for which a dimensional embedding
+         * is wanted.
+         * @param numDimensions The number of dimensions to embed the atomspace
+         * in.
+         *
+         * @todo improve pivot-picking technique: currently pivots are just
+         * picked as the farthest from the current pivots, but connectedness
+         * should be incorporated to avoid picking pivots with no links
+         */
+        void embedAtomSpace(const Type& linkType, const int numDimensions=5);
+
+        /**
+         * Clears the AtomEmbedMap and PivotMap for linkType, also
+         * decreasing the VLTI of any pivots by 1.
+         *
+         * @param linkType Type of link for which the embedding should be
+         * cleared.
+         */
+        void clearEmbedding(const Type& linkType);
+        
+        /**
+         * Logs a string representation of of the (Handle,vector<Double>)
+         * pairs for linkType. This will have as many entries as there are nodes
+         * in the atomspace (unless nodes have been added since the embedding).
+         * Just used for testing/debugging.
+         */
+        void logAtomEmbedding(const Type& linkType);
         
         /**
          * Returns true if a dimensional embedding exists for linkType l

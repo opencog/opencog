@@ -45,6 +45,7 @@ typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
 DECLARE_MODULE(DimEmbedModule)
 
 DimEmbedModule::DimEmbedModule(AtomSpace* atomSpace) {
+    logger().info("[DimEmbedModule] constructor");
     this->as=atomSpace;
     as->atomSpaceAsync->
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal,
@@ -155,13 +156,13 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
     }
 }
 
-void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){   
+void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool backward){   
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-
-    as->incVLTI(h);//We don't want pivot atoms to be forgotten...
+    bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
+    if(!backward) as->incVLTI(h);//We don't want pivot atoms to be forgotten...
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
 
@@ -200,24 +201,36 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
         if (distMap[u]==0) { break;}
         HandleSeq newLinks = as->getIncoming(u);
         for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
-            //ignore links that aren't of type linkType
-            if(as->getType(*it)!=linkType) continue;
+            //ignore links that aren't a subtype of type linkType
+            if(!classserver().isA(as->getType(*it),linkType));
             TruthValuePtr linkTV = as->getTV(*it);
             HandleSeq newNodes = as->getOutgoing(*it);
-            for(HandleSeq::iterator it2=newNodes.begin();
-                it2!=newNodes.end(); ++it2) {
+            HandleSeq::iterator it2=newNodes.begin();
+            if(!symmetric && !backward) {
+                if(*it2==u) ++it2;
+                else continue;
+            }
+            if(!symmetric && backward) {
+                if(*it2==u) {
+                    continue;
+                } else {
+                    newNodes.clear();
+                    newNodes.push_back(*it2);
+                    it2=newNodes.begin();
+                }
+            }
+            for(;it2!=newNodes.end(); ++it2) {
+                if(!as->isNode(*it2)) continue;
                 double alt =
                     distMap[u] * linkTV->getMean() * linkTV->getConfidence();
                 double oldDist=distMap[*it2];
                 //If we've found a better (higher weight) path, update distMap
                 if(alt>oldDist) {
                     pQueue_t::iterator it3;
-
                     std::pair<pQueue_t::iterator, pQueue_t::iterator>
                         itPair = pQueue.equal_range(oldDist);
-
                     for(it3=itPair.first;it3!=itPair.second;++it3) {
-                         if(it3->second==*it2) {pQueue.erase(it3); break;}
+                        if(it3->second==*it2) {pQueue.erase(it3); break;}
                     }
                     pQueue.insert(std::pair<double, Handle>(alt,*it2));
                     distMap[*it2]=alt;
@@ -227,7 +240,12 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
     }
     for(std::map<Handle, double>::iterator it = distMap.begin();
             it != distMap.end(); ++it) {
-        atomMaps[linkType][it->first].push_back(it->second);
+        if(symmetric) {
+            atomMaps[linkType][it->first].push_back(it->second);
+        } else {
+            if(backward) asymAtomMaps[linkType].second[it->first].push_back(it->second);
+            else asymAtomMaps[linkType].first[it->first].push_back(it->second);
+        }
     }
 }
 
@@ -240,7 +258,7 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
             classserver().getTypeName(linkType).c_str());
     //logger().info("starting embedding");
     clearEmbedding(linkType);
-
+    bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
     // Scheme wrapper doesn't deal with unsigned ints, so double check it's not
     // negative, or zero for that matter
     unsigned int numDimensions = 5;
@@ -255,7 +273,12 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     Handle bestChoice = nodes.back();
 
     while((pivots.size() < (unsigned int) numDimensions) && (!nodes.empty())){
-        addPivot(bestChoice, linkType);
+        if(symmetric) {
+            addPivot(bestChoice, linkType);
+        } else {
+            addPivot(bestChoice, linkType, false);
+            addPivot(bestChoice, linkType, true);
+        }
         logger().info("Pivot %d picked", pivots.size());
         nodes.erase(std::find(nodes.begin(), nodes.end(), bestChoice));
 
@@ -264,7 +287,9 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
         //pick the next pivot to maximize its distance from its closest pivot
         //(maximizing distance = minimizing path weight)
         for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-            std::vector<double>& eV = atomMaps[linkType][*it];
+            std::vector<double> eV;
+            if(symmetric) eV = atomMaps[linkType][*it];
+            else eV = asymAtomMaps[linkType].first[*it];
             double testChoiceWeight = *std::max_element(eV.begin(), eV.end());
             if(testChoiceWeight < bestChoiceWeight) {
                 bestChoice = *it;
@@ -276,14 +301,30 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     //cover tree for them.
     //since every element of each embedding vector ranges from 0 to 1, no
     //two elements will have distance greater than numDimensions.
-    CoverTree<CoverTreePoint>& cTree =
-        embedTreeMap.insert(make_pair(linkType,CoverTree<CoverTreePoint>(numDimensions+.1))).first->second;
-    AtomEmbedding& aE = atomMaps[linkType];
-    AtomEmbedding::const_iterator it = aE.begin();
-    for(;it!=aE.end();++it) {
-        cTree.insert(CoverTreePoint(it->first,it->second));
+    if(symmetric) {
+        CoverTree<CoverTreePoint>& cTree =
+            embedTreeMap.insert(make_pair(linkType,CoverTree<CoverTreePoint>(numDimensions+.1))).first->second;
+        AtomEmbedding& aE = atomMaps[linkType];
+        AtomEmbedding::const_iterator it = aE.begin();
+        for(;it!=aE.end();++it) {
+            cTree.insert(CoverTreePoint(it->first,it->second));
+        }
+    } else {
+        std::pair<CoverTree<CoverTreePoint>, CoverTree<CoverTreePoint> >& cTrees
+            = asymEmbedTreeMap.insert(make_pair(linkType,
+                                            make_pair(CoverTree<CoverTreePoint>(numDimensions+.1), CoverTree<CoverTreePoint>(numDimensions+.1)))).first->second;
+        std::pair<AtomEmbedding, AtomEmbedding>& aE = asymAtomMaps[linkType];
+        AtomEmbedding& aE1 = aE.first;
+        AtomEmbedding::const_iterator it = aE1.begin();
+        for(;it!=aE1.end();++it) {
+            cTrees.first.insert(CoverTreePoint(it->first,it->second));
+        }
+        AtomEmbedding& aE2 = aE.second;
+        it = aE2.begin();
+        for(;it!=aE2.end();++it) {
+            cTrees.second.insert(CoverTreePoint(it->first,it->second));
+        }
     }
-    
     //logger().info("done embedding");
 }
 
@@ -364,7 +405,14 @@ void DimEmbedModule::addLink(const Handle& h,
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-    EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);
+    bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
+    if(symmetric) symAddLink(h,linkType,a);
+    else asymAddLink(h,linkType,a);
+}
+void DimEmbedModule::symAddLink(const Handle& h,
+                                const Type& linkType,
+                                AtomSpaceImpl* a) {
+    EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);    
     OC_ASSERT(treeMapIt!=embedTreeMap.end());
     CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
     int dim = dimensionMap[linkType];
@@ -389,6 +437,52 @@ void DimEmbedModule::addLink(const Handle& h,
         }
         if(changed) cTree.insert(CoverTreePoint(aEit->first,aEit->second));
     }
+}
+
+void DimEmbedModule::asymAddLink(const Handle& h,
+                                 const Type& linkType,
+                                 AtomSpaceImpl* a) {
+    AsymEmbedTreeMap::iterator treeMapIt = asymEmbedTreeMap.find(linkType);    
+    OC_ASSERT(treeMapIt!=asymEmbedTreeMap.end());
+    CoverTree<CoverTreePoint>& cTreeForw = treeMapIt->second.first;
+    CoverTree<CoverTreePoint>& cTreeBackw = treeMapIt->second.second;
+    int dim = dimensionMap[linkType];
+    AtomEmbedding& aEForw = asymAtomMaps[linkType].first;
+    AtomEmbedding& aEBackw = asymAtomMaps[linkType].second;
+    const TruthValue& linkTV = a->getTV(h);        
+    double weight = linkTV.getConfidence()*linkTV.getMean();
+    HandleSeq nodes = a->getOutgoing(h);
+    Handle source = nodes.front();
+    HandleSeq::iterator it=nodes.begin();
+    ++it;
+    std::vector<double>& sourceVecForw = aEForw[source];
+    const std::vector<double>& sourceVecBackw = aEBackw[source];
+    bool sourceChanged=false;
+    for(;it!=nodes.end();++it) {
+        bool changed=false;
+        std::vector<double>& vecBackw = aEBackw[*it];
+        for(int i=0; i<dim; ++i) {
+            if(vecBackw[i]<weight*sourceVecBackw[i]) {
+                if(!changed) {
+                    changed=true;
+                    cTreeBackw.remove(CoverTreePoint(*it,vecBackw));
+                }
+                vecBackw[i]=weight*sourceVecBackw[i];
+            }
+        }
+        if(changed) cTreeBackw.insert(CoverTreePoint(*it,vecBackw));
+        const std::vector<double>& vecForw = aEForw[*it];
+        for(int i=0; i<dim; ++i) {
+            if(sourceVecForw[i]<weight*vecForw[i]) {
+                if(!sourceChanged) {
+                    sourceChanged=true;
+                    cTreeForw.remove(CoverTreePoint(source,sourceVecForw));
+                }
+                sourceVecForw[i]=weight*vecForw[i];
+            }
+        }
+    }
+    if(sourceChanged) cTreeForw.insert(CoverTreePoint(source, sourceVecForw));
 }
 
 void DimEmbedModule::clearEmbedding(const Type& linkType){
@@ -530,8 +624,8 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npa
         }
     }
     int transpose;
-    if(pivotWise) transpose=0;
-    else transpose=1;
+    if(pivotWise) transpose=1;
+    else transpose=0;
     //clusterid[i]==j will indicate that handle i belongs in cluster j
     ::kcluster(numClusters, numVectors, numDimensions, embedMatrix,
                mask, weight, transpose, npass, 'a', 'e', clusterid, &error, &ifound);
@@ -815,7 +909,9 @@ void DimEmbedModule::handleAddSignal(AtomSpaceImpl* a, Handle h) {
     }
     else {//h is a link
         for(it=atomMaps.begin();it!=atomMaps.end();it++) {
-            addLink(h,it->first,a);
+            //if the new link is a subtype of an existing embedding, add it
+            if(classserver().isA(a->getType(h),it->first))
+                addLink(h,it->first,a);
         }
     }
 }
