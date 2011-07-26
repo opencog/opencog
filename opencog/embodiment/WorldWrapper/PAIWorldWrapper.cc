@@ -880,7 +880,6 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
             // The agent need to jump only when the delta height is larger than
             // a threshold, which is the minimum delta height used in AStar 3D
             // pathfinding.
-            double minJumpHeight = opencog::config().get_double("ASTAR3D_DELTA_HEIGHT");
             if (std::abs(it_point->get<2>()) > 0.1) {
                 action = PetAction(ActionType::JUMP_TOWARD());
                 action.addParameter(ActionParameter("direction",
