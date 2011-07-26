@@ -122,7 +122,7 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 void occam_contin_bscore::set_complexity_coef(double variance,
                                               double alphabet_size) {
     if(occam)
-        complexity_coef = log((double)alphabet_size) * 2 * variance;
+        complexity_coef = - log((double)alphabet_size) * 2 * variance;
 }
 
 occam_ctruth_table_bscore::occam_ctruth_table_bscore(const ctruth_table& _ctt,
@@ -132,7 +132,7 @@ occam_ctruth_table_bscore::occam_ctruth_table_bscore(const ctruth_table& _ctt,
     : ctt(_ctt), rng(_rng) {
     occam = p > 0 && p < 0.5;
     if(occam)
-        complexity_coef = - log((double)alphabet_size) / log(p/(1-p));
+        complexity_coef = log((double)alphabet_size) / log(p/(1-p));
 }
 
 behavioral_score occam_ctruth_table_bscore::operator()(const combo_tree& tr) const
