@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string>
 #include <time.h>
-#ifdef WIN32
+#ifdef WIN32_NOT_UNIX
 #include <winsock2.h>
 #else
 #include <sys/time.h>

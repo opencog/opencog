@@ -1,5 +1,5 @@
 /*
- * opencog/util/time.h
+ * opencog/util/octime.h
  *
  * Copyright (C) 2011 OpenCog Foundation
  * All Rights Reserved
