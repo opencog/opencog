@@ -523,10 +523,17 @@
 ;)
 
 ; TODO: very file rules only for testing dialog_system
-;(add_rule (stv 1.0 1.0) GetFoodGoal 
-;    (add_action (SpeechActSchemaNode "AskForFood") )
-;    NULL_PRECONDITION
-;)
+(add_rule (stv 1.0 1.0) GetFoodGoal
+    (add_action (SpeechActSchemaNode "AskForFood") )
+    NULL_PRECONDITION
+)
+
+(add_rule (stv 1.0 1.0) GetFoodGoal
+    (SequentialAndLink
+        (add_action (GroundedSchemaNode "lick") ) 
+    )    
+    NULL_PRECONDITION
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;

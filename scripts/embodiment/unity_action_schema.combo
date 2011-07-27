@@ -34,6 +34,8 @@ drop(0) := drop
 turn_to_face(1) := turn_to_face(#1)
 
 say(2) := say(#1 #2)
+lick(0) := lick
+lick_at(1) := lick_at(#1)
 
 grab(1) := grab(#1)
 eat(1) := eat(#1)
