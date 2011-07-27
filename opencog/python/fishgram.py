@@ -20,11 +20,11 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = ForestExtractor(atomspace,  None)
         # settings
-        #self.min_embeddings = 2
+        self.min_embeddings = 2
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 1e35 # 600
+        self.max_per_layer = 10 # 1e35 # 600
 
     def run(self):
         self.forest.extractForest()
@@ -50,16 +50,18 @@ class Fishgram:
 #            print "support =", self.min_embeddings
 #            self.implications()
 #            self.min_embeddings -= 5
-        while self.min_frequency > 0.01:
+        while self.min_frequency > 0.00000000001:
             print '\n\x1B[1;32mfreq =', self.min_frequency, '\x1B[0m'
             self.implications()
             self.min_frequency /= 2
 
     def implications(self):
-        self.forest.extractForest()
-
         layers = []
         for layer in self.closed_bfs_layers():
+            
+            for conj, embs in layer:
+                print pp(conj), pp(embs)
+            
             layers.append(layer)
             if len(layers) >= 2:
                 self.output_implications_for_last_layer(layers)
@@ -72,6 +74,7 @@ class Fishgram:
     def closed_bfs_extend_layer(self, prev_layer):
         next_layer_iter = self.extensions(prev_layer)
         return self.prune_frequency(next_layer_iter)
+        return next_layer_iter
 
     def closed_bfs_layers(self):
         """Main function to run the breadth-first search. It yields results one layer at a time. A layer
@@ -107,6 +110,18 @@ class Fishgram:
                             ret.add(tree_id)
          
         return ret
+
+    def extensions_simple(self, prev_layer):
+        new_layer = []
+        
+        for (prev_conj,  prev_embeddings) in prev_layer:
+            target = prev_conj + (new_var(), )
+            
+            matches = find_matching_conjunctions(target,fish.forest.unique_trees)
+            
+            for m in matches:
+                embs = self.forest.lookup_embeddings(m.conj)
+                new_layer.append( (m.conj, embs) )
 
     def extensions(self,  prev_layer):
         """Find all extensions for that fragment. An extension means adding one link to a particular
@@ -318,6 +333,7 @@ class Fishgram:
         layer = layers[-1]
         prev_layer = layers[-2]
         for (conj, embs) in layer:
+
             vars = self.get_varlist(conj)
             #print [str(var) for var in vars]
             
@@ -357,51 +373,173 @@ class Fishgram:
                 # Can also measure probability of conclusion by itself
                 
                 count_conj = len(embs)*1.0
-                # Called the "confidence" in rule learning literature
-                freq =  count_conj / len(premises_embs)
+                
+                self.make_implication(premises, conclusion, len(premises_embs), count_conj)
+
+    def make_implication(self, premises, conclusion, premises_support, conj_support):
+        # Called the "confidence" in rule learning literature
+        freq =  conj_support*1.0 / premises_support
 #                count_unconditional = len(conclusion_embs)
-#                surprise = count_conj / count_unconditional
+#                surprise = conj_support / count_unconditional
+        
+        if freq > 0.00: # 0.05:
+            assert len(premises)
+            
+            # Convert it into a Psi Rule. Note that this will remove variables corresponding to the TimeNodes, but
+            # the embedding counts will still be equivalent.
+            tmp = self.make_psi_rule(premises, conclusion)
+            #tmp = (premises, conclusion)
+            if tmp:
+                (premises, conclusion) = tmp
                 
-                # haxx: ignore the bug and still produce the rest of the outputs.
-                if count_conj > len(premises_embs):
-                    sys.stderr.write("[embedding glitch?]\n")
-                    print pp(conj)
-                    print pp(premises)
-                    print pp(embs)
-                    print pp(premises_embs)
+                vars = self.get_varlist( premises+(conclusion,) )
+                
+                andLink = tree('AndLink',
+                                    list(premises)) # premises is a tuple remember
+                
+                #print andLink
+
+                qLink = tree('AverageLink', 
+                                tree('ListLink', vars), 
+                                tree('ImplicationLink',
+                                    andLink,
+                                    conclusion))
+                a = atom_from_tree(qLink, self.atomspace)
+                
+                a.tv = TruthValue( freq , premises_support )
+                #count = len(embs)
+                #eval_a = atom_from_tree(evalLink, self.atomspace)
+                #eval_a.tv = TruthValue(1, count)
+                
+                print 'make_implication => %s' % (a,)
+        else:
+            print 'freq = %s' % freq
+        
+        assert conj_support <= premises_support
+
+    def make_psi_rule(self, premises, conclusion):
+        tr = tree
+        a = self.atomspace.add
+        t = types
+        
+        time1 = new_var()
+        time2 = new_var()
+        action = new_var()
+        goal = new_var()
+        
+        action_template = tr('AtTimeLink', time1,
+                                tr('EvaluationLink',
+                                    a(t.PredicateNode, name='actionDone'),
+                                    tr('ListLink', 
+                                       action
+                                     )
+                                )
+                            )
+        seq_and_template = tr('SequentialAndLink', time1, time2)
+        increase_template = tr('AtTimeLink',
+                     time2,
+                     tr('EvaluationLink',
+                                a(t.PredicateNode, name='increased'),
+                                tr('ListLink', goal)
+                                )
+                     )
+
+        ideal_premises = (action_template, seq_and_template)
+        ideal_conclusion = increase_template
+
+        s2 = unify(ideal_premises, premises, {})
+        print 'make_psi_rule: s2=%s' % (s2,)
+        s3 = unify(ideal_conclusion, conclusion, s2)
+        print 'make_psi_rule: s3=%s' % (s3,)
+        
+        if s3 != None:
+            #premises2 = [x for x in premises if not unify (seq_and_template, x, {})]
+            action_psi = s3[action]
+            # TODO should probably record the EvaluationLink in the increased predicate.
+            goal_pred = s3[goal]
+            goal_eval =     tr('EvaluationLink',
+                                goal_pred, 
+                                tr('ListLink')
+                            )
+                            
+            premises2 = (action_psi, )
+
+            return premises2, goal_eval
+        else:
+            return None
+
+    def lookup_causal_patterns(self):
+        tr = tree
+        a = self.atomspace.add
+        t = types
+        
+        time1 = new_var()
+        time2 = new_var()
+        action = new_var()
+        goal = new_var()
+        
+        action_template = tr('AtTimeLink', time1,
+                                tr('EvaluationLink',
+                                    a(t.PredicateNode, name='actionDone'),
+                                    tr('ListLink', 
+                                       action
+                                     )
+                                )
+                            )
+        seq_and_template = tr('SequentialAndLink', time1, time2)
+        increase_template = tr('AtTimeLink',
+                     time2,
+                     tr('EvaluationLink',
+                                a(t.PredicateNode, name='increased'),
+                                tr('ListLink', goal)
+                                )
+                     )
+
+        ideal_premises = (action_template, seq_and_template)
+        ideal_conclusion = increase_template
+        
+        self.causality_template = (action_template, seq_and_template, increase_template)
+        
+        # Try to find suitable patterns and then use them.
+        print pp(self.causality_template)
+        matches = find_matching_conjunctions(self.causality_template, self.forest.unique_trees)
+        
+        for m in matches:
+#            print pp(m.conj)
+#            print pp(m.subst)
+#            embs = self.forest.lookup_embeddings(m.conj)
+#            print pp(embs)
+            yield m.conj
+
+    def make_all_psi_rules(self):
+        for conj in self.lookup_causal_patterns():
+            vars = self.get_varlist(conj)
+            print "make_all_psi_rules: %s" % (pp(conj),)
+            
+            for (premises, conclusion) in self._split_conj_into_rules(conj):
+                # Filter it now since lookup_embeddings is slow
+                if self.make_psi_rule(premises, conclusion) == None:
                     continue
+   
+                count_conj = len(self.forest.lookup_embeddings(conj))
+                count_premises = len(self.forest.lookup_embeddings(premises))
                 
-                if freq > 0.05:
-                    assert len(premises)
-                    
-                    # Convert it into a Psi Rule. Note that this will remove variables corresponding to the TimeNodes, but
-                    # the embedding counts will still be equivalent.
-                    tmp = self.make_psi_rule(premises, conclusion)
-                    if tmp:
-                        (premises, conclusion) = tmp
-                        
-                        andLink = tree('AndLink',
-                                            list(premises)) # premises is a tuple remember
-                        
-                        #print andLink
-
-                        qLink = tree('AverageLink', 
-                                        tree('ListLink', vars), 
-                                        tree('ImplicationLink',
-                                            andLink,
-                                            conclusion))
-                        a = atom_from_tree(qLink, self.atomspace)
-                        
-                        a.tv = TruthValue( freq , len(premises_embs) )
-                        #count = len(embs)
-                        #eval_a = atom_from_tree(evalLink, self.atomspace)
-                        #eval_a.tv = TruthValue(1, count)
-                        
-                        print a
+                print "make_implication(premises=%s, conclusion=%s, count_premises=%s, count_conj=%s)" % (premises, conclusion, count_premises, count_conj)
                 
-                assert count_conj <= len(premises_embs)
+                self.make_implication(premises, conclusion, count_premises, count_conj)
+    
+    def _split_conj_into_rules(self, conj):
+        for i in xrange(0, len(conj)):
+            conclusion = conj[i]
+            premises = conj[:i] + conj[i+1:]
+            
+            # Let's say P implies Q. To keep things simple, P&Q must have the same number of variables as P.
+            # In other words, the conclusion can't add extra variables. This would be equivalent to proving an
+            # AverageLink (as the conclusion of the Implication).
+            if (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):
+                yield (premises, conclusion)
 
-    def make_psi_rule(self, premises_, conclusion_):
+    def make_psi_rule_alt(self, premises_, conclusion_):
         """Looks for a suitable combination of conditions to make a Psi Rule. Returns premises and conclusions for the Psi Rule."""
         # Remove the (one!) SequentialAnd
         # convert AtTime by itself
@@ -416,14 +554,24 @@ class Fishgram:
         time_template = tree('AtTimeLink', -1, -2) # 1 is a TimeNode, 2 is an EvaluationLink
         action_template = tree('EvaluationLink',
                                                 a(t.PredicateNode, name='actionDone'),
-                                                tree('ListLink', -1)) # 1 is the ExecutionLink for the action
+                                                tree('ListLink', -1)) # -1 is the ExecutionLink for the action
+        
+#        res = tree('AtTimeLink',
+#             time2_atom, 
+#             tree('EvaluationLink',
+#                        a(t.PredicateNode, name='increase'),
+#                        tree('ListLink', -3)
+#                        )
+#             )
+        
+        import pdb; pdb.set_trace()
         
         # Can currently only handle one thing following another, not a series (>2)
         seq_ands_prem = [ x for x in premises if unify(seq_and_template, x, {}) != None ]
         actions_prem = [ x for x in premises if unify(action_template, x, {}) != None ]
-        conc_is_seq_and = unify(seq_and_template, conclusion, {})  != None
+        conc_is_atTime = unify(time_template, conclusion, {}) != None
 
-        if 1 == len( seq_ands_prem ) and 1 == len(actions_prem) and not conc_is_seq_and:
+        if 1 == len( seq_ands_prem ) and 1 == len(actions_prem): # and conc_is_atTime:
             premises.remove(seq_ands_prem[0])
             
             premises = [ self.replace(time_template, x, -2) for x in premises ]
@@ -480,11 +628,14 @@ class Fishgram:
         return len(small_embs) * implied_cases
 
 def make_seq(atomspace):
-    # unit of timestamps is 0.1 second so multiply by 10
-    interval = 10* 5
+    # unit of timestamps is 0.01 second so multiply by 10
+    interval = 100* 30
     times = atomspace.get_atoms_by_type(t.TimeNode)
     times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
     times = sorted(times, key= lambda t: int(t.name) )
+    
+    for time_atom in times:
+        print time_atom.name
 
     for (i, time_atom) in enumerate(times[:-1]):
         t1 = int(time_atom.name)
@@ -495,124 +646,181 @@ def make_seq(atomspace):
             else:
                 break
 
-def hack_add_atTime(atomspace, targets):
-    a = atomspace.add
+# Faster but only works if DemandGoals are updated every cycle ( == every timestamp)
+#def notice_changes_alt(atomspace):
+#    tv_delta = 0.001
+#    a = atomspace.add
+#    
+#    times = atomspace.get_atoms_by_type(t.TimeNode)
+#    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
+#    times = sorted(times, key= lambda t: int(t.name) )
+#
+#    print len(times)
+#
+#    target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
+#
+#    for atom in target_PredicateNodes:
+#        target = tree('EvaluationLink', atom, new_var())
+#        
+#        for (i, time_atom) in enumerate(times[:-1]):
+#            #time2_atom = times[i+1]
+#            
+#            template = tree('AtTimeLink', time_atom, target)
+#            matches =[x for x in time_atom.incoming if unify(template, tree_from_atom(x), {}) != None]
+#            
+#            if len(matches) != 1:
+#                continue
+#            
+#            template2 = tree('AtTimeLink', time2_atom, target)
+#            matches2 =[x for x in time2_atom.incoming if unify(template2, tree_from_atom(x), {}) != None]
+#
+#            if len(matches2) == 1:
+#                
+#                tv1 = matches[0].tv
+#                tv2 = matches2[0].tv
+#                
+#                print target, tv2-tv1
+#                
+#                if tv2 - tv1 > tv_delta:
+#                    # increased
+#                    pred = 'increased'
+#                elif tv1 - tv2 > tv_delta:
+#                    # decreased
+#                    pred = 'decreased'
+#                else:
+#                    continue
+#
+#                print matches[0], matches2[0]
+#
+#                tv = TruthValue(1, 1e35)
+#                res = tree('AtTimeLink',
+#                         time2_atom, 
+#                         tree('EvaluationLink',
+#                                    a(t.PredicateNode, name=pred),
+#                                    tree('ListLink', target)
+#                                    )
+#                         )
+#                a = atom_from_tree(res, atomspace)
+#                a.tv = tv
+#                
+#                print str(a)
+#            else:
+#                print '[no match]'
 
-    times = atomspace.get_atoms_by_type(t.TimeNode)
-    times = sorted(times, key= lambda t: int(t.name) )
-    current_time = times[-1]
+#def notice_changes_alt2(atomspace):
+#    tv_delta = 0.01
+#    
+#    times = atomspace.get_atoms_by_type(t.TimeNode)
+#    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
+#    times = sorted(times, key= lambda t: int(t.name) )
+#
+#    target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
+#
+#    for atom in target_PredicateNodes:
+#        args = new_var()
+#        target = tree('EvaluationLink', atom, args)
+#
+#        time1 = new_var()
+#        time2 = new_var()
+#        
+#        template1 = tree('AtTimeLink', time1, target)
+#        template2 = tree('AtTimeLink', time2, target)
+#        seq = tree('SequentialAndLink', time1, time2)
+#        
+#        conj = (template1, template2, seq)
+#        
+#        conj = (template1, seq, template2)
+#        matches = find_conj(conj, atomspace.get_atoms_by_type(t.Link))
+#
+#
+#        if not len(matches):
+#            print '[no changes for %s]' % (atom)
+#        
+#        for match in matches:
+#            #print pp(match.atoms)
+#            
+#            tv1 = match.atoms[0].tv.mean
+#            tv2 = match.atoms[2].tv.mean
+#            
+#            print target, tv2-tv1
+#            
+#            if tv2 - tv1 > tv_delta:
+#                # increased
+#                pred = 'increased'
+#            elif tv1 - tv2 > tv_delta:
+#                # decreased
+#                pred = 'decreased'
+#            else:
+#                continue
+#
+#            time2_result = match.subst[time2]
+#            args_result = match.subst[args]
+#
+#            tv = TruthValue(1, 1e35)
+#            res = tree('AtTimeLink',
+#                     time2_result, 
+#                     tree('EvaluationLink',
+#                                atomspace.add(t.PredicateNode, name=pred),
+#                                tree('ListLink',
+#                                    tree('EvaluationLink', 
+#                                         atom,
+#                                         args_result
+#                                    )
+#                                )
+#                        )
+#                    )
+#            a = atom_from_tree(res, atomspace)
+#            a.tv = tv
+#            
+#            print str(a)
+
+def notice_changes(atomspace):    
+    tv_delta = 0.01    
     
-    for atom in targets:
-        target = tree_from_atom(atom)
+    t = types
+    
+    times = atomspace.get_atoms_by_type(t.TimeNode)
+    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
+    times = sorted(times, key= lambda t: int(t.name) )
+
+    target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
+
+    for atom in target_PredicateNodes:
+        target = tree('EvaluationLink', atom, tree('ListLink'))
+
+        time = new_var()
         
-        template = tree('EvaluationLink', target, new_var())
-        matches =[x for x in atomspace.get_atoms_by_type(t.EvaluationLink) if unify(template, tree_from_atom(x), {}) != None]
+        # find all of the xDemandGoal AtTimeLinks in order, sort them, then check whether each one is higher/lower than the previous one.       
         
-        if len(matches) !=1:
+        atTimes = []
+        times_with_update = []
+        for time in times:
+#            # Need to use unify because not sure what the arguments will be. But they must be the same...
+#            template = tree('AtTimeLink', time, target)
+#            matches = find_conj( (template,) )
+#            
+#            # If this DemandGoal is in use there will be one value at each timestamp (otherwise none)
+#            assert len(matches) < 2
+#            matches[0].
+            template = tree('AtTimeLink', time, target)
+            a = atom_from_tree(template, atomspace)
+            
+            # Was the value updated at that timestamp? The PsiDemandUpdaterAgent is not run every cycle so many
+            # timestamps will have no value recorded.
+            if a.tv.count > 0:
+                atTimes.append(a)
+                times_with_update.append(time)
+    
+        if len(atTimes) < 2:
             continue
         
-        atTime = tree('AtTimeLink', current_time, matches[0])
-        
-        a = atom_from_tree(atTime, atomspace)
-        a.tv = matches[0].tv
-        
-        #print a
-
-def notice_changes_alt(atomspace):
-    tv_delta = 0.001
-    a = atomspace.add
-    
-    times = atomspace.get_atoms_by_type(t.TimeNode)
-    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
-    times = sorted(times, key= lambda t: int(t.name) )
-
-    print len(times)
-
-    target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
-
-    for atom in target_PredicateNodes:
-        target = tree('EvaluationLink', atom, new_var())
-        
-        for (i, time_atom) in enumerate(times[:-1]):
-            #time2_atom = times[i+1]
+        for i, atTime in enumerate(atTimes[:-1]):
+            atTime_next = atTimes[i+1]
             
-            template = tree('AtTimeLink', time_atom, target)
-            matches =[x for x in time_atom.incoming if unify(template, tree_from_atom(x), {}) != None]
+            tv1 = atTime.tv.mean
+            tv2 = atTime_next.tv.mean
             
-            if len(matches) != 1:
-                continue
-            
-            template2 = tree('AtTimeLink', time2_atom, target)
-            matches2 =[x for x in time2_atom.incoming if unify(template2, tree_from_atom(x), {}) != None]
-
-            if len(matches2) == 1:
-                
-                tv1 = matches[0].tv
-                tv2 = matches2[0].tv
-                
-                print target, tv2-tv1
-                
-                if tv2 - tv1 > tv_delta:
-                    # increased
-                    pred = 'increased'
-                elif tv1 - tv2 > tv_delta:
-                    # decreased
-                    pred = 'decreased'
-                else:
-                    continue
-
-                print matches[0], matches2[0]
-
-                tv = TruthValue(1, 1e35)
-                res = tree('AtTimeLink',
-                         time2_atom, 
-                         tree('EvaluationLink',
-                                    a(t.PredicateNode, name=pred),
-                                    tree('ListLink', target)
-                                    )
-                         )
-                a = atom_from_tree(res, atomspace)
-                a.tv = tv
-                
-                print str(a)
-            else:
-                print '[no match]'
-
-def notice_changes(atomspace):
-    tv_delta = 0.001
-    
-    times = atomspace.get_atoms_by_type(t.TimeNode)
-    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
-    times = sorted(times, key= lambda t: int(t.name) )
-
-    target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
-
-    for atom in target_PredicateNodes:
-        target = tree('EvaluationLink', atom, new_var())
-
-        time1 = new_var()
-        time2 = new_var()
-
-        template1 = tree('AtTimeLink', time1, target)
-        template2 = tree('AtTimeLink', time2, target)
-        seq = tree('SequentialAndLink', time1, time2)
-        
-        conj = (template1, template2, seq)
-        
-        conj = (template1, seq, template2)
-
-        matches = find_conj(conj, atomspace.get_atoms_by_type(t.Link))
-
-        if not len(matches):
-            print '[no match]'
-        
-        for match in matches:
-            print pp(match.atoms)
-            
-            tv1 = match.atoms[0].tv.mean
-            tv2 = match.atoms[2].tv.mean
-            
-            print target, tv2-tv1
+            print tv2-tv1
             
             if tv2 - tv1 > tv_delta:
                 # increased
@@ -623,47 +831,59 @@ def notice_changes(atomspace):
             else:
                 continue
 
-            time2_result = match.subst[time2]
+            time2 = times_with_update[i+1]
 
-            tv = TruthValue(1, 1e35)
+            tv = TruthValue(1, 1.0e35)
             res = tree('AtTimeLink',
-                     time2_result, 
+                     time2,
                      tree('EvaluationLink',
                                 atomspace.add(t.PredicateNode, name=pred),
-                                tree('ListLink', target)
+                                tree('ListLink',
+                                    target
                                 )
-                     )
+                        )
+                    )
             a = atom_from_tree(res, atomspace)
             a.tv = tv
             
             print str(a)
 
-def make_seq_alt(atomspace):
-    # unit of timestamps is 0.1 second so multiply by 10
-    interval = 10* 30
-    times = atomspace.get_atoms_by_type(t.TimeNode)
-    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
-    times = sorted(times, key= lambda t: int(t.name) )
+#def make_seq_alt(atomspace):
+#    # unit of timestamps is 0.1 second so multiply by 10
+#    interval = 10* 60
+#    times = atomspace.get_atoms_by_type(t.TimeNode)
+#    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
+#    times = sorted(times, key= lambda t: int(t.name) )
+#
+#    for (i, time_atom) in enumerate(times[:-1]):
+#        t1 = int(time_atom.name)
+#        for time2_atom in times[i+1:]:
+#            t2 = int(time2_atom.name)
+#            if t2 - t1 <= interval:
+#                atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
+##                for atTime in time_atom.incoming:
+##                    for atTime2 in time2_atom.incoming:
+##                        print atomspace.add_link(t.SequentialAndLink,  [atTime,  atTime2], TruthValue(1, 1))
+##                        #event1, event2 = atTime.out[1], atTime2.out[1]
+##                        #print atomspace.add_link(t.SequentialAndLink,  [event1, event2], TruthValue(1, 1))
+#            else:
+#                break
+#
+##    for i in xrange(len(times)-1):
+##        (time1,  time2) = (times[i],  times[i+1])
+##        # TODO SeqAndLink was not supposed to be used on TimeNodes directly.
+##        # But that's more useful for fishgram
+##        print atomspace.add_link(t.SequentialAndLink,  [time1,  time2])
 
-    for (i, time_atom) in enumerate(times[:-1]):
-        t1 = int(time_atom.name)
-        for time2_atom in times[i+1:]:
-            t2 = int(time2_atom.name)
-            if t2 - t1 <= interval:
-                atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
-#                for atTime in time_atom.incoming:
-#                    for atTime2 in time2_atom.incoming:
-#                        print atomspace.add_link(t.SequentialAndLink,  [atTime,  atTime2], TruthValue(1, 1))
-#                        #event1, event2 = atTime.out[1], atTime2.out[1]
-#                        #print atomspace.add_link(t.SequentialAndLink,  [event1, event2], TruthValue(1, 1))
-            else:
-                break
+class ClockMindAgent(opencog.cogserver.MindAgent):
+    def __init__(self):
+        self.cycles = 1
 
-#    for i in xrange(len(times)-1):
-#        (time1,  time2) = (times[i],  times[i+1])
-#        # TODO SeqAndLink was not supposed to be used on TimeNodes directly.
-#        # But that's more useful for fishgram
-#        print atomspace.add_link(t.SequentialAndLink,  [time1,  time2])
+    def run(self,atomspace):
+        times = atomspace.get_atoms_by_type(t.TimeNode)
+        times = sorted(times, key= lambda t: int(t.name) )
+        
+        print times[-1].name
 
 class FishgramMindAgent(opencog.cogserver.MindAgent):
     def __init__(self):
@@ -694,7 +914,10 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #                        bound_tree = bind_conj(conj, binding)
 #                        print 'emb:',  pp(bound_tree)
             
-            fish.iterated_implications()
+            #fish.iterated_implications()
+            #fish.implications()
+            
+            fish.make_all_psi_rules()
         except KeyError,  e:
             KeyError
         except Exception, e:
