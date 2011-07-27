@@ -28,6 +28,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/ClassServer.h>
 
 using namespace opencog;
 
@@ -37,6 +38,11 @@ public:
     void link(AtomSpace* as, Handle h1, Handle h2,
               double strength, double confidence) {
         as->addLink(SIMILARITY_LINK, h1, h2,
+                    SimpleTruthValue(strength, SimpleTruthValue::confidenceToCount(confidence)));
+    }
+    void inhLink(AtomSpace* as, Handle h1, Handle h2,
+                 double strength, double confidence) {
+        as->addLink(INHERITANCE_LINK, h1, h2,
                     SimpleTruthValue(strength, SimpleTruthValue::confidenceToCount(confidence)));
     }
     void testMisc() {
@@ -52,9 +58,19 @@ public:
         link(atomSpace, h1, h4, 1.0, 0.9);
         link(atomSpace, h3, h4, 0.2, 1.0);
         link(atomSpace, h2, h3, 0.2, 1.0);
+        inhLink(atomSpace, h2, h4,.9,1.0);//inhlinks should not affect embedding
+        inhLink(atomSpace, h3, h1, .9,95);
 
         dimEmbed.embedAtomSpace(SIMILARITY_LINK, 4);
 
+        //add some more atoms after embedding in such a way that they should
+        //not affect the tests we do later...
+        Handle d1 = atomSpace->addNode(CONCEPT_NODE, "distraction1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle d2 = atomSpace->addNode(CONCEPT_NODE, "distraction2", SimpleTruthValue(0.001f, 0.00001f));
+        link(atomSpace, d1, d2, 0.7, 0.9);
+        link(atomSpace, d1, h1, 1.0, 0.9);
+        inhLink(atomSpace, h1, h3, .9, .9);
+        inhLink(atomSpace, h2, h4, .8, 1.0);
         //dimEmbed.logAtomEmbedding(SIMILARITY_LINK);
         //We have no guarantee on the order that the pivots
         //were picked in, but since numDimensions=numNodes,
@@ -96,10 +112,9 @@ public:
         TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h4,SIMILARITY_LINK),
                         1.5522242106,
                         .000001);
-        atomSpace->addLink(SIMILARITY_LINK, h1, h5,
-                           SimpleTruthValue(0.5, SimpleTruthValue::confidenceToCount(1.0)));
-        atomSpace->addLink(SIMILARITY_LINK, h3, h5,
-                           SimpleTruthValue(0.6, SimpleTruthValue::confidenceToCount(1.0)));
+
+        link(atomSpace,h1,h5,.5,1.0);
+        link(atomSpace,h3,h5,.6,1.0);
         //h1:(1, .5, .7, .9)
         //h3:(.7, .35, 1, .63)
         //So h5 should be some permutation of
@@ -407,6 +422,160 @@ public:
                 }
             }
         }
+        delete atomSpace;
+    }
+
+    void testAsym() {
+        AtomSpace *atomSpace = new AtomSpace();
+        DimEmbedModule dimEmbed=DimEmbedModule(atomSpace);
+        Handle h1 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog2", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "dog3", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h4 = atomSpace->addNode(CONCEPT_NODE, "dog4", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h5 = atomSpace->addNode(CONCEPT_NODE, "dog5", SimpleTruthValue(0.001f, 0.00001f));
+        Handle h6 = atomSpace->addNode(CONCEPT_NODE, "dog6", SimpleTruthValue(0.001f, 0.00001f));
+
+        inhLink(atomSpace, h1, h2, 0.5, 1.0);
+        atomSpace->addLink(INHERITANCE_LINK, h1, h3, h4, h5,
+                           SimpleTruthValue(0.5, SimpleTruthValue::confidenceToCount(0.6)));
+        inhLink(atomSpace, h2, h3, 0.2, 1.0);
+        inhLink(atomSpace, h2, h5, 1.0, 0.7);
+        inhLink(atomSpace, h3, h2, 0.8, 1.0);
+        atomSpace->addLink(INHERITANCE_LINK, h3, h4, h5,
+                           SimpleTruthValue(0.4, SimpleTruthValue::confidenceToCount(1.0)));
+        inhLink(atomSpace, h4, h2, 0.6, 1.0);
+        inhLink(atomSpace, h4, h5, 0.2, 1.0);
+        inhLink(atomSpace, h4, h2, 0.6, 1.0);
+
+        dimEmbed.embedAtomSpace(INHERITANCE_LINK, 6);
+        //add some more atoms after embedding in such a way that they should
+        //not affect the tests we do later...
+        Handle d1 = atomSpace->addNode(CONCEPT_NODE, "distraction1", SimpleTruthValue(0.001f, 0.00001f));
+        Handle d2 = atomSpace->addNode(CONCEPT_NODE, "distraction2", SimpleTruthValue(0.001f, 0.00001f));
+        link(atomSpace, h1, h2, 0.7, 0.9);
+        link(atomSpace, h6, h3, 1.0, 0.9);
+        inhLink(atomSpace, d1, d2, .9, .9);
+        inhLink(atomSpace, h2, d1, .8, 1.0);
+
+        //dimEmbed.logAtomEmbedding(INHERITANCE_LINK);
+        //We have no guarantee on the order that the pivots
+        //were picked in, but since numDimensions=numNodes,
+        //the euclidean distances between any 2 nodes
+        //will not be affected by this.
+        //So the "forward" embedding vectors should be some permutation of...
+        //h1:(1, .5, .3, .3, .35, 0)
+        //h2:(0, 1,  .2, .08, .7, 0)
+        //h3:(0, .8, 1, .4, .56, 0)
+        //h4:(0, .6, .012, 1, .42, 0)
+        //h5:(0, 0, 0, 0, 1, 0)
+        //h6:(0, 0, 0, 0, 0, 1)
+        //And because every node is a pivot node, the "backward" embedding is
+        //the transpose of this, ie forward_h_i[j]=backward_h_j[i]
+        Handle handles[6] = {h1, h2, h3, h4, h5, h6};
+        //Pre-calculated distances based on what the embedding should be...
+        
+        double dists [6][6] = //dists[i-1][j-1]=distance between hi and hj
+            {{0.0, 1.1962023240238251, 1.2783192089615176, 1.2398790263570072, 1.36106575888162, 1.5976545308670458},
+             {1.1962023240238251, 0.0, 0.89554452708952459, 1.0446051885760477, 1.0660206376989143, 1.5926079241294764}, 
+             {1.2783192089615176, 0.89554452708952459, 0.0, 1.0927030703718188, 1.4119490075778234, 1.7645396000090223}, 
+             {1.2398790263570072, 1.0446051885760477, 1.0927030703718188, 0.0, 1.3079755349393964, 1.597122412340394}, 
+             {1.36106575888162, 1.0660206376989143, 1.4119490075778234, 1.3079755349393964, 0.0, 1.4142135623730951}, 
+             {1.5976545308670458, 1.5926079241294764, 1.7645396000090223, 1.597122412340394, 1.4142135623730951, 0.0}};
+        double distsTrans [6][6] =
+            {{0.0, 1.5, 1.2427389106324787, 1.2870120434556935, 1.55, 1.4142135623730951},
+             {1.5, 0.0, 0.97488460855631531, 1.0983624174196787, 1.0965856099730655, 1.8027756377319946},
+             {1.2427389106324787, 0.97488460855631531, 0.0, 1.071820880557941, 1.2393950137062839, 1.4643770006388384},
+             {1.2870120434556935, 1.0983624174196787, 1.071820880557941, 0.0, 1.3224598292575847, 1.5021318184500321},
+             {1.55, 1.0965856099730655, 1.2393950137062839, 1.3224598292575847, 0.0, 1.7613914953808538},
+             {1.4142135623730951, 1.8027756377319946, 1.4643770006388384, 1.5021318184500321, 1.7613914953808538, 0.0}};
+        double dist;
+        
+        for(int i=0;i<6;i++){
+            for(int j=0;j<6;j++){
+                dist = dimEmbed.euclidDist(handles[i],
+                                           handles[j],
+                                           INHERITANCE_LINK,
+                                           true);
+                TS_ASSERT_DELTA(dist,dists[i][j],.000001);
+                dist = dimEmbed.euclidDist(handles[i],
+                                           handles[j],
+                                           INHERITANCE_LINK,
+                                           false);
+                //this simple reversal is only true because numPivots=numNodes
+                TS_ASSERT_DELTA(dist,distsTrans[j][i],.000001);                
+            }
+        }
+        Handle h7 = atomSpace->addNode(CONCEPT_NODE, "dog7", SimpleTruthValue(0.001f, 0.00001f));
+        //h7 is unconnected, so its embedding should be (0,0,0,0)
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h1,INHERITANCE_LINK,true),
+                        1.24599357944,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h2,INHERITANCE_LINK,true),
+                        1.23951603459,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h3,INHERITANCE_LINK,true),
+                        1.45382254763,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h4,INHERITANCE_LINK,true),
+                        1.24531120608,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h5,INHERITANCE_LINK,true),
+                        1.0,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h6,INHERITANCE_LINK,true),
+                        1.0,
+                        .000001);
+
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h1,INHERITANCE_LINK,false),
+                        1.0,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h2,INHERITANCE_LINK,false),
+                        1.5,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h3,INHERITANCE_LINK,false),
+                        1.06976632963,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h4,INHERITANCE_LINK,false),
+                        1.12089250154,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h5,INHERITANCE_LINK,false),
+                        1.45,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,h6,INHERITANCE_LINK,false),
+                        1.0,
+                        .000001);
+
+        /*
+        atomSpace->addLink(SIMILARITY_LINK, h1, h7,
+                           SimpleTruthValue(0.5, SimpleTruthValue::confidenceToCount(1.0)));
+        atomSpace->addLink(SIMILARITY_LINK, h3, h7,
+                           SimpleTruthValue(0.6, SimpleTruthValue::confidenceToCount(1.0)));
+        //h1:(1, .5, .3, .3, .35, 0)
+        //h3:(0, .8, 1, .4, .56, 0)
+        //So h5-forward should be some permutation of
+        //h5:(
+        //so we know what its distance from the others should be
+        
+        //std::cout << "h5Embed: ";
+        //std::vector<double> h5Embed =
+        //    dimEmbed.getEmbedVector(h5,SIMILARITY_LINK);
+        //for(int i=0;i<h5Embed.size();i++) {
+        //    std::cout << h5Embed[i] << " ";
+        //}
+        
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h1,SIMILARITY_LINK),
+                        0.72456883,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h2,SIMILARITY_LINK),
+                        0.79056941,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h3,SIMILARITY_LINK),
+                        0.49234134,
+                        .000001);
+        TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h4,SIMILARITY_LINK),
+                        0.70950687,
+                        .000001);
+        */
         delete atomSpace;
     }
 };

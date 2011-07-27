@@ -150,10 +150,11 @@ namespace opencog
          *
          * @param h The handle whose embedding vector is returned
          * @param l The link type for which h's embedding vector is wanted
+         * @param backward For asymmetric link types.
          * @return A vector of doubles corresponding to handle h's distance
          * from each of the pivots.
          */
-        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l);
+        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l, bool backward=false);
 
         /**
          * Returns the list of pivots for the embedding of type l.
@@ -209,7 +210,7 @@ namespace opencog
          * Then their distance for link type l is
          * sqrt((a1-a2)^2 + (b1-b2)^2 + ... + (n1-n2)^2)
          */
-        double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
+        double euclidDist(const Handle& h1, const Handle& h2, const Type& l, bool backward=false);
         static double euclidDist
             (const std::vector<double>& v1, const std::vector<double>& v2);
         static double euclidDist(double v1[], double v2[], int size);
@@ -218,11 +219,15 @@ namespace opencog
          * Returns a vector of Handles of the k nearest nodes for the given 
          * link type.
          *
-         * The 0th element of the vector is the closest, the 1st is next,
-         * etc. If there is a tie for the kth closest, this may return more
-         * than k handles.
+         * @param h The handle to find the neighbors of
+         * @param l The Type of link for which the neighbors are found
+         * @param k The number of neighbors to find
+         * @param backward If l is asymmetric, indicates the embedding direction
+         * @return A vector of at least k handles, sorted from nearest to
+         * farthest (the 0ths element of the vector is closest to h). If there
+         * is a tie for the kth closest, this may return more than k handles.
          */
-        HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k);
+        HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k, bool backward=false);
 
         /**
          * Use k-means clustering to find clusters using the
