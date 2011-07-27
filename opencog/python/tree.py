@@ -1,4 +1,4 @@
-from opencog.atomspace import Atom, get_type, types
+from opencog.atomspace import AtomSpace, Atom, get_type, types
 from copy import copy, deepcopy
 from functools import *
 from itertools import permutations
@@ -21,6 +21,7 @@ class tree:
         assert type(op) != type(None)
         if len(args):
             if isinstance(op, Atom):
+                assert not op.is_a(types.Link)
                 self.op = op.type_name
             else:
                 self.op = op
@@ -38,8 +39,18 @@ class tree:
         else:
             return '(' + str(self.op) + ' '+ ' '.join(map(str, self.args)) + ')'
 
+    # TODO add doctests
     def __repr__(self):
         return str(self)
+        
+        if self.is_variable():
+            return "a.add(t.VariableNode, name='$%s')" % (str(self.op),)
+        elif self.is_leaf() and isinstance(self.op, Atom):
+            # a.add(t.ConceptNode, name='cat')
+            return "a.add(t.%s, '%s')" % (self.op.type_name, self.op.name)
+        else:
+            # a.add(t.ListLink, out=[ a.add(t.ConceptNode, name='eat') ])
+            return "a.add(t.%s, out=%s)" % (self.op, repr(self.args))
 
     def __hash__(self):
         return hash( self.to_tuple() )
@@ -47,6 +58,14 @@ class tree:
     def is_variable(self):
         "A variable is an int starting from 0"
         return isinstance(self.op, int)
+    
+    def get_type(self):
+        if isinstance(self.op, int):
+            return types.Atom
+        elif isinstance(self.op, Atom):
+            return self.op.t
+        else:
+            return get_type(self.op)
     
     def is_leaf(self):
         return len(self.args) == 0
@@ -81,7 +100,8 @@ def atom_from_tree(tree, a):
         if isinstance (tree.op, Atom):
             return tree.op
         # Empty Link
-        # Currently still recorded as an Atom (wrong?)
+        else:
+            return a.add(get_type(tree.op), out = [])
     else:
         out = [atom_from_tree(x, a) for x in tree.args]
         return a.add(get_type(tree.op), out=out)
@@ -90,26 +110,68 @@ def find(template, atoms):
     return [a for a in atoms if unify(tree_from_atom(a), template, {}) != None]
 
 class Match(object):
-    def __init__(self, subst = {}, atoms = []):
+    def __init__(self, subst = {}, atoms = [], conj = ()):
         self.subst = subst
         self.atoms = atoms
+        self.conj = conj
     
     def __eq__(self, other):
-        return self.subst == other.subst and self.atoms == other.atoms
+        return self.subst == other.subst and self.atoms == other.atoms and self.conj == other.conj
 
-def find_conj(conj, atoms, match = Match()):
+def find_conj(conj, atom_provider, match = Match()):
+    """Find all combinations of Atoms matching the given conjunction.
+    atom_provider can be either an AtomSpace or a list of Atoms.
+    Returns a list of (unique) Match objects."""
     if conj == ():
         return [match]
     
+    tr = conj[0]
+    
+    if isinstance(atom_provider, AtomSpace):
+        root_type = tr.get_type()
+        atoms = atomspace.get_atoms_by_type(root_type)
+    else:
+        atoms = atom_provider
+    
     ret = []
     for a in atoms:
-        s2 = unify(conj[0], tree_from_atom(a), match.subst)
+        s2 = unify(tr, tree_from_atom(a), match.subst)
         if s2 != None:
             match2 = Match(s2, match.atoms+[a])
             
             #print pp(match2.subst), pp(match2.atoms)
             
             later = find_conj(conj[1:], atoms, match2)
+            
+            for final_match in later:
+                if final_match not in ret:
+                    ret.append(final_match)
+    return ret
+
+def find_matching_conjunctions(conj, trees, match = Match()):
+    if conj == ():
+        #return [match]
+        partially_bound_conj = subst_conjunction(match.subst, match.conj)
+        m2 = Match(conj = partially_bound_conj, subst = match.subst)
+        return [m2]
+    
+    ret = []
+    for tr in trees:
+        tr = standardize_apart(tr)
+        s2 = unify(conj[0], tr, match.subst)
+        if s2 != None:
+            # partly_bound_tr is like conj[0] but with its variables replaced by the specific
+            # values in this tree. e.g. if we were looking for:
+            # (AtTimeLink tree:1000001 (EvaluationLink actionDone:PredicateNode (ListLink tree:1000003)))
+            # we could get:
+            # (AtTimeLink tree:1000005 (EvaluationLink actionDone:PredicateNode (ListLink
+            #       (ExecutionLink eat:GroundedSchemaNode (ListLink tree:1000006)))))
+            #partly_bound_tr = subst(s2, conj[0])
+            match2 = Match(conj=match.conj+(conj[0],), subst=s2)
+            
+            print pp(match2.conj), pp(match2.subst)
+            
+            later = find_matching_conjunctions(conj[1:], trees, match2)
             
             for final_match in later:
                 if final_match not in ret:
@@ -137,13 +199,15 @@ def unify(x, y, s,  vars_only = False):
     {x: y, y: C}
     """
     #print "unify %s %s" % (str(x), str(y))
-    
+        
     if vars_only:
         if isinstance(x, tree) and isinstance(y, tree):
             if x.is_variable() != y.is_variable():
                 return None
 
     if s == None:
+        return None
+    elif type(x) != type(y):
         return None
     elif x == y:
         return s
@@ -234,24 +298,27 @@ def subst_conjunction(substitution, conjunction):
 def subst_from_binding(binding):
     return dict([ (tree(i), obj) for i, obj in enumerate(binding)])
 
+def binding_from_subst(subst, atomspace):
+    return [ atom_from_tree(obj_tree, atomspace) for (var, obj_tree) in sorted(subst.items()) ]
+
 def bind_conj(conj, b):
     return subst_conjunction(subst_from_binding(b), conj)
 
-def standardize_apart(tree, dic={}):
+def standardize_apart(tr, dic=None):
     """Replace all the variables in tree with new variables."""
 
-    if tree.is_variable:
-        if tree in dic:
-            return dic[tree]
+    if dic == None:
+        dic = {}
+
+    if tr.is_variable():
+        if tr in dic:
+            return dic[tr]
         else:
             v = new_var()
-            dic[tree] = v
+            dic[tr] = v
             return v
-    elif not isinstance(tree, tuple):
-        return tree
     else:
-        return tuple([tree[0]]+
-                    [standardize_apart(a, dic) for a in tree[1:]])
+        return tree(tr.op, [standardize_apart(a, dic) for a in tr.args])
 
 #def standardize_apart_subst(s, dic={}):
 #    """Replace all the variables in subst with new variables."""

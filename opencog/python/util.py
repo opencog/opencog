@@ -1,3 +1,5 @@
+from opencog.atomspace import types
+
 import collections
 
 def if_(cond, t, f):
@@ -5,6 +7,13 @@ def if_(cond, t, f):
         return t
     else:
         return f
+
+def output_atoms(atomspace):
+    roots = [x for x in atomspace.get_atoms_by_type(types.Atom) if not x.incoming]
+    #return repr( map(tree_from_atom, roots) )
+    import tree
+    for tr in map(tree.tree_from_atom, roots):
+        print repr(tr)
 
 def pp(x):
     """Pretty-print any collection type (or generator).
@@ -14,7 +23,7 @@ def pp(x):
     elif isinstance(x, set):
         return ppset(x)
     elif isinstance(x, (tuple, list) ):
-        return x.__class__ ( [pp(e) for e in x] )
+        return str ( x.__class__ ( [pp(e) for e in x] ) )
     elif isinstance(x, str):
         # Python strings are iterables, so we need to prevent the
         # infinite recursion of the next call
