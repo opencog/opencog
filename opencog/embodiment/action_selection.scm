@@ -2,7 +2,7 @@
 ; Action planner
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-06-09
+; @date   2011-07-27
 ;
 
 ; TODO: create and AndSeq link, inherits from ordered link for Actions
@@ -495,8 +495,25 @@
                              )
 
 ;                              (display "Available rules ") (newline) (display available_rule_list) (newline)
-                             
-                             ; Search a rule with True context 
+                            
+                             ; Sort available rules based on their truth values, 
+                             ; (i.e. mean values of ImplicationLink truth value)
+                             ; then 'search_rule_with_true_context' below will tend 
+                             ; to pick up rules with higher truth value
+                             (set! available_rule_list
+                                 (sort available_rule_list
+                                       (lambda (psi_rule_1 psi_rule_2)
+                                           (>  (get_truth_value_mean (cog-tv psi_rule_1) )
+                                               (get_truth_value_mean (cog-tv psi_rule_2) )
+                                           )   
+                                       )
+                                 )
+                             ) 
+
+                             ; Search a rule with True context, 
+                             ; TODO: currently, we just process rules one by one in sequence, 
+                             ;       we should change this to roulette wheel selection based 
+                             ;       on truth values later. 
                              (let search_rule_with_true_context ( (rule_list available_rule_list)
                                                                 )
 
