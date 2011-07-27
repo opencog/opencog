@@ -58,11 +58,12 @@ class ForestExtractor:
             return tree(atom)
         else:
             args = [self.extractTree(x,  objects) for x in atom.out]
-            return tree(atom, args)
+            return tree(atom.type_name, args)
 
     def extractForest(self):
+
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
-        for link in [x for x in self.a.get_atoms_by_type(t.Link) if x.tv.mean > 0.5 and x.tv.count > 0]:
+        for link in [x for x in self.a.get_atoms_by_type(t.Link) if x.tv.mean > 0.5 and x.tv.confidence > 0]:
             if not self.include_tree(link): continue
             
             objects = []            
@@ -136,8 +137,7 @@ class ForestExtractor:
         self.writer.stop()
 
     def is_object(self,  atom):
-        return (atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode)
-                     or self.is_important_atom(atom)) # haxx!
+        return atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode) # haxx!
     
     def is_important_atom(self, atom):
         return atom.name in ['actionFailed', 'actionDone'] or "DemandGoal" in atom.name
@@ -148,7 +148,7 @@ class ForestExtractor:
     def include_atom(self,  atom):
         """Whether to include a given atom in the results. If it is not included, all trees containing it will be ignored as well."""
         if atom.is_node():
-            if atom.name in ["proximity", "near", 'next', "AGISIM_rotation", "AGISIM_position", "SpaceMap", "inside_pet_fov", 'turn', # 'walk',
+            if atom.name in ["proximity", "near", 'next', "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
                              'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst',  # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
                              'far', 'left_of', 'right_of', 'between', 'inside', 'outside', 'touching', 'above', 'below', 'behind', 'in_front_of', 'beside']:
                 return False
