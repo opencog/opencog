@@ -135,7 +135,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
 //                        __FUNCTION__, ex.getMessage( ) );
     } // catch
 
-    computeAllSpatialRelations(pet, object, timestamp);
+    //computeAllSpatialRelations(pet, object, timestamp);
 }
 
 void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, string entityA_id, string entityB_id, string entityC_id, AtomSpace& atomSpace, unsigned int timestamp);

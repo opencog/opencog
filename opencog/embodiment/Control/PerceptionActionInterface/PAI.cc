@@ -853,10 +853,6 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
     Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue);
-    // JaredW: not sure if this is quite right, but it should have
-    // some truth value (I think).
-    // Probability of 1, count 1, of this action happening at that time.
-    atomSpace.setTV(atTimeLink, SimpleTruthValue(1,1));
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
 
     // if the action is grab or drop created/update isHoldingSomething
@@ -2031,7 +2027,8 @@ Handle PAI::addActionPredicate(const char* predicateName, const PetAction& actio
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp);
+    SimpleTruthValue tv(1,1e35);
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp,tv);
     AtomSpaceUtil::updateLatestPetActionPredicate(atomSpace, atTimeLink, predicateNode);
 
     return atTimeLink;
