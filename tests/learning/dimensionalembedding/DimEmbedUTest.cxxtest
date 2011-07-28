@@ -462,15 +462,15 @@ public:
         //were picked in, but since numDimensions=numNodes,
         //the euclidean distances between any 2 nodes
         //will not be affected by this.
-        //So the "forward" embedding vectors should be some permutation of...
+        //So the "fanin" embedding vectors should be some permutation of...
         //h1:(1, .5, .3, .3, .35, 0)
         //h2:(0, 1,  .2, .08, .7, 0)
         //h3:(0, .8, 1, .4, .56, 0)
-        //h4:(0, .6, .012, 1, .42, 0)
+        //h4:(0, .6, .12, 1, .42, 0)
         //h5:(0, 0, 0, 0, 1, 0)
         //h6:(0, 0, 0, 0, 0, 1)
         //And because every node is a pivot node, the "backward" embedding is
-        //the transpose of this, ie forward_h_i[j]=backward_h_j[i]
+        //the transpose of this, ie fanout_h_i[j]=fanin_h_j[i]
         Handle handles[6] = {h1, h2, h3, h4, h5, h6};
         //Pre-calculated distances based on what the embedding should be...
         
@@ -502,7 +502,7 @@ public:
                                            INHERITANCE_LINK,
                                            false);
                 //this simple reversal is only true because numPivots=numNodes
-                TS_ASSERT_DELTA(dist,distsTrans[j][i],.000001);                
+                TS_ASSERT_DELTA(dist,distsTrans[i][j],.000001);                
             }
         }
         Handle h7 = atomSpace->addNode(CONCEPT_NODE, "dog7", SimpleTruthValue(0.001f, 0.00001f));
@@ -545,37 +545,45 @@ public:
                         1.0,
                         .000001);
 
-        /*
-        atomSpace->addLink(SIMILARITY_LINK, h1, h7,
-                           SimpleTruthValue(0.5, SimpleTruthValue::confidenceToCount(1.0)));
-        atomSpace->addLink(SIMILARITY_LINK, h3, h7,
-                           SimpleTruthValue(0.6, SimpleTruthValue::confidenceToCount(1.0)));
+
+        inhLink(atomSpace, h2, h7, .5, 1.0);
+        inhLink(atomSpace, h7, h5, 1.0, .5);
         //h1:(1, .5, .3, .3, .35, 0)
+        //h2:(0, 1,  .2, .08, .7, 0)
         //h3:(0, .8, 1, .4, .56, 0)
-        //So h5-forward should be some permutation of
-        //h5:(
+        //h4:(0, .6, .12, 1, .42, 0)
+        //h5:(0, 0, 0, 0, 1, 0)
+        //h6:(0, 0, 0, 0, 0, 1)
+        //The first new link should change h7's fanin-embedding to
+        //h7:(0,.5,.1,.04,.35,0)
+        //The second new link should change h5's fanin-embedding to
+        //h5:(0,.25,.05,.02,1,0)
+        //and h7's fanout-embedding to
+        //h7:(.175,.35,.28,.21,.5,0)
         //so we know what its distance from the others should be
         
-        //std::cout << "h5Embed: ";
-        //std::vector<double> h5Embed =
-        //    dimEmbed.getEmbedVector(h5,SIMILARITY_LINK);
-        //for(int i=0;i<h5Embed.size();i++) {
-        //    std::cout << h5Embed[i] << " ";
+        //std::cout << "h7Embed: ";
+        //std::vector<double> h7Embed =
+        //    dimEmbed.getEmbedVector(h7,INHERITANCE_LINK,true);
+        //for(int i=0;i<h7Embed.size();i++) {
+        //    std::cout << h7Embed[i] << " ";
         //}
-        
-        TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h1,SIMILARITY_LINK),
-                        0.72456883,
-                        .000001);
-        TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h2,SIMILARITY_LINK),
-                        0.79056941,
-                        .000001);
-        TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h3,SIMILARITY_LINK),
-                        0.49234134,
-                        .000001);
-        TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h4,SIMILARITY_LINK),
-                        0.70950687,
-                        .000001);
-        */
+
+        //dists7in[i] is what the fanin-distance of h_i from h7 should be
+        double dists7in [6] = {1.05242576935, 0.619758017294, 1.03619496235, 0.967935948294, 0.698498389404, 1.1764777941};
+        double dists5in [6] = {1.27510783858, 0.823771813065, 1.24217551095, 1.19339850846, 0.0, 1.43714995738};
+        double dists7out [6] = {1.0842624221100721, 1.0957303500405564, 0.90256578707593382, 0.988445749649418, 0.72499999999999998, 1.2351619327035626};
+        for(int i=0;i<6;i++) {
+            TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,handles[i],INHERITANCE_LINK,true),
+                            dists7in[i],
+                            .000001);
+            TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,handles[i],INHERITANCE_LINK,true),
+                            dists5in[i],
+                            .000001);
+            TS_ASSERT_DELTA(dimEmbed.euclidDist(h7,handles[i],INHERITANCE_LINK,false),
+                            dists7out[i],
+                            .000001);
+        }
         delete atomSpace;
     }
 };

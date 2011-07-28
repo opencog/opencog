@@ -51,8 +51,10 @@ namespace opencog
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
         typedef std::map<Type, std::pair<AtomEmbedding, AtomEmbedding> >
             AsymAtomEmbedMap; //For asymmetric embeddings: The first of the pair
-                              //is for links like (inheritance atom pivot)
-                              //the second is for (inheritance pivot atom)
+        //is for links like (inheritance pivot atom) (ie pivot is source)
+        //the second is for (inheritance atom pivot) (ie pivot is target)
+        //the "fanin" argument in several functions represents whether the links
+        //go "inward", with pivots as targets (ie the second embedding)
         typedef std::map<Type, CoverTree<CoverTreePoint> > EmbedTreeMap;
         typedef std::map<Type, std::pair<CoverTree<CoverTreePoint>,
                                          CoverTree<CoverTreePoint> > >
@@ -77,10 +79,12 @@ namespace opencog
          *
          * @param h Handle to be added as a pivot
          * @param linkType Type of link for which h should be added as a pivot
-         * @param backward For asymmetric link types, we need to embed twice,
-         * once with backward=true and once with backward=false
+         * @param fanin For asymmetric link types, we need to embed twice,
+         * once with fanin=true and once with fanin=false. The fanin=true
+         * embedding of a given node represents the weight of the path
+         * starting from the node and going to the pivot.
          */
-        void addPivot(const Handle& h, const Type& linkType, bool backward=false);
+        void addPivot(const Handle& h, const Type& linkType, bool fanin=false);
 
         /**
          * Adds node to the appropriate AtomEmbedding in the AtomEmbedMap.
@@ -150,11 +154,11 @@ namespace opencog
          *
          * @param h The handle whose embedding vector is returned
          * @param l The link type for which h's embedding vector is wanted
-         * @param backward For asymmetric link types.
+         * @param fanin For asymmetric link types.
          * @return A vector of doubles corresponding to handle h's distance
          * from each of the pivots.
          */
-        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l, bool backward=false);
+        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l, bool fanin=false);
 
         /**
          * Returns the list of pivots for the embedding of type l.
@@ -210,7 +214,7 @@ namespace opencog
          * Then their distance for link type l is
          * sqrt((a1-a2)^2 + (b1-b2)^2 + ... + (n1-n2)^2)
          */
-        double euclidDist(const Handle& h1, const Handle& h2, const Type& l, bool backward=false);
+        double euclidDist(const Handle& h1, const Handle& h2, const Type& l, bool fanin=false);
         static double euclidDist
             (const std::vector<double>& v1, const std::vector<double>& v2);
         static double euclidDist(double v1[], double v2[], int size);
@@ -222,12 +226,12 @@ namespace opencog
          * @param h The handle to find the neighbors of
          * @param l The Type of link for which the neighbors are found
          * @param k The number of neighbors to find
-         * @param backward If l is asymmetric, indicates the embedding direction
+         * @param fanin If l is asymmetric, indicates the embedding direction
          * @return A vector of at least k handles, sorted from nearest to
          * farthest (the 0ths element of the vector is closest to h). If there
          * is a tie for the kth closest, this may return more than k handles.
          */
-        HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k, bool backward=false);
+        HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k, bool fanin=false);
 
         /**
          * Use k-means clustering to find clusters using the

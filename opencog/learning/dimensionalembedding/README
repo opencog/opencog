@@ -15,9 +15,10 @@ http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm#source
 
 == Using DimEmbedModule in Scheme
 
-To embed an atomspace using a certain link type (eg similarity link)...
+To embed an atomspace using a certain link type and number of dimensions
+(eg similarity link, 50 dimensions)...
 
-	(embedSpace 'SimilarityLink)
+	(embedSpace 'SimilarityLink 50)
 
 To find the k nearest neighbors of a node...
 

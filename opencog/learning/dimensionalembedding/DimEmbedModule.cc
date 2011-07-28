@@ -94,7 +94,7 @@ void DimEmbedModule::init() {
 
 const std::vector<double>& DimEmbedModule::getEmbedVector(const Handle& h,
                                                           const Type& l,
-                                                          bool backward) {
+                                                          bool fanin) {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -113,7 +113,7 @@ const std::vector<double>& DimEmbedModule::getEmbedVector(const Handle& h,
     } else {
         const std::pair<AtomEmbedding, AtomEmbedding>& aEPair =
             (asymAtomMaps.find(l))->second;
-        if(backward) {
+        if(fanin) {
             //AtomEmbedding::const_iterator aEit = aEPair.second.find(h);
             //return aEit->second;
             return aEPair.second.find(h)->second;
@@ -138,7 +138,7 @@ const HandleSeq& DimEmbedModule::getPivots(const Type& l) {
     return pivotsMap[l];
 }
 
-HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int k, bool backward) {
+HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int k, bool fanin) {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -158,7 +158,7 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
             it->second.kNearestNeighbors(CoverTreePoint(h,atomMaps[l][h]),k);
     } else {
         AsymEmbedTreeMap::iterator it = asymEmbedTreeMap.find(l);
-        if(backward) {
+        if(fanin) {
             points =
                 it->second.second.
                 kNearestNeighbors(CoverTreePoint(h,asymAtomMaps[l].second[h]),k);
@@ -177,13 +177,13 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
     return results;
 }
 
-void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool backward){   
+void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool fanin){   
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
-    if(!backward) as->incVLTI(h);//We don't want pivot atoms to be forgotten...
+    if(!fanin) as->incVLTI(h);//We don't want pivot atoms to be forgotten...
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
 
@@ -201,10 +201,10 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool backwa
         }
     }
     //Only add the pivot once
-    if(!backward) pivotsMap[linkType].push_back(h);
+    if(!fanin) pivotsMap[linkType].push_back(h);
     while(!pQueue.empty()) {
         pQueue_t::reverse_iterator p_it = pQueue.rbegin();
-        Handle u = p_it->second;//extract min
+        Handle u = p_it->second;//extract max (highest weight)
 
         /*std::cout << "U=" << u << " distmap={";
         for(std::map<Handle, double>::iterator it = distMap.begin();
@@ -227,10 +227,10 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool backwa
             TruthValuePtr linkTV = as->getTV(*it);
             HandleSeq newNodes = as->getOutgoing(*it);
             HandleSeq::iterator it2=newNodes.begin();
-            //if !backward, we're following the "forward" links, so it's only a
+            //if !fanin, we're following the "outward" links, so it's only a
             //valid link if u is the source
-            if(!symmetric && !backward && !as->isSource(u,*it)) continue;
-            if(!symmetric && backward) {
+            if(!symmetric && !fanin && !as->isSource(u,*it)) continue;
+            if(!symmetric && fanin) {
                 if(as->isSource(u,*it)) {
                     continue;
                 }
@@ -264,7 +264,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool backwa
         if(symmetric) {
             atomMaps[linkType][it->first].push_back(it->second);
         } else {
-            if(backward) asymAtomMaps[linkType].second[it->first].push_back(it->second);
+            if(fanin) asymAtomMaps[linkType].second[it->first].push_back(it->second);
             else asymAtomMaps[linkType].first[it->first].push_back(it->second);
         }
     }
@@ -939,13 +939,13 @@ double DimEmbedModule::euclidDist(double v1[], double v2[], int size) {
 double DimEmbedModule::euclidDist(const Handle& h1,
                                   const Handle& h2,
                                   const Type& l,
-                                  bool backward) {
+                                  bool fanin) {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
-    return euclidDist(getEmbedVector(h1,l,backward),
-                      getEmbedVector(h2,l,backward));
+    return euclidDist(getEmbedVector(h1,l,fanin),
+                      getEmbedVector(h2,l,fanin));
 }
 
 double DimEmbedModule::euclidDist(const std::vector<double>& v1,
