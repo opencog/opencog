@@ -48,6 +48,7 @@ namespace opencog
     private:
         typedef std::map<Handle, std::vector<double> > AtomEmbedding;
         typedef std::map<Type, HandleSeq> PivotMap;
+        typedef std::map<Type, std::pair<HandleSeq, HandleSeq> > AsymPivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
         typedef std::map<Type, std::pair<AtomEmbedding, AtomEmbedding> >
             AsymAtomEmbedMap; //For asymmetric embeddings: The first of the pair
@@ -66,6 +67,7 @@ namespace opencog
         AtomEmbedMap atomMaps;
         AsymAtomEmbedMap asymAtomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
+        AsymPivotMap asymPivotsMap;
         EmbedTreeMap embedTreeMap;
         AsymEmbedTreeMap asymEmbedTreeMap;
         std::map<Type,int> dimensionMap;//Stores the number of dimensions that
@@ -85,7 +87,7 @@ namespace opencog
          * starting from the node and going to the pivot.
          */
         void addPivot(const Handle& h, const Type& linkType, bool fanin=false);
-
+        Handle pickPivot(const Type& linkType, HandleSeq& nodes, bool fanin=false);
         /**
          * Adds node to the appropriate AtomEmbedding in the AtomEmbedMap.
          *
@@ -158,12 +160,12 @@ namespace opencog
          * @return A vector of doubles corresponding to handle h's distance
          * from each of the pivots.
          */
-        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l, bool fanin=false);
+        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l, bool fanin=false) const;
 
         /**
          * Returns the list of pivots for the embedding of type l.
          */
-        const HandleSeq& getPivots(const Type& l);
+        HandleSeq& getPivots(const Type& l, bool fanin=false);
 
         /**
          * Creates an AtomEmbedding of the atomspace using linkType
@@ -202,7 +204,7 @@ namespace opencog
         /**
          * Returns true if a dimensional embedding exists for linkType l
          */
-        bool isEmbedded(const Type& linkType);
+        bool isEmbedded(const Type& linkType) const;
         
         /**
          * Returns the euclidean distance between handles h1 and h2 for the
@@ -282,7 +284,7 @@ namespace opencog
          * the distances of all members of the cluster to their nearest
          * clustermates.
          */
-        double homogeneity(const HandleSeq& cluster, const Type& linkType);
+        double homogeneity(const HandleSeq& cluster, const Type& linkType) const;
 
         /**
          * Calculate the separation of a cluster of handles for given linkType.
@@ -290,7 +292,7 @@ namespace opencog
          * Separation is the minimum distance from any given member of the
          * cluster to elements outside the cluster.
          */
-        double separation(const HandleSeq& cluster, const Type& linkType);
+        double separation(const HandleSeq& cluster, const Type& linkType) const;
 
         /**
          * Create a new node by blending the two existing nodes, n1 and n2,

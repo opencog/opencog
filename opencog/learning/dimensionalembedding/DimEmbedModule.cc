@@ -94,7 +94,7 @@ void DimEmbedModule::init() {
 
 const std::vector<double>& DimEmbedModule::getEmbedVector(const Handle& h,
                                                           const Type& l,
-                                                          bool fanin) {
+                                                          bool fanin) const {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -125,7 +125,7 @@ const std::vector<double>& DimEmbedModule::getEmbedVector(const Handle& h,
     }
 }
 
-const HandleSeq& DimEmbedModule::getPivots(const Type& l) {
+HandleSeq& DimEmbedModule::getPivots(const Type& l, bool fanin) {
     if(!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -135,7 +135,13 @@ const HandleSeq& DimEmbedModule::getPivots(const Type& l) {
         logger().error("No embedding exists for type %s", tName);
         throw std::string("No embedding exists for type %s", tName);
     }
-    return pivotsMap[l];
+    bool symmetric = classserver().isA(l,UNORDERED_LINK);
+    if(symmetric) {
+        return pivotsMap.find(l)->second;
+    } else {
+        if(fanin) return asymPivotsMap.find(l)->second.second;
+        else return asymPivotsMap.find(l)->second.first;
+    }
 }
 
 HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int k, bool fanin) {
@@ -153,11 +159,11 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
 
     std::vector<CoverTreePoint> points;
     if(symmetric) {
-        EmbedTreeMap::iterator it = embedTreeMap.find(l);
+        EmbedTreeMap::const_iterator it = embedTreeMap.find(l);
         points =
             it->second.kNearestNeighbors(CoverTreePoint(h,atomMaps[l][h]),k);
     } else {
-        AsymEmbedTreeMap::iterator it = asymEmbedTreeMap.find(l);
+        AsymEmbedTreeMap::const_iterator it = asymEmbedTreeMap.find(l);
         if(fanin) {
             points =
                 it->second.second.
@@ -200,8 +206,12 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool fanin)
             distMap[*it]=0;
         }
     }
-    //Only add the pivot once
-    if(!fanin) pivotsMap[linkType].push_back(h);
+    if(symmetric) {
+        pivotsMap[linkType].push_back(h);
+    } else {
+        if(fanin) asymPivotsMap[linkType].second.push_back(h);
+        else asymPivotsMap[linkType].first.push_back(h);
+    }
     while(!pQueue.empty()) {
         pQueue_t::reverse_iterator p_it = pQueue.rbegin();
         Handle u = p_it->second;//extract max (highest weight)
@@ -270,6 +280,33 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool fanin)
     }
 }
 
+Handle DimEmbedModule::pickPivot(const Type& linkType, HandleSeq& nodes, bool fanin) {
+    bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
+    
+    HandleSeq& pivots = getPivots(linkType,fanin);
+    Handle bestChoice = nodes.back();
+    if(pivots.empty()) return bestChoice;
+    logger().info("Pivot %d picked", pivots.size());
+    double bestChoiceWeight = 1;
+    //pick the next pivot to maximize its distance from its closest pivot
+    //(maximizing distance = minimizing path weight)
+    for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it) {
+        std::vector<double> eV;
+        if(symmetric) {
+            eV = atomMaps[linkType][*it];
+        } else {
+            if(fanin) eV = asymAtomMaps[linkType].second[*it];
+            else eV = asymAtomMaps[linkType].first[*it];
+        }
+        double testChoiceWeight = *std::max_element(eV.begin(), eV.end());
+        if(testChoiceWeight < bestChoiceWeight) {
+            bestChoice = *it;
+            bestChoiceWeight = testChoiceWeight;
+        }
+    }
+    return bestChoice;
+}
+
 void DimEmbedModule::embedAtomSpace(const Type& linkType,
                                     const int _numDimensions)
 {
@@ -282,41 +319,30 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
     // Scheme wrapper doesn't deal with unsigned ints, so double check it's not
     // negative, or zero for that matter
-    unsigned int numDimensions = 5;
+    int numDimensions = 5;
     if (_numDimensions > 0) numDimensions = _numDimensions;
 
+    bool fanin=false;
     dimensionMap[linkType]=numDimensions;
-    HandleSeq nodes;
+    //const HandleSeq& pivots = getPivots(linkType);
+    HandleSeq nodes;//candidates for new pivots
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
-    
-    HandleSeq& pivots = pivotsMap[linkType];
     if(nodes.empty()) return;
-    Handle bestChoice = nodes.back();
+    if(nodes.size()<(unsigned int) numDimensions) numDimensions = nodes.size();
 
-    while((pivots.size() < (unsigned int) numDimensions) && (!nodes.empty())){
-        if(symmetric) {
-            addPivot(bestChoice, linkType);
-        } else {
-            addPivot(bestChoice, linkType, false);
-            addPivot(bestChoice, linkType, true);
+    for(int i=0; i<numDimensions; ++i) {
+        Handle newPivot;
+        if(i!=0) newPivot = pickPivot(linkType,nodes,fanin);
+        else newPivot = nodes.back();
+        nodes.erase(std::find(nodes.begin(), nodes.end(), newPivot));
+        addPivot(newPivot, linkType, fanin);
+        if(!symmetric && !fanin && (nodes.empty() || i==numDimensions-1)) {
+            fanin=true;
+            nodes.clear();
+            as->getHandleSet(std::back_inserter(nodes), NODE, true);
+            i=-1;
         }
-        logger().info("Pivot %d picked", pivots.size());
-        nodes.erase(std::find(nodes.begin(), nodes.end(), bestChoice));
 
-        bestChoice = nodes[0];
-        double bestChoiceWeight = 1;
-        //pick the next pivot to maximize its distance from its closest pivot
-        //(maximizing distance = minimizing path weight)
-        for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-            std::vector<double> eV;
-            if(symmetric) eV = atomMaps[linkType][*it];
-            else eV = asymAtomMaps[linkType].first[*it];
-            double testChoiceWeight = *std::max_element(eV.begin(), eV.end());
-            if(testChoiceWeight < bestChoiceWeight) {
-                bestChoice = *it;
-                bestChoiceWeight = testChoiceWeight;
-            }
-        }
     }
     //Now that all the points are calculated, we construct a
     //cover tree for them.
@@ -335,12 +361,12 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
             = asymEmbedTreeMap.insert(make_pair(linkType,
                                             make_pair(CoverTree<CoverTreePoint>(numDimensions+.1), CoverTree<CoverTreePoint>(numDimensions+.1)))).first->second;
         std::pair<AtomEmbedding, AtomEmbedding>& aE = asymAtomMaps[linkType];
-        AtomEmbedding& aE1 = aE.first;
+        const AtomEmbedding& aE1 = aE.first;
         AtomEmbedding::const_iterator it = aE1.begin();
         for(;it!=aE1.end();++it) {
             cTrees.first.insert(CoverTreePoint(it->first,it->second));
         }
-        AtomEmbedding& aE2 = aE.second;
+        const AtomEmbedding& aE2 = aE.second;
         it = aE2.begin();
         for(;it!=aE2.end();++it) {
             cTrees.second.insert(CoverTreePoint(it->first,it->second));
@@ -620,15 +646,15 @@ void DimEmbedModule::printEmbedding() {
     }
     std::cout << oss.str();
 }
-bool DimEmbedModule::isEmbedded(const Type& linkType) {
+bool DimEmbedModule::isEmbedded(const Type& linkType) const {
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
     //See if atomMaps holds an embedding for linkType
-    AtomEmbedMap::iterator aEMit = atomMaps.find(linkType);
+    AtomEmbedMap::const_iterator aEMit = atomMaps.find(linkType);
     if(aEMit!=atomMaps.end()) return true;
-    AsymAtomEmbedMap::iterator aaEMit = asymAtomMaps.find(linkType);
+    AsymAtomEmbedMap::const_iterator aaEMit = asymAtomMaps.find(linkType);
     if(aaEMit!=asymAtomMaps.end()) return true;
     return false;
 }
@@ -640,7 +666,7 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npa
         throw std::string("No embedding exists for type %s", tName);
     }
     int numDimensions=dimensionMap[l];
-    AtomEmbedding& aE = atomMaps[l];
+    const AtomEmbedding& aE = atomMaps[l];
     int numVectors=aE.size();
     if(numVectors<numClusters) {
         logger().error("Cannot make more clusters than there are nodes");
@@ -657,14 +683,14 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npa
         mask[i] = maskArray + numDimensions*i;
     }
     Handle* handleArray = new Handle[numVectors];
-    AtomEmbedding::iterator aEit=aE.begin();
+    AtomEmbedding::const_iterator aEit=aE.begin();
     int i=0;
     int j;
     //add the values to the embeddingmatrix...
     for(;aEit!=aE.end();++aEit) {
         handleArray[i]=aEit->first;
-        std::vector<double> embedding = aEit->second;
-        std::vector<double>::iterator vit=embedding.begin();
+        const std::vector<double>& embedding = aEit->second;
+        std::vector<double>::const_iterator vit=embedding.begin();
         j=0;
         for(;vit!=embedding.end();++vit) {
             embedMatrix[i][j]=*vit;
@@ -751,7 +777,7 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npa
 
 void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
                                        double threshold, int kPasses) {
-    AtomEmbedding aE = atomMaps[l];
+    const AtomEmbedding& aE = atomMaps[l];
     if(kPasses==-1) kPasses = (std::log(aE.size())/std::log(2))-1;
 
     typedef std::pair<double,std::pair<HandleSeq,vector<double> > > cPair;
@@ -823,7 +849,7 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
 }
 
 double DimEmbedModule::homogeneity(const HandleSeq& cluster,
-                                   const Type& linkType) {
+                                   const Type& linkType) const {
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
@@ -834,10 +860,11 @@ double DimEmbedModule::homogeneity(const HandleSeq& cluster,
     for(HandleSeq::const_iterator it=cluster.begin();it!=cluster.end();++it) {
         double minDist=DBL_MAX;
         //find the distance to nearest clustermate
+        const std::vector<double>& embedding = getEmbedVector(*it,linkType);
         for(HandleSeq::const_iterator it2=cluster.begin();
                                       it2!=cluster.end();++it2) {
             if(*it==*it2) continue;
-            double dist=euclidDist(*it,*it2,linkType);
+            double dist=euclidDist(embedding,getEmbedVector(*it2,linkType));
             if(dist<minDist) minDist=dist;
         }
         average+=minDist;
@@ -847,15 +874,15 @@ double DimEmbedModule::homogeneity(const HandleSeq& cluster,
 }
 
 double DimEmbedModule::separation(const HandleSeq& cluster,
-                                  const Type& linkType) {
+                                  const Type& linkType) const {
     if(!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-
-    AtomEmbedding aE = (atomMaps.find(linkType))->second;
+    
+    const AtomEmbedding& aE = (atomMaps.find(linkType))->second;
     double minDist=DBL_MAX;
-    for(AtomEmbedding::iterator it=aE.begin();it!=aE.end();++it) {
+    for(AtomEmbedding::const_iterator it=aE.begin();it!=aE.end();++it) {
         bool inCluster=false; //whether *it is in cluster
         bool better=false; //whether *it is closer to some element of cluster
                            //than minDist
@@ -866,7 +893,7 @@ double DimEmbedModule::separation(const HandleSeq& cluster,
                 inCluster=true;
                 break;
             }
-            dist = euclidDist(it->second,aE[*it2]);
+            dist = euclidDist(it->second,getEmbedVector(*it2,linkType));
             if(dist<minDist) better=true;
         }
         //If the node is closer and it is not in the cluster, update minDist
