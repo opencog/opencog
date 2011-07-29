@@ -3,10 +3,14 @@ from unittest import TestCase
 # http://www.voidspace.org.uk/python/mock/
 from mock import patch
 
+import os
+import tempfile
+
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
+import opencog.util
 
-import fishgram
+import fishgram, tree, adaptors
 
 # run doctests
 import doctest
@@ -19,20 +23,40 @@ doctest.testmod(fishgram)
 
 def add_fishgram_data(atomspace):
     a = atomspace
+    t = types
     # load and parse a file, or just add some dummy nodes.
     # it shouldn't be huge amounts of data, just enough to demonstrate
     # that the code is functionally correct    
-
 
 class FishgramTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
+        print adaptors.ForestExtractor
         self.fishgram = fishgram.Fishgram(self.space)
         add_fishgram_data(self.space)
+        
+        tempfd, self.tempfn = tempfile.mkstemp()
+        # close the temp file as Logger will want to manually
+        # open it
+        os.close(tempfd) 
+        self.log = opencog.util.create_logger(self.tempfn)
+
 
     def tearDown(self):
         pass
+
+    def test_bfs(self):
+#        conj = (
+#            a.add(t.AtTimeLink, out=[a.add(t.TimeNode, '11210347010'), a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'increased'), a.add(t.ListLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'EnergyDemandGoal'), a.add(t.ListLink, out=[])])])])]),
+#            a.add(t.AtTimeLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'actionDone'), a.add(t.ListLink, out=[a.add(t.ExecutionLink, out=[a.add(t.GroundedSchemaNode, 'eat'), a.add(t.ListLink, out=[a.add(t.AccessoryNode, 'id_-54646')])])])])]),
+#            a.add(t.SequentialAndLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.TimeNode, '11210347010')])
+#            )
+#        conj = tuple(map(tree.tree_from_atom, conj))
+
+#res = tree.find_conj(conj,a.get_atoms_by_type(t.Atom))
+        pass
+
 
     def test_implications(self):
         i = None #self.fishgram.implications()
@@ -52,3 +76,85 @@ class FishgramTest(TestCase):
 
     def test_notice_changes(self):
         pass
+
+    def test_make_psi_rule(self):
+        tr = tree.tree
+        a = self.space.add
+        t = types
+        
+        bark =  tr('ExecutionLink',
+                    a(t.GroundedSchemaNode, name='bark'), 
+                    tr('ListLink')
+                )
+        
+        action = tr('AtTimeLink', 1,
+                                tr('EvaluationLink',
+                                    a(t.PredicateNode, name='actionDone'),
+                                    tr('ListLink',
+                                       bark
+                                     )
+                                )
+                            )
+        seq_and = tr('SequentialAndLink', 1, 2) # two TimeNodes
+        result = tr('AtTimeLink',
+                     2,
+                     tr('EvaluationLink',
+                                a(t.PredicateNode, name='increased'),
+                                tr('ListLink',
+                                    a(t.PredicateNode, name = 'EnergyDemandGoal')
+                                )
+                        )
+                     )
+        
+        premises = (action, seq_and)
+        conclusion = result
+        
+        premises2, conclusion2 = self.fishgram.make_psi_rule(premises, conclusion)
+        print premises2, conclusion2
+        
+        ideal_premises = (bark, )
+        ideal_conclusion =  tr('EvaluationLink',
+                                a(t.PredicateNode, name = 'EnergyDemandGoal'), 
+                                    tr('ListLink')
+                            )
+        
+        self.assertEquals(premises2, ideal_premises)
+        self.assertEquals(conclusion2, ideal_conclusion)
+
+    def test_lookup_causal_patterns(self):
+        tr = tree.tree
+        a = self.space.add
+        t = types
+        
+        bark =  tr('ExecutionLink',
+            a(t.GroundedSchemaNode, name='bark'), 
+            tr('ListLink')
+        )
+        
+        action = tr('AtTimeLink', 1,
+                                tr('EvaluationLink',
+                                    a(t.PredicateNode, name='actionDone'),
+                                    tr('ListLink',
+                                       bark
+                                     )
+                                )
+                            )
+        seq_and = tr('SequentialAndLink', 1, 2) # two TimeNodes
+        increase = tr('AtTimeLink',
+                     2,
+                     tr('EvaluationLink',
+                                a(t.PredicateNode, name='increased'),
+                                tr('ListLink',
+                                    a(t.PredicateNode, name = 'EnergyDemandGoal')
+                                )
+                        )
+                     )
+        
+        # Add the pattern (still with some variables) into the ForestExtractor results, then see if it can be looked up correclty
+        ideal_result = (action, seq_and, increase)
+        for x in ideal_result:
+            self.fishgram.forest.unique_trees.add(x)
+        
+        result = next(self.fishgram.lookup_causal_patterns())
+        print result
+        assert tree.unify(result, ideal_result, {}, True) != None
