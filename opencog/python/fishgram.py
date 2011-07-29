@@ -1,6 +1,7 @@
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, types as t
+import opencog.cogserver
 from tree import *
-from adaptors import *
+import adaptors
 from util import *
 from itertools import *
 import sys
@@ -18,7 +19,7 @@ def pairwise(iterable):
 
 class Fishgram:
     def __init__(self,  atomspace):
-        self.forest = ForestExtractor(atomspace,  None)
+        self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
         self.min_embeddings = 2
         self.min_frequency = 0.5
@@ -111,17 +112,21 @@ class Fishgram:
          
         return ret
 
-    def extensions_simple(self, prev_layer):
-        new_layer = []
-        
-        for (prev_conj,  prev_embeddings) in prev_layer:
-            target = prev_conj + (new_var(), )
-            
-            matches = find_matching_conjunctions(target,fish.forest.unique_trees)
-            
-            for m in matches:
-                embs = self.forest.lookup_embeddings(m.conj)
-                new_layer.append( (m.conj, embs) )
+# It may be possible to convert this into a simpler fishgram implementation, based on unify+lookup; the current one uses the 'incoming trees' index created by the
+# ForestExtractor.
+#    def extensions_simple(self, prev_layer):
+#        new_layer = []
+#        
+#        # Not correct - it must choose variables so that new 'links' (trees) will be connected in the right place.
+#        # That should be done based on embeddings (i.e. add a link if some of the embeddings have it)
+#        for (prev_conj,  prev_embeddings) in prev_layer:
+#            target = prev_conj + (new_var(), )
+#            
+#            matches = find_matching_conjunctions(target,fish.forest.unique_trees)
+#            
+#            for m in matches:
+#                embs = self.forest.lookup_embeddings(m.conj)
+#                new_layer.append( (m.conj, embs) )
 
     def extensions(self,  prev_layer):
         """Find all extensions for that fragment. An extension means adding one link to a particular
@@ -495,10 +500,10 @@ class Fishgram:
                                 )
                      )
 
-        ideal_premises = (action_template, seq_and_template)
-        ideal_conclusion = increase_template
+#        ideal_premises = (action_template, seq_and_template)
+#        ideal_conclusion = increase_template
         
-        self.causality_template = (action_template, seq_and_template, increase_template)
+        self.causality_template = (action_template, increase_template, seq_and_template)
         
         # Try to find suitable patterns and then use them.
         print pp(self.causality_template)
@@ -524,9 +529,9 @@ class Fishgram:
                 count_conj = len(self.forest.lookup_embeddings(conj))
                 count_premises = len(self.forest.lookup_embeddings(premises))
                 
-                print "make_implication(premises=%s, conclusion=%s, count_premises=%s, count_conj=%s)" % (premises, conclusion, count_premises, count_conj)
-                
-                self.make_implication(premises, conclusion, count_premises, count_conj)
+                print "make_implication(premises=%s, conclusion=%s, count_premises=%s, count_conj=%s)" % (premises, conclusion, count_premises, count_conj)                
+                if count_premises > 0:
+                    self.make_implication(premises, conclusion, count_premises, count_conj)
     
     def _split_conj_into_rules(self, conj):
         for i in xrange(0, len(conj)):
@@ -628,7 +633,7 @@ class Fishgram:
         return len(small_embs) * implied_cases
 
 def make_seq(atomspace):
-    # unit of timestamps is 0.01 second so multiply by 10
+    # unit of timestamps is 0.01 second so multiply by 100
     interval = 100* 30
     times = atomspace.get_atoms_by_type(t.TimeNode)
     times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
@@ -892,7 +897,9 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
     def run(self,atomspace):
         try:
             fish = Fishgram(atomspace)
-            make_seq(atomspace)
+#            make_seq(atomspace)
+            # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
+            atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
             
             notice_changes(atomspace)
             

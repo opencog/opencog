@@ -310,7 +310,9 @@ def standardize_apart(tr, dic=None):
     if dic == None:
         dic = {}
 
-    if tr.is_variable():
+    if isinstance(tr, tuple):
+        return tuple([standardize_apart(a, dic) for a in tr])
+    elif tr.is_variable():
         if tr in dic:
             return dic[tr]
         else:

@@ -180,11 +180,11 @@ class ForestExtractor:
         (which would be useful for the calculations used when finding implication rules)."""
 
         # Find all bound trees
-#        try:
-#            self.all_bound_trees
-#        except AttributeError:
-#            self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
-        self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
+        try:
+            self.all_bound_trees
+        except AttributeError:
+            self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
+#        self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
         
         return self.lookup_embeddings_helper(conj, (), {}, self.all_bound_trees)
 
@@ -198,34 +198,68 @@ class ForestExtractor:
         tr = conj[0]
 
         ret = []
-        for bound_tr in all_bound_trees:
-            s2 = unify(tr, bound_tr, s)
-            
-            if s2 != None:
-                bc = bound_conj_so_far + ( bound_tr , )
-                later = self.lookup_embeddings_helper(conj[1:], bc, s2, all_bound_trees)
-                # Add the (complete) substitutions from lower down in the recursive search,
-                # but only if they are not duplicates.
-                # TODO I wonder why the duplication happens?
-                for final_s in later:
-                    if final_s not in ret:
-                        ret.append(final_s)
+        substs = []
+        s2 = ForestExtractor.magic_eval(self.a, tr, s)
+        if s2 != None:
+            substs.append(s2)
+            bound_tr = subst(s2, tr)
+        else: # For efficiency, don't try looking it up it if it was magically evaluated
+            for bound_tr in all_bound_trees:
+                s2 = unify(tr, bound_tr, s)
+                if s2 != None:
+                    substs.append( s2 )
+
+        for s2 in substs:
+            bc = bound_conj_so_far + ( bound_tr , )
+            later = self.lookup_embeddings_helper(conj[1:], bc, s2, all_bound_trees)
+            # Add the (complete) substitutions from lower down in the recursive search,
+            # but only if they are not duplicates.
+            # TODO I wonder why the duplication happens?
+            for final_s in later:
+                if final_s not in ret:
+                    ret.append(final_s)
         
         return ret
+    
+    @staticmethod
+    def magic_eval(atomspace, tr, s = {}):
+        '''Evaluate special operators (as opposed to ordinary links in the atomspace).
+        tr is a tree containing a link or operator. s is a substitution to use with tr.
+        Currently the only operator is SequentialAndLink (the type). A SequentialAndLink
+        between Atoms will be accepted if a) 1 or both of its arguments are only variables, or
+        b) its arguments are TimeNodes within a certain interval (currently 30 seconds).
+        If all possible valid links corresponding to this operator were explicitly recorded
+        in the AtomSpace, you would be able to get the same effect by trying to unify tr
+        against the trees for every Atom in the AtomSpace.
         
-#        for size in self.tree_embeddings:
-#            if size == 0: continue
-#            for t in self.tree_embeddings[size]:
-#                s2 = unify(t, tr, {})
-#                
-#                if s2 != None:
-#                    for binding in embs:
-#                        print pp(t)
-#                        var_mapping = dict([ (tree(i), obj) for i, obj in enumerate(binding)])
-#                        print pp(var_mapping)
-#    #                    grounded_t = subst(var_mapping, t)
-#    #                    print pp(grounded_t)
-
+        NOTE: In a conjunction, the operator must be after any links that use the variables.'''
+        # unit of timestamps is 0.01 second so multiply by 100
+        interval = 100* 30
+        
+        # If this is called from lookup_embeddings_helper, s should contain specific TimeNodes
+        tr = subst(s, tr)
+        
+        # use unify to extract a SequentialAndLink
+        t1_var, t2_var = new_var(), new_var()
+        template = tree('SequentialAndLink', t1_var, t2_var)
+        # template_s is just used to find the TimeNodes (to compare them with each other)
+        template_s = unify(template, tr, s)
+        if template_s == None:
+            return None
+        time1_tr = template_s[t1_var]
+        time2_tr = template_s[t2_var]
+        if time1_tr.is_variable() or time2_tr.is_variable():
+            return s
+        
+        time1_atom = time1_tr.op
+        time2_atom = time2_tr.op
+        
+        t1 = int(time1_atom.name)
+        t2 = int(time2_atom.name)
+        if t2 - t1 <= interval:
+            return s
+        else:
+            return None
 
 class GraphConverter:
     def __init__(self, a, writer):
