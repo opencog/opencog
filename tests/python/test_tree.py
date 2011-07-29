@@ -57,7 +57,6 @@ class TreeTest(TestCase):
         self.assertEquals(l_tree1 > l_tree, False)
         self.assertEquals(l_tree1 < l_tree, True)
 
-
     def test_coerce_tree(self):
         node_tree = tree.tree_from_atom(self.x1)
         print str(node_tree)
@@ -99,7 +98,38 @@ class TreeTest(TestCase):
             
             self.assertEquals(first.subst, {})
             self.assertEquals(first.atoms, [self.l1, self.l2])
+    
+    # Test whether find_conj can be used to find atoms for Psi Rules. That is not actually done in the code, but could be useful as an alternative approach.
+    # (This may be obsolete; an even better approach would be to use find_matching_conjunctions)
+    def  test_find_conj2(self):
+        a = self.a
         
+        conj = (
+            a.add(t.AtTimeLink, out=[a.add(t.TimeNode, '11210347010'), a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'increased'), a.add(t.ListLink, out=[a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'EnergyDemandGoal'), a.add(t.ListLink, out=[])])])])]),
+            a.add(t.AtTimeLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'actionDone'), a.add(t.ListLink, out=[a.add(t.ExecutionLink, out=[a.add(t.GroundedSchemaNode, 'eat'), a.add(t.ListLink, out=[a.add(t.AccessoryNode, 'id_-54646')])])])])]),
+            a.add(t.SequentialAndLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.TimeNode, '11210347010')])
+        )
+        conj = tuple(map(tree.tree_from_atom, conj))
+
+        res = tree.find_conj(conj,a.get_atoms_by_type(t.Atom))
+
+    def  test_find_conj3(self):
+        a = self.a
+        
+        t1 = tree.atom_from_tree(tree.new_var(), a)
+        t2 = tree.atom_from_tree(tree.new_var(), a)
+        action = tree.atom_from_tree(tree.new_var(), a)
+        goal = tree.atom_from_tree(tree.new_var(), a)
+        
+        conj = (
+            a.add(t.AtTimeLink, out=[t1, a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'actionDone'), action])]),
+            a.add(t.AtTimeLink, out=[t2, a.add(t.EvaluationLink, out=[a.add(t.PredicateNode, 'increased'), a.add(t.ListLink, out=[a.add(t.EvaluationLink, out=[goal, a.add(t.ListLink, out=[])])])])]),
+            a.add(t.SequentialAndLink, out=[a.add(t.TimeNode, '11210347000'), a.add(t.TimeNode, '11210347010')])
+        )
+        conj = tuple(map(tree.tree_from_atom, conj))
+
+        res = tree.find_conj(conj,a.get_atoms_by_type(t.Atom))
+
     def test_apply_rule(self):
         atoms = [self.l1, self.l2]
         
@@ -110,7 +140,19 @@ class TreeTest(TestCase):
         result_correct = map(tree.tree_from_atom, [self.x1, self.l1])
         self.assertEquals(result_trees, result_correct)
 
-#eval_template = tree('EvaluationLink', 1, tree('ListLink', 2, 3))
-#imp_template = tree('ImplicationLink', 1,  2)
-
-
+    def test_standardize_apart(self):
+        var1, var2 = tree.tree(1), tree.tree(2)
+        tr1 = tree.tree('ListLink', var1, var2)
+        
+        tr2 = tree.standardize_apart(tr1)
+        
+        print tr1
+        print tr2
+        
+        self.assertNotEquals(tree.unify(tr1, tr2, {}),  None)
+        
+        var1_new, var2_new = tr2.args
+        
+        self.assertNotEquals(var1_new, var2_new)        
+        assert var1_new not in [var1, var2]
+        assert var2_new not in [var1, var2]
