@@ -51,7 +51,32 @@ goalId   = 100
 #eval_template = tree('EvaluationLink', 1, tree('ListLink', 2, 3))
 #imp_template = tree('ImplicationLink', 1,  2)
 
+def fc(a):
+    facts = set([r.head for r in rules if not r.goals])
+    real_rules = set([r for r in rules if r.goals])
 
+    # we have rules which are goal:-term,term,term,...
+    # and include rules with no arguments.
+    layer_facts = set()    
+    
+    for r in real_rules:
+        # In case we prove something that still has a variable in it
+        #r = Rule(standardize_apart(r.head), standardize_apart(tuple(r.goals)))
+        s = {}
+        
+        matches = find_matching_conjunctions(tuple(r.goals), facts)
+        
+        for m in matches:
+            result = subst(m.subst, r.head)
+            #res = Rule(result, [])
+            layer_facts.add(result)            
+            print '%s: %s <- %s' % (pp(r), pp(result), pp(m.conj))
+            
+            atom = atom_from_tree(result, a)
+            atom.tv = TruthValue(1, 1)
+    
+    # Add the facts somewhere more permanent
+    return layer_facts
 
 class Rule :
 #    def __init__ (self, s) :   # expect "term:-term,term,..."
@@ -73,28 +98,6 @@ class Rule :
             rep += sep + str(goal)
             sep = ","
         return rep
-        
-class Goal :
-    def __init__ (self, rule, parent=None, env={}) :
-        global goalId
-        goalId += 1
-        self.id = goalId
-        self.rule = rule
-        self.parent = parent
-        self.env = copy.copy(env)
-        self.inx = 0      # start search with 1st subgoal
-
-    def clone(self):
-        return Goal(self.rule, self.parent, self.env)
-
-    def __repr__ (self) :
-        return "Goal %d rule=%s inx=%d env=%s" % (self.id,self.rule,self.inx,self.env)
-
-# A Goal is a rule in at a certain point in its computation. 
-# env contains definitions (so far), inx indexes the current term
-# being satisfied, parent is another Goal which spawned this one
-# and which we will unify back to when this Goal is complete.
-#
 
 def search (term) :
     print "Query: ", str(term)
@@ -135,6 +138,68 @@ def search (term) :
                 queue.insert(0,child)
                 if trace : print "Queue child", child
 
+
+#class Goal :
+#    def __init__ (self, rule, parent=None, env={}) :
+#        global goalId
+#        goalId += 1
+#        self.id = goalId
+#        self.rule = rule
+#        self.parent = parent
+#        self.env = copy.copy(env)
+#        self.inx = 0      # start search with 1st subgoal
+#
+#    def clone(self):
+#        return Goal(self.rule, self.parent, self.env)
+#
+#    def __repr__ (self) :
+#        return "Goal %d rule=%s inx=%d env=%s" % (self.id,self.rule,self.inx,self.env)
+#
+## A Goal is a rule in at a certain point in its computation. 
+## env contains definitions (so far), inx indexes the current term
+## being satisfied, parent is another Goal which spawned this one
+## and which we will unify back to when this Goal is complete.
+##
+#
+#def search (term) :
+#    print "Query: ", str(term)
+#    global trace, rules
+#    # pop will take item from end, insert(0,val) will push item onto queue
+#    goal = Goal(Rule("JUSTICE", []))      # Anything- just get a rule object
+#    goal.rule.goals = [term]                  # target is the single goal
+#    queue = [goal]                            # Start our search
+#    while queue :
+#        c = queue.pop()                       # Next goal to consider
+#        if trace : print "Deque", c
+#        if c.inx >= len(c.rule.goals) :       # Is this one finished?
+#            if c.parent == None :            # Yes. Our original goal?
+##                if c.env : print pp(c.env)         # Yes. tell user we
+##                else     : print "Yes"          # have a solution
+#                target = subst(c.env, c.rule.goals[0])
+#                print "Result:", pp(target)
+#                continue
+#            assert c.parent != None
+##            parent = copy.deepcopy(c.parent)  # Otherwise resume parent goal
+#            parent = c.parent.clone()  # Otherwise resume parent goal
+#            parent.env = unify(c.rule.head, parent.rule.goals[parent.inx], c.env)
+##            unify (c.rule.head,    c.env,
+##                   parent.rule.goals[parent.inx],parent.env)
+#            parent.inx = parent.inx+1         # advance to next goal in body
+#            queue.insert(0,parent)            # let it wait its turn
+#            if trace : print "Queue parent", parent
+#            continue
+#
+#        # No. more to do with this goal.
+#        term = c.rule.goals[c.inx]            # What we want to solve
+#
+#        for rule in rules :                   # Walk rule database
+#            child = Goal(rule, c)               # A possible subgoal
+##            ans = unify (term, c.env, rule.head, child.env)
+#            child.env = unify(term, rule.head, c.env)
+#            if child.env != None:                    # if unifies, queue it up
+#                queue.insert(0,child)
+#                if trace : print "Queue child", child
+
 def setup_rules(a):
     global rules
 
@@ -144,20 +209,30 @@ def setup_rules(a):
             tr = tree_from_atom(obj)
             rules.append(Rule(tr))
     
-#    # Deduction
-#    for type in ['SubsetLink', 'ImplicationLink']:
-#        rules.append(Rule(tree(type, 1,3), 
-#                                     [tree(type, 1, 2),
-#                                      tree(type, 2, 3) ]))
+    # Deduction
+    for type in ['SubsetLink', 'ImplicationLink']:
+        rules.append(Rule(tree(type, 1,3), 
+                                     [tree(type, 1, 2),
+                                      tree(type, 2, 3) ]))
 
+    # ModusPonens
     for type in ['ImplicationLink']:
         rules.append(Rule(tree(2), 
                                      [tree(type, 1, 2),
                                       tree(1) ]))
+    
+    # AND/OR
+    for type in ['AndLink', 'OrLink']:
+        for size in xrange(6):
+            args = [new_var() for i in xrange(size+1)]
+            rules.append(Rule(tree(type, args),
+                               args))
+    
 
 def test(a):
     setup_rules(a)
-    search(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    #search(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    fc(a)
 
 print __name__
 if __name__ == "__main__":
@@ -219,6 +294,4 @@ if __name__ == "__main__":
 #    for tr in [all_template, eval_template, imp_template]:
 #        search(tr)
 
-    setup_rules(a)
-    logic.search(tree.tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
-    
+    test(a)
