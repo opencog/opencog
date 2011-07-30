@@ -36,10 +36,6 @@
 #include <exception>
 
 namespace opencog { namespace combo {
-//inline boost::variant<vertex,combo_tree::iterator>& binding(int idx) {
-//  static hash_map<int,boost::variant<vertex,combo_tree::iterator> > map; //to support lazy evaluation, can also bind to a subtree
-//  return map[idx];
-//}
 
 template<typename It>
 vertex action_eval_throws(RandGen& rng, It it) throw(EvalException, AssertionException, std::bad_exception) {

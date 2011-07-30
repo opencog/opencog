@@ -40,15 +40,10 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")
   ENDIF (APPLE)
   
-  # Nil: added -Wno-deprecated to avoid multiple warnings
-  # due to hash_map which is deprecated in gcc 4.3
-  # note that when replacing hash_map by unordered_map
-  # it results in other warnings explaining that C++0x support is still
-  # experimental, which is why I let hash_map for now
   # Nil: added -Wno-variadic-macros to avoid warnings regarding
   # using variadic in macro OC_ASSERT (the warning warns that this is
   # only available from C99, lol!)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated -Wno-variadic-macros")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros")
 
   SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
   SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
