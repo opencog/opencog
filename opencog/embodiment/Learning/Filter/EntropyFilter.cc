@@ -49,8 +49,7 @@
 //The option below is deprecated
 //when this flag is on it computes an approximation of the entropy
 //of perceptions involving random operators instead of the exact entropy
-//NOTE : that is true anyway because exact random entropy takes too much
-//resources
+//NOTE: exact random entropy takes too many resources
 //#define OPTIMIZE_RANDOM_ENTROPY true
 
 //this correspond to the granularity to evaluate is_last_action_action
