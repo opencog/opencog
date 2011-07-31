@@ -800,7 +800,7 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
     Handle evalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoing);
 
     TimeServer& ts = atomSpace.getTimeServer();
-    ulong latest = ts.getLatestTimestamp();
+    unsigned long latest = ts.getLatestTimestamp();
 
     // An error could occur here, but that should never happen
     Temporal t(latest);
