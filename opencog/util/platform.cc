@@ -168,12 +168,36 @@ size_t opencog::getMemUsage() {
     return diff;
 }
 
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#include <sys/types.h>
+
+uint64_t opencog::getTotalRAM()
+{
+   int mib[2];
+   uint64_t physmem;
+   size_t len;
+
+   mib[0] = CTL_HW;
+   mib[1] = HW_MEMSIZE;
+   len = sizeof(physmem);
+   sysctl(mib, 2, &physmem, &len, NULL, 0);
+   return physmem;
+    
+}
+
+uint64_t opencog::getFreeRAM() {
+    return getTotalRAM() - getMemUsage();
+}
+
+#else // __APPLE__
 #include <sys/sysinfo.h>
 
-unsigned long opencog::getTotalRAM() {
+uint64_t opencog::getTotalRAM() {
     return getpagesize() * get_phys_pages();
 }
 
-unsigned long opencog::getFreeRAM() {
+uint64_t opencog::getFreeRAM() {
     return getpagesize() * get_avphys_pages();
 }
+#endif // __APPLE__

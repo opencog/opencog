@@ -81,13 +81,13 @@ unsigned int       sleep(unsigned seconds);
 
 #endif // ~WIN32_NOT_UNIX
 
-size_t             getMemUsage();
+size_t getMemUsage();
 
 /// return the number of bytes of RAM
-unsigned long      getTotalRAM();
+uint64_t getTotalRAM();
 
 /// return the number of free bytes in RAM (excluding OS caches)
-unsigned long      getFreeRAM();
+uint64_t getFreeRAM();
 
 } // namespace opencog
 
