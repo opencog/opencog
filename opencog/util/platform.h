@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
+#include <stdint.h>
 
 namespace opencog
 {
