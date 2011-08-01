@@ -1262,8 +1262,6 @@ private:
     boost::signals::connection c_add; //! Connection to add atom signals
     boost::signals::connection c_remove; //! Connection to remove atom signals
 
-    mutable boost::mutex cache_lock;
-
     void setUpCaching();
 #endif
 
