@@ -710,9 +710,18 @@ inline bool vertex_to_bool(const vertex& v)
 //renamed negate_vertex to not enter in conflict with negate(string) of STL
 inline vertex negate_vertex(const vertex& v)
 {
-    OC_ASSERT(v == id::logical_true || v == id::logical_false,
-              "vertex should be of logical types 'id::logical_true' or 'id::logical_false'.");
-    return (v == id::logical_true ? id::logical_false : id::logical_true);
+    if(v == id::logical_true)
+        return id::logical_false;
+    else if(v == id::logical_false)
+        return id::logical_true;
+    else {
+        std::stringstream ss;
+        ss << v;
+        OC_ASSERT(false,
+                  "vertex %s should be id::logical_true or id::logical_false",
+                  ss.str().c_str());
+        return vertex();
+    }
 }
 
 inline bool is_complement(const vertex& x, const vertex& y)
