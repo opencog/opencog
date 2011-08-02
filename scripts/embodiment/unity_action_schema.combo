@@ -42,40 +42,23 @@ eat(1) := eat(#1)
 
 go_home(0) := goto_obj(pet_home 2)
 
+rotate_right(0) := rotate_right
+rotate_left(0)  := rotate_left
+step_forward(0) := step_forward
+step_backward(0) := step_backward
+
 #walk random, but more forward and more right and does not rotate every time
 random_search(0) := 
-    and_seq(jump_up step_backward jump_up step_forward)
-#    and_seq( action_boolean_if(greater_than(rand 0.45)
-#                               and_seq(rotate_right rotate_right rotate_right rotate_right rotate_right)
-#                               and_seq(rotate_left rotate_left rotate_left)
-#                              )
-#
-#             action_boolean_if(greater_than(rand 0.45)
-#                               step_backward
-#                               step_forward
-#                              )
-#           )
-#
-#   and_seq( and_seq(rotate_right rotate_right rotate_right rotate_right rotate_right)
-#            step_backward
-#            and_seq(rotate_left rotate_left rotate_left)
-#            step_forward
-#          )    
+    and_seq( action_boolean_if(greater_than(rand 0.45)
+                               rotate_right
+                               rotate_left
+                              )
 
-
-#    and_seq( action_boolean_if(greater_than(rand 0.5) 
-#                               action_boolean_if(greater_than(rand 0.6)
-#          	                                     rotate_left
-#                                                 rotate_right
-#                                                )
-#                               step_forward
-#                              )
-#
-#             action_boolean_if(greater_than(rand 0.3)
-#                               step_forward
-#                               step_backward
-#                              )
-#           )
+             action_boolean_if(greater_than(rand 0.45)
+                               step_backward
+                               step_forward
+                              )
+           )
 
 play_with_grab_and_drop(1) := and_seq( goto_obj(#1 2) grab(#1) drop )
 
@@ -86,10 +69,11 @@ play_without_grab_and_drop(1) := and_seq( goto_obj(#1 2)
                                           kick(#1) 
                                         )
 
-random_simple_action(0) := and_seq( sit bark sleep jump_up 
-                                    step_forward step_backward 
-                                    rotate_left rotate_right
-                                  ) 
+random_simple_action(0) := jump_up
+#    and_seq( jump_up 
+#             step_forward step_backward 
+#             rotate_left rotate_right
+#           ) 
 
 ##############################################
 ############ RULE ENGINE FUNCTIONS ###########

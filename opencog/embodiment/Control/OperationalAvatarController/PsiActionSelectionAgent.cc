@@ -473,7 +473,6 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                       );
     }
 
-
     // Check the state of current running Action: 
     //
     // If it success, fails, or is time out, update corresponding information respectively, and continue processing.
@@ -530,7 +529,7 @@ std::cout<<"action state: success"<<std::endl<<std::endl;
                               this->cycleCount
                             );
 
-std::cout<<"Fail"<<std::endl; 
+std::cout<<"action status: fail"<<std::endl; 
 
                // TODO: record the failure and update the weight of corresponding rule
             }
@@ -545,7 +544,7 @@ std::cout<<"Fail"<<std::endl;
                                this->cycleCount
                              );
 
-std::cout<<"Unexpected result"<<std::endl; 
+std::cout<<"action status: unexpected result"<<std::endl; 
 
                 // TODO: record the failure and update the weight of corresponding rule
             }
@@ -569,7 +568,7 @@ std::cout<<"Unexpected result"<<std::endl;
                            this->cycleCount
                          );
 
-std::cout<<"Fail"<<std::endl; 
+std::cout<<"action status: fail"<<std::endl; 
 
             // Troy: now that this action failed, the following action sequence
             // should be dropped.
@@ -579,6 +578,9 @@ std::cout<<"Fail"<<std::endl;
         }
         // If the Action is time out
         else if ( time(NULL) - this->timeStartCurrentAction >  this->procedureExecutionTimeout ) { 
+
+            // add 'actionFailed' predicates for timeout actions
+            oac->getPAI().setPendingActionPlansFailed(); 
 
             // Stop the time out Action
             procedureInterpreter.stopProcedure(this->currentSchemaId);
@@ -590,7 +592,7 @@ std::cout<<"Fail"<<std::endl;
                            this->cycleCount
                          );
             
-std::cout<<"Timeout"<<std::endl; 
+std::cout<<"action status: timeout"<<std::endl; 
 
             // TODO: record the time out and update the weight of corresponding rule
         }

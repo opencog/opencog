@@ -169,39 +169,33 @@
     ); let*
 ); define 
 
+; PAI::setActionPlanStatus is responsible for creating actionDone/ actionFailed predicates
 (define (CompetenceDemandUpdater)
     (let* ( (plan_done_at_time_link_list 
-                (query_atom_space (find_at_time_link "planDone") ) 
+                (query_atom_space (find_at_time_link "actionDone") ) 
             )
 
             (plan_failed_at_time_link_list
-                (query_atom_space (find_at_time_link "planFailed") ) 
+                (query_atom_space (find_at_time_link "actionFailed") ) 
             )
 
             (plan_done_number (length plan_done_at_time_link_list) )
             (plan_failed_number (length plan_failed_at_time_link_list) )
           )
  
-          ; avoid division by zero
+          ; avoid division by zero and decimal part will force guile return floating
+          ; numbers while division. That is return 0.33333, rather than 1/3, 
+          ; which will confuse the caller via cpp code. 
           (set! plan_done_number
-              (+ plan_done_number 1)
+              (+ plan_done_number 1.0123)
           )
 
           (set! plan_failed_number
-              (+ plan_failed_number 1) 
-          )
-
-          ; TODO: remove random noise, once the virtual world is more interesting
-          (set! plan_done_number
-                (+ plan_done_number (* 35 (random:uniform)))
-          )
-
-          (set! plan_failed_number
-                (+ plan_failed_number (* 15 (random:uniform)))
+              (+ plan_failed_number 1.0123) 
           )
 
           (/ plan_done_number
-             (+ plan_done_number (* 1.0 plan_failed_number) )
+             (+ plan_done_number (* 5 plan_failed_number) )
           )
     )     
 )
