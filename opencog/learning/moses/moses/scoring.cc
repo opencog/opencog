@@ -27,6 +27,8 @@
 
 namespace opencog { namespace moses {
 
+using namespace std;
+
 // helper to log a combo_tree and its behavioral score
 inline void log_candidate_bscore(const combo_tree& tr,
                                  const behavioral_score& bs) {
@@ -40,49 +42,15 @@ inline void log_candidate_bscore(const combo_tree& tr,
     }
 }
 
-
-int logical_score::operator()(const combo_tree& tr) const
-{
-    // std::cout << "scoring " << tr << " " << arity << " "
-    //   << target << " " << combo::complete_truth_table(tr,arity) << " "
-    //   << (target.hamming_distance(combo::complete_truth_table(tr,arity))) << std::endl; // PJ
-
-    return -int(target.hamming_distance(combo::complete_truth_table(tr, arity)));
-}
 behavioral_score logical_bscore::operator()(const combo_tree& tr) const
 {
     combo::complete_truth_table tt(tr, arity);
     behavioral_score bs(target.size());
 
-    std::transform(tt.begin(), tt.end(), target.begin(), bs.begin(),
-                   std::not_equal_to<bool>()); //not_equal because lower is better
+    transform(tt.begin(), tt.end(), target.begin(), bs.begin(),
+              not_equal_to<bool>()); //not_equal because lower is better
 
     return bs;
-}
-
-contin_t contin_score::operator()(const combo_tree& tr) const
-{
-    try {
-        std::cout << "scoring " << tr << std::endl;
-        contin_t sc = -target.abs_distance(combo::contin_output_table(tr, cti, rng));
-        std::cout << sc << " X " << tr << std::endl;
-        return sc;
-    } catch (...) {
-        std::cout << "threw" << std::endl;
-        return get_score(worst_composite_score);
-    }
-}
-
-contin_t contin_score_sq::operator()(const combo_tree& tr) const
-{
-    try {
-        return -target.sum_squared_error(combo::contin_output_table(tr, cti, rng));
-    } catch (...) {
-        stringstream ss;
-        ss << "The following candidate has failed to be evaluated: " << tr;
-        logger().warn(ss.str());
-        return get_score(worst_composite_score);
-    }
 }
 
 behavioral_score contin_bscore::operator()(const combo_tree& tr) const

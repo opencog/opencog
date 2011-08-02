@@ -22,6 +22,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <boost/thread.hpp>
+
 #include <opencog/util/lazy_random_selector.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
@@ -92,9 +95,9 @@ representation::representation(const reduct::rule& simplify_candidate,
 
     //convert the knobs into a field specification
     std::multiset<field_set::spec> tmp;
-    foreach(const disc_map::value_type& v, disc)
+    foreach(const disc_v& v, disc)
         tmp.insert(v.first);
-    foreach(const contin_map::value_type& v, contin)
+    foreach(const contin_v& v, contin)
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 
@@ -111,7 +114,7 @@ representation::representation(const reduct::rule& simplify_candidate,
 
 void representation::transform(const instance& inst)
 {
-    contin_map::iterator ckb = contin.begin();
+    contin_map_it ckb = contin.begin();
     for (field_set::const_contin_iterator ci = _fields.begin_contin(inst);
             ci != _fields.end_contin(inst);++ci, ++ckb) {
         ckb->second.turn(*ci);
@@ -120,7 +123,7 @@ void representation::transform(const instance& inst)
 
     //need to add first onto & then contin
     //cout << _fields.stream(inst) << endl;
-    disc_map::iterator dkb = disc.begin();
+    disc_map_it dkb = disc.begin();
     for (field_set::const_disc_iterator di = _fields.begin_disc(inst);
             di != _fields.end_disc(inst);++di, ++dkb) {
         dkb->second->turn(*di);
@@ -146,25 +149,41 @@ void representation::clear_exemplar()
 
 combo_tree representation::get_clean_exemplar(bool reduce)
 {
+    return get_clean_exemplar(exemplar(), reduce);
+}
+
+combo_tree representation::get_clean_exemplar(combo_tree tr, bool reduce)
+{
     using namespace reduct;
 
-    combo_tree result = exemplar();
-
-    clean_reduce(result); //remove null vertices
+    clean_reduce(tr); //remove null vertices
 
     if(reduce) { //reduce
         // Logger
         if(logger().getLevel() >= Logger::FINE) {
             stringstream ss;
             ss << "Reduce candidate: " 
-               << result;
+               << tr;
             logger().fine(ss.str());
         }
         // ~Logger
-        (*get_simplify_candidate())(result); 
+        (*get_simplify_candidate())(tr); 
     }
 
-    return result;
+    return tr;
+}
+
+combo_tree representation::get_candidate(const instance& inst, bool reduce)
+{
+    // thread safe transform. If that turns out to be a bottle neck,
+    // one should copy the exemplar before tranformation and do the
+    // transformation (unlocked) on that copy
+    boost::mutex::scoped_lock lock(tranform_mutex);
+    transform(inst);
+    combo_tree tr = exemplar();
+    lock.unlock();
+
+    return get_clean_exemplar(tr, reduce);
 }
 
 void representation::set_exemplar_inst() {

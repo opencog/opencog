@@ -27,6 +27,8 @@
 
 #include <boost/utility.hpp>
 
+#include <boost/thread.hpp>
+
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/type_tree.h>
 
@@ -73,6 +75,11 @@ struct representation : public knob_mapper, boost::noncopyable {
      */
     combo_tree get_clean_exemplar(bool reduce);
 
+    /**
+     * Thread safe composition of transform and get_clean_exemplar
+     */
+    combo_tree get_candidate(const instance& inst, bool reduce);
+
     // return _simplify_candidate
     const reduct::rule* get_simplify_candidate() const {
         return _simplify_candidate;
@@ -102,10 +109,10 @@ struct representation : public knob_mapper, boost::noncopyable {
     Out& ostream_prototype(Out& out, combo_tree::iterator it) const {
         typedef combo_tree::sibling_iterator sib_it;
         if(is_contin(*it)) { // contin
-                contin_map::const_iterator c_cit = find_contin_knob(it);
+                contin_map_cit c_cit = find_contin_knob(it);
                 out << (c_cit == contin.end() ? *it : c_cit->second.toStr());
         } else { // disc
-            disc_map::const_iterator d_cit = find_disc_knob(it);
+            disc_map_cit d_cit = find_disc_knob(it);
             out << (d_cit == disc.end() ? *it : d_cit->second->toStr());
         }
         // if null_vertex then print its child instead
@@ -134,7 +141,15 @@ struct representation : public knob_mapper, boost::noncopyable {
 protected:
     void set_exemplar_inst();
 
-    combo_tree _exemplar;
+    /**
+     * helper of get_clean_exemplar and get_candidate
+     */
+    combo_tree get_clean_exemplar(combo_tree tr, bool reduce);
+
+
+    combo_tree _exemplar;     // contains the prototype of the
+                              // exemplar used to generate the deme
+
     instance _exemplar_inst; //instance corresponding to the exemplar
                              //@todo: it is not sure whether we need
                              //that because it is assumed that the
@@ -145,6 +160,7 @@ protected:
     const reduct::rule* _simplify_knob_building; // used to simplify
                                                  // during knob
                                                  // building
+    mutable boost::mutex tranform_mutex;
 };
 
 } //~namespace moses

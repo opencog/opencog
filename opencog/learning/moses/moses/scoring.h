@@ -89,23 +89,6 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
 };
 
 /**
- * Compute the score of a boolean function in term of hamming distance
- * of its output and the output of the entire truth table of the
- * indended function.
- */
-struct logical_score : public unary_function<combo_tree, int> {
-    template<typename Func>
-    logical_score(const Func& func, int a, RandGen& _rng)
-            : target(func, a, _rng), arity(a), rng(_rng) { }
-
-    int operator()(const combo_tree& tr) const;
-
-    combo::complete_truth_table target;
-    int arity;
-    RandGen& rng;
-};
-
-/**
  * Like logical_score but on behaviors (features). Each feature
  * corresponds to an input tuple, 0 if the output of the candidate
  * matches the output of the intended function (lower is better).
@@ -121,44 +104,6 @@ struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
 
     combo::complete_truth_table target;
     int arity;
-};
-
-struct contin_score : public unary_function<combo_tree, score_t> {
-    template<typename Func>
-    contin_score(const Func& func,
-                 const contin_input_table& r,
-                 RandGen& _rng)
-            : target(func, r), cti(r), rng(_rng) { }
-
-    contin_score(const combo::contin_output_table& t,
-                 const contin_input_table& r,
-                 RandGen& _rng)
-        : target(t),cti(r),rng(_rng) { }
-
-    score_t operator()(const combo_tree& tr) const;
-
-    combo::contin_output_table target;
-    contin_input_table cti;
-    RandGen& rng;
-};
-
-struct contin_score_sq : public unary_function<combo_tree,score_t> {
-    template<typename Func>
-    contin_score_sq(const Func& func,
-                    const contin_input_table& r,
-                    RandGen& _rng)
-        : target(func,r),cti(r),rng(_rng) { }
-    
-    contin_score_sq(const combo::contin_output_table& t,
-                    const contin_input_table& r,
-                    RandGen& _rng)
-        : target(t),cti(r),rng(_rng) { }
-    
-    score_t operator()(const combo_tree& tr) const;
-    
-    combo::contin_output_table target;
-    contin_input_table cti;
-    RandGen& rng;
 };
 
 struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
@@ -318,18 +263,17 @@ struct complexity_based_scorer : public unary_function<eda::instance,
         }
         // ~Logger
 
-        _rep.transform(inst);
-
+        combo_tree tr = _rep.get_candidate(inst, _reduce);
+        
         try {
-            combo_tree tr = _rep.get_clean_exemplar(_reduce);
             return composite_score(score(tr), complexity(tr.begin()));
-         } catch (...) {
-             stringstream ss;
-             ss << "The following instance has failed to be evaluated: " 
-                << _rep.fields().stream(inst);
-             logger().warn(ss.str());
-             return worst_composite_score;
-         }
+        } catch (...) {
+            stringstream ss;
+            ss << "The following instance has failed to be evaluated: " 
+               << _rep.fields().stream(inst);
+            logger().warn(ss.str());
+            return worst_composite_score;
+        }
     }
 
 protected:
