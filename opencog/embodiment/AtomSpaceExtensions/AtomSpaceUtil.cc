@@ -760,11 +760,11 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgo
 //    }
 
     if ( resultSet.size() != 1 ) {
-        logger().error( "AtomSpaceUtil::%s - The number of ReferenceLink containing '%s' should be exactly 1, but got %d", 
+        logger().warn( "AtomSpaceUtil::%s - The number of ReferenceLink containing '%s' should be exactly 1, but got %d", 
                        __FUNCTION__, 
                        atomSpace.atomAsString(hFirstOutgoing).c_str(), 
                        resultSet.size()
-                      );
+                     );
 
         return Handle::UNDEFINED; 
     }
