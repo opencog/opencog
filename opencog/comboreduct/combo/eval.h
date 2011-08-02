@@ -62,8 +62,8 @@ struct Evaluator {
 // there are 2 ways of binding input arguments to a combo_tree
 //
 // 1) associate the variable arguments #1, #2, etc with there values
-// using binding, and then eval will use that mapping to evaluate the
-// variable arguments on the fly
+// using a binding_map, and then eval will use that mapping to
+// evaluate the variable arguments on the fly
 //
 // or
 //
@@ -71,9 +71,14 @@ struct Evaluator {
 // statically (be careful because it modifies the combo_tree) using
 // set_bindings
 
+//to support lazy evaluation, can also bind to a subtree
+typedef boost::unordered_map<arity_t,
+                             boost::variant<vertex,
+                                            combo_tree::iterator> > binding_map;
+
 inline boost::variant<vertex, combo_tree::iterator>& binding(int idx)
 {
-    static boost::unordered_map<int, boost::variant<vertex, combo_tree::iterator> > map; //to support lazy evaluation, can also bind to a subtree
+    static binding_map map;
     return map[idx];
 }
 
@@ -98,12 +103,14 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
 void set_bindings(combo_tree& tr, const std::vector<vertex>&);
 void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent);
 
+/// @todo that one should be removed and replaced by
+/// eval_throws_binding (and the latter should be renamed eval_throws)
 template<typename It>
-vertex eval_throws(opencog::RandGen& rng,
+vertex eval_throws(RandGen& rng,
                    It it, Evaluator* pe = NULL,
                    combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
-    throw(EvalException, opencog::ComboException,
-          opencog::AssertionException, std::bad_exception)
+    throw(EvalException, ComboException,
+          AssertionException, std::bad_exception)
 {
 
     //std::cout << "EVAL: " << combo_tree(it) << std::endl;
@@ -340,7 +347,7 @@ vertex eval_throws(opencog::RandGen& rng,
                       "vertex should be a contin.");
             y = get_contin(vy);
             contin_t res = x / y;
-            if (opencog::isnan(res) || opencog::isinf(res))
+            if (isnan(res) || isinf(res))
 	      throw EvalException(vertex(res));
             return res;
         }
@@ -356,7 +363,7 @@ vertex eval_throws(opencog::RandGen& rng,
 #else
             contin_t res = log(get_contin(vx));
 #endif
-            if (opencog::isnan(res) || opencog::isinf(res))
+            if (isnan(res) || isinf(res))
 	      throw EvalException(vertex(res));
             return res;
         }
@@ -369,7 +376,7 @@ vertex eval_throws(opencog::RandGen& rng,
                       "vertex should be an contin");
             contin_t res = exp(get_contin(vx));
             //this may happen in case the argument is too high, then exp will be infty
-            if (opencog::isinf(res)) throw EvalException(vertex(res));
+            if (isinf(res)) throw EvalException(vertex(res));
             return res;
         }
         case id::sin : {
@@ -416,7 +423,7 @@ vertex eval_throws(opencog::RandGen& rng,
     }
     // contin constant
     else if (const contin_t* c = boost::get<contin_t>(&v)) {
-      if (opencog::isnan(*c) || opencog::isinf(*c))
+      if (isnan(*c) || isinf(*c))
 	throw EvalException(vertex(*c));
       return v;
     }
@@ -432,9 +439,9 @@ vertex eval_throws(opencog::RandGen& rng,
 }
 
 template<typename It>
-vertex eval(opencog::RandGen& rng, It it)
-     throw(opencog::ComboException,
-           opencog::AssertionException, std::bad_exception)
+vertex eval(RandGen& rng, It it)
+     throw(ComboException,
+           AssertionException, std::bad_exception)
 {
     try {
         return eval_throws(rng, it);
@@ -444,28 +451,48 @@ vertex eval(opencog::RandGen& rng, It it)
 }
 
 template<typename T>
-vertex eval(opencog::RandGen& rng, const opencog::tree<T>& tr)
-     throw(opencog::StandardException, std::bad_exception)
+vertex eval(RandGen& rng, const tree<T>& tr)
+     throw(StandardException, std::bad_exception)
 {
     return eval(rng, tr.begin());
 }
 
 template<typename T>
-vertex eval_throws(opencog::RandGen& rng, const opencog::tree<T>& tr)
+vertex eval_throws(RandGen& rng, const tree<T>& tr)
      throw(EvalException,
-           opencog::ComboException,
-           opencog::AssertionException,
+           ComboException,
+           AssertionException,
            std::bad_exception)
 {
     return eval_throws(rng, tr.begin());
 }
 
+/// Like above but ignore the variable_unifier and uses
+/// binding_map. It also removes any type checking as it is the job of
+/// static type checker. The Evaluator is ignored till vu is
+/// completely removed
+vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
+                           combo_tree::iterator it, Evaluator* pe = NULL)
+    throw(EvalException, ComboException,
+          AssertionException, std::bad_exception);
+
+vertex eval_binding(RandGen& rng, binding_map& bmap, combo_tree::iterator it)
+     throw(ComboException, AssertionException, std::bad_exception);
+
+vertex eval_binding(RandGen& rng, binding_map& bmap, const combo_tree& tr)
+    throw(StandardException, std::bad_exception);
+
+vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
+                           const combo_tree& tr)
+     throw(EvalException, ComboException, AssertionException,
+           std::bad_exception);
+
 //return the arity of a tree
 template<typename T>
-arity_t arity(const opencog::tree<T>& tr)
+arity_t arity(const tree<T>& tr)
 {
     arity_t a = 0;
-    for (typename opencog::tree<T>::iterator it = tr.begin();
+    for (typename tree<T>::iterator it = tr.begin();
          it != tr.end(); ++it)
         if (is_argument(*it))
             a = std::max(a, (arity_t)std::abs(get_argument(*it).idx));

@@ -48,8 +48,8 @@ bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
     const_iterator cit = begin();
     for (int i = 0; cit != end(); ++i, ++cit) {
         for (int j = 0; j < _arity; ++j)
-            binding(j + 1) = bool_to_vertex((i >> j) % 2);
-        if(*cit != vertex_to_bool(eval(*_rng, tr)))
+            bmap[j + 1] = bool_to_vertex((i >> j) % 2);
+        if(*cit != vertex_to_bool(eval_binding(*_rng, bmap, tr)))
             return false;
     }
     return true;
@@ -59,8 +59,8 @@ truth_output_table::truth_output_table(const combo_tree& tr,
                                        const truth_input_table& tti,
                                        opencog::RandGen& rng) {
     for(bm_cit i = tti.begin(); i != tti.end(); ++i) {
-        tti.set_binding(*i);
-        vertex res = eval_throws(rng, tr);
+        binding_map bmap = tti.get_binding_map(*i);
+        vertex res = eval_throws_binding(rng, bmap, tr);
         OC_ASSERT(is_boolean(res), "res must be boolean");
         push_back(vertex_to_bool(res));
     }
@@ -71,8 +71,8 @@ truth_output_table::truth_output_table(const combo_tree& tr,
                                        opencog::RandGen& rng) {
     for(ctruth_table::const_iterator i = ctt.begin();
         i != ctt.end(); ++i) {
-        ctt.set_binding(i->first);
-        vertex res = eval_throws(rng, tr);
+        binding_map bmap = ctt.get_binding_map(i->first);
+        vertex res = eval_throws_binding(rng, bmap, tr);
         OC_ASSERT(is_boolean(res), "res must be boolean");
         push_back(vertex_to_bool(res));
     }
@@ -143,10 +143,10 @@ contin_output_table::contin_output_table(const combo_tree& tr, const contin_inpu
         }
     } else {
         for(const_cm_it i = cti.begin(); i != cti.end(); ++i) {
-            cti.set_binding(*i);
+            binding_map bmap = cti.get_binding_map(*i);
             // assumption : all inputs and output of tr are contin_t
             // this assumption can be verified using infer_type_tree
-            vertex res = eval_throws(rng, tr);
+            vertex res = eval_throws_binding(rng, bmap, tr);
             push_back(get_contin(res));
         }
     }

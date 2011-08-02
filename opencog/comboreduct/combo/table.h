@@ -308,11 +308,12 @@ public:
             res.push_back(get_labels()[a]);
         return res;
     }
-    // set binding prior calling the combo evaluation, ignoring inputs
-    // to be ignored
-    void set_binding(const std::vector<T>& args) const {
+    // get binding map prior calling the combo evaluation
+    binding_map get_binding_map(const std::vector<T>& args) const {
+        binding_map bmap;
         for(arity_t i = 0; i < (arity_t)args.size(); ++i)
-            binding(i+1) = args[i];
+            bmap[i+1] = args[i];
+        return bmap;
     }
     arity_t get_arity() const {
         return super::front().size();
@@ -489,12 +490,13 @@ protected:
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             for (int j = 0; j < _arity; ++j)
-                binding(j + 1) = bool_to_vertex((i >> j) % 2);
-            (*it) = (eval(*_rng, tr) == id::logical_true);
+                bmap[j + 1] = bool_to_vertex((i >> j) % 2);
+            *it = eval_binding(*_rng, bmap, tr) == id::logical_true;
         }
     }
     arity_t _arity;
     RandGen* _rng; // _rng is dummy and not used anyway
+    mutable binding_map bmap;
 };
 
 
@@ -509,10 +511,11 @@ public:
     truth_input_table(const super& it) : super(it) {}
     // set binding prior calling the combo evaluation, ignoring inputs
     // to be ignored
-    void set_binding(const std::vector<bool>& args) const {
-        for(size_t i = 0; i < args.size(); ++i) {
-            binding(i+1) = bool_to_vertex(args[i]);
-        }
+    binding_map get_binding_map(const std::vector<bool>& args) const {
+        binding_map bmap;
+        for(size_t i = 0; i < args.size(); ++i)
+            bmap[i+1] = bool_to_vertex(args[i]);
+        return bmap;
     }
 };
 
@@ -541,10 +544,11 @@ public:
 class ctruth_table : public std::map<std::vector<bool>, std::pair<unsigned, unsigned> > {
     typedef std::map<std::vector<bool>, std::pair<unsigned, unsigned> > super;
 public:
-    void set_binding(const std::vector<bool>& args) const {
-        for(size_t i = 0; i < args.size(); ++i) {
-            binding(i+1) = bool_to_vertex(args[i]);
-        }
+    binding_map get_binding_map(const std::vector<bool>& args) const {
+        binding_map bmap;
+        for(size_t i = 0; i < args.size(); ++i)
+            bmap[i+1] = bool_to_vertex(args[i]);
+        return bmap;
     }
 };
 
@@ -731,12 +735,12 @@ public:
         unsigned long int bool_table_size = 1 << _bool_arg_count;
         for (unsigned long int i = 0; i < bool_table_size; ++i) {
             for (int bai = 0; bai < _bool_arg_count; ++bai) //bool arg index
-                binding(_bool_arg[bai] + 1) = bool_to_vertex((i >> bai) % 2);
+                bmap[_bool_arg[bai] + 1] = bool_to_vertex((i >> bai) % 2);
             for (const_cm_it si = cti.begin(); si != cti.end(); ++si) {
                 int cai = 0; //contin arg index
                 for (const_cv_it j = (*si).begin(); j != (*si).end(); ++j, ++cai)
-                    binding(_contin_arg[cai] + 1) = *j;
-                vertex e = eval_throws(rng, tr);
+                    bmap[_contin_arg[cai] + 1] = *j;
+                vertex e = eval_throws_binding(rng, bmap, tr);
                 _vt.push_back(is_boolean(e) ? vertex_to_bool(e) : get_contin(e));
             }
         }
@@ -767,6 +771,8 @@ public:
     bool operator!=(const mixed_table& mt) const {
         return !operator==(mt);
     }
+
+    binding_map bmap;
 };
 
 
@@ -877,8 +883,8 @@ public:
             for (const_cm_it si = cti.begin();si != cti.end();++si) {
                 int cai = 0; //contin arg index
                 for (const_cv_it j = (*si).begin(); j != (*si).end(); ++j, ++cai)
-                    binding(_contin_arg[cai] + 1) = *j;
-                vertex e = eval_throws(rng, tr);
+                    bmap[_contin_arg[cai] + 1] = *j;
+                vertex e = eval_throws_binding(rng, bmap, tr);
                 if (is_boolean(e))
                     _vt.push_back(vertex_to_bool(e));
                 else if (is_action_result(e))
@@ -913,6 +919,8 @@ public:
     bool operator!=(const mixed_action_table& mat) const {
         return !operator==(mat);
     }
+
+    binding_map bmap;
 };
 
 /**
