@@ -47,8 +47,8 @@ struct knob_mapper {
     typedef contin_map::const_iterator contin_map_cit;
     typedef contin_map::iterator contin_map_it;
 
-    disc_map disc;
-    contin_map contin;
+    disc_map disc;              // constructed by build_knobs
+    contin_map contin;          // constructed by build_knobs
 
     // find the disc knob corresponding to 'it'
     disc_map_cit find_disc_knob(combo_tree::iterator it) const {

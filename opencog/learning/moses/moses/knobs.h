@@ -496,10 +496,10 @@ protected:
     int _current;
 };
 
-typedef based_variant < boost::variant<logical_subtree_knob,
-                                                action_subtree_knob,
-                                                simple_action_subtree_knob>,
-                                 disc_knob_base > disc_knob;
+typedef based_variant <boost::variant<logical_subtree_knob,
+                                      action_subtree_knob,
+                                      simple_action_subtree_knob>,
+                       disc_knob_base> disc_knob;
 } //~namespace moses
 } //~namespace opencog
 

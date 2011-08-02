@@ -29,9 +29,9 @@ class BooleanReductUTest : public CxxTest::TestSuite {
         size_before=tr.size();
         logical_reduce(3, tr);
         size_after=tr.size();
-        complete_truth_table tt2(tr,integer_log2(tt1.size()));
+        complete_truth_table tt2(tr, integer_log2(tt1.size()));
         
-        TS_ASSERT_LESS_THAN(size_after,size_before);
+        TS_ASSERT_LESS_THAN(size_after, size_before);
         TS_ASSERT_EQUALS(tt1,tt2);
     }
 
