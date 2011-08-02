@@ -252,8 +252,8 @@ class Fishgram:
             num_variables = len(self.get_varlist(conj))*1.0
             
             normalized_frequency =  count / num_possible_objects ** num_variables
-            #if len(embeddings) > self.min_embeddings:
-            if normalized_frequency > self.min_frequency:
+            if len(embeddings) > self.min_embeddings:
+            #if normalized_frequency > self.min_frequency:
                 #print pp(conj), normalized_frequency
                 yield (conj, embeddings)
 
@@ -399,19 +399,23 @@ class Fishgram:
                 
                 vars = self.get_varlist( premises+(conclusion,) )
                 
-                andLink = tree('AndLink',
+                andLink = tree('SequentialAndLink',
                                     list(premises)) # premises is a tuple remember
                 
                 #print andLink
 
-                qLink = tree('AverageLink', 
+                qLink = tree('ForAllLink', 
                                 tree('ListLink', vars), 
                                 tree('ImplicationLink',
-                                    andLink,
-                                    conclusion))
+                                    tree('AndLink',        # Psi rule "meta-and"
+                                        tree('AndLink'),  # Psi rule context
+                                        andLink),             # Psi rule action
+                                    conclusion)
+                                )
                 a = atom_from_tree(qLink, self.atomspace)
                 
                 a.tv = TruthValue( freq , premises_support )
+                a.out[1].tv = TruthValue( freq , premises_support ) # PSI hack
                 #count = len(embs)
                 #eval_a = atom_from_tree(evalLink, self.atomspace)
                 #eval_a.tv = TruthValue(1, count)
@@ -461,12 +465,8 @@ class Fishgram:
             #premises2 = [x for x in premises if not unify (seq_and_template, x, {})]
             action_psi = s3[action]
             # TODO should probably record the EvaluationLink in the increased predicate.
-            goal_pred = s3[goal]
-            goal_eval =     tr('EvaluationLink',
-                                goal_pred, 
-                                tr('ListLink')
-                            )
-                            
+            goal_eval = s3[goal]
+            
             premises2 = (action_psi, )
 
             return premises2, goal_eval
@@ -522,12 +522,21 @@ class Fishgram:
             print "make_all_psi_rules: %s" % (pp(conj),)
             
             for (premises, conclusion) in self._split_conj_into_rules(conj):
+                if not (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):
+                    continue
+                
                 # Filter it now since lookup_embeddings is slow
                 if self.make_psi_rule(premises, conclusion) == None:
                     continue
    
-                count_conj = len(self.forest.lookup_embeddings(conj))
-                count_premises = len(self.forest.lookup_embeddings(premises))
+                embs_conj = self.forest.lookup_embeddings(conj)
+                embs_premises = self.forest.lookup_embeddings(premises)
+   
+                count_conj = len(embs_conj)
+                count_premises = len(embs_premises)
+                
+                if count_conj > count_premises:
+                    import pdb; pdb.set_trace()
                 
                 print "make_implication(premises=%s, conclusion=%s, count_premises=%s, count_conj=%s)" % (premises, conclusion, count_premises, count_conj)                
                 if count_premises > 0:
@@ -634,7 +643,7 @@ class Fishgram:
 
 def make_seq(atomspace):
     # unit of timestamps is 0.01 second so multiply by 100
-    interval = 100* 30
+    interval = 100* 20
     times = atomspace.get_atoms_by_type(t.TimeNode)
     times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
     times = sorted(times, key= lambda t: int(t.name) )
@@ -646,7 +655,7 @@ def make_seq(atomspace):
         t1 = int(time_atom.name)
         for time2_atom in times[i+1:]:
             t2 = int(time2_atom.name)
-            if t2 - t1 <= interval:
+            if 0 < t2 - t1 <= interval:
                 print atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
             else:
                 break
@@ -897,9 +906,9 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
     def run(self,atomspace):
         try:
             fish = Fishgram(atomspace)
-#            make_seq(atomspace)
+            make_seq(atomspace)
             # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
-            atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
+            #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
             
             notice_changes(atomspace)
             
@@ -922,9 +931,9 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #                        print 'emb:',  pp(bound_tree)
             
             #fish.iterated_implications()
-            #fish.implications()
+            fish.implications()
             
-            fish.make_all_psi_rules()
+            #fish.make_all_psi_rules()
         except KeyError,  e:
             KeyError
         except Exception, e:

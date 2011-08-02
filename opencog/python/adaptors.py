@@ -115,6 +115,9 @@ class ForestExtractor:
                 if slot not in self.incoming[obj][size]:
                     self.incoming[obj][size][slot] = []
                 self.incoming[obj][size][slot].append(tree_id)
+        
+        # Make all bound trees. Enables using lookup_embeddings
+        self.all_bound_trees = [subst(subst_from_binding(b), tr) for tr, b in zip(self.all_trees, self.bindings)]        
 
     def output_tree(self, atom,  tree,  bindings):
         vertex_name = str(tree)
@@ -180,11 +183,11 @@ class ForestExtractor:
         (which would be useful for the calculations used when finding implication rules)."""
 
         # Find all bound trees
-        try:
-            self.all_bound_trees
-        except AttributeError:
-            self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
-#        self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
+#        try:
+#            self.all_bound_trees
+#        except AttributeError:
+#            self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
+##        self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
         
         return self.lookup_embeddings_helper(conj, (), {}, self.all_bound_trees)
 
@@ -199,17 +202,21 @@ class ForestExtractor:
 
         ret = []
         substs = []
-        s2 = ForestExtractor.magic_eval(self.a, tr, s)
+        matching_bound_trees = []
+        #s2 = ForestExtractor.magic_eval(self.a, tr, s)
+        s2 = None
         if s2 != None:
             substs.append(s2)
             bound_tr = subst(s2, tr)
+            matching_bound_trees.append(bound_tr)
         else: # For efficiency, don't try looking it up it if it was magically evaluated
             for bound_tr in all_bound_trees:
                 s2 = unify(tr, bound_tr, s)
                 if s2 != None:
                     substs.append( s2 )
+                    matching_bound_trees.append(bound_tr)
 
-        for s2 in substs:
+        for s2, bound_tr in zip(substs, matching_bound_trees):
             bc = bound_conj_so_far + ( bound_tr , )
             later = self.lookup_embeddings_helper(conj[1:], bc, s2, all_bound_trees)
             # Add the (complete) substitutions from lower down in the recursive search,
@@ -234,7 +241,7 @@ class ForestExtractor:
         
         NOTE: In a conjunction, the operator must be after any links that use the variables.'''
         # unit of timestamps is 0.01 second so multiply by 100
-        interval = 100* 30
+        interval = 100* 20
         
         # If this is called from lookup_embeddings_helper, s should contain specific TimeNodes
         tr = subst(s, tr)
@@ -256,7 +263,7 @@ class ForestExtractor:
         
         t1 = int(time1_atom.name)
         t2 = int(time2_atom.name)
-        if t2 - t1 <= interval:
+        if 0 < t2 - t1 <= interval:
             return s
         else:
             return None
