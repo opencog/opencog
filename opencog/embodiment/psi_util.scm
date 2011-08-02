@@ -705,12 +705,37 @@
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ; Get pleasure based on previously/ currently selected demand goal
-; TODO: Finish this function
-; get_pleasure(0) := +( *(0.35 get_current_demand_goal_truth_value)
-;                      *(0.65 get_previous_demand_goal_truth_value)
 ;
 (define (get_pleasure_value)
-    (random:uniform) 
+    (let* (  (previous_demand_evaluation_link 
+                 (get_reference (ConceptNode "PreviousDemandGoal")) 
+             )
+             (current_demand_evaluation_link
+                 (get_reference (ConceptNode "CurrentDemandGoal")) 
+             )
+             (previous_demand_satisfaction (random:uniform) ) ; initialize with random values
+             (current_demand_satisfaction (random:uniform) )
+          )
+
+          ; set previous demand satisfaction (if available)
+          (if (not (null? previous_demand_evaluation_link) )
+              (set! previous_demand_satisfaction 
+                  (get_truth_value_mean (cog-tv previous_demand_evaluation_link))
+              ) 
+          )
+
+          ; set current demand satisfaction (if available)
+          (if (not (null? current_demand_evaluation_link) )
+              (set! current_demand_satisfaction
+                  (get_truth_value_mean (cog-tv current_demand_evaluation_link)) 
+              ) 
+          )
+
+          ; return the pleasure depending on previous and current demand satisfactions
+          (+ (* 0.35 current_demand_satisfaction)
+             (* 0.65 previous_demand_satisfaction)
+          )
+    ) 
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||

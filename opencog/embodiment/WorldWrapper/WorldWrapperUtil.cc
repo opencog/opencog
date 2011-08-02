@@ -2533,7 +2533,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         logger().debug("WorldWrapperUtil::%s - id::get_current_demand_goal_truth_value", __FUNCTION__);
         return WorldWrapperUtil::getDemandGoalTruthValue( rng, 
                                                           atomSpace, 
-                                                          std::string(CURRENT_DEMAND_NAME), 
+                                                          "CurrentDemandGoal", 
                                                           self_id, 
                                                           time
                                                         );
@@ -2543,7 +2543,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         logger().debug("WorldWrapperUtil::%s - id::get_previous_demand_goal_truth_value", __FUNCTION__);
         return WorldWrapperUtil::getDemandGoalTruthValue( rng, 
                                                           atomSpace, 
-                                                          std::string(PREVIOUS_DEMAND_NAME), 
+                                                          "PreviousDemandGoal", 
                                                           self_id, 
                                                           time
                                                         );

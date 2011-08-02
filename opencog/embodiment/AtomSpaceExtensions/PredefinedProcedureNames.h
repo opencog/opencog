@@ -72,8 +72,6 @@
 // They should be the schema names used in "xxx_rules.scm" 
 // without the suffix "DemandUpdater" and 
 // should be exactly the same as defined in "EmbodimentConfig.h"
-#define CURRENT_DEMAND_NAME      "Current"  // Dummy demand goal, indicating currently selected demand goals below
-#define PREVIOUS_DEMAND_NAME     "Previous" // Dummy demand goal, indicating previously selected demand goals below
 #define ENERGY_DEMAND_NAME       "Energy" 
 #define WATER_DEMAND_NAME        "Water"
 #define INTEGRITY_DEMAND_NAME    "Integrity"

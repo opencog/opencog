@@ -201,14 +201,6 @@
 ; Final Goals, also known as Demand Goals
 ;
 
-(define CurrentDemandGoal
-    (add_goal (PredicateNode "CurrentDemandGoal") )
-)
-
-(define PreviousDemandGoal
-    (add_goal (PredicateNode "PreviousDemandGoal") )
-)
-
 (define EnergyDemandGoal 
     (add_goal (PredicateNode "EnergyDemandGoal") )
 )

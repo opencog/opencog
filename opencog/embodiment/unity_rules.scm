@@ -201,14 +201,6 @@
 ; Final Goals, also known as Demand Goals
 ;
 
-(define CurrentDemandGoal
-    (add_goal (PredicateNode "CurrentDemandGoal") )
-)
-
-(define PreviousDemandGoal
-    (add_goal (PredicateNode "PreviousDemandGoal") )
-)
-
 (define EnergyDemandGoal 
     (add_goal (PredicateNode "EnergyDemandGoal") )
 )
@@ -348,7 +340,7 @@
 
 (connect_goal_updater
      CompetenceDemandGoal 
-     (add_goal (GroundedPredicateNode "fuzzy_within") 0.7 1.0 CompetenceDemandSchema) 
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.75 1.0 CompetenceDemandSchema) 
 )
 
 ; TestEnergy is only used for debugging. Remove it once finished. 

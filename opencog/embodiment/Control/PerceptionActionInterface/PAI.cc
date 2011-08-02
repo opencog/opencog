@@ -2355,17 +2355,19 @@ Handle PAI::addOwnershipRelation(const Handle owner, const Handle owned, bool is
     return evalLink;
 }
 
-//TODO: THIS METHOD IS NOT BEING CALLED AT ALL. THIS MEANS THAT, IF PVP DO NOT SEND ANY STATUS FOR THESE PLANS,
-//THEY WILL BE IN INTERNAL DATA STRUCTURES FOREVER. SUGGESTION: CALL THIS METHOD WHEN A SCHEMA TIMEOUT HAPPENS IN SCHEMARUNNER
+// This function is called by PsiActionSelectionAgent, when an action is timeout 
 void PAI::setPendingActionPlansFailed()
 {
-
     ActionPlanMap::iterator it;
-    for (it =  pendingActionPlans.begin(); it != pendingActionPlans.end(); it++) {
-        ActionPlanID planId = it->first;
+
+    // Note: use empty() rather than iterator directly, since setActionPlanStatus 
+    //       will erase action plans in  pendingActionPlans if necessary. 
+    while ( !pendingActionPlans.empty() ) {
+        ActionPlanID planId = pendingActionPlans.begin()->first; 
 
         setActionPlanStatus(planId, 0, opencog::pai::ERROR,
                             getLatestSimWorldTimestamp());
+
     }
 }
 

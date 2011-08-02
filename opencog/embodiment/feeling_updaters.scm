@@ -93,23 +93,23 @@
 (define (modulator_to_feeling_dimension modulator_value indicator)
     (cond
         ( (= indicator modulator_extremely_low_indicator)
-          (fuzzy_low modulator_value modulator_extremely_low_threshold 100)
+          (fuzzy_low modulator_value modulator_extremely_low_threshold 150)
         )
 
         ( (= indicator modulator_low_indicator)
-          (fuzzy_low modulator_value modulator_low_threshold 100)
+          (fuzzy_low modulator_value modulator_low_threshold 150)
         )
 
         ( (= indicator modulator_medium_indicator)
-          (fuzzy_equal modulator_value modulator_medium_threshold 100)
+          (fuzzy_equal modulator_value modulator_medium_threshold 150)
         )
 
         ( (= indicator modulator_high_indicator)
-          (fuzzy_high modulator_value modulator_high_threshold 100)
+          (fuzzy_high modulator_value modulator_high_threshold 150)
         )
 
         ( (= indicator modulator_extremely_high_indicator)
-          (fuzzy_high modulator_value modulator_extremely_high_threshold 100)
+          (fuzzy_high modulator_value modulator_extremely_high_threshold 150)
         )
 
         ( else 

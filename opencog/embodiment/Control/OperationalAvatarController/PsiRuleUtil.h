@@ -30,6 +30,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SpaceServer.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>
 
@@ -273,7 +274,7 @@ public:
 
     static Handle getCurrentDemandGoal(const AtomSpace & atomSpace, Handle & referenceLink); 
 
-    static Handle setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal); 
+    static void setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal); 
 }; // class
 
 } } // namespace opencog::oac

@@ -662,7 +662,7 @@ Handle PsiRuleUtil::getPreviousDemandGoal(const AtomSpace & atomSpace, Handle & 
          atomSpace.getArity(hDemandGoalEvaluationLink) != 2 ) {
         logger().error( "PsiRuleUtil::%s - The previous DemandGoal should be an EvaluationLink with 2 outgoing. But got '%s'", 
                          __FUNCTION__, 
-                         atomSpace.atomAsString(hConceptNode).c_str()
+                         atomSpace.atomAsString(hDemandGoalEvaluationLink).c_str()
                       );
 
         return Handle::UNDEFINED; 
@@ -721,7 +721,7 @@ Handle PsiRuleUtil::getCurrentDemandGoal(const AtomSpace & atomSpace, Handle & r
          atomSpace.getArity(hDemandGoalEvaluationLink) != 2 ) {
         logger().error( "PsiRuleUtil::%s - The current DemandGoal should be an EvaluationLink with 2 outgoing. But got '%s'", 
                          __FUNCTION__, 
-                         atomSpace.atomAsString(hConceptNode).c_str()
+                         atomSpace.atomAsString(hDemandGoalEvaluationLink).c_str()
                       );
 
         return Handle::UNDEFINED; 
@@ -731,27 +731,37 @@ Handle PsiRuleUtil::getCurrentDemandGoal(const AtomSpace & atomSpace, Handle & r
     return hDemandGoalEvaluationLink; 
 }
 
-Handle PsiRuleUtil::setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal)
+void PsiRuleUtil::setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal)
 {
     // Get Handles to old ReferenceLink and EvaluationLink
-    Handle hOldCurrentDemandGoalReferenceLink, hOldPreviousDemandGoalReferenceLink; 
+    Handle hCurrentDemandGoalConceptNode = atomSpace.addNode(CONCEPT_NODE, "CurrentDemandGoal"); 
+    Handle hPreviousDemandGoalConceptNode = atomSpace.addNode(CONCEPT_NODE, "PreviousDemandGoal"); 
+
+    Handle hOldCurrentDemandGoalReferenceLink = 
+        AtomSpaceUtil::getReferenceLink(atomSpace, hCurrentDemandGoalConceptNode); 
+
+    Handle hOldPreviousDemandGoalReferenceLink = 
+        AtomSpaceUtil::getReferenceLink(atomSpace, hPreviousDemandGoalConceptNode); 
 
     Handle hOldCurrentDemandGoalEvaluationLink = 
-        PsiRuleUtil::getCurrentDemandGoal(atomSpace, hOldCurrentDemandGoalReferenceLink); 
+        hOldCurrentDemandGoalReferenceLink != Handle::UNDEFINED ?
+            atomSpace.getOutgoing(hOldCurrentDemandGoalReferenceLink, 1): 
+            Handle::UNDEFINED; 
 
     Handle hOldPreviousDemandGoalEvaluationLink = 
-        PsiRuleUtil::getPreviousDemandGoal(atomSpace, hOldPreviousDemandGoalReferenceLink); 
+        hOldPreviousDemandGoalReferenceLink != Handle::UNDEFINED ?
+            atomSpace.getOutgoing(hOldPreviousDemandGoalReferenceLink, 1): 
+            Handle::UNDEFINED; 
 
-    // If currently selected Demand Goal doesn't change
-    if (hCurrentlySelectedDemandGoal == hOldCurrentDemandGoalEvaluationLink) {
-        return hCurrentlySelectedDemandGoal; 
-    }
+    // If currently selected Demand Goal doesn't change, return immediately
+    if (hCurrentlySelectedDemandGoal == hOldCurrentDemandGoalEvaluationLink)
+        return; 
 
     // Try to delete old ReferenceLink containing previous/ current DemandGoal 
-    if ( hOldCurrentDemandGoalEvaluationLink != Handle::UNDEFINED )
+    if ( hOldCurrentDemandGoalReferenceLink != Handle::UNDEFINED )
         atomSpace.removeAtom( hOldCurrentDemandGoalReferenceLink );
 
-    if ( hOldPreviousDemandGoalEvaluationLink != Handle::UNDEFINED ) 
+    if ( hOldPreviousDemandGoalReferenceLink != Handle::UNDEFINED ) 
         atomSpace.removeAtom( hOldPreviousDemandGoalReferenceLink );
 
     // Create ReferenceLink containing previous DemandGoal
@@ -770,10 +780,8 @@ Handle PsiRuleUtil::setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentl
         outgoingSet.clear(); 
         outgoingSet.push_back( atomSpace.addNode(CONCEPT_NODE, "CurrentDemandGoal") ); 
         outgoingSet.push_back( hCurrentlySelectedDemandGoal ); 
-    }
-    else 
-        return Handle::UNDEFINED; 
 
-    return atomSpace.addLink(REFERENCE_LINK, outgoingSet); 
+        atomSpace.addLink(REFERENCE_LINK, outgoingSet); 
+    }        
 }
 
