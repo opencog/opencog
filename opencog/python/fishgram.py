@@ -21,11 +21,11 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 2
+        self.min_embeddings = 3
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 10 # 1e35 # 600
+        self.max_per_layer = 1e9 # 10 # 1e35 # 600
 
     def run(self):
         self.forest.extractForest()
@@ -73,7 +73,8 @@ class Fishgram:
 # you only need to add extensions if they're in the closure.
 
     def closed_bfs_extend_layer(self, prev_layer):
-        next_layer_iter = self.extensions(prev_layer)
+        #next_layer_iter = self.extensions(prev_layer)
+        next_layer_iter = self.extensions_simple(prev_layer)
         return self.prune_frequency(next_layer_iter)
         return next_layer_iter
 
@@ -83,7 +84,8 @@ class Fishgram:
         tree. For some purposes it would be better to return results immediately rather than one layer at
         a time, however creating ImplicationLinks requires previous layers."""
         #all_bindinglists = [(obj, ) for obj in self.forest.all_objects]
-        prev_layer = [((), None )]
+        #prev_layer = [((), None )]
+        prev_layer = [((), [{}] )]
 
         while len(prev_layer) > 0:
             # Mixing generator and list style because future results depend on previous results.
@@ -114,19 +116,88 @@ class Fishgram:
 
 # It may be possible to convert this into a simpler fishgram implementation, based on unify+lookup; the current one uses the 'incoming trees' index created by the
 # ForestExtractor.
-#    def extensions_simple(self, prev_layer):
-#        new_layer = []
-#        
-#        # Not correct - it must choose variables so that new 'links' (trees) will be connected in the right place.
-#        # That should be done based on embeddings (i.e. add a link if some of the embeddings have it)
-#        for (prev_conj,  prev_embeddings) in prev_layer:
-#            target = prev_conj + (new_var(), )
-#            
-#            matches = find_matching_conjunctions(target,fish.forest.unique_trees)
-#            
-#            for m in matches:
-#                embs = self.forest.lookup_embeddings(m.conj)
-#                new_layer.append( (m.conj, embs) )
+    def extensions_simple(self, prev_layer):
+        new_layer = []
+        
+        # Not correct - it must choose variables so that new 'links' (trees) will be connected in the right place.
+        # That should be done based on embeddings (i.e. add a link if some of the embeddings have it)
+        
+        # But wait, you can just look it up and then merge new variables that point to existing objects.
+        for (prev_conj,  prev_embeddings) in prev_layer:
+
+            for tr in self.forest.unique_trees:
+                size = len(self.get_varlist(tr))
+                embs = self.forest.tree_embeddings[size][tr]
+                embs = map(subst_from_binding, embs)
+
+                # Give the tree new variables. Keep the mapping so that you can find the right embeddings later
+                sa_mapping = {}
+                tr = standardize_apart(tr, sa_mapping)
+                
+                rebound_embs = []
+                for s in embs:
+                    s2 = {}
+                    for (old_var, new_var) in sa_mapping.items():
+                        obj = s[old_var]
+                        s2[new_var] = obj
+                    rebound_embs.append(s2)
+
+                extensions_for_prev_conj_and_tree_type = {}
+                
+                # They all have the same 'link label' (tree) but may be in different places.
+                for s in rebound_embs:
+                    for e in prev_embeddings:
+                        # for each new var, if the object is in the previous embedding, then re-map them.
+                        obj2var_prev = [(obj, var) for (var, obj) in e.items()]
+                        obj2var_new = [(obj, var) for (var, obj) in s.items()]
+                        
+                        # Never allow links that point to the same argument multiple times
+                        tmp = [(o, v) for (o, v) in obj2var_new if o == obj]
+                        if len(tmp) > 1:
+                            continue
+                        
+                        new_vars = [var for var in s if var not in e]
+                        remapping = {}
+                        new_s = dict(e)
+                        for var in new_vars:
+                            obj = s[var]
+                            tmp = [(o, v) for (o, v) in obj2var_prev if o == obj]
+                            assert len(tmp) < 2
+                            if len(tmp) == 1:
+                                _, existing_variable = tmp[0]
+                                remapping[var] = existing_variable
+                            else:
+                                # If it is not a redundant var, then add it to the new binding.
+                                new_s[var] = obj
+                        
+                        # Skip 'links' where there is no remapping, i.e. no connection to the existing pattern (no variables in common)
+                        if not len(remapping) and prev_conj != ():
+                            continue
+                                
+                        remapped_tree = subst(remapping, tr)
+                        remapped_conj = prev_conj+(remapped_tree,)
+                        
+                        if remapped_tree in prev_conj:
+                            continue
+                        # Check for other equivalent ones. It'd be possible to reduce them (and increase efficiency) by ordering
+                        # the extension of patterns. This would only work with a stable frequency measure though.
+                        clones = [c for c in extensions_for_prev_conj_and_tree_type
+                                   if c != remapped_conj and
+                                   unify(remapped_conj, c, {}, True) != None]
+                        if len(clones):
+                            continue
+                            
+                        # There may be many ways to connect a link to an existing pattern. The same one may be found many times.
+                        # If it is, then it will have the same variables each time, so you can just look it up in a dictionary (otherwise
+                        # you would need to check by unification)
+                        
+                        if remapped_conj not in extensions_for_prev_conj_and_tree_type:
+                            extensions_for_prev_conj_and_tree_type[remapped_conj] = []
+                        extensions_for_prev_conj_and_tree_type[remapped_conj].append(new_s)
+
+                new_layer += extensions_for_prev_conj_and_tree_type.items()
+        
+        return new_layer
 
     def extensions(self,  prev_layer):
         """Find all extensions for that fragment. An extension means adding one link to a particular
@@ -252,7 +323,7 @@ class Fishgram:
             num_variables = len(self.get_varlist(conj))*1.0
             
             normalized_frequency =  count / num_possible_objects ** num_variables
-            if len(embeddings) > self.min_embeddings:
+            if len(embeddings) >= self.min_embeddings:
             #if normalized_frequency > self.min_frequency:
                 #print pp(conj), normalized_frequency
                 yield (conj, embeddings)
@@ -457,9 +528,9 @@ class Fishgram:
         ideal_conclusion = increase_template
 
         s2 = unify(ideal_premises, premises, {})
-        print 'make_psi_rule: s2=%s' % (s2,)
+        #print 'make_psi_rule: s2=%s' % (s2,)
         s3 = unify(ideal_conclusion, conclusion, s2)
-        print 'make_psi_rule: s3=%s' % (s3,)
+        #print 'make_psi_rule: s3=%s' % (s3,)
         
         if s3 != None:
             #premises2 = [x for x in premises if not unify (seq_and_template, x, {})]
@@ -660,7 +731,7 @@ def make_seq(atomspace):
             else:
                 break
 
-# Faster but only works if DemandGoals are updated every cycle ( == every timestamp)
+# Only works if DemandGoals are updated every cycle ( == every timestamp). The new version is similarly fast.
 #def notice_changes_alt(atomspace):
 #    tv_delta = 0.001
 #    a = atomspace.add
