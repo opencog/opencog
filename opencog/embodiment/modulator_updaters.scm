@@ -17,10 +17,7 @@
 
 (define (ActivationModulatorUpdater)
     (* (get_predicate_truth_value_mean "CertaintyDemandGoal")
-
-       (- 1
-          (expt (get_predicate_truth_value_mean "CompetenceDemandGoal") 0.5)  
-       )
+       (expt (get_predicate_truth_value_mean "CompetenceDemandGoal") 0.5)  
     )
 )
 
@@ -43,7 +40,7 @@
 
 (define (SecuringThresholdModulatorUpdater)
     (normalize (/ (+ (get_predicate_truth_value_mean "CertaintyDemandGoal") 1)
-                  (+ (get_predicate_truth_value_mean "CurrentDemandGoal") 1)
+                  (+ (get_pleasure_value) 1)
                )
 
                0.5
