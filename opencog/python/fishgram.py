@@ -99,20 +99,6 @@ class Fishgram:
                 yield new_layer
 
             prev_layer = new_layer
-            
-
-    def extending_links(self, binding):
-        ret = set()
-        
-        for obj in binding:
-            for predsize in sorted(self.forest.incoming[obj].keys()):
-                #if predsize > 1: continue
-                for slot in sorted(self.forest.incoming[obj][predsize].keys()):
-                    for tree_id in self.forest.incoming[obj][predsize][slot]:
-                        if tree_id not in ret:
-                            ret.add(tree_id)
-         
-        return ret
 
 # It may be possible to convert this into a simpler fishgram implementation, based on unify+lookup; the current one uses the 'incoming trees' index created by the
 # ForestExtractor.
@@ -130,7 +116,7 @@ class Fishgram:
                 embs = self.forest.tree_embeddings[size][tr]
                 embs = map(subst_from_binding, embs)
 
-                # Give the tree new variables. Keep the mapping so that you can find the right embeddings later
+                # Give the tree new variables. Rewrite the embeddings to match.
                 sa_mapping = {}
                 tr = standardize_apart(tr, sa_mapping)
                 
@@ -148,20 +134,19 @@ class Fishgram:
                 for s in rebound_embs:
                     for e in prev_embeddings:
                         # for each new var, if the object is in the previous embedding, then re-map them.
-                        obj2var_prev = [(obj, var) for (var, obj) in e.items()]
-                        obj2var_new = [(obj, var) for (var, obj) in s.items()]
                         
                         # Never allow links that point to the same argument multiple times
-                        tmp = [(o, v) for (o, v) in obj2var_new if o == obj]
+                        tmp = [(o, v) for (v, o) in s.items() if o == obj]
                         if len(tmp) > 1:
                             continue
                         
+                        # In this embedding, a variable in the tree might fit an object that is already used 
                         new_vars = [var for var in s if var not in e]
                         remapping = {}
                         new_s = dict(e)
                         for var in new_vars:
                             obj = s[var]
-                            tmp = [(o, v) for (o, v) in obj2var_prev if o == obj]
+                            tmp = [(o, v) for (v, o) in e.items() if o == obj]
                             assert len(tmp) < 2
                             if len(tmp) == 1:
                                 _, existing_variable = tmp[0]
@@ -187,10 +172,6 @@ class Fishgram:
                         if len(clones):
                             continue
                             
-                        # There may be many ways to connect a link to an existing pattern. The same one may be found many times.
-                        # If it is, then it will have the same variables each time, so you can just look it up in a dictionary (otherwise
-                        # you would need to check by unification)
-                        
                         if remapped_conj not in extensions_for_prev_conj_and_tree_type:
                             extensions_for_prev_conj_and_tree_type[remapped_conj] = []
                         extensions_for_prev_conj_and_tree_type[remapped_conj].append(new_s)
@@ -198,6 +179,19 @@ class Fishgram:
                 new_layer += extensions_for_prev_conj_and_tree_type.items()
         
         return new_layer
+
+    def extending_links(self, binding):
+        ret = set()
+        
+        for obj in binding:
+            for predsize in sorted(self.forest.incoming[obj].keys()):
+                #if predsize > 1: continue
+                for slot in sorted(self.forest.incoming[obj][predsize].keys()):
+                    for tree_id in self.forest.incoming[obj][predsize][slot]:
+                        if tree_id not in ret:
+                            ret.add(tree_id)
+         
+        return ret
 
     def extensions(self,  prev_layer):
         """Find all extensions for that fragment. An extension means adding one link to a particular
