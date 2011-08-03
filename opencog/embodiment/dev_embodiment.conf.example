@@ -71,12 +71,19 @@ MAX_OAC_PORT                    = 16340
 
 # Log levels for each embodiment component
 # Values: ERROR, WARN, INFO, DEBUG, FINE
-LS_LOG_LEVEL                    = INFO
+#LS_LOG_LEVEL                    = INFO
+#OAC_LOG_LEVEL  	             = DEBUG
+#ROUTER_LOG_LEVEL                = INFO
+#SPAWNER_LOG_LEVEL               = INFO
+#PROXY_LOG_LEVEL                 = DEBUG
+#OPENCOG_LOG_LEVEL               = DEBUG
+
+LS_LOG_LEVEL                    = ERROR
 OAC_LOG_LEVEL  	                = DEBUG
-ROUTER_LOG_LEVEL                = INFO
-SPAWNER_LOG_LEVEL               = INFO
-PROXY_LOG_LEVEL                 = DEBUG
-OPENCOG_LOG_LEVEL               = DEBUG
+ROUTER_LOG_LEVEL                = ERROR
+SPAWNER_LOG_LEVEL               = ERROR
+PROXY_LOG_LEVEL                 = ERROR
+OPENCOG_LOG_LEVEL               = ERROR
 
 # Back trace log level. 
 # Note it is of string type: error, warn, info, debug or fine (case insensitive)
@@ -110,9 +117,9 @@ ROUTER_DATABASE_DIR             = /tmp/$USER/opencog/router_db
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
-#PSI_DEMANDS = Energy, Certainty
+PSI_DEMANDS = Energy, Integrity, Certainty, Competence
 # Complete list of demands (all availabe in multiverse world)
-PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
+#PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
 # TODO: TestEnergy is only used for debugging, remove it once finished
 
@@ -131,19 +138,19 @@ PSI_RULES_CORE_FILE =          rules_core.scm
 PSI_RULES_FILENAME_MASK =      %s_rules.scm
 
 PSI_MODULATOR_UPDATER_ENABLED =        true
-PSI_MODULATOR_UPDATER_CYCLE_PERIOD =   29
+PSI_MODULATOR_UPDATER_CYCLE_PERIOD =   11
 
 PSI_DEMAND_UPDATER_ENABLED =           true
-PSI_DEMAND_UPDATER_CYCLE_PERIOD =      13
+PSI_DEMAND_UPDATER_CYCLE_PERIOD =      7
 
 PSI_ACTION_SELECTION_ENABLED =         true
-PSI_ACTION_SELECTION_CYCLE_PERIOD =    13
+PSI_ACTION_SELECTION_CYCLE_PERIOD =    7
 
 PSI_RELATION_UPDATER_ENABLED =         true
-PSI_RELATION_UPDATER_CYCLE_PERIOD =    29
+PSI_RELATION_UPDATER_CYCLE_PERIOD =    13
 
 PSI_FEELING_UPDATER_ENABLED =          true
-PSI_FEELING_UPDATER_CYCLE_PERIOD =     29
+PSI_FEELING_UPDATER_CYCLE_PERIOD =     11
 
 # If you would like to use PLN planner, set it to true, otherwise it will use random breadth-first planner
 PSI_PLAN_BY_PLN = false
@@ -155,7 +162,7 @@ RE_CYCLE_PERIOD                                  = 2
 ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD = 1
 
 # how much cycles the importance decay will take
-IMPORTANCE_DECAY_CYCLE_PERIOD = 5
+IMPORTANCE_DECAY_CYCLE_PERIOD = 9
 
 #RE_DEFAULT_COUNT	    18
 #RE_DEFAULT_MEAN		0.5  
@@ -167,7 +174,7 @@ IMPORTANCE_DECAY_CYCLE_PERIOD = 5
 
 # Parameter to control the maximal time spent by a procedure to be executed by Procedure Interpreter (in seconds)
 #PROCEDURE_EXECUTION_TIMEOUT     = 90 
-PROCEDURE_EXECUTION_TIMEOUT     = 20 
+PROCEDURE_EXECUTION_TIMEOUT     = 10
 
 # Indicates if walk actions sent to PVP can be canceled so that new navigation plan be sent to PVP when needed.
 ALLOW_WALKING_CANCELATION       = false
