@@ -31,8 +31,7 @@
 
 namespace opencog { namespace reduct {
 const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops, 
-                             opencog::RandGen& rng,
-                             unsigned int cache_size) {
+                             opencog::RandGen& rng) {
     // rules that do not involve factorizing or distributing
     static sequential seq_without_factorize_distribute =
         sequential(// these 2 ones below are added first because the
@@ -91,18 +90,15 @@ const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops,
 
     static iterative res =
         iterative(sequential(seq_without_factorize_distribute,
-                             cache(sequential(complete_factorize,
-                                              ignore_size_increase(sequential(complete_distribute,
-                                                             // we factorize
-                                                             // again to be sure
-                                                             // not to enter in
-                                                             // an infinite
-                                                             // factorize/distribute
-                                                             // loop
-                                                                              complete_factorize))),cache_size)));
-
-    //    static cache res_cache(res, cache_size);
-
+                             sequential(complete_factorize,
+                                        ignore_size_increase(sequential(complete_distribute,
+                                                                        // we factorize
+                                                                        // again to be sure
+                                                                        // not to enter in
+                                                                        // an infinite
+                                                                        // factorize/distribute
+                                                                        // loop
+                                                                        complete_factorize)))));
     return res;
 }
 

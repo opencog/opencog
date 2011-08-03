@@ -69,17 +69,6 @@ protected:
     shared_ptr<const rule> r;
 };
 
-// the result of the reduction applied by r will be cached
-struct cache : public crule<cache> {
-    explicit cache(const rule& r_, unsigned int cache_size, string name = "cache")
-        : crule<cache>::crule(name), r(r_.clone()),
-          rule_cache(cache_size, opencog::toFunc<rule>(*r)) {}
-    void operator()(combo_tree&, combo_tree::iterator) const;
-protected:
-    shared_ptr<const rule> r;
-    opencog::lru_cache<opencog::toFunc<rule> > rule_cache;
-};
-
 //apply rule in pre-order (left-to-right, parents before children, leftward
 //subtrees before rightward subtrees) from a given node, to visit all
 //children in the given iterator's subtree (e.g., the node the iterator
@@ -87,11 +76,11 @@ protected:
 struct downwards : public crule<downwards> {
     explicit downwards(const rule& r_, string name = "downwards")
         : crule<downwards>::crule(name), r(r_.clone()),
-          input(opencog::combo::id::unknown_type), output(opencog::combo::id::unknown_type) { }
-    downwards(const rule& r_, opencog::combo::type_node t, string name = "downwards")
+          input(combo::id::unknown_type), output(combo::id::unknown_type) { }
+    downwards(const rule& r_, combo::type_node t, string name = "downwards")
         : crule<downwards>::crule(name),
           r(r_.clone()), input(t), output(t) { }
-    downwards(const rule& r_, opencog::combo::type_node input_, opencog::combo::type_node output_,
+    downwards(const rule& r_, combo::type_node input_, combo::type_node output_,
               string name = "downwards")
         : crule<downwards>::crule(name),
           r(r_.clone()), input(input_), output(output_) { }
@@ -103,8 +92,8 @@ struct downwards : public crule<downwards> {
 
 protected:
     shared_ptr<const rule> r;
-    opencog::combo::type_tree input;
-    opencog::combo::type_node output;
+    combo::type_tree input;
+    combo::type_node output;
 };
 //apply rule in post-order (left-to-right, children before parents,
 //starting from the leftmost lowermost node) from a given node, to visit

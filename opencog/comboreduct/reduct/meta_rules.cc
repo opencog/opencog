@@ -77,15 +77,6 @@ void ignore_size_increase::operator()(combo_tree& tr, combo_tree::iterator it) c
     DEC_TAB
 }
 
-void cache::operator()(combo_tree& tr, combo_tree::iterator it) const {
-    INC_TAB
-    PRINT_DEBUG_STANDARD
-    replace_without_changing_it(tr, it, rule_cache(combo_tree(it)).begin());
-    // std::cout << "failures = " << rule_cache.get_failures() << std::endl;
-    // std::cout << "success = " << rule_cache.get_hits() << std::endl;
-    DEC_TAB
-}
-
 void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
     INC_TAB
     combo_tree::iterator end=it;  
