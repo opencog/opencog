@@ -2,10 +2,8 @@
 ; Action planner
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-07-27
+; @date   2011-08-03
 ;
-
-; TODO: create and AndSeq link, inherits from ordered link for Actions
 
 ; Modules for debug
 ;(use-modules (ice-9 debugger)
@@ -23,6 +21,60 @@
             (random (length selection_list) ) 
         )    
     ) 
+)
+
+; Roulette wheel select a rule based on truth values (mean value) given a list
+; of psi rules (ImplicationLink), that is for each rule, the probability to be 
+; selected is proportional to its truth value
+;
+; @note before calling this function, make sure 'rule_list' has been sorted based
+;       on truth values (mean value) in ascending order
+(define (roulette_wheel_select rule_list)
+    (let ( (sum_truth_value 0)
+           (selection_threshold 0)
+         )
+
+         ; Calculate the sum of truth values
+         (map
+             (lambda (rule)
+                 (set! sum_truth_value
+                       (+ sum_truth_value 
+                          (get_truth_value_mean (cog-tv rule)) 
+                       )   
+                 )
+             )
+
+             rule_list
+         ); map
+
+         ; Roulette wheel selection
+         (set! selection_threshold
+               (* (random:uniform) sum_truth_value)
+         )
+
+         (let loop_rule_list ( (temp_rule_list rule_list)
+                               (accumulated_truth_value 0)
+                             )
+             (if (null? temp_rule_list)
+                 (list) ; actually we should not reach here
+             
+                 (begin
+                     (set! accumulated_truth_value
+                           (+ (get_truth_value_mean (cog-tv (car temp_rule_list)) ) 
+                              accumulated_truth_value
+                           ) 
+                     )
+
+                     (if (>= accumulated_truth_value selection_threshold)
+                         (car temp_rule_list) 
+                         (loop_rule_list (cdr temp_rule_list) accumulated_truth_value)
+                     )
+                 ); begin
+
+             ); if
+         ); let loop_rule_list
+
+    ); let 
 )
 
 ; Return precondition/ goal given a psi rule
@@ -412,7 +464,7 @@
 ; @note This function will only return a list of actions that can be performed
 ;       immediately in current cognitive cycle. That means it will not preserve 
 ;       a complete chain of actions that would lead to the goal, if some 
-;       preconditions of rules are not satisfied right now. It that situation, 
+;       preconditions of rules are not satisfied right now. In that situation, 
 ;       this function returns a bunch of actions that would be helpful for the
 ;       goal. 
 ;
@@ -500,33 +552,30 @@
                              ; (i.e. mean values of ImplicationLink truth value)
                              ; then 'search_rule_with_true_context' below will tend 
                              ; to pick up rules with higher truth value
-                             (if (not (null? available_rule_list) )
-                                 (set! available_rule_list
-                                     (sort available_rule_list
-                                           (lambda (psi_rule_1 psi_rule_2)
-                                               (>  (get_truth_value_mean (cog-tv psi_rule_1) )
-                                                   (get_truth_value_mean (cog-tv psi_rule_2) )
-                                               )   
-                                           )
-                                     )
-                                 ) 
-                             )
+                             (set! available_rule_list
+                                 (sort available_rule_list
+                                       (lambda (psi_rule_1 psi_rule_2)
+                                           (<  (get_truth_value_mean (cog-tv psi_rule_1) )
+                                               (get_truth_value_mean (cog-tv psi_rule_2) )
+                                           )   
+                                       )
+                                 )
+                             ) 
 
-                             ; Search a rule with True context, 
-                             ; TODO: currently, we just process rules one by one in sequence, 
-                             ;       we should change this to roulette wheel selection based 
-                             ;       on truth values later. 
+                             ; Search a rule with True context, rules with higher truth value (mean value), 
+                             ; have priority to be tested ealier
                              (let search_rule_with_true_context ( (rule_list available_rule_list)
                                                                 )
 
                                   (if ( not (null? rule_list) )
-                                      (let ( (current_rule (car rule_list) )
+                                      (let ( (current_rule (roulette_wheel_select rule_list) )
                                            )
 
                                            (if (equal? (member current_rule unreachable_rule_list)
                                                        #f
                                                )
-                                              
+                                             
+                                               ; if current rule is not in the unreachable rule list
                                                (begin 
                                                    ; Search
                                                    (set! search_result 
@@ -541,7 +590,7 @@
                                                            )
 ;                                                            (display "search_result ") (newline) (display search_result) (newline)
 ;                                                            (display "False context rule ") (newline) (display current_rule) (newline)
-                                                           (search_rule_with_true_context (cdr rule_list) ) 
+                                                           (search_rule_with_true_context (delete current_rule rule_list) ) 
                                                        )   
 
                                                        ; Found
@@ -556,6 +605,9 @@
                                                    ); if 
                                                ); begin
 
+                                               ; if current rule is already in the unreachable rule list, skip it
+                                               (search_rule_with_true_context (delete current_rule rule_list) )
+
                                            ); if 
 
                                       ); let
@@ -563,15 +615,18 @@
                              ); let
   
                              (if (null? selected_rule)
-                                 ; If there's no rule with True context, randomly select a rule
-                                 ;
-                                 ; TODO: we should take advantage of weights (truth value) of
-                                 ;       rules for selection using roulette wheel selection. 
+                                 ; If there's no rule with True context, randomly select a rule using roulette wheel selection, 
+                                 ; that is, for each rule, the possibility to be selected is proportional to its truth value
+                                 ; (mean value).
+                                 ; And the truth value of these rules could be 'learned' very easily through the interaction with 
+                                 ; the environment. For example, we can increase the truth value of a psi rule (ImplicationLink) 
+                                 ; slightly, while corresponding actions are executed successfully, and decrease it, when actions 
+                                 ; fail. This work should be done in 'PsiActionSelectionAgent::run'. 
                                  (begin
 ;                                      (display "Failed to find any rule with true context ") (newline)
 
                                      (set! selected_rule 
-                                           (random_select available_rule_list)
+                                           (roulette_wheel_select available_rule_list)        
                                      )
  
                                      (let* ( (precondition (get_psi_precondition selected_rule) )
@@ -629,7 +684,6 @@
 
     ); let    
 ); define
-
 
 ; Return a list containing all the demand goals (EvaluationLink) 
 ; The list of demand goals is initialized by PsiActionSelectionAgent::initDemandGoalList
