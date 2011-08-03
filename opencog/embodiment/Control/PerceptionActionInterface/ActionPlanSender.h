@@ -38,12 +38,13 @@ public:
     /**
      * Sends the action plan to the target Virtual World.
      *
-     * @param ationPlan a reference to the object that contains the action plan to be sent. Note that
-     *     this reference may not be valid after the call of this method because caller may release the object.
-     *        So, if the implementation of this method is going to store the action plan for further use, it must
-     *        clone/copy the ActionPlan object.
+     * @param actionPlan a reference to the object that contains the action
+     * plan to be sent. Note that this reference may not be valid after the
+     * call of this method because caller may release the object.  So, if the
+     * implementation of this method is going to store the action plan for
+     * further use, it must clone/copy the ActionPlan object.
      *
-     * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
+     * @return the success (true) or failure (false) of the send operation.
      */
     virtual bool sendActionPlan(const ActionPlan& actionPlan) = 0;
 
@@ -52,9 +53,11 @@ public:
     /**
      * Sends the emotional feelings meessage to the target Virtual World.
      *
-     * @param feelings The XML message already converted int a string representation
+     * @param feelings The XML message already converted int a string
+     * representation
      *
-     * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
+     * @return a boolean value that indicates the success (true) or failure
+     * (false) of this sending operation.
      */
     virtual bool sendEmotionalFeelings(const std::string& emotionalFeelings) = 0;
 
