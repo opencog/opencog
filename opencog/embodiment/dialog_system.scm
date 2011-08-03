@@ -273,12 +273,12 @@
 ;******************************************************************************
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-(ReferenceLink (stv 1.0 1.0)
+(ReferenceLink (stv 1.0 1.0) (cog-new-av 1 1 1)
     (DialogNode "dialog_history")
     (ListLink)
 )    
 
-(ReferenceLink (stv 1.0 1.0) 
+(ReferenceLink (stv 1.0 1.0) (cog-new-av 1 1 1) 
     (UtteranceNode "utterance_sentences")
     (ListLink)
 )
