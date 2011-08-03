@@ -500,15 +500,17 @@
                              ; (i.e. mean values of ImplicationLink truth value)
                              ; then 'search_rule_with_true_context' below will tend 
                              ; to pick up rules with higher truth value
-                             (set! available_rule_list
-                                 (sort available_rule_list
-                                       (lambda (psi_rule_1 psi_rule_2)
-                                           (>  (get_truth_value_mean (cog-tv psi_rule_1) )
-                                               (get_truth_value_mean (cog-tv psi_rule_2) )
-                                           )   
-                                       )
-                                 )
-                             ) 
+                             (if (not (null? available_rule_list) )
+                                 (set! available_rule_list
+                                     (sort available_rule_list
+                                           (lambda (psi_rule_1 psi_rule_2)
+                                               (>  (get_truth_value_mean (cog-tv psi_rule_1) )
+                                                   (get_truth_value_mean (cog-tv psi_rule_2) )
+                                               )   
+                                           )
+                                     )
+                                 ) 
+                             )
 
                              ; Search a rule with True context, 
                              ; TODO: currently, we just process rules one by one in sequence, 
