@@ -29,7 +29,6 @@ class ForestExtractor:
         
         # state
         self.all_objects  = set()# all objects in the AtomSpace
-        self.unique_trees = set()
         self.all_trees = []
         self.all_trees_atoms = []
         self.bindings = []
@@ -41,7 +40,6 @@ class ForestExtractor:
         # fishgram-specific experiments. Refactor later
         # map from unique tree to set of embeddings. An embedding is a set of bindings. Maybe store the corresponding link too.
         self.tree_embeddings = {} 
-        self.unique_trees_at_each_size = {}
         
         # The incoming links (or rather trees/predicates) for each object.
         # For each object, for each predsize, for each slot, the list of preds. (Indexes into self.all_trees)
@@ -84,24 +82,14 @@ class ForestExtractor:
             if len(objects):
                 self.all_trees.append(tree)
                 self.all_trees_atoms.append(link)
-                self.unique_trees.add(tree)
                 self.bindings.append(objects)
                 for obj in objects:
                     self.all_objects.add(obj)
                     
-            # fishgram-specific experiments. Refactor later
-            size = len(objects)
-            if size not in self.tree_embeddings:
-                self.tree_embeddings[size] = {}
-            if tree not in self.tree_embeddings[size]:
-                self.tree_embeddings[size][tree] = set()
-            self.tree_embeddings[size][tree].add(objects)
-            # You can output it using something like this:
-            # for (tree,embeddingset_list) in te.tree_embeddings[1].items(): print len(embeddingset_list)
-            # len([tree for (tree,embeddingset_list) in te.tree_embeddings[1].items() if len(embeddingset_list) > 0])
-            if size not in self.unique_trees_at_each_size:
-                self.unique_trees_at_each_size[size] = set()
-            self.unique_trees_at_each_size[size] .add(tree)
+            # fishgram-specific
+            if tree not in self.tree_embeddings:
+                self.tree_embeddings[tree] = set()
+            self.tree_embeddings[tree].add(objects)
             
             size= len(objects)
             tree_id = len(self.all_trees) - 1

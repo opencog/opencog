@@ -111,10 +111,8 @@ class Fishgram:
         # But wait, you can just look it up and then merge new variables that point to existing objects.
         for (prev_conj,  prev_embeddings) in prev_layer:
 
-            for tr in self.forest.unique_trees:
-                size = len(self.get_varlist(tr))
-                embs = self.forest.tree_embeddings[size][tr]
-                embs = map(subst_from_binding, embs)
+            for tr, embs_ in self.forest.tree_embeddings:
+                embs = map(subst_from_binding, embs_)
 
                 # Give the tree new variables. Rewrite the embeddings to match.
                 sa_mapping = {}
@@ -572,7 +570,7 @@ class Fishgram:
         
         # Try to find suitable patterns and then use them.
         print pp(self.causality_template)
-        matches = find_matching_conjunctions(self.causality_template, self.forest.unique_trees)
+        matches = find_matching_conjunctions(self.causality_template, self.forest.tree_embeddings.keys())
         
         for m in matches:
 #            print pp(m.conj)

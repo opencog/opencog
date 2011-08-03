@@ -155,7 +155,8 @@ class FishgramTest(TestCase):
         # Add the pattern (still with some variables) into the ForestExtractor results, then see if it can be looked up correclty
         ideal_result = (action, seq_and, increase)
         for x in ideal_result:
-            self.fishgram.forest.unique_trees.add(x)
+            # No embedding actually needs to be recorded, as long as the tree itself is there
+            self.fishgram.forest.tree_embeddings[x] = []
         
         result = next(self.fishgram.lookup_causal_patterns())
         print result
