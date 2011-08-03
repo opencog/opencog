@@ -87,6 +87,11 @@ class FishgramTest(TestCase):
                     tr('ListLink')
                 )
         
+        goal = tr('EvaluationLink',
+                                a(t.PredicateNode, name = 'EnergyDemandGoal'), 
+                                    tr('ListLink')
+                            )
+        
         action = tr('AtTimeLink', 1,
                                 tr('EvaluationLink',
                                     a(t.PredicateNode, name='actionDone'),
@@ -101,7 +106,7 @@ class FishgramTest(TestCase):
                      tr('EvaluationLink',
                                 a(t.PredicateNode, name='increased'),
                                 tr('ListLink',
-                                    a(t.PredicateNode, name = 'EnergyDemandGoal')
+                                    goal
                                 )
                         )
                      )
@@ -113,10 +118,7 @@ class FishgramTest(TestCase):
         print premises2, conclusion2
         
         ideal_premises = (bark, )
-        ideal_conclusion =  tr('EvaluationLink',
-                                a(t.PredicateNode, name = 'EnergyDemandGoal'), 
-                                    tr('ListLink')
-                            )
+        ideal_conclusion =  goal
         
         self.assertEquals(premises2, ideal_premises)
         self.assertEquals(conclusion2, ideal_conclusion)
