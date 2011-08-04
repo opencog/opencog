@@ -387,6 +387,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
 struct CommandArgsStuc {
 
 	bool bCreateFromFile;
+        string strDestinNetworkFileToRead;
 };
 
 /**
@@ -415,18 +416,17 @@ int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], Com
 
     // Argument: DestinOutputFile or InputNetworkFile
 
-    string strDestinNetworkFileToRead;
     string strDestinNetworkFileToWrite;
     string FirstArg = argv[1];
     if ( FirstArg=="-F" )
     {
         // Argument: InputNetworkFile
         out.bCreateFromFile = true;
-        strDestinNetworkFileToRead = argv[2];  // we read from this file...
+        out.strDestinNetworkFileToRead = argv[2];  // we read from this file...
 
-        if ( !FileExists( strDestinNetworkFileToRead ) )
+        if ( !FileExists( out.strDestinNetworkFileToRead ) )
         {
-            cout << "designated input network file named " << strDestinNetworkFileToRead.c_str() << " does not exist" << endl;
+            cout << "designated input network file named " << out.strDestinNetworkFileToRead.c_str() << " does not exist" << endl;
             return 0;
         }
         cout << "Writing destin file to: " << strDestinNetworkFileToWrite << endl;
@@ -442,7 +442,7 @@ int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], Com
             strDestinNetworkFileToWrite= strDiagnosticDirectoryForData + strDiagnosticFileName;
             cout << "Writing default destin file to: " << strDestinNetworkFileToWrite << endl;
         }
-        strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
+        out.strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
     }
 
 
@@ -816,7 +816,7 @@ int MainDestinExperiments(int argc, char* argv[])
         xml << "</destin>" << endl;
         pugi::xml_document outputFile;
         outputFile.load(xml.str().c_str());
-        string file = strDestinNetworkFileToRead;
+        string file = argsStruc.strDestinNetworkFileToRead;
         stringstream num;
         num << "-" << i;
         file.insert(file.length()-4, num.str());
