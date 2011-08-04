@@ -30,6 +30,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
@@ -63,13 +64,44 @@ namespace opencog
 
         typedef boost::unordered_set<GridPoint, boost::hash<GridPoint> > GridSet;
 
+        // An object in the local space map might be seperated into several
+        // grid points. Since each object has an extra boundary(with the 
+        // length of agent's radius) to detect collision with agent, there 
+        // might be chances that the boundary of an object is
+        // overlapping with another in grid representation when these two
+        // objects are close to each other. We need a flag to tell whether a
+        // seperated part of an object in a grid is an extra boundary or not.
+        struct ObjectInfo {
+            const char* id;
+            bool isExtraBoundary;
+
+            ObjectInfo(const char* id_, bool isExtraBoundary_) {
+                id = id_;
+                isExtraBoundary = isExtraBoundary_;
+            }
+
+            ObjectInfo(const std::string& id_, bool isExtraBoundary_) {
+                id = id_.c_str();
+                isExtraBoundary = isExtraBoundary_;
+            }
+
+            bool operator<(const ObjectInfo& rh) const {
+                return strcmp(id, rh.id) < 0;
+            }
+        };
+
         struct c_str_compare {
             bool operator()(const char* s1, const char* s2) const {
                 return strcmp(s1, s2) < 0;
             }
         };
+
         typedef std::set<const char*, c_str_compare> ObjectIDSet;
-        typedef boost::unordered_map<GridPoint, ObjectIDSet, boost::hash<GridPoint> > GridMap;
+        typedef std::set<ObjectInfo> ObjectInfoSet;
+        typedef boost::unordered_map<GridPoint, ObjectInfoSet, boost::hash<GridPoint> > GridMap;
+
+        //typedef std::map<const char*, bool, c_str_compare> ObjectInfoSet;
+        //typedef boost::unordered_map<GridPoint, ObjectIDSet, boost::hash<GridPoint> > GridMap;
         typedef boost::unordered_map<long, std::vector<GridPoint>, boost::hash<long> > LongGridPointVectorHashMap;
 
         /**

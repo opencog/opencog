@@ -22,7 +22,8 @@ ADD_LIBRARY(SpaceMap SHARED
     Entity.cc
     SuperEntity.cc
     MovableEntity.cc
-    
+    Block.cc
+
     MapExplorerServer.cc
 )
 
@@ -117,6 +118,7 @@ INSTALL (FILES
     PetAgent.h
     Prerequisites.h
     QuadTree.h
+    Block.h
     StaticEntity.h
     stlastar.h
     SuperEntity.h

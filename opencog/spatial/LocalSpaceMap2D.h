@@ -236,9 +236,6 @@ namespace opencog
             double getProperDestAltitude(const GridPoint& src, const GridPoint& dest, const double srcHeight, double delta) const;
             bool isDiagonal(const GridPoint& src, const GridPoint& dest) const;
             ObjectID getTallestObjectInGrid(const GridPoint& gp) const; 
-            ObjectID getLowestObjectInGrid(const GridPoint& gp) const; 
-            double getBottomSurfaceHeightByGridPoint(const GridPoint& gp) const;
-            double getTopSurfaceHeightByGridPoint(const GridPoint& gp) const;
 
             std::vector<Gradient> getObjectGradientsByGridPoint(const GridPoint& gp) const;
             //const ObjectMetaData& getMetaData(const ObjectID& id) const throw(opencog::NotFoundException);
@@ -518,6 +515,12 @@ namespace opencog
              * @param isObstacle If true the object will be considered an obstacle, false an nonObstacle
              */
             void addObject( const ObjectID& id, const ObjectMetaData& metadata, bool isObstacle = false );
+
+            /**
+             * Add basic terrain element(block) to the map
+             * This method is only served in the minecraft-like world.
+             */
+            void addBlock( const ObjectID& id, const ObjectMetaData& metadata);
 
             /**
              * Update the points of an object. If the object metadata has not changed,
