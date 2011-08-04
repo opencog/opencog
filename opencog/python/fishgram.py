@@ -100,8 +100,44 @@ class Fishgram:
 
             prev_layer = new_layer
 
-# It may be possible to convert this into a simpler fishgram implementation, based on unify+lookup; the current one uses the 'incoming trees' index created by the
-# ForestExtractor.
+
+    def _create_new_variables(self, tr, embeddings):
+        sa_mapping = {}
+        tr = standardize_apart(tr, sa_mapping)
+        
+        rebound_embs = []
+        for s in embeddings:
+            s2 = {}
+            for (old_var, new_var) in sa_mapping.items():
+                obj = s[old_var]
+                s2[new_var] = obj
+            rebound_embs.append(s2)
+        
+        return tr, rebound_embs
+
+    def _map_to_existing_variables(self, prev_binding, new_binding):
+        # In this binding, a variable in the tree might fit an object that is already used.
+        new_vars = [var for var in new_binding if var not in prev_binding]
+        remapping = {}
+        new_s = dict(prev_binding)
+        for var in new_vars:
+            obj = new_binding[var]
+            tmp = [(o, v) for (v, o) in prev_binding.items() if o == obj]
+            assert len(tmp) < 2
+            if len(tmp) == 1:
+                _, existing_variable = tmp[0]
+                remapping[var] = existing_variable
+            else:
+                # If it is not a redundant var, then add it to the new binding.
+                new_s[var] = obj
+
+            # Never allow links that point to the same object twice
+            tmp = [(o, v) for (v, o) in new_binding.items() if o == obj]
+            if len(tmp) > 1:
+                return None
+        
+        return remapping, new_s
+
     def extensions_simple(self, prev_layer):
         new_layer = []
         
@@ -111,20 +147,9 @@ class Fishgram:
         # But wait, you can just look it up and then merge new variables that point to existing objects.
         for (prev_conj,  prev_embeddings) in prev_layer:
 
-            for tr, embs_ in self.forest.tree_embeddings:
-                embs = map(subst_from_binding, embs_)
-
+            for tr_, embs_ in self.forest.tree_embeddings.items():
                 # Give the tree new variables. Rewrite the embeddings to match.
-                sa_mapping = {}
-                tr = standardize_apart(tr, sa_mapping)
-                
-                rebound_embs = []
-                for s in embs:
-                    s2 = {}
-                    for (old_var, new_var) in sa_mapping.items():
-                        obj = s[old_var]
-                        s2[new_var] = obj
-                    rebound_embs.append(s2)
+                tr, rebound_embs = self._create_new_variables(tr_, embs_)
 
                 extensions_for_prev_conj_and_tree_type = {}
                 
@@ -133,26 +158,11 @@ class Fishgram:
                     for e in prev_embeddings:
                         # for each new var, if the object is in the previous embedding, then re-map them.
                         
-                        # Never allow links that point to the same argument multiple times
-                        tmp = [(o, v) for (v, o) in s.items() if o == obj]
-                        if len(tmp) > 1:
+                        tmp = self._map_to_existing_variables(e, s)
+                        if tmp == None:
                             continue
-                        
-                        # In this embedding, a variable in the tree might fit an object that is already used 
-                        new_vars = [var for var in s if var not in e]
-                        remapping = {}
-                        new_s = dict(e)
-                        for var in new_vars:
-                            obj = s[var]
-                            tmp = [(o, v) for (v, o) in e.items() if o == obj]
-                            assert len(tmp) < 2
-                            if len(tmp) == 1:
-                                _, existing_variable = tmp[0]
-                                remapping[var] = existing_variable
-                            else:
-                                # If it is not a redundant var, then add it to the new binding.
-                                new_s[var] = obj
-                        
+                        remapping, new_s = tmp
+
                         # Skip 'links' where there is no remapping, i.e. no connection to the existing pattern (no variables in common)
                         if not len(remapping) and prev_conj != ():
                             continue
@@ -169,7 +179,7 @@ class Fishgram:
                                    unify(remapped_conj, c, {}, True) != None]
                         if len(clones):
                             continue
-                            
+
                         if remapped_conj not in extensions_for_prev_conj_and_tree_type:
                             extensions_for_prev_conj_and_tree_type[remapped_conj] = []
                         extensions_for_prev_conj_and_tree_type[remapped_conj].append(new_s)
@@ -177,6 +187,7 @@ class Fishgram:
                 new_layer += extensions_for_prev_conj_and_tree_type.items()
         
         return new_layer
+
 
     def extending_links(self, binding):
         ret = set()

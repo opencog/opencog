@@ -88,8 +88,9 @@ class ForestExtractor:
                     
             # fishgram-specific
             if tree not in self.tree_embeddings:
-                self.tree_embeddings[tree] = set()
-            self.tree_embeddings[tree].add(objects)
+                self.tree_embeddings[tree] = []
+            substitution = subst_from_binding(objects)
+            self.tree_embeddings[tree].append(substitution)
             
             size= len(objects)
             tree_id = len(self.all_trees) - 1
