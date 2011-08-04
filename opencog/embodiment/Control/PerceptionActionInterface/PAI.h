@@ -501,6 +501,13 @@ private:
             &toUpdateHandles);
 
     /**
+     * Process the terrain information from minecraft-like world. The processed
+     * information is then stored in local space map.
+     *
+     */
+    void processTerrainInfo();
+
+    /**
      * Retrieve velocity vector data from a velocity XML element.
      *
      * @param velocityElement The velocity element to be processed

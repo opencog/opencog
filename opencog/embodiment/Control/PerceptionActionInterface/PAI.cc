@@ -1929,6 +1929,10 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
 }
 
+void PAI::processTerrainInfo()
+{
+}
+
 Vector PAI::getVelocityData(DOMElement* velocityElement)
 {
 
