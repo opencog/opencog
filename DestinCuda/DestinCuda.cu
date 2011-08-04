@@ -391,11 +391,16 @@ struct CommandArgsStuc {
 };
 
 /**
- *  parse the program command line arguments.
- *  This doesn't actually have any side affects at the moment
- *  because none of the variables are used and most of the
- *  functionality is not yet ported from the single cpu version of
- *  destin.
+ *  parseCommandArgs
+ *
+ *  Parses the program command line arguments and fills
+ *  the out CommandArgsStuc appropriately ( which you can
+ *  see right now only consists of bCreateFromFile ).
+ *
+ *  This almost doesn'thave any side affects at the moment
+ *  because most of the declared variables in this function
+ *  are not used because most of the functionality it represents
+ *  is not yet  ported from the single cpu version of Destin.
  */
 int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], CommandArgsStuc &out){
     // Argument: TargetDirectory

@@ -113,7 +113,7 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     // Cause of the use of dynamic shared memory you have to tell the kernel how much shared memory space you need for each block.
     int sharedMem;
     // The launch of the kernels itself with centroids(states), dimension, input data and the Data of the layer itself
-    // Calculating the distance of the centroids to a observation
+    // Calculating the distance of the centroids to an observation
     sharedMem = (mInputDimensionlity+mInputDimensionlity)*sizeof(float);
     CalculateDistance<<<grid, threads, sharedMem>>>( mStates, mInputDimensionlity, Input, dCentroidsVectorData, dCentroidsDistance, dCentroidStarvation );
     // Kernel for finding the winning centroids
@@ -176,7 +176,7 @@ __global__ void CalculateDistance( int States, int InputDimensionlity, float *In
     // tid (Thread ID) is the amount of threads inside a block its a fixed amount it can be changed by changing: AmountThreads.
     // Keep in mind that CUDA threads should be in steps of 32 (each warp takes 4 clock cycles where each cycle calculate 8 threads)
     int tid = threadIdx.x;
-    // bid (Block ID) this keeps track in witch node we are working you can ask the grid the size of the blocks used in x or y and on a Fermi or higher even z
+    // bid (Block ID) this keeps track in which  node we are working you can ask the grid the size of the blocks used in x or y and on a Fermi or higher even z
     int bid = blockIdx.x + blockIdx.y * gridDim.x;
 
     // make sure the input data is inside shared memory this we are going to compare the amount of centroids.
@@ -227,7 +227,7 @@ __global__ void CalculateDistance( int States, int InputDimensionlity, float *In
                 // the adding calculation
                 distance[tid] += distance[tid + d];
 
-                // special case in case of odd number (As long as this don't happen to often it won't effect speed)
+                // special case in case of odd number (As long as this doesn't happen too often it won't effect speed)
                 if (dOld == 1 && tid == d-1)
                 {
                     distance[tid] += distance[tid + d + 1];
@@ -341,6 +341,9 @@ __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, floa
     float temp;
     float inputD;
     int pos;
+
+    //this while block calculates the distance between the input vectors
+    //and the centroid vectors
     while(tid < InputDimensionlity)
     {
         pos = InputDimensionlity*States*bid+centroid*InputDimensionlity+tid;

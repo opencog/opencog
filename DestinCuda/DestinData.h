@@ -37,6 +37,11 @@ class DestinData
 
         /**
          * Load the data inside DestinData
+         * Must be a path to the MNIST training data. See http://yann.lecun.com/exdb/mnist/
+         * for an explanation of the data format.
+         *
+         * It loads the images into the mImagePointer vector
+         *
          * @param sFileName const char* location of the file to be loaded.
          */
         void LoadFile(const char* sFileName);
@@ -48,10 +53,10 @@ class DestinData
         float* GetPointerDeviceImage(){ return dImage; };
 
         /**
-         * Puts the selected image on the GPU with the shift applayed to it
+         * Puts the selected image on the GPU with the shift applied to it
          * @param ImageIndex int index of the image loaded
          * @param RowShift int how many rows you want to shift the image
-         * @param ColShift int home many cols you want to shift the image
+         * @param ColShift int how many cols you want to shift the image
          */
         void SetShiftedDeviceImage(int ImageIndex, int RowShift, int ColShift, int DemRow, int DemCol);
 
