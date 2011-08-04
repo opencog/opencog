@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:embodiment-msg xmlns:pet="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
+<oc:embodiment-msg xmlns:oc="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
 <map-info global-position-x="319084" global-position-y="-193599" global-position-offset="67400">
 <blip timestamp="2011-06-15T14:35:52.572" >
 <entity id="138765" name="Troy" type="pet" owner-id="265" owner-name="czhedu"/>
@@ -722,4 +722,4 @@
 </properties>
 </blip>
 </map-info>
-</pet:embodiment-msg>
+</oc:embodiment-msg>

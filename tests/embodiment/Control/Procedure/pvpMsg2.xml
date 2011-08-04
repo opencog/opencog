@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:embodiment-msg 
-  xmlns:pet="http://www.opencog.org/brain"
+<oc:embodiment-msg 
+  xmlns:oc="http://www.opencog.org/brain"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
     <map-info global-position-x="-256" global-position-y="-256" global-position-offset="512">
@@ -114,5 +114,5 @@
         </properties>
     </blip>
   	</map-info>
-</pet:embodiment-msg>
+</oc:embodiment-msg>
 

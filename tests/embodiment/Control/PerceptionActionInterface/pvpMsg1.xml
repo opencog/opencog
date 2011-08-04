@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:embodiment-msg 
-  xmlns:pet="http://www.opencog.org/brain"
+<oc:embodiment-msg 
+  xmlns:oc="http://www.opencog.org/brain"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
     <instruction pet-id="1" avatar-id="2" timestamp="2007-06-18T20:15:00.000-07:00" content-type="FACT" target-mode="ANY">
@@ -27,5 +27,5 @@
     <instruction pet-id="1" avatar-id="2" timestamp="2007-06-18T20:15:01.000-07:00" content-type="FACT" target-mode="ANY">
         <sentence length="10">Good boy!!</sentence>
     </instruction>
-</pet:embodiment-msg>
+</oc:embodiment-msg>
 

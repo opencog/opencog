@@ -46,13 +46,13 @@ public:
         printf("message:\n%s\n", actionPlan.getPVPmessage(pai->getAvatarInterface().getPetId()).c_str());
         // Create a XML PVP message with the action plan status
         char msg[1024];
-        sprintf(msg, "<pet:embodiment-msg\n"
-                "xmlns:pet=\"http://www.opencog.org/brain\"\n"
+        sprintf(msg, "<oc:embodiment-msg\n"
+                "xmlns:oc=\"http://www.opencog.org/brain\"\n"
                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
                 "xsi:schemaLocation=\"http://www.opencog.org/brain BrainProxyAxon.xsd\">\n"
                 "<avatar-signal id=\"%s\" timestamp=\"2007-06-18T20:15:00.000-07:00\">\n"
                 "<action name=\"whatever\" status=\"done\" plan-id=\"%s\"/></avatar-signal>\n"
-                "</pet:embodiment-msg>",
+                "</oc:embodiment-msg>",
                 pai->getAvatarInterface().getPetId().c_str(), actionPlan.getID().c_str());
         pvpMsg.assign(msg);
         return true;

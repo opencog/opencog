@@ -86,19 +86,19 @@ public:
         const char* expectedPVPMessages[NUM_ACTIONS+1] = {
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"0\" id=\"10\"/>\n"
+            "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"0\" id=\"10\"/>\n"
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"1\" id=\"10\">\n"
+            "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"1\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"
-            "</pet:action-plan>\n"
+            "</oc:action-plan>\n"
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"2\" id=\"10\">\n"
+            "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"2\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"
@@ -112,11 +112,11 @@ public:
             "    </param>\n"
             "  </action>\n"
             "\n"
-            "</pet:action-plan>\n"
+            "</oc:action-plan>\n"
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"3\" id=\"10\">\n"
+            "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"3\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"
@@ -132,11 +132,11 @@ public:
             "\n"
             "  <action name=\"bark\" sequence=\"3\"/>\n"
             "\n"
-            "</pet:action-plan>\n"
+            "</oc:action-plan>\n"
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"4\" id=\"10\">\n"
+            "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"4\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"
@@ -158,11 +158,11 @@ public:
             "    </param>\n"
             "  </action>\n"
             "\n"
-            "</pet:action-plan>\n"
+            "</oc:action-plan>\n"
             ,
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            "<pet:action-plan xmlns:pet=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"5\" id=\"10\">\n"
+            "<oc:action-plan xmlns:oc=\"http://www.opencog.org/brain\" demand=\"Integrity\" entity-id=\"5\" id=\"10\">\n"
             "\n"
             "  <action name=\"trickForFood\" sequence=\"1\"/>\n"
             "\n"
@@ -191,7 +191,7 @@ public:
             "    <param name=\"speed\" type=\"float\" value=\"10.5\"/>\n"
             "  </action>\n"
             "\n"
-            "</pet:action-plan>\n"
+            "</oc:action-plan>\n"
         };
 
         //printf("%s\n", expectedPVPMessages[2]);

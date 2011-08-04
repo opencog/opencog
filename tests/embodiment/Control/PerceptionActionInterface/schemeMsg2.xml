@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:embodiment-msg xmlns:pet="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
+<oc:embodiment-msg xmlns:oc="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
 <instruction pet-id="816951" avatar-id="779547" timestamp="2009-05-29T18:28:59.640" content-type="FACT" target-mode="ANY">
 <sentence length="22">where is the red ball?</sentence>
 <parsed-sentence length="21618"><![CDATA[(ReferenceLink (stv 1.0 1.0)
@@ -714,4 +714,4 @@
 )
 (ListLink   (AnchorNode "# New Parsed Sentence")   (SentenceNode "sentence@565ee100-e622-4e97-a73f-32a850f5b14f")); END OF SENTENCE]]></parsed-sentence>
 </instruction>
-</pet:embodiment-msg>
+</oc:embodiment-msg>

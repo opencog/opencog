@@ -15,7 +15,7 @@
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             targetNamespace="http://www.opencog.org/brain"
-            xmlns:pet="http://www.opencog.org/brain"
+            xmlns:oc="http://www.opencog.org/brain"
             xmlns:common="http://www.opencog.org/metadata/common"
             xmlns:action="http://www.opencog.org/metadata/action"
             elementFormDefault="unqualified"
@@ -27,24 +27,24 @@
     <xsd:import namespace="http://www.opencog.org/metadata/action"
                 schemaLocation="PetActionMetadata.xsd"/>    
 
-    <xsd:element name="embodiment-msg" type="pet:EmbodimentMsgType"/>
+    <xsd:element name="embodiment-msg" type="oc:EmbodimentMsgType"/>
 
     <xsd:complexType name="EmbodimentMsgType">
         <xsd:sequence>
             <xsd:choice minOccurs="0" maxOccurs="unbounded">
-                <xsd:element name="map-info" type="pet:MapInfoType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="agent-sensor-info" type="pet:AgentSensorInfoType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="agent-signal" type="pet:AgentSignalType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="avatar-signal" type="pet:AvatarSignalType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="instruction" type="pet:PetInstructionType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="communication" type="pet:CommunicationType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="map-info" type="oc:MapInfoType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="agent-sensor-info" type="oc:AgentSensorInfoType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="agent-signal" type="oc:AgentSignalType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="avatar-signal" type="oc:AvatarSignalType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="instruction" type="oc:PetInstructionType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="communication" type="oc:CommunicationType" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>
         </xsd:sequence>
         <xsd:attribute name="request-id" type="xsd:string" use="optional"/>
     </xsd:complexType>    
 
     <!-- avatar-signal -->
-    <xsd:element name="avatar-signal" type="pet:AvatarSignalType"/>
+    <xsd:element name="avatar-signal" type="oc:AvatarSignalType"/>
     
     <xsd:annotation>
         <xsd:documentation>
@@ -60,7 +60,7 @@
     </xsd:annotation>
     <xsd:complexType name="AvatarSignalType">
         <xsd:complexContent>
-            <xsd:extension base="pet:BaseSignalType">
+            <xsd:extension base="oc:BaseSignalType">
                 <xsd:sequence/>
             </xsd:extension>
         </xsd:complexContent>
@@ -68,7 +68,7 @@
 
 
     <!-- agent-signal -->
-    <xsd:element name="agent-signal" type="pet:AgentSignalType"/>
+    <xsd:element name="agent-signal" type="oc:AgentSignalType"/>
     
     <xsd:annotation>
         <xsd:documentation>
@@ -77,7 +77,7 @@
     </xsd:annotation>
     <xsd:complexType name="AgentSignalType">
         <xsd:complexContent>
-            <xsd:extension base="pet:BaseSignalType">
+            <xsd:extension base="oc:BaseSignalType">
                 <xsd:sequence/>
             </xsd:extension>
         </xsd:complexContent>
@@ -85,8 +85,8 @@
     
     <xsd:complexType name="BaseSignalType" abstract="true">
         <xsd:sequence>
-            <xsd:element name="action" type="pet:ActionSignalType" minOccurs="0" maxOccurs="unbounded"/>
-            <xsd:element name="physiology-level" type="pet:PhysiologyType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="action" type="oc:ActionSignalType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="physiology-level" type="oc:PhysiologyType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="id" type="xsd:string" use="required"/>
         <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
@@ -95,12 +95,12 @@
 
     <xsd:complexType name="ActionSignalType">
         <xsd:sequence>
-            <xsd:element name="param" type="pet:ParamType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="param" type="oc:ParamType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="name" type="xsd:string" use="required"/>        
         <xsd:attribute name="plan-id" type="xsd:string" use="optional"/>
         <xsd:attribute name="sequence" type="xsd:positiveInteger" use="optional"/>
-        <xsd:attribute name="status" type="pet:StatusType" use="optional" default="done"/>
+        <xsd:attribute name="status" type="oc:StatusType" use="optional" default="done"/>
     </xsd:complexType>
 
     <xsd:complexType name="PhysiologyType">
@@ -140,8 +140,8 @@
     </xsd:annotation>
     <xsd:complexType name="PetInstructionType">
         <xsd:sequence>
-            <xsd:element name="sentence" type="pet:PetInstructionTextType" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="parsed-sentence" type="pet:PetInstructionTextType" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="sentence" type="oc:PetInstructionTextType" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="parsed-sentence" type="oc:PetInstructionTextType" minOccurs="0" maxOccurs="1"/>
         </xsd:sequence>
         <xsd:attribute name="pet-id" type="xsd:string" use="required"/>   
         <xsd:attribute name="avatar-id" type="xsd:string" use="required"/>       
@@ -152,7 +152,7 @@
         <xsd:attribute name="target-mode" type="xsd:string" use="required"/>
     </xsd:complexType>
 
-    <xsd:element name="agent-sensor-info" type="pet:AgentSensorInfoType"/>
+    <xsd:element name="agent-sensor-info" type="oc:AgentSensorInfoType"/>
 
     <xsd:annotation>
         <xsd:documentation>
@@ -168,7 +168,7 @@
                 A perception is the signal generated by a specific sensor.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:element name="perception" type="pet:SensorPerceptionType" minOccurs="1" maxOccurs="unbounded"/>
+            <xsd:element name="perception" type="oc:SensorPerceptionType" minOccurs="1" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -184,7 +184,7 @@
         <xsd:attribute name="signal" type="xsd:string" use="required"/>
     </xsd:complexType>
 
-    <xsd:element name="map-info" type="pet:MapInfoType"/>
+    <xsd:element name="map-info" type="oc:MapInfoType"/>
 
     <xsd:annotation>
         <xsd:documentation>
@@ -199,7 +199,7 @@
                 series of blips that represent nearby entities.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:element name="blip" type="pet:BlipType" minOccurs="1" maxOccurs="unbounded"/>
+            <xsd:element name="blip" type="oc:BlipType" minOccurs="1" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="global-position-x" type="xsd:int" use="required"/>
         <xsd:attribute name="global-position-y" type="xsd:int" use="required"/>        
@@ -217,12 +217,12 @@
 
     <xsd:complexType name="BlipType">
         <xsd:sequence>
-            <xsd:element name="entity" type="pet:EntityType" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="entity" type="oc:EntityType" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="position" type="common:VectorDataType" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="rotation" type="common:RotationDataType" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="velocity" type="common:VectorDataType" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="dimension" type="common:VectorDataType" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="properties" type="pet:PropertiesType" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="properties" type="oc:PropertiesType" minOccurs="0" maxOccurs="1"/>
          </xsd:sequence>
          
         <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
@@ -230,7 +230,7 @@
 
     <xsd:complexType name="PropertiesType">
         <xsd:sequence>
-          <xsd:element name="property" type="pet:PropertyType" minOccurs="0" maxOccurs="unbounded"/>
+          <xsd:element name="property" type="oc:PropertyType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -251,7 +251,7 @@
         <xsd:complexContent>
             <xsd:extension base="common:BaseEntityType">
                 <xsd:sequence>
-                    <xsd:element name="metadata" type="pet:ParamType"
+                    <xsd:element name="metadata" type="oc:ParamType"
                                  minOccurs="0" maxOccurs="unbounded"/>
                 </xsd:sequence>
                 <xsd:attribute name="name" type="xsd:string" use="optional"/>
@@ -291,13 +291,13 @@
         ]]>
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:element name="action-plan" type="pet:ActionPlanType"/>
+    <xsd:element name="action-plan" type="oc:ActionPlanType"/>
     
     <xsd:complexType name="ActionPlanType">
         <xsd:sequence>
             <xsd:choice minOccurs="1" maxOccurs="unbounded">
-                <xsd:element name="parallel" type="pet:ParallelActionType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="action" type="pet:SequencedActionType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="parallel" type="oc:ParallelActionType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="action" type="oc:SequencedActionType" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>           
         </xsd:sequence>
         <xsd:attribute name="id" type="xsd:string" use="required"/>
@@ -312,7 +312,7 @@
                     <xsd:choice minOccurs="0" maxOccurs="1">
                         <xsd:element name="vector" type="common:VectorDataType" minOccurs="1" maxOccurs="1"/>
                         <xsd:element name="rotation" type="common:RotationDataType" minOccurs="1" maxOccurs="1"/>
-                        <xsd:element name="entity" type="pet:EntityType" minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="entity" type="oc:EntityType" minOccurs="1" maxOccurs="1"/>
                         <xsd:element name="list" type="common:ListDataType" minOccurs="1" maxOccurs="1"/>
                         <xsd:element name="value" type="xsd:string" minOccurs="1" maxOccurs="1"/>
                     </xsd:choice>
@@ -326,7 +326,7 @@
         <xsd:complexContent>
             <xsd:extension base="common:BaseActionType">
                 <xsd:sequence>
-                    <xsd:element name="param" type="pet:ParamType" minOccurs="0" maxOccurs="unbounded"/>
+                    <xsd:element name="param" type="oc:ParamType" minOccurs="0" maxOccurs="unbounded"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
@@ -334,7 +334,7 @@
 
     <xsd:complexType name="SequencedActionType">
         <xsd:complexContent>
-            <xsd:extension base="pet:ActionType">
+            <xsd:extension base="oc:ActionType">
                 <xsd:sequence/>
                 <xsd:attribute name="sequence" type="xsd:positiveInteger" use="required"/>
                 <xsd:attribute name="reportable" type="xsd:boolean" use="optional" default="true"/>
@@ -344,7 +344,7 @@
 
     <xsd:complexType name="ParallelActionType">
         <xsd:sequence>
-            <xsd:element name="action" type="pet:SequencedActionType" minOccurs="2" maxOccurs="unbounded"/>
+            <xsd:element name="action" type="oc:SequencedActionType" minOccurs="2" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>    
     
@@ -366,13 +366,13 @@
             describe updates to metadata as well.
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:element name="entity-metadata" type="pet:EntityMetadataType"/>
+    <xsd:element name="entity-metadata" type="oc:EntityMetadataType"/>
 
     <xsd:complexType name="EntityMetadataType">
         <xsd:sequence>
             <xsd:element name="name" type="xsd:string"
                          minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="attribute" type="pet:SimpleAttribute"/>
+            <xsd:element name="attribute" type="oc:SimpleAttribute"/>
         </xsd:sequence>
         <xsd:attribute name="id" type="xsd:string" use="required"/>
         <xsd:attribute name="type" type="common:EntityDataType" use="required"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pet:embodiment-msg xmlns:pet="http://www.opencog.org/brain">
+<oc:embodiment-msg xmlns:oc="http://www.opencog.org/brain">
     <avatar-signal id="1" timestamp="2007-06-18T20:15:02.000-07:00">
         <action name="whatever" status="done" plan-id="10"/>
     </avatar-signal>
@@ -153,5 +153,5 @@
     </blip>
  
     </map-info>
-</pet:embodiment-msg>
+</oc:embodiment-msg>
 
