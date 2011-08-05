@@ -40,7 +40,7 @@ using namespace opencog::messaging;
 using namespace opencog;
 
 Router *RouterServerSocket::master = NULL;
-bool no_msg_arrival_notification = false; // TEST: unfortunately it didn't work well when set to true. Needs more testing and debbuging.
+bool no_msg_arrival_notification = true; // TEST: unfortunately it didn't work well when set to true. Needs more testing and debuging.
 
 RouterServerSocket::~RouterServerSocket()
 {
