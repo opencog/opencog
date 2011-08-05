@@ -25,9 +25,7 @@ ADD_LIBRARY (oac
     ScavengerHuntAgentModeHandler
     DefaultAgentModeHandler
     LearningAgentModeHandler
-    LanguageComprehensionCore
-    LanguageComprehensionFrames
-    LanguageComprehensionDialogController
+    LanguageComprehension
     FramesToRelexRuleEngine
     NLGenClient
     OutputRelex
