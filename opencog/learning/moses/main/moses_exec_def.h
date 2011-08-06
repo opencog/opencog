@@ -29,8 +29,10 @@
 
 #include <opencog/util/iostreamContainer.h>
 
+namespace opencog { namespace moses {
+
 // a map btw host name and number of jobs allocated
-typedef std::map<string, unsigned int> jobs_t;
+typedef map<string, unsigned> jobs_t;
 
 // number of evals string
 static const string number_of_evals_str = "n_evals";
@@ -85,4 +87,6 @@ string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
 }
 
+} // ~namespace moses
+} // ~namespace opencog
 #endif // _OPENCOG_MOSES_OPTIONS_NAMES_H

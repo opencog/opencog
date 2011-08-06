@@ -24,6 +24,8 @@
 #ifndef _MOSES_TYPES_H
 #define _MOSES_TYPES_H
 
+#include <functional>
+
 #include <boost/unordered_map.hpp>
 
 #include <opencog/util/functional.h>
@@ -34,106 +36,111 @@
 #include "complexity.h"
 
 namespace opencog { namespace moses {
+
+using std::binary_function;
+using combo::vertex;
   
-    //basic types
-    typedef double score_t;
-    static const score_t worst_score =
-        -(std::numeric_limits<score_t>::max()-score_t(1));
-        // for some weird reasons what is below leads to bugs
-        // std::numeric_limits<score_t>::min(),
-        // so does this!!!
-        // std::numeric_limits<score_t>::min()+1,
+//basic types
+typedef double score_t;
+static const score_t worst_score =
+    -(std::numeric_limits<score_t>::max()-score_t(1));
+    // for some weird reasons what is below leads to bugs
+    // std::numeric_limits<score_t>::min(),
+    // so does this!!!
+    // std::numeric_limits<score_t>::min()+1,
 
-    typedef std::pair<score_t, complexity_t> composite_score;
-    typedef tagged_item<combo::combo_tree,
-                                 composite_score> scored_combo_tree;
+typedef std::pair<score_t, complexity_t> composite_score;
+typedef tagged_item<combo::combo_tree,
+                    composite_score> scored_combo_tree;
 
-    typedef std::vector<score_t> behavioral_score;
+typedef std::vector<score_t> behavioral_score;
 
-    typedef tagged_item<behavioral_score,
-                                 composite_score> composite_behavioral_score;
-    typedef tagged_item<combo::combo_tree,
-                                 composite_behavioral_score> bscored_combo_tree;
+typedef tagged_item<behavioral_score,
+                    composite_score> composite_behavioral_score;
+typedef tagged_item<combo::combo_tree,
+                    composite_behavioral_score> bscored_combo_tree;
 
-    typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
-                                 boost::hash<combo::combo_tree> > metapop_candidates;
-  
-    extern const composite_score worst_composite_score;
+extern const composite_score worst_composite_score;
 
-    //convenience accessors
-    inline const combo::combo_tree& get_tree(const scored_combo_tree& st) { 
-        return st.first; 
-    }
-    inline const combo::combo_tree& get_tree(const bscored_combo_tree& bst) { 
-        return bst.first;
-    }
+typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
+                             boost::hash<combo::combo_tree> > metapop_candidates;
 
-    inline const composite_score& get_composite_score(const composite_behavioral_score& ctbs) {
-        return ctbs.second;
-    }
-    inline const composite_score& get_composite_score(const bscored_combo_tree& bsct) {
-        return get_composite_score(bsct.second);
-    }
+typedef std::vector<bscored_combo_tree> metapop_candidates_vec;
 
-    inline complexity_t get_complexity(const composite_score& ts) { 
-        return ts.second; 
-    }
-    inline complexity_t get_complexity(const composite_behavioral_score& ts) { 
-        return get_complexity(ts.second);
-    }
-    inline complexity_t get_complexity(const bscored_combo_tree& bst) { 
-        return get_complexity(bst.second);
-    }
-    inline complexity_t get_complexity(const scored_combo_tree& st) { 
-        return get_complexity(st.second);
-    }
+//convenience accessors
+inline const combo::combo_tree& get_tree(const scored_combo_tree& st) { 
+    return st.first; 
+}
+inline const combo::combo_tree& get_tree(const bscored_combo_tree& bst) { 
+    return bst.first;
+}
 
-    inline score_t get_score(const composite_score& ts) { 
-        return ts.first;
-    }
-    inline score_t get_score(const composite_behavioral_score& ts) { 
-        return get_score(ts.second);
-    }
-    inline score_t get_score(const bscored_combo_tree& bst) { 
-        return get_score(bst.second);
-    }
-    inline score_t get_score(const scored_combo_tree& st) { 
-        return get_score(st.second);
-    }
+inline const composite_score& get_composite_score(const composite_behavioral_score& ctbs) {
+    return ctbs.second;
+}
+inline const composite_score& get_composite_score(const bscored_combo_tree& bsct) {
+    return get_composite_score(bsct.second);
+}
 
-    inline const behavioral_score& get_bscore(const composite_behavioral_score& ts) { 
-        return ts.first;
-    }
-    inline const behavioral_score& get_bscore(const bscored_combo_tree& bst) { 
-        return get_bscore(bst.second);
-    }
+inline complexity_t get_complexity(const composite_score& ts) { 
+    return ts.second; 
+}
+inline complexity_t get_complexity(const composite_behavioral_score& ts) { 
+    return get_complexity(ts.second);
+}
+inline complexity_t get_complexity(const bscored_combo_tree& bst) { 
+    return get_complexity(bst.second);
+}
+inline complexity_t get_complexity(const scored_combo_tree& st) { 
+    return get_complexity(st.second);
+}
 
-    // ostream functions
-    template<typename Out>
-    Out& ostream_behavioral_score(Out& out, const behavioral_score& bs) {
-        return ostreamContainer(out, bs, " ", "[", "]");
-    }
+inline score_t get_score(const composite_score& ts) { 
+    return ts.first;
+}
+inline score_t get_score(const composite_behavioral_score& ts) { 
+    return get_score(ts.second);
+}
+inline score_t get_score(const bscored_combo_tree& bst) { 
+    return get_score(bst.second);
+}
+inline score_t get_score(const scored_combo_tree& st) { 
+    return get_score(st.second);
+}
 
-    /**
-     * stream out a candidate along with their scores (optionally
-     * complexity and bscore).
-     */
-    template<typename Out>
-    Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
-                                    bool output_score = true,
-                                    bool output_complexity = false,
-                                    bool output_bscore = false) {
-        if(output_score)
-            out << get_score(candidate) << " ";
-        if(output_complexity)
-            out << get_complexity(candidate) << " ";
-        out << get_tree(candidate) << std::endl;
-        if(output_bscore) {
-            ostream_behavioral_score(out, get_bscore(candidate));
-            out << std::endl;
-        }
-        return out;
+inline const behavioral_score& get_bscore(const composite_behavioral_score& ts) { 
+    return ts.first;
+}
+inline const behavioral_score& get_bscore(const bscored_combo_tree& bst) { 
+    return get_bscore(bst.second);
+}
+
+// ostream functions
+template<typename Out>
+Out& ostream_behavioral_score(Out& out, const behavioral_score& bs) {
+    return ostreamContainer(out, bs, " ", "[", "]");
+}
+
+/**
+ * stream out a candidate along with their scores (optionally
+ * complexity and bscore).
+ */
+template<typename Out>
+Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
+                                bool output_score = true,
+                                bool output_complexity = false,
+                                bool output_bscore = false) {
+    if(output_score)
+        out << get_score(candidate) << " ";
+    if(output_complexity)
+        out << get_complexity(candidate) << " ";
+    out << get_tree(candidate) << std::endl;
+    if(output_bscore) {
+        ostream_behavioral_score(out, get_bscore(candidate));
+        out << std::endl;
     }
+    return out;
+}
 
 } // ~namespace moses
 

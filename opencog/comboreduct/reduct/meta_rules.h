@@ -30,7 +30,6 @@
 #include <boost/preprocessor/repetition/enum_trailing_params.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
 
-#include <opencog/util/lru_cache.h>
 #include <opencog/util/functional.h>
 
 #include <opencog/comboreduct/combo/type_tree.h>

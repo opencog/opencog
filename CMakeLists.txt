@@ -43,7 +43,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
   # Nil: added -Wno-variadic-macros to avoid warnings regarding
   # using variadic in macro OC_ASSERT (the warning warns that this is
   # only available from C99, lol!)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp")
 
   SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
   SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})

@@ -22,5 +22,5 @@
 #include "moses_exec.h"
 
 int main(int argc, char** argv) {
-    return moses_exec(argc, argv);
+    return opencog::moses::moses_exec(argc, argv);
 }

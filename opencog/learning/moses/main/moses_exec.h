@@ -37,6 +37,7 @@
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/iostreamContainer.h>
+#include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
@@ -52,12 +53,15 @@
 #include "../moses/scoring.h"
 #include "moses_exec_def.h"
 
+// enable a cache on bscore (takes more memory)
+#define ENABLE_BCACHE
+
+namespace opencog { namespace moses {
+
 using namespace boost::program_options;
 using boost::lexical_cast;
 using boost::assign::list_of;
 using namespace std;
-using namespace opencog;
-using namespace moses;
 using namespace reduct;
 using namespace ant_combo;
 
@@ -100,6 +104,7 @@ struct metapop_moses_results_parameters {
                                      const vector<string>& _labels,
                                      string _output_file,
                                      const jobs_t& _jobs,
+                                     bool _only_local,
                                      bool _hc_terminate_if_improvement) : 
         result_count(_result_count), output_score(_output_score), 
         output_complexity(_output_complexity),
@@ -107,7 +112,7 @@ struct metapop_moses_results_parameters {
         output_with_labels(_output_with_labels),
         enable_cache(_enable_cache), labels(_labels),
         output_file(_output_file),
-        jobs(_jobs),
+        jobs(_jobs), only_local(_only_local),
         hc_terminate_if_improvement(_hc_terminate_if_improvement) {}
     long result_count;
     bool output_score;
@@ -119,6 +124,7 @@ struct metapop_moses_results_parameters {
     const vector<string>& labels;
     string output_file;
     const jobs_t& jobs;
+    bool only_local;
     bool hc_terminate_if_improvement;
 };
 
@@ -145,7 +151,9 @@ void metapop_moses_results(RandGen& rng,
         metapop(rng, bases, tt, si_ca, si_kb, sc, bsc, opt, meta_params);
 
     // run moses
-    if(pa.jobs.empty()) {
+    if(pa.only_local) {
+        unsigned n_threads = pa.jobs.empty()? 1 : pa.jobs.find(localhost)->second;
+        setting_omp(n_threads);
         moses::moses(metapop, moses_params);
     } else moses::distributed_moses(metapop, vm, pa.jobs, moses_params);
 
@@ -234,24 +242,29 @@ void metapop_moses_results(RandGen& rng,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
     if(pa.enable_cache) {
-        typedef adaptive_cache<lru_cache<BScore> > BScoreACache;
-        typedef bscore_based_score<BScoreACache> Score;
-        typedef adaptive_cache<lru_cache<Score> > ScoreACache;
         static const unsigned initial_cache_size = 1000000;
-        lru_cache<BScore> bscore_lrucache(initial_cache_size, bsc);
-        BScoreACache bscore_acache(bscore_lrucache);
-        Score score(bscore_acache);
-        lru_cache<Score> score_lrucache(initial_cache_size, score);
-        ScoreACache score_acache(score_lrucache);
+#ifdef ENABLE_BCACHE
+        typedef prr_cache_threaded<BScore> BScoreCache;
+        typedef adaptive_cache<BScoreCache> BScoreACache;
+        typedef bscore_based_score<BScoreACache> Score;
+        BScoreCache bscore_cache(initial_cache_size, bsc);
+        BScoreACache bscore_acache(bscore_cache);
+#define BSCORE bscore_acache
+#else
+        typedef bscore_based_score<BScore> Score;
+#define BSCORE bsc
+#endif
+        typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
+        Score score(BSCORE);
+        prr_cache_threaded<Score> score_cache(initial_cache_size, score);
+        ScoreACache score_acache(score_cache);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb,
-                              score_acache, bscore_acache, opt_algo,
+                              score_acache, BSCORE, opt_algo,
                               opt_params, meta_params, moses_params, vm, pa);
         // log the number of cache failures
         if(pa.jobs.empty()) { // do not print if using distributed moses
-            logger().info("Number of cache failures for score = %u"
-                          " and bscore = %u",
-                          score_acache.get_failures(),
-                          bscore_acache.get_failures());
+            logger().info("Number of cache failures for score = %u",
+                          score_acache.get_failures());
         }            
     } else {
         bscore_based_score<BScore> score(bsc);
@@ -260,5 +273,8 @@ void metapop_moses_results(RandGen& rng,
                               vm, pa);
     }
 }
+
+} // ~namespace moses
+} // ~namespace opencog
 
 #endif // _OPENCOG_MOSES_EXEC_H

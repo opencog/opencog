@@ -58,10 +58,14 @@ pid_t get_parent_pid() {
     return getpid();
 }
 
-// map the PID to the command line (cmd), the temporary file name
-// (tmp), and the FILE of the output of the process (file)
-typedef tuple<string, string, FILE*> cmd_tmp_file;
-typedef std::map<int, cmd_tmp_file> proc_map;
+// map the PID to
+// 1) the command line (string)
+// 2) the process output temporary file name (string)
+// 3) its corresponding FILE (FILE*)
+// 4) and the number of jobs it is running (unsigned)
+typedef tuple<string, string, FILE*, unsigned> proc_info;
+typedef std::map<int, proc_info> proc_map;
+// proc_map's access functions
 int get_pid(const proc_map::value_type& pmv) {
     return pmv.first;
 }
@@ -74,8 +78,26 @@ string get_tmp(const proc_map::value_type& pmv) {
 FILE* get_file(const proc_map::value_type& pmv) {
     return pmv.second.get<2>();
 }
+unsigned get_num_jobs(const proc_map::value_type& pmv) {
+    return pmv.second.get<3>();
+}
+
 // map the name of host and its proc_map
 typedef std::map<string, proc_map> host_proc_map;
+// host_proc_map's access functions
+const string& get_hostname(const host_proc_map::value_type& hp) {
+    return hp.first;
+}
+const proc_map& get_proc_map(const host_proc_map::value_type& hp) {
+    return hp.second;
+}
+const unsigned get_total_jobs(const host_proc_map::value_type& hp) {
+    // return the number of jobs for all processes of hp's host
+    unsigned acc = 0;
+    foreach(const proc_map::value_type& p, get_proc_map(hp))
+        acc += get_num_jobs(p);
+    return acc;
+}
 
 // number of running processes
 unsigned running_proc_count(const host_proc_map& hpm) {
@@ -94,6 +116,7 @@ unsigned running_proc_count(const host_proc_map& hpm) {
 string build_cmdline(const variables_map& vm, 
                      const combo_tree& tr,
                      const string& host_name,
+                     unsigned n_jobs,
                      unsigned max_evals,
                      unsigned gen_idx) {
     string res;
@@ -133,7 +156,9 @@ string build_cmdline(const variables_map& vm,
     // add output options
     res += string(" -") + output_bscore_opt.second + " 1";
     res += string(" -") + output_complexity_opt.second + " 1";
-    res += string(" -") + output_eval_number_opt.second + " 1";    
+    res += string(" -") + output_eval_number_opt.second + " 1";
+    // add number of jobs option
+    res += string(" -") + jobs_opt.second + lexical_cast<string>(n_jobs);
     // add number of evals option
     res += string(" -") + max_evals_opt.second + " " 
         + lexical_cast<string>(max_evals);
@@ -154,7 +179,7 @@ string build_cmdline(const variables_map& vm,
 }
 
 // run the given command and return its corresponding proc_map
-proc_map::value_type launch_cmd(string cmd) {
+proc_map::value_type launch_cmd(string cmd, unsigned n_jobs) {
     // append " > tempfile&" to cmd
     char tempfile[] = "/tmp/moses-execXXXXXX";
     int fd = mkstemp(tempfile);
@@ -181,7 +206,7 @@ proc_map::value_type launch_cmd(string cmd) {
     OC_ASSERT(count_matches == 1);
 
     // make the proc_map
-    return make_pair(pid, make_tuple(cmd, tmp, fp));
+    return make_pair(pid, make_tuple(cmd, tmp, fp, n_jobs));
 }
 
 // check if a file is being used by process of PID pid 
@@ -300,12 +325,14 @@ void killall(host_proc_map& hpm) {
         killall(hpmv.second);
 }
 
-host_proc_map::iterator find_free_resource(host_proc_map& hpm, const jobs_t& jobs) {
+host_proc_map::iterator find_free_resource(host_proc_map& hpm,
+                                           const jobs_t& jobs) {
     host_proc_map::iterator hpm_it = hpm.begin();
     for(jobs_t::const_iterator jit = jobs.begin(); jit != jobs.end();
         ++jit, ++hpm_it) {
-        OC_ASSERT(jit->first == hpm_it->first);
-        if(hpm_it->second.size() < jit->second)
+        OC_ASSERT(jit->first == hpm_it->first,
+                  "Hosts names are different, there must be a bug");
+        if(get_total_jobs(*hpm_it) < jit->second)
             break;
     }
     return hpm_it;
@@ -335,7 +362,8 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     logger().info("Distributed MOSES starts");
     // ~Logger
 
-    typedef typename metapopulation<Scoring, BScoring, Optimization>::const_iterator mp_cit;
+    typedef typename metapopulation<Scoring, BScoring,
+                                    Optimization>::const_iterator mp_cit;
 
     int gen_idx = 1;
 
@@ -346,16 +374,18 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         // if there exists free resource, launch a process
         host_proc_map::iterator hpm_it = find_free_resource(hpm, jobs);
         if(hpm_it != hpm.end()) {
+            const string& hostname = get_hostname(*hpm_it);
+            unsigned n_jobs = jobs.find(hostname)->second;
             mp_cit exemplar = mp.select_exemplar();
             if(exemplar != mp.end()) {
                 const combo_tree& tr = get_tree(*mp.select_exemplar());
                 mp.visited().insert(tr);
 
                 string cmdline =
-                    build_cmdline(vm, tr, hpm_it->first,
+                    build_cmdline(vm, tr, hostname, n_jobs,
                                   pa.max_evals - mp.n_evals(), gen_idx);
 
-                proc_map::value_type pmv(launch_cmd(cmdline));
+                proc_map::value_type pmv(launch_cmd(cmdline, n_jobs));
                 hpm_it->second.insert(pmv);
 
                 // Logger
@@ -409,13 +439,11 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     }
                     // ~Logger
 
-                    mp.update_best_candidates(candidates);
+                    metapop_candidates_vec mcv = mp.sorted_candidates(candidates);
 
-                    // Logger
-                    mp.log_best_candidates();
-                    // ~Logger
+                    mp.update_best_candidates(mcv);
 
-                    mp.merge_candidates(candidates);
+                    mp.merge_candidates(mcv);
 
                     // Logger
                     logger().info("Metapopulation size is %u", mp.size());
@@ -426,6 +454,10 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     }
                     logger().fine("Number of evaluations so far: %d",
                                   mp.n_evals());
+                    // ~Logger
+
+                    // Logger
+                    mp.log_best_candidates();
                     // ~Logger
 
                     // remove proc info from pm

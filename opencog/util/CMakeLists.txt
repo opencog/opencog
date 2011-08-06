@@ -37,6 +37,7 @@ ADD_LIBRARY(util SHARED
 	StringTokenizer
     octime
 	tree
+    oc_omp
 	${WIN32_GETOPT_FILES}
     ${APPLE_STRNDUP_FILES}
 )
@@ -45,6 +46,7 @@ TARGET_LINK_LIBRARIES(util
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
 	${Boost_REGEX_LIBRARY}
+	${Boost_THREAD_LIBRARY}
 )
 
 INSTALL(FILES
@@ -81,6 +83,7 @@ INSTALL(FILES
 	StringTokenizer.h
 	tree.h
     octime.h
+    oc_omp.h
 	DESTINATION "include/${PROJECT_NAME}/util"
 )
 

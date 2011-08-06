@@ -31,6 +31,7 @@
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/oc_omp.h>
 
 #include "../eda/termination.h"
 #include "../eda/replacement.h"
@@ -40,7 +41,7 @@
 #include "moses.h"
 #include "neighborhood_sampling.h"
 
-#define MINIMUM_DEME_SIZE         2
+#define MINIMUM_DEME_SIZE         50
 #define MAX_EVALS_PER_SLICE       10
 
 namespace opencog { namespace moses {
@@ -329,13 +330,15 @@ struct iterative_hillclimbing {
             logger().debug("Evaluate %u neighbors at distance %u",
                            number_of_new_instances, distance);
             // ~Logger
-            
+
             // score all new instances in the deme
-            transform(deme.begin() + current_number_of_instances, deme.end(),
-                      deme.begin_scores() + current_number_of_instances, 
-                      // using bind cref so that score is passed by
-                      // ref instead of by copy
-                      boost::bind(boost::cref(score), _1)); 
+            OMP_ALGO::transform
+                (deme.begin() + current_number_of_instances, deme.end(),
+                 deme.begin_scores() + current_number_of_instances, 
+                 // using bind cref so that score is passed by
+                 // ref instead of by copy
+                 boost::bind(boost::cref(score), _1));
+
             // check if there is an instance in the deme better than
             // the best candidate
             for (unsigned i = current_number_of_instances;

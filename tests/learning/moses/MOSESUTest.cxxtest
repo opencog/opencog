@@ -25,7 +25,7 @@
 #include <opencog/learning/moses/main/moses_exec.h>
 
 using boost::assign::list_of;
-using namespace moses;
+using namespace opencog::moses;
 
 const string MOSESUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
 
@@ -55,7 +55,7 @@ class MOSESUTest : public CxxTest::TestSuite {
     }
 public:
     MOSESUTest() {
-        logger().setPrintToStdoutFlag(true);
+        // logger().setPrintToStdoutFlag(true);
         // to control the log level use option -l
     }
 
@@ -64,6 +64,9 @@ public:
     }
     void test_hc_2_parity_with_labels() {
         moses_test(list_of("-Hpa")("-k2")("-W1"));
+    }
+    void test_hc_3_parity_multi_thread() {
+        moses_test(list_of("-Hpa")("-k3")("-m100000")("-j4"));
     }
     void test_hc_3_mux() {
         moses_test(list_of("-Hmux")("-k3"));

@@ -24,6 +24,8 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
 
+namespace opencog { namespace moses {
+
 static const unsigned int max_filename_size = 255;
 
 /**
@@ -434,14 +436,16 @@ int moses_exec(int argc, char** argv) {
 
     // fill jobs
     jobs_t jobs;
+    bool only_local = true;
     foreach(const string& js, jobs_str) {
         size_t pos = js.find(job_seperator);
         if(pos != string::npos) {
             unsigned int nj = boost::lexical_cast<unsigned int>(js.substr(0, pos));
             string host_name = js.substr(pos + 1);
-            jobs.insert(make_pair(host_name, nj));
+            jobs[host_name] = nj;
+            only_local = false;
         } else {
-            jobs.insert(make_pair(localhost, boost::lexical_cast<unsigned int>(js)));
+            jobs[localhost] = boost::lexical_cast<unsigned int>(js);
         }
     }
 
@@ -466,7 +470,7 @@ int moses_exec(int argc, char** argv) {
                                             output_bscore, output_eval_number,
                                             output_with_labels,
                                             enable_cache, labels,
-                                            output_file, jobs,
+                                            output_file, jobs, only_local,
                                             hc_terminate_if_improvement);
 
     if(problem == it) { // regression based on input table
@@ -526,8 +530,8 @@ int moses_exec(int argc, char** argv) {
 
             occam_contin_bscore bscore(ot, it, variance, as, rng);
             metapop_moses_results(rng, exemplars, tt,
-                                  contin_reduction(ignore_ops, rng, 1000000),
-                                  contin_reduction(ignore_ops, rng, 1000000),
+                                  contin_reduction(ignore_ops, rng),
+                                  contin_reduction(ignore_ops, rng),
                                   bscore, opt_algo,
                                   opt_params, meta_params, moses_params,
                                   vm, mmr_pa);
@@ -568,8 +572,8 @@ int moses_exec(int argc, char** argv) {
             occam_contin_bscore bscore(table_outputs, it,
                                        variance, as, rng);
             metapop_moses_results(rng, exemplars, tt,
-                                  contin_reduction(ignore_ops, rng, 1000000),
-                                  contin_reduction(ignore_ops, rng, 1000000),
+                                  contin_reduction(ignore_ops, rng),
+                                  contin_reduction(ignore_ops, rng),
                                   bscore, opt_algo,
                                   opt_params, meta_params, moses_params,
                                   vm, mmr_pa);
@@ -577,7 +581,6 @@ int moses_exec(int argc, char** argv) {
             unsupported_type_exit(tt);
         }
     } else if(problem == pa) { // even parity
-        // @todo: for the moment occam's razor and partial truth table are ignored
         even_parity func;
 
         // if no exemplar has been provided in option use the default
@@ -647,8 +650,8 @@ int moses_exec(int argc, char** argv) {
         occam_contin_bscore bscore(simple_symbolic_regression(problem_size),
                                    rands, variance, as, rng);
         metapop_moses_results(rng, exemplars, tt,
-                              contin_reduction(ignore_ops, rng, 1000000),
-                              contin_reduction(ignore_ops, rng, 1000000),
+                              contin_reduction(ignore_ops, rng),
+                              contin_reduction(ignore_ops, rng),
                               bscore, opt_algo,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);
@@ -705,8 +708,8 @@ int moses_exec(int argc, char** argv) {
         occam_contin_bscore bscore(table_outputs, it,
                                    variance, as, rng);
         metapop_moses_results(rng, exemplars, tt,
-                              contin_reduction(ignore_ops, rng, 1000000),
-                              contin_reduction(ignore_ops, rng, 1000000),
+                              contin_reduction(ignore_ops, rng),
+                              contin_reduction(ignore_ops, rng),
                               bscore, opt_algo,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);
@@ -724,3 +727,6 @@ int moses_exec(const vector<string>& argvs) {
     delete argv;
     return res;
 }
+
+} // ~namespace moses
+} // ~namespace opencog

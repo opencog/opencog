@@ -117,8 +117,8 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
  *
  */
 template<typename Scoring, typename BScoring, typename Optimization>
-struct metapopulation : public set < bscored_combo_tree,
-                                     bscored_combo_tree_greater > {
+struct metapopulation : public set<bscored_combo_tree,
+                                   bscored_combo_tree_greater> {
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
 
@@ -128,16 +128,16 @@ struct metapopulation : public set < bscored_combo_tree,
         foreach(const combo_tree& base, exemplars) {
             combo_tree si_base(base);
             (*simplify_candidate)(si_base);
-            composite_score base_sc = make_pair(score(si_base),
-                                                complexity(si_base));
-            bscored_combo_tree base_bsc = 
-                make_pair(si_base, 
-                          composite_behavioral_score(bscore(si_base), base_sc));
-            candidates.insert(base_bsc);
-
+            composite_score csc = make_pair(score(si_base),
+                                            complexity(si_base));
+            behavioral_score bsc = bscore(si_base);
+            candidates.insert(make_pair(si_base,
+                                        composite_behavioral_score(bsc, csc)));
         }
-        update_best_candidates(candidates);
-        merge_candidates(candidates);
+        metapop_candidates_vec mcv(candidates.begin(), candidates.end());
+        std::sort(mcv.begin(), mcv.end(), bscored_combo_tree_greater());
+        update_best_candidates(mcv);
+        merge_candidates(mcv);
     }
 
     /**
@@ -306,7 +306,8 @@ struct metapopulation : public set < bscored_combo_tree,
         return exemplar;
     }
 
-    void merge_candidates(const metapop_candidates& candidates) {
+    template<typename Candidates>
+    void merge_candidates(const Candidates& candidates) {
         if(params.ignore_bscore)
             insert(candidates.begin(), candidates.end());
         else
@@ -541,9 +542,10 @@ struct metapopulation : public set < bscored_combo_tree,
                   std::greater<eda::scored_instance<composite_score> >());
 
         // Logger
-        logger().debug("Compute the behavioral score of all candidates to merge");
+        logger().debug("Select candidates to merge");
         // ~Logger
 
+        // select the set of candidates to add in the metapopulation
         foreach(const eda::scored_instance<composite_score>& inst, *_deme) {
             // this is in case the deme is closed before the entire
             // deme (or rather the current sample of it) has been
@@ -551,18 +553,16 @@ struct metapopulation : public set < bscored_combo_tree,
             if (i++ == eval_during_this_deme)
                 break;
 
-            // if it's really bad just skip it and all that follow
-            if (get_score(inst.second) == get_score(worst_composite_score))
-                break;
+            const composite_score& inst_csc = inst.second;
 
-            // generate the tree coded by inst
-            // turn the knobs of rep._exemplar as stored in inst
-            _rep->transform(inst);
+            // if it's really bad just skip it and all that follow
+            if (get_score(inst_csc) == get_score(worst_composite_score))
+                break;
 
             // get the combo_tree associated to inst, cleaned and reduced
             // @todo: here the canidate is possibly reduced for the second time
             // this could probability be avoid with some clever cache or something
-            combo_tree tr = _rep->get_clean_exemplar(true);
+            combo_tree tr = _rep->get_candidate(inst, true);
 
             // update the set of potential exemplars
             if (_visited_exemplars.find(tr) == _visited_exemplars.end()
@@ -574,17 +574,35 @@ struct metapopulation : public set < bscored_combo_tree,
                     // recompute the complexity if the candidate has
                     // not been previously reduced
                     composite_score csc = params.reduce_all?
-                        inst.second : make_pair(get_score(inst.second),
-                                                complexity(tr));
-                    bscored_combo_tree candidate = 
-                        make_pair(tr, composite_behavioral_score(bscore(tr), csc));
-                    candidates.insert(candidate);
+                        inst_csc : make_pair(get_score(inst_csc),
+                                             complexity(tr));
+                    behavioral_score bsc; // empty bscore till it gets computed
+                    candidates[tr] = composite_behavioral_score(bsc, csc);
                 } else 
                     break;
             }
         }
+
+        // Logger
+        logger().debug("Compute behavioral score of %d selected candidates",
+                       candidates.size());
+        // ~Logger
+        foreach(metapop_candidates::value_type& cand, candidates) {
+            composite_score csc = get_composite_score(cand.second);
+            behavioral_score bsc = bscore(cand.first);
+            cand.second = composite_behavioral_score(bsc, csc);
+        }
+
+        // Logger
+        logger().debug("Sort selected candidates");
+        // ~Logger
+
+        // the candidates are turn into a vector, then sorted so that
+        // merging is slightly faster (about 5%)
+        metapop_candidates_vec mcv = sorted_candidates(candidates);
+
         // update the record of the best-seen score & trees
-        update_best_candidates(candidates);
+        update_best_candidates(mcv);
 
         //Logger
         logger().debug("Merge %u candidates with the metapopulation",
@@ -598,7 +616,7 @@ struct metapopulation : public set < bscored_combo_tree,
         }
         // ~Logger
 
-        merge_candidates(candidates);
+        merge_candidates(mcv);
 
         //Logger
         logger().debug("Metapopulation size is %u", size());
@@ -613,6 +631,14 @@ struct metapopulation : public set < bscored_combo_tree,
         delete _rep;
         _deme = NULL;
         _rep = NULL;
+    }
+
+    // return a sorted vector of candidates, this is used at it makes
+    // merging 10% faster
+    metapop_candidates_vec sorted_candidates(const metapop_candidates& mc) {
+        metapop_candidates_vec mcv(mc.begin(), mc.end());
+        sort(mcv.begin(), mcv.end(), bscored_combo_tree_greater());
+        return mcv;
     }
 
     /**
@@ -634,7 +660,8 @@ struct metapopulation : public set < bscored_combo_tree,
         tribool res = indeterminate;
         for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
              xit != x.end();++xit, ++yit) {
-            if (*xit < *yit) { //individual elements are assumed to represent error
+            if (*xit < *yit) { //individual elements are assumed to
+                               //represent error
                 if (!res)
                     return indeterminate;
                 else
@@ -654,6 +681,7 @@ struct metapopulation : public set < bscored_combo_tree,
      * no element of (dst - _visited_exemplars) dominates c.
      */
     //this may turn out to be too slow...
+    /// @todo parallelize this
     template<typename It>
     void merge_nondominating(It from, It to) {
         for(;from != to;++from) {
@@ -675,8 +703,10 @@ struct metapopulation : public set < bscored_combo_tree,
     }
 
     // update the record of the best-seen score & trees
-    void update_best_candidates(const metapop_candidates& candidates) {
-        foreach(const bscored_combo_tree& candidate, candidates) {
+    template<typename Candidates>
+    void update_best_candidates(const Candidates& candidates) {
+        if(!candidates.empty()) {
+            const bscored_combo_tree& candidate = candidates.front();
             const composite_score& sc = get_composite_score(candidate);
             if (sc >= _best_score) {
                 if (sc > _best_score) {

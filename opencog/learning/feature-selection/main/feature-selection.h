@@ -26,6 +26,7 @@
 
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
+#include <opencog/util/oc_omp.h>
 #include <opencog/learning/moses/eda/field_set.h>
 #include <opencog/learning/moses/eda/instance_set.h>
 #include <opencog/learning/moses/moses/scoring.h>
@@ -69,6 +70,7 @@ static const pair<string, string> complexity_penalty_intensity_opt("complexity-p
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> resources_opt("resources", "R");
 static const pair<string, string> max_score_opt("max-score", "A");
+static const pair<string, string> jobs_opt("jobs", "j");
 static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "Q");
 static const pair<string, string> inc_intensity_opt("inc-intensity", "T");
 static const pair<string, string> inc_target_size_opt("inc-target-size", "C");
@@ -108,6 +110,7 @@ struct feature_selection_parameters {
     double resources; // resources of the learning algo that will take
                       // in input the feature set
     double max_score;
+    unsigned jobs;
     unsigned hc_fraction_of_remaining;
     double inc_intensity;
     unsigned inc_target_size;
@@ -197,7 +200,7 @@ void moses_feature_selection(Table& table,
     MBScorer mb_sc(fs_sc, fields);
     // possibly wrap in a cache
     if(fs_params.cache_size > 0) {
-        typedef prr_cache<MBScorer> ScorerCache;
+        typedef prr_cache_threaded<MBScorer> ScorerCache;
         ScorerCache sc_cache(fs_params.cache_size, mb_sc);
         moses_feature_selection(table, fields, deme, init_inst, optimize,
                                 sc_cache, fs_params);
@@ -258,6 +261,9 @@ template<typename Table>
 void feature_selection(Table& table,
                        const feature_selection_parameters& fs_params,
                        RandGen& rng) {
+    // setting OpenMP parameters
+    setting_omp(fs_params.jobs);
+    // setting moses optimization parameters
     optim_parameters op_param(20, fs_params.max_score);
     if(fs_params.algorithm == un) {
         OC_ASSERT(false, "TODO");

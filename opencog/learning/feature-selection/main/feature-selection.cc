@@ -44,12 +44,13 @@
 #include "../feature_optimization.h"
 #include "../feature_scorer.h"
 
-using namespace boost::program_options;
-using boost::lexical_cast;
-using boost::assign::list_of;
 using namespace std;
 using namespace opencog;
 using namespace combo;
+
+using namespace boost::program_options;
+using boost::lexical_cast;
+using boost::assign::list_of;
 
 const static unsigned max_filename_size = 255;
 
@@ -116,6 +117,9 @@ int main(int argc, char** argv) {
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&fs_params.max_score)->default_value(1),
          "For MOSES based algorithms. The max score to reach, once reached feature selection halts.\n")
+        (opt_desc_str(jobs_opt).c_str(),
+         value<unsigned>(&fs_params.jobs)->default_value(1),
+         string("Number of jobs allocated.\n").c_str())
         (opt_desc_str(hc_fraction_of_remaining_opt).c_str(),
          value<unsigned>(&fs_params.hc_fraction_of_remaining)->default_value(10),
          "Hillclimbing parameter. Determine the fraction of the remaining number of eval to use for the current iteration.\n")
