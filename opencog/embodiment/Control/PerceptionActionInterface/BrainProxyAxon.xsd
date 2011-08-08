@@ -389,7 +389,8 @@
     <xsd:complexType name="CommunicationType">
         <xsd:simpleContent>
             <xsd:extension base="xsd:string">
-                <xsd:attribute name="sourceId" type="xsd:string" use="required"/>
+                <xsd:attribute name="source-id" type="xsd:string" use="required"/>
+                <xsd:attribute name="type" type="xsd:string" use="optional"/>
                 <xsd:attribute name="timestamp" type="xsd:string" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
