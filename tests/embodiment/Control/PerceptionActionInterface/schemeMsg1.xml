@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <oc:embodiment-msg xmlns:oc="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
-<instruction pet-id="816951" avatar-id="779547" timestamp="2009-05-29T18:29:57.187" content-type="FACT" target-mode="ANY">
+<instruction avatar-id="816951" from-id="779547" timestamp="2009-05-29T18:29:57.187" content-type="FACT" target-mode="ANY">
 <sentence length="22">go fetch the blue pill</sentence>
 <parsed-sentence length="27364"><![CDATA[(ReferenceLink (stv 1.0 1.0)
    (WordInstanceNode "go@0b75986f-7176-4f7a-8815-3f3afb0e2837")

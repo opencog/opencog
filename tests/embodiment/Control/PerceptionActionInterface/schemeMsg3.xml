@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <oc:embodiment-msg xmlns:oc="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
-<instruction pet-id="816951" avatar-id="779547" timestamp="2009-05-29T18:29:38.203" content-type="QUESTION" target-mode="ANY">
+<instruction avatar-id="816951" from-id="779547" timestamp="2009-05-29T18:29:38.203" content-type="QUESTION" target-mode="ANY">
 <sentence length="18">is that your best?</sentence>
 <parsed-sentence length="17099"><![CDATA[(ReferenceLink (stv 1.0 1.0)
    (WordInstanceNode "is@3b649d80-2f53-434c-80a2-2c4b46a4e308")

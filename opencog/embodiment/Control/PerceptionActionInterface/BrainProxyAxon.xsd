@@ -36,7 +36,7 @@
                 <xsd:element name="agent-sensor-info" type="oc:AgentSensorInfoType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="agent-signal" type="oc:AgentSignalType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="avatar-signal" type="oc:AvatarSignalType" minOccurs="1" maxOccurs="1"/>
-                <xsd:element name="instruction" type="oc:PetInstructionType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="instruction" type="oc:AvatarInstructionType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="communication" type="oc:CommunicationType" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>
         </xsd:sequence>
@@ -138,13 +138,13 @@
         instruct their pet or designate someone else to instruct them.
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:complexType name="PetInstructionType">
+    <xsd:complexType name="AvatarInstructionType">
         <xsd:sequence>
             <xsd:element name="sentence" type="oc:PetInstructionTextType" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="parsed-sentence" type="oc:PetInstructionTextType" minOccurs="0" maxOccurs="1"/>
         </xsd:sequence>
-        <xsd:attribute name="pet-id" type="xsd:string" use="required"/>   
-        <xsd:attribute name="avatar-id" type="xsd:string" use="required"/>       
+        <xsd:attribute name="avatar-id" type="xsd:string" use="required"/>   
+        <xsd:attribute name="from-id" type="xsd:string" use="required"/>       
         <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
         <!-- describes what kind is that instruction: SPECIFIC_COMMAND, QUESTION, etc.-->
         <xsd:attribute name="content-type" type="xsd:string" use="required"/> 

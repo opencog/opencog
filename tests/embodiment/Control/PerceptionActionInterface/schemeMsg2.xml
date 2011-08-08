@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <oc:embodiment-msg xmlns:oc="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
-<instruction pet-id="816951" avatar-id="779547" timestamp="2009-05-29T18:28:59.640" content-type="FACT" target-mode="ANY">
+<instruction avatar-id="816951" from-id="779547" timestamp="2009-05-29T18:28:59.640" content-type="FACT" target-mode="ANY">
 <sentence length="22">where is the red ball?</sentence>
 <parsed-sentence length="21618"><![CDATA[(ReferenceLink (stv 1.0 1.0)
    (WordInstanceNode "where@6422445f-dbf2-43d4-9d26-f95324f55b60")

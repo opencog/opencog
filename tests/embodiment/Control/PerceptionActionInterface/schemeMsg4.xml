@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <oc:embodiment-msg xmlns:oc="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
-<instruction pet-id="816951" avatar-id="779547" timestamp="2009-05-29T18:29:45.734" content-type="FACT" target-mode="ANY">
+<instruction avatar-id="816951" from-id="779547" timestamp="2009-05-29T18:29:45.734" content-type="FACT" target-mode="ANY">
 <sentence length="15">i will kill you</sentence>
 <parsed-sentence length="7995"><![CDATA[(ReferenceLink (stv 1.0 1.0)
    (WordInstanceNode "i[?]@e914ffe0-1517-4b6b-bbcd-31482d7fe73b")

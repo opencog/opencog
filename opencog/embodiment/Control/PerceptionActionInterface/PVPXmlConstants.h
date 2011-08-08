@@ -54,9 +54,8 @@
 
 // xml attributes
 #define PET_ID_ATTRIBUTE                     "id"
-#define INSTRUCTION_TO_ATTRIBUTE             "pet-id"
-#define INSTRUCTION_FROM_ATTRIBUTE           "avatar-id"
-#define ACTION_PLAN_AVATAR_ID                "pet-id"
+#define INSTRUCTION_TO_ATTRIBUTE             "avatar-id"
+#define INSTRUCTION_FROM_ATTRIBUTE           "from-id"
 #define ENTITY_ID_ATTRIBUTE                  "entity-id"
 #define DEMAND_ATTRIBUTE                     "demand"
 #define NAME_ATTRIBUTE                       "name"
