@@ -1192,7 +1192,7 @@
 ;
 ;       returns "#Color"
 ;
-(define (get-frame-instance-type frame_nstance)
+(define (get-frame-instance-type frame_instance)
     (let ( (links (cog-get-link
                       'InheritanceLink
                       'DefinedFrameNode
