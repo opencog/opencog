@@ -36,7 +36,6 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
 #include <opencog/embodiment/Control/AvatarInterface.h>
 
-#include <opencog/embodiment/Control/OperationalAvatarController/LanguageComprehension.h>
 #include <opencog/spatial/MapExplorerServer.h>
 
 #include "MessageSender.h"
@@ -129,8 +128,6 @@ private:
      * predicate has its TV set to 1.0 and 0.0 otherwise.
      */
     void adjustIsExemplarAvatarPredicate(bool active) throw (opencog::RuntimeException);
-
-    LanguageComprehension* languageTool;
 
     opencog::spatial::MapExplorerServer* visualDebuggerServer;
 
@@ -397,8 +394,6 @@ public:
 
     // target object used by goto and gonear combo functions
     std::pair<std::string, spatial::Point> targetObject;
-
-    LanguageComprehension& getLanguageTool( void );
 
     /**
      * Visual debugger is a service that let the user to see, through a 3D client,

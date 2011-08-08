@@ -21,6 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/**
+ * TODO: Get rid of AgentModeHandler. 
+ *       How? There are two options.  
+ *
+ *       1. Move contents in handleCommand to PAI or
+ *       2. Move contents in handleCommand to LanguageComprehension
+ */
+
 #include "BaseAgentModeHandler.h"
 #include "Pet.h"
 
@@ -51,31 +59,8 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
         logger().debug("BaseAgentModeHandler - Scheduling command" );
         this->commandsQueue.push( arguments );
 
-    } else if ( name == "storeFact" ) {
-        logger().debug("BaseAgentModeHandler - Evaluating a new parsed sentence" );
-        logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );
-        this->agent->getLanguageTool( ).resolveLatestSentenceReference( );
-        logger().debug("BaseAgentModeHandler - Reference resolution done");
-        logger().debug("BaseAgentModeHandler - Starting storing a new fact" );
-        this->agent->getLanguageTool( ).storeFact( );
-        logger().debug("BaseAgentModeHandler - Fact stored" );
-        
-    } else if ( name == "evaluateSentence" ) {
-        logger().debug("BaseAgentModeHandler - Evaluating a new parsed sentence" );
-        logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );
-        this->agent->getLanguageTool( ).resolveLatestSentenceReference( );
-        logger().debug("BaseAgentModeHandler - Reference resolution done");
-        logger().debug("BaseAgentModeHandler - Starting latest sentence command resolution" );
-        this->agent->getLanguageTool( ).resolveLatestSentenceCommand( );
-        logger().debug("BaseAgentModeHandler - Command resolution done");
-
-    } else if ( name == "answerQuestion") {
-        logger().debug("BaseAgentModeHandler - Answering a question" );
-        logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );
-        this->agent->getLanguageTool( ).resolveLatestSentenceReference( );
-        logger().debug("BaseAgentModeHandler - Reference resolution done");
-        
-    } else if ( name == "instruction" ) {
+    } 
+    else if ( name == "instruction" ) {
         if ( arguments.size( ) != 3 ) {
             logger().debug("BaseAgentModeHandler::%s - Invalid instruction number of arguments: %d", __FUNCTION__, arguments.size( ) );
             return;
@@ -91,10 +76,10 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
             this->agent->getCurrentModeHandler( ).handleCommand( "saveVisMap", std::vector<std::string>() );
         } // else if
 
-    } else if ( name == "notifyMapUpdate" ) {
+    }
+    else if ( name == "notifyMapUpdate" ) {
         this->agent->sendMapToVisualDebuggerClients( this->agent->getAtomSpace( ).getSpaceServer( ).getLatestMap( ) );
-    } // else
-    
+    } 
 }
 
 void BaseAgentModeHandler::update( void )
@@ -108,9 +93,4 @@ void BaseAgentModeHandler::update( void )
         logger().debug("BaseAgentModeHandler - Sending requested command to be evaluated. Command %s, # of arguments %d, remaining requests %d",
                        commandName.c_str( ), arguments.size( ), this->commandsQueue.size() );
     } // if
-
-    // TODO: to avoid multithread problems with AtomSpace, do not call
-    // updateDialogControllers with wait option equals to false
-    this->agent->getLanguageTool( ).updateDialogControllers( 
-       this->agent->getPai( ).getLatestSimWorldTimestamp( ) );
 }

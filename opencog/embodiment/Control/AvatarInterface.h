@@ -43,7 +43,6 @@ namespace opencog { namespace control {
 
 class AvatarInterface
 {
-
 public:
     virtual ~AvatarInterface() {}
 

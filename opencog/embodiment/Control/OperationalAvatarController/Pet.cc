@@ -38,9 +38,9 @@
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
 #include "RuleEngine.h"
+#include "LearningAgentModeHandler.h"
 #include "ScavengerHuntAgentModeHandler.h"
 #include "DefaultAgentModeHandler.h"
-#include "LearningAgentModeHandler.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -111,12 +111,10 @@ Pet::Pet(const std::string& petId, const std::string& petName, const
     logger().info("Pet - Created random number generator (%p) for Pet with "
             "seed %lu", this->rng, rand_seed);
 
-    this->modeHandler[ LEARNING ] = new LearningAgentModeHandler( this );
-    this->modeHandler[ PLAYING ] = new DefaultAgentModeHandler( this );
+    this->modeHandler[ LEARNING ] = new LearningAgentModeHandler(this);
+    this->modeHandler[ PLAYING ] = new DefaultAgentModeHandler(this);
     this->modeHandler[ SCAVENGER_HUNT ] =
-        new ScavengerHuntAgentModeHandler( this );
-
-    this->languageTool = new LanguageComprehension( *this );
+        new ScavengerHuntAgentModeHandler(this);
 }
 
 Pet::~Pet()
@@ -1124,11 +1122,6 @@ void Pet::setRequestedCommand(string command, vector<string> parameters)
     this->lastRequestedCommand.name = command;
     this->lastRequestedCommand.arguments = parameters;
     this->lastRequestedCommand.readed = false;
-}
-
-LanguageComprehension& Pet::getLanguageTool( void ) 
-{
-    return *this->languageTool;
 }
 
 void Pet::startVisualDebuggerServer( const std::string& host, const std::string& port )

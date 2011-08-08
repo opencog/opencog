@@ -38,6 +38,7 @@
 #include "ActionPlanSender.h"
 #include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/LanguageComprehension.h>
 
 #include <map>
 #include <vector>
@@ -55,6 +56,7 @@
 //#define DATETIME_DECIMAL_RESOLUTION
 
 using namespace opencog::control;
+using namespace opencog::oac; 
 
 using XERCES_CPP_NAMESPACE::DOMElement;
 using XERCES_CPP_NAMESPACE::DOMDocument;
@@ -141,6 +143,8 @@ private:
      * inside each plan.
      */
     PlanToActionIdsMap planToActionIdsMaps;
+
+    LanguageComprehension * languageTool;
 
     /**
      * Current xMin
@@ -259,6 +263,7 @@ public:
      */
     AvatarInterface& getAvatarInterface();
 
+    LanguageComprehension & getLanguageTool(void);
 
     /**
      * Creates an Action Plan XML message to be sent to the PVP. Once

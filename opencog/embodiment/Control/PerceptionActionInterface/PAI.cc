@@ -117,13 +117,15 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
     }
 #endif
 
-    logPVPMessage = !(config().get_bool("DISABLE_LOG_OF_PVP_MESSAGES"));
+    this->languageTool = new LanguageComprehension(_avatarInterface);
 
+    logPVPMessage = !(config().get_bool("DISABLE_LOG_OF_PVP_MESSAGES"));
 }
 
 PAI::~PAI()
 {
     delete parser;
+    delete languageTool; 
     // TODO: Cannot terminate here because other PAI objects may be using it...
     //PAIUtils::terminateXMLPlatform();
 }
@@ -136,6 +138,11 @@ AtomSpace& PAI::getAtomSpace()
 AvatarInterface& PAI::getAvatarInterface()
 {
     return avatarInterface;
+}
+
+LanguageComprehension & PAI::getLanguageTool(void)
+{
+    return *(this->languageTool); 
 }
 
 ActionPlanID PAI::createActionPlan()
@@ -1162,11 +1169,7 @@ void PAI::processInstruction(DOMElement * element)
     }    
 #endif
 
-    // TODO: some code below may be not necessary, since the PsiActionSelectionAgent
-    //       and dialog_system.scm will do most of the work instead. 
-
     // Add the perceptions into AtomSpace
-
     Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
     Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME, true);
     Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, internalAvatarId);
@@ -1186,7 +1189,6 @@ void PAI::processInstruction(DOMElement * element)
         AtomSpaceUtil::setPredicateValue( atomSpace, "heard_sentence",
             TruthValue::TRUE_TV( ), sentenceNode );
     } // if
-
 
     HandleSeq schemaListLinkOutgoing;
     schemaListLinkOutgoing.push_back(agentNode);
@@ -1236,7 +1238,6 @@ void PAI::processInstruction(DOMElement * element)
 
     } // if
 
-
     HandleSeq execLinkOutgoing;
     execLinkOutgoing.push_back(saySchemaNode);
     execLinkOutgoing.push_back(schemaListLink);
@@ -1253,39 +1254,51 @@ void PAI::processInstruction(DOMElement * element)
     Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue);
     AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, agentNode);
 
-
     std::vector<std::string> arguments;
     arguments.push_back( sentenceText );
 
-    if ( std::string( contentType ) == "FACT" ) {
+    if ( std::string(contentType) == "FACT" ) {
+        this->languageTool->handleCommand("storeFact", arguments);
+    } 
+    else if ( std::string(contentType) == "COMMAND" ) {
+        this->languageTool->handleCommand("evaluateSentence", arguments);
 
-        avatarInterface.getCurrentModeHandler( ).handleCommand( "storeFact", arguments );
+    } 
+    else if ( std::string(contentType) == "QUESTION" ) {
+        AtomSpaceUtil::setPredicateValue( atomSpace, 
+                                          "is_question",
+                                          TruthValue::TRUE_TV(),
+                                          sentenceNode
+                                        );
 
-    } else if ( std::string( contentType ) == "COMMAND" ) {
-        avatarInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", arguments );
-
-    } else if ( std::string( contentType ) == "QUESTION" ) {
         AtomSpaceUtil::setPredicateValue( atomSpace,
-            "is_question", TruthValue::TRUE_TV( ), sentenceNode );
-        AtomSpaceUtil::setPredicateValue( atomSpace,
-            "was_answered", TruthValue::FALSE_TV( ), sentenceNode );
+                                          "was_answered",
+                                          TruthValue::FALSE_TV(),
+                                          sentenceNode
+                                        );
         
-        avatarInterface.getCurrentModeHandler( ).handleCommand( "answerQuestion", arguments );
-
-    } else if ( std::string( contentType ) == "SPECIFIC_COMMAND" ) {
+        this->languageTool->handleCommand("answerQuestion", arguments);
+    }
+    else if ( std::string(contentType) == "SPECIFIC_COMMAND" ) {
         if ( std::string( targetMode ) == avatarInterface.getCurrentModeHandler( ).getModeName( ) ) {
 
             // ATTENTION: a sentence must be upper case to be handled by the agent mode handlers
             boost::to_upper(arguments[0]);            
             arguments.push_back( boost::lexical_cast<std::string>( tsValue ) );
             arguments.push_back( internalAvatarId );
-            avatarInterface.getCurrentModeHandler( ).handleCommand( "instruction", arguments );
-        } else {
+            avatarInterface.getCurrentModeHandler().handleCommand("instruction", arguments);
+        } 
+        else {
             logger().debug( "PAI::%s - A specific command of another mode was sent. Ignoring it. Current Mode: %s, Target Mode: %s, Command: %s", 
-                            __FUNCTION__, avatarInterface.getCurrentModeHandler( ).getModeName( ).c_str( ), targetMode, sentenceText );
-        } // else
+                            __FUNCTION__, 
+                            avatarInterface.getCurrentModeHandler().getModeName().c_str(),
+                            targetMode,
+                            sentenceText 
+                          );
+        } 
     } // if
 
+    this->languageTool->updateDialogControllers( this->getLatestSimWorldTimestamp() ); 
 
     XMLString::release(&petID);
     XMLString::release(&avatarID);

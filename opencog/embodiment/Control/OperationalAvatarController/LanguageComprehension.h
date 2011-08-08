@@ -95,7 +95,7 @@ public:
          * @param elapsedTime The current system timestamp (reference: PAI)
          * @return Result the resulting information after processing the DC
          */
-        virtual Result processSentence( long elapsedTime ) = 0;
+        virtual Result processSentence(long elapsedTime) = 0;
 
     protected:
         std::string name;
@@ -107,7 +107,12 @@ public:
     LanguageComprehension(AvatarInterface& agent );
     
     virtual ~LanguageComprehension( void );        
-    
+
+    /**
+     * This function is invoked by PAI::processInstruction 
+     */
+    void handleCommand(const std::string& name, const std::vector<std::string>& arguments);
+
     void resolveLatestSentenceReference( void );
 
     void resolveLatestSentenceCommand( void );
@@ -233,7 +238,9 @@ protected:
     void loadDialogControllers( void );
 
     std::list<DialogController* > dialogControllers;
-    
+
+private:
+    std::queue<std::vector<std::string> > commandsQueue;
 };
 
 } } // namespace opencog::oac

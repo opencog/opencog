@@ -55,6 +55,79 @@ LanguageComprehension::~LanguageComprehension( void )
     } 
 }
 
+void LanguageComprehension::handleCommand(const std::string& name, const std::vector<std::string>& arguments)
+{
+    if ( name == "requestedCommand" ) {
+        if ( arguments.size() == 0 ) {
+            logger().warn("LanguageComprehension::%s - command[requestedCommand] Invalid number of arguments: 0", 
+                          __FUNCTION__
+                         ); 
+            return;
+        }
+
+        logger().debug("LanguageComprehension::%s - Scheduling command",
+                        __FUNCTION__                 
+                      ); 
+        this->commandsQueue.push(arguments);
+
+    } 
+    else if ( name == "storeFact" ) {
+        logger().debug("LanguageComprehension::%s - Evaluating a new parsed sentence", 
+                       __FUNCTION__
+                      ); 
+
+
+        logger().debug("LanguageComprehension::%s - Starting latest sentence reference resolution", 
+                       __FUNCTION__
+                      ); 
+        this->resolveLatestSentenceReference();
+        logger().debug("LanguageComprehension::%s - Reference resolution done", 
+                       __FUNCTION__
+                      ); 
+
+        logger().debug("LanguageComprehension::%s - Starting storing a new fact", 
+                       __FUNCTION__
+                      );
+        this->storeFact();
+        logger().debug("LanguageComprehension::%s - Fact stored", __FUNCTION__);
+        
+    }
+    else if ( name == "evaluateSentence" ) {
+        logger().debug("LanguageComprehension::%s - Evaluating a new parsed sentence", 
+                       __FUNCTION__
+                      );
+
+        logger().debug("LanguageComprehension::%s - Starting latest sentence reference resolution", 
+                       __FUNCTION__
+                      );
+        this->resolveLatestSentenceReference();
+        logger().debug("LanguageComprehension::%s Reference resolution done", 
+                       __FUNCTION__
+                      );
+
+        logger().debug("LanguageComprehension::%s - Starting latest sentence command resolution", 
+                       __FUNCTION__
+                      );
+        this->resolveLatestSentenceCommand();
+        logger().debug("LanguageComprehension::%s - Command resolution done", 
+                       __FUNCTION__
+                      );
+
+    } 
+    else if ( name == "answerQuestion") {
+        logger().debug("LanguageComprehension::%s - Answering a question", __FUNCTION__);
+
+        logger().debug("LanguageComprehension::%s - Starting latest sentence reference resolution", 
+                       __FUNCTION__
+                      );
+        this->resolveLatestSentenceReference();
+        logger().debug("LanguageComprehension::%s - Reference resolution done", 
+                       __FUNCTION__
+                      );
+        
+    }
+}
+
 void LanguageComprehension::init( void )
 {
     if ( !initialized ) {
@@ -160,14 +233,14 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
         logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve command: %s",
                         __FUNCTION__, answer.c_str( ) );
     } // if
-    SchemeEval::instance().clear_pending( );
+    SchemeEval::instance().clear_pending();
 #endif
     
-    opencog::AtomSpace& as = agent.getAtomSpace( );
+    opencog::AtomSpace& as = agent.getAtomSpace();
     HandleSeq elements = getActivePredicateArguments( "latestAvatarRequestedCommands" );
 
     unsigned int i;
-    for( i = 0; i < elements.size( ); ++i ) {
+    for( i = 0; i < elements.size(); ++i ) {
         Handle execLink = elements[i];
         if (EXECUTION_LINK != as.getType( execLink ) ) {
             logger().error( "LanguageComprehension::%s - Only Execution links are allowed to be here.",
@@ -175,17 +248,19 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
             return;
         } // if
         if ( as.getArity( execLink ) != 2 ) {
-            logger().error( "LanguageComprehension::%s - Malformed Execution link. It should has 2 outgoings but %d was found.", __FUNCTION__, as.getArity( execLink ) );
+            logger().error( "LanguageComprehension::%s - Malformed Execution link. It should has 2 outgoings but %d was found.", 
+                             __FUNCTION__, as.getArity(execLink) );
             return;
         } // if
-        Handle gsn = as.getOutgoing(execLink, 0 );
+        Handle gsn = as.getOutgoing(execLink, 0);
         Handle argumentsList = as.getOutgoing(execLink, 1 );
-        if ( GROUNDED_SCHEMA_NODE != as.getType( gsn ) || LIST_LINK != as.getType(argumentsList) ) {
-            logger().error( "LanguageComprehension::%s - Malformed Execution link. It should link a GroundedSchemaNode and a ListLink of arguments. But types are 0 -> %d and 1 -> %d", __FUNCTION__, as.getType( gsn ), as.getType(argumentsList) );
+        if ( GROUNDED_SCHEMA_NODE != as.getType(gsn) || LIST_LINK != as.getType(argumentsList) ) {
+            logger().error( "LanguageComprehension::%s - Malformed Execution link. It should link a GroundedSchemaNode and a ListLink of arguments. But types are 0 -> %d and 1 -> %d", 
+                            __FUNCTION__, as.getType( gsn ), as.getType(argumentsList) );
             return;
         } // if
         std::vector<std::string> arguments;
-        arguments.push_back( as.getName( gsn ) );
+        arguments.push_back( as.getName(gsn) );
         unsigned int j;
         unsigned int numberOfArguments = as.getArity( argumentsList );
         for( j = 0; j < numberOfArguments; ++j ) {
@@ -193,18 +268,17 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
         } // for
         
         std::stringstream argsDump;
-        std::copy( arguments.begin( ), arguments.end( ), std::ostream_iterator<std::string>(argsDump, " ") );
+        std::copy( arguments.begin(), arguments.end(), std::ostream_iterator<std::string>(argsDump, " ") );
         logger().debug( "LanguageComprehension::%s - A new schema to be executed was detected: '%s'",
-                        __FUNCTION__, argsDump.str( ).c_str( ) );
+                        __FUNCTION__, argsDump.str().c_str() );
         
-        agent.getCurrentModeHandler( ).handleCommand( "requestedCommand", arguments );
+        agent.getCurrentModeHandler().handleCommand( "requestedCommand", arguments );
     } // for
-
 }
 
 std::string LanguageComprehension::resolveFrames2Relex( )
 {
-    init( );
+    init();
 
     std::vector < std::pair<std::string, Handle> > handles; 
     std::set< std::string > pre_conditions;
@@ -307,12 +381,12 @@ std::string LanguageComprehension::resolveFrames2Relex( )
         return "...";
     }
 
-    return resolveRelex2Sentence( text );
+    return resolveRelex2Sentence(text);
 }
 
 std::string LanguageComprehension::resolveRelex2Sentence( const std::string& relexInput ) 
 {
-    init( );
+    init();
     //connect to the NLGen server and try to get the sentence from the relex
     //content
     std::string nlgen_sentence = nlgenClient->send(relexInput);
@@ -451,7 +525,6 @@ void LanguageComprehension::addDialogController( DialogController* dialogControl
 
 void LanguageComprehension::updateDialogControllers( long elapsedTime )
 {
-
     AtomSpace& atomSpace = agent.getAtomSpace( );
     Handle agentHandle = 
         AtomSpaceUtil::getAgentHandle( atomSpace, agent.getPetId( ) );
@@ -550,7 +623,6 @@ void LanguageComprehension::updateDialogControllers( long elapsedTime )
     } // if
 
 }
-
 
 void LanguageComprehension::loadDialogControllers( void )
 {
@@ -1105,7 +1177,7 @@ void LanguageComprehension::loadFrames(void)
                 Handle elementLink = atomSpace.addLink( FRAME_ELEMENT_LINK, element );
                 atomSpace.setTV( elementLink, opencog::TruthValue::TRUE_TV() );
                 atomSpace.setLTI( elementLink, 1 );
-                atomSpace.setVLTI( elementLink, 1 );
+                atomSpace.incVLTI(elementLink); // prvent it from removing
             } // if
 
         } // while
@@ -1132,7 +1204,7 @@ void LanguageComprehension::loadFrames(void)
             std::string line;
             std::getline( input, line );
             boost::trim(line);
-            if ( line.length( ) == 0 ) {
+            if ( line.length() == 0 ) {
                 continue;
             } // if
             std::string inheritance;
@@ -1154,9 +1226,11 @@ void LanguageComprehension::loadFrames(void)
                 Handle inheritanceLink = atomSpace.addLink( INHERITANCE_LINK, inheritance );
                 atomSpace.setTV( inheritanceLink, opencog::TruthValue::TRUE_TV( ) );
                 atomSpace.setLTI( inheritanceLink, 1 );
+                atomSpace.incVLTI(inheritanceLink); // prevent it from removing
             }
 
         } // while
 
     } // end block
 }
+

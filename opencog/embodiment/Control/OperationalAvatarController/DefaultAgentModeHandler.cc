@@ -21,6 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/**
+ * TODO: Get rid of AgentModeHandler. 
+ *       How? There are two options.  
+ *
+ *       1. Move contents in handleCommand to PAI or
+ *       2. Move contents in handleCommand to LanguageComprehension
+ */
+
 #include "DefaultAgentModeHandler.h"
 #include "Pet.h"
 
