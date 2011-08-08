@@ -938,7 +938,9 @@ bool PAI::setLatestSimWorldTimestamp(unsigned long timestamp)
         logger().debug("PAI - setLatestSimWorldTimestamp(%lu).", timestamp, latestSimWorldTimestamp);
         latestSimWorldTimestamp = timestamp;
     } else if (timestamp < latestSimWorldTimestamp) {
-        logger().error("PAI - setLatestSimWorldTimestamp(%lu): Got a timestamp smaller than the latest received timestamp (%lu)!", timestamp, latestSimWorldTimestamp);
+        logger().warn("PAI - setLatestSimWorldTimestamp(%lu): Got a timestamp smaller than the latest received timestamp (%lu)!", 
+                      timestamp, latestSimWorldTimestamp
+                     );
         return false;
     }
     return true;
