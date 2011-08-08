@@ -29,7 +29,7 @@ for f in ${CYGWIN_FILES[@]}; do
 done
 
 # move all OpenCog tools and dlls
-OPENCOG_FILES=( /opencog/util/cygutil.dll /opencog/learning/feature-selection/main/feature-selection.exe /opencog/learning/moses/cygmoses.dll /opencog/learning/moses/main/moses-exec.exe )
+OPENCOG_FILES=( opencog/util/cygutil.dll opencog/comboreduct/cygcomboreduct.dll opencog/learning/feature-selection/main/feature-selection.exe opencog/learning/moses/cygmoses.dll opencog/learning/moses/main/moses-exec.exe )
 for f in ${OPENCOG_FILES[@]}; do
     cp "$BUILD_DIR/$f" "$PACKAGE_DIR"
 done
