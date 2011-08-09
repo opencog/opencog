@@ -132,7 +132,7 @@ void Config::load(const char* filename, bool resetFirst)
     // Whoops, failed.
     if (!fin || !fin.good() || !fin.is_open())
         throw IOException(TRACE_INFO,
-             "[ERROR] unable to open file \"%s\"", filename);
+             "unable to open file \"%s\"", filename);
 
     string line;
     string name;

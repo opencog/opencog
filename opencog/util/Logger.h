@@ -32,6 +32,13 @@
 #include <cstdarg>
 #include <pthread.h>
 
+#define ASYNC_LOGGING
+
+#ifdef ASYNC_LOGGING
+#include <boost/thread.hpp>
+#include <opencog/util/concurrent_queue.h>
+#endif
+
 //#undef ERROR
 //#undef DEBUG
 
@@ -51,6 +58,20 @@ public:
     static const Level getLevelFromString(const std::string&);
     static const char* getLevelString(const Level);
 
+#ifdef ASYNC_LOGGING
+    /** This thread does all writing of log messages */
+    boost::thread m_Thread;
+
+    /** Queue for log messages */
+    concurrent_queue< std::string* > pendingMessagesToWrite;
+
+    void startWriteLoop();
+    void stopWriteLoop();
+    void writingLoop();
+    void flush();
+#endif
+    Logger& operator=(const Logger& log);
+    void writeMsg(std::string &msg);
 
     // ***********************************************/
     // Constructors/destructors

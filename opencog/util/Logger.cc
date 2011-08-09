@@ -59,7 +59,72 @@ const char* levelStrings[] = {"NONE", "ERROR", "WARN", "INFO", "DEBUG", "FINE"};
 
 Logger::~Logger()
 {
+#ifdef ASYNC_LOGGING
+    // Wait for queue to empty
+    while (!pendingMessagesToWrite.empty()) usleep(100);
+    stopWriteLoop();
+#endif
+
     if (f != NULL) fclose(f);
+}
+
+#ifdef ASYNC_LOGGING
+void Logger::startWriteLoop()
+{
+    m_Thread = boost::thread(&Logger::writingLoop, this);
+}
+
+void Logger::stopWriteLoop()
+{
+    pendingMessagesToWrite.cancel();
+    // rejoin thread
+    m_Thread.join();
+    pendingMessagesToWrite.cancel_reset();
+}
+
+void Logger::writingLoop()
+{
+    try {
+        while (true) {
+            std::string* msg;
+            pendingMessagesToWrite.wait_and_pop(msg);
+            writeMsg(*msg);
+            delete msg;
+        }
+    } catch (concurrent_queue< std::string* >::Canceled &e) {
+        return;
+    }
+}
+
+void Logger::flush()
+{
+    while (!pendingMessagesToWrite.empty()) usleep(100);
+}
+#endif
+
+void Logger::writeMsg(std::string &msg)
+{
+    pthread_mutex_lock(&lock);
+    // delay opening the file until the first logging statement is issued;
+    // this allows us to set the main logger's filename without creating
+    // a useless log file with the default filename
+    if (f == NULL) {
+        if ((f = fopen(fileName.c_str(), "a")) == NULL) {
+            fprintf(stderr, "[ERROR] Unable to open log file \"%s\"\n", fileName.c_str());
+            disable();
+            return;
+        } else enable();
+    }
+    // write to file
+    fprintf(f, "%s", msg.c_str());
+    fflush(f);
+    pthread_mutex_unlock(&lock);
+    // write to stdout
+    if (printToStdout) {
+        std::cout << msg;
+        std::cout.flush();
+    }
+
 }
 
 Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampEnabled)
@@ -73,11 +138,24 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
     this->logEnabled = true;
     this->f = NULL;
 
+#ifdef ASYNC_LOGGING
+    startWriteLoop();
+#endif // ASYNC_LOGGING
     pthread_mutex_init(&lock, NULL);
 }
 
 Logger::Logger(const Logger& log) {
+    pthread_mutex_init(&lock, NULL);
     set(log);
+}
+
+Logger& Logger::operator=(const Logger& log)
+{
+#ifdef ASYNC_LOGGING
+    this->stopWriteLoop();
+#endif // ASYNC_LOGGING
+    this->set(log);
+    return *this;
 }
 
 void Logger::set(const Logger& log) {
@@ -89,8 +167,10 @@ void Logger::set(const Logger& log) {
 
     this->logEnabled = log.logEnabled;
     this->f = log.f;
-
-    this->lock = log.lock; //Nil: I'm not sure about that    
+    
+#ifdef ASYNC_LOGGING
+    startWriteLoop();
+#endif // ASYNC_LOGGING
 }
 
 // ***********************************************/
@@ -119,8 +199,12 @@ Logger::Level Logger::getBackTraceLevel() const
 void Logger::setFilename(const std::string& s)
 {
     fileName.assign(s);
+
+    pthread_mutex_lock(&lock);
     if (f != NULL) fclose(f);
     f = NULL;
+    pthread_mutex_unlock(&lock);
+
     enable();
 }
 
@@ -156,7 +240,7 @@ void Logger::disable()
 
 #ifndef WIN32 /// @todo backtrace and backtrace_symbols is UNIX, we
               /// may need a WIN32 version
-static void prt_backtrace(FILE *fh)
+static void prt_backtrace(std::ostringstream& oss)
 {
 #define BT_BUFSZ 50
 	void *bt_buf[BT_BUFSZ];
@@ -166,8 +250,8 @@ static void prt_backtrace(FILE *fh)
 
 	// Start printing at a bit into the stack, so as to avoid recording
 	// the logger functions in the stack trace.
-	fprintf(fh, "\tStack Trace:\n");
-	for (int i=2; i< stack_depth; i++)
+    oss << "\tStack Trace:\n";
+	for (int i=2; i < stack_depth; i++)
 	{
 		// Most things we'll print are mangled C++ names,
 		// So demangle them, get them to pretty-print.
@@ -176,12 +260,12 @@ static void prt_backtrace(FILE *fh)
 		if (!(begin && end) || end <= begin)
 		{
 			// Failed to pull apart the symbol names
-			fprintf(fh, "\t%d: %s\n", i, syms[i]);
+            oss << "\t" << i << ": " << syms[i] << "\n";
 		}
 		else
 		{
 			*begin = 0x0;
-			fprintf(fh, "\t%d: %s ", i, syms[i]);
+            oss << "\t" << i << ": " << syms[i] << " ";
 			*begin = '(';
 			size_t sz = 250;
 			int status;
@@ -190,34 +274,25 @@ static void prt_backtrace(FILE *fh)
 			char *rv = abi::__cxa_demangle(begin+1, fname, &sz, &status);
 			*end = '+';
 			if (rv) fname = rv; // might have re-alloced
-			fprintf(fh, "(%s ", fname);
+            oss << "(" << fname << " " << end << std::endl;
 			free(fname);
-			fprintf(fh, "%s\n", end);
 		}
 	}
-	fprintf(fh, "\n");
+    oss << std::endl;
 	free(syms);
 }
 #endif
 
 void Logger::log(Logger::Level level, const std::string &txt)
 {
+    static const unsigned int max_queue_size_allowed = 1024;
+    static char timestamp[64];
+    static char timestampStr[256];
     if (!logEnabled) return;
-    // delay opening the file until the first logging statement is issued;
-    // this allows us to set the main logger's filename without creating
-    // a useless log file with the default filename
-    if (f == NULL) {
-        if ((f = fopen(fileName.c_str(), "a")) == NULL) {
-            fprintf(stderr, "[ERROR] Unable to open log file \"%s\"\n", fileName.c_str());
-            disable();
-            return;
-        } else enable();
-    }
 
     if (level <= currentLevel) {
-        pthread_mutex_lock(&lock);
+        std::ostringstream oss;
         if (timestampEnabled) {
-            char timestamp[64];
             struct timeval stv;
             struct tm stm;
 
@@ -225,22 +300,30 @@ void Logger::log(Logger::Level level, const std::string &txt)
             time_t t = stv.tv_sec;
             gmtime_r(&t, &stm);
             strftime(timestamp, sizeof(timestamp), "%F %T", &stm);
-            fprintf(f, "[%s:%03ld] ", timestamp, stv.tv_usec / 1000);
-            if (printToStdout) fprintf(stdout, "[%s:%03ld] ", timestamp, stv.tv_usec / 1000);
+            snprintf(timestampStr, sizeof(timestampStr),
+                    "[%s:%03ld] ",timestamp, stv.tv_usec / 1000);
+            oss << timestampStr;
         }
 
-        fprintf(f, "[%s] %s\n", getLevelString(level), txt.c_str());
-        if (printToStdout) fprintf(stdout, "[%s] %s\n", getLevelString(level), txt.c_str());
-        fflush(f);
+        oss << "[" << getLevelString(level) << "] " << txt << std::endl;
 
         if (level <= backTraceLevel)
         {
 #ifndef WIN32
-            prt_backtrace(f);
+            prt_backtrace(oss);
 #endif
         }
-        fflush(f);
-        pthread_mutex_unlock(&lock);
+#ifdef ASYNC_LOGGING
+        pendingMessagesToWrite.push(new std::string(oss.str()));
+
+        // If the queue gets too full, block until it's flushed to file or
+        // stdout
+        if (pendingMessagesToWrite.approx_size() > max_queue_size_allowed) {
+            flush();
+        }
+#else
+        writeMsg(oss.str());
+#endif
     }
 }
 void Logger::error(const std::string &txt)

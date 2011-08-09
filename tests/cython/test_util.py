@@ -1,6 +1,7 @@
 from unittest import TestCase
 import os
 import tempfile
+import time
 
 import opencog.util
 
@@ -39,6 +40,8 @@ class LoggerTest(TestCase):
         for lvlname in lvls_displayed:
             lvl = self.log.string_as_level(lvlname)
             self.log.log(lvl,"this should appear")
+            # sleep because messages are written by another loop
+            time.sleep(0.1)
             new_size = os.path.getsize(self.tempfn)
             self.assertTrue(file_size < new_size)
             file_size = new_size

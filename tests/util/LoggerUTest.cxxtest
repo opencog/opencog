@@ -67,6 +67,8 @@ public:
         _logger.info("msg3");
         baseline.info("msg3");
 
+        _logger.flush();
+
         FILE *f1 = fopen(baselineFile, "r");
         FILE *f2 = fopen(logFile, "r");
 
@@ -105,6 +107,7 @@ public:
         _logger.debug("message");
         _logger.fine ("message");
 
+        _logger.flush();
         TS_ASSERT_LESS_THAN_EQUALS(nLines, countLines(filename));
         remove(filename);
     }
