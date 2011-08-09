@@ -54,7 +54,7 @@ class PAIUTest :  public CxxTest::TestSuite
 {
 
 private:
-    AtomSpace atomSpace;
+    AtomSpace * atomSpace;
 
 public:
     PAIUTest() {
@@ -64,21 +64,24 @@ public:
     }
 
     void setUp() {
+        CogServer& cogserver = static_cast<CogServer&>(server()); 
+        atomSpace = cogserver.getAtomSpace();
+
         std::vector<Handle> outgoing_list; 
         std::vector<Handle> empty_outgoing_list; 
 
-        Handle h_concept_node = atomSpace.addNode(CONCEPT_NODE, "plan_selected_demand_goal"); 
+        Handle h_concept_node = atomSpace->addNode(CONCEPT_NODE, "plan_selected_demand_goal"); 
 
         outgoing_list.clear(); 
-        outgoing_list.push_back( atomSpace.addNode(PREDICATE_NODE, "EnergyDemandGoal") ); 
-        outgoing_list.push_back( atomSpace.addLink(LIST_LINK, empty_outgoing_list) ); 
-        Handle h_demand_evaluation_link = atomSpace.addLink(EVALUATION_LINK, outgoing_list); 
+        outgoing_list.push_back( atomSpace->addNode(PREDICATE_NODE, "EnergyDemandGoal") ); 
+        outgoing_list.push_back( atomSpace->addLink(LIST_LINK, empty_outgoing_list) ); 
+        Handle h_demand_evaluation_link = atomSpace->addLink(EVALUATION_LINK, outgoing_list); 
 
         outgoing_list.clear(); 
         outgoing_list.push_back(h_concept_node); 
         outgoing_list.push_back(h_demand_evaluation_link); 
-        Handle h_demand_reference_link = atomSpace.addLink(REFERENCE_LINK, outgoing_list); 
-        std::cout<<atomSpace.atomAsString(h_demand_reference_link); 
+        Handle h_demand_reference_link = atomSpace->addLink(REFERENCE_LINK, outgoing_list); 
+        std::cout<<atomSpace->atomAsString(h_demand_reference_link); 
     }
 
     void tearDown() {
@@ -94,11 +97,11 @@ public:
 
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
-        PAI pai1(atomSpace, sender, avatarInterface);
+        PAI pai1(*atomSpace, sender, avatarInterface);
         avatarInterface.setPAI(&pai1);
         ActionPlanID planId = pai1.createActionPlan();
         TS_ASSERT(planId == "0");
-        PAI pai2(atomSpace, sender, avatarInterface, 10);
+        PAI pai2(*atomSpace, sender, avatarInterface, 10);
         avatarInterface.setPAI(&pai2);
         planId = pai2.createActionPlan();
         TS_ASSERT(planId == "10");
@@ -115,7 +118,7 @@ public:
 
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
-        PAI pai(atomSpace, sender, avatarInterface);
+        PAI pai(*atomSpace, sender, avatarInterface);
         avatarInterface.setPAI(&pai);
         ActionPlanID plans[NUM_PLANS];
         for (int i = 0; i < NUM_PLANS; i++) {
@@ -139,7 +142,7 @@ public:
 
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
-        PAI pai(atomSpace, sender, avatarInterface);
+        PAI pai(*atomSpace, sender, avatarInterface);
         avatarInterface.setPAI(&pai);
 
         TS_ASSERT_THROWS(pai.sendActionPlan("0"), RuntimeException&);
@@ -157,7 +160,7 @@ public:
         }
 
         FailureActionPlanSender sender2;
-        PAI pai2(atomSpace, sender2, avatarInterface);
+        PAI pai2(*atomSpace, sender2, avatarInterface);
 
         TS_ASSERT_THROWS(pai2.sendActionPlan("0"), RuntimeException&);
         TS_ASSERT_THROWS(pai2.sendActionPlan("1"), RuntimeException&);
@@ -180,7 +183,7 @@ public:
 
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
-        PAI pai(atomSpace, sender, avatarInterface);
+        PAI pai(*atomSpace, sender, avatarInterface);
         avatarInterface.setPAI(&pai);
         ActionPlanID plan1 = pai.createActionPlan();
         ActionPlanID plan2 = pai.createActionPlan();
@@ -222,7 +225,7 @@ public:
 
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
-        PAI pai(atomSpace, sender, avatarInterface, 10);
+        PAI pai(*atomSpace, sender, avatarInterface, 10);
         avatarInterface.setPAI(&pai);
 
         // Check Action Plan status before creating them, according with the passed "nextActionPlanId" argument to the constructor
@@ -307,11 +310,11 @@ public:
         // Check instruction atoms in AtomSpace
         {
             cout << "checking instructions" << endl;
-            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
+            Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-            Handle saySchemaNode = atomSpace.getHandle(GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME);
+            Handle saySchemaNode = atomSpace->getHandle(GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME);
             TS_ASSERT(Handle::compare(saySchemaNode, Handle::UNDEFINED));
-            Handle avatarNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("2"));
+            Handle avatarNode = atomSpace->getHandle(AVATAR_NODE, PAIUtils::getInternalId("2"));
             TS_ASSERT(Handle::compare(avatarNode, Handle::UNDEFINED));
 
             const char* sentences[6] = { "Learn to fetch", "I fetch", "done fetch",
@@ -322,32 +325,32 @@ public:
                 sentenceName += PAIUtils::getInternalId("1");
                 sentenceName += (": ");
                 sentenceName += sentences[i];
-                Handle sentenceNode = atomSpace.getHandle(SENTENCE_NODE, sentenceName);
+                Handle sentenceNode = atomSpace->getHandle(SENTENCE_NODE, sentenceName);
                 cout << sentences[i] << endl;
                 TS_ASSERT(Handle::compare(sentenceNode, Handle::UNDEFINED));
 
                 HandleSeq schemaListLinkOutgoing;
                 schemaListLinkOutgoing.push_back(avatarNode);
                 schemaListLinkOutgoing.push_back(sentenceNode);
-                Handle schemaListLink = atomSpace.getHandle(LIST_LINK, schemaListLinkOutgoing);
+                Handle schemaListLink = atomSpace->getHandle(LIST_LINK, schemaListLinkOutgoing);
                 TS_ASSERT(Handle::compare(schemaListLink, Handle::UNDEFINED));
 
                 HandleSeq execLinkOutgoing;
                 execLinkOutgoing.push_back(saySchemaNode);
                 execLinkOutgoing.push_back(schemaListLink);
-                Handle execLink = atomSpace.getHandle(EXECUTION_LINK, execLinkOutgoing);
+                Handle execLink = atomSpace->getHandle(EXECUTION_LINK, execLinkOutgoing);
                 TS_ASSERT(Handle::compare(execLink, Handle::UNDEFINED));
 
                 HandleSeq predicateListLinkOutgoing;
                 predicateListLinkOutgoing.push_back(execLink);
-                Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+                Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
                 TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
 
                 HandleSeq evalLinkOutgoing;
                 evalLinkOutgoing.push_back(predNode);
                 evalLinkOutgoing.push_back(predicateListLink);
-                Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+                Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
                 TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
             }
         }
@@ -359,19 +362,19 @@ public:
             cout << "checking pet signals: physiological feelings " << endl;
             string id = PAIUtils::getInternalId("1");
             string pred = "hunger";
-            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, pred.c_str());
+            Handle predNode = atomSpace->getHandle(PREDICATE_NODE, pred.c_str());
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-            cout << atomSpace.atomAsString(predNode) << endl;
+            cout << atomSpace->atomAsString(predNode) << endl;
 
-            Handle eval = atomSpace.getIncoming(predNode)[0];
-            cout << atomSpace.cloneAtom(eval)->toString() << endl;
-            TS_ASSERT_EQUALS(atomSpace.getIncoming(predNode).size(), 1);
+            Handle eval = atomSpace->getIncoming(predNode)[0];
+            cout << atomSpace->cloneAtom(eval)->toString() << endl;
+            TS_ASSERT_EQUALS(atomSpace->getIncoming(predNode).size(), 1);
 
-            Handle atTime = atomSpace.getIncoming(eval)[0];
-            cout << atomSpace.cloneAtom(atTime)->toString() << endl;
-            TS_ASSERT_EQUALS(atomSpace.getIncoming(atTime).size(), 1);
+            Handle atTime = atomSpace->getIncoming(eval)[0];
+            cout << atomSpace->cloneAtom(atTime)->toString() << endl;
+            TS_ASSERT_EQUALS(atomSpace->getIncoming(atTime).size(), 1);
 
-            TS_ASSERT_DELTA(atomSpace.getTV(atTime)->getMean(), 0.9, 0.0001);
+            TS_ASSERT_DELTA(atomSpace->getTV(atTime)->getMean(), 0.9, 0.0001);
 
             // @todo check the ListLink and pet node
         }
@@ -407,14 +410,14 @@ public:
             // THEN, USING THE HARD WAY
 
             cout << "checking pet signals: action status " << endl;
-            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_FAILED_PREDICATE_NAME);
+            Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_FAILED_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-            Handle schemaNode = atomSpace.getHandle(GROUNDED_SCHEMA_NODE, ActionType::WALK().getName());
+            Handle schemaNode = atomSpace->getHandle(GROUNDED_SCHEMA_NODE, ActionType::WALK().getName());
             TS_ASSERT(Handle::compare(schemaNode, Handle::UNDEFINED));
 
             /*
             HandleSeq numberNodes;
-            atomSpace.getHandleSet(back_inserter(numberNodes), NUMBER_NODE, false);
+            atomSpace->getHandleSet(back_inserter(numberNodes), NUMBER_NODE, false);
             cout << "Got " << numberNodes.size() << " NumberNodes:" << endl;
             for (int i = 0; i < numberNodes.size(); i++) {
                 cout << TLB::getAtom(numberNodes[i])->toString() << endl;
@@ -425,56 +428,56 @@ public:
             HandleSeq schemaListLinkOutgoing;
 
             // Vector target: action2.addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(10.0,15.0,20.0)));
-            Handle xNode = atomSpace.getHandle(NUMBER_NODE, "10");
+            Handle xNode = atomSpace->getHandle(NUMBER_NODE, "10");
             TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
-            Handle yNode = atomSpace.getHandle(NUMBER_NODE, "15");
+            Handle yNode = atomSpace->getHandle(NUMBER_NODE, "15");
             TS_ASSERT(Handle::compare(yNode, Handle::UNDEFINED));
-            Handle zNode = atomSpace.getHandle(NUMBER_NODE, "20");
+            Handle zNode = atomSpace->getHandle(NUMBER_NODE, "20");
             TS_ASSERT(Handle::compare(zNode, Handle::UNDEFINED));
             HandleSeq targetListLinkOutgoing;
             targetListLinkOutgoing.push_back(xNode);
             targetListLinkOutgoing.push_back(yNode);
             targetListLinkOutgoing.push_back(zNode);
-            Handle targetListLink = atomSpace.getHandle(LIST_LINK, targetListLinkOutgoing);
+            Handle targetListLink = atomSpace->getHandle(LIST_LINK, targetListLinkOutgoing);
             schemaListLinkOutgoing.push_back(targetListLink);
 
             // Float speed: action2.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), toString(1.0)));
-            Handle speedNode = atomSpace.getHandle(NUMBER_NODE, "1");
+            Handle speedNode = atomSpace->getHandle(NUMBER_NODE, "1");
             TS_ASSERT(Handle::compare(speedNode, Handle::UNDEFINED));
             schemaListLinkOutgoing.push_back(speedNode);
 
             // Rotation rotate: action2.addParameter(ActionParameter("rotate", ActionParamType::ROTATION(), Rotation(0.5,0.0,-3.0)));
-            Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "0.5");
+            Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "0.5");
             TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
-            Handle rollNode = atomSpace.getHandle(NUMBER_NODE, "0");
+            Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "0");
             TS_ASSERT(Handle::compare(rollNode, Handle::UNDEFINED));
-            Handle yawNode = atomSpace.getHandle(NUMBER_NODE, "-3");
+            Handle yawNode = atomSpace->getHandle(NUMBER_NODE, "-3");
             TS_ASSERT(Handle::compare(yawNode, Handle::UNDEFINED));
             HandleSeq rotateListLinkOutgoing;
             rotateListLinkOutgoing.push_back(pitchNode);
             rotateListLinkOutgoing.push_back(rollNode);
             rotateListLinkOutgoing.push_back(yawNode);
-            Handle rotateListLink = atomSpace.getHandle(LIST_LINK, rotateListLinkOutgoing);
+            Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
             schemaListLinkOutgoing.push_back(rotateListLink);
 
-            Handle schemaListLink = atomSpace.getHandle(LIST_LINK, schemaListLinkOutgoing);
+            Handle schemaListLink = atomSpace->getHandle(LIST_LINK, schemaListLinkOutgoing);
             TS_ASSERT(Handle::compare(schemaListLink, Handle::UNDEFINED));
 
             HandleSeq execLinkOutgoing;
             execLinkOutgoing.push_back(schemaNode);
             execLinkOutgoing.push_back(schemaListLink);
-            Handle execLink = atomSpace.getHandle(EXECUTION_LINK, execLinkOutgoing);
+            Handle execLink = atomSpace->getHandle(EXECUTION_LINK, execLinkOutgoing);
             TS_ASSERT(Handle::compare(execLink, Handle::UNDEFINED));
 
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(execLink);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(predNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
         }
 
@@ -514,9 +517,9 @@ public:
         // Get the status for the first action
         {
             cout << "checking pet signals: action status" << endl;
-            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
+            Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-            Handle schemaNode = atomSpace.getHandle(GROUNDED_SCHEMA_NODE, ActionType::BARK().getName());
+            Handle schemaNode = atomSpace->getHandle(GROUNDED_SCHEMA_NODE, ActionType::BARK().getName());
             TS_ASSERT(Handle::compare(schemaNode, Handle::UNDEFINED));
 
             HandleSeq schemaListLinkOutgoing;
@@ -524,61 +527,61 @@ public:
             //Action parameters:
             //action1.addParameter(ActionParameter("duration", ActionParamType::FLOAT(), "1.0"));
             //action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
-            Handle avatarNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("Wynx").c_str());
+            Handle avatarNode = atomSpace->getHandle(AVATAR_NODE, PAIUtils::getInternalId("Wynx").c_str());
             TS_ASSERT(Handle::compare(avatarNode, Handle::UNDEFINED));
             schemaListLinkOutgoing.push_back(avatarNode);
-            Handle numberNode = atomSpace.getHandle(NUMBER_NODE, "1.0");
+            Handle numberNode = atomSpace->getHandle(NUMBER_NODE, "1.0");
             TS_ASSERT(Handle::compare(numberNode, Handle::UNDEFINED));
             schemaListLinkOutgoing.push_back(numberNode);
 
-            Handle schemaListLink = atomSpace.getHandle(LIST_LINK, schemaListLinkOutgoing);
+            Handle schemaListLink = atomSpace->getHandle(LIST_LINK, schemaListLinkOutgoing);
             TS_ASSERT(Handle::compare(schemaListLink, Handle::UNDEFINED));
 
             HandleSeq execLinkOutgoing;
             execLinkOutgoing.push_back(schemaNode);
             execLinkOutgoing.push_back(schemaListLink);
-            Handle execLink = atomSpace.getHandle(EXECUTION_LINK, execLinkOutgoing);
+            Handle execLink = atomSpace->getHandle(EXECUTION_LINK, execLinkOutgoing);
             TS_ASSERT(Handle::compare(execLink, Handle::UNDEFINED));
 
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(execLink);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(predNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
         }
 
         // Get the status for the third action
         {
             cout << "checking pet signals: action status" << endl;
-            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
+            Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-            Handle schemaNode = atomSpace.getHandle(GROUNDED_SCHEMA_NODE, ActionType::BARK().getName());
+            Handle schemaNode = atomSpace->getHandle(GROUNDED_SCHEMA_NODE, ActionType::BARK().getName());
             TS_ASSERT(Handle::compare(schemaNode, Handle::UNDEFINED));
 
             HandleSeq schemaListLinkOutgoing;
-            Handle schemaListLink = atomSpace.getHandle(LIST_LINK, schemaListLinkOutgoing);
+            Handle schemaListLink = atomSpace->getHandle(LIST_LINK, schemaListLinkOutgoing);
             TS_ASSERT(Handle::compare(schemaListLink, Handle::UNDEFINED));
 
             HandleSeq execLinkOutgoing;
             execLinkOutgoing.push_back(schemaNode);
             execLinkOutgoing.push_back(schemaListLink);
-            Handle execLink = atomSpace.getHandle(EXECUTION_LINK, execLinkOutgoing);
+            Handle execLink = atomSpace->getHandle(EXECUTION_LINK, execLinkOutgoing);
             TS_ASSERT(Handle::compare(execLink, Handle::UNDEFINED));
 
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(execLink);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(predNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
         }
 
@@ -597,25 +600,25 @@ public:
         {
             cout << "checking agent signals" << endl;
 
-            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
+            Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
 
             HandleSeq predicateListLinkOutgoing;
             HandleSeq parametersListLinkOutgoing;
 
             // Avatar node
-            Handle avatarNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("1").c_str());
+            Handle avatarNode = atomSpace->getHandle(AVATAR_NODE, PAIUtils::getInternalId("1").c_str());
             TS_ASSERT(Handle::compare(avatarNode, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(avatarNode);
 
             // Action node
-            Handle actionNode = atomSpace.getHandle(NODE, "walk");
+            Handle actionNode = atomSpace->getHandle(NODE, "walk");
             TS_ASSERT(Handle::compare(actionNode, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(actionNode);
 
             /* print NumberNodes
             HandleSeq numberNodes;
-            atomSpace.getHandleSet(back_inserter(numberNodes), NUMBER_NODE, false);
+            atomSpace->getHandleSet(back_inserter(numberNodes), NUMBER_NODE, false);
             cout << "Got " << numberNodes.size() << " NumberNodes:" << endl;
             for (int i = 0; i < numberNodes.size(); i++) {
                 cout << TLB::getAtom(numberNodes[i])->toString() << endl;
@@ -623,49 +626,49 @@ public:
             */
 
             // Vector <vector x=\"1\" y=\"1.5\" z=\"2\"/>"
-            Handle xNode = atomSpace.getHandle(NUMBER_NODE, "1");
+            Handle xNode = atomSpace->getHandle(NUMBER_NODE, "1");
             TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
-            Handle yNode = atomSpace.getHandle(NUMBER_NODE, "1.5");
+            Handle yNode = atomSpace->getHandle(NUMBER_NODE, "1.5");
             TS_ASSERT(Handle::compare(yNode, Handle::UNDEFINED));
-            Handle zNode = atomSpace.getHandle(NUMBER_NODE, "2");
+            Handle zNode = atomSpace->getHandle(NUMBER_NODE, "2");
             TS_ASSERT(Handle::compare(zNode, Handle::UNDEFINED));
             HandleSeq targetListLinkOutgoing;
             targetListLinkOutgoing.push_back(xNode);
             targetListLinkOutgoing.push_back(yNode);
             targetListLinkOutgoing.push_back(zNode);
-            Handle targetListLink = atomSpace.getHandle(LIST_LINK, targetListLinkOutgoing);
+            Handle targetListLink = atomSpace->getHandle(LIST_LINK, targetListLinkOutgoing);
             parametersListLinkOutgoing.push_back(targetListLink);
 
             // Speed <param name=\"speed\" type=\"float\" value=\"3.5\"/>"
-            Handle speedNode = atomSpace.getHandle(NUMBER_NODE, "3.5");
+            Handle speedNode = atomSpace->getHandle(NUMBER_NODE, "3.5");
             TS_ASSERT(Handle::compare(speedNode, Handle::UNDEFINED));
             parametersListLinkOutgoing.push_back(speedNode);
 
             // Rotation <rotation pitch=\"0.1\" roll=\"0.2\" yaw=\"0.3\"/>"
-            Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "0.1");
+            Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "0.1");
             TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
-            Handle rollNode = atomSpace.getHandle(NUMBER_NODE, "0.2");
+            Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "0.2");
             TS_ASSERT(Handle::compare(rollNode, Handle::UNDEFINED));
-            Handle yawNode = atomSpace.getHandle(NUMBER_NODE, "0.3");
+            Handle yawNode = atomSpace->getHandle(NUMBER_NODE, "0.3");
             TS_ASSERT(Handle::compare(yawNode, Handle::UNDEFINED));
             HandleSeq rotateListLinkOutgoing;
             rotateListLinkOutgoing.push_back(pitchNode);
             rotateListLinkOutgoing.push_back(rollNode);
             rotateListLinkOutgoing.push_back(yawNode);
-            Handle rotateListLink = atomSpace.getHandle(LIST_LINK, rotateListLinkOutgoing);
+            Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
             parametersListLinkOutgoing.push_back(rotateListLink);
             
-            Handle parametersListLink = atomSpace.getHandle(LIST_LINK, parametersListLinkOutgoing);
+            Handle parametersListLink = atomSpace->getHandle(LIST_LINK, parametersListLinkOutgoing);
             TS_ASSERT(Handle::compare(parametersListLink, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(parametersListLink);
 
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(predNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
         }
 
@@ -675,65 +678,65 @@ public:
         {
             cout << "checking avatar signals" << endl;
 
-            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
+            Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
 
             HandleSeq predicateListLinkOutgoing;
 
             // Agent node
-            Handle agentNode = atomSpace.getHandle(PET_NODE, PAIUtils::getInternalId("3").c_str());
+            Handle agentNode = atomSpace->getHandle(PET_NODE, PAIUtils::getInternalId("3").c_str());
             TS_ASSERT(Handle::compare(agentNode, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(agentNode);
 
             // Action node
-            Handle actionNode = atomSpace.getHandle(NODE, "walk");
+            Handle actionNode = atomSpace->getHandle(NODE, "walk");
             TS_ASSERT(Handle::compare(actionNode, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(actionNode);
 
             HandleSeq parametersListLink;
 
             // Vector <vector x=\"3\" y=\"5.5\" z=\"2.9\"/>"
-            Handle xNode = atomSpace.getHandle(NUMBER_NODE, "3");
+            Handle xNode = atomSpace->getHandle(NUMBER_NODE, "3");
             TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
-            Handle yNode = atomSpace.getHandle(NUMBER_NODE, "5.5");
+            Handle yNode = atomSpace->getHandle(NUMBER_NODE, "5.5");
             TS_ASSERT(Handle::compare(yNode, Handle::UNDEFINED));
-            Handle zNode = atomSpace.getHandle(NUMBER_NODE, "2.9");
+            Handle zNode = atomSpace->getHandle(NUMBER_NODE, "2.9");
             TS_ASSERT(Handle::compare(zNode, Handle::UNDEFINED));
             HandleSeq targetListLinkOutgoing;
             targetListLinkOutgoing.push_back(xNode);
             targetListLinkOutgoing.push_back(yNode);
             targetListLinkOutgoing.push_back(zNode);
-            Handle targetListLink = atomSpace.getHandle(LIST_LINK, targetListLinkOutgoing);
+            Handle targetListLink = atomSpace->getHandle(LIST_LINK, targetListLinkOutgoing);
             parametersListLink.push_back(targetListLink);
 
             // Speed <param name=\"speed\" type=\"float\" value=\"3.87\"/>"
-            Handle speedNode = atomSpace.getHandle(NUMBER_NODE, "3.87");
+            Handle speedNode = atomSpace->getHandle(NUMBER_NODE, "3.87");
             TS_ASSERT(Handle::compare(speedNode, Handle::UNDEFINED));
             parametersListLink.push_back(speedNode);
 
             // Rotation <rotation pitch=\"0.111\" roll=\"0.221\" yaw=\"0.341\"/>"
-            Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "0.111");
+            Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "0.111");
             TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
-            Handle rollNode = atomSpace.getHandle(NUMBER_NODE, "0.221");
+            Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "0.221");
             TS_ASSERT(Handle::compare(rollNode, Handle::UNDEFINED));
-            Handle yawNode = atomSpace.getHandle(NUMBER_NODE, "0.341");
+            Handle yawNode = atomSpace->getHandle(NUMBER_NODE, "0.341");
             TS_ASSERT(Handle::compare(yawNode, Handle::UNDEFINED));
             HandleSeq rotateListLinkOutgoing;
             rotateListLinkOutgoing.push_back(pitchNode);
             rotateListLinkOutgoing.push_back(rollNode);
             rotateListLinkOutgoing.push_back(yawNode);
-            Handle rotateListLink = atomSpace.getHandle(LIST_LINK, rotateListLinkOutgoing);
+            Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
             parametersListLink.push_back(rotateListLink);
 
-            predicateListLinkOutgoing.push_back( atomSpace.getHandle(LIST_LINK, parametersListLink ) );
+            predicateListLinkOutgoing.push_back( atomSpace->getHandle(LIST_LINK, parametersListLink ) );
 
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(predNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
         }
 
@@ -741,65 +744,65 @@ public:
         {
             cout << "checking avatar signals" << endl;
 
-            Handle predNode = atomSpace.getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
+            Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
 
             HandleSeq predicateListLinkOutgoing;
 
             // Agent node
-            Handle agentNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("9").c_str());
+            Handle agentNode = atomSpace->getHandle(AVATAR_NODE, PAIUtils::getInternalId("9").c_str());
             TS_ASSERT(Handle::compare(agentNode, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(agentNode);
 
             // Action node
-            Handle actionNode = atomSpace.getHandle(NODE, "walk");
+            Handle actionNode = atomSpace->getHandle(NODE, "walk");
             TS_ASSERT(Handle::compare(actionNode, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(actionNode);
 
             HandleSeq parametersListLink;
 
             // Vector <vector x=\"1.01\" y=\"1.77\" z=\"2.1\"/>"
-            Handle xNode = atomSpace.getHandle(NUMBER_NODE, "1.01");
+            Handle xNode = atomSpace->getHandle(NUMBER_NODE, "1.01");
             TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
-            Handle yNode = atomSpace.getHandle(NUMBER_NODE, "1.77");
+            Handle yNode = atomSpace->getHandle(NUMBER_NODE, "1.77");
             TS_ASSERT(Handle::compare(yNode, Handle::UNDEFINED));
-            Handle zNode = atomSpace.getHandle(NUMBER_NODE, "2.1");
+            Handle zNode = atomSpace->getHandle(NUMBER_NODE, "2.1");
             TS_ASSERT(Handle::compare(zNode, Handle::UNDEFINED));
             HandleSeq targetListLinkOutgoing;
             targetListLinkOutgoing.push_back(xNode);
             targetListLinkOutgoing.push_back(yNode);
             targetListLinkOutgoing.push_back(zNode);
-            Handle targetListLink = atomSpace.getHandle(LIST_LINK, targetListLinkOutgoing);
+            Handle targetListLink = atomSpace->getHandle(LIST_LINK, targetListLinkOutgoing);
             parametersListLink.push_back(targetListLink);
 
             // Speed <param name=\"speed\" type=\"float\" value=\"8.5\"/>"
-            Handle speedNode = atomSpace.getHandle(NUMBER_NODE, "8.5");
+            Handle speedNode = atomSpace->getHandle(NUMBER_NODE, "8.5");
             TS_ASSERT(Handle::compare(speedNode, Handle::UNDEFINED));
             parametersListLink.push_back(speedNode);
 
             // Rotation <rotation pitch=\"0.3274\" roll=\"0.517\" yaw=\"0.87\"/>"
-            Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "0.3274");
+            Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "0.3274");
             TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
-            Handle rollNode = atomSpace.getHandle(NUMBER_NODE, "0.517");
+            Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "0.517");
             TS_ASSERT(Handle::compare(rollNode, Handle::UNDEFINED));
-            Handle yawNode = atomSpace.getHandle(NUMBER_NODE, "0.87");
+            Handle yawNode = atomSpace->getHandle(NUMBER_NODE, "0.87");
             TS_ASSERT(Handle::compare(yawNode, Handle::UNDEFINED));
             HandleSeq rotateListLinkOutgoing;
             rotateListLinkOutgoing.push_back(pitchNode);
             rotateListLinkOutgoing.push_back(rollNode);
             rotateListLinkOutgoing.push_back(yawNode);
-            Handle rotateListLink = atomSpace.getHandle(LIST_LINK, rotateListLinkOutgoing);
+            Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
             parametersListLink.push_back(rotateListLink);
 
-            predicateListLinkOutgoing.push_back( atomSpace.getHandle(LIST_LINK, parametersListLink ) );
+            predicateListLinkOutgoing.push_back( atomSpace->getHandle(LIST_LINK, parametersListLink ) );
 
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(predNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
         }
 
@@ -808,200 +811,200 @@ public:
             cout << "checking map info" << endl;
 
             // entities
-            Handle wynxNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("2").c_str());
+            Handle wynxNode = atomSpace->getHandle(AVATAR_NODE, PAIUtils::getInternalId("2").c_str());
             TS_ASSERT(Handle::compare(wynxNode, Handle::UNDEFINED));
-            Handle stickNode = atomSpace.getHandle(ACCESSORY_NODE, PAIUtils::getInternalId("Stick").c_str());
+            Handle stickNode = atomSpace->getHandle(ACCESSORY_NODE, PAIUtils::getInternalId("Stick").c_str());
             TS_ASSERT(Handle::compare(stickNode, Handle::UNDEFINED));
-            Handle whistleNode = atomSpace.getHandle(ACCESSORY_NODE, PAIUtils::getInternalId("whistle").c_str());
+            Handle whistleNode = atomSpace->getHandle(ACCESSORY_NODE, PAIUtils::getInternalId("whistle").c_str());
             TS_ASSERT(Handle::compare(whistleNode, Handle::UNDEFINED));
-            Handle fidoNode = atomSpace.getHandle(PET_NODE, PAIUtils::getInternalId("1").c_str());
+            Handle fidoNode = atomSpace->getHandle(PET_NODE, PAIUtils::getInternalId("1").c_str());
             TS_ASSERT(Handle::compare(fidoNode, Handle::UNDEFINED));
-            Handle homeNode = atomSpace.getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("house").c_str());
+            Handle homeNode = atomSpace->getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("house").c_str());
             TS_ASSERT(Handle::compare(homeNode, Handle::UNDEFINED));
-            Handle foodBowlNode = atomSpace.getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("bow").c_str());
+            Handle foodBowlNode = atomSpace->getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("bow").c_str());
             TS_ASSERT(Handle::compare(foodBowlNode, Handle::UNDEFINED));
-            Handle waterBowlNode = atomSpace.getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("Water bow").c_str());
+            Handle waterBowlNode = atomSpace->getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("Water bow").c_str());
             TS_ASSERT(Handle::compare(waterBowlNode, Handle::UNDEFINED));
 
-            Handle woodConceptNode = atomSpace.getHandle(CONCEPT_NODE, "wood");
-            Handle smoothConceptNode = atomSpace.getHandle(CONCEPT_NODE, "smooth");
-            Handle brownConceptNode = atomSpace.getHandle(CONCEPT_NODE, "brown");
-            Handle redConceptNode = atomSpace.getHandle(CONCEPT_NODE, "red");
-            Handle blueConceptNode = atomSpace.getHandle(CONCEPT_NODE, "blue");
-            Handle greenConceptNode = atomSpace.getHandle(CONCEPT_NODE, "green");
-            Handle whiteConceptNode = atomSpace.getHandle(CONCEPT_NODE, "white");
-            Handle blackConceptNode = atomSpace.getHandle(CONCEPT_NODE, "black");
-            Handle grayConceptNode = atomSpace.getHandle(CONCEPT_NODE, "gray");
+            Handle woodConceptNode = atomSpace->getHandle(CONCEPT_NODE, "wood");
+            Handle smoothConceptNode = atomSpace->getHandle(CONCEPT_NODE, "smooth");
+            Handle brownConceptNode = atomSpace->getHandle(CONCEPT_NODE, "brown");
+            Handle redConceptNode = atomSpace->getHandle(CONCEPT_NODE, "red");
+            Handle blueConceptNode = atomSpace->getHandle(CONCEPT_NODE, "blue");
+            Handle greenConceptNode = atomSpace->getHandle(CONCEPT_NODE, "green");
+            Handle whiteConceptNode = atomSpace->getHandle(CONCEPT_NODE, "white");
+            Handle blackConceptNode = atomSpace->getHandle(CONCEPT_NODE, "black");
+            Handle grayConceptNode = atomSpace->getHandle(CONCEPT_NODE, "gray");
 
-            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(atomSpace,
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace,
                       "is_drinkable",
                       whistleNode));
-            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace,
                       "is_edible",
                       whistleNode));
 
             // check is_moving predicates
-            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(atomSpace,
+            TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace,
                       "is_moving",
                       waterBowlNode));
-            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace,
                       "is_moving",
                       whistleNode));
 
-            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace,
                       "is_toy",
                       stickNode));
 
-            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace,
                       "color",
                       stickNode,
                       brownConceptNode ));
 
 
-            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace,
                       "texture",
                       stickNode,
                       smoothConceptNode ));
 
-            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace,
                       "material",
                       stickNode,
                       woodConceptNode));
 
-            Handle colorPredNode = atomSpace.getHandle(PREDICATE_NODE, "color");
+            Handle colorPredNode = atomSpace->getHandle(PREDICATE_NODE, "color");
            
             {
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(stickNode);
             predicateListLinkOutgoing.push_back(brownConceptNode);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(colorPredNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 1.0f, 0.001);
+            TS_ASSERT_DELTA(atomSpace->getMean(evalLink), 1.0f, 0.001);
             }
 
             {
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(stickNode);
             predicateListLinkOutgoing.push_back(redConceptNode);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(colorPredNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.75f, 0.001);
+            TS_ASSERT_DELTA(atomSpace->getMean(evalLink), 0.75f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(stickNode);
             predicateListLinkOutgoing.push_back(blueConceptNode);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(colorPredNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.5f, 0.001);
+            TS_ASSERT_DELTA(atomSpace->getMean(evalLink), 0.5f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(stickNode);
             predicateListLinkOutgoing.push_back(greenConceptNode);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(colorPredNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.25f, 0.001);
+            TS_ASSERT_DELTA(atomSpace->getMean(evalLink), 0.25f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(stickNode);
             predicateListLinkOutgoing.push_back(whiteConceptNode);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(colorPredNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.15f, 0.001);
+            TS_ASSERT_DELTA(atomSpace->getMean(evalLink), 0.15f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(stickNode);
             predicateListLinkOutgoing.push_back(blackConceptNode);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(colorPredNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.1f, 0.001);
+            TS_ASSERT_DELTA(atomSpace->getMean(evalLink), 0.1f, 0.001);
             }
             {
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(stickNode);
             predicateListLinkOutgoing.push_back(grayConceptNode);
-            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
             TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(colorPredNode);
             evalLinkOutgoing.push_back(predicateListLink);
-            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
-            TS_ASSERT_DELTA(atomSpace.getMean(evalLink), 0.05f, 0.001);
+            TS_ASSERT_DELTA(atomSpace->getMean(evalLink), 0.05f, 0.001);
             }
 
             HandleSeq seq;
             seq.push_back(homeNode);
-            seq.push_back(atomSpace.addNode(CONCEPT_NODE, "pet_home"));
+            seq.push_back(atomSpace->addNode(CONCEPT_NODE, "pet_home"));
 
             vector<Handle> handles;
-            atomSpace.getHandleSet(back_inserter(handles), seq, NULL, NULL, 2,
+            atomSpace->getHandleSet(back_inserter(handles), seq, NULL, NULL, 2,
                                    INHERITANCE_LINK, false);
             TS_ASSERT(handles.size() == 1);
 
             seq.clear();
             seq.push_back(foodBowlNode);
-            seq.push_back(atomSpace.addNode(CONCEPT_NODE, "food_bowl"));
+            seq.push_back(atomSpace->addNode(CONCEPT_NODE, "food_bowl"));
 
             handles.clear();
-            atomSpace.getHandleSet(back_inserter(handles), seq, NULL, NULL, 2,
+            atomSpace->getHandleSet(back_inserter(handles), seq, NULL, NULL, 2,
                                    INHERITANCE_LINK, false);
             //printf("Handles.size() %d\n", handles.size());
             TS_ASSERT(handles.size() == 1);
 
             seq.clear();
             seq.push_back(waterBowlNode);
-            seq.push_back(atomSpace.addNode(CONCEPT_NODE, "water_bowl"));
+            seq.push_back(atomSpace->addNode(CONCEPT_NODE, "water_bowl"));
 
             handles.clear();
-            atomSpace.getHandleSet(back_inserter(handles), seq, NULL, NULL, 2,
+            atomSpace->getHandleSet(back_inserter(handles), seq, NULL, NULL, 2,
                                    INHERITANCE_LINK, false);
 
             //printf("Handles.size() %d\n", handles.size());
@@ -1010,11 +1013,11 @@ public:
 
 
             // entity types
-            Handle avatarNode = atomSpace.getHandle(NODE, "avatar");
+            Handle avatarNode = atomSpace->getHandle(NODE, "avatar");
             TS_ASSERT(Handle::compare(avatarNode, Handle::UNDEFINED));
-            Handle accessoryNode = atomSpace.getHandle(NODE, "accessory");
+            Handle accessoryNode = atomSpace->getHandle(NODE, "accessory");
             TS_ASSERT(Handle::compare(accessoryNode, Handle::UNDEFINED));
-            Handle petNode = atomSpace.getHandle(NODE, "pet");
+            Handle petNode = atomSpace->getHandle(NODE, "pet");
             TS_ASSERT(Handle::compare(petNode, Handle::UNDEFINED));
 
             // Inheritance links
@@ -1022,43 +1025,43 @@ public:
                 HandleSeq inhLinkOutgoing;
                 inhLinkOutgoing.push_back(wynxNode);
                 inhLinkOutgoing.push_back(avatarNode);
-                Handle inhLink = atomSpace.getHandle(INHERITANCE_LINK, inhLinkOutgoing);
+                Handle inhLink = atomSpace->getHandle(INHERITANCE_LINK, inhLinkOutgoing);
                 TS_ASSERT(Handle::compare(inhLink, Handle::UNDEFINED));
             }
             {
                 HandleSeq inhLinkOutgoing;
                 inhLinkOutgoing.push_back(stickNode);
                 inhLinkOutgoing.push_back(accessoryNode);
-                Handle inhLink = atomSpace.getHandle(INHERITANCE_LINK, inhLinkOutgoing);
+                Handle inhLink = atomSpace->getHandle(INHERITANCE_LINK, inhLinkOutgoing);
                 TS_ASSERT(Handle::compare(inhLink, Handle::UNDEFINED));
             }
             {
                 HandleSeq inhLinkOutgoing;
                 inhLinkOutgoing.push_back(whistleNode);
                 inhLinkOutgoing.push_back(accessoryNode);
-                Handle inhLink = atomSpace.getHandle(INHERITANCE_LINK, inhLinkOutgoing);
+                Handle inhLink = atomSpace->getHandle(INHERITANCE_LINK, inhLinkOutgoing);
                 TS_ASSERT(Handle::compare(inhLink, Handle::UNDEFINED));
             }
             {
                 HandleSeq inhLinkOutgoing;
                 inhLinkOutgoing.push_back(fidoNode);
                 inhLinkOutgoing.push_back(petNode);
-                Handle inhLink = atomSpace.getHandle(INHERITANCE_LINK, inhLinkOutgoing);
+                Handle inhLink = atomSpace->getHandle(INHERITANCE_LINK, inhLinkOutgoing);
                 TS_ASSERT(Handle::compare(inhLink, Handle::UNDEFINED));
             }
 
             // Position predicates
             {
-                Handle predNode = atomSpace.getHandle(PREDICATE_NODE, AGISIM_POSITION_PREDICATE_NAME);
+                Handle predNode = atomSpace->getHandle(PREDICATE_NODE, AGISIM_POSITION_PREDICATE_NAME);
                 TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
 
                 // Wynx: <position x=\"15\" y=\"164\" z=\"14\"/>\n"
                 {
-                    Handle xNode = atomSpace.getHandle(NUMBER_NODE, "15");
+                    Handle xNode = atomSpace->getHandle(NUMBER_NODE, "15");
                     TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
-                    Handle yNode = atomSpace.getHandle(NUMBER_NODE, "164");
+                    Handle yNode = atomSpace->getHandle(NUMBER_NODE, "164");
                     TS_ASSERT(Handle::compare(yNode, Handle::UNDEFINED));
-                    Handle zNode = atomSpace.getHandle(NUMBER_NODE, "14");
+                    Handle zNode = atomSpace->getHandle(NUMBER_NODE, "14");
                     TS_ASSERT(Handle::compare(zNode, Handle::UNDEFINED));
 
                     HandleSeq predicateListLinkOutgoing;
@@ -1066,23 +1069,23 @@ public:
                     predicateListLinkOutgoing.push_back(xNode);
                     predicateListLinkOutgoing.push_back(yNode);
                     predicateListLinkOutgoing.push_back(zNode);
-                    Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+                    Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
                     TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
                     HandleSeq evalLinkOutgoing;
                     evalLinkOutgoing.push_back(predNode);
                     evalLinkOutgoing.push_back(predicateListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+                    Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
                     TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
                 }
 
                 // Stick: <position x=\"5.051\" y=\"64.251\" z=\"4.251\"/>\n"
                 {
-                    Handle xNode = atomSpace.getHandle(NUMBER_NODE, "5.051");
+                    Handle xNode = atomSpace->getHandle(NUMBER_NODE, "5.051");
                     TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
-                    Handle yNode = atomSpace.getHandle(NUMBER_NODE, "64.251");
+                    Handle yNode = atomSpace->getHandle(NUMBER_NODE, "64.251");
                     TS_ASSERT(Handle::compare(yNode, Handle::UNDEFINED));
-                    Handle zNode = atomSpace.getHandle(NUMBER_NODE, "4.251");
+                    Handle zNode = atomSpace->getHandle(NUMBER_NODE, "4.251");
                     TS_ASSERT(Handle::compare(zNode, Handle::UNDEFINED));
 
                     HandleSeq predicateListLinkOutgoing;
@@ -1090,23 +1093,23 @@ public:
                     predicateListLinkOutgoing.push_back(xNode);
                     predicateListLinkOutgoing.push_back(yNode);
                     predicateListLinkOutgoing.push_back(zNode);
-                    Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+                    Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
                     TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
                     HandleSeq evalLinkOutgoing;
                     evalLinkOutgoing.push_back(predNode);
                     evalLinkOutgoing.push_back(predicateListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+                    Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
                     TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
                 }
 
                 // Whistle: <position x=\"5.052\" y=\"64.252\" z=\"4.252\"/>\n"
                 {
-                    Handle xNode = atomSpace.getHandle(NUMBER_NODE, "5.052");
+                    Handle xNode = atomSpace->getHandle(NUMBER_NODE, "5.052");
                     TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
-                    Handle yNode = atomSpace.getHandle(NUMBER_NODE, "64.252");
+                    Handle yNode = atomSpace->getHandle(NUMBER_NODE, "64.252");
                     TS_ASSERT(Handle::compare(yNode, Handle::UNDEFINED));
-                    Handle zNode = atomSpace.getHandle(NUMBER_NODE, "4.252");
+                    Handle zNode = atomSpace->getHandle(NUMBER_NODE, "4.252");
                     TS_ASSERT(Handle::compare(zNode, Handle::UNDEFINED));
 
                     HandleSeq predicateListLinkOutgoing;
@@ -1114,23 +1117,23 @@ public:
                     predicateListLinkOutgoing.push_back(xNode);
                     predicateListLinkOutgoing.push_back(yNode);
                     predicateListLinkOutgoing.push_back(zNode);
-                    Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+                    Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
                     TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
                     HandleSeq evalLinkOutgoing;
                     evalLinkOutgoing.push_back(predNode);
                     evalLinkOutgoing.push_back(predicateListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+                    Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
                     TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
                 }
 
                 // Fido: <position x=\"25\" y=\"165\" z=\"23.2\"/>\n"
                 {
-                    Handle xNode = atomSpace.getHandle(NUMBER_NODE, "25");
+                    Handle xNode = atomSpace->getHandle(NUMBER_NODE, "25");
                     TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
-                    Handle yNode = atomSpace.getHandle(NUMBER_NODE, "165");
+                    Handle yNode = atomSpace->getHandle(NUMBER_NODE, "165");
                     TS_ASSERT(Handle::compare(yNode, Handle::UNDEFINED));
-                    Handle zNode = atomSpace.getHandle(NUMBER_NODE, "23.2");
+                    Handle zNode = atomSpace->getHandle(NUMBER_NODE, "23.2");
                     TS_ASSERT(Handle::compare(zNode, Handle::UNDEFINED));
 
                     HandleSeq predicateListLinkOutgoing;
@@ -1138,13 +1141,13 @@ public:
                     predicateListLinkOutgoing.push_back(xNode);
                     predicateListLinkOutgoing.push_back(yNode);
                     predicateListLinkOutgoing.push_back(zNode);
-                    Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+                    Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
                     TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
                     HandleSeq evalLinkOutgoing;
                     evalLinkOutgoing.push_back(predNode);
                     evalLinkOutgoing.push_back(predicateListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+                    Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
                     TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
                 }
 
@@ -1152,16 +1155,16 @@ public:
 
             // Rotation predicate
             {
-                Handle predNode = atomSpace.getHandle(PREDICATE_NODE, "AGISIM_rotation");
+                Handle predNode = atomSpace->getHandle(PREDICATE_NODE, "AGISIM_rotation");
                 TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
 
                 // Wynx: <rotation pitch=\"0.01\" roll=\"0.02\" yaw=\"2.53\"/>
                 {
-                    Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "0.01");
+                    Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "0.01");
                     TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
-                    Handle rollNode = atomSpace.getHandle(NUMBER_NODE, "0.02");
+                    Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "0.02");
                     TS_ASSERT(Handle::compare(rollNode, Handle::UNDEFINED));
-                    Handle yawNode = atomSpace.getHandle(NUMBER_NODE, "2.53");
+                    Handle yawNode = atomSpace->getHandle(NUMBER_NODE, "2.53");
                     TS_ASSERT(Handle::compare(yawNode, Handle::UNDEFINED));
 
                     HandleSeq predicateListLinkOutgoing;
@@ -1169,23 +1172,23 @@ public:
                     predicateListLinkOutgoing.push_back(pitchNode);
                     predicateListLinkOutgoing.push_back(rollNode);
                     predicateListLinkOutgoing.push_back(yawNode);
-                    Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+                    Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
                     TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
                     HandleSeq evalLinkOutgoing;
                     evalLinkOutgoing.push_back(predNode);
                     evalLinkOutgoing.push_back(predicateListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+                    Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
                     TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
                 }
 
                 // Stick: <rotation pitch=\"10\" roll=\"10\" yaw=\"12.5\"/>\n"
                 {
-                    Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "10");
+                    Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "10");
                     TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
-                    Handle rollNode = atomSpace.getHandle(NUMBER_NODE, "10");
+                    Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "10");
                     TS_ASSERT(Handle::compare(rollNode, Handle::UNDEFINED));
-                    Handle yawNode = atomSpace.getHandle(NUMBER_NODE, "12.5");
+                    Handle yawNode = atomSpace->getHandle(NUMBER_NODE, "12.5");
                     TS_ASSERT(Handle::compare(yawNode, Handle::UNDEFINED));
 
                     HandleSeq predicateListLinkOutgoing;
@@ -1193,23 +1196,23 @@ public:
                     predicateListLinkOutgoing.push_back(pitchNode);
                     predicateListLinkOutgoing.push_back(rollNode);
                     predicateListLinkOutgoing.push_back(yawNode);
-                    Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+                    Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
                     TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
                     HandleSeq evalLinkOutgoing;
                     evalLinkOutgoing.push_back(predNode);
                     evalLinkOutgoing.push_back(predicateListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+                    Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
                     TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
                 }
 
                 // Whistle: <rotation pitch=\"20\" roll=\"20\" yaw=\"22.5\"/>\n"
                 {
-                    Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "20");
+                    Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "20");
                     TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
-                    Handle rollNode = atomSpace.getHandle(NUMBER_NODE, "20");
+                    Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "20");
                     TS_ASSERT(Handle::compare(rollNode, Handle::UNDEFINED));
-                    Handle yawNode = atomSpace.getHandle(NUMBER_NODE, "22.5");
+                    Handle yawNode = atomSpace->getHandle(NUMBER_NODE, "22.5");
                     TS_ASSERT(Handle::compare(yawNode, Handle::UNDEFINED));
 
                     HandleSeq predicateListLinkOutgoing;
@@ -1217,23 +1220,23 @@ public:
                     predicateListLinkOutgoing.push_back(pitchNode);
                     predicateListLinkOutgoing.push_back(rollNode);
                     predicateListLinkOutgoing.push_back(yawNode);
-                    Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+                    Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
                     TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
                     HandleSeq evalLinkOutgoing;
                     evalLinkOutgoing.push_back(predNode);
                     evalLinkOutgoing.push_back(predicateListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+                    Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
                     TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
                 }
 
                 // Fido: <rotation pitch=\"30\" roll=\"30\" yaw=\"182.5\"/>\n"
                 {
-                    Handle pitchNode = atomSpace.getHandle(NUMBER_NODE, "30");
+                    Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "30");
                     TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
-                    Handle rollNode = atomSpace.getHandle(NUMBER_NODE, "30");
+                    Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "30");
                     TS_ASSERT(Handle::compare(rollNode, Handle::UNDEFINED));
-                    Handle yawNode = atomSpace.getHandle(NUMBER_NODE, "182.5");
+                    Handle yawNode = atomSpace->getHandle(NUMBER_NODE, "182.5");
                     TS_ASSERT(Handle::compare(yawNode, Handle::UNDEFINED));
 
                     HandleSeq predicateListLinkOutgoing;
@@ -1241,13 +1244,13 @@ public:
                     predicateListLinkOutgoing.push_back(pitchNode);
                     predicateListLinkOutgoing.push_back(rollNode);
                     predicateListLinkOutgoing.push_back(yawNode);
-                    Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+                    Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
                     TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
                     HandleSeq evalLinkOutgoing;
                     evalLinkOutgoing.push_back(predNode);
                     evalLinkOutgoing.push_back(predicateListLink);
-                    Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+                    Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
                     TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
                 }
 
@@ -1301,11 +1304,9 @@ public:
             config().load(config().get("CONFIG_FILE").c_str());
         }
 
-        AtomSpace atomSpace;
-
         OKActionPlanSender sender(sentActionPlans);
         AvatarInterfaceMock avatarInterface;
-        PAI pai(atomSpace, sender, avatarInterface);
+        PAI pai(*atomSpace, sender, avatarInterface);
         avatarInterface.setPAI(&pai);
 
         /*
@@ -1369,11 +1370,7 @@ public:
         //set the scheme typesdefs path 
         config().set("SCHEME_TYPEDEFS_PATH",PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
 
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        //AtomSpace atomSpace;
-        AtomSpace *atomSpace = cogserver.getAtomSpace();
-
-        int rc = load_scm_file(*(atomSpace),PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
+        int rc = load_scm_file(*atomSpace, PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
         OKActionPlanSender sender(sentActionPlans);

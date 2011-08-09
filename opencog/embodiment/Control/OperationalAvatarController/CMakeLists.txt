@@ -45,6 +45,7 @@ TARGET_LINK_LIBRARIES (oac
     json_spirit
     PredicateUpdaters
     PAI
+    behavior
     MessagingSystem
     Procedure
     savable
