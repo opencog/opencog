@@ -20,6 +20,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#ifndef _OC_CONCURRENT_QUEUE_H
+#define _OC_CONCURRENT_QUEUE_H
+
 #include "boost/thread.hpp"
 #include <deque>
 
@@ -49,6 +53,12 @@ public:
         boost::mutex::scoped_lock lock(the_mutex);
         if (is_canceled) throw Canceled();
         return the_queue.empty();
+    }
+
+    unsigned int approx_size() const
+    {
+        boost::mutex::scoped_lock lock(the_mutex);
+        return the_queue.size();
     }
 
     bool try_pop(Data& popped_value)
@@ -94,6 +104,14 @@ public:
         return retval;
     }
 
+    void cancel_reset()
+    {
+       // this doesn't lose data, but it instead allows new calls
+       // to not throw Canceled exceptions
+       boost::mutex::scoped_lock lock(the_mutex);
+       is_canceled = false;
+    }
+
     void cancel()
     {
        boost::mutex::scoped_lock lock(the_mutex);
@@ -105,4 +123,4 @@ public:
 
 };
 
-
+#endif // __CONCURRENT_QUEUE__
