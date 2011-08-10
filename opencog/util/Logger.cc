@@ -62,7 +62,7 @@ Logger::~Logger()
 {
 #ifdef ASYNC_LOGGING
     // Wait for queue to empty
-    while (!pendingMessagesToWrite.empty()) usleep(100);
+    flush();
     stopWriteLoop();
 #endif
 
