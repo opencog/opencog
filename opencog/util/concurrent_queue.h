@@ -26,6 +26,7 @@
 
 #include "boost/thread.hpp"
 #include <deque>
+#include <stdio.h>
 
 template<typename Data>
 class concurrent_queue
@@ -83,7 +84,9 @@ public:
         {
             the_condition_variable.wait(lock);
         }
-        if (is_canceled) throw Canceled();
+        if (is_canceled) {
+            throw Canceled();
+        }
 
         popped_value=the_queue.front();
         the_queue.pop_front();

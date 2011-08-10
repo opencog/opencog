@@ -80,7 +80,6 @@ void Logger::stopWriteLoop()
     pendingMessagesToWrite.cancel();
     // rejoin thread
     m_Thread.join();
-    pendingMessagesToWrite.cancel_reset();
 }
 
 void Logger::writingLoop()
@@ -154,6 +153,7 @@ Logger& Logger::operator=(const Logger& log)
 {
 #ifdef ASYNC_LOGGING
     this->stopWriteLoop();
+    pendingMessagesToWrite.cancel_reset();
 #endif // ASYNC_LOGGING
     this->set(log);
     return *this;
