@@ -409,24 +409,6 @@ void PsiFeelingUpdaterAgent::run(opencog::CogServer * server)
     // Get current time stamp
     unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();   
 
-    // Check if map info data is available
-    if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
-        logger().warn( "PsiFeelingUpdaterAgent::%s - There is no map info available yet [ cycle = %d ]", 
-                        __FUNCTION__, 
-                        this->cycleCount
-                     );
-        return;
-    }
-
-    // Check if the pet spatial info is already received
-    if ( !atomSpace.getSpaceServer().getLatestMap().containsObject(petId) ) {
-        logger().warn( "PsiFeelingUpdaterAgent::%s - Pet was not inserted in the space map yet [ cycle = %d ]", 
-                       __FUNCTION__, 
-                       this->cycleCount
-                     );
-        return;
-    }
-
     // Initialize the Agent (feelingMetaMap etc)
     if ( !this->bInitialized )
         this->init(server);

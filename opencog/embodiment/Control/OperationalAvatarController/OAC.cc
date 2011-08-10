@@ -325,6 +325,14 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     } // if
 
+    // Run demand/ feeling updater agents as soon as possible, then virtual
+    // world (say unity) will not wait too much time to get the initial values
+    //
+    // TODO: This is a temporally solution. We should reduce the time of oac 
+    //       initialization. For example, don't send all the map info at initialization. 
+    //
+    this->psiDemandUpdaterAgent->run(this); 
+    this->psiFeelingUpdaterAgent->run(this); 
 }
 
 int OAC::addRulesToAtomSpace()
