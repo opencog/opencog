@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
+#include <sstream>
 
 #ifdef WIN32_NOT_UNIX
 #include <winsock2.h>
@@ -285,7 +286,9 @@ static void prt_backtrace(std::ostringstream& oss)
 
 void Logger::log(Logger::Level level, const std::string &txt)
 {
+#ifdef ASYNC_LOGGING
     static const unsigned int max_queue_size_allowed = 1024;
+#endif
     static char timestamp[64];
     static char timestampStr[256];
     if (!logEnabled) return;
@@ -322,7 +325,8 @@ void Logger::log(Logger::Level level, const std::string &txt)
             flush();
         }
 #else
-        writeMsg(oss.str());
+        std::string temp(oss.str());
+        writeMsg(temp);
 #endif
     }
 }

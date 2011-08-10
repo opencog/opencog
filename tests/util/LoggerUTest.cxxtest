@@ -67,7 +67,9 @@ public:
         _logger.info("msg3");
         baseline.info("msg3");
 
+#ifdef ASYNC_LOGGING
         _logger.flush();
+#endif
 
         FILE *f1 = fopen(baselineFile, "r");
         FILE *f2 = fopen(logFile, "r");
@@ -107,7 +109,9 @@ public:
         _logger.debug("message");
         _logger.fine ("message");
 
+#ifdef ASYNC_LOGGING
         _logger.flush();
+#endif
         TS_ASSERT_LESS_THAN_EQUALS(nLines, countLines(filename));
         remove(filename);
     }
