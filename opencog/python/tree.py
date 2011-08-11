@@ -1,6 +1,7 @@
 from opencog.atomspace import AtomSpace, Atom, get_type, types
 from copy import copy, deepcopy
 from functools import *
+import sys
 from itertools import permutations
 from util import *
 
@@ -195,6 +196,10 @@ def unify(x, y, s,  vars_only = False):
     variables (e.g. 1, Nodes, or tuples of the form ('link type name', arg0, arg1...)
     where arg0 and arg1 are any of the above. NOTE: If you unify two Links, they 
     must both be in tuple-tree format, and their variables must be standardized apart.
+    If you use the vars_only flag, a variable can only unify to a corresponding variable.
+    In other words, normally this function finds the most-general unification of two things;
+    in this case they both have to be exactly as general as each other. Basically tree isomorphism or
+    conjunction isomorphism.
     >>> ppsubst(unify(x + y, y + C, {}))
     {x: y, y: C}
     """
@@ -222,10 +227,23 @@ def unify(x, y, s,  vars_only = False):
 
     # Handle conjunctions.
     elif isinstance(x, tuple) and isinstance(y, tuple) and len(x) == len(y):
+        # They are required to have equivalent variables in the same place.
+        # Watch out for this case: (foo(X),bar(Z)) isn't allowed to match (foo(Y),bar(Y))
+        if vars_only and len(get_varlist(x)) != len(get_varlist(y)):
+            return None
+        
         for permu in permutations(x):
             s2 = unify(list(permu), list(y), s, vars_only)
             if s2 != None:
-                return s2
+                # Also: will only find one permutation that works (if any). But that's OK.
+                # The substitution must be a one-to-one correspondence of variables.
+                # This code checks for a variable in x corresponding to multiple variables in y, and
+                # cases like: A->B B->C.
+                keys = set(s2.keys())
+                values = set(s2.values())
+                if (len(get_varlist(x)) == len(get_varlist(y)) == len(s2.values()) == len(values) and
+                    not (keys & values)):
+                    return s2
         return None
 
     # Recursion to handle arguments.
@@ -281,7 +299,13 @@ def subst(s, x):
     >>> subst({x: 42, y:0}, F(x) + y)
     (F(42) + 0)
     """
-    if x.is_variable(): 
+#    if isinstance(x, Atom):
+#        return x
+#    elif x.is_variable(): 
+#        # Notice recursive substitutions. i.e. $1->$2, $2->$3
+#        # This recursion should also work for e.g. $1->foo($2), $2->bar
+#        return subst(s, s.get(x, x))
+    if x.is_variable():
         return s.get(x, x)
     elif x.is_leaf(): 
         return x
@@ -333,6 +357,25 @@ def new_var():
     return tree(new_var.counter)
 
 new_var.counter = 10**6
+
+
+def get_varlist(t):
+    """Return a list of variables in tree, in the order they appear (with depth-first traversal). Would also work on a conjunction."""
+    if isinstance(t, tree) and t.is_variable():
+        return [t]
+    elif isinstance(t, tree):
+        ret = []
+        for arg in t.args:
+            ret+=([x for x in get_varlist(arg) if x not in ret])
+        return ret
+    # Representing a conjunction as a tuple of trees.
+    elif isinstance(t, tuple):
+        ret = []
+        for arg in t:
+            ret+=([x for x in get_varlist(arg) if x not in ret])
+        return ret
+    else:
+        return []
 
 
 # These functions print their arguments in a standard order

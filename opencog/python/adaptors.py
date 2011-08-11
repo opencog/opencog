@@ -158,7 +158,8 @@ class ForestExtractor:
 #            return False
 
         # TODO check the TruthValue the same way as you would for other links.
-        if any([i.is_a(t.AtTimeLink) for i in link.incoming]): # work around hacks in other modules
+        # work around hacks in other modules
+        if any([i.is_a(t.AtTimeLink) for i in link.incoming]) or link.is_a(t.ExecutionLink):
             return False
         else:
             return True
@@ -192,8 +193,7 @@ class ForestExtractor:
         ret = []
         substs = []
         matching_bound_trees = []
-        #s2 = ForestExtractor.magic_eval(self.a, tr, s)
-        s2 = None
+        s2 = ForestExtractor.magic_eval(self.a, tr, s)
         if s2 != None:
             substs.append(s2)
             bound_tr = subst(s2, tr)

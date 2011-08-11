@@ -6,6 +6,9 @@ from util import *
 from itertools import *
 import sys
 
+# unit of timestamps is 0.01 second so multiply by 100
+interval = 100* 20
+
 def pairwise(iterable):
     """
     s -> (s0,s1), (s1,s2), (s2, s3), ...
@@ -60,8 +63,8 @@ class Fishgram:
         layers = []
         for layer in self.closed_bfs_layers():
             
-            for conj, embs in layer:
-                print pp(conj), pp(embs)
+            #for conj, embs in layer:
+            #    print pp(conj), pp(embs)
             
             layers.append(layer)
             if len(layers) >= 2:
@@ -138,6 +141,31 @@ class Fishgram:
         
         return remapping, new_s
 
+    def _add_all_seq_and_links(self, conj, embedding):
+        '''Takes a conjunction (with variables as usual) and an embedding (i.e. substitution). Returns the conjunction
+        but with all possible SequentialAndLinks between variables. That is, if t2 and t1 are in the substitution, and
+        t2 is shortly after t1, then the relevant variables will be connected by a new SequentialAndLink (if it hasn't been
+        added previously).'''
+        
+        new_conj = conj[:]
+        
+        times_vars = [(obj, var) for (var, obj) in embedding.items()
+                      if obj.t == t.TimeNode]
+        times_vars = [(int(obj.name), var) for obj, var in times_vars]
+        times_vars.sort()
+
+        for (i, (t1, var1)) in enumerate(times_vars[:-1]):
+            for (t2, var2) in times_vars[i+1:]:
+                if 0 < t2 - t1 <= interval:
+                    seq_and = tree("SequentialAndLink",  var1, var2)
+                    if seq_and not in conj:
+                        new_conj+=(seq_and,)
+                else:
+                    break
+        
+        return new_conj
+
+
     def extensions_simple(self, prev_layer):
         new_layer = []
         
@@ -163,26 +191,30 @@ class Fishgram:
                             continue
                         remapping, new_s = tmp
 
-                        # Skip 'links' where there is no remapping, i.e. no connection to the existing pattern (no variables in common)
-                        if not len(remapping) and prev_conj != ():
-                            continue
-                                
                         remapped_tree = subst(remapping, tr)
                         remapped_conj = prev_conj+(remapped_tree,)
                         
+                        # Simple easy approach: just add all possible SequentialAndLinks
+                        remapped_conj_plus = self._add_all_seq_and_links(remapped_conj, new_s)
+
+                        # Skip 'links' where there is no remapping, i.e. no connection to the existing pattern (no variables in common).
+                        if ( prev_conj != () and
+                                not len(remapping) and len(remapped_conj_plus) == len(remapped_conj) ):
+                            continue
+
                         if remapped_tree in prev_conj:
                             continue
                         # Check for other equivalent ones. It'd be possible to reduce them (and increase efficiency) by ordering
                         # the extension of patterns. This would only work with a stable frequency measure though.
                         clones = [c for c in extensions_for_prev_conj_and_tree_type
-                                   if c != remapped_conj and
-                                   unify(remapped_conj, c, {}, True) != None]
+                                   if c != remapped_conj_plus and
+                                   unify(remapped_conj_plus, c, {}, True) != None]
                         if len(clones):
                             continue
 
-                        if remapped_conj not in extensions_for_prev_conj_and_tree_type:
-                            extensions_for_prev_conj_and_tree_type[remapped_conj] = []
-                        extensions_for_prev_conj_and_tree_type[remapped_conj].append(new_s)
+                        if remapped_conj_plus not in extensions_for_prev_conj_and_tree_type:
+                            extensions_for_prev_conj_and_tree_type[remapped_conj_plus] = []
+                        extensions_for_prev_conj_and_tree_type[remapped_conj_plus].append(new_s)
 
                 new_layer += extensions_for_prev_conj_and_tree_type.items()
         
@@ -247,7 +279,7 @@ class Fishgram:
                     # WRONG as the embedding for () is [every] one object
                     #i = len(emb)
                     # The number of the first available variable
-                    i = len(self.get_varlist(prev_conj))
+                    i = len(get_varlist(prev_conj))
                     # The mapping from the (abstract) tree to node numbers in this conjunction            
                     s = {}
                     # Since we allow N-ary patterns, it could be connected to any number (>=1) of
@@ -298,7 +330,7 @@ class Fishgram:
                                 
                             new_embedding = tuple(new_embedding)
                             # BUG
-                            assert len(new_embedding) == len(self.get_varlist(new_conj))
+                            assert len(new_embedding) == len(get_varlist(new_conj))
                             # TODO Don't include the same embedding multiple times. Why is it found multiple times? sc can be found multiple times?
                             if new_embedding not in new_layer[sc]:
                                 new_layer[sc].append(new_embedding)                            
@@ -323,32 +355,13 @@ class Fishgram:
             
             count = len(embeddings)*1.0
             num_possible_objects = len(self.forest.all_objects)*1.0
-            num_variables = len(self.get_varlist(conj))*1.0
+            num_variables = len(get_varlist(conj))*1.0
             
             normalized_frequency =  count / num_possible_objects ** num_variables
             if len(embeddings) >= self.min_embeddings:
             #if normalized_frequency > self.min_frequency:
                 #print pp(conj), normalized_frequency
                 yield (conj, embeddings)
-
-    @classmethod
-    def get_varlist(class_, t):
-        """Return a list of variables in tree, in the order they appear (with depth-first traversal). Would also work on a conjunction."""
-        if isinstance(t, tree) and t.is_variable():
-            return [t]
-        elif isinstance(t, tree):
-            ret = []
-            for arg in t.args:
-                ret+=([x for x in class_.get_varlist(arg) if x not in ret])
-            return ret
-        # Representing a conjunction as a tuple of trees.
-        elif isinstance(t, tuple):
-            ret = []
-            for arg in t:
-                ret+=([x for x in class_.get_varlist(arg) if x not in ret])
-            return ret
-        else:
-            return []
 
     def conjunction_to_string(self,  conjunction):
         return str(tuple([str(tree) for tree in conjunction]))
@@ -358,7 +371,7 @@ class Fishgram:
         
         for layer in layers:
             for (conj, embs) in layer:
-                if (len(self.get_varlist(conj)) == 1):
+                if (len(get_varlist(conj)) == 1):
                     concept = self.atomspace.add_node(t.ConceptNode, 'fishgram_'+str(id))
                     id+=1
                     print concept
@@ -377,7 +390,7 @@ class Fishgram:
                 id+=1
                 #print predicate
                 
-                vars = self.get_varlist(conj)
+                vars = get_varlist(conj)
                 #print [str(var) for var in vars]
 
                 evalLink = tree('EvaluationLink',
@@ -413,7 +426,7 @@ class Fishgram:
         prev_layer = layers[-2]
         for (conj, embs) in layer:
 
-            vars = self.get_varlist(conj)
+            vars = get_varlist(conj)
             #print [str(var) for var in vars]
             
             assert all( [len(vars) == len(binding) for binding in embs] )
@@ -422,12 +435,21 @@ class Fishgram:
                 conclusion = conj[i]
                 premises = conj[:i] + conj[i+1:]
                 
+                # All SequentialAndLinks must be in the premises. Otherwise it might get weird.
+                if conclusion.get_type() == t.SequentialAndLink:
+                    continue
+                
                 # Let's say P implies Q. To keep things simple, P&Q must have the same number of variables as P.
                 # In other words, the conclusion can't add extra variables. This would be equivalent to proving an
                 # AverageLink (as the conclusion of the Implication).
-                if not (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):
+                if not (len(get_varlist(conj)) == len(get_varlist(premises))):
                     continue
                 
+                # Fishgram won't produce conjunctions with dangling SeqAndLinks. And 
+                # i.e. AtTime 1 eat;    SeqAnd 1 2
+                # with 2 being a variable only used in the conclusion (and the whole conjunction), not in the premises.
+                # The embedding count is undefined in this case.
+                # Also, the count measure is not monotonic so if ordering were used you would sometimes miss things.
                 try:
                     ce_premises = next(ce for ce in prev_layer if unify(premises, ce[0], {}, True) != None)
                     premises_original, premises_embs = ce_premises
@@ -435,7 +457,8 @@ class Fishgram:
 #                        ce_conclusion = next(ce for ce in layers[0] if unify( (conclusion,) , ce[0], {}, True) != None)
 #                        conclusion_original, conclusion_embs = ce_conclusion
                 except StopIteration:
-                    sys.stderr.write("[didn't create required subconjunction due to tackypruning and ordering]\n")
+                    #sys.stderr.write("\noutput_implications_for_last_layer: didn't create required subconjunction"+
+                    #    " due to either pruning issues or dangling SeqAndLinks\n"+str(premises)+'\n'+str(conclusion)+'\n')
                     continue
 
 #                print map(str, premises)
@@ -446,12 +469,12 @@ class Fishgram:
 #                p_norm = normalize( (conj, emb), ce_premises )
 #                print p_norm, c_norm
 
-                # Use the embeddings lookup system (alternative approach)
-#                premises_embs = self.forest.lookup_embeddings(premises)
-#                embs = self.forest.lookup_embeddings(conj)
-                # Can also measure probability of conclusion by itself
+##                # Use the embeddings lookup system (alternative approach)
+##                premises_embs = self.forest.lookup_embeddings(premises)
+##                embs = self.forest.lookup_embeddings(conj)
+##                # Can also measure probability of conclusion by itself
                 
-                count_conj = len(embs)*1.0
+                count_conj = len(embs)
                 
                 self.make_implication(premises, conclusion, len(premises_embs), count_conj)
 
@@ -471,7 +494,7 @@ class Fishgram:
             if tmp:
                 (premises, conclusion) = tmp
                 
-                vars = self.get_varlist( premises+(conclusion,) )
+                vars = get_varlist( premises+(conclusion,) )
                 
                 andLink = tree('SequentialAndLink',
                                     list(premises)) # premises is a tuple remember
@@ -498,6 +521,8 @@ class Fishgram:
         else:
             print 'freq = %s' % freq
         
+        if not conj_support <= premises_support:
+            import pdb; pdb.set_trace()
         assert conj_support <= premises_support
 
     def make_psi_rule(self, premises, conclusion):
@@ -592,11 +617,11 @@ class Fishgram:
 
     def make_all_psi_rules(self):
         for conj in self.lookup_causal_patterns():
-            vars = self.get_varlist(conj)
+            vars = get_varlist(conj)
             print "make_all_psi_rules: %s" % (pp(conj),)
             
             for (premises, conclusion) in self._split_conj_into_rules(conj):
-                if not (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):
+                if not (len(get_varlist(conj)) == len(get_varlist(premises))):
                     continue
                 
                 # Filter it now since lookup_embeddings is slow
@@ -624,8 +649,9 @@ class Fishgram:
             # Let's say P implies Q. To keep things simple, P&Q must have the same number of variables as P.
             # In other words, the conclusion can't add extra variables. This would be equivalent to proving an
             # AverageLink (as the conclusion of the Implication).
-            if (len(self.get_varlist(conj)) == len(self.get_varlist(premises))):
+            if (len(get_varlist(conj)) == len(get_varlist(premises))):
                 yield (premises, conclusion)
+
 
     def make_psi_rule_alt(self, premises_, conclusion_):
         """Looks for a suitable combination of conditions to make a Psi Rule. Returns premises and conclusions for the Psi Rule."""
@@ -651,8 +677,6 @@ class Fishgram:
 #                        tree('ListLink', -3)
 #                        )
 #             )
-        
-        import pdb; pdb.set_trace()
         
         # Can currently only handle one thing following another, not a series (>2)
         seq_ands_prem = [ x for x in premises if unify(seq_and_template, x, {}) != None ]
@@ -704,8 +728,8 @@ class Fishgram:
         
         var_numobjs = [len(objs) for objs in var_objs]
         
-        varlist_big = sorted(self.get_varlist(big_conj))
-        varlist_small = sorted(self.get_varlist(small_conj))
+        varlist_big = sorted(get_varlist(big_conj))
+        varlist_small = sorted(get_varlist(small_conj))
         missing_vars = [v for v in varlist_big if v not in varlist_small]
         
         # the counts of possible objects for each variable missing in the smaller conjunction.
@@ -716,8 +740,6 @@ class Fishgram:
         return len(small_embs) * implied_cases
 
 def make_seq(atomspace):
-    # unit of timestamps is 0.01 second so multiply by 100
-    interval = 100* 20
     times = atomspace.get_atoms_by_type(t.TimeNode)
     times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
     times = sorted(times, key= lambda t: int(t.name) )
@@ -978,20 +1000,22 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
         self.cycles = 1
 
     def run(self,atomspace):
-        try:
-            fish = Fishgram(atomspace)
-            make_seq(atomspace)
-            # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
-            #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
-            
-            notice_changes(atomspace)
-            
-#            fish.forest.extractForest()
+        fish = Fishgram(atomspace)
+        #make_seq(atomspace)
+        # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
+        #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
+        
+        notice_changes(atomspace)
+        
+        fish.forest.extractForest()
 #            
 #            conj = (fish.forest.all_trees[0],)
 #            fish.forest.lookup_embeddings(conj)
 
-            fish.forest.extractForest()
+        #fish.forest.extractForest()
+        #time1, time2, time1_binding, time2_binding = new_var(), new_var(), new_var(), new_var()
+        #fish.forest.tree_embeddings[tree('SequentialAndLink', time1, time2)] = [
+        #                                                    {time1: time1_binding, time2: time2_binding}]
 #            for layer in fish.closed_bfs_layers():
 #                for conj, embs in layer:
 #                    print
@@ -1003,13 +1027,10 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #                    for binding in embs:
 #                        bound_tree = bind_conj(conj, binding)
 #                        print 'emb:',  pp(bound_tree)
-            
-            #fish.iterated_implications()
-            fish.implications()
-            
-            #fish.make_all_psi_rules()
-        except KeyError,  e:
-            KeyError
-        except Exception, e:
-            import traceback; traceback.print_exc(file=sys.stdout)
+        
+        #fish.iterated_implications()
+        fish.implications()
+        
+        #fish.make_all_psi_rules()
+
         self.cycles+=1
