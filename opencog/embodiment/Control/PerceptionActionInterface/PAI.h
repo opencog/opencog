@@ -505,7 +505,7 @@ private:
      * information is then stored in local space map.
      *
      */
-    void processTerrainInfo();
+    void processTerrainInfo(DOMElement * element);
 
     /**
      * Retrieve velocity vector data from a velocity XML element.

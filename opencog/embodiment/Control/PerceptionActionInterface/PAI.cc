@@ -28,6 +28,7 @@
 #include <xercesc/validators/common/Grammar.hpp>
 #include <xercesc/validators/schema/SchemaGrammar.hpp>
 #include <xercesc/util/XMLUni.hpp>
+#include <xercesc/util/Base64.hpp>
 
 #include <xercesc/sax2/SAX2XMLReader.hpp>
 #include <xercesc/sax2/XMLReaderFactory.hpp>
@@ -35,6 +36,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <sstream>
 
 #include <boost/regex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -57,6 +59,9 @@
 #include "EmbodimentDOMParser.h"
 #include "EmbodimentErrorHandler.h"
 
+#include "pai.mapinfo.pb.h"
+
+using XERCES_CPP_NAMESPACE::Base64;
 using XERCES_CPP_NAMESPACE::XMLString;
 using XERCES_CPP_NAMESPACE::DOMDocument;
 using XERCES_CPP_NAMESPACE::DOMElement;
@@ -540,6 +545,17 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d map-infos done", list->getLength());
+
+    // getting <terrain-info> elements from the XML message
+    XMLString::transcode(TERRAIN_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    list = doc->getElementsByTagName(tag);
+
+    for (unsigned int i = 0; i < list->getLength(); i++) {
+        processTerrainInfo((DOMElement *)list->item(i));
+    }
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d terrain-infos done", list->getLength());
+
 
     // getting <avatar-signal> elements from the XML message
     XMLString::transcode(AVATAR_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -1929,8 +1945,47 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
 }
 
-void PAI::processTerrainInfo()
+void PAI::processTerrainInfo(DOMElement * element)
 {
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+    XMLString::transcode(TERRAIN_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    DOMNodeList* payloadList = element->getElementsByTagName(tag);
+
+    for (unsigned int i = 0; i < payloadList->getLength(); i++) {
+        DOMElement* payloadElement = (DOMElement*) payloadList->item(i);
+        std::string msg(XMLString::transcode(payloadElement->getTextContent()));
+        // Decode the base64 string into binary
+        unsigned int length = (unsigned int)msg.size();
+        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
+
+        /*
+        unsigned long tsValue = getTimestampFromElement(payloadElement);
+        if (!setLatestSimWorldTimestamp(tsValue)) {
+            logger().error("PAI - Received old timestamp in terrain data => Message discarded!");
+            continue;
+        }
+        */
+        std::string binaryStr(reinterpret_cast<char const*>(binary), length);
+
+        Chunk chunk;
+        chunk.ParseFromString(binaryStr);
+        std::cout << "PAI - processs terrain info: received " << chunk.blocks_size() << " blocks." << std::endl;
+
+        // Debug the parsed information.
+        for (int j = 0; j < 1; j++) {
+            const MapInfo& block = chunk.blocks(i);
+            std::cout << "Block[" << block.id() << "]: " 
+                << block.name() << ", " << block.type() << ","
+                << " length: " << block.length()
+                << " width: " << block.width()
+                << " height: " << block.height()
+                << " position: " << block.position().x() << ", " << block.position().y() << ", " << block.position().z()
+                << " property: " << block.properties(0).key() << "->" << block.properties(0).value()
+                << std::endl;
+        }
+        
+        XMLString::release(&binary);
+    }
 }
 
 Vector PAI::getVelocityData(DOMElement* velocityElement)
