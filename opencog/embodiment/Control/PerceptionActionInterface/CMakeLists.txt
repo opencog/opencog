@@ -13,6 +13,7 @@ ADD_LIBRARY (PAI
 	ActionPlanDispatcher
     EmbodimentDOMParser
     EmbodimentErrorHandler
+    PAI.MapInfo.pb
 )
 
 SET(PAI_LINK_LIBS
@@ -22,6 +23,7 @@ SET(PAI_LINK_LIBS
 	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 
 	${Boost_REGEX_LIBRARY}
+    ${PROTOBUF_LIBRARY}
 )
 
 IF (GUILE_FOUND)
