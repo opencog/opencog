@@ -333,6 +333,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     //
     this->psiDemandUpdaterAgent->run(this); 
     this->psiFeelingUpdaterAgent->run(this); 
+    this->psiModulatorUpdaterAgent->run(this); 
 }
 
 int OAC::addRulesToAtomSpace()
