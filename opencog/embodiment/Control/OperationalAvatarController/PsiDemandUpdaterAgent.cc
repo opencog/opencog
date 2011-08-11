@@ -223,7 +223,9 @@ void PsiDemandUpdaterAgent::sendUpdatedValues(opencog::CogServer * server)
     std::map <std::string, float> demandValueMap; 
 
     foreach (Demand & demand, this->demandList) {
-       demandValueMap[ demand.getDemandName() ] = demand.getDemandTruthValue(); 
+        if ( demand.getDemandName() != "Energy" &&   // these demand values are 
+             demand.getDemandName() != "Integrity")  // updated by virtual world
+            demandValueMap[ demand.getDemandName() ] = demand.getDemandValue(); 
     }
 
     // Send updated feelings to the virtual world where the pet lives
