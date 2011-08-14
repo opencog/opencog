@@ -78,6 +78,45 @@ def fc(a):
     # Add the facts somewhere more permanent
     return layer_facts
 
+def bc(a, target):
+    results = expand_target(a, target, depth=0)
+    print results
+
+def expand_target(a, target, depth):
+    print ' '*depth+'expand_target', pp(target)
+    # we have rules which are goal:-term,term,term,...
+    # and include rules with no arguments.
+    results = []
+    
+    for r in rules:
+        head_goals = (r.head,)+tuple(r.goals)
+        tmp = standardize_apart(head_goals)
+        r = Rule(tmp[0], tmp[1:])
+        s = {}
+        
+        s = unify(r.head, target, {})
+        if s != None:
+            child_results = apply_rule(a, target, r, 0, s, depth)
+            results+=child_results
+    return results
+
+def apply_rule(a, target, rule, goals_index, s, depth):
+    if goals_index == len(rule.goals):
+        return [s]
+    
+    goal = rule.goals[goals_index]
+    goal = subst(s, goal)
+
+    print ' '*depth+'apply_rule', target,'rule =', rule, goals_index, pp(s)
+
+    results = []
+    
+    child_results = expand_target(a, goal, depth+1)
+    
+    for child_s in child_results:
+        results+=apply_rule(a, target, rule, goals_index+1, child_s, depth)
+    return results
+
 class Rule :
 #    def __init__ (self, s) :   # expect "term:-term,term,..."
 #        flds = s.split(":-")
@@ -209,89 +248,100 @@ def setup_rules(a):
             tr = tree_from_atom(obj)
             rules.append(Rule(tr))
     
-    # Deduction
-    for type in ['SubsetLink', 'ImplicationLink']:
-        rules.append(Rule(tree(type, 1,3), 
-                                     [tree(type, 1, 2),
-                                      tree(type, 2, 3) ]))
-
+    #    # Deduction
+    #    for type in ['SubsetLink', 'ImplicationLink']:
+    #        rules.append(Rule(tree(type, 1,3), 
+    #                                     [tree(type, 1, 2),
+    #                                      tree(type, 2, 3) ]))
+    #
     # ModusPonens
-    for type in ['ImplicationLink']:
-        rules.append(Rule(tree(2), 
-                                     [tree(type, 1, 2),
-                                      tree(1) ]))
-    
-    # AND/OR
-    for type in ['AndLink', 'OrLink']:
-        for size in xrange(6):
-            args = [new_var() for i in xrange(size+1)]
-            rules.append(Rule(tree(type, args),
-                               args))
+    #    for type in ['ImplicationLink']:
+    #        rules.append(Rule(tree(2), 
+    #                                     [tree(type, 1, 2),
+    #                                      tree(1) ]))
+
+    #    
+    #    # AND/OR
+    #    for type in ['AndLink', 'OrLink']:
+    #        for size in xrange(6):
+    #            args = [new_var() for i in xrange(size+1)]
+    #            rules.append(Rule(tree(type, args),
+    #                               args))
     
 
 def test(a):
     setup_rules(a)
     #search(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
-    fc(a)
+    #fc(a)
+
+    bc(a, tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+
+    global rules
+    A = tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
+    B = tree('EvaluationLink',a.add_node(t.PredicateNode,'B'))
+    rules.append(Rule(B, 
+                                  [ A ]))
+
+    bc(a, tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
 
 print __name__
 if __name__ == "__main__":
-#    a = AtomSpace()
-#    t=types
-#    bob = a.add_node(t.ConceptNode, "Bob")
-#    alice = a.add_node(t.ConceptNode, "Alice")
-#    link = a.add_link(t.ListLink, [bob, alice])
-#    link2 = a.add_link(t.ListLink, [alice, bob])
-#
-#    link3 = a.add_link(t.EvaluationLink, [a.add_node(t.PredicateNode, "likes"), link2])
-#
-#    obj1 = a.add_node(t.AccessoryNode, 'ball1')
-#    obj2 = a.add_node(t.StructureNode, 'tree1')
-#    next = a.add_link(t.EvaluationLink,
-#                   [a.add_node(t.PredicateNode, 'next'),
-#                    a.add_link(t.ListLink, [obj1, obj2])])
-#
-#    next2 = a.add_link(t.EvaluationLink,
-#                   [a.add_node(t.PredicateNode, 'next'),
-#                    a.add_link(t.ListLink, [obj2, obj1])])
-#
-#    next.tv = TruthValue(1, 1)
-#
-#    arity3 = a.add_link(t.AndLink, [bob, alice, obj1])
-#
-#    time = a.add_link(t.AtTimeLink, [a.add_node(t.TimeNode, "t-0"), a.add_node(t.ConceptNode, "blast-off")])
-#
-#    eval_arity1 = a.add_link(t.EvaluationLink, [a.add_node(t.PredicateNode, "is_edible"),
-#                    a.add_link(t.ListLink, [a.add_node(t.ConceptNode, "bowl123")])])
-#    eval_arity1.tv = TruthValue(1,  1)
-#
-#    #    f = FishgramFilter(a,SubdueTextOutput(a))
-#    #
-#    ##    d = DottyOutput(a)
-#    ##    g = GraphConverter(a,d)
-#    #
-#    ##    g = GraphConverter(a,SubdueTextOutput(a))
-#    #    g = GraphConverter(a, f)
-#    #
-#    #    g.output()
-#
-#    for obj in a.get_atoms_by_type(t.Atom):
-#        if obj.tv.count > 0:
-#            tr = tree_from_atom(obj)
-#            rules.append(Rule(tr))
-#
-#    #trace=1
-#    for  obj in a.get_atoms_by_type(t.Atom):
-#        if obj.tv.count > 0:
-#            tr = tree_from_atom(obj)
-#            search(tr)
-#
-#    r = Rule(tree(bob), [tree(alice)])
-#    rules.append(r)
-#    rules.append(Rule(tree(alice)))
-#    search(tree(alice))
-#
-#    for tr in [all_template, eval_template, imp_template]:
-#        search(tr)
+    #    a = AtomSpace()
+    #    t=types
+    #    bob = a.add_node(t.ConceptNode, "Bob")
+    #    alice = a.add_node(t.ConceptNode, "Alice")
+    #    link = a.add_link(t.ListLink, [bob, alice])
+    #    link2 = a.add_link(t.ListLink, [alice, bob])
+    #
+    #    link3 = a.add_link(t.EvaluationLink, [a.add_node(t.PredicateNode, "likes"), link2])
+    #
+    #    obj1 = a.add_node(t.AccessoryNode, 'ball1')
+    #    obj2 = a.add_node(t.StructureNode, 'tree1')
+    #    next = a.add_link(t.EvaluationLink,
+    #                   [a.add_node(t.PredicateNode, 'next'),
+    #                    a.add_link(t.ListLink, [obj1, obj2])])
+    #
+    #    next2 = a.add_link(t.EvaluationLink,
+    #                   [a.add_node(t.PredicateNode, 'next'),
+    #                    a.add_link(t.ListLink, [obj2, obj1])])
+    #
+    #    next.tv = TruthValue(1, 1)
+    #
+    #    arity3 = a.add_link(t.AndLink, [bob, alice, obj1])
+    #
+    #    time = a.add_link(t.AtTimeLink, [a.add_node(t.TimeNode, "t-0"), a.add_node(t.ConceptNode, "blast-off")])
+    #
+    #    eval_arity1 = a.add_link(t.EvaluationLink, [a.add_node(t.PredicateNode, "is_edible"),
+    #                    a.add_link(t.ListLink, [a.add_node(t.ConceptNode, "bowl123")])])
+    #    eval_arity1.tv = TruthValue(1,  1)
+    #
+    #    #    f = FishgramFilter(a,SubdueTextOutput(a))
+    #    #
+    #    ##    d = DottyOutput(a)
+    #    ##    g = GraphConverter(a,d)
+    #    #
+    #    ##    g = GraphConverter(a,SubdueTextOutput(a))
+    #    #    g = GraphConverter(a, f)
+    #    #
+    #    #    g.output()
+    #
+    #    for obj in a.get_atoms_by_type(t.Atom):
+    #        if obj.tv.count > 0:
+    #            tr = tree_from_atom(obj)
+    #            rules.append(Rule(tr))
+    #
+    #    #trace=1
+    #    for  obj in a.get_atoms_by_type(t.Atom):
+    #        if obj.tv.count > 0:
+    #            tr = tree_from_atom(obj)
+    #            search(tr)
+    #
+    #    r = Rule(tree(bob), [tree(alice)])
+    #    rules.append(r)
+    #    rules.append(Rule(tree(alice)))
+    #    search(tree(alice))
+    #
+    #    for tr in [all_template, eval_template, imp_template]:
+    #        search(tr)
 
     test(a)
