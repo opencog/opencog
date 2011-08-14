@@ -79,15 +79,29 @@ def fc(a):
     return layer_facts
 
 def bc(a, target):
-    results = expand_target(a, target, depth=0)
+    results = expand_target(a, target, [], depth=0)
     print results
 
-def expand_target(a, target, depth):
+def expand_target(a, target, stack, depth):
     print ' '*depth+'expand_target', pp(target)
     # we have rules which are goal:-term,term,term,...
     # and include rules with no arguments.
     results = []
-    
+
+    # haxx to prevent searching for infinitely many nested ImplicationLinks
+    bad = tree('ImplicationLink',
+                     new_var(), 
+                     tree('ImplicationLink', new_var(), new_var())
+                    )
+    if unify(bad, target, {}):
+        print ' '*depth+'nested implication'
+        return []
+
+    for x in stack:
+        if unify(target, x, {}, True) != None:
+            print ' '*depth+'loop'
+            return []
+
     for r in rules:
         head_goals = (r.head,)+tuple(r.goals)
         tmp = standardize_apart(head_goals)
@@ -96,25 +110,25 @@ def expand_target(a, target, depth):
         
         s = unify(r.head, target, {})
         if s != None:
-            child_results = apply_rule(a, target, r, 0, s, depth)
+            child_results = apply_rule(a, target, r, 0, s, stack+[target], depth)
             results+=child_results
     return results
 
-def apply_rule(a, target, rule, goals_index, s, depth):
+def apply_rule(a, target, rule, goals_index, s, stack, depth):
     if goals_index == len(rule.goals):
         return [s]
     
     goal = rule.goals[goals_index]
     goal = subst(s, goal)
 
-    print ' '*depth+'apply_rule', target,'rule =', rule, goals_index, pp(s)
+    print ' '*depth+'apply_rule //', target,'// rule =', rule, '// goal =',  goal, '//'
 
     results = []
     
-    child_results = expand_target(a, goal, depth+1)
+    child_results = expand_target(a, goal, stack, depth+1)
     
     for child_s in child_results:
-        results+=apply_rule(a, target, rule, goals_index+1, child_s, depth)
+        results+=apply_rule(a, target, rule, goals_index+1, child_s, stack, depth)
     return results
 
 class Rule :
@@ -255,10 +269,10 @@ def setup_rules(a):
     #                                      tree(type, 2, 3) ]))
     #
     # ModusPonens
-    #    for type in ['ImplicationLink']:
-    #        rules.append(Rule(tree(2), 
-    #                                     [tree(type, 1, 2),
-    #                                      tree(1) ]))
+        for type in ['ImplicationLink']:
+            rules.append(Rule(tree(2), 
+                                         [tree(type, 1, 2),
+                                          tree(1) ]))
 
     #    
     #    # AND/OR
@@ -276,11 +290,11 @@ def test(a):
 
     bc(a, tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
 
-    global rules
-    A = tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
-    B = tree('EvaluationLink',a.add_node(t.PredicateNode,'B'))
-    rules.append(Rule(B, 
-                                  [ A ]))
+#    global rules
+#    A = tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
+#    B = tree('EvaluationLink',a.add_node(t.PredicateNode,'B'))
+#    rules.append(Rule(B, 
+#                                  [ A ]))
 
     bc(a, tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
 
