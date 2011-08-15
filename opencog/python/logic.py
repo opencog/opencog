@@ -51,88 +51,99 @@ goalId   = 100
 #eval_template = tree('EvaluationLink', 1, tree('ListLink', 2, 3))
 #imp_template = tree('ImplicationLink', 1,  2)
 
-def fc(a):
-    facts = set([r.head for r in rules if not r.goals])
-    real_rules = set([r for r in rules if r.goals])
-
-    # we have rules which are goal:-term,term,term,...
-    # and include rules with no arguments.
-    layer_facts = set()    
+class Chainer:
+    def __init__(self, space):
+        self.space = space
+        self.viz = PLNviz(space)
     
-    for r in real_rules:
-        # In case we prove something that still has a variable in it
-        #r = Rule(standardize_apart(r.head), standardize_apart(tuple(r.goals)))
-        s = {}
+    def fc(self):
+        facts = set([r.head for r in rules if not r.goals])
+        real_rules = set([r for r in rules if r.goals])
+
+        # we have rules which are goal:-term,term,term,...
+        # and include rules with no arguments.
+        layer_facts = set()    
         
-        matches = find_matching_conjunctions(tuple(r.goals), facts)
-        
-        for m in matches:
-            result = subst(m.subst, r.head)
-            #res = Rule(result, [])
-            layer_facts.add(result)            
-            print '%s: %s <- %s' % (pp(r), pp(result), pp(m.conj))
+        for r in real_rules:
+            # In case we prove something that still has a variable in it
+            #r = Rule(standardize_apart(r.head), standardize_apart(tuple(r.goals)))
+            s = {}
             
-            atom = atom_from_tree(result, a)
-            atom.tv = TruthValue(1, 1)
-    
-    # Add the facts somewhere more permanent
-    return layer_facts
+            matches = find_matching_conjunctions(tuple(r.goals), facts)
+            
+            for m in matches:
+                result = subst(m.subst, r.head)
+                #res = Rule(result, [])
+                layer_facts.add(result)            
+                print '%s: %s <- %s' % (pp(r), pp(result), pp(m.conj))
+                
+                atom = atom_from_tree(result, self.space)
+                atom.tv = TruthValue(1, 1)
+        
+        # Add the facts somewhere more permanent
+        return layer_facts
 
-def bc(a, target):
-    results = expand_target(a, target, [], depth=0)
-    print results
+    def bc(self, target):
+        self.viz.outputTarget(target, None, 0)
+        results = self.expand_target(target, [], depth=0)
+        print results
 
-def expand_target(a, target, stack, depth):
-    print ' '*depth+'expand_target', pp(target)
-    # we have rules which are goal:-term,term,term,...
-    # and include rules with no arguments.
-    results = []
+    def expand_target(self, target, stack, depth):
+        print ' '*depth+'expand_target', pp(target)
+        # we have rules which are goal:-term,term,term,...
+        # and include rules with no arguments.
+        results = []
 
-    # haxx to prevent searching for infinitely many nested ImplicationLinks
-    # The unify-based version would match a single variable!
-#    bad = tree('ImplicationLink',
-#                     new_var(), 
-#                     tree('ImplicationLink', new_var(), new_var())
-#                    )
-#    if unify(bad, target, {}) != None:
-    if target.get_type() == t.ImplicationLink and len(target.args) == 2 and target.args[1].get_type() == t.ImplicationLink:
-        print ' '*depth+'nested implication'
-        return []
-
-    for x in stack:
-        if unify(target, x, {}, True) != None:
-            print ' '*depth+'loop'
+        # haxx to prevent searching for infinitely many nested ImplicationLinks
+        # The unify-based version would match a single variable!
+    #    bad = tree('ImplicationLink',
+    #                     new_var(), 
+    #                     tree('ImplicationLink', new_var(), new_var())
+    #                    )
+    #    if unify(bad, target, {}) != None:
+        if target.get_type() == t.ImplicationLink and len(target.args) == 2 and target.args[1].get_type() == t.ImplicationLink:
+            print ' '*depth+'nested implication'
             return []
 
-    for r in rules:
-        head_goals = (r.head,)+tuple(r.goals)
-        tmp = standardize_apart(head_goals)
-        r = Rule(tmp[0], tmp[1:])
-        s = {}
+        for x in stack:
+            if unify(target, x, {}, True) != None:
+                print ' '*depth+'loop'
+                return []
+
+        for r in rules:
+            head_goals = (r.head,)+tuple(r.goals)
+            tmp = standardize_apart(head_goals)
+            r = Rule(tmp[0], tmp[1:])
+            s = {}
+            
+            s = unify(r.head, target, {})
+            if s != None:
+                child_results = self.apply_rule(target, r, 0, s, stack+[target], depth)
+                results+=child_results
+        return results
+
+    def apply_rule(self, target, rule, goals_index, s, stack, depth):
+        if goals_index == len(rule.goals):
+            return [s]
         
-        s = unify(r.head, target, {})
-        if s != None:
-            child_results = apply_rule(a, target, r, 0, s, stack+[target], depth)
-            results+=child_results
-    return results
+        goal = rule.goals[goals_index]
+        goal = subst(s, goal)
 
-def apply_rule(a, target, rule, goals_index, s, stack, depth):
-    if goals_index == len(rule.goals):
-        return [s]
-    
-    goal = rule.goals[goals_index]
-    goal = subst(s, goal)
+        print ' '*depth+'apply_rule //', target,'// rule =', rule, '// goal =',  goal, '// index =', goals_index
 
-    print ' '*depth+'apply_rule //', target,'// rule =', rule, '// goal =',  goal, '// index =', goals_index
+        results = []
 
-    results = []
-    
-    child_results = expand_target(a, goal, stack, depth+1)
-    
-    for child_s in child_results:
-        child_s.update(s)
-        results+=apply_rule(a, target, rule, goals_index+1, child_s, stack, depth)
-    return results
+        self.viz.outputTarget(goal, target, goals_index)
+        child_results = self.expand_target(goal, stack, depth+1)
+        
+        for child_s in child_results:
+            child_s.update(s)
+            results+= self.apply_rule(target, rule, goals_index+1, child_s, stack, depth)
+        
+        if len(results):
+            self.viz.declareResult(target)
+        
+        return results
 
 class Rule :
 #    def __init__ (self, s) :   # expect "term:-term,term,..."
@@ -265,34 +276,35 @@ def setup_rules(a):
             tr = tree_from_atom(obj)
             rules.append(Rule(tr))
     
-    #    # Deduction
-    #    for type in ['SubsetLink', 'ImplicationLink']:
-    #        rules.append(Rule(tree(type, 1,3), 
-    #                                     [tree(type, 1, 2),
-    #                                      tree(type, 2, 3) ]))
-    #
-    #    # ModusPonens
-    #        for type in ['ImplicationLink']:
-    #            rules.append(Rule(tree(2), 
-    #                                         [tree(type, 1, 2),
-    #                                          tree(1) ]))
-
-    
-    # AND/OR
-    #for type in ['AndLink', 'OrLink']:
-    for type in ['OrLink']:
-        for size in xrange(6):
-            args = [new_var() for i in xrange(size+1)]
-            rules.append(Rule(tree(type, args),
-                               args))
-    
+#    # Deduction
+#    for type in ['SubsetLink', 'ImplicationLink']:
+#        rules.append(Rule(tree(type, 1,3), 
+#                                     [tree(type, 1, 2),
+#                                      tree(type, 2, 3) ]))
+#
+    # ModusPonens
+        for type in ['ImplicationLink']:
+            rules.append(Rule(tree(2), 
+                                         [tree(type, 1, 2),
+                                          tree(1) ]))
+#    
+#    # AND/OR
+#    for type in ['AndLink', 'OrLink']:
+#        for size in xrange(6):
+#            args = [new_var() for i in xrange(size+1)]
+#            rules.append(Rule(tree(type, args),
+#                               args))
+#    
 
 def test(a):
     setup_rules(a)
+    
+    c = Chainer(a)
+    
     #search(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
     #fc(a)
 
-    bc(a, tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+    c.bc(tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
 
 #    global rules
 #    A = tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
@@ -300,7 +312,44 @@ def test(a):
 #    rules.append(Rule(B, 
 #                                  [ A ]))
 
-    bc(a, tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    #c.bc(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+
+import pygephi
+class PLNviz:
+
+    def __init__(self, space):
+        self._as = space
+        self.g = pygephi.JSONClient('http://localhost:8080/workspace0', autoflush=True)
+        self.g.clean()
+        self.node_attributes = {'size':10, 'r':0.0, 'g':0.0, 'b':1.0, 'x':1}
+        self.root_attributes = {'size':20, 'r':1.0, 'g':1.0, 'b':1.0, 'x':1}
+        self.result_attributes = {'r':1.0, 'b':0.0, 'g':0.0}
+
+    def outputTarget(self, target, parent, index):
+        
+        #target_id = str(hash(target))
+        target_id = str(target)
+        
+        if parent == None:
+            self.g.add_node(target_id, label=str(target), **self.root_attributes)
+
+        if parent != None:
+            self.g.add_node(target_id, label=str(target), **self.node_attributes)
+            
+            #parent_id = str(hash(parent))
+            #link_id = str(hash(target_id+parent_id))
+            parent_id = str(parent)
+            link_id = str(parent)+str(target)
+            
+            self.g.add_node(parent_id, label=str(parent), **self.node_attributes)
+            self.g.add_edge(link_id, parent_id, target_id, directed=True, label=str(index))
+
+    def declareResult(self, target):
+        
+        target_id = str(target)
+        self.g.change_node(target_id, **self.result_attributes)
+        
+        #self.g.add_node(target_id, label=str(target), **self.result_attributes)
 
 print __name__
 if __name__ == "__main__":

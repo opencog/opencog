@@ -24,6 +24,10 @@ class JSONClient(object):
     def delete_node(self, id):
         self.__send(json.dumps({"dn":{id:{}}}))
     
+    def change_node(self, id, **attributes):
+        self.data += json.dumps({"cn":{id:attributes}}) + '\r\n'
+        if(self.autoflush): self.flush()
+    
     def add_edge(self, id, source, target, directed=True, **attributes):
         attributes['source'] = source
         attributes['target'] = target
@@ -33,6 +37,10 @@ class JSONClient(object):
     
     def delete_edge(self, id):
         self.__send(json.dumps({"de":{id:{}}}))
-        
+
+    def change_edge(self, id, **attributes):
+        self.data += json.dumps({"ce":{id:attributes}}) + '\r\n'
+        if(self.autoflush): self.flush()
+
     def clean(self):
         self.__send(json.dumps({"dn":{"filter":"ALL"}}))
