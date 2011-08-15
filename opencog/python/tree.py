@@ -235,15 +235,19 @@ def unify(x, y, s,  vars_only = False):
         for permu in permutations(x):
             s2 = unify(list(permu), list(y), s, vars_only)
             if s2 != None:
-                # Also: will only find one permutation that works (if any). But that's OK.
-                # The substitution must be a one-to-one correspondence of variables.
-                # This code checks for a variable in x corresponding to multiple variables in y, and
-                # cases like: A->B B->C.
-                keys = set(s2.keys())
-                values = set(s2.values())
-                if (len(get_varlist(x)) == len(get_varlist(y)) == len(s2.values()) == len(values) and
-                    not (keys & values)):
+                # Note: will only find one permutation that works (if any). But that's OK.
+                if not vars_only:
                     return s2
+                else:
+                    # The substitution must be a one-to-one correspondence of variables.
+                    # This code checks for a variable in x corresponding to multiple variables in y, and
+                    # cases like: A->B B->C.
+                    keys = set(s2.keys())
+                    values = set(s2.values())
+
+                    if (len(get_varlist(x)) == len(get_varlist(y)) == len(s2.values()) == len(values) and
+                                not (keys & values)):
+                        return s2
         return None
 
     # Recursion to handle arguments.
