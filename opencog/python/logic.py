@@ -89,11 +89,13 @@ def expand_target(a, target, stack, depth):
     results = []
 
     # haxx to prevent searching for infinitely many nested ImplicationLinks
-    bad = tree('ImplicationLink',
-                     new_var(), 
-                     tree('ImplicationLink', new_var(), new_var())
-                    )
-    if unify(bad, target, {}):
+    # The unify-based version would match a single variable!
+#    bad = tree('ImplicationLink',
+#                     new_var(), 
+#                     tree('ImplicationLink', new_var(), new_var())
+#                    )
+#    if unify(bad, target, {}) != None:
+    if target.get_type() == t.ImplicationLink and len(target.args) == 2 and target.args[1].get_type() == t.ImplicationLink:
         print ' '*depth+'nested implication'
         return []
 
@@ -121,13 +123,14 @@ def apply_rule(a, target, rule, goals_index, s, stack, depth):
     goal = rule.goals[goals_index]
     goal = subst(s, goal)
 
-    print ' '*depth+'apply_rule //', target,'// rule =', rule, '// goal =',  goal, '//'
+    print ' '*depth+'apply_rule //', target,'// rule =', rule, '// goal =',  goal, '// index =', goals_index
 
     results = []
     
     child_results = expand_target(a, goal, stack, depth+1)
     
     for child_s in child_results:
+        child_s.update(s)
         results+=apply_rule(a, target, rule, goals_index+1, child_s, stack, depth)
     return results
 
@@ -268,19 +271,20 @@ def setup_rules(a):
     #                                     [tree(type, 1, 2),
     #                                      tree(type, 2, 3) ]))
     #
-    # ModusPonens
-        for type in ['ImplicationLink']:
-            rules.append(Rule(tree(2), 
-                                         [tree(type, 1, 2),
-                                          tree(1) ]))
+    #    # ModusPonens
+    #        for type in ['ImplicationLink']:
+    #            rules.append(Rule(tree(2), 
+    #                                         [tree(type, 1, 2),
+    #                                          tree(1) ]))
 
-    #    
-    #    # AND/OR
-    #    for type in ['AndLink', 'OrLink']:
-    #        for size in xrange(6):
-    #            args = [new_var() for i in xrange(size+1)]
-    #            rules.append(Rule(tree(type, args),
-    #                               args))
+    
+    # AND/OR
+    #for type in ['AndLink', 'OrLink']:
+    for type in ['OrLink']:
+        for size in xrange(6):
+            args = [new_var() for i in xrange(size+1)]
+            rules.append(Rule(tree(type, args),
+                               args))
     
 
 def test(a):
