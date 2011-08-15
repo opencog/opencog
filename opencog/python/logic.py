@@ -124,6 +124,7 @@ class Chainer:
 
     def apply_rule(self, target, rule, goals_index, s, stack, depth):
         if goals_index == len(rule.goals):
+            self.viz.declareResult(target)
             return [s]
         
         goal = rule.goals[goals_index]
@@ -139,9 +140,6 @@ class Chainer:
         for child_s in child_results:
             child_s.update(s)
             results+= self.apply_rule(target, rule, goals_index+1, child_s, stack, depth)
-        
-        if len(results):
-            self.viz.declareResult(target)
         
         return results
 
@@ -269,6 +267,7 @@ def search (term) :
 
 def setup_rules(a):
     global rules
+    rules = []
 
     # All existing Atoms
     for obj in a.get_atoms_by_type(t.Atom):
@@ -283,10 +282,10 @@ def setup_rules(a):
 #                                      tree(type, 2, 3) ]))
 #
     # ModusPonens
-        for type in ['ImplicationLink']:
-            rules.append(Rule(tree(2), 
-                                         [tree(type, 1, 2),
-                                          tree(1) ]))
+    for type in ['ImplicationLink']:
+        rules.append(Rule(tree(2), 
+                                     [tree(type, 1, 2),
+                                      tree(1) ]))
 #    
 #    # AND/OR
 #    for type in ['AndLink', 'OrLink']:
@@ -304,7 +303,7 @@ def test(a):
     #search(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
     #fc(a)
 
-    c.bc(tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+    #c.bc(tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
 
 #    global rules
 #    A = tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
@@ -312,7 +311,7 @@ def test(a):
 #    rules.append(Rule(B, 
 #                                  [ A ]))
 
-    #c.bc(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    c.bc(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
 
 import pygephi
 class PLNviz:
