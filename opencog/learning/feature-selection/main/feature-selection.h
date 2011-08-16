@@ -87,8 +87,12 @@ void err_empty_features() {
     exit(1);
 }
 
+// log the set of features and its number
 template<typename Table>
-void log_selected_features(const Table& ftable) {
+void log_selected_features(arity_t old_arity, const Table& ftable) {
+    // log the number selected features
+    logger().info("%d out of %d have been selected",
+                  ftable.get_arity(), old_arity);
     // log set of selected feature set
     stringstream ss;
     ss << "The following features have been selected: ";
@@ -138,7 +142,7 @@ void moses_feature_selection(Table& table,
     std::set<arity_t> best_fs = get_feature_set(fields, best_inst);
     Table ftable = table.filter(best_fs);
     // Logger
-    log_selected_features(ftable);
+    log_selected_features(table.get_arity(), ftable);
     {
         // log its score
         stringstream ss;
@@ -248,7 +252,7 @@ void incremental_feature_selection(Table& table,
             err_empty_features();
         } else {
             Table ftable = table.filter(selected_features);
-            log_selected_features(ftable);
+            log_selected_features(table.get_arity(), ftable);
             write_results(ftable, fs_params);
         }
     } else {
