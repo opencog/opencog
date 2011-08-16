@@ -78,13 +78,21 @@ class tree:
         return cmp(self.to_tuple(), other.to_tuple())
     
     def to_tuple(self):
-        # Atom doesn't support comparing to different types in the Python-standard way.
-        if isinstance(self.op, Atom):
-            #assert type(self.op.h) != type(None)
-            return self.op.h.value()
-            #return self.op.type_name+':'+self.op.name # Easier to understand, though a bit less efficient
-        else:
-            return tuple([self.op]+[x.to_tuple() for x in self.args])
+        # Simply cache the tuple.
+        # TODO: A more efficient alternative would be to adapt the hash function and compare function
+        # to work on Trees directly.
+        try:
+            return self._tuple
+        except:
+            # Atom doesn't support comparing to different types in the Python-standard way.
+            if isinstance(self.op, Atom):
+                #assert type(self.op.h) != type(None)
+                self._tuple = self.op.h.value()
+                return self._tuple
+                #return self.op.type_name+':'+self.op.name # Easier to understand, though a bit less efficient
+            else:
+                self._tuple = tuple([self.op]+[x.to_tuple() for x in self.args])
+                return self._tuple
 
 def tree_from_atom(atom):
     if atom.is_node():
