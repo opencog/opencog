@@ -46,9 +46,7 @@ static const pair<string, string> feature_opt("feature", "f");
 static const pair<string, string> features_file_opt("features-file", "F");
 static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
-static const pair<string, string> complexity_penalty_intensity_opt("complexity-penalty-intensity", "p");
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "d");
-static const pair<string, string> resources_opt("resources", "R");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -67,9 +65,7 @@ struct eval_features_parameters {
     vector<string> features;
     string features_file;
     string output_file;
-    double complexity_penalty_intensity;
     double confidence_penalty_intensity;
-    double resources;
 };
 
 void output_results(const eval_features_parameters& pa,
@@ -136,11 +132,10 @@ void eval_output_results(const eval_features_parameters& pa,
                          const OT& ot,
                          opencog::RandGen& rng) {
 
-    typedef MICSScorer<IT, OT, set<arity_t> > FSScorer;
+    typedef MICScorer<IT, OT, set<arity_t> > FSScorer;
 
     if(trs.empty()) { // there is no combo programs so we use the data output
-        FSScorer fs_sc(it, ot, pa.complexity_penalty_intensity,
-                       pa.confidence_penalty_intensity, pa.resources);
+        FSScorer fs_sc(it, ot, pa.confidence_penalty_intensity);
         // compute and output the results
         eval_output_results(pa, fs_sc, fss);
     } else {
@@ -149,8 +144,7 @@ void eval_output_results(const eval_features_parameters& pa,
             OT ot_tr(tr, it, rng);
             ot_tr.set_label(ot.get_label());
 
-            FSScorer fs_sc(it, ot_tr, pa.complexity_penalty_intensity,
-                       pa.confidence_penalty_intensity, pa.resources);
+            FSScorer fs_sc(it, ot_tr, pa.confidence_penalty_intensity);
             
             // compute and output the results
             eval_output_results(pa, fs_sc, fss);

@@ -66,9 +66,7 @@ static const pair<string, string> log_level_opt("log-level", "l");
 static const pair<string, string> log_file_opt("log-file", "F");
 static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
 static const pair<string, string> cache_size_opt("cache-size", "s");
-static const pair<string, string> complexity_penalty_intensity_opt("complexity-penalty-intensity", "p");
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
-static const pair<string, string> resources_opt("resources", "R");
 static const pair<string, string> max_score_opt("max-score", "A");
 static const pair<string, string> jobs_opt("jobs", "j");
 static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "Q");
@@ -109,10 +107,7 @@ struct feature_selection_parameters {
     std::string output_file;
     std::vector<std::string> initial_features;
     unsigned long cache_size;
-    double cpi; // complexity penalty intensity
     double confi; //  confidence intensity
-    double resources; // resources of the learning algo that will take
-                      // in input the feature set
     double max_score;
     unsigned jobs;
     unsigned hc_fraction_of_remaining;
@@ -198,8 +193,8 @@ void moses_feature_selection(Table& table,
     // determine the initial instance given the initial feature set
     eda::instance init_inst = initial_instance(fs_params, fields);
     // define feature set quality scorer
-    typedef MICSScorerTable<Table, set<arity_t> > FSScorer;
-    FSScorer fs_sc(table, fs_params.cpi, fs_params.confi, fs_params.resources);
+    typedef MICScorerTable<Table, set<arity_t> > FSScorer;
+    FSScorer fs_sc(table, fs_params.confi);
     typedef moses_based_scorer<FSScorer> MBScorer;
     MBScorer mb_sc(fs_sc, fields);
     // possibly wrap in a cache

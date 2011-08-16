@@ -48,28 +48,22 @@ protected:
 };
 
 /**
- * Feature set scorer; Mutual Information, Confidence and Speed
- * prior. The formula is as follows
+ * Feature set scorer combining Mutual Information and Confidence. The
+ * formula is as follows
  *
- * MI(fs) * confidence * speedPrior
+ * MI(fs) * confidence
  *
  * where confidence = N/(N+confi*|fs|), the confidence of MI (this is
  * a heuristic, in order to measure the true confidence one could
  * compute several MI based on subsamples the dataset and estimate the
  * confidence based on the distribution of MI obtained)
- *
- * speedPrior = max(1, R/exp(cpi*|fs|)), a larger feature means more
- * computational power for the learning algo. So even if the
- * confidence is quite high (because the number of samples in the data
- * set is high) we still want to bias the search toward small feature
- * sets.
  */
 template<typename IT, typename OT, typename FeatureSet>
-struct MICSScorer : public std::unary_function<FeatureSet, double> {
+struct MICScorer : public std::unary_function<FeatureSet, double> {
 
-    MICSScorer(const IT& it, const OT& ot,
-               double cpi = 1, double confi = 0, double resources = 10000)
-        : _it(it), _ot(ot), _cpi(cpi), _confi(confi), _resources(resources) {}
+    MICScorer(const IT& it, const OT& ot,
+              double cpi = 1, double confi = 0, double resources = 10000)
+        : _it(it), _ot(ot), _confi(confi) {}
 
     /**
      * The feature set is represented by an eda::instance encoding a
@@ -79,24 +73,20 @@ struct MICSScorer : public std::unary_function<FeatureSet, double> {
     double operator()(const FeatureSet& fs) const {
         double MI = mutualInformation(_it, _ot, fs);
         double confidence = _it.size()/(_it.size() + _confi*fs.size());
-        double speedPrior = std::min(1.0, _resources/exp(_cpi*fs.size()));
-        return MI * confidence * speedPrior;
+        return MI * confidence;
     }
 
     const IT& _it;
     const OT& _ot;
-    double _cpi; // complexity penalty intensity
     double _confi; //  confidence intensity
-    double _resources; // resources of the learning algo that will take
-                       // in input the feature set
 };
+
 /// like above but using Table instead of input and output table
 template<typename Table, typename FeatureSet>
-struct MICSScorerTable : public std::unary_function<FeatureSet, double> {
+struct MICScorerTable : public std::unary_function<FeatureSet, double> {
 
-    MICSScorerTable(const Table& table,
-               double cpi = 1, double confi = 0, double resources = 10000)
-        : _table(table), _cpi(cpi), _confi(confi), _resources(resources) {
+    MICScorerTable(const Table& table, double confi = 0)
+        : _table(table), _confi(confi) {
         _ctable = table.compress();
     }
 
@@ -108,16 +98,12 @@ struct MICSScorerTable : public std::unary_function<FeatureSet, double> {
     double operator()(const FeatureSet& fs) const {
         double MI = mutualInformation(_ctable, fs);
         double confidence = _table.size()/(_table.size() + _confi*fs.size());
-        double speedPrior = std::min(1.0, _resources/exp(_cpi*fs.size()));
-        return MI * confidence * speedPrior;
+        return MI * confidence;
     }
 
     const Table& _table;
     typename Table::CTable _ctable;
-    double _cpi; // complexity penalty intensity
     double _confi; //  confidence intensity
-    double _resources; // resources of the learning algo that will take
-                       // in input the feature set
 };
 
 } // ~namespace opencog

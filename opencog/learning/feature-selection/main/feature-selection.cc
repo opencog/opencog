@@ -105,15 +105,9 @@ int main(int argc, char** argv) {
         (opt_desc_str(cache_size_opt).c_str(),
          value<unsigned long>(&fs_params.cache_size)->default_value(1000000),
          "Cache size, so that identical candidates are not re-evaluated, 0 means no cache.\n")
-        (opt_desc_str(complexity_penalty_intensity_opt).c_str(),
-         value<double>(&fs_params.cpi)->default_value(0.0),
-         "Intensity of the feature complexity penalty, in [0,+Inf), 0 means no complexity penalty.\n")
         (opt_desc_str(confidence_penalty_intensity_opt).c_str(),
          value<double>(&fs_params.confi)->default_value(1.0),
          "Intensity of the confidence penalty, in [0,+Inf), 0 means no confidence penalty. This parameter influences how much importance we attribute to the confidence of the feature quality measure. The less samples in the data set, the more features the less confidence in the feature set quality measure.\n")
-        (opt_desc_str(resources_opt).c_str(),
-         value<double>(&fs_params.resources)->default_value(10000),
-         "Resources allocated to the learning algorithm that take in input the selected features. More resource means that the feature set can be larger (as long as it has enough confidence). In this case the algo is supposed to be MOSES and the resources is the number of evaluations.\n")
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&fs_params.max_score)->default_value(1),
          "For MOSES based algorithms. The max score to reach, once reached feature selection halts.\n")
