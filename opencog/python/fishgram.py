@@ -6,6 +6,8 @@ from util import *
 from itertools import *
 import sys
 
+from logic import PLNviz, NullPLNviz
+
 # unit of timestamps is 0.01 second so multiply by 100
 interval = 100* 20
 
@@ -24,11 +26,14 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 3
+        self.min_embeddings = 1
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
         self.max_per_layer = 1e9 # 10 # 1e35 # 600
+        
+        #self.viz = PLNviz(atomspace)
+        self.viz = NullPLNviz(atomspace)
 
     def run(self):
         self.forest.extractForest()
@@ -48,17 +53,19 @@ class Fishgram:
     def iterated_implications(self):
         """Find implications, starting with maximum support (i.e. maximum pruning in the search for
         frequent subgraphs). Then lower the support incrementally."""
-#        self.min_embeddings = 77
-#        
-#        while self.min_embeddings > 0:
-#            print "support =", self.min_embeddings
-#            self.implications()
-#            self.min_embeddings -= 5
-        while self.min_frequency > 0.00000000001:
-            print '\n\x1B[1;32mfreq =', self.min_frequency, '\x1B[0m'
+        self.min_embeddings = 77
+        
+        while self.min_embeddings > 0:
+            print "support =", self.min_embeddings
             self.implications()
-            self.min_frequency /= 2
+            self.min_embeddings -= 5
+#        while self.min_frequency > 0.00000000001:
+#            print '\n\x1B[1;32mfreq =', self.min_frequency, '\x1B[0m'
+#            self.implications()
+#            self.min_frequency /= 2
 
+    #import profiling
+    #@profiling.profile_func()
     def implications(self):
         layers = []
         for layer in self.closed_bfs_layers():
@@ -76,10 +83,14 @@ class Fishgram:
 # you only need to add extensions if they're in the closure.
 
     def closed_bfs_extend_layer(self, prev_layer):
-        #next_layer_iter = self.extensions(prev_layer)
-        next_layer_iter = self.extensions_simple(prev_layer)
-        return self.prune_frequency(next_layer_iter)
-        return next_layer_iter
+        next_layer_iter = self.extensions(prev_layer)
+        #return self.prune_frequency(next_layer_iter)
+        self.viz.outputTarget(target=[], parent=None, index=0)
+        for (conj, embs) in self.prune_frequency(next_layer_iter):
+            #print '***************', conj, len(embs)
+            #self.viz.outputTarget(target=conj[-1], parent=conj[:-1], index=0)
+            self.viz.outputTarget(target=list(conj), parent=list(conj[:-1]), index=0)
+            yield (conj, embs)
 
     def closed_bfs_layers(self):
         """Main function to run the breadth-first search. It yields results one layer at a time. A layer
@@ -100,7 +111,7 @@ class Fishgram:
                 #print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
                 print '\x1B[1;32m# Conjunctions of size', conj_length, ':', len(new_layer), '\x1B[0m'
                 yield new_layer
-
+            
             prev_layer = new_layer
 
 
@@ -248,7 +259,6 @@ class Fishgram:
         new_layer = {}
         
         skipped = 0
-        redundant_anyway = 0
         for (prev_conj,  prev_embeddings) in prev_layer:
             
             if len(new_layer) > self.max_per_layer:
@@ -303,52 +313,46 @@ class Fishgram:
                     assert len(s) == len(bindings)
 
                     # After completing the substitution...
-                    tr = self.forest.all_trees[tree_id]
+                    tr = self.forest.all_trees[tree_id]                    
                     bound_tree = subst(s, tr)
 
                     # Add this embedding for this bound tree.
                     # Bound trees contain variable numbers = the numbers inside the fragment                            
-                    if bound_tree not in prev_conj:
-                    #if self.after_conj(bound_tree,  prev_conj):
-                        new_conj = prev_conj+(bound_tree,)
-                        # Sort the bound trees in the conjunction. So e.g.  ((TreeB 1 2) (TreeA 1 3))  becomes  ((TreeA 1 3) (TreeB 1 2))
-                        # This ensures that only one ordering is produced (out of the many possible orderings).
-                        # If we assume breadth-first search it's possible to just do it here, because all the conjunctions of the same length
-                        # are produced at the same time.
-                        sc = tuple(sorted(new_conj))
-                        #if sc != new_conj: print self.conjunction_to_string(new_conj), "=>", self.conjunction_to_string(sc)                    
+                    if bound_tree in prev_conj:
+                        continue
+                    
+                    new_conj = prev_conj+(bound_tree,)                    
+                    
+                    clones = [c for c in new_layer if unify(new_conj, c, {}, True) != None and c != new_conj]
+                    if len(clones):
+                        skipped+=1
+                        continue
 
-                        if sc == new_conj:
-                            if sc not in new_layer:
-                                new_layer[sc] = []
-                                res[sc] = []
-                            
-                                clones = [c for c in new_layer if unify(new_conj, c, {}, True) != None and c != sc]
-                                if len(clones): # other copies besides itself
-                                    print "REDUNDANCY", pp(new_conj), len(clones)-1
-                                    redundant_anyway+=1
-                                
-                            new_embedding = tuple(new_embedding)
-                            # BUG
-                            assert len(new_embedding) == len(get_varlist(new_conj))
-                            # TODO Don't include the same embedding multiple times. Why is it found multiple times? sc can be found multiple times?
-                            if new_embedding not in new_layer[sc]:
-                                new_layer[sc].append(new_embedding)                            
-                                res[sc].append(new_embedding)
-                            #print self.conjunction_to_string(new_conj), ":", len(new_layer[new_conj]), "so far"
-                        else:
-                            skipped+= 1
+                    if new_conj not in new_layer:
+                            new_layer[new_conj] = []
+                            res[new_conj] = []
+                        
+                    new_embedding = tuple(new_embedding)
+                    # BUG
+                    assert len(new_embedding) == len(get_varlist(new_conj))
+                    if new_embedding not in new_layer[new_conj]:
+                        new_layer[new_conj].append(new_embedding)
+                        res[new_conj].append(new_embedding)
+                    #print self.conjunction_to_string(new_conj), ":", len(new_layer[new_conj]), "so far"
                 
             # Yield the results (once you know they aren't going to be changed...)
             for conj_emb_pair in res.items():
                 yield conj_emb_pair
 
-        print "[skipped", skipped, "conjunction-embeddings that were only reorderings]", redundant_anyway, "redundant anyway", 
+        print "[skipped", skipped, "conjunction-embeddings that were isomorphic]",
         #return new_layer.items()
         # Stops iteration at the end of the function
         
 #        # Can't just use new_layer.items() because we want one entry for each conjunction (plus all of its embeddings)
 #        return [(conj, new_layer[conj]) for conj in new_layer]
+
+    def after_conj(self, c1, c2):
+        return c1 < c2
 
     def prune_frequency(self, layer):
         for (conj, embeddings) in layer:
@@ -526,6 +530,8 @@ class Fishgram:
         assert conj_support <= premises_support
 
     def make_psi_rule(self, premises, conclusion):
+        #print 'make_psi_rule <= \n %s \n %s' % (premises, conclusion)
+        
         tr = tree
         a = self.atomspace.add
         t = types
@@ -915,6 +921,8 @@ def notice_changes(atomspace):
             template = tree('AtTimeLink', time, target)
             a = atom_from_tree(template, atomspace)
             
+            #a.tv = TruthValue(0, 0)
+            
             # Was the value updated at that timestamp? The PsiDemandUpdaterAgent is not run every cycle so many
             # timestamps will have no value recorded.
             if a.tv.count > 0:
@@ -1001,7 +1009,7 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 
     def run(self,atomspace):
         fish = Fishgram(atomspace)
-        #make_seq(atomspace)
+        make_seq(atomspace)
         # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
         #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
         
