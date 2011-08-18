@@ -57,7 +57,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
     } // if
 
     std::vector<std::string> entities;
-    spaceMap.findEntitiesWithClassFilter(back_inserter(entities), "terrain_block");
+    spaceMap.findEntitiesWithClassFilter(back_inserter(entities), "block");
 
     const std::string& entityAId = atomSpace.getName( object );
     if ( processedEntities.find( entityAId ) != processedEntities.end( ) ) {

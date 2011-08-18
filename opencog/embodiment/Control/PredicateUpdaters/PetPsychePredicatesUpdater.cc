@@ -138,7 +138,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
     }
 
     std::vector<std::string> entities;
-    spaceMap.findEntitiesWithClassFilter(back_inserter(entities), "terrain_block");
+    spaceMap.findEntitiesWithClassFilter(back_inserter(entities), "block");
     float meanValue;
     bool atHome = false;
     bool atNight = false;
