@@ -51,6 +51,10 @@
 #include <pthread.h>
 #endif
 
+#ifdef HAVE_PROTOBUF
+#include "PAI.MapInfo.pb.h"
+#endif
+
 // If this is defined, uses decimal of seconds as time unit. Otherwise, uses centesimal of seconds.
 // This is the time unit of the values returned by getTimestampFromXsdDateTimeStr() and getLatestSimWorldTimestamp().
 //#define DATETIME_DECIMAL_RESOLUTION
@@ -74,6 +78,7 @@ typedef Handle ActionID;
 typedef map<ActionPlanID, ActionPlan> ActionPlanMap;
 typedef map<unsigned int, ActionID> ActionIdMap;
 typedef map<ActionPlanID, ActionIdMap> PlanToActionIdsMap;
+typedef map<std::string, std::string> PropertyMap;
 
 /** Perception and Actions Interface.
  *
@@ -497,15 +502,18 @@ private:
      * added/update by the processing of a PVPMessage. This information is used
      * to update is_X predicates in the OAC (by PredicatesUpdater class).
      */
-    void processMapInfo(DOMElement * element, HandleSeq
-            &toUpdateHandles);
+    void processMapInfo(DOMElement* element, HandleSeq& toUpdateHandles);
 
     /**
-     * Process the terrain information from minecraft-like world. The processed
-     * information is then stored in local space map.
+     * Override processMapInfo to support features of protobuf. If protobuf is
+     * found, the function will process the map info by using protobuf.
+     * Otherwise, old function that uses XML parser will be invoked.
      *
+     * @param element The map-info element to be processed
+     * @param toUpdateHandles a vector where the handles of all objects
+     * @param useProtoBuf the flag to enable protobuf
      */
-    void processTerrainInfo(DOMElement * element);
+    void processMapInfo(DOMElement* element, HandleSeq& toUpdateHandles, bool useProtoBuf);
 
     /**
      * Retrieve velocity vector data from a velocity XML element.
@@ -539,6 +547,14 @@ private:
             action, unsigned long timestamp, ActionID actionId);
 
     /**
+     * Get the global space map information from network stream and set it into
+     * space server.
+     *
+     * @param element the XML Dom element that contains the information
+     */
+    void addSpaceMapBoundary(DOMElement * element);
+
+    /**
      * Adds the representation of the predicates about space info of a given
      * object (position, rotation and size)
      *
@@ -556,10 +572,8 @@ private:
      * @return true if any property of the object has changed (or it's a new object). False, otherwise.
      */
     bool addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                            DOMElement* positionElement,
-                            DOMElement* rotationElement,
-                            double length, double width, double height,
-                            bool isEdible, bool isDrinkable, bool isTerrainObject);
+                            DOMElement* positionElement, DOMElement* rotationElement,
+                            double length, double width, double height, bool isTerrainObject);
 
     /**
      * Add a property predicate in atomSpace
@@ -571,10 +585,8 @@ private:
      * @param permanent An optional flag to indicate If the property must be
      * kept forever (or until it is explicitly removed). It's false by default
      */
-    void addPropertyPredicate(std::string predicateName,
-                              Handle objectNode,
-                              bool propertyValue,
-                              bool permanent = false);
+    void addPropertyPredicate(std::string predicateName, Handle objectNode,
+                              bool propertyValue, bool permanent = false);
 
     /**
      * Add an inheritance link between a concept node, whose name is given
@@ -592,6 +604,8 @@ private:
                             Handle subNodeHandle,
                             bool inheritanceValue);
 
+    void addInheritanceLink(Handle fatherNodeHandle, Handle subNodeHandle);
+
     /**
      * Adds a vector-type (e.g., "position" and "velocity") predicate for the
      * given object
@@ -606,6 +620,12 @@ private:
             predicateName, unsigned long timestamp,
             DOMElement* vectorElement);
 
+    Handle addVectorPredicate(Handle objectNode, const std::string& predicateName, 
+            const Vector& vec);
+
+    void addVectorPredicate(Handle objectNode, const std::string& predicateName, 
+            const Vector& vec, unsigned long timestamp);
+
     /**
      * Adds a rotation predicate for the given object
      * @param objectNode    The handle of the node that represents the object
@@ -616,6 +636,20 @@ private:
      */
     Rotation addRotationPredicate(Handle objectNode, unsigned long timestamp,
             DOMElement* rotationElement);
+
+    void addRotationPredicate(Handle objectNode, const Rotation& rot, unsigned long timestamp);
+
+    /**
+     * Add semantic structure of an entity into atomspace, which would be used
+     * in language comprehension. A frame would be created will be created to
+     * represent this entity.
+     *
+     * @param entityId unique id of entity.
+     * @param entityClass class of entity.
+     * @param entityType type of entity.
+     */
+    void addSemanticStructure(Handle objectNode, const std::string& entityId, 
+            const std::string& entityClass, const std::string& entityType);
 
     /**
      * Adds a physiological feeling into the AtomSpace
@@ -694,6 +728,142 @@ private:
      */
     void setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                              ActionStatus statusCode, unsigned long timestamp);
+
+    #ifdef HAVE_PROTOBUF
+    /** -----------------------------------------------------------------------
+     * Functions that depends on google protocol buffer library.
+     * -----------------------------------------------------------------------*/
+
+    /**
+     * Process the terrain information from minecraft-like world. The processed
+     * result is then stored in local space map.
+     */
+    void processTerrainInfo(DOMElement * element);
+ 
+    /**
+     * Adds the entity information processed from map info into atomspace, the
+     * information includes:
+     *      entity id, entity type, entity name
+     *      properties: edible, drinkable, is_home, is_food_bowl, is_water_bowl
+     *                  color, material, texture
+     *      geographic: position, rotation, velocity
+     *
+     * @param mapinfo the map info instance to be processed.
+     * @param timestamp time stamp of the map info.
+     *
+     * @return handle of the entity node after insertion.
+     */
+    Handle addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp);
+
+    /**
+     * Remove entity information from space server and mark it as non-existent
+     * in atomspace.
+     *
+     * @param mapinfo the map info to be removed.
+     * @param timestamp time stamp of the map info.
+     *
+     * @return handle of the entity to be removed.
+     */
+    Handle removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long timestamp);
+
+    bool addSpacePredicates(bool keepPreviousMap, Handle objectNode, const MapInfo& mapinfo, unsigned long timestamp);
+
+    /**
+     * Add property predicates of an entity such as edible, drinkable, material 
+     * and so on into atomspace. If the entity is the avatar itself, then
+     * specific stuffs should be done.
+     *
+     * @param objectNode the handle of object node.
+     * @param isSelfObject the flag to see if the entity is the avatar itself.
+     * @param mapinfo the map info instance containing information of this entity.
+     */
+    void addEntityProperties(Handle objectNode, bool isSelfObject, const MapInfo& mapinfo);
+
+    /**
+     * Add semantic structure of an entity into atomspace, which would be used
+     * in language comprehension. A frame would be created will be created to
+     * represent this entity.
+     *
+     * @param objectNode handle of the object that would be the topic.
+     * @param mapinfo the map info instance containing all information of the entity.
+     */
+    void addSemanticStructure(Handle objectNode, const MapInfo& mapinfo);
+
+    /**
+     * Get property map from a map info.
+     *
+     * @param mapinfo the map-info instance.
+     * @return the property map of passed in map-info.
+     */
+    PropertyMap getPropertyMap(const MapInfo& mapinfo);
+
+    /**
+     * Get the value of a property item via its key.
+     *
+     * @param properties the map of property.
+     * @param the key of a property item.
+     *
+     * @return the value of a property, if not existing, return a default "NULL"
+     * value.
+     */
+    std::string queryMapInfoProperty(const PropertyMap& properties, const std::string& key) const;
+
+    /**
+     * A handy function to test if the string value equals to "true".
+     *
+     * @param value a string to be compared, supposed to be either "true" or "false"
+     * @return true if the param string equals to "true"
+     */
+    bool isPropertyTrue(const std::string& value) const;
+
+    /**
+     * Get boolean value of a given attribute key.
+     *
+     * @param properties the property map contained in a map info instance.
+     * @param key the key of attribute to be retrieved.
+     *
+     * @return the boolean value of the property.
+     */
+    bool getBooleanProperty(const PropertyMap& properties, const std::string& key) const;
+
+    /**
+     * Get string value of a given attribute key.
+     *
+     * @param properties the property map contained in a map info instance.
+     * @param key the key of attribute to be retrieved.
+     *
+     * @return the string value of the property.
+     */
+    std::string getStringProperty(const PropertyMap& properties, const std::string& key) const;
+
+    /**
+     * Check the visibility status of an object.
+     *
+     * @param properties the property map contained in a map info instance.
+     * @return true if the object is visible.
+     */
+    bool isObjectVisible(const PropertyMap& properties) const;
+
+    /**
+     * Check if an object is a terrain object.
+     *
+     * @param entityClass the entity class.
+     * @return true if the object is a terrain object.
+     */
+    bool isObjectBelongToTerrain(const std::string& entityClass) const;
+
+    /**
+     * Check if an object is an obstacle.
+     *
+     * @param objectNode the handle of an object node.
+     * @param entityClass the entity class.
+     * @param mapinfo the map info instance containing the information of this
+     * object.
+     * @return true if the object is an obstacle.
+     */
+    bool isObjectAnObstacle(Handle objectNode, const std::string& entityClass, const MapInfo& mapinfo) const;
+    #endif
+
 }; // class
 
 } }  // namespace opencog::pai

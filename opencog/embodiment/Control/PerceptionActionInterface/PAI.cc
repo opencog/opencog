@@ -59,8 +59,6 @@
 #include "EmbodimentDOMParser.h"
 #include "EmbodimentErrorHandler.h"
 
-#include "pai.mapinfo.pb.h"
-
 using XERCES_CPP_NAMESPACE::Base64;
 using XERCES_CPP_NAMESPACE::XMLString;
 using XERCES_CPP_NAMESPACE::DOMDocument;
@@ -246,7 +244,6 @@ void PAI::sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSe
 
 void PAI::sendEmotionalFeelings(const std::string& petId, const std::map<std::string, float>& feelingsValueMap)
 {
-
     if (feelingsValueMap.empty()) return;
 
     // creating XML DOC
@@ -540,8 +537,14 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     XMLString::transcode(MAP_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
+    bool useProtoBuf = false;
+
+#ifdef HAVE_PROTOBUF
+    useProtoBuf = true;
+#endif
+
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processMapInfo((DOMElement *)list->item(i), toUpdateHandles);
+        processMapInfo((DOMElement *)list->item(i), toUpdateHandles, useProtoBuf);
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d map-infos done", list->getLength());
@@ -800,11 +803,10 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement)
         XMLString::release(&entityOwnerName);
         break;
     }
-    default: {
+    default: 
         // Should never get here, but...
         throw opencog::RuntimeException(TRACE_INFO,
                                         "PAI - Undefined map from '%s' type to an Atom type.", paramType);
-    }
     }
 
     XMLString::release(&paramName);
@@ -891,7 +893,6 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
                                           string(""),
                                           getLatestSimWorldTimestamp());
     }
-
 }
 
 void PAI::processAgentActionPlanResult(char* agentID, unsigned long tsValue, const string& name, char* planIdStr, DOMElement* signal)
@@ -1316,7 +1317,7 @@ void PAI::processInstruction(DOMElement * element)
         } 
     } // if
 
-    this->languageTool->updateDialogControllers( this->getLatestSimWorldTimestamp() ); 
+    this->languageTool->updateDialogControllers(this->getLatestSimWorldTimestamp()); 
 
     XMLString::release(&petID);
     XMLString::release(&avatarID);
@@ -1450,31 +1451,8 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
     logger().debug("PAI - processMapInfo(): init.");
 
-    // gets global position offset (to be added to global x and y positions to get map dimensions)
-    double offset = getPositionAttribute(element, GLOBAL_POS_OFFSET_ATTRIBUTE);
-    logger().fine("PAI - processMapInfo(): global position offset = %s => offset = %lf", GLOBAL_POS_OFFSET_ATTRIBUTE, offset);
-
-    // gets global position x
-    xMin = getPositionAttribute(element, GLOBAL_POS_X_ATTRIBUTE);
-    xMax = xMin + offset;
-    logger().fine("PAI - processMapInfo(): global position x = %s => xMin = %lf, xMax = %lf", GLOBAL_POS_X_ATTRIBUTE, xMin, xMax);
-
-    // gets global position y
-    yMin = getPositionAttribute(element, GLOBAL_POS_Y_ATTRIBUTE);
-    yMax = yMin + offset;
-    logger().fine("PAI - processMapInfo(): global position y = %s => yMin = %lf, yMax = %lf", GLOBAL_POS_Y_ATTRIBUTE, yMin, yMax);
-
-    // gets global level height
-    floorHeight = getPositionAttribute(element, GLOBAL_FLOOR_HEIGHT_ATTRIBUTE);
-    logger().debug("PAI - processMapInfo(): global floor height = %lf", floorHeight);
-
-
-    // getting grid map dimensions from system parameters
-    unsigned int xDim = opencog::config().get_int("MAP_XDIM");
-    unsigned int yDim = opencog::config().get_int("MAP_YDIM");
-
-    SpaceServer& spaceServer = atomSpace.getSpaceServer();
-    spaceServer.setMapBoundaries(xMin, xMax, yMin, yMax, xDim, yDim, floorHeight);
+    // Set the space map boundary.
+    addSpaceMapBoundary(element);
 
     bool keepPreviousMap = avatarInterface.isExemplarInProgress();
     // Gets each blip element
@@ -1748,119 +1726,14 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
             // TODO: velocity vector is not being added to SpaceMaps. Add it when needed.
             addSpacePredicates(keepPreviousMap, objectNode, tsValue,
                                positionElement, rotationElement,
-                               length, width, height, edible, drinkable, isTerrainObject);
+                               length, width, height, isTerrainObject);
 
             gettimeofday(&timer_end, NULL);
             elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                            (timer_end.tv_usec - timer_start.tv_usec);
             // If this entity is a terrain object, then following code can be skipped.
             // Because properties such as edible, drinkable are nonsense to a terrain object.
-            if (isTerrainObject)
-                continue;
-
-            if ( moving ) {
-                addVectorPredicate( objectNode, AGISIM_VELOCITY_PREDICATE_NAME, tsValue, velocityElement );
-            } // if
-
-            Handle agent = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId( ) );
-            if ( agent != objectNode ) { // an agent cannot see himself
-                AtomSpaceUtil::setPredicateValue( atomSpace, "inside_pet_fov",
-                                                  SimpleTruthValue( (isObjectInsidePetFov ? 1.0f : 0.0f), 1.0f ), agent, objectNode );
-            } // if
-
-            addPropertyPredicate(std::string("is_moving"), objectNode, moving);
-            addPropertyPredicate(std::string("is_edible"), objectNode, edible, true);
-            addPropertyPredicate(std::string("is_drinkable"), objectNode, drinkable, true);
-            addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
-
-            addInheritanceLink(std::string("pet_home"), objectNode, petHome);
-            addInheritanceLink(std::string("food_bowl"), objectNode, foodBowl);
-            addInheritanceLink(std::string("water_bowl"), objectNode, waterBowl);
-
             
-            Handle objSemeNode = atomSpace.addNode( SEME_NODE, internalEntityId, SimpleTruthValue( 1, 1 ) );            
-            Handle objWordNode = atomSpace.addNode( WORD_NODE, entityClass );
-            Handle objClassNode = atomSpace.addNode( CONCEPT_NODE, entityClass, SimpleTruthValue( 1, 1 ) );
-
-            { // each seme node must inherit from its class
-                // first normalize the type name to make it
-                // compatible with the classes defined at opencog/scm/predicates-frames.scm
-                std::string typeName = entityType;
-                boost::to_lower(typeName);
-                typeName[0] = std::toupper(typeName[0]);
-                
-                // now create the inheritance link
-                Handle objectType = atomSpace.addNode( CONCEPT_NODE, typeName, SimpleTruthValue( 1, 1 ) );
-                HandleSeq inheritance(2);
-                inheritance[0] = objSemeNode;
-                inheritance[1] = objectType;
-                
-                Handle link = atomSpace.addLink( INHERITANCE_LINK, 
-                    inheritance, SimpleTruthValue( 1, 1 ) );
-                atomSpace.setLTI( link, 1 );
-
-                HandleSeq classReference(2);
-                classReference[0] = objClassNode;
-                classReference[1] = objSemeNode;
-
-                Handle referenceLink = 
-                    atomSpace.addLink( REFERENCE_LINK, classReference, TruthValue::TRUE_TV( ) );
-                atomSpace.setLTI( referenceLink, 1 );
-
-                // finally create a frame for representing this object
-                std::map<std::string, Handle> elements;
-                elements["Entity"] = objSemeNode;
-                elements["Name"] = objClassNode;
-                elements["Type"] = objectType;
-                AtomSpaceUtil::setPredicateFrameFromHandles( 
-                    atomSpace, "#Entity", internalEntityId + "_entity",
-                        elements, TruthValue::TRUE_TV() );
-
-                // JaredW: connect the AccessoryNode[etc] directly to the ConceptNode.
-                // Sometimes the ObjectNode[subtype] is connected to a (Node "accessory") or similar.
-                // It should use the (ConceptNode "Accessory"), as defined above (and only that).
-                // Useful for inference and frequent subgraph mining
-                {
-                    HandleSeq inheritance(2);
-                    inheritance[0] = objectNode;
-                    inheritance[1] = objectType;
-
-                    Handle link = atomSpace.addLink( INHERITANCE_LINK,
-                        inheritance, SimpleTruthValue( 1, 1 ) );
-                    atomSpace.setLTI( link, 1 );
-                }
-            } // end block
-
-            // JaredW: Add e.g. (InheritanceLink (AccessoryNode "id_315840") (ConceptNode "ball"))
-            {
-                HandleSeq inheritance(2);
-                inheritance[0] = objectNode;
-                inheritance[1] = objClassNode;
-
-                Handle link = atomSpace.addLink( INHERITANCE_LINK,
-                    inheritance, SimpleTruthValue( 1, 1 ) );
-                atomSpace.setLTI( link, 1 );
-            }
-            
-            //connect the acessory node to the seme node
-            HandleSeq referenceLinkOutgoing1;
-
-            referenceLinkOutgoing1.push_back(objectNode);
-            referenceLinkOutgoing1.push_back(objSemeNode);
-            {
-                Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing1, TruthValue::TRUE_TV( ) );
-                atomSpace.setLTI( referenceLink, 1 );
-            }
-
-            //connect the seme node to the word node
-            HandleSeq referenceLinkOutgoing2;
-            referenceLinkOutgoing2.push_back(objSemeNode);
-            referenceLinkOutgoing2.push_back(objWordNode);
-            {
-                Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing2, TruthValue::TRUE_TV( ) );
-                atomSpace.setLTI( referenceLink, 1 );
-            }
-
             //material property
             if ( material.length() > 0 ){
                 printf("Material found: %s\n",material.c_str());
@@ -1879,7 +1752,6 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "material",
                                                   SimpleTruthValue( 1.0, 1.0 ), objectNode, materialConceptNode );
-
             }
 
              //texture property
@@ -1918,13 +1790,39 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                                                   tv, objectNode, colorConceptNode );
 
                 std::map<std::string, Handle> elements;
-                elements["Color"] = colorConceptNode;
-                elements["Entity"] = objSemeNode;
-                AtomSpaceUtil::setPredicateFrameFromHandles( 
-                    atomSpace, "#Color", internalEntityId + "_" + it->first + "_color",
-                        elements, tv );
+                //elements["Color"] = colorConceptNode;
+                //elements["Entity"] = objSemeNode;
+                //AtomSpaceUtil::setPredicateFrameFromHandles( 
+                //    atomSpace, "#Color", internalEntityId + "_" + it->first + "_color",
+                //        elements, tv );
 
             }
+
+            if (isTerrainObject) {
+                continue;
+            }
+
+            if (moving) {
+                addVectorPredicate( objectNode, AGISIM_VELOCITY_PREDICATE_NAME, tsValue, velocityElement );
+            } // if
+
+            Handle agent = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId( ) );
+            if ( agent != objectNode ) { // an agent cannot see himself
+                AtomSpaceUtil::setPredicateValue( atomSpace, "inside_pet_fov",
+                                                  SimpleTruthValue( (isObjectInsidePetFov ? 1.0f : 0.0f), 1.0f ), agent, objectNode );
+            } // if
+
+            addPropertyPredicate(std::string("is_moving"), objectNode, moving);
+            addPropertyPredicate(std::string("is_edible"), objectNode, edible, true);
+            addPropertyPredicate(std::string("is_drinkable"), objectNode, drinkable, true);
+            addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
+
+            addInheritanceLink(std::string("pet_home"), objectNode, petHome);
+            addInheritanceLink(std::string("food_bowl"), objectNode, foodBowl);
+            addInheritanceLink(std::string("water_bowl"), objectNode, waterBowl);
+
+            // Add frame into atomspace to represent the entity.
+            addSemanticStructure(objectNode, internalEntityId, entityClass, entityType);
         }// if (objRemoval)
 
         XMLString::release(&entityId);
@@ -1945,52 +1843,71 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 
 }
 
-void PAI::processTerrainInfo(DOMElement * element)
+void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool useProtoBuf)
 {
-    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
-    XMLString::transcode(TERRAIN_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-    DOMNodeList* payloadList = element->getElementsByTagName(tag);
+    if (!useProtoBuf) {
+        // Use the old parser to handle XML document.
+        processMapInfo(element, toUpdateHandles);
+        return;
+    }
 
-    for (unsigned int i = 0; i < payloadList->getLength(); i++) {
-        DOMElement* payloadElement = (DOMElement*) payloadList->item(i);
-        std::string msg(XMLString::transcode(payloadElement->getTextContent()));
+#ifdef HAVE_PROTOBUF
+    // Use protobuf to process the map info sequence.
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+
+    // Add the space map boundary.
+    addSpaceMapBoundary(element);
+
+    // Get the terrain info elements from dom.
+    XMLString::transcode(MAP_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    DOMNodeList* dataList = element->getElementsByTagName(tag);
+
+    for (unsigned int i = 0; i < dataList->getLength(); i++) {
+        DOMElement* dataElement = (DOMElement*) dataList->item(i);
+        std::string msg(XMLString::transcode(dataElement->getTextContent()));
+
         // Decode the base64 string into binary
         unsigned int length = (unsigned int)msg.size();
         XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
 
-        /*
-        unsigned long tsValue = getTimestampFromElement(payloadElement);
-        if (!setLatestSimWorldTimestamp(tsValue)) {
+        // Get timestamp
+        unsigned long timestamp = getTimestampFromElement(dataElement);
+        if (!setLatestSimWorldTimestamp(timestamp)) {
             logger().error("PAI - Received old timestamp in terrain data => Message discarded!");
             continue;
         }
-        */
-        std::string binaryStr(reinterpret_cast<char const*>(binary), length);
 
-        Chunk chunk;
-        chunk.ParseFromString(binaryStr);
-        std::cout << "PAI - processs terrain info: received " << chunk.blocks_size() << " blocks." << std::endl;
+        MapInfoSeq mapinfoSeq;
+        mapinfoSeq.ParseFromArray((void*)binary, length);
+        logger().debug("PAI - processMapInfo recieved mapinfos information: %s", mapinfoSeq.DebugString().c_str());
+        
+        for (int j = 0; j < mapinfoSeq.mapinfos_size(); j++) {
+            const MapInfo& mapinfo = mapinfoSeq.mapinfos(j);
 
-        // Debug the parsed information.
-        for (int j = 0; j < 1; j++) {
-            const MapInfo& block = chunk.blocks(i);
-            std::cout << "Block[" << block.id() << "]: " 
-                << block.name() << ", " << block.type() << ","
-                << " length: " << block.length()
-                << " width: " << block.width()
-                << " height: " << block.height()
-                << " position: " << block.position().x() << ", " << block.position().y() << ", " << block.position().z()
-                << " property: " << block.properties(0).key() << "->" << block.properties(0).value()
-                << std::endl;
+            bool isRemoved = getBooleanProperty(getPropertyMap(mapinfo), REMOVE_ATTRIBUTE);
+            if (!isRemoved) {
+                Handle objectNode = addEntityToAtomSpace(mapinfo, timestamp);
+                // Mark the entity as to be updated.
+                toUpdateHandles.push_back(objectNode);
+            } else {
+                Handle objectNode = removeEntityFromAtomSpace(mapinfo, timestamp);
+                toUpdateHandles.push_back(objectNode);
+            }
         }
         
         XMLString::release(&binary);
     }
+
+    bool keepPreviousMap = avatarInterface.isExemplarInProgress();
+
+    if (!keepPreviousMap) atomSpace.getSpaceServer().cleanupSpaceServer();
+
+    this->avatarInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
+#endif
 }
 
 Vector PAI::getVelocityData(DOMElement* velocityElement)
 {
-
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     XMLString::transcode(X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -2151,6 +2068,65 @@ Vector PAI::addVectorPredicate(Handle objectNode, const std::string& predicateNa
     return result;
 }
 
+Handle PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName, 
+        const Vector& vec)
+{
+    Handle predNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName, true);
+
+    Handle xNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(vec.x).c_str());
+    Handle yNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(vec.y).c_str());
+    Handle zNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(vec.z).c_str());
+
+    HandleSeq listLinkOutgoing;
+    listLinkOutgoing.push_back(objectNode);
+    listLinkOutgoing.push_back(xNode);
+    listLinkOutgoing.push_back(yNode);
+    listLinkOutgoing.push_back(zNode);
+    Handle listLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, listLinkOutgoing);
+
+    HandleSeq evalLinkOutgoing;
+    evalLinkOutgoing.push_back(predNode);
+    evalLinkOutgoing.push_back(listLink);
+    Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+
+    return evalLink;
+}
+
+void PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName, 
+        const Vector& vec, unsigned long timestamp)
+{
+    Handle evalLink = addVectorPredicate(objectNode, predicateName, vec);
+
+    Handle predNode = atomSpace.getHandle(PREDICATE_NODE, predicateName.c_str());
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp);
+    AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
+}
+
+void PAI::addRotationPredicate(Handle objectNode, const Rotation& rot, unsigned long timestamp)
+{
+    Handle predNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, AGISIM_ROTATION_PREDICATE_NAME, true);
+
+    // TODO: check if string is a valid number?
+    Handle pitchNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(rot.pitch).c_str());
+    Handle rollNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(rot.roll).c_str());
+    Handle yawNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(rot.yaw).c_str());
+
+    HandleSeq listLinkOutgoing;
+    listLinkOutgoing.push_back(objectNode);
+    listLinkOutgoing.push_back(pitchNode);
+    listLinkOutgoing.push_back(rollNode);
+    listLinkOutgoing.push_back(yawNode);
+    Handle listLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, listLinkOutgoing);
+
+    HandleSeq evalLinkOutgoing;
+    evalLinkOutgoing.push_back(predNode);
+    evalLinkOutgoing.push_back(listLink);
+    Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo( evalLink, timestamp);
+    AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
+}
+
 Rotation PAI::addRotationPredicate(Handle objectNode, unsigned long timestamp,
                                    DOMElement* rotationElement)
 {
@@ -2230,11 +2206,53 @@ void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, 
     }
 }
 
+void PAI::addInheritanceLink(Handle fatherNodeHandle, Handle subNodeHandle)
+{
+    HandleSeq inheritanceLinkOutgoing;
+    inheritanceLinkOutgoing.push_back(subNodeHandle);
+    inheritanceLinkOutgoing.push_back(fatherNodeHandle);
+
+    AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, inheritanceLinkOutgoing);
+}
+
+void PAI::addSpaceMapBoundary(DOMElement * element)
+{
+    // TODO change the data wrapper once XML is completely replaced.
+
+    // The incoming XML DOM element should contain following attributes:
+    //  <element-tag global-position-x="24" global-position-y="24" \
+    //              global-position-offset="96" global-floor-height="99">
+    //  </element-tag>
+
+    // gets global position offset (to be added to global x and y positions to get map dimensions)
+    double offset = getPositionAttribute(element, GLOBAL_POS_OFFSET_ATTRIBUTE);
+    logger().fine("PAI - addSpaceMapBoundary: global position offset = %s => offset = %lf", GLOBAL_POS_OFFSET_ATTRIBUTE, offset);
+
+    // gets the minimal global position x
+    xMin = getPositionAttribute(element, GLOBAL_POS_X_ATTRIBUTE);
+    xMax = xMin + offset;
+    logger().fine("PAI - addSpaceMapBoundary: global position x = %s => xMin = %lf, xMax = %lf", GLOBAL_POS_X_ATTRIBUTE, xMin, xMax);
+
+    // gets the minimal global position y
+    yMin = getPositionAttribute(element, GLOBAL_POS_Y_ATTRIBUTE);
+    yMax = yMin + offset;
+    logger().fine("PAI - addSpaceMapBoundary: global position y = %s => yMin = %lf, yMax = %lf", GLOBAL_POS_Y_ATTRIBUTE, yMin, yMax);
+
+    // gets the global floor height
+    floorHeight = getPositionAttribute(element, GLOBAL_FLOOR_HEIGHT_ATTRIBUTE);
+    logger().fine("PAI - addSpaceMapBoundary: global floor height = %lf", floorHeight);
+
+    // getting grid map dimensions from system parameters
+    unsigned int xDim = opencog::config().get_int("MAP_XDIM");
+    unsigned int yDim = opencog::config().get_int("MAP_YDIM");
+
+    SpaceServer& spaceServer = atomSpace.getSpaceServer();
+    spaceServer.setMapBoundaries(xMin, xMax, yMin, yMax, xDim, yDim, floorHeight);
+}
+
 bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                             DOMElement* positionElement,
-                             DOMElement* rotationElement,
-                             double length, double width, double height,
-                             bool isEdible, bool isDrinkable, bool isTerrainObject)
+                             DOMElement* positionElement, DOMElement* rotationElement,
+                             double length, double width, double height, bool isTerrainObject)
 {
 
     bool isSelfObject = (avatarInterface.getPetId() == atomSpace.getName(objectNode));
@@ -2245,9 +2263,8 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
     // rotation predicate
     Rotation rotation = addRotationPredicate(objectNode, timestamp, rotationElement);
 
-
     // Entity class
-    std::string entityClass = "common";
+    std::string entityClass = "null";
 
     // Size predicate
     if (length > 0 && width > 0 && height > 0) {
@@ -2333,12 +2350,99 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
         logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
     } else {
         isObstacle = true;
-        entityClass = "terrain_block";
+        entityClass = "block";
     }
-
 
     return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle, entityClass);
 }
+
+void PAI::addSemanticStructure(Handle objectNode, 
+        const std::string& entityId, 
+        const std::string& entityClass,
+        const std::string& entityType)
+{
+    // each seme node must inherit from its class
+    // first normalize the type name to make it
+    // compatible with the classes defined at opencog/scm/predicates-frames.scm
+    std::string typeName = entityType;
+    boost::to_lower(typeName);
+    typeName[0] = std::toupper(typeName[0]);
+
+    // Add semantic structure into atomspace, used for language comprehension.
+    Handle objSemeNode = atomSpace.addNode(SEME_NODE, entityId , SimpleTruthValue(1, 1));
+    Handle objWordNode = atomSpace.addNode(WORD_NODE, entityClass);
+    Handle objClassNode = atomSpace.addNode(CONCEPT_NODE, entityClass, SimpleTruthValue(1, 1));
+        
+    // Create the inheritance link
+    Handle objectType = atomSpace.addNode(CONCEPT_NODE, typeName, SimpleTruthValue(1, 1));
+    HandleSeq inheritance(2);
+    inheritance[0] = objSemeNode;
+    inheritance[1] = objectType;
+    Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, SimpleTruthValue(1, 1));
+    atomSpace.setLTI(link, 1);
+
+    HandleSeq classReference(2);
+    classReference[0] = objClassNode;
+    classReference[1] = objSemeNode;
+
+    Handle referenceLink = 
+        atomSpace.addLink(REFERENCE_LINK, classReference, TruthValue::TRUE_TV());
+    atomSpace.setLTI(referenceLink, 1);
+
+    // Create a frame for representing this object
+    std::map<std::string, Handle> elements;
+    elements["Entity"] = objSemeNode;
+    elements["Name"] = objClassNode;
+    elements["Type"] = objectType;
+    AtomSpaceUtil::setPredicateFrameFromHandles(atomSpace, "#Entity", 
+            entityId + "_entity", elements, TruthValue::TRUE_TV());
+
+    // JaredW: connect the AccessoryNode[etc] directly to the ConceptNode.
+    // Sometimes the ObjectNode[subtype] is connected to a (Node "accessory") or similar.
+    // It should use the (ConceptNode "Accessory"), as defined above (and only that).
+    // Useful for inference and frequent subgraph mining
+    {
+        HandleSeq inheritance(2);
+        inheritance[0] = objectNode;
+        inheritance[1] = objectType;
+
+        Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, 
+                SimpleTruthValue(1, 1));
+        atomSpace.setLTI(link, 1);
+    }
+
+    // JaredW: Add e.g. (InheritanceLink (AccessoryNode "id_315840") (ConceptNode "ball"))
+    {
+        HandleSeq inheritance(2);
+        inheritance[0] = objectNode;
+        inheritance[1] = objClassNode;
+
+        Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, 
+                SimpleTruthValue(1, 1));
+        atomSpace.setLTI(link, 1);
+    }
+    
+    //connect the acessory node to the seme node
+    HandleSeq referenceLinkOutgoing1;
+
+    referenceLinkOutgoing1.push_back(objectNode);
+    referenceLinkOutgoing1.push_back(objSemeNode);
+    {
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing1, TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+    }
+
+    //connect the seme node to the word node
+    HandleSeq referenceLinkOutgoing2;
+    referenceLinkOutgoing2.push_back(objSemeNode);
+    referenceLinkOutgoing2.push_back(objWordNode);
+    {
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing2, TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+    }
+}
+
+
 
 Handle PAI::addPhysiologicalFeeling(const string petID,
                                     const string feeling,
@@ -2441,14 +2545,12 @@ void PAI::setPendingActionPlansFailed()
 
         setActionPlanStatus(planId, 0, opencog::pai::ERROR,
                             getLatestSimWorldTimestamp());
-
     }
 }
 
 void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                               ActionStatus statusCode, unsigned long timestamp)
 {
-
     // Get the corresponding actions from pending map and add the given perceptions
     // into AtomSpace
     ActionPlanMap::iterator it = pendingActionPlans.find(planId);
@@ -2567,3 +2669,428 @@ std::string PAI::camelCaseToUnderscore(const char* s)
     string str(s);
     return camelCaseToUnderscore(str);
 }
+
+#ifdef HAVE_PROTOBUF
+/* ---------------------------------------------------
+ * Private methods used to parse map info by protobuf.
+ * ---------------------------------------------------
+ */
+void PAI::processTerrainInfo(DOMElement * element)
+{
+    // XML is to be replaced by protobuf, but currently, we use it to wrap a
+    // base64 string that can be interpreted into binary and then be deserialized 
+    // by protobuf.
+    // The XML format of terrain info is:
+    //      <?xml version="1.0" encoding="UTF-8"?>
+    //      <oc:embodiment-msg xsi:schemaLocation="..." xmlns:xsi="..." xmlns:pet="...">
+    //          <terrain-info global-position-x="24" global-position-y="24" \
+    //              global-position-offset="96" global-floor-height="99">
+    //              <terrain-data timestamp="...">packed message stream</terrain-data>
+    //          </terrain-info>
+    //      </oc:embodiment-msg>
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+
+    // Add the space map boundary.
+    addSpaceMapBoundary(element);
+
+    // Get the terrain info elements from dom.
+    XMLString::transcode(TERRAIN_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    DOMNodeList* dataList = element->getElementsByTagName(tag);
+
+    for (unsigned int i = 0; i < dataList->getLength(); i++) {
+        DOMElement* dataElement = (DOMElement*) dataList->item(i);
+        std::string msg(XMLString::transcode(dataElement->getTextContent()));
+
+        // Decode the base64 string into binary
+        unsigned int length = (unsigned int)msg.size();
+        XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
+
+        // Get timestamp
+        unsigned long timestamp = getTimestampFromElement(dataElement);
+        if (!setLatestSimWorldTimestamp(timestamp)) {
+            logger().error("PAI - Received old timestamp in terrain data => Message discarded!");
+            continue;
+        }
+
+        Chunk chunk;
+        chunk.ParseFromArray((void*)binary, length);
+        logger().debug("PAI - processTerrainInfo recieved blocks information: %s", chunk.DebugString().c_str());
+
+        for (int j = 0; j < chunk.blocks_size(); j++) {
+            const MapInfo& block = chunk.blocks(j);
+
+            bool isRemoved = getBooleanProperty(getPropertyMap(block), REMOVE_ATTRIBUTE);
+            if (!isRemoved) {
+                addEntityToAtomSpace(block, timestamp);
+            } else {
+                removeEntityFromAtomSpace(block, timestamp);
+            }
+        }
+        
+        XMLString::release(&binary);
+    }
+}
+
+
+Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp)
+{
+    bool keepPreviousMap = avatarInterface.isExemplarInProgress();
+
+    std::string internalEntityId = PAIUtils::getInternalId(mapinfo.id().c_str());
+    std::string entityType = mapinfo.type();
+    std::string entityName = mapinfo.name();
+    
+    bool isSelfObject = (internalEntityId == avatarInterface.getPetId());
+    bool isOwnerObject = (internalEntityId == avatarInterface.getOwnerId());
+
+    Handle objectNode;
+
+    // Add entity type in atomspace
+    if (entityType != "") {
+        objectNode = AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType.c_str()), internalEntityId.c_str());
+        // add an inheritance link
+        Handle typeNode = AtomSpaceUtil::addNode(atomSpace, NODE, entityType.c_str());
+        addInheritanceLink(typeNode, objectNode);   
+    } else {
+        objectNode = AtomSpaceUtil::addNode(atomSpace, OBJECT_NODE, internalEntityId.c_str());
+    }
+
+    // Add entity name in atomspace
+    if (entityName != "") {
+        if (isSelfObject)  {
+            avatarInterface.setName(entityName);
+        }
+        Handle objNameNode = AtomSpaceUtil::addNode(atomSpace, WORD_NODE, entityName, isSelfObject || isOwnerObject);
+        HandleSeq outgoing;
+        outgoing.push_back(objNameNode);
+        outgoing.push_back(objectNode);
+
+        AtomSpaceUtil::addLink(atomSpace, WR_LINK, outgoing, true);
+    }
+
+    // Add property predicates
+    addEntityProperties(objectNode, isSelfObject, mapinfo);
+
+    // Add space predicate.
+    addSpacePredicates(keepPreviousMap, objectNode, mapinfo, timestamp);
+
+    //addPropertyPredicate(std::string("is_moving"), objectNode, moving);
+    
+    // Add semantic structure of this map-info to be used in language comprehension
+    addSemanticStructure(objectNode, mapinfo);
+
+    return objectNode;
+}
+
+Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long timestamp)
+{
+    std::string internalEntityId = PAIUtils::getInternalId(mapinfo.id().c_str());
+    std::string entityType = mapinfo.type();
+    Type nodeType = getSLObjectNodeType(entityType.c_str());
+    Handle objectNode = atomSpace.getHandle(nodeType, internalEntityId);
+
+    bool keepPreviousMap = avatarInterface.isExemplarInProgress();
+    atomSpace.getSpaceServer().removeSpaceInfo(keepPreviousMap, objectNode, timestamp);
+
+    addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate 
+
+    // check if the object to be removed is marked as grabbed in
+    // AvatarInterface. If so grabbed status should be unset.
+    if (avatarInterface.hasGrabbedObj() &&
+            avatarInterface.getGrabbedObj() == atomSpace.getName(objectNode)) {
+        avatarInterface.setGrabbedObj(std::string(""));
+    }
+
+    return objectNode;
+}
+
+bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, const MapInfo& mapinfo, unsigned long timestamp)
+{
+    bool isSelfObject = (avatarInterface.getPetId() == atomSpace.getName(objectNode));
+
+    // Position predicate
+    Vector position(mapinfo.position().x(), mapinfo.position().y(), mapinfo.position().z());
+    addVectorPredicate(objectNode, AGISIM_POSITION_PREDICATE_NAME, position, timestamp);
+
+    // rotation predicate
+    Rotation rotation(mapinfo.rotation().pitch(), mapinfo.rotation().roll(), mapinfo.rotation().yaw());
+    addRotationPredicate(objectNode, rotation, timestamp);
+
+    double length = mapinfo.length();
+    double width = mapinfo.width();
+    double height = mapinfo.height();
+
+    // Size predicate
+    if (length > 0 && width > 0 && height > 0) {
+        Vector size(length, width, height);
+        // For now, assume any object's size does not change in time.
+        // TODO: uncomment this for variable size objects, if any, in the future
+        addVectorPredicate(objectNode, SIZE_PREDICATE_NAME, size);
+
+        // If the object is the Pet, save its radius for new space maps
+        if (isSelfObject) {
+            agentRadius = sqrt(length * length + width * width) / 2;
+            agentHeight = height;
+            atomSpace.getSpaceServer().setAgentRadius(agentRadius);
+            atomSpace.getSpaceServer().setAgentHeight(agentHeight);
+        }
+    } else {
+        // Get the length, width and height of the object
+        // For now, assume any object's size does not change in time.
+        logger().warn("PAI - addSpacePredicates(): No size information available in mapinfo.");
+
+        Handle predNode = atomSpace.getHandle(PREDICATE_NODE, SIZE_PREDICATE_NAME);
+        if (predNode != Handle::UNDEFINED) {
+            HandleSeq sizeEvalLinks;
+            HandleSeq outgoing;
+            outgoing.push_back(predNode);
+            outgoing.push_back(Handle::UNDEFINED);
+            atomSpace.getHandleSet(back_inserter(sizeEvalLinks), outgoing, NULL, NULL, 2, EVALUATION_LINK, false);
+            foreach(Handle evalLink, sizeEvalLinks) {
+                Handle listLink = atomSpace.getOutgoing(evalLink, 1);
+                if (atomSpace.getType(listLink) == LIST_LINK && atomSpace.getArity(listLink) == 4) {
+                    if (atomSpace.getOutgoing(listLink, 0) == objectNode) {
+                        // Found size info for the SL object
+                        // TODO: Check for latest (more recent) EvalLink("size",...) from multiple ones, for sizable SL objects,
+                        // if any, in the future
+                        length = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 1)).c_str());
+                        width = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 2)).c_str());
+                        height = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 3)).c_str());
+                    }
+                }
+            }
+            logger().warn("PAI - addSpacePredicates(): Got last size information available.");
+        }
+
+        if (length <= 0 || width <= 0 || height <= 0) {
+            logger().warn("PAI - addSpacePredicates(): No size information available for SL object: %s\n", atomSpace.getName(objectNode).c_str());
+            if (length < 0) length = 0;
+            if (width < 0) width = 0;
+            if (height < 0) height = 0;
+        }
+    }
+
+    // Entity class
+    std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
+    // Check if it is an obstacle
+    bool isObstacle = isObjectAnObstacle(objectNode, entityClass, mapinfo);
+
+    // Space server insertion
+    return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle, entityClass);
+
+}
+
+void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInfo& mapinfo)
+{
+    // TODO should we process the properties one by one? What if the property
+    // amount increases? Maybe it would be a good idea to maintain a property
+    // list and then query each property in a loop.
+    const PropertyMap& properties = getPropertyMap(mapinfo);
+    bool isEdible = getBooleanProperty(properties, EDIBLE_ATTRIBUTE);
+    bool isDrinkable = getBooleanProperty(properties, DRINKABLE_ATTRIBUTE);
+    bool isHome = getBooleanProperty(properties, PET_HOME_ATTRIBUTE);
+    bool isToy = getBooleanProperty(properties, IS_TOY_ATTRIBUTE);
+    bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
+    bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
+    bool isVisible = isObjectVisible(properties);
+
+    const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
+    const std::string& texture = getStringProperty(properties, TEXTURE_ATTRIBUTE);
+    const std::string& ownerId = getStringProperty(properties, OWNER_ID_ATTRIBUTE);
+
+    // Add the property predicates in atomspace
+    addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate 
+    addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
+    addPropertyPredicate(std::string("is_drinkable"), objectNode, isDrinkable, true);
+    addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
+
+    // Add the inheritance link to mark the family of this entity.
+    addInheritanceLink(std::string("pet_home"), objectNode, isHome);
+    addInheritanceLink(std::string("food_bowl"), objectNode, isFoodbowl);
+    addInheritanceLink(std::string("water_bowl"), objectNode, isWaterbowl);
+
+    // Set the owner id of avatar
+    if (ownerId != NULL_ATTRIBUTE) {
+        string internalOwnerId = PAIUtils::getInternalId(ownerId.c_str());
+        if (isSelfObject) {
+            avatarInterface.setOwnerId(internalOwnerId);
+        }
+
+        Handle ownerNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalOwnerId.c_str(), isSelfObject);
+        addOwnershipRelation(ownerNode, objectNode, isSelfObject);
+    }
+
+    Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, avatarInterface.getPetId());
+    if (agentNode != objectNode) { // an agent cannot see itself
+        AtomSpaceUtil::setPredicateValue(atomSpace, "inside_pet_fov",
+                                        SimpleTruthValue((isVisible ? 1.0f : 0.0f), 1.0f), 
+                                        agentNode, objectNode);
+    } // if
+
+    // Add material property predicate
+    if (material != NULL_ATTRIBUTE){
+        printf("Material found: %s\n",material.c_str());
+        
+        Handle materialWordNode = atomSpace.addNode(WORD_NODE, material);
+        Handle materialConceptNode = atomSpace.addNode(CONCEPT_NODE, material);
+
+        HandleSeq referenceLinkOutgoing;
+        referenceLinkOutgoing.push_back(materialConceptNode);
+        referenceLinkOutgoing.push_back(materialWordNode);
+
+        // Add a reference link
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+
+        AtomSpaceUtil::setPredicateValue(atomSpace, "material",
+                                          SimpleTruthValue(1.0, 1.0), objectNode, materialConceptNode);
+    } // if
+
+    // Add texture property predicate
+    if (texture != NULL_ATTRIBUTE) {
+        printf("Texture found: %s\n", texture.c_str());
+        Handle textureWordNode = atomSpace.addNode(WORD_NODE, texture);
+        Handle textureConceptNode = atomSpace.addNode(CONCEPT_NODE, texture);
+        HandleSeq referenceLinkOutgoing;
+        referenceLinkOutgoing.push_back(textureConceptNode);
+        referenceLinkOutgoing.push_back(textureWordNode);
+
+        // Add a reference link
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+
+        AtomSpaceUtil::setPredicateValue(atomSpace, "texture",
+                                          SimpleTruthValue(1.0f, 1.0f), objectNode, textureConceptNode);
+    } // if
+
+    /* TODO
+    // Add color properties predicate
+    std::map<std::string, float>::const_iterator it;
+    for (it = colors.begin(); it != colors.end(); it++) {
+        printf("Color property found: %s (%f)\n", it->first.c_str(), it->second);
+        Handle colorWordNode = atomSpace.addNode(WORD_NODE, it->first);
+        Handle colorConceptNode = atomSpace.addNode(CONCEPT_NODE, it->first);
+        HandleSeq referenceLinkOutgoing;
+        referenceLinkOutgoing.push_back(colorConceptNode);
+        referenceLinkOutgoing.push_back(colorWordNode);
+        {
+            Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+            atomSpace.setLTI(referenceLink, 1);
+        }
+            
+        SimpleTruthValue tv(it->second, 1.0);
+        AtomSpaceUtil::setPredicateValue(atomSpace, "color",
+                                          tv, objectNode, colorConceptNode);
+
+        std::map<std::string, Handle> elements;
+        elements["Color"] = colorConceptNode;
+        elements["Entity"] = objSemeNode;
+        AtomSpaceUtil::setPredicateFrameFromHandles( 
+            atomSpace, "#Color", internalEntityId + "_" + it->first + "_color",
+                elements, tv);
+
+    }
+    */
+}
+
+void PAI::addSemanticStructure(Handle objectNode, const MapInfo& mapinfo)
+{
+    std::string internalEntityId = PAIUtils::getInternalId(mapinfo.id().c_str());
+    const std::string& entityType = mapinfo.type();
+    std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
+    addSemanticStructure(objectNode, internalEntityId, entityClass, entityType);
+}
+
+PropertyMap PAI::getPropertyMap(const MapInfo& mapinfo)
+{
+    PropertyMap properties;
+    for (int i = 0; i < mapinfo.properties_size(); i++) {
+        std::string key = mapinfo.properties(i).key();
+        std::string value = mapinfo.properties(i).value();
+        properties.insert(std::pair<std::string, std::string>(key, value));
+    }
+
+    return properties;
+}
+
+std::string PAI::queryMapInfoProperty(const PropertyMap& properties, const std::string& key) const
+{
+    PropertyMap::const_iterator it = properties.find(key);
+
+    if (it != properties.end()) {
+        return it->second;
+    }
+
+    return std::string(NULL_ATTRIBUTE);
+}
+
+bool PAI::isPropertyTrue(const std::string& value) const
+{
+    std::string val = value;
+    boost::to_lower(val);
+    if (val == "true") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool PAI::getBooleanProperty(const PropertyMap& properties, const std::string& key) const
+{
+    const std::string& result = queryMapInfoProperty(properties, key);
+    return isPropertyTrue(result);
+}
+
+std::string PAI::getStringProperty(const PropertyMap& properties, const std::string& key) const
+{
+    std::string result = queryMapInfoProperty(properties, key);
+    return result;
+}
+
+bool PAI::isObjectVisible(const PropertyMap& properties) const
+{
+    const std::string& visibility = queryMapInfoProperty(properties, VISIBILITY_STATUS_ATTRIBUTE);
+    if (visibility == "visible") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool PAI::isObjectBelongToTerrain(const std::string& entityClass) const
+{
+    // For now, we just hard coding all the terrain objects.
+    // Now only entities in "block" class are identified as terrain object.
+    // If necessary, maintain a configurable list of terrain object classes in
+    // config file.
+    if (entityClass == "block") {
+        return true;
+    }
+    return false;
+}
+
+bool PAI::isObjectAnObstacle(Handle objectNode, const std::string& entityClass, const MapInfo& mapinfo) const
+{
+    if (isObjectBelongToTerrain(entityClass)) {
+        return true;
+    }
+
+    Handle avatarHandle = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId());
+    std::string objectName = atomSpace.getName(objectNode);
+    double height = mapinfo.height();
+    bool isSelfObject = (avatarHandle == objectNode);
+    bool isAgent = AtomSpaceUtil::getAgentHandle(atomSpace, objectName) != Handle::UNDEFINED;
+    double avatarLength, avatarWidth, avatarHeight;
+
+    bool hasAvatarHeight = (avatarHandle != Handle::UNDEFINED) && AtomSpaceUtil::getSizeInfo(atomSpace, avatarHandle, avatarLength, avatarWidth, avatarHeight);
+
+    bool isPickupable = AtomSpaceUtil::isPredicateTrue(atomSpace, "is_pickupable", objectNode);
+    bool isObstacle = !isSelfObject && (isAgent || ((hasAvatarHeight ? (height > 0.3f * avatarHeight) : true) && !isPickupable));
+
+    logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasAvatarHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, avatarHeight, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f"));
+
+    return isObstacle;
+}
+
+#endif
+

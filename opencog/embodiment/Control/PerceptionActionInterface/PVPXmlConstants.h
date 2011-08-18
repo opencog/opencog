@@ -99,6 +99,7 @@
 #define MATERIAL_ATTRIBUTE      "material"
 #define TEXTURE_ATTRIBUTE       "texture"
 #define IS_TOY_ATTRIBUTE        "isToy"
+#define NULL_ATTRIBUTE          "null"
 
 #define PRIORITY_ATTRIBUTE       "priority" // Note from Tristan: this is actually used only when actions are sent from Proxy to SL. 
 #define GLOBAL_POS_X_ATTRIBUTE   "global-position-x"
