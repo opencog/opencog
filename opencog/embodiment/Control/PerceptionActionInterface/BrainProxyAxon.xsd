@@ -224,7 +224,7 @@
                 series of blips that represent nearby entities.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:element name="terrain-data" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
+            <xsd:element name="terrain-data" type="oc:TerrainDataType" minOccurs="1" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="global-position-x" type="xsd:int" use="required"/>
         <xsd:attribute name="global-position-y" type="xsd:int" use="required"/>        
@@ -232,6 +232,15 @@
         <xsd:attribute name="global-floor-height" type="xsd:int" use="optional"/>
         <xsd:attribute name="gridParcel" type="xsd:string" use="optional"/>
     </xsd:complexType>
+
+    <xsd:complexType name="TerrainDataType">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="timestamp" type="xsd:string" use="required"/>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
         
     <xsd:annotation>
         <xsd:documentation>
