@@ -2,8 +2,8 @@ CMAKE_POLICY(SET CMP0005 OLD)
 
 ADD_DEFINITIONS(-DPVP_XSD_FILE_PATH=\\"${CMAKE_CURRENT_SOURCE_DIR}/BrainProxyAxon.xsd\\")
 
-ADD_LIBRARY (PAI
-	PAIUtils
+SET(PAI_SOURCE_FILES
+    PAIUtils
 	ActionParamType
 	ActionParameter
 	ActionType
@@ -13,7 +13,20 @@ ADD_LIBRARY (PAI
 	ActionPlanDispatcher
     EmbodimentDOMParser
     EmbodimentErrorHandler
-    PAI.MapInfo.pb
+)
+
+IF (PROTOBUF_FOUND)
+    # Compile proto messages.
+    SET(PROTO_ARGS 
+        PROTOFILES PAI.MapInfo.proto
+        OUTPATH ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_ARGS})
+    SET(PAI_SOURCE_FILES ${PAI_SOURCE_FILES} ${PROTO_SRCS})
+ENDIF (PROTOBUF_FOUND)
+
+ADD_LIBRARY (PAI
+    ${PAI_SOURCE_FILES}
 )
 
 SET(PAI_LINK_LIBS

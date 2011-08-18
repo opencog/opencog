@@ -13,6 +13,10 @@ ADD_LIBRARY(WorldWrapper
     NoSpaceLifeWorldWrapper
 )
 
+ADD_DEPENDENCIES(WorldWrapper
+    PAI
+)
+
 TARGET_LINK_LIBRARIES(WorldWrapper
     comboreduct
     util
