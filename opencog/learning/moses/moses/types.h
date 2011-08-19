@@ -25,6 +25,7 @@
 #define _MOSES_TYPES_H
 
 #include <functional>
+#include <iomanip>
 
 #include <boost/unordered_map.hpp>
 
@@ -42,6 +43,11 @@ using combo::vertex;
   
 //basic types
 typedef double score_t;
+
+// score precision used for logging and output results, it is set
+// rather high because that information is used by other tools
+static const int io_score_precision = 12;
+
 static const score_t worst_score =
     -(std::numeric_limits<score_t>::max()-score_t(1));
     // for some weird reasons what is below leads to bugs
@@ -131,7 +137,8 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
                                 bool output_complexity = false,
                                 bool output_bscore = false) {
     if(output_score)
-        out << get_score(candidate) << " ";
+        out << std::setprecision(io_score_precision) 
+            << get_score(candidate) << " ";
     if(output_complexity)
         out << get_complexity(candidate) << " ";
     out << get_tree(candidate) << std::endl;
@@ -146,7 +153,10 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::composite_score& ts) {
-    return out << "[score=" << ts.first << ", complexity=" << ts.second << "]";
+    return out << "[score=" 
+               << std::setprecision(moses::io_score_precision) 
+               << ts.first 
+               << ", complexity=" << ts.second << "]";
 }
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::composite_behavioral_score& s) {
