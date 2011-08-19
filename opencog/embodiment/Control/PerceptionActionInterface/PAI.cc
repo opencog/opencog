@@ -540,7 +540,9 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     bool useProtoBuf = false;
 
 #ifdef HAVE_PROTOBUF
-    useProtoBuf = true;
+    if (opencog::config().get_bool("ENABLE_UNITY_CONNECTOR")) {
+        useProtoBuf = true;
+    }
 #endif
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
@@ -1859,7 +1861,7 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
     addSpaceMapBoundary(element);
 
     // Get the terrain info elements from dom.
-    XMLString::transcode(MAP_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(MAP_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     DOMNodeList* dataList = element->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < dataList->getLength(); i++) {

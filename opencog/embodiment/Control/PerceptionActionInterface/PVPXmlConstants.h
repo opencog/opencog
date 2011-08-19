@@ -41,6 +41,7 @@
 #define MAP_INFO_ELEMENT         "map-info"
 #define TERRAIN_INFO_ELEMENT     "terrain-info"
 #define BLIP_ELEMENT             "blip"
+#define MAP_DATA_ELEMENT         "map-data"
 #define TERRAIN_DATA_ELEMENT     "terrain-data"
 #define AVATAR_SIGNAL_ELEMENT    "avatar-signal"
 #define AGENT_SIGNAL_ELEMENT     "agent-signal"
