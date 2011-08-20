@@ -41,7 +41,7 @@
 #include "moses.h"
 #include "neighborhood_sampling.h"
 
-#define MINIMUM_DEME_SIZE         50
+#define MINIMUM_DEME_SIZE         10
 #define MAX_EVALS_PER_SLICE       10
 
 namespace opencog { namespace moses {
