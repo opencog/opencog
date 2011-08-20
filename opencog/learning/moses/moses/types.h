@@ -41,12 +41,22 @@ namespace opencog { namespace moses {
 using std::binary_function;
 using combo::vertex;
   
-//basic types
-typedef double score_t;
+/////////////////
+// basic types //
+/////////////////
 
-// score precision used for logging and output results, it is set
-// rather high because that information is used by other tools
-static const int io_score_precision = 12;
+// a score_t is defined as float rather than double to save memory and
+// limit the number of decimals needed in IO (such as logging) so that
+// tools that need its textual representation can stay in sync with
+// what's in RAM with less digits. If that precision is not enough,
+// please try first to change the internal scoring function types then
+// convert the result to score_t before changing its typedef to
+// double, float as final score type is likely enough
+typedef float score_t;
+
+// score precision used for logging and outputting results, it is set
+// very high because that information is used by other tools
+static const int io_score_precision = 32;
 
 static const score_t worst_score =
     -(std::numeric_limits<score_t>::max()-score_t(1));
