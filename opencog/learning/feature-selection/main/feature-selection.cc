@@ -138,6 +138,9 @@ int main(int argc, char** argv) {
     store(parse_command_line(argc, argv, desc), vm);
     notify(vm);
 
+    std::cout << "composite_score = "
+              << composite_score(fs_params.max_score, 0) << std::endl;;
+
     // set flags
     log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
 
