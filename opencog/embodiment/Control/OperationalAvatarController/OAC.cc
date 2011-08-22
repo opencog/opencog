@@ -629,8 +629,11 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
 
     // message not for the OAC
     if (msg->getTo() != getID()) {
-        logger().warn("OAC - Wrong destination. Message to: %s",
-                     msg->getTo().c_str());
+        logger().warn("OAC::%s - This message is not for OAC. Its destination is %s. Message content: %s",
+                       __FUNCTION__, 
+                       msg->getTo().c_str(), 
+                       msg->getPlainTextRepresentation()
+                     );
         return false;
     }
 
@@ -640,12 +643,12 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
         result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
 
         if (!result) {
-            logger().error("OAC - Unable to process XML message.");
+            logger().error("OAC::%s - Unable to process XML message.", __FUNCTION__);
         } else {
             // PVP message processed, update predicates for the
             // added/updated atoms
             predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
-            logger().debug("OAC - Message successfully  processed.");
+            logger().debug("OAC::%s - Message successfully  processed.", __FUNCTION__);
         }
         return false;
     }
@@ -657,24 +660,37 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
 		// If you use multiverse, just ignore this.
         if(msg->getType() == opencog::messaging::Message::RAW) {
 			// message from OC Avatar, forward it to RelEx server.
-            StringMessage rawMessage(getID(), config().get("RELEX_SERVER_ID"), msg->getPlainTextRepresentation());
+            StringMessage rawMessage( getID(),
+                                      config().get("RELEX_SERVER_ID"), 
+                                      msg->getPlainTextRepresentation()
+                                    );
 
-            logger().info("Forward raw message to RelEx server.");
-            if (!sendMessage(rawMessage)) {
-                logger().error("Could not send raw message to RelEx server!");
+
+            if ( !sendMessage(rawMessage) ) {
+                logger().error("OAC::%s - Failed to forward raw message to RelEx server. Message content: %s", 
+                                __FUNCTION__, 
+                                msg->getPlainTextRepresentation()
+                              );
             }
-        } else {
+            else {
+                logger().debug("OAC::%s - Forward raw message to RelEx server successfully. Message content: %s", 
+                               __FUNCTION__, 
+                               msg->getPlainTextRepresentation()
+                              );
+            }
+        } 
+        else {
             HandleSeq toUpdateHandles;
             result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
 
             if (!result) {
-                logger().error("OAC - Unable to process XML message.");
+                logger().error("OAC::%s - Unable to process XML message.", __FUNCTION__);
             } else {
                 // PVP message processed, update predicates for the
                 // added/updated atoms
                 predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
 
-                logger().debug("OAC - Message successfully  processed.");
+                logger().debug("OAC::%s - Message successfully  processed.", __FUNCTION__);
             }
         }
         return false;
@@ -687,7 +703,7 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
         // Message correctly processed, just exit
         if (result) {
             // TODO: Save status...
-            logger().info("OAC - Exiting...");
+            logger().info("OAC::%s - Exiting...",__FUNCTION__);
             return true;
         }
     }
@@ -695,7 +711,7 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
     // message from the combo shell to execute a schema
     if (msg->getFrom() == config().get("COMBO_SHELL_ID")) {
         std::string str(msg->getPlainTextRepresentation());
-        logger().error("OAC - Got combo shell msg: '%s'", str.c_str());
+        logger().error("OAC::%s - Got combo shell msg: '%s'", __FUNCTION__, str.c_str());
 
         if (str.empty())
             return false; //a timing error, maybe?
@@ -706,14 +722,13 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
         ComboProcedure cp("", 0, tr);
         std::vector<vertex> args; //an expression, not a function - no args
         procedureInterpreter->runProcedure(cp, args);
-        logger().error(
-                     "OAC - Called runProcedure(" + ss.str() + ")");
+        logger().error("OAC - Called runProcedure(" + ss.str() + ")");
     }
 
     // message from learning server
     if (msg->getFrom() == config().get("LS_ID")) {
         SchemaMessage * sm = (SchemaMessage *)msg;
-        logger().debug("OAC - Got msg from LS: '%s'", msg->getPlainTextRepresentation());
+        logger().debug("OAC::%s - Got msg from LS: '%s'", __FUNCTION__, msg->getPlainTextRepresentation());
 
         // sanity check to see if LS does not return an empty
         // ComboSchema

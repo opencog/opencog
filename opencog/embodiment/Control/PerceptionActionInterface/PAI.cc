@@ -1220,6 +1220,8 @@ void PAI::processInstruction(DOMElement * element)
         // ok there is an incoming parsed (by relex sentece)
         // so, connect the author of the Relex sentences to each sentence
         // it will be useful to identify which agent says each sentence
+        logger().debug("PAI::%s - Processing parsed sentence: %s", __FUNCTION__, parsedSentenceText); 
+
         HandleSeq sentenceOwner(2);
         sentenceOwner[0] = agentNode;
 
@@ -1279,7 +1281,7 @@ void PAI::processInstruction(DOMElement * element)
     arguments.push_back( sentenceText );
 
     if ( std::string(contentType) == "FACT" ) {
-        this->languageTool->handleCommand("storeFact", arguments);
+        this->languageTool->handleCommand("updateFact", arguments);
     } 
     else if ( std::string(contentType) == "COMMAND" ) {
         this->languageTool->handleCommand("evaluateSentence", arguments);

@@ -59,70 +59,89 @@ void LanguageComprehension::handleCommand(const std::string& name, const std::ve
 {
     if ( name == "requestedCommand" ) {
         if ( arguments.size() == 0 ) {
-            logger().warn("LanguageComprehension::%s - command[requestedCommand] Invalid number of arguments: 0", 
-                          __FUNCTION__
+            logger().warn("LanguageComprehension::%s (%s) - command[requestedCommand] Invalid number of arguments: 0", 
+                          __FUNCTION__, 
+                          name.c_str()
                          ); 
             return;
         }
 
-        logger().debug("LanguageComprehension::%s - Scheduling command",
-                        __FUNCTION__                 
+        logger().debug("LanguageComprehension::%s (%s) - Scheduling command",
+                        __FUNCTION__, 
+                        name.c_str()
                       ); 
         this->commandsQueue.push(arguments);
 
     } 
-    else if ( name == "storeFact" ) {
-        logger().debug("LanguageComprehension::%s - Evaluating a new parsed sentence", 
-                       __FUNCTION__
+    else if ( name == "updateFact" ) {
+        logger().debug("LanguageComprehension::%s (%s) - Evaluating a new parsed sentence", 
+                       __FUNCTION__, 
+                       name.c_str()
                       ); 
 
 
-        logger().debug("LanguageComprehension::%s - Starting latest sentence reference resolution", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) - Starting latest sentence reference resolution", 
+                       __FUNCTION__, 
+                       name.c_str()
                       ); 
         this->resolveLatestSentenceReference();
-        logger().debug("LanguageComprehension::%s - Reference resolution done", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) - Reference resolution done", 
+                       __FUNCTION__, 
+                       name.c_str()
                       ); 
 
-        logger().debug("LanguageComprehension::%s - Starting storing a new fact", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) - Starting storing a new fact", 
+                       __FUNCTION__, 
+                       name.c_str()
                       );
-        this->storeFact();
-        logger().debug("LanguageComprehension::%s - Fact stored", __FUNCTION__);
+        this->updateFact();
+        logger().debug("LanguageComprehension::%s (%s) - Fact stored",
+                       __FUNCTION__, 
+                       name.c_str()
+                      );
         
     }
     else if ( name == "evaluateSentence" ) {
-        logger().debug("LanguageComprehension::%s - Evaluating a new parsed sentence", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) - Evaluating a new parsed sentence", 
+                       __FUNCTION__, 
+                       name.c_str()
                       );
 
-        logger().debug("LanguageComprehension::%s - Starting latest sentence reference resolution", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) - Starting latest sentence reference resolution", 
+                       __FUNCTION__, 
+                       name.c_str()
                       );
         this->resolveLatestSentenceReference();
-        logger().debug("LanguageComprehension::%s Reference resolution done", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) Reference resolution done", 
+                       __FUNCTION__, 
+                       name.c_str()
                       );
 
-        logger().debug("LanguageComprehension::%s - Starting latest sentence command resolution", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) - Starting latest sentence command resolution", 
+                       __FUNCTION__, 
+                       name.c_str()
                       );
         this->resolveLatestSentenceCommand();
-        logger().debug("LanguageComprehension::%s - Command resolution done", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) - Command resolution done", 
+                       __FUNCTION__, 
+                       name.c_str()
                       );
 
     } 
     else if ( name == "answerQuestion") {
-        logger().debug("LanguageComprehension::%s - Answering a question", __FUNCTION__);
+        logger().debug("LanguageComprehension::%s (%s) - Answering a question", 
+                        __FUNCTION__, 
+                        name.c_str()
+                      );
 
-        logger().debug("LanguageComprehension::%s - Starting latest sentence reference resolution", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) - Starting latest sentence reference resolution", 
+                       __FUNCTION__, 
+                       name.c_str()
                       );
         this->resolveLatestSentenceReference();
-        logger().debug("LanguageComprehension::%s - Reference resolution done", 
-                       __FUNCTION__
+        logger().debug("LanguageComprehension::%s (%s) - Reference resolution done", 
+                       __FUNCTION__, 
+                       name.c_str()
                       );
         
     }
@@ -421,20 +440,27 @@ std::string LanguageComprehension::resolveRelex2Sentence( const std::string& rel
     
 }
 
-void LanguageComprehension::storeFact( void )
+void LanguageComprehension::updateFact( void )
 {
     init();
 
 #ifdef HAVE_GUILE
-    std::string answer = SchemeEval::instance().eval( "(store-fact)");    
-    logger().info( "LanguageComprehension::%s - (store-fact) answer: %s", __FUNCTION__, answer.c_str() );
+    std::string answer = SchemeEval::instance().eval( "(update-fact)");    
+
+    logger().info( "LanguageComprehension::%s - (update-fact) newly created or deleted frame instances (fact): %s", 
+                   __FUNCTION__, 
+                   answer.c_str()
+                 );
+
     if ( SchemeEval::instance().eval_error() ) {
-        logger().error( "LanguageComprehension::%s - An error occurred while trying to store a new fact: %s",
-                        __FUNCTION__, answer.c_str( ) );
+        logger().error( "LanguageComprehension::%s - (update-fact) An error occurred while trying to update fact: %s",
+                        __FUNCTION__, 
+                        answer.c_str() 
+                      );
     } // if
+
     SchemeEval::instance().clear_pending( );    
 #endif
-
 }
 
 HandleSeq LanguageComprehension::getHeardSentencePredicates( void )
