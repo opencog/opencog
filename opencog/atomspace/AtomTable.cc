@@ -419,8 +419,8 @@ void AtomTable::merge(Handle h, const TruthValue& tvn)
                 delete mergedTV;
             }
         }
-        if (logger().isDebugEnabled()) 
-            logger().debug("Atom merged: %d => %s", h.value(), atom->toString().c_str());
+        if (logger().isFineEnabled()) 
+            logger().fine("Atom merged: %d => %s", h.value(), atom->toString().c_str());
     } 
 }
 
@@ -626,8 +626,8 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 
     for (HandleSeq::reverse_iterator it = hs.rbegin(); it < hs.rend(); ++it) {
         Atom* atom = TLB::removeAtom(*it);
-        if (logger().isDebugEnabled())
-            logger().debug("Atom removed: %d => %s", it->value(), atom->toString().c_str());
+        if (logger().isFineEnabled())
+            logger().fine("Atom removed: %d => %s", it->value(), atom->toString().c_str());
         delete atom;
     }
 }
