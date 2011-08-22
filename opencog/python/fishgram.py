@@ -32,8 +32,11 @@ class Fishgram:
         
         self.max_per_layer = 1e9 # 10 # 1e35 # 600
         
-        #self.viz = PLNviz(atomspace)
-        self.viz = NullPLNviz(atomspace)
+        self.viz = PLNviz(atomspace)
+        #self.viz = NullPLNviz(atomspace)
+        self.viz.outputTarget(target=[], parent=None, index=0)
+        
+        self.awkward = {}
 
     def run(self):
         self.forest.extractForest()
@@ -76,6 +79,10 @@ class Fishgram:
             layers.append(layer)
             if len(layers) >= 2:
                 self.output_implications_for_last_layer(layers)
+            
+            print "All rules produced so far:"
+            for imp in self.atomspace.get_atoms_by_type(t.ForAllLink):
+                print pp(imp)
 
 # breadth-first search (to make it simpler!)
 # use the extension list.
@@ -83,13 +90,14 @@ class Fishgram:
 # you only need to add extensions if they're in the closure.
 
     def closed_bfs_extend_layer(self, prev_layer):
-        next_layer_iter = self.extensions(prev_layer)
+        #next_layer_iter = self.extensions(prev_layer)
+        next_layer_iter = self.extensions_simple(prev_layer)
         #return self.prune_frequency(next_layer_iter)
-        self.viz.outputTarget(target=[], parent=None, index=0)
+        #self.viz.outputTarget(target=[], parent=None, index=0)
         for (conj, embs) in self.prune_frequency(next_layer_iter):
             #print '***************', conj, len(embs)
             #self.viz.outputTarget(target=conj[-1], parent=conj[:-1], index=0)
-            self.viz.outputTarget(target=list(conj), parent=list(conj[:-1]), index=0)
+            #self.viz.outputTarget(target=list(conj), parent=list(conj[:-1]), index=0)
             yield (conj, embs)
 
     def closed_bfs_layers(self):
@@ -107,7 +115,8 @@ class Fishgram:
             new_layer = [conj_embs for conj_embs in self.closed_bfs_extend_layer(prev_layer)]
             
             if len(new_layer):
-                conj_length = len(new_layer[0][0])
+                #conj_length = len(new_layer[0][0])
+                conj_length = set(len(ce[0]) for ce in new_layer)
                 #print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
                 print '\x1B[1;32m# Conjunctions of size', conj_length, ':', len(new_layer), '\x1B[0m'
                 yield new_layer
@@ -158,7 +167,7 @@ class Fishgram:
         t2 is shortly after t1, then the relevant variables will be connected by a new SequentialAndLink (if it hasn't been
         added previously).'''
         
-        new_conj = conj[:]
+        new_links = ()
         
         times_vars = [(obj, var) for (var, obj) in embedding.items()
                       if obj.t == t.TimeNode]
@@ -166,15 +175,24 @@ class Fishgram:
         times_vars.sort()
 
         for (i, (t1, var1)) in enumerate(times_vars[:-1]):
+            # We want to determine whether there is a connected graph of times.
+            # This variable represents whether this time is connected to a future time.
+            # If all of the times are connected to 1+ future time, then it is a connected graph.
+            connected = False
+            
             for (t2, var2) in times_vars[i+1:]:
                 if 0 < t2 - t1 <= interval:
                     seq_and = tree("SequentialAndLink",  var1, var2)
                     if seq_and not in conj:
-                        new_conj+=(seq_and,)
+                        new_links+=(seq_and,)
+                        connected = True
                 else:
                     break
+            
+            if not connected:
+                return None
         
-        return new_conj
+        return new_links
 
 
     def extensions_simple(self, prev_layer):
@@ -187,6 +205,11 @@ class Fishgram:
         for (prev_conj,  prev_embeddings) in prev_layer:
 
             for tr_, embs_ in self.forest.tree_embeddings.items():
+
+#                if prev_conj != () and tr_ < self.awkward[prev_conj]:
+#                    #print 'OUT_OF_ORDER', tr_
+#                    continue
+                
                 # Give the tree new variables. Rewrite the embeddings to match.
                 tr, rebound_embs = self._create_new_variables(tr_, embs_)
 
@@ -206,12 +229,18 @@ class Fishgram:
                         remapped_conj = prev_conj+(remapped_tree,)
                         
                         # Simple easy approach: just add all possible SequentialAndLinks
-                        remapped_conj_plus = self._add_all_seq_and_links(remapped_conj, new_s)
-
-                        # Skip 'links' where there is no remapping, i.e. no connection to the existing pattern (no variables in common).
-                        if ( prev_conj != () and
-                                not len(remapping) and len(remapped_conj_plus) == len(remapped_conj) ):
+                        new_seqs = self._add_all_seq_and_links(remapped_conj, new_s)
+                        # If there is a new time not connected to the others.
+                        if new_seqs == None:
                             continue
+                        remapped_conj_plus = remapped_conj + new_seqs
+
+                        # Skip 'links' where there is no remapping, i.e. no connection to the existing pattern.
+                        # A connection can be one or both of: reusing a variable, and a variable being a time that is
+                        # close to already-mentioned times (i.e. has an afterlink)
+                        if prev_conj != () :
+                            if not (len(remapping) or len(new_seqs) ):
+                                continue
 
                         if remapped_tree in prev_conj:
                             continue
@@ -226,6 +255,10 @@ class Fishgram:
                         if remapped_conj_plus not in extensions_for_prev_conj_and_tree_type:
                             extensions_for_prev_conj_and_tree_type[remapped_conj_plus] = []
                         extensions_for_prev_conj_and_tree_type[remapped_conj_plus].append(new_s)
+                        
+                        self.viz.outputTarget(target=list(remapped_conj_plus), parent=list(prev_conj), index=0)
+                        
+                        self.awkward[remapped_conj_plus] = tr_
 
                 new_layer += extensions_for_prev_conj_and_tree_type.items()
         
@@ -435,35 +468,25 @@ class Fishgram:
             
             assert all( [len(vars) == len(binding) for binding in embs] )
             
-            for i in xrange(0, len(conj)):
-                conclusion = conj[i]
-                premises = conj[:i] + conj[i+1:]
-                
-                # All SequentialAndLinks must be in the premises. Otherwise it might get weird.
-                if conclusion.get_type() == t.SequentialAndLink:
-                    continue
-                
-                # Let's say P implies Q. To keep things simple, P&Q must have the same number of variables as P.
-                # In other words, the conclusion can't add extra variables. This would be equivalent to proving an
-                # AverageLink (as the conclusion of the Implication).
-                if not (len(get_varlist(conj)) == len(get_varlist(premises))):
-                    continue
+            for (premises, conclusion) in self._split_conj_into_rules(conj):
                 
                 # Fishgram won't produce conjunctions with dangling SeqAndLinks. And 
                 # i.e. AtTime 1 eat;    SeqAnd 1 2
                 # with 2 being a variable only used in the conclusion (and the whole conjunction), not in the premises.
                 # The embedding count is undefined in this case.
                 # Also, the count measure is not monotonic so if ordering were used you would sometimes miss things.
-                try:
-                    ce_premises = next(ce for ce in prev_layer if unify(premises, ce[0], {}, True) != None)
-                    premises_original, premises_embs = ce_premises
                 
-#                        ce_conclusion = next(ce for ce in layers[0] if unify( (conclusion,) , ce[0], {}, True) != None)
-#                        conclusion_original, conclusion_embs = ce_conclusion
-                except StopIteration:
-                    #sys.stderr.write("\noutput_implications_for_last_layer: didn't create required subconjunction"+
-                    #    " due to either pruning issues or dangling SeqAndLinks\n"+str(premises)+'\n'+str(conclusion)+'\n')
-                    continue
+                # Also, in the magic-sequence approach, the layers will all be mixed up (as it adds an unspecified number of afterlinks as soon as it can.)
+#                try:
+#                    ce_premises = next(ce for ce in prev_layer if unify(premises, ce[0], {}, True) != None)
+#                    premises_original, premises_embs = ce_premises
+#                
+##                        ce_conclusion = next(ce for ce in layers[0] if unify( (conclusion,) , ce[0], {}, True) != None)
+##                        conclusion_original, conclusion_embs = ce_conclusion
+#                except StopIteration:
+#                    #sys.stderr.write("\noutput_implications_for_last_layer: didn't create required subconjunction"+
+#                    #    " due to either pruning issues or dangling SeqAndLinks\n"+str(premises)+'\n'+str(conclusion)+'\n')
+#                    continue
 
 #                print map(str, premises)
 #                print ce_premises[0]
@@ -473,14 +496,24 @@ class Fishgram:
 #                p_norm = normalize( (conj, emb), ce_premises )
 #                print p_norm, c_norm
 
-##                # Use the embeddings lookup system (alternative approach)
-##                premises_embs = self.forest.lookup_embeddings(premises)
-##                embs = self.forest.lookup_embeddings(conj)
-##                # Can also measure probability of conclusion by itself
+                # Use the embeddings lookup system (alternative approach)
+                premises_embs = self.forest.lookup_embeddings(premises)
+                embs = self.forest.lookup_embeddings(conj)
                 
-                count_conj = len(embs)
+#                premises_embs2 = self.find_exists_embeddings(premises_embs)
+#                embs2 = self.find_exists_embeddings(embs)
+                premises_embs2 = premises_embs
+                embs2 = embs
+                # Can also measure probability of conclusion by itself
+
+#                # This occurs if the premises contain an afterlink A->B where A is only mentioned in the conclusion.
+#                # We only want to create PredictiveImplications where the first thing is in the premises.
+#                if len(get_varlist(conj)) != len(premises_embs2[0]):
+#                    continue
+
+                count_conj = len(embs2)
                 
-                self.make_implication(premises, conclusion, len(premises_embs), count_conj)
+                self.make_implication(premises, conclusion, len(premises_embs2), count_conj)
 
     def make_implication(self, premises, conclusion, premises_support, conj_support):
         # Called the "confidence" in rule learning literature
@@ -521,16 +554,17 @@ class Fishgram:
                 #eval_a = atom_from_tree(evalLink, self.atomspace)
                 #eval_a.tv = TruthValue(1, count)
                 
-                print 'make_implication => %s' % (a,)
+                print 'make_implication => %s <premises_support=%s>' % (a,premises_support)
         else:
             print 'freq = %s' % freq
         
         if not conj_support <= premises_support:
-            import pdb; pdb.set_trace()
-        assert conj_support <= premises_support
+            print 'truth value glitch:', premises,'//', conclusion
+#            import pdb; pdb.set_trace()
+#        assert conj_support <= premises_support
 
     def make_psi_rule(self, premises, conclusion):
-        #print 'make_psi_rule <= \n %s \n %s' % (premises, conclusion)
+        #print '\nmake_psi_rule <= \n %s \n %s' % (premises, conclusion)
         
         tr = tree
         a = self.atomspace.add
@@ -637,8 +671,8 @@ class Fishgram:
                 embs_conj = self.forest.lookup_embeddings(conj)
                 embs_premises = self.forest.lookup_embeddings(premises)
    
-                count_conj = len(embs_conj)
-                count_premises = len(embs_premises)
+                count_conj = len(self.find_exists_embeddings(embs_conj))
+                count_premises = len(self.find_exists_embeddings(embs_premises))
                 
                 if count_conj > count_premises:
                     import pdb; pdb.set_trace()
@@ -648,15 +682,19 @@ class Fishgram:
                     self.make_implication(premises, conclusion, count_premises, count_conj)
     
     def _split_conj_into_rules(self, conj):
-        for i in xrange(0, len(conj)):
-            conclusion = conj[i]
-            premises = conj[:i] + conj[i+1:]
+        seq_and_template = tree('SequentialAndLink', new_var(), new_var()) # two TimeNodes
+        after_links = tuple( x for x in conj if unify(seq_and_template, x, {}) != None )
+        normal = tuple( x for x in conj if unify(seq_and_template, x, {}) == None )
+        
+        for i in xrange(0, len(normal)):
+            conclusion = normal[i]
+            premises = normal[:i] + normal[i+1:]
             
             # Let's say P implies Q. To keep things simple, P&Q must have the same number of variables as P.
             # In other words, the conclusion can't add extra variables. This would be equivalent to proving an
             # AverageLink (as the conclusion of the Implication).
-            if (len(get_varlist(conj)) == len(get_varlist(premises))):
-                yield (premises, conclusion)
+            if (len(get_varlist(normal)) == len(get_varlist(premises+after_links))):
+                yield (premises+after_links, conclusion)
 
 
     def make_psi_rule_alt(self, premises_, conclusion_):
@@ -711,6 +749,33 @@ class Fishgram:
     
     def none_filter(self, list):
         return [x for x in list if x != None]
+
+    def find_exists_embeddings(self, embs):
+        if not len(embs):
+            return embs
+        
+        # All embeddings for a conjunction have the same order of times.
+        # This can only be assumed in the magic-sequence version, where all possible sequence links are included.
+        # Making it a list rather than a generator because a) min complains if you give it a size-0 list and b) it's small anyway.
+        times = [ (var,obj) for (var,obj) in embs[0].items() if obj.get_type() == t.TimeNode ]
+        if not len(times):
+            return embs
+        
+        def int_from_var_obj(ce):
+            return int(ce[1].op.name)
+        
+        first_time_var_obj = min(times, key=int_from_var_obj)
+        first_time, _ = first_time_var_obj
+        
+        simplified_embs = set()
+        for s in embs:
+            simple_s = tuple( (var, obj) for (var, obj) in s.items() if obj.get_type() != t.TimeNode or var == first_time  )
+            simplified_embs.add(simple_s)
+        
+        if len(simplified_embs) != len(embs):
+            print '++find_exists_embeddings', embs, '=>', simplified_embs
+        
+        return simplified_embs
 
     # Wait, we need count(  P(X,Y) ) / count( G(X,Y). Not equal to count( P(X) * count(Y in G))
     def normalize(self, big_conj_and_embeddings, small_conj_and_embeddings):
@@ -921,8 +986,6 @@ def notice_changes(atomspace):
             template = tree('AtTimeLink', time, target)
             a = atom_from_tree(template, atomspace)
             
-            #a.tv = TruthValue(0, 0)
-            
             # Was the value updated at that timestamp? The PsiDemandUpdaterAgent is not run every cycle so many
             # timestamps will have no value recorded.
             if a.tv.count > 0:
@@ -965,6 +1028,8 @@ def notice_changes(atomspace):
             a.tv = tv
             
             print str(a)
+            
+            atTime.tv = TruthValue(0, 0)
 
 #def make_seq_alt(atomspace):
 #    # unit of timestamps is 0.1 second so multiply by 10
@@ -1008,22 +1073,25 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
         self.cycles = 1
 
     def run(self,atomspace):
-        fish = Fishgram(atomspace)
-        make_seq(atomspace)
-        # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
-        #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
-        
-        notice_changes(atomspace)
-        
-        fish.forest.extractForest()
+        try:
+            self.fish
+        except:
+            self.fish = Fishgram(atomspace)
+            #make_seq(atomspace)
+            # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
+            #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
+            
+            notice_changes(atomspace)
+            
+            self.fish.forest.extractForest()
 #            
 #            conj = (fish.forest.all_trees[0],)
 #            fish.forest.lookup_embeddings(conj)
 
-        #fish.forest.extractForest()
-        #time1, time2, time1_binding, time2_binding = new_var(), new_var(), new_var(), new_var()
-        #fish.forest.tree_embeddings[tree('SequentialAndLink', time1, time2)] = [
-        #                                                    {time1: time1_binding, time2: time2_binding}]
+            #fish.forest.extractForest()
+            #time1, time2, time1_binding, time2_binding = new_var(), new_var(), new_var(), new_var()
+            #fish.forest.tree_embeddings[tree('SequentialAndLink', time1, time2)] = [
+            #                                                    {time1: time1_binding, time2: time2_binding}]
 #            for layer in fish.closed_bfs_layers():
 #                for conj, embs in layer:
 #                    print
@@ -1037,7 +1105,7 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #                        print 'emb:',  pp(bound_tree)
         
         #fish.iterated_implications()
-        fish.implications()
+        self.fish.implications()
         
         #fish.make_all_psi_rules()
 

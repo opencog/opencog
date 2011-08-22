@@ -336,7 +336,6 @@ class PLNviz:
         self.result_attributes = {'r':1.0, 'b':0.0, 'g':0.0}
 
     def outputTarget(self, target, parent, index):
-        return
         
         #target_id = str(hash(target))
         target_id = str(target)
@@ -356,7 +355,6 @@ class PLNviz:
             self.g.add_edge(link_id, parent_id, target_id, directed=True, label=str(index))
 
     def declareResult(self, target):
-        return
         
         target_id = str(target)
         self.g.change_node(target_id, **self.result_attributes)
