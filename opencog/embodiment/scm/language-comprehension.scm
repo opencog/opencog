@@ -272,73 +272,88 @@
     ); let
 )
 
-(define (remove-frame-instance predicateNode)  
-  (let ((removed? #f))
-    (if (and (not (null? predicateNode)) (equal? (cog-type predicateNode) 'PredicateNode))
-        (begin         
-    
-          (map
-           (lambda (elementLink)
-             ; first remove all eval link that connects the 
-             ; value to its respetive element
-             (let ((elementPredicate (car (gdr elementLink))))
-               (map
-                (lambda (evalLink)
-                  (cog-delete evalLink)
-                  )
-                (cog-filter-incoming
-                 'EvaluationLink
-                 elementPredicate
-                 )
-                )
+; Remove the given frame instance (PredicateNode) including all the related
+; InheritanceLink, FrameElementLink and EvaluationLink
+;
+; @return (whether removed successfully . frame instance)
+;
+; @note Here is an example of how the current RelEx2Frame output stores a Frame Element, 
+;
+;       Sentence: The ball is red.
+;
+;       InheritanceLink (stv 1 1)
+;           PredicateNode "red@87cd46cc-006d-4ff4-b4de-7e579f92adf6_Color_Entity"
+;           DefinedFrameElementNode "#Color:Entity"
+;       
+;       FrameElementLink (stv 1 1)
+;           PredicateNode "red@87cd46cc-006d-4ff4-b4de-7e579f92adf6_Color"
+;           PredicateNode "red@87cd46cc-006d-4ff4-b4de-7e579f92adf6_Color_Entity"
+;           
+;       EvaluationLink (stv 1 1)
+;           PredicateNode "red@87cd46cc-006d-4ff4-b4de-7e579f92adf6_Color_Entity"
+;           WordInstanceNode "ball@72673eaa-74db-4ff1-9ce9-f57f8805d20c"
+;
+(define (remove-frame-instance frame_instance)  
+    (let ( (removed? #f)
+         )
+         (if (and (not (null? frame_instance))
+                  (equal? (cog-type frame_instance) 'PredicateNode)
+             )
+             (begin       
+                 (map
+                     (lambda (frame_element_link)
+                         ; first remove all the EvaluationLinks and InheritanceLinks 
+                         ; that connect the value to its respetive frame element instance
+                         (let ( (frame_element_instance (car (gdr frame_element_link)))
+                              )
+                              (map
+                                  (lambda (evaluation_link)
+                                      (cog-delete evaluation_link)
+                                  )
+                                  (cog-filter-incoming 'EvaluationLink frame_element_instance)
+                              )
                
-               (map
-                (lambda (inheritanceLink)
-                  (cog-delete inheritanceLink)
-                  )
-                (cog-filter-incoming
-                 'InheritanceLink
-                 elementPredicate
-                 )
-                )               
-               )
-             ; disconnect the frame element from the frame instance
-             (cog-delete elementLink)
-             )
-           (cog-filter-incoming
-            'FrameElementLink
-            predicateNode
-            )
-           )
-         ; finally remove the inheritance link and the instance node
-          (map
-           (lambda (inheritance)
-             (cog-delete inheritance)
-             (set! removed? #t)
-             )
-           (cog-filter-incoming
-            'InheritanceLink
-            predicateNode
-            )
-           )          
-        )
-        )
-    removed?
-    )
-  )
+                              (map
+                                  (lambda (inheritance_link)
+                                      (cog-delete inheritance_link)
+                                  )
+                                  (cog-filter-incoming 'InheritanceLink frame_element_instance)
+                              )               
+                          )
 
-(define (remove-frame-instances frameType)
-  (map
-   (lambda (inheritance)
-     (remove-frame-instance (gar inheritance))
-     )
-   (cog-get-link
-    'InheritanceLink
-    'PredicateNode
-    (DefinedFrameNode frameType)
-    )
-   )    
-  )
+                          ; disconnect the frame element instance from the frame instance
+                          (cog-delete frame_element_link)
+                     ); lambda
+
+                     (cog-filter-incoming 'FrameElementLink frame_instance)
+                 ); map
+
+                 ; finally remove the InheritanceLink containing frame instance
+                 (map
+                     (lambda (inheritance_link)
+                         (cog-delete inheritance_link)
+                         (set! removed? #t)
+                     )
+                     (cog-filter-incoming 'InheritanceLink frame_instance)
+                 )
+             ); begin
+         ); if
+
+         ; return value (whether and which frame instance has been removed successfully)
+         (cons removed? frame_instance)
+    ); let
+)
+
+; Delete all the frame instances of given frame type
+(define (remove-frame-instances frame_type)
+    (map
+        (lambda (inheritance)
+            (remove-frame-instance (gar inheritance))
+        )
+
+        (cog-get-link 'InheritanceLink 'PredicateNode (DefinedFrameNode frame_type) )
+    )    
+)
 
 ; Retrieve a list containing the sentences that belong to the most
 ; recent parsed text
@@ -1364,14 +1379,15 @@
 ; the colon symbol.
 ; i.e. (get-frame-element-name 
 ;        "#Color:Entity" ) = "Entity"
-(define (get-frame-element-name elementType)
-  (if (not (null? elementType))
-      (let ((colonIndex (list-index (lambda (char) (char=? char #\:)) (string->list elementType))))
-        (substring elementType (+ colonIndex 1) (string-length elementType))
+(define (get-frame-element-name element_type)
+    (if (not (null? element_type))
+        (let ( (colon_index (string-index element_type #\:) )
+             )
+             (substring element_type (+ colon_index 1) (string-length element_type))
         )
-      '()
-      )
-  )
+        '()
+    )
+)
 
 ; Given a specific Frame type (string format) and an element name (string format),
 ; this function returns the DefinedFrameElementNode which represents the desired
@@ -1382,32 +1398,31 @@
 ;
 ;      (get-frame-element-node "#Color" "Sunda") = '() 
 ;
-(define (get-frame-element-node frameType elementName)
-    (let ( (chosenElementNode '())
+(define (get-frame-element-node frame_type element_name)
+    (let ( (chosen_element_node '())
          )
          (map
-             (lambda (elementNode)
-                 (let* ( (name (cog-name elementNode))
-                         (colonIndex (string-index name #\:) )
+             (lambda (element_node)
+                 (let* ( (name (cog-name element_node))
+                         (colon_index (string-index name #\:) )
                        )
                        ; do a split in the element name and compare it without the frame prefix
-                       ; i.e. it name is #Color:Entity, but compares only the second part Entity == elementName
-                       (if (and colonIndex
-                                (string=? (substring name (+ colonIndex 1) (string-length name)) elementName) 
+                       ; i.e. it name is #Color:Entity, but compares only the second part Entity == element_name
+                       (if (and colon_index
+                                (string=? (substring name (+ colon_index 1) (string-length name)) element_name) 
                            )
-                           (set! chosenElementNode elementNode)
+                           (set! chosen_element_node element_node)
                        ); if
                  ); let*
              ); lambda
 
-             (get-frame-elements frameType)
+             (get-frame-elements frame_type)
          ); map
 
          ; return value
-         chosenElementNode
+         chosen_element_node
     ); let
 )
-
 
 ; Given the type of a valid Frame, this function will returns a list containing
 ; all the elements of the Frame, represented by DefinedFrameElementNodes.
@@ -1417,9 +1432,9 @@
 ;            (DefinedFrameElementNode "#Color:Color")
 ;          )
 ;
-(define (get-frame-elements frameType)
+(define (get-frame-elements frame_type)
     (let ( (elements '())
-           (frameNode (DefinedFrameNode frameType))
+           (frame_node (DefinedFrameNode frame_type))
            (elementNames '())
          )
          (map
@@ -1432,7 +1447,7 @@
                  )
              ); lambda
 
-             (cog-get-link 'FrameElementLink 'DefinedFrameElementNode frameNode)    
+             (cog-get-link 'FrameElementLink 'DefinedFrameElementNode frame_node)    
          ); map
     
          (map
@@ -1440,7 +1455,7 @@
                  (let ( (parent (car (gdr link)))
                       )
                       (if (and (equal? 'DefinedFrameNode (cog-type parent))
-                               (not (equal? parent frameNode)) 
+                               (not (equal? parent frame_node)) 
                           )
                           (map
                               (lambda (parentElement)
@@ -1461,7 +1476,7 @@
                  ); let
              ); lambda
 
-             (cog-filter-incoming 'InheritanceLink frameNode)
+             (cog-filter-incoming 'InheritanceLink frame_node)
          ); map
 
          ; return value
@@ -2497,59 +2512,80 @@
   ) ; let
 )
 
-; Used by store-fact to make a new frame instance (with ConceptNodes instead of WordInstanceNodes)
-(define (instantiate-frame type instanceName elements)
-  (let ((frameElements '())
-        (frameElementsNodes '())
-        (isFrameInstance? #f)
-        )
-    (map
-     (lambda (elementType)
-       (let ((elementName (get-frame-element-name (cog-name elementType))))
-         (set! frameElements (append frameElements (list elementName)))
-         (set! frameElementsNodes (append frameElementsNodes (list (cons elementName elementType))))
+; Used by update-fact to make a new frame instance (with ConceptNodes instead of
+; WordInstanceNodes) and related frame element instances for each face
+;
+; @return newly created frame instace (an InheritanceLink containing frame instance node)
+;
+(define (instantiate-frame frame_instance_type frame_instance_name frame_element_name_value_pairs)
+    (let ( (frame_element_names '())
+           (frame_element_name_node_pairs '())
+           (is_frame_instance? #f)
          )
-       )
-     (get-frame-elements type)
-     )
-    
-    (map
-     (lambda (element)
-       (let ((name (car element))
-             (value (cdr element)))
-
-         (if (member name frameElements)                            
-             (let ((elementPredicateNode (PredicateNode (string-append instanceName "_" name ))))
-               (InheritanceLink (stv 1 1) (cog-new-av 0 1 0)
-                elementPredicateNode
-                (assoc-ref frameElementsNodes name)
-                )
-               (FrameElementLink (stv 1 1) (cog-new-av 0 1 0)
-                (PredicateNode instanceName)
-                elementPredicateNode
-                )
-               (EvaluationLink (stv 1 1) (cog-new-av 0 1 0)
-                elementPredicateNode
-                value
-                )               
-               (set! isFrameInstance? #t)
-               ) ; let
-             ) ; if
-
-         ) ; let
-       ) ; lambda
-     elements
-     )
-
-    (if isFrameInstance?
-        (InheritanceLink (stv 1 1) (cog-new-av 0 1 0)
-         (PredicateNode instanceName)
-         (DefinedFrameNode type)         
+         ; get frame element name list and (name . DefinedFrameNode) pairs given frame name
+         (map
+             (lambda (frame_element)
+                 (let ( (frame_element_name
+                            (get-frame-element-name (cog-name frame_element))
+                        )
+                      )
+                      (set! frame_element_names
+                          (append frame_element_names (list frame_element_name))
+                      )
+                      (set! frame_element_name_node_pairs 
+                          (append frame_element_name_node_pairs 
+                              (list (cons frame_element_name frame_element))
+                          )
+                      )
+                 )
+             )
+             (get-frame-elements frame_instance_type) ; get DefinedFrameNodes
          )
-        '()
-        )    
-    )
-  )
+
+         ; create related links for frames element instances, including InheritanceLink,
+         ; FrameElementLink and EvaluationLink
+         (map
+             (lambda (frame_element_name_value_pair)
+                 (let ( (name (car frame_element_name_value_pair) )
+                        (value (cdr frame_element_name_value_pair) ) ; grounded frame element
+                      )
+
+                      (if (member name frame_element_names)
+                          (let ( (frame_element_instance
+                                     (PredicateNode (string-append frame_instance_name "_" name)))
+                               )
+                               (InheritanceLink (stv 1 1) (cog-new-av 0 1 0)
+                                   frame_element_instance
+                                   (assoc-ref frame_element_name_node_pairs name)
+                               )
+                               (FrameElementLink (stv 1 1) (cog-new-av 0 1 0)
+                                   (PredicateNode frame_instance_name)
+                                   frame_element_instance
+                               )
+                               (EvaluationLink (stv 1 1) (cog-new-av 0 1 0)
+                                   frame_element_instance
+                                   value
+                               )               
+                               (set! is_frame_instance? #t)
+                          ); let
+                      ); if
+
+                 ); let
+             ); lambda
+
+             frame_element_name_value_pairs
+         ); map
+
+         ; create and return InheritanceLink for frame instance
+         (if is_frame_instance?
+             (InheritanceLink (stv 1 1) (cog-new-av 0 1 0)
+                 (PredicateNode frame_instance_name)
+                 (DefinedFrameNode frame_instance_type)         
+             )
+             '()
+         )    
+    ); let
+)
 
 ;;; Core functions
 
@@ -2831,7 +2867,7 @@
                       )
 
                       ; Note: question frames aren't grounded at this point. get-grounded-element-value is used by the matching functions
-                      ; before doing the lookup (or PLN inference). store-fact also does this for statement sentences.
+                      ; before doing the lookup (or PLN inference). update-fact also does this for statement sentences.
                       ; i.e. at this point it's all WordInstanceNodes rather than ConceptNodes and SemeNodes.
                       (map
                           (lambda (frame_instance)
@@ -2978,67 +3014,101 @@
     ); let
 )
 
-; A fact is a set of Frames which describes something.
-; It can be used as knownledge by the agent to answer
-; questions or in any reasoning process.
-; Basically, this function find a grounded frame instance
-; for each Frame that composes the parsed sentence
-; and set their av and tv values. It also replaces WordInstanceNodes
-; with their normalised form.
-(define (store-fact)
-  (map
-   (lambda (parse)
-     (let ((negation? #f)
-           (incomingPredicates 
-            (get-latest-frame-instances 
-             (get-latest-word-instance-nodes parse))))
-       
-       (map
-        (lambda (predicate)
-          (if (equal? (get-frame-instance-type predicate) "#Negation" )
-              (set! negation? #t)
-              )
-          )
-        incomingPredicates
-        )
-       (if negation?
-           (map
-            (lambda (groundedPredicate)
-              (remove-frame-instance groundedPredicate)
-              )
-            (find-grounded-frame-instances-predicates incomingPredicates)
-            )
-
-           (map
-            (lambda (predicate)
-              (if (null? (match-frame predicate))
-                  (let ((elements '()))
-                    ; there is no grounded frame, so create a new one
-                    (map
-                     (lambda (elementPredicate)
-                       (set! elements (append elements
-                         (list (cons
-                                (get-frame-element-name (get-frame-element-instance-type elementPredicate))
-                                (get-grounded-element-value
-                                 (get-frame-element-instance-value elementPredicate)
-                                 )))))
-                     )
-                     (get-frame-element-instances predicate)
+; Create frames (including frame instances and related frame element instances)
+; based on the parsed sentence. It may also delete fact (i.e. frames) if #Negation
+; frame is found in the parsed sentence. 
+;
+; @return newly created frame instaces (InheritanceLink containing frame instance) or
+;         (remove state . frame instance) pairs if #Negation frame is found in the
+;         parsed sentence. 
+;
+; @note 
+;
+; A fact is a set of Frames which describes something. It can be used as 
+; knownledge by the agent to answer questions or in any reasoning process.
+; Basically, this function find a grounded frame instance for each Frame that 
+; composes the parsed sentence and set their av and tv values. It also replaces
+; WordInstanceNodes with their normalised form.
+;
+(define (update-fact)
+    (map
+        (lambda (parse)
+            (let ( (negation? #f)
+                   (frame_instances 
+                       (get-latest-frame-instances (get-latest-word-instance-nodes parse))
                    )
-                   (instantiate-frame (get-frame-instance-type predicate) 
-                                      (string-append "G_" (cog-name predicate)) elements ) 
-                 ) ; let
-               )
-             )
-             incomingPredicates
-           ) ; map
+                 )
+      
+                 ; Check if there's any #Negation frame instance
+                 (map
+                     (lambda (frame_instance)
+                         (if (equal? (get-frame-instance-type frame_instance) "#Negation")
+                             (set! negation? #t)
+                         )
+                     )
+                     frame_instances
+                 )
 
-       ) ; if
-     ) ; let
-   ) ; lambda
-   (get-latest-parses)
-  ) ; map
+                 (if negation?
+                     ; If there's a #Negation frame, delete all the frame
+                     ; instances including all the related frame element instances
+                     (map
+                         (lambda (grounded_frame_instance)
+                             (remove-frame-instance grounded_frame_instance)
+                         )
+                         (find-grounded-frame-instances-predicates frame_instances)
+                     )
 
+                     ; If there's no #Negation frame, store the fact (i.e. create a
+                     ; frame instance and related frame element instaces for each fact)
+                     (map
+                         (lambda (frame_instance)
+                             (if (null? (match-frame frame_instance))
+                                 (let ( (elements '()) ; a list of (type . value) for frame element instances
+                                      )
+                                      ; there is no grounded frame, so create a new one
+                                      (map
+                                          (lambda (frame_element_instance)
+                                              (set! elements 
+                                                  (append elements
+                                                      (list
+                                                          (cons
+                                                              (get-frame-element-name
+                                                                  (get-frame-element-instance-type frame_element_instance)
+                                                              )
+                                                              (get-grounded-element-value 
+                                                                  (get-frame-element-instance-value frame_element_instance)
+                                                              )
+                                                          ); cons
+                                                      ); list
+                                                  ); append
+                                              ); set
+                                          ); lambda
+                                          (get-frame-element-instances frame_instance)
+                                      ); map
+
+                                      ; store and return the fact 
+                                      ; (i.e. create frame instances and related
+                                      ; frame element instances and then return
+                                      ; those frame instances)
+                                      (instantiate-frame
+                                          (get-frame-instance-type frame_instance) 
+                                          (string-append "G_" (cog-name frame_instance)) 
+                                          elements
+                                      ) 
+                                 ); let
+                             ); if
+                         ); lambda
+
+                         frame_instances
+                     ); map
+
+                 ); if negation?
+            ); let
+        ); lambda
+
+        (get-latest-parses)
+    ); map
 )
 
 ; Helper functions that receives a list of SenseNodeLinks

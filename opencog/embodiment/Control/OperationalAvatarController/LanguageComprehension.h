@@ -118,10 +118,10 @@ public:
     void resolveLatestSentenceCommand( void );
     
     /**
-     * Store a new fact, extracted from a sentence
-     * sent by a trusty agent
+     * Update fact, i.e. frame instances (store new fact or delete old fact if 
+     * #Negation frame is detected), extracted from a sentence sent by a trusty agent
      */
-    void storeFact( void );
+    void updateFact(void);
 
     /**
      * Given a list of Frames, stored as a Predicate into the AtomSpace,
