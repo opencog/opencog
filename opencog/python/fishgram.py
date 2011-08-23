@@ -647,7 +647,7 @@ class Fishgram:
             
             # Try to find suitable patterns and then use them.
             #print pp(self.causality_template)
-            matches = find_matching_conjunctions(template, self.forest.tree_embeddings.keys())
+            matches = find_matching_conjunctions(template.pattern, self.forest.tree_embeddings.keys())
             
             for m in matches:
 #                print pp(m.conj)

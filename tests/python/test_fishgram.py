@@ -32,7 +32,6 @@ class FishgramTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        print adaptors.ForestExtractor
         self.fishgram = fishgram.Fishgram(self.space)
         add_fishgram_data(self.space)
         
@@ -147,7 +146,10 @@ class FishgramTest(TestCase):
                      tr('EvaluationLink',
                                 a(t.PredicateNode, name='increased'),
                                 tr('ListLink',
-                                    a(t.PredicateNode, name = 'EnergyDemandGoal')
+                                    tr('EvaluationLink',
+                                        a(t.PredicateNode, name = 'EnergyDemandGoal'),
+                                        tr('ListLink')
+                                    )
                                 )
                         )
                      )
