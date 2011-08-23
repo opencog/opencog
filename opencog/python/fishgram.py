@@ -4,6 +4,7 @@ from tree import *
 import adaptors
 from util import *
 from itertools import *
+from collections import namedtuple
 import sys
 
 from logic import PLNviz, NullPLNviz
@@ -26,14 +27,14 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 1
+        self.min_embeddings = 3
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
         self.max_per_layer = 1e9 # 10 # 1e35 # 600
         
-        self.viz = PLNviz(atomspace)
-        #self.viz = NullPLNviz(atomspace)
+        #self.viz = PLNviz(atomspace)
+        self.viz = NullPLNviz(atomspace)
         self.viz.outputTarget(target=[], parent=None, index=0)
         
         self.awkward = {}
@@ -558,102 +559,102 @@ class Fishgram:
         else:
             print 'freq = %s' % freq
         
-        if not conj_support <= premises_support:
-            print 'truth value glitch:', premises,'//', conclusion
+#        if not conj_support <= premises_support:
+#            print 'truth value glitch:', premises,'//', conclusion
 #            import pdb; pdb.set_trace()
 #        assert conj_support <= premises_support
 
     def make_psi_rule(self, premises, conclusion):
         #print '\nmake_psi_rule <= \n %s \n %s' % (premises, conclusion)
         
+        for template in self.causal_pattern_templates():
+            ideal_premises = template.pattern[:-1]
+            ideal_conclusion = template.pattern[-1]
+
+            s2 = unify(ideal_premises, premises, {})
+            #print 'make_psi_rule: s2=%s' % (s2,)
+            s3 = unify(ideal_conclusion, conclusion, s2)
+            #print 'make_psi_rule: s3=%s' % (s3,)
+            
+            if s3 != None:
+                #premises2 = [x for x in premises if not unify (seq_and_template, x, {})]
+                actions_psi = [s3[action] for action in template.actions]
+                # TODO should probably record the EvaluationLink in the increased predicate.
+                goal_eval = s3[template.goal]
+                
+                premises2 = tuple(actions_psi)
+
+                return premises2, goal_eval
+        return None
+
+    def causal_pattern_templates(self):
         tr = tree
         a = self.atomspace.add
         t = types
         
-        time1 = new_var()
-        time2 = new_var()
-        action = new_var()
-        goal = new_var()
+        causal_pattern = namedtuple('causal', 'pattern actions goal')
         
-        action_template = tr('AtTimeLink', time1,
-                                tr('EvaluationLink',
-                                    a(t.PredicateNode, name='actionDone'),
-                                    tr('ListLink', 
-                                       action
-                                     )
-                                )
-                            )
-        seq_and_template = tr('SequentialAndLink', time1, time2)
-        increase_template = tr('AtTimeLink',
-                     time2,
-                     tr('EvaluationLink',
-                                a(t.PredicateNode, name='increased'),
-                                tr('ListLink', goal)
-                                )
-                     )
-
-        ideal_premises = (action_template, seq_and_template)
-        ideal_conclusion = increase_template
-
-        s2 = unify(ideal_premises, premises, {})
-        #print 'make_psi_rule: s2=%s' % (s2,)
-        s3 = unify(ideal_conclusion, conclusion, s2)
-        #print 'make_psi_rule: s3=%s' % (s3,)
-        
-        if s3 != None:
-            #premises2 = [x for x in premises if not unify (seq_and_template, x, {})]
-            action_psi = s3[action]
-            # TODO should probably record the EvaluationLink in the increased predicate.
-            goal_eval = s3[goal]
+        for action_seq_size in xrange(1, 6):
+            times = [new_var() for x in xrange(action_seq_size+1)]
+            actions = [new_var() for x in xrange(action_seq_size)]
             
-            premises2 = (action_psi, )
+            goal = new_var()
+            
+            template = []
+            
+            for step in xrange(action_seq_size):
+                #next_step = step+1
+                
+                action_template = tr('AtTimeLink', times[step],
+                        tr('EvaluationLink',
+                            a(t.PredicateNode, name='actionDone'),
+                            tr('ListLink', 
+                               actions[step]
+                             )
+                        )
+                    )
+                
+                template += [action_template]
+                
+                # TODO This assumes the afterlinks are all transitive. But that's not actually required.
+                # But sometimes if you have A -> B -> C the fishgram system will still generate the afterlink
+                # from A -> C, so you should allow it either way.
+                for next_step in times[step+1:]:
+                    seq_and_template = tr('SequentialAndLink', times[step], next_step)
+                    template += [seq_and_template]
+                
+                #template += [action_template, seq_and_template]
 
-            return premises2, goal_eval
-        else:
-            return None
+            increase_template = tr('AtTimeLink',
+                         times[-1],
+                         tr('EvaluationLink',
+                                    a(t.PredicateNode, name='increased'),
+                                    tr('ListLink', goal)
+                                    )
+                         )
+            
+            template += [increase_template]
+            
+            #print 'causal_pattern_templates', template
+            yield causal_pattern(pattern=tuple(template), actions=actions, goal=goal)
 
     def lookup_causal_patterns(self):
-        tr = tree
-        a = self.atomspace.add
-        t = types
-        
-        time1 = new_var()
-        time2 = new_var()
-        action = new_var()
-        goal = new_var()
-        
-        action_template = tr('AtTimeLink', time1,
-                                tr('EvaluationLink',
-                                    a(t.PredicateNode, name='actionDone'),
-                                    tr('ListLink', 
-                                       action
-                                     )
-                                )
-                            )
-        seq_and_template = tr('SequentialAndLink', time1, time2)
-        increase_template = tr('AtTimeLink',
-                     time2,
-                     tr('EvaluationLink',
-                                a(t.PredicateNode, name='increased'),
-                                tr('ListLink', goal)
-                                )
-                     )
-
-#        ideal_premises = (action_template, seq_and_template)
-#        ideal_conclusion = increase_template
-        
-        self.causality_template = (action_template, increase_template, seq_and_template)
-        
-        # Try to find suitable patterns and then use them.
-        print pp(self.causality_template)
-        matches = find_matching_conjunctions(self.causality_template, self.forest.tree_embeddings.keys())
-        
-        for m in matches:
-#            print pp(m.conj)
-#            print pp(m.subst)
-#            embs = self.forest.lookup_embeddings(m.conj)
-#            print pp(embs)
-            yield m.conj
+        for template in self.causal_pattern_templates():
+#            ideal_premises = (action_template, seq_and_template)
+#            ideal_conclusion = increase_template
+            
+            #self.causality_template = (action_template, increase_template, seq_and_template)
+            
+            # Try to find suitable patterns and then use them.
+            #print pp(self.causality_template)
+            matches = find_matching_conjunctions(template, self.forest.tree_embeddings.keys())
+            
+            for m in matches:
+#                print pp(m.conj)
+#                print pp(m.subst)
+#                embs = self.forest.lookup_embeddings(m.conj)
+#                print pp(embs)
+                yield m.conj
 
     def make_all_psi_rules(self):
         for conj in self.lookup_causal_patterns():
@@ -677,7 +678,7 @@ class Fishgram:
                 if count_conj > count_premises:
                     import pdb; pdb.set_trace()
                 
-                print "make_implication(premises=%s, conclusion=%s, count_premises=%s, count_conj=%s)" % (premises, conclusion, count_premises, count_conj)                
+                print "make_implication(premises=%s, conclusion=%s, count_premises=%s, count_conj=%s)" % (premises, conclusion, count_premises, count_conj)
                 if count_premises > 0:
                     self.make_implication(premises, conclusion, count_premises, count_conj)
     
@@ -1106,6 +1107,7 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
         
         #fish.iterated_implications()
         self.fish.implications()
+        #self.fish.run()
         
         #fish.make_all_psi_rules()
 
