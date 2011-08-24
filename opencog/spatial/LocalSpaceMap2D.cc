@@ -744,6 +744,9 @@ std::vector<spatial::Gradient> LocalSpaceMap2D::getObjectGradientsByGridPoint(co
     const spatial::ObjectInfoSet& objInfoSet = _grid.at(gp);
     spatial::ObjectInfoSet::const_iterator it = objInfoSet.begin();
     for (; it != objInfoSet.end(); it++) {
+        if (it->isExtraBoundary) {
+            continue;
+        }
         spatial::ObjectID entityId = spatial::ObjectID(it->id);
         const EntityPtr& entityPtr = getEntity(entityId);
         spatial::Altitude altitude = entityPtr->getPosition().z;
@@ -1145,9 +1148,7 @@ void LocalSpaceMap2D::calculateObjectPoints( std::vector<spatial::GridPoint>& po
             } // else
         } // for
 
-
     } // for
-
 
     std::map<int, std::pair<int, int> >::iterator it;
     for ( it = limits.begin( ); it != limits.end( ); ++it ) {
@@ -1163,7 +1164,6 @@ void LocalSpaceMap2D::calculateObjectPoints( std::vector<spatial::GridPoint>& po
             points.push_back( spatial::GridPoint( it->first, it->second.first ) );
         } // else
     } // for
-
 
 }
 
@@ -1181,7 +1181,7 @@ void LocalSpaceMap2D::addObject( const spatial::ObjectID& id, const spatial::Obj
     entity->setProperty( Entity::ENTITY_CLASS, metadata.entityClass);
 
     if ( isObstacle ) {
-        addToSuperEntity( entity );
+        addToSuperEntity(entity);
     } // if
 
     const math::BoundingBox& bb = entity->getBoundingBox( );
@@ -1214,8 +1214,8 @@ void LocalSpaceMap2D::addObject( const spatial::ObjectID& id, const spatial::Obj
 
 void LocalSpaceMap2D::addBlock(const ObjectID& id, const ObjectMetaData& metadata)
 {
-    long idHash = boost::hash<std::string>()( id );
-    EntityPtr entity(new Block( idHash, id, math::Vector3( metadata.centerX, metadata.centerY, metadata.centerZ ), math::Dimension3( metadata.width, metadata.height, metadata.length ), math::Quaternion( math::Vector3::Z_UNIT, metadata.yaw ), _radius ));
+    long idHash = boost::hash<std::string>()(id);
+    EntityPtr entity(new Block(idHash, id, math::Vector3(metadata.centerX, metadata.centerY, metadata.centerZ), math::Dimension3(metadata.width, metadata.height, metadata.length), math::Quaternion(math::Vector3::Z_UNIT, metadata.yaw), _radius));
     BlockPtr block = boost::static_pointer_cast<Block>(entity);
     entity->setProperty(Entity::OBSTACLE, true);
     entity->setProperty(Entity::ENTITY_CLASS, metadata.entityClass);
@@ -1236,7 +1236,7 @@ void LocalSpaceMap2D::addBlock(const ObjectID& id, const ObjectMetaData& metadat
     bottomSegments.push_back( math::LineSegment( innerBounding.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ), innerBounding.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( innerBounding.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ), innerBounding.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
 
-    calculateObjectPoints( solidArea, bottomSegments );
+    calculateObjectPoints(solidArea, bottomSegments);
 
     // get the expanding boundingbox bottom segments.
     const math::BoundingBox& expansionBounding = entity->getBoundingBox( );
@@ -1246,25 +1246,25 @@ void LocalSpaceMap2D::addBlock(const ObjectID& id, const ObjectMetaData& metadat
     bottomSegments.push_back( math::LineSegment( expansionBounding.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ), expansionBounding.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
     bottomSegments.push_back( math::LineSegment( expansionBounding.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ), expansionBounding.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
 
-    calculateObjectPoints( gridPoints[idHash], bottomSegments );
+    calculateObjectPoints(gridPoints[idHash], bottomSegments);
 
     // the total area that the object occupies with expansion boundary.
     const std::vector<spatial::GridPoint>& totalArea = this->gridPoints[idHash];
     // Calculate the expansion area.
     std::set_difference(solidArea.begin(), solidArea.end(), totalArea.begin(), totalArea.end(), expansionArea.begin());
-    this->entities.insert( LongEntityPtrHashMap::value_type( idHash, entity ) );
+    this->entities.insert(LongEntityPtrHashMap::value_type(idHash, entity));
 
-    const char* internalId = entity->getName( ).c_str( );
+    const char* internalId = entity->getName().c_str();
     logger().debug("LocalSpaceMap - Adding internal points to grid..." );
 
     unsigned int i;
-    for ( i = 0; i < solidArea.size( ); ++i ) {
+    for (i = 0; i < solidArea.size(); ++i) {
         ObjectInfo info(internalId, false);
-        _grid[ solidArea[i] ].insert(info);
+        _grid[solidArea[i]].insert(info);
     } // for
-    for ( i = 0; i < expansionArea.size(); ++i) {
+    for (i = 0; i < expansionArea.size(); ++i) {
         ObjectInfo info(internalId, true);
-        _grid[ expansionArea[i] ].insert(info);
+        _grid[expansionArea[i]].insert(info);
     } // for
 }
 
@@ -1362,7 +1362,6 @@ rec_find::rec_find(const spatial::GridPoint& current,
     // old method - buggy
     //rec();
 }
-
 
 bool rec_find::too_far() const
 {

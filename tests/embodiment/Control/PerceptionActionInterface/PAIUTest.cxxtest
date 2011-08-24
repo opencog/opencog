@@ -1295,6 +1295,10 @@ public:
         TS_ASSERT(! pai.processPVPMessage(pvpMsg4, toUpdateHandles));
     } // testProcessPVPMessage
 
+    void testProcessPVPMessageWithProtobuf() {
+
+    }
+
     void testTimestampRelatedMethods() {
         unsigned long t1 = PAITestUtil::getCurrentTimestamp();
         sleep(1);

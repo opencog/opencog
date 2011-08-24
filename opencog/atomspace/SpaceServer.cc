@@ -229,7 +229,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
     DPRINTF("SpaceServer::add After contains\n");
     if (mapContainsObject) {
         //const SpaceServer::ObjectMetadata& oldMetadata = map->getMetaData(objectId);
-        const spatial::EntityPtr& oldEntity = map->getEntity( objectId );
+        const spatial::EntityPtr& oldEntity = map->getEntity(objectId);
         SpaceServer::ObjectMetadata oldMetadata( oldEntity->getPosition( ).x,
                                                  oldEntity->getPosition( ).y,
                                                  oldEntity->getPosition( ).z,
@@ -276,7 +276,11 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
 
         } else {
             logger().fine("SpaceServer::add - adding object into the space map");
-            map->addObject(objectId, metadata, isObstacle );
+            if (entityClass == "block") {
+                map->addBlock(objectId, metadata);
+            } else {
+                map->addObject(objectId, metadata, isObstacle );
+            }
         }
         return true;
     }
