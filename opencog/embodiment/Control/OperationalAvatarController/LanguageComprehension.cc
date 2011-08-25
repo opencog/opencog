@@ -189,7 +189,10 @@ void LanguageComprehension::resolveLatestSentenceReference( void )
 
 #ifdef HAVE_GUILE
     std::string answer = SchemeEval::instance().eval( "(resolve-reference)");
-    logger().info( "LanguageComprehension::%s - (resolve-reference) answer: %s", __FUNCTION__, answer.c_str() );
+    logger().info( "LanguageComprehension::%s - (resolve-reference) resolved references: \n%s",
+                   __FUNCTION__,
+                   answer.c_str() 
+                 );
     if ( SchemeEval::instance().eval_error() ) {
         logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve reference: %s",
                         __FUNCTION__, answer.c_str( ) );
@@ -209,10 +212,10 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
     HandleSeq evalLinks;
     as.getHandleSet( back_inserter(evalLinks),
                      commands, &types[0], NULL, 2, EVALUATION_LINK, false );
-    logger().debug( "LanguageComprehension::%s - # of EvalLinks for '%s': %d",
+    logger().debug( "LanguageComprehension::%s - Number of EvaluationLinks for Predicate '%s': %d",
                     __FUNCTION__, predicateName.c_str(), evalLinks.size() );
 
-    HandleSeq elements;
+    HandleSeq arguments;
     bool activeEvalLinkFound = false;
     unsigned int k;
     for( k = 0; k < evalLinks.size(); ++k ) {
@@ -236,9 +239,10 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
         activeEvalLinkFound = true;
         logger().debug( "LanguageComprehension::%s - Chosen link '%s'", 
                         __FUNCTION__, as.atomAsString( evalLinks[k] ).c_str() );
-        elements = as.getOutgoing(as.getOutgoing( evalLinks[k], 1 ));
+        arguments = as.getOutgoing(as.getOutgoing( evalLinks[k], 1 ));
     } // for
-    return elements;
+
+    return arguments;
 }
 
 void LanguageComprehension::resolveLatestSentenceCommand( void )
@@ -256,6 +260,7 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
 #endif
     
     opencog::AtomSpace& as = agent.getAtomSpace();
+    // TODO: the variable name here is quite confusing. We should rename 'elements' to 'frameIntances'
     HandleSeq elements = getActivePredicateArguments( "latestAvatarRequestedCommands" );
 
     unsigned int i;
@@ -295,7 +300,7 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
     } // for
 }
 
-std::string LanguageComprehension::resolveFrames2Relex( )
+std::string LanguageComprehension::resolveFrames2Sentence(void)
 {
     init();
 
@@ -304,90 +309,108 @@ std::string LanguageComprehension::resolveFrames2Relex( )
 
     std::map<std::string, unsigned int> frame_elements_count;
 
-    opencog::AtomSpace& as = agent.getAtomSpace( );
-    HandleSeq elements = getActivePredicateArguments( "latestQuestionFrames" );
+    opencog::AtomSpace& as = agent.getAtomSpace();
+    HandleSeq answerFrameInstances = getActivePredicateArguments("latestAnswerFrames");
 
-    if ( elements.size( ) == 0 ) {
-        // there is no question to answer
-        logger().debug( "LanguageComprehension::%s - elements size of the answer is 0. 'I don't know' answer will be reported.",
+    // there is no frame instance related to the answer
+    if ( answerFrameInstances.size() == 0 ) {
+        logger().debug( "LanguageComprehension::%s - number of frame instances related to the answer is 0. 'I don't know' answer will be reported.",
                         __FUNCTION__ );
         return "";
-    } // if
+    } 
 
-    unsigned int j;
-    for( j = 0; j < elements.size(); ++j ) {
-        Handle predicateElement = elements[j];
-
-        //get the frame name
+    foreach (Handle frameInstance, answerFrameInstances) {
+        // try to get InheritanceLinks holding both the given frame instance
+        // (a PredicateNode) and an DefinedFrameNode. 
+        //
+        // Here is an example:
+        //
+        // (InheritanceLink (stv 1 0.99999988) (av -3 1 0)
+        //     (PredicateNode "G_red@ce9b596d-fad6-4858-a2cc-9bd03e029389_Color" (av -3 0 0))
+        //     (DefinedFrameNode "#Color" (av -2 0 0))
+        // )
+        //
         std::string frameName;
-        { // check the inheritance
-            HandleSeq inheritanceLink;
-            inheritanceLink.push_back( predicateElement );
-            inheritanceLink.push_back( Handle::UNDEFINED );
-            
-            Type inheritanceLinkTypes[] = { PREDICATE_NODE, DEFINED_FRAME_NODE };
-            HandleSeq inheritanceLinks;
-            as.getHandleSet( back_inserter( inheritanceLinks ),
-                             inheritanceLink,
-                             &inheritanceLinkTypes[0], NULL, 2, INHERITANCE_LINK, false );        
-            if ( inheritanceLinks.size( ) > 0 ) {
-                // ok it is a frame instance
-                if ( inheritanceLinks.size( ) > 1 ) {
-                    logger().error(
-                                   "LanguageComprehension::%s - The given handle represents more than one instance of Frame, what is unacceptable. Only the first occurrence will be considered.", __FUNCTION__ );                
-                } // if
-                frameName = as.getName( as.getOutgoing( inheritanceLinks[0], 1 ) );
-                logger().debug( "LanguageComprehension::%s - FrameName detected: %s", 
-                                __FUNCTION__, frameName.c_str() );                    
-            } else {
-                logger().debug(
-                               "LanguageComprehension::%s - The given handle isn't a Frame instance. It doesn't inherits from a DEFINED_FRAME_NODE: %s", __FUNCTION__, as.getName( predicateElement ).c_str( ) );
-                return "";
-            } // else
-        } // end block
+        HandleSeq inheritanceLink;
+        inheritanceLink.push_back( frameInstance );
+        inheritanceLink.push_back( Handle::UNDEFINED );
+        
+        Type inheritanceLinkTypes[] = { PREDICATE_NODE, DEFINED_FRAME_NODE };
+        HandleSeq inheritanceLinks;
+        as.getHandleSet( back_inserter( inheritanceLinks ),
+                         inheritanceLink,
+                         &inheritanceLinkTypes[0], NULL, 2, INHERITANCE_LINK, false );
 
+        // If it is a valid frame instance, then retrieve the frame name
+        if ( inheritanceLinks.size() > 0 ) {
+            if ( inheritanceLinks.size() > 1 ) {
+                logger().error( "LanguageComprehension::%s - The given handle represents more than one instance of Frame, what is unacceptable. Only the first occurrence will be considered.", __FUNCTION__ );
+            } 
 
-        std::map<std::string, Handle> elements =
-            AtomSpaceUtil::getFrameInstanceElementsValues( as, predicateElement );
+            frameName = as.getName( as.getOutgoing( inheritanceLinks[0], 1 ) );
+            logger().debug( "LanguageComprehension::%s - FrameName detected: %s", 
+                            __FUNCTION__, 
+                            frameName.c_str() 
+                          );
+        }
+        else {
+            logger().debug( "LanguageComprehension::%s - The given handle '%s' isn't a Frame instance. It doesn't inherit from a DEFINED_FRAME_NODE",
+                            __FUNCTION__,
+                            as.getName(frameInstance).c_str() 
+                          );
+            return "";
+        } 
+
+        // Get frame element name-value pairs        
+        std::map<std::string, Handle> frameElementInstanceNameValues =
+            AtomSpaceUtil::getFrameElementInstanceNameValues( as, frameInstance );
             
-        logger().debug( "LanguageComprehension::%s - # of elements found: '%d' for predicate: '%s'", 
-                        __FUNCTION__, elements.size(), as.atomAsString(predicateElement).c_str() );
+        logger().debug( "LanguageComprehension::%s - Number of frame elements found: '%d' for frame instance: '%s'", 
+                        __FUNCTION__, 
+                        frameElementInstanceNameValues.size(), 
+                        as.atomAsString(frameInstance).c_str() 
+                      );
         
         std::map<std::string, Handle>::iterator it;
-        for(it = elements.begin(); it != elements.end(); ++it) {
-            logger().debug( "LanguageComprehension::%s - Inspecting element: '%s' atom: '%s'", 
-                            __FUNCTION__, it->first.c_str(), as.atomAsString(it->second).c_str() );
-            std::string frameElementName = frameName+":"+it->first;
-            handles.push_back( std::pair<std::string, Handle>(frameElementName, it->second ) );
-            //count the number of times each element appears to be part of
-            //the pre-conditions
-            if( frame_elements_count[frameElementName] > 0 ){
-                frame_elements_count[frameElementName] = frame_elements_count[frameElementName] + 1;
-            }else{
-                frame_elements_count[frameElementName] = 1;
-            }
-        }//for
+        for( it = frameElementInstanceNameValues.begin(); 
+             it != frameElementInstanceNameValues.end(); 
+             ++it ) {
+            logger().debug( "LanguageComprehension::%s - Inspecting frame element instance name: '%s' value: '%s'", 
+                            __FUNCTION__, 
+                            it->first.c_str(),
+                            as.atomAsString(it->second).c_str() 
+                          );
+            std::string frameElementName = frameName + ":" + it->first;
+            handles.push_back( std::pair<std::string, Handle>(frameElementName, it->second) );
 
-    }//for
+            // count the number of times each element appears to be part of
+            // the pre-conditions
+            frame_elements_count[frameElementName] > 0 ? 
+                frame_elements_count[frameElementName] += 1:
+                frame_elements_count[frameElementName] = 1; 
+        }// for
+
+    }// foreach (Handle frameInstance, answerFrameInstances)
   
-
-    //iterate the frame_elements_count to get the preconditions appended with
-    //the element count, like: #Color:Color_2, #Entity:Entity_1, and so on
+    // iterate the frame_elements_count to get the preconditions appended with
+    // the element count, like: #Color:Color$2, #Entity:Entity$1, and so on
     std::map< std::string, unsigned int>::const_iterator iter;
     for( iter = frame_elements_count.begin(); iter != frame_elements_count.end(); ++iter) {
-        std::string precondition = iter->first+"$"+boost::lexical_cast<std::string>(iter->second);
+        std::string precondition = iter->first + "$" + boost::lexical_cast<std::string>(iter->second);
         logger().debug( "LanguageComprehension::%s - Pre-Condition detected: '%s'", 
                         __FUNCTION__, precondition.c_str() );
         pre_conditions.insert( precondition );
     }
-    
-    logger().debug("LanguageComprehension::%s - Pre-Conditions",__FUNCTION__);
+   
+    // log preconditions
+    logger().debug("LanguageComprehension::%s - Begin of Pre-Conditions",__FUNCTION__);
     std::set< std::string >::iterator it;
     for(it = pre_conditions.begin(); it != pre_conditions.end(); ++it){
         logger().debug("LanguageComprehension::%s - Pre-Condition: %s",__FUNCTION__,(*it).c_str());
     }
     logger().debug("LanguageComprehension::%s - End of Pre-Conditions",__FUNCTION__);   
-    
+   
+    // resolve frame to relex
     OutputRelex* output_relex = framesToRelexRuleEngine.resolve( pre_conditions );
     if( output_relex == NULL ){
         logger().debug("LanguageComprehension::%s - Output Relex is NULL for the pre-conditions. No rules were found.",__FUNCTION__);
@@ -396,10 +419,11 @@ std::string LanguageComprehension::resolveFrames2Relex( )
     
     std::string text = output_relex->getOutput( as, handles );
     if( text.empty() ){
-        logger().error("LanguageComprehension::%s - Output Relex returned an empty string.",__FUNCTION__);
+        logger().error("LanguageComprehension::%s - Output Relex returned an empty string.", __FUNCTION__);
         return "...";
     }
 
+    // resolve relex to sentence and return the result
     return resolveRelex2Sentence(text);
 }
 
@@ -437,23 +461,22 @@ std::string LanguageComprehension::resolveRelex2Sentence( const std::string& rel
     
     
     return nlgen_sentence;
-    
 }
 
-void LanguageComprehension::updateFact( void )
+void LanguageComprehension::updateFact(void)
 {
     init();
 
 #ifdef HAVE_GUILE
     std::string answer = SchemeEval::instance().eval( "(update-fact)");    
 
-    logger().info( "LanguageComprehension::%s - (update-fact) newly created or deleted frame instances (fact): %s", 
+    logger().info( "LanguageComprehension::%s - (update-fact) newly created or deleted frame instances (fact): \n%s", 
                    __FUNCTION__, 
                    answer.c_str()
                  );
 
     if ( SchemeEval::instance().eval_error() ) {
-        logger().error( "LanguageComprehension::%s - (update-fact) An error occurred while trying to update fact: %s",
+        logger().error( "LanguageComprehension::%s - (update-fact) An error occurred while trying to update fact: \n%s",
                         __FUNCTION__, 
                         answer.c_str() 
                       );
@@ -647,7 +670,6 @@ void LanguageComprehension::updateDialogControllers( long elapsedTime )
         AtomSpaceUtil::setPredicateValue( atomSpace, "has_something_to_say", 
                                           SimpleTruthValue( 1, 1 ), agentHandle );
     } // if
-
 }
 
 void LanguageComprehension::loadDialogControllers( void )
@@ -721,34 +743,43 @@ public:
         result.heardSentence = 
             this->langComp->getTextFromSentencePredicate( heardSentences.back( ) );
         
-        std::string answer = SchemeEval::instance().eval( "(answer-question)");    
-        logger().debug( "QuestionAnsweringDialogController::%s - (answer-question) answer: %s", __FUNCTION__, answer.c_str() );
+        std::string question_type = SchemeEval::instance().eval( "(answer-question)");    
+        logger().debug( "QuestionAnsweringDialogController::%s - (answer-question) question type: %s",
+                        __FUNCTION__,
+                        question_type.c_str()
+                      );
         if ( SchemeEval::instance().eval_error() ) {
             logger().error( "QuestionAnsweringDialogController::%s - An error occurred while trying to resolve reference: %s",
-                            __FUNCTION__, answer.c_str( ) );
+                            __FUNCTION__, question_type.c_str( ) );
         } // if
         SchemeEval::instance().clear_pending( );
 
-        boost::trim(answer);
+        boost::trim(question_type);
 
-        if ( answer == "#truth-query" ) {
-            // yes/no question
+        // yes/no question
+        // TODO: generate answers based on the truth value (such as pretty sure, maybe etc.)
+        if ( question_type == "#truth-query" ) {
             HandleSeq elements = this->langComp->getActivePredicateArguments( 
-                "latestQuestionFrames" );
+                "latestAnswerFrames" );
 
-            if ( elements.size( ) > 0 ) {
+            if ( elements.size() > 0 ) {
                 result.sentence = "Yes";
-            } else {
+            } 
+            else {
                 opencog::AtomSpace& as = agent->getAtomSpace( );
+
                 HandleSeq link(2);
                 link[0] = as.getHandle( PREDICATE_NODE, "unknownTerm" );
                 link[1] = Handle::UNDEFINED;
-                if ( link[0] != Handle::UNDEFINED ) {                   
+
+                if ( link[0] != Handle::UNDEFINED ) {
 
                     Type types[] = {PREDICATE_NODE, LIST_LINK };
                     HandleSeq evalLinks;
                     as.getHandleSet( back_inserter(evalLinks),
                                      link, &types[0], NULL, 2, EVALUATION_LINK, false );
+
+                    // search for unknown terms
                     bool unknownTermFound = false;
                     unsigned int i;
                     for (i = 0; i < evalLinks.size( ); ++i ) {
@@ -762,30 +793,37 @@ public:
                     
                     if ( unknownTermFound ) {
                         result.sentence = "Could you be more specific, please?";
-                    } else {
+                    } 
+                    else {
                         result.sentence = "No";
-                    } // else
-
-                } else {
+                    } 
+                }
+                else {
                     result.sentence = "No";
                 } // else
 
             } // else
-            result.status = result.sentence.length( ) > 0;
-        } else {
+
+            result.status = result.sentence.length() > 0;
+        }
+        // other types of question
+        else {
             // call nlgen using relations
             result.status = true;
-            result.sentence = langComp->resolveFrames2Relex( );
+            result.sentence = langComp->resolveFrames2Sentence();
         } // else
+
         logger().debug("QuestionAnsweringDialogController::%s - (%s) Sent[%s] Received[%s]",
-                       __FUNCTION__, getName( ).c_str( ), result.heardSentence.c_str( ), result.sentence.c_str( ));
+                       __FUNCTION__,
+                       getName().c_str(),            // name of dialog controller
+                       result.heardSentence.c_str(), // original question
+                       result.sentence.c_str()       // answer
+                      );
 
         return result;
 #endif
-        
     }
 };
-
 
 /**
  * This DC is a generic network DC. It will use the given host/port to try to

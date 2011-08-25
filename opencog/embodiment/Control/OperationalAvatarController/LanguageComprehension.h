@@ -38,27 +38,25 @@ using opencog::control::AvatarInterface;
 namespace opencog { namespace oac {
 
 /**
- * LanguageComprehension is an OAC module responsible
- * for the management of dialogs between agents
+ * LanguageComprehension is an OAC module responsible for the management of 
+ * dialogs between agents
  */
 class LanguageComprehension 
 {
 public: 
     
     /**
-     * A DialogController is an element that can
-     * produce sentences for a dialog session.
-     * A Sentence might be just an answer for a given 
-     * question or an spontaneous speech.
+     * A DialogController is an element that can produce sentences for a dialog
+     * session. A Sentence might be just an answer for a given question or an 
+     * spontaneous speech.
      */
     class DialogController 
     {
     public:
 
         /**
-         * Result is a helper plain data object
-         * used to hold the information returned by
-         * un update step of the DialogController
+         * Result is a helper plain data object used to hold the information 
+         * returned by an update step of the DialogController
          */
         class Result 
         {
@@ -124,13 +122,13 @@ public:
     void updateFact(void);
 
     /**
-     * Given a list of Frames, stored as a Predicate into the AtomSpace,
+     * Given a list of Frames, stored as PredicateNodes into the AtomSpace,
      * this method will try to convert them into RelEx format and then
-     * will call relex2Sentence to try to retrieve an English sentence
+     * will call relex2Sentence to try to retrieve an English sentence.
      * 
      * @return An English sentence translated from the Frames list
      */
-    std::string resolveFrames2Relex( );
+    std::string resolveFrames2Sentence(void);
     
     /**
      * This is a helper function that retrieves the list of all
@@ -138,6 +136,19 @@ public:
      *
      * @param predicateName The predicate name whose its arguments are desired.
      * @return A HandleSeq containing the arguments handles
+     *
+     * @note If there's an EvaluationLink as below in the AtomSpace, then calling 
+     *       getActivePredicateArguments("latestAnswerFrames") would return a
+     *       std::vector<Handle> containing the handle of  
+     *       (PredicateNode "G_red@ce9b596d-fad6-4858-a2cc-9bd03e029389_Color" (av -3 0 0))
+     *
+     * (EvaluationLink (stv 1 0.99999988) (av -2 0 0)
+     *    (PredicateNode "latestAnswerFrames" (av -2 0 0))
+     *    (ListLink (av -2 0 0)
+     *        (PredicateNode "G_red@ce9b596d-fad6-4858-a2cc-9bd03e029389_Color" (av -3 0 0))
+     *    )
+     * )
+     *
      */
     HandleSeq getActivePredicateArguments( const std::string& predicateName );
 
@@ -158,10 +169,12 @@ public:
     }
 
     /**
-     * Responsible for updating all Dialog Controllers at 
-     * each cycle
+     * Responsible for updating all Dialog Controllers at each cycle. 
      *
      * @param elapsedTime The current system timestamp (reference: PAI)
+     * @note  It firstly invokes 'processSentence method' of all the dialog
+     *        controllers holded by LanguageComprehension and then call the 
+     *        scheme function 'choose-sentence'
      */
     void updateDialogControllers( long elapsedTime );
 
