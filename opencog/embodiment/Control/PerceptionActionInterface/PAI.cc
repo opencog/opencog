@@ -1220,7 +1220,7 @@ void PAI::processInstruction(DOMElement * element)
         // ok there is an incoming parsed (by relex sentece)
         // so, connect the author of the Relex sentences to each sentence
         // it will be useful to identify which agent says each sentence
-        logger().debug("PAI::%s - Processing parsed sentence: %s", __FUNCTION__, parsedSentenceText); 
+        logger().debug("PAI::%s - Processing parsed sentence: \n %s", __FUNCTION__, parsedSentenceText); 
 
         HandleSeq sentenceOwner(2);
         sentenceOwner[0] = agentNode;
