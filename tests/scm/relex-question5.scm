@@ -60,11 +60,11 @@
  (lambda (evalLink)
    (cog-set-tv! evalLink (stv 0 0))
    )
- (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
+ (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestAnswerFrames"))
  )
 
 (EvaluationLink (stv 1.0 1.0)
-   (PredicateNode "latestQuestionFrames")
+   (PredicateNode "latestAnswerFrames")
    (ListLink
       (PredicateNode "red@216e8536-4867-49bc-970a-fc69608e39d7_Color")
       (PredicateNode "blue@216e8536-4867-49bc-970a-fc69608e39d7_Color")

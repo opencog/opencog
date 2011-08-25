@@ -630,7 +630,7 @@ public:
         rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-sentence7.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
-        this->language->storeFact( );
+        this->language->updateFact( );
         Handle colorFrame = this->atomSpace->getHandle( PREDICATE_NODE, 
             "G_green@fba0ea8f-ce96-4c3e-b1a3-0dbe4e70bbcb_Color");
         Handle attributesFrame = this->atomSpace->getHandle( PREDICATE_NODE, 
@@ -642,7 +642,7 @@ public:
         rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-sentence8.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
-        this->language->storeFact( );       
+        this->language->updateFact( );       
         
         TS_ASSERT( this->atomSpace->getIncoming( colorFrame ).size( ) == 0 )
         TS_ASSERT( this->atomSpace->getIncoming( attributesFrame ).size( ) == 0 )        
@@ -832,35 +832,35 @@ public:
     */
     //}      
 
-    void testFrames2Relex()
+    void testFrames2Sentence()
     {  
         //color
         int rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question1.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);     
 
-        std::string output = this->language->resolveFrames2Relex( );
+        std::string output = this->language->resolveFrames2Sentence( );
         TS_ASSERT(output != "");
-        logger().debug("testFrames2Relex - Relex Output for relex-question1.scm input: %s",output.c_str() );
+        logger().debug("testFrames2Sentence - Relex Output for relex-question1.scm input: %s",output.c_str() );
 
-        output = this->language->resolveFrames2Relex( );
+        output = this->language->resolveFrames2Sentence( );
         TS_ASSERT(output != "");
-        logger().debug("testFrames2Relex - Relex Output for relex-question3.scm input: %s",output.c_str() );
+        logger().debug("testFrames2Sentence - Relex Output for relex-question3.scm input: %s",output.c_str() );
 
         //hungry
         rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question4.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
 
-        output = this->language->resolveFrames2Relex( );
+        output = this->language->resolveFrames2Sentence( );
         TS_ASSERT(output != "");
-        logger().debug("testFrames2Relex - Relex Output for relex-question4.scm input: %s",output.c_str() );
+        logger().debug("testFrames2Sentence - Relex Output for relex-question4.scm input: %s",output.c_str() );
        
         //two colors
         rc = load_scm_file(*(this->atomSpace),PROJECT_SOURCE_DIR"/tests/scm/relex-question5.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
 
-        output = this->language->resolveFrames2Relex( );
+        output = this->language->resolveFrames2Sentence( );
         TS_ASSERT(output != "");
-        logger().debug("testFrames2Relex - Relex Output for relex-question5.scm input: %s",output.c_str() );
+        logger().debug("testFrames2Sentence - Relex Output for relex-question5.scm input: %s",output.c_str() );
                 
     }
 
@@ -884,7 +884,7 @@ public:
         TS_ASSERT( frameInstancePredicate != Handle::UNDEFINED )
         if ( frameInstancePredicate != Handle::UNDEFINED ) {
             std::map<std::string, Handle> values = 
-                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, frameInstancePredicate );
+                AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, frameInstancePredicate );
             TS_ASSERT_EQUALS( values["Relation_type"], this->atomSpace->getHandle( CONCEPT_NODE, "beside" ) )
             TS_ASSERT_EQUALS( values["Figure"], this->atomSpace->getHandle( SEME_NODE, petId ) )
             TS_ASSERT_EQUALS( values["Ground"], this->atomSpace->getHandle( SEME_NODE, treeId1 ) )
@@ -913,7 +913,7 @@ public:
         TS_ASSERT( frameInstancePredicate != Handle::UNDEFINED )
         if ( frameInstancePredicate != Handle::UNDEFINED ) {
             std::map<std::string, Handle> values = 
-                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, frameInstancePredicate );
+                AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, frameInstancePredicate );
             TS_ASSERT_EQUALS( values["Relation_type"], this->atomSpace->getHandle( CONCEPT_NODE, "behind" ) )
             TS_ASSERT_EQUALS( values["Figure"], this->atomSpace->getHandle( SEME_NODE, petId ) )
             TS_ASSERT_EQUALS( values["Ground"], this->atomSpace->getHandle( SEME_NODE, treeId1 ) )
@@ -943,7 +943,7 @@ public:
         TS_ASSERT( isNearFrameInstance != Handle::UNDEFINED );
         {
             std::map<std::string, Handle> storedElements = 
-                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance );
+                AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, isNearFrameInstance );
             TS_ASSERT_EQUALS( elements, storedElements )
         }
         std::map<std::string, Handle> elements2;
@@ -957,7 +957,7 @@ public:
         TS_ASSERT( isNearFrameInstance2 != Handle::UNDEFINED );
         {
             std::map<std::string, Handle> storedElements = 
-                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance2 );
+                AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, isNearFrameInstance2 );
             TS_ASSERT_EQUALS( elements2, storedElements )
         }
 
@@ -968,7 +968,7 @@ public:
             TS_ASSERT( isNearInstances.size( ) > 0 )
             if ( isNearInstances.size( ) > 0 ) {
                 std::map<std::string, Handle> storedElements = 
-                    AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearInstances[isNearInstances.size()-1] );
+                    AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, isNearInstances[isNearInstances.size()-1] );
                 TS_ASSERT_EQUALS( elements2, storedElements )
             } // if                        
         }
@@ -980,7 +980,7 @@ public:
             TS_ASSERT( isNearInstances.size( ) == 4 )
             if ( isNearInstances.size( ) == 1 ) {
                 std::map<std::string, Handle> storedElements = 
-                    AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearInstances[0] );
+                    AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, isNearInstances[0] );
                 TS_ASSERT_EQUALS( elements2, storedElements )
             } // if
             
@@ -1031,7 +1031,7 @@ public:
         TS_ASSERT( isNearFrameInstance3 != Handle::UNDEFINED );
         {
             std::map<std::string, Handle> storedElements = 
-                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance3 );
+                AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, isNearFrameInstance3 );
             TS_ASSERT_EQUALS( elements3, storedElements )
         }
 
@@ -1052,7 +1052,7 @@ public:
         TS_ASSERT( isNearFrameInstance4 != Handle::UNDEFINED );
         {
             std::map<std::string, Handle> storedElements = 
-                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance4 );
+                AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, isNearFrameInstance4 );
             TS_ASSERT_EQUALS( elements5, storedElements )
         }
 
@@ -1069,7 +1069,7 @@ public:
         TS_ASSERT( isNearFrameInstance6 != Handle::UNDEFINED );
         {
             std::map<std::string, Handle> storedElements = 
-                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance6 );
+                AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, isNearFrameInstance6 );
             TS_ASSERT_EQUALS( elements3, storedElements )
         }
 
@@ -1078,7 +1078,7 @@ public:
             AtomSpaceUtil::deleteFrameInstance( *atomSpace, isNearFrameInstance2 );
             
             std::map<std::string, Handle> storedElements = 
-                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance2 );
+                AtomSpaceUtil::getFrameElementInstanceNameValues( *atomSpace, isNearFrameInstance2 );
             TS_ASSERT( storedElements.size( ) == 0 )
         }
     }
