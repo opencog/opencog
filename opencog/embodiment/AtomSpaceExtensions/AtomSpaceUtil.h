@@ -1043,13 +1043,17 @@ public:
 
 
     /**
-     * Retrieve the handles of all Frame Elements
+     * Retrieve the handles of all Frame Elements (DefinedFrameElementNodes) 
+     * given frame name. 
      *
      * @param AtomSpace the agent atomSpace
      * @param frameName the name of the FrameNet Frame
      * @param frameElementsHandles A HandleSeq which will be filled with
      *                             the Frame Elements handles
+     *
      * @return The Frame handle. Handle::UNDEFINED if the frame doesn't exists
+     *
+     * @note this function will also return the frame elements of parent frames.
      */
     static Handle getFrameElements( AtomSpace& atomSpace, 
                                     const std::string& frameName, 
@@ -1129,16 +1133,42 @@ public:
             bool permanent = true );
 
     /**
-     * Given a predicate Node handle this method returns all the elements
-     * and their values of the Frame instance represented by the PredicateNode
+     * Given a frame instance (PredicateNode handle) this method returns all the
+     * frame element names and corresponding values related.
      *
      * @param atomSpace The AtomSpace reference
      * @param frameInstancePredicateNode The handle of the PredicateNode which
-     * represents the frame instance
+     *                                   represents the frame instance
      *
-     * @return A Map containing the names and values of all the Frame instance elements
+     * @return A Map containing the names and values of all the frame instance elements
+     *
+     * @note Below is an example. If the atomspace contains the info below, 
+     *
+     *       red@xxx_Color is an instance of Frame #Color
+     *       (InheritanceLink (stv 1 1) 
+     *           (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color")
+     *           (DefinedFrameNode "#Color")
+     *       )
+     *
+     *       red@xxx_Color_Entity belongs to Frame instance red@xxx_Color   
+     *       (FrameElementLink (stv 1 1)
+     *           (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color")
+     *           (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color_Entity")
+     *       )  
+     *
+     *       word ball@xxx is the value of (or stands for) the FrameElement instance red@xxx_Color_Entity
+     *       (EvaluationLink (stv 1 1)
+     *           (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color_Entity")
+     *           (WordInstanceNode "ball@8631fad6-f29d-4b15-905c-8594fa1d27d3") 
+     *       ) 
+     *      
+     *       then calling 
+     *       getFrameElementInstanceNameValues( (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color") )
+     *
+     *       would return a std::map<std::string, Handle> holding the pair
+     *       ( "Entity", (WordInstanceNode "ball@8631fad6-f29d-4b15-905c-8594fa1d27d3") )
      */
-    static std::map<std::string, Handle> getFrameInstanceElementsValues (
+    static std::map<std::string, Handle> getFrameElementInstanceNameValues (
             AtomSpace& atomSpace, Handle frameInstancePredicateNode );
 
     /**
