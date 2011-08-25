@@ -9,7 +9,7 @@
 ;         Some code are directly copied from Linas's NLP pipeline 
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-06-23
+; @date   2011-08-23
 ;
 ; Below is an example of how the rule of Dialog System is represented in AtomSpace
 ;
@@ -184,12 +184,11 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Append a bunch of sentence nodes to the end of the utterance history and 
-; move the old utterance sentences to the end of dialog history
+; Append a bunch of sentence nodes to the end of the utterance node. 
 ;
-; Return the created ReferenceLink or an empty list if fails
+; @return the newly created ReferenceLink or an empty list if fails
 ;
-; The utterance history is represented in ActomSpace as follows:
+; The utterance sentences are organized in ActomSpace as follows:
 ;
 ; ReferenceLink
 ;     UtteranceNode  "utterance_sentences"
@@ -208,24 +207,28 @@
             (old_sentence_nodes_list (list) )
           )
 
+          ; Get previous utterance sentences
           (if (not (null? old_list_link) )
               (set! old_sentence_nodes_list 
                     (cog-outgoing-set old_list_link)
               )
           )
 
-          (apply update_dialog_node 
-              (append (list "dialog_history") old_sentence_nodes_list) 
-          )
-
+          ; Delete old ReferenceLink containing only old utterance sentences
           (cog-delete old_reference_link)
 
+          ; Create a new ReferenceLink containing both previous and new 
+          ; utterance sentences
           (update_reference_link
               utterance_node 
 
               (apply cog-new-link
                   (append
                       (list 'ListLink) 
+
+                      ; Old utterance sentences
+                      old_sentence_nodes_list
+
                       ; Process the new sentences
                       (map-in-order 
                           (lambda (sentence)
@@ -240,10 +243,56 @@
                   )
               ); apply 
 
-         ); ReferenceLink
+          ); ReferenceLink
 
     ); let*
+); define
 
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Move the old utterance sentences to the end of dialog history. 
+;
+; @return the newly created ReferenceLink with empty ListLink as below or an 
+;         empty list if fails
+;
+;         ReferenceLink
+;             UtteranceNode  "utterance_sentences"
+;             ListLink (empty)
+;
+; @note This function is invoded by PsiActionSelectionAgent::executeAction after
+;       creating 'say' actions for all the utterance sentences, that prevents the 
+;       agent speaking the same sentences twice or even more. 
+;
+
+(define (reset_utterance_node utterance_node_name)
+    (let* ( (utterance_node (cog-node 'UtteranceNode utterance_node_name) )
+            (old_reference_link (get_reference_link utterance_node) )
+            (old_list_link (list-ref (cog-outgoing-set old_reference_link) 1) )
+            (old_sentence_nodes_list (list) )
+          )
+
+          ; Get old utterance sentences
+          (if (not (null? old_list_link) )
+              (set! old_sentence_nodes_list 
+                    (cog-outgoing-set old_list_link)
+              )
+          )
+
+          ; Append old utterance sentences to the end of dialog history
+          (apply update_dialog_node 
+              (append (list "dialog_history") old_sentence_nodes_list) 
+          )
+
+          ; Delete the old ReferenceLink containing old utterance sentences
+          (cog-delete old_reference_link)
+
+          ; Create a new ReferenceLink with empty ListLink
+          (update_reference_link
+              utterance_node 
+              (ListLink)
+          ); ReferenceLink
+
+    ); let*
 ); define
 
 ;******************************************************************************
