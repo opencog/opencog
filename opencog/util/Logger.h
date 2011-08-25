@@ -48,6 +48,10 @@ namespace opencog
 class Logger
 {
 
+    void set(const Logger&);
+#ifdef ASYNC_LOGGING
+    bool writingLoopActive;
+#endif
 public:
 
     //WARNING: if you change the levels don't forget to update
@@ -87,7 +91,6 @@ public:
     Logger(const std::string &fileName = "opencog.log", Level level = INFO, bool timestampEnabled = true);
 
     Logger(const Logger&);
-    void set(const Logger&);
 
     // ***********************************************/
     // API

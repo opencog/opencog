@@ -21,7 +21,8 @@ TARGET_LINK_LIBRARIES (Procedure
     WorldWrapper
 )
 
-#SET(CMAKE_BUILD_TYPE Debug)
+ADD_DEPENDENCIES(Procedure
+    PAI.MapInfo.pb.h)
 
 IF(COMMAND cmake_policy)
     CMAKE_POLICY(SET CMP0003 NEW)

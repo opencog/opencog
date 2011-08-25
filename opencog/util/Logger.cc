@@ -58,6 +58,51 @@ using namespace opencog;
 #define MAX_PRINTF_STYLE_MESSAGE_SIZE (1<<15)
 const char* levelStrings[] = {"NONE", "ERROR", "WARN", "INFO", "DEBUG", "FINE"};
 
+#ifndef WIN32 /// @todo backtrace and backtrace_symbols is UNIX, we
+              /// may need a WIN32 version
+static void prt_backtrace(std::ostringstream& oss)
+{
+#define BT_BUFSZ 50
+	void *bt_buf[BT_BUFSZ];
+
+	int stack_depth = backtrace(bt_buf, BT_BUFSZ);
+	char **syms = backtrace_symbols(bt_buf, stack_depth);
+
+	// Start printing at a bit into the stack, so as to avoid recording
+	// the logger functions in the stack trace.
+    oss << "\tStack Trace:\n";
+	for (int i=2; i < stack_depth; i++)
+	{
+		// Most things we'll print are mangled C++ names,
+		// So demangle them, get them to pretty-print.
+		char * begin = strchr(syms[i], '(');
+		char * end = strchr(syms[i], '+');
+		if (!(begin && end) || end <= begin)
+		{
+			// Failed to pull apart the symbol names
+            oss << "\t" << i << ": " << syms[i] << "\n";
+		}
+		else
+		{
+			*begin = 0x0;
+            oss << "\t" << i << ": " << syms[i] << " ";
+			*begin = '(';
+			size_t sz = 250;
+			int status;
+			char *fname = (char *) malloc(sz);
+			*end = 0x0;
+			char *rv = abi::__cxa_demangle(begin+1, fname, &sz, &status);
+			*end = '+';
+			if (rv) fname = rv; // might have re-alloced
+            oss << "(" << fname << " " << end << std::endl;
+			free(fname);
+		}
+	}
+    oss << std::endl;
+	free(syms);
+}
+#endif
+
 Logger::~Logger()
 {
 #ifdef ASYNC_LOGGING
@@ -72,14 +117,22 @@ Logger::~Logger()
 #ifdef ASYNC_LOGGING
 void Logger::startWriteLoop()
 {
-    m_Thread = boost::thread(&Logger::writingLoop, this);
+    pthread_mutex_lock(&lock);
+    if (!writingLoopActive) {
+        writingLoopActive = true;
+        m_Thread = boost::thread(&Logger::writingLoop, this);
+    }
+    pthread_mutex_unlock(&lock);
 }
 
 void Logger::stopWriteLoop()
 {
+    pthread_mutex_lock(&lock);
     pendingMessagesToWrite.cancel();
     // rejoin thread
     m_Thread.join();
+    writingLoopActive = false;
+    pthread_mutex_unlock(&lock);
 }
 
 void Logger::writingLoop()
@@ -138,10 +191,11 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
     this->logEnabled = true;
     this->f = NULL;
 
+    pthread_mutex_init(&lock, NULL);
 #ifdef ASYNC_LOGGING
+    this->writingLoopActive = false;
     startWriteLoop();
 #endif // ASYNC_LOGGING
-    pthread_mutex_init(&lock, NULL);
 }
 
 Logger::Logger(const Logger& log) {
@@ -238,51 +292,6 @@ void Logger::disable()
 {
     logEnabled = false;
 }
-
-#ifndef WIN32 /// @todo backtrace and backtrace_symbols is UNIX, we
-              /// may need a WIN32 version
-static void prt_backtrace(std::ostringstream& oss)
-{
-#define BT_BUFSZ 50
-	void *bt_buf[BT_BUFSZ];
-
-	int stack_depth = backtrace(bt_buf, BT_BUFSZ);
-	char **syms = backtrace_symbols(bt_buf, stack_depth);
-
-	// Start printing at a bit into the stack, so as to avoid recording
-	// the logger functions in the stack trace.
-    oss << "\tStack Trace:\n";
-	for (int i=2; i < stack_depth; i++)
-	{
-		// Most things we'll print are mangled C++ names,
-		// So demangle them, get them to pretty-print.
-		char * begin = strchr(syms[i], '(');
-		char * end = strchr(syms[i], '+');
-		if (!(begin && end) || end <= begin)
-		{
-			// Failed to pull apart the symbol names
-            oss << "\t" << i << ": " << syms[i] << "\n";
-		}
-		else
-		{
-			*begin = 0x0;
-            oss << "\t" << i << ": " << syms[i] << " ";
-			*begin = '(';
-			size_t sz = 250;
-			int status;
-			char *fname = (char *) malloc(sz);
-			*end = 0x0;
-			char *rv = abi::__cxa_demangle(begin+1, fname, &sz, &status);
-			*end = '+';
-			if (rv) fname = rv; // might have re-alloced
-            oss << "(" << fname << " " << end << std::endl;
-			free(fname);
-		}
-	}
-    oss << std::endl;
-	free(syms);
-}
-#endif
 
 void Logger::log(Logger::Level level, const std::string &txt)
 {
@@ -436,8 +445,8 @@ const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
 }
 
 // create and return the single instance
+static Logger instance;
 Logger& opencog::logger()
 {
-    static Logger instance;
     return instance;
 }

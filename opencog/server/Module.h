@@ -40,7 +40,6 @@ namespace opencog
        return "opencog::" #MODNAME;                                   \
     }                                                                 \
     extern "C" Module * opencog_module_load(CogServer *cogserver) {   \
-       logger().set(cogserver->logger());                             \
        return new MODNAME();                                          \
     }                                                                 \
     extern "C" void opencog_module_unload(Module * m) {               \

@@ -88,7 +88,6 @@ typedef std::vector<Agent*> AgentSeq;
  * which destroys the instance right after its execution.
  *
  */
-
 class CogServer : public BaseServer, public Registry<Agent>, public Registry<Request>
 {
 
