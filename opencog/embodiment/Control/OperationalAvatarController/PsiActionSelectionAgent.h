@@ -181,6 +181,16 @@ private:
 
     /**
      * Execute the given action
+     *
+     * @note It also handles SpeechActSchemas and generate 'say' actions 
+     *       automatically if the agent has something to say. That is there's 
+     *       SentenceNodes in the structure below: 
+     *
+     * ReferenceLink
+     *     UtteranceNode "utterance_sentences"
+     *     ListLink
+     *         SentenceNode ...
+     *         ...
      */
     void executeAction(AtomSpace & atomSpace, 
                        Procedure::ProcedureInterpreter & procedureInterpreter, 

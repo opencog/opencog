@@ -258,25 +258,24 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                                  atomSpace.getOutgoing(hActionExecutionLink, 0)
                                               );
 
+    // Initialize scheme evaluator
+    SchemeEval & evaluator = SchemeEval::instance();    
+    std::string scheme_expression, scheme_return_value;
+
     // If it is a SPEECH_ACT_SCHEMA_NODE, run the corresponding scheme function, 
-    // and then generate a bunch of say actions (one for each sentence node) 
-    // which would be executed from next cog cycle
+    // to create answers. The generated answers are stored in the format below, 
+    //
+    // ReferenceLink
+    //     UtteranceNode "utterance_sentences"
+    //     ListLink
+    //         SentenceNode ...
+    //         ...
+    //
     if (actionType == SPEECH_ACT_SCHEMA_NODE) {
 #if HAVE_GUILE    
-        // Initialize scheme evaluator
-        SchemeEval & evaluator = SchemeEval::instance();    
-        std::string scheme_expression, scheme_return_value;
-
         scheme_expression = "( " + actionName + " )";
 
-        // Run the speech act schema to generate answers, which would be stored in 
-        //
-        // ReferenceLink
-        //     UtteranceNode "utterance_sentences"
-        //     ListLink
-        //         SentenceNode ...
-        //         ...
-        //
+        // Run the speech act schema to generate answers
         scheme_return_value = evaluator.eval(scheme_expression);
 
         if ( evaluator.eval_error() ) {
@@ -284,8 +283,6 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                              __FUNCTION__, 
                              scheme_expression.c_str() 
                           );
-
-            return; 
         }
 
         logger().debug( "PsiActionSelectionAgent::%s - generate answers successfully by SpeechActSchema: %s [cycle = %d]", 
@@ -293,68 +290,10 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                         actionName.c_str(), 
                         this->cycleCount
                       );
-
-        // Create 'say' actions according to the answers
-        std::string sentenceNodeName, listerner, content; 
-
-        boost::regex expListener("TODO\\s*:\\s*([^,\\s]*)[\\s|,]*");
-        boost::regex expContent("CONTENT\\s*:\\s*(.*)");
-        boost::smatch what; 
-
-        Handle hSpeakAction, hSpeakActionArgument; 
-        std::vector<Handle> tempOutgoingSet; 
-
-        Handle hUtteranceSentencesList =
-            AtomSpaceUtil::getReference(atomSpace, 
-                                        atomSpace.getHandle(UTTERANCE_NODE, 
-                                                            "utterance_sentences"
-                                                           )
-                                       );
-
-        foreach(Handle hSentenceNode, atomSpace.getOutgoing(hUtteranceSentencesList) ) {
-            sentenceNodeName = atomSpace.getName(hSentenceNode); 
-
-            if ( boost::regex_search(sentenceNodeName, what, expListener) && 
-                 what.size() == 2 && what[1].matched ) {
-                listerner = what[1]; 
-            }
-            else 
-                listerner = ""; 
-
-            if ( boost::regex_search(sentenceNodeName, what, expContent) && 
-                 what.size() == 2 && what[1].matched ) {
-                content = what[1]; 
-            }
-            else 
-                content = ""; 
-
-            tempOutgoingSet.clear();
-            tempOutgoingSet.push_back( atomSpace.addNode(SENTENCE_NODE, content) );
-            tempOutgoingSet.push_back( atomSpace.addNode(OBJECT_NODE, listerner) );
-            hSpeakActionArgument = atomSpace.addLink(LIST_LINK, tempOutgoingSet); 
-
-            tempOutgoingSet.clear(); 
-            tempOutgoingSet.push_back( atomSpace.addNode(GROUNDED_PREDICATE_NODE, "say") ); 
-            tempOutgoingSet.push_back( hSpeakActionArgument ); 
-            hSpeakAction = atomSpace.addLink(EXECUTION_LINK, tempOutgoingSet); 
-
-            this->temp_action_list.insert(this->temp_action_list.begin(), hSpeakAction);
-
-            logger().debug( "PsiActionSelectionAgent::%s - generate say action: %s [cycle = %d]",
-                            __FUNCTION__,
-                            atomSpace.atomAsString(hSpeakAction).c_str(), 
-                            this->cycleCount
-                          );
-
-std::cout<<std::endl<<"Generate say action " <<atomSpace.atomAsString(hSpeakAction) 
-         << " [cycle = " << this->cycleCount <<"]"<<std::endl; 
-
-        } // foreach
-       
 #endif // HAVE_GUILE    
     }
     // If it is a combo function, call ProcedureInterpreter to execute the function
-    else {
+    else  {
         // Get combo arguments for Action
         Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments
 
@@ -397,7 +336,95 @@ std::cout<<std::endl<<"Generate say action " <<atomSpace.atomAsString(hSpeakActi
                         this->cycleCount
                       );
 
-    } // if (actionType == SPEECH_ACT_SCHEMA_NODE)
+    } 
+
+    // If the agent has something to say, generate a bunch of say actions 
+    // (one for each sentence node) which would be executed from next cognitive cycle
+    {
+        std::string sentenceNodeName, listerner, content; 
+
+        boost::regex expListener("TO\\s*:\\s*([^,\\s]*)[\\s|,]*");
+        boost::regex expContent("CONTENT\\s*:\\s*(.*)");
+        boost::smatch what; 
+
+        Handle hSpeakAction, hSpeakActionArgument; 
+        std::vector<Handle> tempOutgoingSet; 
+
+        Handle hUtteranceSentencesList =
+            AtomSpaceUtil::getReference(atomSpace, 
+                                        atomSpace.getHandle(UTTERANCE_NODE, 
+                                                            "utterance_sentences"
+                                                           )
+                                       );
+
+        foreach(Handle hSentenceNode, atomSpace.getOutgoing(hUtteranceSentencesList) ) {
+            sentenceNodeName = atomSpace.getName(hSentenceNode); 
+
+            // get listerner and content of the sentence
+            if ( boost::regex_search(sentenceNodeName, what, expListener) && 
+                 what.size() == 2 && what[1].matched ) {
+                listerner = what[1]; 
+            }
+            else 
+                listerner = ""; 
+
+            if ( boost::regex_search(sentenceNodeName, what, expContent) && 
+                 what.size() == 2 && what[1].matched ) {
+                content = what[1]; 
+            }
+            else 
+                content = ""; 
+
+            // skip the sentence with empty content (we should not get in there)
+            if ( content=="" )
+                continue; 
+
+            // create say action for the sentence and insert it into the action
+            // list, which would be executed during next cognitive cycle
+            tempOutgoingSet.clear();
+            tempOutgoingSet.push_back( atomSpace.addNode(SENTENCE_NODE, content) );
+            tempOutgoingSet.push_back( atomSpace.addNode(OBJECT_NODE, listerner) );
+            hSpeakActionArgument = atomSpace.addLink(LIST_LINK, tempOutgoingSet); 
+
+            tempOutgoingSet.clear(); 
+            tempOutgoingSet.push_back( atomSpace.addNode(GROUNDED_PREDICATE_NODE, "say") ); 
+            tempOutgoingSet.push_back( hSpeakActionArgument ); 
+            hSpeakAction = atomSpace.addLink(EXECUTION_LINK, tempOutgoingSet); 
+
+            this->temp_action_list.insert(this->temp_action_list.begin(), hSpeakAction);
+
+            logger().debug( "PsiActionSelectionAgent::%s - generate say action: %s [cycle = %d]",
+                            __FUNCTION__,
+                            atomSpace.atomAsString(hSpeakAction).c_str(), 
+                            this->cycleCount
+                          );
+
+std::cout<<std::endl<<"Generate say action " <<atomSpace.atomAsString(hSpeakAction) 
+         << " [cycle = " << this->cycleCount <<"]"<<std::endl; 
+
+        } // foreach
+
+#if HAVE_GUILE    
+        scheme_expression = "( reset_utterance_node \"utterance_sentences\" )";
+
+        // Move sentences from UtteranceNode to DialogNode, then these sentences
+        // will not be said again. 
+        scheme_return_value = evaluator.eval(scheme_expression);
+
+        if ( evaluator.eval_error() ) {
+            logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
+                             __FUNCTION__, 
+                             scheme_expression.c_str() 
+                          );
+        }
+        else {
+            logger().debug( "PsiActionSelectionAgent::%s - reset utterance node [cycle = %d]", 
+                            __FUNCTION__, 
+                            this->cycleCount
+                          );
+        }
+#endif // HAVE_GUILE    
+    }
 }
 
 void PsiActionSelectionAgent::run(opencog::CogServer * server)
@@ -454,24 +481,6 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     // Initialize the Mind Agent (demandGoalList etc)
     if ( !this->bInitialized ) 
         this->init(server);
-
-    // TODO: process heard sentences here 
-     
-    // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance();    
-    std::string scheme_expression, scheme_return_value;
-
-    scheme_expression = "( resolve-reference )";
-
-    // Run the Procedure that do planning
-    scheme_return_value = evaluator.eval(scheme_expression);
-
-    if ( evaluator.eval_error() ) {
-        logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
-                         __FUNCTION__, 
-                         scheme_expression.c_str() 
-                      );
-    }
 
     // Check the state of current running Action: 
     //
