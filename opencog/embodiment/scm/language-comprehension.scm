@@ -2849,7 +2849,7 @@
            (question? #f)
            (questionType '())
         
-           (use-pln #t)
+           (use-pln #f)
          )
         
          (map
@@ -2991,12 +2991,12 @@
                      (lambda (evalLink)
                          (cog-set-tv! evalLink (stv 0 0))
                      )
-                     (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
+                     (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestAnswerFrames"))
                  ); map
 
                  ; then create a new one
                  (EvaluationLink (stv 1 1)
-                     (PredicateNode "latestQuestionFrames")
+                     (PredicateNode "latestAnswerFrames")
                      (ListLink
                          (if (not (null? chosenAnswer) ) 
                              chosenAnswer
@@ -3005,7 +3005,7 @@
                      )
                  ); EvaluationLink
 
-                 questionType ; Return the question type...
+                 questionType ; Return the question type (used by QuestionAnsweringDialogController::processSentence)
              ); begin
 
              '(); ... or else nothing.
@@ -3534,45 +3534,44 @@
 ; Called by C++ (updateDialogControllers). Chooses a sentence to say (that has
 ; already been stored in the AtomSpace by other processing).
 (define (choose-sentence)
+    (let ( (sentences (list) )
+         )
+         ; get all the possible sentences that could be said
+         (map
+             (lambda (list_link)
+                 (let ( (tv (cog-tv list_link) )
+                      )
+                      (if (and (not (null? tv))
+                               (> (get_truth_value_mean tv) 0)
+                          )
+                          (begin
+                              (cog-set-tv! list_link (stv 0 0)) 
+                              (set! sentences
+                                  (list (cog-name (car (gdr list_link)))) 
+                              )
+                          ); begin
+                      ); if
+                 ); let 
+             ); lambda
 
-  (define (get-valid-sentences links)    
-    (if (not (null? links))
-        (let* ((link (car links))
-               (tv (cog-tv link)))
-          (if (and (not (null? tv)) (> (assoc-ref (cog-tv->alist tv) 'mean) 0))
-              (begin
-                (cog-set-tv! link (stv 0 0))
-                (fold 
-                 (lambda (node result)
-                   (append result (list (cog-name node)))
-                   )
-                 '()
-                 (gdr link)
+             ; get all the ListLinks containing SentenceNode with "Possible Sentences" anchor 
+             (cog-get-link 'ListLink 'SentenceNode (AnchorNode "# Possible Sentences") )
+         ); map
+
+         ; pick up one sentence to say
+         ; TODO: we just choose the first one for the moment
+         (if (null? sentences)
+             #f 
+             (begin
+
+                 ; TODO: use utterance_sentences instead of has_something to say 
+                 ;       (SentenceNode "IS_NEW: TRUE, TO:  , RESPONSER: AskForFood, CONTENT: Could you give me some battery?")
+                 (update_utterance_node "utterance_sentences" 
+                     (string-append "IS_NEW: TRUE, TO: , RESPONSER: , " "CONTENT: " (car sentences) )
                  )
-                )
-              (get-valid-sentences (cdr links))
-              )
-          )
-        #f
-        )
-    )  
-  
-  (let ((sentences
-         (get-valid-sentences
-          (cog-get-link
-           'ListLink
-           'SentenceNode
-           (AnchorNode "# Possible Sentences")              
-           )
-          )
-         
-         ))
-    ; demo rule: return the first sentence
-    (if sentences
-        (car sentences)
-          sentences
-          )
-    )
-  
-  )
+                 (car sentences)
+             )
+         )
+    ); let
+)
   
