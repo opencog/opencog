@@ -94,11 +94,19 @@ class tree:
                 self._tuple = tuple([self.op]+[x.to_tuple() for x in self.args])
                 return self._tuple
 
-def tree_from_atom(atom):
+def tree_from_atom(atom, dic = {}):
     if atom.is_node():
-        return tree(atom)
+        if atom.t in [types.VariableNode, types.FWVariableNode]:
+            try:
+                return dic[atom]
+            except:
+                var = new_var()
+                dic[atom] = new_var()
+                return var
+        else:
+            return tree(atom)
     else:
-        args = [tree_from_atom(x) for x in atom.out]
+        args = [tree_from_atom(x, dic) for x in atom.out]
         return tree(atom.type_name, args)
 
 def atom_from_tree(tree, a):
