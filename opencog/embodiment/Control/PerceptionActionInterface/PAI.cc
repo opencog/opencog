@@ -551,6 +551,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d map-infos done", list->getLength());
 
+#ifdef HAVE_PROTOBUF
     // getting <terrain-info> elements from the XML message
     XMLString::transcode(TERRAIN_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
@@ -560,7 +561,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d terrain-infos done", list->getLength());
-
+#endif
 
     // getting <avatar-signal> elements from the XML message
     XMLString::transcode(AVATAR_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
