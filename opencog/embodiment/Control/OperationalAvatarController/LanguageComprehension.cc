@@ -410,17 +410,27 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
     }
     logger().debug("LanguageComprehension::%s - End of Pre-Conditions",__FUNCTION__);   
    
+    // get all the answer related frame instances, which would be returned if
+    // frames to relex or relex to sentence fails
+    std::string answerFrameInstancesStr; 
+
+    foreach (Handle frameInstance, answerFrameInstances) {
+        answerFrameInstancesStr += as.atomAsString(frameInstance) + "    "; 
+    }
+
     // resolve frame to relex
     OutputRelex* output_relex = framesToRelexRuleEngine.resolve( pre_conditions );
+
     if( output_relex == NULL ){
         logger().debug("LanguageComprehension::%s - Output Relex is NULL for the pre-conditions. No rules were found.",__FUNCTION__);
-        return "I know the answer, but I don't know how to say it. [Frames2Relex did not have a suitable rule]";
+
+        return "I know the answer, but I don't know how to say it, because Frames2Relex does not have a suitable rule. The answer involved frame instances are: " + answerFrameInstancesStr;
     }
     
     std::string text = output_relex->getOutput( as, handles );
     if( text.empty() ){
         logger().error("LanguageComprehension::%s - Output Relex returned an empty string.", __FUNCTION__);
-        return "...";
+        return " I know the answer, but I don't know how to say it, because Relex2Sentence returns empty string. The answer involved frame instances are: " + answerFrameInstancesStr;
     }
 
     // resolve relex to sentence and return the result
