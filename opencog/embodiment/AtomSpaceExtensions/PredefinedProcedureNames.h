@@ -51,6 +51,7 @@
 #define AGISIM_ROTATION_PREDICATE_NAME "AGISIM_rotation"
 #define SIZE_PREDICATE_NAME "size"
 #define OWNERSHIP_PREDICATE_NAME "owns"
+#define ACTION_ACTOR_NAME "Actor"
 
 // high level predicates
 #define NEAR_PREDICATE_NAME "near"

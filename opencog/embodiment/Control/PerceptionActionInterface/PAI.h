@@ -468,9 +468,9 @@ private:
     //! Support method from processAvatarSignal
     Handle processAgentType(const string& agentTypeStr, const string& internalAgentId);
     //! Support method from processAvatarSignal
-    Handle processAgentActionParameter(DOMElement* paramElement);
+    Handle processAgentActionParameter(DOMElement* paramElement, const std::string& actionNameStr, Handle& actionInstancenode);
     //! Support method from processAvatarSignal
-    void processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr, DOMElement* signal);
+    void processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr, const string& instanceNameStr, DOMElement* signal);
     void processAgentActionPlanResult(char* agentID, unsigned long tsValue, const string& name, char* planIdStr, DOMElement* signal);
     /**
      * @param element The agent-signal element to be processed

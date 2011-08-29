@@ -98,7 +98,9 @@
         <xsd:sequence>
             <xsd:element name="param" type="oc:ParamType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
-        <xsd:attribute name="name" type="xsd:string" use="required"/>        
+        <xsd:attribute name="name" type="xsd:string" use="required"/>      
+	<xsd:attribute name="action-instance-name" type="xsd:string" use="optional"/> 
+	<xsd:attribute name="target" type="xsd:string" use="optional"/>  
         <xsd:attribute name="plan-id" type="xsd:string" use="optional"/>
         <xsd:attribute name="sequence" type="xsd:positiveInteger" use="optional"/>
         <xsd:attribute name="status" type="oc:StatusType" use="optional" default="done"/>

@@ -68,6 +68,8 @@
 #define TYPE_ATTRIBUTE                       "type"
 #define VALUE_ATTRIBUTE                      "value"
 #define ACTION_PLAN_ID_ATTRIBUTE             "plan-id"
+#define ACTION_INSTANCE_NAME_ATTRIBUTE       "action-instance-name"
+#define ACTION_TARGET_NAME                        "target"
 #define SEQUENCE_ATTRIBUTE                   "sequence"
 #define AVATAR_ID_ATTRIBUTE                  "id"
 #define X_ATTRIBUTE                          "x"
