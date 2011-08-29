@@ -33,9 +33,9 @@ class Fishgram:
         
         self.max_per_layer = 1e9 # 10 # 1e35 # 600
         
-        #self.viz = PLNviz(atomspace)
-        self.viz = NullPLNviz(atomspace)
-        self.viz.outputTarget(target=[], parent=None, index=0)
+        self.viz = PLNviz(atomspace)
+        #self.viz = NullPLNviz(atomspace)
+        self.viz.outputTreeNode(target=[], parent=None, index=0)
         
         self.awkward = {}
 
@@ -94,11 +94,11 @@ class Fishgram:
         #next_layer_iter = self.extensions(prev_layer)
         next_layer_iter = self.extensions_simple(prev_layer)
         #return self.prune_frequency(next_layer_iter)
-        #self.viz.outputTarget(target=[], parent=None, index=0)
+        #self.viz.outputTreeNode(target=[], parent=None, index=0)
         for (conj, embs) in self.prune_frequency(next_layer_iter):
             #print '***************', conj, len(embs)
-            #self.viz.outputTarget(target=conj[-1], parent=conj[:-1], index=0)
-            #self.viz.outputTarget(target=list(conj), parent=list(conj[:-1]), index=0)
+            #self.viz.outputTreeNode(target=conj[-1], parent=conj[:-1], index=0)
+            #self.viz.outputTreeNode(target=list(conj), parent=list(conj[:-1]), index=0)
             yield (conj, embs)
 
     def closed_bfs_layers(self):
@@ -257,7 +257,7 @@ class Fishgram:
                             extensions_for_prev_conj_and_tree_type[remapped_conj_plus] = []
                         extensions_for_prev_conj_and_tree_type[remapped_conj_plus].append(new_s)
                         
-                        self.viz.outputTarget(target=list(remapped_conj_plus), parent=list(prev_conj), index=0)
+                        self.viz.outputTreeNode(target=list(remapped_conj_plus), parent=list(prev_conj), index=0)
                         
                         self.awkward[remapped_conj_plus] = tr_
 

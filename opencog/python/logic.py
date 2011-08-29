@@ -386,9 +386,9 @@ class PLNviz:
             self.g.add_node(parent_id, label=str(parent), **self.node_attributes)
             
             # Link parent to rule app
-            self.g.add_edge(parent_to_rule_id, parent_id, rule_app_id, directed=True, label='')
+            self.g.add_edge(parent_to_rule_id, rule_app_id, parent_id, directed=True, label='')
             # Link rule app to target
-            self.g.add_edge(target_to_rule_id, rule_app_id, target_id, directed=True, label=str(index+1))
+            self.g.add_edge(target_to_rule_id, target_id, rule_app_id, directed=True, label=str(index+1))
 
     def declareResult(self, target):
         
