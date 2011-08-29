@@ -186,7 +186,7 @@ def find_matching_conjunctions(conj, trees, match = Match()):
             #partly_bound_tr = subst(s2, conj[0])
             match2 = Match(conj=match.conj+(conj[0],), subst=s2)
             
-            print pp(match2.conj), pp(match2.subst)
+            #print pp(match2.conj), pp(match2.subst)
             
             later = find_matching_conjunctions(conj[1:], trees, match2)
             

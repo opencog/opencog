@@ -64,6 +64,8 @@ class Chainer:
         layer_facts = set()    
         
         for r in real_rules:
+            print pp(r)
+            
             # In case we prove something that still has a variable in it
             #r = Rule(standardize_apart(r.head), standardize_apart(tuple(r.goals)))
             s = {}
@@ -78,6 +80,10 @@ class Chainer:
                 
                 atom = atom_from_tree(result, self.space)
                 atom.tv = TruthValue(1, 1)
+                
+                for i, input in enumerate(m.conj):
+                    self.viz.outputTarget(input, result , i, r)
+                self.viz.declareResult(result)
         
         # Add the facts somewhere more permanent
         return layer_facts
@@ -104,9 +110,9 @@ class Chainer:
             print ' '*depth+'nested implication'
             return []
 
-#        if depth > 7:
-#            print ' '*depth+'tacky maximum depth reached'
-#            return []
+        if depth > 3:
+            print ' '*depth+'tacky maximum depth reached'
+            return []
 
         for x in stack:
             if unify(target, x, {}, True) != None:
@@ -137,7 +143,7 @@ class Chainer:
 
         results = []
 
-        self.viz.outputTarget(goal, target, goals_index)
+        self.viz.outputTarget(goal, target, goals_index, rule)
         child_results = self.expand_target(goal, stack, depth+1)
         
         for child_s in child_results:
@@ -284,6 +290,11 @@ def setup_rules(a):
                                      [tree(type, 1, 2),
                                       tree(type, 2, 3) ]))
 
+    # Inversion
+    for type in ['SubsetLink', 'ImplicationLink']:
+        rules.append(Rule( tree(type, 1, 2), 
+                                     [tree(type, 2, 1)]))
+
     # ModusPonens
     for type in ['ImplicationLink']:
         rules.append(Rule(tree(2), 
@@ -292,7 +303,7 @@ def setup_rules(a):
     
     # AND/OR
     for type in ['AndLink', 'OrLink']:
-        for size in xrange(6):
+        for size in xrange(5):
             args = [new_var() for i in xrange(size+1)]
             rules.append(Rule(tree(type, args),
                                args))
@@ -347,11 +358,47 @@ class PLNviz:
         self._as = space
         self.g = pygephi.JSONClient('http://localhost:8080/workspace0', autoflush=True)
         self.g.clean()
-        self.node_attributes = {'size':10, 'r':0.0, 'g':0.0, 'b':1.0, 'x':1}
-        self.root_attributes = {'size':20, 'r':1.0, 'g':1.0, 'b':1.0, 'x':1}
+        self.node_attributes = {'size':10, 'r':0.0, 'g':0.0, 'b':1.0}
+        self.rule_attributes = {'size':10, 'r':0.0, 'g':1.0, 'b':1.0}
+        self.root_attributes = {'size':20, 'r':1.0, 'g':1.0, 'b':1.0}
         self.result_attributes = {'r':1.0, 'b':0.0, 'g':0.0}
 
-    def outputTarget(self, target, parent, index):
+    def outputTarget(self, target, parent, index, rule=None):
+        
+        #target_id = str(hash(target))
+        target_id = str(target)
+        
+        if parent == None:
+            self.g.add_node(target_id, label=str(target), **self.root_attributes)
+
+        if parent != None:
+            self.g.add_node(target_id, label=str(target), **self.node_attributes)
+            
+            #parent_id = str(hash(parent))
+            #link_id = str(hash(target_id+parent_id))
+            parent_id = str(parent)
+            rule_app_id = 'rule '+str(rule)+parent_id
+            target_to_rule_id = rule_app_id+str(index+1)
+            parent_to_rule_id = rule_app_id+' parent'
+            
+            self.g.add_node(rule_app_id, label=str(rule), **self.rule_attributes)
+
+            self.g.add_node(parent_id, label=str(parent), **self.node_attributes)
+            
+            # Link parent to rule app
+            self.g.add_edge(parent_to_rule_id, parent_id, rule_app_id, directed=True, label='')
+            # Link rule app to target
+            self.g.add_edge(target_to_rule_id, rule_app_id, target_id, directed=True, label=str(index+1))
+
+    def declareResult(self, target):
+        
+        target_id = str(target)
+        self.g.change_node(target_id, **self.result_attributes)
+        
+        #self.g.add_node(target_id, label=str(target), **self.result_attributes)
+
+    # More suited for Fishgram
+    def outputTreeNode(self, target, parent, index):
         
         #target_id = str(hash(target))
         target_id = str(target)
@@ -369,13 +416,6 @@ class PLNviz:
             
             self.g.add_node(parent_id, label=str(parent), **self.node_attributes)
             self.g.add_edge(link_id, parent_id, target_id, directed=True, label=str(index))
-
-    def declareResult(self, target):
-        
-        target_id = str(target)
-        self.g.change_node(target_id, **self.result_attributes)
-        
-        #self.g.add_node(target_id, label=str(target), **self.result_attributes)
 
 print __name__
 if __name__ == "__main__":
