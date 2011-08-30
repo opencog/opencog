@@ -11,7 +11,7 @@
     </avatar-signal>
 
     <agent-signal id="1" timestamp="2007-06-18T20:15:02.000-07:00">
-        <action name="walk">
+        <action name="walk" action-instance-name="walk24" result-state="true">
             <param name="target" type="vector">
                <vector x="1" y="1.5" z="2"/>
             </param>
@@ -23,8 +23,8 @@
     </agent-signal>
 
     <avatar-signal id="3" type="pet" timestamp="2007-06-18T20:15:02.000-07:00">
-        <action name="walk">
-            <param name="target" type="vector">
+        <action name="walk" action-instance-name="walk85" result-state="true">
+            <param name="target" type="vector" >
                <vector x="3" y="5.5" z="2.9"/>
             </param>
             <param name="speed" type="float" value="3.87"/>
@@ -34,7 +34,7 @@
         </action>
     </avatar-signal>
     <avatar-signal id="9" type="avatar" timestamp="2007-06-18T20:15:02.000-07:00">
-        <action name="walk">
+        <action name="walk"  action-instance-name="walk93" result-state="true">
             <param name="target" type="vector">
                <vector x="1.01" y="1.77" z="2.1"/>
             </param>

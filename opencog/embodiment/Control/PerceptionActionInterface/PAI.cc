@@ -1023,7 +1023,31 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     } // for each parameter
     //-------------------------------End-------process the parameters-----End------------------------------------------------
 
-    // add this actiion to timelink
+
+    //-------------------------------Begin-------process the result state of the action-----Begin----------------------------------
+    // getting result state attribute value
+    XMLString::transcode(ACTION_RESULT_STATE, tag, PAIUtils::MAX_TAG_LENGTH);
+    bool resultState = XMLString::transcode(signal->getAttribute(tag));
+
+    // Add the action result state node into AtomSpace
+    Handle resultNode;
+    if (resultState)
+        resultNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME );
+    else
+        resultNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_FAILED_PREDICATE_NAME );
+
+    // e.g.: the kick2454 is successful
+    HandleSeq predicateListLinkOutgoing3;
+    predicateListLinkOutgoing3.push_back(actionInstanceNode);
+    Handle predicateListLink3 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing3);
+    HandleSeq evalLinkOutgoing3;
+    evalLinkOutgoing3.push_back(resultNode);
+    evalLinkOutgoing3.push_back(predicateListLink3);
+    Handle evalLink3 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing3);
+
+    //-------------------------------End-------process the result state of the action-----End----------------------------------
+
+    // add this action to timelink
     Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(actionInstanceNode, tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
 

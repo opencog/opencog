@@ -600,30 +600,26 @@ public:
         {
             cout << "checking agent signals" << endl;
 
-            Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
-            TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-
-            HandleSeq predicateListLinkOutgoing;
-            HandleSeq parametersListLinkOutgoing;
-
-            // Avatar node
+	    // Avatar node
             Handle avatarNode = atomSpace->getHandle(AVATAR_NODE, PAIUtils::getInternalId("1").c_str());
             TS_ASSERT(Handle::compare(avatarNode, Handle::UNDEFINED));
-            predicateListLinkOutgoing.push_back(avatarNode);
+     
 
             // Action node
-            Handle actionNode = atomSpace->getHandle(NODE, "walk");
+            Handle actionNode = atomSpace->getHandle(CONCEPT_NODE, "walk");
             TS_ASSERT(Handle::compare(actionNode, Handle::UNDEFINED));
-            predicateListLinkOutgoing.push_back(actionNode);
+      
+            // speed concept node
+            Handle speedConceptNode = atomSpace->getHandle(PREDICATE_NODE, "speed");
+            TS_ASSERT(Handle::compare(speedConceptNode, Handle::UNDEFINED));
 
-            /* print NumberNodes
-            HandleSeq numberNodes;
-            atomSpace->getHandleSet(back_inserter(numberNodes), NUMBER_NODE, false);
-            cout << "Got " << numberNodes.size() << " NumberNodes:" << endl;
-            for (int i = 0; i < numberNodes.size(); i++) {
-                cout << TLB::getAtom(numberNodes[i])->toString() << endl;
-            }
-            */
+            // walk:speed concept node
+            Handle walkSpeedConceptNode = atomSpace->getHandle(PREDICATE_NODE, "walk:speed");
+            TS_ASSERT(Handle::compare(walkSpeedConceptNode, Handle::UNDEFINED));
+
+            // ActionInstance node
+            Handle actionInstanceNode = atomSpace->getHandle(CONCEPT_NODE, "walk24");
+            TS_ASSERT(Handle::compare(actionInstanceNode, Handle::UNDEFINED));
 
             // Vector <vector x=\"1\" y=\"1.5\" z=\"2\"/>"
             Handle xNode = atomSpace->getHandle(NUMBER_NODE, "1");
@@ -637,13 +633,11 @@ public:
             targetListLinkOutgoing.push_back(yNode);
             targetListLinkOutgoing.push_back(zNode);
             Handle targetListLink = atomSpace->getHandle(LIST_LINK, targetListLinkOutgoing);
-            parametersListLinkOutgoing.push_back(targetListLink);
 
             // Speed <param name=\"speed\" type=\"float\" value=\"3.5\"/>"
             Handle speedNode = atomSpace->getHandle(NUMBER_NODE, "3.5");
             TS_ASSERT(Handle::compare(speedNode, Handle::UNDEFINED));
-            parametersListLinkOutgoing.push_back(speedNode);
-
+         
             // Rotation <rotation pitch=\"0.1\" roll=\"0.2\" yaw=\"0.3\"/>"
             Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "0.1");
             TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
@@ -656,23 +650,22 @@ public:
             rotateListLinkOutgoing.push_back(rollNode);
             rotateListLinkOutgoing.push_back(yawNode);
             Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
-            parametersListLinkOutgoing.push_back(rotateListLink);
-            
-            Handle parametersListLink = atomSpace->getHandle(LIST_LINK, parametersListLinkOutgoing);
-            TS_ASSERT(Handle::compare(parametersListLink, Handle::UNDEFINED));
-            predicateListLinkOutgoing.push_back(parametersListLink);
 
+            // Result state
+            Handle actionResultNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
+            TS_ASSERT(Handle::compare(actionResultNode, Handle::UNDEFINED));
+
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(actionInstanceNode);
             Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
-            TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
+	    TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
-            HandleSeq evalLinkOutgoing;
-            evalLinkOutgoing.push_back(predNode);
-            evalLinkOutgoing.push_back(predicateListLink);
+	    HandleSeq evalLinkOutgoing;
+	    evalLinkOutgoing.push_back(actionResultNode);
+	    evalLinkOutgoing.push_back(predicateListLink);
             Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
         }
-
-
 
         // Check Avatar-signal atoms (pet)
         {
@@ -681,21 +674,29 @@ public:
             Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
 
-            HandleSeq predicateListLinkOutgoing;
 
             // Agent node
             Handle agentNode = atomSpace->getHandle(PET_NODE, PAIUtils::getInternalId("3").c_str());
             TS_ASSERT(Handle::compare(agentNode, Handle::UNDEFINED));
-            predicateListLinkOutgoing.push_back(agentNode);
+
 
             // Action node
-            Handle actionNode = atomSpace->getHandle(NODE, "walk");
+            Handle actionNode = atomSpace->getHandle(CONCEPT_NODE, "walk");
             TS_ASSERT(Handle::compare(actionNode, Handle::UNDEFINED));
-            predicateListLinkOutgoing.push_back(actionNode);
+      
+            // speed concept node
+            Handle speedConceptNode = atomSpace->getHandle(PREDICATE_NODE, "speed");
+            TS_ASSERT(Handle::compare(speedConceptNode, Handle::UNDEFINED));
 
-            HandleSeq parametersListLink;
+            // walk:speed concept node
+            Handle walkSpeedConceptNode = atomSpace->getHandle(PREDICATE_NODE, "walk:speed");
+            TS_ASSERT(Handle::compare(walkSpeedConceptNode, Handle::UNDEFINED));
 
-            // Vector <vector x=\"3\" y=\"5.5\" z=\"2.9\"/>"
+            // ActionInstance node
+            Handle actionInstanceNode = atomSpace->getHandle(CONCEPT_NODE, "walk85");
+            TS_ASSERT(Handle::compare(actionInstanceNode, Handle::UNDEFINED));
+
+            // Vector <vector x=\"1\" y=\"1.5\" z=\"2\"/>"
             Handle xNode = atomSpace->getHandle(NUMBER_NODE, "3");
             TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
             Handle yNode = atomSpace->getHandle(NUMBER_NODE, "5.5");
@@ -707,14 +708,12 @@ public:
             targetListLinkOutgoing.push_back(yNode);
             targetListLinkOutgoing.push_back(zNode);
             Handle targetListLink = atomSpace->getHandle(LIST_LINK, targetListLinkOutgoing);
-            parametersListLink.push_back(targetListLink);
 
-            // Speed <param name=\"speed\" type=\"float\" value=\"3.87\"/>"
+            // Speed <param name=\"speed\" type=\"float\" value=\"3.5\"/>"
             Handle speedNode = atomSpace->getHandle(NUMBER_NODE, "3.87");
             TS_ASSERT(Handle::compare(speedNode, Handle::UNDEFINED));
-            parametersListLink.push_back(speedNode);
-
-            // Rotation <rotation pitch=\"0.111\" roll=\"0.221\" yaw=\"0.341\"/>"
+         
+            // Rotation <rotation pitch=\"0.1\" roll=\"0.2\" yaw=\"0.3\"/>"
             Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "0.111");
             TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
             Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "0.221");
@@ -726,42 +725,52 @@ public:
             rotateListLinkOutgoing.push_back(rollNode);
             rotateListLinkOutgoing.push_back(yawNode);
             Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
-            parametersListLink.push_back(rotateListLink);
 
-            predicateListLinkOutgoing.push_back( atomSpace->getHandle(LIST_LINK, parametersListLink ) );
+            // Result state
+            Handle actionResultNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
+            TS_ASSERT(Handle::compare(actionResultNode, Handle::UNDEFINED));
 
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(actionInstanceNode);
             Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
-            TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
+	    TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
-            HandleSeq evalLinkOutgoing;
-            evalLinkOutgoing.push_back(predNode);
-            evalLinkOutgoing.push_back(predicateListLink);
+	    HandleSeq evalLinkOutgoing;
+	    evalLinkOutgoing.push_back(actionResultNode);
+	    evalLinkOutgoing.push_back(predicateListLink);
             Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
+
         }
 
         // Check Avatar-signal atoms (avatar)
         {
             cout << "checking avatar signals" << endl;
-
             Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
 
-            HandleSeq predicateListLinkOutgoing;
 
             // Agent node
             Handle agentNode = atomSpace->getHandle(AVATAR_NODE, PAIUtils::getInternalId("9").c_str());
             TS_ASSERT(Handle::compare(agentNode, Handle::UNDEFINED));
-            predicateListLinkOutgoing.push_back(agentNode);
 
             // Action node
-            Handle actionNode = atomSpace->getHandle(NODE, "walk");
+            Handle actionNode = atomSpace->getHandle(CONCEPT_NODE, "walk");
             TS_ASSERT(Handle::compare(actionNode, Handle::UNDEFINED));
-            predicateListLinkOutgoing.push_back(actionNode);
+      
+            // speed concept node
+            Handle speedConceptNode = atomSpace->getHandle(PREDICATE_NODE, "speed");
+            TS_ASSERT(Handle::compare(speedConceptNode, Handle::UNDEFINED));
 
-            HandleSeq parametersListLink;
+            // walk:speed concept node
+            Handle walkSpeedConceptNode = atomSpace->getHandle(PREDICATE_NODE, "walk:speed");
+            TS_ASSERT(Handle::compare(walkSpeedConceptNode, Handle::UNDEFINED));
 
-            // Vector <vector x=\"1.01\" y=\"1.77\" z=\"2.1\"/>"
+            // ActionInstance node
+            Handle actionInstanceNode = atomSpace->getHandle(CONCEPT_NODE, "walk93");
+            TS_ASSERT(Handle::compare(actionInstanceNode, Handle::UNDEFINED));
+
+            // Vector <vector x=\"1\" y=\"1.5\" z=\"2\"/>"
             Handle xNode = atomSpace->getHandle(NUMBER_NODE, "1.01");
             TS_ASSERT(Handle::compare(xNode, Handle::UNDEFINED));
             Handle yNode = atomSpace->getHandle(NUMBER_NODE, "1.77");
@@ -773,14 +782,12 @@ public:
             targetListLinkOutgoing.push_back(yNode);
             targetListLinkOutgoing.push_back(zNode);
             Handle targetListLink = atomSpace->getHandle(LIST_LINK, targetListLinkOutgoing);
-            parametersListLink.push_back(targetListLink);
 
-            // Speed <param name=\"speed\" type=\"float\" value=\"8.5\"/>"
+            // Speed <param name=\"speed\" type=\"float\" value=\"3.5\"/>"
             Handle speedNode = atomSpace->getHandle(NUMBER_NODE, "8.5");
             TS_ASSERT(Handle::compare(speedNode, Handle::UNDEFINED));
-            parametersListLink.push_back(speedNode);
-
-            // Rotation <rotation pitch=\"0.3274\" roll=\"0.517\" yaw=\"0.87\"/>"
+         
+            // Rotation <rotation pitch=\"0.1\" roll=\"0.2\" yaw=\"0.3\"/>"
             Handle pitchNode = atomSpace->getHandle(NUMBER_NODE, "0.3274");
             TS_ASSERT(Handle::compare(pitchNode, Handle::UNDEFINED));
             Handle rollNode = atomSpace->getHandle(NUMBER_NODE, "0.517");
@@ -792,18 +799,22 @@ public:
             rotateListLinkOutgoing.push_back(rollNode);
             rotateListLinkOutgoing.push_back(yawNode);
             Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
-            parametersListLink.push_back(rotateListLink);
 
-            predicateListLinkOutgoing.push_back( atomSpace->getHandle(LIST_LINK, parametersListLink ) );
+            // Result state
+            Handle actionResultNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
+            TS_ASSERT(Handle::compare(actionResultNode, Handle::UNDEFINED));
 
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(actionInstanceNode);
             Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
-            TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
+	    TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
-            HandleSeq evalLinkOutgoing;
-            evalLinkOutgoing.push_back(predNode);
-            evalLinkOutgoing.push_back(predicateListLink);
+	    HandleSeq evalLinkOutgoing;
+	    evalLinkOutgoing.push_back(actionResultNode);
+	    evalLinkOutgoing.push_back(predicateListLink);
             Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
+
         }
 
         // Check map-info atoms
