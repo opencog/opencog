@@ -65,7 +65,7 @@ class Chainer:
             print ' '*depth+'nested implication'
             return []
 
-        if depth > 3:
+        if depth > 6:
             print ' '*depth+'tacky maximum depth reached'
             return []
 
@@ -75,10 +75,7 @@ class Chainer:
                 return []
 
         for r in self.rules:
-            head_goals = (r.head,)+tuple(r.goals)
-            tmp = standardize_apart(head_goals)
-            r = Rule(tmp[0], tmp[1:])
-            s = {}
+            r = r.standardize_apart()
             
             s = unify(r.head, target, {})
             if s != None:
@@ -119,31 +116,35 @@ class Chainer:
         for obj in a.get_atoms_by_type(t.Atom):
             if obj.tv.count > 0:
                 tr = tree_from_atom(obj)
-                self.rules.append(Rule(tr))
+                self.rules.append(Rule(tr, [], '[axiom]'))
         
         # Deduction
         for type in ['SubsetLink', 'ImplicationLink', 'AssociativeLink']:
             self.rules.append(Rule(tree(type, 1,3), 
                                          [tree(type, 1, 2),
-                                          tree(type, 2, 3) ]))
+                                          tree(type, 2, 3) ], 
+                                          name='Deduction'))
 
         # Inversion
         for type in ['SubsetLink', 'ImplicationLink']:
             self.rules.append(Rule( tree(type, 1, 2), 
-                                         [tree(type, 2, 1)]))
+                                         [tree(type, 2, 1)], 
+                                         name='Inversion'))
 
         # ModusPonens
         for type in ['ImplicationLink']:
             self.rules.append(Rule(tree(2), 
                                          [tree(type, 1, 2),
-                                          tree(1) ]))
+                                          tree(1) ], 
+                                          name='ModusPonens'))
         
         # AND/OR
         for type in ['AndLink', 'OrLink']:
             for size in xrange(5):
                 args = [new_var() for i in xrange(size+1)]
                 self.rules.append(Rule(tree(type, args),
-                                   args))
+                                   args,
+                                   type[:-4]))
         
         # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
     #    fact = new_var()
@@ -156,13 +157,17 @@ class Chainer:
         for atom in a.get_atoms_by_type(t.ForAllLink):
             # out[0] is the ListLink of VariableNodes, out[1] is the expression
             tr = tree_from_atom(atom.out[1])
-            self.rules.append(Rule(tr))
+            self.rules.append(Rule(tr, [], name='ForAll'))
 
 
 class Rule :
-    def __init__ (self, head, goals = []) :
+    def __init__ (self, head, goals, name):
         self.head = head
         self.goals = goals
+        self.name = name
+
+    def __str__(self):
+        return self.name
 
     def __repr__ (self) :
         rep = str(self.head)
@@ -171,6 +176,13 @@ class Rule :
             rep += sep + str(goal)
             sep = ","
         return rep
+    
+    def standardize_apart(self):
+        head_goals = (self.head,)+tuple(self.goals)
+        tmp = standardize_apart(head_goals)
+        new_version = Rule(tmp[0], tmp[1:], name=self.name)
+        
+        return new_version
 
 def search (term) :
     print "Query: ", str(term)
@@ -266,6 +278,7 @@ class PLNviz:
             #parent_id = str(hash(parent))
             #link_id = str(hash(target_id+parent_id))
             parent_id = str(parent)
+            #rule_app_id = 'rule '+repr(rule)+parent_id
             rule_app_id = 'rule '+str(rule)+parent_id
             target_to_rule_id = rule_app_id+target_id
             parent_to_rule_id = rule_app_id+' parent'
