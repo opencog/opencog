@@ -184,47 +184,6 @@ class Rule :
         
         return new_version
 
-def search (term) :
-    print "Query: ", str(term)
-    global trace, rules
-    # pop will take item from end, insert(0,val) will push item onto queue
-    goal = Goal(Rule("JUSTICE", []))      # Anything- just get a rule object
-    goal.rule.goals = [term]                  # target is the single goal
-    queue = [goal]                            # Start our search
-    while queue :
-        c = queue.pop()                       # Next goal to consider
-        if trace : print "Deque", c
-        if c.inx >= len(c.rule.goals) :       # Is this one finished?
-            if c.parent == None :            # Yes. Our original goal?
-#                if c.env : print pp(c.env)         # Yes. tell user we
-#                else     : print "Yes"          # have a solution
-                target = subst(c.env, c.rule.goals[0])
-                print "Result:", pp(target)
-                continue
-            assert c.parent != None
-#            parent = copy.deepcopy(c.parent)  # Otherwise resume parent goal
-            parent = c.parent.clone()  # Otherwise resume parent goal
-            parent.env = unify(c.rule.head, parent.rule.goals[parent.inx], c.env)
-#            unify (c.rule.head,    c.env,
-#                   parent.rule.goals[parent.inx],parent.env)
-            parent.inx = parent.inx+1         # advance to next goal in body
-            queue.insert(0,parent)            # let it wait its turn
-            if trace : print "Queue parent", parent
-            continue
-
-        # No. more to do with this goal.
-        term = c.rule.goals[c.inx]            # What we want to solve
-
-        for rule in rules :                   # Walk rule database
-            child = Goal(rule, c)               # A possible subgoal
-#            ans = unify (term, c.env, rule.head, child.env)
-            child.env = unify(term, rule.head, c.env)
-            if child.env != None:                    # if unifies, queue it up
-                queue.insert(0,child)
-                if trace : print "Queue child", child
-
-
-
 def test(a):
     c = Chainer(a)
     
