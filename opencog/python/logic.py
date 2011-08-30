@@ -54,10 +54,11 @@ class Chainer:
     def __init__(self, space):
         self.space = space
         self.viz = PLNviz(space)
+        self.setup_rules(space)
     
     def fc(self):
-        facts = {r.head for r in rules if not r.goals}
-        real_rules = {r for r in rules if r.goals}
+        facts = {r.head for r in self.rules if not r.goals}
+        real_rules = {r for r in self.rules if r.goals}
 
         # we have rules which are goal:-term,term,term,...
         # and include rules with no arguments.
@@ -119,7 +120,7 @@ class Chainer:
                 print ' '*depth+'loop'
                 return []
 
-        for r in rules:
+        for r in self.rules:
             head_goals = (r.head,)+tuple(r.goals)
             tmp = standardize_apart(head_goals)
             r = Rule(tmp[0], tmp[1:])
@@ -156,6 +157,53 @@ class Chainer:
             results+= self.apply_rule(target, rule, goals_index+1, child_s, stack, depth)
         
         return results
+
+    def setup_rules(self, a):
+        self.rules = []
+
+        # All existing Atoms
+        for obj in a.get_atoms_by_type(t.Atom):
+            if obj.tv.count > 0:
+                tr = tree_from_atom(obj)
+                self.rules.append(Rule(tr))
+        
+        # Deduction
+        for type in ['SubsetLink', 'ImplicationLink', 'AssociativeLink']:
+            self.rules.append(Rule(tree(type, 1,3), 
+                                         [tree(type, 1, 2),
+                                          tree(type, 2, 3) ]))
+
+        # Inversion
+        for type in ['SubsetLink', 'ImplicationLink']:
+            self.rules.append(Rule( tree(type, 1, 2), 
+                                         [tree(type, 2, 1)]))
+
+        # ModusPonens
+        for type in ['ImplicationLink']:
+            self.rules.append(Rule(tree(2), 
+                                         [tree(type, 1, 2),
+                                          tree(1) ]))
+        
+        # AND/OR
+        for type in ['AndLink', 'OrLink']:
+            for size in xrange(5):
+                args = [new_var() for i in xrange(size+1)]
+                self.rules.append(Rule(tree(type, args),
+                                   args))
+        
+        # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
+    #    fact = new_var()
+    #    list_link = new_var()
+    #    self.rules.append(Rule(
+    #                            tree(fact),
+    #                            [tree('ForAllLink', list_link, fact )]
+    #                        ))
+        
+        for atom in a.get_atoms_by_type(t.ForAllLink):
+            # out[0] is the ListLink of VariableNodes, out[1] is the expression
+            tr = tree_from_atom(atom.out[1])
+            self.rules.append(Rule(tr))
+
 
 class Rule :
 #    def __init__ (self, s) :   # expect "term:-term,term,..."
@@ -279,57 +327,7 @@ def search (term) :
 #                queue.insert(0,child)
 #                if trace : print "Queue child", child
 
-def setup_rules(a):
-    global rules
-    rules = []
-
-    # All existing Atoms
-    for obj in a.get_atoms_by_type(t.Atom):
-        if obj.tv.count > 0:
-            tr = tree_from_atom(obj)
-            rules.append(Rule(tr))
-    
-    # Deduction
-    for type in ['SubsetLink', 'ImplicationLink', 'AssociativeLink']:
-        rules.append(Rule(tree(type, 1,3), 
-                                     [tree(type, 1, 2),
-                                      tree(type, 2, 3) ]))
-
-    # Inversion
-    for type in ['SubsetLink', 'ImplicationLink']:
-        rules.append(Rule( tree(type, 1, 2), 
-                                     [tree(type, 2, 1)]))
-
-    # ModusPonens
-    for type in ['ImplicationLink']:
-        rules.append(Rule(tree(2), 
-                                     [tree(type, 1, 2),
-                                      tree(1) ]))
-    
-    # AND/OR
-    for type in ['AndLink', 'OrLink']:
-        for size in xrange(5):
-            args = [new_var() for i in xrange(size+1)]
-            rules.append(Rule(tree(type, args),
-                               args))
-    
-    # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
-#    fact = new_var()
-#    list_link = new_var()
-#    rules.append(Rule(
-#                            tree(fact),
-#                            [tree('ForAllLink', list_link, fact )]
-#                        ))
-    
-    for atom in a.get_atoms_by_type(t.ForAllLink):
-        # out[0] is the ListLink of VariableNodes, out[1] is the expression
-        tr = tree_from_atom(atom.out[1])
-        rules.append(Rule(tr))
-
-
 def test(a):
-    setup_rules(a)
-    
     c = Chainer(a)
     
     #search(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
