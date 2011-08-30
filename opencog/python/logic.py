@@ -148,6 +148,11 @@ class Chainer:
         
         for child_s in child_results:
             child_s.update(s)
+            
+            input = subst(child_s, goal)
+            self.viz.outputTarget(input, target, goals_index, rule)
+            self.viz.declareResult(input)
+            
             results+= self.apply_rule(target, rule, goals_index+1, child_s, stack, depth)
         
         return results
@@ -346,7 +351,7 @@ class NullPLNviz:
     def __init__(self, space):
         pass
     
-    def outputTarget(self, target, parent, index):
+    def outputTarget(self, target, parent, index, rule = None):
         pass
     
     def declareResult(self, target):
@@ -378,7 +383,7 @@ class PLNviz:
             #link_id = str(hash(target_id+parent_id))
             parent_id = str(parent)
             rule_app_id = 'rule '+str(rule)+parent_id
-            target_to_rule_id = rule_app_id+str(index+1)
+            target_to_rule_id = rule_app_id+target_id
             parent_to_rule_id = rule_app_id+' parent'
             
             self.g.add_node(rule_app_id, label=str(rule), **self.rule_attributes)
