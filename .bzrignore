@@ -78,3 +78,5 @@ cscope.out
 lib/opencog-test.conf
 ../opencog/embodiment/embodiment.conf
 ../opencog/embodiment/dev_embodiment.conf
+opencog/embodiment/Control/PerceptionActionInterface/PAI.MapInfo.pb.cc
+opencog/embodiment/Control/PerceptionActionInterface/PAI.MapInfo.pb.h
