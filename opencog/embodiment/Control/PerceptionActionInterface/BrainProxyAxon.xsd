@@ -101,7 +101,8 @@
         <xsd:attribute name="name" type="xsd:string" use="required"/>      
 	<xsd:attribute name="action-instance-name" type="xsd:string" use="optional"/> 
 	<xsd:attribute name="result-state" type="xsd:boolean" use="optional"/> 
-	<xsd:attribute name="target" type="xsd:string" use="optional"/>  
+	<xsd:attribute name="target" type="xsd:string" use="optional"/>
+        <xsd:attribute name="target-type" type="xsd:string" use="optional"/>  
         <xsd:attribute name="plan-id" type="xsd:string" use="optional"/>
         <xsd:attribute name="sequence" type="xsd:positiveInteger" use="optional"/>
         <xsd:attribute name="status" type="oc:StatusType" use="optional" default="done"/>

@@ -965,48 +965,74 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     XMLString::transcode(ACTION_TARGET_NAME, tag, PAIUtils::MAX_TAG_LENGTH);
     char* targetName = XMLString::transcode(signal->getAttribute(tag));
 
-    // if has targetName
+    // if there is a targetName
     if (strlen(targetName))
     {
-        // Add the conceptnode: target of action into AtomSpace
-        Handle actionTargetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_TARGET_NAME, true);
+        // if there is a target, there should be a target-type too
+        XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+        XMLString::transcode(ACTION_TARGET_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* targetType = XMLString::transcode(signal->getAttribute(tag));
 
-        // Add the target of this action into AtomSpace
-        string internalTargetId = PAIUtils::getInternalId(targetName);
-        Handle targetNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalTargetId.c_str());
+        if (strlen(targetType))
+        {
 
-        // the predicate node name is ActionName:PamaterName, e.g.: kick:target
-        std::string targetStr = nameStr + ":" + ACTION_TARGET_NAME;
-        Handle targetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, targetStr.c_str() , true);
+            // Currently only process the Avatar and Object type target:
+            string targetTypeStr(targetType);
+            opencog::Type targetTypeCode;
 
-        // e.g.: "kick:target" is a kind of  "target"
-        HandleSeq targetInheritanceLinkOutgoing;
-        targetInheritanceLinkOutgoing.push_back(targetPredicateNode);
-        targetInheritanceLinkOutgoing.push_back(actionTargetPredicateNode);
-        AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, targetInheritanceLinkOutgoing);
+            if (targetTypeStr == "avatar")
+                targetTypeCode = AVATAR_NODE;
+            else if (targetTypeStr == "object")
+                targetTypeCode = OBJECT_NODE;
+            else
+            {
+                logger().error("PAI - action: %s's targe: %s has a unresolved target type ", nameStr.c_str(), targetName,targetType);
+                return;
+            }
+            // Add the conceptnode: target of action into AtomSpace
+            Handle actionTargetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_TARGET_NAME, true);
+            // Add the target of this action into AtomSpace
+            string internalTargetId = PAIUtils::getInternalId(targetName);
+            Handle targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode, internalTargetId.c_str());
 
-        // e.g.: the kick:Target of kick2454 is ball39
-        HandleSeq predicateListLinkOutgoing2;
-        predicateListLinkOutgoing2.push_back(actionInstanceNode);
-        predicateListLinkOutgoing2.push_back(targetNode);
-        Handle predicateListLink2 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing2);
-        HandleSeq evalLinkOutgoing2;
-        evalLinkOutgoing2.push_back(targetPredicateNode);
-        evalLinkOutgoing2.push_back(predicateListLink2);
-        Handle evalLink2 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing2);
+            // the predicate node name is ActionName:PamaterName, e.g.: kick:target
+            std::string targetStr = nameStr + ":" + ACTION_TARGET_NAME;
+            Handle targetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, targetStr.c_str() , true);
 
-        // if the action is grab or drop created/update isHoldingSomething
-        // and isHolding predicates
-        if (nameStr == "grab") {
-            AtomSpaceUtil::setupHoldingObject(atomSpace,
-                                              internalAgentId,
-                                              internalTargetId,
-                                              getLatestSimWorldTimestamp());
-        } else if (nameStr == "drop") {
-            AtomSpaceUtil::setupHoldingObject(atomSpace,
-                                              internalAgentId,
-                                              string(""),
-                                              getLatestSimWorldTimestamp());
+            // e.g.: "kick:target" is a kind of  "target"
+            HandleSeq targetInheritanceLinkOutgoing;
+            targetInheritanceLinkOutgoing.push_back(targetPredicateNode);
+            targetInheritanceLinkOutgoing.push_back(actionTargetPredicateNode);
+            AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, targetInheritanceLinkOutgoing);
+
+            // e.g.: the kick:Target of kick2454 is ball39
+            HandleSeq predicateListLinkOutgoing2;
+            predicateListLinkOutgoing2.push_back(actionInstanceNode);
+            predicateListLinkOutgoing2.push_back(targetNode);
+            Handle predicateListLink2 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing2);
+            HandleSeq evalLinkOutgoing2;
+            evalLinkOutgoing2.push_back(targetPredicateNode);
+            evalLinkOutgoing2.push_back(predicateListLink2);
+            Handle evalLink2 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing2);
+
+            // if the action is grab or drop created/update isHoldingSomething
+            // and isHolding predicates
+            if (nameStr == "grab") {
+                AtomSpaceUtil::setupHoldingObject(atomSpace,
+                                                  internalAgentId,
+                                                  internalTargetId,
+                                                  getLatestSimWorldTimestamp());
+            } else if (nameStr == "drop") {
+                AtomSpaceUtil::setupHoldingObject(atomSpace,
+                                                  internalAgentId,
+                                                  string(""),
+                                                  getLatestSimWorldTimestamp());
+            }
+        }
+        else
+        {
+            logger().error("PAI - action: %s has a targe: %s but without a target type ", nameStr.c_str(), targetName);
+            return;
         }
     }
     //-------------------------------End-------the target of the action-------End--------------------------------------------------
