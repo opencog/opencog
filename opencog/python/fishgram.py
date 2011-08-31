@@ -7,7 +7,7 @@ from itertools import *
 from collections import namedtuple
 import sys
 
-from logic import PLNviz, NullPLNviz
+from logic import PLNviz
 
 # unit of timestamps is 0.01 second so multiply by 100
 interval = 100* 20
@@ -34,7 +34,7 @@ class Fishgram:
         self.max_per_layer = 1e9 # 10 # 1e35 # 600
         
         self.viz = PLNviz(atomspace)
-        #self.viz = NullPLNviz(atomspace)
+        self.viz.connect()
         self.viz.outputTreeNode(target=[], parent=None, index=0)
         
         self.awkward = {}

@@ -8,6 +8,7 @@ class Chainer:
     def __init__(self, space):
         self.space = space
         self.viz = PLNviz(space)
+        self.viz.connect()
         self.setup_rules(space)
     
     def fc(self):
@@ -200,30 +201,46 @@ def test(a):
 
     c.bc(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
 
-import pygephi
-class NullPLNviz:
-    '''Simply use the null-object pattern, rather than adding lots of if statements everywhere.'''
-    def __init__(self, space):
-        pass
-    
-    def outputTarget(self, target, parent, index, rule = None):
-        pass
-    
-    def declareResult(self, target):
-        pass
 
+from urllib2 import URLError
+def check_connected(method):
+    '''A nice decorator for use in visualization classes that stream graphs to Gephi. It catches exceptions raised
+    when you aren't running Gephi.'''
+    def wrapper(self, *args, **kwargs):
+        if not self.connected:
+            return
+
+        try:
+            method(self, *args, **kwargs)
+        except URLError:
+            self.connected = False
+    
+    return wrapper
+
+import pygephi
 class PLNviz:
 
     def __init__(self, space):
         self._as = space
-        self.g = pygephi.JSONClient('http://localhost:8080/workspace0', autoflush=True)
-        self.g.clean()
         self.node_attributes = {'size':10, 'r':0.0, 'g':0.0, 'b':1.0}
         self.rule_attributes = {'size':10, 'r':0.0, 'g':1.0, 'b':1.0}
         self.root_attributes = {'size':20, 'r':1.0, 'g':1.0, 'b':1.0}
         self.result_attributes = {'r':1.0, 'b':0.0, 'g':0.0}
+        
+        self.connected = False
 
+    def connect(self):
+        try:
+            self.g = pygephi.JSONClient('http://localhost:8080/workspace0', autoflush=True)
+            self.g.clean()
+            self.connected = True
+        except URLError:
+            self.connected = False
+
+    @check_connected
     def outputTarget(self, target, parent, index, rule=None):
+        if not self.connected:
+            return
         
         #target_id = str(hash(target))
         target_id = str(target)
@@ -251,15 +268,21 @@ class PLNviz:
             # Link rule app to target
             self.g.add_edge(target_to_rule_id, target_id, rule_app_id, directed=True, label=str(index+1))
 
+    @check_connected
     def declareResult(self, target):
+        if not self.connected:
+            return
         
         target_id = str(target)
         self.g.change_node(target_id, **self.result_attributes)
         
         #self.g.add_node(target_id, label=str(target), **self.result_attributes)
 
+    @check_connected
     # More suited for Fishgram
     def outputTreeNode(self, target, parent, index):
+        if not self.connected:
+            return
         
         #target_id = str(hash(target))
         target_id = str(target)
