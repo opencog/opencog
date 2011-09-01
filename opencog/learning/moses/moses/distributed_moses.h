@@ -439,11 +439,11 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     }
                     // ~Logger
 
-                    metapop_candidates_vec mcv = mp.sorted_candidates(candidates);
+                    metapop_candidates_list mcl = mp.sorted_candidates(candidates);
 
-                    mp.update_best_candidates(mcv);
+                    mp.update_best_candidates(mcl);
 
-                    mp.merge_candidates(mcv);
+                    mp.merge_candidates(mcl);
 
                     // Logger
                     logger().info("Metapopulation size is %u", mp.size());

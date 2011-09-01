@@ -218,7 +218,7 @@ int moses_exec(int argc, char** argv) {
     int max_candidates;
     bool reduce_all;
     bool revisit;
-    bool ignore_bscore;
+    bool include_dominated;
     // optim_param
     double pop_size_ratio;
     double max_score;
@@ -354,12 +354,12 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(max_dist_ratio_opt).c_str(),
          value<double>(&max_dist_ratio)->default_value(1),
          "The max distance from the exemplar to explore a deme is determined by that value * log2(information_theoretic_bits(deme)).\n")
-        (opt_desc_str(ignore_bscore_opt).c_str(),
-         value<bool>(&ignore_bscore)->default_value(false),
-         "Ignore the behavioral score when merging candidates in the population. This option is useful either when the problem has no obvious behavioral score, or it happens that dominated candidates worth keeping.\n")
+        (opt_desc_str(include_dominated_opt).c_str(),
+         value<bool>(&include_dominated)->default_value(false),
+         "Include dominated candidates (according behavioral score) when merging candidates in the metapopulation. Faster merging but results in a very large metapopulation.\n")
         (opt_desc_str(hc_terminate_if_improvement_opt).c_str(),
          value<bool>(&hc_terminate_if_improvement)->default_value(true),
-         "Hillclimbing parameter. If 1 then deme search terminates when an improvement is found, if 0 it keeps searching until another termination condition is reached.\n")
+         "Hillclimbing parameter. If 1 then deme search terminates when an improvement is found, if 0 it keeps searching until another termination condition is met.\n")
         ;
 
     variables_map vm;
@@ -451,7 +451,7 @@ int moses_exec(int argc, char** argv) {
 
     // set metapopulation parameters
     metapop_parameters meta_params(max_candidates, reduce_all,
-                                   revisit, ignore_bscore);
+                                   revisit, include_dominated);
 
     // set optim_parameters
     optim_parameters opt_params(pop_size_ratio, max_score, max_dist_ratio);

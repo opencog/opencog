@@ -56,12 +56,12 @@ struct metapop_parameters {
     metapop_parameters(int _max_candidates = -1,
                        bool _reduce_all = true,
                        bool _revisit = false,
-                       bool _ignore_bscore = false) :
+                       bool _include_dominated = false) :
         selection_max_range(28),
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         revisit(_revisit),
-        ignore_bscore(_ignore_bscore)
+        include_dominated(_include_dominated)
     { }
     
     // when doing selection of examplars according to 2^-n, where n is
@@ -75,8 +75,9 @@ struct metapop_parameters {
     bool reduce_all;
     // when true then visited exemplars can be revisited
     bool revisit;
-    // ignore the behavioral score when merging candidates in the population
-    bool ignore_bscore;
+    // ignore behavioral score domination when merging candidates in
+    // the metapopulation
+    bool include_dominated;
 };
 
 /**
@@ -134,10 +135,10 @@ struct metapopulation : public set<bscored_combo_tree,
             candidates.insert(make_pair(si_base,
                                         composite_behavioral_score(bsc, csc)));
         }
-        metapop_candidates_vec mcv(candidates.begin(), candidates.end());
-        std::sort(mcv.begin(), mcv.end(), bscored_combo_tree_greater());
-        update_best_candidates(mcv);
-        merge_candidates(mcv);
+        metapop_candidates_list mcl(candidates.begin(), candidates.end());
+        mcl.sort(bscored_combo_tree_greater());
+        update_best_candidates(mcl);
+        merge_candidates(mcl);
     }
 
     /**
@@ -308,7 +309,7 @@ struct metapopulation : public set<bscored_combo_tree,
 
     template<typename Candidates>
     void merge_candidates(const Candidates& candidates) {
-        if(params.ignore_bscore)
+        if(params.include_dominated)
             insert(candidates.begin(), candidates.end());
         else
             merge_nondominating(candidates.begin(), candidates.end());
@@ -546,6 +547,7 @@ struct metapopulation : public set<bscored_combo_tree,
         // ~Logger
 
         // select the set of candidates to add in the metapopulation
+        // @todo this is pretty slow, must be optimized
         foreach(const eda::scored_instance<composite_score>& inst, *_deme) {
             // this is in case the deme is closed before the entire
             // deme (or rather the current sample of it) has been
@@ -560,8 +562,10 @@ struct metapopulation : public set<bscored_combo_tree,
                 break;
 
             // get the combo_tree associated to inst, cleaned and reduced
-            // @todo: here the canidate is possibly reduced for the second time
-            // this could probability be avoid with some clever cache or something
+            //
+            // @todo: here the candidate is possibly reduced for the
+            // second time this could probability be avoid with some
+            // clever cache or something
             combo_tree tr = _rep->get_candidate(inst, true);
 
             // update the set of potential exemplars
@@ -599,10 +603,10 @@ struct metapopulation : public set<bscored_combo_tree,
 
         // the candidates are turn into a vector, then sorted so that
         // merging is slightly faster (about 5%)
-        metapop_candidates_vec mcv = sorted_candidates(candidates);
+        metapop_candidates_list mcl = sorted_candidates(candidates);
 
         // update the record of the best-seen score & trees
-        update_best_candidates(mcv);
+        update_best_candidates(mcl);
 
         //Logger
         logger().debug("Merge %u candidates with the metapopulation",
@@ -616,7 +620,7 @@ struct metapopulation : public set<bscored_combo_tree,
         }
         // ~Logger
 
-        merge_candidates(mcv);
+        merge_candidates(mcl);
 
         //Logger
         logger().debug("Metapopulation size is %u", size());
@@ -634,11 +638,11 @@ struct metapopulation : public set<bscored_combo_tree,
     }
 
     // return a sorted vector of candidates, this is used at it makes
-    // merging 10% faster
-    metapop_candidates_vec sorted_candidates(const metapop_candidates& mc) {
-        metapop_candidates_vec mcv(mc.begin(), mc.end());
-        sort(mcv.begin(), mcv.end(), bscored_combo_tree_greater());
-        return mcv;
+    // merging 5% faster
+    metapop_candidates_list sorted_candidates(const metapop_candidates& mc) {
+        metapop_candidates_list mcl(mc.begin(), mc.end());
+        mcl.sort(bscored_combo_tree_greater());
+        return mcl;
     }
 
     /**

@@ -81,7 +81,7 @@ extern const composite_score worst_composite_score;
 typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
                              boost::hash<combo::combo_tree> > metapop_candidates;
 
-typedef std::vector<bscored_combo_tree> metapop_candidates_vec;
+typedef std::list<bscored_combo_tree> metapop_candidates_list;
 
 //convenience accessors
 inline const combo::combo_tree& get_tree(const scored_combo_tree& st) { 
