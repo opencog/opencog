@@ -242,6 +242,7 @@ bool is_running(const proc_map::value_type& pmv) {
 
 /**
  * read the istream, add the candidates, fill max_evals
+ * @todo replace metapop_candidates by bscored_combo_tree_set
  */
 void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
     in.seekg(0);
@@ -439,11 +440,12 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     }
                     // ~Logger
 
-                    metapop_candidates_list mcl = mp.sorted_candidates(candidates);
+                    bscored_combo_tree_set mc(candidates.begin(),
+                                              candidates.end());
 
-                    mp.update_best_candidates(mcl);
+                    mp.update_best_candidates(mc);
 
-                    mp.merge_candidates(mcl);
+                    mp.merge_candidates(mc);
 
                     // Logger
                     logger().info("Metapopulation size is %u", mp.size());

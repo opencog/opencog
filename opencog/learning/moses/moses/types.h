@@ -28,6 +28,7 @@
 #include <iomanip>
 
 #include <boost/unordered_map.hpp>
+#include <boost/iterator/indirect_iterator.hpp>
 
 #include <opencog/util/functional.h>
 #include <opencog/util/foreach.h>
@@ -40,7 +41,9 @@ namespace opencog { namespace moses {
 
 using std::binary_function;
 using combo::vertex;
-  
+using boost::indirect_iterator;
+using boost::transform_iterator;
+
 /////////////////
 // basic types //
 /////////////////
@@ -66,6 +69,8 @@ static const score_t worst_score =
     // std::numeric_limits<score_t>::min()+1,
 
 typedef std::pair<score_t, complexity_t> composite_score;
+extern const composite_score worst_composite_score;
+
 typedef tagged_item<combo::combo_tree,
                     composite_score> scored_combo_tree;
 
@@ -75,13 +80,6 @@ typedef tagged_item<behavioral_score,
                     composite_score> composite_behavioral_score;
 typedef tagged_item<combo::combo_tree,
                     composite_behavioral_score> bscored_combo_tree;
-
-extern const composite_score worst_composite_score;
-
-typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
-                             boost::hash<combo::combo_tree> > metapop_candidates;
-
-typedef std::list<bscored_combo_tree> metapop_candidates_list;
 
 //convenience accessors
 inline const combo::combo_tree& get_tree(const scored_combo_tree& st) { 
@@ -130,6 +128,35 @@ inline const behavioral_score& get_bscore(const composite_behavioral_score& ts) 
 inline const behavioral_score& get_bscore(const bscored_combo_tree& bst) { 
     return get_bscore(bst.second);
 }
+
+/**
+ * greater_than operator for bscored_combo_tree.  The order is as
+ * follow 1 the score matter, then complexity, then the combo_tree
+ * itself. This is done (formerly replacing
+ * std::greater<bscored_combo_tree>) so that candidates of same score
+ * and same complexity can be added in the metapopulation.
+ */
+struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
+                                                           bscored_combo_tree,
+                                                           bool> {
+    bool operator()(const bscored_combo_tree& bs_tr1,
+                    const bscored_combo_tree& bs_tr2) const {
+        composite_score csc1 = get_composite_score(bs_tr1);
+        composite_score csc2 = get_composite_score(bs_tr2);
+        return csc1 > csc2
+            || (!(csc1 < csc2) && 
+                size_tree_order<vertex>()(get_tree(bs_tr1),
+                                          get_tree(bs_tr2)));
+    }
+};
+typedef std::set<bscored_combo_tree,
+                 bscored_combo_tree_greater> bscored_combo_tree_set;
+
+typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
+                             boost::hash<combo::combo_tree> > metapop_candidates;
+typedef metapop_candidates::value_type metapop_candidate;
+typedef metapop_candidates::iterator metapop_candidates_it;
+typedef metapop_candidates::const_iterator metapop_candidates_cit;
 
 // ostream functions
 template<typename Out>

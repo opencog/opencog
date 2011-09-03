@@ -24,21 +24,23 @@
 #ifndef _OPENCOG_METAPOPULATION_H
 #define _OPENCOG_METAPOPULATION_H
 
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/logic/tribool.hpp>
+
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
+#include <opencog/util/functional.h>
 
 #include <opencog/learning/moses/eda/instance_set.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/util/oc_omp.h>
 
 #include "representation.h"
 #include "scoring.h"
 #include "types.h"
-
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/logic/tribool.hpp>
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -79,27 +81,6 @@ struct metapop_parameters {
     // the metapopulation
     bool include_dominated;
 };
-
-/**
- * greater_than operator for bscored_combo_tree.  The order is as
- * follow 1 the score matter, then complexity, then the combo_tree
- * itself. This is done (formerly replacing
- * std::greater<bscored_combo_tree>) so that candidates of same score
- * and same complexity can be added in the metapopulation.
- */
-struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
-                                                           bscored_combo_tree,
-                                                           bool> {
-    bool operator()(const bscored_combo_tree& bs_tr1,
-                    const bscored_combo_tree& bs_tr2) const {
-        composite_score csc1 = get_composite_score(bs_tr1);
-        composite_score csc2 = get_composite_score(bs_tr2);
-        return csc1 > csc2
-            || (!(csc1 < csc2) && 
-                size_tree_order<vertex>()(get_tree(bs_tr1),
-                                          get_tree(bs_tr2)));
-    }
-};
     
 /**
  * The metapopulation will store the expressions (as scored trees)
@@ -118,8 +99,7 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
  *
  */
 template<typename Scoring, typename BScoring, typename Optimization>
-struct metapopulation : public set<bscored_combo_tree,
-                                   bscored_combo_tree_greater> {
+struct metapopulation : public bscored_combo_tree_set {
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
 
@@ -135,10 +115,10 @@ struct metapopulation : public set<bscored_combo_tree,
             candidates.insert(make_pair(si_base,
                                         composite_behavioral_score(bsc, csc)));
         }
-        metapop_candidates_list mcl(candidates.begin(), candidates.end());
-        mcl.sort(bscored_combo_tree_greater());
-        update_best_candidates(mcl);
-        merge_candidates(mcl);
+        
+        bscored_combo_tree_set mps(candidates.begin(), candidates.end());
+        update_best_candidates(mps);
+        merge_candidates(mps);
     }
 
     /**
@@ -530,7 +510,7 @@ struct metapopulation : public set<bscored_combo_tree,
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
-        metapop_candidates candidates;
+        metapop_candidates pot_candidates;
 
         int i = 0;
 
@@ -570,18 +550,18 @@ struct metapopulation : public set<bscored_combo_tree,
 
             // update the set of potential exemplars
             if (_visited_exemplars.find(tr) == _visited_exemplars.end()
-                && candidates.find(tr) == candidates.end()) {
+                && pot_candidates.find(tr) == pot_candidates.end()) {
 
                 // only add up to max_candidates
                 if(params.max_candidates < 0
-                   || (int)candidates.size() < params.max_candidates) {
+                   || (int)pot_candidates.size() < params.max_candidates) {
                     // recompute the complexity if the candidate has
                     // not been previously reduced
                     composite_score csc = params.reduce_all?
                         inst_csc : make_pair(get_score(inst_csc),
                                              complexity(tr));
                     behavioral_score bsc; // empty bscore till it gets computed
-                    candidates[tr] = composite_behavioral_score(bsc, csc);
+                    pot_candidates[tr] = composite_behavioral_score(bsc, csc);
                 } else 
                     break;
             }
@@ -589,24 +569,31 @@ struct metapopulation : public set<bscored_combo_tree,
 
         // Logger
         logger().debug("Compute behavioral score of %d selected candidates",
-                       candidates.size());
+                       pot_candidates.size());
         // ~Logger
-        foreach(metapop_candidates::value_type& cand, candidates) {
+        foreach(metapop_candidates::value_type& cand, pot_candidates) {
             composite_score csc = get_composite_score(cand.second);
             behavioral_score bsc = bscore(cand.first);
             cand.second = composite_behavioral_score(bsc, csc);
         }
 
+        // bscored_combo_tree_set candidates = get_nondominated(pot_candidates);
+
+
         // Logger
-        logger().debug("Sort selected candidates");
+        logger().debug("Remove dominated candidates");
         // ~Logger
 
-        // the candidates are turn into a vector, then sorted so that
-        // merging is slightly faster (about 5%)
-        metapop_candidates_list mcl = sorted_candidates(candidates);
+        bscored_combo_tree_set candidates = get_nondominated(pot_candidates);
+
+        // Logger
+        logger().debug("Removed %u dominated candidates out of %u",
+                       pot_candidates.size() - candidates.size(),
+                       pot_candidates.size());
+        // ~Logger
 
         // update the record of the best-seen score & trees
-        update_best_candidates(mcl);
+        update_best_candidates(candidates);
 
         //Logger
         logger().debug("Merge %u candidates with the metapopulation",
@@ -620,7 +607,7 @@ struct metapopulation : public set<bscored_combo_tree,
         }
         // ~Logger
 
-        merge_candidates(mcl);
+        merge_candidates(candidates);
 
         //Logger
         logger().debug("Metapopulation size is %u", size());
@@ -637,12 +624,32 @@ struct metapopulation : public set<bscored_combo_tree,
         _rep = NULL;
     }
 
-    // return a sorted vector of candidates, this is used at it makes
-    // merging 5% faster
-    metapop_candidates_list sorted_candidates(const metapop_candidates& mc) {
-        metapop_candidates_list mcl(mc.begin(), mc.end());
+    bscored_combo_tree_set get_nondominated(metapop_candidates& mcs) {
+        typedef std::list<bscored_combo_tree> bscored_combo_tree_list;
+        typedef bscored_combo_tree_list::iterator bscored_combo_tree_list_it;
+        bscored_combo_tree_list mcl(mcs.begin(), mcs.end());
         mcl.sort(bscored_combo_tree_greater());
-        return mcl;
+        // remove all dominated candidates from the list
+        for(bscored_combo_tree_list_it it1 = mcl.begin(); it1 != mcl.end();) {
+            bscored_combo_tree_list_it it2 = it1;
+            ++it2;
+            if(it2 != mcl.end())
+                for(; it2 != mcl.end();) {
+                    tribool dom = dominates(it1->second, it2->second);
+                    if(dom)
+                        it2 = mcl.erase(it2);
+                    else if(!dom) {
+                        it1 = mcl.erase(it1);
+                        it2 = mcl.end();
+                    } else
+                        ++it2;
+                    if(it2 == mcl.end())
+                        ++it1;
+                }
+            else
+                ++it1;
+        }
+        return bscored_combo_tree_set(mcl.begin(), mcl.end());
     }
 
     /**
@@ -650,8 +657,10 @@ struct metapopulation : public set<bscored_combo_tree,
      *        false if y dominates x
      *        indeterminate otherwise
      */
-    tribool dominates(const behavioral_score& x, const behavioral_score& y)
-    {
+    inline tribool dominates(const behavioral_score& x,
+                             const behavioral_score& y) {
+        // static size_t counter = 0;
+        // std::cout << "dominates counter = " << counter++ << std::endl;
         //everything dominates an empty vector
         if (x.empty()) {
             if (y.empty())
@@ -707,10 +716,9 @@ struct metapopulation : public set<bscored_combo_tree,
     }
 
     // update the record of the best-seen score & trees
-    template<typename Candidates>
-    void update_best_candidates(const Candidates& candidates) {
+    void update_best_candidates(const bscored_combo_tree_set& candidates) {
         if(!candidates.empty()) {
-            const bscored_combo_tree& candidate = candidates.front();
+            const bscored_combo_tree& candidate = *candidates.begin();
             const composite_score& sc = get_composite_score(candidate);
             if (sc >= _best_score) {
                 if (sc > _best_score) {
