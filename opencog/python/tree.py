@@ -373,10 +373,11 @@ def standardize_apart(tr, dic=None):
 #                 )
 
 def new_var():
-    new_var.counter += 1
-    return tree(new_var.counter)
+    global _new_var_counter
+    _new_var_counter += 1
+    return tree(_new_var_counter)
 
-new_var.counter = 10**6
+_new_var_counter = 10**6
 
 
 def get_varlist(t):
