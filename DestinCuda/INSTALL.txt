@@ -29,7 +29,7 @@ Windows
  * run cmake to create you Visual Studio solution. (Don't make the output folder the same as the source)
 
 Linux
- * cmake CMakeList.txt && make
+ * cmake CMakeLists.txt && make
  * ./DestinCuda should now be avalible
  
 Mac
