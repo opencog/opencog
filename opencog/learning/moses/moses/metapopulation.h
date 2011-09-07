@@ -47,6 +47,8 @@
 namespace opencog { 
 namespace moses {
 
+using std::pair;
+using std::make_pair;
 using boost::logic::tribool;
 using boost::logic::indeterminate;
 using namespace combo;
@@ -539,7 +541,7 @@ struct metapopulation : public bscored_combo_tree_set {
         // eval_during_this_deme in case the deme is closed before the
         // entire deme (or rather the current sample of it) has been
         // explored
-        std::pair<deme_cit, deme_cit>
+        pair<deme_cit, deme_cit>
             range(_deme->begin(), _deme->begin() + eval_during_this_deme);
         foreach(const eda::scored_instance<composite_score>& inst, range) {
             const composite_score& inst_csc = inst.second;
@@ -666,6 +668,23 @@ struct metapopulation : public bscored_combo_tree_set {
         return bscored_combo_tree_set(mcl.begin(), mcl.end());
     }
 
+    // split in 2 of equal size
+    pair<bscored_combo_tree_set,
+         bscored_combo_tree_set> split(bscored_combo_tree_set& bcs) {
+        // split bcs in 2 (very bad but will be optimized)
+        bscored_combo_tree_set bcs1;
+        bscored_combo_tree_set bcs2;
+        size_t s= bcs.size();
+        size_t m = s / 2;
+        bscored_combo_tree_set_cit cit = bcs.begin();
+        for(size_t i = 0; i < s; ++i, ++cit)
+            if(i < m)
+                bcs1.insert(*cit);
+            else
+                bcs2.insert(*cit);
+        return make_pair(bcs1, bcs2);
+    }
+
     bscored_combo_tree_set get_nondominated_rec(bscored_combo_tree_set& bcs) {
         ///////////////
         // base case //
@@ -677,12 +696,71 @@ struct metapopulation : public bscored_combo_tree_set {
         // rec case //
         //////////////
         else {
-            size_t s = bcs.size();
-            // split bcs in 2
-            // TODO
-            // bscored_combo_tree_set bcs1(bcs.begin(), bcs.begin() + s);
-            // bscored_combo_tree_set bcs2(bcs.begin() + s, bcs.end());
-            return bcs;
+            pair<bscored_combo_tree_set, bscored_combo_tree_set>
+                bcs_p = split(bcs);
+            // recursive call
+            bscored_combo_tree_set bcs1_nd = get_nondominated_rec(bcs_p.first);
+            bscored_combo_tree_set bcs2_nd = get_nondominated_rec(bcs_p.second);
+            bscored_combo_tree_set bcs_res = merge_nondominated_rec(bcs1_nd,
+                                                                    bcs2_nd);
+            // union and return
+            bcs_res.insert(bcs1_nd.begin(), bcs1_nd.end());
+            bcs_res.insert(bcs2_nd.begin(), bcs2_nd.end());
+            return bcs_res;
+        }
+    }
+
+    // return the set of nondominated candidates between bcs1 and
+    // bcs2, assuming none contain dominated candidates
+    pair<bscored_combo_tree_set,
+         bscored_combo_tree_set> merge_nondominated_rec(bscored_combo_tree_set bcs1,
+                                                        bscored_combo_tree_set bcs2) {
+        ///////////////
+        // base case //
+        ///////////////
+        if(bcs1.empty() || bcs2.empty())
+            return make_pair(bcs1, bcs2);
+        else if(bcs1.size() == 1) {
+            bscored_combo_tree_set bcs_res1, bcs_res2;
+            bscored_combo_tree_set_cit it1 = bcs1.begin(), it2 = bcs2.begin();
+            bool it1_inserted = false; // whether *it1 has been
+                                       // inserted in bcs_res
+            for(; it2 += bcs2.end(); ++it2) {
+                tribool dom = dominates(it1->second, it2->second);
+                if(dom && !it1_inserted) {
+                    bcs_res1.insert(*it1);
+                    it1_inserted = true;
+                } else if(!dom) {
+                    bcs_res2.insert(it2, bcs2.end());
+                    break;
+                } else {
+                    if(!it1_inserted) {
+                        bcs_res1.insert(*it1);
+                        it1_inserted = true;
+                    }
+                    bcs_res2.insert(*it2);
+                }
+            }
+            return make_pair(bcs_res1, bcs_res2);
+        }
+        //////////////
+        // rec case //
+        //////////////
+        else {
+            // split bcs1 in 2
+            pair<bscored_combo_tree_set, bscored_combo_tree_set>
+                bcs1_p = split(bcs1);
+            // rec call
+            pair<bscored_combo_tree_set,
+                 bscored_combo_tree_set> 
+                bcs_m1 = merge_nondominated_rec(bcs1_p.first, bcs2);
+            pair<bscored_combo_tree_set,
+                 bscored_combo_tree_set> 
+                bcs_m2 = merge_nondominated_rec(bcs1_p.second, bcs_m1.second);
+            // merge results
+            bscored_combo_tree_set res1(bcs_m1.first);
+            res1.insert(bcs_m2.first.begin(), bcs_m2.first.end());
+            return make_pair(res1, bcs_m2.second);
         }
     }
 
