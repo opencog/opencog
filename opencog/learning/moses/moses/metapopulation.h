@@ -287,12 +287,15 @@ struct metapopulation : public bscored_combo_tree_set {
         return exemplar;
     }
 
+    // merge candidates in to the metapopulation. candidates might be
+    // changed (dominated candidates removed after the merging)
     template<typename Candidates>
-    void merge_candidates(const Candidates& candidates) {
+    void merge_candidates(Candidates& candidates) {
         if(params.include_dominated)
             insert(candidates.begin(), candidates.end());
         else
-            merge_nondominating(candidates.begin(), candidates.end());
+            // merge_nondominated_any(candidates);
+            merge_nondominated(candidates);
     }
 
     /**
@@ -409,7 +412,7 @@ struct metapopulation : public bscored_combo_tree_set {
         } while(!_rep);
 
         // create an empty deme
-        _deme = new eda::instance_set<composite_score>(_rep->fields());
+        _deme = new deme_t(_rep->fields());
 
         _evals_before_this_deme = n_evals();
 
@@ -512,8 +515,6 @@ struct metapopulation : public bscored_combo_tree_set {
         //trees in the final deme
         metapop_candidates pot_candidates;
 
-        int i = 0;
-
         // Logger
         logger().debug("Sort the deme");
         // ~Logger
@@ -526,18 +527,24 @@ struct metapopulation : public bscored_combo_tree_set {
         logger().debug("Select candidates to merge");
         // ~Logger
 
-        // select the set of candidates to add in the metapopulation
-        // @todo this is pretty slow, must be optimized
-        foreach(const eda::scored_instance<composite_score>& inst, *_deme) {
-            // this is in case the deme is closed before the entire
-            // deme (or rather the current sample of it) has been
-            // explored
-            if (i++ == eval_during_this_deme)
-                break;
+        struct MyStruct {
+            int operator()(int x) {
+                return 2*x;
+            }
+        };
 
+        // select the set of candidates to add in the metapopulation
+        //
+        // the range of the deme to merge goes up to
+        // eval_during_this_deme in case the deme is closed before the
+        // entire deme (or rather the current sample of it) has been
+        // explored
+        std::pair<deme_cit, deme_cit>
+            range(_deme->begin(), _deme->begin() + eval_during_this_deme);
+        foreach(const eda::scored_instance<composite_score>& inst, range) {
             const composite_score& inst_csc = inst.second;
 
-            // if it's really bad just skip it and all that follow
+            // if it's really bad just stop (as the deme is sorted)
             if (get_score(inst_csc) == get_score(worst_composite_score))
                 break;
 
@@ -577,20 +584,20 @@ struct metapopulation : public bscored_combo_tree_set {
             cand.second = composite_behavioral_score(bsc, csc);
         }
 
-        // bscored_combo_tree_set candidates = get_nondominated(pot_candidates);
-
-
-        // Logger
-        logger().debug("Remove dominated candidates");
-        // ~Logger
-
-        bscored_combo_tree_set candidates = get_nondominated(pot_candidates);
-
-        // Logger
-        logger().debug("Removed %u dominated candidates out of %u",
-                       pot_candidates.size() - candidates.size(),
-                       pot_candidates.size());
-        // ~Logger
+        bscored_combo_tree_set candidates;
+        if(params.include_dominated)
+            candidates.insert(pot_candidates.begin(), pot_candidates.end());
+        else {
+            // Logger
+            logger().debug("Remove dominated candidates");
+            // ~Logger
+            candidates = get_nondominated(pot_candidates);
+            // Logger
+            logger().debug("Removed %u dominated candidates out of %u",
+                           pot_candidates.size() - candidates.size(),
+                           pot_candidates.size());
+            // ~Logger
+        }            
 
         // update the record of the best-seen score & trees
         update_best_candidates(candidates);
@@ -627,8 +634,15 @@ struct metapopulation : public bscored_combo_tree_set {
     bscored_combo_tree_set get_nondominated(metapop_candidates& mcs) {
         typedef std::list<bscored_combo_tree> bscored_combo_tree_list;
         typedef bscored_combo_tree_list::iterator bscored_combo_tree_list_it;
-        bscored_combo_tree_list mcl(mcs.begin(), mcs.end());
+        // bscored_combo_tree_list mcl(mcs.begin(), mcs.end());
+        bscored_combo_tree_list mcl;
+        logger().debug("+ Init candidate list");
+        foreach(bscored_combo_tree c, mcs) {
+            if(find(c) == end()) // only if not in the metapopulation
+                mcl.push_back(c);
+        }
         mcl.sort(bscored_combo_tree_greater());
+        logger().debug("+ Remove candidates");
         // remove all dominated candidates from the list
         for(bscored_combo_tree_list_it it1 = mcl.begin(); it1 != mcl.end();) {
             bscored_combo_tree_list_it it2 = it1;
@@ -650,6 +664,72 @@ struct metapopulation : public bscored_combo_tree_set {
                 ++it1;
         }
         return bscored_combo_tree_set(mcl.begin(), mcl.end());
+    }
+
+    bscored_combo_tree_set get_nondominated_rec(bscored_combo_tree_set& bcs) {
+        ///////////////
+        // base case //
+        ///////////////
+        if(bcs.size() < 2) {
+            return bcs;
+        }
+        //////////////
+        // rec case //
+        //////////////
+        else {
+            size_t s = bcs.size();
+            // split bcs in 2
+            // TODO
+            // bscored_combo_tree_set bcs1(bcs.begin(), bcs.begin() + s);
+            // bscored_combo_tree_set bcs2(bcs.begin() + s, bcs.end());
+            return bcs;
+        }
+    }
+
+    // merge bcs in the metapopulation assuming that bcs doesn't
+    // contain within itself dominated candidates
+    void merge_nondominated(bscored_combo_tree_set& bcs) {
+        for(bscored_combo_tree_set_it it1 = bcs.begin(); it1 != bcs.end();) {
+            bscored_combo_tree_set_it it2 = begin();
+            if(it2 == end())
+                break;
+            for(; it2 != end();) {
+                tribool dom = dominates(it1->second, it2->second);
+                if(dom)
+                    erase(it2++);
+                else if(!dom) {
+                    bcs.erase(it1++);
+                    it2 = end();
+                } else
+                    ++it2;
+                if(it2 == end())
+                    ++it1;
+            }
+        }
+        // insert the nondominated candidates from bcs
+        insert(bcs.begin(), bcs.end());
+    }
+
+    // like merge_nondominatednondominated but doesn't make any
+    // assumption on bcs
+    void merge_nondominated_any(const bscored_combo_tree_set& bcs) {
+        bscored_combo_tree_set_cit from = bcs.begin(), to = bcs.end();
+        for(;from != to;++from) {
+            bool nondominated = true;
+            for(iterator it = begin(); it != end();) {
+                tribool dom = dominates(from->second, it->second);
+                if (dom) {
+                    erase(it++);
+                } else if (!dom) {
+                    nondominated = false;
+                    break;
+                } else {
+                    ++it;
+                }
+            }
+            if (nondominated)
+                insert(*from);
+        }
     }
 
     /**
@@ -687,32 +767,6 @@ struct metapopulation : public bscored_combo_tree_set {
             }
         }
         return res;
-    }
-
-    /**
-     * For all candidates c in [from, to), insert c in dst iff 
-     * no element of (dst - _visited_exemplars) dominates c.
-     */
-    //this may turn out to be too slow...
-    /// @todo parallelize this
-    template<typename It>
-    void merge_nondominating(It from, It to) {
-        for(;from != to;++from) {
-            bool nondominated = true;
-            for(iterator it = begin(); it != end();) {
-                tribool dom = dominates(from->second, it->second);
-                if (dom) {
-                    erase(it++);
-                } else if (!dom) {
-                    nondominated = false;
-                    break;
-                } else {
-                    ++it;
-                }
-            }
-            if (nondominated)
-                insert(*from);
-        }
     }
 
     // update the record of the best-seen score & trees
@@ -803,7 +857,10 @@ protected:
     combo_tree_hash_set _visited_exemplars;
     
     representation* _rep; // representation of the current deme
-    eda::instance_set<composite_score>* _deme; // current deme
+    typedef eda::instance_set<composite_score> deme_t;
+    typedef deme_t::iterator deme_it;
+    typedef deme_t::const_iterator deme_cit;
+    deme_t* _deme; // current deme
     const_iterator _exemplar; // exemplar of the current deme
 };
 

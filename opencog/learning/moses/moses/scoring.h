@@ -266,7 +266,7 @@ struct complexity_based_scorer : public unary_function<eda::instance,
         combo_tree tr = _rep.get_candidate(inst, _reduce);
         
         try {
-            return composite_score(score(tr), complexity(tr.begin()));
+            return composite_score(score(tr), complexity(tr));
         } catch (...) {
             stringstream ss;
             ss << "The following instance has failed to be evaluated: " 

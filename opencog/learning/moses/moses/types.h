@@ -151,6 +151,8 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
 };
 typedef std::set<bscored_combo_tree,
                  bscored_combo_tree_greater> bscored_combo_tree_set;
+typedef bscored_combo_tree_set::iterator bscored_combo_tree_set_it;
+typedef bscored_combo_tree_set::const_iterator bscored_combo_tree_set_cit;
 
 typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
                              boost::hash<combo::combo_tree> > metapop_candidates;
