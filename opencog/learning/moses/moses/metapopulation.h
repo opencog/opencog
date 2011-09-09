@@ -65,8 +65,7 @@ struct metapop_parameters {
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         revisit(_revisit),
-        include_dominated(_include_dominated)
-    { }
+        include_dominated(_include_dominated) {}
     
     // when doing selection of examplars according to 2^-n, where n is
     // complexity, only examplars with p>=2^-selection_max_range will
@@ -102,6 +101,7 @@ struct metapop_parameters {
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 struct metapopulation : public bscored_combo_tree_set {
+    typedef metapopulation<Scoring, BScoring, Optimization> self;
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
 
@@ -586,18 +586,16 @@ struct metapopulation : public bscored_combo_tree_set {
             cand.second = composite_behavioral_score(bsc, csc);
         }
 
-        bscored_combo_tree_set candidates;
-        if(params.include_dominated)
-            candidates.insert(pot_candidates.begin(), pot_candidates.end());
-        else {
+        bscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
+        if(!params.include_dominated) {
             // Logger
             logger().debug("Remove dominated candidates");
             // ~Logger
-            candidates = get_nondominated(pot_candidates);
+            size_t old_size = candidates.size();
+            remove_dominated(candidates);
             // Logger
             logger().debug("Removed %u dominated candidates out of %u",
-                           pot_candidates.size() - candidates.size(),
-                           pot_candidates.size());
+                           old_size - candidates.size(), old_size);
             // ~Logger
         }            
 
@@ -633,17 +631,25 @@ struct metapopulation : public bscored_combo_tree_set {
         _rep = NULL;
     }
 
-    bscored_combo_tree_set get_nondominated(metapop_candidates& mcs) {
+    // return the set of candidates not present in the metapopulation
+    // this makes merging faster because it decreases the number of
+    // calls of dominates
+    bscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs) {
+        bscored_combo_tree_set res;
+        foreach(bscored_combo_tree cnd, mcs)
+            if(find(cnd) == end())
+                res.insert(cnd);
+        return res;
+    }
+
+    static void remove_dominated(bscored_combo_tree_set& bcs) {
+        bcs = get_nondominated(bcs);
+    }
+
+    static bscored_combo_tree_set get_nondominated(const bscored_combo_tree_set& bcs) {
         typedef std::list<bscored_combo_tree> bscored_combo_tree_list;
         typedef bscored_combo_tree_list::iterator bscored_combo_tree_list_it;
-        // bscored_combo_tree_list mcl(mcs.begin(), mcs.end());
-        bscored_combo_tree_list mcl;
-        logger().debug("+ Init candidate list");
-        foreach(bscored_combo_tree c, mcs) {
-            if(find(c) == end()) // only if not in the metapopulation
-                mcl.push_back(c);
-        }
-        mcl.sort(bscored_combo_tree_greater());
+        bscored_combo_tree_list mcl(bcs.begin(), bcs.end());
         logger().debug("+ Remove candidates");
         // remove all dominated candidates from the list
         for(bscored_combo_tree_list_it it1 = mcl.begin(); it1 != mcl.end();) {
@@ -668,9 +674,11 @@ struct metapopulation : public bscored_combo_tree_set {
         return bscored_combo_tree_set(mcl.begin(), mcl.end());
     }
 
+    typedef pair<bscored_combo_tree_set,
+                 bscored_combo_tree_set> bscored_combo_tree_set_pair;
+
     // split in 2 of equal size
-    pair<bscored_combo_tree_set,
-         bscored_combo_tree_set> split(bscored_combo_tree_set& bcs) {
+    bscored_combo_tree_set_pair split(bscored_combo_tree_set& bcs) {
         // split bcs in 2 (very bad but will be optimized)
         bscored_combo_tree_set bcs1;
         bscored_combo_tree_set bcs2;
@@ -696,8 +704,7 @@ struct metapopulation : public bscored_combo_tree_set {
         // rec case //
         //////////////
         else {
-            pair<bscored_combo_tree_set, bscored_combo_tree_set>
-                bcs_p = split(bcs);
+            bscored_combo_tree_set_pair bcs_p = split(bcs);
             // recursive call
             bscored_combo_tree_set bcs1_nd = get_nondominated_rec(bcs_p.first);
             bscored_combo_tree_set bcs2_nd = get_nondominated_rec(bcs_p.second);
@@ -710,11 +717,12 @@ struct metapopulation : public bscored_combo_tree_set {
         }
     }
 
-    // return the set of nondominated candidates between bcs1 and
-    // bcs2, assuming none contain dominated candidates
-    pair<bscored_combo_tree_set,
-         bscored_combo_tree_set> merge_nondominated_rec(bscored_combo_tree_set bcs1,
-                                                        bscored_combo_tree_set bcs2) {
+    // return a pair of sets of nondominated candidates between bcs1
+    // and bcs2, assuming none contain dominated candidates. The first
+    // (resp. second) element of the pair corresponds to the
+    // nondominated candidates of bcs1 (resp. bcs2)
+    bscored_combo_tree_set_pair merge_nondominated_rec(bscored_combo_tree_set bcs1,
+                                                       bscored_combo_tree_set bcs2) {
         ///////////////
         // base case //
         ///////////////
@@ -725,7 +733,7 @@ struct metapopulation : public bscored_combo_tree_set {
             bscored_combo_tree_set_cit it1 = bcs1.begin(), it2 = bcs2.begin();
             bool it1_inserted = false; // whether *it1 has been
                                        // inserted in bcs_res
-            for(; it2 += bcs2.end(); ++it2) {
+            for(; it2 != bcs2.end(); ++it2) {
                 tribool dom = dominates(it1->second, it2->second);
                 if(dom && !it1_inserted) {
                     bcs_res1.insert(*it1);
@@ -748,14 +756,10 @@ struct metapopulation : public bscored_combo_tree_set {
         //////////////
         else {
             // split bcs1 in 2
-            pair<bscored_combo_tree_set, bscored_combo_tree_set>
-                bcs1_p = split(bcs1);
+            bscored_combo_tree_set_pair bcs1_p = split(bcs1);
             // rec call
-            pair<bscored_combo_tree_set,
-                 bscored_combo_tree_set> 
-                bcs_m1 = merge_nondominated_rec(bcs1_p.first, bcs2);
-            pair<bscored_combo_tree_set,
-                 bscored_combo_tree_set> 
+            bscored_combo_tree_set_pair
+                bcs_m1 = merge_nondominated_rec(bcs1_p.first, bcs2),
                 bcs_m2 = merge_nondominated_rec(bcs1_p.second, bcs_m1.second);
             // merge results
             bscored_combo_tree_set res1(bcs_m1.first);
@@ -764,9 +768,26 @@ struct metapopulation : public bscored_combo_tree_set {
         }
     }
 
-    // merge bcs in the metapopulation assuming that bcs doesn't
-    // contain within itself dominated candidates
+    // merge nondominated candidate to the metapopulation assuming
+    // that bcs contains no dominated candidates within itself
     void merge_nondominated(bscored_combo_tree_set& bcs) {
+        bscored_combo_tree_set bcs_mp(*this);
+        logger().debug("+ Merge nondominated");
+        bscored_combo_tree_set_pair bcs_p = merge_nondominated_rec(bcs, bcs_mp);
+        // remove the nondominates ones from the metapopulation
+        logger().debug("+ Remove nondominated from the metapopulation");
+        bscored_combo_tree_set diff_bcs_mp =
+            set_difference(bcs_mp, bcs_p.second);
+        foreach(bscored_combo_tree cnd, diff_bcs_mp)
+            erase(cnd);
+        // add the non dominates ones from bsc
+        logger().debug("+ Insert nondominated to the metapopulation");
+        foreach(const bscored_combo_tree& cnd, bcs_p.first)
+            insert(cnd);
+    }
+
+    // Iterative version of merge_nondominated
+    void merge_nondominated_iter(bscored_combo_tree_set& bcs) {
         for(bscored_combo_tree_set_it it1 = bcs.begin(); it1 != bcs.end();) {
             bscored_combo_tree_set_it it2 = begin();
             if(it2 == end())
@@ -788,8 +809,8 @@ struct metapopulation : public bscored_combo_tree_set {
         insert(bcs.begin(), bcs.end());
     }
 
-    // like merge_nondominatednondominated but doesn't make any
-    // assumption on bcs
+    // like merge_nondominated_iter but doesn't make any assumption on
+    // bcs
     void merge_nondominated_any(const bscored_combo_tree_set& bcs) {
         bscored_combo_tree_set_cit from = bcs.begin(), to = bcs.end();
         for(;from != to;++from) {
@@ -815,8 +836,8 @@ struct metapopulation : public bscored_combo_tree_set {
      *        false if y dominates x
      *        indeterminate otherwise
      */
-    inline tribool dominates(const behavioral_score& x,
-                             const behavioral_score& y) {
+    static inline tribool dominates(const behavioral_score& x,
+                                    const behavioral_score& y) {
         // static size_t counter = 0;
         // std::cout << "dominates counter = " << counter++ << std::endl;
         //everything dominates an empty vector
