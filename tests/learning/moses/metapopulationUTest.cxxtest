@@ -1,0 +1,44 @@
+/** metapopulationUTest.cxxtest --- 
+ *
+ * Copyright (C) 2011 OpenCog Foundation
+ *
+ * Author: Nil Geisweiller <nilg@laptop>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+#include <opencog/learning/moses/moses/metapopulation.h>
+
+using namespace opencog;
+
+class metapopulationUTest : public CxxTest::TestSuite {
+public:
+    metapopulationUTestUTest() {
+        logger().setPrintToStdoutFlag(true);
+        logger().setLevel(Logger::FINE);
+    }
+    // test metapopulation::remove_dominated
+    void test_remove_dominated() {
+        // a set of bscored_combo_tree, the combo_tree themselves are
+        // dummy (1, 2, ...) as only their bscore matter
+        bscored_combo_tree_set bcs;
+        // 1 TODO
+        behavioral_score bsc1;
+        composite_behavioral_score cbs1;
+        TS_ASSERT(true);
+    }    
+};
