@@ -32,6 +32,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/functional.h>
+#include <opencog/util/algorithm.h>
 
 #include <opencog/learning/moses/eda/instance_set.h>
 
