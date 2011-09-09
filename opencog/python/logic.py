@@ -58,13 +58,16 @@ class Chainer:
         #return results
         
         # Just return a single result for simplicity
-        s = next(results)
-        result1 = atom_from_tree(subst(s, target), self.space)
-        print pp(result1)
-        return [result1.h]
+        try:
+            s = next(results)
+            result1 = atom_from_tree(subst(s, target), self.space)
+            print pp(result1)
+            return [result1.h]
+        except StopIteration:
+            return []
 
     def expand_target(self, target, stack, depth):
-        #print ' '*depth+'expand_target', pp(target)
+        print ' '*depth+'expand_target', pp(target)
         # we have rules which are goal:-term,term,term,...
         # and include rules with no arguments.
         results = []
@@ -78,18 +81,15 @@ class Chainer:
     #    if unify(bad, target, {}) != None:
         if target.get_type() == t.ImplicationLink and len(target.args) == 2 and target.args[1].get_type() == t.ImplicationLink:
             print ' '*depth+'nested implication'
-            #return []
             return
 
         if depth > 6:
             print ' '*depth+'tacky maximum depth reached'
-            #return []
             return
 
         for x in stack:
             if unify(target, x, {}, True) != None:
                 #print ' '*depth+'loop'
-                #return []
                 return
 
         for r in self.rules:
@@ -98,7 +98,7 @@ class Chainer:
             s = unify(r.head, target, {})
             if s != None:
                 child_results = self.apply_rule(target, r, 0, s, stack+[target], depth)
-                #results+=child_results
+                results+=child_results
                 for cr in child_results:
                     yield cr
         #return results
