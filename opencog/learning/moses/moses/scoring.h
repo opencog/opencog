@@ -216,6 +216,20 @@ struct occam_ctruth_table_bscore
     RandGen& rng;
 };
 
+// for testing only
+struct dummy_score : public unary_function<combo_tree, score_t> {
+    score_t operator()(const combo_tree& tr) const {
+        return score_t();
+    }
+};
+
+// for testing only
+struct dummy_bscore : public unary_function<combo_tree, behavioral_score> {
+    behavioral_score operator()(const combo_tree& tr) const {
+        return behavioral_score();
+    }
+};
+
 /**
  * Mostly for testing the optimization algos, returns minus the
  * hamming distance of the candidate to a given target instance and

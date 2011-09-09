@@ -660,8 +660,8 @@ struct simulated_annealing {
 
     template<typename Scoring>
     unsigned operator()(eda::instance_set<composite_score>& deme,
-                            const eda::instance& init_inst,
-                            const Scoring& score, unsigned max_evals) {
+                        const eda::instance& init_inst,
+                        const Scoring& score, unsigned max_evals) {
 
         const eda::field_set& fields = deme.fields();
         max_distance = opt_params.max_distance(fields);
@@ -752,6 +752,10 @@ struct simulated_annealing {
     sa_parameters sa_params;
 protected:
     unsigned max_distance;
+};
+
+// for testing only
+struct dummy_optimization {
 };
 
 } // ~namespace moses

@@ -43,3 +43,10 @@ TARGET_LINK_LIBRARIES(optimizationUTest
   comboreduct
   util
 )
+
+ADD_CXXTEST(metapopulationUTest)
+TARGET_LINK_LIBRARIES(metapopulationUTest
+  moses
+  comboreduct
+  util
+)
