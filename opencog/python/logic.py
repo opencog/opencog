@@ -52,10 +52,16 @@ class Chainer:
         self.viz.outputTarget(target, None, 0)
         results = self.expand_target(target, [], depth=1)
         
-        results = [tree_from_atom(subst(s, target)) for s in results]
-        print 'PythonPLN results: ', pp(results)
+        #results = [atom_from_tree(subst(s, target), self.space) for s in results]
+        #print 'PythonPLN results: ', pp(results)
         
-        return results
+        #return results
+        
+        # Just return a single result for simplicity
+        s = next(results)
+        result1 = atom_from_tree(subst(s, target), self.space)
+        print pp(result1)
+        return [result1.h]
 
     def expand_target(self, target, stack, depth):
         #print ' '*depth+'expand_target', pp(target)
@@ -72,16 +78,19 @@ class Chainer:
     #    if unify(bad, target, {}) != None:
         if target.get_type() == t.ImplicationLink and len(target.args) == 2 and target.args[1].get_type() == t.ImplicationLink:
             print ' '*depth+'nested implication'
-            return []
+            #return []
+            return
 
         if depth > 6:
             print ' '*depth+'tacky maximum depth reached'
-            return []
+            #return []
+            return
 
         for x in stack:
             if unify(target, x, {}, True) != None:
                 #print ' '*depth+'loop'
-                return []
+                #return []
+                return
 
         for r in self.rules:
             r = r.standardize_apart()
@@ -89,8 +98,10 @@ class Chainer:
             s = unify(r.head, target, {})
             if s != None:
                 child_results = self.apply_rule(target, r, 0, s, stack+[target], depth)
-                results+=child_results
-        return results
+                #results+=child_results
+                for cr in child_results:
+                    yield cr
+        #return results
 
     def apply_rule(self, target, rule, goals_index, s, stack, depth):
         if goals_index == len(rule.goals):
