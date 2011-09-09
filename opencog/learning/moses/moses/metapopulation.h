@@ -643,10 +643,10 @@ struct metapopulation : public bscored_combo_tree_set {
     }
 
     static void remove_dominated(bscored_combo_tree_set& bcs) {
-        bcs = get_nondominated(bcs);
+        bcs = get_nondominated_rec(bcs);
     }
 
-    static bscored_combo_tree_set get_nondominated(const bscored_combo_tree_set& bcs) {
+    static bscored_combo_tree_set get_nondominated_iter(const bscored_combo_tree_set& bcs) {
         typedef std::list<bscored_combo_tree> bscored_combo_tree_list;
         typedef bscored_combo_tree_list::iterator bscored_combo_tree_list_it;
         bscored_combo_tree_list mcl(bcs.begin(), bcs.end());
@@ -678,7 +678,7 @@ struct metapopulation : public bscored_combo_tree_set {
                  bscored_combo_tree_set> bscored_combo_tree_set_pair;
 
     // split in 2 of equal size
-    bscored_combo_tree_set_pair split(bscored_combo_tree_set& bcs) {
+    static bscored_combo_tree_set_pair split(const bscored_combo_tree_set& bcs) {
         // split bcs in 2 (very bad but will be optimized)
         bscored_combo_tree_set bcs1;
         bscored_combo_tree_set bcs2;
@@ -693,7 +693,7 @@ struct metapopulation : public bscored_combo_tree_set {
         return make_pair(bcs1, bcs2);
     }
 
-    bscored_combo_tree_set get_nondominated_rec(bscored_combo_tree_set& bcs) {
+    static bscored_combo_tree_set get_nondominated_rec(const bscored_combo_tree_set& bcs) {
         ///////////////
         // base case //
         ///////////////
@@ -708,12 +708,12 @@ struct metapopulation : public bscored_combo_tree_set {
             // recursive call
             bscored_combo_tree_set bcs1_nd = get_nondominated_rec(bcs_p.first);
             bscored_combo_tree_set bcs2_nd = get_nondominated_rec(bcs_p.second);
-            bscored_combo_tree_set bcs_res = merge_nondominated_rec(bcs1_nd,
-                                                                    bcs2_nd);
+            bscored_combo_tree_set_pair bcs_res = merge_nondominated_rec(bcs1_nd,
+                                                                         bcs2_nd);
             // union and return
-            bcs_res.insert(bcs1_nd.begin(), bcs1_nd.end());
-            bcs_res.insert(bcs2_nd.begin(), bcs2_nd.end());
-            return bcs_res;
+            bscored_combo_tree_set res(bcs_res.first);
+            res.insert(bcs_res.second.begin(), bcs_res.second.end());
+            return res;
         }
     }
 
@@ -721,8 +721,8 @@ struct metapopulation : public bscored_combo_tree_set {
     // and bcs2, assuming none contain dominated candidates. The first
     // (resp. second) element of the pair corresponds to the
     // nondominated candidates of bcs1 (resp. bcs2)
-    bscored_combo_tree_set_pair merge_nondominated_rec(bscored_combo_tree_set bcs1,
-                                                       bscored_combo_tree_set bcs2) {
+    static bscored_combo_tree_set_pair merge_nondominated_rec(bscored_combo_tree_set bcs1,
+                                                              bscored_combo_tree_set bcs2) {
         ///////////////
         // base case //
         ///////////////
