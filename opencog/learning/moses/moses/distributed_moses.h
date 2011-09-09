@@ -206,7 +206,7 @@ proc_map::value_type launch_cmd(string cmd, unsigned n_jobs) {
     OC_ASSERT(count_matches == 1);
 
     // make the proc_map
-    return make_pair(pid, make_tuple(cmd, tmp, fp, n_jobs));
+    return make_pair(pid, boost::make_tuple(cmd, tmp, fp, n_jobs));
 }
 
 // check if a file is being used by process of PID pid 

@@ -48,7 +48,7 @@ int main(int argc,char** argv) {
     instance_set<int> population(args.popsize,fs);
     foreach(instance& inst,population)
         generate(fs.begin_disc(inst), fs.end_disc(inst),
-                 bind(&opencog::RandGen::randint, ref(rng), n));
+                 bind(&opencog::RandGen::randint, boost::ref(rng), n));
 
     optimize(population,args.n_select,args.n_generate,args.max_gens,n_max(fs),
              terminate_if_gte<int>((n-1)*args.length),

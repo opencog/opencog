@@ -65,9 +65,9 @@ template<typename Erase, typename It1, typename It2, typename Comp>
 void erase_set_intersection(Erase erase, It1 from1, It1 to1,
                             It2 from2, It2 to2, Comp comp)
 {
-    OC_ASSERT(is_sorted(from1, to1, comp),
+    OC_ASSERT(__gnu_cxx::is_sorted(from1, to1, comp),
               "algorithm - from1 -> to1 aren't sorted (erase_set_intersection).");
-    OC_ASSERT(is_sorted(from2, to2, comp),
+    OC_ASSERT(__gnu_cxx::is_sorted(from2, to2, comp),
               "algorithm - from2 -> to2 aren't sorted (erase_set_intersection).");
 
     while (from1 != to1 && from2 != to2)
@@ -87,9 +87,9 @@ template<typename Erase, typename It1, typename It2, typename Comp>
 void erase_set_difference(Erase erase, It1 from1, It1 to1,
                           It2 from2, It2 to2, Comp comp)
 {
-    OC_ASSERT(is_sorted(from1, to1, comp),
+    OC_ASSERT(__gnu_cxx::is_sorted(from1, to1, comp),
               "algorithm - from1 -> to1 aren't sorted (erase_set_difference).");
-    OC_ASSERT(is_sorted(from2, to2, comp),
+    OC_ASSERT(__gnu_cxx::is_sorted(from2, to2, comp),
               "algorithm - from2 -> to2 aren't sorted (erase_set_difference).");
 
     while (from1 != to1 && from2 != to2)
@@ -112,9 +112,9 @@ template<typename Insert, typename It1, typename It2, typename Comp>
 void insert_set_complement(Insert insert, It1 from1, It1 to1,
                            It2 from2, It2 to2, Comp comp)
 {
-    cassert(TRACE_INFO, is_sorted(from1, to1, comp),
+    cassert(TRACE_INFO, __gnu_cxx::is_sorted(from1, to1, comp),
             "algorithm - from1 -> to1 aren't sorted (insert_set_complement).");
-    cassert(TRACE_INFO, is_sorted(from2, to2, comp),
+    cassert(TRACE_INFO, __gnu_cxx::is_sorted(from2, to2, comp),
             "algorithm - from2 -> to2 aren't sorted (insert_set_complement).");
 
     while (from1 != to1 && from2 != to2)
@@ -137,9 +137,9 @@ template<typename It1, typename It2, typename Comp>
 bool has_empty_intersection(It1 from1, It1 to1,
                             It2 from2, It2 to2, Comp comp)
 {
-    cassert(TRACE_INFO, is_sorted(from1, to1, comp),
+    cassert(TRACE_INFO, __gnu_cxx::is_sorted(from1, to1, comp),
             "algorithm - from1 -> to1 aren't sorted (has_empty_intersection).");
-    cassert(TRACE_INFO, is_sorted(from2, to2, comp),
+    cassert(TRACE_INFO, __gnu_cxx::is_sorted(from2, to2, comp),
             "algorithm - from2 -> to2 aren't sorted (has_empty_intersection).");
 
     while (from1 != to1 && from2 != to2)

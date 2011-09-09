@@ -39,7 +39,7 @@ int main(int argc,char** argv) {
     instance_set<int> population(args.popsize,fs);
     foreach(instance& inst,population)
         generate(fs.begin_bits(inst), fs.end_bits(inst),
-                 bind(&opencog::RandGen::randbool,ref(rng)));
+                 bind(&opencog::RandGen::randbool, boost::ref(rng)));
     
     optimize(population,args.n_select, args.n_generate,args.max_gens,
              one_max(), terminate_if_gte<int>(args.length),

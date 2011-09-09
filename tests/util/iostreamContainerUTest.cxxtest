@@ -38,7 +38,7 @@ class printContainerUTest : public CxxTest::TestSuite
     
 public:
     printContainerUTest() {
-        _N = list_of(1)(2)(3)(4);
+        _N = {1, 2, 3, 4};
     }
 
     void test_ostreamContainer() {

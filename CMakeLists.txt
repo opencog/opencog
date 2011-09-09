@@ -40,10 +40,14 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")
   ENDIF (APPLE)
   
-  # Nil: added -Wno-variadic-macros to avoid warnings regarding
-  # using variadic in macro OC_ASSERT (the warning warns that this is
-  # only available from C99, lol!)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp")
+  # 1) -Wno-variadic-macros is to avoid warnings regarding using
+  # variadic in macro OC_ASSERT (the warning warns that this is only
+  # available from C99, lol!)
+  #
+  # 2) -fopenmp for multithreading support
+  #
+  # 3) -std=gnu++0x for C++0x and GNU extensions support
+  SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++0x")
 
   SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
   SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})

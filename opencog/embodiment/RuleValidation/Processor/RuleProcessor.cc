@@ -77,11 +77,12 @@ RuleProcessor::RuleProcessor(const std::string & type) :
     luabind::set_pcall_callback(&luaThrowException);
 
     // register class to makes lua understand is's structure
-    luabind::module(this->luaState) [
-        luabind::class_<std::vector<std::string> >( "StringVector" )
-        .def( luabind::constructor<>() )
-        .def( "push_back", &std::vector<std::string>::push_back )
-    ];
+    // TODO C++0x
+    // luabind::module(this->luaState) [
+    //     luabind::class_<std::vector<std::string> >( "StringVector" )
+    //     .def( luabind::constructor<>() )
+    //     .def( "push_back", &std::vector<std::string>::push_back )
+    // ];
 
     luabind::module( this->luaState ) [
         luabind::class_< std::map<std::string, float>::value_type >( "StringFloatPair" )

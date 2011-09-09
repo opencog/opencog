@@ -11,12 +11,12 @@ using boost::tuple;
 namespace opencog
 {
 
-typedef tuple<clock_t,clock_t> timepair_t;
+typedef boost::tuple<clock_t,clock_t> timepair_t;
 
 class AtomSpaceBenchmark
 {
     // size of AtomSpace, time taken for operation, rss memory max
-    typedef tuple<size_t,clock_t,long> record_t;
+    typedef boost::tuple<size_t,clock_t,long> record_t;
 
 
     struct TimeStats {

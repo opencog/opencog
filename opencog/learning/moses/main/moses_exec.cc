@@ -404,8 +404,8 @@ int moses_exec(int argc, char** argv) {
             vertex v;
             if(builtin_str_to_vertex(s, v)) {
                 if(!ignore_operators) {
-                    ignore_ops =
-                        list_of(id::plus)(id::times)(id::div)(id::exp)(id::log)(id::sin);
+		  ignore_ops = {id::plus, id::times, id::div,
+				id::exp, id::log, id::sin};
                     ignore_operators = true;
                 }
                 ignore_ops.erase(v);

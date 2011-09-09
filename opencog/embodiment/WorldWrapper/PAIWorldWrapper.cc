@@ -564,7 +564,7 @@ void PAIWorldWrapper::clearPlan( std::vector<spatial::Point>& actions,
     for ( it = actions.begin(); it != actions.end(); ++it ) {
         double d = SpaceServer::SpaceMap::eucDist(*it, endPoint);
         if (d < closestDist) {
-            eraseFrom = next(it);
+	    eraseFrom = boost::next(it);
 
             // at some point the following "take the nearest point" heuristic
             // can be made more subtle by adding a weight to the length of the
