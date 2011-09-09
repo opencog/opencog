@@ -20,15 +20,20 @@ struct PLNTest
     uint minEvalsOfFittestBIT; //Divided by ten
     uint minExhaustiveEvals; //Use either this one or the previous one
     PLNTest(meta _target,
+            Handle _target_handle,
             TruthValue* _minTV,
             TruthValue* _maxTV,
             uint _minEvalsOfFittestBIT,
             uint _minExhaustiveEvals)
         : target(_target), minTV(_minTV), maxTV(_maxTV),
           minEvalsOfFittestBIT(_minEvalsOfFittestBIT),
-          minExhaustiveEvals(_minExhaustiveEvals)
+          minExhaustiveEvals(_minExhaustiveEvals),
+          target_handle(_target_handle)
     {}
     Btr<opencog::pln::BITNodeRoot> state;
+    
+    // The normal Handle. Only used by Python PLN.
+    Handle target_handle;
 };
 
 float getCount(float c);

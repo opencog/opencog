@@ -11,6 +11,8 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
+#include <opencog/cython/logic_wrapper_api.h>
+
 // for backward compatibility as from boost 1.46 filesystem 3 is the default
 #define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem.hpp>
@@ -148,6 +150,7 @@ Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc)
 
     Btr<PLNTest> the_test(new PLNTest(
                target,
+               h,
                minTV, maxTV,
                minEvalsOfFittestBIT,
                0)); // Alternative for using exhaustive evaluation (obsolete).
@@ -256,6 +259,15 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     AtomSpaceWrapper *asw = GET_ASW;
     stats::Instance().ITN2atom.clear();
 
+//    // Code to run the Python backward chainer.
+//    PyGILState_STATE gstate;
+//    gstate = PyGILState_Ensure(); 
+//    import_logic_wrapper();
+//    //python_pln_fc(cogserver().getAtomSpace());
+//    //python_pln_fc();
+//    Handle result = python_pln_bc(cogserver().getAtomSpace(), t->target_handle);
+//    PyGILState_Release(gstate); 
+    
     rawPrint(*t->target, t->target->begin(), -2);
 
     clock_t start, finish;
@@ -456,6 +468,7 @@ bool maketest(meta target,
               uint minExhaustiveEvals,
               bool test_bc) {
     Btr<PLNTest> t = Btr<PLNTest>(new PLNTest(target,
+                                        Handle::UNDEFINED,
                                         minTV,
                                         maxTV,
                                         minEvalsOfFittestBIT,

@@ -32,6 +32,11 @@ add_custom_command(OUTPUT agent_finder.cpp agent_finder_api.h
   DEPENDS "agent_finder.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd")
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
 
+add_custom_command(OUTPUT logic_wrapper.cpp logic_wrapper_api.h
+  COMMAND
+  ${CYTHON_EXECUTABLE} -f -o logic_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/logic_wrapper.pyx"
+  DEPENDS "opencog/atomspace.pxd")
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logic_wrapper.cpp" "logic_wrapper_api.h")
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython SHARED
@@ -100,7 +105,6 @@ ADD_DEPENDENCIES(agent_finder cogserver_cython atomspace_cython)
 SET_TARGET_PROPERTIES(agent_finder PROPERTIES
     PREFIX ""
     OUTPUT_NAME agent_finder)
-##
 
 ADD_LIBRARY (PythonEval SHARED
     PythonEval.cc
@@ -112,13 +116,27 @@ TARGET_LINK_LIBRARIES(PythonEval
     ${PYTHON_LIBRARIES}
 )
 
+# utility library for PythonModule
+ADD_LIBRARY(logic_wrapper SHARED
+    logic_wrapper.cpp
+)
+
+TARGET_LINK_LIBRARIES(logic_wrapper
+)
+
+ADD_DEPENDENCIES(logic_wrapper atomspace_cython)
+
+SET_TARGET_PROPERTIES(logic_wrapper PROPERTIES
+    PREFIX ""
+    OUTPUT_NAME logic_wrapper)
+
 # Python module to be loaded by CogServer
 ADD_LIBRARY (PythonModule SHARED
 	PythonModule.cc 
     PyMindAgent.cc
     PyRequest.cc
 )
-ADD_DEPENDENCIES(PythonModule agent_finder PythonEval)
+ADD_DEPENDENCIES(PythonModule agent_finder PythonEval logic_wrapper)
 
 TARGET_LINK_LIBRARIES(PythonModule
     server

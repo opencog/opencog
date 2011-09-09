@@ -265,6 +265,8 @@ public:
         cogserver().loadSCMModules(paths);
 #endif
 
+        cogserver().loadModule("libPythonModule.so");
+
         allTestsInferenceNodes = 0;
 
         INstats.clear();

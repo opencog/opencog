@@ -24,6 +24,8 @@ LINK_DIRECTORIES (
 LINK_LIBRARIES (
     pln
     server
+    PythonModule
+    ${PYTHON_LIBRARIES}
 )
 
 ADD_CXXTEST(AtomSpaceWrapperUTest)
@@ -37,8 +39,8 @@ ADD_CXXTEST(PLNSchemeWrapperUTest)
 IF (EXPAT_FOUND OR GUILE_FOUND)
         # Nil: PLNUTest and ForwardChainingUTest always fail and take
         # a very long time so I disable them till they get fixed
-    	# ADD_CXXTEST(PLNUTest)
-    #IF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    	ADD_CXXTEST(PLNUTest)
+    # IF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
         # ADD_CXXTEST(ForwardChainingUTest)
     ADD_CXXTEST(DeterminismUTest)
     #ENDIF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")

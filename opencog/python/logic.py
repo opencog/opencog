@@ -1,8 +1,10 @@
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
 import opencog.cogserver
 from tree import *
-from adaptors import *
+from adaptors import find_matching_conjunctions
 from util import pp
+
+t = types
 
 class Chainer:
     def __init__(self, space):
@@ -12,6 +14,8 @@ class Chainer:
         self.setup_rules(space)
     
     def fc(self):
+        #import pdb; pdb.set_trace()
+        
         facts = {r.head for r in self.rules if not r.goals}
         real_rules = {r for r in self.rules if r.goals}
 
@@ -47,10 +51,14 @@ class Chainer:
     def bc(self, target):
         self.viz.outputTarget(target, None, 0)
         results = self.expand_target(target, [], depth=1)
+        
+        results = [tree_from_atom(subst(s, target)) for s in results]
+        print 'PythonPLN results: ', pp(results)
+        
         return results
 
     def expand_target(self, target, stack, depth):
-        print ' '*depth+'expand_target', pp(target)
+        #print ' '*depth+'expand_target', pp(target)
         # we have rules which are goal:-term,term,term,...
         # and include rules with no arguments.
         results = []
@@ -72,7 +80,7 @@ class Chainer:
 
         for x in stack:
             if unify(target, x, {}, True) != None:
-                print ' '*depth+'loop'
+                #print ' '*depth+'loop'
                 return []
 
         for r in self.rules:
@@ -92,7 +100,7 @@ class Chainer:
         goal = rule.goals[goals_index]
         goal = subst(s, goal)
 
-        print ' '*depth+'apply_rule //', target,'// rule =', rule, '// goal =',  goal, '// index =', goals_index
+        #print ' '*depth+'apply_rule //', target,'// rule =', rule, '// goal =',  goal, '// index =', goals_index
 
         results = []
 

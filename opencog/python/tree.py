@@ -13,6 +13,10 @@ def coerce_tree(x):
         return tree(x)
 
 class tree:
+#    cdef public object op
+#    cdef public list args
+#    cdef tuple _tuple
+    
     def __init__(self, op, *args):
         # Transparently allow using passing a list or using it in the more streamlined way
         # (better for constructing trees by hand)
@@ -29,7 +33,9 @@ class tree:
             self.args = [coerce_tree(x) for x in args]
         else:
             self.op = op
-            self.args = args
+            self.args = []
+        
+        self._tuple = None
 
     def __str__(self):
         if self.is_leaf():
@@ -81,9 +87,7 @@ class tree:
         # Simply cache the tuple.
         # TODO: A more efficient alternative would be to adapt the hash function and compare function
         # to work on Trees directly.
-        try:
-            return self._tuple
-        except:
+        if self._tuple != None:
             # Atom doesn't support comparing to different types in the Python-standard way.
             if isinstance(self.op, Atom):
                 #assert type(self.op.h) != type(None)
