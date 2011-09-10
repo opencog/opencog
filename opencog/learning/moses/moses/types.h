@@ -154,6 +154,10 @@ typedef std::set<bscored_combo_tree,
 typedef bscored_combo_tree_set::iterator bscored_combo_tree_set_it;
 typedef bscored_combo_tree_set::const_iterator bscored_combo_tree_set_cit;
 
+typedef std::set<const bscored_combo_tree*> bscored_combo_tree_ptr_set;
+typedef bscored_combo_tree_ptr_set::iterator bscored_combo_tree_ptr_set_it;
+typedef bscored_combo_tree_ptr_set::const_iterator bscored_combo_tree_ptr_set_cit;
+
 typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
                              boost::hash<combo::combo_tree> > metapop_candidates;
 typedef metapop_candidates::value_type metapop_candidate;

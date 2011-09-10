@@ -591,12 +591,26 @@ struct metapopulation : public bscored_combo_tree_set {
         if(!params.include_dominated) {
             // Logger
             logger().debug("Remove dominated candidates");
+            if(logger().getLevel() >= Logger::FINE) {
+                logger().fine("Candidates with their bscores before"
+                              " removing the dominated candidates");
+                stringstream ss;
+                logger().fine(ostream(ss, candidates.begin(), candidates.end(),
+                                      -1, true, true, true).str());
+            }            
             // ~Logger
             size_t old_size = candidates.size();
             remove_dominated(candidates);
             // Logger
             logger().debug("Removed %u dominated candidates out of %u",
                            old_size - candidates.size(), old_size);
+            if(logger().getLevel() >= Logger::FINE) {
+                logger().fine("Candidates with their bscores after"
+                              " removing the dominated candidates");
+                stringstream ss;
+                logger().fine(ostream(ss, candidates.begin(), candidates.end(),
+                                      -1, true, true, true).str());
+            }            
             // ~Logger
         }            
 
@@ -753,26 +767,19 @@ struct metapopulation : public bscored_combo_tree_set {
         else if(bcs1.size() == 1) {
             bscored_combo_tree_set bcs_res1, bcs_res2;
             bscored_combo_tree_set_cit it1 = bcs1.begin(), it2 = bcs2.begin();
-            bool it1_inserted = false; // whether *it1 has been
-                                       // inserted in bcs_res
+            bool it1_insert = true; // whether *it1 is to be inserted
+                                    // in bcs_res1
             for(; it2 != bcs2.end(); ++it2) {
                 tribool dom = dominates(it1->second, it2->second);
-                if(dom) {
-                    if(it1_inserted) {
-                        bcs_res1.insert(*it1);
-                        it1_inserted = true;
-                    }
-                } else if(!dom) {
+                if(!dom) {
+                    it1_insert = false;
                     bcs_res2.insert(it2, bcs2.end());
                     break;
-                } else {
-                    if(!it1_inserted) {
-                        bcs_res1.insert(*it1);
-                        it1_inserted = true;
-                    }
+                } else if(indeterminate(dom))
                     bcs_res2.insert(*it2);
-                }
             }
+            if(it1_insert)
+                bcs_res1.insert(*it1);
             return make_pair(bcs_res1, bcs_res2);
         }
         //////////////
