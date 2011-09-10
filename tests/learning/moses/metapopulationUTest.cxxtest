@@ -119,7 +119,7 @@ public:
             metapopulation_t;
 
         metapopulation_t::bscored_combo_tree_set_pair res_p =
-            metapopulation_t::merge_nondominated_rec(bcs1, bcs2);
+            metapopulation_t::get_nondominated_disjoint(bcs1, bcs2);
         bscored_combo_tree_set res = set_union(res_p.first, res_p.second);
         // 2 is dominated
         TS_ASSERT_EQUALS(res.size(), 2);             // 1 is removed

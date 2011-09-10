@@ -103,6 +103,9 @@ struct metapop_parameters {
 template<typename Scoring, typename BScoring, typename Optimization>
 struct metapopulation : public bscored_combo_tree_set {
     typedef metapopulation<Scoring, BScoring, Optimization> self;
+    typedef bscored_combo_tree_set super;
+    typedef super::value_type value_type;
+
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
 
@@ -657,11 +660,49 @@ struct metapopulation : public bscored_combo_tree_set {
         return res;
     }
 
-    static void remove_dominated(bscored_combo_tree_set& bcs) {
-        bcs = get_nondominated_rec(bcs);
+    typedef pair<bscored_combo_tree_set,
+                 bscored_combo_tree_set> bscored_combo_tree_set_pair;
+
+    typedef std::vector<const bscored_combo_tree*> bscored_combo_tree_ptr_vec;
+    typedef bscored_combo_tree_ptr_vec::iterator bscored_combo_tree_ptr_vec_it;
+    typedef bscored_combo_tree_ptr_vec::const_iterator bscored_combo_tree_ptr_vec_cit;
+    typedef pair<bscored_combo_tree_ptr_vec,
+                 bscored_combo_tree_ptr_vec> bscored_combo_tree_ptr_vec_pair;
+    typedef std::set<const bscored_combo_tree*> bscored_combo_tree_ptr_set;
+
+    // convert a set of bscored_combo_tree into a vector of pointers
+    // of bscored_combo_tree
+    static bscored_combo_tree_ptr_vec
+    to_ptr_vec(const bscored_combo_tree_set& bcs) {
+        bscored_combo_tree_ptr_vec res;
+        foreach(const bscored_combo_tree& cnd, bcs)
+            res.push_back(&cnd);
+        return res;
+    }
+    // reciprocal of to_ptr_vec 
+    static bscored_combo_tree_set
+    to_set(const bscored_combo_tree_ptr_vec& bcv) {
+        bscored_combo_tree_set res;
+        foreach(const bscored_combo_tree* cnd, bcv)
+            res.insert(*cnd);
+        return res;
     }
 
-    static bscored_combo_tree_set get_nondominated_iter(const bscored_combo_tree_set& bcs) {
+    static void remove_dominated(bscored_combo_tree_set& bcs) {
+        // get the nondominated candidates
+        bscored_combo_tree_ptr_vec bcv = to_ptr_vec(bcs);
+        bscored_combo_tree_ptr_vec res = get_nondominated_rec(bcv);
+        // get the dominated by set difference
+        bscored_combo_tree_ptr_set dif =
+            set_difference(bscored_combo_tree_ptr_set(bcv.begin(), bcv.end()),
+                           bscored_combo_tree_ptr_set(res.begin(), res.end()));
+        // remove the dominated ones
+        foreach(const bscored_combo_tree* cnd_ptr, dif)
+            bcs.erase(*cnd_ptr);
+    }
+
+    static bscored_combo_tree_set
+    get_nondominated_iter(const bscored_combo_tree_set& bcs) {
         typedef std::list<bscored_combo_tree> bscored_combo_tree_list;
         typedef bscored_combo_tree_list::iterator bscored_combo_tree_list_it;
         bscored_combo_tree_list mcl(bcs.begin(), bcs.end());
@@ -689,131 +730,115 @@ struct metapopulation : public bscored_combo_tree_set {
         return bscored_combo_tree_set(mcl.begin(), mcl.end());
     }
 
-    typedef pair<bscored_combo_tree_set,
-                 bscored_combo_tree_set> bscored_combo_tree_set_pair;
-
     // split in 2 of equal size
-    static bscored_combo_tree_set_pair split(const bscored_combo_tree_set& bcs) {
-        // split bcs in 2 (very bad but will be optimized)
-        bscored_combo_tree_set bcs1;
-        bscored_combo_tree_set bcs2;
-        size_t s= bcs.size();
-        size_t m = s / 2;
-        bscored_combo_tree_set_cit cit = bcs.begin();
-        for(size_t i = 0; i < s; ++i, ++cit)
-            if(i < m)
-                bcs1.insert(*cit);
-            else
-                bcs2.insert(*cit);
-        return make_pair(bcs1, bcs2);
+    static bscored_combo_tree_ptr_vec_pair 
+    inline split(const bscored_combo_tree_ptr_vec& bcv) {
+        bscored_combo_tree_ptr_vec_cit middle = bcv.begin() + bcv.size() / 2;
+        return make_pair(bscored_combo_tree_ptr_vec(bcv.begin(), middle),
+                         bscored_combo_tree_ptr_vec(middle, bcv.end()));
     }
 
-    static bscored_combo_tree_set get_nondominated_rec(const bscored_combo_tree_set& bcs) {
-        // // print bscored_combo_tree_set
-        // std::cout << "bcs =" << std::endl;
-        // foreach(const bscored_combo_tree& cnd, bcs)
-        //     ostream_bscored_combo_tree(std::cout, cnd, true, true, true);
-        // // ~print
+    static bscored_combo_tree_ptr_vec
+    get_nondominated_rec(const bscored_combo_tree_ptr_vec& bcv) {
         ///////////////
         // base case //
         ///////////////
-        if(bcs.size() < 2) {
-            return bcs;
+        if(bcv.size() < 2) {
+            return bcv;
         }
         //////////////
         // rec case //
         //////////////
-        else {
-            bscored_combo_tree_set_pair bcs_p = split(bcs);
-            // recursive call
-            bscored_combo_tree_set bcs1_nd = get_nondominated_rec(bcs_p.first);
-            bscored_combo_tree_set bcs2_nd = get_nondominated_rec(bcs_p.second);
-            bscored_combo_tree_set_pair bcs_res = merge_nondominated_rec(bcs1_nd,
-                                                                         bcs2_nd);
-            // union and return
-            bscored_combo_tree_set res = 
-                set_union(bcs_res.first, bcs_res.second);
-            // // print bscored_combo_tree_set
-            // std::cout << "res =" << std::endl;
-            // foreach(const bscored_combo_tree& cnd, res)
-            //     ostream_bscored_combo_tree(std::cout, cnd, true, true, true);
-            // // ~print
-
-            return res;
-        }
+        bscored_combo_tree_ptr_vec_pair bcv_p = split(bcv);
+        // recursive call
+        bscored_combo_tree_ptr_vec bcv1_nd = get_nondominated_rec(bcv_p.first);
+        bscored_combo_tree_ptr_vec bcv2_nd = get_nondominated_rec(bcv_p.second);
+        bscored_combo_tree_ptr_vec_pair res_p = 
+            get_nondominated_disjoint_rec(bcv1_nd, bcv2_nd);
+        // union and return
+        append(res_p.first, res_p.second);
+        return res_p.first;
     }
 
     // return a pair of sets of nondominated candidates between bcs1
-    // and bcs2, assuming none contain dominated candidates. The first
-    // (resp. second) element of the pair corresponds to the
-    // nondominated candidates of bcs1 (resp. bcs2)
-    static bscored_combo_tree_set_pair merge_nondominated_rec(bscored_combo_tree_set bcs1,
-                                                              bscored_combo_tree_set bcs2) {
-        // // print bscored_combo_tree_set
-        // std::cout << "bcs1 =" << std::endl;
-        // foreach(const bscored_combo_tree& cnd, bcs1)
-        //     ostream_bscored_combo_tree(std::cout, cnd, true, true, true);
-        // // ~print
-        // // print bscored_combo_tree_set
-        // std::cout << "bcs2 =" << std::endl;
-        // foreach(const bscored_combo_tree& cnd, bcs2)
-        //     ostream_bscored_combo_tree(std::cout, cnd, true, true, true);
-        // // ~print
+    // and bcs2, assuming none contain dominated candidates. Contrary
+    // to what the name of function says, the 2 sets do not need be
+    // disjoint, however there are inded disjoint according to the way
+    // they are used in the code. The first (resp. second) element of
+    // the pair corresponds to the nondominated candidates of bcs1
+    // (resp. bcs2)
+    static bscored_combo_tree_set_pair
+    get_nondominated_disjoint(const bscored_combo_tree_set& bcs1,
+                              const bscored_combo_tree_set& bcs2) {
+        bscored_combo_tree_ptr_vec_pair res_p =
+            get_nondominated_disjoint_rec(to_ptr_vec(bcs1), to_ptr_vec(bcs2));
+        return make_pair(to_set(res_p.first), to_set(res_p.second));
+    }
+    static bscored_combo_tree_ptr_vec_pair
+    get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& bcv1,
+                                  const bscored_combo_tree_ptr_vec& bcv2) {
         ///////////////
         // base case //
         ///////////////
-        if(bcs1.empty() || bcs2.empty())
-            return make_pair(bcs1, bcs2);
-        else if(bcs1.size() == 1) {
-            bscored_combo_tree_set bcs_res1, bcs_res2;
-            bscored_combo_tree_set_cit it1 = bcs1.begin(), it2 = bcs2.begin();
+        if(bcv1.empty() || bcv2.empty())
+            return make_pair(bcv1, bcv2);
+        else if(bcv1.size() == 1) {
+            bscored_combo_tree_ptr_vec bcv_res1, bcv_res2;
+            bscored_combo_tree_ptr_vec_cit it1 = bcv1.begin(),
+                it2 = bcv2.begin();
             bool it1_insert = true; // whether *it1 is to be inserted
-                                    // in bcs_res1
-            for(; it2 != bcs2.end(); ++it2) {
-                tribool dom = dominates(it1->second, it2->second);
+                                    // in bcv_res1
+            for(; it2 != bcv2.end(); ++it2) {
+                tribool dom = dominates(get_bscore(**it1), get_bscore(**it2));
                 if(!dom) {
                     it1_insert = false;
-                    bcs_res2.insert(it2, bcs2.end());
+                    bcv_res2.insert(bcv_res2.end(), it2, bcv2.end());
                     break;
                 } else if(indeterminate(dom))
-                    bcs_res2.insert(*it2);
+                    bcv_res2.push_back(*it2);
             }
             if(it1_insert)
-                bcs_res1.insert(*it1);
-            return make_pair(bcs_res1, bcs_res2);
+                bcv_res1.push_back(*it1);
+            return make_pair(bcv_res1, bcv_res2);
         }
         //////////////
         // rec case //
         //////////////
         else {
             // split bcs1 in 2
-            bscored_combo_tree_set_pair bcs1_p = split(bcs1);
+            bscored_combo_tree_ptr_vec_pair bcv1_p = split(bcv1);
             // rec call
-            bscored_combo_tree_set_pair
-                bcs_m1 = merge_nondominated_rec(bcs1_p.first, bcs2),
-                bcs_m2 = merge_nondominated_rec(bcs1_p.second, bcs_m1.second);
+            bscored_combo_tree_ptr_vec_pair
+                bcv_m1 = get_nondominated_disjoint_rec(bcv1_p.first, bcv2),
+                bcv_m2 = get_nondominated_disjoint_rec(bcv1_p.second,
+                                                       bcv_m1.second);
             // merge results
-            bscored_combo_tree_set res1 = set_union(bcs_m1.first, bcs_m2.first);
-            return make_pair(res1, bcs_m2.second);
+            append(bcv_m1.first, bcv_m2.first);
+            return make_pair(bcv_m1.first, bcv_m2.second);
         }
     }
 
     // merge nondominated candidate to the metapopulation assuming
     // that bcs contains no dominated candidates within itself
     void merge_nondominated(bscored_combo_tree_set& bcs) {
-        bscored_combo_tree_set bcs_mp(*this);
+        bscored_combo_tree_ptr_vec bcv_mp = to_ptr_vec(*this),
+            bcv = to_ptr_vec(bcs);
         logger().debug("+ Merge nondominated");
-        bscored_combo_tree_set_pair bcs_p = merge_nondominated_rec(bcs, bcs_mp);
+        bscored_combo_tree_ptr_vec_pair bcv_p =
+            get_nondominated_disjoint_rec(bcv, bcv_mp);
         // remove the nondominates ones from the metapopulation
         logger().debug("+ Remove nondominated from the metapopulation");
-        bscored_combo_tree_set diff_bcs_mp =
-            set_difference(bcs_mp, bcs_p.second);
-        foreach(bscored_combo_tree cnd, diff_bcs_mp)
-            erase(cnd);
+        bscored_combo_tree_ptr_set diff_bcs_mp =
+            set_difference(bscored_combo_tree_ptr_set(bcv_mp.begin(),
+                                                      bcv_mp.end()),
+                           bscored_combo_tree_ptr_set(bcv_p.second.begin(),
+                                                      bcv_p.second.end()));
+        foreach(const bscored_combo_tree* cnd, diff_bcs_mp)
+            erase(*cnd);
         // add the non dominates ones from bsc
         logger().debug("+ Insert nondominated to the metapopulation");
-        foreach(const bscored_combo_tree& cnd, bcs_p.first)
-            insert(cnd);
+        foreach(const bscored_combo_tree* cnd, bcv_p.first)
+            insert(*cnd);
     }
 
     // Iterative version of merge_nondominated

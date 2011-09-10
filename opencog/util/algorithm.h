@@ -56,7 +56,7 @@ T accumulate2d(iter first, iter last, T init)
 // appends b at the end of a, that is a = a@b
 template<class T>
 void append(T& a, const T& b) {
-    copy(b.begin(), b.end(), back_inserter(a));
+    a.insert(a.end(), b.begin(), b.end());
 }
 
 //erase the intersection of sorted ranges [from1,to1) and [from2,to2) from c,
@@ -171,7 +171,10 @@ Set make_singleton_set(const typename Set::value_type& v) {
     return ret;
 }
 
-// returns s1 - s2
+/**
+ * Returns s1 - s2
+ * It probably only works for std::set or similar
+ */
 template<typename Set>
 Set set_difference(const Set& s1, const Set& s2) {
     Set res;
@@ -180,7 +183,10 @@ Set set_difference(const Set& s1, const Set& s2) {
     return res;
 }
 
-// return s1 inter s2
+/**
+ * Return s1 inter s2
+ * It probably only works for std::set or similar
+ */
 template<typename Set>
 Set set_intersection(const Set& s1, const Set& s2) {
     Set res;
@@ -189,7 +195,10 @@ Set set_intersection(const Set& s1, const Set& s2) {
     return res;
 }
 
-// return s1 union s2
+/**
+ * Return s1 union s2
+ * It probably only works for std::set or similar
+ */
 template<typename Set>
 Set set_union(const Set& s1, const Set& s2) {
     Set res(s1);
