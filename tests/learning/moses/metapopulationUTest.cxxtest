@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
- * Author: Nil Geisweiller <nilg@laptop>
+ * Author: Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,6 +32,7 @@ using namespace combo;
 using namespace moses;
 
 class metapopulationUTest : public CxxTest::TestSuite {
+
 public:
     metapopulationUTest() {
         logger().setPrintToStdoutFlag(true);
@@ -83,8 +84,46 @@ public:
         metapopulation_t::remove_dominated(bcs);
         
         // 2 is dominated
-        TS_ASSERT_EQUALS(bcs.size(), 3);             // only 2 are removed
+        TS_ASSERT_EQUALS(bcs.size(), 3);             // 2 are removed
         TS_ASSERT_EQUALS(bcs.find(bct2), bcs.end()); // bct2
         TS_ASSERT_EQUALS(bcs.find(bct5), bcs.end()); // and bct5
-    }    
+    }
+
+    // test metapopulation::merge_nondominated_rec
+    void test_merge_nondominated_rec() {
+        // a set of bscored_combo_tree, the combo_tree themselves are
+        // dummy (1, 2, ...) as only their bscore matter
+        bscored_combo_tree_set bcs1, bcs2;
+        // 4
+        behavioral_score bsc4 = {0, 1, 0, 1};
+        composite_score csc4(-2, -1);
+        composite_behavioral_score cbs4(bsc4, csc4);
+        combo_tree tr4(4);
+        bscored_combo_tree bct4(tr4, cbs4);
+        bcs1.insert(bct4);
+        // 5
+        behavioral_score bsc5 = {0, 1, 1, 1};
+        composite_score csc5(-3, -1);
+        composite_behavioral_score cbs5(bsc5, csc5);
+        combo_tree tr5(5);
+        bscored_combo_tree bct5(tr5, cbs5);
+        bcs2.insert(bct5);
+        // 2
+        behavioral_score bsc2 = {1, 1, 1, 0};
+        composite_score csc2(-3, -1);
+        composite_behavioral_score cbs2(bsc2, csc2);
+        combo_tree tr2(2);
+        bscored_combo_tree bct2(tr2, cbs2);
+        bcs2.insert(bct2);
+        typedef metapopulation<dummy_score, dummy_bscore, dummy_optimization>
+            metapopulation_t;
+
+        metapopulation_t::bscored_combo_tree_set_pair res_p =
+            metapopulation_t::merge_nondominated_rec(bcs1, bcs2);
+        bscored_combo_tree_set res = set_union(res_p.first, res_p.second);
+        // 2 is dominated
+        TS_ASSERT_EQUALS(res.size(), 2);             // 1 is removed
+        TS_ASSERT_EQUALS(res.find(bct5), res.end()); // bct5
+    }
+
 };

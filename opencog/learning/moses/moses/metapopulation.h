@@ -695,6 +695,11 @@ struct metapopulation : public bscored_combo_tree_set {
     }
 
     static bscored_combo_tree_set get_nondominated_rec(const bscored_combo_tree_set& bcs) {
+        // // print bscored_combo_tree_set
+        // std::cout << "bcs =" << std::endl;
+        // foreach(const bscored_combo_tree& cnd, bcs)
+        //     ostream_bscored_combo_tree(std::cout, cnd, true, true, true);
+        // // ~print
         ///////////////
         // base case //
         ///////////////
@@ -712,8 +717,14 @@ struct metapopulation : public bscored_combo_tree_set {
             bscored_combo_tree_set_pair bcs_res = merge_nondominated_rec(bcs1_nd,
                                                                          bcs2_nd);
             // union and return
-            bscored_combo_tree_set res(bcs_res.first);
-            res.insert(bcs_res.second.begin(), bcs_res.second.end());
+            bscored_combo_tree_set res = 
+                set_union(bcs_res.first, bcs_res.second);
+            // // print bscored_combo_tree_set
+            // std::cout << "res =" << std::endl;
+            // foreach(const bscored_combo_tree& cnd, res)
+            //     ostream_bscored_combo_tree(std::cout, cnd, true, true, true);
+            // // ~print
+
             return res;
         }
     }
@@ -724,6 +735,16 @@ struct metapopulation : public bscored_combo_tree_set {
     // nondominated candidates of bcs1 (resp. bcs2)
     static bscored_combo_tree_set_pair merge_nondominated_rec(bscored_combo_tree_set bcs1,
                                                               bscored_combo_tree_set bcs2) {
+        // // print bscored_combo_tree_set
+        // std::cout << "bcs1 =" << std::endl;
+        // foreach(const bscored_combo_tree& cnd, bcs1)
+        //     ostream_bscored_combo_tree(std::cout, cnd, true, true, true);
+        // // ~print
+        // // print bscored_combo_tree_set
+        // std::cout << "bcs2 =" << std::endl;
+        // foreach(const bscored_combo_tree& cnd, bcs2)
+        //     ostream_bscored_combo_tree(std::cout, cnd, true, true, true);
+        // // ~print
         ///////////////
         // base case //
         ///////////////
@@ -736,9 +757,11 @@ struct metapopulation : public bscored_combo_tree_set {
                                        // inserted in bcs_res
             for(; it2 != bcs2.end(); ++it2) {
                 tribool dom = dominates(it1->second, it2->second);
-                if(dom && !it1_inserted) {
-                    bcs_res1.insert(*it1);
-                    it1_inserted = true;
+                if(dom) {
+                    if(it1_inserted) {
+                        bcs_res1.insert(*it1);
+                        it1_inserted = true;
+                    }
                 } else if(!dom) {
                     bcs_res2.insert(it2, bcs2.end());
                     break;
@@ -763,8 +786,7 @@ struct metapopulation : public bscored_combo_tree_set {
                 bcs_m1 = merge_nondominated_rec(bcs1_p.first, bcs2),
                 bcs_m2 = merge_nondominated_rec(bcs1_p.second, bcs_m1.second);
             // merge results
-            bscored_combo_tree_set res1(bcs_m1.first);
-            res1.insert(bcs_m2.first.begin(), bcs_m2.first.end());
+            bscored_combo_tree_set res1 = set_union(bcs_m1.first, bcs_m2.first);
             return make_pair(res1, bcs_m2.second);
         }
     }
