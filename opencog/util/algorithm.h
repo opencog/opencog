@@ -172,38 +172,43 @@ Set make_singleton_set(const typename Set::value_type& v) {
 }
 
 /**
- * Returns s1 - s2
- * It probably only works for std::set or similar
- */
-template<typename Set>
-Set set_difference(const Set& s1, const Set& s2) {
-    Set res;
-    std::set_difference(s1.begin(), s1.end(), s2.begin(), s2.end(),
-                        std::inserter(res, res.begin()));
-    return res;
-}
-
-/**
- * Return s1 inter s2
- * It probably only works for std::set or similar
- */
-template<typename Set>
-Set set_intersection(const Set& s1, const Set& s2) {
-    Set res;
-    std::set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(),
-                          std::inserter(res, res.begin()));
-    return res;
-}
-
-/**
  * Return s1 union s2
- * It probably only works for std::set or similar
+ * s1 and s2 being std::set or similar concept
  */
 template<typename Set>
 Set set_union(const Set& s1, const Set& s2) {
     Set res(s1);
     res.insert(s2.begin(), s2.end());
     return res;
+}
+
+/**
+ * Return s1 inter s2
+ * s1 and s2 must be sorted
+ */
+template<typename Set>
+Set set_intersection(const Set& s1, const Set& s2) {
+    Set res;
+    std::set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(),
+                          std::inserter(res, res.end()));
+    return res;
+}
+
+/**
+ * Returns s1 - s2
+ * s1 and s2 must be sorted
+ */
+template<typename Set>
+Set set_difference(const Set& s1, const Set& s2) {
+    Set res;
+    std::set_difference(s1.begin(), s1.end(), s2.begin(), s2.end(),
+                        std::inserter(res, res.end()));
+    return res;
+}
+
+template<typename Seq>
+void sort(Seq& s) {
+    std::sort(s.begin(), s.end());
 }
 
 //Predicate maps to the range [0,n)
