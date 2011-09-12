@@ -35,11 +35,11 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/util/oc_omp.h>
 
 #include <opencog/learning/moses/eda/instance_set.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/util/oc_omp.h>
 
 #include "representation.h"
 #include "scoring.h"
@@ -539,52 +539,70 @@ struct metapopulation : public bscored_combo_tree_set {
         logger().debug("Select candidates to merge");
         // ~Logger
 
-        struct MyStruct {
-            int operator()(int x) {
-                return 2*x;
-            }
-        };
+        ///////////////////////////////////////////////////////////////
+        // select the set of candidates to add in the metapopulation //
+        ///////////////////////////////////////////////////////////////
 
-        // select the set of candidates to add in the metapopulation
-        //
+        typedef boost::shared_mutex mutex;
+        typedef boost::shared_lock<mutex> shared_lock;
+        typedef boost::unique_lock<mutex> unique_lock;
+
+        mutex pot_cnd_mutex; // mutex for pot_candidates
+
+        auto select_candidates =
+            [&, this](const eda::scored_instance<composite_score>& inst) {
+            const composite_score& inst_csc = inst.second;
+            
+            // if it's really bad stops
+            if (get_score(inst_csc) == get_score(worst_composite_score))
+                return;
+
+            int pot_candidates_size = [&](void) -> int {
+                shared_lock lock(pot_cnd_mutex);
+                return pot_candidates.size(); }();
+
+            // only add up to max_candidates
+            if(this->params.max_candidates < 0
+               || pot_candidates_size < this->params.max_candidates) {
+
+                // get the combo_tree associated to inst, cleaned and reduced
+                //
+                // @todo: here the candidate is possibly reduced for the
+                // second time this could probability be avoid with some
+                // clever cache or something
+                combo_tree tr = this->_rep->get_candidate(inst, true);
+
+                auto thread_safe_find_tr = [&]() {
+                    shared_lock lock(pot_cnd_mutex);                    
+                    return pot_candidates.find(tr) == pot_candidates.end();
+                };
+
+                bool already_visited = this->_visited_exemplars.find(tr)
+                    == this->_visited_exemplars.end();
+
+                // update the set of potential exemplars
+                if(already_visited && thread_safe_find_tr()) {
+                    // recompute the complexity if the candidate has
+                    // not been previously reduced
+                    composite_score csc = this->params.reduce_all?
+                        inst_csc : make_pair(get_score(inst_csc),
+                                             complexity(tr));
+                    behavioral_score bsc; // empty bscore till it gets computed
+                    composite_behavioral_score cbsc(bsc, csc);
+                    {
+                        unique_lock lock(pot_cnd_mutex);
+                        pot_candidates[tr] = cbsc;
+                    }
+                }
+            }            
+        };
         // the range of the deme to merge goes up to
         // eval_during_this_deme in case the deme is closed before the
         // entire deme (or rather the current sample of it) has been
         // explored
-        pair<deme_cit, deme_cit>
-            range(_deme->begin(), _deme->begin() + eval_during_this_deme);
-        foreach(const eda::scored_instance<composite_score>& inst, range) {
-            const composite_score& inst_csc = inst.second;
-
-            // if it's really bad just stop (as the deme is sorted)
-            if (get_score(inst_csc) == get_score(worst_composite_score))
-                break;
-
-            // get the combo_tree associated to inst, cleaned and reduced
-            //
-            // @todo: here the candidate is possibly reduced for the
-            // second time this could probability be avoid with some
-            // clever cache or something
-            combo_tree tr = _rep->get_candidate(inst, true);
-
-            // update the set of potential exemplars
-            if (_visited_exemplars.find(tr) == _visited_exemplars.end()
-                && pot_candidates.find(tr) == pot_candidates.end()) {
-
-                // only add up to max_candidates
-                if(params.max_candidates < 0
-                   || (int)pot_candidates.size() < params.max_candidates) {
-                    // recompute the complexity if the candidate has
-                    // not been previously reduced
-                    composite_score csc = params.reduce_all?
-                        inst_csc : make_pair(get_score(inst_csc),
-                                             complexity(tr));
-                    behavioral_score bsc; // empty bscore till it gets computed
-                    pot_candidates[tr] = composite_behavioral_score(bsc, csc);
-                } else 
-                    break;
-            }
-        }
+        deme_cit deme_begin = _deme->begin();
+        deme_cit deme_end = _deme->begin() + eval_during_this_deme;
+        OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
         // Logger
         logger().debug("Compute behavioral score of %d selected candidates",
@@ -1049,10 +1067,10 @@ protected:
 
     // trees with score _best_score
     metapop_candidates _best_candidates;
-
+    
     // contains the exemplars of demes that have been searched so far
     combo_tree_hash_set _visited_exemplars;
-    
+
     representation* _rep; // representation of the current deme
     typedef eda::instance_set<composite_score> deme_t;
     typedef deme_t::iterator deme_it;
