@@ -23,20 +23,32 @@
 #include <cxxtest/TestSuite.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/learning/moses/moses/metapopulation.h>
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/learning/moses/moses/optimization.h>
 
 using namespace opencog;
 using namespace combo;
+using namespace reduct;
 using namespace moses;
 
 class metapopulationUTest : public CxxTest::TestSuite {
+    typedef metapopulation<dummy_score,
+                           dummy_bscore,
+                           dummy_optimization> metapopulation_t;
+    MT19937RandGen _rng;
+    dummy_score _dsc;
+    dummy_bscore _dbsc;
+    metapopulation_t _metapopulation;
 
 public:
-    metapopulationUTest() {
+    metapopulationUTest()
+        : _rng(1), _dsc(), _dbsc(),
+          _metapopulation(_rng, combo_tree(), type_tree(),
+                          logical_reduction(), _dsc, _dbsc) {
         logger().setPrintToStdoutFlag(true);
-        logger().setLevel(Logger::FINE);
+        logger().setLevel(Logger::FINE); 
     }
     // test metapopulation::remove_dominated
     void test_remove_dominated() {
@@ -78,10 +90,8 @@ public:
         combo_tree tr5(5);
         bscored_combo_tree bct5(tr5, cbs5);
         bcs.insert(bct5);
-        typedef metapopulation<dummy_score, dummy_bscore, dummy_optimization>
-            metapopulation_t;
 
-        metapopulation_t::remove_dominated(bcs);
+        _metapopulation.remove_dominated(bcs);
         
         // 2 is dominated
         TS_ASSERT_EQUALS(bcs.size(), 3);             // 2 are removed
@@ -119,7 +129,7 @@ public:
             metapopulation_t;
 
         metapopulation_t::bscored_combo_tree_set_pair res_p =
-            metapopulation_t::get_nondominated_disjoint(bcs1, bcs2);
+            _metapopulation.get_nondominated_disjoint(bcs1, bcs2);
         bscored_combo_tree_set res = set_union(res_p.first, res_p.second);
         // 2 is dominated
         TS_ASSERT_EQUALS(res.size(), 2);             // 1 is removed

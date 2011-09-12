@@ -435,7 +435,7 @@ int moses_exec(int argc, char** argv) {
     }
 
     // fill jobs
-    jobs_t jobs;
+    jobs_t jobs{{localhost, 1}}; // by default the localhost has 1 job
     bool only_local = true;
     foreach(const string& js, jobs_str) {
         size_t pos = js.find(job_seperator);
@@ -451,7 +451,7 @@ int moses_exec(int argc, char** argv) {
 
     // set metapopulation parameters
     metapop_parameters meta_params(max_candidates, reduce_all,
-                                   revisit, include_dominated);
+                                   revisit, include_dominated, jobs[localhost]);
 
     // set optim_parameters
     optim_parameters opt_params(pop_size_ratio, max_score, max_dist_ratio);

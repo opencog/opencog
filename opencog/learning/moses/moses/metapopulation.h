@@ -24,6 +24,8 @@
 #ifndef _OPENCOG_METAPOPULATION_H
 #define _OPENCOG_METAPOPULATION_H
 
+#include <future>
+
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/logic/tribool.hpp>
@@ -61,12 +63,14 @@ struct metapop_parameters {
     metapop_parameters(int _max_candidates = -1,
                        bool _reduce_all = true,
                        bool _revisit = false,
-                       bool _include_dominated = false) :
+                       bool _include_dominated = false,
+                       unsigned _jobs = 1) :
         selection_max_range(28),
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         revisit(_revisit),
-        include_dominated(_include_dominated) {}
+        include_dominated(_include_dominated),
+        jobs(_jobs) {}
     
     // when doing selection of examplars according to 2^-n, where n is
     // complexity, only examplars with p>=2^-selection_max_range will
@@ -82,6 +86,9 @@ struct metapop_parameters {
     // ignore behavioral score domination when merging candidates in
     // the metapopulation
     bool include_dominated;
+    // number of jobs for metapopulation maintenance such as merging
+    // candidates to the metapopulation
+    unsigned jobs;
 };
     
 /**
@@ -156,8 +163,6 @@ struct metapopulation : public bscored_combo_tree_set {
     }
 
     // like above but using a single base, and a single reduction rule
-    // this constructor is used for back compatibility and should be
-    // eventually removed
     metapopulation(RandGen& _rng,
                    const combo_tree& base,
                    const type_tree& tt,
@@ -178,6 +183,7 @@ struct metapopulation : public bscored_combo_tree_set {
         delete _rep;
         delete _deme;
     }
+
     /**
      * return the n_evals
      */
@@ -301,7 +307,7 @@ struct metapopulation : public bscored_combo_tree_set {
             insert(candidates.begin(), candidates.end());
         else
             // merge_nondominated_any(candidates);
-            merge_nondominated(candidates);
+            merge_nondominated(candidates, params.jobs);
     }
 
     /**
@@ -603,7 +609,7 @@ struct metapopulation : public bscored_combo_tree_set {
             }            
             // ~Logger
             size_t old_size = candidates.size();
-            remove_dominated(candidates);
+            remove_dominated(candidates, params.jobs);
             // Logger
             logger().debug("Removed %u dominated candidates out of %u",
                            old_size - candidates.size(), old_size);
@@ -688,15 +694,17 @@ struct metapopulation : public bscored_combo_tree_set {
         return res;
     }
 
-    static void remove_dominated(bscored_combo_tree_set& bcs) {
+    void remove_dominated(bscored_combo_tree_set& bcs, unsigned jobs = 1) {
         // get the nondominated candidates
+        logger().fine("+ Get dominated");
         bscored_combo_tree_ptr_vec bcv = to_ptr_vec(bcs);
-        bscored_combo_tree_ptr_vec res = get_nondominated_rec(bcv);
+        bscored_combo_tree_ptr_vec res = get_nondominated_rec(bcv, jobs);
         // get the dominated by set difference
-        bscored_combo_tree_ptr_set dif =
-            set_difference(bscored_combo_tree_ptr_set(bcv.begin(), bcv.end()),
-                           bscored_combo_tree_ptr_set(res.begin(), res.end()));
+        logger().fine("+ Calculate nondominated");
+        sort(bcv); sort(res);
+        bscored_combo_tree_ptr_vec dif = set_difference(bcv, res);
         // remove the dominated ones
+        logger().fine("+ Remove nondominated");
         foreach(const bscored_combo_tree* cnd_ptr, dif)
             bcs.erase(*cnd_ptr);
     }
@@ -706,7 +714,7 @@ struct metapopulation : public bscored_combo_tree_set {
         typedef std::list<bscored_combo_tree> bscored_combo_tree_list;
         typedef bscored_combo_tree_list::iterator bscored_combo_tree_list_it;
         bscored_combo_tree_list mcl(bcs.begin(), bcs.end());
-        logger().debug("+ Remove candidates");
+        logger().fine("+ Remove candidates");
         // remove all dominated candidates from the list
         for(bscored_combo_tree_list_it it1 = mcl.begin(); it1 != mcl.end();) {
             bscored_combo_tree_list_it it2 = it1;
@@ -738,8 +746,9 @@ struct metapopulation : public bscored_combo_tree_set {
                          bscored_combo_tree_ptr_vec(middle, bcv.end()));
     }
 
-    static bscored_combo_tree_ptr_vec
-    get_nondominated_rec(const bscored_combo_tree_ptr_vec& bcv) {
+    bscored_combo_tree_ptr_vec
+    get_nondominated_rec(const bscored_combo_tree_ptr_vec& bcv,
+                         unsigned jobs = 1) {
         ///////////////
         // base case //
         ///////////////
@@ -750,14 +759,32 @@ struct metapopulation : public bscored_combo_tree_set {
         // rec case //
         //////////////
         bscored_combo_tree_ptr_vec_pair bcv_p = split(bcv);
-        // recursive call
-        bscored_combo_tree_ptr_vec bcv1_nd = get_nondominated_rec(bcv_p.first);
-        bscored_combo_tree_ptr_vec bcv2_nd = get_nondominated_rec(bcv_p.second);
-        bscored_combo_tree_ptr_vec_pair res_p = 
-            get_nondominated_disjoint_rec(bcv1_nd, bcv2_nd);
-        // union and return
-        append(res_p.first, res_p.second);
-        return res_p.first;
+        if(jobs > 1) { // multi-threaded
+            unsigned jobs1 = jobs / 2;
+            unsigned jobs2 = std::max(1U, jobs - jobs1);
+            // recursive calls
+            std::future<bscored_combo_tree_ptr_vec> task =
+                std::async(jobs > 1 ? std::launch::async : std::launch::sync,
+                           bind(&self::get_nondominated_rec, this,
+                                bcv_p.first, jobs1));
+            bscored_combo_tree_ptr_vec bcv2_nd =
+                get_nondominated_rec(bcv_p.second, jobs2);
+            bscored_combo_tree_ptr_vec_pair res_p = 
+                get_nondominated_disjoint_rec(task.get(), bcv2_nd, jobs);
+            // union and return
+            append(res_p.first, res_p.second);
+            return res_p.first;
+        } else { // single-threaded
+            // recursive calls
+            bscored_combo_tree_ptr_vec
+                bcv1_nd = get_nondominated_rec(bcv_p.first),
+                bcv2_nd = get_nondominated_rec(bcv_p.second);
+            bscored_combo_tree_ptr_vec_pair
+                res_p = get_nondominated_disjoint_rec(bcv1_nd, bcv2_nd);
+            // union and return
+            append(res_p.first, res_p.second);
+            return res_p.first;            
+        }            
     }
 
     // return a pair of sets of nondominated candidates between bcs1
@@ -767,16 +794,19 @@ struct metapopulation : public bscored_combo_tree_set {
     // they are used in the code. The first (resp. second) element of
     // the pair corresponds to the nondominated candidates of bcs1
     // (resp. bcs2)
-    static bscored_combo_tree_set_pair
+    bscored_combo_tree_set_pair
     get_nondominated_disjoint(const bscored_combo_tree_set& bcs1,
-                              const bscored_combo_tree_set& bcs2) {
+                              const bscored_combo_tree_set& bcs2,
+                              unsigned jobs = 1) {
         bscored_combo_tree_ptr_vec_pair res_p =
-            get_nondominated_disjoint_rec(to_ptr_vec(bcs1), to_ptr_vec(bcs2));
+            get_nondominated_disjoint_rec(to_ptr_vec(bcs1), to_ptr_vec(bcs2),
+                                          jobs);
         return make_pair(to_set(res_p.first), to_set(res_p.second));
     }
-    static bscored_combo_tree_ptr_vec_pair
+    bscored_combo_tree_ptr_vec_pair
     get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& bcv1,
-                                  const bscored_combo_tree_ptr_vec& bcv2) {
+                                  const bscored_combo_tree_ptr_vec& bcv2,
+                                  unsigned jobs = 1) {
         ///////////////
         // base case //
         ///////////////
@@ -804,39 +834,52 @@ struct metapopulation : public bscored_combo_tree_set {
         //////////////
         // rec case //
         //////////////
-        else {
-            // split bcs1 in 2
-            bscored_combo_tree_ptr_vec_pair bcv1_p = split(bcv1);
-            // rec call
+        // split bcs1 in 2
+        bscored_combo_tree_ptr_vec_pair bcv1_p = split(bcv1);
+        if(jobs > 1) { // multi-threaded
+            unsigned jobs1 = jobs / 2;
+            unsigned jobs2 = std::max(1U, jobs - jobs1);
+            std::future<bscored_combo_tree_ptr_vec_pair> task =
+                std::async(std::launch::async,
+                           bind(&self::get_nondominated_disjoint_rec, this,
+                                bcv1_p.first, bcv2, jobs1));
+            bscored_combo_tree_ptr_vec_pair bcv_m2 = 
+                get_nondominated_disjoint_rec(bcv1_p.second, bcv2, jobs2);
+            bscored_combo_tree_ptr_vec_pair bcv_m1 = task.get();
+            // merge results
+            append(bcv_m1.first, bcv_m2.first);
+            sort(bcv_m1.second); sort(bcv_m2.second);
+            bscored_combo_tree_ptr_vec bcv_m2_inter =
+                set_intersection(bcv_m1.second, bcv_m2.second);
+            return make_pair(bcv_m1.first, bcv_m2_inter);
+        } else { // single-threaded
             bscored_combo_tree_ptr_vec_pair
                 bcv_m1 = get_nondominated_disjoint_rec(bcv1_p.first, bcv2),
                 bcv_m2 = get_nondominated_disjoint_rec(bcv1_p.second,
                                                        bcv_m1.second);
             // merge results
             append(bcv_m1.first, bcv_m2.first);
-            return make_pair(bcv_m1.first, bcv_m2.second);
+            return make_pair(bcv_m1.first, bcv_m2.second);            
         }
     }
 
     // merge nondominated candidate to the metapopulation assuming
     // that bcs contains no dominated candidates within itself
-    void merge_nondominated(bscored_combo_tree_set& bcs) {
+    void merge_nondominated(bscored_combo_tree_set& bcs, unsigned jobs = 1) {
         bscored_combo_tree_ptr_vec bcv_mp = to_ptr_vec(*this),
             bcv = to_ptr_vec(bcs);
-        logger().debug("+ Merge nondominated");
+        logger().fine("+ Merge nondominated");
         bscored_combo_tree_ptr_vec_pair bcv_p =
-            get_nondominated_disjoint_rec(bcv, bcv_mp);
+            get_nondominated_disjoint_rec(bcv, bcv_mp, jobs);
         // remove the nondominates ones from the metapopulation
-        logger().debug("+ Remove nondominated from the metapopulation");
-        bscored_combo_tree_ptr_set diff_bcs_mp =
-            set_difference(bscored_combo_tree_ptr_set(bcv_mp.begin(),
-                                                      bcv_mp.end()),
-                           bscored_combo_tree_ptr_set(bcv_p.second.begin(),
-                                                      bcv_p.second.end()));
-        foreach(const bscored_combo_tree* cnd, diff_bcs_mp)
+        logger().fine("+ Remove nondominated from the metapopulation");
+        sort(bcv_mp); sort(bcv_p.second);
+        bscored_combo_tree_ptr_vec diff_bcv_mp =
+            set_difference(bcv_mp, bcv_p.second);
+        foreach(const bscored_combo_tree* cnd, diff_bcv_mp)
             erase(*cnd);
         // add the non dominates ones from bsc
-        logger().debug("+ Insert nondominated to the metapopulation");
+        logger().fine("+ Insert nondominated to the metapopulation");
         foreach(const bscored_combo_tree* cnd, bcv_p.first)
             insert(*cnd);
     }
