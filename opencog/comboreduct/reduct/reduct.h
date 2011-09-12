@@ -61,7 +61,7 @@ struct crule : public rule {
 };
 
 const rule& ann_reduction();
-const rule& logical_reduction(int effort);
+const rule& logical_reduction(int effort = 2);
 
 // ignore_ops is the set of operator to ignore
 const rule& contin_reduction(const vertex_set& ignore_ops, opencog::RandGen& rng);

@@ -29,7 +29,7 @@
 
 namespace opencog { namespace reduct {
 
-// effort 0
+// effort 0 (extra simple) to 3 (complex)
 const rule& logical_reduction(int effort) {
     using namespace opencog::combo;
 
