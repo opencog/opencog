@@ -49,7 +49,7 @@ namespace opencog {
 
 // setting the parallel env, such as number of threads, number of
 // minimal iterations to parallelize
-void setting_omp(unsigned num_threads);
+void setting_omp(unsigned num_threads, unsigned min_n = 100);
 
 } // ~namespace opencog
 

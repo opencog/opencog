@@ -24,12 +24,13 @@
 
 namespace opencog {
 
-void setting_omp(unsigned num_threads) {
+void setting_omp(unsigned num_threads, unsigned min_n) {
 #ifdef OC_OMP
     omp_set_dynamic(false);
     omp_set_num_threads(num_threads);
     __gnu_parallel::_Settings gps;
-    gps.transform_minimal_n = 100;
+    gps.transform_minimal_n = min_n;
+    gps.for_each_minimal_n = min_n;
     __gnu_parallel::_Settings::set(gps);
 #endif
 }
