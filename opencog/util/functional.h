@@ -14,6 +14,8 @@
 
 #include <ext/functional>
 
+#include "foreach.h"
+
 namespace opencog
 {
 using __gnu_cxx::select1st;
@@ -32,7 +34,19 @@ T& valueof(T* v)
     return *v;
 }
 
-//a convenience class for manipulating Item that are tagged with & ordered by Tags
+// Returns a vector of const pointers given a container
+template<typename Container>
+std::vector<const typename Container::value_type*>
+random_access_view(const Container& c) {
+    typedef typename Container::value_type value_type;
+    std::vector<const value_type*> res;
+    foreach(const value_type& v, c)
+        res.push_back(&v);
+    return res;
+}
+
+// Convenience class for manipulating Item that are tagged with &
+// ordered by Tags
 template<typename Item, typename Tag>
 struct tagged_item : public std::pair<Item, Tag>,
             boost::less_than_comparable<tagged_item<Item, Tag> > {
