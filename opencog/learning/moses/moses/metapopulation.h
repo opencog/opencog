@@ -694,16 +694,7 @@ struct metapopulation : public bscored_combo_tree_set {
                  bscored_combo_tree_ptr_vec> bscored_combo_tree_ptr_vec_pair;
     typedef std::set<const bscored_combo_tree*> bscored_combo_tree_ptr_set;
 
-    // convert a set of bscored_combo_tree into a vector of pointers
-    // of bscored_combo_tree
-    static bscored_combo_tree_ptr_vec
-    to_ptr_vec(const bscored_combo_tree_set& bcs) {
-        bscored_combo_tree_ptr_vec res;
-        foreach(const bscored_combo_tree& cnd, bcs)
-            res.push_back(&cnd);
-        return res;
-    }
-    // reciprocal of to_ptr_vec 
+    // reciprocal of random_access_view 
     static bscored_combo_tree_set
     to_set(const bscored_combo_tree_ptr_vec& bcv) {
         bscored_combo_tree_set res;
@@ -715,7 +706,7 @@ struct metapopulation : public bscored_combo_tree_set {
     void remove_dominated(bscored_combo_tree_set& bcs, unsigned jobs = 1) {
         // get the nondominated candidates
         logger().fine("+ Get dominated");
-        bscored_combo_tree_ptr_vec bcv = to_ptr_vec(bcs);
+        bscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
         bscored_combo_tree_ptr_vec res = get_nondominated_rec(bcv, jobs);
         // get the dominated by set difference
         logger().fine("+ Calculate nondominated");
@@ -817,7 +808,8 @@ struct metapopulation : public bscored_combo_tree_set {
                               const bscored_combo_tree_set& bcs2,
                               unsigned jobs = 1) {
         bscored_combo_tree_ptr_vec_pair res_p =
-            get_nondominated_disjoint_rec(to_ptr_vec(bcs1), to_ptr_vec(bcs2),
+            get_nondominated_disjoint_rec(random_access_view(bcs1),
+                                          random_access_view(bcs2),
                                           jobs);
         return make_pair(to_set(res_p.first), to_set(res_p.second));
     }
@@ -884,8 +876,8 @@ struct metapopulation : public bscored_combo_tree_set {
     // merge nondominated candidate to the metapopulation assuming
     // that bcs contains no dominated candidates within itself
     void merge_nondominated(bscored_combo_tree_set& bcs, unsigned jobs = 1) {
-        bscored_combo_tree_ptr_vec bcv_mp = to_ptr_vec(*this),
-            bcv = to_ptr_vec(bcs);
+        bscored_combo_tree_ptr_vec bcv_mp = random_access_view(*this),
+            bcv = random_access_view(bcs);
         logger().fine("+ Merge nondominated");
         bscored_combo_tree_ptr_vec_pair bcv_p =
             get_nondominated_disjoint_rec(bcv, bcv_mp, jobs);
