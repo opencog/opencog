@@ -557,7 +557,7 @@ struct metapopulation : public bscored_combo_tree_set {
             if (get_score(inst_csc) == get_score(worst_composite_score))
                 return;
 
-            int pot_candidates_size = [&](void) -> int {
+            int pot_candidates_size = [&]() {
                 shared_lock lock(pot_cnd_mutex);
                 return pot_candidates.size(); }();
 

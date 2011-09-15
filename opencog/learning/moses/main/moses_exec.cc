@@ -169,12 +169,17 @@ arity_t infer_arity(const string& problem,
 
 // returns n such that a = n+2^n
 arity_t multiplex_arity(arity_t a) {
-    for(unsigned int n = 1; n <= integer_log2(a); ++n)
-        if(n+pow2(n) == (unsigned int)a)
+    unsigned nearest_arity = 1;
+    for(unsigned n = 1; n <= integer_log2(a); ++n) {
+        nearest_arity = n + pow2(n);
+        if(nearest_arity == (unsigned)a)
             return n;
+    }
     // not found, exit
-    std::cerr << "error: for multiplex the arity " << a 
-              << " must be equal to n+2^n, but there is no such n" << std::endl;
+    std::cerr << "Error: for multiplex the arity " << a
+              << " must be equal to n+2^n, but no such n exists."
+              << " However, the arity " << nearest_arity << " would work."
+              << std::endl;
     exit(1);
     return -1;
 }
@@ -339,7 +344,7 @@ int moses_exec(int argc, char** argv) {
          "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
         (opt_desc_str(enable_cache_opt).c_str(),
          value<bool>(&enable_cache)->default_value(true),
-         "Cache, so that identical candidates are not re-evaluated, the cache siz is dynamically adjusted to fit in the RAM.\n")
+         "Cache, so that identical candidates are not re-evaluated, the cache size is dynamically adjusted to fit in the RAM.\n")
         (opt_desc_str(revisit_opt).c_str(),
          "Revisit visited examplars when all have been visited.\n")
         (opt_desc_str(jobs_opt).c_str(),
