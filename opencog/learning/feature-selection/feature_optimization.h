@@ -30,6 +30,8 @@
 #include <opencog/util/foreach.h>
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/util/functional.h>
+#include <opencog/util/oc_omp.h>
 
 namespace opencog {
 
@@ -71,27 +73,43 @@ FeatureSet incremental_selection(const FeatureSet& features,
     FeatureSet rel; // set of relevant features for a given iteration
     FeatureSet res; // set of relevant non-redundant features to return
 
+    typedef boost::shared_mutex shared_mutex;
+    typedef boost::unique_lock<shared_mutex> unique_lock;
+    shared_mutex mutex;
+
     for(unsigned i = 1; i <= max_interaction_terms; ++i) {
         // define the set of set of features to test for relevancy
         FeatureSet tf = set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);
         // add the set of relevant features for that iteration in rel
         rel.empty();
-        foreach(const FeatureSet& fs, fss)
-            if(scorer(fs) > threshold)
-                rel.insert(fs.begin(), fs.end());
+        
+        auto fss_view = random_access_view(fss);
+        auto filter_relevant = [&](const FeatureSet* fs) {
+            if(scorer(*fs) > threshold) {
+                unique_lock lock(mutex);
+                /// @todo this lock can be more granular
+                rel.insert(fs->begin(), fs->end());
+            }};
+        OMP_ALGO::for_each(fss_view.begin(), fss_view.end(), filter_relevant);
+
         if(red_threshold > 0) {
             // define the set of set of features to test redundancy
             std::set<FeatureSet> nrfss = powerset(rel, i+1, true);
             // determine the set of redundant features
             FeatureSet red;
-            foreach(const FeatureSet& fs, nrfss) {
-                if(has_empty_intersection(fs, red)) {
-                    FeatureSet rfs = redundant_features(fs, scorer,
-                                                        threshold * red_threshold);
+            auto filter_redundant = [&](const FeatureSet* fs) {
+                if(has_empty_intersection(*fs, red)) {
+                    FeatureSet rfs = redundant_features(*fs, scorer,
+                                                        threshold
+                                                        * red_threshold);
+                    unique_lock lock(mutex);
+                    /// @todo the lock could be more granular
                     red.insert(rfs.begin(), rfs.end());
-                }
-            }
+                }};
+            auto nrfss_view = random_access_view(nrfss);
+            OMP_ALGO::for_each(nrfss_view.begin(), nrfss_view.end(),
+                               filter_redundant);
             // add in res the relevant non-redundant features
             std::set_difference(rel.begin(), rel.end(), red.begin(), red.end(),
                                 std::inserter(res, res.begin()));
@@ -111,9 +129,11 @@ FeatureSet cached_incremental_selection(const FeatureSet& features,
                                         double threshold,
                                         unsigned max_interaction_terms = 1,
                                         double red_threshold = 0) {
-    lru_cache<Scorer> scorer_cache(std::pow((double)features.size(),
-                                            (int)max_interaction_terms),
-                                   scorer);
+    std::cout << "cached_incremental_selection" << std::endl;
+    /// @todo replace by lru_cache once thread safe fixed
+    prr_cache_threaded<Scorer> scorer_cache(std::pow((double)features.size(),
+                                                     (int)max_interaction_terms),
+                                            scorer);
     return incremental_selection(features, scorer_cache, threshold,
                                  max_interaction_terms, red_threshold);
 }
@@ -166,9 +186,10 @@ FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
                                                  double red_threshold = 0,
                                                  double min = 0, double max = 1,
                                                  double epsilon = 0.01) {
-    lru_cache<Scorer> scorer_cache(std::pow((double)features.size(),
-                                            (int)max_interaction_terms),
-                                   scorer);
+    /// @todo replace by lru_cache once thread safe fixed
+    prr_cache_threaded<Scorer> scorer_cache(std::pow((double)features.size(),
+                                                     (int)max_interaction_terms),
+                                            scorer);
     FeatureSet f = adaptive_incremental_selection(features, scorer_cache,
                                                   features_size_target,
                                                   max_interaction_terms,
