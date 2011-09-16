@@ -38,6 +38,7 @@
 #include "../eda/logging.h"
 #include "../eda/local_structure.h"
 #include "../eda/optimize.h"
+#include "../eda/instance_set.h"
 #include "moses.h"
 #include "neighborhood_sampling.h"
 
@@ -300,31 +301,10 @@ struct iterative_hillclimbing {
                 number_of_new_instances =
                     (max_number_of_instances - current_number_of_instances);
 
-            // the number of all neighbours at the distance d (stops
-            // counting when above number_of_new_instances)
-            unsigned long long total_number_of_neighbours =
-                count_n_changed_knobs(deme.fields(), center_inst, distance,
-                                      number_of_new_instances);
-
-            if (number_of_new_instances < total_number_of_neighbours) {
-                //resize the deme so it can take new instances
-                deme.resize(current_number_of_instances + number_of_new_instances);
-                // sample number_of_new_instances instances at
-                // distance 'distance' from the exemplar
-                sample_from_neighborhood(deme.fields(), distance,
-                                         number_of_new_instances,
-                                         deme.begin() + current_number_of_instances, deme.end(), rng,
-                                         center_inst);
-            } else {
-                number_of_new_instances = total_number_of_neighbours;
-                //resize the deme so it can take new instances
-                deme.resize(current_number_of_instances + number_of_new_instances);
-                //add all instances on the distance 'distance' from
-                //the initial instance
-                generate_all_in_neighborhood(deme.fields(), distance,
-                                             deme.begin() + current_number_of_instances, deme.end(),
-                                             center_inst);
-            }
+            number_of_new_instances =
+                sample_new_instances(number_of_new_instances,
+                                     current_number_of_instances,
+                                     center_inst, deme, distance, rng);
 
             // Logger
             logger().debug("Evaluate %u neighbors at distance %u",
@@ -621,7 +601,7 @@ struct simulated_annealing {
         else
             return std::exp((energy_old - energy_new) / temperature);
     }
-      
+
     double cooling_schedule(double t)
     { 
         OC_ASSERT(t > 0, "t should greater than 0");
@@ -689,17 +669,11 @@ struct simulated_annealing {
 
             // score all new instances in the deme
             unsigned long long number_of_new_instances = 1; //@todo: possibly change that
-
-            // sample one neighbour (for now) of the center_instance
-            // from distance.
-            // @todo: one may experiment with changing the distance of
-            // the contin as well.
-            deme.resize(current_number_of_instances + number_of_new_instances);
-            sample_from_neighborhood(fields, current_distance,
-                                     number_of_new_instances,
-                                     deme.begin() + current_number_of_instances,
-                                     deme.end(),
-                                     rng, center_instance);
+            number_of_new_instances =
+                sample_new_instances(number_of_new_instances,
+                                     current_number_of_instances,
+                                     center_instance, deme,
+                                     current_distance, rng);
                     
             // score all new instances in the deme (1 for now)
             transform(deme.begin() + current_number_of_instances, deme.end(),

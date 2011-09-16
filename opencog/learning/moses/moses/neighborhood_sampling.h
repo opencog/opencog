@@ -34,6 +34,8 @@
 
 #include "using.h"
 #include "../eda/initialization.h"
+#include "../eda/instance_set.h"
+#include "../moses/types.h"
 
 namespace opencog { namespace moses {
 
@@ -426,12 +428,13 @@ Out vary_n_knobs(const eda::field_set& fs,
  * @param max_count       stop counting when above this value, that is
  *                        because this function can be computationally expensive.
  */
-inline unsigned long long count_n_changed_knobs_from_index(const eda::field_set& fs,
-                                                           const eda::instance& inst,
-                                                           unsigned n,
-                                                           unsigned starting_index,
-                                                           unsigned long long max_count
-                                                           = numeric_limits<unsigned long long>::max())
+inline unsigned long long
+count_n_changed_knobs_from_index(const eda::field_set& fs,
+                                 const eda::instance& inst,
+                                 unsigned n,
+                                 unsigned starting_index,
+                                 unsigned long long max_count
+                                 = numeric_limits<unsigned long long>::max())
 {
     if(n == 0)
         return 1;
@@ -549,6 +552,46 @@ inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
 {
     eda::instance inst(fs.packed_width());
     return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
+}
+
+/// file the deme with at max number_of_new_instances, at distance
+/// dist and return the actual number of new instances (bounded by the
+/// possible neighbors at distance dist)
+inline unsigned long long
+sample_new_instances(unsigned long long number_of_new_instances,
+                     unsigned long long current_number_of_instances,
+                     const eda::instance& center_inst,
+                     eda::instance_set<composite_score>& deme,
+                     unsigned dist,
+                     RandGen& rng) {
+    // the number of all neighbours at the distance d (stops
+    // counting when above number_of_new_instances)
+    unsigned long long total_number_of_neighbours =
+        count_n_changed_knobs(deme.fields(), center_inst, dist,
+                              number_of_new_instances);
+
+    if (number_of_new_instances < total_number_of_neighbours) {
+        //resize the deme so it can take new instances
+        deme.resize(current_number_of_instances + number_of_new_instances);
+        // sample number_of_new_instances instances at
+        // distance 'distance' from the exemplar
+        sample_from_neighborhood(deme.fields(), dist,
+                                 number_of_new_instances,
+                                 deme.begin() + current_number_of_instances,
+                                 deme.end(), rng,
+                                 center_inst);
+    } else {
+        number_of_new_instances = total_number_of_neighbours;
+        //resize the deme so it can take new instances
+        deme.resize(current_number_of_instances + number_of_new_instances);
+        //add all instances on the distance dist from
+        //the initial instance
+        generate_all_in_neighborhood(deme.fields(), dist,
+                                     deme.begin() + current_number_of_instances,
+                                     deme.end(),
+                                     center_inst);
+    }
+    return number_of_new_instances;
 }
 
 } // ~namespace moses
