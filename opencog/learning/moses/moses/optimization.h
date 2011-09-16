@@ -634,9 +634,9 @@ struct simulated_annealing {
     unsigned dist_temp(double current_temp)
     {
         return (unsigned)( ((current_temp - sa_params.min_temp)
-                                /(sa_params.init_temp - sa_params.min_temp))
-                               *
-                               (max_distance - 1) + 1 );
+                            /(sa_params.init_temp - sa_params.min_temp))
+                           *
+                           (max_distance - 1) + 1 );
     }
 
     template<typename Scoring>
