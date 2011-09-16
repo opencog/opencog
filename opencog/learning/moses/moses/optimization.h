@@ -296,7 +296,6 @@ struct iterative_hillclimbing {
                 (max_number_of_instances - current_number_of_instances)
                 / hc_params.fraction_of_remaining;
 
-            /// @todo is that really useful?
             if (number_of_new_instances < MINIMUM_DEME_SIZE)
                 number_of_new_instances =
                     (max_number_of_instances - current_number_of_instances);
@@ -575,12 +574,14 @@ struct sa_parameters {
         init_temp(30),
         min_temp(0),
         temp_step_size(0.5),
-        accept_prob_temp_intensity(0.5) {}
+        accept_prob_temp_intensity(0.5),
+        max_new_instances(100) {}
 
     double init_temp;
     double min_temp;
     double temp_step_size;
     double accept_prob_temp_intensity;
+    unsigned long long max_new_instances;
 };
 
 struct simulated_annealing {
@@ -648,9 +649,10 @@ struct simulated_annealing {
 
         // @todo this should be adapted for SA
         unsigned pop_size = opt_params.pop_size(fields);
-        // int max_gens_total = opt_params.max_gens_total(deme.fields());
-        // int max_number_of_instances = max_gens_total * pop_size;
-        unsigned max_number_of_instances = pop_size;
+        // unsigned max_gens_total = opt_params.max_gens_total(deme.fields());
+        unsigned long long max_number_of_instances =
+            /*(unsigned long long)max_gens_total * */
+            (unsigned long long)pop_size;
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
@@ -664,45 +666,69 @@ struct simulated_annealing {
             eda::score_instance(center_instance, score);
         energy_t center_instance_energy = energy(scored_center_inst);
         double current_temp = sa_params.init_temp;
+
+        // Logger
+        {
+            std::stringstream ss;
+            ss << "SA initial instance: " << fields.stream(center_instance);
+            logger().debug(ss.str());
+            logger().debug("Energy = %f", center_instance_energy);
+        }
+        // ~Logger
+
         do {
             unsigned current_distance = dist_temp(current_temp);
 
-            // score all new instances in the deme
-            unsigned long long number_of_new_instances = 1; //@todo: possibly change that
-            number_of_new_instances =
-                sample_new_instances(number_of_new_instances,
+            // Logger
+            {
+                logger().debug("Step: %u", step);
+                logger().debug("Distance = %u, Temperature = %f",
+                               current_distance, current_temp);
+            }
+            // ~Logger
+
+            unsigned long long number_of_new_instances =
+                sample_new_instances(sa_params.max_new_instances,
                                      current_number_of_instances,
                                      center_instance, deme,
                                      current_distance, rng);
                     
-            // score all new instances in the deme (1 for now)
-            transform(deme.begin() + current_number_of_instances, deme.end(),
-                      deme.begin_scores() + current_number_of_instances,
-                      boost::bind(boost::cref(score), _1));
-                      
-            eda::scored_instance<composite_score>& current_scored_instance =
-                deme[current_number_of_instances];
-            eda::instance& current_instance = current_scored_instance.first;
-            energy_t current_instance_energy = energy(current_scored_instance);
+            // score all new instances in the deme
+            OMP_ALGO::transform(deme.begin() + current_number_of_instances,
+                                deme.end(),
+                                deme.begin_scores() + current_number_of_instances,
+                                boost::bind(boost::cref(score), _1));
+            
+            // get the best instance
+            eda::scored_instance<composite_score>& best_scored_instance = 
+                *OMP_ALGO::max_element(deme.begin()
+                                       + current_number_of_instances,
+                                       deme.end());
+
+            eda::instance& best_instance = best_scored_instance.first;
+            energy_t best_instance_energy = energy(best_scored_instance);
                                           
             // check if the current instance in the deme is better than
             // the center_instance                                        
             double actual_accept_prob = sa_params.accept_prob_temp_intensity *
-                accept_probability(current_instance_energy,
-                                   center_instance_energy, current_temp);
+                accept_probability(best_instance_energy,
+                                   best_instance_energy, current_temp);
                       
             if (actual_accept_prob >= rng.randdouble()) {
-                center_instance_energy = current_instance_energy;
-                center_instance = current_instance;
+                center_instance_energy = best_instance_energy;
+                center_instance = best_instance;
+                // Logger
+                {
+                    std::stringstream ss;
+                    ss << "Center instance: "
+                       << fields.stream(center_instance);
+                    logger().debug(ss.str());
+                    logger().debug("Energy = %f", center_instance_energy);
+                }
+                // ~Logger
             }
 
             current_number_of_instances += number_of_new_instances;
-
-            // DEBUG
-            // cout <<"Instance: " << fields.stream(center_instance) <<endl;
-            // cout <<"Energy: " << center_instance_energy << endl;
-            // cout <<"-----------------------------------------------" <<endl;
-            // ~DEBUG
 
             current_temp = cooling_schedule((double)step
                                             * sa_params.temp_step_size);
