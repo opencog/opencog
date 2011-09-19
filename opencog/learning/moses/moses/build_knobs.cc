@@ -242,7 +242,9 @@ void build_knobs::logical_cleanup()
 
 
 /**
- * 
+ * Disallow settings of kb that result in a shorter candidate if
+ * reduced. Return false if all settings are disallowed, true
+ * otherwise.
  */
 bool build_knobs::disc_probe(disc_knob_base& kb)
 {

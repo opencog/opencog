@@ -92,6 +92,13 @@ protected:
     void logical_probe(const combo_tree& tr, combo_tree::iterator it,
                        bool add_if_in_exemplar);
     void logical_cleanup();
+
+    /**
+     * Disallow settings of kb that result in a shorter candidate if
+     * reduced.
+     *
+     * Return false if all settings are disallowed, true otherwise.
+     */
     bool disc_probe(disc_knob_base& kb);
 
     void action_canonize(combo_tree::iterator);
