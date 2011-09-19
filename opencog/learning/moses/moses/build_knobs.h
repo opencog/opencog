@@ -92,7 +92,7 @@ protected:
     void logical_probe(const combo_tree& tr, combo_tree::iterator it,
                        bool add_if_in_exemplar);
     void logical_cleanup();
-    bool disc_probe(combo_tree::iterator parent, disc_knob_base& kb);
+    bool disc_probe(disc_knob_base& kb);
 
     void action_canonize(combo_tree::iterator);
     void add_action_knobs(combo_tree::iterator it,

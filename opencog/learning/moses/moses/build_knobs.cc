@@ -144,7 +144,7 @@ bool build_knobs::permit_ops(const vertex& v)
 
 void build_knobs::logical_canonize(pre_it it)
 {
-    if (*it == id::logical_true || *it == id::logical_false)
+    if(is_boolean(*it))
         *it = id::logical_and;
     else if (*it != id::logical_and && *it != id::logical_or)
         it = _exemplar.insert_above(it, id::logical_and);
@@ -222,7 +222,7 @@ void build_knobs::logical_probe(const combo_tree& subtree, pre_it it,
                                 bool add_if_in_exemplar)
 {
     logical_subtree_knob kb(_exemplar, it, subtree.begin());
-    if ((add_if_in_exemplar || !kb.in_exemplar()) && disc_probe(it, kb)) {
+    if ((add_if_in_exemplar || !kb.in_exemplar()) && disc_probe(kb)) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
     }
 }
@@ -232,7 +232,7 @@ void build_knobs::logical_cleanup()
 {
     combo_tree::post_order_iterator it = _exemplar.begin_post();
     while (it != _exemplar.end_post())
-        if ((*it == id::logical_and || *it == id::logical_or) && it.is_childless())
+        if(is_logical_operator(*it) && it.is_childless())
             _exemplar.erase(it++);
         else
             ++it;
@@ -240,65 +240,32 @@ void build_knobs::logical_cleanup()
         _exemplar.set_head(id::logical_and);
 }
 
-bool build_knobs::disc_probe(pre_it parent, disc_knob_base& kb)
+
+/**
+ * 
+ */
+bool build_knobs::disc_probe(disc_knob_base& kb)
 {
     using namespace reduct;
 
     vector<int> to_disallow;
+
     foreach(int idx, from_one(kb.arity() - 1)) {
-
-        /*combo_tree XX(_exemplar);apply_rule(downwards(remove_null_vertices()),XX);
-        cout << "exemplar " << XX << " -> ";*/
-
         kb.turn(idx);
 
-        /*XX=combo_tree(_exemplar);apply_rule(downwards(remove_null_vertices()),XX);
-        cout << XX << endl;*/
+        /// @todo could use kb.complexity_bound() to be faster, but
+        /// there is a strange thing with kb.complexity_bound()
+        /// because apparently when it is 0 it actually makes
+        /// _exemplar simpler
+        complexity_t initial_c = complexity(_exemplar);
 
-        //fast way
-        /**
-        note: representation-building is a bit tricky & rotten - the pairwise
-        probing approach should be better, but wait until contin is ready to to
-        test..
-        combo_tree probing_tr(vertex());
-        copy_no_nulls(parent,probing_tr.begin());
-        for (combo_tree::upwards_iterator up=_exemplar.parent(parent);
-        up!=_exemplar.end_upwards() && is_associative(*up);++up) {
-        probing_tr.insert_above(probing_tr.begin(),*up);
-        for (combo_tree::sibling_iterator sib=up.begin();sib!=up.end();++sib) {
-        if (*sib==id::null_vertex || sib.node!=parent.node)
-        continue;
-        combo_tree sib_tr(vertex());
-        copy_no_nulls(sib,sib_tr.begin());
-        apply_rule(sequential(remove_null_vertices(),
-        ),exemplar_no_nulls);
-        if (sib.is_childless() && sib.node!=parent.node)
-        tmp.append_child(tmp.begin(),*sib); // *sib not sib cuz only childless
-        }
-        complexity_t initial_c=complexity(tmp.begin());
-        **/
-        /*XX=combo_tree(tmp);apply_rule(downwards(remove_null_vertices()),XX);
-        cout << "tmp= " << XX << endl;*/
-
-        //slow way
-        /**/
-        combo_tree tmp(_exemplar);
-        complexity_t _c = complexity(_exemplar.begin());
-        complexity_t initial_c = _c;//+kb.complexity_bound();
-        /**/
-
-        // cout << "doing  : " << tmp << endl;
-        clean_reduce(tmp);
-        // cout << "clean  : " << tmp << endl;
-
-        (*_rep.get_simplify_knob_building())(tmp);
-
-        // cout << "reduced: " << tmp << endl;
+        // get cleaned and reduced (according to _simplify_knob_building) tree
+        combo_tree tmp = _rep.get_clean_exemplar(true, true);
 
         // Note that complexity is negative, with -inf being highest,
         // 0 lowest, which is why this conditional is taken if tmp is
         // simpler after reduction
-        if (initial_c < complexity(tmp.begin())) {
+        if (initial_c < complexity(tmp)) {
             to_disallow.push_back(idx);
         }
     }
@@ -451,7 +418,7 @@ void build_knobs::simple_action_probe(pre_it it, bool add_if_in_exemplar)
     std::cout << "simple knob - new exemplar : " << _exemplar << endl;
 #endif
 
-    if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(it,kb) PJ*/)
+    if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(kb) PJ*/)
         _rep.disc.insert(make_pair(kb.spec(), kb));
 }
 
@@ -464,7 +431,7 @@ void build_knobs::action_probe(vector<combo_tree>& perms, pre_it it,
     std::cout << "action knob - new exemplar : " << _exemplar << endl;
 #endif
 
-    if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(it,kb) PJ*/)
+    if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(kb) PJ*/)
         _rep.disc.insert(make_pair(kb.spec(), kb));
 }
 

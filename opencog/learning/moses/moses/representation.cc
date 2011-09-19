@@ -147,12 +147,14 @@ void representation::clear_exemplar()
 }
 
 
-combo_tree representation::get_clean_exemplar(bool reduce)
+combo_tree representation::get_clean_exemplar(bool reduce, bool knob_building)
 {
-    return get_clean_exemplar(exemplar(), reduce);
+    return get_clean_exemplar(exemplar(), reduce, knob_building);
 }
 
-combo_tree representation::get_clean_exemplar(combo_tree tr, bool reduce)
+combo_tree representation::get_clean_exemplar(combo_tree tr,
+                                              bool reduce,
+                                              bool knob_building)
 {
     using namespace reduct;
 
@@ -167,7 +169,10 @@ combo_tree representation::get_clean_exemplar(combo_tree tr, bool reduce)
             logger().fine(ss.str());
         }
         // ~Logger
-        (*get_simplify_candidate())(tr); 
+        if(knob_building)
+            (*get_simplify_knob_building())(tr); 
+        else
+            (*get_simplify_candidate())(tr); 
     }
 
     return tr;

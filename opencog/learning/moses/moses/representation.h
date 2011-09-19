@@ -71,9 +71,11 @@ struct representation : public knob_mapper, boost::noncopyable {
      * (usually after turning some of its knobs)
      *
      * @param reduce whether the combo_tree is reduced before it is returned
+     * @param knob_building if true then _simplify_knob_building is used to
+     *                      reduce, otherwise (the default) _simplify_candidate.
      * @return returns a copy of _exemplar, cleaned and reduced
      */
-    combo_tree get_clean_exemplar(bool reduce);
+    combo_tree get_clean_exemplar(bool reduce, bool knob_building = false);
 
     /**
      * Thread safe composition of transform and get_clean_exemplar
@@ -142,10 +144,14 @@ protected:
     void set_exemplar_inst();
 
     /**
-     * helper of get_clean_exemplar and get_candidate
+     * Helper of get_clean_exemplar and get_candidate.
+     *
+     * Return a clean and possibly reduced version of tr. If knob_building
+     * is true then _simplify_knob_building is used to reduce, otherwise
+     * (the default) _simplify_candidate.
      */
-    combo_tree get_clean_exemplar(combo_tree tr, bool reduce);
-
+    combo_tree get_clean_exemplar(combo_tree tr, bool reduce,
+                                  bool knob_building = false);
 
     combo_tree _exemplar;     // contains the prototype of the
                               // exemplar used to generate the deme
