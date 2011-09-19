@@ -608,11 +608,13 @@ struct metapopulation : public bscored_combo_tree_set {
         logger().debug("Compute behavioral score of %d selected candidates",
                        pot_candidates.size());
         // ~Logger
-        foreach(metapop_candidates::value_type& cand, pot_candidates) {
+        auto compute_bscore = [this](metapop_candidates::value_type& cand) {
             composite_score csc = get_composite_score(cand.second);
-            behavioral_score bsc = bscore(cand.first);
+            behavioral_score bsc = this->bscore(cand.first);
             cand.second = composite_behavioral_score(bsc, csc);
-        }
+        };
+        OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),
+                           compute_bscore);
 
         bscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
         if(!params.include_dominated) {
