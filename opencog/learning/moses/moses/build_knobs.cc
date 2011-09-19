@@ -241,11 +241,6 @@ void build_knobs::logical_cleanup()
 }
 
 
-/**
- * Disallow settings of kb that result in a shorter candidate if
- * reduced. Return false if all settings are disallowed, true
- * otherwise.
- */
 bool build_knobs::disc_probe(disc_knob_base& kb)
 {
     using namespace reduct;
@@ -261,7 +256,8 @@ bool build_knobs::disc_probe(disc_knob_base& kb)
         /// _exemplar simpler
         complexity_t initial_c = complexity(_exemplar);
 
-        // get cleaned and reduced (according to _simplify_knob_building) tree
+        // get cleaned and reduced (according to
+        // _simplify_knob_building) _exemplar
         combo_tree tmp = _rep.get_clean_exemplar(true, true);
 
         // Note that complexity is negative, with -inf being highest,
@@ -273,7 +269,7 @@ bool build_knobs::disc_probe(disc_knob_base& kb)
     }
     kb.turn(0);
 
-    //if some settings aren't disallowed, make a knob
+    // if some settings aren't disallowed, make a knob
     if (int(to_disallow.size()) < kb.arity() - 1) {
         foreach (int idx, to_disallow)
             kb.disallow(idx);
