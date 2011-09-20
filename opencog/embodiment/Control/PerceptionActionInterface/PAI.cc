@@ -81,6 +81,7 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
     atomSpace(_atomSpace), actionSender(_actionSender),
     avatarInterface(_avatarInterface), nextActionPlanId(nextPlanID)
 {
+    assert(&atomSpace != NULL);
     PAIUtils::initializeXMLPlatform();
     xMin = -1;
     yMin = -1;

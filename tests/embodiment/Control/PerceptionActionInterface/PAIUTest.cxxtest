@@ -24,6 +24,7 @@
 #include <opencog/server/CogServer.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/EventResponder.h>
 #include "AvatarInterfaceMock.h"
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "ActionPlanSenderMock.h"
@@ -35,7 +36,7 @@
 
 #include "PAITestUtil.h"
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-
+#include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
@@ -227,7 +228,7 @@ public:
         AvatarInterfaceMock avatarInterface;
         PAI pai(*atomSpace, sender, avatarInterface, 10);
         avatarInterface.setPAI(&pai);
-
+        new EventResponder(pai , *atomSpace);
         // Check Action Plan status before creating them, according with the passed "nextActionPlanId" argument to the constructor
         TS_ASSERT(!pai.hasPlanFailed("0"));
         TS_ASSERT(!pai.hasPlanFailed("9"));
@@ -652,16 +653,18 @@ public:
             Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
 
             // Result state
-            Handle actionResultNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
-            TS_ASSERT(Handle::compare(actionResultNode, Handle::UNDEFINED));
+            Handle actionResultPrediceteNode = atomSpace->getHandle(PREDICATE_NODE, "walk:result-state");
+            TS_ASSERT(Handle::compare(actionResultPrediceteNode, Handle::UNDEFINED));
 
+            Handle resultNode = atomSpace->getHandle(CONCEPT_NODE, ACTION_DONE_PREDICATE_NAME );
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(actionInstanceNode);
+            predicateListLinkOutgoing.push_back(resultNode);
             Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
 	    TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
 	    HandleSeq evalLinkOutgoing;
-	    evalLinkOutgoing.push_back(actionResultNode);
+            evalLinkOutgoing.push_back(actionResultPrediceteNode);
 	    evalLinkOutgoing.push_back(predicateListLink);
             Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
@@ -727,17 +730,19 @@ public:
             Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
 
             // Result state
-            Handle actionResultNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
-            TS_ASSERT(Handle::compare(actionResultNode, Handle::UNDEFINED));
+            Handle actionResultPrediceteNode = atomSpace->getHandle(PREDICATE_NODE, "walk:result-state");
+            TS_ASSERT(Handle::compare(actionResultPrediceteNode, Handle::UNDEFINED));
 
+            Handle resultNode = atomSpace->getHandle(CONCEPT_NODE, ACTION_DONE_PREDICATE_NAME );
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(actionInstanceNode);
+            predicateListLinkOutgoing.push_back(resultNode);
             Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
-	    TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
+            TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
-	    HandleSeq evalLinkOutgoing;
-	    evalLinkOutgoing.push_back(actionResultNode);
-	    evalLinkOutgoing.push_back(predicateListLink);
+            HandleSeq evalLinkOutgoing;
+            evalLinkOutgoing.push_back(actionResultPrediceteNode);
+            evalLinkOutgoing.push_back(predicateListLink);
             Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 
@@ -801,17 +806,19 @@ public:
             Handle rotateListLink = atomSpace->getHandle(LIST_LINK, rotateListLinkOutgoing);
 
             // Result state
-            Handle actionResultNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
-            TS_ASSERT(Handle::compare(actionResultNode, Handle::UNDEFINED));
+            Handle actionResultPrediceteNode = atomSpace->getHandle(PREDICATE_NODE, "walk:result-state");
+            TS_ASSERT(Handle::compare(actionResultPrediceteNode, Handle::UNDEFINED));
 
+            Handle resultNode = atomSpace->getHandle(CONCEPT_NODE, ACTION_DONE_PREDICATE_NAME );
             HandleSeq predicateListLinkOutgoing;
             predicateListLinkOutgoing.push_back(actionInstanceNode);
+            predicateListLinkOutgoing.push_back(resultNode);
             Handle predicateListLink = atomSpace->getHandle(LIST_LINK, predicateListLinkOutgoing);
-	    TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
+            TS_ASSERT(Handle::compare(predicateListLink, Handle::UNDEFINED));
 
-	    HandleSeq evalLinkOutgoing;
-	    evalLinkOutgoing.push_back(actionResultNode);
-	    evalLinkOutgoing.push_back(predicateListLink);
+            HandleSeq evalLinkOutgoing;
+            evalLinkOutgoing.push_back(actionResultPrediceteNode);
+            evalLinkOutgoing.push_back(predicateListLink);
             Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
             TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
 

@@ -97,7 +97,7 @@ void EventResponder::response(std::string actionName, Handle instanceNode, Handl
 // and add them into Atomspa
 void EventResponder::ActionParametersprocess(std::string actionName, Handle instanceNode, Handle actorNode, Handle targetNode, std::vector<Handle> actionparams)
 {
-     assert(&atomSpace != NULL);
+     //assert(&atomSpace != NULL);
 
      // travel the parameter vector
      std::string paraName, parakind;
