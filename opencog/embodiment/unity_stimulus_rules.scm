@@ -51,6 +51,14 @@
         stimulus_pred_handle
         (ListLink
             stimulus_instance
+            ;(map-in-order
+            ;    (lambda (argument)
+            ;        (if (cog-atom? argument)
+            ;            argument
+            ;        )
+            ;    )
+            ;    arguments
+            ;);map-in-order
             (apply parse_arguments arguments)
         )
     )
@@ -503,7 +511,7 @@
             (add_stimulus_precondition
                 (PredicateNode "touch:target")
                 (VariableNode "$var_stimulus")
-                PET_HANDLE
+                "'self'"
             )
 
             (add_stimulus_precondition
@@ -536,64 +544,11 @@
     TouchHeavilyRule
 );ForAllLink
 
-(define TouchRule
-    (add_stimulus_rule
-        ; Add preconditions with logical relationship
-        ; Attention! The variables used in the rule should be declared in the 
-        ; scope of this rule.
-        (AndLink
-            ;(InheritanceLink
-            ;    (VariableNode "$var_stimulus")
-            ;    (ConceptNode "touch")
-            ;)
-
-            (add_stimulus_precondition
-                (PredicateNode "touch:actor")
-                (VariableNode "$var_stimulus")
-                (VariableNode "$var_actor")
-            ) 
-
-            (add_stimulus_precondition
-                (PredicateNode "touch:target")
-                (VariableNode "$var_stimulus")
-                PET_HANDLE
-            )
-
-            (add_stimulus_precondition
-                (PredicateNode "touch:force")
-                (VariableNode "$var_stimulus")
-                (ConceptNode "heavy")
-            )
-        );AndLink
-
-        ; Add response
-        (add_attitude 
-            (VariableNode "$var_actor")
-            THANKFUL_HANDLE           
-            1.0
-        )
-    )
-)
-
-; Add scope for touch rule
-(ForAllLink (cog-new-av 1 1 1)
-    (ListLink
-        (TypedVariableLink
-            (VariableNode "$var_stimulus") 
-            (VariableTypeNode "ConceptNode")
-        )
-
-        (VariableNode "$var_actor") 
-    )
-
-    TouchRule
-);ForAllLink
-
 (define stimulus_rules_map
     (list
         ; Each time when a new rule is added, it should be appended in the map
         ; The format is: (action_name rule1 rule2 ...)
-        (list "touch" TouchHeavilyRule TouchRule)
+        (list "touch" TouchHeavilyRule)
         ; TODO for new rules
         (list)
     )
