@@ -164,12 +164,7 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
     OMP_ALGO::for_each(perms.begin(), perms.end(),
                        bind(&build_knobs::logical_probe_thread_safe, this,
                             _1, it, add_if_in_exemplar));
-    
-    
-//     const combo_tree& tr, perms)
-// logical_probe_thread_safe(tr, it, add_if_in_exemplar);
-//         // logical_probe(tr, it, add_if_in_exemplar);
-    }
+}
 
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
