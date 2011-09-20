@@ -56,8 +56,8 @@ using namespace ant_combo;
 //from the tree (while setting it to 0 would return to the original tree).
 
 struct knob_base {
-    knob_base(combo_tree& tr, combo_tree::iterator log)
-        : _tr(tr), _loc(log) {}
+    knob_base(combo_tree& tr, combo_tree::iterator loc)
+        : _tr(tr), _loc(loc) {}
     knob_base(combo_tree& tr) : _tr(tr), _loc(tr.end()) {}
     virtual ~knob_base() { }
 
@@ -134,9 +134,9 @@ protected:
 template<int MaxArity>
 struct knob_with_arity : public disc_knob_base {
     knob_with_arity(combo_tree& tr, combo_tree::iterator tgt) 
-        : disc_knob_base(tr, tgt), _default(0) {}
+        : disc_knob_base(tr, tgt), _default(0), _current(0) {}
     knob_with_arity(combo_tree& tr) 
-        : disc_knob_base(tr), _default(0) {}
+        : disc_knob_base(tr), _default(0), _current(0) {}
 
     void disallow(int idx) {
         _disallowed[idx] = true;
@@ -155,6 +155,7 @@ struct knob_with_arity : public disc_knob_base {
 protected:
     std::bitset<MaxArity> _disallowed;
     int _default;
+    int _current;
 
     int map_idx(int idx) const {
         if (idx == _default)
@@ -172,9 +173,19 @@ struct logical_subtree_knob : public knob_with_arity<3> {
     static const int negated = 2;
     static const std::map<int, string> pos_str;
 
+    // copy lsk on tr at position tgt
+    // logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
+    //                      const logical_subtree_knob& lsk) 
+    //     : knob_with_arity<3>(tr) {
+    //     _loc = sib;
+    //     _disallowed = 
+    //     _default = present;        
+    //     _current = present;
+    // }
+
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                          combo_tree::iterator subtree)
-        : knob_with_arity<3>(tr, tr.end()), _current(absent) {
+        : knob_with_arity<3>(tr) {
         typedef combo_tree::sibling_iterator sib_it;
         typedef combo_tree::pre_order_iterator pre_it;
         //compute the negation of the subtree
@@ -249,8 +260,6 @@ struct logical_subtree_knob : public knob_with_arity<3> {
         ss << "]";
         return ss.str();
     }
-protected:
-    int _current;
 private:
     // return << *_loc or << *_loc.begin() if it is null_vertex
     // if *_loc is a negative literal returns !#n
@@ -301,8 +310,7 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
     action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                         vector<combo_tree>& perms)
-        : knob_with_arity<MAX_PERM_ACTIONS>(tr, tr.end()),
-          _current(0),  _perms(perms) {
+        : knob_with_arity<MAX_PERM_ACTIONS>(tr), _perms(perms) {
 
         OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
 
@@ -314,7 +322,6 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
         _loc = _tr.append_child(tgt, id::null_vertex);
     }
 
-
     int complexity_bound() const {
         return complexity(_loc);
     }
@@ -325,7 +332,6 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
         else
             _tr.erase(_loc);
     }
-
 
     void turn(int idx) {
         idx = map_idx(idx);
@@ -357,11 +363,8 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
         return ss.str();
     }
 protected:
-    int _current;
     const vector<combo_tree> _perms;
 };
-
-
 
 //note - children aren't cannonized when parents are called
 struct ant_action_subtree_knob : public knob_with_arity<4> {
@@ -372,7 +375,7 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
 
     ant_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                             combo_tree::iterator subtree)
-        : knob_with_arity<4>(tr, tr.end()), _current(none) {
+        : knob_with_arity<4>(tr) {
 
         _default = none;
         _current = _default;
@@ -436,8 +439,6 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
         ss << "[" << *_loc << " TODO ]";
         return ss.str();
     }
-protected:
-    int _current;
 };
 
 
@@ -492,8 +493,6 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
         ss << "[" << *_loc << " TODO ]";
         return ss.str();
     }
-protected:
-    int _current;
 };
 
 typedef based_variant <boost::variant<logical_subtree_knob,
