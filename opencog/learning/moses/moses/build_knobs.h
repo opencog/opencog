@@ -41,7 +41,7 @@ using namespace combo;
 
 // build knobs on a reduced combo tree
 struct build_knobs : boost::noncopyable {
-    //used to be ss = 1.0, expansion = 2, depth = 4
+    // used to be ss = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions
     build_knobs(RandGen& rng, combo_tree& exemplar,
                 const type_tree& tt, representation& rep,
@@ -57,9 +57,9 @@ struct build_knobs : boost::noncopyable {
 protected:
     RandGen& rng;
     combo_tree& _exemplar;
-    type_tree _type;
+    const type_tree _type;
     representation& _rep;
-    arity_t _arity; // number of arguments of the combo program
+    const arity_t _arity; // number of arguments of the combo program
     contin_t _step_size, _expansion;
     eda::field_set::arity_t _depth;
 
@@ -91,6 +91,9 @@ protected:
     void sample_logical_perms(combo_tree::iterator it, vector<combo_tree>& perms);
     void logical_probe(const combo_tree& tr, combo_tree::iterator it,
                        bool add_if_in_exemplar);
+    // like logical_probe but thread safe and with a little overhead
+    void logical_probe_thread_safe(const combo_tree& tr, combo_tree::iterator it,
+                                   bool add_if_in_exemplar);
     void logical_cleanup();
 
     /**
@@ -99,6 +102,8 @@ protected:
      *
      * Return false if all settings are disallowed, true otherwise.
      */
+    bool disc_probe(combo_tree& exemplar, disc_knob_base& kb) const;
+    // like the above but exemplar is _exemplar
     bool disc_probe(disc_knob_base& kb);
 
     void action_canonize(combo_tree::iterator);
@@ -127,6 +132,8 @@ protected:
     void append_linear_combination(combo_tree::iterator it);
     combo_tree::iterator mult_add(combo_tree::iterator it, const vertex& v);
     void ann_canonize(combo_tree::iterator);
+
+    mutable boost::shared_mutex logical_probe_mutex;    
 };
 
 } //~namespace moses

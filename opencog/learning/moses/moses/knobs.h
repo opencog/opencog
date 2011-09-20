@@ -174,14 +174,23 @@ struct logical_subtree_knob : public knob_with_arity<3> {
     static const std::map<int, string> pos_str;
 
     // copy lsk on tr at position tgt
-    // logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-    //                      const logical_subtree_knob& lsk) 
-    //     : knob_with_arity<3>(tr) {
-    //     _loc = sib;
-    //     _disallowed = 
-    //     _default = present;        
-    //     _current = present;
-    // }
+    logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
+                         const logical_subtree_knob& lsk) 
+        : knob_with_arity<3>(tr) {
+        // {
+        //     logger().debug("lsk = %s", lsk.toStr().c_str());
+        //     stringstream ss;
+        //     ss << "*tgt = " << *tgt;
+        //     logger().debug(ss.str());
+        // }
+        if(lsk.in_exemplar())
+            _loc = _tr.child(tgt, lsk._tr.sibling_index(lsk._loc));
+        else
+            _loc = _tr.append_child(tgt, lsk._loc);
+        _disallowed = lsk._disallowed;
+        _default = lsk._default;
+        _current = lsk._current;
+    }
 
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                          combo_tree::iterator subtree)

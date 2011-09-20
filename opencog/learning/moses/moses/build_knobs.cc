@@ -28,6 +28,7 @@
 #include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/dorepeat.h>
+#include <opencog/util/oc_omp.h>
 
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/learning/moses/moses/ann_scoring.h>
@@ -160,9 +161,15 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
 {
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
-    foreach(const combo_tree& tr, perms)
-        logical_probe(tr, it, add_if_in_exemplar);
-}
+    OMP_ALGO::for_each(perms.begin(), perms.end(),
+                       bind(&build_knobs::logical_probe_thread_safe, this,
+                            _1, it, add_if_in_exemplar));
+    
+    
+//     const combo_tree& tr, perms)
+// logical_probe_thread_safe(tr, it, add_if_in_exemplar);
+//         // logical_probe(tr, it, add_if_in_exemplar);
+    }
 
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
@@ -227,6 +234,47 @@ void build_knobs::logical_probe(const combo_tree& subtree, pre_it it,
     }
 }
 
+void build_knobs::logical_probe_thread_safe(const combo_tree& subtree, pre_it it,
+                                            bool add_if_in_exemplar)
+{
+    // {
+    //     stringstream ss;
+    //     ss << "subtree = " << subtree;
+    //     logger().debug(ss.str());
+    // }
+
+    combo_tree exemplar_copy(_exemplar);
+    pre_it it_copy = exemplar_copy.begin();
+    // {
+    //     stringstream ss;
+    //     ss << "*it = " << *it;
+    //     logger().debug(ss.str());
+    // }
+    std::advance(it_copy, std::distance(_exemplar.begin(), it));
+    // {
+    //     stringstream ss;
+    //     ss << "*it_copy = " << *it_copy;
+    //     logger().debug(ss.str());
+    // }
+    logical_subtree_knob kb_copy(exemplar_copy, it_copy, subtree.begin());
+    if ((add_if_in_exemplar || !kb_copy.in_exemplar())
+        && disc_probe(exemplar_copy, kb_copy)) {
+        boost::unique_lock<boost::shared_mutex> lock(logical_probe_mutex);
+        // {
+        //     stringstream ss;
+        //     ss << "exemplar_copy = " << exemplar_copy;
+        //     logger().debug(ss.str());
+        // }
+        logical_subtree_knob kb(_exemplar, it, kb_copy);
+        // {
+        //     stringstream ss;
+        //     ss << "_exemplar = " << _exemplar;
+        //     logger().debug(ss.str());
+        // }
+        _rep.disc.insert(make_pair(kb.spec(), kb));
+    }
+}
+
 
 void build_knobs::logical_cleanup()
 {
@@ -240,8 +288,11 @@ void build_knobs::logical_cleanup()
         _exemplar.set_head(id::logical_and);
 }
 
+bool build_knobs::disc_probe(disc_knob_base& kb) {
+    return disc_probe(_exemplar, kb);
+}
 
-bool build_knobs::disc_probe(disc_knob_base& kb)
+bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 {
     using namespace reduct;
 
@@ -254,11 +305,11 @@ bool build_knobs::disc_probe(disc_knob_base& kb)
         /// there is a strange thing with kb.complexity_bound()
         /// because apparently when it is 0 it actually makes
         /// _exemplar simpler
-        complexity_t initial_c = complexity(_exemplar);
+        complexity_t initial_c = complexity(exemplar);
 
         // get cleaned and reduced (according to
-        // _simplify_knob_building) _exemplar
-        combo_tree tmp = _rep.get_clean_exemplar(true, true);
+        // _simplify_knob_building) exemplar
+        combo_tree tmp = _rep.get_clean_combo_tree(exemplar, true, true);
 
         // Note that complexity is negative, with -inf being highest,
         // 0 lowest, which is why this conditional is taken if tmp is

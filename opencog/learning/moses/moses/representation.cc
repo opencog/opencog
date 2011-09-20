@@ -147,7 +147,8 @@ void representation::clear_exemplar()
 }
 
 
-combo_tree representation::get_clean_exemplar(bool reduce, bool knob_building)
+combo_tree representation::get_clean_exemplar(bool reduce,
+                                              bool knob_building) const
 {
     return get_clean_combo_tree(exemplar(), reduce, knob_building);
 }
