@@ -154,7 +154,7 @@ combo_tree representation::get_clean_exemplar(bool reduce, bool knob_building)
 
 combo_tree representation::get_clean_combo_tree(combo_tree tr,
                                                 bool reduce,
-                                                bool knob_building)
+                                                bool knob_building) const
 {
     using namespace reduct;
 

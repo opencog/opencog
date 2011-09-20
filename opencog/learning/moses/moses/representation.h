@@ -151,7 +151,7 @@ protected:
      * (the default) _simplify_candidate.
      */
     combo_tree get_clean_combo_tree(combo_tree tr, bool reduce,
-                                    bool knob_building = false);
+                                    bool knob_building = false) const;
 
     combo_tree _exemplar;     // contains the prototype of the
                               // exemplar used to generate the deme

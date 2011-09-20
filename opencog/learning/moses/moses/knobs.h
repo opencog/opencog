@@ -57,8 +57,8 @@ using namespace ant_combo;
 
 struct knob_base {
     knob_base(combo_tree& tr, combo_tree::iterator log)
-        : _tr(&tr), _loc(log) {}
-    knob_base(combo_tree& tr) : _tr(&tr), _loc(tr.end()) {}
+        : _tr(tr), _loc(log) {}
+    knob_base(combo_tree& tr) : _tr(tr), _loc(tr.end()) {}
     virtual ~knob_base() { }
 
     //is the feature nonzero by default? i.e., is it present in the exemplar?
@@ -72,7 +72,7 @@ struct knob_base {
         return _loc; 
     }
 protected:
-    combo_tree* _tr;
+    combo_tree& _tr;
     combo_tree::iterator _loc; // location of the knob in the combo_tree
 };
 
@@ -183,8 +183,8 @@ struct logical_subtree_knob : public knob_with_arity<3> {
         reduct::logical_reduce(1, negated_subtree);
 
         for (sib_it sib = tgt.begin(); sib != tgt.end();++sib) {
-            if (_tr->equal_subtree(pre_it(sib), subtree) ||
-                _tr->equal_subtree(pre_it(sib), negated_subtree.begin())) {
+            if (_tr.equal_subtree(pre_it(sib), subtree) ||
+                _tr.equal_subtree(pre_it(sib), negated_subtree.begin())) {
                 _loc = sib;
                 _current = present;
                 _default = present;
@@ -192,8 +192,8 @@ struct logical_subtree_knob : public knob_with_arity<3> {
             }
         }
 
-        _loc = _tr->append_child(tgt, id::null_vertex);
-        _tr->append_child(_loc, subtree);
+        _loc = _tr.append_child(tgt, id::null_vertex);
+        _tr.append_child(_loc, subtree);
     }
 
     int complexity_bound() const {
@@ -204,7 +204,7 @@ struct logical_subtree_knob : public knob_with_arity<3> {
         if (in_exemplar())
             turn(0);
         else
-            _tr->erase(_loc);
+            _tr.erase(_loc);
     }
 
     void turn(int idx) {
@@ -221,14 +221,14 @@ struct logical_subtree_knob : public knob_with_arity<3> {
             if (_current == negated)
                 *_loc = id::null_vertex;
             else
-                _loc = _tr->insert_above(_loc, id::null_vertex);
+                _loc = _tr.insert_above(_loc, id::null_vertex);
             break;
         case present:
-            _loc = _tr->erase(_tr->flatten(_loc));
+            _loc = _tr.erase(_tr.flatten(_loc));
             break;
         case negated:
             if (_current == present)
-                _loc = _tr->insert_above(_loc, id::logical_not);
+                _loc = _tr.insert_above(_loc, id::logical_not);
             else
                 *_loc = id::logical_not;
             break;
@@ -311,7 +311,7 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
         _default = 0;
         _current = _default;
-        _loc = _tr->append_child(tgt, id::null_vertex);
+        _loc = _tr.append_child(tgt, id::null_vertex);
     }
 
 
@@ -323,7 +323,7 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
         if (in_exemplar())
             turn(0);
         else
-            _tr->erase(_loc);
+            _tr.erase(_loc);
     }
 
 
@@ -337,11 +337,11 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
         if (idx == 0) {
             if (_current != 0) {
                 combo_tree t(id::null_vertex);
-                _loc = _tr->replace(_loc, t.begin());
+                _loc = _tr.replace(_loc, t.begin());
             }
         } else {
             pre_it ite = (_perms[idx-1]).begin();
-            _loc = _tr->replace(_loc, ite);
+            _loc = _tr.replace(_loc, ite);
         }
         _current = idx;
     }
@@ -377,8 +377,8 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
         _default = none;
         _current = _default;
 
-        _loc = _tr->append_child(tgt, id::null_vertex);
-        _tr->append_child(_loc, subtree);
+        _loc = _tr.append_child(tgt, id::null_vertex);
+        _tr.append_child(_loc, subtree);
     }
 
     int complexity_bound() const {
@@ -389,7 +389,7 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
         if (in_exemplar())
             turn(0);
         else
-            _tr->erase(_loc);
+            _tr.erase(_loc);
     }
 
     void turn(int idx) {
@@ -401,10 +401,10 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
 
         if (idx == none) {
             if (_current != none)
-                _loc = _tr->insert_above(_loc, id::null_vertex);
+                _loc = _tr.insert_above(_loc, id::null_vertex);
         } else {
             if (_current == none)
-                _tr->erase_children(_loc);
+                _tr.erase_children(_loc);
 
             switch (idx) {
             case forward:
@@ -461,7 +461,7 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
 //      if (in_exemplar())
         turn(0);
 //      else
-// _tr->erase(_loc);
+// _tr.erase(_loc);
     }
 
     void turn(int idx) {
@@ -473,10 +473,10 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
 
         switch (idx) {
         case present:
-            _loc = _tr->erase(_tr->flatten(_loc));
+            _loc = _tr.erase(_tr.flatten(_loc));
             break;
         case absent:
-            _loc = _tr->insert_above(_loc, id::null_vertex);
+            _loc = _tr.insert_above(_loc, id::null_vertex);
             break;
         }
 
