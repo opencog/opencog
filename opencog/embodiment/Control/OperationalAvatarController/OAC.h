@@ -34,6 +34,7 @@
 #include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/EventResponder.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 

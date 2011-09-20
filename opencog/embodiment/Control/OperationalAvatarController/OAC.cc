@@ -42,6 +42,7 @@
 
 #include "OAC.h"
 
+
 /**
  * Uncoment the following define in order to delete atomSpace content inside OAC
  * destructor
@@ -100,7 +101,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 //    }
 
     this->pai = new PAI(*atomSpace, *planSender, *pet);
-
+    new EventResponder(*pai , *atomSpace);
     this->procedureRepository = new ProcedureRepository(*pai);
     this->procedureInterpreter = new ProcedureInterpreter(*pai);
 

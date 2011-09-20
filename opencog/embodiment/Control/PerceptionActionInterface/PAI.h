@@ -238,6 +238,9 @@ public:
      */
     unsigned long getTimestampFromElement(DOMElement* element) const;
 
+    // get an avatar's weight
+    double getAvatarWeight(Handle avatarNode);
+
     /**
      * Constructor
      *
@@ -865,6 +868,7 @@ private:
     #endif
 
 }; // class
+
 
 } }  // namespace opencog::pai
 

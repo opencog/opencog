@@ -52,6 +52,7 @@
 #define SIZE_PREDICATE_NAME "size"
 #define OWNERSHIP_PREDICATE_NAME "owns"
 #define ACTION_ACTOR_NAME "Actor"
+#define AVATAR_WEIGHT "avatar_weight"
 
 // high level predicates
 #define NEAR_PREDICATE_NAME "near"

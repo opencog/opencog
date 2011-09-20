@@ -51,6 +51,8 @@ message MapInfo {
 
     // A list
     repeated OCProperty properties = 10;
+
+    optional float weight = 11;
 }
 
 // Map info sequence containing the entity data from virtual world.

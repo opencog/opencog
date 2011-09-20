@@ -37,6 +37,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <sstream>
+#include <stdlib.h>
 
 #include <boost/regex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -52,12 +53,14 @@
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/query/PatternMatch.h>
 
 #include "PAI.h"
 #include "PAIUtils.h"
 #include "PVPXmlConstants.h"
 #include "EmbodimentDOMParser.h"
 #include "EmbodimentErrorHandler.h"
+#include "EventResponder.h"
 
 using XERCES_CPP_NAMESPACE::Base64;
 using XERCES_CPP_NAMESPACE::XMLString;
@@ -855,7 +858,7 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
     XMLString::release(&paramName);
     XMLString::release(&paramType);
     XMLString::release(&paramValue);
-    return resultHandle;
+    return evalLink;
 
 }
 
@@ -922,6 +925,7 @@ by Shujing ke   rainkekekeke@gmail.com
   */
 void PAI::processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr,  const string& instanceNameStr, DOMElement* signal)
 {
+
     // Add the action node into AtomSpace
     Handle actionNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, nameStr.c_str());
 
@@ -933,6 +937,10 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     inheritanceLinkOutgoing.push_back(actionInstanceNode);
     inheritanceLinkOutgoing.push_back(actionNode);
     AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, inheritanceLinkOutgoing);
+
+    // a vector to temporarily save all the parameter handles we create in this action, to be used in event responser
+    // All the elements in this vector should be evaluationLink
+    std::vector<Handle> actionHandles;
 
     //-------------------------------Begin-------the actor of the action-----Begin------------------------------------------------
     // Add the conceptnode: actor of action into AtomSpace
@@ -956,6 +964,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     evalLinkOutgoing.push_back(actorPredicateNode);
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+    actionHandles.push_back(evalLink);
     //-------------------------------End-------the actor of the action-------End--------------------------------------------------
 
 
@@ -964,6 +973,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     XMLString::transcode(ACTION_TARGET_NAME, tag, PAIUtils::MAX_TAG_LENGTH);
     char* targetName = XMLString::transcode(signal->getAttribute(tag));
+    Handle targetNode;
 
     // if there is a targetName
     if (strlen(targetName))
@@ -993,7 +1003,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
             Handle actionTargetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_TARGET_NAME, true);
             // Add the target of this action into AtomSpace
             string internalTargetId = PAIUtils::getInternalId(targetName);
-            Handle targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode, internalTargetId.c_str());
+            targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode, internalTargetId.c_str());
 
             // the predicate node name is ActionName:PamaterName, e.g.: kick:target
             std::string targetStr = nameStr + ":" + ACTION_TARGET_NAME;
@@ -1014,6 +1024,8 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
             evalLinkOutgoing2.push_back(targetPredicateNode);
             evalLinkOutgoing2.push_back(predicateListLink2);
             Handle evalLink2 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing2);
+
+            actionHandles.push_back(evalLink2);
 
             // if the action is grab or drop created/update isHoldingSomething
             // and isHolding predicates
@@ -1046,36 +1058,54 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
         DOMElement* paramElement = (DOMElement*) list->item(i);
         Handle ph = processAgentActionParameter(paramElement, nameStr, actionInstanceNode);
 
+        if (ph != Handle::UNDEFINED)
+            actionHandles.push_back(ph);
+
     } // for each parameter
     //-------------------------------End-------process the parameters-----End------------------------------------------------
 
+    //-------------------------------Begin-------the result state of the action-----Begin------------------------------------------------
 
-    //-------------------------------Begin-------process the result state of the action-----Begin----------------------------------
+      // Add the conceptnode: resultstate of action into AtomSpace
+    Handle resultPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_RESULT_STATE, true);
+    // the predicate node name is ActionName:PamaterName, e.g.: kick:result-state
+    std::string restultStr = nameStr + ":" + ACTION_RESULT_STATE;
+    Handle thisResultPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, restultStr.c_str() , true);
+
     // getting result state attribute value
     XMLString::transcode(ACTION_RESULT_STATE, tag, PAIUtils::MAX_TAG_LENGTH);
     bool resultState = XMLString::transcode(signal->getAttribute(tag));
-
     // Add the action result state node into AtomSpace
     Handle resultNode;
     if (resultState)
-        resultNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME );
+        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, ACTION_DONE_PREDICATE_NAME );
     else
-        resultNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_FAILED_PREDICATE_NAME );
+        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, ACTION_FAILED_PREDICATE_NAME );
 
-    // e.g.: the kick2454 is successful
-    HandleSeq predicateListLinkOutgoing3;
-    predicateListLinkOutgoing3.push_back(actionInstanceNode);
-    Handle predicateListLink3 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing3);
-    HandleSeq evalLinkOutgoing3;
-    evalLinkOutgoing3.push_back(resultNode);
-    evalLinkOutgoing3.push_back(predicateListLink3);
-    Handle evalLink3 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing3);
+    // e.g.: "kick:result-state" is a kind of  "result-state"
+    HandleSeq resultInheritanceLinkOutgoing;
+    resultInheritanceLinkOutgoing.push_back(thisResultPredicateNode);
+    resultInheritanceLinkOutgoing.push_back(resultPredicateNode);
+    AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, resultInheritanceLinkOutgoing);
 
-    //-------------------------------End-------process the result state of the action-----End----------------------------------
+    // e.g.: the kick:result-state of kick2454 is true
+    HandleSeq predicateListLinkOutgoing4;
+    predicateListLinkOutgoing4.push_back(actionInstanceNode);
+    predicateListLinkOutgoing4.push_back(resultNode);
+    Handle predicateListLink4 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing4);
+    HandleSeq evalLinkOutgoing4;
+    evalLinkOutgoing4.push_back(thisResultPredicateNode);
+    evalLinkOutgoing4.push_back(predicateListLink4);
+    Handle evalLink4 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing4);
+    actionHandles.push_back(evalLink4);
+    //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
 
     // add this action to timelink
     Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(actionInstanceNode, tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
+
+    // call the event responser
+    EventResponder::getInstance()->response(nameStr,actionInstanceNode,agentNode,targetNode, actionHandles);
 
 }
 
@@ -3012,6 +3042,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, const MapI
     double length = mapinfo.length();
     double width = mapinfo.width();
     double height = mapinfo.height();
+    double weight = mapinfo.weight();
 
     // Size predicate
     if (length > 0 && width > 0 && height > 0) {
@@ -3062,6 +3093,30 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, const MapI
             if (height < 0) height = 0;
         }
     }
+
+    // weight predicate
+    if (weight > 0)
+    {
+
+        logger().info("PAI - begin to add weight \n");
+
+        // add the weight of objcet to the atomspace
+        Handle weightPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, AVATAR_WEIGHT, true);
+
+        Handle numberNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE,  opencog::toString(weight).c_str() );
+        HandleSeq predicateListLinkOutgoing;
+        predicateListLinkOutgoing.push_back(objectNode);
+        predicateListLinkOutgoing.push_back(numberNode);
+        Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
+
+        HandleSeq evalLinkOutgoing;
+        evalLinkOutgoing.push_back(weightPredicateNode);
+        evalLinkOutgoing.push_back(predicateListLink);
+        Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+        logger().info("PAI - end to add weight \n");
+
+    }
+
 
     // Entity class
     std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
@@ -3283,6 +3338,57 @@ bool PAI::isObjectAnObstacle(Handle objectNode, const std::string& entityClass, 
     logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasAvatarHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, avatarHeight, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f"));
 
     return isObstacle;
+}
+
+// get an avatar's weight by pattern matcher
+double PAI::getAvatarWeight(Handle avatarNode)
+{
+    // Create BindLink used by pattern matcher
+    HandleSeq predicateListLinkOutgoing,evalLinkOutgoing, implicationLinkOutgoings, bindLinkOutgoings;
+
+    Handle weightPredicateNode = atomSpace.getHandle(PREDICATE_NODE, AVATAR_WEIGHT);
+    Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any"); // the weithgt value number node
+    predicateListLinkOutgoing.push_back(avatarNode);
+    predicateListLinkOutgoing.push_back(hVariableNode);
+
+    Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
+    evalLinkOutgoing.push_back(weightPredicateNode);
+    evalLinkOutgoing.push_back(predicateListLink);
+    Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+
+    implicationLinkOutgoings.push_back(evalLink);
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+
+    bindLinkOutgoings.push_back(hVariableNode);
+    bindLinkOutgoings.push_back(hImplicationLink);
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+
+    // Run pattern matcher
+    PatternMatch pm;
+    pm.set_atomspace(&atomSpace);
+
+    Handle hResultListLink = pm.bindlink(hBindLink);
+
+    // Get result
+    // Note: Don't forget remove the hResultListLink, otherwise some scheme script
+    //       may fail to remove the ReferenceLink when necessary.
+    //       Because the ReferenceLink would have an incoming (i.e. hResultListLink here),
+    //       which would make cog-delete scheme function fail.
+    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink);
+    atomSpace.removeAtom(hResultListLink);
+
+    // Check and return the result
+    // currently, the weight of avatar is const, so there should be only one result
+    foreach(Handle hResult, resultSet)
+    {
+        std::string weightStr = atomSpace.getName(hResult);
+        return atof(weightStr.c_str()); // return the first one
+
+    }
+
+    // if there is no any result in resultset, return a default weight : 1
+    return 1.0;
+
 }
 
 #endif

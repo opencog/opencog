@@ -13,6 +13,7 @@ SET(PAI_SOURCE_FILES
 	ActionPlanDispatcher
     EmbodimentDOMParser
     EmbodimentErrorHandler
+    EventResponder
 )
 
 IF (PROTOBUF_FOUND)
