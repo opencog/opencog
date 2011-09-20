@@ -219,6 +219,8 @@ def apply_rule(precedent, conclusion, atoms):
     return ret
 
 # Further code adapted from AIMA-Python under the MIT License (see http://code.google.com/p/aima-python/)
+
+# TODO remove the vars_only option and enable searching conjunctions with different orders (using the isomorphic_conjunctions() function)
 def unify(x, y, s,  vars_only = False):
     """Unify expressions x,y with substitution s; return a substitution that
     would make x,y equal, or None if x,y can not unify. x and y can be
@@ -392,6 +394,20 @@ def new_var():
 
 _new_var_counter = 10**6
 
+def isomorphic_conjunctions(xs, ys):
+    xs, ys = canonical_trees(xs), canonical_trees(ys)
+    return xs == ys
+
+def canonical_trees(trs, dic = {}):
+    '''Returns the canonical version of this tree, i.e. with the variables renamed (consistently) from 0,1,2.'''
+    tmp = new_var.counter
+    new_var.counter = 0
+    ret = []
+    for tr in trs:
+        tr = standardize_apart(tr)
+        ret.append(tr)
+    new_var.counter = tmp
+    return tr
 
 def get_varlist(t):
     """Return a list of variables in tree, in the order they appear (with depth-first traversal). Would also work on a conjunction."""
