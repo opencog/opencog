@@ -95,4 +95,10 @@ drink_water(1) :=
              random_search
            )
 
+##############################################
+############ MINECRAFT WORLD OPERATIONS ######
+##############################################
+
+build_block_at(1) := build_block_at(#1)
+destroy_block_at(0) := destroy_block_at
 
