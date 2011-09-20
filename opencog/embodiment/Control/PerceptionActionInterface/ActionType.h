@@ -131,6 +131,9 @@ enum ActionTypeCode {
     LOOK_AT_CODE,
     SAY_CODE,
 
+    BUILD_BLOCK_AT_CODE,
+    DESTROY_BLOCK_AT_CODE,
+
     // This is not really a type and must be at the end of that enumeration in order to count the number of action types.
     NUMBER_OF_ACTION_TYPES
 };
@@ -508,7 +511,14 @@ public:
      * void say( string message, string target )
      */
     static const ActionType& SAY();
-
+    /**
+     * void build_block_at( Vector position, string texture )
+     */
+    static const ActionType& BUILD_BLOCK_AT();
+    /**
+     * void destroy_block_at( Vector position )
+     */
+    static const ActionType& DESTROY_BLOCK_AT();
 private:
     // Attributes
     ActionTypeCode code;

@@ -703,6 +703,21 @@ const ActionType& ActionType::SAY()
     return *result;
 }
 
+const ActionType& ActionType::BUILD_BLOCK_AT()
+{
+    initParamTypes();
+    static const char* paramNames[] = {"position", "texture"};
+    static ActionType* result = new ActionType(BUILD_BLOCK_AT_CODE, "buildBlockAt", EMPTY, STRING, paramNames, "void buildBlockAt([float texture])");
+    return *result;
+}
+
+const ActionType& ActionType::DESTROY_BLOCK_AT()
+{
+    initParamTypes();
+    static const char* paramNames[] = {};
+    static ActionType* result = new ActionType(DESTROY_BLOCK_AT_CODE, "destroyBlockAt", EMPTY, EMPTY, paramNames, "void destroyBlockAt(Vector position)");
+    return *result;
+}
 
 #if 0
 // TEMPLATE FOR ADDING OTHER TYPES ABOVE
@@ -885,6 +900,9 @@ void ActionType::init()
         RECEIVE_LATEST_GROUP_COMMANDS();
         LOOK_AT();
         SAY();
+
+        BUILD_BLOCK_AT();
+        DESTROY_BLOCK_AT();
 
         initialized = true;
     }
