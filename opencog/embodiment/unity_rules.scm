@@ -595,7 +595,7 @@
 ;
 
 (add_rule (cog-new-stv 1.0 1.0) CompetenceDemandGoal 
-    (add_action (GroundedSchemaNode "random_simple_action") )
+    (add_action (GroundedSchemaNode "random_simple_action") ) 
     NULL_PRECONDITION 
 )
 

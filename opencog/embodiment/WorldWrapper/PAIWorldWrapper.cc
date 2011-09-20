@@ -996,6 +996,8 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         (id::sit, ActionType::SIT())
         (id::look_at, ActionType::LOOK_AT())
         (id::say, ActionType::SAY())
+        (id::build_block_at, ActionType::BUILD_BLOCK_AT())
+        (id::destroy_block_at, ActionType::DESTROY_BLOCK_AT())
         (id::whine_at, ActionType::WHINE());
 
     OC_ASSERT(WorldWrapperUtil::is_builtin_atomic_action(*from));
@@ -1579,6 +1581,31 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
         break;
     }
+
+    case id::build_block_at: {
+        if ( from.number_of_children( ) > 5 ) {
+            throw InvalidParamException(TRACE_INFO,
+                                                 "PAIWorldWrapper - Invalid number of arguments for build_block_at %d", from.number_of_children( )  );
+        } 
+        /*
+        action.addParameter(ActionParameter("position", 
+                                            ActionParamType::VECTOR(),
+                                            Vector(get_contin(*from.begin()),
+                                                     get_contin(*++from.begin()),
+                                                     get_contin(*++from.begin()))));
+        */
+        // TODO change the hard coding texture once the avatar knows how to use
+        // the ability.
+        action.addParameter(ActionParameter("texture",
+                                            ActionParamType::STRING(),
+                                            "lava"));
+    }
+    break;
+
+    case id::destroy_block_at: {
+
+    }
+    break;
 
     default:
         //this will handle simple schema with no arguments - these are:
