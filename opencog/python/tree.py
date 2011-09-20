@@ -48,16 +48,25 @@ class tree:
 
     # TODO add doctests
     def __repr__(self):
-        return str(self)
-        
+        # Display it as code to create the corresponding Atom
+#        if self.is_variable():
+#            return "a.add(t.VariableNode, name='$%s')" % (str(self.op),)
+#        elif self.is_leaf() and isinstance(self.op, Atom):
+#            # a.add(t.ConceptNode, name='cat')
+#            return "a.add(t.%s, '%s')" % (self.op.type_name, self.op.name)
+#        else:
+#            # a.add(t.ListLink, out=[ a.add(t.ConceptNode, name='eat') ])
+#            return "a.add(t.%s, out=%s)" % (self.op, repr(self.args))
+        # Display it as code to create the Tree and required Nodes
         if self.is_variable():
-            return "a.add(t.VariableNode, name='$%s')" % (str(self.op),)
+            # e.g. T(123)
+            return "T(%s)" % (str(int(self.op)),)
         elif self.is_leaf() and isinstance(self.op, Atom):
             # a.add(t.ConceptNode, name='cat')
             return "a.add(t.%s, '%s')" % (self.op.type_name, self.op.name)
         else:
-            # a.add(t.ListLink, out=[ a.add(t.ConceptNode, name='eat') ])
-            return "a.add(t.%s, out=%s)" % (self.op, repr(self.args))
+            # T('ListLink', T(a.add(t.ConceptNode, name='eat')) )
+            return "T('%s', %s)" % (self.op, repr(self.args))
 
     def __hash__(self):
         return hash( self.to_tuple() )
