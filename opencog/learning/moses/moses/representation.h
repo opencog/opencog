@@ -150,8 +150,8 @@ protected:
      * is true then _simplify_knob_building is used to reduce, otherwise
      * (the default) _simplify_candidate.
      */
-    combo_tree get_clean_exemplar(combo_tree tr, bool reduce,
-                                  bool knob_building = false);
+    combo_tree get_clean_combo_tree(combo_tree tr, bool reduce,
+                                    bool knob_building = false);
 
     combo_tree _exemplar;     // contains the prototype of the
                               // exemplar used to generate the deme

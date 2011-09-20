@@ -149,12 +149,12 @@ void representation::clear_exemplar()
 
 combo_tree representation::get_clean_exemplar(bool reduce, bool knob_building)
 {
-    return get_clean_exemplar(exemplar(), reduce, knob_building);
+    return get_clean_combo_tree(exemplar(), reduce, knob_building);
 }
 
-combo_tree representation::get_clean_exemplar(combo_tree tr,
-                                              bool reduce,
-                                              bool knob_building)
+combo_tree representation::get_clean_combo_tree(combo_tree tr,
+                                                bool reduce,
+                                                bool knob_building)
 {
     using namespace reduct;
 
@@ -188,7 +188,7 @@ combo_tree representation::get_candidate(const instance& inst, bool reduce)
     combo_tree tr = exemplar();
     lock.unlock();
 
-    return get_clean_exemplar(tr, reduce);
+    return get_clean_combo_tree(tr, reduce);
 }
 
 void representation::set_exemplar_inst() {
