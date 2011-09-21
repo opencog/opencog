@@ -74,7 +74,7 @@ void EventResponder::response(std::string actionName, Handle instanceNode, Handl
     SchemeEval & evaluator = SchemeEval::instance(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
-    unsigned long handleInt = atomSpace.getAtomHash(instanceNode);
+    unsigned long handleInt = instanceNode.value();
     std::ostringstream expression;
     expression << "(apply_stimulus_rule " << handleInt << " )";
 

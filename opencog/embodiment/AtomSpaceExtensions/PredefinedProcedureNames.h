@@ -51,7 +51,7 @@
 #define AGISIM_ROTATION_PREDICATE_NAME "AGISIM_rotation"
 #define SIZE_PREDICATE_NAME "size"
 #define OWNERSHIP_PREDICATE_NAME "owns"
-#define ACTION_ACTOR_NAME "Actor"
+#define ACTION_ACTOR_NAME "actor"
 #define AVATAR_WEIGHT "avatar_weight"
 
 // high level predicates
