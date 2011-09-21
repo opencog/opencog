@@ -3346,7 +3346,6 @@ bool PAI::isObjectAnObstacle(Handle objectNode, const std::string& entityClass, 
 // get an avatar's weight by pattern matcher
 double PAI::getAvatarWeight(Handle avatarNode)
 {
-#ifdef HAVE_PROTOBUF
     // Create BindLink used by pattern matcher
     HandleSeq predicateListLinkOutgoing,evalLinkOutgoing, implicationLinkOutgoings, bindLinkOutgoings;
 
@@ -3392,10 +3391,6 @@ double PAI::getAvatarWeight(Handle avatarNode)
 
     // if there is no any result in resultset, return a default weight : 1
     return 1.0;
-#else
-    // if there is no protobuf installed , return a default weight : 1
-    return 1.0;
-#endif
+
 
 }
-
