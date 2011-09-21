@@ -517,7 +517,7 @@
             (add_stimulus_precondition
                 (PredicateNode "touch:force")
                 (VariableNode "$var_stimulus")
-                (ConceptNode "heavy")
+                (ConceptNode "high")
             )
         );AndLink
 
