@@ -163,6 +163,11 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
     sample_logical_perms(it, perms);
     OMP_ALGO::for_each(perms.begin(), perms.end(),
                        bind(&build_knobs::logical_probe_thread_safe, this,
+                       /// @todo the following is faster on single thread
+                       // it should either be selected if jobs =
+                       // 1 or logical_probe_thread_safe should
+                       // be sped up
+                       // bind(&build_knobs::logical_probe, this,
                             _1, it, add_if_in_exemplar));
 }
 
@@ -232,44 +237,21 @@ void build_knobs::logical_probe(const combo_tree& subtree, pre_it it,
 void build_knobs::logical_probe_thread_safe(const combo_tree& subtree, pre_it it,
                                             bool add_if_in_exemplar)
 {
-    // {
-    //     stringstream ss;
-    //     ss << "subtree = " << subtree;
-    //     logger().debug(ss.str());
-    // }
-
+    // copy _exemplar and it
+    shared_lock copy_exemplar_lock(lp_mutex);
     combo_tree exemplar_copy(_exemplar);
     pre_it it_copy = exemplar_copy.begin();
-    // {
-    //     stringstream ss;
-    //     ss << "*it = " << *it;
-    //     logger().debug(ss.str());
-    // }
     std::advance(it_copy, std::distance(_exemplar.begin(), it));
-    // {
-    //     stringstream ss;
-    //     ss << "*it_copy = " << *it_copy;
-    //     logger().debug(ss.str());
-    // }
+    copy_exemplar_lock.unlock();
+
     logical_subtree_knob kb_copy(exemplar_copy, it_copy, subtree.begin());
     if ((add_if_in_exemplar || !kb_copy.in_exemplar())
         && disc_probe(exemplar_copy, kb_copy)) {
-        boost::unique_lock<boost::shared_mutex> lock(logical_probe_mutex);
-        // {
-        //     stringstream ss;
-        //     ss << "exemplar_copy = " << exemplar_copy;
-        //     logger().debug(ss.str());
-        // }
+        boost::unique_lock<boost::shared_mutex> lock(lp_mutex);
         logical_subtree_knob kb(_exemplar, it, kb_copy);
-        // {
-        //     stringstream ss;
-        //     ss << "_exemplar = " << _exemplar;
-        //     logger().debug(ss.str());
-        // }
         _rep.disc.insert(make_pair(kb.spec(), kb));
     }
 }
-
 
 void build_knobs::logical_cleanup()
 {

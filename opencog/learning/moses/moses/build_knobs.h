@@ -133,7 +133,12 @@ protected:
     combo_tree::iterator mult_add(combo_tree::iterator it, const vertex& v);
     void ann_canonize(combo_tree::iterator);
 
-    mutable boost::shared_mutex logical_probe_mutex;    
+    typedef boost::shared_mutex shared_mutex;
+    typedef boost::shared_lock<shared_mutex> shared_lock;
+    typedef boost::unique_lock<shared_mutex> unique_lock;
+
+    mutable shared_mutex lp_mutex; // used in logical_probe_thread_safe
+    
 };
 
 } //~namespace moses
