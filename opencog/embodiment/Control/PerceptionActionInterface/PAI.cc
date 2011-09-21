@@ -991,8 +991,16 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
             string targetTypeStr(targetType);
             opencog::Type targetTypeCode;
 
+
+            std::string internalTargetId = PAIUtils::getInternalId(targetName);
+
             if (targetTypeStr == "avatar")
-                targetTypeCode = AVATAR_NODE;
+            {
+                if (internalTargetId == avatarInterface.getPetId())
+                    targetTypeCode = PET_NODE;
+                else
+                    targetTypeCode = AVATAR_NODE;
+            }
             else if (targetTypeStr == "object")
                 targetTypeCode = OBJECT_NODE;
             else
@@ -1002,8 +1010,8 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
             }
             // Add the conceptnode: target of action into AtomSpace
             Handle actionTargetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_TARGET_NAME, true);
+
             // Add the target of this action into AtomSpace
-            string internalTargetId = PAIUtils::getInternalId(targetName);
             targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode, internalTargetId.c_str());
 
             // the predicate node name is ActionName:PamaterName, e.g.: kick:target

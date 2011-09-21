@@ -164,7 +164,7 @@ Handle EventResponder::processForce(std::string actionName, Handle actorNode, Ha
 
         double weight = pai.getAvatarWeight(targetNode);
 
-        double normalizedForce = force / weight / 10.0;
+        double normalizedForce = force / weight / 50.0;
         if (normalizedForce < 0.5)
             return AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, EXTREMELY_LOW);
         else if (normalizedForce < 0.75)
