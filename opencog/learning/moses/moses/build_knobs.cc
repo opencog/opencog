@@ -161,14 +161,13 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
 {
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
-    OMP_ALGO::for_each(perms.begin(), perms.end(),
-                       bind(&build_knobs::logical_probe_thread_safe, this,
-                       /// @todo the following is faster on single thread
-                       // it should either be selected if jobs =
-                       // 1 or logical_probe_thread_safe should
-                       // be sped up
-                       // bind(&build_knobs::logical_probe, this,
-                            _1, it, add_if_in_exemplar));
+    // logical_probe_thread_safe has some overhead, for that reason
+    // when only 1 thread is available logical_probe is run instead
+    auto lp_func = bind(num_threads() > 1?
+                        &build_knobs::logical_probe_thread_safe
+                        : &build_knobs::logical_probe,
+                        this, _1, it, add_if_in_exemplar);
+    OMP_ALGO::for_each(perms.begin(), perms.end(), lp_func);
 }
 
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)

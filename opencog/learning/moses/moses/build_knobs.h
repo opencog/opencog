@@ -91,7 +91,7 @@ protected:
     void sample_logical_perms(combo_tree::iterator it, vector<combo_tree>& perms);
     void logical_probe(const combo_tree& tr, combo_tree::iterator it,
                        bool add_if_in_exemplar);
-    // like logical_probe but thread safe and with a little overhead
+    // like logical_probe but thread safe (+ some overhead)
     void logical_probe_thread_safe(const combo_tree& tr, combo_tree::iterator it,
                                    bool add_if_in_exemplar);
     void logical_cleanup();
