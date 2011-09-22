@@ -35,4 +35,12 @@ void setting_omp(unsigned num_threads, unsigned min_n) {
 #endif
 }
 
+unsigned num_threads() {
+#ifdef OC_OMP
+    return omp_get_num_threads();
+#else
+    return 1;
+#endif
+}
+
 }

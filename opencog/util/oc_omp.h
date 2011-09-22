@@ -51,6 +51,9 @@ namespace opencog {
 // minimal iterations to parallelize
 void setting_omp(unsigned num_threads, unsigned min_n = 100);
 
+// returns the number of threads as configured by setting_omp
+unsigned num_threads();
+
 } // ~namespace opencog
 
 #endif // _OPENCOG_OC_OMP_H
