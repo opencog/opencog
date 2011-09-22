@@ -205,7 +205,10 @@
 (define (apply_stimulus_rule stimulus_handle)
     (let
         ; The result set to be returned
-        ( (result_list (list)) )
+        ( 
+            (stimulus_atom (cog-atom stimulus_handle))
+            (result_list (list)) 
+        )
 
         (map-in-order
             (lambda (rule)
@@ -264,7 +267,7 @@
                                     (
                                         (preconditions (list-ref (cog-outgoing-set rule) 0))
                                         (response (list-ref (cog-outgoing-set rule) 1))
-                                        ; Logic relationship among preconditions.
+                                        ; Logical relationship among preconditions.
                                         (preconditions_logic_type (cog-type preconditions))
                                         (new_preconditions 
                                             (cog-new-link preconditions_logic_type
@@ -279,6 +282,7 @@
 
                                     ;(display preconditions_logic_type) (newline)
                                     ;(display variables) (newline)
+                                    (display new_preconditions) (newline)
 
                                     (set! result_list 
                                          (append 
@@ -303,7 +307,7 @@
             );lambda
 
             ; Get the rule set by given stimulus instance handle
-            (find_stimulus_rule stimulus_handle)
+            (find_stimulus_rule stimulus_atom)
         );map-in-order
 
         result_list
@@ -517,7 +521,7 @@
             (add_stimulus_precondition
                 (PredicateNode "touch:force")
                 (VariableNode "$var_stimulus")
-                (ConceptNode "high")
+                (ConceptNode "extremely_high")
             )
         );AndLink
 
@@ -553,3 +557,5 @@
         (list)
     )
 )
+
+stimulus_rules_map

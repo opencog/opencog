@@ -455,6 +455,23 @@ int OAC::addRulesToAtomSpace()
                         speech_act_schema_file_name.c_str() 
                       );
 
+    // Load the event-driven rules file for unity.
+    if ( config().get_bool("ENABLE_UNITY_CONNECTOR") ) {
+        std::string unity_stimulus_rules_file_name = "unity_stimulus_rules.scm";
+
+        if ( load_scm_file( *(this->atomSpace), unity_stimulus_rules_file_name.c_str() ) == 0  ) 
+            logger().info( "OAC::%s - Loaded stimulus rules file: '%s'", 
+                            __FUNCTION__, 
+                           unity_stimulus_rules_file_name.c_str() 
+                         );
+        else
+            logger().error( "OAC::%s - Failed to load stimulus rules file: '%s'", 
+                             __FUNCTION__, 
+                            unity_stimulus_rules_file_name.c_str() 
+                          );
+    }
+
+
     return 0;
 }
 
