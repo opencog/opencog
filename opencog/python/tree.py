@@ -220,8 +220,7 @@ def apply_rule(precedent, conclusion, atoms):
 
 # Further code adapted from AIMA-Python under the MIT License (see http://code.google.com/p/aima-python/)
 
-# TODO remove the vars_only option and enable searching conjunctions with different orders (using the isomorphic_conjunctions() function)
-def unify(x, y, s,  vars_only = False):
+def unify(x, y, s):
     """Unify expressions x,y with substitution s; return a substitution that
     would make x,y equal, or None if x,y can not unify. x and y can be
     variables (e.g. 1, Nodes, or tuples of the form ('link type name', arg0, arg1...)
@@ -235,11 +234,6 @@ def unify(x, y, s,  vars_only = False):
     {x: y, y: C}
     """
     #print "unify %s %s" % (str(x), str(y))
-        
-    if vars_only:
-        if isinstance(x, tree) and isinstance(y, tree):
-            if x.is_variable() != y.is_variable():
-                return None
 
     if s == None:
         return None
@@ -248,51 +242,26 @@ def unify(x, y, s,  vars_only = False):
     elif x == y:
         return s
     elif isinstance(x, tree) and x.is_variable():
-        return unify_var(x, y, s, vars_only)
+        return unify_var(x, y, s)
     elif isinstance(y, tree) and y.is_variable():
-        return unify_var(y, x, s, vars_only)
+        return unify_var(y, x, s)
         
     elif isinstance(x, tree) and isinstance(y, tree):
-        s2 = unify(x.op, y.op, s, vars_only)
-        return unify(x.args,  y.args, s2, vars_only)
-
-    # Handle conjunctions.
-    elif isinstance(x, tuple) and isinstance(y, tuple) and len(x) == len(y):
-        # They are required to have equivalent variables in the same place.
-        # Watch out for this case: (foo(X),bar(Z)) isn't allowed to match (foo(Y),bar(Y))
-        if vars_only and len(get_varlist(x)) != len(get_varlist(y)):
-            return None
-        
-        for permu in permutations(x):
-            s2 = unify(list(permu), list(y), s, vars_only)
-            if s2 != None:
-                # Note: will only find one permutation that works (if any). But that's OK.
-                if not vars_only:
-                    return s2
-                else:
-                    # The substitution must be a one-to-one correspondence of variables.
-                    # This code checks for a variable in x corresponding to multiple variables in y, and
-                    # cases like: A->B B->C.
-                    keys = set(s2.keys())
-                    values = set(s2.values())
-
-                    if (len(get_varlist(x)) == len(get_varlist(y)) == len(s2.values()) == len(values) and
-                                not (keys & values)):
-                        return s2
-        return None
+        s2 = unify(x.op, y.op, s)
+        return unify(x.args,  y.args, s2)
 
     # Recursion to handle arguments.
     elif isinstance(x, list) and isinstance(y, list) and len(x) == len(y):
-            # unify all the arguments (works with any number of arguments, including 0)
-            s2 = unify(x[0], y[0], s, vars_only)
-            return unify(x[1:], y[1:], s2, vars_only)
+        # unify all the arguments (works with any number of arguments, including 0)
+        s2 = unify(x[0], y[0], s)
+        return unify(x[1:], y[1:], s2)
         
     else:
         return None
 
-def unify_var(var, x, s, vars_only):
+def unify_var(var, x, s):
     if var in s:
-        return unify(s[var], x, s, vars_only)
+        return unify(s[var], x, s)
     elif occur_check(var, x, s):
         return None
     else:
@@ -395,6 +364,14 @@ def new_var():
 _new_var_counter = 10**6
 
 def isomorphic_conjunctions(xs, ys):
+    # Handle conjunctions.
+    if isinstance(xs, tuple) and isinstance(ys, tuple) and len(xs) == len(ys):
+        for perm in permutations(xs):
+            if isomorphic_conjunctions_ordered(perm, ys):
+                return True
+    return False
+
+def isomorphic_conjunctions_ordered(xs, ys):
     xs, ys = canonical_trees(xs), canonical_trees(ys)
     return xs == ys
 

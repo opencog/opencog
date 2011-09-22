@@ -28,7 +28,7 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 3
+        self.min_embeddings = 1
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
@@ -272,8 +272,7 @@ class Fishgram:
                         # Check for other equivalent ones. It'd be possible to reduce them (and increase efficiency) by ordering
                         # the extension of patterns. This would only work with a stable frequency measure though.
                         clones = [c for c in extensions_for_prev_conj_and_tree_type
-                                   if c != remapped_conj_plus and
-                                   unify(remapped_conj_plus, c, {}, True) != None]
+                                   if isomorphic_conjunctions(remapped_conj_plus, c)]
                         if len(clones):
                             continue
 
@@ -381,7 +380,7 @@ class Fishgram:
                     
                     new_conj = prev_conj+(bound_tree,)                    
                     
-                    clones = [c for c in new_layer if unify(new_conj, c, {}, True) != None and c != new_conj]
+                    clones = [c for c in new_layer if isomorphic_conjunctions(new_conj, c)]
                     if len(clones):
                         skipped+=1
                         continue
@@ -503,7 +502,7 @@ class Fishgram:
                 
                 # Also, in the magic-sequence approach, the layers will all be mixed up (as it adds an unspecified number of afterlinks as soon as it can.)
 #                try:
-#                    ce_premises = next(ce for ce in prev_layer if unify(premises, ce[0], {}, True) != None)
+#                    ce_premises = next(ce for ce in prev_layer if isomorphic_conjunctions(premises, ce[0])
 #                    premises_original, premises_embs = ce_premises
 #                
 ##                        ce_conclusion = next(ce for ce in layers[0] if unify( (conclusion,) , ce[0], {}, True) != None)
