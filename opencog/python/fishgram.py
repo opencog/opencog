@@ -6,6 +6,7 @@ from util import *
 from itertools import *
 from collections import namedtuple
 import sys
+import time
 
 from logic import PLNviz
 
@@ -38,6 +39,29 @@ class Fishgram:
         self.viz.outputTreeNode(target=[], parent=None, index=0)
         
         self.awkward = {}
+
+        self._is_running = False 
+
+    def start(self): 
+        # TODO: This function shall be called by c++ FishgramAgent. Code below
+        #       is only to verify fishgram could access atomspace properly and 
+        #       it doesn't block other stuff in the embodiment system. 
+        print "\nRun dummy start function in Fishgram"
+
+        i = 0
+        self._is_running = True 
+        while self._is_running:
+
+            concept = self.atomspace.add_node(t.ConceptNode, 'dummy_'+str(i))
+            print concept
+
+            i += 1
+            time.sleep(1)
+
+        print "\nExit dummy start function in Fishgram"
+
+    def stop(self): 
+        self._is_running = False
 
     def run(self):
         self.forest.extractForest()
