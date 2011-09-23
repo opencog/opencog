@@ -37,10 +37,16 @@ void setting_omp(unsigned num_threads, unsigned min_n) {
 
 unsigned num_threads() {
 #ifdef OC_OMP
-    return omp_get_num_threads();
+    return omp_get_max_threads();
 #else
     return 1;
 #endif
+}
+
+std::pair<unsigned, unsigned> split_jobs(unsigned n_jobs) {
+    unsigned n_jobs1 = n_jobs / 2;
+    unsigned n_jobs2 = std::max(1U, n_jobs - n_jobs1);
+    return {n_jobs1, n_jobs2};
 }
 
 }

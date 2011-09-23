@@ -54,6 +54,9 @@ void setting_omp(unsigned num_threads, unsigned min_n = 100);
 // returns the number of threads as configured by setting_omp
 unsigned num_threads();
 
+// split the number of jobs in 2. For instance if n_jobs is 3, then 
+std::pair<unsigned, unsigned> split_jobs(unsigned n_jobs);
+
 } // ~namespace opencog
 
 #endif // _OPENCOG_OC_OMP_H
