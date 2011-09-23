@@ -5,6 +5,47 @@ import sys
 from itertools import permutations
 from util import *
 
+class FakeHandle:
+    '''A simple class to imitate Handle for use with FakeAtom.'''
+    def __init__(self, id):
+        self.id = id
+    
+    def value(self):
+        return self.id
+
+class FakeAtom:
+    '''A simple pure Python class that can emulate the Cython Atom class. It supports pickling
+    and is safe to use for Python multiprocessing. It is also compatible with PyPy.'''
+    def __init__(self, type_name, name, id):
+        self.type_name = type_name
+        self.name = name
+        self._handle = FakeHandle(id)
+    
+    def __str__(self):
+        return 'fake%s%s' % (self.type_name,  self.name)
+
+    def __eq__(self, other):
+        return self._handle_value == other._handle_value
+
+    def h(self):
+        return self._handle
+
+    def is_a(self, _type):
+        assert _type == types.Link
+        return False
+
+def fake_from_real_Atom(atom):
+    return FakeAtom(atom.type_name, atom.name, atom.h.value())
+
+def tree_with_fake_atoms(tr):
+    if isinstance(tr.op, Atom):
+        return tree(fake_from_real_Atom(tr.op), [])
+    elif tr.is_leaf():
+        return tr
+    else:
+        return tree(tr.op, map(tree_with_fake_atoms, tr.args))
+
+
 def coerce_tree(x):
     assert type(x) != type(None)
     if isinstance(x, tree):

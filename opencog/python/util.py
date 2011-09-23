@@ -1,6 +1,9 @@
 from opencog.atomspace import types
 
 import collections
+import cPickle as pickle
+
+import tree
 
 def if_(cond, t, f):
     if cond:
@@ -14,6 +17,21 @@ def output_atoms(atomspace):
     import tree
     for tr in map(tree.tree_from_atom, roots):
         print repr(tr)
+
+def save_trees(trees, file):
+    '''Save all of the Trees from the AtomSpace to a file. Uses FakeAtom rather than the Cython Atom class.'''
+    f = open(file,'w')
+    trees = map(tree.tree_from_atom, trees.get_atoms_by_type(types.Atom))
+    trees = map(tree.tree_with_fake_atoms, trees)
+    pickle.dump(trees, f)
+    f.close()
+
+def load_trees(file):
+    '''Load all of the Trees from a file. Returns them in a list.'''
+    f = open(file, 'r')
+    trees = pickle.load(f)
+    f.close()
+    return trees
 
 def pp(x):
     """Pretty-print any collection type (or generator).
