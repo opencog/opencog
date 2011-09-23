@@ -102,16 +102,27 @@ SET_TARGET_PROPERTIES(agent_finder PROPERTIES
     OUTPUT_NAME agent_finder)
 ##
 
+ADD_LIBRARY (PythonEval SHARED
+    PythonEval.cc
+)
+ADD_DEPENDENCIES(PythonEval agent_finder)
+
+TARGET_LINK_LIBRARIES(PythonEval
+    server
+    ${PYTHON_LIBRARIES}
+)
+
 # Python module to be loaded by CogServer
 ADD_LIBRARY (PythonModule SHARED
 	PythonModule.cc 
     PyMindAgent.cc
     PyRequest.cc
 )
-ADD_DEPENDENCIES(PythonModule agent_finder)
+ADD_DEPENDENCIES(PythonModule agent_finder PythonEval)
 
 TARGET_LINK_LIBRARIES(PythonModule
     server
+    PythonEval
     ${PYTHON_LIBRARIES}
 )
 

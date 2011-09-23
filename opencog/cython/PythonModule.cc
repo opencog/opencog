@@ -227,6 +227,5 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
 
     // return info on what requests and mindagents were found
     return oss.str();
-
 }
 
