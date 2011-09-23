@@ -771,15 +771,14 @@ struct metapopulation : public bscored_combo_tree_set {
         //////////////
         bscored_combo_tree_ptr_vec_pair bcv_p = split(bcv);
         if(jobs > 1) { // multi-threaded
-            unsigned jobs1 = jobs / 2;
-            unsigned jobs2 = std::max(1U, jobs - jobs1);
+            auto s_jobs = split_jobs(jobs); // pair
             // recursive calls
             std::future<bscored_combo_tree_ptr_vec> task =
                 std::async(jobs > 1 ? std::launch::async : std::launch::sync,
                            bind(&self::get_nondominated_rec, this,
-                                bcv_p.first, jobs1));
+                                bcv_p.first, s_jobs.first));
             bscored_combo_tree_ptr_vec bcv2_nd =
-                get_nondominated_rec(bcv_p.second, jobs2);
+                get_nondominated_rec(bcv_p.second, s_jobs.second);
             bscored_combo_tree_ptr_vec_pair res_p = 
                 get_nondominated_disjoint_rec(task.get(), bcv2_nd, jobs);
             // union and return

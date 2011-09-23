@@ -21,6 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <future>
+
 #include "build_knobs.h"
 #include <opencog/comboreduct/reduct/meta_rules.h>
 #include <opencog/comboreduct/reduct/general_rules.h>
@@ -36,9 +38,9 @@
 // uncomment this line for debug information to be given during execution
 // #define DEBUG_INFO
 
-using namespace std;
-
 namespace opencog { namespace moses {
+
+using namespace std;
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
@@ -161,13 +163,12 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
 {
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
-    // logical_probe_thread_safe has some overhead, for that reason
-    // when only 1 thread is available logical_probe is run instead
-    auto lp_func = bind(num_threads() > 1?
-                        &build_knobs::logical_probe_thread_safe
-                        : &build_knobs::logical_probe,
-                        this, _1, it, add_if_in_exemplar);
-    OMP_ALGO::for_each(perms.begin(), perms.end(), lp_func);
+
+    ptr_vector<logical_subtree_knob> kb_v =
+        logical_probe_rec(_exemplar, it, perms.begin(), perms.end(),
+                          add_if_in_exemplar, num_threads());
+    foreach(const logical_subtree_knob& kb, kb_v)
+        _rep.disc.insert(make_pair(kb.spec(), kb));
 }
 
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
@@ -224,31 +225,54 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 #endif
 }
 
-void build_knobs::logical_probe(const combo_tree& subtree, pre_it it,
-                                bool add_if_in_exemplar)
-{
-    logical_subtree_knob kb(_exemplar, it, subtree.begin());
-    if ((add_if_in_exemplar || !kb.in_exemplar()) && disc_probe(kb)) {
-        _rep.disc.insert(make_pair(kb.spec(), kb));
-    }
-}
+template<typename It>
+ptr_vector<logical_subtree_knob>
+build_knobs::logical_probe_rec(combo_tree& exemplar, pre_it it,
+                               It from, It to,
+                               bool add_if_in_exemplar,
+                               unsigned n_jobs) const {
+    if(n_jobs > 1) {
+        auto s_jobs = split_jobs(n_jobs);
 
-void build_knobs::logical_probe_thread_safe(const combo_tree& subtree, pre_it it,
-                                            bool add_if_in_exemplar)
-{
-    // copy _exemplar and it
-    shared_lock copy_exemplar_lock(lp_mutex);
-    combo_tree exemplar_copy(_exemplar);
-    pre_it it_copy = exemplar_copy.begin();
-    std::advance(it_copy, std::distance(_exemplar.begin(), it));
-    copy_exemplar_lock.unlock();
+        // define new range
+        It mid = from + distance(from, to) / 2;
 
-    logical_subtree_knob kb_copy(exemplar_copy, it_copy, subtree.begin());
-    if ((add_if_in_exemplar || !kb_copy.in_exemplar())
-        && disc_probe(exemplar_copy, kb_copy)) {
-        boost::unique_lock<boost::shared_mutex> lock(lp_mutex);
-        logical_subtree_knob kb(_exemplar, it, kb_copy);
-        _rep.disc.insert(make_pair(kb.spec(), kb));
+        // copy exemplar and it for the second recursive call (this
+        // has to be put before the asyncronous call to avoid
+        // read/write conflicts)
+        combo_tree exemplar_copy(exemplar);
+        pre_it it_copy = exemplar_copy.begin();
+        advance(it_copy, distance(exemplar.begin(), it));
+
+        // asynchronous recursive call for [from, mid)
+        future<ptr_vector<logical_subtree_knob>> f_async =
+            async(launch::async,
+                  [&]() {return this->logical_probe_rec(exemplar, it, from, mid,
+                                                        add_if_in_exemplar,
+                                                        s_jobs.first);});
+                                                   
+        // synchronous recursive call for [mid, to) on the copy
+        ptr_vector<logical_subtree_knob> kb_copy_v =
+            logical_probe_rec(exemplar_copy, it_copy, mid, to,
+                              add_if_in_exemplar, s_jobs.second);
+
+        // append kb_copy_v to kb_v
+        auto kb_v = f_async.get();
+        foreach(const logical_subtree_knob& kb_copy, kb_copy_v) {
+            kb_v.push_back(new logical_subtree_knob(exemplar, it, kb_copy));
+        }
+        return kb_v;
+    } else {
+        ptr_vector<logical_subtree_knob> kb_v;
+        while(from != to) {
+            auto kb = new logical_subtree_knob(exemplar, it, from->begin());
+            if ((add_if_in_exemplar || !kb->in_exemplar())
+                && disc_probe(exemplar, *kb)) {
+                kb_v.push_back(kb);
+            }
+            ++from;
+        }
+        return kb_v;
     }
 }
 
@@ -440,7 +464,7 @@ void build_knobs::simple_action_probe(pre_it it, bool add_if_in_exemplar)
 {
     simple_action_subtree_knob kb(_exemplar, it);
 #ifdef DEBUG_INFO
-    std::cout << "simple knob - new exemplar : " << _exemplar << endl;
+    cout << "simple knob - new exemplar : " << _exemplar << endl;
 #endif
 
     if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(kb) PJ*/)
@@ -453,7 +477,7 @@ void build_knobs::action_probe(vector<combo_tree>& perms, pre_it it,
 {
     action_subtree_knob kb(_exemplar, it, perms);
 #ifdef DEBUG_INFO
-    std::cout << "action knob - new exemplar : " << _exemplar << endl;
+    cout << "action knob - new exemplar : " << _exemplar << endl;
 #endif
 
     if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(kb) PJ*/)
@@ -627,7 +651,7 @@ void build_knobs::rec_canonize(pre_it it)
         linear_canonize(it.begin());
     } else if (*it == id::times) {
         // @todo: think about that case...
-        cerr << "I (Nil) must think for that one" << std::endl;
+        cerr << "I (Nil) must think for that one" << endl;
     } else {
         stringstream ss;
         ss << *it << " not a buitin, neither an argument";

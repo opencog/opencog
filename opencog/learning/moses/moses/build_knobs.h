@@ -25,17 +25,21 @@
 #define _MOSES_BUILD_KNOBS_H
 
 #include <boost/utility.hpp>
-#include "representation.h"
-#include "using.h"
-#include <opencog/learning/moses/eda/field_set.h>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <opencog/comboreduct/combo/type_tree.h>
 #include <opencog/comboreduct/combo/action.h>
 #include <opencog/comboreduct/combo/perception.h>
 
+#include <opencog/learning/moses/eda/field_set.h>
+
+#include "representation.h"
+#include "using.h"
+
 namespace opencog { namespace moses {
 
 using namespace combo;
+using boost::ptr_vector;
 
 //need to call a generator method... (dispatched based on type
 
@@ -88,12 +92,25 @@ protected:
      * such that j != *it, #i is a positive literal choosen randomly
      * and #j is a positive or negative literal choosen randomly.
      */
-    void sample_logical_perms(combo_tree::iterator it, vector<combo_tree>& perms);
-    void logical_probe(const combo_tree& tr, combo_tree::iterator it,
-                       bool add_if_in_exemplar);
-    // like logical_probe but thread safe (+ some overhead)
-    void logical_probe_thread_safe(const combo_tree& tr, combo_tree::iterator it,
-                                   bool add_if_in_exemplar);
+    void sample_logical_perms(combo_tree::iterator it,
+                              vector<combo_tree>& perms);
+
+    /**
+     * @param exemplar reference to the exemplar to apply probe
+     * @param it       where in the exemplar
+     * @param from     begin iterator of perms (see sample_logical_perms)
+     * @param to       end iterator of perms (see sample_logical_perms)
+     * @param add_if_in_exemplar add the knob corresponding to perm
+     *                           (or negation) if it is already in exemplar
+     * @param n_jobs   number of threads to use for the computation
+     * @return a ptr_vector of the knobs
+     */
+    template<typename It>
+    ptr_vector<logical_subtree_knob> logical_probe_rec(combo_tree& exemplar,
+                                                       combo_tree::iterator it,
+                                                       It from, It to,
+                                                       bool add_if_in_exemplar,
+                                                       unsigned n_jobs = 1) const;
     void logical_cleanup();
 
     /**
