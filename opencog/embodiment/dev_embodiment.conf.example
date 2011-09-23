@@ -152,6 +152,9 @@ PSI_RELATION_UPDATER_CYCLE_PERIOD =    13
 PSI_FEELING_UPDATER_ENABLED =          true
 PSI_FEELING_UPDATER_CYCLE_PERIOD =     11
 
+FISHGRAM_AGENT_ENABLE = false
+FISHGRAM_AGENT_CYCLE_PERIOD = 59
+
 # If you would like to use PLN planner, set it to true, otherwise it will use random breadth-first planner
 PSI_PLAN_BY_PLN = false
 

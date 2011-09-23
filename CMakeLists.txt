@@ -355,6 +355,7 @@ IF(HAVE_ATOMSPACE)
     FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
     IF(CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
        # find python destination dir for python bindings
+       ADD_DEFINITIONS(-DHAVE_CYTHON)
        SET(HAVE_CYTHON 1)
        EXECUTE_PROCESS(
            COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"

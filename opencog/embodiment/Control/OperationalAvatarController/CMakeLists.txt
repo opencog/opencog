@@ -14,6 +14,7 @@ ADD_LIBRARY (oac
     PsiRelationUpdaterAgent
     PsiFeelingUpdaterAgent
     PsiRuleUtil
+    FishgramAgent
     SleepAgent
     MockOpcHCTest
     HCTestAgent
@@ -33,15 +34,17 @@ ADD_LIBRARY (oac
 
 INCLUDE_DIRECTORIES (
     ${XERCESC_INCLUDE_DIR}
+    ${PYTHON_INCLUDE_PATH}
     ${LUA_INCLUDE_DIR}
     ${LUABIND_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_BINARY_DIR}
 )
 
-TARGET_LINK_LIBRARIES (oac
+SET(OAC_LINK_LIBS
     ${LUA_LIBRARIES}
     ${LUABIND_LIBRARIES}
     ${XERCESC_LIBRARIES}
-    ${ZMQ_LIBRARIES}
     json_spirit
     PredicateUpdaters
     PAI
@@ -51,6 +54,20 @@ TARGET_LINK_LIBRARIES (oac
     savable
     pln
 )
+
+IF (HAVE_CYTHON)
+    SET(OAC_LINK_LIBS ${OAC_LINK_LIBS} PythonEval)
+ENDIF (HAVE_CYTHON)    
+
+IF (HAVE_ZMQ)
+    SET(OAC_LINK_LIBS ${OAC_LINK_LIBS} ${ZMQ_LIBRARIES})
+ENDIF (HAVE_ZMQ)
+
+IF (HAVE_PYTHON_BINDING)
+    set(OAC_LINK_LIBS ${OAC_LINK_LIBS} ${PYTHON_LIBRARIES})
+ENDIF (HAVE_PYTHON_BINDING)
+
+TARGET_LINK_LIBRARIES (oac ${OAC_LINK_LIBS})
 
 IF(COMMAND cmake_policy)
       CMAKE_POLICY(SET CMP0003 NEW)

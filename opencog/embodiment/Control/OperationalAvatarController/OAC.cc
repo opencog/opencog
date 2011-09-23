@@ -240,6 +240,15 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                   )
                                                                  );
 
+#ifdef HAVE_CYTHON    
+    this->registerAgent( FishgramAgent::info().id, 
+                         &fishgramAgentFactory
+                       );
+    fishgramAgent = static_cast<FishgramAgent*>(
+                        this->createAgent(FishgramAgent::info().id, false)
+                                               );
+#endif    
+
 //    if (config().get_bool("ACTION_SELECTION_ENABLED")) {
 //        actionSelectionAgent->setFrequency(config().get_int("RE_CYCLE_PERIOD"));
 //        this->startAgent(actionSelectionAgent);
@@ -296,6 +305,15 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
            config().get_int( "PSI_FEELING_UPDATER_CYCLE_PERIOD" ) );
         this->startAgent(psiFeelingUpdaterAgent);
     }
+
+#ifdef HAVE_CYTHON    
+    // TODO: use configurations 
+    if (config().get_bool("FISHGRAM_AGENT_ENABLE")) {
+        this->psiFeelingUpdaterAgent->setFrequency(
+            config().get_int("FISHGRAM_AGENT_CYCLE_PERIOD") ); 
+        this->startAgent(fishgramAgent);
+    }
+#endif        
 
     // TODO: This should be done only after NetworkElement is initialized
     // (i.e., handshake with router is done)
@@ -496,6 +514,10 @@ OAC::~OAC()
     delete (psiActionSelectionAgent);
     delete (psiRelationUpdaterAgent); 
     delete (psiFeelingUpdaterAgent); 
+
+#ifdef HAVE_CYTHON    
+    delete (fishgramAgent); 
+#endif    
 
     // ZeroMQ 
 #ifdef HAVE_ZMQ    
