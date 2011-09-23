@@ -30,7 +30,7 @@ def find_subclasses(module, clazz):
 import imp
 import traceback
 import opencog.cogserver
-from opencog.atomspace cimport cAtomSpace, AtomSpace_factory
+from opencog.atomspace cimport cAtomSpace, AtomSpace_factory, AtomSpace
 from opencog.cogserver cimport cAgent, stim_t, cRequest
 
 cdef extern from "agent_finder_types.h" namespace "opencog":
@@ -38,6 +38,10 @@ cdef extern from "agent_finder_types.h" namespace "opencog":
         vector[string] agents
         vector[string] requests
         string err_string 
+
+cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
+    cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
+    return atomspace
 
 cdef api string get_path_as_string() with gil:
     import sys
