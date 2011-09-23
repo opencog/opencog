@@ -57,16 +57,16 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 
 FishgramAgent::~FishgramAgent()
 {
-    this->stopFishgram(); 
+//    this->stopFishgram(); 
 
-    PyGILState_STATE gState = PyGILState_Ensure(); 
-    Py_XDECREF(this->pFishgram); 
-    PyGILState_Release(gState); 
+//    PyGILState_STATE gState = PyGILState_Ensure(); 
+//    Py_XDECREF(this->pFishgram); 
+//    PyGILState_Release(gState); 
 
     logger().info("FishgramAgent::%s", __FUNCTION__);
 
-    this->fishgram_thread->join(); 
-    delete this->fishgram_thread; 
+//   this->fishgram_thread->join(); 
+//    delete this->fishgram_thread; 
 }
 
 FishgramAgent::FishgramAgent()
