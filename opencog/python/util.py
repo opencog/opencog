@@ -3,8 +3,6 @@ from opencog.atomspace import types
 import collections
 import cPickle as pickle
 
-import tree
-
 def if_(cond, t, f):
     if cond:
         return t
@@ -20,6 +18,7 @@ def output_atoms(atomspace):
 
 def save_trees(trees, file):
     '''Save all of the Trees from the AtomSpace to a file. Uses FakeAtom rather than the Cython Atom class.'''
+    import tree
     f = open(file,'w')
     trees = map(tree.tree_from_atom, trees.get_atoms_by_type(types.Atom))
     trees = map(tree.tree_with_fake_atoms, trees)

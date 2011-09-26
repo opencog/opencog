@@ -8,6 +8,7 @@ from util import *
 #import ipdb; ipdb.set_trace()
 
 t = types
+Tree = tree
 
 class ForestExtractor:
     """Extracts a forest of trees, where each tree is a Link (and children) that are true in the AtomSpace.
@@ -53,12 +54,12 @@ class ForestExtractor:
         elif self.is_object(atom):
             objects.append(atom)
             self.i+=1
-            return tree(self.i-1)
+            return Tree(self.i-1)
         elif atom.is_node():
-            return tree(atom)
+            return Tree(atom)
         else:
             args = [self.extractTree(x,  objects) for x in atom.out]
-            return tree(atom.type_name, args)
+            return Tree(atom.type_name, args)
 
     def extractForest(self):
 
@@ -236,7 +237,7 @@ class ForestExtractor:
         
         # use unify to extract a SequentialAndLink
         t1_var, t2_var = new_var(), new_var()
-        template = tree('SequentialAndLink', t1_var, t2_var)
+        template = Tree('SequentialAndLink', t1_var, t2_var)
         # template_s is just used to find the TimeNodes (to compare them with each other)
         template_s = unify(template, tr, s)
         if template_s == None:

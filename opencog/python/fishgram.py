@@ -990,8 +990,10 @@ def notice_changes(atomspace):
 
     target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
 
+    Tree = tree.tree
+
     for atom in target_PredicateNodes:
-        target = tree('EvaluationLink', atom, tree('ListLink'))
+        target = Tree('EvaluationLink', atom, Tree('ListLink'))
 
         time = new_var()
         
@@ -1001,13 +1003,13 @@ def notice_changes(atomspace):
         times_with_update = []
         for time in times:
 #            # Need to use unify because not sure what the arguments will be. But they must be the same...
-#            template = tree('AtTimeLink', time, target)
+#            template = Tree('AtTimeLink', time, target)
 #            matches = find_conj( (template,) )
 #            
 #            # If this DemandGoal is in use there will be one value at each timestamp (otherwise none)
 #            assert len(matches) < 2
 #            matches[0].
-            template = tree('AtTimeLink', time, target)
+            template = Tree('AtTimeLink', time, target)
             a = atom_from_tree(template, atomspace)
             
             # Was the value updated at that timestamp? The PsiDemandUpdaterAgent is not run every cycle so many
@@ -1039,11 +1041,11 @@ def notice_changes(atomspace):
             time2 = times_with_update[i+1]
 
             tv = TruthValue(1, 1.0e35)
-            res = tree('AtTimeLink',
+            res = Tree('AtTimeLink',
                      time2,
-                     tree('EvaluationLink',
+                     Tree('EvaluationLink',
                                 atomspace.add(t.PredicateNode, name=pred),
-                                tree('ListLink',
+                                Tree('ListLink',
                                     target
                                 )
                         )
