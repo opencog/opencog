@@ -5,13 +5,13 @@ import sys
 from itertools import permutations
 from util import *
 
-class FakeHandle:
-    '''A simple class to imitate Handle for use with FakeAtom.'''
-    def __init__(self, id):
-        self.id = id
-    
-    def value(self):
-        return self.id
+#class FakeHandle:
+#    '''A simple class to imitate Handle for use with FakeAtom.'''
+#    def __init__(self, id):
+#        self.id = id
+#    
+#    def value(self):
+#        return self.id
 
 class FakeAtom:
     '''A simple pure Python class that can emulate the Cython Atom class. It supports pickling
@@ -19,19 +19,25 @@ class FakeAtom:
     def __init__(self, type_name, name, id):
         self.type_name = type_name
         self.name = name
-        self._handle = FakeHandle(id)
+#        self._handle = FakeHandle(id)
+        self._handle_value = id
     
     def __str__(self):
         return 'fake%s%s' % (self.type_name,  self.name)
 
     def __eq__(self, other):
+        if type(self) != type(other):
+            return False
         return self._handle_value == other._handle_value
 
-    def h(self):
-        return self._handle
+    def __hash__(self):
+        return hash(self._handle_value)
+
+#    def h(self):
+#        return self._handle
 
     def is_a(self, _type):
-        assert _type == types.Link
+#        assert _type == types.Link
         return False
 
 def fake_from_real_Atom(atom):
@@ -267,10 +273,6 @@ def unify(x, y, s):
     variables (e.g. 1, Nodes, or tuples of the form ('link type name', arg0, arg1...)
     where arg0 and arg1 are any of the above. NOTE: If you unify two Links, they 
     must both be in tuple-tree format, and their variables must be standardized apart.
-    If you use the vars_only flag, a variable can only unify to a corresponding variable.
-    In other words, normally this function finds the most-general unification of two things;
-    in this case they both have to be exactly as general as each other. Basically tree isomorphism or
-    conjunction isomorphism.
     >>> ppsubst(unify(x + y, y + C, {}))
     {x: y, y: C}
     """
