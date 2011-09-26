@@ -136,48 +136,54 @@ class Chainer:
         for obj in a.get_atoms_by_type(t.Atom):
             if obj.tv.count > 0:
                 tr = tree_from_atom(obj)
-                self.rules.append(Rule(tr, [], '[axiom]'))
+                self.add_rule(Rule(tr, [], '[axiom]'))
         
-        # Deduction
-        for type in ['SubsetLink', 'ImplicationLink', 'AssociativeLink']:
-            self.rules.append(Rule(tree(type, 1,3), 
-                                         [tree(type, 1, 2),
-                                          tree(type, 2, 3) ], 
-                                          name='Deduction'))
-
-        # Inversion
-        for type in ['SubsetLink', 'ImplicationLink']:
-            self.rules.append(Rule( tree(type, 1, 2), 
-                                         [tree(type, 2, 1)], 
-                                         name='Inversion'))
+#        # Deduction
+#        for type in ['SubsetLink', 'ImplicationLink', 'AssociativeLink']:
+#            self.add_rule(Rule(tree(type, 1,3), 
+#                                         [tree(type, 1, 2),
+#                                          tree(type, 2, 3) ], 
+#                                          name='Deduction'))
+#
+#        # Inversion
+#        for type in ['SubsetLink', 'ImplicationLink']:
+#            self.add_rule(Rule( tree(type, 1, 2), 
+#                                         [tree(type, 2, 1)], 
+#                                         name='Inversion'))
 
         # ModusPonens
         for type in ['ImplicationLink']:
-            self.rules.append(Rule(tree(2), 
+            self.add_rule(Rule(tree(2), 
                                          [tree(type, 1, 2),
                                           tree(1) ], 
                                           name='ModusPonens'))
         
-        # AND/OR
-        for type in ['AndLink', 'OrLink']:
-            for size in xrange(5):
-                args = [new_var() for i in xrange(size+1)]
-                self.rules.append(Rule(tree(type, args),
-                                   args,
-                                   type[:-4]))
-        
-        # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
-    #    fact = new_var()
-    #    list_link = new_var()
-    #    self.rules.append(Rule(
-    #                            tree(fact),
-    #                            [tree('ForAllLink', list_link, fact )]
-    #                        ))
-        
+#        # AND/OR
+#        for type in ['AndLink', 'OrLink']:
+#            for size in xrange(5):
+#                args = [new_var() for i in xrange(size+1)]
+#                self.add_rule(Rule(tree(type, args),
+#                                   args,
+#                                   type[:-4]))
+#        
+#        # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
+#    #    fact = new_var()
+#    #    list_link = new_var()
+#    #    self.add_rule(Rule(
+#    #                            tree(fact),
+#    #                            [tree('ForAllLink', list_link, fact )]
+#    #                        ))
+#        
         for atom in a.get_atoms_by_type(t.ForAllLink):
             # out[0] is the ListLink of VariableNodes, out[1] is the expression
             tr = tree_from_atom(atom.out[1])
-            self.rules.append(Rule(tr, [], name='ForAll'))
+            self.add_rule(Rule(tr, [], name='ForAll'))
+
+        proven = [r for r in self.rules if not len(r.goals)]
+        # Only done here until we introduce TVs
+        for r in proven:
+            r.tv = True
+            self.add_rule(r)
 
 
 class Rule :
@@ -185,15 +191,16 @@ class Rule :
         self.head = head
         self.goals = goals
         self.name = name
+        self.tv = False
 
     def __str__(self):
         return self.name
 
     def __repr__ (self) :
-        rep = str(self.head)
+        rep = repr(self.head)
         sep = " :- "
         for goal in self.goals :
-            rep += sep + str(goal)
+            rep += sep + repr(goal)
             sep = ","
         return rep
     
@@ -203,6 +210,21 @@ class Rule :
         new_version = Rule(tmp[0], tmp[1:], name=self.name)
         
         return new_version
+    
+    def isomorphic(self, other):
+        # One way: make conjunctions out of the rules to make
+        # sure variable renamings are consistent across both
+        # conclusion and premises
+        self_conj = (self.head,)+tuple(self.goals)
+        other_conj = (other.head,)+tuple(other.goals)
+        
+        return isomorphic_conjunctions_ordered(self_conj, other_conj)
+
+    def subst(self, s):
+        new_head = subst(s, self.head)
+        new_goals = list(subst_conjunction(s, self.goals))
+        new_rule = Rule(new_head, new_goals, name=self.name)
+        return new_rule
 
 def test(a):
     c = Chainer(a)
