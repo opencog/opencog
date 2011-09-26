@@ -420,13 +420,14 @@ def isomorphic_conjunctions_ordered(xs, ys):
 
 def canonical_trees(trs, dic = {}):
     '''Returns the canonical version of this tree, i.e. with the variables renamed (consistently) from 0,1,2.'''
-    tmp = new_var.counter
-    new_var.counter = 0
+    global _new_var_counter
+    tmp = _new_var_counter
+    _new_var_counter = 0
     ret = []
     for tr in trs:
         tr = standardize_apart(tr)
         ret.append(tr)
-    new_var.counter = tmp
+    _new_var_counter = tmp
     return tr
 
 def get_varlist(t):

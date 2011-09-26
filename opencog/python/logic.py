@@ -12,122 +12,87 @@ class Chainer:
         self.viz = PLNviz(space)
         self.viz.connect()
         self.setup_rules(space)
+        self.proven = []
     
+    # Either need to allow a rule-instance to be filled by two things, or reapply old premises,
+    # or check for premises on each new rule-instance.
     def fc(self):
-        #import pdb; pdb.set_trace()
-        
-        facts = {r.head for r in self.rules if not r.goals}
-        real_rules = {r for r in self.rules if r.goals}
-
-        # we have rules which are goal:-term,term,term,...
-        # and include rules with no arguments.
-        layer_facts = set()    
-        
-        for r in real_rules:
-            print pp(r)
+        self.proven = [r for r in self.rules if not len(r.goals)]
             
-            # In case we prove something that still has a variable in it
-            #r = Rule(standardize_apart(r.head), standardize_apart(tuple(r.goals)))
-            s = {}
-            
-            matches = find_matching_conjunctions(tuple(r.goals), facts)
-            
-            for m in matches:
-                result = subst(m.subst, r.head)
-                #res = Rule(result, [])
-                layer_facts.add(result)            
-                print '%s: %s <- %s' % (pp(r), pp(result), pp(m.conj))
+#        while self.proven:
+#            r = self.proven.pop()
+        for r in self.proven:
+            r = r.standardize_apart()
+            # add it into any premises
+            partly_satisfied_rules = self.apply_rules_with_matching_premises(r.head)
+            # check the "filled" rules and add their result to proven
+            for possibly_satisfied in partly_satisfied_rules:
+                # viz
+                for i, input in enumerate(possibly_satisfied.goals):
+                    self.viz.outputTarget(input, possibly_satisfied.head, i, possibly_satisfied)
+                self.viz.declareResult(possibly_satisfied.head)
                 
-                atom = atom_from_tree(result, self.space)
-                atom.tv = TruthValue(1, 1)
-                
-                for i, input in enumerate(m.conj):
-                    self.viz.outputTarget(input, result , i, r)
-                self.viz.declareResult(result)
-        
-        # Add the facts somewhere more permanent
-        return layer_facts
+                if all(map(self.known, possibly_satisfied.goals)):
+                    possibly_satisfied.tv = True
+                    self.add_rule(possibly_satisfied)
+                    self.proven.append(possibly_satisfied)
 
+    # Note: It would be simpler to just skip the goal pool and use a rule pool instead.
+    # Should also apply rules once they are found (and only up through existing specialized
+    # rules, not through general rules)
     def bc(self, target):
-        self.viz.outputTarget(target, None, 0)
-        results = self.expand_target(target, [], depth=1)
+        goal = Rule(None, target, name="goal")
+        self.bc_pool = [goal]
         
-        #results = [atom_from_tree(subst(s, target), self.space) for s in results]
-        #print 'PythonPLN results: ', pp(results)
+        while self.bc_pool:
+            next_target = self.bc_pool.pop()
+            self.query_rules_with_matching_conclusion(next_target)
         
-        #return results
-        
-        # Just return a single result for simplicity
-        try:
-            s = next(results)
-            result1 = atom_from_tree(subst(s, target), self.space)
-            print pp(result1)
-            return [result1.h]
-        except StopIteration:
-            return []
-
-    def expand_target(self, target, stack, depth):
-        print ' '*depth+'expand_target', pp(target)
-        # we have rules which are goal:-term,term,term,...
-        # and include rules with no arguments.
-        results = []
-
-        # haxx to prevent searching for infinitely many nested ImplicationLinks
-        # The unify-based version would match a single variable!
-    #    bad = tree('ImplicationLink',
-    #                     new_var(), 
-    #                     tree('ImplicationLink', new_var(), new_var())
-    #                    )
-    #    if unify(bad, target, {}) != None:
-        if target.get_type() == t.ImplicationLink and len(target.args) == 2 and target.args[1].get_type() == t.ImplicationLink:
-            print ' '*depth+'nested implication'
-            return
-
-        if depth > 6:
-            print ' '*depth+'tacky maximum depth reached'
-            return
-
-        for x in stack:
-            if unify(target, x, {}, True) != None:
-                #print ' '*depth+'loop'
-                return
-
+        return []
+    
+    def query_rules_with_matching_conclusion(self, target):
         for r in self.rules:
             r = r.standardize_apart()
-            
             s = unify(r.head, target, {})
             if s != None:
-                child_results = self.apply_rule(target, r, 0, s, stack+[target], depth)
-                results+=child_results
-                for cr in child_results:
-                    yield cr
-        #return results
+                r2 = r.subst(s)
+                # Add the specialized rule and then add the subgoals to the backchaining pool
+                if self.add_rule(r2):
+                    for new_goal in r2.goals:
+                        existing = [g for g in self.bc_pool if unify(new_goal, g, {}, True) != None]
+                        if not existing:
+                            self.bc_pool.append(new_goal)
 
-    def apply_rule(self, target, rule, goals_index, s, stack, depth):
-        if goals_index == len(rule.goals):
-            self.viz.declareResult(target)
-            return [s]
+    def apply_rules_with_matching_premises(self, premise):
+        conclusions = []
+        for r in self.rules:
+            for i, pr in enumerate(r.goals):
+                s = unify(pr, premise, {})
+                if s != None:
+                    filled_in = r.subst(s)
+                    if self.add_rule(filled_in):
+                        conclusions.append(filled_in)
+        return conclusions
+    
+    def add_rule(self, rule):
+        '''Adds a rule, checking for redundancy (i.e. if it is exactly isomorphic to another rule)'''
+        matches = [r for r in self.rules if rule.isomorphic(r)]
         
-        goal = rule.goals[goals_index]
-        goal = subst(s, goal)
+        if not matches:
+            self.rules.append(rule)
+            print 'added %s rule %s %s' % (rule.tv, rule, repr(rule))
+            return True
+        else:
+            #print 'isomorphic; matches: ', len(matches)
+            if rule.tv:
+                print '***proved rule', repr(rule)
+                return False
 
-        #print ' '*depth+'apply_rule //', target,'// rule =', rule, '// goal =',  goal, '// index =', goals_index
-
-        results = []
-
-        self.viz.outputTarget(goal, target, goals_index, rule)
-        child_results = self.expand_target(goal, stack, depth+1)
+    def known(self, expr):
+        '''Check whether a TruthValue has been found for expr'''
+        matches = [r for r in self.rules if unify(expr, r.head, {}, True) != None]
         
-        for child_s in child_results:
-            child_s.update(s)
-            
-            input = subst(child_s, goal)
-            self.viz.outputTarget(input, target, goals_index, rule)
-            self.viz.declareResult(input)
-            
-            results+= self.apply_rule(target, rule, goals_index+1, child_s, stack, depth)
-        
-        return results
+        return any(m.tv for m in matches)
 
     def setup_rules(self, a):
         self.rules = []
