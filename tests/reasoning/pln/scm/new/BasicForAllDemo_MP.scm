@@ -4,7 +4,7 @@
 
 (define is_axiom (PredicateNode "is_axiom" tv))
 (define R (PredicateNode "R" tv))
-(define x001 (VariableNode "x001" tv))
+(define x001 (VariableNode "x001"))
 (define fact_6 (ConceptNode "fact_6" tv))
 (define fact_42 (ConceptNode "fact_42" tv))
 
