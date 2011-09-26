@@ -144,6 +144,8 @@ class tree:
         # TODO: A more efficient alternative would be to adapt the hash function and compare function
         # to work on Trees directly.
         if self._tuple != None:
+            return self._tuple
+        else:
             # Atom doesn't support comparing to different types in the Python-standard way.
             if isinstance(self.op, Atom):
                 #assert type(self.op.h) != type(None)
@@ -153,6 +155,9 @@ class tree:
             else:
                 self._tuple = tuple([self.op]+[x.to_tuple() for x in self.args])
                 return self._tuple
+
+    def isomorphic(self, other):
+        return isomorphic_conjunctions_ordered([self], [other])
 
 def tree_from_atom(atom, dic = {}):
     if atom.is_node():
@@ -419,16 +424,18 @@ def isomorphic_conjunctions_ordered(xs, ys):
     return xs == ys
 
 def canonical_trees(trs, dic = {}):
-    '''Returns the canonical version of this tree, i.e. with the variables renamed (consistently) from 0,1,2.'''
+    '''Returns the canonical version of a list of trees, i.e. with the variables renamed (consistently) from 0,1,2.
+    It can be a list of only one tree. If you want to use multiple trees, you must put them in the same list, so that
+    any shared variables will be renamed consistently.'''
     global _new_var_counter
     tmp = _new_var_counter
     _new_var_counter = 0
     ret = []
     for tr in trs:
-        tr = standardize_apart(tr)
-        ret.append(tr)
+        tr2 = standardize_apart(tr)
+        ret.append(tr2)
     _new_var_counter = tmp
-    return tr
+    return ret
 
 def get_varlist(t):
     """Return a list of variables in tree, in the order they appear (with depth-first traversal). Would also work on a conjunction."""
