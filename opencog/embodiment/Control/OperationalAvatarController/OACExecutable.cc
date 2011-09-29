@@ -33,7 +33,7 @@ using namespace opencog::oac;
 using namespace opencog;
 using namespace opencog::pai;
 
-void opc_unexpected_handler()
+void oac_unexpected_handler()
 {
     throw;
 }
@@ -52,11 +52,11 @@ int main(int argc, char *argv[])
 
          // take care of the args number.
         if ( config().get_bool("ENABLE_UNITY_CONNECTOR") && argc != 9 ) {
-            logger().error("OACExec - Usage: \n\topc <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> <ZeroMQ publish port> <agent-id>");
+            logger().error("OACExec - Usage: \n\toac <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> <ZeroMQ publish port> <agent-id>");
             return (1);
         }
         else if ( !config().get_bool("ENABLE_UNITY_CONNECTOR") && argc != 8 ) {
-            logger().error("OACExec - Usage: \n\topc <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> <ZeroMQ publish port>");
+            logger().error("OACExec - Usage: \n\toac <agent-brain-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port> <ZeroMQ publish port>");
             return (1);
         }
        
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
         // setting unexpected handler in case a different exception from the
         // especified ones is throw in the code
-        std::set_unexpected(opc_unexpected_handler);
+        std::set_unexpected(oac_unexpected_handler);
         
         //char petName[256];
         //int petID = atoi(argv[1]);
@@ -79,16 +79,16 @@ int main(int argc, char *argv[])
         int portNumber = atoi(argv[5]);
 
         server(OAC::createInstance);
-        OAC& opc = static_cast<OAC&>(server());
+        OAC& oac = static_cast<OAC&>(server());
         // Open database *before* loading modules, since the modules
         // might create atoms, and we can't have that happen until 
         // storage is open, as otherwise, there will be handle conflicts.
-        opc.openDatabase();
+        oac.openDatabase();
 
         // Load modules specified in config
-        opc.loadModules(); 
+        oac.loadModules(); 
         const char* config_path[] = {"."};
-        opc.loadSCMModules(config_path);
+        oac.loadSCMModules(config_path);
 
         // Initialize OAC
         //
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
         // because OAC::loadSCMModules will load 'rules_core.scm',  which should be loaded 
         // before loading Psi Rules ('xxx_rules.scm') and 
         // OAC::init is responsible for loading Psi Rules via OAC::addRulesToAtomSpace
-        opc.init(
+        oac.init(
             argv[1],        // agent-brain-id, i.e., id of OAC
             "127.0.0.1",    // NetworkElement ip 
             portNumber,     // NetworkElement port number
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
         );
 
         // enable the network server and run the server's main loop
-        opc.enableNetworkServer();
+        oac.enableNetworkServer();
 
         // TODO: After making OAC a CogServerMain-compatible server, create a
         // shell command to list all configuration parameters (like MIN_STI
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         logger().debug("MIN_STI = %s\n", config().get("MIN_STI").c_str());
 
         //main loop
-        opc.serverLoop();
+        oac.serverLoop();
 
     } catch (std::bad_alloc) {
         logger().error(

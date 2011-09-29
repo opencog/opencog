@@ -27,7 +27,7 @@
 
 using namespace opencog::oac;
 
-SchemaRunner::SchemaRunner( OAC* opc ) : opc( opc )
+SchemaRunner::SchemaRunner( OAC* oac ) : oac( oac )
 {
     this->defaultMean = config().get_double("RE_DEFAULT_MEAN");
     this->defaultCount = config().get_double("RE_DEFAULT_COUNT");
@@ -56,9 +56,9 @@ SchemaRunner::~SchemaRunner( )
 Handle SchemaRunner::addLink( Type linkType, const HandleSeq& outgoing )
 {
     logger().fine("SchemaRunner - addLink - init");
-    Handle result = AtomSpaceUtil::addLink(*(opc->getAtomSpace()), linkType, outgoing );
-    opc->getAtomSpace()->setAV(result, *defaultAttentionValue);
-    opc->getAtomSpace()->setTV(result, *defaultTruthValue);
+    Handle result = AtomSpaceUtil::addLink(*(oac->getAtomSpace()), linkType, outgoing );
+    oac->getAtomSpace()->setAV(result, *defaultAttentionValue);
+    oac->getAtomSpace()->setTV(result, *defaultTruthValue);
     logger().fine("SchemaRunner - addLink - end");
     return result;
 }
@@ -71,11 +71,11 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
     logger().fine(
                  ("SchemaRunner - Executing runSchema: " + schemaName).c_str());
 
-    const AtomSpace& atomSpace = *(this->opc->getAtomSpace( ));
+    const AtomSpace& atomSpace = *(this->oac->getAtomSpace( ));
 
     // Cannot select a schema to execute while
     // there is no map info data available...
-    if (this->opc->getAtomSpace()->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED) {
+    if (this->oac->getAtomSpace()->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED) {
         logger().warn(
                      "SchemaRunner - Cannot select any schema to be executed"
                      " because there is no map info available yet!");
@@ -83,14 +83,14 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
     } // if
 
     if ( this->executingSchema ) {
-        if ( this->opc->getProcedureInterpreter( ).isFinished( this->executingSchemaID ) ) {
+        if ( this->oac->getProcedureInterpreter( ).isFinished( this->executingSchemaID ) ) {
 
             HandleSeq listLinkOutgoing;
             listLinkOutgoing.push_back(this->executingSchemaImplicationLink);
 
             Handle listLink = addLink(LIST_LINK, listLinkOutgoing);
             Handle selectedRulePredicateNode =
-                AtomSpaceUtil::addNode(*(this->opc->getAtomSpace()),
+                AtomSpaceUtil::addNode(*(this->oac->getAtomSpace()),
                                        PREDICATE_NODE,
                                        SELECTED_RULE_PREDICATE_NAME);
 
@@ -101,7 +101,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
             Handle evalLink = addLink(EVALUATION_LINK, evalLinkOutgoing);
 
             // adding atTimeLink
-            this->opc->getAtomSpace()->getTimeServer().addTimeInfo(evalLink, this->opc->getPAI( ).getLatestSimWorldTimestamp( ) );
+            this->oac->getAtomSpace()->getTimeServer().addTimeInfo(evalLink, this->oac->getPAI( ).getLatestSimWorldTimestamp( ) );
 
             // clear executingSchema variables
             this->petIsMoving = false;
@@ -127,9 +127,9 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                             strcmp(currentWalkingTargetId.c_str(), arguments[0].c_str()) == 0) {
 
                         // check if the target move, thus replan
-                        std::pair<std::string, spatial::Point> lastTargetObject = this->opc->getPet( ).getLatestGotoTarget( );
+                        std::pair<std::string, spatial::Point> lastTargetObject = this->oac->getPet( ).getLatestGotoTarget( );
                         const SpaceServer::SpaceMap& spaceMap =
-                            this->opc->getAtomSpace()->getSpaceServer( ).getLatestMap( );
+                            this->oac->getAtomSpace()->getSpaceServer( ).getLatestMap( );
                         try {
                             //const spatial::Object& targetObject = spaceMap.getObject( lastTargetObject.first );
                             const spatial::EntityPtr& targetEntity =
@@ -141,7 +141,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                                 return false;
                             } // if
 
-                            this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
+                            this->oac->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
                             logger().info("SchemaRunner - Replanning walk (new: %s, %s[%f,%f] old: %s, %s[%f,%f])...",  schemaName.c_str(), lastTargetObject.first.c_str(), targetCenterPosition.first, targetCenterPosition.second, currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str(), lastTargetObject.second.first, lastTargetObject.second.second );
                         } catch ( opencog::NotFoundException& ex ) {
                             // it is impossible to determine if the replanning is needed
@@ -149,12 +149,12 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                         } // catch
                     } else if ( walkCommand && currentWalkingProcedure != schemaName ) {
                         // logger().info("SchemaRunner - Replanning walk(new: %s args: %d old: %s, %s)...", schemaName.c_str(), arguments.size(), currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str() );
-                        // this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
+                        // this->oac->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
 
-                        if (this->opc->getPet().getMode() == opencog::oac::SCAVENGER_HUNT) {
+                        if (this->oac->getPet().getMode() == opencog::oac::SCAVENGER_HUNT) {
                             logger().info("SchemaRunner - Replanning walk(new: %s args: %d old: %s, %s)...", schemaName.c_str(), arguments.size(), currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str() );
 
-                            this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
+                            this->oac->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
                         } else {
                             return false;
                         }
@@ -164,13 +164,13 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 
                     /*
                       std::pair<std::string, spatial::Point> targetObject =
-                      this->opc->getPet( ).getLatestGotoTarget( );
+                      this->oac->getPet( ).getLatestGotoTarget( );
 
                       // check if pet is moving to the right position
                       if ( this->petIsMoving && schemaName == "keepMoving" &&
                       targetObject.first.length( ) > 0 ) {
 
-                      const SpaceServer::SpaceMap& spaceMap = this->opc->getAtomSpace().getSpaceServer().getLatestMap();
+                      const SpaceServer::SpaceMap& spaceMap = this->oac->getAtomSpace().getSpaceServer().getLatestMap();
                       spatial::Point currentTargetPosition = spaceMap.centerOf( targetObject.first );
                       // verify if the distance between the objects start position and current position
                       // is greater than tolerance
@@ -181,16 +181,16 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                       double maxDistance = ( spaceMap.xMax( ) - spaceMap.xMin( ) ) * 0.02;
                       if ( dist > maxDistance ) {
 
-                      this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
+                      this->oac->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
 
                       logger().debug("SchemaRunner - Replanning %s to target %s.", currentWalkingProcedure.c_str( ), targetObject.first.c_str( ) );
                       // replan walking to a new target position
                       std::vector<combo::vertex> schemaArguments;
                       schemaArguments.push_back( targetObject.first );
                       const Procedure::GeneralProcedure& procedure =
-                      this->opc->getProcedureRepository( ).get( currentWalkingProcedure );
+                      this->oac->getProcedureRepository( ).get( currentWalkingProcedure );
 
-                      this->executingSchemaID = this->opc->getProcedureInterpreter( ).runProcedure( procedure, schemaArguments );
+                      this->executingSchemaID = this->oac->getProcedureInterpreter( ).runProcedure( procedure, schemaArguments );
 
                       } // if
 
@@ -201,7 +201,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                 }
             } else {
                 logger().error("SchemaRunner - Previous schema execution timeout: now = %lu, executingSchemaRealTime = %lu (timeout = %lu)", now, executingSchemaRealTime, procedureExecutionTimeout);
-                this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID);
+                this->oac->getProcedureInterpreter( ).stopProcedure(executingSchemaID);
                 this->executingSchema = false;
                 this->executingSchemaTimestamp = 0;
                 this->executingSchemaNode = Handle::UNDEFINED;
@@ -218,7 +218,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                      "SchemaRunner - invalid selected schema: %s",
                      schemaName.c_str());
 
-        schemaNode = this->opc->getAtomSpace()->getHandle(GROUNDED_SCHEMA_NODE,
+        schemaNode = this->oac->getAtomSpace()->getHandle(GROUNDED_SCHEMA_NODE,
                      "full_of_doubts" );
         if ( schemaNode == Handle::UNDEFINED ) {
             return false;
@@ -236,9 +236,9 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
     }// if
 
     // Get the procedure from ProcedureRepository
-    if ( this->opc->getProcedureRepository().contains(schemaName) ) {
+    if ( this->oac->getProcedureRepository().contains(schemaName) ) {
         const Procedure::GeneralProcedure& procedure =
-            this->opc->getProcedureRepository( ).get( schemaName );
+            this->oac->getProcedureRepository( ).get( schemaName );
 
         std::vector<combo::vertex> schemaArguments;
 
@@ -292,7 +292,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 
         // if the schema is a walking schema, put the pet in walking mode
         if (allowWalkingCancelation && schemaName.substr( 0, 2 ) == "go") {
-            //          this->opc->getPet( ).setLatestGotoTarget( std::pair<std::string,spatial::Point>( "", spatial::Point( 0, 0 ) ) );
+            //          this->oac->getPet( ).setLatestGotoTarget( std::pair<std::string,spatial::Point>( "", spatial::Point( 0, 0 ) ) );
             this->petIsMoving = true;
             this->currentWalkingProcedure = schemaName;
 
@@ -303,7 +303,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
             this->currentWalkingTargetId = arguments[0];
         } // if
 
-        executingSchemaID = this->opc->getProcedureInterpreter( ).runProcedure( procedure, schemaArguments );
+        executingSchemaID = this->oac->getProcedureInterpreter( ).runProcedure( procedure, schemaArguments );
 
         logger().debug(
                      "SchemaRunner - Procedure %s sent to execution.",
@@ -313,7 +313,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
         this->executingSchemaNode = schemaNode;
         this->executingSchemaRealTime = time(NULL);
         this->executingSchemaImplicationLink = ruleImplicationLink;
-        this->executingSchemaTimestamp = this->opc->getPAI().getLatestSimWorldTimestamp();
+        this->executingSchemaTimestamp = this->oac->getPAI().getLatestSimWorldTimestamp();
 
         return true;
 
@@ -330,7 +330,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 void SchemaRunner::updateStatus( void )
 {
     if ( this->executingSchema ) {
-        if ( this->opc->getProcedureInterpreter( ).isFinished( this->executingSchemaID ) ) {
+        if ( this->oac->getProcedureInterpreter( ).isFinished( this->executingSchemaID ) ) {
             this->executingSchema = false;
             this->petIsMoving = false;
         } // if
@@ -345,8 +345,8 @@ combo::vertex SchemaRunner::getSchemaExecResult()
         return combo::id::action_success;
     }
 
-    if (!this->opc->getProcedureInterpreter().isFailed(this->executingSchemaID)) {
-        return (this->opc->getProcedureInterpreter().getResult(this->executingSchemaID));
+    if (!this->oac->getProcedureInterpreter().isFailed(this->executingSchemaID)) {
+        return (this->oac->getProcedureInterpreter().getResult(this->executingSchemaID));
     }
     return combo::id::action_failure;
 }

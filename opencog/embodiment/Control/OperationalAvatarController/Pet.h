@@ -1,4 +1,3 @@
-
 /*
  * opencog/embodiment/Control/OperationalAvatarController/Pet.h
  *
@@ -79,7 +78,7 @@ private:
     PetMode mode;
     std::map<PetMode, AgentModeHandler*> modeHandler;
 
-    // opc components received as constructor parameter
+    // oac components received as constructor parameter
     AtomSpace* atomSpace;
     MessageSender* sender;
     RuleEngine* ruleEngine;

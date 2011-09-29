@@ -68,9 +68,9 @@ using namespace opencog;
 using namespace oac;
 using namespace combo;
 
-RuleEngine::RuleEngine( OAC* opc, const std::string& petName )
+RuleEngine::RuleEngine( OAC* oac, const std::string& petName )
 throw( RuntimeException ) :
-        opc(opc), petName( petName ), cycle(0),
+        oac(oac), petName( petName ), cycle(0),
         lastPetActionDone("", std::vector<std::string>()),
         currentAction("", std::vector<std::string>()),
         candidateAction( "", std::vector<std::string>()),
@@ -79,7 +79,7 @@ throw( RuntimeException ) :
         groupingMode(false), groupLeaderId("")
 {
 
-    this->petHandle = AtomSpaceUtil::getAgentHandle( *(opc->getAtomSpace()),
+    this->petHandle = AtomSpaceUtil::getAgentHandle( *(oac->getAtomSpace()),
                       petName );
     rng = new MT19937RandGen(0);
     if ( petHandle == Handle::UNDEFINED ) {
@@ -90,8 +90,8 @@ throw( RuntimeException ) :
     } // if
     
     this->util = new RuleEngineUtil( this );
-    this->schemaRunner = new SchemaRunner( opc );
-    this->learnedTricksHandler = new RuleEngineLearnedTricksHandler( opc );
+    this->schemaRunner = new SchemaRunner( oac );
+    this->learnedTricksHandler = new RuleEngineLearnedTricksHandler( oac );
     this->cyclesDuringAgentLastAction = config().get_int("RE_CYCLES_DURING_AGENT_LAST_ACTION");
     
     this->longTermAttentionValue = AttentionValue::factory(AttentionValue::DEFAULTATOMSTI, 1);
@@ -154,7 +154,7 @@ throw( RuntimeException ) :
         luaThrowException( this->luaState );
     } // if
 
-    std::string agentRules = (boost::format(config().get("RE_RULES_FILENAME_MASK")) % this->opc->getPet().getType()).str();
+    std::string agentRules = (boost::format(config().get("RE_RULES_FILENAME_MASK")) % this->oac->getPet().getType()).str();
 
     // load rules
     logger().debug(
@@ -163,7 +163,7 @@ throw( RuntimeException ) :
         luaThrowException( this->luaState );
     } // if
 
-    // TODO change this loading, get from somewhere else (opc, pet)
+    // TODO change this loading, get from somewhere else (oac, pet)
     this->feelings.push_back(std::string("happiness"));
     this->feelings.push_back(std::string("fear"));
     this->feelings.push_back(std::string("pride"));
@@ -205,7 +205,7 @@ RuleEngine::~RuleEngine( )
 void RuleEngine::setPredicateValue( const std::string& name, float value)
 {
     SimpleTruthValue truthValue( value, 1.0 );
-    AtomSpaceUtil::setPredicateValue( *(opc->getAtomSpace()), name,
+    AtomSpaceUtil::setPredicateValue( *(oac->getAtomSpace()), name,
                                       truthValue, this->petHandle );
 }
 
@@ -283,12 +283,12 @@ void RuleEngine::preCompGaussianDistributionVector(float window,
 
 void RuleEngine::addSchemaNode(const std::string& schemaName)
 {
-    Handle result = AtomSpaceUtil::addNode(*(opc->getAtomSpace()),
+    Handle result = AtomSpaceUtil::addNode(*(oac->getAtomSpace()),
                                            GROUNDED_SCHEMA_NODE,
                                            schemaName, true);
 
-    opc->getAtomSpace()->setAV(result, *longTermAttentionValue);
-    opc->getAtomSpace()->setTV(result, *defaultTruthValue);
+    oac->getAtomSpace()->setAV(result, *longTermAttentionValue);
+    oac->getAtomSpace()->setTV(result, *defaultTruthValue);
 
     logger().debug(
                  "addSchemaNode - Added GROUNDED_SCHEMA_NODE '%s'.",
@@ -346,7 +346,7 @@ void RuleEngine::updateKnownEntities()
 
     // update objects, avatars
     const SpaceServer::SpaceMap& spaceMap =
-        this->opc->getAtomSpace()->getSpaceServer().getLatestMap();
+        this->oac->getAtomSpace()->getSpaceServer().getLatestMap();
 
     std::vector<std::string> entities;
     spaceMap.findAllEntities(back_inserter(entities));
@@ -357,7 +357,7 @@ void RuleEngine::updateKnownEntities()
                      entity.c_str());
 
         std::vector<Handle> objectHandle;
-        opc->getAtomSpace()->getHandleSet(back_inserter(objectHandle),
+        oac->getAtomSpace()->getHandleSet(back_inserter(objectHandle),
                                           OBJECT_NODE, entity, true);
 
         if (objectHandle.size() != 1) {
@@ -373,7 +373,7 @@ void RuleEngine::updateKnownEntities()
             continue;
         }// if
 
-        bool isNextEntity = AtomSpaceUtil::isPredicateTrue(*(opc->getAtomSpace()),
+        bool isNextEntity = AtomSpaceUtil::isPredicateTrue(*(oac->getAtomSpace()),
                             "next",
                             entityHandle,
                             petHandle);
@@ -382,7 +382,7 @@ void RuleEngine::updateKnownEntities()
                       + this->petName + "': "
                       + ((isNextEntity) ? "true" : "false")).c_str());
 
-        Type t = opc->getAtomSpace()->getType(entityHandle);
+        Type t = oac->getAtomSpace()->getType(entityHandle);
 
 
         if (isNextEntity) {
@@ -408,12 +408,12 @@ void RuleEngine::updateKnownEntities()
 
     // update has_novelty predicate
     if (this->util->isNovelty()) {
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "has_novelty",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
     } else {
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "has_novelty",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
@@ -421,12 +421,12 @@ void RuleEngine::updateKnownEntities()
 
     // update has_learned_tricks predicate
     if (this->learnedTricksHandler->hasLearnedTricks()) {
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "has_learned_tricks",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
     } else {
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "has_learned_tricks",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
@@ -434,27 +434,27 @@ void RuleEngine::updateKnownEntities()
 
     // update requested schema predicates, that is, if the owner has requested a schema to be executed
     if (this->util->isThereARequestedSchema()) {
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "has_requested_schema",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
     } else {
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "has_requested_schema",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
     }
 
-    switch (this->opc->getPet().getMode()) {
+    switch (this->oac->getPet().getMode()) {
     case PLAYING:
     case SCAVENGER_HUNT:
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "is_learning",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
         break;
     case LEARNING:
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "is_learning",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
@@ -462,14 +462,14 @@ void RuleEngine::updateKnownEntities()
     }
 
     if (this->avatarAskedToTry) {
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "avatar_asked_to_try",
                                          SimpleTruthValue(1.0f, 0.0f),
                                          this->petHandle);
         ++this->numberOfCyclesSinceAvatarAskToTry;
 
     } else {
-        AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+        AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                          "avatar_asked_to_try",
                                          SimpleTruthValue(0.0f, 0.0f),
                                          this->petHandle);
@@ -524,19 +524,19 @@ void RuleEngine::suggestAction( const std::string& rule,
 
     } else if ( action == "executeRequestedAction" ) {
         unsigned int procArity;
-        finalAction = this->opc->getPet( ).getLatestRequestedCommand( ).name;
+        finalAction = this->oac->getPet( ).getLatestRequestedCommand( ).name;
         logger().debug( "RuleEngine::%s - Handling requested action %s ", __FUNCTION__,  finalAction.c_str() );
         
-        procArity = opc->getProcedureRepository().get(finalAction).getArity();
+        procArity = oac->getProcedureRepository().get(finalAction).getArity();
 
-        if (procArity == this->opc->getPet().getLatestRequestedCommand().arguments.size()) {
+        if (procArity == this->oac->getPet().getLatestRequestedCommand().arguments.size()) {
             std::vector<std::string>& arguments =
-                this->opc->getPet( ).getLatestRequestedCommand( ).arguments;
+                this->oac->getPet( ).getLatestRequestedCommand( ).arguments;
             finalParameters.resize( arguments.size() );
             std::copy( arguments.begin( ), arguments.end( ), finalParameters.begin( ) );
         } else {
             logger().error( "RuleEngine - An invalid list of arguments was sent to the action '%s'. %d arguments was sent but should be %d",
-                            finalAction.c_str(), procArity, this->opc->getPet().getLatestRequestedCommand().arguments.size() );
+                            finalAction.c_str(), procArity, this->oac->getPet().getLatestRequestedCommand().arguments.size() );
         }
     } else if ( action == "runRandomTopFiveLearnedTrick" ) {
         std::set<std::string> arguments;
@@ -550,7 +550,7 @@ void RuleEngine::suggestAction( const std::string& rule,
                  rule.c_str(), action.c_str(), finalAction.c_str());
 
     // get rule -> action implication link strength
-    float strength = AtomSpaceUtil::getRuleImplicationLinkStrength(*(this->opc->getAtomSpace()), rule, this->opc->getPet( ).getCurrentModeHandler( ).getModeName( ) );
+    float strength = AtomSpaceUtil::getRuleImplicationLinkStrength(*(this->oac->getAtomSpace()), rule, this->oac->getPet( ).getCurrentModeHandler( ).getModeName( ) );
     suggestedActions.insert(std::pair<Action, RuleEngine::RuleStrPair>(Action(finalAction,
                             finalParameters),
                             RuleEngine::RuleStrPair(rule, strength)));
@@ -580,7 +580,7 @@ void RuleEngine::addRelation(const Relation& relation)
 
     // verify if the target of relation is a valid object or avatar
     HandleSeq objHandle;
-    this->opc->getAtomSpace()->getHandleSet(back_inserter(objHandle),
+    this->oac->getAtomSpace()->getHandleSet(back_inserter(objHandle),
                                             OBJECT_NODE,
                                             relation.getTarget(), true);
 
@@ -609,7 +609,7 @@ void RuleEngine::addRelation(const Relation& relation)
 
     // yes! the target is a valid object, so setup relation with it
     SimpleTruthValue truthValue(relation.getIntensity(), 1.0 );
-    AtomSpaceUtil::setPredicateValue(*(opc->getAtomSpace()), relation.getName(),
+    AtomSpaceUtil::setPredicateValue(*(oac->getAtomSpace()), relation.getName(),
                                      truthValue, this->petHandle,
                                      targetHandle);
 
@@ -627,7 +627,7 @@ void RuleEngine::logRelations(Logger::Level l)
 {
     // it looks at the existing relating in the atomSpace
     // log them at level l
-    const AtomSpace& as = *(opc->getAtomSpace());
+    const AtomSpace& as = *(oac->getAtomSpace());
 
     logger().log(l, "RuleEngine - TruthValue relations at RuleEngine cycle %d", getCycle());
 
@@ -669,7 +669,7 @@ void RuleEngine::logRelations(Logger::Level l)
 void RuleEngine::removeRelation(const Relation& relation)
 {
 
-    Handle relationHandle = opc->getAtomSpace()->getHandle(PREDICATE_NODE,
+    Handle relationHandle = oac->getAtomSpace()->getHandle(PREDICATE_NODE,
                             relation.getName() );
     if ( relationHandle == Handle::UNDEFINED ) {
         logger().warn(
@@ -680,7 +680,7 @@ void RuleEngine::removeRelation(const Relation& relation)
 
     // verify if the target of relation is a valid object or avatar
     HandleSeq objHandle;
-    this->opc->getAtomSpace()->getHandleSet(back_inserter(objHandle),
+    this->oac->getAtomSpace()->getHandleSet(back_inserter(objHandle),
                                             OBJECT_NODE,
                                             relation.getTarget(), true);
 
@@ -708,7 +708,7 @@ void RuleEngine::removeRelation(const Relation& relation)
     } // if
 
     SimpleTruthValue truthValue( 0.0f, 1.0 );
-    AtomSpaceUtil::setPredicateValue(*(opc->getAtomSpace()),
+    AtomSpaceUtil::setPredicateValue(*(oac->getAtomSpace()),
                                      relation.getName(),
                                      truthValue, this->petHandle,
                                      targetHandle );
@@ -756,7 +756,7 @@ void RuleEngine::addRule(const std::string& rule, const int type,
 
     // all preconditions should be inserted in ProcedureRepository as combo scripts with
     // no parameters
-    if (!this->opc->getProcedureRepository().contains(precondition)) {
+    if (!this->oac->getProcedureRepository().contains(precondition)) {
         throw InvalidParamException(TRACE_INFO, "RuleEngine - Precondition '%s' not found in system ProcedureRepository.", precondition.c_str());
     }
 
@@ -801,7 +801,7 @@ void RuleEngine::addRuleToAtomSpace(const std::string& rule,
                                     const std::vector<std::string>& effectParameters)
 {
 
-    AtomSpace& atomSpace = *(opc->getAtomSpace());
+    AtomSpace& atomSpace = *(oac->getAtomSpace());
 
     Handle preconditionEvalLink = addPreconditionEvalLink(precondition);
     Handle schemaExecLink = addEffectExecLink(effect, effectParameters, true);
@@ -850,7 +850,7 @@ Handle RuleEngine::addEffectExecLink(const std::string& effect,
 throw (RuntimeException)
 {
 
-    AtomSpace& atomSpace = *(opc->getAtomSpace());
+    AtomSpace& atomSpace = *(oac->getAtomSpace());
 
     HandleSeq list;
     foreach( std::string param, parameters ) {
@@ -874,10 +874,10 @@ throw (RuntimeException)
         } else if (param == "owner") {
 
             Handle ownerHandle = atomSpace.getHandle(AVATAR_NODE,
-                                 opc->getPet().getOwnerId());
+                                 oac->getPet().getOwnerId());
             if (ownerHandle == Handle::UNDEFINED) {
                 throw RuntimeException(TRACE_INFO, "addSchemaExecLink - Found no SlAvatarNode for pet owner '%s'.",
-                                                opc->getPet().getOwnerId().c_str());
+                                                oac->getPet().getOwnerId().c_str());
             }
 
             list.push_back(ownerHandle);
@@ -964,7 +964,7 @@ throw (RuntimeException)
 
 Handle RuleEngine::addPreconditionEvalLink(const std::string& precondition)
 {
-    AtomSpace& atomSpace = *(opc->getAtomSpace());
+    AtomSpace& atomSpace = *(oac->getAtomSpace());
 
     logger().debug(
                  "addPreconditionEvalLink - preCond %s."
@@ -1010,7 +1010,7 @@ void RuleEngine::tryExecuteSchema( const std::string& schemaName )
 
 void RuleEngine::updateCurrentActionRepetitions()
 {
-    AtomSpace& atomSpace = *(opc->getAtomSpace());
+    AtomSpace& atomSpace = *(oac->getAtomSpace());
 
     Handle handle = AtomSpaceUtil::addNode(atomSpace,
                                            CONCEPT_NODE,
@@ -1059,7 +1059,7 @@ void RuleEngine::addSchemaDoneOrFailurePred(const std::string& schema,
     if (schema == "") {
         return;
     }
-    AtomSpace& atomSpace = *(opc->getAtomSpace());
+    AtomSpace& atomSpace = *(oac->getAtomSpace());
 
     Handle execLink = addEffectExecLink(schema, parameters, false);
 
@@ -1078,7 +1078,7 @@ void RuleEngine::addSchemaDoneOrFailurePred(const std::string& schema,
 
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK,
                       evalLinkOutgoing);
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, this->opc->getPAI().getLatestSimWorldTimestamp());
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, this->oac->getPAI().getLatestSimWorldTimestamp());
     AtomSpaceUtil::updateLatestSchemaPredicate(atomSpace, atTimeLink,
             predicateNode);
 
@@ -1088,7 +1088,7 @@ void RuleEngine::addSchemaDoneOrFailurePred(const std::string& schema,
                  " '%s' at timestamp '%lu'.",
                  (result ? "schemaDone" : "schemaFailure"),
                  schema.c_str(),
-                 this->opc->getPAI().getLatestSimWorldTimestamp());
+                 this->oac->getPAI().getLatestSimWorldTimestamp());
 }
 
 void RuleEngine::updateSchemaExecutionStatus()
@@ -1183,7 +1183,7 @@ void RuleEngine::runSchemaForCurrentAction( void )
         // reset requested command cycles counter if it was executed
         if ( this->lastRequestedCommandCycles > 0
                 &&
-                ( this->opc->getPet().getLatestRequestedCommand( ).name == getCurrentAction() )
+                ( this->oac->getPet().getLatestRequestedCommand( ).name == getCurrentAction() )
            ) {
             this->lastRequestedCommandCycles = 0;
         } // if
@@ -1197,7 +1197,7 @@ void RuleEngine::runSchemaForCurrentAction( void )
             this->numberOfCyclesSinceAvatarAskToTry = 0;
         } // if
 
-        this->opc->getPet().schemaSelectedToExecute(getCurrentAction( ));
+        this->oac->getPet().schemaSelectedToExecute(getCurrentAction( ));
 
         if ( getCurrentAction( ) == "group_command" ) {
             const std::vector<std::string>& parameters = this->currentAction.getParameters( );
@@ -1226,10 +1226,10 @@ void RuleEngine::runSchemaForCurrentAction( void )
  */
 void RuleEngine::processRules( void )
 {
-    Procedure::ComboInterpreter comboInterpreter(this->opc->getPAI(), *rng);
-    Procedure::ComboSelectInterpreter comboSelectInterpreter(this->opc->getPAI(), *rng);
-    //const Procedure::ComboProcedureRepository& repository = this->opc->getProcedureRepository().getComboRepository();
-    const Procedure::ProcedureRepository& repository = this->opc->getProcedureRepository();
+    Procedure::ComboInterpreter comboInterpreter(this->oac->getPAI(), *rng);
+    Procedure::ComboSelectInterpreter comboSelectInterpreter(this->oac->getPAI(), *rng);
+    //const Procedure::ComboProcedureRepository& repository = this->oac->getProcedureRepository().getComboRepository();
+    const Procedure::ProcedureRepository& repository = this->oac->getProcedureRepository();
 
     std::map<std::string, std::string>::iterator it;
 
@@ -1255,7 +1255,7 @@ void RuleEngine::processRules( void )
         }
 
         if (unifier.empty()) {
-            unifier.insert(this->opc->getPet().getPetId(), true);
+            unifier.insert(this->oac->getPet().getPetId(), true);
         }
 
         std::vector<vertex> arguments;
@@ -1426,13 +1426,13 @@ void RuleEngine::processNextAction( void )
     bool enable_rand_wild_card = config().get_bool("RE_WILD_CARD_RANDOM_SELECTION");
 
     // Process next action only if there is map info data available...
-    if ( this->opc->getAtomSpace()->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
+    if ( this->oac->getAtomSpace()->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
         logger().warn(
                      "RuleEngine - There is no map info available yet!");
         return;
     }
     // ... and pet spatial info is already received
-    if ( !this->opc->getAtomSpace()->getSpaceServer().getLatestMap().containsObject(petName) ) {
+    if ( !this->oac->getAtomSpace()->getSpaceServer().getLatestMap().containsObject(petName) ) {
         logger().error(
                      "RuleEngine - Pet was not inserted in the space map yet!" );
         return;
@@ -1445,12 +1445,12 @@ void RuleEngine::processNextAction( void )
     if (getCurrentAction().length() == 0) {
         std::map<std::string, float> feelingsUpdatedMap;
         foreach(std::string feeling, feelings) {
-            float value = AtomSpaceUtil::getPredicateValue(*(opc->getAtomSpace()),
+            float value = AtomSpaceUtil::getPredicateValue(*(oac->getAtomSpace()),
                           feeling, petHandle);
             feelingsUpdatedMap[ feeling ] = value;
         } // foreach
 
-        opc->getPAI().sendEmotionalFeelings(this->petName,
+        oac->getPAI().sendEmotionalFeelings(this->petName,
                                             feelingsUpdatedMap);
     }
 
@@ -1626,12 +1626,12 @@ void RuleEngine::processNextAction( void )
             newValue /= it->second.size( );
 
             float oldValue =
-                AtomSpaceUtil::getPredicateValue(*(this->opc->getAtomSpace()),
+                AtomSpaceUtil::getPredicateValue(*(this->oac->getAtomSpace()),
                                                  it->first, this->petHandle);
 
             float revisedValue =  reviseValue( oldValue, newValue );
 
-            AtomSpaceUtil::setPredicateValue(*(this->opc->getAtomSpace()),
+            AtomSpaceUtil::setPredicateValue(*(this->oac->getAtomSpace()),
                                              it->first,
                                              SimpleTruthValue(revisedValue,
                                                               0.0f),
@@ -1640,7 +1640,7 @@ void RuleEngine::processNextAction( void )
             feelingsUpdatedMap[ it->first ] = revisedValue;
         } // for
 
-        opc->getPAI().sendEmotionalFeelings(this->petName, feelingsUpdatedMap);
+        oac->getPAI().sendEmotionalFeelings(this->petName, feelingsUpdatedMap);
     } // end block
 
     logger().debug("RuleEngine - feelings updated");
@@ -1688,12 +1688,12 @@ void RuleEngine::processNextAction( void )
         foreach(std::string feeling, feelings) {
 
             float oldValue =
-                AtomSpaceUtil::getPredicateValue(*(opc->getAtomSpace()),
+                AtomSpaceUtil::getPredicateValue(*(oac->getAtomSpace()),
                                                  feeling, petHandle);
             float revisedValue =
                 limitValue( oldValue - feelingsDecreaseFactor );
 
-            AtomSpaceUtil::setPredicateValue(*(opc->getAtomSpace()), feeling,
+            AtomSpaceUtil::setPredicateValue(*(oac->getAtomSpace()), feeling,
                                              SimpleTruthValue(revisedValue,
                                                               0.0f),
                                              petHandle);
@@ -1701,19 +1701,19 @@ void RuleEngine::processNextAction( void )
             feelingsUpdatedMap[ feeling ] = revisedValue;
 
             if ( oldValue != revisedValue ) {
-                std::string frameInstanceName = this->opc->getPet( ).getPetId( ) + "_" + feeling + "_emotion_directed";
+                std::string frameInstanceName = this->oac->getPet( ).getPetId( ) + "_" + feeling + "_emotion_directed";
                 try {
                     std::map<std::string, Handle> elements;
-                    elements["Experiencer"] = opc->getAtomSpace()->addNode( SEME_NODE, this->opc->getPet( ).getPetId( ) );
-                    elements["State"] = opc->getAtomSpace()->addNode( CONCEPT_NODE, feeling );
+                    elements["Experiencer"] = oac->getAtomSpace()->addNode( SEME_NODE, this->oac->getPet( ).getPetId( ) );
+                    elements["State"] = oac->getAtomSpace()->addNode( CONCEPT_NODE, feeling );
                     AtomSpaceUtil::setPredicateFrameFromHandles( 
-                        *(opc->getAtomSpace()), "#Emotion_directed", frameInstanceName,
+                        *(oac->getAtomSpace()), "#Emotion_directed", frameInstanceName,
                             elements, SimpleTruthValue( (revisedValue < 0.5) ? 0.0 : revisedValue, 0.0 ) );        
                         
                 } catch ( const NotFoundException& ex ) {
-                    Handle predicateNode = opc->getAtomSpace()->getHandle( PREDICATE_NODE, frameInstanceName );
+                    Handle predicateNode = oac->getAtomSpace()->getHandle( PREDICATE_NODE, frameInstanceName );
                     if ( predicateNode != Handle::UNDEFINED ) {
-                        AtomSpaceUtil::deleteFrameInstance( *this->opc->getAtomSpace(), predicateNode );
+                        AtomSpaceUtil::deleteFrameInstance( *this->oac->getAtomSpace(), predicateNode );
                     } // if
                 } // catch
                 
@@ -1722,7 +1722,7 @@ void RuleEngine::processNextAction( void )
 
         } // foreach
 
-        opc->getPAI().sendEmotionalFeelings(this->petName, feelingsUpdatedMap);
+        oac->getPAI().sendEmotionalFeelings(this->petName, feelingsUpdatedMap);
     } // end block
 
     { // log known objects and avatars
@@ -1817,7 +1817,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
     logger().debug(
                  "RuleEngine - Getting EvalLinks.");
 
-    AtomSpaceUtil::getAllEvaluationLinks(*(this->opc->getAtomSpace()), pairs,
+    AtomSpaceUtil::getAllEvaluationLinks(*(this->oac->getAtomSpace()), pairs,
                                          SELECTED_RULE_PREDICATE_NAME,
                                          temporal, TemporalTable::OVERLAPS,
                                          true);
@@ -1837,15 +1837,15 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
         // only one selected rule, apply full reward/punish
 
         Handle evalLink = pairs[0].getHandle();
-        if (opc->getAtomSpace()->getType(evalLink) == EVALUATION_LINK) {
+        if (oac->getAtomSpace()->getType(evalLink) == EVALUATION_LINK) {
 
-            Handle listLink = opc->getAtomSpace()->getOutgoing(evalLink, 1);
-            if (opc->getAtomSpace()->getType(listLink) == LIST_LINK) {
+            Handle listLink = oac->getAtomSpace()->getOutgoing(evalLink, 1);
+            if (oac->getAtomSpace()->getType(listLink) == LIST_LINK) {
 
                 logger().debug(
                              "RuleEngine - Apply reinfocement.");
                 applyReinforcement(type,
-                                   opc->getAtomSpace()->getOutgoing(listLink, 0),
+                                   oac->getAtomSpace()->getOutgoing(listLink, 0),
                                    1.0);
                 logger().debug(
                              "RuleEngine - Applied reinfocement.");
@@ -1884,15 +1884,15 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
             }
 
             Handle evalLink = pair.getHandle();
-            if (opc->getAtomSpace()->getType(evalLink) != EVALUATION_LINK) {
+            if (oac->getAtomSpace()->getType(evalLink) != EVALUATION_LINK) {
                 logger().error(
                              "RuleEngine - Handle informed do not"
                              " represent an evaluation link.");
                 continue;
             }
 
-            Handle listLink = opc->getAtomSpace()->getOutgoing(evalLink, 1);
-            if (opc->getAtomSpace()->getType(listLink) != LIST_LINK) {
+            Handle listLink = oac->getAtomSpace()->getOutgoing(evalLink, 1);
+            if (oac->getAtomSpace()->getType(listLink) != LIST_LINK) {
                 logger().error(
                              "RuleEngine - Handle informed do not"
                              " represent list link.");
@@ -1902,7 +1902,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
             logger().debug(
                          "RuleEngine - Apply reinfocement.");
             applyReinforcement(type,
-                               opc->getAtomSpace()->getOutgoing(listLink, 0),
+                               oac->getAtomSpace()->getOutgoing(listLink, 0),
                                this->gaussianVector[index]);
             logger().debug(
                          "RuleEngine - Applied reinfocement.");
@@ -1954,7 +1954,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
 void RuleEngine::applyReinforcement(ReinforcementType type,
                                     Handle implicationLink, float factor)
 {
-    AtomSpace& atomSpace = *(this->opc->getAtomSpace());
+    AtomSpace& atomSpace = *(this->oac->getAtomSpace());
 
     if (atomSpace.getType(implicationLink) != IMPLICATION_LINK) {
         logger().error(

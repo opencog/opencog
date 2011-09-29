@@ -58,27 +58,27 @@ void Spawner::init(const string &id,
 
     setNetworkElement(new NetworkElement(id, ip, port));
 
-    minOpcPort = config().get_int("MIN_OAC_PORT");
-    maxOpcPort = config().get_int("MAX_OAC_PORT");
-    int maxNumberOfPets = maxOpcPort - minOpcPort;
+    minOacPort = config().get_int("MIN_OAC_PORT");
+    maxOacPort = config().get_int("MAX_OAC_PORT");
+    int maxNumberOfPets = maxOacPort - minOacPort;
 
-    if (minOpcPort <= 0 || maxOpcPort <= 0 || maxNumberOfPets < 0) {
+    if (minOacPort <= 0 || maxOacPort <= 0 || maxNumberOfPets < 0) {
         throw InvalidParamException(TRACE_INFO,
                                              "Spawner - Invalid port range defined by (Min '%d', Max '%d').",
-                                             minOpcPort, maxOpcPort);
+                                             minOacPort, maxOacPort);
     }
 }
 
 extern unsigned sleep(unsigned useconds);
 
-int Spawner::allocateOpcPort(const string& petId)
+int Spawner::allocateOacPort(const string& petId)
 {
     std::map<string, int>::const_iterator itr = petId2PortMap.find(petId);
     if (itr != petId2PortMap.end()) {
         // there is a port already allocated to this petId. Returns it.
         return itr->second;
     }
-    for (int port = minOpcPort; port <= maxOpcPort; port++) {
+    for (int port = minOacPort; port <= maxOacPort; port++) {
         if (port2PetIdMap.find(port) == port2PetIdMap.end()) {
             petId2PortMap[petId] = port;
             port2PetIdMap[port] = petId;
@@ -88,7 +88,7 @@ int Spawner::allocateOpcPort(const string& petId)
     return -1;
 }
 
-void Spawner::releaseOpcPort(const string& petId)
+void Spawner::releaseOacPort(const string& petId)
 {
     std::map<string, int>::const_iterator itr = petId2PortMap.find(petId);
     if (itr != petId2PortMap.end()) {
@@ -132,15 +132,15 @@ bool Spawner::processNextMessage(Message *message)
         //}
         std::stringstream command_ss;
         //char str[512];
-        int opcPort = allocateOpcPort(agentID);
-        if (opcPort <= 0) {
-            logger().error("There is no available socket port to run opc %s\n", agentID.c_str());
+        int oacPort = allocateOacPort(agentID);
+        if (oacPort <= 0) {
+            logger().error("There is no available socket port to run oac %s\n", agentID.c_str());
             // TODO: notify PROXY about this problem
             return false;
         }
         // Calculates the CogServer shell  and ZeroMQ publish port to be used 
-        // (based on the opcPort offset)
-        int portOffset = opcPort - minOpcPort + 1;
+        // (based on the oacPort offset)
+        int portOffset = oacPort - minOacPort + 1;
         int cogServerShellPort = config().get_int("SERVER_PORT") + portOffset;
         int zmqPublishPort = config().get_int("ZMQ_PUBLISH_PORT") + portOffset;
 
@@ -152,7 +152,7 @@ bool Spawner::processNextMessage(Message *message)
             ownerID + " " + 
             agentType + " " +
             agentTraits + " " + 
-            lexical_cast<string>(opcPort) + " " +
+            lexical_cast<string>(oacPort) + " " +
             lexical_cast<string>(cogServerShellPort) + " " +
             lexical_cast<string>(zmqPublishPort); 
 
@@ -160,7 +160,7 @@ bool Spawner::processNextMessage(Message *message)
             string debuggerPath = config().get("OAC_DEBUGGER_PATH");
             cmdPrefix = debuggerPath + " ";
             if(config().get_bool("PASS_OAC_ARG_DEBUGGER_COMMAND")) {
-                command_ss << cmdPrefix << " ./opc " << agentArgs << " ";
+                command_ss << cmdPrefix << " ./oac " << agentArgs << " ";
 
                 if(config().get_bool("ENABLE_UNITY_CONNECTOR")) {
                     // This is a hack. To redirect "PROXY_ID" setting to agent id.
@@ -172,7 +172,7 @@ bool Spawner::processNextMessage(Message *message)
 
             }
             else {
-                command_ss << cmdPrefix << " ./opc ";
+                command_ss << cmdPrefix << " ./oac ";
                 std::cout << "====== YOU MUST ENTER DEBUGGER PARAMETERS ======"
                           << std::endl;
                 std::cout << "Please enter the following 2 parameters in "
@@ -183,7 +183,7 @@ bool Spawner::processNextMessage(Message *message)
             if (config().get_bool("CHECK_OAC_MEMORY_LEAKS")) {
                 cmdPrefix = config().get("VALGRIND_PATH");
                 cmdPrefix += " --leak-check=full ";
-                cmdSuffix += " > opc.valgrind.memcheck 2>&1";
+                cmdSuffix += " > oac.valgrind.memcheck 2>&1";
             } else if (config().get_bool("CHECK_OAC_MEMORY_USAGE")) {
                 cmdPrefix = config().get("VALGRIND_PATH");
                 cmdPrefix += " --tool=massif --detailed-freq=";
@@ -191,9 +191,9 @@ bool Spawner::processNextMessage(Message *message)
                 cmdPrefix += " --depth=";
                 cmdPrefix += config().get("MASSIF_DEPTH");
                 cmdPrefix += " ";
-                cmdSuffix += " > opc.valgrind.massif 2>&1 &";
+                cmdSuffix += " > oac.valgrind.massif 2>&1 &";
             }
-            command_ss << cmdPrefix << "./opc " << agentArgs << " ";
+            command_ss << cmdPrefix << "./oac " << agentArgs << " ";
 
 			if(config().get_bool("ENABLE_UNITY_CONNECTOR")) {
 				// This is a hack. To redirect "PROXY_ID" setting to agent id.
@@ -208,7 +208,7 @@ bool Spawner::processNextMessage(Message *message)
                       agentID.c_str(),
                       ownerID.c_str(),
                       agentTraits.c_str( ), 
-                      opcPort, 
+                      oacPort, 
                       cogServerShellPort, 
                       zmqPublishPort, 
                       command_ss.str().c_str( ) 
@@ -233,7 +233,7 @@ bool Spawner::processNextMessage(Message *message)
         logger().info("Sending SAVE_AND_EXIT message to %s", agentID.c_str());
         sendMessage(saveExit);
 
-        releaseOpcPort(agentID);
+        releaseOacPort(agentID);
     } else {
         logger().warn("Unknown command <%s>. Discarding it", command.c_str());
     }

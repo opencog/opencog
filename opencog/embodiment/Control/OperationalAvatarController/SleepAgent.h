@@ -49,7 +49,7 @@ public:
     ~SleepAgent();
     SleepAgent();
 
-    void run(CogServer *opc);
+    void run(CogServer *oac);
 
 }; // class
 

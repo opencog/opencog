@@ -1,6 +1,6 @@
 #!/bin/tcsh
 
-killall -9 opc >& /dev/null
+killall -9 oac >& /dev/null
 killall -9 spawner >& /dev/null
 killall -9 router >& /dev/null
 killall -9 learningServer >& /dev/null

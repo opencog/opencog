@@ -462,7 +462,7 @@ static const action_basic_description abd[] = {
 };
 
 // compound: an action is compound whether it is composed by two or more steps
-// and only after the opc receive the last step execution status, the action will be considered done
+// and only after the oac receive the last step execution status, the action will be considered done
 static const action_property_description apd[] = {
     // builtin action     compound  idempotent reversible  always_succeed  reversal
     { id::goto_obj,       true,     false,     false,      false,          (pet_builtin_action_enum)0 },

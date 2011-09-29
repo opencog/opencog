@@ -496,7 +496,7 @@ int OAC::addRulesToAtomSpace()
 OAC::~OAC()
 {
 
-    // WARNIG: free memory should be implemented if there are more than one opc
+    // WARNIG: free memory should be implemented if there are more than one oac
     // per process
 
     delete (planSender);

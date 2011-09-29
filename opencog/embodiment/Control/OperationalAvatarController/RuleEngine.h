@@ -214,7 +214,7 @@ public:
     typedef boost::variant<Action, Relation, Feeling> Effect;
 
     // methods
-    RuleEngine( OAC* opc, const std::string& petName )
+    RuleEngine( OAC* oac, const std::string& petName )
     throw(opencog::RuntimeException);
 
     virtual ~RuleEngine( void );
@@ -266,7 +266,7 @@ private:
 
     friend class RuleEngineUtil;
 
-    OAC * opc;
+    OAC * oac;
 
     // handle the context of the lua(script language)
     lua_State * luaState;

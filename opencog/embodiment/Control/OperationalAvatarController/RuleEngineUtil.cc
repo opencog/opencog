@@ -51,7 +51,7 @@ RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelEntityHandleSet( void )
 RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelObjectHandleSet( void )
 {
     HandleContainer res;
-    const AtomSpace& as = *(ruleEngine->opc->getAtomSpace());
+    const AtomSpace& as = *(ruleEngine->oac->getAtomSpace());
     RuleEngine::Id_EntityPerception_Map_Const_It it;
     for ( it = this->ruleEngine->objects.begin( );
             it != this->ruleEngine->objects.end( ); ++it ) {
@@ -68,7 +68,7 @@ RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelObjectHandleSet( void )
 RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelAgentHandleSet( void )
 {
     HandleContainer res;
-    const AtomSpace& as = *(ruleEngine->opc->getAtomSpace());
+    const AtomSpace& as = *(ruleEngine->oac->getAtomSpace());
     RuleEngine::Id_EntityPerception_Map_Const_It it;
     for ( it = this->ruleEngine->avatars.begin( );
             it != this->ruleEngine->avatars.end( ); ++it ) {
@@ -117,7 +117,7 @@ bool RuleEngineUtil::isObjectNovelty( void )
 bool RuleEngineUtil::isThereARequestedSchema( void )
 {
 
-    if ( this->ruleEngine->opc->getPet( ).isRequestedCommandNotReaded( ) ) {
+    if ( this->ruleEngine->oac->getPet( ).isRequestedCommandNotReaded( ) ) {
         this->ruleEngine->lastRequestedCommandCycles = config().get_int("RE_CYCLES_FOR_REQUESTED_SCHEMA");
         return true;
     } else if ( this->ruleEngine->lastRequestedCommandCycles > 0 ) {

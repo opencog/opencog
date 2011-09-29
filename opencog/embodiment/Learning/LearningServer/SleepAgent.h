@@ -50,7 +50,7 @@ public:
     ~SleepAgent();
     SleepAgent();
 
-    void run(opencog::CogServer *opc);
+    void run(opencog::CogServer *oac);
 
 }; // class
 } } // namespace opencog::learningserver

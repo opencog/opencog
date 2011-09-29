@@ -349,12 +349,12 @@ void MacroRuleTest()
     args.push_back(new VtreeProviderWrapper(Vertex(h1)));
     args.push_back(new VtreeProviderWrapper(Vertex(h2)));
 
-    RuleApp* topc   = new RuleApp(deduR);
+    RuleApp* toac   = new RuleApp(deduR);
     RuleApp* child2c= new RuleApp(deduR);
 
-    topc->Bind(1, child2c);
+    toac->Bind(1, child2c);
 
-    BoundVertex resC = topc->compute(args.begin(), args.end());
+    BoundVertex resC = toac->compute(args.begin(), args.end());
 
     assert(resC.value == res1b.value);
     const TruthValue& tvC = atw->getTV(v2h(resC.value));

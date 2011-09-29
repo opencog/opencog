@@ -2891,7 +2891,7 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
         fileName << "ww_mapPersistence_";
         fileName << mapCounter;
         fileName << "_";
-        // Add timestamp for preventing (or minimizing chance of) same file name by another opcs.
+        // Add timestamp for preventing (or minimizing chance of) same file name by another oac.
         fileName << time(NULL);
         fileName << ".bin";
         SpaceServer::SpaceMap& map = (SpaceServer::SpaceMap&) sm;

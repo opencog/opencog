@@ -62,14 +62,14 @@ int main()
     string xml = buffer;
 
     server(OAC::createInstance);
-    OAC& opc = static_cast<OAC&>(server());
-    opc.init("teste-opc", "127.0.0.1", 4000, "5000", "1", "2", "pet", "neutral");
+    OAC& oac = static_cast<OAC&>(server());
+    oac.init("teste-oac", "127.0.0.1", 4000, "5000", "1", "2", "pet", "neutral");
     msg->setMessage(xml);
-    opc.processNextMessage(msg);
+    oac.processNextMessage(msg);
 
     delete[] buffer;
-    // TODO: how to delete opc now?
-    //delete opc;
+    // TODO: how to delete oac now?
+    //delete oac;
     return 0;
 }
 

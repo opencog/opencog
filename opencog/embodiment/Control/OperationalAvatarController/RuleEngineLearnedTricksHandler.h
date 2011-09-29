@@ -36,7 +36,7 @@ public:
     static const int PUNISHMENT_VALUE;
     static const int NOT_SELECTED_VALUE;
 
-    RuleEngineLearnedTricksHandler( OAC* opc );
+    RuleEngineLearnedTricksHandler( OAC* oac );
 
     ~RuleEngineLearnedTricksHandler( );
 
@@ -56,7 +56,7 @@ private:
 
     void addToSTIValue( Handle link, short value );
 
-    OAC* opc;
+    OAC* oac;
     AtomSpace* atomSpace;
     Handle learnedTrickNode;
     std::set<Handle> punishedTricks;

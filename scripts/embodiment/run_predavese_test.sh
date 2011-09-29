@@ -13,4 +13,4 @@ echo "Start PredaveseTest.rb, will start OAC..."
 ./run_predavese_mocky_proxy.rb &
 sleep 2
 echo "Start OAC, will start OAC..."
-../bin/src/Control/OperationalAvatarController/opc 1 16330 &
+../bin/src/Control/OperationalAvatarController/oac 1 16330 &

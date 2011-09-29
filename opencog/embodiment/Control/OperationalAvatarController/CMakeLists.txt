@@ -83,8 +83,8 @@ TARGET_LINK_LIBRARIES (OACTester
     ${Boost_THREAD_LIBRARY}
 )
 
-ADD_EXECUTABLE (opc OACExecutable.cc)
-TARGET_LINK_LIBRARIES (opc
+ADD_EXECUTABLE (oac-exec OACExecutable.cc)
+TARGET_LINK_LIBRARIES (oac-exec
     oac
     comboreduct
     PetComboVocabulary
@@ -92,6 +92,7 @@ TARGET_LINK_LIBRARIES (opc
     ${Boost_THREAD_LIBRARY} 
     ${ZMQ_LIBRARIES}
 )
+SET_TARGET_PROPERTIES(oac-exec PROPERTIES OUTPUT_NAME "oac")
 
 ADD_EXECUTABLE (opcHcTester MockOpcHCTestExec.cc)
 TARGET_LINK_LIBRARIES (opcHcTester

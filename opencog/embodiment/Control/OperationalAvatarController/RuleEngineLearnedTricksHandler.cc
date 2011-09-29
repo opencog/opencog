@@ -33,8 +33,8 @@ const int RuleEngineLearnedTricksHandler::REWARD_VALUE = 80;
 const int RuleEngineLearnedTricksHandler::PUNISHMENT_VALUE = -50;
 const int RuleEngineLearnedTricksHandler::NOT_SELECTED_VALUE = 2;
 
-RuleEngineLearnedTricksHandler::RuleEngineLearnedTricksHandler( OAC* opc ) : opc( opc ),
-        atomSpace( opc->getAtomSpace( ) ), latestSelectedTrick( "" ), numberOfLearnedTricks( 0 )
+RuleEngineLearnedTricksHandler::RuleEngineLearnedTricksHandler( OAC* oac ) : oac( oac ),
+        atomSpace( oac->getAtomSpace( ) ), latestSelectedTrick( "" ), numberOfLearnedTricks( 0 )
 {
 
     unsigned long randSeed;
@@ -162,9 +162,9 @@ void RuleEngineLearnedTricksHandler::update( void )
     // reward or punish the latest selected trick if it was executed
     // until 4 seconds passed and the owner gave a feedback
     if ( this->latestSelectedTrick.length( ) > 0 ) {
-        unsigned long rewardTimestamp = this->opc->getPet( ).getLatestRewardTimestamp( );
-        unsigned long punishmentTimestamp = this->opc->getPet( ).getLatestPunishmentTimestamp( );
-        unsigned long currentTimestamp = this->opc->getPAI( ).getLatestSimWorldTimestamp( );
+        unsigned long rewardTimestamp = this->oac->getPet( ).getLatestRewardTimestamp( );
+        unsigned long punishmentTimestamp = this->oac->getPet( ).getLatestPunishmentTimestamp( );
+        unsigned long currentTimestamp = this->oac->getPAI( ).getLatestSimWorldTimestamp( );
         bool reward = false;
         bool punish = false;
 

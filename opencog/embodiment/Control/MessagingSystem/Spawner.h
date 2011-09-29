@@ -37,7 +37,7 @@ class Spawner : public EmbodimentCogServer
 {
 
 private:
-    int minOpcPort, maxOpcPort;
+    int minOacPort, maxOacPort;
     std::map<int, std::string> port2PetIdMap;
     std::map<std::string, int> petId2PortMap;
 
@@ -61,12 +61,12 @@ public:
      * Allocates an available port number, from the range of ports reserved for OACs, to a given pet id.
      * If there is no available port, returns -1.
      */
-    int allocateOpcPort(const std::string& petId);
+    int allocateOacPort(const std::string& petId);
 
     /**
      * Releases the port number allocated to the given pet id, if any
      */
-    void releaseOpcPort(const std::string& petId);
+    void releaseOacPort(const std::string& petId);
 
 }; // class
 

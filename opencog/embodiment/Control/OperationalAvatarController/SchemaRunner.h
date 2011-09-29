@@ -40,7 +40,7 @@ class SchemaRunner
 {
 public:
 
-    SchemaRunner( OAC* opc );
+    SchemaRunner( OAC* oac );
 
     virtual ~SchemaRunner( );
 
@@ -100,7 +100,7 @@ public:
 
     inline bool isSchemaExecFinished( Procedure::RunningProcedureID schemaId ) {
         if (schemaId) {
-            return (this->opc->getProcedureInterpreter().isFinished( schemaId ));
+            return (this->oac->getProcedureInterpreter().isFinished( schemaId ));
         }
 
         // there is no schema being executed, so it is finished
@@ -112,7 +112,7 @@ public:
     }
 
 private:
-    OAC* opc;
+    OAC* oac;
 
     // Executing schema state variables
     bool executingSchema;
