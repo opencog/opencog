@@ -99,9 +99,9 @@ private:
          *           TimeNode "timestamp"
          *           SimilarityLink (stv 1.0 1.0)
          *               NumberNode: "modulator_value"
-         *                   ExecutionOutputLink
-         *                       GroundedSchemaNode: xxxModulatorUpdater
-         *                       ListLink (empty)
+         *               ExecutionOutputLink
+         *                   GroundedSchemaNode: xxxModulatorUpdater
+         *                   ListLink (empty)
          */
         bool updateModulator(AtomSpace & atomSpace, const unsigned long timeStamp);
 

@@ -50,14 +50,13 @@ int main(int argc, char *argv[])
         config().load(config().get("CONFIG_FILE").c_str());
     }
 
-    // setting unexpected handler in case a different exception from the
-    // especified ones is throw in the code
+    // setting unexpected handler in case a different exception from
+    // the specified ones is thrown in the code
     std::set_unexpected(spawner_unexpected_handler);
 
     system("./router &");
     sleep(5);
     system("./learningServer &");
-//    system("nemiver ./learningServer &"); 
     //system("./pvpSimulator &"); // proxy
 
     try {

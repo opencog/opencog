@@ -62,10 +62,10 @@ bool PsiModulatorUpdaterAgent::Modulator::runUpdater (AtomSpace & atomSpace)
                    this->currentModulatorValue
                   );
 
-#endif // HAVE_GUILE    
+#endif // HAVE_GUILE
 
     return true; 
-}    
+}
 
 bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace, const unsigned long timeStamp)
 {
@@ -76,7 +76,7 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
     std::string scheme_expression, scheme_return_value;
 
     // Store the updated Modulator levels to AtomSpace
-    // set_modulator_or_demand_value would create a new NumberNode and SilarityLink 
+    // set_modulator_or_demand_value would create a new NumberNode and SimilarityLink 
     //
     // Note: Since OpenCog would forget (remove) those Nodes and Links gradually, 
     //       unless you create them to be permanent, don't worry about the overflow of memory. 

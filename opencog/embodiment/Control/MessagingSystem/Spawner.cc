@@ -33,8 +33,10 @@
 #include <sstream>
 #include "NetworkElementCommon.h"
 
-using namespace opencog::messaging;
+using std::string;
+using boost::lexical_cast;
 using namespace opencog;
+using namespace messaging;
 
 BaseServer* Spawner::createInstance()
 {
@@ -49,19 +51,19 @@ Spawner::Spawner()
 {
 }
 
-void Spawner::init(const std::string &id,
-                   const std::string &ip,
-                   int port) throw (opencog::InvalidParamException, std::bad_exception)
+void Spawner::init(const string &id,
+                   const string &ip,
+                   int port) throw (InvalidParamException, std::bad_exception)
 {
 
     setNetworkElement(new NetworkElement(id, ip, port));
 
-    minOpcPort = opencog::config().get_int("MIN_OAC_PORT");
-    maxOpcPort = opencog::config().get_int("MAX_OAC_PORT");
+    minOpcPort = config().get_int("MIN_OAC_PORT");
+    maxOpcPort = config().get_int("MAX_OAC_PORT");
     int maxNumberOfPets = maxOpcPort - minOpcPort;
 
     if (minOpcPort <= 0 || maxOpcPort <= 0 || maxNumberOfPets < 0) {
-        throw opencog::InvalidParamException(TRACE_INFO,
+        throw InvalidParamException(TRACE_INFO,
                                              "Spawner - Invalid port range defined by (Min '%d', Max '%d').",
                                              minOpcPort, maxOpcPort);
     }
@@ -69,9 +71,9 @@ void Spawner::init(const std::string &id,
 
 extern unsigned sleep(unsigned useconds);
 
-int Spawner::allocateOpcPort(const std::string& petId)
+int Spawner::allocateOpcPort(const string& petId)
 {
-    std::map<std::string, int>::const_iterator itr = petId2PortMap.find(petId);
+    std::map<string, int>::const_iterator itr = petId2PortMap.find(petId);
     if (itr != petId2PortMap.end()) {
         // there is a port already allocated to this petId. Returns it.
         return itr->second;
@@ -86,9 +88,9 @@ int Spawner::allocateOpcPort(const std::string& petId)
     return -1;
 }
 
-void Spawner::releaseOpcPort(const std::string& petId)
+void Spawner::releaseOpcPort(const string& petId)
 {
-    std::map<std::string, int>::const_iterator itr = petId2PortMap.find(petId);
+    std::map<string, int>::const_iterator itr = petId2PortMap.find(petId);
     if (itr != petId2PortMap.end()) {
         port2PetIdMap.erase(itr->second);
         petId2PortMap.erase(petId);
@@ -98,9 +100,9 @@ void Spawner::releaseOpcPort(const std::string& petId)
 bool Spawner::processNextMessage(Message *message)
 {
 
-    std::string cmdLine = message->getPlainTextRepresentation();
-    std::string command;
-    std::queue<std::string> args;
+    string cmdLine = message->getPlainTextRepresentation();
+    string command;
+    std::queue<string> args;
 
     NetworkElementCommon::parseCommandLine(cmdLine, command, args);
     logger().info("Spawner - line(%s) command(%s) # of parsed arguments(%d).",
@@ -109,13 +111,13 @@ bool Spawner::processNextMessage(Message *message)
     // Order of arguments is:
     // AGENT_ID, OWNER_ID, AGENT_TYPE, AGENT_TRAITS
     if (command == "LOAD_AGENT") {
-        std::string agentID = args.front();
+        string agentID = args.front();
         args.pop( );
-        std::string ownerID = args.front();
+        string ownerID = args.front();
         args.pop( );
-        std::string agentType = args.front();
+        string agentType = args.front();
         args.pop( );
-        std::string agentTraits = args.front();
+        string agentTraits = args.front();
 
         logger().info("Spawner - agentId(%s) ownerId(%s) agentType(%s) agentTraits(%s).",
                       agentID.c_str( ), ownerID.c_str( ), agentType.c_str( ),
@@ -139,28 +141,28 @@ bool Spawner::processNextMessage(Message *message)
         // Calculates the CogServer shell  and ZeroMQ publish port to be used 
         // (based on the opcPort offset)
         int portOffset = opcPort - minOpcPort + 1;
-        int cogServerShellPort = opencog::config().get_int("SERVER_PORT") + portOffset;
-        int zmqPublishPort = opencog::config().get_int("ZMQ_PUBLISH_PORT") + portOffset;
+        int cogServerShellPort = config().get_int("SERVER_PORT") + portOffset;
+        int zmqPublishPort = config().get_int("ZMQ_PUBLISH_PORT") + portOffset;
 
-        std::string cmdPrefix;
-        std::string cmdSuffix;
+        string cmdPrefix;
+        string cmdSuffix;
 
-        std::string agentArgs = 
+        string agentArgs = 
             agentID + " " +
             ownerID + " " + 
             agentType + " " +
             agentTraits + " " + 
-            boost::lexical_cast<std::string>(opcPort) + " " +
-            boost::lexical_cast<std::string>(cogServerShellPort) + " " +
-            boost::lexical_cast<std::string>(zmqPublishPort); 
+            lexical_cast<string>(opcPort) + " " +
+            lexical_cast<string>(cogServerShellPort) + " " +
+            lexical_cast<string>(zmqPublishPort); 
 
-        if (opencog::config().get_bool("RUN_OAC_DEBUGGER")) {
-            std::string debuggerPath = opencog::config().get("OAC_DEBUGGER_PATH");
+        if (config().get_bool("RUN_OAC_DEBUGGER")) {
+            string debuggerPath = config().get("OAC_DEBUGGER_PATH");
             cmdPrefix = debuggerPath + " ";
-            if(opencog::config().get_bool("PASS_OAC_ARG_DEBUGGER_COMMAND")) {
+            if(config().get_bool("PASS_OAC_ARG_DEBUGGER_COMMAND")) {
                 command_ss << cmdPrefix << " ./opc " << agentArgs << " ";
 
-                if(opencog::config().get_bool("ENABLE_UNITY_CONNECTOR")) {
+                if(config().get_bool("ENABLE_UNITY_CONNECTOR")) {
                     // This is a hack. To redirect "PROXY_ID" setting to agent id.
                     // There are also some tweaks in OAC code.
                     command_ss << message->getFrom() << " " << cmdSuffix << " &";
@@ -178,22 +180,22 @@ bool Spawner::processNextMessage(Message *message)
                 std::cout << agentArgs << std::endl;
             }
         } else {
-            if (opencog::config().get_bool("CHECK_OAC_MEMORY_LEAKS")) {
-                cmdPrefix = opencog::config().get("VALGRIND_PATH");
+            if (config().get_bool("CHECK_OAC_MEMORY_LEAKS")) {
+                cmdPrefix = config().get("VALGRIND_PATH");
                 cmdPrefix += " --leak-check=full ";
                 cmdSuffix += " > opc.valgrind.memcheck 2>&1";
-            } else if (opencog::config().get_bool("CHECK_OAC_MEMORY_USAGE")) {
-                cmdPrefix = opencog::config().get("VALGRIND_PATH");
+            } else if (config().get_bool("CHECK_OAC_MEMORY_USAGE")) {
+                cmdPrefix = config().get("VALGRIND_PATH");
                 cmdPrefix += " --tool=massif --detailed-freq=";
-                cmdPrefix += opencog::config().get("MASSIF_DETAILED_FREQ");
+                cmdPrefix += config().get("MASSIF_DETAILED_FREQ");
                 cmdPrefix += " --depth=";
-                cmdPrefix += opencog::config().get("MASSIF_DEPTH");
+                cmdPrefix += config().get("MASSIF_DEPTH");
                 cmdPrefix += " ";
                 cmdSuffix += " > opc.valgrind.massif 2>&1 &";
             }
             command_ss << cmdPrefix << "./opc " << agentArgs << " ";
 
-			if(opencog::config().get_bool("ENABLE_UNITY_CONNECTOR")) {
+			if(config().get_bool("ENABLE_UNITY_CONNECTOR")) {
 				// This is a hack. To redirect "PROXY_ID" setting to agent id.
 				// There are also some tweaks in OAC code.
 				command_ss << message->getFrom() << " " << cmdSuffix << " &";
@@ -212,16 +214,16 @@ bool Spawner::processNextMessage(Message *message)
                       command_ss.str().c_str( ) 
                      );
 
-        if (!opencog::config().get_bool("MANUAL_OAC_LAUNCH")) {
+        if (!config().get_bool("MANUAL_OAC_LAUNCH")) {
             system(command_ss.str().c_str( ) );
         } else {
             printf("\nSpawner Command: %s\n", command_ss.str().c_str());
         }
     } else if (command == "UNLOAD_AGENT") {
-        const std::string& agentID = args.front();
+        const string& agentID = args.front();
 
         // request router to erase all messages for the given pet
-        std::string cmd("CLEAR_MESSAGE_QUEUE ");
+        string cmd("CLEAR_MESSAGE_QUEUE ");
         cmd.append(getID() + " ");
         cmd.append(agentID);
         sendCommandToRouter(cmd);
