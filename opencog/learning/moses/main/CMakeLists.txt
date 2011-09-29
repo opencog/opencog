@@ -107,6 +107,7 @@ ADD_EXECUTABLE (moses-exec moses-exec)
 TARGET_LINK_LIBRARIES (moses-exec
        moses
 )
+SET_TARGET_PROPERTIES(moses-exec PROPERTIES OUTPUT_NAME "moses")
 
 # install moses-exec, eval-contin-table
 INSTALL(TARGETS moses-exec eval-contin-table RUNTIME DESTINATION bin)
