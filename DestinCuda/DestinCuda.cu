@@ -787,8 +787,14 @@ int MainDestinExperiments(int argc, char* argv[])
     cout << "Images to be processed: " << MAX_CNT << endl;
     cout << "Each image moves: " << SEQ_LENGTH << " times." << endl;
 
+    double procces = 0.1;
     for(int i=0;i<MAX_CNT;i++)
     {
+        if(i > (MAX_CNT-1)*procces)
+        {
+            cout << procces*100 << "%" << endl;
+            procces+=0.1;
+        }
         stringstream xml;
         xml << "<destin>" << endl;
 
@@ -819,13 +825,16 @@ int MainDestinExperiments(int argc, char* argv[])
         time_t iStop = time(NULL);
         xml << "<image id=\"" << i << "\" label=\"" << label << "\" labelIndex=\"" << indexOfExample << "\" runtime=\"" << iStop-iStart << "\" />" << endl;
         xml << "</destin>" << endl;
-        pugi::xml_document outputFile;
-        outputFile.load(xml.str().c_str());
-        string file = argsStruc.strDestinNetworkFileToRead;
-        stringstream num;
-        num << "-" << i;
-        file.insert(file.length()-4, num.str());
-        outputFile.save_file(file.c_str());
+        if(i == MAX_CNT-1)
+        {
+            pugi::xml_document outputFile;
+            outputFile.load(xml.str().c_str());
+            string file = argsStruc.strDestinNetworkFileToRead;
+            stringstream num;
+            num << "-" << i;
+            file.insert(file.length()-4, num.str());
+            outputFile.save_file(file.c_str());
+        }
     }
     time_t destinStop = time(NULL);
     cout << "Time run: " << destinStop-destinStart << endl;
