@@ -148,7 +148,7 @@ private:
         testRandomTVsTooHigh();
         testSymmetricRelationFails();
 //        testInverseBinding();
-        testBasicSpawning();
+        DISABLEtestBasicSpawning();
 /*        testMultipleRootsSpawning();
         testGeneralizationForBindLink();
         testGeneralizationForForAllLink();
@@ -530,7 +530,7 @@ public:
     }
 
     //! Involves friendOf being a symmetricRelation
-    void testBasicSpawning()
+    void DISABLEtestBasicSpawning()
     {
         for (int i = 0; i < 5; i++) {
             printf("\nBasic spawning test %d\n", i);

@@ -297,15 +297,6 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 //    AtomSpaceWrapper *asw = GET_ASW;
 //    stats::Instance().ITN2atom.clear();
 //    
-//    // Code to run the Python backward chainer.
-//    PyGILState_STATE gstate;
-//    gstate = PyGILState_Ensure(); 
-//    import_logic_wrapper();
-//    //python_pln_fc(cogserver().getAtomSpace());
-//    //python_pln_fc();
-//    Handle result = python_pln_bc(cogserver().getAtomSpace(), t->target_handle);
-//    PyGILState_Release(gstate); 
-//    
 //    rawPrint(*t->target, t->target->begin(), -2);
 //
 //    clock_t start, finish;

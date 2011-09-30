@@ -32,6 +32,19 @@
 )
 
 (define target
+    (ImplicationLink
+        (EvaluationLink
+            is_axiom
+            fact_6
+        )
+        (EvaluationLink
+            R
+            (ListLink fact_42)
+        )
+    )
+)
+
+(define target
     (EvaluationLink
         R
         (ListLink fact_42)

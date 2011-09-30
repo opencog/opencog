@@ -4,6 +4,8 @@ from tree import *
 from adaptors import find_matching_conjunctions
 from util import pp
 
+from profilestats import profile
+
 t = types
 
 class Chainer:
@@ -12,87 +14,106 @@ class Chainer:
         self.viz = PLNviz(space)
         self.viz.connect()
         self.setup_rules(space)
-        self.proven = []
-    
-    # Either need to allow a rule-instance to be filled by two things, or reapply old premises,
-    # or check for premises on each new rule-instance.
-    def fc(self):
-        self.proven = [r for r in self.rules if not len(r.goals)]
-            
-#        while self.proven:
-#            r = self.proven.pop()
-        for r in self.proven:
-            r = r.standardize_apart()
-            # add it into any premises
-            partly_satisfied_rules = self.apply_rules_with_matching_premises(r.head)
-            # check the "filled" rules and add their result to proven
-            for possibly_satisfied in partly_satisfied_rules:
-                # viz
-                for i, input in enumerate(possibly_satisfied.goals):
-                    self.viz.outputTarget(input, possibly_satisfied.head, i, possibly_satisfied)
-                self.viz.declareResult(possibly_satisfied.head)
-                
-                if all(map(self.known, possibly_satisfied.goals)):
-                    possibly_satisfied.tv = True
-                    self.add_rule(possibly_satisfied)
-                    self.proven.append(possibly_satisfied)
+        self.apps = []
+        self.bc_later = []
+        self.bc_before = []
 
-    # Note: It would be simpler to just skip the goal pool and use a rule pool instead.
-    # Should also apply rules once they are found (and only up through existing specialized
-    # rules, not through general rules)
+    @profile
     def bc(self, target):
-        goal = Rule(None, target, name="goal")
-        self.bc_pool = [goal]
-        
-        while self.bc_pool:
-            next_target = self.bc_pool.pop()
-            self.query_rules_with_matching_conclusion(next_target)
-        
-        return []
+        try:
+            from time import time
+            
+            print '='*40+'\nbc', pp(target), '\n','='*40, '\n'
+            self.bc_later = [target]
+            self.target = target
+            self.results = []
+
+            start = time()
+            while self.bc_later and not self.results:
+                
+                self.bc_step()
+                
+                print time() - start
+                if time() - start > 10:
+                    print 'TIMEOUT'
+                    assert 0
+                    break
+
+            return [atom_from_tree(result, self.space).h for result in self.results]
+        except Exception, e:
+            import traceback, pdb
+            
+            print traceback.format_exc(10)
+            # Start the post-mortem debugger
+            #pdb.pm()
+            return []
     
-    def query_rules_with_matching_conclusion(self, target):
+    def bc_step(self):
+        next_target = self.bc_later.pop(0) # Breadth-first search
+        self.bc_before.append(next_target)
+        #next_target = self.bc_pool.pop() # Depth-first search
+        
+        for a in self.find_rule_applications(next_target):
+            print repr(a)
+            # PROPOGATE THIS RESULT UP THE BACKWARD CHAINING TREE
+            
+            got_result = self.check_premises_and_add_result(a)
+            if got_result and a.head.isomorphic(self.target):
+                self.results.append(a.head)
+            
+            self.add_queries_for_goals(a)
+    
+    # MUST ALSO ADD APPS AS QUERIES
+    
+    def add_queries_for_goals(self, app):
+        def contains_isomorphic_tree(tr, collection):
+            return any(tr.isomorphic(existing) for existing in collection)
+        
+        for goal in app.goals:
+            if     (not contains_isomorphic_tree(goal, self.bc_before) and
+                    not contains_isomorphic_tree(goal, self.bc_later) ):
+                self.bc_later.append(goal)
+    
+    def check_premises_and_add_result(self, app):
+        '''Check whether the given app can produce a result. This will happen if all its premises are
+        already proven. Or if it is one of the axioms given to PLN initially.'''
+        input_tvs = [self.get_tvs(input) for input in app.goals]
+        if all(input_tvs):
+            print 'coz that\'s what gets results'
+            self.compute_and_add_tv(app)
+            return True
+        return False
+    
+    def compute_and_add_tv(self, app):
+        # NOTE: assumes this is the real copy of the rule, not just a new one.
+        app.tv = True
+    
+    def find_rule_applications(self, target):
+        '''The main 'meat' of the chainer. Finds all possible rule-applications matching your criteria.
+        Chainers can be made by searching for certain apps and doing things with them.'''
+        ret = []
         for r in self.rules:
-            r = r.standardize_apart()
             s = unify(r.head, target, {})
             if s != None:
-                r2 = r.subst(s)
-                # Add the specialized rule and then add the subgoals to the backchaining pool
-                if self.add_rule(r2):
-                    for new_goal in r2.goals:
-                        existing = [g for g in self.bc_pool if unify(new_goal, g, {}, True) != None]
-                        if not existing:
-                            self.bc_pool.append(new_goal)
+                new_rule = r.subst(s)
+                ret.append(new_rule)
+        return ret
 
-    def apply_rules_with_matching_premises(self, premise):
-        conclusions = []
-        for r in self.rules:
-            for i, pr in enumerate(r.goals):
-                s = unify(pr, premise, {})
-                if s != None:
-                    filled_in = r.subst(s)
-                    if self.add_rule(filled_in):
-                        conclusions.append(filled_in)
-        return conclusions
-    
-    def add_rule(self, rule):
-        '''Adds a rule, checking for redundancy (i.e. if it is exactly isomorphic to another rule)'''
-        matches = [r for r in self.rules if rule.isomorphic(r)]
-        
-        if not matches:
-            self.rules.append(rule)
-            print 'added %s rule %s %s' % (rule.tv, rule, repr(rule))
-            return True
-        else:
-            #print 'isomorphic; matches: ', len(matches)
-            if rule.tv:
-                print '***proved rule', repr(rule)
-                return False
+    def find_existing_rule(self, rule):
+        matches = [r for r in self.rules if r.isomorphic(rule)]
+        assert len(matches) < 2
+        return matches
 
-    def known(self, expr):
-        '''Check whether a TruthValue has been found for expr'''
-        matches = [r for r in self.rules if unify(expr, r.head, {}, True) != None]
+    def get_tvs(self, expr):
+        # NOTE: It may be easier to just do this by just storing the TVs for each target.
+        rs = self.find_rule_applications(expr)
         
-        return any(m.tv for m in matches)
+        rs = [r for r in rs if expr.isomorphic(r.head)]
+        
+        return [r.tv for r in rs if r.tv]
+
+    def add_rule(self, rule):        
+        self.rules.append(rule)
 
     def setup_rules(self, a):
         self.rules = []
@@ -101,20 +122,26 @@ class Chainer:
         for obj in a.get_atoms_by_type(t.Atom):
             if obj.tv.count > 0:
                 tr = tree_from_atom(obj)
-                self.add_rule(Rule(tr, [], '[axiom]'))
+                # A variable with a TV could just prove anything; that's evil!
+                if not tr.is_variable():
+                    r = Rule(tr, [], '[axiom]')
+                    r.tv = True
+                    self.add_rule(r)
         
-#        # Deduction
-#        for type in ['SubsetLink', 'ImplicationLink', 'AssociativeLink']:
-#            self.add_rule(Rule(tree(type, 1,3), 
-#                                         [tree(type, 1, 2),
-#                                          tree(type, 2, 3) ], 
-#                                          name='Deduction'))
-#
-#        # Inversion
-#        for type in ['SubsetLink', 'ImplicationLink']:
-#            self.add_rule(Rule( tree(type, 1, 2), 
-#                                         [tree(type, 2, 1)], 
-#                                         name='Inversion'))
+        # Deduction
+        for type in ['SubsetLink', 'ImplicationLink', 'AssociativeLink', 'InheritanceLink']:
+            self.add_rule(Rule(tree(type, 1,3), 
+                                         [tree(type, 1, 2),
+                                          tree(type, 2, 3) ], 
+                                          name='Deduction'))
+
+        # Inversion
+        for type in ['SubsetLink', 'ImplicationLink', 'InheritanceLink']:
+            self.add_rule(Rule( tree(type, 1, 2), 
+                                         [tree(type, 2, 1)], 
+                                         name='Inversion'))
+
+        # Try using a more specialized MP as well
 
         # ModusPonens
         for type in ['ImplicationLink']:
@@ -122,57 +149,74 @@ class Chainer:
                                          [tree(type, 1, 2),
                                           tree(1) ], 
                                           name='ModusPonens'))
+#        # ModusPonens for EvaluationLinks only
+#        for type in ['ImplicationLink']:
+#            conc = tree('EvaluationLink', new_var(), new_var())
+#            prem = tree('EvaluationLink', new_var(), new_var())
+#            imp = tree('ImplicationLink', prem, conc)
+#            
+#            self.add_rule(Rule(conc, 
+#                                         [imp, prem], 
+#                                          name='ModusPonens_Eval'))
         
-#        # AND/OR
-#        for type in ['AndLink', 'OrLink']:
-#            for size in xrange(5):
-#                args = [new_var() for i in xrange(size+1)]
-#                self.add_rule(Rule(tree(type, args),
-#                                   args,
-#                                   type[:-4]))
-#        
-#        # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
-#    #    fact = new_var()
-#    #    list_link = new_var()
-#    #    self.add_rule(Rule(
-#    #                            tree(fact),
-#    #                            [tree('ForAllLink', list_link, fact )]
-#    #                        ))
-#        
+        # AND/OR
+        for type in ['AndLink', 'OrLink']:
+            for size in xrange(5):
+                args = [new_var() for i in xrange(size+1)]
+                self.add_rule(Rule(tree(type, args),
+                                   args,
+                                   type[:-4]))
+        
+        # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
+    #    fact = new_var()
+    #    list_link = new_var()
+    #    self.add_rule(Rule(
+    #                            tree(fact),
+    #                            [tree('ForAllLink', list_link, fact )]
+    #                        ))
+        
         for atom in a.get_atoms_by_type(t.ForAllLink):
             # out[0] is the ListLink of VariableNodes, out[1] is the expression
             tr = tree_from_atom(atom.out[1])
-            self.add_rule(Rule(tr, [], name='ForAll'))
-
-        proven = [r for r in self.rules if not len(r.goals)]
-        # Only done here until we introduce TVs
-        for r in proven:
+            r = Rule(tr, [], name='ForAll')
             r.tv = True
             self.add_rule(r)
 
 
 class Rule :
-    def __init__ (self, head, goals, name):
+    def __init__ (self, head, goals, name, tv = False):
         self.head = head
         self.goals = goals
         self.name = name
-        self.tv = False
+        self.tv = tv
+        
+        self.bc_depth = 0
 
     def __str__(self):
         return self.name
 
+#    def __repr__ (self) :
+#        rep = str(self.head)
+#        sep = " :- "
+#        for goal in self.goals :
+#            rep += sep + str(goal)
+#            sep = ","
+#        return rep
+
     def __repr__ (self) :
-        rep = repr(self.head)
-        sep = " :- "
+        rep = self.name + '\n'
+        rep += ' '*self.bc_depth*3
+        rep += str(self.head)
+        rep += '\n'
         for goal in self.goals :
-            rep += sep + repr(goal)
-            sep = ","
+            rep += ' '*(self.bc_depth*3+3)
+            rep += str(goal) + '\n'
         return rep
-    
+
     def standardize_apart(self):
         head_goals = (self.head,)+tuple(self.goals)
         tmp = standardize_apart(head_goals)
-        new_version = Rule(tmp[0], tmp[1:], name=self.name)
+        new_version = Rule(tmp[0], tmp[1:], name=self.name, tv = self.tv)
         
         return new_version
     
@@ -188,8 +232,18 @@ class Rule :
     def subst(self, s):
         new_head = subst(s, self.head)
         new_goals = list(subst_conjunction(s, self.goals))
-        new_rule = Rule(new_head, new_goals, name=self.name)
+        new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv)
         return new_rule
+
+    def category(self):
+        '''Returns the category of this rule. It can be either an axiom, a PLN Rule (e.g. Modus Ponens), or an
+        application. An application is a PLN Rule applied to specific arguments.'''
+        if self.name == '[axiom]':
+            return 'axiom'
+        elif self.name.startswith('[application]'):
+            return 'application'
+        else:
+            return 'rule'
 
 def test(a):
     c = Chainer(a)
