@@ -584,8 +584,20 @@
 ; Rules related to CertaintyDemandGoal
 ;
 
+(define random_build_destroy_blocks
+    (SequentialAndLink
+        (add_action (GroundedSchemaNode "step_backward") ) ; TODO: the direction is wrong 
+        (add_action (GroundedSchemaNode "step_forward") )  ; TODO: the direction is wrong 
+;        (add_action (GroundedSchemaNode "rotate_right") )  ; TODO: doesn't work 
+        (add_action (GroundedSchemaNode "build_block_at") (WordNode "dummy_arg") ) 
+        (add_action (GroundedSchemaNode "jump_up") (NumberNode "1") ) ;TODO: jump to the block 
+        (add_action (GroundedSchemaNode "destroy_block_at") ) 
+    )        
+)    
+
 (add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
-    (add_action (GroundedSchemaNode "random_search") )
+;    (add_action (GroundedSchemaNode "random_search") ) ; TODO: Doesn't work, should be implemented in scheme
+    random_build_destroy_blocks    
     NULL_PRECONDITION
 )
 
@@ -594,8 +606,13 @@
 ; Rules related to CompetenceDemandGoal
 ;
 
-(add_rule (cog-new-stv 1.0 1.0) CompetenceDemandGoal 
+(add_rule (cog-new-stv 0.25 1.0) CompetenceDemandGoal 
     (add_action (GroundedSchemaNode "random_simple_action") ) 
+    NULL_PRECONDITION 
+)
+
+(add_rule (cog-new-stv 0.75 1.0) CompetenceDemandGoal 
+    random_build_destroy_blocks    
     NULL_PRECONDITION 
 )
 
