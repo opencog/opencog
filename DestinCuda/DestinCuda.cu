@@ -839,7 +839,8 @@ int MainDestinExperiments(int argc, char* argv[])
     time_t destinStop = time(NULL);
     cout << "Time run: " << destinStop-destinStart << endl;
 
-    free(DKernel);
+    // I would think you need this for nice cleanup when turning it off segmentation fault is gone.
+    //free(DKernel);
 
     return 0;
 }
