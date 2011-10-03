@@ -21,10 +21,8 @@
  */
 
 #include <cxxtest/TestSuite.h>
-#include <boost/assign/list_of.hpp>
 #include <opencog/learning/moses/main/moses_exec.h>
 
-using boost::assign::list_of;
 using namespace opencog::moses;
 
 const string MOSESUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
@@ -60,26 +58,29 @@ public:
     }
 
     void test_hc_2_parity() {
-        moses_test(list_of("-Hpa")("-k2"));
+        moses_test({"-Hpa", "-k2"});
     }
     void test_hc_2_parity_with_labels() {
-        moses_test(list_of("-Hpa")("-k2")("-W1"));
+        moses_test({"-Hpa", "-k2", "-W1"});
     }
     void test_hc_3_parity_multi_thread() {
-        moses_test(list_of("-Hpa")("-k3")("-m100000")("-j4"));
+        moses_test({"-Hpa", "-k3", "-m100000", "-j4"});
     }
     void test_hc_3_mux() {
-        moses_test(list_of("-Hmux")("-k3"));
+        moses_test({"-Hmux", "-k3"});
     }
     void test_sa_2_parity() {
-        moses_test(list_of("-Hpa")("-k2")("-asa"));
+        moses_test({"-Hpa", "-k2", "-asa"});
     }
     void test_sa_3_mux() {
-        moses_test(list_of("-Hmux")("-k3")("-asa"));
+        moses_test({"-Hmux", "-k3", "-asa"});
+    }
+    void test_un_3_pa() {
+        moses_test({"-Hpa", "-k3", "-aun", "-m100000"});
     }
     void test_hc_it() {
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
         string max_evals("-m1000");
-        moses_test(list_of(data_file_path)(max_evals), -3);
+        moses_test({data_file_path, max_evals}, -3);
     }
 };

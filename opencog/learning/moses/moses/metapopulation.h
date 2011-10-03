@@ -510,7 +510,8 @@ struct metapopulation : public bscored_combo_tree_set {
         if (_rep == NULL || _deme == NULL)
             return;
 
-        int eval_during_this_deme = n_evals() - _evals_before_this_deme;
+        int eval_during_this_deme = std::min(n_evals() - _evals_before_this_deme,
+                                             (int)_deme->size());
 
         // Logger
         {
