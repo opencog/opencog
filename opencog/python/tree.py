@@ -158,6 +158,10 @@ class tree:
 
     def isomorphic(self, other):
         return isomorphic_conjunctions_ordered([self], [other])
+    
+    def unifies(self, other):
+        assert isinstance(other, tree)
+        return unify(self, other, {}) != None
 
 def tree_from_atom(atom, dic = {}):
     if atom.is_node():

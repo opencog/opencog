@@ -17,6 +17,9 @@ class Chainer:
         self.apps = []
         self.bc_later = []
         self.bc_before = []
+        
+        self.fc_later = []
+        self.fc_before = []
 
     @profile
     def bc(self, target):
@@ -30,14 +33,23 @@ class Chainer:
 
             start = time()
             while self.bc_later and not self.results:
-                
-                self.bc_step()
-                
                 print time() - start
-                if time() - start > 10:
+                if time() - start > 120:
                     print 'TIMEOUT'
-                    assert 0
                     break
+
+                children = self.bc_step()
+                
+                assert not self.fc_later
+                self.fc_later = children
+                # Any result which has been propogated before, may now be useful in new places.
+                # So reset this list so they will be tried again.
+                self.fc_before = []
+                
+                while self.fc_later and not self.results:
+                    self.propogate_results_step()
+
+            print '%s goals expanded, %s remaining' % (len(self.bc_before), len(self.bc_later))
 
             return [atom_from_tree(result, self.space).h for result in self.results]
         except Exception, e:
@@ -52,34 +64,108 @@ class Chainer:
         next_target = self.bc_later.pop(0) # Breadth-first search
         self.bc_before.append(next_target)
         #next_target = self.bc_pool.pop() # Depth-first search
+        print '-BCQ', next_target
         
-        for a in self.find_rule_applications(next_target):
-            print repr(a)
-            # PROPOGATE THIS RESULT UP THE BACKWARD CHAINING TREE
+        ret = []
+        apps = self.find_rule_applications(next_target)
+        for a in apps:
+            a = a.standardize_apart()
+            self.add_queries(a)
+            ret+=a.goals
+        
+        return ret
+    
+    def propogate_results_step(self):
+        next_premise = self.fc_later.pop(0) # Depth-first search
+        self.fc_before.append(next_premise)
+        
+        # If the premises are already specific enough to be produced exactly by an existing chain of apps...
+        # then you have a result! Apply the rule and see if it produces the target (or just an intermediary step).
+        for a in self.find_existing_rule_applications_by_premise(next_premise):
+            #print repr(a)
             
             got_result = self.check_premises_and_add_result(a)
-            if got_result and a.head.isomorphic(self.target):
-                self.results.append(a.head)
+            if got_result:
+                if a.head.isomorphic(self.target):
+                    self.results.append(a.head)
             
-            self.add_queries_for_goals(a)
-    
-    # MUST ALSO ADD APPS AS QUERIES
-    
-    def add_queries_for_goals(self, app):
+                # Do you actually need to check for repetitions?
+                if a.head not in self.fc_before and a.head not in self.fc_later:
+                    self.fc_later.append(a.head)
+                    print '+FCQ', a.head, a.name
+
+        # If more specific values for the (variables in the) goals have been found, then make a new
+        # app, which is more specific. In particular, those variables will have been filled in within any other
+        # goals too.
+        for app in self.specialize_existing_rule_applications_by_premise(next_premise):
+            self.add_queries(app)
+
+    def add_queries(self, app):
         def contains_isomorphic_tree(tr, collection):
             return any(tr.isomorphic(existing) for existing in collection)
-        
+
+        def query_is_stupid(goal):
+            #nested_implication = standardize_apart(tree('ImplicationLink', 1, tree('ImplicationLink', 2, 3)))
+            # Accidentally unifies with (ImplicationLink $blah some_target) !
+            #nested_implication2 = tree('ImplicationLink', tree('ImplicationLink', 1, 2), 3)
+            
+            if goal.get_type() == t.ImplicationLink and len(goal.args) == 2 and goal.args[1].get_type() == t.ImplicationLink:
+                return True
+
+            if goal.get_type() == t.ImplicationLink and len(goal.args) == 2 and goal.args[0].get_type() == t.ImplicationLink:
+                return True
+
+            dumb_inheritance = standardize_apart(tree('InheritanceLink', 1, 2))
+            dumb_implication = standardize_apart(tree('ImplicationLink', 1, 2))
+            return (goal.is_variable() or
+                         #goal.unifies(nested_implication) or
+                         #goal.unifies(nested_implication2) or
+                         goal.isomorphic(dumb_inheritance) or
+                         goal.isomorphic(dumb_implication))
+
+        # You should probably skip the app entirely if it has any self-implying goals
+        def self_implication(goal):
+            types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink', 'AssociativeLink']
+            return goal.get_type() == t.ImplicationLink and len(goal.args) == 2 and goal.args[0].isomorphic(goal.args[1])
+
+#        def self_implication(head):
+#            for type in ['ImplicationLink', 'InheritanceLink', 'AssociativeLink']:
+#                template = standardize_apart(tree(type, 1, 1))
+#                if head.unifies(template):
+#                    return True
+#            return False
+#
+#        if self_implication(app.head):
+#            return
+
+        # WRONG. Sometimes one of the queries is stupid, but the app is later specialized so that query
+        # is no longer stupid.
+        #if any(map(query_is_stupid, app.goals)):
+        #    return
+
+        if any(map(self_implication, app.goals)):
+            return
+
         for goal in app.goals:
-            if     (not contains_isomorphic_tree(goal, self.bc_before) and
+            if     (not query_is_stupid(goal) and
+                    not contains_isomorphic_tree(goal, self.bc_before) and
                     not contains_isomorphic_tree(goal, self.bc_later) ):
                 self.bc_later.append(goal)
+                print '+BCQ', goal, app.name
+        
+        # This records the path of potential rule-apps found on the way down the search tree,
+        # so that results can be propogated back up that path. If you just did normal forward
+        # chaining on the results, it would take lots of other paths as well.
+        if not any(app.isomorphic(existing) for existing in self.apps):
+            self.apps.append(app)
     
     def check_premises_and_add_result(self, app):
         '''Check whether the given app can produce a result. This will happen if all its premises are
-        already proven. Or if it is one of the axioms given to PLN initially.'''
+        already proven. Or if it is one of the axioms given to PLN initially. It will only find premises
+        that are exactly isomorphic to those in the app (i.e. no more specific or general). The chainer
+        itself is responsible for finding specific enough apps.'''
         input_tvs = [self.get_tvs(input) for input in app.goals]
         if all(input_tvs):
-            print 'coz that\'s what gets results'
             self.compute_and_add_tv(app)
             return True
         return False
@@ -99,6 +185,23 @@ class Chainer:
                 ret.append(new_rule)
         return ret
 
+    def find_existing_rule_applications_by_premise(self, premise):
+        ret = []
+        for a in self.apps:
+            if (arg.isomorphic(premise) for arg in a.goals):
+                ret.append(a)
+        return ret
+
+    def specialize_existing_rule_applications_by_premise(self, premise):
+        ret = []
+        for a in self.apps:
+            for arg in a.goals:
+                s = unify(arg, premise, {})
+                if s != None:
+                    new_a = a.subst(s)
+                    ret.append(new_a)
+        return ret
+
     def find_existing_rule(self, rule):
         matches = [r for r in self.rules if r.isomorphic(rule)]
         assert len(matches) < 2
@@ -108,6 +211,11 @@ class Chainer:
         # NOTE: It may be easier to just do this by just storing the TVs for each target.
         rs = self.find_rule_applications(expr)
         
+        # Only want to find results for this exact target, not every possible specialized version of it.
+        # The chaining mechanism itself will create different apps for different specialized versions.
+        # If there are any variables in the target, and a TV is found, that means it has been proven
+        # for all values of that variable.
+        #rs = [r for r in rs if unify(expr, r.head, {}) != None]
         rs = [r for r in rs if expr.isomorphic(r.head)]
         
         return [r.tv for r in rs if r.tv]
@@ -166,6 +274,16 @@ class Chainer:
                 self.add_rule(Rule(tree(type, args),
                                    args,
                                    type[:-4]))
+        
+        # Adding a NOT
+        self.add_rule(Rule(tree('NotLink', 1),
+                           [ tree(1) ],
+                           name = 'Not'))
+        
+        # Link conversion
+        self.add_rule(Rule(tree('InheritanceLink', 1, 2),
+                           [ tree('SubsetLink', 1, 2) ],
+                           name = 'Link2Link'))
         
         # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
     #    fact = new_var()
@@ -228,6 +346,12 @@ class Rule :
         other_conj = (other.head,)+tuple(other.goals)
         
         return isomorphic_conjunctions_ordered(self_conj, other_conj)
+
+    def unifies(self, other):
+        self_conj = (self.head,)+tuple(self.goals)
+        other_conj = (other.head,)+tuple(other.goals)
+        
+        return unify(self_conj, other_conj, {}) != None
 
     def subst(self, s):
         new_head = subst(s, self.head)
