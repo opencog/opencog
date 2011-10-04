@@ -42,8 +42,8 @@ struct scored_instance : public tagged_item<instance, ScoreT> {
 };
 
 /**
- * score_instance takes an instance and a scoring functor and returned the
- * scored_instance
+ * score_instance takes an instance and a scoring functor and returns
+ * the scored_instance
  *
  * @param inst candidate instance
  * @param score scoring functor

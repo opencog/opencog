@@ -24,9 +24,10 @@
 #ifndef _EDA_OPTIMIZE_H
 #define _EDA_OPTIMIZE_H
 
-#include "instance_set.h"
-#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_omp.h>
+
+#include "instance_set.h"
 
 namespace opencog { 
 namespace eda {
@@ -60,10 +61,12 @@ namespace eda {
         //compute scores of the initial instance set
         logger().debug("Evaluate the initial population (%u individuals)",
                        current.size());
-        transform(current.begin(),current.end(),current.begin_scores(),
-                  // using bind and cref to be passed by ref instead of copy
-                  boost::bind(boost::cref(score), _1));
-        
+
+        OMP_ALGO::transform(current.begin(), current.end(), current.begin_scores(),
+                            // using bind and cref to be passed by ref
+                            // instead of copy
+                            bind(boost::cref(score), _1));
+
         //main loop
         int gen=0;
         for (;gen<max_gens 
@@ -71,38 +74,39 @@ namespace eda {
              ++gen) {
             
             //do logging of instance_set and scores
-            write_log(current.begin(),current.end(),current.fields(),gen);
+            write_log(current.begin(), current.end(), current.fields(), gen);
             
             //select promising instances
             logger().debug("Select %d promising instances for model building",
                            n_select);
             std::vector<scored_instance<ScoreT> > promising(n_select);
-            select(current.begin(),current.end(),promising.begin(),n_select);
+            select(current.begin(), current.end(), promising.begin(), n_select);
             
             //initialize the model
             logger().debug("Build probabilistic model");
-            model_type model(current.fields(),promising.begin(),
+            model_type model(current.fields(), promising.begin(),
                              promising.end(), rng);
             
             //update the model
-            learn_structure(current.fields(),promising.begin(),
-                            promising.end(),model);
-            learn_probs(current.fields(),promising.begin(),
-                        promising.end(),model);
+            learn_structure(current.fields(), promising.begin(),
+                            promising.end(), model);
+            learn_probs(current.fields(), promising.begin(),
+                        promising.end(), model);
             
             //create new instances and integrate them into the current
             //instance set, replacing existing instances
             logger().debug("Sample, evaluate and replace %d new candidates"
                            " according to that model", n_generate);
+
             replace(begin_generator(bind(score_instance<ScoringPolicy>,
-                                         bind(model),score)),
+                                         bind(model), score)),
                     end_generator(bind(score_instance<ScoringPolicy>,
-                                       bind(model),score),n_generate),
-                    current.begin(),current.end());      
+                                       bind(model), score), n_generate),
+                    current.begin(), current.end());
         }
 
         //log the final result
-        write_log(current.begin(),current.end(),current.fields(),gen);
+        write_log(current.begin(), current.end(), current.fields(), gen);
         
         //return # of evaluations actually performed
         return current.size()+gen*n_generate;

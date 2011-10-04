@@ -31,6 +31,7 @@ void setting_omp(unsigned num_threads, unsigned min_n) {
     __gnu_parallel::_Settings gps;
     gps.transform_minimal_n = min_n;
     gps.for_each_minimal_n = min_n;
+    gps.replace_minimal_n = min_n;
     __gnu_parallel::_Settings::set(gps);
 #endif
 }

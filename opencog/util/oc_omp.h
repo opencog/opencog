@@ -54,7 +54,9 @@ void setting_omp(unsigned num_threads, unsigned min_n = 100);
 // returns the number of threads as configured by setting_omp
 unsigned num_threads();
 
-// split the number of jobs in 2. For instance if n_jobs is 3, then 
+// split the number of jobs in 2. For instance if n_jobs is 3, then it
+// returns <1, 2>. This function is convenient for parallalizing
+// recursive functions
 std::pair<unsigned, unsigned> split_jobs(unsigned n_jobs);
 
 } // ~namespace opencog
