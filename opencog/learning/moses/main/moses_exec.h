@@ -152,7 +152,7 @@ void metapop_moses_results(RandGen& rng,
 
     // run moses
     if(pa.only_local) {
-        unsigned n_threads = pa.jobs.empty()? 1 : pa.jobs.find(localhost)->second;
+        unsigned n_threads = pa.jobs.find(localhost)->second;
         setting_omp(n_threads);
         moses::moses(metapop, moses_params);
     } else moses::distributed_moses(metapop, vm, pa.jobs, moses_params);
@@ -262,7 +262,7 @@ void metapop_moses_results(RandGen& rng,
                               score_acache, BSCORE, opt_algo,
                               opt_params, meta_params, moses_params, vm, pa);
         // log the number of cache failures
-        if(pa.jobs.empty()) { // do not print if using distributed moses
+        if(pa.only_local) { // do not print if using distributed moses
             logger().info("Number of cache failures for score = %u",
                           score_acache.get_failures());
         }            
