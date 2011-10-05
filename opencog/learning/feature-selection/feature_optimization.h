@@ -74,6 +74,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
     FeatureSet res; // set of relevant non-redundant features to return
 
     typedef boost::shared_mutex shared_mutex;
+    typedef boost::shared_lock<shared_mutex> shared_lock;
     typedef boost::unique_lock<shared_mutex> unique_lock;
     shared_mutex mutex;
 
@@ -99,7 +100,10 @@ FeatureSet incremental_selection(const FeatureSet& features,
             // determine the set of redundant features
             FeatureSet red;
             auto filter_redundant = [&](const FeatureSet* fs) {
-                if(has_empty_intersection(*fs, red)) {
+                bool fs_red_disjoint = [&]() {
+                    shared_lock lock(mutex);
+                    return has_empty_intersection(*fs, red); }();
+                if(fs_red_disjoint) {
                     FeatureSet rfs = redundant_features(*fs, scorer,
                                                         threshold
                                                         * red_threshold);
