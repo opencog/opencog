@@ -52,12 +52,14 @@ namespace eda {
                  LoggingPolicy& write_log, 
                  RandGen& rng) 
     {
+
+
         // Logger
         logger().debug("Probabilistic Learning Optimization");
         // ~Logger
 
         typedef typename StructureLearningPolicy::model_type model_type;
-        
+
         //compute scores of the initial instance set
         logger().debug("Evaluate the initial population (%u individuals)",
                        current.size());
@@ -95,13 +97,19 @@ namespace eda {
             
             //create new instances and integrate them into the current
             //instance set, replacing existing instances
-            logger().debug("Sample, evaluate and replace %d new candidates"
-                           " according to that model", n_generate);
+            logger().debug("Sample %d new candidates according to the model",
+                           n_generate);
+            instance_set<ScoreT> new_instances(n_generate, current.fields());
+            foreach(auto& inst, new_instances)
+                inst = model();
 
-            replace(begin_generator(bind(score_instance<ScoringPolicy>,
-                                         bind(model), score)),
-                    end_generator(bind(score_instance<ScoringPolicy>,
-                                       bind(model), score), n_generate),
+            logger().debug("Evaluate them");
+            OMP_ALGO::transform(new_instances.begin(), new_instances.end(),
+                                new_instances.begin_scores(),
+                                bind(boost::cref(score), _1));
+
+            logger().debug("Replace the new candidates");
+            replace(new_instances.begin(), new_instances.end(),
                     current.begin(), current.end());
         }
 

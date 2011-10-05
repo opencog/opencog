@@ -197,9 +197,10 @@ struct univariate_optimization {
                      max_gens_improv),
                     tournament_selection((unsigned)eda_params.selection, rng),
                     eda::univariate(), eda::local_structure_probs_learning(),
-                    eda::rtr_replacement(deme.fields(),
-                                         opt_params.rtr_window_size(deme.fields()),
-                                         rng),
+                    // eda::rtr_replacement(deme.fields(),
+                    //                      opt_params.rtr_window_size(deme.fields()),
+                    //                      rng),
+                    eda::replace_the_worst(),
                     logger, rng);
         } else { //truncation selection
             OC_ASSERT( false,

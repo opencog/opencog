@@ -33,6 +33,7 @@ namespace eda {
 template<typename ScoreT>
 struct instance_set : public vector<scored_instance<ScoreT> > {
     typedef vector<scored_instance<ScoreT> > super;
+    typedef typename super::value_type value_type;
     typedef boost::transform_iterator < select_tag,
                                         typename super::iterator,
                                         ScoreT&,
