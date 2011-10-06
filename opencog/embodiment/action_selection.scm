@@ -279,7 +279,7 @@
         (list (list) (list) )
 
     ); if
-); define    
+); define
 
 ; Calculate the truth value of the given atom
 ; It simply use the truth value the atom and its outgoings already holds.
@@ -346,7 +346,7 @@
 
 ; Check if the context of the given psi rule is true. 
 ;
-; @param precondition Usually the first outgoing of an psi rule, i.e. ImplicationLink
+; @param precondition Usually the first outgoing of a psi rule, i.e. ImplicationLink
 ;
 ; @return A list as follows, 
 ;
@@ -702,7 +702,7 @@
     (random_select (get_demand_goal_list) )
 )
 
-; Reuturn the demand goal (EvaluationLink) with lowest truth value
+; Return the demand goal (EvaluationLink) with lowest truth value
 (define (get_most_critical_demand_goal)
     (let ( (demand_goal_list (get_demand_goal_list) )
            (most_critical_demand_goal (list) )

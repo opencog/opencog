@@ -99,7 +99,8 @@ class PsiActionSelectionAgent : public opencog::Agent
 
 private:
 
-    unsigned long cycleCount;  // Indicate this mind agent has been executed how many times
+    unsigned long cycleCount;  // Indicate how many times this mind
+                               // agent has been executed
 
     // Indicate whether the mind agent has been initialized, 
     // then the 'run' method will not initialize it over and over, 
@@ -121,11 +122,11 @@ private:
     std::vector<Handle> plan_context_list; 
     std::vector<Handle> plan_action_list;
 
-    // A copy of plan_demand_list, each time pop up and execute one of the action
+    // A copy of plan_action_list, each time pop up and execute one of the action
     std::vector<Handle> temp_action_list;     
 
-    // Each action(or step) in plan_demand_list (or temp_action_list) may actually 
-    // contains multiple actions. For example in plan_demand_list there might
+    // Each action(or step) in plan_action_list (or temp_action_list) may actually 
+    // contains multiple actions. For example in plan_action_list there might
     // be an SequentialAndLink containing goto_obj(food) and eat(food) actions. 
     // However, OAC can not do both actions all at once. So in planner side both
     // actions can be considered as just one action, while in OAC side they are 
@@ -146,8 +147,8 @@ private:
 
     // Add the list of demand goals in AtomSpace
     //
-    // It firstly read the names of demands in config file (PSI_DEMANDS) and 
-    // create an ReferenceLink as follows
+    // It firstly reads the names of demands in config file (PSI_DEMANDS) and 
+    // creates a ReferenceLink as follows
     //
     // ReferenceLink
     //     ConceptNode "plan_demand_list"
