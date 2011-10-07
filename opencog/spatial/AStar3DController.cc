@@ -29,7 +29,7 @@ using namespace opencog;
 using namespace opencog::spatial;
 
 AStar3DController::AStar3DController():
-        astarsearch(new AStarSearch<MapSearchNode>(MAX_SEARCH_NODES)),
+        astarsearch(new AStarSearch<MapSearchNode>(MAX_3D_SEARCH_NODES)),
         useFakeSolution(false) {}
 
 AStar3DController::~AStar3DController()
@@ -55,7 +55,7 @@ void AStar3DController::resetSearch(MapSearchNode &startNode, MapSearchNode &goa
 {
     delete astarsearch;
 
-    astarsearch = new AStarSearch<MapSearchNode>(MAX_SEARCH_NODES);
+    astarsearch = new AStarSearch<MapSearchNode>(MAX_3D_SEARCH_NODES);
     astarsearch->SetStartAndGoalStates(startNode, goalNode);
 }
 
@@ -228,7 +228,7 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
         solution_points.push_back(goal);
     } else {
         if (fakeSolution.empty()) return solution_points;
-        /*
+
         std::vector<MapSearchNode>::iterator prev_node, node;
         prev_node = node = fakeSolution.begin();
         for (++node; node != fakeSolution.end(); node++) {
@@ -262,7 +262,6 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
         spatial::Point3D goal(point2d.first, point2d.second, 0.0);
         solution_points.push_back(goal);
         useFakeSolution = false;
-        */
     }
 
     return solution_points;

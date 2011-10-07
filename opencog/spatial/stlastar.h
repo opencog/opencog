@@ -370,19 +370,11 @@ namespace opencog
                                     break;
                             }
 
-                            // do {
-                            //     tmpFakeSolution.push_back(m_CurrentSolutionNode->m_UserState);
-                            //     m_CurrentSolutionNode = nodeParent;
-                            //     if (!m_CurrentSolutionNode) {
-                            //         break;
-                            //     }
-                            //     nodeParent = m_CurrentSolutionNode->parent;
-                            // } while (m_CurrentSolutionNode != m_Start);
-
                             tmpFakeSolution.push_back(m_Start->m_UserState);
                             
                             if ((int)tmpFakeSolution.size() > (int)m_FakeSolution.size()) {
                                 m_FakeSolution.clear();
+
                                 typename std::vector<UserState>::reverse_iterator rit; 
                                 // Record the fake solution in a right
                                 // order.

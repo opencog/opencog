@@ -53,7 +53,7 @@
 
 #include <opencog/spatial/LSMap3DSearchNode.h>
 
-#define MAX_SEARCH_NODES 5000
+#define MAX_3D_SEARCH_NODES 5000
 #define DEBUG_LISTS 0
 #define DEBUG_LIST_LENGTHS_ONLY 0
 #define DISPLAY_SOLUTION 0
