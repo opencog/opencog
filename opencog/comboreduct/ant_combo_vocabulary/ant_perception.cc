@@ -81,18 +81,18 @@ void ant_perception::set_perception(ant_perception_enum ape) {
               "ant_perception with enum %d has not been found in ppd", ape);
 }
 
-const ant_perception* ant_perception::instance(const std::string& name) {
+const ant_perception* ant_perception::get_instance(const std::string& name) {
     //look up for pet_builtin_action_enum corresponding to that name
     bool found = false;
     const ant_perception* p = NULL;
     for(unsigned int i = 0; i<id::ant_perception_count && !found; ++i) {
-        p = ant_perception::instance((ant_perception_enum)i);
+        p = ant_perception::get_instance((ant_perception_enum)i);
         found = p->get_name()==name;
     }
     return (found? p : NULL);
 }
 
-const ant_perception* ant_perception::instance(ant_perception_enum ape) {
+const ant_perception* ant_perception::get_instance(ant_perception_enum ape) {
     static const ant_perception* perceptions=ant_perception::init_perceptions();
     OC_ASSERT(ape<id::ant_perception_count);
     return &perceptions[ape];

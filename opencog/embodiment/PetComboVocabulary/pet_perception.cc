@@ -83,19 +83,19 @@ void pet_perception::set_perception(pet_perception_enum ppe)
                      "pet_perception with enum %d has not been found in ppd", ppe);
 }
 
-perception pet_perception::instance(const std::string& name)
+perception pet_perception::get_instance(const std::string& name)
 {
     //look up for pet_builtin_action_enum corresponding to that name
     bool found = false;
     perception p = NULL;
     for (unsigned int i = 0; i < id::pet_perception_count && !found; i++) {
-        p = pet_perception::instance((pet_perception_enum)i);
+        p = pet_perception::get_instance((pet_perception_enum)i);
         found = p->get_name() == name;
     }
     return (found ? p : NULL);
 }
 
-perception pet_perception::instance(pet_perception_enum ppe)
+perception pet_perception::get_instance(pet_perception_enum ppe)
 {
     static const pet_perception* perceptions = init_perceptions();
     OC_ASSERT(ppe < id::pet_perception_count);

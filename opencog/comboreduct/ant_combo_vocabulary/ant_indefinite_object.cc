@@ -53,18 +53,18 @@ void ant_indefinite_object::set_indefinite_object(ant_indefinite_object_enum pio
   set_basic_description(pioe);
 }
 
-indefinite_object ant_indefinite_object::instance(const std::string& name) {
+indefinite_object ant_indefinite_object::get_instance(const std::string& name) {
   //look up for pet_indefinite_object_enum corresponding to that name
   bool found = false;
   indefinite_object as = NULL;
   for(unsigned int i = 0; i<id::ant_indefinite_object_count && !found; ++i) {
-    as = ant_indefinite_object::instance((ant_indefinite_object_enum)i);
+    as = ant_indefinite_object::get_instance((ant_indefinite_object_enum)i);
     found = as->get_name()==name;
   }
   return (found? as : NULL);
 }
 
-indefinite_object ant_indefinite_object::instance(ant_indefinite_object_enum pioe) {
+indefinite_object ant_indefinite_object::get_instance(ant_indefinite_object_enum pioe) {
   static const ant_indefinite_object* indefinite_objects=init_indefinite_object();
   OC_ASSERT(pioe<id::ant_indefinite_object_count);
   return static_cast<indefinite_object>(&indefinite_objects[pioe]);

@@ -38,10 +38,10 @@ using namespace opencog::combo;
 
 //return a pointer to class base instance
 //of a given action or perception enum
-builtin_action instance(ant_builtin_action_enum);
-perception instance(ant_perception_enum);
-action_symbol instance(ant_action_symbol_enum);
-indefinite_object instance(ant_indefinite_object_enum);
+builtin_action get_instance(ant_builtin_action_enum);
+perception get_instance(ant_perception_enum);
+action_symbol get_instance(ant_action_symbol_enum);
+indefinite_object get_instance(ant_indefinite_object_enum);
 
 //get the enum corresponding to a builtin_action, perception or action_symbol
 ant_builtin_action_enum get_enum(builtin_action);

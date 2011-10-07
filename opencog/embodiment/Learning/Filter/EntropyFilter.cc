@@ -245,7 +245,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
             }
 #ifdef ISMOVING_OPTIMIZE
             //check if the perception is is_moving then look at _isMoving
-            if (head == instance(id::is_moving)) {
+            if (head == get_instance(id::is_moving)) {
                 OC_ASSERT(head_it.has_one_child(),
                                  "is_moving must have only one child");
                 //eval the new perception
@@ -260,7 +260,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
             //hasSaid is particular because we must cut the time in
             //hasSaidDelay time intervals between the start and the end of
             //the spaceMap
-            else if (head == instance(id::has_said)) {
+            else if (head == get_instance(id::has_said)) {
                 OC_ASSERT(_hasSaidDelay > 0,
                                  "_hasSaidDelay cannot be null otherwise that may provoke an infinite loop");
                 for (unsigned long i = ltu; i > ltl; i -= _hasSaidDelay) {
@@ -282,7 +282,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                 }
             }
             //this code is very badly optimized it should be optimized later
-            else if (head == instance(id::is_last_agent_action)) {
+            else if (head == get_instance(id::is_last_agent_action)) {
 
                 //debug print
                 //std::cout << "PERCEPTION IS_LAST_AGENT_ACTION : " << combo_tree(head_it) << std::endl;
@@ -360,7 +360,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
 
 #else //~ISMOVING_OPTIMIZE
 
-            if (head == instance(id::has_said)) {
+            if (head == get_instance(id::has_said)) {
                 for (unsigned long i = ltu; i > ltl; i -= _hasSaidDelay) {
                     if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
                                               smh,
@@ -449,8 +449,8 @@ void EntropyFilter::generateFilteredPerceptions(combo_tree_ns_set& pred_set,
 
 inline bool EntropyFilter::doesInvolveMoving(vertex v)
 {
-    return (v == instance(id::near) || v == instance(id::below)
-            || v == instance(id::above) || v == instance(id::inside));
+    return (v == get_instance(id::near) || v == get_instance(id::below)
+            || v == get_instance(id::above) || v == get_instance(id::inside));
 }
 
 inline void EntropyFilter::setIsMoving(const definite_object& obj, bool val)
@@ -575,7 +575,7 @@ void EntropyFilter::build_and_insert_atomic_perceptions(const combo_tree& tr,
     //is_last_agent_action is a special case because it uses
     //_atas (containing a map of agents corresponding to there
     //actions and arguments) instead of _operands
-    else if (*head == instance(id::is_last_agent_action)) {
+    else if (*head == get_instance(id::is_last_agent_action)) {
 
         //debug print
         //std::cout << "TR HEAD : " << combo_tree(head)

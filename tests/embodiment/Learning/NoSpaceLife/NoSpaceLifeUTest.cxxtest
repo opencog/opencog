@@ -81,13 +81,13 @@ public:
         atomSpace.addNode(PET_NODE, pet_str);
         //fill atomSpace with actions beg, stretch and goto_obj(stick)
         stringstream ss_goto_obj;
-        ss_goto_obj << instance(id::goto_obj);
+        ss_goto_obj << get_instance(id::goto_obj);
         Handle goto_obj_h = atomSpace.addNode(SCHEMA_NODE, ss_goto_obj.str());
         stringstream ss_beg;
-        ss_beg << instance(id::beg);
+        ss_beg << get_instance(id::beg);
         Handle beg_h = atomSpace.addNode(SCHEMA_NODE, ss_beg.str());
         stringstream ss_stretch;
-        ss_stretch << instance(id::stretch);
+        ss_stretch << get_instance(id::stretch);
         Handle stretch_h = atomSpace.addNode(SCHEMA_NODE, ss_stretch.str());
 
         //fill the atomSpace with the behavior to imitate

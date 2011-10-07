@@ -263,11 +263,10 @@ bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
 {
     OC_ASSERT(is_definite_object(v));
 
-    OC_ASSERT(
-                     toHandle(as, get_definite_object(v), self_id, owner_id)
-                     != Handle::UNDEFINED,
-                     "WorldWrapperUtil - Null handle for definite objetc %s.",
-                     get_definite_object(v).c_str());
+    OC_ASSERT(toHandle(as, get_definite_object(v), self_id, owner_id)
+              != Handle::UNDEFINED,
+              "WorldWrapperUtil - Null handle for definite objetc %s.",
+              get_definite_object(v).c_str());
 
     return sm.containsObject(as.getName(toHandle(as, get_definite_object(v),
                                         self_id, owner_id)));
@@ -323,7 +322,7 @@ throw (opencog::ComboException,
         return vertex("null_obj");
     }
     perception p;//used for nearest_X and random_X indefinite objects
-    indefinite_object io = instance(ioe);
+    indefinite_object io = get_instance(ioe);
     switch (ioe) {
     case id::nearest_object: {
 
@@ -818,7 +817,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                      "It is assumed that '*it' is a perception");
 
     perception p = get_perception(*it);
-    if (p == instance(id::is_null)) { //just check directly
+    if (p == get_instance(id::is_null)) { //just check directly
         OC_ASSERT(it.number_of_children() == 1);
 
         combo::vertex v = *it.begin();
@@ -835,7 +834,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         //std::cout << "is_null(" << *it.begin() << ") = " << (get_definite_object(v) == id::null_obj ? "true" : "false") << std::endl;
         return combo::bool_to_vertex(get_definite_object(v) == id::null_obj);
 
-    } else if (p == instance(id::exists)) {
+    } else if (p == get_instance(id::exists)) {
         OC_ASSERT(
                          it.number_of_children() == 1);
         OC_ASSERT(
@@ -1326,7 +1325,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         OC_ASSERT(smh != Handle::UNDEFINED, "WWUtil - near - A SpaceMap must exist");
 
                         stringstream ss;
-                        ss << instance(pe);
+                        ss << get_instance(pe);
 
                         const SpaceServer::SpaceMap& sm =
                             atomSpace.getSpaceServer().getMap(smh);
@@ -2965,57 +2964,57 @@ perception WorldWrapperUtil::nearest_random_X_to_is_X(pet_indefinite_object_enum
 {
 
     // print debug
-    std::cout << "ioe = " << instance(ioe) << std::endl;
+    std::cout << "ioe = " << get_instance(ioe) << std::endl;
 
     switch (ioe) {
         //edible
     case id::random_edible:
     case id::nearest_edible:
-        return instance(id::is_edible);
+        return get_instance(id::is_edible);
         //movable
     case id::random_movable:
     case id::nearest_movable:
-        return instance(id::is_movable);
+        return get_instance(id::is_movable);
         //pickupable
     case id::random_pickupable:
     case id::nearest_pickupable:
-        return instance(id::is_pickupable);
+        return get_instance(id::is_pickupable);
         //drinkable
     case id::random_drinkable:
     case id::nearest_drinkable:
-        return instance(id::is_drinkable);
+        return get_instance(id::is_drinkable);
         //avatar
     case id::random_avatar:
     case id::nearest_avatar:
-        return instance(id::is_avatar);
+        return get_instance(id::is_avatar);
         //pet
     case id::random_pet:
     case id::nearest_pet:
-        return instance(id::is_pet);
+        return get_instance(id::is_pet);
         //small
     case id::random_small:
     case id::nearest_small:
-        return instance(id::is_small);
+        return get_instance(id::is_small);
         //moving
     case id::random_moving:
     case id::nearest_moving:
-        return instance(id::is_moving);
+        return get_instance(id::is_moving);
         //noisy
     case id::random_noisy:
     case id::nearest_noisy:
-        return instance(id::is_noisy);
+        return get_instance(id::is_noisy);
         //poo_place
     case id::random_poo_place:
     case id::nearest_poo_place:
-        return instance(id::is_poo_place);
+        return get_instance(id::is_poo_place);
         //pee_place
     case id::random_pee_place:
     case id::nearest_pee_place:
-        return instance(id::is_pee_place);
+        return get_instance(id::is_pee_place);
         //default
     default:
         OC_ASSERT(false, "nothing is associated with io");
-        return instance(id::is_null);
+        return get_instance(id::is_null);
     }
 }
 

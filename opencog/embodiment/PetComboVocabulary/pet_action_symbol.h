@@ -127,11 +127,11 @@ public:
     //return a pointer of the static action_symbol corresponding
     //to a given name string
     //if no such action_symbol exists then return NULL pointer
-    static action_symbol instance(const std::string& name);
+    static action_symbol get_instance(const std::string& name);
 
     //return a pointer of the static pet_perception_action corresponding
     //to a given pet_perception_enum
-    static action_symbol instance(pet_action_symbol_enum);
+    static action_symbol get_instance(pet_action_symbol_enum);
 
 };
 

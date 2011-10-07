@@ -408,7 +408,8 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                         //create the arg list of goto_obj
                         //====
                         //get handle of goto_obj action
-                        string goto_obj_name = instance(id::goto_obj)->get_name();
+                        string goto_obj_name =
+                            get_instance(id::goto_obj)->get_name();
                         Handle goto_obj_h = as.addNode(NODE, goto_obj_name);
 
                         //get handle of the destination object

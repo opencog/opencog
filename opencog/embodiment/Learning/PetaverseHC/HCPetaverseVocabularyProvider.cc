@@ -39,17 +39,17 @@ HCPetaverseVocabularyProvider::HCPetaverseVocabularyProvider()
     //elementary builtin actions
     if (ea.empty()) {
         for (unsigned int i = 0; i < _elementary_actions_size; i++)
-            ea.insert(instance(_elementary_actions[i]));
+            ea.insert(get_instance(_elementary_actions[i]));
     }
     //elementary perceptions
     if (ep.empty()) {
         for (unsigned int i = 0; i < _elementary_perceptions_size; i++)
-            ep.insert(instance(_elementary_perceptions[i]));
+            ep.insert(get_instance(_elementary_perceptions[i]));
     }
     //indefinite objects
     if (is.empty()) {
         for (unsigned int i = 0; i < _indefinite_objects_size; i++)
-            is.insert(instance(_indefinite_objects[i]));
+            is.insert(get_instance(_indefinite_objects[i]));
     }
 }
 

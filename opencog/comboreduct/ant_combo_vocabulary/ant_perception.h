@@ -103,11 +103,11 @@ public:
   //return a pointer of the static ant_perception corresponding
   //to a given name string
   //if no such ant_perception exists then return NULL pointer
-  static const ant_perception* instance(const std::string& name);
+  static const ant_perception* get_instance(const std::string& name);
 
   //return a pointer of the static ant_perception corresponding
   //to a given ant_perception_enum
-  static const ant_perception* instance(ant_perception_enum);
+  static const ant_perception* get_instance(ant_perception_enum);
 
   //basic access methods
   const std::string& get_name() const;

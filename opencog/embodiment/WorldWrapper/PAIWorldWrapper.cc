@@ -1322,7 +1322,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             part = "5";
             break;
         default:
-            logger().error("PAIWorldWrapper - Invalid avatar part as parameter for sniff_avatar_part: %s.", instance(ase)->get_name().c_str());
+            logger().error("PAIWorldWrapper - Invalid avatar part as parameter for sniff_avatar_part: %s.", get_instance(ase)->get_name().c_str());
             OC_ASSERT(false);
         }
         action.addParameter(ActionParameter("part", ActionParamType::INT(), part));
@@ -1350,7 +1350,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             part = "2";
             break;
         default:
-            logger().error("PAIWorldWrapper - Invalid pet part as parameter for sniff_pet_part: %s.", instance(ase)->get_name().c_str());
+            logger().error("PAIWorldWrapper - Invalid pet part as parameter for sniff_pet_part: %s.", get_instance(ase)->get_name().c_str());
             OC_ASSERT(false);
         }
         action.addParameter(ActionParameter("part", ActionParamType::INT(), part));
@@ -1382,7 +1382,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             action = ActionType::SCRATCH_SELF_LEFT_SHOULDER();
             break;
         default:
-            logger().error("PAIWorldWrapper - Invalid pet part as parameter for scratch_self: %s.", instance(ase)->get_name().c_str());
+            logger().error("PAIWorldWrapper - Invalid pet part as parameter for scratch_self: %s.", get_instance(ase)->get_name().c_str());
             OC_ASSERT(false);
         }
     }
@@ -1390,12 +1390,12 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
     case id::move_left_ear:  // move_left_ear(TWITCH|PERK|BACK)
     case id::move_right_ear: // move_right_ear(TWITCH|PERK|BACK)
-        if (*from.begin() == instance(id::TWITCH)) {
-            action = (bae == instance(id::move_left_ear)) ? ActionType::LEFT_EAR_TWITCH() : ActionType::RIGHT_EAR_TWITCH();
-        } else if (*from.begin() == instance(id::PERK)) {
-            action = (bae == instance(id::move_left_ear)) ? ActionType::LEFT_EAR_PERK() : ActionType::RIGHT_EAR_PERK();
+        if (*from.begin() == get_instance(id::TWITCH)) {
+            action = (bae == get_instance(id::move_left_ear)) ? ActionType::LEFT_EAR_TWITCH() : ActionType::RIGHT_EAR_TWITCH();
+        } else if (*from.begin() == get_instance(id::PERK)) {
+            action = (bae == get_instance(id::move_left_ear)) ? ActionType::LEFT_EAR_PERK() : ActionType::RIGHT_EAR_PERK();
         } else {
-            action = (bae == instance(id::move_left_ear)) ? ActionType::LEFT_EAR_BACK() : ActionType::RIGHT_EAR_BACK();
+            action = (bae == get_instance(id::move_left_ear)) ? ActionType::LEFT_EAR_BACK() : ActionType::RIGHT_EAR_BACK();
         }
         break;
 
@@ -1458,9 +1458,8 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         break;
     case id::step_towards:      // step_towards(obj,TOWARDS|AWAY)
         OC_ASSERT(from.number_of_children() == 2);
-        OC_ASSERT(
-                         *from.last_child() == instance(id::TOWARDS) ||
-                         *from.last_child() == instance(id::AWAY));
+        OC_ASSERT(*from.last_child() == get_instance(id::TOWARDS) ||
+                  *from.last_child() == get_instance(id::AWAY));
         {
             double stepSize = (sm.diagonalSize()) * STEP_SIZE_PERCENTAGE / 100; // 2% of the width
 
@@ -1471,7 +1470,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             p.first *= min(stepSize / len, 1.0);
             p.second *= min(stepSize / len, 1.0);
 
-            if (*from.last_child() == instance(id::AWAY)) {
+            if (*from.last_child() == get_instance(id::AWAY)) {
                 p.first = -p.first;
                 p.second = -p.second;
             }

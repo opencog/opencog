@@ -124,18 +124,18 @@ void ant_builtin_action::set_action(ant_builtin_action_enum abae,
     _exists_zero_neutral_argument = !not_exists_zero_neutral;
 }
 
-builtin_action ant_builtin_action::instance(const std::string& name) {
+builtin_action ant_builtin_action::get_instance(const std::string& name) {
     //look up for ant_builtin_action_enum corresponding to that name
     bool found = false;
     builtin_action a = NULL;
     for(unsigned int i = 0; i<id::ant_builtin_action_count && !found; ++i) {
-        a = ant_builtin_action::instance((ant_builtin_action_enum)i);
+        a = ant_builtin_action::get_instance((ant_builtin_action_enum)i);
         found = a->get_name()==name;
     }
     return (found? a : NULL);
 }
 
-builtin_action ant_builtin_action::instance(ant_builtin_action_enum abae) {
+builtin_action ant_builtin_action::get_instance(ant_builtin_action_enum abae) {
     static const ant_builtin_action* actions=ant_builtin_action::init_actions();
     OC_ASSERT(abae<id::ant_builtin_action_count);
     return static_cast<builtin_action>(&actions[abae]);

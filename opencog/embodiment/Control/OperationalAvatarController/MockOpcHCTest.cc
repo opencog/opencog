@@ -114,13 +114,13 @@ void MockOpcHCTest::init(const std::string & myId,
     //fill atomSpace with actions goto_obj grab and wag
     //goto_obj
     goto_obj_h = atomSpace->addNode(GROUNDED_SCHEMA_NODE,
-                                    instance(id::goto_obj)->get_name().c_str());
+                                    get_instance(id::goto_obj)->get_name().c_str());
     //grab
     grab_h = atomSpace->addNode(GROUNDED_SCHEMA_NODE,
-                                instance(id::grab)->get_name().c_str());
+                                get_instance(id::grab)->get_name().c_str());
     //wag
     wag_h = atomSpace->addNode(GROUNDED_SCHEMA_NODE,
-                               instance(id::wag)->get_name().c_str());
+                               get_instance(id::wag)->get_name().c_str());
     //add the concept of the trick
     trick_h = atomSpace->addNode(CONCEPT_NODE, TRICK_NAME);
     //add AtTimeLink to it

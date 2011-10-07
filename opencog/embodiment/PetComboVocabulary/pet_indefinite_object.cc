@@ -74,19 +74,19 @@ void pet_indefinite_object::set_indefinite_object(pet_indefinite_object_enum pio
                      "pet_perception with enum %d has not been found in iopd", pioe);
 }
 
-indefinite_object pet_indefinite_object::instance(const std::string& name)
+indefinite_object pet_indefinite_object::get_instance(const std::string& name)
 {
     //look up for pet_indefinite_object_enum corresponding to that name
     bool found = false;
     indefinite_object as = NULL;
     for (unsigned int i = 0; i < id::pet_indefinite_object_count && !found; i++) {
-        as = pet_indefinite_object::instance((pet_indefinite_object_enum)i);
+        as = pet_indefinite_object::get_instance((pet_indefinite_object_enum)i);
         found = as->get_name() == name;
     }
     return (found ? as : NULL);
 }
 
-indefinite_object pet_indefinite_object::instance(pet_indefinite_object_enum pioe)
+indefinite_object pet_indefinite_object::get_instance(pet_indefinite_object_enum pioe)
 {
     static const pet_indefinite_object* indefinite_objects = init_indefinite_object();
     OC_ASSERT(pioe < id::pet_indefinite_object_count);

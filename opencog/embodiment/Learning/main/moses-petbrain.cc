@@ -72,11 +72,11 @@ int main(int argc, char** argv)
     combo_tree_ns_set perceptions;
     combo_tree_ns_set actions;
 
-    actions.insert(combo_tree(instance(id::turn_left)));
-    actions.insert(combo_tree(instance(id::turn_right)));
-    actions.insert(combo_tree(instance(id::move_forward)));
+    actions.insert(combo_tree(get_instance(id::turn_left)));
+    actions.insert(combo_tree(get_instance(id::turn_right)));
+    actions.insert(combo_tree(get_instance(id::move_forward)));
 
-    perceptions.insert(combo_tree(instance(id::is_food_ahead)));
+    perceptions.insert(combo_tree(get_instance(id::is_food_ahead)));
 
 
     moses_parameters moses_param(max_evals, -1, 0,

@@ -420,15 +420,15 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
 
             switch (idx) {
             case forward:
-                *_loc = instance(id::move_forward);
+                *_loc = get_instance(id::move_forward);
                 break;
 
             case rleft:
-                *_loc = instance(id::turn_left);
+                *_loc = get_instance(id::turn_left);
                 break;
 
             case rright:
-                *_loc = instance(id::turn_right);
+                *_loc = get_instance(id::turn_right);
                 break;
 
             default:

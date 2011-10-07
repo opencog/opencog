@@ -134,11 +134,11 @@ public:
 
         //fill atomSpace with actions goto_obj and drop
         stringstream ss_goto_obj;
-        ss_goto_obj << instance(id::goto_obj);
+        ss_goto_obj << get_instance(id::goto_obj);
         Handle goto_obj_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE,
                                               ss_goto_obj.str());
         stringstream ss_drop;
-        ss_drop << instance(id::drop);
+        ss_drop << get_instance(id::drop);
         Handle drop_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE, ss_drop.str());
 
         //create the ListLink atoms
@@ -215,11 +215,11 @@ public:
         dos.insert("owner");//avatar_str);
         dos.insert("self");//pet_str);
         std::set<indefinite_object> idos;
-        idos.insert(instance(id::nearest_object));
-        idos.insert(instance(id::random_object));
+        idos.insert(get_instance(id::nearest_object));
+        idos.insert(get_instance(id::random_object));
         builtin_action_set bas;
-        bas.insert(instance(id::goto_obj));
-        bas.insert(instance(id::drop));
+        bas.insert(get_instance(id::goto_obj));
+        bas.insert(get_instance(id::drop));
 
         //retrieve BDs
         AtomSpaceWorldProvider wp(atomSpace);

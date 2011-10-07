@@ -40,14 +40,14 @@ struct ant_hillclimber {
         _elementary_operators.insert(id::sequential_and);
         _elementary_operators.insert(id::action_boolean_if);
         //enumerate actions used in hillclimbing
-        combo_tree a1(instance(id::turn_left));
-        combo_tree a2(instance(id::turn_right));
-        combo_tree a3(instance(id::move_forward));
+        combo_tree a1(get_instance(id::turn_left));
+        combo_tree a2(get_instance(id::turn_right));
+        combo_tree a3(get_instance(id::move_forward));
         _actions.insert(a1);
         _actions.insert(a2);
         _actions.insert(a3);
         //enumarate intuitions used in hillclimbing
-        combo_tree p(instance(id::is_food_ahead));
+        combo_tree p(get_instance(id::is_food_ahead));
         _perceptions.insert(p);
 
         _hillclimber = new hillclimber<FitnessEstimator>

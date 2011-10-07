@@ -25,17 +25,17 @@
 
 namespace ant_combo {
 
-builtin_action instance(ant_builtin_action_enum e) {
-    return ant_builtin_action::instance(e);
+builtin_action get_instance(ant_builtin_action_enum e) {
+    return ant_builtin_action::get_instance(e);
 }
-perception instance(ant_perception_enum e){
-    return ant_perception::instance(e);
+perception get_instance(ant_perception_enum e){
+    return ant_perception::get_instance(e);
 }
-action_symbol instance(ant_action_symbol_enum e) {
-    return ant_action_symbol::instance(e);
+action_symbol get_instance(ant_action_symbol_enum e) {
+    return ant_action_symbol::get_instance(e);
 }
-indefinite_object instance(ant_indefinite_object_enum e) {
-    return ant_indefinite_object::instance(e);
+indefinite_object get_instance(ant_indefinite_object_enum e) {
+    return ant_indefinite_object::get_instance(e);
 }
 
 ant_builtin_action_enum get_enum(builtin_action ba) {
@@ -52,52 +52,52 @@ ant_indefinite_object_enum get_enum(indefinite_object as) {
 }
 
 bool operator==(builtin_action b, ant_builtin_action_enum e) {
-    return instance(e)==b;
+    return get_instance(e)==b;
 }
 bool operator==(ant_builtin_action_enum e, builtin_action b) {
-    return instance(e)==b;
+    return get_instance(e)==b;
 }
 bool operator!=(builtin_action b, ant_builtin_action_enum e) {
-    return instance(e)!=b;
+    return get_instance(e)!=b;
 }
 bool operator!=(ant_builtin_action_enum e, builtin_action b) {
-    return instance(e)!=b;
+    return get_instance(e)!=b;
 }
 bool operator==(perception p, ant_perception_enum e) {
-    return instance(e)==p;
+    return get_instance(e)==p;
 }
 bool operator==(ant_perception_enum e, perception p) {
-    return instance(e)==p;
+    return get_instance(e)==p;
 }
 bool operator!=(perception p, ant_perception_enum e) {
-    return instance(e)!=p;
+    return get_instance(e)!=p;
 }
 bool operator!=(ant_perception_enum e, perception p) {
-    return instance(e)!=p;
+    return get_instance(e)!=p;
 }
 bool operator==(action_symbol a, ant_action_symbol_enum e) {
-    return instance(e)==a;
+    return get_instance(e)==a;
 }
 bool operator==(ant_action_symbol_enum e, action_symbol a) {
-    return instance(e)==a;
+    return get_instance(e)==a;
 }
 bool operator!=(action_symbol a, ant_action_symbol_enum e) {
-    return instance(e)!=a;
+    return get_instance(e)!=a;
 }
 bool operator!=(ant_action_symbol_enum e, action_symbol a) {
-    return instance(e)!=a;
+    return get_instance(e)!=a;
 }
 bool operator==(indefinite_object i, ant_indefinite_object_enum e) {
-    return instance(e)==i;
+    return get_instance(e)==i;
 }
 bool operator==(ant_indefinite_object_enum e, indefinite_object i) {
-    return instance(e)==i;
+    return get_instance(e)==i;
 }
 bool operator!=(indefinite_object i, ant_indefinite_object_enum e) {
-    return instance(e)!=i;
+    return get_instance(e)!=i;
 }
 bool operator!=(ant_indefinite_object_enum e, indefinite_object i) {
-    return instance(e)!=i;
+    return get_instance(e)!=i;
 }
 
 }//~namespace ant_combo

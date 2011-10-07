@@ -48,9 +48,9 @@ int main()
     //cout << "is random" << b << endl;
 
     //b=is_random(id::nearest_movable);
-    perception p = instance(id::is_food_ahead);
-    builtin_action ba1 = instance(id::move_forward);
-    builtin_action ba2 = instance(id::turn_left);
+    perception p = get_instance(id::is_food_ahead);
+    builtin_action ba1 = get_instance(id::move_forward);
+    builtin_action ba2 = get_instance(id::turn_left);
     //cout << "is random" << b << endl;
 
     cout << "1----------------" << endl;

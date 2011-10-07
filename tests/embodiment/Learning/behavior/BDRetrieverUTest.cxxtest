@@ -60,11 +60,11 @@ public:
         Handle pet_h = atomSpace.addNode(PET_NODE, pet_str);
         //fill atomSpace with actions goto_obj grab drop and wag
         stringstream ss_goto_obj;
-        ss_goto_obj << instance(id::goto_obj);
+        ss_goto_obj << get_instance(id::goto_obj);
         Handle goto_obj_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE,
                                               ss_goto_obj.str());
         stringstream ss_grab;
-        ss_grab << instance(id::grab);
+        ss_grab << get_instance(id::grab);
         Handle grab_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE, ss_grab.str());
         //create the ListLink atoms
         //for goto_obj(dummy_object)
@@ -157,17 +157,17 @@ public:
         Handle pet_h = atomSpace.addNode(PET_NODE, pet_str);
         //fill atomSpace with actions goto_obj grab drop and wag
         stringstream ss_goto_obj;
-        ss_goto_obj << instance(id::goto_obj);
+        ss_goto_obj << get_instance(id::goto_obj);
         Handle goto_obj_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE,
                                               ss_goto_obj.str());
         stringstream ss_grab;
-        ss_grab << instance(id::grab);
+        ss_grab << get_instance(id::grab);
         Handle grab_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE, ss_grab.str());
         stringstream ss_wag;
-        ss_wag << instance(id::wag);
+        ss_wag << get_instance(id::wag);
         Handle wag_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE, ss_wag.str());
         stringstream ss_back_flip;
-        ss_back_flip << instance(id::back_flip);
+        ss_back_flip << get_instance(id::back_flip);
         Handle back_flip_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE, ss_back_flip.str());
         //create the ListLink atoms
         //for goto_obj(dummy_object)

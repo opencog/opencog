@@ -139,19 +139,19 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
     }
 }
 
-builtin_action pet_builtin_action::instance(const std::string& name)
+builtin_action pet_builtin_action::get_instance(const std::string& name)
 {
     //look up for pet_builtin_action_enum corresponding to that name
     bool found = false;
     builtin_action a = NULL;
     for (unsigned int i = 0; i < id::pet_builtin_action_count && !found; i++) {
-        a = pet_builtin_action::instance((pet_builtin_action_enum)i);
+        a = pet_builtin_action::get_instance((pet_builtin_action_enum)i);
         found = a->get_name() == name;
     }
     return (found ? a : NULL);
 }
 
-builtin_action pet_builtin_action::instance(pet_builtin_action_enum pbae)
+builtin_action pet_builtin_action::get_instance(pet_builtin_action_enum pbae)
 {
     static const pet_builtin_action* actions = init_actions();
     OC_ASSERT(pbae < id::pet_builtin_action_count);

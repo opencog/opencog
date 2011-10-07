@@ -93,11 +93,11 @@ public:
     //return a pointer of the static action_symbol corresponding
     //to a given name string
     //if no such action_symbol exists then return NULL pointer
-    static indefinite_object instance(const std::string& name);
+    static indefinite_object get_instance(const std::string& name);
 
     //return a pointer of the static pet_perception_action corresponding
     //to a given pet_perception_enum
-    static indefinite_object instance(ant_indefinite_object_enum);
+    static indefinite_object get_instance(ant_indefinite_object_enum);
 
 };
 

@@ -53,18 +53,18 @@ void ant_action_symbol::set_action_symbol(ant_action_symbol_enum pase) {
   set_basic_description(pase);
 }
 
-action_symbol ant_action_symbol::instance(const std::string& name) {
+action_symbol ant_action_symbol::get_instance(const std::string& name) {
   //look up for pet_action_symbol_enum corresponding to that name
   bool found = false;
   action_symbol as = NULL;
   for(unsigned int i = 0; i<id::ant_action_symbol_count && !found; ++i) {
-    as = ant_action_symbol::instance((ant_action_symbol_enum)i);
+    as = ant_action_symbol::get_instance((ant_action_symbol_enum)i);
     found = as->get_name()==name;
   }
   return (found? as : NULL);
 }
 
-action_symbol ant_action_symbol::instance(ant_action_symbol_enum pase) {
+action_symbol ant_action_symbol::get_instance(ant_action_symbol_enum pase) {
   static const ant_action_symbol* action_symbols=init_action_symbol();
   OC_ASSERT(pase<id::ant_action_symbol_count);
   return static_cast<action_symbol>(&action_symbols[pase]);

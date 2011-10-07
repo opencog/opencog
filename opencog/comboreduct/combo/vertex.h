@@ -912,19 +912,19 @@ void str_to_vertex(const std::string& str, vertex& v)
         return;
     }
     // builtin_action
-    else if (builtin_action ba = BUILTIN_ACTION::instance(str)) {
+    else if (builtin_action ba = BUILTIN_ACTION::get_instance(str)) {
         v = ba;
     }
     // perception
-    else if (perception p = PERCEPTION::instance(str)) {
+    else if (perception p = PERCEPTION::get_instance(str)) {
         v = p;
     }
     // action symbol
-    else if (action_symbol as = ACTION_SYMBOL::instance(str)) {
+    else if (action_symbol as = ACTION_SYMBOL::get_instance(str)) {
         v = as;
     }
     // indefinite_object
-    else if (indefinite_object i = INDEFINITE_OBJECT::instance(str)) {
+    else if (indefinite_object i = INDEFINITE_OBJECT::get_instance(str)) {
         v = i;
     }
     // should be definite object then

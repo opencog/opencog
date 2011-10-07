@@ -172,7 +172,7 @@ vertex WorldWrapperUtilMock::evalIndefiniteObject(combo::pet_indefinite_object_e
     std::string res;
     const VirtualWorldData::IndefiniteObjects & indefObjects = vw.getIndefiniteObjects();
 
-    indefinite_object io = instance(ioe);
+    indefinite_object io = get_instance(ioe);
     switch (ioe) {
     case id::nearest_object:
         res = indefObjects.nearest_object;

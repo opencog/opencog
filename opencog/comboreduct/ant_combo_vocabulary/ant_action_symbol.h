@@ -48,7 +48,7 @@ typedef id::ant_action_symbol_enum ant_action_symbol_enum;
 namespace ant_action_symbol_properties {
 
     //struct for description of name and type
-    typedef ant_operator<ant_action_symbol_enum, id::ant_action_symbol_count>::basic_description action_symbol_basic_description;
+    typedef ant_operator<ant_action_symbol_enum,id::ant_action_symbol_count>::basic_description action_symbol_basic_description;
 
     static const action_symbol_basic_description asbd[] = {
         //action_symbol          name                 type
@@ -93,11 +93,11 @@ public:
     //return a pointer of the static action_symbol corresponding
     //to a given name string
     //if no such action_symbol exists then return NULL pointer
-    static action_symbol instance(const std::string& name);
+    static action_symbol get_instance(const std::string& name);
 
     //return a pointer of the static pet_perception_action corresponding
     //to a given pet_perception_enum
-    static action_symbol instance(ant_action_symbol_enum);
+    static action_symbol get_instance(ant_action_symbol_enum);
 
 };
 

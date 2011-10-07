@@ -661,11 +661,11 @@ public:
     //return a pointer of the static builtin_action corresponding
     //to a given name string
     //if no such builtin_action exists then return NULL pointer
-    static builtin_action instance(const std::string& name);
+    static builtin_action get_instance(const std::string& name);
 
     //return a pointer of the static builtin_action corresponding
     //to a given pet_builtin_action_enum
-    static builtin_action instance(pet_builtin_action_enum);
+    static builtin_action get_instance(pet_builtin_action_enum);
 
     //basic access methods
     const std::string& get_name() const;

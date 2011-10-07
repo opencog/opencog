@@ -138,7 +138,7 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
     hs.push_back(_atomSpace.addNode(PET_NODE, _pet_id));
 
     //add the action
-    if (a == instance(id::random_step))
+    if (a == get_instance(id::random_step))
         a = choose_random_step();
     std::stringstream ss;
     ss << a;
@@ -198,17 +198,17 @@ builtin_action NoSpaceLife::choose_random_step() const
     int c = _rng.randint(4);
     switch (c) {
     case 0:
-        return instance(id::step_backward);
+        return get_instance(id::step_backward);
     case 1:
-        return instance(id::step_forward);
+        return get_instance(id::step_forward);
     case 2:
-        return instance(id::rotate_left);
+        return get_instance(id::rotate_left);
     case 3:
-        return instance(id::rotate_right);
+        return get_instance(id::rotate_right);
     default:
         OC_ASSERT(false,
                          "Combo2BD::choose_random_step() : UNKNOWN CASE");
-        return instance(id::random_step);
+        return get_instance(id::random_step);
     }
 }
 
@@ -248,7 +248,7 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
                 do_id = WorldWrapperUtil::atom_name_to_definite_object(_atomSpace.getName(arg_h), _avatar_id, _owner_id);
                 //depending on the random operator check if the object belongs to
                 //the set
-                if (io == instance(id::random_object))
+                if (io == get_instance(id::random_object))
                     corresponding_arg_exists = true;
                 else {
                     perception p = WorldWrapperUtil::nearest_random_X_to_is_X(io);

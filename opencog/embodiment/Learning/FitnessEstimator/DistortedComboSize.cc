@@ -60,10 +60,10 @@ int DistortedComboSize::vertex_size(const vertex& v,
         opencog::config().get_int("CONTIN_SIZE");
 
     //random operators
-    if (v == instance(id::random_object))
+    if (v == get_instance(id::random_object))
         return (int)(std::log((double)(dos.size() + 1))
                      * RANDOM_DISTOR_FACTOR);
-    else if (v == instance(id::random_step))
+    else if (v == get_instance(id::random_step))
         return (int)(std::log((double)RANDOM_STEP_NUMBER)
                      * RANDOM_DISTOR_FACTOR);
     //while operators

@@ -241,9 +241,9 @@ int NoSpaceLifeFitnessEstimator::getTrialCount(const combo::combo_tree& tr) cons
         //also, the technic should certainly be different
         //checking whether it could be random rather than making Monte Carlos
         //simulation
-        if (*it == instance(id::random_object))
+        if (*it == get_instance(id::random_object))
             res *= _dos.size() * TRIAL_FACTOR;
-        else if (*it == instance(id::random_step))
+        else if (*it == get_instance(id::random_step))
             res *= 4 * TRIAL_FACTOR;
     }
     return res;

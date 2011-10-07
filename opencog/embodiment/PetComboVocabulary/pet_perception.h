@@ -442,11 +442,11 @@ public:
     //return a pointer of the static pet_perception corresponding
     //to a given name string
     //if no such perception exists then return NULL pointer
-    static perception instance(const std::string& name);
+    static perception get_instance(const std::string& name);
 
     //return a pointer of the static pet_perception_action corresponding
     //to a given pet_perception_enum
-    static perception instance(pet_perception_enum);
+    static perception get_instance(pet_perception_enum);
 
     //action property methods
     bool is_ultrametric() const;
