@@ -348,32 +348,7 @@ namespace opencog
                                 // thanks to Mike Ryynanen for pointing this out and then explaining
                                 // it in detail. sort_heap called on an invalid heap does not work
                                 make_heap( m_OpenList.begin(), m_OpenList.end(), HeapCompare_f() );
-
-                                // Search for a fake path that can lead to a
-                                // point closest to the goal.
-                                std::vector<UserState> tmpFakeSolution;
-
-                                m_CurrentSolutionNode = *successor; 
-                                Node *nodeParent = m_CurrentSolutionNode->parent;
-                                do {
-                                    tmpFakeSolution.push_back(m_CurrentSolutionNode->m_UserState);
-                                    m_CurrentSolutionNode = nodeParent;
-                                    if (!m_CurrentSolutionNode) {
-                                        break;
-                                    }
-                                    nodeParent = m_CurrentSolutionNode->parent;
-                                } while (m_CurrentSolutionNode != m_Start);
-                                tmpFakeSolution.push_back(m_Start->m_UserState);
                                 
-                                if ((int)tmpFakeSolution.size() > (int)m_FakeSolution.size()) {
-                                    m_FakeSolution.clear();
-                                    typename std::vector<UserState>::reverse_iterator rit; 
-                                    // Record the fake solution in a right
-                                    // order.
-                                    for (rit = tmpFakeSolution.rbegin(); rit != tmpFakeSolution.rend(); ++rit) {
-                                        m_FakeSolution.push_back(*rit);
-                                    }
-                                }
                             }
 
                             // heap now unsorted
@@ -381,6 +356,40 @@ namespace opencog
 
                             // sort back element into heap
                             push_heap( m_OpenList.begin(), m_OpenList.end(), HeapCompare_f() );
+
+                            // Search for a fake path that can lead to a
+                            // point closest to the goal.
+                            std::vector<UserState> tmpFakeSolution;
+
+                            m_CurrentSolutionNode = *successor; 
+
+                            while (!m_CurrentSolutionNode->m_UserState.IsSameState(m_Start->m_UserState)) {
+                                tmpFakeSolution.push_back(m_CurrentSolutionNode->m_UserState);
+                                m_CurrentSolutionNode = m_CurrentSolutionNode->parent;
+                                if (!m_CurrentSolutionNode)
+                                    break;
+                            }
+
+                            // do {
+                            //     tmpFakeSolution.push_back(m_CurrentSolutionNode->m_UserState);
+                            //     m_CurrentSolutionNode = nodeParent;
+                            //     if (!m_CurrentSolutionNode) {
+                            //         break;
+                            //     }
+                            //     nodeParent = m_CurrentSolutionNode->parent;
+                            // } while (m_CurrentSolutionNode != m_Start);
+
+                            tmpFakeSolution.push_back(m_Start->m_UserState);
+                            
+                            if ((int)tmpFakeSolution.size() > (int)m_FakeSolution.size()) {
+                                m_FakeSolution.clear();
+                                typename std::vector<UserState>::reverse_iterator rit; 
+                                // Record the fake solution in a right
+                                // order.
+                                for (rit = tmpFakeSolution.rbegin(); rit != tmpFakeSolution.rend(); ++rit) {
+                                    m_FakeSolution.push_back(*rit);
+                                }
+                            }
 
                         }
 
