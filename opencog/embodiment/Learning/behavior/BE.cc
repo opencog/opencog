@@ -44,8 +44,6 @@ typedef unsigned long ulong;
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-#include <boost/assign/list_of.hpp>
-
 #define WALK_PERCEPT_NAME "walk"
 #define MIN_ACTION_DURATION 2
 #define MIN_PAUSE_DURATION 2
@@ -63,7 +61,6 @@ namespace behavior
 
 using namespace PetCombo;
 using namespace opencog;
-using namespace boost::assign;
 
 const unsigned long BehaviorEncoder::MinActionTime = MIN_ACTION_DURATION;
 const unsigned long BehaviorEncoder::MinPauseTime = MIN_PAUSE_DURATION;
@@ -423,8 +420,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                         Handle speed_h = as.addNode(NUMBER_NODE,
                                                     boost::lexical_cast<string>(GOTO_OBJ_SPEED));
 
-                        HandleSeq arg_seq =
-                            list_of(subject_h)(goto_obj_h)(obj_h)(speed_h);
+                        HandleSeq arg_seq{subject_h, goto_obj_h, obj_h, speed_h};
                             
                         new_arg_list_h = as.addLink(LIST_LINK, arg_seq);
                     } //~else
@@ -432,7 +428,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 } //~if(walk)
                 else {//not a walk command
                     //we just need to flatten the action arguments
-                    HandleSeq arg_seq = list_of(subject_h)(per_h);
+                    HandleSeq arg_seq{subject_h, per_h};
                     if (as.getArity(arg_list_h) > 2) {
 
                         Handle action_arg_list_h = as.getOutgoing(arg_list_h, 2);
@@ -464,13 +460,13 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                             "Apparently the previous action overlaps too much the current one and it's not clear which one should be first.");
                 }
 
-                HandleSeq el_seq = list_of(behaved_h)(new_arg_list_h);
+                HandleSeq el_seq{behaved_h, new_arg_list_h};
                 Handle bd_h = as.addLink(EVALUATION_LINK, el_seq);
                 Temporal t(tl, tu);
                 Handle bd_t_h = as.getTimeServer().addTimeInfo(bd_h, t);
 
                 //add member link
-                HandleSeq memberLinkHS = list_of(bd_t_h)(trickExemplarAtTime);
+                HandleSeq memberLinkHS{bd_t_h, trickExemplarAtTime};
                 as.addLink(MEMBER_LINK, memberLinkHS);
 
                 logger().debug(

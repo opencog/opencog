@@ -27,13 +27,11 @@
 
 #include "WorldWrapperUtilMock.h"
 #include <math.h>
-#include <boost/assign/list_of.hpp>
 #include <boost/algorithm/string.hpp>
 #include <sstream>
 #include <ext/functional>
 
 using namespace PetCombo;
-using namespace boost::assign;
 using namespace opencog;
 
 using namespace opencog::world;

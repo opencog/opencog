@@ -23,10 +23,7 @@
  */
 #include "edaopt.h"
 #include <opencog/util/mt19937ar.h>
-#include <boost/assign/list_of.hpp>
 #include <opencog/util/Logger.h>
-
-using namespace boost::assign;
 
 using std::string;
 using std::vector;
@@ -37,7 +34,7 @@ int main(int argc,char** argv) {
     //set flag to print only cassert and other ERROR level logs on stdout
     opencog::logger().setPrintErrorLevelStdout();
  
-    vector<string> add_args = list_of("n(whatever it is?)");
+    vector<string> add_args{"n(whatever it is?)"};
     optargs args(argc, argv, add_args);
     int n=lexical_cast<int>(argv[5]);
     cout_log_best_and_gen logger;

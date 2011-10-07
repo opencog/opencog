@@ -36,8 +36,6 @@
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 
-#include <boost/assign/list_of.hpp>
-
 //just for debug and profiling
 #include <time.h>
 
@@ -62,7 +60,6 @@ namespace Filter
 using namespace opencog::pai;
 using namespace opencog::world;
 using namespace PetCombo;
-using namespace boost::assign;
 using namespace opencog; /// @todo make it under the namespace opencog
 
 //constructor, desctructor

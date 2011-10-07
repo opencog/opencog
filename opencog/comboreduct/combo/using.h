@@ -29,7 +29,6 @@
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
-#include <boost/assign/list_of.hpp>
 #include <boost/multi_array.hpp>
 
 #include <functional>
@@ -45,7 +44,6 @@ using boost::make_counting_iterator;
 using boost::make_indirect_iterator;
 using boost::make_transform_iterator;
 using boost::apply_visitor;
-using boost::assign::list_of;
 using boost::multi_array;
 using std::find_if;
 using std::accumulate;

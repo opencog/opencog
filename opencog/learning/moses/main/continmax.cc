@@ -28,10 +28,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
-#include <boost/assign/list_of.hpp>
-
-using namespace boost::assign;
-
 using std::string;
 using std::vector;
 using boost::lexical_cast;
@@ -43,7 +39,7 @@ int main(int argc, char** argv)
     //set flag to print only cassert and other ERROR level logs on stdout
     opencog::logger().setPrintErrorLevelStdout();
 
-    vector<string> add_args = list_of("depth");
+    vector<string> add_args{"depth"};
     optargs args(argc, argv, add_args);
     int depth = lexical_cast<int>(argv[5]);
     cout_log_best_and_gen logger;

@@ -29,7 +29,6 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/RandGen.h>
 
-#include <boost/assign/list_of.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/any.hpp>
 
@@ -46,7 +45,6 @@
 #include <typeinfo>
 
 using namespace PetCombo;
-using namespace boost::assign;
 using namespace opencog;
 using namespace opencog::pai;
 // This is already available in opencog::world, but this is placed here to
@@ -231,7 +229,7 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
     }
 
     Handle rhs = as.getHandle(LIST_LINK, children);
-    HandleSeq args = list_of(lhs)(rhs);
+    HandleSeq args{lhs, rhs};
     return (rhs != Handle::UNDEFINED ?
             as.getHandle(EVALUATION_LINK, args) : Handle::UNDEFINED);
 }

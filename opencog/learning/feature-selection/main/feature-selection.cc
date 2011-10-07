@@ -27,7 +27,6 @@
 
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/assign/list_of.hpp>
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
@@ -50,7 +49,6 @@ using namespace combo;
 
 using namespace boost::program_options;
 using boost::lexical_cast;
-using boost::assign::list_of;
 
 const static unsigned max_filename_size = 255;
 
@@ -149,7 +147,7 @@ int main(int argc, char** argv) {
 
     // set log
     if(log_file_dep_opt) {
-        std::set<std::string> ignore_opt = list_of(log_file_dep_opt_opt.first);
+        std::set<std::string> ignore_opt{log_file_dep_opt_opt.first};
         log_file = determine_log_name(default_log_file_prefix,
                                       vm, ignore_opt,
                                       std::string(".").append(default_log_file_suffix));
