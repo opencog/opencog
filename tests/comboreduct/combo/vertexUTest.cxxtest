@@ -1,9 +1,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
-#include <boost/assign/list_of.hpp>
 
 using namespace opencog::combo;
 using namespace std;
-using namespace boost::assign;
 
 class vertexUTest :  public CxxTest::TestSuite {
 public:
@@ -30,11 +28,11 @@ public:
         }
     }
     void test_ph2l() {
-        vector<string> labels = list_of("fat")("pretty");
+        vector<string> labels{"fat", "pretty"};
         TS_ASSERT_EQUALS(ph2l("and(#1 #2)", labels), "and(#fat #pretty)");
     }
     void test_l2ph() {
-        vector<string> labels = list_of("fat")("pretty");
+        vector<string> labels{"fat", "pretty"};
         TS_ASSERT_EQUALS(l2ph("and(#fat #pretty)", labels), "and(#1 #2)");
     }
 };

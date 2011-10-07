@@ -22,8 +22,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <boost/assign/list_of.hpp>
-
 #include <opencog/comboreduct/combo/table.h>
 
 #include <opencog/learning/feature-selection/feature_optimization.h>
@@ -34,7 +32,6 @@
 using namespace opencog;
 using namespace combo;
 using namespace std;
-using namespace boost::assign;
 using boost::counting_iterator;
 
 class feature_selectionUTest : public CxxTest::TestSuite {
@@ -63,7 +60,7 @@ public:
     void test_redundant_features() {
         ctruth_table ctable = table.compress();
         FeatureScorer fs(ctable);
-        set<arity_t> features = list_of(3)(4)(10)(17);
+        set<arity_t> features{3, 4, 10, 17};
         set<arity_t> redundant = redundant_features(features, fs, 0.001);
 
         ostreamContainer(cout, redundant);

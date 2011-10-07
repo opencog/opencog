@@ -20,13 +20,10 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <boost/assign/list_of.hpp>
-
 #include <opencog/util/numeric.h>
 #include <opencog/comboreduct/combo/table.h>
 
 using namespace std;
-using namespace boost::assign;
 using namespace opencog;
 using namespace combo;
 
@@ -58,7 +55,7 @@ public:
                         "1,1,0\n"
                         "0,0,0\n");
         truth_table tt(ss);
-        set<arity_t> fs = list_of(0)(1);
+        set<arity_t> fs{0, 1};
         ctruth_table ctt = tt.compress();
         double mi = mutualInformation(ctt, fs);
         cout << "mi = " << mi << endl;

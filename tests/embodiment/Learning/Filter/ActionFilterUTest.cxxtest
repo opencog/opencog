@@ -33,13 +33,9 @@
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-#include <boost/assign/list_of.hpp>
-
-//using namespace behavior;
 using namespace PetCombo;
 using namespace std;
 using namespace behavior;
-using namespace boost::assign;
 
 #define ACTION_DONE_TIME 200
 #define TIME_INTERVAL ACTION_DONE_TIME
@@ -143,33 +139,33 @@ public:
 
         //create the ListLink atoms
         //for goto_obj(stick)
-        HandleSeq a1_seq = list_of(pet_h)(goto_obj_h)(obj_h)(speed_h);
+        HandleSeq a1_seq{pet_h, goto_obj_h, obj_h, speed_h};
 
         Handle a1_h = atomSpace.addLink(LIST_LINK, a1_seq);
 
         //for drop
-        HandleSeq a2_seq = list_of(pet_h)(drop_h);
+        HandleSeq a2_seq{pet_h, drop_h};
 
         Handle a2_h = atomSpace.addLink(LIST_LINK, a2_seq);
 
         //for goto_obj(Paul)
-        HandleSeq a2bis_seq = list_of(pet_h)(goto_obj_h)(avatar_h)(speed_h);
+        HandleSeq a2bis_seq{pet_h, goto_obj_h, avatar_h, speed_h};
 
         Handle a2bis_h = atomSpace.addLink(LIST_LINK, a2bis_seq);
 
         //create the BDs, that is atoms (EvalLink(behaved ....))
         //for goto_obj(stick)
-        HandleSeq b1_seq = list_of(behaved_h)(a1_h);
+        HandleSeq b1_seq{behaved_h, a1_h};
 
         Handle bd1_h = atomSpace.addLink(EVALUATION_LINK, b1_seq);
 
         //for drop
-        HandleSeq b2_seq = list_of(behaved_h)(a2_h);
+        HandleSeq b2_seq{behaved_h, a2_h};
 
         Handle bd2_h = atomSpace.addLink(EVALUATION_LINK, b2_seq);
 
         //goto_obj(Paul)
-        HandleSeq b2bis_seq = list_of(behaved_h)(a2bis_h);
+        HandleSeq b2bis_seq{behaved_h, a2bis_h};
 
         Handle bd2bis_h = atomSpace.addLink(EVALUATION_LINK, b2bis_seq);
 
@@ -194,18 +190,18 @@ public:
         Handle tt1_h = atomSpace.getTimeServer().addTimeInfo(trick_h,
                                              Temporal(0, 2 * TIME_INTERVAL));
         //add memberLinks to the concept node
-        HandleSeq m1_seq = list_of(t1_h)(tt1_h);
+        HandleSeq m1_seq{t1_h, tt1_h};
         atomSpace.addLink(MEMBER_LINK, m1_seq);
-        HandleSeq m2_seq = list_of(t2_h)(tt1_h);
+        HandleSeq m2_seq{t2_h, tt1_h};
         atomSpace.addLink(MEMBER_LINK, m2_seq);
 
         //add AtTimeLink to trick concept for the second composite BD
         Handle tt2_h = atomSpace.getTimeServer().addTimeInfo(trick_h, Temporal(10 * TIME_INTERVAL,
                                              12 * TIME_INTERVAL));
         //add memberLinks to the concept node
-        HandleSeq m3_seq = list_of(t3_h)(tt2_h);
+        HandleSeq m3_seq{t3_h, tt2_h};
         atomSpace.addLink(MEMBER_LINK, m3_seq);
-        HandleSeq m4_seq = list_of(t4_h)(tt2_h);
+        HandleSeq m4_seq{t4_h, tt2_h};
         atomSpace.addLink(MEMBER_LINK, m4_seq);
 
 
@@ -233,9 +229,9 @@ public:
                                 idos, bas, arity, true, *rng);
         Filter::ActionFilter::combo_tree_ns_set action_subs;
         //set up the arguments, #1=stick and #2=owner
-        combo::argument_list al = list_of(definite_object(obj_str))(id::owner);
+        combo::argument_list al{definite_object(obj_str), id::owner};
         //set up the arguments for the first and second examplar (both the same)
-        combo::argument_list_list all = list_of(al)(al);
+        combo::argument_list_list all{al, al};
 
 
         /*******************************************************************

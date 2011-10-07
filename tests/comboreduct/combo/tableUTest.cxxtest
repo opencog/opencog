@@ -20,12 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <opencog/comboreduct/combo/table.h>
-#include <boost/assign/list_of.hpp>
 
 using namespace opencog;
 using namespace combo;
 using namespace std;
-using namespace boost::assign;
 
 const string label1 = "price";
 const string label2 = "temperature";
@@ -53,29 +51,29 @@ private:
 public:
     void test_TruthTable() {
         truth_input_table it;
-        it.push_back(list_of(true)(false));
-        it.push_back(list_of(false)(true));
-        bool_vector o = list_of(true)(false);
+        it.push_back({true, false});
+        it.push_back({false, true});
+        bool_vector o{true, false};
         truth_output_table ot(o);
         testIStreamTable("1,0,1\n"
                          "0,1,0\n", it, ot);
     }
     void test_ContinTable() {
         contin_input_table it;
-        it.push_back(list_of(0.4)(244.2));
-        it.push_back(list_of(9.5)(4.2));
-        contin_vector o = list_of(10.1)(6.5);
+        it.push_back({0.4, 244.2});
+        it.push_back({9.5, 4.2});
+        contin_vector o{10.1, 6.5};
         contin_output_table ot(o);
         testIStreamTable("0.4,244.2,10.1\n"
                          "9.5,4.2,6.5\n", it, ot);
     }
     void test_ContinTableLabels() {
         contin_input_table it;
-        it.push_back(list_of(0.4)(244.2));
-        it.push_back(list_of(9.5)(4.2));
-        vector<string> il = list_of(label1)(label2);
+        it.push_back({0.4, 244.2});
+        it.push_back({9.5, 4.2});
+        vector<string> il{label1, label2};
         it.set_labels(il);
-        contin_vector o = list_of(10.1)(6.5);
+        contin_vector o{10.1, 6.5};
         contin_output_table ot(o, olabel);
         testIStreamTable("price,temperature,happiness\n"
                          "0.4,244.2,10.1\n"
@@ -83,13 +81,13 @@ public:
     }
     void test_ostreamTrueTable() {
         truth_input_table it;
-        it.push_back(list_of(true)(false));
-        it.push_back(list_of(false)(true));
-        vector<string> lbs = list_of("truc")("trac");
+        it.push_back({true, false});
+        it.push_back({false, true});
+        vector<string> lbs{"truc" ,"trac"};
         it.set_labels(lbs);
-        bool_vector o = list_of(true)(false);
+        bool_vector o{true, false};
         // ignore second argument trac
-        vector<arity_t> args = list_of(0);
+        vector<arity_t> args{0};
         truth_input_table fit = it.filter(args);
         truth_output_table ot(o);
         ot.set_label("troc");

@@ -21,15 +21,12 @@
  */
 
 #include <opencog/util/iostreamContainer.h>
-#include <boost/assign/list_of.hpp>
 
 using opencog::ostreamContainer;
 using opencog::istreamContainer;
 
 using std::stringstream;
 using std::string;
-
-using boost::assign::list_of;
 
 class printContainerUTest : public CxxTest::TestSuite
 {

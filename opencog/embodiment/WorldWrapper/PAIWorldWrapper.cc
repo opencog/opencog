@@ -41,7 +41,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/assign/list_of.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -957,48 +956,48 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
     static const std::map<pet_builtin_action_enum, ActionType> actions2types =
-        boost::assign::map_list_of
-        (id::bark, ActionType::BARK())
-        (id::bare_teeth_at, ActionType::BARE_TEETH())
-        (id::bark_at, ActionType::BARK())
-        (id::chew, ActionType::CHEW())
-        (id::dream, ActionType::DREAM())
-        (id::drink, ActionType::DRINK())
-        (id::eat, ActionType::EAT())
-        (id::grab, ActionType::GRAB())
-        (id::growl_at, ActionType::GROWL())
-        (id::jump_up, ActionType::JUMP_UP())
-        (id::jump_towards, ActionType::JUMP_TOWARD())
-        //(id::move_left_ear, ActionType::LEFT_EAR_?()) each ear movement has its own command
-        //(id::move_right_ear, ActionType::RIGHT_EAR_?())
-        (id::lick_at, ActionType::LICK())
-        (id::move_head, ActionType::MOVE_HEAD())
-        (id::random_step, ActionType::WALK())
-        (id::rotate_left, ActionType::TURN())
-        (id::rotate_right, ActionType::TURN())
-        // (id::scratch_self, ActionType::SCRATCH_SELF_*()) // each body part has itw own  scratch command
-        (id::scratch_other, ActionType::SCRATCH_OTHER())
-        (id::scratch_ground_back_legs, ActionType::SCRATCH_GROUND_BACK_LEGS())
-        (id::sniff_at, ActionType::SNIFF_AT())
-        (id::sniff_avatar_part, ActionType::SNIFF_AVATAR_PART())
-        (id::sniff_pet_part, ActionType::SNIFF_PET_PART())
-        (id::step_backward, ActionType::WALK())
-        (id::step_forward, ActionType::WALK())
-        (id::step_towards, ActionType::WALK())
-        (id::tail_flex, ActionType::TAIL_FLEX())
-        (id::turn_to_face, ActionType::TURN())
-        (id::wag, ActionType::WAG())
-        (id::bite, ActionType::BITE())
-        (id::pet, ActionType::PET())
-        (id::kick, ActionType::KICK())
-        (id::group_command, ActionType::GROUP_COMMAND())
-        (id::receive_latest_group_commands, ActionType::RECEIVE_LATEST_GROUP_COMMANDS())
-        (id::sit, ActionType::SIT())
-        (id::look_at, ActionType::LOOK_AT())
-        (id::say, ActionType::SAY())
-        (id::build_block_at, ActionType::BUILD_BLOCK_AT())
-        (id::destroy_block_at, ActionType::DESTROY_BLOCK_AT())
-        (id::whine_at, ActionType::WHINE());
+        { {id::bark, ActionType::BARK()},
+          {id::bare_teeth_at, ActionType::BARE_TEETH()},
+          {id::bark_at, ActionType::BARK()},
+          {id::chew, ActionType::CHEW()},
+          {id::dream, ActionType::DREAM()},
+          {id::drink, ActionType::DRINK()},
+          {id::eat, ActionType::EAT()},
+          {id::grab, ActionType::GRAB()},
+          {id::growl_at, ActionType::GROWL()},
+          {id::jump_up, ActionType::JUMP_UP()},
+          {id::jump_towards, ActionType::JUMP_TOWARD()},
+          // {id::move_left_ear, ActionType::LEFT_EAR_?()} each ear movement has its own command
+          // {id::move_right_ear, ActionType::RIGHT_EAR_?()}
+          {id::lick_at, ActionType::LICK()},
+          {id::move_head, ActionType::MOVE_HEAD()},
+          {id::random_step, ActionType::WALK()},
+          {id::rotate_left, ActionType::TURN()},
+          {id::rotate_right, ActionType::TURN()},
+        // {id::scratch_self, ActionType::SCRATCH_SELF_*()} // each body part has itw own  scratch command
+          {id::scratch_other, ActionType::SCRATCH_OTHER()},
+          {id::scratch_ground_back_legs, ActionType::SCRATCH_GROUND_BACK_LEGS()},
+          {id::sniff_at, ActionType::SNIFF_AT()},
+          {id::sniff_avatar_part, ActionType::SNIFF_AVATAR_PART()},
+          {id::sniff_pet_part, ActionType::SNIFF_PET_PART()},
+          {id::step_backward, ActionType::WALK()},
+          {id::step_forward, ActionType::WALK()},
+          {id::step_towards, ActionType::WALK()},
+          {id::tail_flex, ActionType::TAIL_FLEX()},
+          {id::turn_to_face, ActionType::TURN()},
+          {id::wag, ActionType::WAG()},
+          {id::bite, ActionType::BITE()},
+          {id::pet, ActionType::PET()},
+          {id::kick, ActionType::KICK()},
+          {id::group_command, ActionType::GROUP_COMMAND()},
+          {id::receive_latest_group_commands, ActionType::RECEIVE_LATEST_GROUP_COMMANDS()},
+          {id::sit, ActionType::SIT()},
+          {id::look_at, ActionType::LOOK_AT()},
+          {id::say, ActionType::SAY()},
+          {id::build_block_at, ActionType::BUILD_BLOCK_AT()},
+          {id::destroy_block_at, ActionType::DESTROY_BLOCK_AT()},
+          {id::whine_at, ActionType::WHINE()}
+        };
 
     OC_ASSERT(WorldWrapperUtil::is_builtin_atomic_action(*from));
     builtin_action ba = get_builtin_action(*from);

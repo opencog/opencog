@@ -3,13 +3,9 @@
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
-#include <boost/assign/list_of.hpp>
-
 using namespace ant_combo;
 using namespace opencog;
 using namespace std;
-using namespace boost::assign;
-
 
 class evalUTest :  public CxxTest::TestSuite {
 public:
@@ -21,7 +17,7 @@ public:
     stringstream ss_expected_res("+(1 2 *(3 4)) ");
 
     //test set_bindings on vertex vector
-    std::vector<vertex> al = list_of(1)(2)(3)(4);
+    std::vector<vertex> al{1, 2, 3, 4};
     combo_tree tr_copy(tr);
     set_bindings(tr, tr.begin(), al, explicit_arity(tr));
     std::cout << "TR AFTER BINDING : " << tr << std::endl;
