@@ -32,7 +32,7 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/type_tree.h>
 
-#include "using.h"
+#include "../moses/using.h"
 #include "knob_mapper.h"
 
 namespace opencog { namespace moses {

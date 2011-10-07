@@ -27,8 +27,8 @@
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 #include <opencog/util/oc_omp.h>
-#include <opencog/learning/moses/eda/field_set.h>
-#include <opencog/learning/moses/eda/instance_set.h>
+#include <opencog/learning/moses/representation/field_set.h>
+#include <opencog/learning/moses/representation/instance_set.h>
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/comboreduct/combo/table.h>
 

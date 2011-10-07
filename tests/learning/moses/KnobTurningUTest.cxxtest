@@ -25,7 +25,7 @@
 #include <cxxtest/TestSuite.h>
 #include <sstream>
 #include <string>
-#include "opencog/learning/moses/moses/knobs.h"
+#include <opencog/learning/moses/representation/knobs.h>
 
 using namespace opencog;
 using namespace moses;

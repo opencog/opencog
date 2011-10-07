@@ -35,7 +35,7 @@
 #include <opencog/comboreduct/reduct/meta_rules.h>
 
 #include "using.h"
-#include "representation.h"
+#include "../representation/representation.h"
 #include "types.h"
 #include "ant_scoring.h"
 

@@ -26,7 +26,7 @@
 
 #include <opencog/util/tree.h>
 
-#include <opencog/learning/moses/moses/optimization.h>
+#include <opencog/learning/moses/optimization/optimization.h>
 
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
 #include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>

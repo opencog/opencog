@@ -26,7 +26,7 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/learning/moses/moses/metapopulation.h>
 #include <opencog/learning/moses/moses/scoring.h>
-#include <opencog/learning/moses/moses/optimization.h>
+#include <opencog/learning/moses/optimization/optimization.h>
 
 using namespace opencog;
 using namespace combo;

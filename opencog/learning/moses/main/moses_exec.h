@@ -47,7 +47,7 @@
 
 #include "../moses/moses.h"
 #include "../moses/distributed_moses.h"
-#include "../moses/optimization.h"
+#include "../optimization/optimization.h"
 #include "../moses/metapopulation.h"
 #include "../moses/scoring_functions.h"
 #include "../moses/scoring.h"

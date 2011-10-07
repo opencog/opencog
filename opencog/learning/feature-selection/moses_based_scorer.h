@@ -26,7 +26,7 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/learning/moses/eda/field_set.h>
+#include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/eda/eda.h>
 #include <opencog/learning/moses/moses/types.h>
 

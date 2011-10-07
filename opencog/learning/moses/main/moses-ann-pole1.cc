@@ -25,11 +25,11 @@
 #include <opencog/comboreduct/combo/eval.h>
 
 #include "../moses/moses.h"
-#include "../moses/optimization.h"
 #include "../moses/scoring_functions.h"
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
-#include "../moses/representation.h"
+#include "../representation/representation.h"
+#include "../optimization/optimization.h"
 
 using namespace std;
 using namespace boost;

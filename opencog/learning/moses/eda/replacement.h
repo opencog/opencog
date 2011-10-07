@@ -29,7 +29,7 @@
 #include <opencog/util/oc_omp.h>
 
 #include "using.h"
-#include "field_set.h"
+#include "../representation/field_set.h"
 #include "scoring.h"
 
 namespace opencog { 

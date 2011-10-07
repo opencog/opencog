@@ -1,16 +1,16 @@
-#include <opencog/comboreduct/combo/eval.h>
-
 #include <iostream>
-#include <opencog/learning/moses/moses/moses.h>
-#include <opencog/learning/moses/moses/optimization.h>
-#include <opencog/learning/moses/moses/scoring_functions.h>
-#include <opencog/learning/moses/moses/scoring.h>
-#include <opencog/learning/moses/moses/ann_scoring.h>
 
 #include <opencog/util/mt19937ar.h>
-
 #include <opencog/util/Logger.h>
-#include <opencog/learning/moses/moses/representation.h>
+#include <opencog/comboreduct/combo/eval.h>
+
+#include "../representation/representation.h"
+#include "../moses/moses.h"
+#include "../optimization/optimization.h"
+#include "../moses/scoring_functions.h"
+#include "../moses/scoring.h"
+#include "../moses/ann_scoring.h"
+
 
 using namespace std;
 using namespace boost;

@@ -34,9 +34,9 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
-#include "using.h"
-#include "../eda/field_set.h"
-#include "complexity.h"
+#include "../moses/using.h"
+#include "../moses/complexity.h"
+#include "field_set.h"
 
 namespace opencog { namespace moses {
 

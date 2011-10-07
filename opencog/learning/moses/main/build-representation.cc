@@ -27,9 +27,9 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
-#include <opencog/learning/moses/moses/moses.h>
-#include <opencog/learning/moses/moses/optimization.h>
-#include <opencog/learning/moses/moses/scoring_functions.h>
+#include "../moses/moses.h"
+#include "../optimization/optimization.h"
+#include "../moses/scoring_functions.h"
 
 using namespace opencog;
 using namespace moses;

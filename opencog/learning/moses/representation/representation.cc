@@ -32,7 +32,7 @@
 #include <opencog/comboreduct/reduct/logical_rules.h>
 #include <opencog/comboreduct/reduct/general_rules.h>
 
-#include "using.h"
+#include "../moses/using.h"
 #include "representation.h"
 #include "build_knobs.h"
 

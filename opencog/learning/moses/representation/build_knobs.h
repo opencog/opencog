@@ -31,10 +31,9 @@
 #include <opencog/comboreduct/combo/action.h>
 #include <opencog/comboreduct/combo/perception.h>
 
-#include <opencog/learning/moses/eda/field_set.h>
-
+#include "field_set.h"
 #include "representation.h"
-#include "using.h"
+#include "../moses/using.h"
 
 namespace opencog { namespace moses {
 

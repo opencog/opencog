@@ -24,10 +24,12 @@
 #ifndef _EDA_FIELD_SET_H
 #define _EDA_FIELD_SET_H
 
-#include "eda.h"
 #include <map>
+
 #include <opencog/util/RandGen.h>
 #include <opencog/util/dorepeat.h>
+
+#include "../eda/eda.h"
 
 namespace opencog { 
 namespace eda {

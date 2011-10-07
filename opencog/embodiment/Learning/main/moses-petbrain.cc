@@ -21,14 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/learning/moses/moses/moses.h>
-#include <opencog/learning/moses/moses/optimization.h>
-#include <opencog/learning/moses/moses/scoring_functions.h>
-#include <boost/lexical_cast.hpp>
-#include <opencog/comboreduct/reduct/reduct.h>
 #include <iostream>
+
+#include <boost/lexical_cast.hpp>
+
 #include <opencog/util/mt19937ar.h>
+
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/reduct/reduct.h>
+
+#include <opencog/learning/moses/moses/moses.h>
+#include <opencog/learning/moses/moses/scoring_functions.h>
+#include <opencog/learning/moses/optimization/optimization.h>
 
 using namespace opencog;
 using namespace moses;

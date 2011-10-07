@@ -37,11 +37,10 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/util/oc_omp.h>
 
-#include <opencog/learning/moses/eda/instance_set.h>
-
 #include <opencog/comboreduct/reduct/reduct.h>
 
-#include "representation.h"
+#include "../representation/instance_set.h"
+#include "../representation/representation.h"
 #include "scoring.h"
 #include "types.h"
 

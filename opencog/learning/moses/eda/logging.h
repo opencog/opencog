@@ -29,7 +29,7 @@
 #include <sstream>
 #include <opencog/util/Logger.h>
 
-#include "field_set.h"
+#include "../representation/field_set.h"
 
 namespace opencog { 
 namespace eda {

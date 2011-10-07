@@ -24,9 +24,10 @@
 #ifndef _EDA_LOCAL_STRUCTURE_H
 #define _EDA_LOCAL_STRUCTURE_H
 
-#include "field_set.h"
 #include <opencog/util/digraph.h>
 #include <opencog/util/oc_assert.h>
+
+#include "../representation/field_set.h"
 
 namespace opencog { 
 namespace eda {

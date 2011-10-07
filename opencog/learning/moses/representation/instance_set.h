@@ -25,7 +25,7 @@
 #define _EDA_INSTANCE_SET_H
 
 #include "field_set.h"
-#include "scoring.h"
+#include "../eda/scoring.h"
 
 namespace opencog {
 namespace eda {

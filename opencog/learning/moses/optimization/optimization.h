@@ -38,9 +38,9 @@
 #include "../eda/logging.h"
 #include "../eda/local_structure.h"
 #include "../eda/optimize.h"
-#include "../eda/instance_set.h"
-#include "moses.h"
-#include "neighborhood_sampling.h"
+#include "../representation/instance_set.h"
+#include "../moses/moses.h"
+#include "../moses/neighborhood_sampling.h"
 
 #define MINIMUM_DEME_SIZE         10
 #define MAX_EVALS_PER_SLICE       10

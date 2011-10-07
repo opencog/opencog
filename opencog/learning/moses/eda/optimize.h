@@ -27,7 +27,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_omp.h>
 
-#include "instance_set.h"
+#include "../representation/instance_set.h"
 
 namespace opencog { 
 namespace eda {

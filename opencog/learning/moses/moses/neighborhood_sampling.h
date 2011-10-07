@@ -34,7 +34,7 @@
 
 #include "using.h"
 #include "../eda/initialization.h"
-#include "../eda/instance_set.h"
+#include "../representation/instance_set.h"
 #include "../moses/types.h"
 
 namespace opencog { namespace moses {

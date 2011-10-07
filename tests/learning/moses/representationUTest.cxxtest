@@ -25,8 +25,7 @@
 #include <cxxtest/TestSuite.h>
 #include <sstream>
 #include <string>
-#include <boost/assign/list_of.hpp>
-#include <opencog/learning/moses/moses/representation.h>
+#include <opencog/learning/moses/representation/representation.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
@@ -36,7 +35,6 @@ using namespace moses;
 using namespace reduct;
 using namespace combo;
 using namespace std;
-using boost::assign::list_of;
 
 class representationUTest : public CxxTest::TestSuite {
 private:
@@ -61,7 +59,7 @@ public:
         string tr_str = "+(*(+(*(+(*(+(*(#1 1.75) 1.875) #1) 0.75) 0.75) 1.375) 0.75) -1.25)";
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
-        vertex_set ignore_ops = list_of(id::div)(id::exp)(id::log)(id::sin);
+        vertex_set ignore_ops{id::div, id::exp, id::log, id::sin};
         representation rep(contin_reduction(ignore_ops, rng),
                            contin_reduction(ignore_ops, rng), tr, tt,
                            rng, ignore_ops);

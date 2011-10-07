@@ -24,14 +24,15 @@
 #ifndef _EDA_SCORING_FUNCTIONS_H
 #define _EDA_SCORING_FUNCTIONS_H
 
+#include <cmath>
+#include <boost/lexical_cast.hpp>
+
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/oc_assert.h>
 
-#include "field_set.h"
-#include <cmath>
-#include <boost/lexical_cast.hpp>
+#include "../representation/field_set.h"
 
 namespace opencog { 
 namespace eda {

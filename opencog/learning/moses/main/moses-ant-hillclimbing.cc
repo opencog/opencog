@@ -33,10 +33,10 @@
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
-#include <opencog/learning/moses/moses/moses.h>
-#include <opencog/learning/moses/moses/optimization.h>
-#include <opencog/learning/moses/moses/scoring_functions.h>
-#include <opencog/learning/moses/moses/ant_scoring.h>
+#include "../moses/moses.h"
+#include "../optimization/optimization.h"
+#include "../moses/scoring_functions.h"
+#include "../moses/ant_scoring.h"
 
 #include <boost/lexical_cast.hpp>
 

@@ -38,7 +38,7 @@
 
 #include <opencog/comboreduct/combo/table.h>
 
-#include <opencog/learning/moses/moses/optimization.h>
+#include <opencog/learning/moses/optimization/optimization.h>
 
 #include "feature-selection.h"
 #include "../feature_optimization.h"
