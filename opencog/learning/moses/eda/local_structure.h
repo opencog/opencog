@@ -48,7 +48,7 @@ struct local_structure_model : public nullary_function<instance>,
 
     instance operator()() const; //sample from the model
 
-    void split(int,int, dtree::iterator);
+    void split(int, int, dtree::iterator);
 
 protected:
     typedef vector<const instance*> iptr_seq;
@@ -56,7 +56,8 @@ protected:
 
     int _instance_length;
     vector<unsigned int> _ordering;
-    digraph _initial_deps;
+    digraph _initial_deps;      // directed graph of the initial
+                                // dependencies between fields
     field_set _fields;
     RandGen& rng;
 
@@ -78,7 +79,7 @@ struct univariate { //i.e., no structure learning
 
     template<typename It>
     void operator()(const field_set&, It, It,
-                    const local_structure_model&) const { }
+                    const local_structure_model&) const {}
 };
 
 /*struct bde_local_structure_learning {
@@ -106,7 +107,7 @@ template<typename It>
 local_structure_model::local_structure_model(const field_set& fs,
                                              It from, It to,
                                              RandGen& _rng) :
-    vector<dtree>(fs.raw_size()), _instance_length(fs.packed_width()),
+    super(fs.raw_size()), _instance_length(fs.packed_width()),
     _ordering(make_counting_iterator(0), make_counting_iterator(int(size()))),
     _initial_deps(size()), _fields(fs), rng(_rng)
 {
@@ -123,7 +124,7 @@ local_structure_model::local_structure_model(const field_set& fs,
             for (field_set::arity_t i = 1;i < o.depth;++i, ++dtr) {
                 make_dtree(dtr, 0);
                 _initial_deps.insert(idx_base + i - 1, idx_base + i);
-                //need to recursively split on gggparent, ... , gparent, parent
+                // need to recursively split on gggparent, ... , gparent, parent
                 rec_split_onto(iptrs.begin(), iptrs.end(),
                                idx_base, idx_base + i,
                                dtr->begin(), o.tr->begin());
@@ -152,15 +153,15 @@ local_structure_model::local_structure_model(const field_set& fs,
 
     //model disc & bool vars
     foreach(const field_set::disc_spec& d, _fields.disc_and_bits())
-    make_dtree(dtr++, d.arity);
+        make_dtree(dtr++, d.arity);
 
-    //now that we have created all of the dtrees, construct a feasible order
-    //that respects the intitial dependencies
+    // now that we have created all of the dtrees, construct a
+    // feasible order that respects the initial dependencies
     randomized_topological_sort(_initial_deps, _ordering.begin());
 }
 
-//instance_set is not const so that we can reorder it - the instances
-//themselves shouldn't change
+// instance_set is not const so that we can reorder it - the instances
+// themselves shouldn't change
 template<typename It>
 void local_structure_probs_learning::operator()(const field_set& fs,
                                                 It from, It to,

@@ -35,34 +35,41 @@
 namespace opencog
 {
 
+// directed graph, each node is represented by an unsigned int
 struct digraph {
     typedef unsigned int size_type;
     typedef size_type value_type;
     typedef std::set<value_type> value_set;
 
+    // construct an empty digraph of size n
     digraph(size_type n) : _incoming(n), _outgoing(n) { }
 
+    // insert an arc outgoing from src to dst
     void insert(value_type src, value_type dst) {
         _incoming[dst].insert(src);
         _outgoing[src].insert(dst);
     }
+    // erase the arc outgoing from src to dst
     void erase(value_type src, value_type dst) {
         _incoming[dst].erase(src);
         _outgoing[src].erase(dst);
     }
+    // return the number of nodes
     size_type n_nodes() const {
         return _incoming.size();
     }
+    // return the number of edges
     size_type n_edges() const {
         return accumulate2d(_incoming.begin(), _incoming.end(), size_type(0));
     }
     bool empty() const {
         return (n_edges() == 0);
     }
-
+    // return the set of all direct predecessor nodes of x
     const value_set& incoming(value_type x) const {
         return _incoming[x];
     }
+    // return the set of all direct successor nodes of x
     const value_set& outgoing(value_type x) const {
         return _outgoing[x];
     }
@@ -82,9 +89,9 @@ Out randomized_topological_sort(digraph g, Out out)
     std::random_shuffle(nodes.begin(), nodes.end());
     std::queue<value_t> q;
 
-    foreach (value_t node, nodes)
-    if (g.incoming(node).empty())
-        q.push(node);
+    foreach(value_t node, nodes)
+        if (g.incoming(node).empty())
+            q.push(node);
 
     while (!q.empty()) {
         value_t src = q.front();
