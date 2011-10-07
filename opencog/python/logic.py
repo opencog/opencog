@@ -4,7 +4,9 @@ from tree import *
 from adaptors import find_matching_conjunctions
 from util import pp
 
+from sys import stdout
 from profilestats import profile
+from time import time
 
 t = types
 
@@ -14,18 +16,24 @@ class Chainer:
         self.viz = PLNviz(space)
         self.viz.connect()
         self.setup_rules(space)
-        self.apps = []
+        self.apps = []; self.apps_set = set()
         self.bc_later = []
         self.bc_before = []
         
         self.fc_later = []
         self.fc_before = []
+        
+        #self.indexes = {'bc_later':set(), 'bc_before':set(), 'fc_later':set(), 'fc_before':set()}
+
+        self.bc_later_idx = set()
+        self.bc_before_idx = set()
+        
+        self.fc_later_idx = set()
+        self.fc_before_idx = set()
 
     @profile
     def bc(self, target):
         try:
-            from time import time
-            
             print '='*40+'\nbc', pp(target), '\n','='*40, '\n'
             self.bc_later = [target]
             self.target = target
@@ -34,9 +42,9 @@ class Chainer:
             start = time()
             while self.bc_later and not self.results:
                 print time() - start
-                if time() - start > 120:
-                    print 'TIMEOUT'
-                    break
+#                if time() - start > 300:
+#                    print 'TIMEOUT'
+#                    break
 
                 children = self.bc_step()
                 
@@ -49,7 +57,7 @@ class Chainer:
                 while self.fc_later and not self.results:
                     self.propogate_results_step()
 
-            print '%s goals expanded, %s remaining' % (len(self.bc_before), len(self.bc_later))
+                print '%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps))
 
             return [atom_from_tree(result, self.space).h for result in self.results]
         except Exception, e:
@@ -65,6 +73,7 @@ class Chainer:
         self.bc_before.append(next_target)
         #next_target = self.bc_pool.pop() # Depth-first search
         print '-BCQ', next_target
+        stdout.flush()
         
         ret = []
         apps = self.find_rule_applications(next_target)
@@ -89,10 +98,16 @@ class Chainer:
                 if a.head.isomorphic(self.target):
                     self.results.append(a.head)
             
-                # Do you actually need to check for repetitions?
-                if a.head not in self.fc_before and a.head not in self.fc_later:
-                    self.fc_later.append(a.head)
-                    print '+FCQ', a.head, a.name
+            # It should propogate results when it gets a TV AND/OR finds a more specialized version. This will ensure that
+            # any parent apps are specific enough to receive more results later. If you don't check that it's more specialized,
+            # it will be slower due to re-finding various things (although it checks if they have already been found, so it won't
+            # add them into the proof DAG more than once).
+            # Do you actually need to check for repetitions?
+            #if a.head not in self.fc_before and a.head not in self.fc_later:
+            if not self.contains_isomorphic_tree(a.head, self.fc_before_idx) and not self.contains_isomorphic_tree(a.head, self.fc_later_idx):
+                self.fc_later.append(a.head)
+                print '+FCQ', a.head, a.name
+                stdout.flush()
 
         # If more specific values for the (variables in the) goals have been found, then make a new
         # app, which is more specific. In particular, those variables will have been filled in within any other
@@ -100,24 +115,42 @@ class Chainer:
         for app in self.specialize_existing_rule_applications_by_premise(next_premise):
             self.add_queries(app)
 
-    def add_queries(self, app):
-        def contains_isomorphic_tree(tr, collection):
-            return any(tr.isomorphic(existing) for existing in collection)
+    # NOTE: assumes that you want to add the item into the corresponding index
+    def contains_isomorphic_tree(self, tr, idx):
+        start = time()
+        #containing = any(tr.isomorphic(existing) for existing in collection)
+        canon = tuple(canonical_trees((tr, )))
+        #idx = self.indexes[collection]
+        if canon in idx:
+            #print 'contains_isomorphic_tree', time() - start
+            return True
+        else:
+            idx.add(canon)
+            #print 'contains_isomorphic_tree', time() - start
+            return False
+        #print 'contains_isomorphic_tree', time() - start
+        #return containing
 
-        def query_is_stupid(goal):
+    def add_queries(self, app):
+        def goal_is_stupid(goal):
+            return goal.is_variable()
+
+        def app_is_stupid(goal):
             #nested_implication = standardize_apart(tree('ImplicationLink', 1, tree('ImplicationLink', 2, 3)))
             # Accidentally unifies with (ImplicationLink $blah some_target) !
             #nested_implication2 = tree('ImplicationLink', tree('ImplicationLink', 1, 2), 3)
             
+            # Nested ImplicationLinks
             if goal.get_type() == t.ImplicationLink and len(goal.args) == 2 and goal.args[1].get_type() == t.ImplicationLink:
                 return True
 
             if goal.get_type() == t.ImplicationLink and len(goal.args) == 2 and goal.args[0].get_type() == t.ImplicationLink:
                 return True
 
+            # Should block this one if it occurs anywhere. Same with SubsetLink
             dumb_inheritance = standardize_apart(tree('InheritanceLink', 1, 2))
             dumb_implication = standardize_apart(tree('ImplicationLink', 1, 2))
-            return (goal.is_variable() or
+            return (self_implication(goal) or
                          #goal.unifies(nested_implication) or
                          #goal.unifies(nested_implication2) or
                          goal.isomorphic(dumb_inheritance) or
@@ -143,21 +176,27 @@ class Chainer:
         #if any(map(query_is_stupid, app.goals)):
         #    return
 
-        if any(map(self_implication, app.goals)):
+        if any(map(app_is_stupid, app.goals)):
             return
 
         for goal in app.goals:
-            if     (not query_is_stupid(goal) and
-                    not contains_isomorphic_tree(goal, self.bc_before) and
-                    not contains_isomorphic_tree(goal, self.bc_later) ):
+            if     (not goal_is_stupid(goal) and
+                    not self.contains_isomorphic_tree(goal, self.bc_before_idx) and
+                    not self.contains_isomorphic_tree(goal, self.bc_later_idx) ):
                 self.bc_later.append(goal)
                 print '+BCQ', goal, app.name
+                stdout.flush()
         
         # This records the path of potential rule-apps found on the way down the search tree,
         # so that results can be propogated back up that path. If you just did normal forward
         # chaining on the results, it would take lots of other paths as well.
-        if not any(app.isomorphic(existing) for existing in self.apps):
+        
+        canon = app.canonical_tuple()
+        if canon not in self.apps_set:
+            self.apps_set.add(canon)
             self.apps.append(app)
+        #if not any(app.isomorphic(existing) for existing in self.apps):
+        #    self.apps.append(app)
     
     def check_premises_and_add_result(self, app):
         '''Check whether the given app can produce a result. This will happen if all its premises are
@@ -243,20 +282,18 @@ class Chainer:
                                           tree(type, 2, 3) ], 
                                           name='Deduction'))
 
-        # Inversion
-        for type in ['SubsetLink', 'ImplicationLink', 'InheritanceLink']:
-            self.add_rule(Rule( tree(type, 1, 2), 
-                                         [tree(type, 2, 1)], 
-                                         name='Inversion'))
-
-        # Try using a more specialized MP as well
-
-        # ModusPonens
-        for type in ['ImplicationLink']:
-            self.add_rule(Rule(tree(2), 
-                                         [tree(type, 1, 2),
-                                          tree(1) ], 
-                                          name='ModusPonens'))
+#        # Inversion
+#        for type in ['SubsetLink', 'ImplicationLink', 'InheritanceLink']:
+#            self.add_rule(Rule( tree(type, 1, 2), 
+#                                         [tree(type, 2, 1)], 
+#                                         name='Inversion'))
+#
+#        # ModusPonens
+#        for type in ['ImplicationLink']:
+#            self.add_rule(Rule(tree(2), 
+#                                         [tree(type, 1, 2),
+#                                          tree(1) ], 
+#                                          name='ModusPonens'))
 #        # ModusPonens for EvaluationLinks only
 #        for type in ['ImplicationLink']:
 #            conc = tree('EvaluationLink', new_var(), new_var())
@@ -299,7 +336,6 @@ class Chainer:
             r = Rule(tr, [], name='ForAll')
             r.tv = True
             self.add_rule(r)
-
 
 class Rule :
     def __init__ (self, head, goals, name, tv = False):
@@ -346,6 +382,14 @@ class Rule :
         other_conj = (other.head,)+tuple(other.goals)
         
         return isomorphic_conjunctions_ordered(self_conj, other_conj)
+
+    def canonical_tuple(self):
+        try:
+            return self._tuple
+        except:
+            conj = (self.head,)+tuple(self.goals)
+            self._tuple = tuple(canonical_trees(conj))
+            return self._tuple
 
     def unifies(self, other):
         self_conj = (self.head,)+tuple(self.goals)

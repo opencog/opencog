@@ -157,7 +157,7 @@ class tree:
                 return self._tuple
 
     def isomorphic(self, other):
-        return isomorphic_conjunctions_ordered([self], [other])
+        return isomorphic_conjunctions_ordered((self, ), (other, ))
     
     def unifies(self, other):
         assert isinstance(other, tree)
@@ -419,7 +419,7 @@ def isomorphic_conjunctions(xs, ys):
     # Handle conjunctions.
     if isinstance(xs, tuple) and isinstance(ys, tuple) and len(xs) == len(ys):
         for perm in permutations(xs):
-            if isomorphic_conjunctions_ordered(perm, ys):
+            if isomorphic_conjunctions_ordered(tuple(perm), ys):
                 return True
     return False
 
@@ -431,6 +431,7 @@ def canonical_trees(trs, dic = {}):
     '''Returns the canonical version of a list of trees, i.e. with the variables renamed (consistently) from 0,1,2.
     It can be a list of only one tree. If you want to use multiple trees, you must put them in the same list, so that
     any shared variables will be renamed consistently.'''
+
     global _new_var_counter
     tmp = _new_var_counter
     _new_var_counter = 0
@@ -439,6 +440,7 @@ def canonical_trees(trs, dic = {}):
         tr2 = standardize_apart(tr)
         ret.append(tr2)
     _new_var_counter = tmp
+    
     return ret
 
 def get_varlist(t):
