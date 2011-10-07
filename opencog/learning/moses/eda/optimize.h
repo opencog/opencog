@@ -97,13 +97,11 @@ namespace eda {
             
             //create new instances and integrate them into the current
             //instance set, replacing existing instances
-            logger().debug("Sample %d new candidates according to the model",
-                           n_generate);
+            logger().debug("Sample and evaluate %d new candidates"
+                           " according to the model", n_generate);
             instance_set<ScoreT> new_instances(n_generate, current.fields());
             foreach(auto& inst, new_instances)
                 inst = model();
-
-            logger().debug("Evaluate them");
             OMP_ALGO::transform(new_instances.begin(), new_instances.end(),
                                 new_instances.begin_scores(),
                                 bind(boost::cref(score), _1));

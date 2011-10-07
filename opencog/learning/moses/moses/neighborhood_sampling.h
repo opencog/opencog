@@ -141,7 +141,7 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
 
 /**
  * This procedure samples sample_size instances at distance n from an
- * instance considered as center (for isntance the exemplar). 
+ * instance considered as center (for instance the exemplar). 
  *
  * @todo: onto fields are ignored for now
  *
