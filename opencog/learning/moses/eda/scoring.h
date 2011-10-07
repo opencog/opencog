@@ -28,7 +28,7 @@
 #include <opencog/util/functional.h>
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
 template<typename ScoreT>
 struct scored_instance : public tagged_item<instance, ScoreT> {
@@ -57,7 +57,7 @@ score_instance(const instance& inst, const Scoring& score)
         (inst, score(inst));
 }
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

@@ -35,7 +35,7 @@
 #include "../representation/field_set.h"
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
 struct one_max : public unary_function<instance, int> {
     int operator()(const instance& inst) const {
@@ -119,7 +119,7 @@ struct ontomax: public unary_function<instance, contin_t> {
     const field_set& fields;
 };
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

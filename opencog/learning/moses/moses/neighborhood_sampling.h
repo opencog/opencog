@@ -55,21 +55,21 @@ using std::numeric_limits;
  *            of the deme if it does so then an assert is raised
  */
 template<typename Out>
-void generate_initial_sample(const eda::field_set& fs, int n, Out out, Out end,
+void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
                              RandGen& rng)
 {
     dorepeat(n) {
 
-        eda::instance inst(fs.packed_width());
+        instance inst(fs.packed_width());
 
-        eda::randomize(fs, inst, rng);
+        randomize(fs, inst, rng);
 
         //bias towards the exemplar instance
-        for (eda::field_set::bit_iterator it = fs.begin_bits(inst);
+        for (field_set::bit_iterator it = fs.begin_bits(inst);
              it != fs.end_bits(inst);++it)
             if (rng.randbool())
                 *it = false;
-        for (eda::field_set::disc_iterator it = fs.begin_disc(inst);
+        for (field_set::disc_iterator it = fs.begin_disc(inst);
              it != fs.end_disc(inst);++it)
             if (rng.randbool())
                 *it = 0;
@@ -99,9 +99,9 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out, Out end,
  * @param n    the haming distance contin encode will be modified
  * @param rng  the random generator
  */
-inline void generate_contin_neighbor(const eda::field_set& fs,
-                                     eda::instance& inst, 
-                                     eda::field_set::contin_iterator it, 
+inline void generate_contin_neighbor(const field_set& fs,
+                                     instance& inst, 
+                                     field_set::contin_iterator it, 
                                      unsigned n, RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
@@ -114,13 +114,13 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
 
     for(unsigned i = n; i > 0; i--) {
         size_t r = select();
-        eda::field_set::disc_iterator itr = fs.begin_raw(inst);        
+        field_set::disc_iterator itr = fs.begin_raw(inst);        
         itr += begin + r;
         // case inst at itr is Stop
-        if(*itr == eda::field_set::contin_spec::Stop) {
+        if(*itr == field_set::contin_spec::Stop) {
             *itr = rng.randbool() ?
-                eda::field_set::contin_spec::Left:
-                eda::field_set::contin_spec::Right;
+                field_set::contin_spec::Left:
+                field_set::contin_spec::Right;
             num++;
             select.reset_range(std::min(num + 1, depth));
         } 
@@ -131,10 +131,10 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
             // whether we allow to turn it to stop
             bool can_be_stop = i <= select.count_n_free();
             if(before_stop && can_be_stop && rng.randbool()) {
-                *itr = eda::field_set::contin_spec::Stop;
+                *itr = field_set::contin_spec::Stop;
                 select.reset_range(--num);
             } else 
-                *itr = eda::field_set::contin_spec::switchLR(*itr);
+                *itr = field_set::contin_spec::switchLR(*itr);
         }
     }
 }
@@ -156,10 +156,10 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
  * @param center_inst   the center instance
  */
 template<typename Out>
-void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
+void sample_from_neighborhood(const field_set& fs, unsigned n,
                               unsigned sample_size, Out out, Out end,
                               RandGen& rng,
-                              const eda::instance & center_inst )
+                              const instance & center_inst )
 {
     OC_ASSERT(center_inst.size() == fs.packed_width(),
               "Please make sure that the center_inst"
@@ -173,14 +173,14 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
 
     dorepeat(sample_size) {
 
-        eda::instance new_inst(center_inst);
+        instance new_inst(center_inst);
         lazy_random_selector select(dim, rng);
 
         for (unsigned i = 1;i <= n;) {
             size_t r = select();
-            eda::field_set::bit_iterator itb = fs.begin_bits(new_inst);
-            eda::field_set::disc_iterator itd = fs.begin_disc(new_inst);
-            eda::field_set::contin_iterator itc = fs.begin_contin(new_inst);
+            field_set::bit_iterator itb = fs.begin_bits(new_inst);
+            field_set::disc_iterator itd = fs.begin_disc(new_inst);
+            field_set::contin_iterator itc = fs.begin_contin(new_inst);
             // modify bit
             if (r < fs.n_bits()) {
                 itb += r;
@@ -225,18 +225,18 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
  *                      of the deme if it does so then an assert is raised
  */
 template<typename Out>
-void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
+void sample_from_neighborhood(const field_set& fs, unsigned n,
                               unsigned sample_size, Out out, Out end,
                               RandGen& rng)
 {
-    eda::instance inst(fs.packed_width());
+    instance inst(fs.packed_width());
 
     // reset all fields (contin and onto fields are ignored)
-    for (eda::field_set::bit_iterator it = fs.begin_bits(inst);
+    for (field_set::bit_iterator it = fs.begin_bits(inst);
             it != fs.end_bits(inst); ++it)
         *it = false;
 
-    for (eda::field_set::disc_iterator it = fs.begin_disc(inst);
+    for (field_set::disc_iterator it = fs.begin_disc(inst);
             it != fs.end_disc(inst); ++it)
         *it = 0;
 
@@ -259,9 +259,9 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned n,
  * @param center_inst   the center instance 
  */
 template<typename Out>
-void generate_all_in_neighborhood(const eda::field_set& fs, unsigned n,
+void generate_all_in_neighborhood(const field_set& fs, unsigned n,
                                   Out out, Out end,
-                                  const eda::instance& center_inst )
+                                  const instance& center_inst )
 {
     OC_ASSERT(center_inst.size() == fs.packed_width(),
               "the size of center_instance should be equal to the width of fs");
@@ -283,10 +283,10 @@ void generate_all_in_neighborhood(const eda::field_set& fs, unsigned n,
  *             of the deme if it does so then an assert is raised
  */
 template<typename Out>
-void generate_all_in_neighborhood(const eda::field_set& fs,
+void generate_all_in_neighborhood(const field_set& fs,
                                   unsigned n, Out out, Out end)
 {
-    eda::instance inst(fs.packed_width());
+    instance inst(fs.packed_width());
     generate_all_in_neighborhood(fs, n, out, end, inst);
 }
 
@@ -310,8 +310,8 @@ void generate_all_in_neighborhood(const eda::field_set& fs,
  * @return the out iterator pointing to the element after the last insertion
  */
 template<typename Out>
-Out vary_n_knobs(const eda::field_set& fs,
-                 const eda::instance& inst,
+Out vary_n_knobs(const field_set& fs,
+                 const instance& inst,
                  unsigned n,
                  unsigned starting_index,
                  Out out, Out end)
@@ -322,7 +322,7 @@ Out vary_n_knobs(const eda::field_set& fs,
         return out;
     }
 
-    eda::instance tmp_inst = inst;
+    instance tmp_inst = inst;
     unsigned begin_contin_idx, begin_disc_idx, begin_bit_idx;
 
     // ontos
@@ -334,16 +334,16 @@ Out vary_n_knobs(const eda::field_set& fs,
     // contins
     else if(starting_index < (begin_disc_idx = begin_contin_idx + fs.n_contin())) {
         // modify the contin disc pointed by itr and recursive call
-        eda::field_set::contin_iterator itc = fs.begin_contin(tmp_inst);
+        field_set::contin_iterator itc = fs.begin_contin(tmp_inst);
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
         itc += contin_idx;
         size_t depth = fs.contin()[itc.idx()].depth;
         size_t num = fs.count_n_before_stop(tmp_inst, contin_idx);
-        eda::field_set::disc_iterator itr = fs.begin_raw(tmp_inst);        
+        field_set::disc_iterator itr = fs.begin_raw(tmp_inst);        
         itr += starting_index;
         size_t relative_raw_idx = starting_index - fs.contin_to_raw_idx(contin_idx);
         // case tmp_inst at itr is Stop
-        if(*itr == eda::field_set::contin_spec::Stop) {
+        if(*itr == field_set::contin_spec::Stop) {
             // Assumption [1]: within the same contin, it is the first Stop
             // recursive call, moved to the next contin (or disc if no more contin)
             out = vary_n_knobs(fs, tmp_inst, n,
@@ -351,9 +351,9 @@ Out vary_n_knobs(const eda::field_set& fs,
                                starting_index + depth - relative_raw_idx,
                                out, end);
             // modify with Left or Right
-            *itr = eda::field_set::contin_spec::Left;
+            *itr = field_set::contin_spec::Left;
             out = vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out, end);
-            *itr = eda::field_set::contin_spec::Right;
+            *itr = field_set::contin_spec::Right;
             out = vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out, end);
         } 
         // case tmp_inst at itr is Left or Right
@@ -361,7 +361,7 @@ Out vary_n_knobs(const eda::field_set& fs,
             // recursive call, moved for one position
             out = vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out, end);
             // Left<->Right
-            *itr = eda::field_set::contin_spec::switchLR(*itr);
+            *itr = field_set::contin_spec::switchLR(*itr);
             out = vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out, end);
             // if the next Stop is not further from itr than the distance n
             // then turn the remaining discs to Stop
@@ -371,7 +371,7 @@ Out vary_n_knobs(const eda::field_set& fs,
             if(remRLs <= n) {
                 for(; relative_raw_idx < num; --num, ++itr) {
                     // Stop
-                    *itr = eda::field_set::contin_spec::Stop;
+                    *itr = field_set::contin_spec::Stop;
                 }
                 out = vary_n_knobs(fs, tmp_inst, n - remRLs,
                                    // below is to fulfill Assumption [1]
@@ -382,9 +382,9 @@ Out vary_n_knobs(const eda::field_set& fs,
     }
     // discs
     else if(starting_index < (begin_bit_idx = begin_disc_idx + fs.n_disc())) {
-        eda::field_set::disc_iterator itd = fs.begin_disc(tmp_inst);
+        field_set::disc_iterator itd = fs.begin_disc(tmp_inst);
         itd += starting_index - begin_disc_idx;
-        eda::disc_t tmp_val = *itd;
+        disc_t tmp_val = *itd;
         // recursive call, moved for one position
         out = vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out, end);
         // modify the disc and recursive call, moved for one position
@@ -400,7 +400,7 @@ Out vary_n_knobs(const eda::field_set& fs,
     }
     // bits
     else if(starting_index < begin_bit_idx + fs.n_bits()) {
-        eda::field_set::bit_iterator itb = fs.begin_bits(tmp_inst);
+        field_set::bit_iterator itb = fs.begin_bits(tmp_inst);
         itb += starting_index - begin_bit_idx;
 
         // recursive call, moved for one position
@@ -429,8 +429,8 @@ Out vary_n_knobs(const eda::field_set& fs,
  *                        because this function can be computationally expensive.
  */
 inline unsigned long long
-count_n_changed_knobs_from_index(const eda::field_set& fs,
-                                 const eda::instance& inst,
+count_n_changed_knobs_from_index(const field_set& fs,
+                                 const instance& inst,
                                  unsigned n,
                                  unsigned starting_index,
                                  unsigned long long max_count
@@ -456,7 +456,7 @@ count_n_changed_knobs_from_index(const eda::field_set& fs,
     }
     // contins
     else if(starting_index < begin_disc_idx) {
-        eda::field_set::const_contin_iterator itc = fs.begin_contin(inst);
+        field_set::const_contin_iterator itc = fs.begin_contin(inst);
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
         itc += contin_idx;
         int depth = fs.contin()[itc.idx()].depth;
@@ -493,7 +493,7 @@ count_n_changed_knobs_from_index(const eda::field_set& fs,
     }
     // discs
     else if(starting_index < begin_bit_idx) {
-        eda::field_set::const_disc_iterator itd = fs.begin_disc(inst);
+        field_set::const_disc_iterator itd = fs.begin_disc(inst);
         itd += starting_index - begin_disc_idx;
         // recursive call, moved for one position
         number_of_instances = 
@@ -536,8 +536,8 @@ count_n_changed_knobs_from_index(const eda::field_set& fs,
  * @param max_count       stop counting when above this value, that is
  *                        because this function can be computationally expensive.
  */
-inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
-                                                const eda::instance& inst,
+inline unsigned long long count_n_changed_knobs(const field_set& fs,
+                                                const instance& inst,
                                                 unsigned n,
                                                 unsigned long long max_count 
                                                 = numeric_limits<unsigned long long>::max())
@@ -545,12 +545,12 @@ inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
     return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
 }
 // for backward compatibility, like above but with null instance
-inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
+inline unsigned long long count_n_changed_knobs(const field_set& fs,
                                                 unsigned n,
                                                 unsigned long long max_count
                                                 = numeric_limits<unsigned long long>::max())
 {
-    eda::instance inst(fs.packed_width());
+    instance inst(fs.packed_width());
     return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
 }
 
@@ -560,8 +560,8 @@ inline unsigned long long count_n_changed_knobs(const eda::field_set& fs,
 inline unsigned long long
 sample_new_instances(unsigned long long number_of_new_instances,
                      unsigned long long current_number_of_instances,
-                     const eda::instance& center_inst,
-                     eda::instance_set<composite_score>& deme,
+                     const instance& center_inst,
+                     instance_set<composite_score>& deme,
                      unsigned dist,
                      RandGen& rng) {
     // the number of all neighbours at the distance d (stops

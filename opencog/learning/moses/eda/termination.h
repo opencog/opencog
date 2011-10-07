@@ -28,7 +28,7 @@
 #include <limits>
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
 template<typename ScoreT>
 struct terminate_if_gte {
@@ -64,7 +64,7 @@ protected:
     mutable int at;
 };
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

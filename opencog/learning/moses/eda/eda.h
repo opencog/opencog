@@ -39,7 +39,7 @@
 //#define EDALIB_64
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 //storage types for packed populations
 #ifdef EDALIB_64
 #  if LLONG_MAX==9223372036854775807LL
@@ -74,7 +74,7 @@ typedef tree<onto_t> onto_tree;
 
 typedef std::vector<packed_t> instance;
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

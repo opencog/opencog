@@ -235,13 +235,13 @@ struct dummy_bscore : public unary_function<combo_tree, behavioral_score> {
  * hamming distance of the candidate to a given target instance and
  * constant null complexity.
  */
-struct distance_based_scorer : public unary_function<eda::instance,
+struct distance_based_scorer : public unary_function<instance,
                                                      composite_score> {
-    distance_based_scorer(const eda::field_set& _fs,
-                          const eda::instance& _target_inst)
+    distance_based_scorer(const field_set& _fs,
+                          const instance& _target_inst)
         : fs(_fs), target_inst(_target_inst) {}
 
-    composite_score operator()(const eda::instance& inst) const {
+    composite_score operator()(const instance& inst) const {
         score_t sc = -fs.hamming_distance(target_inst, inst);
         // Logger
         if(logger().getLevel() >= Logger::FINE) {
@@ -255,17 +255,17 @@ struct distance_based_scorer : public unary_function<eda::instance,
     }
 
 protected:
-    const eda::field_set& fs;
-    const eda::instance& target_inst;
+    const field_set& fs;
+    const instance& target_inst;
 };
 
 template<typename Scoring>
-struct complexity_based_scorer : public unary_function<eda::instance,
+struct complexity_based_scorer : public unary_function<instance,
                                                        composite_score> {
     complexity_based_scorer(const Scoring& s, representation& rep, bool reduce)
         : score(s), _rep(rep), _reduce(reduce) {}
 
-    composite_score operator()(const eda::instance& inst) const {
+    composite_score operator()(const instance& inst) const {
         using namespace reduct;
 
         // Logger

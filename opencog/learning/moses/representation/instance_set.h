@@ -28,7 +28,7 @@
 #include "../eda/scoring.h"
 
 namespace opencog {
-namespace eda {
+namespace moses {
 
 template<typename ScoreT>
 struct instance_set : public vector<scored_instance<ScoreT> > {
@@ -92,7 +92,7 @@ protected:
     const field_set& _fields;
 };
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

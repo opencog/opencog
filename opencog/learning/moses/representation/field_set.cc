@@ -29,7 +29,7 @@
 #include <opencog/util/iostreamContainer.h>
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
 const disc_t field_set::contin_spec::Stop = 0;
 const disc_t field_set::contin_spec::Left = 1;
@@ -204,5 +204,5 @@ void field_set::build_onto_spec(const onto_spec& os, size_t n)
     _onto.insert(_onto.end(), n, os);
 }
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog

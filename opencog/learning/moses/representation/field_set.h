@@ -32,7 +32,7 @@
 #include "../eda/eda.h"
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
  /**
   * A field set creates a simple, optimally compact representation of a set of
@@ -941,7 +941,7 @@ Out field_set::pack(It from, Out out) const
     return out;
 }
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

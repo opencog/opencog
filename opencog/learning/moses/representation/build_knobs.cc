@@ -54,7 +54,7 @@ build_knobs::build_knobs(RandGen& _rng,
                          const combo_tree_ns_set* actions,
                          contin_t step_size,
                          contin_t expansion,
-                         eda::field_set::arity_t depth)
+                         field_set::arity_t depth)
     : rng(_rng), _exemplar(exemplar), _type(tt), _rep(rep),
       _arity(tt.begin().number_of_children() - 1),
       _step_size(step_size), _expansion(expansion), _depth(depth),

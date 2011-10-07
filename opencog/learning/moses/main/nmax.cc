@@ -28,24 +28,26 @@
 using std::string;
 using std::vector;
 using boost::lexical_cast;
+using namespace opencog;
+using namespace moses;
 
 int main(int argc,char** argv) {
 
     //set flag to print only cassert and other ERROR level logs on stdout
-    opencog::logger().setPrintErrorLevelStdout();
+    logger().setPrintErrorLevelStdout();
  
     vector<string> add_args{"n(whatever it is?)"};
     optargs args(argc, argv, add_args);
     int n=lexical_cast<int>(argv[5]);
     cout_log_best_and_gen logger;
     
-    opencog::MT19937RandGen rng(args.rand_seed);
+    MT19937RandGen rng(args.rand_seed);
 
     field_set fs(field_set::disc_spec(n), args.length); //all n-arry
     instance_set<int> population(args.popsize,fs);
     foreach(instance& inst,population)
         generate(fs.begin_disc(inst), fs.end_disc(inst),
-                 bind(&opencog::RandGen::randint, boost::ref(rng), n));
+                 bind(&RandGen::randint, boost::ref(rng), n));
 
     optimize(population,args.n_select,args.n_generate,args.max_gens,n_max(fs),
              terminate_if_gte<int>((n-1)*args.length),

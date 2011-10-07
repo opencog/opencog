@@ -35,7 +35,6 @@
 
 using namespace std;
 using namespace opencog;
-using namespace eda;
 
 //WARNING: the additional arguments must be handled by the caller,
 //but it is informed here for checking and usage printing

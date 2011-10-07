@@ -32,7 +32,6 @@
 
 using namespace opencog;
 using namespace moses;
-using namespace eda;
 
 class optimizationUTest : public CxxTest::TestSuite {
     MT19937RandGen rng;
@@ -54,10 +53,10 @@ public:
         std::cout << "eval_n = " << eval_n << std::endl;
         field_set fs(field_set::disc_spec(2), fs_size);
         // initial instance
-        eda::instance init_inst(fs.packed_width());
+        instance init_inst(fs.packed_width());
         randomize(fs, init_inst, rng);
         // target instance
-        eda::instance target_inst(fs.packed_width());
+        instance target_inst(fs.packed_width());
         randomize(fs, target_inst, rng);
         std::cout << "target_inst =" << fs.stream(target_inst) << std::endl;
         // scorer

@@ -25,21 +25,24 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
 
+using namespace opencog;
+using namespace moses;
+
 int main(int argc,char** argv) { 
 
     //set flag to print only cassert and other ERROR level logs on stdout
-    opencog::logger().setPrintErrorLevelStdout();
+    logger().setPrintErrorLevelStdout();
 
     optargs args(argc,argv);
     cout_log_best_and_gen logger;
     field_set fs(field_set::disc_spec(2),args.length); //all boolean
     
-    opencog::MT19937RandGen rng(args.rand_seed);
+    MT19937RandGen rng(args.rand_seed);
     
     instance_set<int> population(args.popsize,fs);
     foreach(instance& inst,population)
         generate(fs.begin_bits(inst), fs.end_bits(inst),
-                 bind(&opencog::RandGen::randbool, boost::ref(rng)));
+                 bind(&RandGen::randbool, boost::ref(rng)));
     
     optimize(population,args.n_select, args.n_generate,args.max_gens,
              one_max(), terminate_if_gte<int>(args.length),

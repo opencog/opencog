@@ -30,7 +30,7 @@
 #include "../representation/field_set.h"
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
 using std::vector;
 
@@ -206,7 +206,7 @@ void local_structure_probs_learning::rec_learn(const field_set& fs,
     }
 }
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 inline std::ostream& operator<<(std::ostream& o, const std::vector<int>& v)

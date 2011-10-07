@@ -55,8 +55,8 @@ int main(int argc,char** argv) {
           for (int i=0;i<10;++i) { 
           cout << rep.exemplar() << endl;
           
-          eda::instance inst(rep.fields().packed_width());
-          for (eda::field_set::disc_iterator it=rep.fields().begin_raw(inst);
+          instance inst(rep.fields().packed_width());
+          for (field_set::disc_iterator it=rep.fields().begin_raw(inst);
           it!=rep.fields().end_raw(inst);++it)
           it.randomize();	
           

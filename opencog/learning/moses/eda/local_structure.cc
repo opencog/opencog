@@ -30,7 +30,7 @@
 #include <opencog/util/oc_assert.h>
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
 //true if the range is uniform on the variable at index idx
 bool local_structure_model::is_uniform_on(iptr_iter l, iptr_iter u, int idx)
@@ -158,5 +158,5 @@ void local_structure_model::sample(dtree::iterator dtr, disc_t& dst,
     }
 }
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog

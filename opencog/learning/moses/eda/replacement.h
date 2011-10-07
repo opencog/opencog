@@ -33,7 +33,7 @@
 #include "scoring.h"
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
 struct replace_the_worst {
     template<typename NewInst, typename Dst>
@@ -83,7 +83,7 @@ protected:
     RandGen& rng;
 };
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

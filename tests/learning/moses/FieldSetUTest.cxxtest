@@ -5,7 +5,7 @@
 #include <vector>
 
 using namespace opencog;
-using namespace eda;
+using namespace moses;
 
 class FieldSetUTest : public CxxTest::TestSuite {
 public:
@@ -39,7 +39,7 @@ public:
         field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), 1);
         instance inst(fs.packed_width());
         opencog::MT19937RandGen rng(1);
-        eda::randomize(fs, inst, rng);
+        randomize(fs, inst, rng);
 
         size_t idx = 1;
         disc_t rv, v = field_set::contin_spec::Left;

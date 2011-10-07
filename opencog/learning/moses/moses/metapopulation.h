@@ -533,7 +533,7 @@ struct metapopulation : public bscored_combo_tree_set {
 
         // sort the deme according to composite_score (descending order)
         std::sort(_deme->begin(), _deme->end(),
-                  std::greater<eda::scored_instance<composite_score> >());
+                  std::greater<scored_instance<composite_score> >());
 
         // Logger
         logger().debug("Select candidates to merge");
@@ -550,7 +550,7 @@ struct metapopulation : public bscored_combo_tree_set {
         mutex pot_cnd_mutex; // mutex for pot_candidates
 
         auto select_candidates =
-            [&, this](const eda::scored_instance<composite_score>& inst) {
+            [&, this](const scored_instance<composite_score>& inst) {
             const composite_score& inst_csc = inst.second;
             
             // if it's really bad stops
@@ -1065,7 +1065,7 @@ protected:
     combo_tree_hash_set _visited_exemplars;
 
     representation* _rep; // representation of the current deme
-    typedef eda::instance_set<composite_score> deme_t;
+    typedef instance_set<composite_score> deme_t;
     typedef deme_t::iterator deme_it;
     typedef deme_t::const_iterator deme_cit;
     deme_t* _deme; // current deme

@@ -45,8 +45,6 @@ void set_depth(int new_depth);
  * Do the representation-building, create a field_set
  */
 struct representation : public knob_mapper, boost::noncopyable {
-    typedef eda::instance instance;
-
     typedef std::set<combo::vertex> operator_set;
     typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> >
     combo_tree_ns_set;

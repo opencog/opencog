@@ -30,17 +30,18 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/combo/simple_nn.h>
 #include <opencog/comboreduct/reduct/ann_rules.h>
+
 #include "scoring.h"
 #include "scoring_functions.h" 
 #include "pole_balancing.h"
 
-using namespace opencog::combo;
 using namespace opencog;
+using namespace combo;
 using namespace std;
 using namespace moses;
 #define MIN_FITNESS -1.0e10
 
-struct AnnPole2NVFitnessFunction : public unary_function<combo_tree, contin_t> {
+struct AnnPole2NVFitnessFunction : public unary_function<combo_tree, double> {
     result_type operator()(argument_type tr) const {
         bool velocity = false;
         if (tr.empty())
@@ -51,13 +52,13 @@ struct AnnPole2NVFitnessFunction : public unary_function<combo_tree, contin_t> {
         CartPole the_cart(true,velocity);
         the_cart.nmarkov_long=false;
         the_cart.generalization_test=false;
-        contin_t fitness = -100000.0+the_cart.evalNet(&nn);
+        double fitness = -100000.0+the_cart.evalNet(&nn);
         return fitness;
     }
 
 };
 
-struct AnnPole2FitnessFunction : public unary_function<combo_tree, contin_t> {
+struct AnnPole2FitnessFunction : public unary_function<combo_tree, double> {
     result_type operator()(argument_type tr) const {
         bool velocity = true;
         if (tr.empty())
@@ -68,12 +69,12 @@ struct AnnPole2FitnessFunction : public unary_function<combo_tree, contin_t> {
         CartPole the_cart(true,velocity);
         the_cart.nmarkov_long=false;
         the_cart.generalization_test=false;
-        contin_t fitness = -100000+the_cart.evalNet(&nn);
+        double fitness = -100000+the_cart.evalNet(&nn);
         return fitness;
     }
 };
 
-struct AnnPoleFitnessFunction : public unary_function<combo_tree, contin_t> {
+struct AnnPoleFitnessFunction : public unary_function<combo_tree, double> {
     result_type operator()(argument_type tr) const {
         if (tr.empty())
             return MIN_FITNESS;
@@ -96,16 +97,16 @@ struct AnnPoleFitnessFunction : public unary_function<combo_tree, contin_t> {
         
         int random_start=1;
         
-        contin_t in[5];  //Input loading array
+        double in[5];  //Input loading array
         
-        contin_t out1;
-        contin_t out2;
+        double out1;
+        double out2;
         
-        //     contin_t one_degree= 0.0174532;	/* 2pi/360 */
-        //     contin_t six_degrees=0.1047192;
-        contin_t twelve_degrees=0.2094384;
-        //     contin_t thirty_six_degrees= 0.628329;
-        //     contin_t fifty_degrees=0.87266;
+        //     double one_degree= 0.0174532;	/* 2pi/360 */
+        //     double six_degrees=0.1047192;
+        double twelve_degrees=0.2094384;
+        //     double thirty_six_degrees= 0.628329;
+        //     double fifty_degrees=0.87266;
         
         if (random_start) {
             /*set up random start state*/
@@ -199,7 +200,7 @@ struct AnnPoleFitnessFunction : public unary_function<combo_tree, contin_t> {
     }
 };
 
-struct AnnFitnessFunction : public unary_function<combo_tree, contin_t> {
+struct AnnFitnessFunction : public unary_function<combo_tree, double> {
 
     typedef combo_tree::iterator pre_it;
     typedef combo_tree::sibling_iterator sib_it;
@@ -213,21 +214,21 @@ struct AnnFitnessFunction : public unary_function<combo_tree, contin_t> {
         // binary xor_problem. The third input is always 1.0, this is
         // "to potentially supply a constant 'bias' to influence the
         // behavior of other neurons" (Joel Lehman)
-        contin_t inputs[4][3] = { {0.0, 0.0, 1.0}, 
+        double inputs[4][3] = { {0.0, 0.0, 1.0}, 
                                   {0.0, 1.0, 1.0}, 
                                   {1.0, 0.0, 1.0},
                                   {1.0, 1.0, 1.0}};
-        contin_t outputs[4] = {0.0, 1.0, 1.0, 0.0};
+        double outputs[4] = {0.0, 1.0, 1.0, 0.0};
 
         ann nn = tt.decodify_tree(tr);
         int depth = nn.feedforward_depth();
 
-        contin_t error = 0.0;
+        double error = 0.0;
         for (int pattern = 0;pattern < 4;++pattern) {
             nn.load_inputs(inputs[pattern]);
             dorepeat(depth)
                 nn.propagate();
-            contin_t diff = outputs[pattern] - nn.outputs[0]->activation;
+            double diff = outputs[pattern] - nn.outputs[0]->activation;
             error += diff * diff;
         }
 
@@ -238,9 +239,9 @@ struct AnnFitnessFunction : public unary_function<combo_tree, contin_t> {
 
 namespace opencog { namespace moses {
 
-struct ann_pole2nv_score : public unary_function<combo_tree, contin_t> {
+struct ann_pole2nv_score : public unary_function<combo_tree, double> {
     ann_pole2nv_score() { }
-    contin_t operator()(const combo_tree& tr) const {
+    double operator()(const combo_tree& tr) const {
         return p2ff(tr);
     }
     AnnPole2NVFitnessFunction p2ff;
@@ -258,9 +259,9 @@ struct ann_pole2nv_bscore : public unary_function<combo_tree, behavioral_score> 
     }
 };
 
-struct ann_pole2_score : public unary_function<combo_tree, contin_t> {
+struct ann_pole2_score : public unary_function<combo_tree, double> {
    ann_pole2_score() { }
-   contin_t operator()(const combo_tree& tr) const {
+   double operator()(const combo_tree& tr) const {
       return p2ff(tr);
    }
    AnnPole2FitnessFunction p2ff;
@@ -278,9 +279,9 @@ struct ann_pole2_bscore : public unary_function<combo_tree, behavioral_score> {
     }
 };
 
-struct ann_pole_score  : public unary_function<combo_tree, contin_t> {
+struct ann_pole_score  : public unary_function<combo_tree, double> {
     ann_pole_score() { }
-    contin_t operator()(const combo_tree& tr) const {
+    double operator()(const combo_tree& tr) const {
         return pff(tr);
     }
     AnnPoleFitnessFunction pff;
@@ -298,9 +299,9 @@ struct ann_pole_bscore : public unary_function<combo_tree, behavioral_score> {
     }
 };
 
-struct ann_score  : public unary_function<combo_tree, contin_t> {
+struct ann_score  : public unary_function<combo_tree, double> {
    ann_score() { }
-   contin_t operator()(const combo_tree& tr) const {
+   double operator()(const combo_tree& tr) const {
        return aff(tr);
    }
 

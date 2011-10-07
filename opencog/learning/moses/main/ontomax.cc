@@ -30,6 +30,8 @@
 using std::string;
 using std::vector;
 using boost::lexical_cast;
+using namespace opencog;
+using namespace moses;
 
 void recbuild(onto_tree& tr,onto_tree::iterator it,
 	      int b,int maxd,int d,int s) {
@@ -45,7 +47,7 @@ void recbuild(onto_tree& tr,onto_tree::iterator it,
 int main(int argc,char** argv) { 
 
     //set flag to print only cassert and other ERROR level logs on stdout
-    opencog::logger().setPrintErrorLevelStdout();
+    logger().setPrintErrorLevelStdout();
 
     vector<string> addition_args{"depth", "branching"};
     optargs args(argc, argv, addition_args);
@@ -53,7 +55,7 @@ int main(int argc,char** argv) {
     int branching=lexical_cast<int>(argv[6]);
     cout_log_best_and_gen logger;
     
-    opencog::MT19937RandGen rng(args.rand_seed);
+    MT19937RandGen rng(args.rand_seed);
     
     onto_tree tr("");
     recbuild(tr,tr.begin(),branching,depth,0,0);

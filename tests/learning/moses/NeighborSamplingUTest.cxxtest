@@ -9,7 +9,6 @@
 
 
 using namespace opencog;
-using namespace eda;
 using namespace moses;
 
 class NeighborSamplingUTest : public CxxTest::TestSuite {

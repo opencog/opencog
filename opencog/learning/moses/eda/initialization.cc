@@ -25,7 +25,7 @@
 #include "../moses/neighborhood_sampling.h"
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
 using namespace std;
 
@@ -102,6 +102,6 @@ void randomize(const field_set& fs, instance& inst,
     uniform_randomize_bits(fs, inst, rng);
 }
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 

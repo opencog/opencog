@@ -88,7 +88,7 @@ struct disc_knob_base : public knob_base {
     virtual void allow(int) = 0;
 
     //create a spec describing the space spanned by the knob
-    virtual eda::field_set::disc_spec spec() const = 0;
+    virtual field_set::disc_spec spec() const = 0;
 
     //arity based on whatever knobs are currently allowed
     virtual int arity() const = 0;
@@ -102,7 +102,7 @@ struct disc_knob_base : public knob_base {
 struct contin_knob : public knob_base {
     contin_knob(combo_tree& tr, combo_tree::iterator tgt,
                 contin_t step_size, contin_t expansion,
-                eda::field_set::arity_t depth)
+                field_set::arity_t depth)
         : knob_base(tr, tgt), _spec(combo::get_contin(*tgt),
                                     step_size, expansion, depth) { }
 
@@ -113,12 +113,12 @@ struct contin_knob : public knob_base {
     // @todo: it does not go back to the initiale state
     void clear_exemplar() { }
 
-    void turn(eda::contin_t x) {
+    void turn(contin_t x) {
         *_loc = x;
     }
 
     //create a spec describing the space spanned by the knob
-    const eda::field_set::contin_spec& spec() const {
+    const field_set::contin_spec& spec() const {
         return _spec;
     }
 
@@ -128,7 +128,7 @@ struct contin_knob : public knob_base {
         return ss.str();
     }
 protected:
-    eda::field_set::contin_spec _spec;
+    field_set::contin_spec _spec;
 };
 
 template<int MaxArity>
@@ -257,8 +257,8 @@ struct logical_subtree_knob : public knob_with_arity<3> {
         _current = idx;
     }
 
-    eda::field_set::disc_spec spec() const {
-        return eda::field_set::disc_spec(arity());
+    field_set::disc_spec spec() const {
+        return field_set::disc_spec(arity());
     }
     
     string toStr() const {
@@ -362,8 +362,8 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
     }
 
 
-    eda::field_set::disc_spec spec() const {
-        return eda::field_set::disc_spec(arity());
+    field_set::disc_spec spec() const {
+        return field_set::disc_spec(arity());
     }
 
     std::string toStr() const {
@@ -439,8 +439,8 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
         _current = idx;
     }
 
-    eda::field_set::disc_spec spec() const {
-        return eda::field_set::disc_spec(arity());
+    field_set::disc_spec spec() const {
+        return field_set::disc_spec(arity());
     }
 
     std::string toStr() const {
@@ -493,8 +493,8 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
         _current = idx;
     }
 
-    eda::field_set::disc_spec spec() const {
-        return eda::field_set::disc_spec(arity());
+    field_set::disc_spec spec() const {
+        return field_set::disc_spec(arity());
     }
 
     std::string toStr() const {

@@ -37,7 +37,6 @@
 #include "../moses_based_scorer.h"
 
 using namespace opencog;
-using namespace eda;
 using namespace moses;
 using namespace combo;
 using namespace boost::assign; // bring 'operator+=()' into scope
@@ -122,7 +121,7 @@ template<typename Table, typename Optimize, typename Scorer>
 void moses_feature_selection(Table& table,
                              const field_set& fields,
                              instance_set<composite_score>& deme,
-                             eda::instance& init_inst,
+                             instance& init_inst,
                              Optimize& optimize, const Scorer& scorer,
                              const feature_selection_parameters& fs_params) {
     // optimize feature set
@@ -131,7 +130,7 @@ void moses_feature_selection(Table& table,
     // get the best one
     std::sort(deme.begin(), deme.end(),
               std::greater<scored_instance<composite_score> >());
-    eda::instance best_inst = *deme.begin_instances();
+    instance best_inst = *deme.begin_instances();
     composite_score best_score = *deme.begin_scores();
     // get the best feature set
     std::set<arity_t> best_fs = get_feature_set(fields, best_inst);
@@ -154,9 +153,9 @@ void moses_feature_selection(Table& table,
     write_results(ftable, fs_params);
 }
 
-eda::instance initial_instance(const feature_selection_parameters& fs_params,
-                               const field_set& fields) {
-    eda::instance res(fields.packed_width());
+instance initial_instance(const feature_selection_parameters& fs_params,
+                          const field_set& fields) {
+    instance res(fields.packed_width());
     vector<std::string> labels = readInputLabels(fs_params.input_file);
     vector<std::string> vif; // valid initial features, used for logging
     foreach(const std::string& f, fs_params.initial_features) {
@@ -191,7 +190,7 @@ void moses_feature_selection(Table& table,
     field_set fields(field_set::disc_spec(2), arity);
     instance_set<composite_score> deme(fields);
     // determine the initial instance given the initial feature set
-    eda::instance init_inst = initial_instance(fs_params, fields);
+    instance init_inst = initial_instance(fs_params, fields);
     // define feature set quality scorer
     typedef MICScorerTable<Table, set<arity_t> > FSScorer;
     FSScorer fs_sc(table, fs_params.confi);

@@ -31,7 +31,8 @@
 using std::string;
 using std::vector;
 using boost::lexical_cast;
-
+using namespace opencog;
+using namespace moses;
 
 int main(int argc, char** argv)
 {

@@ -30,7 +30,7 @@
 
 //various routines for initializing instances
 namespace opencog { 
-namespace eda {
+namespace moses {
 
 // occam randomize a particular contin or onto field. Note that it is
 // not strictly occam in the Solomonoff sense because the size is
@@ -59,7 +59,7 @@ void uniform_randomize_disc(const field_set&, instance&,
 void randomize(const field_set&, instance&,
                RandGen& rng);
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

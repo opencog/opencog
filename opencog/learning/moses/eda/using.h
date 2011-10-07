@@ -43,7 +43,7 @@
 /// anything that gets imported into the eda namespace with a using
 /// directive should go here
 namespace opencog { 
-namespace eda {
+namespace moses {
 using boost::bind;
 using boost::ref;
 using boost::make_counting_iterator;
@@ -69,7 +69,7 @@ using std::adjacent_find;
 using std::pair;
 using std::make_pair;
 
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

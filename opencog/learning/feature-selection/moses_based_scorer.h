@@ -37,10 +37,10 @@ using namespace moses;
 /**
  * translate an instance into a feature set.
  */
-std::set<arity_t> get_feature_set(const eda::field_set& fields,
-                                  const eda::instance& inst) {
+std::set<arity_t> get_feature_set(const field_set& fields,
+                                  const instance& inst) {
     std::set<arity_t> fs;
-    eda::field_set::const_bit_iterator bit = fields.begin_bits(inst);
+    field_set::const_bit_iterator bit = fields.begin_bits(inst);
     for(arity_t i = 0; bit != fields.end_bits(inst); bit++, i++)
         if(*bit)
             fs.insert(i);
@@ -52,17 +52,17 @@ std::set<arity_t> get_feature_set(const eda::field_set& fields,
  * algorithms.
  */
 template<typename FSScorer>
-struct moses_based_scorer : public unary_function<eda::instance, composite_score> {
+struct moses_based_scorer : public unary_function<instance, composite_score> {
 
-    moses_based_scorer(const FSScorer& fs_scorer, const eda::field_set& fields)
+    moses_based_scorer(const FSScorer& fs_scorer, const field_set& fields)
         : _fs_scorer(fs_scorer), _fields(fields) {}
 
     /**
-     * The feature set is represented by an eda::instance encoding a
+     * The feature set is represented by an instance encoding a
      * field of booleans. Each boolean represents whether its
      * corresponding feature is in the feature set of not.
      */
-    composite_score operator()(const eda::instance& inst) const {
+    composite_score operator()(const instance& inst) const {
         std::set<arity_t> fs = get_feature_set(_fields, inst);
         composite_score csc(_fs_scorer(fs), fs.size());
         // Logger
@@ -77,7 +77,7 @@ struct moses_based_scorer : public unary_function<eda::instance, composite_score
     }
 
     const FSScorer& _fs_scorer;
-    const eda::field_set& _fields;
+    const field_set& _fields;
 };
 
 } // ~namespace opencog

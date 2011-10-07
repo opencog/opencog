@@ -32,7 +32,7 @@
 #include "../representation/field_set.h"
 
 namespace opencog { 
-namespace eda {
+namespace moses {
 
     struct cout_log_best_and_gen {
         template<typename It>
@@ -49,7 +49,7 @@ namespace eda {
         }
     };
     
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

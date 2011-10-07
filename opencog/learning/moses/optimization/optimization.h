@@ -47,18 +47,18 @@
 
 namespace opencog { namespace moses {
 
-inline double information_theoretic_bits(const eda::field_set& fs)
+inline double information_theoretic_bits(const field_set& fs)
 {
     double res = 0;
-    foreach(const eda::field_set::disc_spec& d, fs.disc_and_bits())
+    foreach(const field_set::disc_spec& d, fs.disc_and_bits())
         res += log2(double(d.arity));
-    foreach(const eda::field_set::contin_spec& c, fs.contin()) {
+    foreach(const field_set::contin_spec& c, fs.contin()) {
         // number of possible contins with depth d is 2^(d+1)-1 because
         // after a Stop only Stop is allowed which is why it is not 3^d
         unsigned contin_count = pow2(c.depth + 1) - 1;
         res += log2(double(contin_count));
     }
-    foreach(const eda::field_set::onto_spec& o, fs.onto())
+    foreach(const field_set::onto_spec& o, fs.onto())
         res += log2(double(o.branching)) * double(o.depth);
     return res;
 }
@@ -82,30 +82,30 @@ struct optim_parameters {
         max_dist_ratio(_max_dist_ratio) {}
 
     //N=p.popsize_ratio*n^1.05
-    inline unsigned pop_size(const eda::field_set& fs) {
+    inline unsigned pop_size(const field_set& fs) {
         return ceil((double(pop_size_ratio)*
                      pow(information_theoretic_bits(fs), 1.05)));
     }
 
     //term_total*n
-    inline unsigned max_gens_total(const eda::field_set& fs) {
+    inline unsigned max_gens_total(const field_set& fs) {
         return ceil(term_total*information_theoretic_bits(fs));
     }
 
     //term_improv*sqrt(n/w)
-    inline unsigned max_gens_improv(const eda::field_set& fs) {
+    inline unsigned max_gens_improv(const field_set& fs) {
         return ceil(term_improv*
                     sqrt(information_theoretic_bits(fs) /
                          rtr_window_size(fs)));
     }
     //min(windowsize_pop*N,windowsize_len*n)
-    inline unsigned rtr_window_size(const eda::field_set& fs) {
+    inline unsigned rtr_window_size(const field_set& fs) {
         return ceil(min(window_size_pop*pop_size(fs),
                         window_size_len*information_theoretic_bits(fs)));
     }
 
     // log(max_dist_log_ratio*information_theoretic_bits(fs))
-    inline unsigned max_distance(const eda::field_set& fs) {
+    inline unsigned max_distance(const field_set& fs) {
         double md = max_dist_ratio*log2(information_theoretic_bits(fs));
         return max(1U, numeric_cast<unsigned>(md));
     }
@@ -164,7 +164,7 @@ struct univariate_optimization {
 
     //return # of evaluations actually performed
     template<typename Scoring>
-    unsigned operator()(eda::instance_set<composite_score>& deme,
+    unsigned operator()(instance_set<composite_score>& deme,
                         const Scoring& score, unsigned max_evals) {
         unsigned pop_size = opt_params.pop_size(deme.fields());
         unsigned max_gens_total = opt_params.max_gens_total(deme.fields());
@@ -188,19 +188,19 @@ struct univariate_optimization {
                                 deme.end(), rng);
 
         if (eda_params.is_tournament_selection()) {
-            eda::cout_log_best_and_gen logger;
-            return eda::optimize
+            cout_log_best_and_gen logger;
+            return optimize
                    (deme, n_select, n_generate, max_gens_total, score,
-                    eda::terminate_if_gte_or_no_improv<composite_score>
+                    terminate_if_gte_or_no_improv<composite_score>
                     (composite_score(opt_params.terminate_if_gte,
                                       worst_composite_score.second),
                      max_gens_improv),
                     tournament_selection((unsigned)eda_params.selection, rng),
-                    eda::univariate(), eda::local_structure_probs_learning(),
-                    // eda::rtr_replacement(deme.fields(),
+                    univariate(), local_structure_probs_learning(),
+                    // rtr_replacement(deme.fields(),
                     //                      opt_params.rtr_window_size(deme.fields()),
                     //                      rng),
-                    eda::replace_the_worst(),
+                    replace_the_worst(),
                     logger, rng);
         } else { //truncation selection
             OC_ASSERT( false,
@@ -253,15 +253,15 @@ struct iterative_hillclimbing {
      * @return number of evaluations actually performed
      */
     template<typename Scoring>
-    unsigned operator()(eda::instance_set<composite_score>& deme,
-                        const eda::instance& init_inst,
+    unsigned operator()(instance_set<composite_score>& deme,
+                        const instance& init_inst,
                         const Scoring& score, unsigned max_evals,
                         unsigned* eval_best = NULL) {
         // Logger
         logger(). debug("Iterative HillClimbing Optimization");
         // ~Logger
 
-        const eda::field_set& fields = deme.fields();
+        const field_set& fields = deme.fields();
         unsigned pop_size = opt_params.pop_size(fields);
         unsigned max_gens_total = opt_params.max_gens_total(fields);
 
@@ -276,7 +276,7 @@ struct iterative_hillclimbing {
         unsigned max_distance = opt_params.max_distance(fields);
 
         // score the initial instance
-        eda::instance center_inst(init_inst);
+        instance center_inst(init_inst);
         composite_score best_cscore = worst_composite_score;
 
         unsigned distance = 0;
@@ -359,9 +359,9 @@ struct iterative_hillclimbing {
     }
     // like above but assumes that init_inst is null (backward compatibility)
     template<typename Scoring>
-    unsigned operator()(eda::instance_set<composite_score>& deme,
-                            const Scoring& score, unsigned max_evals) {
-        eda::instance init_inst(deme.fields().packed_width());
+    unsigned operator()(instance_set<composite_score>& deme,
+                        const Scoring& score, unsigned max_evals) {
+        instance init_inst(deme.fields().packed_width());
         return operator()(deme, init_inst, score, max_evals);
     }
 
@@ -396,7 +396,7 @@ struct sliced_iterative_hillclimbing {
     //it is rather ugly and it is a temporary hack till the API of MOSES
     //is better
     template<typename Scoring>
-    int operator()(eda::instance_set<composite_score>& deme,
+    int operator()(instance_set<composite_score>& deme,
                    const Scoring& score, int max_evals) {
         switch (m_state) {
 
@@ -410,18 +410,18 @@ struct sliced_iterative_hillclimbing {
             max_number_of_instances = max_evals;
 
             number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
-            exemplar = eda::instance(deme.fields().packed_width());
+            exemplar = instance(deme.fields().packed_width());
 
             // set to 0 all fields (contin and onto fields are
             // ignored) to represent the exemplar
-            for (eda::field_set::bit_iterator it = deme.fields().begin_bits(exemplar);
+            for (field_set::bit_iterator it = deme.fields().begin_bits(exemplar);
                     it != deme.fields().end_bits(exemplar); ++it)
                 *it = false;
-            for (eda::field_set::disc_iterator it = deme.fields().begin_disc(exemplar);
+            for (field_set::disc_iterator it = deme.fields().begin_disc(exemplar);
                     it != deme.fields().end_disc(exemplar); ++it)
                 *it = 0;
 
-            eda::scored_instance<composite_score> scored_exemplar = exemplar;
+            scored_instance<composite_score> scored_exemplar = exemplar;
             exemplar_score = score(scored_exemplar).first;
             // cout << "Exemplar:" <<deme.fields().stream(scored_exemplar) << " Score:" << exemplar_score << endl;
 
@@ -509,7 +509,7 @@ struct sliced_iterative_hillclimbing {
 
                 *(deme.begin_scores() + current_number_of_instances) = score(*(deme.begin() + current_number_of_instances));
 
-                const eda::scored_instance<composite_score>& inst = deme[current_number_of_instances];
+                const scored_instance<composite_score>& inst = deme[current_number_of_instances];
 
                 if (get_score(inst.second) > best_score) {
 
@@ -552,7 +552,7 @@ struct sliced_iterative_hillclimbing {
     unsigned distance;
     unsigned long long number_of_new_instances;
     unsigned number_of_fields;
-    eda::instance exemplar;
+    instance exemplar;
     int max_number_of_instances;
     score_t exemplar_score;
     int current_number_of_instances;
@@ -621,7 +621,7 @@ struct simulated_annealing {
         // energy.
         return -sc;
     }
-    energy_t energy(const eda::scored_instance<composite_score>& inst)
+    energy_t energy(const scored_instance<composite_score>& inst)
     {
         return energy(get_score(inst.second));
     }
@@ -641,11 +641,11 @@ struct simulated_annealing {
     }
 
     template<typename Scoring>
-    unsigned operator()(eda::instance_set<composite_score>& deme,
-                        const eda::instance& init_inst,
+    unsigned operator()(instance_set<composite_score>& deme,
+                        const instance& init_inst,
                         const Scoring& score, unsigned max_evals) {
 
-        const eda::field_set& fields = deme.fields();
+        const field_set& fields = deme.fields();
         max_distance = opt_params.max_distance(fields);
 
         // @todo this should be adapted for SA
@@ -662,9 +662,9 @@ struct simulated_annealing {
         unsigned step = 1;
 
         // score the initial instance
-        eda::instance center_instance(init_inst);
-        eda::scored_instance<composite_score> scored_center_inst = 
-            eda::score_instance(center_instance, score);
+        instance center_instance(init_inst);
+        scored_instance<composite_score> scored_center_inst = 
+            score_instance(center_instance, score);
         energy_t center_instance_energy = energy(scored_center_inst);
         double current_temp = sa_params.init_temp;
 
@@ -701,12 +701,12 @@ struct simulated_annealing {
                                 boost::bind(boost::cref(score), _1));
             
             // get the best instance
-            eda::scored_instance<composite_score>& best_scored_instance = 
+            scored_instance<composite_score>& best_scored_instance = 
                 *OMP_ALGO::max_element(deme.begin()
                                        + current_number_of_instances,
                                        deme.end());
 
-            eda::instance& best_instance = best_scored_instance.first;
+            instance& best_instance = best_scored_instance.first;
             energy_t best_instance_energy = energy(best_scored_instance);
                                           
             // check if the current instance in the deme is better than
@@ -742,9 +742,9 @@ struct simulated_annealing {
     }
     // like above but assumes that the initial instance is null
     template<typename Scoring>
-    unsigned operator()(eda::instance_set<composite_score>& deme,
-                            const Scoring& score, unsigned max_evals) {
-        const eda::instance init_inst(deme.fields().packed_width());
+    unsigned operator()(instance_set<composite_score>& deme,
+                        const Scoring& score, unsigned max_evals) {
+        const instance init_inst(deme.fields().packed_width());
         return operator()(deme, init_inst, score, max_evals);
     }
       

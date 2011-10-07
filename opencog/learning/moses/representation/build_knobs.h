@@ -52,7 +52,7 @@ struct build_knobs : boost::noncopyable {
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL,
                 contin_t step_size = 1.0, contin_t expansion = 1.0,
-                eda::field_set::arity_t depth = 4);
+                field_set::arity_t depth = 4);
 
     void build_logical(combo_tree::iterator it);
     void build_action(combo_tree::iterator it);
@@ -64,7 +64,7 @@ protected:
     representation& _rep;
     const arity_t _arity; // number of arguments of the combo program
     contin_t _step_size, _expansion;
-    eda::field_set::arity_t _depth;
+    field_set::arity_t _depth;
 
     // perm_ratio ranges from 0 to 1 and defines the number of perms
     // to consider, 0 means _arity positive literals and _arity pairs

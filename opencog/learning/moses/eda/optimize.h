@@ -30,7 +30,7 @@
 #include "../representation/instance_set.h"
 
 namespace opencog { 
-namespace eda {
+namespace moses {
     
     //return # of evaluations actually performed
     template <typename ScoreT,
@@ -118,7 +118,7 @@ namespace eda {
         return current.size()+gen*n_generate;
     }
     
-} // ~namespace eda
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif
