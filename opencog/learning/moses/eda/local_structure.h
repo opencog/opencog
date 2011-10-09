@@ -39,14 +39,15 @@ typedef tree<dtree_node> dtree;
 
 struct local_structure_model : public nullary_function<instance>,
                                public vector<dtree> {
-    typedef vector<dtree> super;
+    typedef vector<dtree> super; // each entry of dtree corresponds to
+                                 // a raw field
 
-    //creates a model based on a set of fields and a range of instances
+    // creates a model based on a set of fields and a range of instances
     template<typename It>
     local_structure_model(const field_set& fields,
                           It from, It to, RandGen& _rng);
 
-    instance operator()() const; //sample from the model
+    instance operator()() const; // sample from the model
 
     void split(int, int, dtree::iterator);
 
@@ -61,8 +62,9 @@ protected:
     field_set _fields;
     RandGen& rng;
 
-    //true if the range is uniform on the variable at index idx
-    bool is_uniform_on(iptr_iter l, iptr_iter u, int idx);
+    // true if the variable at index idx is identical over the range
+    // of instances [l, u)
+    bool is_uniform_on(iptr_iter l, iptr_iter u, int idx) const;
 
     void rec_split_onto(iptr_iter l, iptr_iter u, int src_idx, int idx,
                         dtree::iterator node, onto_tree::iterator osrc);
@@ -209,14 +211,5 @@ void local_structure_probs_learning::rec_learn(const field_set& fs,
 
 } // ~namespace moses
 } // ~namespace opencog
-
-inline std::ostream& operator<<(std::ostream& o, const std::vector<int>& v)
-{
-    o << "< ";
-    for (std::vector<int>::const_iterator it = v.begin();it != v.end();++it)
-        o << (*it) << " ";
-    o << ">";
-    return o;
-}
 
 #endif

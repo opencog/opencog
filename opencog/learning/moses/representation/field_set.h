@@ -268,7 +268,7 @@ struct field_set {
         return n_bits() + n_disc() + contin().size() + onto().size();
     }
 
-    //counts the number of nonzero (raw) settings in an instance
+    // counts the number of nonzero (raw) settings in an instance
     size_t count(const instance& inst) const {
         return raw_size() - std::count(begin_raw(inst), end_raw(inst), 0);
     }

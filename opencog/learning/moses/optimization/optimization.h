@@ -203,9 +203,9 @@ struct univariate_optimization {
                     replace_the_worst(),
                     logger, rng);
         } else { //truncation selection
-            OC_ASSERT( false,
-                       "Trunction selection not implemented."
-                       " Tournament should be used instead.");
+            OC_ASSERT(false,
+                      "Trunction selection not implemented."
+                      " Tournament should be used instead.");
             return 42;
             /*
             return optimize(deme,n_select,n_generate,args.max_gens,score,

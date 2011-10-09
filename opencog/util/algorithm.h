@@ -211,12 +211,12 @@ void sort(Seq& s) {
     std::sort(s.begin(), s.end());
 }
 
-//Predicate maps to the range [0,n)
-//n-1 values (the pivots) are copied to out
+// Predicate maps to the range [0, n)
+// n-1 values (the pivots) are copied to out
 template<typename It, typename Pred, typename Out>
 Out n_way_partition(It begin, It end, const Pred p, int n, Out out)
 {
-    //could be made more efficient if needed
+    // could be made more efficient if needed
     for (int i = 0;i < n - 1;++i)
         *out++ = begin = std::partition(begin, end, boost::bind(p, _1) == i);
     return out;

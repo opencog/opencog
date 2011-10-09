@@ -78,14 +78,17 @@ protected:
     std::vector<value_set> _outgoing;
 };
 
-//digraph must be a dag
+// Fill 'out' with a list of nodes ordered according to a topological
+// sort of g. It is assumed that g is a dag, an assert is raised
+// otherwise.
 template<typename Out>
 Out randomized_topological_sort(digraph g, Out out)
 {
     typedef digraph::value_type value_t;
-    std::vector<value_t> nodes
-    (boost::make_counting_iterator(digraph::size_type(0)),
-     boost::make_counting_iterator(g.n_nodes()));
+    std::vector<value_t>
+        nodes(boost::make_counting_iterator(digraph::size_type(0)),
+              boost::make_counting_iterator(g.n_nodes()));
+    /// @todo replace default random generator by OpenCog's RandGen
     std::random_shuffle(nodes.begin(), nodes.end());
     std::queue<value_t> q;
 
@@ -101,35 +104,16 @@ Out randomized_topological_sort(digraph g, Out out)
 
         std::vector<value_t> outgoing(g.outgoing(src).begin(),
                                       g.outgoing(src).end());
-        foreach (value_t dst, outgoing) {
+        foreach(value_t dst, outgoing) {
             g.erase(src, dst);
             if (g.incoming(dst).empty())
                 q.push(dst);
         }
     }
-    OC_ASSERT(g.empty(), "digraph - g must be a DAG."); //must be a dag
+    OC_ASSERT(g.empty(), "digraph - g must be a DAG."); // must be a dag
     return out;
 }
 
 } //~namespace opencog
-
-#if 0
-const std::vector<value_seq >& incoming() const
-{
-    return _incoming;
-}
-const std::vector<value_seq >& outgoing() const
-{
-    return _outgoing
-       }
-
-       dag::value_seq::iterator toremove =
-           std::remove_if(g.outgoing(src).begin(), g.outgoing(src).end(),
-                          bind(&dag::value_seq::size,
-                               ref(bind(&dag::value_seq::incoming, _1))));
-q.insert(q.begin(), toremove, g.outgoing(n).end());
-for_each(q.begin(), q.begin() + distance(toremove, g.outgoing(n).end()),
-         bind(&dag::erase, src, _1));
-#endif
 
 #endif
