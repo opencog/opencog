@@ -35,7 +35,23 @@ namespace moses {
 
 using std::vector;
 
+// a dtree_node can represent 2 things:
+// 
+// 1) if the node is internal then the vector has only one element,
+// the idx of the known field involved in the definition of
+// conditional probability
+//
+// 2) if the node is a leaf then the vector size is a + 1 where a is
+// the arity of the corresponding field. Each element i in [0, a) is
+// number of "good" instances the (i+1)th disc of the corresponding
+// field is encountered. The last element is the sum of all elements
+// in [0, a) (useful for computing the probability distribution over
+// the elements of the disc)
 typedef vector<int> dtree_node;
+
+// decision tree to compute the conditional (or marginal if the tree
+// is a single node) probability of each raw disc knowing the value of
+// other discs in the field set
 typedef tree<dtree_node> dtree;
 
 struct local_structure_model : public nullary_function<instance>,
@@ -56,10 +72,18 @@ protected:
     typedef vector<const instance*> iptr_seq;
     typedef iptr_seq::iterator iptr_iter;
 
-    int _instance_length;
-    vector<unsigned int> _ordering;
-    digraph _initial_deps;      // directed graph of the initial
-                                // dependencies between fields
+    size_t _instance_length;
+
+    vector<unsigned int> _ordering; // order of field indexes, used
+                                    // for model sampling. Each idx in
+                                    // the ordering is such that only
+                                    // the indexes preceding it are
+                                    // possibly used for computing its
+                                    // conditional probability
+
+    digraph _initial_deps;      // directed graph representing the
+                                // dependencies between fields. This
+                                // is solely used to compute _ordering
     field_set _fields;
     RandGen& rng;
 
@@ -77,7 +101,7 @@ protected:
     void sample(dtree::iterator, disc_t&, const vector<disc_t>&) const;
 };
 
-struct univariate { //i.e., no structure learning
+struct univariate { // i.e., no structure learning
     typedef local_structure_model model_type;
 
     template<typename It>
@@ -125,7 +149,7 @@ local_structure_model::local_structure_model(const field_set& fs,
         
         foreach(const field_set::onto_spec& o, _fields.onto()) { // onto vars
             int idx_base = distance(begin(), dtr);
-            make_dtree(dtr++, o.tr->begin().number_of_children() + 1);
+            make_dtree(dtr++, o.tr->begin().number_of_children() + 1); // why + 1?
 
             for (field_set::arity_t i = 1;i < o.depth;++i, ++dtr) {
                 make_dtree(dtr, 0);
