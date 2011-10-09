@@ -26,6 +26,7 @@
 
 #include <opencog/util/digraph.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/tree.h>
 
 #include "../representation/field_set.h"
 
@@ -95,9 +96,12 @@ struct univariate { //i.e., no structure learning
 struct local_structure_probs_learning {
     typedef local_structure_model model_type;
 
+    // update the model given a field_set and a range of "good"
+    // instances
     template<typename It>
     void operator()(const field_set&, It, It, local_structure_model&) const;
 protected:
+    // update the dtree of the model of a field at index idx
     template<typename It>
     void rec_learn(const field_set&, It, It, int, dtree::iterator) const;
 };
@@ -119,7 +123,7 @@ local_structure_model::local_structure_model(const field_set& fs,
         iptr_seq iptrs(make_transform_iterator(from, addressof<const instance>),
                        make_transform_iterator(to, addressof<const instance>));
         
-        foreach(const field_set::onto_spec& o, _fields.onto()) { //onto vars
+        foreach(const field_set::onto_spec& o, _fields.onto()) { // onto vars
             int idx_base = distance(begin(), dtr);
             make_dtree(dtr++, o.tr->begin().number_of_children() + 1);
 
@@ -135,7 +139,7 @@ local_structure_model::local_structure_model(const field_set& fs,
             }
         }
 
-        foreach(const field_set::contin_spec& c, _fields.contin()) { //contin vars
+        foreach(const field_set::contin_spec& c, _fields.contin()) { // contin vars
             int idx_base = distance(begin(), dtr);
             make_dtree(dtr++, 3); //contin arity is 3
             for (field_set::arity_t i = 1;i < c.depth;++i, ++dtr) {
@@ -153,7 +157,7 @@ local_structure_model::local_structure_model(const field_set& fs,
         }
     }
 
-    //model disc & bool vars
+    // model disc & bool vars
     foreach(const field_set::disc_spec& d, _fields.disc_and_bits())
         make_dtree(dtr++, d.arity);
 
@@ -179,22 +183,13 @@ void local_structure_probs_learning::rec_learn(const field_set& fs,
                                                It from, It to,
                                                int idx, dtree::iterator dtr) const
 {
-    if (dtr.is_childless()) { //a leaf
+    if (dtr.is_childless()) { // a leaf
         while (from != to) {
             assert(fs.get_raw(*from, idx) < int(dtr->size()) - 1);
-            ++(*dtr)[fs.get_raw(*from++,idx)];
+            ++(*dtr)[fs.get_raw(*from++, idx)];
         }
-
-        //add +1 noisy
-        /*if (dtr->size()>2) {
-        for (dtree_node::iterator it=dtr->begin();it!=dtr->end();++it)
-        ++(*it);
-        }*/
-        //std::cout << "XX " << (*dtr)[0] << " " << (*dtr)[1] << std::endl;
-        //(*dtr)[0]=(*dtr)[0]/(*dtr)[0]+(*dtr)[1]
-
         dtr->back() = accumulate(dtr->begin(), --(dtr->end()), 0);
-    } else { //an internal node (split) - sort [from,to) on the src idx
+    } else { // an internal node (split) - sort [from,to) on the src idx
         int raw_arity = dtr.number_of_children();
         vector<It> pivots(raw_arity + 1);
         pivots.front() = from;
