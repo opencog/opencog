@@ -322,6 +322,8 @@ enum pet_builtin_action_enum {
     // build a block in front of avatar, used in unity minecraft-like world only.
     build_block_at,
 
+    build_block,
+
     //==== destroy_block_at(position) ====
     // destroy a block at given position, used in unity minecraft-like world only.
     destroy_block_at,
@@ -456,6 +458,7 @@ static const action_basic_description abd[] = {
     { id::look_at,           "look_at",           "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::say,               "say",               "->(definite_object union(definite_object indefinite_object wild_card) action_result)" },
     { id::build_block_at,    "build_block_at",    "->(definite_object action_result)" },
+    { id::build_block,       "build_block",       "->(contin action_result)" },
     //{ id::destroy_block_at,  "destroy_block_at",  "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::destroy_block_at,  "destroy_block_at",  "action_result" },
 
@@ -548,6 +551,7 @@ static const action_property_description apd[] = {
     { id::say,            false,    false,     false,      true,           (pet_builtin_action_enum)0 },
 
     { id::build_block_at, false,    false,     false,      false,          (pet_builtin_action_enum)0 },
+    { id::build_block,    false,    false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::destroy_block_at, false,    false,     false,      false,          (pet_builtin_action_enum)0 },
 };
 
@@ -612,6 +616,7 @@ static const action_argument_property_description aapd[] = {
     { id::say,                      1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
 
     { id::build_block_at,           0,    false, false,  false,  0,  0 }, 
+    { id::build_block,              0,    false, false,  false,  0,  0 }, 
 };
 
 static const action_precedence must_precede[] = {

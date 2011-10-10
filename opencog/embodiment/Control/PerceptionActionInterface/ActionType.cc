@@ -711,6 +711,14 @@ const ActionType& ActionType::BUILD_BLOCK_AT()
     return *result;
 }
 
+const ActionType& ActionType::BUILD_BLOCK()
+{
+    initParamTypes();
+    static const char* paramNames[] = {"offset", "texture"};
+    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "buildBlock", FLOAT, EMPTY, paramNames, "void buildBlockAt(float offset)");
+    return *result;
+}
+
 const ActionType& ActionType::DESTROY_BLOCK_AT()
 {
     initParamTypes();
@@ -902,6 +910,7 @@ void ActionType::init()
         SAY();
 
         BUILD_BLOCK_AT();
+        BUILD_BLOCK();
         DESTROY_BLOCK_AT();
 
         initialized = true;

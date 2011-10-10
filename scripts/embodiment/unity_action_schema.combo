@@ -100,5 +100,7 @@ drink_water(1) :=
 ##############################################
 
 build_block_at(1) := build_block_at(#1)
+# 1:offset 0, create a block exactly in front of the avatar, positive, above where the avatar stands, negative, under where the avatar stands
+build_block(1) := build_block(#1)
 destroy_block_at(0) := destroy_block_at
 

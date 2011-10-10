@@ -586,6 +586,7 @@
         (add_action (GroundedSchemaNode "step_forward") )  ; TODO: the direction is wrong 
 ;        (add_action (GroundedSchemaNode "rotate_right") )  ; TODO: doesn't work 
         (add_action (GroundedSchemaNode "build_block_at") (WordNode "dummy_arg") ) 
+;        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") ) 
         (add_action (GroundedSchemaNode "jump_up") (NumberNode "1") ) ;TODO: jump to the block 
         (add_action (GroundedSchemaNode "destroy_block_at") ) 
     )        
