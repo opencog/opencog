@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Welter Luigi
  *
- * Updated: by ZhenhuaCai, on 2011-03-10
+ * Updated: by ZhenhuaCai, on 2011-10-07
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -150,7 +150,7 @@ public:
      * @param feelingName name of the feeling wanted
      * @return The current level of a given feeling
      */
-    static float getCurrentPetFeelingLevel(       AtomSpace& atomSpace,
+    static float getCurrentPetFeelingLevel( AtomSpace& atomSpace,
                                             const std::string& petId,
                                             const std::string& feelingName );
 
@@ -174,7 +174,6 @@ public:
      *         NumberNode: "modulator_value"
      *         ExecutionOutputLink
      *             GroundSchemaNode: modulatorUpdater
-     *             ListLink (empty)
      */ 
     static float getCurrentModulatorLevel(const AtomSpace & atomSpace, 
                                           const std::string & modulatorName, 
@@ -901,7 +900,6 @@ public:
      *     PredicateNode: "demand_name_goal" 
      *                    (SimpleTruthValue indicates how well the demand is satisfied)
      *                    (ShortTermInportance indicates the urgency of the demand)
-     *     ListLink (empty)               
      * EvaluationLink
      *     GroundedPredicateNode: "FuzzyWithin"
      *     ListLink
@@ -909,7 +907,6 @@ public:
      *         NumberNode: "max_acceptable_value"
      *         ExecutionOutputLink
      *             GroundedSchemaNode: "demand_schema_name"
-     *             ListLink (empty)
      *
      */
     static bool getDemandEvaluationLinks (AtomSpace & atomSpace, 

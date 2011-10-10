@@ -98,7 +98,6 @@
 ;     NumberNode: "modulator_value"
 ;     ExecutionOutputLink
 ;         GroundedSchemaNode: xxxModulatorUpdater
-;         ListLink (empty)
 ;
 
 (define ActivationModulator 
@@ -133,7 +132,6 @@
 ;     NumberNode: "demand_value"
 ;     ExecutionOutputLink
 ;         GroundedSchemaNode: "demand_schema_name"
-;         ListLink (empty)
 ;
 ; DemandValue is the output of DemandSchema.
 ;
@@ -300,7 +298,6 @@
 ; SimultaneousEquivalenceLink
 ;     EvaluationLink
 ;         PredicateNode: "XxxDemandGoal" 
-;         ListLink (empty)
 ;     EvaluationLink
 ;         GroundedPredicateNode: "fuzzy_within"
 ;         ListLink
@@ -310,7 +307,6 @@
 ;                 NumberNode: "demand_value"
 ;                 ExecutionOutputLink
 ;                     GroundedSchemaNode: "demand_schema_name"
-;                     ListLink (empty)
 ;
 
 (connect_goal_updater 

@@ -16,9 +16,9 @@
 ;
 
 (define (ActivationModulatorUpdater)
-    (* (get_predicate_truth_value_mean "CertaintyDemandGoal")
-       (expt (get_predicate_truth_value_mean "CompetenceDemandGoal") 0.5)  
-    )
+    (* (get_truth_value_mean (cog-tv CertaintyDemandGoal))
+           (expt (get_truth_value_mean (cog-tv CompetenceDemandGoal)) 0.5)
+    )       
 )
 
 ; Resolution level affects perception. 
@@ -39,7 +39,7 @@
 ; An undetermined environment requires more orientation, i.e. lower securing threshold. 
 
 (define (SecuringThresholdModulatorUpdater)
-    (normalize (/ (+ (get_predicate_truth_value_mean "CertaintyDemandGoal") 1)
+    (normalize (/ (+ (get_truth_value_mean (cog-tv CertaintyDemandGoal)) 1)
                   (+ (get_pleasure_value) 1)
                )
 
@@ -56,7 +56,7 @@
 
 (define (SelectionThresholdModulatorUpdater)
     (clip_within (* (+ (get_latest_modulator_or_demand_value "SelectionThresholdModulator") 0.5)
-                    (+ (get_latest_modulator_or_demand_value "ActivationModulator") 0.5)
+                    (+ (get_latest_modulator_or_demand_value "ActivationModulator") 0.1)
                  )
 
                  0.001

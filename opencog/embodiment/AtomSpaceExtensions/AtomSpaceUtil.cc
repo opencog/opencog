@@ -5,7 +5,7 @@
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
- * Updated: by Zhenhua Cai, on 2011-03-10
+ * Updated: by Zhenhua Cai, on 2011-10-07
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -847,27 +847,38 @@ float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
                                               // i.e. returned link should be exactly of 
                   );                          // type EXECUTION_OUTPUT_LINK
 
-    // Pick up the ExecutionOutputLink containing ListLink
-    std::vector<Handle>::iterator iExecutionOutputLink;
-
-    for(iExecutionOutputLink = executionOutputLinkSet.begin(); 
-        iExecutionOutputLink != executionOutputLinkSet.end(); 
-        ++ iExecutionOutputLink ) {
-
-        if ( atomSpace.getArity(*iExecutionOutputLink) == 2 &&
-             atomSpace.getType( atomSpace.getOutgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
-           )
-            break; 
-    }
-
-    if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
-        logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.", 
+    // Get ExecutionOutputLink
+    if (executionOutputLinkSet.size() !=1 ) {
+        logger().error("AtomSpaceUtil::%s - Number of ExecutionOutputLink should be exactly 1, but got %d.", 
+                       executionOutputLinkSet.size(), 
                        __FUNCTION__
                       ); 
         return false; 
     }
 
-    Handle hExecutionOutputLink = *iExecutionOutputLink;
+    Handle hExecutionOutputLink = executionOutputLinkSet[0];
+
+//    // Pick up the ExecutionOutputLink containing ListLink
+//    std::vector<Handle>::iterator iExecutionOutputLink;
+//
+//    for(iExecutionOutputLink = executionOutputLinkSet.begin(); 
+//        iExecutionOutputLink != executionOutputLinkSet.end(); 
+//        ++ iExecutionOutputLink ) {
+//
+//        if ( atomSpace.getArity(*iExecutionOutputLink) == 2 &&
+//             atomSpace.getType( atomSpace.getOutgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
+//           )
+//            break; 
+//    }
+//
+//    if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
+//        logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.", 
+//                       __FUNCTION__
+//                      ); 
+//        return false; 
+//    }
+//
+//    Handle hExecutionOutputLink = *iExecutionOutputLink;
 
     // Get all the SimilarityLink that contains the ExecutionOutputLink
     //
@@ -2292,14 +2303,8 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     Handle hVariableTypeNodeListLink = atomSpace.addNode(VARIABLE_TYPE_NODE, "ListLink"); 
 
     tempOutgoings.clear(); 
-    Handle hVariableNodeDemandGoal = atomSpace.addNode(VARIABLE_NODE, "$var_list_link_type_demand_goal");
-    tempOutgoings.push_back(hVariableNodeDemandGoal); 
-    tempOutgoings.push_back(hVariableTypeNodeListLink); 
-    variableListLinkOutgoings.push_back( atomSpace.addLink(TYPED_VARIABLE_LINK, tempOutgoings) ); 
-
-    tempOutgoings.clear(); 
-    Handle hVariableNodeFuzzyWithin = atomSpace.addNode(VARIABLE_NODE, "$var_list_link_type_fuzzy_within");  
-    tempOutgoings.push_back(hVariableNodeFuzzyWithin); 
+    Handle hVariableNodeListLink = atomSpace.addNode(VARIABLE_NODE, "$var_list_link");  
+    tempOutgoings.push_back(hVariableNodeListLink); 
     tempOutgoings.push_back(hVariableTypeNodeListLink); 
     variableListLinkOutgoings.push_back( atomSpace.addLink(TYPED_VARIABLE_LINK, tempOutgoings) ); 
 
@@ -2307,12 +2312,11 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
 
     tempOutgoings.clear();
     tempOutgoings.push_back( atomSpace.addNode(PREDICATE_NODE, demandName+"DemandGoal") ); 
-    tempOutgoings.push_back(hVariableNodeDemandGoal);
     Handle hEvaluationLinkDemandGoal = atomSpace.addLink(EVALUATION_LINK, tempOutgoings);  
 
     tempOutgoings.clear(); 
     tempOutgoings.push_back( atomSpace.addNode(GROUNDED_PREDICATE_NODE, "fuzzy_within") ); 
-    tempOutgoings.push_back(hVariableNodeFuzzyWithin); 
+    tempOutgoings.push_back(hVariableNodeListLink); 
     Handle hEvaluationLinkFuzzyWithin = atomSpace.addLink(EVALUATION_LINK, tempOutgoings); 
 
     tempOutgoings.clear(); 

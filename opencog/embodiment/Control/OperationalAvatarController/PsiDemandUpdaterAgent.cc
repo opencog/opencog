@@ -106,9 +106,9 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 
     if ( hExecutionOutputLink == opencog::Handle::UNDEFINED ||
          atomSpace.getType(hExecutionOutputLink) != EXECUTION_OUTPUT_LINK ||
-         atomSpace.getArity(hExecutionOutputLink) != 2 ) {
+         atomSpace.getArity(hExecutionOutputLink) != 1 ) {
 
-        logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a ExecutionOutputLink for demand '%s' with two arity that contains an updater. But got '%s'", 
+        logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect an ExecutionOutputLink (updater) for demand '%s' with only one arity. But got '%s'", 
                        __FUNCTION__, 
                        this->demandName.c_str(), 
                        atomSpace.atomAsString(hExecutionOutputLink).c_str()

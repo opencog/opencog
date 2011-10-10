@@ -22,7 +22,6 @@
 ;         NumberNode: "modulator_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "modulator_schema_name"
-;             ListLink (empty)
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -35,7 +34,6 @@
 ;         NumberNode: "demand_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "demand_schema_name"
-;             ListLink (empty)
 ;
 ; DemandValue is the output of DemandSchema.
 ;
@@ -69,8 +67,6 @@
 ; SimultaneousEquivalenceLink
 ;     EvaluationLink
 ;         PredicateNode "XxxDemandGoal" 
-;         ListLink (empty)
-;
 ;     EvaluationLink
 ;         GroundedPredicateNode "fuzzy_within"
 ;         ListLink
@@ -78,7 +74,6 @@
 ;             NumberNode: max_acceptable_value
 ;             ExecutionOutputLink
 ;                 GroundedSchemaNode "XxxDemandUpdater"
-;                 ListLink (empty)
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -250,13 +245,11 @@
 ;         NumberNode: "modulator_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "modulator_schema_name"
-;             ListLink (empty)
 ;
 
 (define (add_modulator modulator_name default_value)
     (let ( (schema_handle (ExecutionOutputLink (stv 1.0 1.0) (cog-new-av 1 1 1) 
                               (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") ) 
-                              (ListLink) 
                           );ExecutionOutputLink
            );schema_handle
          )
@@ -290,7 +283,6 @@
 ;         NumberNode: "demand_value"
 ;         ExecutionOutputLink 
 ;             GroundedSchemaNode: "demand_schema_name"
-;             ListLink (empty)
 ;
 ; DemandValue is the output of DemandSchema.
 ;
@@ -298,7 +290,6 @@
 (define (add_demand_schema demand_name default_value)
     (let ( (schema_handle (ExecutionOutputLink (cog-new-av 1 1 1)
                               (GroundedSchemaNode (string-append (string-trim-both demand_name) "Updater") )
-                              (ListLink)
                           );ExecutionOutputLink
            );schema_handle    
          )    
@@ -371,27 +362,22 @@
               (cond
 
                   ( (cog-atom? argument) 
-
                     argument
                   )
 
                   ( (number? argument)
-
                     (NumberNode (number->string argument) )
                   )   
 
                   ( (equal? (string-contains argument "'") #f)
-                  
                     (VariableNode (string-trim-both argument) )
                   )
 
                   ( (string=? (string-trim-both argument) "'self'")
-
                     PET_HANDLE
                   )
 
                   ( (string=? (string-trim-both argument) "'owner'")
-
                     OWNER_HANDLE
                   )
                   
@@ -445,8 +431,12 @@
     (EvaluationLink (cog-new-av 1 1 1)
         pred_or_gpn_handle   
 
-        (ListLink 
-            (apply parse_arguments arguments)
+        (let ( (argument_list (apply parse_arguments arguments) )
+             )
+             (if (null? argument_list)
+                 (list)
+                 (ListLink argument_list)
+             )
         )
     )
 )
@@ -535,8 +525,12 @@
     (ExecutionLink (cog-new-av 1 1 1)
         schema_handle
 
-        (ListLink 
-            (apply parse_arguments arguments)
+        (let ( (argument_list (apply parse_arguments arguments) )
+             )
+             (if (null? argument_list)
+                 (list)
+                 (ListLink argument_list)
+             )
         )
     )
 )

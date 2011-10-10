@@ -158,7 +158,6 @@
 ;         NumberNode: "modulator_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "modulator_schema_name"
-;             ListLink (empty)
 ;
 ; Demand is represented as: 
 ;
@@ -168,39 +167,6 @@
 ;         NumberNode: "demand_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "demand_schema_name"
-;             ListLink (empty)
-
-; BindLink used by cog-bind to search the updater (ExecutionOutputLink) given
-; updater name
-(define (find_updater_execution_output_link updater_name)
-    (BindLink
-        ; Variables to be used
-        (ListLink
-            (TypedVariableLink
-                (VariableNode "$var_list_link_type") 
-                (VariableTypeNode "ListLink")
-            )
-        )
-
-        (ImplicationLink
-            ; Pattern to be searched
-            (ExecutionOutputLink
-                (GroundedSchemaNode 
-                    (string-trim-both updater_name) 
-                )
-                (VariableNode "$var_list_link_type")
-            ) 
-
-            ; Return values
-            (ExecutionOutputLink
-                (GroundedSchemaNode
-                    (string-append updater_name) 
-                )
-                (VariableNode "$var_list_link_type")
-            ) 
-        )
-    ); BindLink
-)
 
 ; BindLink used by cog-bind to search AtTimeLink of a modulator or a demand, 
 ; given the corresponding updater (ExecutionOutputLink)
@@ -250,22 +216,12 @@
 ; if fails return an empty list
 ;
 (define (get_modulator_or_demand_updater modulator_or_demand_name)
-    (let* ( (find_updater (find_updater_execution_output_link
-                              (string-append (string-trim-both modulator_or_demand_name)
-                                             "Updater"
-                              ) 
-                          ) 
-            )
-            
-            (updater_list (query_atom_space find_updater) ) 
-          )
-   
-          (if (null? updater_list)
-              (list)
-              (car updater_list) 
-          )            
+    (ExecutionOutputLink
+        (GroundedSchemaNode 
+            (string-append (string-trim-both modulator_or_demand_name) "Updater") 
+        )
     )
-)
+)    
 
 ; Return a scheme list containing the information of a modulator or demand 
 ; at all the time points given modulator or demand name, the return result
@@ -417,7 +373,7 @@
               (set! at_time_link
                   (AtTimeLink (stv 1.0 1.0)  
                       (TimeNode (number->string timestamp) )
-                      (SimilarityLink (stv 1.0 1.0) 
+                      (SimilarityLink 
                           (NumberNode (number->string updated_value) )
                           updater_execution_output_link
                       )
@@ -587,7 +543,7 @@
 ;     EvaluationLink
 ;         PredicateNode  "predicate_name"
 ;         ListLink
-;             ...
+;         ...
 ;
 
 (define (find_latest_at_time_link predicate_name)
@@ -613,7 +569,7 @@
                         (PredicateNode
                             (string-trim-both predicate_name)                  
                         ) 
-                        (VariableNode "$var_list_link_type")
+                        (VariableNode "$var_list_link_type") 
                     )
                 ) 
             ); LatestLink     
@@ -625,7 +581,7 @@
                     (PredicateNode
                         (string-trim-both predicate_name)                  
                     ) 
-                    (VariableNode "$var_list_link_type")
+                    (VariableNode "$var_list_link_type") 
                 )
             ); AtTimeLink 
         )

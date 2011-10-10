@@ -88,7 +88,6 @@ void PsiActionSelectionAgent::initDemandGoalList(AtomSpace & atomSpace)
     std::vector<Handle> outgoings; 
 
     outgoings.clear(); 
-    Handle hListLink = atomSpace.addLink(LIST_LINK, outgoings);
 
     for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
           iDemandName != demandNamesTok.end();
@@ -99,7 +98,6 @@ void PsiActionSelectionAgent::initDemandGoalList(AtomSpace & atomSpace)
         // Get EvaluationLink to the demand goal
         outgoings.clear(); 
         outgoings.push_back( atomSpace.addNode(PREDICATE_NODE, demandPredicateName) ); 
-        outgoings.push_back(hListLink); 
 
         this->psi_demand_goal_list.push_back( atomSpace.addLink(EVALUATION_LINK, outgoings) ); 
 
@@ -295,24 +293,26 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
     // If it is a combo function, call ProcedureInterpreter to execute the function
     else  {
         // Get combo arguments for Action
-        Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments
+        if ( atomSpace.getArity(hActionExecutionLink) == 2 ) {
+            Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments
 
-        // Process the arguments according to its type
-        foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
+            // Process the arguments according to its type
+            foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
 
-            Type argumentType = atomSpace.getType(hArgument);
+                Type argumentType = atomSpace.getType(hArgument);
 
-            if (argumentType == NUMBER_NODE) {
-                schemaArguments.push_back(combo::contin_t(
-                                              boost::lexical_cast<combo::contin_t>(atomSpace.getName(hArgument)
-                                                                                  )
-                                                         ) 
-                                         );
-            }
-            else {
-                schemaArguments.push_back( atomSpace.getName(hArgument) );
-            }
-        }// foreach
+                if (argumentType == NUMBER_NODE) {
+                    schemaArguments.push_back(combo::contin_t(
+                                                  boost::lexical_cast<combo::contin_t>(atomSpace.getName(hArgument)
+                                                                                      )
+                                                             ) 
+                                             );
+                }
+                else {
+                    schemaArguments.push_back( atomSpace.getName(hArgument) );
+                }
+            }// foreach
+        }// if
 
         // Run the Procedure of the Action
         //
