@@ -114,7 +114,7 @@ void local_structure_model::make_dtree(super::iterator dtr, int arity)
 void local_structure_model::split(int src_idx, int tgt_idx,
                                   dtree::iterator tgt)
 {
-    OC_ASSERT(tgt.childless(), "dtree node should be childless (split)");
+    OC_ASSERT(tgt.is_childless(), "dtree node should be childless (split)");
     (begin() + tgt_idx)->append_children(tgt, *tgt, tgt->size() - 1);
     *tgt = dtree_node(1, src_idx);
 }
