@@ -139,7 +139,7 @@
 ;
 ; Current timestamp
 ;
-; It would be used by ATTimeLink and TimeNode, since Scheme shell would never know 
+; It would be used by AtTimeLink and TimeNode, since Scheme shell would never know 
 ; unless you tell it in C++ code, as follows 
 ;
 ;     (set! CURRENT_TIMESTAMP "438")

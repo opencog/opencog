@@ -303,10 +303,8 @@
 ;         ListLink
 ;             NumberNode: "min_acceptable_value"
 ;             NumberNode: "max_acceptable_value"
-;             SimilarityLink (stv 1.0 1.0)
-;                 NumberNode: "demand_value"
-;                 ExecutionOutputLink
-;                     GroundedSchemaNode: "demand_schema_name"
+;             ExecutionOutputLink
+;                 GroundedSchemaNode: "demand_schema_name"
 ;
 
 (connect_goal_updater 
