@@ -1614,9 +1614,11 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
         // TODO change the hard coding texture once the avatar knows how to use
         // the ability.
-        action.addParameter(ActionParameter("texture",
-                                            ActionParamType::STRING(),
-                                            "lava"));
+        std::stringstream ss;
+        ss << *from.begin();
+        action.addParameter(ActionParameter("offset",
+                                            ActionParamType::FLOAT(),
+                                            ss.str()));
 
     }
     break;

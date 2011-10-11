@@ -714,8 +714,8 @@ const ActionType& ActionType::BUILD_BLOCK_AT()
 const ActionType& ActionType::BUILD_BLOCK()
 {
     initParamTypes();
-    static const char* paramNames[] = {"offset", "texture"};
-    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "buildBlock", FLOAT, EMPTY, paramNames, "void buildBlockAt(float offset)");
+    static const char* paramNames[] = {"offset"};
+    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "buildBlock", FLOAT, EMPTY, paramNames, "void buildBlock(float offset)");
     return *result;
 }
 
