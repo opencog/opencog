@@ -287,6 +287,8 @@ def unify(x, y, s):
     """
     #print "unify %s %s" % (str(x), str(y))
 
+    assert not type(x) == tuple and not type(y) == tuple
+
     if s == None:
         return None
     elif type(x) != type(y):
@@ -415,8 +417,15 @@ def new_var():
 
 _new_var_counter = 10**6
 
+def unify_conj(xs, ys, s):
+    if isinstance(xs, tuple) and isinstance(ys, tuple) and len(xs) == len(ys):
+        for perm in permutations(xs):
+            s2 = unify(list(perm), list(ys), s)
+            if s2 != None:
+                return s2
+    return None
+
 def isomorphic_conjunctions(xs, ys):
-    # Handle conjunctions.
     if isinstance(xs, tuple) and isinstance(ys, tuple) and len(xs) == len(ys):
         for perm in permutations(xs):
             if isomorphic_conjunctions_ordered(tuple(perm), ys):

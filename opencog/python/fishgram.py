@@ -594,9 +594,9 @@ class Fishgram:
             ideal_premises = template.pattern[:-1]
             ideal_conclusion = template.pattern[-1]
 
-            s2 = unify(ideal_premises, premises, {})
+            s2 = unify_conj(ideal_premises, premises, {})
             #print 'make_psi_rule: s2=%s' % (s2,)
-            s3 = unify(ideal_conclusion, conclusion, s2)
+            s3 = unify_conj(ideal_conclusion, conclusion, s2)
             #print 'make_psi_rule: s3=%s' % (s3,)
             
             if s3 != None:
