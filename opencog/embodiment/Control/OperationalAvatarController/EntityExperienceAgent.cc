@@ -76,17 +76,13 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
         HandleSeq typeLinks, classLinks;
         {
             Type type[] = { SEME_NODE, CONCEPT_NODE };
-            HandleSeq link(2);
-            link[0] = semeNodes[i];
-            link[1] = Handle::UNDEFINED;
+            HandleSeq link = { semeNodes[i], Handle::UNDEFINED };
             atomSpace->getHandleSet( std::back_inserter( typeLinks ), link, 
                                      &type[0], NULL, 2, INHERITANCE_LINK, false );
         }
         {
             Type type[] = { CONCEPT_NODE, SEME_NODE };
-            HandleSeq link(2);
-            link[0] = Handle::UNDEFINED;
-            link[1] = semeNodes[i];
+            HandleSeq link = { Handle::UNDEFINED, semeNodes[i] };
             atomSpace->getHandleSet( std::back_inserter( classLinks ), link, 
                                      &type[0], NULL, 2, REFERENCE_LINK, false );
         }
@@ -103,6 +99,8 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
             count = stv.getCount();
         } // if 
 
+        /// @todo this is not a proper use of the definition of
+        /// TV.count, which is actually equivalent to elapesMoments
         mean = static_cast<strength_t>( count ) / 
             static_cast<strength_t>( this->elapsedMoments );
 

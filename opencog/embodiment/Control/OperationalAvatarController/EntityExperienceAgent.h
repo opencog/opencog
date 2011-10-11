@@ -29,7 +29,7 @@
 namespace opencog { namespace oac {
 
 /**
- * This agent mind computes the importance of the experience
+ * This Mind Agent computes the importance of the experience
  * acquired by the agent when it sees an entity inside the 
  * physical world. Each entity has a SemeNode. That node
  * identifies the entity by connecting it to a basic
@@ -72,6 +72,10 @@ namespace opencog { namespace oac {
  * |3     |ConceptNode "stick"    |1.0     |1    |  
  * |3     |ConceptNode "Accessory"|1.0     |3    |       
  *
+ *
+ * WARNING!!!!!! the definition above is miusing the semantics of
+ * count, which actually means "the number of times the TV of the atom
+ * is observed", not "the number of times the TV of the atom is true".
  */
 class EntityExperienceAgent : public opencog::Agent
 {
@@ -91,9 +95,9 @@ public:
             "OperationalAvatarController::EntityExperienceAgent");
         return _ci;
     }
-    
+
     void run(opencog::CogServer *server);        
-    
+
 };
 
 } } // namespace opencog::oac
