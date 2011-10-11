@@ -45,6 +45,7 @@ void initAxiomSet(std::string premiseFile);
  * @return whether the test passed or not.
  */
 bool runPLNTest(Btr<PLNTest> t, bool test_bc = true);
+bool runPLNTest_CPP(Btr<PLNTest> t, bool test_bc = true);
 //! @todo This next function doesn't need to have test_bc
 Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc = true);
 Btr<PLNTest> findSCMTarget(std::string test_name, bool test_bc = true);

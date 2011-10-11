@@ -190,6 +190,12 @@ bool runSCMTargets(string testDir, bool test_bc) {
                 string filename(dir->path().string());
                 Btr<PLNTest> _test = setupSCMTarget(filename.c_str(), test_bc);
                 if (_test) {
+                    // Run the C++ PLN backward chainer first, for comparison.
+                    cout << "Running C++ backward chainer for comparison" << endl;
+                    runPLNTest_CPP(_test, test_bc);
+                
+                    _test = setupSCMTarget(filename.c_str(), test_bc);
+                    cout << "Running Python backward chainer" << endl;
                     if (!runPLNTest(_test, test_bc))
                         failedSCMTargets.push_back(filename);
                 }
@@ -292,202 +298,202 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     return passed;
 }
 
-//bool runPLNTest(Btr<PLNTest> t, bool test_bc)
-//{
-//    AtomSpaceWrapper *asw = GET_ASW;
-//    stats::Instance().ITN2atom.clear();
-//    
-//    rawPrint(*t->target, t->target->begin(), -2);
-//
-//    clock_t start, finish;
-//    double duration;
-//
-//    test::custom_duration = 0.0;
-//    start = clock();
-//
-//    asw->allowFWVarsInAtomSpace = true;
-//
-//    fflush(stdout);
-//
-//    HybridForwardChainer fc;
-//
-//    uint s_i=0; // Expansion phase #
-//    pHandle eh=PHANDLE_UNDEFINED; // expected target handle
-//    TruthValuePtr etv; // expect target handle TV
-//    bool passed=false;
-//
-//    set<VtreeProvider*> eres;
-//
-//    if (test_bc)
-//        t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
-//    else
-//        // 12 is the maximum depth the BIT reaches (for now), and each "step"
-//        // of FC now does one level
-//        t->minEvalsOfFittestBIT = 7;
-//
-//    const int expansions_per_run = test_bc ? 1000 : 1;
-//    int total_expansions = 0;
-//
-//    if (t->minEvalsOfFittestBIT > 0) {
-//        do {
-///*              for (int k=0;k<expansions_per_run;k++)
-//                t->state->expandFittest();
-//
-//            eres = t->state->evaluate();*/
-//
-//            cprintf(-3, "\n    Evaluating...\n");
-//
-//            int expansions = expansions_per_run;
-//
-//            if (test_bc) {
-//                eres = t->state->infer(expansions, 0.000001f, 0.001f);
-//            } else {
-//                eh = fc.fwdChainToTarget(expansions, (t->target));
-//            }
-//
-//            total_expansions += expansions_per_run - expansions;
-//
-//            if (expansions > 0)
-//                cprintf(-3, "Succeeded. Saved $%d / $%d (from the "
-//                        "beginning of the cycle).\n", expansions,
-//                        expansions_per_run);
-//            else
-//                cprintf(2, "Failed for now... Saved $%d / $%d (from the "
-//                        "beginning of the cycle).\n", expansions,
-//                        expansions_per_run);
-//
-//            if (test_bc)
-//                eh = (eres.empty() ? PHANDLE_UNDEFINED :
-//                        _v2h(*(*eres.rbegin())->getVtree().begin()));
-//
-//            if (eh != PHANDLE_UNDEFINED )
-//                etv = asw->getTV(eh);
-//
-//            if (etv) {
-//                /* Print resulting truth value compared to test requirements */
-//                printf("c: %f min: %f\n", etv->getConfidence(),
-//                        t->minTV->getConfidence());
-//                printf("s: %f min: %f\n", etv->getMean(),
-//                        t->minTV->getMean());
-//                printf("c: %f max: %f\n", etv->getConfidence(),
-//                        t->maxTV->getConfidence());
-//                printf("s: %f max: %f\n", etv->getMean(),
-//                        t->maxTV->getMean());
-//
-//                // This uses the BIT, but the trails are stored using some
-//                // global variables so work in FC. Disabled due to an infinite
-//                // recursion issue in the trails (as of Nov2009) -- JaredW
-//                if (test_bc) {
-//	                std::cout << "Inference trail: " << std::endl;
-//          	        t->state->printTrail(eh);
-//      	        }
-//            }
-//
-//            /* Check whether resulting truth value meets test requirements */
-//            passed = (
-//                eh != PHANDLE_UNDEFINED &&
-//                etv &&
-//                etv->getConfidence() >= t->minTV->getConfidence() &&
-//                etv->getMean()       >= t->minTV->getMean() &&
-//                etv->getConfidence() <= t->maxTV->getConfidence() &&
-//                etv->getMean()       <= t->maxTV->getMean()
-//            );
-//
-//            cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
-//        }
-//        while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT
-//                && !passed);
-//    }
-//    else if (t->minExhaustiveEvals > 0) {
-//        assert(0);
-//        // This should be updated to reflect the new BITNode interface
-//        /*
-//        for (uint L=0;L<t->minExhaustiveEvals;L++)
-//            t->state->expandNextLevel();
-//
-//        eres = t->state->evaluate();
-//        eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
-//        if (eh) {
-//            if (etv != NULL) delete etv;
-//            etv = asw->TV(eh).clone();
-//        }
-//
-//        passed = (eh && etv &&
-//            etv->getConfidence() > t->minTV->getConfidence() &&
-//            etv->getMean()          > t->minTV->getMean()
-//            );*/
-//    }
-//    else
-//        puts("ERROR IN TEST SETTINGS");
-//
-//    if (passed) {
-//        printf("\n"
-//               "**********************************************\n"
-//               "passed: %s.\n"
-//               "**********************************************\n",
-//            (etv?etv->toString().c_str():"(null TV)"));
-//    }
-//    else {
-//        printf("\n**********************************************\n"
-//               "FAILED: %s!\n"
-//               "**********************************************\n",
-//        (etv?etv->toString().c_str():"(null TV)"));
-//    }
-//
-//    // Still want to show this on failed tests
-//    finish = clock();
-//    duration = (double)(finish - start) / CLOCKS_PER_SEC;
-//    printf( "Test took %2.2f seconds TOTAL.\n", duration );
-//
-//    printf( "Custom test time was %3.3f seconds.\n",
-//            test::custom_duration );
-//    printf( "Custom test time was %3.3f seconds.\n",
-//            test::custom_duration2 );
-//
-//    if (test_bc) {
-//        printf("Test results: [");
-//
-//        foreach(VtreeProvider* bv, eres) {
-//            TruthValuePtr tv = asw->getTV(vt2h(*bv));
-//            if (!tv->isNullTv() && tv->getConfidence()>0.0001f)
-//                printf("%d ", vt2h(*bv));
-//        }
-//        printf("]\n");
-//
-//    }
-//
-//    if (passed) {
-//        tests_passed++;
-//    }
-//    else
-//        INstats.push_back(0);
-//
-//    //! @todo Decide whether this stuff should only be done if it passes (like before)
-//    allTestsInferenceNodes += t->state->inferenceNodes;
-//    allTestsExpansions += total_expansions;
-//
-//    INstats.push_back(t->state->inferenceNodes);
-//
-//    cout << "Total expansion steps: " << total_expansions <<
-//            "(" << allTestsExpansions << " in all tests)";
-//    cout << endl << "Exec pool size: " << t->state->getExecPoolSize();
-//    cout << endl << "InferenceNodes: " << t->state->inferenceNodes <<
-//            " (" << allTestsInferenceNodes << " in all tests)" << endl;
-//
-//
-//    tests_total++;
-//
-//    //stats::Instance().print(stats::triviality_filterT());
-//
-//    cout << "So far, failed " << (tests_total - tests_passed) << " out of "
-//         << tests_total << " tests." << endl;
-//
-//#if WAIT_KEY_ON_FAILURE
-//    if (!passed)
-//        getc(stdin);
-//#endif
-//    return passed;
-//}
+bool runPLNTest_CPP(Btr<PLNTest> t, bool test_bc)
+{
+    AtomSpaceWrapper *asw = GET_ASW;
+    stats::Instance().ITN2atom.clear();
+    
+    rawPrint(*t->target, t->target->begin(), -2);
+
+    clock_t start, finish;
+    double duration;
+
+    test::custom_duration = 0.0;
+    start = clock();
+
+    asw->allowFWVarsInAtomSpace = true;
+
+    fflush(stdout);
+
+    HybridForwardChainer fc;
+
+    uint s_i=0; // Expansion phase #
+    pHandle eh=PHANDLE_UNDEFINED; // expected target handle
+    TruthValuePtr etv; // expect target handle TV
+    bool passed=false;
+
+    set<VtreeProvider*> eres;
+
+    if (test_bc)
+        t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
+    else
+        // 12 is the maximum depth the BIT reaches (for now), and each "step"
+        // of FC now does one level
+        t->minEvalsOfFittestBIT = 7;
+
+    const int expansions_per_run = test_bc ? 1000 : 1;
+    int total_expansions = 0;
+
+    if (t->minEvalsOfFittestBIT > 0) {
+        do {
+/*              for (int k=0;k<expansions_per_run;k++)
+                t->state->expandFittest();
+
+            eres = t->state->evaluate();*/
+
+            cprintf(-3, "\n    Evaluating...\n");
+
+            int expansions = expansions_per_run;
+
+            if (test_bc) {
+                eres = t->state->infer(expansions, 0.000001f, 0.001f);
+            } else {
+                eh = fc.fwdChainToTarget(expansions, (t->target));
+            }
+
+            total_expansions += expansions_per_run - expansions;
+
+            if (expansions > 0)
+                cprintf(-3, "Succeeded. Saved $%d / $%d (from the "
+                        "beginning of the cycle).\n", expansions,
+                        expansions_per_run);
+            else
+                cprintf(2, "Failed for now... Saved $%d / $%d (from the "
+                        "beginning of the cycle).\n", expansions,
+                        expansions_per_run);
+
+            if (test_bc)
+                eh = (eres.empty() ? PHANDLE_UNDEFINED :
+                        _v2h(*(*eres.rbegin())->getVtree().begin()));
+
+            if (eh != PHANDLE_UNDEFINED )
+                etv = asw->getTV(eh);
+
+            if (etv) {
+                /* Print resulting truth value compared to test requirements */
+                printf("c: %f min: %f\n", etv->getConfidence(),
+                        t->minTV->getConfidence());
+                printf("s: %f min: %f\n", etv->getMean(),
+                        t->minTV->getMean());
+                printf("c: %f max: %f\n", etv->getConfidence(),
+                        t->maxTV->getConfidence());
+                printf("s: %f max: %f\n", etv->getMean(),
+                        t->maxTV->getMean());
+
+                // This uses the BIT, but the trails are stored using some
+                // global variables so work in FC. Disabled due to an infinite
+                // recursion issue in the trails (as of Nov2009) -- JaredW
+                if (test_bc) {
+	                std::cout << "Inference trail: " << std::endl;
+          	        t->state->printTrail(eh);
+      	        }
+            }
+
+            /* Check whether resulting truth value meets test requirements */
+            passed = (
+                eh != PHANDLE_UNDEFINED &&
+                etv &&
+                etv->getConfidence() >= t->minTV->getConfidence() &&
+                etv->getMean()       >= t->minTV->getMean() &&
+                etv->getConfidence() <= t->maxTV->getConfidence() &&
+                etv->getMean()       <= t->maxTV->getMean()
+            );
+
+            cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
+        }
+        while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT
+                && !passed);
+    }
+    else if (t->minExhaustiveEvals > 0) {
+        assert(0);
+        // This should be updated to reflect the new BITNode interface
+        /*
+        for (uint L=0;L<t->minExhaustiveEvals;L++)
+            t->state->expandNextLevel();
+
+        eres = t->state->evaluate();
+        eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
+        if (eh) {
+            if (etv != NULL) delete etv;
+            etv = asw->TV(eh).clone();
+        }
+
+        passed = (eh && etv &&
+            etv->getConfidence() > t->minTV->getConfidence() &&
+            etv->getMean()          > t->minTV->getMean()
+            );*/
+    }
+    else
+        puts("ERROR IN TEST SETTINGS");
+
+    if (passed) {
+        printf("\n"
+               "**********************************************\n"
+               "passed: %s.\n"
+               "**********************************************\n",
+            (etv?etv->toString().c_str():"(null TV)"));
+    }
+    else {
+        printf("\n**********************************************\n"
+               "FAILED: %s!\n"
+               "**********************************************\n",
+        (etv?etv->toString().c_str():"(null TV)"));
+    }
+
+    // Still want to show this on failed tests
+    finish = clock();
+    duration = (double)(finish - start) / CLOCKS_PER_SEC;
+    printf( "Test took %2.2f seconds TOTAL.\n", duration );
+
+    printf( "Custom test time was %3.3f seconds.\n",
+            test::custom_duration );
+    printf( "Custom test time was %3.3f seconds.\n",
+            test::custom_duration2 );
+
+    if (test_bc) {
+        printf("Test results: [");
+
+        foreach(VtreeProvider* bv, eres) {
+            TruthValuePtr tv = asw->getTV(vt2h(*bv));
+            if (!tv->isNullTv() && tv->getConfidence()>0.0001f)
+                printf("%d ", vt2h(*bv));
+        }
+        printf("]\n");
+
+    }
+
+    if (passed) {
+        tests_passed++;
+    }
+    else
+        INstats.push_back(0);
+
+    //! @todo Decide whether this stuff should only be done if it passes (like before)
+    allTestsInferenceNodes += t->state->inferenceNodes;
+    allTestsExpansions += total_expansions;
+
+    INstats.push_back(t->state->inferenceNodes);
+
+    cout << "Total expansion steps: " << total_expansions <<
+            "(" << allTestsExpansions << " in all tests)";
+    cout << endl << "Exec pool size: " << t->state->getExecPoolSize();
+    cout << endl << "InferenceNodes: " << t->state->inferenceNodes <<
+            " (" << allTestsInferenceNodes << " in all tests)" << endl;
+
+
+    tests_total++;
+
+    //stats::Instance().print(stats::triviality_filterT());
+
+    cout << "So far, failed " << (tests_total - tests_passed) << " out of "
+         << tests_total << " tests." << endl;
+
+#if WAIT_KEY_ON_FAILURE
+    if (!passed)
+        getc(stdin);
+#endif
+    return passed;
+}
 
 // helper for runPLNTest
 bool maketest(meta target,
