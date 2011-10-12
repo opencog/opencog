@@ -40,7 +40,7 @@ protected:
     /// Mean of the strength of the TV over all observations
     strength_t mean;
 
-    /// Total number of observations used to compute the mean 
+    /// Total number of observations used to estimate the mean 
     count_t count;
 
     void init(strength_t mean, count_t count);
