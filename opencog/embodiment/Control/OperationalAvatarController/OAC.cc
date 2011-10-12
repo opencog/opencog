@@ -155,9 +155,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 //    }// if
 
     // warning: it must be called after register the agent and it's owner nodes
-//    this->ruleEngine = new RuleEngine( this, petId );
-//    this->pet->setRuleEngine(ruleEngine);
-
     predicatesUpdater = new PredicatesUpdater(*atomSpace, pet->getPetId());
 
     // Load Psi Rules ('xxx_rules.scm') to AtomSpace
@@ -632,11 +629,6 @@ RandGen & OAC::getRandGen()
     return *( this->rngPtr.get() );
 }
 
-RuleEngine & OAC::getRuleEngine()
-{
-    return *ruleEngine;
-}
-
 ProcedureInterpreter & OAC::getProcedureInterpreter()
 {
     return *procedureInterpreter;
@@ -833,8 +825,6 @@ void OAC::schemaSelection()
     logger().fine("OAC - Executing selectSchemaToExecute().");
 
     this->pet->getCurrentModeHandler( ).update( );
-//    this->ruleEngine->processNextAction( );
-//    this->ruleEngine->runSchemaForCurrentAction( );
 
 //  if ( pet->getMode( ) != PLAYING && pet->getMode( ) != LEARNING ) {
 //    pet->setMode( PLAYING );

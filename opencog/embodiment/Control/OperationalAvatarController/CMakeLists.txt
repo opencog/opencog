@@ -18,12 +18,7 @@ ADD_LIBRARY (oac
     SleepAgent
     MockOpcHCTest
     HCTestAgent
-    RuleEngine
-    RuleEngineUtil
-    RuleEngineLearnedTricksHandler
-    SchemaRunner
     BaseAgentModeHandler
-    ScavengerHuntAgentModeHandler
     DefaultAgentModeHandler
     LearningAgentModeHandler
     LanguageComprehension
@@ -42,8 +37,6 @@ INCLUDE_DIRECTORIES (
 )
 
 SET(OAC_LINK_LIBS
-    ${LUA_LIBRARIES}
-    ${LUABIND_LIBRARIES}
     ${XERCESC_LIBRARIES}
     json_spirit
     PredicateUpdaters

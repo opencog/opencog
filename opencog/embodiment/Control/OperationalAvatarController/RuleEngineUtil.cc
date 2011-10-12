@@ -19,6 +19,10 @@
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Note: This is file is obsolete but might be served as a reference while 
+ *       incorporating learning sever to embodiment system. It can safely 
+ *       deleted once learning server is successfully incorporated. 
  */
 
 #include <lua.hpp>

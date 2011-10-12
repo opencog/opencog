@@ -37,7 +37,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
-#include "RuleEngine.h"
+//#include "RuleEngine.h"
 #include "LearningAgentModeHandler.h"
 #include "ScavengerHuntAgentModeHandler.h"
 #include "DefaultAgentModeHandler.h"
@@ -67,7 +67,6 @@ Pet::Pet(const std::string& petId, const std::string& petName, const
 {
 
     this->pai = NULL;
-    this->ruleEngine = NULL;
     this->latestRewardTimestamp = UNDEFINED_TIMESTAMP;
     this->latestPunishmentTimestamp = UNDEFINED_TIMESTAMP;
     this->sender = sender;
@@ -113,8 +112,6 @@ Pet::Pet(const std::string& petId, const std::string& petName, const
 
     this->modeHandler[ LEARNING ] = new LearningAgentModeHandler(this);
     this->modeHandler[ PLAYING ] = new DefaultAgentModeHandler(this);
-    this->modeHandler[ SCAVENGER_HUNT ] =
-        new ScavengerHuntAgentModeHandler(this);
 }
 
 Pet::~Pet()
@@ -220,11 +217,6 @@ void Pet::initTraitsAndFeelings()
         }
     }
     fin.close();
-}
-
-void Pet::setRuleEngine(RuleEngine *ruleEngine)
-{
-    this->ruleEngine = ruleEngine;
 }
 
 void Pet::setPAI(PAI *pai)
@@ -779,7 +771,7 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned
     } else {
         logger().warn("Pet - Did not executed the last received candidate yet!");
         // Force a new attempt of executing the candidate schema.
-        ruleEngine->tryExecuteSchema(learningSchema.front());
+//        ruleEngine->tryExecuteSchema(learningSchema.front());
     }
 }
 
@@ -815,7 +807,7 @@ void Pet::reward(unsigned long timestamp)
     } else {
         // call rule engine to reward implication links for latest selected
         // rules
-        ruleEngine->rewardRule(timestamp);
+//        ruleEngine->rewardRule(timestamp);
     }
 }
 
@@ -849,7 +841,7 @@ void Pet::punish(unsigned long timestamp)
 
     } else {
         // call rule engine to punish implication links for latest selected rules
-        ruleEngine->punishRule(timestamp);
+//        ruleEngine->punishRule(timestamp);
     }
 }
 

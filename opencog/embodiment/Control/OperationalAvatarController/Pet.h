@@ -45,8 +45,6 @@ using namespace opencog::control;
 
 namespace opencog { namespace oac {
 
-class RuleEngine;
-
 // PetMode
 enum PetMode {
     LEARNING,
@@ -81,7 +79,6 @@ private:
     // oac components received as constructor parameter
     AtomSpace* atomSpace;
     MessageSender* sender;
-    RuleEngine* ruleEngine;
 
     PAI* pai;
 
@@ -171,16 +168,6 @@ public:
      */
     inline PAI& getPai( void ) {
         return *pai;
-    }
-
-    /** Set the RuleEngine of this Pet
-     */
-    void setRuleEngine(RuleEngine* ruleEngine);
-
-    /** Get the RuleEngine of this Pet
-     */
-    inline RuleEngine* getRuleEngine( void ) {
-        return ruleEngine;
     }
 
     /** Init AtomSpace with pet traits, feelings and other atoms
