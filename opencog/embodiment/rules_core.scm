@@ -2,7 +2,7 @@
 ; @file embodiment/rules_core.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-06-21
+; @date   2011-10-12
 ;
 ; Scheme core functions for adding Modulators, Demands and Rules etc. into AtomSpace
 ;
@@ -18,7 +18,7 @@
 ; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
 ;
-;     SimilarityLink (stv 1.0 1.0)
+;     SimilarityLink
 ;         NumberNode: "modulator_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "modulator_schema_name"
@@ -30,7 +30,7 @@
 ; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
 ;
-;     SimilarityLink (stv 1.0 1.0)
+;     SimilarityLink 
 ;         NumberNode: "demand_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "demand_schema_name"
@@ -137,27 +137,6 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Current timestamp
-;
-; It would be used by AtTimeLink and TimeNode, since Scheme shell would never know 
-; unless you tell it in C++ code, as follows 
-;
-;     (set! CURRENT_TIMESTAMP "438")
-; 
-; How to interpret the timestamp depends on the epoch and unit of time,
-;
-; Epoch in OpenCog is defined by PAIUtils::epoch at "PAIUtils.cc" line 35.
-; In regard to time unit, it would be 0.1 seconds or 0.01 seconds, depending  on the
-; macro definition DATETIME_DECIMAL_RESOLUTION (PAIUtils::getTimeInfo "PAIUtils.cc" line 141-149)
-;
-; Learn more
-;     http://wiki.opencog.org/w/TimeServer
-;
-
-(define CURRENT_TIMESTAMP "0")
-
-;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-;
 ; Get the agent Handle given agent_id
 ;
 ; The function is a Scheme version of AtomSpaceUtil::getAgentHandle ("AtomSpaceUtil.cc") \n
@@ -241,7 +220,7 @@
 ;
 ; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
-;     SimilarityLink (stv 1.0 1.0)
+;     SimilarityLink 
 ;         NumberNode: "modulator_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "modulator_schema_name"
@@ -255,9 +234,9 @@
          )
 
          (AtTimeLink (stv 1.0 1.0)
-             (TimeNode CURRENT_TIMESTAMP)
+             (TimeNode "0")
 
-             (SimilarityLink (cog-new-stv 1.0 1.0) 
+             (SimilarityLink
                  (NumberNode (number->string default_value) )
                  schema_handle
              );SimilarityLink
@@ -279,7 +258,7 @@
 ;
 ; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
-;     SimilarityLink (stv 1.0 1.0)
+;     SimilarityLink 
 ;         NumberNode: "demand_value"
 ;         ExecutionOutputLink 
 ;             GroundedSchemaNode: "demand_schema_name"
@@ -295,9 +274,9 @@
          )    
 
         (AtTimeLink (stv 1.0 1.0)
-            (TimeNode CURRENT_TIMESTAMP)
+            (TimeNode "0")
 
-            (SimilarityLink (cog-new-stv 1.0 1.0)
+            (SimilarityLink
                 (NumberNode (number->string default_value) )
                 schema_handle
             );SimilarityLink

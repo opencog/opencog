@@ -2,7 +2,7 @@
 ; Action planner
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-08-03
+; @date   2011-10-12
 ;
 
 ; Modules for debug
@@ -121,9 +121,10 @@
 ; Return a BindLink used by pattern matcher to search the action with suitable 
 ; groundings of all the variables that make the context True
 ;
-; @param variables Usually it is the first outgoing of ForAllLink. 
-;                  It may be a single VariableNode, a single TypedVariableLink
-;                  or a ListLink of VariableNodes or TypedVariableLink. 
+; @param variables Usually it is the first outgoing of AverageLink, ForAllLink
+;                  or ExistsLink. It may be a single VariableNode, a single
+;                  TypedVariableLink or a ListLink of VariableNodes or
+;                  TypedVariableLink. 
 ;  
 ; @note There's a chance that the action is empty. Especially in rules about 
 ;       relations, such as SomeOneKickYou => YouGetAngry  
@@ -164,7 +165,12 @@
                        (list (list) atom)
                      )
 
-                     ; If the input is a Node but NOT a VariableNode, return the input as context 
+                     ; If the input is a Node, just return the input as context
+                     ;
+                     ; Note: When the input is a VariableNode, which means the context is also a VariableNode, 
+                     ;       then crisp pattern matcher (see also find_psi_action) would be applied later to
+                     ;       ground the VariableNode to suitable nodes making the context true.  
+                     ;       
                      ( (cog-subtype? 'Node atom_type)
 ;                       (display "Found a Node ") (newline) (display (list (list atom) (list) )) (newline)
                        (list atom (list) )
@@ -391,7 +397,7 @@
               ; only when the context is true
               (begin
                   ; Get the variables of the rule,
-                  ; the first step is to get a ForAllLink, ExistsLink or AverageLink 
+                  ; the first step is to get an AverageLink, ForAllLink or ExistsLink 
                   ; contaning the rule, and then return the first outgoing of the link 
                   (let search_variables ( (incomings (cog-incoming-set rule) )
                                         ) 

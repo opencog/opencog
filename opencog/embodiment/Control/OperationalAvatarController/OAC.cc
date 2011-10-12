@@ -381,8 +381,7 @@ int OAC::addRulesToAtomSpace()
                       );
     
 */
-    // Set PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP for the Scheme shell 
-    // before loading rules file
+    // Set PET_HANDLE and OWNER_HANDLE for the Scheme shell before loading rules file
     SchemeEval & evaluator = SchemeEval::instance(this->atomSpace);
     std::string scheme_expression, scheme_return_value;
 
@@ -398,22 +397,15 @@ int OAC::addRulesToAtomSpace()
                                               this->getPet().getOwnerId() + 
                                              "\") )";
 
-    scheme_expression += "(set! CURRENT_TIMESTAMP \"" +
-                                boost::lexical_cast<std::string>
-                                    ( this->getPAI().getLatestSimWorldTimestamp() ) +
-                         "\" )";
-
     scheme_return_value = evaluator.eval(scheme_expression);
 
     if ( evaluator.eval_error() ) 
-        logger().error(
-                "OAC::%s - Failed to set PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP", 
-                __FUNCTION__
+        logger().error("OAC::%s - Failed to set PET_HANDLE and OWNER_HANDLE",
+                       __FUNCTION__
                       );
     else 
-        logger().info(
-          "OAC::%s - Set PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP for Scheme shell", 
-          __FUNCTION__
+        logger().info("OAC::%s - Set PET_HANDLE and OWNER_HANDLE for Scheme shell",
+                      __FUNCTION__
                      );
             
     // Load the psi rules file, including Modulators, DemandGoals and Rules 

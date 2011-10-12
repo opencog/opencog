@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-07-05
+; @date   2011-10-12
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into the AtomSpace.
 ;
@@ -13,18 +13,16 @@
 ;       Once PsiActionSelectionAgent is finished, we would tune these Rules, observing Pet's behaviors.
 
 ;
-; Initialize PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP for Test 
+; Initialize PET_HANDLE and OWNER_HANDLE for Test 
 ; If you run the Multiverse Client, comment the lines below 
 ;
 
 ;(set! PET_HANDLE (PetNode "TestPet") )
 ;(set! OWNER_HANDLE (AvatarNode "TestAvatar") )      
-;(set! CURRENT_TIMESTAMP 0)
-
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Check that the PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP are not null
+; Check that the PET_HANDLE and OWNER_HANDLE are not null
 ;
 ; Because the Scheme shell would never know these Handles automatically, 
 ; which would be used by add_action function in "rules_core.scm",
@@ -32,7 +30,6 @@
 ;
 ;    (set! PET_HANDLE (get_agent_handle 'agent_id') )   
 ;    (set! OWNER_HANDLE (get_owner_handle 'owner_id') ) 
-;    (set! CURRENT_TIMESTAMP 'current_time_stamp')
 ;
 ; firstly, in C++ code before actually loading any Rules!
 ;
@@ -67,21 +64,6 @@
     );begin
 );if
 
-; Check that CURRENT_TIMESTAMP is not null
-;
-;(if (null? CURRENT_TIMESTAMP)
-;    (begin
-;        (print_debug_info INFO_TYPE_FAIL "pet_rules.scm" 
-;                          (string-append "CURRENT_TIMESTAMP is null. " 
-;                                         "Please call (set! CURRENT_TIMESTAMP 'current_time_stamp') "
-;                                         "firstly, in c++ code before actually loading any Rules!"
-;                          )              
-;        );print_debug_info
-;
-;        (exit -1)
-;    );begin
-;);if
-
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Modulators
@@ -94,7 +76,7 @@
 ;
 ; Modulator is represented as:
 ;
-; SimilarityLink (stv 1.0 1.0)
+; SimilarityLink
 ;     NumberNode: "modulator_value"
 ;     ExecutionOutputLink
 ;         GroundedSchemaNode: xxxModulatorUpdater
@@ -128,7 +110,7 @@
 ; 
 ; DemandSchema/DemandValue is represented as:
 ;
-; SimilarityLink (stv 1.0 1.0)
+; SimilarityLink
 ;     NumberNode: "demand_value"
 ;     ExecutionOutputLink
 ;         GroundedSchemaNode: "demand_schema_name"
@@ -446,7 +428,7 @@
 ;    )
 ;)
 ;
-;(ForAllLink (stv 1.0 1.0)
+;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar)
 ;
 ;    (ImplicationLink 
@@ -488,7 +470,7 @@
     )
 )
 
-(ForAllLink (cog-new-av 1 1 1)
+(AverageLink (cog-new-av 1 1 1)
     (ListLink
         (VariableNode "$var_food") 
     ) 
@@ -534,7 +516,7 @@
     )    
 )
 
-(ForAllLink (cog-new-av 1 1 1)
+(AverageLink (cog-new-av 1 1 1)
     (ListLink
         (VariableNode "$var_water") 
     ) 
@@ -648,7 +630,7 @@
 ; familiar_with is the first step before knowing
 ; for instance sniffing something makes the pet familiar with it
 
-;(ForAllLink (stv 1.0 1.0)
+;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar)	    
 ;
 ;    (add_rule (cog-new-stv 1.0 1.0) FamiliarWithRelation NULL_ACTION
@@ -661,7 +643,7 @@
 ; know it one step above familiar with, for instance if the pet is familiar
 ; with something and then lick it is considered to be known 
 
-;(ForAllLink (stv 1.0 1.0)
+;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar)	    
 ;
 ;    (add_rule (cog-new-stv 1.0 1.0) KnowRelation NULL_ACTION
@@ -672,7 +654,7 @@
 
 ; enemy
 
-;(ForAllLink (stv 1.0 1.0)
+;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar) 
 ;
 ;    (add_rule (cog-new-stv 1.0 1.0) EnemyRelation NULL_ACTION
@@ -682,7 +664,7 @@
 
 ; friend
 
-;(ForAllLink (stv 1.0 1.0)
+;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar)	    
 ;
 ;    (add_rule (cog-new-stv 1.0 1.0) FriendRelation NULL_ACTION
@@ -693,7 +675,7 @@
 
 ; anger
 
-;(ForAllLink (stv 1.0 1.0)
+;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar)	    
 ;
 ;    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
@@ -701,7 +683,7 @@
 ;    )
 ;)
 ;
-;(ForAllLink (stv 1.0 1.0)
+;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar)
 ;
 ;    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION
@@ -709,7 +691,7 @@
 ;    )
 ;)
 ;
-;(ForAllLink (stv 1.0 1.0)
+;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar)	    
 ;
 ;    (add_rule (cog-new-stv 1.0 1.0) AngerRelation NULL_ACTION

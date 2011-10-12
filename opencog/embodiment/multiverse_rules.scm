@@ -13,18 +13,16 @@
 ;       Once PsiActionSelectionAgent is finished, we would tune these Rules, observing Pet's behaviors.
 
 ;
-; Initialize PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP for Test 
+; Initialize PET_HANDLE and OWNER_HANDLE for Test 
 ; If you run the Multiverse Client, comment the lines below 
 ;
 
 ;(set! PET_HANDLE (PetNode "TestPet") )
 ;(set! OWNER_HANDLE (AvatarNode "TestAvatar") )      
-;(set! CURRENT_TIMESTAMP 0)
-
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Check that the PET_HANDLE, OWNER_HANDLE and CURRENT_TIMESTAMP are not null
+; Check that the PET_HANDLE and OWNER_HANDLE are not null
 ;
 ; Because the Scheme shell would never know these Handles automatically, 
 ; which would be used by add_action function in "rules_core.scm",
@@ -32,7 +30,6 @@
 ;
 ;    (set! PET_HANDLE (get_agent_handle 'agent_id') )   
 ;    (set! OWNER_HANDLE (get_owner_handle 'owner_id') ) 
-;    (set! CURRENT_TIMESTAMP 'current_time_stamp')
 ;
 ; firstly, in C++ code before actually loading any Rules!
 ;
@@ -66,21 +63,6 @@
         (exit -1)
     );begin
 );if
-
-; Check that CURRENT_TIMESTAMP is not null
-;
-;(if (null? CURRENT_TIMESTAMP)
-;    (begin
-;        (print_debug_info INFO_TYPE_FAIL "pet_rules.scm" 
-;                          (string-append "CURRENT_TIMESTAMP is null. " 
-;                                         "Please call (set! CURRENT_TIMESTAMP 'current_time_stamp') "
-;                                         "firstly, in c++ code before actually loading any Rules!"
-;                          )              
-;        );print_debug_info
-;
-;        (exit -1)
-;    );begin
-;);if
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
