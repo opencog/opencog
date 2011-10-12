@@ -47,7 +47,7 @@ class Exist2ForAllRule : public Rule
     virtual bool valid(Handle* h, const int n) const
     {
         assert(n==1);
-        return isSubType(h[0], EXIST_LINK);
+        return isSubType(h[0], EXISTS_LINK);
     }
     
     BoundVertex compute(const VertexSeq& premiseArray,

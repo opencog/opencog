@@ -42,7 +42,7 @@ public:
           domain(_domain), OUTPUT_LINK_TYPE(outLinkType) {
         inputFilter.push_back(meta(
                                    new tree<Vertex>(
-                                                    mva((pHandle)((OUTPUT_LINK_TYPE==FORALL_LINK) ? EXIST_LINK : FORALL_LINK),
+                                                    mva((pHandle)((OUTPUT_LINK_TYPE==FORALL_LINK) ? EXISTS_LINK : FORALL_LINK),
                                                         mva((pHandle)ATOM),
                                                         mva((pHandle)ATOM))
                                                     )));
