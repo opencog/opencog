@@ -37,7 +37,10 @@ class SimpleTruthValue : public TruthValue
 
 protected:
 
+    /// Mean of the strength of the TV over all observations
     strength_t mean;
+
+    /// Total number of observations used to compute the mean 
     count_t count;
 
     void init(strength_t mean, count_t count);
@@ -55,7 +58,17 @@ public:
     virtual bool operator==(const TruthValue& rhs) const;
 
     static SimpleTruthValue* fromString(const char*);
+
+    /// Heuristic to compute the count given the confidence (according
+    /// to the PLN book)
+    /// count =  confidence * k / (1 - confidence)
+    /// where k is the look-ahead
     static count_t confidenceToCount(confidence_t);
+
+    /// Heuristic to compute the confidence given the count (according
+    /// to the PLN book)
+    /// confidence = count / (count + k)
+    /// where k is the look-ahead
     static confidence_t countToConfidence(count_t);
 
     float toFloat() const;
