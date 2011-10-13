@@ -2808,7 +2808,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
         set<unsigned int>::const_iterator itr;
         for (itr = seqNumbers.begin(); itr != seqNumbers.end(); itr++) {
             unsigned int seqNumber = *itr;
-            const char* predicateName;
+            const char* predicateName = NULL;
 
             switch (statusCode) {
             case opencog::pai::DONE:
