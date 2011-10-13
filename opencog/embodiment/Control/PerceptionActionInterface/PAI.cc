@@ -2123,7 +2123,8 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
                 toUpdateHandles.push_back(objectNode);
             } else {
                 Handle objectNode = removeEntityFromAtomSpace(mapinfo, timestamp);
-                toUpdateHandles.push_back(objectNode);
+                if (objectNode != Handle::UNDEFINED)
+                    toUpdateHandles.push_back(objectNode);
             }
         }
         
