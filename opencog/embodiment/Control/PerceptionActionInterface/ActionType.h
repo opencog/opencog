@@ -98,6 +98,7 @@ enum ActionTypeCode {
     EARS_PERK_CODE,
     JUMP_UP_CODE,
     JUMP_TOWARD_CODE,
+    JUMP_FORWARD_CODE,
     PAY_ATTENTION_CODE,
     VOMIT_CODE,
     LEAN_ROCK_DANCE_CODE,
@@ -388,6 +389,11 @@ public:
      * void jumpToward(Vector direction)
      */
     static const ActionType& JUMP_TOWARD();
+    /**
+     * void jumpForward(Vector direction)
+     */
+    static const ActionType& JUMP_FORWARD();
+
     /**
      * void PayAttention()
      */

@@ -52,6 +52,7 @@ static ActionType::ParamTypes ENTITY_and_INT;
 static ActionType::ParamTypes ENTITY_and_FLOAT;
 static ActionType::ParamTypes ENTITY_and_VECTOR;
 static ActionType::ParamTypes STRING_and_STRING;
+static ActionType::ParamTypes FLOAT_and_FLOAT;
 
 // Arity 3
 static ActionType::ParamTypes VECTOR_ROTATION_and_FLOAT;
@@ -86,6 +87,8 @@ void ActionType::initParamTypes()
         ENTITY_and_VECTOR.push_back(ActionParamType::VECTOR());
         STRING_and_STRING.push_back(ActionParamType::STRING());
         STRING_and_STRING.push_back(ActionParamType::STRING());
+        FLOAT_and_FLOAT.push_back(ActionParamType::FLOAT());
+        FLOAT_and_FLOAT.push_back(ActionParamType::FLOAT());
 
         // Arity 3
         VECTOR_ROTATION_and_FLOAT.push_back(ActionParamType::VECTOR());
@@ -479,6 +482,13 @@ const ActionType& ActionType::JUMP_TOWARD()
     static ActionType* result = new ActionType(JUMP_TOWARD_CODE, "jumpToward", VECTOR, EMPTY, paramNames, "void jumpToward(Vector direction)");
     return *result;
 }
+const ActionType& ActionType::JUMP_FORWARD()
+{
+    initParamTypes();
+    static const char* paramNames[] = {"height"};
+    static ActionType* result = new ActionType(JUMP_FORWARD_CODE, "jumpForward", FLOAT, EMPTY, paramNames, "void jumpForward(float height)");
+    return *result;
+}
 const ActionType& ActionType::PAY_ATTENTION()
 {
     initParamTypes();
@@ -714,8 +724,8 @@ const ActionType& ActionType::BUILD_BLOCK_AT()
 const ActionType& ActionType::BUILD_BLOCK()
 {
     initParamTypes();
-    static const char* paramNames[] = {"offset"};
-    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "buildBlock", FLOAT, EMPTY, paramNames, "void buildBlock(float offset)");
+    static const char* paramNames[] = {"offset", "direction"};
+    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "buildBlock", FLOAT_and_FLOAT, EMPTY, paramNames, "void buildBlock(float offset[, int direction])");
     return *result;
 }
 
@@ -877,6 +887,7 @@ void ActionType::init()
         EARS_PERK();
         JUMP_UP();
         JUMP_TOWARD();
+        JUMP_FORWARD();
         PAY_ATTENTION();
         VOMIT();
         LEAN_ROCK_DANCE();

@@ -1494,6 +1494,15 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                                             Vector(p.first, p.second, 0.0)));
     }
     break;
+    case id::jump_forward:      // jump_forward(height)
+    {
+        std::stringstream ss;
+        ss << *from.begin();
+        action.addParameter(ActionParameter("height",
+                                            ActionParamType::FLOAT(),
+                                            ss.str()));
+    }
+    break;
     case id::move_head:         // move_head(angle, angle)
         OC_ASSERT(from.number_of_children() == 3);
         action.addParameter(ActionParameter("position",
@@ -1605,18 +1614,23 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     break;
 
     case id::build_block: {
-        if ( from.number_of_children() != 1 ) {
+        if ( from.number_of_children() != 2 ) {
             throw InvalidParamException( TRACE_INFO,
                                          "PAIWorldWrapper - Invalid number of arguments for build_block %d", 
                                          from.number_of_children() 
                                        );
         } 
 
-        // TODO change the hard coding texture once the avatar knows how to use
-        // the ability.
         std::stringstream ss;
         ss << *from.begin();
+
         action.addParameter(ActionParameter("offset",
+                                            ActionParamType::FLOAT(),
+                                            ss.str()));
+        ss.str("");
+        ss << *++from.begin();
+
+        action.addParameter(ActionParameter("direction",
                                             ActionParamType::FLOAT(),
                                             ss.str()));
 

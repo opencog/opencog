@@ -102,6 +102,8 @@ enum pet_builtin_action_enum {
     // not implemented on MV-Proxy
     jump_towards,
 
+    jump_forward,
+
     //==== turn_to_face(object) ====
     // does not turn in the right direction
     turn_to_face,
@@ -387,6 +389,7 @@ static const action_basic_description abd[] = {
     { id::heel,              "heel",              "action_result" },
     { id::jump_up,           "jump_up",           "action_result" },
     { id::jump_towards,      "jump_towards",      "->(union(definite_object indefinite_object wild_card) action_result)" },
+    { id::jump_forward,      "jump_forward",      "->(contin action_result)" },
     { id::turn_to_face,      "turn_to_face",      "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::grab,              "grab",              "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::nudge_to,          "nudge_to",          "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) action_result)" },
@@ -458,7 +461,7 @@ static const action_basic_description abd[] = {
     { id::look_at,           "look_at",           "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::say,               "say",               "->(definite_object union(definite_object indefinite_object wild_card) action_result)" },
     { id::build_block_at,    "build_block_at",    "->(definite_object action_result)" },
-    { id::build_block,       "build_block",       "->(contin action_result)" },
+    { id::build_block,       "build_block",       "->(contin contin action_result)" },
     //{ id::destroy_block_at,  "destroy_block_at",  "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::destroy_block_at,  "destroy_block_at",  "action_result" },
 
@@ -482,6 +485,7 @@ static const action_property_description apd[] = {
     { id::heel,           true,     false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::jump_up,        false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::jump_towards,   false,    false,     false,      false,          (pet_builtin_action_enum)0 },
+    { id::jump_forward,   false,    false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::turn_to_face,   false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::grab,           false,    false,     false,      false,          (pet_builtin_action_enum)0 },
     { id::nudge_to,       true,     false,     false,      false,          (pet_builtin_action_enum)0 },
@@ -578,6 +582,7 @@ static const action_argument_property_description aapd[] = {
     { id::step_towards,             0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::step_towards,             1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::jump_towards,             0,    false, false,  false,  0,  0 },
+    { id::jump_forward,             0,    false, false,  false,  0,  0 },
     { id::turn_to_face,             0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::grab,                     0,    false, false,  false,  0,  0 },
     { id::nudge_to,                 0,    false, false,  false,  0,  0 },
@@ -617,6 +622,7 @@ static const action_argument_property_description aapd[] = {
 
     { id::build_block_at,           0,    false, false,  false,  0,  0 }, 
     { id::build_block,              0,    false, false,  false,  0,  0 }, 
+    { id::build_block,              1,    false, false,  false,  0,  0 }, 
 };
 
 static const action_precedence must_precede[] = {
