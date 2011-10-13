@@ -20,7 +20,8 @@ def save_trees(trees, file):
     '''Save all of the Trees from the AtomSpace to a file. Uses FakeAtom rather than the Cython Atom class.'''
     import tree
     f = open(file,'w')
-    trees = map(tree.tree_from_atom, trees.get_atoms_by_type(types.Atom))
+    #trees = map(tree.tree_from_atom, trees.get_atoms_by_type(types.Atom))
+    #trees = map(tree.tree_from_atom, trees)
     trees = map(tree.tree_with_fake_atoms, trees)
     pickle.dump(trees, f)
     f.close()
@@ -91,3 +92,64 @@ def ppset(s):
     slist = list(s)
     slist.sort(key=str)
     return 'set(%s)' % pp(slist)
+
+
+import collections
+
+class OrderedSet(collections.OrderedDict, collections.MutableSet):
+    def __init__(self, elements=[]):
+        collections.OrderedDict.__init__(self)
+        collections.MutableSet.__init__(self)
+        for e in elements:
+            self.add(e)
+
+    def update(self, *args, **kwargs):
+        if kwargs:
+            raise TypeError("update() takes no keyword arguments")
+
+        for s in args:
+            for e in s:
+                 self.add(e)
+
+    def add(self, elem):
+        self[elem] = None
+        
+    def append(self, elem):
+        self.add(elem)
+
+    def discard(self, elem):
+        self.pop(elem, None)
+
+    def pop_last(self):
+        return self.popitem(last=True)[0]
+
+    def pop_first(self):
+        return self.popitem(last=False)[0]
+    
+    def __le__(self, other):
+        return all(e in other for e in self)
+
+    def __lt__(self, other):
+        return self <= other and self != other
+
+    def __ge__(self, other):
+        return all(e in self for e in other)
+
+    def __gt__(self, other):
+        return self >= other and self != other
+
+    def __repr__(self):
+        return 'OrderedSet([%s])' % (', '.join(map(repr, self.keys())))
+
+    def __str__(self):
+        return '{%s}' % (', '.join(map(repr, self.keys())))
+
+    difference = property(lambda self: self.__sub__)
+    difference_update = property(lambda self: self.__isub__)
+    intersection = property(lambda self: self.__and__)
+    intersection_update = property(lambda self: self.__iand__)
+    issubset = property(lambda self: self.__le__)
+    issuperset = property(lambda self: self.__ge__)
+    symmetric_difference = property(lambda self: self.__xor__)
+    symmetric_difference_update = property(lambda self: self.__ixor__)
+    union = property(lambda self: self.__or__)

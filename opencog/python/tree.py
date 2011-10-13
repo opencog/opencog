@@ -163,6 +163,9 @@ class tree:
         assert isinstance(other, tree)
         return unify(self, other, {}) != None
 
+    def canonical(self):
+        return canonical_trees([self])[0]
+
 def tree_from_atom(atom, dic = {}):
     if atom.is_node():
         if atom.t in [types.VariableNode, types.FWVariableNode]:
