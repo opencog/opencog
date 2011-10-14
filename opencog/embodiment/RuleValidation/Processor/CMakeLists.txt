@@ -1,7 +1,5 @@
 INCLUDE_DIRECTORIES (
     ${XERCESC_INCLUDE_DIR}
-    ${LUA_INCLUDE_DIR}
-    ${LUABIND_INCLUDE_DIR}
 )
 
 ADD_LIBRARY(Processor
@@ -9,8 +7,6 @@ ADD_LIBRARY(Processor
 )
 
 TARGET_LINK_LIBRARIES(Processor
-    ${LUA_LIBRARIES}
-    ${LUABIND_LIBRARIES}
     ${XERCESC_LIBRARIES}
     VirtualWorldData
     Procedure
