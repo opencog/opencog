@@ -40,7 +40,6 @@ $binDirH/opencog/embodiment/Control/OperationalAvatarController/opcHcTester \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
 $binDirH/opencog/embodiment/Learning/LearningServer/learningServer \
-$binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
 ./cleanup.sh \
 ./stop_embodiment.sh \
 ./start_embodiment.sh \
