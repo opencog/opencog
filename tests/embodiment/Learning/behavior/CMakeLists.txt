@@ -14,7 +14,7 @@ ADD_CXXTEST(BehaviorCategoryUTest)
 ADD_CXXTEST(BDRetrieverUTest)
 
 LINK_LIBRARIES(
-	PetComboVocabulary
+	AvatarComboVocabulary
 	${XERCESC_LIBRARIES}
 	comboreduct
 )

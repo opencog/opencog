@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(Filter
 	PAI
 	util
 	comboreduct
-	PetComboVocabulary
+	AvatarComboVocabulary
 	behavior
 	RewritingRules
 	WorldWrapper

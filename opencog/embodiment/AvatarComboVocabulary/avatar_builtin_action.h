@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetComboVocabulary/pet_builtin_action.h
+ * opencog/embodiment/AvatarComboVocabulary/avatar_builtin_action.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,20 +21,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PET_BUILTIN_ACTION_H
-#define _PET_BUILTIN_ACTION_H
+#ifndef _AVATAR_BUILTIN_ACTION_H
+#define _AVATAR_BUILTIN_ACTION_H
 
 #include <opencog/util/numeric.h>
 
 #include <opencog/comboreduct/combo/builtin_action.h>
 
-#include "pet_operator.h"
+#include "avatar_operator.h"
 
 namespace opencog { namespace combo {
 
 namespace id {
 
-enum pet_builtin_action_enum {
+enum avatar_builtin_action_enum {
 
     //Note that all following comments are based on experimentation
     //with the MV-Proxy. It does not necessarily apply for another proxy
@@ -330,36 +330,36 @@ enum pet_builtin_action_enum {
     // destroy a block at given position, used in unity minecraft-like world only.
     destroy_block_at,
 
-    pet_builtin_action_count //to give the number of actions
+    avatar_builtin_action_count //to give the number of actions
 };
 
 } // ~namespace id
 
-typedef id::pet_builtin_action_enum pet_builtin_action_enum;
+typedef id::avatar_builtin_action_enum avatar_builtin_action_enum;
 
 /*********************************************************************
  *         Arrays containing action name type and properties         *
  *                 to be edited by the developer                     *
  *********************************************************************/
 
-namespace pet_builtin_action_properties {
+namespace avatar_builtin_action_properties {
 
 //struct for description of name and type
-typedef pet_operator<pet_builtin_action_enum, id::pet_builtin_action_count>::basic_description action_basic_description;
+typedef avatar_operator<avatar_builtin_action_enum, id::avatar_builtin_action_count>::basic_description action_basic_description;
 
 //struct for decription of action properties
 struct action_property_description {
-    pet_builtin_action_enum action;
+    avatar_builtin_action_enum action;
     bool compound; //compound is not in the set of required action but is needed for PetBrain, loosing saying that the action requires possibly several cycles to be completed
     bool idempotent;
     bool reversible;
     bool always_succeeds; //true iff the action_result is always action_succeed
-    pet_builtin_action_enum reversal;
+    avatar_builtin_action_enum reversal;
 };
 
 //struct for description of action argument
 struct action_argument_property_description {
-    pet_builtin_action_enum action;
+    avatar_builtin_action_enum action;
     unsigned char argument_index;
     bool additive;
     bool zero_neutral;
@@ -369,8 +369,8 @@ struct action_argument_property_description {
 };
 
 struct action_precedence {
-    pet_builtin_action_enum action1;
-    pet_builtin_action_enum action2;
+    avatar_builtin_action_enum action1;
+    avatar_builtin_action_enum action2;
 };
 
 static const action_basic_description abd[] = {
@@ -471,92 +471,92 @@ static const action_basic_description abd[] = {
 // and only after the oac receive the last step execution status, the action will be considered done
 static const action_property_description apd[] = {
     // builtin action     compound  idempotent reversible  always_succeed  reversal
-    { id::goto_obj,       true,     false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::gonear_obj,     true,     false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::gobehind_obj,   true,     false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::go_behind,      true,     false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::follow,         true,     false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::step_towards,   false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::step_backward,  false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::step_forward,   false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::random_step,    false,    false,     false,      false,          (pet_builtin_action_enum)0 },
+    { id::goto_obj,       true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::gonear_obj,     true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::gobehind_obj,   true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::go_behind,      true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::follow,         true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::step_towards,   false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::step_backward,  false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::step_forward,   false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::random_step,    false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::rotate_left,    false,    false,     true,       true,           id::rotate_right },
     { id::rotate_right,   false,    false,     true,       true,           id::rotate_left },
-    { id::heel,           true,     false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::jump_up,        false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::jump_towards,   false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::jump_forward,   false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::turn_to_face,   false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::grab,           false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::nudge_to,       true,     false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::drop,           false,    true,      false,      true,           (pet_builtin_action_enum)0 },
-    { id::sniff,          false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::sniff_at,       false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::sniff_pet_part, false,    false,     false,      false,          (pet_builtin_action_enum)0 },
+    { id::heel,           true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::jump_up,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::jump_towards,   false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::jump_forward,   false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::turn_to_face,   false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::grab,           false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::nudge_to,       true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::drop,           false,    true,      false,      true,           (avatar_builtin_action_enum)0 },
+    { id::sniff,          false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::sniff_at,       false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::sniff_avatar_part, false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::sniff_avatar_part,
-      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::eat,            false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::drink,          false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::chew,           false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::beg,            false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::hide_face,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::eat,            false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::drink,          false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::chew,           false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::beg,            false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::hide_face,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::look_up_turn_head,
-      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::sit,            false,    true,      false,      true,           (pet_builtin_action_enum)0 },
-    { id::stretch,        false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::run_in_circle,  false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::scratch_self,   false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::sit,            false,    true,      false,      true,           (avatar_builtin_action_enum)0 },
+    { id::stretch,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::run_in_circle,  false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::scratch_self,   false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::scratch_ground_back_legs,
-      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::scratch_other,  false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::lie_down,       false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::trick_for_food, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::pee,            false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::poo,            false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::speak,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::bark,           false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::bark_at,        false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::lick,           false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::lick_at,        false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::belch,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::move_head,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::growl,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::growl_at,       false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::whine,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::whine_at,       false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::fearful_posture, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::clean,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::tap_dance,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::bare_teeth,     false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::bare_teeth_at,  false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::play_dead,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::vomit,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::lean_rock_dance, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::anticipate_play, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::back_flip,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::move_left_ear,  false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::move_right_ear, false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::widen_eyes,     false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::shake_head,     false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::sleep,          false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::dream,          false,    false,     false,  /*n/a*/false,       (pet_builtin_action_enum)0 },
-    { id::wag,            false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::tail_flex,      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::bite,           false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::scratch_other,  false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::lie_down,       false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::trick_for_food, false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::pee,            false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::poo,            false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::speak,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::bark,           false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::bark_at,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::lick,           false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::lick_at,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::belch,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::move_head,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::growl,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::growl_at,       false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::whine,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::whine_at,       false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::fearful_posture, false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::clean,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::tap_dance,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::bare_teeth,     false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::bare_teeth_at,  false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::play_dead,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::vomit,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::lean_rock_dance, false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::anticipate_play, false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::back_flip,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::move_left_ear,  false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::move_right_ear, false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::widen_eyes,     false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::shake_head,     false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::sleep,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::dream,          false,    false,     false,  /*n/a*/false,       (avatar_builtin_action_enum)0 },
+    { id::wag,            false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::tail_flex,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::bite,           false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
 
-    { id::pet,            true,     false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::kick,           false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::kick_left,      false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::kick_right,     false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::group_command,  false,    false,     false,      false,          (pet_builtin_action_enum)0 },
+    { id::pet,            true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::kick,           false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::kick_left,      false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::kick_right,     false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::group_command,  false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::receive_latest_group_commands,
-      false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::look_at,        false,    false,     false,      true,           (pet_builtin_action_enum)0 },
-    { id::say,            false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::look_at,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
+    { id::say,            false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
 
-    { id::build_block_at, false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::build_block,    false,    false,     false,      false,          (pet_builtin_action_enum)0 },
-    { id::destroy_block_at, false,    false,     false,      false,          (pet_builtin_action_enum)0 },
+    { id::build_block_at, false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::build_block,    false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::destroy_block_at, false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
 };
 
 
@@ -629,9 +629,9 @@ static const action_precedence must_precede[] = {
     { id::grab, id::drop  }
 };
 
-}//~namespace pet_builtin_action_properties
+}//~namespace avatar_builtin_action_properties
 
-class pet_builtin_action : public builtin_action_base, public pet_operator<pet_builtin_action_enum, id::pet_builtin_action_count>
+class avatar_builtin_action : public builtin_action_base, public avatar_operator<avatar_builtin_action_enum, id::avatar_builtin_action_count>
 {
 
 private:
@@ -639,7 +639,7 @@ private:
     //standard properties
     bool _reversible;
     bool _always_succeeds;
-    const pet_builtin_action* _reversal;
+    const avatar_builtin_action* _reversal;
     bool _idempotent;
     std::vector<bool> _arg_additive;
     bool _exists_additive_argument;
@@ -656,17 +656,17 @@ private:
     //private methods
 
     //ctor
-    pet_builtin_action();
+    avatar_builtin_action();
 
     const basic_description* get_basic_description_array() const;
     unsigned int get_basic_description_array_count() const;
 
-    static const pet_builtin_action* init_actions();
+    static const avatar_builtin_action* init_actions();
     //set an action with all its name, type and properties
     //action_array is used to refer to other actions
     //as _reversal needs for instance
-    void set_action(pet_builtin_action_enum,
-                    pet_builtin_action* action_array);
+    void set_action(avatar_builtin_action_enum,
+                    avatar_builtin_action* action_array);
 
 public:
     //return a pointer of the static builtin_action corresponding
@@ -675,8 +675,8 @@ public:
     static builtin_action get_instance(const std::string& name);
 
     //return a pointer of the static builtin_action corresponding
-    //to a given pet_builtin_action_enum
-    static builtin_action get_instance(pet_builtin_action_enum);
+    //to a given avatar_builtin_action_enum
+    static builtin_action get_instance(avatar_builtin_action_enum);
 
     //basic access methods
     const std::string& get_name() const;

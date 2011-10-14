@@ -28,7 +28,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Learning/behavior/CompositeBehaviorDescription.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #include <opencog/util/RandGen.h>
 

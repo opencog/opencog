@@ -28,7 +28,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #include <opencog/atomspace/Node.h>
 
@@ -115,7 +115,7 @@ throw (ComboException, AssertionException, std::bad_exception)
         OC_ASSERT(++sib_it(from) == to); // there is only one compound action
         pre_it it = from;
         builtin_action ba = get_builtin_action(*it);
-        pet_builtin_action_enum bae = get_enum(ba);
+        avatar_builtin_action_enum bae = get_enum(ba);
         switch (bae) {
         case id::goto_obj: {
             logger().debug("PAIWorldWrapper - Handling goto_obj. # of parameters = %d",
@@ -955,7 +955,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     unsigned int current_time = pai.getLatestSimWorldTimestamp();
     AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
-    static const std::map<pet_builtin_action_enum, ActionType> actions2types =
+    static const std::map<avatar_builtin_action_enum, ActionType> actions2types =
         { {id::bark, ActionType::BARK()},
           {id::bare_teeth_at, ActionType::BARE_TEETH()},
           {id::bark_at, ActionType::BARK()},
@@ -1002,7 +1002,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
     OC_ASSERT(WorldWrapperUtil::is_builtin_atomic_action(*from));
     builtin_action ba = get_builtin_action(*from);
-    pet_builtin_action_enum bae = get_enum(ba);
+    avatar_builtin_action_enum bae = get_enum(ba);
 
     stringstream ss;
     ss << *from;
@@ -1299,7 +1299,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         combo::vertex v = *from.last_child();
         OC_ASSERT(is_action_symbol(v),
                          "It is assumed v is an action_symbol");
-        combo::pet_action_symbol_enum ase = get_enum(get_action_symbol(v));
+        combo::avatar_action_symbol_enum ase = get_enum(get_action_symbol(v));
         string part;
         // From Pet Action spec: RIGHT_FOOT = 0, LEFT_FOOT = 1, BUTT = 2, RIGHT_HAND = 2, LEFT_HAND = 3, CROTCH = 4
         switch (ase) {
@@ -1337,7 +1337,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         combo::vertex v = *from.last_child();
         OC_ASSERT(is_action_symbol(v),
                          "It is assumed v is an action_symbol");
-        pet_action_symbol_enum ase = get_enum(get_action_symbol(v));
+        avatar_action_symbol_enum ase = get_enum(get_action_symbol(v));
         string part;
         switch (ase) {
         case id::NOSE:
@@ -1361,7 +1361,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         combo::vertex v = *from.begin();
         OC_ASSERT(is_action_symbol(v),
                          "It is assumed v is an action_symbol");
-        combo::pet_action_symbol_enum ase = get_enum(get_action_symbol(v));
+        combo::avatar_action_symbol_enum ase = get_enum(get_action_symbol(v));
         switch (ase) {
         case id::NOSE:
             action = ActionType::SCRATCH_SELF_NOSE();

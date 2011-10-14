@@ -22,7 +22,7 @@
  */
 
 #include "ComboSelectProcedureRepository.h"
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #include <stdio.h>
 #include <opencog/comboreduct/combo/procedure_call.h>
@@ -142,11 +142,11 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
             return 0;
         }
 
-        combo::procedure_call pc1 = load_procedure_call < pet_builtin_action, pet_perception,
-                                    pet_action_symbol, pet_indefinite_object > (in, false);
+        combo::procedure_call pc1 = load_procedure_call < avatar_builtin_action, avatar_perception,
+                                    avatar_action_symbol, avatar_indefinite_object > (in, false);
 
-        combo::procedure_call pc2 = load_procedure_call < pet_builtin_action, pet_perception,
-                                    pet_action_symbol, pet_indefinite_object > (in, false);
+        combo::procedure_call pc2 = load_procedure_call < avatar_builtin_action, avatar_perception,
+                                    avatar_action_symbol, avatar_indefinite_object > (in, false);
 
 //        if (!in.good()){
 //            break;

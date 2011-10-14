@@ -7,5 +7,5 @@ TARGET_LINK_LIBRARIES(PetaverseMOSES
     util
     comboreduct
     FitnessEstimator
-    PetComboVocabulary
+    AvatarComboVocabulary
 )

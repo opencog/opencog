@@ -26,8 +26,8 @@
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/embodiment/PetComboVocabulary/pet_builtin_action.h>
-#include <opencog/embodiment/PetComboVocabulary/pet_perception.h>
+#include <opencog/embodiment/AvatarComboVocabulary/avatar_builtin_action.h>
+#include <opencog/embodiment/AvatarComboVocabulary/avatar_perception.h>
 
 namespace ImaginaryLife
 {

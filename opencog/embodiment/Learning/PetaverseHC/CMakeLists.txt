@@ -9,5 +9,5 @@ TARGET_LINK_LIBRARIES(PetaverseHC
     comboreduct
     util
     FitnessEstimator
-    PetComboVocabulary
+    AvatarComboVocabulary
 )

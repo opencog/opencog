@@ -32,7 +32,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
 using namespace PetCombo;

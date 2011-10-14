@@ -24,7 +24,7 @@
 
 #include "NoSpaceLifeWorldWrapper.h"
 #include "WorldWrapperUtil.h"
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #define LOOK_IN_THE_PAST true
 

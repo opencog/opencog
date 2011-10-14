@@ -161,7 +161,7 @@ vertex WorldWrapperUtilMock::evalIndefiniteObject(combo::indefinite_object io,
     return evalIndefiniteObject(get_enum(io), vw, vu);
 }
 
-vertex WorldWrapperUtilMock::evalIndefiniteObject(combo::pet_indefinite_object_enum ioe,
+vertex WorldWrapperUtilMock::evalIndefiniteObject(combo::avatar_indefinite_object_enum ioe,
         VirtualWorldData::VirtualWorldState & vw,
         combo::variable_unifier& vu)
 {
@@ -292,7 +292,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
     //combo_tree tmp(it);
 
     perception p = get_perception(*it);
-    pet_perception_enum pe = get_enum(p);
+    avatar_perception_enum pe = get_enum(p);
     switch (pe) {
     case id::exists_edible:
         return combo::bool_to_vertex((evalIndefiniteObject(id::random_edible, vw) !=

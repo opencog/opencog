@@ -29,7 +29,7 @@
 
 #include <opencog/embodiment/Learning/NoSpaceLife/NoSpaceLife.h>
 #include <opencog/embodiment/Learning/behavior/BehaviorDescriptionMatcher.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 using namespace ImaginaryLife;
 using namespace behavior;

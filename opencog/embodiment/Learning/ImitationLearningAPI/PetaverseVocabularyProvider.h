@@ -35,7 +35,7 @@
 #define _PETAVERSE_VOCABULARY_PROVIDER_BASE_H
 
 #include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 class PetaverseVocabularyProviderBase
 {

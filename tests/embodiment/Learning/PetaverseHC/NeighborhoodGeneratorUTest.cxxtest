@@ -23,7 +23,7 @@
 
 
 #include <opencog/learning/hillclimbing/NeighborhoodGenerator.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/Learning/RewritingRules/hillclimbing_action_reduction.h>
 #include <opencog/embodiment/Learning/RewritingRules/hillclimbing_full_reduction.h>
 #include <iostream>
@@ -41,7 +41,7 @@ class NeighborhoodGeneratorUTest : public CxxTest::TestSuite
 
 public:
 
-    void test_percomputeCompositePerceptions() {
+    void test_precomputeCompositePerceptions() {
         //generate the compositePerceptions set
         std::set<vertex> operators;
         combo_tree_ns_set conditions;

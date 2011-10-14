@@ -9,7 +9,7 @@ ADD_LIBRARY (LearningServerMessages
 
 TARGET_LINK_LIBRARIES (LearningServerMessages
     MessagingSystem
-    PetComboVocabulary
+    AvatarComboVocabulary
     comboreduct
     util
     xml

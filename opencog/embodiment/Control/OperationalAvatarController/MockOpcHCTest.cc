@@ -25,7 +25,7 @@
 #include "MockOpcHCTest.h"
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include "HCTestAgent.h"
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 //#define LEARNING_SCHEMA "fnorb"
 #define TRICK_NAME "fnorb"

@@ -27,7 +27,7 @@
 #include "ComboInterpreterUTest.h"
 #include <opencog/util/mt19937ar.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <fstream>
 #include <iostream>

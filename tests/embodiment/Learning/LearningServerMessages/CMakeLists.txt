@@ -20,7 +20,7 @@ TARGET_LINK_LIBRARIES(RewardMessageUTest
     MessagingSystem
     LearningServerMessages
     SpaceMap
-    PetComboVocabulary
+    AvatarComboVocabulary
 )
 
 IF(WIN32)
@@ -32,7 +32,7 @@ TARGET_LINK_LIBRARIES(SchemaMessageUTest
     MessagingSystem
     LearningServerMessages
     SpaceMap
-    PetComboVocabulary
+    AvatarComboVocabulary
     #util
     #comboreduct
 )

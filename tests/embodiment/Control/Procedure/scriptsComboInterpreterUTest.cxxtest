@@ -25,7 +25,7 @@
 #include <opencog/embodiment/Control/Procedure/RunningProcedureId.h>
 #include "ComboInterpreterUTest.h"
 #include <opencog/util/mt19937ar.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
 #include <fstream>

@@ -29,7 +29,7 @@
 #include <opencog/comboreduct/combo/variable_unifier.h>
 
 #include <opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorldState.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 namespace opencog { namespace world {
 
@@ -43,34 +43,34 @@ class WorldWrapperUtilMock
 public:
 
     // pet perception maps, iterator and pair
-    typedef std::map < combo::pet_perception_enum,  float (VirtualWorldData::VirtualAgent::*)() const >
+    typedef std::map < combo::avatar_perception_enum,  float (VirtualWorldData::VirtualAgent::*)() const >
     PetPerception;
-    typedef std::map < combo::pet_perception_enum,  float (VirtualWorldData::VirtualAgent::*)() const >::const_iterator
+    typedef std::map < combo::avatar_perception_enum,  float (VirtualWorldData::VirtualAgent::*)() const >::const_iterator
     PetPerceptionIt;
-    typedef std::pair < combo::pet_perception_enum, float (VirtualWorldData::VirtualAgent::*)() const >
+    typedef std::pair < combo::avatar_perception_enum, float (VirtualWorldData::VirtualAgent::*)() const >
     PetPerceptionPair;
 
     // pet perception maps, iterator and pair
-    typedef std::map < combo::pet_perception_enum,  bool (VirtualWorldData::VirtualAgent::*)() const >
+    typedef std::map < combo::avatar_perception_enum,  bool (VirtualWorldData::VirtualAgent::*)() const >
     BoolPetPerception;
-    typedef std::map < combo::pet_perception_enum,  bool (VirtualWorldData::VirtualAgent::*)() const >::const_iterator
+    typedef std::map < combo::avatar_perception_enum,  bool (VirtualWorldData::VirtualAgent::*)() const >::const_iterator
     BoolPetPerceptionIt;
-    typedef std::pair < combo::pet_perception_enum, bool (VirtualWorldData::VirtualAgent::*)() const >
+    typedef std::pair < combo::avatar_perception_enum, bool (VirtualWorldData::VirtualAgent::*)() const >
     BoolPetPerceptionPair;
 
 
     // entity perception map, iterator and pair
-    typedef std::map < combo::pet_perception_enum,  bool (VirtualWorldData::VirtualEntity::*)() const >
+    typedef std::map < combo::avatar_perception_enum,  bool (VirtualWorldData::VirtualEntity::*)() const >
     EntityPerception;
-    typedef std::map < combo::pet_perception_enum,  bool (VirtualWorldData::VirtualEntity::*)() const >::const_iterator
+    typedef std::map < combo::avatar_perception_enum,  bool (VirtualWorldData::VirtualEntity::*)() const >::const_iterator
     EntityPerceptionIt;
-    typedef std::pair < combo::pet_perception_enum, bool (VirtualWorldData::VirtualEntity::*)() const >
+    typedef std::pair < combo::avatar_perception_enum, bool (VirtualWorldData::VirtualEntity::*)() const >
     EntityPerceptionPair;
 
     // entity perception map, iterator and pair
-    typedef std::map < combo::pet_perception_enum,  bool (VirtualWorldData::VirtualWorldState::*)(const std::string&, const std::string&) const > WorldPerception;
-    typedef std::map < combo::pet_perception_enum,  bool (VirtualWorldData::VirtualWorldState::*)(const std::string&, const std::string&) const >::const_iterator WorldPerceptionIt;
-    typedef std::pair < combo::pet_perception_enum, bool (VirtualWorldData::VirtualWorldState::*)(const std::string&, const std::string&) const > WorldPerceptionPair;
+    typedef std::map < combo::avatar_perception_enum,  bool (VirtualWorldData::VirtualWorldState::*)(const std::string&, const std::string&) const > WorldPerception;
+    typedef std::map < combo::avatar_perception_enum,  bool (VirtualWorldData::VirtualWorldState::*)(const std::string&, const std::string&) const >::const_iterator WorldPerceptionIt;
+    typedef std::pair < combo::avatar_perception_enum, bool (VirtualWorldData::VirtualWorldState::*)(const std::string&, const std::string&) const > WorldPerceptionPair;
 
     /**
      * evalIndefiniteObject
@@ -92,7 +92,7 @@ public:
      *
      * @param vu      variable_unifier object used to resolve wild_card symbol _*_
      */
-    static combo::vertex evalIndefiniteObject(combo::pet_indefinite_object_enum ioe,
+    static combo::vertex evalIndefiniteObject(combo::avatar_indefinite_object_enum ioe,
             VirtualWorldData::VirtualWorldState & vw,
             combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 

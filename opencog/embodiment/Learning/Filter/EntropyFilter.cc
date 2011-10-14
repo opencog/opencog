@@ -32,7 +32,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 
@@ -78,7 +78,7 @@ EntropyFilter::EntropyFilter(const std::string& self_id,
         _idos(idos), _dos(dos), _ms(ms), _atas(atas),
         _input_arg_types(input_arg_types),
         _total_time(0),
-        _indefToDef(id::pet_indefinite_object_count, ""),
+        _indefToDef(id::avatar_indefinite_object_count, ""),
         _rng(rng)
 {
 
@@ -215,7 +215,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                 //evaluate perception operand if indefinite object
                 if (is_indefinite_object(*opra)) {
                     indefinite_object io = get_indefinite_object(*opra);
-                    pet_indefinite_object_enum ioe = get_enum(io);
+                    avatar_indefinite_object_enum ioe = get_enum(io);
                     //check if the indefinite object is in _indefToDef cache
                     if (_indefToDef[(unsigned int)ioe] == "") {
                         *opra =

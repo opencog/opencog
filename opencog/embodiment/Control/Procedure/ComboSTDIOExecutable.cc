@@ -25,7 +25,7 @@
 #include "ComboProcedureRepository.h"
 
 #include <opencog/embodiment/WorldWrapper/ShellWorldWrapper.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/util/mt19937ar.h>
 #include <fstream>

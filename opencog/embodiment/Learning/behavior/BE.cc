@@ -42,7 +42,7 @@ typedef unsigned long ulong;
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #define WALK_PERCEPT_NAME "walk"
 #define MIN_ACTION_DURATION 2

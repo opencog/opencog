@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetComboVocabulary/pet_perception.cc
+ * opencog/embodiment/AvatarComboVocabulary/avatar_perception.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,13 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "pet_perception.h"
+#include "avatar_perception.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
 using namespace opencog::combo;
-using namespace pet_perception_properties;
+using namespace avatar_perception_properties;
 
-pet_perception::pet_perception()
+avatar_perception::avatar_perception()
 {
     _ultrametric = false;
     _transitive = false;
@@ -37,35 +37,35 @@ pet_perception::pet_perception()
     _identity_of_indiscernibles = false;
 }
 
-const perception_basic_description* pet_perception::get_basic_description_array() const
+const perception_basic_description* avatar_perception::get_basic_description_array() const
 {
-    return pet_perception_properties::pbd;
+    return avatar_perception_properties::pbd;
 }
 
-unsigned int pet_perception::get_basic_description_array_count() const
+unsigned int avatar_perception::get_basic_description_array_count() const
 {
-    return sizeof(pet_perception_properties::pbd) / sizeof(basic_description);
+    return sizeof(avatar_perception_properties::pbd) / sizeof(basic_description);
 }
 
-const pet_perception* pet_perception::init_perceptions()
+const avatar_perception* avatar_perception::init_perceptions()
 {
-    static pet_perception* perceptions =
-        new pet_perception[id::pet_perception_count];
-    for (unsigned int i = 0; i < id::pet_perception_count; i++)
-        perceptions[i].set_perception((pet_perception_enum)i);
+    static avatar_perception* perceptions =
+        new avatar_perception[id::avatar_perception_count];
+    for (unsigned int i = 0; i < id::avatar_perception_count; i++)
+        perceptions[i].set_perception((avatar_perception_enum)i);
     return perceptions;
 }
 
-void pet_perception::set_perception(pet_perception_enum ppe)
+void avatar_perception::set_perception(avatar_perception_enum ppe)
 {
-    OC_ASSERT(ppe < id::pet_perception_count);
+    OC_ASSERT(ppe < id::avatar_perception_count);
     _enum = ppe;
     //fill the various properties using the arrays edited by the developer
     set_basic_description(ppe);
     //standard properties specific to action
     unsigned int ppd_count = sizeof(ppd) / sizeof(perception_property_description);
     OC_ASSERT(
-                     ppd_count == (unsigned int)id::pet_perception_count,
+                     ppd_count == (unsigned int)id::avatar_perception_count,
                      "there must be entries for all perceptions.");
     bool found = false;
     for (unsigned int i = 0; i < ppd_count && !found; ++i) {
@@ -80,74 +80,74 @@ void pet_perception::set_perception(pet_perception_enum ppe)
         }
     }
     OC_ASSERT(found,
-                     "pet_perception with enum %d has not been found in ppd", ppe);
+                     "avatar_perception with enum %d has not been found in ppd", ppe);
 }
 
-perception pet_perception::get_instance(const std::string& name)
+perception avatar_perception::get_instance(const std::string& name)
 {
-    //look up for pet_builtin_action_enum corresponding to that name
+    //look up for avatar_builtin_action_enum corresponding to that name
     bool found = false;
     perception p = NULL;
-    for (unsigned int i = 0; i < id::pet_perception_count && !found; i++) {
-        p = pet_perception::get_instance((pet_perception_enum)i);
+    for (unsigned int i = 0; i < id::avatar_perception_count && !found; i++) {
+        p = avatar_perception::get_instance((avatar_perception_enum)i);
         found = p->get_name() == name;
     }
     return (found ? p : NULL);
 }
 
-perception pet_perception::get_instance(pet_perception_enum ppe)
+perception avatar_perception::get_instance(avatar_perception_enum ppe)
 {
-    static const pet_perception* perceptions = init_perceptions();
-    OC_ASSERT(ppe < id::pet_perception_count);
+    static const avatar_perception* perceptions = init_perceptions();
+    OC_ASSERT(ppe < id::avatar_perception_count);
     return static_cast<perception>(&perceptions[ppe]);
 }
 
-const std::string& pet_perception::get_name() const
+const std::string& avatar_perception::get_name() const
 {
     return _name;
 }
 
-const type_tree& pet_perception::get_type_tree() const
+const type_tree& avatar_perception::get_type_tree() const
 {
     return _type_tree;
 }
 
-arity_t pet_perception::arity() const
+arity_t avatar_perception::arity() const
 {
     return _arity;
 }
 
-type_tree pet_perception::get_output_type_tree() const
+type_tree avatar_perception::get_output_type_tree() const
 {
     return _output_type;
 }
 
-const type_tree& pet_perception::get_input_type_tree(arity_t i) const
+const type_tree& avatar_perception::get_input_type_tree(arity_t i) const
 {
     return argument_type_list_input_type(_arg_type_tree, _arity, i);
 }
 
-bool pet_perception::is_ultrametric() const
+bool avatar_perception::is_ultrametric() const
 {
     return _ultrametric;
 }
-bool pet_perception::is_transitive() const
+bool avatar_perception::is_transitive() const
 {
     return _transitive;
 }
-bool pet_perception::is_irreflexive() const
+bool avatar_perception::is_irreflexive() const
 {
     return _irreflexive;
 }
-bool pet_perception::is_reflexive() const
+bool avatar_perception::is_reflexive() const
 {
     return _reflexive;
 }
-bool pet_perception::is_symmetric() const
+bool avatar_perception::is_symmetric() const
 {
     return _symmetric;
 }
-bool pet_perception::is_identity_of_indiscernibles() const
+bool avatar_perception::is_identity_of_indiscernibles() const
 {
     return _identity_of_indiscernibles;
 }

@@ -27,7 +27,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 //true if the timing is taken into account in the similarity measure
 #define TIMING_PERTINANCE true

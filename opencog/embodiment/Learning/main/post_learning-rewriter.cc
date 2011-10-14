@@ -25,7 +25,7 @@
 #include <opencog/comboreduct/combo/type_tree.h>
 
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #include <iostream>
 

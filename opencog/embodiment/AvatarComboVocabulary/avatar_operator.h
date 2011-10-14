@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetComboVocabulary/pet_operator.h
+ * opencog/embodiment/AvatarComboVocabulary/avatar_operator.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PET_OPERATOR_H
-#define _PET_OPERATOR_H
+#ifndef _AVATAR_OPERATOR_H
+#define _AVATAR_OPERATOR_H
 
 #include <opencog/comboreduct/combo/operator_base.h>
 #include <opencog/comboreduct/combo/type_tree.h>
@@ -36,7 +36,7 @@ using namespace std;
 //enum_count corresponds to the last enum element of OPERATOR_ENUM
 //supposely denoting the number of elements
 template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
-class pet_operator : public operator_base
+class avatar_operator : public operator_base
 {
 
 public:
@@ -61,7 +61,7 @@ protected:
     argument_type_list _arg_type_tree;
 
     //ctor
-    pet_operator();
+    avatar_operator();
 
     //these 2 methods must be implemented to simply contain the address of
     //the start of an array containing all basic descriptions
@@ -79,7 +79,7 @@ public:
 };
 
 template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
-pet_operator<OPERATOR_ENUM, enum_count>::pet_operator()
+avatar_operator<OPERATOR_ENUM, enum_count>::avatar_operator()
 {
     _enum = enum_count;
     _name = "UNDEFINED_OPERATOR";
@@ -88,7 +88,7 @@ pet_operator<OPERATOR_ENUM, enum_count>::pet_operator()
 }
 
 template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
-void pet_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_ENUM oe)
+void avatar_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_ENUM oe)
 {
     const basic_description* bd = get_basic_description_array();
     unsigned int bd_count = get_basic_description_array_count();
@@ -116,12 +116,12 @@ void pet_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_ENU
         }
     }
     OC_ASSERT(found,
-                     "pet_perception with enum %d has not been found in pbd",
+                     "avatar_perception with enum %d has not been found in pbd",
                      oe);
 }
 
 template<typename OPERATOR_ENUM, OPERATOR_ENUM enum_count>
-OPERATOR_ENUM pet_operator<OPERATOR_ENUM, enum_count>::get_enum() const
+OPERATOR_ENUM avatar_operator<OPERATOR_ENUM, enum_count>::get_enum() const
 {
     return _enum;
 }

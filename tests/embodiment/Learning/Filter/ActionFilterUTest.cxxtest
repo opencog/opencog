@@ -31,7 +31,7 @@
 #include <opencog/embodiment/Learning/Filter/ActionFilter.h>
 #include <opencog/embodiment/Learning/behavior/BDRetriever.h>
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 using namespace PetCombo;
 using namespace std;

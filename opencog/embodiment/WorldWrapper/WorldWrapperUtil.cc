@@ -296,7 +296,7 @@ vertex WorldWrapperUtil::evalIndefiniteObject(opencog::RandGen& rng,
         AtomSpace& atomSpace,
         const string& self_id,
         const string& owner_id,
-        combo::pet_indefinite_object_enum ioe,
+        combo::avatar_indefinite_object_enum ioe,
         bool isInThePast,
         combo::variable_unifier& vu)
 throw (opencog::ComboException,
@@ -847,7 +847,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     // not modify it
     combo_tree tmp(it);
 
-    pet_perception_enum pe = get_enum(p);
+    avatar_perception_enum pe = get_enum(p);
     switch (pe) { //could be made more efficient if needed
 
     case id::exists_edible:
@@ -2958,7 +2958,7 @@ perception WorldWrapperUtil::nearest_random_X_to_is_X(indefinite_object io)
     return nearest_random_X_to_is_X(get_enum(io));
 }
 
-perception WorldWrapperUtil::nearest_random_X_to_is_X(pet_indefinite_object_enum ioe)
+perception WorldWrapperUtil::nearest_random_X_to_is_X(avatar_indefinite_object_enum ioe)
 {
 
     // print debug
@@ -3019,8 +3019,8 @@ perception WorldWrapperUtil::nearest_random_X_to_is_X(pet_indefinite_object_enum
 bool WorldWrapperUtil::is_builtin_compound_action(const vertex& v)
 {
     if (const builtin_action* ba = boost::get<builtin_action>(&v)) {
-        const pet_builtin_action* pba =
-            dynamic_cast<const pet_builtin_action*>(*ba);
+        const avatar_builtin_action* pba =
+            dynamic_cast<const avatar_builtin_action*>(*ba);
         return pba->is_compound();
     }
     return false;
@@ -3028,8 +3028,8 @@ bool WorldWrapperUtil::is_builtin_compound_action(const vertex& v)
 bool WorldWrapperUtil::is_builtin_atomic_action(const vertex& v)
 {
     if (const builtin_action* ba = boost::get<builtin_action>(&v)) {
-        const pet_builtin_action* pba =
-            dynamic_cast<const pet_builtin_action*>(*ba);
+        const avatar_builtin_action* pba =
+            dynamic_cast<const avatar_builtin_action*>(*ba);
         return !pba->is_compound();
     }
     return false;

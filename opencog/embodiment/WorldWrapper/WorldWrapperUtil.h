@@ -33,7 +33,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 #include "WorldWrapperUtilCache.h"
@@ -322,14 +322,14 @@ public:
             combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
     throw (opencog::ComboException, opencog::AssertionException, std::bad_exception);
 
-    //like above but uses directly pet_indefinite_object_enum
+    //like above but uses directly avatar_indefinite_object_enum
     static combo::vertex evalIndefiniteObject(opencog::RandGen& rng,
             Handle smh,
             unsigned long time,
             AtomSpace& atomSpace,
             const std::string& self_id,
             const std::string& owner_id,
-            combo::pet_indefinite_object_enum ioe,
+            combo::avatar_indefinite_object_enum ioe,
             bool isInThePast = false,
             combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
     throw (opencog::ComboException, opencog::AssertionException, std::bad_exception);
@@ -390,7 +390,7 @@ public:
     //get a indefinite object of type nearest_X or random_X and return
     //the associated perception is_X
     //for instance nearest_moving returns is_moving
-    static combo::perception nearest_random_X_to_is_X(combo::pet_indefinite_object_enum ioe);
+    static combo::perception nearest_random_X_to_is_X(combo::avatar_indefinite_object_enum ioe);
 
     //like above but uses indefinite_object instead
     static combo::perception nearest_random_X_to_is_X(combo::indefinite_object io);

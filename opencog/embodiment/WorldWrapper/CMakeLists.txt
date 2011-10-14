@@ -26,7 +26,7 @@ TARGET_LINK_LIBRARIES(WorldWrapper
     HPASearch
     MessagingSystem
 #    ImaginaryLife
-    PetComboVocabulary
+    AvatarComboVocabulary
     VirtualWorldData
     ${XERCESC_LIBRARIES}
 )

@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetComboVocabulary/pet_builtin_action.cc
+ * opencog/embodiment/AvatarComboVocabulary/avatar_builtin_action.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,13 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "pet_builtin_action.h"
+#include "avatar_builtin_action.h"
 #include <opencog/comboreduct/combo/type_tree.h>
 
 using namespace opencog::combo;
-using namespace pet_builtin_action_properties;
+using namespace avatar_builtin_action_properties;
 
-pet_builtin_action::pet_builtin_action()
+avatar_builtin_action::avatar_builtin_action()
 {
     _reversible = false;
     _always_succeeds = false;
@@ -37,29 +37,29 @@ pet_builtin_action::pet_builtin_action()
     _compound = false;
 }
 
-const action_basic_description* pet_builtin_action::get_basic_description_array() const
+const action_basic_description* avatar_builtin_action::get_basic_description_array() const
 {
-    return pet_builtin_action_properties::abd;
+    return avatar_builtin_action_properties::abd;
 }
 
-unsigned int pet_builtin_action::get_basic_description_array_count() const
+unsigned int avatar_builtin_action::get_basic_description_array_count() const
 {
-    return sizeof(pet_builtin_action_properties::abd) / sizeof(basic_description);
+    return sizeof(avatar_builtin_action_properties::abd) / sizeof(basic_description);
 }
 
-const pet_builtin_action* pet_builtin_action::init_actions()
+const avatar_builtin_action* avatar_builtin_action::init_actions()
 {
-    pet_builtin_action* action_array =
-        new pet_builtin_action[id::pet_builtin_action_count];
-    for (unsigned int i = 0; i < id::pet_builtin_action_count; i++)
-        action_array[i].set_action((pet_builtin_action_enum)i, action_array);
+    avatar_builtin_action* action_array =
+        new avatar_builtin_action[id::avatar_builtin_action_count];
+    for (unsigned int i = 0; i < id::avatar_builtin_action_count; i++)
+        action_array[i].set_action((avatar_builtin_action_enum)i, action_array);
     return action_array;
 }
 
-void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
-                                    pet_builtin_action* action_array)
+void avatar_builtin_action::set_action(avatar_builtin_action_enum pbae,
+                                       avatar_builtin_action* action_array)
 {
-    OC_ASSERT(pbae < id::pet_builtin_action_count);
+    OC_ASSERT(pbae < id::avatar_builtin_action_count);
     _enum = pbae;
     //printf("_enum = %d\n", _enum);
     //fill the various properties using the arrays edited by the developer
@@ -68,9 +68,8 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
     set_basic_description(pbae);
     //standard and PetBrain properties specific to action
     unsigned int apd_count = sizeof(apd) / sizeof(action_property_description);
-    OC_ASSERT(
-                     apd_count == (unsigned int)id::pet_builtin_action_count,
-                     "there must be entries for all actions.");
+    OC_ASSERT(apd_count == (unsigned int)id::avatar_builtin_action_count,
+              "there must be entries for all actions.");
     bool found = false;
     for (unsigned int i = 0; i < apd_count && !found; ++i) {
         if (apd[i].action == pbae) {
@@ -85,7 +84,7 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
         }
     }
     OC_ASSERT(found,
-                     "pet_builtin_action with enum %d has not been found in apd", pbae);
+                     "avatar_builtin_action with enum %d has not been found in apd", pbae);
     //standard properties specific to action argument
     unsigned int aapd_count =
         sizeof(aapd) / sizeof(action_argument_property_description);
@@ -139,111 +138,111 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
     }
 }
 
-builtin_action pet_builtin_action::get_instance(const std::string& name)
+builtin_action avatar_builtin_action::get_instance(const std::string& name)
 {
-    //look up for pet_builtin_action_enum corresponding to that name
+    //look up for avatar_builtin_action_enum corresponding to that name
     bool found = false;
     builtin_action a = NULL;
-    for (unsigned int i = 0; i < id::pet_builtin_action_count && !found; i++) {
-        a = pet_builtin_action::get_instance((pet_builtin_action_enum)i);
+    for (unsigned int i = 0; i < id::avatar_builtin_action_count && !found; i++) {
+        a = avatar_builtin_action::get_instance((avatar_builtin_action_enum)i);
         found = a->get_name() == name;
     }
     return (found ? a : NULL);
 }
 
-builtin_action pet_builtin_action::get_instance(pet_builtin_action_enum pbae)
+builtin_action avatar_builtin_action::get_instance(avatar_builtin_action_enum pbae)
 {
-    static const pet_builtin_action* actions = init_actions();
-    OC_ASSERT(pbae < id::pet_builtin_action_count);
+    static const avatar_builtin_action* actions = init_actions();
+    OC_ASSERT(pbae < id::avatar_builtin_action_count);
     return static_cast<builtin_action>(&actions[pbae]);
 }
 
-const std::string& pet_builtin_action::get_name() const
+const std::string& avatar_builtin_action::get_name() const
 {
     return _name;
 }
 
-const type_tree& pet_builtin_action::get_type_tree() const
+const type_tree& avatar_builtin_action::get_type_tree() const
 {
     return _type_tree;
 }
 
-arity_t pet_builtin_action::arity() const
+arity_t avatar_builtin_action::arity() const
 {
     return _arity;
 }
 
-type_tree pet_builtin_action::get_output_type_tree() const
+type_tree avatar_builtin_action::get_output_type_tree() const
 {
     return _output_type;
 }
 
-const type_tree& pet_builtin_action::get_input_type_tree(arity_t i) const
+const type_tree& avatar_builtin_action::get_input_type_tree(arity_t i) const
 {
     return argument_type_list_input_type(_arg_type_tree, _arity, i);
 }
 
-bool pet_builtin_action::is_reversible() const
+bool avatar_builtin_action::is_reversible() const
 {
     return _reversible;
 }
 
-bool pet_builtin_action::always_succeeds() const
+bool avatar_builtin_action::always_succeeds() const
 {
     return _always_succeeds;
 }
 
-const builtin_action_base* pet_builtin_action::get_reversal() const
+const builtin_action_base* avatar_builtin_action::get_reversal() const
 {
     return _reversal;
 }
 
-bool pet_builtin_action::is_idempotent() const
+bool avatar_builtin_action::is_idempotent() const
 {
     return _idempotent;
 }
 
-bool pet_builtin_action::is_additive(arity_t i) const
+bool avatar_builtin_action::is_additive(arity_t i) const
 {
     return _arg_additive[convert_index(_arity, i)];
 }
 
-bool pet_builtin_action::exists_additive_argument() const
+bool avatar_builtin_action::exists_additive_argument() const
 {
     return _exists_additive_argument;
 }
 
-bool pet_builtin_action::is_zero_neutral(arity_t i) const
+bool avatar_builtin_action::is_zero_neutral(arity_t i) const
 {
     return _arg_zero_neutral[convert_index(_arity, i)];
 }
 
-bool pet_builtin_action::exists_zero_neutral_argument() const
+bool avatar_builtin_action::exists_zero_neutral_argument() const
 {
     return _exists_zero_neutral_argument;
 }
 
-bool pet_builtin_action::is_modulo(arity_t i) const
+bool avatar_builtin_action::is_modulo(arity_t i) const
 {
     return _arg_modulo[convert_index(_arity, i)];
 }
 
-double pet_builtin_action::modulo_min(arity_t i) const
+double avatar_builtin_action::modulo_min(arity_t i) const
 {
     return _arg_modulo_min[convert_index(_arity, i)];
 }
 
-double pet_builtin_action::modulo_max(arity_t i) const
+double avatar_builtin_action::modulo_max(arity_t i) const
 {
     return _arg_modulo_max[convert_index(_arity, i)];
 }
 
-const std::set<builtin_action> pet_builtin_action::preconditions() const
+const std::set<builtin_action> avatar_builtin_action::preconditions() const
 {
     return _preconditions;
 }
 
-bool pet_builtin_action::is_compound() const
+bool avatar_builtin_action::is_compound() const
 {
     return _compound;
 }

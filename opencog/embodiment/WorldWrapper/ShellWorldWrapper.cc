@@ -23,7 +23,7 @@
 
 
 #include "ShellWorldWrapper.h"
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 namespace opencog { namespace world {
 

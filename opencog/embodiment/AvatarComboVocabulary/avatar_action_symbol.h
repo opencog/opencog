@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetComboVocabulary/pet_action_symbol.h
+ * opencog/embodiment/AvatarComboVocabulary/avatar_action_symbol.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,18 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PET_ACTION_SYMBOL_H
-#define _PET_ACTION_SYMBOL_H
+#ifndef _AVATAR_ACTION_SYMBOL_H
+#define _AVATAR_ACTION_SYMBOL_H
 
 #include <opencog/util/numeric.h>
 
 #include <opencog/comboreduct/combo/action_symbol.h>
-#include "pet_operator.h"
+#include "avatar_operator.h"
 
 namespace opencog { namespace combo {
 
 namespace id {
-enum pet_action_symbol_enum {
+enum avatar_action_symbol_enum {
     TOWARDS,
     AWAY,
     RIGHT_FOOT,
@@ -50,21 +50,21 @@ enum pet_action_symbol_enum {
     TWITCH,
     PERK,
     BACK,
-    pet_action_symbol_count
+    avatar_action_symbol_count
 };
 }
 
-typedef id::pet_action_symbol_enum pet_action_symbol_enum;
+typedef id::avatar_action_symbol_enum avatar_action_symbol_enum;
 
 /*********************************************************************
  *      Arrays containing action_symbol name type and properties     *
  *                 to be edited by the developer                     *
  *********************************************************************/
 
-namespace pet_action_symbol_properties {
+namespace avatar_action_symbol_properties {
 
 //struct for description of name and type
-typedef pet_operator<pet_action_symbol_enum, id::pet_action_symbol_count>::basic_description action_symbol_basic_description;
+typedef avatar_operator<avatar_action_symbol_enum, id::avatar_action_symbol_count>::basic_description action_symbol_basic_description;
 
 static const action_symbol_basic_description asbd[] = {
     //action_symbol          name                 type
@@ -87,10 +87,10 @@ static const action_symbol_basic_description asbd[] = {
     { id::BACK,              "BACK",              "action_symbol" }
 };
 
-}//~namespace pet_perception_properties
+}//~namespace avatar_perception_properties
 
-//pet_action_symbol both derive from action_symbol_base and pet_operator
-class pet_action_symbol : public pet_operator<pet_action_symbol_enum, id::pet_action_symbol_count>, public action_symbol_base
+//avatar_action_symbol both derive from action_symbol_base and avatar_operator
+class avatar_action_symbol : public avatar_operator<avatar_action_symbol_enum, id::avatar_action_symbol_count>, public action_symbol_base
 {
 
 private:
@@ -98,13 +98,13 @@ private:
     //private methods
 
     //ctor
-    pet_action_symbol();
+    avatar_action_symbol();
 
     const basic_description * get_basic_description_array() const;
     unsigned int get_basic_description_array_count() const;
 
-    static const pet_action_symbol* init_action_symbol();
-    void set_action_symbol(pet_action_symbol_enum);
+    static const avatar_action_symbol* init_action_symbol();
+    void set_action_symbol(avatar_action_symbol_enum);
 
 public:
     //name
@@ -129,9 +129,9 @@ public:
     //if no such action_symbol exists then return NULL pointer
     static action_symbol get_instance(const std::string& name);
 
-    //return a pointer of the static pet_perception_action corresponding
-    //to a given pet_perception_enum
-    static action_symbol get_instance(pet_action_symbol_enum);
+    //return a pointer of the static avatar_perception_action corresponding
+    //to a given avatar_perception_enum
+    static action_symbol get_instance(avatar_action_symbol_enum);
 
 };
 

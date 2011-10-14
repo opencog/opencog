@@ -35,7 +35,7 @@
 #include "LSMessageSenderMock.h"
 #include "PredicatesUpdater.h"
 #include "Pet.h"
-#include "PetComboVocabulary.h"
+#include "AvatarComboVocabulary.h"
 
 
 

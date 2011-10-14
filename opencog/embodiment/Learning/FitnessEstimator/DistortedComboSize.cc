@@ -22,7 +22,7 @@
  */
 
 #include "DistortedComboSize.h"
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/util/Config.h>
 
 //the distortion of the size of the random instruction is number of

@@ -1,6 +1,6 @@
 ADD_CXXTEST(EntropyFilterUTest)
 TARGET_LINK_LIBRARIES(EntropyFilterUTest
-	PetComboVocabulary
+	AvatarComboVocabulary
 	Filter
         comboreduct
         util
@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(EntropyFilterUTest
 ADD_CXXTEST(ActionFilterUTest)
 TARGET_LINK_LIBRARIES(ActionFilterUTest
 	behavior
-	PetComboVocabulary
+	AvatarComboVocabulary
 	Filter
         comboreduct
         util

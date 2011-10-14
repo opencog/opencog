@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetComboVocabulary/pet_perception.h
+ * opencog/embodiment/AvatarComboVocabulary/avatar_perception.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,18 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PET_PERCEPTION_H
-#define _PET_PERCEPTION_H
+#ifndef _AVATAR_PERCEPTION_H
+#define _AVATAR_PERCEPTION_H
 
 #include <opencog/util/numeric.h>
 
 #include <opencog/comboreduct/combo/perception.h>
-#include "pet_operator.h"
+#include "avatar_operator.h"
 
 namespace opencog { namespace combo {
 
 namespace id {
-enum pet_perception_enum {
+enum avatar_perception_enum {
     exists,
     exists_edible,
     exists_movable,
@@ -149,25 +149,25 @@ enum pet_perception_enum {
     is_last_pet_schema,
     is_last_group_command,
 
-    pet_perception_count
+    avatar_perception_count
 };
 }
 
-typedef id::pet_perception_enum pet_perception_enum;
+typedef id::avatar_perception_enum avatar_perception_enum;
 
 /*********************************************************************
  *       Arrays containing perception name type and properties       *
  *                 to be edited by the developer                     *
  *********************************************************************/
 
-namespace pet_perception_properties {
+namespace avatar_perception_properties {
 
 //struct for description of name and type
-typedef pet_operator<pet_perception_enum, id::pet_perception_count>::basic_description perception_basic_description;
+typedef avatar_operator<avatar_perception_enum, id::avatar_perception_count>::basic_description perception_basic_description;
 
 //struct for decription of perception properties
 struct perception_property_description {
-    pet_perception_enum perception;
+    avatar_perception_enum perception;
     bool ultrametric;
     bool transitive;
     bool irreflexive;
@@ -394,10 +394,10 @@ static const perception_property_description ppd[] = {
 };
 
 
-}//~namespace pet_perception_properties
+}//~namespace avatar_perception_properties
 
-//pet_perception both derive from perception_base and pet_operator
-class pet_perception : public pet_operator<pet_perception_enum, id::pet_perception_count>, public perception_base
+//avatar_perception both derive from perception_base and avatar_operator
+class avatar_perception : public avatar_operator<avatar_perception_enum, id::avatar_perception_count>, public perception_base
 {
 
 private:
@@ -413,13 +413,13 @@ private:
     //private methods
 
     //ctor
-    pet_perception();
+    avatar_perception();
 
     const basic_description * get_basic_description_array() const;
     unsigned int get_basic_description_array_count() const;
 
-    static const pet_perception* init_perceptions();
-    void set_perception(pet_perception_enum);
+    static const avatar_perception* init_perceptions();
+    void set_perception(avatar_perception_enum);
 
 public:
     //name
@@ -439,14 +439,14 @@ public:
     //then it returns always T past that index
     const type_tree& get_input_type_tree(arity_t i) const;
 
-    //return a pointer of the static pet_perception corresponding
+    //return a pointer of the static avatar_perception corresponding
     //to a given name string
     //if no such perception exists then return NULL pointer
     static perception get_instance(const std::string& name);
 
-    //return a pointer of the static pet_perception_action corresponding
-    //to a given pet_perception_enum
-    static perception get_instance(pet_perception_enum);
+    //return a pointer of the static avatar_perception_action corresponding
+    //to a given avatar_perception_enum
+    static perception get_instance(avatar_perception_enum);
 
     //action property methods
     bool is_ultrametric() const;

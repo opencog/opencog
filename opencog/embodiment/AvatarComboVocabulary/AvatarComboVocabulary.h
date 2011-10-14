@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h
+ * opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -24,10 +24,10 @@
 #ifndef _PETCOMBOVOCABULARY_H
 #define _PETCOMBOVOCABULARY_H
 
-#include "pet_builtin_action.h"
-#include "pet_perception.h"
-#include "pet_action_symbol.h"
-#include "pet_indefinite_object.h"
+#include "avatar_builtin_action.h"
+#include "avatar_perception.h"
+#include "avatar_action_symbol.h"
+#include "avatar_indefinite_object.h"
 
 #include <opencog/comboreduct/combo/vertex.h>
 
@@ -61,31 +61,31 @@ using namespace opencog::combo;
 
 //return a pointer to class base instance
 //of a given action or perception enum
-builtin_action get_instance(pet_builtin_action_enum);
-perception get_instance(pet_perception_enum);
-action_symbol get_instance(pet_action_symbol_enum);
-indefinite_object get_instance(pet_indefinite_object_enum);
+builtin_action get_instance(avatar_builtin_action_enum);
+perception get_instance(avatar_perception_enum);
+action_symbol get_instance(avatar_action_symbol_enum);
+indefinite_object get_instance(avatar_indefinite_object_enum);
 
 //get the enum corresponding to
 //builtin_action, perception, action_symbol or indefinite_object
-pet_builtin_action_enum get_enum(builtin_action);
-pet_perception_enum get_enum(perception);
-pet_action_symbol_enum get_enum(action_symbol);
-pet_indefinite_object_enum get_enum(indefinite_object);
+avatar_builtin_action_enum get_enum(builtin_action);
+avatar_perception_enum get_enum(perception);
+avatar_action_symbol_enum get_enum(action_symbol);
+avatar_indefinite_object_enum get_enum(indefinite_object);
 
 //return wether an indefinite object is random,
-//of course the type of the object must be pet_indefinite_object*
+//of course the type of the object must be avatar_indefinite_object*
 bool is_random(indefinite_object);
-bool is_random(pet_indefinite_object_enum);
+bool is_random(avatar_indefinite_object_enum);
 
 //for some bizard reason this makes a compiling error
 //however I keep them because it can indiquate when it is required to
 //use base_instance(action or perception) instead of enum which print
 //the wrong thing (a digit)
-std::ostream& operator<<(std::ostream& out, pet_builtin_action_enum e);
-std::ostream& operator<<(std::ostream& out, pet_perception_enum e);
-std::ostream& operator<<(std::ostream& out, pet_action_symbol_enum e);
-std::ostream& operator<<(std::ostream& out, pet_indefinite_object_enum e);
+std::ostream& operator<<(std::ostream& out, avatar_builtin_action_enum e);
+std::ostream& operator<<(std::ostream& out, avatar_perception_enum e);
+std::ostream& operator<<(std::ostream& out, avatar_action_symbol_enum e);
+std::ostream& operator<<(std::ostream& out, avatar_indefinite_object_enum e);
 
 std::istream& operator>>(std::istream& in, vertex& v);
 std::istream& operator>>(std::istream& in, combo_tree& tr);
@@ -95,22 +95,22 @@ std::istream& operator>>(std::istream& in, combo_tree& tr);
 //That means that different vocabularies will not be able to coexist
 //with the same code file but will be able within the same library
 //using namespace PetCombo;
-bool operator==(builtin_action, pet_builtin_action_enum);
-bool operator==(pet_builtin_action_enum, builtin_action);
-bool operator!=(builtin_action, pet_builtin_action_enum);
-bool operator!=(pet_builtin_action_enum, builtin_action);
-bool operator==(perception, pet_perception_enum);
-bool operator==(pet_perception_enum, perception);
-bool operator!=(perception, pet_perception_enum);
-bool operator!=(pet_perception_enum, perception);
-bool operator==(action_symbol, pet_action_symbol_enum);
-bool operator==(pet_action_symbol_enum, action_symbol);
-bool operator!=(action_symbol, pet_action_symbol_enum);
-bool operator!=(pet_action_symbol_enum, action_symbol);
-bool operator==(indefinite_object, pet_indefinite_object_enum);
-bool operator==(pet_indefinite_object_enum, indefinite_object);
-bool operator!=(indefinite_object, pet_indefinite_object_enum);
-bool operator!=(pet_indefinite_object_enum, indefinite_object);
+bool operator==(builtin_action, avatar_builtin_action_enum);
+bool operator==(avatar_builtin_action_enum, builtin_action);
+bool operator!=(builtin_action, avatar_builtin_action_enum);
+bool operator!=(avatar_builtin_action_enum, builtin_action);
+bool operator==(perception, avatar_perception_enum);
+bool operator==(avatar_perception_enum, perception);
+bool operator!=(perception, avatar_perception_enum);
+bool operator!=(avatar_perception_enum, perception);
+bool operator==(action_symbol, avatar_action_symbol_enum);
+bool operator==(avatar_action_symbol_enum, action_symbol);
+bool operator!=(action_symbol, avatar_action_symbol_enum);
+bool operator!=(avatar_action_symbol_enum, action_symbol);
+bool operator==(indefinite_object, avatar_indefinite_object_enum);
+bool operator==(avatar_indefinite_object_enum, indefinite_object);
+bool operator!=(indefinite_object, avatar_indefinite_object_enum);
+bool operator!=(avatar_indefinite_object_enum, indefinite_object);
 
 }//~namespace PetCombo
 

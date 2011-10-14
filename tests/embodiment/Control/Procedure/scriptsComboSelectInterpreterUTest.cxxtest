@@ -24,7 +24,7 @@
 
 #include "ComboSelectInterpreterUTest.h"
 #include "util/mt19937ar.h"
-#include "PetComboVocabulary.h"
+#include "AvatarComboVocabulary.h"
 #include "SimpleTruthValue.h"
 
 #include "ComboProcedureRepository.h"

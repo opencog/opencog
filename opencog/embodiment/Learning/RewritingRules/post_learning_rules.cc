@@ -22,7 +22,7 @@
  */
 
 #include "post_learning_rules.h"
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 namespace opencog { namespace reduct {
 

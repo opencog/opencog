@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetComboVocabulary/pet_indefinite_object.h
+ * opencog/embodiment/AvatarComboVocabulary/avatar_indefinite_object.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,18 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PET_INDEFINITE_OBJECT_H
-#define _PET_INDEFINITE_OBJECT_H
+#ifndef _AVATAR_INDEFINITE_OBJECT_H
+#define _AVATAR_INDEFINITE_OBJECT_H
 
 #include <opencog/util/numeric.h>
 
 #include <opencog/comboreduct/combo/indefinite_object.h>
-#include "pet_operator.h"
+#include "avatar_operator.h"
 
 namespace opencog { namespace combo {
 
 namespace id {
-enum pet_indefinite_object_enum {
+enum avatar_indefinite_object_enum {
     nearest_object,
     nearest_edible,
     nearest_movable,
@@ -68,25 +68,25 @@ enum pet_indefinite_object_enum {
 
     exemplar_avatar,
 
-    pet_indefinite_object_count
+    avatar_indefinite_object_count
 };
 }
 
-typedef id::pet_indefinite_object_enum pet_indefinite_object_enum;
+typedef id::avatar_indefinite_object_enum avatar_indefinite_object_enum;
 
 /*********************************************************************
  *   Arrays containing indefinite_object name type and properties    *
  *                 to be edited by the developer                     *
  *********************************************************************/
 
-namespace pet_indefinite_object_properties {
+namespace avatar_indefinite_object_properties {
 
 //struct for description of name and type
-typedef pet_operator<pet_indefinite_object_enum, id::pet_indefinite_object_count>::basic_description indefinite_object_basic_description;
+typedef avatar_operator<avatar_indefinite_object_enum, id::avatar_indefinite_object_count>::basic_description indefinite_object_basic_description;
 
 //struct for property description
 struct indefinite_object_property_description {
-    pet_indefinite_object_enum indefinite_object;
+    avatar_indefinite_object_enum indefinite_object;
     bool random;
 };
 
@@ -159,11 +159,11 @@ static const indefinite_object_property_description iopd[] = {
     { id::exemplar_avatar,    false }
 };
 
-}//~namespace pet_perception_properties
+}//~namespace avatar_perception_properties
 
-//pet_indefinite_object both derive
-//from indefinite_object_base and pet_operator
-class pet_indefinite_object : public pet_operator<pet_indefinite_object_enum, id::pet_indefinite_object_count>, public indefinite_object_base
+//avatar_indefinite_object both derive
+//from indefinite_object_base and avatar_operator
+class avatar_indefinite_object : public avatar_operator<avatar_indefinite_object_enum, id::avatar_indefinite_object_count>, public indefinite_object_base
 {
 
 private:
@@ -174,13 +174,13 @@ private:
     //private methods
 
     //ctor
-    pet_indefinite_object();
+    avatar_indefinite_object();
 
     const basic_description * get_basic_description_array() const;
     unsigned int get_basic_description_array_count() const;
 
-    static const pet_indefinite_object* init_indefinite_object();
-    void set_indefinite_object(pet_indefinite_object_enum);
+    static const avatar_indefinite_object* init_indefinite_object();
+    void set_indefinite_object(avatar_indefinite_object_enum);
 
 public:
     //name
@@ -205,9 +205,9 @@ public:
     //if no such action_symbol exists then return NULL pointer
     static indefinite_object get_instance(const std::string& name);
 
-    //return a pointer of the static pet_perception_action corresponding
-    //to a given pet_perception_enum
-    static indefinite_object get_instance(pet_indefinite_object_enum);
+    //return a pointer of the static avatar_perception_action corresponding
+    //to a given avatar_perception_enum
+    static indefinite_object get_instance(avatar_indefinite_object_enum);
 
     //is_random, property used by PetBrain
     bool is_random() const;

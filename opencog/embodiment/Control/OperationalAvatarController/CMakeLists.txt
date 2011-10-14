@@ -68,7 +68,7 @@ ADD_EXECUTABLE (OACTester OACTester.cc)
 TARGET_LINK_LIBRARIES (OACTester
     oac
     comboreduct
-    PetComboVocabulary
+    AvatarComboVocabulary
     AtomSpaceExtensions
     ImaginaryLife
     ${Boost_THREAD_LIBRARY}
@@ -78,7 +78,7 @@ ADD_EXECUTABLE (oac-exec OACExecutable.cc)
 TARGET_LINK_LIBRARIES (oac-exec
     oac
     comboreduct
-    PetComboVocabulary
+    AvatarComboVocabulary
     ImaginaryLife
     ${Boost_THREAD_LIBRARY} 
     ${ZMQ_LIBRARIES}
@@ -89,6 +89,6 @@ ADD_EXECUTABLE (opcHcTester MockOpcHCTestExec.cc)
 TARGET_LINK_LIBRARIES (opcHcTester
     oac
     comboreduct
-    PetComboVocabulary
+    AvatarComboVocabulary
     ImaginaryLife
 )

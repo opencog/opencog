@@ -32,7 +32,7 @@
 #include <tests/embodiment/Control/OperationalAvatarController/LSMessageSenderMock.h>
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/Pet.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #ifndef COMBOINTERPRETERUTEST_H
 #define COMBOINTERPRETERUTEST_H

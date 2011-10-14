@@ -25,7 +25,7 @@
 #include <opencog/comboreduct/combo/type_tree.h>
 #include <string.h>
 #include <sstream>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 using namespace PetCombo;
 using opencog::messaging::Message;

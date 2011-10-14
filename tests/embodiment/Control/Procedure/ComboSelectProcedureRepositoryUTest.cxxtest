@@ -26,7 +26,7 @@
 #include <fstream>
 #include <iostream>
 #include "utils.h"
-#include "PetComboVocabulary.h"
+#include "AvatarComboVocabulary.h"
 
 using namespace Procedure;
 using namespace PetCombo;

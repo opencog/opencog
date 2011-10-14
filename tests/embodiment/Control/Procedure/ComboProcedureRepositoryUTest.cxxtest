@@ -27,7 +27,7 @@
 #include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <sstream>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 using namespace Procedure;
 using namespace PetCombo;

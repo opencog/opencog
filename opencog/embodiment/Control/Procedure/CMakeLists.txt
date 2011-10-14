@@ -34,7 +34,7 @@ TARGET_LINK_LIBRARIES (combo_shell_stdio
     WorldWrapper
     util
     ${XERCESC_LIBRARIES}
-    PetComboVocabulary
+    AvatarComboVocabulary
 )
 
 ADD_EXECUTABLE (combo_shell ComboPAIExecutable)

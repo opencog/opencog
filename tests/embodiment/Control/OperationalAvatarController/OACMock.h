@@ -23,7 +23,7 @@
 #include <opencog/comboreduct/combo/type_tree.h>
 
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 // For loading Scheme scripts by C++ code
 #include <opencog/guile/load-file.h>

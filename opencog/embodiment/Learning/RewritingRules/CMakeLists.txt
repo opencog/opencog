@@ -10,5 +10,5 @@ ADD_LIBRARY(RewritingRules
 TARGET_LINK_LIBRARIES(RewritingRules
 	util
 	comboreduct
-	PetComboVocabulary
+	AvatarComboVocabulary
 )

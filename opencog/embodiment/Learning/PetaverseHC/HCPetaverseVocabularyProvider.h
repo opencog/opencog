@@ -58,7 +58,7 @@ static const unsigned int _elementary_operators_size =
  * action and perception set for petaverse hillclimber
  */
 
-static const pet_builtin_action_enum _elementary_actions[] = {
+static const avatar_builtin_action_enum _elementary_actions[] = {
     id::goto_obj,
     id::step_forward,
     id::step_backward,
@@ -85,9 +85,9 @@ static const pet_builtin_action_enum _elementary_actions[] = {
 };
 
 static const unsigned int _elementary_actions_size =
-    sizeof(_elementary_actions) / sizeof(pet_builtin_action_enum);
+    sizeof(_elementary_actions) / sizeof(avatar_builtin_action_enum);
 
-static const pet_perception_enum _elementary_perceptions[] = {
+static const avatar_perception_enum _elementary_perceptions[] = {
     id::exists_edible,
     id::is_pet,
     id::is_avatar,
@@ -101,15 +101,15 @@ static const pet_perception_enum _elementary_perceptions[] = {
 };
 
 static const unsigned int _elementary_perceptions_size =
-    sizeof(_elementary_perceptions) / sizeof(pet_perception_enum);
+    sizeof(_elementary_perceptions) / sizeof(avatar_perception_enum);
 
-static const pet_indefinite_object_enum _indefinite_objects[] = {
+static const avatar_indefinite_object_enum _indefinite_objects[] = {
     //id::random_object,
     //id::nearest_object
 };
 
 static const unsigned int _indefinite_objects_size =
-    sizeof(_indefinite_objects) / sizeof(pet_indefinite_object_enum);
+    sizeof(_indefinite_objects) / sizeof(avatar_indefinite_object_enum);
 
 class HCPetaverseVocabularyProvider : public PetaverseVocabularyProviderBase
 {

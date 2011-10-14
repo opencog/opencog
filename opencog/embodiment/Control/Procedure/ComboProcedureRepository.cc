@@ -28,7 +28,7 @@
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/Config.h>
 
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 using namespace PetCombo;
@@ -58,8 +58,8 @@ unsigned int ComboProcedureRepository::loadFromStream(istream& in)
             continue;
         }
 
-        procedure_call pc = load_procedure_call < pet_builtin_action, pet_perception,
-                            pet_action_symbol, pet_indefinite_object > (in, false);
+        procedure_call pc = load_procedure_call < avatar_builtin_action, avatar_perception,
+                            avatar_action_symbol, avatar_indefinite_object > (in, false);
 
         if (!in.good()) {
             break;

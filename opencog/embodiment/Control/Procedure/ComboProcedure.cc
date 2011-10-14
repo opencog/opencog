@@ -24,7 +24,7 @@
 #include "ComboProcedure.h"
 #include <opencog/util/foreach.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #include <sstream>
 #include <boost/lexical_cast.hpp>
