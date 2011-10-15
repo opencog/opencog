@@ -34,7 +34,7 @@
 #include <opencog/embodiment/Learning/Filter/EntityRelevanceFilter.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
-#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabularyse.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 //using namespace behavior;

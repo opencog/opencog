@@ -67,11 +67,11 @@ void avatar_builtin_action::set_action(avatar_builtin_action_enum pbae,
     //basic properties
     set_basic_description(pbae);
     //standard and PetBrain properties specific to action
-    unsigned int apd_count = sizeof(apd) / sizeof(action_property_description);
-    OC_ASSERT(apd_count == (unsigned int)id::avatar_builtin_action_count,
+    unsigned apd_count = sizeof(apd) / sizeof(action_property_description);
+    OC_ASSERT(apd_count == (unsigned)id::avatar_builtin_action_count,
               "there must be entries for all actions.");
     bool found = false;
-    for (unsigned int i = 0; i < apd_count && !found; ++i) {
+    for (unsigned i = 0; i < apd_count && !found; ++i) {
         if (apd[i].action == pbae) {
             found = true;
             _compound = apd[i].compound;
@@ -84,7 +84,7 @@ void avatar_builtin_action::set_action(avatar_builtin_action_enum pbae,
         }
     }
     OC_ASSERT(found,
-                     "avatar_builtin_action with enum %d has not been found in apd", pbae);
+              "avatar_builtin_action with enum %d has not been found in apd", pbae);
     //standard properties specific to action argument
     unsigned int aapd_count =
         sizeof(aapd) / sizeof(action_argument_property_description);
@@ -117,7 +117,7 @@ void avatar_builtin_action::set_action(avatar_builtin_action_enum pbae,
         }
     }
     OC_ASSERT(arg_not_found.empty(),
-                     "Some argument are not found in aapd for action %s", _name.c_str());
+              "Some argument are not found in aapd for action %s", _name.c_str());
     //check if exists additive, zero_neutral
     bool not_exists_additive = true;
     for (std::vector<bool>::const_iterator it = _arg_additive.begin();
