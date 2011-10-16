@@ -43,8 +43,8 @@ private:
 
 public:
 
-    static const double POSITIVE = 1.0;
-    static const double NEGATIVE = 0.0;
+    static const double POSITIVE;
+    static const double NEGATIVE;
 
     ~RewardMessage();
     RewardMessage(const std::string &from, const std::string &to);

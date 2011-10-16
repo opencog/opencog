@@ -30,6 +30,9 @@
 
 using namespace opencog::learningserver::messages;
 
+const double RewardMessage::POSITIVE = 1.0;
+const double RewardMessage::NEGATIVE = 0.0;
+
 RewardMessage::~RewardMessage()
 {
 }

@@ -129,16 +129,14 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
         try {
             arity = boost::lexical_cast<unsigned int>(str.substr(lparen + 1, rparen - lparen - 1));
         } catch (...) {
-            logger().debug(
-                         "ComboSelectProcedureRepository - Cannot get arity for '%s'.", str.c_str());
+            logger().debug("ComboSelectProcedureRepository - Cannot get arity for '%s'.", str.c_str());
             return 0;
         }
 
         //recognize {
         in >> tmp;
         if (tmp != "|=" || !in.good()) {
-            logger().debug(
-                         "ComboSelectProcedureRepository - Found no '|=' symbol for '%s'.", str.c_str());
+            logger().debug("ComboSelectProcedureRepository - Found no '|=' symbol for '%s'.", str.c_str());
             return 0;
         }
 
@@ -173,8 +171,7 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
             n++;
 
         } else {
-            logger().error(
-                         "ComboSelectProcedureRepository - Error parsing combo function.");
+            logger().error("ComboSelectProcedureRepository - Error parsing combo function.");
         }
         delete(pc1);
         delete(pc2);

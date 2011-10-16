@@ -195,7 +195,7 @@ private:
 public:
     //currently combo percepts are boolean, and nm percepts may continuous
     //truth values - thresholding is used for conversion to bool
-    static const float meanTruthThreshold = 0.5;
+    static const float meanTruthThreshold;
 
     static unsigned long getHasSaidDelay() {
         return opencog::config().get_int("HAS_SAID_DELAY");

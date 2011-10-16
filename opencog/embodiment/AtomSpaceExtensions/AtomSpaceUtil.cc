@@ -59,6 +59,7 @@ AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPhysiologicalFeeling;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarSayActionDone;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarActionDone;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPetActionPredicate;
+const double AtomSpaceUtil::highLongTermImportance = 0.7;
 std::map<Handle, AtomSpaceUtil::HandleToHandleMap > AtomSpaceUtil::latestSpatialPredicate;
 std::map<Handle, Handle> AtomSpaceUtil::latestSchemaPredicate;
 boost::unordered_map<std::string, HandleSeq> AtomSpaceUtil::frameElementsCache;

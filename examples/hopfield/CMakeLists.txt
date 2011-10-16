@@ -33,8 +33,8 @@ ADD_DEPENDENCIES(hopfield attention_atom_types)
 TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
+    ${PROJECT_UBI_LIB}
     pln
 	${Boost_SIGNALS_LIBRARY}
 	${EXPAT_LIBRARIES}
-    ${PROJECT_UBI_LIB}
 )

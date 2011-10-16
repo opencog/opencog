@@ -10,7 +10,14 @@ ADD_LIBRARY(query SHARED
 	QueryModule.cc
 )
 
-ADD_DEPENDENCIES(query opencog_atom_types)
+ADD_DEPENDENCIES(query
+  opencog_atom_types
+)
+
+TARGET_LINK_LIBRARIES(query
+  smob
+  server
+)
 
 IF (WIN32)
    INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

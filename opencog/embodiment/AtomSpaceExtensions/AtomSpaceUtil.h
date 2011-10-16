@@ -277,7 +277,7 @@ public:
                                      Handle object3 = Handle::UNDEFINED );
 
 
-    const static double highLongTermImportance = 0.7;
+    const static double highLongTermImportance;
 
     /**
     * Adds a node into the AtomSpace.

@@ -3,6 +3,26 @@
 using namespace opencog;
 using namespace combo;
 
+const int CartPole::NUM_INPUTS=7;
+const double CartPole::MUP = 0.000002;
+const double CartPole::MUC = 0.0005;
+const double CartPole::GRAVITY= -9.8;
+const double CartPole::MASSCART= 1.0;
+const double CartPole::MASSPOLE_1= 0.1;
+
+const double CartPole::LENGTH_1= 0.5;		  /* actually half the pole's length */
+
+const double CartPole::FORCE_MAG= 10.0;
+const double CartPole::TAU= 0.01;		  //seconds between state updates 
+
+const double CartPole::one_degree= 0.0174532;	/* 2pi/360 */
+const double CartPole::six_degrees= 0.1047192;
+const double CartPole::twelve_degrees= 0.2094384;
+const double CartPole::fifteen_degrees= 0.2617993;
+const double CartPole::thirty_six_degrees= 0.628329;
+const double CartPole::fifty_degrees= 0.87266;
+
+
 CartPole::CartPole(bool randomize,bool velocity)
 {
     maxFitness = 100000;

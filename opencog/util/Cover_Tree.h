@@ -86,6 +86,7 @@ class CoverTree
          */
         std::vector<CoverTreeNode*> getAllChildren() const;
     }; // CoverTreeNode class
+
  private:
     typedef std::pair<double, CoverTreeNode*> distNodePair;
 
@@ -118,7 +119,7 @@ class CoverTree
                     bool& multi);
 
  public:
-    static const double base = 2.0;
+    const double base;
 
     /**
      * Constructs a cover tree which begins with all points in points.
@@ -175,7 +176,7 @@ class CoverTree
 
 template<class Point>
 CoverTree<Point>::CoverTree(const double& maxDist,
-                            const std::vector<Point>& points)
+                            const std::vector<Point>& points) : base(2.0)
 {
     _root=NULL;
     _numNodes=0;

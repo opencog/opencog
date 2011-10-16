@@ -58,6 +58,8 @@ typedef combo_tree::sibling_iterator sib_it;
 
 WorldWrapperUtilCache WorldWrapperUtil::cache;
 
+const float WorldWrapperUtil::meanTruthThreshold = 0.5;
+
 definite_object WorldWrapperUtil::atom_name_to_definite_object(const string& atom_name, const string& self_id, const string& owner_id)
 {
     if (atom_name == self_id)
