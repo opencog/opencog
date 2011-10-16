@@ -118,7 +118,7 @@ std::string PAIUtils::getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument *
 
 std::string PAIUtils::getInternalId(const char* externalId)
 {
-    std::string  result("id_");
+    std::string result("id_");
     result += externalId;
     return result;
 }

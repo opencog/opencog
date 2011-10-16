@@ -22,6 +22,23 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include "platform.h"
+#include <stdlib.h>
+
+namespace opencog {
+
+const char* getUserName() { 
+    const char* username = getenv("LOGNAME");
+    if (username == NULL)
+        username = getenv("USER");
+    if (username == NULL)
+        username = "unknown_user";
+    return username;
+}
+
+} // ~namespace opencog
+
 #ifdef __APPLE__
 
 #include <sys/timeb.h>

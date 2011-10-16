@@ -90,6 +90,9 @@ uint64_t getTotalRAM();
 /// return the number of free bytes in RAM (excluding OS caches)
 uint64_t getFreeRAM();
 
+/// return the OS username
+const char* getUserName();
+
 } // namespace opencog
 
 #endif // _OPENCOG_PLATFORM_H

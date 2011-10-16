@@ -93,12 +93,13 @@ public:
         sender->setPai(ppai);
 
         string pvpMsg;
-        printf("Will open  file %s\n", xmlFileName.c_str());
+        printf("Will open file %s\n", xmlFileName.c_str());
         if (!appendFileContent( string(PVP_XML_FILE_PATH + string("/") +  xmlFileName).c_str(), pvpMsg)) {
             printf("Could not read content of file %s\n",
                    string(PVP_XML_FILE_PATH + string("/") +  xmlFileName).c_str());
         }
-        printf("Processing pvp message:\n"); //, pvpMsg.c_str());
+        printf("Processing pvp message:\n");
+        printf("%s", pvpMsg.c_str());
         ppai->processPVPMessage(pvpMsg, toUpdateHandles);
 
         PredicatesUpdater * updater;

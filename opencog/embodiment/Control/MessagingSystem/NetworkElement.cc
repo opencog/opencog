@@ -106,8 +106,6 @@ NetworkElement::NetworkElement(const std::string &myId, const std::string &ip, i
 
 void NetworkElement::initialize(const std::string &myId, const std::string &ip, int portNumber)
 {
-
-
     this->portNumber = portNumber;
     this->myId.assign(myId);
     this->ipAddress.assign(ip);

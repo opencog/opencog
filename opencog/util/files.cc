@@ -31,6 +31,7 @@
 #include <stdlib.h>
 
 #include "files.h"
+#include "platform.h"
 
 #ifdef WIN32_NOT_UNIX
 #include <direct.h>
@@ -70,11 +71,7 @@ void opencog::expandPath(std::string& path)
 
     size_t user_index = path.find(USER_FLAG, 0);
     if (user_index != std::string::npos) {
-        const char* username = getenv("LOGNAME");
-
-        if (username == NULL) {
-            username = "unknown_user";
-        }
+        const char* username = getUserName();
         path.replace(user_index, strlen(USER_FLAG), username);
     }
 

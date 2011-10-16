@@ -23,9 +23,10 @@
 
 
 #include "LoggerFactory.h"
-#include "stdlib.h"
-#include "string.h"
+#include <stdlib.h>
+#include <string.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/platform.h>
 
 using namespace opencog;
 using namespace opencog::control;
@@ -47,11 +48,8 @@ opencog::Logger LoggerFactory::getLogger(const std::string &id)
     logFile.assign(config().get("LOG_DIR"));
     size_t user_index = logFile.find(USER_FLAG, 0);
     if (user_index != std::string::npos) {
-        //const char* username = getlogin();
-        const char* username = getenv("LOGNAME");
+        const char* username = getUserName();
         logger().info("LoggerFactory::getLogger: processing $USER flag => username = %s\n", username);
-        if (username == NULL)
-            username = "unknown_user";
         logFile = logFile.replace(user_index, strlen(USER_FLAG), username);
     }
     logFile.append(slash);
