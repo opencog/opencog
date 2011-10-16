@@ -400,12 +400,6 @@ void PsiFeelingUpdaterAgent::run(opencog::CogServer * server)
     // Get OAC
     OAC * oac = (OAC *) server;
 
-    // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get petId
-    const std::string & petId = oac->getPet().getPetId();
-
     // Get current time stamp
     unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();   
 
