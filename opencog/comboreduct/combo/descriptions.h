@@ -140,7 +140,6 @@ private:
             builtin_type_tree[bd[i].b] = t;
             
             type_tree::iterator ty_it = t.begin();  // setting the arity
-            type_tree::sibling_iterator sib = ty_it.begin();
             arity[bd[i].b]= type_tree_arity(t); 
             
             if(*ty_it==id::lambda_type)
@@ -266,7 +265,6 @@ private:
             action_type_tree[ad[i].a] = t;
             
             type_tree::iterator ty_it = t.begin();  // setting the arity
-            type_tree::sibling_iterator sib = ty_it.begin();
             arity[ad[i].a]= type_tree_arity(t); 
 
             if(*ty_it==id::lambda_type)
