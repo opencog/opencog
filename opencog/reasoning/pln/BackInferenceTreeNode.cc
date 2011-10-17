@@ -2195,8 +2195,9 @@ string BITNodeRoot::printTrail(VtreeProvider* vp, unsigned int level) const
         ss << repeatc(' ', level*3) << "[" << h << "] was produced by applying ";
         ss << name << " to:\n";
 
-        NMPrinter nmp(NMP_BRACKETED | NMP_TYPE_NAME | NMP_NODE_NAME |
-                NMP_HANDLE | NMP_TRUTH_VALUE | NMP_NO_TV_WITH_NO_CONFIDENCE, 0,
+        NMPrinter nmp(NMP_BRACKETED | NMP_TYPE_NAME | NMP_NODE_NAME
+                //NMP_HANDLE | NMP_TRUTH_VALUE | NMP_NO_TV_WITH_NO_CONFIDENCE, 0,
+                , 0,
                 NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0,
                 level+1);
 

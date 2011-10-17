@@ -10,6 +10,9 @@ from cython.operator cimport dereference as deref, preincrement as inc
 #        char * c_str()
 #        int size()
 
+# Automatically compile .pyx modules. util.py, tree.py and logic.py all work, but I'm not sure it's actually faster.
+#import pyximport; pyximport.install()
+
 from opencog.atomspace cimport cAtomSpace, AtomSpace_factory, cHandle, Handle, Atom
 
 from logic import Chainer

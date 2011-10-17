@@ -95,6 +95,7 @@ class tree:
 
     # TODO add doctests
     def __repr__(self):
+        return str(self)
         # Display it as code to create the corresponding Atom
 #        if self.is_variable():
 #            return "a.add(t.VariableNode, name='$%s')" % (str(self.op),)
@@ -165,6 +166,10 @@ class tree:
 
     def canonical(self):
         return canonical_trees([self])[0]
+
+    def flatten(self):
+        # t=tree('EvaluationLink',tree(1),tree('ListLink',tree('cat'),tree('dog')))
+        return [self]+concat_lists(map(tree.flatten, self.args))
 
 def tree_from_atom(atom, dic = {}):
     if atom.is_node():

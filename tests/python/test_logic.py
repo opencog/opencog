@@ -8,10 +8,10 @@ import tempfile
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
-import opencog.util
 
 import logic
 from tree import tree as T
+import opencog.util
 
 # run doctests
 import doctest
