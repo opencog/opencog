@@ -32,7 +32,6 @@ TARGET_LINK_LIBRARIES (moses
         ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 
-
 #install library
 IF (WIN32)
     INSTALL(TARGETS moses DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

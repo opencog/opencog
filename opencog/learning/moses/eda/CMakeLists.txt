@@ -2,9 +2,7 @@
 INSTALL(FILES
 
 	eda.h
-	field_set.h
 	initialization.h
-	instance_set.h
 	local_structure.h
 	logging.h
 	optimize.h
