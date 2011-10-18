@@ -125,6 +125,7 @@ IF(Boost_FOUND)
     SET(HAVE_UTIL 1)
     SET(HAVE_COMBOREDUCT 1)
     SET(HAVE_MOSES 1)
+    SET(HAVE_FEATURE_SELECTION 1)
 ENDIF(Boost_FOUND)
 
 FIND_PACKAGE(OpenGL)
@@ -550,9 +551,10 @@ ENDIF (DOXYGEN_FOUND)
 # Show a summary of what we got
 
 
-SUMMARY_ADD("Util" "General OpenCog utility library" HAVE_UTIL)
-SUMMARY_ADD("ComboReduct" "library for the reduction of combo program trees" HAVE_COMBOREDUCT)
+SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
+SUMMARY_ADD("ComboReduct" "Library for reduction of combo program trees" HAVE_COMBOREDUCT)
 SUMMARY_ADD("MOSES" "Meta-Optimizing Semantic Evolutionary Search" HAVE_MOSES)
+SUMMARY_ADD("FeatureSelection" "MOSES based feature selection tool" HAVE_FEATURE_SELECTION)
 SUMMARY_ADD("Persist" "Interfaces for persistance of the AtomSpace" HAVE_PERSIST)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph" HAVE_ATOMSPACE)
