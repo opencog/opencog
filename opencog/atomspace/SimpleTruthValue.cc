@@ -36,6 +36,7 @@
 
 using namespace opencog;
 
+// If you change this, make sure to update atomspace_details.pyx!
 #define KKK 800.0
 
 SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)

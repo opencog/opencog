@@ -1,6 +1,6 @@
 #import pyximport; pyximport.install()
 
-from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
+from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, count_to_confidence, confidence_to_count
 import opencog.cogserver
 from tree import *
 from adaptors import find_matching_conjunctions
@@ -618,6 +618,12 @@ class Rule :
             return 'application'
         else:
             return 'rule'
+
+def deductionSimpleFormula(tvs, U):
+    pass
+
+def andSymmetricFormula(tvs, U):
+    sTot = 1.0
 
 def test(a):
     c = Chainer(a)

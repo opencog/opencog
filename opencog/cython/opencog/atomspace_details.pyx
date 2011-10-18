@@ -87,6 +87,15 @@ cdef class TruthValue:
     def __str__(self):
         return self._ptr().toString().c_str()
 
+# If you change the constant, make sure to replace it in SimpleTruthValue.cc
+def confidence_to_count(conf):
+    KKK = 800.0
+    conf = min(conf, 0.9999999)
+    return int(KKK * conf / (1.0 - conf))
+
+def count_to_confidence(count):
+    KKK = 800.0
+    return count / (count + KKK)
 
 cdef class TimeServer:
     cdef cTimeServer *timeserver
