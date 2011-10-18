@@ -2909,7 +2909,6 @@ typename tree<T, tree_node_allocator>::leaf_iterator tree<T, tree_node_allocator
     return copy;
 }
 
-
 template <class T, class tree_node_allocator>
 typename tree<T, tree_node_allocator>::leaf_iterator& tree<T, tree_node_allocator>::leaf_iterator::operator+=(unsigned int num)
 {
@@ -2997,12 +2996,12 @@ typename tree<T, tree_node_allocator>::upwards_iterator& tree<T, tree_node_alloc
 namespace std {
 
 template<typename T>
-void swap(opencog::tree<T>& x,opencog::tree<T>& y) {
+void swap(opencog::tree<T>& x, opencog::tree<T>& y) {
     std::swap(x.head,y.head);
     std::swap(x.feet,y.feet);
 }
 
-} //~namespace std
+} // ~namespace std
 
 
 namespace opencog {
@@ -3079,17 +3078,17 @@ struct lexicographic_subtree_order {
     compare comp;
 
     template<typename iter>
-    bool operator()(const opencog::tree<T>& tr1,iter it2) const {
+    bool operator()(const tree<T>& tr1,iter it2) const {
         return (cmp(iter(tr1.begin()),it2)>0);
     }
 
     template<typename iter>
-    bool operator()(const iter& it1,const opencog::tree<T>& tr2) const {
+    bool operator()(const iter& it1,const tree<T>& tr2) const {
         return (cmp(it1,iter(tr2.begin()))>0);
     }
 
-    bool operator()(const opencog::tree<T>& tr1,
-                    const opencog::tree<T>& tr2) const {
+    bool operator()(const tree<T>& tr1,
+                    const tree<T>& tr2) const {
         return (cmp(tr1.begin(),tr2.begin())>0);
     }
 
@@ -3127,8 +3126,8 @@ struct lexicographic_subtree_order {
 //otherwise lexicographic_subtree_order
 template<typename T,typename compare=std::less<T> >
 struct size_tree_order : public lexicographic_subtree_order<T, compare> {
-    bool operator()(const opencog::tree<T>& tr1,
-                    const opencog::tree<T>& tr2) const {
+    bool operator()(const tree<T>& tr1,
+                    const tree<T>& tr2) const {
         int s1 = tr1.size();
         int s2 = tr2.size();
         if(s1 == s2) {
@@ -3228,6 +3227,6 @@ std::istream& operator>>(std::istream& in,opencog::tree<T>& tr) throw (opencog::
     return  in;
 }
 
-}
+} // ~namespace std
 
 #endif
