@@ -8,7 +8,6 @@ from util import *
 #import ipdb; ipdb.set_trace()
 
 t = types
-Tree = tree
 
 class ForestExtractor:
     """Extracts a forest of trees, where each tree is a Link (and children) that are true in the AtomSpace.

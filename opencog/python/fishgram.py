@@ -207,7 +207,7 @@ class Fishgram:
             
             for (t2, var2) in times_vars[i+1:]:
                 if 0 < t2 - t1 <= interval:
-                    seq_and = tree("SequentialAndLink",  var1, var2)
+                    seq_and = Tree("SequentialAndLink",  var1, var2)
                     if seq_and not in conj:
                         new_links+=(seq_and,)
                         connected = True
@@ -356,10 +356,10 @@ class Fishgram:
                         obj = bindings[slot]
                         
                         if obj in emb:
-                            s[tree(slot)] = tree(emb.index(obj))
+                            s[Tree(slot)] = Tree(emb.index(obj))
                             assert len(s) <= len(bindings)
                         else:
-                            s[tree(slot)] = tree(i)
+                            s[Tree(slot)] = Tree(i)
                             tmp = list(new_embedding)
                             tmp.append(obj)
                             new_embedding = tuple(tmp)
@@ -437,7 +437,7 @@ class Fishgram:
                     id+=1
                     print concept
                     for tr in conj:
-                        s = {tree(0):concept}
+                        s = {Tree(0):concept}
                         bound_tree = subst(s, tr)
                         #print bound_tree
                         print atom_from_tree(bound_tree, self.atomspace)
@@ -454,15 +454,15 @@ class Fishgram:
                 vars = get_varlist(conj)
                 #print [str(var) for var in vars]
 
-                evalLink = tree('EvaluationLink',
+                evalLink = Tree('EvaluationLink',
                                     predicate, 
-                                    tree('ListLink', vars))
-                andLink = tree('AndLink',
+                                    Tree('ListLink', vars))
+                andLink = Tree('AndLink',
                                     conj)
                 
-                qLink = tree('ForAllLink', 
-                                tree('ListLink', vars), 
-                                tree('ImplicationLink',
+                qLink = Tree('ForAllLink', 
+                                Tree('ListLink', vars), 
+                                Tree('ImplicationLink',
                                     andLink,
                                     evalLink))
                 a = atom_from_tree(qLink, self.atomspace)
@@ -475,7 +475,7 @@ class Fishgram:
                 print a
 
 #                for tr in conj:
-#                    s = {tree(0):concept}
+#                    s = {Tree(0):concept}
 #                    bound_tree = subst(s, tr)
 #                    #print bound_tree
 #                    print atom_from_tree(bound_tree, self.atomspace)
@@ -557,16 +557,16 @@ class Fishgram:
                 
                 vars = get_varlist( premises+(conclusion,) )
                 
-                andLink = tree('SequentialAndLink',
+                andLink = Tree('SequentialAndLink',
                                     list(premises)) # premises is a tuple remember
                 
                 #print andLink
 
-                qLink = tree('ForAllLink', 
-                                tree('ListLink', vars), 
-                                tree('ImplicationLink',
-                                    tree('AndLink',        # Psi rule "meta-and"
-                                        tree('AndLink'),  # Psi rule context
+                qLink = Tree('ForAllLink', 
+                                Tree('ListLink', vars), 
+                                Tree('ImplicationLink',
+                                    Tree('AndLink',        # Psi rule "meta-and"
+                                        Tree('AndLink'),  # Psi rule context
                                         andLink),             # Psi rule action
                                     conclusion)
                                 )
@@ -611,7 +611,7 @@ class Fishgram:
         return None
 
     def causal_pattern_templates(self):
-        tr = tree
+        tr = Tree
         a = self.atomspace.add
         t = types
         
@@ -706,7 +706,7 @@ class Fishgram:
                     self.make_implication(premises, conclusion, count_premises, count_conj)
     
     def _split_conj_into_rules(self, conj):
-        seq_and_template = tree('SequentialAndLink', new_var(), new_var()) # two TimeNodes
+        seq_and_template = Tree('SequentialAndLink', new_var(), new_var()) # two TimeNodes
         after_links = tuple( x for x in conj if unify(seq_and_template, x, {}) != None )
         normal = tuple( x for x in conj if unify(seq_and_template, x, {}) == None )
         
@@ -732,17 +732,17 @@ class Fishgram:
         
         a = self.atomspace.add
         
-        seq_and_template = tree('SequentialAndLink', -1, -2) # two TimeNodes
-        time_template = tree('AtTimeLink', -1, -2) # 1 is a TimeNode, 2 is an EvaluationLink
-        action_template = tree('EvaluationLink',
+        seq_and_template = Tree('SequentialAndLink', -1, -2) # two TimeNodes
+        time_template = Tree('AtTimeLink', -1, -2) # 1 is a TimeNode, 2 is an EvaluationLink
+        action_template = Tree('EvaluationLink',
                                                 a(t.PredicateNode, name='actionDone'),
-                                                tree('ListLink', -1)) # -1 is the ExecutionLink for the action
+                                                Tree('ListLink', -1)) # -1 is the ExecutionLink for the action
         
-#        res = tree('AtTimeLink',
+#        res = Tree('AtTimeLink',
 #             time2_atom, 
-#             tree('EvaluationLink',
+#             Tree('EvaluationLink',
 #                        a(t.PredicateNode, name='increase'),
-#                        tree('ListLink', -3)
+#                        Tree('ListLink', -3)
 #                        )
 #             )
         
@@ -767,7 +767,7 @@ class Fishgram:
     def replace(self, pattern, example, var):
         s = unify(pattern, example, {})
         if s != None:
-            return s[tree(var)]
+            return s[Tree(var)]
         else:
             return example
     
@@ -865,18 +865,18 @@ def make_seq(atomspace):
 #    target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
 #
 #    for atom in target_PredicateNodes:
-#        target = tree('EvaluationLink', atom, new_var())
+#        target = Tree('EvaluationLink', atom, new_var())
 #        
 #        for (i, time_atom) in enumerate(times[:-1]):
 #            #time2_atom = times[i+1]
 #            
-#            template = tree('AtTimeLink', time_atom, target)
+#            template = Tree('AtTimeLink', time_atom, target)
 #            matches =[x for x in time_atom.incoming if unify(template, tree_from_atom(x), {}) != None]
 #            
 #            if len(matches) != 1:
 #                continue
 #            
-#            template2 = tree('AtTimeLink', time2_atom, target)
+#            template2 = Tree('AtTimeLink', time2_atom, target)
 #            matches2 =[x for x in time2_atom.incoming if unify(template2, tree_from_atom(x), {}) != None]
 #
 #            if len(matches2) == 1:
@@ -898,11 +898,11 @@ def make_seq(atomspace):
 #                print matches[0], matches2[0]
 #
 #                tv = TruthValue(1, 1e35)
-#                res = tree('AtTimeLink',
+#                res = Tree('AtTimeLink',
 #                         time2_atom, 
-#                         tree('EvaluationLink',
+#                         Tree('EvaluationLink',
 #                                    a(t.PredicateNode, name=pred),
-#                                    tree('ListLink', target)
+#                                    Tree('ListLink', target)
 #                                    )
 #                         )
 #                a = atom_from_tree(res, atomspace)
@@ -923,14 +923,14 @@ def make_seq(atomspace):
 #
 #    for atom in target_PredicateNodes:
 #        args = new_var()
-#        target = tree('EvaluationLink', atom, args)
+#        target = Tree('EvaluationLink', atom, args)
 #
 #        time1 = new_var()
 #        time2 = new_var()
 #        
-#        template1 = tree('AtTimeLink', time1, target)
-#        template2 = tree('AtTimeLink', time2, target)
-#        seq = tree('SequentialAndLink', time1, time2)
+#        template1 = Tree('AtTimeLink', time1, target)
+#        template2 = Tree('AtTimeLink', time2, target)
+#        seq = Tree('SequentialAndLink', time1, time2)
 #        
 #        conj = (template1, template2, seq)
 #        
@@ -962,12 +962,12 @@ def make_seq(atomspace):
 #            args_result = match.subst[args]
 #
 #            tv = TruthValue(1, 1e35)
-#            res = tree('AtTimeLink',
+#            res = Tree('AtTimeLink',
 #                     time2_result, 
-#                     tree('EvaluationLink',
+#                     Tree('EvaluationLink',
 #                                atomspace.add(t.PredicateNode, name=pred),
-#                                tree('ListLink',
-#                                    tree('EvaluationLink', 
+#                                Tree('ListLink',
+#                                    Tree('EvaluationLink', 
 #                                         atom,
 #                                         args_result
 #                                    )
@@ -989,8 +989,6 @@ def notice_changes(atomspace):
     times = sorted(times, key= lambda t: int(t.name) )
 
     target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
-
-    Tree = tree.tree
 
     for atom in target_PredicateNodes:
         target = Tree('EvaluationLink', atom, Tree('ListLink'))
@@ -1116,7 +1114,7 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 
             #fish.forest.extractForest()
             #time1, time2, time1_binding, time2_binding = new_var(), new_var(), new_var(), new_var()
-            #fish.forest.tree_embeddings[tree('SequentialAndLink', time1, time2)] = [
+            #fish.forest.tree_embeddings[Tree('SequentialAndLink', time1, time2)] = [
             #                                                    {time1: time1_binding, time2: time2_binding}]
 #            for layer in fish.closed_bfs_layers():
 #                for conj, embs in layer:

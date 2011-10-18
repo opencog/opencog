@@ -77,7 +77,7 @@ class FishgramTest(TestCase):
         pass
 
     def test_make_psi_rule(self):
-        tr = tree.tree
+        tr = tree.Tree
         a = self.space.add
         t = types
         
@@ -123,7 +123,7 @@ class FishgramTest(TestCase):
         self.assertEquals(conclusion2, ideal_conclusion)
 
     def test_lookup_causal_patterns(self):
-        tr = tree.tree
+        tr = tree.Tree
         a = self.space.add
         t = types
         
@@ -162,4 +162,4 @@ class FishgramTest(TestCase):
         
         result = next(self.fishgram.lookup_causal_patterns())
         print result
-        assert tree.unify(result, ideal_result, {}, True) != None
+        assert tree.isomorphic_conjunctions(result, ideal_result)

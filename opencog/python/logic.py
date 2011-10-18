@@ -249,9 +249,9 @@ class Chainer:
             return goal.is_variable()
 
         def app_is_stupid(goal):
-            #nested_implication = standardize_apart(tree('ImplicationLink', 1, tree('ImplicationLink', 2, 3)))
+            #nested_implication = standardize_apart(Tree('ImplicationLink', 1, Tree('ImplicationLink', 2, 3)))
             # Accidentally unifies with (ImplicationLink $blah some_target) !
-            #nested_implication2 = tree('ImplicationLink', tree('ImplicationLink', 1, 2), 3)
+            #nested_implication2 = Tree('ImplicationLink', Tree('ImplicationLink', 1, 2), 3)
 
             # Nested ImplicationLinks
             # skip Implications between InheritanceLinks etc as well
@@ -264,7 +264,7 @@ class Chainer:
                     return True
 
             # Should actually block this one if it occurs anywhere, not just at the root of the tree.
-            very_vague = any(goal.isomorphic(standardize_apart(tree(type, 1, 2))) for type in self.deduction_types)
+            very_vague = any(goal.isomorphic(standardize_apart(Tree(type, 1, 2))) for type in self.deduction_types)
             return (self_implication(goal) or
                          very_vague)
 
@@ -395,17 +395,17 @@ class Chainer:
             already.add(canon)
         
         #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
-        return tree(target, [self.traverse_tree(g, already) for g in subgoals_])
+        return Tree(target, [self.traverse_tree(g, already) for g in subgoals_])
 
     def follow_tree(self, tr, level = 1):
-        print ' '*level, tree(tr.op)
+        print ' '*level, Tree(tr.op)
         
         for child in tr.args:
             self.follow_tree(child, level+1)
 
     def add_depths(self, tr, level = 1):
         args = [self.add_depths(child, level+1) for child in tr.args]
-        return tree((level, tr.op), args)
+        return Tree((level, tr.op), args)
 
     def get_fittest(self, queue):
         def num_vars(target):
@@ -451,49 +451,49 @@ class Chainer:
 
         # Deduction
         for type in self.deduction_types:
-            self.add_rule(Rule(tree(type, 1,3), 
-                                         [tree(type, 1, 2),
-                                          tree(type, 2, 3) ], 
+            self.add_rule(Rule(Tree(type, 1,3), 
+                                         [Tree(type, 1, 2),
+                                          Tree(type, 2, 3) ], 
                                           name='Deduction'))
 
         # Inversion
         for type in self.deduction_types:
-            self.add_rule(Rule( tree(type, 1, 2), 
-                                         [tree(type, 2, 1)], 
+            self.add_rule(Rule( Tree(type, 1, 2), 
+                                         [Tree(type, 2, 1)], 
                                          name='Inversion'))
 
         # ModusPonens
         for type in ['ImplicationLink']:
-            self.add_rule(Rule(tree(2), 
-                                         [tree(type, 1, 2),
-                                          tree(1) ], 
+            self.add_rule(Rule(Tree(2), 
+                                         [Tree(type, 1, 2),
+                                          Tree(1) ], 
                                           name='ModusPonens'))
 
 #       # MP for AndLink as a premise
 #        for type in ['ImplicationLink']:
 #            for size in xrange(5):
 #                args = [new_var() for i in xrange(size+1)]
-#                andlink = tree('AndLink', args)
+#                andlink = Tree('AndLink', args)
 #
-#                self.add_rule(Rule(tree(2), 
-#                                             [tree(type, andlink, 2),
+#                self.add_rule(Rule(Tree(2), 
+#                                             [Tree(type, andlink, 2),
 #                                              andlink ], 
 #                                              name='TheoremRule'))
         
        # ModusPonens for EvaluationLinks only
 #        for type in ['ImplicationLink']:
-#            conc = tree('EvaluationLink', new_var(), new_var())
-#            prem = tree('EvaluationLink', new_var(), new_var())
-#            imp = tree('ImplicationLink', prem, conc)
+#            conc = Tree('EvaluationLink', new_var(), new_var())
+#            prem = Tree('EvaluationLink', new_var(), new_var())
+#            imp = Tree('ImplicationLink', prem, conc)
 #            
 #            self.add_rule(Rule(conc, 
 #                                         [imp, prem], 
 #                                          name='ModusPonens_Eval'))
 
 #        for type in ['ImplicationLink']:
-#            conc = tree('EvaluationLink', a.add_node(t.PredicateNode, 'B'))
-#            prem = tree('EvaluationLink', a.add_node(t.PredicateNode, 'A'))
-#            imp = tree('ImplicationLink', prem, conc)
+#            conc = Tree('EvaluationLink', a.add_node(t.PredicateNode, 'B'))
+#            prem = Tree('EvaluationLink', a.add_node(t.PredicateNode, 'A'))
+#            imp = Tree('ImplicationLink', prem, conc)
 #            
 #            self.add_rule(Rule(conc, 
 #                                         [imp, prem], 
@@ -503,18 +503,18 @@ class Chainer:
         for type in ['AndLink', 'OrLink']:
             for size in xrange(5):
                 args = [new_var() for i in xrange(size+1)]
-                self.add_rule(Rule(tree(type, args),
+                self.add_rule(Rule(Tree(type, args),
                                    args,
                                    type[:-4]))
 
         # Adding a NOT
-        self.add_rule(Rule(tree('NotLink', 1),
-                           [ tree(1) ],
+        self.add_rule(Rule(Tree('NotLink', 1),
+                           [ Tree(1) ],
                            name = 'Not'))
 
         # Link conversion
-        self.add_rule(Rule(tree('InheritanceLink', 1, 2),
-                           [ tree('SubsetLink', 1, 2) ],
+        self.add_rule(Rule(Tree('InheritanceLink', 1, 2),
+                           [ Tree('SubsetLink', 1, 2) ],
                            name = 'Link2Link'))
 
         # This may cause weirdness with things matching too eagerly...
@@ -523,7 +523,7 @@ class Chainer:
 #        list_link = new_var()
 #        r = Rule(
 #                        fact,
-#                        [tree('ForAllLink', list_link, fact )], 
+#                        [Tree('ForAllLink', list_link, fact )], 
 #                        name = 'ForAll'     
 #                    )
 #        r.tv = True
@@ -622,18 +622,18 @@ class Rule :
 def test(a):
     c = Chainer(a)
 
-    #search(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    #search(Tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
     #fc(a)
 
-    #c.bc(tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+    #c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
 
 #    global rules
-#    A = tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
-#    B = tree('EvaluationLink',a.add_node(t.PredicateNode,'B'))
+#    A = Tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
+#    B = Tree('EvaluationLink',a.add_node(t.PredicateNode,'B'))
 #    rules.append(Rule(B, 
 #                                  [ A ]))
 
-    c.bc(tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
 
 
 from urllib2 import URLError

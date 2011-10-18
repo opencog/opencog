@@ -48,21 +48,21 @@ def fake_from_real_Atom(atom):
 
 def tree_with_fake_atoms(tr):
     if isinstance(tr.op, Atom):
-        return tree(fake_from_real_Atom(tr.op), [])
+        return Tree(fake_from_real_Atom(tr.op), [])
     elif tr.is_leaf():
         return tr
     else:
-        return tree(tr.op, map(tree_with_fake_atoms, tr.args))
+        return Tree(tr.op, map(tree_with_fake_atoms, tr.args))
 
 
 def coerce_tree(x):
     assert type(x) != type(None)
-    if isinstance(x, tree):
+    if isinstance(x, Tree):
         return x
     else:
-        return tree(x)
+        return Tree(x)
 
-class tree:
+class Tree:
 #    cdef public object op
 #    cdef public list args
 #    cdef tuple _tuple
@@ -92,7 +92,7 @@ class tree:
             if isinstance(self.op, Atom):
                 return self.op.name+':'+self.op.type_name
             else:
-                return 'tree:'+str(self.op)
+                return 'Tree:'+str(self.op)
         else:
             return '(' + str(self.op) + ' '+ ' '.join(map(str, self.args)) + ')'
 
@@ -138,8 +138,8 @@ class tree:
         return len(self.args) == 0
     
     def __cmp__(self, other):
-        if not isinstance(other, tree):
-            return cmp(tree, type(other))
+        if not isinstance(other, Tree):
+            return cmp(Tree, type(other))
         #print self.to_tuple(), other.to_tuple()
         return cmp(self.to_tuple(), other.to_tuple())
     
@@ -164,15 +164,15 @@ class tree:
         return isomorphic_conjunctions_ordered((self, ), (other, ))
     
     def unifies(self, other):
-        assert isinstance(other, tree)
+        assert isinstance(other, Tree)
         return unify(self, other, {}) != None
 
     def canonical(self):
         return canonical_trees([self])[0]
 
     def flatten(self):
-        # t=tree('EvaluationLink',tree(1),tree('ListLink',tree('cat'),tree('dog')))
-        return [self]+concat_lists(map(tree.flatten, self.args))
+        # t=Tree('EvaluationLink',Tree(1),Tree('ListLink',Tree('cat'),Tree('dog')))
+        return [self]+concat_lists(map(Tree.flatten, self.args))
 
 def tree_from_atom(atom, dic = {}):
     if atom.is_node():
@@ -184,10 +184,10 @@ def tree_from_atom(atom, dic = {}):
                 dic[atom] = new_var()
                 return var
         else:
-            return tree(atom)
+            return Tree(atom)
     else:
         args = [tree_from_atom(x, dic) for x in atom.out]
-        return tree(atom.type_name, args)
+        return Tree(atom.type_name, args)
 
 def atom_from_tree(tree, a):
     if tree.is_variable():
@@ -259,10 +259,10 @@ def find_matching_conjunctions(conj, trees, match = Match()):
         if s2 != None:
             # partly_bound_tr is like conj[0] but with its variables replaced by the specific
             # values in this tree. e.g. if we were looking for:
-            # (AtTimeLink tree:1000001 (EvaluationLink actionDone:PredicateNode (ListLink tree:1000003)))
+            # (AtTimeLink Tree:1000001 (EvaluationLink actionDone:PredicateNode (ListLink Tree:1000003)))
             # we could get:
-            # (AtTimeLink tree:1000005 (EvaluationLink actionDone:PredicateNode (ListLink
-            #       (ExecutionLink eat:GroundedSchemaNode (ListLink tree:1000006)))))
+            # (AtTimeLink Tree:1000005 (EvaluationLink actionDone:PredicateNode (ListLink
+            #       (ExecutionLink eat:GroundedSchemaNode (ListLink Tree:1000006)))))
             #partly_bound_tr = subst(s2, conj[0])
             match2 = Match(conj=match.conj+(conj[0],), subst=s2)
             
@@ -306,12 +306,12 @@ def unify(x, y, s):
         return None
     elif x == y:
         return s
-    elif isinstance(x, tree) and x.is_variable():
+    elif isinstance(x, Tree) and x.is_variable():
         return unify_var(x, y, s)
-    elif isinstance(y, tree) and y.is_variable():
+    elif isinstance(y, Tree) and y.is_variable():
         return unify_var(y, x, s)
         
-    elif isinstance(x, tree) and isinstance(y, tree):
+    elif isinstance(x, Tree) and isinstance(y, Tree):
         s2 = unify(x.op, y.op, s)
         return unify(x.args,  y.args, s2)
 
@@ -380,7 +380,7 @@ def subst(s, x):
         return x
     else: 
         #return tuple([x[0]]+ [subst(s, arg) for arg in x[1:]])
-        return tree(x.op, [subst(s, arg) for arg in x.args])
+        return Tree(x.op, [subst(s, arg) for arg in x.args])
 
 def subst_conjunction(substitution, conjunction):
     ret = []
@@ -389,7 +389,7 @@ def subst_conjunction(substitution, conjunction):
     return tuple(ret)
 
 def subst_from_binding(binding):
-    return dict([ (tree(i), obj) for i, obj in enumerate(binding)])
+    return dict([ (Tree(i), obj) for i, obj in enumerate(binding)])
 
 def binding_from_subst(subst, atomspace):
     return [ atom_from_tree(obj_tree, atomspace) for (var, obj_tree) in sorted(subst.items()) ]
@@ -413,7 +413,7 @@ def standardize_apart(tr, dic=None):
             dic[tr] = v
             return v
     else:
-        return tree(tr.op, [standardize_apart(a, dic) for a in tr.args])
+        return Tree(tr.op, [standardize_apart(a, dic) for a in tr.args])
 
 #def standardize_apart_subst(s, dic={}):
 #    """Replace all the variables in subst with new variables."""
@@ -424,7 +424,7 @@ def standardize_apart(tr, dic=None):
 def new_var():
     global _new_var_counter
     _new_var_counter += 1
-    return tree(_new_var_counter)
+    return Tree(_new_var_counter)
 
 _new_var_counter = 10**6
 
@@ -465,9 +465,9 @@ def canonical_trees(trs, dic = {}):
 
 def get_varlist(t):
     """Return a list of variables in tree, in the order they appear (with depth-first traversal). Would also work on a conjunction."""
-    if isinstance(t, tree) and t.is_variable():
+    if isinstance(t, Tree) and t.is_variable():
         return [t]
-    elif isinstance(t, tree):
+    elif isinstance(t, Tree):
         ret = []
         for arg in t.args:
             ret+=([x for x in get_varlist(arg) if x not in ret])
