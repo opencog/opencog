@@ -28,6 +28,7 @@
 
 #include <opencog/util/RandGen.h>
 #include <opencog/util/dorepeat.h>
+#include <opencog/util/oc_assert.h>
 
 #include "../eda/eda.h"
 

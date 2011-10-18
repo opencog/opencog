@@ -494,7 +494,7 @@ int moses_exec(int argc, char** argv) {
 
         OC_ASSERT(output_type == inferred_type);
 
-        auto_ptr<ifstream> in(open_data_file(input_data_file));
+        unique_ptr<ifstream> in(open_data_file(input_data_file));
 
         if(output_type == id::boolean_type) {
             // read input_data_file file
@@ -664,7 +664,7 @@ int moses_exec(int argc, char** argv) {
     // ANN problems //
     //////////////////
     } else if(problem == ann_it) { // regression based on input table using ann
-        auto_ptr<ifstream> in(open_data_file(input_data_file));
+        unique_ptr<ifstream> in(open_data_file(input_data_file));
         contin_input_table it;
         contin_output_table ot;
         // read input_data_file file
