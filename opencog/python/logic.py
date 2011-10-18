@@ -3,7 +3,6 @@
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, count_to_confidence, confidence_to_count
 import opencog.cogserver
 from tree import *
-from adaptors import find_matching_conjunctions
 from util import pp, OrderedSet, concat_lists
 from opencog.util import log
 
@@ -322,7 +321,12 @@ class Chainer:
 
     def compute_and_add_tv(self, app):
         # NOTE: assumes this is the real copy of the rule, not just a new one.
-        app.tv = True
+        #app.tv = True
+        input_tvs = [self.get_tvs(g) for g in app.goals]
+        if all(input_tvs):
+            input_tvs = [tvs[0] for tvs in input_tvs]
+            app.tv = app.formula(input_tvs,  None)
+            atom_from_tree(app.head, self.space).tv = app.tv
 
     def find_rule_applications(self, target):
         '''The main 'meat' of the chainer. Finds all possible rule-applications matching your criteria.
@@ -467,7 +471,8 @@ class Chainer:
             self.add_rule(Rule(Tree(2), 
                                          [Tree(type, 1, 2),
                                           Tree(1) ], 
-                                          name='ModusPonens'))
+                                          name='ModusPonens', 
+                                          formula = crispModusPonensFormula))
 
 #       # MP for AndLink as a premise
 #        for type in ['ImplicationLink']:
@@ -505,7 +510,8 @@ class Chainer:
                 args = [new_var() for i in xrange(size+1)]
                 self.add_rule(Rule(Tree(type, args),
                                    args,
-                                   type[:-4]))
+                                   type[:-4], 
+                                   formula = andSymmetricFormula))
 
         # Adding a NOT
         self.add_rule(Rule(Tree('NotLink', 1),
@@ -539,7 +545,7 @@ class Chainer:
         Chainer._convert_atoms = False
 
 class Rule :
-    def __init__ (self, head, goals, name, tv = False):
+    def __init__ (self, head, goals, name, tv = False, formula = identityFormula):
         if Chainer._convert_atoms:
             self.head = tree_with_fake_atoms(head)
             self.goals = map(tree_with_fake_atoms, goals)
@@ -549,8 +555,9 @@ class Rule :
 
         self.name = name
         self.tv = tv
+        self.formula = formula
 
-        self.bc_depth = 0
+        #self.bc_depth = 0
 
     def __str__(self):
         return self.name
@@ -576,7 +583,7 @@ class Rule :
     def standardize_apart(self):
         head_goals = (self.head,)+tuple(self.goals)
         tmp = standardize_apart(head_goals)
-        new_version = Rule(tmp[0], tmp[1:], name=self.name, tv = self.tv)
+        new_version = Rule(tmp[0], tmp[1:], name=self.name, tv = self.tv, formula=self.formula)
 
         return new_version
 
@@ -606,24 +613,67 @@ class Rule :
     def subst(self, s):
         new_head = subst(s, self.head)
         new_goals = list(subst_conjunction(s, self.goals))
-        new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv)
+        new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv, formula = self.formula)
         return new_rule
 
-    def category(self):
-        '''Returns the category of this rule. It can be either an axiom, a PLN Rule (e.g. Modus Ponens), or an
-        application. An application is a PLN Rule applied to specific arguments.'''
-        if self.name == '[axiom]':
-            return 'axiom'
-        elif self.name.startswith('[application]'):
-            return 'application'
-        else:
-            return 'rule'
+#    def category(self):
+#        '''Returns the category of this rule. It can be either an axiom, a PLN Rule (e.g. Modus Ponens), or an
+#        application. An application is a PLN Rule applied to specific arguments.'''
+#        if self.name == '[axiom]':
+#            return 'axiom'
+#        elif self.name.startswith('[application]'):
+#            return 'application'
+#        else:
+#            return 'rule'
+
+def identityFormula(tvs, U):
+    return TruthValue(tvs[0].mean, tvs[0].count)
 
 def deductionSimpleFormula(tvs, U):
     pass
 
+def crispModusPonensFormula(tvs, U):
+    AB, A = tvs
+    sAB, nAB = AB.mean, AB.confidence
+    sA, nA = A.mean, A.confidence
+
+    true = 0.99
+    if all(lambda x: x > true, [sAB, nAB, sA, nA]):
+        return TruthValue(1, confidence_to_count(1))
+    else:
+        return TruthValue(0, 0)
+
+def modusPonensFormula(tvs, U):
+    AB, A = tvs
+    sAB, nAB = AB.mean, AB.confidence
+    sA, nA = A.mean, A.confidence
+    # P(B|not A) -- how should we find this?
+    BNA = TruthValue(0, 0)
+    sBNA, nBNA = BNA.mean, BNA.confidence
+    
+    n2 = min(nAB, nA)
+    if n2 + nBNA > 0:
+        s2 = ((sAB * sA * n2 + nBNA +
+                 sBNA * (1 - sA) * nBNA) /
+                 above_zero(n2 + nBNA))
+    else:
+        s2 = BNA.confidence
+    
+    return TruthValue(s2, n2)
+
 def andSymmetricFormula(tvs, U):
-    sTot = 1.0
+    total_strength = 1.0
+    total_confidence = 1.0
+    
+    for tv in tvs:
+        log.fine(tv)
+        total_strength *= tv.mean
+        total_confidence *= tv.confidence
+    
+    return TruthValue(total_strength, total_confidence)
+
+def above_zero(n):
+    return max(n, 0.00001)
 
 def test(a):
     c = Chainer(a)
