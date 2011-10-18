@@ -13,6 +13,7 @@ from util import *
 #    def value(self):
 #        return self.id
 
+from collections import namedtuple
 class FakeAtom:
     '''A simple pure Python class that can emulate the Cython Atom class. It supports pickling
     and is safe to use for Python multiprocessing. It is also compatible with PyPy.'''
@@ -21,6 +22,8 @@ class FakeAtom:
         self.name = name
 #        self._handle = FakeHandle(id)
         self._handle_value = id
+        TruthValue = namedtuple('TruthValue', 'count')
+        self.tv = TruthValue(count=1)
     
     def __str__(self):
         return 'fake%s%s' % (self.type_name,  self.name)
