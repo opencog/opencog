@@ -30,6 +30,7 @@
 
 namespace opencog { namespace combo {
 
+using namespace std;
 using namespace boost;
 
 complete_truth_table::size_type
@@ -91,7 +92,7 @@ ctruth_table truth_table::compress() const {
     for(; in_it != input.end(); ++in_it, ++out_it) {
         ctruth_table::iterator dup_in_it = res.find(*in_it);
         if(dup_in_it == res.end())
-            res[*in_it] = std::make_pair(*out_it?0:1, *out_it?1:0);
+            res[*in_it] = make_pair(*out_it?0:1, *out_it?1:0);
         else {            // found, update duplicate's the output
             dup_in_it->second.first += *out_it?0:1;
             dup_in_it->second.second += *out_it?1:0;
@@ -223,16 +224,16 @@ void removeNonASCII(string& str) {
 }
 
 arity_t istreamArity(istream& in) {
-    std::string line;
+    string line;
     getline(in, line);    
-    return tokenizeRowIO<std::string>(line).first.size();
+    return tokenizeRowIO<string>(line).first.size();
 }
 
 ifstream* open_data_file(const string& fileName) {
     ifstream* in = new ifstream(fileName.c_str());
     if(!in->is_open()) {
         stringstream ss;
-        ss << "Could not open " << fileName << std::endl;
+        ss << "Could not open " << fileName << endl;
         OC_ASSERT(false, ss.str());
     }
     return in;
@@ -240,13 +241,13 @@ ifstream* open_data_file(const string& fileName) {
 
 vector<string> readInputLabels(const string& file) {
     auto_ptr<ifstream> in(open_data_file(file));
-    std::string line;
+    string line;
     getline(*in, line);    
-    return tokenizeRowIO<std::string>(line).first;
+    return tokenizeRowIO<string>(line).first;
 }
 
 arity_t dataFileArity(const string& fileName) {
-    auto_ptr<ifstream> in(open_data_file(fileName));
+    unique_ptr<ifstream> in(open_data_file(fileName));
     return istreamArity(*in);
 }
 
@@ -271,7 +272,7 @@ type_node infer_type_from_token(const string& token) {
 
 type_node inferDataType(const string& fileName) {
     type_node res;
-    auto_ptr<ifstream> in(open_data_file(fileName));
+    unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
     // check the last token of the first row
     getline(*in, line);
