@@ -91,7 +91,7 @@ cdef class TruthValue:
 def confidence_to_count(conf):
     KKK = 800.0
     conf = min(conf, 0.9999999)
-    return int(KKK * conf / (1.0 - conf))
+    return KKK * conf / (1.0 - conf)
 
 def count_to_confidence(count):
     KKK = 800.0
