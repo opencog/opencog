@@ -777,7 +777,6 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
     // NEAR = near
     
     return spatialRelations;
-    
 }
 
 std::string Entity::spatialRelationToString( Entity::SPATIAL_RELATION relation ) {
@@ -799,5 +798,4 @@ std::string Entity::spatialRelationToString( Entity::SPATIAL_RELATION relation )
     case TOTAL_RELATIONS:
         return " invalid relation ";
     }
-
 }

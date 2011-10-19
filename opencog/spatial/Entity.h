@@ -46,8 +46,6 @@ namespace opencog
 
     namespace spatial
     {
-
-
         class Entity;
         typedef boost::shared_ptr<Entity> EntityPtr;
 
@@ -58,8 +56,6 @@ namespace opencog
         class Entity
         {
         public:
-
-
 
             enum SPATIAL_RELATION 
             {
