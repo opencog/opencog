@@ -271,8 +271,31 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     Handle eh = python_pln_bc(cogserver().getAtomSpace(), t->target_handle);
     PyGILState_Release(gstate); 
 
-    TruthValue* etv = NULL;
-    bool passed = (eh != Handle::UNDEFINED);
+    TruthValuePtr etv = cogserver().getAtomSpace()->getTV(eh, NULL_VERSION_HANDLE);
+
+    if (etv) {
+        /* Print resulting truth value compared to test requirements */
+        printf("c: %f min: %f\n", etv->getConfidence(),
+                t->minTV->getConfidence());
+        printf("s: %f min: %f\n", etv->getMean(),
+                t->minTV->getMean());
+        printf("c: %f max: %f\n", etv->getConfidence(),
+                t->maxTV->getConfidence());
+        printf("s: %f max: %f\n", etv->getMean(),
+                t->maxTV->getMean());
+
+        // TODO: print a trail
+    }
+
+    /* Check whether resulting truth value meets test requirements */
+    bool passed = (
+        eh != Handle::UNDEFINED &&
+        etv &&
+        etv->getConfidence() >= t->minTV->getConfidence() &&
+        etv->getMean()       >= t->minTV->getMean() &&
+        etv->getConfidence() <= t->maxTV->getConfidence() &&
+        etv->getMean()       <= t->maxTV->getMean()
+    );
 
     if (passed) {
         tests_passed++;

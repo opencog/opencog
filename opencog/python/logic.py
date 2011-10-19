@@ -46,8 +46,10 @@ class Chainer:
         global _line
         _line = 1
 
-    @profile
+    #@profile
     def bc(self, target):
+        #import prof3d; prof3d.profile_me()
+        
         try:
             #save_trees([target], 'target')
             #save_trees([tree_from_atom(a) for a in self.space.get_atoms_by_type(t.Atom) if a.tv.count > 0], 'as')
@@ -74,6 +76,7 @@ class Chainer:
                 log.info('%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps)))
                 #print ('%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps)))
 
+            print [str(atom_from_tree(result, self.space).tv) for result in self.results]
             return [atom_from_tree(result, self.space).h for result in self.results]
         except Exception, e:
             import traceback, pdb
@@ -202,7 +205,7 @@ class Chainer:
                 if app.head.unifies(self.target):
                     self.results.append(app.head)
 
-                print (format_log('produced:', app.head))
+                print (format_log(app.name, 'produced:', app.head, app.tv))
 
                 real_results.append(app)
 
@@ -373,7 +376,8 @@ class Chainer:
         #rs = [r for r in rs if unify(expr, r.head, {}) != None]
         rs = [r for r in self.rules+self.apps if expr.isomorphic(r.head)]
 
-        return [r.tv for r in rs if r.tv]
+        return [r.tv for r in rs if r.tv.confidence > 0]
+        #return [r.tv for r in rs if r.tv]
 
 #    def is_true_weird(self, expr):
 #        #import pdb; pdb.set_trace()
@@ -450,7 +454,7 @@ class Chainer:
                 # A variable with a TV could just prove anything; that's evil!
                 if not tr.is_variable():
                     r = Rule(tr, [], '[axiom]')
-                    r.tv = True
+                    r.tv = obj.tv
                     self.add_rule(r)
 
         # Deduction
@@ -472,7 +476,7 @@ class Chainer:
                                          [Tree(type, 1, 2),
                                           Tree(1) ], 
                                           name='ModusPonens', 
-                                          formula = crispModusPonensFormula))
+                                          formula = modusPonensFormula))
 
 #       # MP for AndLink as a premise
 #        for type in ['ImplicationLink']:
@@ -539,13 +543,13 @@ class Chainer:
             # out[0] is the ListLink of VariableNodes, out[1] is the expression
             tr = tree_from_atom(atom.out[1])
             r = Rule(tr, [], name='ForAll')
-            r.tv = True
+            r.tv = atom.tv
             self.add_rule(r)
 
         Chainer._convert_atoms = False
 
 class Rule :
-    def __init__ (self, head, goals, name, tv = False, formula = identityFormula):
+    def __init__ (self, head, goals, name, tv = TruthValue(0, 0), formula = None):
         if Chainer._convert_atoms:
             self.head = tree_with_fake_atoms(head)
             self.goals = map(tree_with_fake_atoms, goals)
@@ -555,7 +559,7 @@ class Rule :
 
         self.name = name
         self.tv = tv
-        self.formula = formula
+        self.formula = if_(formula, formula, identityFormula)
 
         #self.bc_depth = 0
 
@@ -571,12 +575,11 @@ class Rule :
 #        return rep
 
     def __repr__ (self) :
-        rep = self.name + '\n'
-        rep += ' '*self.bc_depth*3
-        rep += str(self.head)
+        rep = self.name + ' '  + str(self.head) + ' ' + str(self.tv)
+        #rep += ' '*self.bc_depth*3
         rep += '\n'
         for goal in self.goals :
-            rep += ' '*(self.bc_depth*3+3)
+            #rep += ' '*(self.bc_depth*3+3)
             rep += str(goal) + '\n'
         return rep
 
@@ -637,8 +640,8 @@ def crispModusPonensFormula(tvs, U):
     sAB, nAB = AB.mean, AB.confidence
     sA, nA = A.mean, A.confidence
 
-    true = 0.99
-    if all(lambda x: x > true, [sAB, nAB, sA, nA]):
+    true = 0.1
+    if all(x > true for x in [sAB, nAB, sA, nA]):
         return TruthValue(1, confidence_to_count(1))
     else:
         return TruthValue(0, 0)
@@ -648,7 +651,7 @@ def modusPonensFormula(tvs, U):
     sAB, nAB = AB.mean, AB.confidence
     sA, nA = A.mean, A.confidence
     # P(B|not A) -- how should we find this?
-    BNA = TruthValue(0, 0)
+    BNA = TruthValue(0.5, 0.01)
     sBNA, nBNA = BNA.mean, BNA.confidence
     
     n2 = min(nAB, nA)
@@ -666,7 +669,7 @@ def andSymmetricFormula(tvs, U):
     total_confidence = 1.0
     
     for tv in tvs:
-        log.fine(tv)
+        log.fine(format_log(tv))
         total_strength *= tv.mean
         total_confidence *= tv.confidence
     
