@@ -764,7 +764,7 @@
 ;
 ; The truth value of 'proximity' is defined as 
 ; SimpleTruthValue tv(1.0 - (distance/mapDiagonal), 1);
-; See also ./opencog/embodiment/Control/PredicateUpdaters/NearPredicateUpdater.cc
+; See also ./opencog/embodiment/Control/PredicateUpdaters/SpatialPredicateUpdater.cc
 
 (define (get_proximity object_a object_b)
     (let ( (proximity_evaluation_link (list) )

@@ -7,7 +7,7 @@ ADD_LIBRARY (PredicateUpdaters
 	IsNoisyPredicateUpdater.cc
 	IsPeePlacePredicateUpdater.cc 
 	IsPooPlacePredicateUpdater.cc
-	NearPredicateUpdater.cc 
+    SpatialPredicateUpdater.cc 
 	PetPsychePredicatesUpdater.cc
 )
 

@@ -22,7 +22,7 @@
  */
 
 #include "PredicatesUpdater.h"
-#include "NearPredicateUpdater.h"
+#include "SpatialPredicateUpdater.h"
 #include "IsSmallPredicateUpdater.h"
 #include "IsNoisyPredicateUpdater.h"
 #include "IsMovablePredicateUpdater.h"
@@ -50,7 +50,7 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
     updaters.push_back(new IsPooPlacePredicateUpdater(atomSpace));
     updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
     // relation predicates
-    updaters.push_back(new NearPredicateUpdater(atomSpace));
+    updaters.push_back(new SpatialPredicateUpdater(atomSpace));
 
     petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);
 }

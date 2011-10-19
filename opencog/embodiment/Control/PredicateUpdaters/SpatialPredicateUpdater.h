@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/PredicateUpdaters/NearPredicateUpdater.h
+ * opencog/embodiment/Control/PredicateUpdaters/SpatialPredicateUpdater.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef NEARPREDICATEUPDATER_H_
-#define NEARPREDICATEUPDATER_H_
+#ifndef SPATIALPREDICATEUPDATER_H_
+#define SPATIALPREDICATEUPDATER_H_
 
 #include "BasicPredicateUpdater.h"
 #include <opencog/atomspace/AtomSpace.h>
@@ -39,13 +39,13 @@ namespace opencog { namespace oac {
  * @todo computeAllSpatialRelations should check which objects are near to each other using the spatial grid system.
  * @todo computeAllSpatialRelations doesn't handle the "between" relation (connected to the above)
  */
-class NearPredicateUpdater : public BasicPredicateUpdater
+class SpatialPredicateUpdater : public BasicPredicateUpdater
 {
 
 public:
 
-    NearPredicateUpdater(AtomSpace& _atomSpace);
-    ~NearPredicateUpdater();
+    SpatialPredicateUpdater(AtomSpace& _atomSpace);
+    ~SpatialPredicateUpdater();
 
     virtual void update(Handle object, Handle pet, unsigned long timestamp );
 

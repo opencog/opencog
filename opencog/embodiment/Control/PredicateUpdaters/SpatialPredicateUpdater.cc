@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/PredicateUpdaters/NearPredicateUpdater.cc
+ * opencog/embodiment/Control/PredicateUpdaters/SpatialPredicateUpdater.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -24,7 +24,7 @@
 
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include "NearPredicateUpdater.h"
+#include "SpatialPredicateUpdater.h"
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/spatial/Entity.h>
 
@@ -32,24 +32,28 @@ using namespace opencog::oac;
 using namespace opencog;
 using namespace spatial;
 
-NearPredicateUpdater::NearPredicateUpdater(AtomSpace &_atomSpace) :
+SpatialPredicateUpdater::SpatialPredicateUpdater(AtomSpace &_atomSpace) :
         BasicPredicateUpdater(_atomSpace) {}
 
-NearPredicateUpdater::~NearPredicateUpdater()
+SpatialPredicateUpdater::~SpatialPredicateUpdater()
 {
 }
 
-void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
+void SpatialPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
 {
+struct timeval timer_start, timer_end;
+time_t elapsed_time = 0;
+gettimeofday(&timer_start, NULL);
+
     // there is no map, no update is possible
     Handle spaceMapHandle = atomSpace.getSpaceServer().getLatestMapHandle();
     if (spaceMapHandle == Handle::UNDEFINED) {
-        logger().warn( "NearPredicateUpdater::%s - No space map handle found!", __FUNCTION__);
+        logger().warn( "SpatialPredicateUpdater::%s - No space map handle found!", __FUNCTION__);
         return;
     }
     const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
 
-    logger().debug( "NearPredicateUpdater::%s - Processing timestamp '%lu'",
+    logger().debug( "SpatialPredicateUpdater::%s - Processing timestamp '%lu'",
             __FUNCTION__, timestamp );
     if ( lastTimestamp != timestamp ) {
         lastTimestamp = timestamp;
@@ -80,7 +84,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
 //        spatial::Distance distance = spaceMap.getNextDistance();
 //        spatial::Distance gridDistance = distance/(spaceMap.xDim()+spaceMap.yDim());
 //        spaceMap.findEntities(gridPoint, gridDistance, back_inserter(entities));
-        logger().debug( "NearPredicateUpdater::%s - Nearby entities: %d",
+        logger().debug( "SpatialPredicateUpdater::%s - Nearby entities: %d",
                         __FUNCTION__, entities.size());
 
         for( unsigned int i = 0; i < entities.size( ); ++i ) {
@@ -91,7 +95,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             Handle entityBHandle = getHandle( entityBId );
 
             if ( !mapContainsEntity ) {
-                logger().debug( "NearPredicateUpdater::%s - Removing predicates "
+                logger().debug( "SpatialPredicateUpdater::%s - Removing predicates "
                         "from '%s' and '%s'", __FUNCTION__,
                         entityAId.c_str( ), entityBId.c_str( ) );
                 setPredicate( object, entityBHandle, "near", 0.0f, timestamp);
@@ -99,7 +103,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             } else {
                 const spatial::EntityPtr& entityB = spaceMap.getEntity( entityBId );
                 double distance = entityA->distanceTo( *entityB );
-                logger().debug( "NearPredicateUpdater::%s - Adding predicates "
+                logger().debug( "SpatialPredicateUpdater::%s - Adding predicates "
                         "for '%s' and '%s'. distance '%f'", __FUNCTION__,
                         entityAId.c_str( ), entityBId.c_str( ), distance );
 
@@ -111,7 +115,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
                 double nearDistance = spaceMap.getNearDistance( );
                 double nextDistance = spaceMap.getNextDistance( );
 
-                logger().debug( "NearPredicateUpdater::%s - nearDistance '%f'",
+                logger().debug( "SpatialPredicateUpdater::%s - nearDistance '%f'",
                                 __FUNCTION__, nearDistance );
 
                 setPredicate( object, entityBHandle, "near",
@@ -131,11 +135,29 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
 // Disable the log below, which prints almost useless info in log file. When the
 // object is removed, it will fail to find the object. That is normal and happens  
 // quite often for consumable objects, such as FoodCube
-//        logger().error( "NearPredicateUpdater::%s - Entity not found '%s'",
+//        logger().error( "SpatialPredicateUpdater::%s - Entity not found '%s'",
 //                        __FUNCTION__, ex.getMessage( ) );
     } // catch
 
-    //computeAllSpatialRelations(pet, object, timestamp);
+gettimeofday(&timer_end, NULL);
+elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+    (timer_end.tv_usec - timer_start.tv_usec);
+timer_start = timer_end; 
+logger().warn("SpatialPredicateUpdater::%s - process distance relations: consumed %f seconds", 
+               __FUNCTION__, 
+               1.0 * elapsed_time/1000000
+             );
+
+    computeAllSpatialRelations(pet, object, timestamp);
+
+gettimeofday(&timer_end, NULL);
+elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+    (timer_end.tv_usec - timer_start.tv_usec);
+timer_start = timer_end; 
+logger().warn("SpatialPredicateUpdater::%s - process other relations: consumed %f seconds", 
+               __FUNCTION__, 
+               1.0 * elapsed_time/1000000
+             );
 }
 
 void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, string entityA_id, string entityB_id, string entityC_id, AtomSpace& atomSpace, unsigned int timestamp);
@@ -144,7 +166,7 @@ void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, stri
 //! spatial grid, and/or apriori knowledge about which things can happen (e.g. "A is between B and C" can only happen if
 //! "B is left of A" and "C is right of A".) Responds only when an object has moved. (Should it also be every time the agent moves? -
 //! these relations are evaluated from a certain perspective...)
-void NearPredicateUpdater::computeAllSpatialRelations(Handle objectA, Handle observer, unsigned long timestamp)
+void SpatialPredicateUpdater::computeAllSpatialRelations(Handle objectA, Handle observer, unsigned long timestamp)
 {
     HandleSeq resultingFrames;
 
@@ -253,7 +275,7 @@ void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> relations, std:
     }
 }
 
-void NearPredicateUpdater::setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean, unsigned long timestamp)
+void SpatialPredicateUpdater::setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean, unsigned long timestamp)
 {
     // Don't record 0-strength relations
     if (mean == 0) return;
