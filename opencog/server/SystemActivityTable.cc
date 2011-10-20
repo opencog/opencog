@@ -1,7 +1,7 @@
 /*
  * opencog/server/SystemActivityTable.cc
  *
- * Copyright (C) 2009 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2009 by OpenCog Foundation
  * Copyright (C) 2010-2011 OpenCog Foundation
  * All Rights Reserved
  *

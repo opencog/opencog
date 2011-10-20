@@ -1,7 +1,7 @@
 /*
  * opencog/learning/dimensionalembedding/DimEmbedModule.cc
  *
- * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010 by OpenCog Foundation
  * All Rights Reserved
  *
  * Written by David Crane <dncrane@gmail.com>

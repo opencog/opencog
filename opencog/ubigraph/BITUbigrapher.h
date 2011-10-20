@@ -1,7 +1,7 @@
 /*
  * opencog/ubigraph/BITUbigrapher.h
  *
- * Copyright (C) 2008-2009 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2008-2009 by OpenCog Foundation
  * All Rights Reserved
  *
  * Written by Jared Wigmore <jared.wigmore@gmail.com>

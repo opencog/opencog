@@ -2,7 +2,7 @@
  * opencog/util/platform.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
  *
  * Written by Gustavo Gama <moshe@metacog.org>

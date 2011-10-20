@@ -1,7 +1,7 @@
 /*
  * Fri Feb 18 11:35:16 2005
  * Copyright (C) 2005  Ari A. Heljakka <heljakka at gmail.com>  / Novamente LLC
- * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>
  * All Rights Reserved
  *

@@ -1,7 +1,7 @@
 /*
  * opencog/CogServer/Module.h
  *
- * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2008 by OpenCog Foundation
  * Copyright (C) 2011 OpenCog Foundation
  * All Rights Reserved
  *

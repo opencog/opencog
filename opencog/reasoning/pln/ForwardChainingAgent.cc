@@ -1,7 +1,7 @@
 /*
  * opencog/reasoning/pln/ForwardChainingAgent.cc
  *
- * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010 by OpenCog Foundation
  * Written by Jared Wigmore <jared.wigmore@gmail.com>
  * All Rights Reserved
  *

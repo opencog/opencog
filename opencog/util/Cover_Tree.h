@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2011 by OpenCog Foundation
  * All Rights Reserved
  *
  * Written by David Crane <dncrane@gmail.com>

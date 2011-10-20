@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2008 by OpenCog Foundation
  * Written by   Ari Heljakka <heljakka@gmail.com>
  *              Joel Pitt <joel@fruitionnz.com>
  * All Rights Reserved

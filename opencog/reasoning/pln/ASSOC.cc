@@ -1,7 +1,7 @@
 /*
  * ASSOC.cc
  *
- * Copyright (C) 2009 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2009 by OpenCog Foundation
  * Written by Nil Geisweiller
  * All Rights Reserved
  *
