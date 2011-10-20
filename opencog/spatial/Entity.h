@@ -108,9 +108,7 @@ namespace opencog
                 std::vector<unsigned int> relations;
             }; 
 
-
             typedef boost::variant<std::string, int, double, bool> PropertyValueType;
-
 
             /**
              * All the types of entities
@@ -174,9 +172,10 @@ namespace opencog
                     double distanceToObject2 = referenceEntity->distanceTo(*o2);
                     if ( distanceToObject1 < distanceToObject2 ) {
                         return true;
-                    } else {
+                    } 
+                    else {
                         return false;
-                    } // else
+                    } 
                 }
             };
 
@@ -209,7 +208,6 @@ namespace opencog
              * @return
              */
             math::Vector3 getDirection( void ) const;
-
 
             /**
              * Getter for entity bounding box
@@ -356,7 +354,6 @@ namespace opencog
                                math::Vector3* pointInB = NULL, 
                                LimitRelation* = NULL ) const;
 
-
             /**
              * This method computes the limits of two objects.
              * The limits are the points of the objects located
@@ -422,12 +419,14 @@ namespace opencog
              * Extract the spatial relations between two objects
              * 
              * @param observer The observer entity
-             * @param besideDistance A distance used as threshold for considering an object beside or not another
+             * @param besideDistance A distance used as threshold for considering 
+             *        an object beside or not another
              * @param entityA The entity used as reference
              * @param entityB The entity that relates with the reference one
              * @return std::list<SPATIAL_RELATION> a list of all spatial relations between entityA and entityB
              */
-            std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer, double besideDistance,
+            std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
+                                                                 double besideDistance,
                                                                  const Entity& entityB ) const;
 
             /**
@@ -435,26 +434,27 @@ namespace opencog
              * Currently this can only be BETWEEN, which states that A is between B and C
              *
              * @param observer The observer entity
-             * @param besideDistance A distance used as threshold for considering an object beside or not another
+             * @param besideDistance A distance used as threshold for considering 
+             *        an object beside or not another
              * @param entityB The entity that relates with the reference one
              * @param entityC A second entity that relates with the reference one
              * @return std::list<SPATIAL_RELATION> a list of all spatial relations between entityA and entityB
              */
-            std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer, double besideDistance,
-                                                                 const Entity& entityB, const Entity& entityC ) const;
+            std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
+                                                                 double besideDistance,
+                                                                 const Entity& entityB,
+                                                                 const Entity& entityC ) const;
 
             /**
              * Return a string description of the relation
              */
             static std::string spatialRelationToString( SPATIAL_RELATION relation );
 
-
         protected:
             long id;
             std::string name;
 
             math::Dimension3 dimension;
-
 
             // the entity is positioned at a specific point on space
             math::Vector3 position;
@@ -465,7 +465,6 @@ namespace opencog
 
             // bounding box dimensions
             math::BoundingBox boundingBox;
-
 
             // properties map
             PropertyHashMap properties;

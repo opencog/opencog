@@ -42,27 +42,34 @@ class SortByAxisX {
 public:
     inline bool operator()( const math::Vector3& p1, const math::Vector3& p2 ) const {
         return p1.x < p2.x;
-    } // if
+    }
 };
 class SortByAxisY {
 public:
     inline bool operator()( const math::Vector3& p1, const math::Vector3& p2 ) const {
         return p1.y < p2.y;
-    } // if
+    }
 };
 class SortByAxisZ {
 public:
     inline bool operator()( const math::Vector3& p1, const math::Vector3& p2 ) const {
         return p1.z < p2.z;
-    } // if
+    }
 };
 
-Entity::Entity( const EntityPtr& entity ) : id(entity->id), name(entity->name), dimension(entity->dimension), position(entity->position), orientation(entity->orientation), expansionRadius(entity->expansionRadius), boundingBox(this)
+Entity::Entity( const EntityPtr& entity ) : 
+    id(entity->id), name(entity->name), dimension(entity->dimension),
+    position(entity->position), orientation(entity->orientation), 
+    expansionRadius(entity->expansionRadius), boundingBox(this)
 {
     //this->properties.resize( Entity::NUMBER_OF_PROPERTIES );
 }
 
-Entity::Entity( long id, const std::string& name, const math::Vector3& position, const math::Dimension3& dimension, const math::Quaternion& orientation, double radius ) : id(id), name(name), dimension(dimension), position(position), orientation(orientation), expansionRadius( radius ), boundingBox(this) {}
+Entity::Entity( long id, const std::string& name, const math::Vector3& position, 
+                const math::Dimension3& dimension, const math::Quaternion& orientation, 
+                double radius ) :
+                    id(id), name(name), dimension(dimension), position(position),
+                    orientation(orientation), expansionRadius( radius ), boundingBox(this) {}
 
 math::Vector3 Entity::getDirection( void ) const
 {
@@ -90,7 +97,7 @@ double Entity::distanceTo( const Entity& entity,
 
     if ( status != NULL ) {
         *status = localStatus;
-    } // if
+    }
     
     std::list<unsigned int> bordersOfA;
     std::list<unsigned int> bordersOfB;
@@ -101,18 +108,21 @@ double Entity::distanceTo( const Entity& entity,
         bordersOfA.push_back( XMAX );
         bordersOfB.push_back( XMIN );
         completelyOverlap = false;
-    } else if ( ( localStatus.relations[LimitRelation::X] & (2|8|32) ) > 0 ) {
+    }
+    else if ( ( localStatus.relations[LimitRelation::X] & (2|8|32) ) > 0 ) {
         // get the most left point of A and most right point of B
         bordersOfA.push_back( XMIN );
         bordersOfB.push_back( XMAX );
         completelyOverlap = false;
     }
+
     if ( ( localStatus.relations[LimitRelation::Y] & (1|4|16) ) > 0 ) {
         // get the most right point of A and most left point of B
         bordersOfA.push_back( YMAX );
         bordersOfB.push_back( YMIN );
         completelyOverlap = false;
-    } else if ( ( localStatus.relations[LimitRelation::Y] & (2|8|32) ) > 0 ) {
+    }
+    else if ( ( localStatus.relations[LimitRelation::Y] & (2|8|32) ) > 0 ) {
         // get the most left point of A and most right point of B
         bordersOfA.push_back( YMIN );
         bordersOfB.push_back( YMAX );
@@ -124,7 +134,8 @@ double Entity::distanceTo( const Entity& entity,
         bordersOfA.push_back( ZMAX );
         bordersOfB.push_back( ZMIN );
         completelyOverlap = false;
-    } else if ( ( localStatus.relations[LimitRelation::Z] & (2|8|32) ) > 0 ) {
+    } 
+    else if ( ( localStatus.relations[LimitRelation::Z] & (2|8|32) ) > 0 ) {
         // get the most left point of A and most right point of B
         bordersOfA.push_back( ZMIN );
         bordersOfB.push_back( ZMAX );
@@ -226,7 +237,6 @@ double Entity::distanceTo( const Entity& entity,
         } // for
     } // end block
     
-
     math::LineSegment chosenSegmentA( *segmentsInA.begin( ) );
     math::LineSegment chosenSegmentB( *segmentsInB.begin( ) );
     // special case where both entities are parallel each other
@@ -253,7 +263,7 @@ double Entity::distanceTo( const Entity& entity,
         if ( bb1.isInside( chosenSegmentB.pointA ) || bb1.isInside( chosenSegmentB.pointB ) ||
              bb2.isInside( chosenSegmentA.pointA ) || bb2.isInside( chosenSegmentA.pointB ) ) {
             return 0.0;
-        } // if
+        } 
     } // if
 
     return chosenSegmentA.distanceTo( chosenSegmentB, pointInA, pointInB );
@@ -264,15 +274,13 @@ void Entity::setProperty( Entity::PROPERTY property, PropertyValueType value )
     this->properties.insert( PropertyHashMap::value_type( property, value ) );
 }
 
-
-
 bool Entity::getBooleanProperty( Entity::PROPERTY property ) const
 {
     PropertyHashMap::const_iterator it = this->properties.find( property );
     const bool* result = NULL;
     if ( it == this->properties.end( ) || ( result = boost::get<bool>( &it->second ) ) == NULL ) {
         return false;
-    } // if
+    } 
     return *result;
 }
 
@@ -282,7 +290,7 @@ std::string Entity::getStringProperty( PROPERTY property ) const
     const std::string* result = NULL;
     if ( it == this->properties.end( ) || ( result = boost::get<std::string>( &it->second ) ) == NULL ) {
         return "";
-    } // if
+    }
     return *result;
 }
 
@@ -292,7 +300,7 @@ double Entity::getDoubleProperty( PROPERTY property ) const
     const double* result = NULL;
     if ( it == this->properties.end( ) || ( result = boost::get<double>( &it->second ) ) == NULL ) {
         return 0.0;
-    } // if
+    }
     return *result;
 }
 
@@ -302,7 +310,7 @@ int Entity::getIntProperty( PROPERTY property ) const
     const int* result = NULL;
     if ( it == this->properties.end( ) || ( result = boost::get<int>( &it->second ) ) == NULL ) {
         return 0;
-    } // if
+    }
     return *result;
 }
 
@@ -367,7 +375,6 @@ std::string Entity::toString( ) const
     return description.str();
 }
 
-
 Entity::LimitRelation Entity::computeObjectsLimits( const Entity& entityB ) const {
 
     const Entity& entityA = *this;
@@ -392,6 +399,7 @@ Entity::LimitRelation Entity::computeObjectsLimits( const Entity& entityB ) cons
     std::multiset<math::Vector3, SortByAxisX > sortedByXInB;
     std::multiset<math::Vector3, SortByAxisY > sortedByYInB;
     std::multiset<math::Vector3, SortByAxisZ > sortedByZInB;
+
     // sort all corners of both objects by X, Y and Z
     unsigned int i;
     for( i = 0; i < corners1.size( ); ++i ) {
@@ -567,13 +575,18 @@ Entity::LimitRelation Entity::computeObjectsLimits( const Entity& entityB ) cons
     return status;
 }
 
+std::list<Entity::SPATIAL_RELATION> 
+Entity::computeSpatialRelations( const Entity & observer, 
+                                 double besideDistance, 
+                                 const Entity & entityB,
+                                 const Entity & entityC ) const {
 
-std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations( 
-    const Entity& observer, double besideDistance, 
-        const Entity& entityB, const Entity& entityC ) const {
+    // TODO: cache relations of two objects would make this function run faster 
+    std::list<SPATIAL_RELATION> spatialRelationsAB = 
+        computeSpatialRelations( observer, besideDistance, entityB );
 
-    std::list<SPATIAL_RELATION> spatialRelationsAB = computeSpatialRelations( observer, besideDistance, entityB );
-    std::list<SPATIAL_RELATION> spatialRelationsAC = computeSpatialRelations( observer, besideDistance, entityC );
+    std::list<SPATIAL_RELATION> spatialRelationsAC = 
+        computeSpatialRelations( observer, besideDistance, entityC );
     
     std::list<SPATIAL_RELATION> relations;
     
@@ -581,7 +594,7 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
     unsigned int i;
     for( i = 0; i < activeRelationsAB.size( ); ++i ) {
         activeRelationsAB[i] = false;
-    } // for
+    } 
 
     std::vector<bool> relationsAB(6);
 
@@ -589,38 +602,46 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
     for( it = spatialRelationsAB.begin( ); it != spatialRelationsAB.end( ); ++it ) {
         if ( *it == RIGHT_OF ) {
             relationsAB[0] = true;
-        } else if ( *it == LEFT_OF ) {
+        }
+        else if ( *it == LEFT_OF ) {
             relationsAB[1] = true;
-        } else if ( *it == BEHIND ) {
+        } 
+        else if ( *it == BEHIND ) {
             relationsAB[2] = true;
-        } else if ( *it == IN_FRONT_OF ) {
+        }
+        else if ( *it == IN_FRONT_OF ) {
             relationsAB[3] = true;
-        } else if ( *it == ABOVE ) {
+        }
+        else if ( *it == ABOVE ) {
             relationsAB[4] = true;
-        } else if ( *it == BELOW ) {
+        } 
+        else if ( *it == BELOW ) {
             relationsAB[5] = true;
-        } // else
-        activeRelationsAB[*it] = true;
-    } // for
+        } 
+        else
+            activeRelationsAB[*it] = true;
+    }// for
 
     for( it = spatialRelationsAC.begin( ); it != spatialRelationsAC.end( ); ++it ) {
         if ( ( *it == LEFT_OF && relationsAB[0] ) ||
              ( *it == RIGHT_OF && relationsAB[1] ) ||
-             ( *it == BEHIND && relationsAB[2] ) ||
-             ( *it == IN_FRONT_OF && relationsAB[3] ) ||
+             ( *it == IN_FRONT_OF && relationsAB[2] ) ||
+             ( *it == BEHIND && relationsAB[3] ) ||
              ( *it == BELOW && relationsAB[4] ) ||
              ( *it == ABOVE && relationsAB[5] ) ) {
             relations.push_back( BETWEEN );
-        } // if
-    } // for
+        }// if
+    }// for
 
     return relations;
 }
 
-std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations( 
- const Entity& observer, double besideDistance, const Entity& entityB ) const {
-
-    const Entity& entityA = *this;
+std::list<Entity::SPATIAL_RELATION> 
+Entity::computeSpatialRelations( const Entity & observer, 
+                                 double besideDistance, 
+                                 const Entity & entityB ) const
+{
+    const Entity & entityA = *this;
 
     std::list<SPATIAL_RELATION> spatialRelations;
 
@@ -628,69 +649,89 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
     math::Vector3 pointInB;
 
     LimitRelation status;
-    double distance = entityA.distanceTo( entityB, &pointInA, &pointInB, &status );
+    double distance = entityA.distanceTo( entityB, & pointInA, & pointInB, & status );
 
     bool computeAsideRelations = false;
-    if ( ( status.relations[0] & 64 ) > 0 && ( status.relations[1] & 64 ) > 0 && ( status.relations[2] & 64 ) > 0 ) {
+    if ( ( status.relations[0] & 64 ) > 0 && 
+         ( status.relations[1] & 64 ) > 0 &&
+         ( status.relations[2] & 64 ) > 0 ) {
         // A overlaps B and vice-versa
         spatialRelations.push_back(INSIDE);
         spatialRelations.push_back(TOUCHING);
         spatialRelations.push_back(NEAR);
         return spatialRelations;
-    } else if ( ( status.relations[0] & 128 ) > 0 && ( status.relations[1] & 128 ) > 0 && ( status.relations[2] & 128 ) > 0 ) {
+    } 
+    else if ( ( status.relations[0] & 128 ) > 0 && 
+              ( status.relations[1] & 128 ) > 0 && 
+              ( status.relations[2] & 128 ) > 0 ) {
         // A is inside B
         spatialRelations.push_back(INSIDE);
         spatialRelations.push_back(NEAR);
         return spatialRelations;
-    } else if ( ( status.relations[0] & 256 ) > 0 && ( status.relations[1] & 256 ) > 0 && ( status.relations[2] & 256 ) > 0 ) {
+    }
+    else if ( ( status.relations[0] & 256 ) > 0 && 
+              ( status.relations[1] & 256 ) > 0 &&
+              ( status.relations[2] & 256 ) > 0 ) {
         // A is outside B
         spatialRelations.push_back(OUTSIDE);
         spatialRelations.push_back(NEAR);
-    } else if ( ( status.relations[0] & (64|128|512) ) > 0 && ( status.relations[1] & (64|128|512) ) > 0 && ( status.relations[2] & (64|128|512) ) > 0 ) {
+    }
+    else if ( ( status.relations[0] & (64|128|512) ) > 0 &&
+              ( status.relations[1] & (64|128|512) ) > 0 &&
+              ( status.relations[2] & (64|128|512) ) > 0 ) {
         // A is inside B and touching it
         spatialRelations.push_back(INSIDE);
         spatialRelations.push_back(TOUCHING);
         spatialRelations.push_back(NEAR);
         return spatialRelations;
-    } else if ( ( status.relations[0] & (64|256|1024) ) > 0 && ( status.relations[1] & (64|256|1024) ) > 0 && ( status.relations[2] & (64|256|1024) ) > 0 ) {
+    } 
+    else if ( ( status.relations[0] & (64|256|1024) ) > 0 &&
+              ( status.relations[1] & (64|256|1024) ) > 0 &&
+              ( status.relations[2] & (64|256|1024) ) > 0 ) {
         // A is outside B but touching it
         spatialRelations.push_back(OUTSIDE);
         spatialRelations.push_back(TOUCHING);
         spatialRelations.push_back(NEAR);
-    } else if ( ( status.relations[0] & (1|2) ) == 0 && ( status.relations[1] & (1|2) ) == 0 && ( status.relations[2] & (1|2) ) == 0 ) {
+    } 
+    else if ( ( status.relations[0] & (1|2) ) == 0 &&
+              ( status.relations[1] & (1|2) ) == 0 &&
+              ( status.relations[2] & (1|2) ) == 0 ) {
         // A is not completely inside B or vice-versa, but they intersect
         spatialRelations.push_back(TOUCHING);
         spatialRelations.push_back(NEAR);
-    } else { 
+    } 
+    else { 
         computeAsideRelations = true;
-    } // else
+    }// if 
 
     ///*************************** WARNING *********************************////
     // TODO: UP AXIS = Y (TODO: customize it)    
-    // an intersection must occur at X and Y besides
-    if ( ( status.relations[0] & (1|2) ) == 0 && ( status.relations[1] & (1|2) ) == 0 ) {
+    //       an intersection must occur at X and Y besides
+    if ( ( status.relations[0] & (1|2) ) == 0 &&
+         ( status.relations[1] & (1|2) ) == 0 ) {
         if ( ( status.relations[2] & (1|4|16) ) > 0 ) {
             spatialRelations.push_back(BELOW);
-
-        } else if ( ( status.relations[2] & (2|8|32) ) > 0 ) {
+        } 
+        else if ( ( status.relations[2] & (2|8|32) ) > 0 ) {
             spatialRelations.push_back(ABOVE);
-        } // else if
-    } // if
+        }
+    }// if
     ///*************************** WARNING *********************************////
 
     if ( distance > besideDistance ) {
         spatialRelations.push_back(FAR_);
         return spatialRelations;
-    } else if ( distance < besideDistance * (LocalSpaceMap2D::NEAR_FACTOR/LocalSpaceMap2D::NEXT_FACTOR) ) {
+    } 
+    else if ( distance < besideDistance * (LocalSpaceMap2D::NEAR_FACTOR/LocalSpaceMap2D::NEXT_FACTOR) ) {
         spatialRelations.push_back(NEAR);
-    } else {
+    } 
+    else {
         spatialRelations.push_back(BESIDE);
-    } // else
+    }// if
 
     if ( !computeAsideRelations ) {
         return spatialRelations;
-    } // if
-
+    }
 
     const math::Vector3& observerPosition = observer.getPosition( );
 
@@ -702,12 +743,12 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
     if ( observer.getName( ) == entityA.getName( ) || 
          entityA.getBoundingBox( ).isInside( observerPosition ) ) {
         observerDirection = -(observer.getDirection( ) * objectDirection.length( )+1.0);
-
-    } else if ( observer.getName( ) == entityB.getName( ) || 
-                entityB.getBoundingBox( ).isInside( observerPosition ) ) {
+    } 
+    else if ( observer.getName( ) == entityB.getName( ) || 
+              entityB.getBoundingBox( ).isInside( observerPosition ) ) {
         observerDirection = (observer.getDirection( ) * objectDirection.length( )+1.0);
-
-    } else {
+    }
+    else {
         math::Vector3 observerToEntityA, observerToEntityB;
         {
             math::Vector3 observerPoint, entityPoint;
@@ -725,8 +766,7 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
 
         double angle = std::acos( observerToEntityA.dotProduct( observerToEntityB ) );
         observerBetweenObjects = ( std::abs(angle) > 150.0/180.0*M_PI );
-
-    } // else
+    }// if
 
     double distanceToA = observerDirection.length( );
     double distanceBetweenAandB = objectDirection.length( );
@@ -748,7 +788,6 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
             angle += M_PI*2.0;
         }
         ///*************************** WARNING *********************************////
-
     }
     angle *= 180.0/M_PI;
     
@@ -757,21 +796,22 @@ std::list<Entity::SPATIAL_RELATION> Entity::computeSpatialRelations(
 
     if ( angle > lowerLimit && angle <= upperLimit ) {
         spatialRelations.push_back( LEFT_OF );
-
-    } else if ( ( angle > upperLimit && angle <= 180.0 ) || ( angle >= -180.0 && angle <= -upperLimit ) ) {
+    } 
+    else if ( ( angle > upperLimit && angle <= 180.0 ) || 
+              ( angle >= -180.0 && angle <= -upperLimit ) ) {
         spatialRelations.push_back( observerBetweenObjects ? BEHIND : IN_FRONT_OF );           
-        
-    } else if ( angle > -upperLimit && angle <= -lowerLimit ) {
+    }
+    else if ( angle > -upperLimit && angle <= -lowerLimit ) {
         spatialRelations.push_back( RIGHT_OF );
-        
-    } else {
+    }
+    else {
         if ( distanceToA > distanceBetweenAandB ) {
             spatialRelations.push_back( observerBetweenObjects ? IN_FRONT_OF : BEHIND );
-        } else {
+        } 
+        else {
             spatialRelations.push_back( angle > 0 ? RIGHT_OF : LEFT_OF );
-        } // else
-
-    } // else
+        }
+    }// if
 
     // BESIDE = next
     // NEAR = near
