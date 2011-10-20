@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 /**
  * Update all is_X predicates once a XML message has been processed by the
  * PAI component.
@@ -61,15 +60,14 @@ public:
     ~PredicatesUpdater();
 
     /**
-     * Update the predicates based on the objects that were
-     * created or changed via a PVPMessage processed by the
-     * PAI component.
+     * Update the predicates based on the objects that were created or changed 
+     * via a PVPMessage processed by the PAI component.
      *
-     * @param objects A std::vector containing the handles of
-     *     all OBJECT_NODES that were updated
+     * @param objects A std::vector containing the handles of all OBJECT_NODES
+     *                that were updated
      * @param timestamp The current timestamp in the virtual world.
      */
-    void update(std::vector<Handle> objects, unsigned long timestamp);
+    void update(std::vector<Handle> & objects, unsigned long timestamp);
 
 };// class
 

@@ -67,7 +67,6 @@ Handle BasicPredicateUpdater::getPredHandle(Handle object, std::string predicate
 
 Handle BasicPredicateUpdater::getHandle(std::string objName)
 {
-
     HandleSeq objHandle;
     atomSpace.getHandleSet(back_inserter(objHandle), OBJECT_NODE, objName, true);
 
@@ -81,18 +80,21 @@ Handle BasicPredicateUpdater::getHandle(std::string objName)
     // found more than one handle - WARNING, return the first one
     // TODO: In this case, it could return the one with the more specific Object type.
     else if (objHandle.size() > 1) {
-        logger().error("BasicPredUpdater - Found more than one Handle for SpaceMap object %s. Returning the first one.", objName.c_str());
+        logger().error("BasicPredUpdater - Found more than one Handle for SpaceMap object %s. Returning the first one.", 
+                       objName.c_str()
+                      );
         unsigned int i;
         for ( i = 0; i < objHandle.size( ); ++i ) {
-            logger().error("BasicPredUpdater - %s %i", atomSpace.getName(objHandle[i]).c_str( ), atomSpace.getType(objHandle[i]) );
+            logger().error("BasicPredUpdater - %s %i",
+                           atomSpace.getName(objHandle[i]).c_str( ), 
+                           atomSpace.getType(objHandle[i]) 
+                          );
         } // for
-
     }
 
     // found exactly one handle
     return objHandle[0];
 }
-
 
 bool BasicPredicateUpdater::isUpdated(Handle object, std::string predicateName)
 {
@@ -103,7 +105,15 @@ bool BasicPredicateUpdater::isUpdated(Handle object, std::string predicateName)
     return true;
 }
 
-void BasicPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
+void BasicPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp)
 {
     logger().warn("BasicPredUpdater::update - Virtual method. Subclasses should implement it.");
 }
+
+void BasicPredicateUpdater::update(std::vector<Handle> & objects, Handle pet, unsigned long timestamp)
+{
+    foreach (Handle object, objects) {
+        this->update(object, pet, timestamp); 
+    }
+}    
+

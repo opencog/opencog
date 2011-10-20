@@ -31,7 +31,6 @@
 #include "IsPickupablePredicateUpdater.h"
 #include "PetPsychePredicatesUpdater.h"
 
-
 // this time frame corresponde to one minute
 static const unsigned long timeWindow = 600;
 
@@ -42,14 +41,15 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
 {
     logger().debug("%s - PetId: '%s'.", __FUNCTION__, _petId.c_str());
 
-    // perceptual predicates
+    // Perceptual predicates
     updaters.push_back(new IsSmallPredicateUpdater(atomSpace));
     updaters.push_back(new IsNoisyPredicateUpdater(atomSpace));
     updaters.push_back(new IsMovablePredicateUpdater(atomSpace));
     updaters.push_back(new IsPickupablePredicateUpdater(atomSpace));
     updaters.push_back(new IsPooPlacePredicateUpdater(atomSpace));
     updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
-    // relation predicates
+
+    // Spatial relation predicates
     updaters.push_back(new SpatialPredicateUpdater(atomSpace));
 
     petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);
@@ -64,23 +64,18 @@ PredicatesUpdater::~PredicatesUpdater()
     delete this->petPsychePredicatesUpdater;
 }
 
-void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timestamp)
+void PredicatesUpdater::update(std::vector<Handle> & objects, unsigned long timestamp)
 {
-
     Handle petHandle = atomSpace.getHandle(PET_NODE, petId);
+
     if ( petHandle == Handle::UNDEFINED ) {
         petHandle = atomSpace.getHandle(HUMANOID_NODE, petId);
-    } // if
+    } 
 
-    for (unsigned int i = 0; i < objects.size(); i++) {
-        // updating all predicates ...
-        for (unsigned int j = 0; j < updaters.size(); j++) {
-            updaters[j]->update(objects[i], petHandle, timestamp );
-        }
-
-    } // for
+    foreach (BasicPredicateUpdater * updater, updaters)
+        updater->update(objects, petHandle, timestamp);
 
     if (objects.size() > 0) {
-        petPsychePredicatesUpdater->update( Handle::UNDEFINED, petHandle, timestamp );
+        petPsychePredicatesUpdater->update(Handle::UNDEFINED, petHandle, timestamp);
     }
 }

@@ -35,8 +35,50 @@ namespace opencog { namespace oac {
 class BasicPredicateUpdater
 {
 
+public:
+
+    /*
+     * Constructor and destructor;
+     */
+    BasicPredicateUpdater(AtomSpace& _atomSpace) : atomSpace(_atomSpace) {}
+
+    virtual  ~BasicPredicateUpdater() {}
+
+    /**
+     * Update all the predicates of given objects.  
+     *
+     * The default behavior of this function, especially for is_X predicates, is
+     * simply invoking the 'update' function below for each object. In many 
+     * circumstances, that is exactly what we want. Then there's no need to
+     * override this function. We only have to override the function below.  
+     *
+     * However, if we want to consider all the objects all at once, such as during 
+     * calculating spatial relations, we should override this function. 
+     */
+    virtual void update(std::vector<Handle> & objects, Handle pet, unsigned long timestamp);
+
+    /**
+     * Update is_X predicate based on the object in question. 
+     *
+     * The pet handle may be used to update predicates relative to the pet.
+     *
+     * @param object The handle of the object
+     * @param pet The handle of the pet
+     */
+    virtual void update(Handle object, Handle pet, unsigned long timestamp); 
+
+    /**
+     * Return true if there is already a is_X predicate created for the given
+     * object handle.
+     *
+     * @param object The handle of the object
+     * @param predicateName A string representation of the predicate
+     */
+    bool isUpdated(Handle object, std::string predicateName);
+
 protected:
-    AtomSpace& atomSpace;
+
+    AtomSpace & atomSpace;
 
     /**
      * Return the handle of all of the EvalLink for the predicate in
@@ -51,39 +93,11 @@ protected:
     /**
      * Get the handle of the OBJECT_NODE (or subtype) for the given name.
      *
-     * @return Handle::UNDEFINED if no handle is found, the exatcly handle if
+     * @return Handle::UNDEFINED if no handle is found, the exactly handle if
      * just one handle is found or the first handle if more than on handle
      * is found
      */
     Handle getHandle(std::string objName);
-
-public:
-
-    /*
-     * Constructor and destructor;
-     */
-    BasicPredicateUpdater(AtomSpace& _atomSpace) : atomSpace(_atomSpace) {}
-    virtual  ~BasicPredicateUpdater() {}
-
-    /**
-     * Update is_X predicate based on the object in question. The pet
-     * handle may be used to update predicates relative to the
-     * the pet.
-     *
-     * @param object The handle of the object
-     * @param pet The handle of the pet
-     */
-    virtual void update(Handle object, Handle pet, unsigned long timestamp );
-
-    /**
-     * Return true if there is already a is_X predicate created for the given
-     * object handle.
-     *
-     * @param object The handle of the object
-     * @param predicateName A string representation of the predicate
-     */
-    bool isUpdated(Handle object, std::string predicateName);
-
 
 }; // class
 
