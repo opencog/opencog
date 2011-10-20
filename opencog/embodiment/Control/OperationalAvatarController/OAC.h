@@ -56,8 +56,6 @@
 
 #include <opencog/embodiment/Control/OperationalAvatarController/FishgramAgent.h>
 
-#include "RuleEngine.h"
-
 class PsiModulatorUpdaterAgentUTest; 
 class PsiDemandUpdaterAgentUTest;
 class PsiFeelingUpdaterAgentUTest; 
@@ -147,7 +145,6 @@ private:
     /** opencog Agents */
     ProcedureInterpreterAgent* procedureInterpreterAgent;
     ImportanceDecayAgent* importanceDecayAgent;
-//    ActionSelectionAgent* actionSelectionAgent;
     EntityExperienceAgent* entityExperienceAgent;
 
     PsiModulatorUpdaterAgent * psiModulatorUpdaterAgent;
@@ -159,8 +156,6 @@ private:
 #ifdef HAVE_CYTHON
     FishgramAgent * fishgramAgent; 
 #endif    
-
-    RuleEngine* ruleEngine;
 
     /**
      * Load pet metadata for a given pet.
@@ -265,19 +260,11 @@ public:
     RandGen & getRandGen();
 
     /**
-     * Get the RuleEngine associated with the OAC.
-     *
-     * @return The RuleEngine associated with the OAC.
-     */
-    RuleEngine & getRuleEngine();
-
-    /**
      * Get the Procedure Interpreter associated with the OAC.
      *
      * @return The ProcedureInterpreter associated with the OAC.
      */
     Procedure::ProcedureInterpreter & getProcedureInterpreter();
-
 
     /**
      * Get the Procedure Repository associated with the OAC.
@@ -326,7 +313,6 @@ public:
 
     SingletonFactory<ProcedureInterpreterAgent, Agent> procedureInterpreterAgentFactory;
     SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
-//    SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
     SingletonFactory<EntityExperienceAgent, Agent> entityExperienceAgentFactory;
 
     SingletonFactory <PsiModulatorUpdaterAgent, Agent> psiModulatorUpdaterAgentFactory;

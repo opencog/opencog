@@ -42,7 +42,6 @@
 
 #include "OAC.h"
 
-
 /**
  * Uncoment the following define in order to delete atomSpace content inside OAC
  * destructor
@@ -246,11 +245,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                );
 #endif    
 
-//    if (config().get_bool("ACTION_SELECTION_ENABLED")) {
-//        actionSelectionAgent->setFrequency(config().get_int("RE_CYCLE_PERIOD"));
-//        this->startAgent(actionSelectionAgent);
-//    }
-
 //    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         // adds the same procedure interpreter agent to schedule again
 //        this->startAgent(procedureInterpreterAgent);
@@ -408,11 +402,6 @@ int OAC::addRulesToAtomSpace()
     // Load the psi rules file, including Modulators, DemandGoals and Rules 
     std::string psi_rules_file_name; 
 
-//    std::string psi_rules_file_name = 
-//                                ( boost::format(config().get("PSI_RULES_FILENAME_MASK")) %
-//                                                                this->getPet().getType()
-//                                ).str();
-
     if ( config().get_bool("ENABLE_UNITY_CONNECTOR") ) 
         psi_rules_file_name = "unity_rules.scm"; 
     else
@@ -498,7 +487,6 @@ OAC::~OAC()
     // agents
     delete (procedureInterpreterAgent);
     delete (importanceDecayAgent);
-//    delete (actionSelectionAgent);
     delete (psiModulatorUpdaterAgent);
     delete (psiActionSelectionAgent);
     delete (psiRelationUpdaterAgent); 
@@ -835,30 +823,6 @@ void OAC::decayShortTermImportance()
 {
     atomSpace->decayShortTermImportance();
 }
-
-
-/* TODO: OAC does not extend NetworkElement anymore.
- * So, a better design must be created to figure out LS has just recovered from a failure:
-void OAC::markAsAvailableElement(const std::string& id){
-    logger().debug("OAC - markAsAvailableElement(%s).", id.c_str());
-
-    // remove element from unavailable list and handshake if router
-    NetworkElement::markAsAvailableElement(id);
-
-    if (isInitialized()) {
-        // OAC-specific actions
-        PetMode mode = pet->getMode();
-        if(mode == OperationalAvatarController::LEARNING){
-            // Pet still in learning mode and LS has recovered from a crash. Restart
-            // the learning process from the begining
-     // TODO: Review this. Perhaps the best thing to do is exiting Learning mode and give feedback to the user (via Feedback messages)
-            if(id == config().get("LS_ID")){
-                pet->restartLearning();
-            }
-        }
-    }
-}
-*/
 
 const std::string OAC::getPath(const std::string& petId, const std::string& filename)
 {
