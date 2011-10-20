@@ -79,7 +79,4 @@ void IsNoisyPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
 
     // 2. all other objects are not (for starters)
     AtomSpaceUtil::setPredicateValue(atomSpace, "is_noisy", tv, object);
-
-
-
 }

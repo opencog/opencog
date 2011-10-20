@@ -68,7 +68,6 @@ double IsSmallPredicateUpdater::getSize(Handle object)
 
 void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
 {
-
     // an is_small predicate is already assigned for this object, just
     // return. This function is used to keep the predicates consistent
     // over time

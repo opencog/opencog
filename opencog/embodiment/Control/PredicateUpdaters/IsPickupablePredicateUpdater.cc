@@ -45,7 +45,6 @@ IsPickupablePredicateUpdater::~IsPickupablePredicateUpdater()
 
 void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
 {
-
     // an is_pickupable predicate is already assigned for this object, just
     // return. This test is used to keep the predicates consistent
     // over time

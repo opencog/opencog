@@ -41,7 +41,6 @@ IsMovablePredicateUpdater::~IsMovablePredicateUpdater()
 
 void IsMovablePredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
 {
-
     // an is_movable predicate is already assigned for this object, just
     // return. This function is used to keep the predicates consistent
     // over time
@@ -63,5 +62,4 @@ void IsMovablePredicateUpdater::update(Handle object, Handle pet, unsigned long 
     SimpleTruthValue tv( isMovable ? 1.0 : 0.0, 1.0);
 
     AtomSpaceUtil::setPredicateValue(atomSpace, "is_movable", tv, object);
-
 }

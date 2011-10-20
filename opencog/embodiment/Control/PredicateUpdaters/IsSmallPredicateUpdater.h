@@ -59,7 +59,7 @@ public:
      * @param object The handle of the object, used to get it's category
      *        and size.
      */
-    void update(Handle object, Handle pet, unsigned long timestamp );
+    void update(Handle object, Handle pet, unsigned long timestamp);
 
 }; // class
 

@@ -113,7 +113,7 @@ spatial::math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Ha
 
 }
 
-void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long timestamp )
+void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long timestamp)
 {
     logger().info("PetPsychePredicatesUpdater - updating context predicates..." );
 

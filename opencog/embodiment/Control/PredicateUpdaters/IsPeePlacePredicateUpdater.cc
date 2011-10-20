@@ -41,7 +41,6 @@ IsPeePlacePredicateUpdater::~IsPeePlacePredicateUpdater()
 
 void IsPeePlacePredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
 {
-
     // an is_pee_place predicate is already assigned for this object, just
     // return. This function is used to keep the predicates consistent
     // over time

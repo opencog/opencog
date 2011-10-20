@@ -39,9 +39,9 @@ SpatialPredicateUpdater::~SpatialPredicateUpdater()
 
 void SpatialPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp)
 {
-//struct timeval timer_start, timer_end;
-//time_t elapsed_time = 0;
-//gettimeofday(&timer_start, NULL);
+struct timeval timer_start, timer_end;
+time_t elapsed_time = 0;
+gettimeofday(&timer_start, NULL);
 
     // If there is no map, none update is possible
     Handle spaceMapHandle = atomSpace.getSpaceServer().getLatestMapHandle();
@@ -64,25 +64,25 @@ void SpatialPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
 
     this->computeDistanceSpatialRelations(spaceMap, entities, object, timestamp); 
 
-//gettimeofday(&timer_end, NULL);
-//elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-//    (timer_end.tv_usec - timer_start.tv_usec);
-//timer_start = timer_end; 
-//logger().warn("SpatialPredicateUpdater::%s - process distance relations: consumed %f seconds", 
-//               __FUNCTION__, 
-//               1.0 * elapsed_time/1000000
-//             );
+gettimeofday(&timer_end, NULL);
+elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+    (timer_end.tv_usec - timer_start.tv_usec);
+timer_start = timer_end; 
+logger().warn("SpatialPredicateUpdater::%s - process distance relations: consumed %f seconds", 
+               __FUNCTION__, 
+               1.0 * elapsed_time/1000000
+             );
 
     this->computeDirectionalSpatialRelations(spaceMap, entities, pet, object, timestamp);
 
-//gettimeofday(&timer_end, NULL);
-//elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-//    (timer_end.tv_usec - timer_start.tv_usec);
-//timer_start = timer_end; 
-//logger().warn("SpatialPredicateUpdater::%s - process directional relations: consumed %f seconds", 
-//               __FUNCTION__, 
-//               1.0 * elapsed_time/1000000
-//             );
+gettimeofday(&timer_end, NULL);
+elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+    (timer_end.tv_usec - timer_start.tv_usec);
+timer_start = timer_end; 
+logger().warn("SpatialPredicateUpdater::%s - process directional relations: consumed %f seconds", 
+               __FUNCTION__, 
+               1.0 * elapsed_time/1000000
+             );
 }
 
 void SpatialPredicateUpdater::
