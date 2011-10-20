@@ -1,14 +1,19 @@
 #import pyximport; pyximport.install()
 
-from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, count_to_confidence, confidence_to_count
+#from IPython.Debugger import Tracer; debug_here = Tracer()
+
+from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
 import opencog.cogserver
 from tree import *
 from util import pp, OrderedSet, concat_lists
 from opencog.util import log
 
+import formulas
+
 from sys import stdout
 from profilestats import profile
 from time import time
+import exceptions
 
 t = types
 
@@ -81,6 +86,7 @@ class Chainer:
         except Exception, e:
             import traceback, pdb
 
+            #pdb.set_trace()
             print traceback.format_exc(10)
             # Start the post-mortem debugger
             #pdb.pm()
@@ -328,7 +334,9 @@ class Chainer:
         input_tvs = [self.get_tvs(g) for g in app.goals]
         if all(input_tvs):
             input_tvs = [tvs[0] for tvs in input_tvs]
-            app.tv = app.formula(input_tvs,  None)
+            input_tvs = [(tv.mean, tv.count) for tv in input_tvs]
+            tv_tuple = app.formula(input_tvs,  None)
+            app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
             atom_from_tree(app.head, self.space).tv = app.tv
 
     def find_rule_applications(self, target):
@@ -461,14 +469,21 @@ class Chainer:
         for type in self.deduction_types:
             self.add_rule(Rule(Tree(type, 1,3), 
                                          [Tree(type, 1, 2),
-                                          Tree(type, 2, 3) ], 
-                                          name='Deduction'))
+                                          Tree(type, 2, 3), 
+                                          Tree(1),
+                                          Tree(2), 
+                                          Tree(3)],
+                                        name='Deduction', 
+                                        formula = formulas.deductionSimpleFormula))
 
         # Inversion
         for type in self.deduction_types:
-            self.add_rule(Rule( Tree(type, 1, 2), 
-                                         [Tree(type, 2, 1)], 
-                                         name='Inversion'))
+            self.add_rule(Rule( Tree(type, 2, 1), 
+                                         [Tree(type, 1, 2),
+                                          Tree(1),
+                                          Tree(2)], 
+                                         name='Inversion', 
+                                         formula = formulas.inversionFormula))
 
         # ModusPonens
         for type in ['ImplicationLink']:
@@ -476,7 +491,7 @@ class Chainer:
                                          [Tree(type, 1, 2),
                                           Tree(1) ], 
                                           name='ModusPonens', 
-                                          formula = modusPonensFormula))
+                                          formula = formulas.modusPonensFormula))
 
 #       # MP for AndLink as a premise
 #        for type in ['ImplicationLink']:
@@ -509,23 +524,33 @@ class Chainer:
 #                                          name='ModusPonens_AB'))
 
         # AND/OR
-        for type in ['AndLink', 'OrLink']:
-            for size in xrange(5):
-                args = [new_var() for i in xrange(size+1)]
-                self.add_rule(Rule(Tree(type, args),
-                                   args,
-                                   type[:-4], 
-                                   formula = andSymmetricFormula))
+        type = 'AndLink'
+        for size in xrange(5):                
+            args = [new_var() for i in xrange(size+1)]
+            self.add_rule(Rule(Tree(type, args),
+                               args,
+                               type[:-4], 
+                               formula = formulas.andSymmetricFormula))
+
+        type = 'OrLink'
+        for size in xrange(2):
+            args = [new_var() for i in xrange(size+1)]
+            self.add_rule(Rule(Tree(type, args),
+                               args,
+                               type[:-4], 
+                               formula = formulas.orFormula))
 
         # Adding a NOT
         self.add_rule(Rule(Tree('NotLink', 1),
                            [ Tree(1) ],
-                           name = 'Not'))
+                           name = 'Not', 
+                           formula = formulas.notFormula))
 
         # Link conversion
         self.add_rule(Rule(Tree('InheritanceLink', 1, 2),
                            [ Tree('SubsetLink', 1, 2) ],
-                           name = 'Link2Link'))
+                           name = 'SubsetLink=>InheritanceLink', 
+                           formula = formulas.ext2InhFormula))
 
         # This may cause weirdness with things matching too eagerly...
 #       # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
@@ -559,7 +584,7 @@ class Rule :
 
         self.name = name
         self.tv = tv
-        self.formula = if_(formula, formula, identityFormula)
+        self.formula = if_(formula, formula, formulas.identityFormula)
 
         #self.bc_depth = 0
 
@@ -629,55 +654,6 @@ class Rule :
 #        else:
 #            return 'rule'
 
-def identityFormula(tvs, U):
-    return TruthValue(tvs[0].mean, tvs[0].count)
-
-def deductionSimpleFormula(tvs, U):
-    pass
-
-def crispModusPonensFormula(tvs, U):
-    AB, A = tvs
-    sAB, nAB = AB.mean, AB.confidence
-    sA, nA = A.mean, A.confidence
-
-    true = 0.1
-    if all(x > true for x in [sAB, nAB, sA, nA]):
-        return TruthValue(1, confidence_to_count(1))
-    else:
-        return TruthValue(0, 0)
-
-def modusPonensFormula(tvs, U):
-    AB, A = tvs
-    sAB, nAB = AB.mean, AB.confidence
-    sA, nA = A.mean, A.confidence
-    # P(B|not A) -- how should we find this?
-    BNA = TruthValue(0.5, 0.01)
-    sBNA, nBNA = BNA.mean, BNA.confidence
-    
-    n2 = min(nAB, nA)
-    if n2 + nBNA > 0:
-        s2 = ((sAB * sA * n2 + nBNA +
-                 sBNA * (1 - sA) * nBNA) /
-                 above_zero(n2 + nBNA))
-    else:
-        s2 = BNA.confidence
-    
-    return TruthValue(s2, n2)
-
-def andSymmetricFormula(tvs, U):
-    total_strength = 1.0
-    total_confidence = 1.0
-    
-    for tv in tvs:
-        log.fine(format_log(tv))
-        total_strength *= tv.mean
-        total_confidence *= tv.confidence
-    
-    return TruthValue(total_strength, total_confidence)
-
-def above_zero(n):
-    return max(n, 0.00001)
-
 def test(a):
     c = Chainer(a)
 
@@ -692,7 +668,8 @@ def test(a):
 #    rules.append(Rule(B, 
 #                                  [ A ]))
 
-    c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    atom_from_tree(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')), a)
+    print c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
 
 
 from urllib2 import URLError
