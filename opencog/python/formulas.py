@@ -96,7 +96,7 @@ def orFormula(tvs, U):
     return (s_tot, n_tot)
 
 def ext2InhFormula(tvs, U):
-    (sA, nA), (sB, nB) = tvs
+    (sAB, nAB) = tvs
     
     sABint = sAB
     nABint = nAB * EXTENSION_TO_INTENSION_DISCOUNT_FACTOR

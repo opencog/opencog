@@ -72,9 +72,9 @@ class Chainer:
             start = time()
             while self.bc_later and not self.results:
                 log.info(format_log(time() - start))
-#                if time() - start > 30:
-#                    print 'TIMEOUT'
-#                    break
+                if time() - start > 60:
+                    print 'TIMEOUT'
+                    break
                 children = self.bc_step()
                 self.propogate_results_loop(children)
 
