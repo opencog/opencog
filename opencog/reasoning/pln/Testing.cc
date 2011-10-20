@@ -273,7 +273,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 
     TruthValuePtr etv = cogserver().getAtomSpace()->getTV(eh, NULL_VERSION_HANDLE);
 
-    if (etv) {
+    if (*etv != TruthValue::NULL_TV()) {
         /* Print resulting truth value compared to test requirements */
         printf("c: %f min: %f\n", etv->getConfidence(),
                 t->minTV->getConfidence());
