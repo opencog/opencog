@@ -5,7 +5,7 @@
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
 import opencog.cogserver
 from tree import *
-from util import pp, OrderedSet, concat_lists
+from util import pp, OrderedSet, concat_lists, inplace_set_attributes
 from opencog.util import log
 
 import formulas
@@ -413,15 +413,20 @@ class Chainer:
         #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
         return Tree(target, [self.traverse_tree(g, already) for g in subgoals_])
 
-    def follow_tree(self, tr, level = 1):
-        print ' '*level, Tree(tr.op)
+    def print_tree(self, tr, level = 1):
+        print ' '*(level-1)*3, tr.op, tr.depth
         
         for child in tr.args:
-            self.follow_tree(child, level+1)
+            self.print_tree(child, level+1)
 
-    def add_depths(self, tr, level = 1):
-        args = [self.add_depths(child, level+1) for child in tr.args]
-        return Tree((level, tr.op), args)
+    def add_depths(self, bitnode, level = 1):
+        #args = [self.add_depths(child, level+1) for child in tr.args]
+        #return Tree((level, tr.op), args)
+        
+        args = [self.add_depths(child, level+1) for child in bitnode.args]
+        return inplace_set_attributes(bitnode, depth=level)
+
+    #def add_best_above(self
 
     def get_fittest(self, queue):
         def num_vars(target):
@@ -432,20 +437,21 @@ class Chainer:
 
         bit = self.traverse_tree(self.target, set())
         deep = self.add_depths(bit)
-        #print format_log(self.follow_tree(deep))
+        
+        #self.print_tree(deep)
+        
         flat = deep.flatten()
-        in_queue = [depthed_tr for depthed_tr in flat if self.contains_isomorphic_tree(depthed_tr.op[1], queue)]
+        in_queue = [bitnode for bitnode in flat if self.contains_isomorphic_tree(bitnode.op, queue)]
         if not in_queue:
             import pdb; pdb.set_trace()
         assert in_queue
-        #print in_queue
-        ranked = [(tr.op[0]*depth_weight
-                        +num_vars(tr.op[1])*solution_space_weight
-                        , tr.op[1])
-                       for tr in in_queue]
+        scores = [bitnode.depth*depth_weight
+                        +num_vars(bitnode.op)*solution_space_weight
+                       for bitnode in in_queue]
+        ranked_bitnodes = zip(scores, in_queue)
         #ranked.sort(key=lambda (score, tr): -score)
         #print format_log(ranked)
-        best = max(ranked, key=lambda (score, tr): score) [1]
+        best = max(ranked_bitnodes, key=lambda (score, tr): score) [1] . op
         length = len(queue)
         queue.remove(next(existing for existing in queue if existing.isomorphic(best)))
         assert len(queue) == length - 1

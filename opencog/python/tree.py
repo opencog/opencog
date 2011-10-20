@@ -62,7 +62,7 @@ def coerce_tree(x):
     else:
         return Tree(x)
 
-class Tree:
+class Tree (object):
 #    cdef public object op
 #    cdef public list args
 #    cdef tuple _tuple

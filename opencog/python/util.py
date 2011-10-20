@@ -13,6 +13,10 @@ import operator
 def concat_lists(lists):    
     return reduce(operator.concat, lists, [])
 
+def inplace_set_attributes(obj, **attr_values):
+    obj.__dict__.update(attr_values)
+    return obj
+
 def output_atoms(atomspace):
     roots = [x for x in atomspace.get_atoms_by_type(types.Atom) if not x.incoming]
     #return repr( map(tree_from_atom, roots) )
