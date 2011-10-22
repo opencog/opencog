@@ -31,6 +31,8 @@
 
 namespace opencog { namespace moses {
 
+using namespace std;
+
 // a map btw host name and number of jobs allocated
 typedef map<string, unsigned> jobs_t;
 
@@ -83,10 +85,9 @@ static const pair<string, string> max_candidates_opt("max-candidates", "M");
 static const pair<string, string> include_dominated_opt("include-dominated", "I");
 static const pair<string, string> hc_terminate_if_improvement_opt("hc-terminate-if-improvement", "T");
 
-string opt_desc_str(const pair<string, string>& opt) {
-    return string(opt.first).append(",").append(opt.second);
-}
+string opt_desc_str(const pair<string, string>& opt);
 
 } // ~namespace moses
 } // ~namespace opencog
+
 #endif // _OPENCOG_MOSES_OPTIONS_NAMES_H

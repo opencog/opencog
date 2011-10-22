@@ -13,6 +13,7 @@ ENDIF (APPLE)
 ADD_LIBRARY(util SHARED
     ansi
 	algorithm
+    log_prog_name
 	based_variant
 	cluster
 	Config
@@ -52,6 +53,7 @@ TARGET_LINK_LIBRARIES(util
 INSTALL(FILES
     ansi.h
 	algorithm.h
+    log_prog_name.h
 	based_variant.h
 	cluster.h
 	Config.h
