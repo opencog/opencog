@@ -72,6 +72,8 @@ namespace opencog
                 BETWEEN,
                 INSIDE,
                 OUTSIDE,
+                ON_TOP_OF, 
+                ADJACENT,
         
                 TOTAL_RELATIONS
             };
@@ -360,47 +362,32 @@ namespace opencog
              * at its extremities on each of X,Y,Z axis
              *
              * Here are the possible types of limits
-             **********************
-             * 1) |--A--|
-             *            |--B--|
-             **********************
-             * 2)         |--A--|
-             *    |--B--|
-             **********************
-             * 4) |--A--|     
-             *        |--B--|
-             **********************
-             * 8)     |--A--|
-             *    |--B--|
-             **********************
-             *16) |--A--|
-             *          |--B--|
-             **********************
-             *32)       |--A--|
-             *    |--B--|      
-             **********************
-             *64) |--A--|
-             *    |--B--|     
-             *  
-             **********************
-             *128)  |--A--|
-             *    |----B----|
-             **********************
-             *256)|----A----|
-             *      |--B--|
-             **********************      
-             *512)|--A--|
-             *    |----B----|
              *
-             *        |--A--|
-             *    |----B----|
-             **********************
-             *1024)|----A----|
-             *     |--B--|
-             *
-             *     |----A----|
-             *         |--B--|
-             *+++++++++++++++++++++
+             ********************* ********************* **********************
+             *                     *                     *
+             * 1) |--A--|          * 2)         |--A--|  * 4) |--A--|     
+             *            |--B--|  *    |--B--|          *        |--B--|
+             *                     *                     * 
+             ********************* ********************* **********************
+             *                     *                     *
+             * 8)     |--A--|      * 16) |--A--|         * 32)       |--A--|     
+             *    |--B--|          *           |--B--|   *     |--B--|      
+             *                     *                     *
+             ********************* ********************* **********************
+             *                     *                     *
+             * 64) |--A--|         * 128)  |--A--|       * 256) |----A----|
+             *     |--B--|         *     |----B----|     *        |--B--|
+                                   *                     *
+             ********************* ********************* ********************** 
+             *                     *
+             * 512) |--A--|        * 1024) |----A----|
+             *      |----B----|    *       |--B--|
+             *                     *  
+             *          |--A--|    *       |----A----|
+             *      |----B----|    *           |--B--|
+             *                     *
+             ******************************************************************
+             * 
              * Note that the number of the limit is
              * the code used to classify the limits relation between
              * the objects. 
@@ -423,11 +410,11 @@ namespace opencog
              *        an object beside or not another
              * @param entityA The entity used as reference
              * @param entityB The entity that relates with the reference one
-             * @return std::list<SPATIAL_RELATION> a list of all spatial relations between entityA and entityB
+             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations between entityA and entityB
              */
-            std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
-                                                                 double besideDistance,
-                                                                 const Entity& entityB ) const;
+            std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
+                                                                   double besideDistance,
+                                                                   const Entity& entityB ) const;
 
             /**
              * Finds the list of spatial relationships that apply to the three entities.
@@ -438,12 +425,13 @@ namespace opencog
              *        an object beside or not another
              * @param entityB The entity that relates with the reference one
              * @param entityC A second entity that relates with the reference one
-             * @return std::list<SPATIAL_RELATION> a list of all spatial relations between entityA and entityB
+             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations between entityA and entityB
+             *
              */
-            std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
-                                                                 double besideDistance,
-                                                                 const Entity& entityB,
-                                                                 const Entity& entityC ) const;
+            std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
+                                                                   double besideDistance,
+                                                                   const Entity& entityB,
+                                                                   const Entity& entityC ) const;
 
             /**
              * Return a string description of the relation

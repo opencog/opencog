@@ -575,20 +575,19 @@ Entity::LimitRelation Entity::computeObjectsLimits( const Entity& entityB ) cons
     return status;
 }
 
-std::list<Entity::SPATIAL_RELATION> 
+std::vector<Entity::SPATIAL_RELATION> 
 Entity::computeSpatialRelations( const Entity & observer, 
                                  double besideDistance, 
                                  const Entity & entityB,
                                  const Entity & entityC ) const {
 
-    // TODO: cache relations of two objects would make this function run faster 
-    std::list<SPATIAL_RELATION> spatialRelationsAB = 
+    std::vector<SPATIAL_RELATION> spatialRelationsAB = 
         computeSpatialRelations( observer, besideDistance, entityB );
 
-    std::list<SPATIAL_RELATION> spatialRelationsAC = 
+    std::vector<SPATIAL_RELATION> spatialRelationsAC = 
         computeSpatialRelations( observer, besideDistance, entityC );
     
-    std::list<SPATIAL_RELATION> relations;
+    std::vector<SPATIAL_RELATION> relations;
     
     std::vector<bool> activeRelationsAB(TOTAL_RELATIONS);
     unsigned int i;
@@ -598,7 +597,7 @@ Entity::computeSpatialRelations( const Entity & observer,
 
     std::vector<bool> relationsAB(6);
 
-    std::list<SPATIAL_RELATION>::const_iterator it;    
+    std::vector<SPATIAL_RELATION>::const_iterator it;    
     for( it = spatialRelationsAB.begin( ); it != spatialRelationsAB.end( ); ++it ) {
         if ( *it == RIGHT_OF ) {
             relationsAB[0] = true;
@@ -636,14 +635,14 @@ Entity::computeSpatialRelations( const Entity & observer,
     return relations;
 }
 
-std::list<Entity::SPATIAL_RELATION> 
+std::vector<Entity::SPATIAL_RELATION> 
 Entity::computeSpatialRelations( const Entity & observer, 
                                  double besideDistance, 
                                  const Entity & entityB ) const
 {
     const Entity & entityA = *this;
 
-    std::list<SPATIAL_RELATION> spatialRelations;
+    std::vector<SPATIAL_RELATION> spatialRelations;
 
     math::Vector3 pointInA;
     math::Vector3 pointInB;
@@ -697,6 +696,28 @@ Entity::computeSpatialRelations( const Entity & observer,
               ( status.relations[1] & (1|2) ) == 0 &&
               ( status.relations[2] & (1|2) ) == 0 ) {
         // A is not completely inside B or vice-versa, but they intersect
+        spatialRelations.push_back(TOUCHING);
+        spatialRelations.push_back(NEAR);
+    }
+    else if ( ( status.relations[0] & (1|2|16|32) ) == 0 &&
+              ( status.relations[1] & (1|2|16|32) ) == 0 &&
+              ( status.relations[2] & 32 ) > 0 ) {
+        // A is on top of B
+        spatialRelations.push_back(ON_TOP_OF);
+        spatialRelations.push_back(TOUCHING);
+        spatialRelations.push_back(NEAR);
+    } 
+    else if ( ( ( ( status.relations[0] & (16|32) ) > 0 &&
+                  ( status.relations[1] & (1|2) ) == 0
+                ) ||
+                ( ( status.relations[0] & (1|2) ) == 0 &&
+                  ( status.relations[1] & (16|32) ) > 0 
+                )
+              ) &&
+              ( status.relations[2] & (1|2) ) == 0 
+            ) {
+        // A is adjacent to B
+        spatialRelations.push_back(ADJACENT);
         spatialRelations.push_back(TOUCHING);
         spatialRelations.push_back(NEAR);
     } 
