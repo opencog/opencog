@@ -5,6 +5,8 @@
  * All Rights Reserved
  * Author(s): Ari Heljakka, Welter Luigi
  *
+ * Updated: by Zhenhua Cai, on 2011-10-24
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -46,45 +48,129 @@ public:
 
     SpatialPredicateUpdater(AtomSpace & _atomSpace);
     ~SpatialPredicateUpdater();
-    virtual void update(Handle object, Handle pet, unsigned long timestamp);
+
+    void update(std::vector<Handle> & objects, Handle pet, unsigned long timestamp);
 
 private:
 
-    void computeDistanceSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
-                                         std::vector <std::string> & entities,
-                                         Handle object, 
-                                         unsigned long timestamp
-                                        ); 
+    unsigned long lastTimestamp; 
+
+    typedef std::vector <Entity::SPATIAL_RELATION> SPATIAL_RELATION_VECTOR;
+    typedef SPATIAL_RELATION_VECTOR::iterator SPATIAL_RELATION_VECTOR_ITER; 
 
     /**
-     * @todo
-     *
-     * For the moment it actually calculate all the spatial relations. It's not 
-     * very efficient but fast enough in current situations. This could be improved 
-     * a lot. Because many other relations could be figured out from the very basic 
-     * "left", "above" relations and distance. 
+     * Cache all the 2-size spatial relations, which would greatly accelerate 
+     * 3-size spatial relations (only 'between' relation for the moment) 
      */
-    void computeDirectionalSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
-                                            std::vector <std::string> & entities,
-                                            Handle objectA, Handle observer, 
-                                            unsigned long timestamp
-                                           );
+    class SpatialRelationCache
+    {
+        public:
 
-    void addRelationsToAtomSpace(std::list<Entity::SPATIAL_RELATION> & relations, 
-                                 std::string entityA_id, 
-                                 std::string entityB_id, 
-                                 std::string entityC_id, 
-                                 AtomSpace & atomSpace, unsigned long timestamp
-                                ); 
+            /**
+             * Check whether spatial relations between A and B has been cached.  
+             */
+            bool isCached(std::string entityA_id, std::string entityB_id); 
 
-    void addSymmetricalRelation(const Handle & entityA, const Handle & entityB, 
-                                const std::string & predicateName,
-                                float mean, unsigned long timestamp
-                               );
+            /**
+             * Return spatial relations between A and B
+             *
+             * @return True, if get relations successfully, otherwise false
+             */
+            bool getRelation(std::string entityA_id, std::string entityB_id, 
+                             SPATIAL_RELATION_VECTOR & relation);
 
-    unsigned long lastTimestamp;
+            /**
+             * Add spatial relations between A and B to the cache. 
+             */
+            void addRelation(std::string entityA_id, std::string entityB_id, 
+                             const SPATIAL_RELATION_VECTOR & relation); 
 
-    boost::unordered_set<std::string, boost::hash<std::string> > processedEntities;
+            /**
+             * Clear the cache. 
+             */
+            void clear(); 
+
+        private: 
+
+            // key: entityA_id + entityB_id, value: vector of relations
+            boost::unordered_map <std::string, SPATIAL_RELATION_VECTOR> _entityRelationMap;
+
+    }; // class SpatialRelationCache
+
+    // Cache all the 2-size spatial relations. 
+    // 3-size spatial relations calculation would rely on this cache. 
+    SpatialRelationCache spatialRelationCache; 
+
+    /**
+     * Calculate all the 2-size spatial relations. 
+     *
+     * @spaceMap 
+     *
+     * @objects  Handles to latest changed objects in the virtual world. 
+     *           Only spatial relations related to these objects are updated. 
+     *           It is returned by PAI::processMapInfo
+     *
+     * @entities All entities in spaceMap involved in spatial relations. 
+     *           'blocks' are not considered when computing spatial relations. 
+     *
+     * @observer Usually just the pet itself. 
+     *
+     * @timestamp 
+     */
+    void compute2SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap, 
+                                      std::vector<Handle> & objects, 
+                                      std::vector <std::string> & entities, 
+                                      Handle observer, 
+                                      unsigned long timestamp
+                                     ); 
+
+    /**
+     * Calculate all the 3-size spatial relations (only 'between' for the moment)
+     *
+     * @spaceMap 
+     *
+     * @objects  Handles to latest changed objects in the virtual world. 
+     *           Only spatial relations related to these objects are updated. 
+     *           It is returned by PAI::processMapInfo
+     *
+     * @entities All entities in spaceMap involved in spatial relations. 
+     *           'blocks' are not considered when computing spatial relations. 
+     *
+     * @observer Usually just the pet itself. 
+     *
+     * @timestamp 
+     */
+    void compute3SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap, 
+                                      std::vector<Handle> & objects, 
+                                      std::vector <std::string> & entities, 
+                                      Handle observer, 
+                                      unsigned long timestamp
+                                     ); 
+
+    /**
+     * Return the spatial relations of B to A given that of A to B. 
+     * Use this function to remove redundant calculation. 
+     */
+    SPATIAL_RELATION_VECTOR swapRelations(SPATIAL_RELATION_VECTOR & relations); 
+
+    /**
+     * Return whether A is between B and C given relations between A and B, A and C
+     */
+    bool isBetween(const SPATIAL_RELATION_VECTOR & relationsAB, 
+                   const SPATIAL_RELATION_VECTOR & relationsAC
+                  ); 
+
+    /**
+     * Add spatial relations to the AtomSpace. 
+     *
+     * It could be 2-size relations from A to B or 3-size relations among A, B and C. 
+     */
+    void addSpatialRelations(const SPATIAL_RELATION_VECTOR & relations, 
+                             AtomSpace & atomSpace, unsigned long timestamp, 
+                             Handle objetA, 
+                             Handle objectB, 
+                             Handle objectC = Handle::UNDEFINED
+                            ); 
 
 };// class SpatialPredicateUpdater
 
