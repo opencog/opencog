@@ -672,10 +672,10 @@ public:
 
 
         { // IN_FRONT_OF
-            std::list<Entity::SPATIAL_RELATION> relations = 
+            std::vector<Entity::SPATIAL_RELATION> relations = 
                 e1->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<Entity::SPATIAL_RELATION>::iterator it;
+            std::vector<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
                 if ( *it == Entity::IN_FRONT_OF ) {
@@ -691,10 +691,10 @@ public:
             observer->setOrientation( math::Quaternion( math::Vector3::Z_UNIT, 90 ) );
             observer->update( );
 
-            std::list<Entity::SPATIAL_RELATION> relations = 
+            std::vector<Entity::SPATIAL_RELATION> relations = 
                 e1->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<Entity::SPATIAL_RELATION>::iterator it;
+            std::vector<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
                 if ( *it == Entity::RIGHT_OF ) {
@@ -705,10 +705,10 @@ public:
         } // end block
 
         { // LEFT_OF
-            std::list<Entity::SPATIAL_RELATION> relations = 
+            std::vector<Entity::SPATIAL_RELATION> relations = 
                 e2->computeSpatialRelations( *observer, besideDistance, *e1 );
             
-            std::list<Entity::SPATIAL_RELATION>::iterator it;
+            std::vector<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
                 if ( *it == Entity::LEFT_OF ) {
@@ -719,10 +719,10 @@ public:
         } // end block
 
         { // BELOW
-            std::list<Entity::SPATIAL_RELATION> relations = 
+            std::vector<Entity::SPATIAL_RELATION> relations = 
                 e2->computeSpatialRelations( *observer, besideDistance, *e3 );
             
-            std::list<Entity::SPATIAL_RELATION>::iterator it;
+            std::vector<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
                 if ( *it == Entity::BELOW ) {
@@ -733,10 +733,10 @@ public:
         } // end block
 
         { // ABOVE
-            std::list<Entity::SPATIAL_RELATION> relations = 
+            std::vector<Entity::SPATIAL_RELATION> relations = 
                 e3->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<Entity::SPATIAL_RELATION>::iterator it;
+            std::vector<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
                 if ( *it == Entity::ABOVE ) {
@@ -751,10 +751,10 @@ public:
             observer->setPosition( math::Vector3( 20, 40, 0 ) );
             observer->update( );
 
-            std::list<Entity::SPATIAL_RELATION> relations = 
+            std::vector<Entity::SPATIAL_RELATION> relations = 
                 e1->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<Entity::SPATIAL_RELATION>::iterator it;
+            std::vector<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
                 if ( *it == Entity::IN_FRONT_OF ) {
@@ -767,10 +767,10 @@ public:
         { // BEHIND
             observer->setPosition( math::Vector3( -20, 40, 0 ) );
             observer->update( );
-            std::list<Entity::SPATIAL_RELATION> relations = 
+            std::vector<Entity::SPATIAL_RELATION> relations = 
                 e1->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<Entity::SPATIAL_RELATION>::iterator it;
+            std::vector<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
                 if ( *it == Entity::BEHIND ) {
@@ -782,10 +782,10 @@ public:
 
         { // INSIDE
             observer->setPosition( math::Vector3( 0, 0, 0 ) );
-            std::list<Entity::SPATIAL_RELATION> relations = 
+            std::vector<Entity::SPATIAL_RELATION> relations = 
                 e3->computeSpatialRelations( *observer, besideDistance, *e4 );
             
-            std::list<Entity::SPATIAL_RELATION>::iterator it;
+            std::vector<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
                 if ( *it == Entity::INSIDE ) {
@@ -796,10 +796,10 @@ public:
         } // end block
 
         { // OUTSIDE
-            std::list<Entity::SPATIAL_RELATION> relations = 
+            std::vector<Entity::SPATIAL_RELATION> relations = 
                 e4->computeSpatialRelations( *observer, besideDistance, *e3 );
             
-            std::list<Entity::SPATIAL_RELATION>::iterator it;
+            std::vector<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
                 if ( *it == Entity::OUTSIDE ) {

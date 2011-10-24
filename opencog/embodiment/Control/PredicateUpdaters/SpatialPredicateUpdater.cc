@@ -127,14 +127,14 @@ compute2SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
 {
     double besideDistance = spaceMap.getNextDistance();
 
-    const spatial::EntityPtr & observerEntity = 
-        spaceMap.getEntity( atomSpace.getName(observer) );
+    try {
+        const spatial::EntityPtr & observerEntity = 
+            spaceMap.getEntity( atomSpace.getName(observer) );
 
-    foreach (Handle objectA, objects) {
-        int numRelations = 0;
-        std::string entityID_A = atomSpace.getName(objectA); 
+        foreach (Handle objectA, objects) {
+            int numRelations = 0;
+            std::string entityID_A = atomSpace.getName(objectA); 
 
-        try {
             const spatial::EntityPtr & entityA = spaceMap.getEntity(entityID_A);
 
             foreach (const std::string & entityID_B, entities) {
@@ -164,15 +164,15 @@ compute2SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
             logger().debug("%s - Finished evaluating: %d 2-size spatial relations related to '%s'", 
                            __FUNCTION__, numRelations, entityID_A.c_str()
                           );
-        } 
-        catch( const opencog::NotFoundException & ex ) {
-            // Usually it is ok to just skip the exception, because when the object 
-            // is removed, it will fail to find the object. That is normal and happens  
-            // quite often for consumable objects, such as FoodCube
-            return;
-        } // try
 
-    } // foreach (Handle objectA, objects)
+        } // foreach (Handle objectA, objects)
+    } 
+    catch( const opencog::NotFoundException & ex ) {
+        // Usually it is ok to just skip the exception, because when the object 
+        // is removed, it will fail to find the object. That is normal and happens  
+        // quite often for consumable objects, such as FoodCube
+        return;
+    } // try
 }
 
 void SpatialPredicateUpdater::
@@ -185,16 +185,16 @@ compute3SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
 {
     double besideDistance = spaceMap.getNextDistance();
 
-    const spatial::EntityPtr & observerEntity = 
-        spaceMap.getEntity( atomSpace.getName(observer) );
+    try {
+        const spatial::EntityPtr & observerEntity = 
+            spaceMap.getEntity( atomSpace.getName(observer) );
 
-    std::vector <std::string>::iterator iter_entityB, iter_entityC; 
+        std::vector <std::string>::iterator iter_entityB, iter_entityC; 
 
-    foreach (Handle objectA, objects) {
-        std::string entityID_A = atomSpace.getName(objectA); 
-        int numRelations = 0;
+        foreach (Handle objectA, objects) {
+            std::string entityID_A = atomSpace.getName(objectA); 
+            int numRelations = 0;
 
-        try {
             const spatial::EntityPtr & entityA = spaceMap.getEntity(entityID_A);
 
             for (iter_entityB = entities.begin(); iter_entityB != entities.end(); ++ iter_entityB) {
@@ -231,19 +231,19 @@ compute3SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
 
                 } // foreach (const std::string & entityID_C, entities)
             } // foreach (const std::string & entityID_B, entities)
-        } 
-        catch( const opencog::NotFoundException & ex ) {
-            // Usually it is ok to just skip the exception, because when the object 
-            // is removed, it will fail to find the object. That is normal and happens  
-            // quite often for consumable objects, such as FoodCube
-            return;
-        } // try
 
-        logger().debug("%s - Finished evaluating: %d 3-size spatial relations related to '%s'", 
-                       __FUNCTION__, numRelations, entityID_A.c_str()
-                      );
+            logger().debug("%s - Finished evaluating: %d 3-size spatial relations related to '%s'", 
+                           __FUNCTION__, numRelations, entityID_A.c_str()
+                          );
 
-    } // foreach (Handle objectA, objects)
+        } // foreach (Handle objectA, objects)
+    } 
+    catch( const opencog::NotFoundException & ex ) {
+        // Usually it is ok to just skip the exception, because when the object 
+        // is removed, it will fail to find the object. That is normal and happens  
+        // quite often for consumable objects, such as FoodCube
+        return;
+    } // try
 }
 
 bool SpatialPredicateUpdater::isBetween(const SPATIAL_RELATION_VECTOR & relationsAB, 
