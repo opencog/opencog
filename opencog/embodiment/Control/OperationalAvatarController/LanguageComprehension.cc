@@ -1175,10 +1175,10 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
 
 void LanguageComprehension::createFrameInstancesFromRelations( 
     AtomSpace& atomSpace, HandleSeq& resultingFrames,
-        const std::list<spatial::Entity::SPATIAL_RELATION>& relations,
+        const std::vector<spatial::Entity::SPATIAL_RELATION>& relations,
             const std::string& objectA, const std::string& objectB, const std::string& objectC ) {
 
-    std::list<spatial::Entity::SPATIAL_RELATION>::const_iterator it;
+    std::vector<spatial::Entity::SPATIAL_RELATION>::const_iterator it;
     for( it = relations.begin( ); it != relations.end( ); ++it ) {
         std::string relationName = spatial::Entity::spatialRelationToString( *it );
 

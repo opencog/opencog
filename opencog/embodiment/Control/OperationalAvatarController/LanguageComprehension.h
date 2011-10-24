@@ -227,7 +227,7 @@ protected:
     static SCM execute(SCM objectObserver, SCM figureSemeNode, SCM groundSemeNode, SCM ground2SemeNode );
 #endif
     static void createFrameInstancesFromRelations( AtomSpace& atomSpace, HandleSeq& resultingFrames,
-                                                   const std::list<spatial::Entity::SPATIAL_RELATION>& relations,
+                                                   const std::vector<spatial::Entity::SPATIAL_RELATION>& relations,
                                                    const std::string& objectA, const std::string& objectB, const std::string& objectC );
     static AvatarInterface* localAgent;
     
