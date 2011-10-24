@@ -72,15 +72,18 @@ class Chainer:
             start = time()
             while self.bc_later and not self.results:
                 log.info(format_log(time() - start))
-                if time() - start > 60:
-                    print 'TIMEOUT'
-                    break
+#                if time() - start > 0:
+#                    print 'TIMEOUT'
+#                    break
                 children = self.bc_step()
                 self.propogate_results_loop(children)
 
-                log.info('%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps)))
+                msg = '%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps))
+                log.info(msg)
                 #print ('%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps)))
-
+            
+            # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
+            print msg
             print [str(atom_from_tree(result, self.space).tv) for result in self.results]
             return [atom_from_tree(result, self.space).h for result in self.results]
         except Exception, e:
@@ -105,9 +108,9 @@ class Chainer:
     def bc_step(self):
         assert self.bc_later
         #print 'bcq', map(str, self.bc_later)
-        #next_target = self.bc_later.pop_first() # Breadth-first search
+        next_target = self.bc_later.pop_first() # Breadth-first search
         #next_target = self.bc_later.pop_last() # Depth-first search
-        next_target = self.get_fittest(self.bc_later) # Best-first search
+        #next_target = self.get_fittest(self.bc_later) # Best-first search
         log.info(format_log('-BCQ', next_target))
         self.bc_before.append(next_target)
 
@@ -414,7 +417,7 @@ class Chainer:
         return Tree(target, [self.traverse_tree(g, already) for g in subgoals_])
 
     def print_tree(self, tr, level = 1):
-        print ' '*(level-1)*3, tr.op, tr.depth
+        print ' '*(level-1)*3, tr.op, tr.depth, tr.best_conf_above
         
         for child in tr.args:
             self.print_tree(child, level+1)
@@ -426,28 +429,42 @@ class Chainer:
         args = [self.add_depths(child, level+1) for child in bitnode.args]
         return inplace_set_attributes(bitnode, depth=level)
 
-    #def add_best_above(self
+    def add_best_conf_above(self, bitnode, best_above=0.0):
+        bitnode.best_conf_above = best_above
+
+        if best_above > 0:
+            print '-------', str(bitnode), best_above
+
+        confs_this_target = [tv.confidence for tv in self.get_tvs(bitnode.op)]
+        best_above = max([best_above] + confs_this_target)
+        
+        for child in bitnode.args:
+            self.add_best_conf_above(child, best_above) 
+        return bitnode
 
     def get_fittest(self, queue):
         def num_vars(target):
             return len([vertex for vertex in target.flatten() if vertex.is_variable()])
 
+        competition_weight = - 10000
         depth_weight = -100
         solution_space_weight = -0.01
 
         bit = self.traverse_tree(self.target, set())
-        deep = self.add_depths(bit)
+        self.add_depths(bit)
+        self.add_best_conf_above(bit)
         
-        #self.print_tree(deep)
+        #self.print_tree(bit)
         
-        flat = deep.flatten()
+        flat = bit.flatten()
         in_queue = [bitnode for bitnode in flat if self.contains_isomorphic_tree(bitnode.op, queue)]
         if not in_queue:
             import pdb; pdb.set_trace()
         assert in_queue
-        scores = [bitnode.depth*depth_weight
-                        +num_vars(bitnode.op)*solution_space_weight
-                       for bitnode in in_queue]
+        scores = [ bitnode.best_conf_above * competition_weight
+                        +bitnode.depth * depth_weight
+                        +num_vars(bitnode.op) * solution_space_weight
+                        for bitnode in in_queue]
         ranked_bitnodes = zip(scores, in_queue)
         #ranked.sort(key=lambda (score, tr): -score)
         #print format_log(ranked)

@@ -262,6 +262,12 @@ Btr<PLNTest> findSCMTarget(std::string test_name, bool test_bc) {
 
 bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 {
+    clock_t start, finish;
+    double duration;
+
+    test::custom_duration = 0.0;
+    start = clock();
+
     // Code to run the Python backward chainer.
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure(); 
@@ -312,6 +318,11 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                "**********************************************\n",
         (etv?etv->toString().c_str():"(null TV)"));
     }
+
+    // Still want to show this on failed tests
+    finish = clock();
+    duration = (double)(finish - start) / CLOCKS_PER_SEC;
+    printf( "Test took %2.2f seconds TOTAL.\n", duration );
 
     tests_total++;
     
