@@ -80,15 +80,15 @@ Handle BasicPredicateUpdater::getHandle(std::string objName)
     // found more than one handle - WARNING, return the first one
     // TODO: In this case, it could return the one with the more specific Object type.
     else if (objHandle.size() > 1) {
-        logger().error("BasicPredUpdater - Found more than one Handle for SpaceMap object %s. Returning the first one.", 
+        logger().warn("BasicPredUpdater - Found more than one Handle for SpaceMap object %s. Returning the first one.", 
                        objName.c_str()
-                      );
+                     );
         unsigned int i;
         for ( i = 0; i < objHandle.size( ); ++i ) {
-            logger().error("BasicPredUpdater - %s %i",
+            logger().warn("BasicPredUpdater - id = %s handle = %i",
                            atomSpace.getName(objHandle[i]).c_str( ), 
                            atomSpace.getType(objHandle[i]) 
-                          );
+                         );
         } // for
     }
 
