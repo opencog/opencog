@@ -438,3 +438,72 @@ __global__ void CalculatePOS( int States, float *CentroidDist, float *Output )
         tid += blockDim.x;
     }
 }
+
+__global__ void UpdateCountingTables(int mStates, int parentStates, int * dCountingTables,
+		int * dParentsAdvice, int * dOldWinningStates, int * dNewWinningNodes, int * dSumTables){
+
+	 int bid = blockIdx.x + blockIdx.y * gridDim.x;
+
+	 int s2 = mStates * mStates;
+
+	 //make sure Im consistent with old states across the top and new states down the side for the table.
+	 int i = bid * parentsStates * s2
+			 + dParentsAdvice[bid] * s2
+			 + dOldWinningState[bid] * mStates
+			 + dNewWinningState[bid];
+
+	 dCountingTables[i]++;
+
+	 i = bid * parentStates * mStates +
+			 + dParentsAdvice[bid] * mStates
+			 + dOldWinningStates[bid];
+
+	 dSumTables[i]++;
+
+}
+
+__global__ void UpdateBeliefs( int mStates, float *CentroidDist,
+		float *dPOS, float * dNewBeliefs, float * dOldBeliefs, float * dCountingTables,
+		int * dParentsAdvice, int parentsStates, int * dSumTables){
+
+	int bid = blockIdx.x + blockIdx.y * gridDim.x; //corresponds to the node
+
+	int advice = dParentsAdvice[bid];
+
+    int tid = threadIdx.x; //corresponds to the centroid
+
+    float sum;
+
+    ///// single thread make belief
+	int s2 = mStates * mStates;
+	int offset1 = bid * parentsStates * s2 + advice * s2;
+
+	int sp = 0;
+	while( sp < mStates ) {
+		float sum = 0;
+		float pssa;
+		float temp;
+		int offset2 = offset1 + sp * mStates;
+		int s = 0;
+		while( s < mStates) {
+			int i = offset2 + s;
+
+			float prob;
+			prob = dCountingTables[i] / dSumTables[bid * parentStates * mStates	+ advice * mStates + s];
+			temp = dOldBeliefs[bid * mStates + s] * prob;
+
+			sum += temp;
+			s+=1;
+		}
+
+		dNewBeliefs[bid * mStates + s] = dPOS[bid * mStates + s] * sum;
+
+		sp+=1;
+	}
+    dNewBeliefs[tid] =  dPOS[tid] * sum;
+    //////
+
+
+}
+
+
