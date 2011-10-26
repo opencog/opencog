@@ -259,63 +259,15 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
                    bBasicOnlineClustering, bClanDestin, bInitialLayerIsTransformOnly, bDoGoodPOS,
                    RowsPerLayer, FixedLearningRateLayer, bSelfAndUpperFeedback, ImageInput[0], ImageInput[1]);
 
-    // The name and loop looks like it is giving to option to save steps of the movements.
-    vector<bool> vectorOfMovementsToSave;
-    for( int c=0;c<SEQ_LENGTH;c++ )
-    {
-        vectorOfMovementsToSave.push_back(false);
-    }
 
     DKernel = new DestinKernel[NumberOfLayers];
     int* ColsPerLayer = new int[NumberOfLayers];
-    int* NumberOfParentStates = new int[NumberOfLayers];
     int* InputDimensionality = new int[NumberOfLayers];
-    int* OffsetSelf = new int[NumberOfLayers];
-    int* OffsetSelfFeedback = new int[NumberOfLayers];
 
-    int MovementsForClusteringOption = 1;
-    if ( bClanDestin )
-    {
-        MovementsForClusteringOption=SEQ_LENGTH; // use this if you want one clustering engine per movement
-    }
 
-    // These are changed inside the XML file
-    if ( bFFT )
-    {
-        InputDimensionality[0] = 10;  //4x4 FFT has 10 unique magnitude values...
+    for(int Layer=1; Layer<NumberOfLayers; Layer++ ){
+        InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
     }
-    else
-    {
-        InputDimensionality[0] = 16;  //4x4 has 16 inputs
-    }
-
-    if ( bInitialLayerIsTransformOnly )
-    {
-        InputDimensionality[1] = NumberOfCentroids[0];
-        NumberOfParentStates[0] = NumberOfCentroids[1];
-        RowsPerLayer[1] = RowsPerLayer[0];
-        for( int Layer=2; Layer<NumberOfLayers; Layer++ )
-        {
-            InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
-            NumberOfParentStates[Layer-1] = NumberOfCentroids[Layer];
-            RowsPerLayer[Layer] = RowsPerLayer[Layer-1]/2;
-        }
-    }
-    else
-    {
-        for(int Layer=1; Layer<NumberOfLayers; Layer++ )
-        {
-            InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
-            NumberOfParentStates[Layer-1] = NumberOfCentroids[Layer];
-        }
-    }
-    NumberOfParentStates[NumberOfLayers-1]=1;
-    //if you want to FORCE stability, an exponential / gaussian decay will start at iDecayPoint
-    bool bUseDecayLR = false;
-    int DigitToStartDecay=1000;
-    int iDecayPoint = SEQ_LENGTH*DigitToStartDecay;
-    float fRhoThreshold = (float)(1e-2);
-    bool bUseRhoDerivative = false;
 
     // curandGenerator_t is a CUDA version of rand
     // This fills the whole memory block with number between 0.0 and 1.0
@@ -325,29 +277,22 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
     // This is the right place to do this saves the most time creating numbers. (Inside layer increase the time by +/- 5 times)
     curandSetPseudoRandomGeneratorSeed( gen, 1 );
 
-    // Here we put the first image into the device memory
-    for( int Layer=0; Layer<NumberOfLayers; Layer++ )
-    {
-
-        OffsetSelf[Layer] = InputDimensionality[Layer]; // the basic value.
+    for( int Layer = NumberOfLayers - 1; Layer>=0 ; Layer-- ){
         ColsPerLayer[Layer] = RowsPerLayer[Layer];
-        // increase the input dimensionality if you are using the self-upper feedback
-        if ( bSelfAndUpperFeedback[Layer] )
-        {
-            InputDimensionality[Layer] = InputDimensionality[Layer]+NumberOfCentroids[Layer];  // layers get self-feedback
-            OffsetSelfFeedback[Layer] = InputDimensionality[Layer];
-            if ( Layer<NumberOfLayers-1 )
-            {
-                InputDimensionality[Layer] = InputDimensionality[Layer]+NumberOfCentroids[Layer+1];  // all layers but the top get feedback from above
-            }
-        }
-
-        //void DestinKernel::Create( int ID, int Rows, int Cols, int States, int ParentStates, int InputDimensionlity, float FixedLeaningRate, int * dParentsAdvice, curandGenerator_t gen)
         int parentStates = Layer == NumberOfLayers - 1 ? 0 : NumberOfCentroids[Layer + 1];
-        //TODO: dont think I should have dParentsAdvice here.
-        DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer],parentStates,  InputDimensionality[Layer], FixedLearningRateLayer[Layer], gen);
-        // Assign Childeren and Parrents of nodes
+        DKernel[Layer].Create(
+        		Layer, RowsPerLayer[Layer], ColsPerLayer[Layer],
+        		NumberOfCentroids[Layer],parentStates,  InputDimensionality[Layer],
+        		FixedLearningRateLayer[Layer], gen);
+
+        //give the child layers their parents' advice
+        if(Layer == NumberOfLayers - 1){
+        	DKernel[Layer].SetInputAdvice(NULL);
+        }else{
+            DKernel[Layer].SetInputAdvice(DKernel[Layer+1].GetOutputAdvice());
+        }
     }
+
     // The generator have to be destroyed after use.
     curandDestroyGenerator( gen );
     cout << "------------------" << endl;
@@ -746,7 +691,7 @@ int MainDestinExperiments(int argc, char* argv[])
             DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage(),xmlLayer);
             for(int i=1;i<NumberOfLayers;i++)
             {
-                DKernel[i].DoDestin(DKernel[i-1].GetDevicePointerOutput(),xmlLayer);
+                DKernel[i].DoDestin(DKernel[i-1].GetDevicePointerBeliefs(),xmlLayer);
             }
             time_t lStop = time(NULL);
             xmlLayer << "<layerRuntime>" << lStop-lStart << "</layerRuntime>" << endl;

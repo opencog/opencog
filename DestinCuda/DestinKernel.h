@@ -51,8 +51,9 @@ private:
 	float *dCentroidsDistance;
 	float *mCentroidStarvation;
 	float *dCentroidStarvation;
-	float *mNodeOutput;
-	float *dNodeOutput;
+	float *mPOS;
+	float *dPOS;
+
 	int *mWinningCentroids;
 	int *dWinningCentroids;
 	int *mCentroidWinCounter;
@@ -63,7 +64,7 @@ private:
 	float *dBeliefs;
 	//TODO: make sure all memory vectors are initialized and cleared properly
 	int *dOutputAdvice;
-	int *dParentsAdvice;//points to advice vector in parent layer,  this layer is not responsible for clearing it
+	int *dParentInputAdvice;//points to advice vector in parent layer,  this layer is not responsible for clearing it
 
 	void WriteData( stringstream& xml );
 
@@ -75,7 +76,7 @@ public:
 	/*
 	 * Create a DeSTIN kernel here the layer and node and clustering is put all together.
 	 */
-	void Create( int ID, int Rows, int Cols, int States, int ParentStates, int InputDimensionlity, float FixedLeaningRate, int * dParentsAdvice, curandGenerator_t gen );
+	void Create( int ID, int Rows, int Cols, int States, int ParentStates, int InputDimensionlity, float FixedLeaningRate, curandGenerator_t gen );
 
 
 
@@ -99,7 +100,15 @@ public:
 
 	int GetNumberOfInputDimensionlity(){ return mInputDimensionlity; }
 
-	float *GetDevicePointerOutput(){ return dNodeOutput; }
-};
+	float *GetDevicePointerPOS(){ return dPOS; }
 
+	float *GetDevicePointerBeliefs(){ return dBeliefs; }
+
+	int * GetOutputAdvice(){ return dOutputAdvice;  }
+
+	void SetInputAdvice(int * dParentInputAdvice){
+		this->dParentInputAdvice = dParentInputAdvice;
+	}
+
+};
 #endif
