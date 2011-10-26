@@ -471,6 +471,8 @@ __global__ void UpdateCountingTables(int mStates, int parentStates, int * dCount
 
 
 */
+
+//TODO: make a check to see if it has enough shared memory
 __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 		float *dPOS, float * dNewBeliefs, float * dOldBeliefs, float * dCountingTables,
 		int * dParentsAdvice, int parentsStates, int * dSumTables){
@@ -479,43 +481,55 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 
 	int advice = dParentsAdvice[bid];
 
-    ///// single thread make belief
 	const int s2 = mStates * mStates;
 
-	// Variable cts (counting table start) is the first element of the correct PSSA counting table based on the node and advice state.
+	// Variable cts (counting table start) is the first element of the correct PSSA counting table
+	// based on the node and advice state. PSSA means P(s'|s,c)*b(s) where c = advice, meaning
+	// probability of transitioning to state s' given the current state s and the parents node's advice (or state) c.
 	// Each node has a seperate counting table for each possible parent advice state
 	// of size N x N, where N is the number of centroids (states) of the child node.
 	// The number of counting tables per node equal to the number of parent states.
+	// Each time a node transitions from s to s' given advice c, the counting table for advice c
+	// has the value of the element at row s and column s' incremented by 1. Then, to get the
+	// probability, that value is divided by the corresponding value in the SumsTables.
+	// There is one sum table per counting table, which has one element per column of the
+	// matching counting table which sums up the elements of the column.
 	const int cts = bid * parentsStates * s2 + advice * s2;
 
-	int sp = threadIdx.y; // read as "s prime" as in b'(s') which is the left side of the belief update equation.
 
-	__shared__ float cache[mStates];
+	__shared__ float cache[s2]; // the cache saves each P(s'|s,c)*b(s) for s = 0 to mStates - 1.
 
-	while( sp < mStates ) {
-		float sum = 0;
+	//variable sp is read as "s prime" as in b'(s') which is the left side of the belief update equation.
+	for(int sp = threadIdx.y; sp < mStates ; sp += blockDim.y) {
 		int ctr = cts + sp * mStates; // ctr (counting table row) is the first element of the sp'th row of the counting table
-		int s = threadIdx.x; // current state
-		while( s < mStates) {
+		//s = current state
+		for(int s = threadIdx.x ;  s < mStates ; s += blockDim.x ) {
 			int i = ctr + s;
+			//TODO: is it guaranteed that dSumTables will not be 0?
 			float prob = dCountingTables[i] / dSumTables[bid * parentStates * mStates	+ advice * mStates + s];
-			cache[s] = dOldBeliefs[bid * mStates + s] * prob;
-			s += blockDim.y;
+			cache[ sp * mStates + s] = dOldBeliefs[bid * mStates + s] * prob; // this is the P(s'|s,c)*b(s) calculation.
+
 		}
+	}
+	__syncthreads();
 
-		__syncthreads(); // is it safe to put this here?
-
-		if(sp == 0){
-			for(int i = 1 ; i < mStates ; i++){
-				cache[0] += cache[i];
+	__shared__ float sums[mStates]; //hold sum of P(s'|s,c)*b(s)
+	//should probably do a reduction trick here
+	if(threadIdx.x == 0){
+		for(int sp = threadIdx.y; sp < mStates ; sp += blockDim.y){
+			sums[sp] = 0;
+			for(int s = 0 ; s < mStates ; s++){
+				sums[sp] += cache[ sp * mStates +  s ];
 			}
 		}
-		__syncthreads();
-		int sum = cache[0];
-
-		dNewBeliefs[bid * mStates + s] = dPOS[bid * mStates + s] * sum;
-		sp+= blockDim.x;
 	}
+	__syncthreads();
+
+	for(int sp = threadIdx.y ; sp < mStates ; sp += blockDim.y){
+		int i = bid * mStates + sp;
+		dNewBeliefs[i] = dPOS[i] * sums[sp];
+	}
+
 }
 
 
