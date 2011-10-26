@@ -18,7 +18,7 @@ __global__ void CalculateDistance( int States, int InputDimensionlity, float *In
 __global__ void CalculateWinningCentroids( int States, float *CentroidDist, int *WinningCentroids );
 __global__ void UpdateStarvation( int States, float StarvationCoefficient, int *WinningCentroids, float *CentroidStarvation );
 __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, float LearningRate, float *InputData, float *CentroidVectorData, int *WinningCentroids, float *CentroidDist );
-__global__ void CalculateOutput( int States, float *CentroidDist, float *Output );
+__global__ void CalculatePOS( int States, float *CentroidDist, float *Output );
 
 DestinKernel::DestinKernel( void )
 {
@@ -68,9 +68,10 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     sizeOfNodes = mRows*mCols;
     // Size of the data of nodes is rows times columns times centroids
     sizeOfNodeData = sizeOfNodes*mStates;
-    // Size of the layer with all vectors is rows times columns times centroids times input vector
+
+    // Size of the layer with all vectors is rows times columns times centroids times the input (also observation) vector length.
     sizeOfLayerData = sizeOfNodeData*mInputDimensionlity;
-    // Keep track which centroid one
+    // Keep track of which centroid won
     mCentroidWinCounter = new int[sizeOfNodeData];
     for(int c=0;c<sizeOfNodeData;c++)
     {
@@ -106,7 +107,7 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
 
 void DestinKernel::DoDestin( float *Input, stringstream& xml )
 {
-    // Threads is the amount of thread inside each. block
+    // Threads is the amount of thread inside each block
     dim3 threads( AmountThreads );
     // Grid is the amount of blocks inside a grid.
     dim3 grid( mCols, mRows );
@@ -126,7 +127,7 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     UpdateWinningCentroids<<<grid, threads, sharedMem>>>( mStates, mInputDimensionlity, mLearningRate, Input, dCentroidsVectorData, dWinningCentroids, dCentroidsDistance );
     // Kernel for calculating output
     sharedMem = (mStates+mStates)*sizeof(float);
-    CalculateOutput<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dNodeOutput );
+    CalculatePOS<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dNodeOutput );
 
     this->WriteData(xml);
 }
@@ -389,7 +390,7 @@ __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, floa
     }
 }
 
-__global__ void CalculateOutput( int States, float *CentroidDist, float *Output )
+__global__ void CalculatePOS( int States, float *CentroidDist, float *Output )
 {
     extern __shared__ float shared[];
     float* distance = (float*)&shared;
