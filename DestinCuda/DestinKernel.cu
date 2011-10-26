@@ -497,7 +497,7 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 	const int cts = bid * parentsStates * s2 + advice * s2;
 
 
-	__shared__ float cache[s2]; // the cache saves each P(s'|s,c)*b(s) for s = 0 to mStates - 1.
+	__shared__ float cache[s2]; // the cache saves each P(s'|s,c)*b(s) for all s' and s for the given advice c
 
 	//variable sp is read as "s prime" as in b'(s') which is the left side of the belief update equation.
 	for(int sp = threadIdx.y; sp < mStates ; sp += blockDim.y) {
@@ -513,21 +513,31 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 	}
 	__syncthreads();
 
-	__shared__ float sums[mStates]; //hold sum of P(s'|s,c)*b(s)
-	//should probably do a reduction trick here
-	if(threadIdx.x == 0){
+	
+
+	//this part performs a reduction on the sums of the P(s'|s,c)*b(s) elements
+	//of the cache table, storing the sums in the first column of the table.
+	dOld = mStates;
+	for (int d = mStates >> 1;  d != 0; d >>= 1) { 				
+	 	dOld -= d*2;	
 		for(int sp = threadIdx.y; sp < mStates ; sp += blockDim.y){
-			sums[sp] = 0;
-			for(int s = 0 ; s < mStates ; s++){
-				sums[sp] += cache[ sp * mStates +  s ];
+			for(int s = threadIdx.x; s < d ; s += blockDim.x){
+				int i = sp * mStates + s;
+ 				cache[ i ] +=  cache[ i + d ];
+				//trick for if cache has odd length
+				if(dOld == 1 && s == d - 1){
+					cache[ i ] += cache[ i + d + 1]; 
+				}
 			}
 		}
+	        __syncthreads();
+		dOld = d;
 	}
-	__syncthreads();
+
 
 	for(int sp = threadIdx.y ; sp < mStates ; sp += blockDim.y){
 		int i = bid * mStates + sp;
-		dNewBeliefs[i] = dPOS[i] * sums[sp];
+		dNewBeliefs[i] = dPOS[i] * cache[sp * mStates];
 	}
 
 }
