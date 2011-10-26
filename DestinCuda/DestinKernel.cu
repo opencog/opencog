@@ -462,6 +462,15 @@ __global__ void UpdateCountingTables(int mStates, int parentStates, int * dCount
 
 }
 
+/*
+
+	dim3 grid( mCols, mRows);
+	dim3 threads( states, states);
+
+	UpdateBeliefs<< grid, threads >>();
+
+
+*/
 __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 		float *dPOS, float * dNewBeliefs, float * dOldBeliefs, float * dCountingTables,
 		int * dParentsAdvice, int parentsStates, int * dSumTables){
@@ -470,40 +479,43 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 
 	int advice = dParentsAdvice[bid];
 
-    int tid = threadIdx.x; //corresponds to the centroid
-
-    float sum;
-
     ///// single thread make belief
-	int s2 = mStates * mStates;
-	int offset1 = bid * parentsStates * s2 + advice * s2;
+	const int s2 = mStates * mStates;
 
-	int sp = 0;
+	// Variable cts (counting table start) is the first element of the correct PSSA counting table based on the node and advice state.
+	// Each node has a seperate counting table for each possible parent advice state
+	// of size N x N, where N is the number of centroids (states) of the child node.
+	// The number of counting tables per node equal to the number of parent states.
+	const int cts = bid * parentsStates * s2 + advice * s2;
+
+	int sp = threadIdx.y; // read as "s prime" as in b'(s') which is the left side of the belief update equation.
+
+	__shared__ float cache[mStates];
+
 	while( sp < mStates ) {
 		float sum = 0;
-		float pssa;
-		float temp;
-		int offset2 = offset1 + sp * mStates;
-		int s = 0;
+		int ctr = cts + sp * mStates; // ctr (counting table row) is the first element of the sp'th row of the counting table
+		int s = threadIdx.x; // current state
 		while( s < mStates) {
-			int i = offset2 + s;
-
-			float prob;
-			prob = dCountingTables[i] / dSumTables[bid * parentStates * mStates	+ advice * mStates + s];
-			temp = dOldBeliefs[bid * mStates + s] * prob;
-
-			sum += temp;
-			s+=1;
+			int i = ctr + s;
+			float prob = dCountingTables[i] / dSumTables[bid * parentStates * mStates	+ advice * mStates + s];
+			cache[s] = dOldBeliefs[bid * mStates + s] * prob;
+			s += blockDim.y;
 		}
 
+		__syncthreads(); // is it safe to put this here?
+
+		if(sp == 0){
+			for(int i = 1 ; i < mStates ; i++){
+				cache[0] += cache[i];
+			}
+		}
+		__syncthreads();
+		int sum = cache[0];
+
 		dNewBeliefs[bid * mStates + s] = dPOS[bid * mStates + s] * sum;
-
-		sp+=1;
+		sp+= blockDim.x;
 	}
-    dNewBeliefs[tid] =  dPOS[tid] * sum;
-    //////
-
-
 }
 
 
