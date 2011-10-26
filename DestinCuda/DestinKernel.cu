@@ -48,7 +48,7 @@ DestinKernel::~DestinKernel( void )
     cout << "Kernel destroyed" << endl;
 }
 
-void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, float FixedLeaningRate, curandGenerator_t gen)
+void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, float FixedLeaningRate, curandGenerator_t gen, int ParentStates)
 {
     mID = ID;
     mRows = Rows;
@@ -56,6 +56,7 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     mStates = States;
     mInputDimensionlity = InputDimensionlity;
     mLearningRate = FixedLeaningRate;
+    mParentStates = ParentStates;
 
     mSTARVATION_COEFFICIENT = 1.0/((float)InputDimensionlity*(float)InputDimensionlity);
     if ( mSTARVATION_COEFFICIENT < 1.0/512.0 )
@@ -105,7 +106,7 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     curandGenerateUniform( gen, dCentroidsVectorData, sizeOfLayerData );
 }
 
-void DestinKernel::DoDestin( float *Input, stringstream& xml )
+void DestinKernel::DoDestin( float *Input, stringstream& xml, int * dParentsAdvice )
 {
     // Threads is the amount of thread inside each block
     dim3 threads( AmountThreads );
@@ -440,7 +441,7 @@ __global__ void CalculatePOS( int States, float *CentroidDist, float *Output )
 }
 
 __global__ void UpdateCountingTables(int mStates, int parentStates, int * dCountingTables,
-		int * dParentsAdvice, int * dOldWinningStates, int * dNewWinningNodes, int * dSumVectors){
+			int * dParentsAdvice, int * dOldWinningStates, int * dNewWinningNodes, int * dSumVectors){
 
 	 int bid = blockIdx.x + blockIdx.y * gridDim.x;
 
@@ -478,6 +479,7 @@ __global__ void UpdateCountingTables(int mStates, int parentStates, int * dCount
 */
 
 //TODO: make a check to see if it has enough shared memory
+//TODO: still need to normalize as in the denominator of the belief update equation.
 __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 		float *dPOS, float * dNewBeliefs, float * dOldBeliefs, float * dCountingTables,
 		int * dParentsAdvice, int parentsStates, int * dSumTables){
@@ -518,33 +520,59 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 	}
 	__syncthreads();
 
-	
+
 
 	//this part performs a reduction on the sums of the P(s'|s,c)*b(s) rows
 	//of the cache table, storing the sums in the first column of the table.
 	int dOld = mStates;
 	for (int d = mStates >> 1;  d != 0; d >>= 1) { 				
-	 	dOld -= d*2;	
+		dOld -= d*2;	
 		for(int sp = threadIdx.y; sp < mStates ; sp += blockDim.y){
 			for(int s = threadIdx.x; s < d ; s += blockDim.x){
 				int i = sp * mStates + s;
- 				cache[i] +=  cache[i + d];
+				cache[i] +=  cache[i + d];
 				//trick for if cache has odd length
 				if(dOld == 1 && s == d - 1){
 					cache[i] += cache[i + d + 1];
 				}
 			}
 		}
-	        __syncthreads(); //TODO: is this the correct place for the sync?
+		__syncthreads(); //TODO: is this the correct place for the sync?
 		dOld = d;
 	}
 
-
+	__shared__ float pssc_b_vector[mStates];
+	//multiply the two parts of the belief update equation numerator together, Pr(o|s') by Sum[ Pr(s'|s,c)*b(S) ]
+	//The cache[sp * mStates] is the Pr(s'|s,c)*b(S)  vector
 	for(int sp = threadIdx.y ; sp < mStates ; sp += blockDim.y){
-		int i = bid * mStates + sp;
-		dNewBeliefs[i] = dPOS[i] * cache[sp * mStates];
+		//dNewBeliefs[i] = dPOS[i] * cache[sp * mStates];
+		cache[sp * mStates]*=dPOS[bid * mStates + sp];
+		pssc_b_vector[sp] = cache[sp * mStates];
 	}
+	__syncthreads();
 
+	//right now only the first column of cache is used to store the POS * PSSA
+	//so use the second column to perform its reduction to get its sum
+	//normlzie dNewBeliefs	   
+	dOld = mStates;
+	for (int d = mStates >> 1; d!=0 ; d>>=1 ){
+		dOld -= d*2;
+		for(int s = threadIdx.x; s < d; s += blockDim.x){
+			pssc_b_vector[s] += pssc_b_vector[s + d ];
+			if(dOld == 1 && s ==  d - 1){
+				pssc_b_vector[s] += pssc_b_vector[s + d + 1];
+			}
+		}
+		__syncthreads();	
+		dOld = d;
+	}
+	float sum = pssc_b_vector[0];
+	float temp;
+	for(int sp = threadIdx.y ; sp < mStates ; sp += blockDim.y){
+		temp = cache[sp * mStates] /= sum;
+		pssc_b_vector[sp] =  temp;
+	}
+	
 }
 
 

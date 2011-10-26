@@ -36,6 +36,7 @@ private:
     int mRows;
 	int mCols;
 	int mStates;
+	int mParentStates;
 	int mInputDimensionlity;
 	int mDevices;
 	float mLearningRate;
@@ -55,6 +56,9 @@ private:
 	int *mWinningCentroids;
 	int *dWinningCentroids;
 	int *mCentroidWinCounter;
+
+	int *dCountingTables;
+	int *dSumVectors;
 
 	void WriteData( stringstream& xml );
 
