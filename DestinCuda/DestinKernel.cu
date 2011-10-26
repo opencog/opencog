@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 // Cuda header
 #include <cuda.h>
@@ -21,7 +22,7 @@ __global__ void UpdateStarvation( int States, float StarvationCoefficient, int *
 __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, float LearningRate, float *InputData, float *CentroidVectorData, int *WinningCentroids, float *CentroidDist );
 __global__ void CalculatePOS( int States, float *CentroidDist, float *Output );
 __global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBeliefs, float * dOldBeliefs, int * dCountingTables, int * dParentsAdvice, int parentStates, int * dSumTables, int * dOutputAdvice);
-__device__ void find_max(const int states,float * winner, int * winnerId );
+__device__ void find_max(const int thread_start, const int threadcount, const int length,float * winner, int * winnerId );
 __device__ void updateCountingTables(int mStates, int parentStates, int * dCountingTables, int advice, int previousWinningBelief, int newWinningBelief, int * dSumTables, int bid);
 __global__ void initializeMemory( const int states, const int parentStates, float * dBeliefs, int * dOutputAdvice, int * dCountingTables, int * dSumTables );
 
@@ -68,7 +69,9 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int ParentSta
     mParentStates = ParentStates;
     mInputDimensionlity = InputDimensionlity;
     mLearningRate = FixedLeaningRate;
-
+    if(ParentStates==0){
+	throw logic_error("ParentStates must be at least one. Set = 1 if this is the top layer");
+    }
     mSTARVATION_COEFFICIENT = 1.0/((float)InputDimensionlity*(float)InputDimensionlity);
     if ( mSTARVATION_COEFFICIENT < 1.0/512.0 )
     {
@@ -195,7 +198,6 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     //total threads should be less than 512 per block, hardware limit so states needs to be less<=22
     //Chose 16 because seems like it would play better than 22... but not sure.
     //TODO: this should probably be a multiple of states instead to avoid wasting threads
-    //TODO: update dBeliefs properly
     //TODO: might make sense to break up UpdateBeliefs because alot is done with just a single row of threads so
     //lots of the threads are wasted, not sure if this would outweight the overhead of a sperate kernel launchss
     sharedMem = (mStates * mStates + mStates) * sizeof(float);
@@ -553,7 +555,7 @@ __global__ void CalculatePOS( int States, float *CentroidDist, float *POSOutput 
  * dOldBeliefs - b(s) - beliefs how they were before calling this kernel, currently dOldBeliefs points to same memory location as dNewBeliefs
  * dCountingTables - keeps track of the P(s'|s,a) table along with the dSumTables
  * dParentsInputAdvice - input advice from the parent node. The 'a' of P(s'|s,a). NULL if this is the top layer, no parent layer.
- * parentStates - number of centroids of the parent node. Zero if this is the top layer.
+ * parentStates - number of centroids of the parent node. Defined as one if this is the top layer 
  * dSumTables - vector of the sum of the columns of the dCountingTables
  * dOutputAdvice - this node's advice to be fed to its children nodes
  */
@@ -622,7 +624,7 @@ __global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBelief
 
      //we launched with a 2d block of threads now only dealing with 1d arrays, so convert this back to 1d so we waste fewer threads
 	int sp_start  = threadIdx.y * blockDim.x + threadIdx.x; 
-    int n_threads = blockDim.x * blockDim.y;
+        int n_threads = blockDim.x * blockDim.y;
 
     //transform it from a column into a row
 	for(int sp = sp_start ; sp < states ; sp += n_threads ){
@@ -657,7 +659,7 @@ __global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBelief
 	int * max_index = (int *)cache; //max_index size = #states. Overwrite first row of cache shared memory to save winning index.
 
 	//find max belief, store corresponding index in max_index[0]
-	find_max(states, pssc_b_vector, max_index);
+	find_max(sp_start, n_threads, states, pssc_b_vector, max_index);
 
 	//set max belief state as advice for child nodes
 	if(sp_start == 0){//only one thread does this to save memory bandwidth
@@ -689,26 +691,36 @@ __device__ void updateCountingTables(int mStates, int parentStates, int * dCount
 	 dSumTables[i]++;
 
 }
-
-__device__ void find_max(const int states,float * winner, int * winnerId ){
+/**
+* find_max - finds the maximum value of winner and its corresponding index. The 
+* maximum value is stored at winner[0] and the corresponding index of the maximum
+* value is stored at winnerId[0]
+* 
+* thread_start = tid
+* threadcount = how many threads
+* length = size of vector to find the maximum of
+* winner = input vector to find maximum of, winner[0] will contain the maximum value afterwords
+* winnerId = empty buffer, winnerId[0] will have the max id
+*/
+__device__ void find_max(const int thread_start, const int threadcount, const int length,float * winner, int * winnerId ){
 
     int tid;
-    for(tid = threadIdx.x; tid < states ; tid += blockDim.x ){
+    for(tid = thread_start; tid < length ; tid += threadcount ){
         winnerId[tid] = tid;
     }
     __syncthreads();
     
-    for(int dOld = states, d = states >> 1; d != 0 ; dOld = d, d >>= 1 ){
-        for(tid = threadIdx.x, dOld -= d*2 ; tid < d ; tid += blockDim.x){
+    for(int dOld = length, d = length >> 1; d != 0 ; dOld = d, d >>= 1 ){
+        for(tid = thread_start , dOld -= d*2 ; tid < d ; tid += threadcount){
             int tidd= tid + d;	
-            if(winner[tid] > winner[tidd]){
-                // Move winning centroid to the beginning
+            if(winner[tid] < winner[tidd]){
+                // Move large index to the beginning
                 winner[tid] = winner[tidd];
                 winnerId[tid] = winnerId[tidd];
             }
             if (dOld == 1 && tid == d-1){
                 // special case of odd numbers
-                if(winner[tid] > winner[tidd + 1]){
+                if(winner[tid] < winner[tidd + 1]){
                     winner[tid] = winner[tidd + 1];
                     winnerId[tid] = winnerId[tidd + 1];
                 }

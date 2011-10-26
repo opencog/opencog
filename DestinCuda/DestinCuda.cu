@@ -280,7 +280,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
 
     for( int Layer = NumberOfLayers - 1; Layer>=0 ; Layer-- ){
         ColsPerLayer[Layer] = RowsPerLayer[Layer];
-        int parentStates = Layer == NumberOfLayers - 1 ? 0 : NumberOfCentroids[Layer + 1];
+        int parentStates = Layer == NumberOfLayers - 1 ? 1 : NumberOfCentroids[Layer + 1];
         DKernel[Layer].Create(
         		Layer, RowsPerLayer[Layer], ColsPerLayer[Layer],
         		NumberOfCentroids[Layer],parentStates,  InputDimensionality[Layer],
