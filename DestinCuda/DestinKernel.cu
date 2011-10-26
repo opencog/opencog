@@ -440,32 +440,37 @@ __global__ void CalculatePOS( int States, float *CentroidDist, float *Output )
 }
 
 __global__ void UpdateCountingTables(int mStates, int parentStates, int * dCountingTables,
-		int * dParentsAdvice, int * dOldWinningStates, int * dNewWinningNodes, int * dSumTables){
+		int * dParentsAdvice, int * dOldWinningStates, int * dNewWinningNodes, int * dSumVectors){
 
 	 int bid = blockIdx.x + blockIdx.y * gridDim.x;
 
 	 int s2 = mStates * mStates;
 
 	 //make sure Im consistent with old states across the top and new states down the side for the table.
-	 int i = bid * parentsStates * s2
-			 + dParentsAdvice[bid] * s2
-			 + dOldWinningState[bid] * mStates
-			 + dNewWinningState[bid];
+	 int i = bid * parentsStates * s2 //node
+			 + dParentsAdvice[bid] * s2 //advice table for node
+			 + dNewWinningState[bid] * mStates //row of table
+			 + dOldWinningState[bid];	//col of table
 
 	 dCountingTables[i]++;
 
-	 i = bid * parentStates * mStates +
-			 + dParentsAdvice[bid] * mStates
-			 + dOldWinningStates[bid];
+	 i = bid * parentStates * mStates // node index
+			 + dParentsAdvice[bid] * mStates //advice index
+			 + dOldWinningStates[bid]; //element of sum vector
 
-	 dSumTables[i]++;
+	 //SumTable, collection of 1 dimensional vectors. Each node has the same number of them as its counting tables, one for each parent state.
+	 //One dimensional of length equal to the number of the child node's centroids or states.
+	 dSumVectors[i]++;
 
 }
 
 /*
 
 	dim3 grid( mCols, mRows);
-	dim3 threads( states, states);
+
+	int n = states > 22 ? 22 : states;
+	dim3 threads( n, n ); //total threads should be less than 512 per block, hardware limit so states needs to be less<=22
+	//TODO: this should probably be a multiple of states instead to avoid wasting threads
 
 	UpdateBeliefs<< grid, threads >>();
 
@@ -506,7 +511,7 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 		for(int s = threadIdx.x ;  s < mStates ; s += blockDim.x ) {
 			int i = ctr + s;
 			//TODO: is it guaranteed that dSumTables will not be 0?
-			float prob = dCountingTables[i] / dSumTables[bid * parentStates * mStates	+ advice * mStates + s];
+			float prob = dCountingTables[i] / dSumTables[bid * parentStates * mStates + advice * mStates + s];
 			cache[ sp * mStates + s] = dOldBeliefs[bid * mStates + s] * prob; // this is the P(s'|s,c)*b(s) calculation.
 
 		}
@@ -515,22 +520,22 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 
 	
 
-	//this part performs a reduction on the sums of the P(s'|s,c)*b(s) elements
+	//this part performs a reduction on the sums of the P(s'|s,c)*b(s) rows
 	//of the cache table, storing the sums in the first column of the table.
-	dOld = mStates;
+	int dOld = mStates;
 	for (int d = mStates >> 1;  d != 0; d >>= 1) { 				
 	 	dOld -= d*2;	
 		for(int sp = threadIdx.y; sp < mStates ; sp += blockDim.y){
 			for(int s = threadIdx.x; s < d ; s += blockDim.x){
 				int i = sp * mStates + s;
- 				cache[ i ] +=  cache[ i + d ];
+ 				cache[i] +=  cache[i + d];
 				//trick for if cache has odd length
 				if(dOld == 1 && s == d - 1){
-					cache[ i ] += cache[ i + d + 1]; 
+					cache[i] += cache[i + d + 1];
 				}
 			}
 		}
-	        __syncthreads();
+	        __syncthreads(); //TODO: is this the correct place for the sync?
 		dOld = d;
 	}
 
