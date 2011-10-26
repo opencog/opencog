@@ -70,15 +70,6 @@ void PrintHelp()
     cout << "    [OutputDistillationLevel] is optional.  If this exists it must be a number and currently its got to be 0.  "<<endl;
     cout << "        0 = regular outputs with a lot of details about movements and processing: this is our input to SampleAndStack"<<endl;
     cout << "        1 = outputs compatible with the regular distilled output of SampleAndStack. If you use this you can skip SampleAndStack.exe" << endl;
-    cout << endl;
-    cout << "-OR-" << endl;
-    cout << endl;
-    cout << "Usage: DestinCuda -F InputNetworkFile LayerToShow ParamsFile TrainingDataFile DestinOutputFile TargetDirectory [OutputDistillationLevel]" << endl;
-    cout << "Where:" << endl;
-    cout << "    -F signifies use a saved DeSTIN network file " << endl;
-    cout << "    InputNetworkFile is the NAME of the saved DeSTIN network file" << endl;
-    cout << "    All others are as in first usage type" << endl;
-    cout << endl;
 }
 
 bool FileExists(string strFilename)
@@ -339,7 +330,6 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
     // Here we put the first image into the device memory
     for( int Layer=0; Layer<NumberOfLayers; Layer++ )
     {
-        bool bTopNode = false;
         bool bAveragingLayer = false;
         bool bConstrainInitialCentroids = true;
 
@@ -361,11 +351,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
             bAveragingLayer=bAveraging;
             bConstrainInitialCentroids=false;
         }
-        if ( Layer==NumberOfLayers-1)
-        {
-            // Yes you are the top layer
-            bTopNode = true;
-        }
+
 
         DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer], FixedLearningRateLayer[Layer], gen);
         // Assign Childeren and Parrents of nodes
@@ -386,8 +372,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
 
 struct CommandArgsStuc {
 
-	bool bCreateFromFile;
-        string strDestinNetworkFileToRead;
+    string strDestinNetworkFileToRead;
 };
 
 /**
@@ -423,32 +408,16 @@ int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], Com
 
     string strDestinNetworkFileToWrite;
     string FirstArg = argv[1];
-    if ( FirstArg=="-F" )
-    {
-        // Argument: InputNetworkFile
-        out.bCreateFromFile = true;
-        out.strDestinNetworkFileToRead = argv[2];  // we read from this file...
 
-        if ( !FileExists( out.strDestinNetworkFileToRead ) )
-        {
-            cout << "designated input network file named " << out.strDestinNetworkFileToRead.c_str() << " does not exist" << endl;
-            return 0;
-        }
-        cout << "Writing destin file to: " << strDestinNetworkFileToWrite << endl;
-    }
-    else
+    // Argument: DestinOutputFile
+    strDestinNetworkFileToWrite = argv[6]; // we write to this file, and then we read from it too!!
+    if ( strDestinNetworkFileToWrite == "-D" )
     {
-        // Argument: DestinOutputFile
-        out.bCreateFromFile = false;
-        strDestinNetworkFileToWrite = argv[6]; // we write to this file, and then we read from it too!!
-        if ( strDestinNetworkFileToWrite == "-D" )
-        {
-            // If given -D
-            strDestinNetworkFileToWrite= strDiagnosticDirectoryForData + strDiagnosticFileName;
-            cout << "Writing default destin file to: " << strDestinNetworkFileToWrite << endl;
-        }
-        out.strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
+        // If given -D
+        strDestinNetworkFileToWrite= strDiagnosticDirectoryForData + strDiagnosticFileName;
+        cout << "Writing default destin file to: " << strDestinNetworkFileToWrite << endl;
     }
+    out.strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
 
 
     // Create the old variable sDiagnosticFileNameForMarking
@@ -608,8 +577,7 @@ int MainDestinExperiments(int argc, char* argv[])
     string ParametersFileName;
     vector< pair<int,int> > vIndicesAndGTLabelToUse;
 
-    if (argsStruc.bCreateFromFile==false )
-    {
+
         // Argument: MAXCNT
         MAX_CNT=atoi(argv[2]);
         // Argument: CodeWord
@@ -724,12 +692,7 @@ int MainDestinExperiments(int argc, char* argv[])
         }
         free( Picked);
         cout << "------------------" << endl;
-    }  //check on bCreateFromFile==false
-    else
-    {
-        // TODO: We want to create the network from an INPUT FILE!
-        cout << "We want to create the network from an INPUT FILE!" << endl;
-    }
+
 
     // Argument: ParamsFile
     // A configuration file for DeSTIN
@@ -754,32 +717,18 @@ int MainDestinExperiments(int argc, char* argv[])
     map<int,int> LabelsUsedToCreateNetwork;
     map<int,int> IndicesUsedToCreateNetwork;
     int NumberOfLayers=4;
-    if ( !argsStruc.bCreateFromFile)
-    {
-        int LayerToShow=-1;   //normally this should be -1 for regular operation.  For debugging, set it to 0 to look at the particular input for layer 0
-        int RowToShowInputs=3;
-        int ColToShowInputs=3;
-        CreateDestinOnTheFly(ParametersFileName, NumberOfLayers, DKernel,
-                             DataSourceForTraining, SEQ_LENGTH, SEQ, ImageInput);
 
-        for (int i=0; i<NumberOfLayers;i++)
-        {
-            cout << "DeSTIN Layer information" << endl;
-            cout << "Layer: " << DKernel[i].GetID() << endl;
-            cout << "Dimension (row, col): " << DKernel[i].GetNumberOfRows() << " X " << DKernel[i].GetNumberOfCols() << endl;
-            cout << "Input each node: " << DKernel[i].GetNumberOfInputDimensionlity() << endl;
-            cout << "Centroids: " << DKernel[i].GetNumberOfStates() << endl;
-            cout << endl;
-        }
-    }
-    else
+    CreateDestinOnTheFly(ParametersFileName, NumberOfLayers, DKernel,
+                          DataSourceForTraining, SEQ_LENGTH, SEQ, ImageInput);
+
+    for (int i=0; i<NumberOfLayers;i++)
     {
-        // even if you don't create the file here, we want to mark the experiment number so make a dummy file...
-        ofstream stmDummy;
-        stmDummy.open(strDiagnosticFileName.c_str(),ios::out);
-        stmDummy << strCommandLineData.c_str() << endl;
-        stmDummy << "DummyHeader" << endl;
-        stmDummy.close();
+        cout << "DeSTIN Layer information" << endl;
+        cout << "Layer: " << DKernel[i].GetID() << endl;
+        cout << "Dimension (row, col): " << DKernel[i].GetNumberOfRows() << " X " << DKernel[i].GetNumberOfCols() << endl;
+        cout << "Input each node: " << DKernel[i].GetNumberOfInputDimensionlity() << endl;
+        cout << "Centroids: " << DKernel[i].GetNumberOfStates() << endl;
+        cout << endl;
     }
 
     cout << "------------------" << endl;
@@ -801,6 +750,7 @@ int MainDestinExperiments(int argc, char* argv[])
         pair<int,int> element = vIndicesAndGTLabelToUse[i];
         int indexOfExample = element.first;
         int label = element.second;
+
         time_t iStart = time(NULL);
         for(int seq=0;seq<SEQ_LENGTH;seq++)
         {
