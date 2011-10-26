@@ -58,7 +58,12 @@ private:
 	int *mCentroidWinCounter;
 
 	int *dCountingTables;
-	int *dSumVectors;
+	int *dSumTables;
+
+	float *dBeliefs;
+	//TODO: make sure all memory vectors are initialized and cleared properly
+	int *dOutputAdvice;
+	int *dParentsAdvice;//points to advice vector in parent layer,  this layer is not responsible for clearing it
 
 	void WriteData( stringstream& xml );
 
@@ -70,7 +75,9 @@ public:
 	/*
 	 * Create a DeSTIN kernel here the layer and node and clustering is put all together.
 	 */
-	void Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, float FixedLeaningRate, curandGenerator_t gen);
+	void Create( int ID, int Rows, int Cols, int States, int ParentStates, int InputDimensionlity, float FixedLeaningRate, int * dParentsAdvice, curandGenerator_t gen );
+
+
 
 	/*
 	 * Do DeSTIN is the launcher of the GPU kernel.

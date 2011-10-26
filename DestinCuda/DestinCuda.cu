@@ -316,8 +316,6 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
     int iDecayPoint = SEQ_LENGTH*DigitToStartDecay;
     float fRhoThreshold = (float)(1e-2);
     bool bUseRhoDerivative = false;
-    int MaxNumberOfInputs=-1;
-    int MaxNumberOfOutputs=-1;
 
     // curandGenerator_t is a CUDA version of rand
     // This fills the whole memory block with number between 0.0 and 1.0
@@ -330,8 +328,6 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
     // Here we put the first image into the device memory
     for( int Layer=0; Layer<NumberOfLayers; Layer++ )
     {
-        bool bAveragingLayer = false;
-        bool bConstrainInitialCentroids = true;
 
         OffsetSelf[Layer] = InputDimensionality[Layer]; // the basic value.
         ColsPerLayer[Layer] = RowsPerLayer[Layer];
@@ -345,24 +341,12 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
                 InputDimensionality[Layer] = InputDimensionality[Layer]+NumberOfCentroids[Layer+1];  // all layers but the top get feedback from above
             }
         }
-        // Initial layer does this a little different (input is raw instead of centroids)
-        if ( Layer==0 )
-        {
-            bAveragingLayer=bAveraging;
-            bConstrainInitialCentroids=false;
-        }
 
-
-        DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer], InputDimensionality[Layer], FixedLearningRateLayer[Layer], gen);
+        //void DestinKernel::Create( int ID, int Rows, int Cols, int States, int ParentStates, int InputDimensionlity, float FixedLeaningRate, int * dParentsAdvice, curandGenerator_t gen)
+        int parentStates = Layer == NumberOfLayers - 1 ? 0 : NumberOfCentroids[Layer + 1];
+        //TODO: dont think I should have dParentsAdvice here.
+        DKernel[Layer].Create( Layer, RowsPerLayer[Layer], ColsPerLayer[Layer], NumberOfCentroids[Layer],parentStates,  InputDimensionality[Layer], FixedLearningRateLayer[Layer], gen);
         // Assign Childeren and Parrents of nodes
-        if ( NumberOfCentroids[Layer] > MaxNumberOfOutputs )
-        {
-            MaxNumberOfOutputs=NumberOfCentroids[Layer];
-        }
-        if ( InputDimensionality[Layer] > MaxNumberOfInputs )
-        {
-            MaxNumberOfInputs=InputDimensionality[Layer];
-        }
     }
     // The generator have to be destroyed after use.
     curandDestroyGenerator( gen );

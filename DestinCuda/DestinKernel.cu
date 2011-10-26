@@ -19,6 +19,9 @@ __global__ void CalculateWinningCentroids( int States, float *CentroidDist, int 
 __global__ void UpdateStarvation( int States, float StarvationCoefficient, int *WinningCentroids, float *CentroidStarvation );
 __global__ void UpdateWinningCentroids( int States, int InputDimensionlity, float LearningRate, float *InputData, float *CentroidVectorData, int *WinningCentroids, float *CentroidDist );
 __global__ void CalculatePOS( int States, float *CentroidDist, float *Output );
+__global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBeliefs, float * dOldBeliefs, int * dCountingTables,int * dParentsAdvice, int parentsStates, int * dSumTables, int * dOutputAdvice);
+__device__ void find_max(const int states,float * winner, int * winnerId );
+__device__ void updateCountingTables(int mStates, int parentStates, int * dCountingTables, int advice, int previousWinningBelief, int newWinningBelief, int * dSumTables, int bid);
 
 DestinKernel::DestinKernel( void )
 {
@@ -26,6 +29,7 @@ DestinKernel::DestinKernel( void )
 	mRows=0;
 	mCols=0;
 	mStates=0;
+	mParentStates=0;
 	mInputDimensionlity=0;
     mLearningRate = 0;
     mSTARVATION_COEFFICIENT = 0;
@@ -40,6 +44,7 @@ DestinKernel::~DestinKernel( void )
     cudaFree( dCentroidsDistance );
     cudaFree( dCentroidStarvation );
     cudaFree( dWinningCentroids );
+    cudaFree( dBeliefs );
     free ( mCentroidsDistance );
     free ( mCentroidStarvation );
     free ( mWinningCentroids );
@@ -48,15 +53,18 @@ DestinKernel::~DestinKernel( void )
     cout << "Kernel destroyed" << endl;
 }
 
-void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDimensionlity, float FixedLeaningRate, curandGenerator_t gen, int ParentStates)
+void DestinKernel::Create( int ID, int Rows, int Cols, int States, int ParentStates, int InputDimensionlity, float FixedLeaningRate, int * dParentsAdvice, curandGenerator_t gen)
 {
     mID = ID;
     mRows = Rows;
     mCols = Cols;
     mStates = States;
+    mParentStates = ParentStates;
     mInputDimensionlity = InputDimensionlity;
     mLearningRate = FixedLeaningRate;
-    mParentStates = ParentStates;
+
+    this->dParentsAdvice = dParentsAdvice;
+
 
     mSTARVATION_COEFFICIENT = 1.0/((float)InputDimensionlity*(float)InputDimensionlity);
     if ( mSTARVATION_COEFFICIENT < 1.0/512.0 )
@@ -97,6 +105,9 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     // Copy the data from host to device
     cudaMemcpy(dCentroidStarvation, mCentroidStarvation, sizeOfNodeData*sizeof(float), cudaMemcpyHostToDevice);
 
+    //TODO: initialize to zero, or something.
+    cudaMalloc((void**)&dBeliefs, sizeOfNodeData * sizeof(float));
+
     // Output for next layer
     mNodeOutput = new float[sizeOfNodeData];
     cudaMalloc( (void**)&dNodeOutput, sizeOfNodeData*sizeof(float) );
@@ -106,7 +117,7 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int InputDime
     curandGenerateUniform( gen, dCentroidsVectorData, sizeOfLayerData );
 }
 
-void DestinKernel::DoDestin( float *Input, stringstream& xml, int * dParentsAdvice )
+void DestinKernel::DoDestin( float *Input, stringstream& xml )
 {
     // Threads is the amount of thread inside each block
     dim3 threads( AmountThreads );
@@ -129,6 +140,26 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml, int * dParentsAdvi
     // Kernel for calculating output
     sharedMem = (mStates+mStates)*sizeof(float);
     CalculatePOS<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dNodeOutput );
+
+    //TODO: rename dNodeOutput here to dPOS. 
+    //TODO: rename dNewBeliefs and dOldVeliefs to just dBeliefs, get rid of one.
+    //TODO: update dCountingTables
+    //TODO: make sure dParentsAdvice is correct
+    //TODO: set parentsStates in create function
+    //TODO: update dSumTables
+    int n = mStates > 16 ? 16 : mStates ;
+    dim3 threads_plane( n, n ); 
+    //total threads should be less than 512 per block, hardware limit so states needs to be less<=22
+    //Chose 16 because seems like it would play better than 22... but not sure.
+    //TODO: this should probably be a multiple of states instead to avoid wasting threads
+    //TODO: update dBeliefs properly
+    //TODO: might make sense to break up UpdateBeliefs because alot is done with just a single row of threads so
+    //lots of the threads are wasted, not sure if this would outweight the overhead of a sperate kernel launchss
+    sharedMem = (mStates * mStates + mStates) * sizeof(float);
+    UpdateBeliefs<<<grid, threads_plane, sharedMem >>>(mStates, dNodeOutput, dBeliefs, dBeliefs, dCountingTables, dParentsAdvice, mParentStates, dSumTables, dOutputAdvice) ;
+
+    
+    
 
     this->WriteData(xml);
 }
@@ -256,7 +287,8 @@ __global__ void CalculateDistance( int States, int InputDimensionlity, float *In
     }
 }
 
-// To reduce the amount of work that one kernel is doing i have decided that splitting the work over more kernels should speed up the whole procces
+	// To reduce the amount of work that one kernel is doing i have decided that splitting the work over more kernels should speed up the whole procces
+   //TODO: make sure this can work with __shared__ as is
 __global__ void CalculateWinningCentroids( int States, float *CentroidDist, int *WinningCentroids )
 {
     extern __shared__ float shared[];
@@ -440,30 +472,7 @@ __global__ void CalculatePOS( int States, float *CentroidDist, float *Output )
     }
 }
 
-__global__ void UpdateCountingTables(int mStates, int parentStates, int * dCountingTables,
-			int * dParentsAdvice, int * dOldWinningStates, int * dNewWinningNodes, int * dSumVectors){
 
-	 int bid = blockIdx.x + blockIdx.y * gridDim.x;
-
-	 int s2 = mStates * mStates;
-
-	 //make sure Im consistent with old states across the top and new states down the side for the table.
-	 int i = bid * parentsStates * s2 //node
-			 + dParentsAdvice[bid] * s2 //advice table for node
-			 + dNewWinningState[bid] * mStates //row of table
-			 + dOldWinningState[bid];	//col of table
-
-	 dCountingTables[i]++;
-
-	 i = bid * parentStates * mStates // node index
-			 + dParentsAdvice[bid] * mStates //advice index
-			 + dOldWinningStates[bid]; //element of sum vector
-
-	 //SumTable, collection of 1 dimensional vectors. Each node has the same number of them as its counting tables, one for each parent state.
-	 //One dimensional of length equal to the number of the child node's centroids or states.
-	 dSumVectors[i]++;
-
-}
 
 /*
 
@@ -479,24 +488,25 @@ __global__ void UpdateCountingTables(int mStates, int parentStates, int * dCount
 */
 
 //TODO: make a check to see if it has enough shared memory
+//TODO: make sure that I'm useing __shared__ properly and if im doing it dynamically will it work properly
 //TODO: still need to normalize as in the denominator of the belief update equation.
-__global__ void UpdateBeliefs( int mStates, float *CentroidDist,
-		float *dPOS, float * dNewBeliefs, float * dOldBeliefs, float * dCountingTables,
-		int * dParentsAdvice, int parentsStates, int * dSumTables){
+__global__ void UpdateBeliefs( const int states, const int parentStates,
+		float *dPOS, float * dNewBeliefs, float * dOldBeliefs, int * dCountingTables,
+		int * dParentsAdvice, int parentsStates, int * dSumTables, int * dOutputAdvice){
 
 	int bid = blockIdx.x + blockIdx.y * gridDim.x; //corresponds to the node
 
 	int advice = dParentsAdvice[bid];
 
-	const int s2 = mStates * mStates;
+	const int s2 = states * states;
 
 	// Variable cts (counting table start) is the first element of the correct PSSA counting table
-	// based on the node and advice state. PSSA means P(s'|s,c)*b(s) where c = advice, meaning
-	// probability of transitioning to state s' given the current state s and the parents node's advice (or state) c.
+	// based on the node and advice state. PSSA means P(s'|s,a)*b(s) where a = advice, meaning
+	// probability of transitioning to state s' given the current state s and the parents node's advice (or state) a.
 	// Each node has a seperate counting table for each possible parent advice state
 	// of size N x N, where N is the number of centroids (states) of the child node.
 	// The number of counting tables per node equal to the number of parent states.
-	// Each time a node transitions from s to s' given advice c, the counting table for advice c
+	// Each time a node transitions from s to s' given advice a, the counting table for advice a
 	// has the value of the element at row s and column s' incremented by 1. Then, to get the
 	// probability, that value is divided by the corresponding value in the SumsTables.
 	// There is one sum table per counting table, which has one element per column of the
@@ -504,17 +514,18 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 	const int cts = bid * parentsStates * s2 + advice * s2;
 
 
-	__shared__ float cache[s2]; // the cache saves each P(s'|s,c)*b(s) for all s' and s for the given advice c
+	extern __shared__ float cache[]; // the cache saves each P(s'|s,c)*b(s) for all s' and s for the given advice c. The size  is states x states
 
 	//variable sp is read as "s prime" as in b'(s') which is the left side of the belief update equation.
-	for(int sp = threadIdx.y; sp < mStates ; sp += blockDim.y) {
-		int ctr = cts + sp * mStates; // ctr (counting table row) is the first element of the sp'th row of the counting table
+	for(int sp = threadIdx.y; sp < states ; sp += blockDim.y) {
+		int ctr = cts + sp * states; // ctr (counting table row) is the first element of the sp'th row of the counting table
 		//s = current state
-		for(int s = threadIdx.x ;  s < mStates ; s += blockDim.x ) {
+		for(int s = threadIdx.x ;  s < states ; s += blockDim.x ) {
 			int i = ctr + s;
 			//TODO: is it guaranteed that dSumTables will not be 0?
-			float prob = dCountingTables[i] / dSumTables[bid * parentStates * mStates + advice * mStates + s];
-			cache[ sp * mStates + s] = dOldBeliefs[bid * mStates + s] * prob; // this is the P(s'|s,c)*b(s) calculation.
+			//TODO: how to handle the top layer that does not have a parent?
+			float prob = dCountingTables[i] / dSumTables[bid * parentStates * states + advice * states + s];
+			cache[ sp * states + s] = dOldBeliefs[bid * states + s] * prob; // this is the P(s'|s,c)*b(s) calculation.
 
 		}
 	}
@@ -524,12 +535,12 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 
 	//this part performs a reduction on the sums of the P(s'|s,c)*b(s) rows
 	//of the cache table, storing the sums in the first column of the table.
-	int dOld = mStates;
-	for (int d = mStates >> 1;  d != 0; d >>= 1) { 				
+	int dOld = states;
+	for (int d = states >> 1;  d != 0; d >>= 1) { 				
 		dOld -= d*2;	
-		for(int sp = threadIdx.y; sp < mStates ; sp += blockDim.y){
+		for(int sp = threadIdx.y; sp < states ; sp += blockDim.y){
 			for(int s = threadIdx.x; s < d ; s += blockDim.x){
-				int i = sp * mStates + s;
+				int i = sp * states + s;
 				cache[i] +=  cache[i + d];
 				//trick for if cache has odd length
 				if(dOld == 1 && s == d - 1){
@@ -541,38 +552,107 @@ __global__ void UpdateBeliefs( int mStates, float *CentroidDist,
 		dOld = d;
 	}
 
-	__shared__ float pssc_b_vector[mStates];
-	//multiply the two parts of the belief update equation numerator together, Pr(o|s') by Sum[ Pr(s'|s,c)*b(S) ]
-	//The cache[sp * mStates] is the Pr(s'|s,c)*b(S)  vector
-	for(int sp = threadIdx.y ; sp < mStates ; sp += blockDim.y){
-		//dNewBeliefs[i] = dPOS[i] * cache[sp * mStates];
-		cache[sp * mStates]*=dPOS[bid * mStates + sp];
-		pssc_b_vector[sp] = cache[sp * mStates];
-	}
-	__syncthreads();
+	float * pssc_b_vector = (float *)&cache[s2]; //length is states, start this vector right after the end of cache array
 
-	//right now only the first column of cache is used to store the POS * PSSA
-	//so use the second column to perform its reduction to get its sum
-	//normlzie dNewBeliefs	   
-	dOld = mStates;
-	for (int d = mStates >> 1; d!=0 ; d>>=1 ){
+	//multiply the two parts of the belief update equation numerator together, Pr(o|s') by Sum[ Pr(s'|s,c)*b(S) ]
+	//The cache[sp * states] is the Pr(s'|s,c)*b(S)  vector
+
+     //we launched with a 2d block of threads now only dealing with 1d arrays, so convert this back to 1d so we waste fewer threads
+	int sp_start  = threadIdx.y * blockDim.x + threadIdx.x; 
+    int n_threads = blockDim.x * blockDim.y;
+
+    //transform it from a column into a row
+	for(int sp = sp_start ; sp < states ; sp += n_threads ){
+		//dNewBeliefs[i] = dPOS[i] * cache[sp * states];
+		pssc_b_vector[sp] = cache[sp * states] *= dPOS[bid * states + sp];
+	}
+	__syncthreads(); //might not need this here
+
+
+	//find the sum of the pssc_b_vector so it can be normalized   
+	dOld = states;
+	int s_start = sp_start;   
+	for (int d = states >> 1; d!=0 ; dOld = d, d>>=1 ){
 		dOld -= d*2;
-		for(int s = threadIdx.x; s < d; s += blockDim.x){
+		for(int s = s_start; s < d; s +=  n_threads ){
 			pssc_b_vector[s] += pssc_b_vector[s + d ];
 			if(dOld == 1 && s ==  d - 1){
 				pssc_b_vector[s] += pssc_b_vector[s + d + 1];
 			}
 		}
 		__syncthreads();	
-		dOld = d;
 	}
+
 	float sum = pssc_b_vector[0];
-	float temp;
-	for(int sp = threadIdx.y ; sp < mStates ; sp += blockDim.y){
-		temp = cache[sp * mStates] /= sum;
-		pssc_b_vector[sp] =  temp;
+
+
+	//pssc_b_vector will now contain b'(s') after normalizing the Pr(s'|s,c)*b(S) vector
+	for(int sp = sp_start; sp < states ; sp += n_threads ){
+		dNewBeliefs[ bid * states + sp] =  pssc_b_vector[sp] = cache[sp * states] /= sum;
 	}
 	
+	int * max_index = (int *)cache; //max_index size = #states. Overwrite first row of cache shared memory to save winning index.
+
+	//find max belief, store corresponding index in max_index[0]
+	find_max(states, pssc_b_vector, max_index);
+
+	//set max belief state as advice for child nodes
+	if(sp_start == 0){//only one thread does this to save memory bandwidth
+		int old_winning_belief = dOutputAdvice[bid];
+		//new winning belief
+		dOutputAdvice[bid] = max_index[0];
+		updateCountingTables(states, parentStates, dCountingTables, advice, old_winning_belief, max_index[0], dSumTables, bid);
+	}
+
 }
 
+__device__ void updateCountingTables(int mStates, int parentStates, int * dCountingTables,
+			int advice, int previousWinningBelief, int newWinningBelief, int * dSumTables, int bid){
+	 int s2 = mStates * mStates;
+	 //make sure Im consistent with old states across the top and new states down the side for the table.
+	 int i = bid * parentStates * s2 //node
+			 + advice * s2 //advice table for node
+			 + newWinningBelief * mStates //row of table
+			 + previousWinningBelief;	//col of table
+
+	 dCountingTables[i]++;
+
+	 //dSumTables, collection of 1 dimensional vectors. Each node has the same number of them as its counting tables or one for each parent state.
+	 //One sum vector has length equal to the number of the node's centroids or states. Each element is the sum of the corresponding column
+	 //of the dCountingTable
+	 i = bid * parentStates * mStates // node index
+		 + advice * mStates //advice index
+		 + previousWinningBelief; //element of sum vector
+	 dSumTables[i]++;
+
+}
+
+__device__ void find_max(const int states,float * winner, int * winnerId ){
+
+    int tid;
+    for(tid = threadIdx.x; tid < states ; tid += blockDim.x ){
+        winnerId[tid] = tid;
+    }
+    __syncthreads();
+    
+    for(int dOld = states, d = states >> 1; d != 0 ; dOld = d, d >>= 1 ){
+        for(tid = threadIdx.x, dOld -= d*2 ; tid < d ; tid += blockDim.x){
+            int tidd= tid + d;	
+            if(winner[tid] > winner[tidd]){
+                // Move winning centroid to the beginning
+                winner[tid] = winner[tidd];
+                winnerId[tid] = winnerId[tidd];
+            }
+            if (dOld == 1 && tid == d-1){
+                // special case of odd numbers
+                if(winner[tid] > winner[tidd + 1]){
+                    winner[tid] = winner[tidd + 1];
+                    winnerId[tid] = winnerId[tidd + 1];
+                }
+            }
+        }
+        // Sync moment before starting with next iteration of reduction.
+        __syncthreads();
+    }
+}
 
