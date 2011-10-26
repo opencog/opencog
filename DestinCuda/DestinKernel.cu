@@ -191,8 +191,6 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     CalculatePOS<<<grid, threads, sharedMem>>>( mStates, dCentroidsDistance, dPOS );
 
     //TODO: rename dNewBeliefs and dOldBeliefs to just dBeliefs, get rid of one.
-    //TODO: make sure dParentsAdvice is correct
-    //TODO: set parentsStates in create function
     int n = mStates > 16 ? 16 : mStates ;
     dim3 threads_plane( n, n ); 
     //total threads should be less than 512 per block, hardware limit so states needs to be less<=22
@@ -516,25 +514,6 @@ __global__ void CalculatePOS( int States, float *CentroidDist, float *POSOutput 
     }
 }
 
-
-
-/*
-
-	dim3 grid( mCols, mRows);
-
-	int n = states > 22 ? 22 : states;
-	dim3 threads( n, n ); //total threads should be less than 512 per block, hardware limit so states needs to be less<=22
-	//TODO: this should probably be a multiple of states instead to avoid wasting threads
-
-	UpdateBeliefs<< grid, threads >>();
-
-
-*/
-
-//TODO: make a check to see if it has enough shared memory
-//TODO: make sure that I'm useing __shared__ properly and if im doing it dynamically will it work properly
-//TODO: still need to normalize as in the denominator of the belief update equation.
-
 /**
  * UpdateBeliefs - Performs the P(s'|s,a)*b(s) calculations of the DeSTIN belief update rule.
  *
@@ -559,6 +538,7 @@ __global__ void CalculatePOS( int States, float *CentroidDist, float *POSOutput 
  * dSumTables - vector of the sum of the columns of the dCountingTables
  * dOutputAdvice - this node's advice to be fed to its children nodes
  */
+//TODO: make a check to see if it has enough shared memory
 __global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBeliefs, float * dOldBeliefs, int * dCountingTables,
 		int * dParentsInputAdvice, int parentStates, int * dSumTables, int * dOutputAdvice){
 
@@ -568,8 +548,8 @@ __global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBelief
 	//Points the 4 children nodes to the right parent for advice
 	//Be careful of integer division if trying to simplify this.
 	//TODO: simplify this
-	//TODO: could make one thread pull from global memory into shared memory, instead of all threads pulling
 	int parent_node_id = blockIdx.x / 2 + (blockIdx.y /2 ) * (gridDim.x / 2) ;
+	//TODO: could make one thread pull from global memory into shared memory, instead of all threads pulling
 	const int advice = dParentsInputAdvice==NULL ? 0 : dParentsInputAdvice[parent_node_id];
 
 	const int s2 = states * states;
@@ -613,7 +593,7 @@ __global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBelief
 				}
 			}
 		}
-		__syncthreads(); //TODO: is this the correct place for the sync?
+		__syncthreads(); 
 		dOld = d;
 	}
 
@@ -622,11 +602,11 @@ __global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBelief
 	//multiply the two parts of the belief update equation numerator together, Pr(o|s') by Sum[ Pr(s'|s,c)*b(S) ]
 	//The cache[sp * states] is the Pr(s'|s,c)*b(S)  vector
 
-     //we launched with a 2d block of threads now only dealing with 1d arrays, so convert this back to 1d so we waste fewer threads
+	//we launched with a 2d block of threads now only dealing with 1d arrays, so convert this back to 1d so we waste fewer threads
 	int sp_start  = threadIdx.y * blockDim.x + threadIdx.x; 
-        int n_threads = blockDim.x * blockDim.y;
+	int n_threads = blockDim.x * blockDim.y;
 
-    //transform it from a column into a row
+	//transform it from a column into a row
 	for(int sp = sp_start ; sp < states ; sp += n_threads ){
 		//dNewBeliefs[i] = dPOS[i] * cache[sp * states];
 		pssc_b_vector[sp] = cache[sp * states] *= dPOS[bid * states + sp];
@@ -655,7 +635,7 @@ __global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBelief
 	for(int sp = sp_start; sp < states ; sp += n_threads ){
 		dNewBeliefs[ bid * states + sp] =  pssc_b_vector[sp] = cache[sp * states] /= sum;
 	}
-	
+
 	int * max_index = (int *)cache; //max_index size = #states. Overwrite first row of cache shared memory to save winning index.
 
 	//find max belief, store corresponding index in max_index[0]
@@ -672,62 +652,62 @@ __global__ void UpdateBeliefs( const int states, float *dPOS, float * dNewBelief
 }
 
 __device__ void updateCountingTables(int mStates, int parentStates, int * dCountingTables,
-			int advice, int previousWinningBelief, int newWinningBelief, int * dSumTables, int bid){
-	 int s2 = mStates * mStates;
-	 //make sure Im consistent with old states across the top and new states down the side for the table.
-	 int i = bid * parentStates * s2 //node
-			 + advice * s2 //advice table for node
-			 + newWinningBelief * mStates //row of table
-			 + previousWinningBelief;	//col of table
+		int advice, int previousWinningBelief, int newWinningBelief, int * dSumTables, int bid){
+	int s2 = mStates * mStates;
+	//make sure Im consistent with old states across the top and new states down the side for the table.
+	int i = bid * parentStates * s2 //node
+		+ advice * s2 //advice table for node
+		+ newWinningBelief * mStates //row of table
+		+ previousWinningBelief;	//col of table
 
-	 dCountingTables[i]++;
+	dCountingTables[i]++;
 
-	 //dSumTables, collection of 1 dimensional vectors. Each node has the same number of them as its counting tables or one for each parent state.
-	 //One sum vector has length equal to the number of the node's centroids or states. Each element is the sum of the corresponding column
-	 //of the dCountingTable
-	 i = bid * parentStates * mStates // node index
-		 + advice * mStates //advice index
-		 + previousWinningBelief; //element of sum vector
-	 dSumTables[i]++;
+	//dSumTables, collection of 1 dimensional vectors. Each node has the same number of them as its counting tables or one for each parent state.
+	//One sum vector has length equal to the number of the node's centroids or states. Each element is the sum of the corresponding column
+	//of the dCountingTable
+	i = bid * parentStates * mStates // node index
+		+ advice * mStates //advice index
+		+ previousWinningBelief; //element of sum vector
+	dSumTables[i]++;
 
 }
 /**
-* find_max - finds the maximum value of winner and its corresponding index. The 
-* maximum value is stored at winner[0] and the corresponding index of the maximum
-* value is stored at winnerId[0]
-* 
-* thread_start = tid
-* threadcount = how many threads
-* length = size of vector to find the maximum of
-* winner = input vector to find maximum of, winner[0] will contain the maximum value afterwords
-* winnerId = empty buffer, winnerId[0] will have the max id
-*/
+ * find_max - finds the maximum value of winner and its corresponding index. The 
+ * maximum value is stored at winner[0] and the corresponding index of the maximum
+ * value is stored at winnerId[0]
+ * 
+ * thread_start = tid
+ * threadcount = how many threads
+ * length = size of vector to find the maximum of
+ * winner = input vector to find maximum of, winner[0] will contain the maximum value afterwords
+ * winnerId = empty buffer, winnerId[0] will have the max id
+ */
 __device__ void find_max(const int thread_start, const int threadcount, const int length,float * winner, int * winnerId ){
 
-    int tid;
-    for(tid = thread_start; tid < length ; tid += threadcount ){
-        winnerId[tid] = tid;
-    }
-    __syncthreads();
-    
-    for(int dOld = length, d = length >> 1; d != 0 ; dOld = d, d >>= 1 ){
-        for(tid = thread_start , dOld -= d*2 ; tid < d ; tid += threadcount){
-            int tidd= tid + d;	
-            if(winner[tid] < winner[tidd]){
-                // Move large index to the beginning
-                winner[tid] = winner[tidd];
-                winnerId[tid] = winnerId[tidd];
-            }
-            if (dOld == 1 && tid == d-1){
-                // special case of odd numbers
-                if(winner[tid] < winner[tidd + 1]){
-                    winner[tid] = winner[tidd + 1];
-                    winnerId[tid] = winnerId[tidd + 1];
-                }
-            }
-        }
-        // Sync moment before starting with next iteration of reduction.
-        __syncthreads();
-    }
+	int tid;
+	for(tid = thread_start; tid < length ; tid += threadcount ){
+		winnerId[tid] = tid;
+	}
+	__syncthreads();
+
+	for(int dOld = length, d = length >> 1; d != 0 ; dOld = d, d >>= 1 ){
+		for(tid = thread_start , dOld -= d*2 ; tid < d ; tid += threadcount){
+			int tidd= tid + d;	
+			if(winner[tid] < winner[tidd]){
+				// Move large index to the beginning
+				winner[tid] = winner[tidd];
+				winnerId[tid] = winnerId[tidd];
+			}
+			if (dOld == 1 && tid == d-1){
+				// special case of odd numbers
+				if(winner[tid] < winner[tidd + 1]){
+					winner[tid] = winner[tidd + 1];
+					winnerId[tid] = winnerId[tidd + 1];
+				}
+			}
+		}
+		// Sync moment before starting with next iteration of reduction.
+		__syncthreads();
+	}
 }
 
