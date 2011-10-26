@@ -58,13 +58,17 @@ private:
 	int *dWinningCentroids;
 	int *mCentroidWinCounter;
 
+	//TODO: properly document how the memory variables are arranged.
+
 	int *dCountingTables;
+
 	int *dSumTables;
 
 	float *dBeliefs;
 	//TODO: make sure all memory vectors are initialized and cleared properly
-	int *dOutputAdvice;
-	int *dParentInputAdvice;//points to advice vector in parent layer,  this layer is not responsible for clearing it
+	int *dOutputAdvice; //advice to be used by child layer
+
+	int *dParentInputAdvice;//points to advice vector in parent layer,  child layer is not responsible for clearing it
 
 	void WriteData( stringstream& xml );
 
@@ -105,6 +109,7 @@ public:
 	float *GetDevicePointerBeliefs(){ return dBeliefs; }
 
 	int * GetOutputAdvice(){ return dOutputAdvice;  }
+
 
 	void SetInputAdvice(int * dParentInputAdvice){
 		this->dParentInputAdvice = dParentInputAdvice;

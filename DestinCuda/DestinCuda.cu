@@ -264,6 +264,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
     int* ColsPerLayer = new int[NumberOfLayers];
     int* InputDimensionality = new int[NumberOfLayers];
 
+    InputDimensionality[0] = 16; //4x4 has 16 inputs
 
     for(int Layer=1; Layer<NumberOfLayers; Layer++ ){
         InputDimensionality[Layer] = 4*NumberOfCentroids[Layer-1];
@@ -689,6 +690,7 @@ int MainDestinExperiments(int argc, char* argv[])
             time_t lStart = time(NULL);
             DataSourceForTraining.SetShiftedDeviceImage(indexOfExample, SEQ[seq][0], SEQ[seq][1], ImageInput[0], ImageInput[1]);
             DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage(),xmlLayer);
+            //TODO: is the order of layer evaluation going in the right order?
             for(int i=1;i<NumberOfLayers;i++)
             {
                 DKernel[i].DoDestin(DKernel[i-1].GetDevicePointerBeliefs(),xmlLayer);
