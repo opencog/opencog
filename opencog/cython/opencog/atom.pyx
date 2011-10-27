@@ -115,5 +115,14 @@ cdef class Atom(object):
         #elif op == 5: # >=
             #return deref(h1.h) >= deref(h2.h)
 
+    # Necessary to prevent weirdness with RPyC
+    def __cmp__(a1, a2):
+        is_equal = (a1.atomspace == a2.atomspace and
+                     a1.handle == a2.handle)
+        if is_equal:
+            return 0
+        else:
+            return -1
+
     def __hash__(a1):
         return hash(a1.h.value())

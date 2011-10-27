@@ -59,13 +59,14 @@ cdef class TruthValue:
         # This deletes the *smart pointer*, not the actual pointer
         del self.cobj
 
-    def __getattr__(self,aname):
-        if aname == "mean":
-            return self._mean()
-        elif aname == "confidence":
-            return self._confidence()
-        elif aname == "count":
-            return self._count()
+    property mean:
+        def __get__(self): return self._mean()
+
+    property confidence:
+        def __get__(self): return self._confidence()
+
+    property count:
+        def __get__(self): return self._count()
 
     cdef _mean(self):
         return self._ptr().getMean()
@@ -80,6 +81,8 @@ cdef class TruthValue:
         " @todo support the rest of the comparison operators"
         if op == 2: # ==
             return deref(h1._ptr()) == deref(h2._ptr())
+        
+        raise ValueError, "TruthValue does not yet support most comparison operators"
 
     cdef cTruthValue* _ptr(self):
         return self.cobj.get()
