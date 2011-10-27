@@ -38,6 +38,8 @@ cdef api cHandle python_pln_bc(cAtomSpace* c_space, cHandle c_target) with gil:
     target = tree_from_atom(target_Atom)
     c = Chainer(space)
     result_Handle_list = c.bc(target)
+#    from logic_frontend import rpyc_bc
+#    result_Handle_list = rpyc_bc(space, target_Atom)
 
 #    # Create a C++ vector (optional; not really needed for PLNUTest)
 #    cdef vector[cHandle] o_vect

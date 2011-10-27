@@ -1,4 +1,4 @@
-from opencog.atomspace import types
+#from opencog.atomspace import types
 
 import collections
 import cPickle as pickle
@@ -17,29 +17,30 @@ def inplace_set_attributes(obj, **attr_values):
     obj.__dict__.update(attr_values)
     return obj
 
-def output_atoms(atomspace):
-    roots = [x for x in atomspace.get_atoms_by_type(types.Atom) if not x.incoming]
-    #return repr( map(tree_from_atom, roots) )
-    import tree
-    for tr in map(tree.tree_from_atom, roots):
-        print repr(tr)
-
-def save_trees(trees, file):
-    '''Save all of the Trees from the AtomSpace to a file. Uses FakeAtom rather than the Cython Atom class.'''
-    import tree
-    f = open(file,'w')
-    #trees = map(tree.tree_from_atom, trees.get_atoms_by_type(types.Atom))
-    #trees = map(tree.tree_from_atom, trees)
-    trees = map(tree.tree_with_fake_atoms, trees)
-    pickle.dump(trees, f)
-    f.close()
-
-def load_trees(file):
-    '''Load all of the Trees from a file. Returns them in a list.'''
-    f = open(file, 'r')
-    trees = pickle.load(f)
-    f.close()
-    return trees
+# These can't be used in PyPy but otherwise are fine.
+#def output_atoms(atomspace):
+#    roots = [x for x in atomspace.get_atoms_by_type(types.Atom) if not x.incoming]
+#    #return repr( map(tree_from_atom, roots) )
+#    import tree
+#    for tr in map(tree.tree_from_atom, roots):
+#        print repr(tr)
+#
+#def save_trees(trees, file):
+#    '''Save all of the Trees from the AtomSpace to a file. Uses FakeAtom rather than the Cython Atom class.'''
+#    import tree
+#    f = open(file,'w')
+#    #trees = map(tree.tree_from_atom, trees.get_atoms_by_type(types.Atom))
+#    #trees = map(tree.tree_from_atom, trees)
+#    trees = map(tree.tree_with_fake_atoms, trees)
+#    pickle.dump(trees, f)
+#    f.close()
+#
+#def load_trees(file):
+#    '''Load all of the Trees from a file. Returns them in a list.'''
+#    f = open(file, 'r')
+#    trees = pickle.load(f)
+#    f.close()
+#    return trees
 
 def pp(x):
     """Pretty-print any collection type (or generator).

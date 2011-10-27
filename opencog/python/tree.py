@@ -1,4 +1,9 @@
 from opencog.atomspace import AtomSpace, Atom, get_type, types
+
+#import rpyc_connection
+#_as = rpyc_connection.conn.modules['opencog.atomspace']
+#AtomSpace, types, Atom, get_type, is_a = _as.AtomSpace, _as.types, _as.Atom, _as.get_type, _as.is_a
+
 from copy import copy, deepcopy
 from functools import *
 import sys
@@ -17,13 +22,14 @@ from collections import namedtuple
 class FakeAtom:
     '''A simple pure Python class that can emulate the Cython Atom class. It supports pickling
     and is safe to use for Python multiprocessing. It is also compatible with PyPy.'''
-    def __init__(self, type_name, name, id):
+    def __init__(self, t,  type_name, name, id, tv):
+        self.t = t
         self.type_name = type_name
         self.name = name
 #        self._handle = FakeHandle(id)
         self._handle_value = id
         TruthValue = namedtuple('TruthValue', 'count')
-        self.tv = TruthValue(count=1)
+        self.tv = tv #TruthValue(count=1)
     
     def __str__(self):
         return 'fake%s%s' % (self.type_name,  self.name)
@@ -41,19 +47,19 @@ class FakeAtom:
 
     def is_a(self, _type):
 #        assert _type == types.Link
-        return False
+        return is_a (self.t, _type)
 
 def fake_from_real_Atom(atom):
-    return FakeAtom(atom.type_name, atom.name, atom.h.value())
+    return FakeAtom(atom.t, atom.type_name, atom.name, atom.h.value(), atom.tv)
 
 def tree_with_fake_atoms(tr):
-    if isinstance(tr.op, Atom):
+    #if isinstance(tr.op, Atom):
+    if not isinstance(tr.op, Tree) and not isinstance(tr.op, str) and not isinstance(tr.op, int):
         return Tree(fake_from_real_Atom(tr.op), [])
     elif tr.is_leaf():
         return tr
     else:
         return Tree(tr.op, map(tree_with_fake_atoms, tr.args))
-
 
 def coerce_tree(x):
     assert type(x) != type(None)
@@ -151,7 +157,7 @@ class Tree (object):
             return self._tuple
         else:
             # Atom doesn't support comparing to different types in the Python-standard way.
-            if isinstance(self.op, Atom):
+            if isinstance(self.op, Atom) and not isinstance(self.op, FakeAtom):
                 #assert type(self.op.h) != type(None)
                 self._tuple = self.op.h.value()
                 return self._tuple
@@ -193,7 +199,7 @@ def atom_from_tree(tree, a):
     if tree.is_variable():
         return a.add(types.VariableNode, name='$'+str(tree.op))
     elif tree.is_leaf():
-        # Node (simply the handle)
+        # Node (simply the handle)        
         if isinstance (tree.op, Atom):
             return tree.op
         # Empty Link
@@ -302,8 +308,9 @@ def unify(x, y, s):
 
     if s == None:
         return None
-    elif type(x) != type(y):
-        return None
+    # Not compatible with RPyC as it will make one of them 'netref t'
+#    elif type(x) != type(y):
+#        return None
     elif x == y:
         return s
     elif isinstance(x, Tree) and x.is_variable():

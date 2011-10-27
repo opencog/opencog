@@ -1,3 +1,6 @@
+#import rpyc_connection
+#_as = rpyc_connection.conn.modules['opencog.atomspace']
+#count_to_confidence, confidence_to_count = _as.count_to_confidence, _as.confidence_to_count
 from opencog.atomspace import count_to_confidence, confidence_to_count
 
 import operator, functools, itertools
