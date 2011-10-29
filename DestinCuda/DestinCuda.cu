@@ -261,6 +261,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
 
 
     DKernel = new DestinKernel[NumberOfLayers];
+    //TODO: I think all these "new" declarations are not being deleted and potentially leaking memory
     int* ColsPerLayer = new int[NumberOfLayers];
     int* InputDimensionality = new int[NumberOfLayers];
 
@@ -337,7 +338,6 @@ int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], Com
     // Argument: DestinOutputFile or InputNetworkFile
 
     string strDestinNetworkFileToWrite;
-    string FirstArg = argv[1];
 
     // Argument: DestinOutputFile
     strDestinNetworkFileToWrite = argv[6]; // we write to this file, and then we read from it too!!
@@ -348,85 +348,6 @@ int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], Com
         cout << "Writing default destin file to: " << strDestinNetworkFileToWrite << endl;
     }
     out.strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
-
-
-    // Create the old variable sDiagnosticFileNameForMarking
-    // it have the location based on TargetDirectory + FileName
-    string sDiagnosticFileNameForMarking;
-    sDiagnosticFileNameForMarking = strDiagnosticDirectoryForData + strDiagnosticFileName;
-    // Argument: LayerToShow
-    // Structure of processing S:E:O:P:T
-    // List of default values
-    int FirstLayerToShowHECK = 3;
-    int LastLayerToShow = FirstLayerToShowHECK;
-    int iMovementOutputOffset = 0;
-    int iMovementOutputPeriod = 1;
-    OutputTypes eTypeOfOutput = eBeliefs;
-
-    string sLayerSpecs = argv[3];
-    int iColon = sLayerSpecs.find(":");
-    if ( iColon == -1 || sLayerSpecs.substr(iColon).empty() )  //first layer = last layer, and no sampling specified.
-    {
-        // S
-        FirstLayerToShowHECK=atoi(sLayerSpecs.c_str());
-        LastLayerToShow=FirstLayerToShowHECK;
-    }
-    else
-    {
-        // S:E
-        FirstLayerToShowHECK=atoi(sLayerSpecs.substr(0,1).c_str());
-        LastLayerToShow=atoi(sLayerSpecs.substr(iColon+1,1).c_str());
-        sLayerSpecs = sLayerSpecs.substr(iColon+1);
-        iColon = sLayerSpecs.find(":");
-        if ( iColon!=-1 && !( sLayerSpecs.substr(iColon).empty() ) )
-        {
-            //S:E:O
-            sLayerSpecs = sLayerSpecs.substr(iColon+1);
-            iMovementOutputOffset = atoi(sLayerSpecs.substr(0,1).c_str());
-            iColon = sLayerSpecs.find(":");
-            if ( iColon!=-1 && !( sLayerSpecs.substr(iColon).empty() ) )
-            {
-                //S:E:O:P
-                sLayerSpecs = sLayerSpecs.substr(iColon+1);
-                iMovementOutputPeriod = atoi(sLayerSpecs.substr(0,1).c_str());
-                iColon = sLayerSpecs.find(":");
-                if ( iColon!=-1 && !( sLayerSpecs.substr(iColon).empty() ) )
-                {
-                    //S:E:O:P:T
-                    sLayerSpecs = sLayerSpecs.substr(iColon+1);
-                    if ( sLayerSpecs.substr(0,1)=="A" )
-                    {
-                        eTypeOfOutput = eBeliefInAdviceTabular;
-                    }
-                    else if ( sLayerSpecs.substr(0,1)=="B" )
-                    {
-                        eTypeOfOutput = eBeliefs;
-                    }
-                    else if ( sLayerSpecs.substr(0,1)=="N" )
-                    {
-                        eTypeOfOutput = eBeliefInAdviceNNFA;
-                    }
-                    else if ( sLayerSpecs.substr(0,1)=="L" )
-                    {
-                        eTypeOfOutput = eBeliefInAdviceLinearFA;
-                    }
-                    else
-                    {
-                        cout << "Do not understand the output type " << sLayerSpecs.c_str() << endl;
-                        return 1;
-                    }
-                }
-            }
-        }
-    }
-
-    // Optional argument: OutputDistillationLevel
-    // This will write out a distilled movement log file this movement log matches that what SampleAndStack would produce.
-    int OutputDistillationLevel = 0; //default level
-    if ( argc == 9 )
-    {
-        OutputDistillationLevel = atoi(argv[8]);
-    }
 
 
     return 0;
@@ -644,8 +565,6 @@ int MainDestinExperiments(int argc, char* argv[])
     int* ImageInput;
 
     DestinKernel* DKernel=NULL;
-    map<int,int> LabelsUsedToCreateNetwork;
-    map<int,int> IndicesUsedToCreateNetwork;
     int NumberOfLayers=4;
 
     CreateDestinOnTheFly(ParametersFileName, NumberOfLayers, DKernel,
@@ -720,7 +639,7 @@ int MainDestinExperiments(int argc, char* argv[])
     time_t destinStop = time(NULL);
     cout << "Time run: " << destinStop-destinStart << endl;
 
-    delete [] DKernel;
+    delete [] DKernel; 
 
     return 0;
 }
