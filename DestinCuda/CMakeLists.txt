@@ -24,16 +24,35 @@ if(CUDA_FOUND)
 	else()
        		 FIND_LIBRARY(lib_curand curand "/usr/local/cuda/lib64" )
 	endif()
-
 	#Make solution
-	CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu DestinData.cu AdviceData.cu DestinKernel.cu)
+	CUDA_ADD_LIBRARY(cudadestin SHARED DestinCuda.cu DestinData.cu AdviceData.cu DestinKernel.cu)
+	CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu)
+	
 	TARGET_LINK_LIBRARIES( destinCuda
 	    pugixml
-        ${lib_curand}
+            ${lib_curand}
+	    cudadestin
 	)
         if(WIN32)
         link_directories( $ENV{CUDA_LIB_PATH} )
         endif()
+
+	FIND_PACKAGE (SWIG 2.0.4)
+	if(SWIG_FOUND)
+		INCLUDE(UseSWIG)
+		FIND_PACKAGE(JNI)
+		if(JNI_FOUND)
+			include_directories( ${JNI_INCLUDE_DIRS} )
+			SET_SOURCE_FILES_PROPERTIES(DestinKernel.i PROPERTIES CPLUSPLUS ON)
+			SWIG_ADD_MODULE(destinjava java  DestinKernel.i )	
+			SWIG_LINK_LIBRARIES(destinjava cudadestin)
+			#add_library(libjavadestin SHARED DestinKernel_wrap.cxx )
+		else(JNI_FOUND)
+			message("Couldn't find jni. Is a jdk installed?")
+		endif(JNI_FOUND)
+	else(SWIG_FOUND)
+		message("Could not find SWIG > 2.0. Not building java interfaces")
+	endif(SWIG_FOUND)		
 else()
 	MESSAGE("CUDA not found. Not building CUDA DestinPort.")
 endif()
