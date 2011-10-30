@@ -1,31 +1,5 @@
-#include "AdviceData.h"
-#include "DestinData.h"
-#include "DestinKernel.h"
+#include "DestinCuda.h"
 
-//pugiXML read/writer
-#include "pugixml/pugixml.hpp"
-
-#include <iostream>
-#include <stdio.h>
-#include <vector>
-#include <fstream>
-#include <ctime>
-#include <sstream>
-#include <sys/stat.h>
-#include <math.h>
-// CUDA Lib
-#include <curand.h>
-
-#ifdef _WIN32
-#include <direct.h>
-#include <string>
-#else
-// Linux only requirements...
-#include <errno.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#endif
 
 using namespace std;
 
@@ -37,7 +11,7 @@ using namespace std;
  * It still might be a idea to just replace the command line complete and do everything from the configuration
  * This will save a lot of code to analyze the input arguments
  */
-void PrintHelp()
+void DestinCuda::PrintHelp()
 {
     // ***************************
     // Print out how to use DeSTIN
@@ -72,7 +46,7 @@ void PrintHelp()
     cout << "        1 = outputs compatible with the regular distilled output of SampleAndStack. If you use this you can skip SampleAndStack.exe" << endl;
 }
 
-bool FileExists(string strFilename)
+bool DestinCuda::FileExists(string strFilename)
 {
     // **************************
     // Does the given file exists
@@ -98,7 +72,7 @@ bool FileExists(string strFilename)
     return(blnReturn);
 }
 
-string GetNextFileForDiagnostic()
+string DestinCuda::GetNextFileForDiagnostic()
 {
     // *************************************
     // Find next available experimental file
@@ -123,7 +97,7 @@ string GetNextFileForDiagnostic()
     return strFileName;
 }
 
-void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, double*& dcSigma, double*& dcRho,
+void DestinCuda::GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, double*& dcSigma, double*& dcRho,
                     int*& NumberOfStates, bool& bAveraging,bool& bFFT,bool& bBinaryPOS,int* DistanceMeasureArray,
                     bool& bUseStarvationTrace,int& PSSAUpdateDelay,bool& bIgnoreAdvice,
                     int**& SEQ, int& SEQ_LENGTH, string& sFileContents, int& iBlocksToProcess,
@@ -221,7 +195,7 @@ void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, d
     cout << "------------------" << endl;
 }
 
-bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, DestinKernel*& DKernel,
+bool DestinCuda::CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, DestinKernel*& DKernel,
                           DestinData& DataSourceForTraining, int& SEQ_LENGTH, int**& SEQ,
                           int*& ImageInput)
 
@@ -301,10 +275,7 @@ bool CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLayers, Destin
     return 0;
 }
 
-struct CommandArgsStuc {
 
-    string strDestinNetworkFileToRead;
-};
 
 /**
  *  parseCommandArgs
@@ -318,7 +289,7 @@ struct CommandArgsStuc {
  *  are not used because most of the functionality it represents
  *  is not yet  ported from the single cpu version of Destin.
  */
-int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], CommandArgsStuc &out){
+int DestinCuda::parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], CommandArgsStuc &out){
     // Argument: TargetDirectory
     // A given location instead or default
     string strDiagnosticDirectoryForData;
@@ -354,7 +325,7 @@ int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], Com
 }
 
 
-int MainDestinExperiments(int argc, char* argv[])
+int DestinCuda::MainDestinExperiments(int argc, char* argv[])
 {
     time_t destinStart = time(NULL);
     // ********************************************
@@ -651,15 +622,18 @@ int main(int argc, char* argv[])
     // Startup check DeSTIN
     // ********************
     // There should be 8 or 9 arguments at this time if not show how to use DeSTIN
+    
+    DestinCuda dc;
     if ( argc==8 || argc==9 )
     {
         cout << "Starting DeSTIN" << endl;
         cout << "------------------" << endl;
-        return MainDestinExperiments(argc,argv);
+        
+        return dc.MainDestinExperiments(argc,argv);
     }
     else
     {
-        PrintHelp();
+        dc.PrintHelp();
         return 0;
     }
 }
