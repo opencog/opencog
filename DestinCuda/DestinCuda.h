@@ -1,10 +1,10 @@
 #ifndef DESTIN_CUDA_H
 #define DESTIN_CUDA_H
 
-
 #include "AdviceData.h"
 #include "DestinData.h"
 #include "DestinKernel.h"
+#include "LayerFinishedCallback.h"
 
 //pugiXML read/writer
 #include "pugixml/pugixml.hpp"
@@ -34,11 +34,20 @@
 struct CommandArgsStuc {
 
     string strDestinNetworkFileToRead;
+    string strTesting;
+    string strDestinTrainingFileName;
+    int MAX_CNT;
+    int iTestSequence;
+    string sCodeWord;
+    string ParametersFileName;
 };
 
 class DestinCuda {
     
 private:
+    
+    LayerFinishedCallback * callback;
+    
     string GetNextFileForDiagnostic();
     
     void GetParameters( const char* cFilename, int& NumberOfLayers, double*& dcMu, double*& dcSigma, double*& dcRho,
@@ -55,10 +64,18 @@ private:
                           DestinData& DataSourceForTraining, int& SEQ_LENGTH, int**& SEQ,
                           int*& ImageInput);
     
-    int parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], CommandArgsStuc &out);
 public:
+    int parseCommandArgs( int argc, char* argv[], CommandArgsStuc &out);
+
+    
+    DestinCuda() : callback(NULL){ 
+    
+    }
+    
+    
+    void SetLayerFinishedCallback(LayerFinishedCallback * callback ){ this->callback = callback; }
     void PrintHelp();
-    int MainDestinExperiments(int argc, char* argv[]);
+    int MainDestinExperiments(CommandArgsStuc & argsOut);
 };      
 
 #endif

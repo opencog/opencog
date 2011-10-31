@@ -275,21 +275,36 @@ bool DestinCuda::CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLa
     return 0;
 }
 
-
-
 /**
  *  parseCommandArgs
  *
  *  Parses the program command line arguments and fills
- *  the out CommandArgsStuc appropriately ( which you can
- *  see right now only consists of bCreateFromFile ).
- *
- *  This almost doesn'thave any side affects at the moment
- *  because most of the declared variables in this function
- *  are not used because most of the functionality it represents
- *  is not yet  ported from the single cpu version of Destin.
+ *  the out CommandArgsStuc appropriately
+ *      
  */
-int DestinCuda::parseCommandArgs(  string strDiagnosticFileName, int argc, char* argv[], CommandArgsStuc &out){
+int DestinCuda::parseCommandArgs( int argc, char* argv[], CommandArgsStuc &out){
+    
+         // Argument: ParamsFile
+    // A configuration file for DeSTIN
+    out.ParametersFileName=argv[4];
+    if ( !FileExists(out.ParametersFileName) )
+    {
+        // According to the help the ParamsFile is always used? Maybe some vital information on how to load data?
+        // Or some testing to see how the network reacts when expanding or shrinking the network.
+        cout << "Parameters file name does not exist" << endl;
+        return 1;
+    }
+    
+        out.sCodeWord=argv[1];
+        if (out.sCodeWord.length() != 11 )
+        {
+            PrintHelp();
+            return 1;
+        }
+        
+        
+    out.iTestSequence =atoi(argv[1]);
+    out.MAX_CNT=atoi(argv[2]);
     // Argument: TargetDirectory
     // A given location instead or default
     string strDiagnosticDirectoryForData;
@@ -306,12 +321,11 @@ int DestinCuda::parseCommandArgs(  string strDiagnosticFileName, int argc, char*
         strDiagnosticDirectoryForData = buffer.str();
     }
 
-    // Argument: DestinOutputFile or InputNetworkFile
-
-    string strDestinNetworkFileToWrite;
-
+    // File for diagnostic
+    string strDiagnosticFileName = GetNextFileForDiagnostic();
+    
     // Argument: DestinOutputFile
-    strDestinNetworkFileToWrite = argv[6]; // we write to this file, and then we read from it too!!
+    string strDestinNetworkFileToWrite = argv[6]; // we write to this file, and then we read from it too!!
     if ( strDestinNetworkFileToWrite == "-D" )
     {
         // If given -D
@@ -320,37 +334,18 @@ int DestinCuda::parseCommandArgs(  string strDiagnosticFileName, int argc, char*
     }
     out.strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
 
-
+    out.strDestinTrainingFileName = argv[5];
+    
+    out.strTesting  = out.strDestinTrainingFileName + "_TESTING";
     return 0;
 }
 
-
-int DestinCuda::MainDestinExperiments(int argc, char* argv[])
+int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
 {
     time_t destinStart = time(NULL);
     // ********************************************
     // Main experiment of DeSTIN (Also called main)
     // ********************************************
-
-    // File for diagnostic
-    string strDiagnosticFileName;
-    strDiagnosticFileName = GetNextFileForDiagnostic();
-
-    // arguments processing
-
-    // For debug information we output the command line to our Diagnostic file.
-    string strCommandLineData = "";
-    for( int i=0; i<argc; i++ )
-    {
-        strCommandLineData += argv[i];
-        strCommandLineData += " ";
-    }
-
-
-    CommandArgsStuc argsStruc;
-    if(parseCommandArgs(strDiagnosticFileName, argc, argv, argsStruc)!=0){
-    	return 1;
-    }
 
 
     // **********************
@@ -358,31 +353,23 @@ int DestinCuda::MainDestinExperiments(int argc, char* argv[])
     // **********************
     // Arguments: TrainingDataFile
     // Load the training file for DeSTIN
-    string strDestinTrainingFileName = argv[5];
+    
 
     // Data object containing source (training)
     DestinData DataSourceForTraining;
 
-    int NumberOfUniqueLabels;
-    DataSourceForTraining.LoadFile(strDestinTrainingFileName.c_str());
-    NumberOfUniqueLabels = DataSourceForTraining.GetNumberOfUniqueLabels();
+    DataSourceForTraining.LoadFile(argsStruc.strDestinTrainingFileName.c_str());
+    int NumberOfUniqueLabels = DataSourceForTraining.GetNumberOfUniqueLabels();
     if ( NumberOfUniqueLabels==0 )
     {
-        cout << "There seems to be something off with data source " << strDestinTrainingFileName.c_str() << endl;
+        cout << "There seems to be something off with data source " << argsStruc.strDestinTrainingFileName.c_str() << endl;
         return 0;
     }
 
-    // A vector with all the labels of the data source
-    vector<int> vLabelList;
-    DataSourceForTraining.GetUniqueLabels(vLabelList);
-
-    // Load the test file for DeSTIN
-    string strTesting = strDestinTrainingFileName;
-    strTesting = strTesting + "_TESTING";
     // Data object of test source
     DestinData DataSourceForTesting;
 
-    DataSourceForTesting.LoadFile((char*)(strTesting.c_str()));
+    DataSourceForTesting.LoadFile((char*)(argsStruc.strTesting.c_str()));
     if ( DataSourceForTesting.GetNumberOfUniqueLabels()!=NumberOfUniqueLabels )
     {
         cout << "Test set does not have the same number of labels as train set " << endl;
@@ -393,26 +380,14 @@ int DestinCuda::MainDestinExperiments(int argc, char* argv[])
     // Preparing working data set
     // **************************
     // now get the data set creation parameters
-    int NumberOfUniqueLabelsToUse;
-    int MAX_CNT = 1000;
-    int iTestSequence = 0;
-    string ParametersFileName;
+   
     vector< pair<int,int> > vIndicesAndGTLabelToUse;
 
 
-        // Argument: MAXCNT
-        MAX_CNT=atoi(argv[2]);
-        // Argument: CodeWord
-        iTestSequence=atoi(argv[1]);
-        string sCodeWord=argv[1];
-        if (sCodeWord.length() != 11 )
-        {
-            PrintHelp();
-            return 0;
-        }
+  
+
         // First part of code word RRRR = for time seeding
-        string sNumInp;
-        sNumInp= sCodeWord.substr(0,4);
+        string sNumInp = argsStruc.sCodeWord.substr(0,4);
 
         // if the first 4 digits are 0000 make a TRUE random, otherwise use the complete number.
         int iReserve = atoi( sNumInp.c_str() );
@@ -422,18 +397,17 @@ int DestinCuda::MainDestinExperiments(int argc, char* argv[])
         }
         else
         {
-            int iRandSeed = iTestSequence;
+            int iRandSeed = argsStruc.iTestSequence;
             srand( (unsigned int)iRandSeed );
         }
 
         // Second part of code word XX = number of inputs
-        sNumInp = sCodeWord.substr(4,2);
-        NumberOfUniqueLabelsToUse = atoi( sNumInp.c_str() );
+        sNumInp = argsStruc.sCodeWord.substr(4,2);
+        int NumberOfUniqueLabelsToUse = atoi( sNumInp.c_str() );
 
         // Last part of code word YYYYY
-        int iNumberOfExamplesFromEachLabel;
-        sNumInp = sCodeWord.substr(6,5);
-        iNumberOfExamplesFromEachLabel=atoi( sNumInp.c_str() );
+        sNumInp = argsStruc.sCodeWord.substr(6,5);
+        int iNumberOfExamplesFromEachLabel=atoi( sNumInp.c_str() );
 
         // if iNumberOfExamplesFromEachLabel is 0 we randomly pick examples from the available
         // classes and only show them ONE TIME
@@ -491,7 +465,7 @@ int DestinCuda::MainDestinExperiments(int argc, char* argv[])
 
         int Digit;
         int iChoice;
-        for(int jj=0;jj<MAX_CNT;jj++)
+        for(int jj=0;jj<argsStruc.MAX_CNT;jj++)
         {
             //pick the digit first...
             Digit = rand() % NumberOfUniqueLabelsToUse;
@@ -516,16 +490,7 @@ int DestinCuda::MainDestinExperiments(int argc, char* argv[])
         cout << "------------------" << endl;
 
 
-    // Argument: ParamsFile
-    // A configuration file for DeSTIN
-    ParametersFileName=argv[4];
-    if ( !FileExists(ParametersFileName) )
-    {
-        // According to the help the ParamsFile is always used? Maybe some vital information on how to load data?
-        // Or some testing to see how the network reacts when expanding or shrinking the network.
-        cout << "Parameters file name does not exist" << endl;
-        return 0;
-    }
+
 
     // ***********************
     // Creating DeSTIN network
@@ -538,7 +503,7 @@ int DestinCuda::MainDestinExperiments(int argc, char* argv[])
     DestinKernel* DKernel=NULL;
     int NumberOfLayers=4;
 
-    CreateDestinOnTheFly(ParametersFileName, NumberOfLayers, DKernel,
+    CreateDestinOnTheFly(argsStruc.ParametersFileName, NumberOfLayers, DKernel,
                           DataSourceForTraining, SEQ_LENGTH, SEQ, ImageInput);
 
     for (int i=0; i<NumberOfLayers;i++)
@@ -553,13 +518,13 @@ int DestinCuda::MainDestinExperiments(int argc, char* argv[])
 
     cout << "------------------" << endl;
     cout << "Run Destin" << endl;
-    cout << "Images to be processed: " << MAX_CNT << endl;
+    cout << "Images to be processed: " << argsStruc.MAX_CNT << endl;
     cout << "Each image moves: " << SEQ_LENGTH << " times." << endl;
 
     double procces = 0.1;
-    for(int i=0;i<MAX_CNT;i++)
+    for(int i=0;i< argsStruc.MAX_CNT;i++)
     {
-        if(i > (MAX_CNT-1)*procces)
+        if(i > (argsStruc.MAX_CNT-1)*procces)
         {
             cout << procces*100 << "%" << endl;
             procces+=0.1;
@@ -580,6 +545,7 @@ int DestinCuda::MainDestinExperiments(int argc, char* argv[])
             time_t lStart = time(NULL);
             DataSourceForTraining.SetShiftedDeviceImage(indexOfExample, SEQ[seq][0], SEQ[seq][1], ImageInput[0], ImageInput[1]);
             DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage(),xmlLayer);
+            
             //TODO: is the order of layer evaluation going in the right order?
             for(int i=1;i<NumberOfLayers;i++)
             {
@@ -596,7 +562,7 @@ int DestinCuda::MainDestinExperiments(int argc, char* argv[])
         time_t iStop = time(NULL);
         xml << "<image id=\"" << i << "\" label=\"" << label << "\" labelIndex=\"" << indexOfExample << "\" runtime=\"" << iStop-iStart << "\" />" << endl;
         xml << "</destin>" << endl;
-        if(i == MAX_CNT-1)
+        if(i == argsStruc.MAX_CNT-1)
         {
             pugi::xml_document outputFile;
             outputFile.load(xml.str().c_str());
@@ -624,12 +590,20 @@ int main(int argc, char* argv[])
     // There should be 8 or 9 arguments at this time if not show how to use DeSTIN
     
     DestinCuda dc;
+    
+    // arguments processing
+    CommandArgsStuc argsStruc;
+    if(dc.parseCommandArgs( argc, argv, argsStruc)!=0){
+    	return 1;
+    }
+    
+    
     if ( argc==8 || argc==9 )
     {
         cout << "Starting DeSTIN" << endl;
         cout << "------------------" << endl;
         
-        return dc.MainDestinExperiments(argc,argv);
+        return dc.MainDestinExperiments(argsStruc);
     }
     else
     {

@@ -1,10 +1,19 @@
-public class JavaDestin {
-	static {
-		System.loadLibrary("destinjava");
+package javadestin;
 
-	}
-	public static void main(String [] argv){
-		System.out.println("hi there");
-		DestinKernel dk = new DestinKernel();
-	}
+
+public class JavaDestin {
+
+    static {
+        //load swig generated destin cuda c++ dynamic library 
+        System.loadLibrary("cudadestin");
+        System.loadLibrary("destinjava");
+    }
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        // TODO code application logic here
+        DestinKernel dk = new DestinKernel();
+       
+    }
 }
