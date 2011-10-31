@@ -37,7 +37,7 @@ struct CommandArgsStuc {
     string strTesting;
     string strDestinTrainingFileName;
     int MAX_CNT;
-    int iTestSequence;
+    int seed;
     string sCodeWord;
     string ParametersFileName;
 };

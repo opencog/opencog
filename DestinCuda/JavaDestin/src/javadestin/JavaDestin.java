@@ -24,18 +24,24 @@ public class JavaDestin {
         // TODO code application logic here
         DestinCuda dc = new DestinCuda();
         dc.SetLayerFinishedCallback( new LayerFinishedCallback(){
+
             @Override
-            public void callback(int run) {
-                //super.callback(run);
-                System.out.println("java callback called.");
+            public void callback(int run, int layer) {
+                
+                System.out.println("callback: run: "+run+" layer: "+layer);
+                
             }
-        
+            
         });
         
         CommandArgsStuc cas = new CommandArgsStuc();
         cas.setSCodeWord("00010100000");
         cas.setMAX_CNT(120);
-        cas.setParametersFileName(null);
+        cas.setParametersFileName("/home/ted/oc/destin/src/DestinCuda/config.xml");
+        cas.setSeed(Integer.parseInt(cas.getSCodeWord()));
+        cas.setStrDestinTrainingFileName("/home/ted/oc/destin/data/MNISTTraining32");
+        cas.setStrTesting("/home/ted/oc/destin/data/MNISTTraining32_TESTING");
+        cas.setStrDestinNetworkFileToRead("/home/ted/oc/destin/src/DiagnosticData/DestinDiagnostics.xml");
         dc.MainDestinExperiments(cas);
         
         

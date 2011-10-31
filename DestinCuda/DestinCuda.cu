@@ -274,7 +274,6 @@ bool DestinCuda::CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLa
     cout << "------------------" << endl;
     return 0;
 }
-
 /**
  *  parseCommandArgs
  *
@@ -282,61 +281,66 @@ bool DestinCuda::CreateDestinOnTheFly(string ParametersFileName, int& NumberOfLa
  *  the out CommandArgsStuc appropriately
  *      
  */
-int DestinCuda::parseCommandArgs( int argc, char* argv[], CommandArgsStuc &out){
+
+CommandArgsStuc createCommandArgsStuc(string sCodeWord, int MAX_CNT, string ParametersFileName){
+    CommandArgsStuc cas;
+    cas.sCodeWord = sCodeWord;
     
-         // Argument: ParamsFile
+    return cas;
+}
+
+int DestinCuda::parseCommandArgs(int argc, char* argv[], CommandArgsStuc &out) {
+
+ 
+    out.sCodeWord = argv[1];
+    if (out.sCodeWord.length() != 11) {
+        PrintHelp();
+        return 1;
+    }
+    out.seed = atoi(argv[1]);
+    out.MAX_CNT = atoi(argv[2]);
+    
+    
+    // Argument: ParamsFile
     // A configuration file for DeSTIN
-    out.ParametersFileName=argv[4];
-    if ( !FileExists(out.ParametersFileName) )
-    {
+    out.ParametersFileName = argv[4];
+    if (!FileExists(out.ParametersFileName)) {
         // According to the help the ParamsFile is always used? Maybe some vital information on how to load data?
         // Or some testing to see how the network reacts when expanding or shrinking the network.
         cout << "Parameters file name does not exist" << endl;
         return 1;
     }
-    
-        out.sCodeWord=argv[1];
-        if (out.sCodeWord.length() != 11 )
-        {
-            PrintHelp();
-            return 1;
-        }
-        
-        
-    out.iTestSequence =atoi(argv[1]);
-    out.MAX_CNT=atoi(argv[2]);
+
+     out.strDestinTrainingFileName = argv[5];
+     
+     
     // Argument: TargetDirectory
     // A given location instead or default
     string strDiagnosticDirectoryForData;
     string strArg7 = argv[7];
-    if ( strArg7 == "D" )
-    {
+    if (strArg7 == "D") {
         strDiagnosticDirectoryForData = "../DiagnosticData/";
-    }
-    else
-    {
+    } else {
         // Buffer with path + filename where to put diagnostic data
         stringstream buffer;
         buffer << strArg7.c_str() << "/";
         strDiagnosticDirectoryForData = buffer.str();
     }
-
-    // File for diagnostic
-    string strDiagnosticFileName = GetNextFileForDiagnostic();
     
+   
+
     // Argument: DestinOutputFile
     string strDestinNetworkFileToWrite = argv[6]; // we write to this file, and then we read from it too!!
-    if ( strDestinNetworkFileToWrite == "-D" )
-    {
+    if (strDestinNetworkFileToWrite == "-D") {
         // If given -D
-        strDestinNetworkFileToWrite= strDiagnosticDirectoryForData + strDiagnosticFileName;
+        strDestinNetworkFileToWrite = strDiagnosticDirectoryForData + GetNextFileForDiagnostic();
         cout << "Writing default destin file to: " << strDestinNetworkFileToWrite << endl;
     }
     out.strDestinNetworkFileToRead = strDestinNetworkFileToWrite;
 
-    out.strDestinTrainingFileName = argv[5];
     
-    out.strTesting  = out.strDestinTrainingFileName + "_TESTING";
+
+    out.strTesting = out.strDestinTrainingFileName + "_TESTING";
     return 0;
 }
 
@@ -397,8 +401,7 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
         }
         else
         {
-            int iRandSeed = argsStruc.iTestSequence;
-            srand( (unsigned int)iRandSeed );
+            srand( (unsigned int)argsStruc.seed );
         }
 
         // Second part of code word XX = number of inputs
@@ -545,11 +548,16 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
             time_t lStart = time(NULL);
             DataSourceForTraining.SetShiftedDeviceImage(indexOfExample, SEQ[seq][0], SEQ[seq][1], ImageInput[0], ImageInput[1]);
             DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage(),xmlLayer);
-            
+            if(this->callback!=NULL){
+                this->callback->callback(i,0 );
+            }
             //TODO: is the order of layer evaluation going in the right order?
             for(int i=1;i<NumberOfLayers;i++)
             {
                 DKernel[i].DoDestin(DKernel[i-1].GetDevicePointerBeliefs(),xmlLayer);
+                if(this->callback!=NULL){
+                     this->callback->callback(i,0 );
+                }
             }
             time_t lStop = time(NULL);
             xmlLayer << "<layerRuntime>" << lStop-lStart << "</layerRuntime>" << endl;

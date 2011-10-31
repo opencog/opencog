@@ -1,2 +1,2 @@
-add_library( pugixml
+add_library( pugixml SHARED
 pugixml.cpp )
