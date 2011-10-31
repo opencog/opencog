@@ -42,28 +42,8 @@ class Fishgram:
 
         self._is_running = False 
 
-    def start(self): 
-        # TODO: This function shall be called by c++ FishgramAgent. Code below
-        #       is only to verify fishgram could access atomspace properly and 
-        #       it doesn't block other stuff in the embodiment system. 
-        print "\nRun dummy start function in Fishgram"
-
-        i = 0
-        self._is_running = True 
-        while self._is_running:
-
-            concept = self.atomspace.add_node(t.ConceptNode, 'dummy_'+str(i))
-            print concept
-
-            i += 1
-            time.sleep(1)
-
-        print "\nExit dummy start function in Fishgram"
-
-    def stop(self): 
-        self._is_running = False
-
     def run(self):
+        '''The basic way to run Fishgram. It will find all the frequent conjunctions above min_frequency.'''
         self.forest.extractForest()
 
 #        print '# predicates(1arg) including infrequent:', len(self.forest.tree_embeddings[1])
@@ -80,7 +60,10 @@ class Fishgram:
 
     def iterated_implications(self):
         """Find implications, starting with maximum support (i.e. maximum pruning in the search for
-        frequent subgraphs). Then lower the support incrementally."""
+        frequent subgraphs). Then lower the support incrementally. This is like the APRIORI rule-learning algorithm
+        which finds frequent implication rules by first requiring very frequent rules and then needing less frequent
+        ones if it can't find any."""
+        # This number could be anything
         self.min_embeddings = 77
         
         while self.min_embeddings > 0:
@@ -95,6 +78,9 @@ class Fishgram:
     #import profiling
     #@profiling.profile_func()
     def implications(self):
+        '''This method will make Fishgram search for conjunctions. After it finds conjunctions of length 2,3,4 it will
+        use them to create implication rules in a similar way to the APRIORI algorithm. The code uses the Python "yield"
+        command, so it can start producing the rules before the search finishes. This is useful if the search (for conjunctions) is slow.'''
         layers = []
         for layer in self.closed_bfs_layers():
             
@@ -115,6 +101,7 @@ class Fishgram:
 # you only need to add extensions if they're in the closure.
 
     def closed_bfs_extend_layer(self, prev_layer):
+        '''Just a helper function for closed_bfs_layers'''
         #next_layer_iter = self.extensions(prev_layer)
         next_layer_iter = self.extensions_simple(prev_layer)
         #return self.prune_frequency(next_layer_iter)
@@ -126,10 +113,13 @@ class Fishgram:
             yield (conj, embs)
 
     def closed_bfs_layers(self):
-        """Main function to run the breadth-first search. It yields results one layer at a time. A layer
+        '''Main function to run the breadth-first search. It yields results one layer at a time. A layer
         contains all of the conjunctions resulting from extending previous conjunctions with one extra
         tree. For some purposes it would be better to return results immediately rather than one layer at
-        a time, however creating ImplicationLinks requires previous layers."""
+        a time, however creating ImplicationLinks requires previous layers. Note that in the current design,
+        the code will automatically add SeqAndLinks between TimeNodes whenever possible. This means the
+        conjunctions in a layer may be different lengths. But only due to having more/less SeqAndLinks; they
+        will have the same number of other links.'''
         #all_bindinglists = [(obj, ) for obj in self.forest.all_objects]
         #prev_layer = [((), None )]
         prev_layer = [((), [{}] )]
@@ -148,7 +138,8 @@ class Fishgram:
             
             prev_layer = new_layer
 
-
+    # Helper functions for extensions_simple
+    # Code to handle variables. It's not important to understand this (to understand fishgram).
     def _create_new_variables(self, tr, embeddings):
         sa_mapping = {}
         tr = standardize_apart(tr, sa_mapping)
@@ -219,8 +210,15 @@ class Fishgram:
         
         return new_links
 
-
+    # This is the new approach to finding extensions. It works like this:
+    # Start with the basic pattern/conjunction () - which means 'no criteria at all'
+    # Each 'layer', it goes through the patterns in the previous layer. For each one:
+    #   Look at extra single things you could add into the pattern.
+    #   The new layer contains all the resulting patterns.
+    # A pattern is a connected graph, that is to say, all of the expressions in it need to share variables.
     def extensions_simple(self, prev_layer):
+        '''Find all patterns (and examples) that would extend the previous layer of patterns. That is, the patterns
+        that include one extra constraint.'''
         new_layer = []
         
         # Not correct - it must choose variables so that new 'links' (trees) will be connected in the right place.
@@ -302,114 +300,117 @@ class Fishgram:
          
         return ret
 
-    def extensions(self,  prev_layer):
-        """Find all extensions for that fragment. An extension means adding one link to a particular
-        node in the fragment. Nodes in the fragment are numbered from 0 onwards, and the numbers
-        don't correspond to exact nodes in the AtomSpace. Each fragment has 1 or more embeddings,
-        that is, matching sets of nodes/links in the AtomSpace."""
-        # for each embedding
-        # for each extension
-        # add the new embedding to the set for that extension
-        
-        # new_layer is used to avoid redundancy. res keeps track of the smallest sets of results that can be returned at one time
-        # (i.e. for which we can guarantee there won't be any further embeddings found later)
-        new_layer = {}
-        
-        skipped = 0
-        for (prev_conj,  prev_embeddings) in prev_layer:
-            
-            if len(new_layer) > self.max_per_layer:
-                break
-
-            # Results for extending this conjunction. All results for this conjunction are produced in this iteration.
-            res = {}
-
-            # Start with all single objects. The binding for no condition (empty tuple) is undefined. The algorithm
-            # will create bindings for one-condition conjunctions and all other ones, by adding new variables when
-            # necessary.
-            if prev_conj == ():
-                source_bindings = [(obj, ) for obj in self.forest.all_objects]
-            else:
-                source_bindings = prev_embeddings
-            for emb in source_bindings:
-                extension_tree_ids = self.extending_links(emb)
-
-                if prev_conj == ():
-                    emb = []
-
-                #extension_tree_ids_sorted = sorted(extension_tree_ids,  key=lambda id: self.forest.all_trees[id])
-                # If you sort the tree_ids by what bound-tree they are then you can return results more incrementally
-                for tree_id in extension_tree_ids:
-
-                    # Using the particular tree-instance, find its outgoing set
-                    bindings = self.forest.bindings[tree_id]
-                    # WRONG as the embedding for () is [every] one object
-                    #i = len(emb)
-                    # The number of the first available variable
-                    i = len(get_varlist(prev_conj))
-                    # The mapping from the (abstract) tree to node numbers in this conjunction            
-                    s = {}
-                    # Since we allow N-ary patterns, it could be connected to any number (>=1) of
-                    # nodes in the conjunction so far, and 0+ new ones
-                    new_embedding = copy(emb)
-                    for slot in xrange(len(bindings)):
-                        obj = bindings[slot]
-                        
-                        if obj in emb:
-                            s[Tree(slot)] = Tree(emb.index(obj))
-                            assert len(s) <= len(bindings)
-                        else:
-                            s[Tree(slot)] = Tree(i)
-                            tmp = list(new_embedding)
-                            tmp.append(obj)
-                            new_embedding = tuple(tmp)
-                            assert obj == new_embedding[i]
-                            i+=1
-                            assert len(s) <= len(bindings)
-
-                    assert len(s) == len(bindings)
-
-                    # After completing the substitution...
-                    tr = self.forest.all_trees[tree_id]                    
-                    bound_tree = subst(s, tr)
-
-                    # Add this embedding for this bound tree.
-                    # Bound trees contain variable numbers = the numbers inside the fragment                            
-                    if bound_tree in prev_conj:
-                        continue
-                    
-                    new_conj = prev_conj+(bound_tree,)                    
-                    
-                    clones = [c for c in new_layer if isomorphic_conjunctions(new_conj, c)]
-                    if len(clones):
-                        skipped+=1
-                        continue
-
-                    if new_conj not in new_layer:
-                            new_layer[new_conj] = []
-                            res[new_conj] = []
-                        
-                    new_embedding = tuple(new_embedding)
-                    # BUG
-                    assert len(new_embedding) == len(get_varlist(new_conj))
-                    if new_embedding not in new_layer[new_conj]:
-                        new_layer[new_conj].append(new_embedding)
-                        res[new_conj].append(new_embedding)
-                    #print self.conjunction_to_string(new_conj), ":", len(new_layer[new_conj]), "so far"
-                
-            # Yield the results (once you know they aren't going to be changed...)
-            for conj_emb_pair in res.items():
-                yield conj_emb_pair
-
-        print "[skipped", skipped, "conjunction-embeddings that were isomorphic]",
-        #return new_layer.items()
-        # Stops iteration at the end of the function
+    # This is part of a different, earlier approach. It was based on the gSpan algorithm. The idea was that you must always
+    # look for example graphs first, and then find what patterns there are. And as you made the example graphs larger, you
+    # would find more patterns.
+#    def extensions(self,  prev_layer):
+#        """Find all extensions for that fragment. An extension means adding one link to a particular
+#        node in the fragment. Nodes in the fragment are numbered from 0 onwards, and the numbers
+#        don't correspond to exact nodes in the AtomSpace. Each fragment has 1 or more embeddings,
+#        that is, matching sets of nodes/links in the AtomSpace."""
+#        # for each embedding
+#        # for each extension
+#        # add the new embedding to the set for that extension
+#        
+#        # new_layer is used to avoid redundancy. res keeps track of the smallest sets of results that can be returned at one time
+#        # (i.e. for which we can guarantee there won't be any further embeddings found later)
+#        new_layer = {}
+#        
+#        skipped = 0
+#        for (prev_conj,  prev_embeddings) in prev_layer:
+#            
+#            if len(new_layer) > self.max_per_layer:
+#                break
+#
+#            # Results for extending this conjunction. All results for this conjunction are produced in this iteration.
+#            res = {}
+#
+#            # Start with all single objects. The binding for no condition (empty tuple) is undefined. The algorithm
+#            # will create bindings for one-condition conjunctions and all other ones, by adding new variables when
+#            # necessary.
+#            if prev_conj == ():
+#                source_bindings = [(obj, ) for obj in self.forest.all_objects]
+#            else:
+#                source_bindings = prev_embeddings
+#            for emb in source_bindings:
+#                extension_tree_ids = self.extending_links(emb)
+#
+#                if prev_conj == ():
+#                    emb = []
+#
+#                #extension_tree_ids_sorted = sorted(extension_tree_ids,  key=lambda id: self.forest.all_trees[id])
+#                # If you sort the tree_ids by what bound-tree they are then you can return results more incrementally
+#                for tree_id in extension_tree_ids:
+#
+#                    # Using the particular tree-instance, find its outgoing set
+#                    bindings = self.forest.bindings[tree_id]
+#                    # WRONG as the embedding for () is [every] one object
+#                    #i = len(emb)
+#                    # The number of the first available variable
+#                    i = len(get_varlist(prev_conj))
+#                    # The mapping from the (abstract) tree to node numbers in this conjunction            
+#                    s = {}
+#                    # Since we allow N-ary patterns, it could be connected to any number (>=1) of
+#                    # nodes in the conjunction so far, and 0+ new ones
+#                    new_embedding = copy(emb)
+#                    for slot in xrange(len(bindings)):
+#                        obj = bindings[slot]
+#                        
+#                        if obj in emb:
+#                            s[Tree(slot)] = Tree(emb.index(obj))
+#                            assert len(s) <= len(bindings)
+#                        else:
+#                            s[Tree(slot)] = Tree(i)
+#                            tmp = list(new_embedding)
+#                            tmp.append(obj)
+#                            new_embedding = tuple(tmp)
+#                            assert obj == new_embedding[i]
+#                            i+=1
+#                            assert len(s) <= len(bindings)
+#
+#                    assert len(s) == len(bindings)
+#
+#                    # After completing the substitution...
+#                    tr = self.forest.all_trees[tree_id]                    
+#                    bound_tree = subst(s, tr)
+#
+#                    # Add this embedding for this bound tree.
+#                    # Bound trees contain variable numbers = the numbers inside the fragment                            
+#                    if bound_tree in prev_conj:
+#                        continue
+#                    
+#                    new_conj = prev_conj+(bound_tree,)                    
+#                    
+#                    clones = [c for c in new_layer if isomorphic_conjunctions(new_conj, c)]
+#                    if len(clones):
+#                        skipped+=1
+#                        continue
+#
+#                    if new_conj not in new_layer:
+#                            new_layer[new_conj] = []
+#                            res[new_conj] = []
+#                        
+#                    new_embedding = tuple(new_embedding)
+#                    # BUG
+#                    assert len(new_embedding) == len(get_varlist(new_conj))
+#                    if new_embedding not in new_layer[new_conj]:
+#                        new_layer[new_conj].append(new_embedding)
+#                        res[new_conj].append(new_embedding)
+#                    #print self.conjunction_to_string(new_conj), ":", len(new_layer[new_conj]), "so far"
+#                
+#            # Yield the results (once you know they aren't going to be changed...)
+#            for conj_emb_pair in res.items():
+#                yield conj_emb_pair
+#
+#        print "[skipped", skipped, "conjunction-embeddings that were isomorphic]",
+#        #return new_layer.items()
+#        # Stops iteration at the end of the function
         
 #        # Can't just use new_layer.items() because we want one entry for each conjunction (plus all of its embeddings)
 #        return [(conj, new_layer[conj]) for conj in new_layer]
 
-    def after_conj(self, c1, c2):
-        return c1 < c2
+#    def after_conj(self, c1, c2):
+#        return c1 < c2
 
     def prune_frequency(self, layer):
         for (conj, embeddings) in layer:
@@ -661,6 +662,35 @@ class Fishgram:
             #print 'causal_pattern_templates', template
             yield causal_pattern(pattern=tuple(template), actions=actions, goal=goal)
 
+# This is a simple "fake" approach. It just looks up causal patterns directly. The usual approach is to find all frequent
+# patterns. And then filter just the ones that are causal patterns. Commented out to reduce confusion, but it could be
+# useful sometimes. It's much faster than using the actual Fishgram.
+#    def make_all_psi_rules(self):
+#        for conj in self.lookup_causal_patterns():
+#            vars = get_varlist(conj)
+#            print "make_all_psi_rules: %s" % (pp(conj),)
+#            
+#            for (premises, conclusion) in self._split_conj_into_rules(conj):
+#                if not (len(get_varlist(conj)) == len(get_varlist(premises))):
+#                    continue
+#                
+#                # Filter it now since lookup_embeddings is slow
+#                if self.make_psi_rule(premises, conclusion) == None:
+#                    continue
+#   
+#                embs_conj = self.forest.lookup_embeddings(conj)
+#                embs_premises = self.forest.lookup_embeddings(premises)
+#   
+#                count_conj = len(self.find_exists_embeddings(embs_conj))
+#                count_premises = len(self.find_exists_embeddings(embs_premises))
+#                
+#                if count_conj > count_premises:
+#                    import pdb; pdb.set_trace()
+#                
+#                print "make_implication(premises=%s, conclusion=%s, count_premises=%s, count_conj=%s)" % (premises, conclusion, count_premises, count_conj)
+#                if count_premises > 0:
+#                    self.make_implication(premises, conclusion, count_premises, count_conj)
+#
     def lookup_causal_patterns(self):
         for template in self.causal_pattern_templates():
 #            ideal_premises = (action_template, seq_and_template)
@@ -679,32 +709,6 @@ class Fishgram:
 #                print pp(embs)
                 yield m.conj
 
-    def make_all_psi_rules(self):
-        for conj in self.lookup_causal_patterns():
-            vars = get_varlist(conj)
-            print "make_all_psi_rules: %s" % (pp(conj),)
-            
-            for (premises, conclusion) in self._split_conj_into_rules(conj):
-                if not (len(get_varlist(conj)) == len(get_varlist(premises))):
-                    continue
-                
-                # Filter it now since lookup_embeddings is slow
-                if self.make_psi_rule(premises, conclusion) == None:
-                    continue
-   
-                embs_conj = self.forest.lookup_embeddings(conj)
-                embs_premises = self.forest.lookup_embeddings(premises)
-   
-                count_conj = len(self.find_exists_embeddings(embs_conj))
-                count_premises = len(self.find_exists_embeddings(embs_premises))
-                
-                if count_conj > count_premises:
-                    import pdb; pdb.set_trace()
-                
-                print "make_implication(premises=%s, conclusion=%s, count_premises=%s, count_conj=%s)" % (premises, conclusion, count_premises, count_conj)
-                if count_premises > 0:
-                    self.make_implication(premises, conclusion, count_premises, count_conj)
-    
     def _split_conj_into_rules(self, conj):
         seq_and_template = Tree('SequentialAndLink', new_var(), new_var()) # two TimeNodes
         after_links = tuple( x for x in conj if unify(seq_and_template, x, {}) != None )
@@ -720,51 +724,8 @@ class Fishgram:
             if (len(get_varlist(normal)) == len(get_varlist(premises+after_links))):
                 yield (premises+after_links, conclusion)
 
-
-    def make_psi_rule_alt(self, premises_, conclusion_):
-        """Looks for a suitable combination of conditions to make a Psi Rule. Returns premises and conclusions for the Psi Rule."""
-        # Remove the (one!) SequentialAnd
-        # convert AtTime by itself
-        # convert Eval-actionDone
-        
-        # Because modifying inputs is evil
-        premises, conclusion = list(premises_), conclusion_
-        
-        a = self.atomspace.add
-        
-        seq_and_template = Tree('SequentialAndLink', -1, -2) # two TimeNodes
-        time_template = Tree('AtTimeLink', -1, -2) # 1 is a TimeNode, 2 is an EvaluationLink
-        action_template = Tree('EvaluationLink',
-                                                a(t.PredicateNode, name='actionDone'),
-                                                Tree('ListLink', -1)) # -1 is the ExecutionLink for the action
-        
-#        res = Tree('AtTimeLink',
-#             time2_atom, 
-#             Tree('EvaluationLink',
-#                        a(t.PredicateNode, name='increase'),
-#                        Tree('ListLink', -3)
-#                        )
-#             )
-        
-        # Can currently only handle one thing following another, not a series (>2)
-        seq_ands_prem = [ x for x in premises if unify(seq_and_template, x, {}) != None ]
-        actions_prem = [ x for x in premises if unify(action_template, x, {}) != None ]
-        conc_is_atTime = unify(time_template, conclusion, {}) != None
-
-        if 1 == len( seq_ands_prem ) and 1 == len(actions_prem): # and conc_is_atTime:
-            premises.remove(seq_ands_prem[0])
-            
-            premises = [ self.replace(time_template, x, -2) for x in premises ]
-            premises = [ self.replace(action_template, x, -1) for x in premises ]
-            
-            conclusion = replace(time_template, conclusion, -2)
-            conclusion = replace(action_template, conclusion, -1)
-        
-            return tuple(premises), conclusion
-        else:
-            return None
-
     def replace(self, pattern, example, var):
+        '''A simple function to replace one thing with another using unification. Not currently used.'''
         s = unify(pattern, example, {})
         if s != None:
             return s[Tree(var)]
@@ -801,183 +762,38 @@ class Fishgram:
         
         return simplified_embs
 
-    # Wait, we need count(  P(X,Y) ) / count( G(X,Y). Not equal to count( P(X) * count(Y in G))
-    def normalize(self, big_conj_and_embeddings, small_conj_and_embeddings):
-        """If you take some of the conditions (trees) from a conjunction, the result will sometimes
-        only refer to some of the variables. In this case the embeddings stored for that sub-conjunction
-        will only include objects mentioned by the smaller conjunction. This function normalizes the
-        count of embeddings. Suppose you have F(X,Y) == G(X, Y) AND H(X). The count for H(X) will be
-        too low and you really need the count of "H(X) for all X and Y". This function will multiply the count
-        by the number of objects in Y."""""
-        big_conj, big_embs = big_conj_and_embeddings
-        small_conj, small_embs = small_conj_and_embeddings
-        
-        # Count the number of possibilities for each variable. (Only possibilities that actually occur.)
-        numvars = len(big_embs[0])
-        var_objs = [set() for i in xrange(numvars)]
-        
-        for i in xrange(0, len(numvars)):
-            for emb in big_embs:
-                obj = emb[i]
-                var_objs[i].add(obj)
-        
-        var_numobjs = [len(objs) for objs in var_objs]
-        
-        varlist_big = sorted(get_varlist(big_conj))
-        varlist_small = sorted(get_varlist(small_conj))
-        missing_vars = [v for v in varlist_big if v not in varlist_small]
-        
-        # the counts of possible objects for each variable missing in the smaller conjunction.
-        numobjs_missing = [var_numobjs[v] for v in missing_vars]
-        
-        implied_cases = reduce(op.times, numobjs_missing, 1)
-        
-        return len(small_embs) * implied_cases
-
-def make_seq(atomspace):
-    times = atomspace.get_atoms_by_type(t.TimeNode)
-    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
-    times = sorted(times, key= lambda t: int(t.name) )
-    
-    for time_atom in times:
-        print time_atom.name
-
-    for (i, time_atom) in enumerate(times[:-1]):
-        t1 = int(time_atom.name)
-        for time2_atom in times[i+1:]:
-            t2 = int(time2_atom.name)
-            if 0 < t2 - t1 <= interval:
-                print atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
-            else:
-                break
-
-# Only works if DemandGoals are updated every cycle ( == every timestamp). The new version is similarly fast.
-#def notice_changes_alt(atomspace):
-#    tv_delta = 0.001
-#    a = atomspace.add
-#    
-#    times = atomspace.get_atoms_by_type(t.TimeNode)
-#    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
-#    times = sorted(times, key= lambda t: int(t.name) )
-#
-#    print len(times)
-#
-#    target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
-#
-#    for atom in target_PredicateNodes:
-#        target = Tree('EvaluationLink', atom, new_var())
+#    # Wait, we need count(  P(X,Y) ) / count( G(X,Y). Not equal to count( P(X) * count(Y in G))
+#    def normalize(self, big_conj_and_embeddings, small_conj_and_embeddings):
+#        """If you take some of the conditions (trees) from a conjunction, the result will sometimes
+#        only refer to some of the variables. In this case the embeddings stored for that sub-conjunction
+#        will only include objects mentioned by the smaller conjunction. This function normalizes the
+#        count of embeddings. Suppose you have F(X,Y) == G(X, Y) AND H(X). The count for H(X) will be
+#        too low and you really need the count of "H(X) for all X and Y". This function will multiply the count
+#        by the number of objects in Y."""""
+#        big_conj, big_embs = big_conj_and_embeddings
+#        small_conj, small_embs = small_conj_and_embeddings
 #        
-#        for (i, time_atom) in enumerate(times[:-1]):
-#            #time2_atom = times[i+1]
-#            
-#            template = Tree('AtTimeLink', time_atom, target)
-#            matches =[x for x in time_atom.incoming if unify(template, tree_from_atom(x), {}) != None]
-#            
-#            if len(matches) != 1:
-#                continue
-#            
-#            template2 = Tree('AtTimeLink', time2_atom, target)
-#            matches2 =[x for x in time2_atom.incoming if unify(template2, tree_from_atom(x), {}) != None]
-#
-#            if len(matches2) == 1:
-#                
-#                tv1 = matches[0].tv
-#                tv2 = matches2[0].tv
-#                
-#                print target, tv2-tv1
-#                
-#                if tv2 - tv1 > tv_delta:
-#                    # increased
-#                    pred = 'increased'
-#                elif tv1 - tv2 > tv_delta:
-#                    # decreased
-#                    pred = 'decreased'
-#                else:
-#                    continue
-#
-#                print matches[0], matches2[0]
-#
-#                tv = TruthValue(1, 1e35)
-#                res = Tree('AtTimeLink',
-#                         time2_atom, 
-#                         Tree('EvaluationLink',
-#                                    a(t.PredicateNode, name=pred),
-#                                    Tree('ListLink', target)
-#                                    )
-#                         )
-#                a = atom_from_tree(res, atomspace)
-#                a.tv = tv
-#                
-#                print str(a)
-#            else:
-#                print '[no match]'
-
-#def notice_changes_alt2(atomspace):
-#    tv_delta = 0.01
-#    
-#    times = atomspace.get_atoms_by_type(t.TimeNode)
-#    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
-#    times = sorted(times, key= lambda t: int(t.name) )
-#
-#    target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
-#
-#    for atom in target_PredicateNodes:
-#        args = new_var()
-#        target = Tree('EvaluationLink', atom, args)
-#
-#        time1 = new_var()
-#        time2 = new_var()
+#        # Count the number of possibilities for each variable. (Only possibilities that actually occur.)
+#        numvars = len(big_embs[0])
+#        var_objs = [set() for i in xrange(numvars)]
 #        
-#        template1 = Tree('AtTimeLink', time1, target)
-#        template2 = Tree('AtTimeLink', time2, target)
-#        seq = Tree('SequentialAndLink', time1, time2)
+#        for i in xrange(0, len(numvars)):
+#            for emb in big_embs:
+#                obj = emb[i]
+#                var_objs[i].add(obj)
 #        
-#        conj = (template1, template2, seq)
+#        var_numobjs = [len(objs) for objs in var_objs]
 #        
-#        conj = (template1, seq, template2)
-#        matches = find_conj(conj, atomspace.get_atoms_by_type(t.Link))
-#
-#
-#        if not len(matches):
-#            print '[no changes for %s]' % (atom)
+#        varlist_big = sorted(get_varlist(big_conj))
+#        varlist_small = sorted(get_varlist(small_conj))
+#        missing_vars = [v for v in varlist_big if v not in varlist_small]
 #        
-#        for match in matches:
-#            #print pp(match.atoms)
-#            
-#            tv1 = match.atoms[0].tv.mean
-#            tv2 = match.atoms[2].tv.mean
-#            
-#            print target, tv2-tv1
-#            
-#            if tv2 - tv1 > tv_delta:
-#                # increased
-#                pred = 'increased'
-#            elif tv1 - tv2 > tv_delta:
-#                # decreased
-#                pred = 'decreased'
-#            else:
-#                continue
-#
-#            time2_result = match.subst[time2]
-#            args_result = match.subst[args]
-#
-#            tv = TruthValue(1, 1e35)
-#            res = Tree('AtTimeLink',
-#                     time2_result, 
-#                     Tree('EvaluationLink',
-#                                atomspace.add(t.PredicateNode, name=pred),
-#                                Tree('ListLink',
-#                                    Tree('EvaluationLink', 
-#                                         atom,
-#                                         args_result
-#                                    )
-#                                )
-#                        )
-#                    )
-#            a = atom_from_tree(res, atomspace)
-#            a.tv = tv
-#            
-#            print str(a)
+#        # the counts of possible objects for each variable missing in the smaller conjunction.
+#        numobjs_missing = [var_numobjs[v] for v in missing_vars]
+#        
+#        implied_cases = reduce(op.times, numobjs_missing, 1)
+#        
+#        return len(small_embs) * implied_cases
 
 def notice_changes(atomspace):    
     tv_delta = 0.01    
@@ -1054,33 +870,6 @@ def notice_changes(atomspace):
             print str(a)
             
             atTime.tv = TruthValue(0, 0)
-
-#def make_seq_alt(atomspace):
-#    # unit of timestamps is 0.1 second so multiply by 10
-#    interval = 10* 60
-#    times = atomspace.get_atoms_by_type(t.TimeNode)
-#    times = [f for f in times if f.name != "0"] # Related to a bug in the Psi Modulator system
-#    times = sorted(times, key= lambda t: int(t.name) )
-#
-#    for (i, time_atom) in enumerate(times[:-1]):
-#        t1 = int(time_atom.name)
-#        for time2_atom in times[i+1:]:
-#            t2 = int(time2_atom.name)
-#            if t2 - t1 <= interval:
-#                atomspace.add_link(t.SequentialAndLink,  [time_atom,  time2_atom], TruthValue(1, 1))
-##                for atTime in time_atom.incoming:
-##                    for atTime2 in time2_atom.incoming:
-##                        print atomspace.add_link(t.SequentialAndLink,  [atTime,  atTime2], TruthValue(1, 1))
-##                        #event1, event2 = atTime.out[1], atTime2.out[1]
-##                        #print atomspace.add_link(t.SequentialAndLink,  [event1, event2], TruthValue(1, 1))
-#            else:
-#                break
-#
-##    for i in xrange(len(times)-1):
-##        (time1,  time2) = (times[i],  times[i+1])
-##        # TODO SeqAndLink was not supposed to be used on TimeNodes directly.
-##        # But that's more useful for fishgram
-##        print atomspace.add_link(t.SequentialAndLink,  [time1,  time2])
 
 class ClockMindAgent(opencog.cogserver.MindAgent):
     def __init__(self):
