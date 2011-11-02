@@ -45,6 +45,7 @@ struct CommandArgsStuc {
 class DestinCuda {
     
 private:
+    DestinKernel * DKernel; //array of DestinKernel objects, one for each layer.
     
     LayerFinishedCallback * callback;
     
@@ -68,10 +69,9 @@ public:
     int parseCommandArgs( int argc, char* argv[], CommandArgsStuc &out);
 
     
-    DestinCuda() : callback(NULL){ 
+    DestinCuda() : callback(NULL){ }
     
-    }
-    
+
     
     void SetLayerFinishedCallback(LayerFinishedCallback * callback ){ this->callback = callback; }
     void PrintHelp();

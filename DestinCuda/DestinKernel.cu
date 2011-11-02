@@ -52,11 +52,12 @@ DestinKernel::~DestinKernel( void )
     cudaFree( dCountingTables );
     cudaFree( dSumTables );
 
-    free ( mCentroidsDistance );
-    free ( mCentroidStarvation );
-    free ( mWinningCentroids );
-    free ( mPOS );
-    free(mCentroidWinCounter);
+    delete [] mCentroidsDistance;
+    delete [] mCentroidStarvation;
+    delete [] mWinningCentroids;
+    delete [] mPOS;
+    delete [] mCentroidWinCounter;
+    delete [] mBeliefs;
     cout << "Kernel destroyed" << endl;
 }
 
@@ -123,8 +124,9 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int ParentSta
     curandGenerateUniform( gen, dCentroidsVectorData, sizeOfLayerData );
 
     //Node belief output, fed as input to parent nodes
+    mBeliefs = new float[sizeOfNodeData];
     cudaMalloc((void**)&dBeliefs, sizeOfNodeData * sizeof(float));
-
+    
     //Node advice for fed to child nodes
     cudaMalloc((void**)&dOutputAdvice, sizeOfNodes * sizeof(int));
 
@@ -212,7 +214,9 @@ void DestinKernel::WriteData( stringstream& xml )
     cudaMemcpy(mCentroidStarvation, dCentroidStarvation, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mPOS, dPOS, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mWinningCentroids, dWinningCentroids, sizeOfNodes*sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(mBeliefs, dBeliefs, sizeOfNodeData * sizeof(float), cudaMemcpyDeviceToHost);
 
+    /*
     xml << "<layer id=\"" << mID << "\">" << endl;
     for(int r=0;r<mRows;r++)
     {
@@ -236,6 +240,7 @@ void DestinKernel::WriteData( stringstream& xml )
         }
     }
     xml << "</layer>" << endl;
+     */ 
 }
 // ***********************
 // DeSTIN inside CUDA Part

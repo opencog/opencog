@@ -12,6 +12,10 @@ See http://www.swig.org/Doc2.0/SWIGDocumentation.html#Java_directors
 See https://swig.svn.sourceforge.net/svnroot/swig/trunk/Examples/java/callback/
 */
 
+%include "carrays.i" 
+%array_class(int, SWIG_IntArray);
+%array_class(float, SWIG_FloatArray);
+
 %include "std_string.i"
 
 %feature("director") LayerFinishedCallback;

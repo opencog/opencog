@@ -344,6 +344,7 @@ int DestinCuda::parseCommandArgs(int argc, char* argv[], CommandArgsStuc &out) {
     return 0;
 }
 
+
 int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
 {
     time_t destinStart = time(NULL);
@@ -498,13 +499,10 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
     // ***********************
     // Creating DeSTIN network
     // ***********************
-    // Yes its going to happen we going to create the network where we are waiting for.
     int SEQ_LENGTH = 0;
     int** SEQ;
     int* ImageInput;
-
-    DestinKernel* DKernel=NULL;
-    int NumberOfLayers=4;
+    int NumberOfLayers;
 
     CreateDestinOnTheFly(argsStruc.ParametersFileName, NumberOfLayers, DKernel,
                           DataSourceForTraining, SEQ_LENGTH, SEQ, ImageInput);
@@ -524,6 +522,7 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
     cout << "Images to be processed: " << argsStruc.MAX_CNT << endl;
     cout << "Each image moves: " << SEQ_LENGTH << " times." << endl;
 
+	RunningInfo run_info;
     double procces = 0.1;
     for(int i=0;i< argsStruc.MAX_CNT;i++)
     {
@@ -538,25 +537,32 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
         pair<int,int> element = vIndicesAndGTLabelToUse[i];
         int indexOfExample = element.first;
         int label = element.second;
-
+		run_info.image_label = label;
+		
         time_t iStart = time(NULL);
+		run_info.image_count = i;
+		
         for(int seq=0;seq<SEQ_LENGTH;seq++)
         {
+			run_info.sequence_step = seq;
             stringstream xmlLayer;
             // Run lowest layer (Kernel)
 
             time_t lStart = time(NULL);
+			
             DataSourceForTraining.SetShiftedDeviceImage(indexOfExample, SEQ[seq][0], SEQ[seq][1], ImageInput[0], ImageInput[1]);
             DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage(),xmlLayer);
+			run_info.layer = 0;
             if(this->callback!=NULL){
-                this->callback->callback(i,0 );
+                this->callback->callback(run_info, DKernel[0] );
             }
             //TODO: is the order of layer evaluation going in the right order?
-            for(int i=1;i<NumberOfLayers;i++)
+            for(int l=1;l<NumberOfLayers;l++)
             {
-                DKernel[i].DoDestin(DKernel[i-1].GetDevicePointerBeliefs(),xmlLayer);
+				run_info.layer = l;
+                DKernel[l].DoDestin(DKernel[l-1].GetDevicePointerBeliefs(),xmlLayer);
                 if(this->callback!=NULL){
-                     this->callback->callback(i,0 );
+                     this->callback->callback(run_info, DKernel[l] );
                 }
             }
             time_t lStop = time(NULL);

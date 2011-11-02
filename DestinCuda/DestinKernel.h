@@ -61,10 +61,10 @@ private:
 	//TODO: properly document how the memory variables are arranged.
 
 	int *dCountingTables;
-
 	int *dSumTables;
-
 	float *dBeliefs;
+	float *mBeliefs;
+        
 	//TODO: make sure all memory vectors are initialized and cleared properly
 	int *dOutputAdvice; //advice to be used by child layer
 
@@ -107,13 +107,31 @@ public:
 	float *GetDevicePointerPOS(){ return dPOS; }
 
 	float *GetDevicePointerBeliefs(){ return dBeliefs; }
-
+        
 	int * GetOutputAdvice(){ return dOutputAdvice;  }
-
 
 	void SetInputAdvice(int * dParentInputAdvice){
 		this->dParentInputAdvice = dParentInputAdvice;
 	}
+	/**
+	 * Return a pointer that points to the beginning of the node's belief state
+	 * vector b(s) of the DeSTIN belief update equation.
+	 * 
+	 * Undefined behavior if nodeRow and nodeCol are out of bounds.
+	 * Calling GetNodeBeliefVector(0,0) returns the same pointer as given by 
+	 * calling GetHostPointerBeliefs();
+	 * 
+	 * @param layer - which layer the node belongs to
+	 * @param nodeRow - row the node is in of the given layer
+	 * @param nodeCol - col the node is in of the given layer
+	 * @return - a pointer that points to the beginning of the chosen
+	 * node's belief state vector. The length of the vector can be found
+	 * using the GetNumberOfStates() method.
+	 * 
+	 */
+	float * GetNodeBeliefVector(int nodeRow, int nodeCol){
+		return &mBeliefs[nodeRow*mCols + nodeCol];
+	};
 
 };
 #endif
