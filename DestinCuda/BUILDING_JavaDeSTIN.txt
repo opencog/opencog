@@ -28,6 +28,8 @@ The the ant build file build.xml located in DestinCuda/JavaDestin was generated 
 
 ---BUILDING---
 
+Note: at the moment there are some hard coded paths in src/DestinCuda/JavaDestin/src/javadestin/JavaDestin.java. Edit it as appropriate.
+
 After installing the prerequisites,to build:
 
 cd destin/src/DestinCuda
