@@ -1,4 +1,4 @@
-/** printContainer.h --- 
+/** iostreamContainer.h --- 
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -114,6 +114,31 @@ namespace opencog {
     {
         ostreamContainer(std::cout, container,
                          delimiter, left, right, empty_lr);
+    }
+
+    /**
+     * like printContainer but with an endline at the end
+     */
+    template<class It>
+    void printlnContainer(It from,
+                          It to,
+                          const std::string& delimiter = " ",
+                          const std::string& left = "",
+                          const std::string& right = "",
+                          bool empty_lr = true)
+    {
+        printContainer(from, to, delimiter, left, right, empty_lr);
+        std::cout << std::endl;
+    }
+    template<class Con>
+    void printlnContainer(const Con& container,
+                          const std::string& delimiter = " ",
+                          const std::string& left = "", 
+                          const std::string& right = "",
+                          bool empty_lr = true)
+    {
+        printContainer(container, delimiter, left, right, empty_lr);
+        std::cout << std::endl;
     }
 
     /**
