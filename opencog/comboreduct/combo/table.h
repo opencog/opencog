@@ -77,6 +77,13 @@ arity_t dataFileArity(const std::string& dataFileName);
 type_node inferDataType(const std::string& dataFileName);
 
 /**
+ * return the position of the target in the DSV data file fileName. If
+ * none raise an assert.
+ */
+int findTargetFeaturePosition(const std::string& fileName,
+                              const std::string& target);
+
+/**
  * take a row, modify it to be Unix format compatible and return a
  * tokenizer of it using as sperator the characters ',', ' ' or '\t'.
  */
@@ -378,11 +385,11 @@ struct table {
     typedef typename IT::value_type value_type;
 
     table() {}
-    table(std::istream& in) {
-        istreamTable(in, input, output);
+    table(std::istream& in, int pos = -1) {
+        istreamTable(in, input, output, pos);
     }
-    table(const std::string& file_name) {
-        istreamTable(file_name, input, output);
+    table(const std::string& file_name, int pos = -1) {
+        istreamTable(file_name, input, output, pos);
     }
     size_t size() const { return input.size(); }
     arity_t get_arity() const { return input.get_arity(); }
@@ -573,8 +580,9 @@ public:
     typedef ctruth_table CTable;
 
     truth_table(const super& t) : super(t) {}
-    truth_table(std::istream& in) : super(in) {}
-    truth_table(const std::string& file_name) : super(file_name) {}
+    truth_table(std::istream& in, int pos = -1) : super(in, pos) {}
+    truth_table(const std::string& file_name, int pos = -1) :
+        super(file_name, pos) {}
 
     /// return the corresponding compressed truth table 
     CTable compress() const;
@@ -649,8 +657,9 @@ public:
 
 struct contin_table : public table<contin_input_table, contin_output_table> {
     typedef table<contin_input_table, contin_output_table> super;
-    contin_table(std::istream& in) : super(in) {}
-    contin_table(const std::string& file_name) : super(file_name) {}
+    contin_table(std::istream& in, int pos = -1) : super(in, pos) {}
+    contin_table(const std::string& file_name, int pos = -1)
+        : super(file_name, pos) {}
 };
 
 /////////////////
@@ -921,9 +930,9 @@ public:
 };
 
 /**
- * if the data file has a first row with labels
+ * if the DSV data file has a header with labels
  */
-std::vector<std::string> readInputLabels(const std::string& file);
+std::vector<std::string> readInputLabels(const std::string& file, int pos = -1);
 
 std::ifstream* open_data_file(const std::string& fileName);
 

@@ -21,8 +21,10 @@
  */
 #include "table.h"
 
-#include <opencog/util/numeric.h>
 #include <boost/lexical_cast.hpp>
+
+#include <opencog/util/numeric.h>
+#include <opencog/util/algorithm.h>
 
 #include "ann.h"
 #include "simple_nn.h"
@@ -239,11 +241,11 @@ ifstream* open_data_file(const string& fileName) {
     return in;
 }
 
-vector<string> readInputLabels(const string& file) {
+vector<string> readInputLabels(const string& file, int pos) {
     auto_ptr<ifstream> in(open_data_file(file));
     string line;
     getline(*in, line);    
-    return tokenizeRowIO<string>(line).first;
+    return tokenizeRowIO<string>(line, pos).first;
 }
 
 arity_t dataFileArity(const string& fileName) {
@@ -268,6 +270,19 @@ type_node infer_type_from_token(const string& token) {
             return id::ill_formed_type;
         }
     }
+}
+
+int findTargetFeaturePosition(const string& fileName, const string& target) {
+    unique_ptr<ifstream> in(open_data_file(fileName));
+    string line;
+    getline(*in, line);
+    vector<string> labels = tokenizeRow<string>(line);
+    int pos = distance(labels.begin(), find(labels, target));
+    if(pos < (int)labels.size())
+        return pos;
+    else
+        OC_ASSERT(false, "There is no such target feature %s in data file %s",
+                  target.c_str(), fileName.c_str());
 }
 
 type_node inferDataType(const string& fileName) {
