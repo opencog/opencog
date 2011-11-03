@@ -2,9 +2,10 @@ from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, types 
 import opencog.cogserver
 from tree import *
 import adaptors
+from pprint import pprint
 from util import *
 from itertools import *
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 import sys
 import time
 
@@ -82,10 +83,11 @@ class Fishgram:
         use them to create implication rules in a similar way to the APRIORI algorithm. The code uses the Python "yield"
         command, so it can start producing the rules before the search finishes. This is useful if the search (for conjunctions) is slow.'''
         layers = []
+        start = time.time()
         for layer in self.closed_bfs_layers():
             
-            #for conj, embs in layer:
-            #    print pp(conj), pp(embs)
+            for conj, embs in layer:
+                print pp(conj), len(embs) #, pp(embs)
             
             layers.append(layer)
             if len(layers) >= 2:
@@ -94,6 +96,10 @@ class Fishgram:
             print "All rules produced so far:"
             for imp in self.atomspace.get_atoms_by_type(t.ForAllLink):
                 print pp(imp)
+            
+#            if time.time() - start > 120:
+#                print 'TIMEOUT'
+#                break
 
 # breadth-first search (to make it simpler!)
 # use the extension list.
@@ -219,12 +225,39 @@ class Fishgram:
     def extensions_simple(self, prev_layer):
         '''Find all patterns (and examples) that would extend the previous layer of patterns. That is, the patterns
         that include one extra constraint.'''
-        new_layer = []
         
         # Not correct - it must choose variables so that new 'links' (trees) will be connected in the right place.
         # That should be done based on embeddings (i.e. add a link if some of the embeddings have it)
         
         # But wait, you can just look it up and then merge new variables that point to existing objects.
+        conj2emblist = defaultdict(list)
+        
+        for (conj, s) in self.find_extensions(prev_layer):
+            
+            # Check for other equivalent ones. It'd be possible to reduce them (and increase efficiency) by ordering
+            # the extension of patterns. This would only work with a stable frequency measure though.
+            clones = [c for c in conj2emblist
+                       if isomorphic_conjunctions(conj, c) and c != conj]
+            if len(clones):
+                continue
+            
+            conj2emblist[conj].append(s)
+
+            # Faster, but causes a bug.
+#            canon = tuple(canonical_trees(conj))
+#            print 'conj', pp(conj)
+#            print 'canon', pp(canon)
+#            conj2emblist[canon].append(s)
+            #print 'extensions_simple', len(conj2emblist[canon])
+        
+        return conj2emblist.items()
+
+    def find_extensions(self, prev_layer):
+        '''Helper function for extensions_simple. It's a generator that finds all conjunctions (X,Y,Z) for (X,Y) in
+        the previous layer. It returns a series of (conjunction, substitution) pairs. Where each substitution is
+        one way to produce an atom(s) in the AtomSpace by replacing variables in the conjunction. The conjunctions
+        will often appear more than once.'''
+        
         for (prev_conj,  prev_embeddings) in prev_layer:
 
             for tr_, embs_ in self.forest.tree_embeddings.items():
@@ -235,8 +268,6 @@ class Fishgram:
                 
                 # Give the tree new variables. Rewrite the embeddings to match.
                 tr, rebound_embs = self._create_new_variables(tr_, embs_)
-
-                extensions_for_prev_conj_and_tree_type = {}
                 
                 # They all have the same 'link label' (tree) but may be in different places.
                 for s in rebound_embs:
@@ -267,25 +298,10 @@ class Fishgram:
 
                         if remapped_tree in prev_conj:
                             continue
-                        # Check for other equivalent ones. It'd be possible to reduce them (and increase efficiency) by ordering
-                        # the extension of patterns. This would only work with a stable frequency measure though.
-                        clones = [c for c in extensions_for_prev_conj_and_tree_type
-                                   if isomorphic_conjunctions(remapped_conj_plus, c)]
-                        if len(clones):
-                            continue
 
-                        if remapped_conj_plus not in extensions_for_prev_conj_and_tree_type:
-                            extensions_for_prev_conj_and_tree_type[remapped_conj_plus] = []
-                        extensions_for_prev_conj_and_tree_type[remapped_conj_plus].append(new_s)
-                        
                         self.viz.outputTreeNode(target=list(remapped_conj_plus), parent=list(prev_conj), index=0)
-                        
-                        self.awkward[remapped_conj_plus] = tr_
 
-                new_layer += extensions_for_prev_conj_and_tree_type.items()
-        
-        return new_layer
-
+                        yield (remapped_conj_plus, new_s)
 
     def extending_links(self, binding):
         ret = set()
@@ -414,7 +430,7 @@ class Fishgram:
 
     def prune_frequency(self, layer):
         for (conj, embeddings) in layer:
-            
+            #import pdb; pdb.set_trace()
             count = len(embeddings)*1.0
             num_possible_objects = len(self.forest.all_objects)*1.0
             num_variables = len(get_varlist(conj))*1.0
@@ -422,8 +438,11 @@ class Fishgram:
             normalized_frequency =  count / num_possible_objects ** num_variables
             if len(embeddings) >= self.min_embeddings:
             #if normalized_frequency > self.min_frequency:
-                #print pp(conj), normalized_frequency
+                #print pp(conj), normalized_frequency                
                 yield (conj, embeddings)
+
+    def surprise(self, layer):
+        pass
 
     def conjunction_to_string(self,  conjunction):
         return str(tuple([str(tree) for tree in conjunction]))
@@ -432,7 +451,7 @@ class Fishgram:
         id = 1001
         
         for layer in layers:
-            for (conj, embs) in layer:
+            for (conj, embs) in layer:                
                 if (len(get_varlist(conj)) == 1):
                     concept = self.atomspace.add_node(t.ConceptNode, 'fishgram_'+str(id))
                     id+=1
@@ -515,7 +534,6 @@ class Fishgram:
 
 #                print map(str, premises)
 #                print ce_premises[0]
-#                print len(premises_embs), len(embs)
                 
 #                c_norm = normalize( (conj, emb), ce_conclusion )
 #                p_norm = normalize( (conj, emb), ce_premises )
@@ -886,14 +904,16 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
         self.cycles = 1
 
     def run(self,atomspace):
+        # It may be useful to store the fishgram object so you can reuse results in each cycle
         try:
             self.fish
-        except:
+        except:            
             self.fish = Fishgram(atomspace)
             #make_seq(atomspace)
             # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
             #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
             
+            # Detect timestamps where a DemandGoal got satisfied or frustrated
             notice_changes(atomspace)
             
             self.fish.forest.extractForest()
@@ -918,8 +938,8 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #                        print 'emb:',  pp(bound_tree)
         
         #fish.iterated_implications()
-        self.fish.implications()
-        #self.fish.run()
+        #self.fish.implications()
+        self.fish.run()
         
         #fish.make_all_psi_rules()
 

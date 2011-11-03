@@ -22,9 +22,15 @@ class ForestExtractor:
         self.miner_friendly = True
         # Only affects output
         self.compact_binary_links = True
-        self.unwanted_atoms = set(["proximity", "near", 'next', "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
-                                    # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
-                                    'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst'])
+        # Spatial relations are useful, but cause a big combinatorial explosion
+        self.unwanted_atoms = set(["proximity", "near", 'next',
+            #'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of', 'left_of', 'right_of', 
+            #'below', 'above', 'between', 'touching', 'inside', 'outside', 
+            # Not useful e.g. because they contain numbers
+            #'is_movable', 'is_noisy', 
+            "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
+            # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
+            'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst'])
         
         # state
         self.all_objects  = set()# all objects in the AtomSpace
@@ -131,7 +137,7 @@ class ForestExtractor:
         self.writer.stop()
 
     def is_object(self,  atom):
-        return atom.is_a(t.ObjectNode) or atom.is_a(t.TimeNode) # haxx!
+        return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) # haxx!
     
     def is_important_atom(self, atom):
         return atom.name in ['actionFailed', 'actionDone'] or "DemandGoal" in atom.name
@@ -142,7 +148,7 @@ class ForestExtractor:
     def include_atom(self,  atom):
         """Whether to include a given atom in the results. If it is not included, all trees containing it will be ignored as well."""
         if atom.is_node():
-            if atom.name in self.unwanted_atoms:
+            if atom.name in self.unwanted_atoms or atom.name.startswith('id_CHUNK'):
                 return False
         else:
             if (atom.is_a(t.SimultaneousEquivalenceLink) or atom.is_a(t.SimilarityLink) or atom.is_a(t.ImplicationLink) or atom.is_a(t.ReferenceLink) ):

@@ -463,8 +463,9 @@ def canonical_trees(trs, dic = {}):
     tmp = _new_var_counter
     _new_var_counter = 0
     ret = []
+    dic = {}
     for tr in trs:
-        tr2 = standardize_apart(tr)
+        tr2 = standardize_apart(tr, dic)
         ret.append(tr2)
     _new_var_counter = tmp
     

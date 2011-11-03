@@ -156,3 +156,12 @@ class TreeTest(TestCase):
         self.assertNotEquals(var1_new, var2_new)        
         assert var1_new not in [var1, var2]
         assert var2_new not in [var1, var2]
+
+    def test_canonical_trees(self):
+        conj = (
+            tree.Tree('ListLink', 1, 2), 
+            tree.Tree('ListLink', 2, 3)
+        )
+        
+        canon = tree.canonical_trees(conj)
+        print canon
