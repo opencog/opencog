@@ -77,39 +77,47 @@ arity_t dataFileArity(const std::string& dataFileName);
 type_node inferDataType(const std::string& dataFileName);
 
 /**
+ * take a row, modify it to be Unix format compatible and return a
+ * tokenizer of it using as sperator the characters ',', ' ' or '\t'.
+ */
+boost::tokenizer<boost::char_separator<char>> get_row_tokenizer(std::string& line);
+
+/**
  * take a line and return a vector containing the elements parsed.
  * Used by istreamTable. Please note that it may modify line to be
  * Unix compatible.
  */
 template<typename T>
 std::vector<T> tokenizeRow(std::string& line) {
-    //typedef boost::escaped_list_separator<char> seperator;
-    typedef boost::char_separator<char> seperator;
-    typedef boost::tokenizer<seperator> tokenizer;
-    typedef tokenizer::const_iterator tokenizer_cit;
-
-    // remove weird symbols at the start of the line and carriage
-    // return symbol (for DOS files)
-    removeNonASCII(line);
-    removeCarriageReturn(line);
-
-    // tokenize line
-    // static const seperator sep("\\", ","/*" \t"*/, "\"");
-    static const seperator sep(", \t");
-    tokenizer tok(line, sep);
+    boost::tokenizer<boost::char_separator<char> > tok = get_row_tokenizer(line);
     std::vector<T> res;
     foreach(const std::string& t, tok)
         res.push_back(boost::lexical_cast<T>(t));
     return res;
 }
 // Like above but split the result into an vector (the inputs) and an
-// element (the output)
+// element (the output) given that the output is at position pos. If
+// pos < 0 then the position is the last. If pos >= 0 then the
+// position is as usual (0 is the first, 1 is the second, etc).
+// If pos is out of range then an assert is raised.
 template<typename T>
-std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line) {
-    std::vector<T> inputs = tokenizeRow<T>(line);
-    T output = inputs.back();
-    inputs.pop_back();
-    return std::make_pair(inputs, output);
+std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = -1) {
+    boost::tokenizer<boost::char_separator<char> > tok = get_row_tokenizer(line);
+    std::vector<T> inputs;
+    T output;
+    int i = 0;
+    foreach(const std::string& t, tok) {
+        if(i++ != pos)
+            inputs.push_back(boost::lexical_cast<T>(t));
+        else output = boost::lexical_cast<T>(t);
+    }
+    if(pos < 0) {
+        output = inputs.back();
+        inputs.pop_back();
+    }
+    // the following assert is to garanty that the output has been filled
+    OC_ASSERT((int)inputs.size() == i-1);
+    return {inputs, output};
 }
 
 /**
@@ -120,12 +128,11 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line) {
  * It is assumed that each row have the same number of columns, if not
  * an assert is raised.
  *
- * If the table has no header then it uses "v1" to "vn" as input
- * labels, where n is the number of inputs, and "output" as output
- * label.
+ * pos specifies the position of the output, by default the last one.
  */
 template<typename IT, typename OT>
-std::istream& istreamTable(std::istream& in, IT& input_table, OT& output_table) {
+std::istream& istreamTable(std::istream& in, IT& input_table, OT& output_table,
+                           int pos = -1) {
     typedef typename OT::value_type T;
     std::string line;
 
@@ -133,26 +140,16 @@ std::istream& istreamTable(std::istream& in, IT& input_table, OT& output_table) 
     // first row, check if they are labels or values //
     ///////////////////////////////////////////////////
     getline(in, line);    
-    std::pair<std::vector<std::string>, std::string> ioh = tokenizeRowIO<std::string>(line);
+    std::pair<std::vector<std::string>, std::string> ioh =
+        tokenizeRowIO<std::string>(line, pos);
     try { // try to interpret then as values
         std::vector<T> inputs;
-        T output;
-        foreach(std::string& s, ioh.first)
+        foreach(auto& s, ioh.first)
             inputs.push_back(boost::lexical_cast<T>(s));
-        output = boost::lexical_cast<T>(ioh.second);
+        T output = boost::lexical_cast<T>(ioh.second);
         // they are values so we add them
         input_table.push_back(inputs);
         output_table.push_back(output);
-        // // set the input labels as i1, ..., in, where n is the number
-        // // of inputs, and the output label as output
-        // std::vector<std::string> ilabels;
-        // for(unsigned i = 1; i < inputs.size(); i++) {
-        //     std::string label("v");
-        //     label += boost::lexical_cast<std::string>(i);
-        //     ilabels.push_back(label);
-        // }
-        // input_table.set_labels(ilabels);
-        // output_table.set_label("output");
     } catch (boost::bad_lexical_cast &) { // not interpretable, they
                                           // must be labels
         input_table.set_labels(ioh.first);
@@ -165,7 +162,7 @@ std::istream& istreamTable(std::istream& in, IT& input_table, OT& output_table) 
     //////////////////////////////////////////
     while (getline(in, line)) {
         // tokenize the line and fill the input vector and output
-        std::pair<std::vector<T>, T> io = tokenizeRowIO<T>(line);
+        std::pair<std::vector<T>, T> io = tokenizeRowIO<T>(line, pos);
         
         // check arity
         OC_ASSERT(arity == (arity_t)io.first.size(),
@@ -185,11 +182,11 @@ std::istream& istreamTable(std::istream& in, IT& input_table, OT& output_table) 
  */
 template<typename IT, typename OT>
 void istreamTable(const std::string& file_name,
-                  IT& input_table, OT& output_table) {
+                  IT& input_table, OT& output_table, int pos = -1) {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     std::ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamTable(in, input_table, output_table);
+    istreamTable(in, input_table, output_table, pos);
 }
 
 //////////////////

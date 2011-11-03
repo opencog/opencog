@@ -284,4 +284,20 @@ type_node inferDataType(const string& fileName) {
     return res;
 }
 
+boost::tokenizer<boost::char_separator<char>>
+get_row_tokenizer(std::string& line) {
+    typedef boost::char_separator<char> seperator;
+    typedef boost::tokenizer<seperator> tokenizer;
+    typedef tokenizer::const_iterator tokenizer_cit;
+
+    // remove weird symbols at the start of the line and carriage
+    // return symbol (for DOS files)
+    removeNonASCII(line);
+    removeCarriageReturn(line);
+
+    // tokenize line
+    static const seperator sep(", \t");
+    return tokenizer(line, sep);
+}
+
 }} // ~namespaces combo opencog
