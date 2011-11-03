@@ -191,6 +191,7 @@ int moses_exec(int argc, char** argv) {
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
     string input_data_file;
+    string target_feature;
     string problem;
     string combo_str;
     unsigned int problem_size;
@@ -268,6 +269,9 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&input_data_file),
          "Input table file, the maximum number of samples is the number of rows in the file.\n")
+        (opt_desc_str(target_feature_opt).c_str(),
+         value<string>(&target_feature),
+         "Label of the target feature to fit. If none is given the last one is used.\n")
         (opt_desc_str(problem_opt).c_str(),
          value<string>(&problem)->default_value("it"),
          string("Problem to solve, supported problems are"
@@ -464,10 +468,15 @@ int moses_exec(int argc, char** argv) {
     // set moses_parameters
     moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);
 
+    // find the position of the target feature of the data file if any
+    int target_pos = -1;
+    if(!target_feature.empty() && !input_data_file.empty())
+        target_pos = findTargetFeaturePosition(input_data_file, target_feature);
+
     // read labels on data file
     vector<string> labels;
     if(output_with_labels && !input_data_file.empty())
-        labels = readInputLabels(input_data_file);
+        labels = readInputLabels(input_data_file, target_pos);
 
     // set metapop_moses_results_parameters
     metapop_moses_results_parameters mmr_pa(result_count,
@@ -480,11 +489,12 @@ int moses_exec(int argc, char** argv) {
 
     if(problem == it) { // regression based on input table
         
-        // try to infer the type of the input table
+        // infer the type of the input table
         type_node inferred_type = inferDataType(input_data_file);
-        if(exemplars.empty()) {            
+
+        // determine the default exemplar to start with
+        if(exemplars.empty())
             exemplars.push_back(type_to_exemplar(inferred_type));
-        }
 
         type_node output_type = 
             *(get_output_type_tree(*exemplars.begin()->begin()).begin());
@@ -499,7 +509,7 @@ int moses_exec(int argc, char** argv) {
         if(output_type == id::boolean_type) {
             // read input_data_file file
             logger().debug("Read data file %s", input_data_file.c_str());
-            truth_table table(*in);
+            truth_table table(*in, target_pos);
             if(nsamples>0)
                 subsampleTable(table.input, table.output, nsamples, rng);
             ctruth_table ctable = table.compress();
@@ -520,7 +530,7 @@ int moses_exec(int argc, char** argv) {
             // read input_data_file file
             contin_input_table it;
             contin_output_table ot;
-            istreamTable(*in, it, ot);
+            istreamTable(*in, it, ot, target_pos);
             if(nsamples>0)
                 subsampleTable(it, ot, nsamples, rng);
 
@@ -668,7 +678,7 @@ int moses_exec(int argc, char** argv) {
         contin_input_table it;
         contin_output_table ot;
         // read input_data_file file
-        istreamTable(*in, it, ot);
+        istreamTable(*in, it, ot, target_pos);
         // if no exemplar has been provided in option insert the default one
         if(exemplars.empty()) {
             exemplars.push_back(ann_exemplar(arity));
