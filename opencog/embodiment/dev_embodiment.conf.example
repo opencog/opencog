@@ -117,7 +117,7 @@ ROUTER_DATABASE_DIR             = /tmp/$USER/opencog/router_db
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
-PSI_DEMANDS = Energy, Integrity, Certainty, Competence
+PSI_DEMANDS = Energy, Integrity, Certainty, Competence, Affiliation
 # Complete list of demands (all availabe in multiverse world)
 #PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
@@ -141,10 +141,10 @@ PSI_MODULATOR_UPDATER_ENABLED =        true
 PSI_MODULATOR_UPDATER_CYCLE_PERIOD =   11
 
 PSI_DEMAND_UPDATER_ENABLED =           true
-PSI_DEMAND_UPDATER_CYCLE_PERIOD =      5
+PSI_DEMAND_UPDATER_CYCLE_PERIOD =      1
 
 PSI_ACTION_SELECTION_ENABLED =         true
-PSI_ACTION_SELECTION_CYCLE_PERIOD =    5
+PSI_ACTION_SELECTION_CYCLE_PERIOD =    1
 
 PSI_RELATION_UPDATER_ENABLED =         true
 PSI_RELATION_UPDATER_CYCLE_PERIOD =    13
@@ -419,7 +419,7 @@ STORAGE_USERNAME       = opencog
 STORAGE_PASSWD         = asdf
 
 # Dialog controllers
-DIALOG_CONTROLLERS	= QuestionAnswering, MegaHal, AliceBot, Ramona
+#DIALOG_CONTROLLERS	= MegaHal, AliceBot, Ramona
 MEGAHAL_SERVER_HOST	= localhost
 MEGAHAL_SERVER_PORT	= 7001
 
