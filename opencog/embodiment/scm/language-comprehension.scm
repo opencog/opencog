@@ -2035,99 +2035,108 @@
     ) ; let
   )
 
-; Prototype. Converts all frame instances from the messy format into the elegant format. Seems to be essential for
-; PLN to be able to handle it with reasonable efficiency.
+; Prototype. Converts all frame instances from the messy format into the elegant format. 
+; Seems to be essential for PLN to be able to handle it with reasonable efficiency.
 (define convert-frames
     (BindLink
-     (ListLink
-      (TypedVariableLink
-       (VariableNode "$frameInstance")
-       (VariableTypeNode "PredicateNode")
-      )
-      (VariableNode "$frameElementInstance")
-;      (VariableNode "$frame")
-      (VariableNode "$frameElement")
-      (TypedVariableLink
-       (VariableNode "$value")
-       (ListLink
-        (VariableTypeNode "ConceptNode")
-        (VariableTypeNode "SemeNode")
-        ; Do it on the raw WordInstanceNode version (ungrounded version) too. Needed by frames-to-implication.
-        (VariableTypeNode "WordInstanceNode")
-       )
-      )
-     )
-     (ImplicationLink
-      (AndLink
-;            (InheritanceLink
-;          (VariableNode "$frameInstance")
-;          (VariableNode "$frame")
-;            )
-      (FrameElementLink
-             (VariableNode "$frameInstance")
-             (VariableNode "$frameElementInstance")
-             )
-            (InheritanceLink
-             (VariableNode "$frameElementInstance")
-             (VariableNode "$frameElement")
-             )
-            (EvaluationLink
-             (VariableNode "$frameElementInstance")
-             (VariableNode "$value")
-            )
-      )
-
-      (EvaluationLink (VariableNode "$frameElement")
         (ListLink
-            (VariableNode "$frameInstance")
-            (VariableNode "$value")
-        )
-      )
+            (TypedVariableLink
+                (VariableNode "$frameInstance")
+                (VariableTypeNode "PredicateNode")
+            )
+            (VariableNode "$frameElementInstance")
+;            (VariableNode "$frame")
+            (VariableNode "$frameElement")
+            (TypedVariableLink
+                (VariableNode "$value")
+                (ListLink
+                    (VariableTypeNode "ConceptNode")
+                    (VariableTypeNode "SemeNode")
+                    ; Do it on the raw WordInstanceNode version (ungrounded version) too. Needed by frames-to-implication.
+                    (VariableTypeNode "WordInstanceNode")
+                )
+            )
+        ); ListLink
 
-     ) ; Implication
-    ) ; VarScope
+        (ImplicationLink
+            (AndLink
+;                (InheritanceLink
+;                    (VariableNode "$frameInstance")
+;                    (VariableNode "$frame")
+;                )
+                (FrameElementLink
+                    (VariableNode "$frameInstance")
+                    (VariableNode "$frameElementInstance")
+                )
+                (InheritanceLink
+                    (VariableNode "$frameElementInstance")
+                    (VariableNode "$frameElement")
+                )
+                (EvaluationLink
+                    (VariableNode "$frameElementInstance")
+                    (VariableNode "$value")
+                )
+            ); AndLink
+
+            (EvaluationLink
+                (VariableNode "$frameElement")
+                (ListLink
+                    (VariableNode "$frameInstance")
+                    (VariableNode "$value")
+                )
+            )
+
+        ); Implication
+    ); BindLink
 )
 
 (define frames-to-inh
     (BindLink
-     (ListLink
-      (TypedVariableLink
-       (VariableNode "$frameInstance")
-       (VariableTypeNode "PredicateNode")
-      )
-      (TypedVariableLink
-       (VariableNode "$entity")
-       (ListLink
-        (VariableTypeNode "ConceptNode")
-        (VariableTypeNode "SemeNode")
-       )
-      )
-      (TypedVariableLink
-       (VariableNode "$attribute")
-       (ListLink
-        (VariableTypeNode "ConceptNode")
-        (VariableTypeNode "SemeNode")
-       )
-      )
-     )
-     (ImplicationLink
-      (AndLink
-       (EvaluationLink (DefinedFrameElementNode "#Attributes:Entity")
-         (ListLink
-             (VariableNode "$frameInstance")             
-             (VariableNode "$entity")
-         )
-       )
-       (EvaluationLink (DefinedFrameElementNode "#Attributes:Attribute")
-         (ListLink
-             (VariableNode "$frameInstance")
-             (VariableNode "$attribute")
-         )
-       )
-      ) ; And
-      (InheritanceLink (VariableNode "$entity") (VariableNode "$attribute"))
-     ) ; Implication
-    ) ; VarScope
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$frameInstance")
+                (VariableTypeNode "PredicateNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$entity")
+                (ListLink
+                    (VariableTypeNode "ConceptNode")
+                    (VariableTypeNode "SemeNode")
+                )
+            )
+            (TypedVariableLink
+                (VariableNode "$attribute")
+                (ListLink
+                    (VariableTypeNode "ConceptNode")
+                    (VariableTypeNode "SemeNode")
+                )
+            )
+        ); ListLink
+
+        (ImplicationLink
+            (AndLink
+                (EvaluationLink 
+                    (DefinedFrameElementNode "#Attributes:Entity")
+                    (ListLink
+                        (VariableNode "$frameInstance")             
+                        (VariableNode "$entity")
+                    )
+                )
+                (EvaluationLink 
+                    (DefinedFrameElementNode "#Attributes:Attribute")
+                    (ListLink
+                        (VariableNode "$frameInstance")
+                        (VariableNode "$attribute")
+                    )
+                )
+            ); AndLink
+
+            (InheritanceLink 
+                (VariableNode "$entity") 
+                (VariableNode "$attribute")
+            )
+        ); ImplicationLink
+    ); BindLink
 )
 
 (define (find-frame-elements-new-eval-links frameInstance)
@@ -2158,70 +2167,91 @@
 
 ; Lookup the query atom (can contain variables).
 (define (lookup-atoms variables query)
-    (let ((implication
-         (BindLink
-            variables
-            (ImplicationLink
-                query
-                query
-            )
+    (let ( (implication
+               (BindLink
+                   variables
+                   (ImplicationLink
+                       query
+                       query
+                   )
+               ); BindLink
+           )
          )
-         ))
          
          ; cog-bind returns a ListLink of results, so get the list not the ListLink
          (cog-outgoing-set (cog-bind implication))
-     )
+    ); let
 )
 
 ; TODO: this function really shouldn't have to be this long.
+;
+; Given:
+;     (WordInstanceNode eats@c19cfa35-0d75-4762-ae96-f960745d777f)
+;
+; Find:
+;     (PredicateNode eats@c19cfa35-0d75-4762-ae96-f960745d777f_Ingestion)
+; and without including:
+;     (PredicateNode eats@c19cfa35-0d75-4762-ae96-f960745d777f_Ingestion_Ingestor)
+;
+; We want it to find the grounded version of the frame instance, which starts with G_
+;
 (define (find-frame-instance-for-word-instance wordInstance)
-    ; given:
-    ; (WordInstanceNode eats@c19cfa35-0d75-4762-ae96-f960745d777f)
-    ; find:
-    ; (PredicateNode eats@c19cfa35-0d75-4762-ae96-f960745d777f_Ingestion)
-    ; and without including:
-    ; (PredicateNode eats@c19cfa35-0d75-4762-ae96-f960745d777f_Ingestion_Ingestor)
-    
-    ; We want it to find the grounded version of the frame instance, which starts with G_
     
     ; (InheritanceLink PredicateNode DefinedFrameNode)
     (define variables
         (ListLink
-            (TypedVariableLink (VariableNode "frameInstance") (VariableTypeNode "PredicateNode"))
-            (TypedVariableLink (VariableNode "frame") (VariableTypeNode "DefinedFrameNode"))
-        )
+            (TypedVariableLink
+                (VariableNode "frameInstance")
+                (VariableTypeNode "PredicateNode")
+            )
+            (TypedVariableLink 
+                (VariableNode "frame")
+                (VariableTypeNode "DefinedFrameNode")
+            )
+        ); ListLink
     )
+
     (define result '())
+
     (let
-        ((all-frame-instances
-            (lookup-atoms variables
-                (InheritanceLink (VariableNode "frameInstance") (VariableNode "frame")))
-        ))
+        ( (all-frame-instances
+              (lookup-atoms variables
+                  (InheritanceLink
+                      (VariableNode "frameInstance")
+                      (VariableNode "frame")
+                  )
+              )
+          ); all-frame-instances    
+        )
 
         (map
             (lambda (instanceLink)
-                (let* ((instance (gar instanceLink))
-                      (instanceFullName (cog-name instance))
+                (let* ( (instance (gar instanceLink) )
+                        (instanceFullName (cog-name instance) )
                       )
-                      (if (string=? "G_" (substring instanceFullName 0 2))
+                      (if (string=? "G_" (substring instanceFullName 0 2) )
                           (let* ( (instanceRestName (substring instanceFullName 2) )
-                              (underscoreIndex (list-index (lambda (char) (char=? char #\_)) (string->list instanceRestName) ))
-                              (correspondingWordNodeName (substring instanceRestName 0 underscoreIndex))
-                              )
-                              (if (and
-                                      (string=? correspondingWordNodeName (cog-name wordInstance))
-                                      ; Reuse this ~hack for now, to make sure it's only one.
-                                      (not (member (get-frame-instance-type instance) invalid-question-frames))
+                                  (underscoreIndex 
+                                      (list-index (lambda (char) (char=? char #\_)) (string->list instanceRestName) )
                                   )
-                                  (set! result instance)
-                              )
-                          ) ; let*
+                                  (correspondingWordNodeName
+                                      (substring instanceRestName 0 underscoreIndex)
+                                  )
+                                )
+                                (if (and
+                                        (string=? correspondingWordNodeName (cog-name wordInstance) )
+                                        ; Reuse this ~hack for now, to make sure it's only one.
+                                        (not (member (get-frame-instance-type instance) invalid-question-frames) )
+                                    )
+                                    (set! result instance)
+                                )
+                          ); let*
                       )
-                )
-            )
+                ); let*
+            ); lambda
             all-frame-instances
-        )
-    )
+        ); map
+    ); let
     
     result
 )
@@ -2242,44 +2272,48 @@
 ; when there are multiple conclusions, so this rule will simply be triggered multiple times.
 (define frames-to-implication
     (BindLink
-     (ListLink
-      (TypedVariableLink
-       (VariableNode "$frameInstance")
-       (VariableTypeNode "PredicateNode")
-      )
-      (TypedVariableLink
-       (VariableNode "$premise")
-       (VariableTypeNode "WordInstanceNode")
-      )
-      (TypedVariableLink
-       (VariableNode "$conclusion")
-       (VariableTypeNode "WordInstanceNode")
-      )
-     )
-     (ImplicationLink
-      (AndLink
-       (EvaluationLink (DefinedFrameElementNode "#Contingency:Determinant")
-         (ListLink
-             (VariableNode "$frameInstance")             
-             (VariableNode "$premise")
-         )
-       )
-       (EvaluationLink (DefinedFrameElementNode "#Contingency:Outcome")
-          (ListLink
-              (VariableNode "$frameInstance")             
-              (VariableNode "$conclusion")
-          )
-       )
-      ) ; AND
-      (ExecutionLink
-          (GroundedSchemaNode "scm:convert-frame-to-implication")
-          (ListLink
-              (VariableNode "$premise")
-              (VariableNode "$conclusion")
-          )
-      )    
-     ) ; Implication
-    ) ; VariableScope
+        (ListLink
+            (TypedVariableLink
+                (VariableNode "$frameInstance")
+                (VariableTypeNode "PredicateNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$premise")
+                (VariableTypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$conclusion")
+                (VariableTypeNode "WordInstanceNode")
+            )
+        ); ListLink
+
+        (ImplicationLink
+            (AndLink
+                (EvaluationLink 
+                    (DefinedFrameElementNode "#Contingency:Determinant")
+                    (ListLink
+                        (VariableNode "$frameInstance")             
+                        (VariableNode "$premise")
+                    )
+                )
+                (EvaluationLink
+                    (DefinedFrameElementNode "#Contingency:Outcome")
+                    (ListLink
+                        (VariableNode "$frameInstance")             
+                        (VariableNode "$conclusion")
+                    )
+                )
+            ); AndLink
+
+            (ExecutionLink
+                (GroundedSchemaNode "scm:convert-frame-to-implication")
+                (ListLink
+                    (VariableNode "$premise")
+                    (VariableNode "$conclusion")
+                )
+            )    
+        ); ImplicationLink
+    ); BindLink
 )
 
 ; Just a prototype for now. Uses a possibly-obsolete approach. For every Frame element, looks up an InheritanceLink, FrameElementLink and EvaluationLink.
