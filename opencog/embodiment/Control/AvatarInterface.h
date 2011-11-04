@@ -49,7 +49,7 @@ public:
     virtual const std::string& getPetId() const = 0;
     virtual const std::string& getExemplarAvatarId() const = 0;
 
-    virtual AtomSpace& getAtomSpace() = 0;
+    virtual AtomSpace & getAtomSpace() = 0;
 
     virtual void stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp) = 0;
 

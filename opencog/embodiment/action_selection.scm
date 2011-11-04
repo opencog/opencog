@@ -4,6 +4,8 @@
 ; @author Zhenhua Cai <czhedu@gmail.com>
 ; @date   2011-10-12
 ;
+; @todo   Many of tail recursive functions could be replaced by 'fold' function. 
+;
 
 ; Modules for debug
 ;(use-modules (ice-9 debugger)
