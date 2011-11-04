@@ -5,6 +5,8 @@
  * All Rights Reserved
  * Author(s): Samir Araujo
  *
+ * Update: by Zhenhua Cai <czhedu@gmail.com>, on 2011-11-03
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -73,78 +75,6 @@ void LanguageComprehension::handleCommand(const std::string& name, const std::ve
         this->commandsQueue.push(arguments);
 
     } 
-    else if ( name == "updateFact" ) {
-        logger().debug("LanguageComprehension::%s (%s) - Evaluating a new parsed sentence", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      ); 
-
-
-        logger().debug("LanguageComprehension::%s (%s) - Starting latest sentence reference resolution", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      ); 
-        this->resolveLatestSentenceReference();
-        logger().debug("LanguageComprehension::%s (%s) - Reference resolution done", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      ); 
-
-        logger().debug("LanguageComprehension::%s (%s) - Starting storing a new fact", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      );
-        this->updateFact();
-        logger().debug("LanguageComprehension::%s (%s) - Fact stored",
-                       __FUNCTION__, 
-                       name.c_str()
-                      );
-        
-    }
-    else if ( name == "evaluateSentence" ) {
-        logger().debug("LanguageComprehension::%s (%s) - Evaluating a new parsed sentence", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      );
-
-        logger().debug("LanguageComprehension::%s (%s) - Starting latest sentence reference resolution", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      );
-        this->resolveLatestSentenceReference();
-        logger().debug("LanguageComprehension::%s (%s) Reference resolution done", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      );
-
-        logger().debug("LanguageComprehension::%s (%s) - Starting latest sentence command resolution", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      );
-        this->resolveLatestSentenceCommand();
-        logger().debug("LanguageComprehension::%s (%s) - Command resolution done", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      );
-
-    } 
-    else if ( name == "answerQuestion") {
-        logger().debug("LanguageComprehension::%s (%s) - Answering a question", 
-                        __FUNCTION__, 
-                        name.c_str()
-                      );
-
-        logger().debug("LanguageComprehension::%s (%s) - Starting latest sentence reference resolution", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      );
-        this->resolveLatestSentenceReference();
-        logger().debug("LanguageComprehension::%s (%s) - Reference resolution done", 
-                       __FUNCTION__, 
-                       name.c_str()
-                      );
-        
-    }
 }
 
 void LanguageComprehension::init( void )
@@ -178,7 +108,6 @@ void LanguageComprehension::init( void )
         this->nlgen_server_host = config().get("NLGEN_SERVER_HOST");
 
         nlgenClient = new NLGenClient(this->nlgen_server_host, this->nlgen_server_port);
-        loadDialogControllers( );
 
     } // if
 }
@@ -189,10 +118,10 @@ void LanguageComprehension::resolveLatestSentenceReference( void )
 
 #ifdef HAVE_GUILE
     std::string answer = SchemeEval::instance().eval( "(resolve-reference)");
-    logger().info( "LanguageComprehension::%s - (resolve-reference) resolved references: \n%s",
-                   __FUNCTION__,
-                   answer.c_str() 
-                 );
+    logger().debug( "LanguageComprehension::%s - (resolve-reference) resolved references: \n%s",
+                    __FUNCTION__,
+                    answer.c_str() 
+                  );
     if ( SchemeEval::instance().eval_error() ) {
         logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve reference: %s",
                         __FUNCTION__, answer.c_str( ) );
@@ -251,7 +180,7 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
 
 #ifdef HAVE_GUILE
     std::string answer = SchemeEval::instance().eval( "(resolve-command)");
-    logger().info( "LanguageComprehension::%s - (resolve-command) answer: %s", __FUNCTION__, answer.c_str() );
+    logger().debug( "LanguageComprehension::%s - (resolve-command) answer: %s", __FUNCTION__, answer.c_str() );
     if ( SchemeEval::instance().eval_error() ) {
         logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve command: %s",
                         __FUNCTION__, answer.c_str( ) );
@@ -279,8 +208,12 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
         Handle gsn = as.getOutgoing(execLink, 0);
         Handle argumentsList = as.getOutgoing(execLink, 1 );
         if ( GROUNDED_SCHEMA_NODE != as.getType(gsn) || LIST_LINK != as.getType(argumentsList) ) {
-            logger().error( "LanguageComprehension::%s - Malformed Execution link. It should link a GroundedSchemaNode and a ListLink of arguments. But types are 0 -> %d and 1 -> %d", 
-                            __FUNCTION__, as.getType( gsn ), as.getType(argumentsList) );
+            logger().error( "LanguageComprehension::%s - Malformed Execution link. "
+                            "It should link a GroundedSchemaNode and a ListLink of arguments. "
+                            "But types are 0 -> %d and 1 -> %d", 
+                            __FUNCTION__, 
+                            as.getType(gsn), as.getType(argumentsList) 
+                          );
             return;
         } // if
         std::vector<std::string> arguments;
@@ -314,7 +247,8 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
 
     // there is no frame instance related to the answer
     if ( answerFrameInstances.size() == 0 ) {
-        logger().debug( "LanguageComprehension::%s - number of frame instances related to the answer is 0. 'I don't know' answer will be reported.",
+        logger().debug( "LanguageComprehension::%s - number of frame instances related to the answer is 0. "
+                        "'I don't know' answer will be reported.",
                         __FUNCTION__ );
         return "";
     } 
@@ -422,15 +356,20 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
     OutputRelex* output_relex = framesToRelexRuleEngine.resolve( pre_conditions );
 
     if( output_relex == NULL ){
-        logger().debug("LanguageComprehension::%s - Output Relex is NULL for the pre-conditions. No rules were found.",__FUNCTION__);
+        logger().debug("LanguageComprehension::%s - "
+                       "Output Relex is NULL for the pre-conditions. No rules were found.",
+                       __FUNCTION__
+                      );
 
-        return "I know the answer, but I don't know how to say it, because Frames2Relex does not have a suitable rule. The answer involved frame instances are: " + answerFrameInstancesStr;
+        return "Found the answer but lack of suitable Frames2Relex. The answer involved frame instances are: " +
+               answerFrameInstancesStr;
     }
     
     std::string text = output_relex->getOutput( as, handles );
     if( text.empty() ){
         logger().error("LanguageComprehension::%s - Output Relex returned an empty string.", __FUNCTION__);
-        return " I know the answer, but I don't know how to say it, because Relex2Sentence returns empty string. The answer involved frame instances are: " + answerFrameInstancesStr;
+        return "Found the answer but Relex2Sentence returns an empty string. The answer involved frame instances are: " +
+                answerFrameInstancesStr;
     }
 
     // resolve relex to sentence and return the result
@@ -480,10 +419,10 @@ void LanguageComprehension::updateFact(void)
 #ifdef HAVE_GUILE
     std::string answer = SchemeEval::instance().eval( "(update-fact)");    
 
-    logger().info( "LanguageComprehension::%s - (update-fact) newly created or deleted frame instances (fact): \n%s", 
-                   __FUNCTION__, 
-                   answer.c_str()
-                 );
+    logger().debug( "LanguageComprehension::%s - (update-fact) newly created or deleted frame instances (fact): \n%s", 
+                    __FUNCTION__, 
+                    answer.c_str()
+                  );
 
     if ( SchemeEval::instance().eval_error() ) {
         logger().error( "LanguageComprehension::%s - (update-fact) An error occurred while trying to update fact: \n%s",
@@ -498,40 +437,44 @@ void LanguageComprehension::updateFact(void)
 
 HandleSeq LanguageComprehension::getHeardSentencePredicates( void )
 {
-    AtomSpace& atomSpace = agent.getAtomSpace( );
-    Handle agentHandle = AtomSpaceUtil::getAgentHandle( atomSpace, agent.getPetId( ) );
+    AtomSpace & atomSpace = agent.getAtomSpace( );
+    Handle agentHandle = AtomSpaceUtil::getAgentHandle( atomSpace, agent.getPetId() );
 
     HandleSeq heardSentences;
     
     Handle node = atomSpace.getHandle( PREDICATE_NODE, "heard_sentence" );
     if ( node == Handle::UNDEFINED ) {
         return heardSentences;
-    } // if
-    HandleSeq incoming = atomSpace.getIncoming( node );
-    unsigned int i;
-    for( i = 0; i < incoming.size( ); ++i ) {
-        if ( atomSpace.getType( incoming[i] ) != EVALUATION_LINK ||
-             atomSpace.getTV( incoming[i] )->isNullTv() || 
-             atomSpace.getMean( incoming[i] ) == 0 ||
-             atomSpace.getArity( incoming[i] ) != 2 ||
-             atomSpace.getOutgoing( incoming[i], 1 ) == node ) {
+    } 
+
+    HandleSeq incomingSet = atomSpace.getIncoming(node);
+
+    foreach (Handle incoming, incomingSet) {
+        if ( atomSpace.getType(incoming) != EVALUATION_LINK ||
+             atomSpace.getTV(incoming)->isNullTv() || 
+             atomSpace.getMean(incoming) == 0 ||
+             atomSpace.getArity(incoming) != 2 ||
+             atomSpace.getOutgoing(incoming, 1) == node ) {
             continue;
-        } // if
-        Handle listLink = atomSpace.getOutgoing( incoming[i], 1 );
-        Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
-        if ( atomSpace.getType( sentenceNode ) != SENTENCE_NODE ) {
+        } 
+
+        Handle listLink = atomSpace.getOutgoing(incoming, 1);
+        Handle sentenceNode = atomSpace.getOutgoing(listLink, 0);
+        if ( atomSpace.getType(sentenceNode) != SENTENCE_NODE ) {
             continue;
-        } // if
-        // "to:agentId: sentencetexthere"
+        }
+
+        // "to:agentId: sentencetext"
         std::string nodeName = atomSpace.getName( sentenceNode );
         static const boost::regex pattern( "^to:[^:]+:\\s.+$");
         if ( !boost::regex_match( nodeName, pattern ) ) {
             logger().error( "LanguageComprehension::%s - Invalid sentence node '%s'. "
                             "Should be in format 'to:agentId: sentencetext'",
-                            __FUNCTION__, nodeName.c_str( ) );
-        } // if
-        heardSentences.push_back( incoming[i] );
-    } // for
+                            __FUNCTION__, nodeName.c_str() );
+        }
+
+        heardSentences.push_back(incoming);
+    } // foreach
     
     return heardSentences;
 }
@@ -560,476 +503,201 @@ std::string LanguageComprehension::getTextFromSentencePredicate( Handle evalLink
     return text;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// Functions related to DialogController
-
-void LanguageComprehension::addDialogController( DialogController* dialogController )
+void LanguageComprehension::answerQuestion()
 {
-    if ( dialogController == NULL ) {
-        return;
-    } // if
-    std::list<DialogController*>::const_iterator it;
-    for( it = this->dialogControllers.begin( ); it != this->dialogControllers.end( ); ++it ) {
-        if ( (*it)->getName( ) == dialogController->getName( ) ) {
-            return;
-        } // if
-    } // for
-
-    logger().debug("LanguageComprehension::%s - New Dialog Controller registered: %s",
-                   __FUNCTION__, dialogController->getName( ).c_str( ) );
+#ifdef HAVE_GUILE
+    // -------------------------------------------------------------------------
+    // Step 0: preparation
     
-    this->dialogControllers.push_back( dialogController );
-}
-
-void LanguageComprehension::updateDialogControllers( long elapsedTime )
-{
-    AtomSpace& atomSpace = agent.getAtomSpace( );
-    Handle agentHandle = 
-        AtomSpaceUtil::getAgentHandle( atomSpace, agent.getPetId( ) );
-
-    bool hasSomethingToSay = AtomSpaceUtil::isPredicateTrue( atomSpace,
-        "has_something_to_say", agentHandle );
-    
-    if ( hasSomethingToSay ) {
-        // there is already something to be said, so ignore this call
-        return;
-    } // if
-
     init();
 
-    std::list<DialogController* >::iterator it;
+    AtomSpace & atomSpace = this->agent.getAtomSpace(); 
+    Handle agentHandle = AtomSpaceUtil::getAgentHandle( atomSpace, agent.getPetId() );
+
+    std::string answer = ""; 
+
+    // Do not process a second sentence if there's already one to be said
+    if ( AtomSpaceUtil::isPredicateTrue( atomSpace, "has_something_to_say", agentHandle ) ) {
+        logger().debug( "LanguageComprehension::%s - There is already something to say. "
+                        "So this call will be ignoring.",
+                        __FUNCTION__
+                      );
+        return; 
+    } 
+
+    HandleSeq heardSentences = this->getHeardSentencePredicates();
+    
+    if ( heardSentences.size() == 0 ) {
+        logger().debug( "LanguageComprehension::%s - There is no cached heard sentence. ",
+                        __FUNCTION__ 
+                      );
+        return; 
+    } 
+
+    foreach (Handle hEvalSentence, heardSentences) {
+        logger().debug("LanguageComprehension::%s - Cached heard sentence: %s", 
+                       __FUNCTION__, 
+                       atomSpace.atomAsString(hEvalSentence).c_str()
+                      ); 
+    }
+
+    Handle listLink = atomSpace.getOutgoing( heardSentences.front(), 1 );
+    Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
+
+    // If latest heard sentence is not a question, do not process any more. 
+    bool bIsQuestion = AtomSpaceUtil::isPredicateTrue( atomSpace, "is_question", sentenceNode ); 
+    bool bWasAnswered = AtomSpaceUtil::isPredicateTrue( atomSpace, "was_answered", sentenceNode ); 
+
+    if ( !bIsQuestion || bWasAnswered ) {
+        logger().debug( "LanguageComprehension::%s - Heard sentence isn't a question or was already answered. "
+                        "is_question: %s, was_answered: %s, sentence: %s",
+                        __FUNCTION__, 
+                        bIsQuestion? "True": "False", 
+                        bWasAnswered? "True": "False", 
+                        atomSpace.atomAsString(sentenceNode).c_str()
+                      );
+        return; 
+    }
+
+    std::string heardSentence = this->getTextFromSentencePredicate( heardSentences.front() );
+
+    // --------------------------------------------------------------------------
+    // Step 1: get frames representing answers by pattern matching
+
+    // Launch a pattern matching process to find the answer in atomspace.
+    // The question type is returned and answer frames are written into atomspace. 
+    //
+    // Answer frames are stored as 
+    //   EvaluationLink
+    //       PredicateNode "latestAnswerFrames"
+    //       ListLink
+    //           Frame1
+    //           Frame 2
+    //           ...
+    //
+    std::string question_type = SchemeEval::instance().eval( "(answer-question)");    
+    logger().debug( "LanguageComprehension::%s - (answer-question) question type: %s",
+                    __FUNCTION__,
+                    question_type.c_str()
+                  );
+    if ( SchemeEval::instance().eval_error() ) {
+        logger().error( "LanguageComprehension::%s - An error occurred while trying to answer the question: %s",
+                        __FUNCTION__, 
+                        question_type.c_str()
+                      );
+    } 
+    SchemeEval::instance().clear_pending( );
+
+    // ------------------------------------------------------------------------
+    // Step 2: create sentences based on answer frames via frame2relex and relex2sentence. 
+
+    boost::trim(question_type);
+    std::string answer_sentence = ""; 
+
+    // yes/no question
+    // TODO: generate answers based on the truth value (such as pretty sure, maybe etc.)
+    if ( question_type == "#truth-query" ) {
+        HandleSeq elements = this->getActivePredicateArguments("latestAnswerFrames");
+
+        if ( elements.size() > 0 ) {
+            answer_sentence = "Yes";
+        } 
+        else {
+            HandleSeq link(2);
+            link[0] = atomSpace.getHandle( PREDICATE_NODE, "unknownTerm" );
+            link[1] = Handle::UNDEFINED;
+
+            if ( link[0] != Handle::UNDEFINED ) {
+
+                Type types[] = {PREDICATE_NODE, LIST_LINK };
+                HandleSeq evalLinks;
+                atomSpace.getHandleSet( back_inserter(evalLinks),
+                                        link, &types[0], NULL, 2, EVALUATION_LINK, false );
+
+                // search for unknown terms
+                bool unknownTermFound = false;
+                unsigned int i;
+                for (i = 0; i < evalLinks.size( ); ++i ) {
+                    TruthValuePtr ev_tv = atomSpace.getTV( evalLinks[i] );
+                    if ( ev_tv->isNullTv() || ev_tv->getMean() == 0 ) {
+                        continue;                    
+                    }
+                    atomSpace.setTV( evalLinks[i], TruthValue::FALSE_TV() );
+                    unknownTermFound = true;
+                } // for
+                
+                if ( unknownTermFound ) {
+                    answer_sentence = "Could you be more specific, please?";
+                } 
+                else {
+                    answer_sentence = "No";
+                } 
+            }
+            else {
+                answer_sentence = "No";
+            } // if ( link[0] != Handle::UNDEFINED )
+
+        } // if ( elements.size() > 0 )
+    }
+    // other types of question, call nlgen using relations
+    else {
+        answer_sentence = this->resolveFrames2Sentence();
+    } // if ( question_type == "#truth-query" )
+
+    logger().debug("LanguageComprehension::%s - question: '%s' answer: '%s'",
+                   __FUNCTION__,
+                   heardSentence.c_str(),   // original question
+                   answer_sentence.c_str()  // answer
+                  );
+
+    // -------------------------------------------------------------------------
+    // Step 3: choose the sentence that best answers the question and do clean up work.  
+    //         (PsiActionSelectionAgent::executeAction will generate 'say' actions later)
 
     HandleSeq sentences; 
     sentences.push_back( atomSpace.addNode( ANCHOR_NODE, "# Possible Sentences" ) );
-    for( it = this->dialogControllers.begin( ); it != this->dialogControllers.end( ); ++it ) {
-        DialogController::Result candidate = 
-            (*it)->processSentence( elapsedTime );
-
-        // get only valid answers
-        if ( candidate.status && candidate.sentence.length( ) > 0 ) {
-            sentences.push_back( atomSpace.addNode( SENTENCE_NODE, candidate.sentence ) );
-        } // if
-        
-    } // for
-
+    sentences.push_back( atomSpace.addNode( SENTENCE_NODE, answer_sentence) ); 
     atomSpace.addLink( LIST_LINK, sentences, SimpleTruthValue( 1, 1 ) );
 
-    bool hasQuestionToAnswer = false;    
-    { // check if there is a question to be answered
-        HandleSeq heardSentences = getHeardSentencePredicates( );
-        
-        if ( heardSentences.size( ) > 0 ) {
-            Handle listLink = atomSpace.getOutgoing( heardSentences.back( ), 1 );
-            Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
-            
-            hasQuestionToAnswer |= (AtomSpaceUtil::isPredicateTrue( 
-                atomSpace, "is_question", sentenceNode ) &&
-                                    !AtomSpaceUtil::isPredicateTrue( 
-                atomSpace, "was_answered", sentenceNode ));
-        } // if
-    }
-
-    std::string finalSentence;
-
-#ifdef HAVE_GUILE
-    std::string answer = SchemeEval::instance().eval( "(choose-sentence)");
-    logger().debug( "QuestionAnsweringDialogController::%s - (choose-sentence) answer: %s", __FUNCTION__, answer.c_str() );
+    answer = SchemeEval::instance().eval( "(choose-sentence)");
+    logger().debug( "LanguageComprehension::%s - (choose-sentence) answer: %s",
+                    __FUNCTION__, 
+                    answer.c_str()
+                  );
     if ( SchemeEval::instance().eval_error() ) {
-        logger().error( "QuestionAnsweringDialogController::%s - An error occurred while trying to choose a sentence: %s",
-                        __FUNCTION__, answer.c_str( ) );
-    } else {
-        boost::trim( answer );
-        if ( answer != "#f" ) {
-            finalSentence  = answer;
-        } // if
-    } // else
+        logger().error( "LanguageComprehension::%s - "
+                        "An error occurred while trying to choose a sentence: %s",
+                        __FUNCTION__,
+                        answer.c_str( ) 
+                      );
+    } 
 
     SchemeEval::instance().clear_pending( );
-#else
-    finalSentence = sentences.size( ) > 0 ? atomSpace.getName( sentences[0] ) : "";
-#endif
 
-    { // now set to false all heard sentences
-      // and set as answered all heard questions
-        HandleSeq heardSentences = getHeardSentencePredicates( );        
-        // set the TV of all heard sentences to false
-        unsigned int i;
-        for( i = 0; i < heardSentences.size( ); ++i ) {
-            atomSpace.setTV( heardSentences[i], SimpleTruthValue( 0, 1) );
+    // now set to false all heard sentences and set as answered all heard questions
+    for( unsigned int i = 0; i < heardSentences.size(); ++i ) {
+        atomSpace.setTV( heardSentences[i], SimpleTruthValue( 0, 1) );
 
-            Handle listLink = atomSpace.getOutgoing( heardSentences[i], 1 );
-            Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
-    
-            if ( AtomSpaceUtil::isPredicateTrue( atomSpace, "is_question", sentenceNode ) ) {
-                AtomSpaceUtil::setPredicateValue( atomSpace,
-                    "was_answered", TruthValue::TRUE_TV( ), sentenceNode );
-            } // if
-        } // for
-    } // end block
+        Handle listLink = atomSpace.getOutgoing( heardSentences[i], 1 );
+        Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
 
-    if ( finalSentence.length( ) == 0 && hasQuestionToAnswer ) {
-        // ok, the agent did not find an answer but still there is a pending
-        // question, so report its ignorance about the matter
-        finalSentence = "I don't know";
-    } // if
-
-    if ( finalSentence.length( ) > 0 ) {
-        agent.getCurrentModeHandler( ).setProperty( "customMessage", finalSentence );
-        // and finally, the agent has something to say
-        AtomSpaceUtil::setPredicateValue( atomSpace, "has_something_to_say", 
-                                          SimpleTruthValue( 1, 1 ), agentHandle );
-    } // if
-}
-
-void LanguageComprehension::loadDialogControllers( void )
-{
-    std::vector<std::string> controllers;
-    boost::split( controllers, config().get("DIALOG_CONTROLLERS"), boost::is_any_of(",;") );
-    unsigned int i;
-    for ( i = 0; i < controllers.size(); ++i ) {
-        boost::trim( controllers[i] );
-        addDialogController( createDialogController( controllers[i] ) );
+        if ( AtomSpaceUtil::isPredicateTrue( atomSpace, "is_question", sentenceNode ) ) {
+            AtomSpaceUtil::setPredicateValue( atomSpace,
+                                              "was_answered",
+                                              TruthValue::TRUE_TV(), 
+                                              sentenceNode 
+                                            );
+        } 
     } // for
-}
 
+    AtomSpaceUtil::setPredicateValue( atomSpace,
+                                      "has_unanswered_question",
+                                      TruthValue::FALSE_TV() 
+                                    );
 
-// Controllers classes
-
-
-/**
- * This DC implementation will look for unanswered questions
- * and execute the internal question answering mechanism
- * to try to answer it
- */
-class QuestionAnsweringDialogController : public LanguageComprehension::DialogController 
-{
-public:
-    QuestionAnsweringDialogController( LanguageComprehension* langComp ) :
-        LanguageComprehension::DialogController::DialogController( "QuestionAnswering", langComp ) 
-    { }
-
-    virtual ~QuestionAnsweringDialogController( void ) 
-    { }
-
-    virtual LanguageComprehension::DialogController::Result processSentence( long elapsedTime )
-    {
-#ifdef HAVE_GUILE
-
-        LanguageComprehension::DialogController::Result result;
-        result.questionAnswering = true;
-
-        if ( AtomSpaceUtil::isPredicateTrue( agent->getAtomSpace( ), 
-            "has_something_to_say", this->agentHandle ) ) {
-            // do not process a second sentence if there
-            // already one to be said
-            logger().debug( "QuestionAnsweringDialogController::%s - There is already something to say. "
-                            "So this call will be ignoring.",
-                            __FUNCTION__ );
-            return result;
-        } // if
-
-        HandleSeq heardSentences = this->langComp->getHeardSentencePredicates( );
-        
-        if ( heardSentences.size( ) == 0 ) {
-            logger().debug( "QuestionAnsweringDialogController::%s - There is no cached heard sentence. ",
-                            __FUNCTION__ );
-            return result;
-        } // if
-        
-        Handle listLink = agent->getAtomSpace( ).getOutgoing( heardSentences.back( ), 1 );
-        Handle sentenceNode = agent->getAtomSpace( ).getOutgoing( listLink, 0 );
-
-        if ( !AtomSpaceUtil::isPredicateTrue( agent->getAtomSpace( ),
-                 "is_question", sentenceNode ) ||
-             AtomSpaceUtil::isPredicateTrue( 
-                agent->getAtomSpace( ), "was_answered", sentenceNode ) ) {
-            // latest heard sentence is not a question
-            logger().debug( "QuestionAnsweringDialogController::%s - Heard sentence isn't a question or was already answered.",
-                            __FUNCTION__ );
-            return result;
-        } // if
-
-        result.heardSentence = 
-            this->langComp->getTextFromSentencePredicate( heardSentences.back( ) );
-        
-        std::string question_type = SchemeEval::instance().eval( "(answer-question)");    
-        logger().debug( "QuestionAnsweringDialogController::%s - (answer-question) question type: %s",
-                        __FUNCTION__,
-                        question_type.c_str()
-                      );
-        if ( SchemeEval::instance().eval_error() ) {
-            logger().error( "QuestionAnsweringDialogController::%s - An error occurred while trying to resolve reference: %s",
-                            __FUNCTION__, question_type.c_str( ) );
-        } // if
-        SchemeEval::instance().clear_pending( );
-
-        boost::trim(question_type);
-
-        // yes/no question
-        // TODO: generate answers based on the truth value (such as pretty sure, maybe etc.)
-        if ( question_type == "#truth-query" ) {
-            HandleSeq elements = this->langComp->getActivePredicateArguments( 
-                "latestAnswerFrames" );
-
-            if ( elements.size() > 0 ) {
-                result.sentence = "Yes";
-            } 
-            else {
-                opencog::AtomSpace& as = agent->getAtomSpace( );
-
-                HandleSeq link(2);
-                link[0] = as.getHandle( PREDICATE_NODE, "unknownTerm" );
-                link[1] = Handle::UNDEFINED;
-
-                if ( link[0] != Handle::UNDEFINED ) {
-
-                    Type types[] = {PREDICATE_NODE, LIST_LINK };
-                    HandleSeq evalLinks;
-                    as.getHandleSet( back_inserter(evalLinks),
-                                     link, &types[0], NULL, 2, EVALUATION_LINK, false );
-
-                    // search for unknown terms
-                    bool unknownTermFound = false;
-                    unsigned int i;
-                    for (i = 0; i < evalLinks.size( ); ++i ) {
-                        TruthValuePtr ev_tv = as.getTV( evalLinks[i] );
-                        if ( ev_tv->isNullTv() || ev_tv->getMean() == 0 ) {
-                            continue;                    
-                        } // if
-                        as.setTV( evalLinks[i], TruthValue::FALSE_TV() );
-                        unknownTermFound = true;
-                    } // for
-                    
-                    if ( unknownTermFound ) {
-                        result.sentence = "Could you be more specific, please?";
-                    } 
-                    else {
-                        result.sentence = "No";
-                    } 
-                }
-                else {
-                    result.sentence = "No";
-                } // else
-
-            } // else
-
-            result.status = result.sentence.length() > 0;
-        }
-        // other types of question
-        else {
-            // call nlgen using relations
-            result.status = true;
-            result.sentence = langComp->resolveFrames2Sentence();
-        } // else
-
-        logger().debug("QuestionAnsweringDialogController::%s - (%s) Sent[%s] Received[%s]",
-                       __FUNCTION__,
-                       getName().c_str(),            // name of dialog controller
-                       result.heardSentence.c_str(), // original question
-                       result.sentence.c_str()       // answer
-                      );
-
-        return result;
 #endif
-    }
-};
-
-/**
- * This DC is a generic network DC. It will use the given host/port to try to
- * retrieve a sentence in a server outside the application. Basically, at each
- * update, this DC will send a sentence and receive another as the answer of
- * the first.
- */
-class NetworkDialogController : public LanguageComprehension::DialogController 
-{
-public:
-    NetworkDialogController( const std::string& name, LanguageComprehension* langComp, 
-                             const std::string& host, const std::string& port ) :
-        LanguageComprehension::DialogController::DialogController( name, langComp )
-    {        
-        try {
-            logger().debug("NetworkDialogController::%s - opening socket connection",__FUNCTION__);
-
-            boost::asio::ip::tcp::resolver resolver(service);
-            boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4( ), host, port);
-            this->iterator = resolver.resolve(query);
-        } catch( const std::exception& e){
-            logger().error("NetworkDialogController::%s - Failed to open socket. Exception Message: %s",__FUNCTION__,e.what());
-            
-        } // catch
-        
-    }
-
-    virtual ~NetworkDialogController( void ) 
-    {
-    }
-
-    virtual LanguageComprehension::DialogController::Result processSentence( long elapsedTime )
-    {
-        LanguageComprehension::DialogController::Result result;
-        try {
-            boost::asio::ip::tcp::resolver::iterator end;
-            if ( iterator == end ) {
-                logger().error("NetworkDialogController::%s - (%s) Invalid iterator. "
-                               "Socket cannot be opened.",
-                               __FUNCTION__, getName( ).c_str( ));
-                return result;
-            } // if
-
-            HandleSeq heardSentences = this->langComp->getHeardSentencePredicates( );
-            
-            if ( heardSentences.size( ) == 0 ) {
-                logger().error("NetworkDialogController::%s - (%s) There is no heard sentence available. ",
-                               __FUNCTION__, getName( ).c_str( ) );
-                return result;
-            } // if
-
-            result.heardSentence = 
-                this->langComp->getTextFromSentencePredicate( heardSentences.back( ) );
-
-            boost::asio::ip::tcp::socket socket(this->service);
-            socket.connect( *this->iterator );
-
-            logger().debug("NetworkDialogController::%s - (%s) socket connection opened with success",
-                __FUNCTION__, getName( ).c_str( ));
-
-            {
-                std::stringstream sentence;
-                sentence << result.heardSentence;
-                sentence << std::endl;
-                socket.send(boost::asio::buffer(sentence.str().c_str(), sentence.str().length( ) ) );
-            }
-
-            std::stringstream message;
-            do {
-                char buffer[1024] = { '\0' };
-                socket.receive( boost::asio::buffer(buffer, 1024) );
-                message << buffer;
-            } while( socket.available( ) > 0 );
-            
-            socket.close( );
-
-            logger().debug("NetworkDialogController::%s - (%s) socket connection closed with success",
-                               __FUNCTION__, getName( ).c_str( ));
-
-            std::string sentence = message.str( );
-            boost::trim(sentence);
-
-            result.sentence = sentence;
-            result.status = sentence.length( ) > 0;
-
-            logger().debug("NetworkDialogController::%s - (%s) Sent[%s] Received[%s]",
-                               __FUNCTION__, getName( ).c_str( ), result.heardSentence.c_str( ), result.sentence.c_str( ));
-
-            return result;
-        } catch( const std::exception& e){
-            logger().error("NetworkDialogController::%s - (%s) Failed to open socket. Exception Message: %s",
-                           __FUNCTION__, getName( ).c_str( ),e.what());
-            return result;
-        } // catch
-    }
-
-private:
-    boost::asio::io_service service;    
-    boost::asio::ip::tcp::resolver::iterator iterator;
-};
-
-
-/**
- * A Network Question Answerer DC will look for unanswered questions into the
- * AtomSpace and will use the host service to try to retrieve an answer for
- * a given question.
- */
-class NetworkQuestionAnswererDialogController : public NetworkDialogController
-{
-
-public:
-    NetworkQuestionAnswererDialogController( const std::string& name, LanguageComprehension* langComp, 
-                                             const std::string& host, const std::string& port ) :
-        NetworkDialogController::NetworkDialogController( name, langComp, host, port )
-    {
-        
-    }
-    
-    virtual LanguageComprehension::DialogController::Result processSentence( long elapsedTime )
-    {
-
-        LanguageComprehension::DialogController::Result result;
-        result.questionAnswering = true;
-        
-        if ( AtomSpaceUtil::isPredicateTrue( agent->getAtomSpace( ), 
-            "has_something_to_say", this->agentHandle ) ) {
-            // do not process a second sentence if there
-            // already one to be said
-            return result;
-        } // if
-
-        HandleSeq heardSentences = this->langComp->getHeardSentencePredicates( );
-        
-        if ( heardSentences.size( ) == 0 ) {
-            return result;
-        } // if
-        Handle listLink = agent->getAtomSpace( ).getOutgoing( heardSentences.back( ), 1 );
-        Handle sentenceNode = agent->getAtomSpace( ).getOutgoing( listLink, 0 );
-
-        if ( !AtomSpaceUtil::isPredicateTrue( agent->getAtomSpace( ),
-                 "is_question", sentenceNode ) ||
-             AtomSpaceUtil::isPredicateTrue( 
-                agent->getAtomSpace( ), "was_answered", sentenceNode )) {
-            // latest heard sentence is not a question
-            return result;
-        } // if
-
-        result.heardSentence = 
-            this->langComp->getTextFromSentencePredicate( heardSentences.back( ) );
-
-        // define a new sentence to be sent to the remote chat bot
-        LanguageComprehension::DialogController::Result innerResult;
-        innerResult = NetworkDialogController::processSentence( elapsedTime );
-
-        if ( innerResult.status && innerResult.heardSentence == result.heardSentence ) {
-            result.status = true;
-            result.sentence = innerResult.sentence;
-        } // if
-
-        return result;
-    }
-    
-};
-
-
-/**
- * Dialog Controller Factory Method. If you have created a new DC and want to 
- * use it in the DC chain, you can define some configuration parameters in:
- * opencog/embodiment/Control/EmbodimentConfig.h and add some custom values for
- * that arguments in the .conf file.
- */
-LanguageComprehension::DialogController* 
-LanguageComprehension::createDialogController( const std::string& name )
-{
-    if ( name == "QuestionAnswering" ) {
-        return new QuestionAnsweringDialogController( this );
-
-    } else if ( name == "MegaHal" ) {
-        std::string host = opencog::config().get( "MEGAHAL_SERVER_HOST" );
-        std::string port = opencog::config().get( "MEGAHAL_SERVER_PORT" );
-        return new NetworkQuestionAnswererDialogController( "MegaHalQuestionAnswering", this, host, port );
-
-    } else if ( name == "AliceBot" ) {
-        std::string host = opencog::config().get( "ALICEBOT_SERVER_HOST" );
-        std::string port = opencog::config().get( "ALICEBOT_SERVER_PORT" );
-        return new NetworkQuestionAnswererDialogController( "AliceBotQuestionAnswering", this, host, port );
-
-    } else if ( name == "Ramona" ) {
-        std::string host = opencog::config().get( "RAMONA_SERVER_HOST" );
-        std::string port = opencog::config().get( "RAMONA_SERVER_PORT" );
-        return new NetworkQuestionAnswererDialogController( "RamonaQuestionAnswering", this, host, port );
-
-    } else {
-        return NULL;
-    } // else
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -1206,7 +874,6 @@ void LanguageComprehension::createFrameInstancesFromRelations(
     } // for
 }
 
-
 void LanguageComprehension::loadFrames(void)
 {
     opencog::AtomSpace& atomSpace = agent.getAtomSpace();
@@ -1307,4 +974,176 @@ void LanguageComprehension::loadFrames(void)
 
     } // end block
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Controllers classes
+//
+// Note: Since openpsi will take over dialogue control, all these controllers are
+//       not necessary. However, many methods of these controllers are still useful. 
+//       Move these useful methods to LanguageComprehension class gradually and use
+//       LanguageComprehension directly. 
+// 
+
+///**
+// * This DC is a generic network DC. It will use the given host/port to try to
+// * retrieve a sentence in a server outside the application. Basically, at each
+// * update, this DC will send a sentence and receive another as the answer of
+// * the first.
+// */
+//class NetworkDialogController : public DialogController 
+//{
+//public:
+//    NetworkDialogController( const std::string& name, LanguageComprehension* langComp, 
+//                             const std::string& host, const std::string& port ) :
+//                             DialogController::DialogController( name, langComp )
+//    {        
+//        try {
+//            logger().debug("NetworkDialogController::%s - opening socket connection",__FUNCTION__);
+//
+//            boost::asio::ip::tcp::resolver resolver(service);
+//            boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4( ), host, port);
+//            this->iterator = resolver.resolve(query);
+//        } catch( const std::exception& e){
+//            logger().error("NetworkDialogController::%s - Failed to open socket. Exception Message: %s",__FUNCTION__,e.what());
+//            
+//        } // catch
+//        
+//    }
+//
+//    virtual ~NetworkDialogController( void ) 
+//    {
+//    }
+//
+//    virtual DialogController::Result processSentence( long elapsedTime )
+//    {
+//        DialogController::Result result;
+//        try {
+//            boost::asio::ip::tcp::resolver::iterator end;
+//            if ( iterator == end ) {
+//                logger().error("NetworkDialogController::%s - (%s) Invalid iterator. "
+//                               "Socket cannot be opened.",
+//                               __FUNCTION__, getName( ).c_str( ));
+//                return result;
+//            } // if
+//
+//            HandleSeq heardSentences = this->langComp->getHeardSentencePredicates( );
+//            
+//            if ( heardSentences.size( ) == 0 ) {
+//                logger().error("NetworkDialogController::%s - (%s) There is no heard sentence available. ",
+//                               __FUNCTION__, getName( ).c_str( ) );
+//                return result;
+//            } // if
+//
+//            result.heardSentence = 
+//                this->langComp->getTextFromSentencePredicate( heardSentences.back( ) );
+//
+//            boost::asio::ip::tcp::socket socket(this->service);
+//            socket.connect( *this->iterator );
+//
+//            logger().debug("NetworkDialogController::%s - (%s) socket connection opened with success",
+//                __FUNCTION__, getName( ).c_str( ));
+//
+//            {
+//                std::stringstream sentence;
+//                sentence << result.heardSentence;
+//                sentence << std::endl;
+//                socket.send(boost::asio::buffer(sentence.str().c_str(), sentence.str().length( ) ) );
+//            }
+//
+//            std::stringstream message;
+//            do {
+//                char buffer[1024] = { '\0' };
+//                socket.receive( boost::asio::buffer(buffer, 1024) );
+//                message << buffer;
+//            } while( socket.available( ) > 0 );
+//            
+//            socket.close( );
+//
+//            logger().debug("NetworkDialogController::%s - (%s) socket connection closed with success",
+//                               __FUNCTION__, getName( ).c_str( ));
+//
+//            std::string sentence = message.str( );
+//            boost::trim(sentence);
+//
+//            result.sentence = sentence;
+//            result.status = sentence.length( ) > 0;
+//
+//            logger().debug("NetworkDialogController::%s - (%s) Sent[%s] Received[%s]",
+//                               __FUNCTION__, getName( ).c_str( ), result.heardSentence.c_str( ), result.sentence.c_str( ));
+//
+//            return result;
+//        } catch( const std::exception& e){
+//            logger().error("NetworkDialogController::%s - (%s) Failed to open socket. Exception Message: %s",
+//                           __FUNCTION__, getName( ).c_str( ),e.what());
+//            return result;
+//        } // catch
+//    }
+//
+//private:
+//    boost::asio::io_service service;    
+//    boost::asio::ip::tcp::resolver::iterator iterator;
+//};
+//
+//
+///**
+// * A Network Question Answerer DC will look for unanswered questions into the
+// * AtomSpace and will use the host service to try to retrieve an answer for
+// * a given question.
+// */
+//class NetworkQuestionAnswererDialogController : public NetworkDialogController
+//{
+//
+//public:
+//    NetworkQuestionAnswererDialogController( const std::string& name, LanguageComprehension* langComp, 
+//                                             const std::string& host, const std::string& port ) :
+//        NetworkDialogController::NetworkDialogController( name, langComp, host, port )
+//    {
+//        
+//    }
+//    
+//    virtual DialogController::Result processSentence( long elapsedTime )
+//    {
+//        DialogController::Result result;
+//        result.questionAnswering = true;
+//        
+//        if ( AtomSpaceUtil::isPredicateTrue( agent->getAtomSpace( ), 
+//            "has_something_to_say", this->agentHandle ) ) {
+//            // do not process a second sentence if there
+//            // already one to be said
+//            return result;
+//        } // if
+//
+//        HandleSeq heardSentences = this->langComp->getHeardSentencePredicates( );
+//        
+//        if ( heardSentences.size( ) == 0 ) {
+//            return result;
+//        } // if
+//        Handle listLink = agent->getAtomSpace( ).getOutgoing( heardSentences.back( ), 1 );
+//        Handle sentenceNode = agent->getAtomSpace( ).getOutgoing( listLink, 0 );
+//
+//        if ( !AtomSpaceUtil::isPredicateTrue( agent->getAtomSpace( ),
+//                 "is_question", sentenceNode ) ||
+//             AtomSpaceUtil::isPredicateTrue( 
+//                agent->getAtomSpace( ), "was_answered", sentenceNode )) {
+//            // latest heard sentence is not a question
+//            return result;
+//        } // if
+//
+//        result.heardSentence = 
+//            this->langComp->getTextFromSentencePredicate( heardSentences.back( ) );
+//
+//        // define a new sentence to be sent to the remote chat bot
+//        DialogController::Result innerResult;
+//        innerResult = NetworkDialogController::processSentence( elapsedTime );
+//
+//        if ( innerResult.status && innerResult.heardSentence == result.heardSentence ) {
+//            result.status = true;
+//            result.sentence = innerResult.sentence;
+//        } // if
+//
+//        return result;
+//    }
+//    
+//};
 
