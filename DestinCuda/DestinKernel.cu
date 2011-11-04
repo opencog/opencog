@@ -216,7 +216,6 @@ void DestinKernel::WriteData( stringstream& xml )
     cudaMemcpy(mWinningCentroids, dWinningCentroids, sizeOfNodes*sizeof(int), cudaMemcpyDeviceToHost);
     cudaMemcpy(mBeliefs, dBeliefs, sizeOfNodeData * sizeof(float), cudaMemcpyDeviceToHost);
 
-    /*
     xml << "<layer id=\"" << mID << "\">" << endl;
     for(int r=0;r<mRows;r++)
     {
@@ -240,7 +239,6 @@ void DestinKernel::WriteData( stringstream& xml )
         }
     }
     xml << "</layer>" << endl;
-     */ 
 }
 // ***********************
 // DeSTIN inside CUDA Part
