@@ -1232,7 +1232,10 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
         Handle object3 )
 {
     HandleSeq listLink;
-    listLink.push_back( object1 );
+
+    if ( object1 != Handle::UNDEFINED ) {
+        listLink.push_back( object1 ); 
+    }
     if ( object2 != Handle::UNDEFINED ) {
         listLink.push_back( object2 );
     }
@@ -1240,19 +1243,27 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
         listLink.push_back( object3 );
     }
 
-    Handle listLinkHandle = AtomSpaceUtil::addLink(atomSpace,
-                            LIST_LINK,
-                            listLink);
+    Handle listLinkHandle = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, listLink);
+
     Handle predicateHandle = AtomSpaceUtil::addNode(atomSpace,
-                             PREDICATE_NODE,
-                             predicateName, true);
+                                                    PREDICATE_NODE,
+                                                    predicateName, 
+                                                    true
+                                                   );
     HandleSeq evalLink;
-    evalLink.push_back( predicateHandle );
-    evalLink.push_back( listLinkHandle );
+
+    evalLink.push_back(predicateHandle);
+
+    if ( !listLink.empty() )
+        evalLink.push_back(listLinkHandle);
+
     Handle evalLinkHandle = AtomSpaceUtil::addLink(atomSpace,
-                            EVALUATION_LINK,
-                            evalLink, true);
-    atomSpace.setTV( evalLinkHandle, tv );
+                                                   EVALUATION_LINK,
+                                                   evalLink,
+                                                   true
+                                                  );
+    atomSpace.setTV(evalLinkHandle, tv);
+
     return evalLinkHandle;
 }
 

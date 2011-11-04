@@ -252,7 +252,7 @@ public:
      * EvaluationLink
      *    pred:PredicateNode
      *    ListLink
-     *       object1
+     *       object1 (optional)
      *       object2 (optional)
      *       object3 (optional)
      * </code>
@@ -272,7 +272,7 @@ public:
     static Handle setPredicateValue( AtomSpace& atomSpace,
                                      std::string predicateName,
                                      const TruthValue &tv,
-                                     Handle object1,
+                                     Handle object1 = Handle::UNDEFINED,
                                      Handle object2 = Handle::UNDEFINED,
                                      Handle object3 = Handle::UNDEFINED );
 
