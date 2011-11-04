@@ -25,21 +25,38 @@ if(CUDA_FOUND)
        		 FIND_LIBRARY(lib_curand curand "/usr/local/cuda/lib64" )
 	endif()
 	#Make solution
-	CUDA_ADD_LIBRARY(cudadestin SHARED DestinCuda.cu DestinData.cu AdviceData.cu DestinKernel.cu)
+	set(cudadest_source DestinCuda.cu DestinData.cu AdviceData.cu DestinKernel.cu )
+
+
+ 	FIND_LIBRARY(lib_highgui highgui )
+
+	if(lib_highgui)
+		set(cudadest_source ${cudadest_source} VideoSource)
+	else()
+		message("OpenCV highgui lib not found, not building video input capabilities or java wrappers.")
+		set(lib_highgui "") #set it to nothing so it wont complain about it being set to NOTFOUND
+	endif(lib_highgui)	
+
+	CUDA_ADD_LIBRARY(cudadestin SHARED ${cudadest_source} ) 
 	CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu)
 	
+	ADD_EXECUTABLE(testvideo TestVideo VideoSource)
+ 	target_link_libraries(testvideo ${lib_highgui} )
+
 	TARGET_LINK_LIBRARIES( destinCuda
 	    pugixml
             ${lib_curand}
 	    cudadestin
+	    ${lib_highgui}
 	)
+
         if(WIN32)
-        link_directories( $ENV{CUDA_LIB_PATH} )
+        	link_directories( $ENV{CUDA_LIB_PATH} )
         endif()
 
 	#This section creates java JNI bindings using SWIG 2.0
 	FIND_PACKAGE (SWIG 2.0.4)
-	if(SWIG_FOUND)
+	if(SWIG_FOUND AND lib_highgui)
 		INCLUDE(UseSWIG)
 
 		FIND_PACKAGE(JNI)
@@ -49,13 +66,13 @@ if(CUDA_FOUND)
 			SET_SOURCE_FILES_PROPERTIES(DestinKernel.i PROPERTIES SWIG_FLAGS "-package;javadestin"  )
 			SET(CMAKE_SWIG_OUTDIR ./JavaDestin/gen_src/javadestin )			
 			SWIG_ADD_MODULE(destinjava java  DestinKernel.i )	
-			SWIG_LINK_LIBRARIES(destinjava cudadestin pugixml ${lib_curand}  )
+			SWIG_LINK_LIBRARIES(destinjava cudadestin pugixml ${lib_curand}  ${lib_highgui} )
 		else(JNI_FOUND)
-			message("Couldn't find jni. Is a jdk installed?")
+			message("Couldn't find jni. Is a jdk installed? Not building java interfaces.")
 		endif(JNI_FOUND)
-	else(SWIG_FOUND)
-		message("Could not find SWIG > 2.0. Not building java interfaces")
-	endif(SWIG_FOUND)		
+	else()
+		message("Could not find either SWIG > 2.0 or libhighgui. Not building java interfaces.")
+	endif()		
 	
 else()
 	MESSAGE("CUDA not found. Not building CUDA DestinPort.")

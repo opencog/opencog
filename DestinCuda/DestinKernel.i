@@ -4,6 +4,9 @@
 #include "LayerFinishedCallback.h"
 #include "DestinKernel.h"
 #include "DestinCuda.h"
+#include "opencv/cv.h"
+#include "opencv/highgui.h"
+#include "VideoSource.h"
 %}
 
 /* 
@@ -20,10 +23,7 @@ See https://swig.svn.sourceforge.net/svnroot/swig/trunk/Examples/java/callback/
 
 %feature("director") LayerFinishedCallback;
 
-
+%include "VideoSource.h"
 %include "LayerFinishedCallback.h"
 %include "DestinKernel.h"
-
-/* %include "StringArrayToCharPP.i" 
-*/
 %include "DestinCuda.h"
