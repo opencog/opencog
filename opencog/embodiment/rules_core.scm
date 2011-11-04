@@ -445,7 +445,7 @@
 ;
 
 (define (add_precondition pred_or_gpn_handle . arguments)
-    (add_goal pred_or_gpn_handle . arguments) 
+    (apply add_goal pred_or_gpn_handle arguments)     
 )
 
 ; NULL_PRECONDITION is a dummy Precondition that is always satisfied!
