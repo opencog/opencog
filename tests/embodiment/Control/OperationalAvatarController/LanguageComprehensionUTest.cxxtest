@@ -710,7 +710,7 @@ public:
 
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 0 );
+        this->language->answerQuestion(); 
 
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
@@ -726,7 +726,7 @@ public:
 
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 1 );
+        this->language->answerQuestion(); 
 
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
@@ -740,7 +740,7 @@ public:
 
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 2 );
+        this->language->answerQuestion(); 
 
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
@@ -754,7 +754,7 @@ public:
 
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 3 );
+        this->language->answerQuestion(); 
 
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
@@ -768,7 +768,7 @@ public:
 
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 4 );
+        this->language->answerQuestion(); 
 
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
@@ -782,11 +782,11 @@ public:
 
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 5 );
+        this->language->answerQuestion(); 
 
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 6 );
+        this->language->answerQuestion(); 
         TS_ASSERT( !AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
         logger().debug("Question 11 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());

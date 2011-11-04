@@ -35,6 +35,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 
+class LanguageComprehensionUTest; 
+
 using opencog::control::AvatarInterface;
 
 namespace opencog { namespace oac {
@@ -45,6 +47,8 @@ namespace opencog { namespace oac {
  */
 class LanguageComprehension 
 {
+    friend class::LanguageComprehensionUTest; 
+
 public: 
 
     LanguageComprehension(AvatarInterface & agent);
