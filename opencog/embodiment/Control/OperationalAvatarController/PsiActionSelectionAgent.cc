@@ -2,7 +2,7 @@
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.cc
  *
  * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-06-09
+ * @date 2011-11-03
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -25,6 +25,7 @@
 
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace opencog::oac;
 
@@ -69,10 +70,9 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
 
 void PsiActionSelectionAgent::initDemandGoalList(AtomSpace & atomSpace)
 {
-    logger().debug(
-            "PsiActionSelectionAgent::%s - Initializing the list of Demand Goals (Final Goals) [ cycle =%d ]",
-                    __FUNCTION__, 
-                    this->cycleCount
+    logger().debug("PsiActionSelectionAgent::%s - "
+                   "Initializing the list of Demand Goals (Final Goals) [ cycle =%d ]",
+                    __FUNCTION__, this->cycleCount
                   );
 
     // Clear the old demand goal list
@@ -109,10 +109,10 @@ void PsiActionSelectionAgent::initDemandGoalList(AtomSpace & atomSpace)
     outgoings.push_back( atomSpace.addLink(LIST_LINK, this->psi_demand_goal_list) );  
     Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, outgoings);
 
-    logger().debug("PsiActionSelectionAgent::%s - Add the list of demand goals to AtomSpace: %s [cycle = %d]", 
+    logger().debug("PsiActionSelectionAgent::%s - "
+                   "Add the list of demand goals to AtomSpace: %s [cycle = %d]", 
                    __FUNCTION__, 
-                   atomSpace.atomAsString(referenceLink).c_str(), 
-                   this->cycleCount
+                   atomSpace.atomAsString(referenceLink).c_str(), this->cycleCount
                   ); 
 }
 
@@ -237,6 +237,7 @@ void PsiActionSelectionAgent::printPlan(AtomSpace & atomSpace)
 }
 
 void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace, 
+                                            LanguageComprehension & languageTool, 
                                             Procedure::ProcedureInterpreter & procedureInterpreter, 
                                             const Procedure::ProcedureRepository & procedureRepository, 
                                             Handle hActionExecutionLink)
@@ -256,6 +257,16 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                                  atomSpace.getOutgoing(hActionExecutionLink, 0)
                                               );
 
+    // Get scheme function name if any
+    bool bSchemeFunction = false;   
+    size_t scm_prefix_index = actionName.find("scm:");
+
+    if ( scm_prefix_index != std::string::npos ) {
+        actionName = actionName.substr(scm_prefix_index+4);
+        boost::trim(actionName); 
+        bSchemeFunction = true; 
+    }
+
     // Initialize scheme evaluator
     SchemeEval & evaluator = SchemeEval::instance();    
     std::string scheme_expression, scheme_return_value;
@@ -268,7 +279,7 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
     //     ListLink
     //         SentenceNode ...
     //         ...
-    //
+    // TODO: this is unnecessary, remove it later. 
     if (actionType == SPEECH_ACT_SCHEMA_NODE) {
 #if HAVE_GUILE    
         scheme_expression = "( " + actionName + " )";
@@ -289,6 +300,60 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                         this->cycleCount
                       );
 #endif // HAVE_GUILE    
+    }
+    // If it is a scheme function, call scheme evaluator 
+    else if ( bSchemeFunction ) {
+        // Get arguments for the scheme function
+        scheme_expression = actionName; 
+
+        if ( atomSpace.getArity(hActionExecutionLink) == 2 ) {
+            Handle hListLink = atomSpace.getOutgoing(hActionExecutionLink, 1); // Handle to ListLink containing arguments
+
+            // Process the arguments according to its type
+            foreach( Handle  hArgument, atomSpace.getOutgoing(hListLink) ) {
+                Type argumentType = atomSpace.getType(hArgument);
+                if (argumentType == NUMBER_NODE) {
+                    scheme_expression += " " + atomSpace.getName(hArgument);
+                }
+                else {
+                    scheme_expression += " \"" + atomSpace.getName(hArgument) + "\"";
+                }
+            }// foreach
+        }// if
+
+        // TODO: A better approach is implementing 'answer_question' in 'unity_speech_act_schema.scm'. 
+        //       We implement it here is because many previous c++ are required.
+        if ( actionName == "answer_question" ) {
+            languageTool.resolveLatestSentenceReference(); 
+            languageTool.answerQuestion(); 
+            logger().debug( "PsiActionSelectionAgent::%s - executed function: %s [cycle = %d]", 
+                            __FUNCTION__, 
+                            actionName.c_str(), 
+                            this->cycleCount
+                          );
+        }
+        else {
+#if HAVE_GUILE    
+            scheme_expression = "( " + scheme_expression + " )";
+
+            // Run scheme function
+            scheme_return_value = evaluator.eval(scheme_expression);
+
+            if ( evaluator.eval_error() ) {
+                logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
+                                 __FUNCTION__, 
+                                 scheme_expression.c_str() 
+                              );
+            }
+            else {
+                logger().debug( "PsiActionSelectionAgent::%s - Successfully executed scheme function: %s [cycle = %d]", 
+                                __FUNCTION__, 
+                                scheme_expression.c_str(), 
+                                this->cycleCount
+                              );
+            }
+#endif // HAVE_GUILE    
+        } // if (actionName == "answer_question")
     }
     // If it is a combo function, call ProcedureInterpreter to execute the function
     else  {
@@ -360,7 +425,7 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
         foreach(Handle hSentenceNode, atomSpace.getOutgoing(hUtteranceSentencesList) ) {
             sentenceNodeName = atomSpace.getName(hSentenceNode); 
 
-            // get listerner and content of the sentence
+            // get listener and content of the sentence
             if ( boost::regex_search(sentenceNodeName, what, expListener) && 
                  what.size() == 2 && what[1].matched ) {
                 listerner = what[1]; 
@@ -444,6 +509,9 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
 
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+
+    // Get Language Comprehension Tool
+    LanguageComprehension & languageTool = oac->getPAI().getLanguageTool(); 
 
     // Get ProcedureInterpreter
     Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
@@ -546,7 +614,9 @@ std::cout<<"action status: fail"<<std::endl;
             else {
                 stringstream unexpected_result;
                 unexpected_result << result;
-                logger().warn( "PsiActionSelectionAgent::%s - Action procedure result should be 'built-in' or 'action result'. Got '%s' [SchemaId = %d,  cycle = %d].",
+                logger().warn( "PsiActionSelectionAgent::%s - "
+                               "Action procedure result should be 'built-in' or 'action result'. "
+                               "Got '%s' [SchemaId = %d,  cycle = %d].",
                                __FUNCTION__, 
                                unexpected_result.str().c_str(), 
                                this->currentSchemaId, 
@@ -607,13 +677,15 @@ std::cout<<"action status: timeout"<<std::endl;
         }
         // If the Action is still running and is not time out, simply returns
         else {  
-            logger().debug( "PsiActionSelectionAgent::%s - Current Action is still running. [SchemaId = %d, cycle = %d]", 
+            logger().debug( "PsiActionSelectionAgent::%s - "
+                            "Current Action is still running. [SchemaId = %d, cycle = %d]", 
                             __FUNCTION__,
-                            this->currentSchemaId, 
-                            this->cycleCount
+                            this->currentSchemaId, this->cycleCount
                           );
 
-std::cout<<"current action is still running [SchemaId = "<<this->currentSchemaId<<", cycle = "<<this->cycleCount<<"] ... "<<std::endl; 
+std::cout<<"current action is still running [SchemaId = "
+         <<this->currentSchemaId<<", cycle = "<<this->cycleCount<<"] ... "
+         <<std::endl; 
 
             return; 
         }
@@ -646,12 +718,14 @@ std::cout<<"current action is still running [SchemaId = "<<this->currentSchemaId
 
         // Try to get the plan stored in AtomSpace
         if ( !this->getPlan(atomSpace) ) {
-            logger().warn("PsiActionSelectionAgent::%s - 'do_planning' can not find any suitable plan for the selected demand goal [cycle = %d]", 
+            logger().warn("PsiActionSelectionAgent::%s - "
+                           "'do_planning' can not find any suitable plan for the selected demand goal [cycle = %d]", 
                            __FUNCTION__, 
                            this->cycleCount
                          ); 
 
-std::cout<<"'do_planning' can not find any suitable plan for the selected demand goal [cycle = "<<this->cycleCount<<"]."<<std::endl; 
+std::cout<<"'do_planning' can not find any suitable plan for the selected demand goal [cycle = "
+         <<this->cycleCount<<"]."<<std::endl; 
             return;  
         }
 
@@ -686,16 +760,17 @@ std::cout<<"'do_planning' can not find any suitable plan for the selected demand
         this->current_actions.pop_back(); 
     }
     else {
-        logger().debug("PsiActionSelectionAgent::%s - Failed to get any actions from the planner. Try planning next cycle [cycle = %d]", 
-                        __FUNCTION__, 
-                        this->cycleCount
+        logger().debug("PsiActionSelectionAgent::%s - "
+                       "Failed to get any actions from the planner. Try planning next cycle [cycle = %d]", 
+                        __FUNCTION__, this->cycleCount
                       ); 
         return; 
     }
 
     // Execute current action
-    this->executeAction(atomSpace, procedureInterpreter, procedureRepository, this->current_action);
+    this->executeAction(atomSpace, languageTool, procedureInterpreter, procedureRepository, this->current_action);
     this->timeStartCurrentAction = time(NULL); 
+
 /**
     // TODO: The code snippets below show the idea of how the modulators 
     // (or emotions) have impact on cognitive process, more specifically planning

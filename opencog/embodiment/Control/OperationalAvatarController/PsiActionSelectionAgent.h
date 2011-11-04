@@ -194,6 +194,7 @@ private:
      *         ...
      */
     void executeAction(AtomSpace & atomSpace, 
+                       LanguageComprehension & languageTool,
                        Procedure::ProcedureInterpreter & procedureInterpreter, 
                        const Procedure::ProcedureRepository & procedureRepository, 
                        Handle hActionExecutionLink); 

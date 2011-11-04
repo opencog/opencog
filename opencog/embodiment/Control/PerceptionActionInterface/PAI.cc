@@ -1425,12 +1425,15 @@ void PAI::processInstruction(DOMElement * element)
     sentence += sentenceText;
     //logger().debug("sentence = '%s'\n", sentence.c_str());
 
-    Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE, sentence.c_str());
+    Handle sentenceNode = AtomSpaceUtil::addNode( atomSpace, SENTENCE_NODE, sentence.c_str() );
 
     if ( avatarInterface.getPetId( ) == internalPetId ) {
-        AtomSpaceUtil::setPredicateValue( atomSpace, "heard_sentence",
-            TruthValue::TRUE_TV( ), sentenceNode );
-    } // if
+        AtomSpaceUtil::setPredicateValue( atomSpace, 
+                                          "heard_sentence",
+                                          TruthValue::TRUE_TV(),
+                                          sentenceNode 
+                                        );
+    }
 
     HandleSeq schemaListLinkOutgoing;
     schemaListLinkOutgoing.push_back(agentNode);
@@ -1502,13 +1505,25 @@ void PAI::processInstruction(DOMElement * element)
     arguments.push_back( sentenceText );
 
     if ( std::string(contentType) == "FACT" ) {
-        this->languageTool->handleCommand("updateFact", arguments);
+        this->languageTool->resolveLatestSentenceReference(); 
+        this->languageTool->updateFact(); 
     } 
     else if ( std::string(contentType) == "COMMAND" ) {
-        this->languageTool->handleCommand("evaluateSentence", arguments);
-
+        this->languageTool->resolveLatestSentenceReference();
+        this->languageTool->resolveLatestSentenceCommand(); 
     } 
     else if ( std::string(contentType) == "QUESTION" ) {
+        // Affiliation demand will increase when there's a pending question. 
+        // Once Affiliation demand is selected, a suitable rule (defined in 
+        // 'unity_rules.scm') will be invoked, which will eventually call 
+        // 'answer_question' function. The 'answer_question' is designed to be 
+        // a scheme function, but it is currently handled by c++ code within 
+        // PsiActionSelectionAgent::executeAction. 
+        AtomSpaceUtil::setPredicateValue( atomSpace, 
+                                          "has_unanswered_question", 
+                                          TruthValue::TRUE_TV()
+                                        ); 
+
         AtomSpaceUtil::setPredicateValue( atomSpace, 
                                           "is_question",
                                           TruthValue::TRUE_TV(),
@@ -1520,8 +1535,6 @@ void PAI::processInstruction(DOMElement * element)
                                           TruthValue::FALSE_TV(),
                                           sentenceNode
                                         );
-        
-        this->languageTool->handleCommand("answerQuestion", arguments);
     }
     else if ( std::string(contentType) == "SPECIFIC_COMMAND" ) {
         if ( std::string( targetMode ) == avatarInterface.getCurrentModeHandler( ).getModeName( ) ) {
@@ -1533,7 +1546,8 @@ void PAI::processInstruction(DOMElement * element)
             avatarInterface.getCurrentModeHandler().handleCommand("instruction", arguments);
         } 
         else {
-            logger().debug( "PAI::%s - A specific command of another mode was sent. Ignoring it. Current Mode: %s, Target Mode: %s, Command: %s", 
+            logger().debug( "PAI::%s - A specific command of another mode was sent. Ignoring it. "
+                            "Current Mode: %s, Target Mode: %s, Command: %s", 
                             __FUNCTION__, 
                             avatarInterface.getCurrentModeHandler().getModeName().c_str(),
                             targetMode,
@@ -1541,8 +1555,6 @@ void PAI::processInstruction(DOMElement * element)
                           );
         } 
     } // if
-
-    this->languageTool->updateDialogControllers(this->getLatestSimWorldTimestamp()); 
 
     XMLString::release(&petID);
     XMLString::release(&avatarID);
