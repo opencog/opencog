@@ -2,7 +2,7 @@
 ; Demand updaters
 ;
 ; @author Zhenhua Cai czhedu@gmail.com
-; @date   2011-05-17
+; @date   2011-10-28
 ;
 
 (define (EnergyDemandUpdater)
@@ -19,24 +19,37 @@
     (get_latest_predicate_truth_value_mean "fitness")
 )
 
+;(define (AffiliationDemandUpdater)
+;    (let* ( (proximity
+;                 (get_proximity (get_owner) (get_self) )
+;            )
+;
+;            (fitness
+;                (get_latest_predicate_truth_value_mean "fitness") 
+;            )
+;          )
+;
+;         ; Note: We take fitness into consideration, because when you are in bad
+;         ; situation, you would probably miss your family and friends
+;          (* (expt proximity 0.5) 
+;             (expt fitness 0.5)  
+;          )   
+;    )
+;)
+
 (define (AffiliationDemandUpdater)
-    (let* ( (proximity
-                 (get_proximity (get_owner) (get_self) )
-            )
+    (let ( (eval_has_unanswered_question
+               (EvaluationLink (PredicateNode "has_unanswered_question") )
+           )
+         ) 
 
-            (fitness
-                (get_latest_predicate_truth_value_mean "fitness") 
-            )
-          )
-
-         ; Note: We take fitness into consideration, because when you are in bad
-         ; situation, you would probably miss your family and friends
-          (* (expt proximity 0.5) 
-             (expt fitness 0.5)  
-          )   
+        (- 1 (get_truth_value_mean (cog-tv eval_has_unanswered_question) ) )
     )
 )
 
+; TODO: Think about how to connect certainty demand with dialog system? 
+;       A possible question might be evaluate how much infomaton the agent knows
+;       about the world, objects and agents. And then it can ask questions on that stuff.
 (define (CertaintyDemandUpdater)
     (let* ( (curious_about_evaluation_link_list
                 (query_atom_space (find_evaluation_link "curious_about") ) 
