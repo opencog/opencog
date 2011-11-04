@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-10-12
+; @date   2011-10-28
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into the AtomSpace.
 ;
@@ -131,7 +131,7 @@
 )
 
 (define AffiliationDemandSchema
-    (add_demand_schema "AffiliationDemand" 0.75)
+    (add_demand_schema "AffiliationDemand" 0.9)
 )
 
 (define CertaintyDemandSchema
@@ -306,7 +306,7 @@
 
 (connect_goal_updater   
      AffiliationDemandGoal 
-     (add_goal (GroundedPredicateNode "fuzzy_within") 0.4 1.0 AffiliationDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.8 1.0 AffiliationDemandSchema)
 )
 
 (connect_goal_updater
@@ -550,10 +550,37 @@
 ; Rules related to AffiliationDemandGoal
 ;
 
-(add_rule (stv 1.0 1.0) AffiliationDemandGoal 
-    (add_action (GroundedSchemaNode "goto_obj") OWNER_HANDLE (NumberNode "2") )
-    NULL_PRECONDITION
+;(add_rule (stv 1.0 1.0) AffiliationDemandGoal 
+;    (add_action (GroundedSchemaNode "goto_obj") OWNER_HANDLE (NumberNode "2") )
+;    NULL_PRECONDITION
+;)
+
+; This rule will please conversation partner by answering their questions
+; The question could be TruthValueQuestion, WhatQuestion, WhyQuestion, even HowQuestion
+(add_rule (stv 1.0 1.0) AffiliationDemandGoal
+    (add_action (GroundedSchemaNode "scm:answer_question") )
+    (add_goal (PredicateNode "has_unanswered_question") )
 )
+
+; This rule will please other agents by making a random statement,
+; because it's boring if you keep silent for too long time. 
+;(add_rule (stv 0.3 1.0) AffiliationDemandGoal
+;    (add_action (GroundedSchemaNode "scm:unsolicited_observation") )
+;    NULL_PRECONDITION
+;)
+
+; This rule will notify other agents important external changes if any. 
+;(add_rule (stv 0.6 1.0) AffiliationDemandGoal
+;    (add_action (GroundedSchemaNode "scm:notify_external_change") )
+;    (add_precondition (PredicateNode "has_important_external_change") )
+;)
+
+; This rule will notify other agents important internal changes, 
+; such as "I'm so happy. " or "I'm terribly sad."
+;(add_rule (stv 0.8 1.0) AffiliationDemandGoal
+;    (add_action (GroundedSchemaNode "scm:notify_internal_change") )
+;    (add_precondition (PredicateNode "has_important_internal_change") )
+;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -572,11 +599,17 @@
     )        
 )    
 
-(add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
+(add_rule (cog-new-stv 0.0 1.0) CertaintyDemandGoal 
 ;    (add_action (GroundedSchemaNode "random_search") ) ; TODO: Doesn't work, should be implemented in scheme
     random_build_destroy_blocks    
     NULL_PRECONDITION
 )
+
+; This rule will increase the agent's certainty by asking questions to other agents. 
+;(add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
+;    (add_action (GroundedSchemaNode "scm:ask_question") )
+;    NULL_PRECONDITION
+;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
