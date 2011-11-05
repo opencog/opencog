@@ -83,7 +83,7 @@ public:
         string max_evals("-m1000");
         moses_test({data_file_path, max_evals}, -3);
     }
-    // void test_sr_3() {
-    //     moses_test({"-Hsr", "-k3", "-m100000"});
-    // }
+    void test_sr_3() {
+        moses_test({"-Hsr", "-k3", "-m100000"});
+    }
 };

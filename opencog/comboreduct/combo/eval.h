@@ -348,7 +348,7 @@ vertex eval_throws(RandGen& rng,
             y = get_contin(vy);
             contin_t res = x / y;
             if (isnan(res) || isinf(res))
-	      throw EvalException(vertex(res));
+                throw EvalException(vertex(res));
             return res;
         }
         case id::log : {
