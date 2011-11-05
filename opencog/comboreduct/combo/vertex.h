@@ -411,7 +411,9 @@ inline bool operator!=(const vertex& v1, const vertex& v2)
 
 inline size_t hash_value(const message& m)
 {
-    return hash_value(m.getContent());
+    /// WARNING: let the boost namespace as it permits to not generate
+    /// infinit recursive calls of hash_value(const vertex& v)
+    return boost::hash_value(m.getContent());
 }
 
 inline size_t hash_value(const vertex& v)
@@ -435,51 +437,58 @@ inline size_t hash_value(const vertex& v)
         return size_t(a->idx * (a->is_negated() + 2)) + c1;
     if (const contin_t* c = boost::get<contin_t>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(*c));
+        /// WARNING: let the boost namespace as it permits to not generate
+        /// infinit recursive calls of hash_value(const vertex& v)
+        hash_combine(tmp, boost::hash_value(*c));
         return tmp;
     }
     if (const action* a = boost::get<action>(&v))
         return size_t(*a) + c2;
     if (const builtin_action* b = boost::get<builtin_action>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(*b));
+        /// WARNING: let the boost namespace (see above)
+        hash_combine(tmp, boost::hash_value(*b));
         return tmp;
     }
     if (const perception* p = boost::get<perception>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(*p));
+        /// WARNING: let the boost namespace (see above)
+        hash_combine(tmp, boost::hash_value(*p));
         return tmp;
     }
-    if (const definite_object*
-            d = boost::get<definite_object>(&v)) {
+    if (const definite_object* d = boost::get<definite_object>(&v)) {
         size_t tmp = c_last;
+        /// WARNING: let the boost namespace (see above)
         hash_combine(tmp, boost::hash_value(*d));
         return tmp;
     }
-    if (const indefinite_object*
-            i = boost::get<indefinite_object>(&v)) {
+    if (const indefinite_object* i = boost::get<indefinite_object>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(*i));
+        /// WARNING: let the boost namespace (see above)
+        hash_combine(tmp, boost::hash_value(*i));
         return tmp;
     }
     if (const message* m = boost::get<message>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(*m));
+        hash_combine(tmp, combo::hash_value(*m));
         return tmp;
     }
     if (const procedure_call* pc = boost::get<procedure_call>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(*pc));
+        /// WARNING: let the boost namespace (see above)
+        hash_combine(tmp, boost::hash_value(*pc));
         return tmp;
     }
     if (const action_symbol* as = boost::get<action_symbol>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(*as));
+        /// WARNING: let the boost namespace (see above)
+        hash_combine(tmp, boost::hash_value(*as));
         return tmp;
     }
     if (const ann_type* a = boost::get<ann_type>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(a->idx));
+        /// WARNING: let the boost namespace (see above)
+        hash_combine(tmp, boost::hash_value(a->idx));
         return tmp;
     }
     OC_ASSERT(false, "A case is missing");

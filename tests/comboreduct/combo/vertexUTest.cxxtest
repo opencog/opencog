@@ -35,4 +35,15 @@ public:
         vector<string> labels{"fat", "pretty"};
         TS_ASSERT_EQUALS(l2ph("and(#fat #pretty)", labels), "and(#1 #2)");
     }
+    void test_hash_value() {
+        vertex v_db(4.2);
+        size_t hv_bd = hash_value(v_db);
+        vertex v_bl(id::logical_true);
+        size_t hv_bl = hash_value(v_bl);
+        vertex v_do("definite_object");
+        size_t hv_do = hash_value(v_do);
+        TS_ASSERT_DIFFERS(hv_bd, hv_bl);
+        TS_ASSERT_DIFFERS(hv_bd, hv_do);
+        TS_ASSERT_DIFFERS(hv_bl, hv_do);
+    }
 };
