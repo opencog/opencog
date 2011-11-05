@@ -741,11 +741,11 @@ void reduce_sum_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
 void reduce_log_div_times::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::log) {
         OC_ASSERT(it.has_one_child(), 
-                  "combo_tree node should have exactly one child");
+                  "combo_tree node id::log should have exactly one child");
         pre_it log_child = it.begin();
         if(*log_child==id::div) { //log(c/x) -> log(c^1*x)
             OC_ASSERT(log_child.number_of_children()==2,
-                      "combo_tree child node should have exactly two children");
+                      "combo_tree node id::div should have exactly two children");
             pre_it num = log_child.begin();
             pre_it denom = log_child.last_child();
             if(is_contin(*num)) {
@@ -761,7 +761,7 @@ void reduce_log_div_times::operator()(combo_tree& tr,combo_tree::iterator it) co
         }
         else if(*log_child==id::exp) { //log(exp(x)) -> x
             OC_ASSERT(log_child.has_one_child(),
-                      "combo_tree child node should have exactly one child");
+                      "combo_tree node id::exp should have exactly one child");
             tr.erase(tr.flatten(log_child));
             *it=*it.begin();
             tr.erase(tr.flatten(it.begin()));
@@ -886,12 +886,12 @@ void reduce_exp_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
 void reduce_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::sin) {
         OC_ASSERT(it.has_one_child(),
-                  "combo_tree node should have exactly one child (reduce_sin).");
+                  "combo_tree node id::sin should have exactly one child (reduce_sin).");
         pre_it c_it = tr.end();
         pre_it sin_child = it.begin();
         if(*sin_child==id::plus) {
             OC_ASSERT(!sin_child.is_childless(), 
-                      "combo_tree node should have exactly one child (reduce_sin).");
+                      "combo_tree node id::plus should no be childless (reduce_sin).");
             for(sib_it sib = sin_child.begin(); sib != sin_child.end(); ) {
                 if(is_contin(*sib)) {
                     if(c_it == tr.end()) {

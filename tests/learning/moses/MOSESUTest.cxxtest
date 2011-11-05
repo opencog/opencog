@@ -57,16 +57,16 @@ public:
         // to control the log level use option -l
     }
 
-    void test_hc_2_parity() {
+    void test_2_parity() {
         moses_test({"-Hpa", "-k2"});
     }
-    void test_hc_2_parity_with_labels() {
+    void test_2_parity_with_labels() {
         moses_test({"-Hpa", "-k2", "-W1"});
     }
-    void test_hc_3_parity_multi_thread() {
+    void test_3_parity_multi_thread() {
         moses_test({"-Hpa", "-k3", "-m100000", "-j4"});
     }
-    void test_hc_3_mux() {
+    void test_3_mux() {
         moses_test({"-Hmux", "-k3"});
     }
     void test_sa_2_parity() {
@@ -78,9 +78,12 @@ public:
     void test_un_3_pa() {
         moses_test({"-Hpa", "-k3", "-aun", "-m100000"});
     }
-    void test_hc_it() {
+    void test_it() {
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
         string max_evals("-m1000");
         moses_test({data_file_path, max_evals}, -3);
     }
+    // void test_sr_3() {
+    //     moses_test({"-Hsr", "-k3", "-m100000"});
+    // }
 };

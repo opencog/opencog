@@ -121,11 +121,9 @@ struct metapopulation : public bscored_combo_tree_set {
         foreach(const combo_tree& base, exemplars) {
             combo_tree si_base(base);
             (*simplify_candidate)(si_base);
-            composite_score csc = make_pair(score(si_base),
-                                            complexity(si_base));
-            behavioral_score bsc = bscore(si_base);
-            candidates.insert(make_pair(si_base,
-                                        composite_behavioral_score(bsc, csc)));
+            composite_score csc(score(si_base), complexity(si_base));
+            behavioral_score bsc(bscore(si_base));
+            candidates[si_base] = composite_behavioral_score(bsc, csc);
         }
         
         bscored_combo_tree_set mps(candidates.begin(), candidates.end());

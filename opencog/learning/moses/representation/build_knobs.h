@@ -145,7 +145,16 @@ protected:
     void linear_canonize_times(combo_tree::iterator it);
     void linear_canonize(combo_tree::iterator it);
     void rec_canonize(combo_tree::iterator it);
+    
+    // Assuming that 'it' is '+', then for each variable v, it appends
+    // the children *(0 #v). If 'it' is not '+' then '+' is appended
+    // as child of 'it' and the same applies to that child. For
+    // instance if there are 3 variables and 'it' is a childless '+'
+    // then it becomes '+(*(0 #1) *(0 #2) *(0 #3))'
     void append_linear_combination(combo_tree::iterator it);
+    
+    // is assumes 'it' is '+', appends *(0 v) as child of 'it' and
+    // returns the iterator pointing to 0
     combo_tree::iterator mult_add(combo_tree::iterator it, const vertex& v);
     void ann_canonize(combo_tree::iterator);
 
