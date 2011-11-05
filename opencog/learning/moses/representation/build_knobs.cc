@@ -672,10 +672,9 @@ void build_knobs::append_linear_combination(pre_it it)
 
 pre_it build_knobs::mult_add(pre_it it, const vertex& v)
 {
-    pre_it times_it = _exemplar.insert_above(_exemplar.append_child(it,
-                                                                    contin_t(0)),
-                                             id::times);
-    return --_exemplar.append_child(times_it, v);
+    pre_it times_it =
+        _exemplar.insert_above(_exemplar.append_child(it, contin_t(0)), id::times);
+    return _exemplar.append_child(times_it, v);
 }
 
 static int get_max_id(sib_it it, int max_id = 0)

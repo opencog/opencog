@@ -154,7 +154,7 @@ protected:
     void append_linear_combination(combo_tree::iterator it);
     
     // is assumes 'it' is '+', appends *(0 v) as child of 'it' and
-    // returns the iterator pointing to 0
+    // returns the iterator pointing to v
     combo_tree::iterator mult_add(combo_tree::iterator it, const vertex& v);
     void ann_canonize(combo_tree::iterator);
 
