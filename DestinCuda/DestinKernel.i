@@ -7,6 +7,8 @@
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 #include "VideoSource.h"
+#include "CurandGeneratorWrapper.h"
+
 %}
 
 /* 
@@ -27,3 +29,4 @@ See https://swig.svn.sourceforge.net/svnroot/swig/trunk/Examples/java/callback/
 %include "LayerFinishedCallback.h"
 %include "DestinKernel.h"
 %include "DestinCuda.h"
+%include "CurandGeneratorWrapper.h"

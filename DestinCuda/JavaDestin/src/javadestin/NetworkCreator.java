@@ -2,8 +2,12 @@ package javadestin;
 
 public class NetworkCreator {
 
-	
-	public void run(){
+	public static class Network {
+		
+		
 	}
 	
+	Network createStandard(int [] centroidCounts){
+		return null;
+	}
 }

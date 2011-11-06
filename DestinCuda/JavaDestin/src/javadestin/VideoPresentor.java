@@ -1,23 +1,18 @@
 package javadestin;
+import javadestin.NetworkCreator.Network;
 
-public class VideoPresentor {
+public class VideoPresentor implements Presentor {
+	Source source;
 	Network network;
-	VideoSource source;
+	LayerFinishedCallback lfcb;
+	
 	static {
 		//load swig generated destin cuda c++ dynamic library 
 		System.loadLibrary("destinjava");
 	}
 	
-	public void setNetwork(Network network){
-		this.network = network;
-	}
 	
-	public void setVideoSource(VideoSource source){
-		this.source = source;
-	}
-	public void isOpened(){
-		
-	}
+	@Override
 	public void present(){
 		if(network==null){
 			throw new RuntimeException("Set the network to present to first.");
@@ -33,18 +28,20 @@ public class VideoPresentor {
 		System.out.println("finished presenting");
 	}
 	
-	public static void main(String [] argv){
-		VideoPresentor vp = new VideoPresentor();
-		VideoSource vs = new VideoSource(true, "",1);
-		vp.setVideoSource(vs);
-		vp.setNetwork(new Network());
-		if(vs.isOpened()){
-			vs.showVideo();
-			vp.present();
-		}else{
-			System.out.println("Could not open the video source.");
-		}
-			
-		
+
+	@Override
+	public void setNetwork(Network n) {
+		this.network = n;
+	}
+
+	@Override
+	public void setSource(Source s) {
+		// TODO Auto-generated method stub
+		this.source = s;
+	}
+
+	@Override
+	public void setLayerFinishedCallback(LayerFinishedCallback lfc) {
+		this.lfcb = lfc;
 	}
 }
