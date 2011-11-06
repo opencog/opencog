@@ -168,7 +168,7 @@ __global__ void initializeMemory( const int states, const int parentStates, floa
 	}
 }
 
-void DestinKernel::DoDestin( float *Input, stringstream& xml )
+void DestinKernel::DoDestin( float *Input, stringstream * xml )
 {
     // Threads is the amount of thread inside each block
     dim3 threads( AmountThreads );
@@ -208,7 +208,7 @@ void DestinKernel::DoDestin( float *Input, stringstream& xml )
     this->WriteData(xml);
 }
 
-void DestinKernel::WriteData( stringstream& xml )
+void DestinKernel::WriteData( stringstream * xmls )
 {
     cudaMemcpy(mCentroidsDistance, dCentroidsDistance, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(mCentroidStarvation, dCentroidStarvation, sizeOfNodeData*sizeof(float), cudaMemcpyDeviceToHost);
@@ -216,29 +216,33 @@ void DestinKernel::WriteData( stringstream& xml )
     cudaMemcpy(mWinningCentroids, dWinningCentroids, sizeOfNodes*sizeof(int), cudaMemcpyDeviceToHost);
     cudaMemcpy(mBeliefs, dBeliefs, sizeOfNodeData * sizeof(float), cudaMemcpyDeviceToHost);
 
-    xml << "<layer id=\"" << mID << "\">" << endl;
-    for(int r=0;r<mRows;r++)
-    {
-        for(int c=0;c<mCols;c++)
+    if(xmls!=NULL){
+    	stringstream & xml(*xmls);
+        xml << "<layer id=\"" << mID << "\">" << endl;
+        for(int r=0;r<mRows;r++)
         {
-            int winningCentroid = mWinningCentroids[r*mCols+c];
-            // winning counter finds place on the host might not be the best place to put this still
-            // cause we are already writing here some output why create a special loop for it.
-            mCentroidWinCounter[(c+r*mCols)*mStates+winningCentroid] += 1;
-            xml << "<node id=\"" << r*mCols+c << "\" centroidWin=\"" << mWinningCentroids[r*mCols+c] << "\">" << endl;
-            for(int s=0;s<mStates;s++)
+            for(int c=0;c<mCols;c++)
             {
-                xml << "<centroid id=\"" << s << "\" ";
-                xml << "lastDistance=\"" << mCentroidsDistance[(c+r*mCols)*mStates+s] << "\" ";
-                xml << "starvation=\"" << mCentroidStarvation[(c+r*mCols)*mStates+s] << "\" ";
-                xml << "POS=\"" << mPOS[(c+r*mCols)*mStates+s]  << "\" ";
-                xml << "winCount=\"" << mCentroidWinCounter[(c+r*mCols)*mStates+s]  << "\"";
-                xml << "/>" << endl;
+                int winningCentroid = mWinningCentroids[r*mCols+c];
+                // winning counter finds place on the host might not be the best place to put this still
+                // cause we are already writing here some output why create a special loop for it.
+                mCentroidWinCounter[(c+r*mCols)*mStates+winningCentroid] += 1;
+                xml << "<node id=\"" << r*mCols+c << "\" centroidWin=\"" << mWinningCentroids[r*mCols+c] << "\">" << endl;
+                for(int s=0;s<mStates;s++)
+                {
+                    xml << "<centroid id=\"" << s << "\" ";
+                    xml << "lastDistance=\"" << mCentroidsDistance[(c+r*mCols)*mStates+s] << "\" ";
+                    xml << "starvation=\"" << mCentroidStarvation[(c+r*mCols)*mStates+s] << "\" ";
+                    xml << "POS=\"" << mPOS[(c+r*mCols)*mStates+s]  << "\" ";
+                    xml << "winCount=\"" << mCentroidWinCounter[(c+r*mCols)*mStates+s]  << "\"";
+                    xml << "/>" << endl;
+                }
+                xml << "</node>" << endl;
             }
-            xml << "</node>" << endl;
         }
+        xml << "</layer>" << endl;
     }
-    xml << "</layer>" << endl;
+
 }
 // ***********************
 // DeSTIN inside CUDA Part

@@ -10,7 +10,6 @@ struct RunningInfo {
 	int layer;
 };
 
-
 class LayerFinishedCallback {
 	public:
 		virtual ~LayerFinishedCallback(){}

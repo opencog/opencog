@@ -551,7 +551,7 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
             time_t lStart = time(NULL);
 			
             DataSourceForTraining.SetShiftedDeviceImage(indexOfExample, SEQ[seq][0], SEQ[seq][1], ImageInput[0], ImageInput[1]);
-            DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage(),xmlLayer);
+            DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage(),&xmlLayer);
 			run_info.layer = 0;
             if(this->callback!=NULL){
                 this->callback->callback(run_info, DKernel[0] );
@@ -560,7 +560,7 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
             for(int l=1;l<NumberOfLayers;l++)
             {
 				run_info.layer = l;
-                DKernel[l].DoDestin(DKernel[l-1].GetDevicePointerBeliefs(),xmlLayer);
+                DKernel[l].DoDestin(DKernel[l-1].GetDevicePointerBeliefs(),&xmlLayer);
                 if(this->callback!=NULL){
                      this->callback->callback(run_info, DKernel[l] );
                 }

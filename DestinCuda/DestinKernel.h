@@ -70,7 +70,7 @@ private:
 
 	int *dParentInputAdvice;//points to advice vector in parent layer,  child layer is not responsible for clearing it
 
-	void WriteData( stringstream& xml );
+	void WriteData( stringstream * xml );
 
 public:
 	DestinKernel( void );
@@ -88,8 +88,10 @@ public:
 	 * Do DeSTIN is the launcher of the GPU kernel.
 	 * @param *Input It's input can be a dNodeOutput or a image(for lowest layer)
 	 * Make sure it is the device pointer and not the host pointer (kernel will crash/not run with it)
+	 *
+	 * xml - string buffer to out
 	 */
-	void DoDestin( float *Input, stringstream& xml);
+	void DoDestin( float *Input, stringstream * xml);
 
 	// Mostly getters i name should be clear enough
 	int GetID(){ return mID; }

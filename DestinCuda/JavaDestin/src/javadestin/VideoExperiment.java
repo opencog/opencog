@@ -8,16 +8,15 @@ public class VideoExperiment {
 	
 		NetworkCreator nc = new NetworkCreator();
 		Network n = nc.createStandard(new int[]{25,15,15,10});
+		n.setLayerFinishedCallback(new ShowBeliefsCallback() );
 		
 		VideoPresentor vp = new VideoPresentor();
 		vp.setNetwork(n);
 		
 		VidSource s = new VidSource(true,"",1);
-		s.showVideo(); //shows the video to the screen while feeding to DeSTIN
+		s.enableDisplayWindow();//shows the video to the screen while feeding to DeSTIN
 		
 		vp.setSource(s);
-		
-		vp.setLayerFinishedCallback(new ShowBeliefsCallback() );
 		
 		vp.present(); //present the video source to DeSTIN for processing
 	}

@@ -9,6 +9,6 @@ public interface Presentor {
 	
 	public void setSource(Source s);
 	
-	public void setLayerFinishedCallback(LayerFinishedCallback lfc);
 	
+	public void setInputTransporter(InputTransporter t);
 }

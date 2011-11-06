@@ -5,6 +5,7 @@ public class VideoPresentor implements Presentor {
 	Source source;
 	Network network;
 	LayerFinishedCallback lfcb;
+	InputTransporter inputTrans;
 	
 	static {
 		//load swig generated destin cuda c++ dynamic library 
@@ -23,7 +24,11 @@ public class VideoPresentor implements Presentor {
 		}
 		
 		while(source.grab()){
-			System.out.println("grabed frame"); 
+			
+			inputTrans.setHostSourceImage(source.getOutput());
+			inputTrans.transport();
+			network.doDestin(inputTrans.getDeviceDest());
+			
 		}
 		System.out.println("finished presenting");
 	}
@@ -40,8 +45,9 @@ public class VideoPresentor implements Presentor {
 		this.source = s;
 	}
 
+
 	@Override
-	public void setLayerFinishedCallback(LayerFinishedCallback lfc) {
-		this.lfcb = lfc;
+	public void setInputTransporter(InputTransporter t) {
+		inputTrans = t;
 	}
 }

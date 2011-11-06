@@ -1,6 +1,5 @@
 package javadestin;
 
-import java.text.DecimalFormat;
 
 /**
  * ASCIIArt
@@ -41,11 +40,10 @@ class ASCIIArt {
 
 public class ShowBeliefsCallback extends LayerFinishedCallback {
 
-	DecimalFormat df = new DecimalFormat("0.00");
-
 	@Override
 	public void callback(RunningInfo info, DestinKernel layer) {
 		//nodeBeliefs
+		
 		if (info.getLayer() != 3 || info.getImage_count() < 118) {
 			return;
 		}
