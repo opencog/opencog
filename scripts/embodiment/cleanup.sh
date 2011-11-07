@@ -1,6 +1,6 @@
 #!/bin/bash
 # remove log and pet database directories
-rm -rf /tmp/$USER/opencog/
+rm -rf /tmp/$USER/opencog/log
 
 # the -p of these commands prevent them from complaining if the directories
 # already exist

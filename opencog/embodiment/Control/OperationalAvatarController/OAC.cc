@@ -550,6 +550,7 @@ void OAC::saveState()
 
     // save atom space and othe repositories
     std::string file = getPath(pet->getPetId(), config().get("ATOM_SPACE_DUMP"));
+
     remove(file.c_str());
     savingLoading.save(file.c_str(), *atomSpace);
 

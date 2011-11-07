@@ -108,7 +108,7 @@ ROUTER_DATABASE_DIR             = /tmp/$USER/opencog/router_db
 
 # Filenames for Petaveser dumpfiles and system
 #
-#ATOM_SPACE_DUMP atomSpace.dump
+ATOM_SPACE_DUMP = atomSpace.dump
 #PET_DUMP pet.dump
 #COMBO_REPOSITORY_FILE stdlib.combo
 #ROUTER_DATA_FILE router.dat
