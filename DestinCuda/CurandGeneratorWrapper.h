@@ -10,6 +10,10 @@
 
 #include <curand.h>
 
+/**
+ * CurandGeneratorWrapper
+ * This exists so the java bindings can use it.
+ */
 class CurandGeneratorWrapper {
 	curandGenerator_t gen;
 public:
@@ -20,7 +24,7 @@ public:
 		curandDestroyGenerator(gen);
 	}
 
-	curandGenerator_t& reference(){
+	curandGenerator_t& getReference(){
 		return gen;
 	}
 };

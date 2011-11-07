@@ -37,6 +37,7 @@ DestinKernel::DestinKernel( void )
     mLearningRate = 0;
     mSTARVATION_COEFFICIENT = 0;
 	cuDeviceGetCount(&mDevices);
+	dParentInputAdvice=NULL;
 	cout << "Kernel created" << endl;
 }
 

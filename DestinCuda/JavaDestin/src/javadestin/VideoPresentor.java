@@ -5,7 +5,7 @@ public class VideoPresentor implements Presentor {
 	Source source;
 	Network network;
 	LayerFinishedCallback lfcb;
-	InputTransporter inputTrans;
+	Transporter  inputTrans;
 	
 	static {
 		//load swig generated destin cuda c++ dynamic library 
@@ -16,16 +16,21 @@ public class VideoPresentor implements Presentor {
 	@Override
 	public void present(){
 		if(network==null){
-			throw new RuntimeException("Set the network to present to first.");
+			throw new RuntimeException("Network cannot be null.");
 		}
-		
 		if(source==null){
-			throw new RuntimeException("Video source needs to be set.");
+			throw new RuntimeException("Video cannot be null.");
+		}
+		if(inputTrans==null){
+			throw new RuntimeException("Transporter cannot be null."); 
 		}
 		
 		while(source.grab()){
 			
 			inputTrans.setHostSourceImage(source.getOutput());
+			
+			//arrange pixel groups to match input node regions
+			//and copy the array to the device
 			inputTrans.transport();
 			network.doDestin(inputTrans.getDeviceDest());
 			
@@ -47,7 +52,7 @@ public class VideoPresentor implements Presentor {
 
 
 	@Override
-	public void setInputTransporter(InputTransporter t) {
+	public void setInputTransporter(Transporter t) {
 		inputTrans = t;
 	}
 }

@@ -68,7 +68,7 @@ private:
 	//TODO: make sure all memory vectors are initialized and cleared properly
 	int *dOutputAdvice; //advice to be used by child layer
 
-	int *dParentInputAdvice;//points to advice vector in parent layer,  child layer is not responsible for clearing it
+	int *dParentInputAdvice;//points to advice vector in parent layer, child layer is not responsible for clearing it
 
 	void WriteData( stringstream * xml );
 

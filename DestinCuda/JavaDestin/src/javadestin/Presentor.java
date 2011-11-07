@@ -10,5 +10,5 @@ public interface Presentor {
 	public void setSource(Source s);
 	
 	
-	public void setInputTransporter(InputTransporter t);
+	public void setInputTransporter(Transporter t);
 }
