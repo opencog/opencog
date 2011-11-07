@@ -62,6 +62,12 @@ DestinKernel::~DestinKernel( void )
     cout << "Kernel destroyed" << endl;
 }
 
+#define CUDA_TEST_MALLOC( p, s )                                                                           \
+	if( cudaMalloc( p , s ) != 0 ){                                                                        \
+		 stringstream mess; mess << "could not cudaMaclloc at " << __FILE__ << ":" << __LINE__ << endl ;   \
+         mess << "trying to allocate with size " << s << endl ;            		             		       \
+	     throw runtime_error(mess.str());}                                                                 \
+
 void DestinKernel::Create( int ID, int Rows, int Cols, int States, int ParentStates, int InputDimensionlity, float FixedLeaningRate, curandGenerator_t gen)
 {
     mID = ID;
@@ -98,15 +104,15 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int ParentSta
     //TODO: put in error checking incase the cudaMallocs fail in case of not enough memory on device
     // Array full with all the winning centroids of each node
     mWinningCentroids = new int[sizeOfNodes];
-    cudaMalloc( (void**)&dWinningCentroids, sizeOfNodes*sizeof(int) );
+    CUDA_TEST_MALLOC( (void**)&dWinningCentroids, sizeOfNodes*sizeof(int) );
 
     // Node data contains the distance to the observation of all centroids (It's is empty the first run)
     mCentroidsDistance = new float[sizeOfNodeData];
-    cudaMalloc( (void**)&dCentroidsDistance, sizeOfNodeData*sizeof(float) );
+    CUDA_TEST_MALLOC( (void**)&dCentroidsDistance, sizeOfNodeData*sizeof(float) );
 
     // Starvation data for all centroids
     mCentroidStarvation = new float[sizeOfNodeData];
-    cudaMalloc( (void**)&dCentroidStarvation, sizeOfNodeData*sizeof(float) );
+    CUDA_TEST_MALLOC( (void**)&dCentroidStarvation, sizeOfNodeData*sizeof(float) );
     for(int i=0;i<sizeOfNodeData;i++)
     {
         mCentroidStarvation[i]=1.0f;
@@ -117,25 +123,27 @@ void DestinKernel::Create( int ID, int Rows, int Cols, int States, int ParentSta
     //TODO: make sure this POS is being fed to the correct place, and if it needs to go back to the host
     //POS - P(o|s') of update equation
     mPOS = new float[sizeOfNodeData];
-    cudaMalloc( (void**)&dPOS, sizeOfNodeData*sizeof(float) );
+    CUDA_TEST_MALLOC( (void**)&dPOS, sizeOfNodeData*sizeof(float) );
 
-    cudaMalloc( (void**)&dCentroidsVectorData, sizeOfLayerData*sizeof(float) );
+    CUDA_TEST_MALLOC( (void**)&dCentroidsVectorData, sizeOfLayerData*sizeof(float) );
 
     // This is to fill the dLayerData with all random numbers between 0.0 and 1.0
     curandGenerateUniform( gen, dCentroidsVectorData, sizeOfLayerData );
 
     //Node belief output, fed as input to parent nodes
     mBeliefs = new float[sizeOfNodeData];
-    cudaMalloc((void**)&dBeliefs, sizeOfNodeData * sizeof(float));
+    CUDA_TEST_MALLOC((void**)&dBeliefs, sizeOfNodeData * sizeof(float));
     
     //Node advice for fed to child nodes
-    cudaMalloc((void**)&dOutputAdvice, sizeOfNodes * sizeof(int));
+    CUDA_TEST_MALLOC((void**)&dOutputAdvice, sizeOfNodes * sizeof(int));
 
     //Used in P(s'|s,a) calculations, counts when node transitions from s to s' when parent advice = a
-    cudaMalloc((void**)&dCountingTables, mRows * mCols * mParentStates * mStates * mStates * sizeof(int));
+    cout << "mRows " << mRows <<  "mCols " << mCols << "mParentStates " << mParentStates << " mStates " << mStates
+    		<< " sizeof int " << sizeof(int) << endl ;
+    CUDA_TEST_MALLOC((void**)&dCountingTables, mRows * mCols * mParentStates * mStates * mStates * sizeof(int));
 
     //Used in P(s'|s,a) (aka PSSA) calculations, holds the sum of the counting table columns
-    cudaMalloc((void**)&dSumTables, mRows * mCols * mParentStates * mStates * sizeof(int));
+    CUDA_TEST_MALLOC((void**)&dSumTables, mRows * mCols * mParentStates * mStates * sizeof(int));
 
     dim3 grid(mCols, mRows); //grid of nodes (aka blocks)
     dim3 threads(AmountThreads);//threads per node

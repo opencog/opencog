@@ -20,6 +20,9 @@ public class NetworkCreator {
 			return ri;
 		}
 		public void doDestin(SWIGTYPE_p_float dInput){
+			if(dInput==null){
+				throw new RuntimeException("dInput cannot be null");
+			}
 			DestinKernel layer;
 			ri.setImage_count(callcount);
 			for(int l = layers.size() - 1 ; l >=0 ; l--){
@@ -54,7 +57,7 @@ public class NetworkCreator {
 		for(int l = 0 ; l < nlayers ; l++){
 			layer = new DestinKernel();
 			//TODO: is ID set right?
-			int width = (int)Math.pow(2, nlayers - l);
+			int width = (int)Math.pow(2, nlayers - l - 1);
 			int inputDim = l==0  ? pixelsPerInputNode : centroidCounts[l-1] * 4;
 			int parentStates = l==nlayers - 1 ? 1 : centroidCounts[l+1];
 			layer.Create(l, width, width, centroidCounts[l], parentStates, inputDim, config.fixedLearningRate, gen.getReference());
@@ -65,6 +68,7 @@ public class NetworkCreator {
 			if(l==(nlayers - 1)){
 				layer.SetInputAdvice(null);
 			}
+			network.layers.add(layer);
 		}
 		return network;
 	}

@@ -25,7 +25,8 @@ if(CUDA_FOUND)
        		 FIND_LIBRARY(lib_curand curand "/usr/local/cuda/lib64" )
 	endif()
 	#Make solution
-	set(cudadest_source DestinCuda.cu DestinData.cu AdviceData.cu DestinKernel.cu Transporter.h )
+	set(cudadest_source DestinCuda.cu DestinData.cu AdviceData.cu DestinKernel.cu Transporter.h CurandGeneratorWrapper.h)
+
 
 
  	FIND_LIBRARY(lib_highgui highgui )

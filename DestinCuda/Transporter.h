@@ -10,6 +10,14 @@
  * Derived classes may want to arrage the image pixels so that different nodes
  * get different regions of pixels.
  */
+
+#define CUDA_TEST_MALLOC( p, s )                                                                    \
+	if( cudaMalloc( p , s ) != 0 ){                                                                 \
+		 stringstream mess; mess << "could not cudaMaclloc at " << __FILE__ << ":" << __LINE__ ;    \
+	     throw runtime_error(mess.str());}
+
+
+using namespace std;
 class Transporter {
 private:
 	float * deviceDest;
@@ -32,7 +40,8 @@ public:
 		 transformedImage(NULL){
 
 		std::cout << "Transporter constructor" << std::endl;
-		cudaMalloc( (void**)&deviceDest, floatArrayLength  * sizeof(float) );
+		cout << "floatArrayLength " << floatArrayLength  << endl;
+		CUDA_TEST_MALLOC( (void**)&deviceDest, floatArrayLength  * sizeof(float) );
 	}
 
 	void setHostSourceImage(float * sourceImage){

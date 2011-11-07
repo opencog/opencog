@@ -30,7 +30,9 @@ bool VideoSource::grab() {
 		// some strange issues with waitkey, see http://opencv.willowgarage.com/wiki/documentation/c/highgui/WaitKey
 		//Needs this so it gives time for the computer to update. If its too small, it wont be drawn at all,
 		//if its too high, then the frames per seconds drops.
-		cv::waitKey(5);
+		if(cv::waitKey(5)>=0){
+			return false;
+		}
 
 		return true;
 	} else {

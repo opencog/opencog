@@ -7,11 +7,6 @@ public class VideoPresentor implements Presentor {
 	LayerFinishedCallback lfcb;
 	Transporter  inputTrans;
 	
-	static {
-		//load swig generated destin cuda c++ dynamic library 
-		System.loadLibrary("destinjava");
-	}
-	
 	
 	@Override
 	public void present(){

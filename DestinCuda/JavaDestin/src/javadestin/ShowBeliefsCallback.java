@@ -40,11 +40,14 @@ class ASCIIArt {
 
 public class ShowBeliefsCallback extends LayerFinishedCallback {
 
+	FPSCallback fps = new FPSCallback();
+	
 	@Override
 	public void callback(RunningInfo info, DestinKernel layer) {
 		//nodeBeliefs
+		fps.callback(info, layer); //report fps
 		
-		if (info.getLayer() != 3 || info.getImage_count() < 118) {
+		if (info.getLayer() != 7 ) {
 			return;
 		}
 
