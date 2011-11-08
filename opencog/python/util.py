@@ -17,6 +17,13 @@ def inplace_set_attributes(obj, **attr_values):
     obj.__dict__.update(attr_values)
     return obj
 
+import functools
+import operator
+
+def product(seq):
+    """Product of a sequence."""
+    return functools.reduce(operator.mul, seq, 1)
+
 # These can't be used in PyPy but otherwise are fine.
 #def output_atoms(atomspace):
 #    roots = [x for x in atomspace.get_atoms_by_type(types.Atom) if not x.incoming]

@@ -4,6 +4,7 @@ from tree import *
 import adaptors
 from pprint import pprint
 from util import *
+import util
 from itertools import *
 from collections import namedtuple, defaultdict
 import sys
@@ -29,7 +30,7 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 1
+        self.min_embeddings = 2
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
@@ -112,7 +113,9 @@ class Fishgram:
         next_layer_iter = self.extensions_simple(prev_layer)
         #return self.prune_frequency(next_layer_iter)
         #self.viz.outputTreeNode(target=[], parent=None, index=0)
-        for (conj, embs) in self.prune_frequency(next_layer_iter):
+        
+        #for (conj, embs) in self.prune_frequency(next_layer_iter):
+        for (conj, embs) in self.prune_surprise(next_layer_iter):
             #print '***************', conj, len(embs)
             #self.viz.outputTreeNode(target=conj[-1], parent=conj[:-1], index=0)
             #self.viz.outputTreeNode(target=list(conj), parent=list(conj[:-1]), index=0)
@@ -234,6 +237,10 @@ class Fishgram:
         
         for (conj, s) in self.find_extensions(prev_layer):
             
+#            num_variables = len(get_varlist(conj))
+#            if num_variables != 1:
+#                continue
+            
             # Check for other equivalent ones. It'd be possible to reduce them (and increase efficiency) by ordering
             # the extension of patterns. This would only work with a stable frequency measure though.
             clones = [c for c in conj2emblist
@@ -241,7 +248,9 @@ class Fishgram:
             if len(clones):
                 continue
             
-            conj2emblist[conj].append(s)
+            entry=conj2emblist[conj]
+            if s not in entry:
+                entry.append(s)
 
             # Faster, but causes a bug.
 #            canon = tuple(canonical_trees(conj))
@@ -430,6 +439,8 @@ class Fishgram:
 
     def prune_frequency(self, layer):
         for (conj, embeddings) in layer:
+            #self.surprise(conj, embeddings)
+            
             #import pdb; pdb.set_trace()
             count = len(embeddings)*1.0
             num_possible_objects = len(self.forest.all_objects)*1.0
@@ -441,9 +452,62 @@ class Fishgram:
                 #print pp(conj), normalized_frequency                
                 yield (conj, embeddings)
 
-    def surprise(self, layer):
-        pass
+    def prune_surprise(self, layer):
+        for (conj, embeddings) in layer:
+            surprise = self.surprise(conj, embeddings)
+            if len(conj) < 2 or surprise > 0.10:
+                print surprise, conj
+                yield (conj, embeddings)
 
+    def surprise(self, conj, embeddings):
+        c = len(conj)
+        if c < 2:
+            return
+
+        num_variables = len(get_varlist(conj))
+        if num_variables > 1:
+            return
+        
+        # all_objects :: [Atom]
+        all_objects = self.forest.all_objects
+        # embeddings :: [{Tree(Var):Atom}]
+        # ab :: [Atom]
+        ab = [s.values()[0] for s in embeddings]
+        # xs :: [ [{Tree(Var):Tree(Atom)}] ]
+        xs = [self.forest.lookup_embeddings((tr, )) for tr in conj]
+        # xs :: [[Tree(Atom)]]
+        xs = [[s.values()[0] for s in embs] for embs in xs]
+        xs = [[atom_from_tree(a, self.atomspace) for a in embs] for embs in xs]
+        
+        N = self.count_actual_objs(all_objects)*1.0
+        NAB = self.count_actual_objs(ab)*1.0
+        Nxs = [self.count_actual_objs(x)*1.0 for x in xs]
+        
+        # With one conj and one variable, these should all be the same!
+        #print 'conj, N, len(all_objects), NAB, len(ab),  Nxs, map(len, xs)', conj, N, len(all_objects), NAB, len(ab),  Nxs, map(len, xs)
+        
+        # Means it contains a TimeNode. Possibly an error.
+        if any([c == 0 for c in Nxs]):
+            print 'only time:', conj, pp(embeddings)
+            return
+        
+        P = NAB/N**c
+        P_each = [Nx/N for Nx in Nxs]
+        #P_independent = util.product(Nxs)/N**c
+        P_independent = util.product(P_each)
+        #surprise = NAB / (util.product(Nxs) * N**(c-1))
+        surprise = P / P_independent
+        #print conj, surprise, P, P_independent, [Nx/N for Nx in Nxs], N
+        return surprise
+    
+    def count_actual_objs(self, atoms):
+        return len(self.filter_actual_objs(atoms))
+    
+    def filter_actual_objs(self, atoms):
+        actual_objs = [obj for obj in atoms if obj.t != t.TimeNode]
+        #print len(actual_objs), len(all_substs)
+        return actual_objs
+    
     def conjunction_to_string(self,  conjunction):
         return str(tuple([str(tree) for tree in conjunction]))
 
@@ -940,6 +1004,7 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
         #fish.iterated_implications()
         #self.fish.implications()
         self.fish.run()
+        print "Finished one Fishgram cycle"
         
         #fish.make_all_psi_rules()
 

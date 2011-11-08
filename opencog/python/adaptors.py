@@ -24,10 +24,12 @@ class ForestExtractor:
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
         self.unwanted_atoms = set(["proximity", "near", 'next',
-            #'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of', 'left_of', 'right_of', 
-            #'below', 'above', 'between', 'touching', 'inside', 'outside', 
+            'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of', 'left_of', 'right_of', 
+            'below', 'above', 'between', 'touching', 'inside', 'outside', 
+            # Useless stuff. null means the object class isn't specified (something that was used in the
+            # Multiverse world but not in the Unity world. Maybe it should be?
+            'is_movable', 'is_noisy', 'null', 
             # Not useful e.g. because they contain numbers
-            #'is_movable', 'is_noisy', 
             "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
             # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
             'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst'])
