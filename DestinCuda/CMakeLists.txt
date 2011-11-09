@@ -33,6 +33,8 @@ if(CUDA_FOUND)
 
 	if(lib_highgui)
 		set(cudadest_source ${cudadest_source} VideoSource)
+		ADD_EXECUTABLE(testvideo TestVideo VideoSource)
+ 		target_link_libraries(testvideo ${lib_highgui} )
 	else()
 		message("OpenCV highgui lib not found, not building video input capabilities or java wrappers.")
 		set(lib_highgui "") #set it to nothing so it wont complain about it being set to NOTFOUND
@@ -41,8 +43,6 @@ if(CUDA_FOUND)
 	CUDA_ADD_LIBRARY(cudadestin SHARED ${cudadest_source} ) 
 	CUDA_ADD_EXECUTABLE(destinCuda DestinCuda.cu)
 	
-	ADD_EXECUTABLE(testvideo TestVideo VideoSource)
- 	target_link_libraries(testvideo ${lib_highgui} )
 
 	TARGET_LINK_LIBRARIES( destinCuda
 	    pugixml
