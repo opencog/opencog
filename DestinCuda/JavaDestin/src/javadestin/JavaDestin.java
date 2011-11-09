@@ -8,6 +8,8 @@
  */
 package javadestin;
 
+import callbacks.ShowBeliefsCallback;
+
 
 
 public class JavaDestin {

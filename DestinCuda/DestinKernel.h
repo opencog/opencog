@@ -72,10 +72,20 @@ private:
 
 	void WriteData( stringstream * xml );
 
+
+	bool mIsCentroidsTraining;
+	bool mIsPSSATraining;
+
 public:
 	DestinKernel( void );
 
 	~DestinKernel( void );
+
+	//need this method so graphics memory can be free
+	//from other language wrappers that use garbage collection.
+	//the user can specifically release graphics card memory instead
+	//of hoping the gc will eventually call the destructor to free graphics memory
+	void free();
 
 	/*
 	 * Create a DeSTIN kernel here the layer and node and clustering is put all together.
@@ -115,13 +125,36 @@ public:
 	void SetInputAdvice(int * dParentInputAdvice){
 		this->dParentInputAdvice = dParentInputAdvice;
 	}
+
 	/**
-	 * Return a pointer that points to the beginning of the node's belief state
+	 * setIsPOSTraining
+	 *
+	 * when set to true, the centroids used in online clustering
+	 * for calculation of the P(o|s') of the belief
+	 * update equation are continually updated with
+	 * each new input. Default is true.
+	 */
+	void setIsPOSTraining(bool is_training){
+		mIsCentroidsTraining = is_training;
+	}
+
+	/**
+	 * setIsPSSATraining
+	 *
+	 * When set to true, the PSSA tables used in the
+	 * P(s'|s,a) portion of the belief update equation
+	 * are continually updated with each new input.
+	 * Default is true.
+	 */
+	void setIsPSSATraining(bool is_training){
+		mIsPSSATraining = is_training;
+	}
+
+	/**
+	 * Returns a host pointer that points to the beginning of the node's belief state
 	 * vector b(s) of the DeSTIN belief update equation.
 	 * 
 	 * Undefined behavior if nodeRow and nodeCol are out of bounds.
-	 * Calling GetNodeBeliefVector(0,0) returns the same pointer as given by 
-	 * calling GetHostPointerBeliefs();
 	 * 
 	 * @param layer - which layer the node belongs to
 	 * @param nodeRow - row the node is in of the given layer

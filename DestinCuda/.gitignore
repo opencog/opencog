@@ -1,6 +1,7 @@
 /destinCuda
 /profiler
 /debug
+Debug
 DeSTIN_Session*
 *.trc
 DestinKernelJAVA_wrap.h

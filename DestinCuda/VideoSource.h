@@ -41,6 +41,7 @@ private:
 	//title on the window which displays the video output
 #define DESTIN_VIDEO_WINDOW_TITLE  "DeSTIN Input Video"
 
+	bool edge_detection; //if true shows video in edge detection mode ( shows image outlines)
 	/**
 	 * convert - converts from an OpenCV Mat greyscal 8bit uchar image into
 	 * a float array where each element is normalized to 0 to 1.0, with 1,0 being black.
@@ -79,13 +80,22 @@ public:
 	 *
 	 */
 	VideoSource(bool use_device, std::string video_file, int dev_no = 0) :
-		target_size(512, 512) {
+		target_size(512, 512), edge_detection(false) {
 
 		float_frame = new float[target_size.area()];
+		stringstream mess;
 		if (use_device) {
 			cap = new cv::VideoCapture(dev_no);
 		} else {
 			cap = new cv::VideoCapture(video_file);
+		}
+		if(!cap->isOpened()){
+			if(use_device){
+				mess << "Could not open capturing device with device number " << dev_no << endl;
+			}else{
+				mess << "Could not open video file " << video_file << endl;
+			}
+			throw runtime_error(mess.str());
 		}
 	}
 
@@ -129,6 +139,13 @@ public:
 		cv::namedWindow(DESTIN_VIDEO_WINDOW_TITLE);
 	}
 
+	/**
+	 * When set to true, "Canny" edge detection is applied to the video source
+	 * ( shape outlines are shown in video)
+	 */
+	void setDoesEdgeDetection(bool on_off){
+		edge_detection = on_off;
+	}
 	/*
 	 * grab - grabs a frame from the video source.
 	 * Returns true if it could retrieve one, otherwize returns false

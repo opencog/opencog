@@ -1,15 +1,21 @@
 package javadestin;
-import javadestin.NetworkCreator.Network;
 
 public class VideoPresentor implements Presentor {
-	Source source;
-	Network network;
-	LayerFinishedCallback lfcb;
-	Transporter  inputTrans;
+	private Source source;
+	private Network network;
+	private Transporter  inputTrans;
 	
+	private boolean isStopped;
+	final private Object networkLock = new Object();
+	
+	@Override
+	public Object getNetworkLock(){
+		return networkLock;
+	}
 	
 	@Override
 	public void present(){
+		isStopped = false;
 		if(network==null){
 			throw new RuntimeException("Network cannot be null.");
 		}
@@ -20,15 +26,18 @@ public class VideoPresentor implements Presentor {
 			throw new RuntimeException("Transporter cannot be null."); 
 		}
 		
-		while(source.grab()){
+		while(!isStopped && source.grab()){
 			
 			inputTrans.setHostSourceImage(source.getOutput());
 			
 			//arrange pixel groups to match input node regions
 			//and copy the array to the device
 			inputTrans.transport();
-			network.doDestin(inputTrans.getDeviceDest());
-			
+
+			//Make sure no other threads are trying to do stuff with the network
+			synchronized (networkLock) {
+				network.doDestin(inputTrans.getDeviceDest());
+			}
 		}
 		System.out.println("finished presenting");
 	}
@@ -41,7 +50,6 @@ public class VideoPresentor implements Presentor {
 
 	@Override
 	public void setSource(Source s) {
-		// TODO Auto-generated method stub
 		this.source = s;
 	}
 
@@ -49,5 +57,10 @@ public class VideoPresentor implements Presentor {
 	@Override
 	public void setInputTransporter(Transporter t) {
 		inputTrans = t;
+	}
+
+	@Override
+	public void stop() {
+		isStopped = true;
 	}
 }

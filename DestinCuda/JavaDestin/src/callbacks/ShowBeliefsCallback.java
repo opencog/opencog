@@ -1,4 +1,9 @@
-package javadestin;
+package callbacks;
+
+import javadestin.DestinKernel;
+import javadestin.LayerFinishedCallback;
+import javadestin.RunningInfo;
+import javadestin.Util;
 
 
 /**
@@ -12,15 +17,6 @@ class ASCIIArt {
 	static final String blackRamp = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
 	static final int cellWidth = 4;
 	static final float interval = 1.0f / blackRamp.length();
-
-	static float[] toJavaArray(SWIGTYPE_p_float floatPointer, int len) {
-		float a[] = new float[len];
-		SWIG_FloatArray wfa = SWIG_FloatArray.frompointer(floatPointer);
-		for (int i = 0; i < len; i++) {
-			a[i] = wfa.getitem(i);
-		}
-		return a;
-	}
 
 	static void printArray(float[] v) {
 		for (int k = 0; k < cellWidth; k++) {
@@ -40,12 +36,12 @@ class ASCIIArt {
 
 public class ShowBeliefsCallback extends LayerFinishedCallback {
 
-	FPSCallback fps = new FPSCallback();
+	private FPSCallback fps = new FPSCallback();
 	
 	@Override
 	public void callback(RunningInfo info, DestinKernel layer) {
-		//nodeBeliefs
-		fps.callback(info, layer); //report fps
+		//show frames per second
+		fps.callback(info, layer); 
 		
 		if (info.getLayer() != 7 ) {
 			return;
@@ -56,6 +52,6 @@ public class ShowBeliefsCallback extends LayerFinishedCallback {
 			System.out.println("-----------------------------------------------");
 		}
 			
-		ASCIIArt.printArray(ASCIIArt.toJavaArray(layer.GetNodeBeliefVector(0, 0), states));
+		ASCIIArt.printArray(Util.toJavaArray(layer.GetNodeBeliefVector(0, 0), states));
 	}
 }
