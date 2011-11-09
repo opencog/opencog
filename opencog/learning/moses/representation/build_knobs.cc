@@ -647,11 +647,10 @@ void build_knobs::rec_canonize(pre_it it)
             append_linear_combination(mult_add(it, id::exp));
         append_linear_combination(it);
     } else if (*it == id::sin || *it == id::log || *it == id::exp) {
-        cout << _exemplar << " | " << combo_tree(it) << endl;
         linear_canonize(it.begin());
     } else if (*it == id::times) {
         // @todo: think about that case...
-        cerr << "I (Nil) must think for that one" << endl;
+        logger().warn("TODO: handle case where it = id::times in build_knobs::rec_canonize");
     } else {
         stringstream ss;
         ss << *it << " not a buitin, neither an argument";
