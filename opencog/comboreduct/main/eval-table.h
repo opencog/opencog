@@ -38,6 +38,7 @@ using namespace ant_combo;
 
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_table_opt("input-table", "i");
+static const pair<string, string> target_feature_opt("target-feature", "u");
 static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> labels_opt("labels", "l");
@@ -46,6 +47,7 @@ static const pair<string, string> feature_opt("feature", "f");
 static const pair<string, string> features_file_opt("features-file", "F");
 static const pair<string, string> compute_MI_opt("compute-MI", "m");
 static const pair<string, string> display_output_table_opt("display-output-table", "d");
+static const pair<string, string> display_RMSE_opt("display-RMSE-opt", "R");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -60,28 +62,34 @@ struct evalTableParameters {
     string input_table_file;
     vector<string> combo_programs;
     string combo_programs_file;
+    string target_feature;
     bool has_labels;
     vector<string> features;
     string features_file;
     bool display_output_table;
+    bool display_RMSE;
     string output_file;
 };
 
 template<typename Out, typename OT>
-Out& output_results(Out& out, const evalTableParameters& pa, const OT& ot) {
+Out& output_results(Out& out, const evalTableParameters& pa,
+                    const OT& ot, const OT& ot_tr) {
     if(pa.display_output_table)
-        out << ot << endl; // print output table
+        out << ot_tr << endl; // print output table
+    if(pa.display_RMSE)
+        out << "Root mean square error = "
+            << ot.root_mean_square_error(ot_tr) << endl;
     return out;
 }
 
 template<typename OT>
-void output_results(const evalTableParameters& pa, const OT& ot) {
-    
+void output_results(const evalTableParameters& pa,
+                    const OT& ot, const OT& ot_tr) {
     if(pa.output_file.empty())
-        output_results(cout, pa, ot);
+        output_results(cout, pa, ot, ot_tr);
     else {
         ofstream of(pa.output_file.c_str(), ios_base::app);
-        output_results(of, pa, ot);
+        output_results(of, pa, ot, ot_tr);
         of.close();        
     }
 }
@@ -95,15 +103,21 @@ void eval_output_results(const evalTableParameters& pa,
         OT ot_tr(tr, it, rng);        
         ot_tr.set_label(ot.get_label());
         // print results
-        output_results(pa, ot_tr);
+        output_results(pa, ot, ot_tr);
     }
 }
 
 template<typename Table>
 void read_eval_output_results(const evalTableParameters& pa,
                               opencog::RandGen& rng) {
+    // find the position of the target feature of the data file if any
+    int target_pos = -1;
+    if(!pa.target_feature.empty() && !pa.input_table_file.empty())
+        target_pos = findTargetFeaturePosition(pa.input_table_file,
+                                               pa.target_feature);
+
     // read data table
-    Table table(pa.input_table_file);
+    Table table(pa.input_table_file, target_pos);
 
     // read combo programs
     vector<combo_tree> trs;

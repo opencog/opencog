@@ -89,7 +89,10 @@ string l2ph(const string& ce, const vector<string>& labels)
                 matching = true;
         } else {
             if(c == ' ' || c == ')' || c == '\n') { //matching ends
-                arity_t idx = distance(labels.begin(), find(labels, match)) + 1;
+                auto found_it = find(labels, match);
+                OC_ASSERT(found_it != labels.end(), "No label %s matching",
+                          match.c_str());
+                arity_t idx = distance(labels.begin(), found_it) + 1;
                 res += lexical_cast<string>(idx) + c;
                 match.clear();
                 matching = false;
@@ -99,7 +102,10 @@ string l2ph(const string& ce, const vector<string>& labels)
     }
     // if a matching is going on flush to the result
     if(matching) {
-        arity_t idx = distance(labels.begin(), find(labels, match)) + 1;
+        auto found_it = find(labels, match);
+        OC_ASSERT(found_it != labels.end(), "No label %s matching",
+                  match.c_str());
+        arity_t idx = distance(labels.begin(), found_it) + 1;
         res += lexical_cast<string>(idx);
     }
     return res;

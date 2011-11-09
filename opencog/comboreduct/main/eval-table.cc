@@ -78,18 +78,23 @@ int main(int argc,char** argv) {
          "Random seed.\n")
         (opt_desc_str(input_table_opt).c_str(),
          value<string>(&pa.input_table_file),
-         "Input table file.\n")
+         "Input table file in DSL format (where the delimiters are comma, whitespace and tabulation).\n")
+        (opt_desc_str(target_feature_opt).c_str(),
+         value<string>(&pa.target_feature),
+         "Label of the target feature to fit. If none is given the last one is used.\n")
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string> >(&pa.combo_programs),
-         "Combo program to evaluate against the input table. It can be used several time so that several programs are evaluated at once.\n")
+         "Combo program to evaluate against the input table. It can be used several times so that several programs are evaluated at once.\n")
         (opt_desc_str(combo_prog_file_opt).c_str(),
          value<string>(&pa.combo_programs_file),
          "File containing combo programs to evaluate against the input table. Each combo program in the file is seperated by a new line and each results are displaied in the same order, seperated by a new line.\n")
         (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels #labels1, etc, instead of place holders. For instance one provide the combo program \"and(#large #tall)\" instead of \"and(#24 #124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
-        (opt_desc_str(display_output_table_opt).c_str(), value<bool>(&pa.display_output_table),
-         "Display the output table resulting from applying the combo program on the input table.\n")
+        (opt_desc_str(display_output_table_opt).c_str(), value<bool>(&pa.display_output_table)->default_value(false),
+         "Display the output column resulting from applying the combo program on the input table.\n")
+        (opt_desc_str(display_RMSE_opt).c_str(), value<bool>(&pa.display_RMSE)->default_value(true),
+         "Display the output column resulting from applying the combo program on the input table.\n")
         ;
 
     variables_map vm;
@@ -112,11 +117,10 @@ int main(int argc,char** argv) {
     type_node data_type = inferDataType(pa.input_table_file);
 
     if(data_type == id::boolean_type) {
-        read_eval_output_results<truth_table>(pa, rng);
+        std::cerr << "TODO: support boolean table" << std::endl;
+        // read_eval_output_results<truth_table>(pa, rng);
     } else if(data_type == id::contin_type) {
         read_eval_output_results<contin_table>(pa, rng);
     }
 
 }
-
-

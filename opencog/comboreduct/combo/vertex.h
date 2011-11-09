@@ -1014,8 +1014,9 @@ std::string ph2l(const std::string& ce,
                  const std::vector<std::string>& labels);
 
 /**
- * This is the converse of ph2l, that is given for instance
- * "and(#fat #pretty)" it returns "and(#1 #2)"
+ * This is the converse of ph2l, that is given for instance "and(#fat
+ * #pretty)" it returns "and(#1 #2)". If a variable is not in labels
+ * (that is it doesn't correspond to a place holder)
  */
 std::string l2ph(const std::string& ce,
                  const std::vector<std::string>& labels);
