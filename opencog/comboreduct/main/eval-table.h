@@ -48,6 +48,7 @@ static const pair<string, string> features_file_opt("features-file", "F");
 static const pair<string, string> compute_MI_opt("compute-MI", "m");
 static const pair<string, string> display_output_table_opt("display-output-table", "d");
 static const pair<string, string> display_RMSE_opt("display-RMSE-opt", "R");
+static const pair<string, string> display_STD_opt("display-STD-opt", "S");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -68,6 +69,7 @@ struct evalTableParameters {
     string features_file;
     bool display_output_table;
     bool display_RMSE;
+    bool display_STD;
     string output_file;
 };
 
@@ -79,6 +81,9 @@ Out& output_results(Out& out, const evalTableParameters& pa,
     if(pa.display_RMSE)
         out << "Root mean square error = "
             << ot.root_mean_square_error(ot_tr) << endl;
+    if(pa.display_STD)
+        out << "Standard deviation of the target feature = "
+            << "TODO" << endl;
     return out;
 }
 

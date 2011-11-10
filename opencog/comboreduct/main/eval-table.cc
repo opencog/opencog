@@ -94,7 +94,9 @@ int main(int argc,char** argv) {
         (opt_desc_str(display_output_table_opt).c_str(), value<bool>(&pa.display_output_table)->default_value(false),
          "Display the output column resulting from applying the combo program on the input table.\n")
         (opt_desc_str(display_RMSE_opt).c_str(), value<bool>(&pa.display_RMSE)->default_value(true),
-         "Display the output column resulting from applying the combo program on the input table.\n")
+         "Display the root mean square error.\n")
+        (opt_desc_str(display_STD_opt).c_str(), value<bool>(&pa.display_RMSE)->default_value(true),
+         "Display the standard deviation of the target feature of the data file.\n")
         ;
 
     variables_map vm;
