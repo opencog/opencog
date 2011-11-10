@@ -70,9 +70,8 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 {
     combo::contin_output_table ct(tr, cti, rng);
     behavioral_score bs(target.size() + (occam?1:0));
-        
     behavioral_score::iterator dst = bs.begin();
-    for(combo::contin_output_table::const_iterator it1 = ct.begin(), 
+    for(combo::contin_output_table::const_iterator it1 = ct.begin(),
             it2 = target.begin(); it1 != ct.end(); ++it1, ++it2) {
         *dst++ = sq(*it1 - *it2);
     }
@@ -85,6 +84,47 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     // ~Logger
 
     return bs;
+}
+
+bool discretize_contin_bscore::same_class(score_t e, score_t r) const {
+    const auto& t = thresholds;
+    if(e < thresholds[0])
+        return r < thresholds[0];
+    size_t last = thresholds.size() - 1;
+    if(e >= t[last])
+        return r >= t[last];
+    return same_class_within(e, r, 0, last);
+}
+
+bool discretize_contin_bscore::same_class_within(score_t e, score_t r,
+                                                 size_t l_idx, size_t u_idx) const
+{
+    // base case
+    if(u_idx - l_idx == 1)
+        return true;
+    // recursive case
+    size_t m_idx = l_idx + (u_idx - l_idx) / 2;
+    score_t t = thresholds[m_idx];
+    if(e < t)
+        return same_class_within(e, r, l_idx, m_idx);
+    else
+        return same_class_within(e, r, m_idx, u_idx);
+}
+
+behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) const
+{
+    combo::contin_output_table ct(tr, cti, rng);
+    behavioral_score bs(target.size());
+    auto dst = bs.begin();
+    for(combo::contin_output_table::const_iterator it1 = ct.begin(),
+            it2 = target.begin(); it1 != ct.end(); ++it1, ++it2) {
+        *dst++ = !same_class(*it1, *it2);
+    }
+    // Logger
+    log_candidate_bscore(tr, bs);
+    // ~Logger
+
+    return bs;    
 }
 
 void occam_contin_bscore::set_complexity_coef(double variance,

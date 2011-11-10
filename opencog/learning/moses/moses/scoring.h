@@ -28,6 +28,7 @@
 #include <fstream>
 
 #include <opencog/util/lru_cache.h>
+#include <opencog/util/algorithm.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/eval.h>
@@ -111,18 +112,45 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
     contin_bscore(const Func& func,
                   const contin_input_table& r,
                   RandGen& _rng)
-        : target(func, r), cti(r), rng(_rng) { }
+        : target(func, r), cti(r), rng(_rng) {}
 
     contin_bscore(const combo::contin_output_table& t,
                   const contin_input_table& r,
                   RandGen& _rng)
-        : target(t), cti(r), rng(_rng) { }
+        : target(t), cti(r), rng(_rng) {}
 
     behavioral_score operator()(const combo_tree& tr) const;
 
     combo::contin_output_table target;
     contin_input_table cti;
     RandGen& rng;
+};
+
+// Fitness function based on discretization of the output. If the
+// classes match the bscore element is 0, or 1 otherwise.
+struct discretize_contin_bscore : public unary_function<combo_tree,
+                                                        behavioral_score> {
+
+    discretize_contin_bscore(const combo::contin_output_table& t,
+                             const contin_input_table& r,
+                             const vector<score_t>& thres,
+                             RandGen& _rng)
+        : target(t), cti(r), thresholds(thres), rng(_rng) {
+        sort(thresholds);  // enforce that thresholds is sorted
+    }
+
+    behavioral_score operator()(const combo_tree& tr) const;
+    combo::contin_output_table target;
+    contin_input_table cti;
+    vector<score_t> thresholds;
+    RandGen& rng;
+
+protected:
+    // return true the 2 scores are in the same class according to thresholds
+    bool same_class(score_t, score_t) const;
+    // like same_class but assume that both scores e and r are within
+    // the class u_idx and l_idx
+    bool same_class_within(score_t e, score_t r, size_t l_idx, size_t u_idx) const;
 };
 
 /**
