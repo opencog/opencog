@@ -206,6 +206,9 @@ Set set_difference(const Set& s1, const Set& s2) {
     return res;
 }
 
+/**
+ * overload sort for container
+ */
 template<typename Seq>
 void sort(Seq& s) {
     std::sort(s.begin(), s.end());
@@ -262,7 +265,7 @@ template<typename Set> std::set<Set> powerset(const Set& s)
 }
 
 /**
- * overloading of find to work with container
+ * overload find for container
  */
 template<typename C>
 typename C::const_iterator find(const C& c, const typename C::value_type& e)
