@@ -289,7 +289,9 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
     }
 
     vtree::iterator target_it = _target->begin();
-    Type targetType = (Type) _v2h(*target_it);
+    
+    // Type targetType = (Type) _v2h(*target_it);
+
     // Check whether the target inherits from either BIND_LINK
     // or FORALL_LINK
     //! @todo This should be done for all quantifiers
@@ -817,7 +819,7 @@ void BITNode::addDirectResult(Btr<set<BoundVertex> > directResult, spawn_mode sp
             else //Proceed to Rule evaluation (if parent has other args already)
             {
                 tlog(0, "Unbound result: notify parent...");
-                pHandle hh = _v2h(bv.value);
+                // pHandle hh = _v2h(bv.value);
                 /*printTree(hh,0,2); */
                 NotifyParentOfResult(new VtreeProviderWrapper(bv.value));
             }
@@ -1627,7 +1629,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 
                 const vector<VtreeProvider*>& rule_args = *a;
 
-                int s2 = rule_args.size();
+                // int s2 = rule_args.size();
 
                 boost::indirect_iterator<vector<VtreeProvider*>::const_iterator, const VtreeProvider > ii;
                 RuleApp* ruleApp = NULL;
@@ -2014,7 +2016,7 @@ string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
 
 string BITNodeRoot::extract_plan(pHandle h) const
 {
-    AtomSpaceWrapper *asw = GET_ASW;
+    // AtomSpaceWrapper *asw = GET_ASW;
     ostringstream ss;
     vtree do_template = mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "do"),
@@ -2159,7 +2161,7 @@ string BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > usedBITNod
                 ss << repeatc(' ', (depth+1)*3) << "---" << endl;
             }
             ccount++;
-            int n_children = i->size();
+            // int n_children = i->size();
 
             ss1 << ss.str();
             cprintf(loglevel, ss.str().c_str());
@@ -2178,7 +2180,7 @@ static int _trail_print_more_count = 0;
 string BITNodeRoot::printTrail(VtreeProvider* vp, unsigned int level) const
 {
     stringstream ss;
-    AtomSpaceWrapper* asw = ASW();
+    // AtomSpaceWrapper* asw = ASW();
 
     NMPrinter np;
     //ss << np.toString(vp->getVtree(),-10);
@@ -2215,7 +2217,7 @@ string BITNodeRoot::printTrail(VtreeProvider* vp, unsigned int level) const
 string BITNodeRoot::printTrail(pHandle h) const
 {
     stringstream ss;
-    AtomSpaceWrapper* asw = ASW();
+    // AtomSpaceWrapper* asw = ASW();
 
     VtreeProvider* first_result = *eval_results[0].begin();
     ss << printTree(h,0,-10);
