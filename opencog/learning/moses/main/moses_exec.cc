@@ -223,7 +223,7 @@ int moses_exec(int argc, char** argv) {
     // metapop_param
     int max_candidates;
     bool reduce_all;
-    bool revisit;
+    bool revisit = false;
     bool include_dominated;
     // optim_param
     double pop_size_ratio;
@@ -349,8 +349,6 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(enable_cache_opt).c_str(),
          value<bool>(&enable_cache)->default_value(true),
          "Cache, so that identical candidates are not re-evaluated, the cache size is dynamically adjusted to fit in the RAM.\n")
-        (opt_desc_str(revisit_opt).c_str(),
-         "Revisit visited examplars when all have been visited.\n")
         (opt_desc_str(jobs_opt).c_str(),
          value<vector<string> >(&jobs_str),
          string("Number of jobs allocated for deme optimization. Jobs can be executed on a remote machine as well, in such case the notation -j N:REMOTE_HOST is used. For instance one can enter the options -j 4 -j 16").append(job_seperator).append("my_server.org (or -j 16").append(job_seperator).append("user@my_server.org if wishes to run the remote jobs under a different user name), meaning that 4 jobs are allocated on the local machine and 16 jobs are allocated on my_server.org. The assumption is that moses-exec must be on the remote machine and is located in a directory included in the PATH environment variable. Beware that a lot of log files are gonna be generated when using this option.\n").c_str())
@@ -376,7 +374,6 @@ int moses_exec(int argc, char** argv) {
     notify(vm);
 
     // set flags
-    revisit = vm.count(revisit_opt.first) > 0;
     log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
     
     if (vm.count("help") || argc == 1) {
