@@ -649,11 +649,12 @@ std::cout<<"action status: unexpected result"<<std::endl;
 
 std::cout<<"action status: fail"<<std::endl; 
 
+            // TODO: record the failure and update the weight of corresponding rule
+            
             // Troy: now that this action failed, the following action sequence
             // should be dropped.
             this->current_actions.clear();
             this->temp_action_list.clear();
-            // TODO: record the failure and update the weight of corresponding rule
         }
         // If the Action is time out
         else if ( time(NULL) - this->timeStartCurrentAction >  this->procedureExecutionTimeout ) { 
@@ -674,6 +675,11 @@ std::cout<<"action status: fail"<<std::endl;
 std::cout<<"action status: timeout"<<std::endl; 
 
             // TODO: record the time out and update the weight of corresponding rule
+            
+            // Troy: now that this action failed, the following action sequence
+            // should be dropped.
+            this->current_actions.clear();
+            this->temp_action_list.clear();
         }
         // If the Action is still running and is not time out, simply returns
         else {  
