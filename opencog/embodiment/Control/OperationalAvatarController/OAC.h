@@ -54,7 +54,9 @@
 #include <opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/PsiFeelingUpdaterAgent.h>
 
-#include <opencog/embodiment/Control/OperationalAvatarController/FishgramAgent.h>
+#ifdef HAVE_CYTHON
+    #include <opencog/cython/PyMindAgent.h>
+#endif
 
 class PsiModulatorUpdaterAgentUTest; 
 class PsiDemandUpdaterAgentUTest;
@@ -154,7 +156,8 @@ private:
     PsiFeelingUpdaterAgent * psiFeelingUpdaterAgent; 
 
 #ifdef HAVE_CYTHON
-    FishgramAgent * fishgramAgent; 
+    PyMindAgent * fishgramAgent; 
+    PyMindAgent * monitorChangesAgent; 
 #endif    
 
     /**
@@ -320,7 +323,6 @@ public:
     SingletonFactory <PsiActionSelectionAgent, Agent> psiActionSelectionAgentFactory;
     SingletonFactory <PsiRelationUpdaterAgent, Agent> psiRelationUpdaterAgentFactory; 
     SingletonFactory <PsiFeelingUpdaterAgent, Agent> psiFeelingUpdaterAgentFactory; 
-    SingletonFactory <FishgramAgent, Agent> fishgramAgentFactory; 
 }; // class
 
 } } // namespace opencog::oac

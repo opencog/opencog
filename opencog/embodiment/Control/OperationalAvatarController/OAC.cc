@@ -236,15 +236,6 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                   )
                                                                  );
 
-#ifdef HAVE_CYTHON    
-    this->registerAgent( FishgramAgent::info().id, 
-                         &fishgramAgentFactory
-                       );
-    fishgramAgent = static_cast<FishgramAgent*>(
-                        this->createAgent(FishgramAgent::info().id, false)
-                                               );
-#endif    
-
 //    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         // adds the same procedure interpreter agent to schedule again
 //        this->startAgent(procedureInterpreterAgent);
@@ -298,11 +289,16 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     }
 
 #ifdef HAVE_CYTHON    
-    // TODO: use configurations 
-    if (config().get_bool("FISHGRAM_AGENT_ENABLE")) {
-        this->psiFeelingUpdaterAgent->setFrequency(
-            config().get_int("FISHGRAM_AGENT_CYCLE_PERIOD") ); 
-        this->startAgent(fishgramAgent);
+    if ( config().get_bool("FISHGRAM_ENABLED") ) {
+        this->fishgramAgent = new PyMindAgent("fishgram", "FishgramMindAgent"); 
+        this->fishgramAgent->setFrequency( config().get_int("FISHGRAM_CYCLE_PERIOD") ); 
+        this->startAgent(this->fishgramAgent); 
+    }
+
+    if ( config().get_bool("MONITOR_CHANGES_ENABLED") ) {
+        this->monitorChangesAgent = new PyMindAgent("monitor_changes", "MonitorChangesMindAgent"); 
+        this->monitorChangesAgent->setFrequency( config().get_int("MONITOR_CHANGES_CYCLE_PERIOD") ); 
+        this->startAgent(this->monitorChangesAgent); 
     }
 #endif        
 
@@ -494,6 +490,7 @@ OAC::~OAC()
 
 #ifdef HAVE_CYTHON    
     delete (fishgramAgent); 
+    delete (monitorChangesAgent); 
 #endif    
 
     // ZeroMQ 

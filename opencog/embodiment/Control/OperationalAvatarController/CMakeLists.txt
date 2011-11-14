@@ -14,7 +14,6 @@ ADD_LIBRARY (oac
     PsiRelationUpdaterAgent
     PsiFeelingUpdaterAgent
     PsiRuleUtil
-    FishgramAgent
     SleepAgent
     MockOpcHCTest
     HCTestAgent
