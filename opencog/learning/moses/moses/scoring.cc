@@ -37,6 +37,7 @@ inline void log_candidate_bscore(const combo_tree& tr,
         ss_tr << "Evaluate candidate: " << tr;
         logger().fine(ss_tr.str());
         stringstream ss_bsc;
+        ss_bsc << "BScored: ";
         ostream_behavioral_score(ss_bsc, bs);
         logger().fine(ss_bsc.str());
     }
@@ -72,9 +73,8 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     behavioral_score bs(target.size() + (occam?1:0));
     behavioral_score::iterator dst = bs.begin();
     for(combo::contin_output_table::const_iterator it1 = ct.begin(),
-            it2 = target.begin(); it1 != ct.end(); ++it1, ++it2) {
+            it2 = target.begin(); it1 != ct.end(); ++it1, ++it2)
         *dst++ = sq(*it1 - *it2);
-    }
     // add the Occam's razor feature
     if(occam)
         *dst = complexity(tr) * complexity_coef;
@@ -86,40 +86,59 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-bool discretize_contin_bscore::same_class(score_t e, score_t r) const {
-    const auto& t = thresholds;
-    if(e < thresholds[0])
-        return r < thresholds[0];
-    size_t last = thresholds.size() - 1;
-    if(e >= t[last])
-        return r >= t[last];
-    return same_class_within(e, r, 0, last);
+discretize_contin_bscore::discretize_contin_bscore(const combo::contin_output_table& ot,
+                                                   const contin_input_table& it,
+                                                   const vector<contin_t>& thres,
+                                                   bool wa,
+                                                   RandGen& _rng)
+    : target(ot), cit(it), thresholds(thres), weighted_accuracy(wa), rng(_rng),
+      weights(thresholds.size() + 1, 1), classes(ot.size()) {
+    // enforce that thresholds is sorted
+    sort(thresholds);
+    // precompute classes
+    transform(target.begin(), target.end(), classes.begin(),
+              [&](contin_t v) { return this->class_idx(v); });
+    // precompute weights
+    multiset<size_t> cs(classes.begin(), classes.end());
+    if(weighted_accuracy)
+        for(size_t i = 0; i < weights.size(); ++i) {
+            weights[i] = classes.size() / (float)(weights.size() * cs.count(i));
+            // std::cout << "i = " << i << " weight = " << weights[i] << std::endl;
+        }
 }
 
-bool discretize_contin_bscore::same_class_within(score_t e, score_t r,
-                                                 size_t l_idx, size_t u_idx) const
+size_t discretize_contin_bscore::class_idx(contin_t v) const {
+    if(v < thresholds[0])
+        return 0;
+    size_t s = thresholds.size();
+    if(v >= thresholds[s - 1])
+        return s;
+    return class_idx_within(v, 1, s);
+}
+
+size_t discretize_contin_bscore::class_idx_within(contin_t v,
+                                                  size_t l_idx, size_t u_idx) const
 {
     // base case
     if(u_idx - l_idx == 1)
-        return true;
+        return l_idx;
     // recursive case
     size_t m_idx = l_idx + (u_idx - l_idx) / 2;
-    score_t t = thresholds[m_idx];
-    if(e < t)
-        return same_class_within(e, r, l_idx, m_idx);
+    contin_t t = thresholds[m_idx - 1];
+    if(v < t)
+        return class_idx_within(v, l_idx, m_idx);
     else
-        return same_class_within(e, r, m_idx, u_idx);
+        return class_idx_within(v, m_idx, u_idx);
 }
 
 behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) const
 {
-    combo::contin_output_table ct(tr, cti, rng);
+    combo::contin_output_table ct(tr, cit, rng);
     behavioral_score bs(target.size());
-    auto dst = bs.begin();
-    for(combo::contin_output_table::const_iterator it1 = ct.begin(),
-            it2 = target.begin(); it1 != ct.end(); ++it1, ++it2) {
-        *dst++ = !same_class(*it1, *it2);
-    }
+    transform(ct.begin(), ct.end(), classes.begin(), bs.begin(),
+              [&](contin_t res, size_t c_idx) {
+                  return (c_idx != this->class_idx(res)) * this->weights[c_idx];
+              });
     // Logger
     log_candidate_bscore(tr, bs);
     // ~Logger

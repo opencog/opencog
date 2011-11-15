@@ -76,12 +76,12 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             // Logger
             stringstream ss1;
             ss1 << "The following candidate: " << tr;
-            logger().warn(ss1.str());
+            logger().fine(ss1.str());
             stringstream ss2;
             ss2 << "has failed to be evaluated,"
                 << " raising the following exception: "
                 << ee.get_message() << " " << ee.get_vertex();
-            logger().warn(ss2.str());
+            logger().fine(ss2.str());
             // ~Logger
             return get_score(worst_composite_score);
         }
@@ -127,30 +127,41 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
 };
 
 // Fitness function based on discretization of the output. If the
-// classes match the bscore element is 0, or 1 otherwise.
+// classes match the bscore element is 0, or 1 otherwise. If wa (for
+// weighted_average is true then each element of the bscore is
+// weighted so that each class overall as the same weight in the
+// scoring function.
 struct discretize_contin_bscore : public unary_function<combo_tree,
                                                         behavioral_score> {
 
-    discretize_contin_bscore(const combo::contin_output_table& t,
-                             const contin_input_table& r,
-                             const vector<score_t>& thres,
-                             RandGen& _rng)
-        : target(t), cti(r), thresholds(thres), rng(_rng) {
-        sort(thresholds);  // enforce that thresholds is sorted
-    }
+    discretize_contin_bscore(const combo::contin_output_table& ot,
+                             const contin_input_table& it,
+                             const vector<contin_t>& thres,
+                             bool wa,
+                             RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
     combo::contin_output_table target;
-    contin_input_table cti;
-    vector<score_t> thresholds;
+    contin_input_table cit;
+    vector<contin_t> thresholds;
+    bool weighted_accuracy;     // whether the bscore is weighted to
+                                // deal with unbalanced data
     RandGen& rng;
 
 protected:
-    // return true the 2 scores are in the same class according to thresholds
-    bool same_class(score_t, score_t) const;
-    // like same_class but assume that both scores e and r are within
-    // the class u_idx and l_idx
-    bool same_class_within(score_t e, score_t r, size_t l_idx, size_t u_idx) const;
+    // return the index of the class of value v
+    size_t class_idx(contin_t v) const;
+    // like class_idx but assume that the value v is within the class
+    // [l_idx, u_idx)
+    size_t class_idx_within(contin_t v, size_t l_idx, size_t u_idx) const;
+
+    vector<size_t> classes;       // classes of the output, alligned with target
+
+    // weight of each class so that each one weights as much as the
+    // others even in case of unbalance sampling. For specifically:
+    // weights[i] = s / (n * c_i) where s is the sample size, n the
+    // number of classes and c_i the number of samples for class i.
+    vector<score_t> weights;
 };
 
 /**
@@ -304,7 +315,7 @@ struct complexity_based_scorer : public unary_function<instance,
             logger().fine(ss.str());
         }
         // ~Logger
-        
+
         try {
             combo_tree tr = _rep.get_candidate(inst, _reduce);
             return composite_score(score(tr), complexity(tr));
@@ -312,7 +323,7 @@ struct complexity_based_scorer : public unary_function<instance,
             stringstream ss;
             ss << "The following instance has failed to be evaluated: " 
                << _rep.fields().stream(inst);
-            logger().warn(ss.str());
+            logger().fine(ss.str());
             return worst_composite_score;
         }
     }

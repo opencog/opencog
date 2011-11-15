@@ -220,6 +220,7 @@ int moses_exec(int argc, char** argv) {
     int reduct_knob_building_effort;
     bool enable_cache;
     vector<string> jobs_str;
+    bool weighted_accuracy;
     // metapop_param
     int max_candidates;
     bool reduce_all;
@@ -231,6 +232,8 @@ int moses_exec(int argc, char** argv) {
     double max_dist_ratio;
     // hc_param
     bool hc_terminate_if_improvement;
+    // continuous optimization
+    vector<contin_t> discretize_thresholds;
 
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -352,6 +355,9 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(jobs_opt).c_str(),
          value<vector<string> >(&jobs_str),
          string("Number of jobs allocated for deme optimization. Jobs can be executed on a remote machine as well, in such case the notation -j N:REMOTE_HOST is used. For instance one can enter the options -j 4 -j 16").append(job_seperator).append("my_server.org (or -j 16").append(job_seperator).append("user@my_server.org if wishes to run the remote jobs under a different user name), meaning that 4 jobs are allocated on the local machine and 16 jobs are allocated on my_server.org. The assumption is that moses-exec must be on the remote machine and is located in a directory included in the PATH environment variable. Beware that a lot of log files are gonna be generated when using this option.\n").c_str())
+        (opt_desc_str(weighted_accuracy_opt).c_str(),
+         value<bool>(&weighted_accuracy)->default_value(false),
+         "This option is useful in case of unbalanced data as it weights the score so that each class weights equally regardless of their proportion in terms of sample size.\n")
         (opt_desc_str(pop_size_ratio_opt).c_str(),
          value<double>(&pop_size_ratio)->default_value(20),
          "The higher the more effort is spent on a deme.\n")
@@ -367,6 +373,9 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(hc_terminate_if_improvement_opt).c_str(),
          value<bool>(&hc_terminate_if_improvement)->default_value(true),
          "Hillclimbing parameter. If 1 then deme search terminates when an improvement is found, if 0 it keeps searching until another termination condition is met.\n")
+        (opt_desc_str(discretize_threshold_opt).c_str(),
+         value<vector<contin_t> >(&discretize_thresholds),
+         "If the domain is continuous, discretize the target feature. A unique used of that option produces 2 classes, x < thresold and x >= threshold. The option can be used several times (n-1) to produce n classes and the thresholds are automatically sorted.\n")
         ;
 
     variables_map vm;
@@ -540,13 +549,24 @@ int moses_exec(int argc, char** argv) {
                 exemplars.push_back(type_to_exemplar(id::contin_type));
             }
 
-            occam_contin_bscore bscore(ot, it, variance, as, rng);
-            metapop_moses_results(rng, exemplars, tt,
-                                  contin_reduction(ignore_ops, rng),
-                                  contin_reduction(ignore_ops, rng),
-                                  bscore, opt_algo,
-                                  opt_params, meta_params, moses_params,
-                                  vm, mmr_pa);
+            if(discretize_thresholds.empty()) {
+                occam_contin_bscore bscore(ot, it, variance, as, rng);
+                metapop_moses_results(rng, exemplars, tt,
+                                      contin_reduction(ignore_ops, rng),
+                                      contin_reduction(ignore_ops, rng),
+                                      bscore, opt_algo,
+                                      opt_params, meta_params, moses_params,
+                                      vm, mmr_pa);
+            } else {
+                discretize_contin_bscore bscore(ot, it, discretize_thresholds,
+                                                weighted_accuracy, rng);
+                metapop_moses_results(rng, exemplars, tt,
+                                      contin_reduction(ignore_ops, rng),
+                                      contin_reduction(ignore_ops, rng),
+                                      bscore, opt_algo,
+                                      opt_params, meta_params, moses_params,
+                                      vm, mmr_pa);                
+            }
         } else {
             unsupported_type_exit(output_type);
         }
