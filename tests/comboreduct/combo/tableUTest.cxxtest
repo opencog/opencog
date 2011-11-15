@@ -25,9 +25,9 @@ using namespace opencog;
 using namespace combo;
 using namespace std;
 
+const string olabel = "happiness";
 const string label1 = "price";
 const string label2 = "temperature";
-const string olabel = "happiness";
 
 class tableUTest : public CxxTest::TestSuite {
 private:
@@ -50,34 +50,34 @@ private:
     }
 public:
     void test_TruthTable() {
+        bool_vector o{true, false};
+        truth_output_table ot(o);
         truth_input_table it;
         it.push_back({true, false});
         it.push_back({false, true});
-        bool_vector o{true, false};
-        truth_output_table ot(o);
-        testIStreamTable("1,0,1\n"
-                         "0,1,0\n", it, ot);
+        testIStreamTable("1,1,0\n"
+                         "0,0,1\n", it, ot);
     }
     void test_ContinTable() {
+        contin_vector o{10.1, 6.5};
+        contin_output_table ot(o);
         contin_input_table it;
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
-        contin_vector o{10.1, 6.5};
-        contin_output_table ot(o);
-        testIStreamTable("0.4,244.2,10.1\n"
-                         "9.5,4.2,6.5\n", it, ot);
+        testIStreamTable("10.1,0.4,244.2\n"
+                         "6.5,9.5,4.2\n", it, ot);
     }
     void test_ContinTableLabels() {
+        contin_vector o{10.1, 6.5};
+        contin_output_table ot(o, olabel);
         contin_input_table it;
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
         vector<string> il{label1, label2};
         it.set_labels(il);
-        contin_vector o{10.1, 6.5};
-        contin_output_table ot(o, olabel);
-        testIStreamTable("price,temperature,happiness\n"
-                         "0.4,244.2,10.1\n"
-                         "9.5,4.2,6.5\n", it, ot);
+        testIStreamTable("happiness,price,temperature\n"
+                         "10.1,0.4,244.2\n"
+                         "6.5,9.5,4.2\n", it, ot);
     }
     void test_ostreamTrueTable() {
         truth_input_table it;
@@ -93,6 +93,9 @@ public:
         ot.set_label("troc");
         stringstream ss;
         ostreamTable(ss, fit, ot);
-        TS_ASSERT_EQUALS(ss.str(), "truc,troc\n1,1\n0,0\n");
+        TS_ASSERT_EQUALS(ss.str(),
+                         "troc,truc\n"
+                         "1,1\n"
+                         "0,0\n");
     }
 };

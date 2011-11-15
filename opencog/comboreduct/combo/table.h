@@ -108,7 +108,7 @@ std::vector<T> tokenizeRow(std::string& line) {
 // position is as usual (0 is the first, 1 is the second, etc).
 // If pos is out of range then an assert is raised.
 template<typename T>
-std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = -1) {
+std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0) {
     boost::tokenizer<boost::char_separator<char> > tok = get_row_tokenizer(line);
     std::vector<T> inputs;
     T output;
@@ -135,11 +135,12 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = -1) {
  * It is assumed that each row have the same number of columns, if not
  * an assert is raised.
  *
- * pos specifies the position of the output, by default the last one.
+ * pos specifies the position of the output, if -1 it is the last
+ * position. The default position is 0, the first column.
  */
 template<typename IT, typename OT>
 std::istream& istreamTable(std::istream& in, IT& input_table, OT& output_table,
-                           int pos = -1) {
+                           int pos = 0) {
     typedef typename OT::value_type T;
     std::string line;
 
@@ -189,7 +190,7 @@ std::istream& istreamTable(std::istream& in, IT& input_table, OT& output_table,
  */
 template<typename IT, typename OT>
 void istreamTable(const std::string& file_name,
-                  IT& input_table, OT& output_table, int pos = -1) {
+                  IT& input_table, OT& output_table, int pos = 0) {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     std::ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
@@ -203,8 +204,9 @@ void istreamTable(const std::string& file_name,
 // output the header of a data table in CSV format.
 template<typename IT, typename OT>
 std::ostream& ostreamTableHeader(std::ostream& out, const IT& it, const OT& ot) {
-    ostreamContainer(out, it.get_labels(), ",", "", ",");
-    out << ot.get_label() << std::endl;
+    out << ot.get_label() << ",";
+    ostreamContainer(out, it.get_labels(), ",");
+    out << std::endl;
     return out;
 }
 
@@ -217,9 +219,14 @@ std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
     // print data
     OC_ASSERT(it.size() == ot.size());
     for(size_t row = 0; row < it.size(); ++row) {
-        for(arity_t col = 0; col < it.get_arity(); col++)
-            out << it[row][col] << ",";
-        out << ot[row] << std::endl;
+        out << ot[row] << ",";
+        for(arity_t col = 0; col < it.get_arity(); col++) {
+            out << it[row][col];
+            if(col != (it.get_arity() - 1))
+                out << ",";
+            else
+                out << std::endl;
+        }
     }
     return out;
 }
@@ -385,10 +392,10 @@ struct table {
     typedef typename IT::value_type value_type;
 
     table() {}
-    table(std::istream& in, int pos = -1) {
+    table(std::istream& in, int pos = 0) {
         istreamTable(in, input, output, pos);
     }
-    table(const std::string& file_name, int pos = -1) {
+    table(const std::string& file_name, int pos = 0) {
         istreamTable(file_name, input, output, pos);
     }
     size_t size() const { return input.size(); }
@@ -420,17 +427,17 @@ typedef bool_matrix::const_iterator bm_cit;
  * assumed to be ordered in the conventional way, for instance if
  * there are 2 inputs, the output is ordered as follows:
  *
- * +--+--+-----------------------+
- * |#1|#2|Output                 |
- * +--+--+-----------------------+
- * |F |F |complete_truth_table[0]|
- * +--+--+-----------------------+
- * |T |F |complete_truth_table[1]|
- * +--+--+-----------------------+
- * |F |T |complete_truth_table[2]|
- * +--+--+-----------------------+
- * |T |T |complete_truth_table[3]|
- * +--+--+-----------------------+
+ * +-----------------------+--+--+
+ * |Output                 |#1|#2|
+ * +-----------------------+--+--+
+ * |complete_truth_table[0]|F |F |
+ * +-----------------------+--+--+
+ * |complete_truth_table[1]|T |F |
+ * +-----------------------+--+--+
+ * |complete_truth_table[2]|F |T |
+ * +-----------------------+--+--+
+ * |complete_truth_table[3]|T |T |
+ * +-----------------------+--+--+
  */
 class complete_truth_table : public bool_vector
 {
@@ -526,17 +533,17 @@ public:
 /// Struct to contain a compressed truth table, for instance if
 /// the following truth table is:
 ///
-/// i1,i2,o
-/// 1,0,1
+/// o,i1,i2
 /// 1,1,0
-/// 1,0,1
-/// 1,0,0
+/// 0,1,1
+/// 1,1,0
+/// 0,1,0
 ///
 /// the compressed truth table is
 ///
-/// i1,i2,o
-/// 1,0,(1,2)
-/// 1,1,(1,0)
+/// o,i1,i2
+/// (1,2),1,0
+/// (1,0),1,1
 ///
 /// that is the duplicated inputs are removed and the output is
 /// replaced by a counter of the false ones and the true ones
@@ -580,8 +587,8 @@ public:
     typedef ctruth_table CTable;
 
     truth_table(const super& t) : super(t) {}
-    truth_table(std::istream& in, int pos = -1) : super(in, pos) {}
-    truth_table(const std::string& file_name, int pos = -1) :
+    truth_table(std::istream& in, int pos = 0) : super(in, pos) {}
+    truth_table(const std::string& file_name, int pos = 0) :
         super(file_name, pos) {}
 
     /// return the corresponding compressed truth table 
@@ -657,8 +664,8 @@ public:
 
 struct contin_table : public table<contin_input_table, contin_output_table> {
     typedef table<contin_input_table, contin_output_table> super;
-    contin_table(std::istream& in, int pos = -1) : super(in, pos) {}
-    contin_table(const std::string& file_name, int pos = -1)
+    contin_table(std::istream& in, int pos = 0) : super(in, pos) {}
+    contin_table(const std::string& file_name, int pos = 0)
         : super(file_name, pos) {}
 };
 
@@ -932,7 +939,7 @@ public:
 /**
  * if the DSV data file has a header with labels
  */
-std::vector<std::string> readInputLabels(const std::string& file, int pos = -1);
+std::vector<std::string> readInputLabels(const std::string& file, int pos = 0);
 
 std::ifstream* open_data_file(const std::string& fileName);
 

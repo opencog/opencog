@@ -41,7 +41,7 @@ public:
     typedef MutualInformation<ctruth_table, set<arity_t> > FeatureScorer;
 
 
-    feature_selectionUTest() : table(FEATURE_SELECTION_TEST_DIR"dataset") {}
+    feature_selectionUTest() : table(FEATURE_SELECTION_TEST_DIR"dataset.csv") {}
 
     void test_incremental_selection() {
         ctruth_table ctable = table.compress();

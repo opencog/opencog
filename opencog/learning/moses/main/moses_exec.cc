@@ -262,7 +262,7 @@ int moses_exec(int argc, char** argv) {
          "If 1, outputs the actual number of evaluations.\n")
         (opt_desc_str(output_with_labels_opt).c_str(),
          value<bool>(&output_with_labels)->default_value(false),
-         "If 1, outputs the candidates with their labels instead of place holders. for instance *(\"price\" \"temprature\") instead of *(#1 #2). This only works for data fitting problems where the data file contains labels in its header\n")
+         "If 1, outputs the candidates with their labels instead of place holders. for instance *(\"#price\" \"#temprature\") instead of *(#1 #2). This only works for data fitting problems where the data file contains labels in its header\n")
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&output_file)->default_value(""),
          "File where to save the results. If empty then it outputs on the stdout.\n")
@@ -274,17 +274,17 @@ int moses_exec(int argc, char** argv) {
          "Input table file in DSL format (where the delimiters are comma, whitespace and tabulation), the maximum number of samples is the number of rows in the file.\n")
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&target_feature),
-         "Label of the target feature to fit. If none is given the last one is used.\n")
+         "Label of the target feature to fit. If none is given the first one is used.\n")
         (opt_desc_str(problem_opt).c_str(),
          value<string>(&problem)->default_value("it"),
-         string("Problem to solve, supported problems are"
-                " regression based on input table (").append(it).
-         append("), regression based on input table using ann (").append(ann_it).
-         append("), regression based on combo program (").append(cp).
-         append("), even parity (").append(pa).
-         append("), disjunction (").append(dj).
-         append("), multiplex (").append(mux).
-         append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").
+         string("Problem to solve, supported problems are\n"
+                "regression based on input table (").append(it).
+         append("),\n" "regression based on input table using ann (").append(ann_it).
+         append("),\n" "regression based on combo program (").append(cp).
+         append("),\n" "even parity (").append(pa).
+         append("),\n" "disjunction (").append(dj).
+         append("),\n" "multiplex (").append(mux).
+         append("),\n" "regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").
          append(").\n").c_str())
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
@@ -475,7 +475,7 @@ int moses_exec(int argc, char** argv) {
     moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);
 
     // find the position of the target feature of the data file if any
-    int target_pos = -1;
+    int target_pos = 0;
     if(!target_feature.empty() && !input_data_file.empty())
         target_pos = findTargetFeaturePosition(input_data_file, target_feature);
 
