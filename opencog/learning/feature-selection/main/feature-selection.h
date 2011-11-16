@@ -275,7 +275,8 @@ void feature_selection(Table& table,
     } else if(fs_params.algorithm == inc) {
         incremental_feature_selection(table, fs_params);
     } else {
-        std::cerr << "Unknown algorithm, please consult the help for the list of algorithms." << std::endl;
+        std::cerr << "Algorithm '" << fs_params.algorithm
+                  << "' is unknown, please consult the help for the list of algorithms." << std::endl;
         exit(1);
     }
 }

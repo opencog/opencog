@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
          "Random seed.\n")
         (opt_desc_str(algo_opt).c_str(),
          value<string>(&fs_params.algorithm)->default_value(hc),
-         string("Feature selection algorithm. Supported algorithms are ").append(un).append(" for univariate, ").append(sa).append(" for simulated annealing, ").append(hc).append(" for hillclimbing, ").append(inc).append(" for incremental.").c_str())
+         string("Feature selection algorithm. Supported algorithms are\n").append(un).append(" for univariate,\n").append(sa).append(" for simulated annealing,\n").append(hc).append(" for hillclimbing,\n").append(inc).append(" for incremental.\n").c_str())
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&fs_params.input_file),
          "Input table file, DSV file using comman, whitespace or tabulation as seperator.\n")
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
          "Incremental Selection parameter. Error interval tolerated to control the automatically adjust feature selection intensity when using option -C.\n")
         (opt_desc_str(inc_redundant_intensity_opt).c_str(),
          value<double>(&fs_params.inc_rintensity)->default_value(0.1),
-         "Incremental Selection parameter. Value between 0 and 1. 0 means no redundant features are discarded, 1 means redudant features are maximally discarded. This option is only active when feature selection is active.\n")
+         "Incremental Selection parameter. Value between 0 and 1. 0 means no redundant features are discarded, 1 means redudant features are maximally discarded.\n")
         (opt_desc_str(inc_interaction_terms_opt).c_str(),
          value<unsigned>(&fs_params.inc_interaction_terms)->default_value(1),
          "Incremental Selection parameter. Maximum number of interaction terms considered during feature selection. Higher values make the feature selection more accurate but is computationally expensive.\n")
