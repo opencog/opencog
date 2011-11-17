@@ -2,7 +2,7 @@
 
 #from IPython.Debugger import Tracer; debug_here = Tracer()
 
-from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
+from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, get_type_name
 import opencog.cogserver
 from tree import *
 from util import pp, OrderedSet, concat_lists, inplace_set_attributes
@@ -36,7 +36,7 @@ class Chainer:
 
         self.space = space
         self.viz = PLNviz(space)
-        self.viz.connect()
+        #self.viz.connect()
         self.setup_rules(space)
         self.apps = []
         # Disturbingly, a separate set is still necessary for rule applications as they contain lists so tuples are stored instead.
@@ -63,8 +63,11 @@ class Chainer:
 
             log.info(format_log('bc', target))
             self.bc_later = OrderedSet([target])
-            self.target = target
             self.results = []
+
+            self.target = target
+            dummy = Rule(Tree('GOAL'), [target], name='producing target')
+            self.apps.append(dummy)
 
             # viz - visualize the root
             self.viz.outputTarget(target, None, 0, 'GOAL')
@@ -85,6 +88,16 @@ class Chainer:
             # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
             print msg
             print [str(atom_from_tree(result, self.space).tv) for result in self.results]
+            for res in self.results:
+                bit = self.traverse_tree(res, set())
+                self.add_depths(bit)
+                self.add_best_conf_above(bit)
+                
+                self.print_tree(bit)
+            for res in self.results:
+                self.print_tree(self.trail(res))
+            for res in self.results:
+                self.viz_proof_tree(self.trail(res))
             return [atom_from_tree(result, self.space).h for result in self.results]
         except Exception, e:
             import traceback, pdb
@@ -121,7 +134,10 @@ class Chainer:
             a = a.standardize_apart()
             if not a.goals: print 'generator', repr(a)
             if not a.goals and a.tv:
-                ret.append(a.head)
+                # Makes sure it goes in the list of apps, but just propogate results from the head (i.e. the actual Atom)
+                # and not the goals (an empty list!)
+                ret.append(a.head)                
+                self.add_queries(a)
                 #ret += self.add_queries(a)
                 #viz
                 self.viz.declareResult(a.head)
@@ -206,17 +222,21 @@ class Chainer:
         for app in potential_results:
             #print repr(a)
 
-            got_result = self.check_premises_and_add_result(app)
+            got_result = self.check_premises(app)
             if got_result:
-                #viz
-                self.viz.declareResult(app.head)
+                if app.head.op == 'GOAL':
+                    target = app.goals[0]
+                    print format_log('Target produced!', target)
+                    self.results.append(target)
+                else:
+                    #viz
+                    self.viz.declareResult(app.head)
+                    
+                    self.compute_and_add_tv(app)
 
-                if app.head.unifies(self.target):
-                    self.results.append(app.head)
+                    print (format_log(app.name, 'produced:', app.head, app.tv))
 
-                print (format_log(app.name, 'produced:', app.head, app.tv))
-
-                real_results.append(app)
+                    real_results.append(app)
 
         for app in specialized+real_results:
             # If there is a result, then you want to propogate it up. You should also propogate specializations,
@@ -266,13 +286,11 @@ class Chainer:
 
             # Nested ImplicationLinks
             # skip Implications between InheritanceLinks etc as well
-            for nested_type_name in self.deduction_types:
-                nested_type = get_type(nested_type_name)
-                if goal.get_type() == t.ImplicationLink and len(goal.args) == 2 and goal.args[1].get_type() == nested_type:
-                    return True
-
-                if goal.get_type() == t.ImplicationLink and len(goal.args) == 2 and goal.args[0].get_type() == nested_type:
-                    return True
+            types = map(get_type, self.deduction_types)
+            if (goal.get_type() in types and len(goal.args) == 2 and
+                    (goal.args[0].get_type() in types or
+                     goal.args[1].get_type() in types) ):
+                return True
 
             # Should actually block this one if it occurs anywhere, not just at the root of the tree.
             very_vague = any(goal.isomorphic(standardize_apart(Tree(type, 1, 2))) for type in self.deduction_types)
@@ -320,17 +338,14 @@ class Chainer:
 
         return added_queries
 
-    def check_premises_and_add_result(self, app):
+    def check_premises(self, app):
         '''Check whether the given app can produce a result. This will happen if all its premises are
         already proven. Or if it is one of the axioms given to PLN initially. It will only find premises
         that are exactly isomorphic to those in the app (i.e. no more specific or general). The chainer
         itself is responsible for finding specific enough apps.'''
         input_tvs = [self.get_tvs(input) for input in app.goals]
-        if all(input_tvs):
-            self.compute_and_add_tv(app)
-            return True
-        return False
-
+        return all(input_tvs)
+    
     def compute_and_add_tv(self, app):
         # NOTE: assumes this is the real copy of the rule, not just a new one.
         #app.tv = True
@@ -401,8 +416,20 @@ class Chainer:
     def add_rule(self, rule):        
         self.rules.append(rule)
 
+    def trail(self, target):
+        def filter_with_tv(tr):
+            args = []
+            for child in tr.args:
+                if len(self.get_tvs(child.op)) > 0:
+                    args.append(child)
+            return Tree(tr.op, args)
+        
+        bit = self.traverse_tree(target, set())
+        
+        return filter_with_tv(bit)
+
     def traverse_tree(self, target, already):
-        producers = [app for app in self.apps if app.head.unifies(target)]
+        producers = [app for app in self.apps if app.head.isomorphic(target)]
         
         # Deliberately allows repetition of subgoals
         subgoals = concat_lists([list(app.goals) for app in producers])
@@ -414,13 +441,62 @@ class Chainer:
             already.add(canon)
         
         #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
-        return Tree(target, [self.traverse_tree(g, already) for g in subgoals_])
+        # Note: make a separate copy of `already` for each branch, so we only prevent loops within
+        # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
+        # (If you do, you'll want to do it a different way for each function)
+        return Tree(target, [self.traverse_tree(g, set(already)) for g in subgoals_])
+
+    def traverse_tree__(self, target):
+        pass
+    
+    # arrange the tree by rule applications not by goals
+    def traverse_tree_(self, target, already):
+        producers = [a for a in self.apps if a.head.unifies(target)]
+        
+        # Deliberately allows repetition of subgoals
+        subgoals = concat_lists([list(app.goals) for app in producers])
+        producers_ = []
+        for app in producers:
+            canon = app.canonical_tuple()
+            if canon not in already:
+                producers_.append(canon)
+            already.add(canon)
+        
+        #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
+        # Note: make a separate copy of `already` for each branch, so we only prevent loops within
+        # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
+        # (If you do, you'll want to do it a different way for each function)
+        return Tree(target, [self.traverse_tree(g, set(already)) for g in producers])
 
     def print_tree(self, tr, level = 1):
-        print ' '*(level-1)*3, tr.op, tr.depth, tr.best_conf_above
+        try:
+            (tr.depth, tr.best_conf_above)
+            print ' '*(level-1)*3, tr.op, tr.depth, tr.best_conf_above
+        except AttributeError:
+            print ' '*(level-1)*3, tr.op
         
         for child in tr.args:
             self.print_tree(child, level+1)
+
+    def viz_proof_tree(self, pt):
+        self.viz.connect()
+
+        target = pt.op
+        self.viz.outputTarget(target, None, 0, repr(target))
+        
+        for arg in pt.args:
+            self.viz_proof_tree_(arg)
+        
+    def viz_proof_tree_(self, pt):
+        target = pt.op
+        
+        self.viz.declareResult(target)
+        
+        for (i, input) in enumerate(pt.args):
+            self.viz.outputTarget(input, target, i, repr(target))
+
+        for arg in pt.args:
+            self.viz_proof_tree_(arg)
 
     def add_depths(self, bitnode, level = 1):
         #args = [self.add_depths(child, level+1) for child in tr.args]
@@ -488,25 +564,25 @@ class Chainer:
                     r.tv = obj.tv
                     self.add_rule(r)
 
-        # Deduction
-        for type in self.deduction_types:
-            self.add_rule(Rule(Tree(type, 1,3), 
-                                         [Tree(type, 1, 2),
-                                          Tree(type, 2, 3), 
-                                          Tree(1),
-                                          Tree(2), 
-                                          Tree(3)],
-                                        name='Deduction', 
-                                        formula = formulas.deductionSimpleFormula))
-
-        # Inversion
-        for type in self.deduction_types:
-            self.add_rule(Rule( Tree(type, 2, 1), 
-                                         [Tree(type, 1, 2),
-                                          Tree(1),
-                                          Tree(2)], 
-                                         name='Inversion', 
-                                         formula = formulas.inversionFormula))
+#        # Deduction
+#        for type in self.deduction_types:
+#            self.add_rule(Rule(Tree(type, 1,3), 
+#                                         [Tree(type, 1, 2),
+#                                          Tree(type, 2, 3), 
+#                                          Tree(1),
+#                                          Tree(2), 
+#                                          Tree(3)],
+#                                        name='Deduction', 
+#                                        formula = formulas.deductionSimpleFormula))
+#
+#        # Inversion
+#        for type in self.deduction_types:
+#            self.add_rule(Rule( Tree(type, 2, 1), 
+#                                         [Tree(type, 1, 2),
+#                                          Tree(1),
+#                                          Tree(2)], 
+#                                         name='Inversion', 
+#                                         formula = formulas.inversionFormula))
 
         # ModusPonens
         for type in ['ImplicationLink']:
@@ -574,6 +650,13 @@ class Chainer:
                            [ Tree('SubsetLink', 1, 2) ],
                            name = 'SubsetLink=>InheritanceLink', 
                            formula = formulas.ext2InhFormula))
+
+#        # Producing ForAll/Bind/AverageLinks?
+#        for type in ['ForAllLink', 'BindLink', 'AverageLink']:
+#            self.add_rule(Rule(Tree(type, 1, 2),
+#                               [ Tree(2) ],
+#                               name = type+' abstraction', 
+#                               formula = formulas.identityFormula))
 
         # This may cause weirdness with things matching too eagerly...
 #       # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
@@ -677,24 +760,6 @@ class Rule :
 #        else:
 #            return 'rule'
 
-def test(a):
-    c = Chainer(a)
-
-    #search(Tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
-    #fc(a)
-
-    #c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
-
-#    global rules
-#    A = Tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
-#    B = Tree('EvaluationLink',a.add_node(t.PredicateNode,'B'))
-#    rules.append(Rule(B, 
-#                                  [ A ]))
-
-    atom_from_tree(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')), a)
-    print c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
-
-
 from urllib2 import URLError
 def check_connected(method):
     '''A nice decorator for use in visualization classes that stream graphs to Gephi. It catches exceptions raised
@@ -789,3 +854,26 @@ class PLNviz:
 
             self.g.add_node(parent_id, label=str(parent), **self.node_attributes)
             self.g.add_edge(link_id, parent_id, target_id, directed=True, label=str(index))
+
+if __name__ == '__main__':
+    a = AtomSpace()
+    log.use_stdout(True)
+
+    atom_from_tree(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')), a).tv = TruthValue(1, 1)
+    #atom_from_tree(Tree('EvaluationLink',1), a).tv = TruthValue(1, 1)
+
+    c = Chainer(a)
+
+    #search(Tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    #fc(a)
+
+    #c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+
+#    global rules
+#    A = Tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
+#    B = Tree('EvaluationLink',a.add_node(t.PredicateNode,'B'))
+#    rules.append(Rule(B, 
+#                                  [ A ]))
+
+    #c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+    c.bc(Tree('EvaluationLink',-1))
