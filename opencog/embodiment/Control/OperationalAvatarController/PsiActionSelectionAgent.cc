@@ -678,8 +678,8 @@ std::cout<<"action status: timeout"<<std::endl;
             
             // Troy: now that this action failed, the following action sequence
             // should be dropped.
-            this->current_actions.clear();
-            this->temp_action_list.clear();
+//            this->current_actions.clear();
+//            this->temp_action_list.clear();
         }
         // If the Action is still running and is not time out, simply returns
         else {  
