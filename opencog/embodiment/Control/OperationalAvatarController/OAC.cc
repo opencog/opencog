@@ -288,18 +288,22 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->startAgent(psiFeelingUpdaterAgent);
     }
 
-#ifdef HAVE_CYTHON    
+#ifdef HAVE_CYTHON
     if ( config().get_bool("FISHGRAM_ENABLED") ) {
         this->fishgramAgent = new PyMindAgent("fishgram", "FishgramMindAgent"); 
         this->fishgramAgent->setFrequency( config().get_int("FISHGRAM_CYCLE_PERIOD") ); 
         this->startAgent(this->fishgramAgent); 
     }
+    else 
+        this->fishgramAgent = NULL; 
 
     if ( config().get_bool("MONITOR_CHANGES_ENABLED") ) {
         this->monitorChangesAgent = new PyMindAgent("monitor_changes", "MonitorChangesMindAgent"); 
         this->monitorChangesAgent->setFrequency( config().get_int("MONITOR_CHANGES_CYCLE_PERIOD") ); 
         this->startAgent(this->monitorChangesAgent); 
     }
+    else
+        this->monitorChangesAgent = NULL; 
 #endif        
 
     // TODO: This should be done only after NetworkElement is initialized
@@ -488,7 +492,7 @@ OAC::~OAC()
     delete (psiRelationUpdaterAgent); 
     delete (psiFeelingUpdaterAgent); 
 
-#ifdef HAVE_CYTHON    
+#ifdef HAVE_CYTHON
     delete (fishgramAgent); 
     delete (monitorChangesAgent); 
 #endif    

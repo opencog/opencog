@@ -63,6 +63,8 @@ public:
         config().set("SCHEMA_GOAL_MINING_ENABLED", "false"); 
         config().set("PROCEDURE_INTERPRETER_ENABLED", "false"); 
         config().set("ENTITY_EXPERIENCE_ENABLED", "false"); 
+        config().set("FISHGRAM_ENABLED", "false");
+        config().set("MONITOR_CHANGES_ENABLED", "false"); 
 
         oacMock.createOAC(); 
 
