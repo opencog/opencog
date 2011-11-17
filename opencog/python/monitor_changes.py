@@ -11,41 +11,8 @@ import random
 from time      import sleep
 from threading import Thread
 
-def get_similarity(atomspace, eval1, eval2): 
-    if eval1 == eval2: 
-        return 1
-
-    similarity_pred = 0
-    similarity_arg = 0
-
-    eval1_outgoing = atomspace.get_outgoing(eval1.h)
-    eval2_outgoing = atomspace.get_outgoing(eval2.h)
-
-    # Calculate similarity of PredicateNode
-    if eval1_outgoing[0] == eval2_outgoing[0]: 
-        similarity_pred = 1
-    else: 
-        similarity_pred = 0
-
-    if len(eval1_outgoing) !=2 or len(eval2_outgoing) != 2: 
-        return similarity_pred
-
-    # Calculate similarity of arguments (ListLink)
-    arg_set1 = set( atomspace.get_outgoing(eval1_outgoing[1].h) )
-    arg_set2 = set( atomspace.get_outgoing(eval2_outgoing[1].h) )
-
-    if len(arg_set1 | arg_set2) == 0: 
-        similarity_arg = 1
-    else: 
-        similarity_arg = len(arg_set1 & arg_set2) / len(arg_set1 | arg_set2)
-
-    # Weighted sum the similarity
-    return 0.5*similarity_pred + 0.5*similarity_arg
-
 def monitor_changes(atomspace):    
-    tv_delta = 0.01 
-    min_similarity = 0.5
-    max_similarity = 0.75
+    tv_delta = 0.1 
     interval = 5 + 5*random.random() # seconds
  
     t = types
@@ -79,14 +46,12 @@ def monitor_changes(atomspace):
             eval_previous = atomspace.get_outgoing(previous.h)[1]
             if eval_latest.t != t.EvaluationLink or eval_previous.t != t.EvaluationLink: 
                 continue
-            similarity = get_similarity(atomspace, eval_latest, eval_previous)
-#            print [similarity, str(eval_latest), str(eval_previous)]
 
-            if similarity == 1: 
+            if eval_latest == eval_previous: 
                 if abs( latest.tv.mean - previous.tv.mean ) >= tv_delta:
                     changes_with_tv.append( [latest, previous] )
-            elif similarity > min_similarity and similarity < max_similarity: 
-                changes_with_arg.append( [latest, previous] )
+
+    changes_with_arg = list( set(at_times_latest) ^ set(at_times_previous) )
 
     # Remove previous records of changes in the atomspace
     pred_change_with_tv = atomspace.add_node(t.PredicateNode, "change_with_tv")
@@ -114,15 +79,17 @@ def monitor_changes(atomspace):
         eval_link = atomspace.add_link(t.ReferenceLink, [pred_change_with_tv, list_link])
 #        print eval_link
 
-    for change_with_arg in changes_with_arg:        
-        list_link = atomspace.add_link(t.ListLink, change_with_arg)
-        eval_link =  atomspace.add_link(t.ReferenceLink, [pred_change_with_arg, list_link])
+    if changes_with_arg: 
+        list_link = atomspace.add_link(t.ListLink, changes_with_arg)
+        eval_link = atomspace.add_link(t.ReferenceLink, [pred_change_with_arg, list_link])
 #        print eval_link
 
     if changes_with_tv or changes_with_arg:  
         atomspace.set_tv(eval_has_dramatical_changes.h, TruthValue(1, 1))
 
-#    print eval_has_dramatical_changes
+    print "Found " + str(len(changes_with_tv)) + " changes_with_tv"
+    print "Found " + str(len(changes_with_arg)) + " changes_with_arg"
+    print eval_has_dramatical_changes
 
 def monitor_loop(atomspace):
     while True: 

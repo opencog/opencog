@@ -911,3 +911,79 @@
     )
 )
 
+;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+;
+; Miscellaneous
+;
+
+; Return a random member of the given list, 
+; return an empty list, if the given list is empty. 
+(define (random_select selection_list)
+    (if (null? selection_list) 
+        (list) 
+
+        (list-ref selection_list
+            (random (length selection_list) ) 
+        )    
+    ) 
+)
+
+; Return #t if given atom is a Link    
+(define (cog-link? atom)
+    (cog-subtype? 'Link (cog-type atom) ) 
+)    
+
+; Return #t if given atom is an Node
+(define (cog-node? atom)
+    (cog-subtype? 'Node (cog-type atom) ) 
+)
+
+; Return a string representing the given atom
+(define (atom_as_string atom)
+    (cond 
+       ( (not (cog-atom? atom) )
+         ""    
+       )  
+
+       ( (cog-node? atom)
+         (string-append (cog-name atom) " ")
+       ) 
+
+       (else
+         (string-append
+           "[" (fold-right string-append "" (map-in-order atom_as_string (cog-outgoing-set atom) ) )
+               "<" (number->string (get_truth_value_mean (cog-tv atom) ) ) " "
+                   (number->string (get_truth_value_confidence (cog-tv atom) ) ) ">"
+           "]"
+         )
+       ) 
+    ); cond
+)
+
+(define (get_changes_with_tv)
+    (let* ( (changes_with_tv (cog-incoming-set (PredicateNode "change_with_tv")) )
+          )
+
+          (set! changes_with_tv
+              (filter 
+                   (lambda (change_candidate)
+                       (eqv? (cog-type change_candidate) 'ReferenceLink)
+                   ) 
+                   changes_with_tv 
+              ) 
+          )
+
+          changes_with_tv
+    ) 
+)
+
+(define (get_changes_with_arg)
+    (let ( (list_link (get_reference (PredicateNode "change_with_arg")) )
+         )
+         (if (null? list_link)
+             (list)
+             (cog-outgoing-set list_link) 
+         )           
+    )
+)
+

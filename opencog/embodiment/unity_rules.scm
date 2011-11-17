@@ -569,18 +569,11 @@
 ;    NULL_PRECONDITION
 ;)
 
-; This rule will notify other agents important external changes if any. 
-;(add_rule (stv 0.6 1.0) AffiliationDemandGoal
-;    (add_action (GroundedSchemaNode "scm:notify_external_change") )
-;    (add_precondition (PredicateNode "has_important_external_change") )
-;)
-
-; This rule will notify other agents important internal changes, 
-; such as "I'm so happy. " or "I'm terribly sad."
-;(add_rule (stv 0.8 1.0) AffiliationDemandGoal
-;    (add_action (GroundedSchemaNode "scm:notify_internal_change") )
-;    (add_precondition (PredicateNode "has_important_internal_change") )
-;)
+; This rule will notify other agents important changes, 
+(add_rule (stv 0.75 1.0) AffiliationDemandGoal
+    (add_action (GroundedSchemaNode "scm:notify_changes") )
+    (add_precondition (PredicateNode "has_dramatical_changes") )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;

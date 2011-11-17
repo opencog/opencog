@@ -13,18 +13,6 @@
 ;             (ice-9 debugging traps)
 ;)
 
-; Return a random member of the given list, 
-; return an empty list, if the given list is empty. 
-(define (random_select selection_list)
-    (if (null? selection_list) 
-        (list) 
-
-        (list-ref selection_list
-            (random (length selection_list) ) 
-        )    
-    ) 
-)
-
 ; Roulette wheel select a rule based on truth values (mean value) given a list
 ; of psi rules (ImplicationLink), that is for each rule, the probability to be 
 ; selected is proportional to its truth value
@@ -86,16 +74,6 @@
 
 (define (get_psi_goal rule)
     (list-ref (cog-outgoing-set rule) 1) 
-)
-
-; Return #t if given atom is a Link    
-(define (cog-link? atom)
-    (cog-subtype? 'Link (cog-type atom) ) 
-)    
-
-; Return #t if given atom is an Node
-(define (cog-node? atom)
-    (cog-subtype? 'Node (cog-type atom) ) 
 )
 
 ; Return a BindLink used by pattern matcher to search psi rules given goal

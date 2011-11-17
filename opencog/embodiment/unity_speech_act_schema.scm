@@ -6,7 +6,10 @@
 ;         dialog_system.scm
 ;
 ; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-10-28
+; @date   2011-11-15
+
+(use-modules (srfi srfi-1)
+)
 
 ;******************************************************************************
 ;******************************************************************************
@@ -37,16 +40,24 @@
     )
 )
 
-(define (notify_external_change)
-    (update_utterance_node "utterance_sentences"  
-        (SentenceNode "IS_NEW: TRUE, TO:  , RESPONSER: notify_external_change, CONTENT: Test notify_external_change.")
-    )
-)
-
-(define (notify_internal_change)
-    (update_utterance_node "utterance_sentences"  
-        (SentenceNode "IS_NEW: TRUE, TO:  , RESPONSER: notify_internal_change, CONTENT: Test notify_internal_change.")
-    )
+(define (notify_changes)
+    (let* ( (changes_with_arg (get_changes_with_arg) )
+            (changes_with_tv (get_changes_with_tv) )
+            (changes (append changes_with_arg changes_with_tv) )
+            (random_change (random_select changes) )
+          )
+         
+          (if (not (null? random_change) )
+              (update_utterance_node "utterance_sentences"  
+                  (SentenceNode 
+                      (string-append
+                          "IS_NEW: TRUE, TO:  , RESPONSER: notify_changes, CONTENT: found change: "
+                          (atom_as_string random_change)
+                      )
+                  )
+              )
+          ); if
+    ); let
 )
 
 (define (ask_question)
