@@ -341,9 +341,9 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     // TODO: This is a temporally solution. We should reduce the time of oac 
     //       initialization. For example, don't send all the map info at initialization. 
     //
-    this->psiDemandUpdaterAgent->run(this); 
-    this->psiFeelingUpdaterAgent->run(this); 
-    this->psiModulatorUpdaterAgent->run(this); 
+//    this->psiDemandUpdaterAgent->run(this); 
+//    this->psiFeelingUpdaterAgent->run(this); 
+//    this->psiModulatorUpdaterAgent->run(this); 
 }
 
 int OAC::addRulesToAtomSpace()

@@ -137,3 +137,7 @@ foreach file $schemeOpencogFiles {
 foreach file $schemeEmbodimentFiles {
     exec cp $file $distDir/scm/embodiment/
 }
+
+# copy python scripts of the monitor
+exec cp -R $pdh/opencog/embodiment/Monitor $distDir
+

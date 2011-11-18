@@ -3,7 +3,7 @@
 # The main job of a widget is getting data from Plaza within OAC and drawing graphs
 #
 # @author: Zhenhua Cai, czhedu@gmail.com 
-# @date:   2011-04-23
+# @date:   2011-11-18
 #
 # @note: I borrowed some code from 
 # http://matplotlib.sourceforge.net/examples/user_interfaces/embedding_in_qt4.html
@@ -45,6 +45,9 @@ class MonitorWidget(FigureCanvas):
     def __init__(self, publish_endpoint, filter_key, 
                  parent=None, width=5, height=4, dpi=100):
 
+        self.filter_key = filter_key
+        self.tick_interval = 0.01 # real time (in sec) = timestamp * tick_interval 
+
         # Initialize figure canvas
         self.figure = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.figure.add_subplot(111)
@@ -79,33 +82,51 @@ class MonitorWidget(FigureCanvas):
                                                          filter_key)
         self.zmq_subscriber_thread.start()
 
-    # Initialize data and legend
+    # Initialize data, legend and table title of recording file
     def initialize_data(self, json_dict):
+        self.initialTimeStamp = json_dict["timestamp"]
+
+        f = file(self.filter_key, "w")
+        f.write("time\t\t")
+
         for k, v in json_dict.iteritems():
             self.data_dict[k] = [v]
             if k != "timestamp":
                 self.legend_list.append(k)
+                f.write(k+"\t\t")
 
+        f.write("\n")
+        f.close()
         self.has_initialized = True
 
-    # Update data list
+    # Update data list and also record them in the external file named after filter_key
     def update_data(self, json_dict):
-        latestTimeStamp = json_dict["timestamp"]
+        self.latestTimeStamp = json_dict["timestamp"]
         forgetFirst = False
+        f = file(self.filter_key, "a")
+        elapsed_time = (self.latestTimeStamp - self.initialTimeStamp) * self.tick_interval
+
+        f.write(str(elapsed_time) + "\t\t")
+        
         # forget old data
-        if latestTimeStamp - self.data_dict["timestamp"][0] > self.max_time_period or \
+        if self.latestTimeStamp - self.data_dict["timestamp"][0] > self.max_time_period or \
             len(self.data_dict["timestamp"]) > self.max_data_len:
             forgetFirst = True
+
         for k, v in json_dict.iteritems():
             self.data_dict[k].append(v)
             if forgetFirst: self.data_dict[k].pop(0)
+            if k != "timestamp": f.write(str(v)+"\t\t")
+
+        f.write("\n")
+        f.close()
 
     # Draw the graph on the widget
     def draw_graph(self):
         self.axes.clear()
         
         max_t = max(self.data_dict["timestamp"])
-        t_minus = [x - max_t for x in self.data_dict["timestamp"]]
+        t_minus = [(x - self.latestTimeStamp)*self.tick_interval for x in self.data_dict["timestamp"]]
 
         for k in self.data_dict:
             if k == "timestamp": continue
@@ -117,7 +138,7 @@ class MonitorWidget(FigureCanvas):
 
         self.axes.set_title(self.zmq_subscriber_thread.filter_key)
         self.axes.grid(True)
-        self.axes.set_xlim(-self.max_time_period,0)
+        self.axes.set_xlim(-self.max_time_period*self.tick_interval,0)
         self.axes.set_ylim(0,1)
 
         self.draw()
