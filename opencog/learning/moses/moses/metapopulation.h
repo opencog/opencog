@@ -29,6 +29,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/logic/tribool.hpp>
+#include <boost/range/algorithm/sort.hpp>
 
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
@@ -710,7 +711,7 @@ struct metapopulation : public bscored_combo_tree_set {
         bscored_combo_tree_ptr_vec res = get_nondominated_rec(bcv, jobs);
         // get the dominated by set difference
         logger().fine("+ Calculate nondominated");
-        sort(bcv); sort(res);
+        boost::sort(bcv); boost::sort(res);
         bscored_combo_tree_ptr_vec dif = set_difference(bcv, res);
         // remove the dominated ones
         logger().fine("+ Remove nondominated");
@@ -857,7 +858,7 @@ struct metapopulation : public bscored_combo_tree_set {
             bscored_combo_tree_ptr_vec_pair bcv_m1 = task.get();
             // merge results
             append(bcv_m1.first, bcv_m2.first);
-            sort(bcv_m1.second); sort(bcv_m2.second);
+            boost::sort(bcv_m1.second); boost::sort(bcv_m2.second);
             bscored_combo_tree_ptr_vec bcv_m2_inter =
                 set_intersection(bcv_m1.second, bcv_m2.second);
             return make_pair(bcv_m1.first, bcv_m2_inter);
@@ -882,7 +883,7 @@ struct metapopulation : public bscored_combo_tree_set {
             get_nondominated_disjoint_rec(bcv, bcv_mp, jobs);
         // remove the nondominates ones from the metapopulation
         logger().fine("+ Remove nondominated from the metapopulation");
-        sort(bcv_mp); sort(bcv_p.second);
+        boost::sort(bcv_mp); boost::sort(bcv_p.second);
         bscored_combo_tree_ptr_vec diff_bcv_mp =
             set_difference(bcv_mp, bcv_p.second);
         foreach(const bscored_combo_tree* cnd, diff_bcv_mp)

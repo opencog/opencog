@@ -24,6 +24,7 @@
  */
 #include "vertex.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/range/algorithm/find.hpp>
 #include "procedure_call.h"
 #include <opencog/util/algorithm.h>
 
@@ -102,7 +103,7 @@ string l2ph(const string& ce, const vector<string>& labels)
     }
     // if a matching is going on flush to the result
     if(matching) {
-        auto found_it = find(labels, match);
+        auto found_it = boost::find(labels, match);
         OC_ASSERT(found_it != labels.end(), "No label %s matching",
                   match.c_str());
         arity_t idx = distance(labels.begin(), found_it) + 1;

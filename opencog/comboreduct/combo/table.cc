@@ -22,6 +22,7 @@
 #include "table.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/range/algorithm/find.hpp>
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/algorithm.h>
@@ -277,7 +278,7 @@ int findTargetFeaturePosition(const string& fileName, const string& target) {
     string line;
     getline(*in, line);
     vector<string> labels = tokenizeRow<string>(line);
-    int pos = distance(labels.begin(), find(labels, target));
+    int pos = distance(labels.begin(), boost::find(labels, target));
     if(pos < (int)labels.size())
         return pos;
     else

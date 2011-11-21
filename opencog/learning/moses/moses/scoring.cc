@@ -23,6 +23,7 @@
  */
 #include "scoring.h"
 #include <opencog/util/numeric.h>
+#include <boost/range/algorithm/sort.hpp>
 #include <cmath>
 
 namespace opencog { namespace moses {
@@ -94,7 +95,7 @@ discretize_contin_bscore::discretize_contin_bscore(const combo::contin_output_ta
     : target(ot), cit(it), thresholds(thres), weighted_accuracy(wa), rng(_rng),
       weights(thresholds.size() + 1, 1), classes(ot.size()) {
     // enforce that thresholds is sorted
-    sort(thresholds);
+    boost::sort(thresholds);
     // precompute classes
     transform(target.begin(), target.end(), classes.begin(),
               [&](contin_t v) { return this->class_idx(v); });

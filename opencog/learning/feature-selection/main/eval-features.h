@@ -30,6 +30,7 @@
 #include <opencog/util/numeric.h>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/range/algorithm/find.hpp>
 
 #include "../feature_scorer.h"
 
@@ -84,7 +85,7 @@ set<arity_t> get_features_idx(const vector<string>& features,
                               const eval_features_parameters& pa) {
     set<arity_t> res;
     foreach(const string& f, features) {
-        arity_t idx = distance(labels.begin(), find(labels, f));
+        arity_t idx = distance(labels.begin(), boost::find(labels, f));
         OC_ASSERT((size_t)idx != labels.size(),
                   "No such a feature %s in file %s",
                   f.c_str(), pa.input_table_file.c_str());

@@ -206,14 +206,6 @@ Set set_difference(const Set& s1, const Set& s2) {
     return res;
 }
 
-/**
- * overload sort for container
- */
-template<typename Seq>
-void sort(Seq& s) {
-    std::sort(s.begin(), s.end());
-}
-
 // Predicate maps to the range [0, n)
 // n-1 values (the pivots) are copied to out
 template<typename It, typename Pred, typename Out>
@@ -262,20 +254,6 @@ template<typename Set> std::set<Set> powerset(const Set& s, size_t n, bool exact
 template<typename Set> std::set<Set> powerset(const Set& s)
 {
     return powerset(s, s.size());
-}
-
-/**
- * overload find for container
- */
-template<typename C>
-typename C::const_iterator find(const C& c, const typename C::value_type& e)
-{
-    return std::find(c.begin(), c.end(), e);
-}
-template<typename C>
-typename C::iterator find(C& c, const typename C::value_type& e)
-{
-    return std::find(c.begin(), c.end(), e);
 }
 
 } //~namespace opencog

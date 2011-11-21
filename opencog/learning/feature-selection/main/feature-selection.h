@@ -25,6 +25,7 @@
 #define _OPENCOG_FEATURE_SELECTION_H
 
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
+#include <boost/range/algorithm/find.hpp>
 
 #include <opencog/util/oc_omp.h>
 #include <opencog/learning/moses/representation/field_set.h>
@@ -159,7 +160,7 @@ instance initial_instance(const feature_selection_parameters& fs_params,
     vector<std::string> labels = readInputLabels(fs_params.input_file);
     vector<std::string> vif; // valid initial features, used for logging
     foreach(const std::string& f, fs_params.initial_features) {
-        size_t idx = std::distance(labels.begin(), find(labels, f));
+        size_t idx = std::distance(labels.begin(), boost::find(labels, f));
         if(idx < labels.size()) { // feature found
             *(fields.begin_bits(res) + idx) = true;
             // for logging
