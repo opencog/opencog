@@ -200,7 +200,7 @@ void metapop_moses_results(RandGen& rng,
                            const metapop_parameters& meta_params,
                            const moses_parameters& moses_params,
                            const variables_map& vm,
-                           const metapop_moses_results_parameters& pa) {
+                           const metapop_moses_results_parameters& pa) {    
     if(opt_algo == un) { // univariate
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               univariate_optimization(rng, opt_params),
@@ -234,11 +234,19 @@ void metapop_moses_results(RandGen& rng,
                            const reduct::rule& si_kb,
                            const BScore& bsc,
                            const string& opt_algo,
-                           const optim_parameters& opt_params,
+                           optim_parameters opt_params,
                            const metapop_parameters& meta_params,
-                           const moses_parameters& moses_params,
+                           moses_parameters moses_params,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
+    bscore_based_score<BScore> bb_score(bsc);
+    
+    // update terminate_if_gte and max_score criteria
+    score_t bps = bb_score.best_possible_score();
+    opt_params.terminate_if_gte = std::min(opt_params.terminate_if_gte, bps);
+    moses_params.max_score = std::min(moses_params.max_score, bps);
+    logger().info("Target score (maximum reachable score) = %f", bps);
+
     if(pa.enable_cache) {
         static const unsigned initial_cache_size = 1000000;
 #ifdef ENABLE_BCACHE
@@ -265,8 +273,7 @@ void metapop_moses_results(RandGen& rng,
                           score_acache.get_failures());
         }            
     } else {
-        bscore_based_score<BScore> score(bsc);
-        metapop_moses_results(rng, bases, tt, si_ca, si_kb, score, bsc,
+        metapop_moses_results(rng, bases, tt, si_ca, si_kb, bb_score, bsc,
                               opt_algo, opt_params, meta_params, moses_params,
                               vm, pa);
     }

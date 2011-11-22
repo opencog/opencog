@@ -123,7 +123,7 @@ struct optim_parameters {
     // problem size in info-t bits
     double pop_size_ratio;
     // optimization is terminated if best score is >= terminate_if_gte
-    double terminate_if_gte;
+    score_t terminate_if_gte;
     // defines the max distance to search during one iteration (used
     // in method max_distance)
     double max_dist_ratio;

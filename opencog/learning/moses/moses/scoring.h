@@ -27,6 +27,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <boost/range/numeric.hpp>
+
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
 
@@ -44,7 +46,7 @@ namespace opencog { namespace moses {
 
 #define NEG_INFINITY INT_MIN
  
-typedef float fitness_t;
+typedef float fitness_t; /// @todo is that really useful?
 
 /**
  * score calculated based on the behavioral score. Useful to avoid
@@ -86,13 +88,18 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             return get_score(worst_composite_score);
         }
     }
+    // returns the best score reachable for that problem. Used as
+    // termination condition.
+    score_t best_possible_score() const {
+        return -boost::accumulate(bscore.best_possible_bscore(), 0.0);
+    }
     const BScore& bscore;
 };
 
 /**
- * Like logical_score but on behaviors (features). Each feature
- * corresponds to an input tuple, 0 if the output of the candidate
- * matches the output of the intended function (lower is better).
+ * Each feature corresponds to an input tuple, 0 if the output of the
+ * candidate matches the output of the intended function (lower is
+ * better), 1 otherwise.
  */
 struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
     template<typename Func>
@@ -103,6 +110,8 @@ struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
 
     behavioral_score operator()(const combo_tree& tr) const;
 
+    behavioral_score best_possible_bscore() const;
+    
     combo::complete_truth_table target;
     int arity;
 };
@@ -141,6 +150,12 @@ struct discretize_contin_bscore : public unary_function<combo_tree,
                              RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
+
+    // for the best possible bscore is a vector of zeros. It's
+    // probably not true because there could be duplicated inputs but
+    // that's acceptable for now
+    behavioral_score best_possible_bscore() const;
+    
     combo::contin_output_table target;
     contin_input_table cit;
     vector<contin_t> thresholds;
@@ -216,6 +231,11 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
 
     behavioral_score operator()(const combo_tree& tr) const;
 
+    // for the best possible bscore is a vector of zeros. It's
+    // probably not true because there could be duplicated inputs but
+    // that's acceptable for now
+    behavioral_score best_possible_bscore() const;
+    
     contin_output_table target;
     contin_input_table cti;
     bool occam;
@@ -249,6 +269,10 @@ struct occam_ctruth_table_bscore
 
     behavioral_score operator()(const combo_tree& tr) const;
 
+    // return the best possible bscore. Used as one of the
+    // terminations condition (when the best bscore is reached)
+    behavioral_score best_possible_bscore() const;
+    
     const ctruth_table& ctt;
     bool occam; // if true the Occam's razor is taken into account
     score_t complexity_coef;

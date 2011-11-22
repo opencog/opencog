@@ -24,11 +24,15 @@
 #include "scoring.h"
 #include <opencog/util/numeric.h>
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/for_each.hpp>
+#include <boost/range/algorithm/transform.hpp>
+#include <boost/range/adaptor/map.hpp>
 #include <cmath>
 
 namespace opencog { namespace moses {
 
 using namespace std;
+using boost::adaptors::map_values;
 
 // helper to log a combo_tree and its behavioral score
 inline void log_candidate_bscore(const combo_tree& tr,
@@ -49,10 +53,14 @@ behavioral_score logical_bscore::operator()(const combo_tree& tr) const
     combo::complete_truth_table tt(tr, arity);
     behavioral_score bs(target.size());
 
-    transform(tt.begin(), tt.end(), target.begin(), bs.begin(),
-              not_equal_to<bool>()); //not_equal because lower is better
+    // not_equal because lower is better
+    boost::transform(tt, target, bs.begin(), not_equal_to<bool>());
 
     return bs;
+}
+
+behavioral_score logical_bscore::best_possible_bscore() const {
+    return behavioral_score(target.size(), 0);
 }
 
 behavioral_score contin_bscore::operator()(const combo_tree& tr) const
@@ -87,6 +95,16 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
+behavioral_score occam_contin_bscore::best_possible_bscore() const {
+    return behavioral_score(target.size() + (occam?1:0), 0);
+}
+
+void occam_contin_bscore::set_complexity_coef(double variance,
+                                              double alphabet_size) {
+    if(occam)
+        complexity_coef = - log((double)alphabet_size) * 2 * variance;
+}
+
 discretize_contin_bscore::discretize_contin_bscore(const combo::contin_output_table& ot,
                                                    const contin_input_table& it,
                                                    const vector<contin_t>& thres,
@@ -97,8 +115,8 @@ discretize_contin_bscore::discretize_contin_bscore(const combo::contin_output_ta
     // enforce that thresholds is sorted
     boost::sort(thresholds);
     // precompute classes
-    transform(target.begin(), target.end(), classes.begin(),
-              [&](contin_t v) { return this->class_idx(v); });
+    boost::transform(target, classes.begin(),
+                     [&](contin_t v) { return this->class_idx(v); });
     // precompute weights
     multiset<size_t> cs(classes.begin(), classes.end());
     if(weighted_accuracy)
@@ -108,6 +126,10 @@ discretize_contin_bscore::discretize_contin_bscore(const combo::contin_output_ta
         }
 }
 
+behavioral_score discretize_contin_bscore::best_possible_bscore() const {
+    return behavioral_score(target.size(), 0);
+}
+        
 size_t discretize_contin_bscore::class_idx(contin_t v) const {
     if(v < thresholds[0])
         return 0;
@@ -136,10 +158,9 @@ behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) cons
 {
     combo::contin_output_table ct(tr, cit, rng);
     behavioral_score bs(target.size());
-    transform(ct.begin(), ct.end(), classes.begin(), bs.begin(),
-              [&](contin_t res, size_t c_idx) {
-                  return (c_idx != this->class_idx(res)) * this->weights[c_idx];
-              });
+    boost::transform(ct, classes, bs.begin(), [&](contin_t res, size_t c_idx) {
+            return (c_idx != this->class_idx(res)) * this->weights[c_idx];
+        });
     // Logger
     log_candidate_bscore(tr, bs);
     // ~Logger
@@ -147,12 +168,7 @@ behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) cons
     return bs;    
 }
 
-void occam_contin_bscore::set_complexity_coef(double variance,
-                                              double alphabet_size) {
-    if(occam)
-        complexity_coef = - log((double)alphabet_size) * 2 * variance;
-}
-
+        
 occam_ctruth_table_bscore::occam_ctruth_table_bscore(const ctruth_table& _ctt,
                                                      float p,
                                                      float alphabet_size,
@@ -184,5 +200,16 @@ behavioral_score occam_ctruth_table_bscore::operator()(const combo_tree& tr) con
     return bs;
 }
 
+behavioral_score occam_ctruth_table_bscore::best_possible_bscore() const {
+    behavioral_score bs(ctt.size() + (occam?1:0));
+    auto dst = bs.begin();
+    for_each(ctt | map_values, [&](const ctruth_table::mapped_type& p) {
+            *dst++ = std::min(p.first, p.second); });
+    // add the Occam's razor feature
+    if(occam)
+        *dst = 0;
+    return bs;
+}
+        
 } // ~namespace moses
 } // ~namespace opencog

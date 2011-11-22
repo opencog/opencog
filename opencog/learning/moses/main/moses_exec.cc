@@ -363,7 +363,7 @@ int moses_exec(int argc, char** argv) {
          "The higher the more effort is spent on a deme.\n")
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&max_score)->default_value(0),
-         "The max score to reach, once reached MOSES halts.\n")
+         "The max score to reach, once reached MOSES halts. MOSES is sometimes able to calculate the max score that can be reached for a particular problem, in such case the max_score is automatically reset of the minimum between MOSES's calculation and the user's option.\n")
         (opt_desc_str(max_dist_ratio_opt).c_str(),
          value<double>(&max_dist_ratio)->default_value(1),
          "The max distance from the exemplar to explore a deme is determined by that value * log2(information_theoretic_bits(deme)).\n")
@@ -519,6 +519,11 @@ int moses_exec(int argc, char** argv) {
             if(nsamples>0)
                 subsampleTable(table.input, table.output, nsamples, rng);
             ctruth_table ctable = table.compress();
+
+            stringstream ss;
+            ss << std::endl;
+            ostreamCTable(ss, ctable);
+            logger().debug(ss.str());
 
             type_tree tt = declare_function(output_type, arity);
 
