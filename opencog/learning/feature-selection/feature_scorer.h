@@ -86,9 +86,7 @@ template<typename Table, typename FeatureSet>
 struct MICScorerTable : public std::unary_function<FeatureSet, double> {
 
     MICScorerTable(const Table& table, double confi = 0)
-        : _table(table), _confi(confi) {
-        _ctable = table.compress();
-    }
+        : _table(table), _ctable(_table.compress()), _confi(confi) {}
 
     /**
      * The feature set is represented by an eda::instance encoding a
