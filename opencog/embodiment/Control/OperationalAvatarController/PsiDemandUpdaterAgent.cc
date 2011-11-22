@@ -1,8 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.cc
  *
- * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-05-11
+ * @author Jinhua Chua <JinhuaChua@gmail.com>
+ * @date   2011-11-22
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -185,7 +185,25 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
     atomSpace.setTV(this->hDemandGoal, demand_satisfaction);
 
     // Add AtTimeLink around EvaluationLink of  DemandGoal, which is required by fishgram
-    atomSpace.getTimeServer().addTimeInfo(this->hDemandGoal, timeStamp, demand_satisfaction); 
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(this->hDemandGoal,
+                                                              timeStamp, 
+                                                              demand_satisfaction
+                                                             );
+
+//    // Update the LatestLink
+    std::string predicateName = this->demandName + "DemandGoal"; 
+    Handle demandPredicateNode = atomSpace.addNode(PREDICATE_NODE, predicateName.c_str()); 
+
+    std::vector <Handle> outgoings;
+    Handle listLink = atomSpace.addLink(LIST_LINK, outgoings); 
+    outgoings.push_back(demandPredicateNode); 
+    outgoings.push_back(listLink); 
+    Handle evaluationLink = atomSpace.addLink(EVALUATION_LINK, outgoings); 
+    atomSpace.setTV(evaluationLink, demand_satisfaction); 
+
+    atTimeLink = atomSpace.getTimeServer().addTimeInfo(evaluationLink, timeStamp, demand_satisfaction);
+
+    AtomSpaceUtil::updateLatestDemand(atomSpace, atTimeLink, demandPredicateNode); 
 
     atomSpace.setTV( this->hFuzzyWithin, demand_satisfaction); 
 

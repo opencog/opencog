@@ -1,8 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiModulatorUpdaterAgent.h
  *
- * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-05-11
+ * @author Jinhua Chua <JinhuaChua@gmail.com>
+ * @date   2011-11-22
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -48,6 +48,13 @@ namespace opencog { namespace oac {
  *         ExecutionOutputLink
  *             GroundedSchemaNode: xxxModulatorUpdater
  *             ListLink (empty)
+ *
+ * LatestLink
+ *     AtTimeLink
+ *         TimeNode "latestTimestamp"
+ *         EvaluationLink (stv denotes the level of the modulator)
+ *             PredicateNode "xxxModulator"
+ *
 */
 class PsiModulatorUpdaterAgent : public opencog::Agent
 {
@@ -102,6 +109,12 @@ private:
          *               ExecutionOutputLink
          *                   GroundedSchemaNode: xxxModulatorUpdater
          *                   ListLink (empty)
+         *
+         *       LatestLink
+         *           AtTimeLink
+         *               TimeNode "latestTimestamp"
+         *               EvaluationLink (stv denotes the level of the modulator)
+         *                   PredicateNode "xxxModulator"
          */
         bool updateModulator(AtomSpace & atomSpace, const unsigned long timeStamp);
 

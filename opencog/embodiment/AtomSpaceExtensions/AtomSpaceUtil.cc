@@ -5,7 +5,7 @@
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
  *
- * Updated: by Zhenhua Cai, on 2011-10-07
+ * Updated: by Jinhua Chua, on 2011-11-22
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -53,12 +53,18 @@ using namespace opencog; /// @todo make it under the namespace opencog
 #define IS_HOLDING_PREDICATE_NAME "isHolding"
 #define IS_HOLDING_SOMETHING_PREDICATE_NAME "isHoldingSomething"
 
-// Initialize static variables that stores the LatestLinks for each type of information
+// Initialize static variables that stores the LatestLinks for each type of information. 
+// We cache these LatestLinks to accelerate updating. 
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAgentActionDone;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPhysiologicalFeeling;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarSayActionDone;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarActionDone;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPetActionPredicate;
+
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestModulators; 
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestDemands; 
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestFeelings; 
+
 const double AtomSpaceUtil::highLongTermImportance = 0.7;
 std::map<Handle, AtomSpaceUtil::HandleToHandleMap > AtomSpaceUtil::latestSpatialPredicate;
 std::map<Handle, Handle> AtomSpaceUtil::latestSchemaPredicate;
@@ -2726,8 +2732,8 @@ Handle AtomSpaceUtil::getTimedHandle(AtomSpace& as, Handle atTimeLink)
     return as.getOutgoing(atTimeLink, 1);
 }
 
-void AtomSpaceUtil::updateGenericLatestInfoMap(std::map<Handle, Handle>& infoMap,
-                                               AtomSpace& as,
+void AtomSpaceUtil::updateGenericLatestInfoMap(std::map<Handle, Handle> & infoMap,
+                                               AtomSpace & as,
                                                Handle atTimeLink,
                                                Handle key)
 {
@@ -2806,8 +2812,8 @@ void AtomSpaceUtil::updateLatestSchemaPredicate(AtomSpace& as,
                                as, atTimeLink, predicateNode);
 }
 
-void AtomSpaceUtil::updateGenericLatestSingleInfo(Handle& latestSingleInfoHandle,
-                                                  AtomSpace& as,
+void AtomSpaceUtil::updateGenericLatestSingleInfo(Handle & latestSingleInfoHandle,
+                                                  AtomSpace & as,
                                                   Handle atTimeLink)
 {
     if (latestSingleInfoHandle != Handle::UNDEFINED) {
@@ -2816,6 +2822,27 @@ void AtomSpaceUtil::updateGenericLatestSingleInfo(Handle& latestSingleInfoHandle
     HandleSeq hs;
     hs.push_back(atTimeLink);
     latestSingleInfoHandle = addLink(as, LATEST_LINK, hs, true);
+}
+
+void AtomSpaceUtil::updateLatestModulator(AtomSpace & as, 
+                                          Handle atTimeLink, 
+                                          Handle modulatorPredicateNode)
+{
+    updateGenericLatestInfoMap(latestModulators, as, atTimeLink, modulatorPredicateNode); 
+}
+
+void AtomSpaceUtil::updateLatestDemand(AtomSpace & as, 
+                                       Handle atTimeLink, 
+                                       Handle demandPredicateNode)
+{
+    updateGenericLatestInfoMap(latestDemands, as, atTimeLink, demandPredicateNode); 
+}
+
+void AtomSpaceUtil::updateLatestFeeling(AtomSpace & as, 
+                                        Handle atTimeLink, 
+                                        Handle feelingPredicateNode)
+{
+    updateGenericLatestInfoMap(latestFeelings, as, atTimeLink, feelingPredicateNode); 
 }
 
 void AtomSpaceUtil::updateLatestIsExemplarAvatar(AtomSpace& as,

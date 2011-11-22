@@ -1,8 +1,8 @@
 ;
 ; Modulator updaters
 ;
-; @author Zhenhua Cai czhedu@gmail.com
-; @date   2011-05-11
+; @author Jinhua Chua <JinhuaChua@gmail.com>
+; @date   2011-11-22
 ;
 
 ; I borrow a few equations from the paper below
@@ -27,7 +27,7 @@
 
 (define (ResolutionModulatorUpdater)
     (- 1
-       (expt (get_latest_modulator_or_demand_value "ActivationModulator") 0.5)
+       (expt (get_latest_predicate_truth_value_mean "ActivationModulator") 0.5)
     ) 
 )
 
@@ -55,8 +55,8 @@
 ; While a lower one results in opportunism/flexibility, or even motive fluttering. 
 
 (define (SelectionThresholdModulatorUpdater)
-    (clip_within (* (+ (get_latest_modulator_or_demand_value "SelectionThresholdModulator") 0.5)
-                    (+ (get_latest_modulator_or_demand_value "ActivationModulator") 0.1)
+    (clip_within (* (+ (get_latest_predicate_truth_value_mean "SelectionThresholdModulator") 0.5)
+                    (+ (get_latest_predicate_truth_value_mean "ActivationModulator") 0.1)
                  )
 
                  0.001

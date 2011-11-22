@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Welter Luigi
  *
- * Updated: by ZhenhuaCai, on 2011-10-07
+ * Updated: by Jinhua Chua, on 2011-11-22
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -93,6 +93,11 @@ private:
     static HandleToHandleMap latestAvatarSayActionDone;
     static HandleToHandleMap latestAvatarActionDone;
     static HandleToHandleMap latestPetActionPredicate;
+
+    static HandleToHandleMap latestModulators; 
+    static HandleToHandleMap latestDemands; 
+    static HandleToHandleMap latestFeelings; 
+
     static std::map<Handle, HandleToHandleMap > latestSpatialPredicate;
     static HandleToHandleMap latestSchemaPredicate;
     static boost::unordered_map<std::string, HandleSeq> frameElementsCache;
@@ -107,20 +112,19 @@ private:
      * @param key         key (a handle to PredicateNode) of infoMap
      *
      * @note
-     *  
      *     LatestLink
-     *         EvaluationLink
-     *
-     *  TODO: who would use this infoMap and LatestLink?
+     *         AtTimeLink
+     *             TimeNode
+     *             EvaluationLink
      */
-    static void updateGenericLatestInfoMap(HandleToHandleMap& infoMap,
-                                           AtomSpace& as,
+    static void updateGenericLatestInfoMap(HandleToHandleMap & infoMap,
+                                           AtomSpace & as,
                                            Handle atTimeLink,
                                            Handle key);
 
-    static void updateGenericLatestSingleInfo(Handle& latestSingleInfoHandle,
-            AtomSpace& as,
-            Handle atTimeLink);
+    static void updateGenericLatestSingleInfo(Handle & latestSingleInfoHandle,
+                                              AtomSpace & as,
+                                              Handle atTimeLink);
 
 public:
 
@@ -1038,6 +1042,17 @@ public:
     static void updateLatestIsExemplarAvatar(AtomSpace& as,
                                              Handle atTimeLink);
 
+    static void updateLatestModulator(AtomSpace & as, 
+                                      Handle atTimeLink, 
+                                      Handle modulatorPredicateNode); 
+
+    static void updateLatestDemand(AtomSpace & as, 
+                                   Handle atTimeLink, 
+                                   Handle demandPredicateNode); 
+
+    static void updateLatestFeeling(AtomSpace & as, 
+                                    Handle atTimeLink, 
+                                    Handle feelingPredicateNode); 
 
     /**
      * Retrieve the handles of all Frame Elements (DefinedFrameElementNodes) 

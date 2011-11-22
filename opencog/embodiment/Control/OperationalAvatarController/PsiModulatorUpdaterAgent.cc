@@ -1,8 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiModulatorUpdaterAgent.cc
  *
- * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-05-13
+ * @author Jinhua Chua <JinhuaChua@gmail.com>
+ * @date   2011-11-22
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -69,6 +69,23 @@ bool PsiModulatorUpdaterAgent::Modulator::runUpdater (AtomSpace & atomSpace)
 
 bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace, const unsigned long timeStamp)
 {
+    // Update LatestLink containig latest modulator level
+    std::string predicateName = this->modulatorName + "Modulator"; 
+    Handle modulatorPredicateNode = atomSpace.addNode(PREDICATE_NODE, predicateName.c_str()); 
+    SimpleTruthValue stv = SimpleTruthValue(this->currentModulatorValue, 1); 
+
+    std::vector <Handle> outgoings;
+    Handle listLink = atomSpace.addLink(LIST_LINK, outgoings); 
+    outgoings.push_back(modulatorPredicateNode); 
+    outgoings.push_back(listLink); 
+    Handle evaluationLink = atomSpace.addLink(EVALUATION_LINK, outgoings); 
+    atomSpace.setTV(evaluationLink, stv); 
+
+//    Handle evaluationLink = AtomSpaceUtil::setPredicateValue(atomSpace, predicateName, stv); 
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evaluationLink, timeStamp, stv); 
+
+    AtomSpaceUtil::updateLatestModulator(atomSpace, atTimeLink, modulatorPredicateNode); 
+
 #if HAVE_GUILE    
 
     // Initialize scheme evaluator

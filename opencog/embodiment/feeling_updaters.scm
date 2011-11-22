@@ -1,8 +1,8 @@
 ;
 ; Feeling updaters
 ;
-; @author Zhenhua Cai czhedu@gmail.com
-; @date   2011-07-07
+; @author Jinhua Chua <JinhuaChua@gmail.com>
+; @date   2011-11-22
 ;
 
 ; How emotions emerge from the system?
@@ -136,22 +136,22 @@
         )
 
     (/ (+ (modulator_to_feeling_dimension 
-              (get_latest_modulator_or_demand_value "ActivationModulator") 
+              (get_latest_predicate_truth_value_mean "ActivationModulator") 
               activation_indicator 
           )
 
           (modulator_to_feeling_dimension
-              (get_latest_modulator_or_demand_value "ResolutionModulator") 
+              (get_latest_predicate_truth_value_mean "ResolutionModulator") 
               resolution_indicator
           )
 
           (modulator_to_feeling_dimension 
-              (get_latest_modulator_or_demand_value "SecuringThresholdModulator") 
+              (get_latest_predicate_truth_value_mean "SecuringThresholdModulator") 
               securing_threshold_indicator 
           )
 
           (modulator_to_feeling_dimension 
-              (get_latest_modulator_or_demand_value "SelectionThresholdModulator") 
+              (get_latest_predicate_truth_value_mean "SelectionThresholdModulator") 
               selection_threshold_indicator 
           )
 

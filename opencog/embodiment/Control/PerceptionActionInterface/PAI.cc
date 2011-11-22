@@ -2718,7 +2718,6 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
     // count=1, i.e. one observation of this biological urge
     atomSpace.setTV(atTimeLink,SimpleTruthValue((strength_t)level, 1));
 
-    // TODO: what does this for? [by Zhenhua Cai, on 2011-03-08]
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, feelingNode);
     
     // setup the frame for the given physiological feeling

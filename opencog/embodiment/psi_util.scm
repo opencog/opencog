@@ -1,8 +1,8 @@
 ;
 ; Helper functions used by all sorts of psi scheme scripts
 ;
-; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-06-09
+; @author Jinhua Chua <JinhuaChua@gmail.com>
+; @date   2011-11-22
 ;
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -321,34 +321,7 @@
 ; If fails to retrieve the modulator or demand from AtomSpace, it would return a random 
 ; value in [0, 1]
 (define (get_latest_modulator_or_demand_value modulator_or_demand_name)
-    (let* ( (latest_modulator_or_demand 
-                (get_latest_modulator_or_demand modulator_or_demand_name) 
-            )
-            (latest_number_node (list) )
-            (latest_value (list) )
-          )
-
-          (if (null? latest_modulator_or_demand)
-              (begin
-                   (print_debug_info INFO_TYPE_WARN "get_latest_modulator_or_demand_value"
-                                     (string-append "Failed to retrieve " 
-                                                     modulator_or_demand_name 
-                                                     " from AtomSpace. "
-                                                     "Return random number in [0, 1] instead."
-                                     )
-                   )
-                  (set! latest_value (random:uniform) )
-              )
-
-              (begin
-                  (set! latest_number_node (list-ref latest_modulator_or_demand 1) ) 
-                  (set! latest_value (string->number (cog-name latest_number_node) ) )
-              )
-          ); if
-
-          ; Return the latest value
-          latest_value
-    ); let* 
+    (get_latest_predicate_truth_value_mean modulator_or_demand_name)
 )
 
 ; Save the modulator or demand value to AtomSpace given modulator or demand name, 

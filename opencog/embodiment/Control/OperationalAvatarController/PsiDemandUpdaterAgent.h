@@ -1,8 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.h
  *
- * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-05-09
+ * @author Jinhua Chua <JinhuaChua@gmail.com>
+ * @date   2011-11-22
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -121,7 +121,7 @@ private:
          *
          * TODO: Only current (latest) demand value is considered, also take previous demand values in future
          *
-         * @note This function does two jobs as follows:
+         * @note This function does three jobs as follows:
          *
          *       1. Create a new NumberNode and SimilarityLink to store the result, 
          *          and then time stamp the SimilarityLink.
@@ -139,6 +139,14 @@ private:
          *
          *       2. Run the procedure named "FuzzyWithin", and then set the result to the truth value of 
          *         both EvaluationLink of Demand Goal and FuzzyWithin
+         *       
+         *       3. Update corresponding LatestLink
+         *
+         *          LatestLink
+         *              AtTimeLink
+         *                  TimeNode "latestTimestamp"
+         *                  EvaluationLink (stv denotes the satisfaction level of the demand)
+         *                      PredicateNode "xxxDemand"
          */
         bool updateDemandGoal(AtomSpace & atomSpace, const unsigned long timeStamp);
 
