@@ -88,7 +88,7 @@ ctruth_table truth_table::compress() const {
     logger().debug("Compress the dataset, current size is %d", input.size());
     // ~Logger
 
-    ctruth_table res;
+    ctruth_table res(output.get_label(), input.get_labels());
 
     InputTable::const_iterator in_it = input.begin();
     OutputTable::const_iterator out_it = output.begin();

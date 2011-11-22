@@ -205,13 +205,10 @@ void istreamTable(const std::string& file_name,
 template<typename IT, typename OT>
 std::ostream& ostreamTableHeader(std::ostream& out, const IT& it, const OT& ot) {
     out << ot.get_label() << ",";
-    ostreamContainer(out, it.get_labels(), ",");
-    out << std::endl;
-    return out;
+    return ostreamlnContainer(out, it.get_labels(), ",");
 }
 
-// output a data table in CSV format, note that ignored arguments are
-// not printed
+// output a data table in CSV format
 template<typename IT, typename OT>
 std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
     // print header
@@ -220,13 +217,7 @@ std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
     OC_ASSERT(it.size() == ot.size());
     for(size_t row = 0; row < it.size(); ++row) {
         out << ot[row] << ",";
-        for(arity_t col = 0; col < it.get_arity(); col++) {
-            out << it[row][col];
-            if(col != (it.get_arity() - 1))
-                out << ",";
-            else
-                out << std::endl;
-        }
+        ostreamlnContainer(out, it[row], ",");
     }
     return out;
 }
@@ -250,6 +241,25 @@ void ostreamTable(const std::string& file_name, const Table& table) {
     ostreamTable(file_name, table.input, table.output);
 }
 
+template<typename CT>
+std::ostream& ostreamCTableHeader(std::ostream& out, const CT& ct) {
+    out << ct.olabel << ",";
+    return ostreamlnContainer(out, ct.ilabels, ",");
+}
+        
+// output a compress table in pseudo CSV format
+template<typename CT>
+std::ostream& ostreamCTable(std::ostream& out, const CT& ct) {
+    // print header
+    ostreamCTableHeader(out, ct);
+    // print data
+    foreach(const auto& v, ct) {
+        out << "{" << v.second.first << "," << v.second.second << "},";
+        ostreamlnContainer(out, v.first, ",");
+    }
+    return out;
+}
+        
 /**
  * template to subsample input and output tables, after subsampling
  * the table have size min(nsamples, *table.size())
@@ -520,8 +530,7 @@ class truth_input_table : public input_table<bool> {
 public:
     truth_input_table() {}
     truth_input_table(const super& it) : super(it) {}
-    // set binding prior calling the combo evaluation, ignoring inputs
-    // to be ignored
+    // set binding prior calling the combo evaluation
     binding_map get_binding_map(const std::vector<bool>& args) const {
         binding_map bmap;
         for(size_t i = 0; i < args.size(); ++i)
@@ -549,13 +558,23 @@ public:
 /// replaced by a counter of the false ones and the true ones
 /// respectively.
 ///
-/// Note: this could generalized using a mapping<T, unsigned> instead
+/// Note: this could be generalized using a mapping<T, unsigned> instead
 /// of std::pair for non-boolean case. Here with T = bool it's fine
 /// though.
 class ctruth_table : public std::map<std::vector<bool>, std::pair<unsigned, unsigned> > {
-    typedef std::map<std::vector<bool>, std::pair<unsigned, unsigned> > super;
 public:
-    binding_map get_binding_map(const std::vector<bool>& args) const {
+    typedef std::vector<bool> key_type;
+    typedef std::pair<unsigned, unsigned> mapped_type;
+    typedef std::map<key_type, mapped_type> super;
+
+    std::string olabel;               // output label
+    std::vector<std::string> ilabels; // list of input labels
+
+    ctruth_table(const std::string& _olabel,
+                 const std::vector<std::string>& _ilabels)
+        : olabel(_olabel), ilabels(_ilabels) {}
+
+    binding_map get_binding_map(const key_type& args) const {
         binding_map bmap;
         for(size_t i = 0; i < args.size(); ++i)
             bmap[i+1] = bool_to_vertex(args[i]);
@@ -948,10 +967,8 @@ inline std::ostream& operator<<(std::ostream& out,
                                 const input_table<T>& it)
 {
     ostreamContainer(out, it.get_labels(), ",");
-    foreach(const std::vector<T>& row, it) {
-        ostreamContainer(out, row, ",");
-        out << std::endl;
-    }
+    foreach(const std::vector<T>& row, it)
+        ostreamlnContainer(out, row, ",");
     return out;
 }
 
