@@ -91,6 +91,41 @@ namespace opencog {
                                 delimiter, left, right, empty_lr);
     }
 
+    
+    /**
+     * like ostreamContainer but adding a new line at the end
+     */
+    template<class Out, class It>
+    Out& ostreamlnContainer(Out& out,
+                            It from,
+                            It to,
+                            const std::string& delimiter = " ",
+                            const std::string& left = "",
+                            const std::string& right = "",
+                            bool empty_lr = true)
+    {
+        ostreamContainer(out, from, to, delimiter, left, right, empty_lr);
+        out << std::endl;
+        return out;
+    }
+
+    /**
+     * like ostreamContainer but adding a new line at the end
+     */
+    template<class Out, class Con>
+    Out& ostreamlnContainer(Out& out,
+                            const Con& container,
+                            const std::string& delimiter = " ",
+                            const std::string& left = "", 
+                            const std::string& right = "",
+                            bool empty_lr = true)
+    {
+        ostreamContainer(out, container.begin(), container.end(),
+                         delimiter, left, right, empty_lr);
+        out << std::endl;
+        return out;
+    }
+
     /**
      * like ostreamContainer but uses std::cout
      */
@@ -127,8 +162,8 @@ namespace opencog {
                           const std::string& right = "",
                           bool empty_lr = true)
     {
-        printContainer(from, to, delimiter, left, right, empty_lr);
-        std::cout << std::endl;
+        ostreamlnContainer(std::cout, from, to,
+                           delimiter, left, right, empty_lr);
     }
     template<class Con>
     void printlnContainer(const Con& container,
@@ -137,8 +172,8 @@ namespace opencog {
                           const std::string& right = "",
                           bool empty_lr = true)
     {
-        printContainer(container, delimiter, left, right, empty_lr);
-        std::cout << std::endl;
+        ostreamlnContainer(std::cout, container,
+                           delimiter, left, right, empty_lr);
     }
 
     /**
