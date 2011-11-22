@@ -42,8 +42,8 @@
     (let ( (eval_has_unanswered_question
                (EvaluationLink (PredicateNode "has_unanswered_question") )
            )
-           (eval_has_dramatical_changes
-               (EvaluationLink (PredicateNode "has_dramatical_changes") )
+           (eval_has_dramatic_changes
+               (EvaluationLink (PredicateNode "has_dramatic_changes") )
            )
          ) 
 
@@ -53,7 +53,7 @@
 
             (+ 
                 (* 0.4  (get_truth_value_mean (cog-tv eval_has_unanswered_question) ) )
-                (* 0.35 (get_truth_value_mean (cog-tv eval_has_dramatical_changes) ) )
+                (* 0.35 (get_truth_value_mean (cog-tv eval_has_dramatic_changes) ) )
             )    
          ); -
     )

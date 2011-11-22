@@ -572,7 +572,7 @@
 ; This rule will notify other agents important changes, 
 (add_rule (stv 0.75 1.0) AffiliationDemandGoal
     (add_action (GroundedSchemaNode "scm:notify_changes") )
-    (add_precondition (PredicateNode "has_dramatical_changes") )
+    (add_precondition (PredicateNode "has_dramatic_changes") )
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

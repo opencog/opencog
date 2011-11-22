@@ -56,7 +56,7 @@ def monitor_changes(atomspace):
     # Remove previous records of changes in the atomspace
     pred_change_with_tv = atomspace.add_node(t.PredicateNode, "change_with_tv")
     pred_change_with_arg = atomspace.add_node(t.PredicateNode, "change_with_arg")
-    pred_has_dramatical_changes = atomspace.add_node(t.PredicateNode, "has_dramatical_changes")
+    pred_has_dramatic_changes = atomspace.add_node(t.PredicateNode, "has_dramatic_changes")
 
     old_changes_with_tv = atomspace.get_atoms_by_target_atom(t.ReferenceLink, pred_change_with_tv, subtype = False)
     for old_change_with_tv in old_changes_with_tv:
@@ -70,8 +70,8 @@ def monitor_changes(atomspace):
         atomspace.remove(old_change_with_arg, recursive = False)
         atomspace.remove(list_link, recursive = False)
 
-    eval_has_dramatical_changes = atomspace.add_link(t.EvaluationLink, [pred_has_dramatical_changes]) 
-    atomspace.set_tv(eval_has_dramatical_changes.h, TruthValue(0, 0))
+    eval_has_dramatic_changes = atomspace.add_link(t.EvaluationLink, [pred_has_dramatic_changes]) 
+    atomspace.set_tv(eval_has_dramatic_changes.h, TruthValue(0, 0))
 
     # Record the changes in the atomspace
     for change_with_tv in changes_with_tv:        
@@ -85,11 +85,11 @@ def monitor_changes(atomspace):
 #        print eval_link
 
     if changes_with_tv or changes_with_arg:  
-        atomspace.set_tv(eval_has_dramatical_changes.h, TruthValue(1, 1))
+        atomspace.set_tv(eval_has_dramatic_changes.h, TruthValue(1, 1))
 
     print "Found " + str(len(changes_with_tv)) + " changes_with_tv"
     print "Found " + str(len(changes_with_arg)) + " changes_with_arg"
-    print eval_has_dramatical_changes
+    print eval_has_dramatic_changes
 
 def monitor_loop(atomspace):
     while True: 
