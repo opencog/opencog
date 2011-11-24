@@ -42,7 +42,7 @@
 #include "../moses/moses.h"
 #include "../moses/neighborhood_sampling.h"
 
-#define MINIMUM_DEME_SIZE         10
+#define MINIMUM_DEME_SIZE         50
 #define MAX_EVALS_PER_SLICE       10
 
 namespace opencog { namespace moses {
@@ -242,6 +242,42 @@ struct iterative_hillclimbing {
         : rng(_rng), opt_params(op), hc_params(hc) {}
 
     /**
+     * Heuristic to estimate the probability that an improvement can
+     * be gotten given that
+     * - we sample the neighborhood at distance d,
+     * - with N samples,
+     * - the total number of neighbors at that distance is T
+     */
+    float prob_improvement(deme_size_t N, deme_size_t T, unsigned d,
+                           const field_set& fields) {
+        
+        // the following is based on the not always true assumption
+        // that there is an improvement in the neighborhood
+        static const deme_size_t NB = 10000; // number of better candidates in
+                                             // the neighborhood at distance d
+                                             // that number is a big lie!
+
+        // if the entire neighborhood is explored then the improvement
+        // is sure to be found
+        if(N >= T)
+            return 1;
+        
+        // approximation of the total number of candidates at distance
+        // d. This figure is lower than the reality because the
+        // distance is not necessarily binary. If the field has only
+        // binary knobs then it is correct. We use that because T is
+        // not the actual number of neighbors but between N and the
+        // actually number of neighbors at distance d
+        deme_size_t bT =
+            safe_binomial_coefficient(information_theoretic_bits(fields), d);
+
+        // proportion of good candidates in the neighborhood
+        double B = std::min(1.0, (double)NB/(double)std::max(T, bT));
+                                      
+        return 1 - pow(1 - B, double(N));
+    }
+    
+    /**
      * @param deme were to store the candidates searched. Typically
      *             the deme is empty, if it is not empty it will be
      *             overwritten
@@ -265,11 +301,11 @@ struct iterative_hillclimbing {
         unsigned pop_size = opt_params.pop_size(fields);
         unsigned max_gens_total = opt_params.max_gens_total(fields);
 
-        unsigned long long current_number_of_instances = 0;
+        deme_size_t current_number_of_instances = 0;
 
         //adjust parameters based on the maximal # of evaluations allowed
-        unsigned long long max_number_of_instances =
-            (unsigned long long)max_gens_total * (unsigned long long)pop_size;
+        deme_size_t max_number_of_instances =
+            (deme_size_t)max_gens_total * (deme_size_t)pop_size;
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
@@ -293,7 +329,7 @@ struct iterative_hillclimbing {
             }
             // ~Logger
 
-            unsigned long long number_of_new_instances =
+            deme_size_t number_of_new_instances =
                 (max_number_of_instances - current_number_of_instances)
                 / hc_params.fraction_of_remaining;
 
@@ -301,11 +337,32 @@ struct iterative_hillclimbing {
                 number_of_new_instances =
                     (max_number_of_instances - current_number_of_instances);
 
+            // the number of all neighbours at the distance d (stops
+            // counting when above number_of_new_instances)
+            deme_size_t total_number_of_neighbours =
+                count_n_changed_knobs(deme.fields(), center_inst, distance,
+                                      number_of_new_instances);
+
+            // Estimate the probability of an impovement and halts if too low
+            float p_improv = prob_improvement(number_of_new_instances,
+                                              total_number_of_neighbours,
+                                              distance, fields);
+
+            logger().debug("Estimated probability to find an improvement = %f",
+                           p_improv);
+
+            if(p_improv < 0.01) {
+                logger().debug("The probability is too low to pursue the search",
+                               p_improv);
+                break;
+            }
+            
             number_of_new_instances =
-                sample_new_instances(number_of_new_instances,
+                sample_new_instances(total_number_of_neighbours,
+                                     number_of_new_instances,
                                      current_number_of_instances,
                                      center_inst, deme, distance, rng);
-
+            
             // Logger
             logger().debug("Evaluate %u neighbors at distance %u",
                            number_of_new_instances, distance);
@@ -332,6 +389,7 @@ struct iterative_hillclimbing {
             }
 
             current_number_of_instances += number_of_new_instances;
+
             if(has_improved) {
                 distance = 1;
                 if(eval_best)
@@ -457,7 +515,7 @@ struct sliced_iterative_hillclimbing {
             cout << "Distance in this iteration:" << distance << endl;
 
             // the number of all neighbours at the distance d
-            unsigned long long total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
+            deme_size_t total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
             cout << "Number of possible instances:" << total_number_of_neighbours << endl;
 
             if (total_number_of_neighbours == 0) {
@@ -550,7 +608,7 @@ struct sliced_iterative_hillclimbing {
     }
 
     unsigned distance;
-    unsigned long long number_of_new_instances;
+    deme_size_t number_of_new_instances;
     unsigned number_of_fields;
     instance exemplar;
     int max_number_of_instances;
@@ -582,7 +640,7 @@ struct sa_parameters {
     double min_temp;
     double temp_step_size;
     double accept_prob_temp_intensity;
-    unsigned long long max_new_instances;
+    deme_size_t max_new_instances;
 };
 
 struct simulated_annealing {
@@ -651,13 +709,13 @@ struct simulated_annealing {
         // @todo this should be adapted for SA
         unsigned pop_size = opt_params.pop_size(fields);
         // unsigned max_gens_total = opt_params.max_gens_total(deme.fields());
-        unsigned long long max_number_of_instances =
-            /*(unsigned long long)max_gens_total * */
-            (unsigned long long)pop_size;
+        deme_size_t max_number_of_instances =
+            /*(deme_size_t)max_gens_total * */
+            (deme_size_t)pop_size;
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
-        unsigned long long current_number_of_instances = 0;
+        deme_size_t current_number_of_instances = 0;
 
         unsigned step = 1;
 
@@ -688,7 +746,7 @@ struct simulated_annealing {
             }
             // ~Logger
 
-            unsigned long long number_of_new_instances =
+            deme_size_t number_of_new_instances =
                 sample_new_instances(sa_params.max_new_instances,
                                      current_number_of_instances,
                                      center_instance, deme,

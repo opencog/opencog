@@ -520,11 +520,6 @@ int moses_exec(int argc, char** argv) {
                 subsampleTable(table.input, table.output, nsamples, rng);
             ctruth_table ctable = table.compress();
 
-            stringstream ss;
-            ss << std::endl;
-            ostreamCTable(ss, ctable);
-            logger().debug(ss.str());
-
             type_tree tt = declare_function(output_type, arity);
 
             int as = alphabet_size(tt, ignore_ops);

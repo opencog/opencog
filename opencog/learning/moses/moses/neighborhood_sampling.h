@@ -414,6 +414,16 @@ Out vary_n_knobs(const field_set& fs,
     return out;
 }
 
+inline deme_size_t safe_binomial_coefficient(unsigned k, unsigned n) {
+    deme_size_t res;
+    double noi_db = binomial_coefficient<double>(k , n);
+    try {
+        res = numeric_cast<deme_size_t>(noi_db);
+    } catch(positive_overflow&) {
+        res = numeric_limits<deme_size_t>::max();
+    }
+    return res;
+}
 
 /**
  * Used by the function count_n_changed_knobs (only) for counting
@@ -428,18 +438,18 @@ Out vary_n_knobs(const field_set& fs,
  * @param max_count       stop counting when above this value, that is
  *                        because this function can be computationally expensive.
  */
-inline unsigned long long
+inline deme_size_t
 count_n_changed_knobs_from_index(const field_set& fs,
                                  const instance& inst,
                                  unsigned n,
                                  unsigned starting_index,
-                                 unsigned long long max_count
-                                 = numeric_limits<unsigned long long>::max())
+                                 deme_size_t max_count
+                                 = numeric_limits<deme_size_t>::max())
 {
     if(n == 0)
         return 1;
 
-    unsigned long long number_of_instances = 0;
+    deme_size_t number_of_instances = 0;
 
     unsigned begin_contin_idx = fs.n_onto();
     unsigned begin_disc_idx = begin_contin_idx + fs.n_contin();
@@ -513,14 +523,8 @@ count_n_changed_knobs_from_index(const field_set& fs,
         // since bits have the same arity (2) and are the last there
         // is no need for recursive call
         unsigned rb = end_bit_idx - starting_index;
-        if(n <= rb) {
-            double noi_db = binomial_coefficient<double>(rb , n);
-            try {
-                number_of_instances = numeric_cast<unsigned long long>(noi_db);
-            } catch(positive_overflow&) {
-                number_of_instances = numeric_limits<unsigned long long>::max();
-            }
-        }
+        if(n <= rb)
+            number_of_instances = safe_binomial_coefficient(rb, n);
     }
     return number_of_instances;
 }
@@ -536,40 +540,35 @@ count_n_changed_knobs_from_index(const field_set& fs,
  * @param max_count       stop counting when above this value, that is
  *                        because this function can be computationally expensive.
  */
-inline unsigned long long count_n_changed_knobs(const field_set& fs,
-                                                const instance& inst,
-                                                unsigned n,
-                                                unsigned long long max_count 
-                                                = numeric_limits<unsigned long long>::max())
+inline deme_size_t count_n_changed_knobs(const field_set& fs,
+                                         const instance& inst,
+                                         unsigned n,
+                                         deme_size_t max_count 
+                                         = numeric_limits<deme_size_t>::max())
 {
     return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
 }
 // for backward compatibility, like above but with null instance
-inline unsigned long long count_n_changed_knobs(const field_set& fs,
-                                                unsigned n,
-                                                unsigned long long max_count
-                                                = numeric_limits<unsigned long long>::max())
+inline deme_size_t count_n_changed_knobs(const field_set& fs,
+                                         unsigned n,
+                                         deme_size_t max_count
+                                         = numeric_limits<deme_size_t>::max())
 {
     instance inst(fs.packed_width());
     return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
 }
 
-/// file the deme with at max number_of_new_instances, at distance
+/// fill the deme with at max number_of_new_instances, at distance
 /// dist and return the actual number of new instances (bounded by the
 /// possible neighbors at distance dist)
-inline unsigned long long
-sample_new_instances(unsigned long long number_of_new_instances,
-                     unsigned long long current_number_of_instances,
+inline deme_size_t
+sample_new_instances(deme_size_t total_number_of_neighbours,
+                     deme_size_t number_of_new_instances,
+                     deme_size_t current_number_of_instances,
                      const instance& center_inst,
                      instance_set<composite_score>& deme,
                      unsigned dist,
                      RandGen& rng) {
-    // the number of all neighbours at the distance d (stops
-    // counting when above number_of_new_instances)
-    unsigned long long total_number_of_neighbours =
-        count_n_changed_knobs(deme.fields(), center_inst, dist,
-                              number_of_new_instances);
-
     if (number_of_new_instances < total_number_of_neighbours) {
         //resize the deme so it can take new instances
         deme.resize(current_number_of_instances + number_of_new_instances);
@@ -592,6 +591,25 @@ sample_new_instances(unsigned long long number_of_new_instances,
                                      center_inst);
     }
     return number_of_new_instances;
+}
+/// like above but doesn't compute total_number_of_neighbours instead
+/// of taking it argument
+inline deme_size_t
+sample_new_instances(deme_size_t number_of_new_instances,
+                     deme_size_t current_number_of_instances,
+                     const instance& center_inst,
+                     instance_set<composite_score>& deme,
+                     unsigned dist,
+                     RandGen& rng) {
+    // the number of all neighbours at the distance d (stops
+    // counting when above number_of_new_instances)
+    deme_size_t total_number_of_neighbours =
+        count_n_changed_knobs(deme.fields(), center_inst, dist,
+                              number_of_new_instances);
+    return sample_new_instances(total_number_of_neighbours,
+                                number_of_new_instances,
+                                current_number_of_instances,
+                                center_inst, deme, dist, rng);
 }
 
 } // ~namespace moses

@@ -57,8 +57,12 @@ using boost::transform_iterator;
 // double, float as final score type is likely enough
 typedef float score_t;
 
+// the type used to hold the number of individuals in a deme can have
+// in principle
+typedef unsigned long long deme_size_t;
+        
 // score precision used for logging and outputting results, it is set
-// very high because that information is used by other tools
+// very high because that information may be used by other tools
 static const int io_score_precision = 32;
 
 static const score_t worst_score =
