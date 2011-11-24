@@ -2694,6 +2694,8 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
                                     unsigned long timestamp,
                                     float level)
 {
+    AttentionValue::sti_t sti = config().get_int("MIN_STI") + 10;
+
     HandleSeq evalLinkOutgoing;
 
     Handle feelingNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, feeling);
@@ -2706,6 +2708,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
     HandleSeq dummy;dummy.push_back(agentNode);
     evalLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, dummy));
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+    atomSpace.setSTI(evalLink, sti); 
 
     // Time stamp the EvaluationLink
     //
@@ -2717,6 +2720,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
 
     // count=1, i.e. one observation of this biological urge
     atomSpace.setTV(atTimeLink,SimpleTruthValue((strength_t)level, 1));
+    atomSpace.setSTI(atTimeLink, sti); 
 
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, feelingNode);
     
