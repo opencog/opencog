@@ -107,7 +107,7 @@ void PsiActionSelectionAgent::initDemandGoalList(AtomSpace & atomSpace)
     outgoings.clear(); 
     outgoings.push_back( atomSpace.addNode(CONCEPT_NODE, "psi_demand_goal_list") );
     outgoings.push_back( atomSpace.addLink(LIST_LINK, this->psi_demand_goal_list) );  
-    Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, outgoings);
+    Handle referenceLink = AtomSpaceUtil::addLink(atomSpace, REFERENCE_LINK, outgoings, true);
 
     logger().debug("PsiActionSelectionAgent::%s - "
                    "Add the list of demand goals to AtomSpace: %s [cycle = %d]", 
