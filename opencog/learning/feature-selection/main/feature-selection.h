@@ -59,6 +59,7 @@ static const string default_log_file = default_log_file_prefix + "." + default_l
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> algo_opt("algo", "a");
 static const pair<string, string> input_data_file_opt("input-file", "i");
+static const pair<string, string> target_feature_opt("target-feature", "u");
 static const pair<string, string> initial_feature_opt("initial-feature", "f");
 static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> output_file_opt("output-file", "o");
@@ -104,6 +105,7 @@ struct feature_selection_parameters {
     std::string algorithm;
     unsigned int max_evals;
     std::string input_file;
+    std::string target_feature;
     std::string output_file;
     std::vector<std::string> initial_features;
     unsigned long cache_size;
@@ -187,6 +189,7 @@ template<typename Table, typename Optimize>
 void moses_feature_selection(Table& table,
                              Optimize& optimize,
                              const feature_selection_parameters& fs_params) {
+    /// @todo do the compression
     arity_t arity = table.get_arity();
     field_set fields(field_set::disc_spec(2), arity);
     instance_set<composite_score> deme(fields);

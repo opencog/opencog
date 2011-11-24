@@ -84,6 +84,9 @@ int main(int argc, char** argv) {
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&fs_params.input_file),
          "Input table file, DSV file using comman, whitespace or tabulation as seperator.\n")
+        (opt_desc_str(target_feature_opt).c_str(),
+         value<string>(&fs_params.target_feature),
+         "Label of the target feature to fit. If none is given the first one is used.\n")
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&fs_params.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
@@ -168,9 +171,14 @@ int main(int argc, char** argv) {
     logger().info("Read input file %s", fs_params.input_file.c_str());
     // ~Logger
 
+    // find the position of the target feature (the first one by default)
+    int target_pos = fs_params.target_feature.empty()? 0
+        : findTargetFeaturePosition(fs_params.input_file,
+                                    fs_params.target_feature);
+
     if(inferred_type == id::boolean_type) {
         // read input_data_file file
-        truth_table table(fs_params.input_file);
+        truth_table table(fs_params.input_file, target_pos);
         feature_selection(table, fs_params, rng);
     } else {
         unsupported_type_exit(inferred_type);
