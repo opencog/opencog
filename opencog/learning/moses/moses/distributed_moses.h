@@ -81,9 +81,9 @@ const unsigned get_total_jobs(const host_proc_map::value_type& hp);
 unsigned running_proc_count(const host_proc_map& hpm);
 
 /**
- * generate a command line that launches moses-exec with exemplar base
- * 'tr' keeping all initial options, but running over one generation
- * and returning the adequate information to merge the result with the
+ * generate a command line that launches moses with exemplar base 'tr'
+ * keeping all initial options, but running over one generation and
+ * returning the adequate information to merge the result with the
  * metapopulation
  */
 string build_cmdline(const variables_map& vm, 
@@ -181,7 +181,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                               " that has not been visited and"
                               " no more results from other process are expected."
                               " This is a blockage situation, several options"
-                              " can be used to prevent that, see moses-exec -h");
+                              " can be used to prevent that, see moses -h");
                 // ~Logger
                 break;
             }

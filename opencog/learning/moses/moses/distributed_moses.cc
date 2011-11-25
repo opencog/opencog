@@ -78,9 +78,9 @@ string build_cmdline(const variables_map& vm,
                      unsigned gen_idx) {
     string res;
     if(host_name == localhost)
-        res = "moses-exec";
+        res = "moses";
     else
-        res = string("ssh ") + host_name + " 'moses-exec";
+        res = string("ssh ") + host_name + " 'moses";
     // replicate initial command's options, except all of those
     // interfering with the command to be built, that is:
     // exemplar, output options, jobs, max_evals, max_gens and
@@ -137,7 +137,7 @@ string build_cmdline(const variables_map& vm,
 
 proc_map::value_type launch_cmd(string cmd, unsigned n_jobs) {
     // append " > tempfile&" to cmd
-    char tempfile[] = "/tmp/moses-execXXXXXX";
+    char tempfile[] = "/tmp/mosesXXXXXX";
     int fd = mkstemp(tempfile);
     if(fd == -1) {
         std::cerr << "could not create temporary file" << std::endl;
