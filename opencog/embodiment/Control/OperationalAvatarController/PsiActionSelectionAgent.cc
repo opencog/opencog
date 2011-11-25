@@ -659,27 +659,27 @@ std::cout<<"action status: fail"<<std::endl;
         // If the Action is time out
         else if ( time(NULL) - this->timeStartCurrentAction >  this->procedureExecutionTimeout ) { 
 
-            // add 'actionFailed' predicates for timeout actions
-            oac->getPAI().setPendingActionPlansFailed(); 
-
-            // Stop the time out Action
-            procedureInterpreter.stopProcedure(this->currentSchemaId);
-
             logger().debug( "PsiActionSelectionAgent::%s - The Action %s is time out [SchemaId = %d, cycle = %d]", 
                            __FUNCTION__,
                            atomSpace.atomAsString(this->current_action).c_str(), 
                            this->currentSchemaId,
                            this->cycleCount
                          );
-            
+
+            // add 'actionFailed' predicates for timeout actions
+            oac->getPAI().setPendingActionPlansFailed(); 
+
+            // Stop the time out Action
+            procedureInterpreter.stopProcedure(this->currentSchemaId);
+
 std::cout<<"action status: timeout"<<std::endl; 
 
             // TODO: record the time out and update the weight of corresponding rule
             
             // Troy: now that this action failed, the following action sequence
             // should be dropped.
-//            this->current_actions.clear();
-//            this->temp_action_list.clear();
+            this->current_actions.clear();
+            this->temp_action_list.clear();
         }
         // If the Action is still running and is not time out, simply returns
         else {  
