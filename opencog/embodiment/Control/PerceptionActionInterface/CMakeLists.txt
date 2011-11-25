@@ -14,6 +14,7 @@ SET(PAI_SOURCE_FILES
     EmbodimentDOMParser
     EmbodimentErrorHandler
     EventResponder
+    EventDetector
 )
 
 IF (PROTOBUF_FOUND)

@@ -61,6 +61,8 @@ EventResponder::~EventResponder()
     delete EventResponder::instance;
 }
 
+// TODO: it now can only solve one single action, not exactly an event.
+// We expect we can response to an real event in future.
 void EventResponder::response(std::string actionName, Handle instanceNode, Handle actorNode, Handle targetNode,std::vector<Handle> actionparams)
 {
     // process all the parameters in this action

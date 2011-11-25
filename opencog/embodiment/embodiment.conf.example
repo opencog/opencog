@@ -16,7 +16,7 @@ AUTOMATED_SYSTEM_TESTS          = false
 
 # Are we working with the older Multiverse or newer Unity client?
 # Note: eventually Multiverse will be deprecated as Unity integration improves
-ENABLE_UNITY_CONNECTOR          = false
+ENABLE_UNITY_CONNECTOR          = true
 # There are two modes of action plan sending procedure. One is to send the whole action
 # plan to client at one time, the other is to extract individual actions from an action
 # plan and to send them one by one. This switch controls the mode. While extracted sending
