@@ -2,8 +2,18 @@
 ; Helper functions used by all sorts of psi scheme scripts
 ;
 ; @author Jinhua Chua <JinhuaChua@gmail.com>
-; @date   2011-11-22
+; @date   2011-11-25
 ;
+
+; Initialize seed of pseudo-random generator using current time
+(let ( (time (gettimeofday) )
+     )
+    (set! *random-state*
+         (seed->random-state
+             (+ (car time) (cdr time) )
+         )
+    )
+)
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
