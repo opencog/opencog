@@ -23,10 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/bind.hpp>
+#include <boost/array.hpp>
 #include <opencog/server/ServerSocket.h>
 #include <opencog/util/Logger.h>
-#include <boost/bind.hpp>
-
 
 using namespace opencog; 
 
