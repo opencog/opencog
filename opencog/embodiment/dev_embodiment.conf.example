@@ -13,10 +13,7 @@
 # Automated System Tests: when set to true, it uses constant values for random seeds 
 AUTOMATED_SYSTEM_TESTS          = false
 
-# Are we working with the older Multiverse or newer Unity client?
-# Note: eventually Multiverse will be deprecated as Unity integration improves
-#       if you want to use unity world now, please set the PSI_DEMANDS carefully, 
-#       since many demands are not available for the moment.  
+# Set to false if you want to use multiverse world, which is not supported any more and probably doesn't work
 ENABLE_UNITY_CONNECTOR          = true
 # There are two modes of action plan sending procedure. One is to send the whole action
 # plan to client at one time, the other is to extract individual actions from an action
@@ -123,7 +120,7 @@ PSI_DEMANDS = Energy, Integrity, Certainty, Competence, Affiliation
 #PSI_DEMANDS = TestEnergy
 # TODO: TestEnergy is only used for debugging, remove it once finished
 
-PSI_FEELINGS = fear, anger, happiness, sadness, excitement
+PSI_FEELINGS = fear, anger, happiness, sadness
 # Complete list of feelings
 #PSI_FEELINGS = fear, pride, love, hate, anger, gratitude, happiness, excitement 
 
@@ -138,7 +135,7 @@ PSI_RULES_CORE_FILE =          rules_core.scm
 PSI_RULES_FILENAME_MASK =      %s_rules.scm
 
 PSI_MODULATOR_UPDATER_ENABLED =        true
-PSI_MODULATOR_UPDATER_CYCLE_PERIOD =   11
+PSI_MODULATOR_UPDATER_CYCLE_PERIOD =   2
 
 PSI_DEMAND_UPDATER_ENABLED =           true
 PSI_DEMAND_UPDATER_CYCLE_PERIOD =      1
@@ -150,10 +147,13 @@ PSI_RELATION_UPDATER_ENABLED =         true
 PSI_RELATION_UPDATER_CYCLE_PERIOD =    13
 
 PSI_FEELING_UPDATER_ENABLED =          true
-PSI_FEELING_UPDATER_CYCLE_PERIOD =     11
+PSI_FEELING_UPDATER_CYCLE_PERIOD =     3
 
-FISHGRAM_AGENT_ENABLE = false
-FISHGRAM_AGENT_CYCLE_PERIOD = 59
+MONITOR_CHANGES_ENABLED = true
+MONITOR_CHANGES_CYCLE_PERIOD = 5
+
+FISHGRAM_ENABLED = false
+FISHGRAM_CYCLE_PERIOD = 1
 
 # If you would like to use PLN planner, set it to true, otherwise it will use random breadth-first planner
 PSI_PLAN_BY_PLN = false
@@ -165,7 +165,7 @@ RE_CYCLE_PERIOD                                  = 2
 ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD = 1
 
 # how much cycles the importance decay will take
-IMPORTANCE_DECAY_CYCLE_PERIOD = 9
+IMPORTANCE_DECAY_CYCLE_PERIOD = 1
 
 #RE_DEFAULT_COUNT	    18
 #RE_DEFAULT_MEAN		0.5  
@@ -177,7 +177,7 @@ IMPORTANCE_DECAY_CYCLE_PERIOD = 9
 
 # Parameter to control the maximal time spent by a procedure to be executed by Procedure Interpreter (in seconds)
 #PROCEDURE_EXECUTION_TIMEOUT     = 90 
-PROCEDURE_EXECUTION_TIMEOUT     = 10
+PROCEDURE_EXECUTION_TIMEOUT     = 20
 
 # Indicates if walk actions sent to PVP can be canceled so that new navigation plan be sent to PVP when needed.
 ALLOW_WALKING_CANCELATION       = false
@@ -379,7 +379,7 @@ SERVER_PORT           = 17001
 
 # modules that will be loaded at the cogserver start
 MODULES               = libquery.so, libbuiltinreqs.so,
-                        libscheme-shell.so, libpersist.so, libpln.so
+                        libscheme-shell.so, libpersist.so, libpln.so, libPythonModule.so
 
 # scheme script files that will be loaded during the system startup
 SCM_PRELOAD           = scm/type_constructors.scm, scm/utilities.scm, scm/file-utils.scm, scm/debug.scm, scm/embodiment/type_constructors.scm, scm/embodiment/predicates-frames.scm, scm/embodiment/language-comprehension.scm, scm/embodiment/reference-resolution-rules.scm, scm/embodiment/command-resolution-rules.scm, scm/embodiment/question-answering.scm, psi_util.scm, rules_core.scm, action_selection.scm, feeling_updaters.scm, demand_updaters.scm, modulator_updaters.scm
