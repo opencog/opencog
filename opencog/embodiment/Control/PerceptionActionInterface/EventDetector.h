@@ -30,5 +30,19 @@
 #ifndef EventDetector_H
 #define EventDetector_H
 
+#include <opencog/atomspace/AtomSpace.h>
+#include "PAI.h"
+
+namespace opencog { namespace pai {
+
+class EventDetector
+{
+
+
+
+};// class EventDetector
+
+}} // namespace opencog::pai
+
 
 #endif // EventDetector_H
