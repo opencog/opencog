@@ -1,8 +1,8 @@
 ;
 ; @file embodiment/rules_core.scm
 ;
-; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-10-12
+; @author Jinhua Chua <JinhuaChua@gmail.com>
+; @date   2011-11-28
 ;
 ; Scheme core functions for adding Modulators, Demands and Rules etc. into AtomSpace
 ;
@@ -499,18 +499,27 @@
 ;         Node:arguments
 ;         ...
 ;
+; Note: ListLink is required. Even there's no argument, you should also put an 
+;       empty ListLink within ExecutionLink. 
+;       Othersise, calling
+;           (query_atom_space_crisp (find_psi_action variables context action) )
+;           in 'opencog/embodiment/action_selection.scm' 
+;       will discard all the actions without ListLink. This weird problem is 
+;       caused by the behaviour of pattern matcher. 
+;
 
 (define (add_action schema_handle . arguments)
     (ExecutionLink (cog-new-av 1 1 1)
         schema_handle
+        (ListLink (apply parse_arguments arguments) )
 
-        (let ( (argument_list (apply parse_arguments arguments) )
-             )
-             (if (null? argument_list)
-                 (list)
-                 (ListLink argument_list)
-             )
-        )
+;        (let ( (argument_list (apply parse_arguments arguments) )
+;             )
+;             (if (null? argument_list)
+;                 (list)
+;                 (ListLink argument_list)
+;             )
+;        )
     )
 )
 
