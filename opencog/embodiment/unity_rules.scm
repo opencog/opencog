@@ -470,6 +470,22 @@
     )
 )
 
+;(AverageLink (cog-new-av 1 1 1)
+;    (ListLink
+;        (VariableNode "$var_food") 
+;    ) 
+;
+;    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
+;        (SequentialAndLink
+;            (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
+;            (add_action (GroundedSchemaNode "grab") (VariableNode "$var_food") )
+;            (add_action (GroundedSchemaNode "eat") (VariableNode "$var_food") )
+;        )    
+;        GetFoodGoal
+;    )
+;)    
+
+
 (AverageLink (cog-new-av 1 1 1)
     (ListLink
         (VariableNode "$var_food") 
@@ -477,13 +493,72 @@
 
     (add_rule (stv 1.0 1.0) EnergyDemandGoal 
         (SequentialAndLink
-            (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
-            (add_action (GroundedSchemaNode "grab") (VariableNode "$var_food") )
-            (add_action (GroundedSchemaNode "eat") (VariableNode "$var_food") )
-        )    
-        GetFoodGoal
+;            (add_action (GroundedSchemaNode "rotate") (NumberNode "-90") )
+            (add_action (GroundedSchemaNode "rotate_left") )
+            (add_action (GroundedSchemaNode "step_forward") )
+        )
+        (AndLink 
+            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+            (add_precondition (PredicateNode "left_of") (VariableNode "$var_food") PET_HANDLE) 
+        )
     )
-)    
+)
+
+(AverageLink (cog-new-av 1 1 1)
+    (ListLink
+        (VariableNode "$var_food") 
+    ) 
+
+    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
+        (SequentialAndLink
+;            (add_action (GroundedSchemaNode "rotate") (NumberNode "90") )
+            (add_action (GroundedSchemaNode "rotate_right") )
+            (add_action (GroundedSchemaNode "step_forward") )
+        )
+        (AndLink 
+            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+            (add_precondition (PredicateNode "right_of") (VariableNode "$var_food") PET_HANDLE) 
+        )
+    )
+)
+
+(AverageLink (cog-new-av 1 1 1)
+    (ListLink
+        (VariableNode "$var_food") 
+    ) 
+
+    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
+        (add_action (GroundedSchemaNode "step_forward") )
+        (AndLink 
+            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+            (add_precondition (PredicateNode "in_front_of") (VariableNode "$var_food") PET_HANDLE) 
+        )
+    )
+)
+
+(AverageLink (cog-new-av 1 1 1)
+    (ListLink
+        (VariableNode "$var_food") 
+    ) 
+
+    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
+        (SequentialAndLink
+;            (add_action (GroundedSchemaNode "rotate") (NumberNode "180") )
+            (add_action (GroundedSchemaNode "rotate_right") )
+            (add_action (GroundedSchemaNode "rotate_right") )
+            (add_action (GroundedSchemaNode "step_forward") )
+        )
+        (AndLink 
+            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+            (add_precondition (PredicateNode "behind") (VariableNode "$var_food") PET_HANDLE) 
+        )
+    )
+)
+
 
 ;(add_rule (stv 1.0 1.0) GetFoodGoal 
 ;    (add_action (GroundedSchemaNode "random_search") )
@@ -491,17 +566,17 @@
 ;)
 
 ; TODO: very file rules only for testing dialog_system
-(add_rule (stv 0.6 1.0) GetFoodGoal
-    (add_action (SpeechActSchemaNode "AskForFood") )
-    NULL_PRECONDITION
-)
-
-(add_rule (stv 0.3 1.0) GetFoodGoal
-    (SequentialAndLink
-        (add_action (GroundedSchemaNode "lick") ) 
-    )    
-    NULL_PRECONDITION
-)
+;(add_rule (stv 0.6 1.0) GetFoodGoal
+;    (add_action (SpeechActSchemaNode "AskForFood") )
+;    NULL_PRECONDITION
+;)
+;
+;(add_rule (stv 0.3 1.0) GetFoodGoal
+;    (SequentialAndLink
+;        (add_action (GroundedSchemaNode "lick") ) 
+;    )    
+;    NULL_PRECONDITION
+;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
