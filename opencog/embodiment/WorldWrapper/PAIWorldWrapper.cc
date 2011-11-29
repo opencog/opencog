@@ -975,6 +975,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
           {id::lick_at, ActionType::LICK()},
           {id::move_head, ActionType::MOVE_HEAD()},
           {id::random_step, ActionType::WALK()},
+          {id::rotate, ActionType::ROTATE()},
           {id::rotate_left, ActionType::TURN()},
           {id::rotate_right, ActionType::TURN()},
         // {id::scratch_self, ActionType::SCRATCH_SELF_*()} // each body part has itw own  scratch command
@@ -1031,6 +1032,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
          grab(pickupable_obj)
          growl_at(obj)
          jump_towards(obj)
+         jump_forward(height)
          move_left_ear(TWITCH|PERK|BACK)
          lick_at(obj)
          move_head(angle, angle)
@@ -1038,6 +1040,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
          move_right_ear(TWITCH|PERK|BACK)
          rotate_left
          rotate_right
+         rotate(angle)
          scratch_other(obj)
          scratch_self(NOSE|RIGHT_EAR|LEFT_EAR|NECK|RIGHT_SHOULDER|LEFT_SHOULDER)
          sniff_at(obj)
@@ -1415,6 +1418,16 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                                             Rotation(0.0, 0.0, -pai.getAvatarInterface().computeRotationAngle())));
         break;
 
+    case id::rotate:
+    {
+        std::stringstream ss;
+        ss << *from.begin();
+
+        action.addParameter(ActionParameter("angle",
+                                            ActionParamType::FLOAT(),
+                                            ss.str()));
+    }
+    break;
         //now stepping actions
     case id::random_step:        // random_step
         theta = 2.0 * PI * rng.randdouble();

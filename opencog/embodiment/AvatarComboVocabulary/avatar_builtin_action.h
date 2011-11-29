@@ -91,6 +91,10 @@ enum avatar_builtin_action_enum {
     // not implemented or buggy
     rotate_right,
 
+    //==== rotate ====
+    // A generic rotate function that accepts an rotating angle
+    rotate,
+
     //==== heel ====
     // not implemented on MV-Proxy
     heel,
@@ -386,6 +390,7 @@ static const action_basic_description abd[] = {
     { id::random_step,       "random_step",       "action_result" },
     { id::rotate_left,       "rotate_left",       "action_result" },
     { id::rotate_right,      "rotate_right",      "action_result" },
+    { id::rotate,            "rotate",            "->(contin action_result)" },
     { id::heel,              "heel",              "action_result" },
     { id::jump_up,           "jump_up",           "action_result" },
     { id::jump_towards,      "jump_towards",      "->(union(definite_object indefinite_object wild_card) action_result)" },
@@ -482,6 +487,7 @@ static const action_property_description apd[] = {
     { id::random_step,    false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::rotate_left,    false,    false,     true,       true,           id::rotate_right },
     { id::rotate_right,   false,    false,     true,       true,           id::rotate_left },
+    { id::rotate,         false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::heel,           true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::jump_up,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::jump_towards,   false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
@@ -584,6 +590,7 @@ static const action_argument_property_description aapd[] = {
     { id::jump_towards,             0,    false, false,  false,  0,  0 },
     { id::jump_forward,             0,    false, false,  false,  0,  0 },
     { id::turn_to_face,             0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
+    { id::rotate,                   0,    false, false,  false,  0,  0 },
     { id::grab,                     0,    false, false,  false,  0,  0 },
     { id::nudge_to,                 0,    false, false,  false,  0,  0 },
     { id::nudge_to,                 1,    false, false,  false,  0,  0 },

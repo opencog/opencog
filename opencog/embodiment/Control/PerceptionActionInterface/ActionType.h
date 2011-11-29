@@ -94,6 +94,7 @@ enum ActionTypeCode {
     CHEW_CODE,
     DREAM_CODE,
     TURN_CODE,
+    ROTATE_CODE, // only turn around along the vertical axis.
     SCRATCH_OTHER_CODE,
     EARS_PERK_CODE,
     JUMP_UP_CODE,
@@ -373,6 +374,10 @@ public:
      * void turn(Rotation direction)
      */
     static const ActionType& TURN();
+    /**
+     * void rotate(Rotation direction)
+     */
+    static const ActionType& ROTATE();
     /**
      * void scratchOther(EntityID target [, float duration])
      */

@@ -454,6 +454,15 @@ const ActionType& ActionType::TURN()
     static ActionType* result = new ActionType(TURN_CODE, "turn", ROTATION, EMPTY, paramNames, "void turn(Rotation direction)");
     return *result;
 }
+const ActionType& ActionType::ROTATE()
+{
+    initParamTypes();
+    // To be convention, the angle is in the range [-180, 180], where negative
+    // angle means rotating left, while positive one means rotating right.
+    static const char* paramNames[] = {"angle"};
+    static ActionType* result = new ActionType(ROTATE_CODE, "rotate", FLOAT, EMPTY, paramNames, "void rotate(float angle)");
+    return *result;
+}
 const ActionType& ActionType::SCRATCH_OTHER()
 {
     initParamTypes();
