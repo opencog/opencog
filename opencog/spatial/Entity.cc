@@ -82,7 +82,7 @@ double Entity::distanceTo( const Entity& entity,
                            LimitRelation* status ) const
 {
 
-    /* TODO: This method is not precise. It does an aproximation of the real
+    /* TODO: This method is not precise. It does an approximation of the real
      * distance between the entities comparing the distance of the edges of the
      * objects. It would be better if the three cases bellow were handle by this method:
      * 1) corner vs corner
@@ -757,30 +757,30 @@ Entity::computeSpatialRelations( const Entity & observer,
     const math::Vector3& observerPosition = observer.getPosition( );
 
     math::Vector3 observerDirection;
-    math::Vector3 objectDirection( pointInB - pointInA );
+    math::Vector3 objectDirection( pointInB - pointInA ); // direction vector from A (this) to B
 
     bool observerBetweenObjects = false;
 
     if ( observer.getName( ) == entityA.getName( ) || 
          entityA.getBoundingBox( ).isInside( observerPosition ) ) {
-        observerDirection = -(observer.getDirection( ) * objectDirection.length( )+1.0);
+        observerDirection = (observer.getDirection( ) * objectDirection.length( )+1.0);
     } 
     else if ( observer.getName( ) == entityB.getName( ) || 
               entityB.getBoundingBox( ).isInside( observerPosition ) ) {
-        observerDirection = (observer.getDirection( ) * objectDirection.length( )+1.0);
+        observerDirection = -(observer.getDirection( ) * objectDirection.length( )+1.0);
     }
     else {
         math::Vector3 observerToEntityA, observerToEntityB;
         {
             math::Vector3 observerPoint, entityPoint;
             observer.distanceTo( entityA, &observerPoint, &entityPoint );
-            observerToEntityA = entityPoint - observerPoint;
-            observerDirection = observerPoint - entityPoint;
+            observerToEntityA = entityPoint - observerPoint; // direction vector from observer to A (this)
+            observerDirection = observerPoint - entityPoint; // direction vector from A (this) to observer
         } 
         {
             math::Vector3 observerPoint, entityPoint;
             observer.distanceTo( entityB, &observerPoint, &entityPoint );
-            observerToEntityB = entityPoint - observerPoint;
+            observerToEntityB = entityPoint - observerPoint; // direction vector from observer to B (this)
         }
         observerToEntityA.normalise( );
         observerToEntityB.normalise( );
@@ -792,16 +792,17 @@ Entity::computeSpatialRelations( const Entity & observer,
     double distanceToA = observerDirection.length( );
     double distanceBetweenAandB = objectDirection.length( );
 
-    observerDirection.normalise( );
-    objectDirection.normalise( );
+    observerDirection.normalise(); // direction vector from A (this) to observer
+    objectDirection.normalise();   // direction vector from A (this) to B
 
     double angle;
     {
         ///*************************** WARNING *********************************////
         // TODO: UP AXIS = Z (TODO: customize it)
 
+        // Angle from observerDirection (A to observer) to objectDirection (A to B)
         angle = std::atan2( objectDirection.y, objectDirection.x ) - 
-            std::atan2( observerDirection.y, observerDirection.x );
+                std::atan2( observerDirection.y, observerDirection.x );
 
         if ( angle > M_PI ) {
             angle -= M_PI*2.0;

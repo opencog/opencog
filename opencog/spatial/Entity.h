@@ -407,10 +407,12 @@ namespace opencog
              * 
              * @param observer The observer entity
              * @param besideDistance A distance used as threshold for considering 
-             *        an object beside or not another
-             * @param entityA The entity used as reference
-             * @param entityB The entity that relates with the reference one
-             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations between entityA and entityB
+             *                       an object beside or not another
+             * @param entityB The entity used as reference entity
+             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations 
+             *         between entityA (this entity) and entityB (reference entity)
+             *
+             * @note entityA is 'this' entity, that is the entity launches this function. 
              */
             std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
                                                                    double besideDistance,
@@ -422,11 +424,15 @@ namespace opencog
              *
              * @param observer The observer entity
              * @param besideDistance A distance used as threshold for considering 
-             *        an object beside or not another
-             * @param entityB The entity that relates with the reference one
-             * @param entityC A second entity that relates with the reference one
-             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations between entityA and entityB
+             *                       an object beside or not another
+             * @param entityB First reference entity
+             * @param entityC Second reference entity
              *
+             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations
+             *         among entityA (this entity), entityB (first reference) and entityC
+             *         (second reference)
+             *
+             * @note entityA is 'this' entity, that is the entity launches this function. 
              */
             std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
                                                                    double besideDistance,
