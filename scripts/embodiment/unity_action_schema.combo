@@ -45,6 +45,7 @@ go_home(0) := goto_obj(pet_home 2)
 
 rotate_right(0) := rotate_right
 rotate_left(0)  := rotate_left
+rotate(1) := rotate(#1)
 step_forward(0) := step_forward
 step_backward(0) := step_backward
 

@@ -892,6 +892,7 @@ void ActionType::init()
         CHEW();
         DREAM();
         TURN();
+        ROTATE();
         SCRATCH_OTHER();
         EARS_PERK();
         JUMP_UP();
