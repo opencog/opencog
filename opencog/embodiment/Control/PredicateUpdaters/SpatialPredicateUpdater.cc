@@ -147,7 +147,7 @@ compute2SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
                 Handle objectB = getHandle(entityID_B); 
                 SPATIAL_RELATION_VECTOR relationsAB, relationsBA;
 
-                // Compute size-2 directional spatial relations
+                // Compute size-2 directional spatial relations (B is the reference object)
                 relationsAB = entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB );
                 relationsBA = this->swapRelations(relationsAB); 
 

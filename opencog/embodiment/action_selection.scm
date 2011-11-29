@@ -363,6 +363,9 @@
             (variables (list) )
           ) 
 
+;          (display "splitted context") (newline) (display context) (newline)
+;          (display "splitted action") (newline) (display action) (newline)
+
           (if (null? context)
               ; If the context is empty, which implies the agent can do the 
               ; action in any context, then return the action if there exists any

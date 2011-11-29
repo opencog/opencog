@@ -110,8 +110,9 @@ private:
      *           Only spatial relations related to these objects are updated. 
      *           It is returned by PAI::processMapInfo
      *
-     * @entities All entities in spaceMap involved in spatial relations. 
-     *           'blocks' are not considered when computing spatial relations. 
+     * @entities All entities in spaceMap involved in spatial relations. They are
+     *           the reference entities. 'blocks' are not considered when computing
+     *           spatial relations. 
      *
      * @observer Usually just the pet itself. 
      *
@@ -133,8 +134,9 @@ private:
      *           Only spatial relations related to these objects are updated. 
      *           It is returned by PAI::processMapInfo
      *
-     * @entities All entities in spaceMap involved in spatial relations. 
-     *           'blocks' are not considered when computing spatial relations. 
+     * @entities All entities in spaceMap involved in spatial relations. They are 
+     *           the reference entities. 'blocks' are not considered when computing 
+     *           spatial relations. 
      *
      * @observer Usually just the pet itself. 
      *
