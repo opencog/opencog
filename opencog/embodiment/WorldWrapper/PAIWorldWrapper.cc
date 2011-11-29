@@ -698,7 +698,6 @@ printf("Original start point (%lf, %lf, %lf); goal point (%lf, %lf, %lf).\n",
         endPoint.get<0>(), endPoint.get<1>(), endPoint.get<2>());
 
     spatial::Point3D correctedEndPoint = sm.getNearestFree3DPoint(endPoint, config().get_double("ASTAR3D_DELTA_HEIGHT"));
-    //spatial::Point3D correctedEndPoint = endPoint;
 
 printf("Corrected goal point (%lf, %lf, %lf).\n", correctedEndPoint.get<0>(), correctedEndPoint.get<1>(), correctedEndPoint.get<2>());
 
@@ -706,9 +705,13 @@ printf("Corrected goal point (%lf, %lf, %lf).\n", correctedEndPoint.get<0>(), co
     SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
     AStar3D.setMap( map );
 
-    spatial::LSMap3DSearchNode petNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(startPoint.get<0>(), startPoint.get<1>())), maxDeltaHeight);
+    spatial::LSMap3DSearchNode petNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(startPoint.get<0>(), 
+                                                                            startPoint.get<1>())), 
+                                                                    maxDeltaHeight);
     petNode.z = startPoint.get<2>();
-    spatial::LSMap3DSearchNode goalNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(correctedEndPoint.get<0>(), correctedEndPoint.get<1>())), maxDeltaHeight);
+    spatial::LSMap3DSearchNode goalNode = spatial::LSMap3DSearchNode(sm.snap(spatial::Point(correctedEndPoint.get<0>(), 
+                                                                                            correctedEndPoint.get<1>())), 
+                                                                     maxDeltaHeight);
     goalNode.z = correctedEndPoint.get<2>();
 
     AStar3D.setStartAndGoalStates(petNode, goalNode);
@@ -717,8 +720,7 @@ printf("Corrected goal point (%lf, %lf, %lf).\n", correctedEndPoint.get<0>(), co
     _hasPlanFailed = (AStar3D.findPath() != spatial::AStarSearch<spatial::LSMap3DSearchNode>::SEARCH_STATE_SUCCEEDED);
     actions = AStar3D.getShortestCalculatedPath( );
 
-    logger().debug("PAIWorldWrapper - AStar result %s.",
-            !_hasPlanFailed ? "true" : "false");
+    logger().debug("PAIWorldWrapper - AStar result %s.", !_hasPlanFailed ? "true" : "false");
 
     gettimeofday(&timer_end, NULL);
     elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
@@ -967,6 +969,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
           {id::growl_at, ActionType::GROWL()},
           {id::jump_up, ActionType::JUMP_UP()},
           {id::jump_towards, ActionType::JUMP_TOWARD()},
+          {id::jump_forward, ActionType::JUMP_FORWARD()},
           // {id::move_left_ear, ActionType::LEFT_EAR_?()} each ear movement has its own command
           // {id::move_right_ear, ActionType::RIGHT_EAR_?()}
           {id::lick_at, ActionType::LICK()},
@@ -1431,7 +1434,8 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         {
             spatial::Point petLoc = WorldWrapperUtil::getLocation(sm, as, WorldWrapperUtil::selfHandle(as, selfName()));
 
-            double stepSize = (sm.diagonalSize()) * STEP_SIZE_PERCENTAGE / 100; // 2% of the width
+            //double stepSize = (sm.diagonalSize()) * STEP_SIZE_PERCENTAGE / 100; // 2% of the width
+            double stepSize = 1.0; // The unit length in a block world.
             double x = (double)petLoc.first + (cos(theta) * stepSize);
             double y = (double)petLoc.second + (sin(theta) * stepSize);
 
@@ -1498,6 +1502,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     {
         std::stringstream ss;
         ss << *from.begin();
+
         action.addParameter(ActionParameter("height",
                                             ActionParamType::FLOAT(),
                                             ss.str()));
