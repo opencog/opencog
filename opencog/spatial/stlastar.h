@@ -187,6 +187,9 @@ namespace opencog
                     // search...
                     // New: Allow user abort
                     if ( m_OpenList.empty() || m_CancelRequest ) {
+                        // If a solution can not be found, record a approximate
+                        // optimal one.
+                        RecordApproxOptimalSolution();
                         FreeAllNodes();
                         m_State = SEARCH_STATE_FAILED;
                         return m_State;
@@ -199,6 +202,8 @@ namespace opencog
                     Node *n = m_OpenList.front(); // get pointer to the node
                     pop_heap( m_OpenList.begin(), m_OpenList.end(), HeapCompare_f() );
                     m_OpenList.pop_back();
+
+                    m_ApproxOptimalNode = n;
 
                     // Check for the goal, once we pop that we're done
                     if ( n->m_UserState.IsGoal( m_Goal->m_UserState ) ) {
@@ -252,8 +257,8 @@ namespace opencog
                                 FreeNode( (*successor) );
                             }
 
+                            RecordApproxOptimalSolution();
                             m_Successors.clear(); // empty vector of successor nodes to n
-
                             // free up everything else we allocated
                             FreeAllNodes();
 
@@ -356,33 +361,6 @@ namespace opencog
 
                             // sort back element into heap
                             push_heap( m_OpenList.begin(), m_OpenList.end(), HeapCompare_f() );
-
-                            // Search for a fake path that can lead to a
-                            // point closest to the goal.
-                            std::vector<UserState> tmpFakeSolution;
-
-                            m_CurrentSolutionNode = *successor; 
-
-                            while (!m_CurrentSolutionNode->m_UserState.IsSameState(m_Start->m_UserState)) {
-                                tmpFakeSolution.push_back(m_CurrentSolutionNode->m_UserState);
-                                m_CurrentSolutionNode = m_CurrentSolutionNode->parent;
-                                if (!m_CurrentSolutionNode)
-                                    break;
-                            }
-
-                            tmpFakeSolution.push_back(m_Start->m_UserState);
-                            
-                            if ((int)tmpFakeSolution.size() > (int)m_FakeSolution.size()) {
-                                m_FakeSolution.clear();
-
-                                typename std::vector<UserState>::reverse_iterator rit; 
-                                // Record the fake solution in a right
-                                // order.
-                                for (rit = tmpFakeSolution.rbegin(); rit != tmpFakeSolution.rend(); ++rit) {
-                                    m_FakeSolution.push_back(*rit);
-                                }
-                            }
-
                         }
 
                         // push n onto Closed, as we have expanded it now
@@ -578,9 +556,35 @@ namespace opencog
 #endif
 
                 }
-                
-                std::vector<UserState> GetFakeSolution() {
-                    return m_FakeSolution;
+
+                void RecordApproxOptimalSolution() {
+                    // Clear approximate solution, if any.
+                    m_ApproxSolution.clear();
+                    Node *n = m_ApproxOptimalNode;
+
+                    if (n) {
+                        // A reverse solution path from the end.
+                        std::vector<UserState> rSolution;
+                        if (false == n->m_UserState.IsSameState(m_Start->m_UserState)) {
+                            do {
+                                rSolution.push_back(n->m_UserState);
+                                n = n->parent;
+                            } while (n && n != m_Start);
+
+                            rSolution.push_back(m_Start->m_UserState);
+                        }
+
+                        if (!rSolution.empty()) {
+                            typename std::vector<UserState>::reverse_iterator rit;
+                            for (rit = rSolution.rbegin(); rit != rSolution.rend(); ++rit) {
+                                m_ApproxSolution.push_back(*rit);
+                            }
+                        }
+                    }
+                }
+
+                vector<UserState> GetApproxOptimalSolution() {
+                    return m_ApproxSolution;
                 }
 
             private: // methods
@@ -614,7 +618,6 @@ namespace opencog
 
                     FreeNode(m_Goal);
                 }
-
 
                 // This call is made by the search class when the search ends. A lot of nodes may be
                 // created that are still present when the search ends. They will be deleted by this
@@ -724,11 +727,8 @@ namespace opencog
 
                 bool m_CancelRequest;
 
-
-                // Customized: add a feature that even if a solution is failed
-                // to be found, a path that can get closed to the goal can still 
-                // be recorded.
-                std::vector<UserState> m_FakeSolution;
+                Node *m_ApproxOptimalNode;
+                vector<UserState> m_ApproxSolution;
             };
 
     } // spatial

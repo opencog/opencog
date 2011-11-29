@@ -30,7 +30,7 @@ using namespace opencog::spatial;
 
 AStar3DController::AStar3DController():
         astarsearch(new AStarSearch<MapSearchNode>(MAX_3D_SEARCH_NODES)),
-        useFakeSolution(false) {}
+        useApproxSolution(false) {}
 
 AStar3DController::~AStar3DController()
 {
@@ -46,7 +46,6 @@ void AStar3DController::setStartAndGoalStates(MapSearchNode &nodeStart, MapSearc
 {
     astarsearch->SetStartAndGoalStates(nodeStart, nodeEnd);
 }
-
 
 /**
  * Create new astarsearch with same start and goal nodes, for testing and comparing different heuristics
@@ -69,10 +68,6 @@ unsigned int AStar3DController::findPath()
     do {
         SearchState = astarsearch->SearchStep();
         SearchSteps++;
-
-#if DEBUG_LISTS
-        debugLists(SearchSteps);
-#endif  //DEBUG_LISTS
 
     } while ( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SEARCHING );
 
@@ -109,8 +104,9 @@ unsigned int AStar3DController::findPath()
     else if ( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_FAILED ) {
         cout << "Search terminated. Did not find goal state\n";
 
-        useFakeSolution = true;
-        fakeSolution = astarsearch->GetFakeSolution();
+        useApproxSolution = true;
+
+        approxSolution = astarsearch->GetApproxOptimalSolution();
     }
 
     // Display the number of loops the search went through
@@ -120,7 +116,6 @@ unsigned int AStar3DController::findPath()
 
     return SearchState;
 } //function findPath()
-
 
 void AStar3DController::debugLists(unsigned int SearchSteps)
 {
@@ -154,7 +149,6 @@ void AStar3DController::debugLists(unsigned int SearchSteps)
 
 }
 
-
 vector<GridPoint> AStar3DController::getSolutionGridPoints()
 {
     vector<GridPoint> solution_points;
@@ -179,14 +173,13 @@ vector<GridPoint> AStar3DController::getSolutionGridPoints()
     return solution_points;
 }
 
-
 vector<spatial::Point3D> AStar3DController::getSolutionPoints()
 {
     vector<spatial::Point3D> solution_points;
     spatial::GridPoint gp;
     Map *map = MapSearchNode::map;
 
-    if (!useFakeSolution) {
+    if (!useApproxSolution) {
         MapSearchNode *previous_node, *node;
         previous_node = node = astarsearch->GetSolutionStart();
 
@@ -226,12 +219,10 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
         // We never need to jump at the goal point. 
         spatial::Point3D goal(point2d.first, point2d.second, 0.0);
         solution_points.push_back(goal);
-    } else {
-        if (fakeSolution.empty()) return solution_points;
-
-        std::vector<MapSearchNode>::iterator prev_node, node;
-        prev_node = node = fakeSolution.begin();
-        for (++node; node != fakeSolution.end(); node++) {
+    } else if (!approxSolution.empty()) {
+        std::vector<MapSearchNode>::const_iterator prev_node, node;
+        prev_node = node = approxSolution.begin();
+        for (++node; node != approxSolution.end(); node++) {
             gp.first = prev_node->x;
             gp.second = prev_node->y;
 
@@ -261,7 +252,7 @@ vector<spatial::Point3D> AStar3DController::getSolutionPoints()
         // We never need to jump at the goal point. 
         spatial::Point3D goal(point2d.first, point2d.second, 0.0);
         solution_points.push_back(goal);
-        useFakeSolution = false;
+        useApproxSolution = false;
     }
 
     return solution_points;

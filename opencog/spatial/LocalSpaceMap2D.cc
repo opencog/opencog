@@ -463,7 +463,6 @@ spatial::Point LocalSpaceMap2D::getNearestFreePoint(const spatial::Point& pt) co
 
 spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& pt, double delta) const throw (opencog::RuntimeException, std::bad_exception)
 {
-    const double MAX_ALTITUDE_DELTA = 0.1;
     double destAltitude = pt.get<2>();
 
     GridPoint gp = snap(spatial::Point(pt.get<0>(), pt.get<1>()));
@@ -575,7 +574,7 @@ spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& 
     spatial::Point freePoint2D = unsnap(nearestFreePoint);
     spatial::Point3D freePoint3D = spatial::Point3D(freePoint2D.first, freePoint2D.second, nearestAltitude);
     if (foundFreePoint) { // Goal point can be reached from free point.
-        if (std::abs(nearestAltitude - destAltitude) < MAX_ALTITUDE_DELTA) { // at the same altitude level
+        if (std::abs(nearestAltitude - destAltitude) <= _agentHeight/2) { // at the same altitude level
             return pt;
         }
     }
