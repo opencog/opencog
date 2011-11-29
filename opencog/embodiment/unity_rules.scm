@@ -596,7 +596,7 @@
     (SequentialAndLink
         (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") ) ;build block in middle front
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "-1") ) ;build block in lower front
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") ) ;build block in lower front
     )        
 )
 
