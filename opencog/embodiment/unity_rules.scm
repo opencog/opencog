@@ -592,9 +592,17 @@
     )        
 )    
 
+(define build_jump_onto_blocks
+    (SequentialAndLink
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") ) ;build block in middle front
+        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "-1") ) ;build block in lower front
+    )        
+)
+
 (add_rule (cog-new-stv 0.0 1.0) CertaintyDemandGoal 
 ;    (add_action (GroundedSchemaNode "random_search") ) ; TODO: Doesn't work, should be implemented in scheme
-    random_build_destroy_blocks    
+    build_jump_onto_blocks    
     NULL_PRECONDITION
 )
 
@@ -615,7 +623,7 @@
 )
 
 (add_rule (cog-new-stv 0.75 1.0) CompetenceDemandGoal 
-    random_build_destroy_blocks    
+    build_jump_onto_blocks    
     NULL_PRECONDITION 
 )
 
