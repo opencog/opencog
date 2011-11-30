@@ -683,7 +683,10 @@ void PAI::processAvatarSignal(DOMElement * element)
 
             addPhysiologicalFeeling(internalAgentId, name, tsValue, level);
 
-        } 
+        } else if (strcmp(signalName, ACTION_AVAILABILITY_ELEMENT) == 0) {
+            // Store action availability state in atomspace. 
+            processActionAvailability(signal);
+        }
         XMLString::release(&signalName);
         XMLString::release(&name);
     }
@@ -882,7 +885,103 @@ Handle PAI::processAgentType(const string& agentTypeStr, const string& internalA
     return agentNode;
 }
 
+Handle PAI::processActionAvailability(DOMElement* signal)
+{
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
+    // Extract action name
+    XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* actionName = XMLString::transcode(signal->getAttribute(tag));
+
+    // Add the action node into AtomSpace
+    Handle actionNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, actionName);
+
+    if (actionNode == Handle::UNDEFINED)
+    {
+        logger().error("PAI - processActionAvailability: unable to add available status for action[%s].",
+                       actionName);
+
+        XMLString::release(&actionName);
+        return Handle::UNDEFINED;
+    }
+
+    // Extract action target name, if any.
+    XMLString::transcode(ACTION_TARGET_NAME, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* targetName = XMLString::transcode(signal->getAttribute(tag));
+
+    Handle targetNode = Handle::UNDEFINED;
+
+    if (strlen(targetName))
+    {
+        std::string internalTargetId = PAIUtils::getInternalId(targetName);
+        // if there is a target, there should be a target-type, too
+        XMLString::transcode(ACTION_TARGET_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* targetType = XMLString::transcode(signal->getAttribute(tag));
+
+        opencog::Type targetTypeCode;
+
+        if (strlen(targetType))
+        {
+            string targetTypeStr(targetType);
+
+            std::string internalTargetId = PAIUtils::getInternalId(targetName);
+
+            if (targetTypeStr == "avatar")
+            {
+                if (internalTargetId == avatarInterface.getPetId())
+                    targetTypeCode = PET_NODE;
+                else
+                    targetTypeCode = AVATAR_NODE;
+            }
+            else if (targetTypeStr == "accessory")
+            {
+                targetTypeCode = ACCESSORY_NODE;
+            }
+            else
+            {
+                targetTypeCode = OBJECT_NODE; // Set a default type.
+            }
+        }
+
+        // Add the target of this action into AtomSpace
+        targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode, internalTargetId.c_str());
+
+        XMLString::release(&targetType);
+    }
+
+    // The availability state of reported action.
+    bool available;
+
+    XMLString::transcode(AVAILABLE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* availablePred = XMLString::transcode(signal->getAttribute(tag));
+
+    available = (strcmp(availablePred, "true") == 0) ? true : false;
+ 
+    // Get self handle.
+    Handle selfNode = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId());
+
+    Handle evalLinkHandle = Handle::UNDEFINED;
+
+    // Set "can_do" predicate of the action according to its availability
+    // state.
+    evalLinkHandle = AtomSpaceUtil::setPredicateValue(atomSpace, "can_do", 
+                                         available ? TruthValue::TRUE_TV() : TruthValue::FALSE_TV(),
+                                         actionNode,
+                                         selfNode,
+                                         targetNode); 
+
+    // Print debug info in console, to be commented.
+    printf("PAI - Action availability: action[%s] is %savailable for avatar%s.\n",
+           actionName,
+           available ? "":"not ",
+           strlen(targetName) ? (" to perform on " + string(targetName)).c_str() : "");
+
+    XMLString::release(&targetName);
+    XMLString::release(&actionName);
+    XMLString::release(&availablePred);
+
+    return evalLinkHandle;
+}
 
 /*
   This function will store an action observed in the AtomSpace, as the following structure:
@@ -926,7 +1025,6 @@ by Shujing ke   rainkekekeke@gmail.com
   */
 void PAI::processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr,  const string& instanceNameStr, DOMElement* signal)
 {
-
     // Add the action node into AtomSpace
     Handle actionNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, nameStr.c_str());
 
@@ -2465,7 +2563,7 @@ void PAI::addSpaceMapBoundary(DOMElement * element)
     // TODO change the data wrapper once XML is completely replaced.
 
     // The incoming XML DOM element should contain following attributes:
-    //  <element-tag global-position-x="24" global-position-y="24" \
+    //  <element-tag global-position-x="24" global-position-y="24" 
     //              global-position-offset="96" global-floor-height="99">
     //  </element-tag>
 
@@ -2931,7 +3029,7 @@ void PAI::processTerrainInfo(DOMElement * element)
     // The XML format of terrain info is:
     //      <?xml version="1.0" encoding="UTF-8"?>
     //      <oc:embodiment-msg xsi:schemaLocation="..." xmlns:xsi="..." xmlns:pet="...">
-    //          <terrain-info global-position-x="24" global-position-y="24" \
+    //          <terrain-info global-position-x="24" global-position-y="24" 
     //              global-position-offset="96" global-floor-height="99">
     //              <terrain-data timestamp="...">packed message stream</terrain-data>
     //          </terrain-info>

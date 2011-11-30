@@ -468,13 +468,32 @@ private:
         (opencog::RuntimeException, opencog::InvalidParamException,
          std::bad_exception);
 
-    //! Support method from processAvatarSignal
+    //! Supported method for processAvatarSignal
     Handle processAgentType(const string& agentTypeStr, const string& internalAgentId);
-    //! Support method from processAvatarSignal
+    //! Supported method for processAvatarSignal
     Handle processAgentActionParameter(DOMElement* paramElement, const std::string& actionNameStr, Handle& actionInstancenode);
-    //! Support method from processAvatarSignal
+    //! Supported method for processAvatarSignal
     void processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr, const string& instanceNameStr, DOMElement* signal);
     void processAgentActionPlanResult(char* agentID, unsigned long tsValue, const string& name, char* planIdStr, DOMElement* signal);
+
+    /**
+     * This function will process the availability status of an action in the
+     * atomspace. In the virtual world, some actions are available only when the
+     * avatar is close enough to an object. e.g. When the avatar is close to a
+     * soccer, it will get the ability of "Kick". 
+     * Thus to be a convention, the atom of an available action can be represented
+     * as:
+     *      EvaluationLink (stv 1 1) (av 1 1 1)
+     *          PredicateNode "can_do"
+     *          ListLink
+     *              "#Kick"
+     *              "#actor"
+     *              "#target"
+     * Otherwise when the action is no longer available, just set the truth value of
+     * evaluation link to 0.
+     */
+    Handle processActionAvailability(DOMElement* signal);
+
     /**
      * @param element The agent-signal element to be processed
      */
