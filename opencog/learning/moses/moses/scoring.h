@@ -181,7 +181,7 @@ protected:
 
 /**
  * the occam_contin_bscore is based on the following thread
- * http://groups.google.com/group/opencog-developers/browse_thread/thread/a4771ecf63d38df?hl=en&pli=1
+ * http://groups.google.com/group/opencog-news/browse_thread/thread/b7704419e082c6f1
  *
  * Here's a summary:
  *
@@ -251,7 +251,7 @@ private:
  * variance the probability p that one datum is wrong is used.
  *
  * The details are in this thread
- * http://groups.google.com/group/opencog/browse_thread/thread/b7704419e082c6f1?hl=en
+ * http://groups.google.com/group/opencog/browse_thread/thread/a4771ecf63d38df
  *
  * Briefly after reduction of
  * LL(M) = -|M|*log(|A|) + Sum_{x\in D1} log(p) + Sum_{x\in D2} log(1-p)
