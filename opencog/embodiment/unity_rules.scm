@@ -463,10 +463,72 @@
 ; Rules related to EnergyDemandGoal
 ;
 
+(define multiple_step_forward
+    (SequentialAndLink
+;        (add_action (GroundedSchemaNode "step_forward") ) 
+;        (add_action (GroundedSchemaNode "step_forward") ) 
+;        (add_action (GroundedSchemaNode "step_forward") ) 
+
+        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
+        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
+        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
+    ) 
+)
+
+(define multiple_step_backward
+    (SequentialAndLink
+        (add_action (GroundedSchemaNode "step_backward") ) 
+        (add_action (GroundedSchemaNode "step_forward") ) 
+        (add_action (GroundedSchemaNode "step_forward") ) 
+    ) 
+)
+
+(define random_rotate_right
+    (OrLink
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "23") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "47") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "61") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "89") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "107") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "137") )
+    )
+)
+
+(define random_rotate_left
+    (OrLink
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-29") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-43") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-67") )
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-83") )
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-109") )
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-131") )
+    )
+)
+
+; Rotate randomly
+(define random_rotate
+    (OrLink
+        random_rotate_left
+        random_rotate_right
+    )
+)
+
+(define random_search
+    (SequentialAndLink
+        random_rotate
+        (OrLink
+            multiple_step_forward
+            multiple_step_backward
+            multiple_step_forward
+        )
+    ) 
+)
+
 (define GetFoodGoal
     (AndLink 
         (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
         (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+        (add_goal (PredicateNode "can_do") (ConceptNode "grab") PET_HANDLE (VariableNode "$var_food") )
     )
 )
 
@@ -485,7 +547,6 @@
 ;    )
 ;)    
 
-
 (AverageLink (cog-new-av 1 1 1)
     (ListLink
         (VariableNode "$var_food") 
@@ -493,9 +554,23 @@
 
     (add_rule (stv 1.0 1.0) EnergyDemandGoal 
         (SequentialAndLink
-;            (add_action (GroundedSchemaNode "rotate") (NumberNode "-90") )
-            (add_action (GroundedSchemaNode "rotate_left") )
-            (add_action (GroundedSchemaNode "step_forward") )
+;            (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
+            (add_action (GroundedSchemaNode "grab") (VariableNode "$var_food") )
+            (add_action (GroundedSchemaNode "eat") (VariableNode "$var_food") )
+        )    
+        GetFoodGoal
+    )
+)    
+
+(AverageLink (cog-new-av 1 1 1)
+    (ListLink
+        (VariableNode "$var_food") 
+    ) 
+
+    (add_rule (stv 1.0 1.0) GetFoodGoal 
+        (SequentialAndLink
+            random_rotate_left
+            multiple_step_forward
         )
         (AndLink 
             (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
@@ -510,11 +585,10 @@
         (VariableNode "$var_food") 
     ) 
 
-    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
+    (add_rule (stv 1.0 1.0) GetFoodGoal 
         (SequentialAndLink
-;            (add_action (GroundedSchemaNode "rotate") (NumberNode "90") )
-            (add_action (GroundedSchemaNode "rotate_right") )
-            (add_action (GroundedSchemaNode "step_forward") )
+            random_rotate_right
+            multiple_step_forward
         )
         (AndLink 
             (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
@@ -529,8 +603,8 @@
         (VariableNode "$var_food") 
     ) 
 
-    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
-        (add_action (GroundedSchemaNode "step_forward") )
+    (add_rule (stv 1.0 1.0) GetFoodGoal 
+        multiple_step_forward
         (AndLink 
             (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
             (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
@@ -544,12 +618,11 @@
         (VariableNode "$var_food") 
     ) 
 
-    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
+    (add_rule (stv 1.0 1.0) GetFoodGoal 
         (SequentialAndLink
-;            (add_action (GroundedSchemaNode "rotate") (NumberNode "180") )
-            (add_action (GroundedSchemaNode "rotate_right") )
-            (add_action (GroundedSchemaNode "rotate_right") )
-            (add_action (GroundedSchemaNode "step_forward") )
+            random_rotate_right
+            random_rotate_right
+            multiple_step_forward
         )
         (AndLink 
             (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
@@ -559,9 +632,8 @@
     )
 )
 
-
-;(add_rule (stv 1.0 1.0) GetFoodGoal 
-;    (add_action (GroundedSchemaNode "random_search") )
+;(add_rule (stv 0.2 1.0) GetFoodGoal 
+;    random_search
 ;    NULL_PRECONDITION
 ;)
 
@@ -603,7 +675,7 @@
 )    
 
 (add_rule (stv 1.0 1.0) GetWaterGoal 
-    (add_action (GroundedSchemaNode "random_search") )
+    random_search
     NULL_PRECONDITION
 )
 
@@ -654,51 +726,6 @@
 ;
 ; Rules related to CertaintyDemandGoal
 ;
-
-(define multiple_step_forward
-    (SequentialAndLink
-        (add_action (GroundedSchemaNode "step_forward") ) 
-        (add_action (GroundedSchemaNode "step_forward") ) 
-        (add_action (GroundedSchemaNode "step_forward") ) 
-    ) 
-)
-
-(define multiple_step_backward
-    (SequentialAndLink
-        (add_action (GroundedSchemaNode "step_backward") ) 
-        (add_action (GroundedSchemaNode "step_backward") ) 
-        (add_action (GroundedSchemaNode "step_backward") ) 
-    ) 
-)
-
-; Rotate randomly, but more to the right
-(define random_rotate
-    (OrLink
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "29") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "23") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-19") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "47") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "43") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-41") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "113") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "109") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-101") )
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "167") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "163") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-157") )
-    )
-)
-
-(define random_search
-    (SequentialAndLink
-        random_rotate
-        (OrLink
-            multiple_step_forward
-            multiple_step_backward
-            multiple_step_forward
-        )
-    ) 
-)
 
 (define random_build_destroy_blocks
     (SequentialAndLink
