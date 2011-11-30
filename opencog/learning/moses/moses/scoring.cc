@@ -80,13 +80,11 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 {
     combo::contin_output_table ct(tr, cti, rng);
     behavioral_score bs(target.size() + (occam?1:0));
-    behavioral_score::iterator dst = bs.begin();
-    for(combo::contin_output_table::const_iterator it1 = ct.begin(),
-            it2 = target.begin(); it1 != ct.end(); ++it1, ++it2)
-        *dst++ = sq(*it1 - *it2);
+    boost::transform(ct, target, bs.begin(), [](contin_t vl, contin_t vr) {
+            return sq(vl - vr); });
     // add the Occam's razor feature
     if(occam)
-        *dst = complexity(tr) * complexity_coef;
+        bs.back() = complexity(tr) * complexity_coef;
 
     // Logger
     log_candidate_bscore(tr, bs);
@@ -105,13 +103,16 @@ void occam_contin_bscore::set_complexity_coef(double variance,
         complexity_coef = - log((double)alphabet_size) * 2 * variance;
 }
 
-discretize_contin_bscore::discretize_contin_bscore(const combo::contin_output_table& ot,
-                                                   const contin_input_table& it,
-                                                   const vector<contin_t>& thres,
-                                                   bool wa,
-                                                   RandGen& _rng)
+occam_discretize_contin_bscore::occam_discretize_contin_bscore
+                                        (const combo::contin_output_table& ot,
+                                         const contin_input_table& it,
+                                         const vector<contin_t>& thres,
+                                         bool wa,
+                                         float p,
+                                         float alphabet_size,
+                                         RandGen& _rng)
     : target(ot), cit(it), thresholds(thres), weighted_accuracy(wa), rng(_rng),
-      weights(thresholds.size() + 1, 1), classes(ot.size()) {
+      classes(ot.size()), weights(thresholds.size() + 1, 1) {
     // enforce that thresholds is sorted
     boost::sort(thresholds);
     // precompute classes
@@ -124,13 +125,17 @@ discretize_contin_bscore::discretize_contin_bscore(const combo::contin_output_ta
             weights[i] = classes.size() / (float)(weights.size() * cs.count(i));
             // std::cout << "i = " << i << " weight = " << weights[i] << std::endl;
         }
+    // precompute Occam's razor coefficient
+    occam = p > 0 && p < 0.5;
+    if(occam)
+        complexity_coef = log((double)alphabet_size) / log(p/(1-p));    
 }
 
-behavioral_score discretize_contin_bscore::best_possible_bscore() const {
+behavioral_score occam_discretize_contin_bscore::best_possible_bscore() const {
     return behavioral_score(target.size(), 0);
 }
         
-size_t discretize_contin_bscore::class_idx(contin_t v) const {
+size_t occam_discretize_contin_bscore::class_idx(contin_t v) const {
     if(v < thresholds[0])
         return 0;
     size_t s = thresholds.size();
@@ -139,8 +144,9 @@ size_t discretize_contin_bscore::class_idx(contin_t v) const {
     return class_idx_within(v, 1, s);
 }
 
-size_t discretize_contin_bscore::class_idx_within(contin_t v,
-                                                  size_t l_idx, size_t u_idx) const
+size_t occam_discretize_contin_bscore::class_idx_within(contin_t v,
+                                                        size_t l_idx,
+                                                        size_t u_idx) const
 {
     // base case
     if(u_idx - l_idx == 1)
@@ -154,13 +160,17 @@ size_t discretize_contin_bscore::class_idx_within(contin_t v,
         return class_idx_within(v, m_idx, u_idx);
 }
 
-behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) const
+behavioral_score occam_discretize_contin_bscore::operator()(const combo_tree& tr) const
 {
     combo::contin_output_table ct(tr, cit, rng);
-    behavioral_score bs(target.size());
+    behavioral_score bs(target.size() + (occam?1:0));
     boost::transform(ct, classes, bs.begin(), [&](contin_t res, size_t c_idx) {
             return (c_idx != this->class_idx(res)) * this->weights[c_idx];
         });
+    // add the Occam's razor feature
+    if(occam)
+        bs.back() = complexity(tr) * complexity_coef;
+
     // Logger
     log_candidate_bscore(tr, bs);
     // ~Logger

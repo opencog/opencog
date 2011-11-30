@@ -135,19 +135,25 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
     RandGen& rng;
 };
 
-// Fitness function based on discretization of the output. If the
-// classes match the bscore element is 0, or 1 otherwise. If wa (for
-// weighted_average is true then each element of the bscore is
-// weighted so that each class overall as the same weight in the
-// scoring function.
-struct discretize_contin_bscore : public unary_function<combo_tree,
-                                                        behavioral_score> {
+/**
+ * Fitness function based on discretization of the output. If the
+ * classes match the bscore element is 0, or 1 otherwise. If wa (for
+ * weighted_average is true then each element of the bscore is
+ * weighted so that each class overall as the same weight in the
+ * scoring function.
+ *
+ * The Occam's razor function is identical to occam_ctruth_table_bscore
+ */
+struct occam_discretize_contin_bscore : public unary_function<combo_tree,
+                                                              behavioral_score> {
 
-    discretize_contin_bscore(const combo::contin_output_table& ot,
-                             const contin_input_table& it,
-                             const vector<contin_t>& thres,
-                             bool wa,
-                             RandGen& _rng);
+    occam_discretize_contin_bscore(const combo::contin_output_table& ot,
+                                   const contin_input_table& it,
+                                   const vector<contin_t>& thres,
+                                   bool wa,
+                                   float p,
+                                   float alphabet_size,
+                                   RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -161,6 +167,8 @@ struct discretize_contin_bscore : public unary_function<combo_tree,
     vector<contin_t> thresholds;
     bool weighted_accuracy;     // whether the bscore is weighted to
                                 // deal with unbalanced data
+    bool occam;                 // whether Occam's razor is enabled
+    score_t complexity_coef;
     RandGen& rng;
 
 protected:

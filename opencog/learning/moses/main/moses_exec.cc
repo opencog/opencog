@@ -558,8 +558,11 @@ int moses_exec(int argc, char** argv) {
                                       opt_params, meta_params, moses_params,
                                       vm, mmr_pa);
             } else {
-                discretize_contin_bscore bscore(ot, it, discretize_thresholds,
-                                                weighted_accuracy, rng);
+                occam_discretize_contin_bscore bscore(ot, it,
+                                                      discretize_thresholds,
+                                                      weighted_accuracy,
+                                                      prob, as,
+                                                      rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduction(ignore_ops, rng),
                                       contin_reduction(ignore_ops, rng),
