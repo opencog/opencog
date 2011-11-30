@@ -64,6 +64,7 @@ def modusPonensFormula(tvs, U):
                  sBNA * (1 - sA) * nBNA) /
                  low(n2 + nBNA))
     else:
+        raise NotImplementedError
         s2 = BNA.confidence
     
     return (s2, n2)
@@ -99,7 +100,7 @@ def orFormula(tvs, U):
     return (s_tot, n_tot)
 
 def ext2InhFormula(tvs, U):
-    (sAB, nAB) = tvs
+    [(sAB, nAB)] = tvs
     
     sABint = sAB
     nABint = nAB * EXTENSION_TO_INTENSION_DISCOUNT_FACTOR

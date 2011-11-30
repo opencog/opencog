@@ -88,16 +88,17 @@ class Chainer:
             # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
             print msg
             print [str(atom_from_tree(result, self.space).tv) for result in self.results]
-            for res in self.results:
-                bit = self.traverse_tree(res, set())
-                self.add_depths(bit)
-                self.add_best_conf_above(bit)
-                
-                self.print_tree(bit)
-            for res in self.results:
-                self.print_tree(self.trail(res))
-            for res in self.results:
-                self.viz_proof_tree(self.trail(res))
+#            for res in self.results:
+#                bit = self.traverse_tree(res, set())
+#                self.add_depths(bit)
+#                self.add_best_conf_above(bit)
+#                
+#                self.print_tree(bit)
+
+#            for res in self.results:
+#                self.print_tree(self.trail(res))
+#            for res in self.results:
+#                self.viz_proof_tree(self.trail(res))
             return [atom_from_tree(result, self.space).h for result in self.results]
         except Exception, e:
             import traceback, pdb
@@ -132,7 +133,7 @@ class Chainer:
 
         for a in apps:
             a = a.standardize_apart()
-            if not a.goals: print 'generator', repr(a)
+            if not a.goals: print format_log('generator', repr(a))
             if not a.goals and a.tv:
                 # Makes sure it goes in the list of apps, but just propogate results from the head (i.e. the actual Atom)
                 # and not the goals (an empty list!)
@@ -226,15 +227,13 @@ class Chainer:
             if got_result:
                 if app.head.op == 'GOAL':
                     target = app.goals[0]
-                    print format_log('Target produced!', target)
+                    log.info(format_log('Target produced!', target))
                     self.results.append(target)
                 else:
                     #viz
                     self.viz.declareResult(app.head)
                     
                     self.compute_and_add_tv(app)
-
-                    print (format_log(app.name, 'produced:', app.head, app.tv))
 
                     real_results.append(app)
 
@@ -356,6 +355,8 @@ class Chainer:
             tv_tuple = app.formula(input_tvs,  None)
             app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
             atom_from_tree(app.head, self.space).tv = app.tv
+            
+            print (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
 
     def find_rule_applications(self, target):
         '''The main 'meat' of the chainer. Finds all possible rule-applications matching your criteria.
