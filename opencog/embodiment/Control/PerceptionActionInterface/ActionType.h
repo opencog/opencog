@@ -387,7 +387,7 @@ public:
      */
     static const ActionType& EARS_PERK();
     /**
-     * void jumpUp()
+     * void jump_up()
      */
     static const ActionType& JUMP_UP();
     /**

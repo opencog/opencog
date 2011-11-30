@@ -115,7 +115,7 @@ const ActionType& ActionType::TRICK_FOR_FOOD()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(TRICK_FOR_FOOD_CODE, "trickForFood", EMPTY, EMPTY, paramNames, "void trickForFood()");
+    static ActionType* result = new ActionType(TRICK_FOR_FOOD_CODE, "trick_for_food", EMPTY, EMPTY, paramNames, "void trick_for_food()");
     return *result;
 }
 const ActionType& ActionType::EAT()
@@ -157,7 +157,7 @@ const ActionType& ActionType::LIE_DOWN()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(LIE_DOWN_CODE, "lieDown", EMPTY, FLOAT, paramNames, "void lieDown([float duration])");
+    static ActionType* result = new ActionType(LIE_DOWN_CODE, "lie_down", EMPTY, FLOAT, paramNames, "void lie_down([float duration])");
     return *result;
 }
 const ActionType& ActionType::FLY()
@@ -171,7 +171,7 @@ const ActionType& ActionType::FLY_FOLLOW()
 {
     initParamTypes();
     static const char* paramNames[] = {"target"};
-    static ActionType* result = new ActionType(FLY_FOLLOW_CODE, "flyFollow", ENTITY, EMPTY, paramNames, "void flyFolow(EntityID target)");
+    static ActionType* result = new ActionType(FLY_FOLLOW_CODE, "fly_follow", ENTITY, EMPTY, paramNames, "void fly_follow(EntityID target)");
     return *result;
 }
 const ActionType& ActionType::STRETCH()
@@ -185,63 +185,63 @@ const ActionType& ActionType::SCRATCH_SELF_NOSE()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(SCRATCH_SELF_NOSE_CODE, "scratchSelfNose", EMPTY, FLOAT, paramNames, "void scratchSelfNose([float duration])");
+    static ActionType* result = new ActionType(SCRATCH_SELF_NOSE_CODE, "scratch_self_nose", EMPTY, FLOAT, paramNames, "void scratch_self_nose([float duration])");
     return *result;
 }
 const ActionType& ActionType::SCRATCH_SELF_RIGHT_EAR()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(SCRATCH_SELF_RIGHT_EAR_CODE, "scratchSelfRightEar", EMPTY, FLOAT, paramNames, "void scratchSelfRightEar([float duration])");
+    static ActionType* result = new ActionType(SCRATCH_SELF_RIGHT_EAR_CODE, "scratch_self_right_ear", EMPTY, FLOAT, paramNames, "void scratch_self_right_ear([float duration])");
     return *result;
 }
 const ActionType& ActionType::SCRATCH_SELF_LEFT_EAR()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(SCRATCH_SELF_LEFT_EAR_CODE, "scratchSelfLeftEar", EMPTY, FLOAT, paramNames, "void scratchSelfLeftEar([float duration])");
+    static ActionType* result = new ActionType(SCRATCH_SELF_LEFT_EAR_CODE, "scratch_self_left_ear", EMPTY, FLOAT, paramNames, "void scratchSelfLeftEar([float duration])");
     return *result;
 }
 const ActionType& ActionType::SCRATCH_SELF_NECK()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(SCRATCH_SELF_NECK_CODE, "scratchSelfNeck", EMPTY, FLOAT, paramNames, "void scratchSelfNeck([float duration])");
+    static ActionType* result = new ActionType(SCRATCH_SELF_NECK_CODE, "scratch_self_neck", EMPTY, FLOAT, paramNames, "void scratchSelfNeck([float duration])");
     return *result;
 }
 const ActionType& ActionType::SCRATCH_SELF_RIGHT_SHOULDER()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(SCRATCH_SELF_RIGHT_SHOULDER_CODE, "scratchSelfRightShoulder", EMPTY, FLOAT, paramNames, "void scratchSelfRightShoulder([float duration])");
+    static ActionType* result = new ActionType(SCRATCH_SELF_RIGHT_SHOULDER_CODE, "scratch_self_right_shoulder", EMPTY, FLOAT, paramNames, "void scratchSelfRightShoulder([float duration])");
     return *result;
 }
 const ActionType& ActionType::SCRATCH_SELF_LEFT_SHOULDER()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(SCRATCH_SELF_LEFT_SHOULDER_CODE, "scratchSelfLeftShoulder", EMPTY, FLOAT, paramNames, "void scratchSelfLeftShoulder([float duration])");
+    static ActionType* result = new ActionType(SCRATCH_SELF_LEFT_SHOULDER_CODE, "scratch_self_left_shoulder", EMPTY, FLOAT, paramNames, "void scratchSelfLeftShoulder([float duration])");
     return *result;
 }
 const ActionType& ActionType::SCRATCH_GROUND_BACK_LEGS()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(SCRATCH_GROUND_BACK_LEGS_CODE, "scratchGroundBackLegs", EMPTY, FLOAT, paramNames, "void scratchGroundBackLegs([float duration])");
+    static ActionType* result = new ActionType(SCRATCH_GROUND_BACK_LEGS_CODE, "scratch_ground_back_legs", EMPTY, FLOAT, paramNames, "void scratchGroundBackLegs([float duration])");
     return *result;
 }
 const ActionType& ActionType::RUN_IN_CIRCLE()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(RUN_IN_CIRCLE_CODE, "runInCircle", EMPTY, FLOAT, paramNames, "void runInCircle([float duration])");
+    static ActionType* result = new ActionType(RUN_IN_CIRCLE_CODE, "run_in_circle", EMPTY, FLOAT, paramNames, "void runInCircle([float duration])");
     return *result;
 }
 const ActionType& ActionType::ANTICIPATE_PLAY()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(ANTICIPATE_PLAY_CODE, "anticipatePlay", EMPTY, EMPTY, paramNames, "void anticipatePlay()");
+    static ActionType* result = new ActionType(ANTICIPATE_PLAY_CODE, "anticipate_play", EMPTY, EMPTY, paramNames, "void anticipatePlay()");
     return *result;
 }
 const ActionType& ActionType::BEG()
@@ -262,14 +262,14 @@ const ActionType& ActionType::HIDE_FACE()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(HIDE_FACE_CODE, "hideFace", EMPTY, FLOAT, paramNames, "void hideFace([float duration])");
+    static ActionType* result = new ActionType(HIDE_FACE_CODE, "hide_face", EMPTY, FLOAT, paramNames, "void hideFace([float duration])");
     return *result;
 }
 const ActionType& ActionType::PLAY_DEAD()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(PLAY_DEAD_CODE, "playDead", EMPTY, EMPTY, paramNames, "void playDead()");
+    static ActionType* result = new ActionType(PLAY_DEAD_CODE, "play_dead", EMPTY, EMPTY, paramNames, "void playDead()");
     return *result;
 }
 const ActionType& ActionType::FOLLOW()
@@ -290,21 +290,21 @@ const ActionType& ActionType::NUDGE_TO()
 {
     initParamTypes();
     static const char* paramNames[] = {"moveableObj", "target"};
-    static ActionType* result = new ActionType(NUDGE_TO_CODE, "nudgeTo", ENTITY_and_VECTOR, EMPTY, paramNames, "void nudge(EntityID moveableObj, Vector target)");
+    static ActionType* result = new ActionType(NUDGE_TO_CODE, "nudge_to", ENTITY_and_VECTOR, EMPTY, paramNames, "void nudge(EntityID moveableObj, Vector target)");
     return *result;
 }
 const ActionType& ActionType::TAP_DANCE()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(TAP_DANCE_CODE, "tapDance", EMPTY, FLOAT, paramNames, "void tapDance([float duration])");
+    static ActionType* result = new ActionType(TAP_DANCE_CODE, "tap_dance", EMPTY, FLOAT, paramNames, "void tapDance([float duration])");
     return *result;
 }
 const ActionType& ActionType::BARE_TEETH()
 {
     initParamTypes();
     static const char* paramNames[] = {"target", "duration"};
-    static ActionType* result = new ActionType(BARE_TEETH_CODE, "bareTeeth", EMPTY, ENTITY_and_FLOAT, paramNames, "void bareTeeth([EntityID target [, float duration]])");
+    static ActionType* result = new ActionType(BARE_TEETH_CODE, "bare_teeth", EMPTY, ENTITY_and_FLOAT, paramNames, "void bareTeeth([EntityID target [, float duration]])");
     return *result;
 }
 const ActionType& ActionType::GROWL()
@@ -318,7 +318,7 @@ const ActionType& ActionType::LOOK_UP_TURN_HEAD()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(LOOK_UP_TURN_HEAD_CODE, "lookUpTurnHead", EMPTY, FLOAT, paramNames, "void lookUpTurnHead([float duration])");
+    static ActionType* result = new ActionType(LOOK_UP_TURN_HEAD_CODE, "look_up_turn_head", EMPTY, FLOAT, paramNames, "void lookUpTurnHead([float duration])");
     return *result;
 }
 const ActionType& ActionType::WHINE()
@@ -339,49 +339,49 @@ const ActionType& ActionType::SNIFF_AT()
 {
     initParamTypes();
     static const char* paramNames[] = {"target"};
-    static ActionType* result = new ActionType(SNIFF_AT_CODE, "sniffAt", ENTITY, EMPTY, paramNames, "void sniffAt(EntityID target)");
+    static ActionType* result = new ActionType(SNIFF_AT_CODE, "sniff_at", ENTITY, EMPTY, paramNames, "void sniffAt(EntityID target)");
     return *result;
 }
 const ActionType& ActionType::SNIFF_PET_PART()
 {
     initParamTypes();
     static const char* paramNames[] = {"pet part"};
-    static ActionType* result = new ActionType(SNIFF_PET_PART_CODE, "sniffPetPart", ENTITY_and_INT, EMPTY, paramNames, "void sniffPetPart(EntityID pet, integer part)");
+    static ActionType* result = new ActionType(SNIFF_PET_PART_CODE, "sniff_pet_part", ENTITY_and_INT, EMPTY, paramNames, "void sniffPetPart(EntityID pet, integer part)");
     return *result;
 }
 const ActionType& ActionType::SNIFF_AVATAR_PART()
 {
     initParamTypes();
     static const char* paramNames[] = {"avatar part"};
-    static ActionType* result = new ActionType(SNIFF_AVATAR_PART_CODE, "sniffAvatarPart", ENTITY_and_INT, EMPTY, paramNames, "void sniffAvatarPart(EntityID avatar, integer part)");
+    static ActionType* result = new ActionType(SNIFF_AVATAR_PART_CODE, "sniff_avatar_part", ENTITY_and_INT, EMPTY, paramNames, "void sniffAvatarPart(EntityID avatar, integer part)");
     return *result;
 }
 const ActionType& ActionType::SHAKE_HEAD()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(SHAKE_HEAD_CODE, "shakeHead", EMPTY, FLOAT, paramNames, "void shakeHead([float duration])");
+    static ActionType* result = new ActionType(SHAKE_HEAD_CODE, "shake_head", EMPTY, FLOAT, paramNames, "void shakeHead([float duration])");
     return *result;
 }
 const ActionType& ActionType::EARS_BACK()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(EARS_BACK_CODE, "earsBack", EMPTY, FLOAT, paramNames, "void earsBack([float duration])");
+    static ActionType* result = new ActionType(EARS_BACK_CODE, "ears_back", EMPTY, FLOAT, paramNames, "void earsBack([float duration])");
     return *result;
 }
 const ActionType& ActionType::EARS_TWITCH()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(EARS_TWITCH_CODE, "earsTwitch", EMPTY, FLOAT, paramNames, "void earTwitch([float duration])");
+    static ActionType* result = new ActionType(EARS_TWITCH_CODE, "ears_twitch", EMPTY, FLOAT, paramNames, "void earTwitch([float duration])");
     return *result;
 }
 const ActionType& ActionType::MOVE_HEAD()
 {
     initParamTypes();
     static const char* paramNames[] = {"toPosition", "rotate", "speed"};
-    static ActionType* result = new ActionType(MOVE_HEAD_CODE, "moveHead", VECTOR_ROTATION_and_FLOAT, EMPTY, paramNames, "void moveHead(Vector toPosition, Rotation rotate, float speed)");
+    static ActionType* result = new ActionType(MOVE_HEAD_CODE, "move_head", VECTOR_ROTATION_and_FLOAT, EMPTY, paramNames, "void moveHead(Vector toPosition, Rotation rotate, float speed)");
     return *result;
 }
 const ActionType& ActionType::WAKE()
@@ -430,7 +430,7 @@ const ActionType& ActionType::TAIL_FLEX()
 {
     initParamTypes();
     static const char* paramNames[] = {"position", "duration"};
-    static ActionType* result = new ActionType(TAIL_FLEX_CODE, "tailFlex", VECTOR, FLOAT, paramNames, "void tailFlex(Vector position [, float duration])");
+    static ActionType* result = new ActionType(TAIL_FLEX_CODE, "tail_flex", VECTOR, FLOAT, paramNames, "void tailFlex(Vector position [, float duration])");
     return *result;
 }
 const ActionType& ActionType::CHEW()
@@ -467,42 +467,42 @@ const ActionType& ActionType::SCRATCH_OTHER()
 {
     initParamTypes();
     static const char* paramNames[] = {"target", "duration"};
-    static ActionType* result = new ActionType(SCRATCH_OTHER_CODE, "scratchOther", ENTITY, FLOAT, paramNames, "void scratchOther(EntityID target [, float duration])");
+    static ActionType* result = new ActionType(SCRATCH_OTHER_CODE, "scratch_other", ENTITY, FLOAT, paramNames, "void scratchOther(EntityID target [, float duration])");
     return *result;
 }
 const ActionType& ActionType::EARS_PERK()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(EARS_PERK_CODE, "perkEar", EMPTY, FLOAT, paramNames, "void earsPerk([float duration])");
+    static ActionType* result = new ActionType(EARS_PERK_CODE, "perk_ear", EMPTY, FLOAT, paramNames, "void earsPerk([float duration])");
     return *result;
 }
 const ActionType& ActionType::JUMP_UP()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(JUMP_UP_CODE, "jumpUp", EMPTY, EMPTY, paramNames, "void jumpUp()");
+    static ActionType* result = new ActionType(JUMP_UP_CODE, "jump_up", EMPTY, EMPTY, paramNames, "void jump_up()");
     return *result;
 }
 const ActionType& ActionType::JUMP_TOWARD()
 {
     initParamTypes();
     static const char* paramNames[] = {"direction"};
-    static ActionType* result = new ActionType(JUMP_TOWARD_CODE, "jumpToward", VECTOR, EMPTY, paramNames, "void jumpToward(Vector direction)");
+    static ActionType* result = new ActionType(JUMP_TOWARD_CODE, "jump_toward", VECTOR, EMPTY, paramNames, "void jumpToward(Vector direction)");
     return *result;
 }
 const ActionType& ActionType::JUMP_FORWARD()
 {
     initParamTypes();
     static const char* paramNames[] = {"height"};
-    static ActionType* result = new ActionType(JUMP_FORWARD_CODE, "jumpForward", FLOAT, EMPTY, paramNames, "void jumpForward(float height)");
+    static ActionType* result = new ActionType(JUMP_FORWARD_CODE, "jump_forward", FLOAT, EMPTY, paramNames, "void jumpForward(float height)");
     return *result;
 }
 const ActionType& ActionType::PAY_ATTENTION()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(PAY_ATTENTION_CODE, "payAttention", EMPTY, EMPTY, paramNames, "void payAttention()");
+    static ActionType* result = new ActionType(PAY_ATTENTION_CODE, "pay_attention", EMPTY, EMPTY, paramNames, "void payAttention()");
     return *result;
 }
 const ActionType& ActionType::VOMIT()
@@ -516,28 +516,28 @@ const ActionType& ActionType::LEAN_ROCK_DANCE()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(LEAN_ROCK_DANCE_CODE, "leanRockDance", EMPTY, EMPTY, paramNames, "void leanRockDance()");
+    static ActionType* result = new ActionType(LEAN_ROCK_DANCE_CODE, "lean_rock_dance", EMPTY, EMPTY, paramNames, "void leanRockDance()");
     return *result;
 }
 const ActionType& ActionType::BACK_FLIP()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(BACK_FLIP_CODE, "backFlip", EMPTY, EMPTY, paramNames, "void backFlip()");
+    static ActionType* result = new ActionType(BACK_FLIP_CODE, "back_flip", EMPTY, EMPTY, paramNames, "void backFlip()");
     return *result;
 }
 const ActionType& ActionType::WIDEN_EYES()
 {
     initParamTypes();
     static const char* paramNames[] = {"interval"};
-    static ActionType* result = new ActionType(WIDEN_EYES_CODE, "widenEyes", EMPTY, INT, paramNames, "void widenEyes([short interval])");
+    static ActionType* result = new ActionType(WIDEN_EYES_CODE, "widen_eyes", EMPTY, INT, paramNames, "void widenEyes([short interval])");
     return *result;
 }
 const ActionType& ActionType::FEARFUL_POSTURE()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(FEARFUL_POSTURE_CODE, "fearfulPosture", EMPTY, EMPTY, paramNames, "void fearfulPosture()");
+    static ActionType* result = new ActionType(FEARFUL_POSTURE_CODE, "fearful_posture", EMPTY, EMPTY, paramNames, "void fearfulPosture()");
     return *result;
 }
 const ActionType& ActionType::CLEAN()
@@ -572,98 +572,98 @@ const ActionType& ActionType::LOOK_RIGHT()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(LOOK_RIGHT_CODE, "lookRight", EMPTY, FLOAT, paramNames, "void lookRight([float duration])");
+    static ActionType* result = new ActionType(LOOK_RIGHT_CODE, "look_right", EMPTY, FLOAT, paramNames, "void lookRight([float duration])");
     return *result;
 }
 const ActionType& ActionType::LOOK_LEFT()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(LOOK_LEFT_CODE, "lookLeft", EMPTY, FLOAT, paramNames, "void lookLeft([float duration])");
+    static ActionType* result = new ActionType(LOOK_LEFT_CODE, "look_left", EMPTY, FLOAT, paramNames, "void lookLeft([float duration])");
     return *result;
 }
 const ActionType& ActionType::KICK_LEFT()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(KICK_LEFT_CODE, "kickLeft", EMPTY, FLOAT, paramNames, "void kickLeft([float duration])");
+    static ActionType* result = new ActionType(KICK_LEFT_CODE, "kick_left", EMPTY, FLOAT, paramNames, "void kickLeft([float duration])");
     return *result;
 }
 const ActionType& ActionType::KICK_RIGHT()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(KICK_RIGHT_CODE, "kickRight", EMPTY, FLOAT, paramNames, "void kickRight([float duration])");
+    static ActionType* result = new ActionType(KICK_RIGHT_CODE, "kick_right", EMPTY, FLOAT, paramNames, "void kickRight([float duration])");
     return *result;
 }
 const ActionType& ActionType::LEFT_EAR_PERK()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(LEFT_EAR_PERK_CODE, "leftEarPerk", EMPTY, FLOAT, paramNames, "void leftEarPerk([float duration])");
+    static ActionType* result = new ActionType(LEFT_EAR_PERK_CODE, "left_ear_perk", EMPTY, FLOAT, paramNames, "void leftEarPerk([float duration])");
     return *result;
 }
 const ActionType& ActionType::RIGHT_EAR_PERK()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(RIGHT_EAR_PERK_CODE, "rightEarPerk", EMPTY, FLOAT, paramNames, "void rightEarPerk([float duration])");
+    static ActionType* result = new ActionType(RIGHT_EAR_PERK_CODE, "right_ear_perk", EMPTY, FLOAT, paramNames, "void rightEarPerk([float duration])");
     return *result;
 }
 const ActionType& ActionType::LEFT_EAR_BACK()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(LEFT_EAR_BACK_CODE, "leftEarBack", EMPTY, FLOAT, paramNames, "void leftEarBack([float duration])");
+    static ActionType* result = new ActionType(LEFT_EAR_BACK_CODE, "left_ear_back", EMPTY, FLOAT, paramNames, "void leftEarBack([float duration])");
     return *result;
 }
 const ActionType& ActionType::RIGHT_EAR_BACK()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(RIGHT_EAR_BACK_CODE, "rightEarBack", EMPTY, FLOAT, paramNames, "void rightEarBack([float duration])");
+    static ActionType* result = new ActionType(RIGHT_EAR_BACK_CODE, "right_ear_back", EMPTY, FLOAT, paramNames, "void rightEarBack([float duration])");
     return *result;
 }
 const ActionType& ActionType::LEFT_EAR_TWITCH()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(LEFT_EAR_TWITCH_CODE, "leftEarTwitch", EMPTY, FLOAT, paramNames, "void leftEarTwitch([float duration])");
+    static ActionType* result = new ActionType(LEFT_EAR_TWITCH_CODE, "left_ear_twitch", EMPTY, FLOAT, paramNames, "void leftEarTwitch([float duration])");
     return *result;
 }
 const ActionType& ActionType::RIGHT_EAR_TWITCH()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(RIGHT_EAR_TWITCH_CODE, "rightEarTwitch", EMPTY, FLOAT, paramNames, "void rightEarTwitch([float duration])");
+    static ActionType* result = new ActionType(RIGHT_EAR_TWITCH_CODE, "right_ear_twitch", EMPTY, FLOAT, paramNames, "void rightEarTwitch([float duration])");
     return *result;
 }
 const ActionType& ActionType::ANGRY_EYES()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(ANGRY_EYES_CODE, "angryEyes", EMPTY, FLOAT, paramNames, "void angryEyes([float duration])");
+    static ActionType* result = new ActionType(ANGRY_EYES_CODE, "angry_eyes", EMPTY, FLOAT, paramNames, "void angryEyes([float duration])");
     return *result;
 }
 const ActionType& ActionType::SAD_EYES()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(SAD_EYES_CODE, "sadEyes", EMPTY, FLOAT, paramNames, "void sadEyes([float duration])");
+    static ActionType* result = new ActionType(SAD_EYES_CODE, "sad_eyes", EMPTY, FLOAT, paramNames, "void sad_eyes([float duration])");
     return *result;
 }
 const ActionType& ActionType::HAPPY_EYES()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(HAPPY_EYES_CODE, "happyEyes", EMPTY, FLOAT, paramNames, "void happyEyes([float duration])");
+    static ActionType* result = new ActionType(HAPPY_EYES_CODE, "happy_eyes", EMPTY, FLOAT, paramNames, "void happyEyes([float duration])");
     return *result;
 }
 const ActionType& ActionType::CLOSE_EYES()
 {
     initParamTypes();
     static const char* paramNames[] = {"duration"};
-    static ActionType* result = new ActionType(CLOSE_EYES_CODE, "closeEyes", EMPTY, FLOAT, paramNames, "void closeEyes([float duration])");
+    static ActionType* result = new ActionType(CLOSE_EYES_CODE, "close_eyes", EMPTY, FLOAT, paramNames, "void closeEyes([float duration])");
     return *result;
 }
 const ActionType& ActionType::BITE()
@@ -726,7 +726,7 @@ const ActionType& ActionType::BUILD_BLOCK_AT()
 {
     initParamTypes();
     static const char* paramNames[] = {"position", "texture"};
-    static ActionType* result = new ActionType(BUILD_BLOCK_AT_CODE, "buildBlockAt", EMPTY, STRING, paramNames, "void buildBlockAt([float texture])");
+    static ActionType* result = new ActionType(BUILD_BLOCK_AT_CODE, "build_block_at", EMPTY, STRING, paramNames, "void buildBlockAt([float texture])");
     return *result;
 }
 
@@ -734,7 +734,7 @@ const ActionType& ActionType::BUILD_BLOCK()
 {
     initParamTypes();
     static const char* paramNames[] = {"offset", "direction"};
-    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "buildBlock", FLOAT_and_FLOAT, EMPTY, paramNames, "void buildBlock(float offset[, int direction])");
+    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "build_block", FLOAT_and_FLOAT, EMPTY, paramNames, "void buildBlock(float offset[, int direction])");
     return *result;
 }
 
@@ -742,7 +742,7 @@ const ActionType& ActionType::DESTROY_BLOCK_AT()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(DESTROY_BLOCK_AT_CODE, "destroyBlockAt", EMPTY, EMPTY, paramNames, "void destroyBlockAt(Vector position)");
+    static ActionType* result = new ActionType(DESTROY_BLOCK_AT_CODE, "destroy_block_at", EMPTY, EMPTY, paramNames, "void destroyBlockAt(Vector position)");
     return *result;
 }
 
