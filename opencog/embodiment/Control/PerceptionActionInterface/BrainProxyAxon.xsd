@@ -88,6 +88,7 @@
         <xsd:sequence>
             <xsd:element name="action" type="oc:ActionSignalType" minOccurs="0" maxOccurs="unbounded"/>
             <xsd:element name="physiology-level" type="oc:PhysiologyType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="action-availability" type="oc:ActionAvailabilityType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="id" type="xsd:string" use="required"/>
         <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
@@ -112,6 +113,14 @@
         <xsd:sequence/>
         <xsd:attribute name="name" type="xsd:string" use="required"/>        
         <xsd:attribute name="value" type="xsd:float" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="ActionAvailabilityType">
+        <xsd:sequence/>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>        
+        <xsd:attribute name="target" type="xsd:string" use="optional"/>
+        <xsd:attribute name="target-type" type="xsd:string" use="optional"/>  
+        <xsd:attribute name="available" type="xsd:boolean" use="required"/>
     </xsd:complexType>
 
     <xsd:element name="instruction"/>
