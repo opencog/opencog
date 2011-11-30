@@ -34,7 +34,7 @@ namespace opencog { namespace moses {
 
     // due to stl_pair.h considering that
     //
-    // (a1,b1) < (a2,b2) if b1<b2 when a1==a2
+    // (a1,b1) < (a2,b2) if b1 < b2 when a1==a2
     //
     // it is easier to assume a negative complexity, that is the lower
     // the value of complexity_t the higher the complexity. That way

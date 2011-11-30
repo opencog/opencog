@@ -33,22 +33,19 @@ using namespace opencog::combo;
 // for a Boolean formula, the complexity is the neg(# of literals)
 
 complexity_t complexity(combo_tree::iterator it) {
+    // base cases
     if (*it==id::logical_true || *it==id::logical_false || *it==id::null_vertex)
         return 0;
 
-    if (is_argument(*it))
+    if (is_argument(*it) || is_builtin_action(*it) || is_ann_type(*it))
         return -1;
 
-    if (is_builtin_action(*it))
-        return -1;
-
+    // recursive cases
     if (*it==id::logical_not)
         return complexity(it.begin());
 
-    if (is_ann_type(*it))
-        return -1;
-
-    int c=0;
+    // div and trigonometric functions have complexity 1
+    int c = *it==id::div || *it==id::exp || *it==id::log || *it==id::sin;
     for (combo_tree::sibling_iterator sib = it.begin(); sib != it.end(); ++sib)
         c += complexity(sib);
     return c;
