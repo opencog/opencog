@@ -655,19 +655,70 @@
 ; Rules related to CertaintyDemandGoal
 ;
 
-(define random_build_destroy_blocks
+(define multiple_step_forward
+    (SequentialAndLink
+        (add_action (GroundedSchemaNode "step_forward") ) 
+        (add_action (GroundedSchemaNode "step_forward") ) 
+        (add_action (GroundedSchemaNode "step_forward") ) 
+    ) 
+)
+
+(define multiple_step_backward
     (SequentialAndLink
         (add_action (GroundedSchemaNode "step_backward") ) 
-        (add_action (GroundedSchemaNode "step_forward") )
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "90") )  ; TODO: doesn't work 
-;        (add_action (GroundedSchemaNode "build_block_at") (WordNode "dummy_arg") ) 
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") ) 
-        (add_action (GroundedSchemaNode "jump_up") (NumberNode "1") ) ;TODO: jump to the block 
-        (add_action (GroundedSchemaNode "destroy_block_at") ) 
+        (add_action (GroundedSchemaNode "step_backward") ) 
+        (add_action (GroundedSchemaNode "step_backward") ) 
+    ) 
+)
+
+; Rotate randomly, but more to the right
+(define random_rotate
+    (OrLink
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "29") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "23") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-19") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "47") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "43") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-41") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "113") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "109") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-101") )
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "167") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "163") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-157") )
+    )
+)
+
+(define random_search
+    (SequentialAndLink
+        random_rotate
+        (OrLink
+            multiple_step_forward
+            multiple_step_backward
+            multiple_step_forward
+        )
+    ) 
+)
+
+(define random_build_destroy_blocks
+    (SequentialAndLink
+        random_rotate
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") )
+        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") )
+        (OrLink
+            (add_action (GroundedSchemaNode "destroy_block_at") ) 
+            (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+            (add_action (GroundedSchemaNode "jump_forward") (NumberNode "0") ) 
+;            (add_action (GroundedSchemaNode "step_forward") ) 
+;            (add_action (GroundedSchemaNode "step_backward") ) 
+;            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") )
+;            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") )
+        )
     )        
 )    
 
-(define build_jump_onto_blocks
+(define build_jump_line_ladder
     (SequentialAndLink
         (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") ) ;build block in middle front
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
@@ -675,9 +726,22 @@
     )        
 )
 
+(define build_jump_twisted_ladder
+    (SequentialAndLink
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") ) ;build block in middle front
+        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+        (OrLink
+            (add_action (GroundedSchemaNode "rotate") (NumberNode "90") )  
+            (add_action (GroundedSchemaNode "rotate") (NumberNode "-90") )  
+        )
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") ) ;build block in lower front
+    )        
+)
+
 (add_rule (cog-new-stv 0.0 1.0) CertaintyDemandGoal 
-;    (add_action (GroundedSchemaNode "random_search") ) ; TODO: Doesn't work, should be implemented in scheme
-    build_jump_onto_blocks    
+    random_build_destroy_blocks
+;    random_search
+;    build_jump_twisted_ladder
     NULL_PRECONDITION
 )
 
@@ -698,7 +762,7 @@
 )
 
 (add_rule (cog-new-stv 0.75 1.0) CompetenceDemandGoal 
-    build_jump_onto_blocks    
+    build_jump_line_ladder
     NULL_PRECONDITION 
 )
 

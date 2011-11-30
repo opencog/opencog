@@ -14,6 +14,8 @@ sit(0) := sit
 bark(0) := bark
 sleep(0) := sleep
 jump_up(0) := jump_up
+
+# #1 verticle offset 
 jump_forward(1) := jump_forward(#1)
 
 # 1:target 2:speed
@@ -49,19 +51,6 @@ rotate(1) := rotate(#1)
 step_forward(0) := step_forward
 step_backward(0) := step_backward
 
-#walk random, but more forward and more right and does not rotate every time
-random_search(0) := 
-    and_seq( action_boolean_if(greater_than(rand 0.45)
-                               rotate_right
-                               rotate_left
-                              )
-
-             action_boolean_if(greater_than(rand 0.45)
-                               step_backward
-                               step_forward
-                              )
-           )
-
 play_with_grab_and_drop(1) := and_seq( goto_obj(#1 2) grab(#1) drop )
 
 play_without_grab_and_drop(1) := and_seq( goto_obj(#1 2) 
@@ -86,7 +75,6 @@ eat_food(1) :=
              drop
              wag
              eat(#1)
-             random_search
            )
 
 drink_water(1) :=  
@@ -94,7 +82,6 @@ drink_water(1) :=
              drop 
              wag 
              drink(#1)
-             random_search
            )
 
 ##############################################
@@ -102,7 +89,12 @@ drink_water(1) :=
 ##############################################
 
 build_block_at(1) := build_block_at(#1)
-# 1:offset 0, create a block exactly in front of the avatar, positive, above where the avatar stands, negative, under where the avatar stands
+
+# #1: verticle offset 1,   create a block exactly in front of the avatar, 
+#                     >=2, above where the avatar stands, 
+#                     <=0, under where the avatar stands
+# #2: type of the block (reserved)
 build_block(2) := build_block(#1 #2)
+
 destroy_block_at(0) := destroy_block_at
 
