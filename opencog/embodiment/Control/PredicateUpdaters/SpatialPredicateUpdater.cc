@@ -302,28 +302,26 @@ addSpatialRelations(const SPATIAL_RELATION_VECTOR & relations,
                     Handle objectA, Handle objectB, Handle objectC 
                    )
 {
-    SimpleTruthValue tv(1, 1);
-
+    // Clear all the relations firstly
+    for (int rel = 0; rel < (int)Entity::TOTAL_RELATIONS; ++ rel) {
+        string predicateName = Entity::spatialRelationToString( (Entity::SPATIAL_RELATION) rel );
+        Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
+                                                       predicateName, 
+                                                       TruthValue::FALSE_TV(), 
+                                                       objectA, objectB, objectC
+                                                      );
+    }
+    
+    // Set relations
     foreach (Entity::SPATIAL_RELATION rel, relations) {
         string predicateName = Entity::spatialRelationToString(rel);
-        if ( objectC == Handle::UNDEFINED ) {
-            Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
-                                                           predicateName, 
-                                                           tv,
-                                                           objectA, objectB 
-                                                          );
-            Handle atTime = atomSpace.getTimeServer().addTimeInfo(eval, timestamp);
-            atomSpace.setTV(atTime, tv);
-        } 
-        else {
-            Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
-                                                           predicateName, 
-                                                           tv, 
-                                                           objectA, objectB, objectC
-                                                          );
-            Handle atTime = atomSpace.getTimeServer().addTimeInfo(eval, timestamp);
-            atomSpace.setTV(atTime, tv);
-        }
+        Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
+                                                       predicateName, 
+                                                       TruthValue::TRUE_TV(), 
+                                                       objectA, objectB, objectC
+                                                      );
+        Handle atTime = atomSpace.getTimeServer().addTimeInfo(eval, timestamp);
+        atomSpace.setTV(atTime, TruthValue::TRUE_TV());
     }
 }
 
