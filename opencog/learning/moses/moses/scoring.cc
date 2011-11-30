@@ -97,10 +97,10 @@ behavioral_score occam_contin_bscore::best_possible_bscore() const {
     return behavioral_score(target.size() + (occam?1:0), 0);
 }
 
-void occam_contin_bscore::set_complexity_coef(double variance,
+void occam_contin_bscore::set_complexity_coef(double stdev,
                                               double alphabet_size) {
     if(occam)
-        complexity_coef = - log((double)alphabet_size) * 2 * variance;
+        complexity_coef = - log((double)alphabet_size) * 2 * sq(stdev);
 }
 
 occam_discretize_contin_bscore::occam_discretize_contin_bscore

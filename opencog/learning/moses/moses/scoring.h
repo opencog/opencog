@@ -219,22 +219,22 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     template<typename Scoring>
     occam_contin_bscore(const Scoring& score,
                         const contin_input_table& r,
-                        float variance,
+                        float stdev,
                         float alphabet_size,
                         RandGen& _rng)
         : target(score, r), cti(r), rng(_rng) {
-        occam = variance > 0;
-        set_complexity_coef(variance, alphabet_size);
+        occam = stdev > 0;
+        set_complexity_coef(stdev, alphabet_size);
     }
 
     occam_contin_bscore(const contin_output_table& t,
                         const contin_input_table& r,
-                        float variance,
+                        float stdev,
                         float alphabet_size,
                         RandGen& _rng)
         : target(t), cti(r), rng(_rng) {
-        occam = variance > 0;
-        set_complexity_coef(variance, alphabet_size);
+        occam = stdev > 0;
+        set_complexity_coef(stdev, alphabet_size);
     }
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -251,7 +251,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     RandGen& rng;
 
 private:
-    void set_complexity_coef(double variance, double alphabet_size);
+    void set_complexity_coef(double stdev, double alphabet_size);
 };
 
 /**

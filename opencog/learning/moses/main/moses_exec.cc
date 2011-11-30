@@ -210,7 +210,7 @@ int moses_exec(int argc, char** argv) {
     string log_level;
     string log_file;
     bool log_file_dep_opt;
-    float variance;
+    float stdev;
     float prob;
     vector<string> include_only_ops_str;
     vector<string> ignore_ops_str;
@@ -316,9 +316,9 @@ int moses_exec(int argc, char** argv) {
         (opt_desc_str(log_file_opt).c_str(),
          value<string>(&log_file)->default_value(default_log_file),
          string("File name where to write the log. This option is overwritten by ").append(log_file_dep_opt_opt.first).append(".\n").c_str())
-        (opt_desc_str(variance_opt).c_str(),
-         value<float>(&variance)->default_value(0),
-         "In the case of contin regression. variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor.\n")
+        (opt_desc_str(stdev_opt).c_str(),
+         value<float>(&stdev)->default_value(0),
+         "In the case of contin regression. standard deviation of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher the standard deviation the stronger the Occam's razor.\n")
         (opt_desc_str(prob_opt).c_str(),
          value<float>(&prob)->default_value(0),
          "In the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor.\n")
@@ -550,7 +550,7 @@ int moses_exec(int argc, char** argv) {
             }
 
             if(discretize_thresholds.empty()) {
-                occam_contin_bscore bscore(ot, it, variance, as, rng);
+                occam_contin_bscore bscore(ot, it, stdev, as, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduction(ignore_ops, rng),
                                       contin_reduction(ignore_ops, rng),
@@ -605,7 +605,7 @@ int moses_exec(int argc, char** argv) {
             int as = alphabet_size(tt, ignore_ops);
             
             occam_contin_bscore bscore(table_outputs, it,
-                                       variance, as, rng);
+                                       stdev, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
@@ -683,7 +683,7 @@ int moses_exec(int argc, char** argv) {
         int as = alphabet_size(tt, ignore_ops);
 
         occam_contin_bscore bscore(simple_symbolic_regression(problem_size),
-                                   rands, variance, as, rng);
+                                   rands, stdev, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),
@@ -712,7 +712,7 @@ int moses_exec(int argc, char** argv) {
         
         int as = alphabet_size(tt, ignore_ops);
 
-        occam_contin_bscore bscore(ot, it, variance, as, rng);
+        occam_contin_bscore bscore(ot, it, stdev, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               ann_reduction(),
                               ann_reduction(),
@@ -741,7 +741,7 @@ int moses_exec(int argc, char** argv) {
         int as = alphabet_size(tt, ignore_ops);
         
         occam_contin_bscore bscore(table_outputs, it,
-                                   variance, as, rng);
+                                   stdev, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),
