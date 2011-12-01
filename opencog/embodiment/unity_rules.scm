@@ -470,8 +470,8 @@
 ;        (add_action (GroundedSchemaNode "step_forward") ) 
 
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
-        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
-        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
+;        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
+;        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
     ) 
 )
 
@@ -487,7 +487,7 @@
     (OrLink
 ;        (add_action (GroundedSchemaNode "rotate") (NumberNode "23") )  
 ;        (add_action (GroundedSchemaNode "rotate") (NumberNode "47") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "61") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "61") )  
         (add_action (GroundedSchemaNode "rotate") (NumberNode "89") )  
         (add_action (GroundedSchemaNode "rotate") (NumberNode "107") )  
 ;        (add_action (GroundedSchemaNode "rotate") (NumberNode "137") )
@@ -498,7 +498,7 @@
     (OrLink
 ;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-29") )  
 ;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-43") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-67") )
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-67") )
         (add_action (GroundedSchemaNode "rotate") (NumberNode "-83") )
         (add_action (GroundedSchemaNode "rotate") (NumberNode "-109") )
 ;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-131") )
@@ -620,8 +620,7 @@
 
     (add_rule (stv 1.0 1.0) GetFoodGoal 
         (SequentialAndLink
-            random_rotate_right
-            random_rotate_right
+            (add_action (GroundedSchemaNode "rotate") (NumberNode "180") )
             multiple_step_forward
         )
         (AndLink 

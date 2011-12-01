@@ -101,6 +101,12 @@ private:
     // 3-size spatial relations calculation would rely on this cache. 
     SpatialRelationCache spatialRelationCache; 
 
+    void computeObserverInvolvedSpatialRelations(const SpaceServer::SpaceMap & spaceMap, 
+                                                 std::vector <std::string> & entities, 
+                                                 Handle observer, 
+                                                 unsigned long timestamp
+                                                ); 
+
     /**
      * Calculate all the 2-size spatial relations. 
      *

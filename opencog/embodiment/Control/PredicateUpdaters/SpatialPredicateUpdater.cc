@@ -69,6 +69,9 @@ void SpatialPredicateUpdater::update(std::vector<Handle> & objects,
 
     this->compute2SizeSpatialRelations(spaceMap, objects, entities, pet, timestamp); 
 
+    // TODO: Extremely slow. Use better algorithm later. 
+//    this->computeObserverInvolvedSpatialRelations(spaceMap, entities, pet, timestamp); 
+
 //gettimeofday(&timer_end, NULL);
 //elapsed_time += ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
 //    (timer_end.tv_usec - timer_start.tv_usec);
@@ -115,6 +118,72 @@ swapRelations(SPATIAL_RELATION_VECTOR & relations)
     } // foreach (Entity::SPATIAL_RELATION rel, relations) 
 
     return newRelations; 
+}
+
+void SpatialPredicateUpdater::
+computeObserverInvolvedSpatialRelations(const SpaceServer::SpaceMap & spaceMap, 
+                                        std::vector <std::string> & entities, 
+                                        Handle observer, 
+                                        unsigned long timestamp
+                                       )
+{
+    const std::string & observerName = atomSpace.getName(observer); 
+    const spatial::EntityPtr & observerEntity = spaceMap.getEntity(observerName);
+    int numRelations = 0;
+
+    foreach (const std::string & entityID_B, entities) {
+        const spatial::EntityPtr & entityB = spaceMap.getEntity(entityID_B);
+        Handle objectB = getHandle(entityID_B); 
+
+        if (observer == objectB) {
+            continue;
+        } 
+
+        SPATIAL_RELATION_VECTOR relationsOB, relationsBO;
+
+        const math::Vector3 & observerPosition = observerEntity->getPosition();
+        const math::Vector3 & objectPosition = entityB->getPosition();  
+        math::Vector3 objectDirection = objectPosition - observerPosition;
+        math::Vector3 observerDirection = (observerEntity->getDirection() * objectDirection.length()+1.0);
+
+        // Angle from observerDirection (pet facing direction) to objectDirection (pet to to B)
+        double angle; 
+        angle = std::atan2( objectDirection.y, objectDirection.x ) - 
+                std::atan2( observerDirection.y, observerDirection.x );
+
+        if ( angle > M_PI ) {
+            angle -= M_PI*2.0;
+        } 
+        else if ( angle < -M_PI ) {
+            angle += M_PI*2.0;
+        }
+
+        angle *= 180.0/M_PI;
+
+        // Compute size-2 directional spatial relations (observer is the reference object)
+        if (angle >= -45 && angle <= 45) 
+            relationsBO.push_back(Entity::IN_FRONT_OF); 
+        else if (angle >= 45 && angle <= 135)
+            relationsBO.push_back(Entity::LEFT_OF);
+        else if (angle >= -135 && angle <= -45)
+            relationsBO.push_back(Entity::RIGHT_OF);
+        else
+            relationsBO.push_back(Entity::BEHIND); 
+
+        relationsOB = this->swapRelations(relationsBO); 
+
+        this->addSpatialRelations(relationsOB, atomSpace, timestamp, observer, objectB); 
+        this->addSpatialRelations(relationsBO, atomSpace, timestamp, objectB, observer); 
+
+        this->spatialRelationCache.addRelation(observerName, entityID_B, relationsOB); 
+        this->spatialRelationCache.addRelation(entityID_B, observerName, relationsBO); 
+
+        numRelations ++; 
+    } // foreach (const std::string & entityID_B, entities)
+
+    logger().debug("%s - Finished evaluating: %d observer involved spatial relations", 
+                   __FUNCTION__, numRelations
+                  );
 }
 
 void SpatialPredicateUpdater::
@@ -303,13 +372,15 @@ addSpatialRelations(const SPATIAL_RELATION_VECTOR & relations,
                    )
 {
     // Clear all the relations firstly
-    for (int rel = 0; rel < (int)Entity::TOTAL_RELATIONS; ++ rel) {
-        string predicateName = Entity::spatialRelationToString( (Entity::SPATIAL_RELATION) rel );
-        Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
-                                                       predicateName, 
-                                                       TruthValue::FALSE_TV(), 
-                                                       objectA, objectB, objectC
-                                                      );
+    if ( objectC == Handle::UNDEFINED ) {
+        for (int rel = 0; rel < (int)Entity::TOTAL_RELATIONS; ++ rel) {
+            string predicateName = Entity::spatialRelationToString( (Entity::SPATIAL_RELATION) rel );
+            Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
+                                                           predicateName, 
+                                                           TruthValue::FALSE_TV(), 
+                                                           objectA, objectB, objectC
+                                                          );
+        }
     }
     
     // Set relations
