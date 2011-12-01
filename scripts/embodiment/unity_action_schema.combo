@@ -88,13 +88,11 @@ drink_water(1) :=
 ############ MINECRAFT WORLD OPERATIONS ######
 ##############################################
 
-build_block_at(1) := build_block_at(#1)
-
 # #1: verticle offset 1,   create a block exactly in front of the avatar, 
 #                     >=2, above where the avatar stands, 
 #                     <=0, under where the avatar stands
 # #2: type of the block (reserved)
 build_block(2) := build_block(#1 #2)
 
-destroy_block_at(0) := destroy_block_at
+destroy_block(0) := destroy_block
 

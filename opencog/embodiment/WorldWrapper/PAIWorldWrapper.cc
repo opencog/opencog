@@ -998,9 +998,8 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
           {id::sit, ActionType::SIT()},
           {id::look_at, ActionType::LOOK_AT()},
           {id::say, ActionType::SAY()},
-          {id::build_block_at, ActionType::BUILD_BLOCK_AT()},
           {id::build_block, ActionType::BUILD_BLOCK()},
-          {id::destroy_block_at, ActionType::DESTROY_BLOCK_AT()},
+          {id::destroy_block, ActionType::DESTROY_BLOCK()},
           {id::whine_at, ActionType::WHINE()}
         };
 
@@ -1608,29 +1607,6 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         break;
     }
 
-    case id::build_block_at: {
-        if ( from.number_of_children() != 1 ) {
-            throw InvalidParamException( TRACE_INFO,
-                                         "PAIWorldWrapper - Invalid number of arguments for build_block_at %d", 
-                                         from.number_of_children()  
-                                       );
-        } 
-
-        /*
-        action.addParameter(ActionParameter("position", 
-                                            ActionParamType::VECTOR(),
-                                            Vector(get_contin(*from.begin()),
-                                                     get_contin(*++from.begin()),
-                                                     get_contin(*++from.begin()))));
-        */
-        // TODO change the hard coding texture once the avatar knows how to use
-        // the ability.
-        action.addParameter(ActionParameter("texture",
-                                            ActionParamType::STRING(),
-                                            "lava"));
-    }
-    break;
-
     case id::build_block: {
         if ( from.number_of_children() != 2 ) {
             throw InvalidParamException( TRACE_INFO,
@@ -1655,7 +1631,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     }
     break;
 
-    case id::destroy_block_at: {
+    case id::destroy_block: {
 
     }
     break;

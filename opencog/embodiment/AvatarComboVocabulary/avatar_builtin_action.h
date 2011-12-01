@@ -324,15 +324,13 @@ enum avatar_builtin_action_enum {
     //=== say a sentence ===
     say,
 
-    //==== build_block_at(position) ====
+    //==== build_block(offset, block_type) ====
     // build a block in front of avatar, used in unity minecraft-like world only.
-    build_block_at,
-
     build_block,
 
-    //==== destroy_block_at(position) ====
-    // destroy a block at given position, used in unity minecraft-like world only.
-    destroy_block_at,
+    //==== destroy_block(offset) ====
+    // destroy a block at given vertical offset, used in unity minecraft-like world only.
+    destroy_block,
 
     avatar_builtin_action_count //to give the number of actions
 };
@@ -465,10 +463,9 @@ static const action_basic_description abd[] = {
     { id::receive_latest_group_commands,          "receive_latest_group_commands",     "action_result" },
     { id::look_at,           "look_at",           "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::say,               "say",               "->(definite_object union(definite_object indefinite_object wild_card) action_result)" },
-    { id::build_block_at,    "build_block_at",    "->(definite_object action_result)" },
     { id::build_block,       "build_block",       "->(contin contin action_result)" },
     //{ id::destroy_block_at,  "destroy_block_at",  "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::destroy_block_at,  "destroy_block_at",  "action_result" },
+    { id::destroy_block,  "destroy_block",  "action_result" },
 
 };
 
@@ -560,9 +557,8 @@ static const action_property_description apd[] = {
     { id::look_at,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::say,            false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
 
-    { id::build_block_at, false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::build_block,    false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
-    { id::destroy_block_at,false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
+    { id::destroy_block,  false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
 };
 
 
@@ -627,7 +623,6 @@ static const action_argument_property_description aapd[] = {
     { id::say,                      0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::say,                      1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
 
-    { id::build_block_at,           0,    false, false,  false,  0,  0 }, 
     { id::build_block,              0,    false, false,  false,  0,  0 }, 
     { id::build_block,              1,    false, false,  false,  0,  0 }, 
 };

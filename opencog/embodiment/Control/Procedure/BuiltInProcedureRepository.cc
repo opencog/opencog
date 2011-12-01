@@ -78,9 +78,8 @@ BuiltInProcedureRepository::BuiltInProcedureRepository(PAI& pai)
     //add(new PetActionSchema(pai, ActionType::WAG_TAIL()));
     //add(new PetActionSchema(pai, ActionType::MOVE_TAIL()));
 
-    add(new PetActionSchema(pai, ActionType::BUILD_BLOCK_AT()));
     add(new PetActionSchema(pai, ActionType::BUILD_BLOCK()));
-    add(new PetActionSchema(pai, ActionType::DESTROY_BLOCK_AT()));
+    add(new PetActionSchema(pai, ActionType::DESTROY_BLOCK()));
 
     // TODO: Create and add all other builtIn procedures here
 }

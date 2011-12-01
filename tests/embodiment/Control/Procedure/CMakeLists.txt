@@ -52,8 +52,8 @@ TARGET_LINK_LIBRARIES(existsComboInterpreterUTest Procedure PredicateUpdaters be
 ADD_CXXTEST(scriptsComboInterpreterUTest)
 TARGET_LINK_LIBRARIES(scriptsComboInterpreterUTest Procedure PredicateUpdaters behavior)
 
-ADD_CXXTEST(actionsComboInterpreterUTest)
-TARGET_LINK_LIBRARIES(actionsComboInterpreterUTest Procedure PredicateUpdaters behavior)
+#ADD_CXXTEST(actionsComboInterpreterUTest)
+#TARGET_LINK_LIBRARIES(actionsComboInterpreterUTest Procedure PredicateUpdaters behavior)
 
 ADD_CXXTEST(ProcedureRepositoryUTest)
 TARGET_LINK_LIBRARIES(ProcedureRepositoryUTest

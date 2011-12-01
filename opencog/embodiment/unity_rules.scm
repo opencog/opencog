@@ -734,7 +734,7 @@
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
         (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") )
         (OrLink
-            (add_action (GroundedSchemaNode "destroy_block_at") ) 
+            (add_action (GroundedSchemaNode "destroy_block") ) 
             (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
             (add_action (GroundedSchemaNode "jump_forward") (NumberNode "0") ) 
 ;            (add_action (GroundedSchemaNode "step_forward") ) 

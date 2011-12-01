@@ -722,27 +722,19 @@ const ActionType& ActionType::SAY()
     return *result;
 }
 
-const ActionType& ActionType::BUILD_BLOCK_AT()
-{
-    initParamTypes();
-    static const char* paramNames[] = {"position", "texture"};
-    static ActionType* result = new ActionType(BUILD_BLOCK_AT_CODE, "build_block_at", EMPTY, STRING, paramNames, "void buildBlockAt([float texture])");
-    return *result;
-}
-
 const ActionType& ActionType::BUILD_BLOCK()
 {
     initParamTypes();
     static const char* paramNames[] = {"offset", "direction"};
-    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "build_block", FLOAT_and_FLOAT, EMPTY, paramNames, "void buildBlock(float offset[, int direction])");
+    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "build_block", FLOAT_and_FLOAT, EMPTY, paramNames, "void build_block(float offset[, int direction])");
     return *result;
 }
 
-const ActionType& ActionType::DESTROY_BLOCK_AT()
+const ActionType& ActionType::DESTROY_BLOCK()
 {
     initParamTypes();
     static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(DESTROY_BLOCK_AT_CODE, "destroy_block_at", EMPTY, EMPTY, paramNames, "void destroyBlockAt(Vector position)");
+    static ActionType* result = new ActionType(DESTROY_BLOCK_CODE, "destroy_block", EMPTY, EMPTY, paramNames, "void destroy_block(float offset)");
     return *result;
 }
 
@@ -930,9 +922,8 @@ void ActionType::init()
         LOOK_AT();
         SAY();
 
-        BUILD_BLOCK_AT();
         BUILD_BLOCK();
-        DESTROY_BLOCK_AT();
+        DESTROY_BLOCK();
 
         initialized = true;
     }
