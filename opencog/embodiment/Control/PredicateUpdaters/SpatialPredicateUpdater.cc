@@ -170,6 +170,9 @@ computeObserverInvolvedSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
         else
             relationsBO.push_back(Entity::BEHIND); 
 
+        if ( objectPosition.z - entityB->getHeight()*0.5 > observerPosition.z + observerEntity->getHeight() ) 
+            relationsBO.push_back(Entity::ABOVE); 
+
         relationsOB = this->swapRelations(relationsBO); 
 
         this->addSpatialRelations(relationsOB, atomSpace, timestamp, observer, objectB); 

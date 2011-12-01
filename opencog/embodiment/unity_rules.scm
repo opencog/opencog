@@ -465,6 +465,7 @@
 
 (define multiple_step_forward
     (SequentialAndLink
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") )
 ;        (add_action (GroundedSchemaNode "step_forward") ) 
 ;        (add_action (GroundedSchemaNode "step_forward") ) 
 ;        (add_action (GroundedSchemaNode "step_forward") ) 
@@ -561,6 +562,25 @@
         GetFoodGoal
     )
 )    
+
+(AverageLink (cog-new-av 1 1 1)
+    (ListLink
+        (VariableNode "$var_food") 
+    ) 
+
+    (add_rule (stv 1.0 1.0) GetFoodGoal 
+        (SequentialAndLink
+            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") )
+            (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") )
+        )
+        (AndLink 
+            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+            (add_precondition (PredicateNode "above") (VariableNode "$var_food") PET_HANDLE) 
+        )
+    )
+)
 
 (AverageLink (cog-new-av 1 1 1)
     (ListLink
