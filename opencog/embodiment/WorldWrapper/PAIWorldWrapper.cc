@@ -1608,7 +1608,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     }
 
     case id::build_block: {
-        if ( from.number_of_children() != 2 ) {
+        if ( from.number_of_children() > 2 ) {
             throw InvalidParamException( TRACE_INFO,
                                          "PAIWorldWrapper - Invalid number of arguments for build_block %d", 
                                          from.number_of_children() 
@@ -1624,8 +1624,8 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         ss.str("");
         ss << *++from.begin();
 
-        action.addParameter(ActionParameter("direction",
-                                            ActionParamType::FLOAT(),
+        action.addParameter(ActionParameter("blockType",
+                                            ActionParamType::STRING(),
                                             ss.str()));
 
     }

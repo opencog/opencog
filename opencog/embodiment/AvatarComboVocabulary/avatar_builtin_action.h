@@ -463,7 +463,7 @@ static const action_basic_description abd[] = {
     { id::receive_latest_group_commands,          "receive_latest_group_commands",     "action_result" },
     { id::look_at,           "look_at",           "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::say,               "say",               "->(definite_object union(definite_object indefinite_object wild_card) action_result)" },
-    { id::build_block,       "build_block",       "->(contin contin action_result)" },
+    { id::build_block,       "build_block",       "->(contin definite_object action_result)" },
     //{ id::destroy_block_at,  "destroy_block_at",  "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::destroy_block,  "destroy_block",  "action_result" },
 

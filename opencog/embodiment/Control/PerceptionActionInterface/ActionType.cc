@@ -53,6 +53,7 @@ static ActionType::ParamTypes ENTITY_and_FLOAT;
 static ActionType::ParamTypes ENTITY_and_VECTOR;
 static ActionType::ParamTypes STRING_and_STRING;
 static ActionType::ParamTypes FLOAT_and_FLOAT;
+static ActionType::ParamTypes FLOAT_and_STRING;
 
 // Arity 3
 static ActionType::ParamTypes VECTOR_ROTATION_and_FLOAT;
@@ -89,6 +90,8 @@ void ActionType::initParamTypes()
         STRING_and_STRING.push_back(ActionParamType::STRING());
         FLOAT_and_FLOAT.push_back(ActionParamType::FLOAT());
         FLOAT_and_FLOAT.push_back(ActionParamType::FLOAT());
+        FLOAT_and_STRING.push_back(ActionParamType::FLOAT());
+        FLOAT_and_STRING.push_back(ActionParamType::STRING());
 
         // Arity 3
         VECTOR_ROTATION_and_FLOAT.push_back(ActionParamType::VECTOR());
@@ -725,8 +728,8 @@ const ActionType& ActionType::SAY()
 const ActionType& ActionType::BUILD_BLOCK()
 {
     initParamTypes();
-    static const char* paramNames[] = {"offset", "direction"};
-    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "build_block", FLOAT_and_FLOAT, EMPTY, paramNames, "void build_block(float offset[, int direction])");
+    static const char* paramNames[] = {"offset", "blockType"};
+    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "build_block", FLOAT_and_STRING, EMPTY, paramNames, "void build_block(float offset[, int direction])");
     return *result;
 }
 
