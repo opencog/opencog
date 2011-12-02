@@ -465,7 +465,7 @@
 
 (define multiple_step_forward
     (SequentialAndLink
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") )
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "TopSoil") )
 ;        (add_action (GroundedSchemaNode "step_forward") ) 
 ;        (add_action (GroundedSchemaNode "step_forward") ) 
 ;        (add_action (GroundedSchemaNode "step_forward") ) 
@@ -749,9 +749,18 @@
 (define random_build_destroy_blocks
     (SequentialAndLink
         random_rotate
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") )
+        (OrLink
+            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "Stone") )
+            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "Dirt") )
+            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "TopSoil") )
+        )
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") )
+        (OrLink
+            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "TopSoil") )
+            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "Light") )
+            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "Leaves") )
+            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "Dirt") )
+        )
         (OrLink
             (add_action (GroundedSchemaNode "destroy_block") ) 
             (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
@@ -766,21 +775,21 @@
 
 (define build_jump_line_ladder
     (SequentialAndLink
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") ) ;build block in middle front
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "Stone") ) ;build block in middle front
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") ) ;build block in lower front
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "Lava") ) ;build block in lower front
     )        
 )
 
 (define build_jump_twisted_ladder
     (SequentialAndLink
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") ) ;build block in middle front
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "Lava") ) ;build block in middle front
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
         (OrLink
             (add_action (GroundedSchemaNode "rotate") (NumberNode "90") )  
             (add_action (GroundedSchemaNode "rotate") (NumberNode "-90") )  
         )
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") ) ;build block in lower front
+        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "TopSoil") ) ;build block in lower front
     )        
 )
 
