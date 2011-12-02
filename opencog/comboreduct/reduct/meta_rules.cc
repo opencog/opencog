@@ -70,10 +70,8 @@ void ignore_size_increase::operator()(combo_tree& tr, combo_tree::iterator it) c
     INC_TAB
     PRINT_DEBUG_STANDARD
     combo_tree tmp(it);
-    size_t tmp_s = tmp.size();
     (*r)(tr,it);
-    size_t tr_s = combo_tree(it).size();
-    if(tmp_s < tr_s || (!strict && tmp_s == tr_s)) { // ignore the size increase
+    if(tmp.size() <= combo_tree(it).size()) { // ignore size increase or equal
         replace_without_changing_it(tr, it, tmp.begin());
     }
     DEC_TAB
