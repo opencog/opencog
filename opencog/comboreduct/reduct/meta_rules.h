@@ -54,18 +54,22 @@ protected:
     bool cond;
 };
 
-// if applying rule r_ increases the size of the combo_tree then ignore it
+// if applying rule r_ increases the size of the combo_tree then
+// ignore it. If strict is false then ignore even if the size hasn't
+// changed.
 struct ignore_size_increase : public crule<ignore_size_increase> {
     explicit ignore_size_increase(const rule& r_,
+                                  bool strict_ = true,
                                   string name = "ignore_size_increase")
         : crule<ignore_size_increase>::crule(name),
-          r(r_.clone()) {}
+          r(r_.clone()), strict(strict_) {}
     ignore_size_increase(const ignore_size_increase& i)
         : crule<ignore_size_increase>::crule(i.get_name()), r(i.r->clone()) { }
     void operator()(combo_tree&, combo_tree::iterator) const;
 
 protected:
     shared_ptr<const rule> r;
+    bool strict;
 };
 
 //apply rule in pre-order (left-to-right, parents before children, leftward

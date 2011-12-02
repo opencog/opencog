@@ -37,406 +37,168 @@ static MT19937RandGen rng(0);
 
 class ContinReductUTest : public CxxTest::TestSuite {
 public:
-  void test_stub() { }
-  //test_simplify1 :
-  //x+0 -> x
-  //x*1 -> x
-  //x*0 -> 0
-  //x/c -> 1/c * x
-  //x/(c*y) -> 1/c * x/y
-  //0/x -> 0
-  //*(x) -> x
-  //+(x) -> x
-  void test_simplify1() {
-    string tree_str="*(+(*(/(*(+(#1 *(#2 0)) 1) *(5.0 #3)) /(+(#3 /(0 #4)) 5.0))))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table cti(s, a, rng);
-
-    int size_before,size_after;
-    try {
-      
-      contin_output_table ct1(tr, cti, rng); 
-      size_before=tr.size();
-      contin_reduce(tr, vertex_set(), rng);
-      size_after=tr.size();
-      contin_output_table ct2(tr, cti, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(ct1,ct2);
+    // test if the combo program of string tr_str is shorter (or equal
+    // if strict is false) to the result once reduced, and preserves
+    // semantics (compare contin table)
+    void perform_test_reduce(const string& tr_str, bool strict = true) {
+        stringstream ss(tr_str);
+        combo_tree tr;
+        ss >> tr;
+        
+        int a = arity(tr);
+        int s = sample_count(a);
+        
+        contin_input_table rnt(s, a, rng);
+        
+        int size_before, size_after;
+        
+        try {
+            contin_output_table ct1(tr, rnt, rng);
+            size_before=tr.size();
+            std::cout << "before: " << tr << std::endl;
+            
+            contin_reduce(tr, vertex_set(), rng);
+            std::cout << "after:  " << tr << std::endl;      
+            size_after=tr.size();
+            contin_output_table ct2(tr, rnt, rng);
+            
+            if(strict) {
+                TS_ASSERT_LESS_THAN(size_after, size_before);
+            } else {
+                TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
+            }
+            TS_ASSERT_EQUALS(ct1,ct2);
+        }
+        catch(EvalException& e) {
+            std::cout << "An expection has been raised during the test (could be normal)" << std::endl;
+            TS_ASSERT(true);
+        }
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+    
+    // test_simplify1 :
+    // x+0 -> x
+    // x*1 -> x
+    // x*0 -> 0
+    // x/c -> 1/c * x
+    // x/(c*y) -> 1/c * x/y
+    // 0/x -> 0
+    // *(x) -> x
+    // +(x) -> x
+    void test_simplify1() {
+        string tree_str="*(+(*(/(*(+(#1 *(#2 0)) 1) *(5.0 #3)) /(+(#3 /(0 #4)) 5.0))))";
+        perform_test_reduce(tree_str);
     }
-  }
 
-  //test_simplify2 :
-  //x/z+y/z -> (x+y)/z
-  //x*y+x*z -> x*(y+z)
-  //(x*y)/(x*z) -> y/z
-  void test_simplify2() {
-    string tree_str="/(*(#5 +(*(#4 +(/(#1 #3) /(#2 #3))) *(#5 +(/(#1 #3) /(#2 #3))))) *(#5 #6))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table cti(s, a, rng);
-
-    int size_before,size_after;
-    try {
-      contin_output_table ct1(tr, cti, rng);
-      size_before=tr.size();
-      contin_reduce(tr, vertex_set(), rng);
-      size_after=tr.size();
-      contin_output_table ct2(tr, cti, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(ct1,ct2);
+    // test_simplify2 :
+    // x/z+y/z -> (x+y)/z
+    // x*y+x*z -> x*(y+z)
+    // (x*y)/(x*z) -> y/z
+    void test_simplify2() {
+        string tree_str="/(*(#5 +(*(#4 +(/(#1 #3) /(#2 #3))) *(#5 +(/(#1 #3) /(#2 #3))))) *(#5 #6))";
+        perform_test_reduce(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+
+    // test_simplify3 :
+    // (x/y)/z -> x/(y*z)
+    // x/(y/z) -> (x*z)/y
+    // x*(y/z) -> (x*y)/z
+    void test_simplify3() {
+        string tree_str="*(/(/(#1 #2) #3) /(#4 /(#5 #6)) /(#7 /(#8 #9)))";
+        perform_test_reduce(tree_str);
     }
-  }
 
-  //test_simplify3 :
-  //(x/y)/z -> x/(y*z)
-  //x/(y/z) -> (x*z)/y
-  //x*(y/z) -> (x*y)/z
-  void test_simplify3() {
-    string tree_str="*(/(/(#1 #2) #3) /(#4 /(#5 #6)) /(#7 /(#8 #9)))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);//return always 5, for the moment
-
-    contin_input_table cti(s, a, rng);
-
-    int size_before,size_after;
-    try {
-      contin_output_table ct1(tr, cti, rng);
-      size_before=tr.size();
-      contin_reduce(tr, vertex_set(), rng);
-      size_after=tr.size();
-      contin_output_table ct2(tr, cti, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(ct1,ct2);
+    // test_simplify4 :
+    // log(x)+log(y) -> log(x*y)
+    // log(x)-log(y) -> log(x/y)
+    // log(c/x) -> -log(c^-1*x)
+    // log(exp(x)*y) -> x+log(y)
+    void test_simplify4() {
+        string tree_str="*(+(log(+(#1 1)) log(+(#2 1))) +(log(+(#3 1)) *(log(+(#4 1)) -1)) log(/(5.0 +(#5 1))) log(*(exp(#6) +(#7 1))))";
+        perform_test_reduce(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
-    }
-  }
 
-  //test_simplify4 :
-  //log(x)+log(y) -> log(x*y)
-  //log(x)-log(y) -> log(x/y)
-  //log(c/x) -> -log(c^-1*x)
-  //log(exp(x)*y) -> x+log(y)
-  void test_simplify4() {
-    string tree_str="*(+(log(+(#1 1)) log(+(#2 1))) +(log(+(#3 1)) *(log(+(#4 1)) -1)) log(/(5.0 +(#5 1))) log(*(exp(#6) +(#7 1))))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table cti(s, a, rng);
-
-    int size_before,size_after;
-    try {
-      contin_output_table ct1(tr, cti, rng);
-      size_before=tr.size();
-      contin_reduce(tr, vertex_set(), rng);
-      size_after=tr.size();
-      contin_output_table ct2(tr, cti, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(ct1,ct2);
-    }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
-    }
-  }
-
-  //test_simplify5 :
-  //prod exp(x_i) -> exp(sum x_i)
-  //x/exp(y) -> x*exp(-y)
-  //exp(log(x)+y) -> x*exp(y) (if log is not defined as log(abs(x)))
-  //sin(x+c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
-  void test_simplify5() {
-    string tree_str="+(*(exp(#1) exp(#2) #3 exp(#4)) /(#5 exp(#6)) exp(+(log(+(#7 1)) #8)) sin(+(#9 100.0)))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table cti(s, a, rng);
-
-    int size_before,size_after;
-    try {
-      contin_output_table ct1(tr, cti, rng);
-      size_before=tr.size();
-      std::cout << "before: " << tr << std::endl;
-      contin_reduce(tr, vertex_set(), rng);
-      std::cout << "after:  " << tr << std::endl;      
-      size_after=tr.size();
-      contin_output_table ct2(tr, cti, rng);
-
-// the following TS_ASSERT is not valid if log has the semantics
+// the following test is not valid if log has the semantics
 // log(abs(x)) because the rule exp(log(x)+y) -> x*exp(y) is not
 // applied
 #ifndef ABS_LOG
-      TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
+    // test_simplify5 :
+    // prod exp(x_i) -> exp(sum x_i)
+    // x/exp(y) -> x*exp(-y)
+    // exp(log(x)+y) -> x*exp(y) (if log is not defined as log(abs(x)))
+    // sin(x+c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
+    void test_simplify5() {
+        string tree_str="+(*(exp(#1) exp(#2) #3 exp(#4)) /(#5 exp(#6)) exp(+(log(+(#7 1)) #8)) sin(+(#9 100.0)))";
+        perform_test_reduce(tree_str, false);
+    }
 #endif
-      TS_ASSERT_EQUALS(ct1,ct2);
+
+    // test_simplify6 :
+    // test the distribute rule
+    // *(+(*(+(#1 #2 1) -1) 1) -1) should reduce to +(#1 #2)
+    void test_simplify6() {
+        string tree_str="*(+(*(+(#1 #2 1) -1) 1) -1)";
+        perform_test_reduce(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+    
+    // test_simplify7 :
+    // test the distribute rule
+    // +(*(+(*(+(#1 #2) 2) 1.5) 0.5) -1) should reduce to +(#1 #2)
+    void test_simplify7() {
+        string tree_str="+(*(+(*(+(#1 #2) 2) 1.5) 0.5) -1)";
+        perform_test_reduce(tree_str);
     }
-  }
 
-  //test_simplify6 :
-  // test the distribute rule
-  // *(+(*(+(#1 #2 1) -1) 1) -1) should reduce to +(#1 #2)
-  void test_simplify6() {
-    string tree_str="*(+(*(+(#1 #2 1) -1) 1) -1)";
+    // test_simplify8 :
+    // test the distribute rule
+    void test_simplify8() {
+        string tree_str="*(+(#3 *(2 +(*(+(#1 1)) 1))) #1 4)";
+        perform_test_reduce(tree_str);
+    }
 
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
+    // test_simplify9 :
+    // +(#1 *(5 #1)) should reduce to *(6 #1)
+    void test_simplify9() {
+        string tree_str="+(#1 *(5 #1))";
+        perform_test_reduce(tree_str);
+    }
 
-    int a = arity(tr);
-    int s = sample_count(a);
+    // test_simplify10 :
+    // factorize/distribute test
+    /// @todo
+    // +(*(+(*(+(#1 1) 0.9375) -0.9375) #1) 2.9375) 
+    // becomes +(2.9375 *(+(-0.9375 *(0.9375 +(1 #1))) #1))
+    // wich could probably be improved
+    void test_simplify10() {
+        string tree_str="+(*(+(*(+(#1 1) 0.9375) -0.9375) #1) 2.9375)";
+        perform_test_reduce(tree_str, false);
+    }
 
-    contin_input_table cti(s, a, rng);
+    // test_simplify11 :
+    // factorize/distribute test
+    void test_simplify11() {
+        string tree_str="*(+(*(#1 +(2.75 *(#1 -2))) 1) #1 +(0.5 *(#1 0.5)))";
+        perform_test_reduce(tree_str);
+    }
 
-    int size_before,size_after;
+    //test_simplify12 :
+    // factorize/distribute test
+    void test_simplify12() {
+        string tree_str="*(-1 +(1 #1) +(*(#1 #1) #1))";
+        perform_test_reduce(tree_str);
+    }
 
-    contin_output_table ct1(tr, cti, rng);
-    size_before=tr.size();
-    std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, vertex_set(), rng);
-    std::cout << "after:  " << tr << std::endl;      
-    size_after=tr.size();
-    contin_output_table ct2(tr, cti, rng);
-
-    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
-    TS_ASSERT_EQUALS(ct1,ct2);
-  }
-  //test_simplify7 :
-  // test the distribute rule
-  // +(*(+(*(+(#1 #2) 2) 1.5) 0.5) -1) should reduce to +(#1 #2)
-  void test_simplify7() {
-    string tree_str="+(*(+(*(+(#1 #2) 2) 1.5) 0.5) -1)";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table cti(s, a, rng);
-
-    int size_before,size_after;
-
-    contin_output_table ct1(tr, cti, rng);
-    size_before=tr.size();
-    std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, vertex_set(), rng);
-    std::cout << "after:  " << tr << std::endl;      
-    size_after=tr.size();
-    contin_output_table ct2(tr, cti, rng);
-
-    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
-    TS_ASSERT_EQUALS(ct1,ct2);
-  }
-
-  //test_simplify8 :
-  // test the distribute rule
-  void test_simplify8() {
-    string tree_str="*(+(#3 *(2 +(*(+(#1 1)) 1))) #1 4)";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table cti(s, a, rng);
-
-    int size_before,size_after;
-
-    contin_output_table ct1(tr, cti, rng);
-    size_before=tr.size();
-    std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, vertex_set(), rng);
-    std::cout << "after:  " << tr << std::endl;      
-    size_after=tr.size();
-    contin_output_table ct2(tr, cti, rng);
-
-    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
-    TS_ASSERT_EQUALS(ct1,ct2);
-  }
-
-  //test_simplify9 :
-  // general test
-  void test_simplify9() {
-    string tree_str="+(#1 *(5 #1))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table cti(s, a, rng);
-
-    int size_before,size_after;
-
-    contin_output_table ct1(tr, cti, rng);
-    size_before=tr.size();
-    std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, vertex_set(), rng);
-    std::cout << "after:  " << tr << std::endl;      
-    size_after=tr.size();
-    contin_output_table ct2(tr, cti, rng);
-
-    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
-    TS_ASSERT_EQUALS(ct1,ct2);
-  }
-
-  //test_simplify10 :
-  // factorize/distribute test
-  void test_simplify10() {
-    string tree_str="+(*(+(*(+(#1 1) 0.9375) -0.9375) #1) 2.9375)";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table cti(s, a, rng);
-
-    int size_before,size_after;
-
-    contin_output_table ct1(tr, cti, rng);
-    size_before=tr.size();
-    std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, vertex_set(), rng);
-    std::cout << "after:  " << tr << std::endl;      
-    size_after=tr.size();
-    contin_output_table ct2(tr, cti, rng);
-
-    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
-    TS_ASSERT_EQUALS(ct1,ct2);
-  }
-
-  //test_simplify11 :
-  // factorize/distribute test
-  void test_simplify11() {
-    string tree_str="*(+(*(#1 +(2.75 *(#1 -2))) 1) #1 +(0.5 *(#1 0.5)))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table rnt(s, a, rng);
-
-    int size_before,size_after;
-
-    contin_output_table ct1(tr, rnt, rng);
-    size_before=tr.size();
-    std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, vertex_set(), rng);
-    std::cout << "after:  " << tr << std::endl;      
-    size_after=tr.size();
-    contin_output_table ct2(tr, rnt, rng);
-
-    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
-    TS_ASSERT_EQUALS(ct1,ct2);
-  }
-
-//test_simplify12 :
-// factorize/distribute test
-void test_simplify12() {
-    string tree_str="*(-1 +(1 #1) +(*(#1 #1) #1))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table rnt(s, a, rng);
-
-    int size_before,size_after;
-
-    contin_output_table ct1(tr, rnt, rng);
-    size_before=tr.size();
-    std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, vertex_set(), rng);
-    std::cout << "after:  " << tr << std::endl;      
-    size_after=tr.size();
-    contin_output_table ct2(tr, rnt, rng);
-
-    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
-    TS_ASSERT_EQUALS(ct1,ct2);
+    //test_simplify13 :
+    // factorize/distribute test
+    void test_simplify13() {
+        string tree_str="+(*(2 #1) *(+(1 *(+(1 *(-1 #1)) +(2 *(-4 #1))) *(+(2 *(-2 #1)) #1)) #1 #1))";
+        perform_test_reduce(tree_str);
 }
 
-//test_simplify13 :
-// factorize/distribute test
-void test_simplify13() {
-    string tree_str="+(*(2 #1) *(+(1 *(+(1 *(-1 #1)) +(2 *(-4 #1))) *(+(2 *(-2 #1)) #1)) #1 #1))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    int a = arity(tr);
-    int s = sample_count(a);
-
-    contin_input_table rnt(s, a, rng);
-
-    int size_before,size_after;
-
-    contin_output_table ct1(tr, rnt, rng);
-    size_before=tr.size();
-    std::cout << "before: " << tr << std::endl;
-
-    contin_reduce(tr, vertex_set(), rng);
-    std::cout << "after:  " << tr << std::endl;      
-    size_after=tr.size();
-    contin_output_table ct2(tr, rnt, rng);
-
-    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
-    TS_ASSERT_EQUALS(ct1,ct2);
+    //test_simplify14 :
+    // factorize/distribute test
+    void test_simplify14() {
+        string tree_str="*(1.125 +(1 *(+(1 *(+(1 *(#1 #1)) #1)) +(1 #1) #1)))";
+        perform_test_reduce(tree_str, false);
 }
-
+    
 };
