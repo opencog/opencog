@@ -94,10 +94,10 @@ void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
     else
         for(;it!=end;++it) {
             PRINT_DEBUG_STANDARD
-            if(//combo::get_argument_type_tree(*it, tr.sibling_index(it))==input
-               //&& 
-               //@todo: checking that it inherits would be better
-               //but has to be sure of it (Nil)
+            if(// combo::get_argument_type_tree(*it, tr.sibling_index(it))==input
+               // && 
+               // @todo: checking that it inherits would be better
+               // but has to be sure of it (Nil)
                opencog::combo::get_output_type_tree(*it)==type_tree(output))
                 (*r)(tr,it);
         }

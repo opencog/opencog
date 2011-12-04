@@ -90,15 +90,11 @@ const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops,
 
     static iterative res =
         iterative(sequential(seq_without_factorize_distribute,
-                             sequential(complete_factorize,
-                                        ignore_size_increase(sequential(complete_distribute,
-                                                                        // we factorize
-                                                                        // again to be sure
-                                                                        // not to enter in
-                                                                        // an infinite
-                                                                        // factorize/distribute
-                                                                        // loop
-                                                                        complete_factorize)))));
+                             ignore_size_increase(complete_factorize),
+                             // ignore_size_increase(sequential(complete_factorize,
+                             //                                 complete_distribute)),
+                             ignore_size_increase(sequential(complete_distribute,
+                                                             complete_factorize))));
     return res;
 }
 
