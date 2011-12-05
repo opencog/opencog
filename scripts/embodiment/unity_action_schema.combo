@@ -60,12 +60,6 @@ play_without_grab_and_drop(1) := and_seq( goto_obj(#1 2)
                                           kick(#1) 
                                         )
 
-random_simple_action(0) := jump_up
-#    and_seq( jump_up 
-#             step_forward step_backward 
-#             rotate_left rotate_right
-#           ) 
-
 ##############################################
 ############ RULE ENGINE FUNCTIONS ###########
 ##############################################

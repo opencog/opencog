@@ -1,8 +1,8 @@
 ;
 ; @file embodiment/pet_rules.scm
 ;
-; @author Zhenhua Cai <czhedu@gmail.com>
-; @date   2011-10-28
+; @author Jinhua Chua <JinhuaChua@gmail.com>
+; @date   2011-12-05
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into the AtomSpace.
 ;
@@ -142,11 +142,6 @@
     (add_demand_schema "CompetenceDemand" 0.65)
 )
 
-; TODO: TestEnergy is only used for debugging. Remove it once finished. 
-(define TestEnergyDemandSchema
-    (add_demand_schema "TestEnergyDemand" 0.85)
-)
-
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Goal to AtomSpace. 
@@ -203,11 +198,6 @@
 
 (define CompetenceDemandGoal
     (add_goal (PredicateNode "CompetenceDemandGoal") )
-)
-
-; TODO: TestEnergy is only used for debugging. Remove it once finished. 
-(define TestEnergyDemandGoal
-    (add_goal (PredicateNode "TestEnergyDemandGoal") )
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -319,12 +309,6 @@
      (add_goal (GroundedPredicateNode "fuzzy_within") 0.75 1.0 CompetenceDemandSchema) 
 )
 
-; TestEnergy is only used for debugging. Remove it once finished. 
-(connect_goal_updater     
-     TestEnergyDemandGoal 
-     (add_goal (GroundedPredicateNode "fuzzy_within") 0.1 0.95 TestEnergyDemandSchema)
-)
-
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Rules
@@ -337,34 +321,6 @@
 ;     ...
 ; )   
 ;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-; Rules connect with TestEnergy
-;
-; TODO: TestEnergy is only used for debugging. Remove it once finished.
-;
-
-;(define TestGetFoodGoal 
-;    (add_goal "TestGetFoodGoal")
-;)
-;
-;(define test_eat_food
-;    (add_action (GroundedSchemaNode "test_eat_food") )
-;)
-;
-;(add_rule (cog-new-stv 0.8 1.0) TestEnergyDemandGoal
-;          (add_action (GroundedSchemaNode "goto_owner") )
-;          truePrecondition
-;)
-;
-;(define test_search_food
-;    (add_action (GroundedSchemaNode "test_search_food") )
-;)
-;
-;(add_rule (cog-new-stv 0.8 1.0) TestGetFoodGoal test_search_food
-;          (add_gpn "testSearchFoodPrecondition") 
-;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; 
@@ -439,114 +395,100 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; Rules to test the whole OpenPsi, can be used as a very simple demo
-;
-
-;(define wander_searching_food
-;    (add_action (GroundedSchemaNode "wander_searching_food") )
-;)
-;
-;(define goto_owner
-;    (add_action (GroundedSchemaNode "goto_owner") )
-;)
-;
-;(define random_step_searching
-;    (add_action (GroundedSchemaNode "random_step_searching") )
-;)
-;
-;(add_rule (cog-new-stv 0.8 1.0)  EnergyDemandGoal random_step_searching
-;    (add_gpn "searchForFoodPrecondition")
-;)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
 ; Rules related to EnergyDemandGoal
 ;
 
+; build a block with random texture. offset should be a NumberNode
+(define (build_dark_block offset)
+    (OrLink
+        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Stone") )
+        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Dirt") )
+        (add_action (GroundedSchemaNode "build_block") offset (WordNode "TopSoil") )
+        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Light") )
+    )
+)
+
+(define (build_light_block offset)
+    (OrLink
+        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Lava") )
+        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Leaves") )
+    )
+)
+
 (define multiple_step_forward
     (SequentialAndLink
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "TopSoil") )
-;        (add_action (GroundedSchemaNode "step_forward") ) 
-;        (add_action (GroundedSchemaNode "step_forward") ) 
-;        (add_action (GroundedSchemaNode "step_forward") ) 
-
+        (build_dark_block (NumberNode "0") )
+;        (add_action (GroundedSchemaNode "step_forward") ) ; TODO: direction for step_backward is wrong sometimes
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
-;        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
-;        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
     ) 
 )
 
-(define multiple_step_backward
-    (SequentialAndLink
-        (add_action (GroundedSchemaNode "step_backward") ) 
-        (add_action (GroundedSchemaNode "step_forward") ) 
-        (add_action (GroundedSchemaNode "step_forward") ) 
-    ) 
-)
-
+; Rotate randomly
 (define random_rotate_right
     (OrLink
-;        (add_action (GroundedSchemaNode "rotate") (NumberNode "23") )  
-;        (add_action (GroundedSchemaNode "rotate") (NumberNode "47") )  
-;        (add_action (GroundedSchemaNode "rotate") (NumberNode "61") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "73") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "79") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "83") )  
         (add_action (GroundedSchemaNode "rotate") (NumberNode "89") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "107") )  
-;        (add_action (GroundedSchemaNode "rotate") (NumberNode "137") )
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "97") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "101") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "103") )  
     )
 )
 
 (define random_rotate_left
     (OrLink
-;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-29") )  
-;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-43") )  
-;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-67") )
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-83") )
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-109") )
-;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-131") )
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-73") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-79") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-83") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-89") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-97") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-101") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-103") )  
     )
 )
 
-; Rotate randomly
+(define random_rotate_back
+    (OrLink
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "173") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-179") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "181") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "-191") )  
+        (add_action (GroundedSchemaNode "rotate") (NumberNode "193") )  
+    )
+)
+
 (define random_rotate
     (OrLink
         random_rotate_left
+        random_rotate_left
+        random_rotate_left
         random_rotate_right
+        random_rotate_right
+        random_rotate_right
+        random_rotate_right
+        random_rotate_back
     )
 )
 
 (define random_search
     (SequentialAndLink
         random_rotate
-        (OrLink
-            multiple_step_forward
-            multiple_step_backward
-            multiple_step_forward
-        )
+        (add_action (GroundedSchemaNode "step_forward") ) 
     ) 
 )
+
+;------------------------------------------------------------------------------
+;
+; This rule will guide the robot directly to the battery cube 
+;
 
 (define GetFoodGoal
     (AndLink 
         (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
         (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
-        (add_goal (PredicateNode "can_do") (ConceptNode "grab") PET_HANDLE (VariableNode "$var_food") )
     )
 )
-
-;(AverageLink (cog-new-av 1 1 1)
-;    (ListLink
-;        (VariableNode "$var_food") 
-;    ) 
-;
-;    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
-;        (SequentialAndLink
-;            (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
-;            (add_action (GroundedSchemaNode "grab") (VariableNode "$var_food") )
-;            (add_action (GroundedSchemaNode "eat") (VariableNode "$var_food") )
-;        )    
-;        GetFoodGoal
-;    )
-;)    
 
 (AverageLink (cog-new-av 1 1 1)
     (ListLink
@@ -555,7 +497,7 @@
 
     (add_rule (stv 1.0 1.0) EnergyDemandGoal 
         (SequentialAndLink
-;            (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
+            (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
             (add_action (GroundedSchemaNode "grab") (VariableNode "$var_food") )
             (add_action (GroundedSchemaNode "eat") (VariableNode "$var_food") )
         )    
@@ -563,111 +505,149 @@
     )
 )    
 
-(AverageLink (cog-new-av 1 1 1)
-    (ListLink
-        (VariableNode "$var_food") 
-    ) 
+;------------------------------------------------------------------------------
+;
+; These heuristic rules will help robot approaching the battery cube step by step
+;
+; Note: If you want to enable these rules, you should also comment the GetFoodGoal
+;       and the corresponding rule above. Also you should enalbe the function calling 
+;       of 'computeObserverInvolvedSpatialRelations' in file (line 73)
+;       ./opencog/embodiment/Control/PredicateUpdaters/SpatialPredicateUpdater.cc
+;       Finally, bacause of the limits of the action planner, make sure there's only 
+;       one battery cube in the environment. Since the calculation of spatial relations 
+;       between the robot and other objects is very time consuming, you should run 
+;       opencog in real linux, rather than on a virtual machine. 
+;
 
-    (add_rule (stv 1.0 1.0) GetFoodGoal 
-        (SequentialAndLink
-            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") )
-            (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") )
-        )
-        (AndLink 
-            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
-            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
-            (add_precondition (PredicateNode "above") (VariableNode "$var_food") PET_HANDLE) 
-        )
-    )
-)
-
-(AverageLink (cog-new-av 1 1 1)
-    (ListLink
-        (VariableNode "$var_food") 
-    ) 
-
-    (add_rule (stv 1.0 1.0) GetFoodGoal 
-        (SequentialAndLink
-            random_rotate_left
-            multiple_step_forward
-        )
-        (AndLink 
-            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
-            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
-            (add_precondition (PredicateNode "left_of") (VariableNode "$var_food") PET_HANDLE) 
-        )
-    )
-)
-
-(AverageLink (cog-new-av 1 1 1)
-    (ListLink
-        (VariableNode "$var_food") 
-    ) 
-
-    (add_rule (stv 1.0 1.0) GetFoodGoal 
-        (SequentialAndLink
-            random_rotate_right
-            multiple_step_forward
-        )
-        (AndLink 
-            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
-            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
-            (add_precondition (PredicateNode "right_of") (VariableNode "$var_food") PET_HANDLE) 
-        )
-    )
-)
-
-(AverageLink (cog-new-av 1 1 1)
-    (ListLink
-        (VariableNode "$var_food") 
-    ) 
-
-    (add_rule (stv 1.0 1.0) GetFoodGoal 
-        multiple_step_forward
-        (AndLink 
-            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
-            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
-            (add_precondition (PredicateNode "in_front_of") (VariableNode "$var_food") PET_HANDLE) 
-        )
-    )
-)
-
-(AverageLink (cog-new-av 1 1 1)
-    (ListLink
-        (VariableNode "$var_food") 
-    ) 
-
-    (add_rule (stv 1.0 1.0) GetFoodGoal 
-        (SequentialAndLink
-            (add_action (GroundedSchemaNode "rotate") (NumberNode "180") )
-            multiple_step_forward
-        )
-        (AndLink 
-            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
-            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
-            (add_precondition (PredicateNode "behind") (VariableNode "$var_food") PET_HANDLE) 
-        )
-    )
-)
-
-;(add_rule (stv 0.2 1.0) GetFoodGoal 
-;    random_search
-;    NULL_PRECONDITION
-;)
-
-; TODO: very file rules only for testing dialog_system
-;(add_rule (stv 0.6 1.0) GetFoodGoal
-;    (add_action (SpeechActSchemaNode "AskForFood") )
-;    NULL_PRECONDITION
+;(define GetFoodGoal
+;    (AndLink 
+;        (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+;        (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+;        (add_goal (PredicateNode "can_do") (ConceptNode "grab") PET_HANDLE (VariableNode "$var_food") )
+;    )
 ;)
 ;
-;(add_rule (stv 0.3 1.0) GetFoodGoal
-;    (SequentialAndLink
-;        (add_action (GroundedSchemaNode "lick") ) 
-;    )    
-;    NULL_PRECONDITION
+;(AverageLink (cog-new-av 1 1 1)
+;    (ListLink
+;        (VariableNode "$var_food") 
+;    ) 
+;
+;    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
+;        (SequentialAndLink
+;            (add_action (GroundedSchemaNode "grab") (VariableNode "$var_food") )
+;            (add_action (GroundedSchemaNode "eat") (VariableNode "$var_food") )
+;        )    
+;        GetFoodGoal
+;    )
+;)    
+;
+;(AverageLink (cog-new-av 1 1 1)
+;    (ListLink
+;        (VariableNode "$var_food") 
+;    ) 
+;
+;    (add_rule (stv 1.0 1.0) GetFoodGoal 
+;        (SequentialAndLink
+;            (build_dark_block (NumberNode "1") )
+;            (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+;            (build_dark_block (NumberNode "0") )
+;        )
+;        (AndLink 
+;            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+;            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+;            (add_precondition (PredicateNode "above") (VariableNode "$var_food") PET_HANDLE) 
+;        )
+;    )
 ;)
+;
+;(AverageLink (cog-new-av 1 1 1)
+;    (ListLink
+;        (VariableNode "$var_food") 
+;    ) 
+;
+;    (add_rule (stv 1.0 1.0) GetFoodGoal 
+;        (SequentialAndLink
+;            random_rotate_left
+;            multiple_step_forward
+;        )
+;        (AndLink 
+;            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+;            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+;            (add_precondition (PredicateNode "left_of") (VariableNode "$var_food") PET_HANDLE) 
+;        )
+;    )
+;)
+;
+;(AverageLink (cog-new-av 1 1 1)
+;    (ListLink
+;        (VariableNode "$var_food") 
+;    ) 
+;
+;    (add_rule (stv 1.0 1.0) GetFoodGoal 
+;        (SequentialAndLink
+;            random_rotate_right
+;            multiple_step_forward
+;        )
+;        (AndLink 
+;            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+;            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+;            (add_precondition (PredicateNode "right_of") (VariableNode "$var_food") PET_HANDLE) 
+;        )
+;    )
+;)
+;
+;(AverageLink (cog-new-av 1 1 1)
+;    (ListLink
+;        (VariableNode "$var_food") 
+;    ) 
+;
+;    (add_rule (stv 1.0 1.0) GetFoodGoal 
+;        multiple_step_forward
+;        (AndLink 
+;            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+;            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+;            (add_precondition (PredicateNode "in_front_of") (VariableNode "$var_food") PET_HANDLE) 
+;        )
+;    )
+;)
+;
+;(AverageLink (cog-new-av 1 1 1)
+;    (ListLink
+;        (VariableNode "$var_food") 
+;    ) 
+;
+;    (add_rule (stv 1.0 1.0) GetFoodGoal 
+;        (SequentialAndLink
+;            random_rotate_back
+;            multiple_step_forward
+;        )
+;        (AndLink 
+;            (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
+;            (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+;            (add_precondition (PredicateNode "behind") (VariableNode "$var_food") PET_HANDLE) 
+;        )
+;    )
+;)
+
+;------------------------------------------------------------------------------
+
+(add_rule (stv 0.2 1.0) GetFoodGoal 
+    random_search
+    NULL_PRECONDITION
+)
+
+; TODO: very simple rules only for testing dialog_system
+(add_rule (stv 0.6 1.0) GetFoodGoal
+    (add_action (SpeechActSchemaNode "AskForFood") )
+    NULL_PRECONDITION
+)
+
+(add_rule (stv 0.3 1.0) GetFoodGoal
+    (SequentialAndLink
+        (add_action (GroundedSchemaNode "lick") ) 
+    )    
+    NULL_PRECONDITION
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -716,10 +696,10 @@
 ; Rules related to AffiliationDemandGoal
 ;
 
-;(add_rule (stv 1.0 1.0) AffiliationDemandGoal 
-;    (add_action (GroundedSchemaNode "goto_obj") OWNER_HANDLE (NumberNode "2") )
-;    NULL_PRECONDITION
-;)
+(add_rule (stv 0.2 1.0) AffiliationDemandGoal 
+    (add_action (GroundedSchemaNode "goto_obj") OWNER_HANDLE (NumberNode "2") )
+    NULL_PRECONDITION
+)
 
 ; This rule will please conversation partner by answering their questions
 ; The question could be TruthValueQuestion, WhatQuestion, WhyQuestion, even HowQuestion
@@ -749,47 +729,41 @@
 (define random_build_destroy_blocks
     (SequentialAndLink
         random_rotate
+        (build_dark_block (NumberNode "1") )
         (OrLink
-            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "Stone") )
-            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "Dirt") )
-            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "TopSoil") )
-        )
-        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-        (OrLink
-            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "TopSoil") )
-            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "Light") )
-            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "Leaves") )
-            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "Dirt") )
-        )
-        (OrLink
-            (add_action (GroundedSchemaNode "destroy_block") ) 
-            (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-            (add_action (GroundedSchemaNode "jump_forward") (NumberNode "0") ) 
-;            (add_action (GroundedSchemaNode "step_forward") ) 
-;            (add_action (GroundedSchemaNode "step_backward") ) 
-;            (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (NumberNode "2") )
-;            (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (NumberNode "2") )
+            (SequentialAndLink
+                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+                (build_dark_block (NumberNode "0") )
+            )
+            (SequentialAndLink
+                (add_action (GroundedSchemaNode "destroy_block") ) 
+                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+            )
+            (SequentialAndLink
+                (add_action (GroundedSchemaNode "destroy_block") ) 
+                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+            )
         )
     )        
 )    
 
 (define build_jump_line_ladder
     (SequentialAndLink
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "Stone") ) ;build block in middle front
+        (build_dark_block (NumberNode "1") ) ;build block in middle front
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "Lava") ) ;build block in lower front
+        (build_dark_block (NumberNode "0") ) ;build block in lower front
     )        
 )
 
 (define build_jump_twisted_ladder
     (SequentialAndLink
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "1") (WordNode "Lava") ) ;build block in middle front
+        (build_dark_block (NumberNode "1") ) ;build block in middle front
         (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
         (OrLink
             (add_action (GroundedSchemaNode "rotate") (NumberNode "90") )  
             (add_action (GroundedSchemaNode "rotate") (NumberNode "-90") )  
         )
-        (add_action (GroundedSchemaNode "build_block") (NumberNode "0") (WordNode "TopSoil") ) ;build block in lower front
+        (build_dark_block (NumberNode "0") ) ;build block in lower front
     )        
 )
 
@@ -811,13 +785,22 @@
 ; Rules related to CompetenceDemandGoal
 ;
 
-(add_rule (cog-new-stv 0.25 1.0) CompetenceDemandGoal 
-    (add_action (GroundedSchemaNode "random_simple_action") ) 
+(define random_simple_action
+    (OrLink
+        random_rotate
+        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
+        (add_action (GroundedSchemaNode "step_forward") ) 
+        (add_action (GroundedSchemaNode "step_backward") ) 
+    )
+)
+
+(add_rule (cog-new-stv 0.65 1.0) CompetenceDemandGoal 
+    random_simple_action 
     NULL_PRECONDITION 
 )
 
-(add_rule (cog-new-stv 0.75 1.0) CompetenceDemandGoal 
-    build_jump_line_ladder
+(add_rule (cog-new-stv 0.35 1.0) CompetenceDemandGoal 
+    random_build_destroy_blocks
     NULL_PRECONDITION 
 )
 

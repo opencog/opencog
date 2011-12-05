@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Ari Heljakka, Welter Luigi, Samir Araujo
  *
- * Updated: by Zhenhua Cai, on 2011-10-24
+ * Updated: by Jinhua Chua, on 2011-12-05
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
