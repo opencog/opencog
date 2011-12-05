@@ -565,25 +565,25 @@ class Chainer:
                     r.tv = obj.tv
                     self.add_rule(r)
 
-#        # Deduction
-#        for type in self.deduction_types:
-#            self.add_rule(Rule(Tree(type, 1,3), 
-#                                         [Tree(type, 1, 2),
-#                                          Tree(type, 2, 3), 
-#                                          Tree(1),
-#                                          Tree(2), 
-#                                          Tree(3)],
-#                                        name='Deduction', 
-#                                        formula = formulas.deductionSimpleFormula))
-#
-#        # Inversion
-#        for type in self.deduction_types:
-#            self.add_rule(Rule( Tree(type, 2, 1), 
-#                                         [Tree(type, 1, 2),
-#                                          Tree(1),
-#                                          Tree(2)], 
-#                                         name='Inversion', 
-#                                         formula = formulas.inversionFormula))
+        # Deduction
+        for type in self.deduction_types:
+            self.add_rule(Rule(Tree(type, 1,3), 
+                                         [Tree(type, 1, 2),
+                                          Tree(type, 2, 3), 
+                                          Tree(1),
+                                          Tree(2), 
+                                          Tree(3)],
+                                        name='Deduction', 
+                                        formula = formulas.deductionSimpleFormula))
+
+        # Inversion
+        for type in self.deduction_types:
+            self.add_rule(Rule( Tree(type, 2, 1), 
+                                         [Tree(type, 1, 2),
+                                          Tree(1),
+                                          Tree(2)], 
+                                         name='Inversion', 
+                                         formula = formulas.inversionFormula))
 
         # ModusPonens
         for type in ['ImplicationLink']:
