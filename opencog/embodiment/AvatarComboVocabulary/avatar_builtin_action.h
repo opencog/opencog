@@ -465,7 +465,7 @@ static const action_basic_description abd[] = {
     { id::say,               "say",               "->(definite_object union(definite_object indefinite_object wild_card) action_result)" },
     { id::build_block,       "build_block",       "->(contin definite_object action_result)" },
     //{ id::destroy_block_at,  "destroy_block_at",  "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::destroy_block,  "destroy_block",  "action_result" },
+    { id::destroy_block,     "destroy_block",     "->(contin action_result)" },
 
 };
 
@@ -625,6 +625,7 @@ static const action_argument_property_description aapd[] = {
 
     { id::build_block,              0,    false, false,  false,  0,  0 }, 
     { id::build_block,              1,    false, false,  false,  0,  0 }, 
+    { id::destroy_block,            0,    false, false,  false,  0,  0 }, 
 };
 
 static const action_precedence must_precede[] = {

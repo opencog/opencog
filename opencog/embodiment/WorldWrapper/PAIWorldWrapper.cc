@@ -1632,7 +1632,12 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     break;
 
     case id::destroy_block: {
+        std::stringstream ss;
+        ss << *from.begin();
 
+        action.addParameter(ActionParameter("offset",
+                                            ActionParamType::FLOAT(),
+                                            ss.str()));
     }
     break;
 

@@ -736,8 +736,8 @@ const ActionType& ActionType::BUILD_BLOCK()
 const ActionType& ActionType::DESTROY_BLOCK()
 {
     initParamTypes();
-    static const char* paramNames[] = {};
-    static ActionType* result = new ActionType(DESTROY_BLOCK_CODE, "destroy_block", EMPTY, EMPTY, paramNames, "void destroy_block(float offset)");
+    static const char* paramNames[] = {"offset"};
+    static ActionType* result = new ActionType(DESTROY_BLOCK_CODE, "destroy_block", FLOAT, EMPTY, paramNames, "void destroy_block(float offset)");
     return *result;
 }
 

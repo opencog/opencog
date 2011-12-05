@@ -95,5 +95,5 @@ drink_water(1) :=
 # Note that the spelling is case sensitive
 build_block(2) := build_block(#1 #2)
 
-destroy_block(0) := destroy_block
+destroy_block(1) := destroy_block(#1)
 
