@@ -736,11 +736,11 @@
                 (build_dark_block (NumberNode "0") )
             )
             (SequentialAndLink
-                (add_action (GroundedSchemaNode "destroy_block") ) 
+                (add_action (GroundedSchemaNode "destroy_block") (NumberNode "1") ) 
                 (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
             )
             (SequentialAndLink
-                (add_action (GroundedSchemaNode "destroy_block") ) 
+                (add_action (GroundedSchemaNode "destroy_block") (NumberNode "1") ) 
                 (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
             )
         )
