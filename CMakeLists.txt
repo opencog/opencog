@@ -26,6 +26,9 @@ ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 # add the 'lib' dir to cmake's module search path
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
+# ===============================================================
+# Detect different compilers and OS'es, tweak flags as necessary.
+
 IF (CMAKE_COMPILER_IS_GNUCXX)
   IF (APPLE) 
     SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
@@ -96,13 +99,16 @@ ENDIF (WIN32 AND NOT UNIX)
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
                 -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
 
+# ===================================================================
+# Check for existance of various required, optional packages.
+
+# Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
 
 # Required boost packages
 # hypertable requires boost iostreams
 FIND_PACKAGE(Boost 1.45 COMPONENTS date_time filesystem iostreams regex serialization signals system thread REQUIRED)
-
 
 # Optional boost packages; can build without these.
 # Arghhh. Except cmake is treating these as required, not optional. #$%**&
@@ -116,72 +122,31 @@ ELSE(Boost_PROGRAM_OPTIONS_FOUND)
 ENDIF(Boost_PROGRAM_OPTIONS_FOUND)
 
 IF(Boost_MATH_C99_FOUND)
-  MESSAGE(STATUS "Found Boost::math")
+	MESSAGE(STATUS "Found Boost::math")
 ELSE(Boost_MATH_C99_FOUND)
-  MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")  
+	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")  
 ENDIF(Boost_MATH_C99_FOUND)
 
-IF(Boost_FOUND)
-    SET(HAVE_UTIL 1)
-    SET(HAVE_COMBOREDUCT 1)
-    SET(HAVE_MOSES 1)
-    SET(HAVE_FEATURE_SELECTION 1)
-ENDIF(Boost_FOUND)
+FIND_PACKAGE(CURL)
+IF (NOT CURL_FOUND)
+	MESSAGE(WARNING "libcurl missing: needed for ubigraph module.")
+ENDIF (NOT CURL_FOUND)
 
-FIND_PACKAGE(OpenGL)
+# XML parsing library
+FIND_PACKAGE(EXPAT)
+IF (EXPAT_FOUND)
+	ADD_DEFINITIONS(-DHAVE_EXPAT)
+	SET(HAVE_EXPAT 1)
+ELSE (EXPAT_FOUND)
+	MESSAGE(STATUS "Expat XML parser missing: needed for hypertable support.")
+ENDIF (EXPAT_FOUND)
 
-IF(OPENGL_FOUND)
-  MESSAGE(STATUS "OpenGL was found.")
-ELSE(OPENGL_FOUND)
-  MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")  
-ENDIF(OPENGL_FOUND)
-
-FIND_PACKAGE(SDL)
-
-IF(SDL_FOUND)
-  MESSAGE(STATUS "SDL was found.")
-ELSE(SDL_FOUND)
-  MESSAGE(STATUS "SDL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")  
-ENDIF(SDL_FOUND)
-
-FIND_PACKAGE(SDL_gfx)
-
-IF(SDLGFX_FOUND)
-  MESSAGE(STATUS "SDL_gfx was found")
-ELSE(SDLGFX_FOUND)
-  MESSAGE(STATUS "SDL_gfx missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
-ENDIF(SDLGFX_FOUND)
-
-
-# At this time, there is no reason to build with memcached for 
-# FIND_PACKAGE(LibMemCached)
-
-# Enable the hypergraph persistence module, if unixodbc is found.
-# In principle, iODBC could be used; however, iODBC is buggy when
-# used with UTF8/unicode node names, and fails miserably. Thus, 
-# only UnixODBC is supported at this time.
-#
-# FIND_PACKAGE(IODBC QUIET)
-# IF (IODBC_FOUND)
-# 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-# 	SET(ODBC_FOUND 1)
-# 	SET(ODBC_INCLUDE_DIRS ${IODBC_INCLUDE_DIRS})
-# 	SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-# ENDIF (IODBC_FOUND)
-
-FIND_PACKAGE(UnixODBC QUIET)
-IF (UnixODBC_FOUND)
-	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-    SET(HAVE_SQL_STORAGE 1)
-	SET(ODBC_FOUND 1)
-	SET(ODBC_INCLUDE_DIRS ${UnixODBC_INCLUDE_DIRS})
-	SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-	SET(ODBC_DIR_MESSAGE "UnixODBC was found.")
-ELSE (UnixODBC_FOUND)
-	SET(ODBC_FOUND 0)
-	SET(ODBC_DIR_MESSAGE "UnixODBC was not found; persistence subsystem will not be built.\nTo over-ride, make sure UnixODBC_LIBRARIES and UnixODBC_INCLUDE_DIRS are set.")
-ENDIF (UnixODBC_FOUND)
-MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
+# Gnu Scientific Library
+FIND_PACKAGE(GSL)
+IF (GSL_FOUND)
+	ADD_DEFINITIONS(-DHAVE_GSL)
+	SET(HAVE_GSL 1)
+ENDIF (GSL_FOUND)
 
 # This is required for Guile
 FIND_LIBRARY(GMP_LIBRARY gmp)
@@ -193,23 +158,23 @@ FIND_PATH(GMP_INCLUDE_DIR gmp.h)
 FIND_PACKAGE(Guile 1.8.6)
 IF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
-    SET(HAVE_GUILE 1)
+	SET(HAVE_GUILE 1)
 	SET(GUILE_DIR_MESSAGE "Guile was found.")
 ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 
-# ZeroMQ library 2.1.2
-FIND_PACKAGE(ZMQ)
-IF (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
-	ADD_DEFINITIONS(-DHAVE_ZMQ)
-    SET(HAVE_ZMQ 1)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
-ELSE (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure ZMQ_LIBRARIES and ZMQ_INCLUDE_DIRS are set.")
-ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
-MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
+FIND_PACKAGE(OpenGL)
+
+IF(OPENGL_FOUND)
+  MESSAGE(STATUS "OpenGL was found.")
+ELSE(OPENGL_FOUND)
+  MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")  
+ENDIF(OPENGL_FOUND)
+
+# At this time, there is no reason to build with memcached for 
+# FIND_PACKAGE(LibMemCached)
 
 # Google Protobuf library
 # The protocol buffer compiler is a separately installable package, and
@@ -244,13 +209,90 @@ ENDIF (PROTOBUF_FOUND
 
 MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
+# SDL needed for the spatial tools
+FIND_PACKAGE(SDL)
 
-# Gnu Scientific Library
-FIND_PACKAGE(GSL)
-IF (GSL_FOUND)
-	ADD_DEFINITIONS(-DHAVE_GSL)
-    SET(HAVE_GSL 1)
-ENDIF (GSL_FOUND)
+IF(SDL_FOUND)
+  MESSAGE(STATUS "SDL was found.")
+ELSE(SDL_FOUND)
+  MESSAGE(STATUS "SDL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")  
+ENDIF(SDL_FOUND)
+
+FIND_PACKAGE(SDL_gfx)
+
+IF(SDLGFX_FOUND)
+  MESSAGE(STATUS "SDL_gfx was found")
+ELSE(SDLGFX_FOUND)
+  MESSAGE(STATUS "SDL_gfx missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
+ENDIF(SDLGFX_FOUND)
+
+# Enable the hypergraph persistence module, if unixodbc is found.
+# In principle, iODBC could be used; however, iODBC is buggy when
+# used with UTF8/unicode node names, and fails miserably. Thus, 
+# only UnixODBC is supported at this time.
+#
+# FIND_PACKAGE(IODBC QUIET)
+# IF (IODBC_FOUND)
+# 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
+# 	SET(ODBC_FOUND 1)
+# 	SET(ODBC_INCLUDE_DIRS ${IODBC_INCLUDE_DIRS})
+# 	SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
+# ENDIF (IODBC_FOUND)
+
+FIND_PACKAGE(UnixODBC QUIET)
+IF (UnixODBC_FOUND)
+	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
+    SET(HAVE_SQL_STORAGE 1)
+	SET(ODBC_FOUND 1)
+	SET(ODBC_INCLUDE_DIRS ${UnixODBC_INCLUDE_DIRS})
+	SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
+	SET(ODBC_DIR_MESSAGE "UnixODBC was found.")
+ELSE (UnixODBC_FOUND)
+	SET(ODBC_FOUND 0)
+	SET(ODBC_DIR_MESSAGE "UnixODBC was not found; persistence subsystem will not be built.\nTo over-ride, make sure UnixODBC_LIBRARIES and UnixODBC_INCLUDE_DIRS are set.")
+ENDIF (UnixODBC_FOUND)
+MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
+
+# These are required for building the embodiment code
+FIND_PACKAGE(XercesC)
+IF (XERCESC_FOUND)
+ # using COMPARE_VERSION_STRINGS instead of COMPARE_VERSION for staying compatible with cmake 2.4
+ IF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+   MESSAGE(STATUS "Found Xerces ${XERCESC_VERSION} -- ${XERCESC_LIBRARIES}")
+   INCLUDE_DIRECTORIES(${XERCESC_INCLUDE})
+   SET(XERCESC_VERSION_OK TRUE)
+ ELSE ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+   MESSAGE(WARNING "Xerces ${XERCESC_VERSION} not supported. Only versions 2.* are supported. Embodiment won't be built.")
+   SET(XERCESC_VERSION_OK FALSE)
+ ENDIF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+ENDIF (XERCESC_FOUND)
+
+# XML-RPC, used by the ubigraph module
+FIND_PACKAGE(XMLRPC COMPONENTS client)
+IF (NOT XMLRPC_FOUND)
+    MESSAGE(WARNING "libxmlrpc missing: needed for ubigraph module.")
+ENDIF (NOT XMLRPC_FOUND)
+
+# ZeroMQ library 2.1.2
+FIND_PACKAGE(ZMQ)
+IF (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
+	ADD_DEFINITIONS(-DHAVE_ZMQ)
+    SET(HAVE_ZMQ 1)
+	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
+ELSE (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
+	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure ZMQ_LIBRARIES and ZMQ_INCLUDE_DIRS are set.")
+ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
+MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
+
+# ==========================================================
+# Decide what to build, based on the packages found.
+
+IF(Boost_FOUND)
+    SET(HAVE_UTIL 1)
+    SET(HAVE_COMBOREDUCT 1)
+    SET(HAVE_MOSES 1)
+    SET(HAVE_FEATURE_SELECTION 1)
+ENDIF(Boost_FOUND)
 
 IF(GSL_FOUND)
     SET(HAVE_ATOMSPACE 1)
@@ -270,15 +312,6 @@ ELSE(HAVE_ATOMSPACE)
     ENDIF(OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 ENDIF(HAVE_ATOMSPACE)
 
-# XML parsing library
-FIND_PACKAGE(EXPAT)
-IF (EXPAT_FOUND)
-	ADD_DEFINITIONS(-DHAVE_EXPAT)
-    SET(HAVE_EXPAT 1)
-ELSE (EXPAT_FOUND)
-	MESSAGE(STATUS "Expat XML parser missing: needed for hypertable support.")
-ENDIF (EXPAT_FOUND)
-
 IF(EXPAT_FOUND AND HAVE_ATOMSPACE)
     SET(HAVE_PERSIST 1)
 ENDIF(EXPAT_FOUND AND HAVE_ATOMSPACE)
@@ -291,48 +324,15 @@ IF(HAVE_SERVER) # because web depends on server
     SET(HAVE_WEB 1)
 ENDIF(HAVE_SERVER)
 
-# These are required for building the embodiment code
-FIND_PACKAGE(XercesC)
-IF (XERCESC_FOUND)
- # using COMPARE_VERSION_STRINGS instead of COMPARE_VERSION for staying compatible with cmake 2.4
- IF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-   MESSAGE(STATUS "Found Xerces ${XERCESC_VERSION} -- ${XERCESC_LIBRARIES}")
-   INCLUDE_DIRECTORIES(${XERCESC_INCLUDE})
-   SET(XERCESC_VERSION_OK TRUE)
- ELSE ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-   MESSAGE(WARNING "Xerces ${XERCESC_VERSION} not supported. Only versions 2.* are supported. Embodiment won't be built.")
-   SET(XERCESC_VERSION_OK FALSE)
- ENDIF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-
-ENDIF (XERCESC_FOUND)
 
 IF(XERCESC_VERSION_OK AND EXPAT_FOUND AND HAVE_PROTOBUF)
    SET(HAVE_EMBODIMENT 1)
 ENDIF(XERCESC_VERSION_OK AND EXPAT_FOUND AND HAVE_PROTOBUF)
 
-# Not used at this time, its incompatible with the current code.
-#
-# FIND_PACKAGE(LinkGrammar)
-# IF (LINK_GRAMMAR_FOUND)
-# 	ADD_DEFINITIONS(-DHAVE_LINK_GRAMMAR)
-# 	ADD_DEFINITIONS(-DLINK_GRAMMAR_DATA_DIR=\\"${LINK_GRAMMAR_DATA_DIR}/\\")
-# ENDIF (LINK_GRAMMAR_FOUND)
-
-# XML-RPC, used by the ubigraph module
-FIND_PACKAGE(XMLRPC COMPONENTS client)
-IF (NOT XMLRPC_FOUND)
-    MESSAGE(WARNING "libxmlrpc missing: needed for ubigraph module.")
-ENDIF (NOT XMLRPC_FOUND)
-FIND_PACKAGE(CURL)
-IF (NOT CURL_FOUND)
-    MESSAGE(WARNING "libcurl missing: needed for ubigraph module.")
-ENDIF (NOT CURL_FOUND)
-IF (CURL_FOUND)
-    IF (XMLRPC_FOUND)
-        ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
-        SET(HAVE_UBIGRAPH 1)
-    ENDIF (XMLRPC_FOUND)
-ENDIF (CURL_FOUND)
+IF (CURL_FOUND AND XMLRPC_FOUND)
+	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
+	SET(HAVE_UBIGRAPH 1)
+ENDIF (CURL_FOUND AND XMLRPC_FOUND)
 
 # At this time, there is no reason to build with memcached for
 # any "normal" use, so just stub it out.
@@ -387,6 +387,7 @@ IF(HAVE_ATOMSPACE)
     ENDIF(CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
 ENDIF(HAVE_ATOMSPACE)
 
+# ===================================================================
 # global includes
 
 # set confdir and datadir
@@ -584,7 +585,7 @@ SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTIO
 SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
 SUMMARY_ADD("Spatial" "Spatial tools" HAVE_SPATIAL)
 SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
-SUMMARY_ADD("Dim. Embedding" "Module for computing dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
+SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace and PLN's BIT" HAVE_UBIGRAPH)
 SUMMARY_ADD("Hypertable" "Use HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("WebInterface" "Web server and REST API" HAVE_WEB)
