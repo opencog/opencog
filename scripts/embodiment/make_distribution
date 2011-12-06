@@ -1,4 +1,4 @@
-#!/usr/bin/tclsh
+#!/usr/bin/env tclsh
 
 # Usage:
 # make_distribution [<bin dir> [<tag name>] [<type of distribution = "dev" or "user">]]

@@ -1,4 +1,4 @@
-#!/usr/bin/tclsh 
+#!/usr/bin/env tclsh 
 
 
 # To run this script just execute it in the command line. It will

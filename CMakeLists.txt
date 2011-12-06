@@ -30,7 +30,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 # Detect different compilers and OS'es, tweak flags as necessary.
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-  IF (APPLE) 
+  IF (APPLE)
     SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
     SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
@@ -42,7 +42,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_C_FLAGS_DEBUG "-g -fstack-protector -pg")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")
   ENDIF (APPLE)
-  
+
   # 1) -Wno-variadic-macros is to avoid warnings regarding using
   # variadic in macro OC_ASSERT (the warning warns that this is only
   # available from C99, lol!)
@@ -118,13 +118,13 @@ FIND_PACKAGE(Boost 1.45 COMPONENTS math_c99 QUIET)
 IF(Boost_PROGRAM_OPTIONS_FOUND)
   MESSAGE(STATUS "Found Boost::program_options")
 ELSE(Boost_PROGRAM_OPTIONS_FOUND)
-  MESSAGE(STATUS "Boost program_options missing: needed for Spatial tools (MapTools).")  
+  MESSAGE(STATUS "Boost program_options missing: needed for Spatial tools (MapTools).")
 ENDIF(Boost_PROGRAM_OPTIONS_FOUND)
 
 IF(Boost_MATH_C99_FOUND)
 	MESSAGE(STATUS "Found Boost::math")
 ELSE(Boost_MATH_C99_FOUND)
-	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")  
+	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")
 ENDIF(Boost_MATH_C99_FOUND)
 
 FIND_PACKAGE(CURL)
@@ -167,13 +167,13 @@ MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 
 FIND_PACKAGE(OpenGL)
 
-IF(OPENGL_FOUND)
-  MESSAGE(STATUS "OpenGL was found.")
-ELSE(OPENGL_FOUND)
-  MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")  
-ENDIF(OPENGL_FOUND)
+IF (OPENGL_FOUND)
+	MESSAGE(STATUS "OpenGL was found.")
+ELSE (OPENGL_FOUND)
+	MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
+ENDIF (OPENGL_FOUND)
 
-# At this time, there is no reason to build with memcached for 
+# At this time, there is no reason to build with memcached for
 # FIND_PACKAGE(LibMemCached)
 
 # Google Protobuf library
@@ -212,23 +212,33 @@ MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 # SDL needed for the spatial tools
 FIND_PACKAGE(SDL)
 
-IF(SDL_FOUND)
-  MESSAGE(STATUS "SDL was found.")
-ELSE(SDL_FOUND)
-  MESSAGE(STATUS "SDL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")  
-ENDIF(SDL_FOUND)
+IF (SDL_FOUND)
+	MESSAGE(STATUS "SDL was found.")
+ELSE (SDL_FOUND)
+	MESSAGE(STATUS "SDL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
+ENDIF (SDL_FOUND)
 
 FIND_PACKAGE(SDL_gfx)
 
-IF(SDLGFX_FOUND)
-  MESSAGE(STATUS "SDL_gfx was found")
-ELSE(SDLGFX_FOUND)
-  MESSAGE(STATUS "SDL_gfx missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
-ENDIF(SDLGFX_FOUND)
+IF (SDLGFX_FOUND)
+	MESSAGE(STATUS "SDL_gfx was found")
+ELSE (SDLGFX_FOUND)
+	MESSAGE(STATUS "SDL_gfx missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
+ENDIF (SDLGFX_FOUND)
+
+FIND_PACKAGE(TCL)
+
+# /usr/bin/tclsh is expected for some embodiment tests, but is
+# not otherwise important for anything...
+IF (TCL_TCLSH)
+	MESSAGE(STATUS "TCL shell was found here: ${TCL_TCLSH}")
+ELSE (TCL_TCLSH)
+	MESSAGE(STATUS "TCL shell missing: needed for some embodiment tests.")
+ENDIF (TCL_TCLSH)
 
 # Enable the hypergraph persistence module, if unixodbc is found.
 # In principle, iODBC could be used; however, iODBC is buggy when
-# used with UTF8/unicode node names, and fails miserably. Thus, 
+# used with UTF8/unicode node names, and fails miserably. Thus,
 # only UnixODBC is supported at this time.
 #
 # FIND_PACKAGE(IODBC QUIET)
@@ -301,7 +311,7 @@ IF(GSL_FOUND)
     SET(HAVE_DIMEMBED 1)
 ENDIF(GSL_FOUND)
 
-# Always want to build spatial dir for the AtomSpace 
+# Always want to build spatial dir for the AtomSpace
 # as it depends on libSpaceMap and guards against compiling
 # stuff requiring opengl and sdl in it's own CMakeLists.txt
 IF(HAVE_ATOMSPACE)
@@ -379,7 +389,7 @@ IF(HAVE_ATOMSPACE)
        STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
        IF ("${PYTHON_DEST}" STREQUAL "")
            MESSAGE(FATAL_ERROR "Python destination dir not found")
-       ELSE ("${PYTHON_DEST}" STREQUAL "") 
+       ELSE ("${PYTHON_DEST}" STREQUAL "")
            MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
        ENDIF ("${PYTHON_DEST}" STREQUAL "")
     ELSE(CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
@@ -559,14 +569,14 @@ IF (DOXYGEN_FOUND)
 		COMMAND bzr revno
 		OUTPUT_VARIABLE BZR_REVNO OUTPUT_STRIP_TRAILING_WHITESPACE)
 	CONFIGURE_FILE(
-		${PROJECT_SOURCE_DIR}/doc/doxygen.conf.in 
+		${PROJECT_SOURCE_DIR}/doc/doxygen.conf.in
 		${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-	ADD_CUSTOM_TARGET ( 
+	ADD_CUSTOM_TARGET (
 		doxygen
 		COMMAND ${DOXYGEN} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		COMMENT "Generating documentation"
-	) 
+	)
 ELSE (DOXYGEN_FOUND)
     MESSAGE(STATUS "Doxygen not found, you won't be able to generate API documentation.")
 ENDIF (DOXYGEN_FOUND)
