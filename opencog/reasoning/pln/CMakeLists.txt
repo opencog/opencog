@@ -13,7 +13,7 @@ ADD_LIBRARY (pln SHARED
 #	PLNShell.cc
 	PLNGlobals.cc
 #	Tester.cc
-    Testing.cc
+	Testing.cc
 	ForwardChainer.cc
 	BackChainingAgent
 	ForwardChainingAgent
@@ -76,10 +76,15 @@ SET(PLN_LINK_LIBS
 	atomspace
 	util
 	#${Boost_SIGNALS_LIBRARY}
-    logic_wrapper
-    PythonModule
-    ${PYTHON_LIBRARIES}
 )
+
+IF (HAVE_CYTHON)
+	SET(PLN_LINK_LIBS
+		logic_wrapper
+		PythonModule
+		${PYTHON_LIBRARIES}
+	${PLN_LINK_LIBS})
+ENDIF (HAVE_CYTHON)
 
 IF (HAVE_GUILE)
 	SET(PLN_LINK_LIBS smob ${PLN_LINK_LIBS})
