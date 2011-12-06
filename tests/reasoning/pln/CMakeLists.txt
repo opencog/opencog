@@ -18,15 +18,22 @@ LINK_DIRECTORIES (
 	${PROJECT_BINARY_DIR}/opencog/server
 	${PROJECT_BINARY_DIR}/opencog/reasoning/pln
 	${PROJECT_BINARY_DIR}/opencog/util
-    ${Boost_LIBRARY_DIRS}
+	${Boost_LIBRARY_DIRS}
 )
 
-LINK_LIBRARIES (
-    pln
-    server
-    PythonModule
-    ${PYTHON_LIBRARIES}
+SET(PLN_LINK_LIBS
+	pln
+	server
 )
+
+IF (HAVE_CYTHON)
+	SET(PLN_LINK_LIBS
+		PythonModule
+		${PYTHON_LIBRARIES}
+	${PLN_LINK_LIBS})
+ENDIF (HAVE_CYTHON)
+
+LINK_LIBRARIES (${PLN_LINK_LIBS})
 
 ADD_CXXTEST(AtomSpaceWrapperUTest)
 ADD_CXXTEST(BITNodeUTest)
@@ -34,16 +41,16 @@ ADD_CXXTEST(ASSOCUTest)
 ADD_CXXTEST(PLNUtilsUTest)
 ADD_CXXTEST(PLNSchemeWrapperUTest)
 
-# At this point, PLNUTest requires libexpat or the Scheme subsystem since axioms 
-# are loaded from files.
+# At this point, PLNUTest requires either libexpat or the Scheme
+# subsystem since axioms are loaded from files.
 IF (EXPAT_FOUND OR GUILE_FOUND)
-        # Nil: PLNUTest and ForwardChainingUTest always fail and take
-        # a very long time so I disable them till they get fixed
-    	ADD_CXXTEST(PLNUTest)
-    # IF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
-        # ADD_CXXTEST(ForwardChainingUTest)
-    ADD_CXXTEST(DeterminismUTest)
-    #ENDIF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
+	# Nil: PLNUTest and ForwardChainingUTest always fail and take
+	# a very long time so I disable them till they get fixed
+	ADD_CXXTEST(PLNUTest)
+	# IF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
+		# ADD_CXXTEST(ForwardChainingUTest)
+	ADD_CXXTEST(DeterminismUTest)
+	# ENDIF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (EXPAT_FOUND OR GUILE_FOUND)
 
 ADD_SUBDIRECTORY(formulas)
