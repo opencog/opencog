@@ -129,7 +129,7 @@ ENDIF(Boost_MATH_C99_FOUND)
 
 FIND_PACKAGE(CURL)
 IF (NOT CURL_FOUND)
-	MESSAGE(WARNING "libcurl missing: needed for ubigraph module.")
+	MESSAGE(STATUS "libcurl missing: needed for ubigraph module.")
 ENDIF (NOT CURL_FOUND)
 
 # XML parsing library
@@ -165,6 +165,28 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 
+# Hypertable library, for atomspace persistence
+FIND_PACKAGE(HyperTable)
+IF (HYPERTABLE_FOUND)
+	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
+	SET(HAVE_HYPERTABLE 1)
+	MESSAGE(STATUS "Hypertable was found.")
+
+	# Don't bother looking for SIGAR unlesss hyperable was found.
+	FIND_PACKAGE(SIGAR)
+	IF (SIGAR_FOUND)
+	ELSE (SIGAR_FOUND)
+        MESSAGE(WARNING "SIGAR was not found! It is needed for Hypertable support.")
+	ENDIF (SIGAR_FOUND)
+
+ELSE (HYPERTABLE_FOUND)
+	# The FindHypertable.cmake file already prints a message.
+	# MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\n   To over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS\n   are set.")
+	MESSAGE(STATUS "Hypertable not found; the experimental distributed persistence DB needs it.")
+
+ENDIF (HYPERTABLE_FOUND)
+
+# OpenGL needed for visualization...
 FIND_PACKAGE(OpenGL)
 
 IF (OPENGL_FOUND)
@@ -208,6 +230,33 @@ ENDIF (PROTOBUF_FOUND
 		AND PROTOBUF_PROTOC_EXECUTABLE)
 
 MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
+
+# Python bindings using Cython
+# Needed for testing
+FIND_PACKAGE(PythonInterp)
+FIND_PACKAGE(PythonLibs)
+# Cython is used to generate bindings
+FIND_PROGRAM(CYTHON_EXECUTABLE cython)
+FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+IF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
+   # find python destination dir for python bindings
+   ADD_DEFINITIONS(-DHAVE_CYTHON)
+   SET(HAVE_CYTHON 1)
+   EXECUTE_PROCESS(
+	   COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
+		OUTPUT_VARIABLE PYTHON_DEST
+   )
+
+   # replace new line at end
+   STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+   IF ("${PYTHON_DEST}" STREQUAL "")
+	   MESSAGE(FATAL_ERROR "Python destination dir not found")
+   ELSE ("${PYTHON_DEST}" STREQUAL "")
+	   MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+   ENDIF ("${PYTHON_DEST}" STREQUAL "")
+ELSE (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
+	MESSAGE(STATUS "Neither Cython or Python libraries not found.")
+ENDIF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
 
 # SDL needed for the spatial tools
 FIND_PACKAGE(SDL)
@@ -280,7 +329,7 @@ ENDIF (XERCESC_FOUND)
 # XML-RPC, used by the ubigraph module
 FIND_PACKAGE(XMLRPC COMPONENTS client)
 IF (NOT XMLRPC_FOUND)
-    MESSAGE(WARNING "libxmlrpc missing: needed for ubigraph module.")
+    MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
 ENDIF (NOT XMLRPC_FOUND)
 
 # ZeroMQ library 2.1.2
@@ -349,53 +398,6 @@ ENDIF (CURL_FOUND AND XMLRPC_FOUND)
 # IF (LIBMEMCACHED_FOUND)
 #	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
 # ENDIF (LIBMEMCACHED_FOUND)
-
-# Hypertable library
-FIND_PACKAGE(HyperTable)
-IF (HYPERTABLE_FOUND)
-	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
-    SET(HAVE_HYPERTABLE 1)
-	MESSAGE(STATUS "Hypertable was found.")
-
-	# Don't bother looking for SIGAR unlesss hyperable was found.
-	FIND_PACKAGE(SIGAR)
-	IF (SIGAR_FOUND)
-	ELSE (SIGAR_FOUND)
-        MESSAGE(WARNING "SIGAR was not found! It is needed for Hypertable support.")
-	ENDIF (SIGAR_FOUND)
-
-ELSE (HYPERTABLE_FOUND)
-	MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\nTo over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS are set.")
-ENDIF (HYPERTABLE_FOUND)
-
-# Python bindings using Cython
-IF(HAVE_ATOMSPACE)
-    # Needed for testing
-    FIND_PACKAGE(PythonInterp)
-    FIND_PACKAGE(PythonLibs)
-    # Cython is used to generate bindings
-    FIND_PROGRAM(CYTHON_EXECUTABLE cython)
-    FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
-    IF(CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
-       # find python destination dir for python bindings
-       ADD_DEFINITIONS(-DHAVE_CYTHON)
-       SET(HAVE_CYTHON 1)
-       EXECUTE_PROCESS(
-           COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
-            OUTPUT_VARIABLE PYTHON_DEST
-       )
-
-       # replace new line at end
-       STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-       IF ("${PYTHON_DEST}" STREQUAL "")
-           MESSAGE(FATAL_ERROR "Python destination dir not found")
-       ELSE ("${PYTHON_DEST}" STREQUAL "")
-           MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-       ENDIF ("${PYTHON_DEST}" STREQUAL "")
-    ELSE(CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
-        MESSAGE(STATUS "Cython or Python libraries not found.")
-    ENDIF(CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
-ENDIF(HAVE_ATOMSPACE)
 
 # ===================================================================
 # global includes
