@@ -1,3 +1,13 @@
+#
+# Master Opencog CMake file.
+#
+# General organization:
+# -- check for different compilers, OS'es
+# -- search for various required & optional libraries/tools
+# -- decide what to build based on above results.
+# -- configure various config files.
+# -- print pretty summary
+#
 include(lib/Summary.cmake)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
