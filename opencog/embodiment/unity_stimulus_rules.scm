@@ -163,7 +163,11 @@
 
 ; Get a list of rules that maps to given action name
 (define (get_stimulus_rules_from_map stimulus_name)
-    (cdr (assoc stimulus_name stimulus_rules_map))
+    (if 
+        (list? (assoc stimulus_name stimulus_rules_map))
+        (cdr (assoc stimulus_name stimulus_rules_map))
+        (list)
+    )
 )
 
 ; Find stimulus rules according to stimulus instance handle.
@@ -553,8 +557,9 @@
         ; Each time when a new rule is added, it should be appended in the map
         ; The format is: (action_name rule1 rule2 ...)
         (list "touch" TouchHeavilyRule)
-        ; TODO for new rules
-        (list)
+        ; TODO add new rules if there are new stimulus to be applied.
+        ; (list "kick" SomeKickRule)
+        ; (list "hug" SomeHugRule)
     )
 )
 
