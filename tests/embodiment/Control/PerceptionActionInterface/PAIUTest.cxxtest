@@ -25,6 +25,7 @@
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/EventResponder.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/EventDetector.h>
 #include "AvatarInterfaceMock.h"
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "ActionPlanSenderMock.h"
@@ -229,6 +230,7 @@ public:
         PAI pai(*atomSpace, sender, avatarInterface, 10);
         avatarInterface.setPAI(&pai);
         new EventResponder(pai , *atomSpace);
+	new EventDetector(pai , *atomSpace);
         // Check Action Plan status before creating them, according with the passed "nextActionPlanId" argument to the constructor
         TS_ASSERT(!pai.hasPlanFailed("0"));
         TS_ASSERT(!pai.hasPlanFailed("9"));
