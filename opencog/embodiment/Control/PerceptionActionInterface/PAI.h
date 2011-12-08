@@ -470,9 +470,9 @@ private:
 
     //! Supported method for processAvatarSignal
     Handle processAgentType(const string& agentTypeStr, const string& internalAgentId);
-    //! Supported method for processAvatarSignal
-    Handle processAgentActionParameter(DOMElement* paramElement, const std::string& actionNameStr, Handle& actionInstancenode);
-    //! Supported method for processAvatarSignal
+    //! Support method from processAvatarSignal
+    Handle processAgentActionParameter(DOMElement* paramElement,const std::string& actionNameStr, Handle& actionInstancenode, std::string&changedStateName,  Handle& newStateValNode, std::vector<Handle> &actionConcernedHandles);
+    //! Support method from processAvatarSignal
     void processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr, const string& instanceNameStr, DOMElement* signal);
     void processAgentActionPlanResult(char* agentID, unsigned long tsValue, const string& name, char* planIdStr, DOMElement* signal);
 
@@ -510,6 +510,22 @@ private:
      *        or actions is done within PsiActionSelectionAgent and dialog_system.scm
      */
     void processInstruction(DOMElement * element);
+
+    /**
+     * @param signal The state-info element to be processed.
+     *
+     * @note When a robot is loaded, there are many existing states of the objects in the virtual world.
+     *       This function is to save all this existing states into the Atomspace.
+     *       It will only runs for one time, just at the very beginning of a robot.
+     */
+    void processExistingStateInfo(DOMElement* element);
+
+    /**
+     * @param element The param element to be processed.
+     *
+     * @note Get value hanle from a param doc
+     */
+    Handle getParmValueHanleFromXMLDoc(DOMElement* paramElement);
 
     /** 
      * Extract double attributes from XML message.

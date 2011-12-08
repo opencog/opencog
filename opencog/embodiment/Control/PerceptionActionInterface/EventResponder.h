@@ -57,7 +57,8 @@ class EventResponder
 public:
     static EventResponder* getInstance();
     EventResponder(PAI& _pai , AtomSpace& _atomSpace);
-    ~EventResponder();
+    void destroy();
+
     void response(std::string actionName, Handle instanceNode, Handle actorNode, Handle targetNode, std::vector<Handle> actionparams);
 
 private:
@@ -65,6 +66,7 @@ private:
     std::map<std::string, ParaFunc_Ptr> paraFuncMap;
     PAI& pai;
     AtomSpace& atomSpace;
+    ~EventResponder();
 
     void ActionParametersprocess(std::string actionName, Handle instanceNode, Handle actorNode, Handle targetNode, std::vector<Handle> actionparams);
 

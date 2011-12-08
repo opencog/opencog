@@ -39,6 +39,7 @@
                 <xsd:element name="instruction" type="oc:AvatarInstructionType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="communication" type="oc:CommunicationType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="terrain-info" type="oc:TerrainInfoType" minOccurs="1" maxOccurs="1"/>
+		<xsd:element name="state-info" type="oc:StateInfoType" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>
         </xsd:sequence>
         <xsd:attribute name="request-id" type="xsd:string" use="optional"/>
@@ -450,6 +451,25 @@
                 <xsd:attribute name="timestamp" type="xsd:string" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
+    </xsd:complexType>
+
+
+    <!-- state-info -->
+    <xsd:element name="state-info" type="oc:StateInfoType"/>
+
+    <xsd:annotation>
+        <xsd:documentation>
+        Save the existing states of objects in the virtual world when oac is loaded.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType name="StateInfoType">
+	<xsd:sequence>
+		<xsd:element name="state-value" type="oc:ParamType" minOccurs="1" maxOccurs="1"/> 
+ 	</xsd:sequence>
+	<xsd:attribute name="object-id" type="xsd:string" use="required"/>  
+	<xsd:attribute name="object-type" type="common:EntityDataType" use="required"/>
+	<xsd:attribute name="state-name" type="xsd:string" use="required"/>  
+	<xsd:attribute name="timestamp" type="xsd:string" use="required"/>
     </xsd:complexType>
 
 </xsd:schema>

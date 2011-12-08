@@ -58,7 +58,13 @@ EventResponder::EventResponder(PAI& _pai , AtomSpace& _atomSpace):
 
 EventResponder::~EventResponder()
 {
-    delete EventResponder::instance;
+
+}
+
+void EventResponder::destroy()
+{
+    if (EventResponder::instance != NULL)
+        delete EventResponder::instance;
 }
 
 // TODO: it now can only solve one single action, not exactly an event.

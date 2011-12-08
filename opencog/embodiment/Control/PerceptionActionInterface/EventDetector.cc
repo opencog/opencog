@@ -28,8 +28,76 @@
  */
 
 #include "EventDetector.h"
+#include "opencog/guile/SchemeSmob.h"
+#include <iostream>
+#include <fstream>
 
 using namespace opencog::pai;
 using namespace opencog::control;
 using namespace opencog;
 
+EventDetector* EventDetector::instance = NULL;
+
+EventDetector* EventDetector::getInstance()
+{
+    return EventDetector::instance;
+}
+
+EventDetector::EventDetector(PAI& _pai , AtomSpace& _atomSpace):
+    pai(_pai),atomSpace(_atomSpace)
+{
+    // EventDetector is allowed only one in an oac
+    if (EventDetector::instance != NULL)
+    {
+        logger().info("There is already an EventResponder, you cannot create another one!\n");
+        return;
+    }
+
+    EventDetector::instance = this;
+
+}
+
+EventDetector::~EventDetector()
+{
+
+}
+
+void EventDetector::destroy()
+{
+    exportActionConcernedNodesToSCM();
+
+    if (EventDetector::instance != NULL)
+        delete EventDetector::instance;
+}
+
+// First, we collect all the action corpra from PAI
+void EventDetector::actionCorporaCollect(std::vector<Handle> actionConcernedHandles)
+{
+    std::vector<Handle>::iterator iter = actionConcernedHandles.begin();
+    for (; iter != actionConcernedHandles.end(); iter ++)
+    {
+        insertNodeToScmMap((Handle)(*iter));
+    }
+}
+
+// insert a node into allNodesForScmActions
+void EventDetector::insertNodeToScmMap(Handle node)
+{
+    if( allNodesForScmActions.find(node.value()) ==  allNodesForScmActions.end())
+        allNodesForScmActions.insert(map<UUID, Handle>::value_type(node.value(),node));
+}
+
+void EventDetector::exportActionConcernedNodesToSCM()
+{
+    std::fstream fscm;
+    fscm.open(ActionsExportToScmFileName,ios::out | ios::app);
+    std::map<UUID,Handle>::iterator iter = allNodesForScmActions.begin();
+    std::string nodeStr;
+
+    for (; iter != allNodesForScmActions.end(); ++iter)
+    {
+        nodeStr = SchemeSmob::to_string(iter->second);
+        fscm << nodeStr << endl;
+    }
+    fscm.close();
+}

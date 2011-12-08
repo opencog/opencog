@@ -212,6 +212,8 @@
 	(apply cog-new-node (append (list 'AccessoryNode) x)))
 (define (HumanoidNode . x)
 	(apply cog-new-node (append (list 'HumanoidNode) x)))
+(define (UnknownObjectNode . x)
+	(apply cog-new-node (append (list 'UnknownObjectNode) x)))
 (define (AtTimeLink . x)
 	(apply cog-new-link (append (list 'AtTimeLink) x)))
 (define (TimeNode . x)

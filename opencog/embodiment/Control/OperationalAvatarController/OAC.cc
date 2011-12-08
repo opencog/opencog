@@ -101,6 +101,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     this->pai = new PAI(*atomSpace, *planSender, *pet);
     new EventResponder(*pai , *atomSpace);
+    new EventDetector(*pai , *atomSpace);
     this->procedureRepository = new ProcedureRepository(*pai);
     this->procedureInterpreter = new ProcedureInterpreter(*pai);
 
@@ -480,6 +481,8 @@ OAC::~OAC()
     delete (planSender);
     delete (petMessageSender);
     delete (predicatesUpdater);
+    EventResponder::getInstance()->destroy();
+    EventDetector::getInstance()->destroy();
     delete (pai);
     delete (procedureRepository);
     delete (pet);

@@ -55,6 +55,8 @@
 #define DEMAND_ELEMENT           "demand"
 #define PROPERTIES_ELEMENT       "properties"
 #define PROPERTY_ELEMENT         "property"
+#define STATE_INFO_ELEMENT         "state-info"
+#define STATE_VALUE_ELEMENT         "state-value"
 
 // xml attributes
 #define PET_ID_ATTRIBUTE                     "id"
@@ -85,6 +87,7 @@
 #define OWNER_NAME_ATTRIBUTE                 "owner-name"
 #define OBJECT_ID_ATTRIBUTE                  "object-id"
 #define AVAILABLE_ATTRIBUTE                  "available"
+#define OBJECT_TYPE_ATTRIBUTE                "object-type"
 #define STATUS_ATTRIBUTE                     "status"
 #define REMOVE_ATTRIBUTE                     "remove"
 #define LENGTH_ATTRIBUTE                     "length"
@@ -113,6 +116,7 @@
 #define GLOBAL_POS_Y_ATTRIBUTE   "global-position-y"
 #define GLOBAL_POS_OFFSET_ATTRIBUTE   "global-position-offset"
 #define GLOBAL_FLOOR_HEIGHT_ATTRIBUTE "global-floor-height"
+#define STATE_NAME_ATTRIBUTE "state-name"
 
 // xml object types
 #define PET_OBJECT_TYPE          "pet"

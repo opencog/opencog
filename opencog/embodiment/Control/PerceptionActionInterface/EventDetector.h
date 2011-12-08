@@ -32,12 +32,35 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include "PAI.h"
+#include <map>
+
+using namespace std;
 
 namespace opencog { namespace pai {
 
+#define ActionsExportToScmFileName "ActionsScmCorpus"
+
 class EventDetector
 {
+public:
+    static EventDetector* getInstance();
+    EventDetector(PAI& _pai , AtomSpace& _atomSpace);
+    void destroy();
 
+    // collect action corpora from PAI
+    // the actionConcernedHandles contains all the nodes concerned an action
+    void actionCorporaCollect(std::vector<Handle> actionConcernedHandles);
+    void exportActionConcernedNodesToSCM();
+
+private:
+    static EventDetector* instance;
+    std::map<UUID,Handle> allNodesForScmActions;
+    PAI& pai;
+    AtomSpace& atomSpace;
+    ~EventDetector();
+
+    // insert a node into allNodesForScmActions
+    void insertNodeToScmMap(Handle node);
 
 
 };// class EventDetector
