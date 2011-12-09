@@ -59,7 +59,6 @@ ForgettingAgent::ForgettingAgent()
     // Provide a logger, but disable it initially
     log = NULL;
     setLogger(new opencog::Logger("ForgettingAgent.log", Logger::WARN, true));
-    log->disable();
 }
 
 ForgettingAgent::~ForgettingAgent()

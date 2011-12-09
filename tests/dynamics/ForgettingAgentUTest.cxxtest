@@ -103,8 +103,7 @@ public:
         cogserver.registerAgent(ForgettingAgent::info().id, &factory);
         agent = static_cast<ForgettingAgent*>(cogserver.createAgent(ForgettingAgent::info().id, true));
         logger().setLevel(Logger::FINE);
-	    logger().setPrintToStdoutFlag(true);
-        logger().enable();
+        logger().setPrintToStdoutFlag(true);
     }
 
     ~ForgettingAgentUTest() {

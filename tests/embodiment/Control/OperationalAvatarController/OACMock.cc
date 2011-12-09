@@ -38,7 +38,6 @@ void OACMock::setConfig() {
     // Set logger level
     logger().setLevel(Logger::FINE);
     logger().setPrintToStdoutFlag(true);
-    logger().enable();
 
     // Load config file and reset some configurations  
     config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);

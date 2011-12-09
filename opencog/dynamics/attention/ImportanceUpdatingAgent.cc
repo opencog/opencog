@@ -102,7 +102,6 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     // Provide a logger, but disable it initially
     log = NULL;
     setLogger(new opencog::Logger("ImportanceUpdatingAgent.log", Logger::WARN, true));
-    log->disable();
 }
 
 ImportanceUpdatingAgent::~ImportanceUpdatingAgent()

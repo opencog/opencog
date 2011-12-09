@@ -175,18 +175,10 @@ public:
     bool isDebugEnabled() const;
     bool isFineEnabled() const;
 
-    /**
-     * Enable logging messages.
-     */
-    void enable();
-
-    /**
-     * Disable logging messages.
-     */
-    void disable();
-
 #ifdef ASYNC_LOGGING
     void flush();
+#else
+    inline void flush() {}
 #endif
 
 private:
@@ -212,6 +204,17 @@ private:
     void writingLoop();
     void writeMsg(std::string &msg);
 #endif
+
+    /**
+     * Enable logging messages.
+     */
+    void enable();
+
+    /**
+     * Disable logging messages.
+     */
+    void disable();
+
 }; // class
 
 // singleton instance (following meyer's design pattern)

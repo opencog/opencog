@@ -141,7 +141,6 @@ public:
         agent = static_cast<HebbianUpdatingAgent*>(cogserver.createAgent(HebbianUpdatingAgent::info().id, true));
         logger().setLevel(Logger::FINE);
         logger().setPrintToStdoutFlag(true);
-        logger().enable();
     }
 
     ~HebbianUpdatingAgentUTest() {

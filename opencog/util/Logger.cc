@@ -157,7 +157,10 @@ void Logger::writingLoop()
 void Logger::flush()
 {
     while (!pendingMessagesToWrite.empty())
+    {
+        pthread_yield();
         usleep(100);
+    }
 }
 #endif
 
@@ -197,7 +200,7 @@ Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
 {
     this->fileName.assign(fname);
     this->currentLevel = level;
-    this->backTraceLevel = getLevelFromString(opencog::config()["BACK_TRACE_LOG_LEVEL"]); 
+    this->backTraceLevel = getLevelFromString(opencog::config()["BACK_TRACE_LOG_LEVEL"]);
     this->timestampEnabled = tsEnabled;
     this->printToStdout = false;
 
@@ -237,7 +240,7 @@ void Logger::set(const Logger& log)
 
     this->logEnabled = log.logEnabled;
     this->f = log.f;
-    
+
 #ifdef ASYNC_LOGGING
     startWriteLoop();
 #endif // ASYNC_LOGGING
@@ -315,45 +318,48 @@ void Logger::log(Logger::Level level, const std::string &txt)
 #endif
     static char timestamp[64];
     static char timestampStr[256];
+
+    // Don't log if not enabled, or level is too low.
     if (!logEnabled) return;
+    if (level > currentLevel) return;
 
-    if (level <= currentLevel) {
-        std::ostringstream oss;
-        if (timestampEnabled) {
-            struct timeval stv;
-            struct tm stm;
+    std::ostringstream oss;
+    if (timestampEnabled)
+    {
+        struct timeval stv;
+        struct tm stm;
 
-            ::gettimeofday(&stv, NULL);
-            time_t t = stv.tv_sec;
-            gmtime_r(&t, &stm);
-            strftime(timestamp, sizeof(timestamp), "%F %T", &stm);
-            snprintf(timestampStr, sizeof(timestampStr),
-                    "[%s:%03ld] ",timestamp, stv.tv_usec / 1000);
-            oss << timestampStr;
-        }
+        ::gettimeofday(&stv, NULL);
+        time_t t = stv.tv_sec;
+        gmtime_r(&t, &stm);
+        strftime(timestamp, sizeof(timestamp), "%F %T", &stm);
+        snprintf(timestampStr, sizeof(timestampStr),
+                "[%s:%03ld] ",timestamp, stv.tv_usec / 1000);
+        oss << timestampStr;
+    }
 
-        oss << "[" << getLevelString(level) << "] " << txt << std::endl;
+    oss << "[" << getLevelString(level) << "] " << txt << std::endl;
 
-        if (level <= backTraceLevel)
-        {
+    if (level <= backTraceLevel)
+    {
 #ifndef WIN32
-            prt_backtrace(oss);
-#endif
-        }
-#ifdef ASYNC_LOGGING
-        pendingMessagesToWrite.push(new std::string(oss.str()));
-
-        // If the queue gets too full, block until it's flushed to file or
-        // stdout
-        if (pendingMessagesToWrite.approx_size() > max_queue_size_allowed) {
-            flush();
-        }
-#else
-        std::string temp(oss.str());
-        writeMsg(temp);
+        prt_backtrace(oss);
 #endif
     }
+#ifdef ASYNC_LOGGING
+    pendingMessagesToWrite.push(new std::string(oss.str()));
+
+    // If the queue gets too full, block until it's flushed to file or
+    // stdout
+    if (pendingMessagesToWrite.approx_size() > max_queue_size_allowed) {
+        flush();
+    }
+#else
+    std::string temp(oss.str());
+    writeMsg(temp);
+#endif
 }
+
 void Logger::error(const std::string &txt)
 {
     log(ERROR, txt);
@@ -445,7 +451,7 @@ const char* Logger::getLevelString(const Logger::Level level)
 {
     if (level == BAD_LEVEL)
         return "Bad level";
-    else 
+    else
         return levelStrings[level];
 }
 

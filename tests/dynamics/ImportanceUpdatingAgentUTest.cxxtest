@@ -99,7 +99,6 @@ public:
 	void setUp() {
 	    agent = (ImportanceUpdatingAgent*) cogserver.createAgent(ImportanceUpdatingAgent::info().id);
 
-	    agent->getLogger()->enable();
 	    agent->getLogger()->setLevel(opencog::Logger::FINE);
 	    //agent->getLogger()->setPrintToStdoutFlag(true);
 	    

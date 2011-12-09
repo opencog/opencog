@@ -791,7 +791,7 @@ void AtomSpaceImpl::clear()
             Links(NULL_VERSION_HANDLE));
     DPRINTF("atoms in allAtoms: %lu\n",allAtoms.size());
 
-    logger().enable();
+    Logger::Level save = logger().getLevel();
     logger().setLevel(Logger::DEBUG);
 
     for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
@@ -807,6 +807,8 @@ void AtomSpaceImpl::clear()
     std::back_insert_iterator< std::vector<Handle> > output2(allAtoms);
     getHandleSet(output2, ATOM, true);
     assert(allAtoms.size() == 0);
+
+    logger().setLevel(save);
 }
 
 void AtomSpaceImpl::printGDB() const { print(); }
