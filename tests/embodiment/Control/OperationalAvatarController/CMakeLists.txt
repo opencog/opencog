@@ -49,12 +49,24 @@ ENDIF (GUILE_FOUND)
 IF (TCL_TCLSH)
 	GET_FILENAME_COMPONENT(MAKE_DIST_BIN_DIR ${CMAKE_BINARY_DIR} NAME)
 	ADD_CUSTOM_TARGET(DistributeOACStuff
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Scaffold ${CMAKE_BINARY_DIR}
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Scaffold ${CMAKE_CURRENT_BINARY_DIR}
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Scaffold ${CMAKE_BINARY_DIR}
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Scaffold ${CMAKE_CURRENT_BINARY_DIR}
 
-	    COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/scripts/embodiment ./make_distribution  ${MAKE_DIST_BIN_DIR} Embodiment
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/dist/Embodiment ${CMAKE_BINARY_DIR}
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/dist/Embodiment ${CMAKE_CURRENT_BINARY_DIR}
+		COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/scripts/embodiment ./make_distribution  ${MAKE_DIST_BIN_DIR} Embodiment
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/dist/Embodiment ${CMAKE_BINARY_DIR}
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/dist/Embodiment ${CMAKE_CURRENT_BINARY_DIR}
+
+		# The following dependencies must be built first, because the
+		# scripts/embodiment/make_distribution script tries to copy them.
+		# (see lines 36:42 of that script, starting with $binDirH/opencog/...
+		DEPENDS ${CMAKE_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem/router
+		DEPENDS ${CMAKE_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem/spawner
+		DEPENDS ${CMAKE_BINARY_DIR}/opencog/embodiment/Control/OperationalAvatarController/oac-exec
+		DEPENDS ${CMAKE_BINARY_DIR}/opencog/embodiment/Control/OperationalAvatarController/opcHcTester
+		DEPENDS ${CMAKE_BINARY_DIR}/opencog/embodiment/Control/Procedure/combo_shell
+		DEPENDS ${CMAKE_BINARY_DIR}/opencog/embodiment/Control/Procedure/combo_shell_stdio
+		DEPENDS ${CMAKE_BINARY_DIR}/opencog/embodiment/Learning/LearningServer/learningServer
+		DEPENDS ${CMAKE_BINARY_DIR}/opencog/embodiment/AutomatedSystemTest/pbTest
 	)
 
 	ADD_LIBRARY(oacmock
