@@ -54,43 +54,33 @@ class Logger
 #endif
 public:
 
-    //WARNING: if you change the levels don't forget to update
-    //levelStrings[] in Logger.cc
+    // WARNING: if you change the levels don't forget to update
+    // levelStrings[] in Logger.cc
     enum Level { NONE, ERROR, WARN, INFO, DEBUG, FINE, BAD_LEVEL=255 };
 
     /** Convert from 'enum' (int) to 'string' and vice-versa */
     static const Level getLevelFromString(const std::string&);
     static const char* getLevelString(const Level);
 
-#ifdef ASYNC_LOGGING
-    /** This thread does all writing of log messages */
-    boost::thread m_Thread;
-
-    /** Queue for log messages */
-    concurrent_queue< std::string* > pendingMessagesToWrite;
-
-    void startWriteLoop();
-    void stopWriteLoop();
-    void writingLoop();
-    void flush();
-#endif
-    Logger& operator=(const Logger& log);
-    void writeMsg(std::string &msg);
-
     // ***********************************************/
     // Constructors/destructors
-    ~Logger();
 
     /**
      * Messages will be appended to the passed file.
      *
      * @param fileName The log file
-     * @param level Only messages with log-level lower than or equals to level will be logged
-     * @param timestampEnabled If true, a timestamp will be pre-fixed in every log message
+     * @param level Only messages with log-level less than or equal to
+     *        level will be logged
+     * @param timestampEnabled If true, a timestamp will be prefixed to
+              every log message
      */
-    Logger(const std::string &fileName = "opencog.log", Level level = INFO, bool timestampEnabled = true);
+    Logger(const std::string &fileName = "opencog.log", 
+           Level level = INFO, bool timestampEnabled = true);
 
     Logger(const Logger&);
+
+    ~Logger();
+    Logger& operator=(const Logger& log);
 
     // ***********************************************/
     // API
@@ -138,15 +128,16 @@ public:
     void setPrintToStdoutFlag(bool flag);
 
     /**
-     * set the main logger to prints only
+     * Set the main logger to print only
      * error level log on stdout (useful when one is only interested
      * in printing cassert logs)
      */
     void setPrintErrorLevelStdout();
 
     /**
-     * Logs a message into log file (passed in constructor) if and only if passed level is
-     * lower than or equals to the current log level of Logger.
+     * Log a message into log file (passed in constructor) if and only
+     * if passed level is lower than or equal to the current log level
+     * of this Logger instance.
      */
     void log  (Level level, const std::string &txt);
     void error(const std::string &txt);
@@ -156,10 +147,12 @@ public:
     void fine (const std::string &txt);
 
     /**
-     * Logs a message (printf style) into log file (passed in constructor) if and only if passed level is
-     * lower than or equals to the current log level of Logger.
+     * Log a message (printf style) into log file (passed in constructor)
+     * if and only if passed level is lower than or equals to the current
+     * log level of this Logger instance.
      *
-     * You may use these methods as any printf-style call, eg: fine("Count = %d", count)
+     * You may use these methods as any printf-style call, eg: 
+     * fine("Count = %d", count)
      */
     void logva(Level level, const char *, va_list args);
     void log  (Level level, const char *, ...);
@@ -169,6 +162,7 @@ public:
     void debug(const char *, ...);
     void fine (const char *, ...);
 
+public:
     /** 
      * Methods to check if a given log level is enabled. This is useful for
      * avoiding unnecessary code for logger. For example: 
@@ -191,6 +185,10 @@ public:
      */
     void disable();
 
+#ifdef ASYNC_LOGGING
+    void flush();
+#endif
+
 private:
 
     std::string fileName;
@@ -202,6 +200,18 @@ private:
     pthread_mutex_t lock;
     FILE *f;
 
+#ifdef ASYNC_LOGGING
+    /** This thread does all writing of log messages */
+    boost::thread m_Thread;
+
+    /** Queue for log messages */
+    concurrent_queue< std::string* > pendingMessagesToWrite;
+
+    void startWriteLoop();
+    void stopWriteLoop();
+    void writingLoop();
+    void writeMsg(std::string &msg);
+#endif
 }; // class
 
 // singleton instance (following meyer's design pattern)

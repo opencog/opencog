@@ -36,17 +36,14 @@ class LoggerUTest : public CxxTest::TestSuite
 {
 public:
 
-    LoggerUTest() {
+    LoggerUTest() {}
 
-    }
+    void setUp() {}
 
-    void setUp() {
-    }
+    void tearDown() {}
 
-    void tearDown() {
-    }
-
-    void testLog() {
+    void testLog()
+    {
         char baselineFile[256];
         char logFile[256];
 
@@ -64,12 +61,10 @@ public:
         _logger.info("msg3");
         baseline.info("msg3");
 
-#ifdef ASYNC_LOGGING
-        // Must fluush, as otherwise there is a race against the 
+        // Must flush, as otherwise there is a race against the 
         // fopen()'s below.
         _logger.flush();
         baseline.flush();
-#endif
 
         FILE *f1 = fopen(baselineFile, "r");
         FILE *f2 = fopen(logFile, "r");
@@ -78,7 +73,8 @@ public:
         TS_ASSERT(f2 != NULL);
 
         char c1 = fgetc(f1);
-        while (c1 != EOF) {
+        while (c1 != EOF)
+        {
             char c2 = fgetc(f2);
             TS_ASSERT(c1 == c2);
             c1 = fgetc(f1);
@@ -87,11 +83,13 @@ public:
         remove(logFile);
     }
 
-    void testDefaultLogger() {
+    void testDefaultLogger()
+    {
         logger().info("Running LoggerUTest");
     }
 
-    unsigned int countLines(const char *filename) {
+    unsigned int countLines(const char *filename)
+    {
         unsigned int nLines = 0;
         std::string line;
 
@@ -101,7 +99,10 @@ public:
         return nLines;
     }
 
-    void logAllLevels(const char *filename, const Logger::Level level, const unsigned int nLines) {
+    void logAllLevels(const char *filename,
+                      const Logger::Level level,
+                      const unsigned int nLines)
+    {
         Logger _logger(filename, level);
         _logger.error("message");
         _logger.warn ("message");
@@ -109,14 +110,14 @@ public:
         _logger.debug("message");
         _logger.fine ("message");
 
-#ifdef ASYNC_LOGGING
         _logger.flush();
-#endif
+
         TS_ASSERT_LESS_THAN_EQUALS(nLines, countLines(filename));
         remove(filename);
     }
 
-    void testLevels() {
+    void testLevels()
+    {
         logAllLevels("LoggerUTest.none.log", Logger::NONE, 0);
         logAllLevels("LoggerUTest.error.log", Logger::ERROR, 1);
         logAllLevels("LoggerUTest.warn.log",  Logger::WARN,  2);
