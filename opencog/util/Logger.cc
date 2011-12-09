@@ -118,7 +118,8 @@ Logger::~Logger()
 void Logger::startWriteLoop()
 {
     pthread_mutex_lock(&lock);
-    if (!writingLoopActive) {
+    if (!writingLoopActive)
+    {
         writingLoopActive = true;
         m_Thread = boost::thread(&Logger::writingLoop, this);
     }
@@ -137,21 +138,26 @@ void Logger::stopWriteLoop()
 
 void Logger::writingLoop()
 {
-    try {
-        while (true) {
+    try
+    {
+        while (true)
+        {
             std::string* msg;
             pendingMessagesToWrite.wait_and_pop(msg);
             writeMsg(*msg);
             delete msg;
         }
-    } catch (concurrent_queue< std::string* >::Canceled &e) {
+    }
+    catch (concurrent_queue< std::string* >::Canceled &e)
+    {
         return;
     }
 }
 
 void Logger::flush()
 {
-    while (!pendingMessagesToWrite.empty()) usleep(100);
+    while (!pendingMessagesToWrite.empty())
+        usleep(100);
 }
 #endif
 
@@ -161,31 +167,38 @@ void Logger::writeMsg(std::string &msg)
     // delay opening the file until the first logging statement is issued;
     // this allows us to set the main logger's filename without creating
     // a useless log file with the default filename
-    if (f == NULL) {
-        if ((f = fopen(fileName.c_str(), "a")) == NULL) {
-            fprintf(stderr, "[ERROR] Unable to open log file \"%s\"\n", fileName.c_str());
+    if (f == NULL)
+    {
+        if ((f = fopen(fileName.c_str(), "a")) == NULL)
+        {
+            fprintf(stderr, "[ERROR] Unable to open log file \"%s\"\n",
+                    fileName.c_str());
             disable();
             return;
-        } else enable();
+        }
+        else
+            enable();
     }
+
     // write to file
     fprintf(f, "%s", msg.c_str());
     fflush(f);
     pthread_mutex_unlock(&lock);
+
     // write to stdout
-    if (printToStdout) {
+    if (printToStdout)
+    {
         std::cout << msg;
         std::cout.flush();
     }
-
 }
 
-Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampEnabled)
+Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
 {
-    this->fileName.assign(fileName);
+    this->fileName.assign(fname);
     this->currentLevel = level;
     this->backTraceLevel = getLevelFromString(opencog::config()["BACK_TRACE_LOG_LEVEL"]); 
-    this->timestampEnabled = timestampEnabled;
+    this->timestampEnabled = tsEnabled;
     this->printToStdout = false;
 
     this->logEnabled = true;
@@ -198,7 +211,8 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
 #endif // ASYNC_LOGGING
 }
 
-Logger::Logger(const Logger& log) {
+Logger::Logger(const Logger& log)
+{
     pthread_mutex_init(&lock, NULL);
     set(log);
 }
@@ -213,7 +227,8 @@ Logger& Logger::operator=(const Logger& log)
     return *this;
 }
 
-void Logger::set(const Logger& log) {
+void Logger::set(const Logger& log)
+{
     this->fileName.assign(log.fileName);
     this->currentLevel = log.currentLevel;
     this->backTraceLevel = log.backTraceLevel;
