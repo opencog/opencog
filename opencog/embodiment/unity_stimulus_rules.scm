@@ -5,7 +5,7 @@
 ; @date   2011-09-07
 ;
 ; @brief Stimulus is an external signal receiving from the environment that may 
-; lead to the change of agent's internal state(i.e. emotion state).
+; lead to the change of agent's internal state(i.e. emotional state).
 ; Currently, stimulus can be an event or an action performed by other agents.
 ; e.g. A punched B, from the perspective of B, a nasty action has been performed 
 ; which may make it angry. But from the perspective of other agent, say C, this 
@@ -18,6 +18,7 @@
 ;
 (define ANGRY_HANDLE (ConceptNode "angry"))
 (define THANKFUL_HANDLE (ConceptNode "thankful"))
+(define LOVE_HANDLE (ConceptNode "love"))
 
 (define TIME_NODE_TYPED_VARIABLE_LINK
     (TypedVariableLink
@@ -165,7 +166,7 @@
 (define (get_stimulus_rules_from_map stimulus_name)
     (if 
         (list? (assoc stimulus_name stimulus_rules_map))
-        (cdr (assoc stimulus_name stimulus_rules_map))
+        (car (cdr (assoc stimulus_name stimulus_rules_map)))
         (list)
     )
 )
@@ -555,8 +556,8 @@
 (define stimulus_rules_map
     (list
         ; Each time when a new rule is added, it should be appended in the map
-        ; The format is: (action_name rule1 rule2 ...)
-        (list "touch" TouchHeavilyRule)
+        ; The format is: (action_name (list rule1 rule2 ...))
+        (list "touch" (list TouchHeavilyRule) )
         ; TODO add new rules if there are new stimulus to be applied.
         ; (list "kick" SomeKickRule)
         ; (list "hug" SomeHugRule)
