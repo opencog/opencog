@@ -70,7 +70,7 @@ static void prt_backtrace(std::ostringstream& oss)
 
 	// Start printing at a bit into the stack, so as to avoid recording
 	// the logger functions in the stack trace.
-    oss << "\tStack Trace:\n";
+	oss << "\tStack Trace:\n";
 	for (int i=2; i < stack_depth; i++)
 	{
 		// Most things we'll print are mangled C++ names,
@@ -85,7 +85,7 @@ static void prt_backtrace(std::ostringstream& oss)
 		else
 		{
 			*begin = 0x0;
-            oss << "\t" << i << ": " << syms[i] << " ";
+			oss << "\t" << i << ": " << syms[i] << " ";
 			*begin = '(';
 			size_t sz = 250;
 			int status;
@@ -94,11 +94,11 @@ static void prt_backtrace(std::ostringstream& oss)
 			char *rv = abi::__cxa_demangle(begin+1, fname, &sz, &status);
 			*end = '+';
 			if (rv) fname = rv; // might have re-alloced
-            oss << "(" << fname << " " << end << std::endl;
+			oss << "(" << fname << " " << end << std::endl;
 			free(fname);
 		}
 	}
-    oss << std::endl;
+	oss << std::endl;
 	free(syms);
 }
 #endif
@@ -439,9 +439,9 @@ const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
     unsigned int nLevels = sizeof(levelStrings) / sizeof(levelStrings[0]);
     for (unsigned int i = 0; i < nLevels; ++i) {
         if (boost::iequals(levelStrings[i], levelStr))
-            return ((Logger::Level) i);
+            return (Logger::Level) i;
     }
-    return ((Logger::Level) BAD_LEVEL);
+    return BAD_LEVEL;
 }
 
 // create and return the single instance
