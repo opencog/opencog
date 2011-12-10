@@ -181,16 +181,6 @@ public:
     inline void flush() {}
 #endif
 
-    /**
-     * Enable logging messages.
-     */
-    void enable();
-
-    /**
-     * Disable logging messages.
-     */
-    void disable();
-
 private:
 
     std::string fileName;
@@ -214,6 +204,16 @@ private:
     void writingLoop();
     void writeMsg(std::string &msg);
 #endif
+
+    /**
+     * Enable logging messages.
+     */
+    void enable();
+
+    /**
+     * Disable logging messages.
+     */
+    void disable();
 
 }; // class
 

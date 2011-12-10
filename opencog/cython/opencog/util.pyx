@@ -23,8 +23,6 @@ cdef extern from "opencog/util/Logger.h" namespace "opencog":
         void log(loglevel lvl, string txt)
 
         bool isEnabled(loglevel lvl)
-        void enable()
-        void disable()
 
     cdef loglevel string_to_log_level "opencog::Logger::getLevelFromString"(string s)
     cdef string log_level_to_string "opencog::Logger::getLevelString"(loglevel lvl)
@@ -117,10 +115,6 @@ cdef class Logger:
 
     def is_enabled(self, int lvl):
         return self.clog.isEnabled(<loglevel>lvl)
-    def enable(self):
-        self.clog.enable()
-    def disable(self):
-        self.clog.disable()
     def use_stdout(self,use_it=True):
         self.clog.setPrintToStdoutFlag(use_it)
 
