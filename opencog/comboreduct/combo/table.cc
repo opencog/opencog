@@ -279,12 +279,10 @@ int findTargetFeaturePosition(const string& fileName, const string& target)
     string line;
     getline(*in, line);
     vector<string> labels = tokenizeRow<string>(line);
-    unsigned int pos = distance(labels.begin(), boost::find(labels, target));
-    if (pos < labels.size())
-        return pos;
-    else
-        OC_ASSERT(false, "There is no such target feature %s in data file %s",
-                  target.c_str(), fileName.c_str());
+    unsigned pos = distance(labels.begin(), boost::find(labels, target)); 
+    OC_ASSERT(pos < labels.size(),
+              "There is no such target feature %s in data file %s",
+              target.c_str(), fileName.c_str());
     return pos;
 }
 
