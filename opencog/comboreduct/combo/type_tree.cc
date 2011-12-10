@@ -625,7 +625,6 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 tt.erase_children(it);
                 return;
             } else { //the number of applied arguments is correct
-                // type_tree_pre_it output_it = it_child.last_child();
 
                 //will be set to true if at some point arg_list is reached
                 bool is_arg_list_reached = false;
@@ -1012,7 +1011,7 @@ type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
     if (!it.is_childless()) {
         //wrap lambda over res
         type_tree_pre_it head = res.begin();
-        // type_tree_pre_it new_head = res.wrap(head, id::lambda_type);
+        res.wrap(head, id::lambda_type);
         for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
             //if argument then uses atl to get the input type
             type_tree child_type;
