@@ -4,6 +4,7 @@
  * Based off of http://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html
  * Original version by Anthony Williams
  * Modifications by Michael Anderson
+ * Modified by Linas Vepstas; the original code had race-conditions in it.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -62,21 +63,26 @@ public:
         return the_queue.size();
     }
 
-    bool try_pop(Data& popped_value)
+    bool try_get(Data& value)
     {
         boost::mutex::scoped_lock lock(the_mutex);
         if (is_canceled) throw Canceled();
-        if(the_queue.empty())
+        if (the_queue.empty())
         {
             return false;
         }
 
-        popped_value=the_queue.front();
-        the_queue.pop_front();
+        value = the_queue.front();
         return true;
     }
 
-    void wait_and_pop(Data& popped_value)
+    // The code originally had a wait_and_pop() primitive.
+    // Unfortunately, this will race against the empty() primitive.
+    // The correct solution is to wait_and_get the value, do things
+    // with the value, and then, only when done working with the value,
+    // should one pop. Doing things this way will allow the empty()
+    // function to correctly report the state of the work queue.
+    void wait_and_get(Data& value)
     {
         boost::mutex::scoped_lock lock(the_mutex);
 
@@ -87,8 +93,11 @@ public:
         if (is_canceled) {
             throw Canceled();
         }
+        value = the_queue.front();
+    }
 
-        popped_value=the_queue.front();
+    void pop()
+    {
         the_queue.pop_front();
     }
 

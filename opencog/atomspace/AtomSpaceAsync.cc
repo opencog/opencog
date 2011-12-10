@@ -55,7 +55,8 @@ void AtomSpaceAsync::zmqLoop()
     zmq::socket_t socket (*zmq_context, ZMQ_REP);
     socket.bind ("inproc://gettv");
 
-    while (processingRequests) {
+    while (processingRequests)
+    {
         zmq::message_t request;
 
         //  Wait for next request from client
@@ -78,16 +79,20 @@ void AtomSpaceAsync::zmqLoop()
 
 void AtomSpaceAsync::eventLoop()
 {
-    try {
-        while (processingRequests) {
+    try
+    {
+        while (processingRequests)
+        {
             boost::shared_ptr<ASRequest> req;
-            requestQueue.wait_and_pop(req);
+            requestQueue.wait_and_get(req);
             counter++;
             req->run();
+            requestQueue.pop();
         }
-    } catch (concurrent_queue< boost::shared_ptr<ASRequest> >::Canceled &e) {
+    }
+    catch (concurrent_queue< boost::shared_ptr<ASRequest> >::Canceled &e)
+    {
         //cout << "End AtomSpace event loop" << endl;
-        return;
     }
 }
 

@@ -142,9 +142,14 @@ void Logger::writingLoop()
     {
         while (true)
         {
+            // Must not pop until *after* the message has been written,
+            // as otherwise, the flush() call will race with the write,
+            // causing flush to report an empty queue, even though the
+            // message has not actually been written yet.
             std::string* msg;
-            pendingMessagesToWrite.wait_and_pop(msg);
+            pendingMessagesToWrite.wait_and_get(msg);
             writeMsg(*msg);
+            pendingMessagesToWrite.pop();
             delete msg;
         }
     }
