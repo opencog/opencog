@@ -94,8 +94,8 @@ void HPASearch::Level::buildClusters( void )
         } // for
     } // for
 
-    boost::property_map<Graph, HPASearch::VertexPosition>::type position =
-        boost::get( HPASearch::VertexPosition( ), *this->abstractGraph );
+    // boost::property_map<Graph, HPASearch::VertexPosition>::type position =
+    boost::get( HPASearch::VertexPosition( ), *this->abstractGraph );
 
 
     for ( row = 0; row < numberOfRows; ++row ) {

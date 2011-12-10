@@ -179,14 +179,17 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName) {
 }
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember)) 
-void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodToCall) {
+void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
+                                     BMFn methodToCall)
+{
     clock_t sumAsyncTime = 0;
-    long rssStart, rssEnd;
+    long rssStart;
     std::vector<record_t> records;
     cout << "Benchmarking AtomSpace's " << methodName << " method " << N <<
         " times ";
     std::ofstream myfile;
-    if (saveToFile) {
+    if (saveToFile)
+    {
         myfile.open ((methodName + "_benchmark.csv").c_str());
     }
     int diff = (N / PROGRESS_BAR_LENGTH);
@@ -197,8 +200,10 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodT
     timeval tim;
     gettimeofday(&tim, NULL);
     double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
-    for (int i=0; i < N; i++) {
-        if (sizeIncrease) {
+    for (int i=0; i < N; i++)
+    {
+        if (sizeIncrease)
+        {
             long rssBeforeIncrease = getMemUsage();
             buildAtomSpace(sizeIncrease,percentLinks,false);
             // Try to negate the memory increase due to adding atoms
@@ -208,7 +213,8 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodT
         timepair_t timeTaken = CALL_MEMBER_FN(*this,methodToCall)();
         sumAsyncTime += get<0>(timeTaken);
         counter++;
-        if (saveInterval && counter % saveInterval == 0) {
+        if (saveInterval && counter % saveInterval == 0)
+        {
             // Only save datapoints every saveInterval calls
             record_t dataPoint(atomspaceSize,get<0>(timeTaken),getMemUsage()-rssStart-rssFromIncrease);
             // Only save datapoints if we have to calculate the stats
@@ -228,14 +234,15 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName, BMFn methodT
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/N));
-    rssEnd = getMemUsage();
+    // rssEnd = getMemUsage();
     cout << "Sum clock() time for all requests: " << sumAsyncTime << " (" <<
         (float) sumAsyncTime / CLOCKS_PER_SEC << " seconds, "<<
         1.0f/(((float)sumAsyncTime/CLOCKS_PER_SEC) / N) << " requests per second)" << endl;
     //cout << "Memory (max RSS) change after benchmark: " <<
     //    (rssEnd - rssStart - rssFromIncrease) / 1024 << "kb" << endl;
 
-    if (saveInterval && doStats) {
+    if (saveInterval && doStats)
+    {
         // Only calculate stats if we've actually been saving datapoints
         // the option to calculate them is enabled
         AtomSpaceBenchmark::TimeStats t(records);

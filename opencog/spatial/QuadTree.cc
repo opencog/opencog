@@ -203,18 +203,19 @@ void QuadTree::processVertices( const std::vector<unsigned int>& vertices1, cons
     unsigned int i;
     unsigned int j;
 
-    for ( i = 0; i < vertices1.size( ); ++i ) {
-        for ( j = 0; j < vertices2.size( ); ++j ) {
-            math::Vector2 position1 =
-                boost::get( HPASearch::VertexPosition( ), *this->graph, vertices1[ i ] );
+    for ( i = 0; i < vertices1.size( ); ++i )
+    {
+        for ( j = 0; j < vertices2.size( ); ++j )
+        {
+            // math::Vector2 position1 =
+            boost::get(HPASearch::VertexPosition(), *this->graph, vertices1[i]);
 
-            math::Vector2 position2 =
-                boost::get( HPASearch::VertexPosition( ), *this->graph, vertices2[ j ] );
+            // math::Vector2 position2 =
+            boost::get(HPASearch::VertexPosition(), *this->graph, vertices2[j]);
 
-            boost::add_edge( vertices1[ i ], vertices2[ j ], 1, *graph );
-        } // for
-    } // for
-
+            boost::add_edge(vertices1[i], vertices2[j], 1, *graph);
+        }
+    }
 }
 
 std::vector<unsigned int> QuadTree::getVerticesFrom( POSITION position )

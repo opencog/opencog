@@ -273,20 +273,23 @@ type_node infer_type_from_token(const string& token) {
     }
 }
 
-int findTargetFeaturePosition(const string& fileName, const string& target) {
+int findTargetFeaturePosition(const string& fileName, const string& target)
+{
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
     getline(*in, line);
     vector<string> labels = tokenizeRow<string>(line);
-    int pos = distance(labels.begin(), boost::find(labels, target));
-    if(pos < (int)labels.size())
+    unsigned int pos = distance(labels.begin(), boost::find(labels, target));
+    if (pos < labels.size())
         return pos;
     else
         OC_ASSERT(false, "There is no such target feature %s in data file %s",
                   target.c_str(), fileName.c_str());
+    return pos;
 }
 
-type_node inferDataType(const string& fileName) {
+type_node inferDataType(const string& fileName)
+{
     type_node res;
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;

@@ -77,7 +77,7 @@ void * SchemeEval::c_wrap_finish(void *p)
 }
 
 static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
-static pthread_key_t tid_key = NULL;
+static pthread_key_t tid_key = 0;
 
 #define WORK_AROUND_GUILE_185_BUG
 #ifdef WORK_AROUND_GUILE_185_BUG
@@ -110,7 +110,7 @@ static void * do_bogus_scm(void *p)
  * means of a mutex lock.
  */
 static pthread_mutex_t serialize_lock;
-static pthread_key_t ser_key = NULL;
+static pthread_key_t ser_key = 0;
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 static void first_time_only(void)

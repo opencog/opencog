@@ -197,33 +197,33 @@ public:
                         OC_ASSERT(!act->empty(),
                                          "atomic action cannot be empty");
                         pre_it act_head = act->begin();
-                        { //add action_action_if(cond and_seq(act) and_seq())
+                        { // add action_action_if(cond and_seq(act) and_seq())
                             combo_tree tmp1;
                             tmp1.set_head(id::action_action_if);
                             pre_it head = tmp1.begin();
-                            //add condition
+                            // add condition
                             tmp1.replace(tmp1.append_child(head), cond_head);
-                            //add and_seq(act) at first branche
+                            // add and_seq(act) at first branch
                             pre_it br1 = tmp1.append_child(head, id::sequential_and);
                             tmp1.replace(tmp1.append_child(br1), act_head);
-                            //add and_seq() at second branche
-                            pre_it empty_and_seq_it =
-                                tmp1.append_child(head, id::sequential_and);
+                            // add and_seq() at second branch
+                            // pre_it empty_and_seq_it =
+                            tmp1.append_child(head, id::sequential_and);
 #ifdef NOT_EMPTY_AND_SEQ
                             tmp1.append_child(empty_and_seq_it,
                                               id::action_success);
 #endif
                             add_composite_action(tmp1);
                         }
-                        { //add action_action_if(cond and_seq() and_seq(act))
+                        { // add action_action_if(cond and_seq() and_seq(act))
                             combo_tree tmp2;
                             tmp2.set_head(id::action_action_if);
                             pre_it head = tmp2.begin();
-                            //add condition
+                            // add condition
                             tmp2.replace(tmp2.append_child(head), cond_head);
-                            //add and_seq() at first branche
-                            pre_it empty_and_seq_it =
-                                tmp2.append_child(head, id::sequential_and);
+                            // add and_seq() at first branch
+                            // pre_it empty_and_seq_it =
+                            tmp2.append_child(head, id::sequential_and);
 #ifdef NOT_EMPTY_AND_SEQ
                             tmp2.append_child(empty_and_seq_it,
                                               id::action_success);

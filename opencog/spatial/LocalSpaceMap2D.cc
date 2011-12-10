@@ -279,34 +279,33 @@ void LocalSpaceMap2D::save( FILE* fp ) const
 
         fwrite(&metaData, sizeof(spatial::ObjectMetaData), 1, fp);
         fwrite(&isObstacle, sizeof(bool), 1, fp );
-    } // for
+    }
 }
 
-void LocalSpaceMap2D::load( FILE* fp )
+void LocalSpaceMap2D::load(FILE* fp)
 {
     unsigned int numberOfObjects;
-    size_t readSize;
-    readSize = fread(&numberOfObjects, sizeof(unsigned int), 1, fp);
+    fread(&numberOfObjects, sizeof(unsigned int), 1, fp);
 
-    for (unsigned int i = 0; i < numberOfObjects; ++i) {
-
+    for (unsigned int i = 0; i < numberOfObjects; ++i)
+    {
         unsigned int length;
-        readSize = fread(&length, sizeof(unsigned int), 1, fp);
+        fread(&length, sizeof(unsigned int), 1, fp);
 
         char* id = new char[length+1];
-        readSize = fread(id, sizeof(char), length, fp);
+        fread(id, sizeof(char), length, fp);
         id[length] = '\0';
 
         spatial::ObjectMetaData metadata;
-        readSize = fread(&metadata, sizeof(spatial::ObjectMetaData), 1, fp);
+        fread(&metadata, sizeof(spatial::ObjectMetaData), 1, fp);
 
         bool isObstacle;
-        readSize = fread(&isObstacle, sizeof(bool), 1, fp);
+        fread(&isObstacle, sizeof(bool), 1, fp);
 
         addObject(std::string(id), metadata, isObstacle );
 
         delete id;
-    } // for
+    }
 }
 
 spatial::Distance LocalSpaceMap2D::xGridWidth() const

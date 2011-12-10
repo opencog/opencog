@@ -1190,7 +1190,7 @@ void reduce_gt_zero_sin::operator()(combo_tree& tr,combo_tree::iterator it) cons
         if(*it_child==id::sin) {
             OC_ASSERT(it_child.has_one_child(),
                       "combo_tree child node should have exactly one child (reduce_gt_zero_sin).");
-            pre_it y = it_child.begin();
+            it_child.begin();
             combo_tree copy_tr = tr.subtree(sib_it(it), tr.next_sibling(sib_it(it)));
             //copy old assumptions, begin
             sib_it bna = copy_tr.begin(); //before new assumption
