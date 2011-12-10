@@ -167,7 +167,6 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 {
     HandleSeq links;
     float totalDifference, differenceScaling;
-    int totalTransferred;
     AttentionValue::sti_t sourceSTI;
 
     std::vector<Handle> linksVector;
@@ -175,7 +174,6 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 
     totalDifference = 0.0f;
     differenceScaling = 1.0f;
-    totalTransferred = 0;
 
     logger().fine("+Spreading importance for atom %s", a->atomAsString(h).c_str());
 

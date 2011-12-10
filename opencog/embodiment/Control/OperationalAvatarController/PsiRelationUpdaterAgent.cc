@@ -261,7 +261,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get petId and petName
-    const std::string & petName = oac->getPet().getName();
+    // const std::string & petName = oac->getPet().getName();
     const std::string & petId = oac->getPet().getPetId(); 
 
     // Get Handle to the pet
@@ -554,7 +554,7 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     const Procedure::ProcedureRepository & procedureRepository = oac->getProcedureRepository();
 
     // Get petId and petName
-    const std::string & petName = oac->getPet().getName();
+    // const std::string & petName = oac->getPet().getName();
     const std::string & petId = oac->getPet().getPetId(); 
 
     // Get Handle to the pet
@@ -588,10 +588,11 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     }
 
     // Decide whether to update relations during this cognitive cycle (controlled by the modulator 'SecuringThreshold')
-    float securingThreshold = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
-                                                                      SECURING_THRESHOLD_MODULATOR_NAME, 
-                                                                      randGen
-                                                                     );
+    // float securingThreshold =
+    AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
+                                            SECURING_THRESHOLD_MODULATOR_NAME, 
+                                            randGen);
+
 // TODO: Uncomment the lines below once finish testing
 //    if ( randGen.randfloat() < securingThreshold ) 
 //    {

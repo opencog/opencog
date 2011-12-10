@@ -67,7 +67,7 @@ static double TestIntegralFormula(double x, void * params) {
 static float TestDensityIntegral(float lower, float upper, 
 				 float L_, float U_, float k_, float s_) {
   double params[4];
-  int status = 0; size_t neval = 0;
+  size_t neval = 0;
   double result = 0, abserr = 0 ;
   gsl_function F;
   
@@ -79,7 +79,7 @@ static float TestDensityIntegral(float lower, float upper,
   F.function = &TestIntegralFormula;
   F.params = &params;
   
-  status = gsl_integration_qng (&F, lower, upper, 
+  gsl_integration_qng (&F, lower, upper, 
 				1e-1, 0.0, &result, &abserr, &neval);
 
   return (float) result;

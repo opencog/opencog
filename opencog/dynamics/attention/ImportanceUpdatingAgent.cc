@@ -626,16 +626,14 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, const AgentSeq &agents
 
 bool ImportanceUpdatingAgent::enforceSTICap(AtomSpace* a, Handle h)
 {
-    AttentionValue::sti_t current, diff;
+    AttentionValue::sti_t current;
 
     current = a->getSTI(h);
     if (current > STICap) {
-        diff = current - STICap;
         a->setSTI(h, STICap);
         log->fine("Atom STI too high - old = %d, new = %d", current, a->getSTI(h));
         return true;
     } else if (current < -STICap) {
-        diff = -STICap + current;
         a->setSTI(h, -STICap);
         log->fine("Atom STI too low - old = %d, new = %d", current, a->getSTI(h));
         return true;
@@ -645,16 +643,14 @@ bool ImportanceUpdatingAgent::enforceSTICap(AtomSpace* a, Handle h)
 
 bool ImportanceUpdatingAgent::enforceLTICap(AtomSpace* a, Handle h)
 {
-    AttentionValue::lti_t current, diff;
+    AttentionValue::lti_t current;
 
     current = a->getLTI(h);
     if (current > LTICap) {
-        diff = current - LTICap;
         a->setLTI(h, LTICap);
         log->fine("Atom LTI too high - old = %d, new = %d", current, a->getSTI(h));
         return true;
     } else if (current < -LTICap) {
-        diff = -LTICap + current;
         a->setLTI(h, -LTICap);
         log->fine("Atom LTI too low - old = %d, new = %d", current, a->getSTI(h));
         return true;

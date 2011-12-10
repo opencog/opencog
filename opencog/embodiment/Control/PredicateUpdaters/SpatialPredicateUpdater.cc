@@ -255,19 +255,20 @@ compute3SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
                              unsigned long timestamp
                             )
 {
-    double besideDistance = spaceMap.getNextDistance();
+    spaceMap.getNextDistance();
 
-    try {
-        const spatial::EntityPtr & observerEntity = 
-            spaceMap.getEntity( atomSpace.getName(observer) );
+    try
+    {
+        spaceMap.getEntity( atomSpace.getName(observer) );
 
         std::vector <std::string>::iterator iter_entityB, iter_entityC; 
 
-        foreach (Handle objectA, objects) {
+        foreach (Handle objectA, objects)
+        {
             std::string entityID_A = atomSpace.getName(objectA); 
             int numRelations = 0;
 
-            const spatial::EntityPtr & entityA = spaceMap.getEntity(entityID_A);
+            spaceMap.getEntity(entityID_A);
 
             for (iter_entityB = entities.begin(); iter_entityB != entities.end(); ++ iter_entityB) {
                 const std::string & entityID_B = *iter_entityB; 

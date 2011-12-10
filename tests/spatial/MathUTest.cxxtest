@@ -193,7 +193,7 @@ public:
         //std::cout << limitLine.toString( ) << std::endl;
 
         // agent fov will be 160 degrees
-        spatial::math::Vector3 leftPoint = Quaternion( spatial::math::Vector3::Z_UNIT, 80 * M_PI / 180.0).rotate(front) * agentFovReach;
+        // spatial::math::Vector3 leftPoint = Quaternion( spatial::math::Vector3::Z_UNIT, 80 * M_PI / 180.0).rotate(front) * agentFovReach;
         spatial::math::Vector3 rightPoint = Quaternion( spatial::math::Vector3::Z_UNIT, -80 * M_PI / 180.0).rotate(front) * agentFovReach;
 
         spatial::math::Vector3 intersectionPoint;

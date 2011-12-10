@@ -415,7 +415,7 @@ public:
             std::string objectId = mockyObjects[rng.randint( )%numberOfObjects].name;
             Point x = map->behindPoint(p, objectId );
 
-            GridPoint gx = map->snap(x);
+            // GridPoint gx = map->snap(x);
             TS_ASSERT(!map->gridIllegal(map->snap(x)));
             TS_ASSERT(map->coordinatesAreOnGrid(map->snap(x).first,
                                                 map->snap(x).second));

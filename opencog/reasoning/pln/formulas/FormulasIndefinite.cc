@@ -78,7 +78,7 @@ void Sampler::generateSample(IndefiniteTruthValuePtr TVa,
 
     number_t valuesA[100], valuesB[100];
     float alpha = IndefiniteTruthValue::DEFAULT_K * 0.5;
-    float beta = alpha; float diff;
+    float beta = alpha;
     float default_k = IndefiniteTruthValue::DEFAULT_K;
     float args[2];
     vector <float*> distributionA, distributionB;
@@ -93,8 +93,8 @@ void Sampler::generateSample(IndefiniteTruthValuePtr TVa,
     // step 1 - calculate diff on both variables
     // verify if L_ and U_ were previously calculated
 
-    diff = TVa->getDiff();
-    diff = TVb->getDiff();
+    TVa->getDiff();
+    TVb->getDiff();
 
     // step 2 - generate n1 values for each TV
     // for two TV - no need to check consistency
@@ -150,7 +150,7 @@ void Sampler::generateSample(IndefiniteTruthValuePtr TVa,
 
     number_t valuesA[100], valuesC[100], valuesAC[100];
     float alpha = IndefiniteTruthValue::DEFAULT_K * 0.5;
-    float beta = alpha; float diff;
+    float beta = alpha;
     float default_k = IndefiniteTruthValue::DEFAULT_K;
     float args[2];
     vector <float*> distributionA, distributionC, distributionAC;
@@ -163,9 +163,9 @@ void Sampler::generateSample(IndefiniteTruthValuePtr TVa,
             !distributionC.empty() && !distributionAC.empty()) return;
 
     // step 1 - same as generateSample(TVa, TVb);
-    diff = TVa->getDiff();
-    diff = TVb->getDiff();
-    diff = TVc->getDiff();
+    TVa->getDiff();
+    TVb->getDiff();
+    TVc->getDiff();
 
     // step 2 - generate n1 consistent values for each TV
     args[0] = alpha;
@@ -239,7 +239,7 @@ void Sampler::generateSample(IndefiniteTruthValuePtr TVa,
     number_t valuesA[100], valuesB[100],
     valuesC[100], valuesAB[100], valuesCB_BC[100];
     float alpha = IndefiniteTruthValue::DEFAULT_K * 0.5;
-    float beta = alpha; float diff;
+    float beta = alpha;
     float default_k = IndefiniteTruthValue::DEFAULT_K;
     float args[2];
     bool check = false;
@@ -258,11 +258,11 @@ void Sampler::generateSample(IndefiniteTruthValuePtr TVa,
         !distributionCB_BC.empty()) return;
 
     // step 1 - same as generateSample(TVa, TVb);
-    diff = TVa->getDiff();
-    diff = TVb->getDiff();
-    diff = TVc->getDiff();
-    diff = TVab->getDiff();
-    diff = TVcb_bc->getDiff();
+    TVa->getDiff();
+    TVb->getDiff();
+    TVc->getDiff();
+    TVab->getDiff();
+    TVcb_bc->getDiff();
 
     // step 2 - generate n1 consistent values for each TV
     args[0] = alpha;

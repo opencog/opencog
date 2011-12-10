@@ -125,6 +125,7 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
         }
 
         std::string name = str.substr(0, lparen);
+#if UNUSED
         unsigned int arity;
         try {
             arity = boost::lexical_cast<unsigned int>(str.substr(lparen + 1, rparen - lparen - 1));
@@ -132,6 +133,7 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
             logger().debug("ComboSelectProcedureRepository - Cannot get arity for '%s'.", str.c_str());
             return 0;
         }
+#endif
 
         //recognize {
         in >> tmp;

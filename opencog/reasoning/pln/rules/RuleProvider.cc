@@ -135,7 +135,7 @@ RulePtr ReferenceRuleProvider::addRule(Rule* r, float priority)
 {
     boost::mutex::scoped_lock lock(guard);
     RulePtr rp(r);
-    std::map<std::string, RulePtr>::const_iterator i = rules.find(rp->getName());
+    rules.find(rp->getName());
     // TODO prevent double addition of existing rule!!
     DPRINTF("Rule added %s\n",rp->getName().c_str());
     rules[rp->getName()] = rp;

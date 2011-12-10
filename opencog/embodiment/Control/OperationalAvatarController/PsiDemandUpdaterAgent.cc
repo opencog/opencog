@@ -382,10 +382,10 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get Pet
-    Pet & pet = oac->getPet();
+    // Pet & pet = oac->getPet();
 
     // Get petId
-    const std::string & petId = pet.getPetId();
+    // const std::string & petId = pet.getPetId();
 
     // Get current time stamp
     unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp(); 

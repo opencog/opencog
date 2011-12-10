@@ -42,28 +42,29 @@ using namespace reduct;
 
 int main(int argc, char** argv)
 {
-
-    //set flag to print only cassert and other ERROR level logs on stdout
+    // Set flag to print only cassert and other ERROR level logs on stdout.
     opencog::logger().setPrintErrorLevelStdout();
-    //read maximum evaluations and RNG seed from command line
-    int max_evals;
+    // Read maximum evaluations and RNG seed from command line.
     int seed;
     bool reduce=true;
-    try {
-       // if (argc!=3)
+    try
+    {
+        // if (argc!=3)
         //    throw "foo";
-        max_evals=lexical_cast<int>(argv[1]);
+        // max_evals = lexical_cast<int>(argv[1]);
         seed=lexical_cast<int>(argv[2]);
         set_stepsize(1.25); //lexical_cast<double>(argv[3]));
         set_expansion(1.5); //lexical_cast<double>(argv[4]));
         set_depth(4) ; //exical_cast<int>(argv[5]));
         reduce = true;
-    } catch (...) {
+    }
+    catch (...)
+    {
         cerr << "usage: " << argv[0] << " maxevals seed" << endl;
         exit(1);
     }
     
-    //read in seed tree
+    // Read in seed tree.
     combo_tree tr;
     cin >> tr; 
 

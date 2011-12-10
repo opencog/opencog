@@ -95,7 +95,6 @@ break_inner:
 Rule::setOfMPs CrispTheoremRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     set<MPs> ret;
-    bool htemp=false;
     
 /*  for (map<vtree, vector<vtree> ,less_vtree>::iterator thm=thms.begin(); thm != thms.end(); thm++)
     {
@@ -226,8 +225,6 @@ Rule::setOfMPs CrispTheoremRule::o2iMetaExtra(meta outh, bool& overrideInputFilt
                 printer.print(outh->begin(), 4);
                 cprintf(4,"thm_substed\n");
                 printer.print(thm_substed->begin(), 4);
-                
-                htemp =true;
                 
                 new_thm_args.push_back(thm_substed);
             }

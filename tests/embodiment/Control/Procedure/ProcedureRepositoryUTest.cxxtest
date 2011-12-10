@@ -148,9 +148,8 @@ public:
         {
             ifstream fin(PROJECT_SOURCE_DIR "/scripts/embodiment/stdlib.combo");
 
-            int n = 0;
             if (fin.good()) {
-                n = pr->loadComboFromStream(fin);
+                pr->loadComboFromStream(fin);
             } else {
                 TS_ASSERT(false);
             }
@@ -159,9 +158,8 @@ public:
         {
             ifstream fin(PROJECT_SOURCE_DIR "/scripts/embodiment/multiverse_action_schema.combo");
 
-            int n = 0;
             if (fin.good()) {
-                n = pr->loadComboFromStream(fin);
+                pr->loadComboFromStream(fin);
             } else {
                 TS_ASSERT(false);
             }

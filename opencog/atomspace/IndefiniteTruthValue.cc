@@ -61,8 +61,8 @@ static strength_t DensityIntegral(strength_t lower, strength_t upper,
                                   count_t k_, strength_t s_)
 {
     double params[4];
-    int status = 0; size_t neval = 0;
-    double result = 0, abserr = 0 ;
+    size_t neval = 0;
+    double result = 0.0, abserr = 0.0;
     gsl_function F;
 
     params[0] = static_cast<double>(L_);
@@ -73,8 +73,8 @@ static strength_t DensityIntegral(strength_t lower, strength_t upper,
     F.function = &integralFormula;
     F.params = &params;
 
-    status = gsl_integration_qng (&F, lower, upper,
-                                  1e-1, 0.0, &result, &abserr, &neval);
+    gsl_integration_qng (&F, lower, upper,
+                         1e-1, 0.0, &result, &abserr, &neval);
     return (strength_t) result;
 }
 

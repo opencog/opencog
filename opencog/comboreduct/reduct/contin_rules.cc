@@ -177,13 +177,15 @@ void reduce_factorize_fraction::operator()(combo_tree& tr,combo_tree::iterator i
         //---------
         //find the vector of iterators to factorize
         subtree_partition_it spit = sp.find(chosen_factor);
-        if(spit != sp.end()) { //check if there is something to factorize
+        if (spit != sp.end())
+        { //check if there is something to factorize
             pre_it key = spit->first;
             equiv_subtrees es = spit->second;
             pre_it_vector es_vec = es.second;
-            pre_it first_one = tr.end(); //count number of copies of factor
-            //when alone
-            if(!es_vec.empty()) { //check if there is something to factorize
+            // pre_it first_one = tr.end(); //count number of copies of factor
+            // when alone
+            if(!es_vec.empty())
+            { //check if there is something to factorize
                 //------------
                 //move the key
                 //------------
@@ -747,7 +749,7 @@ void reduce_log_div_times::operator()(combo_tree& tr,combo_tree::iterator it) co
             OC_ASSERT(log_child.number_of_children()==2,
                       "combo_tree node id::div should have exactly two children");
             pre_it num = log_child.begin();
-            pre_it denom = log_child.last_child();
+            // pre_it denom = log_child.last_child();
             if(is_contin(*num)) {
                 contin_t c = get_contin(*num);
                 if(c != 0.0) {

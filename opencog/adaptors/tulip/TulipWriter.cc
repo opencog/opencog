@@ -97,7 +97,7 @@ void TulipWriter::writeCluster(Handle setLink)
         if (si == inSet.end()) myfile << h << " ";
     }
     foreach (Handle h, linkHandles) {
-        std::set<Handle>::iterator si = inSet.find(h);
+        inSet.find(h);
     }
     myfile << ")" << endl;
 

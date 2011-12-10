@@ -505,7 +505,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     OAC * oac = (OAC *) server;
 
     // Get rand generator
-    RandGen & randGen = oac->getRandGen();
+    // RandGen & randGen = oac->getRandGen();
 
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );

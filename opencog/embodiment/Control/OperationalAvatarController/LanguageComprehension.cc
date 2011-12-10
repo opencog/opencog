@@ -44,7 +44,7 @@ opencog::control::AvatarInterface* LanguageComprehension::localAgent = NULL;
 // Core functions of LanguageComprehension
 
 LanguageComprehension::LanguageComprehension( opencog::control::AvatarInterface& agent ) : 
-    agent( agent ), nlgenClient( NULL ), initialized( false )
+    initialized( false ), agent( agent ), nlgenClient( NULL )
 {
 
 }

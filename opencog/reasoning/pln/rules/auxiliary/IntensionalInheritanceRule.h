@@ -43,7 +43,7 @@ public:
     meta i2oType(const VertexSeq& h) const;
     
     BoundVertex compute(const VertexSeq& premiseArray,
-                        pHandle CX = NULL,
+                        pHandle CX = 0,
                         bool fresh = true) const;
 
     //@todo: not sure it is enough

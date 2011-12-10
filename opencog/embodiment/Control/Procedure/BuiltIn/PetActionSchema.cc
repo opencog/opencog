@@ -100,7 +100,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
     }
 
     unsigned int argIndex = 0;
-    std::vector<combo::vertex>::const_iterator argItr = arguments.begin();
+    // std::vector<combo::vertex>::const_iterator argItr = arguments.begin();
 
     foreach(const ActionParamType& paramType, mandatoryParamTypes) {
         bool validArg = false;

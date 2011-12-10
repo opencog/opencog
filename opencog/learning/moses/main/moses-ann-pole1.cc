@@ -40,17 +40,17 @@ using namespace reduct;
 int main(int argc, char** argv)
 {
 
-    //set flag to print only cassert and other ERROR level logs on stdout
+    // Set flag to print only cassert and other ERROR level logs on stdout.
     logger().setPrintErrorLevelStdout();
 
-    //read in maximum evaluations and RNG seed from command line
-    int max_evals;
+    // Read in maximum evaluations and RNG seed from command line.
     int seed;
     bool reduce=true;
-    try {
+    try
+    {
         //if (argc!=3)
         //    throw "foo";
-        max_evals=lexical_cast<int>(argv[1]);
+        // int max_evals=lexical_cast<int>(argv[1]);
         seed=lexical_cast<int>(argv[2]);
         
         set_stepsize(lexical_cast<double>(argv[3]));
@@ -58,12 +58,14 @@ int main(int argc, char** argv)
         set_depth(lexical_cast<int>(argv[5]));
 
         reduce = lexical_cast<int>(argv[6]);
-    } catch (...) {
+    }
+    catch (...)
+    {
         cerr << "usage: " << argv[0] << " maxevals seed" << endl;
         exit(1);
     }
     
-    //read seed tree in from stdin
+    // Read seed tree in from stdin.
     combo_tree tr;
     cin >> tr; 
 
