@@ -49,10 +49,9 @@ ImprintAgent::ImprintAgent() : epsilon(Pattern(0,0))
 
 //    convertLinks = config().get_bool("ECAN_CONVERT_LINKS");
 
-    // Provide a logger, but disable it initially
+    // Provide a logger
     log = NULL;
     setLogger(new opencog::Logger("ImprintAgent.log", Logger::WARN, true));
-    log->disable();
 }
 
 ImprintAgent::~ImprintAgent()

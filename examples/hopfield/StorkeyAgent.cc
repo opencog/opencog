@@ -48,10 +48,9 @@ StorkeyAgent::StorkeyAgent()
 
     convertLinks = config().get_bool("ECAN_CONVERT_LINKS");
 
-    // Provide a logger, but disable it initially
+    // Provide a logger
     log = NULL;
     setLogger(new opencog::Logger("StorkeyAgent.log", Logger::WARN, true));
-    log->disable();
 }
 
 StorkeyAgent::~StorkeyAgent()

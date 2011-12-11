@@ -261,27 +261,20 @@ void HopfieldServer::init(int width, int height, int numLinks)
             this->createAgent(ForgettingAgent::info().id, true));
 
     if (options->verboseLevel) {
-        importUpdateAgent->getLogger()->enable();
         importUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
         if (hebUpdateAgent) {
-            hebUpdateAgent->getLogger()->enable();
             hebUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
         } else {
-            storkeyAgent->getLogger()->enable();
             storkeyAgent->getLogger()->setPrintToStdoutFlag (true);
         }
 //! @todo make all attention modules use their own logger object or upgrade
 //! logging system to allow hierarchical logs.
 #if 0
-        diffuseAgent->getLogger()->enable();
         diffuseAgent->getLogger()->setPrintToStdoutFlag (true);
-//        spreadAgent->getLogger()->enable();
 //        spreadAgent->getLogger()->setPrintToStdoutFlag (true);
 
 #endif
-        imprintAgent->getLogger()->enable();
         imprintAgent->getLogger()->setPrintToStdoutFlag (true);
-        forgetAgent->getLogger()->enable();
         forgetAgent->getLogger()->setPrintToStdoutFlag (true);
     }
     switch (options->verboseLevel) {
