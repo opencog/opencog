@@ -467,115 +467,123 @@ spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& 
     GridPoint gp = snap(spatial::Point(pt.get<0>(), pt.get<1>()));
     if (!gridIllegal(gp)) {
         return spatial::Point3D(pt.get<0>(), pt.get<1>(), _floorHeight);
-    }
+    } 
 
-    bool valid_lower_x = (gp.first > 0);
-    bool valid_lower_y = (gp.second > 0);
-    bool valid_upper_x = (_xDim > gp.first + 1);
-    bool valid_upper_y = (_yDim > gp.second + 1);
-
-    if (!valid_lower_x && !valid_lower_y && !valid_upper_x && !valid_upper_y) {
-        throw opencog::RuntimeException(TRACE_INFO,
-                                        "LocalSpaceMap2D - Could not find the nearest valid grid point from (%u,%u)",
-                                        gp.first, gp.second);
-    }
-
-    unsigned int lower_x = valid_lower_x ? (gp.first - 1) : 0;
-    unsigned int lower_y = valid_lower_y ? (gp.second - 1) : 0;
-    unsigned int upper_x = valid_upper_x ? (gp.first + 1) : _xDim - 1;
-    unsigned int upper_y = valid_upper_y ? (gp.second + 1) : _yDim - 1;
+    //printf("Original point (%lf, %lf). lower x:%u, lower y:%u, upper x:%u, upper y:%u.\n",
+    //       pt.get<0>(), pt.get<1>(), lower_x, lower_y, upper_x, upper_y);
 
     // Check if there's some point to reach that goal.
     bool foundFreePoint = false;
     spatial::GridPoint nearestFreePoint;
     double nearestAltitude = HUGE_DISTANCE;
 
-    if (valid_lower_x) {
-        for (unsigned int y = lower_y; y <= upper_y; y++) {
-            double altitude = getProperFreePointAltitude(spatial::GridPoint(lower_x, y), pt, delta);
-            if (altitude + _agentHeight >= destAltitude) {
-                if (!foundFreePoint ||
-                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
-                    nearestAltitude = altitude;
-                    nearestFreePoint = spatial::GridPoint(lower_x, y);
-                    foundFreePoint = true;
+    unsigned int limit = std::max(_xDim, _yDim);
+    for (unsigned int step = 1; !foundFreePoint && (step < limit); step++) { 
+        bool valid_lower_x = step <= gp.first;
+        bool valid_lower_y = step <= gp.second;
+        bool valid_upper_x = step < (_xDim - gp.first);
+        bool valid_upper_y = step < (_yDim - gp.second);
+        if (!valid_lower_x && !valid_lower_y && !valid_upper_x && !valid_upper_y) {
+            break;
+        }
+        unsigned int lower_x = valid_lower_x ? (gp.first - step) : 0;
+        unsigned int lower_y = valid_lower_y ? (gp.second - step) : 0;
+        unsigned int upper_x = valid_upper_x ? (gp.first + step) : _xDim - 1;
+        unsigned int upper_y = valid_upper_y ? (gp.second + step) : _yDim - 1;
+
+        if (valid_lower_x) {
+            for (unsigned int y = lower_y; y <= upper_y; y++) {
+                double altitude = getProperFreePointAltitude(spatial::GridPoint(lower_x, y), pt, delta);
+                if (altitude + _agentHeight >= destAltitude) {
+                    if (!foundFreePoint ||
+                        std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                        nearestAltitude = altitude;
+                        nearestFreePoint = spatial::GridPoint(lower_x, y);
+                        foundFreePoint = true;
+                    }
+                } else {
+                    if (!foundFreePoint &&
+                        std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                        nearestAltitude = altitude;
+                        nearestFreePoint = spatial::GridPoint(lower_x, y);
+                    }
                 }
-            } else {
-                if (!foundFreePoint &&
-                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
-                    nearestAltitude = altitude;
-                    nearestFreePoint = spatial::GridPoint(lower_x, y);
+            }
+        }
+
+        if (valid_lower_y) {
+            for (unsigned int x = lower_x; x <= upper_x; x++) {
+                double altitude = getProperFreePointAltitude(spatial::GridPoint(x, lower_y), pt, delta);
+                if (altitude + _agentHeight >= destAltitude) {
+                    if (!foundFreePoint ||
+                        std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                        nearestAltitude = altitude;
+                        nearestFreePoint = spatial::GridPoint(x, lower_y);
+                        foundFreePoint = true;
+                    }
+                } else {
+                    if (!foundFreePoint &&
+                        std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                        nearestAltitude = altitude;
+                        nearestFreePoint = spatial::GridPoint(x, lower_y);
+                    }
+                }
+            }
+        }
+
+        if (valid_upper_x) {
+            for (unsigned int y = lower_y; y <= upper_y; y++) {
+                double altitude = getProperFreePointAltitude(spatial::GridPoint(upper_x, y), pt, delta);
+                if (altitude + _agentHeight >= destAltitude) {
+                    if (!foundFreePoint ||
+                        std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                        nearestAltitude = altitude;
+                        nearestFreePoint = spatial::GridPoint(upper_x, y);
+                        foundFreePoint = true;
+                    }
+                } else {
+                    if (!foundFreePoint &&
+                        std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                        nearestAltitude = altitude;
+                        nearestFreePoint = spatial::GridPoint(upper_x, y);
+                    }
+                }
+            }
+        }
+
+        if (valid_upper_y) {
+            for (unsigned int x = lower_x; x <= upper_x; x++) {
+                double altitude = getProperFreePointAltitude(spatial::GridPoint(x, upper_y), pt, delta);
+                if (altitude + _agentHeight >= destAltitude) {
+                    if (!foundFreePoint ||
+                        std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                        nearestAltitude = altitude;
+                        nearestFreePoint = spatial::GridPoint(x, upper_y);
+                        foundFreePoint = true;
+                    }
+                } else {
+                    if (!foundFreePoint &&
+                        std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
+                        nearestAltitude = altitude;
+                        nearestFreePoint = spatial::GridPoint(x, upper_y);
+                    }
                 }
             }
         }
     }
 
-    if (valid_lower_y) {
-        for (unsigned int x = lower_x; x <= upper_x; x++) {
-            double altitude = getProperFreePointAltitude(spatial::GridPoint(x, lower_y), pt, delta);
-            if (altitude + _agentHeight >= destAltitude) {
-                if (!foundFreePoint ||
-                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
-                    nearestAltitude = altitude;
-                    nearestFreePoint = spatial::GridPoint(x, lower_y);
-                    foundFreePoint = true;
-                }
-            } else {
-                if (!foundFreePoint &&
-                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
-                    nearestAltitude = altitude;
-                    nearestFreePoint = spatial::GridPoint(x, lower_y);
-                }
-            }
-        }
+    if (!foundFreePoint) { // Goal point can not be reached from free point.
+        throw opencog::RuntimeException(TRACE_INFO,
+                                        "LocalSpaceMap2D - Could not find the nearest valid grid point from (%u,%u)",
+                                        pt.get<0>(), pt.get<1>());
     }
 
-    if (valid_upper_x) {
-        for (unsigned int y = lower_y; y <= upper_y; y++) {
-            double altitude = getProperFreePointAltitude(spatial::GridPoint(upper_x, y), pt, delta);
-            if (altitude + _agentHeight >= destAltitude) {
-                if (!foundFreePoint ||
-                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
-                    nearestAltitude = altitude;
-                    nearestFreePoint = spatial::GridPoint(upper_x, y);
-                    foundFreePoint = true;
-                }
-            } else {
-                if (!foundFreePoint &&
-                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
-                    nearestAltitude = altitude;
-                    nearestFreePoint = spatial::GridPoint(upper_x, y);
-                }
-            }
-        }
-    }
-
-    if (valid_upper_y) {
-        for (unsigned int x = lower_x; x <= upper_x; x++) {
-            double altitude = getProperFreePointAltitude(spatial::GridPoint(x, upper_y), pt, delta);
-            if (altitude + _agentHeight >= destAltitude) {
-                if (!foundFreePoint ||
-                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
-                    nearestAltitude = altitude;
-                    nearestFreePoint = spatial::GridPoint(x, upper_y);
-                    foundFreePoint = true;
-                }
-            } else {
-                if (!foundFreePoint &&
-                    std::abs(altitude - destAltitude) < std::abs(nearestAltitude - destAltitude)) {
-                    nearestAltitude = altitude;
-                    nearestFreePoint = spatial::GridPoint(x, upper_y);
-                }
-            }
-        }
-    }
 
     spatial::Point freePoint2D = unsnap(nearestFreePoint);
     spatial::Point3D freePoint3D = spatial::Point3D(freePoint2D.first, freePoint2D.second, nearestAltitude);
-    if (foundFreePoint) { // Goal point can be reached from free point.
-        if (std::abs(nearestAltitude - destAltitude) <= _agentHeight/2) { // at the same altitude level
-            return pt;
-        }
+
+    if (std::abs(nearestAltitude - destAltitude) <= _agentHeight) { // at the same altitude level
+        return pt;
     }
     return freePoint3D;
 }
@@ -592,7 +600,7 @@ double LocalSpaceMap2D::getProperFreePointAltitude(const spatial::GridPoint& gp,
 
     double topSurface = _floorHeight;
     std::vector<spatial::Gradient> grads = getObjectGradientsByGridPoint(gp);
-    std::vector<spatial::Gradient>::iterator it = grads.begin();
+    std::vector<spatial::Gradient>::const_iterator it = grads.begin();
     for (; it != grads.end(); it++) {
         if (topSurface + _agentHeight > it->first) {
             // The agent is not able to stand on this point because the roof of
@@ -678,7 +686,7 @@ double LocalSpaceMap2D::getProperDestAltitude(const spatial::GridPoint &src, con
     } else {
         double topSurface = _floorHeight;
         std::vector<spatial::Gradient> grads = getObjectGradientsByGridPoint(dest);
-        std::vector<spatial::Gradient>::iterator it = grads.begin();
+        std::vector<spatial::Gradient>::const_iterator it = grads.begin();
         for (; it != grads.end(); it++) {
             if (srcHeight >= it->first) {
                 // bottom surface is lower than src altitude, then the altitude of
