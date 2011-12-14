@@ -1,8 +1,8 @@
 ;
 ; Demand updaters
 ;
-; @author Zhenhua Cai czhedu@gmail.com
-; @date   2011-11-15
+; @author Jinhua Chua <JinhuaChua@gmail.com>
+; @date   2011-12-09
 ;
 
 (define (EnergyDemandUpdater)
@@ -79,9 +79,9 @@
          (set! change_with_tv_level
              (/ 1
                 (+ 1 
-                   (* 0.01 
-                      (+ (length changes_with_tv) (* 5 (random:uniform)) )
-                      (+ (length changes_with_tv) (* 5 (random:uniform)) )
+                   (* 0.001 
+                      (+ (length changes_with_tv) (* 20 (random:uniform)) )
+                      (+ (length changes_with_tv) (* 20 (random:uniform)) )
                    )  
                 )
              )
@@ -90,17 +90,18 @@
          (set! change_with_arg_level
              (/ 1
                 (+ 1 
-                   (* 0.01 
-                      (+ (length changes_with_arg) (* 5 (random:uniform)) )
-                      (+ (length changes_with_arg) (* 5 (random:uniform)) )
+                   (* 0.001
+                      (+ (length changes_with_arg) (* 1 (random:uniform)) )
+                      (+ (length changes_with_arg) (* 1 (random:uniform)) )
                    )  
                 )
              )
          )
 
          ; Return certainty level
-         (+ (* 0.3 change_with_tv_level) 
-            (* 0.7 change_with_arg_level)
+         (+ (* 0.45 change_with_tv_level) 
+            (* 0.35 change_with_arg_level)
+            (* 0.20 (get_truth_value_mean (cog-tv CertaintyDemandGoal)) )
          )
     ) 
 )
@@ -241,6 +242,11 @@
 ;); define 
 
 ; PAI::setActionPlanStatus is responsible for creating actionDone/ actionFailed predicates
+; 
+; Plot the graph in gnuplot
+; set contour both; set grid; set xlabel "Action Done";set ylabel "Action Fail"; set zlabel "Competence";
+; set xrange [0:100]; set yrange [0:100]; set isosample 50, 50; splot x/(x+y**1.5)
+;
 (define (CompetenceDemandUpdater)
     (let* ( (plan_done_at_time_link_list 
                 (query_atom_space (find_at_time_link "actionDone") ) 
@@ -258,21 +264,26 @@
           ; numbers while division. That is return 0.33333, rather than 1/3, 
           ; which will confuse the caller via cpp code. 
           (set! plan_done_number
-              (+ plan_done_number 7.0123)
+              (+ plan_done_number 
+                 (* (random:uniform) 2) 
+                 3.0123 
+              )
           )
 
-;          (set! plan_failed_number
-;              (+ plan_failed_number 0.0123) 
-;          )
+          (set! plan_failed_number
+              (+ plan_failed_number 
+                 (* (random:uniform) 1) 
+                 0.0123
+              ) 
+          )
 
           (/ plan_done_number
-             (+ plan_done_number (* 2.5 plan_failed_number) )
+             (+ plan_done_number (expt plan_failed_number 1.5) )
           )
-    )     
-)
-
-; TODO: TestEnergy is only used for debugging. Remove it once finished. 
-(define (TestEnergyDemandUpdater)
-    (random:uniform) 
+;
+;          (/ plan_done_number
+;             (+ plan_done_number (* 4 plan_failed_number) )
+;          )
+    ); let*
 )
 

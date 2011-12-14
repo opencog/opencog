@@ -2,7 +2,7 @@
 ; Modulator updaters
 ;
 ; @author Jinhua Chua <JinhuaChua@gmail.com>
-; @date   2011-11-22
+; @date   2011-12-09
 ;
 
 ; I borrow a few equations from the paper below
@@ -16,9 +16,16 @@
 ;
 
 (define (ActivationModulatorUpdater)
-    (* (get_truth_value_mean (cog-tv CertaintyDemandGoal))
-           (expt (get_truth_value_mean (cog-tv CompetenceDemandGoal)) 0.5)
-    )       
+;    (* (get_truth_value_mean (cog-tv CertaintyDemandGoal))
+;           (expt (get_truth_value_mean (cog-tv CompetenceDemandGoal)) 0.5)
+;    )       
+    (let ( (competence (get_truth_value_mean (cog-tv CompetenceDemandGoal)) )
+           (energy (get_truth_value_mean (cog-tv EnergyDemandGoal)) )
+         )
+         (* (/ competence (+ competence 0.5) )
+            (/ energy (+ 0.05 energy) )
+         )
+    )
 )
 
 ; Resolution level affects perception. 
@@ -37,14 +44,20 @@
 ; i.e. in the face of urgency, there will be less orientation. 
 ; It also depends on the uncertainty in the current context.
 ; An undetermined environment requires more orientation, i.e. lower securing threshold. 
+; Finally, it relates with Integrity. When the agetn gets hurt (lower Integriry), it
+; concerns more about background changes, that is lower securing threshold. 
 
 (define (SecuringThresholdModulatorUpdater)
-    (normalize (/ (+ (get_truth_value_mean (cog-tv CertaintyDemandGoal)) 1)
-                  (+ (get_pleasure_value) 1)
-               )
-
-               0.5
-               2
+;    (* (expt (get_truth_value_mean (cog-tv CertaintyDemandGoal)) 0.5)
+;       (expt (get_truth_value_mean (cog-tv IntegrityDemandGoal)) 2)
+;    )
+    (let ( (certainty (get_truth_value_mean (cog-tv CertaintyDemandGoal)) )
+           (integrity (get_truth_value_mean (cog-tv IntegrityDemandGoal)) )
+         )
+;         (* (/ certainty (+ certainty 0.05) )
+;            (expt integrity 3)
+;         )
+         (expt integrity 3)
     )
 )
 
@@ -53,14 +66,28 @@
 ; A higher selection threshold leads to "stubbornness", makes it harder to switch motives (Demand Goals), 
 ; then oscillations can be avoided.
 ; While a lower one results in opportunism/flexibility, or even motive fluttering. 
+; Lower competence causes lower selection threshold, that is tend to more random behaviour. 
 
 (define (SelectionThresholdModulatorUpdater)
-    (clip_within (* (+ (get_latest_predicate_truth_value_mean "SelectionThresholdModulator") 0.5)
-                    (+ (get_latest_predicate_truth_value_mean "ActivationModulator") 0.1)
-                 )
+;    (clip_within (* (+ (get_truth_value_mean (cog-tv CompetenceDemandGoal)) 0.1)
+;                    (+ (get_latest_predicate_truth_value_mean "ActivationModulator") 0.3)
+;                 )
+;
+;                 0.001
+;                 1
+;    )
 
-                 0.001
-                 1
+;    (let ( (competence (get_truth_value_mean (cog-tv CompetenceDemandGoal)) )
+;           (activation (get_latest_predicate_truth_value_mean "ActivationModulator") )
+;         )
+;         (* (/ activation (+ activation 0.05) )
+;            (expt competence 2)
+;         )
+;    )
+
+    (let ( (competence (get_truth_value_mean (cog-tv CompetenceDemandGoal)) )
+         )
+         (fuzzy_equal competence 1 15)
     )
 )
 

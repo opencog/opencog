@@ -2,7 +2,7 @@
 ; Feeling updaters
 ;
 ; @author Jinhua Chua <JinhuaChua@gmail.com>
-; @date   2011-11-22
+; @date   2011-12-09
 ;
 
 ; How emotions emerge from the system?
@@ -48,16 +48,17 @@
 ; Step 2 in detail:
 ;
 ; Different emotions with their corresponding occupation in the space spanned by the dimentions above.
+; ( Note: We only tuned parameters for happy, sad, anger and fear )
 ;       
 ;   Emotion       ||    Activation    Resolution    SecuringThreshold    SelectionThreshold    Pleasure
 ;  ======================================================================================================
-;   anger         ||        H             L                H                      L                L
+;   happiness     ||        H             L                                       H                H
 ;  ------------------------------------------------------------------------------------------------------ 
-;   fear          ||        H             L                L                      H                L 
+;   sadness       ||        L             H                                       EL               EL
 ;  ------------------------------------------------------------------------------------------------------ 
-;   happiness     ||        H             L                H                      H                H
+;   anger         ||        H             L                                       L                EL
 ;  ------------------------------------------------------------------------------------------------------ 
-;   sadness       ||        L             H                L                      L                L
+;   fear          ||        EL            EH               L                                       EL 
 ;  ------------------------------------------------------------------------------------------------------ 
 ;   excitement    ||        H             L                                       L                EH/EL  
 ;  ------------------------------------------------------------------------------------------------------ 
@@ -93,23 +94,23 @@
 (define (modulator_to_feeling_dimension modulator_value indicator)
     (cond
         ( (= indicator modulator_extremely_low_indicator)
-          (fuzzy_low modulator_value modulator_extremely_low_threshold 150)
+          (fuzzy_low modulator_value modulator_extremely_low_threshold 50)
         )
 
         ( (= indicator modulator_low_indicator)
-          (fuzzy_low modulator_value modulator_low_threshold 150)
+          (fuzzy_low modulator_value modulator_low_threshold 50)
         )
 
         ( (= indicator modulator_medium_indicator)
-          (fuzzy_equal modulator_value modulator_medium_threshold 150)
+          (fuzzy_equal modulator_value modulator_medium_threshold 50)
         )
 
         ( (= indicator modulator_high_indicator)
-          (fuzzy_high modulator_value modulator_high_threshold 150)
+          (fuzzy_high modulator_value modulator_high_threshold 50)
         )
 
         ( (= indicator modulator_extremely_high_indicator)
-          (fuzzy_high modulator_value modulator_extremely_high_threshold 150)
+          (fuzzy_high modulator_value modulator_extremely_high_threshold 50)
         )
 
         ( else 
@@ -166,45 +167,45 @@
 )
 
 ; Feeling updaters    
-(define (angerFeelingUpdater)
-    (feeling_calculator modulator_high_indicator
-                        modulator_low_indicator
-                        modulator_high_indicator
-                        modulator_low_indicator
-                        modulator_low_indicator
-                        5
-    )
-)
-
-(define (fearFeelingUpdater) 
-    (feeling_calculator modulator_high_indicator
-                        modulator_low_indicator
-                        modulator_low_indicator
-                        modulator_high_indicator
-                        modulator_low_indicator
-                        5
-    )
-)
-
 (define (happinessFeelingUpdater) 
     (feeling_calculator modulator_high_indicator
                         modulator_low_indicator
+                        modulator_undefined_indicator 
                         modulator_high_indicator
                         modulator_high_indicator
-                        modulator_high_indicator
-                        5
+                        4
     )
 )    
 
 (define (sadnessFeelingUpdater) 
     (feeling_calculator modulator_low_indicator
                         modulator_high_indicator
-                        modulator_low_indicator
-                        modulator_low_indicator
-                        modulator_low_indicator
-                        5
+                        modulator_undefined_indicator
+                        modulator_extremely_low_indicator
+                        modulator_extremely_low_indicator
+                        4
     )
 )    
+
+(define (angerFeelingUpdater)
+    (feeling_calculator modulator_high_indicator
+                        modulator_low_indicator
+                        modulator_undefined_indicator
+                        modulator_low_indicator
+                        modulator_extremely_low_indicator
+                        4
+    )
+)
+
+(define (fearFeelingUpdater) 
+    (feeling_calculator modulator_extremely_low_indicator
+                        modulator_extremely_high_indicator
+                        modulator_low_indicator
+                        modulator_undefined_indicator
+                        modulator_extremely_low_indicator
+                        4
+    )
+)
 
 (define (excitementFeelingUpdater) 
     (max (feeling_calculator modulator_high_indicator

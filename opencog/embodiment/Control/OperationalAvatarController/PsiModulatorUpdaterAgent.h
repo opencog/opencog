@@ -125,6 +125,8 @@ private:
 
     };// class Modulator
 
+    double pleasure; 
+
     unsigned long cycleCount;
 
     std::vector<Modulator> modulatorList;  // List of Modulators

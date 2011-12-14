@@ -2,7 +2,7 @@
 ; @file embodiment/pet_rules.scm
 ;
 ; @author Jinhua Chua <JinhuaChua@gmail.com>
-; @date   2011-12-05
+; @date   2011-12-09
 ;
 ; Scheme scripts for adding Modulators, Demands and Rules into the AtomSpace.
 ;
@@ -83,7 +83,7 @@
 ;
 
 (define ActivationModulator 
-    (add_modulator "ActivationModulator" 0.6)
+    (add_modulator "ActivationModulator" 0.85)
 )
 
 (define ResolutionModulator 
@@ -91,7 +91,7 @@
 )
 
 (define SecuringThreshold 
-    (add_modulator "SecuringThresholdModulator"  0.35)
+    (add_modulator "SecuringThresholdModulator"  0.60)
 )
 
 (define SelectionThresholdModulator 
@@ -127,7 +127,7 @@
 )
 
 (define IntegrityDemandSchema
-    (add_demand_schema "IntegrityDemand" 0.8)
+    (add_demand_schema "IntegrityDemand" 0.85)
 )
 
 (define AffiliationDemandSchema
@@ -135,11 +135,11 @@
 )
 
 (define CertaintyDemandSchema
-    (add_demand_schema "CertaintyDemand" 0.65)
+    (add_demand_schema "CertaintyDemand" 0.50)
 )
 
 (define CompetenceDemandSchema
-    (add_demand_schema "CompetenceDemand" 0.65)
+    (add_demand_schema "CompetenceDemand" 0.60)
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -291,7 +291,7 @@
 
 (connect_goal_updater
      IntegrityDemandGoal
-     (add_goal (GroundedPredicateNode "fuzzy_within") 0.8 1.0 IntegrityDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.80 1.0 IntegrityDemandSchema)
 )
 
 (connect_goal_updater   
@@ -301,12 +301,12 @@
 
 (connect_goal_updater
      CertaintyDemandGoal
-     (add_goal (GroundedPredicateNode "fuzzy_within") 0.6 1.0 CertaintyDemandSchema)
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.70 1.0 CertaintyDemandSchema)
 )
 
 (connect_goal_updater
      CompetenceDemandGoal 
-     (add_goal (GroundedPredicateNode "fuzzy_within") 0.75 1.0 CompetenceDemandSchema) 
+     (add_goal (GroundedPredicateNode "fuzzy_within") 0.80 1.0 CompetenceDemandSchema) 
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -471,7 +471,29 @@
     )
 )
 
+(define random_build_destroy_blocks
+    (SequentialAndLink
+        random_rotate
+        (build_dark_block (NumberNode "1") )
+        (OrLink
+            (SequentialAndLink
+                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+                (build_dark_block (NumberNode "0") )
+            )
+            (SequentialAndLink
+                (add_action (GroundedSchemaNode "destroy_block") ) 
+                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+            )
+            (SequentialAndLink
+                (add_action (GroundedSchemaNode "destroy_block") ) 
+                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+            )
+        )
+    )        
+)    
+
 (define random_search
+;    random_build_destroy_blocks
     (SequentialAndLink
         random_rotate
         (add_action (GroundedSchemaNode "step_forward") ) 
@@ -637,12 +659,12 @@
 )
 
 ; TODO: very simple rules only for testing dialog_system
-(add_rule (stv 0.6 1.0) GetFoodGoal
+(add_rule (stv 0.3 1.0) GetFoodGoal
     (add_action (SpeechActSchemaNode "AskForFood") )
     NULL_PRECONDITION
 )
 
-(add_rule (stv 0.3 1.0) GetFoodGoal
+(add_rule (stv 0.5 1.0) GetFoodGoal
     (SequentialAndLink
         (add_action (GroundedSchemaNode "lick") ) 
     )    
@@ -725,27 +747,6 @@
 ;
 ; Rules related to CertaintyDemandGoal
 ;
-
-(define random_build_destroy_blocks
-    (SequentialAndLink
-        random_rotate
-        (build_dark_block (NumberNode "1") )
-        (OrLink
-            (SequentialAndLink
-                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-                (build_dark_block (NumberNode "0") )
-            )
-            (SequentialAndLink
-                (add_action (GroundedSchemaNode "destroy_block") (NumberNode "1") ) 
-                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-            )
-            (SequentialAndLink
-                (add_action (GroundedSchemaNode "destroy_block") (NumberNode "1") ) 
-                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-            )
-        )
-    )        
-)    
 
 (define build_jump_line_ladder
     (SequentialAndLink

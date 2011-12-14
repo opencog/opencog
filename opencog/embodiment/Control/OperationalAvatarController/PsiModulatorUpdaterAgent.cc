@@ -164,6 +164,8 @@ void PsiModulatorUpdaterAgent::publishUpdatedValue(Plaza & plaza,
         jsonObj.push_back( Pair( modulator.getModulatorName(), modulator.getModulatorLevel() ) );
     }
 
+    jsonObj.push_back( Pair("Pleasure", this->pleasure) ); 
+
     // Publish the data packed in json format
     std::string dataString = write_formatted(jsonObj);
     plaza.publishString(publisher, dataString);
@@ -262,6 +264,27 @@ void PsiModulatorUpdaterAgent::run(opencog::CogServer * server)
     foreach (Modulator & modulator, this->modulatorList) {
         modulator.updateModulator(atomSpace, timeStamp);
     }
+
+#if HAVE_GUILE    
+    // Initialize scheme evaluator
+    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);    
+    std::string scheme_expression, scheme_return_value;
+
+    scheme_expression = "( get_pleasure_value )";
+
+    // Run the scheme procedure
+    scheme_return_value = evaluator.eval(scheme_expression);
+
+    if ( evaluator.eval_error() ) {
+        logger().error( "PsiModulatorUpdaterAgent::Modulator::%s - Failed to execute '%s'", 
+                         __FUNCTION__, 
+                         scheme_expression.c_str() 
+                      );
+    }
+
+    this->pleasure = atof( scheme_return_value.c_str() ); 
+#endif // HAVE_GUILE    
+
 
 #ifdef HAVE_ZMQ    
     // Publish updated modulator values via ZeroMQ

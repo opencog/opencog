@@ -654,6 +654,8 @@
              )
              (previous_demand_satisfaction (random:uniform) ) ; initialize with random values
              (current_demand_satisfaction (random:uniform) )
+             (energy (get_truth_value_mean (cog-tv EnergyDemandGoal)) )
+             (integrity (get_truth_value_mean (cog-tv IntegrityDemandGoal)) )
           )
 
           ; set previous demand satisfaction (if available)
@@ -671,8 +673,10 @@
           )
 
           ; return the pleasure depending on previous and current demand satisfactions
-          (+ (* 0.35 current_demand_satisfaction)
-             (* 0.65 previous_demand_satisfaction)
+          (+ (* 0.25 current_demand_satisfaction)
+             (* 0.15 previous_demand_satisfaction)
+             (* 0.6 energy) ; we concern more on the energy demand, so use it to bias the plesaure value
+;             (* 0.3 integrity)
           )
     ) 
 )
