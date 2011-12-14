@@ -27,19 +27,325 @@
 #include <fstream>
 
 #include <boost/iterator/counting_iterator.hpp>
+#include <boost/range/algorithm/transform.hpp>
+#include <boost/range/adaptor/map.hpp>
 #include <boost/tokenizer.hpp>
 
 #include <opencog/util/RandGen.h>
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/dorepeat.h>
+#include <opencog/util/Counter.h>
 
 #include "eval.h"
 #include "vertex.h"
 #include "common_def.h"
 
+#define COEF_SAMPLE_COUNT 20.0 // involved in the formula that counts
+                               // the number of trials needed to check
+                               // a formula
+
 namespace opencog { namespace combo {
 
 using boost::variant;
+using boost::adaptors::map_values;
+
+///////////////////
+// Generic table //
+///////////////////
+
+static const std::string default_input_label("i");
+
+/// Contain a compressed table, for instance if the following table
+/// is:
+///
+/// o,i1,i2
+/// 1,1,0
+/// 0,1,1
+/// 1,1,0
+/// 0,1,0
+///
+/// the compressed table is
+///
+/// o,i1,i2
+/// {0:1,1:2},1,0
+/// {0:1},1,1
+///
+/// that is the duplicated inputs are removed and the output is
+/// replaced by a counter of the false ones and the true ones
+/// respectively.
+class CTable : public std::map<vertex_seq, std::map<vertex, unsigned> > {
+public:
+    typedef vertex_seq key_type;
+    typedef std::map<vertex, unsigned> mapped_type;
+    typedef std::map<key_type, mapped_type> super;
+
+    std::string olabel;               // output label
+    std::vector<std::string> ilabels; // list of input labels
+
+    CTable(const std::string& _olabel, const std::vector<std::string>& _ilabels)
+        : olabel(_olabel), ilabels(_ilabels) {}
+
+    binding_map get_binding_map(const key_type& args) const {
+        binding_map bmap;
+        for(size_t i = 0; i < args.size(); ++i)
+            bmap[i+1] = args[i];
+        return bmap;
+    }
+};
+
+/**
+ * Matrix of vertexes.
+ * Rows represent samples.
+ * Columns represent input variables
+ * Optionally a list of labels (input variable names)
+ */
+class ITable : public std::vector<vertex_seq> {
+public:
+    typedef std::vector<vertex_seq > super;
+    ITable();
+    ITable(const super& mat,
+           std::vector<std::string> il = std::vector<std::string>());
+    /**
+     * generate an input table according to the signature tt.
+     *
+     * @param tt signature of the table to generate
+     * @param nsamples sample size, if negative then the sample size is automatically determined
+     * @param min_contin minimum contin value
+     * @param max_contin maximum contin value
+     */
+    // min_contin and max_contin are used in case tt has contin inputs
+    ITable(const type_tree& tt, RandGen& rng, int nsamples = -1,
+           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
+    // set input labels
+    void set_labels(std::vector<std::string> il) {
+        labels = il;
+    }
+    const std::vector<std::string>& get_labels() const {
+        if(labels.empty() and !super::empty()) { // return default labels
+            static const std::vector<std::string> dl(get_default_labels());
+            return dl;
+        } else return labels;
+    }
+    // like get_labels but filter accordingly to a container of arity_t
+    template<typename F>
+    std::vector<std::string> get_filtered_labels(const F& filter) {
+        std::vector<std::string> res;
+        foreach(arity_t a, filter)
+            res.push_back(get_labels()[a]);
+        return res;
+    }
+    // get binding map prior calling the combo evaluation
+    binding_map get_binding_map(const vertex_seq& args) const {
+        binding_map bmap;
+        for(arity_t i = 0; i < (arity_t)args.size(); ++i)
+            bmap[i+1] = args[i];
+        return bmap;
+    }
+    arity_t get_arity() const {
+        return super::front().size();
+    }
+    bool operator==(const ITable& rhs) const {
+        return 
+            static_cast<const super&>(*this) == static_cast<const super&>(rhs)
+            && get_labels() == rhs.get_labels();
+    }
+    /// return a copy of the input table filtered according to a given
+    /// container of arity_t
+    template<typename F>
+    ITable filter(const F& f) {
+        ITable res;
+        res.set_labels(get_filtered_labels(f));
+        foreach(const typename super::value_type& row, *this) {
+            vertex_seq new_row;
+            foreach(arity_t a, f)
+                new_row.push_back(row[a]);
+            res.push_back(new_row);
+        }
+        return res;
+    }
+protected:
+    std::vector<std::string> labels; // list of input labels
+private:
+    std::vector<std::string> get_default_labels() const {
+        std::vector<std::string> res;
+        for(arity_t i = 1; i <= get_arity(); ++i)
+            res.push_back(default_input_label 
+                          + boost::lexical_cast<std::string>(i));
+        return res;
+    }
+    /**
+     * this function take an arity in input and returns in output the
+     * number of samples that would be appropriate to check the semantics
+     * of its associated tree.
+     *
+     * Note : could take the two trees to checking and according to their
+     * arity structure, whatever, find an appropriate number.
+     */
+    unsigned sample_count(arity_t contin_arity)
+    {
+        if (contin_arity == 0)
+            return 1;
+        else return COEF_SAMPLE_COUNT*log(contin_arity + EXPONENTIAL);
+    }
+
+};
+        
+static const std::string default_output_label("output");
+        
+class OTable : public vertex_seq {
+    typedef vertex_seq super;
+public:
+    typedef vertex value_type;
+
+    OTable(const std::string& ol = default_output_label);
+    OTable(const super& ot, const std::string& ol = default_output_label);
+    OTable(const combo_tree& tr, const ITable& itable, RandGen& rng);
+    OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng);
+    template<typename Func>
+    OTable(const Func& f, const ITable& it) {
+        foreach(const vertex_seq& vs, it)
+            push_back(f(vs.begin(), vs.end()));        
+    }
+
+    void set_label(const std::string& ol) { label = ol; }
+    std::string& get_label() { return label; }
+    const std::string& get_label() const { return label; }
+    bool operator==(const OTable& rhs) const;
+    contin_t abs_distance(const OTable& ot) const;
+    contin_t sum_squared_error(const OTable& ot) const;
+    contin_t mean_squared_error(const OTable& ot) const;
+    contin_t root_mean_square_error(const OTable& ot) const;
+private:
+    std::string label; // output label
+};
+
+struct Table {
+    typedef vertex value_type;
+
+    Table();
+    Table(const combo_tree& tr, RandGen& rng, int nsamples = -1,
+          contin_t min_contin = -1.0, contin_t max_contin = 1.0);
+    size_t size() const { return itable.size(); }
+    arity_t get_arity() const { return itable.get_arity(); }
+    template<typename F> Table filter(const F& f) {
+        Table res;
+        res.itable = itable.filter(f);
+        res.otable = otable;
+        return res;
+    }
+    /// return the corresponding compressed table 
+    CTable compress() const;
+
+    type_tree tt;
+    ITable itable;
+    OTable otable;
+};
+
+////////////////////////
+// Mutual Information //
+////////////////////////
+
+/**
+ * Compute the entropy H(Y) of an output table. It assumes the data
+ * are discretized.
+ */
+double OTEntropy(const OTable& ot);
+
+/**
+ * Given a feature set X1, ..., Xn provided a set of indices of the
+ * column of an input table of type IT, and an output feature Y
+ * provided by the output table of type OT, compute the mutual
+ * information
+ *
+ * MI(X1, ..., Xn; Y)
+ *
+ * @note only works for discrete data set.
+ */
+template<typename FeatureSet>
+double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& fs) {
+    // the following mapping is used to keep track of the number
+    // of inputs a given setting. For instance X1=false, X2=true,
+    // X3=true is one possible setting. It is then used to compute
+    // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
+    typedef Counter<vertex_seq, unsigned> VSCounter;
+    VSCounter ic, // for H(X1, ..., Xn)
+        ioc; // for H(Y, X1, ..., Xn)
+    ITable::const_iterator i_it = it.begin();
+    OTable::const_iterator o_it = ot.begin();
+    for(; i_it != it.end(); ++i_it, ++o_it) {
+        vertex_seq ic_vec;
+        foreach(const typename FeatureSet::value_type& idx, fs)
+            ic_vec.push_back((*i_it)[idx]);
+        ++ic[ic_vec];
+        vertex_seq ioc_vec(ic_vec);
+        ioc_vec.push_back(*o_it);
+        ++ioc[ioc_vec];
+    }
+    // Compute the probability distributions
+    std::vector<double> ip(ic.size()), iop(ioc.size());
+    double total = it.size();
+    auto div_total = [&](unsigned c) { return c/total; };
+    transform(ic | map_values, ip.begin(), div_total);
+    transform(ioc | map_values, iop.begin(), div_total);
+    // Compute the entropies
+    return entropy(ip) + OTEntropy(ot) - entropy(iop);
+}
+
+// like above but taking a table in argument instead of input and output tables
+template<typename FeatureSet>
+double mutualInformation(const Table& table, const FeatureSet& fs) {
+    return mutualInformation(table.itable, table.otable, fs);
+}
+
+/**
+ * Like above but uses a compressed table instead of input and output
+ * table. It assumes the output is boolean. The CTable cannot be
+ * passed as const because the use of the operator[] may modify it's
+ * content (by adding default value on missing keys).
+ */
+template<typename FeatureSet>
+double mutualInformation(CTable& ctable, const FeatureSet& fs) {
+    // the following mapping is used to keep track of the number
+    // of inputs a given setting. For instance X1=false, X2=true,
+    // X3=true is one possible setting. It is then used to compute
+    // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
+    typedef Counter<vertex_seq, unsigned> VSCounter;
+    VSCounter ic, // for H(X1, ..., Xn)
+        ioc; // for H(Y, X1, ..., Xn)
+    unsigned oc = 0; // for H(Y)
+    double total = 0;
+    foreach(auto& row, ctable) {
+        unsigned falses = row.second[id::logical_false];
+        unsigned trues = row.second[id::logical_true];
+        unsigned row_total = falses + trues;
+        // update ic
+        vertex_seq vec;
+        foreach(unsigned idx, fs)
+            vec.push_back(row.first[idx]);
+        ic[vec] += row_total;
+        // update ioc
+        if(falses > 0) {
+            vec.push_back(false);
+            ioc[vec] += falses;
+            vec.pop_back();
+        }
+        if(trues > 0) {
+            vec.push_back(true);
+            ioc[vec] += trues;
+        }
+        // update oc
+        oc += trues;
+        // update total
+        total += row_total;
+    }
+    // Compute the probability distributions
+    std::vector<double> ip(ic.size()), iop(ioc.size());
+    auto div_total = [&](unsigned c) { return c/total; };
+    transform(ic | map_values, ip.begin(), div_total);
+    transform(ioc | map_values, iop.begin(), div_total);
+    // Compute the entropies
+    return entropy(ip) + binaryEntropy(oc/total) - entropy(iop);
+}
 
 //////////////////
 // istreamTable //
@@ -72,9 +378,31 @@ arity_t istreamArity(std::istream& in);
 arity_t dataFileArity(const std::string& dataFileName);
 
 /**
- * Infer the type of elements of the data file
+ * check if the data file has a header. That is whether the first row
+ * starts with a sequence of output and input labels
  */
-type_node inferDataType(const std::string& dataFileName);
+bool has_header(const std::string& dataFileName);
+
+/**
+ * Check the token, if it is "0" or "1" then it is boolean, otherwise
+ * it is contin. It is not 100% reliable of course and should be
+ * improved.
+ */
+type_node infer_type_from_token(const std::string& token);
+
+/**
+ * take a row in input as a pair {inputs, output} and return the type
+ * tree corresponding to the function mapping inputs to output. If the
+ * inference fails then it returns a type_tree with
+ * id::ill_formed_type as root.
+ */
+type_tree infer_row_type_tree(std::pair<std::vector<std::string>,
+                                        std::string>& row);
+
+/**
+ * Infer the type_tree of the function given underlying the data file
+ */
+type_tree infer_data_type_tree(const std::string& dataFileName, int pos = 0);
 
 /**
  * return the position of the target in the DSV data file fileName. If
@@ -128,303 +456,77 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0) {
 }
 
 /**
- * template to fill an input table (IT) and output table (OT) of type
- * T, given a DSV (delimiter-seperated values) file format, where
- * delimiters are ',', ' ' or '\t'.
- * 
+ * Fill an input table and output table given a DSV
+ * (delimiter-seperated values) file format, where delimiters are ',',
+ * ' ' or '\t'.
+ *
  * It is assumed that each row have the same number of columns, if not
  * an assert is raised.
  *
  * pos specifies the position of the output, if -1 it is the last
  * position. The default position is 0, the first column.
  */
-template<typename IT, typename OT>
-std::istream& istreamTable(std::istream& in, IT& input_table, OT& output_table,
-                           int pos = 0) {
-    typedef typename OT::value_type T;
-    std::string line;
-
-    ///////////////////////////////////////////////////
-    // first row, check if they are labels or values //
-    ///////////////////////////////////////////////////
-    getline(in, line);    
-    std::pair<std::vector<std::string>, std::string> ioh =
-        tokenizeRowIO<std::string>(line, pos);
-    try { // try to interpret then as values
-        std::vector<T> inputs;
-        foreach(auto& s, ioh.first)
-            inputs.push_back(boost::lexical_cast<T>(s));
-        T output = boost::lexical_cast<T>(ioh.second);
-        // they are values so we add them
-        input_table.push_back(inputs);
-        output_table.push_back(output);
-    } catch (boost::bad_lexical_cast &) { // not interpretable, they
-                                          // must be labels
-        input_table.set_labels(ioh.first);
-        output_table.set_label(ioh.second);
-    }
-    arity_t arity = ioh.first.size();
-    
-    //////////////////////////////////////////
-    // next rows, we assume they are values //
-    //////////////////////////////////////////
-    while (getline(in, line)) {
-        // tokenize the line and fill the input vector and output
-        std::pair<std::vector<T>, T> io = tokenizeRowIO<T>(line, pos);
-        
-        // check arity
-        OC_ASSERT(arity == (arity_t)io.first.size(),
-                  "The row %u has %u columns while the first row has %d"
-                  " columns, all rows should have the same number of"
-                  " columns", output_table.size(), io.first.size(), arity);
-        
-        // fill table
-        input_table.push_back(io.first);
-        output_table.push_back(io.second);
-    }
-    return in;
-}
+std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
+                           bool has_header, const type_tree& tt, int pos = 0);
 /**
  * like above but take an string (file name) instead of istream. If
  * the file name is not correct then an OC_ASSERT is raised.
  */
-template<typename IT, typename OT>
 void istreamTable(const std::string& file_name,
-                  IT& input_table, OT& output_table, int pos = 0) {
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    std::ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamTable(in, input_table, output_table, pos);
-}
+                  ITable& it, OTable& ot, int pos = 0);
+/**
+ * like above but return an object Table. 
+ */
+Table istreamTable(const std::string& file_name, int pos = 0);
 
 //////////////////
 // ostreamTable //
 //////////////////
 
 // output the header of a data table in CSV format.
-template<typename IT, typename OT>
-std::ostream& ostreamTableHeader(std::ostream& out, const IT& it, const OT& ot) {
-    out << ot.get_label() << ",";
-    return ostreamlnContainer(out, it.get_labels(), ",");
-}
+std::ostream& ostreamTableHeader(std::ostream& out,
+                                 const ITable& it, const OTable& ot);
 
-// output a data table in CSV format
-template<typename IT, typename OT>
-std::ostream& ostreamTable(std::ostream& out, const IT& it, const OT& ot) {
-    // print header
-    ostreamTableHeader(out, it, ot);
-    // print data
-    OC_ASSERT(it.size() == ot.size());
-    for(size_t row = 0; row < it.size(); ++row) {
-        out << ot[row] << ",";
-        ostreamlnContainer(out, it[row], ",");
-    }
-    return out;
-}
+// output a data table in CSV format. Boolean values are output in
+// binary form (0 for false, 1 for true)
+std::ostream& ostreamTable(std::ostream& out,
+                           const ITable& it, const OTable& ot);
 // like above but take a table instead of a input and output table
-template<typename Table>
-std::ostream& ostreamTable(std::ostream& out, const Table& table) {
-    return ostreamTable(out, table.input, table.output);
-}
+std::ostream& ostreamTable(std::ostream& out, const Table& table);
 
 // like above but takes the file name where to write the table
-template<typename IT, typename OT>
-void ostreamTable(const std::string& file_name, const IT& it, const OT& ot) {
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    std::ofstream out(file_name.c_str());
-    OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
-    ostreamTable(out, it, ot);
-}
+void ostreamTable(const std::string& file_name,
+                  const ITable& it, const OTable& ot);
 // like above but take a table instead of a input and output table
-template<typename Table>
-void ostreamTable(const std::string& file_name, const Table& table) {
-    ostreamTable(file_name, table.input, table.output);
-}
+void ostreamTable(const std::string& file_name, const Table& table);
 
-template<typename CT>
-std::ostream& ostreamCTableHeader(std::ostream& out, const CT& ct) {
-    out << ct.olabel << ",";
-    return ostreamlnContainer(out, ct.ilabels, ",");
-}
-        
+// like ostreamTableHeader but on a compressed table
+std::ostream& ostreamCTableHeader(std::ostream& out, const CTable& ct);
+
 // output a compress table in pseudo CSV format
-template<typename CT>
-std::ostream& ostreamCTable(std::ostream& out, const CT& ct) {
-    // print header
-    ostreamCTableHeader(out, ct);
-    // print data
-    foreach(const auto& v, ct) {
-        out << "{" << v.second.first << "," << v.second.second << "},";
-        ostreamlnContainer(out, v.first, ",");
-    }
-    return out;
-}
+std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
         
 /**
  * template to subsample input and output tables, after subsampling
  * the table have size min(nsamples, *table.size())
  */
-template<typename IT, typename OT>
-void subsampleTable(IT& it, OT& ot, unsigned int nsamples, RandGen& rng) {
-    OC_ASSERT(it.size() == ot.size());
-    if(nsamples < ot.size()) {
-        unsigned int nremove = ot.size() - nsamples;
-        dorepeat(nremove) {
-            unsigned int ridx = rng.randint(ot.size());
-            it.erase(it.begin()+ridx);
-            ot.erase(ot.begin()+ridx);
-        }
-    }
-}
+void subsampleTable(ITable& it, OTable& ot,
+                    unsigned int nsamples, RandGen& rng);
+
 /**
  * like above but subsample only the input table
  */
-template<typename IT>
-void subsampleTable(IT& input_table, unsigned int nsamples, RandGen& rng) {
-    if(nsamples < input_table.size()) {
-        unsigned int nremove = input_table.size() - nsamples;
-        dorepeat(nremove) {
-            unsigned int ridx = rng.randint(input_table.size());
-            input_table.erase(input_table.begin()+ridx);
-        }
-    }
-}
-
-///////////////////
-// Generic table //
-///////////////////
-
-static const std::string default_input_label("i");
-
-/**
- * Matrix of type T.
- * Rows represent samples.
- * Columns represent input variables
- * Optionally a list of labels (input variable names)
- */
-template<typename T>
-class input_table : public std::vector<std::vector<T> > {
-    typedef std::vector<std::vector<T> > super;
-public:
-    input_table() {}
-    input_table(const super& mt,
-                std::vector<std::string> il = std::vector<std::string>())
-        : super(mt), labels(il) {
-    }
-    // set input labels
-    void set_labels(std::vector<std::string> il) {
-        labels = il;
-    }
-    const std::vector<std::string>& get_labels() const {
-        if(labels.empty() and !super::empty()) { // return default labels
-            static const std::vector<std::string> dl(get_default_labels());
-            return dl;
-        } else return labels;
-    }
-    // like get_labels but filter accordingly to a container of arity_t
-    template<typename F>
-    std::vector<std::string> get_filtered_labels(const F& filter) {
-        std::vector<std::string> res;
-        foreach(arity_t a, filter)
-            res.push_back(get_labels()[a]);
-        return res;
-    }
-    // get binding map prior calling the combo evaluation
-    binding_map get_binding_map(const std::vector<T>& args) const {
-        binding_map bmap;
-        for(arity_t i = 0; i < (arity_t)args.size(); ++i)
-            bmap[i+1] = args[i];
-        return bmap;
-    }
-    arity_t get_arity() const {
-        return super::front().size();
-    }
-    bool operator==(const input_table<T>& rhs) const {
-        return 
-            static_cast<const super&>(*this) == static_cast<const super&>(rhs)
-            && get_labels() == rhs.get_labels();
-    }
-    /// return a copy of the input table filtered according to a given
-    /// container of arity_t
-    template<typename F>
-    input_table filter(const F& f) {
-        input_table res;
-        res.set_labels(get_filtered_labels(f));
-        foreach(const typename super::value_type& row, *this) {
-            std::vector<T> new_row;
-            foreach(arity_t a, f)
-                new_row.push_back(row[a]);
-            res.push_back(new_row);
-        }
-        return res;
-    }
-protected:
-    std::vector<std::string> labels; // list of input labels
-private:
-    std::vector<std::string> get_default_labels() const {
-        std::vector<std::string> res;
-        for(arity_t i = 1; i <= get_arity(); ++i)
-            res.push_back(default_input_label 
-                          + boost::lexical_cast<std::string>(i));
-        return res;
-    }
-};
-
-static const std::string default_output_label("output");
-
-template<typename T>
-class output_table : public std::vector<T> {
-    typedef std::vector<T> super;
-public:
-    typedef T value_type;
-
-    output_table(const std::string& ol = default_output_label)
-        : label(ol) {}
-    output_table(const super& ot, const std::string& ol = default_output_label)
-        : super(ot), label(ol) {}
-
-    void set_label(const std::string& ol) { label = ol; }
-    std::string& get_label() { return label; }
-    const std::string& get_label() const { return label; }
-    bool operator==(const output_table<T>& rhs) const {
-        return 
-            static_cast<const super&>(*this) == static_cast<const super&>(rhs)
-            && rhs.get_label() == label;
-    }
-private:
-    std::string label; // output label
-};
-
-template<typename IT, typename OT>
-struct table {
-    typedef IT InputTable;
-    typedef OT OutputTable;
-    typedef typename IT::value_type value_type;
-
-    table() {}
-    table(std::istream& in, int pos = 0) {
-        istreamTable(in, input, output, pos);
-    }
-    table(const std::string& file_name, int pos = 0) {
-        istreamTable(file_name, input, output, pos);
-    }
-    size_t size() const { return input.size(); }
-    arity_t get_arity() const { return input.get_arity(); }
-    template<typename F> table filter(const F& f) {
-        table res;
-        res.input = input.filter(f);
-        res.output = output;
-        return res;
-    }
-    IT input;
-    OT output;
-};
+void subsampleTable(ITable& it, unsigned int nsamples, RandGen& rng);
 
 /////////////////
 // Truth table //
 /////////////////
 
-//shorthands used by class contin_input_table and contin_output_table
+//////////////////////////////
+// probably soon deprecated //
+//////////////////////////////
+ 
+// shorthands used by class contin_input_table and contin_output_table
 typedef std::vector<bool> bool_vector;
 typedef bool_vector::iterator bv_it;
 typedef bool_vector::const_iterator bv_cit;
@@ -520,104 +622,14 @@ protected:
     mutable binding_map bmap;
 };
 
-
-/**
- * truth_input_table, matrix of booleans, each row corresponds to a
- * possible vector input
- */
-class truth_input_table : public input_table<bool> {
-    typedef input_table<bool> super;
-public:
-    truth_input_table() {}
-    truth_input_table(const super& it) : super(it) {}
-    // set binding prior calling the combo evaluation
-    binding_map get_binding_map(const std::vector<bool>& args) const {
-        binding_map bmap;
-        for(size_t i = 0; i < args.size(); ++i)
-            bmap[i+1] = bool_to_vertex(args[i]);
-        return bmap;
-    }
-};
-
-/// Struct to contain a compressed truth table, for instance if
-/// the following truth table is:
-///
-/// o,i1,i2
-/// 1,1,0
-/// 0,1,1
-/// 1,1,0
-/// 0,1,0
-///
-/// the compressed truth table is
-///
-/// o,i1,i2
-/// (1,2),1,0
-/// (1,0),1,1
-///
-/// that is the duplicated inputs are removed and the output is
-/// replaced by a counter of the false ones and the true ones
-/// respectively.
-///
-/// Note: this could be generalized using a mapping<T, unsigned> instead
-/// of std::pair for non-boolean case. Here with T = bool it's fine
-/// though.
-class ctruth_table : public std::map<std::vector<bool>, std::pair<unsigned, unsigned> > {
-public:
-    typedef std::vector<bool> key_type;
-    typedef std::pair<unsigned, unsigned> mapped_type;
-    typedef std::map<key_type, mapped_type> super;
-
-    std::string olabel;               // output label
-    std::vector<std::string> ilabels; // list of input labels
-
-    ctruth_table(const std::string& _olabel,
-                 const std::vector<std::string>& _ilabels)
-        : olabel(_olabel), ilabels(_ilabels) {}
-
-    binding_map get_binding_map(const key_type& args) const {
-        binding_map bmap;
-        for(size_t i = 0; i < args.size(); ++i)
-            bmap[i+1] = bool_to_vertex(args[i]);
-        return bmap;
-    }
-};
-
-/**
- * truth_output_table, column of result of a corresponding truth_input_table
- */
-struct truth_output_table : public output_table<bool> {
-    truth_output_table(const std::string& ol = default_output_label)
-        : output_table<bool>(ol) {}
-    truth_output_table(const bool_vector& bv,
-                        std::string ol = default_output_label)
-        : output_table<bool>(bv, ol) {}
-    truth_output_table(const combo_tree& tr,
-                       const truth_input_table& tti,
-                       RandGen& rng);
-    truth_output_table(const combo_tree& tr,
-                       const ctruth_table& ctt,
-                       RandGen& rng);
-    
-};
-
-class truth_table : public table<truth_input_table, truth_output_table> {
-    typedef table<truth_input_table, truth_output_table> super;
-public:
-    typedef ctruth_table CTable;
-
-    truth_table(const super& t) : super(t) {}
-    truth_table(std::istream& in, int pos = 0) : super(in, pos) {}
-    truth_table(const std::string& file_name, int pos = 0) :
-        super(file_name, pos) {}
-
-    /// return the corresponding compressed truth table 
-    CTable compress() const;
-};
-
 //////////////////
 // contin table //
 //////////////////
 
+//////////////////////////////
+// probably soon deprecated //
+//////////////////////////////
+ 
 //shorthands used by class contin_input_table and contin_output_table
 typedef std::vector<contin_t> contin_vector;
 typedef contin_vector::iterator cv_it;
@@ -626,334 +638,6 @@ typedef std::vector<contin_vector> contin_matrix;
 typedef contin_matrix::iterator cm_it;
 typedef contin_matrix::const_iterator const_cm_it;
 
-/*
-  class contin_input_table
-    matrix of randomly generated contin_t of sample_count rows and arity columns
-*/
-class contin_input_table : public input_table<contin_t>
-{
-    typedef input_table<contin_t> super;
-public:
-    // constructors
-    contin_input_table() {}
-    contin_input_table(const super& it) : super(it) {}
-    contin_input_table(int sample_count, int arity, RandGen& rng,
-                       double max_randvalue = 1.0, double min_randvalue = -1.0);
-};
-
-/*
-  class contin_output_table
-    contains sample_count evaluations obtained by evaluating t, a tree, over
-    a RndNumTable cti.
-    assumption : t has only contin inputs and output
-*/
-class contin_output_table : public output_table<contin_t>   //a column of results
-{
-public:
-    typedef output_table<contin_t> super;
-
-    //constructors
-    contin_output_table(const std::string& ol = default_output_label)
-        : super(ol) {}
-    contin_output_table(const contin_vector& cv,
-                        std::string ol = default_output_label) 
-        : super(cv, ol) {}
-    contin_output_table(const combo_tree& tr, const contin_input_table& cti,
-                 RandGen& rng);
-    template<typename Func>
-    contin_output_table(const Func& f, const contin_input_table& cti) {
-        foreach(const contin_vector& v, cti)
-            push_back(f(v.begin(), v.end()));
-    }
-
-    //equality operator
-    bool operator==(const contin_output_table& ct) const;
-    bool operator!=(const contin_output_table& ct) const {
-        return !operator==(ct);
-    }
-    // total of the absolute distance of each value
-    contin_t abs_distance(const contin_output_table& other) const;
-    // total of the squared error of each value
-    contin_t sum_squared_error(const contin_output_table& other) const;
-    // mean of the squared error of each value
-    contin_t mean_squared_error(const contin_output_table& other) const;
-    // sqrt of mean_squared_error
-    contin_t root_mean_square_error(const contin_output_table& other) const;
-};
-
-struct contin_table : public table<contin_input_table, contin_output_table> {
-    typedef table<contin_input_table, contin_output_table> super;
-    contin_table(std::istream& in, int pos = 0) : super(in, pos) {}
-    contin_table(const std::string& file_name, int pos = 0)
-        : super(file_name, pos) {}
-};
-
-/////////////////
-// Mixed table //
-/////////////////
-
-class mixed_table
-{
-    typedef type_tree::iterator type_pre_it;
-    typedef type_tree::sibling_iterator type_sib_it;
-    //Vector of bool or contin, depending on the output type of combo_tree
-    //size = 2^|boolean inputs| * _cti.size()
-    //each slice of cti.size() corresponds to a particular boolean input
-    //all possible boolean inputs are enumerated in lexico order as for
-    //complete_truth_table
-    //each element in a slice of cti.size() corresponds to the result of
-    //a particular contin input, all obtained from cti
-    std::vector<variant<bool, contin_t> > _vt;
-    //NOTE : can be a bit optimized by using
-    //variant<std::vector<bool>,std::vector<contin_t> > _vt;
-    //instead
-
-    int _contin_arg_count; //number of contin arguments
-    int _bool_arg_count; //number of boolean arguments
-
-    boost::unordered_map<int, int> _arg_map; //link the argument index with the
-    //boolean or contin index, that is
-    //for instance if the inputs are
-    //(bool, contin, contin, bool, bool)
-    //the the map is
-    //(<0,0>,<1,0>,<2,1>,<3,1>,<4,2>)
-    std::vector<int> _bool_arg; //link the ith bool arg with arg index
-    std::vector<int> _contin_arg; //link the ith contin arg with arg index
-    type_tree _prototype;
-    type_node _output_type;
-
-    contin_input_table _cti;
-
-    //take a prototype, set _prototype, _contin_arg_count, _bool_arg_count
-    //_arg_map, _bool_arg, _contin_arg and _output_type
-    void set_prototype(const type_tree& prototype) {
-        _contin_arg_count = 0;
-        _bool_arg_count = 0;
-        _prototype = prototype;
-        type_pre_it proto_it = prototype.begin();
-        int arg_idx = 0;
-        for (type_sib_it i = proto_it.begin();
-             i != proto_it.end(); ++i, ++arg_idx) {
-            if (type_pre_it(i) == _prototype.last_child(proto_it)) {
-                _output_type = *i;
-            } else {
-                if (*i == id::boolean_type) {
-                    std::pair<int, int> p(arg_idx, _bool_arg_count);
-                    _arg_map.insert(p);
-                    _bool_arg.push_back(arg_idx);
-                    _bool_arg_count++;
-                } else if (*i == id::contin_type) {
-                    std::pair<int, int> p(arg_idx, _contin_arg_count);
-                    _arg_map.insert(p);
-                    _contin_arg.push_back(arg_idx);
-                    _contin_arg_count++;
-                }
-            }
-        }
-    }
-
-public:
-    //constructors
-    mixed_table() {}
-    mixed_table(const combo_tree& tr, const contin_input_table& cti,
-                const type_tree& prototype, RandGen& rng) {
-        _cti = cti;
-        if (prototype.empty()) {
-            type_tree inferred_proto = infer_type_tree(tr);
-            set_prototype(inferred_proto);
-        } else set_prototype(prototype);
-        //populate _vt
-        //works only for _bool_arg_count < 64
-        unsigned long int bool_table_size = 1 << _bool_arg_count;
-        for (unsigned long int i = 0; i < bool_table_size; ++i) {
-            for (int bai = 0; bai < _bool_arg_count; ++bai) //bool arg index
-                bmap[_bool_arg[bai] + 1] = bool_to_vertex((i >> bai) % 2);
-            for (const_cm_it si = cti.begin(); si != cti.end(); ++si) {
-                int cai = 0; //contin arg index
-                for (const_cv_it j = (*si).begin(); j != (*si).end(); ++j, ++cai)
-                    bmap[_contin_arg[cai] + 1] = *j;
-                vertex e = eval_throws_binding(rng, bmap, tr);
-                _vt.push_back(is_boolean(e) ? vertex_to_bool(e) : get_contin(e));
-            }
-        }
-    }
-    //access mesthods
-    const std::vector<variant<bool, contin_t> >& get_vt() const {
-        return _vt;
-    }
-
-    boost::unordered_map<int, int> & get_arg_idx_map()  {
-		return _arg_map;
-    }
-
-    //equality operator
-    bool operator==(const mixed_table& mt) const {
-        std::vector<variant<bool, contin_t> >::const_iterator il = _vt.begin();
-        for (std::vector<variant<bool, contin_t> >::const_iterator
-                ir = mt._vt.begin(); ir != mt._vt.end(); ++il, ++ir) {
-            if (boost::get<bool>(&(*il))) {
-                if (boost::get<bool>(*il) != boost::get<bool>(*ir))
-                    return false;
-            } else if (!isApproxEq(boost::get<contin_t>(*il),
-                                   boost::get<contin_t>(*ir)))
-                return false;
-        }
-        return true;
-    }
-    bool operator!=(const mixed_table& mt) const {
-        return !operator==(mt);
-    }
-
-    binding_map bmap;
-};
-
-
-
-//WARNING : should be in eval_action.h
-//but could not do that due to dependency issues
-//-------------------------------------------------------------------------
-// mixed_action table
-//-------------------------------------------------------------------------
-
-//this table permits to represent inputs and outputs of combo trees
-//that have boolean, continuous, action_result arguments and/or output
-
-class mixed_action_table
-{
-    typedef type_tree::iterator type_pre_it;
-    typedef type_tree::sibling_iterator type_sib_it;
-    //Vector of bool or contin, depending on the output type of combo_tree
-    //size = 2^|boolean+action_result inputs| * _cti.size()
-    //each slice of cti.size() corresponds to a particular
-    //boolean+action_result input, all possible boolean+action_result inputs
-    //are enumerated in lexico order as for complete_truth_table
-    //each element in a slice of cti.size() corresponds to the result of
-    //a particular contin input, all obtained from cti
-    std::vector<variant<bool, contin_t> > _vt;
-    //NOTE : can be a bit optimized by using
-    //variant<std::vector<bool>,std::vector<contin_t> > _vt;
-    //instead
-
-    int _bool_arg_count; //number of boolean arguments
-    int _contin_arg_count; //number of contin arguments
-    int _action_arg_count; //number of action_result arguments
-
-    boost::unordered_map<int, int> _arg_map; //link the argument index with the
-    //boolean, action_result or contin
-    //index, that is
-    //for instance if the inputs are
-    //(bool, contin, contin, bool, action)
-    //the the map is
-    //(<0,0>,<1,0>,<2,1>,<3,1>,<4,0>)
-    std::vector<int> _bool_arg; //link the ith bool arg with arg index
-    std::vector<int> _contin_arg; //link the ith contin arg with arg index
-    std::vector<int> _action_arg; //link the ith action arg with arg index
-    type_tree _prototype;
-    type_node _output_type;
-
-    contin_input_table _cti;
-
-    //take a prototype, set _prototype, _contin_arg_count, _bool_arg_count,
-    //_action_arg_count, _arg_map, _bool_arg, _contin_arg, action_arg
-    //and _output_type
-    void set_prototype(const type_tree& prototype) {
-        _contin_arg_count = 0;
-        _bool_arg_count = 0;
-        _action_arg_count = 0;
-        _prototype = prototype;
-        type_pre_it proto_it = prototype.begin();
-        int arg_idx = 0;
-        for (type_sib_it i = proto_it.begin();i != proto_it.end();++i, ++arg_idx) {
-            if (type_pre_it(i) == _prototype.last_child(proto_it)) {
-                _output_type = *i;
-            } else {
-                if (*i == id::boolean_type) {
-                    std::pair<int, int> p(arg_idx, _bool_arg_count);
-                    _arg_map.insert(p);
-                    _bool_arg.push_back(arg_idx);
-                    _bool_arg_count++;
-                } else if (*i == id::contin_type) {
-                    std::pair<int, int> p(arg_idx, _contin_arg_count);
-                    _arg_map.insert(p);
-                    _contin_arg.push_back(arg_idx);
-                    _contin_arg_count++;
-                } else if (*i == id::action_result_type) {
-                    std::pair<int, int> p(arg_idx, _action_arg_count);
-                    _arg_map.insert(p);
-                    _action_arg.push_back(arg_idx);
-                    _action_arg_count++;
-                }
-            }
-        }
-    }
-
-public:
-    //constructors
-    mixed_action_table() {}
-    mixed_action_table(const combo_tree& tr, const contin_input_table& cti,
-                       const type_tree& prototype, RandGen& rng) {
-        _cti = cti;
-        if (prototype.empty()) {
-            type_tree inferred_proto = infer_type_tree(tr);
-            set_prototype(inferred_proto);
-        } else set_prototype(prototype);
-        //populate _vt
-        //WARNING : works only for _bool_arg_count + _action_arg_count <= 64
-        int bool_action_arg_count = (_bool_arg_count + _action_arg_count);
-        unsigned long int bool_action_table_size = 1 << bool_action_arg_count;
-        for (unsigned long int i = 0; i < bool_action_table_size; ++i) {
-            //bai stands for bool arg index
-            for (int bai = 0; bai < _bool_arg_count; ++bai)
-                binding(_bool_arg[bai] + 1) = bool_to_vertex((i >> bai) % 2);
-            //aai stands for action arg index
-            for (int aai = 0; aai < _action_arg_count; ++aai) {
-                int arg_idx = _action_arg[aai] + 1;
-                bool arg_val = (i >> (aai + _bool_arg_count)) % 2;
-                binding(arg_idx) = (arg_val ? id::action_success : id::action_failure);
-            }
-            //contin populate
-            for (const_cm_it si = cti.begin();si != cti.end();++si) {
-                int cai = 0; //contin arg index
-                for (const_cv_it j = (*si).begin(); j != (*si).end(); ++j, ++cai)
-                    bmap[_contin_arg[cai] + 1] = *j;
-                vertex e = eval_throws_binding(rng, bmap, tr);
-                if (is_boolean(e))
-                    _vt.push_back(vertex_to_bool(e));
-                else if (is_action_result(e))
-                    _vt.push_back(e == id::action_success ? true : false);
-                else if (is_contin(e))
-                    _vt.push_back(get_contin(e));
-                //should never get to this part
-                else OC_ASSERT(false,
-                                       "should never get to this part.");
-            }
-        }
-    }
-    //access mesthods
-    const std::vector<variant<bool, contin_t> >& get_vt() const {
-        return _vt;
-    }
-
-    //equality operator
-    bool operator==(const mixed_action_table& mat) const {
-        std::vector<variant<bool, contin_t> >::const_iterator il = _vt.begin();
-        for (std::vector<variant<bool, contin_t> >::const_iterator
-                ir = mat._vt.begin(); ir != mat._vt.end(); ++il, ++ir) {
-            if (boost::get<bool>(&(*il))) {
-                if (boost::get<bool>(*il) != boost::get<bool>(*ir))
-                    return false;
-            } else if (!isApproxEq(boost::get<contin_t>(*il),
-                                   boost::get<contin_t>(*ir)))
-                return false;
-        }
-        return true;
-    }
-    bool operator!=(const mixed_action_table& mat) const {
-        return !operator==(mat);
-    }
-
-    binding_map bmap;
-};
 
 /**
  * if the DSV data file has a header with labels
@@ -962,19 +646,15 @@ std::vector<std::string> readInputLabels(const std::string& file, int pos = 0);
 
 std::ifstream* open_data_file(const std::string& fileName);
 
-template<typename T>
-inline std::ostream& operator<<(std::ostream& out,
-                                const input_table<T>& it)
+inline std::ostream& operator<<(std::ostream& out, const ITable& it)
 {
-    ostreamContainer(out, it.get_labels(), ",");
-    foreach(const std::vector<T>& row, it)
+    ostreamlnContainer(out, it.get_labels(), ",");
+    foreach(const vertex_seq& row, it)
         ostreamlnContainer(out, row, ",");
     return out;
 }
 
-template<typename T>
-inline std::ostream& operator<<(std::ostream& out,
-                                const output_table<T>& ot)
+inline std::ostream& operator<<(std::ostream& out, const OTable& ot)
 {
     if(!ot.get_label().empty())
         out << ot.get_label() << std::endl;
@@ -984,29 +664,7 @@ inline std::ostream& operator<<(std::ostream& out,
 inline std::ostream& operator<<(std::ostream& out,
                                 const complete_truth_table& tt)
 {
-    return opencog::ostreamContainer(out, tt);
-}
-
-inline std::ostream& operator<<(std::ostream& out,
-                                const mixed_table& mt)
-{
-    const std::vector<boost::variant<bool, contin_t> >& vt = mt.get_vt();
-    for (unsigned i = 0; i != vt.size(); ++i)
-        out << (boost::get<contin_t>(&vt[i]) ?
-                boost::get<contin_t>(vt[i]) :
-                boost::get<bool>(vt[i])) << " ";
-    return out;
-}
-
-inline std::ostream& operator<<(std::ostream& out,
-                                const mixed_action_table& mat)
-{
-    const std::vector<boost::variant<bool, contin_t> >& vt = mat.get_vt();
-    for (unsigned i = 0; i != vt.size(); ++i)
-        out << (boost::get<contin_t>(&vt[i]) ?
-                boost::get<contin_t>(vt[i]) :
-                boost::get<bool>(vt[i])) << " ";
-    return out;
+    return ostreamContainer(out, tt);
 }
 
 }} // ~namespaces combo opencog

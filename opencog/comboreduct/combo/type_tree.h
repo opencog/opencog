@@ -264,96 +264,96 @@ void set_arg_type(const type_tree& tt, unsigned int idx,
 //if no type_tree are stored then return the type_tree id::unknown_type
 const type_tree& get_arg_type(const argument& arg,
                               const argument_type_list& arg_types);
-//like above but takes a type_node corresponding to an argument
-//it is assumed that the given type_node does correspond to an argument
+// like above but takes a type_node corresponding to an argument
+// it is assumed that the given type_node does correspond to an argument
 const type_tree& get_arg_type(type_node arg,
                               const argument_type_list& arg_types);
-//like above but uses the index of the argument
-//(counted from 1, like in class argument of vertex.h)
+// like above but uses the index of the argument
+// (counted from 1, like in class argument of vertex.h)
 const type_tree& get_arg_type(unsigned int idx,
                               const argument_type_list& arg_types);
 
-//generate type tree from a combo_tree,
-//does not perform any type check or reduction at that stage
+// generate type tree from a combo_tree,
+// does not perform any type check or reduction at that stage
 type_tree get_type_tree(const combo_tree& tr);
-//like above but consider it as root of tr
+// like above but consider it as root of tr
 type_tree get_type_tree(const combo_tree& tr, combo_tree::iterator it);
 
-//infer_type_tree generate the type signature (i.e. in reduced form)
-//of a given combo_tree.
-//If a type error is detected then the type_tree will contain
-//ill_formed_type
+// infer_type_tree generate the type signature (i.e. in reduced form)
+// of a given combo_tree.
+// If a type error is detected then the type_tree will contain
+// ill_formed_type
 type_tree infer_type_tree(const combo_tree& tr);
 
-//return the number of arguments of type contin
+// return the number of arguments of type contin
 arity_t contin_arity(const type_tree& ty);
 
-//return the number of arguments of type boolean
+// return the number of arguments of type boolean
 arity_t boolean_arity(const type_tree& ty);
 
-//WARNING : should be action.h but could not do that due to dependency issues
-//return the number of arguments of type action_result
+// WARNING : should be action.h but could not do that due to dependency issues
+// return the number of arguments of type action_result
 arity_t action_result_arity(const type_tree& ty);
 
-//return the number of input arguments of type tree
-//That is :
-//->(T1 ... Tn T)
-//if Tn != arg_list(T')
-//then returns n
-//else (i.e. Tn == arg_list(T'))
-//then return -n
-//And finaly if it's not a function then returns 0
-//Note that it is assumed that if there is arg_list in the arguments
-//then it solely one and it is the last argument
+// return the number of input arguments of type tree
+// That is :
+// ->(T1 ... Tn T)
+// if Tn != arg_list(T')
+// then returns n
+// else (i.e. Tn == arg_list(T'))
+// then return -n
+// And finaly if it's not a function then returns 0
+// Note that it is assumed that if there is arg_list in the arguments
+// then it solely one and it is the last argument
 arity_t type_tree_arity(const type_tree& ty);
 
-//return a vector containing the type of each input argument given
-//a reduced type tree signature
-//if there is an arg_list(T) at last argument then it
-//fills the last element of the vector directly with T
+// return a vector containing the type of each input argument given a
+// reduced type tree signature if there is an arg_list(T) at last
+// argument then it fills the last element of the vector directly with
+// T
 argument_type_list type_tree_input_arg_types(const type_tree& ty);
 
-//takes in argument the arity of an operator (or procedure)
-//and an index and convert that index such that
-//if the arity is positive then the index is unchanged
-//and if it's negative (i.e. arg_list is used) then it is converted to
-//reach the last argument if it goes beyond the absolute arity
+// takes in argument the arity of an operator (or procedure) and an
+// index and convert that index such that if the arity is positive
+// then the index is unchanged and if it's negative (i.e. arg_list is
+// used) then it is converted to reach the last argument if it goes
+// beyond the absolute arity
 arity_t convert_index(arity_t arity, arity_t index);
 
-//take in input an arity which can be explicit (using only input variables
-//and no arg_list, or implicit (using all)
-//and return the minimum number or input arguments the function
-//with such arity can take
+// take in input an arity which can be explicit (using only input
+// variables and no arg_list, or implicit (using all) and return the
+// minimum number or input arguments the function with such arity can
+// take
 arity_t abs_min_arity(arity_t arity);
 
-//return the type tree of the input argument of index i
-//if the operator has arg_list(T) as last input argument
-//then it returns always T past that index
+// return the type tree of the input argument of index i if the
+// operator has arg_list(T) as last input argument then it returns
+// always T past that index
 const type_tree& argument_type_list_input_type(const argument_type_list& atl,
                                                arity_t arity,
                                                arity_t index);
 
-//return the type node of the output
+// return the type node of the output
 type_tree type_tree_output_type_tree(const type_tree& ty);
 
-//return the arity of a vertex, -1 if the arity is an arg_list
-//0 if it is a constant
+// return the arity of a vertex, -1 if the arity is an arg_list 0 if
+// it is a constant
 arity_t get_arity(const vertex& v);
 
-//check if a type_tree is well formed
+// check if a type_tree is well formed
 bool is_well_formed(const type_tree& tt);
 
-//check if a combo_tree contains at least once every input arguments up to n
-//and no input arguments above n
-//it is assumed this function is only called with n>=0
+// check if a combo_tree contains at least once every input arguments
+// up to n and no input arguments above n it is assumed this function
+// is only called with n>=0
 bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n);
 
-//return the implicit arity of a given combo_tree
-//without performing type checking
+// return the implicit arity of a given combo_tree without performing
+// type checking
 arity_t infer_arity(const combo_tree& tr);
 
-//return the higher argument index of tr
-//for instance if tr==+(#1 #5) it returns 5
+// return the higher argument index of tr,
+// for instance if tr==+(#1 #5) it returns 5
 arity_t explicit_arity(const combo_tree& tr);
 
 // helpers to defined type_trees

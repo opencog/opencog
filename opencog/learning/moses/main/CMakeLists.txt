@@ -75,42 +75,14 @@ TARGET_LINK_LIBRARIES (moses-ant-hillclimbing
         util
 )
 
-ADD_EXECUTABLE (eval-contin-table eval-contin-table)
-TARGET_LINK_LIBRARIES (eval-contin-table
-        comboreduct
-        util
-        ${Boost_PROGRAM_OPTIONS_LIBRARY} 
-)
-
-ADD_EXECUTABLE (gen-contin-table gen-contin-table)
-TARGET_LINK_LIBRARIES (gen-contin-table
-	moses
-        comboreduct
-        util
-)
-
-ADD_EXECUTABLE (gen-mixed-table gen-mixed-table)
-TARGET_LINK_LIBRARIES (gen-mixed-table
-	moses
-        comboreduct
-        util
-)
-
-ADD_EXECUTABLE (gen-truth-table gen-truth-table)
-TARGET_LINK_LIBRARIES (gen-truth-table
-	moses
-        comboreduct
-        util
-)
-
 ADD_EXECUTABLE (moses-exec moses-exec)
 TARGET_LINK_LIBRARIES (moses-exec
        moses
 )
 SET_TARGET_PROPERTIES(moses-exec PROPERTIES OUTPUT_NAME "moses")
 
-# install moses-exec, eval-contin-table
-INSTALL(TARGETS moses-exec eval-contin-table RUNTIME DESTINATION bin)
+# install moses-exec
+INSTALL(TARGETS moses-exec RUNTIME DESTINATION bin)
 
 #install header files
 INSTALL(FILES

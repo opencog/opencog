@@ -140,10 +140,10 @@ int main() {
             break;
 
         //determine the type of tr
-        type_tree tr_type = infer_type_tree(tr);
+        type_tree tt = infer_type_tree(tr);
         //cout << "Type : " << tr_type << endl;
         
-        bool ct = is_well_formed(tr_type);
+        bool ct = is_well_formed(tt);
         
         if(!ct) {
             cout << "Bad type" << endl;
@@ -163,11 +163,8 @@ int main() {
 
             if(selected_rule) {
 
-                int ca = contin_arity(tr_type);
-                int s = sample_count(ca);
-                
                 //produce random inputs
-                contin_input_table cti(s, ca, rng);
+                ITable cti(tt, rng);
                 //print cti, for debugging
                 //cout << "Rnd matrix :" << endl << cti;
             

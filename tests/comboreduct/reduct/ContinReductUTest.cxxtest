@@ -44,30 +44,31 @@ public:
         stringstream ss(tr_str);
         combo_tree tr;
         ss >> tr;
+
+        type_tree tt = infer_type_tree(tr);
         
-        int a = arity(tr);
-        int s = sample_count(a);
-        
-        contin_input_table rnt(s, a, rng);
+        ITable rnt(tt, rng);
         
         int size_before, size_after;
         
         try {
-            contin_output_table ct1(tr, rnt, rng);
+            OTable ct1(tr, rnt, rng);
+            // std::cout << "ct1:" << std::endl << ct1 << std::endl;;
             size_before=tr.size();
             std::cout << "before: " << tr << std::endl;
             
             contin_reduce(tr, vertex_set(), rng);
             std::cout << "after:  " << tr << std::endl;      
             size_after=tr.size();
-            contin_output_table ct2(tr, rnt, rng);
+            OTable ct2(tr, rnt, rng);
+            // std::cout << "ct2:" << std::endl << ct2 << std::endl;;
             
             if(strict) {
                 TS_ASSERT_LESS_THAN(size_after, size_before);
             } else {
                 TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
             }
-            TS_ASSERT_EQUALS(ct1,ct2);
+            TS_ASSERT_EQUALS(ct1, ct2);
         }
         catch(EvalException& e) {
             std::cout << "An expection has been raised during the test (could be normal)" << std::endl;

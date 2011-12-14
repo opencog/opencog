@@ -4,7 +4,7 @@
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
  *
- * Written by Moshe Looks
+ * Written by Moshe Looks, Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -33,6 +33,7 @@ namespace opencog { namespace moses {
 
 using namespace std;
 using boost::adaptors::map_values;
+using boost::transform;
 
 // helper to log a combo_tree and its behavioral score
 inline void log_candidate_bscore(const combo_tree& tr,
@@ -65,23 +66,21 @@ behavioral_score logical_bscore::best_possible_bscore() const {
 
 behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 {
-    combo::contin_output_table ct(tr, cti, rng);
+    OTable ct(tr, cti, rng);
     behavioral_score bs(target.size());
-
-    behavioral_score::iterator dst = bs.begin();
-    for (combo::contin_output_table::const_iterator it1 = ct.begin(), it2 = target.begin();
-         it1 != ct.end();)
-        *dst++ = fabs((*it1++) - (*it2++));
-
+    boost::transform(ct, target, bs.begin(),
+                     [](const vertex& vl, const vertex& vr) {
+                         return fabs(get_contin(vl) - get_contin(vr)); });
     return bs;
 }
 
 behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 {
-    combo::contin_output_table ct(tr, cti, rng);
+    OTable ct(tr, cti, rng);
     behavioral_score bs(target.size() + (occam?1:0));
-    boost::transform(ct, target, bs.begin(), [](contin_t vl, contin_t vr) {
-            return sq(vl - vr); });
+    boost::transform(ct, target, bs.begin(),
+                     [](const vertex& vl, const vertex& vr) {
+                         return sq(get_contin(vl) - get_contin(vr)); });
     // add the Occam's razor feature
     if(occam)
         bs.back() = complexity(tr) * complexity_coef;
@@ -104,8 +103,8 @@ void occam_contin_bscore::set_complexity_coef(double stdev,
 }
 
 occam_discretize_contin_bscore::occam_discretize_contin_bscore
-                                        (const combo::contin_output_table& ot,
-                                         const contin_input_table& it,
+                                        (const OTable& ot,
+                                         const ITable& it,
                                          const vector<contin_t>& thres,
                                          bool wa,
                                          float p,
@@ -116,8 +115,8 @@ occam_discretize_contin_bscore::occam_discretize_contin_bscore
     // enforce that thresholds is sorted
     boost::sort(thresholds);
     // precompute classes
-    boost::transform(target, classes.begin(),
-                     [&](contin_t v) { return this->class_idx(v); });
+    boost::transform(target, classes.begin(), [&](const vertex& v) {
+            return this->class_idx(get_contin(v)); });
     // precompute weights
     multiset<size_t> cs(classes.begin(), classes.end());
     if(weighted_accuracy)
@@ -162,10 +161,10 @@ size_t occam_discretize_contin_bscore::class_idx_within(contin_t v,
 
 behavioral_score occam_discretize_contin_bscore::operator()(const combo_tree& tr) const
 {
-    combo::contin_output_table ct(tr, cit, rng);
+    OTable ct(tr, cit, rng);
     behavioral_score bs(target.size() + (occam?1:0));
-    boost::transform(ct, classes, bs.begin(), [&](contin_t res, size_t c_idx) {
-            return (c_idx != this->class_idx(res)) * this->weights[c_idx];
+    boost::transform(ct, classes, bs.begin(), [&](const vertex& v, size_t c_idx) {
+            return (c_idx != this->class_idx(get_contin(v))) * this->weights[c_idx];
         });
     // add the Occam's razor feature
     if(occam)
@@ -179,7 +178,7 @@ behavioral_score occam_discretize_contin_bscore::operator()(const combo_tree& tr
 }
 
         
-occam_ctruth_table_bscore::occam_ctruth_table_bscore(const ctruth_table& _ctt,
+occam_ctruth_table_bscore::occam_ctruth_table_bscore(const CTable& _ctt,
                                                      float p,
                                                      float alphabet_size,
                                                      RandGen& _rng) 
@@ -191,18 +190,14 @@ occam_ctruth_table_bscore::occam_ctruth_table_bscore(const ctruth_table& _ctt,
 
 behavioral_score occam_ctruth_table_bscore::operator()(const combo_tree& tr) const
 {
-    truth_output_table ptt(tr, ctt, rng);
+    OTable ptt(tr, ctt, rng);
     behavioral_score bs(ctt.size() + (occam?1:0));
-        
-    behavioral_score::iterator dst = bs.begin();
-    truth_output_table::const_iterator it1 = ptt.begin();
-    ctruth_table::const_iterator it2 = ctt.begin();
-    for(; it1 != ptt.end(); ++it1, ++it2) {
-        *dst++ = *it1? it2->second.first : it2->second.second;
-    }
+    transform(ptt, ctt | map_values, bs.begin(),
+              [](const vertex& v, CTable::mapped_type& vd) {
+                  return vd[negate_vertex(v)]; });
     // add the Occam's razor feature
     if(occam)
-        *dst = complexity(tr) * complexity_coef;
+        bs.back() = complexity(tr) * complexity_coef;
 
     // Logger
     log_candidate_bscore(tr, bs);
@@ -212,12 +207,11 @@ behavioral_score occam_ctruth_table_bscore::operator()(const combo_tree& tr) con
 
 behavioral_score occam_ctruth_table_bscore::best_possible_bscore() const {
     behavioral_score bs(ctt.size() + (occam?1:0));
-    auto dst = bs.begin();
-    for_each(ctt | map_values, [&](const ctruth_table::mapped_type& p) {
-            *dst++ = std::min(p.first, p.second); });
+    transform(ctt | map_values, bs.begin(), [](CTable::mapped_type& vd) {
+            return std::min(vd[id::logical_true], vd[id::logical_false]); });
     // add the Occam's razor feature
     if(occam)
-        *dst = 0;
+        bs.back() = 0;
     return bs;
 }
         

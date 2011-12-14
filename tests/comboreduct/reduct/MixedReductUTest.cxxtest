@@ -16,573 +16,162 @@ static MT19937RandGen rng(0);
 
 class MixedReductUTest : public CxxTest::TestSuite {
 public:
-  void test_stub() { } 
-  //test_simplify1 :
-  //0<c*x*x -> false if c<0
-  //0<log(x) -> 0<-1+x
-  //0<exp(x) -> true
-  //0<c*x -> 0<x if c>0
-  //0<c/x -> 0<-1*x if c<0
-  void test_simplify1() {
-    string tree_str="and(0<(*(-5.0 #1 #1)) 0<(log(#2)) 0<(exp(#3)) 0<(*(5.0 #4)) 0<(/(-3.0 #5)))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
+    void base_test(const string& tree_str) {
+        stringstream ss(tree_str);
+        combo_tree tr;
+        ss >> tr;
+        
+        type_tree tt = infer_type_tree(tr);
+        
+        bool ct = is_well_formed(tt);
+        
+        TS_ASSERT(ct);
+        
+        ITable cti(tt, rng);
+        
+        int size_before, size_after;
+        try {
+            OTable mt1(tr, cti, rng);
+            size_before=tr.size();
+            mixed_reduce(tr, rng);
+            size_after=tr.size();
+            OTable mt2(tr, cti, rng);
+            
+            TS_ASSERT_LESS_THAN(size_after,size_before);
+            TS_ASSERT_EQUALS(mt1,mt2);
+        }
+        catch(EvalException& e) {
+            TS_ASSERT(true);
+        }
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+    
+    // test_simplify1 :
+    // 0<c*x*x -> false if c<0
+    // 0<log(x) -> 0<-1+x
+    // 0<exp(x) -> true
+    // 0<c*x -> 0<x if c>0
+    // 0<c/x -> 0<-1*x if c<0
+    void test_simplify1() {
+        string tree_str="and(0<(*(-5.0 #1 #1)) 0<(log(#2)) 0<(exp(#3)) 0<(*(5.0 #4)) 0<(/(-3.0 #5)))";
+        base_test(tree_str);
     }
-  }
 
-  //test_simplify2 :
-  //0<c+sin(x) -> true if c>1
-  //0<impulse(x) -> x
-  //0<impulse(x)*impulse(x)*impulse(y)*z -> 0<impulse(x and y)*z
-  //0<impulse(x)+impulse(y) -> x or y
-  void test_simplify2() {
-    string tree_str="and(0<(+(5.0 sin(#1))) 0<(impulse(#2)) 0<(*(impulse(#3) impulse(#3) impulse(#4) #5)) 0<(+(impulse(#6) impulse(#7))))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    std::cout << tr_type << std::endl;
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
+    // test_simplify2 :
+    // 0<c+sin(x) -> true if c>1
+    // 0<impulse(x) -> x
+    // 0<impulse(x)*impulse(x)*impulse(y)*z -> 0<impulse(x and y)*z
+    // 0<impulse(x)+impulse(y) -> x or y
+    void test_simplify2() {
+        string tree_str="and(0<(+(5.0 sin(#1))) 0<(impulse(#2)) 0<(*(impulse(#3) impulse(#3) impulse(#4) #5)) 0<(+(impulse(#6) impulse(#7))))";
+        base_test(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+
+    // test_simplify3 :
+    // contin_if(x 1 0) -> impulse(x)
+    // contin_if(x 0 1) -> impulse(NOT(x))
+    // contin_if(true x y) -> x
+    // contin_if(false x y) -> y
+    // contin_if(x y y) -> y
+    void test_simplify3() {
+        string tree_str="+(contin_if(#1 1.0 0.0) contin_if(#2 0.0 1.0) contin_if(true #3 #4) contin_if(false #5 #6) contin_if(#7 #8 #8))";
+        base_test(tree_str);
     }
-  }
 
-  //test_simplify3 :
-  //contin_if(x 1 0) -> impulse(x)
-  //contin_if(x 0 1) -> impulse(NOT(x))
-  //contin_if(true x y) -> x
-  //contin_if(false x y) -> y
-  //contin_if(x y y) -> y
-  void test_simplify3() {
-    string tree_str="+(contin_if(#1 1.0 0.0) contin_if(#2 0.0 1.0) contin_if(true #3 #4) contin_if(false #5 #6) contin_if(#7 #8 #8))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
+    // test_simplify4 :
+    // contin_if(x y1 z1) +/* contin_if(x y2 z2) -> contin_if(x +/*(y1 y2) +/*(z1 z2))
+    // contin_if(x /(y z) /(y w)) -> y/contin_if(x z w)
+    void test_simplify4() {
+        string tree_str="*(+(contin_if(#1 #2 #3) contin_if(#1 #4 #5) #6) contin_if(#7 #8 #9) contin_if(#7 #10 #11) contin_if(#12 /(#13 #14) /(#13 #15)) contin_if(#16 *(#17 #18) *(#17 #19)))";
+        base_test(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+
+    // test_simplify5 :
+    // contin_if(x exp1[x] exp2[x]) -> contin_if(x exp1[true] exp2[false])
+    // 0<x+c1 and 0<x+c2 -> 0<x+min(c1,c2)
+    // 0<x+c1 or 0<x+c2 -> 0<x+max(c1, c2)
+    void test_simplify5() {
+        string tree_str="contin_if(and(0<(+(#1 5.0)) 0<(+(#1 0.5))) impulse(and(0<(+(#1 5.0)) 0<(+(#1 0.5)))) *(impulse(or(and(0<(+(#1 5.0)) 0<(+(#1 0.5))) 0<(+(#2 1.0)) 0<(+(0.25 #2)))) #3))";
+        base_test(tree_str);
     }
-  }
 
-  //test_simplify4 :
-  //contin_if(x y1 z1) +/* contin_if(x y2 z2) -> contin_if(x +/*(y1 y2) +/*(z1 z2))
-  //contin_if(x /(y z) /(y w)) -> y/contin_if(x z w)
-  void test_simplify4() {
-    string tree_str="*(+(contin_if(#1 #2 #3) contin_if(#1 #4 #5) #6) contin_if(#7 #8 #9) contin_if(#7 #10 #11) contin_if(#12 /(#13 #14) /(#13 #15)) contin_if(#16 *(#17 #18) *(#17 #19)))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
+    // test_simplify6 :
+    // 0<x+y and 0<x and 0<y -> 0<x and 0<y
+    void test_simplify6() {
+        string tree_str="and(0<(+(#1 #2)) 0<(#1) 0<(#2) 0<(*(#3 #4)) not(0<(#4)) 0<(#3))";
+        base_test(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+
+    // test_simplify7 :
+    // 0<prod x_i -> 0<prod x_i    with x_i=1 if 0<x_i -> true
+    //                            with x_i=-1 if 0<-x_i -> true
+    // 0<prod x_i -> false     if exist x_i==0, 
+    //                           that is 0<x_i -> false and 0<-1*x_i -> false
+    void test_simplify7() {
+        string tree_str="and(0<(*(+(#1 #2) #3)) 0<(*(-1 +(#1 #2))) 0<(#3) 0<(*(#4 #5)) not(0<(#4)) not(0<(*(-1 #4))))";
+        base_test(tree_str);
     }
-  }
 
-  //test_simplify5 :
-  //contin_if(x exp1[x] exp2[x]) -> contin_if(x exp1[true] exp2[false])
-  //0<x+c1 and 0<x+c2 -> 0<x+min(c1,c2)
-  //0<x+c1 or 0<x+c2 -> 0<x+max(c1, c2)
-  void test_simplify5() {
-    string tree_str="contin_if(and(0<(+(#1 5.0)) 0<(+(#1 0.5))) impulse(and(0<(+(#1 5.0)) 0<(+(#1 0.5)))) *(impulse(or(and(0<(+(#1 5.0)) 0<(+(#1 0.5))) 0<(+(#2 1.0)) 0<(+(0.25 #2)))) #3))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    std::cout << tr_type << std::endl;
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
+    // test_simplify8 :
+    // 0<x/y -> 0<x    if 0<y -> true
+    // 0<x/y -> 0<y    if 0<x -> true
+    // 0<x/y -> 0<-1*y if 0<-1*x -> true
+    // 0<x/y -> 0<-1*x if 0<-1*y -> true
+    // 0<x/y -> false  if x==0, that is not(0<x) -> true and not(0<-x) -> true
+    void test_simplify8() {
+        string tree_str="and(0<(/(#1 #2)) 0<(#1) 0<(/(#3 #4)) 0<(#4) 0<(/(+(#5 #6) #7)) 0<(*(-1 +(#5 #6))) 0<(/(#8 +(#9 #10))) 0<(+(#9 #10)) 0<(/(#11 +(#12 #13))) 0<(*(+(#12 #13) -1)) 0<(+(#5 #6)))";
+        base_test(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+
+    // test_simplify9 :
+    // 0<x+sin(y) -> true if 0<x-1 -> true
+    // 0<x+sin(y) -> false if 0<x+1 -> false
+    // 0<sin(y) -> true  if 0<y -> true and 0<pi-y -> true
+    // 0<sin(y) -> false if 0<y -> false and 0<y+pi ->false
+    void test_simplify9() {
+        string tree_str="and(0<(+(#1 sin(#2))) 0<(+(#3 sin(#4))) 0<(+(#1 -1.0)) not(0<(+(#3 1.0))) 0<(sin(#5)) 0<(#5) 0<(+(3.141592653589793 *(-1 #5))) 0<(sin(#6)) not(0<(#6)) not(0<(*(+(#6 3.141592653589793) -1))))";
+        base_test(tree_str);
     }
-  }
 
-  //test_simplify6 :
-  //0<x+y and 0<x and 0<y -> 0<x and 0<y
-  void test_simplify6() {
-    string tree_str="and(0<(+(#1 #2)) 0<(#1) 0<(#2) 0<(*(#3 #4)) not(0<(#4)) 0<(#3))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
+    // test_simplify10 :
+    // and(0<(+(*(#1 7) *(#2 3) *(#3 4) *(#4 6) 14)) 0<(+(*(2 #1) *(2 #3) *(3 #4) 2)) 0<(+(#1 #2 3))) -> and(0<(+(*(2 #1) *(2 #3) *(3 #4) 2)) 0<(+(#1 #2 3)))
+    void test_simplify10() {
+        string tree_str="and(0<(+(*(#1 7) *(#2 3) *(#3 4) *(#4 6) 14)) 0<(+(*(2 #1) *(2 #3) *(3 #4) 2)) 0<(+(#1 #2 3)))";
+        base_test(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+
+    // test_simplify11 :
+    // and(0<(+(*(-6 #1) *(-4 #2) -8)) 0<(+(*(2 #1) *(2 #2) 3)) 0<(+(*(2 #1) #2))) -> false
+    void test_simplify11() {
+        string tree_str="and(0<(+(*(-6 #1) *(-4 #2) -8)) 0<(+(*(2 #1) *(2 #2) 3)) 0<(+(*(2 #1) #2)))";
+        base_test(tree_str);
     }
-  }
 
-  //test_simplify7 :
-  //0<prod x_i -> 0<prod x_i    with x_i=1 if 0<x_i -> true
-  //                            with x_i=-1 if 0<-x_i -> true
-  //0<prod x_i -> false     if exist x_i==0, 
-  //                           that is 0<x_i -> false and 0<-1*x_i -> false
-  void test_simplify7() {
-    string tree_str="and(0<(*(+(#1 #2) #3)) 0<(*(-1 +(#1 #2))) 0<(#3) 0<(*(#4 #5)) not(0<(#4)) not(0<(*(-1 #4))))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
+    // test_simplify12 :
+    // and(0<(+(*(#2 -1) #1)) 0<(+(#1 #2)) 0<(#1)) -> and(0<(+(*(#2 -1) #1)) 0<(+(#1 #2)))
+    void test_simplify12() {
+        string tree_str="and(0<(+(*(#2 -1) #1)) 0<(+(#1 #2)) 0<(#1))";
+        base_test(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+
+    // test_simplify13 :
+    // and(0<(+(*(7 #1) *(3 #2) 11)) 0<(+(*(2 #1) 2)) not(0<(+(*(-1 #1) *(-1 #2) -1)))) -> and(0<(+(*(2 #2) 2)) not(0<(+(*(-1 #1) *(-1 #2) -1))))
+    void test_simplify13() {
+        string tree_str="and(0<(+(*(7 #1) *(3 #2) 11)) 0<(+(*(2 #1) 2)) not(0<(+(*(-1 #1) *(-1 #2) -1))))";
+        base_test(tree_str);
     }
-  }
 
-  //test_simplify8 :
-  //0<x/y -> 0<x    if 0<y -> true
-  //0<x/y -> 0<y    if 0<x -> true
-  //0<x/y -> 0<-1*y if 0<-1*x -> true
-  //0<x/y -> 0<-1*x if 0<-1*y -> true
-  //0<x/y -> false  if x==0, that is not(0<x) -> true and not(0<-x) -> true
-  void test_simplify8() {
-    string tree_str="and(0<(/(#1 #2)) 0<(#1) 0<(/(#3 #4)) 0<(#4) 0<(/(+(#5 #6) #7)) 0<(*(-1 +(#5 #6))) 0<(/(#8 +(#9 #10))) 0<(+(#9 #10)) 0<(/(#11 +(#12 #13))) 0<(*(+(#12 #13) -1)) 0<(+(#5 #6)))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
+    // test_simplify14 :
+    // and(not(0<(#1)) not(0<(+(#1 #2))) not(0<(+(#1 *(-1 #2))))) -> and(not(0<(+(#1 #2))) not(0<(+(#1 *(-1 #2)))))
+    void test_simplify14() {
+        string tree_str="and(not(0<(#1)) not(0<(+(#1 #2))) not(0<(+(#1 *(-1 #2)))))";
+        base_test(tree_str);
     }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
+
+    // test_simplify15 :
+    // and(not(0<(+(*(7 #1) *(3 #2) 6))) 0<(+(*(-2 #1) -2)) not(0<(+(#1 #2 1)))) -> and(0<(+(*(-2 #1) -2)) not(0<(+(#1 #2 1))))
+    void test_simplify15() {
+        string tree_str="and(not(0<(+(*(7 #1) *(3 #2) 6))) 0<(+(*(-2 #1) -2)) not(0<(+(#1 #2 1))))";
+        base_test(tree_str);
     }
-  }
-
-  //test_simplify9 :
-  //0<x+sin(y) -> true if 0<x-1 -> true
-  //0<x+sin(y) -> false if 0<x+1 -> false
-  //0<sin(y) -> true  if 0<y -> true and 0<pi-y -> true
-  //0<sin(y) -> false if 0<y -> false and 0<y+pi ->false
-  void test_simplify9() {
-    string tree_str="and(0<(+(#1 sin(#2))) 0<(+(#3 sin(#4))) 0<(+(#1 -1.0)) not(0<(+(#3 1.0))) 0<(sin(#5)) 0<(#5) 0<(+(3.141592653589793 *(-1 #5))) 0<(sin(#6)) not(0<(#6)) not(0<(*(+(#6 3.141592653589793) -1))))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
-    }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
-    }
-  }
-
-  //test_simplify10 :
-  //and(0<(+(*(#1 7) *(#2 3) *(#3 4) *(#4 6) 14)) 0<(+(*(2 #1) *(2 #3) *(3 #4) 2)) 0<(+(#1 #2 3))) -> and(0<(+(*(2 #1) *(2 #3) *(3 #4) 2)) 0<(+(#1 #2 3)))
-  void test_simplify10() {
-    string tree_str="and(0<(+(*(#1 7) *(#2 3) *(#3 4) *(#4 6) 14)) 0<(+(*(2 #1) *(2 #3) *(3 #4) 2)) 0<(+(#1 #2 3)))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
-    }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
-    }
-  }
-
-  //test_simplify11 :
-  //and(0<(+(*(-6 #1) *(-4 #2) -8)) 0<(+(*(2 #1) *(2 #2) 3)) 0<(+(*(2 #1) #2))) -> false
-  void test_simplify11() {
-    string tree_str="and(0<(+(*(-6 #1) *(-4 #2) -8)) 0<(+(*(2 #1) *(2 #2) 3)) 0<(+(*(2 #1) #2)))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
-    }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
-    }
-  }
-
-  //test_simplify12 :
-  //and(0<(+(*(#2 -1) #1)) 0<(+(#1 #2)) 0<(#1)) -> and(0<(+(*(#2 -1) #1)) 0<(+(#1 #2)))
-  void test_simplify12() {
-    string tree_str="and(0<(+(*(#2 -1) #1)) 0<(+(#1 #2)) 0<(#1))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
-    }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
-    }
-  }
-
-  //test_simplify13 :
-  //and(0<(+(*(7 #1) *(3 #2) 11)) 0<(+(*(2 #1) 2)) not(0<(+(*(-1 #1) *(-1 #2) -1)))) -> and(0<(+(*(2 #2) 2)) not(0<(+(*(-1 #1) *(-1 #2) -1))))
-  void test_simplify13() {
-    string tree_str="and(0<(+(*(7 #1) *(3 #2) 11)) 0<(+(*(2 #1) 2)) not(0<(+(*(-1 #1) *(-1 #2) -1))))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
-    }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
-    }
-  }
-
-  //test_simplify14 :
-  //and(not(0<(#1)) not(0<(+(#1 #2))) not(0<(+(#1 *(-1 #2))))) -> and(not(0<(+(#1 #2))) not(0<(+(#1 *(-1 #2)))))
-  void test_simplify14() {
-    string tree_str="and(not(0<(#1)) not(0<(+(#1 #2))) not(0<(+(#1 *(-1 #2)))))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
-    }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
-    }
-  }
-
-  //test_simplify15 :
-  //and(not(0<(+(*(7 #1) *(3 #2) 6))) 0<(+(*(-2 #1) -2)) not(0<(+(#1 #2 1)))) -> and(0<(+(*(-2 #1) -2)) not(0<(+(#1 #2 1))))
-  void test_simplify15() {
-    string tree_str="and(not(0<(+(*(7 #1) *(3 #2) 6))) 0<(+(*(-2 #1) -2)) not(0<(+(#1 #2 1))))";
-
-    stringstream ss(tree_str);
-    combo_tree tr;
-    ss >> tr;
-
-    type_tree tr_type = infer_type_tree(tr);
-
-    bool ct = is_well_formed(tr_type);
-
-    TS_ASSERT(ct);
-
-    int ca = contin_arity(tr_type);
-    int s = sample_count(ca);
-
-    contin_input_table cti(s, ca, rng);
-
-    int size_before, size_after;
-    try {
-      mixed_table mt1(tr, cti, tr_type, rng);
-      size_before=tr.size();
-      mixed_reduce(tr, rng);
-      size_after=tr.size();
-      mixed_table mt2(tr, cti, tr_type, rng);
-
-      TS_ASSERT_LESS_THAN(size_after,size_before);
-      TS_ASSERT_EQUALS(mt1,mt2);
-    }
-    catch(EvalException& e) {
-      TS_ASSERT(true);
-    }
-  }
 
 };

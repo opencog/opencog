@@ -116,13 +116,15 @@ int main(int argc,char** argv) {
     opencog::MT19937RandGen rng(rand_seed);
 
     // read input_table_file file
-    type_node data_type = inferDataType(pa.input_table_file);
+    type_tree data_tt = infer_data_type_tree(pa.input_table_file);
+    type_tree output_tt = type_tree_output_type_tree(data_tt);
+    type_node data_type = *output_tt.begin();
 
     if(data_type == id::boolean_type) {
         std::cerr << "TODO: support boolean table" << std::endl;
-        // read_eval_output_results<truth_table>(pa, rng);
+        // read_eval_output_results(pa, rng);
     } else if(data_type == id::contin_type) {
-        read_eval_output_results<contin_table>(pa, rng);
+        read_eval_output_results(pa, rng);
     }
 
 }

@@ -46,11 +46,10 @@ int main()
         if (!cin.good())
             break;
 
-        int a = arity(tr);
-        int s = sample_count(a);//return always 5, for the moment
+        type_tree tt = infer_type_tree(tr);
 
         //produce random inputs
-        contin_input_table cti(s, a, rng);
+        ITable cti(tt, rng);
 
         try {
 
@@ -59,7 +58,7 @@ int main()
 
 
             //evalutate tr over cti and fill ct1
-            contin_output_table ct1(tr, cti, rng);
+            OTable ct1(tr, cti, rng);
 
             //print the tree before reduction, for debugging
             cout << "Before : " << tr << endl;
@@ -67,12 +66,12 @@ int main()
             contin_reduce(tr, vertex_set(), rng);
 
             //evaluate tr over cti and fill ct2
-            contin_output_table ct2(tr, cti, rng);
+            OTable ct2(tr, cti, rng);
 
             cout << "After  : " << tr << endl;
             if (ct1 != ct2) {
                 cout << ct1 << endl << ct2 << endl;
-                cerr << "contin-tables don't match!" << endl;
+                cerr << "contin tables don't match!" << endl;
                 //return 1;
             }
         } catch (EvalException& e) {

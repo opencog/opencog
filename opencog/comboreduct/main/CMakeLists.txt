@@ -53,6 +53,13 @@ TARGET_LINK_LIBRARIES(eval-table
     ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 
+ADD_EXECUTABLE (gen-table gen-table.cc)
+TARGET_LINK_LIBRARIES(gen-table
+    comboreduct
+    util
+    ${Boost_PROGRAM_OPTIONS_LIBRARY} 
+)
+
 # install eval-table
-INSTALL(TARGETS eval-table RUNTIME DESTINATION bin)
+INSTALL(TARGETS eval-table gen-table RUNTIME DESTINATION bin)
 

@@ -47,20 +47,6 @@ public:
         TS_ASSERT_EQUALS(res_4, 2);
         TS_ASSERT_EQUALS(res_5, 4);
     }
-
-    void test_mutualInformation() {
-        stringstream ss("1,1,1\n"
-                        "1,1,1\n"
-                        "0,1,0\n"
-                        "0,1,1\n"
-                        "0,0,0\n");
-        truth_table tt(ss);
-        set<arity_t> fs{0, 1};
-        ctruth_table ctt = tt.compress();
-        double mi = mutualInformation(ctt, fs);
-        cout << "mi = " << mi << endl;
-        TS_ASSERT_DELTA(0.419973, mi, 0.0001);
-    }
 };
 
  

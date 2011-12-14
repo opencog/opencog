@@ -124,16 +124,15 @@ void eval_output_results(const eval_features_parameters& pa,
     output_results(pa, qs);
 }
 
-template<typename IT, typename OT>
 void eval_output_results(const eval_features_parameters& pa,
                          const vector<string>& labels,
                          const vector<set<arity_t> > fss,
                          const vector<combo_tree>& trs,
-                         const IT& it,
-                         const OT& ot,
+                         const ITable& it,
+                         const OTable& ot,
                          opencog::RandGen& rng) {
 
-    typedef MICScorer<IT, OT, set<arity_t> > FSScorer;
+    typedef MICScorer<set<arity_t> > FSScorer;
 
     if(trs.empty()) { // there is no combo programs so we use the data output
         FSScorer fs_sc(it, ot, pa.confidence_penalty_intensity);
@@ -142,7 +141,7 @@ void eval_output_results(const eval_features_parameters& pa,
     } else {
         foreach(const combo_tree& tr, trs) {
             // evaluated tr over input table
-            OT ot_tr(tr, it, rng);
+            OTable ot_tr(tr, it, rng);
             ot_tr.set_label(ot.get_label());
 
             FSScorer fs_sc(it, ot_tr, pa.confidence_penalty_intensity);
@@ -153,10 +152,9 @@ void eval_output_results(const eval_features_parameters& pa,
     }
 }
 
-template<typename Table>
 void read_eval_output_results(const eval_features_parameters& pa,
                               opencog::RandGen& rng) {
-    Table table(pa.input_table_file);
+    Table table = istreamTable(pa.input_table_file);
 
     // determine labels
     vector<string> labels = readInputLabels(pa.input_table_file);
@@ -168,7 +166,7 @@ void read_eval_output_results(const eval_features_parameters& pa,
     vector<combo_tree> trs;
     foreach(const string& tr_str, pa.combo_programs)
         trs += str2combo_tree_label(tr_str, pa.has_labels,
-                                    table.input.get_labels());
+                                    table.itable.get_labels());
     if(!pa.combo_programs_file.empty()) {
         ifstream in(pa.combo_programs_file.c_str());
         while(in.good()) {
@@ -177,12 +175,12 @@ void read_eval_output_results(const eval_features_parameters& pa,
             if(line.empty())
                 continue;
             trs += str2combo_tree_label(line, pa.has_labels,
-                                        table.input.get_labels());
+                                        table.itable.get_labels());
         }
     }
 
     // eval and output the results
-    eval_output_results(pa, labels, fss, trs, table.input, table.output, rng);
+    eval_output_results(pa, labels, fss, trs, table.itable, table.otable, rng);
 }
 
 #endif // _OPENCOG_EVAL_FEATURES_H

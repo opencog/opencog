@@ -496,7 +496,9 @@ int moses_exec(int argc, char** argv) {
     if(problem == it) { // regression based on input table
         
         // infer the type of the input table
-        type_node inferred_type = inferDataType(input_data_file);
+        type_tree inferred_tt = infer_data_type_tree(input_data_file);
+        type_tree output_tt = type_tree_output_type_tree(inferred_tt);
+        type_node inferred_type = *output_tt.begin();
 
         // determine the default exemplar to start with
         if(exemplars.empty())
@@ -510,20 +512,17 @@ int moses_exec(int argc, char** argv) {
 
         OC_ASSERT(output_type == inferred_type);
 
-        unique_ptr<ifstream> in(open_data_file(input_data_file));
-
+        // read input_data_file file
+        logger().debug("Read data file %s", input_data_file.c_str());
+        Table table = istreamTable(input_data_file, target_pos);
+        if(nsamples>0)
+            subsampleTable(table.itable, table.otable, nsamples, rng);
+        
+        type_tree tt = declare_function(output_type, arity);
+        int as = alphabet_size(tt, ignore_ops);
+        
         if(output_type == id::boolean_type) {
-            // read input_data_file file
-            logger().debug("Read data file %s", input_data_file.c_str());
-            truth_table table(*in, target_pos);
-            if(nsamples>0)
-                subsampleTable(table.input, table.output, nsamples, rng);
-            ctruth_table ctable = table.compress();
-
-            type_tree tt = declare_function(output_type, arity);
-
-            int as = alphabet_size(tt, ignore_ops);
-
+            CTable ctable = table.compress();
             occam_ctruth_table_bscore bscore(ctable, prob, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   logical_reduction(reduct_candidate_effort),
@@ -533,24 +532,9 @@ int moses_exec(int argc, char** argv) {
                                   vm, mmr_pa);
         }
         else if(output_type == id::contin_type) {
-            // read input_data_file file
-            contin_input_table it;
-            contin_output_table ot;
-            istreamTable(*in, it, ot, target_pos);
-            if(nsamples>0)
-                subsampleTable(it, ot, nsamples, rng);
-
-            type_tree tt = declare_function(output_type, arity);
-            int as = alphabet_size(tt, ignore_ops);
-
-            // if no exemplar has been provided in option use the default
-            // contin_type exemplar (+)
-            if(exemplars.empty()) {            
-                exemplars.push_back(type_to_exemplar(id::contin_type));
-            }
-
             if(discretize_thresholds.empty()) {
-                occam_contin_bscore bscore(ot, it, stdev, as, rng);
+                occam_contin_bscore bscore(table.otable, table.itable,
+                                           stdev, as, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduction(ignore_ops, rng),
                                       contin_reduction(ignore_ops, rng),
@@ -558,7 +542,7 @@ int moses_exec(int argc, char** argv) {
                                       opt_params, meta_params, moses_params,
                                       vm, mmr_pa);
             } else {
-                occam_discretize_contin_bscore bscore(ot, it,
+                occam_discretize_contin_bscore bscore(table.otable, table.itable,
                                                       discretize_thresholds,
                                                       weighted_accuracy,
                                                       prob, as,
@@ -598,14 +582,12 @@ int moses_exec(int argc, char** argv) {
             if(nsamples<=0)
                 nsamples = default_nsamples;
             
-            contin_input_table it(nsamples, arity, rng,
-                                  max_rand_input, min_rand_input);
-            contin_output_table table_outputs(tr, it, rng);
+            ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
+            OTable ot(tr, it, rng);
             
             int as = alphabet_size(tt, ignore_ops);
             
-            occam_contin_bscore bscore(table_outputs, it,
-                                       stdev, as, rng);
+            occam_contin_bscore bscore(ot, it, stdev, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
@@ -677,13 +659,12 @@ int moses_exec(int argc, char** argv) {
         
         type_tree tt = declare_function(id::contin_type, arity);
 
-        contin_input_table rands((nsamples>0? nsamples : default_nsamples),
-                                  arity, rng);
+        ITable it(tt, rng, (nsamples>0? nsamples : default_nsamples));
 
         int as = alphabet_size(tt, ignore_ops);
 
         occam_contin_bscore bscore(simple_symbolic_regression(problem_size),
-                                   rands, stdev, as, rng);
+                                   it, stdev, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),
@@ -694,11 +675,7 @@ int moses_exec(int argc, char** argv) {
     // ANN problems //
     //////////////////
     } else if(problem == ann_it) { // regression based on input table using ann
-        unique_ptr<ifstream> in(open_data_file(input_data_file));
-        contin_input_table it;
-        contin_output_table ot;
-        // read input_data_file file
-        istreamTable(*in, it, ot, target_pos);
+        Table table = istreamTable(input_data_file, target_pos);
         // if no exemplar has been provided in option insert the default one
         if(exemplars.empty()) {
             exemplars.push_back(ann_exemplar(arity));
@@ -706,13 +683,13 @@ int moses_exec(int argc, char** argv) {
 
         // subsample the table
         if(nsamples>0)
-            subsampleTable(it, ot, nsamples, rng);
+            subsampleTable(table.itable, table.otable, nsamples, rng);
 
         type_tree tt = declare_function(id::ann_type, 0);
         
         int as = alphabet_size(tt, ignore_ops);
 
-        occam_contin_bscore bscore(ot, it, stdev, as, rng);
+        occam_contin_bscore bscore(table.otable, table.itable, stdev, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               ann_reduction(),
                               ann_reduction(),
@@ -722,6 +699,8 @@ int moses_exec(int argc, char** argv) {
     } else if(problem == ann_cp) { // regression based on combo program using ann
         // get the combo_tree and infer its type
         combo_tree tr = str_to_combo_tree(combo_str);
+        type_tree tt = declare_function(id::ann_type, 0);
+        int as = alphabet_size(tt, ignore_ops);
 
         // if no exemplar has been provided in option use the default one
         if(exemplars.empty()) {
@@ -732,16 +711,10 @@ int moses_exec(int argc, char** argv) {
         if(nsamples<=0)
             nsamples = default_nsamples;
         
-        contin_input_table it(nsamples, arity, rng,
-                              max_rand_input, min_rand_input);
-        contin_output_table table_outputs(tr, it, rng);
-        
-        type_tree tt = declare_function(id::ann_type, 0);
-        
-        int as = alphabet_size(tt, ignore_ops);
-        
-        occam_contin_bscore bscore(table_outputs, it,
-                                   stdev, as, rng);
+        ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
+        OTable ot(tr, it, rng);
+                
+        occam_contin_bscore bscore(ot, it, stdev, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),

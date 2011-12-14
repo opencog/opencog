@@ -184,6 +184,10 @@ typedef std::set<vertex> vertex_set;
 typedef vertex_set::iterator vertex_set_it;
 typedef vertex_set::const_iterator vertex_set_const_it;
 
+typedef std::vector<vertex> vertex_seq;
+typedef vertex_seq::iterator vertex_seq_it;
+typedef vertex_seq::const_iterator vertex_seq_const_it;
+        
 typedef std::set<vertex> operator_set;
 typedef operator_set::iterator operator_set_it;
 typedef operator_set::iterator operator_set_const_it;
@@ -713,7 +717,7 @@ inline vertex bool_to_vertex(bool b)
 inline bool vertex_to_bool(const vertex& v)
 {
     OC_ASSERT(v == id::logical_true || v == id::logical_false,
-                     "vertex should be of logical types 'id::logical_true' or 'id::logical_false'.");
+              "vertex should be 'id::logical_true' or 'id::logical_false'.");
     return (v == id::logical_true);
 }
 //renamed negate_vertex to not enter in conflict with negate(string) of STL
@@ -1058,5 +1062,14 @@ std::ostream& operator<<(std::ostream&, const opencog::combo::vertex&);
 
 } // ~namespace combo
 } // ~namespace opencog
+
+// this is to be able to use std::unordered_map and such
+namespace std {
+    template<>
+    inline size_t
+    hash<opencog::combo::vertex>::operator()(opencog::combo::vertex v) const {
+        return opencog::combo::hash_value(v);
+    }
+}
 
 #endif

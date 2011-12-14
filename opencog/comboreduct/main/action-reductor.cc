@@ -106,27 +106,24 @@ int main()
             break;
 
         //determine the type of tr
-        type_tree tr_type = infer_type_tree(tr);
-        cout << "Type : " << tr_type << endl;
+        type_tree tt = infer_type_tree(tr);
+        cout << "Type : " << tt << endl;
 
-        bool ct = is_well_formed(tr_type);
+        bool ct = is_well_formed(tt);
 
         if (!ct) {
             cout << "Bad type" << endl;
             break;
         }
 
-        int ca = contin_arity(tr_type);
-        int s = sample_count(ca);
-
         //produce random inputs
-        contin_input_table cti(s, ca, rng);
+        ITable cti(tt, rng);
         //print cti, for debugging
         cout << "Rnd matrix :" << endl << cti;
 
         try {
             //evalutate tr over cti and fill mat1
-            mixed_action_table mat1(tr, cti, tr_type, rng);
+            OTable mat1(tr, cti, rng);
             //print mat1, for debugging
             cout << "MAT1" << endl << mat1 << endl;
 
@@ -136,14 +133,14 @@ int main()
             action_reduce(tr);
 
             //evaluate tr over cti and fill mat2
-            mixed_action_table mat2(tr, cti, tr_type, rng);
+            OTable mat2(tr, cti, rng);
             //print mat2, for debugging
             cout << "MAT2" << endl << mat2 << endl;
 
             cout << "After  : " << tr << endl;
             if (mat1 != mat2) {
                 cout << mat1 << endl << mat2 << endl;
-                cerr << "mixed-action-tables don't match!" << endl;
+                cerr << "mixed action tables don't match!" << endl;
                 return 1;
             }
         } catch (EvalException& e) {

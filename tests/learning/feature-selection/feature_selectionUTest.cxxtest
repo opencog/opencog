@@ -35,16 +35,18 @@ using namespace std;
 using boost::counting_iterator;
 
 class feature_selectionUTest : public CxxTest::TestSuite {
-    truth_table table;
+    Table table;
 
 public:
-    typedef MutualInformation<ctruth_table, set<arity_t> > FeatureScorer;
+    typedef MutualInformation<set<arity_t>> FeatureScorer;
 
 
-    feature_selectionUTest() : table(FEATURE_SELECTION_TEST_DIR"dataset.csv") {}
+    feature_selectionUTest() {
+        table = istreamTable(FEATURE_SELECTION_TEST_DIR"dataset.csv");
+    }
 
     void test_incremental_selection() {
-        ctruth_table ctable = table.compress();
+        CTable ctable = table.compress();
         FeatureScorer fs(ctable);
         set<arity_t> features(counting_iterator<arity_t>(0),
                               counting_iterator<arity_t>(table.get_arity()));
@@ -58,7 +60,7 @@ public:
     }
 
     void test_redundant_features() {
-        ctruth_table ctable = table.compress();
+        CTable ctable = table.compress();
         FeatureScorer fs(ctable);
         set<arity_t> features{3, 4, 10, 17};
         set<arity_t> redundant = redundant_features(features, fs, 0.001);

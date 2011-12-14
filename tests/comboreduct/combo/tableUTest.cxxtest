@@ -28,15 +28,17 @@ using namespace std;
 const string olabel = "happiness";
 const string label1 = "price";
 const string label2 = "temperature";
+const string tableUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/comboreduct/combo/";
 
 class tableUTest : public CxxTest::TestSuite {
 private:
     template<typename IT, typename OT>
-    void testIStreamTable(const string& ts, const IT& it, const OT& ot) {
+    void testIStreamTable(const string& ts, const IT& it, const OT& ot,
+                          bool has_header, const type_tree& tt) {
         stringstream ss(ts);
         IT it_test;
         OT ot_test;
-        istreamTable(ss, it_test, ot_test);
+        istreamTable(ss, it_test, ot_test, has_header, tt);
         std::cout << "it =" << std::endl;
         std::cout << it << std::endl;
         std::cout << "it_test =" << std::endl;
@@ -50,52 +52,69 @@ private:
     }
 public:
     void test_TruthTable() {
-        bool_vector o{true, false};
-        truth_output_table ot(o);
-        truth_input_table it;
-        it.push_back({true, false});
-        it.push_back({false, true});
+        vertex_seq o{id::logical_true, id::logical_false};
+        OTable ot(o);
+        ITable it;
+        it.push_back({id::logical_true, id::logical_false});
+        it.push_back({id::logical_false, id::logical_true});
         testIStreamTable("1,1,0\n"
-                         "0,0,1\n", it, ot);
+                         "0,0,1\n", it, ot, false,
+                         declare_function(id::boolean_type, 2));
     }
     void test_ContinTable() {
-        contin_vector o{10.1, 6.5};
-        contin_output_table ot(o);
-        contin_input_table it;
+        vertex_seq o{10.1, 6.5};
+        OTable ot(o);
+        ITable it;
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
         testIStreamTable("10.1,0.4,244.2\n"
-                         "6.5,9.5,4.2\n", it, ot);
+                         "6.5,9.5,4.2\n", it, ot, false,
+                         declare_function(id::contin_type, 2));
     }
     void test_ContinTableLabels() {
-        contin_vector o{10.1, 6.5};
-        contin_output_table ot(o, olabel);
-        contin_input_table it;
+        vertex_seq o{10.1, 6.5};
+        OTable ot(o, olabel);
+        ITable it;
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
         vector<string> il{label1, label2};
         it.set_labels(il);
         testIStreamTable("happiness,price,temperature\n"
                          "10.1,0.4,244.2\n"
-                         "6.5,9.5,4.2\n", it, ot);
+                         "6.5,9.5,4.2\n", it, ot, true,
+                         declare_function(id::contin_type, 2));
     }
-    void test_ostreamTrueTable() {
-        truth_input_table it;
-        it.push_back({true, false});
-        it.push_back({false, true});
+    void test_filterTable() {
+        ITable it;
+        it.push_back({id::logical_true, id::logical_false});
+        it.push_back({id::logical_false, id::logical_true});
         vector<string> lbs{"truc" ,"trac"};
         it.set_labels(lbs);
-        bool_vector o{true, false};
+        vertex_seq o{id::logical_true, id::logical_false,};
         // ignore second argument trac
         vector<arity_t> args{0};
-        truth_input_table fit = it.filter(args);
-        truth_output_table ot(o);
+        ITable fit = it.filter(args);
+        OTable ot(o);
         ot.set_label("troc");
         stringstream ss;
         ostreamTable(ss, fit, ot);
+        cout << "result:" << endl;
+        cout << ss.str();
+        cout << "fit:" << endl;
+        cout << fit;
+        cout << "ot:" << endl;
+        cout << ot;
         TS_ASSERT_EQUALS(ss.str(),
                          "troc,truc\n"
                          "1,1\n"
                          "0,0\n");
+    }
+    void test_mutualInformation() {
+        Table tt = istreamTable(tableUTest_dir + "dataset.csv");
+        set<arity_t> fs{0, 1};
+        CTable ctt = tt.compress();
+        double mi = mutualInformation(ctt, fs);
+        cout << "mi = " << mi << endl;
+        TS_ASSERT_DELTA(0.419973, mi, 0.0001);
     }
 };

@@ -47,28 +47,25 @@ int main()
         if (!cin.good())
             break;
 
-        //determine the type of tr
-        type_tree tr_type = infer_type_tree(tr);
-        cout << "Type : " << tr_type << endl;
+        // determine the type of tr
+        type_tree tt = infer_type_tree(tr);
+        cout << "Type : " << tt << endl;
 
-        bool ct = is_well_formed(tr_type);
+        bool ct = is_well_formed(tt);
 
         if (!ct) {
             cout << "Bad type" << endl;
             break;
         }
 
-        int ca = contin_arity(tr_type);
-        int s = sample_count(ca);
-
-        //produce random inputs
-        contin_input_table cti(s, ca, rng);
-        //print cti, for debugging
+        // produce random inputs
+        ITable cti(tt, rng);
+        // print cti, for debugging
         cout << "Rnd matrix :" << endl << cti;
 
         try {
-            //evalutate tr over cti and fill mt1
-            mixed_table mt1(tr, cti, tr_type, rng);
+            // evalutate tr over cti and fill mt1
+            OTable mt1(tr, cti, rng);
             //print mt1, for debugging
             cout << "MT1" << endl << mt1 << endl;
 
@@ -77,15 +74,15 @@ int main()
 
             full_reduce(tr, rng);
 
-            //evaluate tr over cti and fill mt2
-            mixed_table mt2(tr, cti, tr_type, rng);
+            // evaluate tr over cti and fill mt2
+            OTable mt2(tr, cti, rng);
             //print mt2, for debugging
             cout << "MT2" << endl << mt2 << endl;
 
             cout << "After  : " << tr << endl;
             if (mt1 != mt2) {
                 cout << mt1 << endl << mt2 << endl;
-                cerr << "mixed-tables don't match!" << endl;
+                cerr << "mixed tables don't match!" << endl;
                 return 1;
             }
         } catch (EvalException& e) {

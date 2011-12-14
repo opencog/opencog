@@ -21,8 +21,13 @@
  */
 #include "table.h"
 
+#include <iomanip>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/for_each.hpp>
+#include <boost/range/algorithm/transform.hpp>
+#include <boost/range/adaptor/map.hpp>
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/algorithm.h>
@@ -35,7 +40,88 @@ namespace opencog { namespace combo {
 
 using namespace std;
 using namespace boost;
+using namespace boost::adaptors;
+        
+ITable::ITable() {}
+        
+ITable::ITable(const ITable::super& mat, std::vector<std::string> il)
+    : super(mat), labels(il) {}
 
+ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
+               contin_t min_contin, contin_t max_contin) {
+    arity_t barity = boolean_arity(tt), carity = contin_arity(tt);
+
+    if(nsamples < 0)
+        nsamples = std::max(pow2(barity), sample_count(carity));
+    
+    // in that case the boolean inputs are not picked randomly but
+    // instead are enumerated
+    bool comp_tt = nsamples == (int)pow2(barity);
+    
+    //populate the matrix
+    auto root = tt.begin();
+    for(int i = 0; i < nsamples; ++i) {
+        size_t bidx = 0;
+        vertex_seq vv;
+        foreach(type_node n, make_pair(root.begin(), root.last_child()))
+            if(n == id::boolean_type)
+                if(comp_tt)
+                    vv.push_back(bool_to_vertex(i & (1 << bidx++)));
+                else
+                    vv.push_back(bool_to_vertex(rng.randint(2)));
+            else if(n == id::contin_type)
+                vv.push_back((max_contin - min_contin) 
+                             * rng.randdouble() + min_contin); 
+        
+        // input interval
+        push_back(vv);
+    }
+}
+
+OTable::OTable(const std::string& ol) : label(ol) {}
+        
+OTable::OTable(const super& ot, const std::string& ol) : super(ot), label(ol) {}
+        
+OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng) {
+    OC_ASSERT(!tr.empty());
+    if(is_ann_type(*tr.begin())) { 
+        // we treat ANN differently because they must be decoded
+        // before being evaluated. Also note that if there are memory
+        // neurones then the state of the network is evolving at each
+        // input, so the order within itable does matter
+        ann net = tree_transform().decodify_tree(tr);
+        int depth = net.feedforward_depth();
+        foreach(const vertex_seq& vv, itable) {
+            vector<contin_t> tmp(vv.size());
+            transform(vv, tmp.begin(), get_contin);
+            tmp.push_back(1.0); // net uses that in case the function
+                                // to learn needs some kind of offset
+            net.load_inputs(tmp);
+            dorepeat(depth)
+                net.propagate();
+            push_back(net.outputs[0]->activation);
+        }
+    } else {
+        foreach(const vertex_seq& vv, itable) {
+            binding_map bmap = itable.get_binding_map(vv);
+            push_back(eval_throws_binding(rng, bmap, tr));
+        }
+    }
+}
+
+OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng) {
+    for_each(ctable | map_keys, [&](const vertex_seq& vs) {
+            binding_map bmap = ctable.get_binding_map(vs);
+            this->push_back(eval_throws_binding(rng, bmap, tr)); });
+}
+
+Table::Table() {}
+        
+Table::Table(const combo_tree& tr, RandGen& rng, int nsamples,
+             contin_t min_contin, contin_t max_contin) :
+    tt(infer_type_tree(tr)), itable(tt, rng, nsamples, min_contin, max_contin),
+    otable(tr, itable, rng) {}
+        
 complete_truth_table::size_type
 complete_truth_table::hamming_distance(const complete_truth_table& other) const
 {
@@ -59,48 +145,18 @@ bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
     return true;
 }
 
-truth_output_table::truth_output_table(const combo_tree& tr,
-                                       const truth_input_table& tti,
-                                       opencog::RandGen& rng) {
-    for(bm_cit i = tti.begin(); i != tti.end(); ++i) {
-        binding_map bmap = tti.get_binding_map(*i);
-        vertex res = eval_throws_binding(rng, bmap, tr);
-        OC_ASSERT(is_boolean(res), "res must be boolean");
-        push_back(vertex_to_bool(res));
-    }
-}
-
-truth_output_table::truth_output_table(const combo_tree& tr,
-                                       const ctruth_table& ctt,
-                                       opencog::RandGen& rng) {
-    for(ctruth_table::const_iterator i = ctt.begin();
-        i != ctt.end(); ++i) {
-        binding_map bmap = ctt.get_binding_map(i->first);
-        vertex res = eval_throws_binding(rng, bmap, tr);
-        OC_ASSERT(is_boolean(res), "res must be boolean");
-        push_back(vertex_to_bool(res));
-    }
-}
-
-ctruth_table truth_table::compress() const {
+CTable Table::compress() const {
 
     // Logger
-    logger().debug("Compress the dataset, current size is %d", input.size());
+    logger().debug("Compress the dataset, current size is %d", itable.size());
     // ~Logger
 
-    ctruth_table res(output.get_label(), input.get_labels());
+    CTable res(otable.get_label(), itable.get_labels());
 
-    InputTable::const_iterator in_it = input.begin();
-    OutputTable::const_iterator out_it = output.begin();
-    for(; in_it != input.end(); ++in_it, ++out_it) {
-        ctruth_table::iterator dup_in_it = res.find(*in_it);
-        if(dup_in_it == res.end())
-            res[*in_it] = make_pair(*out_it?0:1, *out_it?1:0);
-        else {            // found, update duplicate's the output
-            dup_in_it->second.first += *out_it?0:1;
-            dup_in_it->second.second += *out_it?1:0;
-        }
-    }
+    ITable::const_iterator in_it = itable.begin();
+    OTable::const_iterator out_it = otable.begin();
+    for(; in_it != itable.end(); ++in_it, ++out_it)
+        ++res[*in_it][*out_it];
 
     // Logger
     logger().debug("Size of the compressed dataset is %d", res.size());
@@ -109,103 +165,60 @@ ctruth_table truth_table::compress() const {
     return res;
 }
 
-contin_input_table::contin_input_table(int sample_count, int arity,
-                                       opencog::RandGen& rng, 
-                                       double max_randvalue,
-                                       double min_randvalue)
-{
-    //populate the matrix
-    for (int i = 0; i < sample_count; ++i) {
-        contin_vector cv;
-        for (int j = 0; j < arity; ++j)
-        cv.push_back((max_randvalue - min_randvalue) 
-                     * rng.randdouble() + min_randvalue); 
-        // input interval
-        push_back(cv);
-    }
-}
-
-contin_output_table::contin_output_table(const combo_tree& tr, const contin_input_table& cti,
-                                         opencog::RandGen& rng)
-{
-    OC_ASSERT(!tr.empty());
-    if(is_ann_type(*tr.begin())) { 
-        // we treat ANN differently because they must be decoded
-        // before being evaluated. Also note that if there are memory
-        // neurones then the state of the network is evolving at each
-        // input, so the order with contin_input_table does matter
-        ann net = tree_transform().decodify_tree(tr);
-        int depth = net.feedforward_depth();
-        for(const_cm_it i = cti.begin(); i != cti.end(); ++i) {
-            contin_vector tmp(*i);
-            tmp.push_back(1.0); // net uses that in case the function
-                                // to learn needs some kind of offset
-            net.load_inputs(tmp);
-            dorepeat(depth)
-                net.propagate();
-            push_back(net.outputs[0]->activation);
-        }
-    } else {
-        for(const_cm_it i = cti.begin(); i != cti.end(); ++i) {
-            binding_map bmap = cti.get_binding_map(*i);
-            // assumption : all inputs and output of tr are contin_t
-            // this assumption can be verified using infer_type_tree
-            vertex res = eval_throws_binding(rng, bmap, tr);
-            push_back(get_contin(res));
-        }
-    }
-}
-
-bool contin_output_table::operator==(const contin_output_table& ct) const
-{
-    if (get_label() != ct.get_label())
-        return false;
-    if (ct.size() == size()) {
-        const_cv_it ct_i = ct.begin();
-        for (const_cv_it i = begin(); i != end(); ++i, ++ct_i) {
-            if (!isApproxEq(*i, *ct_i))
+bool OTable::operator==(const OTable& rhs) const {
+    const static contin_t epsilon = 1e-12;
+    for(auto lit = begin(), rit = rhs.begin(); lit != end(); ++lit, ++rit) {
+        if(is_contin(*lit) && is_contin(*rit)) {
+            if(!isApproxEq(get_contin(*lit), get_contin(*rit), epsilon))
                 return false;
         }
-        return true;
-    } else return false;
+        else if(*lit != *rit)
+            return false;
+    }
+    return rhs.get_label() == label;
 }
 
-contin_t contin_output_table::abs_distance(const contin_output_table& other) const
+contin_t OTable::abs_distance(const OTable& ot) const
 {
-    OC_ASSERT(other.size() == size(),
-              "contin_output_tables should have the same size.");
-
+    OC_ASSERT(ot.size() == size());
     contin_t res = 0;
-    for (const_iterator x = begin(), y = other.begin();x != end();)
-        res += fabs(*x++ -*y++);
+    for(const_iterator x = begin(), y = ot.begin(); x != end();)
+        res += fabs(get_contin(*(x++)) - get_contin(*(y++)));
     return res;
 }
 
-contin_t contin_output_table::sum_squared_error(const contin_output_table& other) const
+contin_t OTable::sum_squared_error(const OTable& ot) const
 {
-    OC_ASSERT(other.size() == size(),
-              "contin_output_tables should have the same size.");
-
+    OC_ASSERT(ot.size() == size());
     contin_t res = 0;
-    for (const_iterator x = begin(), y = other.begin();x != end();)
-        res += sq(*x++ -*y++);
+    for(const_iterator x = begin(), y = ot.begin(); x != end();)
+        res += sq(get_contin(*(x++)) - get_contin(*(y++)));
     return res;
 }
 
-contin_t contin_output_table::mean_squared_error(const contin_output_table& other) const
+contin_t OTable::mean_squared_error(const OTable& ot) const
 {
-    OC_ASSERT(other.size() == size() && size() > 0,
-              "contin_output_tables should have the same size > 0.");
-    return sum_squared_error(other) / (contin_t)other.size();
+    OC_ASSERT(ot.size() == size() && size() > 0);
+    return sum_squared_error(ot) / ot.size();
 }
 
-contin_t contin_output_table::root_mean_square_error(const contin_output_table& other) const
+contin_t OTable::root_mean_square_error(const OTable& ot) const
 {
-    OC_ASSERT(other.size() == size() && size() > 0,
-              "contin_output_tables should have the same size > 0.");
-    return sqrt(mean_squared_error(other));
+    OC_ASSERT(ot.size() == size() && size() > 0);
+    return sqrt(mean_squared_error(ot));
 }
 
+double OTEntropy(const OTable& ot) {
+    // Compute the probability distributions
+    Counter<vertex, unsigned> counter(ot.begin(), ot.end());
+    std::vector<double> py(counter.size());
+    double total = ot.size();
+    transform(counter | map_values, py.begin(),
+              [&](unsigned c) { return c/total; });
+    // Compute the entropy
+    return entropy(py);
+}
+        
 bool checkCarriageReturn(istream& in) {
     char next_c = in.get();
     if(next_c == '\r') // DOS format
@@ -254,11 +267,14 @@ arity_t dataFileArity(const string& fileName) {
     return istreamArity(*in);
 }
 
-/**
- * Check the token, if it is "0" or "1" then it is boolean, otherwise
- * it is contin. It is not 100% reliable of course and should be
- * improved.
- */
+bool has_header(const std::string& dataFileName) {
+    unique_ptr<ifstream> in(open_data_file(dataFileName));
+    string line;
+    getline(*in, line);    
+    type_node n = infer_type_from_token(tokenizeRow<string>(line).front());
+    return n == id::ill_formed_type;
+}
+
 type_node infer_type_from_token(const string& token) {
     if(token == "0" || token == "1")
         return id::boolean_type;
@@ -279,25 +295,42 @@ int findTargetFeaturePosition(const string& fileName, const string& target)
     string line;
     getline(*in, line);
     vector<string> labels = tokenizeRow<string>(line);
-    unsigned pos = distance(labels.begin(), boost::find(labels, target)); 
+    unsigned pos = distance(labels.begin(), find(labels, target)); 
     OC_ASSERT(pos < labels.size(),
               "There is no such target feature %s in data file %s",
               target.c_str(), fileName.c_str());
     return pos;
 }
 
-type_node inferDataType(const string& fileName)
+type_tree infer_row_type_tree(const pair<vector<string>, string>& row) {
+    type_tree tt(id::lambda_type);
+    auto root = tt.begin();
+
+    foreach(const string& s, row.first) {
+        type_node n = infer_type_from_token(s);
+        if(n == id::ill_formed_type)
+            return type_tree(id::ill_formed_type);
+        else
+            tt.append_child(root, n);
+    }
+    type_node n = infer_type_from_token(row.second);
+    if(n == id::ill_formed_type)
+        return type_tree(id::ill_formed_type);
+    else
+        tt.append_child(root, n);
+    
+    return tt;
+}
+
+type_tree infer_data_type_tree(const string& fileName, int pos)
 {
-    type_node res;
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
-    // check the last token of the first row
     getline(*in, line);
-    res = infer_type_from_token(tokenizeRowIO<string>(line).second);
-    if(res == id::ill_formed_type) { // check the last token of the second row
+    if(has_header(fileName))
         getline(*in, line);
-        res = infer_type_from_token(tokenizeRowIO<string>(line).second);
-    }
+    type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line));
+    OC_ASSERT(is_well_formed(res));
     return res;
 }
 
@@ -315,6 +348,151 @@ get_row_tokenizer(std::string& line) {
     // tokenize line
     static const seperator sep(", \t");
     return tokenizer(line, sep);
+}
+
+vertex token_to_vertex(const string& token) {
+    if(token == "0")
+        return id::logical_false;
+    else if(token == "1")
+        return id::logical_true;
+    else
+        return lexical_cast<contin_t>(token);
+}
+
+istream& istreamTable(istream& in, ITable& it, OTable& ot,
+                      bool has_header, const type_tree& tt, int pos) {
+    string line;
+    arity_t arity = type_tree_arity(tt);
+    if(has_header) {
+        getline(in, line);
+        pair<vector<string>, string> ioh = tokenizeRowIO<string>(line, pos);
+        it.set_labels(ioh.first);
+        ot.set_label(ioh.second);
+        OC_ASSERT(arity == (arity_t)ioh.first.size());
+    } 
+
+    while(getline(in, line)) {
+        // tokenize the line and fill the input vector and output
+        pair<vector<string>, string> io = tokenizeRowIO<string>(line, pos);
+        
+        // check arity
+        OC_ASSERT(arity == (arity_t)io.first.size(),
+                  "The row %u has %u columns while the first row has %d"
+                  " columns, all rows should have the same number of"
+                  " columns", ot.size(), io.first.size(), arity);
+        
+        // fill table
+        vertex_seq ivs(arity);
+        transform(io.first, ivs.begin(), token_to_vertex);
+        it.push_back(ivs);
+        ot.push_back(token_to_vertex(io.second));
+    }
+    return in;
+}
+
+void istreamTable(const string& file_name, ITable& it, OTable& ot, int pos) {
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    std::ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+    istreamTable(in, it, ot, has_header(file_name),
+                 infer_data_type_tree(file_name), pos);
+}
+
+Table istreamTable(const string& file_name, int pos) {
+    Table res;
+    istreamTable(file_name, res.itable, res.otable, pos);
+    return res;
+}
+
+ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot) {
+    out << ot.get_label() << ",";
+    return ostreamlnContainer(out, it.get_labels(), ",");
+}
+
+ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot) {
+    // print header
+    ostreamTableHeader(out, it, ot);
+    // print data
+    OC_ASSERT(it.size() == ot.size());
+    auto vertex_to_str = [](const vertex& v) {
+        stringstream ss;
+        if(is_boolean(v))
+            ss << vertex_to_bool(v);
+        else
+            ss << v;
+        return ss.str();
+    };
+    for(size_t row = 0; row < it.size(); ++row) {
+        // print output
+        out << vertex_to_str(ot[row]) << ",";
+        // print inputs
+        const auto& irow = it[row];
+        for(unsigned i = 0; i < irow.size();) {
+            out << vertex_to_str(irow[i]);
+            ++i;
+            if(i < irow.size())
+                out << ",";
+            out << endl;
+        }
+    }
+    return out;
+}
+ostream& ostreamTable(ostream& out, const Table& table) {
+    return ostreamTable(out, table.itable, table.otable);
+}
+
+void ostreamTable(const string& file_name, const ITable& it, const OTable& ot) {
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    ofstream out(file_name.c_str());
+    OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
+    ostreamTable(out, it, ot);
+}
+void ostreamTable(const string& file_name, const Table& table) {
+    ostreamTable(file_name, table.itable, table.otable);
+}
+ostream& ostreamCTableHeader(ostream& out, const CTable& ct) {
+    out << ct.olabel << ",";
+    return ostreamlnContainer(out, ct.ilabels, ",");
+}
+ostream& ostreamCTable(ostream& out, const CTable& ct) {
+    // print header
+    ostreamCTableHeader(out, ct);
+    // print data
+    foreach(const auto& v, ct) {
+        // print map of outputs
+        out << "{";
+        for(auto it = v.second.begin(); it != v.second.end();) {
+            out << it->first << ":" << it->second;
+            if(++it != v.second.end())
+                out << ",";
+        }
+        out << "},";
+        // print inputs
+        ostreamlnContainer(out, v.first, ",");
+    }
+    return out;
+}
+        
+void subsampleTable(ITable& it, OTable& ot,
+                    unsigned int nsamples, RandGen& rng) {
+    OC_ASSERT(it.size() == ot.size());
+    if(nsamples < ot.size()) {
+        unsigned int nremove = ot.size() - nsamples;
+        dorepeat(nremove) {
+            unsigned int ridx = rng.randint(ot.size());
+            it.erase(it.begin()+ridx);
+            ot.erase(ot.begin()+ridx);
+        }
+    }
+}
+void subsampleTable(ITable& it, unsigned int nsamples, RandGen& rng) {
+    if(nsamples < it.size()) {
+        unsigned int nremove = it.size() - nsamples;
+        dorepeat(nremove) {
+            unsigned int ridx = rng.randint(it.size());
+            it.erase(it.begin()+ridx);
+        }
+    }
 }
 
 }} // ~namespaces combo opencog

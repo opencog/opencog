@@ -50,22 +50,19 @@ int main()
             break;
 
         //get type_node tree of tr.
-        type_tree tr_type = infer_type_tree(tr);
-        cout << "Type : " << tr_type << endl;
+        type_tree tt = infer_type_tree(tr);
+        cout << "Type : " << tt << endl;
 
         //check whether the tree is well-formed.
-        bool ct = is_well_formed(tr_type);
+        bool ct = is_well_formed(tt);
 
         if (!ct) {
             cout << "Bad type" << endl;
             break;
         }
 
-        int ca = contin_arity(tr_type);
-        int s = sample_count(ca);
-
         //produce random inputs
-        contin_input_table cti(s, ca, rng);
+        ITable cti(tt, rng);
         //print cti, for debugging
         cout << "Rnd matrix :" << endl << cti;
 

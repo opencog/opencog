@@ -40,9 +40,6 @@
 #include <exception>
 #include <boost/unordered_map.hpp>
 
-#define COEF_SAMPLE_COUNT 20.0 //involved in the formula that counts
-//the number of trials needed to check a formula
-
 namespace opencog { namespace combo {
 
 struct Evaluator {
@@ -497,19 +494,6 @@ arity_t arity(const tree<T>& tr)
         if (is_argument(*it))
             a = std::max(a, (arity_t)std::abs(get_argument(*it).idx));
     return a;
-}
-
-/*
-  this function take an arity in input and returns in output the number
-  of samples that would be appropriate to check the semantics of its associated
-  tree. (Note : could take the two trees to checking and according to their arity
-  structure, whatever, find an appropriate number.)
-*/
-inline int sample_count(arity_t arity)
-{
-    if (arity == 0)
-        return 1;
-    else return (int)(COEF_SAMPLE_COUNT*log((float)arity + EXPONENTIAL));
 }
 
 }} // ~namespaces combo opencog

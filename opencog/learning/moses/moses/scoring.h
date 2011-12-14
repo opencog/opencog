@@ -112,26 +112,22 @@ struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
 
     behavioral_score best_possible_bscore() const;
     
-    combo::complete_truth_table target;
+    complete_truth_table target;
     int arity;
 };
 
 struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
     template<typename Func>
-    contin_bscore(const Func& func,
-                  const contin_input_table& r,
-                  RandGen& _rng)
+    contin_bscore(const Func& func, const ITable& r, RandGen& _rng)
         : target(func, r), cti(r), rng(_rng) {}
 
-    contin_bscore(const combo::contin_output_table& t,
-                  const contin_input_table& r,
-                  RandGen& _rng)
+    contin_bscore(const OTable& t, const ITable& r, RandGen& _rng)
         : target(t), cti(r), rng(_rng) {}
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    combo::contin_output_table target;
-    contin_input_table cti;
+    OTable target;
+    ITable cti;
     RandGen& rng;
 };
 
@@ -147,11 +143,9 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
 struct occam_discretize_contin_bscore : public unary_function<combo_tree,
                                                               behavioral_score> {
 
-    occam_discretize_contin_bscore(const combo::contin_output_table& ot,
-                                   const contin_input_table& it,
+    occam_discretize_contin_bscore(const OTable& ot, const ITable& it,
                                    const vector<contin_t>& thres,
-                                   bool wa,
-                                   float p,
+                                   bool wa, float p,
                                    float alphabet_size,
                                    RandGen& _rng);
 
@@ -162,8 +156,8 @@ struct occam_discretize_contin_bscore : public unary_function<combo_tree,
     // that's acceptable for now
     behavioral_score best_possible_bscore() const;
     
-    combo::contin_output_table target;
-    contin_input_table cit;
+    OTable target;
+    ITable cit;
     vector<contin_t> thresholds;
     bool weighted_accuracy;     // whether the bscore is weighted to
                                 // deal with unbalanced data
@@ -218,7 +212,7 @@ protected:
 struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score> {
     template<typename Scoring>
     occam_contin_bscore(const Scoring& score,
-                        const contin_input_table& r,
+                        const ITable& r,
                         float stdev,
                         float alphabet_size,
                         RandGen& _rng)
@@ -227,8 +221,8 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
         set_complexity_coef(stdev, alphabet_size);
     }
 
-    occam_contin_bscore(const contin_output_table& t,
-                        const contin_input_table& r,
+    occam_contin_bscore(const OTable& t,
+                        const ITable& r,
                         float stdev,
                         float alphabet_size,
                         RandGen& _rng)
@@ -244,8 +238,8 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     // that's acceptable for now
     behavioral_score best_possible_bscore() const;
     
-    contin_output_table target;
-    contin_input_table cti;
+    OTable target;
+    ITable cti;
     bool occam;
     score_t complexity_coef;
     RandGen& rng;
@@ -270,7 +264,7 @@ private:
  */
 struct occam_ctruth_table_bscore 
     : public unary_function<combo_tree, behavioral_score> {
-    occam_ctruth_table_bscore(const ctruth_table& _ctt,
+    occam_ctruth_table_bscore(const CTable& _ctt,
                               float p,
                               float alphabet_size,
                               RandGen& _rng);
@@ -281,7 +275,8 @@ struct occam_ctruth_table_bscore
     // terminations condition (when the best bscore is reached)
     behavioral_score best_possible_bscore() const;
     
-    const ctruth_table& ctt;
+    mutable CTable ctt;         // mutable because accessing a missing
+                                // element add it in the map
     bool occam; // if true the Occam's razor is taken into account
     score_t complexity_coef;
     RandGen& rng;

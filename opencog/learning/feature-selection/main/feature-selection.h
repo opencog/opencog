@@ -87,7 +87,6 @@ void err_empty_features() {
 }
 
 // log the set of features and its number
-template<typename Table>
 void log_selected_features(arity_t old_arity, const Table& ftable) {
     // log the number selected features
     logger().info("%d out of %d have been selected",
@@ -95,7 +94,7 @@ void log_selected_features(arity_t old_arity, const Table& ftable) {
     // log set of selected feature set
     stringstream ss;
     ss << "The following features have been selected: ";
-    ostreamContainer(ss, ftable.input.get_labels(), ",");
+    ostreamContainer(ss, ftable.itable.get_labels(), ",");
     logger().info(ss.str());
 }
 
@@ -185,7 +184,7 @@ instance initial_instance(const feature_selection_parameters& fs_params,
 }
 
 // run feature selection given an moses optimizer
-template<typename Table, typename Optimize>
+template<typename Optimize>
 void moses_feature_selection(Table& table,
                              Optimize& optimize,
                              const feature_selection_parameters& fs_params) {
@@ -196,7 +195,7 @@ void moses_feature_selection(Table& table,
     // determine the initial instance given the initial feature set
     instance init_inst = initial_instance(fs_params, fields);
     // define feature set quality scorer
-    typedef MICScorerTable<Table, set<arity_t> > FSScorer;
+    typedef MICScorerTable<set<arity_t> > FSScorer;
     FSScorer fs_sc(table, fs_params.confi);
     typedef moses_based_scorer<FSScorer> MBScorer;
     MBScorer mb_sc(fs_sc, fields);
@@ -215,7 +214,6 @@ void moses_feature_selection(Table& table,
     }
 }
 
-template<typename Table>
 void write_results(const Table& table,
                    const feature_selection_parameters& fs_params) {
     if(fs_params.output_file.empty())
@@ -224,13 +222,11 @@ void write_results(const Table& table,
         ostreamTable(fs_params.output_file, table);
 }
 
-template<typename Table>
 void incremental_feature_selection(Table& table,
                                    const feature_selection_parameters& fs_params) {
-    typedef typename Table::CTable CTable;
     if(fs_params.inc_intensity > 0 || fs_params.inc_target_size > 0) {
         CTable ctable = table.compress();
-        typedef MutualInformation<CTable, std::set<arity_t> > FeatureScorer;
+        typedef MutualInformation<std::set<arity_t> > FeatureScorer;
         FeatureScorer fsc(ctable);
         std::set<arity_t> features(counting_iterator<arity_t>(0),
                                    counting_iterator<arity_t>(table.get_arity()));
@@ -259,7 +255,6 @@ void incremental_feature_selection(Table& table,
     }
 }
 
-template<typename Table>
 void feature_selection(Table& table,
                        const feature_selection_parameters& fs_params,
                        RandGen& rng) {

@@ -25,15 +25,18 @@
 #define _OPENCOG_FEATURE_SCORER_H
 
 #include <opencog/util/numeric.h>
+#include <opencog/comboreduct/combo/table.h>
 
 namespace opencog {
 
+using namespace combo;
+    
 /**
  * Compute the MutualInformation
  *
  * H(Y;X1, ..., Xn) = H(X1, ..., Xn) + H(Y) - H(X1, ..., Xn, Y)
  */
-template<typename CTable, typename FeatureSet>
+template<typename FeatureSet>
 struct MutualInformation : public std::unary_function<FeatureSet, double> {
 
     MutualInformation(const CTable& ctable) 
@@ -44,7 +47,7 @@ struct MutualInformation : public std::unary_function<FeatureSet, double> {
     }
 
 protected:
-    const CTable& _ctable;
+    mutable CTable _ctable;
 };
 
 /**
@@ -58,10 +61,10 @@ protected:
  * compute several MI based on subsamples the dataset and estimate the
  * confidence based on the distribution of MI obtained)
  */
-template<typename IT, typename OT, typename FeatureSet>
+template<typename FeatureSet>
 struct MICScorer : public std::unary_function<FeatureSet, double> {
 
-    MICScorer(const IT& it, const OT& ot,
+    MICScorer(const ITable& it, const OTable& ot,
               double cpi = 1, double confi = 0, double resources = 10000)
         : _it(it), _ot(ot), _confi(confi) {}
 
@@ -76,13 +79,13 @@ struct MICScorer : public std::unary_function<FeatureSet, double> {
         return MI * confidence;
     }
 
-    const IT& _it;
-    const OT& _ot;
+    const ITable& _it;
+    const OTable& _ot;
     double _confi; //  confidence intensity
 };
 
 /// like above but using Table instead of input and output table
-template<typename Table, typename FeatureSet>
+template<typename FeatureSet>
 struct MICScorerTable : public std::unary_function<FeatureSet, double> {
 
     MICScorerTable(const Table& table, double confi = 0)
@@ -100,7 +103,7 @@ struct MICScorerTable : public std::unary_function<FeatureSet, double> {
     }
 
     const Table& _table;
-    typename Table::CTable _ctable;
+    mutable CTable _ctable;
     double _confi; //  confidence intensity
 };
 

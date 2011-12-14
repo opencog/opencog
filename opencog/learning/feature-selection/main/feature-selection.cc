@@ -156,7 +156,9 @@ int main(int argc, char** argv) {
                                       std::string(".").append(default_log_file_suffix));
     }
 
-    type_node inferred_type = inferDataType(fs_params.input_file);
+    type_tree inferred_tt = infer_data_type_tree(fs_params.input_file);
+    type_tree output_tt = type_tree_output_type_tree(inferred_tt);
+    type_node inferred_type = *output_tt.begin();
 
     // remove log_file
     remove(log_file.c_str());
@@ -178,7 +180,7 @@ int main(int argc, char** argv) {
 
     if(inferred_type == id::boolean_type) {
         // read input_data_file file
-        truth_table table(fs_params.input_file, target_pos);
+        Table table = istreamTable(fs_params.input_file, target_pos);
         feature_selection(table, fs_params, rng);
     } else {
         unsupported_type_exit(inferred_type);

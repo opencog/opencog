@@ -112,7 +112,6 @@ void eval_output_results(const evalTableParameters& pa,
     }
 }
 
-template<typename Table>
 void read_eval_output_results(const evalTableParameters& pa,
                               opencog::RandGen& rng) {
     // find the position of the target feature of the data file if any
@@ -122,13 +121,13 @@ void read_eval_output_results(const evalTableParameters& pa,
                                                pa.target_feature);
 
     // read data table
-    Table table(pa.input_table_file, target_pos);
+    Table table = istreamTable(pa.input_table_file, target_pos);
 
     // read combo programs
     vector<combo_tree> trs;
     foreach(const string& tr_str, pa.combo_programs)
         trs += str2combo_tree_label(tr_str, pa.has_labels,
-                                    table.input.get_labels());
+                                    table.itable.get_labels());
     if(!pa.combo_programs_file.empty()) {
         ifstream in(pa.combo_programs_file.c_str());
         while(in.good()) {
@@ -137,11 +136,11 @@ void read_eval_output_results(const evalTableParameters& pa,
             if(line.empty())
                 continue;
             trs += str2combo_tree_label(line, pa.has_labels,
-                                        table.input.get_labels());
+                                        table.itable.get_labels());
         }
     }
     // eval and output the results
-    eval_output_results(pa, trs, table.input, table.output, rng);
+    eval_output_results(pa, trs, table.itable, table.otable, rng);
 }
 
 #endif // _OPENCOG_EVAL_TABLE_H

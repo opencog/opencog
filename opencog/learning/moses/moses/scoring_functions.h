@@ -76,19 +76,20 @@ struct multiplex {
 };
 
 
-//simple function : f(x)_o = sum_{i={1,o}} x^i
-//that is for instance:
-//f(x)_3 = x+x^2+x^3
-//f(x)_2 = x+x^2
-//f(x)_1 = x
-//f(x)_0 = 0
+// simple function : f(x)_o = sum_{i={1,o}} x^i
+// that is for instance:
+// f(x)_3 = x+x^2+x^3
+// f(x)_2 = x+x^2
+// f(x)_1 = x
+// f(x)_0 = 0
 struct simple_symbolic_regression {
     simple_symbolic_regression(int o = 4) : order(o) { }
     int order;
     template<typename It>
-    contin_t operator()(It from,It to) const {
+    contin_t operator()(It from, It to) const {
         contin_t res = 0;
-        dorepeat(order) res = (res + contin_t(1)) * (*from);
+        dorepeat(order)
+            res = (res + 1) * get_contin(*from);
         return res;
     }
 };
