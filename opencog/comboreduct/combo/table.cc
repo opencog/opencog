@@ -78,11 +78,23 @@ ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
     }
 }
 
+void ITable::set_labels(std::vector<std::string> il) {
+    labels = il;
+}
+
+const std::vector<std::string>& ITable::get_labels() const {
+    if(labels.empty() and !super::empty()) { // return default labels
+        static const std::vector<std::string> dl(get_default_labels());
+        return dl;
+    } else return labels;
+}
+
 OTable::OTable(const std::string& ol) : label(ol) {}
         
 OTable::OTable(const super& ot, const std::string& ol) : super(ot), label(ol) {}
         
-OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng) {
+OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
+               const std::string& ol) : label(ol) {
     OC_ASSERT(!tr.empty());
     if(is_ann_type(*tr.begin())) { 
         // we treat ANN differently because they must be decoded
@@ -109,12 +121,21 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng) {
     }
 }
 
-OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng) {
+OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
+               const std::string& ol) : label(ol) {
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
             binding_map bmap = ctable.get_binding_map(vs);
             this->push_back(eval_throws_binding(rng, bmap, tr)); });
 }
 
+void OTable::set_label(const std::string& ol) {
+    label = ol;
+}
+
+const std::string& OTable::get_label() const {
+    return label;
+}
+        
 Table::Table() {}
         
 Table::Table(const combo_tree& tr, RandGen& rng, int nsamples,
@@ -432,8 +453,8 @@ ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot) {
             ++i;
             if(i < irow.size())
                 out << ",";
-            out << endl;
         }
+        out << endl;
     }
     return out;
 }

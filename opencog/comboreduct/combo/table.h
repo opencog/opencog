@@ -117,15 +117,8 @@ public:
     ITable(const type_tree& tt, RandGen& rng, int nsamples = -1,
            contin_t min_contin = -1.0, contin_t max_contin = 1.0);
     // set input labels
-    void set_labels(std::vector<std::string> il) {
-        labels = il;
-    }
-    const std::vector<std::string>& get_labels() const {
-        if(labels.empty() and !super::empty()) { // return default labels
-            static const std::vector<std::string> dl(get_default_labels());
-            return dl;
-        } else return labels;
-    }
+    void set_labels(std::vector<std::string> il);
+    const std::vector<std::string>& get_labels() const;
     // like get_labels but filter accordingly to a container of arity_t
     template<typename F>
     std::vector<std::string> get_filtered_labels(const F& filter) {
@@ -199,17 +192,20 @@ public:
 
     OTable(const std::string& ol = default_output_label);
     OTable(const super& ot, const std::string& ol = default_output_label);
-    OTable(const combo_tree& tr, const ITable& itable, RandGen& rng);
-    OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng);
+    OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
+           const std::string& ol = default_output_label);
+    OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
+           const std::string& ol = default_output_label);
     template<typename Func>
-    OTable(const Func& f, const ITable& it) {
+    OTable(const Func& f, const ITable& it,
+           const std::string& ol = default_output_label)
+        : label(ol) {
         foreach(const vertex_seq& vs, it)
             push_back(f(vs.begin(), vs.end()));        
     }
 
-    void set_label(const std::string& ol) { label = ol; }
-    std::string& get_label() { return label; }
-    const std::string& get_label() const { return label; }
+    void set_label(const std::string& ol);
+    const std::string& get_label() const;
     bool operator==(const OTable& rhs) const;
     contin_t abs_distance(const OTable& ot) const;
     contin_t sum_squared_error(const OTable& ot) const;
@@ -491,7 +487,7 @@ std::ostream& ostreamTableHeader(std::ostream& out,
 // binary form (0 for false, 1 for true)
 std::ostream& ostreamTable(std::ostream& out,
                            const ITable& it, const OTable& ot);
-// like above but take a table instead of a input and output table
+// like above but take a table instead of an input and output table
 std::ostream& ostreamTable(std::ostream& out, const Table& table);
 
 // like above but takes the file name where to write the table
