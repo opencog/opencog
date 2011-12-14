@@ -86,6 +86,7 @@ INSTALL(FILES
 	tree.h
     octime.h
     oc_omp.h
+    Counter.h
 	DESTINATION "include/${PROJECT_NAME}/util"
 )
 
