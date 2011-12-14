@@ -3,6 +3,7 @@ ADD_SUBDIRECTORY (representation)
 ADD_SUBDIRECTORY (optimization)
 ADD_SUBDIRECTORY (eda)
 ADD_SUBDIRECTORY (main)
+ADD_SUBDIRECTORY (example-progs)
 
 ADD_LIBRARY (moses SHARED
 	representation/build_knobs
