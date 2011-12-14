@@ -1,0 +1,21 @@
+INTRODUCTION
+------------
+
+MOSES is an evolutionary program learner. It is mostly based on Moshe
+Looks' thesis http://metacog.org/main.pdf, also the primary author of
+the code.
+
+LICENSE
+-------
+
+MOSES is under double license, Apache 2.0 and GNU AGPL 3.
+
+INSTALLATION
+------------
+
+Compile and install OpenCog, more information at
+http://wiki.opencog.org/w/Building_OpenCog.
+
+PROJECT DIRECTORY
+-----------------
+
