@@ -247,135 +247,163 @@ For compiling MOSES, create a directory
 status collapsed
 
 \begin_layout Plain Layout
-bin
-\end_layout
-
-\end_inset
-
- yeah 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|bin|
+build
 \end_layout
 
 \end_inset
 
  (from the root folder of the MOSES distribution), go under it and run 
-\begin_inset ERT
+
+\begin_inset Flex Code
 status collapsed
 
 \begin_layout Plain Layout
 
+\begin_inset Quotes eld
+\end_inset
 
-\backslash
-verb|"cmake .."|
+cmake ..
+\lang english
+
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
 \end_inset
 
+
+\lang english
 .
  This will create the needed build files.
- Then, make the project using "
-\begin_inset ERT
+ Then, make the project using 
+\begin_inset Flex Code
 status collapsed
 
 \begin_layout Plain Layout
+\begin_inset Quotes eld
+\end_inset
+
+make
+\begin_inset Quotes erd
+\end_inset
 
 
-\backslash
-verb|make|
 \end_layout
 
 \end_inset
 
-" (again from the directory 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|bin|
-\end_layout
-
-\end_inset
-
+ (again from the directory 
+\family typewriter
+build
+\family default
 ).
  Generated executables will be in the folder 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|bin/src/MosesEda/main|
-\end_layout
-
-\end_inset
-
+\family typewriter
+build/moses/learning/moses/main
+\family default
 .
  
 \end_layout
 
 \begin_layout Section
-Basic Ideas and Notions
+Overview
 \end_layout
 
 \begin_layout Standard
-MOSES is an approach (and a tool) for program evolution, but it can be used
- for learning different structured expressions, such as, for instance, propositi
-onal formulas or arithmetic expressions.
+MOSES performs supervised learning, and thus requires either a scoring function
+ or training data to be specified as input.
+ As output, it generates a Combo program that, when executed, approximates
+ the scoring function.
+ MOSES uses general concepts from evolutionary search, in that it maintains
+ a population of programs, and then explores the neighborhood of modified,
+ "mutated" programs, evaluating their fitness.
+ After some number of iterations, the fittest program found is output.
 \end_layout
 
 \begin_layout Standard
-Here are some of the basic notions of MOSES:
+More precisely, MOSES maintains a population of demes.
+ Each deme is a program with many adjustable, tuneable parameters.
+ These adjustable parameters are colloquially referred to as knobs.
+ Thus, finding the fittest program requires not only selecting a deme, but
+ also determining the best setting for the knobs.
+\end_layout
+
+\begin_layout Standard
+The MOSES algorithm proceeds by selecting a deme and performing random mutations
+ on it, by inserting new knobs in various random places.
+ The best-possible knob settings for the mutated deme are found by using
+ using existing, well-known optimization algorithms such as hill-climbing,
+ simulated annealing or estimation of distribution algorithms (EDA) such
+ as Bayesian optimization (BOA/hBOA).
+ The fitness of the resulting program(s) can be compared to the fittest
+ exemplar of other demes.
+ If the new program is found to be more fit, it is used to start a new deme,
+ (while discarding the old, dominated deme) and the process then repeats.
+\end_layout
+
+\begin_layout Standard
+All program evolution algorithms tend to produce bloated, convoluted, redundant
+ programs ("spaghetti code").
+ To avoid this, MOSES performs reduction at each stage, to bring the program
+ into normal form.
+ The specific normalization used is based on Holman's "elegant normal form",
+ which mixes alternate layers of linear and non-linear operators.
+ The resulting form is far more compact than, say, for example, boolean
+ disjunctive normal form.
+ Normalization eliminates redundant terms, and tends to make the resulting
+ code both more human-readable, and faster to execute.
+\end_layout
+
+\begin_layout Standard
+MOSES is able to out-perform standard genetic programming systems for two
+ important reasons.
+ One is that the EDA algorithms, by finding the dependencies in a Bayesian
+ network, in fact find how different parts of a program are related.
+ This quickly rules out pointless mutations that change one part of a program
+ without making corresponding changes in other, related parts of the program.
+ The other reason is that by performing reduction to normal form, programs
+ become smaller, more compact, faster to execute, and more human readable.
+ Besides avoiding spaghetti code, normalization removes redundancies in
+ programs, thus allowing smaller populations of less complex programs, speeding
+ convergence.
+\end_layout
+
+\begin_layout Standard
+The programs that MOSES generates are "generic", in the sense that MOSES
+ works with structured trees, represented in Combo.
+ Such trees can represent propositional formula, procedural or functional
+ programs, etc.
+ The core MOSES solver is written in C++, and takes the form of a library.
+ There are many example programs illustrating how to use this library.
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Section
+Terminology
+\end_layout
+
+\begin_layout Standard
+Here is some of the basic vocabulary used in MOSES:
 \end_layout
 
 \begin_layout Description
-Scoring function.
- During the learning phase, candidates being explored are scored by a 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
+Scoring
+\begin_inset space ~
 \end_inset
 
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-em
-\end_layout
-
-\end_inset
-
- scoring function
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-, specific for a given problem.
+function.
+ During the learning phase, candidate programs being explored are scored
+ by a 
+\emph on
+scoring function
+\emph default
+.
+ Ths is specific to the given problem.
  For instance, a given problem can be to learn a disjunctive propositional
  formulae over the given set of propositional variables, e.g., 
 \begin_inset Formula $\#1\vee\#2\vee\ldots\vee\#n$
@@ -419,79 +447,45 @@ status collapsed
 \end_layout
 
 \begin_layout Description
-Exemplar and representation-building.
+Exemplar.
+ An 
+\emph on
+examplar
+\emph default
+ is a specific program; typically, the fittest one found.
+ 
+\end_layout
+
+\begin_layout Description
+Representation.
  The 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-em
-\end_layout
-
-\end_inset
-
- representation-building
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
- component of MOSES constructs a parameterized representation of a particular
- region of program space, centered around a single program (the 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-em
-\end_layout
-
-\end_inset
-
- exemplar
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-) or family of closely related programs.
+\emph on
+representation-building
+\emph default
+ component of MOSES constructs a parameterized 
+\emph on
+representation
+\emph default
+ of a particular region of program space, centered around a single program
+ (the 
+\emph on
+exemplar
+\emph default
+), or around a family of closely related programs.
+ The representation should be thought of as a program with a number of adjustabl
+e parameters or 
+\emph on
+knobs
+\emph default
+ that alter the program behaviour.
+ During the optimization phase, the space of all possible parameter or knob
+ settings will be explored, to locate the best possible settings, 
+\emph on
+i.e
+\emph default
+.
+ to find the fittest program.
+ 
 \end_layout
 
 \begin_layout Description
@@ -611,57 +605,54 @@ status collapsed
  would return to the original tree).
 \end_layout
 
-\begin_deeper
-\begin_layout Standard
-A program in a deme is represented as a list of knob settings (these values
- can be bits, integer values, or real-number values, depending on the knob
- type).
- The program itself can be easily constructed from such list and the exemplar.
-\end_layout
-
-\end_deeper
 \begin_layout Description
-Deme and metapopulation.
- A sample of programs within a representation will be referred to herein
- as a 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-em
-\end_layout
-
-\end_inset
-
- deme
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-; a set of demes will be referred to as a metapopulation.
- MOSES operates on a metapopulation, adaptively creating, removing, and
- allocating optimization effort to various demes.
+Program.
+ A particular program is a representation together with a list of particular
+ knob settings.
+ These values can be bits, integer values, or real-number values, depending
+ on the knob type.
  
+\end_layout
+
+\begin_layout Description
+Deme.
+ A 
+\emph on
+deme
+\emph default
+ is a population of programs derived from one single representation.
+ Thus, a deme can be thought of as a population of knob settings.
+ During the optimization phase, an optimizer algorithm, such as hill-climbing,
+ simulated annealing, or the Bayesian optimizaation algorithm is used to
+ work with the population, locating the best possible knob settings for
+ the given representation.
+ 
+\end_layout
+
+\begin_layout Description
+Metapopulation.
+ MOSES maintains a collection of demes, playing each off the others.
+ This set of demes is refered to as the 
+\emph on
+metapopulation
+\emph default
+.
+ Pairs of demes are in competition; fitter demes are used to replace less
+ fit demes.
+\end_layout
+
+\begin_layout Description
+Domination.
+ One deme is considered to 
+\emph on
+dominate
+\emph default
+ another if it is better in every way.
+ During learning, demes typically do not dominate one-another: some are
+ beter at some parts of the scoring function, while others are better at
+ other aspects.
+ Thus, both are kept around and further evolved.
+ Demes that are completely dominated are (usually) discarded.
 \end_layout
 
 \begin_layout Section
@@ -669,7 +660,7 @@ Overall Algorithm
 \end_layout
 
 \begin_layout Standard
-A basic MOSES algorithm can be described as follows:
+The basic MOSES algorithm can be described as follows:
 \end_layout
 
 \begin_layout Enumerate
