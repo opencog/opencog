@@ -1,0 +1,2479 @@
+#LyX file created by tex2lyx 2.0.0
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+
+
+
+\newtheorem{class}{class or struct}
+\newtheorem{type}{type}
+
+
+\title{MOSES --- A Quick Guide}
+\author{Predrag Janicic}
+\author{Revised, Linas Vepstas}
+
+
+\end_preamble
+\use_default_options false
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref 0
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+
+
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+Introduction
+\end_layout
+
+\begin_layout Standard
+
+Meta-optimizing semantic evolutionary search (MOSES) is a new approach to program evolution, based on representation-building and probabilistic modeling. MOSES has been successfully applied to solve hard problems in domains such as computational biology, sentiment evaluation, and agent control. Results tend to be more accurate, and require less objective function evaluations, in comparison to other program evolution systems. Best of all, the result of running MOSES is not a large nested structure or numerical vector, but a compact and comprehensible program written in a simple Lisp-like mini-language. For more information see 
+\begin_inset Flex Flex:URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://metacog.org/doc.html
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+
+The list of publications on MOSES is given in the References section. Moshe Look's PhD thesis 
+\begin_inset CommandInset citation
+LatexCommand cite
+after ""
+key "6"
+
+\end_inset
+
+ should be the first material to be read by someone interested in using or modifying MOSES.
+\end_layout
+
+\begin_layout Standard
+
+MOSES is implemented in C++ and it heavily uses templates. So, one interested in modifying MOSES must be familiar with C++ and, at least to some extent, to C++ templates.
+\end_layout
+
+\begin_layout Section
+
+Copyright Notice
+\end_layout
+
+\begin_layout Standard
+
+MOSES is Copyright 2005-2008, Moshe Looks and Novamente LLC.
+\end_layout
+
+\begin_layout Standard
+
+It is licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Flex Flex:URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.apache.org/licenses/LICENSE-2.0
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+\end_layout
+
+\begin_layout Section
+
+Installation
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%The code for reproducing all of the published experiments on MOSES 
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%may be found in the moses/ subdirectory. A more nicely architected and
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%performant implementation that is under active development may be found in the
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%moses2/ subdirectory. These two directories are completely independent and use
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%no common files (although identical versions of some files may be found in both
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%subdirectories).
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% Go into either moses/ or moses2/ (see above) and do 'make'. You will need to
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% have a recent gcc (4.x or late 3.x) and the boost libraries installed
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% (http://www.boost.org).
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+For compiling MOSES, you need 
+\end_layout
+
+\begin_layout Itemize
+
+a recent gcc (4.x or late 3.x); 
+\end_layout
+
+\begin_layout Itemize
+
+the boost libraries (
+\begin_inset Flex Flex:URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.boost.org
+\end_layout
+
+\end_inset
+
+); 
+\end_layout
+
+\begin_layout Itemize
+
+the CMake package (
+\begin_inset Flex Flex:URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.cmake.org/HTML/Index.html
+\end_layout
+
+\end_inset
+
+); 
+\end_layout
+
+\begin_layout Itemize
+
+the ComboReduct and LADSUtil libraries (TODO : place the urls). 
+\end_layout
+
+\begin_layout Standard
+
+For compiling MOSES, create a directory 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|bin|
+\end_layout
+
+\end_inset
+
+ (from the root folder of the MOSES distribution), go under it and run 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|"cmake .."|
+\end_layout
+
+\end_inset
+
+. This will create the needed build files. Then, make the project using "
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|make|
+\end_layout
+
+\end_inset
+
+" (again from the directory 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|bin|
+\end_layout
+
+\end_inset
+
+). Generated executables will be in the folder 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|bin/src/MosesEda/main|
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+
+Basic Ideas and Notions
+\end_layout
+
+\begin_layout Standard
+
+MOSES is an approach (and a tool) for program evolution, but it can be used for learning different structured expressions, such as, for instance, propositional formulas or arithmetic expressions.
+\end_layout
+
+\begin_layout Standard
+
+Here are some of the basic notions of MOSES:
+\end_layout
+
+\begin_layout Description
+
+Scoring function. During the learning phase, candidates being explored are scored by a 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ scoring function
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+, specific for a given problem. For instance, a given problem can be to learn a disjunctive propositional formulae over the given set of propositional variables, e.g., 
+\begin_inset Formula $\#1 \vee \#2 \vee \ldots \vee \#n$
+\end_inset
+
+. The learning mechanism does not know this formula and instead it only has an access to the corresponding scoring function. A scoring function for this problem, for a given formula 
+\begin_inset Formula $f$
+\end_inset
+
+ (over the variables 
+\begin_inset Formula $\#1, \#2, \ldots, \#n$
+\end_inset
+
+) would return the number of rows in the truth table for 
+\begin_inset Formula $f$
+\end_inset
+
+ such that the output truth value is equal to the truth value for 
+\begin_inset Formula $\#1 \vee \#2 \vee \ldots \vee \#n$
+\end_inset
+
+. In this case, the scoring function could return values from 
+\begin_inset Formula $0$
+\end_inset
+
+ to 
+\begin_inset Formula $2^n$
+\end_inset
+
+. These values can be normalized or transformed in some other way. Usually, the perfect score is 
+\begin_inset Formula $0$
+\end_inset
+
+, while the worse scores are negative.
+\end_layout
+
+\begin_layout Description
+
+Exemplar and representation-building. The 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ representation-building
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+ component of MOSES constructs a parameterized representation of a particular region of program space, centered around a single program (the 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ exemplar
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+) or family of closely related programs.
+\end_layout
+
+\begin_layout Description
+
+Knobs. A representation built (around an exemplar) is given in terms of 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ knobs
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+. A 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ knob
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+ is a single dimension of variation relative to an exemplar program tree. It may be discrete or continuous. For example, given the program tree fragment 
+\begin_inset Formula $or(0<(*(\#1,0.5)),\#2)$
+\end_inset
+
+, a continuous knob might be used to vary the numerical constant. So, setting this knob to 
+\begin_inset Formula $0.7$
+\end_inset
+
+ would transform the tree fragment to 
+\begin_inset Formula $or(0<(*(\#1,0.7)),\#2)$
+\end_inset
+
+. A discrete knob with 
+\begin_inset Formula $arity()==3$
+\end_inset
+
+ might be used to transform the boolean input 
+\begin_inset Formula $\#2$
+\end_inset
+
+. So, setting this knob to 
+\begin_inset Formula $1$
+\end_inset
+
+ might transform the tree to 
+\begin_inset Formula $or(0<(*(\#1,0.7)),not(\#2))$
+\end_inset
+
+, and setting it to 
+\begin_inset Formula $2$
+\end_inset
+
+ might remove it from the tree (while setting it to 
+\begin_inset Formula $0$
+\end_inset
+
+ would return to the original tree).
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+A program in a deme is represented as a list of knob settings (these values can be bits, integer values, or real-number values, depending on the knob type). The program itself can be easily constructed from such list and the exemplar.
+\end_layout
+
+\end_deeper
+\begin_layout Description
+
+Deme and metapopulation. A sample of programs within a representation will be referred to herein as a 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ deme
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+; a set of demes will be referred to as a metapopulation. MOSES operates on a metapopulation, adaptively creating, removing, and allocating optimization effort to various demes. 
+\end_layout
+
+\begin_layout Section
+
+Overall Algorithm
+\end_layout
+
+\begin_layout Standard
+
+A basic MOSES algorithm can be described as follows:
+\end_layout
+
+\begin_layout Enumerate
+
+Construct an initial set of knobs (via representation-building) based on some prior (e.g., based on an empty program) and use it to generate an initial random sampling of programs. Add this deme to the metapopulation.
+\end_layout
+
+\begin_layout Enumerate
+
+Select a deme from the metapopulation and iteratively update its sample, as follows:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+Select some promising programs from the deme’s existing sample to use for modeling, according to the scoring function. Ties in the scoring function are broken by preferring smaller programs.
+\end_layout
+
+\begin_layout Enumerate
+
+Considering the promising programs as collections of knob settings, generate new collections of knob settings by applying some (competent) optimization algorithm.
+\end_layout
+
+\begin_layout Enumerate
+
+Convert the new collections of knob settings into their corresponding programs, evaluate their scores, and integrate them into the deme’s sample, replacing less promising programs. 
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+For each of the new programs that meet the criteria for creating a new deme, if any:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+
+Construct a new set of knobs (via representation-building) to define a region centered around the program (the deme’s exemplar), and use it to generate a new random sampling of programs, producing a new deme.
+\end_layout
+
+\begin_layout Enumerate
+
+Integrate the new deme into the metapopulation, possibly displacing less promising demes. 
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+Repeat from step 2. 
+\end_layout
+
+\begin_layout Standard
+
+Note that representation-building and optimization algorithm that parametrize the above algorithm are vital components of the system and they crucially influence its performance. Representation building is specific for each domain (e.g., learning propositional formulae), while optimization algorithm is general. Currently, in MOSES, there is support for representation building for several problem domains (e.g., propositional formulae, actions
+\begin_inset Foot
+status collapsed
+
+
+\begin_layout Standard
+
+By 
+\begin_inset Quotes eld
+\end_inset
+
+actions
+\begin_inset Quotes erd
+\end_inset
+
+ we mean mini programming languages describing actions of a agents such as artificial and 
+\begin_inset CommandInset citation
+LatexCommand cite
+after ""
+key "6"
+
+\end_inset
+
+. Available actions typically cover atomic instructions like 
+\begin_inset Quotes eld
+\end_inset
+
+step forward
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+rotate left
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+rotate right
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+step forward
+\begin_inset Quotes erd
+\end_inset
+
+, branching instruction such as ,,if-then-else
+\begin_inset Quotes eld
+\end_inset
+
+, and loop instruction such as ,,while
+\begin_inset Quotes eld
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+) and several optimization algorithms.
+\end_layout
+
+\begin_layout Section
+
+Source Files and Folders
+\end_layout
+
+\begin_layout Standard
+
+In the MOSES distribution, there are the following folders (under 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/learning/moses|
+\end_layout
+
+\end_inset
+
+) with the source files:
+\end_layout
+
+\begin_layout Description
+
+moses this is the folder with the core support for MOSES --- support for representation building, some scoring functions, optimization algorithms, etc.
+\end_layout
+
+\begin_layout Description
+
+main this is the folder with files giving examples of executables demonstrating different features of the MOSES system: representation building, reducing expressions, and, of course, applications of MOSES itself (for instance, there are examples for the "ant problem", for "parity formulae", etc.
+\end_layout
+
+\begin_layout Description
+
+eda support for estimation of distribution algorithms with lower level support for optimization algorithms. 
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%MOSES is a part of a bigger project, so there are some functions (or even files)
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%that are not used by MOSES (but are used elsewhere).
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%In addition, there are the folders with 
+\backslash
+verb|scripts|, 
+\backslash
+verb|sample|, and 
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%
+\backslash
+verb|test|.
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+Key Types, Structures, and Classes
+\end_layout
+
+\begin_layout Standard
+
+This section briefly discusses technical details about the key elements of MOSES.
+\end_layout
+
+\begin_layout Subsection
+
+Structured Expressions
+\end_layout
+
+\begin_layout Standard
+
+For representing structured expressions (programs, propositional formulae, etc) MOSES relies on the library ComboReduct.
+\end_layout
+
+\begin_layout Standard
+
+In ComboReduct, structured expressions are represented by trees of the type 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|combo_tree|
+\end_layout
+
+\end_inset
+
+ as follows:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|typedef Util::tree<vertex> combo_tree;|
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+The file 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|comboreduct/combo/vertex.h|
+\end_layout
+
+\end_inset
+
+ defines 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|vertex|
+\end_layout
+
+\end_inset
+
+ as shown blow. It is done this way so that it can capture different sorts of nodes, for different, but still fixed, problem domains.
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ typedef boost::variant<builtin, wildcard, argument, contint, action, builtinaction, perception, definiteobject, indefiniteobject, message, procedurecall, anntype, actionsymbol> vertex; 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+For a detailed explanation, review the docs provided in the distribution of the ComboReduct library.
+\end_layout
+
+\begin_layout Subsection
+
+Metapopulation
+\end_layout
+
+\begin_layout Standard
+
+The metapopulation is a set of scored combo trees. Several types of scores are used, ranging from single floats, to composite scores that include a complexity measure, to 'behavioural' scores, consisting of vectors of floats. These are all defined in the file 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|learning/moses/moses/types.h|
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+A 'scored combo tree' is then just a pair that associates a score with a tree:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ typedef taggeditem<combo::combotree, compositebehavioralscore> bscoredcombotree; 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+The metapopulation is then a set of scored combo trees, defined in 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|learning/moses/moses/metapopulation.h|
+\end_layout
+
+\end_inset
+
+ (more precisely, it is a class, inheriting from the set):
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ typedef std::set<bscoredcombotree, bscoredcombotreegreater> bscoredcombotreeset;
+\end_layout
+
+\begin_layout Standard
+
+struct metapopulation : public bscoredcombotreeset 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+...
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+; 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+The metapopulation will store expressions (as scored trees) that were encountered during the learning process (not all of them; the weak ones, which are dominated by existing ones, are usually skipped as non-promising).
+\end_layout
+
+\begin_layout Standard
+
+As an example, one can iterate through the metapopulation and print all its elements with their scores and complexities in the following way:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ for (constiterator it=begin(); it!=end(); ++it) cout 
+\begin_inset Quotes ard
+\end_inset
+
+ gettree(*it) 
+\begin_inset Quotes ard
+\end_inset
+
+ " " 
+\begin_inset Quotes ard
+\end_inset
+
+ getscore(*it) 
+\begin_inset Quotes ard
+\end_inset
+
+ " " 
+\begin_inset Quotes ard
+\end_inset
+
+ getcomplexity(*it) 
+\begin_inset Quotes ard
+\end_inset
+
+ endl; 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+The metapopulation is updated in iterations. In each iteration, one of its elements is selected as an exemplar. The exemplar is then used for building a new deme (that will further extend the metapopulation).
+\end_layout
+
+\begin_layout Subsection
+
+Deme
+\end_layout
+
+\begin_layout Standard
+
+The metapopulation consists of expressions (stored as scored trees). These expressions do not refer to some exemplar. On the other hand, during the learning process, new demes are generated. A deme is centered around an exemplar from the metapopulation. However, elements of the deme are not represented as (scored) trees but, instead, are represented relative to the exemplar. So, the deme has the type (declared in 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|eda/instance_set.h|
+\end_layout
+
+\end_inset
+
+):
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ eda::instanceset<treescore> 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+where 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|instance_set|
+\end_layout
+
+\end_inset
+
+ is a set of scored instances, and 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|instance|
+\end_layout
+
+\end_inset
+
+ is declared in 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|eda/eda.h|
+\end_layout
+
+\end_inset
+
+ is a vector of packed knob settings:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ typedef vector<packedt> instance; 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+The basic learning and optimization processes work over these instances, and not over trees. So, a suitable way for representing expressions/trees as sequences of bit/integer/real values (relative to the exemplar) enable abstract and clean optimization steps, uniform for different domains. This representation is based on representation building relative to a given exemplar.
+\end_layout
+
+\begin_layout Subsection
+
+Representation
+\end_layout
+
+\begin_layout Standard
+
+A structure describing a representation of a deme (relative to its exemplar) is declared in 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/representation.h|
+\end_layout
+
+\end_inset
+
+. Its constructor uses as arguments a simplification rule, an exemplar, a type tree, a pseudo-number generator and, optionally, just for actions (like for the ant problem), sets of available operators, perceptions, and actions).
+\end_layout
+
+\begin_layout Standard
+
+The constructor of this structure, builds knobs with respect to the given exemplar (by the method 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|build_knobs|
+\end_layout
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+
+This structure stores the exemplar like a tree (more precisely 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|vtree|
+\end_layout
+
+\end_inset
+
+). This structure has a method for using a given instance to transform the exemplar (
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|transform|
+\end_layout
+
+\end_inset
+
+) providing a new expression tree.
+\end_layout
+
+\begin_layout Standard
+
+The structure also has methods for clearing the current version of the exemplar (setting all knobs to default values --- zeros) --- 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|clear_exemplar|
+\end_layout
+
+\end_inset
+
+, for getting the exemplar --- 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|get_clean_exemplar|
+\end_layout
+
+\end_inset
+
+, and for getting the reduced, simplified version of the exemplar 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|get_clean_exemplar|
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+
+Key Methods
+\end_layout
+
+\begin_layout Standard
+
+This section briefly discusses key MOSES's methods.
+\end_layout
+
+\begin_layout Subsection
+
+Representation Building
+\end_layout
+
+\begin_layout Standard
+
+Representation building is one of the key aspects of the MOSES approach. It is implemented separately for different problem domains (propositional formulae, action, etc). Support for several problem domains is given in the file 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/build_knobs.h/cc|
+\end_layout
+
+\end_inset
+
+. Representation building starts with an exemplar and add to it new nodes and corresponding knobs (see 
+\begin_inset CommandInset citation
+LatexCommand cite
+after ""
+key "6"
+
+\end_inset
+
+). Knobs can have different settings. If all knobs are set to 0, then we the original exemplar is obtained.
+\end_layout
+
+\begin_layout Standard
+
+There are several types of knobs, described in 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/knobs.h|
+\end_layout
+
+\end_inset
+
+. Some of them are suitable for propositional formulae (so some subexpression can be 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ present
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+, 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ absent
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+, or 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ negated
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+. In simple knobs, a subexpression can be just 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ present
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+{
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+em
+\end_layout
+
+\end_inset
+
+ absent
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+}
+\end_layout
+
+\end_inset
+
+. In action knobs, a node can have different settings, corresponding to atomic or compound actions, sampled as 
+\begin_inset Quotes eld
+\end_inset
+
+perms
+\begin_inset Quotes erd
+\end_inset
+
+ in the method 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|build_knobs::sample_action_perms|
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+
+The key method is 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|void build_knobs::build_action(pre_it it)|
+\end_layout
+
+\end_inset
+
+ --- it substantially determines the representation building for one domain and substantially influence the learning process.
+\end_layout
+
+\begin_layout Subsection
+
+Optimization
+\end_layout
+
+\begin_layout Standard
+
+The role of optimization is to score elements of the deme, and to process them and to generate new promising instances. The optimization process works over sequences of numbers (i.e., over 
+\begin_inset Quotes eld
+\end_inset
+
+instances
+\begin_inset Quotes erd
+\end_inset
+
+). It is invoked in the main procedure, in each iteration of expanding (the method 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|metapopulation::expand|
+\end_layout
+
+\end_inset
+
+, implemented in the file 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/moses.h|
+\end_layout
+
+\end_inset
+
+) the metapopulation. The result is a set of instances that are transformed to trees and then added to the metapopulation (if they are not dominated by existing elements).
+\end_layout
+
+\begin_layout Standard
+
+Currently, there are two optimization methods implemented (implemented in the file 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/optimization.h|
+\end_layout
+
+\end_inset
+
+): 
+\end_layout
+
+\begin_layout Description
+
+univariate optimization based on Bayesian optimization (see 
+\begin_inset CommandInset citation
+LatexCommand cite
+after ""
+key "6"
+
+\end_inset
+
+);
+\end_layout
+
+\begin_layout Description
+
+iterative hillclimbing based on a simple greedy iterative process, looking for a better than exemplar instance at distance 
+\begin_inset Formula $1, 2, 3, \ldots$
+\end_inset
+
+; 
+\end_layout
+
+\begin_layout Standard
+
+In addition, there is support for 
+\begin_inset Quotes eld
+\end_inset
+
+sliced iterative hillclimbing
+\begin_inset Quotes erd
+\end_inset
+
+, similar as the one as above, but using a time slicing, so it can be used in some wider context, without leaving other subtasks idle for too long.
+\end_layout
+
+\begin_layout Standard
+
+Optimization algorithms also have to take care of number of evaluations (number of calls to scoring functions) used. Basically, this number controls the resources given to the algorithm.
+\end_layout
+
+\begin_layout Subsection
+
+Scoring
+\end_layout
+
+\begin_layout Standard
+
+While the representation building is specific for each problem domain, the scoring is specific for each specific problem. For instance, in learning propositional formulae, the same representation building algorithm is used, but different scoring functions will be used for each specific task (for instance, for learning disjunction or conjunction over the given set of propositional variables).
+\end_layout
+
+\begin_layout Standard
+
+There is a 
+\end_layout
+
+\begin_layout Description
+
+score function returning 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|int|
+\end_layout
+
+\end_inset
+
+, generally with 0 as a perfect score, and negative numbers as worse scores; 
+\end_layout
+
+\begin_layout Description
+
+behavioral score function returning a vector of specific values, that is used for comparing expressions on different dimensions and for discarding elements dominated by other elements. 
+\end_layout
+
+\begin_layout Standard
+
+Technically, these functions are provided as operators within structures.
+\end_layout
+
+\begin_layout Standard
+
+The scoring functions are used for instantiating higher-level functions used uniformly for different problem domains and different problems.
+\end_layout
+
+\begin_layout Standard
+
+Some low-level, problem specific, scoring functions are defined in the file (under 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|src/MosesEda|
+\end_layout
+
+\end_inset
+
+) 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/scoring_functions.h|
+\end_layout
+
+\end_inset
+
+, while higher-level support is defined in the file 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/scoring.h/cc|
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+
+MOSES: Putting It All Together
+\end_layout
+
+\begin_layout Standard
+
+With all components briefly described above, this section discusses how are they combined in a system MOSES.
+\end_layout
+
+\begin_layout Standard
+
+The main moses method is trivial: it only expand the metapopulation in iterations until the given number of evaluations or a perfect solution is reached. This method is implemented in 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/moses.h|
+\end_layout
+
+\end_inset
+
+, in several variations (some with additional arguments corresponding to available actions and perceptions, just for the action problem domain).
+\end_layout
+
+\begin_layout Standard
+
+Typical usage of MOSES starts by providing scoring functions. For instance, for learning disjunction propositional formula one can use the following declaration (defined in 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/scoring_functions.h|
+\end_layout
+
+\end_inset
+
+):
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ disjunction scorer; 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+and for solving the ant problem, one can use the following declaration (defined in 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|moses/scoring_functions.h|
+\end_layout
+
+\end_inset
+
+):
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ antscore scorer; 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Also, the type of expression to be learnt has to be provided 
+\begin_inset Foot
+status collapsed
+
+
+\begin_layout Standard
+
+for a detail explanation of the type system used in ComboReduct see the doc provided with the distribution of ComboReduct
+\end_layout
+
+\end_inset
+
+. For instance, for the disjunctive formula, one should use:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ typetree tt(id::lambdatype); tt.appendchildren(tt.begin(),id::booleantype,arity+1); 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+where 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|arity|
+\end_layout
+
+\end_inset
+
+ carries the information of the number of propositional variables to be considered. For the ant problem, one would write:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ typetree tt(id::lambdatype); tt.appendchildren(tt.begin(),id::actionresulttype,1); 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Then the metapopulation has to be declared. It is instantiated via templates, saying which scoring function, which behavioral scoring function, and which optimization algorithm to use. As, arguments one has to provide the random generator, the initial exemplar, the type tree, simplification procedure, then the scorers and the optimization algorithm. This is an example for learning the disjunctive formula:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ metapopulation<logicalscore,logicalbscore,univariateoptimization> metapop(rng, vtree(id::logicaland),tt,logicalreduction(), logicalscore(scorer,arity,rng), logicalbscore(scorer,arity,rng), univariateoptimization(rng)); 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+
+and this is an example for the ant problem:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\end_inset
+
+ metapopulation<antscore,antbscore,univariateoptimization> metapop(rng,vtree(id::sequentialand),tt,actionreduction(), scorer, bscorer, univariateoptimization(rng)); 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+There is also a version of MOSES that uses the sliced interactive hillclimbing --- 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|sliced_moses|
+\end_layout
+
+\end_inset
+
+. It supports the action domain, but can be simply modify to support other domains as well.
+\end_layout
+
+\begin_layout Standard
+
+These, and several more examples, can be found in the folder 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+verb|main|
+\end_layout
+
+\end_inset
+
+. The example programs provided often ask for arguments like the seed for the pseudo-random number generation or for the number of evaluations.
+\end_layout
+
+\begin_layout Section
+
+Final Remarks
+\end_layout
+
+\begin_layout Standard
+
+MOSES is a rather big system and it cannot be documented in details in a few pages. However, the descriptions given above should be helpful when one first encounters MOSES and tries to use it and modify it.
+\end_layout
+
+\begin_layout Bibliography
+
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "1"
+
+\end_inset
+
+ Moshe Looks, "Scalable Estimation-of-Distribution Program Evolution", Genetic and Evolutionary Computation COnference (GECCO), 2007.
+\end_layout
+
+\begin_layout Bibliography
+
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "2"
+
+\end_inset
+
+ Moshe Looks, "On the Behavioral Diversity of Random Programs", Genetic and Evolutionary Computation COnference (GECCO), 2007.
+\end_layout
+
+\begin_layout Bibliography
+
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "3"
+
+\end_inset
+
+ Moshe Looks, "Meta-Optimizing Semantic Evolutionary Search", Genetic and Evolutionary Computation COnference (GECCO), 2007.
+\end_layout
+
+\begin_layout Bibliography
+
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "4"
+
+\end_inset
+
+ Moshe Looks, Ben Goertzel, Lucio de Souza Coelho, Mauricio Mudado, and Cassio Pennachin,"Clustering Gene Expression Data via Mining Ensembles of Classification Rules Evolved Using MOSES", Genetic and Evolutionary Computation COnference (GECCO), 2007.
+\end_layout
+
+\begin_layout Bibliography
+
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "5"
+
+\end_inset
+
+ Moshe Looks, Ben Goertzel, Lucio de Souza Coelho, Mauricio Mudado, and Cassio Pennachin, "Understanding Microarray Data through Applying Competent Program Evolution", Genetic and Evolutionary Computation COnference (GECCO), 2007.
+\end_layout
+
+\begin_layout Bibliography
+
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "6"
+
+\end_inset
+
+ Moshe Looks, "Competent Program Evolution" Doctoral Dissertation, Washington University in St. Louis, 2006.
+\end_layout
+
+\begin_layout Bibliography
+
+
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label ""
+key "7"
+
+\end_inset
+
+ Moshe Looks, "Program Evolution for General Intelligence", Artificial General Intelligence Research Institute Workshop (AGIRI), 2006. 
+\end_layout
+
+\end_body
+\end_document
