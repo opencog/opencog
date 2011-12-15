@@ -663,7 +663,7 @@ normal form
 \begin_inset Formula $\#3\vee F$
 \end_inset
 
- can be normalized to just 
+ can be reduced to just 
 \begin_inset Formula $\#3$
 \end_inset
 
@@ -681,7 +681,7 @@ normal form
 \begin_inset Formula $\mbox{if }(x=x)\mbox{ then }y$
 \end_inset
 
- can be normalized to 
+ can be reduced to 
 \begin_inset Formula $y$
 \end_inset
 
@@ -698,7 +698,7 @@ elegant normal form
 \end_layout
 
 \begin_layout Section
-Overall Algorithm
+MOSES Algorithm
 \end_layout
 
 \begin_layout Standard
@@ -706,14 +706,18 @@ The basic MOSES algorithm can be described as follows:
 \end_layout
 
 \begin_layout Enumerate
-Choose a program, expressed 
+Choose one or more exemplars, expressed as program trees.
+ Initially, this may be the empty program.
 \end_layout
 
 \begin_layout Enumerate
-Construct an initial set of knobs (via representation-building) based on
- some prior (e.g., based on an empty program) and use it to generate an initial
- random sampling of programs.
- Add this deme to the metapopulation.
+Representiation-building step.
+ For each exemplar, construct a representation; that is, a set of knobs
+ based on the chosen exemplar.
+ Generate a random sampling of knob values, i.e.
+ of programs based on the representation.
+ This is a deme; add this deme to the metapopulation, possibly displacing
+ a less promising deme.
 \end_layout
 
 \begin_layout Enumerate
@@ -743,37 +747,18 @@ Convert the new collections of knob settings into their corresponding programs,
 
 \end_deeper
 \begin_layout Enumerate
-For each of the new programs that meet the criteria for creating a new deme,
- if any:
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-Construct a new set of knobs (via representation-building) to define a region
- centered around the program (the deme’s exemplar), and use it to generate
- a new random sampling of programs, producing a new deme.
-\end_layout
-
-\begin_layout Enumerate
-Integrate the new deme into the metapopulation, possibly displacing less
- promising demes.
- 
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Repeat from step 2.
- 
+For each new program that meets the criteria for creating a new deme, go
+ to step 2.
 \end_layout
 
 \begin_layout Standard
-Note that representation-building and optimization algorithm that parametrize
- the above algorithm are vital components of the system and they crucially
- influence its performance.
+Note that representation-building, the optimization algorithm, and normalization
+ are vital components of the system, and they crucially influence its performanc
+e.
  Representation building is specific for each domain (e.g., learning propositional
- formulae), while optimization algorithm is general.
- Currently, in MOSES, there is support for representation building for several
- problem domains (e.g., propositional formulae, actions
+ formulae), while the optimization algorithm is general.
+ MOSES currently supports representation building for several problem domains,
+ including propositional formulae, actions
 \begin_inset Foot
 status collapsed
 
@@ -840,12 +825,19 @@ step forward
 
 \end_inset
 
-) and several optimization algorithms.
- 
+, and other things (XXX like what??).
+ MOSES also supports several different optimization algorithms, including
+ hill-climbing, simulated annealing and Bayesian optimzation.
+ Work on support-vector machine (SVM) optimization is underway.
+ Only one form of program reduction, to elegant normal form, is supported.
+ Other types of reduction, e.g.
+ SAT-based or satisfiability-modulo-theory (SMT) may be possible but remains
+ unexplored.
 \end_layout
 
 \begin_layout Standard
-XXX todo normalizatin
+XXX todo: Above algorithm is not quite correct.
+ In particular, the normalization step is omitted.
 \end_layout
 
 \begin_layout Section
@@ -861,152 +853,167 @@ moses/learning/moses
 \end_layout
 
 \begin_layout Description
-moses This is the folder with the core support for MOSES --- support for
- representation building, some scoring functions, optimization algorithms,
+eda This folder contains support for estimation of distribution algorithms,
+ and the lower level support for optimization algorithms.
  
+\end_layout
+
+\begin_layout Description
+example-progs This folder contains examples demonstrating different features
+ of the MOSES system: reducing expressions, and, of course, applications
+ of MOSES itself.
+ It includes examples for the "ant problem/santa-fe trail", for "parity
+ formulae", 
 \emph on
 etc.
 \end_layout
 
 \begin_layout Description
-main This is the folder with files giving examples of executables demonstrating
- different features of the MOSES system: representation building, reducing
- expressions, and, of course, applications of MOSES itself (for instance,
- there are examples for the "ant problem", for "parity formulae", 
-\emph on
-etc.
-\emph default
-)
+main Contains the main moses executable.
 \end_layout
 
 \begin_layout Description
-eda support for estimation of distribution algorithms with lower level support
- for optimization algorithms.
+moses This folder contains the core support for MOSES -- including base
+ type definitions, and distributed computation support.
  
+\end_layout
+
+\begin_layout Description
+optimization Contains the main optimization code.
+\end_layout
+
+\begin_layout Description
+representation Contains code for representation-building.
 \end_layout
 
 \begin_layout Section
-Key Types, Structures, and Classes
+Types, Structures, and Classes
 \end_layout
 
 \begin_layout Standard
-This section briefly discusses technical details about the key elements
- of MOSES.
+This section briefly reviews some of the key datatypes and classes found
+ in the code.
+ 
 \end_layout
 
 \begin_layout Subsection
-Structured Expressions
+Structured expression trees
 \end_layout
 
 \begin_layout Standard
-For representing structured expressions (programs, propositional formulae,
+For representing structured expression trees (programs, propositional formulae,
  
 \emph on
 etc
 \emph default
-) MOSES relies on the library ComboReduct.
-\end_layout
-
-\begin_layout Standard
-In ComboReduct, structured expressions are represented by trees of the type
+.) MOSES relies on the library ComboReduct.
+ In this library, structured expressions are represented by trees of the
+ type
+\emph on
  
-\begin_inset ERT
-status collapsed
+\family typewriter
+\emph default
+combo tree 
+\family default
+as follows:
+\begin_inset listings
+inline false
+status open
 
 \begin_layout Plain Layout
 
-
-\backslash
-verb|combo_tree|
+typedef Util::tree<vertex> combo_tree;
 \end_layout
 
 \end_inset
 
- as follows:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|typedef Util::tree<vertex> combo_tree;|
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 The file 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|comboreduct/combo/vertex.h|
-\end_layout
-
-\end_inset
-
- defines 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|vertex|
-\end_layout
-
-\end_inset
-
- as shown blow.
+\family typewriter
+comboreduct/combo/vertex.h 
+\family default
+defines 
+\family typewriter
+vertex 
+\family default
+as shown blow.
  It is done this way so that it can capture different sorts of nodes, for
  different, but still fixed, problem domains.
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status collapsed
+\begin_inset listings
+inline false
+status open
 
 \begin_layout Plain Layout
 
+typedef boost::variant<builtin,
+\end_layout
 
-\backslash
-begin{verbatim}
+\begin_layout Plain Layout
+
+		wildcard,
+\end_layout
+
+\begin_layout Plain Layout
+
+		argument,
+\end_layout
+
+\begin_layout Plain Layout
+
+		contint,
+\end_layout
+
+\begin_layout Plain Layout
+
+		action,
+\end_layout
+
+\begin_layout Plain Layout
+
+		builtinaction,
+\end_layout
+
+\begin_layout Plain Layout
+
+		perception,
+\end_layout
+
+\begin_layout Plain Layout
+
+		definiteobject,
+\end_layout
+
+\begin_layout Plain Layout
+
+		indefiniteobject,
+\end_layout
+
+\begin_layout Plain Layout
+
+		message,
+\end_layout
+
+\begin_layout Plain Layout
+
+		procedurecall,
+\end_layout
+
+\begin_layout Plain Layout
+
+		anntype,
+\end_layout
+
+\begin_layout Plain Layout
+
+		actionsymbol> vertex; 
 \end_layout
 
 \end_inset
 
- typedef boost::variant<builtin, wildcard, argument, contint, action, builtinact
-ion, perception, definiteobject, indefiniteobject, message, procedurecall,
- anntype, actionsymbol> vertex; 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{verbatim}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-For a detailed explanation, review the docs provided in the distribution
- of the ComboReduct library.
+For more information, review the docs provided in the distribution of the
+ ComboReduct library.
 \end_layout
 
 \begin_layout Subsection
@@ -1019,49 +1026,23 @@ The metapopulation is a set of scored combo trees.
  scores that include a complexity measure, to 'behavioural' scores, consisting
  of vectors of floats.
  These are all defined in the file 
-\begin_inset ERT
-status collapsed
+\family typewriter
+learning/moses/moses/types.h.
 
-\begin_layout Plain Layout
-
-
-\backslash
-verb|learning/moses/moses/types.h|
-\end_layout
-
-\end_inset
-
-
+\family default
+ A 'scored combo tree' is then just a pair that associates a score with
+ a tree:
 \end_layout
 
 \begin_layout Standard
-A 'scored combo tree' is then just a pair that associates a score with a
- tree:
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
+\begin_inset listings
+inline false
+status open
 
 \begin_layout Plain Layout
 
-
-\backslash
-begin{verbatim}
-\end_layout
-
-\end_inset
-
- typedef taggeditem<combo::combotree, compositebehavioralscore> bscoredcombotree
-; 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{verbatim}
+typedef taggeditem<combo::combotree, compositebehavioralscore> bscoredcombotree;
+ 
 \end_layout
 
 \end_inset
@@ -1071,78 +1052,30 @@ end{verbatim}
 
 \begin_layout Standard
 The metapopulation is then a set of scored combo trees, defined in 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|learning/moses/moses/metapopulation.h|
-\end_layout
-
-\end_inset
-
- (more precisely, it is a class, inheriting from the set):
+\family typewriter
+learning/moses/moses/metapopulation.h.
+ M
+\family default
+ore precisely, it is a class, inheriting from the set:
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status collapsed
+\begin_inset listings
+inline false
+status open
 
 \begin_layout Plain Layout
 
+typedef std::set<bscoredcombotree, bscoredcombotreegreater> bscoredcombotreeset;
+\end_layout
 
-\backslash
-begin{verbatim}
+\begin_layout Plain Layout
+
+struct metapopulation : public bscoredcombotreeset {...}; 
 \end_layout
 
 \end_inset
 
- typedef std::set<bscoredcombotree, bscoredcombotreegreater> bscoredcombotreeset
-;
-\end_layout
-
-\begin_layout Standard
-struct metapopulation : public bscoredcombotreeset 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
-\end_inset
-
-...
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-; 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{verbatim}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 The metapopulation will store expressions (as scored trees) that were encountere
 d during the learning process (not all of them; the weak ones, which are
  dominated by existing ones, are usually skipped as non-promising).
@@ -1154,51 +1087,19 @@ As an example, one can iterate through the metapopulation and print all
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status collapsed
+\begin_inset listings
+inline false
+status open
 
 \begin_layout Plain Layout
 
-
-\backslash
-begin{verbatim}
+for (constiterator it=begin(); it!=end(); ++it) 
 \end_layout
 
-\end_inset
-
- for (constiterator it=begin(); it!=end(); ++it) cout 
-\begin_inset Quotes ard
-\end_inset
-
- gettree(*it) 
-\begin_inset Quotes ard
-\end_inset
-
- " " 
-\begin_inset Quotes ard
-\end_inset
-
- getscore(*it) 
-\begin_inset Quotes ard
-\end_inset
-
- " " 
-\begin_inset Quotes ard
-\end_inset
-
- getcomplexity(*it) 
-\begin_inset Quotes ard
-\end_inset
-
- endl; 
-\begin_inset ERT
-status collapsed
-
 \begin_layout Plain Layout
 
-
-\backslash
-end{verbatim}
+	cout << gettree(*it) << " " << getscore(*it) << " " << getcomplexity(*it)
+ << endl;
 \end_layout
 
 \end_inset
@@ -1218,6 +1119,10 @@ Deme
 \end_layout
 
 \begin_layout Standard
+XXX some details below incorrect.
+\end_layout
+
+\begin_layout Standard
 The metapopulation consists of expressions (stored as scored trees).
  These expressions do not refer to some exemplar.
  On the other hand, during the learning process, new demes are generated.
@@ -1225,43 +1130,20 @@ The metapopulation consists of expressions (stored as scored trees).
  However, elements of the deme are not represented as (scored) trees but,
  instead, are represented relative to the exemplar.
  So, the deme has the type (declared in 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|eda/instance_set.h|
-\end_layout
-
-\end_inset
-
+\family typewriter
+eda/instance_set.h
+\family default
 ):
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status collapsed
+\begin_inset listings
+inline false
+status open
 
 \begin_layout Plain Layout
 
-
-\backslash
-begin{verbatim}
-\end_layout
-
-\end_inset
-
- eda::instanceset<treescore> 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{verbatim}
+eda::instanceset<treescore>
 \end_layout
 
 \end_inset
@@ -1272,69 +1154,28 @@ end{verbatim}
 \begin_layout Standard
 \noindent
 where 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|instance_set|
-\end_layout
-
-\end_inset
-
+\family typewriter
+instance_set
+\family default
  is a set of scored instances, and 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|instance|
-\end_layout
-
-\end_inset
-
+\family typewriter
+instance
+\family default
  is declared in 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|eda/eda.h|
-\end_layout
-
-\end_inset
-
+\family typewriter
+eda/eda.h
+\family default
  is a vector of packed knob settings:
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status collapsed
+\begin_inset listings
+inline false
+status open
 
 \begin_layout Plain Layout
 
-
-\backslash
-begin{verbatim}
-\end_layout
-
-\end_inset
-
- typedef vector<packedt> instance; 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{verbatim}
+typedef vector<packedt> instance;
 \end_layout
 
 \end_inset
@@ -1357,20 +1198,15 @@ Representation
 \end_layout
 
 \begin_layout Standard
-A structure describing a representation of a deme (relative to its exemplar)
- is declared in 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|moses/representation.h|
+XXX some details below incorrect.
 \end_layout
 
-\end_inset
-
+\begin_layout Standard
+A structure describing a representation of a deme (relative to its exemplar)
+ is declared in 
+\family typewriter
+moses/represetation.h
+\family default
 .
  Its constructor uses as arguments a simplification rule, an exemplar, a
  type tree, a pseudo-number generator and, optionally, just for actions
@@ -1381,94 +1217,40 @@ verb|moses/representation.h|
 \begin_layout Standard
 The constructor of this structure, builds knobs with respect to the given
  exemplar (by the method 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|build_knobs|
-\end_layout
-
-\end_inset
-
+\family typewriter
+build_knobs
+\family default
 ).
 \end_layout
 
 \begin_layout Standard
 This structure stores the exemplar like a tree (more precisely 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|vtree|
-\end_layout
-
-\end_inset
-
+\family typewriter
+combo_tree
+\family default
 ).
  This structure has a method for using a given instance to transform the
  exemplar (
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|transform|
-\end_layout
-
-\end_inset
-
+\family typewriter
+transform
+\family default
 ) providing a new expression tree.
 \end_layout
 
 \begin_layout Standard
 The structure also has methods for clearing the current version of the exemplar
  (setting all knobs to default values --- zeros) --- 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|clear_exemplar|
-\end_layout
-
-\end_inset
-
+\family typewriter
+clear_exemplar
+\family default
 , for getting the exemplar --- 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|get_clean_exemplar|
-\end_layout
-
-\end_inset
-
+\family typewriter
+get_clean_exemplar
+\family default
 , and for getting the reduced, simplified version of the exemplar 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|get_clean_exemplar|
-\end_layout
-
-\end_inset
-
+\family typewriter
+get_clean_exemplar
+\family default
 .
 \end_layout
 
@@ -2293,10 +2075,17 @@ Final Remarks
 \end_layout
 
 \begin_layout Standard
-MOSES is a rather big system and it cannot be documented in details in a
- few pages.
+While MOSES is not that big a system, it cannot be documented in detail
+ in just a few pages.
  However, the descriptions given above should be helpful when one first
  encounters MOSES and tries to use it and modify it.
+\end_layout
+
+\begin_layout Standard
+Currently, MOSES together with ComboReduct consists of 17 KLOC of .cc files
+ and 24 KLOC of header files, as counted by the wc command.
+ This includes all comments, copyright notices, example programs and utilities.
+ Of this, combo consists of about 18 KLOC while MOSES consists of 22 KLOC.
 \end_layout
 
 \begin_layout Bibliography
