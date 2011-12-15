@@ -803,111 +803,35 @@ Source Files and Folders
 
 \begin_layout Standard
 In the MOSES distribution, there are the following folders (under 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|moses/learning/moses|
-\end_layout
-
-\end_inset
-
+\family typewriter
+moses/learning/moses
+\family default
 ) with the source files:
 \end_layout
 
 \begin_layout Description
-moses this is the folder with the core support for MOSES --- support for
+moses This is the folder with the core support for MOSES --- support for
  representation building, some scoring functions, optimization algorithms,
- etc.
+ 
+\emph on
+etc.
 \end_layout
 
 \begin_layout Description
-main this is the folder with files giving examples of executables demonstrating
+main This is the folder with files giving examples of executables demonstrating
  different features of the MOSES system: representation building, reducing
  expressions, and, of course, applications of MOSES itself (for instance,
- there are examples for the "ant problem", for "parity formulae", etc.
+ there are examples for the "ant problem", for "parity formulae", 
+\emph on
+etc.
+\emph default
+)
 \end_layout
 
 \begin_layout Description
 eda support for estimation of distribution algorithms with lower level support
  for optimization algorithms.
  
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-%MOSES is a part of a bigger project, so there are some functions (or even
- files)
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-%that are not used by MOSES (but are used elsewhere).
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-%In addition, there are the folders with 
-\backslash
-verb|scripts|, 
-\backslash
-verb|sample|, and 
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-%
-\backslash
-verb|test|.
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Section
@@ -925,7 +849,11 @@ Structured Expressions
 
 \begin_layout Standard
 For representing structured expressions (programs, propositional formulae,
- etc) MOSES relies on the library ComboReduct.
+ 
+\emph on
+etc
+\emph default
+) MOSES relies on the library ComboReduct.
 \end_layout
 
 \begin_layout Standard
