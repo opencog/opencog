@@ -7,6 +7,7 @@
 
 \title{MOSES --- A Quick Guide}
 \author{Predrag Janicic}
+\author{Revised, Linas Vepstas}
 
 \begin{document}
 
@@ -266,30 +267,36 @@ in the distribution of the ComboReduct library.
 
 \subsection{Metapopulation}
 
-The metapopulation is a set of scored combo trees
+The metapopulation is a set of scored combo trees. Several types of scores 
+are used, ranging from single floats, to composite scores that include 
+a complexity measure, to 'behavioural' scores, consisting of vectors of floats.
+These are all defined in the file
+\verb|learning/moses/moses/types.h|
 
-described by a structure \verb|metapopulation|
-(declared in \verb|learning/moses/moses.h|) that inherits STL \verb|set|:
+A 'scored combo tree' is then just a pair that associates a score with a tree:
 
 \begin{verbatim}
-  struct metapopulation : public set<behavioral_scored_tree,
-				     std::greater<behavioral_scored_tree> > 
+typedef tagged_item<combo::combo_tree,
+                    composite_behavioral_score> bscored_combo_tree;
 \end{verbatim}
 
-As it can be seen, the metapopulation consists of elements of the type
-\verb|behavioral_scored_tree| which is, in turn, declared in 
-\verb|moses/types.h|):
+The metapopulation is then a set of scored combo trees, defined in 
+\verb|learning/moses/moses/metapopulation.h| (more precisely, it is a
+class, inheriting from the set):
 
 \begin{verbatim}
-  typedef Util::tagged_item<combo::vtree,
-			    behavioral_tree_score> behavioral_scored_tree;
+  typedef std::set<bscored_combo_tree,
+                   bscored_combo_tree_greater> bscored_combo_tree_set;
+
+  struct metapopulation : public bscored_combo_tree_set {...};
 \end{verbatim}
 
 The metapopulation will store expressions (as scored trees) that were
-encountered during the learning process (while some of them, dominated
-by existing ones, might be skipped as non-promising). 
+encountered during the learning process (not all of them; the weak
+ones, which are dominated by existing ones, are usually skipped as
+non-promising). 
 
-For instance, one can iterate through the metapopulation and print 
+As an example, one can iterate through the metapopulation and print 
 all its elements with their scores and complexities in the following way:
 
 \begin{verbatim}
@@ -301,7 +308,8 @@ all its elements with their scores and complexities in the following way:
 
 The metapopulation is updated in iterations. In each iteration, one 
 of its elements is selected as an exemplar. The exemplar is then
-used for building a new deme (that will, firther, extend the metapopulation).
+used for building a new deme (that will further extend the
+metapopulation).
 
 
 \subsection{Deme}
