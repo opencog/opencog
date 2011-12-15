@@ -202,14 +202,15 @@ and several optimization algorithms.
 
 \section{Source Files and Folders}
 
-In the MOSES distribution, there are the following folders (under \verb|src/MosesEda|) with the source files:
+In the MOSES distribution, there are the following folders (under
+\verb|moses/learning/moses|) with the source files:
 
 \begin{description}
 \item[moses] this is the folder with the core support for MOSES --- 
 support for representation building, some scoring functions, optimization
 algorithms, etc. 
 
-\item[main] this is the folder with files giving samples of executables 
+\item[main] this is the folder with files giving examples of executables 
 demonstrating different features of the MOSES system: representation building, 
 reducing expressions, and, of course, applications of MOSES itself (for 
 instance, there are examples for the "ant problem", for "parity formulae", etc.
@@ -234,15 +235,15 @@ This section briefly discusses technical details about the key elements of MOSES
 For representing structured expressions (programs, propositional formulae, etc)
 MOSES relies on the library ComboReduct.
 
-In ComboReduct structured expressions are represented 
-by trees of the type 
-\verb|vtree| as follows:
+In ComboReduct, structured expressions are represented 
+by trees of the type \verb|combo_tree| as follows:
 
-\verb|typedef Util::tree<vertex> vtree;|
+\verb|typedef Util::tree<vertex> combo_tree;|
 
-\verb|vertex| is defined in the following way
-(so it can capture different sorts of nodes, for different, but still
-fixed, problem domains):
+The file \verb|comboreduct/combo/vertex.h| defines
+\verb|vertex| as shown blow.  It is done this way so that it 
+can capture different sorts of nodes, for different, but still
+fixed, problem domains.
 
 \begin{verbatim}
   typedef boost::variant<builtin,
@@ -256,15 +257,19 @@ fixed, problem domains):
                          indefinite_object,
                          message,
                          procedure_call,
+                         ann_type,
                          action_symbol> vertex;
 \end{verbatim}
 
-For a detail explanation you can have a look at the doc provided in distribution of the ComboReduct library.
+For a detailed explanation, review the docs provided 
+in the distribution of the ComboReduct library.
 
 \subsection{Metapopulation}
 
-The metapopulation is described by a structure \verb|metapopulation|
-(declared in \verb|moses/moses.h|) that inherits STL \verb|set|:
+The metapopulation is a set of scored combo trees
+
+described by a structure \verb|metapopulation|
+(declared in \verb|learning/moses/moses.h|) that inherits STL \verb|set|:
 
 \begin{verbatim}
   struct metapopulation : public set<behavioral_scored_tree,
@@ -516,7 +521,7 @@ hillclimbing --- \verb|sliced_moses|. It supports the action domain,
 but can be simply modify to support other domains as well.
 
 These, and several more examples, can be found in the folder \verb|main|.
-The sample programs provided often ask for arguments like the seed for
+The example programs provided often ask for arguments like the seed for
 the pseudo-random number generation or for the number of evaluations.
 
 
