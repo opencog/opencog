@@ -42,44 +42,47 @@ namespace opencog { namespace moses {
 
 using namespace ant_combo;
 
-//a knob represents a single dimension of variation relative to an exemplar
-//program tree. This may be discrete or continuous. In the discrete case, the
-//various settings are accessible via turn(0),turn(1),...turn(arity()-1). In
-//the continuous case, turn(contin_t) is used.
+// A knob represents a single dimension of variation relative to an exemplar
+// program tree. This may be discrete or continuous. In the discrete case, the
+// various settings are accessible via turn(0),turn(1),...turn(arity()-1). In
+// the continuous case, turn(contin_t) is used.
 //
-//for example, given the program tree fragment or(0<(*(#1,0.5)),#2), a
-//continuous knob might be used to vary the numerical constant. So setting
-//this knob to 0.7 would transform the tree fragment to
-//or(0<(*(#1,0.7)),#2). A discrete knob with arity()==3 might be used to
-//transform the boolean input #2. So setting this knob to 1 might transform
-//the tree to or(0<(*(#1,0.7)),not(#2)), and setting it to 2 might remove it
-//from the tree (while setting it to 0 would return to the original tree).
+//  For example, given the program tree fragment or(0<(*(#1,0.5)),#2), a
+// continuous knob might be used to vary the numerical constant. So setting
+// this knob to 0.7 would transform the tree fragment to
+// or(0<(*(#1,0.7)),#2). A discrete knob with arity()==3 might be used to
+// transform the boolean input #2. So setting this knob to 1 might transform
+// the tree to or(0<(*(#1,0.7)),not(#2)), and setting it to 2 might remove it
+// from the tree (while setting it to 0 would return to the original tree).
 
-struct knob_base {
+struct knob_base
+{
     knob_base(combo_tree& tr, combo_tree::iterator loc)
         : _tr(tr), _loc(loc) {}
     knob_base(combo_tree& tr) : _tr(tr), _loc(tr.end()) {}
     virtual ~knob_base() { }
 
-    //is the feature nonzero by default? i.e., is it present in the exemplar?
+    // Is the feature nonzero by default? i.e., is it present in the exemplar?
     virtual bool in_exemplar() const = 0;
 
-    //return the exemplar to its state before the knob was created (deleting
-    //any null vertices if present)
+    // Return the exemplar to its state before the knob was created
+    // (deleting any null vertices if present).
     virtual void clear_exemplar() = 0;
 
     combo_tree::iterator get_loc() const {
-        return _loc; 
+        return _loc;
     }
+
 protected:
     combo_tree& _tr;
     combo_tree::iterator _loc; // location of the knob in the combo_tree
 };
 
-struct disc_knob_base : public knob_base {
-    disc_knob_base(combo_tree& tr, combo_tree::iterator tgt) 
+struct disc_knob_base : public knob_base
+{
+    disc_knob_base(combo_tree& tr, combo_tree::iterator tgt)
         : knob_base(tr, tgt) {}
-    disc_knob_base(combo_tree& tr) 
+    disc_knob_base(combo_tree& tr)
         : knob_base(tr) {}
     virtual ~disc_knob_base() {}
 
@@ -87,19 +90,21 @@ struct disc_knob_base : public knob_base {
     virtual void disallow(int) = 0;
     virtual void allow(int) = 0;
 
-    //create a spec describing the space spanned by the knob
+    // Create a spec describing the space spanned by the knob.
     virtual field_set::disc_spec spec() const = 0;
 
-    //arity based on whatever knobs are currently allowed
+    // Arity based on whatever knobs are currently allowed.
     virtual int arity() const = 0;
 
-    //expected complexity based on whatever the knob is currently turned to
+    // Expected complexity based on whatever the knob is currently
+    // turned to.
     virtual int complexity_bound() const = 0;
 
     virtual std::string toStr() const = 0;
 };
 
-struct contin_knob : public knob_base {
+struct contin_knob : public knob_base
+{
     contin_knob(combo_tree& tr, combo_tree::iterator tgt,
                 contin_t step_size, contin_t expansion,
                 field_set::arity_t depth)
@@ -127,15 +132,17 @@ struct contin_knob : public knob_base {
         ss << "[" << *_loc << "]";
         return ss.str();
     }
+
 protected:
     field_set::contin_spec _spec;
 };
 
 template<int MaxArity>
-struct knob_with_arity : public disc_knob_base {
-    knob_with_arity(combo_tree& tr, combo_tree::iterator tgt) 
+struct knob_with_arity : public disc_knob_base
+{
+    knob_with_arity(combo_tree& tr, combo_tree::iterator tgt)
         : disc_knob_base(tr, tgt), _default(0), _current(0) {}
-    knob_with_arity(combo_tree& tr) 
+    knob_with_arity(combo_tree& tr)
         : disc_knob_base(tr), _default(0), _current(0) {}
 
     void disallow(int idx) {
@@ -152,6 +159,7 @@ struct knob_with_arity : public disc_knob_base {
     bool in_exemplar() const {
         return (_default != 0);
     }
+
 protected:
     std::bitset<MaxArity> _disallowed;
     int _default;
@@ -167,7 +175,8 @@ protected:
 };
 
 //note - children aren't cannonized when parents are called
-struct logical_subtree_knob : public knob_with_arity<3> {
+struct logical_subtree_knob : public knob_with_arity<3>
+{
     static const int absent = 0;
     static const int present = 1;
     static const int negated = 2;
@@ -175,7 +184,7 @@ struct logical_subtree_knob : public knob_with_arity<3> {
 
     // copy lsk on tr at position tgt
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                         const logical_subtree_knob& lsk) 
+                         const logical_subtree_knob& lsk)
         : knob_with_arity<3>(tr) {
         // {
         //     logger().debug("lsk = %s", lsk.toStr().c_str());
@@ -260,7 +269,7 @@ struct logical_subtree_knob : public knob_with_arity<3> {
     field_set::disc_spec spec() const {
         return field_set::disc_spec(arity());
     }
-    
+ 
     string toStr() const {
         stringstream ss;
         ss << "[";
@@ -269,6 +278,7 @@ struct logical_subtree_knob : public knob_with_arity<3> {
         ss << "]";
         return ss.str();
     }
+
 private:
     // return << *_loc or << *_loc.begin() if it is null_vertex
     // if *_loc is a negative literal returns !#n
@@ -290,8 +300,9 @@ private:
         }
         return ss.str();
     }
-    // return the name of the position, if it is the current one and
-    // tag_current is true then the name is put in parenthesis
+
+    // Return the name of the position, if it is the current one and
+    // tag_current is true then the name is put in parenthesis.
     string posStr(int pos, bool tag_current = false) const {
         stringstream ss;
         switch(pos) {
@@ -312,7 +323,7 @@ private:
 
 #define MAX_PERM_ACTIONS 128
 
-//note - children aren't cannonized when parents are called
+// Note - children aren't cannonized when parents are called.
 struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
     typedef combo_tree::pre_order_iterator pre_it;
@@ -375,7 +386,7 @@ protected:
     const vector<combo_tree> _perms;
 };
 
-//note - children aren't cannonized when parents are called
+// Note - children aren't cannonized when parents are called.
 struct ant_action_subtree_knob : public knob_with_arity<4> {
     static const int none    = 0;
     static const int forward = 1;
