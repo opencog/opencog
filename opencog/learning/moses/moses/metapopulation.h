@@ -1,4 +1,4 @@
-/** metapopulation.h --- 
+/** metapopulation.h ---
  *
  * Copyright (C) 2010 Novemente LLC
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -47,7 +47,7 @@
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
-namespace opencog { 
+namespace opencog {
 namespace moses {
 
 using std::pair;
@@ -59,7 +59,8 @@ using namespace combo;
 /**
  * parameters about deme management
  */
-struct metapop_parameters {
+struct metapop_parameters
+{
     metapop_parameters(int _max_candidates = -1,
                        bool _reduce_all = true,
                        bool _revisit = false,
@@ -71,44 +72,45 @@ struct metapop_parameters {
         revisit(_revisit),
         include_dominated(_include_dominated),
         jobs(_jobs) {}
-    
-    // when doing selection of examplars according to 2^-n, where n is
+
+    // When doing selection of examplars according to 2^-n, where n is
     // complexity, only examplars with p>=2^-selection_max_range will
-    // be considered
+    // be considered.
     double selection_max_range;
-    // the max number of candidates considered to be added to the
-    // metapopulation, if negative then all candidates are considered
+    // The max number of candidates considered to be added to the
+    // metapopulation, if negative then all candidates are considered.
     int max_candidates;
-    // if true then all candidates are reduced before evaluation
+    // If true then all candidates are reduced before evaluation.
     bool reduce_all;
-    // when true then visited exemplars can be revisited
+    // When true then visited exemplars can be revisited.
     bool revisit;
-    // ignore behavioral score domination when merging candidates in
-    // the metapopulation
+    // Ignore behavioral score domination when merging candidates in
+    // the metapopulation.
     bool include_dominated;
-    // number of jobs for metapopulation maintenance such as merging
-    // candidates to the metapopulation
+    // Number of jobs for metapopulation maintenance such as merging
+    // candidates to the metapopulation.
     unsigned jobs;
 };
-    
+
 /**
  * The metapopulation will store the expressions (as scored trees)
  * that were encountered during the learning process (which some of
  * them, dominated by exsiting ones, might be skipped as
  * non-promising)
- * 
+ *
  * The metapopulation is updated in iterations. In each iteration, one
  * of its elements is selected as an exemplar. The exemplar is then
  * used for building a new deme (that will, further, extend the
  * metapopulation)
- * 
+ *
  * NOTE:
- *   BScoring = behavioral scoring function (output behaviors), we use std::greater
- *   because we are maximizing
+ *   BScoring = behavioral scoring function (output behaviors), we use
+ *   std::greater because we are maximizing.
  *
  */
 template<typename Scoring, typename BScoring, typename Optimization>
-struct metapopulation : public bscored_combo_tree_set {
+struct metapopulation : public bscored_combo_tree_set
+{
     typedef metapopulation<Scoring, BScoring, Optimization> self;
     typedef bscored_combo_tree_set super;
     typedef super::value_type value_type;
@@ -116,17 +118,18 @@ struct metapopulation : public bscored_combo_tree_set {
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
 
-    // init the metapopulation with the following set of exemplars
-    void init(const std::vector<combo_tree>& exemplars) {
+    // Init the metapopulation with the following set of exemplars.
+    void init(const std::vector<combo_tree>& exemplars)
+    {
         metapop_candidates candidates;
-        foreach(const combo_tree& base, exemplars) {
+        foreach (const combo_tree& base, exemplars) {
             combo_tree si_base(base);
             (*simplify_candidate)(si_base);
             composite_score csc(score(si_base), complexity(si_base));
             behavioral_score bsc(bscore(si_base));
             candidates[si_base] = composite_behavioral_score(bsc, csc);
         }
-        
+
         bscored_combo_tree_set mps(candidates.begin(), candidates.end());
         update_best_candidates(mps);
         merge_candidates(mps);
@@ -134,15 +137,15 @@ struct metapopulation : public bscored_combo_tree_set {
 
     /**
      *  Constuctor for the class metapopulation
-     *  
-     * @param _rng    rand number 
+     *
+     * @param _rng    rand number
      * @param bases   exemplars used to initialize the metapopulation
      * @param tt      type of expression to be learned
      * @param si      reduct rule for reducting
      * @param sc      scoring function for scoring
      * @param bsc     behavior scoring function
      * @param opt     optimization should be providing for the learning
-     * @param pa      parameter for selecting the deme 
+     * @param pa      parameter for selecting the deme
      */
     metapopulation(RandGen& _rng,
                    const std::vector<combo_tree>& bases,
@@ -160,7 +163,7 @@ struct metapopulation : public bscored_combo_tree_set {
         init(bases);
     }
 
-    // like above but using a single base, and a single reduction rule
+    // Like above but using a single base, and a single reduction rule.
     metapopulation(RandGen& _rng,
                    const combo_tree& base,
                    const type_tree& tt,
@@ -193,7 +196,7 @@ struct metapopulation : public bscored_combo_tree_set {
     }
 
     /**
-     * return the best composite score
+     * Return the best composite score.
      */
     const composite_score& best_composite_score() const {
         return _best_score;
@@ -232,13 +235,13 @@ struct metapopulation : public bscored_combo_tree_set {
      * the best score (if more that one) are distributed according to
      * a Solomonoff-like distribution (2^{-complexity}) and the
      * exemplar is selected accordingly.
-     * 
+     *
      * @return the iterator of the selected exemplar, if no such
      *         exemplar exists then return end()
      */
     const_iterator select_exemplar() const {
         OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
-        
+
         //compute the probs for all candidates with best score
         score_t score = get_score(*begin());
         complexity_t cmin = get_complexity(*begin());
@@ -262,7 +265,7 @@ struct metapopulation : public bscored_combo_tree_set {
             complexity_t c = get_complexity(*it);
 
             // this to not consider too complex exemplar
-            if (cmin - c > params.selection_max_range) 
+            if (cmin - c > params.selection_max_range)
                 break;
             const combo_tree& tr = get_tree(*it);
             if(_visited_exemplars.find(tr) == _visited_exemplars.end()) {
@@ -272,7 +275,7 @@ struct metapopulation : public bscored_combo_tree_set {
                    // complexity so we know it must be ignored
                 probs.push_back(1);
         }
-        
+
         if(!exist_exemplar) {
             return end(); // there is no exemplar to select
         }
@@ -292,7 +295,7 @@ struct metapopulation : public bscored_combo_tree_set {
         const_iterator exemplar = begin();
         advance(exemplar, distance(probs.begin(),
                                    roulette_select(probs.begin(),
-                                                            probs.end(), 
+                                                            probs.end(),
                                                             sum, rng)));
         return exemplar;
     }
@@ -328,7 +331,7 @@ struct metapopulation : public bscored_combo_tree_set {
                 const combo_tree_ns_set* actions = NULL)  {
         if(!create_deme(ignore_ops, perceptions, actions))
             return false;
-            
+
         _n_evals += optimize_deme(max_evals);
 
         close_deme();
@@ -391,15 +394,15 @@ struct metapopulation : public bscored_combo_tree_set {
             combo_tree tr(get_tree(*_exemplar));
 
             // Logger
-            { 
-                stringstream ss; 
-                ss << "Attempt to expand with exemplar: " << tr; 
-                logger().debug(ss.str()); 
+            {
+                stringstream ss;
+                ss << "Attempt to expand with exemplar: " << tr;
+                logger().debug(ss.str());
             }
-            { 
-                stringstream ss; 
-                ss << "Scored: " << score(tr); 
-                logger().debug(ss.str()); 
+            {
+                stringstream ss;
+                ss << "Scored: " << score(tr);
+                logger().debug(ss.str());
             }
             // ~Logger
 
@@ -435,9 +438,9 @@ struct metapopulation : public bscored_combo_tree_set {
      * sliced version.
      *
      * @param max_evals the max evals
-     * @param max_for_slice the max for slice 
-     * @param max_score the max score 
-     * 
+     * @param max_for_slice the max for slice
+     * @param max_score the max score
+     *
      * @return return the number of evaluations actually performed,
      *         return -1 if all available is evaluated.
      */
@@ -452,7 +455,7 @@ struct metapopulation : public bscored_combo_tree_set {
         int n;
         complexity_based_scorer<Scoring> scorer =
             complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
-        n = optimize(*_deme, scorer, max_evals);                
+        n = optimize(*_deme, scorer, max_evals);
 
         // This is very ugly, but saves the old MOSES' architecture
         // The only return value of the operator is used for two
@@ -479,7 +482,7 @@ struct metapopulation : public bscored_combo_tree_set {
      * optimizer
      *
      * @param max_evals the max evals
-     * 
+     *
      * @return return the number of evaluations actually performed,
      */
     int optimize_deme(int max_evals) {
@@ -487,7 +490,7 @@ struct metapopulation : public bscored_combo_tree_set {
         {
             logger().debug("Optimize deme");
             stringstream ss;
-            ss << "Maximum evaluations during that expansion: " 
+            ss << "Maximum evaluations during that expansion: "
                << max_evals;
             logger().debug(ss.str());
         }
@@ -551,7 +554,7 @@ struct metapopulation : public bscored_combo_tree_set {
         auto select_candidates =
             [&, this](const scored_instance<composite_score>& inst) {
             const composite_score& inst_csc = inst.second;
-            
+
             // if it's really bad stops
             if (get_score(inst_csc) == get_score(worst_composite_score))
                 return;
@@ -572,7 +575,7 @@ struct metapopulation : public bscored_combo_tree_set {
                 combo_tree tr = this->_rep->get_candidate(inst, true);
 
                 auto thread_safe_find_tr = [&]() {
-                    shared_lock lock(pot_cnd_mutex);                    
+                    shared_lock lock(pot_cnd_mutex);
                     return pot_candidates.find(tr) == pot_candidates.end();
                 };
 
@@ -593,7 +596,7 @@ struct metapopulation : public bscored_combo_tree_set {
                         pot_candidates[tr] = cbsc;
                     }
                 }
-            }            
+            }
         };
         // the range of the deme to merge goes up to
         // eval_during_this_deme in case the deme is closed before the
@@ -625,7 +628,7 @@ struct metapopulation : public bscored_combo_tree_set {
                 stringstream ss;
                 logger().fine(ostream(ss, candidates.begin(), candidates.end(),
                                       -1, true, true, true).str());
-            }            
+            }
             // ~Logger
             size_t old_size = candidates.size();
             remove_dominated(candidates, params.jobs);
@@ -638,9 +641,9 @@ struct metapopulation : public bscored_combo_tree_set {
                 stringstream ss;
                 logger().fine(ostream(ss, candidates.begin(), candidates.end(),
                                       -1, true, true, true).str());
-            }            
+            }
             // ~Logger
-        }            
+        }
 
         // update the record of the best-seen score & trees
         update_best_candidates(candidates);
@@ -695,7 +698,7 @@ struct metapopulation : public bscored_combo_tree_set {
                  bscored_combo_tree_ptr_vec> bscored_combo_tree_ptr_vec_pair;
     typedef std::set<const bscored_combo_tree*> bscored_combo_tree_ptr_set;
 
-    // reciprocal of random_access_view 
+    // reciprocal of random_access_view
     static bscored_combo_tree_set
     to_set(const bscored_combo_tree_ptr_vec& bcv) {
         bscored_combo_tree_set res;
@@ -749,7 +752,7 @@ struct metapopulation : public bscored_combo_tree_set {
     }
 
     // split in 2 of equal size
-    static bscored_combo_tree_ptr_vec_pair 
+    static bscored_combo_tree_ptr_vec_pair
     inline split(const bscored_combo_tree_ptr_vec& bcv) {
         bscored_combo_tree_ptr_vec_cit middle = bcv.begin() + bcv.size() / 2;
         return make_pair(bscored_combo_tree_ptr_vec(bcv.begin(), middle),
@@ -778,7 +781,7 @@ struct metapopulation : public bscored_combo_tree_set {
                                 bcv_p.first, s_jobs.first));
             bscored_combo_tree_ptr_vec bcv2_nd =
                 get_nondominated_rec(bcv_p.second, s_jobs.second);
-            bscored_combo_tree_ptr_vec_pair res_p = 
+            bscored_combo_tree_ptr_vec_pair res_p =
                 get_nondominated_disjoint_rec(task.get(), bcv2_nd, jobs);
             // union and return
             append(res_p.first, res_p.second);
@@ -792,8 +795,8 @@ struct metapopulation : public bscored_combo_tree_set {
                 res_p = get_nondominated_disjoint_rec(bcv1_nd, bcv2_nd);
             // union and return
             append(res_p.first, res_p.second);
-            return res_p.first;            
-        }            
+            return res_p.first;
+        }
     }
 
     // return a pair of sets of nondominated candidates between bcs1
@@ -853,7 +856,7 @@ struct metapopulation : public bscored_combo_tree_set {
                 std::async(std::launch::async,
                            bind(&self::get_nondominated_disjoint_rec, this,
                                 bcv1_p.first, bcv2, jobs1));
-            bscored_combo_tree_ptr_vec_pair bcv_m2 = 
+            bscored_combo_tree_ptr_vec_pair bcv_m2 =
                 get_nondominated_disjoint_rec(bcv1_p.second, bcv2, jobs2);
             bscored_combo_tree_ptr_vec_pair bcv_m1 = task.get();
             // merge results
@@ -869,7 +872,7 @@ struct metapopulation : public bscored_combo_tree_set {
                                                        bcv_m1.second);
             // merge results
             append(bcv_m1.first, bcv_m2.first);
-            return make_pair(bcv_m1.first, bcv_m2.second);            
+            return make_pair(bcv_m1.first, bcv_m2.second);
         }
     }
 
@@ -956,7 +959,7 @@ struct metapopulation : public bscored_combo_tree_set {
         } else if (y.empty()) {
             return true;
         }
-        
+
         tribool res = indeterminate;
         for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
              xit != x.end();++xit, ++yit) {
@@ -997,7 +1000,7 @@ struct metapopulation : public bscored_combo_tree_set {
             logger().info("Only worst scored candidates");
         else {
             stringstream ss;
-            ss << "The following candidate(s) have the best score " 
+            ss << "The following candidate(s) have the best score "
                << best_score();
             logger().info(ss.str());
             foreach(const bscored_combo_tree& cand, best_candidates()) {
@@ -1055,11 +1058,11 @@ protected:
     int _evals_before_this_deme;
 
     // the best score ever
-    composite_score _best_score; 
+    composite_score _best_score;
 
     // trees with score _best_score
     metapop_candidates _best_candidates;
-    
+
     // contains the exemplars of demes that have been searched so far
     combo_tree_hash_set _visited_exemplars;
 
