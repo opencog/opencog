@@ -66,6 +66,7 @@ logicalmkup
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
+\listings_params "basicstyle={\ttfamily}"
 \tracking_changes false
 \output_changes false
 \html_math_output 0
@@ -131,13 +132,13 @@ ns, in comparison to other program evolution systems.
  or numerical vector, but a compact and comprehensible program written in
  a simple Lisp-like mini-language.
  For more information see 
-\begin_inset Flex Flex:URL
-status collapsed
-
-\begin_layout Plain Layout
-
-http://metacog.org/doc.html
 \end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset href
+LatexCommand href
+name "http://metacog.org/doc.html"
+target "http://metacog.org/doc.html"
 
 \end_inset
 
@@ -178,13 +179,10 @@ It is licensed under the Apache License, Version 2.0 (the "License"); you
 \end_layout
 
 \begin_layout Standard
-\begin_inset Flex Flex:URL
-status collapsed
-
-\begin_layout Plain Layout
-
-http://www.apache.org/licenses/LICENSE-2.0
-\end_layout
+\begin_inset CommandInset href
+LatexCommand href
+name "http://www.apache.org/licenses/LICENSE-2.0"
+target "http://www.apache.org/licenses/LICENSE-2.0"
 
 \end_inset
 
@@ -213,13 +211,10 @@ a recent gcc (4.x or later);
 
 \begin_layout Itemize
 the boost libraries (
-\begin_inset Flex Flex:URL
-status collapsed
-
-\begin_layout Plain Layout
-
-http://www.boost.org
-\end_layout
+\begin_inset CommandInset href
+LatexCommand href
+name "http://www.boost.org/"
+target "http://www.boost.org/"
 
 \end_inset
 
@@ -228,13 +223,10 @@ http://www.boost.org
 
 \begin_layout Itemize
 the CMake package (
-\begin_inset Flex Flex:URL
-status collapsed
-
-\begin_layout Plain Layout
-
-http://www.cmake.org/HTML/Index.html
-\end_layout
+\begin_inset CommandInset href
+LatexCommand href
+name "http://www.cmake.org/HTML/Index.html"
+target "http://www.cmake.org/HTML/Index.html"
 
 \end_inset
 
@@ -253,18 +245,14 @@ build
 \end_inset
 
  (from the root folder of the MOSES distribution), go under it and run 
-
 \begin_inset Flex Code
 status collapsed
 
 \begin_layout Plain Layout
-
 \begin_inset Quotes eld
 \end_inset
 
 cmake ..
-\lang english
-
 \begin_inset Quotes erd
 \end_inset
 
@@ -273,8 +261,6 @@ cmake ..
 
 \end_inset
 
-
-\lang english
 .
  This will create the needed build files.
  Then, make the project using 
@@ -440,7 +426,8 @@ n
 \end_inset
 
 -ed) with argument #2 (a boolean).
- A program can also be understood to be a 
+ Although programs may be explicit, as in this example, a program can also
+ be understood to be a 
 \emph on
 representation
 \emph default
@@ -581,7 +568,7 @@ deme
  is a population of programs derived from one single representation.
  Thus, a deme can be thought of as a population of knob settings.
  During the optimization phase, an optimizer algorithm, such as hill-climbing,
- simulated annealing, or the Bayesian optimizaation algorithm is used to
+ simulated annealing, or the Bayesian optimization algorithm is used to
  work with the population, locating the best possible knob settings for
  the given representation.
  
@@ -590,7 +577,7 @@ deme
 \begin_layout Description
 Metapopulation.
  MOSES maintains a collection of demes, playing each off the others.
- This set of demes is refered to as the 
+ This set of demes is referred to as the 
 \emph on
 metapopulation
 \emph default
@@ -615,7 +602,7 @@ scoring function
  how closely the candidate program matched the desired output.
  For supervised training problems, the scoring function just returns how
  closely the candidate program matched the training set.
- For demnostration problems, the scoring function is typically some well-studied
+ For demonstration problems, the scoring function is typically some well-studied
  toy problem, such as parity, santa-fe-trail, 
 \emph on
 etc.
@@ -677,8 +664,16 @@ normal form
 \end_inset
 
  since multiplying by one-half never changes the sign of a number.
- Likewise, 
+ Likewise, the expression 
+\begin_inset Quotes eld
+\end_inset
+
+
 \begin_inset Formula $\mbox{if }(x=x)\mbox{ then }y$
+\end_inset
+
+
+\begin_inset Quotes erd
 \end_inset
 
  can be reduced to 
@@ -711,7 +706,7 @@ Choose one or more exemplars, expressed as program trees.
 \end_layout
 
 \begin_layout Enumerate
-Representiation-building step.
+Representation-building step.
  For each exemplar, construct a representation; that is, a set of knobs
  based on the chosen exemplar.
  Generate a random sampling of knob values, i.e.
@@ -827,7 +822,7 @@ step forward
 
 , and other things (XXX like what??).
  MOSES also supports several different optimization algorithms, including
- hill-climbing, simulated annealing and Bayesian optimzation.
+ hill-climbing, simulated annealing and Bayesian optimization.
  Work on support-vector machine (SVM) optimization is underway.
  Only one form of program reduction, to elegant normal form, is supported.
  Other types of reduction, e.g.
@@ -1041,8 +1036,12 @@ status open
 
 \begin_layout Plain Layout
 
-typedef taggeditem<combo::combotree, compositebehavioralscore> bscoredcombotree;
- 
+typedef taggeditem<combo::combotree,
+\end_layout
+
+\begin_layout Plain Layout
+
+		compositebehavioralscore> bscoredcombotree; 
 \end_layout
 
 \end_inset
@@ -1066,7 +1065,7 @@ status open
 
 \begin_layout Plain Layout
 
-typedef std::set<bscoredcombotree, bscoredcombotreegreater> bscoredcombotreeset;
+typedef std::set<bscoredcombotree> bscoredcombotreeset;
 \end_layout
 
 \begin_layout Plain Layout
@@ -1098,8 +1097,17 @@ for (constiterator it=begin(); it!=end(); ++it)
 
 \begin_layout Plain Layout
 
-	cout << gettree(*it) << " " << getscore(*it) << " " << getcomplexity(*it)
- << endl;
+	cout << gettree(*it) << " " 
+\end_layout
+
+\begin_layout Plain Layout
+
+		<< getscore(*it) << " "
+\end_layout
+
+\begin_layout Plain Layout
+
+		<< getcomplexity(*it) << endl;
 \end_layout
 
 \end_inset
@@ -2097,7 +2105,7 @@ key "1"
 \end_inset
 
  Moshe Looks, "Scalable Estimation-of-Distribution Program Evolution", Genetic
- and Evolutionary Computation COnference (GECCO), 2007.
+ and Evolutionary Computation Conference (GECCO), 2007.
 \end_layout
 
 \begin_layout Bibliography
@@ -2109,7 +2117,7 @@ key "2"
 \end_inset
 
  Moshe Looks, "On the Behavioral Diversity of Random Programs", Genetic
- and Evolutionary Computation COnference (GECCO), 2007.
+ and Evolutionary Computation Conference (GECCO), 2007.
 \end_layout
 
 \begin_layout Bibliography
@@ -2121,7 +2129,7 @@ key "3"
 \end_inset
 
  Moshe Looks, "Meta-Optimizing Semantic Evolutionary Search", Genetic and
- Evolutionary Computation COnference (GECCO), 2007.
+ Evolutionary Computation Conference (GECCO), 2007.
 \end_layout
 
 \begin_layout Bibliography
@@ -2135,7 +2143,7 @@ key "4"
  Moshe Looks, Ben Goertzel, Lucio de Souza Coelho, Mauricio Mudado, and
  Cassio Pennachin,"Clustering Gene Expression Data via Mining Ensembles
  of Classification Rules Evolved Using MOSES", Genetic and Evolutionary
- Computation COnference (GECCO), 2007.
+ Computation Conference (GECCO), 2007.
 \end_layout
 
 \begin_layout Bibliography
@@ -2148,7 +2156,7 @@ key "5"
 
  Moshe Looks, Ben Goertzel, Lucio de Souza Coelho, Mauricio Mudado, and
  Cassio Pennachin, "Understanding Microarray Data through Applying Competent
- Program Evolution", Genetic and Evolutionary Computation COnference (GECCO),
+ Program Evolution", Genetic and Evolutionary Computation Conference (GECCO),
  2007.
 \end_layout
 
