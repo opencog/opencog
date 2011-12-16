@@ -71,7 +71,7 @@ representation::representation(const reduct::rule& simplify_candidate,
 {
     // Logger
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Representation building from exemplar: " << _exemplar;
         logger().debug(ss.str());
     }
@@ -84,7 +84,7 @@ representation::representation(const reduct::rule& simplify_candidate,
 
     // Logger
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Created prototype: ";
         ostream_prototype(ss);
         logger().debug(ss.str());
@@ -105,7 +105,7 @@ representation::representation(const reduct::rule& simplify_candidate,
 
     // Logger
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << "Exemplar instance: " << _fields.stream(_exemplar_inst);
         logger().debug(ss.str());
     }
@@ -164,7 +164,7 @@ combo_tree representation::get_clean_combo_tree(combo_tree tr,
     if(reduce) { //reduce
         // Logger
         if(logger().getLevel() >= Logger::FINE) {
-            stringstream ss;
+            std::stringstream ss;
             ss << "Reduce candidate: " 
                << tr;
             logger().fine(ss.str());
