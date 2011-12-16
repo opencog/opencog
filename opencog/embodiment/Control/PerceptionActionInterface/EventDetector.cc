@@ -90,7 +90,7 @@ void EventDetector::insertNodeToScmMap(Handle node)
 void EventDetector::exportActionConcernedNodesToSCM()
 {
     std::fstream fscm;
-    fscm.open(ActionsExportToScmFileName,ios::out | ios::app);
+    fscm.open(ActionsExportToScmFileName,ios::out);
     std::map<UUID,Handle>::iterator iter = allNodesForScmActions.begin();
     std::string nodeStr;
 
