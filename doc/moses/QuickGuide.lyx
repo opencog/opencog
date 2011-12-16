@@ -1021,7 +1021,7 @@ Scoring
 The fitness of program trees are ranked with scores.
  There are several types of scores, these are all defined in 
 \family typewriter
-learning/moses/moses/types.h.
+moses/types.h.
  
 \family default
 The most basic is
@@ -1058,7 +1058,7 @@ typedef std::vector<score_t> behavioral_score;
 \begin_layout Standard
 Programs are also scored according to their complexity, so in 
 \family typewriter
-learning/moses/moses/complexity.h
+moses/complexity.h
 \family default
  we find: 
 \begin_inset listings
@@ -1111,7 +1111,7 @@ The metapopulation is a set of scored combo trees.
  A 'bscored combo tree' is then just a pair that associates a b-score with
  a tree, defined in the file 
 \family typewriter
-learning/moses/moses/types.h.
+moses/types.h.
 
 \family default
  
@@ -1136,7 +1136,7 @@ typedef tagged_item<combo::combo_tree,
 
 The metapopulation is then a set of scored combo trees, defined in 
 \family typewriter
-learning/moses/moses/metapopulation.h.
+moses/metapopulation.h.
 
 \family default
  More precisely, it is a template, inheriting from the set:
@@ -1173,7 +1173,12 @@ template<typename Scoring,
 
 \begin_layout Plain Layout
 
-struct metapopulation : public bscoredcombotreeset {...}; 
+struct metapopulation :
+\end_layout
+
+\begin_layout Plain Layout
+
+	public bscoredcombotreeset {...}; 
 \end_layout
 
 \end_inset
@@ -1232,7 +1237,7 @@ The metapopulation is updated in iterations.
 \end_layout
 
 \begin_layout Subsection
-Deme
+Demes and Optimization
 \end_layout
 
 \begin_layout Standard
@@ -1246,35 +1251,15 @@ The metapopulation consists of expressions (stored as scored trees).
  A deme is centered around an exemplar from the metapopulation.
  However, elements of the deme are not represented as (scored) trees but,
  instead, are represented relative to the exemplar.
- So, the deme has the type (declared in 
-\family typewriter
-eda/instance_set.h
-\family default
-):
+ 
 \end_layout
 
 \begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-eda::instanceset<treescore>
-\end_layout
-
-\end_inset
-
-
+xxx above to define packed knobs, instance
 \end_layout
 
 \begin_layout Standard
-\noindent
-where 
-\family typewriter
-instance_set
-\family default
- is a set of scored instances, and 
+Packed knob settings are called 
 \family typewriter
 instance
 \family default
@@ -1292,7 +1277,105 @@ status open
 
 \begin_layout Plain Layout
 
-typedef vector<packedt> instance;
+typedef unsigned int packed_t;
+\end_layout
+
+\begin_layout Plain Layout
+
+typedef vector<packed_t> instance;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In 
+\family typewriter
+eda/scoring.h
+\family default
+ we find scored instances:
+\family typewriter
+ 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+template<typename ScoreT>
+\end_layout
+
+\begin_layout Plain Layout
+
+struct scored_instance :
+\end_layout
+
+\begin_layout Plain Layout
+
+	public tagged_item<instance, ScoreT> {...}; 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In 
+\family typewriter
+representation/instance_set.h 
+\family default
+we find:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+template<typename ScoreT>
+\end_layout
+
+\begin_layout Plain Layout
+
+struct instance_set :
+\end_layout
+
+\begin_layout Plain Layout
+
+	public vector<scored_instance<ScoreT> > {...};  
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Optimization works on these, so in 
+\family typewriter
+eda/optimize.h
+\family default
+ we find a function template:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+template <...>
+\end_layout
+
+\begin_layout Plain Layout
+
+int optimize(instance_set<ScoreT>&, ...);
 \end_layout
 
 \end_inset
