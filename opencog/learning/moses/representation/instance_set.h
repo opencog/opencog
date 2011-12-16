@@ -31,7 +31,8 @@ namespace opencog {
 namespace moses {
 
 template<typename ScoreT>
-struct instance_set : public vector<scored_instance<ScoreT> > {
+struct instance_set : public vector<scored_instance<ScoreT> >
+{
     typedef vector<scored_instance<ScoreT> > super;
     typedef typename super::value_type value_type;
     typedef boost::transform_iterator < select_tag,
@@ -51,17 +52,17 @@ struct instance_set : public vector<scored_instance<ScoreT> > {
                                         const instance&,
                                         const instance& > const_instance_iterator;
 
-    // create a deme initialized with n null instances
+    // Create a deme initialized with n null instances.
     instance_set(unsigned int n, const field_set& fs)
         : super(n, instance(fs.packed_width())), _fields(fs) { }
-    // create a deme initialized with n instances of inst
+    // Create a deme initialized with n instances of inst.
     instance_set(unsigned int n, const instance& inst, const field_set& fs)
         : super(n, inst), _fields(fs) { }
-    // create an empty deme
+    // Create an empty deme.
     instance_set(const field_set& fs) : _fields(fs) { }
 
-    // insert or erase instances so that the size becomes n
-    // in case of insertions it will insert null instances
+    // Insert or erase instances so that the size becomes n.
+    // In case of insertions, it will insert null instances.
     void resize(unsigned int n) {
         super::resize(n, instance(_fields.packed_width()));
     }
