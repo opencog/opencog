@@ -25,6 +25,7 @@
 #define _MOSES_KNOBS_H
 
 #include <bitset>
+#include <string>
 
 #include <opencog/util/tree.h>
 #include <opencog/util/exceptions.h>
@@ -32,15 +33,12 @@
 #include <opencog/util/based_variant.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 #include "../moses/using.h"
 #include "../moses/complexity.h"
 #include "field_set.h"
 
 namespace opencog { namespace moses {
-
-using namespace ant_combo;
 
 // A knob represents a single dimension of variation relative to an exemplar
 // program tree. This may be discrete or continuous. In the discrete case, the
@@ -128,7 +126,7 @@ struct contin_knob : public knob_base
     }
 
     std::string toStr() const {
-        stringstream ss;
+        std::stringstream ss;
         ss << "[" << *_loc << "]";
         return ss.str();
     }
@@ -180,7 +178,7 @@ struct logical_subtree_knob : public knob_with_arity<3>
     static const int absent = 0;
     static const int present = 1;
     static const int negated = 2;
-    static const std::map<int, string> pos_str;
+    static const std::map<int, std::string> pos_str;
 
     // copy lsk on tr at position tgt
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
@@ -270,8 +268,8 @@ struct logical_subtree_knob : public knob_with_arity<3>
         return field_set::disc_spec(arity());
     }
  
-    string toStr() const {
-        stringstream ss;
+    std::string toStr() const {
+        std::stringstream ss;
         ss << "[";
         for(int i = 0; i < arity(); ++i)
             ss << posStr(map_idx(i)) << (i < arity()-1? " " : "");
@@ -283,10 +281,11 @@ private:
     // return << *_loc or << *_loc.begin() if it is null_vertex
     // if *_loc is a negative literal returns !#n
     // if negated is true a copy of the literal is negated before being printed
-    string locStr(bool negated = false) const {
+    std::string locStr(bool negated = false) const
+    {
         OC_ASSERT(*_loc != id::null_vertex || _loc.has_one_child(),
                   "if _loc is null_vertex then it must have only one child");
-        stringstream ss;
+        std::stringstream ss;
         combo_tree::iterator it;
         if(*_loc == id::null_vertex)
             it = _loc.begin();
@@ -303,8 +302,9 @@ private:
 
     // Return the name of the position, if it is the current one and
     // tag_current is true then the name is put in parenthesis.
-    string posStr(int pos, bool tag_current = false) const {
-        stringstream ss;
+    std::string posStr(int pos, bool tag_current = false) const
+    {
+        std::stringstream ss;
         switch(pos) {
         case absent:
             ss << "nil";
@@ -317,7 +317,7 @@ private:
             break;
         }
         return pos == _current && tag_current?
-            string("(") + ss.str() + ")" : ss.str();
+            std::string("(") + ss.str() + ")" : ss.str();
     }
 };
 
@@ -378,89 +378,13 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
     }
 
     std::string toStr() const {
-        stringstream ss;
+        std::stringstream ss;
         ss << "[" << *_loc << " TODO ]";
         return ss.str();
     }
 protected:
     const vector<combo_tree> _perms;
 };
-
-// Note - children aren't cannonized when parents are called.
-struct ant_action_subtree_knob : public knob_with_arity<4> {
-    static const int none    = 0;
-    static const int forward = 1;
-    static const int rleft   = 2;
-    static const int rright  = 3;
-
-    ant_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                            combo_tree::iterator subtree)
-        : knob_with_arity<4>(tr) {
-
-        _default = none;
-        _current = _default;
-
-        _loc = _tr.append_child(tgt, id::null_vertex);
-        _tr.append_child(_loc, subtree);
-    }
-
-    int complexity_bound() const {
-        return complexity(_loc);
-    }
-
-    void clear_exemplar() {
-        if (in_exemplar())
-            turn(0);
-        else
-            _tr.erase(_loc);
-    }
-
-    void turn(int idx) {
-        idx = map_idx(idx);
-        OC_ASSERT((idx < 4), "Index greater than 3.");
-
-        if (idx == _current) //already set, nothing to
-            return;
-
-        if (idx == none) {
-            if (_current != none)
-                _loc = _tr.insert_above(_loc, id::null_vertex);
-        } else {
-            if (_current == none)
-                _tr.erase_children(_loc);
-
-            switch (idx) {
-            case forward:
-                *_loc = get_instance(id::move_forward);
-                break;
-
-            case rleft:
-                *_loc = get_instance(id::turn_left);
-                break;
-
-            case rright:
-                *_loc = get_instance(id::turn_right);
-                break;
-
-            default:
-                break;
-            }
-        }
-
-        _current = idx;
-    }
-
-    field_set::disc_spec spec() const {
-        return field_set::disc_spec(arity());
-    }
-
-    std::string toStr() const {
-        stringstream ss;
-        ss << "[" << *_loc << " TODO ]";
-        return ss.str();
-    }
-};
-
 
 
 struct simple_action_subtree_knob : public knob_with_arity<2> {
@@ -509,7 +433,7 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
     }
 
     std::string toStr() const {
-        stringstream ss;
+        std::stringstream ss;
         ss << "[" << *_loc << " TODO ]";
         return ss.str();
     }
