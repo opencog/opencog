@@ -31,7 +31,8 @@ namespace opencog {
 namespace moses {
 
 template<typename ScoreT>
-struct scored_instance : public tagged_item<instance, ScoreT> {
+struct scored_instance : public tagged_item<instance, ScoreT>
+{
     typedef tagged_item<instance, ScoreT> super;
 
     scored_instance(const instance& i, const ScoreT& s) : super(i, s) { }
