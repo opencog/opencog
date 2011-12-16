@@ -888,7 +888,9 @@ Types, Structures, and Classes
 \begin_layout Standard
 This section briefly reviews some of the key datatypes and classes found
  in the code.
- 
+ MOSES makes heavy use of C++ templating.
+ This is done so as to avoid the need for defining base classes, and so
+ avoid the need for pervasive use of derived classes and virtual methods.
 \end_layout
 
 \begin_layout Subsection
@@ -1012,21 +1014,17 @@ For more information, review the docs provided in the distribution of the
 \end_layout
 
 \begin_layout Subsection
-Metapopulation
+Scoring
 \end_layout
 
 \begin_layout Standard
-The metapopulation is a set of scored combo trees.
- Several types of scores are used, ranging from single floats, to composite
- scores that include a complexity measure, to 'behavioural' scores, consisting
- of vectors of floats.
- These are all defined in the file 
+The fitness of program trees are ranked with scores.
+ There are several types of scores, these are all defined in 
 \family typewriter
 learning/moses/moses/types.h.
-
+ 
 \family default
- A 'scored combo tree' is then just a pair that associates a score with
- a tree:
+The most basic is
 \end_layout
 
 \begin_layout Standard
@@ -1036,12 +1034,20 @@ status open
 
 \begin_layout Plain Layout
 
-typedef taggeditem<combo::combotree,
+typedef float score_t; 
 \end_layout
+
+\end_inset
+
+Different programs may be code at different things, and so judging their
+ fitness in multiple ways requires a vector: 
+\begin_inset listings
+inline false
+status open
 
 \begin_layout Plain Layout
 
-		compositebehavioralscore> bscoredcombotree; 
+typedef std::vector<score_t> behavioral_score;  
 \end_layout
 
 \end_inset
@@ -1050,12 +1056,65 @@ typedef taggeditem<combo::combotree,
 \end_layout
 
 \begin_layout Standard
-The metapopulation is then a set of scored combo trees, defined in 
+Programs are also scored according to their complexity, so in 
 \family typewriter
-learning/moses/moses/metapopulation.h.
- M
+learning/moses/moses/complexity.h
 \family default
-ore precisely, it is a class, inheriting from the set:
+ we find: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef int complexity_t;
+\end_layout
+
+\end_inset
+
+Composite scores pair up the complexity and the fitness score: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef std::pair<score_t, complexity_t> composite_score; 
+\end_layout
+
+\end_inset
+
+ while behavioral composite scores combine the complexity measure with the
+ vector: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef tagged_item<behavioral_score,                     		composite_score>
+ composite_behavioral_score;  
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Metapopulation
+\end_layout
+
+\begin_layout Standard
+The metapopulation is a set of scored combo trees.
+ More precisely, they are scored with composite behavioural scores (or b-scores).
+ A 'bscored combo tree' is then just a pair that associates a b-score with
+ a tree, defined in the file 
+\family typewriter
+learning/moses/moses/types.h.
+
+\family default
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1065,7 +1124,51 @@ status open
 
 \begin_layout Plain Layout
 
-typedef std::set<bscoredcombotree> bscoredcombotreeset;
+typedef tagged_item<combo::combo_tree,
+\end_layout
+
+\begin_layout Plain Layout
+
+		composite_behavioral_score> bscored_combo_tree; 
+\end_layout
+
+\end_inset
+
+The metapopulation is then a set of scored combo trees, defined in 
+\family typewriter
+learning/moses/moses/metapopulation.h.
+
+\family default
+ More precisely, it is a template, inheriting from the set:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef std::set<bscored_combo_tree> bscored_combo_tree_set;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+template<typename Scoring,
+\end_layout
+
+\begin_layout Plain Layout
+
+         typename BScoring,
+\end_layout
+
+\begin_layout Plain Layout
+
+         typename Optimization>
 \end_layout
 
 \begin_layout Plain Layout
@@ -1075,6 +1178,12 @@ struct metapopulation : public bscoredcombotreeset {...};
 
 \end_inset
 
+The template plays only a small role in this class; it's only purpose is
+ to allow generic scoring and optimization algorithms to be used with the
+ metapopulation.
+\end_layout
+
+\begin_layout Standard
 The metapopulation will store expressions (as scored trees) that were encountere
 d during the learning process (not all of them; the weak ones, which are
  dominated by existing ones, are usually skipped as non-promising).
