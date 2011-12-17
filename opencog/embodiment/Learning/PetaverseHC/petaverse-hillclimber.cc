@@ -24,8 +24,7 @@
 #include "petaverse-hillclimber.h"
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 
-namespace hillclimbing
-{
+namespace opencog { namespace hillclimbing {
 
 //constructor, generate/filter conditions and actions
 petaverse_hillclimber::petaverse_hillclimber(int nepc,
@@ -91,4 +90,5 @@ void petaverse_hillclimber::reset_estimator()
     _hillclimber.reset_estimator();
 }
 
-}//~namespace hillclimbing
+} // ~namespace opencog
+} // ~namespace hillclimbing

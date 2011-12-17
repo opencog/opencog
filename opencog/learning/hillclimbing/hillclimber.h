@@ -57,20 +57,11 @@
 //around the best candidates the re-expansion occurs
 #define NARROWNESS 5.0
 
-namespace hillclimbing
-{
+namespace opencog { namespace hillclimbing {
 
-using namespace opencog::combo;
-using namespace opencog;
+using namespace combo;
 
 typedef double fitness_t;
-
-//ns = normal size
-typedef std::set<combo_tree, size_tree_order<vertex> > combo_tree_ns_set;
-typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
-
-typedef std::set<vertex> operator_set;
-typedef operator_set::iterator operator_set_it;
 
 template < typename FE, typename Combo_TreeComp = size_tree_order<vertex> >
 struct hillclimber {
@@ -517,6 +508,7 @@ private:
 
 };
 
-}//~namespace hillclimbing
+}// ~namespace opencog
+}// ~namespace hillclimbing
 
 #endif

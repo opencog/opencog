@@ -28,8 +28,7 @@
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
-namespace hillclimbing
-{
+namespace opencog { namespace hillclimbing {
 
 using namespace ant_combo;
 
@@ -100,7 +99,7 @@ private:
     combo_tree_ns_set _perceptions;
 };
 
-}//~namespace hillclimbing
-
+} // ~namespace opencog
+} // ~namespace hillclimbing
 
 #endif

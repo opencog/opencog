@@ -28,6 +28,7 @@
 #include <opencog/embodiment/Learning/RewritingRules/hillclimbing_full_reduction.h>
 #include <iostream>
 
+using namespace opencog;
 using namespace hillclimbing;
 using namespace std;
 using namespace PetCombo;

@@ -29,6 +29,7 @@
 #include <iostream>
 #include <opencog/learning/moses/moses/ant_scoring.h>
 
+using namespace opencog;
 using namespace hillclimbing;
 using namespace combo;
 using namespace std;

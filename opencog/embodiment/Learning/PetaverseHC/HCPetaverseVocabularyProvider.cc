@@ -24,8 +24,7 @@
 #include "HCPetaverseVocabularyProvider.h"
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
-namespace hillclimbing
-{
+namespace opencog { namespace hillclimbing {
 
 using namespace PetCombo;
 
@@ -79,4 +78,5 @@ HCPetaverseVocabularyProvider::get_indefinite_objects() const
     return is;
 }
 
-}//~namespace hillclimbing
+} // ~namespace opencog
+} // ~namespace hillclimbing

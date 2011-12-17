@@ -30,6 +30,7 @@
 #include <iostream>
 #include <opencog/util/mt19937ar.h>
 
+using namespace opencog;
 using namespace hillclimbing;
 using namespace std;
 

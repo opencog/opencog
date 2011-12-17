@@ -26,10 +26,9 @@
 
 #include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseVocabularyProvider.h>
 
-namespace hillclimbing
-{
+namespace opencog { namespace hillclimbing {
 
-using namespace opencog::combo;
+using namespace combo;
 
 //-----------------------------------------------------------------------
 //Definitions of the operators, actions and perceptions used in petaverse
@@ -142,7 +141,8 @@ private:
     indefinite_object_set is; //indefinite objects
 };
 
-}//~namespace hillclimbing
+} // ~namespace opencog
+} // ~namespace hillclimbing
 
 #endif
 

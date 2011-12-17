@@ -27,10 +27,12 @@
 #include <opencog/learning/hillclimbing/hillclimber.h>
 #include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
 #include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
-namespace hillclimbing
-{
+namespace opencog { namespace hillclimbing {
 
+using namespace ant_combo;
+    
 template<typename FitnessEstimator>
 struct interactive_hillclimber {
     interactive_hillclimber(const FitnessEstimator& fe, int fepc) {
@@ -99,6 +101,7 @@ private:
     combo_tree_ns_set _perceptions;
 };
 
-}//~namespace hillclimbing
+}// ~namespace opencog
+}// ~namespace hillclimbing
 
 #endif

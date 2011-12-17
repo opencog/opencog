@@ -28,8 +28,7 @@
 #include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
 #include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseImitationLearning.h>
 
-namespace hillclimbing
-{
+namespace opencog { namespace hillclimbing {
 
 class petaverse_hillclimber : public PetaverseImitationLearningBase
 {
@@ -86,7 +85,8 @@ private:
 
 };
 
-}//~namespace hillclimbing
+} // ~namespace opencog
+} // ~namespace hillclimbing
 
 
 #endif

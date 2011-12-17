@@ -40,10 +40,8 @@
 //the arity is positive or null (because empty and_seq have arity -1)
 //#define NOT_EMPTY_AND_SEQ
 
-namespace hillclimbing
-{
+namespace opencog { namespace hillclimbing {
 
-using namespace opencog;
 using namespace combo;
 using namespace reduct;
 
@@ -612,6 +610,8 @@ private:
     }
 
 };
-}
+
+} // ~namespace opencog
+} // ~namespace hillclimbing
 
 #endif
