@@ -24,8 +24,6 @@
 #ifndef _OPENCOG_EVAL_TABLE_H
 #define _OPENCOG_EVAL_TABLE_H
 
-//ant_combo_vocabulary is used only for the boolean core vocabulary
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 #include <opencog/comboreduct/combo/table.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/numeric.h>
@@ -34,7 +32,7 @@
 
 using namespace std;
 using namespace boost::assign;
-using namespace ant_combo;
+using namespace opencog::combo;
 
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_table_opt("input-table", "i");

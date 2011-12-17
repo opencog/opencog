@@ -30,11 +30,9 @@
 #include "../combo/eval.h"
 #include "../combo/table.h"
 #include "../combo/type_tree.h"
-#include "../ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace std;
 using namespace opencog;
-using namespace ant_combo;
 using namespace reduct;
 
 int main()

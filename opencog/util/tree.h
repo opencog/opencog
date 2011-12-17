@@ -3039,8 +3039,9 @@ void tree_copy(const treeT1& src,treeT2& dst) {
 
 template<typename treeT1,typename src_iterator,
          typename treeT2,typename dst_iterator>
-void subtree_convert(const treeT1& src,src_iterator src_it,
-                     treeT2& dst,dst_iterator dst_it) {
+void subtree_convert(const treeT1& src, src_iterator src_it,
+                     treeT2& dst,dst_iterator dst_it)
+{
     typedef typename treeT1::value_type T1;
     typedef typename treeT2::value_type T2;
 
@@ -3052,15 +3053,17 @@ void subtree_convert(const treeT1& src,src_iterator src_it,
 }
 
 template<typename treeT1,typename treeT2>
-void tree_convert(const treeT1& src,treeT2& dst) {
+void tree_convert(const treeT1& src, treeT2& dst)
+{
     typedef typename treeT1::value_type T1;
     typedef typename treeT2::value_type T2;
 
     dst=treeT2(T2());
     typename treeT1::iterator src_it=src.begin();
     typename treeT2::iterator dst_it=dst.begin();
-    while (src_it!=src.end()) {
-        dst_it=dst.insert_after(dst_it,T2());
+    while (src_it != src.end())
+    {
+        dst_it = dst.insert_after(dst_it,T2());
         subtree_convert(src,src_it,dst,dst_it);
         src_it.skip_children();
         ++src_it;
@@ -3068,8 +3071,8 @@ void tree_convert(const treeT1& src,treeT2& dst) {
     dst.erase(dst.begin());
 }
 
-//not really lexicographic, but a valid ordering
-//this can be changed if it's important...
+// Not really lexicographic, but a valid ordering.
+// This can be changed if it's important...
 template<typename T,typename compare=std::less<T> >
 struct lexicographic_subtree_order {
     lexicographic_subtree_order() { }
@@ -3158,8 +3161,8 @@ boost_range_end(const tree<T>& tr) {
     return make_counting_iterator(tr.end());
 }
 
-//returns the index (i.e. the position) of a given pre_order_iterator
-//WARNING: it is assumed that the iterator is in the tree
+// Returns the index (i.e. the position) of a given pre_order_iterator.
+// WARNING: it is assumed that the iterator is in the tree
 template<typename T>
 unsigned int pre_order_index(const tree<T>& tr,
                              typename tree<T>::iterator it) {
@@ -3199,10 +3202,25 @@ std::string subtree_to_string(iter it) {
 
 namespace std {
 
-std::istream& operator>>(std::istream& in,opencog::tree<std::string>& t) throw (opencog::InconsistenceException, std::bad_exception);
+// Instantiate a string-specific converter first, as we need this for
+// the general case, below. Note that it is being instantiated in the
+// std namespace.  We do ths because we want to use the std variants
+// to create the tree. It is then used in the code below, to first
+// convert a string to a string-tree, and then the string-tree to the
+// final, desired typename-tree. Without this, operator>>() would be
+// infinitely recursive.
+std::istream& operator>>(std::istream&, opencog::tree<std::string>&)
+    throw (opencog::InconsistenceException, std::bad_exception);
+}
+
+namespace opencog {
+// Provide operators that know how to print trees and input them.
+// Note: These operators need to live on the opencog namespace, not
+// the std namespace. Putting them in std will elicit weird bugs.
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr) {
+std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr)
+{
     for (typename opencog::tree<T>::iterator it=tr.begin();it!=tr.end();++it) {
         out << subtree_to_string(it);
         it.skip_children();
@@ -3212,7 +3230,9 @@ std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr) {
 }
 
 template<typename T>
-std::istream& operator>>(std::istream& in,opencog::tree<T>& tr) throw (opencog::InconsistenceException, std::bad_exception){
+std::istream& operator>>(std::istream& in, opencog::tree<T>& tr)
+	throw (opencog::InconsistenceException, std::bad_exception)
+{
     opencog::tree<std::string> tmp;
     in >> tmp;
     try {
@@ -3227,6 +3247,6 @@ std::istream& operator>>(std::istream& in,opencog::tree<T>& tr) throw (opencog::
     return  in;
 }
 
-} // ~namespace std
+} // ~namespace opencog
 
 #endif

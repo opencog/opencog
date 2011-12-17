@@ -199,7 +199,10 @@ typedef std::vector<argument_list> argument_list_list;
 typedef argument_list_list::iterator argument_list_list_it;
 typedef argument_list_list::const_iterator argument_list_list_const_it;
 
-//builtin == vertex
+// Disambiguate stream operator; use the one declared in util/tree.h
+std::istream& operator>>(std::istream& in, combo::vertex& v);
+
+// builtin == vertex
 inline bool operator==(const vertex& v, builtin h)
 {
     if (const builtin* vh = boost::get<builtin>(&v))
@@ -504,6 +507,9 @@ typedef tree<vertex> combo_tree;
 typedef std::set<combo_tree, size_tree_order<vertex> > combo_tree_ns_set;
 typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
 typedef combo_tree_ns_set::const_iterator combo_tree_ns_set_const_it;
+
+// Disambiguate stream operator; use the one declared in util/tree.h
+std::istream& operator>>(std::istream& in, combo::combo_tree& tr);
 
 template<typename T>
 inline bool is_associative(const T& v)
@@ -851,7 +857,7 @@ inline bool builtin_str_to_vertex(const std::string& str, vertex& v)
     return true;
 }
 
-// return false if str has no ann matches
+//* Return false if str has no ann matches.
 inline bool ann_str_to_vertex(const std::string& str, vertex& v)
 {
     if (str[0] == '#' && str[1]=='N') {

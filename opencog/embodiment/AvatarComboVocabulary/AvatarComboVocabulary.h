@@ -87,8 +87,8 @@ std::ostream& operator<<(std::ostream& out, avatar_perception_enum e);
 std::ostream& operator<<(std::ostream& out, avatar_action_symbol_enum e);
 std::ostream& operator<<(std::ostream& out, avatar_indefinite_object_enum e);
 
-std::istream& operator>>(std::istream& in, vertex& v);
-std::istream& operator>>(std::istream& in, combo_tree& tr);
+// std::istream& operator>>(std::istream& in, vertex& v);
+// std::istream& operator>>(std::istream& in, combo_tree& tr);
 
 //this is added to be sure that the operators == and != between
 //combo operator type and enum is used

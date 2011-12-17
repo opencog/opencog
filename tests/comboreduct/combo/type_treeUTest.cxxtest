@@ -1,9 +1,8 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/combo/type_tree.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
-using namespace ant_combo;
 using namespace opencog;
+using namespace opencog::combo;
 using namespace std;
 
 class TreeTypeUTest : public CxxTest::TestSuite

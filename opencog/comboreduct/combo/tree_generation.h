@@ -28,11 +28,10 @@
 
 #include "vertex.h"
 #include "type_tree.h"
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 namespace opencog { namespace trees {
 
-  using namespace ant_combo;
+  using namespace opencog::combo;
 
   template<int MIN_ARITY>
   class Generator {

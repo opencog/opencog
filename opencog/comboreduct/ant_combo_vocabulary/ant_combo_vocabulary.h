@@ -72,12 +72,4 @@ bool operator!=(ant_indefinite_object_enum, indefinite_object);
 
 } // ~namespace ant_combo
 
-namespace opencog { namespace combo {
-
-std::istream& operator>>(std::istream& in, combo::vertex& v);
-std::istream& operator>>(std::istream& in, combo::combo_tree& tr);
-
-} // ~namespace combo
-} // ~namespace opencog
-
 #endif

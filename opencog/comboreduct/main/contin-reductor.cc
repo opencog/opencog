@@ -28,12 +28,10 @@
 #include "../reduct/reduct.h"
 #include "../combo/eval.h"
 #include "../combo/table.h"
-#include "../ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace std;
 using namespace opencog;
 using namespace reduct;
-using namespace ant_combo;
 
 int main()
 {

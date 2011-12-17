@@ -29,12 +29,11 @@
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
 #include <opencog/comboreduct/combo/type_tree.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace boost::program_options;
 using namespace opencog;
 using namespace combo;
-using namespace ant_combo;
+using namespace std;
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
