@@ -68,7 +68,7 @@ struct Evaluator {
 // statically (be careful because it modifies the combo_tree) using
 // set_bindings
 
-//to support lazy evaluation, can also bind to a subtree
+// to support lazy evaluation, can also bind to a subtree
 typedef boost::unordered_map<arity_t,
                              boost::variant<vertex,
                                             combo_tree::iterator> > binding_map;
@@ -110,16 +110,16 @@ vertex eval_throws(RandGen& rng,
           AssertionException, std::bad_exception)
 {
 
-    //std::cout << "EVAL: " << combo_tree(it) << std::endl;
+    // std::cout << "EVAL: " << combo_tree(it) << std::endl;
 
-    //std::cout << "VU: " << vu.toString() << std::endl;
+    // std::cout << "VU: " << vu.toString() << std::endl;
 
     typedef typename It::sibling_iterator sib_it;
     vertex& v = *it;
 
     if (const argument* a = boost::get<argument>(&v)) {
         int idx = a->idx;
-        //assumption : when idx is negative the argument is necessary boolean
+        // assumption : when idx is negative the argument is necessary boolean
         if (idx > 0) {
             if (const vertex* v = boost::get<const vertex>(&binding(idx)))
                 return * v;
@@ -139,7 +139,7 @@ vertex eval_throws(RandGen& rng,
     // builtin
     else if (const builtin* b = boost::get<builtin>(&v)) {
         switch (*b) {
-            //boolean operators
+            // boolean operators
         case id::logical_true :
             return v;
         case id::logical_false :
@@ -147,11 +147,11 @@ vertex eval_throws(RandGen& rng,
         case id::logical_and :
             for (sib_it sib = it.begin();sib != it.end();++sib) {
 
-                if (vu.empty()) { //no wild_card case
+                if (vu.empty()) { // no wild_card case
                     if (eval_throws(rng, sib, pe, vu) == id::logical_false) {
                         return id::logical_false;
                     }
-                } else { //wild_card case
+                } else { // wild_card case
                     combo::variable_unifier work_vu(vu);
                     work_vu.setUpdated(false);
                     bool is_false = (eval_throws(rng, sib, pe, work_vu)
@@ -195,13 +195,13 @@ vertex eval_throws(RandGen& rng,
                                                           return_vu));
 
                     if(!return_vu.isUpdated()) {
-                        if(res) { //then all activated entities are
-                                  //necessarily valid
+                        if(res) { // then all activated entities are
+                                  // necessarily valid
                             return id::logical_true;
                         }
-                        else { //then all activated entities remains
-                               //to be checked to which can directly
-                               //go back to the next loop
+                        else { // then all activated entities remains
+                               // to be checked to which can directly
+                               // go back to the next loop
                             continue;
                         }
                     }
@@ -209,16 +209,16 @@ vertex eval_throws(RandGen& rng,
                     work_vu.unify(combo::UNIFY_OR, return_vu);
 
 
-                    //if no variable remains to be checked
-                    //after OR unification it means that
-                    //the unification has succeeded
-                    //ASSUMING THAT unify has done actually something
-                    //which is only the case if updated is true
+                    // if no variable remains to be checked
+                    // after OR unification it means that
+                    // the unification has succeeded
+                    // ASSUMING THAT unify has done actually something
+                    // which is only the case if updated is true
                     if(!work_vu.isOneVariableActiveTMP()) {
-                        //OC_ASSERT(res,
-                        //                "res should be true because work_vu"
-                        //                " should start the iteration with"
-                        //                " at least one active variable");
+                        // OC_ASSERT(res,
+                        //           "res should be true because work_vu"
+                        //           " should start the iteration with"
+                        //           " at least one active variable");
                         vu.unify(combo::UNIFY_OR, work_vu);
                         return id::logical_true;
                     }
@@ -277,11 +277,9 @@ vertex eval_throws(RandGen& rng,
                       "vertex should be a boolean.");
             ++sib;
             if (vcond == id::logical_true) {
-                //TODO : check the type of the result
                 return eval_throws(rng, sib, pe, vu);
             } else {
                 ++sib;
-                //TODO : check the type of the result
                 return eval_throws(rng, sib, pe, vu);
             }
         }
@@ -308,7 +306,7 @@ vertex eval_throws(RandGen& rng,
         // continuous operator
         case id::plus : {
             contin_t res = 0;
-            //assumption : plus can have 1 or more arguments
+            // assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
                 OC_ASSERT(is_contin(vres), "vertex should be a contin.");
@@ -320,7 +318,7 @@ vertex eval_throws(RandGen& rng,
             return rng.randfloat();
         case id::times : {
             contin_t res = 1;
-            //assumption : times can have 1 or more arguments
+            // assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
                 OC_ASSERT(is_contin(vres), "vertex should be a contin");
@@ -372,7 +370,7 @@ vertex eval_throws(RandGen& rng,
             OC_ASSERT(is_contin(vx),
                       "vertex should be an contin");
             contin_t res = exp(get_contin(vx));
-            //this may happen in case the argument is too high, then exp will be infty
+            // this may happen in case the argument is too high, then exp will be infty
             if (isinf(res)) throw EvalException(vertex(res));
             return res;
         }
@@ -484,7 +482,7 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
      throw(EvalException, ComboException, AssertionException,
            std::bad_exception);
 
-//return the arity of a tree
+// return the arity of a tree
 template<typename T>
 arity_t arity(const tree<T>& tr)
 {

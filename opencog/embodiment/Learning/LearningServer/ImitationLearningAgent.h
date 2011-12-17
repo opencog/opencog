@@ -42,7 +42,7 @@ using namespace hillclimbing;
 using namespace std;
 using namespace Filter;
 
-//Warning: it is a Mind Agent not a virtual agent in a virtual world
+// Warning: it is a Mind Agent not a virtual agent in a virtual world
 class ImitationLearningAgent : public opencog::Agent
 {
 
@@ -68,9 +68,9 @@ public:
         return _ci;
     }
 
-    //attempt to initialize the learning algo
-    //return true if it succeeds
-    //false if it fails
+    // attempt to initialize the learning algo
+    // return true if it succeeds
+    // false if it fails
     bool initLearning(int number_of_estimation_per_cycle,
                       WorldProvider* wp,
                       const argument_list& al,
@@ -116,7 +116,7 @@ private:
     RandGen* _rng;
 };
 
-} } // namespace opencog::messaging
+}} // ~namespace opencog::messaging
 
 
 #endif
