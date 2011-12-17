@@ -29,10 +29,8 @@
 #include <algorithm>
 #include <iostream>
 #include <opencog/util/mt19937ar.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace hillclimbing;
-using namespace ant_combo;
 using namespace std;
 
 struct InteractiveFitnessFunction : unary_function<combo_tree, fitness_t> {

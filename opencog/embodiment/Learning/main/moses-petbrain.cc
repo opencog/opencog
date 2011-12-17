@@ -27,7 +27,6 @@
 
 #include <opencog/util/mt19937ar.h>
 
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include <opencog/learning/moses/moses/moses.h>
@@ -39,7 +38,6 @@ using namespace moses;
 using namespace reduct;
 using namespace boost;
 using namespace std;
-using namespace ant_combo;
 
 int main(int argc, char** argv)
 {
