@@ -1,0 +1,30 @@
+* ComboReduct
+** Code Improvements
+- [ ] add a dummy action/perception vocabulary to not use
+  ant_vocabulary when it is not necessary
+- [ ] moved ant evaluator as part of the ant vocabulary definition
+- [ ] have eval-table detects automatically if the input file has a header
+- [ ] unify partial and complete truth table
+- [ ]
++(-0.25 *(-1.5 #8) *(0.5 +(1 #5)) #2 #7)
+and
++(0.25 *(-1.5 #8) *(0.5 #5) #2 #7) 
+are equivalent but not reduced
+- [ ] the following programs are quivalent yet how to reduce them
+or(and(or(!#1 #3) !#2) and(!#1 #3))
+and(or(and(!#2 #3) !#1) or(!#2 #3))
+or(and(or(!#1 !#2) #3) and(!#1 !#2))
+- [ ] reduce_to_enf does not assume one is working on a subtree
+- [ ] reduce_from_assumptions::implies is abnormally long, surely the
+  code can be simplified
+- [ ] in mixed_reduction (and probably full_reduction as well) the
+  reduction strategy is recalled everytime since it is not in the
+  constructor
+- [ ] move CaseBasedBoolean table under comboreduct/comno/table.[h|cc]
+- [ ] simplify *_reduction.cc to avoid redundant rule def following
+  contin_reduction.cc
+- [ ] rename comboreduct/combo/vertex.h by combo_vertex or something,
+      same for the class and so on.
+** Ideas
+- [ ] add a cache to reduct engine (preliminary test on that suggests
+  it doesn't work that well)
