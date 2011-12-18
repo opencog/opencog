@@ -124,7 +124,8 @@ public:
         combo::combo_tree tree;
 
         std::stringstream ss(cmd);
-        ss >> tree;
+        // ss >> tree;
+        PetCombo::operator>>(ss, tree);
 
         cpr.instantiateProcedureCalls(tree, true);
 

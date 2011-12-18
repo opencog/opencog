@@ -74,12 +74,13 @@ std::ostream& operator<<(std::ostream& out, avatar_builtin_action_enum e)
     out << get_instance(e)->get_name();
     return out;
 }
-std::ostream& operator>>(std::ostream& out, avatar_perception_enum e)
+
+std::ostream& operator<<(std::ostream& out, avatar_perception_enum e)
 {
     out << get_instance(e)->get_name();
     return out;
 }
-std::ostream& operator>>(std::ostream& out, avatar_action_symbol_enum e)
+std::ostream& operator<<(std::ostream& out, avatar_action_symbol_enum e)
 {
     out << get_instance(e)->get_name();
     return out;
@@ -87,12 +88,14 @@ std::ostream& operator>>(std::ostream& out, avatar_action_symbol_enum e)
 
 std::istream& operator>>(std::istream& in, vertex& v)
 {
-    return stream_to_vertex<avatar_builtin_action, avatar_perception, avatar_action_symbol, avatar_indefinite_object>(in, v);
+    return stream_to_vertex<avatar_builtin_action, avatar_perception,
+                            avatar_action_symbol, avatar_indefinite_object>(in, v);
 }
 
 std::istream& operator>>(std::istream& in, combo_tree& tr)
 {
-    return stream_to_combo_tree<avatar_builtin_action, avatar_perception, avatar_action_symbol, avatar_indefinite_object>(in, tr);
+    return stream_to_combo_tree<avatar_builtin_action, avatar_perception,
+                                avatar_action_symbol, avatar_indefinite_object>(in, tr);
 }
 
 bool operator==(builtin_action b, avatar_builtin_action_enum e)

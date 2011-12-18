@@ -78,23 +78,25 @@ avatar_indefinite_object_enum get_enum(indefinite_object);
 bool is_random(indefinite_object);
 bool is_random(avatar_indefinite_object_enum);
 
-//for some bizard reason this makes a compiling error
-//however I keep them because it can indiquate when it is required to
-//use base_instance(action or perception) instead of enum which print
-//the wrong thing (a digit)
-std::ostream& operator<<(std::ostream& out, avatar_builtin_action_enum e);
-std::ostream& operator<<(std::ostream& out, avatar_perception_enum e);
-std::ostream& operator<<(std::ostream& out, avatar_action_symbol_enum e);
-std::ostream& operator<<(std::ostream& out, avatar_indefinite_object_enum e);
+// Overload the stream operators
+std::ostream& operator<<(std::ostream&, avatar_builtin_action_enum);
+std::ostream& operator<<(std::ostream&, avatar_perception_enum);
+std::ostream& operator<<(std::ostream&, avatar_action_symbol_enum);
+std::ostream& operator<<(std::ostream&, avatar_indefinite_object_enum);
 
-// std::istream& operator>>(std::istream& in, vertex& v);
-// std::istream& operator>>(std::istream& in, combo_tree& tr);
+// Overload the operators to parse input, and create vertexes and combos.
+// XXX This design is real dicy, as its easy for the compiler to use
+// the wrong opator>>(), and to get confused about which of serval to
+// use... the problem is that the below, which are really 
+// PetCombo::operator>>() collide with opencog::combo::operator>>()
+std::istream& operator>>(std::istream&, vertex&);
+std::istream& operator>>(std::istream&, combo_tree&);
 
-//this is added to be sure that the operators == and != between
-//combo operator type and enum is used
-//That means that different vocabularies will not be able to coexist
-//with the same code file but will be able within the same library
-//using namespace PetCombo;
+// This is added to be sure that the operators == and != between
+// combo operator type and enum is used
+// That means that different vocabularies will be able to coexist
+// with the same code file and within the same library -- just say
+// using namespace PetCombo.
 bool operator==(builtin_action, avatar_builtin_action_enum);
 bool operator==(avatar_builtin_action_enum, builtin_action);
 bool operator!=(builtin_action, avatar_builtin_action_enum);

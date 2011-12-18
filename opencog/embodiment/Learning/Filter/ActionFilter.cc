@@ -246,20 +246,23 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
     //get the action name
     std::string action_name = (as.getName(action_h));
 
-    //determine whether the action is in the action_set _bas
-    vertex head_v;
-    stringstream ss(action_name);
-
     // print debug
     std::cout << "action_name = " << action_name << std::endl;
 
-    ss >> head_v;
+    // Determine whether the action is in the action_set.
+    // Be sure to use the PetCombo operator>> for this, as otherwise,
+    // the compiler will pick the wrong one, and/or get confused.
+    vertex head_v;
+    stringstream ss(action_name);
+    // ss >> head_v;
+    PetCombo::operator>>(ss,head_v);
+
 
     // print debug
     std::cout << "head_v = " << head_v << std::endl;
 
     OC_ASSERT(is_builtin_action(head_v),
-                     "%s is not a builtin_action", ss.str().c_str());
+                     "%s is not a builtin_action", action_name.c_str());
 
     if (_bas.find(get_builtin_action(head_v)) != _bas.end()) {
         //get arg list names and generate all possible list of arguments

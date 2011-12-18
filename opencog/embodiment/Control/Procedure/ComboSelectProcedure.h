@@ -94,8 +94,4 @@ private:
 
 }
 
-//std::istream& operator>>(std::istream&,Procedure::ComboSelectProcedure&) throw (ComboException, std::bad_exception);
-//std::ostream& operator<<(std::ostream&,const Procedure::ComboSelectProcedure&);
-
-
-#endif /*COMBOSELECTPROCEDURE_H_*/
+#endif /* COMBOSELECTPROCEDURE_H_ */

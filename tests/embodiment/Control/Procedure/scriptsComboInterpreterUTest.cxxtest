@@ -410,7 +410,8 @@ public :
         combo::combo_tree tree;
 
         stringstream ss(cmd);
-        ss >> tree;
+        // ss >> tree;
+        PetCombo::operator>>(ss, tree);
 
         //charge scripts
         cpr.instantiateProcedureCalls(tree, true);
@@ -451,7 +452,8 @@ public :
         combo::combo_tree tree;
 
         stringstream ss(cmd);
-        ss >> tree;
+        // ss >> tree;
+        PetCombo::operator>>(ss, tree);
 
         //charge scripts
         cpr.instantiateProcedureCalls(tree, true);
@@ -501,7 +503,8 @@ public :
 
         combo::combo_tree tree;
         stringstream ss(cmd);
-        ss >> tree;
+        // ss >> tree;
+        PetCombo::operator>>(ss, tree);
 
         //charge scripts
         cpr.instantiateProcedureCalls(tree, true);

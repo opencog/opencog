@@ -63,8 +63,10 @@ public:
         stringstream tr_str(string("and_seq(beg stretch goto_obj(")
                             + obj_str + string("))"));
         stringstream tr_str_rand(string("and_seq(beg stretch goto_obj(random_object))"));
-        tr_str >> tr;
-        tr_str_rand >> tr_rand;
+        // tr_str >> tr;
+        // tr_str_rand >> tr_rand;
+        PetCombo::operator>>(tr_str, tr);
+        PetCombo::operator>>(tr_str_rand, tr_rand);
 
         //fill atomSpace with definite objects
         AtomSpace atomSpace;

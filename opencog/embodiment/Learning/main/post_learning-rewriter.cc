@@ -40,7 +40,8 @@ int main()
     combo_tree tr;
 
     while (cin.good()) {
-        cin >> tr;
+        // cin >> tr;
+        PetCombo::operator>>(cin, tr);
         if (!cin.good())
             break;
 

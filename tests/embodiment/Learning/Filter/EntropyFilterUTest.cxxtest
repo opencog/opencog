@@ -97,22 +97,26 @@ public:
         string dummy_action_action = string(DUMMY_ACTION) + string("_action");
         stringstream ss1("near(#1 #2)");
         combo_tree tr1;
-        ss1 >> tr1;
+        // ss1 >> tr1;
+        PetCombo::operator>>(ss1, tr1);
 
         string tr2_str = string("near(#1 ") + obj_str + string(")");
         combo_tree tr2;
         stringstream ss2(tr2_str);
-        ss2 >> tr2;
+        // ss2 >> tr2;
+        PetCombo::operator>>(ss2, tr2);
 
         string tr3_str = string("near(#2 owner)");
         combo_tree tr3;
         stringstream ss3(tr3_str);
-        ss3 >> tr3;
+        // ss3 >> tr3;
+        PetCombo::operator>>(ss3, tr3);
 
         string tr4_str = string("near(owner ") + obj_str + string(")");
         combo_tree tr4;
         stringstream ss4(tr4_str);
-        ss4 >> tr4;
+        // ss4 >> tr4;
+        PetCombo::operator>>(ss4, tr4);
 
         combo_tree tr5;
         tr5.set_head(get_instance(id::has_said));
@@ -129,7 +133,8 @@ public:
         string s7 = string("is_last_agent_action(owner ")
                     + dummy_action_action + string(")");
         stringstream ss7(s7);
-        ss7 >> tr7;
+        // ss7 >> tr7;
+        PetCombo::operator>>(ss7, tr7);
 
         //fill atomSpace with dummy_object and dummy_avatar definite object
         AtomSpace atomSpace;

@@ -78,7 +78,10 @@ int main(int argc, char** argv)
             cin.getline(tmp, 1024);
             continue;
         }
-        cin >> tr;
+        // Pick the correct operator>> explicitly, as otherwise, the
+        // compiler may not pick the one we want.
+        // cin >> tr;
+        PetCombo::operator>>(cin, tr);
         if (!cin.good())
             break;
         cout << "running " << tr << endl;

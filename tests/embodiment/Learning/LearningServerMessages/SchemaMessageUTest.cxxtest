@@ -51,7 +51,8 @@ public:
 
     SchemaMessageUTest() {
         std::stringstream ss(comboSchema);
-        ss >> schema;
+        // ss >> schema;
+        PetCombo::operator>>(ss, schema);
     }
 
     ~SchemaMessageUTest() {

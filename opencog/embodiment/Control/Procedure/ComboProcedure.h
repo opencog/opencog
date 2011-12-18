@@ -57,10 +57,10 @@ public:
 //  opencog::combo::combo_tree& getComboTree() { return _body; }
 };
 
-}
-
-std::istream& operator>>(std::istream&, Procedure::ComboProcedure&) throw (opencog::ComboException, std::bad_exception);
+std::istream& operator>>(std::istream&, Procedure::ComboProcedure&)
+     throw (opencog::ComboException, std::bad_exception);
 std::ostream& operator<<(std::ostream&, const Procedure::ComboProcedure&);
 
+}
 
-#endif /*COMBOPROCEDURE_H_*/
+#endif /* COMBOPROCEDURE_H_ */

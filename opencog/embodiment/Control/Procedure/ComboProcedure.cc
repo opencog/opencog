@@ -66,7 +66,8 @@ const combo::combo_tree& ComboProcedure::getComboTree() const
     return get_body();
 }
 
-std::istream& operator>>(std::istream& in, Procedure::ComboProcedure& proc) throw (ComboException, std::bad_exception)
+std::istream& operator>>(std::istream& in, Procedure::ComboProcedure& proc)
+    throw (ComboException, std::bad_exception)
 {
     using namespace std;
     using namespace combo;
@@ -133,7 +134,8 @@ std::istream& operator>>(std::istream& in, Procedure::ComboProcedure& proc) thro
 
     combo_tree tr;
     stringstream ss(body);
-    ss >> tr;
+    // ss >> tr;
+    PetCombo::operator>>(ss, tr);
 
     for (combo_tree::iterator it = tr.begin();it != tr.end();++it) {
         if (is_argument(*it)) {
