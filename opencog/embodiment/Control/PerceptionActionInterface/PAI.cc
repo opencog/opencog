@@ -1316,7 +1316,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
 
     // call the event responser
-    EventResponder::getInstance()->response(nameStr,actionInstanceNode,agentNode,targetNode, actionHandles);
+    EventResponder::getInstance()->response(nameStr,actionInstanceNode,agentNode,targetNode, actionHandles, tsValue);
 
     XMLString::release(&targetName);
 

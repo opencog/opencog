@@ -60,6 +60,7 @@ $pdh/opencog/embodiment/feeling_updaters.scm \
 $pdh/opencog/embodiment/demand_updaters.scm \
 $pdh/opencog/embodiment/modulator_updaters.scm \
 $pdh/opencog/embodiment/unity_stimulus_rules.scm \
+$pdh/opencog/embodiment/unity_attitude_processor.scm \
 $pdh/opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorld.xsd \
 ./SPCTools.py \
 $pdh/opencog/embodiment/frames2relex.rules \

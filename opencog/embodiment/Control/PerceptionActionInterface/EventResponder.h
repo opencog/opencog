@@ -59,7 +59,7 @@ public:
     EventResponder(PAI& _pai , AtomSpace& _atomSpace);
     void destroy();
 
-    void response(std::string actionName, Handle instanceNode, Handle actorNode, Handle targetNode, std::vector<Handle> actionparams);
+    void response(std::string actionName, Handle instanceNode, Handle actorNode, Handle targetNode, std::vector<Handle> actionparams, unsigned long timestamp);
 
 private:
     static EventResponder* instance;

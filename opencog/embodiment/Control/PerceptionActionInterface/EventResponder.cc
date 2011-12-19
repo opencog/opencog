@@ -69,7 +69,7 @@ void EventResponder::destroy()
 
 // TODO: it now can only solve one single action, not exactly an event.
 // We expect we can response to an real event in future.
-void EventResponder::response(std::string actionName, Handle instanceNode, Handle actorNode, Handle targetNode,std::vector<Handle> actionparams)
+void EventResponder::response(std::string actionName, Handle instanceNode, Handle actorNode, Handle targetNode,std::vector<Handle> actionparams, unsigned long timestamp)
 {
     // process all the parameters in this action
     ActionParametersprocess(actionName,instanceNode,actorNode, targetNode,actionparams);
@@ -90,6 +90,21 @@ void EventResponder::response(std::string actionName, Handle instanceNode, Handl
 
     logger().debug("EventResponder::response scheme_expression = %s",scheme_expression.c_str());
     // Run the Procedure that update Demands and get the updated value
+    scheme_return_value = evaluator.eval(scheme_expression);
+
+    if ( evaluator.eval_error() ) {
+        logger().error( "EventResponder::response - Failed to execute scheme function '%s'",
+                         scheme_expression.c_str()
+                      );
+    }
+
+    // reuse the string stream.
+    expression.clear();
+    expression.str("");
+    expression << "(do_attitude_processing " << timestamp << " )";
+    scheme_expression = expression.str();
+
+    logger().debug("EventResponder::response process attitudes. scheme_expression = %s",scheme_expression.c_str());
     scheme_return_value = evaluator.eval(scheme_expression);
 
     if ( evaluator.eval_error() ) {
