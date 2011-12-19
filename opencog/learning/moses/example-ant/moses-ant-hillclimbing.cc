@@ -21,10 +21,11 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <set>
-#include <string>
 #include <algorithm>
 #include <iostream>
+#include <set>
+#include <string>
+#include <boost/lexical_cast.hpp>
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
@@ -36,9 +37,8 @@
 #include "../moses/moses.h"
 #include "../optimization/optimization.h"
 #include "../moses/scoring_functions.h"
-#include "../moses/ant_scoring.h"
+#include "ant_scoring.h"
 
-#include <boost/lexical_cast.hpp>
 
 using namespace opencog;
 using namespace moses;

@@ -27,7 +27,7 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include <opencog/learning/moses/moses/ant_scoring.h>
+#include "../../moses/example-ant/ant_scoring.h"
 
 using namespace opencog;
 using namespace hillclimbing;

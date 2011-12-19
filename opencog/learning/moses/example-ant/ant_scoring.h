@@ -30,7 +30,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
-#include "types.h"
+#include "../moses/types.h"
 
 using namespace ant_combo;
 using namespace opencog::moses;
