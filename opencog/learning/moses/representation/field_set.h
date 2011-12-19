@@ -36,19 +36,28 @@ namespace opencog {
 namespace moses {
 
  /**
-  * A field set creates a simple, optimally compact representation of a set of
-  * ontological, continuous, and discrete variables. This is made possible by
-  * assuming that the number of bits in the encoding of the smallest
-  * ontological variable is either a multiple of bits_per_packed_t, or is
-  * equal in size to or larger than the number of bits in the encoding of the
-  * largest continuious variable. Similarly the smallest continuous variable
-  * must be a multiple of bits_per_packed_t, or be larger (in bits) than the
-  * largest discrete variable.
+  * A field set creates a simple, optimally compact representation of
+  * a set of continuous, discrete and 'ontological' variables. 
+  * ('Ontological' values are sets of strings, and thus are essentially
+  * discrete variables, except that when unpacked, they have string
+  * values.)  
+  *
+  * The packing assumes that the number of bits in the encoding of the
+  * smallest discrete variable is either a multiple of bits_per_packed_t,
+  * or is equal in size to or larger than the number of bits in the
+  * encoding of the largest continuous variable. Similarly, the smallest 
+  * continuous variable must be a multiple of bits_per_packed_t, or be
+  * larger (in bits) than the largest discrete variable.
   *
   * Without such restrictions, the optimal packing problem is more complex (in
   * particular, it is NP-complete, IIRC).
+  *
+  * Currently, bits_per_packed_t will be either 32 or 64, depending on
+  * whther the system is 32 or 64-bit. Continuous variables may be float
+  * or double.
   */
-struct field_set {
+struct field_set
+{
     typedef unsigned int arity_t;
     typedef std::size_t size_t;
 
@@ -73,9 +82,10 @@ struct field_set {
      * encode the value.
      * 
      * There is a wiki page about the field_set in the opencog, you could find it on
-     * http://www.opencog.org/wiki/The_struct_of_field_set_in_MOSES
+     * http://www.opencog.org/wiki/Field_set_struct_in_MOSES
      */
-    struct field {
+    struct field
+    {
         field() { }
         field(arity_t w, size_t ma, size_t mi)
                 : width(w), major_offset(ma), minor_offset(mi) { }
@@ -84,7 +94,8 @@ struct field_set {
     };
     typedef std::vector<field>::const_iterator field_iterator;
 
-    struct disc_spec {
+    struct disc_spec
+    {
         disc_spec(arity_t a) : arity(a) { }
         arity_t arity;
         bool operator<(const disc_spec& rhs) const { //sort descending by arity
@@ -107,12 +118,16 @@ struct field_set {
      * quantities , you could find it on
      * http://code.google.com/p/moses/wiki/ModelingAtomSpaces
      */
-    struct contin_spec {
+    struct contin_spec
+    {
         contin_spec(contin_t m, contin_t ss, contin_t ex, arity_t d)
                 : mean(m), step_size(ss), expansion(ex), depth(d) { }
         contin_t mean, step_size, expansion;
         size_t depth;
-        bool operator<(const contin_spec& rhs) const { //sort descending by depth
+
+        bool operator<(const contin_spec& rhs) const
+        { 
+            //sort descending by depth
             return (depth > rhs.depth
                     || (depth == rhs.depth 
                         && (expansion > rhs.expansion
@@ -121,26 +136,29 @@ struct field_set {
                                     || (step_size == rhs.step_size
                                         && mean > rhs.mean))))));
         }
-        bool operator==(const contin_spec& rhs) const { //don't know why this is needed
+        bool operator==(const contin_spec& rhs) const //don't know why this is needed
+        {
             return (mean == rhs.mean &&
                     step_size == rhs.step_size &&
                     expansion == rhs.expansion &&
                     depth == rhs.depth);
         }
 
-        //half the smallest possible difference between two values represented
-        //according to the spec
-        contin_t epsilon() const {
+        // half the smallest possible difference between two values represented
+        // according to the spec
+        contin_t epsilon() const
+        {
             return step_size / contin_t(size_t(1) << depth);
         }
 
         static const disc_t Stop;  // 0
         static const disc_t Left;  // 1
         static const disc_t Right; // 2
-        // this method returns Left if lr is Right
+        // This method returns Left if lr is Right
         // and Right if lr is Left
         // otherwise is raises an assert
-        static disc_t switchLR(disc_t lr) {
+        static disc_t switchLR(disc_t lr)
+        {
             if(lr == Left)
                 return Right;
             else if(lr == Right)
@@ -151,14 +169,17 @@ struct field_set {
             }
         }
     };
-    struct contin_stepper {
+
+    struct contin_stepper
+    {
         contin_stepper(const contin_spec& c_)
                 : c(c_), value(c.mean),
                 _all_left(true), _all_right(true), _step_size(c.step_size) { }
         const contin_spec& c;
         contin_t value;
 
-        void left() {
+        void left()
+        {
             if (_all_left) {
                 value -= _step_size;
                 _step_size *= c.expansion;
@@ -172,7 +193,8 @@ struct field_set {
                 _step_size /= 2;
             }
         }
-        void right() {
+        void right()
+        {
             if (_all_right) {
                 value += _step_size;
                 _step_size *= c.expansion;
@@ -191,7 +213,9 @@ struct field_set {
         bool _all_right;
         contin_t _step_size;
     };
-    struct onto_spec {
+
+    struct onto_spec
+    {
         onto_spec(const onto_tree& t)
                 : tr(&t), depth(t.max_depth(t.begin())),
                 branching(next_power_of_two(1 + t.max_branching(t.begin()))) { }
@@ -220,20 +244,25 @@ struct field_set {
 
     //default ctor for an empty field set
     field_set() { }
+
     //copy ctor
     field_set(const field_set& x)
         : _fields(x._fields), _onto(x._onto), _contin(x._contin),
           _disc(x._disc), _nbool(x._nbool) {
         compute_starts();
     }
+
     //a single spec, n times
-    field_set(const spec& s, size_t n) : _nbool(0) {
+    field_set(const spec& s, size_t n) : _nbool(0)
+    {
         build_spec(s, n);
         compute_starts();
     }
-    //a range of specs
+
+    // A range of specs.
     template<typename It>
-    field_set(It from, It to) : _nbool(0) {
+    field_set(It from, It to) : _nbool(0)
+    {
         typedef std::map<spec, size_t> spec_map;
 
         // identical specs are merged and there are sorted (by the map)
@@ -250,7 +279,7 @@ struct field_set {
         compute_starts();                 //compute iterator positions
     }
 
-    //assignment and equality
+    // Assignment and equality
     field_set& operator=(const field_set&);
     bool operator==(const field_set&) const;
 
@@ -302,14 +331,15 @@ struct field_set {
     contin_t get_contin(const instance& inst, size_t idx) const;
     void set_contin(instance& inst, size_t idx, contin_t v) const;
 
-    //pack the data in [from,from+dof) according to our scheme, copy to out
+    // pack the data in [from,from+dof) according to our scheme, copy to out
     template<typename It, typename Out>
     Out pack(It from, Out out) const;
 
     std::string stream(const instance&) const;
     std::string stream_raw(const instance&) const;
 
-    int hamming_distance(const instance& inst1, const instance& inst2) const {
+    int hamming_distance(const instance& inst1, const instance& inst2) const
+    {
         int d = 0;
         for (const_disc_iterator it1 = begin_raw(inst1), it2 = begin_raw(inst2);
                 it1 != end_raw(inst1);++it1, ++it2)
@@ -377,9 +407,11 @@ struct field_set {
             raw_idx += it->depth;
         return raw_idx;
     }
-    // it is the exact reverse of contin_to_raw_idx, if the idx does
+
+    // It is the exact reverse of contin_to_raw_idx, if the idx does
     // not correspond to any contin then an OC_ASSERT is raised.
-    size_t raw_to_contin_idx(size_t idx) const {
+    size_t raw_to_contin_idx(size_t idx) const
+    {
         // @todo: compute at the start in _fields - could be faster..
         size_t begin_contin_idx = n_onto();
         size_t end_contin_idx = begin_contin_idx + n_contin();
@@ -392,7 +424,8 @@ struct field_set {
         OC_ASSERT(false, "Impossible case");
         return size_t(); // to make the compiler quiet
     }
-    size_t onto_to_raw_idx(size_t idx) const {
+    size_t onto_to_raw_idx(size_t idx) const
+    {
         // @todo: compute at the start in _fields - could be faster..
         size_t raw_idx = 0;
         for (vector<onto_spec>::const_iterator it = _onto.begin();
@@ -461,7 +494,8 @@ protected:
     // increment _nbool by n if ds has arity 2 (i.e. only needs one bit).
     void build_disc_spec(const disc_spec& ds, size_t n);
 
-    void compute_starts() {
+    void compute_starts()
+    {
         _contin_start = _fields.begin();
         foreach(const onto_spec& o, _onto)
             _contin_start += o.depth; //# of fields
@@ -472,10 +506,12 @@ protected:
 
     template<typename Self, typename Iterator>
     struct bit_iterator_base
-        : boost::random_access_iterator_helper<Self, bool> {
+        : boost::random_access_iterator_helper<Self, bool>
+    {
         typedef std::ptrdiff_t Distance;
         
-        Self& operator++() {
+        Self& operator++()
+        {
             _mask <<= 1;
             if (!_mask) {
                 _mask = packed_t(1);
@@ -483,7 +519,9 @@ protected:
             }
             return (*((Self*)this));
         }
-        Self& operator--() {
+
+        Self& operator--()
+        {
             static const packed_t reset = packed_t(1 << (bits_per_packed_t - 1));
             _mask >>= 1;
             if (!_mask) {
@@ -492,7 +530,9 @@ protected:
             }
             return (*((Self*)this));
         }
-        Self& operator+=(Distance n) {
+
+        Self& operator+=(Distance n)
+        {
             if (n < 0)
                 return (*this) -= (-n);
             _it += n / bits_per_packed_t;
@@ -500,7 +540,9 @@ protected:
                 ++(*this);
             return (*((Self*)this));
         }
-        Self& operator-=(Distance n) {
+
+        Self& operator-=(Distance n)
+        {
             if (n < 0)
                 return (*this) += (-n); 
             _it -= n / bits_per_packed_t;
@@ -508,17 +550,23 @@ protected:
                 --(*this);
             return (*((Self*)this));
         }
-        bool operator<(const Self& x) const {
+
+        bool operator<(const Self& x) const
+        {
             return (_it < x._it ? true : integer_log2(_mask) < integer_log2(x._mask));
         }
-        friend Distance operator-(const Self& x, const Self& y) {
+
+        friend Distance operator-(const Self& x, const Self& y)
+        {
             return (bits_per_packed_t*(x._it - y._it) +
                     integer_log2(x._mask) - integer_log2(y._mask));
         }
 
-        bool operator==(const Self& rhs) const {
+        bool operator==(const Self& rhs) const
+        {
             return (_it == rhs._it && _mask == rhs._mask);
         }
+
     protected:
         bit_iterator_base(Iterator it, arity_t offset)
             : _it(it), _mask(packed_t(1) << offset) { }
@@ -532,10 +580,12 @@ protected:
 
     template<typename Iterator, typename Value>
     struct iterator_base
-        : boost::random_access_iterator_helper<Iterator, Value> {
+        : boost::random_access_iterator_helper<Iterator, Value>
+    {
         typedef std::ptrdiff_t Distance;
 
-        struct reference {
+        struct reference
+        {
             reference(const Iterator* it, size_t idx) : _it(it), _idx(idx) { }
 
             operator Value() const {
@@ -612,7 +662,8 @@ public:
         : public bit_iterator_base<bit_iterator, instance::iterator> {
         friend struct field_set;
 
-        struct reference {
+        struct reference
+        {
             reference(instance::iterator it, packed_t mask)
                 : _it(it), _mask(mask) {}
 
@@ -694,7 +745,8 @@ public:
                                   instance::const_iterator > (it, offset) { }
     };
 
-    struct disc_iterator : public iterator_base<disc_iterator, disc_t> {
+    struct disc_iterator : public iterator_base<disc_iterator, disc_t>
+    {
         friend struct field_set;
         friend struct reference;
 
@@ -722,7 +774,8 @@ public:
     };
 
     struct const_disc_iterator
-        : public iterator_base<const_disc_iterator, disc_t> {
+        : public iterator_base<const_disc_iterator, disc_t>
+    {
         friend class field_set;
         disc_t operator*() const {
             return _fs->get_raw(*_inst, _idx);
@@ -744,7 +797,8 @@ public:
         const instance* _inst;
     };
 
-    struct contin_iterator : public iterator_base<contin_iterator, contin_t> {
+    struct contin_iterator : public iterator_base<contin_iterator, contin_t>
+    {
         friend struct field_set;
         friend struct reference;
 
@@ -762,9 +816,9 @@ public:
     };
 
 
-
     struct const_contin_iterator
-        : public iterator_base<const_contin_iterator, contin_t> {
+        : public iterator_base<const_contin_iterator, contin_t>
+    {
         friend class field_set;
         contin_t operator*() const {
             return _fs->get_contin(*_inst, _idx);
@@ -782,7 +836,8 @@ public:
     };
 
     struct const_onto_iterator
-        : public iterator_base<const_onto_iterator, onto_t> {
+        : public iterator_base<const_onto_iterator, onto_t>
+    {
         friend class field_set;
         const onto_t& operator*() {
             return _fs->get_onto(*_inst, _idx);
@@ -796,30 +851,40 @@ public:
         const instance* _inst;
     };
 
-    const_bit_iterator begin_bits(const instance& inst) const {
+    const_bit_iterator begin_bits(const instance& inst) const
+    {
         return (begin_bit_fields() == _fields.end() ? const_bit_iterator() :
                 const_bit_iterator(inst.begin() + begin_bit_fields()->major_offset,
                                    begin_bit_fields()->minor_offset));
     }
-    const_bit_iterator end_bits(const instance& inst) const {
+
+    const_bit_iterator end_bits(const instance& inst) const
+    {
         return (begin_bit_fields() == _fields.end() ? const_bit_iterator() :
                 ++const_bit_iterator(--inst.end(), _fields.back().minor_offset));
     }
-    bit_iterator begin_bits(instance& inst) const {
+
+    bit_iterator begin_bits(instance& inst) const
+    {
         return (begin_bit_fields() == _fields.end() ? bit_iterator() :
                 bit_iterator(inst.begin() + begin_bit_fields()->major_offset,
                              begin_bit_fields()->minor_offset));
     }
-    bit_iterator end_bits(instance& inst) const {
+
+    bit_iterator end_bits(instance& inst) const
+    {
         return (begin_bit_fields() == _fields.end() ? bit_iterator() :
                 ++bit_iterator(--inst.end(), _fields.back().minor_offset));
     }
 
-    const_disc_iterator begin_disc(const instance& inst) const {
+    const_disc_iterator begin_disc(const instance& inst) const
+    {
         return const_disc_iterator(*this, distance(_fields.begin(),
                                                    begin_disc_fields()), inst);
     }
-    const_disc_iterator end_disc(const instance& inst) const {
+
+    const_disc_iterator end_disc(const instance& inst) const
+    {
         return const_disc_iterator(*this, distance(_fields.begin(),
                                                    end_disc_fields()), inst);
     }
@@ -893,7 +958,7 @@ contin_t >::reference::do_set(contin_t x)
     _it->_fs->set_contin(*_it->_inst, _idx, x);
 }
 
-//pack the data in [from,from+dof) according to our scheme, copy to out
+// pack the data in [from,from+dof) according to our scheme, copy to out
 template<typename It, typename Out>
 Out field_set::pack(It from, Out out) const
 {
