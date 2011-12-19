@@ -34,9 +34,11 @@ namespace opencog { namespace moses {
 /**
  * maps disc_spec (resp. contin_spec) to actual disc_knob (resp. contin_knob)
  */
-struct knob_mapper {
-    //important: knobs are kept sorted in an order consistant with that of the
-    //field_set _fields that is constructed according to their corresponding specs
+struct knob_mapper
+{
+    // Important: knobs are kept sorted in an order consistant with
+    // that of the field_set _fields that is constructed according to
+    // their corresponding specs
     typedef std::multimap<field_set::disc_spec, disc_knob> disc_map;
     typedef disc_map::value_type disc_v;
     typedef disc_map::const_iterator disc_map_cit;

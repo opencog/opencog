@@ -1266,6 +1266,176 @@ The metapopulation is updated in iterations.
 \end_layout
 
 \begin_layout Subsection
+Knobs
+\end_layout
+
+\begin_layout Standard
+Knobs represent tunable parameters in a representation.
+ In the MOSES implementation, every knob is defined with respect to a particular
+ program tree; that is, ever knob has a specific, explicit location in a
+ specific, explicit 
+\family typewriter
+combo_tree
+\family default
+.
+ Knobs are defined in 
+\family typewriter
+representation/knobs.h
+\family default
+ and inherit from the base class 
+\family typewriter
+knob_base
+\family default
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+struct knob_base { 
+\end_layout
+
+\begin_layout Plain Layout
+
+	protected:
+\end_layout
+
+\begin_layout Plain Layout
+
+		combo_tree& _tr;
+\end_layout
+
+\begin_layout Plain Layout
+
+		combo_tree::iterator _loc; // location of knob in tree
+\end_layout
+
+\begin_layout Plain Layout
+
+}; 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Knobs may be continuous (
+\family typewriter
+contin_knob
+\family default
+) or discrete.
+ Discrete knobs have a fixed number of settings, determined at compile time:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+template<int Multiplicity>
+\end_layout
+
+\begin_layout Plain Layout
+
+struct discrete_knob : public knob_base {...}; 
+\end_layout
+
+\end_inset
+
+although some of the discrete knob settings may be disallowed at runtime,
+ effectively decreasing the total multiplicity.
+\end_layout
+
+\begin_layout Standard
+In general, knobs may be 
+\begin_inset Quotes eld
+\end_inset
+
+present
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+absent
+\begin_inset Quotes erd
+\end_inset
+
+.
+ XXX The semantics of this is unclear.
+ What does this mean? Knobs also have 
+\begin_inset Quotes eld
+\end_inset
+
+default
+\begin_inset Quotes erd
+\end_inset
+
+ settings, but the meaning of this setting is also unclear, as the code
+ does wonky things with this...
+ XXX TODO fix this.
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+logical_subtree_knob
+\family default
+ is suitable for propositional formulae; it has three possible settings:
+ 
+\emph on
+present
+\emph default
+, 
+\emph on
+absent
+\emph default
+, or 
+\emph on
+negated
+\emph default
+.
+ In 
+\family typewriter
+simple_action_subtree_knob
+\family default
+ knobs, a subexpression can be just 
+\emph on
+present
+\emph default
+ or 
+\emph on
+absent
+\emph default
+.
+ In action knobs, a node can have different settings, corresponding to atomic
+ or compound actions, sampled as 
+\begin_inset Quotes eld
+\end_inset
+
+perms
+\begin_inset Quotes erd
+\end_inset
+
+ in the method 
+\family typewriter
+build_knobs::sample_action_perms
+\family default
+.
+ XXX more explanation please ...
+\end_layout
+
+\begin_layout Subsection
 Demes and Optimization
 \end_layout
 
@@ -1423,127 +1593,6 @@ er/real values (relative to the exemplar) enable abstract and clean optimization
 \end_layout
 
 \begin_layout Subsection
-Knobs
-\end_layout
-
-\begin_layout Standard
-Knobs represent tunable parameters in a representation.
- In the MOSES implementation, every knob is defined with respect to a particular
- program tree; that is, ever knob has a specific, explicit location in a
- specific, explicit 
-\family typewriter
-combo_tree
-\family default
-.
- Knobs are defined in 
-\family typewriter
-representation/knobs.h
-\family default
- and inherit from the base class 
-\family typewriter
-knob_base
-\family default
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-struct knob_base { 
-\end_layout
-
-\begin_layout Plain Layout
-
-	protected:
-\end_layout
-
-\begin_layout Plain Layout
-
-		combo_tree& _tr;
-\end_layout
-
-\begin_layout Plain Layout
-
-		combo_tree::iterator _loc; // location of knob in tree
-\end_layout
-
-\begin_layout Plain Layout
-
-}; 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Knobs may be continuous (
-\family typewriter
-contin_knob
-\family default
-) or discrete.
- Discrete knobs have a fixed number of settings, determined at compile time:
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-template<int Multiplicity>
-\end_layout
-
-\begin_layout Plain Layout
-
-struct discrete_knob : public knob_base {...}; 
-\end_layout
-
-\end_inset
-
-although some of the discrete knob settings may be disallowed at runtime,
- effectively decreasing the total multiplicity.
-\end_layout
-
-\begin_layout Standard
-In general, knobs may be 
-\begin_inset Quotes eld
-\end_inset
-
-present
-\begin_inset Quotes erd
-\end_inset
-
- or 
-\begin_inset Quotes eld
-\end_inset
-
-absent
-\begin_inset Quotes erd
-\end_inset
-
-.
- XXX The semantics of this is unclear.
- What does this mean? Knobs also have 
-\begin_inset Quotes eld
-\end_inset
-
-default
-\begin_inset Quotes erd
-\end_inset
-
- settings, but the meaning of this setting is also unclear, as the code
- does wonky things with this...
- XXX TODO fix this.
-\end_layout
-
-\begin_layout Subsection
 Representation
 \end_layout
 
@@ -1617,24 +1666,12 @@ Representation Building
 \end_layout
 
 \begin_layout Standard
-Representation building is one of the key aspects of the MOSES approach.
- It is implemented separately for different problem domains (propositional
- formulae, action, etc).
- Support for several problem domains is given in the file 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|moses/build_knobs.h/cc|
-\end_layout
-
-\end_inset
-
-.
- Representation building starts with an exemplar and add to it new nodes
+The creation of representations from exemplars, termed '
+\emph on
+representation building
+\emph default
+', is one of the key ideas of the MOSES algorithm.
+ Representation building starts with an exemplar and adds to it new nodes
  and corresponding knobs (see 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -1644,231 +1681,20 @@ key "6"
 
 ).
  Knobs can have different settings.
- If all knobs are set to 0, then we the original exemplar is obtained.
-\end_layout
-
-\begin_layout Standard
-There are several types of knobs, described in 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|moses/knobs.h|
-\end_layout
-
-\end_inset
-
-.
- Some of them are suitable for propositional formulae (so some subexpression
- can be 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-em
-\end_layout
-
-\end_inset
-
- present
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-, 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-em
-\end_layout
-
-\end_inset
-
- absent
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-, or 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-em
-\end_layout
-
-\end_inset
-
- negated
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-.
- In simple knobs, a subexpression can be just 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-em
-\end_layout
-
-\end_inset
-
- present
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
- or 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-{
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-em
-\end_layout
-
-\end_inset
-
- absent
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-.
- In action knobs, a node can have different settings, corresponding to atomic
- or compound actions, sampled as 
-\begin_inset Quotes eld
-\end_inset
-
-perms
-\begin_inset Quotes erd
-\end_inset
-
- in the method 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|build_knobs::sample_action_perms|
-\end_layout
-
-\end_inset
-
+ If all knobs are set to 0, then the original exemplar is obtained.
+ The code provides support for several different problem domains, including
+ propositional formulae and actions.
+ These are given in the file 
+\family typewriter
+representation/build_knobs.h
+\family default
 .
 \end_layout
 
 \begin_layout Standard
 The key method is 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 

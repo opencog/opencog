@@ -40,10 +40,11 @@ namespace opencog { namespace moses {
 using namespace combo;
 using boost::ptr_vector;
 
-//need to call a generator method... (dispatched based on type
+// need to call a generator method... (dispatched based on type
 
 // build knobs on a reduced combo tree
-struct build_knobs : boost::noncopyable {
+struct build_knobs : boost::noncopyable
+{
     // used to be ss = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions
     build_knobs(RandGen& rng, combo_tree& exemplar,

@@ -55,6 +55,11 @@ namespace moses {
   * Currently, bits_per_packed_t will be either 32 or 64, depending on
   * whther the system is 32 or 64-bit. Continuous variables may be float
   * or double.
+  *
+  * XXX The above comments can't possibly be right: discrete variables
+  * are not being 'packed' in multiples of 32 or 64, but in something
+  * much much smaller.  Figure out what this code actually does, and change
+  * the above to actually explain it.
   */
 struct field_set
 {
