@@ -98,9 +98,10 @@ struct metapop_moses_results_parameters {
                                      bool _output_bscore,
                                      bool _output_eval_number,
                                      bool _output_with_labels,
+                                     const string& _opt_algo,
                                      bool _enable_cache,
                                      const vector<string>& _labels,
-                                     string _output_file,
+                                     const string& _output_file,
                                      const jobs_t& _jobs,
                                      bool _only_local,
                                      bool _hc_terminate_if_improvement) : 
@@ -108,6 +109,7 @@ struct metapop_moses_results_parameters {
         output_complexity(_output_complexity),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
+        opt_algo(_opt_algo),
         enable_cache(_enable_cache), labels(_labels),
         output_file(_output_file),
         jobs(_jobs), only_local(_only_local),
@@ -118,6 +120,7 @@ struct metapop_moses_results_parameters {
     bool output_bscore;
     bool output_eval_number;
     bool output_with_labels;
+    string opt_algo;
     bool enable_cache;
     const vector<string>& labels;
     string output_file;
@@ -195,27 +198,26 @@ void metapop_moses_results(RandGen& rng,
                            const reduct::rule& si_kb,
                            const Score& sc,
                            const BScore& bsc,
-                           const string& opt_algo,
                            const optim_parameters& opt_params,
                            const metapop_parameters& meta_params,
                            const moses_parameters& moses_params,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {    
-    if(opt_algo == un) { // univariate
+    if(pa.opt_algo == un) { // univariate
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               univariate_optimization(rng, opt_params),
                               meta_params, moses_params, vm, pa);
-    } else if(opt_algo == sa) { // simulation annealing
+    } else if(pa.opt_algo == sa) { // simulation annealing
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               simulated_annealing(rng, opt_params),
                               meta_params, moses_params, vm, pa);
-    } else if(opt_algo == hc) { // hillclimbing
+    } else if(pa.opt_algo == hc) { // hillclimbing
         hc_parameters hc_params(pa.hc_terminate_if_improvement);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               iterative_hillclimbing(rng, opt_params, hc_params),
                               meta_params, moses_params, vm, pa);
     } else {
-        std::cerr << "Unknown optimization algo " << opt_algo 
+        std::cerr << "Unknown optimization algo " << pa.opt_algo 
                   << ". Supported algorithms are un (for univariate),"
                   << " sa (for simulation annealing) and hc (for hillclimbing)"
                   << std::endl;
@@ -233,7 +235,6 @@ void metapop_moses_results(RandGen& rng,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            const BScore& bsc,
-                           const string& opt_algo,
                            optim_parameters opt_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
@@ -265,7 +266,7 @@ void metapop_moses_results(RandGen& rng,
         prr_cache_threaded<Score> score_cache(initial_cache_size, score);
         ScoreACache score_acache(score_cache);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb,
-                              score_acache, BSCORE, opt_algo,
+                              score_acache, BSCORE,
                               opt_params, meta_params, moses_params, vm, pa);
         // log the number of cache failures
         if(pa.only_local) { // do not print if using distributed moses
@@ -274,7 +275,7 @@ void metapop_moses_results(RandGen& rng,
         }            
     } else {
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, bb_score, bsc,
-                              opt_algo, opt_params, meta_params, moses_params,
+                              opt_params, meta_params, moses_params,
                               vm, pa);
     }
 }

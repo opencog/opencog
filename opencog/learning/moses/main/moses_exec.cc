@@ -488,7 +488,7 @@ int moses_exec(int argc, char** argv) {
     metapop_moses_results_parameters mmr_pa(result_count,
                                             output_score, output_complexity,
                                             output_bscore, output_eval_number,
-                                            output_with_labels,
+                                            output_with_labels, opt_algo,
                                             enable_cache, labels,
                                             output_file, jobs, only_local,
                                             hc_terminate_if_improvement);
@@ -527,7 +527,7 @@ int moses_exec(int argc, char** argv) {
             metapop_moses_results(rng, exemplars, tt,
                                   logical_reduction(reduct_candidate_effort),
                                   logical_reduction(reduct_knob_building_effort),
-                                  bscore, opt_algo,
+                                  bscore,
                                   opt_params, meta_params, moses_params,
                                   vm, mmr_pa);
         }
@@ -538,7 +538,7 @@ int moses_exec(int argc, char** argv) {
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduction(ignore_ops, rng),
                                       contin_reduction(ignore_ops, rng),
-                                      bscore, opt_algo,
+                                      bscore,
                                       opt_params, meta_params, moses_params,
                                       vm, mmr_pa);
             } else {
@@ -550,7 +550,7 @@ int moses_exec(int argc, char** argv) {
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduction(ignore_ops, rng),
                                       contin_reduction(ignore_ops, rng),
-                                      bscore, opt_algo,
+                                      bscore,
                                       opt_params, meta_params, moses_params,
                                       vm, mmr_pa);                
             }
@@ -573,7 +573,7 @@ int moses_exec(int argc, char** argv) {
             metapop_moses_results(rng, exemplars, tt,
                                   logical_reduction(reduct_candidate_effort),
                                   logical_reduction(reduct_knob_building_effort),
-                                  bscore, opt_algo,
+                                  bscore,
                                   opt_params, meta_params, moses_params,
                                   vm, mmr_pa);                
         }
@@ -591,7 +591,7 @@ int moses_exec(int argc, char** argv) {
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
-                                  bscore, opt_algo,
+                                  bscore,
                                   opt_params, meta_params, moses_params,
                                   vm, mmr_pa);
         } else {
@@ -611,7 +611,7 @@ int moses_exec(int argc, char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),
-                              bscore, opt_algo,
+                              bscore,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     } else if(problem == dj) { // disjunction
@@ -629,7 +629,7 @@ int moses_exec(int argc, char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),
-                              bscore, opt_algo,
+                              bscore,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     } else if(problem == mux) { // multiplex
@@ -647,7 +647,7 @@ int moses_exec(int argc, char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),
-                              bscore, opt_algo,
+                              bscore,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     } else if(problem == sr) { // simple regression of f(x)_o = sum_{i={1,o}} x^i
@@ -668,7 +668,7 @@ int moses_exec(int argc, char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),
-                              bscore, opt_algo,
+                              bscore,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     //////////////////
@@ -693,7 +693,7 @@ int moses_exec(int argc, char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               ann_reduction(),
                               ann_reduction(),
-                              bscore, opt_algo,
+                              bscore,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     } else if(problem == ann_cp) { // regression based on combo program using ann
@@ -718,7 +718,7 @@ int moses_exec(int argc, char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),
-                              bscore, opt_algo,
+                              bscore,
                               opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     }
