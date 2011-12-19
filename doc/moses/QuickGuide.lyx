@@ -505,7 +505,21 @@ knob
 \end_inset
 
 .
- A discrete knob with an multiplicity of 4 might be used to transform the
+ Discrete knobs have a '
+\emph on
+multiplicity
+\emph default
+': the number of different possible settings they may have.
+ Continuous knobs have an effectively infinite multiplicity.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+A discrete knob with a multiplicity of 4 might be used to transform the
  boolean input 
 \begin_inset Formula $\#2$
 \end_inset
@@ -1414,16 +1428,119 @@ Knobs
 
 \begin_layout Standard
 Knobs represent tunable parameters in a representation.
-\end_layout
-
-\begin_layout Standard
-are defined in 
+ In the MOSES implementation, every knob is defined with respect to a particular
+ program tree; that is, ever knob has a specific, explicit location in a
+ specific, explicit 
 \family typewriter
-representation/knobs.h ...
+combo_tree
+\family default
+.
+ Knobs are defined in 
+\family typewriter
+representation/knobs.h
+\family default
+ and inherit from the base class 
+\family typewriter
+knob_base
+\family default
+:
 \end_layout
 
 \begin_layout Standard
--- are always relative to a given tree.
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+struct knob_base { 
+\end_layout
+
+\begin_layout Plain Layout
+
+	protected:
+\end_layout
+
+\begin_layout Plain Layout
+
+		combo_tree& _tr;
+\end_layout
+
+\begin_layout Plain Layout
+
+		combo_tree::iterator _loc; // location of knob in tree
+\end_layout
+
+\begin_layout Plain Layout
+
+}; 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Knobs may be continuous (
+\family typewriter
+contin_knob
+\family default
+) or discrete.
+ Discrete knobs have a fixed number of settings, determined at compile time:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+template<int Multiplicity>
+\end_layout
+
+\begin_layout Plain Layout
+
+struct discrete_knob : public knob_base {...}; 
+\end_layout
+
+\end_inset
+
+although some of the discrete knob settings may be disallowed at runtime,
+ effectively decreasing the total multiplicity.
+\end_layout
+
+\begin_layout Standard
+In general, knobs may be 
+\begin_inset Quotes eld
+\end_inset
+
+present
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+absent
+\begin_inset Quotes erd
+\end_inset
+
+.
+ XXX The semantics of this is unclear.
+ What does this mean? Knobs also have 
+\begin_inset Quotes eld
+\end_inset
+
+default
+\begin_inset Quotes erd
+\end_inset
+
+ settings, but the meaning of this setting is also unclear, as the code
+ does wonky things with this...
+ XXX TODO fix this.
 \end_layout
 
 \begin_layout Subsection

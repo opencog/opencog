@@ -135,10 +135,13 @@ protected:
     field_set::contin_spec _spec;
 };
 
-// A discrete_knob is a knob with a finite number of different,
-// discrete settings. The total number of possible settings is
-// called the "Multiplicity" of the knob.  Zero is always a 
-// valid knob setting.
+//* A discrete_knob is a knob with a finite number of different,
+// discrete settings. The total number of possible settings is called
+// the "Multiplicity" of the knob.  Zero is always a valid knob setting.
+//
+// Some knob settings can be disalowed at runtime, and thus, the
+// effective multiplicity can be less than that declared at compile-time.
+//
 template<int Multiplicity>
 struct discrete_knob : public disc_knob_base
 {
@@ -165,8 +168,13 @@ struct discrete_knob : public disc_knob_base
 protected:
     std::bitset<Multiplicity> _disallowed;
     int _default;
-    int _current;
+    int _current;   // The current knob setting.
 
+    // XXX Huh?? what does this do?? Why does shifting matter, 
+    // if the only thing done is to count the number of bits set ?? 
+    // WTF ??  I think the shift is n the  wrong direction, yeah?
+    // If the goal is to skip over index values that are disallowed, then
+    // the shift is definitely in the wrong direction!! FIXME.
     int map_idx(int idx) const {
         if (idx == _default)
             idx = 0;
@@ -176,7 +184,23 @@ protected:
     }
 };
 
-// note - children aren't cannonized when parents are called
+// A unary function knob: this knob negates (or not) a boolean value
+// underneath it. Typically, the boolean value is a subtree underneath
+// this knob.
+//
+// XXX what is the difference between "present" and "absent" ??? A knob
+// that is "absent" from a logical "or" is the same as "present and false".
+// while one that is absent from a logical "and" is the same as "present and true"
+// So I think this is a bit confusing ...  I think that a better
+// implementation might have four settings: "invert", "identity",
+// "always true" and "alwys false".  So, overall, this is confusing
+// without some sort of additional justification.
+//
+// XXX Also -- I think I want to rename this to "logical unary knob",
+// or something like that, as it is a unary logical function ... err...
+// well, I guess all combo opers are unary, due to Currying. 
+//
+// note - children aren't cannonized when parents are called (??? huh ???)
 struct logical_subtree_knob : public discrete_knob<3>
 {
     static const int absent = 0;
@@ -187,14 +211,14 @@ struct logical_subtree_knob : public discrete_knob<3>
     // copy lsk on tr at position tgt
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                          const logical_subtree_knob& lsk)
-        : discrete_knob<3>(tr) {
-        // {
-        //     logger().debug("lsk = %s", lsk.toStr().c_str());
-        //     stringstream ss;
-        //     ss << "*tgt = " << *tgt;
-        //     logger().debug(ss.str());
-        // }
-        if(lsk.in_exemplar())
+        : discrete_knob<3>(tr)
+    {
+        // logger().debug("lsk = %s", lsk.toStr().c_str());
+        // stringstream ss;
+        // ss << "*tgt = " << *tgt;
+        // logger().debug(ss.str());
+
+        if (lsk.in_exemplar())
             _loc = _tr.child(tgt, lsk._tr.sibling_index(lsk._loc));
         else
             _loc = _tr.append_child(tgt, lsk._loc);
@@ -205,9 +229,11 @@ struct logical_subtree_knob : public discrete_knob<3>
 
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                          combo_tree::iterator subtree)
-        : discrete_knob<3>(tr) {
+        : discrete_knob<3>(tr)
+    {
         typedef combo_tree::sibling_iterator sib_it;
         typedef combo_tree::pre_order_iterator pre_it;
+
         //compute the negation of the subtree
         combo_tree negated_subtree(subtree);
         negated_subtree.insert_above(negated_subtree.begin(), id::logical_not);
@@ -238,11 +264,12 @@ struct logical_subtree_knob : public discrete_knob<3>
             _tr.erase(_loc);
     }
 
-    void turn(int idx) {
+    void turn(int idx) 
+    {
         idx = map_idx(idx);
-        OC_ASSERT((idx < 3), "Index greater than 3.");
+        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 3.");
 
-        if (idx == _current) //already set, nothing to
+        if (idx == _current) // already set, nothing to
             return;
 
         switch (idx) {
@@ -272,7 +299,8 @@ struct logical_subtree_knob : public discrete_knob<3>
         return field_set::disc_spec(multiplicity());
     }
  
-    std::string toStr() const {
+    std::string toStr() const
+    {
         std::stringstream ss;
         ss << "[";
         for(int i = 0; i < multiplicity(); ++i)
@@ -291,12 +319,12 @@ private:
                   "if _loc is null_vertex then it must have only one child");
         std::stringstream ss;
         combo_tree::iterator it;
-        if(*_loc == id::null_vertex)
+        if (*_loc == id::null_vertex)
             it = _loc.begin();
         else it = _loc;
-        if(is_argument(*it)) {
+        if (is_argument(*it)) {
             argument arg = get_argument(*it);
-            if(negated) arg.negate();
+            if (negated) arg.negate();
             ostream_abbreviate_literal(ss, arg);
         } else {
             ss << (negated? "!" : "") << *it;
@@ -309,7 +337,7 @@ private:
     std::string posStr(int pos, bool tag_current = false) const
     {
         std::stringstream ss;
-        switch(pos) {
+        switch (pos) {
         case absent:
             ss << "nil";
             break;
@@ -319,6 +347,8 @@ private:
         case negated:
             ss << locStr(true);
             break;
+        default:
+            ss << "INVALID SETTING";
         }
         return pos == _current && tag_current?
             std::string("(") + ss.str() + ")" : ss.str();
@@ -414,7 +444,8 @@ struct simple_action_subtree_knob : public discrete_knob<2>
 // _tr.erase(_loc);
     }
 
-    void turn(int idx) {
+    void turn(int idx)
+    {
         idx = map_idx(idx);
         OC_ASSERT((idx < 2), "Index greater than 2.");
 
