@@ -464,7 +464,7 @@ exemplar
 \emph on
 parameter
 \emph default
-, and is colloquially refered to as a 
+, and is colloquially referred to as a 
 \emph on
 knob
 \emph default
@@ -505,8 +505,8 @@ knob
 \end_inset
 
 .
- A discrete knob with an arity of 1 might be used to transform the boolean
- input 
+ A discrete knob with an multiplicity of 4 might be used to transform the
+ boolean input 
 \begin_inset Formula $\#2$
 \end_inset
 
@@ -521,8 +521,8 @@ knob
 \end_inset
 
 .
- A discrete knob of arity 2 might be used to replace the less-than comparison
- with 
+ A discrete knob of multiplicity 6 might be used to replace the less-than
+ comparison with 
 \begin_inset Formula $\leq,>,\geq,=$
 \end_inset
 
@@ -530,8 +530,9 @@ or
 \begin_inset Formula $\ne$
 \end_inset
 
-, and so on.
- Another discrete knob of arity 2 might replace the '
+(thus making six possible comparison operators, for a multiplicity of 6
+ for this knob).
+ Another discrete knob of multiplicity 3 might replace the '
 \emph on
 or
 \emph default
@@ -539,17 +540,31 @@ or
 \begin_inset Formula $\vee$
 \end_inset
 
- with 
-\begin_inset Formula $\wedge,\otimes$
+ with the '
+\emph on
+and
+\emph default
+' symbol 
+\begin_inset Formula $\wedge$
 \end_inset
 
-, 
+ or the '
 \emph on
-etc.
+exclusive-or
+\emph default
+' symbol 
+\begin_inset Formula $\otimes$
+\end_inset
+
+.
+
+\emph on
  
 \emph default
 Knobs do not have to be defined as running over all possible values; it
- is usually convenient to keep knobs on a fairly restricted range.
+ is usually convenient to keep multiplicity fairly low.
+ This will usually help avoid excess redundancy in program space, although
+ resulting programs may be more verbose.
 \end_layout
 
 \begin_layout Description
@@ -1178,7 +1193,7 @@ struct metapopulation :
 
 \begin_layout Plain Layout
 
-	public bscoredcombotreeset {...}; 
+	public bscored_combo_tree_set {...}; 
 \end_layout
 
 \end_inset
@@ -1206,7 +1221,7 @@ status open
 
 \begin_layout Plain Layout
 
-for (constiterator it=begin(); it!=end(); ++it) 
+for (const iterator it=begin(); it!=end(); ++it) 
 \end_layout
 
 \begin_layout Plain Layout
@@ -1391,6 +1406,24 @@ er/real values (relative to the exemplar) enable abstract and clean optimization
  steps, uniform for different domains.
  This representation is based on representation building relative to a given
  exemplar.
+\end_layout
+
+\begin_layout Subsection
+Knobs
+\end_layout
+
+\begin_layout Standard
+Knobs represent tunable parameters in a representation.
+\end_layout
+
+\begin_layout Standard
+are defined in 
+\family typewriter
+representation/knobs.h ...
+\end_layout
+
+\begin_layout Standard
+-- are always relative to a given tree.
 \end_layout
 
 \begin_layout Subsection

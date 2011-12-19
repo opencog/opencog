@@ -298,7 +298,7 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 
     vector<int> to_disallow;
 
-    foreach(int idx, from_one(kb.arity() - 1)) {
+    foreach(int idx, from_one(kb.multiplicity() - 1)) {
         kb.turn(idx);
 
         /// @todo could use kb.complexity_bound() to be faster, but
@@ -321,7 +321,7 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
     kb.turn(0);
 
     // if some settings aren't disallowed, make a knob
-    if (int(to_disallow.size()) < kb.arity() - 1) {
+    if (int(to_disallow.size()) < kb.multiplicity() - 1) {
         foreach (int idx, to_disallow)
             kb.disallow(idx);
         return true;

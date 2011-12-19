@@ -42,13 +42,13 @@ namespace opencog { namespace moses {
 
 // A knob represents a single dimension of variation relative to an exemplar
 // program tree. This may be discrete or continuous. In the discrete case, the
-// various settings are accessible via turn(0),turn(1),...turn(arity()-1). In
+// various settings are accessible via turn(0),turn(1),...turn(multiplicity()-1). In
 // the continuous case, turn(contin_t) is used.
 //
 //  For example, given the program tree fragment or(0<(*(#1,0.5)),#2), a
 // continuous knob might be used to vary the numerical constant. So setting
 // this knob to 0.7 would transform the tree fragment to
-// or(0<(*(#1,0.7)),#2). A discrete knob with arity()==3 might be used to
+// or(0<(*(#1,0.7)),#2). A discrete knob with multiplicity()==3 might be used to
 // transform the boolean input #2. So setting this knob to 1 might transform
 // the tree to or(0<(*(#1,0.7)),not(#2)), and setting it to 2 might remove it
 // from the tree (while setting it to 0 would return to the original tree).
@@ -92,7 +92,7 @@ struct disc_knob_base : public knob_base
     virtual field_set::disc_spec spec() const = 0;
 
     // Arity based on whatever knobs are currently allowed.
-    virtual int arity() const = 0;
+    virtual int multiplicity() const = 0;
 
     // Expected complexity based on whatever the knob is currently
     // turned to.
@@ -135,12 +135,16 @@ protected:
     field_set::contin_spec _spec;
 };
 
-template<int MaxArity>
-struct knob_with_arity : public disc_knob_base
+// A discrete_knob is a knob with a finite number of different,
+// discrete settings. The total number of possible settings is
+// called the "Multiplicity" of the knob.  Zero is always a 
+// valid knob setting.
+template<int Multiplicity>
+struct discrete_knob : public disc_knob_base
 {
-    knob_with_arity(combo_tree& tr, combo_tree::iterator tgt)
+    discrete_knob(combo_tree& tr, combo_tree::iterator tgt)
         : disc_knob_base(tr, tgt), _default(0), _current(0) {}
-    knob_with_arity(combo_tree& tr)
+    discrete_knob(combo_tree& tr)
         : disc_knob_base(tr), _default(0), _current(0) {}
 
     void disallow(int idx) {
@@ -150,8 +154,8 @@ struct knob_with_arity : public disc_knob_base
         _disallowed[idx] = false;
     }
 
-    int arity() const {
-        return MaxArity -_disallowed.count();
+    int multiplicity() const {
+        return Multiplicity -_disallowed.count();
     }
 
     bool in_exemplar() const {
@@ -159,7 +163,7 @@ struct knob_with_arity : public disc_knob_base
     }
 
 protected:
-    std::bitset<MaxArity> _disallowed;
+    std::bitset<Multiplicity> _disallowed;
     int _default;
     int _current;
 
@@ -168,12 +172,12 @@ protected:
             idx = 0;
         else if (idx == 0)
             idx = _default;
-        return idx + (_disallowed << (MaxArity - idx)).count();
+        return idx + (_disallowed << (Multiplicity - idx)).count();
     }
 };
 
-//note - children aren't cannonized when parents are called
-struct logical_subtree_knob : public knob_with_arity<3>
+// note - children aren't cannonized when parents are called
+struct logical_subtree_knob : public discrete_knob<3>
 {
     static const int absent = 0;
     static const int present = 1;
@@ -183,7 +187,7 @@ struct logical_subtree_knob : public knob_with_arity<3>
     // copy lsk on tr at position tgt
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                          const logical_subtree_knob& lsk)
-        : knob_with_arity<3>(tr) {
+        : discrete_knob<3>(tr) {
         // {
         //     logger().debug("lsk = %s", lsk.toStr().c_str());
         //     stringstream ss;
@@ -201,7 +205,7 @@ struct logical_subtree_knob : public knob_with_arity<3>
 
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                          combo_tree::iterator subtree)
-        : knob_with_arity<3>(tr) {
+        : discrete_knob<3>(tr) {
         typedef combo_tree::sibling_iterator sib_it;
         typedef combo_tree::pre_order_iterator pre_it;
         //compute the negation of the subtree
@@ -265,14 +269,14 @@ struct logical_subtree_knob : public knob_with_arity<3>
     }
 
     field_set::disc_spec spec() const {
-        return field_set::disc_spec(arity());
+        return field_set::disc_spec(multiplicity());
     }
  
     std::string toStr() const {
         std::stringstream ss;
         ss << "[";
-        for(int i = 0; i < arity(); ++i)
-            ss << posStr(map_idx(i)) << (i < arity()-1? " " : "");
+        for(int i = 0; i < multiplicity(); ++i)
+            ss << posStr(map_idx(i)) << (i < multiplicity()-1? " " : "");
         ss << "]";
         return ss.str();
     }
@@ -324,13 +328,13 @@ private:
 #define MAX_PERM_ACTIONS 128
 
 // Note - children aren't cannonized when parents are called.
-struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
+struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS> {
 
     typedef combo_tree::pre_order_iterator pre_it;
 
     action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                         vector<combo_tree>& perms)
-        : knob_with_arity<MAX_PERM_ACTIONS>(tr), _perms(perms) {
+        : discrete_knob<MAX_PERM_ACTIONS>(tr), _perms(perms) {
 
         OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
 
@@ -374,7 +378,7 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
 
     field_set::disc_spec spec() const {
-        return field_set::disc_spec(arity());
+        return field_set::disc_spec(multiplicity());
     }
 
     std::string toStr() const {
@@ -387,13 +391,14 @@ protected:
 };
 
 
-struct simple_action_subtree_knob : public knob_with_arity<2> {
+struct simple_action_subtree_knob : public discrete_knob<2>
+{
     static const int present = 0;
     static const int absent = 1;
 
     simple_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt)
-        : knob_with_arity<2>(tr, tgt) {
-
+        : discrete_knob<2>(tr, tgt)
+   {
         _current = present;
         _default = present;
     }
@@ -429,7 +434,7 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
     }
 
     field_set::disc_spec spec() const {
-        return field_set::disc_spec(arity());
+        return field_set::disc_spec(multiplicity());
     }
 
     std::string toStr() const {

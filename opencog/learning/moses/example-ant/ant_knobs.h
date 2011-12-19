@@ -33,15 +33,15 @@ using namespace ant_combo;
 
 // Knob specifically designed for the Sante Fe Trail problem.
 // Note - children aren't cannonized when parents are called.
-struct ant_action_subtree_knob : public knob_with_arity<4> {
+struct ant_action_subtree_knob : public discrete_knob<4> {
     static const int none    = 0;
     static const int forward = 1;
-    static const int rleft   = 2;
-    static const int rright  = 3;
+    static const int rleft   = 2;   // rotate left
+    static const int rright  = 3;   // rotate right
 
     ant_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                             combo_tree::iterator subtree)
-        : knob_with_arity<4>(tr) {
+        : discrete_knob<4>(tr) {
 
         _default = none;
         _current = _default;
@@ -97,7 +97,7 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
     }
 
     field_set::disc_spec spec() const {
-        return field_set::disc_spec(arity());
+        return field_set::disc_spec(multiplicity());
     }
 
     std::string toStr() const {
