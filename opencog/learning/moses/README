@@ -19,3 +19,5 @@ http://wiki.opencog.org/w/Building_OpenCog.
 PROJECT DIRECTORY
 -----------------
 
+example-ant: Santa Fe Trail ant example
+example-progs: other example programs.
