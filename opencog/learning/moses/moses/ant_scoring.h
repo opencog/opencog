@@ -33,7 +33,7 @@
 #include "types.h"
 
 using namespace ant_combo;
-using opencog::moses::score_t;
+using namespace opencog::moses;
 
 #define MIN_FITNESS -1.0e10
 
@@ -222,5 +222,28 @@ private:
 
 };
 
+
+struct ant_score : public unary_function<combo_tree, score_t> {
+    ant_score() {}
+
+    int operator()(const combo_tree& tr) const {
+        return -1000 + aff(tr);
+    }
+
+    AntFitnessFunction aff;
+};
+
+// @todo: it is probability not a good behavioral_score
+struct ant_bscore : public unary_function<combo_tree, behavioral_score> {
+    ant_bscore( ) { }
+
+    behavioral_score operator()(const combo_tree& tr) const {
+        behavioral_score bs(2);
+        bs[0] = -ant_score()(tr);
+        bs[1] = tr.size();
+
+        return bs;
+    }
+};
 
 #endif

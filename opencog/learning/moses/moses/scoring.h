@@ -40,7 +40,6 @@
 #include "using.h"
 #include "../representation/representation.h"
 #include "types.h"
-#include "ant_scoring.h"
 
 namespace opencog { namespace moses {
 

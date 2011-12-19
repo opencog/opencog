@@ -50,12 +50,16 @@ namespace opencog { namespace moses {
     using std::max;
     using std::accumulate;
     using std::set;
+    using std::string;
     using std::unary_function;
     using std::make_pair;
     using std::vector;
     using std::advance;
+    using std::cin;
     using std::cout;
     using std::endl;
+    using std::istream;
+    using std::stringstream;
 
     using boost::logic::tribool;
     using boost::logic::indeterminate;

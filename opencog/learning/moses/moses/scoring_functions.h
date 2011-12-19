@@ -24,8 +24,9 @@
 #ifndef _MOSES_SCORING_FUNCTIONS_H
 #define _MOSES_SCORING_FUNCTIONS_H
 
+#include <opencog/util/mt19937ar.h>
+#include "types.h"
 #include "using.h"
-#include "ant_scoring.h"
 
 namespace opencog { namespace moses {
 
@@ -93,8 +94,6 @@ struct simple_symbolic_regression {
         return res;
     }
 };
-
-
 
 
 // ///////////////////// Scoring for truth table data /////////////////////////
@@ -203,8 +202,6 @@ private:
     struct CaseBasedBoolean *c;
 };
 
-
-
 struct truth_table_data_bscore : public unary_function<combo_tree, behavioral_score> {
     truth_table_data_bscore(struct CaseBasedBoolean& bc) {
         c = &bc;
@@ -224,13 +221,7 @@ private:
     struct CaseBasedBoolean *c;
 };
 
-
-
-
 // ////////////// End of scoring for truth table ///////////////
-
-
-
 
 struct interactive_score : public unary_function<combo_tree, score_t> {
     interactive_score() {  }
@@ -249,32 +240,6 @@ struct interactive_bscore : public unary_function<combo_tree, behavioral_score> 
 
     behavioral_score  operator()(const combo_tree& tr) const {
         behavioral_score bs(0);
-        return bs;
-    }
-};
-
-
-
-
-struct ant_score : public unary_function<combo_tree, score_t> {
-    ant_score() {}
-
-    int operator()(const combo_tree& tr) const {
-        return -1000 + aff(tr);
-    }
-
-    AntFitnessFunction aff;
-};
-
-// @todo: it is probability not a good behavioral_score
-struct ant_bscore : public unary_function<combo_tree, behavioral_score> {
-    ant_bscore( ) { }
-
-    behavioral_score operator()(const combo_tree& tr) const {
-        behavioral_score bs(2);
-        bs[0] = -moses::ant_score()(tr);
-        bs[1] = tr.size();
-
         return bs;
     }
 };
