@@ -456,16 +456,31 @@ int OAC::addRulesToAtomSpace()
     if ( config().get_bool("ENABLE_UNITY_CONNECTOR") ) {
         std::string unity_stimulus_rules_file_name = "unity_stimulus_rules.scm";
 
-        if ( load_scm_file( *(this->atomSpace), unity_stimulus_rules_file_name.c_str() ) == 0  ) 
+        if ( load_scm_file( *(this->atomSpace), unity_stimulus_rules_file_name.c_str() ) == 0  ) {
             logger().info( "OAC::%s - Loaded stimulus rules file: '%s'", 
                             __FUNCTION__, 
                            unity_stimulus_rules_file_name.c_str() 
                          );
-        else
+        } else {
             logger().error( "OAC::%s - Failed to load stimulus rules file: '%s'", 
                              __FUNCTION__, 
                             unity_stimulus_rules_file_name.c_str() 
                           );
+        }
+        
+        std::string unity_attitude_processor_file_name = "unity_attitude_processor.scm";
+
+        if ( load_scm_file( *(this->atomSpace), unity_attitude_processor_file_name.c_str() ) == 0  ) {
+            logger().info( "OAC::%s - Loaded attitude processor module file: '%s'", 
+                           __FUNCTION__, 
+                           unity_attitude_processor_file_name.c_str() 
+                         );
+        } else {
+            logger().error( "OAC::%s - Failed to load attitude processor module file: '%s'", 
+                            __FUNCTION__, 
+                            unity_attitude_processor_file_name.c_str() 
+                          );
+        }
     }
 
 
