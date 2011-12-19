@@ -39,6 +39,7 @@ ADD_LIBRARY(util SHARED
     octime
 	tree
     oc_omp
+    KLD
 	${WIN32_GETOPT_FILES}
     ${APPLE_STRNDUP_FILES}
 )
@@ -87,6 +88,7 @@ INSTALL(FILES
     octime.h
     oc_omp.h
     Counter.h
+    KLD.h
 	DESTINATION "include/${PROJECT_NAME}/util"
 )
 
