@@ -192,7 +192,8 @@ combo_tree representation::get_candidate(const instance& inst, bool reduce)
     return get_clean_combo_tree(tr, reduce);
 }
 
-void representation::set_exemplar_inst() {
+void representation::set_exemplar_inst()
+{
     OC_ASSERT(_exemplar_inst.empty(),
               "Should be called only once,"
               " therefore _exemplar_inst should be empty");

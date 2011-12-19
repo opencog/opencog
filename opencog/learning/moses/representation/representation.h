@@ -25,9 +25,8 @@
 #ifndef _MOSES_REPRESENTATION_H
 #define _MOSES_REPRESENTATION_H
 
-#include <boost/utility.hpp>
-
 #include <boost/thread.hpp>
+#include <boost/utility.hpp>
 
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/type_tree.h>
@@ -44,7 +43,8 @@ void set_depth(int new_depth);
 /**
  * Do the representation-building, create a field_set
  */
-struct representation : public knob_mapper, boost::noncopyable {
+struct representation : public knob_mapper, boost::noncopyable
+{
     typedef std::set<combo::vertex> operator_set;
     typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> >
     combo_tree_ns_set;
@@ -65,8 +65,8 @@ struct representation : public knob_mapper, boost::noncopyable {
     void clear_exemplar();
 
     /**
-     * returns a clean and reduced version of the current exemplar
-     * (usually after turning some of its knobs)
+     * Returns a clean and reduced version of the current exemplar
+     * (usually after turning some of its knobs).
      *
      * @param reduce whether the combo_tree is reduced before it is returned
      * @param knob_building if true then _simplify_knob_building is used to
@@ -85,7 +85,7 @@ struct representation : public knob_mapper, boost::noncopyable {
                                     bool knob_building = false) const;
 
     /**
-     * Thread safe composition of transform and get_clean_exemplar
+     * Thread safe composition of transform and get_clean_exemplar.
      */
     combo_tree get_candidate(const instance& inst, bool reduce);
 
@@ -115,7 +115,8 @@ struct representation : public knob_mapper, boost::noncopyable {
      * the exemplar is yet unchanged).
      */
     template<typename Out>
-    Out& ostream_prototype(Out& out, combo_tree::iterator it) const {
+    Out& ostream_prototype(Out& out, combo_tree::iterator it) const
+    {
         typedef combo_tree::sibling_iterator sib_it;
         if(is_contin(*it)) { // contin
                 contin_map_cit c_cit = find_contin_knob(it);
@@ -143,7 +144,8 @@ struct representation : public knob_mapper, boost::noncopyable {
 
     // like above but on the _exemplar
     template<typename Out>
-    Out& ostream_prototype(Out& out) const {
+    Out& ostream_prototype(Out& out) const
+    {
         return ostream_prototype(out, _exemplar.begin());
     }
 
@@ -153,10 +155,10 @@ protected:
     combo_tree _exemplar;     // contains the prototype of the
                               // exemplar used to generate the deme
 
-    instance _exemplar_inst; //instance corresponding to the exemplar
-                             //@todo: it is not sure whether we need
-                             //that because it is assumed that the
-                             //instance of the exemplar is null
+    instance _exemplar_inst; // instance corresponding to the exemplar
+                             // @todo: it is not sure whether we need
+                             // that because it is assumed that the
+                             // instance of the exemplar is null
     field_set _fields;
     RandGen& rng;
     const reduct::rule* _simplify_candidate; // used to simplify candidates
