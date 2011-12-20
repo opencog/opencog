@@ -8,6 +8,7 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/random.h>
 #include <ctime>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -308,7 +309,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink() {
     clock_t tAddLinkStart;
     if (p < chanceOfNonDefaultLink) t=randomType(LINK);
 
-    int arity = rng->pos_gaussian_rand(linkSize_std, linkSize_std);
+    int arity = gaussian_rand<unsigned>(linkSize_std, linkSize_std, *rng);
     if (arity==0) { ++arity; };
 
     for (int j=0; j < arity; j++) {
@@ -512,7 +513,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
 
 AtomSpaceBenchmark::TimeStats::TimeStats(
         const std::vector<record_t>& records) {
-    double sum;
+    double sum = 0;
     t_min = 1 << 31;
     t_max = 0;
     foreach (record_t record, records) {

@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/random.h>
 #include <opencog/spatial/TangentBug.h>
 #include <opencog/spatial/TB_ASSERT.h>
 
@@ -1125,8 +1126,8 @@ bool TangentBug::place_pet_randomly(const TBPoint& prob_center,
         return false;
     }
 
-    int x = rng.pos_gaussian_rand(25, prob_center.first);
-    int y = rng.pos_gaussian_rand(25, prob_center.second);
+    int x = gaussian_rand<unsigned>(prob_center.first, 25, rng);
+    int y = gaussian_rand<unsigned>(prob_center.second, 25, rng);
 
     TBPoint pt(x, y);
     //logger().fine("TangentBug::place_pet_randomly(): before gridIllegal");
@@ -1148,8 +1149,8 @@ bool TangentBug::place_goal_randomly(const TBPoint& prob_center,
         return false;
     }
 
-    int x = rng.pos_gaussian_rand(300, prob_center.first);
-    int y = rng.pos_gaussian_rand(200, prob_center.second);
+    int x = gaussian_rand<unsigned>(prob_center.first, 300, rng);
+    int y = gaussian_rand<unsigned>(prob_center.second, 200, rng);
 
     //logger().fine("TangentBug::place_pet_randomly(): before gridIllegal");
     TBPoint pt(x, y);

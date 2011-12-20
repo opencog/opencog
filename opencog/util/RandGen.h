@@ -56,9 +56,6 @@ public:
     // return -1 or 1 randonly
     virtual int randPositiveNegative() = 0;
 
-    // Random int from a gaussian distribution. Neg numbers are clipped to 0
-    virtual unsigned int pos_gaussian_rand(unsigned int std_dev, unsigned int mean) = 0;
-
     //random boolean
     virtual bool randbool() = 0;
 };

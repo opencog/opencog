@@ -26,6 +26,7 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
+#include <opencog/util/random.h>
 
 #include <opencog/spatial/math/Vector3.h>
 #include <opencog/spatial/math/LineSegment.h>
@@ -106,18 +107,20 @@ bool ObjectMetaData::operator!=(const ObjectMetaData& rhs) const
 /**
  * DEPRECATED METHOD - it must be removed as like TangentBugTestExec and AStarTest
  */
-void opencog::spatial::populateRandom(opencog::RandGen& rng, spatial::LocalSpaceMap2D& lsm,
-                    int obstacles, const spatial::GridPoint& prob_center, int std_dev)
+void opencog::spatial::populateRandom(opencog::RandGen& rng,
+                                      spatial::LocalSpaceMap2D& lsm,
+                                      int obstacles,
+                                      const spatial::GridPoint& prob_center,
+                                      int std_dev)
 {
 
     for (int cnt = 0; cnt < obstacles; ++cnt) {
-        unsigned int center_x = rng.pos_gaussian_rand(std_dev, prob_center.first);
-        unsigned int center_y = rng.pos_gaussian_rand(std_dev, prob_center.second);
-        unsigned int center_z = rng.pos_gaussian_rand(std_dev, prob_center.second);
-        unsigned int radius_y = 1 + static_cast<unsigned int>
-                                (30 * rng.randDoubleOneExcluded());
-        unsigned int radius_x = 1 + static_cast<unsigned int>
-                                (20 * rng.randDoubleOneExcluded());
+        unsigned
+            center_x = gaussian_rand<unsigned>(prob_center.first, std_dev, rng),
+            center_y = gaussian_rand<unsigned>(prob_center.second, std_dev, rng),
+            center_z = gaussian_rand<unsigned>(prob_center.second, std_dev, rng),
+            radius_y = 1 + static_cast<unsigned>(30 * rng.randDoubleOneExcluded()),
+            radius_x = 1 + static_cast<unsigned>(20 * rng.randDoubleOneExcluded());
 
         spatial::ObjectMetaData metaData;
         metaData.centerX = center_x;

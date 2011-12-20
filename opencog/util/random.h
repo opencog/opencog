@@ -24,8 +24,10 @@
 #ifndef _OPENCOG_RANDOM_H
 #define _OPENCOG_RANDOM_H
 
+#include <boost/numeric/conversion/cast.hpp>
+
 #include "RandGen.h"
-#include <opencog/util/numeric.h>
+#include "numeric.h"
 
 /**
  * This file contains a collection of random generators based on RandGen
@@ -33,28 +35,37 @@
 
 namespace opencog {
 
-//choose uniformly randomly an element of the set s
-//WARNING : it is assumed that s is non-empty
-template<typename T> T randset(const std::set<T>& s, RandGen& rng)
+// choose uniformly randomly an element of the set s
+// WARNING : it is assumed that s is non-empty
+template<typename T>
+T randset(const std::set<T>& s, RandGen& rng)
 {
-    OC_ASSERT(!s.empty(), "numeric - std::set should be empty.");
-    int chosen_int = rng.randint(s.size());
-    typename std::set<T>::const_iterator s_it = s.begin();
-    //can be optimized maybe
-    for (int si = 0; si < chosen_int; si++)
-        ++s_it;
-    return *s_it;
+    OC_ASSERT(!s.empty());
+    return *std::next(s.begin(), rng.randint(s.size()));
 }
 
-double gaussian_rand(double std_dev, double mean, RandGen& rng) {
-    double res = mean + std_dev *
+// return a random number sampled according to a Gaussian
+// distribution. If the number falls out of the range of T then it is
+// automatically truncated.
+template<typename T>
+T gaussian_rand(T mean, T std_dev, RandGen& rng)
+{
+    double val = mean + std_dev *
         std::sqrt(-2 * std::log(rng.randDoubleOneExcluded())) * 
         std::cos(2 * PI * rng.randDoubleOneExcluded());
+    T res;
+    try {
+        res = boost::numeric_cast<T>(val);
+    } catch(boost::numeric::positive_overflow&) {
+        res = std::numeric_limits<T>::max();
+    } catch(boost::numeric::negative_overflow&) {
+        res = std::numeric_limits<T>::min();
+    }
     return res;
 }
 
-//linear biased random bool, b in [0,1]
-//when b tends to 1 the result tends to be true
+// linear biased random bool, b in [0,1] when b tends to 1 the result
+// tends to be true
 bool biased_randbool(float b, RandGen& rng) {
     return b > rng.randfloat();
 }

@@ -160,20 +160,6 @@ int MT19937RandGen::randPositiveNegative(){
     return result;
 }
 
-// Random int from a gaussian distribution. Neg numbers are clipped to 0
-unsigned int MT19937RandGen::pos_gaussian_rand(unsigned int std_dev, unsigned int mean){
-    int random = mean + 
-                static_cast<unsigned int>(std_dev *
-                std::sqrt(-2 * std::log(this->randDoubleOneExcluded())) * 
-                std::cos(2 * PI * this->randDoubleOneExcluded()));
-
-    unsigned int result = (random >= 0 ? (unsigned) random : 0);
-#ifdef DEBUG_RAND_CALLS
-    logger().debug("MT19937RandGen::pos_gaussian_rand() => %u", result);
-#endif
-    return result;
-}
-
 //random boolean
 bool MT19937RandGen::randbool() { 
     bool result;

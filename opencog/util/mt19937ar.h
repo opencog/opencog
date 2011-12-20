@@ -120,9 +120,6 @@ public:
     // return -1 or 1 randonly
     int randPositiveNegative();
 
-    // Random int from a gaussian distribution. Neg numbers are clipped to 0
-    unsigned int pos_gaussian_rand(unsigned int std_dev, unsigned int mean);
-
     //random boolean
     bool randbool();
 };
