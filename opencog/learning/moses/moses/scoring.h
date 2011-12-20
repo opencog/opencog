@@ -244,7 +244,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     RandGen& rng;
 
 private:
-    void set_complexity_coef(double stdev, double alphabet_size);
+    void set_complexity_coef(float stdev, float alphabet_size);
 };
 
 /**
@@ -281,6 +281,35 @@ struct occam_ctruth_table_bscore
     RandGen& rng;
 };
 
+// Bscore to find interesting patterns. Interestingness is measured as
+// the Kullback Leibler Divergence between the distribution output of
+// the dataset and the distribution over the output filtered by the
+// program (when the output is true)
+struct occam_max_KLD_bscore
+    : public unary_function<combo_tree, behavioral_score> {
+    occam_max_KLD_bscore(const Table& table,
+                         float stdev,
+                         float alphabet_size,
+                         RandGen& _rng);
+    
+    behavioral_score operator()(const combo_tree& tr) const;
+
+    // for the best possible bscore is a vector of zeros. It's
+    // probably not true because there could be duplicated inputs but
+    // that's acceptable for now
+    behavioral_score best_possible_bscore() const;
+    
+    std::vector<contin_t> cot;
+    OTable otable;
+    ITable itable;
+    bool occam;
+    score_t complexity_coef;
+    RandGen& rng;
+
+private:
+    void set_complexity_coef(float stdev, float alphabet_size);
+};
+        
 // for testing only
 struct dummy_score : public unary_function<combo_tree, score_t> {
     score_t operator()(const combo_tree& tr) const {

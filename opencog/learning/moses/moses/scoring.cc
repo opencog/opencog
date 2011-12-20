@@ -23,16 +23,19 @@
  */
 #include "scoring.h"
 #include <opencog/util/numeric.h>
+#include <opencog/util/KLD.h>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/adaptor/map.hpp>
+#include <boost/range/adaptor/filtered.hpp>
 #include <cmath>
 
 namespace opencog { namespace moses {
 
 using namespace std;
 using boost::adaptors::map_values;
+using boost::adaptors::filtered;
 using boost::transform;
 
 // helper to log a combo_tree and its behavioral score
@@ -49,6 +52,10 @@ inline void log_candidate_bscore(const combo_tree& tr,
     }
 }
 
+////////////////////
+// logical_bscore //
+////////////////////
+        
 behavioral_score logical_bscore::operator()(const combo_tree& tr) const
 {
     combo::complete_truth_table tt(tr, arity);
@@ -64,6 +71,10 @@ behavioral_score logical_bscore::best_possible_bscore() const {
     return behavioral_score(target.size(), 0);
 }
 
+///////////////////
+// contin_bscore //
+///////////////////
+        
 behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 {
     OTable ct(tr, cti, rng);
@@ -74,6 +85,10 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
+/////////////////////////
+// occam_contin_bscore //
+/////////////////////////
+        
 behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 {
     OTable ct(tr, cti, rng);
@@ -96,12 +111,16 @@ behavioral_score occam_contin_bscore::best_possible_bscore() const {
     return behavioral_score(target.size() + (occam?1:0), 0);
 }
 
-void occam_contin_bscore::set_complexity_coef(double stdev,
-                                              double alphabet_size) {
+void occam_contin_bscore::set_complexity_coef(float stdev, float alphabet_size)
+{
     if(occam)
-        complexity_coef = - log((double)alphabet_size) * 2 * sq(stdev);
+        complexity_coef = - log(alphabet_size) * 2 * sq(stdev);
 }
 
+////////////////////////////////////
+// occam_discretize_contin_bscore //
+////////////////////////////////////
+        
 occam_discretize_contin_bscore::occam_discretize_contin_bscore
                                         (const OTable& ot,
                                          const ITable& it,
@@ -177,6 +196,9 @@ behavioral_score occam_discretize_contin_bscore::operator()(const combo_tree& tr
     return bs;    
 }
 
+///////////////////////////////
+// occam_ctruth_table_bscore //
+///////////////////////////////
         
 occam_ctruth_table_bscore::occam_ctruth_table_bscore(const CTable& _ctt,
                                                      float p,
@@ -214,6 +236,64 @@ behavioral_score occam_ctruth_table_bscore::best_possible_bscore() const {
         bs.back() = 0;
     return bs;
 }
+
+//////////////////////////
+// occam_max_KLD_bscore //
+//////////////////////////
         
+occam_max_KLD_bscore::occam_max_KLD_bscore(const Table& table,
+                                           float stdev,
+                                           float alphabet_size,
+                                           RandGen& _rng)
+    : cot(table.size()), otable(table.otable), itable(table.itable), rng(_rng)
+{
+    occam = stdev > 0;
+    set_complexity_coef(stdev, alphabet_size);
+    boost::transform(table.otable, cot.begin(),
+                     [](const vertex& v) { return get_contin(v); });
+    boost::sort(cot);
+}
+
+behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
+{
+    OTable tr_ot(tr, itable, rng);
+
+    // filter the output according to tr
+    vector<contin_t> f_output;
+    auto ot_it = otable.cbegin(), tr_ot_it = tr_ot.cbegin();
+    for (; ot_it != otable.cend(); ++ot_it, ++tr_ot_it)
+        if (vertex_to_bool(*tr_ot_it))
+            f_output.push_back(get_contin(*ot_it));
+
+    // sort the filtered output and compute KLD(cot, f_output) per
+    // component
+    boost::sort(f_output);
+    KLDS<vector<contin_t> > klds(cot, f_output);
+    behavioral_score bs;
+    dorepeat(otable.size())
+        bs.push_back(klds.next());
+    
+    // add the Occam's razor feature
+    if(occam)
+        bs.push_back(complexity(tr) * complexity_coef);
+
+    // Logger
+    log_candidate_bscore(tr, bs);
+    // ~Logger
+
+    return bs;
+}
+
+behavioral_score occam_max_KLD_bscore::best_possible_bscore() const
+{
+    return behavioral_score(-best_score);
+}
+
+void occam_max_KLD_bscore::set_complexity_coef(float stdev, float alphabet_size)
+{
+    if(occam)
+        complexity_coef = - log(alphabet_size) * 2 * sq(stdev);
+}
+
 } // ~namespace moses
 } // ~namespace opencog
