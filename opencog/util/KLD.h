@@ -64,7 +64,7 @@ double KLD(const SortedSeq& p, const SortedSeq& q)
         FloatT p_x = *it_p, delta_p = 1.0 / (p_x - p_x_pre);
         
         // compute delta Q
-        FloatT q_x = *it_q;
+        FloatT q_x = it_q == q.cend()? x_very_last : *it_q;
         // search the points of q right before and after p_x
         while (q_x < p_x) {
             q_x_pre = q_x;
