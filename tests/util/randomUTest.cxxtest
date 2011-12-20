@@ -1,0 +1,59 @@
+/** randomUTest.cxxtest --- 
+ *
+ * Copyright (C) 2011 OpenCog Foundation
+ *
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/random.h>
+#include <opencog/util/mt19937ar.h>
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/moment.hpp>
+
+using namespace std;
+using namespace opencog;
+using namespace boost::accumulators;
+
+class randomUTest : public CxxTest::TestSuite
+{
+public:
+    // test that sampling a gaussian of unsigned doesn't raise an
+    // exception when the sample would be negative
+    void test_unsigned_gaussian_rand() {
+        const unsigned m = 0, s = 10, size = 100;
+        MT19937RandGen rng(1);
+        for (unsigned i = 0; i < size; ++i)
+            TS_ASSERT_THROWS_NOTHING(gaussian_rand(m, s, rng));
+    }
+
+    void test_gaussian_rand_convergence() {
+        const double m = 1, s = 10, delta = 0.05;
+        size_t size = 10000000;
+        MT19937RandGen rng(1);
+        accumulator_set<double, stats<tag::mean, tag::moment<2> > > acc;
+        for (size_t i = 0; i < size; ++i)
+            acc(gaussian_rand(m, s, rng));
+        // check mean
+        TS_ASSERT_DELTA(mean(acc), m, delta);
+        // check standard deviation
+        TS_ASSERT_DELTA(sqrt(moment<2>(acc)), s, delta);        
+    }
+};
