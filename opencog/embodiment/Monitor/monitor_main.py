@@ -77,6 +77,14 @@ class MonitorMainWindow(QtGui.QMainWindow):
                             )
         grid_layout.addWidget(self.PsiDemandUpdaterAgentMonitor.widget, 1, 0)
 
+        # Add StimulusUpdaterAgentMonitor
+        self.StimulusUpdaterAgentMonitor = MonitorThread(self.zmq_context,
+                             plaza_publish_endpoint, 
+                             "StimulusUpdaterAgent", 
+                             self.main_widget, width=5, height=4, dpi=100
+                            )
+        grid_layout.addWidget(self.StimulusUpdaterAgentMonitor.widget, 1, 1)
+
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
 
@@ -85,6 +93,7 @@ class MonitorMainWindow(QtGui.QMainWindow):
         self.PsiModulatorUpdaterAgentMonitor.start()
         self.PsiFeelingUpdaterAgentMonitor.start()
         self.PsiDemandUpdaterAgentMonitor.start()
+        self.StimulusUpdaterAgentMonitor.start()
 
     def file_quit(self):
         self.close()

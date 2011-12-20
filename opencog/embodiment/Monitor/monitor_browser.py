@@ -72,10 +72,12 @@ class OCMonitorPanel(QFrame):
         monitor1 = MonitorWidget(str(self.zmqUrl), "PsiModulatorUpdaterAgent")
         monitor2 = MonitorWidget(str(self.zmqUrl), "PsiFeelingUpdaterAgent")
         monitor3 = MonitorWidget(str(self.zmqUrl), "PsiDemandUpdaterAgent")
+        monitor4 = MonitorWidget(str(self.zmqUrl), "StimulusUpdaterAgent")
                                 
         self.addMonitors([monitor1, \
                           monitor2, \
-                          monitor3]) 
+                          monitor3, \
+                          monitor4]) 
 
     def showSoloView(self):
         sender = self.sender()
