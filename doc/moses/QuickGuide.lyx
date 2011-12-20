@@ -1436,37 +1436,20 @@ build_knobs::sample_action_perms
 \end_layout
 
 \begin_layout Subsection
-Demes and Optimization
+Packed Knobs
 \end_layout
 
 \begin_layout Standard
-XXX some details below incorrect.
-\end_layout
-
-\begin_layout Standard
-The metapopulation consists of expressions (stored as scored trees).
- These expressions do not refer to some exemplar.
- On the other hand, during the learning process, new demes are generated.
- A deme is centered around an exemplar from the metapopulation.
- However, elements of the deme are not represented as (scored) trees but,
- instead, are represented relative to the exemplar.
- 
-\end_layout
-
-\begin_layout Standard
-xxx above to define packed knobs, instance
-\end_layout
-
-\begin_layout Standard
-Packed knob settings are called 
+In order for knob settings to be efficiently managed by the optimization
+ step, they are packed into a bit-string; the bit-string is of type 
 \family typewriter
 instance
 \family default
- is declared in 
+, declared in 
 \family typewriter
 eda/eda.h
 \family default
- is a vector of packed knob settings:
+ as a vector of ints:
 \end_layout
 
 \begin_layout Standard
@@ -1487,6 +1470,168 @@ typedef vector<packed_t> instance;
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+The class 
+\family typewriter
+field_set
+\family default
+ describes the manner in which knobs are packed into the bit string.
+ Defined in 
+\family typewriter
+representation/field_set.h
+\family default
+, it contains a list of fields with describe the width of a field, and it's
+ offset within the bit-string:
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+struct field {
+\end_layout
+
+\begin_layout Plain Layout
+
+	width_t width;
+\end_layout
+
+\begin_layout Plain Layout
+
+	size_t major_offset, minor_offset;
+\end_layout
+
+\begin_layout Plain Layout
+
+};
+\end_layout
+
+\end_inset
+
+Fields come in four basic types: continuous, discrete, 
+\begin_inset Quotes eld
+\end_inset
+
+ontological
+\begin_inset Quotes erd
+\end_inset
+
+, and single-bit booleans.
+ Discrete fields represent variables that can take on multiple distinct
+ values.
+ These typically take several bits to represent; single-bit boolean variables
+ are treated distinctly.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+ontological
+\begin_inset Quotes erd
+\end_inset
+
+ type is simply a discrete type that takes values over a set of character
+ strings.
+ Continuous variables can take on values in the real-number line.
+ However, they are not represented by floats or doubles, but rather, are
+ represented with a certain binary tree of intervals of the real-number
+ line.
+ This encoding is used in order to avoid various difficulties that optimization
+ algorithms encounter with floats and doubles.
+ The rationale and design is further discussed here: 
+\begin_inset CommandInset href
+LatexCommand href
+name "http://code.google.com/p/moses/wiki/ModelingAtomSpaces"
+target "http://code.google.com/p/moses/wiki/ModelingAtomSpaces"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+field_set
+\family default
+ provides a set of iterators for walking over these four types; the iterators
+ can be used to extract and change specific values in the bit-string, in
+ the usual fashion.
+ That is, dereferencing an iterator gives the value.
+ So for example, the 
+\family typewriter
+disc_iterator
+\family default
+ can be used to iterate over discrete fields in an instance: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+const_disc_iterator begin_disc(const instance& inst) const;
+\end_layout
+
+\begin_layout Plain Layout
+
+const_disc_iterator end_disc(const instance& inst) const; 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+instance_t my_inst = ...;
+\end_layout
+
+\begin_layout Plain Layout
+
+const_disc_iterator it = begin_disc(my_inst);
+\end_layout
+
+\begin_layout Plain Layout
+
+for ( ; it<end_disc(my_inst); it++) {
+\end_layout
+
+\begin_layout Plain Layout
+
+	cout " This is the value: " << *it << endl;
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Demes and Optimization
+\end_layout
+
+\begin_layout Standard
+XXX some details below incorrect.
+\end_layout
+
+\begin_layout Standard
+The metapopulation consists of expressions (stored as scored trees).
+ These expressions do not refer to some exemplar.
+ On the other hand, during the learning process, new demes are generated.
+ A deme is centered around an exemplar from the metapopulation.
+ However, elements of the deme are not represented as (scored) trees but,
+ instead, are represented relative to the exemplar.
+ 
+\end_layout
+
+\begin_layout Standard
+xxx above to define packed knobs, instance
 \end_layout
 
 \begin_layout Standard

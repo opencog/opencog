@@ -77,7 +77,7 @@ struct field_set
 {
     // To avoid the accidental confusion between the multiplicity of
     // values that a variable can take, and the width of a bit-field,
-    // (which is ciel(log_2) of the former), we define two distinct 
+    // (which is ciel(log_2) of the former), we define two distinct
     // types.  A third type, combo::arity_t is reserved for the arity
     // of a function.  These are three distinct concepts, they should
     // not be confused with one-another.
@@ -144,14 +144,14 @@ struct field_set
      */
     struct contin_spec
     {
-        contin_spec(contin_t m, contin_t ss, contin_t ex, width_t d)
+        contin_spec(contin_t m, contin_t ss, contin_t ex, size_t d)
                 : mean(m), step_size(ss), expansion(ex), depth(d) { }
         contin_t mean, step_size, expansion;
         size_t depth;
 
         bool operator<(const contin_spec& rhs) const
         {
-            //sort descending by depth
+            // Sort descending by depth.
             return (depth > rhs.depth
                     || (depth == rhs.depth
                         && (expansion > rhs.expansion
@@ -170,6 +170,8 @@ struct field_set
 
         // half the smallest possible difference between two values represented
         // according to the spec
+        // XXX This uses depth as depth of tree, but in other places,
+        // its used as breadth, e.g. in build_contin_spec. So which is it ???
         contin_t epsilon() const
         {
             return step_size / contin_t(size_t(1) << depth);

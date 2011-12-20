@@ -28,7 +28,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/iostreamContainer.h>
 
-namespace opencog { 
+namespace opencog {
 namespace moses {
 
 const disc_t field_set::contin_spec::Stop = 0;
@@ -59,10 +59,11 @@ bool field_set::operator==(const field_set& rhs) const
 const onto_t& field_set::get_onto(const instance& inst, size_t idx) const
 {
     size_t raw_idx = onto_to_raw_idx(idx);
-    //walk down the tree to get the appropriate onto_t
+
+    // Walk down the tree to get the appropriate onto_t.
     const onto_spec& o = _onto[idx];
     onto_tree::iterator it = o.tr->begin();
-    for (width_t i = 0; i < o.depth; ++i) {
+    for (size_t i = 0; i < o.depth; ++i) {
         disc_t raw_value = get_raw(inst, raw_idx + i);
         if (raw_value == onto_spec::Stop) {
             break;
@@ -76,10 +77,11 @@ const onto_t& field_set::get_onto(const instance& inst, size_t idx) const
 contin_t field_set::get_contin(const instance& inst, size_t idx) const
 {
     size_t raw_idx = contin_to_raw_idx(idx);
-    //start with the mean a walk down to the res
+
+    // Start with the mean, and walk down to the res.
     const contin_spec& c = _contin[idx];
     contin_stepper stepper(c);
-    for (width_t i = 0; i < c.depth; ++i) {
+    for (size_t i = 0; i < c.depth; ++i) {
         disc_t direction = get_raw(inst, raw_idx + i);
         if (direction == contin_spec::Stop) {
             break;
@@ -99,12 +101,12 @@ void field_set::set_contin(instance& inst, size_t idx, contin_t target) const
     size_t raw_idx = contin_to_raw_idx(idx);
     const contin_spec& c = _contin[idx];
 
-    //use binary search to assign to the nearest value
+    // Use binary search to assign to the nearest value.
     contin_t best_distance = fabs(c.mean - target);
-    width_t best_depth = 0;
+    size_t best_depth = 0;
     contin_stepper stepper(c);
     for (width_t i = 0; i<c.depth && best_distance>c.epsilon(); ++i) {
-        //take a step in the correct direction
+        // Take a step in the correct direction.
         if (target < stepper.value) { //go left
             stepper.left();
             set_raw(inst, raw_idx + i, contin_spec::Left);
@@ -118,8 +120,8 @@ void field_set::set_contin(instance& inst, size_t idx, contin_t target) const
         }
     }
 
-    //backtrack up to the best depth
-    for (width_t i = best_depth; i < c.depth; ++i)
+    // Backtrack up to the best depth.
+    for (size_t i = best_depth; i < c.depth; ++i)
         set_raw(inst, raw_idx + i, contin_spec::Stop);
 }
 
@@ -173,13 +175,18 @@ void field_set::build_disc_spec(const disc_spec& ds, size_t n)
 
 void field_set::build_contin_spec(const contin_spec& cs, size_t n)
 {
-    //depth must be a power of 2
+    // Depth must be a power of 2
+    // XXX Really??? Why?? Elswhere we seem to treat "depth" as
+    // the depth of the tree (see e.g. use of "best_depth" which
+    // increments by one. Yet here, its used as the breadth of
+    // the tree, not the dpeth. See, for example, epsilon()
+    // where depth is used as a shift...
     OC_ASSERT(cs.depth == next_power_of_two(cs.depth),
-              "depth must be a power of 2 and it is %d", 
-              cs.depth); 
+              "depth must be a power of 2 and it is %d",
+              cs.depth);
     //all have arity of 3 (left, right, or stop) and hence are 2 wide
     size_t base = back_offset(), width = 2;
-    dorepeat(n*cs.depth) {
+    dorepeat (n*cs.depth) {
         _fields.push_back(field(width, base / bits_per_packed_t,
                                 base % bits_per_packed_t));
         base += width;
@@ -192,9 +199,9 @@ void field_set::build_onto_spec(const onto_spec& os, size_t n)
     size_t base = back_offset(), width = nbits_to_pack(os.branching);
     size_t total_width = size_t((width * os.depth - 1) /
                                 bits_per_packed_t + 1) * bits_per_packed_t;
-        
-    dorepeat(n) {
-        dorepeat(os.depth) {
+
+    dorepeat (n) {
+        dorepeat (os.depth) {
             _fields.push_back(field(width, base / bits_per_packed_t,
                                     base % bits_per_packed_t));
             base += width;
