@@ -152,6 +152,9 @@ PSI_FEELING_UPDATER_CYCLE_PERIOD =     3
 MONITOR_CHANGES_ENABLED = true
 MONITOR_CHANGES_CYCLE_PERIOD = 5
 
+STIMULUS_UPDATER_ENABLED =             true
+STIMULUS_UPDATER_CYCLE_PERIOD =        1
+
 FISHGRAM_ENABLED = false
 FISHGRAM_CYCLE_PERIOD = 1
 
@@ -382,7 +385,7 @@ MODULES               = libquery.so, libbuiltinreqs.so,
                         libscheme-shell.so, libpersist.so, libpln.so, libPythonModule.so
 
 # scheme script files that will be loaded during the system startup
-SCM_PRELOAD           = scm/type_constructors.scm, scm/utilities.scm, scm/file-utils.scm, scm/debug.scm, scm/embodiment/type_constructors.scm, scm/embodiment/predicates-frames.scm, scm/embodiment/language-comprehension.scm, scm/embodiment/reference-resolution-rules.scm, scm/embodiment/command-resolution-rules.scm, scm/embodiment/question-answering.scm, psi_util.scm, rules_core.scm, action_selection.scm, feeling_updaters.scm, demand_updaters.scm, modulator_updaters.scm
+SCM_PRELOAD           = scm/type_constructors.scm, scm/utilities.scm, scm/file-utils.scm, scm/debug.scm, scm/embodiment/type_constructors.scm, scm/embodiment/predicates-frames.scm, scm/embodiment/language-comprehension.scm, scm/embodiment/reference-resolution-rules.scm, scm/embodiment/command-resolution-rules.scm, scm/embodiment/question-answering.scm, psi_util.scm, rules_core.scm, action_selection.scm, feeling_updaters.scm, demand_updaters.scm, modulator_updaters.scm, stimulus_updaters.scm
 
 # PLN settings (needed by OpenPsi among other components)
 PLN_RECORD_TRAILS        = true
