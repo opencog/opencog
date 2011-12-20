@@ -54,7 +54,7 @@ build_knobs::build_knobs(RandGen& _rng,
                          const combo_tree_ns_set* actions,
                          contin_t step_size,
                          contin_t expansion,
-                         field_set::arity_t depth)
+                         field_set::width_t depth)
     : rng(_rng), _exemplar(exemplar), _type(tt), _rep(rep),
       _arity(tt.begin().number_of_children() - 1),
       _step_size(step_size), _expansion(expansion), _depth(depth),
@@ -298,7 +298,7 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 
     vector<int> to_disallow;
 
-    foreach(int idx, from_one(kb.multiplicity() - 1)) {
+    foreach (int idx, from_one(kb.multiplicity() - 1)) {
         kb.turn(idx);
 
         /// @todo could use kb.complexity_bound() to be faster, but
@@ -629,7 +629,7 @@ void build_knobs::rec_canonize(pre_it it)
     // cout << "X " << _exemplar << " | " << combo_tree(it) << endl;
     //recurse on whatever's already present, and create a multiplicand for it
     if (*it == id::plus) {
-        for (sib_it sib = it.begin();sib != it.end();++sib) {
+        for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
             if (!is_contin(*sib)) {
                 sib = canonize_times(sib);
                 rec_canonize(sib.begin());

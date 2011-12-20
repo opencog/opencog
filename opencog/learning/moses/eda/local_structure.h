@@ -151,7 +151,7 @@ local_structure_model::local_structure_model(const field_set& fs,
             int idx_base = distance(begin(), dtr);
             make_dtree(dtr++, o.tr->begin().number_of_children() + 1); // why + 1?
 
-            for (field_set::arity_t i = 1;i < o.depth;++i, ++dtr) {
+            for (field_set::width_t i = 1;i < o.depth;++i, ++dtr) {
                 make_dtree(dtr, 0);
                 _initial_deps.insert(idx_base + i - 1, idx_base + i);
                 // need to recursively split on gggparent, ... , gparent, parent
@@ -166,7 +166,7 @@ local_structure_model::local_structure_model(const field_set& fs,
         foreach(const field_set::contin_spec& c, _fields.contin()) { // contin vars
             int idx_base = distance(begin(), dtr);
             make_dtree(dtr++, 3); //contin arity is 3
-            for (field_set::arity_t i = 1;i < c.depth;++i, ++dtr) {
+            for (field_set::width_t i = 1;i < c.depth;++i, ++dtr) {
                 make_dtree(dtr, 3);
                 _initial_deps.insert(idx_base + i - 1, idx_base + i); //add dep to parent
 

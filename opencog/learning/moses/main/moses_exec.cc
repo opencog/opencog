@@ -92,7 +92,8 @@ combo_tree type_to_exemplar(type_node type) {
     return combo_tree();
 }
 
-combo_tree ann_exemplar(arity_t arity) {
+combo_tree ann_exemplar(combo::arity_t arity)
+{
     combo_tree ann_tr(ann_type(0, id::ann));
     // ann root
     combo_tree::iterator root_node = ann_tr.begin();
@@ -100,7 +101,7 @@ combo_tree ann_exemplar(arity_t arity) {
     combo_tree::iterator output_node =
         ann_tr.append_child(root_node, ann_type(1, id::ann_node));
     // input nodes
-    for(arity_t i = 0; i <= arity; ++i) 
+    for (combo::arity_t i = 0; i <= arity; ++i) 
         ann_tr.append_child(output_node, ann_type(i + 2, id::ann_input));
     // input nodes' weights
     ann_tr.append_children(output_node, 0.0, arity + 1);
@@ -112,16 +113,17 @@ combo_tree ann_exemplar(arity_t arity) {
  * determine the alphabet size given the type_tree of the problem and
  * the of operator that are ignored
  */
-int alphabet_size(const type_tree& tt, const vertex_set ignore_ops) {
-    arity_t arity = type_tree_arity(tt);
+int alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
+{
+    combo::arity_t arity = type_tree_arity(tt);
     type_node output_type = *type_tree_output_type_tree(tt).begin();
-    if(output_type == id::boolean_type) {
+    if (output_type == id::boolean_type) {
         return 3 + arity;
-    } else if(output_type == id::contin_type) {
+    } else if (output_type == id::contin_type) {
         // set alphabet size, 8 is roughly the number of operators
         // in contin formula, it will have to be adapted
         return 8 + arity - ignore_ops.size();
-    } else if(output_type == id::ann_type) {
+    } else if (output_type == id::ann_type) {
         return 2 + arity*arity; // to account for hidden neurones, very roughly
     } else {
         unsupported_type_exit(tt);
@@ -139,7 +141,7 @@ combo_tree str_to_combo_tree(const string& combo_str) {
 }
 
 // infer the arity of the problem
-arity_t infer_arity(const string& problem,                    
+combo::arity_t infer_arity(const string& problem,                    
                     unsigned int problem_size,
                     const string& input_table_file,
                     const string& combo_str) {
@@ -168,18 +170,21 @@ arity_t infer_arity(const string& problem,
 }
 
 // returns n such that a = n+2^n
-arity_t multiplex_arity(arity_t a) {
-    unsigned nearest_arity = 1;
-    for(unsigned n = 1; n <= integer_log2(a); ++n) {
+field_set::width_t multiplex_arity(field_set::multiplicity_t a)
+{
+    field_set::multiplicity_t nearest_arity = 1;
+    for (field_set::width_t n = 1; n <= integer_log2(a); ++n) {
         nearest_arity = n + pow2(n);
-        if(nearest_arity == (unsigned)a)
+        if (nearest_arity == a)
             return n;
     }
-    // not found, exit
+
+    // not found, exit (XXX or assert ??)
     std::cerr << "Error: for multiplex the arity " << a
               << " must be equal to n+2^n, but no such n exists."
               << " However, the arity " << nearest_arity << " would work."
               << std::endl;
+
     exit(1);
     return -1;
 }
@@ -407,26 +412,26 @@ int moses_exec(int argc, char** argv) {
     MT19937RandGen rng(rand_seed);
 
     // infer arity
-    arity_t arity = infer_arity(problem, problem_size, input_data_file, combo_str);
+    combo::arity_t arity = infer_arity(problem, problem_size, input_data_file, combo_str);
 
     // convert include_only_ops_str to the set of actual operators to
     // ignore
     vertex_set ignore_ops;
-    if(vm.count(include_only_ops_str_opt.first.c_str())) {
+    if (vm.count(include_only_ops_str_opt.first.c_str())) {
         bool ignore_arguments = false;
         bool ignore_operators = false;
-        foreach(const string& s, include_only_ops_str) {
+        foreach (const string& s, include_only_ops_str) {
             vertex v;
-            if(builtin_str_to_vertex(s, v)) {
+            if (builtin_str_to_vertex(s, v)) {
                 if(!ignore_operators) {
 		  ignore_ops = {id::plus, id::times, id::div,
 				id::exp, id::log, id::sin};
                     ignore_operators = true;
                 }
                 ignore_ops.erase(v);
-            } else if(argument_str_to_vertex(s, v)) {
-                if(!ignore_arguments) {
-                    for(arity_t arg = 1; arg <= arity; ++arg)
+            } else if (argument_str_to_vertex(s, v)) {
+                if (!ignore_arguments) {
+                    for (combo::arity_t arg = 1; arg <= arity; ++arg)
                         ignore_ops.insert(argument(arg));
                     ignore_arguments = true;
                 }
@@ -436,7 +441,7 @@ int moses_exec(int argc, char** argv) {
     }
 
     // convert ignore_ops_str to the set of actual operators to ignore
-    foreach(const string& s, ignore_ops_str) {
+    foreach (const string& s, ignore_ops_str) {
         vertex v;
         if(builtin_str_to_vertex(s, v) || argument_str_to_vertex(s, v))
             ignore_ops.insert(v);

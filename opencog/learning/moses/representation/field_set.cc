@@ -62,7 +62,7 @@ const onto_t& field_set::get_onto(const instance& inst, size_t idx) const
     //walk down the tree to get the appropriate onto_t
     const onto_spec& o = _onto[idx];
     onto_tree::iterator it = o.tr->begin();
-    for (arity_t i = 0;i < o.depth;++i) {
+    for (width_t i = 0; i < o.depth; ++i) {
         disc_t raw_value = get_raw(inst, raw_idx + i);
         if (raw_value == onto_spec::Stop) {
             break;
@@ -79,7 +79,7 @@ contin_t field_set::get_contin(const instance& inst, size_t idx) const
     //start with the mean a walk down to the res
     const contin_spec& c = _contin[idx];
     contin_stepper stepper(c);
-    for (arity_t i = 0;i < c.depth;++i) {
+    for (width_t i = 0; i < c.depth; ++i) {
         disc_t direction = get_raw(inst, raw_idx + i);
         if (direction == contin_spec::Stop) {
             break;
@@ -101,9 +101,9 @@ void field_set::set_contin(instance& inst, size_t idx, contin_t target) const
 
     //use binary search to assign to the nearest value
     contin_t best_distance = fabs(c.mean - target);
-    arity_t best_depth = 0;
+    width_t best_depth = 0;
     contin_stepper stepper(c);
-    for (arity_t i = 0;i<c.depth && best_distance>c.epsilon();++i) {
+    for (width_t i = 0; i<c.depth && best_distance>c.epsilon(); ++i) {
         //take a step in the correct direction
         if (target < stepper.value) { //go left
             stepper.left();
@@ -119,7 +119,7 @@ void field_set::set_contin(instance& inst, size_t idx, contin_t target) const
     }
 
     //backtrack up to the best depth
-    for (arity_t i = best_depth;i < c.depth;++i)
+    for (width_t i = best_depth; i < c.depth; ++i)
         set_raw(inst, raw_idx + i, contin_spec::Stop);
 }
 
@@ -160,7 +160,7 @@ void field_set::build_spec(const spec& s, size_t n)
 
 void field_set::build_disc_spec(const disc_spec& ds, size_t n)
 {
-    arity_t width = nbits_to_pack(ds.arity);
+    width_t width = nbits_to_pack(ds.arity);
     size_t base = back_offset();
     for (size_t idx = 0;idx < n;++idx)
         _fields.push_back(field(width,

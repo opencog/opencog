@@ -32,7 +32,7 @@
 
 #include "../eda/eda.h"
 
-namespace opencog { 
+namespace opencog {
 namespace moses {
 
  /**
@@ -42,9 +42,9 @@ namespace moses {
   * how they are packed into a bit-string. The field set provides
   * a collection of iterators for walking over such bit strings, which
   * may then be used to extract values from the bit string (or to
-  * change them).  
+  * change them).
   *
-  * Some terminology: 
+  * Some terminology:
   * 'Discrete' variables, or discs, are just variables that range over
   * a set of n discrete values. These take ciel(log_2(n)) bits to store.
   *
@@ -63,19 +63,26 @@ namespace moses {
   *
   * 'Boolean' or 'bit' variables. This is a special case of the discrete
   * variables, and are handled distinctly in the code and API's below:
-  * they have their own iterators, etc. Only teh multi-bit discrete 
+  * they have their own iterators, etc. Only the multi-bit discrete
   * variables are called 'disc'.
   *
   * The variable values are packed into bit strings, which are chunked
   * as vector arrays of 32 or 64-bit unsigned ints, depending on the
   * C library execution environment. Thus, instead of having a single
-  * offset, two are used: a "major offset", pointing to the appropriate 
+  * offset, two are used: a "major offset", pointing to the appropriate
   * 32/64-bit int, and a "minor offset", ranging over 0-31/63. The
   * "width" is the width of the field, in bits.
   */
 struct field_set
 {
-    typedef unsigned int arity_t;
+    // To avoid the accidental confusion between the multiplicity of
+    // values that a variable can take, and the width of a bit-field,
+    // (which is ciel(log_2) of the former), we define two distinct 
+    // types.  A third type, combo::arity_t is reserved for the arity
+    // of a function.  These are three distinct concepts, they should
+    // not be confused with one-another.
+    typedef unsigned int multiplicity_t;
+    typedef unsigned int width_t;
     typedef std::size_t size_t;
 
     struct bit_iterator;
@@ -87,9 +94,9 @@ struct field_set
     struct const_onto_iterator;
 
     /**
-     * The field struct provides the information needed to get/set the 
+     * The field struct provides the information needed to get/set the
      * value of some variable(of any type) in an instance (i.e. a packed/vector)
-     * 
+     *
      * The major_offset is the index of the element in the instance where the
      * value of the field is stored in. But since there may be values of many
      * different variables stored in the same packed_t value of the instance,
@@ -97,24 +104,24 @@ struct field_set
      * packed_t value instance[major_offset] the value is stored. And we need
      * width to tell us how many bits (starting at this position) are used to
      * encode the value.
-     * 
+     *
      * There is a wiki page about the field_set in the opencog, you could find it on
      * http://www.opencog.org/wiki/Field_set_struct_in_MOSES
      */
     struct field
     {
         field() { }
-        field(arity_t w, size_t ma, size_t mi)
+        field(width_t w, size_t ma, size_t mi)
                 : width(w), major_offset(ma), minor_offset(mi) { }
-        arity_t width;
+        width_t width;
         size_t major_offset, minor_offset;
     };
     typedef std::vector<field>::const_iterator field_iterator;
 
     struct disc_spec
     {
-        disc_spec(arity_t a) : arity(a) { }
-        arity_t arity;
+        disc_spec(width_t a) : arity(a) { }
+        width_t arity;
         bool operator<(const disc_spec& rhs) const { //sort descending by arity
             return arity > rhs.arity;
         }
@@ -130,23 +137,23 @@ struct field_set
      * mapped to continuous values using a simple
      * information-theoretic approach.  (i.e. consider representing a
      * value in the range (-1,1) with a uniform prior)
-     * 
+     *
      * There is a paper about the how to represent continous
      * quantities , you could find it on
      * http://code.google.com/p/moses/wiki/ModelingAtomSpaces
      */
     struct contin_spec
     {
-        contin_spec(contin_t m, contin_t ss, contin_t ex, arity_t d)
+        contin_spec(contin_t m, contin_t ss, contin_t ex, width_t d)
                 : mean(m), step_size(ss), expansion(ex), depth(d) { }
         contin_t mean, step_size, expansion;
         size_t depth;
 
         bool operator<(const contin_spec& rhs) const
-        { 
+        {
             //sort descending by depth
             return (depth > rhs.depth
-                    || (depth == rhs.depth 
+                    || (depth == rhs.depth
                         && (expansion > rhs.expansion
                             || (expansion == rhs.expansion
                                 && (step_size > rhs.step_size
@@ -180,7 +187,7 @@ struct field_set
                 return Right;
             else if(lr == Right)
                 return Left;
-            else { 
+            else {
                 OC_ASSERT(false);
                 return disc_t(); // to keep the compiler quiet
             }
@@ -498,14 +505,14 @@ struct field_set
     }
 
 protected:
-    
+
     // _fields holds all of the different field types in one array.
     // They are arranged in order, so that the "ontological" fields
-    // come first, followed by the continuous fields, then the 
+    // come first, followed by the continuous fields, then the
     // (multi-bit) discrete fields (i.e. the discrete fields that
     // require more than one bit), and finally the one-bit or boolean
     // fields.
-    // 
+    //
     // The locations and sizes of these can be gotten using the methods:
     // begin_onto_fields() - end_onto_fields()
     // begin_contin_fields() - end_contin_fields()
@@ -518,9 +525,9 @@ protected:
     size_t _nbool; // the number of disc_spec that requires only 1 bit to pack
 
     // Cached values for start location of the continuous and discrete
-    // fields in the _fields array.  We don't need to cache the onto 
+    // fields in the _fields array.  We don't need to cache the onto
     // start, as that is same as start of _field. Meanwhile, the start
-    // of the booleans is just _nbool back from the end of the array, 
+    // of the booleans is just _nbool back from the end of the array,
     // so we don't cache that either. These can be computed from
     // scratch (below, with compute_starts()) and are cached here for
     // performance resons.
@@ -567,7 +574,7 @@ protected:
         : boost::random_access_iterator_helper<Self, bool>
     {
         typedef std::ptrdiff_t Distance;
-        
+
         Self& operator++()
         {
             _mask <<= 1;
@@ -602,7 +609,7 @@ protected:
         Self& operator-=(Distance n)
         {
             if (n < 0)
-                return (*this) += (-n); 
+                return (*this) += (-n);
             _it -= n / bits_per_packed_t;
             dorepeat(n % bits_per_packed_t) //could be faster...
                 --(*this);
@@ -626,7 +633,7 @@ protected:
         }
 
     protected:
-        bit_iterator_base(Iterator it, arity_t offset)
+        bit_iterator_base(Iterator it, width_t offset)
             : _it(it), _mask(packed_t(1) << offset) { }
         bit_iterator_base(packed_t mask, Iterator it) : _it(it), _mask(mask) { }
         bit_iterator_base() : _it(), _mask(0) { }
@@ -782,7 +789,7 @@ public:
 
         bit_iterator() { }
     protected:
-        bit_iterator(instance::iterator it, arity_t offset)
+        bit_iterator(instance::iterator it, width_t offset)
             : bit_iterator_base<bit_iterator, instance::iterator>(it, offset)
         { }
     };
@@ -800,7 +807,7 @@ public:
 
         const_bit_iterator() { }
     protected:
-        const_bit_iterator(instance::const_iterator it, arity_t offset)
+        const_bit_iterator(instance::const_iterator it, width_t offset)
             : bit_iterator_base < const_bit_iterator,
                                   instance::const_iterator > (it, offset) { }
     };
@@ -818,7 +825,7 @@ public:
         disc_iterator() : _inst(NULL) { }
 
         //for convenience, but will only work over discrete & boolean
-        arity_t arity() const {
+        width_t arity() const {
             return
                 _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
                 _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
@@ -845,7 +852,7 @@ public:
             _inst(bi._inst) { }
         const_disc_iterator() : _inst(NULL) { }
         //for convenience, but will only work over disc & bool
-        arity_t arity() const {
+        width_t arity() const {
             return
                 _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
                 _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
@@ -1034,7 +1041,7 @@ Out field_set::pack(It from, Out out) const
         size_t width = nbits_to_pack(o.branching);
         size_t total_width = size_t((width * o.depth - 1) /
                                     bits_per_packed_t + 1) * bits_per_packed_t;
-        for (arity_t i = 0;i < o.depth;++i) {
+        for (width_t i = 0;i < o.depth;++i) {
             *out |= (*from++) << offset;
             offset += width;
             if (offset == bits_per_packed_t) {
@@ -1050,7 +1057,7 @@ Out field_set::pack(It from, Out out) const
     }
 
     foreach(const contin_spec& c, _contin) {
-        for (arity_t i = 0;i < c.depth;++i) {
+        for (width_t i = 0;i < c.depth;++i) {
             *out |= (*from++) << offset;
             offset += 2;
             if (offset == bits_per_packed_t) {

@@ -105,7 +105,7 @@ struct contin_knob : public knob_base
 {
     contin_knob(combo_tree& tr, combo_tree::iterator tgt,
                 contin_t step_size, contin_t expansion,
-                field_set::arity_t depth)
+                field_set::width_t depth)
         : knob_base(tr, tgt), _spec(combo::get_contin(*tgt),
                                     step_size, expansion, depth) { }
 

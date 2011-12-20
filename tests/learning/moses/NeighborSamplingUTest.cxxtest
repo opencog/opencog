@@ -106,7 +106,7 @@ public:
         int rand_seed = clock();
         unsigned int distance;
         size_t sample_size,fs_size;
-        field_set::arity_t arity ;
+        field_set::width_t width ;
         size_t sampled_size;
         unsigned int sampled_max_distance;
         unsigned int sampled_min_distance;        
@@ -117,8 +117,8 @@ public:
             distance  = 2;
             sample_size = 10;
             fs_size = 20;
-            arity = 5;
-            field_set fs(field_set::disc_spec(arity), fs_size);
+            width = 5;
+            field_set fs(field_set::disc_spec(width), fs_size);
             instance_set<composite_score>  deme(100, fs);
 
             sample_from_neighborhood(deme.fields(),
@@ -142,8 +142,8 @@ public:
             distance  = 1;
             sample_size = 8;
             fs_size = 15;
-            arity = 4;
-            field_set fs(field_set::disc_spec(arity), fs_size);
+            width = 4;
+            field_set fs(field_set::disc_spec(width), fs_size);
             instance center_inst(fs.packed_width());
             randomize(fs, center_inst, rng);
             instance_set<composite_score> 
@@ -233,11 +233,11 @@ public:
     void test_generate_all_in_neighborhood1() 
     {
         // test all neighbors of a null instance, fields are 5
-        // discs of arity 8
+        // discs of width 8
         unsigned int distance = 2;
-        field_set::arity_t arity = 8;
+        field_set::width_t width = 8;
         size_t size = 5;
-        field_set fs(field_set::disc_spec(arity), size);
+        field_set fs(field_set::disc_spec(width), size);
         instance inst(fs.packed_width());
         test_generate_all_in_neighborhood(fs, distance, 100000, inst);
     }
@@ -245,11 +245,11 @@ public:
     void test_generate_all_in_neighborhood2() 
     { 
         // test all neighbors of a random center instance, fields
-        // are 5 discs of arity 3            
+        // are 5 discs of width 3            
         unsigned int distance = 2;
-        field_set::arity_t arity = 3;
+        field_set::width_t width = 3;
         size_t size = 5;
-        field_set fs(field_set::disc_spec(arity), size);
+        field_set fs(field_set::disc_spec(width), size);
         instance center_inst(fs.packed_width());
         int rand_seed = clock();
         opencog::MT19937RandGen rng(rand_seed);
@@ -276,9 +276,9 @@ public:
     { 
         // test all neighbors of a null center instance, fields are 40 bits
         unsigned int distance = 1;
-        field_set::arity_t arity = 2;
+        field_set::width_t width = 2;
         size_t b_size = 40;
-        field_set fs(field_set::disc_spec(arity), b_size);
+        field_set fs(field_set::disc_spec(width), b_size);
         instance inst(fs.packed_width());
         std::cout << "bits : " << fs.stream(inst) << std::endl;
         test_generate_all_in_neighborhood(fs, distance, 100, inst);
@@ -288,10 +288,10 @@ public:
     { 
         // test n_modif neighbors of a null center instance, fields are 40 bits
         unsigned int distance = 1;
-        field_set::arity_t arity = 2;
+        field_set::width_t width = 2;
         unsigned int n_modif = 1; // number of bits to modify 
         size_t b_size = 40;
-        field_set fs(field_set::disc_spec(arity), b_size);
+        field_set fs(field_set::disc_spec(width), b_size);
         instance inst(fs.packed_width());
         std::cout << "bits : " << fs.stream(inst) << std::endl;
         instance_set<composite_score> deme(n_modif, fs);

@@ -24,8 +24,8 @@
 - [ ] try adaptive reduct effort in moses-exec
 - [ ] in moses-exec replace boolean program options by flags (like with-blah or without-blah)
 - [ ] refactore test_sample_from_neighborhood in NeighborSamplingUTest
-- [ ] there are possibly confusions btw eda::field_set::arity_t and
-  combo::arity_t,
+- [ ] there are possibly confusions between eda::field_set::width_t, multiplicity_t and
+  combo::arity_t
 - [ ] there is a big mess between score_t fitness_t and contin_t, fix
   that mess
 - [ ] refactore Pedrag slice moses code, optimization API should be
