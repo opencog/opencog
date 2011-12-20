@@ -77,7 +77,7 @@ double KLD(const SortedSeq& p, const SortedSeq& q)
         res += std::log(delta_p / delta_q);
         p_x_pre = p_x;
     }
-    return res / p.size();
+    return res / p.size() - 1;
 }
 
 } // ~namespace opencog

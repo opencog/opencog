@@ -20,26 +20,62 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/range/algorithm/sort.hpp>
+
+#include <opencog/util/random.h>
+#include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/KLD.h>
 
+using namespace std;
+using namespace boost;
 using namespace opencog;
 
 class KLDUTest : public CxxTest::TestSuite
 {
-public:
+    MT19937RandGen rng;
+
     // test the KLD between 2 Gaussians
-    void test_gaussian_KLD() {
-        // means and std deviations of the Gaussians
-        const double m1 = 1.0, s1 = 10.0,
-            m2 = 2.0, s2 = 5.0;
-        
-        // according to that website http://allisons.org/ll/MML/KL/Normal/
+    void base_test_gaussian_KLD(double m1, double s1, double m2, double s2,
+                                double delta = 0.1, size_t size = 10000000) {
+        // according to http://allisons.org/ll/MML/KL/Normal/
         double expected_res =
             (sq(m1 - m2) + sq(s1) - sq(s2)) / (2 * sq(s2)) + log(s2/s1);
 
+        cout << "expected_res = " << expected_res << endl; 
+
         // sample the 2 Gaussians
-        // TODO
-        TS_ASSERT(true);
+        vector<double> G1(size), G2(size);
+        for (size_t i = 0; i < size; ++i) {
+            G1[i] = gaussian_rand(m1, s1, rng);
+            G2[i] = gaussian_rand(m2, s2, rng);
+        }
+
+        // before calling KLD the samples must be sorted
+        sort(G1);
+        sort(G2);
+        
+        double computed_res = KLD(G1, G2);
+        
+        cout << "computed_res = " << computed_res << endl; 
+        
+        TS_ASSERT_DELTA(expected_res, computed_res, delta);        
+    }
+public:
+    KLDUTest() : rng(1) {}
+    
+    void test_gaussian_KLD1() {
+        cout << "test_gaussian_KLD1" << endl;
+        base_test_gaussian_KLD(1, 10, 2, 5);
+    }
+
+    void test_gaussian_KLD2() {
+        cout << "test_gaussian_KLD2" << endl;
+        base_test_gaussian_KLD(1, 10, 1, 5);
+    }
+
+    void test_gaussian_KLD3() {
+        cout << "test_gaussian_KLD3" << endl;
+        base_test_gaussian_KLD(1, 1, 5, 1);
     }
 };
