@@ -21,10 +21,14 @@
  */
 #include "moses_exec.h"
 
+#include <boost/format.hpp>
 #include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
 
 namespace opencog { namespace moses {
+
+using boost::format;
+using boost::str;
 
 static const unsigned int max_filename_size = 255;
 
@@ -281,29 +285,30 @@ int moses_exec(int argc, char** argv) {
          value<string>(&target_feature),
          "Label of the target feature to fit. If none is given the first one is used.\n")
         (opt_desc_str(problem_opt).c_str(),
-         value<string>(&problem)->default_value("it"),
-         string("Problem to solve, supported problems are\n"
-                "regression based on input table (").append(it).
-         append("),\n" "regression based on input table using ann (").append(ann_it).
-         append("),\n" "regression based on combo program (").append(cp).
-         append("),\n" "even parity (").append(pa).
-         append("),\n" "disjunction (").append(dj).
-         append("),\n" "multiplex (").append(mux).
-         append("),\n" "regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").
-         append(").\n").c_str())
+         value<string>(&problem)->default_value(it),
+         str(format("Problem to solve, supported problems are:\n"
+                    "%s, regression based on input table\n"
+                    "%s, regression based on input table using ann\n"
+                    "%s, regression based on combo program\n"
+                    "%s, even parity\n"
+                    "%s, disjunction\n"
+                    "%s, multiplex\n"
+                    "%s, regression of f(x)_o = sum_{i={1,o}} x^i\n")
+             % it % ann_it % cp % pa % dj % mux % sr).c_str())
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
-         string("Combo program to learn, use when the problem ").append(cp).append(" is selected (option -").append(problem_opt.second).append(").\n").c_str())
+         str(format("Combo program to learn, used when the problem"
+                    " %s is selected (option -%s).\n")
+             % cp % problem_opt.second).c_str())
         (opt_desc_str(problem_size_opt).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
-         string("For even parity (").append(pa).
-         append("), disjunction (").append(dj).
-         append(") and multiplex (").append(mux).
-         append(") the problem size corresponds to the arity.").
-         append(" Note that for multiplex (").append(mux).
-         append(") the problem size must be equal to n+2^n.").
-         append(" For regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).
-         append(") the problem size corresponds to the order o.\n").c_str())
+         str(format("For even parity (%s), disjunction (%s) and multiplex (%s)"
+                    " the problem size corresponds to the arity."
+                    " Note that for multiplex the problem size"
+                    " must be equal to n+2^n."
+                    " For regression of f(x)_o = sum_{i={1,o}} x^i (%s)"
+                    " the problem size corresponds to the order o.\n")
+             % pa % dj % mux % sr).c_str())
         (opt_desc_str(nsamples_opt).c_str(),
          value<int>(&nsamples)->default_value(-1),
          "Number of samples to describ the problem. If nsample is negative, null or larger than the maximum number of samples allowed it is ignored. If the default problem size is larger than the value provided with that option then the dataset is subsampled randomly to reach the target size.\n")
@@ -317,10 +322,18 @@ int moses_exec(int argc, char** argv) {
          value<string>(&log_level)->default_value("DEBUG"),
          "Log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter.\n")
         (opt_desc_str(log_file_dep_opt_opt).c_str(),
-         string("The name of the log is determined by the options, for instance if moses-exec is called with -r 123 -H pa the log name is moses_random-seed_123_problem_pa.log. Note that the name will be truncated in order not to be longer than ").append(lexical_cast<string>(max_filename_size)).append(" characters.\n").c_str())
+         str(format("The name of the log is determined by the options, for"
+                    " instance if moses-exec is called with -%s 123 -%s %s"
+                    " the log name is moses_random-seed_123_problem_pa.log."
+                    " Note that the name will be truncated in order not to"
+                    " be longer than %s characters.\n")
+             % rand_seed_opt.second % problem_opt.second % pa
+             % max_filename_size).c_str())
         (opt_desc_str(log_file_opt).c_str(),
          value<string>(&log_file)->default_value(default_log_file),
-         string("File name where to write the log. This option is overwritten by ").append(log_file_dep_opt_opt.first).append(".\n").c_str())
+         str(format("File name where to write the log."
+                    " This option is overwritten by %s.\n")
+             % log_file_dep_opt_opt.first).c_str())
         (opt_desc_str(stdev_opt).c_str(),
          value<float>(&stdev)->default_value(0),
          "In the case of contin regression. standard deviation of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher the standard deviation the stronger the Occam's razor.\n")
@@ -332,13 +345,20 @@ int moses_exec(int argc, char** argv) {
          "Include only the operator in the solution, can be used several times, for the moment only plus, times, div, sin, exp, log and variables (#n) are supported. Note that variables and operators are decoralated (including only some operators still include all variables and including only some variables still include all operators). You may need to put variables under double quotes. This option does not work with ANN.\n")
         (opt_desc_str(ignore_ops_str_opt).c_str(),
          value<vector<string> >(&ignore_ops_str),
-         string("Ignore the following operator in the program solution, can be used several times, for the moment only div, sin, exp, log and variables (#n) can be ignored. You may need to put variables under double quotes. This option has the priority over ").append(include_only_ops_str_opt.first).append(". That is if an operator is both be included and ignored, it is ignored. This option does not work with ANN.\n").c_str())
+         str(format("Ignore the following operator in the program solution,"
+                    " can be used several times, for the moment only div,"
+                    " sin, exp, log  and variables (#n) can be ignored."
+                    " You may need to put variables under double quotes."
+                    " This option has the priority over --%s."
+                    " That is if an operator is both be included and ignored,"
+                    " it is ignored. This option does not work with ANN.\n")
+             % include_only_ops_str_opt.first).c_str())
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(hc),
-         string("Optimization algorithm, supported algorithms are"
-                " univariate (").append(un).
-         append("), simulation annealing (").append(sa).
-         append("), hillclimbing (").append(hc).append(").\n").c_str())
+         str(format("Optimization algorithm, supported algorithms are"
+                    " univariate (%s), simulation annealing (%s),"
+                    " hillclimbing (%s).\n")
+             % un % sa % hc).c_str())
         (opt_desc_str(exemplars_str_opt).c_str(),
          value<vector<string> >(&exemplars_str),
          "Start the search with a given exemplar, can be used several times.\n")
@@ -359,7 +379,22 @@ int moses_exec(int argc, char** argv) {
          "Cache, so that identical candidates are not re-evaluated, the cache size is dynamically adjusted to fit in the RAM.\n")
         (opt_desc_str(jobs_opt).c_str(),
          value<vector<string> >(&jobs_str),
-         string("Number of jobs allocated for deme optimization. Jobs can be executed on a remote machine as well, in such case the notation -j N:REMOTE_HOST is used. For instance one can enter the options -j 4 -j 16").append(job_seperator).append("my_server.org (or -j 16").append(job_seperator).append("user@my_server.org if wishes to run the remote jobs under a different user name), meaning that 4 jobs are allocated on the local machine and 16 jobs are allocated on my_server.org. The assumption is that moses-exec must be on the remote machine and is located in a directory included in the PATH environment variable. Beware that a lot of log files are gonna be generated when using this option.\n").c_str())
+         str(format("Number of jobs allocated for deme optimization."
+                    " Jobs can be executed on a remote machine as well,"
+                    " in such case the notation -%1% N:REMOTE_HOST is used,"
+                    " where N is the number of jobs on the machine REMOTE_HOST."
+                    " For instance one can enter the options"
+                    " -%1%4 -%1%16%2%my_server.org"
+                    " (or -%1%16%2%user@my_server.org if one wishes to"
+                    " run the remote jobs under a different user name),"
+                    " meaning that 4 jobs are allocated on the local machine"
+                    " and 16 jobs are allocated on my_server.org."
+                    " The assumption is that moses-exec must be on the remote"
+                    " machine and is located in a directory included in the"
+                    " PATH environment variable. Beware that a lot of log"
+                    " files are gonna be generated when using this option on"
+                    " the remote machines.\n")
+             % jobs_opt.second % job_seperator).c_str())
         (opt_desc_str(weighted_accuracy_opt).c_str(),
          value<bool>(&weighted_accuracy)->default_value(false),
          "This option is useful in case of unbalanced data as it weights the score so that each class weights equally regardless of their proportion in terms of sample size.\n")
