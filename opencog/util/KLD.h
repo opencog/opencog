@@ -24,6 +24,8 @@
 #ifndef _OPENCOG_KLD_H
 #define _OPENCOG_KLD_H
 
+#include "dorepeat.h"
+
 /**
  * Functions to compute the Kullback-Leibler Divergence of discrete
  * and continouous distirbution
@@ -36,50 +38,65 @@ namespace opencog {
  * Kullback-Leibler Divergence Estimation of Continuous Distributions
  * by Fernando Perez-Cruz.
  *
- * @param p sorted sequence of values representing the distribution of P
- * @param q sorted sequence of values representing the distribution of Q
- *
- * @return estimate of KL(P||Q)
+ * That structure allows to access to intermediary results. A function
+ * returning the direct KLD is defined below for convenience.
  */
 template<typename SortedSeq>
-double KLD(const SortedSeq& p, const SortedSeq& q)
-{
-    typedef typename SortedSeq::value_type FloatT;
+struct KLDS {
+    typedef typename SortedSeq::value_type result_type;
     
-    static const FloatT margin = 1.0; // distance of the point from the min
-                                      // and max points of *p.begin() and
-                                      // *p.last()
-    
-    FloatT res = 0.0;           // final result
-    
-    auto it_p = p.cbegin(),
-        it_q = q.cbegin();
+    // @param p sorted sequence of values representing the distribution of P
+    // @param q sorted sequence of values representing the distribution of Q
+    KLDS(const SortedSeq& p_, const SortedSeq& q_) :
+        p(p_), q(q_), margin(1.0), it_p(p.cbegin()), it_q(q.cbegin()),
+        x_very_first(*it_p - margin), x_very_last(p.back() + margin),
+        p_x_pre(x_very_first), q_x_pre(p_x_pre) {}
 
-    FloatT x_very_first = *it_p - margin,
-        x_very_last = p.back() + margin,
-        p_x_pre = x_very_first,
-        q_x_pre = p_x_pre;
-    for (; it_p != p.cend(); ++it_p) {
+    // computes the components log(delta_p / delta_q) once at a
+    // time. This is useful when one want to treat each component as a
+    // seperate optimization of a multi-optimization problem.
+    result_type next() {
         // compute delta P
-        FloatT p_x = *it_p, delta_p = 1.0 / (p_x - p_x_pre);
-        
+        result_type p_x = *it_p, delta_p = 1.0 / (p_x - p_x_pre);
+            
         // compute delta Q
-        FloatT q_x = it_q == q.cend()? x_very_last : *it_q;
+        result_type q_x = it_q == q.cend()? x_very_last : *it_q;
         // search the points of q right before and after p_x
         while (q_x < p_x) {
             q_x_pre = q_x;
             ++it_q;
             q_x = it_q == q.cend()? x_very_last : *it_q;
         }
-        FloatT delta_q = 1.0 / (q_x - q_x_pre);
+        result_type delta_q = 1.0 / (q_x - q_x_pre);
 
-        // accumulate result and update previous value
-        res += std::log(delta_p / delta_q);
         p_x_pre = p_x;
-    }
-    return res / p.size() - 1;
-}
+        ++it_p;
 
+        return std::log(delta_p / delta_q);
+    }
+
+    // @return estimate of KL(P||Q)
+    result_type operator()() {
+        result_type res = 0;
+        size_t size = p.size();
+        dorepeat(size)
+            res += next();
+        return res / size - 1;
+    }
+
+    const SortedSeq &p, &q;
+    result_type margin;
+    typename SortedSeq::const_iterator it_p, it_q;
+    result_type x_very_first, x_very_last, p_x_pre, q_x_pre;
+};
+
+// function helper
+template<typename SortedSeq>
+typename SortedSeq::value_type KLD(const SortedSeq& p, const SortedSeq& q) {
+    KLDS<SortedSeq> klds(p, q);
+    return klds();
+}
+    
 } // ~namespace opencog
 
 #endif // _OPENCOG_KLD_H
