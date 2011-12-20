@@ -24,8 +24,6 @@ ADD_LIBRARY (moses SHARED
     moses/pole_balancing
     eda/initialization
     eda/local_structure
-    main/moses_exec
-    main/moses_exec_def
 )
 
 TARGET_LINK_LIBRARIES (moses

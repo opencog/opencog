@@ -32,6 +32,7 @@ TARGET_LINK_LIBRARIES(representationUTest
 
 ADD_CXXTEST(MOSESUTest)
 TARGET_LINK_LIBRARIES(MOSESUTest
+    moses_exec
     moses
     comboreduct
     util        
