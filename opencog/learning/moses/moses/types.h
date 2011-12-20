@@ -65,8 +65,8 @@ typedef unsigned long long deme_size_t;
 // very high because that information may be used by other tools
 static const int io_score_precision = 32;
 
-static const score_t worst_score =
-    -(std::numeric_limits<score_t>::max()-score_t(1));
+static const score_t best_score = std::numeric_limits<score_t>::max();
+static const score_t worst_score = score_t(1) - best_score;
     // for some weird reasons what is below leads to bugs
     // std::numeric_limits<score_t>::min(),
     // so does this!!!
