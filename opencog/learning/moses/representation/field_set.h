@@ -36,30 +36,42 @@ namespace opencog {
 namespace moses {
 
  /**
-  * A field set creates a simple, optimally compact representation of
-  * a set of continuous, discrete and 'ontological' variables. 
-  * ('Ontological' values are sets of strings, and thus are essentially
-  * discrete variables, except that when unpacked, they have string
-  * values.)  
+  * A field set describes a compact encoding of a set of continuous,
+  * discrete and 'ontological' variables.  The field set does not
+  * itself hold the values of these variables; it simply describes
+  * how they are packed into a bit-string. The field set provides
+  * a collection of iterators for walking over such bit strings, which
+  * may then be used to extract values from the bit string (or to
+  * change them).  
   *
-  * The packing assumes that the number of bits in the encoding of the
-  * smallest discrete variable is either a multiple of bits_per_packed_t,
-  * or is equal in size to or larger than the number of bits in the
-  * encoding of the largest continuous variable. Similarly, the smallest 
-  * continuous variable must be a multiple of bits_per_packed_t, or be
-  * larger (in bits) than the largest discrete variable.
+  * Some terminology: 
+  * 'Discrete' variables, or discs, are just variables that range over
+  * a set of n discrete values. These take ciel(log_2(n)) bits to store.
   *
-  * Without such restrictions, the optimal packing problem is more complex (in
-  * particular, it is NP-complete, IIRC).
+  * 'Ontological' variables, or 'onto's, are sets of strings, and thus
+  * are essentially discrete variables, except that when unpacked, they
+  * have string values.  The field set handles these as a distinct group.
   *
-  * Currently, bits_per_packed_t will be either 32 or 64, depending on
-  * whther the system is 32 or 64-bit. Continuous variables may be float
-  * or double.
+  * 'Continuous' variables are variables that can range over a continuum.
+  * Although one might want to think of these as floats or doubles,
+  * they're not.  They're represented very, very differently: as
+  * variable-length bit strings which encode intervals on the real-number
+  * line. The motivation for this, as opposed to using floats or doubles,
+  * is that EDA algorithms are more efficient for such an encoding.
+  * Further details, motivation and documentation can be found here:
+  * http://code.google.com/p/moses/wiki/ModelingAtomSpaces
   *
-  * XXX The above comments can't possibly be right: discrete variables
-  * are not being 'packed' in multiples of 32 or 64, but in something
-  * much much smaller.  Figure out what this code actually does, and change
-  * the above to actually explain it.
+  * 'Boolean' or 'bit' variables. This is a special case of the discrete
+  * variables, and are handled distinctly in the code and API's below:
+  * they have their own iterators, etc. Only teh multi-bit discrete 
+  * variables are called 'disc'.
+  *
+  * The variable values are packed into bit strings, which are chunked
+  * as vector arrays of 32 or 64-bit unsigned ints, depending on the
+  * C library execution environment. Thus, instead of having a single
+  * offset, two are used: a "major offset", pointing to the appropriate 
+  * 32/64-bit int, and a "minor offset", ranging over 0-31/63. The
+  * "width" is the width of the field, in bits.
   */
 struct field_set
 {
@@ -245,26 +257,29 @@ struct field_set
             return d + 1;
         }
     };
+
+    // A spec, in general, is one of the above  three specs.
     typedef boost::variant<onto_spec, contin_spec, disc_spec> spec;
 
-    //default ctor for an empty field set
+    // Default constructor for an empty field set
     field_set() { }
 
-    //copy ctor
+    // Copy cconstructor
     field_set(const field_set& x)
         : _fields(x._fields), _onto(x._onto), _contin(x._contin),
-          _disc(x._disc), _nbool(x._nbool) {
+          _disc(x._disc), _nbool(x._nbool)
+    {
         compute_starts();
     }
 
-    //a single spec, n times
+    // Constructor for a single spec, repeated n times
     field_set(const spec& s, size_t n) : _nbool(0)
     {
         build_spec(s, n);
         compute_starts();
     }
 
-    // A range of specs.
+    // Constructor for a range of specs.
     template<typename It>
     field_set(It from, It to) : _nbool(0)
     {
@@ -297,7 +312,7 @@ struct field_set
     size_t raw_size() const {
         return _fields.size();
     }
-    // dimension size, number of actual knobs to consider, as onto and
+    // Dimension size, number of actual knobs to consider, as onto and
     // contin may take several raw knobs
     size_t dim_size() const {
         return n_bits() + n_disc() + contin().size() + onto().size();
@@ -308,6 +323,9 @@ struct field_set
         return raw_size() - std::count(begin_raw(inst), end_raw(inst), 0);
     }
 
+    // Return vector of discrete specs. This vector includes the single
+    // bit (boolean) specs, which are at the end of the array. thus the
+    // name "disc and bits".
     const vector<disc_spec>& disc_and_bits() const {
         return _disc;
     }
@@ -352,6 +370,12 @@ struct field_set
         return d;
     }
 
+    // The fields are organized so that onto fields come first,
+    // followed by the continuous fields, and then the discrete
+    // fields. These are then followed by the 1-bit (boolean)
+    // discrete fields, tacked on at the very end. Thus, the
+    // start/end values below reflect this structure.
+
     field_iterator begin_onto_fields() const {
         return _fields.begin();
     }
@@ -387,24 +411,32 @@ struct field_set
         return _fields.end();
     }
 
-    // number of bit discs
+    //* number of discrete fields that are single bits
+    // (i.e. are booleans)
     size_t n_bits() const {
         return _nbool;
     }
-    // number of non-onto, non-contin, non-bit discs
+
+    //* number of discrete fields, not counting the booleans
+    // i.e. not counting the 1-bit discrete fields.
     size_t n_disc() const {
         return distance(_disc_start, _fields.end()) - _nbool;
     }
-    // number of discs allocated for contins
+
+    //* number of continuous fields.
     size_t n_contin() const {
+        // Funny math because _contin_end is same as _disc_start.
         return distance(_contin_start, _disc_start);
     }
-    // number of discs allocated for ontos
+
+    //* number of "ontologicial" fields.
     size_t n_onto() const {
+        // The ontological fields come first in the vector.
         return distance(_fields.begin(), _contin_start);
     }
 
-    size_t contin_to_raw_idx(size_t idx) const {
+    size_t contin_to_raw_idx(size_t idx) const
+    {
         // @todo: compute at the start in _fields - could be faster..
         size_t raw_idx = distance(_fields.begin(), _contin_start);
         for (vector<contin_spec>::const_iterator it = _contin.begin();
@@ -429,6 +461,7 @@ struct field_set
         OC_ASSERT(false, "Impossible case");
         return size_t(); // to make the compiler quiet
     }
+
     size_t onto_to_raw_idx(size_t idx) const
     {
         // @todo: compute at the start in _fields - could be faster..
@@ -438,6 +471,7 @@ struct field_set
             raw_idx += it->depth;
         return raw_idx;
     }
+
     /**
      *  Get number of non-stop in the contin encode at the idx-th
      *  contin. For instance, the inst is {LRSSRLLS} of two
@@ -465,40 +499,35 @@ struct field_set
 
 protected:
     
-    // _fields contains in order:
-    // onto fields, contin fields, disc fields (with the boolean ones at last)
-    // which can be gotten through the methods
-    // begin_onto_fields - end_onto_fields
-    // begin_contin_fields - end_contin_fields
-    // begin_disc_fields - end_disc_fields
-    // begin_bit_fields - end_bit_fields
+    // _fields holds all of the different field types in one array.
+    // They are arranged in order, so that the "ontological" fields
+    // come first, followed by the continuous fields, then the 
+    // (multi-bit) discrete fields (i.e. the discrete fields that
+    // require more than one bit), and finally the one-bit or boolean
+    // fields.
+    // 
+    // The locations and sizes of these can be gotten using the methods:
+    // begin_onto_fields() - end_onto_fields()
+    // begin_contin_fields() - end_contin_fields()
+    // begin_disc_fields() - end_disc_fields()
+    // begin_bit_fields() - end_bit_fields()
     vector<field> _fields;
     vector<onto_spec> _onto;
     vector<contin_spec> _contin;
     vector<disc_spec> _disc; // included bits
     size_t _nbool; // the number of disc_spec that requires only 1 bit to pack
+
+    // Cached values for start location of the continuous and discrete
+    // fields in the _fields array.  We don't need to cache the onto 
+    // start, as that is same as start of _field. Meanwhile, the start
+    // of the booleans is just _nbool back from the end of the array, 
+    // so we don't cache that either. These can be computed from
+    // scratch (below, with compute_starts()) and are cached here for
+    // performance resons.
     field_iterator _contin_start, _disc_start;
 
-    size_t back_offset() const {
-        return _fields.empty() ? 0 :
-               _fields.back().major_offset*bits_per_packed_t +
-               _fields.back().minor_offset + _fields.back().width;
-    }
-
-    // Build spec s, n times, that is:
-    // Fill the corresponding field in _fields, n times.
-    // Add the spec n times in _onto, _contin or _disc depending on its type.
-    void build_spec(const spec& s, size_t n);
-    // Build onto_spec os, n times
-    // Fill the corresponding field, n times.
-    // Add the spec in _onto, n times.
-    void build_onto_spec(const onto_spec& os, size_t n);
-    // Like above but for contin
-    void build_contin_spec(const contin_spec& cs, size_t n);
-    // Like above but for disc, and also,
-    // increment _nbool by n if ds has arity 2 (i.e. only needs one bit).
-    void build_disc_spec(const disc_spec& ds, size_t n);
-
+    // Figure out where, in the field array, the varous different
+    // field types start. Cache these, as they're handy to have around.
     void compute_starts()
     {
         _contin_start = _fields.begin();
@@ -508,6 +537,30 @@ protected:
         foreach(const contin_spec& c, _contin)
             _disc_start += c.depth;
     }
+
+    size_t back_offset() const
+    {
+        return _fields.empty() ? 0 :
+               _fields.back().major_offset*bits_per_packed_t +
+               _fields.back().minor_offset + _fields.back().width;
+    }
+
+    //* Build spec s, n times, that is:
+    // Fill the corresponding field in _fields, n times.
+    // Add the spec n times in _onto, _contin or _disc depending on its type.
+    void build_spec(const spec& s, size_t n);
+
+    //* Build onto_spec os, n times
+    // Fill the corresponding field, n times.
+    // Add the spec in _onto, n times.
+    void build_onto_spec(const onto_spec& os, size_t n);
+
+    // Like above but for contin
+    void build_contin_spec(const contin_spec& cs, size_t n);
+
+    // Like above but for disc, and also,
+    // increment _nbool by n if ds has multiplicity 2 (i.e. only needs one bit).
+    void build_disc_spec(const disc_spec& ds, size_t n);
 
     template<typename Self, typename Iterator>
     struct bit_iterator_base
@@ -664,7 +717,8 @@ protected:
     };
 public:
     struct bit_iterator
-        : public bit_iterator_base<bit_iterator, instance::iterator> {
+        : public bit_iterator_base<bit_iterator, instance::iterator>
+    {
         friend struct field_set;
 
         struct reference
@@ -734,7 +788,8 @@ public:
     };
 
     struct const_bit_iterator
-        : public bit_iterator_base<const_bit_iterator, instance::const_iterator> {
+        : public bit_iterator_base<const_bit_iterator, instance::const_iterator>
+    {
         friend class field_set;
         bool operator*() const {
             return (*_it & _mask) != 0;
@@ -762,7 +817,7 @@ public:
 
         disc_iterator() : _inst(NULL) { }
 
-        //for convenience, but will only work over disc & bool
+        //for convenience, but will only work over discrete & boolean
         arity_t arity() const {
             return
                 _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
@@ -819,7 +874,6 @@ public:
         { }
         instance* _inst;
     };
-
 
     struct const_contin_iterator
         : public iterator_base<const_contin_iterator, contin_t>
@@ -898,6 +952,7 @@ public:
         return disc_iterator(*this, distance(_fields.begin(),
                                              begin_disc_fields()), inst);
     }
+
     disc_iterator end_disc(instance& inst) const {
         return disc_iterator(*this, distance(_fields.begin(),
                                              end_disc_fields()), inst);
@@ -906,12 +961,15 @@ public:
     const_contin_iterator begin_contin(const instance& inst) const {
         return const_contin_iterator(*this, 0, inst);
     }
+
     const_contin_iterator end_contin(const instance& inst) const {
         return const_contin_iterator(*this, _contin.size(), inst);
     }
+
     contin_iterator begin_contin(instance& inst) const {
         return contin_iterator(*this, 0, inst);
     }
+
     contin_iterator end_contin(instance& inst) const {
         return contin_iterator(*this, _contin.size(), inst);
     }
@@ -919,6 +977,7 @@ public:
     const_onto_iterator begin_onto(const instance& inst) const {
         return const_onto_iterator(*this, 0, inst);
     }
+
     const_onto_iterator end_onto(const instance& inst) const {
         return const_onto_iterator(*this, _onto.size(), inst);
     }
@@ -943,6 +1002,7 @@ disc_t >::reference::do_get() const
 {
     return _it->_fs->get_raw(*_it->_inst, _idx);
 }
+
 template<>
 inline void field_set::iterator_base < field_set::disc_iterator,
 disc_t >::reference::do_set(disc_t x)
@@ -956,6 +1016,7 @@ contin_t >::reference::do_get() const
 {
     return _it->_fs->get_contin(*_it->_inst, _idx);
 }
+
 template<>
 inline void field_set::iterator_base < field_set::contin_iterator,
 contin_t >::reference::do_set(contin_t x)
