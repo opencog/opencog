@@ -79,10 +79,14 @@ struct field_set
     // values that a variable can take, and the width of a bit-field,
     // (which is ciel(log_2) of the former), we define two distinct
     // types.  A third type, combo::arity_t is reserved for the arity
-    // of a function.  These are three distinct concepts, they should
+    // of a function.  For binary trees, two more types are introduced:
+    // depth_t and breadth_t, corresponding to the depth and breadth of
+    // a binary tree. These are five distinct concepts, they should
     // not be confused with one-another.
     typedef unsigned int multiplicity_t;
     typedef unsigned int width_t;
+    typedef unsigned int breadth_t;
+    typedef unsigned int depth_t;
     typedef std::size_t size_t;
 
     struct bit_iterator;
@@ -120,13 +124,13 @@ struct field_set
 
     struct disc_spec
     {
-        disc_spec(width_t a) : arity(a) { }
-        width_t arity;
-        bool operator<(const disc_spec& rhs) const { //sort descending by arity
-            return arity > rhs.arity;
+        disc_spec(multiplicity_t a) : multy(a) { }
+        multiplicity_t multy;
+        bool operator<(const disc_spec& rhs) const { //sort descending by multy
+            return multy > rhs.multy;
         }
         bool operator==(const disc_spec& rhs) const { //don't know why this is needed
-            return arity == rhs.arity;
+            return multy == rhs.multy;
         }
     };
 
@@ -144,10 +148,10 @@ struct field_set
      */
     struct contin_spec
     {
-        contin_spec(contin_t m, contin_t ss, contin_t ex, size_t d)
+        contin_spec(contin_t m, contin_t ss, contin_t ex, depth_t d)
                 : mean(m), step_size(ss), expansion(ex), depth(d) { }
         contin_t mean, step_size, expansion;
-        size_t depth;
+        depth_t depth;
 
         bool operator<(const contin_spec& rhs) const
         {
@@ -174,7 +178,7 @@ struct field_set
         // its used as breadth, e.g. in build_contin_spec. So which is it ???
         contin_t epsilon() const
         {
-            return step_size / contin_t(size_t(1) << depth);
+            return step_size / contin_t(1UL << depth);
         }
 
         static const disc_t Stop;  // 0
@@ -831,7 +835,7 @@ public:
             return
                 _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
                 _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
-                _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].arity;
+                _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].multy;
         }
         void randomize(RandGen& rng) {
             _fs->set_raw(*_inst, _idx, rng.randint(arity()));
@@ -858,7 +862,7 @@ public:
             return
                 _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
                 _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
-                _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].arity;
+                _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].multy;
         }
     protected:
         const_disc_iterator(const field_set& fs, size_t idx, const instance& inst)
@@ -1043,7 +1047,7 @@ Out field_set::pack(It from, Out out) const
         size_t width = nbits_to_pack(o.branching);
         size_t total_width = size_t((width * o.depth - 1) /
                                     bits_per_packed_t + 1) * bits_per_packed_t;
-        for (width_t i = 0;i < o.depth;++i) {
+        for (width_t i = 0; i < o.depth; ++i) {
             *out |= (*from++) << offset;
             offset += width;
             if (offset == bits_per_packed_t) {
@@ -1059,7 +1063,7 @@ Out field_set::pack(It from, Out out) const
     }
 
     foreach(const contin_spec& c, _contin) {
-        for (width_t i = 0;i < c.depth;++i) {
+        for (width_t i = 0; i < c.depth; ++i) {
             *out |= (*from++) << offset;
             offset += 2;
             if (offset == bits_per_packed_t) {
@@ -1071,7 +1075,7 @@ Out field_set::pack(It from, Out out) const
 
     foreach(const disc_spec& d, _disc) {
         *out |= (*from++) << offset;
-        offset += nbits_to_pack(d.arity);
+        offset += nbits_to_pack(d.multy);
         if (offset == bits_per_packed_t) {
             offset = 0;
             ++out;
