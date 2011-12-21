@@ -583,8 +583,8 @@ Knobs do not have to be defined as running over all possible values; it
 
 \begin_layout Description
 Representation-building.
- The step in the MOSES algorithm where an examplar is choosen, and a representat
-ion is constructed from it.
+ The step in the MOSES algorithm where an examplar is chosen, and a representati
+on is constructed from it.
  This representation is essentially the cornerstone of a deme.
 \end_layout
 
@@ -1435,6 +1435,18 @@ build_knobs::sample_action_perms
  XXX more explanation please ...
 \end_layout
 
+\begin_layout Standard
+Knobs are added to an exemplar using 
+\family typewriter
+class build_knobs
+\family default
+ defined in 
+\family typewriter
+representation/build_knobs.h
+\family default
+.
+\end_layout
+
 \begin_layout Subsection
 Packed Knobs
 \end_layout
@@ -1609,7 +1621,75 @@ for ( ; it<end_disc(my_inst); it++) {
 
 \end_inset
 
+Typically, many different instances can be described by the same 
+\family typewriter
+field_set
+\family default
+.
+ Thus, when an 
+\family typewriter
+instance_set
+\family default
+ is defined (see below), one copy of the 
+\family typewriter
+field_set
+\family default
+ is kept, to describe all of the instances in an 
+\family typewriter
+instance_set
+\family default
+.
+\end_layout
 
+\begin_layout Standard
+These unpacked fields are associated with actual knobs in a specific 
+\family typewriter
+combo_tree
+\family default
+ by means of the 
+\family typewriter
+knob_mapper
+\family default
+.
+ So, for example
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef std::multimap<field_set::disc_spec, disc_knob> disc_map;
+\end_layout
+
+\end_inset
+
+is a map between 
+\family typewriter
+disc_knob
+\family default
+'s (discrete knobs, which are aware of the 
+\family typewriter
+combo_tree
+\family default
+ in which they are located), and 
+\family typewriter
+disc_spec
+\family default
+'s (knob specifications, which are used by 
+\family typewriter
+field_set
+\family default
+ to describe fields in the packed bit-string).
+ This map can be used to find a knob value in a packed bit-string, or, conversel
+y, given a field, to find the corresponding knob in a 
+\family typewriter
+combo_tree
+\family default
+.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -1617,29 +1697,38 @@ Demes and Optimization
 \end_layout
 
 \begin_layout Standard
-XXX some details below incorrect.
+At the conceptual level, the optimization algorithms operate on a population
+ in a deme, by twiddling knobs until the optimizer finds a program that
+ performs well.
+ That is, a deme is a collection of knob settings: for evolutionary optimization
+ algorithms, it may be thought of as a population: different instances of
+ knob settings compete with one-another until a population of the best-possible
+ knob settings is found.
 \end_layout
 
 \begin_layout Standard
-The metapopulation consists of expressions (stored as scored trees).
- These expressions do not refer to some exemplar.
- On the other hand, during the learning process, new demes are generated.
- A deme is centered around an exemplar from the metapopulation.
- However, elements of the deme are not represented as (scored) trees but,
- instead, are represented relative to the exemplar.
- 
+At the practical level, optimization operates on a population of bit-strings,
+ and not on abstract 'knob settings'.
+ Thus, a necessary step of the MOSES algorithm is to convert such abstract
+ knob settings into packed bit strings, and 
+\emph on
+vice versa
+\emph default
+.
+ This is done during the representation step of the algorithm: knobs were
+ inserted into an exemplar, the knobs were mapped to knob specifications,
+ and the knob specifications were in-turn mapped to bit-strings.
+ The optimization algorithm then tries to find the fittest bit-strings or
+ 'instances'.
 \end_layout
 
 \begin_layout Standard
-xxx above to define packed knobs, instance
-\end_layout
-
-\begin_layout Standard
-In 
+So, in 
 \family typewriter
-eda/scoring.h
+eda/scoring.h,
 \family default
- we find scored instances:
+ we find scored instances.
+ The higher the score, the fitter the bit-string:
 \family typewriter
  
 \begin_inset listings
@@ -1671,7 +1760,7 @@ In
 \family typewriter
 representation/instance_set.h 
 \family default
-we find:
+we find a collection of scored instances:
 \end_layout
 
 \begin_layout Standard
@@ -1691,12 +1780,36 @@ struct instance_set :
 
 \begin_layout Plain Layout
 
-	public vector<scored_instance<ScoreT> > {...};  
+	public vector<scored_instance<ScoreT> > {
+\end_layout
+
+\begin_layout Plain Layout
+
+	...
+\end_layout
+
+\begin_layout Plain Layout
+
+	protected:
+\end_layout
+
+\begin_layout Plain Layout
+
+		const field_set &_fields;
+\end_layout
+
+\begin_layout Plain Layout
+
+};  
 \end_layout
 
 \end_inset
 
-
+Note that, in the above, there is a 
+\family typewriter
+field_set
+\family default
+ member used to describe how the packed bits in the instance are to be unpacked.
 \end_layout
 
 \begin_layout Standard
@@ -1728,13 +1841,9 @@ int optimize(instance_set<ScoreT>&, ...);
 \end_layout
 
 \begin_layout Standard
-The basic learning and optimization processes work over these instances,
- and not over trees.
- So, a suitable way for representing expressions/trees as sequences of bit/integ
-er/real values (relative to the exemplar) enable abstract and clean optimization
- steps, uniform for different domains.
- This representation is based on representation building relative to a given
- exemplar.
+The output of the optimization step is a deme: conceptually, a population
+ of the fittest programs there were centered on the exemplar.
+ 
 \end_layout
 
 \begin_layout Subsection
