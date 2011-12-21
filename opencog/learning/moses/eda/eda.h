@@ -68,7 +68,7 @@ const unsigned int bits_per_packed_t = 32;
 
 // Value types accessing unpacked instances.
 typedef double       contin_t;  // continuous
-typedef int          disc_t;    // discrete
+typedef unsigned     disc_t;    // discrete
 typedef std::string  onto_t;
 typedef tree<onto_t> onto_tree;
 
