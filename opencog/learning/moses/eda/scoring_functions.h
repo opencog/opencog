@@ -34,12 +34,38 @@
 
 #include "../representation/field_set.h"
 
-namespace opencog { 
+namespace opencog {
 namespace moses {
 
-struct one_max : public unary_function<instance, int> {
-    int operator()(const instance& inst) const {
-        //operates directly on packed_t
+// Example scoring functions.
+//
+// These scoring functions all implement "toy problems" that typical
+// optimization algorithms are expected to do well in solving. Thus,
+// for example, "one_max" just counts the number of bits set in a
+// bit-string.
+//
+// These functions take an instance as an argument, and score that
+// instance for fitness.  Recall that an "instance" is a string of bits
+// that encode a set of knob settings; an instance may encode discrete,
+// continuous, or string variables.
+//
+// Recall that the C++ std::unary_fuinction<> template is jus a trick
+// to make a C++ class behave as if it were a function, so that it can
+// be used anywhere a function is used.
+
+
+// Return, as the score, the total number of bits set in the instance.
+struct one_max : public unary_function<instance, int>
+{
+    int operator()(const instance& inst) const
+    {
+        // This operates directly on the packed_t of the instance.
+        //
+        // boost::make_transform_iterator is a kind of pullback or
+        // pushforward kind of thing, it creates a new iterator, such
+        // that the new iterator applies the function count_bits() when
+        // the iterator is dereferences.  Not sure, but I think
+        // make_transform_iterator is kind-of-like a "monad functor".
         return accumulate
                (make_transform_iterator(inst.begin(),
                                         count_bits<packed_t>),
@@ -48,34 +74,57 @@ struct one_max : public unary_function<instance, int> {
     }
 };
 
-struct n_max : public unary_function<instance, int> {
+
+// Return, as the score, the sum total settings of all discrete knob
+// settings in the instance.
+struct n_max : public unary_function<instance, int>
+{
     n_max(const field_set& fs) : fields(fs) {}
-    int operator()(const instance& inst) const {
+    int operator()(const instance& inst) const
+    {
         return accumulate(fields.begin_disc(inst), fields.end_disc(inst), 0);
     }
     const field_set& fields;
 };
 
-struct contin_max : public unary_function<instance, contin_t> {
+// Return, as the score, the sum total of all continuous knob settings
+// in the instance.
+struct contin_max : public unary_function<instance, contin_t>
+{
     contin_max(const field_set& fs) : fields(fs) {}
-    contin_t operator()(const instance& inst) const {
+    contin_t operator()(const instance& inst) const
+    {
         return accumulate(fields.begin_contin(inst), fields.end_contin(inst),
                           contin_t(0));
     }
     const field_set& fields;
 };
 
-struct contin_uniform : public unary_function<instance, contin_t> {
+// Return, as the score, the absolute difference (the "lp_1" distance)
+// between the instance, and a vector of fixed, randomly generated values.
+//
+// That is, a vector of continuous values, bounded between a min and max,
+// are randomly generated. The values of the continuous variables in the
+// instance are compared to these random values, taking the absolute value,
+// and summed over, thus returning the "lp_1" distance between the instance,
+// and the random vector.
+//
+athe sum of the absolute value of the differences
+struct contin_uniform : public unary_function<instance, contin_t>
+{
     contin_uniform(const field_set& fs, contin_t minval, contin_t maxval,
                    RandGen& rng)
-        : fields(fs), target(fs.n_contin()) {
+        : fields(fs), target(fs.n_contin())
+    {
         generate(target.begin(), target.end(),
                  bind(std::plus<contin_t>(),
                       bind(std::multiplies<contin_t>(),
                            bind(&RandGen::randdouble, ref(rng)),
                            maxval - minval), minval));
     }
-    contin_t operator()(const instance& inst) const {
+
+    contin_t operator()(const instance& inst) const
+    {
         contin_t res = 0;
         field_set::const_contin_iterator it1 = fields.begin_contin(inst);
         for (vector<contin_t>::const_iterator it2 = target.begin();
@@ -87,7 +136,11 @@ struct contin_uniform : public unary_function<instance, contin_t> {
     vector<contin_t> target;
 };
 
-struct sphere : public unary_function<instance, contin_t> {
+// Return, as the score, minus the sum of the squares of all
+// contiinuous knob settings in the instance.
+//
+struct sphere : public unary_function<instance, contin_t>
+{
     sphere(const field_set& fs) : fields(fs) {}
     contin_t operator()(const instance& inst) const {
         contin_t res = 0;
@@ -101,7 +154,17 @@ struct sphere : public unary_function<instance, contin_t> {
     const field_set& fields;
 };
 
-struct ontomax: public unary_function<instance, contin_t> {
+// Return, as the score, the sum of pairs of numbers expressed as
+// "ontological variables".
+//
+// Recall that an "ontological variable" is a knob whose values are
+// arbitrary strings. In this case, this function insists that all
+// these strings are exactly two characters long, and that each
+// character is an ASCII digit. This scoring function then goes over
+// all ontological knobs in the instance, pulls out these two digits,
+// and adds them together.  The sum of all of these is the returned score.
+struct ontomax: public unary_function<instance, contin_t>
+{
     ontomax(const field_set& fs) : fields(fs) {}
     contin_t operator()(const instance& inst) const {
         contin_t res = 0;
