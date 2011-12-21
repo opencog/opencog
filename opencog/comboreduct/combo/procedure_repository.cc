@@ -265,7 +265,7 @@ bool procedure_repository::infer_types_repo() {
     typedef std::map<procedure_call, type_tree> proc_type;
     typedef proc_type::iterator proc_type_it;
     typedef proc_type::const_iterator proc_type_const_it;
-    typedef std::map<procedure_call, argument_type_list> proc_arg_type;
+    typedef std::map<procedure_call, type_tree_seq> proc_arg_type;
 
     generate_and_order_strongly_connected_components();
 
@@ -284,8 +284,8 @@ bool procedure_repository::infer_types_repo() {
                 procedure_call current_pc = *pci;
 
                 //insert argument_list to pat[current_pc]
-                pat[current_pc] = argument_type_list();
-                argument_type_list& atl = pat.find(current_pc)->second;
+                pat[current_pc] = type_tree_seq();
+                type_tree_seq& atl = pat.find(current_pc)->second;
                 //insert unknown type for current_pc in pt
                 pt[current_pc] = type_tree(id::unknown_type);
 

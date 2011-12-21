@@ -71,7 +71,7 @@ EntropyFilter::EntropyFilter(const std::string& self_id,
                              const definite_object_set& dos,
                              const message_set& ms,
                              const agent_to_actions& atas,
-                             const argument_type_list& input_arg_types,
+                             const type_tree_seq& input_arg_types,
                              opencog::RandGen& rng)
         : _self_id(self_id), _owner_id(owner_id),
         _atomSpace(atomSpace), _elementary_perceptions(ep),

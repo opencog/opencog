@@ -235,7 +235,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
 
         //for now it is assumed that all arguments of the program to learn
         //are definite_object
-        argument_type_list atl(_arity, type_tree(id::definite_object_type));
+        type_tree_seq atl(_arity, type_tree(id::definite_object_type));
 
         _entropyFilter = new EntropyFilter(_avatar_id, _owner_id,
                                            wp->getAtomSpace(),

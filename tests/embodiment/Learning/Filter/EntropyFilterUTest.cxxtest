@@ -341,7 +341,7 @@ public:
                                petID);
 
         //instanciation of EntropyFilter
-        argument_type_list atl(2, type_tree(id::definite_object_type));
+        type_tree_seq atl(2, type_tree(id::definite_object_type));
         Filter::EntropyFilter ef(pet_str, avatar_str, atomSpace,
                                  ps, idos, dos, messages, atas, atl, rng);
 

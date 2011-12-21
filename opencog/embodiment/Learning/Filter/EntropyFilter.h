@@ -121,7 +121,7 @@ public:
                   const definite_object_set& dos,
                   const message_set& ms,
                   const agent_to_actions& atas,
-                  const argument_type_list& input_arg_types,
+                  const type_tree_seq& input_arg_types,
                   opencog::RandGen& _rng);
     ~EntropyFilter();
 
@@ -171,7 +171,7 @@ private:
     const definite_object_set& _dos;
     const message_set& _ms;
     const agent_to_actions& _atas;
-    const argument_type_list& _input_arg_types; //input arguments of the
+    const type_tree_seq& _input_arg_types; //input arguments of the
     //combo program to learn
     arity_t _arity;//size of _input_arg_types
 

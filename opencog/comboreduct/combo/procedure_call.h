@@ -45,7 +45,7 @@ protected:
     type_tree _type_tree;
     arity_t _arity;
     type_tree _output_type;
-    argument_type_list _arg_types;
+    type_tree_seq _arg_types;
 
     //procedure body
     combo_tree _body;

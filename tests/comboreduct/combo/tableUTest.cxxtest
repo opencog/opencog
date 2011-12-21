@@ -59,7 +59,7 @@ public:
         it.push_back({id::logical_false, id::logical_true});
         testIStreamTable("1,1,0\n"
                          "0,0,1\n", it, ot, false,
-                         declare_function(id::boolean_type, 2));
+                         gen_signature(id::boolean_type, 2));
     }
     void test_ContinTable() {
         vertex_seq o{10.1, 6.5};
@@ -69,7 +69,7 @@ public:
         it.push_back({9.5, 4.2});
         testIStreamTable("10.1,0.4,244.2\n"
                          "6.5,9.5,4.2\n", it, ot, false,
-                         declare_function(id::contin_type, 2));
+                         gen_signature(id::contin_type, 2));
     }
     void test_ContinTableLabels() {
         vertex_seq o{10.1, 6.5};
@@ -82,7 +82,7 @@ public:
         testIStreamTable("happiness,price,temperature\n"
                          "10.1,0.4,244.2\n"
                          "6.5,9.5,4.2\n", it, ot, true,
-                         declare_function(id::contin_type, 2));
+                         gen_signature(id::contin_type, 2));
     }
     void test_filterTable() {
         ITable it;

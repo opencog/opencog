@@ -71,7 +71,7 @@ public:
     void test_boolean_rep1() {
         string tr_str = "and";
         combo_tree tr = totree(tr_str);
-        type_tree tt = declare_function(id::boolean_type, 3);
+        type_tree tt = gen_signature(id::boolean_type, 3);
         representation rep(logical_reduction(2), logical_reduction(3),
                            tr, tt, rng, vertex_set());
 

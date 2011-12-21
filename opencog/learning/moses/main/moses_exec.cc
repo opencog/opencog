@@ -563,7 +563,7 @@ int moses_exec(int argc, char** argv) {
         if(nsamples>0)
             subsampleTable(table.itable, table.otable, nsamples, rng);
         
-        type_tree tt = declare_function(output_type, arity);
+        type_tree tt = gen_signature(output_type, arity);
         int as = alphabet_size(tt, ignore_ops);
         
         if(output_type == id::boolean_type) {
@@ -602,6 +602,13 @@ int moses_exec(int argc, char** argv) {
         } else {
             unsupported_type_exit(output_type);
         }
+    } else if(problem == kl) { // find interesting patterns
+        // it assumes that the inputs are boolean and the output is contin
+
+        // infer the type of the input table
+        type_tree inferred_tt = infer_data_type_tree(input_data_file);
+        // TODO
+
     } else if(problem == cp) { // regression based on combo program
         // get the combo_tree and infer its type
         combo_tree tr = str_to_combo_tree(combo_str);
@@ -651,7 +658,7 @@ int moses_exec(int argc, char** argv) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
-        type_tree tt = declare_function(id::boolean_type, arity);
+        type_tree tt = gen_signature(id::boolean_type, arity);
         logical_bscore bscore(func, arity);
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
@@ -669,7 +676,7 @@ int moses_exec(int argc, char** argv) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
-        type_tree tt = declare_function(id::boolean_type, arity);
+        type_tree tt = gen_signature(id::boolean_type, arity);
         logical_bscore bscore(func, arity);
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
@@ -687,7 +694,7 @@ int moses_exec(int argc, char** argv) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
-        type_tree tt = declare_function(id::boolean_type, arity);
+        type_tree tt = gen_signature(id::boolean_type, arity);
         logical_bscore bscore(func, arity);
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
@@ -702,7 +709,7 @@ int moses_exec(int argc, char** argv) {
             exemplars.push_back(type_to_exemplar(id::contin_type));
         }
         
-        type_tree tt = declare_function(id::contin_type, arity);
+        type_tree tt = gen_signature(id::contin_type, arity);
 
         ITable it(tt, rng, (nsamples>0? nsamples : default_nsamples));
 
@@ -730,7 +737,7 @@ int moses_exec(int argc, char** argv) {
         if(nsamples>0)
             subsampleTable(table.itable, table.otable, nsamples, rng);
 
-        type_tree tt = declare_function(id::ann_type, 0);
+        type_tree tt = gen_signature(id::ann_type, 0);
         
         int as = alphabet_size(tt, ignore_ops);
 
@@ -744,7 +751,7 @@ int moses_exec(int argc, char** argv) {
     } else if(problem == ann_cp) { // regression based on combo program using ann
         // get the combo_tree and infer its type
         combo_tree tr = str_to_combo_tree(combo_str);
-        type_tree tt = declare_function(id::ann_type, 0);
+        type_tree tt = gen_signature(id::ann_type, 0);
         int as = alphabet_size(tt, ignore_ops);
 
         // if no exemplar has been provided in option use the default one

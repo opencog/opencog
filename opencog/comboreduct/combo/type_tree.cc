@@ -28,6 +28,8 @@
 
 namespace opencog { namespace combo {
 
+using namespace std;
+        
 // ------------ support for builtins --------------------------
 
 char get_arity(builtin b)
@@ -245,7 +247,7 @@ type_tree get_output_type_tree(const vertex& v)
     } else if (is_procedure_call(v)) {
         return get_output_type_tree(get_procedure_call(v));
     } else {
-        std::stringstream out;
+        stringstream out;
         out << v;
         OC_ASSERT(false, "Unhandled case '%s'",
                           out.str().c_str());
@@ -278,7 +280,7 @@ type_tree get_input_type_tree(const vertex& v, arity_t i)
     } else if (is_procedure_call(v)) {
         return get_input_type_tree(get_procedure_call(v), i);
     } else {
-        std::stringstream out;
+        stringstream out;
         out << v;
         OC_ASSERT(false,
                           "Unhandled case '%s'", out.str().c_str());
@@ -342,11 +344,11 @@ arity_t type_tree_arity(const type_tree& ty)
     return 0;
 }
 
-argument_type_list type_tree_input_arg_types(const type_tree& ty)
+type_tree_seq type_tree_input_arg_types(const type_tree& ty)
 {
     OC_ASSERT(!ty.empty(),
                       "Not sure this assert should not be replaced by a conditional");
-    argument_type_list res;
+    type_tree_seq res;
     type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type) {
         OC_ASSERT(!ty_it.is_childless(),
@@ -376,7 +378,7 @@ arity_t abs_min_arity(arity_t arity)
     else return arity;
 }
 
-const type_tree& argument_type_list_input_type(const argument_type_list& atl,
+const type_tree& argument_type_list_input_type(const type_tree_seq& atl,
                                                arity_t arity,
                                                arity_t index)
 {
@@ -391,6 +393,18 @@ type_tree type_tree_output_type_tree(const type_tree& ty)
         return type_tree(ty_it.last_child());
     else
         return type_tree(ty_it);
+}
+
+type_tree_seq signature_inputs(const type_tree& ty)
+{
+    typedef type_tree::sibling_iterator sib_it;
+    OC_ASSERT(!ty.empty(), "ty must not be empty");
+    type_tree_pre_it ty_it = ty.begin();
+    OC_ASSERT(*ty_it == id::lambda_type);
+    type_tree_seq tts;
+    for(sib_it sib = ty_it.begin(); sib != ty_it.last_child(); ++sib)
+        tts.push_back(type_tree(sib));
+    return tts;
 }
 
 arity_t get_arity(const vertex& v)
@@ -504,28 +518,28 @@ bool inherit_type_tree(const type_tree& ty1, type_tree_pre_it it1,
 }
 
 void reduce_type_tree(type_tree& tt,
-                      const argument_type_list& arg_types,
+                      const type_tree_seq& arg_types,
                       const combo_tree& tr,
-                      const std::string& proc_name)
+                      const string& proc_name)
 {
     if (!tt.empty()) {
         reduce_type_tree(tt, tt.begin(), arg_types, tr, tr.begin(), proc_name);
-    } else std::cout << "Warning : you're trying to reduce an empty type_tree"
-                     << std::endl;
+    } else cout << "Warning : you're trying to reduce an empty type_tree"
+                << endl;
 }
 
 void reduce_type_tree(type_tree& tt,
                       const combo_tree& tr,
-                      const std::string& proc_name)
+                      const string& proc_name)
 {
-    argument_type_list empty_arg_types;
+    type_tree_seq empty_arg_types;
     reduce_type_tree(tt, empty_arg_types, tr, proc_name);
 }
 
 void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
-                      const argument_type_list& arg_types,
+                      const type_tree_seq& arg_types,
                       const combo_tree& tr, combo_tree::iterator ct_it,
-                      const std::string& proc_name)
+                      const string& proc_name)
 {
 
     //---------------------
@@ -596,7 +610,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                     || (!ila && arg_count_app != arg_count)) {
 
                 //log message
-                std::stringstream message;
+                stringstream message;
                 message << "combo::type_tree - Type reduction error:"
                         << " the number of arguments, which is "
                         << arg_count_app;
@@ -672,7 +686,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                             else {
                                 
                                 //log message
-                                std::stringstream message;
+                                stringstream message;
                                 message << "combo::type_tree - Type reduction error:"
                                         << " the output of the "
                                         << tt.sibling_index(arg_app)
@@ -704,7 +718,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                         else {
                             
                             //log message
-                            std::stringstream message;
+                            stringstream message;
                             message << "combo::type_tree - Type reduction error:"
                                     << " the "
                                     << tt.sibling_index(arg_app)
@@ -768,7 +782,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
         // is not a function
         else {
             //log message
-            std::stringstream message;
+            stringstream message;
             message << "combo::type_tree - Type reduction error:"
                     << " the supposely operator ";
 
@@ -796,7 +810,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
     else if (*it == id::union_type) {
         OC_ASSERT(!it.is_childless(),
                           "union_type must have at least a child");
-        std::vector<type_tree> utt;
+        type_tree_seq utt;
         //apply reduce recursively to the children of the union
         for (type_tree_sib_it sib = it.begin(); sib != it.end(); ++sib) {
             reduce_type_tree(tt, type_tree_pre_it(sib), arg_types,
@@ -872,7 +886,7 @@ type_tree get_intersection(const type_tree& tt1, type_tree_pre_it it1,
     //check if tt1 and tt2 are unions, if so the intersection of the unions
     //is the union of the interections
     else if (*it1 == id::union_type && *it2 == id::union_type) {
-        std::set<type_tree, opencog::size_tree_order<type_node> > union_of_inter;
+        set<type_tree, opencog::size_tree_order<type_node> > union_of_inter;
         for (type_tree_sib_it sib1 = it1.begin(); sib1 != it1.end(); ++sib1) {
             for (type_tree_sib_it sib2 = it2.begin(); sib2 != it2.end(); ++sib2) {
                 type_tree inter_tt = get_intersection(tt1,
@@ -891,7 +905,7 @@ type_tree get_intersection(const type_tree& tt1, type_tree_pre_it it1,
             type_tree tmp;
             tmp.set_head(id::union_type);
             type_tree_pre_it head = tmp.begin();
-            for (std::set<type_tree>::const_iterator its = union_of_inter.begin();
+            for (set<type_tree>::const_iterator its = union_of_inter.begin();
                     its != union_of_inter.end(); ++its) {
                 tmp.replace(tmp.append_child(head), its->begin());
             }
@@ -942,21 +956,21 @@ type_tree get_intersection(const type_tree& tt1, type_tree_pre_it it1,
 //function to fill a vector of type_tree corresponding to a given
 //arguments
 void set_arg_type(const type_tree& tt, const argument& arg,
-                  argument_type_list& arg_types)
+                  type_tree_seq& arg_types)
 {
     set_arg_type(tt, arg.abs_idx(), arg_types);
 }
 //like above but takes a type_node corresponding to an argument
 //it is assumed that the given type_node does correspond to an argument
 void set_arg_type(const type_tree& tt, type_node arg,
-                  argument_type_list& arg_types)
+                  type_tree_seq& arg_types)
 {
     set_arg_type(tt, arg_to_idx(arg), arg_types);
 }
 //like above but uses the index of the argument
 //(counted from 1, like in class argument of vertex.h)
 void set_arg_type(const type_tree& tt, unsigned int idx,
-                  argument_type_list& arg_types)
+                  type_tree_seq& arg_types)
 {
     OC_ASSERT(idx > 0);
     unsigned int idxfz = idx - 1;
@@ -970,21 +984,21 @@ void set_arg_type(const type_tree& tt, unsigned int idx,
 //return the type_tree stored in the vector arg_types
 //if no type_tree are stored then return the type_tree id::unknown_type
 const type_tree& get_arg_type(const argument& arg,
-                              const argument_type_list& arg_types)
+                              const type_tree_seq& arg_types)
 {
     return get_arg_type(arg.abs_idx(), arg_types);
 }
 //like above but takes a type_node corresponding to an argument
 //it is assumed that the given type_node does correspond to an argument
 const type_tree& get_arg_type(type_node arg,
-                              const argument_type_list& arg_types)
+                              const type_tree_seq& arg_types)
 {
     return get_arg_type(arg_to_idx(arg), arg_types);
 }
 //like above but uses the index of the argument
 //(counted from 1, like in class argument of vertex.h)
 const type_tree& get_arg_type(unsigned int idx,
-                              const argument_type_list& arg_types)
+                              const type_tree_seq& arg_types)
 {
     static const type_tree unknown_type_tree = type_tree(id::unknown_type);
     if (idx <= arg_types.size())
@@ -993,7 +1007,7 @@ const type_tree& get_arg_type(unsigned int idx,
 }
 
 type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
-                            const argument_type_list& atl)
+                            const type_tree_seq& atl)
 {
     typedef combo_tree::iterator pre_it;
     typedef combo_tree::sibling_iterator sib_it;
@@ -1037,7 +1051,7 @@ vertex_set argument_set(const combo_tree& tr)
 
 //that function uses a trace of procedure_calls already in progress
 //in order to avoid infinite loop due to circularity references
-void infer_arg_type_tree(const combo_tree& tr, argument_type_list& arg_types)
+void infer_arg_type_tree(const combo_tree& tr, type_tree_seq& arg_types)
 {
     typedef combo_tree::leaf_iterator leaf_it;
     OC_ASSERT(!tr.empty(),
@@ -1054,17 +1068,16 @@ void infer_arg_type_tree(const combo_tree& tr, argument_type_list& arg_types)
     }
 }
 
-void insert_arg_type_tree(const argument_type_list& arg_types,
+void insert_arg_type_tree(const type_tree_seq& arg_types,
                           type_tree& tt2)
 {
-    OC_ASSERT(!tt2.empty(),
-                      "tt2 is supposed to contain a type");
+    OC_ASSERT(!tt2.empty(), "tt2 is supposed to contain a type");
     if (!arg_types.empty()) {
         type_tree_pre_it head = tt2.begin();
         if (*head != id::lambda_type)
             head = tt2.wrap(head, id::lambda_type);
         type_tree_pre_it first_var_arg = head.begin();
-        for (argument_type_list_const_it itt = arg_types.begin();
+        for (type_tree_seq_cit itt = arg_types.begin();
                 itt != arg_types.end(); ++itt) {
             tt2.insert_subtree(first_var_arg, itt->begin());
         }
@@ -1105,7 +1118,7 @@ type_tree get_type_tree(const combo_tree& tr, combo_tree::iterator it)
 type_tree infer_type_tree(const combo_tree& tr)
 {
     type_tree tt = get_type_tree(tr);
-    argument_type_list arg_types;
+    type_tree_seq arg_types;
     infer_arg_type_tree(tr, arg_types);
     reduce_type_tree(tt, arg_types, tr);
     insert_arg_type_tree(arg_types, tt);
@@ -1129,7 +1142,7 @@ bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n)
     OC_ASSERT(!tr.empty(),
                       "cannot infer arg types on an empty combo_tree");
     OC_ASSERT(n >= 0, "Must be positive or null");
-    std::vector<bool> bv(n, false);
+    vector<bool> bv(n, false);
     if (n > 0) {
         for (leaf_it lit = tr.begin_leaf(); lit != tr.end_leaf(); ++lit) {
             if (is_argument(*lit)) {
@@ -1140,7 +1153,7 @@ bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n)
                 else return false;
             }
         }
-        std::vector<bool> tbv(n, true);
+        vector<bool> tbv(n, true);
         return tbv == bv;
     } else return true;
 }
@@ -1174,7 +1187,7 @@ arity_t explicit_arity(const combo_tree& tr)
     return res;
 }
 
-type_tree declare_function(const type_tree& iotype, arity_t arity)
+type_tree gen_signature(const type_tree& iotype, arity_t arity)
 {
     type_tree res(id::lambda_type);
     type_tree::iterator root = res.begin();
@@ -1183,10 +1196,10 @@ type_tree declare_function(const type_tree& iotype, arity_t arity)
         sib = res.replace(sib, iotype.begin());
     return res;
 }
-type_tree declare_function(type_node iotype, arity_t arity)
+type_tree gen_signature(type_node iotype, arity_t arity)
 {
     type_tree tt(iotype);
-    return declare_function(tt, arity);
+    return gen_signature(tt, arity);
 }
 
 } // ~namespace combo
@@ -1194,7 +1207,7 @@ type_tree declare_function(type_node iotype, arity_t arity)
 
 namespace std {
 
-std::ostream& operator<<(std::ostream& out, const opencog::combo::type_node& n)
+ostream& operator<<(ostream& out, const opencog::combo::type_node& n)
 {
     using namespace opencog::combo;
     switch (n) {
@@ -1237,10 +1250,10 @@ std::ostream& operator<<(std::ostream& out, const opencog::combo::type_node& n)
     }
 }
 
-std::istream& operator>>(std::istream& in, opencog::combo::type_node& n)
+istream& operator>>(istream& in, opencog::combo::type_node& n)
 {
     using namespace opencog::combo;
-    std::string str;
+    string str;
     in >> str;
     OC_ASSERT(!str.empty(),
                       "str representation must not be empty.");

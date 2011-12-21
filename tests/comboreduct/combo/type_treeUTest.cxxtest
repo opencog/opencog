@@ -438,7 +438,7 @@ public:
         stringstream ss("->(contin boolean arg_list(action_result) boolean)");
         type_tree tt;
         ss >> tt;
-        argument_type_list atl = type_tree_input_arg_types(tt);
+        type_tree_seq atl = type_tree_input_arg_types(tt);
         arity_t a = type_tree_arity(tt);
         TS_ASSERT_EQUALS(a, -3);
         type_tree tti3 = argument_type_list_input_type(atl, a, 3);

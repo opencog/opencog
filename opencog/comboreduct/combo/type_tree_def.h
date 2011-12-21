@@ -74,10 +74,10 @@ typedef type_tree::iterator type_tree_pre_it;
 typedef type_tree::sibling_iterator type_tree_sib_it;
 
 //list of argument types
-typedef std::vector<type_tree> argument_type_list;
-typedef argument_type_list::iterator argument_type_list_it;
-typedef argument_type_list::const_iterator argument_type_list_const_it;
-const static argument_type_list empty_atl;
+typedef std::vector<type_tree> type_tree_seq;
+typedef type_tree_seq::iterator type_tree_seq_it;
+typedef type_tree_seq::const_iterator type_tree_seq_cit;
+const static type_tree_seq empty_tts;
 
 //check whether a given type_node represents an argument type
 bool is_argument_type(type_node n);
