@@ -358,8 +358,9 @@ private:
 #define MAX_PERM_ACTIONS 128
 
 // Note - children aren't cannonized when parents are called.
-struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS> {
-
+// XXX what does the above comment mean ???
+struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
+{
     typedef combo_tree::pre_order_iterator pre_it;
 
     action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
@@ -475,6 +476,8 @@ struct simple_action_subtree_knob : public discrete_knob<2>
     }
 };
 
+// The disc_knob may be any one of a number of different discrete
+// knob types.
 typedef based_variant <boost::variant<logical_subtree_knob,
                                       action_subtree_knob,
                                       simple_action_subtree_knob>,
