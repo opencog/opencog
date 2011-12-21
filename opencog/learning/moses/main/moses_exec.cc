@@ -170,10 +170,10 @@ combo::arity_t infer_arity(const string& problem,
 }
 
 // returns n such that a = n+2^n
-field_set::width_t multiplex_arity(field_set::multiplicity_t a)
+unsigned multiplex_arity(arity_t a)
 {
-    field_set::multiplicity_t nearest_arity = 1;
-    for (field_set::width_t n = 1; n <= integer_log2(a); ++n) {
+    arity_t nearest_arity = 1;
+    for (unsigned n = 1; n <= integer_log2(a); ++n) {
         nearest_arity = n + pow2(n);
         if (nearest_arity == a)
             return n;
