@@ -75,8 +75,8 @@ public:
     void test_sa_3_mux() {
         moses_test({"-Hmux", "-k3", "-asa"});
     }
-    void test_un_3_pa() {
-        moses_test({"-Hpa", "-k3", "-aun", "-m100000"});
+    void test_un_3_pa_multi_thread() {
+        moses_test({"-Hpa", "-k3", "-aun", "-m100000", "-j4"});
     }
     void test_it() {
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
