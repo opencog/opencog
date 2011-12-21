@@ -34,9 +34,11 @@
 namespace opencog { 
 namespace moses {
 
-    struct cout_log_best_and_gen {
+    struct cout_log_best_and_gen
+    {
         template<typename It>
-        void operator()(It from,It to,const field_set& fs,int gen) const {
+        void operator()(It from,It to,const field_set& fs,int gen) const
+        {
             if (from==to)
                 return;
             
