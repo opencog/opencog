@@ -61,6 +61,10 @@ struct representation : public knob_mapper, boost::noncopyable
                    const combo_tree_ns_set* actions = NULL);
 
 
+    /**
+     * Turn the knobs on this representation, so that they have the same
+     * settings as those in the 'instance' argument.
+     */
     void transform(const instance&);
     void clear_exemplar();
 
@@ -89,11 +93,11 @@ struct representation : public knob_mapper, boost::noncopyable
      */
     combo_tree get_candidate(const instance& inst, bool reduce);
 
-    // return _simplify_candidate
+    //* return _simplify_candidate
     const reduct::rule* get_simplify_candidate() const {
         return _simplify_candidate;
     }
-    // return _simplify_knob_building
+    //* return _simplify_knob_building
     const reduct::rule* get_simplify_knob_building() const {
         return _simplify_knob_building;
     }
