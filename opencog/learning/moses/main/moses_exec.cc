@@ -299,7 +299,7 @@ int moses_exec(int argc, char** argv) {
                     "%s, disjunction\n"
                     "%s, multiplex\n"
                     "%s, regression of f(x)_o = sum_{i={1,o}} x^i\n")
-             % it % ann_it % cp % pa % dj % mux % sr).c_str())
+             % it % kl % ann_it % cp % pa % dj % mux % sr).c_str())
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
          str(format("Combo program to learn, used when the problem"
