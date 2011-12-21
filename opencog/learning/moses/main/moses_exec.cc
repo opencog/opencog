@@ -288,6 +288,11 @@ int moses_exec(int argc, char** argv) {
          value<string>(&problem)->default_value(it),
          str(format("Problem to solve, supported problems are:\n"
                     "%s, regression based on input table\n"
+                    "%s, search interesting patterns, where interestingness"
+                    " is defined in terms of maximizing the Kullback-Leibler"
+                    " divergence between the distribution of the outputs and"
+                    " that same distribution in the context of the pattern"
+                    " being true.\n"
                     "%s, regression based on input table using ann\n"
                     "%s, regression based on combo program\n"
                     "%s, even parity\n"
