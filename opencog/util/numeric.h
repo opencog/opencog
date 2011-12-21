@@ -170,8 +170,13 @@ inline unsigned int count_bits(T v)
     return ((T)(v * ((T)~(T)0 / 255)) >> (sizeof(v) - 1) * CHAR_BIT);
 }
 
+// return p the smallest power of 2 so that p >= x. So for instance:
+//   next_power_of_two(1) = 1
+//   next_power_of_two(2) = 2
+//   next_power_of_two(3) = 4
 inline size_t next_power_of_two(size_t x)
 {
+    OC_ASSERT(x > 0);
     x--;
     x |= x >> 1;
     x |= x >> 2;
@@ -203,13 +208,16 @@ template<typename FloatT> FloatT log2(FloatT x)
     return std::log(x) / std::log(static_cast<FloatT>(2));
 }
 
-// return the smaller power of 2 bits that can encode arity combinations
-// So for instance
-// nbits_to_pack(2) = 1, nbits_to_pack(3) = 2, nbits_to_pack(50) = 8
-inline unsigned int nbits_to_pack(size_t arity)
+// return the smaller exponent in base 2. This is used to know how
+// many bits should be used to pack a certain number of values. So
+// for instance
+//    nbits_to_pack(2) = 1,
+//    nbits_to_pack(3) = 2,
+//    nbits_to_pack(50) = 8
+inline unsigned int nbits_to_pack(size_t multy)
 {
-    OC_ASSERT(arity>0);
-    return next_power_of_two(integer_log2(arity -1) + 1);
+    OC_ASSERT(multy > 0);
+    return next_power_of_two(integer_log2(multy -1) + 1);
 }
 
 //sums of natural logarithms (for a particular floating-point type)

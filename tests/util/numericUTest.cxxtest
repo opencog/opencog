@@ -30,13 +30,31 @@ using namespace combo;
 class numericUTest : public CxxTest::TestSuite
 {
 public:
+    void test_next_power_of_two() {
+        TS_ASSERT_THROWS_ANYTHING(next_power_of_two(0));
+        unsigned res_1 = next_power_of_two(1),
+            res_2 = next_power_of_two(2),
+            res_3 = next_power_of_two(3),
+            res_4 = next_power_of_two(4),
+            res_5 = next_power_of_two(5);
+
+        cout << res_1 << " " << res_2 << " " << res_3 << " " 
+             << res_4 << " " << res_5 << endl;
+
+        TS_ASSERT_EQUALS(res_1, 1);
+        TS_ASSERT_EQUALS(res_2, 2);
+        TS_ASSERT_EQUALS(res_3, 4);
+        TS_ASSERT_EQUALS(res_4, 4);
+        TS_ASSERT_EQUALS(res_5, 8);
+    }
+
     void test_nbits_to_pack() {
         TS_ASSERT_THROWS_ANYTHING(nbits_to_pack(0));
-        unsigned int res_1 = nbits_to_pack(1);
-        unsigned int res_2 = nbits_to_pack(2);
-        unsigned int res_3 = nbits_to_pack(3);
-        unsigned int res_4 = nbits_to_pack(4);
-        unsigned int res_5 = nbits_to_pack(5);
+        unsigned res_1 = nbits_to_pack(1),
+            res_2 = nbits_to_pack(2),
+            res_3 = nbits_to_pack(3),
+            res_4 = nbits_to_pack(4),
+            res_5 = nbits_to_pack(5);
 
         cout << res_1 << " " << res_2 << " " << res_3 << " " 
              << res_4 << " " << res_5 << endl;
@@ -48,6 +66,3 @@ public:
         TS_ASSERT_EQUALS(res_5, 4);
     }
 };
-
- 
-
