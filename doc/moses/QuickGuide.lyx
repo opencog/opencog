@@ -85,7 +85,7 @@ Predrag Janicic, Revised by Linas Vepstas
 \end_layout
 
 \begin_layout Date
-3 November 2008, revised 14 December 2011
+3 November 2008, revised 21 December 2011
 \end_layout
 
 \begin_layout Abstract
@@ -883,11 +883,21 @@ eda This folder contains support for estimation of distribution algorithms,
 \end_layout
 
 \begin_layout Description
+example-ant Example implementation of using MOSES to solve for robotic perceptio
+n-action algorithms.
+ This example dmonstrates the "ant on the Santa Fe Trail" problem; it includes
+ definitions for the movement of the ant, the perceptions of the ant, and
+ the space in which the ant can move.
+ Conceptually, the problem is that of finding the best possible algorithm
+ for a robot to use to accomplish some task, given that the robot has certain
+ limited senses, and certain limited movements.
+\end_layout
+
+\begin_layout Description
 example-progs This folder contains examples demonstrating different features
  of the MOSES system: reducing expressions, and, of course, applications
  of MOSES itself.
- It includes examples for the "ant problem/santa-fe trail", for "parity
- formulae", 
+ It includes examples for the, for "parity formulae", 
 \emph on
 etc.
 \end_layout
@@ -907,7 +917,9 @@ optimization Contains the main optimization code.
 \end_layout
 
 \begin_layout Description
-representation Contains code for representation-building.
+representation Contains code for representation-building, that is, for taking
+ an exemplar, attaching knobs to it, and converting the knob settings to
+ and from bit-strings that the optimizer expects to work on.
 \end_layout
 
 \begin_layout Section
@@ -1803,13 +1815,106 @@ int optimize(instance_set<ScoreT>&, ...);
 
 \end_inset
 
+This function template serves as a wrapper to define a generic evolutionary
+ selection algorithm:
+\begin_inset listings
+inline false
+status open
 
+\begin_layout Plain Layout
+
+template <typename ScoreT,
 \end_layout
 
-\begin_layout Standard
-The output of the optimization step is a deme: conceptually, a population
- of the fittest programs there were centered on the exemplar.
- 
+\begin_layout Plain Layout
+
+		typename ScoringPolicy,
+\end_layout
+
+\begin_layout Plain Layout
+
+		typename TerminationPolicy,
+\end_layout
+
+\begin_layout Plain Layout
+
+		typename SelectionPolicy,
+\end_layout
+
+\begin_layout Plain Layout
+
+		typename StructureLearningPolicy,
+\end_layout
+
+\begin_layout Plain Layout
+
+		typename ProbsLearningPolicy,
+\end_layout
+
+\begin_layout Plain Layout
+
+		typename ReplacementPolicy,
+\end_layout
+
+\begin_layout Plain Layout
+
+		typename LoggingPolicy>
+\end_layout
+
+\begin_layout Plain Layout
+
+int optimize(...);
+\end_layout
+
+\end_inset
+
+The algorithm itself is meant to be generic: it is a loop, until termination
+ (using 
+\family typewriter
+TerminationPolicy
+\family default
+), of steps performed on a population.
+ Before entering the loop, each individual in the population is scored for
+ fitness (using XXX??).
+ Inside the loop, the following steps are taken:
+\end_layout
+
+\begin_layout Enumerate
+One or more individuals are selected, using 
+\family typewriter
+SelectionPolicy
+\family default
+.
+\end_layout
+
+\begin_layout Enumerate
+Build a model, using 
+\family typewriter
+StructureLearningPolicy
+\end_layout
+
+\begin_layout Enumerate
+-- learn structure,
+\end_layout
+
+\begin_layout Enumerate
+--learn probs
+\end_layout
+
+\begin_layout Enumerate
+-- create a bunch of instances
+\end_layout
+
+\begin_layout Enumerate
+-- score
+\end_layout
+
+\begin_layout Enumerate
+-- Replace 
+\end_layout
+
+\begin_layout Enumerate
+-- repeat.
 \end_layout
 
 \begin_layout Subsection
@@ -1953,54 +2058,6 @@ Key Methods
 
 \begin_layout Standard
 This section briefly discusses key MOSES's methods.
-\end_layout
-
-\begin_layout Subsection
-Representation Building
-\end_layout
-
-\begin_layout Standard
-The creation of representations from exemplars, termed '
-\emph on
-representation building
-\emph default
-', is one of the key ideas of the MOSES algorithm.
- Representation building starts with an exemplar and adds to it new nodes
- and corresponding knobs (see 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "6"
-
-\end_inset
-
-).
- Knobs can have different settings.
- If all knobs are set to 0, then the original exemplar is obtained.
- The code provides support for several different problem domains, including
- propositional formulae and actions.
- These are given in the file 
-\family typewriter
-representation/build_knobs.h
-\family default
-.
-\end_layout
-
-\begin_layout Standard
-The key method is 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|void build_knobs::build_action(pre_it it)|
-\end_layout
-
-\end_inset
-
- --- it substantially determines the representation building for one domain
- and substantially influence the learning process.
 \end_layout
 
 \begin_layout Subsection
