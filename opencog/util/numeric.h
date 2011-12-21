@@ -200,7 +200,7 @@ inline unsigned int integer_log2(size_t v)
 
 template<typename FloatT> FloatT log2(FloatT x)
 {
-    return std::log(x) / std::log(2.0);
+    return std::log(x) / std::log(static_cast<FloatT>(2));
 }
 
 // return the smaller power of 2 bits that can encode arity combinations
