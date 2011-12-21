@@ -1364,7 +1364,7 @@ Fields come in four basic types: continuous, discrete,
 \begin_inset Quotes eld
 \end_inset
 
-ontological
+terms
 \begin_inset Quotes erd
 \end_inset
 
@@ -1373,16 +1373,6 @@ ontological
  values.
  These typically take several bits to represent; single-bit boolean variables
  are treated distinctly.
- The 
-\begin_inset Quotes eld
-\end_inset
-
-ontological
-\begin_inset Quotes erd
-\end_inset
-
- type is simply a discrete type that takes values over a set of character
- strings.
  Continuous variables can take on values in the real-number line.
  However, they are not represented by floats or doubles, but rather, are
  represented with a certain binary tree of intervals of the real-number
@@ -1398,6 +1388,33 @@ target "http://code.google.com/p/moses/wiki/ModelingAtomSpaces"
 \end_inset
 
 .
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Term
+\begin_inset Quotes erd
+\end_inset
+
+ fields refer to the tree structure of term algebras: they can be thought
+ of as trees whose nodes are labeled with strings.
+ Term algebras, also known as 
+\begin_inset Quotes eld
+\end_inset
+
+absolutely free algebras
+\begin_inset Quotes erd
+\end_inset
+
+, are commonly used in logic, category theory, universal algebra and programming
+ to represent arbitrary data structures.
+ From the standpoint of MOSES, they generalize the binary tree structure
+ of the '
+\family typewriter
+contin
+\family default
+' variables.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1670,6 +1687,15 @@ typedef tagged_item<behavioral_score, composite_score>
 
 \end_layout
 
+\begin_layout Standard
+All score types need to provide an 
+\family typewriter
+operator>()
+\family default
+ for comparison, as the generic ranking algorithms need to be able to compare
+ generic scores.
+\end_layout
+
 \begin_layout Subsection
 Demes and Optimization
 \end_layout
@@ -1874,7 +1900,17 @@ The algorithm itself is meant to be generic: it is a loop, until termination
 TerminationPolicy
 \family default
 ), of steps performed on a population.
- Before entering the loop, each individual in the population is scored for
+ Currently, two types of termination are implemented, in 
+\family typewriter
+eda/termination.h
+\family default
+: one when scores exceed a bound, and another when scores exceed a bound,
+ or fail to show improvement.
+ 
+\end_layout
+
+\begin_layout Standard
+Before entering the loop, each individual in the population is scored for
  fitness (using XXX??).
  Inside the loop, the following steps are taken:
 \end_layout
@@ -2052,6 +2088,14 @@ The metapopulation is updated in iterations.
  the metapopulation).
 \end_layout
 
+\begin_layout Subsection
+TODO:
+\end_layout
+
+\begin_layout Standard
+Discuss role of tree_type in knobs.
+\end_layout
+
 \begin_layout Section
 Key Methods
 \end_layout
@@ -2079,7 +2123,7 @@ instances
  It is invoked in the main procedure, in each iteration of expanding (the
  method 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -2092,7 +2136,7 @@ verb|metapopulation::expand|
 
 , implemented in the file 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -2112,7 +2156,7 @@ verb|moses/moses.h|
 Currently, there are two optimization methods implemented (implemented in
  the file 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 

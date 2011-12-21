@@ -35,14 +35,14 @@ const disc_t field_set::contin_spec::Stop = 0;
 const disc_t field_set::contin_spec::Left = 1;
 const disc_t field_set::contin_spec::Right = 2;
 
-const disc_t field_set::onto_spec::Stop = 0;
+const disc_t field_set::term_spec::Stop = 0;
 
 field_set& field_set::operator=(const field_set& rhs)
 {
     _fields = rhs._fields;
     _disc = rhs._disc;
     _contin = rhs._contin;
-    _onto = rhs._onto;
+    _term = rhs._term;
     _nbool = rhs._nbool;
     _contin_start = _fields.begin() + distance(rhs._fields.begin(),
                                                rhs._contin_start);
@@ -53,22 +53,22 @@ field_set& field_set::operator=(const field_set& rhs)
 bool field_set::operator==(const field_set& rhs) const
 {
     return (_disc == rhs._disc && _contin == rhs._contin &&
-            _onto == rhs._onto && _nbool == rhs._nbool);
+            _term == rhs._term && _nbool == rhs._nbool);
 }
 
-const onto_t& field_set::get_onto(const instance& inst, size_t idx) const
+const term_t& field_set::get_term(const instance& inst, size_t idx) const
 {
-    size_t raw_idx = onto_to_raw_idx(idx);
+    size_t raw_idx = term_to_raw_idx(idx);
 
-    // Walk down the tree to get the appropriate onto_t.
-    const onto_spec& o = _onto[idx];
-    onto_tree::iterator it = o.tr->begin();
+    // Walk down the tree to get the appropriate term_t.
+    const term_spec& o = _term[idx];
+    term_tree::iterator it = o.tr->begin();
     for (size_t i = 0; i < o.depth; ++i) {
         disc_t raw_value = get_raw(inst, raw_idx + i);
-        if (raw_value == onto_spec::Stop) {
+        if (raw_value == term_spec::Stop) {
             break;
         } else {
-            it = o.tr->child(it, onto_spec::to_child_idx(raw_value));
+            it = o.tr->child(it, term_spec::to_child_idx(raw_value));
         }
     }
     return *it;
@@ -132,7 +132,7 @@ std::string field_set::stream(const instance& inst) const
 {
     std::stringstream ss;
     ss << "[";
-    ostreamContainer(ss, begin_onto(inst), end_onto(inst), "#", "#", "", false);
+    ostreamContainer(ss, begin_term(inst), end_term(inst), "#", "#", "", false);
     ostreamContainer(ss, begin_contin(inst), end_contin(inst), "|", "|", "", false);
     ostreamContainer(ss, begin_disc(inst), end_disc(inst), " ", " ", "", false);
     ostreamContainer(ss, begin_bits(inst), end_bits(inst), "", "", "", false);
@@ -149,8 +149,8 @@ std::string field_set::stream_raw(const instance& inst) const
 
 void field_set::build_spec(const spec& s, size_t n)
 {
-    if (const onto_spec* os = boost::get<onto_spec>(&s)) {
-        build_onto_spec(*os, n);
+    if (const term_spec* os = boost::get<term_spec>(&s)) {
+        build_term_spec(*os, n);
     } else if (const contin_spec* cs = boost::get<contin_spec>(&s)) {
         build_contin_spec(*cs, n);
     } else if (const disc_spec* ds = boost::get<disc_spec>(&s)) {
@@ -194,7 +194,7 @@ void field_set::build_contin_spec(const contin_spec& cs, size_t n)
     _contin.insert(_contin.end(), n, cs);
 }
 
-void field_set::build_onto_spec(const onto_spec& os, size_t n)
+void field_set::build_term_spec(const term_spec& os, size_t n)
 {
     size_t base = back_offset(), width = nbits_to_pack(os.branching);
     size_t total_width = size_t((width * os.depth - 1) /
@@ -206,9 +206,9 @@ void field_set::build_onto_spec(const onto_spec& os, size_t n)
                                     base % bits_per_packed_t));
             base += width;
         }
-        base += total_width - (os.depth * width); //onto vars must pack evenly
+        base += total_width - (os.depth * width); //term vars must pack evenly
     }
-    _onto.insert(_onto.end(), n, os);
+    _term.insert(_term.end(), n, os);
 }
 
 } // ~namespace moses

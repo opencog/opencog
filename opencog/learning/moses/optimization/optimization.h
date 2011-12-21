@@ -58,7 +58,7 @@ inline double information_theoretic_bits(const field_set& fs)
         unsigned contin_count = pow2(c.depth + 1) - 1;
         res += log2<double>(contin_count);
     }
-    foreach(const field_set::onto_spec& o, fs.onto())
+    foreach(const field_set::term_spec& o, fs.term())
         res += log2<double>(o.branching) * double(o.depth);
     return res;
 }
@@ -470,7 +470,7 @@ struct sliced_iterative_hillclimbing {
             number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
             exemplar = instance(deme.fields().packed_width());
 
-            // set to 0 all fields (contin and onto fields are
+            // set to 0 all fields (contin and term fields are
             // ignored) to represent the exemplar
             for (field_set::bit_iterator it = deme.fields().begin_bits(exemplar);
                     it != deme.fields().end_bits(exemplar); ++it)

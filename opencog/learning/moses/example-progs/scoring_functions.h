@@ -153,25 +153,26 @@ struct sphere : public unary_function<instance, contin_t>
     const field_set& fields;
 };
 
-// Return, as the score, the sum of pairs of numbers expressed as
-// "ontological variables".
+// Return, as the score, the sum of pairs of numbers organized into
+// terms.
 //
-// Recall that an "ontological variable" is a knob whose values are
-// arbitrary strings. In this case, this function insists that all
+// Recall that an "term variable" is a knob whose values are trees
+// of arbitrary strings. In this case, this function insists that all
 // these strings are exactly two characters long, and that each
 // character is an ASCII digit. This scoring function then goes over
-// all ontological knobs in the instance, pulls out these two digits,
-// and adds them together.  The sum of all of these is the returned score.
-struct ontomax: public unary_function<instance, contin_t>
+// all term knobs in the instance, pulls out these two digits, and
+// adds them together.  The sum of all of these is the returned score.
+struct termmax: public unary_function<instance, contin_t>
 {
-    ontomax(const field_set& fs) : fields(fs) {}
-    contin_t operator()(const instance& inst) const {
+    termmax(const field_set& fs) : fields(fs) {}
+    contin_t operator()(const instance& inst) const
+    {
         contin_t res = 0;
-        for (field_set::const_onto_iterator it = fields.begin_onto(inst);
-                it != fields.end_onto(inst);++it) {
-            onto_t s = *it;
+        for (field_set::const_term_iterator it = fields.begin_term(inst);
+                it != fields.end_term(inst);++it) {
+            term_t s = *it;
             OC_ASSERT(s.length() == 2,
-                             "onto_t length should be equals to two");
+                             "term_t length should be equals to two");
             int a = boost::lexical_cast<int>(s[0]);
             int b = boost::lexical_cast<int>(s[1]);
             res += a + b;

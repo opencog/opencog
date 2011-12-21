@@ -37,7 +37,7 @@ namespace moses {
 
  /**
   * A field set describes a compact encoding of a set of continuous,
-  * discrete and 'ontological' variables.  The field set does not
+  * discrete and 'term algebra' variables.  The field set does not
   * itself hold the values of these variables; it simply describes
   * how they are packed into a bit-string. The field set provides
   * a collection of iterators for walking over such bit strings, which
@@ -48,9 +48,10 @@ namespace moses {
   * 'Discrete' variables, or discs, are just variables that range over
   * a set of n discrete values. These take ciel(log_2(n)) bits to store.
   *
-  * 'Ontological' variables, or 'onto's, are sets of strings, and thus
-  * are essentially discrete variables, except that when unpacked, they
-  * have string values.  The field set handles these as a distinct group.
+  * 'Boolean' or 'bit' variables. This is a special case of the discrete
+  * variables, and are handled distinctly in the code and API's below:
+  * they have their own iterators, etc. Only the multi-bit discrete
+  * variables are called 'disc'.
   *
   * 'Continuous' variables are variables that can range over a continuum.
   * Although one might want to think of these as floats or doubles,
@@ -61,10 +62,16 @@ namespace moses {
   * Further details, motivation and documentation can be found here:
   * http://code.google.com/p/moses/wiki/ModelingAtomSpaces
   *
-  * 'Boolean' or 'bit' variables. This is a special case of the discrete
-  * variables, and are handled distinctly in the code and API's below:
-  * they have their own iterators, etc. Only the multi-bit discrete
-  * variables are called 'disc'.
+  * 'Term algebra' variables, or 'term's, are variables that take values
+  * in a term algebra (aka an 'absolutely free algebra').  Terms are
+  * best understood as node-labelled trees. The labels occuring as leaves
+  * of a tree are commonly called 'constants' or 'zero-ary functions',
+  * while the internal nodes of the tree would be called 'n-ary functions'
+  * (presuming that they have n children).  The labels on nodes are
+  * strings.  Note that atoms (in the general sense, not the opencog
+  * sense) are terms with truth values (predicates);  however no atoms or
+  * truth values are used here.  See for example, Baader & Nipkow, 
+  * 'Term Rewriting and All That', for more information. Or wikipedia.
   *
   * The variable values are packed into bit strings, which are chunked
   * as vector arrays of 32 or 64-bit unsigned ints, depending on the
@@ -95,7 +102,7 @@ struct field_set
     struct const_disc_iterator;
     struct contin_iterator;
     struct const_contin_iterator;
-    struct const_onto_iterator;
+    struct const_term_iterator;
 
     /**
      * The field struct provides the information needed to get/set the
@@ -244,21 +251,21 @@ struct field_set
         contin_t _step_size;
     };
 
-    struct onto_spec
+    struct term_spec
     {
-        onto_spec(const onto_tree& t)
+        term_spec(const term_tree& t)
                 : tr(&t), depth(t.max_depth(t.begin())),
                 branching(next_power_of_two(1 + t.max_branching(t.begin()))) { }
         // @todo: could be a source of bug if such order is not total
         // as it's gonna make problems with field_set(from, to)
-        bool operator<(const onto_spec& rhs) const { //sort descending by size
+        bool operator<(const term_spec& rhs) const { //sort descending by size
             return (depth*branching > rhs.depth*rhs.branching);
         }
 
-        const onto_tree* tr;
+        const term_tree* tr;
         size_t depth, branching;
 
-        bool operator==(const onto_spec& rhs) const { //don't know why this is needed
+        bool operator==(const term_spec& rhs) const { //don't know why this is needed
             return (depth == rhs.depth && branching == rhs.branching && *tr == *(rhs.tr));
         }
 
@@ -272,14 +279,14 @@ struct field_set
     };
 
     // A spec, in general, is one of the above  three specs.
-    typedef boost::variant<onto_spec, contin_spec, disc_spec> spec;
+    typedef boost::variant<term_spec, contin_spec, disc_spec> spec;
 
     // Default constructor for an empty field set
     field_set() { }
 
-    // Copy cconstructor
+    // Copy constructor
     field_set(const field_set& x)
-        : _fields(x._fields), _onto(x._onto), _contin(x._contin),
+        : _fields(x._fields), _term(x._term), _contin(x._contin),
           _disc(x._disc), _nbool(x._nbool)
     {
         compute_starts();
@@ -325,10 +332,10 @@ struct field_set
     size_t raw_size() const {
         return _fields.size();
     }
-    // Dimension size, number of actual knobs to consider, as onto and
+    // Dimension size, number of actual knobs to consider, as term and
     // contin may take several raw knobs
     size_t dim_size() const {
-        return n_bits() + n_disc() + contin().size() + onto().size();
+        return n_bits() + n_disc() + contin().size() + term().size();
     }
 
     // counts the number of nonzero (raw) settings in an instance
@@ -345,8 +352,8 @@ struct field_set
     const vector<contin_spec>& contin() const {
         return _contin;
     }
-    const vector<onto_spec>& onto() const {
-        return _onto;
+    const vector<term_spec>& term() const {
+        return _term;
     }
 
     disc_t get_raw(const instance& inst, size_t idx) const { //nth encoded var
@@ -360,9 +367,9 @@ struct field_set
                                  ((packed_t(1) << f.width) - 1) << f.minor_offset);
     }
 
-    // returns a reference of the onto at idx, idx is relative to
-    // onto_iterator
-    const onto_t& get_onto(const instance& inst, size_t idx) const;
+    // returns a reference of the term at idx, idx is relative to
+    // term_iterator
+    const term_t& get_term(const instance& inst, size_t idx) const;
     // returns the contin at idx, idx is relative to contin_iterator
     contin_t get_contin(const instance& inst, size_t idx) const;
     void set_contin(instance& inst, size_t idx, contin_t v) const;
@@ -383,16 +390,16 @@ struct field_set
         return d;
     }
 
-    // The fields are organized so that onto fields come first,
+    // The fields are organized so that term fields come first,
     // followed by the continuous fields, and then the discrete
     // fields. These are then followed by the 1-bit (boolean)
     // discrete fields, tacked on at the very end. Thus, the
     // start/end values below reflect this structure.
 
-    field_iterator begin_onto_fields() const {
+    field_iterator begin_term_fields() const {
         return _fields.begin();
     }
-    field_iterator end_onto_fields() const {
+    field_iterator end_term_fields() const {
         return _contin_start;
     }
 
@@ -442,9 +449,9 @@ struct field_set
         return distance(_contin_start, _disc_start);
     }
 
-    //* number of "ontologicial" fields.
-    size_t n_onto() const {
-        // The ontological fields come first in the vector.
+    //* number of "term algebra" fields.
+    size_t n_term() const {
+        // The term fields come first in the vector.
         return distance(_fields.begin(), _contin_start);
     }
 
@@ -463,7 +470,7 @@ struct field_set
     size_t raw_to_contin_idx(size_t idx) const
     {
         // @todo: compute at the start in _fields - could be faster..
-        size_t begin_contin_idx = n_onto();
+        size_t begin_contin_idx = n_term();
         size_t end_contin_idx = begin_contin_idx + n_contin();
         OC_ASSERT(idx >= begin_contin_idx && idx < end_contin_idx);
         int contin_raw_idx = idx - begin_contin_idx;
@@ -475,12 +482,12 @@ struct field_set
         return size_t(); // to make the compiler quiet
     }
 
-    size_t onto_to_raw_idx(size_t idx) const
+    size_t term_to_raw_idx(size_t idx) const
     {
         // @todo: compute at the start in _fields - could be faster..
         size_t raw_idx = 0;
-        for (vector<onto_spec>::const_iterator it = _onto.begin();
-                it != _onto.begin() + idx;++it)
+        for (vector<term_spec>::const_iterator it = _term.begin();
+                it != _term.begin() + idx;++it)
             raw_idx += it->depth;
         return raw_idx;
     }
@@ -513,25 +520,25 @@ struct field_set
 protected:
 
     // _fields holds all of the different field types in one array.
-    // They are arranged in order, so that the "ontological" fields
+    // They are arranged in order, so that the "term algebra" fields
     // come first, followed by the continuous fields, then the
     // (multi-bit) discrete fields (i.e. the discrete fields that
     // require more than one bit), and finally the one-bit or boolean
     // fields.
     //
     // The locations and sizes of these can be gotten using the methods:
-    // begin_onto_fields() - end_onto_fields()
+    // begin_term_fields() - end_term_fields()
     // begin_contin_fields() - end_contin_fields()
     // begin_disc_fields() - end_disc_fields()
     // begin_bit_fields() - end_bit_fields()
     vector<field> _fields;
-    vector<onto_spec> _onto;
+    vector<term_spec> _term;
     vector<contin_spec> _contin;
     vector<disc_spec> _disc; // included bits
     size_t _nbool; // the number of disc_spec that requires only 1 bit to pack
 
     // Cached values for start location of the continuous and discrete
-    // fields in the _fields array.  We don't need to cache the onto
+    // fields in the _fields array.  We don't need to cache the term
     // start, as that is same as start of _field. Meanwhile, the start
     // of the booleans is just _nbool back from the end of the array,
     // so we don't cache that either. These can be computed from
@@ -544,7 +551,7 @@ protected:
     void compute_starts()
     {
         _contin_start = _fields.begin();
-        foreach(const onto_spec& o, _onto)
+        foreach(const term_spec& o, _term)
             _contin_start += o.depth; //# of fields
         _disc_start = _contin_start;
         foreach(const contin_spec& c, _contin)
@@ -560,13 +567,13 @@ protected:
 
     //* Build spec s, n times, that is:
     // Fill the corresponding field in _fields, n times.
-    // Add the spec n times in _onto, _contin or _disc depending on its type.
+    // Add the spec n times in _term, _contin or _disc depending on its type.
     void build_spec(const spec& s, size_t n);
 
-    //* Build onto_spec os, n times
+    //* Build term_spec os, n times
     // Fill the corresponding field, n times.
-    // Add the spec in _onto, n times.
-    void build_onto_spec(const onto_spec& os, size_t n);
+    // Add the spec in _term, n times.
+    void build_term_spec(const term_spec& os, size_t n);
 
     // Like above but for contin
     void build_contin_spec(const contin_spec& cs, size_t n);
@@ -833,9 +840,9 @@ public:
         // for convenience, but will only work over discrete & boolean
         multiplicity_t multy() const {
             return
-                _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
-                _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
-                _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].multy;
+                _idx < _fs->term().size() ? _fs->term()[_idx].branching :
+                _idx < _fs->term().size() + _fs->contin().size() ? 3 :
+                _fs->disc_and_bits()[_idx-_fs->term().size()-_fs->contin().size()].multy;
         }
         void randomize(RandGen& rng) {
             _fs->set_raw(*_inst, _idx, rng.randint(multy()));
@@ -860,9 +867,9 @@ public:
         // for convenience, but will only work over disc & bool
         multiplicity_t multy() const {
             return
-                _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
-                _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
-                _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].multy;
+                _idx < _fs->term().size() ? _fs->term()[_idx].branching :
+                _idx < _fs->term().size() + _fs->contin().size() ? 3 :
+                _fs->disc_and_bits()[_idx-_fs->term().size()-_fs->contin().size()].multy;
         }
     protected:
         const_disc_iterator(const field_set& fs, size_t idx, const instance& inst)
@@ -907,18 +914,18 @@ public:
         const instance* _inst;
     };
 
-    struct const_onto_iterator
-        : public iterator_base<const_onto_iterator, onto_t>
+    struct const_term_iterator
+        : public iterator_base<const_term_iterator, term_t>
     {
         friend class field_set;
-        const onto_t& operator*() {
-            return _fs->get_onto(*_inst, _idx);
+        const term_t& operator*() {
+            return _fs->get_term(*_inst, _idx);
         }
-        const_onto_iterator() : _inst(NULL) { }
+        const_term_iterator() : _inst(NULL) { }
     protected:
-        const_onto_iterator(const field_set& fs, size_t idx,
+        const_term_iterator(const field_set& fs, size_t idx,
                             const instance& inst)
-            : iterator_base<const_onto_iterator, onto_t>(fs, idx),
+            : iterator_base<const_term_iterator, term_t>(fs, idx),
               _inst(&inst) { }
         const instance* _inst;
     };
@@ -987,12 +994,12 @@ public:
         return contin_iterator(*this, _contin.size(), inst);
     }
 
-    const_onto_iterator begin_onto(const instance& inst) const {
-        return const_onto_iterator(*this, 0, inst);
+    const_term_iterator begin_term(const instance& inst) const {
+        return const_term_iterator(*this, 0, inst);
     }
 
-    const_onto_iterator end_onto(const instance& inst) const {
-        return const_onto_iterator(*this, _onto.size(), inst);
+    const_term_iterator end_term(const instance& inst) const {
+        return const_term_iterator(*this, _term.size(), inst);
     }
 
     const_disc_iterator begin_raw(const instance& inst) const {
@@ -1043,7 +1050,7 @@ Out field_set::pack(It from, Out out) const
 {
     unsigned int offset = 0;
 
-    foreach(const onto_spec& o, _onto) {
+    foreach(const term_spec& o, _term) {
         size_t width = nbits_to_pack(o.branching);
         size_t total_width = size_t((width * o.depth - 1) /
                                     bits_per_packed_t + 1) * bits_per_packed_t;
@@ -1055,7 +1062,7 @@ Out field_set::pack(It from, Out out) const
                 ++out;
             }
         }
-        offset += total_width - (o.depth * width); //onto vars must pack evenly
+        offset += total_width - (o.depth * width); //term vars must pack evenly
         if (offset == bits_per_packed_t) {
             offset = 0;
             ++out;

@@ -121,7 +121,7 @@ void representation::transform(const instance& inst)
         //_exemplar.validate();
     }
 
-    //need to add first onto & then contin
+    //need to add first term & then contin
     //cout << _fields.stream(inst) << endl;
     disc_map_it dkb = disc.begin();
     for (field_set::const_disc_iterator di = _fields.begin_disc(inst);
@@ -199,7 +199,7 @@ void representation::set_exemplar_inst()
               " therefore _exemplar_inst should be empty");
     _exemplar_inst.resize(_fields.packed_width());
 
-    // @todo: onto
+    // @todo: term algebras
     // bit
     for(field_set::bit_iterator it = _fields.begin_bits(_exemplar_inst);
         it != _fields.end_bits(_exemplar_inst); ++it)

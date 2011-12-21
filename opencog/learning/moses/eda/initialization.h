@@ -32,18 +32,18 @@
 namespace opencog { 
 namespace moses {
 
-// occam randomize a particular contin or onto field. Note that it is
+// occam randomize a particular contin or term field. Note that it is
 // not strictly occam in the Solomonoff sense because the size is
 // uniformely distributed.
 void occam_randomize_contin(const field_set&, instance&,
                             field_set::contin_iterator,
                             RandGen& rng);
-void occam_randomize_onto(const field_set&, instance&,
-                          field_set::const_onto_iterator,
+void occam_randomize_term(const field_set&, instance&,
+                          field_set::const_term_iterator,
                           RandGen& rng);
 
-//occam randomize all contin or onto fields
-void occam_randomize_onto(const field_set&, instance&,
+//occam randomize all contin or term fields
+void occam_randomize_term(const field_set&, instance&,
                           RandGen& rng);
 void occam_randomize_contin(const field_set&, instance&,
                             RandGen& rng);
@@ -54,7 +54,7 @@ void uniform_randomize_bits(const field_set&, instance&,
 void uniform_randomize_disc(const field_set&, instance&,
                             RandGen& rng);
 
-//occam randomize all contin and onto fields, and uniformly randomize all bit
+//occam randomize all contin and term fields, and uniformly randomize all bit
 //and disc fields
 void randomize(const field_set&, instance&,
                RandGen& rng);

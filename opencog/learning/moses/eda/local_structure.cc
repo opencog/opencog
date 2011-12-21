@@ -43,10 +43,10 @@ bool local_structure_model::is_uniform_on(iptr_iter l, iptr_iter u, int idx) con
             make_indirect_iterator(u));
 }
 
-void local_structure_model::rec_split_onto(iptr_iter l, iptr_iter u,
+void local_structure_model::rec_split_term(iptr_iter l, iptr_iter u,
                                            int src_idx, int idx,
                                            dtree::iterator node,
-                                           onto_tree::iterator osrc)
+                                           term_tree::iterator osrc)
 {
     int raw_arity = osrc.number_of_children() + 1;
 
@@ -61,7 +61,7 @@ void local_structure_model::rec_split_onto(iptr_iter l, iptr_iter u,
     node->front() = src_idx;
     (*node.begin()) = dtree_node(2, 0);
 
-    if (src_idx < idx - 1) { // important - needs to match onto_spec::Left/Right
+    if (src_idx < idx - 1) { // important - needs to match term_spec::Left/Right
         vector<iptr_iter> pivots(raw_arity);
         pivots.back() = u;
         n_way_partition(l, u,
@@ -69,17 +69,17 @@ void local_structure_model::rec_split_onto(iptr_iter l, iptr_iter u,
                              bind(valueof<const instance>, _1), src_idx),
                         raw_arity, pivots.begin());
 
-        // we don't recurse on the leftmost partition - it's onto_spec::Stop
+        // we don't recurse on the leftmost partition - it's term_spec::Stop
         // instead just make it a (null) leaf
         for_each(pivots.begin(), --pivots.end(), ++pivots.begin(),
                  make_counting_iterator(++node.begin()),
                  make_counting_iterator(osrc.begin()),
-                 bind(&local_structure_model::rec_split_onto, this, _1, _2,
+                 bind(&local_structure_model::rec_split_term, this, _1, _2,
                       src_idx + 1, idx, _3, _4));
     } else {
         //we're the parent of leaves
         dtree::sibling_iterator dsib = ++node.begin();
-        for(onto_tree::sibling_iterator osib = osrc.begin(); osib != osrc.end();
+        for(term_tree::sibling_iterator osib = osrc.begin(); osib != osrc.end();
             ++osib, ++dsib) {
             *dsib = dtree_node(raw_arity + 1, 0);
         }

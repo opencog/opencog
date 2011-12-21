@@ -106,8 +106,8 @@ protected:
     // of instances [l, u)
     bool is_uniform_on(iptr_iter l, iptr_iter u, int idx) const;
 
-    void rec_split_onto(iptr_iter l, iptr_iter u, int src_idx, int idx,
-                        dtree::iterator node, onto_tree::iterator osrc);
+    void rec_split_term(iptr_iter l, iptr_iter u, int src_idx, int idx,
+                        dtree::iterator node, term_tree::iterator osrc);
     void rec_split_contin(iptr_iter l, iptr_iter u,
                           int src_idx, int idx, dtree::iterator node);
 
@@ -158,11 +158,11 @@ local_structure_model::local_structure_model(const field_set& fs,
 {
     super::iterator dtr = begin();
 
-    if (!_fields.contin().empty() || !_fields.onto().empty()) {
+    if (!_fields.contin().empty() || !_fields.term().empty()) {
         iptr_seq iptrs(make_transform_iterator(from, addressof<const instance>),
                        make_transform_iterator(to, addressof<const instance>));
 
-        foreach(const field_set::onto_spec& o, _fields.onto()) { // onto vars
+        foreach(const field_set::term_spec& o, _fields.term()) { // term vars
             int idx_base = distance(begin(), dtr);
             make_dtree(dtr++, o.tr->begin().number_of_children() + 1); // why + 1?
 
@@ -170,7 +170,7 @@ local_structure_model::local_structure_model(const field_set& fs,
                 make_dtree(dtr, 0);
                 _initial_deps.insert(idx_base + i - 1, idx_base + i);
                 // need to recursively split on gggparent, ... , gparent, parent
-                rec_split_onto(iptrs.begin(), iptrs.end(),
+                rec_split_term(iptrs.begin(), iptrs.end(),
                                idx_base, idx_base + i,
                                dtr->begin(), o.tr->begin());
 

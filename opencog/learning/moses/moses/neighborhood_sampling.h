@@ -143,7 +143,7 @@ inline void generate_contin_neighbor(const field_set& fs,
  * This procedure samples sample_size instances at distance n from an
  * instance considered as center (for instance the exemplar). 
  *
- * @todo: onto fields are ignored for now
+ * @todo: term algebra fields are ignored for now
  *
  * @param fs            deme
  * @param n             distance
@@ -231,7 +231,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
 {
     instance inst(fs.packed_width());
 
-    // reset all fields (contin and onto fields are ignored)
+    // reset all fields (contin and term algebra fields are ignored)
     for (field_set::bit_iterator it = fs.begin_bits(inst);
             it != fs.end_bits(inst); ++it)
         *it = false;
@@ -297,7 +297,7 @@ void generate_all_in_neighborhood(const field_set& fs,
  * varies one instance field (at the changing position starting_index
  * and calls itself for the remaining fields).
  *
- * @todo: onto is ignored for the moment.
+ * @todo: term algebra is ignored for the moment.
  *
  * @param fs              deme
  * @param inst            exemplar
@@ -325,9 +325,9 @@ Out vary_n_knobs(const field_set& fs,
     instance tmp_inst = inst;
     unsigned begin_contin_idx, begin_disc_idx, begin_bit_idx;
 
-    // ontos
-    if(starting_index < (begin_contin_idx = fs.n_onto())) {
-        // @todo: handle onto
+    // terms
+    if(starting_index < (begin_contin_idx = fs.n_term())) {
+        // @todo: handle term algebras
         out = vary_n_knobs(fs, tmp_inst, n, starting_index + begin_contin_idx,
                            out, end);
     }
@@ -451,14 +451,14 @@ count_n_changed_knobs_from_index(const field_set& fs,
 
     deme_size_t number_of_instances = 0;
 
-    unsigned begin_contin_idx = fs.n_onto();
+    unsigned begin_contin_idx = fs.n_term();
     unsigned begin_disc_idx = begin_contin_idx + fs.n_contin();
     unsigned begin_bit_idx = begin_disc_idx + fs.n_disc();
     unsigned end_bit_idx = begin_bit_idx + fs.n_bits();
 
-    // ontos
+    // terms
     if(starting_index < begin_contin_idx) {
-        // @todo: handle onto
+        // @todo: handle term algebras
         number_of_instances = 
             count_n_changed_knobs_from_index(fs, inst, n,
                                              starting_index + begin_contin_idx,

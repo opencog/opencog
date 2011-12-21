@@ -33,14 +33,15 @@ using boost::lexical_cast;
 using namespace opencog;
 using namespace moses;
 
-void recbuild(onto_tree& tr,onto_tree::iterator it,
-	      int b,int maxd,int d,int s) {
-    *it=lexical_cast<string>(d)+lexical_cast<string>(s);
+void recbuild(term_tree& tr, term_tree::iterator it,
+	      int b, int maxd, int d, int s)
+{
+    *it = lexical_cast<string>(d)+lexical_cast<string>(s);
     if (d<maxd) {
         tr.append_children(it,b);
         int child_s=0;
-        for (onto_tree::sibling_iterator sib=it.begin();sib!=it.end();++sib)
-            recbuild(tr,sib,b,maxd,d+1,s*b+child_s++);
+        for (term_tree::sibling_iterator sib = it.begin(); sib != it.end(); ++sib)
+            recbuild(tr, sib, b, maxd, d+1, s*b+child_s++);
     }
 }
 
@@ -57,16 +58,16 @@ int main(int argc,char** argv) {
     
     MT19937RandGen rng(args.rand_seed);
     
-    onto_tree tr("");
-    recbuild(tr,tr.begin(),branching,depth,0,0);
-    field_set fs(field_set::onto_spec(tr),args.length);
+    term_tree tr("");
+    recbuild(tr, tr.begin(), branching, depth, 0, 0);
+    field_set fs(field_set::term_spec(tr), args.length);
     instance_set<contin_t> population(args.popsize,fs);
     foreach(instance& inst,population) {
-        occam_randomize_onto(fs,inst,rng);
+        occam_randomize_term(fs,inst,rng);
     }
 
     optimize(population,args.n_select,args.n_generate,args.max_gens,
-             ontomax(fs),
+             termmax(fs),
              terminate_if_gte<contin_t>((depth+pow(float(branching),
                                                    depth)-1)*args.length),
              tournament_selection(2,rng),
