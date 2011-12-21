@@ -66,7 +66,7 @@ logicalmkup
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
-\listings_params "basicstyle={\ttfamily}"
+\listings_params "basicstyle={\ttfamily},tabsize=3"
 \tracking_changes false
 \output_changes false
 \html_math_output 0
@@ -1043,226 +1043,52 @@ For more information, review the docs provided in the distribution of the
 \end_layout
 
 \begin_layout Subsection
-Scoring
+Representation building
 \end_layout
 
 \begin_layout Standard
-The fitness of program trees are ranked with scores.
- There are several types of scores, these are all defined in 
+Conceptually, representation building proceeds by selecting a single program
+ tree or exemplar, and then building a neighborhood of nearby programs.
+ The result is a deme: a population of similar programs, centered upon the
+ exemplar.
+ After representation building, the optimization step is performed, to find
+ the fittest programs in the deme.
+\end_layout
+
+\begin_layout Standard
+Representation building proceeds in several steps: the exemplar is festooned
+ with a set of 'knobs': these are adjustable parameters added to the program
+ tree, to alter its operation.
+ An exemplar festtoned with knobs is called a 
 \family typewriter
-moses/types.h.
- 
+'representation'
 \family default
-The most basic is
+.
+ A deme is then constructed: the deme consists of a population of different
+ possible knob settings.
+ Each of these steps is reviewed in greater detail, below.
 \end_layout
 
 \begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-typedef float score_t; 
-\end_layout
-
-\end_inset
-
-Different programs may be code at different things, and so judging their
- fitness in multiple ways requires a vector: 
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-typedef std::vector<score_t> behavioral_score;  
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Programs are also scored according to their complexity, so in 
+The representation itself is specified by the 
 \family typewriter
-moses/complexity.h
+class representation
 \family default
- we find: 
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-typedef int complexity_t;
-\end_layout
-
-\end_inset
-
-Composite scores pair up the complexity and the fitness score: 
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-typedef std::pair<score_t, complexity_t> composite_score; 
-\end_layout
-
-\end_inset
-
- while behavioral composite scores combine the complexity measure with the
- vector: 
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-typedef tagged_item<behavioral_score,                     		composite_score>
- composite_behavioral_score;  
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-Metapopulation
-\end_layout
-
-\begin_layout Standard
-The metapopulation is a set of scored combo trees.
- More precisely, they are scored with composite behavioural scores (or b-scores).
- A 'bscored combo tree' is then just a pair that associates a b-score with
- a tree, defined in the file 
+, given in 
 \family typewriter
-moses/types.h.
-
+representation/representation.h
 \family default
+.
+ The structure itself maintains a copy of the exemplar, as well as the collectio
+n of knobs used to create the representation.
+ Knobs are added to the exemplar by the class constructor.
  
 \end_layout
 
 \begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-typedef tagged_item<combo::combo_tree,
-\end_layout
-
-\begin_layout Plain Layout
-
-		composite_behavioral_score> bscored_combo_tree; 
-\end_layout
-
-\end_inset
-
-The metapopulation is then a set of scored combo trees, defined in 
-\family typewriter
-moses/metapopulation.h.
-
-\family default
- More precisely, it is a template, inheriting from the set:
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-typedef std::set<bscored_combo_tree> bscored_combo_tree_set;
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-template<typename Scoring,
-\end_layout
-
-\begin_layout Plain Layout
-
-         typename BScoring,
-\end_layout
-
-\begin_layout Plain Layout
-
-         typename Optimization>
-\end_layout
-
-\begin_layout Plain Layout
-
-struct metapopulation :
-\end_layout
-
-\begin_layout Plain Layout
-
-	public bscored_combo_tree_set {...}; 
-\end_layout
-
-\end_inset
-
-The template plays only a small role in this class; it's only purpose is
- to allow generic scoring and optimization algorithms to be used with the
- metapopulation.
-\end_layout
-
-\begin_layout Standard
-The metapopulation will store expressions (as scored trees) that were encountere
-d during the learning process (not all of them; the weak ones, which are
- dominated by existing ones, are usually skipped as non-promising).
-\end_layout
-
-\begin_layout Standard
-As an example, one can iterate through the metapopulation and print all
- its elements with their scores and complexities in the following way:
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-for (const iterator it=begin(); it!=end(); ++it) 
-\end_layout
-
-\begin_layout Plain Layout
-
-	cout << gettree(*it) << " " 
-\end_layout
-
-\begin_layout Plain Layout
-
-		<< getscore(*it) << " "
-\end_layout
-
-\begin_layout Plain Layout
-
-		<< getcomplexity(*it) << endl;
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The metapopulation is updated in iterations.
- In each iteration, one of its elements is selected as an exemplar.
- The exemplar is then used for building a new deme (that will further extend
- the metapopulation).
+This class, however, does not maintain the set of possible knob settings;
+ these are the deme, and are held elsewhere.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -1693,6 +1519,146 @@ combo_tree
 \end_layout
 
 \begin_layout Subsection
+Representation, revisited 
+\end_layout
+
+\begin_layout Standard
+XXX some details below incorrect.
+\end_layout
+
+\begin_layout Standard
+The constructor of this structure, builds knobs with respect to the given
+ exemplar (by the method 
+\family typewriter
+build_knobs
+\family default
+).
+\end_layout
+
+\begin_layout Standard
+This structure stores the exemplar like a tree (more precisely 
+\family typewriter
+combo_tree
+\family default
+).
+ This structure has a method for using a given instance to transform the
+ exemplar (
+\family typewriter
+transform
+\family default
+) providing a new expression tree.
+\end_layout
+
+\begin_layout Standard
+The structure also has methods for clearing the current version of the exemplar
+ (setting all knobs to default values --- zeros) --- 
+\family typewriter
+clear_exemplar
+\family default
+, for getting the exemplar --- 
+\family typewriter
+get_clean_exemplar
+\family default
+, and for getting the reduced, simplified version of the exemplar 
+\family typewriter
+get_clean_exemplar
+\family default
+.
+\end_layout
+
+\begin_layout Subsection
+Scoring
+\end_layout
+
+\begin_layout Standard
+The fitness of program trees are ranked with scores.
+ There are several types of scores, these are all defined in 
+\family typewriter
+moses/types.h.
+ 
+\family default
+The most basic is
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef float score_t; 
+\end_layout
+
+\end_inset
+
+Different programs may be code at different things, and so judging their
+ fitness in multiple ways requires a vector: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef std::vector<score_t> behavioral_score;  
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Programs are also scored according to their complexity, so in 
+\family typewriter
+moses/complexity.h
+\family default
+ we find: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef int complexity_t;
+\end_layout
+
+\end_inset
+
+Composite scores pair up the complexity and the fitness score: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef std::pair<score_t, complexity_t> composite_score; 
+\end_layout
+
+\end_inset
+
+ while behavioral composite scores combine the complexity measure with the
+ vector: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef tagged_item<behavioral_score, composite_score>
+\end_layout
+
+\begin_layout Plain Layout
+
+	composite_behavioral_score;  
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
 Demes and Optimization
 \end_layout
 
@@ -1847,64 +1813,138 @@ The output of the optimization step is a deme: conceptually, a population
 \end_layout
 
 \begin_layout Subsection
-Representation
+Metapopulation
 \end_layout
 
 \begin_layout Standard
-XXX some details below incorrect.
+The metapopulation is a set of scored combo trees.
+ More precisely, they are scored with composite behavioural scores (or b-scores).
+ A 'bscored combo tree' is then just a pair that associates a b-score with
+ a tree, defined in the file 
+\family typewriter
+moses/types.h.
+
+\family default
+ 
 \end_layout
 
 \begin_layout Standard
-A structure describing a representation of a deme (relative to its exemplar)
- is declared in 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef tagged_item<combo::combo_tree,
+\end_layout
+
+\begin_layout Plain Layout
+
+		composite_behavioral_score> bscored_combo_tree; 
+\end_layout
+
+\end_inset
+
+The metapopulation is then a set of scored combo trees, defined in 
 \family typewriter
-moses/represetation.h
+moses/metapopulation.h.
+
 \family default
-.
- Its constructor uses as arguments a simplification rule, an exemplar, a
- type tree, a pseudo-number generator and, optionally, just for actions
- (like for the ant problem), sets of available operators, perceptions, and
- actions).
+ More precisely, it is a template, inheriting from the set:
 \end_layout
 
 \begin_layout Standard
-The constructor of this structure, builds knobs with respect to the given
- exemplar (by the method 
-\family typewriter
-build_knobs
-\family default
-).
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+typedef std::set<bscored_combo_tree> bscored_combo_tree_set;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+template<typename Scoring,
+\end_layout
+
+\begin_layout Plain Layout
+
+         typename BScoring,
+\end_layout
+
+\begin_layout Plain Layout
+
+         typename Optimization>
+\end_layout
+
+\begin_layout Plain Layout
+
+struct metapopulation :
+\end_layout
+
+\begin_layout Plain Layout
+
+	public bscored_combo_tree_set {...}; 
+\end_layout
+
+\end_inset
+
+The template plays only a small role in this class; it's only purpose is
+ to allow generic scoring and optimization algorithms to be used with the
+ metapopulation.
 \end_layout
 
 \begin_layout Standard
-This structure stores the exemplar like a tree (more precisely 
-\family typewriter
-combo_tree
-\family default
-).
- This structure has a method for using a given instance to transform the
- exemplar (
-\family typewriter
-transform
-\family default
-) providing a new expression tree.
+The metapopulation will store expressions (as scored trees) that were encountere
+d during the learning process (not all of them; the weak ones, which are
+ dominated by existing ones, are usually skipped as non-promising).
 \end_layout
 
 \begin_layout Standard
-The structure also has methods for clearing the current version of the exemplar
- (setting all knobs to default values --- zeros) --- 
-\family typewriter
-clear_exemplar
-\family default
-, for getting the exemplar --- 
-\family typewriter
-get_clean_exemplar
-\family default
-, and for getting the reduced, simplified version of the exemplar 
-\family typewriter
-get_clean_exemplar
-\family default
-.
+As an example, one can iterate through the metapopulation and print all
+ its elements with their scores and complexities in the following way:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+for (const iterator it=begin(); it!=end(); ++it) 
+\end_layout
+
+\begin_layout Plain Layout
+
+	cout << gettree(*it) << " " 
+\end_layout
+
+\begin_layout Plain Layout
+
+		<< getscore(*it) << " "
+\end_layout
+
+\begin_layout Plain Layout
+
+		<< getcomplexity(*it) << endl;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The metapopulation is updated in iterations.
+ In each iteration, one of its elements is selected as an exemplar.
+ The exemplar is then used for building a new deme (that will further extend
+ the metapopulation).
 \end_layout
 
 \begin_layout Section
