@@ -51,15 +51,15 @@ inline double information_theoretic_bits(const field_set& fs)
 {
     double res = 0;
     foreach(const field_set::disc_spec& d, fs.disc_and_bits())
-        res += log2(d.multy);
+        res += log2<double>(d.multy);
     foreach(const field_set::contin_spec& c, fs.contin()) {
         // number of possible contins with depth d is 2^(d+1)-1 because
         // after a Stop only Stop is allowed which is why it is not 3^d
         unsigned contin_count = pow2(c.depth + 1) - 1;
-        res += log2(contin_count);
+        res += log2<double>(contin_count);
     }
     foreach(const field_set::onto_spec& o, fs.onto())
-        res += log2(o.branching) * double(o.depth);
+        res += log2<double>(o.branching) * double(o.depth);
     return res;
 }
 
