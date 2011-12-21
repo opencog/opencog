@@ -189,7 +189,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
             // modify disc
             } else if (r >= fs.n_bits() && (r < (fs.n_bits() + fs.n_disc()))) {
                 itd += r - fs.n_bits();
-                int temp = 1 + rng.randint(itd.arity() - 1);
+                disc_t temp = 1 + rng.randint(itd.multy() - 1);
                 if ( *itd == temp)
                     *itd = 0;
                 else
@@ -388,10 +388,10 @@ Out vary_n_knobs(const field_set& fs,
         // recursive call, moved for one position
         out = vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out, end);
         // modify the disc and recursive call, moved for one position
-        for(unsigned i = 1; i <= itd.arity() - 1; ++i) {
+        for(unsigned i = 1; i <= itd.multy() - 1; ++i) {
             // vary all legal values, the neighborhood should 
             // not equals to itself, so if it is same, set it to 0.
-            if(static_cast<unsigned>(tmp_val) == i)
+            if(tmp_val == i)
                 *itd = 0;
             else
                 *itd = i;
@@ -514,7 +514,7 @@ count_n_changed_knobs_from_index(const field_set& fs,
             return number_of_instances;
         // count all legal values of the knob
         number_of_instances += 
-            (itd.arity() - 1) 
+            (itd.multy() - 1) 
             * count_n_changed_knobs_from_index(fs, inst, n - 1,
                                                starting_index + 1, max_count);
     }

@@ -83,10 +83,10 @@ struct field_set
     // depth_t and breadth_t, corresponding to the depth and breadth of
     // a binary tree. These are five distinct concepts, they should
     // not be confused with one-another.
-    typedef unsigned int multiplicity_t;
-    typedef unsigned int width_t;
-    typedef unsigned int breadth_t;
-    typedef unsigned int depth_t;
+    typedef unsigned multiplicity_t;
+    typedef unsigned width_t;
+    typedef unsigned breadth_t;
+    typedef unsigned depth_t;
     typedef std::size_t size_t;
 
     struct bit_iterator;
@@ -830,15 +830,15 @@ public:
 
         disc_iterator() : _inst(NULL) { }
 
-        //for convenience, but will only work over discrete & boolean
-        width_t arity() const {
+        // for convenience, but will only work over discrete & boolean
+        multiplicity_t multy() const {
             return
                 _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
                 _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
                 _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].multy;
         }
         void randomize(RandGen& rng) {
-            _fs->set_raw(*_inst, _idx, rng.randint(arity()));
+            _fs->set_raw(*_inst, _idx, rng.randint(multy()));
         }
     protected:
         disc_iterator(const field_set& fs, size_t idx, instance& inst)
@@ -857,8 +857,8 @@ public:
             iterator_base<const_disc_iterator, disc_t>(*bi._fs, bi._idx),
             _inst(bi._inst) { }
         const_disc_iterator() : _inst(NULL) { }
-        //for convenience, but will only work over disc & bool
-        width_t arity() const {
+        // for convenience, but will only work over disc & bool
+        multiplicity_t multy() const {
             return
                 _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
                 _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
@@ -1047,7 +1047,7 @@ Out field_set::pack(It from, Out out) const
         size_t width = nbits_to_pack(o.branching);
         size_t total_width = size_t((width * o.depth - 1) /
                                     bits_per_packed_t + 1) * bits_per_packed_t;
-        for (width_t i = 0; i < o.depth; ++i) {
+        dorepeat (o.depth) {
             *out |= (*from++) << offset;
             offset += width;
             if (offset == bits_per_packed_t) {
@@ -1063,7 +1063,7 @@ Out field_set::pack(It from, Out out) const
     }
 
     foreach(const contin_spec& c, _contin) {
-        for (width_t i = 0; i < c.depth; ++i) {
+        dorepeat (c.depth) {
             *out |= (*from++) << offset;
             offset += 2;
             if (offset == bits_per_packed_t) {

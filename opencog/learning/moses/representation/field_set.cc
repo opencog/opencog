@@ -162,7 +162,7 @@ void field_set::build_spec(const spec& s, size_t n)
 
 void field_set::build_disc_spec(const disc_spec& ds, size_t n)
 {
-    width_t width = nbits_to_pack(ds.arity);
+    width_t width = nbits_to_pack(ds.multy);
     size_t base = back_offset();
     for (size_t idx = 0;idx < n;++idx)
         _fields.push_back(field(width,

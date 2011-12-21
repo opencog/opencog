@@ -183,7 +183,7 @@ local_structure_model::local_structure_model(const field_set& fs,
 
     // model disc & bool vars
     foreach(const field_set::disc_spec& d, _fields.disc_and_bits())
-        make_dtree(dtr++, d.arity);
+        make_dtree(dtr++, d.multy);
 
     // now that we have created all of the dtrees, construct a
     // feasible order that respects the initial dependencies
@@ -209,7 +209,7 @@ void local_structure_probs_learning::rec_learn(const field_set& fs,
 {
     if (dtr.is_childless()) { // a leaf
         while (from != to) {
-            assert(fs.get_raw(*from, idx) < int(dtr->size()) - 1);
+            OC_ASSERT(fs.get_raw(*from, idx) < dtr->size() - 1);
             ++(*dtr)[fs.get_raw(*from++, idx)];
         }
         dtr->back() = accumulate(dtr->begin(), --(dtr->end()), 0);
