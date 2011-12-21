@@ -30,20 +30,35 @@
 
 #include "../representation/field_set.h"
 
-namespace opencog { 
+namespace opencog {
 namespace moses {
+
+// Code in this file is used to implement the Bayesian Optimization
+// Algorithm (BOA). Given a set of variables, it generates possible
+// dependency trees between these variables, and then computes
+// conditional probabilities between these variables.  The BOA algorithm
+// then attempts to discover the dependency tree that best describes
+// the inter-relationships between the variables.
 
 using std::vector;
 
+// dtree == dependency tree
+//
+// XXX from what I can tell, this code currently handles only
+// dependencies between discrete variables... which makes snese,
+// since conditional probabilities bewteen continuous variables
+// would be quite different in the nitty gritty details. Don't
+// know who easily this could be fixed using templates.
+//
 // a dtree_node can represent 2 things:
-// 
+//
 // 1) if the node is internal then the vector has only one element,
 // the idx of the known field involved in the definition of
 // conditional probability
 //
 // 2) if the node is a leaf then the vector size is a + 1 where a is
-// the arity of the corresponding field. Each element i in [0, a) is
-// number of "good" instances the (i+1)th disc of the corresponding
+// the multiplicity of the corresponding field. Each element i in [0, a)
+// is the number of "good" instances the (i+1)th disc of the corresponding
 // field is encountered. The last element is the sum of all elements
 // in [0, a) (useful for computing the probability distribution over
 // the elements of the disc)
@@ -146,7 +161,7 @@ local_structure_model::local_structure_model(const field_set& fs,
     if (!_fields.contin().empty() || !_fields.onto().empty()) {
         iptr_seq iptrs(make_transform_iterator(from, addressof<const instance>),
                        make_transform_iterator(to, addressof<const instance>));
-        
+
         foreach(const field_set::onto_spec& o, _fields.onto()) { // onto vars
             int idx_base = distance(begin(), dtr);
             make_dtree(dtr++, o.tr->begin().number_of_children() + 1); // why + 1?
