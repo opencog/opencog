@@ -30,8 +30,12 @@
 namespace opencog { 
 namespace moses {
 
+//* Terminate iteration if the score is greater than the indicated
+//  bound.
+//
 template<typename ScoreT>
-struct terminate_if_gte {
+struct terminate_if_gte
+{
     terminate_if_gte(const ScoreT& b) : bound(b) { }
 
     template<typename It>
@@ -42,8 +46,14 @@ protected:
     ScoreT bound;
 };
 
+//* Terminate the iteration, if the score is greater than the indicated
+// bound, or if there is no forward progress.  This class "remembers" 
+// previous high scores, and uses these to determine if progress is
+// being made.
+//
 template<typename ScoreT>
-struct terminate_if_gte_or_no_improv {
+struct terminate_if_gte_or_no_improv
+{
     terminate_if_gte_or_no_improv(const ScoreT& b, int n) :
             bound(b), n_gen(n), at(-1) { }
 
