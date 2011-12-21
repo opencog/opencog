@@ -37,19 +37,20 @@ class KLDUTest : public CxxTest::TestSuite
 
     // test the KLD between 2 Gaussians
     void base_test_gaussian_KLD(double m1, double s1, double m2, double s2,
-                                double delta = 0.05, size_t size = 1000000) {
+                                double delta = 0.05, size_t size1 = 1000000, size_t size2 = 1000000) {
         // according to http://allisons.org/ll/MML/KL/Normal/
         double expected_res =
             (sq(m1 - m2) + sq(s1) - sq(s2)) / (2 * sq(s2)) + log(s2/s1);
 
         cout << "expected_res = " << expected_res << endl; 
 
-        // sample the 2 Gaussians
-        vector<double> G1(size), G2(size);
-        for (size_t i = 0; i < size; ++i) {
+        // sample the 2 Gaussians as different size (to check the
+        // robustness of the algorithm)
+        vector<double> G1(size1), G2(size2);
+        for (size_t i = 0; i < size1; ++i)
             G1[i] = gaussian_rand(m1, s1, rng);
+        for (size_t i = 0; i < size2; ++i)
             G2[i] = gaussian_rand(m2, s2, rng);
-        }
 
         // before calling KLD the samples must be sorted
         sort(G1);
@@ -63,21 +64,25 @@ class KLDUTest : public CxxTest::TestSuite
     }
 public:
     KLDUTest() : rng(1) {}
-    
+
+    // different mean and standard deviation
     void test_gaussian_KLD1() {
         cout << "test_gaussian_KLD1" << endl;
         base_test_gaussian_KLD(1, 10, 2, 5);
     }
+    // different standard deviation
     void test_gaussian_KLD2() {
         cout << "test_gaussian_KLD2" << endl;
         base_test_gaussian_KLD(1, 10, 1, 5);
     }
+    // different mean
     void test_gaussian_KLD3() {
         cout << "test_gaussian_KLD3" << endl;
-        base_test_gaussian_KLD(1, 1, 5, 1);
+        base_test_gaussian_KLD(1, 1, 5, 1, 0.1, 2000000, 2000000);
     }
+    // same distribution of different sampling size
     void test_gaussian_KLD4() {
         cout << "test_gaussian_KLD4" << endl;
-        base_test_gaussian_KLD(0, 1, 0, 2);
+        base_test_gaussian_KLD(0, 1, 0, 1, 0.1, 10000, 1000);
     }
 };

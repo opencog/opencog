@@ -48,7 +48,8 @@ struct KLDS {
     // @param p sorted sequence of values representing the distribution of P
     // @param q sorted sequence of values representing the distribution of Q
     KLDS(const SortedSeq& p_, const SortedSeq& q_) :
-        p(p_), q(q_), margin(1.0), it_p(p.cbegin()), it_q(q.cbegin()),
+        p(p_), q(q_), p_s(p.size()), q_s(q.size()),
+        margin(1.0), it_p(p.cbegin()), it_q(q.cbegin()),
         x_very_first(*it_p - margin), x_very_last(p.back() + margin),
         p_x_pre(x_very_first), q_x_pre(p_x_pre) {}
 
@@ -57,7 +58,7 @@ struct KLDS {
     // seperate optimization of a multi-optimization problem.
     result_type next() {
         // compute delta P
-        result_type p_x = *it_p, delta_p = 1.0 / (p_x - p_x_pre);
+        result_type p_x = *it_p, delta_p = q_s / (p_x - p_x_pre);
             
         // compute delta Q
         result_type q_x = it_q == q.cend()? x_very_last : *it_q;
@@ -67,8 +68,8 @@ struct KLDS {
             ++it_q;
             q_x = it_q == q.cend()? x_very_last : *it_q;
         }
-        result_type delta_q = 1.0 / (q_x - q_x_pre);
-
+        result_type delta_q = p_s / (q_x - q_x_pre);
+        
         p_x_pre = p_x;
         ++it_p;
 
@@ -78,13 +79,13 @@ struct KLDS {
     // @return estimate of KL(P||Q)
     result_type operator()() {
         result_type res = 0;
-        size_t size = p.size();
-        dorepeat(size)
+        dorepeat(p_s)
             res += next();
-        return res / size - 1;
+        return res / p_s - 1;
     }
 
     const SortedSeq &p, &q;
+    const size_t p_s, q_s;            // sizes of p and q
     result_type margin;
     typename SortedSeq::const_iterator it_p, it_q;
     result_type x_very_first, x_very_last, p_x_pre, q_x_pre;
