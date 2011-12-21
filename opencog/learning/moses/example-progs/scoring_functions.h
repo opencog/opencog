@@ -109,7 +109,6 @@ struct contin_max : public unary_function<instance, contin_t>
 // and summed over, thus returning the "lp_1" distance between the instance,
 // and the random vector.
 //
-athe sum of the absolute value of the differences
 struct contin_uniform : public unary_function<instance, contin_t>
 {
     contin_uniform(const field_set& fs, contin_t minval, contin_t maxval,

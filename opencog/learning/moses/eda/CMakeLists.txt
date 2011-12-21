@@ -7,7 +7,6 @@ INSTALL(FILES
 	logging.h
 	optimize.h
 	replacement.h
-	scoring_functions.h
 	scoring.h
 	termination.h
 	using.h
