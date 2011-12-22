@@ -1929,23 +1929,37 @@ SelectionPolicy
 \end_layout
 
 \begin_layout Enumerate
-Build a model, using 
+Initialize a model, using the specified 
 \family typewriter
 StructureLearningPolicy
 \family default
- ...
- available pre-defined: univariate(), which does no structure learning at
- all.
+.
+ Two different policies are pre-defined: 
+\family typewriter
+univariate()
+\family default
+, which is the trivial structure, and XXX.
+ The univariate policy assumes no interdependency at all between different
+ genes (variables) in the population: its a no-op.
+ The XXX policy will build a full Bayesian network of dependencies.
  
 \end_layout
 
 \begin_layout Enumerate
--- learn structure, for univariate, its a no-op.
- All selected at previous stage will be passed in here.
+Learn the structure.
+ That is, invoke the
+\family typewriter
+ StructureLearningPolicy.
+
+\family default
+ Only the selected individuals, from step 1, are used for this.
 \end_layout
 
 \begin_layout Enumerate
---learn probs All selected will be passed in.
+Learn the probability distribution for the selected individuals.
+ The learning here is done within the context of the 
+\family typewriter
+StructureLearningPolicy.
 \end_layout
 
 \begin_layout Enumerate

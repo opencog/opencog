@@ -5,6 +5,7 @@
  * All Rights Reserved
  *
  * Written by Moshe Looks
+ * Documented by Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,7 +33,25 @@
 // bit-string of all ones.
 //
 // As such problems go, this is among the simplest to solve.  The code
-// below illustrates how to do this using teh MOSES infrastructure.
+// below illustrates how to do this using the MOSES infrastructure.
+//
+// This program requires four arguments:
+// -- an initial seed value for the random number generator
+// -- the bit-string length
+// -- the population size
+// -- the maximum number of generations to run. 
+//
+// Suggest values of 0 15 20 100 for these.
+//
+// The population size should always be larger than the bit-string
+// length, as otherwise, the least-fit individuals will be bred out of
+// the population before the fittest individual is found, causing the
+// algo loop forever (well, only up to max generations). There's even
+// some risk of this when the population is only a little larger than
+// the bit-string length.
+//
+// As output, this will print the fittest individual found at each
+// generation. At the conclusion, the entire population will be printed.
 
 int main(int argc, char** argv)
 {
@@ -72,11 +91,13 @@ int main(int argc, char** argv)
         generate(fs.begin_bits(inst), fs.end_bits(inst),
                  bind(&RandGen::randbool, boost::ref(rng)));
 
-    // Run the optimizer.  
-// xxx explain why num to select for demes is popsize ... 
+    // Run the optimizer.
+    // For this problem, there is no dependency at all between different
+    // bits in the bit string.  Thus, for the "structure learning" step,
+    // use the univariate() model, which is basically a no-op; it doesn't
+    // try to learn any structure.
+// xxx explain why num to select is popsize ... 
 // num to generate is the num to evaluate ... 
-// hillclimbing ...
-// univariate does no learning at all ... 
     int num_score_evals = 
     optimize(population,   // population fo bit strings, from above.
              args.popsize,                       // num to select
@@ -85,8 +106,8 @@ int main(int argc, char** argv)
              one_max(),                          // ScoringPolicy
              terminate_if_gte<int>(args.length), // TerminationPolicy
              tournament_selection(2, rng),       // SelectionPolicy
-             univariate(),  // structure learning policy why ??  actually, none.
-             local_structure_probs_learning(),  // Useless ...!? no structure!
+             univariate(),                       // StructureLearningPolicy
+             local_structure_probs_learning(),
              replace_the_worst(),
              mlogger,
              rng);

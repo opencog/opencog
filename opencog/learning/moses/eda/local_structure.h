@@ -39,16 +39,13 @@ namespace moses {
 // conditional probabilities between these variables.  The BOA algorithm
 // then attempts to discover the dependency tree that best describes
 // the inter-relationships between the variables.
+//
+// As a special case, the univariate() structure learning function is
+// a no-op; that is, it doesn't create any dependency trees.
 
 using std::vector;
 
 // dtree == dependency tree
-//
-// XXX from what I can tell, this code currently handles only
-// dependencies between discrete variables... which makes snese,
-// since conditional probabilities bewteen continuous variables
-// would be quite different in the nitty gritty details. Don't
-// know who easily this could be fixed using templates.
 //
 // a dtree_node can represent 2 things:
 //
@@ -119,8 +116,8 @@ protected:
 
 // May be used as a StructureLearningPolicy.
 // Simplest case: does no structure learning at all.
-// This is sutiable for use when all genes in a population are known
-// to be statistically independent of one-another.
+// This is suitable for use when all fields/variables in a population
+// are known to be statistically independent of one-another.
 struct univariate
 {
     typedef local_structure_model model_type;
@@ -188,12 +185,14 @@ local_structure_model::local_structure_model(const field_set& fs,
     // going on here, skip to the bottom, and look at disc first, as
     // that is the simplest case.
 
-    // Contin variables and term-valued variables both have a tree
-    // structure.  We need to create a dtree for each node in these
-    // variables.  Now, the funny thing here is, the field set is not
-    // enough to tell us what possible values we might find in the
-    // contin and term trees.  So, to get that, we need to take a look
-    // at each instance.
+    // Contin variables and term-valued variables both have trees as
+    // values.  We want to create a dtree for each node in each tree.
+    // Now, the funny thing here is, the field set is not enough to
+    // tell us what possible values we might find in the contin and
+    // term variables.  So, to get that, we need to take a look
+    // at each field in each instance, pull out the value (which is a
+    // tree) and then recusively walk this tree, adding a dtree for
+    // each node found. Err, something like that ... 
     if (!_fields.contin().empty() || !_fields.term().empty())
     {
         iptr_seq iptrs(make_transform_iterator(from, addressof<const instance>),
@@ -203,9 +202,15 @@ local_structure_model::local_structure_model(const field_set& fs,
         foreach (const field_set::term_spec& o, _fields.term())
         {
             int idx_base = distance(begin(), dtr);
-            make_dtree(dtr++, o.tr->begin().number_of_children() + 1); // why + 1?
 
-            for (field_set::width_t i = 1;i < o.depth;++i, ++dtr)
+            // why + 1?  Because, see note 2) up top. The first n of
+            // will hold counts for how often each is observed, and the
+            // last is just an accumulator, holding the grand total.
+            // We need the grand total later, to compute the fraction.
+            // (Do this for disc fields too, down below.)
+            make_dtree(dtr++, o.tr->begin().number_of_children() + 1);
+
+            for (field_set::width_t i = 1; i < o.depth; ++i, ++dtr)
             {
                 make_dtree(dtr, 0);
                 _initial_deps.insert(idx_base + i - 1, idx_base + i);
@@ -222,17 +227,17 @@ local_structure_model::local_structure_model(const field_set& fs,
         foreach (const field_set::contin_spec& c, _fields.contin())
         {
             int idx_base = distance(begin(), dtr);
-            make_dtree(dtr++, 3); //contin arity is 3
+            make_dtree(dtr++, 3); // contin arity is 3=2+1
             for (field_set::width_t i = 1;i < c.depth;++i, ++dtr)
             {
                 make_dtree(dtr, 3);
                 _initial_deps.insert(idx_base + i - 1, idx_base + i); //add dep to parent
 
-                //recursively split on gggparent, ... , gparent, parent
+                // recursively split on gggparent, ... , gparent, parent
                 /*rec_split_contin(iptrs.begin(),iptrs.end(),
                   idx_base,idx_base+i,dtr->begin());*/
 
-                //alternatively, only split on parent
+                // Alternatively, only split on parent.
                 rec_split_contin(iptrs.begin(), iptrs.end(),
                                  idx_base + i - 1, idx_base + i, dtr->begin());
             }
@@ -248,6 +253,7 @@ local_structure_model::local_structure_model(const field_set& fs,
 
     // Now that we have created all of the dtrees, construct a
     // feasible order that respects the initial dependencies
+    // XXX ??? Huh? More details, please... 
     randomized_topological_sort(_initial_deps, _ordering.begin());
 }
 
@@ -256,9 +262,15 @@ local_structure_model::local_structure_model(const field_set& fs,
 // population).
 //
 // instance_set is not const so that we can reorder it - the instances
-// themselves shouldn't change (xxx why do this ??)
+// themselves shouldn't change (XXX why would we want to do this ??)
 //
 // For univariate(), the dtree for each field will be empty.
+//
+// The "model" is a set of dtrees, which indicate the dependency between
+// each variable in the field set (and more, for contins & terms).  So,
+// iterate over the dtrees, and accumulate statistics.
+//
+// XXX TODO this is unclear, explain what is being accumulated where.
 template<typename It>
 void local_structure_probs_learning::operator()(const field_set& fs,
                                                 It from, It to,
@@ -271,18 +283,26 @@ void local_structure_probs_learning::operator()(const field_set& fs,
                   from, to, _2, bind(&dtree::begin, _1)));
 }
 
+// For each node in the dependency tree, accumulate statistics from
+// the instances.  Basically, just count how often various values
+// occur ...
 template<typename It>
 void local_structure_probs_learning::rec_learn(const field_set& fs,
                                                It from, It to,
                                                int idx, dtree::iterator dtr) const
 {
-    if (dtr.is_childless()) { // a leaf
-        while (from != to) {
+    // Empty tree: a leaf.
+    if (dtr.is_childless())
+    {
+        while (from != to)
+        {
             OC_ASSERT(fs.get_raw(*from, idx) < dtr->size() - 1);
             ++(*dtr)[fs.get_raw(*from++, idx)];
         }
         dtr->back() = accumulate(dtr->begin(), --(dtr->end()), 0);
-    } else { // an internal node (split) - sort [from,to) on the src idx
+    }
+    else
+    { // an internal node (split) - sort [from,to) on the src idx
         int raw_arity = dtr.number_of_children();
         vector<It> pivots(raw_arity + 1);
         pivots.front() = from;

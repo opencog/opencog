@@ -29,7 +29,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 
-namespace opencog { 
+namespace opencog {
 namespace moses {
 
 // true if the variable at index idx is identical over the range of
@@ -108,6 +108,8 @@ void local_structure_model::rec_split_contin(iptr_iter l, iptr_iter u,
 
 void local_structure_model::make_dtree(super::iterator dtr, int arity)
 {
+    // plus one: the first arity will hold counts, the last will hold
+    // the grand-total.
     dtr->set_head(dtree_node(arity + 1, 0));
 }
 
