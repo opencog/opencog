@@ -290,9 +290,9 @@ type_tree get_input_type_tree(const vertex& v, arity_t i)
 
 arity_t contin_arity(const type_tree& ty)
 {
-    typedef type_tree::sibling_iterator sib_it;
+    typedef type_tree_sib_it sib_it;
     int res = 0;
-    type_tree::iterator ty_it = ty.begin();
+    type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type)
         for (sib_it sib = ty_it.begin();sib != sib_it(ty.last_child(ty_it));++sib)
             if (*sib == id::contin_type)
@@ -302,11 +302,11 @@ arity_t contin_arity(const type_tree& ty)
 
 arity_t boolean_arity(const type_tree& ty)
 {
-    typedef type_tree::sibling_iterator sib_it;
+    typedef type_tree_sib_it sib_it;
     int res = 0;
-    type_tree::iterator ty_it = ty.begin();
+    type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type)
-        for (sib_it sib = ty_it.begin();sib != sib_it(ty.last_child(ty_it)); ++sib)
+        for (sib_it sib = ty_it.begin(); sib != ty.last_child(ty_it); ++sib)
             if (*sib == id::boolean_type)
                 res++;
     return res;
@@ -314,11 +314,11 @@ arity_t boolean_arity(const type_tree& ty)
 
 arity_t action_result_arity(const type_tree& ty)
 {
-    typedef type_tree::sibling_iterator sib_it;
+    typedef type_tree_sib_it sib_it;
     int res = 0;
-    type_tree::iterator ty_it = ty.begin();
+    type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type)
-        for (sib_it sib = ty_it.begin();sib != sib_it(ty.last_child(ty_it)); ++sib)
+        for (sib_it sib = ty_it.begin(); sib != ty.last_child(ty_it); ++sib)
             if (*sib == id::action_result_type)
                 res++;
     return res;
@@ -328,7 +328,7 @@ arity_t type_tree_arity(const type_tree& ty)
 {
     OC_ASSERT(!ty.empty(),
                       "Not sure this assert should not be replaced by a conditional");
-    type_tree::iterator ty_it = ty.begin();
+    type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type) {
         unsigned int noc = ty_it.number_of_children();
         OC_ASSERT(noc > 0, "Lambda must not be childless");
@@ -397,7 +397,7 @@ type_tree type_tree_output_type_tree(const type_tree& ty)
 
 type_tree_seq signature_inputs(const type_tree& ty)
 {
-    typedef type_tree::sibling_iterator sib_it;
+    typedef type_tree_sib_it sib_it;
     OC_ASSERT(!ty.empty(), "ty must not be empty");
     type_tree_pre_it ty_it = ty.begin();
     OC_ASSERT(*ty_it == id::lambda_type);
@@ -1187,14 +1187,28 @@ arity_t explicit_arity(const combo_tree& tr)
     return res;
 }
 
-type_tree gen_signature(const type_tree& iotype, arity_t arity)
+type_tree gen_signature(const type_tree& itype, const type_tree& otype,
+                        arity_t arity)
 {
     type_tree res(id::lambda_type);
-    type_tree::iterator root = res.begin();
-    res.append_children(root, arity+1);
-    for(type_tree::sibling_iterator sib = root.begin(); sib!= root.end(); ++sib)
-        sib = res.replace(sib, iotype.begin());
+    type_tree_pre_it root = res.begin();
+    res.append_children(root, arity + 1);
+    type_tree_sib_it sib = root.begin();
+    for(; sib!= root.last_child(); ++sib)
+        sib = res.replace(sib, itype.begin());
+    res.replace(sib, otype.begin());
     return res;
+}
+
+type_tree gen_signature(type_node itype, type_node otype, arity_t arity)
+{
+    type_tree itt(itype), ott(otype);
+    return gen_signature(itt, ott, arity);
+}
+
+type_tree gen_signature(const type_tree& iotype, arity_t arity)
+{
+    return gen_signature(iotype, iotype, arity);
 }
 type_tree gen_signature(type_node iotype, arity_t arity)
 {

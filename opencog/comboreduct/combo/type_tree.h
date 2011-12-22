@@ -356,6 +356,10 @@ arity_t explicit_arity(const combo_tree& tr);
 // ->(boolean boolean boolean boolean boolean)
 type_tree gen_signature(const type_tree& iotype, arity_t arity);
 type_tree gen_signature(type_node iotype, arity_t arity);
+// Like above but specify the input type as well as the output
+type_tree gen_signature(const type_tree& itype, const type_tree& otype,
+                        arity_t arity);
+type_tree gen_signature(type_node itype, type_node otype, arity_t arity);
 
 } // ~namespace combo
 } // ~namespace opencog
