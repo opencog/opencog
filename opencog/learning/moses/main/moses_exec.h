@@ -93,8 +93,10 @@ int moses_exec(int argc, char** argv);
 // the name of the supposed executable
 int moses_exec(const vector<string>& argv);
 
+// set of parameters in common with all problems
 struct metapop_moses_results_parameters {
-    metapop_moses_results_parameters(long _result_count,
+    metapop_moses_results_parameters(const variables_map& _vm,
+                                     long _result_count,
                                      bool _output_score,
                                      bool _output_complexity,
                                      bool _output_bscore,
@@ -107,7 +109,7 @@ struct metapop_moses_results_parameters {
                                      const jobs_t& _jobs,
                                      bool _only_local,
                                      bool _hc_terminate_if_improvement) : 
-        result_count(_result_count), output_score(_output_score), 
+        vm(_vm), result_count(_result_count), output_score(_output_score), 
         output_complexity(_output_complexity),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
@@ -116,6 +118,7 @@ struct metapop_moses_results_parameters {
         output_file(_output_file),
         jobs(_jobs), only_local(_only_local),
         hc_terminate_if_improvement(_hc_terminate_if_improvement) {}
+    const variables_map& vm;
     long result_count;
     bool output_score;
     bool output_complexity;
@@ -147,7 +150,6 @@ void metapop_moses_results(RandGen& rng,
                            const Optimization& opt,
                            const metapop_parameters& meta_params,
                            const moses_parameters& moses_params,
-                           const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
     // instantiate metapop
     metapopulation<Score, BScore, Optimization> 
@@ -158,7 +160,7 @@ void metapop_moses_results(RandGen& rng,
         unsigned n_threads = pa.jobs.find(localhost)->second;
         setting_omp(n_threads);
         moses::moses(metapop, moses_params);
-    } else moses::distributed_moses(metapop, vm, pa.jobs, moses_params);
+    } else moses::distributed_moses(metapop, pa.vm, pa.jobs, moses_params);
 
     // output result
     {
@@ -203,21 +205,20 @@ void metapop_moses_results(RandGen& rng,
                            const optim_parameters& opt_params,
                            const metapop_parameters& meta_params,
                            const moses_parameters& moses_params,
-                           const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {    
     if(pa.opt_algo == un) { // univariate
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               univariate_optimization(rng, opt_params),
-                              meta_params, moses_params, vm, pa);
+                              meta_params, moses_params, pa);
     } else if(pa.opt_algo == sa) { // simulation annealing
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               simulated_annealing(rng, opt_params),
-                              meta_params, moses_params, vm, pa);
+                              meta_params, moses_params, pa);
     } else if(pa.opt_algo == hc) { // hillclimbing
         hc_parameters hc_params(pa.hc_terminate_if_improvement);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               iterative_hillclimbing(rng, opt_params, hc_params),
-                              meta_params, moses_params, vm, pa);
+                              meta_params, moses_params, pa);
     } else {
         std::cerr << "Unknown optimization algo " << pa.opt_algo 
                   << ". Supported algorithms are un (for univariate),"
@@ -240,7 +241,6 @@ void metapop_moses_results(RandGen& rng,
                            optim_parameters opt_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
-                           const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
     bscore_based_score<BScore> bb_score(bsc);
     
@@ -269,7 +269,7 @@ void metapop_moses_results(RandGen& rng,
         ScoreACache score_acache(score_cache);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb,
                               score_acache, BSCORE,
-                              opt_params, meta_params, moses_params, vm, pa);
+                              opt_params, meta_params, moses_params, pa);
         // log the number of cache failures
         if(pa.only_local) { // do not print if using distributed moses
             logger().info("Number of cache failures for score = %u",
@@ -277,8 +277,7 @@ void metapop_moses_results(RandGen& rng,
         }            
     } else {
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, bb_score, bsc,
-                              opt_params, meta_params, moses_params,
-                              vm, pa);
+                              opt_params, meta_params, moses_params, pa);
     }
 }
 
