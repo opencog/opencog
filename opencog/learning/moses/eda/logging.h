@@ -31,26 +31,29 @@
 
 #include "../representation/field_set.h"
 
-namespace opencog { 
+namespace opencog {
 namespace moses {
 
     struct cout_log_best_and_gen
     {
         template<typename It>
-        void operator()(It from,It to,const field_set& fs,int gen) const
+        void operator()(It from, It to, const field_set& fs, int gen) const
         {
-            if (from==to)
+            if (logger().getLevel() < Logger::DEBUG)
                 return;
-            
-            It best=std::max_element(from,to);
+
+            if (from == to)
+                return;
+
+            It best = std::max_element(from, to);
             logger().debug("Generation: %d", gen);
             std::stringstream ss;
-            ss << "Best instance: " << best->second << " " 
+            ss << "Best instance: " << best->second << " "
                << fs.stream(best->first);
             logger().debug(ss.str());
         }
     };
-    
+
 } // ~namespace moses
 } // ~namespace opencog
 
