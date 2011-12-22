@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/main/continmax.cc
+ * opencog/learning/moses/example-progs/continmax.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,18 +21,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "edaopt.h"
-#include <opencog/learning/moses/eda/initialization.h>
-#include <opencog/util/mt19937ar.h>
 
-#include <opencog/util/Logger.h>
-#include <opencog/util/oc_assert.h>
+#include "headers.h"
 
 using std::string;
 using std::vector;
 using boost::lexical_cast;
-using namespace opencog;
-using namespace moses;
 
 int main(int argc, char** argv)
 {

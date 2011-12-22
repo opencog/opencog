@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/main/nmax.cc
+ * opencog/learning/moses/example-progs/nmax.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,26 +21,23 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "edaopt.h"
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/Logger.h>
+
+#include "headers.h"
 
 using std::string;
 using std::vector;
 using boost::lexical_cast;
-using namespace opencog;
-using namespace moses;
 
-int main(int argc,char** argv) {
-
-    //set flag to print only cassert and other ERROR level logs on stdout
+int main(int argc,char** argv)
+{
+    // set flag to print only cassert and other ERROR level logs on stdout
     logger().setPrintErrorLevelStdout();
- 
+
     vector<string> add_args{"n(whatever it is?)"};
     optargs args(argc, argv, add_args);
     int n=lexical_cast<int>(argv[5]);
     cout_log_best_and_gen logger;
-    
+
     MT19937RandGen rng(args.rand_seed);
 
     field_set fs(field_set::disc_spec(n), args.length); //all n-arry

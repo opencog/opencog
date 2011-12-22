@@ -21,44 +21,38 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <assert.h>
+#include <iostream>
+#include <vector>
 #include <boost/lexical_cast.hpp>
 
-#include <opencog/learning/moses/eda/termination.h>
-#include <opencog/learning/moses/eda/local_structure.h>
-#include <opencog/learning/moses/eda/replacement.h>
-#include <opencog/learning/moses/eda/logging.h>
-#include <opencog/learning/moses/eda/optimize.h>
-
-#include <opencog/util/selection.h>
-#include <opencog/util/oc_assert.h>
-
-#include "scoring_functions.h"
-
 using namespace std;
-using namespace opencog;
 
-//WARNING: the additional arguments must be handled by the caller,
-//but it is informed here for checking and usage printing
-//It is ugly but that was the fastest fix I could come up with (Nil)
-struct optargs {
+// WARNING: the additional arguments must be handled by the caller,
+// but it is done here for checking and usage printing.
+// This is an ugly but quick fix for the demo programs.
+struct optargs
+{
     optargs(int argc, char** argv,
             const vector<string>& additional_args = vector<string>()) { 
         if (argc != (5 + static_cast<int>(additional_args.size()))) {
-            cerr << "not the right number of args, usage: " << argv[0] 
+            cerr << "Error: wrong  number of args.\n"
+                 << "Usage: " << argv[0] 
                  << " seed length popsize ngens "
                  << usage(additional_args) << endl;
             exit(1);
         }
         try {
-            assert(argc>=5);
-            rand_seed=boost::lexical_cast<int>(argv[1]);
-            length=boost::lexical_cast<int>(argv[2]);
-            popsize=boost::lexical_cast<int>(argv[3]);
-            n_select=popsize;
-            n_generate=popsize/2;
-            max_gens=boost::lexical_cast<int>(argv[4]);
+            assert(argc >= 5);
+            rand_seed = boost::lexical_cast<int>(argv[1]);
+            length = boost::lexical_cast<int>(argv[2]);
+            popsize = boost::lexical_cast<int>(argv[3]);
+            n_select = popsize;
+            n_generate = popsize/2;
+            max_gens = boost::lexical_cast<int>(argv[4]);
         } catch (...) {
-            cerr << "invalid args, usage: " << argv[0]
+            cerr << "Error: invalid argument\nUsage: " << argv[0]
                  << " seed length popsize ngens "
                  << usage(additional_args) << endl;
             exit(1);
@@ -72,9 +66,10 @@ struct optargs {
     int max_gens;
 
 private:
-    string usage(const vector<string>& args) {
+    string usage(const vector<string>& args)
+    {
         string res;
-        for(vector<string>::const_iterator i = args.begin();
+        for (vector<string>::const_iterator i = args.begin();
             i != args.end(); ++i) {
             res += *i + string(" ");
         }
