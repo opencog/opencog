@@ -607,11 +607,13 @@ int moses_exec(int argc, char** argv) {
         // it assumes that the inputs are boolean and the output is contin
 
         // infer the type of the input table and check if it's correct
-        type_tree inferred_tt = infer_data_type_tree(input_data_file);
-        type_tree tt = gen_signature(id::boolean_type, id::contin_type, arity);
-        OC_ASSERT(tt == inferred_tt,
+        type_tree table_tt = infer_data_type_tree(input_data_file);
+        type_tree ettt = gen_signature(id::boolean_type, id::contin_type, arity);
+        OC_ASSERT(ettt == table_tt,
                   "The input table doesn't have the right data types."
                   " The output should be contin and the inputs should be boolean");
+        // signature of the functions to learn
+        type_tree tt = gen_signature(id::boolean_type, arity);
 
         Table table = istreamTable(input_data_file, target_pos);
         if(nsamples>0)
@@ -619,8 +621,7 @@ int moses_exec(int argc, char** argv) {
         
         int as = alphabet_size(tt, ignore_ops);
 
-        occam_contin_bscore bscore(table.otable, table.itable,
-                                   stdev, as, rng);
+        occam_max_KLD_bscore bscore(table, stdev, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
