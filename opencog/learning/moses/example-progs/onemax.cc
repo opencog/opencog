@@ -24,27 +24,66 @@
 
 #include "headers.h"
 
-int main(int argc,char** argv)
+// Demonstration program for the "onemax" optimization problem.  This
+// is a standard learning/optimization demonstraton problem: a scoring
+// function is given that counts the number of one-bits in a bit-string.
+// This is the "one_max" scoring function.  The optimizer is supposed
+// to be able to find the best solution to this function: namely, a
+// bit-string of all ones.
+//
+// As such problems go, this is among the simplest to solve.  The code
+// below illustrates how to do this using teh MOSES infrastructure.
+
+int main(int argc, char** argv)
 {
-    // Set flag to print only cassert and other ERROR level logs on stdout.
-    logger().setPrintErrorLevelStdout();
+    // Tell the logger to print detailed debugging messages to stdout.
+    // This will let us watch what the optimizer is doing.
+    logger().setLevel(Logger::FINE);
+    logger().setPrintToStdoutFlag(true);
 
-    optargs args(argc,argv);
+    // Parse program arguments
+    optargs args(argc, argv);
 
-    cout_log_best_and_gen logger;
-
-    // Create a
-    field_set fs(field_set::disc_spec(2), args.length);
+    // Initialize random number generator (from the first argument
+    // given to the program).
     MT19937RandGen rng(args.rand_seed);
 
-    instance_set<int> population(args.popsize,fs);
-    foreach(instance& inst,population)
+    // Create a set of "fields". Each field is a discrete variable,
+    // with two possible settings. That is, each field is a boolean.
+    // The number of such boolean variables to create was passed as
+    // the second argument to the program.
+    field_set fs(field_set::disc_spec(2), args.length);
+
+    // Create a population of bit-strings corresponding to the field
+    // specification above. The length of the bit string will be the
+    // same as the field specification. The population size was passed
+    // as the third argument to the program.
+    instance_set<int> population(args.popsize, fs);
+
+    // Initialize each member of the population to a random value.
+    foreach(instance& inst, population)
         generate(fs.begin_bits(inst), fs.end_bits(inst),
                  bind(&RandGen::randbool, boost::ref(rng)));
 
-    optimize(population,args.n_select, args.n_generate,args.max_gens,
-             one_max(), terminate_if_gte<int>(args.length),
+    // Declare a logger, where debug and logging messages will be written.
+    cout_log_best_and_gen logger;
+
+    // Run the optimizer.  
+// why num to seldet for demes is popsize ... 
+// num to generate is the num to evaluate ... 
+    optimize(population,   // population fo bit strings, from above.
+             args.popsize,                     // num to select
+             args.popsize / 2,                 // num to generate
+             args.max_gens,                    // max number of generations to run
+             one_max(),                        // scoring function
+             terminate_if_gte<int>(args.length), // termination criterion
              tournament_selection(2, rng),
-             univariate(),local_structure_probs_learning(),
-             replace_the_worst(),logger, rng);
+             univariate(),  // why ?? 
+             local_structure_probs_learning(),  // Useless ...!? no structure!
+             replace_the_worst(),
+             logger,
+             rng);
+
+    // XXX show how to demo the results.
+    // cout << "Found this" << population << endl;
 }

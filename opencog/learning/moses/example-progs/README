@@ -1,0 +1,17 @@
+
+                   Example Programs for MOSES
+                   --------------------------
+
+This directory contains a set of example programs for MOSES, showing
+how to use the MOSES algorithm and assorted infrastructure to solve 
+various common "textbook" problems with MOSES. 
+
+Some of these are better documented then others. Start reading here:
+
+-- onemax.  This uses a scoring function that counts the number of ones
+   in a bit string. The solver is supposed to find the optimal solution,
+   which is a string of all ones.
+
+   Usage: onemax <rand-seed> <bit-string-len> <population-size> <num-gens>
+
+   

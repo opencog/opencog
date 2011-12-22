@@ -39,7 +39,7 @@ struct optargs
         if (argc != (5 + static_cast<int>(additional_args.size()))) {
             cerr << "Error: wrong  number of args.\n"
                  << "Usage: " << argv[0] 
-                 << " seed length popsize ngens "
+                 << " <rand seed> <length> <population size> <num generations> "
                  << usage(additional_args) << endl;
             exit(1);
         }
@@ -53,7 +53,7 @@ struct optargs
             max_gens = boost::lexical_cast<int>(argv[4]);
         } catch (...) {
             cerr << "Error: invalid argument\nUsage: " << argv[0]
-                 << " seed length popsize ngens "
+                 << " <rand seed> <length> <population size> <num generations> "
                  << usage(additional_args) << endl;
             exit(1);
         }
