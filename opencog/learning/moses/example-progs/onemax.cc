@@ -36,10 +36,16 @@
 
 int main(int argc, char** argv)
 {
-    // Tell the logger to print detailed debugging messages to stdout.
-    // This will let us watch what the optimizer is doing.
+    // Tell the system logger to print detailed debugging messages to
+    // stdout. This will let us watch what the optimizer is doing.
     logger().setLevel(Logger::FINE);
     logger().setPrintToStdoutFlag(true);
+
+    // We also need to declare a specific logger for the aglo.
+    // This one uses the same system logger() above, and writes all
+    // messages ad the "debug" level. This allows the main loop of the
+    // algo to be traced.
+    cout_log_best_and_gen mlogger;
 
     // Parse program arguments
     optargs args(argc, argv);
@@ -65,25 +71,37 @@ int main(int argc, char** argv)
         generate(fs.begin_bits(inst), fs.end_bits(inst),
                  bind(&RandGen::randbool, boost::ref(rng)));
 
-    // Declare a logger, where debug and logging messages will be written.
-    cout_log_best_and_gen logger;
-
     // Run the optimizer.  
-// why num to seldet for demes is popsize ... 
+// xxx explain why num to select for demes is popsize ... 
 // num to generate is the num to evaluate ... 
+    int num_score_evals = 
     optimize(population,   // population fo bit strings, from above.
-             args.popsize,                     // num to select
-             args.popsize / 2,                 // num to generate
-             args.max_gens,                    // max number of generations to run
-             one_max(),                        // scoring function
-             terminate_if_gte<int>(args.length), // termination criterion
-             tournament_selection(2, rng),
-             univariate(),  // why ?? 
+             args.popsize,                       // num to select
+             args.popsize / 2,                   // num to generate
+             args.max_gens,                      // max number of generations to run
+             one_max(),                          // ScoringPolicy
+             terminate_if_gte<int>(args.length), // TerminationPolicy
+             tournament_selection(2, rng),       // SelectionPolicy
+             univariate(),  // structure learning policy why ?? 
              local_structure_probs_learning(),  // Useless ...!? no structure!
              replace_the_worst(),
-             logger,
+             mlogger,
              rng);
 
-    // XXX show how to demo the results.
-    // cout << "Found this" << population << endl;
+    // The logger is asynchronous, so flush it's output before
+    // writing to cout, else output will be garbled.
+    logger().flush();
+
+    cout << "A total of " << num_score_evals
+         << " scoring funtion evaluations were done." << endl;
+
+    // Show the final population
+    // cout << "Final population:\n" << population << endl;
+    cout << "The final population was:" << endl;
+    instance_set<int>::const_iterator it = population.begin();
+    for(; it != population.end(); it++) {
+       cout << "Score: " << it->second
+            << "\tindividual: " << population.fields().stream(it->first)
+            << endl;
+    }
 }

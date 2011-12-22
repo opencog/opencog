@@ -1688,12 +1688,15 @@ typedef tagged_item<behavioral_score, composite_score>
 \end_layout
 
 \begin_layout Standard
-All score types need to provide an 
-\family typewriter
-operator>()
-\family default
- for comparison, as the generic ranking algorithms need to be able to compare
- generic scores.
+XXX Disconnect ..
+ the optimize() template in eda/optimize.h doesn't take any of these, but
+ a generic scoring policy which can return anything (and maintain anything
+ internally, by being a class that inherits from unary_function<instance,retval>
+ and implementing operator>().
+ So.
+ ahh explain....
+ also, a number of example scoring functions in example-progs/scoring_functions.h
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -1916,17 +1919,22 @@ Before entering the loop, each individual in the population is scored for
 \end_layout
 
 \begin_layout Enumerate
-One or more individuals are selected, using 
+A number of individuals are selected, using 
 \family typewriter
 SelectionPolicy
 \family default
 .
+ The selected individuals will be modeled and then entered into the tournament.
+ (XXX what pre-defined selection policies to we have??)
 \end_layout
 
 \begin_layout Enumerate
 Build a model, using 
 \family typewriter
 StructureLearningPolicy
+\family default
+ ...
+ available pre-defined: univariate()
 \end_layout
 
 \begin_layout Enumerate
@@ -1951,6 +1959,11 @@ StructureLearningPolicy
 
 \begin_layout Enumerate
 -- repeat.
+\end_layout
+
+\begin_layout Standard
+Note that ScoringPolicy needs to be thread-safe, as it's operator() will
+ be invoked from multiple threads.
 \end_layout
 
 \begin_layout Subsection
