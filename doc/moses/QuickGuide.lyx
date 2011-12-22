@@ -1934,15 +1934,18 @@ Build a model, using
 StructureLearningPolicy
 \family default
  ...
- available pre-defined: univariate()
+ available pre-defined: univariate(), which does no structure learning at
+ all.
+ 
 \end_layout
 
 \begin_layout Enumerate
--- learn structure,
+-- learn structure, for univariate, its a no-op.
+ All selected at previous stage will be passed in here.
 \end_layout
 
 \begin_layout Enumerate
---learn probs
+--learn probs All selected will be passed in.
 \end_layout
 
 \begin_layout Enumerate

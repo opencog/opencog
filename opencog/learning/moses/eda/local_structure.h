@@ -70,7 +70,8 @@ typedef vector<int> dtree_node;
 typedef tree<dtree_node> dtree;
 
 struct local_structure_model : public nullary_function<instance>,
-                               public vector<dtree> {
+                               public vector<dtree>
+{
     typedef vector<dtree> super; // each entry of dtree corresponds to
                                  // a raw field
 
@@ -116,7 +117,12 @@ protected:
     void sample(dtree::iterator, disc_t&, const vector<disc_t>&) const;
 };
 
-struct univariate { // i.e., no structure learning
+// May be used as a StructureLearningPolicy.
+// Simplest case: does no structure learning at all.
+// This is sutiable for use when all genes in a population are known
+// to be statistically independent of one-another.
+struct univariate
+{
     typedef local_structure_model model_type;
 
     template<typename It>
@@ -132,41 +138,75 @@ struct univariate { // i.e., no structure learning
   void operator()(const field_set&,It,It,local_structure_model&) const { }
   };*/
 
-struct local_structure_probs_learning {
+struct local_structure_probs_learning
+{
     typedef local_structure_model model_type;
 
-    // update the model given a field_set and a range of "good"
-    // instances
+    // Update the model given a field_set and a range of "good"
+    // instances.
     template<typename It>
     void operator()(const field_set&, It, It, local_structure_model&) const;
 protected:
-    // update the dtree of the model of a field at index idx
+    // Update the dtree of the model of a field at index idx
     template<typename It>
     void rec_learn(const field_set&, It, It, int, dtree::iterator) const;
 };
 
 /////////////TEMPLATIZED FUNCTION IMPLEMENTATION///////////////
 
-//creates a model based on a set of fields and a range of instances
+// Local structure model constructor.
+// Create a model based on a set of variables.
+//
+// This constructor creates a dependency tree (dtree) for each
+// variable (i.e. for each field in the field set).  For contin and
+// term variables, we also need to look at each instance as well.
+// This is because the value of contin and term variables are trees
+// themselves, and we want to create a dtree for each node in each
+// instance. So its ot enough to pass just the field_set to this
+// constructor, we need to pass in the instances as well.
+//
+// The iterators are presumed to run over an instance_set<ScoreT>
+// The field_set is assumed to describe the fields in the instances.
+//
 template<typename It>
 local_structure_model::local_structure_model(const field_set& fs,
                                              It from, It to,
                                              RandGen& _rng) :
-    super(fs.raw_size()), _instance_length(fs.packed_width()),
+    super(fs.raw_size()),
+    _instance_length(fs.packed_width()),
     _ordering(make_counting_iterator(0), make_counting_iterator(int(size()))),
-    _initial_deps(size()), _fields(fs), rng(_rng)
+    _initial_deps(size()),  // by inheritance, this is vector<dtree>::size()
+    _fields(fs),
+    rng(_rng)
 {
     super::iterator dtr = begin();
 
-    if (!_fields.contin().empty() || !_fields.term().empty()) {
+    // The dtrees are created in the same order as the variabes appear
+    // in the field set.  And these are in the order: terms, contin,
+    // disc, bool.  I don't know if its really important to preserve
+    // this ordering, but here we are ... To get a better idea of what's
+    // going on here, skip to the bottom, and look at disc first, as
+    // that is the simplest case.
+
+    // Contin variables and term-valued variables both have a tree
+    // structure.  We need to create a dtree for each node in these
+    // variables.  Now, the funny thing here is, the field set is not
+    // enough to tell us what possible values we might find in the
+    // contin and term trees.  So, to get that, we need to take a look
+    // at each instance.
+    if (!_fields.contin().empty() || !_fields.term().empty())
+    {
         iptr_seq iptrs(make_transform_iterator(from, addressof<const instance>),
                        make_transform_iterator(to, addressof<const instance>));
 
-        foreach(const field_set::term_spec& o, _fields.term()) { // term vars
+        // Iterate over term-algebgra-valued fields
+        foreach (const field_set::term_spec& o, _fields.term())
+        {
             int idx_base = distance(begin(), dtr);
             make_dtree(dtr++, o.tr->begin().number_of_children() + 1); // why + 1?
 
-            for (field_set::width_t i = 1;i < o.depth;++i, ++dtr) {
+            for (field_set::width_t i = 1;i < o.depth;++i, ++dtr)
+            {
                 make_dtree(dtr, 0);
                 _initial_deps.insert(idx_base + i - 1, idx_base + i);
                 // need to recursively split on gggparent, ... , gparent, parent
@@ -178,10 +218,13 @@ local_structure_model::local_structure_model(const field_set& fs,
             }
         }
 
-        foreach(const field_set::contin_spec& c, _fields.contin()) { // contin vars
+        // Iterate over all contin-valued fields
+        foreach (const field_set::contin_spec& c, _fields.contin())
+        {
             int idx_base = distance(begin(), dtr);
             make_dtree(dtr++, 3); //contin arity is 3
-            for (field_set::width_t i = 1;i < c.depth;++i, ++dtr) {
+            for (field_set::width_t i = 1;i < c.depth;++i, ++dtr)
+            {
                 make_dtree(dtr, 3);
                 _initial_deps.insert(idx_base + i - 1, idx_base + i); //add dep to parent
 
@@ -196,24 +239,35 @@ local_structure_model::local_structure_model(const field_set& fs,
         }
     }
 
-    // model disc & bool vars
-    foreach(const field_set::disc_spec& d, _fields.disc_and_bits())
+    // Model discrete & boolean fields.
+    // Each discrete variable can take on multiplicity of different
+    // values, specifically, one of disc_spec::multy() of them. Thus,
+    // each node in the dependency tree will have an arity of multy.
+    foreach (const field_set::disc_spec& d, _fields.disc_and_bits())
         make_dtree(dtr++, d.multy);
 
-    // now that we have created all of the dtrees, construct a
+    // Now that we have created all of the dtrees, construct a
     // feasible order that respects the initial dependencies
     randomized_topological_sort(_initial_deps, _ordering.begin());
 }
 
+// This presumes that It is an iterator over instance_set<ScoreT>,
+// so that from, to define a range of instances (individuals in the
+// population).
+//
 // instance_set is not const so that we can reorder it - the instances
-// themselves shouldn't change
+// themselves shouldn't change (xxx why do this ??)
+//
+// For univariate(), the dtree for each field will be empty.
 template<typename It>
 void local_structure_probs_learning::operator()(const field_set& fs,
                                                 It from, It to,
                                                 local_structure_model& dst) const
 {
+    // This is a binary for_each, defined in util/algorithms.h
     for_each(dst.begin(), dst.end(), make_counting_iterator(0),
-             bind(&local_structure_probs_learning::rec_learn<It>, this, ref(fs),
+             bind(&local_structure_probs_learning::rec_learn<It>,
+                  this, ref(fs),
                   from, to, _2, bind(&dtree::begin, _1)));
 }
 

@@ -38,6 +38,7 @@ int main(int argc, char** argv)
 {
     // Tell the system logger to print detailed debugging messages to
     // stdout. This will let us watch what the optimizer is doing.
+    // Set to Logger::WARN to only show arnings and errors.
     logger().setLevel(Logger::FINE);
     logger().setPrintToStdoutFlag(true);
 
@@ -74,6 +75,8 @@ int main(int argc, char** argv)
     // Run the optimizer.  
 // xxx explain why num to select for demes is popsize ... 
 // num to generate is the num to evaluate ... 
+// hillclimbing ...
+// univariate does no learning at all ... 
     int num_score_evals = 
     optimize(population,   // population fo bit strings, from above.
              args.popsize,                       // num to select
@@ -82,7 +85,7 @@ int main(int argc, char** argv)
              one_max(),                          // ScoringPolicy
              terminate_if_gte<int>(args.length), // TerminationPolicy
              tournament_selection(2, rng),       // SelectionPolicy
-             univariate(),  // structure learning policy why ?? 
+             univariate(),  // structure learning policy why ??  actually, none.
              local_structure_probs_learning(),  // Useless ...!? no structure!
              replace_the_worst(),
              mlogger,
