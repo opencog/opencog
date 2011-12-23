@@ -26,15 +26,24 @@
 
 using boost::lexical_cast;
 
-// XXX UNDER CONSTRUCTION XXX
-
 // Demonstration program for the "univariate trap" optimization problem.
-// This is a standard learning/optimization demonstraton problem: a scoring
-// function is given that counts the number of one-bits in a bit-string.
-// This is the "one_max" scoring function.  The optimizer is supposed
-// to be able to find the best solution to this function: namely, a
-// bit-string of all ones.  The onemax problem is a special case of the
-// "nmax" problem, with 'n'=2.
+// This is a standard learning/optimization demonstraton problem: a 
+// scoring function is given that surrounds the correct solution with
+// nearby solutions which are given a very low score.  This is related
+// to the "nmax" problem, except for having a vee-shaped scoring function.
+// The vee-shape is meant to be "deceptive", in that it fools ordinary
+// GA or hill-climbing solvers into loking for a solution in the wrong
+// place (i.e. on the wrong side of the vee -- the vee isolates the 
+// singular, unique global maximum by a valley on all sides, which is
+// densely surrounded by exponentially many local but inferior maxima.)
+//
+// As such problems go, this turns out to be "deceptively" easy for
+// the moses univariate optimizer to solve. This is because it has been
+// constructed to treat each possible value of a variable as independent,
+// and analyzing probability distributions for these.  Thus, the
+// optimizer doesn't perceive the "vee" shape in the scoring function.
+// It is able to solve this problem at exactly the same efficiency as the
+// nmax problem.  The code here just illustrates this.
 //
 // NOTE: This is NOT a demonstration of program learning, which is what
 // MOSES is designed for; rather, this a demonstration of the use of a
@@ -42,31 +51,34 @@ using boost::lexical_cast;
 // relies heavily on this optimizer to implement its meta-optimization
 // algorithm.
 //
-// As such problems go, this is among the simplest to solve.  The code
-// below illustrates how to do this using the MOSES infrastructure.
 //
-// This program requires four arguments:
+// This program requires five arguments:
 // -- an initial seed value for the random number generator
-// -- the bit-string length
+// -- the number of discrete variables
 // -- the population size
 // -- the maximum number of generations to run.
+// -- the number of values that variables may take.
 //
-// Suggest values of 0 15 20 100 for these.
+// Suggest values of 0 8 70 100 5 for these.
 //
-// The population size should always be larger than the bit-string
-// length, as otherwise, the least-fit individuals will be bred out of
+// The population size should always be at least (n-1)*num_variables
+// as otherwise, the least-fit individuals will be bred out of
 // the population before the fittest individual is found, causing the
 // algo loop forever (well, only up to max generations). There's even
 // some risk of this when the population is only a little larger than
-// the bit-string length.
+// this lower bound; maybe one-n-a-half or twice this lower bound would
+// be a good choice.
 //
 // As output, this will print the fittest individual found at each
 // generation. At the conclusion, the entire population will be printed.
 
 // Return, as the score, the trap function. The trap has a V-shape,
 // giving highest score for bit strings with all bits set, 
-// XXX
+// -----------------------------------------------------------
 
+// Trap scoring function.
+// The per-variable scoring function is implemented in "vee()".
+// The operator() function computes the score for a given instance.
 
 struct trap : public unary_function<instance, int>
 {
@@ -119,16 +131,18 @@ int main(int argc, char** argv)
     MT19937RandGen rng(args.rand_seed);
 
     // Create a set of "fields". Each field is a discrete variable,
-    // with two possible settings. That is, each field is a boolean.
-    // The number of such boolean variables to create was passed as
-    // the second argument to the program.
+    // with 'n' different possible settings. That is, each field has
+    // a multiplicity or "arity" of 'n'.  The number of such discrete
+    // variables to create was passed as the second argument to the
+    // program.
     field_set fs(field_set::disc_spec(n), args.length);
 
-    // Create a population of bit-strings corresponding to the field
-    // specification above. The length of the bit string will be the
-    // same as the length of the field specification: one bit per field.
-    // The population size was passed as the third argument to the
-    // program.
+    // Create a population of instances (bit-strings) corresponding
+    // to the field specification above. The length of the bit string
+    // will be ciel(log_2(n)) times the length of the field specification.
+    // This is because 'n' values require at least log_2(n) bits to be
+    // represented in binary.  The population size was passed as the
+    // third argument to the program.
     instance_set<int> population(args.popsize, fs);
 
     // Initialize each member of the population to a random value.
@@ -138,9 +152,9 @@ int main(int argc, char** argv)
 
     // Run the optimizer.
     // For this problem, there is no dependency at all between different
-    // bits in the bit string.  Thus, for the "structure learning" step,
-    // use the univariate() model, which is basically a no-op; it doesn't
-    // try to learn any structure.
+    // fields ("genes") in the field set.  Thus, for the "structure
+    // learning" step, use the univariate() model, which is basically a
+    // no-op; it doesn't try to learn any structure.
     //
     // The "num to select" argument is number of individuals to select
     // for learning the population distribution. For this problem, it
@@ -162,15 +176,14 @@ int main(int argc, char** argv)
     // the new individuals are less fit than the current population!
     // But this is good enough for this example...)
     //
-    // The one_max() scoring function simply counts the number of
-    // one-bits in the bit-string. It is defined in scoring_functions.h
+    // The trap() scoring function is described above.
+    //
     // The termination policy will halt iteration if an individual is
-    // discovered to have a score of "args.length" -- but of course,
-    // this is the bit string length, and such a score means all bits
-    // are one.
+    // discovered to have a score of "(n-1)*args.length" -- but of
+    // course, since each field takes a value from 0 to (n-1) so the
     //
     int num_score_evals =
-    optimize(population,   // population of bit strings, from above.
+    optimize(population,   // population of instances, from above.
              args.popsize,                       // num to select
              args.popsize / 2,                   // num to generate
              args.max_gens,                      // max number of generations to run

@@ -25,19 +25,17 @@
 
 #include "headers.h"
 
-using std::string;
-using std::vector;
 using boost::lexical_cast;
 
 // Demonstration program for the "nmax" optimization problem.  This
 // is a standard learning/optimization demonstraton problem: a scoring
-// function is given that totals up the values of a set of discrete 
+// function is given that totals up the values of a set of discrete
 // variables.  This is the "n_max" scoring function.  The optimizer is
 // supposed to be able to find the best solution to this function:
 // namely, a set of variables, the value of each of which is at maximum.
 // This is a generalization of the "onemax" problem, which is nmax with n=2.
 //
-// XXX setting n=2 currently fails due to a bug, see 
+// XXX setting n=2 currently fails due to a bug, see
 // https://bugs.launchpad.net/opencog/+bug/908230
 //
 // NOTE: This is NOT a demonstration of program learning, which is what
@@ -69,7 +67,7 @@ using boost::lexical_cast;
 // As output, this will print the fittest individual found at each
 // generation. At the conclusion, the entire population will be printed.
 
-int main(int argc,char** argv)
+int main(int argc, char** argv)
 {
     // Tell the system logger to print detailed debugging messages to
     // stdout. This will let us watch what the optimizer is doing.
@@ -110,7 +108,7 @@ int main(int argc,char** argv)
     instance_set<int> population(args.popsize, fs);
 
     // Initialize each member of the population to a random value.
-    foreach(instance& inst,population)
+    foreach(instance& inst, population)
         generate(fs.begin_disc(inst), fs.end_disc(inst),
                  bind(&RandGen::randint, boost::ref(rng), n));
 
