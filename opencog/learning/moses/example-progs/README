@@ -3,8 +3,8 @@
                    --------------------------
 
 This directory contains a set of example programs for MOSES, showing
-how to use the MOSES algorithm and assorted infrastructure to solve 
-various common "textbook" problems with MOSES. 
+how to use the MOSES algorithm and assorted infrastructure to solve
+various common "textbook" problems with MOSES.
 
 Some of these are better documented then others. Start reading here:
 
@@ -22,4 +22,11 @@ Some of these are better documented then others. Start reading here:
    Usage: nmax <rand-seed> <set-size> <population-size> <num-gens> <arity>
 
    NOTE: There's currently a bug, this fails for n=2, see bug 908230.
- 
+   https://bugs.launchpad.net/opencog/+bug/908230
+
+-- continmax. This is a variation of the onemax/nmax problems above, but
+   with continuous variables in place of discrete variables.
+
+   NOTE: This sort-of works, but not well, I think due to bugs. See
+   https://bugs.launchpad.net/opencog/+bug/908247
+

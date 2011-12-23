@@ -92,7 +92,7 @@ int main(int argc,char** argv)
     // variables to create was passed as the second argument to the
     // program.
     //
-    // For teh onemax problem, 'n' would be 2.
+    // For the onemax problem, 'n' would be 2.
     field_set fs(field_set::disc_spec(n), args.length);
 
     // Create a population of instances (bit-strings) corresponding
@@ -142,7 +142,7 @@ int main(int argc,char** argv)
     // largest score would be the max value times the number of fields.
     //
     int num_score_evals =
-    optimize(population,   // population of bit strings, from above.
+    optimize(population,   // population of instances, from above.
              args.popsize,                       // num to select
              args.popsize / 2,                   // num to generate
              args.max_gens,                      // max number of generations to run
