@@ -14,4 +14,12 @@ Some of these are better documented then others. Start reading here:
 
    Usage: onemax <rand-seed> <bit-string-len> <population-size> <num-gens>
 
-   
+-- nmax. This uses a scoring function that totals up the values of a
+   set of discrete variables. The solver should find as a solution the
+   set where all of the variables have thier maximum value.  The onemax
+   problem is a special case of this, with n=2.
+
+   Usage: nmax <rand-seed> <set-size> <population-size> <num-gens> <arity>
+
+   NOTE: There's currently a bug, this fails for n=2, see bug 908230.
+ 

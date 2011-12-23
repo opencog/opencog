@@ -5,7 +5,7 @@
  * All Rights Reserved
  *
  * Written by Moshe Looks
- * Documented by Linas Vepstas
+ * Documented by Linas Vepstas, 2011
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -30,7 +30,8 @@
 // function is given that counts the number of one-bits in a bit-string.
 // This is the "one_max" scoring function.  The optimizer is supposed
 // to be able to find the best solution to this function: namely, a
-// bit-string of all ones.
+// bit-string of all ones.  The onemax problem is a special case of the
+// "nmax" problem, with 'n'=2.
 //
 // As such problems go, this is among the simplest to solve.  The code
 // below illustrates how to do this using the MOSES infrastructure.
@@ -39,7 +40,7 @@
 // -- an initial seed value for the random number generator
 // -- the bit-string length
 // -- the population size
-// -- the maximum number of generations to run. 
+// -- the maximum number of generations to run.
 //
 // Suggest values of 0 15 20 100 for these.
 //
@@ -82,8 +83,9 @@ int main(int argc, char** argv)
 
     // Create a population of bit-strings corresponding to the field
     // specification above. The length of the bit string will be the
-    // same as the field specification. The population size was passed
-    // as the third argument to the program.
+    // same as the length of the field specification: one bit per field.
+    // The population size was passed as the third argument to the
+    // program.
     instance_set<int> population(args.popsize, fs);
 
     // Initialize each member of the population to a random value.
@@ -99,20 +101,20 @@ int main(int argc, char** argv)
     //
     // The "num to select" argument is number of individuals to select
     // for learning the population distribution. For this problem, it
-    // makes sense to select them all.  For smaller selections, the 
-    // SelectionPolicy is used to make the selection; here, the 
+    // makes sense to select them all.  For smaller selections, the
+    // SelectionPolicy is used to make the selection; here, the
     // tournament_selection() policy is used to select the fittest
     // individuals from the population. Since we select all, holding
     // a tournament is pointless.
     //
     // The "num to generate" is the number of individuals to create for
     // the next generation.  These are created with reference to the
-    // learned model.  If the model is working well, then the created 
+    // learned model.  If the model is working well, then the created
     // individuals should be fairly fit.  In this example, it makes
     // sense to replace half the population each generation.
     // The generated individuals are then folded into the population
     // using the replace_the_worst() replacement policy. This
-    // replacement policy is unconditional: the worst part of the 
+    // replacement policy is unconditional: the worst part of the
     // current population is replaced by the new individuals (even if
     // the new individuals are less fit than the current population!
     // But this is good enough for this example...)
@@ -124,8 +126,8 @@ int main(int argc, char** argv)
     // this is the bit string length, and such a score means all bits
     // are one.
     //
-    int num_score_evals = 
-    optimize(population,   // population fo bit strings, from above.
+    int num_score_evals =
+    optimize(population,   // population of bit strings, from above.
              args.popsize,                       // num to select
              args.popsize / 2,                   // num to generate
              args.max_gens,                      // max number of generations to run
