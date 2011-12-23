@@ -57,7 +57,15 @@ struct replace_the_worst
     }
 };
 
-// replace the most (or almost) similar
+// Replace the most similar individual, where similarity is determined by
+// the hamming distance.
+//
+// TODO: I think it might be a little more efficent to use the
+// hamming_distance as a sort comparison operator, and hand off the whole
+// thing to std:nth_element, and let that class figure out who is close or
+// not.  This avoids the use of doubly-nested loops, and multiple redundant
+// evaluations of the hamming distance, right?
+//
 struct rtr_replacement
 {
     rtr_replacement(const field_set& fs, int ws, RandGen& _rng)
@@ -69,7 +77,7 @@ struct rtr_replacement
         OC_ASSERT(window_size <= distance(from_dst, to_dst),
                   "windows size greater than distance from_dst -> to_dst.");
 
-        for (;from != to;++from)
+        for (;from != to; ++from)
             operator()(*from, from_dst, to_dst);
     }
 

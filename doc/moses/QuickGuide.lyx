@@ -1906,19 +1906,10 @@ int optimize(...);
 
 \end_inset
 
-The algorithm itself is meant to be generic: it is a loop, until termination
- (using 
-\family typewriter
-TerminationPolicy
-\family default
-), of steps performed on a population.
- Currently, two types of termination are implemented, in 
-\family typewriter
-eda/termination.h
-\family default
-: one when scores exceed a bound, and another when scores exceed a bound,
- or fail to show improvement.
- 
+The algorithm itself is meant to be generic: it is a loop of steps performed
+ on a population.
+ The different policies determine how the different steps of the algorithm
+ are actually carried out.
 \end_layout
 
 \begin_layout Standard
@@ -1956,7 +1947,21 @@ univariate()
 
 \begin_layout Enumerate
 Learn the structure.
- That is, invoke the
+ The idea here is that the different variables in the problem are not independen
+t, but are related to one-another: this is the 
+\begin_inset Quotes eld
+\end_inset
+
+structure
+\begin_inset Quotes erd
+\end_inset
+
+ of the problem.
+ This step gives the solver the opportunity to discern that structure.
+ So, for example, the Bayesian Optimization Algorithm (BOA) assumes that
+ the structure is a network of probabilities, a Bayesian network.
+ As this algorithm is generic, any structure learning system may be used;
+ that is, this step invokes the
 \family typewriter
  StructureLearningPolicy.
 
@@ -1966,30 +1971,110 @@ Learn the structure.
 
 \begin_layout Enumerate
 Learn the probability distribution for the selected individuals.
- The learning here is done within the context of the 
+ The learning here is done within the context of the previously learned
+ structure.
+ Again, the presumption is that, once the dependencies between variables
+ are known, then understanding the actual distribution in a population will
+ hint at were optimal solutions lie.
+ This function is of type 
 \family typewriter
-StructureLearningPolicy.
+ProbsLearningPolicy.
 \end_layout
 
 \begin_layout Enumerate
--- create a bunch of instances
+Create a fixed number of new individuals or instances.
+ These are created based on the distribution learned in the previous step.
+ The goal here is to create more individuals that are likely to have a high
+ score.
 \end_layout
 
 \begin_layout Enumerate
--- score
+Score the new individuals, using the 
+\family typewriter
+ScoringPolicy
+\family default
+.
+ This step determines the fitness of the newly created individuals.
+ The scoring policy is, by definition, highly problem-specific.
+ A number of different example scoring policies can be found in 
+\family typewriter
+example-progs/scoring_functions.h
+\family default
+.
 \end_layout
 
 \begin_layout Enumerate
--- Replace 
+Replace segments of the existing population with the newly created individuals.
+ This is done with the 
+\family typewriter
+ReplacementPolicy
+\family default
+.
+ Several different replacement policies are defined in 
+\family typewriter
+eda/replacement.h
+\family default
+: the 
+\family typewriter
+replace_the_worst()
+\family default
+ policy unconditionally replaces the lowest-scoring members of the population.
+ The 
+\family typewriter
+rtr_replacement()
+\family default
+ replaces the most similar members, based on the hamming distance between
+ the fields.
 \end_layout
 
 \begin_layout Enumerate
--- repeat.
+Repeat.
+ Go to step 1, unless the maximum generation count has been exceeded, or
+ if the 
+\family typewriter
+TerminationPolicy
+\family default
+ has been met.
+ There is no point in iterating if a good-enough solution has already been
+ found; the 
+\family typewriter
+TerminationPolicy
+\family default
+ determines what is considered to be 
+\begin_inset Quotes eld
+\end_inset
+
+good enough
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Currently, two types of termination are pre-defined, in 
+\family typewriter
+eda/termination.h
+\family default
+: one is 
+\family typewriter
+terminate_if_gte()
+\family default
+, which ends when scores exceed a bound, and 
+\family typewriter
+terminate_if_gte_or_no_improv
+\family default
+(), which ends when scores exceed a bound, or fail to show improvement.
+ 
 \end_layout
 
 \begin_layout Standard
-Note that ScoringPolicy needs to be thread-safe, as it's operator() will
- be invoked from multiple threads.
+Note that 
+\family typewriter
+ScoringPolicy
+\family default
+ needs to be thread-safe, as it's 
+\family typewriter
+operator()
+\family default
+ will be invoked from multiple threads.
 \end_layout
 
 \begin_layout Subsection
