@@ -582,8 +582,17 @@ Knobs do not have to be defined as running over all possible values; it
 \end_layout
 
 \begin_layout Description
+XXX provide hint that knobs and fields and variables are same thing.
+ XXX
+\end_layout
+
+\begin_layout Description
+XXX
+\end_layout
+
+\begin_layout Description
 Representation-building.
- The step in the MOSES algorithm where an examplar is chosen, and a representati
+ The step in the MOSES algorithm where an exemplar is chosen, and a representati
 on is constructed from it.
  This representation is essentially the cornerstone of a deme.
 \end_layout

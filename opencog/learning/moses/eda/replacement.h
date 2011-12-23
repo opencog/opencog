@@ -35,23 +35,37 @@
 namespace opencog { 
 namespace moses {
 
-struct replace_the_worst {
+// Replace the lowest-scored individuals in the current population,
+// specified by the iteratators Dst, and replace them unconditionally
+// with the individuals given by NewInst.  The container holding the
+// Dst iterators will be partially sorted.
+struct replace_the_worst
+{
     template<typename NewInst, typename Dst>
-    void operator()(NewInst from,NewInst to, Dst from_dst, Dst to_dst) const {
+    void operator()(NewInst from, NewInst to, Dst from_dst, Dst to_dst) const
+    {
         OC_ASSERT(distance(from, to) <= distance(from_dst, to_dst),
-                  "Distance from -> to greater than distance from_dst -> to_dst.");
+                  "ERROR: The number of individuals to replace in a population\n"
+                  "is larger than the population itself.");
+
+        // OMP_ALGO here means that this is done in parallel.
+        // nth_element is a partial sort, putting the weakest individuals
+        // at the head. The new individuals then replace these by simply
+        // getting copied over.
         OMP_ALGO::nth_element(from_dst, from_dst + distance(from, to), to_dst);
         copy(from, to, from_dst);
     }
 };
 
 // replace the most (or almost) similar
-struct rtr_replacement {
+struct rtr_replacement
+{
     rtr_replacement(const field_set& fs, int ws, RandGen& _rng)
         : window_size(ws), _fields(&fs), rng(_rng) { }
 
     template<typename NewInst, typename Dst>
-    void operator()(NewInst from, NewInst to, Dst from_dst, Dst to_dst) const {
+    void operator()(NewInst from, NewInst to, Dst from_dst, Dst to_dst) const
+    {
         OC_ASSERT(window_size <= distance(from_dst, to_dst),
                   "windows size greater than distance from_dst -> to_dst.");
 
@@ -61,7 +75,8 @@ struct rtr_replacement {
 
     template<typename Dst, typename ScoreT>
     void operator()(const scored_instance<ScoreT>& inst,
-                    Dst from_dst, Dst to_dst) const {
+                    Dst from_dst, Dst to_dst) const
+    {
         lazy_random_selector select(distance(from_dst, to_dst), rng);
         Dst closest = from_dst + select();
         int closest_distance = _fields->hamming_distance(inst, *closest);

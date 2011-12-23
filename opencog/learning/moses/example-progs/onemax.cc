@@ -96,8 +96,34 @@ int main(int argc, char** argv)
     // bits in the bit string.  Thus, for the "structure learning" step,
     // use the univariate() model, which is basically a no-op; it doesn't
     // try to learn any structure.
-// xxx explain why num to select is popsize ... 
-// num to generate is the num to evaluate ... 
+    //
+    // The "num to select" argument is number of individuals to select
+    // for learning the population distribution. For this problem, it
+    // makes sense to select them all.  For smaller selections, the 
+    // SelectionPolicy is used to make the selection; here, the 
+    // tournament_selection() policy is used to select the fittest
+    // individuals from the population. Since we select all, holding
+    // a tournament is pointless.
+    //
+    // The "num to generate" is the number of individuals to create for
+    // the next generation.  These are created with reference to the
+    // learned model.  If the model is working well, then the created 
+    // individuals should be fairly fit.  In this example, it makes
+    // sense to replace half the population each generation.
+    // The generated individuals are then folded into the population
+    // using the replace_the_worst() replacement policy. This
+    // replacement policy is unconditional: the worst part of the 
+    // current population is replaced by the new individuals (even if
+    // the new individuals are less fit than the current population!
+    // But this is good enough for this example...)
+    //
+    // The one_max() scoring function simply counts the number of
+    // one-bits in the bit-string. It is defined in scoring_functions.h
+    // The termination policy will halt iteration if an individual is
+    // discovered to have a score of "args.length" -- but of course,
+    // this is the bit string length, and such a score means all bits
+    // are one.
+    //
     int num_score_evals = 
     optimize(population,   // population fo bit strings, from above.
              args.popsize,                       // num to select
@@ -107,8 +133,8 @@ int main(int argc, char** argv)
              terminate_if_gte<int>(args.length), // TerminationPolicy
              tournament_selection(2, rng),       // SelectionPolicy
              univariate(),                       // StructureLearningPolicy
-             local_structure_probs_learning(),
-             replace_the_worst(),
+             local_structure_probs_learning(),   // ProbsLearningPolicy
+             replace_the_worst(),                // ReplacementPolicy
              mlogger,
              rng);
 

@@ -37,25 +37,42 @@ namespace moses {
     // of "genes" within the population (i.e. intended for use with 
     // estimation-of-distribution algorithms, such as the Bayesian 
     // optimization algorithm, but can also be used with "dumb"
-    // algorithms).
+    // algorithms). For MOSES, "gene" is a synonym for "knob", 
+    // "variable" or "field".
     //
-    // Rough outline: a population of individuals is created and
-    // scored.  Then iteration on a population is performed until
-    // the TerminationPolicy is met. Uses ScoringPolicy to rank
-    // individuals in the population. Uses SelectionPolicy to select
-    // individuals for tournament rounds.  Uses ReplacementPolicy to
-    // replace loosing individuals in the population.  The dependencies
-    // between genes in individuals are modelled using the
-    // StructureLearningPolicy, while the ProbsLearningPolicy is used to
-    // generate specific genetic variations (based on the learned
-    // dependencies.)
+    // Rough outline: an initial population of individuals is created
+    // and scored.  Then, up to max_gen iterations are performed, or
+    // until the TerminationPolicy is satisfied, whichever is less.
+    // Uses SelectionPolicy to select n_select individuals out of the 
+    // population. Typical policies would select the fittest individuals.
+    // The selected individuals are then used to create a "structure
+    // model" and a "probability model".  The structure model building
+    // step is meant to discover any inter-dependencies between the
+    // "genes" in the model (aka the variables, fields).  The 
+    // probability model-building step is meant to discern the actual
+    // distribution of the fittest instances in the selected population.
+    // After modelling, the model is used to create n_generate new
+    // individuals.  These new individuals are scored for fitness using
+    // the ScoringPolicy.  Finally, the ReplacementPolicy is used to
+    // fold these new individuals into the populatin, and then the
+    // iteration loop repeats.
     //
-    // Other arguments:
+    // So, again:
     // n_select: number of individuals to select out of the population,
-    //     and enroll into the tournament. The SelectionPolicy will be
-    //     used to select this many, each generation.
+    //     and enroll into the model-building steps.  The SelectionPolicy
+    //     will be  used to select this many, each generation.
+    // n_generate: the number of new individuals to generate, after
+    //     modelling.
     //
-    // Returns the number of scoring evaluations actually performed.
+    // Returns the number of scoring function evaluations actually
+    // performed.
+    //
+    // Note that the scoring function must be THREAD-SAFE.  This routine
+    // will launch multiple threads to perform scoring, but it will use
+    // only a single instance of the scoring function to do so. Thus,
+    // if the scoring function is implemented as an object, and is
+    // maintaining internal state, it must do so in a thread-safe manner.
+    //
     template <typename ScoreT,
               typename ScoringPolicy,
               typename TerminationPolicy,
@@ -65,9 +82,9 @@ namespace moses {
               typename ReplacementPolicy,
               typename LoggingPolicy>
     int optimize(instance_set<ScoreT>& current, // population
-                 int n_select,  // number of individuals to enroll.
-                 int n_generate,
-                 int max_gens,  // maximum number of generations
+                 int n_select,   // num of individuals to select for modeling
+                 int n_generate, // num of individuals to create
+                 int max_gens,   // maximum number of generations
                  const ScoringPolicy& score,
                  const TerminationPolicy& termination_criterion,
                  const SelectionPolicy& select,
@@ -121,34 +138,44 @@ namespace moses {
             std::vector<scored_instance<ScoreT> > promising(n_select);
             select(current.begin(), current.end(), promising.begin(), n_select);
             
-            // Initialize the model.
+            // Initialize the model (run it's constructor).
             logger().debug("Build probabilistic model");
             model_type model(current.fields(), promising.begin(),
                              promising.end(), rng);
             
-            // Update the model.
+            // Update the model. First, learn the "structure" of the
+            // dependencies between different variables in the
+            // population.  Next, within the context of this structure,
+            // determine the probability distribution of the actual
+            // population.  The trivial learner, univariate(), uses an
+            // empty function for learn_structure.
             learn_structure(current.fields(), promising.begin(),
                             promising.end(), model);
             learn_probs(current.fields(), promising.begin(),
                         promising.end(), model);
             
-            //create new instances and integrate them into the current
-            //instance set, replacing existing instances
+            // Create new instances and integrate them into the current
+            // instance set, replacing existing instances. We use the
+            // model to create the new instances, so that 
             logger().debug("Sample and evaluate %d new candidates"
                            " according to the model", n_generate);
             instance_set<ScoreT> new_instances(n_generate, current.fields());
             foreach(auto& inst, new_instances)
                 inst = model();
+
+            // Compute a fitness score for each instance.
+            // This is parallelized.
             OMP_ALGO::transform(new_instances.begin(), new_instances.end(),
                                 new_instances.begin_scores(),
                                 bind(boost::cref(score), _1));
 
+            // Run a tournament to replace old instances.
             logger().debug("Replace the new candidates");
             replace(new_instances.begin(), new_instances.end(),
                     current.begin(), current.end());
         }
 
-        //log the final result
+        // Log the final result.
         write_log(current.begin(), current.end(),
                   current.fields(), generation);
         

@@ -32,9 +32,11 @@
 namespace opencog
 {
 
-struct tournament_selection {
+struct tournament_selection
+{
     tournament_selection(unsigned int t_size_, RandGen& _rng)
-    : t_size(t_size_), rng(_rng) {
+    : t_size(t_size_), rng(_rng)
+    {
         OC_ASSERT(t_size > 0);
     }
     
@@ -48,9 +50,11 @@ struct tournament_selection {
      * and append the winners in dst.
      */
     template<typename In, typename Out>
-    void operator()(In from,In to, Out dst, unsigned int n_select) const {
-        typename std::iterator_traits<In>::difference_type d = distance(from,
-                                                                        to);
+    void operator()(In from, In to, Out dst, unsigned int n_select) const
+    {
+        typename std::iterator_traits<In>::difference_type d =
+           distance(from, to);
+
         dorepeat(n_select) {
             In res = from + rng.randint(d);
             dorepeat(t_size - 1) {
