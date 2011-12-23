@@ -27,6 +27,14 @@ using std::string;
 using std::vector;
 using boost::lexical_cast;
 
+// This is some sort of term-algebra variant of the onemax/nmax problem.
+// I don't think it works, the term support in MOSES is incomplete and/or
+// broken. Algorithmically, the term-algebra support is similar to the
+// contin support, but for general terms arranged in an n-ary tree, 
+// instead of a 2-ary tree for contin.
+//
+// XXX Someday, fix all of this!
+
 void recbuild(term_tree& tr, term_tree::iterator it,
 	      int b, int maxd, int d, int s)
 {
@@ -41,15 +49,26 @@ void recbuild(term_tree& tr, term_tree::iterator it,
 
 int main(int argc,char** argv)
 {
-    // Set flag to print only cassert and other ERROR level logs on stdout
-    logger().setPrintErrorLevelStdout();
+    // Tell the system logger to print detailed debugging messages to
+    // stdout. This will let us watch what the optimizer is doing.
+    // Set to Logger::WARN to only show arnings and errors.
+    logger().setLevel(Logger::FINE);
+    logger().setPrintToStdoutFlag(true);
 
-    vector<string> addition_args{"depth", "branching"};
+    // We also need to declare a specific logger for the aglo.
+    // This one uses the same system logger() above, and writes all
+    // messages ad the "debug" level. This allows the main loop of the
+    // algo to be traced.
+    cout_log_best_and_gen mlogger;
+
+    // Parse program arguments
+    vector<string> addition_args{"<depth>", "<branching>"};
     optargs args(argc, argv, addition_args);
-    int depth=lexical_cast<int>(argv[5]);
-    int branching=lexical_cast<int>(argv[6]);
-    cout_log_best_and_gen logger;
+    int depth = lexical_cast<int>(argv[5]);
+    int branching = lexical_cast<int>(argv[6]);
 
+    // Initialize random number generator (from the first argument
+    // given to the program).
     MT19937RandGen rng(args.rand_seed);
 
     term_tree tr("");
@@ -60,11 +79,28 @@ int main(int argc,char** argv)
         occam_randomize_term(fs,inst,rng);
     }
 
-    optimize(population,args.n_select,args.n_generate,args.max_gens,
-             termmax(fs),
+
+    int num_score_evals =
+    optimize(population,   // population of bit strings, from above.
+             args.popsize,                       // num to select
+             args.popsize / 2,                   // num to generate
+             args.max_gens,                      // max number of generations to run
+             termmax(fs),                        // ScoringPolicy
              terminate_if_gte<contin_t>((depth+pow(float(branching),
                                                    depth)-1)*args.length),
-             tournament_selection(2,rng),
-             univariate(),local_structure_probs_learning(),
-             replace_the_worst(),logger,rng);
+                                                 // TerminationPolicy
+             tournament_selection(2, rng),       // SelectionPolicy
+             univariate(),                       // StructureLearningPolicy
+             local_structure_probs_learning(),   // ProbsLearningPolicy
+             replace_the_worst(),                // ReplacementPolicy
+             mlogger,
+             rng);
+
+    // The logger is asynchronous, so flush it's output before
+    // writing to cout, else output will be garbled.
+    logger().flush();
+
+    cout << "A total of " << num_score_evals
+         << " scoring funtion evaluations were done." << endl;
+
 }

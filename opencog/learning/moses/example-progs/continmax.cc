@@ -50,6 +50,12 @@ using boost::lexical_cast;
 // and log_2(arity), etc.) See
 // https://bugs.launchpad.net/opencog/+bug/908247
 //
+// NOTE: This is NOT a demonstration of program learning, which is what
+// MOSES is designed for; rather, this a demonstration of the use of a
+// certain component within MOSES, the so-called "optimizer". MOSES itself
+// relies heavily on this optimizer to implement its meta-optimization
+// algorithm.
+//
 // This program requires five arguments:
 // -- an initial seed value for the random number generator
 // -- the number of contin variables

@@ -33,6 +33,12 @@
 // bit-string of all ones.  The onemax problem is a special case of the
 // "nmax" problem, with 'n'=2.
 //
+// NOTE: This is NOT a demonstration of program learning, which is what
+// MOSES is designed for; rather, this a demonstration of the use of a
+// certain component within MOSES, the so-called "optimizer". MOSES itself
+// relies heavily on this optimizer to implement its meta-optimization
+// algorithm.
+//
 // As such problems go, this is among the simplest to solve.  The code
 // below illustrates how to do this using the MOSES infrastructure.
 //

@@ -6,7 +6,14 @@ This directory contains a set of example programs for MOSES, showing
 how to use the MOSES algorithm and assorted infrastructure to solve
 various common "textbook" problems with MOSES.
 
-Some of these are better documented then others. Start reading here:
+Some of these are better documented then others. A synopsis of the
+documented examples are given below.
+
+Most/all of these examples don't demonstrate MOSES at all, but rather
+exercise a certain compenent within MOSES. In most cases, this is the
+optimizer, which implements a generic estimation-of-distribution
+algorithm.  The MOSES meta-optimizer draws heavily on this component
+to perform much of the "heavy lifting".
 
 -- onemax.  This uses a scoring function that counts the number of ones
    in a bit string. The solver is supposed to find the optimal solution,
@@ -30,3 +37,6 @@ Some of these are better documented then others. Start reading here:
    NOTE: This sort-of works, but not well, I think due to bugs. See
    https://bugs.launchpad.net/opencog/+bug/908247
 
+-- termmax. A variation of the continmax problem, but extended for
+   arbitrary n-ary term-algebra trees.  term support in MOSES is 
+   currently incomplete and non-functional.
