@@ -52,6 +52,12 @@ TARGET_LINK_LIBRARIES (ontomax
 	util
 )
 
+ADD_EXECUTABLE (trap-bit trap-bit)
+TARGET_LINK_LIBRARIES (trap-bit
+	moses
+	util
+)
+
 ADD_EXECUTABLE (trap-uni trap-uni)
 TARGET_LINK_LIBRARIES (trap-uni
 	moses

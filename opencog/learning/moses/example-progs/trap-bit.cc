@@ -1,10 +1,7 @@
 /*
- * opencog/learning/moses/example-progs/trap-uni.cc
+ * opencog/learning/moses/example-progs/trap-bit.cc
  *
- * Copyright (C) 2002-2008 Novamente LLC
- * All Rights Reserved
- *
- * Written by Linas Vepstas, 2011
+ * Copyright (C) 2011 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -25,6 +22,8 @@
 #include "headers.h"
 
 using boost::lexical_cast;
+
+// XXX under sconstruction XXX
 
 // Demonstration program for the "univariate trap" optimization problem.
 // This is a standard learning/optimization demonstraton problem: a 
@@ -82,7 +81,7 @@ using boost::lexical_cast;
 
 struct trap : public unary_function<instance, int>
 {
-    trap(const field_set& fs, int n) : fields(fs), max(n-1) {}
+    trap(int n) : max(n) {}
 
     int vee(int x) const
     {
@@ -92,16 +91,29 @@ struct trap : public unary_function<instance, int>
 
     int operator()(const instance& inst) const
     {
-        return accumulate
-               (make_transform_iterator(fields.begin_disc(inst),
-                    bind(&trap::vee, this, _1)),
-                make_transform_iterator(fields.end_disc(inst), 
-                    bind(&trap::vee, this, _1)),
-                0);
+        instance::const_iterator it = inst.begin();
+        int odo = 0;
+        int total = 0;
+        int subtotal = 0;
+        for (; it != inst.end(); it ++)
+        {
+            packed_t bits = *it;
+            for (unsigned int b=0; b<sizeof(packed_t); b++)
+            {
+                subtotal += bits & 0x1;
+                odo++;
+                bits = bits >> 1;
+                if (0 == odo%max)
+                {
+                     total += vee(subtotal);
+                     subtotal = 0;
+                }
+            }
+        }
+        return total;
     }
 
 private:
-    const field_set& fields;
     int max;
 };
 
@@ -131,11 +143,10 @@ int main(int argc, char** argv)
     MT19937RandGen rng(args.rand_seed);
 
     // Create a set of "fields". Each field is a discrete variable,
-    // with 'n' different possible settings. That is, each field has
-    // a multiplicity or "arity" of 'n'.  The number of such discrete
-    // variables to create was passed as the second argument to the
-    // program.
-    field_set fs(field_set::disc_spec(n), args.length);
+    // with two possible settings. That is, each field is a boolean.
+    // The number of such boolean variables to create will be the
+    // length (second argument) times the trap size (last argument).
+    field_set fs(field_set::disc_spec(2), n*args.length);
 
     // Create a population of instances (bit-strings) corresponding
     // to the field specification above. The length of the bit string
@@ -147,8 +158,8 @@ int main(int argc, char** argv)
 
     // Initialize each member of the population to a random value.
     foreach(instance& inst, population)
-        generate(fs.begin_disc(inst), fs.end_disc(inst),
-                 bind(&RandGen::randint, boost::ref(rng), n));
+        generate(fs.begin_bits(inst), fs.end_bits(inst),
+                 bind(&RandGen::randbool, boost::ref(rng)));
 
     // Run the optimizer.
     // For this problem, there is no dependency at all between different
@@ -187,7 +198,7 @@ int main(int argc, char** argv)
              args.popsize,                       // num to select
              args.popsize / 2,                   // num to generate
              args.max_gens,                      // max number of generations to run
-             trap(fs, n),                        // ScoringPolicy
+             trap(n),                            // ScoringPolicy
              terminate_if_gte<int>((n-1)*args.length), // TerminationPolicy
              tournament_selection(2, rng),       // SelectionPolicy
              univariate(),                       // StructureLearningPolicy
