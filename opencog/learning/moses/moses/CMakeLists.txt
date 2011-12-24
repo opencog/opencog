@@ -1,6 +1,5 @@
 #install header files
 INSTALL(FILES
-    ant_scoring.h
     metapopulation.h
     moses.h
     distributed_moses.h
