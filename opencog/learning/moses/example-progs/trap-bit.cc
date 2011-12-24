@@ -76,37 +76,48 @@ using boost::lexical_cast;
 // -----------------------------------------------------------
 
 // Trap scoring function.
-// The per-variable scoring function is implemented in "vee()".
+// The per-trap scoring function is implemented in "vee()".
 // The operator() function computes the score for a given instance.
 
 struct trap : public unary_function<instance, int>
 {
-    trap(int n) : max(n) {}
+    trap(int n, int len) : trapsz(n), rounds(len) {}
 
     int vee(int x) const
     {
-        if (max <= x) return x;
-        return max-1-x;
+        if (trapsz <= x) return x;
+        return trapsz-1-x;
     }
 
+    // This scoring function loops over the bits in the bit string,
+    // grouping them into "traps" of "trapsz" bits each.  The number of
+    // bits in each trap is counted, and then passed through the
+    // trap function. The trap score is then accumulated.  The length
+    // of the bit string must be a multiple of the trap size, else
+    // the trailing fractional bits will be ignored.
     int operator()(const instance& inst) const
     {
         instance::const_iterator it = inst.begin();
-        int odo = 0;
+        int odo = 0;   // odometer
         int total = 0;
         int subtotal = 0;
+        int nr = 0;
         for (; it != inst.end(); it ++)
         {
             packed_t bits = *it;
-            for (unsigned int b=0; b<sizeof(packed_t); b++)
+
+            // loop over bits in a packed_t
+            for (unsigned int b=0; b<sizeof(packed_t)*8; b++)
             {
                 subtotal += bits & 0x1;
                 odo++;
                 bits = bits >> 1;
-                if (0 == odo%max)
+                if (0 == odo%trapsz)
                 {
                      total += vee(subtotal);
                      subtotal = 0;
+                     nr ++;
+                     if (rounds < nr) break;
                 }
             }
         }
@@ -114,7 +125,8 @@ struct trap : public unary_function<instance, int>
     }
 
 private:
-    int max;
+    int trapsz;
+    int rounds;
 };
 
 
@@ -198,8 +210,8 @@ int main(int argc, char** argv)
              args.popsize,                       // num to select
              args.popsize / 2,                   // num to generate
              args.max_gens,                      // max number of generations to run
-             trap(n),                            // ScoringPolicy
-             terminate_if_gte<int>((n-1)*args.length), // TerminationPolicy
+             trap(n, args.length),               // ScoringPolicy
+             terminate_if_gte<int>(n*args.length), // TerminationPolicy
              tournament_selection(2, rng),       // SelectionPolicy
              univariate(),                       // StructureLearningPolicy
              local_structure_probs_learning(),   // ProbsLearningPolicy
