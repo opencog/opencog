@@ -18,19 +18,21 @@ ENDIF (COMMAND CMAKE_POLICY)
 
 PROJECT(opencog)
 
-################################
 # uncomment to be in Release mode
-################################
-#SET(CMAKE_BUILD_TYPE Release)
-##
-# uncomment to be in coverage testing mode
-#SET(CMAKE_BUILD_TYPE Coverage)
-#
-# uncomment to build in profile mode
-#SET(CMAKE_BUILD_TYPE Profile)
+# SET(CMAKE_BUILD_TYPE Release)
 
+# uncomment to build in debug mode
+# SET(CMAKE_BUILD_TYPE Debug)
+
+# uncomment to be in coverage testing mode
+# SET(CMAKE_BUILD_TYPE Coverage)
+
+# uncomment to build in profile mode
+# SET(CMAKE_BUILD_TYPE Profile)
+
+# default build type
 IF (CMAKE_BUILD_TYPE STREQUAL "")
-	SET(CMAKE_BUILD_TYPE Debug)
+	SET(CMAKE_BUILD_TYPE Release)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 
 # add the 'lib' dir to cmake's module search path
