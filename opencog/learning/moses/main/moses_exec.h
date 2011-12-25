@@ -245,10 +245,11 @@ void metapop_moses_results(RandGen& rng,
     bscore_based_score<BScore> bb_score(bsc);
     
     // update terminate_if_gte and max_score criteria
-    score_t bps = bb_score.best_possible_score();
-    opt_params.terminate_if_gte = std::min(opt_params.terminate_if_gte, bps);
-    moses_params.max_score = std::min(moses_params.max_score, bps);
-    logger().info("Target score (maximum reachable score) = %f", bps);
+    score_t bps = bb_score.best_possible_score(),
+        target_score = std::min(moses_params.max_score, bps);
+    opt_params.terminate_if_gte = target_score;
+    moses_params.max_score = target_score;
+    logger().info("Target score = %f", target_score);
 
     if(pa.enable_cache) {
         static const unsigned initial_cache_size = 1000000;

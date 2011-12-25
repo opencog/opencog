@@ -67,7 +67,7 @@ inline double information_theoretic_bits(const field_set& fs)
 // other algo
 struct optim_parameters {
     optim_parameters(double _pop_size_ratio = 20,
-                     double _terminate_if_gte = 0,
+                     score_t _terminate_if_gte = 0,
                      double _max_dist_ratio = 1) :
         term_total(1),
         term_improv(1),

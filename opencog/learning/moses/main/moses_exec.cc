@@ -149,7 +149,7 @@ combo::arity_t infer_arity(const string& problem,
                     unsigned int problem_size,
                     const string& input_table_file,
                     const string& combo_str) {
-    if(problem == it || problem == ann_it)
+    if(problem == it || problem == kl || problem == ann_it)
         return dataFileArity(input_table_file);
     else if(problem == cp || problem == ann_cp) {
         if(combo_str.empty())
@@ -237,7 +237,7 @@ int moses_exec(int argc, char** argv) {
     bool include_dominated;
     // optim_param
     double pop_size_ratio;
-    double max_score;
+    score_t max_score;
     double max_dist_ratio;
     // hc_param
     bool hc_terminate_if_improvement;
@@ -407,7 +407,7 @@ int moses_exec(int argc, char** argv) {
          value<double>(&pop_size_ratio)->default_value(20),
          "The higher the more effort is spent on a deme.\n")
         (opt_desc_str(max_score_opt).c_str(),
-         value<double>(&max_score)->default_value(0),
+         value<score_t>(&max_score)->default_value(best_score),
          "The max score to reach, once reached MOSES halts. MOSES is sometimes able to calculate the max score that can be reached for a particular problem, in such case the max_score is automatically reset of the minimum between MOSES's calculation and the user's option.\n")
         (opt_desc_str(max_dist_ratio_opt).c_str(),
          value<double>(&max_dist_ratio)->default_value(1),

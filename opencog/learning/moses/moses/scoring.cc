@@ -286,7 +286,7 @@ behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score occam_max_KLD_bscore::best_possible_bscore() const
 {
-    return behavioral_score(-best_score);
+    return behavioral_score(1, -best_score);
 }
 
 void occam_max_KLD_bscore::set_complexity_coef(float stdev, float alphabet_size)
