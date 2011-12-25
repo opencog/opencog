@@ -144,14 +144,24 @@ combo_tree str_to_combo_tree(const string& combo_str) {
     return tr;
 }
 
+// return true iff the problem is based on data file
+bool data_based_problem(const string& problem) {
+    return problem == it || problem == ann_it || problem == kl;
+}
+
+// return true iff the problem is based on a combo tree
+bool combo_based_problem(const string& problem) {
+    return problem == cp || problem == ann_cp;
+}
+        
 // infer the arity of the problem
 combo::arity_t infer_arity(const string& problem,                    
                     unsigned int problem_size,
                     const string& input_table_file,
                     const string& combo_str) {
-    if(problem == it || problem == kl || problem == ann_it)
+    if(data_based_problem(problem))
         return dataFileArity(input_table_file);
-    else if(problem == cp || problem == ann_cp) {
+    else if(combo_based_problem(problem)) {
         if(combo_str.empty())
             unspecified_combo_exit();
         // get the combo_tree and infer its type
@@ -192,7 +202,7 @@ unsigned multiplex_arity(arity_t a)
     exit(1);
     return -1;
 }
-
+        
 int moses_exec(int argc, char** argv) { 
     // for(int i = 0; i < argc; ++i)
     //     std::cout << "arg = " << argv[i] << std::endl;
@@ -544,120 +554,178 @@ int moses_exec(int argc, char** argv) {
     const rule& bool_reduct = logical_reduction(reduct_candidate_effort);
     // logical reduction rules used during representation building
     const rule& bool_reduct_rep = logical_reduction(reduct_knob_building_effort);
-    
-    if(problem == it) { // regression based on input table
-        
-        // infer the type of the input table
-        type_tree inferred_tt = infer_data_type_tree(input_data_file);
-        type_tree output_tt = type_tree_output_type_tree(inferred_tt);
-        type_node inferred_type = *output_tt.begin();
 
-        // determine the default exemplar to start with
-        if(exemplars.empty())
-            exemplars.push_back(type_to_exemplar(inferred_type));
-
-        type_node output_type = 
-            *(get_output_type_tree(*exemplars.begin()->begin()).begin());
-        if(output_type == id::unknown_type) {
-            output_type = inferred_type;
-        }
-
-        OC_ASSERT(output_type == inferred_type);
+    // problem based on input table
+    if(data_based_problem(problem)) {
+        // infer the signature based on the input table
+        type_tree table_tt = infer_data_type_tree(input_data_file);
 
         // read input_data_file file
         logger().debug("Read data file %s", input_data_file.c_str());
         Table table = istreamTable(input_data_file, target_pos);
+
+        // possible subsample the table
         if(nsamples>0)
             subsampleTable(table.itable, table.otable, nsamples, rng);
+
+        if(problem == it) { // regression based on input table
         
-        type_tree tt = gen_signature(output_type, arity);
-        int as = alphabet_size(tt, ignore_ops);
+            // infer the type of the input table
+            type_tree table_output_tt = type_tree_output_type_tree(table_tt);
+            type_node table_output_tn = *table_output_tt.begin();
+
+            // determine the default exemplar to start with
+            if(exemplars.empty())
+                exemplars.push_back(type_to_exemplar(table_output_tn));
+
+            type_node output_type = 
+                *(get_output_type_tree(*exemplars.begin()->begin()).begin());
+            if(output_type == id::unknown_type) {
+                output_type = table_output_tn;
+            }
+
+            OC_ASSERT(output_type == table_output_tn);
+
+            if(nsamples>0)
+                subsampleTable(table.itable, table.otable, nsamples, rng);
         
-        if(output_type == id::boolean_type) {
-            CTable ctable = table.compress();
-            occam_ctruth_table_bscore bscore(ctable, prob, as, rng);
+            type_tree tt = gen_signature(output_type, arity);
+            int as = alphabet_size(tt, ignore_ops);
+        
+            if(output_type == id::boolean_type) {
+                CTable ctable = table.compress();
+                occam_ctruth_table_bscore bscore(ctable, prob, as, rng);
+                metapop_moses_results(rng, exemplars, tt,
+                                      bool_reduct, bool_reduct_rep, bscore,
+                                      opt_params, meta_params, moses_params,
+                                      mmr_pa);
+            }
+            else if(output_type == id::contin_type) {
+                if(discretize_thresholds.empty()) {
+                    occam_contin_bscore bscore(table.otable, table.itable,
+                                               stdev, as, rng);
+                    metapop_moses_results(rng, exemplars, tt,
+                                          contin_reduct, contin_reduct, bscore,
+                                          opt_params, meta_params, moses_params,
+                                          mmr_pa);
+                } else {
+                    occam_discretize_contin_bscore bscore(table.otable,
+                                                          table.itable,
+                                                          discretize_thresholds,
+                                                          weighted_accuracy,
+                                                          prob, as,
+                                                          rng);
+                    metapop_moses_results(rng, exemplars, tt,
+                                          contin_reduct, contin_reduct, bscore,
+                                          opt_params, meta_params, moses_params,
+                                          mmr_pa);                
+                }
+            } else {
+                unsupported_type_exit(output_type);
+            }
+        } else if(problem == kl) { // find interesting patterns
+            // it assumes that the inputs are boolean and the output is contin
+            type_tree ettt = gen_signature(id::boolean_type,
+                                           id::contin_type, arity);
+            OC_ASSERT(ettt == table_tt,
+                      "The input table doesn't have the right data types."
+                      " The output should be contin and the inputs should"
+                      " be boolean");
+            // signature of the functions to learn
+            type_tree tt = gen_signature(id::boolean_type, arity);
+
+            // determine the default exemplar to start with
+            if(exemplars.empty())
+                exemplars.push_back(type_to_exemplar(id::boolean_type));
+
+            int as = alphabet_size(tt, ignore_ops);
+
+            occam_max_KLD_bscore bscore(table, stdev, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   bool_reduct, bool_reduct_rep, bscore,
-                                  opt_params, meta_params, moses_params,
-                                  mmr_pa);
+                                  opt_params, meta_params, moses_params, mmr_pa);
+        } else if(problem == ann_it) { // regression based on input table using ann
+            Table table = istreamTable(input_data_file, target_pos);
+            // if no exemplar has been provided in option insert the default one
+            if(exemplars.empty()) {
+                exemplars.push_back(ann_exemplar(arity));
+            }
+
+            // subsample the table
+            if(nsamples>0)
+                subsampleTable(table.itable, table.otable, nsamples, rng);
+
+            type_tree tt = gen_signature(id::ann_type, 0);
+        
+            int as = alphabet_size(tt, ignore_ops);
+
+            occam_contin_bscore bscore(table.otable, table.itable, stdev, as, rng);
+            metapop_moses_results(rng, exemplars, tt,
+                                  ann_reduction(), ann_reduction(), bscore,
+                                  opt_params, meta_params, moses_params, mmr_pa);
         }
-        else if(output_type == id::contin_type) {
-            if(discretize_thresholds.empty()) {
-                occam_contin_bscore bscore(table.otable, table.itable,
-                                           stdev, as, rng);
+    }
+    // problem based on input table
+    else if(combo_based_problem(problem)) {
+        combo_tree tr = str_to_combo_tree(combo_str);
+
+        if(problem == cp) { // regression based on combo program
+            // get the combo_tree and infer its type
+            type_tree tt = infer_type_tree(tr);
+
+            type_node output_type = *type_tree_output_type_tree(tt).begin();
+            // if no exemplar has been provided in option use the default one
+            if(exemplars.empty()) {
+                exemplars.push_back(type_to_exemplar(output_type));
+            }
+            if(output_type == id::boolean_type) {
+                // @todo: Occam's razor and nsamples is not taken into account
+                logical_bscore bscore(tr, arity);
+                metapop_moses_results(rng, exemplars, tt,
+                                      bool_reduct, bool_reduct_rep, bscore,
+                                      opt_params, meta_params, moses_params,
+                                      mmr_pa);
+            }
+            else if (output_type == id::contin_type) {
+                // @todo: introduce some noise optionally
+                if(nsamples<=0)
+                    nsamples = default_nsamples;
+                
+                ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
+                OTable ot(tr, it, rng);
+                
+                int as = alphabet_size(tt, ignore_ops);
+                
+                occam_contin_bscore bscore(ot, it, stdev, as, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduct, contin_reduct, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
             } else {
-                occam_discretize_contin_bscore bscore(table.otable, table.itable,
-                                                      discretize_thresholds,
-                                                      weighted_accuracy,
-                                                      prob, as,
-                                                      rng);
-                metapop_moses_results(rng, exemplars, tt,
-                                      contin_reduct, contin_reduct, bscore,
-                                      opt_params, meta_params, moses_params,
-                                      mmr_pa);                
+                unsupported_type_exit(tt);
             }
-        } else {
-            unsupported_type_exit(output_type);
-        }
-    } else if(problem == kl) { // find interesting patterns
-        // it assumes that the inputs are boolean and the output is contin
+        } else if(problem == ann_cp) { // regression based on combo
+                                       // program using ann
+            // get the combo_tree and infer its type
+            type_tree tt = gen_signature(id::ann_type, 0);
+            int as = alphabet_size(tt, ignore_ops);
 
-        // infer the type of the input table and check if it's correct
-        type_tree table_tt = infer_data_type_tree(input_data_file);
-        type_tree ettt = gen_signature(id::boolean_type, id::contin_type, arity);
-        OC_ASSERT(ettt == table_tt,
-                  "The input table doesn't have the right data types."
-                  " The output should be contin and the inputs should be boolean");
-        // signature of the functions to learn
-        type_tree tt = gen_signature(id::boolean_type, arity);
-
-        Table table = istreamTable(input_data_file, target_pos);
-        if(nsamples>0)
-            subsampleTable(table.itable, table.otable, nsamples, rng);
+            // if no exemplar has been provided in option use the default one
+            if(exemplars.empty()) {
+                exemplars.push_back(ann_exemplar(arity));
+            }
         
-        int as = alphabet_size(tt, ignore_ops);
-
-        occam_max_KLD_bscore bscore(table, stdev, as, rng);
-        metapop_moses_results(rng, exemplars, tt,
-                              bool_reduct, bool_reduct_rep, bscore,
-                              opt_params, meta_params, moses_params, mmr_pa);
-    } else if(problem == cp) { // regression based on combo program
-        // get the combo_tree and infer its type
-        combo_tree tr = str_to_combo_tree(combo_str);
-        type_tree tt = infer_type_tree(tr);
-
-        type_node output_type = *type_tree_output_type_tree(tt).begin();
-        // if no exemplar has been provided in option use the default one
-        if(exemplars.empty()) {
-            exemplars.push_back(type_to_exemplar(output_type));
-        }
-        if(output_type == id::boolean_type) {
-            // @todo: Occam's razor and nsamples is not taken into account
-            logical_bscore bscore(tr, arity);
-            metapop_moses_results(rng, exemplars, tt,
-                                  bool_reduct, bool_reduct_rep, bscore,
-                                  opt_params, meta_params, moses_params, mmr_pa);
-        }
-        else if (output_type == id::contin_type) {
             // @todo: introduce some noise optionally
             if(nsamples<=0)
                 nsamples = default_nsamples;
-            
+        
             ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
             OTable ot(tr, it, rng);
-            
-            int as = alphabet_size(tt, ignore_ops);
-            
+                
             occam_contin_bscore bscore(ot, it, stdev, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduct, contin_reduct, bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
-        } else {
-            unsupported_type_exit(tt);
         }
     } else if(problem == pa) { // even parity
         even_parity func;
@@ -718,50 +786,6 @@ int moses_exec(int argc, char** argv) {
 
         occam_contin_bscore bscore(simple_symbolic_regression(problem_size),
                                    it, stdev, as, rng);
-        metapop_moses_results(rng, exemplars, tt,
-                              contin_reduct, contin_reduct, bscore,
-                              opt_params, meta_params, moses_params, mmr_pa);
-    //////////////////
-    // ANN problems //
-    //////////////////
-    } else if(problem == ann_it) { // regression based on input table using ann
-        Table table = istreamTable(input_data_file, target_pos);
-        // if no exemplar has been provided in option insert the default one
-        if(exemplars.empty()) {
-            exemplars.push_back(ann_exemplar(arity));
-        }
-
-        // subsample the table
-        if(nsamples>0)
-            subsampleTable(table.itable, table.otable, nsamples, rng);
-
-        type_tree tt = gen_signature(id::ann_type, 0);
-        
-        int as = alphabet_size(tt, ignore_ops);
-
-        occam_contin_bscore bscore(table.otable, table.itable, stdev, as, rng);
-        metapop_moses_results(rng, exemplars, tt,
-                              ann_reduction(), ann_reduction(), bscore,
-                              opt_params, meta_params, moses_params, mmr_pa);
-    } else if(problem == ann_cp) { // regression based on combo program using ann
-        // get the combo_tree and infer its type
-        combo_tree tr = str_to_combo_tree(combo_str);
-        type_tree tt = gen_signature(id::ann_type, 0);
-        int as = alphabet_size(tt, ignore_ops);
-
-        // if no exemplar has been provided in option use the default one
-        if(exemplars.empty()) {
-            exemplars.push_back(ann_exemplar(arity));
-        }
-        
-        // @todo: introduce some noise optionally
-        if(nsamples<=0)
-            nsamples = default_nsamples;
-        
-        ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
-        OTable ot(tr, it, rng);
-                
-        occam_contin_bscore bscore(ot, it, stdev, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduct, contin_reduct, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
