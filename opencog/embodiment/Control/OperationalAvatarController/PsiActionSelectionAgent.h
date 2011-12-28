@@ -1,8 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.h
  *
- * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-06-09
+ * @author Jinhua Chua <JinhuaChua@gmail.com>
+ * @date 2011-12-28
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -179,6 +179,12 @@ private:
      * Print the plan to the screen, only used for debugging
      */
     void printPlan(AtomSpace & atomSpace);
+
+    /**
+     * Stimulate atoms related to the plan, ImportanceUpdatingAgent will then 
+     * use these stimulates to renew corresponding attention values. 
+     */
+    void stimulateAtoms(); 
 
     /**
      * Execute the given action

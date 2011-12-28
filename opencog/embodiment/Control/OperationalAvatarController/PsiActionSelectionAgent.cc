@@ -1,8 +1,8 @@
 /*
  * @file opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.cc
  *
- * @author Zhenhua Cai <czhedu@gmail.com>
- * @date 2011-11-03
+ * @author Jinhua Chua <JinhuaChua@gmail.com>
+ * @date 2011-12-28
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -159,7 +159,6 @@ bool PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
 
     this->plan_selected_demand_goal = hSelectedDemandGoal; 
 
-/**    
     Handle hRuleList =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE, 
@@ -177,7 +176,7 @@ bool PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
                                    );
 
     this->plan_context_list = atomSpace.getOutgoing(hContextList); 
-*/
+
     Handle hActionList =
         AtomSpaceUtil::getReference(atomSpace, 
                                     atomSpace.getHandle(CONCEPT_NODE, 
@@ -234,6 +233,23 @@ void PsiActionSelectionAgent::printPlan(AtomSpace & atomSpace)
     }
 
     std::cout<<std::endl<<std::endl;
+}
+
+void PsiActionSelectionAgent::stimulateAtoms()
+{
+    foreach (Handle h, this->plan_rule_list)
+        this->stimulateAtom(h, 10); // 10 is the same as noiseUnit in ImportanceUpdatingAgent
+
+    foreach (Handle h, this->plan_context_list)
+        this->stimulateAtom(h, 10);
+
+    foreach (Handle h, this->plan_action_list)
+        this->stimulateAtom(h, 10);
+
+    logger().warn("PsiActionSelectionAgent::%s - Stimulate plan related atoms [cycle = %d]", 
+                   __FUNCTION__, 
+                   this->cycleCount
+                 ); 
 }
 
 void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace, 
@@ -734,6 +750,8 @@ std::cout<<"'do_planning' can not find any suitable plan for the selected demand
          <<this->cycleCount<<"]."<<std::endl; 
             return;  
         }
+
+        this->stimulateAtoms(); 
 
 //        std::cout<<std::endl<<"Done (do_planning), scheme_return_value(Handle): "<<scheme_return_value; 
 //        Handle hPlanning = Handle( atol(scheme_return_value.c_str()) );         
