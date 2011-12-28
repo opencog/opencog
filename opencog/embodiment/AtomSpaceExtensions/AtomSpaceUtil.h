@@ -97,6 +97,7 @@ private:
     static HandleToHandleMap latestModulators; 
     static HandleToHandleMap latestDemands; 
     static HandleToHandleMap latestFeelings; 
+    static HandleToHandleMap latestStimulus; 
 
     static std::map<Handle, HandleToHandleMap > latestSpatialPredicate;
     static HandleToHandleMap latestSchemaPredicate;
@@ -1053,6 +1054,10 @@ public:
     static void updateLatestFeeling(AtomSpace & as, 
                                     Handle atTimeLink, 
                                     Handle feelingPredicateNode); 
+    
+    static void updateLatestStimulus(AtomSpace & as, 
+                                     Handle atTimeLink, 
+                                     Handle stimulusPredicateNode);
 
     /**
      * Retrieve the handles of all Frame Elements (DefinedFrameElementNodes) 

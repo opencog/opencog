@@ -64,6 +64,7 @@ AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPetActionPredicate;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestModulators; 
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestDemands; 
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestFeelings; 
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestStimulus; 
 
 const double AtomSpaceUtil::highLongTermImportance = 0.7;
 std::map<Handle, AtomSpaceUtil::HandleToHandleMap > AtomSpaceUtil::latestSpatialPredicate;
@@ -2843,6 +2844,13 @@ void AtomSpaceUtil::updateLatestFeeling(AtomSpace & as,
                                         Handle feelingPredicateNode)
 {
     updateGenericLatestInfoMap(latestFeelings, as, atTimeLink, feelingPredicateNode); 
+}
+
+void AtomSpaceUtil::updateLatestStimulus(AtomSpace & as, 
+                                         Handle atTimeLink, 
+                                         Handle stimulusPredicateNode)
+{
+    updateGenericLatestInfoMap(latestStimulus, as, atTimeLink, stimulusPredicateNode); 
 }
 
 void AtomSpaceUtil::updateLatestIsExemplarAvatar(AtomSpace& as,
