@@ -37,7 +37,12 @@
 ;
 ;   ( U = Up, D = Down, UU = Up Up, DD = Down Down )
 
+(define LATEST_STIMULUS_TIMESTAMP 0)
 (define attitude_to_modulator_impact_func_map (list))
+
+(define (get_latest_stimulus_timestamp)
+    LATEST_STIMULUS_TIMESTAMP
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interface to be invoked
@@ -62,7 +67,7 @@
 
                         (map-in-order
                             (lambda (impact_func)
-                                (impact_func intensity timestamp)
+                                (impact_func intensity)
                             ); lambda
 
                             (get_impact_func_from_map (cog-name attitude_type) )
@@ -74,7 +79,12 @@
             ); map-in-order
 
             attitude_link_list
-        )
+        ); begin
+
+        ; If any stimulus is processed, record the latest timestamp
+        (if (not (null? attitude_link_list) )
+            (set! LATEST_STIMULUS_TIMESTAMP timestamp)
+        ); if
     ); let*
 )
 
@@ -128,25 +138,23 @@
 ;;; Mapping attitude to modulator value
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (attitude_impact_on_modulator modulator_name 
+(define (attitude_impact_on_modulator stimulus_name 
                                       impact_factor 
-                                      timestamp
         )
         
         (let* ( 
                 ; get latest modulator value by its name
-                (latest_modulator_value 
-                    (get_latest_predicate_truth_value_mean modulator_name)
+                (latest_stimulus_value 
+                    (get_predicate_truth_value_mean stimulus_name)
                 ) 
 
                 ; set the updated value by applying impact factor
-                (updated_value (+ latest_modulator_value impact_factor))
+                (updated_value (+ latest_stimulus_value impact_factor))
               )
               
-              ; renew the modulator value by adding timestamp
-              (set_modulator_or_demand_value modulator_name 
-                                             updated_value 
-                                             timestamp
+              ; renew the stimulus value by adding change
+              (set_predicate_truth_value stimulus_name 
+                  (cog-new-stv updated_value 1.0)
               )
         ); let*
 )
@@ -158,55 +166,54 @@
                           pleasure_impact_factor
 
                           intensity
-                          timestamp
         )
 
-        (begin
+        (let 
+             ; Here we should scale the intensity by dividing 2 in order to
+             ; limit the range of stimulus in [0, 1]
+             ( (scale_intensity (/ intensity 2))
+             )
+
               (attitude_impact_on_modulator 
-                  "ActivationModulator"
-                  (* activation_impact_factor intensity)
-                  timestamp
+                  "ActivationStimulus"
+                  (* activation_impact_factor scale_intensity)
               )
 
               (attitude_impact_on_modulator
-                  "ResolutionModulator" 
-                  (* resolution_impact_factor intensity)
-                  timestamp
+                  "ResolutionStimulus" 
+                  (* resolution_impact_factor scale_intensity)
               )
 
               (attitude_impact_on_modulator 
-                  "SecuringThresholdModulator" 
-                  (* securing_threshold_impact_factor intensity)
-                  timestamp
+                  "SecuringThresholdStimulus" 
+                  (* securing_threshold_impact_factor scale_intensity)
               )
 
               (attitude_impact_on_modulator 
-                  "SelectionThresholdModulator" 
-                  (* selection_threshold_impact_factor intensity)
-                  timestamp
+                  "SelectionThresholdStimulus" 
+                  (* selection_threshold_impact_factor scale_intensity)
               )
 
-              ;(attitude_impact_on_modulator 
-              ;    (get_pleasure_value) 
-              ;    pleasure_impact_factor
-              ;)
-        ); begin
+              (attitude_impact_on_modulator 
+                  "PleasureStimulus"
+                  (* pleasure_impact_factor scale_intensity)
+              )
+        ); let
 )
 
 ; Specific attitude to apply changes on modulator
-(define (angerModulatorImpact intensity timestamp)
-    (modulator_impact 0.3
-                      -0.3
+(define (angerModulatorImpact intensity)
+    (modulator_impact 0.35
+                      -0.4
                       0.3
-                      -0.3
-                      -0.3
+                      -0.35
+                      -0.5
 
                       intensity
-                      timestamp
     )
 )
 
-(define (loveModulatorImpact intensity timestamp)
+(define (loveModulatorImpact intensity)
     (modulator_impact 0
                       -0.4
                       0.4
@@ -214,7 +221,6 @@
                       0.4
 
                       intensity
-                      timestamp
     )
 )
 

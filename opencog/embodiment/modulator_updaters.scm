@@ -4,6 +4,8 @@
 ; @author Jinhua Chua <JinhuaChua@gmail.com>
 ; @date   2011-12-09
 ;
+; @update Troy Huang <huangdeheng@gmail.com> 2011-12-19
+;
 
 ; I borrow a few equations from the paper below
 ; Psi and MicroPsi A Novel Approach to Modeling Emotion and Cognition in a Cognitive Architecture, 
@@ -21,9 +23,14 @@
 ;    )       
     (let ( (competence (get_truth_value_mean (cog-tv CompetenceDemandGoal)) )
            (energy (get_truth_value_mean (cog-tv EnergyDemandGoal)) )
+
+           (stimulus (get_predicate_truth_value_mean "ActivationStimulus"))
          )
-         (* (/ competence (+ competence 0.5) )
-            (/ energy (+ 0.05 energy) )
+         
+         (+  (* 2 stimulus)
+             (* (/ competence (+ competence 0.5) )
+                (/ energy (+ 0.05 energy) )
+             )
          )
     )
 )
@@ -33,9 +40,15 @@
 ; A low resolution level tends to miss differences, then the agent would get a better overview
 
 (define (ResolutionModulatorUpdater)
-    (- 1
-       (expt (get_latest_predicate_truth_value_mean "ActivationModulator") 0.5)
-    ) 
+    (let ( (stimulus (get_predicate_truth_value_mean "ResolutionStimulus"))
+         )
+
+        (+  (* 2 stimulus)
+            (- 1
+               (expt (get_predicate_truth_value_mean "ActivationModulator") 0.5)
+            ) 
+        )
+    )
 )
 
 ; The frequency of the securing behavior is inversily determined by SecuringThreshold.
@@ -53,11 +66,15 @@
 ;    )
     (let ( (certainty (get_truth_value_mean (cog-tv CertaintyDemandGoal)) )
            (integrity (get_truth_value_mean (cog-tv IntegrityDemandGoal)) )
+
+           (stimulus (get_predicate_truth_value_mean "SecuringThresholdStimulus"))
          )
 ;         (* (/ certainty (+ certainty 0.05) )
 ;            (expt integrity 3)
 ;         )
-         (expt integrity 3)
+         (+  (* 2 stimulus)
+             (expt integrity 3)
+         )
     )
 )
 
@@ -86,8 +103,12 @@
 ;    )
 
     (let ( (competence (get_truth_value_mean (cog-tv CompetenceDemandGoal)) )
+           (stimulus (get_predicate_truth_value_mean "SelectionThresholdStimulus"))
          )
-         (fuzzy_equal competence 1 15)
+         
+         (+  (* 2 stimulus)
+             (fuzzy_equal competence 1 15)
+         )
     )
 )
 

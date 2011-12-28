@@ -68,7 +68,7 @@
 ; Add an attitude towards certain role that maybe other agent or object.
 ; @note To generate an attitude is a kind of response.
 (define (add_attitude target_handle attitude_handle strength) 
-    (AtTimeLink (stv 1.0 1.0)
+    (AtTimeLink (stv strength 1.0)
         ; In order to take timestamp into consideration, an at time Link is 
         ; added here. The variable time node would be replaced by a real 
         ; timestamp when applying the rule onto certain stimulus instance.
