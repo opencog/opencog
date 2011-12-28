@@ -44,6 +44,7 @@ SET(OAC_LINK_LIBS
     Procedure
     savable
     pln
+    attention
 )
 
 IF (HAVE_CYTHON)

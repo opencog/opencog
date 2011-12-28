@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
- * Updated: By Zhenhua Cai, on 2011-06-01
+ * Updated: By Jinhua Chua <JinhuaChua@gmail.com>, on 2011-12-19
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -27,6 +27,8 @@
 #define OAC_H
 
 #include <string>
+#include <boost/thread/thread.hpp>
+
 #include <opencog/persist/file/SavingLoading.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
@@ -55,6 +57,13 @@
 #include <opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/PsiFeelingUpdaterAgent.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/StimulusUpdaterAgent.h>
+
+#include <opencog/dynamics/attention/ForgettingAgent.h>
+#include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
+//#include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
+#include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
+#include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
+#include <opencog/dynamics/attention/STIDecayingAgent.h>
 
 #ifdef HAVE_CYTHON
     #include <opencog/cython/PyMindAgent.h>
@@ -89,6 +98,9 @@ class OAC : public EmbodimentCogServer
     friend class::PsiActionSelectionAgentUTest; 
 
 private:
+
+    static void attention_allocation(OAC * oac); 
+    boost::thread thread_attention_allocation; 
 
     /**
      * Object used to save/load atomSpace dumps. Other componentes that
@@ -158,6 +170,13 @@ private:
     PsiFeelingUpdaterAgent * psiFeelingUpdaterAgent; 
 
     StimulusUpdaterAgent * stimulusUpdaterAgent;
+
+    ForgettingAgent * forgettingAgent; 
+    HebbianUpdatingAgent * hebbianUpdatingAgent; 
+//    ImportanceDiffusionAgent * importanceDiffusionAgent; 
+    ImportanceSpreadingAgent * importanceSpreadingAgent; 
+    ImportanceUpdatingAgent * importanceUpdatingAgent; 
+    STIDecayingAgent * stiDecayingAgent; 
 
 #ifdef HAVE_CYTHON
     PyMindAgent * fishgramAgent; 
@@ -329,6 +348,14 @@ public:
     SingletonFactory <PsiFeelingUpdaterAgent, Agent> psiFeelingUpdaterAgentFactory; 
 
     SingletonFactory <StimulusUpdaterAgent, Agent> stimulusUpdaterAgentFactory; 
+
+    SingletonFactory <ForgettingAgent, Agent> forgettingAgentFactory; 
+    SingletonFactory <HebbianUpdatingAgent, Agent> hebbianUpdatingAgentFactory;  
+//    SingletonFactory <ImportanceDiffusionAgent, Agent> importanceDiffusionAgentFactory; 
+    SingletonFactory <ImportanceSpreadingAgent, Agent> importanceSpreadingAgentFactory;  
+    SingletonFactory <ImportanceUpdatingAgent, Agent> importanceUpdatingAgentFactory; 
+    SingletonFactory <STIDecayingAgent, Agent> stiDecayingAgentFactory;  
+
 }; // class
 
 } } // namespace opencog::oac

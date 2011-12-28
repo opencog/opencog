@@ -5,7 +5,7 @@
  * All Rights Reserved
  * Author(s): Carlos Lopes
  *
- * Updated: by Zhenhua Cai, on 2011-06-01
+ * Updated: By Jinhua Chua <JinhuaChua@gmail.com>, on 2011-12-19
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -245,6 +245,60 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                   )
                                                                  );
 
+    this->registerAgent( ForgettingAgent::info().id, 
+                         &forgettingAgentFactory
+                       );
+    forgettingAgent = static_cast<ForgettingAgent*>(
+                          this->createAgent( ForgettingAgent::info().id,
+                                             false
+                                           )
+                                                   );
+
+    this->registerAgent( HebbianUpdatingAgent::info().id, 
+                         &hebbianUpdatingAgentFactory
+                       );
+    hebbianUpdatingAgent = static_cast<HebbianUpdatingAgent*>(
+                               this->createAgent( HebbianUpdatingAgent::info().id,
+                                                  false
+                                                )
+                                                             );
+
+//    this->registerAgent( ImportanceDiffusionAgent::info().id, 
+//                         &importanceDiffusionAgentFactory
+//                       );
+//    importanceDiffusionAgent = static_cast<ImportanceDiffusionAgent*>(
+//                                   this->createAgent( ImportanceDiffusionAgent::info().id,
+//                                                      false
+//                                                    )
+//                                                                     );
+
+    this->registerAgent( ImportanceSpreadingAgent::info().id, 
+                         &importanceSpreadingAgentFactory
+                       );
+    importanceSpreadingAgent = static_cast<ImportanceSpreadingAgent*>(
+                                   this->createAgent( ImportanceSpreadingAgent::info().id,
+                                                      false
+                                                    )
+                                                                     );
+
+    this->registerAgent( ImportanceUpdatingAgent::info().id, 
+                         &importanceUpdatingAgentFactory
+                       );
+    importanceUpdatingAgent = static_cast<ImportanceUpdatingAgent*>(
+                                  this->createAgent( ImportanceUpdatingAgent::info().id,
+                                                     false
+                                                   )
+                                                                   );
+
+    this->registerAgent( STIDecayingAgent::info().id, 
+                         &stiDecayingAgentFactory
+                       );
+    stiDecayingAgent = static_cast<STIDecayingAgent*>(
+                           this->createAgent( STIDecayingAgent::info().id,
+                                              false
+                                            )
+                                                     );
+
 //    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         // adds the same procedure interpreter agent to schedule again
 //        this->startAgent(procedureInterpreterAgent);
@@ -303,6 +357,42 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->startAgent(stimulusUpdaterAgent);
     }
 
+    if (config().get_bool("FORGETTING_ENABLED")) {
+        this->forgettingAgent->setFrequency(
+           config().get_int( "FORGETTING_CYCLE_PERIOD" ) );
+        this->startAgent(forgettingAgent);
+    }
+
+    if (config().get_bool("HEBBIAN_UPDATING_ENABLED")) {
+        this->hebbianUpdatingAgent->setFrequency(
+           config().get_int( "HEBBIAN_UPDATING_CYCLE_PERIOD" ) );
+        this->startAgent(hebbianUpdatingAgent);
+    }
+
+//    if (config().get_bool("IMPORTANCE_DIFFUSION_ENABLED")) {
+//        this->importanceDiffusionAgent->setFrequency(
+//           config().get_int( "IMPORTANCE_DIFFUSION_CYCLE_PERIOD" ) );
+//        this->startAgent(importanceDiffusionAgent);
+//    }
+
+    if (config().get_bool("IMPORTANCE_SPREADING_ENABLED")) {
+        this->importanceSpreadingAgent->setFrequency(
+           config().get_int( "IMPORTANCE_SPREADING_CYCLE_PERIOD" ) );
+        this->startAgent(importanceSpreadingAgent);
+    }
+
+    if (config().get_bool("IMPORTANCE_UPDATING_ENABLED")) {
+        this->importanceUpdatingAgent->setFrequency(
+           config().get_int( "IMPORTANCE_UPDATING_CYCLE_PERIOD" ) );
+        this->startAgent(importanceUpdatingAgent);
+    }
+
+    if (config().get_bool("STI_DECAYING_ENABLED")) {
+        this->stiDecayingAgent->setFrequency(
+           config().get_int( "STI_DECAYING_CYCLE_PERIOD" ) );
+        this->startAgent(stiDecayingAgent);
+    }
+
 #ifdef HAVE_CYTHON
     if ( config().get_bool("FISHGRAM_ENABLED") ) {
         this->fishgramAgent = new PyMindAgent("fishgram", "FishgramMindAgent"); 
@@ -359,6 +449,28 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 //    this->psiDemandUpdaterAgent->run(this); 
 //    this->psiFeelingUpdaterAgent->run(this); 
 //    this->psiModulatorUpdaterAgent->run(this); 
+
+    // TODO: multi-threading doesn't work. 
+//    this->thread_attention_allocation = boost::thread( boost::bind(&attention_allocation, this) ); 
+}
+
+void OAC::attention_allocation(OAC * oac)
+{
+    for (int i=0; i>=0; i++) {
+        usleep(500000); 
+        oac->runAgent(oac->forgettingAgent);
+        std::cout<<"forgettingAgent "<<i<<std::endl; 
+        oac->runAgent(oac->hebbianUpdatingAgent); 
+        std::cout<<"hebbianUpdatingAgent "<<i<<std::endl; 
+//    ImportanceDiffusionAgent * importanceDiffusionAgent; 
+        oac->runAgent(oac->importanceSpreadingAgent);     
+        std::cout<<"importanceSpreadingAgent "<<i<<std::endl; 
+        oac->runAgent(oac->importanceUpdatingAgent); 
+        std::cout<<"importanceUpdatingAgent "<<i<<std::endl; 
+        oac->runAgent(oac->stiDecayingAgent); 
+        std::cout<<"stiDecayingAgent "<<i<<std::endl; 
+        std::cout<<"attention_allocation Done: "<<i<<std::endl; 
+    }
 }
 
 int OAC::addRulesToAtomSpace()
@@ -526,10 +638,17 @@ OAC::~OAC()
 
     delete (stimulusUpdaterAgent);
 
+    delete (forgettingAgent); 
+    delete (hebbianUpdatingAgent); 
+//    delete (importanceDiffusionAgent); 
+    delete (importanceSpreadingAgent); 
+    delete (importanceUpdatingAgent); 
+    delete (stiDecayingAgent); 
+
 #ifdef HAVE_CYTHON
     delete (fishgramAgent); 
     delete (monitorChangesAgent); 
-#endif    
+#endif
 
     // ZeroMQ 
 #ifdef HAVE_ZMQ    
