@@ -1934,14 +1934,20 @@ Initialize a model, using the specified
 StructureLearningPolicy
 \family default
 .
- Two different policies are pre-defined: 
+ Currently, only one policy is pre-defined: 
 \family typewriter
 univariate()
 \family default
-, which is the trivial structure, and XXX.
+, which creates the trivial structure, 
+\emph on
+viz.
+
+\emph default
+ no structure at all.
  The univariate policy assumes no interdependency at all between different
  genes (variables) in the population: its a no-op.
- The XXX policy will build a full Bayesian network of dependencies.
+ The BOA policy, (XXX which needs to be ported over from older code XXX),
+ will build a full Bayesian network of dependencies.
  
 \end_layout
 

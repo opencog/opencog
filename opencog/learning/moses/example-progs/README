@@ -47,3 +47,6 @@ to perform much of the "heavy lifting".
    minima in the wrong places.  For the moses infrastructure, the
    default univariate solver decouples values, and so is not decieved
    at all -- it is treated in exactly the same way as the nmax problem.
+
+-- trap-bits. A variation of the trap-uni problem above. Under
+   construction, curently broken.

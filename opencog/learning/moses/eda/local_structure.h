@@ -127,7 +127,10 @@ struct univariate
                     const local_structure_model&) const {}
 };
 
-/*struct bde_local_structure_learning {
+/*
+ * XXX implement this. "bde" is "bayesian distribution estimation"
+ * I think. 
+  struct bde_local_structure_learning {
   typedef local_structure_model model_type;
 
   //scratch_model should go here
@@ -135,6 +138,7 @@ struct univariate
   void operator()(const field_set&,It,It,local_structure_model&) const { }
   };*/
 
+// XXX TODO document what this does...
 struct local_structure_probs_learning
 {
     typedef local_structure_model model_type;

@@ -25,24 +25,29 @@ using boost::lexical_cast;
 
 // XXX under sconstruction XXX
 
-// Demonstration program for the "univariate trap" optimization problem.
+// XXX this example is broken, and will remain so until "multivariate"
+// is ported over/re-implemented. Basically, there is no structure
+// learning at this time.  
+// XXX some of the documentation below may be misleading.
+//
+// Demonstration program for the "bit-trap" optimization problem.
 // This is a standard learning/optimization demonstraton problem: a 
 // scoring function is given that surrounds the correct solution with
-// nearby solutions which are given a very low score.  This is related
-// to the "nmax" problem, except for having a vee-shaped scoring function.
-// The vee-shape is meant to be "deceptive", in that it fools ordinary
-// GA or hill-climbing solvers into loking for a solution in the wrong
-// place (i.e. on the wrong side of the vee -- the vee isolates the 
-// singular, unique global maximum by a valley on all sides, which is
-// densely surrounded by exponentially many local but inferior maxima.)
+// nearby solutions which are given a very low score.  This is a variant
+// of the "univariate-trap" problem, the difference here being that
+// the population being optimized over is a set of bit-strings, and the
+// scoring functions make different bits depend on one-another.  Thus,
+// the optimal solution cannot be found without structure learning; the
+// MOSES univariate() learner is a no-op, and so cannot solve this problem.
+// XXX which is why we need to put structure leanring back in the code XXX
 //
-// As such problems go, this turns out to be "deceptively" easy for
-// the moses univariate optimizer to solve. This is because it has been
-// constructed to treat each possible value of a variable as independent,
-// and analyzing probability distributions for these.  Thus, the
-// optimizer doesn't perceive the "vee" shape in the scoring function.
-// It is able to solve this problem at exactly the same efficiency as the
-// nmax problem.  The code here just illustrates this.
+// The correlation between variables is accomplished by using a
+// vee-shaped scoring function. The vee-shape is meant to be "deceptive",
+// in that it fools ordinary GA or hill-climbing solvers into loking
+// for a solution in the wrong place (i.e. on the wrong side of the vee
+// -- the vee isolates the singular, unique global maximum by a valley
+// on all sides, which is densely surrounded by combinatorially many
+// local but inferior maxima.)
 //
 // NOTE: This is NOT a demonstration of program learning, which is what
 // MOSES is designed for; rather, this a demonstration of the use of a
@@ -60,7 +65,7 @@ using boost::lexical_cast;
 //
 // Suggest values of 0 8 70 100 5 for these.
 //
-// The population size should always be at least (n-1)*num_variables
+// The population size should always be at least 2^n*num_variables
 // as otherwise, the least-fit individuals will be bred out of
 // the population before the fittest individual is found, causing the
 // algo loop forever (well, only up to max generations). There's even
