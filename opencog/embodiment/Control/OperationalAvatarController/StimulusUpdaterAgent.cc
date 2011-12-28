@@ -67,6 +67,27 @@ bool StimulusUpdaterAgent::Stimulus::runUpdater (AtomSpace & atomSpace)
     return true; 
 }
 
+
+void StimulusUpdaterAgent::Stimulus::initStimulus (AtomSpace & atomSpace, const unsigned long timeStamp)
+{
+    std::string predicateName = this->stimulusName + "Stimulus"; 
+    Handle stimulusPredicateNode = atomSpace.addNode(PREDICATE_NODE, predicateName.c_str()); 
+    SimpleTruthValue stv = SimpleTruthValue(0.5, 1); 
+
+    std::vector<Handle> outgoings;
+    Handle listLink = atomSpace.addLink(LIST_LINK, outgoings); 
+    outgoings.push_back(stimulusPredicateNode); 
+    outgoings.push_back(listLink); 
+    Handle evaluationLink = atomSpace.addLink(EVALUATION_LINK, outgoings); 
+    atomSpace.setTV(evaluationLink, stv); 
+
+//    Handle evaluationLink = AtomSpaceUtil::setPredicateValue(atomSpace, predicateName, stv); 
+    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evaluationLink, timeStamp, stv); 
+
+    AtomSpaceUtil::updateLatestStimulus(atomSpace, atTimeLink, stimulusPredicateNode); 
+}
+
+
 bool StimulusUpdaterAgent::Stimulus::updateStimulus (AtomSpace & atomSpace, const unsigned long timeStamp)
 {
     // Update LatestLink containig latest stimulus level
@@ -84,8 +105,7 @@ bool StimulusUpdaterAgent::Stimulus::updateStimulus (AtomSpace & atomSpace, cons
 //    Handle evaluationLink = AtomSpaceUtil::setPredicateValue(atomSpace, predicateName, stv); 
     Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evaluationLink, timeStamp, stv); 
 
-    //TODO
-    //AtomSpaceUtil::updateLatestStimulus(atomSpace, atTimeLink, stimulusPredicateNode); 
+    AtomSpaceUtil::updateLatestStimulus(atomSpace, atTimeLink, stimulusPredicateNode); 
 
 #if HAVE_GUILE    
 
@@ -122,10 +142,9 @@ bool StimulusUpdaterAgent::Stimulus::updateStimulus (AtomSpace & atomSpace, cons
     //               this->stimulusName.c_str(), 
     //               this->currentStimulusValue
     //              );
+#endif // HAVE_GUILE    
 
     return true; 
-
-#endif // HAVE_GUILE    
 }    
 
 StimulusUpdaterAgent::~StimulusUpdaterAgent()
@@ -165,8 +184,6 @@ void StimulusUpdaterAgent::publishUpdatedValue(Plaza & plaza,
     foreach (Stimulus & stimulus, this->stimulusList) {
         jsonObj.push_back( Pair( stimulus.getStimulusName(), stimulus.getStimulusLevel() ) );
     }
-
-    jsonObj.push_back( Pair("Pleasure", this->pleasureStimulus) ); 
 
     // Publish the data packed in json format
     std::string dataString = write_formatted(jsonObj);
@@ -219,6 +236,16 @@ void StimulusUpdaterAgent::init(opencog::CogServer * server)
                       );
     }// for
 
+    // Add an additional modulator named "Pleasure".
+    this->stimulusList.push_back(Stimulus("Pleasure"));
+
+    unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();   
+
+    // Init stimulus
+    foreach (Stimulus & stimulus, this->stimulusList) {
+        stimulus.initStimulus(*(oac->getAtomSpace()), timeStamp);
+    }
+
     // Initialize ZeroMQ publisher and add it to the plaza
 #ifdef HAVE_ZMQ
     Plaza & plaza = oac->getPlaza();
@@ -266,27 +293,7 @@ void StimulusUpdaterAgent::run(opencog::CogServer * server)
     // Set the updated value to AtomSpace
     foreach (Stimulus & stimulus, this->stimulusList) {
         stimulus.updateStimulus(atomSpace, timeStamp);
-    }
-
-#if HAVE_GUILE    
-    // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);    
-    std::string scheme_expression, scheme_return_value;
-
-    scheme_expression = "( get_pleasure_value )";
-
-    // Run the scheme procedure
-    scheme_return_value = evaluator.eval(scheme_expression);
-
-    if ( evaluator.eval_error() ) {
-        logger().error( "StimulusUpdaterAgent::Stimulus::%s - Failed to execute '%s'", 
-                         __FUNCTION__, 
-                         scheme_expression.c_str() 
-                      );
-    }
-
-    this->pleasureStimulus = atof( scheme_return_value.c_str() ); 
-#endif // HAVE_GUILE    
+    } 
 
 
 #ifdef HAVE_ZMQ    

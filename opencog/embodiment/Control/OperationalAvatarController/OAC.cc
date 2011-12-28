@@ -236,6 +236,14 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                     false
                                                   )
                                                                  );
+    this->registerAgent( StimulusUpdaterAgent::info().id, 
+                         &stimulusUpdaterAgentFactory
+                       );
+    stimulusUpdaterAgent = static_cast<StimulusUpdaterAgent*>(
+                                 this->createAgent( StimulusUpdaterAgent::info().id,
+                                                    false
+                                                  )
+                                                                 );
 
 //    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         // adds the same procedure interpreter agent to schedule again
@@ -287,6 +295,12 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->psiFeelingUpdaterAgent->setFrequency(
            config().get_int( "PSI_FEELING_UPDATER_CYCLE_PERIOD" ) );
         this->startAgent(psiFeelingUpdaterAgent);
+    }
+
+    if (config().get_bool("STIMULUS_UPDATER_ENABLED")) {
+        this->psiFeelingUpdaterAgent->setFrequency(
+           config().get_int( "STIMULUS_UPDATER_CYCLE_PERIOD" ) );
+        this->startAgent(stimulusUpdaterAgent);
     }
 
 #ifdef HAVE_CYTHON
@@ -509,6 +523,8 @@ OAC::~OAC()
     delete (psiActionSelectionAgent);
     delete (psiRelationUpdaterAgent); 
     delete (psiFeelingUpdaterAgent); 
+
+    delete (stimulusUpdaterAgent);
 
 #ifdef HAVE_CYTHON
     delete (fishgramAgent); 

@@ -66,7 +66,7 @@ class StimulusUpdaterAgent : public opencog::Agent
 private:
 
     /**
-     * Inner class for Modulator
+     * Inner class for Stimulus
      */
     class Stimulus
     {
@@ -118,6 +118,13 @@ private:
          *                   PredicateNode "xxxStimulus"
          */
         bool updateStimulus(AtomSpace & atomSpace, const unsigned long timeStamp);
+        
+        /**
+         * The original value range of stimulus should be [-1, 1].
+         * But as there is no negative value for truth value, we scale the
+         * interval to [0, 1]. Thus the initial mean for truth value is 0.5
+         */
+        void initStimulus(AtomSpace & atomSpace, const unsigned long timeStamp);
 
     private:        
 
@@ -126,9 +133,9 @@ private:
 
     };// class Modulator
 
-    double pleasureStimulus; 
-
     unsigned long cycleCount;
+
+    unsigned long latestStimulusTimestamp;
 
     std::vector<Stimulus> stimulusList;  // List of Modulators
 
