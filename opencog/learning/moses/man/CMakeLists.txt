@@ -7,11 +7,12 @@ set(MANPAGES moses.1)
 find_program(GZIP_EXECUTABLE NAMES gzip)
 
 # Compress all manpages...
-# XXX this is somehow broken, the gzipped version is not rebuilt...
+# XXX for some reason, this never notices that sources have changed...
 foreach(manpage ${MANPAGES})
-	execute_process(COMMAND ${GZIP_EXECUTABLE} -c
-		${CMAKE_CURRENT_SOURCE_DIR}/${manpage} 
-		OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/${manpage}.gz
+	add_custom_command(COMMAND ${GZIP_EXECUTABLE} -c
+		${CMAKE_CURRENT_SOURCE_DIR}/${manpage} > 
+      ${CMAKE_CURRENT_BINARY_DIR}/${manpage}.gz
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${manpage}.gz
       )
 endforeach()
 

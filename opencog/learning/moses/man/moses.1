@@ -1,7 +1,12 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
+.\" Man page for moses-exec
+.\"
+.\" Copyright (C) 2011 Linas Vepstas
+.\"
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
+.pc
 .TH MOSES 1 "December 29, 2011"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
@@ -19,49 +24,92 @@
 .SH NAME
 moses \- meta-optimizing semantic evolutionary search solver
 .SH SYNOPSIS
+.\" The general command line
 .B moses
+.RB [ \-c 
+.IR result_count ]
 .RB [ \-e 
-.IR exemplars ]
+.IR exemplar ]
+.RB [ \-j
+.IR jobs ]
+.RB [ \-k
+.IR problem_size ]
+.br
+.\" The help & version command line
+.B moses
+.RB \-h 
 .SH DESCRIPTION
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
 .\" respectively.
-MOSES is blah.
-Use the  \fBmoses\fP command to do stuff.
+\fBmoses\fP is the command-line wrapper to the MOSES program learning
+library. It may be used to solve learning tasks specified with file inputs,
+or to run various demonstration problems.
 .PP
 .SH OPTIONS
 .PP
-moses has many options. Some are for demo use, some for solving.
+Options fall into two classes: those that are used to run \fBmoses\fP in
+demo mode, and those used for practical problem solving.
 .SS "General options"
 .TP
-.B \-j jobs
+.BI \-e\  exemplar
+Specify an initial \fIexemplar\fR to use. Each exemplar is written in
+combo. May be specified multiple times.
+.TP
+.B \-h, --help
+Print help.
+.TP
+.BI \-j\  num_jobs
+Number of jobs allocated for deme optimization.
+Jobs can be executed on a remote machine as well,
+in such case the notation \fB\-j\fR \fIN:REMOTE_HOST\fR is used,
+where \fIN\fR is the number of jobs on the machine \fIREMOTE_HOST\fR.
+For instance, one can enter the options
+\fB\-j\fR4 \fB\-j\fR16:my_server.org
+(or \fB\-j\fR16:user@my_server.org if one wishes to
+run the remote jobs under a different user name),
+meaning that 4 jobs are allocated on the local machine
+and 16 jobs are allocated on my_server.org.
+The assumption is that moses must be on the remote
+machine and is located in a directory included in the
+\fBPATH\fR environment variable. Beware that a lot of log
+files are going to be generated when using this option on
+the remote machines.
 .SS "Demo options"
 .TP
-.B \-e exemplars
+.BI \-H\  type \fR,\ \fB\-\-problem\-type= type
+A number of demonstration problems are supported. In each case, the top 
+results are printed to stdout, as a score, followed by a combo program.
+.I type
+may be one of:
+.TS
+tab (@);
+l lx.
+\fBdj\fR@T{
+Disjunction problem.
+T}
+\fBmux\fR@T{
+Multiplex problem. 
+T}
+\fBpa\fR@T{
+Even parity problem.  The resulting combo program computes the parity of k
+bits, evaluating to true if the parity is even, else evaluating to false.
+T}
+.TE
+
+The size of the demonstration problem may be specified with the -k flag.
+.TP
+.BI \-k\  size \fR,\ \fB\-\-problem\-size= size
+Size of the problem.
+.PP
 .SH USE
 .PP
-moses will run demo rpoblems or solve real problems from data files.
+\fBmoses\fR will run demo problems or solve real problems from data files.
 .PP
 Other remarks ...
 .TP
 .B moses \-j jobs
-.TP
-.B Number of jobs allocated for deme optimization.
-Jobs can be executed on a remote machine as well,
- in such case the notation \-%1% N:REMOTE_HOST is used,
- where N is the number of jobs on the machine REMOTE_HOST.
- For instance one can enter the options
- \-%1%4 \-%1%16%2%my_server.org
- (or \-%1%16%2%user@my_server.org if one wishes to
- run the remote jobs under a different user name),
- meaning that 4 jobs are allocated on the local machine
- and 16 jobs are allocated on my_server.org.
- The assumption is that moses must be on the remote
- machine and is located in a directory included in the
- PATH environment variable. Beware that a lot of log
- files are gonna be generated when using this option on
- the remote machines.
 .PP
 .RE
 .SH SEE ALSO
