@@ -203,7 +203,8 @@ unsigned multiplex_arity(arity_t a)
     return -1;
 }
         
-int moses_exec(int argc, char** argv) { 
+int moses_exec(int argc, char** argv)
+{
     // for(int i = 0; i < argc; ++i)
     //     std::cout << "arg = " << argv[i] << std::endl;
 
@@ -255,6 +256,7 @@ int moses_exec(int argc, char** argv) {
     vector<contin_t> discretize_thresholds;
 
     // Declare the supported options.
+    // XXX TODO: make this print correctly, instead of using brackets.
     options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "Produce help message.\n")
@@ -452,6 +454,7 @@ int moses_exec(int argc, char** argv) {
                                       vm, ignore_opt,
                                       std::string(".").append(default_log_file_suffix));
     }
+
     // remove log_file
     remove(log_file.c_str());
     logger().setFilename(log_file);
@@ -464,8 +467,8 @@ int moses_exec(int argc, char** argv) {
     // infer arity
     combo::arity_t arity = infer_arity(problem, problem_size, input_data_file, combo_str);
 
-    // convert include_only_ops_str to the set of actual operators to
-    // ignore
+    // Convert include_only_ops_str to the set of actual operators to
+    // ignore.
     vertex_set ignore_ops;
     if (vm.count(include_only_ops_str_opt.first.c_str())) {
         bool ignore_arguments = false;
@@ -490,7 +493,7 @@ int moses_exec(int argc, char** argv) {
         }
     }
 
-    // convert ignore_ops_str to the set of actual operators to ignore
+    // Convert ignore_ops_str to the set of actual operators to ignore.
     foreach (const string& s, ignore_ops_str) {
         vertex v;
         if(builtin_str_to_vertex(s, v) || argument_str_to_vertex(s, v))
@@ -498,7 +501,7 @@ int moses_exec(int argc, char** argv) {
         else not_recognized_combo_operator(s);
     }
 
-    // set the initial exemplars
+    // Set the initial exemplars.
     vector<combo_tree> exemplars;
     foreach(const string& exemplar_str, exemplars_str) {
         exemplars.push_back(str_to_combo_tree(exemplar_str));
@@ -548,15 +551,18 @@ int moses_exec(int argc, char** argv) {
                                             output_file, jobs, only_local,
                                             hc_terminate_if_improvement);
 
-    // continuous reduction rules used during search and representation building
+    // Continuous reduction rules used during search and representation
+    // building.
     const rule& contin_reduct = contin_reduction(ignore_ops, rng);
-    // logical reduction rules used during earch
+
+    // Logical reduction rules used during search.
     const rule& bool_reduct = logical_reduction(reduct_candidate_effort);
-    // logical reduction rules used during representation building
+
+    // Logical reduction rules used during representation building.
     const rule& bool_reduct_rep = logical_reduction(reduct_knob_building_effort);
 
-    // problem based on input table
-    if(data_based_problem(problem)) {
+    // Problem based on input table.
+    if (data_based_problem(problem)) {
         // infer the signature based on the input table
         type_tree table_tt = infer_data_type_tree(input_data_file);
 
@@ -565,10 +571,10 @@ int moses_exec(int argc, char** argv) {
         Table table = istreamTable(input_data_file, target_pos);
 
         // possible subsample the table
-        if(nsamples>0)
+        if (nsamples > 0)
             subsampleTable(table.itable, table.otable, nsamples, rng);
 
-        if(problem == it) { // regression based on input table
+        if (problem == it) { // regression based on input table
         
             // infer the type of the input table
             type_tree table_output_tt = type_tree_output_type_tree(table_tt);
@@ -623,7 +629,7 @@ int moses_exec(int argc, char** argv) {
             } else {
                 unsupported_type_exit(output_type);
             }
-        } else if(problem == kl) { // find interesting patterns
+        } else if (problem == kl) { // find interesting patterns
             // it assumes that the inputs are boolean and the output is contin
             type_tree ettt = gen_signature(id::boolean_type,
                                            id::contin_type, arity);
@@ -644,10 +650,12 @@ int moses_exec(int argc, char** argv) {
             metapop_moses_results(rng, exemplars, tt,
                                   bool_reduct, bool_reduct_rep, bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
-        } else if(problem == ann_it) { // regression based on input table using ann
+        }
+        else if (problem == ann_it)
+        { // regression based on input table using ann
             Table table = istreamTable(input_data_file, target_pos);
             // if no exemplar has been provided in option insert the default one
-            if(exemplars.empty()) {
+            if (exemplars.empty()) {
                 exemplars.push_back(ann_exemplar(arity));
             }
 
@@ -665,11 +673,13 @@ int moses_exec(int argc, char** argv) {
                                   opt_params, meta_params, moses_params, mmr_pa);
         }
     }
+
     // problem based on input table
-    else if(combo_based_problem(problem)) {
+    else if (combo_based_problem(problem))
+    {
         combo_tree tr = str_to_combo_tree(combo_str);
 
-        if(problem == cp) { // regression based on combo program
+        if (problem == cp) { // regression based on combo program
             // get the combo_tree and infer its type
             type_tree tt = infer_type_tree(tr);
 
@@ -704,19 +714,21 @@ int moses_exec(int argc, char** argv) {
             } else {
                 unsupported_type_exit(tt);
             }
-        } else if(problem == ann_cp) { // regression based on combo
-                                       // program using ann
+        }
+        else if (problem == ann_cp)
+        {
+            // regression based on combo program using ann
             // get the combo_tree and infer its type
             type_tree tt = gen_signature(id::ann_type, 0);
             int as = alphabet_size(tt, ignore_ops);
 
             // if no exemplar has been provided in option use the default one
-            if(exemplars.empty()) {
+            if (exemplars.empty()) {
                 exemplars.push_back(ann_exemplar(arity));
             }
         
             // @todo: introduce some noise optionally
-            if(nsamples<=0)
+            if (nsamples <= 0)
                 nsamples = default_nsamples;
         
             ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
@@ -727,12 +739,14 @@ int moses_exec(int argc, char** argv) {
                                   contin_reduct, contin_reduct, bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
         }
-    } else if(problem == pa) { // even parity
+    }
+    else if (problem == pa)
+    { // even parity
         even_parity func;
 
         // if no exemplar has been provided in option use the default
         // contin_type exemplar (and)
-        if(exemplars.empty()) {
+        if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
@@ -741,7 +755,9 @@ int moses_exec(int argc, char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
-    } else if(problem == dj) { // disjunction
+    }
+    else if (problem == dj)
+    { // disjunction
         // @todo: for the moment occam's razor and partial truth table are ignored
         disjunction func;
 
@@ -756,7 +772,9 @@ int moses_exec(int argc, char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
-    } else if(problem == mux) { // multiplex
+    }
+    else if (problem == mux)
+    { // multiplex
         // @todo: for the moment occam's razor and partial truth table are ignored
         multiplex func(multiplex_arity(arity));
 
@@ -771,7 +789,9 @@ int moses_exec(int argc, char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
-    } else if(problem == sr) { // simple regression of f(x)_o = sum_{i={1,o}} x^i
+    }
+    else if (problem == sr)
+    { // simple regression of f(x)_o = sum_{i={1,o}} x^i
         // if no exemplar has been provided in option use the default
         // contin_type exemplar (+)
         if(exemplars.empty()) {            
@@ -790,11 +810,13 @@ int moses_exec(int argc, char** argv) {
                               contin_reduct, contin_reduct, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
     }
-    else unsupported_problem_exit(problem);
+    else
+       unsupported_problem_exit(problem);
     return 0;
 }
 
-int moses_exec(const vector<string>& argvs) {
+int moses_exec(const vector<string>& argvs)
+{
     char** argv = new char*[argvs.size()];
     for(size_t i = 0; i < argvs.size(); ++i) {
         argv[i] = const_cast<char*>(argvs[i].c_str());
