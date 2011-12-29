@@ -404,7 +404,7 @@ int moses_exec(int argc, char** argv) {
                     " run the remote jobs under a different user name),"
                     " meaning that 4 jobs are allocated on the local machine"
                     " and 16 jobs are allocated on my_server.org."
-                    " The assumption is that moses-exec must be on the remote"
+                    " The assumption is that moses must be on the remote"
                     " machine and is located in a directory included in the"
                     " PATH environment variable. Beware that a lot of log"
                     " files are gonna be generated when using this option on"

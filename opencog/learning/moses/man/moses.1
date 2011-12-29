@@ -1,0 +1,75 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH MOSES 1 "December 29, 2011"
+.LO 1
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+moses \- meta-optimizing semantic evolutionary search solver
+.SH SYNOPSIS
+.B moses
+.RB [ \-e 
+.IR exemplars ]
+.SH DESCRIPTION
+.PP
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
+.\" respectively.
+MOSES is blah.
+Use the  \fBmoses\fP command to do stuff.
+.PP
+.SH OPTIONS
+.PP
+moses has many options. Some are for demo use, some for solving.
+.SS "General options"
+.TP
+.B \-j jobs
+.SS "Demo options"
+.TP
+.B \-e exemplars
+.SH USE
+.PP
+moses will run demo rpoblems or solve real problems from data files.
+.PP
+Other remarks ...
+.TP
+.B moses \-j jobs
+.TP
+.B Number of jobs allocated for deme optimization.
+Jobs can be executed on a remote machine as well,
+ in such case the notation \-%1% N:REMOTE_HOST is used,
+ where N is the number of jobs on the machine REMOTE_HOST.
+ For instance one can enter the options
+ \-%1%4 \-%1%16%2%my_server.org
+ (or \-%1%16%2%user@my_server.org if one wishes to
+ run the remote jobs under a different user name),
+ meaning that 4 jobs are allocated on the local machine
+ and 16 jobs are allocated on my_server.org.
+ The assumption is that moses must be on the remote
+ machine and is located in a directory included in the
+ PATH environment variable. Beware that a lot of log
+ files are gonna be generated when using this option on
+ the remote machines.
+.PP
+.RE
+.SH SEE ALSO
+.br
+More information is available at
+.B http://wiki.opencog.org/w/MOSES
+.SH AUTHORS
+.nh
+moses was written by Moshe Looks, Nil Geisweiller, and many others.
+.PP
+This manual page is being written by Linas Vepstas. COMPLETELY INCOMPLETE.
