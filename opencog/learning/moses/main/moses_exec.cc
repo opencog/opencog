@@ -329,7 +329,12 @@ int moses_exec(int argc, char** argv)
              % pa % dj % mux % sr).c_str())
         (opt_desc_str(nsamples_opt).c_str(),
          value<int>(&nsamples)->default_value(-1),
-         "Number of samples to describ the problem. If nsample is negative, null or larger than the maximum number of samples allowed it is ignored. If the default problem size is larger than the value provided with that option then the dataset is subsampled randomly to reach the target size.\n")
+         "Number of samples to describe the problem. "
+         "If nsample is negative, null or larger than the maximum "
+         "number of samples allowed it is ignored. If the default "
+         "problem size is larger than the value provided with that "
+         "option then the dataset is subsampled randomly to reach the "
+         "target size.\n")
         (opt_desc_str(min_rand_input_opt).c_str(),
          value<float>(&min_rand_input)->default_value(0),
          "Min of an input value chosen randomly, only used when the problem takes continuous inputs.\n")

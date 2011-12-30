@@ -33,19 +33,27 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-F ]
 .RB [ \-f 
 .IR logfile ]
+.RB [ \-g
+.IR max_gens ]
 .RB [ \-j
 .IR jobs ]
 .RB [ \-k
 .IR problem_size ]
 .RB [ \-l
 .IR loglevel ]
+.RB [ \-m
+.IR max_evals ]
 .RB [ \-o
 .IR output_file ]
+.RB [ \-r
+.IR random_seed ]
 .RB [ \-S0 ]
 .RB [ \-t1 ]
 .RB [ \-V1 ]
 .RB [ \-W1 ]
 .RB [ \-x1 ]
+.RB [ \-y
+.IR combo_program ]
 .br
 .\" The help & version command line
 .B moses
@@ -73,8 +81,8 @@ combo. May be specified multiple times.
 .B \-h, --help
 Print help.
 .TP
-.BI \-j\  num_jobs
-Number of jobs allocated for deme optimization.
+.BI \-j\  num \fR,\ \fB\-\-jobs= num
+Allocate \fInum\fR jobs for deme optimization.
 Jobs can be executed on a remote machine as well,
 in such case the notation \fB\-j\fR \fIN:REMOTE_HOST\fR is used,
 where \fIN\fR is the number of jobs on the machine \fIREMOTE_HOST\fR.
@@ -89,6 +97,22 @@ machine and is located in a directory included in the
 \fBPATH\fR environment variable. Beware that a lot of log
 files are going to be generated when using this option on
 the remote machines.
+
+.\" ============================================================
+.SS "Algorithm control options"
+These options provide overall control over the algorithm execution.
+.TP
+.BI \-g\  num \fR,\ \fB\-\-max\-gens= num
+Create and optimize no more than \fInum\fR demes.  Negative numbers
+are interpreted as "unlimited". By default, the number of demes is
+unlimited.
+.TP
+.BI \-m\  num \fR,\ \fB\-\-max\-evals= num
+Perform no more than \fInum\fR evaluations of the scoring function.
+Default value is 10000.
+.TP
+.BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
+Use \fIseed\fR as the seed value for the pseudo-random number generator.
 
 .\" ============================================================
 .SS "Output control options"
@@ -148,8 +172,15 @@ may be one of:
 .TS
 tab (@);
 l lx.
+\fBcp\fR@T{
+Combo program regression. The scoring function is based on the
+combo program specified with the \fB-y\fR flag. That is, the goal of
+the run is to deduce and learn the specified combo program. 
+T}
 \fBdj\fR@T{
-Disjunction problem.
+Disjunction problem. The scoring function awards a result that is a
+boolean disjunction (or) of N boolean-valued variables. The resulting
+combo program should be or(#1 #2 ...).
 T}
 \fBmux\fR@T{
 Multiplex problem. 
@@ -164,6 +195,11 @@ The size of the demonstration problem may be specified with the -k flag.
 .TP
 .BI \-k\  size \fR,\ \fB\-\-problem\-size= size
 Specify the size of the problem.
+.TP
+.BI \-y\  prog \fR,\ \fB\-\-combo\-program= prog
+Specify the combo prorgram to be learned, when used in combination with
+the \fB-H cp\fR option.  Thus, for example, \fB-H cp -y "and(#1 #2)"\fR
+specifies that the two-input conjunction is to be learned.
 .PP
 .\" ============================================================
 .SH USE
