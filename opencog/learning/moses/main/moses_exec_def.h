@@ -64,7 +64,7 @@ static const pair<string, string> log_file_opt("log-file", "f");
 static const string default_log_file_prefix = "moses";
 static const string default_log_file_suffix = "log";
 static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
-static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
+static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "F");
 static const pair<string, string> stdev_opt("stdev", "v");
 static const pair<string, string> prob_opt("probability", "p");
 static const pair<string, string> include_only_ops_str_opt("include-only-operator", "N");
