@@ -24,6 +24,10 @@
 .SH NAME
 moses \- meta-optimizing semantic evolutionary search solver
 .SH SYNOPSIS
+.\" The help & version command line
+.B moses
+.RB \-h 
+.br
 .\" The general command line
 .B moses
 .RB [ \-c 
@@ -54,10 +58,6 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-x1 ]
 .RB [ \-y
 .IR combo_program ]
-.br
-.\" The help & version command line
-.B moses
-.RB \-h 
 .SH DESCRIPTION
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
@@ -179,22 +179,33 @@ the run is to deduce and learn the specified combo program.
 T}
 \fBdj\fR@T{
 Disjunction problem. The scoring function awards a result that is a
-boolean disjunction (or) of N boolean-valued variables. The resulting
-combo program should be or(#1 #2 ...).
+boolean disjunction (\fIor\fR) of \fIN\fR boolean-valued variables.
+The resulting combo program should be \fIor(#1 #2 ...)\fR.
+The size of the problem may be specified with the \fB\-k\fR option.
 T}
 \fBmux\fR@T{
-Multiplex problem. 
+Multiplex problem. The scoring function models a boolean digital
+multiplexer, that is, an electronic circuit where an "address" of \fIn\fR
+bits selects one and only one line, out of \fI2^n\fR possible lines. Thus,
+for example, a single address bit can select one of two possible lines:
+the first, if its false, and the second, if its true. The \fB\-k\fR
+option may be used to specify the value of \fIn\fR.  The actual size
+of the problem, measured in bits, is \fIn+2^n\fR and so increases
+exponentially fast.
 T}
 \fBpa\fR@T{
-Even parity problem.  The resulting combo program computes the parity of k
-bits, evaluating to true if the parity is even, else evaluating to false.
+Even parity problem.  The resulting combo program computes the parity of
+\fIk\fR bits, evaluating to true if the parity is even, else evaluating
+to false.
+The size of the problem may be specified with the \fB\-k\fR option.
 T}
 .TE
 
 The size of the demonstration problem may be specified with the -k flag.
 .TP
 .BI \-k\  size \fR,\ \fB\-\-problem\-size= size
-Specify the size of the problem.
+Specify the size of the problem.  The interpretation of \fIsize\fR
+depends on the particular problem type.
 .TP
 .BI \-y\  prog \fR,\ \fB\-\-combo\-program= prog
 Specify the combo prorgram to be learned, when used in combination with

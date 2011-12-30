@@ -67,13 +67,13 @@ public:
         moses_test({"-Hpa", "-k3", "-m100000", "-j4"});
     }
     void test_3_mux() {
-        moses_test({"-Hmux", "-k3"});
+        moses_test({"-Hmux", "-k1"});
     }
     void test_sa_2_parity() {
         moses_test({"-Hpa", "-k2", "-asa"});
     }
     void test_sa_3_mux() {
-        moses_test({"-Hmux", "-k3", "-asa"});
+        moses_test({"-Hmux", "-k1", "-asa"});
     }
     void test_un_3_pa_multi_thread() {
         moses_test({"-Hpa", "-k3", "-aun", "-m100000", "-j4"});

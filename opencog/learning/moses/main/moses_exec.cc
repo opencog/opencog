@@ -153,15 +153,17 @@ bool data_based_problem(const string& problem) {
 bool combo_based_problem(const string& problem) {
     return problem == cp || problem == ann_cp;
 }
-        
-// infer the arity of the problem
-combo::arity_t infer_arity(const string& problem,                    
+
+// Infer the arity of the problem
+combo::arity_t infer_arity(const string& problem,
                     unsigned int problem_size,
                     const string& input_table_file,
-                    const string& combo_str) {
-    if(data_based_problem(problem))
+                    const string& combo_str)
+{
+    if (data_based_problem(problem))
         return dataFileArity(input_table_file);
-    else if(combo_based_problem(problem)) {
+    else if(combo_based_problem(problem))
+    {
         if(combo_str.empty())
             unspecified_combo_exit();
         // get the combo_tree and infer its type
@@ -173,36 +175,26 @@ combo::arity_t infer_arity(const string& problem,
             illformed_exit(tr);
             return -1;
         }
-    } else if(problem == pa || problem == dj || problem == mux) {
+    }
+    else if (problem == pa || problem == dj)
+    {
         return problem_size;
-    } else if(problem == sr) {
+    }
+    else if (problem == mux)
+    {
+        return problem_size + (1<<problem_size);
+    }
+    else if (problem == sr)
+    {
         return 1;
-    } else {
+    }
+    else
+    {
         unsupported_problem_exit(problem);
         return -1;
     }
 }
 
-// returns n such that a = n+2^n
-unsigned multiplex_arity(arity_t a)
-{
-    arity_t nearest_arity = 1;
-    for (unsigned n = 1; n <= integer_log2(a); ++n) {
-        nearest_arity = n + pow2(n);
-        if (nearest_arity == a)
-            return n;
-    }
-
-    // not found, exit (XXX or assert ??)
-    std::cerr << "Error: for multiplex the arity " << a
-              << " must be equal to n+2^n, but no such n exists."
-              << " However, the arity " << nearest_arity << " would work."
-              << std::endl;
-
-    exit(1);
-    return -1;
-}
-        
 int moses_exec(int argc, char** argv)
 {
     // for(int i = 0; i < argc; ++i)
@@ -322,8 +314,6 @@ int moses_exec(int argc, char** argv)
          value<unsigned int>(&problem_size)->default_value(5),
          str(format("For even parity (%s), disjunction (%s) and multiplex (%s)"
                     " the problem size corresponds to the arity."
-                    " Note that for multiplex the problem size"
-                    " must be equal to n+2^n."
                     " For regression of f(x)_o = sum_{i={1,o}} x^i (%s)"
                     " the problem size corresponds to the order o.\n")
              % pa % dj % mux % sr).c_str())
@@ -393,7 +383,7 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(reduce_all_opt).c_str(),
          value<bool>(&reduce_all)->default_value(true),
          "Reduce all candidates before being evaluated, otherwise there are only reduced before being added to the metapopulation. This option can be valuable if the cache is enabled to not re-evaluate duplicates.\n")
-        (opt_desc_str(reduct_candidate_effort_opt).c_str(),         
+        (opt_desc_str(reduct_candidate_effort_opt).c_str(),
          value<int>(&reduct_candidate_effort)->default_value(2),
          "Effort allocated for reduction of candidates, 0-3, 0 means minimum effort, 3 means maximum effort.\n")
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
@@ -449,7 +439,7 @@ int moses_exec(int argc, char** argv)
 
     // set flags
     log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
-    
+ 
     if (vm.count("help") || argc == 1) {
         cout << desc << "\n";
         return 1;
@@ -583,7 +573,7 @@ int moses_exec(int argc, char** argv)
             subsampleTable(table.itable, table.otable, nsamples, rng);
 
         if (problem == it) { // regression based on input table
-        
+ 
             // infer the type of the input table
             type_tree table_output_tt = type_tree_output_type_tree(table_tt);
             type_node table_output_tn = *table_output_tt.begin();
@@ -784,11 +774,12 @@ int moses_exec(int argc, char** argv)
     else if (problem == mux)
     { // multiplex
         // @todo: for the moment occam's razor and partial truth table are ignored
-        multiplex func(multiplex_arity(arity));
+        // arity = problem_size + 1<<problem_size
+        multiplex func(problem_size);
 
         // if no exemplar has been provided in option use the default
         // contin_type exemplar (and)
-        if(exemplars.empty()) {            
+        if (exemplars.empty()) {            
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
