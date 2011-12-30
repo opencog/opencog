@@ -336,14 +336,16 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(max_rand_input_opt).c_str(),
          value<float>(&max_rand_input)->default_value(1),
          "Max of an input value chosen randomly, only used when the problem takes continuous inputs.\n")
+
         (opt_desc_str(log_level_opt).c_str(),
-         value<string>(&log_level)->default_value("DEBUG"),
-         "Log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter.\n")
+         value<string>(&log_level)->default_value("WARN"),
+         "Log level, possible levels are NONE, ERROR, WARN, INFO, "
+         "DEBUG, FINE. Case does not matter.\n")
         (opt_desc_str(log_file_dep_opt_opt).c_str(),
          str(format("The name of the log is determined by the options, for"
                     " instance if moses-exec is called with -%s 123 -%s %s"
                     " the log name is moses_random-seed_123_problem_pa.log."
-                    " Note that the name will be truncated in order not to"
+                    " The name will be truncated in order not to"
                     " be longer than %s characters.\n")
              % rand_seed_opt.second % problem_opt.second % pa
              % max_filename_size).c_str())

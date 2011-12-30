@@ -30,10 +30,15 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR result_count ]
 .RB [ \-e 
 .IR exemplar ]
+.RB [ \-F ]
+.RB [ \-f 
+.IR logfile ]
 .RB [ \-j
 .IR jobs ]
 .RB [ \-k
 .IR problem_size ]
+.RB [ \-l
+.IR loglevel ]
 .RB [ \-o
 .IR output_file ]
 .RB [ \-S0 ]
@@ -93,6 +98,22 @@ These options control the displayed output.
 The number of non-dominated (best) results to return, ordered according
 to score. If negative, then all results are returned, including the 
 dominated results.
+.TP
+.BI \-f\  filename \fR,\ \fB\-\-log\-file= filename
+Write debug log traces \fIfilename\fR. If not specified, traces
+are written to \fBmoses.log\fR.
+.TP
+.BI \-F\fR,\ \fB\-\-log\-file\-dep\-opt
+Write debug log traces to a filename constructed from the passed
+option flags and values. The filename will be truncated to a maximum
+of 255 characters.
+.TP
+.BI \-l\  loglevel \fR,\ \fB\-\-log\-level= loglevel
+Specify the level of detail for debug loging. Possible
+values for \fIloglevel\fR are \fBNONE\fR, \fBERROR\fR, \fBWARN\fR,
+\fBINFO\fR, \fBDEBUG\fR, and \fBFINE\fR. Case does not matter. 
+Caution: excessive logging detail can lead to significant
+program slowdown.
 .TP
 .BI \-o\  filename \fR,\ \fB\-\-output\-file= filename
 Write results to \fIfilename\fR. If not specified, results are written to
