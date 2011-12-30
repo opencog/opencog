@@ -34,6 +34,13 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR jobs ]
 .RB [ \-k
 .IR problem_size ]
+.RB [ \-o
+.IR output_file ]
+.RB [ \-S0 ]
+.RB [ \-t1 ]
+.RB [ \-V1 ]
+.RB [ \-W1 ]
+.RB [ \-x1 ]
 .br
 .\" The help & version command line
 .B moses
@@ -47,6 +54,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 library. It may be used to solve learning tasks specified with file inputs,
 or to run various demonstration problems.
 .PP
+.\" ============================================================
 .SH OPTIONS
 .PP
 Options fall into two classes: those that are used to run \fBmoses\fP in
@@ -76,7 +84,40 @@ machine and is located in a directory included in the
 \fBPATH\fR environment variable. Beware that a lot of log
 files are going to be generated when using this option on
 the remote machines.
+
+.\" ============================================================
+.SS "Output control options"
+These options control the displayed output.
+.TP
+.BI \-c\  count \fR,\ \fB\-\-result\-count= count
+The number of non-dominated (best) results to return, ordered according
+to score. If negative, then all results are returned, including the 
+dominated results.
+.TP
+.BI \-o\  filename \fR,\ \fB\-\-output\-file= filename
+Write results to \fIfilename\fR. If not specified, results are written to
+\fBstdout\fR.
+.TP
+.BI \-S0\fR,\ \fB\-\-output\-score=0
+Prevent printing of the score.
+.TP
+.BI \-t1\fR,\ \fB\-\-output\-bscore=1
+Print the behavioural score.
+.TP
+.BI \-V1\fR,\ \fB\-\-output\-eval\-number=1
+Print the number of evaluations performed.
+.TP
+.BI \-W1\fR,\ \fB\-\-output\-with\-labels=1
+Use named labels instead of position placeholders when printing 
+candidates. For example, *("#temperature" "#entropy") instead
+of *(#3 #4). This option is effective only when the data file
+contains labels in its header.
+.TP
+.BI \-x1\fR,\ \fB\-\-output\-complexity=1
+Print the complexity score.
+.\" ============================================================
 .SS "Demo options"
+These options pertain to the varius built-in demo and example modes.
 .TP
 .BI \-H\  type \fR,\ \fB\-\-problem\-type= type
 A number of demonstration problems are supported. In each case, the top 
@@ -101,8 +142,9 @@ T}
 The size of the demonstration problem may be specified with the -k flag.
 .TP
 .BI \-k\  size \fR,\ \fB\-\-problem\-size= size
-Size of the problem.
+Specify the size of the problem.
 .PP
+.\" ============================================================
 .SH USE
 .PP
 \fBmoses\fR will run demo problems or solve real problems from data files.

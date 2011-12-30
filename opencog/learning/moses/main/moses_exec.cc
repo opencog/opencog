@@ -268,7 +268,8 @@ int moses_exec(int argc, char** argv)
          "Maximum number of fitness function evaluations.\n")
         (opt_desc_str(result_count_opt).c_str(),
          value<long>(&result_count)->default_value(10),
-         "The number of non-dominated best results to return ordered according to their score, if negative then returns all of them.\n")
+         "The number of non-dominated results to return, "
+         "ordered according to score. If negative, then return all results.\n")
         (opt_desc_str(output_score_opt).c_str(),
          value<bool>(&output_score)->default_value(true),
          "If 1, outputs the score before each candidate (at the left of the complexity).\n")
