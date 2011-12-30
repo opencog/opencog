@@ -265,14 +265,19 @@ behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
         if (vertex_to_bool(*tr_ot_it))
             f_output.push_back(get_contin(*ot_it));
 
-    // sort the filtered output and compute KLD(cot, f_output) per
-    // component
-    boost::sort(f_output);
-    KLDS<vector<contin_t> > klds(cot, f_output);
+    logger().fine("f_output.size() = %u", f_output.size());
+
     behavioral_score bs;
-    dorepeat(otable.size())
-        bs.push_back(klds.next());
-    
+    if (f_output.size() > (tr_ot.size() / 4)
+        && f_output.size() < ((3 * tr_ot.size()) / 4)) {
+            
+            // sort the filtered output and compute KLD(cot, f_output) per
+            // component
+            boost::sort(f_output);
+            KLDS<vector<contin_t> > klds(cot, f_output);
+            dorepeat(otable.size())
+                bs.push_back(klds.next());
+    }
     // add the Occam's razor feature
     if(occam)
         bs.push_back(complexity(tr) * complexity_coef);

@@ -25,6 +25,7 @@
 #define _OPENCOG_KLD_H
 
 #include "dorepeat.h"
+#include <opencog/util/Logger.h>
 
 /**
  * Functions to compute the Kullback-Leibler Divergence of discrete
@@ -38,8 +39,9 @@ namespace opencog {
  * Kullback-Leibler Divergence Estimation of Continuous Distributions
  * by Fernando Perez-Cruz.
  *
- * That structure allows to access to intermediary results. A function
- * returning the direct KLD is defined below for convenience.
+ * That structure (will) allow to evaluate KLD(P|Q) over different Q
+ * for a fixed P and access to intermediary results. A function
+ * returning the direct KLD is defined further below for convenience.
  */
 template<typename SortedSeq>
 struct KLDS {
@@ -49,7 +51,8 @@ struct KLDS {
     // @param q sorted sequence of values representing the distribution of Q
     KLDS(const SortedSeq& p_, const SortedSeq& q_) :
         p(p_), q(q_), p_s(p.size()), q_s(q.size()),
-        margin(1.0), it_p(p.cbegin()), it_q(q.cbegin()),
+        margin(1.0), epsilon(0.00000000000000000000000000000000000000000000000001),
+        it_p(p.cbegin()), it_q(q.cbegin()),
         x_very_first(*it_p - margin), x_very_last(p.back() + margin),
         p_x_pre(x_very_first), q_x_pre(p_x_pre) {}
 
@@ -58,8 +61,12 @@ struct KLDS {
     // seperate optimization of a multi-optimization problem.
     result_type next() {
         // compute delta P
-        result_type p_x = *it_p, delta_p = q_s / (p_x - p_x_pre);
-            
+        result_type p_x = *it_p,
+            delta_p_x = std::max(epsilon, p_x - p_x_pre),
+            delta_p = q_s / delta_p_x;
+
+        logger().fine("q_s = %u, p_x = %f, p_x_pre = %f, p_x - p_x_pre = %f", q_s, p_x, p_x_pre, p_x - p_x_pre);
+
         // compute delta Q
         result_type q_x = it_q == q.cend()? x_very_last : *it_q;
         // search the points of q right before and after p_x
@@ -68,11 +75,14 @@ struct KLDS {
             ++it_q;
             q_x = it_q == q.cend()? x_very_last : *it_q;
         }
-        result_type delta_q = p_s / (q_x - q_x_pre);
+        result_type delta_q_x = std::max(epsilon, q_x - q_x_pre),
+            delta_q = p_s / delta_q_x;
         
         p_x_pre = p_x;
         ++it_p;
 
+        logger().fine("delta_p = %f, delat_q = %f, Q = %f", delta_p, delta_q, delta_p / delta_q);
+        
         return std::log(delta_p / delta_q);
     }
 
@@ -87,6 +97,8 @@ struct KLDS {
     const SortedSeq &p, &q;
     const size_t p_s, q_s;            // sizes of p and q
     result_type margin;
+    result_type epsilon;        // minimum distance between 2 values
+                                // (to avoid getting infinite delta)
     typename SortedSeq::const_iterator it_p, it_q;
     result_type x_very_first, x_very_last, p_x_pre, q_x_pre;
 };
