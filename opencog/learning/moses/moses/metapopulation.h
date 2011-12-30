@@ -709,15 +709,12 @@ struct metapopulation : public bscored_combo_tree_set
 
     void remove_dominated(bscored_combo_tree_set& bcs, unsigned jobs = 1) {
         // get the nondominated candidates
-        logger().fine("+ Get dominated");
         bscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
         bscored_combo_tree_ptr_vec res = get_nondominated_rec(bcv, jobs);
         // get the dominated by set difference
-        logger().fine("+ Calculate nondominated");
         boost::sort(bcv); boost::sort(res);
         bscored_combo_tree_ptr_vec dif = set_difference(bcv, res);
         // remove the dominated ones
-        logger().fine("+ Remove nondominated");
         foreach(const bscored_combo_tree* cnd_ptr, dif)
             bcs.erase(*cnd_ptr);
     }
@@ -727,7 +724,6 @@ struct metapopulation : public bscored_combo_tree_set
         typedef std::list<bscored_combo_tree> bscored_combo_tree_list;
         typedef bscored_combo_tree_list::iterator bscored_combo_tree_list_it;
         bscored_combo_tree_list mcl(bcs.begin(), bcs.end());
-        logger().fine("+ Remove candidates");
         // remove all dominated candidates from the list
         for(bscored_combo_tree_list_it it1 = mcl.begin(); it1 != mcl.end();) {
             bscored_combo_tree_list_it it2 = it1;
@@ -881,18 +877,15 @@ struct metapopulation : public bscored_combo_tree_set
     void merge_nondominated(bscored_combo_tree_set& bcs, unsigned jobs = 1) {
         bscored_combo_tree_ptr_vec bcv_mp = random_access_view(*this),
             bcv = random_access_view(bcs);
-        logger().fine("+ Merge nondominated");
         bscored_combo_tree_ptr_vec_pair bcv_p =
             get_nondominated_disjoint_rec(bcv, bcv_mp, jobs);
         // remove the nondominates ones from the metapopulation
-        logger().fine("+ Remove nondominated from the metapopulation");
         boost::sort(bcv_mp); boost::sort(bcv_p.second);
         bscored_combo_tree_ptr_vec diff_bcv_mp =
             set_difference(bcv_mp, bcv_p.second);
         foreach(const bscored_combo_tree* cnd, diff_bcv_mp)
             erase(*cnd);
         // add the non dominates ones from bsc
-        logger().fine("+ Insert nondominated to the metapopulation");
         foreach(const bscored_combo_tree* cnd, bcv_p.first)
             insert(*cnd);
     }
